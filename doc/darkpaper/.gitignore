@@ -1,0 +1,8 @@
+# cspell:words latexmk, synctex
+*.aux
+*.bak
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
+*.synctex.gz
