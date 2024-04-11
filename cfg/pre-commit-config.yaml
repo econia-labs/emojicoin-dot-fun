@@ -1,0 +1,159 @@
+# cspell:words autofix, markdownlint, mdformat, shfmt, autoflake, Autoflake
+# cspell:words isort, mypy, Mypy
+---
+repos:
+-
+  hooks:
+  -
+    entry: './src/sh/ensure-shebang.sh'
+    id: 'ensure-shebang'
+    language: 'script'
+    name: 'ensure shebang'
+    types:
+    - 'shell'
+  -
+    entry: './src/sh/python-lint/poetry-check.sh'
+    id: 'local-poetry-check'
+    language: 'script'
+    name: 'local poetry check'
+    # Only run this script once since it potentially installs poetry.
+    # It exits successfully early if "$GITHUB_ACTIONS" == "true".
+    pass_filenames: false
+  - entry: |
+      './src/sh/python-lint/run-in-poetry-subdir.sh'
+      'poetry run autoflake -i --remove-all-unused-imports
+      --remove-unused-variables --ignore-init-module-imports'
+      'Please run src/sh/python-lint/format.sh and fix the errors.'
+    id: 'gitignore-formatter'
+    language: 'script'
+    name: '.gitignore Formatter'
+    types:
+    - 'gitignore'
+  -
+    entry: |
+      './src/sh/python-lint/run-in-poetry-subdir.sh'
+      'poetry run python -m file_name_conventions'
+      'Please run src/sh/python-lint/format.sh and fix the errors.'
+    id: 'file_name_conventions'
+    language: 'script'
+    name: 'check file name conventions'
+    types:
+    - 'python'
+  -
+    entry: |
+      './src/sh/python-lint/run-in-poetry-subdir.sh'
+      'poetry run autoflake -c --remove-all-unused-imports
+      --remove-unused-variables --ignore-init-module-imports'
+      'Please run src/sh/python-lint/format.sh and fix the errors.'
+    id: 'autoflake'
+    language: 'script'
+    name: 'autoflake'
+    types:
+    - 'python'
+  -
+    entry: |
+      './src/sh/python-lint/run-in-poetry-subdir.sh'
+      'poetry run black --check'
+      'Please run src/sh/python-lint/format.sh and fix the errors.'
+    id: 'black'
+    language: 'script'
+    name: 'black'
+    types:
+    - 'python'
+  -
+    entry: |
+      './src/sh/python-lint/run-in-poetry-subdir.sh'
+      'poetry run flake8'
+      'Please run src/sh/python-lint/format.sh and fix the errors.'
+    id: 'flake8'
+    language: 'script'
+    name: 'flake8'
+    types:
+    - 'python'
+  -
+    entry: |
+      './src/sh/python-lint/run-in-poetry-subdir.sh'
+      'poetry run isort --check'
+      'Please run src/sh/python-lint/format.sh and fix the errors.'
+    id: 'isort'
+    language: 'script'
+    name: 'isort'
+    types:
+    - 'python'
+  -
+    entry: |
+      './src/sh/python-lint/run-in-poetry-subdir.sh'
+      'poetry run mypy'
+      'Please run src/sh/python-lint/format.sh and fix the errors.'
+    id: 'mypy'
+    language: 'script'
+    name: 'mypy'
+    types:
+    - 'python'
+  repo: 'local'
+-
+  hooks:
+  - id: 'check-added-large-files'
+  - id: 'check-case-conflict'
+  - id: 'detect-private-key'
+  - id: 'end-of-file-fixer'
+  -
+    files: 'cfg/cspell-dictionary.txt'
+    id: 'file-contents-sorter'
+  - id: 'mixed-line-ending'
+  -
+    args:
+    - '--autofix'
+    id: 'pretty-format-json'
+  - id: 'trailing-whitespace'
+  repo: 'https://github.com/pre-commit/pre-commit-hooks'
+  rev: 'v4.5.0'
+-
+  hooks:
+  - additional_dependencies:
+    - 'mdformat-gfm'
+    id: 'mdformat'
+  repo: 'https://github.com/executablebooks/mdformat'
+  rev: '0.7.17'
+-
+  hooks:
+  -
+    args:
+    - '--config'
+    - 'cfg/markdownlint-config.yaml'
+    id: 'markdownlint-fix'
+  repo: 'https://github.com/igorshubovych/markdownlint-cli'
+  rev: 'v0.39.0'
+-
+  hooks:
+  -
+    args:
+    - '--autofix'
+    id: 'pretty-format-toml'
+  repo: 'https://github.com/macisamuele/language-formatters-pre-commit-hooks'
+  rev: 'v2.12.0'
+-
+  hooks:
+  -
+    args:
+    - '--config-file'
+    - 'cfg/yamllint-config.yaml'
+    - '--strict'
+    id: 'yamllint'
+  repo: 'https://github.com/adrienverge/yamllint'
+  rev: 'v1.35.1'
+-
+  hooks:
+  - id: 'shfmt'
+  repo: 'https://github.com/scop/pre-commit-shfmt'
+  rev: 'v3.8.0-1'
+-
+  hooks:
+  -
+    args:
+    - '--config'
+    - 'cfg/cspell-config.json'
+    id: 'cspell'
+  repo: 'https://github.com/streetsidesoftware/cspell-cli'
+  rev: 'v8.6.0'
+...

@@ -1,0 +1,27 @@
+# cspell:words autoflake, black, flake8, isort, mypy, pyyaml, colorama
+
+[tool.isort]
+profile = "black"
+
+[tool.poetry]
+authors = ["Econia Labs <developers@econialabs.com>"]
+description = "Python pre-commit hooks for emojicoin-dot-fun."
+name = "econia_precommit"
+packages = []
+version = "1.0.0"
+
+[tool.poetry.dependencies]
+colorama = "^0.4.6"
+identify = "^2.5.35"
+pre-commit = "^3.7.0"
+python = "^3.9"
+pyyaml = "^6.0.1"
+types-colorama = "^0.4.15.20240311"
+
+[tool.poetry.group.dev.dependencies]
+autoflake = "^2.2.0"
+black = "^23.7.0"
+flake8 = "6.0.0"
+isort = "^5.12.1"
+mypy = "^1.9.0"
+types-pyyaml = "^6.0.12.20240311"
