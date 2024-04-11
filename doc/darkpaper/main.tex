@@ -15,6 +15,10 @@
 
 \input{figures/tangent-line-style.tex}
 
+% Acronyms.
+\newacronym{cpamm}{CPAMM}{Constant Product Automated Market Maker}
+\newacronym{clamm}{CLAMM}{Concentrated Liquidity Automated Market Maker}
+
 \title{emojicoin dot fun}
 \author{Econia Labs}
 \date{}
@@ -22,5 +26,71 @@
 \begin{document}
 
 \maketitle
+
+\section{Bonding curve}
+
+The state transition occurs at pre-defined nominal market capitalization $m_n$, for
+example 10,000 \texttt{APT}. Internally this corresponds to a market capitalization in
+octas $m_o$ as defined in equation \ref{eqn:state-transition-market-cap}.
+
+\begin{equation} \label{eqn:state-transition-market-cap}
+  m_o = 10^8 m_n
+\end{equation}
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline \rowcolor{blue}
+    Term                           & Notation  \\ \hline
+    Real base reserves             & $b_r$     \\ \hline
+    Real quote reserves            & $q_r$     \\ \hline
+    Virtual base reserves          & $b_v$     \\ \hline
+    Virtual quote reserves         & $q_v$     \\ \hline
+    Liquidity                      & $L$       \\ \hline
+    Low price range endpoint       & $p_l$     \\ \hline
+    High price range endpoint      & $p_h$     \\ \hline
+    Real base reserves ceiling     & $b_{r,c}$ \\ \hline
+    Real quote reserves ceiling    & $q_{r,c}$ \\ \hline
+    Virtual base reserves ceiling  & $b_{v,c}$ \\ \hline
+    Virtual quote reserves ceiling & $q_{v,c}$ \\ \hline
+    Virtual base reserves floor    & $b_{v,f}$ \\ \hline
+    Virtual quote reserves floor   & $q_{v,f}$ \\ \hline
+  \end{tabular}
+  \caption{Terms, translation from \gls{cpamm} to \gls{clamm}}
+  \label{tab:clamm-curve-translation}
+\end{table}
+
+\begin{equation} \label{eqn:clamm-curve-translation}
+  (b_r + b_{v, f})(q_r + q_{v, f}) = L^2 = b_v q_v
+\end{equation}
+
+\begin{figure}[!htb]
+  \centering
+  \input{figures/clamm-curve-translation.tex}
+  \caption{Translation from \gls{cpamm} to \gls{clamm}}
+  \label{fig:clamm-curve-translation}
+\end{figure}
+
+With the state transition constrained by $m_n$, it follows that $q_{r, c} = m_o$. Hence
+either a circulating supply at the time of transition ($b_{r, c}$) or a price at the
+time of state transition can be chosen to fully constrain the bonding curve ($p_h$)
+
+there is thus a relationship between
+nominal number of circulating emojicoins and nominal price at the time of the state
+transition per equation \ref{eqn:state-transition-relationship}
+nominal amount
+
+\begin{equation} \label{eqn:state-transition-relationship}
+  b_{r, c} = \frac{m_n}{p_h}
+\end{equation}
+
+
+At the state transition, the price is emojicoin priced at 1 \texttt{APT} per, such that
+$p_h = 1$. Additionally,
+
+\begin{equation} \label{eqn:b-q-out-clamm-simple}
+  b_{out} = \frac{q_{in} b_{v, 0}}{q_{in} + q_{v, 0}},
+  q_{out} = \frac{b_{in} q_{v, 0}}{b_{in} + b_{v, 0}}
+\end{equation}
 
 \end{document}
