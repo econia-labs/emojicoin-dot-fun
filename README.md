@@ -1,4 +1,4 @@
-# Emojicoin dot fun
+# emojicoin dot fun
 
 [![pre-commit shield]][pre-commit repo]
 

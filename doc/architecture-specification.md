@@ -1,4 +1,4 @@
-# Emojicoin Dot Fun Architecture Specification
+# emojicoin dot fun Architecture Specification
 
 The key words `MUST`, `MUST NOT`, `REQUIRED`, `SHALL`, `SHALL NOT`, `SHOULD`,
 `SHOULD NOT`, `RECOMMENDED`,  `MAY`, and `OPTIONAL` in this document are to be
@@ -13,8 +13,8 @@ These keywords `SHALL` be in `monospace` for ease of identification.
    simple constant product pool.
 1. The bonding curve state `SHALL` implement a concentrated liquidity automated
    market maker curve that contains purely emojicoins upon initialization,
-   eventually exhausted fully into `APT` upon bonding curve phase completion.
-1. After completing the bonding curve phase, the `APT` generated from initial
+   eventually exhausted fully into `APT` upon bonding curve state completion.
+1. After completing the bonding curve state, the `APT` generated from initial
    buy orders `SHALL` be locked into a constant product pool with set aside
    emojicoin reserves, such that market price is identical before and after the
    state transition.
@@ -24,6 +24,21 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 1. A buy order that breaks the market out of the bonding curve `SHALL` continue
    to fill after the state transition, rather than fragmenting the order into
    two transactions.
+
+## Indexing
+
+1. The user interface `SHALL` rely solely on the Aptos GraphQL endpoint for
+   indexing purposes, enabling for example a leaderboard based on market
+   capitalization of each emojicoin market.
+
+## Frontend
+
+1. The frontend `SHALL` implement a market capitalization leaderboard with
+   logarithmic to enable viewing of prevalent markets.
+1. The frontend `SHALL` enable a king-of-the-hill style mechanism to show
+   emojicoins passing others in market capitalization.
+1. The frontend `SHALL` enable permissionless registration of a new emojicoin
+   market that has not yet been registered.
 
 ## Coin definitions
 
