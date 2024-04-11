@@ -1,15 +1,15 @@
-import math
-
 def get_q_v_f(m_o, m_s, p_crit):
     return m_o / ((m_s / m_o) * p_crit - 1)
+
 
 def get_b_v_f(m_o, m_s, p_crit):
     return m_o / (p_crit - m_o / m_s)
 
+
 m_a = 10_000.0
-m_o = m_a * (10.0 ** 8)
+m_o = m_a * (10.0**8)
 m_e = 1_000_000.0
-m_s = m_e * (10.0 ** 8)
+m_s = m_e * (10.0**8)
 p_crit = 1.0
 
 print(f"m_a: {m_a}")
