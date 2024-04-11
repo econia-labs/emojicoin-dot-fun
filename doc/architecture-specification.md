@@ -56,11 +56,17 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 1. For parallelism, `APT` for each pool `SHALL` be contained locally. To enable
    total value locked calculations, an aggregator `SHALL` track all `APT`
    deposited into the Move package.
+1. View functions `SHALL` enable lookup of markets by symbol.
+1. Each market `SHALL` be assigned a 1-indexed `market_id: u64`.
 
 ## APIs
 
 1. Trade functions `SHALL` include an `integrator_fee_rate_bps` and an
    `integrator_address` to be assessed on the `APT` volume from the trade (asset
    in for a buy, asset out for a sell) and deposited to the integrator's wallet.
+
+## Presentation
+
+1. The implementation `SHALL` use the stylized format `emojicoin dot fun`.
 
 [rfc 2119]: https://www.ietf.org/rfc/rfc2119.txt

@@ -2,6 +2,8 @@ aptos
 econia
 emojicoin
 emojicoins
+leaderboard
+permissionless
 precommit
 struct
 subdir
