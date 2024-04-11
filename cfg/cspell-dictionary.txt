@@ -1,6 +1,7 @@
 aptos
 econia
 emojicoin
+octas
 precommit
 struct
 subdir

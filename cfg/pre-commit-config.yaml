@@ -1,5 +1,5 @@
-# cspell:words autofix, markdownlint, mdformat, shfmt, autoflake, Autoflake
-# cspell:words isort, mypy, Mypy
+# cspell:words autofix, autoflake, isort, latexindent, markdownlint
+# cspell:words mdformat, mypy, shfmt
 ---
 repos:
 -

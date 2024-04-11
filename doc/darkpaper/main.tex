@@ -27,15 +27,34 @@
 
 \maketitle
 
+\section{State transition}
+
+The state transition occurs at pre-defined nominal market capitalization in
+\texttt{APT} ($m_a$), for example 10,000 \texttt{APT}. This corresponds to a market
+capitalization in octas $m_o$ as defined in equation
+\ref{eqn:state-transition-market-cap-apt}.
+
+\begin{equation} \label{eqn:state-transition-market-cap-apt}
+  m_o = 10^8 m_a
+\end{equation}
+
+At the state transition, the spot price resolves to $p_{crit}$, for example 1
+\texttt{APT} per emojicoin.
+
+When the price finally reaches $p_{crit}$, there are $m_s$ emojicoin subunits in
+circulation. Taking emojicoin decimals as identical to \texttt{APT} decimals, $m_s$
+relates to nominal emojicoin units $m_e$ as defined in equation
+\ref{eqn:state-transition-market-cap-emojicoin}.
+
+\begin{equation} \label{eqn:state-transition-market-cap-emojicoin}
+  m_s = 10^8 m_e
+\end{equation}
+
 \section{Bonding curve}
 
-The state transition occurs at pre-defined nominal market capitalization $m_n$, for
-example 10,000 \texttt{APT}. Internally this corresponds to a market capitalization in
-octas $m_o$ as defined in equation \ref{eqn:state-transition-market-cap}.
-
-\begin{equation} \label{eqn:state-transition-market-cap}
-  m_o = 10^8 m_n
-\end{equation}
+The bonding curve is represented by a \gls{clamm}, which functions as a \gls{cpamm}
+within a specific range as defined by table \ref{tab:clamm-curve-translation}, equation
+\ref{eqn:clamm-curve-translation}, and figure \ref{fig:clamm-curve-translation}.
 
 \begin{table}[!htb]
   \centering
@@ -71,26 +90,116 @@ octas $m_o$ as defined in equation \ref{eqn:state-transition-market-cap}.
   \label{fig:clamm-curve-translation}
 \end{figure}
 
-With the state transition constrained by $m_n$, it follows that $q_{r, c} = m_o$. Hence
-either a circulating supply at the time of transition ($b_{r, c}$) or a price at the
-time of state transition can be chosen to fully constrain the bonding curve ($p_h$)
+As derived in section \ref{sec:bonding-curve-constraints}, the bonding curve initializes
+with virtual reserves defined in equation \ref{eqn:bonding-curve-setup}, ending when
+virtual reserves reach the values from equation \ref{eqn:bonding-curve-transition}.
 
-there is thus a relationship between
-nominal number of circulating emojicoins and nominal price at the time of the state
-transition per equation \ref{eqn:state-transition-relationship}
-nominal amount
-
-\begin{equation} \label{eqn:state-transition-relationship}
-  b_{r, c} = \frac{m_n}{p_h}
+\begin{equation} \label{eqn:bonding-curve-setup}
+  b_{v, c} = m_s + \frac{q_{m, o}}{p_{crit} - \frac{m_o}{m_s}},
+  q_{v, f} = \frac{q_{m, o}}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
 \end{equation}
 
+\begin{equation} \label{eqn:bonding-curve-transition}
+  b_{v, f} = \frac{q_{m, o}}{p_{crit} - \frac{m_o}{m_s}},
+  q_{v, c} = m_o + \frac{q_{m, o}}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+\end{equation}
 
-At the state transition, the price is emojicoin priced at 1 \texttt{APT} per, such that
-$p_h = 1$. Additionally,
+Throughout the bonding curve, the virtual reserve amounts in the \gls{clamm} follow a
+simple constant product curve invariant, yielding equation
+\ref{eqn:b-q-out-cpamm-simple} as derived in section
+\ref{eqn:b-q-out-simple-derivation}.
 
-\begin{equation} \label{eqn:b-q-out-clamm-simple}
+\begin{equation} \label{eqn:b-q-out-cpamm-simple}
   b_{out} = \frac{q_{in} b_{v, 0}}{q_{in} + q_{v, 0}},
   q_{out} = \frac{b_{in} q_{v, 0}}{b_{in} + b_{v, 0}}
 \end{equation}
+
+\section{Derivations}
+
+\subsection{Bonding curve constraints} \label{sec:bonding-curve-constraints}
+
+Evaluated at $p_l$, (\ref{eqn:clamm-curve-translation}) reduces to:
+
+\begin{equation} \label{eqn:bonding-curve-1}
+  (b_{r, c} + b_{v, f}) \cdot q_{v, f} = L^2
+\end{equation}
+
+Likewise, (\ref{eqn:clamm-curve-translation}) evaluated at $p_h$ reduces to:
+
+\begin{equation} \label{eqn:bonding-curve-2}
+  b_{v, f} \cdot (q_{r, c} + q_{v, f}) = L^2
+\end{equation}
+
+For a fixed $b_{r, c} = m_s$ and $q_{r, c} = m_o$ combining (\ref{eqn:bonding-curve-1})
+and (\ref{eqn:bonding-curve-2}) yields:
+
+\begin{align} \label{eqn:bonding-curve-3}
+  (b_{r, c} + b_{v, f}) \cdot q_{v, f}              & =
+  b_{v, f} \cdot (q_{r, c} + q_{v, f}) \nonumber                                                           \\
+  b_{r, c} \cdot q_{v, f} + b_{v, f} \cdot q_{v, f} & =
+  b_{v, f} \cdot q_{r, c} + b_{v, f} \cdot q_{v, f} \nonumber                                              \\
+  b_{r, c} \cdot q_{v, f}                           & = b_{v, f} \cdot q_{r, c} \nonumber                  \\
+  \frac{b_{r, c}}{q_{r, c}} q_{v, f}                & = b_{v, f} \nonumber                                 \\
+  b_{v, f}                                          & = \frac{b_{r, c}}{q_{r, c}} \cdot q_{v, f} \nonumber \\
+  b_{v, f}                                          & = \frac{m_s}{m_o} \cdot q_{v, f}
+\end{align}
+
+$p_h = p_{crit}$ yields:
+
+\begin{align} \label{eqn:bonding-curve-4}
+  p_h                                                 & = \frac{q_{v, c}}{b_{v, f}} \nonumber                      \\
+  p_h                                                 & = \frac{q_{r, c} + q_{v, f}}{b_{v, f}} \nonumber           \\
+  p_h \cdot b_{v, f}                                  & = q_{r, c} + q_{v, f} \nonumber                            \\
+  \frac{m_e}{m_a} \cdot p_h \cdot q_{v, f}            & = q_{r, c} + q_{v, f} \nonumber                            \\
+  \frac{m_e}{m_a} \cdot p_h \cdot q_{v, f} - q_{v, f} & = q_{r, c} \nonumber                                       \\
+  q_{v, f} (\frac{m_s}{m_0} \cdot p_h - 1)            & = q_{r, c} \nonumber                                       \\
+  q_{v, f}                                            & = \frac{q_{r, c}}{\frac{m_s}{m_o} \cdot p_h - 1} \nonumber \\
+  q_{v, f}                                            & = \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+\end{align}
+
+Substituting (\ref{eqn:bonding-curve-4}) into (\ref{eqn:bonding-curve-3}) yields:
+
+\begin{align} \label{eqn:bonding-curve-5}
+  b_{v, f} & =
+  \frac{m_s}{m_o} \cdot \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1} \nonumber \\
+  b_{v, f} & =
+  \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o} \nonumber                       \\
+  b_{v, f} & = \frac{m_o}{p_{crit} - \frac{m_o}{m_s}}
+\end{align}
+
+Hence the \gls{clamm} is initialized with $q_{v, f}$ per (\ref{eqn:bonding-curve-4}) and
+$b_{v, c}$ per:
+
+\begin{align}
+  b_{v, c} & = b_{r, c} + b_{v, f} \nonumber                \\
+  b_{v, c} & = m_s + \frac{m_o}{p_{crit} - \frac{m_o}{m_s}}
+\end{align}
+
+The other bonding curve regime endpoint is thus at $b_{v, f}$ per
+(\ref{eqn:bonding-curve-5}) and $q_{v, c}$ per:
+
+\begin{align}
+  q_{v, c} & = q_{r, c} + q_{v, f} \nonumber                        \\
+  q_{v, c} & = m_o + \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+\end{align}
+
+\subsection{Base in and out for \gls{cpamm} swap} \label{eqn:b-q-out-simple-derivation}
+
+\begin{align}
+  b_0 q_0               & = b_f q_f \nonumber                                      \\
+  b_0 q_0               & = (b_0 - b_{out})(q_0 + q_{in}) \nonumber                \\
+  b_0 q_0               & = b_0 q_0 + b_0 q_{in} - b_{out}(q_0 + q_{in}) \nonumber \\
+  b_{out}(q_0 + q_{in}) & = b_{0} q_{in} \nonumber                                 \\
+  b_{out}               & = \frac{q_{in} b_0}{q_{in} + q_0}
+\end{align}
+
+\begin{align}
+  b_0 q_0               & = b_f q_f \nonumber                                      \\
+  b_0 q_0               & = (b_0 + b_{in})(q_0 - q_{out}) \nonumber                \\
+  b_0 q_0               & = b_0 q_0 + b_{in} q_0 - q_{out}(b_0 + b_{in}) \nonumber \\
+  q_{out}(b_0 + b_{in}) & = b_{in} q_0 \nonumber                                   \\
+  q_{out}               & = \frac{b_{in} q_0}{b_{in} + b_0}
+\end{align}
+
 
 \end{document}
