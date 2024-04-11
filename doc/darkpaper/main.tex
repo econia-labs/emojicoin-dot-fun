@@ -91,17 +91,17 @@ within a specific range as defined by table \ref{tab:clamm-curve-translation}, e
 \end{figure}
 
 As derived in section \ref{sec:bonding-curve-constraints}, the bonding curve initializes
-with virtual reserves defined in equation \ref{eqn:bonding-curve-setup}, ending when
+with virtual reserves defined in equation \ref{eqn:bonding-curve-setup}, and ends when
 virtual reserves reach the values from equation \ref{eqn:bonding-curve-transition}.
 
 \begin{equation} \label{eqn:bonding-curve-setup}
-  b_{v, c} = m_s + \frac{m_o}{p_{crit} - \frac{m_o}{m_s}},
-  q_{v, f} = \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+  b_{v, c} = m_s + \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o},
+  q_{v, f} = \frac{m_o ^ 2}{m_s \cdot p_{crit} - m_o}
 \end{equation}
 
 \begin{equation} \label{eqn:bonding-curve-transition}
-  b_{v, f} = \frac{m_o}{p_{crit} - \frac{m_o}{m_s}},
-  q_{v, c} = m_o + \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+  b_{v, f} = \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o},
+  q_{v, c} = m_o + \frac{m_o ^ 2}{m_s \cdot p_{crit} - m_o}
 \end{equation}
 
 Throughout the bonding curve, the virtual reserve amounts in the \gls{clamm} follow a
@@ -166,17 +166,16 @@ $p_h = p_{crit}$ yields:
   q_{v, f}                                            & =
   \frac{q_{r, c}}{\frac{m_s}{m_o} \cdot p_h - 1} \nonumber \\
   q_{v, f}                                            & =
-  \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+  \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1} \nonumber \\
+  q_{v, f}                                            & =
+  \frac{m_o ^ 2}{m_s \cdot p_{crit} - m_o}
 \end{align}
 
 Substituting (\ref{eqn:bonding-curve-4}) into (\ref{eqn:bonding-curve-3}) yields:
 
 \begin{align} \label{eqn:bonding-curve-5}
-  b_{v, f} & =
-  \frac{m_s}{m_o} \cdot \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1} \nonumber \\
-  b_{v, f} & =
-  \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o} \nonumber                       \\
-  b_{v, f} & = \frac{m_o}{p_{crit} - \frac{m_o}{m_s}}
+  b_{v, f} & = \frac{m_s}{m_o} \cdot \frac{m_o^2}{m_s \cdot p_{crit} - m_o} \nonumber \\
+  b_{v, f} & = \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o}
 \end{align}
 
 Hence the \gls{clamm} is initialized with $q_{v, f}$ per (\ref{eqn:bonding-curve-4}) and
@@ -184,7 +183,7 @@ $b_{v, c}$ per:
 
 \begin{align}
   b_{v, c} & = b_{r, c} + b_{v, f} \nonumber                \\
-  b_{v, c} & = m_s + \frac{m_o}{p_{crit} - \frac{m_o}{m_s}}
+  b_{v, c} & = m_s + \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o}
 \end{align}
 
 The other bonding curve regime endpoint is thus at $b_{v, f}$ per
@@ -192,7 +191,7 @@ The other bonding curve regime endpoint is thus at $b_{v, f}$ per
 
 \begin{align}
   q_{v, c} & = q_{r, c} + q_{v, f} \nonumber                        \\
-  q_{v, c} & = m_o + \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+  q_{v, c} & = m_o + \frac{m_o ^ 2}{m_s \cdot p_{crit} - m_o}
 \end{align}
 
 \subsection{Base in and out for \gls{cpamm} swap} \label{eqn:b-q-out-simple-derivation}
