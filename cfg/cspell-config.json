@@ -1,0 +1,15 @@
+{
+  "dictionaries": [
+    "project-words"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "addWords": true,
+      "name": "project-words",
+      "path": "./cspell-dictionary.txt"
+    }
+  ],
+  "ignorePaths": [
+    "/project-words.txt"
+  ]
+}

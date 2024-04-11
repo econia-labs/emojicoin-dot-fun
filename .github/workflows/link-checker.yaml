@@ -1,0 +1,46 @@
+# cspell:words lycheeverse, micalevisk
+---
+jobs:
+  linkChecker:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v3'
+    - env:
+        GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
+      id: 'lychee'
+      name: 'Link Checker'
+      uses: 'lycheeverse/lychee-action@v1'
+    - id: 'last-issue'
+      name: 'Find the last open report issue'
+      uses: 'micalevisk/last-issue-action@v2'
+      with:
+        labels: |
+          report
+          automated issue
+          link checker
+        state: 'open'
+    - if: >-
+        steps.last-issue.outputs.has-found == 'true' ||
+        env.lychee_exit_code != '0'
+      name: 'Update last updated report issue'
+      uses: 'peter-evans/create-issue-from-file@v5'
+      with:
+        assignees: 'xbtmatt'
+        content-filepath: './lychee/out.md'
+        # Update an existing issue if one was found (issue-number),
+        # otherwise an empty value creates a new issue.
+        issue-number: '${{ steps.last-issue.outputs.issue-number }}'
+        labels: |
+          report
+          automated issue
+          link checker
+        title: 'Link Checker Report'
+name: 'Link Checker'
+'on':
+  schedule:
+  - cron: '0 0 * * *'
+  workflow_dispatch: null
+permissions:
+  issues: 'write'
+  pull-requests: 'write'
+...
