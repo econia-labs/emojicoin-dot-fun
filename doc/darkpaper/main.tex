@@ -95,13 +95,13 @@ with virtual reserves defined in equation \ref{eqn:bonding-curve-setup}, ending 
 virtual reserves reach the values from equation \ref{eqn:bonding-curve-transition}.
 
 \begin{equation} \label{eqn:bonding-curve-setup}
-  b_{v, c} = m_s + \frac{q_{m, o}}{p_{crit} - \frac{m_o}{m_s}},
-  q_{v, f} = \frac{q_{m, o}}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+  b_{v, c} = m_s + \frac{m_o}{p_{crit} - \frac{m_o}{m_s}},
+  q_{v, f} = \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
 \end{equation}
 
 \begin{equation} \label{eqn:bonding-curve-transition}
-  b_{v, f} = \frac{q_{m, o}}{p_{crit} - \frac{m_o}{m_s}},
-  q_{v, c} = m_o + \frac{q_{m, o}}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
+  b_{v, f} = \frac{m_o}{p_{crit} - \frac{m_o}{m_s}},
+  q_{v, c} = m_o + \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1}
 \end{equation}
 
 Throughout the bonding curve, the virtual reserve amounts in the \gls{clamm} follow a
