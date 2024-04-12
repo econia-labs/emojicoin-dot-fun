@@ -1,5 +1,5 @@
 def get_q_v_f(m_o, m_s, p_crit):
-    return m_o ** 2 / (m_s * p_crit - m_o)
+    return m_o**2 / (m_s * p_crit - m_o)
 
 
 def get_b_v_f(m_o, m_s, p_crit):

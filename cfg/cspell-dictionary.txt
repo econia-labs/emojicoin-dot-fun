@@ -1,6 +1,7 @@
 aptos
 econia
 emojicoin
+emojicoins
 octas
 precommit
 struct
