@@ -18,7 +18,8 @@ def main():
     changed_files_before = utils.get_changed_files()
 
     root = utils.get_git_root()
-    print(root)
+    hooks_dir = f"{root}/src/python/hooks"
+    move_emojis_dir = f"{root}/src/python/move_emojis"
 
     autoflake_args = [
         "-i",
@@ -27,7 +28,7 @@ def main():
         "--ignore-init-module-imports",
     ]
 
-    isort_config = f"--src {root}/src/python/hooks --src {root}/src/python/move_emojis"
+    isort_config = f"--src {hooks_dir} --src {move_emojis_dir} --profile black"
 
     cmd_and_args = {
         "poetry run autoflake": (
