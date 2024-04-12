@@ -5,11 +5,6 @@
 # cspell:words mypy
 # cspell:words pyyaml
 
-[tool.isort]
-known_first_party = ["code_point", "emojis_to_const"]
-profile = "black"
-src_paths = ["./", "../move_emojis"]
-
 [tool.poetry]
 authors = ["Econia Labs <developers@econialabs.com>"]
 description = "Python pre-commit hooks for emojicoin-dot-fun."

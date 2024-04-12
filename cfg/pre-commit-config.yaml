@@ -73,7 +73,7 @@ repos:
   -
     entry: |
       './src/sh/python-lint/run-in-poetry-subdir.sh'
-      'poetry run isort --check -v --show-config'
+      'poetry run isort --check'
       'Please run src/sh/python-lint/format.sh and fix the errors.'
     id: 'isort'
     language: 'script'
