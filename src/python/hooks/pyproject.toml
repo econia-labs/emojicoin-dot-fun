@@ -1,6 +1,12 @@
-# cspell:words autoflake, black, flake8, isort, mypy, pyyaml, colorama
+# cspell:words autoflake
+# cspell:words colorama
+# cspell:words flake8
+# cspell:words isort
+# cspell:words mypy
+# cspell:words pyyaml
 
 [tool.isort]
+known_first_party = ["code_point", "emojis_to_const"]
 profile = "black"
 src_paths = ["./", "../move_emojis"]
 

@@ -1,31 +1,23 @@
-# cspell:words unidecode
 # cspell:words alnum
+# cspell:words unidecode
 
 # Helper file for converting all of the data in the Unicode Emoji data files
-# to json files.
+# to Move-friendly constants.
 
-import json
 import re
 import string
 import sys
 
+import requests
 from unidecode import unidecode
 
 import code_point
 
-BASE_EMOJI_DATA_PATH = "data/emoji-test.txt"
-VIABLE_EMOJI_JSON_PATH = "data/viable_emojis.json"
-ZWJ_EMOJIS_DATA_PATH = "data/emoji-zwj-sequences.txt"
+BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
+ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
 
 # In bytes.
 MAX_SYMBOL_SIZE = 10
-
-DEBUG = False
-
-
-def debug_print(*args, **kwargs):
-    if DEBUG:
-        print("[DEBUG]:", *args, **kwargs)
 
 
 def format_code_points_for_json(code_points: list) -> dict:
@@ -38,26 +30,26 @@ def format_code_points_for_json(code_points: list) -> dict:
     }
 
 
-def sanitized_lines(filename: str) -> list:
+def sanitized_lines(data_url: str) -> list:
+    data = requests.get(data_url).text.split("\n")
     lines = []
-    with open(filename) as in_file:
-        for line in in_file.readlines():
-            line = line.strip()
-            if len(line) < 1 or line.startswith("#"):
-                continue
+    for line in data:
+        line = line.strip()
+        if len(line) < 1 or line.startswith("#"):
+            continue
 
-            # Replace ‘ and ’ by using unicode code_points
-            # so the linter doesn't complain.
-            line = line.replace(code_point.to_emoji("2018"), "'")
-            line = line.replace(code_point.to_emoji("2019"), "'")
-            line = line.replace("“", '"')
-            line = line.replace("”", '"')
-            lines.append(line)
+        # The Unicode code_points are used here so the linter
+        # doesn't complain about the characters ‘ and ’.
+        line = line.replace(code_point.to_emoji("2018"), "'")
+        line = line.replace(code_point.to_emoji("2019"), "'")
+        line = line.replace("“", '"')
+        line = line.replace("”", '"')
+        lines.append(line)
     return lines
 
 
-def get_base_emojis(filename: str) -> dict:
-    lines = sanitized_lines(filename)
+def get_base_emojis(data_url: str) -> dict:
+    lines = sanitized_lines(data_url)
 
     emoji_pattern = r"(.+)"
     version_pattern = r"(E[0-9.]+)"
@@ -98,8 +90,8 @@ def get_base_emojis(filename: str) -> dict:
     return d
 
 
-def get_zwj_emojis(filename: str) -> dict:
-    lines = sanitized_lines(filename)
+def get_zwj_emojis(data_url: str) -> dict:
+    lines = sanitized_lines(data_url)
 
     patterns = [
         # Version.
@@ -177,14 +169,11 @@ def get_viable_emojis(
             )
         )
 
-        biggest_is_too_large = False
         if qualifications[-1][1]["code_points"]["num_bytes"] > MAX_SYMBOL_SIZE:
-            biggest_is_too_large = True
+            pass
+            # If the biggest emoji is too large and we don't want to try to
+            # use another variation with looser qualifications, we continue.
             if not use_minimal_if_necessary:
-                debug_print(
-                    f"'{name}' is too large to be used and "
-                    + "`use_minimum_if_necessary` is off."
-                )
                 continue
 
         # If the biggest emoji is too large, we can use the minimal
@@ -199,14 +188,8 @@ def get_viable_emojis(
                 largest_viable_qualification_type = k
                 largest_viable_qualification = v
 
+        # If any of the qualifications are small enough, we can use them.
         if largest_viable_qualification is not None:
-            if biggest_is_too_large:
-                debug_print(
-                    "Using minimal qualification for emoji:",
-                    name,
-                    largest_viable_qualification["code_points"]["num_bytes"],
-                )
-
             viable_emojis[name] = {
                 "emoji": data["emoji"],
                 "version": data["version"],
@@ -214,8 +197,6 @@ def get_viable_emojis(
                 "zwj": False,
                 **largest_viable_qualification,
             }
-        else:
-            debug_print(f"'{name}' is too large to be used.")
 
     for name, data in tuple(zwj_emojis.items()):
         code_points = data["code_points"]["as_unicode"]
@@ -243,7 +224,7 @@ def convert_to_move_const(viable_emojis: dict):
 
     In Move, we can define this as a constant:
 
-    `const FLAG_UNITED_ARAB_EMIRATES: vector<u8> = b\"f09f87a6f09f87aa\";`
+    `const FLAG_UNITED_ARAB_EMIRATES: vector<u8> = x\"f09f87a6f09f87aa\";`
     ::
     """
     consts = {}
@@ -291,15 +272,15 @@ def convert_to_move_const(viable_emojis: dict):
 
 
 if __name__ == "__main__":
-    base_emoji_dict = get_base_emojis(BASE_EMOJI_DATA_PATH)
-    zwj_emoji_dict = get_zwj_emojis(ZWJ_EMOJIS_DATA_PATH)
+    base_emoji_dict = get_base_emojis(BASE_EMOJIS_URL)
+    zwj_emoji_dict = get_zwj_emojis(ZWJ_EMOJIS_URL)
 
     viable_emojis = get_viable_emojis(
         base_emoji_dict, zwj_emoji_dict, use_minimal_if_necessary=True
     )
-    json.dump(viable_emojis, open(VIABLE_EMOJI_JSON_PATH, "w"), indent=4)
 
     consts = convert_to_move_const(viable_emojis)
+    consts = dict(list(sorted(consts.items(), key=lambda x: x[0])))
     with open("move_consts.txt", "w") as outfile:
         for name, move_string in consts.items():
-            outfile.write(f'const {name}: vector<u8> = b"{move_string}";\n')
+            outfile.write(f'const {name}: vector<u8> = x"{move_string}";\n')

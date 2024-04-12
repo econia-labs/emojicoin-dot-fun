@@ -12,5 +12,5 @@ emoji = "0xc0de"
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
 name = "Move Emojis"
-upgrade_policy = "compatible"
+upgrade_policy = "immutable"
 version = "1.0.0"

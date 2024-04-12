@@ -73,7 +73,7 @@ repos:
   -
     entry: |
       './src/sh/python-lint/run-in-poetry-subdir.sh'
-      'poetry run isort --check'
+      'poetry run isort --check -v --show-config'
       'Please run src/sh/python-lint/format.sh and fix the errors.'
     id: 'isort'
     language: 'script'
@@ -93,10 +93,7 @@ repos:
   repo: 'local'
 -
   hooks:
-  -
-    # Ignore emoji-test.txt because it's only 625 KB and the max is 500 KB.
-    exclude: 'src/python/move_emojis/data/emoji-test.txt'
-    id: 'check-added-large-files'
+  - id: 'check-added-large-files'
   - id: 'check-case-conflict'
   - id: 'detect-private-key'
   - id: 'end-of-file-fixer'
