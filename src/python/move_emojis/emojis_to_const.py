@@ -29,8 +29,8 @@ def debug_print(*args, **kwargs):
 
 
 def format_code_points_for_json(code_points: list) -> dict:
-    num_bytes = sum([len(code_point.str_to_bytes(cp)) for cp in code_points])
-    as_hex = [code_point.str_to_bytes(cp).hex() for cp in code_points]
+    num_bytes = sum([len(code_point.to_bytes(cp)) for cp in code_points])
+    as_hex = [code_point.to_bytes(cp).hex() for cp in code_points]
     return {
         "num_bytes": num_bytes,
         "as_unicode": code_points,
@@ -48,8 +48,8 @@ def sanitized_lines(filename: str) -> list:
 
             # Replace ‘ and ’ by using unicode code_points
             # so the linter doesn't complain.
-            line = line.replace(code_point.str_to_char("2018"), "'")
-            line = line.replace(code_point.str_to_char("2019"), "'")
+            line = line.replace(code_point.to_emoji("2018"), "'")
+            line = line.replace(code_point.to_emoji("2019"), "'")
             line = line.replace("“", '"')
             line = line.replace("”", '"')
             lines.append(line)
@@ -142,17 +142,20 @@ def get_zwj_emojis(filename: str) -> dict:
     return d
 
 
-# Two important distinctions to make for the base emojis:
-# 1. Fully-qualified emojis have a terminating code_point that isn't
-#    completely necessary: `FE0F`. This is a variation selector that
-#    is used to specify that the emoji should be displayed as an emoji.
-# 2. We can opt in to using unqualified and minimally-qualified emojis
-#    if the emoji is too large.
 def get_viable_emojis(
     base_emojis: dict,
     zwj_emojis: dict,
     use_minimal_if_necessary: bool = False,
 ):
+    """
+    Two important distinctions to make for the base emojis:
+    1. Fully-qualified emojis have a terminating code_point that isn't
+       completely necessary: `FE0F`. This is a variation selector that
+       is used to specify that the emoji should be displayed as an emoji.
+    2. We can opt in to using unqualified and minimally-qualified emojis
+       if the emoji is too large.
+    """
+
     # Get rid of duplicates by filtering out zwj emoji sequences that
     # already exist in the base emoji set.
     viable_emojis = {}
@@ -229,8 +232,20 @@ def get_viable_emojis(
     return viable_emojis
 
 
-# Convert all viable emojis to move constants as hex strings.
 def convert_to_move_const(viable_emojis: dict):
+    """
+    Convert all viable emojis to move constants as hex strings.
+
+    As defined by `the data files at
+    unicode.org<https://unicode.org/Public/emoji/latest/emoji-test.txt>`__,
+    the emoji with the name `flag: United Arab Emirates` has the code points
+    `1F1E6 1F1EA`.
+
+    In Move, we can define this as a constant:
+
+    `const FLAG_UNITED_ARAB_EMIRATES: vector<u8> = b\"f09f87a6f09f87aa\";`
+    ::
+    """
     consts = {}
     for name, data in viable_emojis.items():
         sanitized_name = ""
@@ -288,5 +303,3 @@ if __name__ == "__main__":
     with open("move_consts.txt", "w") as outfile:
         for name, move_string in consts.items():
             outfile.write(f'const {name}: vector<u8> = b"{move_string}";\n')
-
-    # viable_emojis = get_viable_emojis()
