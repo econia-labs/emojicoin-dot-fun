@@ -2,6 +2,7 @@
 
 [tool.isort]
 profile = "black"
+src_paths = ["./", "../move_emojis"]
 
 [tool.poetry]
 authors = ["Econia Labs <developers@econialabs.com>"]

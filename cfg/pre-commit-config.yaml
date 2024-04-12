@@ -93,7 +93,10 @@ repos:
   repo: 'local'
 -
   hooks:
-  - id: 'check-added-large-files'
+  -
+    # Ignore emoji-test.txt because it's only 625 KB and the max is 500 KB.
+    exclude: 'src/python/move_emojis/data/emoji-test.txt'
+    id: 'check-added-large-files'
   - id: 'check-case-conflict'
   - id: 'detect-private-key'
   - id: 'end-of-file-fixer'

@@ -1,0 +1,25 @@
+# cspell:words autoflake
+# cspell:words black
+# cspell:words flake8
+# cspell:words isort
+# cspell:words mypy
+# cspell:words pyyaml
+# cspell:words colorama
+# cspell:words unidecode
+
+[tool.isort]
+profile = "black"
+
+[tool.poetry]
+authors = ["Econia Labs <developers@econialabs.com>"]
+description = "Python scripts for using emojis in Move hex strings."
+name = "move_emojis"
+package-mode = false
+packages = []
+version = "1.0.0"
+
+[tool.poetry.dependencies]
+colorama = "^0.4.6"
+python = "^3.9"
+types-colorama = "^0.4.15.20240311"
+unidecode = "^1.3.8"
