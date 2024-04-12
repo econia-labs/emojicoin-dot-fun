@@ -69,7 +69,6 @@ def main():
         # Get the file extension and handle the case where there isn't
         # one. Then get the case by its extension and the regex by its case.
         extension = file_path.split(".")[-1] if "." in file_path else ""
-        extension in filetypes
         case = filetypes.get(extension, default_case)
         regex = CASE_REGEXES.get(case, default_case)
 

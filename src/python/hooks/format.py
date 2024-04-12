@@ -3,6 +3,7 @@
 
 import os
 import subprocess
+from typing import Any, Callable
 
 from colorama import Fore, init
 
@@ -13,7 +14,6 @@ def main():
     init(autoreset=True)
 
     all_files = utils.git_ls_files(abs_paths=True)
-    list(filter(utils.is_python_file, all_files))
 
     changed_files_before = utils.get_changed_files()
 
@@ -30,7 +30,9 @@ def main():
 
     isort_config = f"--src {hooks_dir} --src {move_emojis_dir} --profile black"
 
-    cmd_and_args = {
+    always_true: Callable[[Any], bool] = lambda x: True
+
+    cmd_and_args: dict[str, tuple[str, Callable[[Any], bool]]] = {
         "poetry run autoflake": (
             " ".join(autoflake_args),
             utils.is_python_file,
@@ -42,15 +44,16 @@ def main():
         ),
         "poetry run flake8": ("", utils.is_python_file),
         "poetry run mypy": ("", utils.is_python_file),
-        "poetry run python -m file_name_conventions": ("", lambda x: True),
+        "poetry run python -m file_name_conventions": ("", always_true),
     }
 
-    return_statuses = dict()
+    return_statuses: dict[str, str] = {}
 
     for cmd, arg_and_filter in cmd_and_args.items():
         args, filter_func = arg_and_filter
         # Filter with the `filter_func` and only include files that still
         # exist, since `git ls-files` includes directories and deleted files.
+
         filtered_files = list(
             filter(lambda x: filter_func(x) and os.path.isfile(x), all_files)
         )
@@ -65,7 +68,7 @@ def main():
         process = subprocess.Popen(
             full_cmd,
         )
-        stdout, stderr = process.communicate()
+        _ = process.communicate()
         print()
         return_status = "Success" if process.returncode == 0 else "Failure"
         pretty_cmd = cmd.replace(" " + isort_config, "")

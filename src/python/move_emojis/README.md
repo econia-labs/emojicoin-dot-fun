@@ -1,6 +1,6 @@
 # Description
 
-The scripts in this directory are intended to ingest the Unicode list of all
+The scripts in this directory are intended to ingest the list of all Unicode
 emojis and each of their possible iterations, and then convert them to Move
 hex strings with corresponding Move-friendly const variable names.
 

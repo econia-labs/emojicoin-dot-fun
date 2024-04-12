@@ -8,6 +8,7 @@ filetypes:
   md: '*'
   move: 'snake_case'
   py: 'snake_case'
+  pyi: 'snake_case'
   rs: 'snake_case'
   toml: 'PascalCase'
   ts: 'kebab-case'
