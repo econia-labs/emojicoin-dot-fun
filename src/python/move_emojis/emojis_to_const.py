@@ -16,8 +16,7 @@ import code_point
 BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
 ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
 
-# In bytes.
-MAX_SYMBOL_SIZE = 10
+SYMBOL_MAX_BYTES = 10
 
 
 def format_code_points_for_json(code_points: list) -> dict:
@@ -169,7 +168,7 @@ def get_viable_emojis(
             )
         )
 
-        if qualifications[-1][1]["code_points"]["num_bytes"] > MAX_SYMBOL_SIZE:
+        if qualifications[-1][1]["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
             pass
             # If the biggest emoji is too large and we don't want to try to
             # use another variation with looser qualifications, we continue.
@@ -184,7 +183,7 @@ def get_viable_emojis(
         largest_viable_qualification = None
         while qualifications:
             k, v = qualifications.pop()
-            if v["code_points"]["num_bytes"] <= MAX_SYMBOL_SIZE:
+            if v["code_points"]["num_bytes"] <= SYMBOL_MAX_BYTES:
                 largest_viable_qualification_type = k
                 largest_viable_qualification = v
 
