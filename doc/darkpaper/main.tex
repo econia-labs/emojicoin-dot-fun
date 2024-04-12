@@ -1,4 +1,4 @@
-%cspell:words clamm, cpamm, keefer, zinsmeister
+%cspell:words keefer, zinsmeister
 
 \documentclass[table, twocolumn]{article}
 \usepackage{amsmath}
@@ -35,16 +35,16 @@
 \section{Two-state model}
 
 \texttt{emojicoin dot fun} bootstraps liquidity for ``fair'' (no presale, no team
-allocation) emojicoin markets using a two-state mechanism popularized by \texttt{pump
-dot fun} \cite{pump}. The first state, referred to as a bonding curve, relies on an
-abridged \gls*{clamm} with a single price range \cite{univ3}. Once the market
-capitalization for an emojicoin reaches a predefined value, a state transition from
-bonding curve to \gls*{cpamm} takes place and liquidity is then locked into a
-an abridged constant-product curve \cite{univ2}.
+allocation) emojicoin \cite{emojicoin} markets using a two-state mechanism popularized
+by \texttt{pump dot fun} \cite{pump}. The first state, known as a bonding curve, uses an
+abridged \gls*{clamm} with a single price range \cite{univ3}. Once the
+\texttt{APT}-denominated market capitalization for an emojicoin reaches a predefined
+value, a state transition occurs whereby liquidity is removed from the bonding curve and
+locked into an abridged \gls*{cpamm} \cite{univ2}.
 
 The state transition occurs at \texttt{APT}-denominated market capitalization $m_a$, for
-example 10,000 \texttt{APT}. This corresponds to market capitalization in octas $m_o$,
-as shown in equation \ref{eqn:state-transition-market-cap-apt} \cite{octas}.
+example 10,000 \texttt{APT}. This corresponds to octa-denominated \cite{octa} market
+capitalization $m_o$, as shown in equation \ref{eqn:state-transition-market-cap-apt}.
 
 \begin{equation} \label{eqn:state-transition-market-cap-apt}
   m_o = 10^8 m_a
@@ -70,7 +70,7 @@ To summarize, liquidity mechanics are fully prescribed by the variables in table
     Term                                           & Notation   \\ \hline
     \texttt{APT}-denominated market capitalization & $m_a$      \\ \hline
     Circulating emojicoin supply                   & $m_e$      \\ \hline
-    \texttt{APT}-quoted spot price                 & $p_{crit}$ \\ \hline
+    \texttt{APT}-denominated spot price            & $p_{crit}$ \\ \hline
   \end{tabular}
   \caption{Liquidity variables, at time of state transition}
   \label{tab:state-model-variables}
@@ -246,14 +246,16 @@ The other bonding curve regime endpoint is thus at $b_{v, f}$ per
 \end{align}
 
 \begin{thebibliography}{2}
-  \bibitem{pump} \url{https://www.pump.fun/board}, \url{https://x.com/pumpdotfun}.
+  \bibitem{emojicoin} Emojicoins. Retrieved April 11, 2024 from
+  \url{https://x.com/alnoki_/status/1776323147874119915}.
+  \bibitem{pump} Pump. \url{https://www.pump.fun/board}, \url{https://x.com/pumpdotfun}.
   Retrieved April 11, 2024.
   \bibitem{univ3} Hayden Adams, Noah Zinsmeister, Moody Salem, River Keefer, and Dan
   Robinson. 2021. \emph{Uniswap v3 Core}. Retrieved April 11, 2024 from
   \url{https://uniswap.org/whitepaper-v3.pdf}.
   \bibitem{univ2} Hayden Adams, Noah Zinsmeister, and Dan Robinson. 2020. \emph{Uniswap
     v2 Core}. Retrieved April 11, 2024 from \url{https://uniswap.org/whitepaper.pdf}.
-  \bibitem{octas} \url{https://aptos.dev/reference/glossary/#gas-unit-price}. Retrieved
+  \bibitem{octa} \url{https://aptos.dev/reference/glossary/#gas-unit-price}. Retrieved
   April 11, 2024.
 \end{thebibliography}
 
