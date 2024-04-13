@@ -50,14 +50,14 @@ capitalization $m_o$, as shown in equation \ref{eqn:state-transition-market-cap-
   m_o = 10^8 m_a
 \end{equation}
 
-At the state transition, the spot price resolves to $p_{crit}$, for example 1
+At the state transition, the spot price resolves to $p_s$, for example 1
 \texttt{APT} per emojicoin. At this point there are a predefined number of circulating
-emojicoin subunits $m_s$. For simplicity emojicoins are taken to have 8 decimals, the
-same as \texttt{APT}. Hence $m_s$ relates to nominal emojicoin units $m_e$ as shown
+emojicoin subunits $c_s$. For simplicity emojicoins are taken to have 8 decimals, the
+same as \texttt{APT}. Hence $c_s$ relates to nominal emojicoin units $c_e$ as shown
 in equation \ref{eqn:state-transition-supply-emojicoin}.
 
 \begin{equation} \label{eqn:state-transition-supply-emojicoin}
-  m_s = 10^8 m_e
+  c_s = 10^8 c_e
 \end{equation}
 
 To summarize, liquidity mechanics are fully prescribed by the variables in table
@@ -69,8 +69,8 @@ To summarize, liquidity mechanics are fully prescribed by the variables in table
     \hline \rowcolor{blue}
     Term                                           & Notation   \\ \hline
     \texttt{APT}-denominated market capitalization & $m_a$      \\ \hline
-    Circulating emojicoin supply                   & $m_e$      \\ \hline
-    \texttt{APT}-denominated spot price            & $p_{crit}$ \\ \hline
+    Circulating emojicoin supply                   & $c_e$      \\ \hline
+    \texttt{APT}-denominated spot price            & $p_s$ \\ \hline
   \end{tabular}
   \caption{Liquidity variables, at time of state transition}
   \label{tab:state-model-variables}
@@ -148,6 +148,41 @@ a \gls*{cpamm} takes place. With $m_e$ of emojicoins now in circulation and the 
 price fixed at $p_crit$,
 
 \section{Derivations}
+
+\subsection{Emojicoin remainder calculations}
+
+To ensure a constant price during the state transition, a portion of emojicoin reserves
+must be set aside from the initial bonding curve. At the state transition this emojicoin
+remainder $r_e$ is locked into the \gls*{cpamm} together with all of the \texttt{APT}
+from the bonding curve, yielding:
+
+\begin{align} \label{eqn:remainder-1}
+  p_s &= \frac{q_{r, c}}{r_e} \nonumber \\
+  p_s \cdot r_e &= q_{r, c} \nonumber \\
+  r_e &= \frac{q_{r, c}}{p_s}
+\end{align}
+
+Define $p_s = f(m_a, c_e, r_e)$:
+
+\begin{align} \label{eqn:remainder-2}
+  p_s &= \frac{m_a}{c_e + r_e}
+\end{align}
+
+Substitute (\ref{eqn:remainder-1}) into (\ref{eqn:remainder-2}):
+
+\begin{align} \label{eqn:remainder-3}
+  p_s &= \frac{m_a}{c_e + \frac{q_{r, c}}{p_s}} \nonumber \\
+  p_s \cdot \left(c_e + \frac{q_{r, c}}{p_s} \right) &= m_a \nonumber \\
+  c_e + \frac{q_{r, c}}{p_s} &= \frac{m_a}{p_s} \nonumber \\
+  \frac{q_{r, c}}{p_s} &= \frac{m_a}{p_s} - c_e \nonumber \\
+  q_{r, c} &= m_a - c_e \cdot p_s
+\end{align}
+
+Substitute (\ref{eqn:remainder-3}) into (\ref{eqn:remainder-1}):
+
+\begin{equation} \label{eqn:remainder-4}
+  r_e = \frac{m_a - c_e \cdot p_s}{p_s}
+\end{equation}
 
 \subsection{Bonding curve constraints} \label{sec:bonding-curve-constraints}
 
