@@ -24,7 +24,7 @@
 % Links.
 \hypersetup{colorlinks=true, allcolors={blue}}
 
-\title{emojicoin dot fun}
+\title{\texttt{emojicoin dot fun}}
 \author{Econia Labs}
 \date{}
 
@@ -67,10 +67,10 @@ To summarize, liquidity mechanics are fully prescribed by the variables in table
   \centering
   \begin{tabular}{|c|c|}
     \hline \rowcolor{blue}
-    Term                                           & Notation   \\ \hline
-    \texttt{APT}-denominated market capitalization & $m_a$      \\ \hline
-    Circulating emojicoin supply                   & $c_e$      \\ \hline
-    \texttt{APT}-denominated spot price            & $p_s$ \\ \hline
+    Term                                           & Notation \\ \hline
+    \texttt{APT}-denominated market capitalization & $m_a$    \\ \hline
+    Circulating emojicoin supply                   & $c_e$    \\ \hline
+    \texttt{APT}-denominated spot price            & $p_s$    \\ \hline
   \end{tabular}
   \caption{Liquidity variables, at time of state transition}
   \label{tab:state-model-variables}
@@ -80,8 +80,9 @@ To summarize, liquidity mechanics are fully prescribed by the variables in table
 \section{Bonding curve}
 
 The bonding curve is represented by a \gls*{clamm}, which functions as a \gls*{cpamm}
-within a specific range as defined by table \ref{tab:clamm-curve-translation}, equation
-\ref{eqn:clamm-curve-translation}, and figure \ref{fig:clamm-curve-translation}.
+within a the price range $[p_l, p_h]$ as defined by table
+\ref{tab:clamm-curve-translation}, equation \ref{eqn:clamm-curve-translation}, and
+figure \ref{fig:clamm-curve-translation}.
 
 \begin{table}[!htb]
   \centering
@@ -117,39 +118,82 @@ within a specific range as defined by table \ref{tab:clamm-curve-translation}, e
   \label{fig:clamm-curve-translation}
 \end{figure}
 
-As derived in section \ref{sec:bonding-curve-constraints}, the bonding curve initializes
-with virtual reserves defined in equation \ref{eqn:bonding-curve-setup}, and ends when
-virtual reserves reach the values from equation \ref{eqn:bonding-curve-transition}.
+The bonding curve initializes with real emojicoin reserves $c_e$, which represent only a
+portion of total supply $s_e$. The remainder of emojicoin reserves $r_e$ is set aside
+for the state transition which occurs when $q_{r, c}$ of \texttt{APT} has been deposited
+into the bonding curve, per equation \ref{eqn:supply-amounts} as derived in section
+\ref{sec:supply-amounts}.
+
+\begin{equation} \label{eqn:supply-amounts}
+  r_e = \frac{m_a - c_e \cdot p_s}{p_s},
+  s_e = \frac{m_a}{p_s},
+  q_{r, c} = m_a - c_e \cdot p_s
+\end{equation}
+
+Virtual reserves initialize per equation \ref{eqn:bonding-curve-setup} as derived in
+section \ref{sec:bonding-curve-constraints}.
 
 \begin{equation} \label{eqn:bonding-curve-setup}
-  b_{v, c} = m_s + \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o},
-  q_{v, f} = \frac{m_o ^ 2}{m_s \cdot p_{crit} - m_o}
+  b_{v, c} = \frac{c_e ^ 2 \cdot p_s}{2 \cdot c_e \cdot p_s - m_a},
+  q_{v, f} = \frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a}
 \end{equation}
 
-\begin{equation} \label{eqn:bonding-curve-transition}
-  b_{v, f} = \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o},
-  q_{v, c} = m_o + \frac{m_o ^ 2}{m_s \cdot p_{crit} - m_o}
+The bonding curve price initializes to $p_l$ per equation \ref{eqn:bonding-curve-pl},
+also derived in section \ref{sec:bonding-curve-constraints}.
+
+\begin{equation} \label{eqn:bonding-curve-pl}
+  p_l = \frac{(m_a - c_e \cdot p_s) ^ 2}{c_e ^ 2 \cdot p_s}
 \end{equation}
 
-Throughout the bonding curve, the virtual reserve amounts in the \gls*{clamm} follow a
+During the bonding curve phase, virtual reserve amounts in the \gls*{clamm} follow a
 simple constant product curve invariant, yielding equation
 \ref{eqn:b-q-out-cpamm-simple} as derived in section
 \ref{eqn:b-q-out-simple-derivation}.
 
 \begin{equation} \label{eqn:b-q-out-cpamm-simple}
-  b_{out} = \frac{q_{in} b_{v, 0}}{q_{in} + q_{v, 0}},
-  q_{out} = \frac{b_{in} q_{v, 0}}{b_{in} + b_{v, 0}}
+  b_{out} = \frac{b_0 \cdot q_{in}}{q_0 + q_{in}},
+  q_{out} = \frac{b_{in} \cdot q_0}{b_0 + b_{in}}
 \end{equation}
+
+The state transition occurs when virtual reserves reach the values from equation
+\ref{eqn:bonding-curve-transition}, derived in section
+\ref{sec:bonding-curve-constraints}.
+
+\begin{equation} \label{eqn:bonding-curve-transition}
+  b_{v, f} = \frac{c_e \cdot (m_a - c_e \cdot p_s)}{2 \cdot c_e \cdot p_s - m_a},
+  q_{v, c} = \frac{c_e \cdot p_s \cdot(m_a - c_e \cdot p_s)}
+  {2 \cdot c_e \cdot p_s - m_a}
+\end{equation}
+
+Actual implementation values are given in table \ref{tab:clamm-implementation-values}.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline \rowcolor{blue}
+    Term            & Amount        \\ \hline
+    $m_a$           & 10,000        \\ \hline
+    $c_e = b_{r,c}$ & 750,000       \\ \hline
+    $r_e $          & 250,000       \\ \hline
+    $s_e $          & 1,000,000     \\ \hline
+    $p_s = p_h$     & 0.01          \\ \hline
+    \rule{0pt}{10pt} % https://tex.stackexchange.com/a/387263.
+    $p_l$           & $0.00\bar{1}$ \\ \hline
+    $q_{r,c}$       & 2,500         \\ \hline
+    $q_{v,f}$       & 1,250         \\ \hline
+    $q_{v,c}$       & 3,750         \\ \hline
+    $b_{v,f}$       & 375,000       \\ \hline
+    $b_{v,c}$       & 1,125,000     \\ \hline
+  \end{tabular}
+  \caption{Implementation values}
+  \label{tab:clamm-implementation-values}
+\end{table}
 
 \section{State transition to \gls*{cpamm}}
 
-Once $m_a$ of \texttt{APT} is deposited into the bonding curve, a state transition to
-a \gls*{cpamm} takes place. With $m_e$ of emojicoins now in circulation and the spot
-price fixed at $p_crit$,
-
 \section{Derivations}
 
-\subsection{Emojicoin remainder calculations}
+\subsection{Supply amounts} \label{sec:supply-amounts}
 
 To ensure a constant price during the state transition, a portion of emojicoin reserves
 must be set aside from the initial bonding curve. At the state transition this emojicoin
@@ -157,34 +201,53 @@ remainder $r_e$ is locked into the \gls*{cpamm} together with all of the \texttt
 from the bonding curve, yielding:
 
 \begin{align} \label{eqn:remainder-1}
-  p_s &= \frac{q_{r, c}}{r_e} \nonumber \\
-  p_s \cdot r_e &= q_{r, c} \nonumber \\
-  r_e &= \frac{q_{r, c}}{p_s}
+  p_s           & = \frac{q_{r, c}}{r_e} \nonumber \\
+  p_s \cdot r_e & = q_{r, c} \nonumber             \\
+  r_e           & = \frac{q_{r, c}}{p_s}
 \end{align}
 
 Define $p_s = f(m_a, c_e, r_e)$:
 
 \begin{align} \label{eqn:remainder-2}
-  p_s &= \frac{m_a}{c_e + r_e}
+  p_s & = \frac{m_a}{c_e + r_e}
 \end{align}
 
 Substitute (\ref{eqn:remainder-1}) into (\ref{eqn:remainder-2}):
 
 \begin{align} \label{eqn:remainder-3}
-  p_s &= \frac{m_a}{c_e + \frac{q_{r, c}}{p_s}} \nonumber \\
-  p_s \cdot \left(c_e + \frac{q_{r, c}}{p_s} \right) &= m_a \nonumber \\
-  c_e + \frac{q_{r, c}}{p_s} &= \frac{m_a}{p_s} \nonumber \\
-  \frac{q_{r, c}}{p_s} &= \frac{m_a}{p_s} - c_e \nonumber \\
-  q_{r, c} &= m_a - c_e \cdot p_s
+  p_s                                                & =
+  \frac{m_a}{c_e + \frac{q_{r, c}}{p_s}} \nonumber                                 \\
+  p_s \cdot \left(c_e + \frac{q_{r, c}}{p_s} \right) & = m_a \nonumber             \\
+  c_e + \frac{q_{r, c}}{p_s}                         & = \frac{m_a}{p_s} \nonumber \\
+  \frac{q_{r, c}}{p_s}                               & =
+  \frac{m_a}{p_s} - c_e \nonumber                                                  \\
+  q_{r, c}                                           & = m_a - c_e \cdot p_s
+\end{align}
+
+Note $q_{r, c}$ is only positive for:
+
+\begin{align} \label{eqn:remainder-4}
+  m_a - c_e \cdot p_s & > 0 \nonumber   \\
+  m_a                 & > c_e \cdot p_s
 \end{align}
 
 Substitute (\ref{eqn:remainder-3}) into (\ref{eqn:remainder-1}):
 
-\begin{equation} \label{eqn:remainder-4}
+\begin{equation} \label{eqn:remainder-5}
   r_e = \frac{m_a - c_e \cdot p_s}{p_s}
 \end{equation}
 
-\subsection{Bonding curve constraints} \label{sec:bonding-curve-constraints}
+Hence total supply $s_e$ evaluates to:
+
+\begin{align} \label{eqn:remainder-6}
+  s_e & = c_e + r_e \nonumber                                                   \\
+  s_e & = c_e + \frac{m_a - c_e \cdot p_s}{p_s} \nonumber                       \\
+  s_e & = \frac{c_e \cdot p_s}{p_s} + \frac{m_a - c_e \cdot p_s}{p_s} \nonumber \\
+  s_e & = \frac{c_e \cdot p_s + m_a - c_e \cdot p_s}{p_s} \nonumber             \\
+  s_e & = \frac{m_a}{p_s}
+\end{align}
+
+\subsection{Bonding curve amounts} \label{sec:bonding-curve-constraints}
 
 Evaluated at $p_l$, (\ref{eqn:clamm-curve-translation}) reduces to:
 
@@ -198,8 +261,8 @@ Likewise, (\ref{eqn:clamm-curve-translation}) evaluated at $p_h$ reduces to:
   b_{v, f} \cdot (q_{r, c} + q_{v, f}) = L^2
 \end{equation}
 
-For a fixed $b_{r, c} = m_s$ and $q_{r, c} = m_o$ combining (\ref{eqn:bonding-curve-1})
-and (\ref{eqn:bonding-curve-2}) yields:
+For $b_{r, c} = c_e$, combining (\ref{eqn:remainder-3}),
+(\ref{eqn:bonding-curve-1}), and (\ref{eqn:bonding-curve-2}) yields:
 
 \begin{align} \label{eqn:bonding-curve-3}
   (b_{r, c} + b_{v, f}) \cdot q_{v, f}              & =
@@ -208,76 +271,132 @@ and (\ref{eqn:bonding-curve-2}) yields:
   b_{v, f} \cdot q_{r, c} + b_{v, f} \cdot q_{v, f} \nonumber \\
   b_{r, c} \cdot q_{v, f}                           & =
   b_{v, f} \cdot q_{r, c} \nonumber                           \\
-  \frac{b_{r, c}}{q_{r, c}} q_{v, f}                & =
-  b_{v, f} \nonumber                                          \\
-  b_{v, f}                                          & =
-  \frac{b_{r, c}}{q_{r, c}} \cdot q_{v, f} \nonumber          \\
-  b_{v, f}                                          & =
-  \frac{m_s}{m_o} \cdot q_{v, f}
+  q_{v, f}                                          & =
+  \frac{b_{v, f} \cdot q_{r, c}}{b_{r, c}} \nonumber          \\
+  q_{v, f}                                          & =
+  \frac{b_{v, f} \cdot (m_a - c_e \cdot p_s)}{c_e}
 \end{align}
 
-$p_h = p_{crit}$ yields:
+For $p_h = p_s$, substituting (\ref{eqn:remainder-3}) and (\ref{eqn:bonding-curve-3})
+yields:
 
 \begin{align} \label{eqn:bonding-curve-4}
-  p_h                                                 & =
-  \frac{q_{v, c}}{b_{v, f}} \nonumber                      \\
-  p_h                                                 & =
-  \frac{q_{r, c} + q_{v, f}}{b_{v, f}} \nonumber           \\
-  p_h \cdot b_{v, f}                                  & =
-  q_{r, c} + q_{v, f} \nonumber                            \\
-  \frac{m_e}{m_a} \cdot p_h \cdot q_{v, f}            & =
-  q_{r, c} + q_{v, f} \nonumber                            \\
-  \frac{m_e}{m_a} \cdot p_h \cdot q_{v, f} - q_{v, f} & =
-  q_{r, c} \nonumber                                       \\
-  q_{v, f} (\frac{m_s}{m_0} \cdot p_h - 1)            & =
-  q_{r, c} \nonumber                                       \\
-  q_{v, f}                                            & =
-  \frac{q_{r, c}}{\frac{m_s}{m_o} \cdot p_h - 1} \nonumber \\
-  q_{v, f}                                            & =
-  \frac{m_o}{\frac{m_s}{m_o} \cdot p_{crit} - 1} \nonumber \\
-  q_{v, f}                                            & =
-  \frac{m_o ^ 2}{m_s \cdot p_{crit} - m_o}
+  p_h                                                                   & =
+  \frac{q_{v, c}}{b_{v, f}} \nonumber                                       \\
+  p_s                                                                   & =
+  \frac{q_{r, c} + q_{v, f}}{b_{v, f}} \nonumber                            \\
+  b_{v, f} \cdot p_s                                                    & =
+  q_{r, c} + q_{v, f} \nonumber                                             \\
+  b_{v, f} \cdot p_s - q_{v, f}                                         & =
+  q_{r, c} \nonumber                                                        \\
+  b_{v, f} \cdot p_s - \frac{b_{v, f} \cdot (m_a - c_e \cdot p_s)}{c_e} & =
+  m_a - c_e \cdot p_s \nonumber                                             \\
+  \frac{b_{v, f} \cdot c_e \cdot p_s}{c_e} +
+  \frac{b_{v, f} \cdot (c_e \cdot p_s - m_a)}{c_e}                      & =
+  m_a - c_e \cdot p_s \nonumber                                             \\
+  \frac{b_{v, f} \cdot (2 \cdot c_e \cdot p_s - m_a)}{c_e}              & =
+  m_a - c_e \cdot p_s \nonumber                                             \\
+  b_{v, f} \cdot (2 \cdot c_e \cdot p_s - m_a)                          & =
+  c_e \cdot (m_a - c_e \cdot p_s) \nonumber                                 \\
+  b_{v, f}                                                              & =
+  \frac{c_e \cdot (m_a - c_e \cdot p_s)}{2 \cdot c_e \cdot p_s - m_a}
 \end{align}
+
+Since $m_a > c_e \cdot p_s$, the numerator is always positive for positive $c_e$.
+However the denominator is only positive if:
+
+\begin{align} \label{eqn:bonding-curve-5}
+  2 \cdot c_e \cdot p_s - m_a & > 0 \nonumber           \\
+  2 \cdot c_e \cdot p_s       & > m_a \nonumber         \\
+  m_a                         & < 2 \cdot c_e \cdot p_s
+\end{align}
+
+Combining (\ref{eqn:bonding-curve-5}) and (\ref{eqn:remainder-4}) yields:
+
+\begin{equation} \label{eqn:bonding-curve-6}
+  c_e \cdot p_s < m_a < 2 \cdot c_e \cdot p_s
+\end{equation}
 
 Substituting (\ref{eqn:bonding-curve-4}) into (\ref{eqn:bonding-curve-3}) yields:
 
-\begin{align} \label{eqn:bonding-curve-5}
-  b_{v, f} & = \frac{m_s}{m_o} \cdot \frac{m_o^2}{m_s \cdot p_{crit} - m_o} \nonumber \\
-  b_{v, f} & = \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o}
+\begin{align} \label{eqn:bonding-curve-7}
+  q_{v, f} & =
+  \frac{\frac{c_e \cdot (m_a - c_e \cdot p_s)}{2 \cdot c_e \cdot p_s - m_a}
+  \cdot (m_a - c_e \cdot p_s)}{c_e} \nonumber                                \\
+  q_{v, f} & = \frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a}
 \end{align}
 
-Hence the \gls*{clamm} is initialized with $q_{v, f}$ per (\ref{eqn:bonding-curve-4})
-and $b_{v, c}$ per:
+For $b_{r, c} = c_e$ and $b_{v, f}$ per (\ref{eqn:bonding-curve-4}), $b_{v, c}$ resolves
+to:
 
-\begin{align}
-  b_{v, c} & = b_{r, c} + b_{v, f} \nonumber                        \\
-  b_{v, c} & = m_s + \frac{m_s \cdot m_o}{m_s \cdot p_{crit} - m_o}
+\begin{align} \label{eqn:bonding-curve-8}
+  b_{v, c} & = b_{r, c} + b_{v, f} \nonumber                                          \\
+  b_{v, c} & =
+  c_e + \frac{c_e \cdot (m_a - c_e \cdot p_s)}{2 \cdot c_e \cdot p_s - m_a} \nonumber \\
+  b_{v, c} & =
+  \frac{c_e \cdot (2 \cdot c_e \cdot p_s - m_a)}{2 \cdot c_e \cdot p_s - m_a} +
+  \frac{c_e \cdot (m_a - c_e \cdot p_s)}{2 \cdot c_e \cdot p_s - m_a} \nonumber       \\
+  b_{v, c} & =
+  \frac{c_e \cdot (c_e \cdot p_s)}{2 \cdot c_e \cdot p_s - m_a} \nonumber             \\
+  b_{v, c} & = \frac{c_e ^ 2 \cdot p_s}{2 \cdot c_e \cdot p_s - m_a}
 \end{align}
 
-The other bonding curve regime endpoint is thus at $b_{v, f}$ per
-(\ref{eqn:bonding-curve-5}) and $q_{v, c}$ per:
+For $q_{r, c}$ per (\ref{eqn:remainder-3}) and $q_{v, f}$ per
+(\ref{eqn:bonding-curve-7}), $q_{v, c}$ resolves to:
 
 \begin{align}
-  q_{v, c} & = q_{r, c} + q_{v, f} \nonumber                  \\
-  q_{v, c} & = m_o + \frac{m_o ^ 2}{m_s \cdot p_{crit} - m_o}
+  q_{v, c} & = q_{r, c} + q_{v, f} \nonumber                                   \\
+  q_{v, c} & = m_a - c_e \cdot p_s +
+  \frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a} \nonumber      \\
+  q_{v, c} & = \frac{(2 \cdot c_e \cdot p_s - m_a) \cdot(m_a - c_e \cdot p_s)}
+  {2 \cdot c_e \cdot p_s - m_a} +
+  \frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a} \nonumber      \\
+  q_{v, c} & =
+  \frac{(m_a - c_e \cdot p_s) \cdot (2 \cdot c_e \cdot p_s - m_a + m_a - c_e \cdot p_s)}
+  {2 \cdot c_e \cdot p_s - m_a} \nonumber                                      \\
+  q_{v, c} & = \frac{(m_a - c_e \cdot p_s) \cdot (c_e \cdot p_s)}
+  {2 \cdot c_e \cdot p_s - m_a} \nonumber                                      \\
+  q_{v, c} & = \frac{c_e \cdot p_s \cdot(m_a - c_e \cdot p_s)}
+  {2 \cdot c_e \cdot p_s - m_a}
+\end{align}
+
+Hence for $q_{v, f}$ per (\ref{eqn:bonding-curve-7}) and $b_{v, c}$ per
+(\ref{eqn:bonding-curve-8}), $p_l$ resolves to:
+
+\begin{align}
+  p_l & = \frac{q_{v, f}}{b_{v, c}} \nonumber                                  \\
+  p_l & = \frac{\frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a}}
+  {\frac{c_e ^ 2 \cdot p_s}{2 \cdot c_e \cdot p_s - m_a}} \nonumber            \\
+  p_l & = \frac{(m_a - c_e \cdot p_s) ^ 2}{c_e ^ 2 \cdot p_s}
 \end{align}
 
 \subsection{Base in and out for \gls*{cpamm} swap} \label{eqn:b-q-out-simple-derivation}
 
-\begin{align}
-  b_0 q_0               & = b_f q_f \nonumber                                      \\
-  b_0 q_0               & = (b_0 - b_{out})(q_0 + q_{in}) \nonumber                \\
-  b_0 q_0               & = b_0 q_0 + b_0 q_{in} - b_{out}(q_0 + q_{in}) \nonumber \\
-  b_{out}(q_0 + q_{in}) & = b_{0} q_{in} \nonumber                                 \\
-  b_{out}               & = \frac{q_{in} b_0}{q_{in} + q_0}
-\end{align}
+Let $b_0$ and $q_0$ represent base and quote reserves before a swap, and $b_f$ and $q_f$
+represent reserves after a swap. For a feeless swap buy:
 
 \begin{align}
-  b_0 q_0               & = b_f q_f \nonumber                                      \\
-  b_0 q_0               & = (b_0 + b_{in})(q_0 - q_{out}) \nonumber                \\
-  b_0 q_0               & = b_0 q_0 + b_{in} q_0 - q_{out}(b_0 + b_{in}) \nonumber \\
-  q_{out}(b_0 + b_{in}) & = b_{in} q_0 \nonumber                                   \\
-  q_{out}               & = \frac{b_{in} q_0}{b_{in} + b_0}
+  b_0 \cdot q_0                & = b_f \cdot q_f \nonumber                         \\
+  b_0 \cdot q_0                & = (b_0 - b_{out}) \cdot (q_0 + q_{in}) \nonumber  \\
+  b_0 \cdot q_0                & = b_0 \cdot q_0 + b_0 \cdot q_{in} - b_{out}
+  \cdot q_0 - b_{out} \cdot q_{in} \nonumber                                       \\
+  b_0 \cdot q_0                & = b_0 \cdot q_0 + b_0 \cdot q_{in} -
+  b_{out} \cdot (q_0 + q_{in}) \nonumber                                           \\
+  b_{out} \cdot (q_0 + q_{in}) & = b_0 \cdot q_{in} \nonumber                      \\
+  b_{out}                      & = \frac{b_0 \cdot q_{in}}{q_0 + q_{in}} \nonumber \\
+\end{align}
+
+For a feeless swap sell:
+
+\begin{align}
+  b_0 \cdot q_0               & = b_f q_f \nonumber                               \\
+  b_0 \cdot q_0               & = (b_0 + b_{in}) \cdot (q_0 - q_{out}) \nonumber  \\
+  b_0 \cdot q_0               & = b_0 \cdot q_0 - b_0 \cdot q_{out} +
+  b_{in} \cdot q_0 - b_{in} \cdot q_{out} \nonumber                               \\
+  b_0 \cdot q_0               & = b_0 \cdot q_0 + b_{in} \cdot q_0 -
+  q_{out} \cdot(b_0 + b_{in}) \nonumber                                           \\
+  q_{out} \cdot(b_0 + b_{in}) & = b_{in} \cdot q_0 \nonumber                      \\
+  q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}} \nonumber \\
 \end{align}
 
 \begin{thebibliography}{2}
