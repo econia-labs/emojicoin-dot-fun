@@ -14,7 +14,7 @@
 % Page options.
 \pagecolor{black}
 \color{gray}
-\geometry{left=50pt, top=50pt, bottom=50pt, right=50pt}
+\geometry{left=35pt, top=50pt, bottom=50pt, right=35pt}
 
 % Acronyms.
 \newacronym{amm}{AMM}{Automated Market Maker}
@@ -190,7 +190,7 @@ with $L_i$ taken as the geometric mean of the two contributions per equation
 The initial \gls*{lp} token mint is then held by the protocol, similar in effect to
 burning \gls*{lp} tokens, thus constituting protocol-owned liquidity.
 
-A pool fee rate $f_p$ denominated in basis points is assessed on the output of swap to
+A pool fee rate $f_p$ denominated in basis points is assessed on the output of a swap to
 incentivize additional \gls*{lp}s.  By assessing the fee on the output amount and
 reinvesting it in the pool, spot price slippage decreases and liquidity increases for
 each swap.
@@ -235,8 +235,8 @@ Nominal implementation values are given in table
   \label{tab:nominal-implementation-values}
 \end{table}
 
-This set meets the restriction from equation \ref{eqn:bonding-curve-inequality}, derived
-in section \ref{sec:bonding-curve-constraints}.
+This value set meets the restriction from equation \ref{eqn:bonding-curve-inequality},
+derived in section \ref{sec:bonding-curve-constraints}.
 
 \begin{equation} \label{eqn:bonding-curve-inequality}
   c_e \cdot p_s < m_a < 2 \cdot c_e \cdot p_s
