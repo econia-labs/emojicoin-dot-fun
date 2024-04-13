@@ -1,18 +1,18 @@
 \begin{tikzpicture}
   \begin{axis}[
       axis lines = left,
-      xlabel = Emojicoin reserves,
-      ylabel = \texttt{APT} reserves,
+      xlabel = Base reserves,
+      ylabel = Quote reserves,
       xmin = 0,
       xmax = 3,
       ymin = 0,
       ymax = 3,
       ytick=\empty,
       xtick=\empty,
-      extra x ticks = {0.5, 1.5, 2},
-      extra x tick labels = {$b_{v, f}$, $b_{r,c}$, $b_{v, c}$},
-      extra y ticks = {0.5, 1.5, 2},
-      extra y tick labels = {$q_{v, f}$, $q_{r,c}$, $q_{v, c}$},
+      extra x ticks = {0.5, 2},
+      extra x tick labels = {$b_0$, $b_f$},
+      extra y ticks = {2, 0.5},
+      extra y tick labels = {$q_0$, $q_f$},
       tick style = {thick, major tick length = 7pt},
       legend style = {fill = black, draw = gray},
       % Tangent lines on graph per https://tex.stackexchange.com/a/198046.
@@ -35,25 +35,28 @@
       thick,
       tangent,
     ] {1 / x};
-    \addlegendentry{Virtual reserves}
+    \addlegendentry{Before reinvestment}
     \addplot [
       domain = 0:5,
       samples = 100,
       color = green,
       thick,
-    ] {1 / (x + 0.5) - 0.5};
-    \addlegendentry{Real reserves}
-    \node at (2.3, 0.75) [] {$p_{l} = -\frac{dq_v}{db_v}|_{b_{v,c}} = \frac{q_{v, f}}{b_{v, c}}$};
-    \node at (1.5, 0.175) [] {$p_{l}$} ;
-    \node at (1.35, 2) [] {$p_{h} = -\frac{dq_v}{db_v}|_{b_{v,f}} = \frac{q_{v, c}}{b_{v, f}}$};
-    \node at (0.175, 1.5) [] {$p_{h}$} ;
+      tangent,
+    ] {1.75 / x};
+    \addlegendentry{After reinvestment}
     \node at (2, 0.5) [circle, fill, scale = 0.5] {};
+    \node at (2, 0.875) [circle, fill, scale = 0.5] {};
     \node at (0.5, 2) [circle, fill, scale = 0.5] {};
-    \draw [dashed] (2, 0) -- (2, 0.5);
-    \draw [dashed] (0, 2) -- (0.5, 2);
-    \draw [dashed] (0, 0.5) -- (2, 0.5);
     \draw [dashed] (0.5, 0) -- (0.5, 2);
-    \draw [arrows = {-Latex[]}] (2, 0.5) -- (1.5, 0);
-    \draw [arrows = {-Latex[]}] (0.5, 2) -- (0, 1.5);
+    \draw [dashed] (0, 2) -- (0.5, 2);
+    \draw [dashed] (2, 0) -- (2, 0.875);
+    \draw [dashed] (0, 0.5) -- (2, 0.5);
+    \draw [dashed] (0, 0.875) -- (2, 0.875);
+    \draw [arrows = {-Latex[]}] (0.5, 0.125) -- (2, 0.125);
+    \node at (1.25, 0.25) [] {$b_{in}$} ;
+    \draw [arrows = {-Latex[]}] (0.125, 2) -- (0.125, 0.5);
+    \draw [arrows = {-Latex[]}] (0.625, 0.5) -- (0.625, 0.875);
+    \node at (0.3, 1.25) [] {$q_{out}$} ;
+    \node at (0.9, 0.6875) [] {$f_p \cdot q_{out}$} ;
   \end{axis}
 \end{tikzpicture}

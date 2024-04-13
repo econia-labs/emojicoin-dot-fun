@@ -29,39 +29,25 @@
 \author{Econia Labs}
 \date{}
 
+\input{figures/tangent-line-style.tex}
+
 \begin{document}
 
 \maketitle
 
 \section{Two-state model}
 
-\texttt{emojicoin dot fun} bootstraps liquidity for ``fair'' (no presale, no team
-allocation) emojicoin \cite{emojicoin} markets using a two-state mechanism popularized
+\texttt{emojicoin dot fun} bootstraps liquidity for ``fair'' (public allocation only, no
+presale) emojicoin \cite{emojicoin} markets using a two-state mechanism popularized
 by \texttt{pump dot fun} \cite{pump}. The first state, known as a bonding curve, uses an
-abridged \gls*{clamm} with a single price range \cite{univ3}. Once the
-\texttt{APT}-denominated market capitalization for an emojicoin reaches a predefined
-value, a state transition occurs whereby liquidity is removed from the bonding curve and
-locked into an abridged \gls*{cpamm} \cite{univ2}.
+abridged \gls*{clamm} with a single price range \cite{univ3}.
 
-The state transition occurs at \texttt{APT}-denominated market capitalization $m_a$, for
-example 10,000 \texttt{APT}. This corresponds to octa-denominated \cite{octa} market
-capitalization $m_o$, as shown in equation \ref{eqn:state-transition-market-cap-apt}.
+Once the \texttt{APT}-denominated \cite{octa} market capitalization for an emojicoin
+reaches a predefined value, a state transition occurs whereby \texttt{APT} proceeds
+are removed from the bonding curve and locked into a \gls*{cpamm} \cite{univ2} together
+with a remainder of emojicoin supply.
 
-\begin{equation} \label{eqn:state-transition-market-cap-apt}
-  m_o = 10^8 m_a
-\end{equation}
-
-At the state transition, the spot price resolves to $p_s$, for example 1
-\texttt{APT} per emojicoin. At this point there are a predefined number of circulating
-emojicoin subunits $c_s$. For simplicity emojicoins are taken to have 8 decimals, the
-same as \texttt{APT}. Hence $c_s$ relates to nominal emojicoin units $c_e$ as shown
-in equation \ref{eqn:state-transition-supply-emojicoin}.
-
-\begin{equation} \label{eqn:state-transition-supply-emojicoin}
-  c_s = 10^8 c_e
-\end{equation}
-
-To summarize, liquidity mechanics are fully prescribed by the variables in table
+Liquidity mechanics are fully prescribed by the state transition variables in table
 \ref{tab:state-model-variables}.
 
 \begin{table}[!htb]
@@ -73,17 +59,28 @@ To summarize, liquidity mechanics are fully prescribed by the variables in table
     Circulating emojicoin supply                   & $c_e$    \\ \hline
     \texttt{APT}-denominated spot price            & $p_s$    \\ \hline
   \end{tabular}
-  \caption{Liquidity variables, at time of state transition}
+  \caption{Liquidity variables at time of state transition}
   \label{tab:state-model-variables}
 \end{table}
 
-
-\section{Bonding curve}
+\section{Bonding curve state}
 
 The bonding curve is represented by a \gls*{clamm}, which functions as a \gls*{cpamm}
-within the price range $[p_l, p_h]$ as defined by table
+within the price range $[p_l, p_h]$ as defined by tables \ref{tab:b-q-definitions},
 \ref{tab:clamm-curve-translation}, equation \ref{eqn:clamm-curve-translation}, and
 figure \ref{fig:clamm-curve-translation}.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline \rowcolor{blue}
+    Term        & Notation & Asset        \\ \hline
+    Base asset  & $b$      & emojicoin    \\ \hline
+    Quote asset & $q$      & \texttt{APT} \\ \hline
+  \end{tabular}
+  \caption{Base and quote asset definitions}
+  \label{tab:b-q-definitions}
+\end{table}
 
 \begin{table}[!htb]
   \centering
@@ -147,9 +144,21 @@ also derived in section \ref{sec:bonding-curve-constraints}.
 \end{equation}
 
 During the bonding curve phase, virtual reserve amounts in the \gls*{clamm} follow a
-simple constant product curve invariant for swaps, yielding equation
-\ref{eqn:b-q-out-cpamm-simple} as derived in section
+simple constant product curve invariant for swaps per table \ref{tab:swap-in-out}
+and equation \ref{eqn:b-q-out-cpamm-simple} as derived in section
 \ref{eqn:b-q-out-simple-derivation}.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline \rowcolor{blue}
+    Term  & Swap input & Swap output \\ \hline
+    Base  & $b_{in}$   & $b_{out}$   \\ \hline
+    Quote & $q_{in}$   & $q_{out}$   \\ \hline
+  \end{tabular}
+  \caption{Swap input and output definitions}
+  \label{tab:swap-in-out}
+\end{table}
 
 \begin{equation} \label{eqn:b-q-out-cpamm-simple}
   b_{out} = \frac{b_0 \cdot q_{in}}{q_0 + q_{in}},
@@ -166,21 +175,41 @@ The state transition occurs when virtual reserves reach the values from equation
   {2 \cdot c_e \cdot p_s - m_a}
 \end{equation}
 
-\section{State transition to \gls*{cpamm}}
+\section{\gls*{cpamm} state}
 
 At the state transition, $q_{r, c}$ is withdrawn from the bonding curve and locked into
 a \gls*{cpamm} together with $r_e$, thus maintaining a constant spot price throughout
-the transition. This results in the minting of $L_i$ initial \gls*{lp} tokens, with
-$L_i$ taken as the geometric mean of the two contributions per equation
+the state transition. This results in the minting of $L_i$ initial \gls*{lp} tokens,
+with $L_i$ taken as the geometric mean of the two contributions per equation
 \ref{eqn:initial-lp-tokens} as derived in section \ref{sec:initial-lp-tokens}.
 
 \begin{equation} \label{eqn:initial-lp-tokens}
   L_i = \frac{m_a - c_e \cdot p_s}{\sqrt{p_s}}
 \end{equation}
 
+The initial \gls*{lp} token mint is then held by the protocol, similar in effect to
+burning \gls*{lp} tokens, thus constituting protocol-owned liquidity.
+
+A pool fee rate $f_p$ denominated in basis points is assessed on the output of swap to
+incentivize additional \gls*{lp}s.  By assessing the fee on the output amount and
+reinvesting it in the pool, spot price slippage decreases and liquidity increases for
+each swap.
+
+For example figure \ref{fig:cpamm-swap-sell-with-fee} denotes a swap sell, where
+$f_p \cdot q_{out}$ is deducted from quote proceeds and reinvested in the pool, thus
+increasing available liquidity.
+
+\begin{figure}[!htb]
+  \centering
+  \input{figures/cpamm-swap-sell-with-fee.tex}
+  \caption{\gls*{cpamm} swap sell with fee}
+  \label{fig:cpamm-swap-sell-with-fee}
+\end{figure}
+
 \section{Actual implementation values}
 
-Actual implementation values are given in table \ref{tab:clamm-implementation-values}.
+Nominal implementation values are given in table
+\ref{tab:nominal-implementation-values}.
 
 \begin{table}[!htb]
   \centering
@@ -200,17 +229,59 @@ Actual implementation values are given in table \ref{tab:clamm-implementation-va
     $b_{v,f}$       & 375,000       \\ \hline
     $b_{v,c}$       & 1,125,000     \\ \hline
     $L_i$           & 25,000        \\ \hline
+    $f_p$           & 25            \\ \hline
   \end{tabular}
-  \caption{Implementation values}
-  \label{tab:clamm-implementation-values}
+  \caption{Nominal implementation values}
+  \label{tab:nominal-implementation-values}
 \end{table}
 
-This meets the restriction from equation \ref{eqn:bonding-curve-inequality}, derived
+This set meets the restriction from equation \ref{eqn:bonding-curve-inequality}, derived
 in section \ref{sec:bonding-curve-constraints}.
 
 \begin{equation} \label{eqn:bonding-curve-inequality}
   c_e \cdot p_s < m_a < 2 \cdot c_e \cdot p_s
 \end{equation}
+
+$m_a$ scales to octa-denominated \cite{octa} market capitalization $m_o$ as shown in
+equation \ref{eqn:state-transition-market-cap-apt}.
+
+\begin{equation} \label{eqn:state-transition-market-cap-apt}
+  m_o = 10^8 m_a
+\end{equation}
+
+For simplicity emojicoins are taken to have 8 decimals, the same as \texttt{APT}. Hence
+$c_e$ scales to integer emojicoin subunits $c_s$ as shown in equation
+\ref{eqn:state-transition-supply-emojicoin}.
+
+\begin{equation} \label{eqn:state-transition-supply-emojicoin}
+  c_s = 10^8 c_e
+\end{equation}
+
+Applying the same scale factor across variables produces the integer values in table
+\ref{tab:integer-implementation-values}.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline \rowcolor{blue}
+    Constant                         & Amount                           \\ \hline
+    \texttt{MARKET\_CAP}             & \texttt{1\_000\_000\_000\_000}   \\ \hline
+    \texttt{EMOJICOIN\_REMAINDER}    & \texttt{25\_000\_000\_000\_000}  \\ \hline
+    \texttt{EMOJICOIN\_SUPPLY}       & \texttt{100\_000\_000\_000\_000} \\ \hline
+    \texttt{LP\_TOKENS\_INITIAL}     & \texttt{2\_500\_000\_000\_000}   \\ \hline
+    \texttt{BASE\_REAL\_FLOOR}       & \texttt{0}                       \\ \hline
+    \texttt{QUOTE\_REAL\_FLOOR}      & \texttt{0}                       \\ \hline
+    \texttt{BASE\_REAL\_CEILING}     & \texttt{75\_000\_000\_000\_000}  \\ \hline
+    \texttt{QUOTE\_REAL\_CEILING}    & \texttt{250\_000\_000\_000}      \\ \hline
+    \texttt{BASE\_VIRTUAL\_FLOOR}    & \texttt{37\_500\_000\_000\_000}  \\ \hline
+    \texttt{QUOTE\_VIRTUAL\_FLOOR}   & \texttt{125\_000\_000\_000}      \\ \hline
+    \texttt{BASE\_VIRTUAL\_CEILING}  & \texttt{37\_500\_000\_000\_000}  \\ \hline
+    \texttt{QUOTE\_VIRTUAL\_CEILING} & \texttt{125\_000\_000\_000}      \\ \hline
+    \texttt{POOL\_FEE\_RATE\_BPS}    & \texttt{25}                      \\ \hline
+  \end{tabular}
+  \caption{Integer implementation values}
+  \label{tab:integer-implementation-values}
+\end{table}
 
 \section{Derivations}
 
@@ -426,11 +497,11 @@ Define $L_i$ as the geometric mean of $q_{r, c}$ and $r_e$, substituting
 (\ref{eqn:remainder-3}) and (\ref{eqn:remainder-5}):
 
 \begin{align}
-  L_i &= \sqrt{q_{r, c} \cdot r_e} \nonumber \\
-  L_i &= \sqrt{(m_a - c_e \cdot p_s) \cdot \frac{m_a - c_e \cdot p_s}{p_s}} \nonumber \\
-  L_i &= \sqrt{\frac{(m_a - c_e \cdot p_s) ^ 2}{p_s}} \nonumber \\
-  L_i &=\frac{m_a - c_e \cdot p_s}{\sqrt{p_s}}
-\end{align}
+  L_i & = \sqrt{q_{r, c} \cdot r_e} \nonumber                                  \\
+  L_i & =
+  \sqrt{(m_a - c_e \cdot p_s) \cdot \frac{m_a - c_e \cdot p_s}{p_s}} \nonumber \\
+  L_i & = \sqrt{\frac{(m_a - c_e \cdot p_s) ^ 2}{p_s}} \nonumber               \\
+  L_i & =\frac{m_a - c_e \cdot p_s}{\sqrt{p_s}}\end{align}
 
 \begin{thebibliography}{}
   \bibitem{emojicoin} Emojicoins. Retrieved April 11, 2024 from
@@ -439,11 +510,11 @@ Define $L_i$ as the geometric mean of $q_{r, c}$ and $r_e$, substituting
   Retrieved April 11, 2024.
   \bibitem{univ3} Hayden Adams, Noah Zinsmeister, Moody Salem, River Keefer, and Dan
   Robinson. 2021. \emph{Uniswap v3 Core}. Retrieved April 11, 2024 from
+  \bibitem{octa} \url{https://aptos.dev/reference/glossary/#gas-unit-price}. Retrieved
+  April 11, 2024.
   \url{https://uniswap.org/whitepaper-v3.pdf}.
   \bibitem{univ2} Hayden Adams, Noah Zinsmeister, and Dan Robinson. 2020. \emph{Uniswap
     v2 Core}. Retrieved April 11, 2024 from \url{https://uniswap.org/whitepaper.pdf}.
-  \bibitem{octa} \url{https://aptos.dev/reference/glossary/#gas-unit-price}. Retrieved
-  April 11, 2024.
 \end{thebibliography}
 
 \end{document}
