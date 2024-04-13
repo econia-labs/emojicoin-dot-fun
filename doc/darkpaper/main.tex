@@ -20,6 +20,7 @@
 \newacronym{amm}{AMM}{Automated Market Maker}
 \newacronym{cpamm}{CPAMM}{Constant Product Automated Market Maker}
 \newacronym{clamm}{CLAMM}{Concentrated Liquidity Automated Market Maker}
+\newacronym{lp}{LP}{Liquidity Provider}
 
 % Links.
 \hypersetup{colorlinks=true, allcolors={blue}}
@@ -80,7 +81,7 @@ To summarize, liquidity mechanics are fully prescribed by the variables in table
 \section{Bonding curve}
 
 The bonding curve is represented by a \gls*{clamm}, which functions as a \gls*{cpamm}
-within a the price range $[p_l, p_h]$ as defined by table
+within the price range $[p_l, p_h]$ as defined by table
 \ref{tab:clamm-curve-translation}, equation \ref{eqn:clamm-curve-translation}, and
 figure \ref{fig:clamm-curve-translation}.
 
@@ -103,7 +104,7 @@ figure \ref{fig:clamm-curve-translation}.
     Virtual base reserves floor    & $b_{v,f}$ \\ \hline
     Virtual quote reserves floor   & $q_{v,f}$ \\ \hline
   \end{tabular}
-  \caption{Terms, translation from \gls*{cpamm} to \gls*{clamm}}
+  \caption{Terms, \gls*{clamm} as a fixed-range \gls*{cpamm}}
   \label{tab:clamm-curve-translation}
 \end{table}
 
@@ -114,7 +115,7 @@ figure \ref{fig:clamm-curve-translation}.
 \begin{figure}[!htb]
   \centering
   \input{figures/clamm-curve-translation.tex}
-  \caption{Translation from \gls*{cpamm} to \gls*{clamm}}
+  \caption{\gls*{clamm} as a fixed-range \gls*{cpamm}}
   \label{fig:clamm-curve-translation}
 \end{figure}
 
@@ -146,7 +147,7 @@ also derived in section \ref{sec:bonding-curve-constraints}.
 \end{equation}
 
 During the bonding curve phase, virtual reserve amounts in the \gls*{clamm} follow a
-simple constant product curve invariant, yielding equation
+simple constant product curve invariant for swaps, yielding equation
 \ref{eqn:b-q-out-cpamm-simple} as derived in section
 \ref{eqn:b-q-out-simple-derivation}.
 
@@ -165,6 +166,20 @@ The state transition occurs when virtual reserves reach the values from equation
   {2 \cdot c_e \cdot p_s - m_a}
 \end{equation}
 
+\section{State transition to \gls*{cpamm}}
+
+At the state transition, $q_{r, c}$ is withdrawn from the bonding curve and locked into
+a \gls*{cpamm} together with $r_e$, thus maintaining a constant spot price throughout
+the transition. This results in the minting of $L_i$ initial \gls*{lp} tokens, with
+$L_i$ taken as the geometric mean of the two contributions per equation
+\ref{eqn:initial-lp-tokens} as derived in section \ref{sec:initial-lp-tokens}.
+
+\begin{equation} \label{eqn:initial-lp-tokens}
+  L_i = \frac{m_a - c_e \cdot p_s}{\sqrt{p_s}}
+\end{equation}
+
+\section{Actual implementation values}
+
 Actual implementation values are given in table \ref{tab:clamm-implementation-values}.
 
 \begin{table}[!htb]
@@ -174,8 +189,8 @@ Actual implementation values are given in table \ref{tab:clamm-implementation-va
     Term            & Amount        \\ \hline
     $m_a$           & 10,000        \\ \hline
     $c_e = b_{r,c}$ & 750,000       \\ \hline
-    $r_e $          & 250,000       \\ \hline
-    $s_e $          & 1,000,000     \\ \hline
+    $r_e$           & 250,000       \\ \hline
+    $s_e$           & 1,000,000     \\ \hline
     $p_s = p_h$     & 0.01          \\ \hline
     \rule{0pt}{10pt} % https://tex.stackexchange.com/a/387263.
     $p_l$           & $0.00\bar{1}$ \\ \hline
@@ -184,12 +199,18 @@ Actual implementation values are given in table \ref{tab:clamm-implementation-va
     $q_{v,c}$       & 3,750         \\ \hline
     $b_{v,f}$       & 375,000       \\ \hline
     $b_{v,c}$       & 1,125,000     \\ \hline
+    $L_i$           & 25,000        \\ \hline
   \end{tabular}
   \caption{Implementation values}
   \label{tab:clamm-implementation-values}
 \end{table}
 
-\section{State transition to \gls*{cpamm}}
+This meets the restriction from equation \ref{eqn:bonding-curve-inequality}, derived
+in section \ref{sec:bonding-curve-constraints}.
+
+\begin{equation} \label{eqn:bonding-curve-inequality}
+  c_e \cdot p_s < m_a < 2 \cdot c_e \cdot p_s
+\end{equation}
 
 \section{Derivations}
 
@@ -397,6 +418,18 @@ For a feeless swap sell:
   q_{out} \cdot(b_0 + b_{in}) \nonumber                                           \\
   q_{out} \cdot(b_0 + b_{in}) & = b_{in} \cdot q_0 \nonumber                      \\
   q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}} \nonumber \\
+\end{align}
+
+\subsection{Initial \gls*{lp} tokens} \label{sec:initial-lp-tokens}
+
+Define $L_i$ as the geometric mean of $q_{r, c}$ and $r_e$, substituting
+(\ref{eqn:remainder-3}) and (\ref{eqn:remainder-5}):
+
+\begin{align}
+  L_i &= \sqrt{q_{r, c} \cdot r_e} \nonumber \\
+  L_i &= \sqrt{(m_a - c_e \cdot p_s) \cdot \frac{m_a - c_e \cdot p_s}{p_s}} \nonumber \\
+  L_i &= \sqrt{\frac{(m_a - c_e \cdot p_s) ^ 2}{p_s}} \nonumber \\
+  L_i &=\frac{m_a - c_e \cdot p_s}{\sqrt{p_s}}
 \end{align}
 
 \begin{thebibliography}{}
