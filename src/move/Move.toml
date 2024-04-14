@@ -1,5 +1,5 @@
 [addresses]
-emoji = "_"
+emojicoin_dot_fun = "_"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
@@ -7,10 +7,10 @@ rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
 [dev-addresses]
-emoji = "0xc0de"
+emojicoin_dot_fun = "0xc0de"
 
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
-name = "Move Emojis"
+name = "EmojicoinDotFun"
 upgrade_policy = "immutable"
 version = "1.0.0"
