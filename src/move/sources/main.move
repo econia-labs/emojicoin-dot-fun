@@ -1,6 +1,8 @@
 // cspell:disable
 module emoji::main {
 
+    use aptos_std::smart_table::{Self, SmartTable};
+
     const ABACUS: vector<u8> = x"f09fa7ae";
     const AB_BUTTON_BLOOD_TYPE: vector<u8> = x"f09f868e";
     const ACCORDION: vector<u8> = x"f09faa97";
@@ -2437,8 +2439,26 @@ module emoji::main {
     const ZOMBIE: vector<u8> = x"f09fa79f";
     const ZZZ: vector<u8> = x"f09f92a4";
 
-    fun init_module(_: &signer) {
+    struct Registry has key {
+        supported_emojis: SmartTable<vector<u8>, u8>,
+    }
 
+    fun init_module(emojicoin_dot_fun: &signer) {
+        let registry = Registry {
+            supported_emojis: smart_table::new(),
+        };
+        smart_table::add_all(
+            &mut registry.supported_emojis,
+            vector[
+                ABACUS,
+                AB_BUTTON_BLOOD_TYPE,
+            ],
+            vector[
+                0,
+                0,
+            ],
+        );
+        move_to(emojicoin_dot_fun, registry);
     }
 
 }
