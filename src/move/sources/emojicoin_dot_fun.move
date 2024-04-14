@@ -1,4 +1,3 @@
-// cspell:disable
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_std::smart_table::{Self, SmartTable};
