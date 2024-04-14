@@ -14,7 +14,7 @@ import requests
 from unidecode import unidecode
 
 import codepoint
-from stubs.data_types import (
+from data_types import (
     CodePointInfo,
     EmojiData,
     QualificationKey,

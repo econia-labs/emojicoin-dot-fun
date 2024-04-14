@@ -2,6 +2,7 @@ from typing import Literal, TypedDict
 
 QualificationKey = Literal["unqualified", "minimally_qualified", "fully_qualified"]
 
+
 class CodePointInfo(TypedDict):
     num_bytes: int
     as_unicode: list[str]
