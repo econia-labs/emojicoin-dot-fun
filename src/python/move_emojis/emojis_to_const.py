@@ -290,4 +290,6 @@ if __name__ == "__main__":
     consts = dict(list(sorted(consts.items(), key=lambda x: x[0])))
     with open("move_consts.txt", "w") as outfile:
         for name, move_string in consts.items():
-            _ = outfile.write(f'const {name}: vector<u8> = x"{move_string}";\n')
+            _ = outfile.write(
+                f'const {name}: vector<u8> = x"{move_string}";\n'  # noqa: E231,E702
+            )
