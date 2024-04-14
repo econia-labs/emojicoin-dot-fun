@@ -1,6 +1,7 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_std::smart_table::{Self, SmartTable};
+    use aptos_framework::object::{ExtendRef, ObjectGroup};
 
     const ABACUS: vector<u8> = x"f09fa7ae";
     const AB_BUTTON_BLOOD_TYPE: vector<u8> = x"f09f868e";
@@ -2438,13 +2439,25 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const ZOMBIE: vector<u8> = x"f09fa79f";
     const ZZZ: vector<u8> = x"f09f92a4";
 
+    #[resource_group = ObjectGroup]
+    struct Market has key {
+        market_id: address,
+        market_address: address,
+        emoji_bytes: vector<u8>,
+        extend_ref: ExtendRef,
+    }
+
     struct Registry has key {
         supported_emojis: SmartTable<vector<u8>, u8>,
+        markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
+        markets_by_market_id: SmartTable<u64, address>,
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
         let registry = Registry {
             supported_emojis: smart_table::new(),
+            markets_by_emoji_bytes: smart_table::new(),
+            markets_by_market_id: smart_table::new(),
         };
         smart_table::add_all(
             &mut registry.supported_emojis,
