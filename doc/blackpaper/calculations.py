@@ -64,6 +64,11 @@ q_v_c = get_q_v_c(M_A, C_E, P_S)
 p_l = get_p_l(M_A, C_E, P_S)
 L_i = get_L_i(M_A, C_E, P_S)
 
+print(f"A: {A}")
+print(f"R: {R}")
+print(f"T: {T}")
+print()
+
 
 print(f"M_A: {M_A}")
 print(f"C_E: {C_E}")
