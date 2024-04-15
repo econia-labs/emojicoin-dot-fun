@@ -36,7 +36,7 @@
 
 \maketitle
 
-\section{Overview}
+\section{Overview} \label{sec:overview}
 
 \texttt{emojicoin dot fun} bootstraps liquidity for ``fair'' (public allocation only, no
 presale) emojicoin \cite{emojicoin} markets using a two-state mechanism popularized
@@ -280,6 +280,10 @@ derived in section \ref{sec:bonding-curve-constraints}.
 \begin{equation} \label{eqn:bonding-curve-inequality}
   c_e \cdot p_s < m_a < 2 \cdot c_e \cdot p_s
 \end{equation}
+
+Notably, for a given $c_e$ and $p_s$, larger values of $m_a$ correspond to larger $R$.
+Hence the alternative economic variable approach described in section
+\ref{sec:overview}, which enables direct specification of $R$.
 
 $m_a$ scales to octa-denominated \cite{octa} market capitalization $m_o$ as shown in
 equation \ref{eqn:state-transition-market-cap-apt}.
