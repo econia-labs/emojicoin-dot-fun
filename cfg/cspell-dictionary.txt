@@ -5,8 +5,8 @@ econia
 emojicoin
 emojicoins
 leaderboard
-permissionless
 octa
+permissionless
 precommit
 presale
 struct
