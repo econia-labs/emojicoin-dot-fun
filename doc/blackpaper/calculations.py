@@ -1,3 +1,4 @@
+# cspell:words texttt
 from math import sqrt
 
 A = 1_000_000.0
@@ -76,16 +77,18 @@ def print_vars(section_label, vars):
         print(pad + label + f": {var[2]:,}")  # noqa: E231
     print()
 
+
 def print_latex_nominals(vars):
     for var in vars:
         if len(var) == 2:
             val = var[1]
             assert val.is_integer()
-            val = f"{int(var[1]):,}"
+            val = f"{int(var[1]):,}"  # noqa: E231
         else:
-            val = f"{var[1]:.10f}"
+            val = f"{var[1]:.10f}"  # noqa: E231
         print(f"${var[0]}$ & {val} \\\\ \\hline")
     print()
+
 
 def print_latex_constants(vars):
     for var in vars:
