@@ -72,6 +72,10 @@ def print_vars(section_label, vars):
         print((max_label_length - len(label)) * " " + label + f": {var[2]:,}")
     print()
 
+def print_latex(vars):
+    for var in vars:
+        print(f"\\texttt{{{var[0]}}} & \\texttt{{{int(var[1] * SCALE_TO_SUBUNITS):_}}} \\\\ \\hline".replace("_", "\\_"))
+
 print_vars("Alternate economic variables", [
     ["Approx emojicoins per APT", "A", A],
     ["bonding curve endpoints price ratio", "R", R],
@@ -100,18 +104,21 @@ print_vars("Virtual reserve variables", [
     ["Quote virtual ceiling", "q_v_c", q_v_c],
 ])
 
-print(f"MARKET_CAP: {int(M_A * SCALE_TO_SUBUNITS): _}")
-print(f"EMOJICOIN_REMAINDER: {int(r_e * SCALE_TO_SUBUNITS): _}")
-print(f"EMOJICOIN_SUPPLY: {int(s_e * SCALE_TO_SUBUNITS): _}")
-print(f"LP_TOKENS_INITIAL: {int(L_i * SCALE_TO_SUBUNITS): _}")
-print(f"BASE_REAL_FLOOR: {int(0): _}")
-print(f"QUOTE_REAL_FLOOR: {int(0): _}")
-print(f"BASE_REAL_CEILING: {int(C_E * SCALE_TO_SUBUNITS): _}")
-print(f"QUOTE_REAL_CEILING: {int(q_r_c * SCALE_TO_SUBUNITS): _}")
-print(f"BASE_VIRTUAL_FLOOR: {int(b_v_f * SCALE_TO_SUBUNITS): _}")
-print(f"QUOTE_VIRTUAL_FLOOR: {int(q_v_f * SCALE_TO_SUBUNITS): _}")
-print(f"BASE_VIRTUAL_CEILING: {int(b_v_f * SCALE_TO_SUBUNITS): _}")
-print(f"QUOTE_VIRTUAL_CEILING: {int(q_v_f * SCALE_TO_SUBUNITS): _}")
+print_latex([
+    ["MARKET_CAP", M_A],
+    ["EMOJICOIN_REMAINDER", r_e],
+    ["EMOJICOIN_SUPPLY", s_e],
+    ["LP_TOKENS_INITIAL", L_i],
+    ["BASE_REAL_FLOOR", 0],
+    ["QUOTE_REAL_FLOOR", 0],
+    ["BASE_REAL_CEILING", C_E],
+    ["QUOTE_REAL_CEILING", q_r_c],
+    ["BASE_VIRTUAL_FLOOR", b_v_f],
+    ["QUOTE_VIRTUAL_FLOOR", q_v_f],
+    ["BASE_VIRTUAL_CEILING", b_v_f],
+    ["QUOTE_VIRTUAL_CEILING", q_v_f],
+])
+
 
 # Check assorted systems of equations.
 assert q_r_c / P_S == r_e
