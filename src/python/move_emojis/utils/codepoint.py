@@ -1,3 +1,6 @@
+from typing import Union
+
+
 def unicode_to_emoji(code_point: str) -> str:
     """
     Convert a code_point to a character.
@@ -28,7 +31,7 @@ def unicode_to_hex_str(code_point: str) -> str:
     return unicode_to_bytes(code_point).hex()
 
 
-def decode_to_emoji(hex_string: str | bytes) -> str:
+def decode_to_emoji(hex_string: Union[str, bytes]) -> str:
     """
     Convert a hex string to a character.
     Example:
