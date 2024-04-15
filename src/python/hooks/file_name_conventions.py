@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# cspell:words LIGHTBLACK
-# cspell:words LIGHTGREEN
-# cspell:words LIGHTRED
-# cspell:words LIGHTWHITE
 # cspell:words colorama
+# cspell:words lightblack
+# cspell:words lightgreen
+# cspell:words lightred
+# cspell:words lightwhite
 import os
 import re
 import sys

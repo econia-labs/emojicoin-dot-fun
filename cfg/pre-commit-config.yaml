@@ -1,5 +1,10 @@
-# cspell:words autofix, markdownlint, mdformat, shfmt, autoflake, Autoflake
-# cspell:words isort, mypy, Mypy
+# cspell:words autofix
+# cspell:words autoflake
+# cspell:words isort
+# cspell:words markdownlint
+# cspell:words mdformat
+# cspell:words mypy
+# cspell:words shfmt
 ---
 repos:
 -
