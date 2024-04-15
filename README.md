@@ -1,4 +1,4 @@
-# emojicoin dot fun
+# Emojicoin dot fun
 
 <!-- markdownlint-disable MD036 -->
 
