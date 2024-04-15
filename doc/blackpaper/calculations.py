@@ -1,7 +1,7 @@
 from math import sqrt
 
 A = 1_000_000.0
-R = 9.0
+R = 1.25**2
 T = 5_000.0
 
 M_A = T * (1 + sqrt(R))
@@ -75,8 +75,9 @@ def print_vars(section_label, vars):
     print()
 
 
-def print_latex(vars):
+def print_latex_constants(vars):
     for var in vars:
+        assert var[1].is_integer()
         val = int(var[1]) * SCALE_TO_SUBUNITS
         left_col = f"\\texttt{{{var[0]}}} &"
         right_col = f"\\texttt{{{val:_}}} \\\\ \\hline"  # noqa: E231
@@ -87,7 +88,7 @@ print_vars(
     "Alternate economic variables",
     [
         ["Approx emojicoins per APT", "A", A],
-        ["bonding curve endpoints price ratio", "R", R],
+        ["Bonding curve endpoints price ratio", "R", R],
         ["Total APT deposited into bonding curve", "T", T],
     ],
 )
@@ -123,14 +124,14 @@ print_vars(
     ],
 )
 
-print_latex(
+print_latex_constants(
     [
         ["MARKET_CAP", M_A],
         ["EMOJICOIN_REMAINDER", r_e],
         ["EMOJICOIN_SUPPLY", s_e],
         ["LP_TOKENS_INITIAL", L_i],
-        ["BASE_REAL_FLOOR", 0],
-        ["QUOTE_REAL_FLOOR", 0],
+        ["BASE_REAL_FLOOR", 0.0],
+        ["QUOTE_REAL_FLOOR", 0.0],
         ["BASE_REAL_CEILING", C_E],
         ["QUOTE_REAL_CEILING", q_r_c],
         ["BASE_VIRTUAL_FLOOR", b_v_f],
@@ -139,7 +140,6 @@ print_latex(
         ["QUOTE_VIRTUAL_CEILING", q_v_f],
     ]
 )
-
 
 # Check assorted systems of equations.
 assert q_r_c / P_S == r_e
