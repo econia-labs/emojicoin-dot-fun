@@ -40,12 +40,13 @@
 \texttt{emojicoin dot fun} bootstraps liquidity for ``fair'' (public allocation only, no
 presale) emojicoin \cite{emojicoin} markets using a two-state mechanism popularized
 by \texttt{pump dot fun} \cite{pump}. The first state, known as a bonding curve, uses an
-abridged \gls*{clamm} with a single price range \cite{univ3}.
+abridged \gls*{clamm} with a single price range \cite{univ3} as described in section
+\ref{sec:bonding-curve}.
 
 Once the \texttt{APT}-denominated \cite{octa} market capitalization for an emojicoin
 reaches a predefined value, a state transition occurs whereby \texttt{APT} proceeds
 are removed from the bonding curve and locked into a \gls*{cpamm} \cite{univ2} together
-with a remainder of emojicoin supply.
+with a remainder of emojicoin supply, as described in section \ref{sec:cpamm-state}.
 
 Liquidity mechanics are fully prescribed by the state transition variables in table
 \ref{tab:state-model-variables}.
@@ -63,7 +64,7 @@ Liquidity mechanics are fully prescribed by the state transition variables in ta
   \label{tab:state-model-variables}
 \end{table}
 
-\section{Bonding curve state}
+\section{Bonding curve state} \label{sec:bonding-curve}
 
 The bonding curve is represented by a \gls*{clamm}, which functions as a \gls*{cpamm}
 within the price range $[p_l, p_h]$ as defined by tables \ref{tab:b-q-definitions},
@@ -175,7 +176,7 @@ The state transition occurs when virtual reserves reach the values from equation
   {2 \cdot c_e \cdot p_s - m_a}
 \end{equation}
 
-\section{\gls*{cpamm} state}
+\section{\gls*{cpamm} state} \label{sec:cpamm-state}
 
 At the state transition, $q_{r, c}$ is withdrawn from the bonding curve and locked into
 a \gls*{cpamm} together with $r_e$, thus maintaining a constant spot price throughout
