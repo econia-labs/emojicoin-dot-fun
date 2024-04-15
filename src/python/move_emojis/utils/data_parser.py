@@ -1,29 +1,22 @@
-# cspell:words alnum
 # cspell:words codepoint
-# cspell:words unidecode
 
 # Helper file for converting all of the data in the Unicode Emoji data files
 # to Move-friendly constants.
 
 import re
-import string
 import sys
 from typing import cast
 
 import requests
-from unidecode import unidecode
 
-import codepoint
-from data_types import (
+from data_types.type_defs import (
     CodePointInfo,
     EmojiData,
     QualificationKey,
     Qualifications,
     QualifiedEmojiData,
 )
-
-BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
-ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
+from utils import codepoint
 
 SYMBOL_MAX_BYTES = 10
 
@@ -184,6 +177,7 @@ def get_viable_emojis(
         )
 
         if sorted_qualifications[-1][1]["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
+            pass
             # If the biggest emoji is too large and we don't want to try to
             # use another variation with looser qualifications, we continue.
             if not use_minimal_if_necessary:
@@ -198,7 +192,6 @@ def get_viable_emojis(
             _, v = sorted_qualifications.pop()
             if v["code_points"]["num_bytes"] <= SYMBOL_MAX_BYTES:
                 largest_viable_qualification = v
-                break
 
         # If any of the qualifications are small enough, we can use them.
         if largest_viable_qualification is not None:
@@ -218,78 +211,3 @@ def get_viable_emojis(
         viable_emojis[name] = zwj_emoji_data
 
     return viable_emojis
-
-
-def convert_to_move_const(viable_emojis: dict[str, EmojiData]) -> dict[str, str]:
-    """
-    Convert all viable emojis to move constants as hex strings.
-
-    As defined by `the data files at
-    unicode.org<https://unicode.org/Public/emoji/latest/emoji-test.txt>`__,
-    the emoji with the name `flag: United Arab Emirates` has the code points
-    `1F1E6 1F1EA`.
-
-    In Move, we can define this as a constant:
-
-    `const FLAG_UNITED_ARAB_EMIRATES: vector<u8> = x\"f09f87a6f09f87aa\";`
-    ::
-    """
-    consts: dict[str, str] = {}
-    for name, data in viable_emojis.items():
-        sanitized_name = ""
-
-        # Replace characters with characters that are allowed in
-        # Move variable names.
-        for char in name:
-            if char.isalnum() or char == "_":
-                sanitized_name += char
-            elif char in [":", "-", ",", " ", "'"]:
-                sanitized_name += "_"
-            elif char == "#":
-                sanitized_name += "POUND"
-            elif char == "*":
-                sanitized_name += "ASTERISK"
-
-        words = []
-        if " " in sanitized_name:
-            words = sanitized_name.split(" ")
-        else:
-            words = [sanitized_name]
-
-        alnum_words = filter(lambda x: x.replace("_", "").isalnum(), words)
-        const_name = "_".join([w.upper() for w in alnum_words])
-
-        # Get rid of multiple underscores.
-        split_underscore = filter(lambda x: len(x) > 0, const_name.split("_"))
-        const_name = "_".join(split_underscore)
-
-        if const_name and const_name[0] in string.digits:
-            const_name = f"EMOJI_{const_name}"
-        if len(const_name) == 0:
-            print(f"ERROR: invalid constant name: {name} => {const_name}")
-            sys.exit(1)
-        move_string = "".join(data["code_points"]["as_hex"])
-        if const_name in consts:
-            print(f"ERROR: duplicate constant name: {const_name}")
-            sys.exit(1)
-        const_name = unidecode(const_name)
-        consts[const_name] = move_string
-
-    return consts
-
-
-if __name__ == "__main__":
-    base_emoji_dict = get_base_emojis(BASE_EMOJIS_URL)
-    zwj_emoji_dict = get_zwj_emojis(ZWJ_EMOJIS_URL)
-
-    viable_emojis = get_viable_emojis(
-        base_emoji_dict, zwj_emoji_dict, use_minimal_if_necessary=True
-    )
-
-    consts = convert_to_move_const(viable_emojis)
-    consts = dict(list(sorted(consts.items(), key=lambda x: x[0])))
-    with open("move_consts.txt", "w") as outfile:
-        for name, move_string in consts.items():
-            _ = outfile.write(
-                f'const {name}: vector<u8> = x"{move_string}";\n'  # noqa: E231,E702
-            )

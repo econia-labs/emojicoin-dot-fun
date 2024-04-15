@@ -15,7 +15,7 @@ poetry install
 ## Run the generation script
 
 ```shell
-poetry run -m emojis_to_const
+poetry run python -m scripts.generate_code
 ```
 
 ### Viable Emojis
