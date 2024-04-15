@@ -1,8 +1,17 @@
 from math import sqrt
 
-M_A = 10_000
-C_E = 750_000
+M_A = 10_000.0
+C_E = 750_000.0
 P_S = 0.01
+
+A = 1_000_000.0
+R = 9.0
+T = 5_000.0
+
+M_A = T * (1 + sqrt(R))
+P_S = 1 / A
+C_E = A * T * sqrt(R)
+
 SCALE_TO_SUBUNITS = 10**8
 
 assert M_A > C_E * P_S, f"M_A must be greater than {C_E * P_S}"
@@ -99,3 +108,6 @@ assert p_l == q_v_f / b_v_c
 assert C_E == (b_v_c * q_r_c) / (q_v_f + q_r_c)
 assert q_r_c == (C_E * q_v_c) / (b_v_f + C_E)
 assert L_i == sqrt(q_r_c * r_e)
+assert A == 1 / P_S
+assert P_S / p_l == R
+assert T == q_r_c

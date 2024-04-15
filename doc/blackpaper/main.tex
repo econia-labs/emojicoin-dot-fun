@@ -436,7 +436,7 @@ to:
 For $q_{r, c}$ per (\ref{eqn:remainder-3}) and $q_{v, f}$ per
 (\ref{eqn:bonding-curve-7}), $q_{v, c}$ resolves to:
 
-\begin{align}
+\begin{align} \label{eqn:bonding-curve-9}
   q_{v, c} & = q_{r, c} + q_{v, f} \nonumber                                   \\
   q_{v, c} & = m_a - c_e \cdot p_s +
   \frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a} \nonumber      \\
@@ -455,7 +455,7 @@ For $q_{r, c}$ per (\ref{eqn:remainder-3}) and $q_{v, f}$ per
 Hence for $q_{v, f}$ per (\ref{eqn:bonding-curve-7}) and $b_{v, c}$ per
 (\ref{eqn:bonding-curve-8}), $p_l$ resolves to:
 
-\begin{align}
+\begin{align} \label{eqn:bonding-curve-10}
   p_l & = \frac{q_{v, f}}{b_{v, c}} \nonumber                                  \\
   p_l & = \frac{\frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a}}
   {\frac{c_e ^ 2 \cdot p_s}{2 \cdot c_e \cdot p_s - m_a}} \nonumber            \\
@@ -490,6 +490,87 @@ For a feeless swap sell:
   q_{out} \cdot(b_0 + b_{in}) & = b_{in} \cdot q_0 \nonumber                      \\
   q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}} \nonumber \\
 \end{align}
+
+\subsection{Alternate liquidity variable selection}
+
+Define the inverse of spot price, roughly interpreted as the number of emojicoins that 1
+\texttt{APT} will buy at the state transition $A$:
+
+\begin{equation} \label{eqn:alt-define-a}
+  A = \frac{1}{p_s}
+\end{equation}
+
+Define the ratio of bonding curve price endpoints $R$:
+
+\begin{equation} \label{eqn:alt-define-r}
+  R = \frac{p_s}{p_l}
+\end{equation}
+
+Define the total amount of \texttt{APT} required to initiate a state transition $T$:
+
+\begin{equation} \label{eqn:alt-define-t}
+  T = q_{r, c}
+\end{equation}
+
+Combine (\ref{eqn:alt-define-r}), (\ref{eqn:bonding-curve-10}), and
+(\ref{eqn:remainder-3}):
+
+\begin{align} \label{eqn:alt-solve-c-e}
+  R                     & = \frac{p_s}{p_l} \nonumber                           \\
+  R                     & =
+  \frac{p_s}{\frac{(m_a - c_e \cdot p_s) ^ 2}{c_e ^ 2 \cdot p_s}} \nonumber     \\
+  R                     & =
+  \frac{c_e ^ 2 \cdot p_s^2}{(m_a - c_e \cdot p_s) ^ 2} \nonumber               \\
+  R                     & = \frac{c_e ^ 2 \cdot (\frac{1}{A})^2}{T^2} \nonumber \\
+  R                     & = \frac{c_e ^ 2}{A^2 \cdot T^2} \nonumber             \\
+  A^2 \cdot R \cdot T^2 & = c_e ^ 2 \nonumber                                   \\
+  c_e^2                 & = A^2 \cdot R \cdot T^2 \nonumber                     \\
+  c_e                   & = A \cdot T \cdot \sqrt{R}
+\end{align}
+
+Refactor (\ref{eqn:alt-define-a}):
+
+\begin{align} \label{eqn:alt-solve-p-s}
+  A           & = \frac{1}{p_s} \nonumber \\
+  A \cdot p_s & = \frac{1}{p_s} \nonumber \\
+  p_s         & = \frac{1}{A}
+\end{align}
+
+Combine (\ref{eqn:alt-define-t}), (\ref{eqn:remainder-3}), (\ref{eqn:alt-solve-c-e}),
+and (\ref{eqn:alt-solve-p-s}):
+
+\begin{align} \label{eqn:alt-solve-m-a}
+  T                    & = m_a - c_e \cdot p_s \nonumber                              \\
+  T                    & = m_a - A \cdot T \cdot \sqrt{R} \cdot \frac{1}{A} \nonumber \\
+  T                    & = m_a - T \cdot \sqrt{R} \nonumber                           \\
+  T + T \cdot \sqrt{R} & = m_a \nonumber                                              \\
+  m_a                  & = T + T \cdot \sqrt{R} \nonumber                             \\
+  m_a                  & = T \cdot (1 + \sqrt{R})
+\end{align}
+
+Combine (\ref{eqn:remainder-4}), (\ref{eqn:alt-solve-c-e}), (\ref{eqn:alt-solve-p-s}),
+(\ref{eqn:alt-solve-m-a}), demonstrating a condition that is always met:
+
+\begin{align}
+  T \cdot (1 + \sqrt{R}) & > A \cdot T \cdot \sqrt{R} \cdot \frac{1}{A} \nonumber \\
+  1 + \sqrt{R}           & > \sqrt{R}  \nonumber                                  \\
+  1                      & > 0
+\end{align}
+
+Combine (\ref{eqn:bonding-curve-5}), (\ref{eqn:alt-solve-c-e}),
+(\ref{eqn:alt-solve-p-s}), (\ref{eqn:alt-solve-m-a}), demonstrating another condition
+that is always met:
+
+\begin{align}
+  m_a                    & < 2 \cdot c_e \cdot p_s \nonumber   \\
+  T \cdot (1 + \sqrt{R}) & <
+  2 \cdot A \cdot T \cdot \sqrt{R} \cdot \frac{1}{A} \nonumber \\
+  1 + \sqrt{R}           & < 2 \cdot \sqrt{R} \nonumber        \\
+  1                      & < \sqrt{R} \nonumber                \\
+  \sqrt{R}               & > 1 \nonumber                       \\
+  R                      & > 1
+\end{align}
+
 
 \subsection{Initial \gls*{lp} tokens} \label{sec:initial-lp-tokens}
 
