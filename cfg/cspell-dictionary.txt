@@ -4,7 +4,9 @@ cpamm
 econia
 emojicoin
 emojicoins
+leaderboard
 octa
+permissionless
 precommit
 presale
 struct

@@ -62,11 +62,6 @@ results in the comment being marked as resolved.
 1. Inlining `SHALL` only be used for functions that pass up a reference to a
    borrow out of global storage.
 
-### Optimization
-
-1. Function call paths `SHALL` be analyzed to minimize bytecode instructions in
-   key operations of placing/cancelling limit orders, and swapping.
-
 ## Style
 
 ### General
