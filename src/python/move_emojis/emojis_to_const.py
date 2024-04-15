@@ -184,7 +184,6 @@ def get_viable_emojis(
         )
 
         if sorted_qualifications[-1][1]["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
-            pass
             # If the biggest emoji is too large and we don't want to try to
             # use another variation with looser qualifications, we continue.
             if not use_minimal_if_necessary:
@@ -199,6 +198,7 @@ def get_viable_emojis(
             _, v = sorted_qualifications.pop()
             if v["code_points"]["num_bytes"] <= SYMBOL_MAX_BYTES:
                 largest_viable_qualification = v
+                break
 
         # If any of the qualifications are small enough, we can use them.
         if largest_viable_qualification is not None:
