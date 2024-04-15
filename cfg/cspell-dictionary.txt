@@ -1,7 +1,12 @@
 aptos
+clamm
+cpamm
 econia
 emojicoin
+emojicoins
+octa
 precommit
+presale
 struct
 subdir
 xbtmatt
