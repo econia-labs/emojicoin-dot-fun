@@ -15,11 +15,20 @@ from data_types.type_defs import EmojiData
 BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
 ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
 MOVE_CONSTS_DATA_FILE = "data/move_consts.txt"
+TAB = " " * 4
 
 
-def convert_to_move_const(viable_emojis: dict[str, EmojiData]) -> dict[str, str]:
+def to_human_readable(viable_emojis: dict[str, EmojiData]) -> dict[str, str]:
     """
-    Convert all viable emojis to move constants as hex strings.
+    Convert all viable emojis to a dictionary of human readable names as the key
+    and their hex string representations as the value.
+
+    Returns a dictionary of the form:
+    ::
+        {
+            "FLAG_UNITED_ARAB_EMIRATES": "f09f87a6f09f87aa",
+            ...
+        }
 
     As defined by `the data files at
     unicode.org<https://unicode.org/Public/emoji/latest/emoji-test.txt>`__,
@@ -40,7 +49,7 @@ def convert_to_move_const(viable_emojis: dict[str, EmojiData]) -> dict[str, str]
         for char in name:
             if char.isalnum() or char == "_":
                 sanitized_name += char
-            elif char in [":", "-", ",", " ", "'"]:
+            elif char in [":", "-", ",", " "]:
                 sanitized_name += "_"
             elif char == "#":
                 sanitized_name += "POUND"
@@ -78,19 +87,41 @@ def convert_to_move_const(viable_emojis: dict[str, EmojiData]) -> dict[str, str]
 if __name__ == "__main__":
     base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
     zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
+    viable_emojis = data_parser.get_viable_emojis(base_emoji_dict, zwj_emoji_dict)
 
-    viable_emojis = data_parser.get_viable_emojis(
-        base_emoji_dict, zwj_emoji_dict, use_minimal_if_necessary=True
-    )
+    # Map the full hex string to its original unicode code point.
+    original_unicode_points: dict[str, list[str]] = {}
+    for data in viable_emojis.values():
+        hex_str = "".join(data["code_points"]["as_hex"])
+        original_unicode_points[hex_str] = data["code_points"]["as_unicode"]
 
-    consts = convert_to_move_const(viable_emojis)
+    consts = to_human_readable(viable_emojis)
     consts = dict(list(sorted(consts.items(), key=lambda x: x[0])))
+    consts_reverse_dict = {v: k for k, v in consts.items()}
+    hex_strings = list(consts.values())
 
-    move_code = ""
-    for name, move_string in consts.items():
-        move_code += (
-            f'const {name}: vector<u8> = x"{move_string}";\n'  # noqa: E231,E702
-        )
+    return_open = f"{TAB*2}vector<vector<u8>> ["
+    # The hex bytes args, the aka vector<vector<u8>> args.
+    args_and_comments: list[tuple[str, str]] = []
+    # fhs == the full hex string.
+    for fhs in hex_strings:
+        whitespace = TAB * 3
+        name_split = consts_reverse_dict[fhs].split("_")
+        name = " ".join([s.lower() for s in name_split]).capitalize()
+        original_unicode = original_unicode_points[fhs]
+        comment = f' // {name}, {" ".join(original_unicode)}.'
+        value = f'x"{fhs}"'
+        arg = f"{whitespace}{value}, "
+        args_and_comments.append((arg, comment))
+
+    longest_arg = max(len(a) for a, _ in args_and_comments)
+
+    full_args: list[str] = []
+    for arg, comment in args_and_comments:
+        full_args.append(f"{arg:<{longest_arg}}{comment}")
+    return_close = f"{TAB*2}]"
 
     with open(MOVE_CONSTS_DATA_FILE, "w") as outfile:
-        _ = outfile.write(move_code)
+        _ = outfile.write(f"\n{return_open}\n")
+        _ = outfile.write("\n".join(full_args))
+        _ = outfile.write(f"\n{return_close}\n")

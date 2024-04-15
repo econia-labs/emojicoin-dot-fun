@@ -22,8 +22,8 @@ SYMBOL_MAX_BYTES = 10
 
 
 def format_code_points_for_json(code_points: list[str]) -> CodePointInfo:
-    num_bytes = sum([len(codepoint.to_bytes(cp)) for cp in code_points])
-    as_hex = [codepoint.to_bytes(cp).hex() for cp in code_points]
+    num_bytes = sum([len(codepoint.unicode_to_bytes(cp)) for cp in code_points])
+    as_hex = [codepoint.unicode_to_bytes(cp).hex() for cp in code_points]
     return {
         "num_bytes": num_bytes,
         "as_unicode": code_points,
@@ -41,8 +41,8 @@ def sanitized_lines(data_url: str) -> list[str]:
 
         # The Unicode code_points are used here so the linter
         # doesn't complain about the characters ‘ and ’.
-        line = line.replace(codepoint.to_emoji("2018"), "'")
-        line = line.replace(codepoint.to_emoji("2019"), "'")
+        line = line.replace(codepoint.unicode_to_emoji("2018"), "'")
+        line = line.replace(codepoint.unicode_to_emoji("2019"), "'")
         line = line.replace("“", '"')
         line = line.replace("”", '"')
         lines.append(line)
@@ -64,8 +64,9 @@ def get_base_emojis(data_url: str) -> dict[str, QualifiedEmojiData]:
         # Order matters for code_points.
         code_points = semicolon_split[0].split(" ")
         comment_split = [s.strip() for s in semicolon_split[1].split("#", 1)]
+        qualification_string = comment_split[0].replace("-", "_")
 
-        qualification_type = cast(QualificationKey, comment_split[0])
+        qualification_type = cast(QualificationKey, qualification_string)
 
         comment = comment_split[1]
         matches = comment_regex.match(comment)
@@ -145,15 +146,9 @@ def get_zwj_emojis(data_url: str) -> dict[str, EmojiData]:
 def get_viable_emojis(
     base_emojis: dict[str, QualifiedEmojiData],
     zwj_emojis: dict[str, EmojiData],
-    use_minimal_if_necessary: bool = False,
 ) -> dict[str, EmojiData]:
     """
-    Two important distinctions to make for the base emojis:
-    1. Fully-qualified emojis have a terminating code_point that isn't
-       completely necessary: `FE0F`. This is a variation selector that
-       is used to specify that the emoji should be displayed as an emoji.
-    2. We can opt in to using unqualified and minimally-qualified emojis
-       if the emoji is too large.
+    Aggregates and deduplicates all emojis that are fully qualified.
     """
 
     viable_emojis: dict[str, EmojiData] = {}
@@ -165,41 +160,17 @@ def get_viable_emojis(
         for q in values:
             all_base_code_points.add("".join(q["code_points"]["as_unicode"]))
 
-        # Sort by the number of bytes in the code_points, ascending.
-        keys = qualifications.keys()
+        if "fully_qualified" not in qualifications:
+            continue
+        fully_qualified = qualifications["fully_qualified"]
+        if fully_qualified["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
+            continue
 
-        sorted_qualifications = list(
-            sorted(
-                zip(keys, values),
-                key=lambda x: x[1]["code_points"]["num_bytes"],
-                reverse=False,
-            )
-        )
-
-        if sorted_qualifications[-1][1]["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
-            pass
-            # If the biggest emoji is too large and we don't want to try to
-            # use another variation with looser qualifications, we continue.
-            if not use_minimal_if_necessary:
-                continue
-
-        # If the biggest emoji is too large, we can use the minimal
-        # qualification type that is still viable.
-        # We sort by the number of bytes in the code_points, largest first.
-        # Then we pop from the list until we find a viable qualification.
-        largest_viable_qualification = None
-        while sorted_qualifications:
-            _, v = sorted_qualifications.pop()
-            if v["code_points"]["num_bytes"] <= SYMBOL_MAX_BYTES:
-                largest_viable_qualification = v
-
-        # If any of the qualifications are small enough, we can use them.
-        if largest_viable_qualification is not None:
-            viable_emojis[name] = {
-                "emoji": base_emoji_data["emoji"],
-                "version": base_emoji_data["version"],
-                "code_points": largest_viable_qualification["code_points"],
-            }
+        viable_emojis[name] = {
+            "emoji": base_emoji_data["emoji"],
+            "version": base_emoji_data["version"],
+            "code_points": qualifications["fully_qualified"]["code_points"],
+        }
 
     for name, zwj_emoji_data in tuple(zwj_emojis.items()):
         code_points_string = "".join(zwj_emoji_data["code_points"]["as_unicode"])
