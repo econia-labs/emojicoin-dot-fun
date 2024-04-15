@@ -62,62 +62,83 @@ d_p = get_d_p(M_A, C_E, P_S)
 p_l = get_p_l(M_A, C_E, P_S)
 L_i = get_L_i(M_A, C_E, P_S)
 
+
 def print_vars(section_label, vars):
-    print(f"{section_label}:")
+    print(f"{section_label}:")  # noqa: E231
     labels = []
     for var in vars:
         labels.append(f"{var[0]} ({var[1]})")
     max_label_length = max(len(s) for s in labels)
     for label, var in zip(labels, vars):
-        print((max_label_length - len(label)) * " " + label + f": {var[2]:,}")
+        pad = (max_label_length - len(label)) * " "
+        print(pad + label + f": {var[2]:,}")  # noqa: E231
     print()
+
 
 def print_latex(vars):
     for var in vars:
-        print(f"\\texttt{{{var[0]}}} & \\texttt{{{int(var[1] * SCALE_TO_SUBUNITS):_}}} \\\\ \\hline".replace("_", "\\_"))
+        val = int(var[1]) * SCALE_TO_SUBUNITS
+        left_col = f"\\texttt{{{var[0]}}} &"
+        right_col = f"\\texttt{{{val:_}}} \\\\ \\hline"  # noqa: E231
+        print((left_col + right_col).replace("_", "\\_"))
 
-print_vars("Alternate economic variables", [
-    ["Approx emojicoins per APT", "A", A],
-    ["bonding curve endpoints price ratio", "R", R],
-    ["Total APT deposited into bonding curve", "T", T],
-])
 
-print_vars("Original economic variables", [
-    ["Market cap", "M_A", M_A],
-    ["Circulating emojicoins", "C_E", C_E],
-    ["Spot price", "P_S", P_S],
-])
+print_vars(
+    "Alternate economic variables",
+    [
+        ["Approx emojicoins per APT", "A", A],
+        ["bonding curve endpoints price ratio", "R", R],
+        ["Total APT deposited into bonding curve", "T", T],
+    ],
+)
 
-print_vars("Derived variables", [
-    ["Real quote reserves ceiling", "q_r_c", q_r_c],
-    ["Emojicoin remainder", "r_e", r_e],
-    ["Total emojicoin supply", "s_e", s_e],
-    ["Dilution percentage", "d_p", d_p],
-    ["Low price range endpoint", "p_l", p_l],
-    ["Initial LP tokens", "L_i", L_i],
-])
+print_vars(
+    "Original economic variables",
+    [
+        ["Market cap", "M_A", M_A],
+        ["Circulating emojicoins", "C_E", C_E],
+        ["Spot price", "P_S", P_S],
+    ],
+)
 
-print_vars("Virtual reserve variables", [
-    ["Base virtual floor", "b_v_f", b_v_f],
-    ["Quote virtual floor", "q_v_f", q_v_f],
-    ["Base virtual ceiling", "b_v_c", b_v_c],
-    ["Quote virtual ceiling", "q_v_c", q_v_c],
-])
+print_vars(
+    "Derived variables",
+    [
+        ["Real quote reserves ceiling", "q_r_c", q_r_c],
+        ["Emojicoin remainder", "r_e", r_e],
+        ["Total emojicoin supply", "s_e", s_e],
+        ["Dilution percentage", "d_p", d_p],
+        ["Low price range endpoint", "p_l", p_l],
+        ["Initial LP tokens", "L_i", L_i],
+    ],
+)
 
-print_latex([
-    ["MARKET_CAP", M_A],
-    ["EMOJICOIN_REMAINDER", r_e],
-    ["EMOJICOIN_SUPPLY", s_e],
-    ["LP_TOKENS_INITIAL", L_i],
-    ["BASE_REAL_FLOOR", 0],
-    ["QUOTE_REAL_FLOOR", 0],
-    ["BASE_REAL_CEILING", C_E],
-    ["QUOTE_REAL_CEILING", q_r_c],
-    ["BASE_VIRTUAL_FLOOR", b_v_f],
-    ["QUOTE_VIRTUAL_FLOOR", q_v_f],
-    ["BASE_VIRTUAL_CEILING", b_v_f],
-    ["QUOTE_VIRTUAL_CEILING", q_v_f],
-])
+print_vars(
+    "Virtual reserve variables",
+    [
+        ["Base virtual floor", "b_v_f", b_v_f],
+        ["Quote virtual floor", "q_v_f", q_v_f],
+        ["Base virtual ceiling", "b_v_c", b_v_c],
+        ["Quote virtual ceiling", "q_v_c", q_v_c],
+    ],
+)
+
+print_latex(
+    [
+        ["MARKET_CAP", M_A],
+        ["EMOJICOIN_REMAINDER", r_e],
+        ["EMOJICOIN_SUPPLY", s_e],
+        ["LP_TOKENS_INITIAL", L_i],
+        ["BASE_REAL_FLOOR", 0],
+        ["QUOTE_REAL_FLOOR", 0],
+        ["BASE_REAL_CEILING", C_E],
+        ["QUOTE_REAL_CEILING", q_r_c],
+        ["BASE_VIRTUAL_FLOOR", b_v_f],
+        ["QUOTE_VIRTUAL_FLOOR", q_v_f],
+        ["BASE_VIRTUAL_CEILING", b_v_f],
+        ["QUOTE_VIRTUAL_CEILING", q_v_f],
+    ]
+)
 
 
 # Check assorted systems of equations.
