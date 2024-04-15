@@ -26,7 +26,10 @@
 % Links.
 \hypersetup{colorlinks=true, allcolors={blue}}
 
-\title{\texttt{emojicoin dot fun}}
+\title{%
+  \Huge \texttt{emojicoin dot fun} \\ \vspace{10pt}
+  \small \emph{Sponsored by a grant from the Aptos Foundation}
+}
 \author{Econia Labs}
 \date{}
 
@@ -45,11 +48,11 @@ abridged \gls*{clamm} with a single price range \cite{univ3} as described in sec
 \ref{sec:bonding-curve}.
 
 Once the \texttt{APT}-denominated \cite{octa} market capitalization for an emojicoin
-reaches a predefined value, a \gls*{st} occurs whereby \texttt{APT} proceeds
-are removed from the bonding curve and locked into a \gls*{cpamm} \cite{univ2} together
-with a remainder of emojicoin supply, as described in section \ref{sec:cpamm-state}.
+reaches a predefined value, a \gls*{st} occurs whereby \texttt{APT} deposits are removed
+from the bonding curve and locked into a \gls*{cpamm} \cite{univ2} together with a
+remainder of emojicoin supply, as described in section \ref{sec:cpamm-state}.
 
-\section{Asset pricing}
+\section{Economic variables}
 
 Price $p$ is defined per table \ref{tab:b-q-definitions} and equation
 \ref{eqn:price-defined}.
@@ -70,8 +73,6 @@ Price $p$ is defined per table \ref{tab:b-q-definitions} and equation
   p = \frac{q}{b}
 \end{equation}
 
-\section{Economic variables}
-
 The economic variables in table \ref{tab:state-model-variables} fully specify the set of
 numerical values required for the implementation, as derived in sections
 \ref{sec:bonding-curve} through \ref{sec:derivations}.
@@ -90,7 +91,7 @@ numerical values required for the implementation, as derived in sections
 \end{table}
 
 As derived in section \ref{sec:alt-vars}, the alternative set of economic variables
-in table \ref{tab:state-model-variables-alt} can also be used to prescribe numerical
+in table \ref{tab:state-model-variables-alt} can also be used to fully specify numerical
 values.
 
 \begin{table}[!htb]
@@ -546,7 +547,7 @@ For a feeless swap sell:
   q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}} \nonumber \\
 \end{align}
 
-\subsection{Alternate economic variable selection} \label{sec:alt-vars}
+\subsection{Alternative economic variable selection} \label{sec:alt-vars}
 
 Define the inverse of spot price, roughly interpreted as the number of emojicoins that 1
 \texttt{APT} will buy at the \gls*{st} $A$:
