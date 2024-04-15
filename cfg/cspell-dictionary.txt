@@ -1,10 +1,14 @@
 aptos
+clamm
+cpamm
 econia
 emojicoin
 emojicoins
 leaderboard
 permissionless
+octa
 precommit
+presale
 struct
 subdir
 xbtmatt

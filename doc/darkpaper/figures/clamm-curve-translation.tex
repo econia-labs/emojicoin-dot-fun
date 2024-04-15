@@ -1,0 +1,59 @@
+\begin{tikzpicture}
+  \begin{axis}[
+      axis lines = left,
+      xlabel = Emojicoin reserves,
+      ylabel = \texttt{APT} reserves,
+      xmin = 0,
+      xmax = 3,
+      ymin = 0,
+      ymax = 3,
+      ytick=\empty,
+      xtick=\empty,
+      extra x ticks = {0.5, 1.5, 2},
+      extra x tick labels = {$b_{v, f}$, $b_{r,c}$, $b_{v, c}$},
+      extra y ticks = {0.5, 1.5, 2},
+      extra y tick labels = {$q_{v, f}$, $q_{r,c}$, $q_{v, c}$},
+      tick style = {thick, major tick length = 7pt},
+      legend style = {fill = black, draw = gray},
+      % Tangent lines on graph per https://tex.stackexchange.com/a/198046.
+      tangent/.style={add node at x={2}{[
+                  sloped, minimum width = 75pt,
+                  append after command =
+                    {(\tikzlastnode.west) edge [thick] (\tikzlastnode.east)}
+                ]},
+          add node at x={0.5}{[
+                  sloped, minimum width = 75pt,
+                  append after command =
+                    {(\tikzlastnode.west) edge [thick] (\tikzlastnode.east)}
+                ]}
+        }
+    ]
+    \addplot [
+      domain = 0:5,
+      samples = 100,
+      color = blue,
+      thick,
+      tangent,
+    ] {1 / x};
+    \addlegendentry{Virtual reserves}
+    \addplot [
+      domain = 0:5,
+      samples = 100,
+      color = green,
+      thick,
+    ] {1 / (x + 0.5) - 0.5};
+    \addlegendentry{Real reserves}
+    \node at (2.3, 0.75) [] {$p_{l} = -\frac{dq_v}{db_v}|_{b_{v,c}} = \frac{q_{v, f}}{b_{v, c}}$};
+    \node at (1.5, 0.175) [] {$p_{l}$} ;
+    \node at (1.35, 2) [] {$p_{h} = -\frac{dq_v}{db_v}|_{b_{v,f}} = \frac{q_{v, c}}{b_{v, f}}$};
+    \node at (0.175, 1.5) [] {$p_{h}$} ;
+    \node at (2, 0.5) [circle, fill, scale = 0.5] {};
+    \node at (0.5, 2) [circle, fill, scale = 0.5] {};
+    \draw [dashed] (2, 0) -- (2, 0.5);
+    \draw [dashed] (0, 2) -- (0.5, 2);
+    \draw [dashed] (0, 0.5) -- (2, 0.5);
+    \draw [dashed] (0.5, 0) -- (0.5, 2);
+    \draw [arrows = {-Latex[]}] (2, 0.5) -- (1.5, 0);
+    \draw [arrows = {-Latex[]}] (0.5, 2) -- (0, 1.5);
+  \end{axis}
+\end{tikzpicture}
