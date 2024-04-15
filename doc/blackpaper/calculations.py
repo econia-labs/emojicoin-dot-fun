@@ -62,28 +62,43 @@ d_p = get_d_p(M_A, C_E, P_S)
 p_l = get_p_l(M_A, C_E, P_S)
 L_i = get_L_i(M_A, C_E, P_S)
 
-print(f"A: {A}")
-print(f"R: {R}")
-print(f"T: {T}")
-print()
+def print_vars(section_label, vars):
+    print(f"{section_label}:")
+    labels = []
+    for var in vars:
+        labels.append(f"{var[0]} ({var[1]})")
+    max_label_length = max(len(s) for s in labels)
+    for label, var in zip(labels, vars):
+        print((max_label_length - len(label)) * " " + label + f": {var[2]:,}")
+    print()
 
+print_vars("Alternate economic variables", [
+    ["Approx emojicoins per APT", "A", A],
+    ["bonding curve endpoints price ratio", "R", R],
+    ["Total APT deposited into bonding curve", "T", T],
+])
 
-print(f"M_A: {M_A}")
-print(f"C_E: {C_E}")
-print(f"P_S: {P_S}")
-print()
+print_vars("Original economic variables", [
+    ["Market cap", "M_A", M_A],
+    ["Circulating emojicoins", "C_E", C_E],
+    ["Spot price", "P_S", P_S],
+])
 
-print(f"q_r_c: {q_r_c}")
-print(f"r_e: {r_e}")
-print(f"s_e: {s_e}")
-print(f"b_v_f: {b_v_f}")
-print(f"q_v_f: {q_v_f}")
-print(f"b_v_c: {b_v_c}")
-print(f"q_v_c: {q_v_c}")
-print(f"d_p: {d_p}")
-print(f"p_l: {p_l}")
-print(f"L_i: {L_i}")
-print()
+print_vars("Derived variables", [
+    ["Real quote reserves ceiling", "q_r_c", q_r_c],
+    ["Emojicoin remainder", "r_e", r_e],
+    ["Total emojicoin supply", "s_e", s_e],
+    ["Dilution percentage", "d_p", d_p],
+    ["Low price range endpoint", "p_l", p_l],
+    ["Initial LP tokens", "L_i", L_i],
+])
+
+print_vars("Virtual reserve variables", [
+    ["Base virtual floor", "b_v_f", b_v_f],
+    ["Quote virtual floor", "q_v_f", q_v_f],
+    ["Base virtual ceiling", "b_v_c", b_v_c],
+    ["Quote virtual ceiling", "q_v_c", q_v_c],
+])
 
 print(f"MARKET_CAP: {int(M_A * SCALE_TO_SUBUNITS): _}")
 print(f"EMOJICOIN_REMAINDER: {int(r_e * SCALE_TO_SUBUNITS): _}")
