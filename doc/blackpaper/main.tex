@@ -21,6 +21,7 @@
 \newacronym{cpamm}{CPAMM}{Constant Product Automated Market Maker}
 \newacronym{clamm}{CLAMM}{Concentrated Liquidity Automated Market Maker}
 \newacronym{lp}{LP}{Liquidity Provider}
+\newacronym{st}{ST}{State Transition}
 
 % Links.
 \hypersetup{colorlinks=true, allcolors={blue}}
@@ -35,7 +36,7 @@
 
 \maketitle
 
-\section{Two-state model}
+\section{Overview}
 
 \texttt{emojicoin dot fun} bootstraps liquidity for ``fair'' (public allocation only, no
 presale) emojicoin \cite{emojicoin} markets using a two-state mechanism popularized
@@ -44,32 +45,14 @@ abridged \gls*{clamm} with a single price range \cite{univ3} as described in sec
 \ref{sec:bonding-curve}.
 
 Once the \texttt{APT}-denominated \cite{octa} market capitalization for an emojicoin
-reaches a predefined value, a state transition occurs whereby \texttt{APT} proceeds
+reaches a predefined value, a \gls*{st} occurs whereby \texttt{APT} proceeds
 are removed from the bonding curve and locked into a \gls*{cpamm} \cite{univ2} together
 with a remainder of emojicoin supply, as described in section \ref{sec:cpamm-state}.
 
-Numerical values are fully prescribed by the economic variables in table
-\ref{tab:state-model-variables}.
+\section{Asset pricing}
 
-\begin{table}[!htb]
-  \centering
-  \begin{tabular}{|c|c|}
-    \hline \rowcolor{blue}
-    Term                                           & Notation \\ \hline
-    \texttt{APT}-denominated market capitalization & $m_a$    \\ \hline
-    Circulating emojicoin supply                   & $c_e$    \\ \hline
-    \texttt{APT}-denominated spot price            & $p_s$    \\ \hline
-  \end{tabular}
-  \caption{Economic variables at time of state transition}
-  \label{tab:state-model-variables}
-\end{table}
-
-\section{Bonding curve state} \label{sec:bonding-curve}
-
-The bonding curve is represented by a \gls*{clamm}, which functions as a \gls*{cpamm}
-within the price range $[p_l, p_h]$ as defined by tables \ref{tab:b-q-definitions},
-\ref{tab:clamm-curve-translation}, equation \ref{eqn:clamm-curve-translation}, and
-figure \ref{fig:clamm-curve-translation}.
+Price $p$ is defined per table \ref{tab:b-q-definitions} and equation
+\ref{eqn:price-defined}.
 
 \begin{table}[!htb]
   \centering
@@ -82,6 +65,53 @@ figure \ref{fig:clamm-curve-translation}.
   \caption{Base and quote asset definitions}
   \label{tab:b-q-definitions}
 \end{table}
+
+\begin{equation} \label{eqn:price-defined}
+  p = \frac{q}{b}
+\end{equation}
+
+\section{Economic variables}
+
+The economic variables in table \ref{tab:state-model-variables} fully specify the set of
+numerical values required for the implementation, as derived in sections
+\ref{sec:bonding-curve} through \ref{sec:derivations}.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline \rowcolor{blue}
+    Term                                           & Notation \\ \hline
+    \texttt{APT}-denominated market capitalization & $m_a$    \\ \hline
+    Circulating emojicoin supply                   & $c_e$    \\ \hline
+    \texttt{APT}-denominated spot price            & $p_s$    \\ \hline
+  \end{tabular}
+  \caption{Economic variables at time of \gls*{st}}
+  \label{tab:state-model-variables}
+\end{table}
+
+As derived in section \ref{sec:alt-vars}, the alternative set of economic variables
+in table \ref{tab:state-model-variables-alt} can also be used to prescribe numerical
+values.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline \rowcolor{blue}
+    Term                                           & Notation \\ \hline
+    $p_s^{-1} \approx$ emojicoins per 1 \texttt{APT} at \gls*{st} & $A$    \\ \hline
+    Ratio of $p$ at \gls*{st} to $p$ at start of bonding curve& $R$    \\ \hline
+    Total \texttt{APT} deposited before \gls*{st}       & $T$    \\ \hline
+  \end{tabular}
+  \caption{Alternative economic variables}
+  \label{tab:state-model-variables-alt}
+\end{table}
+
+\section{Bonding curve state} \label{sec:bonding-curve}
+
+The bonding curve is represented by a \gls*{clamm}, which functions as a \gls*{cpamm}
+within the price range $[p_l, p_h]$ as defined by table
+\ref{tab:clamm-curve-translation}, equation \ref{eqn:clamm-curve-translation}, and
+figure \ref{fig:clamm-curve-translation}.
 
 \begin{table}[!htb]
   \centering
@@ -119,8 +149,8 @@ figure \ref{fig:clamm-curve-translation}.
 
 The bonding curve initializes with real emojicoin reserves $c_e$, which represent only a
 portion of total supply $s_e$. The remainder of emojicoin reserves $r_e$ is set aside
-for the state transition which occurs when $q_{r, c}$ of \texttt{APT} has been deposited
-into the bonding curve, per equation \ref{eqn:supply-amounts} as derived in section
+for the \gls*{st} which occurs when $q_{r, c}$ of \texttt{APT} has been deposited into
+the bonding curve, per equation \ref{eqn:supply-amounts} as derived in section
 \ref{sec:supply-amounts}.
 
 \begin{equation} \label{eqn:supply-amounts}
@@ -166,7 +196,7 @@ and equation \ref{eqn:b-q-out-cpamm-simple} as derived in section
   q_{out} = \frac{b_{in} \cdot q_0}{b_0 + b_{in}}
 \end{equation}
 
-The state transition occurs when virtual reserves reach the values from equation
+The \gls*{st} occurs when virtual reserves reach the values from equation
 \ref{eqn:bonding-curve-transition}, derived in section
 \ref{sec:bonding-curve-constraints}.
 
@@ -178,10 +208,10 @@ The state transition occurs when virtual reserves reach the values from equation
 
 \section{\gls*{cpamm} state} \label{sec:cpamm-state}
 
-At the state transition, $q_{r, c}$ is withdrawn from the bonding curve and locked into
-a \gls*{cpamm} together with $r_e$, thus maintaining a constant spot price throughout
-the state transition. This results in the minting of $L_i$ initial \gls*{lp} tokens,
-with $L_i$ taken as the geometric mean of the two contributions per equation
+At the \gls*{st}, $q_{r, c}$ is withdrawn from the bonding curve and locked into a
+\gls*{cpamm} together with $r_e$, thus maintaining a constant spot price throughout
+the \gls*{st}. This results in the minting of $L_i$ initial \gls*{lp} tokens, with $L_i$
+taken as the geometric mean of the two contributions per equation
 \ref{eqn:initial-lp-tokens} as derived in section \ref{sec:initial-lp-tokens}.
 
 \begin{equation} \label{eqn:initial-lp-tokens}
@@ -284,14 +314,14 @@ Applying the same scale factor across variables produces the integer values in t
   \label{tab:integer-implementation-values}
 \end{table}
 
-\section{Derivations}
+\section{Derivations} \label{sec:derivations}
 
 \subsection{Supply amounts} \label{sec:supply-amounts}
 
-To ensure a constant price during the state transition, a portion of emojicoin reserves
-must be set aside from the initial bonding curve. At the state transition this emojicoin
-remainder $r_e$ is locked into the \gls*{cpamm} together with all of the \texttt{APT}
-from the bonding curve, yielding:
+To ensure a constant price during the \gls*{st}, a portion of emojicoin reserves must be
+set aside from the initial bonding curve. At the \gls*{st} this emojicoin remainder
+$r_e$ is locked into the \gls*{cpamm} together with all of the \texttt{APT} from the
+bonding curve, yielding:
 
 \begin{align} \label{eqn:remainder-1}
   p_s           & = \frac{q_{r, c}}{r_e} \nonumber \\
@@ -492,10 +522,10 @@ For a feeless swap sell:
   q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}} \nonumber \\
 \end{align}
 
-\subsection{Alternate economic variable selection}
+\subsection{Alternate economic variable selection} \label{sec:alt-vars}
 
 Define the inverse of spot price, roughly interpreted as the number of emojicoins that 1
-\texttt{APT} will buy at the state transition $A$:
+\texttt{APT} will buy at the \gls*{st} $A$:
 
 \begin{equation} \label{eqn:alt-define-a}
   A = \frac{1}{p_s}
@@ -507,7 +537,7 @@ Define the ratio of bonding curve price endpoints $R$:
   R = \frac{p_s}{p_l}
 \end{equation}
 
-Define the total amount of \texttt{APT} required to initiate a state transition $T$:
+Define the total amount of \texttt{APT} required to initiate a \gls*{st} $T$:
 
 \begin{equation} \label{eqn:alt-define-t}
   T = q_{r, c}
