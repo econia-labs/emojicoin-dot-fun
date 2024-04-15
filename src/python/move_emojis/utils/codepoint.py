@@ -28,11 +28,11 @@ def unicode_to_hex_str(code_point: str) -> str:
     return unicode_to_bytes(code_point).hex()
 
 
-def hex_to_emoji(hex_string: str | bytes) -> str:
+def decode_to_emoji(hex_string: str | bytes) -> str:
     """
     Convert a hex string to a character.
     Example:
-    >>> hex_to_char('f09f9880')
+    >>> decode_to_emoji('f09f9880')
     '😀'
     """
     if type(hex_string) == str:
