@@ -1,9 +1,5 @@
 from math import sqrt
 
-M_A = 10_000.0
-C_E = 750_000.0
-P_S = 0.01
-
 A = 1_000_000.0
 R = 9.0
 T = 5_000.0
@@ -13,9 +9,6 @@ P_S = 1 / A
 C_E = A * T * sqrt(R)
 
 SCALE_TO_SUBUNITS = 10**8
-
-assert M_A > C_E * P_S, f"M_A must be greater than {C_E * P_S}"
-assert M_A < 2 * C_E * P_S, f"M_A must be less than {2 * C_E * P_S}"
 
 
 def get_q_r_c(m_a, c_e, p_s):
