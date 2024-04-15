@@ -48,7 +48,7 @@ reaches a predefined value, a state transition occurs whereby \texttt{APT} proce
 are removed from the bonding curve and locked into a \gls*{cpamm} \cite{univ2} together
 with a remainder of emojicoin supply, as described in section \ref{sec:cpamm-state}.
 
-Liquidity mechanics are fully prescribed by the state transition variables in table
+Numerical values are fully prescribed by the economic variables in table
 \ref{tab:state-model-variables}.
 
 \begin{table}[!htb]
@@ -60,7 +60,7 @@ Liquidity mechanics are fully prescribed by the state transition variables in ta
     Circulating emojicoin supply                   & $c_e$    \\ \hline
     \texttt{APT}-denominated spot price            & $p_s$    \\ \hline
   \end{tabular}
-  \caption{Liquidity variables at time of state transition}
+  \caption{Economic variables at time of state transition}
   \label{tab:state-model-variables}
 \end{table}
 
@@ -492,7 +492,7 @@ For a feeless swap sell:
   q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}} \nonumber \\
 \end{align}
 
-\subsection{Alternate liquidity variable selection}
+\subsection{Alternate economic variable selection}
 
 Define the inverse of spot price, roughly interpreted as the number of emojicoins that 1
 \texttt{APT} will buy at the state transition $A$:
