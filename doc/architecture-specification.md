@@ -34,7 +34,7 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 ## Frontend
 
 1. The frontend `SHALL` implement a market capitalization leaderboard with
-   logarithmic to enable viewing of prevalent markets.
+   logarithmic scaling to enable viewing of prevalent markets.
 1. The frontend `SHALL` enable a king-of-the-hill style mechanism to show
    emojicoins passing others in market capitalization.
 1. The frontend `SHALL` enable permissionless registration of a new emojicoin
@@ -45,9 +45,8 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 1. New coins `SHALL` use the same number of decimals as `APT` for ease of
    constant product calculations.
 1. Each Emojicoin's `symbol` field `SHALL` use hex-encoded UTF8.
-1. Each Emojicoin's `name` field `SHALL` use the format `A [+ B] emojicoin`
-   where `A` and optionally `B` are the official emoji name, for example
-   "Globe with Meridians emojicoin" or "Rocket + Rocket emojicoin".
+1. Each Emojicoin's `name` field `SHALL` use the format `<symbol> emojicoin`
+   where `<symbol>` is identical to the bytes from the `symbol` field.
 
 ## Global tracking
 
