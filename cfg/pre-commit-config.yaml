@@ -1,6 +1,7 @@
 # cspell:words autofix
 # cspell:words autoflake
 # cspell:words isort
+# cspell:words latexindent
 # cspell:words markdownlint
 # cspell:words mdformat
 # cspell:words mypy
@@ -161,4 +162,15 @@ repos:
     id: 'cspell'
   repo: 'https://github.com/streetsidesoftware/cspell-cli'
   rev: 'v8.6.0'
+-
+  hooks:
+  -
+    args:
+    - '--local'
+    - 'cfg/latexindent-config.yaml'
+    - '--overwrite'
+    - '--silent'
+    id: 'latexindent'
+  repo: 'https://github.com/cmhughes/latexindent.pl'
+  rev: 'V3.23.7'
 ...

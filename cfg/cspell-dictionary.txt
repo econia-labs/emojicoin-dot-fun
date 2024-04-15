@@ -5,12 +5,15 @@ bento
 bouvet
 burkina
 caicos
+clamm
 clipperton
+cpamm
 cunha
 dango
 diya
 econia
 emojicoin
+emojicoins
 eswatini
 faso
 fleur
@@ -20,6 +23,7 @@ ivoire
 keycap
 khanda
 kitts
+leaderboard
 leste
 maarten
 marino
@@ -28,8 +32,11 @@ melilla
 merperson
 moai
 nazar
+octa
 oden
+permissionless
 precommit
+presale
 rica
 sint
 struct

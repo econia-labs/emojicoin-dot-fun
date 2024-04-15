@@ -1,0 +1,28 @@
+% Tangent lines on graph per https://tex.stackexchange.com/a/198046.
+\makeatletter
+\def\parsenode[#1]#2\pgf@nil{%
+  \tikzset{label node/.style = {#1}}
+\def\nodetext{#2}
+}
+\tikzset{add node at x/.style 2 args = {name path global = plot line,
+      /pgfplots/execute at end plot visualization/.append = {\begingroup
+          \@ifnextchar[{\parsenode}{\parsenode[]}#2\pgf@nil
+          \path [name path global = position line #1-1]
+          ({axis cs:#1,0}|-{rel axis cs:0,0}) --
+          ({axis cs:#1,0}|-{rel axis cs:0,1});
+          \path [xshift = 1pt, name path global = position line #1-2]
+          ({axis cs:#1,0}|-{rel axis cs:0,0}) --
+          ({axis cs:#1,0}|-{rel axis cs:0,1});
+          \path [
+            name intersections =
+              {of = {plot line and position line #1-1}, name = left intersection},
+            name intersections =
+              {of = {plot line and position line #1-2}, name = right intersection},
+            label node/.append style = {pos = 1}
+          ] (left intersection-1) -- (right intersection-1)
+          node [label node]{\nodetext};
+          \endgroup
+        }
+    }
+}
+\makeatother
