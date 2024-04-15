@@ -111,7 +111,6 @@ These keywords `SHALL` be in `monospace` for ease of identification.
    once, to delay trading from the onset of package publication.
 1. The package `SHALL` be published immutably.
 
-
 ## Presentation
 
 1. The implementation `SHALL` use the stylized format `emojicoin dot fun`.
