@@ -39,6 +39,10 @@ def get_q_v_c(m_a, c_e, p_s):
     return c_e * p_s * (m_a - c_e * p_s) / (2 * c_e * p_s - m_a)
 
 
+def get_d_p(m_a, c_e, p_s):
+    return c_e * p_s / m_a * 100
+
+
 def get_p_l(m_a, c_e, p_s):
     return ((m_a - c_e * p_s) ** 2) / ((c_e**2) * p_s)
 
@@ -54,6 +58,7 @@ b_v_f = get_b_v_f(M_A, C_E, P_S)
 q_v_f = get_q_v_f(M_A, C_E, P_S)
 b_v_c = get_b_v_c(M_A, C_E, P_S)
 q_v_c = get_q_v_c(M_A, C_E, P_S)
+d_p = get_d_p(M_A, C_E, P_S)
 p_l = get_p_l(M_A, C_E, P_S)
 L_i = get_L_i(M_A, C_E, P_S)
 
@@ -75,6 +80,7 @@ print(f"b_v_f: {b_v_f}")
 print(f"q_v_f: {q_v_f}")
 print(f"b_v_c: {b_v_c}")
 print(f"q_v_c: {q_v_c}")
+print(f"d_p: {d_p}")
 print(f"p_l: {p_l}")
 print(f"L_i: {L_i}")
 print()
@@ -109,3 +115,4 @@ assert L_i == sqrt(q_r_c * r_e)
 assert A == 1 / P_S
 assert P_S / p_l == R
 assert T == q_r_c
+assert d_p == C_E / s_e * 100
