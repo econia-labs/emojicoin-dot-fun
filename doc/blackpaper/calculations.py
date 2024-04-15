@@ -1,8 +1,10 @@
 from math import sqrt
 
 A = 1_000_000.0
-R = 1.25**2
-T = 5_000.0
+R = 1.5**2
+T = 10_000.0
+
+F_P = 25.0
 
 M_A = T * (1 + sqrt(R))
 P_S = 1 / A
@@ -74,6 +76,16 @@ def print_vars(section_label, vars):
         print(pad + label + f": {var[2]:,}")  # noqa: E231
     print()
 
+def print_latex_nominals(vars):
+    for var in vars:
+        if len(var) == 2:
+            val = var[1]
+            assert val.is_integer()
+            val = f"{int(var[1]):,}"
+        else:
+            val = f"{var[1]:.10f}"
+        print(f"${var[0]}$ & {val} \\\\ \\hline")
+    print()
 
 def print_latex_constants(vars):
     for var in vars:
@@ -124,6 +136,27 @@ print_vars(
     ],
 )
 
+print_latex_nominals(
+    [
+        ["A", A],
+        ["R", R, False],
+        ["T = q_{r ,c}", T],
+        ["m_a", M_A],
+        ["c_e = b_{r, c}", C_E],
+        ["r_e", r_e],
+        ["s_e", s_e],
+        ["d_\\%", d_p, False],
+        ["p_s = p_h", P_S, False],
+        ["p_l", p_l, False],
+        ["L_i", L_i],
+        ["f_p", F_P],
+        ["b_{v, f}", b_v_f],
+        ["q_{v, f}", q_v_f],
+        ["b_{v, c}", b_v_c],
+        ["q_{v, c}", q_v_c],
+    ]
+)
+
 print_latex_constants(
     [
         ["MARKET_CAP", M_A],
@@ -133,11 +166,12 @@ print_latex_constants(
         ["BASE_REAL_FLOOR", 0.0],
         ["QUOTE_REAL_FLOOR", 0.0],
         ["BASE_REAL_CEILING", C_E],
-        ["QUOTE_REAL_CEILING", q_r_c],
+        ["QUOTE_REAL_CEILING", T],
         ["BASE_VIRTUAL_FLOOR", b_v_f],
         ["QUOTE_VIRTUAL_FLOOR", q_v_f],
-        ["BASE_VIRTUAL_CEILING", b_v_f],
-        ["QUOTE_VIRTUAL_CEILING", q_v_f],
+        ["BASE_VIRTUAL_CEILING", b_v_c],
+        ["QUOTE_VIRTUAL_CEILING", q_v_c],
+        ["POOL_FEE_RATE_BPS", F_P],
     ]
 )
 

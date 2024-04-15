@@ -255,20 +255,23 @@ Nominal implementation values are given in table
   \begin{tabular}{|c|c|}
     \hline \rowcolor{blue}
     Term            & Amount        \\ \hline
-    $m_a$           & 10,000        \\ \hline
-    $c_e = b_{r,c}$ & 750,000       \\ \hline
-    $r_e$           & 250,000       \\ \hline
-    $s_e$           & 1,000,000     \\ \hline
-    $p_s = p_h$     & 0.01          \\ \hline
+    $A$ & 1,000,000 \\ \hline
+    $R$ & 2.25 \\ \hline
+    $T = q_{r ,c}$ & 10,000 \\ \hline
+    $m_a$ & 25,000 \\ \hline
+    $c_e = b_{r, c}$ & 15,000,000,000 \\ \hline
+    $r_e$ & 10,000,000,000 \\ \hline
+    $s_e$ & 25,000,000,000 \\ \hline
+    $d_\%$ & 60 \\ \hline
+    $p_s = p_h$ & 0.000001 \\ \hline
     \rule{0pt}{10pt} % https://tex.stackexchange.com/a/387263.
-    $p_l$           & $0.00\bar{1}$ \\ \hline
-    $q_{r,c}$       & 2,500         \\ \hline
-    $q_{v,f}$       & 1,250         \\ \hline
-    $q_{v,c}$       & 3,750         \\ \hline
-    $b_{v,f}$       & 375,000       \\ \hline
-    $b_{v,c}$       & 1,125,000     \\ \hline
-    $L_i$           & 25,000        \\ \hline
-    $f_p$           & 25            \\ \hline
+    $p_l$ & $0.000000\bar{4}$ \\ \hline
+    $L_i$ & 10,000,000 \\ \hline
+    $f_p$ & 25 \\ \hline
+    $b_{v, f}$ & 30,000,000,000 \\ \hline
+    $q_{v, f}$ & 20,000 \\ \hline
+    $b_{v, c}$ & 45,000,000,000 \\ \hline
+    $q_{v, c}$ & 30,000 \\ \hline
   \end{tabular}
   \caption{Nominal implementation values}
   \label{tab:nominal-implementation-values}
@@ -308,19 +311,19 @@ Applying the same scale factor across variables produces the integer values in t
   \begin{tabular}{|c|c|}
     \hline \rowcolor{blue}
     Constant                         & Amount                           \\ \hline
-    \texttt{MARKET\_CAP}             & \texttt{1\_000\_000\_000\_000}   \\ \hline
-    \texttt{EMOJICOIN\_REMAINDER}    & \texttt{25\_000\_000\_000\_000}  \\ \hline
-    \texttt{EMOJICOIN\_SUPPLY}       & \texttt{100\_000\_000\_000\_000} \\ \hline
-    \texttt{LP\_TOKENS\_INITIAL}     & \texttt{2\_500\_000\_000\_000}   \\ \hline
-    \texttt{BASE\_REAL\_FLOOR}       & \texttt{0}                       \\ \hline
-    \texttt{QUOTE\_REAL\_FLOOR}      & \texttt{0}                       \\ \hline
-    \texttt{BASE\_REAL\_CEILING}     & \texttt{75\_000\_000\_000\_000}  \\ \hline
-    \texttt{QUOTE\_REAL\_CEILING}    & \texttt{250\_000\_000\_000}      \\ \hline
-    \texttt{BASE\_VIRTUAL\_FLOOR}    & \texttt{37\_500\_000\_000\_000}  \\ \hline
-    \texttt{QUOTE\_VIRTUAL\_FLOOR}   & \texttt{125\_000\_000\_000}      \\ \hline
-    \texttt{BASE\_VIRTUAL\_CEILING}  & \texttt{37\_500\_000\_000\_000}  \\ \hline
-    \texttt{QUOTE\_VIRTUAL\_CEILING} & \texttt{125\_000\_000\_000}      \\ \hline
-    \texttt{POOL\_FEE\_RATE\_BPS}    & \texttt{25}                      \\ \hline
+    \texttt{MARKET\_CAP} &\texttt{2\_500\_000\_000\_000} \\ \hline
+    \texttt{EMOJICOIN\_REMAINDER} &\texttt{1\_000\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{EMOJICOIN\_SUPPLY} &\texttt{2\_500\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{LP\_TOKENS\_INITIAL} &\texttt{1\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{BASE\_REAL\_FLOOR} &\texttt{0} \\ \hline
+    \texttt{QUOTE\_REAL\_FLOOR} &\texttt{0} \\ \hline
+    \texttt{BASE\_REAL\_CEILING} &\texttt{1\_500\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_REAL\_CEILING} &\texttt{1\_000\_000\_000\_000} \\ \hline
+    \texttt{BASE\_VIRTUAL\_FLOOR} &\texttt{3\_000\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_VIRTUAL\_FLOOR} &\texttt{2\_000\_000\_000\_000} \\ \hline
+    \texttt{BASE\_VIRTUAL\_CEILING} &\texttt{4\_500\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_VIRTUAL\_CEILING} &\texttt{3\_000\_000\_000\_000} \\ \hline
+    \texttt{POOL\_FEE\_RATE\_BPS} &\texttt{2\_500\_000\_000} \\ \hline
   \end{tabular}
   \caption{Integer implementation values}
   \label{tab:integer-implementation-values}
