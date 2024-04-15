@@ -206,6 +206,14 @@ The \gls*{st} occurs when virtual reserves reach the values from equation
   {2 \cdot c_e \cdot p_s - m_a}
 \end{equation}
 
+Notably, this results in a percent dilution at the time of \gls*{st}, $d_\%$, defined in
+equation \ref{eqn:percent-dilution} as derived in section
+\ref{sec:bonding-curve-constraints}.
+
+\begin{equation} \label{eqn:percent-dilution}
+  d_\% = \frac{c_e \cdot p_s}{m_a} \cdot 100\%
+\end{equation}
+
 \section{\gls*{cpamm} state} \label{sec:cpamm-state}
 
 At the \gls*{st}, $q_{r, c}$ is withdrawn from the bonding curve and locked into a
@@ -493,6 +501,15 @@ Hence for $q_{v, f}$ per (\ref{eqn:bonding-curve-7}) and $b_{v, c}$ per
   p_l & = \frac{(m_a - c_e \cdot p_s) ^ 2}{c_e ^ 2 \cdot p_s}
 \end{align}
 
+Define dilution percentage at the time of \gls*{st}, $d_\%$ substituting
+(\ref{eqn:remainder-6}):
+
+\begin{align} \label{eqn:bonding-curve-11}
+  d_\% &= \frac{c_e}{s_e} \cdot 100\% \nonumber \\
+  d_\% &= \frac{c_e}{\frac{m_a}{p_s}} \cdot 100\% \nonumber \\
+  d_\% &= \frac{c_e \cdot p_s}{m_a} \cdot 100\% \nonumber \\
+\end{align}
+
 \subsection{Base in and out for \gls*{cpamm} swap} \label{eqn:b-q-out-simple-derivation}
 
 Let $b_0$ and $q_0$ represent base and quote reserves before a swap, and $b_f$ and $q_f$
@@ -601,7 +618,6 @@ that is always met:
   \sqrt{R}               & > 1 \nonumber                       \\
   R                      & > 1
 \end{align}
-
 
 \subsection{Initial \gls*{lp} tokens} \label{sec:initial-lp-tokens}
 
