@@ -5,6 +5,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use emojicoin_dot_fun::hex_codes;
 
+    const MAX_SYMBOL_LENGTH: u8 = 10;
+    const MAX_NAME_LENGTH: u8 = 32;
+
     #[resource_group = ObjectGroup]
     struct Market has key {
         market_id: address,
@@ -57,6 +60,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test_only] use std::aptos_account;
     #[test_only] use std::vector;
+
+    #[test]
+    fun test_all_supported_emojis_under_10_bytes() {
+        let all_supported_emojis = hex_codes::get_all();
+        vector::for_each(all_supported_emojis, |bytes| {
+            assert!(vector::length(&bytes) <= (MAX_SYMBOL_LENGTH as u64), 0);
+        });
+    }
 
     #[test(deployer = @emojicoin_dot_fun)]
     fun test_supported_emoji_happy_path(deployer: &signer) acquires Registry, RegistryAddress {
