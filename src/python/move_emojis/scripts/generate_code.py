@@ -121,7 +121,7 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
     # Generate the zeroed hex string. This results in a vector of vectors,
     # all containing a single value `0`.
     zeroes = ", ".join(["0"] * len(args_and_comments))
-    zeroed_hex_str = f"{TAB*2}vector<vector<u8>> [ {zeroes} ]"
+    zeroed_hex_str = f"{TAB*2}vector<u8> [ {zeroes} ]"
 
     return "\n".join(
         [
