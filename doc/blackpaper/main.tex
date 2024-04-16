@@ -556,7 +556,7 @@ Define the inverse of spot price, roughly interpreted as the number of emojicoin
   A = \frac{1}{p_s}
 \end{equation}
 
-Define the ratio of bonding curve price endpoints $R$:
+Define the ratio of bonding curve price endpoints, $R$:
 
 \begin{equation} \label{eqn:alt-define-r}
   R = \frac{p_s}{p_l}
@@ -625,6 +625,32 @@ that is always met:
   1                      & < \sqrt{R} \nonumber                \\
   \sqrt{R}               & > 1 \nonumber                       \\
   R                      & > 1
+\end{align}
+
+To avoid numerical issues during calculations in a script or similar, substitute
+(\ref{eqn:alt-define-t}) and (\ref{eqn:alt-solve-p-s}) into (\ref{eqn:remainder-1}):
+
+\begin{align}
+  r_e & = \frac{q_{r, c}}{p_s} \nonumber \\
+  r_e & = \frac{T}{\frac{1}{A}} \nonumber \\
+  r_e & = A \cdot T
+\end{align}
+
+Similarly, substitute (\ref{eqn:alt-solve-c-e}), (\ref{eqn:alt-solve-p-s}), and
+(\ref{eqn:alt-solve-m-a}) into (\ref{eqn:bonding-curve-8}):
+
+\begin{align}
+  b_{v, c} & = \frac{c_e ^ 2 \cdot p_s}{2 \cdot c_e \cdot p_s - m_a} \nonumber \\
+  b_{v, c} & =
+  \frac{(A \cdot T \cdot \sqrt{R}) ^ 2 \cdot \frac{1}{A}}
+  {2 \cdot (A \cdot T \cdot \sqrt{R}) \cdot
+  \frac{1}{A} - T \cdot (1 + \sqrt{R})} \nonumber \\
+  b_{v, c} & = \frac{A^2 \cdot T^2 \cdot R \cdot \frac{1}{A}}
+  {2 \cdot T \cdot \sqrt{R} - T \cdot (1 + \sqrt{R})} \nonumber \\
+  b_{v, c} & = \frac{A \cdot T^2 \cdot R}
+  {T \cdot(2 \cdot \sqrt{R} - (1 + \sqrt{R}))} \nonumber \\
+  b_{v, c} & = \frac{A \cdot T \cdot R}{2 \cdot \sqrt{R} - (1 + \sqrt{R})} \nonumber \\
+  b_{v, c} & = \frac{A \cdot T \cdot R}{\sqrt{R} - 1}
 \end{align}
 
 \subsection{Initial \gls*{lp} tokens} \label{sec:initial-lp-tokens}
