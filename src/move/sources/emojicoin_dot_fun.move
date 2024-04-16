@@ -2,7 +2,7 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_std::smart_table::{Self, SmartTable};
-    use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
+    use aptos_framework::object::{Self, ExtendRef, Object, ObjectGroup};
     use emojicoin_dot_fun::hex_codes;
 
     #[test_only] use std::aptos_account;
@@ -68,8 +68,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         output_amount: u64,
         integrator_fee: u64,
         pool_fee: u64,
-        results_in_state_transition: bool,
-        buying_through_state_transition: bool,
     }
 
     struct RegistryAddress has key {
@@ -105,7 +103,25 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         smart_table::contains(&registry.supported_emojis, hex_bytes)
     }
 
-    inline fun simulate_swap(
+    #[view]
+    public fun simulate_swap(
+        input_amount: u64,
+        input_is_base: bool,
+        integrator: address,
+        integrator_fee_rate_bps: u8,
+        market: Object<Market>,
+    ): Swap
+    acquires Market {
+        simulate_swap_inner(
+            input_amount,
+            input_is_base,
+            integrator,
+            integrator_fee_rate_bps,
+            borrow_global<Market>(object::object_address(&market)),
+        )
+    }
+
+    inline fun simulate_swap_inner(
         input_amount: u64,
         input_is_base: bool,
         integrator: address,
@@ -114,17 +130,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ): Swap {
         assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
         let starts_in_bonding_curve = market_ref.lp_token_supply == 0;
-
-        // Defaults, may be overwritten later.
-        let output_amount = 0;
-        let integrator_fee = 0;
+        let output_amount;
+        let integrator_fee;
         let pool_fee = 0;
-        let remaining_quote_after_state_transition = 0;
-        let results_in_state_transition = false;
-        let buying_through_state_transition = false;
-
-        if (starts_in_bonding_curve) {
-            if (input_is_base) { // Selling back to bonding curve.
+        if (input_is_base) { // If selling, no possibility of state transition.
+            if (starts_in_bonding_curve) { // Selling to bonding curve.
                 let quote_output_before_integrator_fee = cpamm_simple_swap_output_amount(
                     input_amount,
                     input_is_base,
@@ -133,9 +143,20 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 integrator_fee =
                     get_bps_fee(quote_output_before_integrator_fee, integrator_fee_rate_bps);
                 output_amount = quote_output_before_integrator_fee - integrator_fee;
-            } else { // Buying from bonding curve.
-                integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
-                let quote_input_after_integrator_fee = input_amount - integrator_fee;
+            } else { // Selling to CPAMM.
+                let quote_output_before_fees = cpamm_simple_swap_output_amount(
+                    input_amount,
+                    input_is_base,
+                    market_ref.real_reserves,
+                );
+                integrator_fee = get_bps_fee(quote_output_before_fees, integrator_fee_rate_bps);
+                pool_fee = get_bps_fee(quote_output_before_fees, POOL_FEE_RATE_BPS);
+                output_amount = quote_output_before_fees - integrator_fee - pool_fee;
+            }
+        } else { // If buying, there may be a state transition.
+            integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
+            let quote_input_after_integrator_fee = input_amount - integrator_fee;
+            if (starts_in_bonding_curve) {
                 let max_possible_input = QUOTE_REAL_CEILING - market_ref.real_reserves.quote;
                 if (quote_input_after_integrator_fee < max_possible_input) { // Staying in curve.
                     output_amount = cpamm_simple_swap_output_amount(
@@ -145,48 +166,30 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                     );
                 } else { // Max quote has been deposited to bonding curve.
                     output_amount = market_ref.real_reserves.base; // Clear out remaining base.
-                    results_in_state_transition = true;
-                    remaining_quote_after_state_transition =
+                    quote_input_after_integrator_fee =
                         quote_input_after_integrator_fee - max_possible_input;
-                    // Might need to continue buying against CPAMM.
-                    buying_through_state_transition = remaining_quote_after_state_transition > 0;
+                    if (quote_input_after_integrator_fee > 0) { // Keep buying against CPAMM.
+                        // Evaluate swap against CPAMM with newly locked liquidity.
+                        let base_output_from_pool_before_pool_fee = cpamm_simple_swap_output_amount(
+                            quote_input_after_integrator_fee,
+                            input_is_base,
+                            Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
+                        );
+                        pool_fee =
+                            get_bps_fee(base_output_from_pool_before_pool_fee, POOL_FEE_RATE_BPS);
+                        let base_output_from_pool_after_pool_fee =
+                            base_output_from_pool_before_pool_fee - pool_fee;
+                        output_amount = output_amount + base_output_from_pool_after_pool_fee;
+                    }
                 }
-            };
-        };
-
-        if (!starts_in_bonding_curve || buying_through_state_transition) {
-            if (input_is_base) { // Selling to CPAMM.
-                let output_amount_before_fees = cpamm_simple_swap_output_amount(
-                    input_amount,
+            } else { // Buying from CPAMM only.
+                let output_amount_before_pool_fee = cpamm_simple_swap_output_amount(
+                    quote_input_after_integrator_fee,
                     input_is_base,
                     market_ref.real_reserves,
                 );
-                pool_fee = get_bps_fee(output_amount_before_fees, POOL_FEE_RATE_BPS);
-                integrator_fee = get_bps_fee(output_amount_before_fees, integrator_fee_rate_bps);
-                output_amount = output_amount_before_fees - pool_fee - integrator_fee;
-            } else { // Buying from pool.
-                if (buying_through_state_transition) {
-                    // Integrator fees already assessed on quote input during bonding curve state.
-                    // Evaulate CPAMM swap based on newly locked liquidity.
-                    let base_output_before_pool_fee = cpamm_simple_swap_output_amount(
-                        remaining_quote_after_state_transition,
-                        input_is_base,
-                        Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
-                    );
-                    pool_fee = get_bps_fee(base_output_before_pool_fee, POOL_FEE_RATE_BPS);
-                    let base_output_after_pool_fee = base_output_before_pool_fee - pool_fee;
-                    output_amount = output_amount + base_output_after_pool_fee;
-                } else {
-                    integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
-                    let quote_input_after_integrator_fee = input_amount - integrator_fee;
-                    let output_amount_before_pool_fee = cpamm_simple_swap_output_amount(
-                        quote_input_after_integrator_fee,
-                        input_is_base,
-                        market_ref.real_reserves,
-                    );
-                    pool_fee = get_bps_fee(output_amount_before_pool_fee, POOL_FEE_RATE_BPS);
-                    output_amount = output_amount_before_pool_fee - pool_fee;
-                }
+                pool_fee = get_bps_fee(output_amount_before_pool_fee, POOL_FEE_RATE_BPS);
+                output_amount = output_amount_before_pool_fee - pool_fee;
             }
         };
         Swap {
@@ -198,8 +201,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             output_amount,
             integrator_fee,
             pool_fee,
-            results_in_state_transition,
-            buying_through_state_transition,
         }
     }
 
