@@ -132,17 +132,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         aptos_account::create_account(@emojicoin_dot_fun);
         init_module(deployer);
         let various_emojis = vector<vector<u8>> [
-            x"f09f868e",              // AB button blood type, 1F18E.
-            x"f09fa6bbf09f8fbe",      // Ear with hearing aid medium dark skin tone, 1F9BB 1F3FE.
-            x"f09f87a7f09f87b9",      // Flag Bhutan, 1F1E7 1F1F9.
-            x"f09f9190f09f8fbe",      // Open hands medium dark skin tone, 1F450 1F3FE.
-            x"f09fa4b0f09f8fbc",      // Pregnant woman medium light skin tone, 1F930 1F3FC.
-            x"f09f9faa",              // Purple square, 1F7EA.
+            x"f09f868e",         // AB button blood type, 1F18E.
+            x"f09fa6bbf09f8fbe", // Ear with hearing aid medium dark skin tone, 1F9BB 1F3FE.
+            x"f09f87a7f09f87b9", // Flag Bhutan, 1F1E7 1F1F9.
+            x"f09f9190f09f8fbe", // Open hands medium dark skin tone, 1F450 1F3FE.
+            x"f09fa4b0f09f8fbc", // Pregnant woman medium light skin tone, 1F930 1F3FC.
+            x"f09f9faa",         // Purple square, 1F7EA.
             // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
             x"f09f91abf09f8fbe",
-            x"f09f91a9f09f8fbe",      // Woman medium dark skin tone, 1F469 1F3FE.
-            x"f09fa795f09f8fbd",      // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
-            x"f09fa490",              // Zipper mouth face, 1F910.
+            x"f09f91a9f09f8fbe", // Woman medium dark skin tone, 1F469 1F3FE.
+            x"f09fa795f09f8fbd", // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
+            x"f09fa490",         // Zipper mouth face, 1F910.
         ];
         vector::for_each(various_emojis, |bytes| {
             assert!(is_supported_emoji(bytes), 0);
