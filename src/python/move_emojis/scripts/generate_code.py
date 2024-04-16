@@ -84,11 +84,7 @@ def to_human_readable(viable_emojis: dict[str, EmojiData]) -> dict[str, str]:
     return consts
 
 
-if __name__ == "__main__":
-    base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
-    zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
-    viable_emojis = data_parser.get_viable_emojis(base_emoji_dict, zwj_emoji_dict)
-
+def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
     # Map the full hex string to its original unicode code point.
     original_unicode_points: dict[str, list[str]] = {}
     for data in viable_emojis.values():
@@ -124,8 +120,24 @@ if __name__ == "__main__":
     zeroes = ", ".join(["0"] * len(args_and_comments))
     zeroed_hex_str = f"{TAB*2}vector<vector<u8>> [ {zeroes} ]"
 
+    return "\n".join(
+        [
+            return_open,
+            "\n".join(full_args),
+            return_close,
+            "",
+            zeroed_hex_str,
+            "",
+        ]
+    )
+
+
+if __name__ == "__main__":
+    base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
+    zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
+    viable_emojis = data_parser.get_viable_emojis(base_emoji_dict, zwj_emoji_dict)
+
+    generated_code = generate_move_code(viable_emojis)
+
     with open(MOVE_CONSTS_DATA_FILE, "w") as outfile:
-        _ = outfile.write(f"\n{return_open}\n")
-        _ = outfile.write("\n".join(full_args))
-        _ = outfile.write(f"\n{return_close}\n")
-        _ = outfile.write(f"\n{zeroed_hex_str}\n")
+        _ = outfile.write(generated_code)
