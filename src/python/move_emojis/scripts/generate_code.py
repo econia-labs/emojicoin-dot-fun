@@ -99,24 +99,27 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
     return_open = f"{TAB*2}vector<vector<u8>> ["
     # The hex bytes args, the aka vector<vector<u8>> args.
     args_and_comments: list[tuple[str, str]] = []
-    # fhs == the full hex string.
     for fhs in hex_strings:
-        whitespace = TAB * 3
+        # Lookup the const name by its full hex string and split it into
+        # words by the underscore.
         name_split = consts_reverse_dict[fhs].split("_")
+        # Convert the name to lowercase, then capitalize the first letter.
         name = " ".join([s.lower() for s in name_split]).capitalize()
         original_unicode = original_unicode_points[fhs]
         comment = f' // {name}, {" ".join(original_unicode)}.'
-        value = f'x"{fhs}"'
-        arg = f"{whitespace}{value}, "
+        hex_value = f'x"{fhs}"'
+        arg = f"{TAB*3}{hex_value}, "
         args_and_comments.append((arg, comment))
 
+    # Size all lines of code (up to the comment) to the same length.
     longest_arg = max(len(a) for a, _ in args_and_comments)
-
     full_args: list[str] = []
     for arg, comment in args_and_comments:
         full_args.append(f"{arg:<{longest_arg}}{comment}")
     return_close = f"{TAB*2}]"
 
+    # Generate the zeroed hex string. This results in a vector of vectors,
+    # all containing a single value `0`.
     zeroes = ", ".join(["0"] * len(args_and_comments))
     zeroed_hex_str = f"{TAB*2}vector<vector<u8>> [ {zeroes} ]"
 
