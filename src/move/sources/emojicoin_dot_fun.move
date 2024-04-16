@@ -35,6 +35,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_SWAP_DIVIDE_BY_ZERO: u64 = 0;
     // No input amount provided for swap.
     const E_SWAP_INPUT_ZERO: u64 = 1;
+    // No market exists at the given address.
+    const E_NO_MARKET: u64 = 2;
 
     struct Reserves has copy, drop, store {
         base: u64,
@@ -87,6 +89,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator_fee_rate_bps: u8,
         market_address: address,
     ) acquires Market {
+        assert!(exists<Market>(market_address), E_NO_MARKET);
         let market_ref_mut = borrow_global_mut<Market>(market_address);
         let market_signer = object::generate_signer_for_extending(&market_ref_mut.extend_ref);
         let swapper_address = signer::address_of(swapper);
@@ -175,6 +178,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
     ): Swap
     acquires Market {
+        assert!(exists<Market>(market_address), E_NO_MARKET);
         simulate_swap_inner(
             input_amount,
             input_is_base,
