@@ -3,10 +3,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_std::smart_table::{Self, SmartTable};
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
-
     use emojicoin_dot_fun::hex_codes;
 
+    #[test_only] use std::aptos_account;
+    #[test_only] use std::vector;
+
     const MAX_SYMBOL_LENGTH: u8 = 10;
+
+    const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
 
     // Generated automatically by blackpaper calculations script.
     const MARKET_CAP: u64 = 2_500_000_000_000;
@@ -22,6 +26,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const BASE_VIRTUAL_CEILING: u64 = 4_500_000_000_000_000_000;
     const QUOTE_VIRTUAL_CEILING: u64 = 3_000_000_000_000;
     const POOL_FEE_RATE_BPS: u64 = 25;
+
+    // Swap results in attempted divide by zero.
+    const E_SWAP_DIVIDE_BY_ZERO: u64 = 0;
 
     struct Reserves has copy, drop, store {
         base: u64,
@@ -81,8 +88,36 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         smart_table::contains(&registry.supported_emojis, hex_bytes)
     }
 
-    #[test_only] use std::aptos_account;
-    #[test_only] use std::vector;
+    inline fun cpamm_simple_swap_output_amount(
+        input_amount: u64,
+        input_is_base: bool,
+        reserves: Reserves
+    ): u64 {
+        let (numerator_coefficient, denominator_addend) = if (input_is_base)
+            (reserves.quote, reserves.base) else (reserves.base, reserves.quote);
+        let numerator = (input_amount as u128) * (numerator_coefficient as u128);
+        let denominator = (input_amount as u128) + (denominator_addend as u128);
+        assert!(denominator > 0, E_SWAP_DIVIDE_BY_ZERO);
+        let result = numerator / denominator;
+        (result as u64)
+    }
+
+    #[test]
+    fun test_cpamm_simple_swap_output_amount() {
+        // Buy all base from start of bonding curve.
+        let reserves = Reserves { base: BASE_VIRTUAL_CEILING, quote: QUOTE_VIRTUAL_FLOOR };
+        let output = cpamm_simple_swap_output_amount(QUOTE_REAL_CEILING, false, reserves);
+        assert!(output == BASE_REAL_CEILING, 0);
+        // Sell all base to a bonding curve that is theoretically complete but has not transitioned.
+        reserves = Reserves { base: BASE_VIRTUAL_FLOOR, quote: QUOTE_VIRTUAL_CEILING };
+        output = cpamm_simple_swap_output_amount(BASE_REAL_CEILING, true, reserves);
+        assert!(output == QUOTE_REAL_CEILING, 0);
+    }
+
+    #[test, expected_failure(abort_code = E_SWAP_DIVIDE_BY_ZERO)]
+    fun test_cpamm_simple_swap_output_amount_divide_by_zero() {
+        cpamm_simple_swap_output_amount(0, true, Reserves { base: 0, quote: 16});
+    }
 
     #[test]
     fun test_all_supported_emojis_under_10_bytes() {
@@ -121,16 +156,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(!is_supported_emoji(x"f0beefcafef0"), 0);
         // Minimally qualified "head shaking horizontally".
         assert!(!is_supported_emoji(x"f09f9982e2808de28694"), 0);
-    }
-
-    inline fun swap_output_amount(input_amount: u64, input_is_base: bool, reserves: Reserves): u64 {
-        let (numerator_coefficient, denominator_addend) = if (input_is_base) {
-            (reserves.quote, reserves.base) else (reserves.base, reserves.quote)
-        };
-        let numerator = (input_amount as u128) * (numerator_coefficient as u128);
-        let denominator = (input_amount as u128) + (denominator_addend as u128);
-        let result = numerator / denominator;
-        // Assert fits in a u64
     }
 
 }
