@@ -11,6 +11,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const MAX_SYMBOL_LENGTH: u8 = 10;
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
+    const BASIS_POINTS_PER_UNIT: u128 = 10_000;
 
     // Generated automatically by blackpaper calculations script.
     const MARKET_CAP: u64 = 2_500_000_000_000;
@@ -29,6 +30,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     // Swap results in attempted divide by zero.
     const E_SWAP_DIVIDE_BY_ZERO: u64 = 0;
+    // No input amount provided for swap.
+    const E_SWAP_INPUT_ZERO: u64 = 1;
 
     struct Reserves has copy, drop, store {
         base: u64,
@@ -37,7 +40,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[resource_group = ObjectGroup]
     struct Market has key {
-        market_id: address,
+        market_id: u64,
         market_address: address,
         emoji_bytes: vector<u8>,
         extend_ref: ExtendRef,
@@ -53,6 +56,23 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
+    }
+
+    #[event]
+    struct Swap has copy, drop, store {
+        market_id: u64,
+        input_amount: u64,
+        input_is_base: bool,
+        integrator: address,
+        integrator_fee_rate_bps: u8,
+        output_amount: u64,
+        results_in_state_transition: bool,
+        integrator_fees_paid: u64,
+        pool_fees_paid: u64,
+        bonding_curve_base_delta: u64,
+        bonding_curve_quote_delta: u64,
+        cpamm_base_delta: u64,
+        cpamm_quote_delta: u64,
     }
 
     struct RegistryAddress has key {
@@ -86,6 +106,101 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let registry_address = borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address;
         let registry = borrow_global<Registry>(registry_address);
         smart_table::contains(&registry.supported_emojis, hex_bytes)
+    }
+
+    inline fun simulate_swap(
+        input_amount: u64,
+        input_is_base: bool,
+        integrator: address,
+        integrator_fee_rate_bps: u8,
+        market_ref: &Market,
+    ): Swap {
+        assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
+        let starts_in_bonding_curve_state = market_ref.lp_token_supply == 0;
+        let integrator_fees_paid = 0;
+        let input_amount_after_fees = 0;
+        let output_amount = 0;
+        let results_in_state_transition = false;
+        let pool_fees_paid = 0;
+        let bonding_curve_base_delta = 0;
+        let bonding_curve_quote_delta = 0;
+        let cpamm_base_delta = 0;
+        let cpamm_quote_delta = 0;
+        let remaining_quote_after_state_transition = 0;
+        if (starts_in_bonding_curve_state) {
+            if (input_is_base) { // Selling back to bonding curve.
+                let output_before_fees = cpamm_simple_swap_output_amount(
+                    input_amount,
+                    input_is_base,
+                    market_ref.virtual_reserves,
+                );
+                // Fees assessed on quote output proceeds.
+                integrator_fees_paid = get_bps_fee(output_before_fees, integrator_fee_rate_bps);
+                output_amount = output_before_fees - integrator_fees_paid;
+                bonding_curve_base_delta = input_amount;
+                bonding_curve_quote_delta = output_before_fees;
+            } else { // Buying from bonding curve.
+                // Fees assessed on quote input before it goes to the pool.
+                integrator_fees_paid = get_bps_fee(input_amount, integrator_fee_rate_bps);
+                input_amount_after_fees = input_amount - integrator_fees_paid;
+                let max_possible_input = QUOTE_REAL_CEILING - market_ref.real_reserves.quote;
+                if (input_amount_after_fees <= max_possible_input) { // Not leaving bonding curve.
+                    output_amount = cpamm_simple_swap_output_amount(
+                        input_amount_after_fees,
+                        input_is_base,
+                        market_ref.virtual_reserves,
+                    );
+                    bonding_curve_base_delta = output_amount;
+                    bonding_curve_quote_delta = input_amount_after_fees;
+                } else { // Leaving bonding curve.
+                    results_in_state_transition = true;
+                    remaining_quote_after_state_transition =
+                        input_amount_after_fees - max_possible_input;
+                    output_amount = market_ref.real_reserves.base;
+                    bonding_curve_base_delta = output_amount;
+                    bonding_curve_quote_delta = max_possible_input;
+                }
+            };
+        };
+        if (!starts_in_bonding_curve_state || results_in_state_transition) {
+            if (input_is_base) { // Selling to pool.
+                // Swap against pool.
+                // Reinvest pool fees.
+                // Assess integrator fees.
+            } else { // Buying from pool.
+                if (!results_in_state_transition) {
+                    integrator_fees_paid = get_bps_fee(input_amount, integrator_fee_rate_bps);
+                    input_amount_after_fees = input_amount - integrator_fees_paid;
+                } else { // Swap triggered state transition, so integrator fees already assessed.
+                    // Handle case of if just barely hit state transition but no more to swap
+                    // Set up pool virtual reserves.
+                    // Do not double asses integrator
+                };
+                // Swap against pool, reinvest output.
+            }
+        };
+        Swap {
+            market_id: market_ref.market_id,
+            input_amount,
+            input_is_base,
+            integrator,
+            integrator_fee_rate_bps,
+            output_amount,
+            results_in_state_transition,
+            integrator_fees_paid,
+            pool_fees_paid,
+            bonding_curve_base_delta,
+            bonding_curve_quote_delta,
+            cpamm_base_delta,
+            cpamm_quote_delta,
+        }
+    }
+
+    inline fun get_bps_fee(
+        principal: u64,
+        fee_rate_bps: u8,
+    ): u64 {
+        ((((principal as u128) * (fee_rate_bps as u128)) / BASIS_POINTS_PER_UNIT) as u64)
     }
 
     inline fun cpamm_simple_swap_output_amount(
