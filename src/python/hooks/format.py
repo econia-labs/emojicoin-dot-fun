@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-# cspell:words autoflake, colorama, LIGHTBLACK, LIGHTWHITE, LIGHTYELLOW
+# cspell:words autoflake
+# cspell:words colorama
+# cspell:words lightblack
+# cspell:words lightwhite
+# cspell:words lightyellow
 
 import os
 import subprocess
+from typing import Any, Callable
 
 from colorama import Fore, init
 
@@ -13,9 +18,12 @@ def main():
     init(autoreset=True)
 
     all_files = utils.git_ls_files(abs_paths=True)
-    list(filter(utils.is_python_file, all_files))
 
     changed_files_before = utils.get_changed_files()
+
+    root = utils.get_git_root()
+    hooks_dir = f"{root}/src/python/hooks"
+    move_emojis_dir = f"{root}/src/python/move_emojis"
 
     autoflake_args = [
         "-i",
@@ -24,24 +32,32 @@ def main():
         "--ignore-init-module-imports",
     ]
 
-    cmd_and_args = {
+    isort_config = f"--src {hooks_dir} --src {move_emojis_dir} --profile black"
+
+    always_true: Callable[[Any], bool] = lambda x: True
+
+    cmd_and_args: dict[str, tuple[str, Callable[[Any], bool]]] = {
         "poetry run autoflake": (
             " ".join(autoflake_args),
             utils.is_python_file,
         ),
         "poetry run black": ("--color", utils.is_python_file),
-        "poetry run isort": ("", utils.is_python_file),
+        f"poetry run isort {isort_config}": (
+            "",
+            utils.is_python_file,
+        ),
         "poetry run flake8": ("", utils.is_python_file),
         "poetry run mypy": ("", utils.is_python_file),
-        "poetry run python -m file_name_conventions": ("", lambda x: True),
+        "poetry run python -m file_name_conventions": ("", always_true),
     }
 
-    return_statuses = {k: "" for k in cmd_and_args.keys()}
+    return_statuses: dict[str, str] = {}
 
     for cmd, arg_and_filter in cmd_and_args.items():
         args, filter_func = arg_and_filter
         # Filter with the `filter_func` and only include files that still
         # exist, since `git ls-files` includes directories and deleted files.
+
         filtered_files = list(
             filter(lambda x: filter_func(x) and os.path.isfile(x), all_files)
         )
@@ -56,18 +72,20 @@ def main():
         process = subprocess.Popen(
             full_cmd,
         )
-        stdout, stderr = process.communicate()
+        _ = process.communicate()
         print()
         return_status = "Success" if process.returncode == 0 else "Failure"
-        return_statuses[cmd] = return_status
+        pretty_cmd = cmd.replace(" " + isort_config, "")
+        return_statuses[pretty_cmd] = return_status
 
     changed_files_after = utils.get_changed_files()
     changed_files = changed_files_after - changed_files_before
 
     # Pretty print the return statuses for each command.
-    len_longest_cmd = max([len(c) for c in cmd_and_args.keys()])
+    len_longest_cmd = max([len(c) for c in return_statuses.keys()])
     for cmd, return_status in return_statuses.items():
         return_emoji = "✅" if return_status == "Success" else "❌"
+        pretty_cmd = cmd.replace(" " + isort_config, "")
         print(
             Fore.LIGHTWHITE_EX + cmd,
             "." * (len_longest_cmd + 4 - len(cmd)),

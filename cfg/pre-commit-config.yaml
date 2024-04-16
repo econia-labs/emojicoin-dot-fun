@@ -1,5 +1,11 @@
-# cspell:words autofix, autoflake, isort, latexindent, markdownlint
-# cspell:words mdformat, mypy, shfmt
+# cspell:words autofix
+# cspell:words autoflake
+# cspell:words isort
+# cspell:words latexindent
+# cspell:words markdownlint
+# cspell:words mdformat
+# cspell:words mypy
+# cspell:words shfmt
 ---
 repos:
 -
@@ -73,7 +79,7 @@ repos:
   -
     entry: |
       './src/sh/python-lint/run-in-poetry-subdir.sh'
-      'poetry run isort --check'
+      'poetry run isort --check --src ../move_emojis --src . --profile black'
       'Please run src/sh/python-lint/format.sh and fix the errors.'
     id: 'isort'
     language: 'script'

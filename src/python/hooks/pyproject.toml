@@ -1,7 +1,9 @@
-# cspell:words autoflake, black, flake8, isort, mypy, pyyaml, colorama
-
-[tool.isort]
-profile = "black"
+# cspell:words autoflake
+# cspell:words colorama
+# cspell:words flake8
+# cspell:words isort
+# cspell:words mypy
+# cspell:words pyyaml
 
 [tool.poetry]
 authors = ["Econia Labs <developers@econialabs.com>"]

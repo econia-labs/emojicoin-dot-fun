@@ -1,0 +1,3 @@
+# cspell:words unidecode
+
+def unidecode(input: str) -> str: ...
