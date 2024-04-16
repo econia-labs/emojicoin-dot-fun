@@ -8,12 +8,20 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const MAX_SYMBOL_LENGTH: u8 = 10;
     const MAX_NAME_LENGTH: u8 = 32;
 
+    struct Reserves has copy, drop, store {
+        base: u64,
+        quote: u64,
+    }
+
     #[resource_group = ObjectGroup]
     struct Market has key {
         market_id: address,
         market_address: address,
         emoji_bytes: vector<u8>,
         extend_ref: ExtendRef,
+        real_reserves: Reserves,
+        virtual_reserves: Reserves,
+        lp_token_supply: u64,
     }
 
     #[resource_group = ObjectGroup]
@@ -97,4 +105,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(!is_supported_emoji(x"f0beefcafef0"), 0);
         assert!(!is_supported_emoji(x"f09f9982e2808de28694"), 0); // Minimally qualified "head shaking horizontally".
     }
+
+    inline fun swap_output_amount(input_amount: u64, input_is_base: bool, reserves: Reserves): u64 {
+        let (numerator_coefficient, denominator_addend) = if (input_is_base) {
+            (reserves.quote, reserves.base) else (reserves.base, reserves.quote)
+        };
+        let numerator = (input_amount as u128) * (numerator_coefficient as u128);
+        let denominator = (input_amount as u128) + (denominator_addend as u128);
+        let result = numerator / denominator;
+        // Assert fits in a u64
+    }
+
 }
