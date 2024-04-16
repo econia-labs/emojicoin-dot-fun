@@ -26,7 +26,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const QUOTE_VIRTUAL_FLOOR: u64 = 400_000_000_000;
     const BASE_VIRTUAL_CEILING: u64 = 490_000_000_000_000_000;
     const QUOTE_VIRTUAL_CEILING: u64 = 1_400_000_000_000;
-    const POOL_FEE_RATE_BPS: u64 = 25;
+    const POOL_FEE_RATE_BPS: u8 = 25;
 
     // Swap results in attempted divide by zero.
     const E_SWAP_DIVIDE_BY_ZERO: u64 = 0;
@@ -66,13 +66,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator: address,
         integrator_fee_rate_bps: u8,
         output_amount: u64,
+        integrator_fee: u64,
+        pool_fee: u64,
         results_in_state_transition: bool,
-        integrator_fees_paid: u64,
-        pool_fees_paid: u64,
-        bonding_curve_base_delta: u64,
-        bonding_curve_quote_delta: u64,
-        cpamm_base_delta: u64,
-        cpamm_quote_delta: u64,
+        buying_through_state_transition: bool,
     }
 
     struct RegistryAddress has key {
@@ -116,67 +113,80 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_ref: &Market,
     ): Swap {
         assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
-        let starts_in_bonding_curve_state = market_ref.lp_token_supply == 0;
-        let integrator_fees_paid = 0;
-        let input_amount_after_fees = 0;
+        let starts_in_bonding_curve = market_ref.lp_token_supply == 0;
+
+        // Defaults, may be overwritten later.
         let output_amount = 0;
-        let results_in_state_transition = false;
-        let pool_fees_paid = 0;
-        let bonding_curve_base_delta = 0;
-        let bonding_curve_quote_delta = 0;
-        let cpamm_base_delta = 0;
-        let cpamm_quote_delta = 0;
+        let integrator_fee = 0;
+        let pool_fee = 0;
         let remaining_quote_after_state_transition = 0;
-        if (starts_in_bonding_curve_state) {
+        let results_in_state_transition = false;
+        let buying_through_state_transition = false;
+
+        if (starts_in_bonding_curve) {
             if (input_is_base) { // Selling back to bonding curve.
-                let output_before_fees = cpamm_simple_swap_output_amount(
+                let quote_output_before_integrator_fee = cpamm_simple_swap_output_amount(
                     input_amount,
                     input_is_base,
                     market_ref.virtual_reserves,
                 );
-                // Fees assessed on quote output proceeds.
-                integrator_fees_paid = get_bps_fee(output_before_fees, integrator_fee_rate_bps);
-                output_amount = output_before_fees - integrator_fees_paid;
-                bonding_curve_base_delta = input_amount;
-                bonding_curve_quote_delta = output_before_fees;
+                integrator_fee =
+                    get_bps_fee(quote_output_before_integrator_fee, integrator_fee_rate_bps);
+                output_amount = quote_output_before_integrator_fee - integrator_fee;
             } else { // Buying from bonding curve.
-                // Fees assessed on quote input before it goes to the pool.
-                integrator_fees_paid = get_bps_fee(input_amount, integrator_fee_rate_bps);
-                input_amount_after_fees = input_amount - integrator_fees_paid;
+                integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
+                let quote_input_after_integrator_fee = input_amount - integrator_fee;
                 let max_possible_input = QUOTE_REAL_CEILING - market_ref.real_reserves.quote;
-                if (input_amount_after_fees <= max_possible_input) { // Not leaving bonding curve.
+                if (quote_input_after_integrator_fee < max_possible_input) { // Staying in curve.
                     output_amount = cpamm_simple_swap_output_amount(
-                        input_amount_after_fees,
+                        quote_input_after_integrator_fee,
                         input_is_base,
                         market_ref.virtual_reserves,
                     );
-                    bonding_curve_base_delta = output_amount;
-                    bonding_curve_quote_delta = input_amount_after_fees;
-                } else { // Leaving bonding curve.
+                } else { // Max quote has been deposited to bonding curve.
+                    output_amount = market_ref.real_reserves.base; // Clear out remaining base.
                     results_in_state_transition = true;
                     remaining_quote_after_state_transition =
-                        input_amount_after_fees - max_possible_input;
-                    output_amount = market_ref.real_reserves.base;
-                    bonding_curve_base_delta = output_amount;
-                    bonding_curve_quote_delta = max_possible_input;
+                        quote_input_after_integrator_fee - max_possible_input;
+                    // Might need to continue buying against CPAMM.
+                    buying_through_state_transition = remaining_quote_after_state_transition > 0;
                 }
             };
         };
-        if (!starts_in_bonding_curve_state || results_in_state_transition) {
-            if (input_is_base) { // Selling to pool.
-                // Swap against pool.
-                // Reinvest pool fees.
-                // Assess integrator fees.
+
+        if (!starts_in_bonding_curve || buying_through_state_transition) {
+            if (input_is_base) { // Selling to CPAMM.
+                let output_amount_before_fees = cpamm_simple_swap_output_amount(
+                    input_amount,
+                    input_is_base,
+                    market_ref.real_reserves,
+                );
+                pool_fee = get_bps_fee(output_amount_before_fees, POOL_FEE_RATE_BPS);
+                integrator_fee = get_bps_fee(output_amount_before_fees, integrator_fee_rate_bps);
+                output_amount = output_amount_before_fees - pool_fee - integrator_fee;
             } else { // Buying from pool.
-                if (!results_in_state_transition) {
-                    integrator_fees_paid = get_bps_fee(input_amount, integrator_fee_rate_bps);
-                    input_amount_after_fees = input_amount - integrator_fees_paid;
-                } else { // Swap triggered state transition, so integrator fees already assessed.
-                    // Handle case of if just barely hit state transition but no more to swap
-                    // Set up pool virtual reserves.
-                    // Do not double asses integrator
-                };
-                // Swap against pool, reinvest output.
+                if (buying_through_state_transition) {
+                    // Integrator fees already assessed on quote input during bonding curve state.
+                    // Evaulate CPAMM swap based on newly locked liquidity.
+                    let base_output_before_pool_fee = cpamm_simple_swap_output_amount(
+                        remaining_quote_after_state_transition,
+                        input_is_base,
+                        Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
+                    );
+                    pool_fee = get_bps_fee(base_output_before_pool_fee, POOL_FEE_RATE_BPS);
+                    let base_output_after_pool_fee = base_output_before_pool_fee - pool_fee;
+                    output_amount = output_amount + base_output_after_pool_fee;
+                } else {
+                    integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
+                    let quote_input_after_integrator_fee = input_amount - integrator_fee;
+                    let output_amount_before_pool_fee = cpamm_simple_swap_output_amount(
+                        quote_input_after_integrator_fee,
+                        input_is_base,
+                        market_ref.real_reserves,
+                    );
+                    pool_fee = get_bps_fee(output_amount_before_pool_fee, POOL_FEE_RATE_BPS);
+                    output_amount = output_amount_before_pool_fee - pool_fee;
+                }
             }
         };
         Swap {
@@ -186,13 +196,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             integrator,
             integrator_fee_rate_bps,
             output_amount,
+            integrator_fee,
+            pool_fee,
             results_in_state_transition,
-            integrator_fees_paid,
-            pool_fees_paid,
-            bonding_curve_base_delta,
-            bonding_curve_quote_delta,
-            cpamm_base_delta,
-            cpamm_quote_delta,
+            buying_through_state_transition,
         }
     }
 
