@@ -103,7 +103,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             x"f09f9190f09f8fbe",      // Open hands medium dark skin tone, 1F450 1F3FE.
             x"f09fa4b0f09f8fbc",      // Pregnant woman medium light skin tone, 1F930 1F3FC.
             x"f09f9faa",              // Purple square, 1F7EA.
-            x"f09f91abf09f8fbe",      // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
+            // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
+            x"f09f91abf09f8fbe",
             x"f09f91a9f09f8fbe",      // Woman medium dark skin tone, 1F469 1F3FE.
             x"f09fa795f09f8fbd",      // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
             x"f09fa490",              // Zipper mouth face, 1F910.
@@ -118,7 +119,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(!is_supported_emoji(x"1234"), 0);
         assert!(!is_supported_emoji(x"f0fabcdefabcdeff0f"), 0);
         assert!(!is_supported_emoji(x"f0beefcafef0"), 0);
-        assert!(!is_supported_emoji(x"f09f9982e2808de28694"), 0); // Minimally qualified "head shaking horizontally".
+        // Minimally qualified "head shaking horizontally".
+        assert!(!is_supported_emoji(x"f09f9982e2808de28694"), 0);
     }
 
     inline fun swap_output_amount(input_amount: u64, input_is_base: bool, reserves: Reserves): u64 {
