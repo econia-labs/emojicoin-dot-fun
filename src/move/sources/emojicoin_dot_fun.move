@@ -111,33 +111,26 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             let transfer_from_swapper_to_market = input_amount - event.integrator_fee;
             coin::transfer<Q>(swapper, market_address, transfer_from_swapper_to_market);
             coin::transfer<B>(&market_signer, swapper_address, event.output_amount);
-            if (event.starts_in_bonding_curve) {
-                if (event.results_in_state_transition) { // Buy that triggers state transition.
-
-                    //
-                    // Mint `LP_TOKENS_INITIAL` tokens to the market's `CoinStore`.
-                    //
-
-                    let virtual_reserves_ref_mut = &mut market_ref_mut.virtual_reserves;
-                    let base_out_of_cpamm = event.output_amount - virtual_reserves_ref_mut.base;
-                    let quote_to_transition = QUOTE_REAL_CEILING - virtual_reserves_ref_mut.quote;
-                    let quote_into_cpamm = transfer_from_swapper_to_market - quote_to_transition;
-                    virtual_reserves_ref_mut.base = 0;
-                    virtual_reserves_ref_mut.quote = 0;
-                    let real_reserves_ref_mut = &mut market_ref_mut.real_reserves;
-                    real_reserves_ref_mut.base = EMOJICOIN_REMAINDER - base_out_of_cpamm;
-                    real_reserves_ref_mut.quote = QUOTE_REAL_CEILING + quote_into_cpamm;
-                } else { // Buy without state transition.
-                    let reserves_ref_mut = &mut market_ref_mut.virtual_reserves;
-                    reserves_ref_mut.base = reserves_ref_mut.base - event.output_amount;
-                    reserves_ref_mut.quote =
-                        reserves_ref_mut.quote + transfer_from_swapper_to_market;
-                }
-            } else { // Buy from CPAMM only.
-                let reserves_ref_mut = &mut market_ref_mut.real_reserves;
+            if (event.results_in_state_transition) {
+                //
+                // Mint `LP_TOKENS_INITIAL` tokens to the market's `CoinStore`.
+                //
+                let virtual_reserves_ref_mut = &mut market_ref_mut.virtual_reserves;
+                let quote_to_transition = QUOTE_REAL_CEILING - virtual_reserves_ref_mut.quote;
+                let quote_into_cpamm = transfer_from_swapper_to_market - quote_to_transition;
+                let base_out_of_cpamm = event.output_amount - virtual_reserves_ref_mut.base;
+                virtual_reserves_ref_mut.base = 0;
+                virtual_reserves_ref_mut.quote = 0;
+                let real_reserves_ref_mut = &mut market_ref_mut.real_reserves;
+                real_reserves_ref_mut.base = EMOJICOIN_REMAINDER - base_out_of_cpamm;
+                real_reserves_ref_mut.quote = QUOTE_REAL_CEILING + quote_into_cpamm;
+            } else {
+                let reserves_ref_mut = if (event.starts_in_bonding_curve)
+                    &mut market_ref_mut.virtual_reserves else &mut market_ref_mut.real_reserves;
                 reserves_ref_mut.base = reserves_ref_mut.base - event.output_amount;
                 reserves_ref_mut.quote = reserves_ref_mut.quote + transfer_from_swapper_to_market;
-            }
+
+            };
         };
         event::emit(event);
     }
