@@ -21,11 +21,15 @@
 \newacronym{cpamm}{CPAMM}{Constant Product Automated Market Maker}
 \newacronym{clamm}{CLAMM}{Concentrated Liquidity Automated Market Maker}
 \newacronym{lp}{LP}{Liquidity Provider}
+\newacronym{st}{ST}{State Transition}
 
 % Links.
 \hypersetup{colorlinks=true, allcolors={blue}}
 
-\title{\texttt{emojicoin dot fun}}
+\title{%
+  \Huge \texttt{emojicoin dot fun} \\ \vspace{10pt}
+  \small \emph{Sponsored by a grant from the Aptos Foundation}
+}
 \author{Econia Labs}
 \date{}
 
@@ -35,40 +39,23 @@
 
 \maketitle
 
-\section{Two-state model}
+\section{Overview} \label{sec:overview}
 
 \texttt{emojicoin dot fun} bootstraps liquidity for ``fair'' (public allocation only, no
 presale) emojicoin \cite{emojicoin} markets using a two-state mechanism popularized
 by \texttt{pump dot fun} \cite{pump}. The first state, known as a bonding curve, uses an
-abridged \gls*{clamm} with a single price range \cite{univ3}.
+abridged \gls*{clamm} with a single price range \cite{univ3} as described in section
+\ref{sec:bonding-curve}.
 
 Once the \texttt{APT}-denominated \cite{octa} market capitalization for an emojicoin
-reaches a predefined value, a state transition occurs whereby \texttt{APT} proceeds
-are removed from the bonding curve and locked into a \gls*{cpamm} \cite{univ2} together
-with a remainder of emojicoin supply.
+reaches a predefined value, a \gls*{st} occurs whereby \texttt{APT} deposits are removed
+from the bonding curve and locked into a \gls*{cpamm} \cite{univ2} together with a
+remainder of emojicoin supply, as described in section \ref{sec:cpamm-state}.
 
-Liquidity mechanics are fully prescribed by the state transition variables in table
-\ref{tab:state-model-variables}.
+\section{Economic variables}
 
-\begin{table}[!htb]
-  \centering
-  \begin{tabular}{|c|c|}
-    \hline \rowcolor{blue}
-    Term                                           & Notation \\ \hline
-    \texttt{APT}-denominated market capitalization & $m_a$    \\ \hline
-    Circulating emojicoin supply                   & $c_e$    \\ \hline
-    \texttt{APT}-denominated spot price            & $p_s$    \\ \hline
-  \end{tabular}
-  \caption{Liquidity variables at time of state transition}
-  \label{tab:state-model-variables}
-\end{table}
-
-\section{Bonding curve state}
-
-The bonding curve is represented by a \gls*{clamm}, which functions as a \gls*{cpamm}
-within the price range $[p_l, p_h]$ as defined by tables \ref{tab:b-q-definitions},
-\ref{tab:clamm-curve-translation}, equation \ref{eqn:clamm-curve-translation}, and
-figure \ref{fig:clamm-curve-translation}.
+Price $p$ is defined per table \ref{tab:b-q-definitions} and equation
+\ref{eqn:price-defined}.
 
 \begin{table}[!htb]
   \centering
@@ -81,6 +68,51 @@ figure \ref{fig:clamm-curve-translation}.
   \caption{Base and quote asset definitions}
   \label{tab:b-q-definitions}
 \end{table}
+
+\begin{equation} \label{eqn:price-defined}
+  p = \frac{q}{b}
+\end{equation}
+
+The economic variables in table \ref{tab:state-model-variables} fully specify the set of
+numerical values required for the implementation, as derived in sections
+\ref{sec:bonding-curve} through \ref{sec:derivations}.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline \rowcolor{blue}
+    Term                                           & Notation \\ \hline
+    \texttt{APT}-denominated market capitalization & $m_a$    \\ \hline
+    Circulating emojicoin supply                   & $c_e$    \\ \hline
+    \texttt{APT}-denominated spot price            & $p_s$    \\ \hline
+  \end{tabular}
+  \caption{Economic variables at time of \gls*{st}}
+  \label{tab:state-model-variables}
+\end{table}
+
+As derived in section \ref{sec:alt-vars}, the alternative set of economic variables
+in table \ref{tab:state-model-variables-alt} can also be used to fully specify numerical
+values.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline \rowcolor{blue}
+    Term                                                          & Notation \\ \hline
+    $p_s^{-1} \approx$ emojicoins per 1 \texttt{APT} at \gls*{st} & $A$      \\ \hline
+    Ratio of $p$ at \gls*{st} to $p$ at start of bonding curve    & $R$      \\ \hline
+    Total \texttt{APT} deposited before \gls*{st}                 & $T$      \\ \hline
+  \end{tabular}
+  \caption{Alternative economic variables}
+  \label{tab:state-model-variables-alt}
+\end{table}
+
+\section{Bonding curve state} \label{sec:bonding-curve}
+
+The bonding curve is represented by a \gls*{clamm}, which functions as a \gls*{cpamm}
+within the price range $[p_l, p_h]$ as defined by table
+\ref{tab:clamm-curve-translation}, equation \ref{eqn:clamm-curve-translation}, and
+figure \ref{fig:clamm-curve-translation}.
 
 \begin{table}[!htb]
   \centering
@@ -118,8 +150,8 @@ figure \ref{fig:clamm-curve-translation}.
 
 The bonding curve initializes with real emojicoin reserves $c_e$, which represent only a
 portion of total supply $s_e$. The remainder of emojicoin reserves $r_e$ is set aside
-for the state transition which occurs when $q_{r, c}$ of \texttt{APT} has been deposited
-into the bonding curve, per equation \ref{eqn:supply-amounts} as derived in section
+for the \gls*{st} which occurs when $q_{r, c}$ of \texttt{APT} has been deposited into
+the bonding curve, per equation \ref{eqn:supply-amounts} as derived in section
 \ref{sec:supply-amounts}.
 
 \begin{equation} \label{eqn:supply-amounts}
@@ -165,7 +197,7 @@ and equation \ref{eqn:b-q-out-cpamm-simple} as derived in section
   q_{out} = \frac{b_{in} \cdot q_0}{b_0 + b_{in}}
 \end{equation}
 
-The state transition occurs when virtual reserves reach the values from equation
+The \gls*{st} occurs when virtual reserves reach the values from equation
 \ref{eqn:bonding-curve-transition}, derived in section
 \ref{sec:bonding-curve-constraints}.
 
@@ -175,12 +207,20 @@ The state transition occurs when virtual reserves reach the values from equation
   {2 \cdot c_e \cdot p_s - m_a}
 \end{equation}
 
-\section{\gls*{cpamm} state}
+Notably, this results in a percent dilution at the time of \gls*{st}, $d_\%$, defined in
+equation \ref{eqn:percent-dilution} as derived in section
+\ref{sec:bonding-curve-constraints}.
 
-At the state transition, $q_{r, c}$ is withdrawn from the bonding curve and locked into
-a \gls*{cpamm} together with $r_e$, thus maintaining a constant spot price throughout
-the state transition. This results in the minting of $L_i$ initial \gls*{lp} tokens,
-with $L_i$ taken as the geometric mean of the two contributions per equation
+\begin{equation} \label{eqn:percent-dilution}
+  d_\% = \frac{c_e \cdot p_s}{m_a} \cdot 100\%
+\end{equation}
+
+\section{\gls*{cpamm} state} \label{sec:cpamm-state}
+
+At the \gls*{st}, $q_{r, c}$ is withdrawn from the bonding curve and locked into a
+\gls*{cpamm} together with $r_e$, thus maintaining a constant spot price throughout
+the \gls*{st}. This results in the minting of $L_i$ initial \gls*{lp} tokens, with $L_i$
+taken as the geometric mean of the two contributions per equation
 \ref{eqn:initial-lp-tokens} as derived in section \ref{sec:initial-lp-tokens}.
 
 \begin{equation} \label{eqn:initial-lp-tokens}
@@ -215,21 +255,24 @@ Nominal implementation values are given in table
   \centering
   \begin{tabular}{|c|c|}
     \hline \rowcolor{blue}
-    Term            & Amount        \\ \hline
-    $m_a$           & 10,000        \\ \hline
-    $c_e = b_{r,c}$ & 750,000       \\ \hline
-    $r_e$           & 250,000       \\ \hline
-    $s_e$           & 1,000,000     \\ \hline
-    $p_s = p_h$     & 0.01          \\ \hline
+    Term             & Amount            \\ \hline
+    $A$              & 1,000,000         \\ \hline
+    $R$              & 2.25              \\ \hline
+    $T = q_{r ,c}$   & 10,000            \\ \hline
+    $m_a$            & 25,000            \\ \hline
+    $c_e = b_{r, c}$ & 15,000,000,000    \\ \hline
+    $r_e$            & 10,000,000,000    \\ \hline
+    $s_e$            & 25,000,000,000    \\ \hline
+    $d_\%$           & 60                \\ \hline
+    $p_s = p_h$      & 0.000001          \\ \hline
     \rule{0pt}{10pt} % https://tex.stackexchange.com/a/387263.
-    $p_l$           & $0.00\bar{1}$ \\ \hline
-    $q_{r,c}$       & 2,500         \\ \hline
-    $q_{v,f}$       & 1,250         \\ \hline
-    $q_{v,c}$       & 3,750         \\ \hline
-    $b_{v,f}$       & 375,000       \\ \hline
-    $b_{v,c}$       & 1,125,000     \\ \hline
-    $L_i$           & 25,000        \\ \hline
-    $f_p$           & 25            \\ \hline
+    $p_l$            & $0.000000\bar{4}$ \\ \hline
+    $L_i$            & 10,000,000        \\ \hline
+    $f_p$            & 25                \\ \hline
+    $b_{v, f}$       & 30,000,000,000    \\ \hline
+    $q_{v, f}$       & 20,000            \\ \hline
+    $b_{v, c}$       & 45,000,000,000    \\ \hline
+    $q_{v, c}$       & 30,000            \\ \hline
   \end{tabular}
   \caption{Nominal implementation values}
   \label{tab:nominal-implementation-values}
@@ -241,6 +284,10 @@ derived in section \ref{sec:bonding-curve-constraints}.
 \begin{equation} \label{eqn:bonding-curve-inequality}
   c_e \cdot p_s < m_a < 2 \cdot c_e \cdot p_s
 \end{equation}
+
+Notably, for a given $c_e$ and $p_s$, larger values of $m_a$ correspond to larger $R$
+and larger $d_\%$. Hence the alternative economic variable approach described in section
+\ref{sec:overview}, which enables direct specification of $R$.
 
 $m_a$ scales to octa-denominated \cite{octa} market capitalization $m_o$ as shown in
 equation \ref{eqn:state-transition-market-cap-apt}.
@@ -264,33 +311,33 @@ Applying the same scale factor across variables produces the integer values in t
   \centering
   \begin{tabular}{|c|c|}
     \hline \rowcolor{blue}
-    Constant                         & Amount                           \\ \hline
-    \texttt{MARKET\_CAP}             & \texttt{1\_000\_000\_000\_000}   \\ \hline
-    \texttt{EMOJICOIN\_REMAINDER}    & \texttt{25\_000\_000\_000\_000}  \\ \hline
-    \texttt{EMOJICOIN\_SUPPLY}       & \texttt{100\_000\_000\_000\_000} \\ \hline
-    \texttt{LP\_TOKENS\_INITIAL}     & \texttt{2\_500\_000\_000\_000}   \\ \hline
-    \texttt{BASE\_REAL\_FLOOR}       & \texttt{0}                       \\ \hline
-    \texttt{QUOTE\_REAL\_FLOOR}      & \texttt{0}                       \\ \hline
-    \texttt{BASE\_REAL\_CEILING}     & \texttt{75\_000\_000\_000\_000}  \\ \hline
-    \texttt{QUOTE\_REAL\_CEILING}    & \texttt{250\_000\_000\_000}      \\ \hline
-    \texttt{BASE\_VIRTUAL\_FLOOR}    & \texttt{37\_500\_000\_000\_000}  \\ \hline
-    \texttt{QUOTE\_VIRTUAL\_FLOOR}   & \texttt{125\_000\_000\_000}      \\ \hline
-    \texttt{BASE\_VIRTUAL\_CEILING}  & \texttt{37\_500\_000\_000\_000}  \\ \hline
-    \texttt{QUOTE\_VIRTUAL\_CEILING} & \texttt{125\_000\_000\_000}      \\ \hline
-    \texttt{POOL\_FEE\_RATE\_BPS}    & \texttt{25}                      \\ \hline
+    Constant                         & Amount                                   \\ \hline
+    \texttt{MARKET\_CAP}             & \texttt{2\_500\_000\_000\_000}           \\ \hline
+    \texttt{EMOJICOIN\_REMAINDER}    & \texttt{1\_000\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{EMOJICOIN\_SUPPLY}       & \texttt{2\_500\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{LP\_TOKENS\_INITIAL}     & \texttt{1\_000\_000\_000\_000\_000}      \\ \hline
+    \texttt{BASE\_REAL\_FLOOR}       & \texttt{0}                               \\ \hline
+    \texttt{QUOTE\_REAL\_FLOOR}      & \texttt{0}                               \\ \hline
+    \texttt{BASE\_REAL\_CEILING}     & \texttt{1\_500\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_REAL\_CEILING}    & \texttt{1\_000\_000\_000\_000}           \\ \hline
+    \texttt{BASE\_VIRTUAL\_FLOOR}    & \texttt{3\_000\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_VIRTUAL\_FLOOR}   & \texttt{2\_000\_000\_000\_000}           \\ \hline
+    \texttt{BASE\_VIRTUAL\_CEILING}  & \texttt{4\_500\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_VIRTUAL\_CEILING} & \texttt{3\_000\_000\_000\_000}           \\ \hline
+    \texttt{POOL\_FEE\_RATE\_BPS}    & \texttt{2\_500\_000\_000}                \\ \hline
   \end{tabular}
   \caption{Integer implementation values}
   \label{tab:integer-implementation-values}
 \end{table}
 
-\section{Derivations}
+\section{Derivations} \label{sec:derivations}
 
 \subsection{Supply amounts} \label{sec:supply-amounts}
 
-To ensure a constant price during the state transition, a portion of emojicoin reserves
-must be set aside from the initial bonding curve. At the state transition this emojicoin
-remainder $r_e$ is locked into the \gls*{cpamm} together with all of the \texttt{APT}
-from the bonding curve, yielding:
+To ensure a constant price during the \gls*{st}, a portion of emojicoin reserves must be
+set aside from the initial bonding curve. At the \gls*{st} this emojicoin remainder
+$r_e$ is locked into the \gls*{cpamm} together with all of the \texttt{APT} from the
+bonding curve, yielding:
 
 \begin{align} \label{eqn:remainder-1}
   p_s           & = \frac{q_{r, c}}{r_e} \nonumber \\
@@ -436,7 +483,7 @@ to:
 For $q_{r, c}$ per (\ref{eqn:remainder-3}) and $q_{v, f}$ per
 (\ref{eqn:bonding-curve-7}), $q_{v, c}$ resolves to:
 
-\begin{align}
+\begin{align} \label{eqn:bonding-curve-9}
   q_{v, c} & = q_{r, c} + q_{v, f} \nonumber                                   \\
   q_{v, c} & = m_a - c_e \cdot p_s +
   \frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a} \nonumber      \\
@@ -455,11 +502,20 @@ For $q_{r, c}$ per (\ref{eqn:remainder-3}) and $q_{v, f}$ per
 Hence for $q_{v, f}$ per (\ref{eqn:bonding-curve-7}) and $b_{v, c}$ per
 (\ref{eqn:bonding-curve-8}), $p_l$ resolves to:
 
-\begin{align}
+\begin{align} \label{eqn:bonding-curve-10}
   p_l & = \frac{q_{v, f}}{b_{v, c}} \nonumber                                  \\
   p_l & = \frac{\frac{(m_a - c_e \cdot p_s) ^ 2}{2 \cdot c_e \cdot p_s - m_a}}
   {\frac{c_e ^ 2 \cdot p_s}{2 \cdot c_e \cdot p_s - m_a}} \nonumber            \\
   p_l & = \frac{(m_a - c_e \cdot p_s) ^ 2}{c_e ^ 2 \cdot p_s}
+\end{align}
+
+Define dilution percentage at the time of \gls*{st}, $d_\%$ substituting
+(\ref{eqn:remainder-6}):
+
+\begin{align} \label{eqn:bonding-curve-11}
+  d_\% & = \frac{c_e}{s_e} \cdot 100\% \nonumber             \\
+  d_\% & = \frac{c_e}{\frac{m_a}{p_s}} \cdot 100\% \nonumber \\
+  d_\% & = \frac{c_e \cdot p_s}{m_a} \cdot 100\% \nonumber   \\
 \end{align}
 
 \subsection{Base in and out for \gls*{cpamm} swap} \label{eqn:b-q-out-simple-derivation}
@@ -489,6 +545,86 @@ For a feeless swap sell:
   q_{out} \cdot(b_0 + b_{in}) \nonumber                                           \\
   q_{out} \cdot(b_0 + b_{in}) & = b_{in} \cdot q_0 \nonumber                      \\
   q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}} \nonumber \\
+\end{align}
+
+\subsection{Alternative economic variable selection} \label{sec:alt-vars}
+
+Define the inverse of spot price, roughly interpreted as the number of emojicoins that 1
+\texttt{APT} will buy at the \gls*{st} $A$:
+
+\begin{equation} \label{eqn:alt-define-a}
+  A = \frac{1}{p_s}
+\end{equation}
+
+Define the ratio of bonding curve price endpoints $R$:
+
+\begin{equation} \label{eqn:alt-define-r}
+  R = \frac{p_s}{p_l}
+\end{equation}
+
+Define the total amount of \texttt{APT} required to initiate a \gls*{st} $T$:
+
+\begin{equation} \label{eqn:alt-define-t}
+  T = q_{r, c}
+\end{equation}
+
+Combine (\ref{eqn:alt-define-r}), (\ref{eqn:bonding-curve-10}), and
+(\ref{eqn:remainder-3}):
+
+\begin{align} \label{eqn:alt-solve-c-e}
+  R                     & = \frac{p_s}{p_l} \nonumber                           \\
+  R                     & =
+  \frac{p_s}{\frac{(m_a - c_e \cdot p_s) ^ 2}{c_e ^ 2 \cdot p_s}} \nonumber     \\
+  R                     & =
+  \frac{c_e ^ 2 \cdot p_s^2}{(m_a - c_e \cdot p_s) ^ 2} \nonumber               \\
+  R                     & = \frac{c_e ^ 2 \cdot (\frac{1}{A})^2}{T^2} \nonumber \\
+  R                     & = \frac{c_e ^ 2}{A^2 \cdot T^2} \nonumber             \\
+  A^2 \cdot R \cdot T^2 & = c_e ^ 2 \nonumber                                   \\
+  c_e^2                 & = A^2 \cdot R \cdot T^2 \nonumber                     \\
+  c_e                   & = A \cdot T \cdot \sqrt{R}
+\end{align}
+
+Refactor (\ref{eqn:alt-define-a}):
+
+\begin{align} \label{eqn:alt-solve-p-s}
+  A           & = \frac{1}{p_s} \nonumber \\
+  A \cdot p_s & = \frac{1}{p_s} \nonumber \\
+  p_s         & = \frac{1}{A}
+\end{align}
+
+Combine (\ref{eqn:alt-define-t}), (\ref{eqn:remainder-3}), (\ref{eqn:alt-solve-c-e}),
+and (\ref{eqn:alt-solve-p-s}):
+
+\begin{align} \label{eqn:alt-solve-m-a}
+  T                    & = m_a - c_e \cdot p_s \nonumber                              \\
+  T                    & = m_a - A \cdot T \cdot \sqrt{R} \cdot \frac{1}{A} \nonumber \\
+  T                    & = m_a - T \cdot \sqrt{R} \nonumber                           \\
+  T + T \cdot \sqrt{R} & = m_a \nonumber                                              \\
+  m_a                  & = T + T \cdot \sqrt{R} \nonumber                             \\
+  m_a                  & = T \cdot (1 + \sqrt{R})
+\end{align}
+
+Combine (\ref{eqn:remainder-4}), (\ref{eqn:alt-solve-c-e}), (\ref{eqn:alt-solve-p-s}),
+(\ref{eqn:alt-solve-m-a}), demonstrating a condition that is always met:
+
+\begin{align}
+  T \cdot (1 + \sqrt{R}) & > A \cdot T \cdot \sqrt{R} \cdot \frac{1}{A} \nonumber \\
+  1 + \sqrt{R}           & > \sqrt{R}  \nonumber                                  \\
+  1                      & > 0
+\end{align}
+
+Combine (\ref{eqn:bonding-curve-5}), (\ref{eqn:alt-solve-c-e}),
+(\ref{eqn:alt-solve-p-s}), (\ref{eqn:alt-solve-m-a}), demonstrating another condition
+that is always met:
+
+\begin{align}
+  m_a                    & < 2 \cdot c_e \cdot p_s \nonumber   \\
+  T \cdot (1 + \sqrt{R}) & <
+  2 \cdot A \cdot T \cdot \sqrt{R} \cdot \frac{1}{A} \nonumber \\
+  1 + \sqrt{R}           & < 2 \cdot \sqrt{R} \nonumber        \\
+  1                      & < \sqrt{R} \nonumber                \\
+  \sqrt{R}               & > 1 \nonumber                       \\
+  R                      & > 1
 \end{align}
 
 \subsection{Initial \gls*{lp} tokens} \label{sec:initial-lp-tokens}

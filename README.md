@@ -1,5 +1,11 @@
 # emojicoin dot fun
 
+<!-- markdownlint-disable MD036 -->
+
+*Sponsored by a grant from the Aptos Foundation*
+
+<!-- markdownlint-enable MD036 -->
+
 [![pre-commit shield]][pre-commit repo]
 
 [pre-commit repo]: https://github.com/pre-commit/pre-commit
