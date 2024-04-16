@@ -105,7 +105,8 @@ def print_constants(vars):
         print((left_col + right_col).replace("_", "\\_"))
     print()
     for var, val in zip(vars, vals):
-        print(f"const {var[0]}: u64 = {val:_};")  # noqa: E231,E702
+        var_type = "u8" if var[0] == "POOL_FEE_RATE_BPS" else "u64"
+        print(f"const {var[0]}: {var_type} = {val:_};")  # noqa: E231,E702
 
 
 print_vars(
