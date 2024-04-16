@@ -324,7 +324,7 @@ Applying the same scale factor across variables produces the integer values in t
     \texttt{QUOTE\_VIRTUAL\_FLOOR}   & \texttt{2\_000\_000\_000\_000}           \\ \hline
     \texttt{BASE\_VIRTUAL\_CEILING}  & \texttt{4\_500\_000\_000\_000\_000\_000} \\ \hline
     \texttt{QUOTE\_VIRTUAL\_CEILING} & \texttt{3\_000\_000\_000\_000}           \\ \hline
-    \texttt{POOL\_FEE\_RATE\_BPS}    & \texttt{2\_500\_000\_000}                \\ \hline
+    \texttt{POOL\_FEE\_RATE\_BPS}    & \texttt{25}                              \\ \hline
   \end{tabular}
   \caption{Integer implementation values}
   \label{tab:integer-implementation-values}
@@ -524,26 +524,26 @@ Let $b_0$ and $q_0$ represent base and quote reserves before a swap, and $b_f$ a
 represent reserves after a swap. For a feeless swap buy:
 
 \begin{align}
-  b_0 \cdot q_0                & = b_f \cdot q_f \nonumber                         \\
-  b_0 \cdot q_0                & = (b_0 - b_{out}) \cdot (q_0 + q_{in}) \nonumber  \\
+  b_0 \cdot q_0                & = b_f \cdot q_f \nonumber                        \\
+  b_0 \cdot q_0                & = (b_0 - b_{out}) \cdot (q_0 + q_{in}) \nonumber \\
   b_0 \cdot q_0                & = b_0 \cdot q_0 + b_0 \cdot q_{in} - b_{out}
-  \cdot q_0 - b_{out} \cdot q_{in} \nonumber                                       \\
+  \cdot q_0 - b_{out} \cdot q_{in} \nonumber                                      \\
   b_0 \cdot q_0                & = b_0 \cdot q_0 + b_0 \cdot q_{in} -
-  b_{out} \cdot (q_0 + q_{in}) \nonumber                                           \\
-  b_{out} \cdot (q_0 + q_{in}) & = b_0 \cdot q_{in} \nonumber                      \\
+  b_{out} \cdot (q_0 + q_{in}) \nonumber                                          \\
+  b_{out} \cdot (q_0 + q_{in}) & = b_0 \cdot q_{in} \nonumber                     \\
   b_{out}                      & = \frac{b_0 \cdot q_{in}}{q_0 + q_{in}}
 \end{align}
 
 For a feeless swap sell:
 
 \begin{align}
-  b_0 \cdot q_0               & = b_f q_f \nonumber                               \\
-  b_0 \cdot q_0               & = (b_0 + b_{in}) \cdot (q_0 - q_{out}) \nonumber  \\
+  b_0 \cdot q_0               & = b_f q_f \nonumber                              \\
+  b_0 \cdot q_0               & = (b_0 + b_{in}) \cdot (q_0 - q_{out}) \nonumber \\
   b_0 \cdot q_0               & = b_0 \cdot q_0 - b_0 \cdot q_{out} +
-  b_{in} \cdot q_0 - b_{in} \cdot q_{out} \nonumber                               \\
+  b_{in} \cdot q_0 - b_{in} \cdot q_{out} \nonumber                              \\
   b_0 \cdot q_0               & = b_0 \cdot q_0 + b_{in} \cdot q_0 -
-  q_{out} \cdot(b_0 + b_{in}) \nonumber                                           \\
-  q_{out} \cdot(b_0 + b_{in}) & = b_{in} \cdot q_0 \nonumber                      \\
+  q_{out} \cdot(b_0 + b_{in}) \nonumber                                          \\
+  q_{out} \cdot(b_0 + b_{in}) & = b_{in} \cdot q_0 \nonumber                     \\
   q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}}
 \end{align}
 

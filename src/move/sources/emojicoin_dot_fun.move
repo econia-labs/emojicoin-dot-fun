@@ -1,3 +1,4 @@
+// cspell:words blackpaper
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_std::smart_table::{Self, SmartTable};
@@ -6,7 +7,21 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use emojicoin_dot_fun::hex_codes;
 
     const MAX_SYMBOL_LENGTH: u8 = 10;
-    const MAX_NAME_LENGTH: u8 = 32;
+
+    // Generated automatically by blackpaper calculations script.
+    const MARKET_CAP: u64 = 2_500_000_000_000;
+    const EMOJICOIN_REMAINDER: u64 = 1_000_000_000_000_000_000;
+    const EMOJICOIN_SUPPLY: u64 = 2_500_000_000_000_000_000;
+    const LP_TOKENS_INITIAL: u64 = 1_000_000_000_000_000;
+    const BASE_REAL_FLOOR: u64 = 0;
+    const QUOTE_REAL_FLOOR: u64 = 0;
+    const BASE_REAL_CEILING: u64 = 1_500_000_000_000_000_000;
+    const QUOTE_REAL_CEILING: u64 = 1_000_000_000_000;
+    const BASE_VIRTUAL_FLOOR: u64 = 3_000_000_000_000_000_000;
+    const QUOTE_VIRTUAL_FLOOR: u64 = 2_000_000_000_000;
+    const BASE_VIRTUAL_CEILING: u64 = 4_500_000_000_000_000_000;
+    const QUOTE_VIRTUAL_CEILING: u64 = 3_000_000_000_000;
+    const POOL_FEE_RATE_BPS: u64 = 25;
 
     struct Reserves has copy, drop, store {
         base: u64,

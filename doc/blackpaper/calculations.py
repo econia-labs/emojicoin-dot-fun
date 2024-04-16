@@ -90,13 +90,20 @@ def print_latex_nominals(vars):
     print()
 
 
-def print_latex_constants(vars):
+def print_constants(vars):
+    vals = []
     for var in vars:
         assert var[1].is_integer()
-        val = int(var[1]) * SCALE_TO_SUBUNITS
+        val = int(var[1])
+        if var[0] != "POOL_FEE_RATE_BPS":
+            val = val * SCALE_TO_SUBUNITS
+        vals.append(val)
         left_col = f"\\texttt{{{var[0]}}} &"
         right_col = f"\\texttt{{{val:_}}} \\\\ \\hline"  # noqa: E231
         print((left_col + right_col).replace("_", "\\_"))
+    print()
+    for var, val in zip(vars, vals):
+        print(f"const {var[0]}: u64 = {val:_};")  # noqa: E231,E702
 
 
 print_vars(
@@ -160,7 +167,7 @@ print_latex_nominals(
     ]
 )
 
-print_latex_constants(
+print_constants(
     [
         ["MARKET_CAP", M_A],
         ["EMOJICOIN_REMAINDER", r_e],
