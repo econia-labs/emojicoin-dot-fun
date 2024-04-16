@@ -121,7 +121,11 @@ if __name__ == "__main__":
         full_args.append(f"{arg:<{longest_arg}}{comment}")
     return_close = f"{TAB*2}]"
 
+    zeroes = ", ".join(["0"] * len(args_and_comments))
+    zeroed_hex_str = f"{TAB*2}vector<vector<u8>> [ {zeroes} ]"
+
     with open(MOVE_CONSTS_DATA_FILE, "w") as outfile:
         _ = outfile.write(f"\n{return_open}\n")
         _ = outfile.write("\n".join(full_args))
         _ = outfile.write(f"\n{return_close}\n")
+        _ = outfile.write(f"\n{zeroed_hex_str}\n")

@@ -39,15 +39,51 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             markets_by_market_id: smart_table::new(),
             extend_ref,
         };
+
         smart_table::add_all(
             &mut registry.supported_emojis,
             hex_codes::get_all(),
-            vector[
-                0,
-                0,
-            ],
+            hex_codes::get_zeroed_vector(),
         );
         move_to(&registry_signer, registry);
     }
 
+    #[view]
+    public fun is_supported_emoji(hex_bytes: vector<u8>): bool acquires Registry, RegistryAddress {
+        let registry_address = borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address;
+        let registry = borrow_global<Registry>(registry_address);
+        smart_table::contains(&registry.supported_emojis, hex_bytes)
+    }
+
+    #[test_only] use std::aptos_account;
+    #[test_only] use std::vector;
+
+    #[test(deployer = @emojicoin_dot_fun)]
+    fun test_supported_emoji_happy_path(deployer: &signer) acquires Registry, RegistryAddress {
+        aptos_account::create_account(@emojicoin_dot_fun);
+        init_module(deployer);
+        let various_emojis = vector<vector<u8>> [
+            x"f09f868e",              // Ab button blood type, 1F18E.
+            x"f09fa6bbf09f8fbe",      // Ear with hearing aid medium dark skin tone, 1F9BB 1F3FE.
+            x"f09f87a7f09f87b9",      // Flag bhutan, 1F1E7 1F1F9.
+            x"f09f9190f09f8fbe",      // Open hands medium dark skin tone, 1F450 1F3FE.
+            x"f09fa4b0f09f8fbc",      // Pregnant woman medium light skin tone, 1F930 1F3FC.
+            x"f09f9faa",              // Purple square, 1F7EA.
+            x"f09f91abf09f8fbe",      // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
+            x"f09f91a9f09f8fbe",      // Woman medium dark skin tone, 1F469 1F3FE.
+            x"f09fa795f09f8fbd",      // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
+            x"f09fa490",              // Zipper mouth face, 1F910.
+        ];
+        vector::for_each(various_emojis, |bytes| {
+            assert!(is_supported_emoji(bytes), 0);
+        });
+
+        // Test unsupported emojis.
+        assert!(!is_supported_emoji(x"0000"), 0);
+        assert!(!is_supported_emoji(x"fe0f"), 0);
+        assert!(!is_supported_emoji(x"1234"), 0);
+        assert!(!is_supported_emoji(x"f0fabcdefabcdeff0f"), 0);
+        assert!(!is_supported_emoji(x"f0beefcafef0"), 0);
+        assert!(!is_supported_emoji(x"f09f9982e2808de28694"), 0); // Minimally qualified "head shaking horizontally".
+    }
 }
