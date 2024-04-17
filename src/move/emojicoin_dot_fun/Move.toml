@@ -1,5 +1,6 @@
 [addresses]
 emojicoin_dot_fun = "_"
+fee_receiver = "_"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
@@ -8,6 +9,7 @@ subdir = "aptos-move/framework/aptos-framework"
 
 [dev-addresses]
 emojicoin_dot_fun = "0xc0de"
+fee_receiver = "0xfeeeeed00d"
 
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]

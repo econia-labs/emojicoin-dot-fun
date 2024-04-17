@@ -5,6 +5,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_framework::code;
     use aptos_framework::event;
     use aptos_framework::aptos_account;
+    use aptos_framework::aptos_coin::{AptosCoin};
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::hex_codes;
@@ -17,6 +18,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
+
+    // Denominated in AptosCoin.
+    const REGISTER_MARKET_FEE: u64 = 1;
 
     // Generated automatically by blackpaper calculations script.
     const MARKET_CAP: u64 = 4_500_000_000_000;
@@ -87,37 +91,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         sender: &signer,
         emojis: vector<vector<u8>>
     ) acquires Registry, RegistryAddress {
-        // Fill out this stub later for charging a fee to register a market.
-        let _ = sender;
-
-        if (vector::length(&emojis) == 0) {
-            return
-        };
-
-        // Concatenate all emoji bytes into a single byte vector.
-        let emoji_bytes: vector<u8> = vector::empty();
-        vector::reverse(&mut emojis);
-
-        // `while` because `vector::for_each` doesn't support `return` yet.
-        while (vector::length(&emojis) > 0) {
-            let emoji = vector::pop_back(&mut emojis);
-            vector::append(&mut emoji_bytes, emoji);
-            if (!is_supported_emoji(emoji)) {
-                // Silently return if any of the emojis are not supported.
-                return
-            };
-        };
-
-        let opt_market_address = get_market_address(emoji_bytes);
-        let is_registered_market = option::is_some(&opt_market_address);
-        let emoji_utf8_string = string::utf8(emoji_bytes);
-        let emoji_str_length = string::length(&emoji_utf8_string);
-        // Silently return if the emoji bytes are too long or if the market is already registered.
-        if (emoji_str_length > (MAX_SYMBOL_LENGTH as u64) || is_registered_market) {
+        let (can_register, emoji_bytes) = can_market_be_registered(sender, emojis);
+        if (!can_register) {
             return
         };
 
         // NOTE: Do not silently return after here; the rest of this function has side effects.
+
+        aptos_account::transfer(sender, @fee_receiver, REGISTER_MARKET_FEE);
 
         // Create the named Market object.
         let registry = borrow_global<Registry>(get_registry_address());
@@ -302,6 +283,49 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             },
             lp_token_supply: 0,
         });
+    }
+
+    inline fun can_market_be_registered(
+        sender: &signer,
+        emojis: vector<vector<u8>>,
+    ): (bool, vector<u8>) {
+        let num_emojis = vector::length(&emojis);
+        if (num_emojis == 0) {
+            return (false, b"")
+        };
+
+        let sender_addr = signer::address_of(sender);
+        let insufficient_sender_balance = coin::balance<AptosCoin>(sender_addr) < REGISTER_MARKET_FEE;
+        if (insufficient_sender_balance) {
+            return (false, b"")
+        };
+
+        // Concatenate all emoji bytes into a single byte vector.
+        let emoji_bytes: vector<u8> = vector::empty();
+
+        // `while` because `vector::for_each` doesn't support `return` yet.
+        let i = 0;
+        while (i < num_emojis) {
+            let emoji = *vector::borrow(&emojis, i);
+            vector::append(&mut emoji_bytes, emoji);
+            if (!is_supported_emoji(emoji)) {
+                return (false, b"")
+            };
+            i = i + 1;
+        };
+
+        let opt_market_address = get_market_address(emoji_bytes);
+        let is_registered_market = option::is_some(&opt_market_address);
+
+        let emoji_utf8_string = string::utf8(emoji_bytes);
+        let emoji_str_length = string::length(&emoji_utf8_string);
+        let symbol_too_long = emoji_str_length > (MAX_SYMBOL_LENGTH as u64);
+
+        if (symbol_too_long || is_registered_market) {
+            return (false, b"")
+        };
+
+        (true, emoji_bytes)
     }
 
     inline fun simulate_swap_inner(
