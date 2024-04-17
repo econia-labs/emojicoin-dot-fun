@@ -83,34 +83,41 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         registry_address: address,
     }
 
-    public entry fun register_market(emojis: vector<vector<u8>>) acquires Registry, RegistryAddress {
+    public entry fun register_market(
+        sender: &signer,
+        emojis: vector<vector<u8>>
+    ) acquires Registry, RegistryAddress {
+        // Fill out this stub later for charging a fee to register a market.
+        let _ = sender;
+
         if (vector::length(&emojis) == 0) {
             return
         };
-        // Concatenate all emoji bytes into a single byte vector.
-        // Silently return if any of the emojis are not supported.
-        let emoji_bytes: vector<u8> = vector::empty();
 
-        // While loop because inline `for_each` doesn't support `return` yet.
+        // Concatenate all emoji bytes into a single byte vector.
+        let emoji_bytes: vector<u8> = vector::empty();
         vector::reverse(&mut emojis);
+
+        // `while` because `vector::for_each` doesn't support `return` yet.
         while (vector::length(&emojis) > 0) {
             let emoji = vector::pop_back(&mut emojis);
             vector::append(&mut emoji_bytes, emoji);
             if (!is_supported_emoji(emoji)) {
+                // Silently return if any of the emojis are not supported.
                 return
             };
         };
 
-        // Silently return if the emoji bytes are too long or if the market is already registered.
         let opt_market_address = get_market_address(emoji_bytes);
         let is_registered_market = option::is_some(&opt_market_address);
         let emoji_utf8_string = string::utf8(emoji_bytes);
         let emoji_str_length = string::length(&emoji_utf8_string);
+        // Silently return if the emoji bytes are too long or if the market is already registered.
         if (emoji_str_length > (MAX_SYMBOL_LENGTH as u64) || is_registered_market) {
             return
         };
 
-        // NOTE: Do not silent return after here; the rest of this function has side effects.
+        // NOTE: Do not silently return after here; the rest of this function has side effects.
 
         // Create the named Market object.
         let registry = borrow_global<Registry>(get_registry_address());
@@ -127,10 +134,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Interpolate the Market object address and emoji symbol bytes into the
         // coin_factory.move bytecode, then use that bytecode to publish the module
         // with the market object's signer.
-        // Note that since coin_factory.move handles creating the Coin name by appending
-        // " emojicoin" to the Coin symbol, we only need to pass the symbol bytes here.
         let (metadata_bytecode, module_bytecode) = hex_codes::get_publish_code(
             market_address,
+            // These emoji bytes are just the symbol. coin_factory.move handles creating
+            // the `name` by appending b" emojicoin" to the symbol.
             emoji_bytes,
         );
 
