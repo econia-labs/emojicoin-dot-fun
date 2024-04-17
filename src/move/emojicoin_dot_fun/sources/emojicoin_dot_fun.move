@@ -19,7 +19,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
 
-    // Denominated in AptosCoin.
+    /// Denominated in AptosCoin.
     const REGISTER_MARKET_FEE: u64 = 1;
 
     // Generated automatically by blackpaper calculations script.
@@ -37,11 +37,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const QUOTE_VIRTUAL_CEILING: u64 = 1_400_000_000_000;
     const POOL_FEE_RATE_BPS: u8 = 25;
 
-    // Swap results in attempted divide by zero.
+    /// Swap results in attempted divide by zero.
     const E_SWAP_DIVIDE_BY_ZERO: u64 = 0;
-    // No input amount provided for swap.
+    /// No input amount provided for swap.
     const E_SWAP_INPUT_ZERO: u64 = 1;
-    // No market exists at the given address.
+    /// No market exists at the given address.
     const E_NO_MARKET: u64 = 2;
 
     struct Reserves has copy, drop, store {
