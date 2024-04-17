@@ -2,14 +2,16 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_framework::coin;
+    use aptos_framework::code;
     use aptos_framework::event;
+    use aptos_framework::aptos_account;
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::hex_codes;
+    use std::string;
+    use std::vector;
+    use std::option::{Self, Option};
     use std::signer;
-
-    #[test_only] use std::aptos_account;
-    #[test_only] use std::vector;
 
     const MAX_SYMBOL_LENGTH: u8 = 10;
 
@@ -79,6 +81,71 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     struct RegistryAddress has key {
         registry_address: address,
+    }
+
+    public entry fun register_market(emojis: vector<vector<u8>>) acquires Registry, RegistryAddress {
+        if (vector::length(&emojis) == 0) {
+            return
+        };
+        // Concatenate all emoji bytes into a single byte vector.
+        // Silently return if any of the emojis are not supported.
+        let emoji_bytes: vector<u8> = vector::empty();
+
+        // While loop because inline `for_each` doesn't support `return` yet.
+        vector::reverse(&mut emojis);
+        while (vector::length(&emojis) > 0) {
+            let emoji = vector::pop_back(&mut emojis);
+            vector::append(&mut emoji_bytes, emoji);
+            if (!is_supported_emoji(emoji)) {
+                return
+            };
+        };
+
+        // Silently return if the emoji bytes are too long or if the market is already registered.
+        let opt_market_address = get_market_address(emoji_bytes);
+        let is_registered_market = option::is_some(&opt_market_address);
+        let emoji_utf8_string = string::utf8(emoji_bytes);
+        let emoji_str_length = string::length(&emoji_utf8_string);
+        if (emoji_str_length > (MAX_SYMBOL_LENGTH as u64) || is_registered_market) {
+            return
+        };
+
+        // NOTE: Do not silent return after here; the rest of this function has side effects.
+
+        // Create the named Market object.
+        let registry = borrow_global<Registry>(get_registry_address());
+        let market_signer = object::generate_signer_for_extending(&registry.extend_ref);
+        let market_c_ref = object::create_named_object(&market_signer, emoji_bytes);
+        let market_extend_ref = object::generate_extend_ref(&market_c_ref);
+        let market_obj_signer = object::generate_signer_for_extending(&market_extend_ref);
+        let market_address = object::address_from_constructor_ref(&market_c_ref);
+
+        // Each object must also have an Aptos Account resource at its address, as specified
+        // by the coin.move module.
+        aptos_account::create_account(market_address);
+
+        // Interpolate the Market object address and emoji symbol bytes into the
+        // coin_factory.move bytecode, then use that bytecode to publish the module
+        // with the market object's signer.
+        // Note that since coin_factory.move handles creating the Coin name by appending
+        // " emojicoin" to the Coin symbol, we only need to pass the symbol bytes here.
+        let (metadata_bytecode, module_bytecode) = hex_codes::get_publish_code(
+            market_address,
+            emoji_bytes,
+        );
+
+        code::publish_package_txn(
+            &market_obj_signer,
+            metadata_bytecode,
+            module_bytecode,
+        );
+
+        create_market_and_add_to_registry(
+            &market_obj_signer,
+            market_address,
+            emoji_bytes,
+            market_extend_ref,
+        );
     }
 
     public entry fun swap<B, Q>(
@@ -186,6 +253,48 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             integrator_fee_rate_bps,
             borrow_global(market_address),
         )
+    }
+
+    inline fun get_registry_address(): address {
+        borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address
+    }
+
+    inline fun get_market_address(emoji_bytes: vector<u8>): Option<address> {
+        let registry = borrow_global<Registry>(get_registry_address());
+        let markets = &registry.markets_by_emoji_bytes;
+        if (smart_table::contains(markets, emoji_bytes)) {
+            option::some(*smart_table::borrow(markets, emoji_bytes))
+        } else {
+            option::none()
+        }
+    }
+
+    inline fun create_market_and_add_to_registry(
+        obj_signer: &signer,
+        market_address: address,
+        emoji_bytes: vector<u8>,
+        extend_ref: ExtendRef,
+    ) {
+        let registry = borrow_global_mut<Registry>(get_registry_address());
+        let market_id = 1 + smart_table::length(&registry.markets_by_emoji_bytes);
+        smart_table::add(&mut registry.markets_by_emoji_bytes, emoji_bytes, market_address);
+        smart_table::add(&mut registry.markets_by_market_id, market_id, market_address);
+
+        move_to(obj_signer, Market {
+            market_id,
+            market_address,
+            emoji_bytes,
+            extend_ref,
+            clamm_virtual_reserves: Reserves {
+                base: BASE_VIRTUAL_FLOOR,
+                quote: QUOTE_VIRTUAL_FLOOR,
+            },
+            cpamm_real_reserves: Reserves {
+                base: BASE_REAL_FLOOR,
+                quote: QUOTE_REAL_FLOOR,
+            },
+            lp_token_supply: 0,
+        });
     }
 
     inline fun simulate_swap_inner(
@@ -319,7 +428,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     fun test_all_supported_emojis_under_10_bytes() {
         let all_supported_emojis = hex_codes::get_all();
         vector::for_each(all_supported_emojis, |bytes| {
-            assert!(vector::length(&bytes) <= (MAX_SYMBOL_LENGTH as u64), 0);
+            let emoji_as_string = string::utf8(bytes);
+            assert!(string::length(&emoji_as_string) <= (MAX_SYMBOL_LENGTH as u64), 0);
         });
     }
 
