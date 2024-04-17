@@ -1,6 +1,0 @@
-# cspell:words mvcov
-*.mvcov
-*.trace
-build/*
-build_publish_payload.json
-bytecode.json
