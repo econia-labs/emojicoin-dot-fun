@@ -1,4 +1,3 @@
-// cspell:words blackpaper
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_framework::coin::{Self, MintCapability, BurnCapability};
