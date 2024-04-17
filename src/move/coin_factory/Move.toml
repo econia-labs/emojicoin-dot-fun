@@ -1,13 +1,20 @@
 [addresses]
 coin_factory = "_"
+emojicoin_dot_fun = "_"
+fee_receiver = "_"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
+[dependencies.EmojicoinDotFun]
+local = "../emojicoin_dot_fun"
+
 [dev-addresses]
-coin_factory = "0xc0de"
+coin_factory = "0xc000de"
+emojicoin_dot_fun = "0xc0de"
+fee_receiver = "0xfeeeeed00d"
 
 [package]
 name = "CoinFactory"

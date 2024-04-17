@@ -3,16 +3,27 @@
 import json
 import subprocess
 
-MODULE_NAME = "coin_factory"
+COIN_FACTORY = "coin_factory"
 JSON_FILE_PATH = "build_publish_payload.json"
 SYMBOL_PLACEHOLDER = "99887766554433221100ffeeddccbbaa00112233445566778899aabbccddeeff"
-MODULE_ADDRESS_PLACEHOLDER = (
-    "ffeeddccbbaa99887766554433221100aabbccddeeff00112233445566778899"
-)
 BYTECODE_JSON_FILE = "bytecode.json"
 
 SYMBOL_HEX_STRING_GOES_HERE = "bcs_serialized_SYMBOL_VECTOR_U8_HERE"
-MODULE_ADDRESS_HEX_STRING_GOES_HERE = "bcs_serialized_MODULE_ADDRESS_HERE"
+
+# Mapping of named addresses to placeholder addresses for generating Move bytecode.
+# Note these values are completely random hex values, generated with:
+# from random import randint
+# ''.join(hex(randint(0, 255))[2:].zfill(2) for x in range(32))
+random_addresses = [
+    "d821750d56947cc65fe313eb14feb72a03c1fc9d740a0ae31710251173dc6517",
+    "771ea88fe30c3525dd4d4b95e8cd67f956ddc1f2774f19b4c404115299894e52",
+    "c859f297cd4bed0704b235a7d61c1e0ca7d8ae3627990ff2534fdf1ea051a885",
+]
+NAMED_ADDRESSES = {
+    COIN_FACTORY: random_addresses.pop(),
+    "emojicoin_dot_fun": random_addresses.pop(),
+    "fee_receiver": random_addresses.pop(),
+}
 
 
 # Splits a string into a list of strings, replacing the delimiter with the replacement.
@@ -29,10 +40,27 @@ def split_and_replace(input_string: str, delimiter: str, replacement: str) -> li
     return replaced
 
 
+def split_and_replace_named_addresses(
+    lines_to_replace: list[str], named_addresses: dict[str, str]
+) -> list[str]:
+    for named_addr, addr in named_addresses.items():
+        lines: list[str] = []
+        for spl in lines_to_replace:
+            spl_replaced = split_and_replace(
+                spl,
+                addr,
+                f"@{named_addr}: interpolate the BCS-serialized address here...",
+            )
+            lines.extend(spl_replaced)
+        lines_to_replace = lines.copy()
+    return lines_to_replace
+
+
 # To run this script you must:
 #  - Have the `aptos` CLI installed
 #  - Run this script from the coin factory module directory (where the `Move.toml` is)
 if __name__ == "__main__":
+    named_addresses_args = ",".join([f"{k}={v}" for k, v in NAMED_ADDRESSES.items()])
     _ = subprocess.run(
         [
             "aptos",
@@ -41,28 +69,30 @@ if __name__ == "__main__":
             "--json-output-file",
             JSON_FILE_PATH,
             "--named-addresses",
-            f"{MODULE_NAME}={MODULE_ADDRESS_PLACEHOLDER}",
+            named_addresses_args,
             "--assume-yes",
-        ]
+        ],
+        stdout=subprocess.DEVNULL,
     )
 
     d = json.load(open(JSON_FILE_PATH))
 
-    metadata = d["args"][0]["value"]
+    metadata: str = d["args"][0]["value"]
     if metadata.startswith("0x"):
         metadata = metadata[2:]
 
-    bytecode_array = d["args"][1]["value"]
+    metadata_lines = split_and_replace_named_addresses([metadata], NAMED_ADDRESSES)
+
+    bytecode_array: list[str] = d["args"][1]["value"]
     assert len(bytecode_array) == 1
     bytecode = bytecode_array[0]
     if bytecode.startswith("0x"):
         bytecode = bytecode[2:]
 
     assert SYMBOL_PLACEHOLDER not in metadata
-    assert MODULE_ADDRESS_PLACEHOLDER not in metadata
 
-    assert SYMBOL_PLACEHOLDER in bytecode
-    assert MODULE_ADDRESS_PLACEHOLDER in bytecode
+    assert NAMED_ADDRESSES[COIN_FACTORY] not in metadata
+    assert NAMED_ADDRESSES[COIN_FACTORY] in bytecode
 
     # The vector<u8> byte length is prepended to the actual symbol value
     # in the bytecode. We need to remove/replace this value when publishing as well.
@@ -71,24 +101,13 @@ if __name__ == "__main__":
     sym_bytecode = f"{symbol_len_bytes_as_hex}{SYMBOL_PLACEHOLDER}"
     sym_msg = SYMBOL_HEX_STRING_GOES_HERE
 
-    bytecode_replaced = split_and_replace(bytecode, sym_bytecode, sym_msg)
-
-    # Addresses are always 32 bytes, so we don't need to remove or replace the length.
-    addr_bytecode = MODULE_ADDRESS_PLACEHOLDER
-    addr_msg = MODULE_ADDRESS_HEX_STRING_GOES_HERE
-
-    lines: list[str] = []
-    for s2 in bytecode_replaced:
-        if addr_bytecode in s2:
-            s2_replaced = split_and_replace(s2, addr_bytecode, addr_msg)
-            lines.extend(s2_replaced)
-        else:
-            lines.append(s2)
+    bytecode_lines = split_and_replace(bytecode, sym_bytecode, sym_msg)
+    bytecode_lines = split_and_replace_named_addresses(bytecode_lines, NAMED_ADDRESSES)
 
     d = {
-        "metadata": metadata,
-        "bytecode": lines,
+        "metadata": metadata_lines,
+        "bytecode": bytecode_lines,
     }
     json.dump(d, open(BYTECODE_JSON_FILE, "w"), indent=2)
 
-    print(f"Output bytecode contents to {BYTECODE_JSON_FILE}")
+    print(f"[SUCCESS]: Output bytecode contents to {BYTECODE_JSON_FILE}")

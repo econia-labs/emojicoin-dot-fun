@@ -1,7 +1,7 @@
 // cspell:words blackpaper
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
-    use aptos_framework::coin;
+    use aptos_framework::coin::{Self, MintCapability, BurnCapability};
     use aptos_framework::code;
     use aptos_framework::event;
     use aptos_framework::aptos_account;
@@ -47,6 +47,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     struct Reserves has copy, drop, store {
         base: u64,
         quote: u64,
+    }
+
+    #[resource_group = ObjectGroup]
+    struct LPCoinCapabilities<phantom CoinType> has key {
+        mint: MintCapability<CoinType>,
+        burn: BurnCapability<CoinType>,
     }
 
     #[resource_group = ObjectGroup]
@@ -122,18 +128,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             emoji_bytes,
         );
 
-        code::publish_package_txn(
-            &market_obj_signer,
-            metadata_bytecode,
-            module_bytecode,
-        );
-
         create_market_and_add_to_registry(
             &market_obj_signer,
             market_address,
             emoji_bytes,
             market_extend_ref,
         );
+
+        code::publish_package_txn(
+            &market_obj_signer,
+            metadata_bytecode,
+            module_bytecode,
+        );
+
     }
 
     public entry fun swap<B, Q>(
@@ -193,6 +200,21 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             };
         };
         event::emit(event);
+    }
+
+    // Intended to be called from `coin_factory`, this function facilitates
+    // storing the LP Coin capabilities atomically when the coin factory
+    // module is initialized.
+    public fun store_capabilities<T>(
+        market_obj_signer: &signer,
+        burn_capability: BurnCapability<T>,
+        mint_capability: MintCapability<T>,
+    ) {
+        assert!(exists<Market>(signer::address_of(market_obj_signer)), E_NO_MARKET);
+        move_to(market_obj_signer, LPCoinCapabilities<T> {
+            mint: mint_capability,
+            burn: burn_capability,
+        });
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
@@ -285,10 +307,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
-    inline fun can_market_be_registered(
+    // Not inline because we can't `return` from within an inline function.
+    fun can_market_be_registered(
         sender: &signer,
         emojis: vector<vector<u8>>,
-    ): (bool, vector<u8>) {
+    ): (bool, vector<u8>) acquires Registry, RegistryAddress {
         let num_emojis = vector::length(&emojis);
         if (num_emojis == 0) {
             return (false, b"")
