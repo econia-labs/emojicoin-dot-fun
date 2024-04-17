@@ -81,7 +81,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         input_is_base: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
-        output_amount: u64,
+        net_proceeds: u64,
+        base_volume: u64,
+        quote_volume: u64,
         integrator_fee: u64,
         pool_fee: u64,
         starts_in_bonding_curve: bool,
@@ -142,6 +144,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     }
 
+/*
     public entry fun swap<B, Q>(
         swapper: &signer,
         input_amount: u64,
@@ -200,6 +203,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
         event::emit(event);
     }
+*/
 
     // Intended to be called from `coin_factory`, this function facilitates
     // storing the LP Coin capabilities atomically when the coin factory
@@ -359,71 +363,71 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ): Swap {
         assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
         let starts_in_bonding_curve = market_ref.lp_token_supply == 0;
-        let output_amount;
+        let net_proceeds;
+        let base_volume;
+        let quote_volume;
         let integrator_fee;
         let pool_fee = 0;
         let results_in_state_transition = false;
         if (input_is_base) { // If selling, no possibility of state transition.
-            if (starts_in_bonding_curve) { // Selling to bonding curve.
-                let quote_output_before_integrator_fee = cpamm_simple_swap_output_amount(
+            let amm_quote_output;
+            if (starts_in_bonding_curve) { // Selling to CLAMM only.
+                amm_quote_output = cpamm_simple_swap_output_amount(
                     input_amount,
                     input_is_base,
                     market_ref.clamm_virtual_reserves,
                 );
-                integrator_fee =
-                    get_bps_fee(quote_output_before_integrator_fee, integrator_fee_rate_bps);
-                output_amount = quote_output_before_integrator_fee - integrator_fee;
-            } else { // Selling to CPAMM.
-                let quote_output_before_fees = cpamm_simple_swap_output_amount(
+            } else { // Selling to CPAMM only.
+                amm_quote_output = cpamm_simple_swap_output_amount(
                     input_amount,
                     input_is_base,
                     market_ref.cpamm_real_reserves,
                 );
-                integrator_fee = get_bps_fee(quote_output_before_fees, integrator_fee_rate_bps);
-                pool_fee = get_bps_fee(quote_output_before_fees, POOL_FEE_RATE_BPS);
-                output_amount = quote_output_before_fees - integrator_fee - pool_fee;
-            }
+                pool_fee = get_bps_fee(amm_quote_output, POOL_FEE_RATE_BPS);
+            };
+            integrator_fee = get_bps_fee(amm_quote_output, integrator_fee_rate_bps);
+            base_volume = input_amount;
+            quote_volume = amm_quote_output - pool_fee - integrator_fee;
+            net_proceeds = quote_volume;
         } else { // If buying, there may be a state transition.
             integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
-            let quote_input_after_integrator_fee = input_amount - integrator_fee;
+            quote_volume = input_amount - integrator_fee;
+            let quote_volume_after_clamm = 0;
             if (starts_in_bonding_curve) {
-                let quote_to_transition =
-                    QUOTE_REAL_CEILING - market_ref.cpamm_real_reserves.quote;
-                if (quote_input_after_integrator_fee < quote_to_transition) { // Staying in curve.
-                    output_amount = cpamm_simple_swap_output_amount(
-                        quote_input_after_integrator_fee,
+                let max_quote_volume_in_clamm =
+                    QUOTE_VIRTUAL_CEILING - market_ref.clamm_virtual_reserves.quote;
+                if (quote_volume < max_quote_volume_in_clamm) {
+                    base_volume = cpamm_simple_swap_output_amount(
+                        quote_volume,
                         input_is_base,
                         market_ref.clamm_virtual_reserves,
                     );
                 } else { // Max quote has been deposited to bonding curve.
                     results_in_state_transition = true;
                     // Clear out remaining base.
-                    output_amount = market_ref.cpamm_real_reserves.base;
-                    quote_input_after_integrator_fee =
-                        quote_input_after_integrator_fee - quote_to_transition;
-                    if (quote_input_after_integrator_fee > 0) { // Keep buying against CPAMM.
+                    base_volume = market_ref.clamm_virtual_reserves.base - BASE_VIRTUAL_FLOOR;
+                    let remaining_quote_volume = quote_volume - max_quote_volume_in_clamm;
+                    if (remaining_quote_volume > 0) { // Keep buying against CPAMM.
                         // Evaluate swap against CPAMM with newly locked liquidity.
-                        let base_output_from_pool_before_pool_fee = cpamm_simple_swap_output_amount(
-                            quote_input_after_integrator_fee,
+                        let cpamm_base_output = cpamm_simple_swap_output_amount(
+                            remaining_quote_volume,
                             input_is_base,
                             Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
                         );
-                        pool_fee =
-                            get_bps_fee(base_output_from_pool_before_pool_fee, POOL_FEE_RATE_BPS);
-                        let base_output_from_pool_after_pool_fee =
-                            base_output_from_pool_before_pool_fee - pool_fee;
-                        output_amount = output_amount + base_output_from_pool_after_pool_fee;
+                        pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
+                        base_volume = base_volume + cpamm_base_output - pool_fee;
                     }
                 }
             } else { // Buying from CPAMM only.
-                let output_amount_before_pool_fee = cpamm_simple_swap_output_amount(
-                    quote_input_after_integrator_fee,
+                let cpamm_base_output = cpamm_simple_swap_output_amount(
+                    quote_volume,
                     input_is_base,
                     market_ref.cpamm_real_reserves,
                 );
-                pool_fee = get_bps_fee(output_amount_before_pool_fee, POOL_FEE_RATE_BPS);
-                output_amount = output_amount_before_pool_fee - pool_fee;
-            }
+                pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
+                base_volume = cpamm_base_output - pool_fee;
+            };
+            net_proceeds = base_volume;
         };
         Swap {
             market_id: market_ref.market_id,
@@ -431,7 +435,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             input_is_base,
             integrator,
             integrator_fee_rate_bps,
-            output_amount,
+            net_proceeds,
+            base_volume,
+            quote_volume,
             integrator_fee,
             pool_fee,
             starts_in_bonding_curve,
