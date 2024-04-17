@@ -115,13 +115,13 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
     longest_arg = max(len(a) for a, _ in args_and_comments)
     full_args: list[str] = []
     for arg, comment in args_and_comments:
-        full_args.append(f"{arg:<{longest_arg}}{comment}")
+        full_args.append(f"{arg:<{longest_arg}}{comment}")  # noqa E231
     return_close = f"{TAB*2}]"
 
     # Generate the zeroed hex string. This results in a vector of vectors,
     # all containing a single value `0`.
     zeroes = ", ".join(["0"] * len(args_and_comments))
-    zeroed_hex_str = f"{TAB*2}vector<u8> [ {zeroes} ]"
+    zeroed_hex_str = f"{TAB*2}vector<u8> [ {zeroes} ]"  # noqa E201,E202
 
     return "\n".join(
         [

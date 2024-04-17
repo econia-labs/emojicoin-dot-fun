@@ -1,8 +1,8 @@
 # cspell:words texttt
-from math import sqrt
+from math import isclose, sqrt
 
-A = 1_000_000.0
-R = 1.5**2
+A = 100_000.0
+R = 3.5**2
 T = 10_000.0
 
 F_P = 25.0
@@ -18,8 +18,8 @@ def get_q_r_c(m_a, c_e, p_s):
     return m_a - c_e * p_s
 
 
-def get_r_e(m_a, c_e, p_s):
-    return (m_a - c_e * p_s) / p_s
+def get_r_e(A, T):
+    return A * T
 
 
 def get_s_e(m_a, p_s):
@@ -34,8 +34,8 @@ def get_q_v_f(m_a, c_e, p_s):
     return ((m_a - c_e * p_s) ** 2) / (2 * c_e * p_s - m_a)
 
 
-def get_b_v_c(m_a, c_e, p_s):
-    return (c_e**2) * p_s / (2 * c_e * p_s - m_a)
+def get_b_v_c(A, R, T):
+    return A * T * R / (sqrt(R) - 1)
 
 
 def get_q_v_c(m_a, c_e, p_s):
@@ -55,11 +55,11 @@ def get_L_i(m_a, c_e, p_s):
 
 
 q_r_c = get_q_r_c(M_A, C_E, P_S)
-r_e = get_r_e(M_A, C_E, P_S)
+r_e = get_r_e(A, T)
 s_e = get_s_e(M_A, P_S)
 b_v_f = get_b_v_f(M_A, C_E, P_S)
 q_v_f = get_q_v_f(M_A, C_E, P_S)
-b_v_c = get_b_v_c(M_A, C_E, P_S)
+b_v_c = get_b_v_c(A, R, T)
 q_v_c = get_q_v_c(M_A, C_E, P_S)
 d_p = get_d_p(M_A, C_E, P_S)
 p_l = get_p_l(M_A, C_E, P_S)
@@ -85,18 +85,28 @@ def print_latex_nominals(vars):
             assert val.is_integer()
             val = f"{int(var[1]):,}"  # noqa: E231
         else:
-            val = f"{var[1]:.10f}"  # noqa: E231
+            val = f"{var[1]:,.15f}"  # noqa: E231
         print(f"${var[0]}$ & {val} \\\\ \\hline")
     print()
 
 
-def print_latex_constants(vars):
+def print_constants(vars):
+    vals = []
     for var in vars:
-        assert var[1].is_integer()
-        val = int(var[1]) * SCALE_TO_SUBUNITS
+        if var[0] != "LP_TOKENS_INITIAL":
+            assert var[1].is_integer()
+        val = var[1]
+        if var[0] != "POOL_FEE_RATE_BPS":
+            val = val * SCALE_TO_SUBUNITS
+        val = int(val)
+        vals.append(val)
         left_col = f"\\texttt{{{var[0]}}} &"
         right_col = f"\\texttt{{{val:_}}} \\\\ \\hline"  # noqa: E231
         print((left_col + right_col).replace("_", "\\_"))
+    print()
+    for var, val in zip(vars, vals):
+        var_type = "u8" if var[0] == "POOL_FEE_RATE_BPS" else "u64"
+        print(f"const {var[0]}: {var_type} = {val:_};")  # noqa: E231,E702
 
 
 print_vars(
@@ -151,7 +161,7 @@ print_latex_nominals(
         ["d_\\%", d_p, False],
         ["p_s = p_h", P_S, False],
         ["p_l", p_l, False],
-        ["L_i", L_i],
+        ["L_i", L_i, False],
         ["f_p", F_P],
         ["b_{v, f}", b_v_f],
         ["q_{v, f}", q_v_f],
@@ -160,7 +170,7 @@ print_latex_nominals(
     ]
 )
 
-print_latex_constants(
+print_constants(
     [
         ["MARKET_CAP", M_A],
         ["EMOJICOIN_REMAINDER", r_e],
@@ -179,20 +189,20 @@ print_latex_constants(
 )
 
 # Check assorted systems of equations.
-assert q_r_c / P_S == r_e
+assert isclose(q_r_c / P_S, r_e)
 assert P_S == M_A / (C_E + r_e)
 assert s_e == C_E + r_e
-assert r_e == q_r_c / P_S
+assert isclose(r_e, q_r_c / P_S)
 assert (C_E + b_v_f) * q_v_f == b_v_f * (q_r_c + q_v_f)
 assert q_v_c / b_v_f == P_S
 assert q_v_c * b_v_f == q_v_f * b_v_c
 assert b_v_c == C_E + b_v_f
 assert q_v_c == q_r_c + q_v_f
-assert p_l == q_v_f / b_v_c
+assert isclose(p_l, q_v_f / b_v_c)
 assert C_E == (b_v_c * q_r_c) / (q_v_f + q_r_c)
 assert q_r_c == (C_E * q_v_c) / (b_v_f + C_E)
-assert L_i == sqrt(q_r_c * r_e)
-assert A == 1 / P_S
-assert P_S / p_l == R
+assert isclose(L_i, sqrt(q_r_c * r_e))
+assert isclose(A, 1 / P_S)
+assert isclose(P_S / p_l, R)
 assert T == q_r_c
 assert d_p == C_E / s_e * 100

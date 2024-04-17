@@ -255,24 +255,24 @@ Nominal implementation values are given in table
   \centering
   \begin{tabular}{|c|c|}
     \hline \rowcolor{blue}
-    Term             & Amount            \\ \hline
-    $A$              & 1,000,000         \\ \hline
-    $R$              & 2.25              \\ \hline
-    $T = q_{r ,c}$   & 10,000            \\ \hline
-    $m_a$            & 25,000            \\ \hline
-    $c_e = b_{r, c}$ & 15,000,000,000    \\ \hline
-    $r_e$            & 10,000,000,000    \\ \hline
-    $s_e$            & 25,000,000,000    \\ \hline
-    $d_\%$           & 60                \\ \hline
-    $p_s = p_h$      & 0.000001          \\ \hline
+    Term             & Amount              \\ \hline
+    $A$              & 100,000             \\ \hline
+    $R$              & 12.25               \\ \hline
+    $T = q_{r ,c}$   & 10,000              \\ \hline
+    $m_a$            & 45,000              \\ \hline
+    $c_e = b_{r, c}$ & 3,500,000,000       \\ \hline
+    $r_e$            & 1,000,000,000       \\ \hline
+    $s_e$            & 4,500,000,000       \\ \hline
     \rule{0pt}{10pt} % https://tex.stackexchange.com/a/387263.
-    $p_l$            & $0.000000\bar{4}$ \\ \hline
-    $L_i$            & 10,000,000        \\ \hline
-    $f_p$            & 25                \\ \hline
-    $b_{v, f}$       & 30,000,000,000    \\ \hline
-    $q_{v, f}$       & 20,000            \\ \hline
-    $b_{v, c}$       & 45,000,000,000    \\ \hline
-    $q_{v, c}$       & 30,000            \\ \hline
+    $d_\%$           & $77.\bar{7}$        \\ \hline
+    $p_s = p_h$      & 0.00001             \\ \hline
+    $p_l$            & 0.0000008163 \ldots \\ \hline
+    $L_i$            & 3,162,277.66 \ldots \\ \hline
+    $f_p$            & 25                  \\ \hline
+    $b_{v, f}$       & 1,400,000,000       \\ \hline
+    $q_{v, f}$       & 4,000               \\ \hline
+    $b_{v, c}$       & 4,900,000,000       \\ \hline
+    $q_{v, c}$       & 14,000              \\ \hline
   \end{tabular}
   \caption{Nominal implementation values}
   \label{tab:nominal-implementation-values}
@@ -311,20 +311,20 @@ Applying the same scale factor across variables produces the integer values in t
   \centering
   \begin{tabular}{|c|c|}
     \hline \rowcolor{blue}
-    Constant                         & Amount                                   \\ \hline
-    \texttt{MARKET\_CAP}             & \texttt{2\_500\_000\_000\_000}           \\ \hline
-    \texttt{EMOJICOIN\_REMAINDER}    & \texttt{1\_000\_000\_000\_000\_000\_000} \\ \hline
-    \texttt{EMOJICOIN\_SUPPLY}       & \texttt{2\_500\_000\_000\_000\_000\_000} \\ \hline
-    \texttt{LP\_TOKENS\_INITIAL}     & \texttt{1\_000\_000\_000\_000\_000}      \\ \hline
-    \texttt{BASE\_REAL\_FLOOR}       & \texttt{0}                               \\ \hline
-    \texttt{QUOTE\_REAL\_FLOOR}      & \texttt{0}                               \\ \hline
-    \texttt{BASE\_REAL\_CEILING}     & \texttt{1\_500\_000\_000\_000\_000\_000} \\ \hline
-    \texttt{QUOTE\_REAL\_CEILING}    & \texttt{1\_000\_000\_000\_000}           \\ \hline
-    \texttt{BASE\_VIRTUAL\_FLOOR}    & \texttt{3\_000\_000\_000\_000\_000\_000} \\ \hline
-    \texttt{QUOTE\_VIRTUAL\_FLOOR}   & \texttt{2\_000\_000\_000\_000}           \\ \hline
-    \texttt{BASE\_VIRTUAL\_CEILING}  & \texttt{4\_500\_000\_000\_000\_000\_000} \\ \hline
-    \texttt{QUOTE\_VIRTUAL\_CEILING} & \texttt{3\_000\_000\_000\_000}           \\ \hline
-    \texttt{POOL\_FEE\_RATE\_BPS}    & \texttt{2\_500\_000\_000}                \\ \hline
+    Constant                         & Amount                                \\ \hline
+    \texttt{MARKET\_CAP}             & \texttt{4\_500\_000\_000\_000}        \\ \hline
+    \texttt{EMOJICOIN\_REMAINDER}    & \texttt{100\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{EMOJICOIN\_SUPPLY}       & \texttt{450\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{LP\_TOKENS\_INITIAL}     & \texttt{316\_227\_766\_016\_837}      \\ \hline
+    \texttt{BASE\_REAL\_FLOOR}       & \texttt{0}                            \\ \hline
+    \texttt{QUOTE\_REAL\_FLOOR}      & \texttt{0}                            \\ \hline
+    \texttt{BASE\_REAL\_CEILING}     & \texttt{350\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_REAL\_CEILING}    & \texttt{1\_000\_000\_000\_000}        \\ \hline
+    \texttt{BASE\_VIRTUAL\_FLOOR}    & \texttt{140\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_VIRTUAL\_FLOOR}   & \texttt{400\_000\_000\_000}           \\ \hline
+    \texttt{BASE\_VIRTUAL\_CEILING}  & \texttt{490\_000\_000\_000\_000\_000} \\ \hline
+    \texttt{QUOTE\_VIRTUAL\_CEILING} & \texttt{1\_400\_000\_000\_000}        \\ \hline
+    \texttt{POOL\_FEE\_RATE\_BPS}    & \texttt{25}                           \\ \hline
   \end{tabular}
   \caption{Integer implementation values}
   \label{tab:integer-implementation-values}
@@ -524,45 +524,45 @@ Let $b_0$ and $q_0$ represent base and quote reserves before a swap, and $b_f$ a
 represent reserves after a swap. For a feeless swap buy:
 
 \begin{align}
-  b_0 \cdot q_0                & = b_f \cdot q_f \nonumber                         \\
-  b_0 \cdot q_0                & = (b_0 - b_{out}) \cdot (q_0 + q_{in}) \nonumber  \\
+  b_0 \cdot q_0                & = b_f \cdot q_f \nonumber                        \\
+  b_0 \cdot q_0                & = (b_0 - b_{out}) \cdot (q_0 + q_{in}) \nonumber \\
   b_0 \cdot q_0                & = b_0 \cdot q_0 + b_0 \cdot q_{in} - b_{out}
-  \cdot q_0 - b_{out} \cdot q_{in} \nonumber                                       \\
+  \cdot q_0 - b_{out} \cdot q_{in} \nonumber                                      \\
   b_0 \cdot q_0                & = b_0 \cdot q_0 + b_0 \cdot q_{in} -
-  b_{out} \cdot (q_0 + q_{in}) \nonumber                                           \\
-  b_{out} \cdot (q_0 + q_{in}) & = b_0 \cdot q_{in} \nonumber                      \\
-  b_{out}                      & = \frac{b_0 \cdot q_{in}}{q_0 + q_{in}} \nonumber \\
+  b_{out} \cdot (q_0 + q_{in}) \nonumber                                          \\
+  b_{out} \cdot (q_0 + q_{in}) & = b_0 \cdot q_{in} \nonumber                     \\
+  b_{out}                      & = \frac{b_0 \cdot q_{in}}{q_0 + q_{in}}
 \end{align}
 
 For a feeless swap sell:
 
 \begin{align}
-  b_0 \cdot q_0               & = b_f q_f \nonumber                               \\
-  b_0 \cdot q_0               & = (b_0 + b_{in}) \cdot (q_0 - q_{out}) \nonumber  \\
+  b_0 \cdot q_0               & = b_f q_f \nonumber                              \\
+  b_0 \cdot q_0               & = (b_0 + b_{in}) \cdot (q_0 - q_{out}) \nonumber \\
   b_0 \cdot q_0               & = b_0 \cdot q_0 - b_0 \cdot q_{out} +
-  b_{in} \cdot q_0 - b_{in} \cdot q_{out} \nonumber                               \\
+  b_{in} \cdot q_0 - b_{in} \cdot q_{out} \nonumber                              \\
   b_0 \cdot q_0               & = b_0 \cdot q_0 + b_{in} \cdot q_0 -
-  q_{out} \cdot(b_0 + b_{in}) \nonumber                                           \\
-  q_{out} \cdot(b_0 + b_{in}) & = b_{in} \cdot q_0 \nonumber                      \\
-  q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}} \nonumber \\
+  q_{out} \cdot(b_0 + b_{in}) \nonumber                                          \\
+  q_{out} \cdot(b_0 + b_{in}) & = b_{in} \cdot q_0 \nonumber                     \\
+  q_{out}                     & = \frac{b_{in} \cdot q_0}{b_0 + b_{in}}
 \end{align}
 
 \subsection{Alternative economic variable selection} \label{sec:alt-vars}
 
 Define the inverse of spot price, roughly interpreted as the number of emojicoins that 1
-\texttt{APT} will buy at the \gls*{st} $A$:
+\texttt{APT} will buy at the \gls*{st}, $A$:
 
 \begin{equation} \label{eqn:alt-define-a}
   A = \frac{1}{p_s}
 \end{equation}
 
-Define the ratio of bonding curve price endpoints $R$:
+Define the ratio of bonding curve price endpoints, $R$:
 
 \begin{equation} \label{eqn:alt-define-r}
   R = \frac{p_s}{p_l}
 \end{equation}
 
-Define the total amount of \texttt{APT} required to initiate a \gls*{st} $T$:
+Define the total amount of \texttt{APT} required to initiate the \gls*{st}, $T$:
 
 \begin{equation} \label{eqn:alt-define-t}
   T = q_{r, c}
@@ -625,6 +625,32 @@ that is always met:
   1                      & < \sqrt{R} \nonumber                \\
   \sqrt{R}               & > 1 \nonumber                       \\
   R                      & > 1
+\end{align}
+
+To avoid numerical issues during calculations in a script or similar, substitute
+(\ref{eqn:alt-define-t}) and (\ref{eqn:alt-solve-p-s}) into (\ref{eqn:remainder-1}):
+
+\begin{align}
+  r_e & = \frac{q_{r, c}}{p_s} \nonumber  \\
+  r_e & = \frac{T}{\frac{1}{A}} \nonumber \\
+  r_e & = A \cdot T
+\end{align}
+
+Similarly, substitute (\ref{eqn:alt-solve-c-e}), (\ref{eqn:alt-solve-p-s}), and
+(\ref{eqn:alt-solve-m-a}) into (\ref{eqn:bonding-curve-8}):
+
+\begin{align}
+  b_{v, c} & = \frac{c_e ^ 2 \cdot p_s}{2 \cdot c_e \cdot p_s - m_a} \nonumber       \\
+  b_{v, c} & =
+  \frac{(A \cdot T \cdot \sqrt{R}) ^ 2 \cdot \frac{1}{A}}
+  {2 \cdot (A \cdot T \cdot \sqrt{R}) \cdot
+  \frac{1}{A} - T \cdot (1 + \sqrt{R})} \nonumber                                    \\
+  b_{v, c} & = \frac{A^2 \cdot T^2 \cdot R \cdot \frac{1}{A}}
+  {2 \cdot T \cdot \sqrt{R} - T \cdot (1 + \sqrt{R})} \nonumber                      \\
+  b_{v, c} & = \frac{A \cdot T^2 \cdot R}
+  {T \cdot(2 \cdot \sqrt{R} - (1 + \sqrt{R}))} \nonumber                             \\
+  b_{v, c} & = \frac{A \cdot T \cdot R}{2 \cdot \sqrt{R} - (1 + \sqrt{R})} \nonumber \\
+  b_{v, c} & = \frac{A \cdot T \cdot R}{\sqrt{R} - 1}
 \end{align}
 
 \subsection{Initial \gls*{lp} tokens} \label{sec:initial-lp-tokens}
