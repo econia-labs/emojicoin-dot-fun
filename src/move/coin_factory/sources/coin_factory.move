@@ -89,4 +89,9 @@ module coin_factory::coin_factory {
 
         (burn_cap, freeze_cap, mint_cap)
     }
+
+    #[test]
+    fun test_emojicoin_supply() {
+        assert!(EMOJICOIN_SUPPLY == emojicoin_dot_fun::get_EMOJICOIN_SUPPLY(), 0);
+    }
 }

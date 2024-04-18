@@ -508,6 +508,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
+    #[test_only]
+    public fun get_EMOJICOIN_SUPPLY(): u64 {
+        EMOJICOIN_SUPPLY
+    }
+
     #[test]
     fun test_cpamm_simple_swap_output_amount() {
         // Buy all base from start of bonding curve.
