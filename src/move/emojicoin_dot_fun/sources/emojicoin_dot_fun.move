@@ -297,8 +297,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
 
         // Transfer coins.
-        coin::transfer<B>(&market_signer, provider_address, event.base_amount);
-        coin::transfer<Q>(&market_signer, provider_address, event.quote_amount);
+        let base_total = event.base_amount + event.pro_rata_base_donation_claim_amount;
+        let quote_total = event.quote_amount + event.pro_rata_quote_donation_claim_amount;
+        coin::transfer<B>(&market_signer, provider_address, base_total);
+        coin::transfer<Q>(&market_signer, provider_address, quote_total);
 
         // Burn coins by first withdrawing them from provider's coin store, to trigger event.
         let lp_coins = coin::withdraw<LP>(provider, event.lp_coin_amount);
