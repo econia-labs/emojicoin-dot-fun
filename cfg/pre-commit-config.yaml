@@ -1,11 +1,11 @@
-# cspell:words autofix
-# cspell:words autoflake
-# cspell:words isort
-# cspell:words latexindent
-# cspell:words markdownlint
-# cspell:words mdformat
-# cspell:words mypy
-# cspell:words shfmt
+# cspell:word autofix
+# cspell:word autoflake
+# cspell:word isort
+# cspell:word latexindent
+# cspell:word markdownlint
+# cspell:word mdformat
+# cspell:word mypy
+# cspell:word shfmt
 ---
 repos:
 -

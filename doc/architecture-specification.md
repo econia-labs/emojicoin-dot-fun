@@ -6,6 +6,15 @@ interpreted as described in [RFC 2119].
 
 These keywords `SHALL` be in `monospace` for ease of identification.
 
+## Terminology
+
+1. Price `SHALL` be interpreted as a ratio of quote to base.
+1. Volume `SHALL` be interpreted in terms of the net proceeds to transactional
+   counterparties, independent of fees: base volume `SHALL` be interpreted as
+   the swapper's net proceeds in a buy, or the amount deposited into the market
+   in a sell; quote volume `SHALL` be interpreted as the swapper's net proceeds
+   in a sell, or the amount deposited into the market in a buy.
+
 ## General mechanism
 
 1. Each emojicoin market `SHALL` be denominated in `APT`.
@@ -49,7 +58,6 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 1. Simulation functions `SHALL` be paired with simulation commitment functions
    such that results can be applied during runtime, using the same logic as
    view function indexing functions.
-1. Price `SHALL` be indexed as a ratio of quote to base.
 1. Events `SHALL` include timestamps for chronological indexing.
 1. Events `SHALL` include information for fees charged, accumulated at the
    market and global level.
