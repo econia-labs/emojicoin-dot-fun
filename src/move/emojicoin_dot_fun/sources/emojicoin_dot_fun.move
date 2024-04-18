@@ -172,8 +172,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             coin::transfer<Q>(swapper, market_address, transfer_from_swapper_to_market);
             coin::transfer<B>(&market_signer, swapper_address, event.output_amount);
             if (event.results_in_state_transition) {
-                let lp_coins = lp_coin_manager::mint<B, LP>(&market_signer, LP_TOKENS_INITIAL);
-                coin::deposit<LP>(market_address, lp_coins);
+                mint_and_deposit_lp_coins<B, LP>(market_ref_mut, LP_TOKENS_INITIAL, market_address);
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
                 let quote_to_transition = QUOTE_REAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
                 let quote_into_cpamm = transfer_from_swapper_to_market - quote_to_transition;
@@ -218,7 +217,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[view]
-    public fun is_supported_emoji(hex_bytes: vector<u8>): bool acquires Registry, RegistryAddress {
+    /// Checks if an individual emoji is supported. Note that this does *not*
+    /// check if multiple concatenated emojis are valid.
+    public fun is_a_supported_emoji(hex_bytes: vector<u8>): bool acquires Registry, RegistryAddress {
         let registry_address = borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address;
         let registry = borrow_global<Registry>(registry_address);
         smart_table::contains(&registry.supported_emojis, hex_bytes)
@@ -301,33 +302,35 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             return (false, b"")
         };
 
-        // Concatenate all emoji bytes into a single byte vector.
-        let emoji_bytes: vector<u8> = vector::empty();
+        let (is_well_formed, symbol_bytes) = ensure_multiple_emojis_well_formed(emojis);
 
-        // `while` because `vector::for_each` doesn't support `return` yet.
-        let i = 0;
-        while (i < num_emojis) {
-            let emoji = *vector::borrow(&emojis, i);
-            vector::append(&mut emoji_bytes, emoji);
-            if (!is_supported_emoji(emoji)) {
-                return (false, b"")
-            };
-            i = i + 1;
+        if (!is_well_formed) {
+            return (false, b"")
         };
 
-        let opt_market_address = get_market_address(emoji_bytes);
+        let opt_market_address = get_market_address(symbol_bytes);
         let is_registered_market = option::is_some(&opt_market_address);
 
-        let utf8_bytes = bcs::to_bytes(&emoji_bytes);
-        let emoji_utf8_string = string::utf8(utf8_bytes);
-        let emoji_str_length = string::length(&emoji_utf8_string);
-        let symbol_too_long = emoji_str_length > (MAX_SYMBOL_LENGTH as u64);
+        let utf8_bytes = bcs::to_bytes(&symbol_bytes);
+        let utf8_string = string::utf8(utf8_bytes);
+        let symbol_length = string::length(&utf8_string);
+        let symbol_too_long = symbol_length > (MAX_SYMBOL_LENGTH as u64);
 
         if (symbol_too_long || is_registered_market) {
             return (false, b"")
         };
 
-        (true, emoji_bytes)
+        (true, symbol_bytes)
+    }
+
+    inline fun mint_and_deposit_lp_coins<T_Emojicoin, T_EmojicoinLP>(
+        market_ref: &Market,
+        amount: u64,
+        to: address,
+    ) {
+        let market_signer = object::generate_signer_for_extending(&market_ref.extend_ref);
+        let lp_coins = lp_coin_manager::mint<T_Emojicoin, T_EmojicoinLP>(&market_signer, amount);
+        aptos_account::deposit_coins<T_EmojicoinLP>(to, lp_coins);
     }
 
     inline fun simulate_swap_inner(
@@ -440,6 +443,26 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (result as u64)
     }
 
+    inline fun ensure_multiple_emojis_well_formed(emojis: vector<vector<u8>>): (bool, vector<u8>) {
+        let well_formed = true;
+        let emoji_bytes = vector<u8> [];
+
+        for (i in 0..vector::length(&emojis)) {
+            let emoji = *vector::borrow(&emojis, i);
+            vector::append(&mut emoji_bytes, emoji);
+            if (!is_a_supported_emoji(emoji)) {
+                well_formed = false;
+                break
+            };
+        };
+
+        if (!well_formed) {
+            (false, b"")
+        } else {
+            (true, emoji_bytes)
+        }
+    }
+
     #[test]
     fun test_cpamm_simple_swap_output_amount() {
         // Buy all base from start of bonding curve.
@@ -455,6 +478,31 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test, expected_failure(abort_code = E_SWAP_DIVIDE_BY_ZERO)]
     fun test_cpamm_simple_swap_output_amount_divide_by_zero() {
         cpamm_simple_swap_output_amount(0, true, Reserves { base: 0, quote: 16});
+    }
+
+    #[test(deployer = @emojicoin_dot_fun)]
+    fun test_happy_path_lp_mint(deployer: &signer) acquires Registry, RegistryAddress {
+        aptos_account::create_account(@emojicoin_dot_fun);
+        init_module(deployer);
+        let emoji_bytes = vector<vector<u8>> [
+            x"f09fa5ba",
+            x"f09fa594",
+        ];
+
+        register_market(deployer, emoji_bytes);
+
+        let (well_formed, symbol_bytes) = ensure_multiple_emojis_well_formed(emoji_bytes);
+        assert!(well_formed, 0);
+
+        let market_address_opt = get_market_address(symbol_bytes);
+        assert!(option::is_some(&market_address_opt), 0);
+        let market_address = option::extract(&mut market_address_opt);
+        let market = borrow_global<Market>(market_address);
+
+        // mint_and_deposit_lp_coins<B, LP>(market_ref_mut, LP_TOKENS_INITIAL, market_address);
+        // In order to finish this function, we first need to add dummy Emojicoin/EmojicoinLP
+        // coins, published in dummy packages adjacent to this module. Otherwise we will not have
+        // access to the types necessary to call `mint_and_deposit_lp_coins<E, E_LP>`.
     }
 
     #[test]
@@ -484,17 +532,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             x"f09fa490",         // Zipper mouth face, 1F910.
         ];
         vector::for_each(various_emojis, |bytes| {
-            assert!(is_supported_emoji(bytes), 0);
+            assert!(is_a_supported_emoji(bytes), 0);
         });
 
         // Test unsupported emojis.
-        assert!(!is_supported_emoji(x"0000"), 0);
-        assert!(!is_supported_emoji(x"fe0f"), 0);
-        assert!(!is_supported_emoji(x"1234"), 0);
-        assert!(!is_supported_emoji(x"f0fabcdefabcdeff0f"), 0);
-        assert!(!is_supported_emoji(x"f0beefcafef0"), 0);
+        assert!(!is_a_supported_emoji(x"0000"), 0);
+        assert!(!is_a_supported_emoji(x"fe0f"), 0);
+        assert!(!is_a_supported_emoji(x"1234"), 0);
+        assert!(!is_a_supported_emoji(x"f0fabcdefabcdeff0f"), 0);
+        assert!(!is_a_supported_emoji(x"f0beefcafef0"), 0);
         // Minimally qualified "head shaking horizontally".
-        assert!(!is_supported_emoji(x"f09f9982e2808de28694"), 0);
+        assert!(!is_a_supported_emoji(x"f09f9982e2808de28694"), 0);
     }
 
 }

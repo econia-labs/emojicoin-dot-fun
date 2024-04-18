@@ -17,10 +17,6 @@ module coin_factory::coin_factory {
 
     const EMOJICOIN_LP_STRING: vector<u8> = b" emojicoin LP";
 
-    struct Coins has key {
-        coins: coin::Coin<Emojicoin>,
-    }
-
     // Note that by virtue of how publishing modules works, the @coin_factory
     // address will always be equal to the signer passed into `init_module`,
     // so we do not need to check it.
