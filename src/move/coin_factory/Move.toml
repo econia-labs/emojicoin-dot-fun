@@ -1,20 +1,23 @@
+# cspell:words beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef
+# cspell:words f00000000000000000000000000000000000000000000000000000000000000d
+
 [addresses]
 coin_factory = "_"
-emojicoin_dot_fun = "_"
-fee_receiver = "_"
+lp_coin_manager = "_"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
-[dependencies.EmojicoinDotFun]
-local = "../emojicoin_dot_fun"
+[dependencies.LPCoinManager]
+local = "../lp_coin_manager"
 
 [dev-addresses]
-coin_factory = "0xc000de"
-emojicoin_dot_fun = "0xc0de"
-fee_receiver = "0xfeeeeed00d"
+# These addresses are not valid, they are solely for easily finding
+# and replacing named addresses in the compiled bytecode.
+coin_factory = "beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef"
+lp_coin_manager = "f00000000000000000000000000000000000000000000000000000000000000d"
 
 [package]
 name = "CoinFactory"

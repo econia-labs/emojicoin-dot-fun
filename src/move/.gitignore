@@ -2,4 +2,4 @@
 *.mvcov
 *.trace
 **/build/
-coin_factory/*.json
+**/coin_factory/json

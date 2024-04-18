@@ -1,7 +1,7 @@
 // cspell:words blackpaper
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
-    use aptos_framework::coin::{Self, MintCapability, BurnCapability};
+    use aptos_framework::coin::{Self};
     use aptos_framework::code;
     use aptos_framework::event;
     use aptos_framework::aptos_account;
@@ -9,6 +9,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::hex_codes;
+    use lp_coin_manager::lp_coin_manager;
+    use std::bcs;
     use std::string;
     use std::vector;
     use std::option::{Self, Option};
@@ -20,7 +22,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
 
     // Denominated in AptosCoin.
-    const REGISTER_MARKET_FEE: u64 = 1;
+    const REGISTER_MARKET_FEE: u64 = 10_000_000;
 
     // Generated automatically by blackpaper calculations script.
     const MARKET_CAP: u64 = 4_500_000_000_000;
@@ -47,12 +49,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     struct Reserves has copy, drop, store {
         base: u64,
         quote: u64,
-    }
-
-    #[resource_group = ObjectGroup]
-    struct LPCoinCapabilities<phantom CoinType> has key {
-        mint: MintCapability<CoinType>,
-        burn: BurnCapability<CoinType>,
     }
 
     #[resource_group = ObjectGroup]
@@ -104,8 +100,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // NOTE: Do not silently return after here; the rest of this function has side effects.
 
-        aptos_account::transfer(sender, @fee_receiver, REGISTER_MARKET_FEE);
-
         // Create the named Market object.
         let registry = borrow_global<Registry>(get_registry_address());
         let market_signer = object::generate_signer_for_extending(&registry.extend_ref);
@@ -118,6 +112,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // by the coin.move module.
         aptos_account::create_account(market_address);
 
+        create_market_and_add_to_registry(
+            &market_obj_signer,
+            market_address,
+            emoji_bytes,
+            market_extend_ref,
+        );
+
         // Interpolate the Market object address and emoji symbol bytes into the
         // coin_factory.move bytecode, then use that bytecode to publish the module
         // with the market object's signer.
@@ -128,13 +129,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             emoji_bytes,
         );
 
-        create_market_and_add_to_registry(
-            &market_obj_signer,
-            market_address,
-            emoji_bytes,
-            market_extend_ref,
-        );
-
         code::publish_package_txn(
             &market_obj_signer,
             metadata_bytecode,
@@ -143,7 +137,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     }
 
-    public entry fun swap<B, Q>(
+    public entry fun swap<B, Q, LP>(
         swapper: &signer,
         input_amount: u64,
         input_is_base: bool,
@@ -178,9 +172,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             coin::transfer<Q>(swapper, market_address, transfer_from_swapper_to_market);
             coin::transfer<B>(&market_signer, swapper_address, event.output_amount);
             if (event.results_in_state_transition) {
-                //
-                // Mint `LP_TOKENS_INITIAL` tokens to the market's `CoinStore`.
-                //
+                let lp_coins = lp_coin_manager::mint<B, LP>(&market_signer, LP_TOKENS_INITIAL);
+                coin::deposit<LP>(market_address, lp_coins);
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
                 let quote_to_transition = QUOTE_REAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
                 let quote_into_cpamm = transfer_from_swapper_to_market - quote_to_transition;
@@ -200,21 +193,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             };
         };
         event::emit(event);
-    }
-
-    // Intended to be called from `coin_factory`, this function facilitates
-    // storing the LP Coin capabilities atomically when the coin factory
-    // module is initialized.
-    public fun store_capabilities<T>(
-        market_obj_signer: &signer,
-        burn_capability: BurnCapability<T>,
-        mint_capability: MintCapability<T>,
-    ) {
-        assert!(exists<Market>(signer::address_of(market_obj_signer)), E_NO_MARKET);
-        move_to(market_obj_signer, LPCoinCapabilities<T> {
-            mint: mint_capability,
-            burn: burn_capability,
-        });
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
@@ -340,7 +318,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let opt_market_address = get_market_address(emoji_bytes);
         let is_registered_market = option::is_some(&opt_market_address);
 
-        let emoji_utf8_string = string::utf8(emoji_bytes);
+        let utf8_bytes = bcs::to_bytes(&emoji_bytes);
+        let emoji_utf8_string = string::utf8(utf8_bytes);
         let emoji_str_length = string::length(&emoji_utf8_string);
         let symbol_too_long = emoji_str_length > (MAX_SYMBOL_LENGTH as u64);
 
