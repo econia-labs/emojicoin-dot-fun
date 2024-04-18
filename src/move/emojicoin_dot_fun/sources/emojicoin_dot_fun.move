@@ -1,4 +1,3 @@
-// cspell:words blackpaper
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_framework::coin::{Self};
@@ -21,8 +20,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
 
-    // Denominated in AptosCoin.
-    const REGISTER_MARKET_FEE: u64 = 10_000_000;
+    /// Denominated in AptosCoin.
+    const REGISTER_MARKET_FEE: u64 = 100_000_000;
 
     // Generated automatically by blackpaper calculations script.
     const MARKET_CAP: u64 = 4_500_000_000_000;
@@ -39,11 +38,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const QUOTE_VIRTUAL_CEILING: u64 = 1_400_000_000_000;
     const POOL_FEE_RATE_BPS: u8 = 25;
 
-    // Swap results in attempted divide by zero.
+    /// Swap results in attempted divide by zero.
     const E_SWAP_DIVIDE_BY_ZERO: u64 = 0;
-    // No input amount provided for swap.
+    /// No input amount provided for swap.
     const E_SWAP_INPUT_ZERO: u64 = 1;
-    // No market exists at the given address.
+    /// No market exists at the given address.
     const E_NO_MARKET: u64 = 2;
 
     struct Reserves has copy, drop, store {
@@ -78,7 +77,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         input_is_base: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
-        output_amount: u64,
+        net_proceeds: u64,
+        base_volume: u64,
+        quote_volume: u64,
         integrator_fee: u64,
         pool_fee: u64,
         starts_in_bonding_curve: bool,
@@ -156,41 +157,45 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             integrator_fee_rate_bps,
             market_ref_mut,
         );
+        let quote;
         if (input_is_base) { // If selling, no possibility of state transition.
             coin::transfer<B>(swapper, market_address, input_amount);
-            coin::transfer<Q>(&market_signer, integrator, event.integrator_fee);
-            coin::transfer<Q>(&market_signer, swapper_address, event.output_amount);
+            let quote_leaving_market = event.quote_volume + event.integrator_fee;
+            quote = coin::withdraw<Q>(&market_signer, quote_leaving_market);
+            let net_proceeds = coin::extract(&mut quote, event.quote_volume);
+            aptos_account::deposit_coins(swapper_address, net_proceeds);
             let reserves_ref_mut = if (event.starts_in_bonding_curve)
                 &mut market_ref_mut.clamm_virtual_reserves else
                 &mut market_ref_mut.cpamm_real_reserves;
             reserves_ref_mut.base = reserves_ref_mut.base + event.input_amount;
-            reserves_ref_mut.quote =
-                reserves_ref_mut.quote - event.integrator_fee - event.output_amount;
+            reserves_ref_mut.quote = reserves_ref_mut.quote - quote_leaving_market;
         } else { // If buying, might need to buy through the state transition.
-            coin::transfer<Q>(swapper, integrator, event.integrator_fee);
-            let transfer_from_swapper_to_market = input_amount - event.integrator_fee;
-            coin::transfer<Q>(swapper, market_address, transfer_from_swapper_to_market);
-            coin::transfer<B>(&market_signer, swapper_address, event.output_amount);
-            if (event.results_in_state_transition) {
+            quote = coin::withdraw<Q>(swapper, input_amount);
+            coin::deposit(market_address, coin::extract(&mut quote, event.quote_volume));
+            aptos_account::transfer_coins<B>(&market_signer, swapper_address, event.base_volume);
+            if (event.results_in_state_transition) { // Buy with state transition.
                 mint_and_deposit_lp_coins<B, LP>(market_ref_mut, LP_TOKENS_INITIAL, market_address);
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
-                let quote_to_transition = QUOTE_REAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
-                let quote_into_cpamm = transfer_from_swapper_to_market - quote_to_transition;
-                let base_out_of_cpamm = event.output_amount - clamm_virtual_reserves_ref_mut.base;
+                let quote_to_transition =
+                    QUOTE_VIRTUAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
+                let base_left_in_clamm = clamm_virtual_reserves_ref_mut.base - BASE_VIRTUAL_FLOOR;
+                let quote_into_cpamm = event.quote_volume - quote_to_transition;
+                let base_out_of_cpamm = event.base_volume - base_left_in_clamm;
                 clamm_virtual_reserves_ref_mut.base = 0;
                 clamm_virtual_reserves_ref_mut.quote = 0;
                 let cpamm_real_reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
                 cpamm_real_reserves_ref_mut.base = EMOJICOIN_REMAINDER - base_out_of_cpamm;
                 cpamm_real_reserves_ref_mut.quote = QUOTE_REAL_CEILING + quote_into_cpamm;
-            } else {
+            } else { // Buy without state transition.
                 let reserves_ref_mut = if (event.starts_in_bonding_curve)
                     &mut market_ref_mut.clamm_virtual_reserves else
                     &mut market_ref_mut.cpamm_real_reserves;
-                reserves_ref_mut.base = reserves_ref_mut.base - event.output_amount;
-                reserves_ref_mut.quote = reserves_ref_mut.quote + transfer_from_swapper_to_market;
+                reserves_ref_mut.base = reserves_ref_mut.base - event.base_volume;
+                reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_volume;
 
             };
         };
+        aptos_account::deposit_coins(integrator, quote);
         event::emit(event);
     }
 
@@ -342,71 +347,70 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ): Swap {
         assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
         let starts_in_bonding_curve = market_ref.lp_token_supply == 0;
-        let output_amount;
+        let net_proceeds;
+        let base_volume;
+        let quote_volume;
         let integrator_fee;
         let pool_fee = 0;
         let results_in_state_transition = false;
         if (input_is_base) { // If selling, no possibility of state transition.
-            if (starts_in_bonding_curve) { // Selling to bonding curve.
-                let quote_output_before_integrator_fee = cpamm_simple_swap_output_amount(
+            let amm_quote_output;
+            if (starts_in_bonding_curve) { // Selling to CLAMM only.
+                amm_quote_output = cpamm_simple_swap_output_amount(
                     input_amount,
                     input_is_base,
                     market_ref.clamm_virtual_reserves,
                 );
-                integrator_fee =
-                    get_bps_fee(quote_output_before_integrator_fee, integrator_fee_rate_bps);
-                output_amount = quote_output_before_integrator_fee - integrator_fee;
-            } else { // Selling to CPAMM.
-                let quote_output_before_fees = cpamm_simple_swap_output_amount(
+            } else { // Selling to CPAMM only.
+                amm_quote_output = cpamm_simple_swap_output_amount(
                     input_amount,
                     input_is_base,
                     market_ref.cpamm_real_reserves,
                 );
-                integrator_fee = get_bps_fee(quote_output_before_fees, integrator_fee_rate_bps);
-                pool_fee = get_bps_fee(quote_output_before_fees, POOL_FEE_RATE_BPS);
-                output_amount = quote_output_before_fees - integrator_fee - pool_fee;
-            }
+                pool_fee = get_bps_fee(amm_quote_output, POOL_FEE_RATE_BPS);
+            };
+            integrator_fee = get_bps_fee(amm_quote_output, integrator_fee_rate_bps);
+            base_volume = input_amount;
+            quote_volume = amm_quote_output - pool_fee - integrator_fee;
+            net_proceeds = quote_volume;
         } else { // If buying, there may be a state transition.
             integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
-            let quote_input_after_integrator_fee = input_amount - integrator_fee;
+            quote_volume = input_amount - integrator_fee;
             if (starts_in_bonding_curve) {
-                let quote_to_transition =
-                    QUOTE_REAL_CEILING - market_ref.cpamm_real_reserves.quote;
-                if (quote_input_after_integrator_fee < quote_to_transition) { // Staying in curve.
-                    output_amount = cpamm_simple_swap_output_amount(
-                        quote_input_after_integrator_fee,
+                let max_quote_volume_in_clamm =
+                    QUOTE_VIRTUAL_CEILING - market_ref.clamm_virtual_reserves.quote;
+                if (quote_volume < max_quote_volume_in_clamm) {
+                    base_volume = cpamm_simple_swap_output_amount(
+                        quote_volume,
                         input_is_base,
                         market_ref.clamm_virtual_reserves,
                     );
                 } else { // Max quote has been deposited to bonding curve.
                     results_in_state_transition = true;
                     // Clear out remaining base.
-                    output_amount = market_ref.cpamm_real_reserves.base;
-                    quote_input_after_integrator_fee =
-                        quote_input_after_integrator_fee - quote_to_transition;
-                    if (quote_input_after_integrator_fee > 0) { // Keep buying against CPAMM.
+                    base_volume = market_ref.clamm_virtual_reserves.base - BASE_VIRTUAL_FLOOR;
+                    let remaining_quote_volume = quote_volume - max_quote_volume_in_clamm;
+                    if (remaining_quote_volume > 0) { // Keep buying against CPAMM.
                         // Evaluate swap against CPAMM with newly locked liquidity.
-                        let base_output_from_pool_before_pool_fee = cpamm_simple_swap_output_amount(
-                            quote_input_after_integrator_fee,
+                        let cpamm_base_output = cpamm_simple_swap_output_amount(
+                            remaining_quote_volume,
                             input_is_base,
                             Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
                         );
-                        pool_fee =
-                            get_bps_fee(base_output_from_pool_before_pool_fee, POOL_FEE_RATE_BPS);
-                        let base_output_from_pool_after_pool_fee =
-                            base_output_from_pool_before_pool_fee - pool_fee;
-                        output_amount = output_amount + base_output_from_pool_after_pool_fee;
-                    }
-                }
+                        pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
+                        base_volume = base_volume + cpamm_base_output - pool_fee;
+                    };
+                };
             } else { // Buying from CPAMM only.
-                let output_amount_before_pool_fee = cpamm_simple_swap_output_amount(
-                    quote_input_after_integrator_fee,
+                let cpamm_base_output = cpamm_simple_swap_output_amount(
+                    quote_volume,
                     input_is_base,
                     market_ref.cpamm_real_reserves,
                 );
-                pool_fee = get_bps_fee(output_amount_before_pool_fee, POOL_FEE_RATE_BPS);
-                output_amount = output_amount_before_pool_fee - pool_fee;
-            }
+                pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
+                base_volume = cpamm_base_output - pool_fee;
+            };
+            net_proceeds = base_volume;
         };
         Swap {
             market_id: market_ref.market_id,
@@ -414,7 +418,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             input_is_base,
             integrator,
             integrator_fee_rate_bps,
-            output_amount,
+            net_proceeds,
+            base_volume,
+            quote_volume,
             integrator_fee,
             pool_fee,
             starts_in_bonding_curve,

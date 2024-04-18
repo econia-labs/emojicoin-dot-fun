@@ -1,4 +1,4 @@
-// # cspell:disable
+// cspell:ignoreRegExp /FA[ABCDEF]{2}/
 module emojicoin_dot_fun::hex_codes {
     use std::vector;
     use std::bcs;

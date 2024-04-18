@@ -2,11 +2,13 @@ aland
 aptos
 barthelemy
 bento
+blackpaper
 bouvet
 burkina
 caicos
 clamm
 clipperton
+counterparties
 cpamm
 cunha
 dango
