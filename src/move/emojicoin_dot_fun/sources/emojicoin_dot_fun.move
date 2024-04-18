@@ -1,10 +1,10 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
+    use aptos_framework::coin::{Self, Coin, MintCapability, BurnCapability, FreezeCapability};
+    use aptos_framework::code;
+    use aptos_framework::event;
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::{AptosCoin};
-    use aptos_framework::code;
-    use aptos_framework::coin::{Self, Coin, MintCapability, BurnCapability, FreezeCapability};
-    use aptos_framework::event;
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::hex_codes;
@@ -287,7 +287,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         provider: &signer,
         lp_coin_amount: u64,
-    ) acquires Market {
+    ) acquires LPCoinCapabilities, Market {
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         let provider_address = signer::address_of(provider);
         let event = simulate_remove_liquidity_inner<B, Q>(
@@ -302,7 +302,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Burn coins by first withdrawing them from provider's coin store, to trigger event.
         let lp_coins = coin::withdraw<LP>(provider, event.lp_coin_amount);
-        lp_coin_manager::burn<B, LP>(&market_signer, lp_coins);
+        burn_lp_coin<B, LP>(market_ref_mut.market_address, lp_coins);
 
         // Update state.
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
@@ -462,7 +462,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::mint<LPCoinType>(amount, &coin_caps.mint)
     }
 
-    inline fun can_market_be_registered(
+    // Not inline because we can't `return` from within an inline function.
+    fun can_market_be_registered(
         sender: &signer,
         emojis: vector<vector<u8>>,
     ): (bool, vector<u8>) acquires Registry, RegistryAddress {
