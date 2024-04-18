@@ -181,6 +181,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
+    inline fun get_market_ref_mut_and_signer_checked(market_address: address):
+    (&mut Market, signer)
+    acquires Market {
+        assert!(exists<Market>(market_address), E_NO_MARKET);
+        let market_ref_mut = borrow_global_mut<Market>(market_address);
+        let market_signer = object::generate_signer_for_extending(&market_ref_mut.extend_ref);
+        (market_ref_mut, market_signer)
+    }
+
     public entry fun swap<B, Q, LP>(
         market_address: address,
         swapper: &signer,
@@ -189,9 +198,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator: address,
         integrator_fee_rate_bps: u8,
     ) acquires LPCoinCapabilities, Market {
-        assert!(exists<Market>(market_address), E_NO_MARKET);
-        let market_ref_mut = borrow_global_mut<Market>(market_address);
-        let market_signer = object::generate_signer_for_extending(&market_ref_mut.extend_ref);
+        let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         let swapper_address = signer::address_of(swapper);
         let event = simulate_swap_inner(
             swapper_address,
@@ -241,6 +248,34 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             };
         };
         aptos_account::deposit_coins(integrator, quote);
+        event::emit(event);
+    }
+
+    public entry fun provide_liquidity<B, Q, LP>(
+        market_address: address,
+        provider: &signer,
+        quote_amount: u64,
+    ) acquires LPCoinCapabilities, Market {
+        let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
+        let provider_address = signer::address_of(provider);
+        let event = simulate_provide_liquidity_inner(
+            provider_address,
+            quote_amount,
+            market_ref_mut
+        );
+
+        // Transfer coins.
+        coin::transfer<B>(provider, market_address, event.base_amount);
+        coin::transfer<Q>(provider, market_address, event.quote_amount);
+        let lp_coins = mint_lp_coins<B, LP>(market_ref_mut.market_address, event.lp_coin_amount);
+        aptos_account::deposit_coins(provider_address, lp_coins);
+        let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
+
+        // Update state.
+        reserves_ref_mut.base = reserves_ref_mut.base + event.base_amount;
+        reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_amount;
+        market_ref_mut.lp_coin_supply =
+            market_ref_mut.lp_coin_supply + (event.lp_coin_amount as u128);
         event::emit(event);
     }
 
