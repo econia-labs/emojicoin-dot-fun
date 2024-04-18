@@ -49,9 +49,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// No quote amount given during liquidity provision/removal.
     const E_LIQUIDITY_NO_QUOTE: u64 = 4;
     /// Providing quote amount as liquidity would require more base than existing supply.
-    const E_LIQUIDITY_BASE_TOO_SCARCE: u64 = 5;
+    const E_PROVIDE_BASE_TOO_SCARCE: u64 = 5;
     /// Providing quote amount as liquidity would result in LP coin overflow.
-    const E_LIQUIDITY_TOO_MANY_LP_COINS: u64 = 6;
+    const E_PROVIDE_TOO_MANY_LP_COINS: u64 = 6;
+    /// Remove liquidity operation specified more LP coins than existing supply.
+    const E_REMOVE_TOO_MANY_LP_COINS: u64 = 7;
 
     struct Reserves has copy, drop, store {
         base: u64,
@@ -269,13 +271,43 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::transfer<Q>(provider, market_address, event.quote_amount);
         let lp_coins = mint_lp_coins<B, LP>(market_ref_mut.market_address, event.lp_coin_amount);
         aptos_account::deposit_coins(provider_address, lp_coins);
-        let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
 
         // Update state.
+        let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
         reserves_ref_mut.base = reserves_ref_mut.base + event.base_amount;
         reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_amount;
         market_ref_mut.lp_coin_supply =
             market_ref_mut.lp_coin_supply + (event.lp_coin_amount as u128);
+        event::emit(event);
+    }
+
+    public entry fun remove_liquidity<B, Q, LP>(
+        market_address: address,
+        provider: &signer,
+        lp_coin_amount: u64,
+    ) acquires Market {
+        let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
+        let provider_address = signer::address_of(provider);
+        let event = simulate_remove_liquidity_inner(
+            provider_address,
+            lp_coin_amount,
+            market_ref_mut
+        );
+
+        // Transfer coins.
+        coin::transfer<B>(&market_signer, provider_address, event.base_amount);
+        coin::transfer<Q>(&market_signer, provider_address, event.quote_amount);
+
+        // Burn coins by first withdrawing them from provider's coin store, to trigger event.
+        let lp_coins = coin::withdraw<LP>(provider, event.lp_coin_amount);
+        lp_coin_manager::burn<B, LP>(&market_signer, lp_coins);
+
+        // Update state.
+        let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
+        reserves_ref_mut.base = reserves_ref_mut.base - event.base_amount;
+        reserves_ref_mut.quote = reserves_ref_mut.quote - event.quote_amount;
+        market_ref_mut.lp_coin_supply =
+            market_ref_mut.lp_coin_supply - (event.lp_coin_amount as u128);
         event::emit(event);
     }
 
@@ -342,6 +374,21 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         simulate_provide_liquidity_inner(
             provider,
             quote_amount,
+            borrow_global(market_address),
+        )
+    }
+
+    #[view]
+    public fun simulate_remove_liquidity(
+        market_address: address,
+        provider: address,
+        lp_coin_amount: u64,
+    ): Liquidity
+    acquires Market {
+        assert!(exists<Market>(market_address), E_NO_MARKET);
+        simulate_provide_liquidity_inner(
+            provider,
+            lp_coin_amount,
             borrow_global(market_address),
         )
     }
@@ -555,12 +602,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Proportional base amount: (base_reserves / quote_reserves) * (quote_amount).
         let base_amount_u128 = (base_reserves_u128 * quote_amount_u128) / quote_reserves_u128;
-        assert!(base_amount_u128 <= (EMOJICOIN_SUPPLY as u128), E_LIQUIDITY_BASE_TOO_SCARCE);
+        assert!(base_amount_u128 <= (EMOJICOIN_SUPPLY as u128), E_PROVIDE_BASE_TOO_SCARCE);
 
         // Proportional LP coins to mint: (quote_amount / quote_reserves) * (lp_coin_supply).
         let lp_coin_amount_u128 =
             (quote_amount_u128 * market_ref.lp_coin_supply) / quote_reserves_u128;
-        assert!(lp_coin_amount_u128 <= U64_MAX_AS_u128, E_LIQUIDITY_TOO_MANY_LP_COINS);
+        assert!(lp_coin_amount_u128 <= U64_MAX_AS_u128, E_PROVIDE_TOO_MANY_LP_COINS);
 
         Liquidity {
             market_id: market_ref.market_id,
@@ -569,6 +616,37 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             quote_amount,
             lp_coin_amount: (lp_coin_amount_u128 as u64),
             liquidity_provided: true
+        }
+    }
+
+    inline fun simulate_remove_liquidity_inner(
+        provider: address,
+        lp_coin_amount: u64,
+        market_ref: &Market,
+    ): Liquidity {
+        let lp_coin_supply = market_ref.lp_coin_supply;
+        let lp_coin_amount_u128 = (lp_coin_amount as u128);
+
+        assert!(lp_coin_supply > 0, E_STILL_IN_BONDING_CURVE);
+        assert!(lp_coin_amount_u128 <= lp_coin_supply, E_REMOVE_TOO_MANY_LP_COINS);
+
+        let reserves_ref = market_ref.cpamm_real_reserves;
+        let base_reserves_u128 = (reserves_ref.base as u128);
+        let quote_reserves_u128 = (reserves_ref.quote as u128);
+
+        // Proportional base amount: (lp_coin_amount / lp_coin_supply) * (base_reserves).
+        let base_amount = ((lp_coin_amount_u128 * base_reserves_u128 / lp_coin_supply) as u64);
+
+        // Proportional quote amount: (lp_coin_amount / lp_coin_supply) * (quote_reserves).
+        let quote_amount = ((lp_coin_amount_u128 * quote_reserves_u128 / lp_coin_supply) as u64);
+
+        Liquidity {
+            market_id: market_ref.market_id,
+            provider,
+            base_amount,
+            quote_amount,
+            lp_coin_amount,
+            liquidity_provided: false
         }
     }
 
