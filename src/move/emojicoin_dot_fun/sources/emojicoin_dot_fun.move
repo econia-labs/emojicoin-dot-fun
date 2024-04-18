@@ -3,7 +3,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::{AptosCoin};
     use aptos_framework::code;
-    use aptos_framework::coin::{Self, Coin, MintCapability, BurnCapability, FreezeCapability};
+    use aptos_framework::coin::{Self, BurnCapability, Coin, MintCapability};
     use aptos_framework::event;
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
@@ -138,10 +138,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let market_signer = object::generate_signer_for_extending(&market_extend_ref);
         let market_address = object::address_from_constructor_ref(&market_constructor_ref);
 
-        // Each object must also have an Aptos Account resource at its address, as specified
-        // by the coin.move module.
-        aptos_account::create_account(market_address);
-
         create_market_and_add_to_registry(
             &market_signer,
             market_address,
@@ -170,15 +166,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     // Intended to be called from `coin_factory`, this function facilitates
     // storing the LP Coin capabilities atomically when the coin factory
     // module is initialized.
-    public fun store_capabilities<CoinType, LPCoinType>(
+    public fun store_lp_coin_capabilities<CoinType, LPCoinType>(
         market_obj: &signer,
         burn_cap: BurnCapability<LPCoinType>,
-        freeze_cap: FreezeCapability<LPCoinType>,
         mint_cap: MintCapability<LPCoinType>,
     ) {
         assert!(exists<Market>(signer::address_of(market_obj)), E_NO_MARKET);
-        coin::destroy_freeze_cap<LPCoinType>(freeze_cap);
-
         move_to(market_obj, LPCoinCapabilities<CoinType, LPCoinType> {
             burn: burn_cap,
             mint: mint_cap,

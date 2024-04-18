@@ -7,7 +7,7 @@ from pathlib import Path
 
 COIN_FACTORY = "coin_factory"
 PACKAGE_BYTECODE_PATH = "json/build_publish_payload.json"
-SYMBOL_PLACEHOLDER = "7abcdef01234578abcdef7"
+SYMBOL_PLACEHOLDER = "aaaaaaaaaaaaaaaaaaaaaa"
 SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
 METADATA_K, CODE_K = "metadata", "code"
 
