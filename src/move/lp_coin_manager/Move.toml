@@ -1,5 +1,4 @@
 [addresses]
-coin_factory = "_"
 lp_coin_manager = "_"
 
 [dependencies.AptosFramework]
@@ -7,16 +6,10 @@ git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
-[dependencies.LPCoinManager]
-local = "../lp_coin_manager"
-
 [dev-addresses]
-# These addresses are not valid, they are solely for easily finding
-# and replacing named addresses in the compiled bytecode.
-coin_factory = "0xc001d00d"
 lp_coin_manager = "0xbeefd00d"
 
 [package]
-name = "CoinFactory"
+name = "LPCoinManager"
 upgrade_policy = "immutable"
 version = "1.0.0"

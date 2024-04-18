@@ -1,29 +1,36 @@
 #!/usr/bin/env python3
+# cspell:words beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef
+# cspell:words f00000000000000000000000000000000000000000000000000000000000000d
 
 import json
 import subprocess
+from pathlib import Path
 
 COIN_FACTORY = "coin_factory"
-JSON_FILE_PATH = "build_publish_payload.json"
-SYMBOL_PLACEHOLDER = "99887766554433221100ffeeddccbbaa00112233445566778899aabbccddeeff"
-BYTECODE_JSON_FILE = "bytecode.json"
+JSON_FILE_PATH = "json/build_publish_payload.json"
+SYMBOL_PLACEHOLDER = "7abcdef01234578abcdef7"
+BYTECODE_JSON_FILE = "json/split_bytecode.json"
 
 SYMBOL_HEX_STRING_GOES_HERE = "bcs_serialized_SYMBOL_VECTOR_U8_HERE"
 
 # Mapping of named addresses to placeholder addresses for generating Move bytecode.
-# Note these values are completely random hex values, generated with:
-# from random import randint
-# ''.join(hex(randint(0, 255))[2:].zfill(2) for x in range(32))
 random_addresses = [
-    "d821750d56947cc65fe313eb14feb72a03c1fc9d740a0ae31710251173dc6517",
-    "771ea88fe30c3525dd4d4b95e8cd67f956ddc1f2774f19b4c404115299894e52",
-    "c859f297cd4bed0704b235a7d61c1e0ca7d8ae3627990ff2534fdf1ea051a885",
+    # coin_factory
+    "beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef",
+    # lp_coin_manager
+    "f00000000000000000000000000000000000000000000000000000000000000d",
 ]
 NAMED_ADDRESSES = {
-    COIN_FACTORY: random_addresses.pop(),
-    "emojicoin_dot_fun": random_addresses.pop(),
-    "fee_receiver": random_addresses.pop(),
+    COIN_FACTORY: random_addresses[0],
+    "lp_coin_manager": random_addresses[1],
 }
+
+
+def ensure_parent_directories_exist(s: str) -> Path:
+    fp = Path(s)
+    Path(fp.parent).mkdir(exist_ok=True)
+
+    return fp
 
 
 # Splits a string into a list of strings, replacing the delimiter with the replacement.
@@ -60,6 +67,7 @@ def split_and_replace_named_addresses(
 #  - Have the `aptos` CLI installed
 #  - Run this script from the coin factory module directory (where the `Move.toml` is)
 if __name__ == "__main__":
+    json_path = ensure_parent_directories_exist(JSON_FILE_PATH)
     named_addresses_args = ",".join([f"{k}={v}" for k, v in NAMED_ADDRESSES.items()])
     _ = subprocess.run(
         [
@@ -67,17 +75,18 @@ if __name__ == "__main__":
             "move",
             "build-publish-payload",
             "--json-output-file",
-            JSON_FILE_PATH,
+            json_path,
             "--named-addresses",
             named_addresses_args,
             "--assume-yes",
+            "--included-artifacts=none",
         ],
-        stdout=subprocess.DEVNULL,
     )
 
-    d = json.load(open(JSON_FILE_PATH))
+    d = json.load(open(json_path))
 
     metadata: str = d["args"][0]["value"]
+    len_metadata = len(metadata)
     if metadata.startswith("0x"):
         metadata = metadata[2:]
 
@@ -86,6 +95,7 @@ if __name__ == "__main__":
     bytecode_array: list[str] = d["args"][1]["value"]
     assert len(bytecode_array) == 1
     bytecode = bytecode_array[0]
+    len_bytecode = len(bytecode_array[0])
     if bytecode.startswith("0x"):
         bytecode = bytecode[2:]
 
@@ -96,9 +106,15 @@ if __name__ == "__main__":
 
     # The vector<u8> byte length is prepended to the actual symbol value
     # in the bytecode. We need to remove/replace this value when publishing as well.
-    symbol_len_bytes_as_hex = hex(len(bytes.fromhex(SYMBOL_PLACEHOLDER)))[2:]
+    symbol_len_bytes_as_hex = hex(len(bytes.fromhex(SYMBOL_PLACEHOLDER)))[2:].zfill(2)
+    # It's a vector of vectors, so we need to serialize the bytes following it as
+    # if it's a vector of u8s, meaning we prepend the entire length of the inner vector.
+    # plus the one byte for the byte denoting the length of the inner vector.
+    outer_vector_bytes_as_hex = hex(int(symbol_len_bytes_as_hex, 16) + 1)[2:].zfill(2)
 
-    sym_bytecode = f"{symbol_len_bytes_as_hex}{SYMBOL_PLACEHOLDER}"
+    sym_bytecode = (
+        f"{outer_vector_bytes_as_hex}{symbol_len_bytes_as_hex}{SYMBOL_PLACEHOLDER}"
+    )
     sym_msg = SYMBOL_HEX_STRING_GOES_HERE
 
     bytecode_lines = split_and_replace(bytecode, sym_bytecode, sym_msg)
@@ -108,6 +124,7 @@ if __name__ == "__main__":
         "metadata": metadata_lines,
         "bytecode": bytecode_lines,
     }
-    json.dump(d, open(BYTECODE_JSON_FILE, "w"), indent=2)
+    bytecode_json_path = ensure_parent_directories_exist(BYTECODE_JSON_FILE)
+    json.dump(d, open(bytecode_json_path, "w"), indent=2)
 
-    print(f"[SUCCESS]: Output bytecode contents to {BYTECODE_JSON_FILE}")
+    print(f"[SUCCESS]: Output bytecode contents to {bytecode_json_path}")
