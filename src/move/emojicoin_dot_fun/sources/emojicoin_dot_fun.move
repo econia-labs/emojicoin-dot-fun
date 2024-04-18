@@ -1,10 +1,10 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
-    use aptos_framework::coin::{Self, Coin, MintCapability, BurnCapability, FreezeCapability};
-    use aptos_framework::code;
-    use aptos_framework::event;
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::{AptosCoin};
+    use aptos_framework::code;
+    use aptos_framework::coin::{Self, Coin, MintCapability, BurnCapability, FreezeCapability};
+    use aptos_framework::event;
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::hex_codes;
@@ -185,9 +185,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
-    inline fun get_market_ref_mut_and_signer_checked(market_address: address):
-    (&mut Market, signer)
-    acquires Market {
+    inline fun get_market_ref_mut_and_signer_checked(market_address: address): (
+        &mut Market,
+        signer,
+    ) acquires Market {
         assert!(exists<Market>(market_address), E_NO_MARKET);
         let market_ref_mut = borrow_global_mut<Market>(market_address);
         let market_signer = object::generate_signer_for_extending(&market_ref_mut.extend_ref);
@@ -464,8 +465,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::mint<LPCoinType>(amount, &coin_caps.mint)
     }
 
-    // Not inline because we can't `return` from within an inline function.
-    fun can_market_be_registered(
+    inline fun can_market_be_registered(
         sender: &signer,
         emojis: vector<vector<u8>>,
     ): (bool, vector<u8>) acquires Registry, RegistryAddress {
