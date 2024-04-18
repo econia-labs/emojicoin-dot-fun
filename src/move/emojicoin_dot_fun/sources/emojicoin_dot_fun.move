@@ -144,7 +144,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     }
 
-/*
     public entry fun swap<B, Q>(
         swapper: &signer,
         input_amount: u64,
@@ -164,46 +163,49 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             integrator_fee_rate_bps,
             market_ref_mut,
         );
+        let quote;
         if (input_is_base) { // If selling, no possibility of state transition.
             coin::transfer<B>(swapper, market_address, input_amount);
-            coin::transfer<Q>(&market_signer, integrator, event.integrator_fee);
-            coin::transfer<Q>(&market_signer, swapper_address, event.output_amount);
+            let quote_leaving_market = event.quote_volume + event.integrator_fee;
+            quote = coin::withdraw<Q>(&market_signer, quote_leaving_market);
+            let net_proceeds = coin::extract(&mut quote, event.quote_volume);
+            aptos_account::deposit_coins(swapper_address, net_proceeds);
             let reserves_ref_mut = if (event.starts_in_bonding_curve)
                 &mut market_ref_mut.clamm_virtual_reserves else
                 &mut market_ref_mut.cpamm_real_reserves;
             reserves_ref_mut.base = reserves_ref_mut.base + event.input_amount;
-            reserves_ref_mut.quote =
-                reserves_ref_mut.quote - event.integrator_fee - event.output_amount;
+            reserves_ref_mut.quote = reserves_ref_mut.quote - quote_leaving_market;
         } else { // If buying, might need to buy through the state transition.
-            coin::transfer<Q>(swapper, integrator, event.integrator_fee);
-            let transfer_from_swapper_to_market = input_amount - event.integrator_fee;
-            coin::transfer<Q>(swapper, market_address, transfer_from_swapper_to_market);
-            coin::transfer<B>(&market_signer, swapper_address, event.output_amount);
-            if (event.results_in_state_transition) {
+            quote = coin::withdraw<Q>(swapper, input_amount);
+            coin::deposit(market_address, coin::extract(&mut quote, event.quote_volume));
+            aptos_account::transfer_coins<B>(&market_signer, swapper_address, event.base_volume);
+            if (event.results_in_state_transition) { // Buy with state transition.
                 //
                 // Mint `LP_TOKENS_INITIAL` tokens to the market's `CoinStore`.
                 //
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
-                let quote_to_transition = QUOTE_REAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
-                let quote_into_cpamm = transfer_from_swapper_to_market - quote_to_transition;
-                let base_out_of_cpamm = event.output_amount - clamm_virtual_reserves_ref_mut.base;
+                let quote_to_transition =
+                    QUOTE_VIRTUAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
+                let base_left_in_clamm = clamm_virtual_reserves_ref_mut.base - BASE_VIRTUAL_FLOOR;
+                let quote_into_cpamm = event.quote_volume - quote_to_transition;
+                let base_out_of_cpamm = event.base_volume - base_left_in_clamm;
                 clamm_virtual_reserves_ref_mut.base = 0;
                 clamm_virtual_reserves_ref_mut.quote = 0;
                 let cpamm_real_reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
                 cpamm_real_reserves_ref_mut.base = EMOJICOIN_REMAINDER - base_out_of_cpamm;
                 cpamm_real_reserves_ref_mut.quote = QUOTE_REAL_CEILING + quote_into_cpamm;
-            } else {
+            } else { // Buy without state transition.
                 let reserves_ref_mut = if (event.starts_in_bonding_curve)
                     &mut market_ref_mut.clamm_virtual_reserves else
                     &mut market_ref_mut.cpamm_real_reserves;
-                reserves_ref_mut.base = reserves_ref_mut.base - event.output_amount;
-                reserves_ref_mut.quote = reserves_ref_mut.quote + transfer_from_swapper_to_market;
+                reserves_ref_mut.base = reserves_ref_mut.base - event.base_volume;
+                reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_volume;
 
             };
         };
+        aptos_account::deposit_coins(integrator, quote);
         event::emit(event);
     }
-*/
 
     // Intended to be called from `coin_factory`, this function facilitates
     // storing the LP Coin capabilities atomically when the coin factory
@@ -392,7 +394,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         } else { // If buying, there may be a state transition.
             integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
             quote_volume = input_amount - integrator_fee;
-            let quote_volume_after_clamm = 0;
             if (starts_in_bonding_curve) {
                 let max_quote_volume_in_clamm =
                     QUOTE_VIRTUAL_CEILING - market_ref.clamm_virtual_reserves.quote;
@@ -416,8 +417,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                         );
                         pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
                         base_volume = base_volume + cpamm_base_output - pool_fee;
-                    }
-                }
+                    };
+                };
             } else { // Buying from CPAMM only.
                 let cpamm_base_output = cpamm_simple_swap_output_amount(
                     quote_volume,
