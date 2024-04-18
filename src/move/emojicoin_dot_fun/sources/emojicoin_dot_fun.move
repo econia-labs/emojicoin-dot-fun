@@ -480,31 +480,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         cpamm_simple_swap_output_amount(0, true, Reserves { base: 0, quote: 16});
     }
 
-    #[test(deployer = @emojicoin_dot_fun)]
-    fun test_happy_path_lp_mint(deployer: &signer) acquires Registry, RegistryAddress {
-        aptos_account::create_account(@emojicoin_dot_fun);
-        init_module(deployer);
-        let emoji_bytes = vector<vector<u8>> [
-            x"f09fa5ba",
-            x"f09fa594",
-        ];
-
-        register_market(deployer, emoji_bytes);
-
-        let (well_formed, symbol_bytes) = ensure_multiple_emojis_well_formed(emoji_bytes);
-        assert!(well_formed, 0);
-
-        let market_address_opt = get_market_address(symbol_bytes);
-        assert!(option::is_some(&market_address_opt), 0);
-        let market_address = option::extract(&mut market_address_opt);
-        let market = borrow_global<Market>(market_address);
-
-        // mint_and_deposit_lp_coins<B, LP>(market_ref_mut, LP_TOKENS_INITIAL, market_address);
-        // In order to finish this function, we first need to add dummy Emojicoin/EmojicoinLP
-        // coins, published in dummy packages adjacent to this module. Otherwise we will not have
-        // access to the types necessary to call `mint_and_deposit_lp_coins<E, E_LP>`.
-    }
-
     #[test]
     fun test_all_supported_emojis_under_10_bytes() {
         let all_supported_emojis = hex_codes::get_all();
