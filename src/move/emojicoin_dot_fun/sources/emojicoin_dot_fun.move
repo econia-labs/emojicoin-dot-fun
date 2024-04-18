@@ -44,6 +44,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_SWAP_INPUT_ZERO: u64 = 1;
     /// No market exists at the given address.
     const E_NO_MARKET: u64 = 2;
+    /// The market is still in the bonding curve.
+    const E_STILL_IN_BONDING_CURVE: u64 = 3;
+    /// No quote amount given during liquidity provision/removal.
+    const E_LIQUIDITY_NO_QUOTE: u64 = 4;
+    /// Providing quote amount as liquidity would require more base than existing supply.
+    const E_LIQUIDITY_BASE_TOO_SCARCE: u64 = 5;
+    /// Providing quote amount as liquidity would result in LP coin overflow.
+    const E_LIQUIDITY_TOO_MANY_LP_COINS: u64 = 6;
 
     struct Reserves has copy, drop, store {
         base: u64,
@@ -58,7 +66,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         extend_ref: ExtendRef,
         clamm_virtual_reserves: Reserves,
         cpamm_real_reserves: Reserves,
-        lp_token_supply: u64,
+        lp_coin_supply: u128,
     }
 
     #[resource_group = ObjectGroup]
@@ -73,6 +81,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[event]
     struct Swap has copy, drop, store {
         market_id: u64,
+        swapper: address,
         input_amount: u64,
         input_is_base: bool,
         integrator: address,
@@ -90,6 +99,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     struct LPCoinCapabilities<phantom CoinType, phantom LPCoinType> has key {
         burn: BurnCapability<LPCoinType>,
         mint: MintCapability<LPCoinType>,
+    }
+
+    #[event]
+    struct Liquidity has copy, drop, store {
+        market_id: u64,
+        provider: address,
+        base_amount: u64,
+        quote_amount: u64,
+        lp_coin_amount: u64,
+        liquidity_provided: bool,
     }
 
     struct RegistryAddress has key {
@@ -163,18 +182,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     public entry fun swap<B, Q, LP>(
+        market_address: address,
         swapper: &signer,
         input_amount: u64,
         input_is_base: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
-        market_address: address,
-    ) acquires Market, LPCoinCapabilities {
+    ) acquires LPCoinCapabilities, Market {
         assert!(exists<Market>(market_address), E_NO_MARKET);
         let market_ref_mut = borrow_global_mut<Market>(market_address);
         let market_signer = object::generate_signer_for_extending(&market_ref_mut.extend_ref);
         let swapper_address = signer::address_of(swapper);
         let event = simulate_swap_inner(
+            swapper_address,
             input_amount,
             input_is_base,
             integrator,
@@ -257,19 +277,36 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun simulate_swap(
+        market_address: address,
+        swapper: address,
         input_amount: u64,
         input_is_base: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
-        market_address: address,
     ): Swap
     acquires Market {
         assert!(exists<Market>(market_address), E_NO_MARKET);
         simulate_swap_inner(
+            swapper,
             input_amount,
             input_is_base,
             integrator,
             integrator_fee_rate_bps,
+            borrow_global(market_address),
+        )
+    }
+
+    #[view]
+    public fun simulate_provide_liquidity(
+        market_address: address,
+        provider: address,
+        quote_amount: u64,
+    ): Liquidity
+    acquires Market {
+        assert!(exists<Market>(market_address), E_NO_MARKET);
+        simulate_provide_liquidity_inner(
+            provider,
+            quote_amount,
             borrow_global(market_address),
         )
     }
@@ -312,7 +349,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 base: BASE_REAL_FLOOR,
                 quote: QUOTE_REAL_FLOOR,
             },
-            lp_token_supply: 0,
+            lp_coin_supply: 0,
         });
     }
 
@@ -378,6 +415,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     inline fun simulate_swap_inner(
+        swapper: address,
         input_amount: u64,
         input_is_base: bool,
         integrator: address,
@@ -385,7 +423,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_ref: &Market,
     ): Swap {
         assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
-        let starts_in_bonding_curve = market_ref.lp_token_supply == 0;
+        let starts_in_bonding_curve = market_ref.lp_coin_supply == 0;
         let net_proceeds;
         let base_volume;
         let quote_volume;
@@ -453,6 +491,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
         Swap {
             market_id: market_ref.market_id,
+            swapper,
             input_amount,
             input_is_base,
             integrator,
@@ -464,6 +503,37 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             pool_fee,
             starts_in_bonding_curve,
             results_in_state_transition,
+        }
+    }
+
+    inline fun simulate_provide_liquidity_inner(
+        provider: address,
+        quote_amount: u64,
+        market_ref: &Market,
+    ): Liquidity {
+        assert!(market_ref.lp_coin_supply > 0, E_STILL_IN_BONDING_CURVE);
+        assert!(quote_amount > 0, E_LIQUIDITY_NO_QUOTE);
+        let reserves_ref = market_ref.cpamm_real_reserves;
+        let base_reserves_u128 = (reserves_ref.base as u128);
+        let quote_reserves_u128 = (reserves_ref.quote as u128);
+        let quote_amount_u128 = (quote_amount as u128);
+
+        // Proportional base amount: (base_reserves / quote_reserves) * (quote_amount).
+        let base_amount_u128 = (base_reserves_u128 * quote_amount_u128) / quote_reserves_u128;
+        assert!(base_amount_u128 <= (EMOJICOIN_SUPPLY as u128), E_LIQUIDITY_BASE_TOO_SCARCE);
+
+        // Proportional LP coins to mint: (quote_amount / quote_reserves) * (lp_coin_supply).
+        let lp_coin_amount_u128 =
+            (quote_amount_u128 * market_ref.lp_coin_supply) / quote_reserves_u128;
+        assert!(lp_coin_amount_u128 <= U64_MAX_AS_u128, E_LIQUIDITY_TOO_MANY_LP_COINS);
+
+        Liquidity {
+            market_id: market_ref.market_id,
+            provider,
+            base_amount: (base_amount_u128 as u64),
+            quote_amount,
+            lp_coin_amount: (lp_coin_amount_u128 as u64),
+            liquidity_provided: true
         }
     }
 
