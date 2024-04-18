@@ -111,6 +111,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         quote_amount: u64,
         lp_coin_amount: u64,
         liquidity_provided: bool,
+        pro_rata_base_donation_claim_amount: u64,
+        pro_rata_quote_donation_claim_amount: u64,
     }
 
     struct RegistryAddress has key {
@@ -288,7 +290,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ) acquires Market {
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         let provider_address = signer::address_of(provider);
-        let event = simulate_remove_liquidity_inner(
+        let event = simulate_remove_liquidity_inner<B, Q>(
             provider_address,
             lp_coin_amount,
             market_ref_mut
@@ -379,14 +381,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[view]
-    public fun simulate_remove_liquidity(
+    public fun simulate_remove_liquidity<B, Q>(
         market_address: address,
         provider: address,
         lp_coin_amount: u64,
     ): Liquidity
     acquires Market {
         assert!(exists<Market>(market_address), E_NO_MARKET);
-        simulate_provide_liquidity_inner(
+        simulate_remove_liquidity_inner<B, Q>(
             provider,
             lp_coin_amount,
             borrow_global(market_address),
@@ -615,11 +617,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             base_amount: (base_amount_u128 as u64),
             quote_amount,
             lp_coin_amount: (lp_coin_amount_u128 as u64),
-            liquidity_provided: true
+            liquidity_provided: true,
+            pro_rata_base_donation_claim_amount: 0,
+            pro_rata_quote_donation_claim_amount: 0,
         }
     }
 
-    inline fun simulate_remove_liquidity_inner(
+    inline fun simulate_remove_liquidity_inner<B, Q>(
         provider: address,
         lp_coin_amount: u64,
         market_ref: &Market,
@@ -640,13 +644,26 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Proportional quote amount: (lp_coin_amount / lp_coin_supply) * (quote_reserves).
         let quote_amount = ((lp_coin_amount_u128 * quote_reserves_u128 / lp_coin_supply) as u64);
 
+        // Check to see if base or quote donations have been sent to market coin stores.
+        let market_address = market_ref.market_address;
+        let market_balance_base_u128 = (coin::balance<B>(market_address) as u128);
+        let market_balance_quote_u128 = (coin::balance<Q>(market_address) as u128);
+        let base_donations_u128 = market_balance_base_u128 - base_reserves_u128;
+        let quote_donations_u128= market_balance_quote_u128 - quote_reserves_u128;
+        let pro_rata_base_donation_claim_amount =
+            (((lp_coin_amount_u128 * base_donations_u128) / lp_coin_supply) as u64);
+        let pro_rata_quote_donation_claim_amount =
+            (((lp_coin_amount_u128 * quote_donations_u128) / lp_coin_supply) as u64);
+
         Liquidity {
             market_id: market_ref.market_id,
             provider,
             base_amount,
             quote_amount,
             lp_coin_amount,
-            liquidity_provided: false
+            liquidity_provided: false,
+            pro_rata_base_donation_claim_amount,
+            pro_rata_quote_donation_claim_amount,
         }
     }
 
