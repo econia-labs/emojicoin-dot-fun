@@ -1,10 +1,10 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
-    use aptos_framework::coin::{Self, Coin, MintCapability, BurnCapability, FreezeCapability};
-    use aptos_framework::code;
-    use aptos_framework::event;
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::{AptosCoin};
+    use aptos_framework::code;
+    use aptos_framework::coin::{Self, Coin, MintCapability, BurnCapability, FreezeCapability};
+    use aptos_framework::event;
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::hex_codes;
@@ -15,6 +15,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use std::signer;
 
     const MAX_SYMBOL_LENGTH: u8 = 10;
+    const EXPECTED_FULL_SYMBOL_LENGTH: u8 = 11;
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
@@ -108,18 +109,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Create the named Market object.
         let registry = borrow_global<Registry>(get_registry_address());
-        let market_signer = object::generate_signer_for_extending(&registry.extend_ref);
-        let market_c_ref = object::create_named_object(&market_signer, emoji_bytes);
-        let market_extend_ref = object::generate_extend_ref(&market_c_ref);
-        let market_obj_signer = object::generate_signer_for_extending(&market_extend_ref);
-        let market_address = object::address_from_constructor_ref(&market_c_ref);
+        let registry_signer = object::generate_signer_for_extending(&registry.extend_ref);
+        let market_constructor_ref = object::create_named_object(&registry_signer, emoji_bytes);
+        let market_extend_ref = object::generate_extend_ref(&market_constructor_ref);
+        let market_signer = object::generate_signer_for_extending(&market_extend_ref);
+        let market_address = object::address_from_constructor_ref(&market_constructor_ref);
 
         // Each object must also have an Aptos Account resource at its address, as specified
         // by the coin.move module.
         aptos_account::create_account(market_address);
 
         create_market_and_add_to_registry(
-            &market_obj_signer,
+            &market_signer,
             market_address,
             emoji_bytes,
             market_extend_ref,
@@ -136,7 +137,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
 
         code::publish_package_txn(
-            &market_obj_signer,
+            &market_signer,
             metadata_bytecode,
             module_bytecode,
         );
@@ -152,6 +153,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         freeze_cap: FreezeCapability<LPCoinType>,
         mint_cap: MintCapability<LPCoinType>,
     ) {
+        assert!(exists<Market>(signer::address_of(market_obj)), E_NO_MARKET);
         coin::destroy_freeze_cap<LPCoinType>(freeze_cap);
 
         move_to(market_obj, LPCoinCapabilities<CoinType, LPCoinType> {
@@ -339,41 +341,40 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::mint<LPCoinType>(amount, &coin_caps.mint)
     }
 
-    // Not inline because we can't `return` from within an inline function.
-    fun can_market_be_registered(
+    inline fun can_market_be_registered(
         sender: &signer,
         emojis: vector<vector<u8>>,
     ): (bool, vector<u8>) acquires Registry, RegistryAddress {
         let num_emojis = vector::length(&emojis);
         if (num_emojis == 0) {
-            return (false, b"")
-        };
+           (false, b"")
+        } else {
+            let sender_addr = signer::address_of(sender);
+            let insufficient_balance = coin::balance<AptosCoin>(sender_addr) < REGISTER_MARKET_FEE;
+            if (insufficient_balance) {
+                (false, b"")
+            } else {
+                let (is_well_formed, symbol_bytes) = ensure_multiple_emojis_well_formed(emojis);
 
-        let sender_addr = signer::address_of(sender);
-        let insufficient_sender_balance = coin::balance<AptosCoin>(sender_addr) < REGISTER_MARKET_FEE;
-        if (insufficient_sender_balance) {
-            return (false, b"")
-        };
+                if (!is_well_formed) {
+                    (false, b"")
+                } else {
+                    let opt_market_address = get_market_address(symbol_bytes);
+                    let is_registered_market = option::is_some(&opt_market_address);
 
-        let (is_well_formed, symbol_bytes) = ensure_multiple_emojis_well_formed(emojis);
+                    let utf8_bytes = bcs::to_bytes(&symbol_bytes);
+                    let utf8_string = string::utf8(utf8_bytes);
+                    let symbol_length = string::length(&utf8_string);
+                    let symbol_too_long = symbol_length > (MAX_SYMBOL_LENGTH as u64);
 
-        if (!is_well_formed) {
-            return (false, b"")
-        };
-
-        let opt_market_address = get_market_address(symbol_bytes);
-        let is_registered_market = option::is_some(&opt_market_address);
-
-        let utf8_bytes = bcs::to_bytes(&symbol_bytes);
-        let utf8_string = string::utf8(utf8_bytes);
-        let symbol_length = string::length(&utf8_string);
-        let symbol_too_long = symbol_length > (MAX_SYMBOL_LENGTH as u64);
-
-        if (symbol_too_long || is_registered_market) {
-            return (false, b"")
-        };
-
-        (true, symbol_bytes)
+                    if (symbol_too_long || is_registered_market) {
+                        (false, b"")
+                    } else {
+                        (true, symbol_bytes)
+                    }
+                }
+            }
+        }
     }
 
     inline fun simulate_swap_inner(
@@ -564,4 +565,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(!is_a_supported_emoji(x"f09f9982e2808de28694"), 0);
     }
 
+    #[test]
+    fun test_expected_full_symbol_length() {
+        assert!(EXPECTED_FULL_SYMBOL_LENGTH == hex_codes::get_EXPECTED_FULL_SYMBOL_LENGTH(), 0);
+    }
 }

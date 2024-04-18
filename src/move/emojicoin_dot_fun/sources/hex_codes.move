@@ -2324,7 +2324,7 @@ module emojicoin_dot_fun::hex_codes {
     // hardcode the number of bytes to be 11. The first byte will be the signifier of how long
     // the symbol is, called `SYMBOL_LEN` the next `SYMBOL_LEN` bytes will be the symbol,
     // and the rest of the bytes will be 0s and ignored.
-    public(friend) fun encode_symbol(
+    public(friend) inline fun encode_symbol(
         emoji_bytes: vector<u8>,
     ): vector<u8> {
         let symbol = bcs::to_bytes(&emoji_bytes);
@@ -2376,5 +2376,38 @@ module emojicoin_dot_fun::hex_codes {
         vector::append(&mut replaced_bytecode, vector::pop_back(&mut module_bytecode));
 
         (replaced_metadata, vector<vector<u8>> [ replaced_bytecode, ])
+    }
+
+    #[test_only]
+    public(friend) fun get_EXPECTED_FULL_SYMBOL_LENGTH(): u8 {
+        EXPECTED_FULL_SYMBOL_LENGTH
+    }
+
+    #[test]
+    fun test_encode_symbol() {
+        let symbols = vector<vector<u8>> [
+            x"e29895",
+            x"f09fa587",
+            x"f09f85b0efb88f",
+            x"f09f91bcf09f8fbd",
+            x"f09f8f87f09f8fbd",
+            x"f09f90a6e2808de2ac9b",
+            x"f09f9088e2808de2ac9b",
+        ];
+
+        let expected_encoded = vector<vector<u8>> [
+            x"03e2989500000000000000",
+            x"04f09fa587000000000000",
+            x"07f09f85b0efb88f000000",
+            x"08f09f91bcf09f8fbd0000",
+            x"08f09f8f87f09f8fbd0000",
+            x"0af09f90a6e2808de2ac9b",
+            x"0af09f9088e2808de2ac9b",
+        ];
+
+        vector::zip(symbols, expected_encoded, |symbol, expected| {
+            assert!(encode_symbol(symbol) == expected, 0);
+            assert!(vector::length(&expected) == (EXPECTED_FULL_SYMBOL_LENGTH as u64), 1)
+        });
     }
 }
