@@ -3,7 +3,7 @@ module coin_factory::coin_factory {
     use aptos_std::string::{Self, String};
     use std::signer;
     use std::vector;
-    use lp_coin_manager::lp_coin_manager;
+    use emojicoin_dot_fun::emojicoin_dot_fun;
 
     struct Emojicoin {}
     struct EmojicoinLP {}
@@ -61,7 +61,7 @@ module coin_factory::coin_factory {
             EMOJICOIN_LP_STRING,
         );
 
-        lp_coin_manager::store_capabilities<Emojicoin, EmojicoinLP>(
+        emojicoin_dot_fun::store_capabilities<Emojicoin, EmojicoinLP>(
             market,
             burn_cap,
             freeze_cap,

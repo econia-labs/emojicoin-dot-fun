@@ -1,6 +1,6 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
-    use aptos_framework::coin::{Self};
+    use aptos_framework::coin::{Self, Coin, MintCapability, BurnCapability, FreezeCapability};
     use aptos_framework::code;
     use aptos_framework::event;
     use aptos_framework::aptos_account;
@@ -8,7 +8,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::hex_codes;
-    use lp_coin_manager::lp_coin_manager;
     use std::bcs;
     use std::string;
     use std::vector;
@@ -86,6 +85,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         results_in_state_transition: bool,
     }
 
+    #[resource_group = ObjectGroup]
+    struct LPCoinCapabilities<phantom CoinType, phantom LPCoinType> has key {
+        burn: BurnCapability<LPCoinType>,
+        mint: MintCapability<LPCoinType>,
+    }
+
     struct RegistryAddress has key {
         registry_address: address,
     }
@@ -138,6 +143,23 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     }
 
+    // Intended to be called from `coin_factory`, this function facilitates
+    // storing the LP Coin capabilities atomically when the coin factory
+    // module is initialized.
+    public fun store_capabilities<CoinType, LPCoinType>(
+        market_obj: &signer,
+        burn_cap: BurnCapability<LPCoinType>,
+        freeze_cap: FreezeCapability<LPCoinType>,
+        mint_cap: MintCapability<LPCoinType>,
+    ) {
+        coin::destroy_freeze_cap<LPCoinType>(freeze_cap);
+
+        move_to(market_obj, LPCoinCapabilities<CoinType, LPCoinType> {
+            burn: burn_cap,
+            mint: mint_cap,
+        });
+    }
+
     public entry fun swap<B, Q, LP>(
         swapper: &signer,
         input_amount: u64,
@@ -145,7 +167,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator: address,
         integrator_fee_rate_bps: u8,
         market_address: address,
-    ) acquires Market {
+    ) acquires Market, LPCoinCapabilities {
         assert!(exists<Market>(market_address), E_NO_MARKET);
         let market_ref_mut = borrow_global_mut<Market>(market_address);
         let market_signer = object::generate_signer_for_extending(&market_ref_mut.extend_ref);
@@ -174,7 +196,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             coin::deposit(market_address, coin::extract(&mut quote, event.quote_volume));
             aptos_account::transfer_coins<B>(&market_signer, swapper_address, event.base_volume);
             if (event.results_in_state_transition) { // Buy with state transition.
-                mint_and_deposit_lp_coins<B, LP>(market_ref_mut, LP_TOKENS_INITIAL, market_address);
+                let lp_coins = mint_lp_coins<B, LP>(market_address, LP_TOKENS_INITIAL);
+                coin::deposit<LP>(market_address, lp_coins);
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
                 let quote_to_transition =
                     QUOTE_VIRTUAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
@@ -291,6 +314,31 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
+    inline fun burn_lp_coin_from<CoinType, LPCoinType>(
+        market_address: address,
+        account_addr: address,
+        amount: u64,
+    ) acquires LPCoinCapabilities {
+        let coin_caps = borrow_global<LPCoinCapabilities<CoinType, LPCoinType>>(market_address);
+        coin::burn_from<LPCoinType>(account_addr, amount, &coin_caps.burn);
+    }
+
+    inline fun burn_lp_coin<CoinType, LPCoinType>(
+        market_address: address,
+        coin: Coin<LPCoinType>,
+    ) acquires LPCoinCapabilities {
+        let coin_caps = borrow_global<LPCoinCapabilities<CoinType, LPCoinType>>(market_address);
+        coin::burn<LPCoinType>(coin, &coin_caps.burn);
+    }
+
+    inline fun mint_lp_coins<CoinType, LPCoinType>(
+        market_address: address,
+        amount: u64,
+    ): Coin<LPCoinType> acquires LPCoinCapabilities {
+        let coin_caps = borrow_global<LPCoinCapabilities<CoinType, LPCoinType>>(market_address);
+        coin::mint<LPCoinType>(amount, &coin_caps.mint)
+    }
+
     // Not inline because we can't `return` from within an inline function.
     fun can_market_be_registered(
         sender: &signer,
@@ -326,16 +374,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
 
         (true, symbol_bytes)
-    }
-
-    inline fun mint_and_deposit_lp_coins<T_Emojicoin, T_EmojicoinLP>(
-        market_ref: &Market,
-        amount: u64,
-        to: address,
-    ) {
-        let market_signer = object::generate_signer_for_extending(&market_ref.extend_ref);
-        let lp_coins = lp_coin_manager::mint<T_Emojicoin, T_EmojicoinLP>(&market_signer, amount);
-        aptos_account::deposit_coins<T_EmojicoinLP>(to, lp_coins);
     }
 
     inline fun simulate_swap_inner(

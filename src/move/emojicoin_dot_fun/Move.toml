@@ -1,18 +1,13 @@
 [addresses]
 emojicoin_dot_fun = "_"
-lp_coin_manager = "_"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
-[dependencies.LPCoinManager]
-local = "../lp_coin_manager"
-
 [dev-addresses]
 emojicoin_dot_fun = "0xc0de"
-lp_coin_manager = "0xbeefd00d"
 
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]

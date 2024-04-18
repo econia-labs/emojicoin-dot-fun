@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-# cspell:words beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef
-# cspell:words f00000000000000000000000000000000000000000000000000000000000000d
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
 COIN_FACTORY = "coin_factory"
-JSON_FILE_PATH = "json/build_publish_payload.json"
+PACKAGE_BYTECODE_PATH = "json/build_publish_payload.json"
 SYMBOL_PLACEHOLDER = "7abcdef01234578abcdef7"
-BYTECODE_JSON_FILE = "json/split_bytecode.json"
+SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
+METADATA_K, CODE_K = "metadata", "code"
 
 SYMBOL_HEX_STRING_GOES_HERE = "bcs_serialized_SYMBOL_VECTOR_U8_HERE"
 
 # Mapping of named addresses to placeholder addresses for generating Move bytecode.
 random_addresses = [
     # coin_factory
-    "beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef",
-    # lp_coin_manager
-    "f00000000000000000000000000000000000000000000000000000000000000d",
+    "00000000abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef00000000",
+    # emojicoin_dot_fun
+    "11111111abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef11111111",
 ]
 NAMED_ADDRESSES = {
     COIN_FACTORY: random_addresses[0],
-    "lp_coin_manager": random_addresses[1],
+    "emojicoin_dot_fun": random_addresses[1],
 }
 
 
@@ -63,13 +63,34 @@ def split_and_replace_named_addresses(
     return lines_to_replace
 
 
+def compare_contents_and_log(fp: Path, new_data: dict[str, list[str]]) -> None:
+    metadata_bytes_changed = False
+    module_bytes_changed = False
+
+    if fp.exists():
+        old_data = json.load(open(fp))
+        assert METADATA_K in new_data and CODE_K in new_data
+        metadata_bytes_changed = new_data[METADATA_K] != old_data.get(METADATA_K, [])
+        module_bytes_changed = new_data[CODE_K] != old_data.get(CODE_K, [])
+
+    if metadata_bytes_changed:
+        print(f"[INFO]: The {METADATA_K} bytecode has changed.")
+    else:
+        print(f"[INFO]: No changes detected in the {METADATA_K} bytecode.")
+    if module_bytes_changed:
+        print(f"[INFO]: The {CODE_K} bytecode has changed.")
+    else:
+        print(f"[INFO]: No changes detected in the {CODE_K} bytecode.")
+
+
 # To run this script you must:
 #  - Have the `aptos` CLI installed
 #  - Run this script from the coin factory module directory (where the `Move.toml` is)
 if __name__ == "__main__":
-    json_path = ensure_parent_directories_exist(JSON_FILE_PATH)
+    json_path = ensure_parent_directories_exist(PACKAGE_BYTECODE_PATH)
     named_addresses_args = ",".join([f"{k}={v}" for k, v in NAMED_ADDRESSES.items()])
-    _ = subprocess.run(
+    file_contents_last_updated = os.path.getmtime(PACKAGE_BYTECODE_PATH)
+    asdf = subprocess.run(
         [
             "aptos",
             "move",
@@ -82,17 +103,32 @@ if __name__ == "__main__":
             "--included-artifacts=none",
         ],
     )
+    print()
+    print("----------" * 10)
+    if file_contents_last_updated == os.path.getmtime(PACKAGE_BYTECODE_PATH):
+        print(
+            "[ERROR]:",
+            f"{PACKAGE_BYTECODE_PATH}",
+            "was not updated with new bytecode. Exiting...",
+        )
+        exit(1)
+    else:
+        print(
+            "[SUCCESS]:",
+            "Successfully compiled package.",
+            "Replacing relevant bytecode...",
+        )
 
-    d = json.load(open(json_path))
+    cli_json_publish_output = json.load(open(json_path))
 
-    metadata: str = d["args"][0]["value"]
+    metadata: str = cli_json_publish_output["args"][0]["value"]
     len_metadata = len(metadata)
     if metadata.startswith("0x"):
         metadata = metadata[2:]
 
     metadata_lines = split_and_replace_named_addresses([metadata], NAMED_ADDRESSES)
 
-    bytecode_array: list[str] = d["args"][1]["value"]
+    bytecode_array: list[str] = cli_json_publish_output["args"][1]["value"]
     assert len(bytecode_array) == 1
     bytecode = bytecode_array[0]
     len_bytecode = len(bytecode_array[0])
@@ -120,11 +156,13 @@ if __name__ == "__main__":
     bytecode_lines = split_and_replace(bytecode, sym_bytecode, sym_msg)
     bytecode_lines = split_and_replace_named_addresses(bytecode_lines, NAMED_ADDRESSES)
 
-    d = {
-        "metadata": metadata_lines,
-        "bytecode": bytecode_lines,
+    new_data: dict[str, list[str]] = {
+        METADATA_K: metadata_lines,
+        CODE_K: bytecode_lines,
     }
-    bytecode_json_path = ensure_parent_directories_exist(BYTECODE_JSON_FILE)
-    json.dump(d, open(bytecode_json_path, "w"), indent=2)
+    split_bytecode_path = ensure_parent_directories_exist(SPLIT_BYTECODE_PATH)
 
-    print(f"[SUCCESS]: Output bytecode contents to {bytecode_json_path}")
+    compare_contents_and_log(split_bytecode_path, new_data)
+    json.dump(new_data, open(split_bytecode_path, "w"), indent=2)
+
+    print(f"[SUCCESS]: Output bytecode contents to {split_bytecode_path}")
