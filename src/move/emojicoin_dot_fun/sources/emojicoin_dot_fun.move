@@ -7,6 +7,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_framework::event;
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
+    use aptos_std::table::{Self, Table};
     use emojicoin_dot_fun::hex_codes;
     use std::bcs;
     use std::string;
@@ -74,7 +75,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[resource_group = ObjectGroup]
     struct Registry has key {
         registry_address: address,
-        supported_emojis: SmartTable<vector<u8>, u8>,
+        supported_emojis: Table<vector<u8>, u8>,
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
@@ -317,17 +318,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         move_to(emojicoin_dot_fun, RegistryAddress { registry_address });
         let registry = Registry {
             registry_address,
-            supported_emojis: smart_table::new(),
+            supported_emojis: table::new(),
             markets_by_emoji_bytes: smart_table::new(),
             markets_by_market_id: smart_table::new(),
             extend_ref,
         };
 
-        smart_table::add_all(
-            &mut registry.supported_emojis,
-            hex_codes::get_all(),
-            hex_codes::get_zeroed_vector(),
-        );
+        // Load supported emojis into registry.
+        vector::for_each_ref(&hex_codes::get_supported_emojis(), |emoji_bytes_ref| {
+            table::add(&mut registry.supported_emojis, *emoji_bytes_ref, 0);
+        });
         move_to(&registry_signer, registry);
     }
 
@@ -337,7 +337,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     public fun is_a_supported_emoji(hex_bytes: vector<u8>): bool acquires Registry, RegistryAddress {
         let registry_address = borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address;
         let registry = borrow_global<Registry>(registry_address);
-        smart_table::contains(&registry.supported_emojis, hex_bytes)
+        table::contains(&registry.supported_emojis, hex_bytes)
     }
 
     #[view]
