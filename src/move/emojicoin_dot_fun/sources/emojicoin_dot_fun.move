@@ -185,6 +185,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         *emoji_type != *lp_type
     }
 
+    inline fun assert_valid_coin_types<CoinType, LP_CoinType>(market_address: address) {
+        assert!(
+            exists<LPCoinCapabilities<CoinType, LP_CoinType>>(market_address),
+            E_INVALID_COIN_TYPES
+        );
+    }
+
     inline fun ensure_coins_initialized<CoinType, LP_CoinType>(
         market_ref: &Market,
         market_signer: &signer,
@@ -329,6 +336,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         quote_amount: u64,
     ) acquires LPCoinCapabilities, Market {
         let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
+        assert_valid_coin_types<B, LP>(market_address);
         let provider_address = signer::address_of(provider);
         let event = simulate_provide_liquidity_inner(
             provider_address,
@@ -357,6 +365,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         lp_coin_amount: u64,
     ) acquires LPCoinCapabilities, Market {
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
+        assert_valid_coin_types<B, LP>(market_address);
         let provider_address = signer::address_of(provider);
         let event = simulate_remove_liquidity_inner<B, Q>(
             provider_address,
