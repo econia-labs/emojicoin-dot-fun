@@ -21,6 +21,7 @@ module coin_factory::coin_factory {
     const EMOJICOIN_LP_NAME_SUFFIX: vector<u8> = b" emojicoin LP";
 
     fun init_module(market: &signer) {
+
         // Decode symbol.
         let symbol_flag = SYMBOL_FLAG; // Load once to minimize gas.
         let encoded_symbol_length = (*vector::borrow(&symbol_flag, 0) as u64);
