@@ -12,7 +12,7 @@ SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
 SYMBOL_PLACEHOLDER = "aaaaaaaaaaaaaaaaaaaaaa"
 METADATA_K, CODE_K = "metadata", "code"
 
-SYMBOL_HEX_STRING_GOES_HERE = "bcs_serialized_SYMBOL_VECTOR_U8_HERE"
+SYMBOL_HEX_STRING_GOES_HERE = "Interpolate the BCS encoding of the symbol here."
 
 # Mapping of named addresses to placeholder addresses for generating Move bytecode.
 named_addresses = [
