@@ -1,11 +1,11 @@
 ---
 jobs:
-  run-tests:
+  ts-run-tests:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v3'
-    - uses: './.github/actions/run-tests'
-name: 'Run emojicoin dot fun TypeScript E2E and unit tests with a local testnet'
+    - uses: './.github/actions/ts-run-tests'
+name: 'Run the TypeScript E2E and unit tests with a local testnet'
 'on':
   pull_request:
     types: |

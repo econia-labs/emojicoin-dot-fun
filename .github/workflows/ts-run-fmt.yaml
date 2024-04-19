@@ -1,0 +1,21 @@
+---
+jobs:
+  ts-run-fmt:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v3'
+    - uses: './.github/actions/ts-run-fmt'
+name: 'Run the TypeScript formatter'
+'on':
+  pull_request:
+    types: |
+      labeled
+      opened
+      synchronize
+      reopened
+      auto_merge_enabled
+  push:
+    branches:
+    - 'main'
+  workflow_dispatch: null
+...
