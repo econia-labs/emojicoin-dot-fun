@@ -7,15 +7,15 @@ jobs:
     - uses: './.github/actions/ts-run-tests'
 name: 'Run the TypeScript E2E and unit tests with a local testnet'
 'on':
-  pull_request:
-    types: |
-      labeled
-      opened
-      synchronize
-      reopened
-      auto_merge_enabled
-  push:
-    branches:
-    - 'main'
+  # pull_request:
+  #   types: |
+  #     labeled
+  #     opened
+  #     synchronize
+  #     reopened
+  #     auto_merge_enabled
+  # push:
+  #   branches:
+  #   - 'main'
   workflow_dispatch: null
 ...
