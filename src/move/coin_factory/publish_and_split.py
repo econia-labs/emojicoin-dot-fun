@@ -11,8 +11,6 @@ PACKAGE_BYTECODE_PATH = "json/build_publish_payload.json"
 SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
 METADATA_K, CODE_K = "metadata", "code"
 
-SYMBOL_HEX_STRING_GOES_HERE = "Interpolate the BCS encoding of the symbol here."
-
 # Mapping of named addresses to placeholder addresses for generating Move bytecode.
 named_addresses = [
     # coin_factory
