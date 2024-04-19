@@ -113,6 +113,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         results_in_state_transition: bool,
     }
 
+    #[resource_group = ObjectGroup]
     struct LPCoinCapabilities<phantom CoinType, phantom LP_CoinType> has key {
         burn: BurnCapability<LP_CoinType>,
         mint: MintCapability<LP_CoinType>,
@@ -226,8 +227,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 MONITOR_SUPPLY
             );
             let emojicoins = coin::mint<CoinType>(EMOJICOIN_SUPPLY, &mint_cap);
-            coin::register<CoinType>(market_signer);
-            coin::deposit(market_address, emojicoins);
+            aptos_account::deposit_coins(market_address, emojicoins);
             coin::destroy_freeze_cap(freeze_cap);
             coin::destroy_mint_cap(mint_cap);
             coin::destroy_burn_cap(burn_cap);
@@ -287,7 +287,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_ref_mut,
         );
         let quote;
-        coin::register<B>(swapper);
+        coin::register<B>(swapper); // In case user calls swap sell but hasn't registered store.
         if (input_is_base) { // If selling, no possibility of state transition.
             coin::transfer<B>(swapper, market_address, input_amount);
             let quote_leaving_market = event.quote_volume + event.integrator_fee;
