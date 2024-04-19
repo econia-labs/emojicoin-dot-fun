@@ -15,11 +15,11 @@ from colorama import Fore, init
 import utils
 
 CASE_REGEXES = {
-    "camelCase": r"^([a-z]+[a-zA-Z0-9]*)?(\.\w+)?$",
-    "snake_case": r"^(_*[a-z]+[a-z0-9_]*)?(\.\w+)?$",
-    "kebab-case": r"^([a-z]+[a-z0-9\-]*)?(\.\w+)?$",
-    "PascalCase": r"^([A-Z]+[a-zA-Z0-9]*)?(\.\w+)?$",
-    "UPPER_CASE": r"^(_*[A-Z]+[A-Z0-9_]*)?(\.\w+)?$",
+    "camelCase": r"^([a-z]+[a-zA-Z0-9]*)$",
+    "snake_case": r"^(_*[a-z]+[a-z0-9_]*)$",
+    "kebab-case": r"^([a-z]+[a-z0-9\-]*)$",
+    "PascalCase": r"^([A-Z]+[a-zA-Z0-9]*)$",
+    "UPPER_CASE": r"^(_*[A-Z]+[A-Z0-9_]*)$",
     "*": r"^.*$",
 }
 
@@ -61,27 +61,25 @@ def main():
         sys.exit(1)
 
     # The files are passed as arguments from the pre-commit hook.
-    files = sys.argv[1:]
+    files = [Path(p) for p in sys.argv[1:]]
 
     # Check the user-supplied file name conventions against each file.
     invalid_file_names = False
     for file_path in files:
-        # Get the file extension and handle the case where there isn't
-        # one. Then get the case by its extension and the regex by its case.
-        extension = file_path.split(".")[-1] if "." in file_path else ""
+        extension = "".join(file_path.suffixes)
         case = filetypes.get(extension, default_case)
         regex = CASE_REGEXES.get(case, default_case)
 
-        filename = Path(file_path).name
-        if filename in ignore_files:
+        if file_path.name in ignore_files:
             continue
 
         # Check the file name as a Path object against the regex pattern.
-        if not re.match(regex, filename):
-            file_dir = os.path.dirname(file_path) + "/"
-            file_name = os.path.basename(file_path)
-            colored_dir = Fore.LIGHTBLACK_EX + file_dir
-            colored_fp = Fore.LIGHTWHITE_EX + file_name
+        just_file_name = file_path.name.rstrip(extension)
+        if not re.match(regex, just_file_name):
+            print(just_file_name)
+            file_dir = file_path.parent
+            colored_dir = Fore.LIGHTBLACK_EX + str(file_dir) + "/"
+            colored_fp = Fore.LIGHTWHITE_EX + file_path.name
             colored_case = Fore.YELLOW + case
             colored_default_msg = Fore.LIGHTBLACK_EX + "(default)"
             print(ERROR_STRING, end="")
