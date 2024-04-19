@@ -145,6 +145,7 @@ repos:
     - '--config-file'
     - 'cfg/yamllint-config.yaml'
     - '--strict'
+    exclude: 'src/typescript/pnpm-lock.yaml'
     id: 'yamllint'
   repo: 'https://github.com/adrienverge/yamllint'
   rev: 'v1.35.1'
