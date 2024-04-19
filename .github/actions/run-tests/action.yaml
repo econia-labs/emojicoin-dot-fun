@@ -1,0 +1,36 @@
+# cspell:word TMPDIR
+---
+description: |
+  Run the emojicoin dot fun TypeScript E2E and unit tests on a local network
+name: 'Run Typescript E2E tests'
+runs:
+  steps:
+  # Install node and pnpm.
+  - uses: 'actions/setup-node@v3'
+    with:
+      node-version-file: '.node-version'
+      registry-url: 'https://registry.npmjs.org'
+  - uses: 'pnpm/action-setup@v2'
+    with:
+      version: '8.9.0'
+  # Run package install. If install fails, it probably means the updated
+  # lockfile was not included in the commit.
+  - run: 'pnpm install --frozen-lockfile'
+    shell: 'bash'
+  - env:
+      # This is important for ensuring that any temporary directories are
+      # created in a location that actually supports mounting.
+      # See here: https://stackoverflow.com/a/76523941/3846032.
+      TMPDIR: '${{ runner.temp }}'
+    name: 'sdk-pnpm-test'
+    uses: 'nick-fields/retry@7f8f3d9f0f62fe5925341be21c2e8314fd4f7c7c' # pin@v2
+    with:
+      command: 'pnpm run test'
+      max_attempts: 3
+      timeout_minutes: 25
+  - if: 'failure()'
+    name: 'Print local testnet logs on failure'
+    run: 'cat ${{ runner.temp }}/local-testnet-logs.txt'
+    shell: 'bash'
+  using: 'composite'
+...
