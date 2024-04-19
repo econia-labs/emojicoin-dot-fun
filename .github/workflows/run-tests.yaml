@@ -17,4 +17,5 @@ name: 'Run emojicoin dot fun TypeScript E2E and unit tests with a local testnet'
   push:
     branches:
     - 'main'
+  workflow_dispatch: null
 ...
