@@ -7,15 +7,12 @@ git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
-# Link the stub package implementation here instead of the real package.
 [dependencies.EmojicoinDotFun]
 local = "../emojicoin_dot_fun"
 
 [dev-addresses]
-# These addresses are not valid, they are solely for easily finding
-# and replacing named addresses in the compiled bytecode.
-coin_factory = "0xc001d00d"
-emojicoin_dot_fun = "0xbeefd00d"
+coin_factory = "0xbbbbbbbb"
+emojicoin_dot_fun = "0xcccccccc"
 
 [package]
 name = "CoinFactory"

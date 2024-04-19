@@ -6,23 +6,21 @@ import subprocess
 from pathlib import Path
 
 COIN_FACTORY = "coin_factory"
+EMOJICOIN_DOT_FUN = "emojicoin_dot_fun"
 PACKAGE_BYTECODE_PATH = "json/build_publish_payload.json"
-SYMBOL_PLACEHOLDER = "7abcdef01234578abcdef7"
 SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
 METADATA_K, CODE_K = "metadata", "code"
 
-SYMBOL_HEX_STRING_GOES_HERE = "bcs_serialized_SYMBOL_VECTOR_U8_HERE"
-
 # Mapping of named addresses to placeholder addresses for generating Move bytecode.
-random_addresses = [
+named_addresses = [
     # coin_factory
-    "00000000abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef00000000",
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
     # emojicoin_dot_fun
-    "11111111abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef11111111",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
 ]
 NAMED_ADDRESSES = {
-    COIN_FACTORY: random_addresses[0],
-    "emojicoin_dot_fun": random_addresses[1],
+    COIN_FACTORY: named_addresses[0],
+    EMOJICOIN_DOT_FUN: named_addresses[1],
 }
 
 
@@ -56,7 +54,7 @@ def split_and_replace_named_addresses(
             spl_replaced = split_and_replace(
                 spl,
                 addr,
-                f"@{named_addr}: interpolate the BCS-serialized address here...",
+                f"Interpolate the BCS encoding of address @{named_addr} here.",
             )
             lines.extend(spl_replaced)
         lines_to_replace = lines.copy()
@@ -89,7 +87,10 @@ def compare_contents_and_log(fp: Path, new_data: dict[str, list[str]]) -> None:
 if __name__ == "__main__":
     json_path = ensure_parent_directories_exist(PACKAGE_BYTECODE_PATH)
     named_addresses_args = ",".join([f"{k}={v}" for k, v in NAMED_ADDRESSES.items()])
-    file_contents_last_updated = os.path.getmtime(PACKAGE_BYTECODE_PATH)
+    try:
+        file_contents_last_updated = os.path.getmtime(PACKAGE_BYTECODE_PATH)
+    except FileNotFoundError:
+        file_contents_last_updated = 0
     asdf = subprocess.run(
         [
             "aptos",
@@ -135,26 +136,10 @@ if __name__ == "__main__":
     if bytecode.startswith("0x"):
         bytecode = bytecode[2:]
 
-    assert SYMBOL_PLACEHOLDER not in metadata
-
     assert NAMED_ADDRESSES[COIN_FACTORY] not in metadata
     assert NAMED_ADDRESSES[COIN_FACTORY] in bytecode
 
-    # The vector<u8> byte length is prepended to the actual symbol value
-    # in the bytecode. We need to remove/replace this value when publishing as well.
-    symbol_len_bytes_as_hex = hex(len(bytes.fromhex(SYMBOL_PLACEHOLDER)))[2:].zfill(2)
-    # It's a vector of vectors, so we need to serialize the bytes following it as
-    # if it's a vector of u8s, meaning we prepend the entire length of the inner vector.
-    # plus the one byte for the byte denoting the length of the inner vector.
-    outer_vector_bytes_as_hex = hex(int(symbol_len_bytes_as_hex, 16) + 1)[2:].zfill(2)
-
-    sym_bytecode = (
-        f"{outer_vector_bytes_as_hex}{symbol_len_bytes_as_hex}{SYMBOL_PLACEHOLDER}"
-    )
-    sym_msg = SYMBOL_HEX_STRING_GOES_HERE
-
-    bytecode_lines = split_and_replace(bytecode, sym_bytecode, sym_msg)
-    bytecode_lines = split_and_replace_named_addresses(bytecode_lines, NAMED_ADDRESSES)
+    bytecode_lines = split_and_replace_named_addresses([bytecode], NAMED_ADDRESSES)
 
     new_data: dict[str, list[str]] = {
         METADATA_K: metadata_lines,
