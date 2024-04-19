@@ -9,7 +9,6 @@ COIN_FACTORY = "coin_factory"
 EMOJICOIN_DOT_FUN = "emojicoin_dot_fun"
 PACKAGE_BYTECODE_PATH = "json/build_publish_payload.json"
 SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
-SYMBOL_PLACEHOLDER = "aaaaaaaaaaaaaaaaaaaaaa"
 METADATA_K, CODE_K = "metadata", "code"
 
 SYMBOL_HEX_STRING_GOES_HERE = "Interpolate the BCS encoding of the symbol here."
@@ -139,26 +138,10 @@ if __name__ == "__main__":
     if bytecode.startswith("0x"):
         bytecode = bytecode[2:]
 
-    assert SYMBOL_PLACEHOLDER not in metadata
-
     assert NAMED_ADDRESSES[COIN_FACTORY] not in metadata
     assert NAMED_ADDRESSES[COIN_FACTORY] in bytecode
 
-    # The vector<u8> byte length is prepended to the actual symbol value
-    # in the bytecode. We need to remove/replace this value when publishing as well.
-    symbol_len_bytes_as_hex = hex(len(bytes.fromhex(SYMBOL_PLACEHOLDER)))[2:].zfill(2)
-    # It's a vector of vectors, so we need to serialize the bytes following it as
-    # if it's a vector of u8s, meaning we prepend the entire length of the inner vector.
-    # plus the one byte for the byte denoting the length of the inner vector.
-    outer_vector_bytes_as_hex = hex(int(symbol_len_bytes_as_hex, 16) + 1)[2:].zfill(2)
-
-    sym_bytecode = (
-        f"{outer_vector_bytes_as_hex}{symbol_len_bytes_as_hex}{SYMBOL_PLACEHOLDER}"
-    )
-    sym_msg = SYMBOL_HEX_STRING_GOES_HERE
-
-    bytecode_lines = split_and_replace(bytecode, sym_bytecode, sym_msg)
-    bytecode_lines = split_and_replace_named_addresses(bytecode_lines, NAMED_ADDRESSES)
+    bytecode_lines = split_and_replace_named_addresses([bytecode], NAMED_ADDRESSES)
 
     new_data: dict[str, list[str]] = {
         METADATA_K: metadata_lines,

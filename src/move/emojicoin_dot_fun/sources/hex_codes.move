@@ -4,8 +4,6 @@ module emojicoin_dot_fun::hex_codes {
     use std::bcs;
     friend emojicoin_dot_fun::emojicoin_dot_fun;
 
-    const EXPECTED_FULL_SYMBOL_LENGTH: u8 = 11;
-
     public(friend) inline fun get_supported_emojis(): vector<vector<u8>> {
 
         vector<vector<u8>> [
@@ -2316,94 +2314,58 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
-    /// The bytecode changes when the length of the emoji bytes vector changes, so the `SYMBOL_FLAG`
-    /// from the coin factory is taken to have a fixed length of 11 bytes. The first byte denotes
-    /// the number of subsequent emoji bytes to include in the symbol. After emoji bytes, pad with
-    /// zeroes.
-    public(friend) inline fun encode_symbol(
-        emoji_bytes: vector<u8>,
-    ): vector<u8> {
-        let symbol = bcs::to_bytes(&emoji_bytes);
-        let symbol_length = (vector::length(&symbol) as u8);
-        let padding_len = EXPECTED_FULL_SYMBOL_LENGTH - symbol_length;
-        for (i in 0..padding_len) {
-            vector::push_back(&mut symbol, 0);
-        };
-        symbol
-    }
-
-    public(friend) inline fun get_publish_code(
-        publisher_address: address,
-        symbol: vector<u8>,
-    ): (vector<u8>, vector<vector<u8>>) {
-        let symbol = encode_symbol(symbol);
-
-        // Interpolate into metadata.
-        let metadata_bytes = vector<vector<u8>>[
-            x"0b436f696e466163746f72790200000000000000004031444430443532333633453033344637323837313744463030414342353334433241343746374146313432414530423933304134363533333434344633444641f7011f8b08000000000002ff7d50cb6ec32010bcf31511f760f75aa987aaad7f22b2ac35ac1d1ac3221e6efaf7059bf412257b62869961d81328e531040c3d93a4ed30818ce47f0f6f073e708686bef5c62b8ac3946ce5d949a143abd04a8d41bcbb48a1f360f087fca567b38e45788ed185d7a6c9f09c4621c9345094c705c6508f923c8a2ce0cce35a4c06b4b5987148a3d2be50bbd2d08acd747ba4dafff15da7af5bf54f8a5db23d5b48c252e28468eefeb5dbd7e39375b4d7b1ce83bdb45759a7a439901798b16736372cd71f59deed719c25377b5038385ab4dce2b53129c2b820672bfaa069cb7c11ad6839fb036f6f8134a7010000010c636f696e5f666163746f72790000000400000000000000000000000000000000000000000000000000000000000000010e4170746f734672616d65776f726b00000000000000000000000000000000000000000000000000000000000000010b4170746f735374646c696200000000000000000000000000000000000000000000000000000000000000010a4d6f76655374646c6962",
+    inline fun get_split_metadata_bytes(): vector<vector<u8>> {
+        vector<vector<u8>> [
+            // For testing purposes, note that the bytes marked below are the upgrade policy.
+            //                        vv   00 == unrestricted, 01 == compatible, 02 == immutable
+            x"0b436f696e466163746f72790200000000000000004045343632464342353243444532383332423539373445423344384637434230303043363642433646323834393930334137464333334243363332423736354545f7011f8b08000000000002ff7d50cb6ec32010bcf31511f760f75aa987aaad7f22b2ac35ac1d1ac3221e6efaf7059bf412257b62869961d81328e531040c3d93a4ed30818ce47f0f6f073e708686bef5c62b8ac3946ce5d949a143abd04a8d41bcbb48a1f360f087fca567b38e45788ed185d7a6c9f09c4621c9345094c705c6508f923c8a2ce0cce35a4c06b4b5987148a3d2be50bbd2d08acd747ba4dafff15da7af5bf54f8a5db23d5b48c252e28468eefeb5dbd7e39375b4d7b1ce83bdb45759a7a439901798b16736372cd71f59deed719c25377b5038385ab4dce2b53129c2b820672bfaa069cb7c11ad6839fb036f6f8134a7010000010c636f696e5f666163746f72790000000400000000000000000000000000000000000000000000000000000000000000010e4170746f734672616d65776f726b00000000000000000000000000000000000000000000000000000000000000010b4170746f735374646c696200000000000000000000000000000000000000000000000000000000000000010a4d6f76655374646c6962",
             // Interpolate the BCS encoding of address @emojicoin_dot_fun here.
             x"0f456d6f6a69636f696e446f7446756e00",
-        ];
-        let replaced_metadata = vector<u8>[];
+        ]
+    }
+
+    inline fun get_split_module_bytes(): vector<vector<u8>> {
+        vector<vector<u8>> [
+            x"a11ceb0b0600000005010002020208070a2f0839200a590a000000010000000200000c636f696e5f666163746f727909456d6f6a69636f696e0b456d6f6a69636f696e4c500b64756d6d795f6669656c64",
+            // Interpolate the BCS encoding of address @coin_factory here.
+            x"0002010301010201030100",
+        ]
+    }
+
+    public(friend) inline fun get_publish_code(publisher_addr: address): (vector<u8>, vector<u8>) {
+        // Interpolate into metadata.
+        let metadata_bytes = get_split_metadata_bytes();
+        let replaced_metadata = vector<u8> [];
         vector::reverse(&mut metadata_bytes);
         vector::append(&mut replaced_metadata, vector::pop_back(&mut metadata_bytes));
         vector::append(&mut replaced_metadata, bcs::to_bytes(&@emojicoin_dot_fun));
         vector::append(&mut replaced_metadata, vector::pop_back(&mut metadata_bytes));
 
         // Interpolate into module bytecode.
-        let module_bytecode = vector<vector<u8>>[
-            x"a11ceb0b060000000b01000c020c24033045047514058901a20107ab02bc0208e7046006c70542108906310aba060a0cc406d9010000010101020103010402050006000000070000020a05010001020b04010001020c05010001020d05010001040e07000008000100040f040500041006010002110809010002120a0b01000313000c0001140d01010002150e01010002160f0101000217100101000218000101000519130102000003070407060707070807090703110a1107110b1201060c0012060c060c0103030b020108000b020108010b03010800030b040108000b040108010b050108000b050108010806080608060a020a020102010a02010806020708060a0201080005060c080608060201030b020109000b040109000b050109000203060b05010900010b03010900010502050b03010900010b04010900010b05010900010b02010900010801020800080103060c0b020109010b050109010c636f696e5f666163746f72790d6170746f735f6163636f756e7404636f696e067369676e657206737472696e6711656d6f6a69636f696e5f646f745f66756e09456d6f6a69636f696e0b456d6f6a69636f696e4c500b696e69745f6d6f64756c650b64756d6d795f6669656c640e4275726e4361706162696c69747904436f696e10467265657a654361706162696c6974790e4d696e744361706162696c69747906537472696e6704757466380b617070656e645f757466380a696e697469616c697a65046d696e740a616464726573735f6f660d6465706f7369745f636f696e731264657374726f795f667265657a655f6361701064657374726f795f6d696e745f6361701064657374726f795f6275726e5f6361700872656769737465721a73746f72655f6c705f636f696e5f6361706162696c6974696573",
-            // Interpolate the BCS encoding of address @coin_factory here.
-            x"0000000000000000000000000000000000000000000000000000000000000001",
-            // Interpolate the BCS encoding of address @emojicoin_dot_fun here.
-            x"0201080a020e0d20656d6f6a69636f696e204c500a020b0a20656d6f6a69636f696e03080000eda49db83e060101010a02",
-            // Interpolate the BCS encoding of the symbol here.
-            x"0a020100126170746f733a3a6d657461646174615f76311d010000eda49db83e0610454d4f4a49434f494e5f535550504c590000000002010901010201090100000000026007050c120e12060000000000000000420314340c0907060c110601000000000000000c05090c030b09060100000000000000160c040a0304190b05060100000000000000160c05051b080c030a050a042304260d110e120a05420314440305120b1111010c0e0a000c010a0e0c0f0d0f070211020b010b0f0a0e0700070438000c0c0c0a0c0607030e0c38010c080a0011050b0838020b0a38030b0c38040b0638050a000c020a0e0c100d10070111020b020b100b0e0700070438060c0d0c0b0c070a0038070b0b38080b000b070b0d38090200",
-        ];
-        let replaced_bytecode = vector<u8>[];
+        let module_bytecode = get_split_module_bytes();
+        let replaced_bytecode = vector<u8> [];
         vector::reverse(&mut module_bytecode);
         vector::append(&mut replaced_bytecode, vector::pop_back(&mut module_bytecode));
-        vector::append(&mut replaced_bytecode, bcs::to_bytes(&publisher_address));
-        vector::append(&mut replaced_bytecode, vector::pop_back(&mut module_bytecode));
-        vector::append(&mut replaced_bytecode, bcs::to_bytes(&@emojicoin_dot_fun));
-        vector::append(&mut replaced_bytecode, vector::pop_back(&mut module_bytecode));
-        let inner = bcs::to_bytes(&symbol);
-        vector::append(&mut replaced_bytecode, bcs::to_bytes(&inner));
+        vector::append(&mut replaced_bytecode, bcs::to_bytes(&publisher_addr));
         vector::append(&mut replaced_bytecode, vector::pop_back(&mut module_bytecode));
 
-        (replaced_metadata, vector<vector<u8>>[replaced_bytecode])
-    }
-
-    #[test_only]
-    public(friend) fun get_EXPECTED_FULL_SYMBOL_LENGTH(): u8 {
-        EXPECTED_FULL_SYMBOL_LENGTH
+        (replaced_metadata, replaced_bytecode)
     }
 
     #[test]
-    fun test_encode_symbol() {
-        let symbols = vector<vector<u8>> [
-            x"e29895",
-            x"f09fa587",
-            x"f09f85b0efb88f",
-            x"f09f91bcf09f8fbd",
-            x"f09f8f87f09f8fbd",
-            x"f09f90a6e2808de2ac9b",
-            x"f09f9088e2808de2ac9b",
-        ];
+    fun test_get_publish_code() {
+        let publisher_address = @0x0000012345789abcdef012345789abcdef012345789abcdef012345789abcdef;
+        let (metadata_bytecode, module_bytecode) = get_publish_code(publisher_address);
+        assert!(@emojicoin_dot_fun == @0xc0de, 0);
 
-        let expected_encoded = vector<vector<u8>> [
-            x"03e2989500000000000000",
-            x"04f09fa587000000000000",
-            x"07f09f85b0efb88f000000",
-            x"08f09f91bcf09f8fbd0000",
-            x"08f09f8f87f09f8fbd0000",
-            x"0af09f90a6e2808de2ac9b",
-            x"0af09f9088e2808de2ac9b",
-        ];
+        let test_metadata_bytecode = *vector::borrow(&get_split_metadata_bytes(), 0);
+        vector::append(&mut test_metadata_bytecode, bcs::to_bytes(&@0xc0de));
+        vector::append(&mut test_metadata_bytecode, *vector::borrow(&get_split_metadata_bytes(), 1));
 
-        vector::zip(symbols, expected_encoded, |symbol, expected| {
-            assert!(encode_symbol(symbol) == expected, 0);
-            assert!(vector::length(&expected) == (EXPECTED_FULL_SYMBOL_LENGTH as u64), 1)
-        });
+        let test_module_bytecode = *vector::borrow(&get_split_module_bytes(), 0);
+        vector::append(&mut test_module_bytecode, bcs::to_bytes(&publisher_address));
+        vector::append(&mut test_module_bytecode, *vector::borrow(&get_split_module_bytes(), 1));
+        assert!(metadata_bytecode == test_metadata_bytecode, 1);
+        assert!(module_bytecode == test_module_bytecode, 2);
     }
 }
