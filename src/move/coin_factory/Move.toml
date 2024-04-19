@@ -1,6 +1,5 @@
 [addresses]
 coin_factory = "_"
-emojicoin_dot_fun = "_"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
