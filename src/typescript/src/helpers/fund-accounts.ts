@@ -2,11 +2,12 @@ import {
   type Aptos,
   type Account,
   MoveVector,
-  isUserTransactionResponse,
+  type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { ONE_APT } from "../utils";
 
-// Instead of funding each account individually, we fund one twice, then send coins from it to the rest
+// Instead of calling the faucet for each account, we fund one twice and have it distribute them
+// evenly among the rest with the `batch_transfer` function.
 // This results in 2 fund requests and 1 transaction instead of N fund requests. For running tests,
 // this saves 10-15 seconds each run.
 export async function fundAccounts(aptos: Aptos, accounts: Array<Account>) {
@@ -22,9 +23,7 @@ export async function fundAccounts(aptos: Aptos, accounts: Array<Account>) {
     amount: ONE_APT,
   });
   // Get the addresses for `accounts[1..n]`
-  const addressesRemaining = accounts
-    .slice(1)
-    .map((account) => account.accountAddress);
+  const addressesRemaining = accounts.slice(1).map((account) => account.accountAddress);
   const amountToSend = Math.floor((ONE_APT * 2) / accounts.length);
   // Send coins from `account[0]` to `account[1..n]`
   const transaction = await aptos.transaction.build.simple({
@@ -48,8 +47,5 @@ export async function fundAccounts(aptos: Aptos, accounts: Array<Account>) {
   const response = await aptos.waitForTransaction({
     transactionHash: transactionResponse.hash,
   });
-  if (!isUserTransactionResponse(response)) {
-    throw new Error("Expected user transaction response");
-  }
-  return response;
+  return response as UserTransactionResponse;
 }

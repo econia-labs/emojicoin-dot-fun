@@ -16,12 +16,9 @@ module.exports = {
   plugins: ["@typescript-eslint"],
   rules: {
     quotes: ["error", "double"],
-    "max-len": ["error", 140],
+    "max-len": ["error", 100],
     "import/extensions": ["error", "never"],
-    "import/no-commonjs": [
-      "error",
-      { allowRequire: false, allowPrimitiveModules: false },
-    ],
+    "import/no-commonjs": ["error", { allowRequire: false, allowPrimitiveModules: false }],
     "import/no-extraneous-dependencies": [
       "error",
       {
@@ -35,17 +32,9 @@ module.exports = {
     "import/prefer-default-export": "off",
     "object-curly-newline": "off",
     // Replacing airbnb rule with following, to re-enable "ForOfStatement"
-    "no-restricted-syntax": [
-      "error",
-      "ForInStatement",
-      "LabeledStatement",
-      "WithStatement",
-    ],
+    "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": "off",
-    "@typescript-eslint/no-use-before-define": [
-      "error",
-      { functions: false, classes: false },
-    ],
+    "@typescript-eslint/no-use-before-define": ["error", { functions: false, classes: false }],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
