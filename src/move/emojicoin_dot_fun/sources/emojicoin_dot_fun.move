@@ -1,7 +1,7 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_framework::aptos_account;
-    use aptos_framework::aptos_coin::{AptosCoin};
+    use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::code;
     use aptos_framework::coin::{Self, BurnCapability, Coin, MintCapability};
     use aptos_framework::event;
@@ -20,7 +20,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] use emojicoin_dot_fun::bad_coin_factory::{EmojicoinLP as BadModuleEmojicoinLP};
     #[test_only] use emojicoin_dot_fun::coin_factory::{Emojicoin as TestEmojicoin};
     #[test_only] use emojicoin_dot_fun::coin_factory::{EmojicoinLP as TestEmojicoinLP};
-    #[test_only] use emojicoin_dot_fun::coin_factory::{BadType};
+    #[test_only] use emojicoin_dot_fun::coin_factory::BadType;
 
     const MAX_SYMBOL_LENGTH: u8 = 10;
     const DECIMALS: u8 = 8;
@@ -34,8 +34,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
 
-    /// Denominated in AptosCoin.
-    const REGISTER_MARKET_FEE: u64 = 100_000_000;
+    /// Denominated in `AptosCoin`.
+    const MARKET_REGISTRATION_FEE: u64 = 100_000_000;
 
     // Generated automatically by blackpaper calculations script.
     const MARKET_CAP: u64 = 4_500_000_000_000;
@@ -70,6 +70,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_REMOVE_TOO_MANY_LP_COINS: u64 = 7;
     /// The type arguments passed in are invalid.
     const E_INVALID_COIN_TYPES: u64 = 8;
+    /// Provided bytes do not indicate a supported emoji.
+    const E_NOT_SUPPORTED_EMOJI: u64 = 9;
+    /// Too many bytes in emoji symbol.
+    const E_EMOJI_BYTES_TOO_LONG: u64 = 10;
+    /// Market is already registered.
+    const E_ALREADY_REGISTERED: u64 = 11;
+    /// Account is unable to pay market registration fee.
+    const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 12;
 
     struct Reserves has copy, drop, store {
         base: u64,
@@ -136,41 +144,59 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     public entry fun register_market(
-        sender: &signer,
-        emojis: vector<vector<u8>>
+        registrant: &signer,
+        emojis: vector<vector<u8>>,
+        integrator: address,
     ) acquires Registry, RegistryAddress {
-        let (can_register, emoji_bytes) = can_market_be_registered(sender, emojis);
-        if (!can_register) {
-            return
+        // Verify well-formed emoji bytes.
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let supported_emojis_ref = &registry_ref_mut.supported_emojis;
+        let emoji_bytes = vector[];
+        for (i in 0..vector::length(&emojis)) {
+            let emoji = *vector::borrow(&emojis, i);
+            assert!(table::contains(supported_emojis_ref, emoji), E_NOT_SUPPORTED_EMOJI);
+            vector::append(&mut emoji_bytes, emoji);
         };
+        assert!(vector::length(&emoji_bytes) <= (MAX_SYMBOL_LENGTH as u64), E_EMOJI_BYTES_TOO_LONG);
 
-        // NOTE: Do not silently return after here; the rest of this function has side effects.
+        // Verify market is not already registered.
+        let markets_by_emoji_bytes_ref_mut = &mut registry_ref_mut.markets_by_emoji_bytes;
+        let already_registered = smart_table::contains(markets_by_emoji_bytes_ref_mut, emoji_bytes);
+        assert!(!already_registered, E_ALREADY_REGISTERED);
 
-        // Create the named Market object.
-        let registry = borrow_global<Registry>(get_registry_address());
-        let registry_signer = object::generate_signer_for_extending(&registry.extend_ref);
+        // Create market object.
+        let registry_signer = object::generate_signer_for_extending(&registry_ref_mut.extend_ref);
         let market_constructor_ref = object::create_named_object(&registry_signer, emoji_bytes);
-        let market_extend_ref = object::generate_extend_ref(&market_constructor_ref);
-        let market_signer = object::generate_signer_for_extending(&market_extend_ref);
         let market_address = object::address_from_constructor_ref(&market_constructor_ref);
-
-        create_market_and_add_to_registry(
-            &market_signer,
+        let market_signer = object::generate_signer(&market_constructor_ref);
+        let market_extend_ref = object::generate_extend_ref(&market_constructor_ref);
+        let market_id = 1 + smart_table::length(markets_by_emoji_bytes_ref_mut);
+        move_to(&market_signer, Market {
+            market_id,
             market_address,
             emoji_bytes,
-            market_extend_ref,
-        );
+            extend_ref: market_extend_ref,
+            clamm_virtual_reserves:
+                Reserves { base: BASE_VIRTUAL_FLOOR, quote: QUOTE_VIRTUAL_FLOOR },
+            cpamm_real_reserves: Reserves { base: 0, quote: 0 },
+            lp_coin_supply: 0,
+        });
 
-        // Interpolate the Market object address into the coin_factory.move bytecode, and then use
-        // that bytecode to publish the module with the market object's signer.
+        // Publish coin types at market address.
         let (metadata_bytecode, module_bytecode) = hex_codes::get_publish_code(market_address);
+        code::publish_package_txn(&market_signer, metadata_bytecode, vector[module_bytecode]);
 
-        code::publish_package_txn(
-            &market_signer,
-            metadata_bytecode,
-            vector<vector<u8>> [ module_bytecode ],
-        );
+        // Update registry.
+        smart_table::add(markets_by_emoji_bytes_ref_mut, emoji_bytes, market_address);
+        smart_table::add(&mut registry_ref_mut.markets_by_market_id, market_id, market_address);
 
+        // Charge registrant.
+        let registrant_address = signer::address_of(registrant);
+        let can_pay_fee =
+            coin::is_account_registered<AptosCoin>(registrant_address) &&
+            coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_FEE;
+        assert!(can_pay_fee, E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE);
+        aptos_account::transfer(registrant, integrator, MARKET_REGISTRATION_FEE);
     }
 
     inline fun valid_coin_types<CoinType, LP_CoinType>(market_address: address): bool {
@@ -487,32 +513,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun create_market_and_add_to_registry(
-        obj_signer: &signer,
-        market_address: address,
-        emoji_bytes: vector<u8>,
-        extend_ref: ExtendRef,
-    ) {
-        let registry = borrow_global_mut<Registry>(get_registry_address());
-        let market_id = 1 + smart_table::length(&registry.markets_by_emoji_bytes);
-        smart_table::add(&mut registry.markets_by_emoji_bytes, emoji_bytes, market_address);
-        smart_table::add(&mut registry.markets_by_market_id, market_id, market_address);
-
-        move_to(obj_signer, Market {
-            market_id,
-            market_address,
-            emoji_bytes,
-            extend_ref,
-            clamm_virtual_reserves: Reserves {
-                base: BASE_VIRTUAL_FLOOR,
-                quote: QUOTE_VIRTUAL_FLOOR,
-            },
-            cpamm_real_reserves: Reserves {
-                base: BASE_REAL_FLOOR,
-                quote: QUOTE_REAL_FLOOR,
-            },
-            lp_coin_supply: 0,
-        });
+    inline fun borrow_registry_ref_mut(): &mut Registry acquires Registry, RegistryAddress {
+        borrow_global_mut<Registry>(
+            borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address
+        )
     }
 
     inline fun burn_lp_coin_from<CoinType, LP_CoinType>(
@@ -538,41 +542,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ): Coin<LP_CoinType> acquires LPCoinCapabilities {
         let coin_caps = borrow_global<LPCoinCapabilities<CoinType, LP_CoinType>>(market_address);
         coin::mint<LP_CoinType>(amount, &coin_caps.mint)
-    }
-
-    inline fun can_market_be_registered(
-        sender: &signer,
-        emojis: vector<vector<u8>>,
-    ): (bool, vector<u8>) acquires Registry, RegistryAddress {
-        let num_emojis = vector::length(&emojis);
-        if (num_emojis == 0) {
-           (false, b"")
-        } else {
-            let sender_addr = signer::address_of(sender);
-            let insufficient_balance = coin::balance<AptosCoin>(sender_addr) < REGISTER_MARKET_FEE;
-            if (insufficient_balance) {
-                (false, b"")
-            } else {
-                let (is_well_formed, symbol_bytes) = ensure_multiple_emojis_well_formed(emojis);
-
-                if (!is_well_formed) {
-                    (false, b"")
-                } else {
-                    let opt_market_address = get_market_address(symbol_bytes);
-                    let is_registered_market = option::is_some(&opt_market_address);
-
-                    let utf8_string = string::utf8(symbol_bytes);
-                    let symbol_length = string::length(&utf8_string);
-                    let symbol_too_long = symbol_length > (MAX_SYMBOL_LENGTH as u64);
-
-                    if (symbol_too_long || is_registered_market) {
-                        (false, b"")
-                    } else {
-                        (true, symbol_bytes)
-                    }
-                }
-            }
-        }
     }
 
     inline fun simulate_swap_inner(
@@ -813,7 +782,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test, expected_failure(abort_code = E_SWAP_DIVIDE_BY_ZERO)]
     fun test_cpamm_simple_swap_output_amount_divide_by_zero() {
-        cpamm_simple_swap_output_amount(0, true, Reserves { base: 0, quote: 16});
+        cpamm_simple_swap_output_amount(0, true, Reserves { base: 0, quote: 16 });
     }
 
     #[test]
