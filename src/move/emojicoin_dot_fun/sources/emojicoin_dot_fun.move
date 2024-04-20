@@ -177,7 +177,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             emoji_bytes,
             extend_ref: market_extend_ref,
             clamm_virtual_reserves:
-                Reserves { base: BASE_VIRTUAL_FLOOR, quote: QUOTE_VIRTUAL_FLOOR },
+                Reserves { base: BASE_VIRTUAL_CEILING, quote: QUOTE_VIRTUAL_FLOOR },
             cpamm_real_reserves: Reserves { base: 0, quote: 0 },
             lp_coin_supply: 0,
         });
