@@ -2,7 +2,7 @@ import { Account, Network, isUserTransactionResponse } from "@aptos-labs/ts-sdk"
 import { getAptosClient } from "../../src/helpers/aptos-client";
 import { fundAccounts } from "../../src/helpers/fund-accounts";
 import { publishPackage } from "../../src/cli/publish";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src/utils/env";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
 
 jest.setTimeout(15000);
 
