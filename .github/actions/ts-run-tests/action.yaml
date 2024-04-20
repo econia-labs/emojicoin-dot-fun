@@ -8,24 +8,24 @@ runs:
   # Install node and pnpm.
   - uses: 'actions/setup-node@v3'
     with:
-      node-version-file: '.node-version'
+      node-version-file: 'src/typescript/.node-version'
       registry-url: 'https://registry.npmjs.org'
   - uses: 'pnpm/action-setup@v2'
     with:
       version: '8.9.0'
   # Run package install. If install fails, it probably means the updated
   # lockfile was not included in the commit.
-  - run: 'pnpm install --frozen-lockfile'
+  - run: 'cd src/typescript && pnpm install --frozen-lockfile'
     shell: 'bash'
   - env:
       # This is important for ensuring that any temporary directories are
       # created in a location that actually supports mounting.
       # See here: https://stackoverflow.com/a/76523941/3846032.
       TMPDIR: '${{ runner.temp }}'
-    name: 'sdk-pnpm-test'
+    name: 'pnpm-test'
     uses: 'nick-fields/retry@7f8f3d9f0f62fe5925341be21c2e8314fd4f7c7c' # pin@v2
     with:
-      command: 'pnpm run test'
+      command: 'cd src/typescript && pnpm run test'
       max_attempts: 3
       timeout_minutes: 25
   - if: 'failure()'

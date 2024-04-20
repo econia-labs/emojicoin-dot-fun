@@ -1,7 +1,8 @@
+require("dotenv").config();
 module.exports = async function () {
   // Check if the current local node process is
-  // from within the sdk node environment
-  if (process.env.RUN_LOCAL_NODE == "true" && globalThis.__LOCAL_NODE__.process) {
+  // from within this node testing environment
+  if (process.env.START_LOCAL_NODE_FOR_TEST == "true" && globalThis.__LOCAL_NODE__.process) {
     const aptosNode = globalThis.__LOCAL_NODE__;
     // Local node runs multiple processes, to avoid asynchronous operations
     // that weren't stopped in our tests, we kill all the descendent processes

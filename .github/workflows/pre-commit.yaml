@@ -51,5 +51,8 @@ jobs:
 name: 'pre-commit'
 'on':
   pull_request: null
+  push:
+    branches:
+    - 'main'
   workflow_dispatch: null
 ...

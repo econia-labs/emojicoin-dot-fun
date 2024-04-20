@@ -7,15 +7,9 @@ jobs:
     - uses: './.github/actions/ts-run-lint'
 name: 'Run the TypeScript linter'
 'on':
-  # pull_request:
-  #   types: |
-  #     labeled
-  #     opened
-  #     synchronize
-  #     reopened
-  #     auto_merge_enabled
-  # push:
-  #   branches:
-  #   - 'main'
+  pull_request: null
+  push:
+    branches:
+    - 'main'
   workflow_dispatch: null
 ...

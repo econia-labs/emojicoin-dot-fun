@@ -1,4 +1,4 @@
-import { Account, EntryFunctionPayloadResponse } from "@aptos-labs/ts-sdk";
+import { Account, type EntryFunctionPayloadResponse } from "@aptos-labs/ts-sdk";
 import { getAptosClient } from "../../src/helpers/aptos-client";
 
 import { fundAccounts } from "../../src/helpers/fund-accounts";
@@ -22,7 +22,8 @@ describe("tests a simple faucet fund account request", () => {
 
     // Sends two fund requests to the first account and splits it up between the rest.
     const fundResponse = await fundAccounts(aptos, [account]);
-    const gasUsed = Number(fundResponse.gas_unit_price) * Number(fundResponse.gas_used);
+    const gasUsed =
+      Number(fundResponse.gas_unit_price) * Number(fundResponse.gas_used);
 
     const balance = await aptos.getAccountAPTAmount({
       accountAddress: account.accountAddress,
@@ -31,6 +32,6 @@ describe("tests a simple faucet fund account request", () => {
     const payload = fundResponse.payload as EntryFunctionPayloadResponse;
     expect(payload.arguments[0]).toStrictEqual([]);
 
-    expect(balance).toBe((previousBalance + ONE_APT * 2) - gasUsed);
+    expect(balance).toBe(previousBalance + ONE_APT * 2 - gasUsed);
   });
 });
