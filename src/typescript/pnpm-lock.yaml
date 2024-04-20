@@ -8,6 +8,9 @@ dependencies:
   '@aptos-labs/ts-sdk':
     specifier: ^1.12.2
     version: 1.12.2
+  find-git-root:
+    specifier: ^1.0.4
+    version: 1.0.4
 
 devDependencies:
   '@aptos-labs/aptos-cli':
@@ -2165,6 +2168,10 @@ packages:
     dependencies:
       to-regex-range: 5.0.1
     dev: true
+
+  /find-git-root@1.0.4:
+    resolution: {integrity: sha512-468fmirKKgcrqfZfPn0xIpwZUUsZQcYXfx0RC2/jX39GPz83TwutQNZZhDrI6HqjO8cRejxQVaUY8GQdXopFfA==}
+    dev: false
 
   /find-up@4.1.0:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}

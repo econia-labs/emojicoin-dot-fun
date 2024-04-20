@@ -76,7 +76,6 @@ def main():
         # Check the file name as a Path object against the regex pattern.
         just_file_name = file_path.name.rstrip(extension)
         if not re.match(regex, just_file_name):
-            print(just_file_name)
             file_dir = file_path.parent
             colored_dir = Fore.LIGHTBLACK_EX + str(file_dir) + "/"
             colored_fp = Fore.LIGHTWHITE_EX + file_path.name

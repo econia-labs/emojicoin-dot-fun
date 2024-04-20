@@ -23,7 +23,7 @@ runs:
       # See here: https://stackoverflow.com/a/76523941/3846032.
       TMPDIR: '${{ runner.temp }}'
     name: 'pnpm-test'
-    uses: 'nick-fields/retry@7f8f3d9f0f62fe5925341be21c2e8314fd4f7c7c' # pin@v2
+    uses: 'nick-fields/retry@7f8f3d9f0f62fe5925341be21c2e8314fd4f7c7c'
     with:
       command: 'cd src/typescript && pnpm run test'
       max_attempts: 3

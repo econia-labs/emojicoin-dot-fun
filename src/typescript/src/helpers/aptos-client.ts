@@ -1,9 +1,4 @@
-import {
-  Aptos,
-  AptosConfig,
-  Network,
-  NetworkToNetworkName,
-} from "@aptos-labs/ts-sdk";
+import { Aptos, AptosConfig, Network, NetworkToNetworkName } from "@aptos-labs/ts-sdk";
 
 export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
   aptos: Aptos;

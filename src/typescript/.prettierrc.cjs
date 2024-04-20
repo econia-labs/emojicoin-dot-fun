@@ -5,7 +5,7 @@ const config = {
     trailingComma: "es5",
     singleQuote: false,
     arrowParens: "always",
-    printWidth: 80,
+    printWidth: 100,
   };
 
   module.exports = config;

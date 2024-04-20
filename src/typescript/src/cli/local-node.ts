@@ -10,8 +10,8 @@ export class LocalNode {
   process: ChildProcessWithoutNullStreams | null = null;
 
   /**
-   * kills all the descendent processes
-   * of the node process, including the node process itself
+   * Kills all the descendent processes of the node
+   * process, including the node process itself.
    */
   stop() {
     if (!this.process?.pid) return;
@@ -21,8 +21,8 @@ export class LocalNode {
   /**
    * Runs a local testnet and waits for process to be up.
    *
-   * If local node process is already up it returns and does
-   * not start the process
+   * If the local node process is already up, it returns and does
+   * not start the process.
    */
   async run() {
     const nodeIsUp = await this.checkIfProcessIsUp();
@@ -34,7 +34,7 @@ export class LocalNode {
   }
 
   /**
-   * Starts the local testnet by running the aptos node run-local-testnet command
+   * Starts the local testnet by running the aptos node run-local-testnet command.
    */
   start() {
     const cliCommand = "npx";
@@ -52,21 +52,19 @@ export class LocalNode {
 
     childProcess.stderr?.on("data", (data: any) => {
       const str = data.toString();
-      // Print local node output log
       // eslint-disable-next-line no-console
       console.log(str);
     });
 
     childProcess.stdout?.on("data", (data: any) => {
       const str = data.toString();
-      // Print local node output log
       // eslint-disable-next-line no-console
       console.log(str);
     });
   }
 
   /**
-   * Waits for the local testnet process to be up
+   * Waits for the local testnet process to be up.
    *
    * @returns Promise<boolean>
    */
@@ -84,7 +82,7 @@ export class LocalNode {
     }
 
     // If we are here it means something blocks the process to start.
-    // Might worth checking if another process is running on port 8080
+    // Might worth checking if another process is running on port 8080.
     if (!operational) {
       throw new Error("Process failed to start");
     }
@@ -93,7 +91,7 @@ export class LocalNode {
   }
 
   /**
-   * Checks if the local testnet is up
+   * Checks if the local testnet is up.
    *
    * @returns Promise<boolean>
    */

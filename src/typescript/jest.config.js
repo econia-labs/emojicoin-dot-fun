@@ -5,7 +5,7 @@ module.exports = {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   testEnvironment: "node",
-  coveragePathIgnorePatterns: [],
+  coveragePathIgnorePatterns: ["src/helpers/aptos-client.ts", "src/utils/env.ts"],
   testPathIgnorePatterns: ["dist/*"],
   collectCoverage: true,
   setupFiles: ["dotenv/config"],

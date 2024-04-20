@@ -21,6 +21,7 @@ ignore_files:
 - '.eslintrc.js'
 - '.flake8'
 - '.gitignore'
+- '.node-version'
 - '.prettierignore'
 - '.prettierrc.cjs'
 - 'pyproject.toml'
