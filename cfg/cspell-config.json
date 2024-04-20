@@ -10,6 +10,7 @@
     }
   ],
   "ignorePaths": [
-    "/project-words.txt"
+    "/project-words.txt",
+    "../src/typescript/pnpm-lock.yaml"
   ]
 }

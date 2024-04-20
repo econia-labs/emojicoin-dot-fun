@@ -12,6 +12,7 @@ counterparties
 cpamm
 cunha
 dango
+devnet
 diya
 econia
 emojicoin
