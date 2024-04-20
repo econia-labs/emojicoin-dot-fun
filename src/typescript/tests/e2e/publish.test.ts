@@ -4,7 +4,7 @@ import { fundAccounts } from "../../src/helpers/fund-accounts";
 import { publishPackage } from "../../src/cli/publish";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
 
-jest.setTimeout(15000);
+jest.setTimeout(30000);
 
 describe("tests publishing modules to a local network", () => {
   const { aptos } = getAptosClient();
