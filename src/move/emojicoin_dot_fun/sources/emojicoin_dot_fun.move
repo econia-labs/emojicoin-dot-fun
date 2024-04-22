@@ -113,7 +113,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_id: u64,
         swapper: address,
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
         net_proceeds: u64,
@@ -307,7 +307,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         swapper: &signer,
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
@@ -321,7 +321,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let event = simulate_swap_inner(
             swapper_address,
             input_amount,
-            input_is_base,
+            is_sell,
             integrator,
             integrator_fee_rate_bps,
             market_ref_mut,
@@ -334,7 +334,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let quote_volume_as_u128 = (event.quote_volume as u128);
         let total_quote_locked_ref_mut = &mut registry_ref_mut.total_quote_locked;
 
-        if (input_is_base) { // If selling, no possibility of state transition.
+        if (is_sell) { // If selling, no possibility of state transition.
 
             // Transfer funds.
             coin::register<Emojicoin>(swapper); // For better feedback if insufficient funds.
@@ -526,7 +526,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         swapper: address,
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
     ): Swap
@@ -535,7 +535,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         simulate_swap_inner(
             swapper,
             input_amount,
-            input_is_base,
+            is_sell,
             integrator,
             integrator_fee_rate_bps,
             borrow_global(market_address),
@@ -605,7 +605,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     inline fun simulate_swap_inner(
         swapper: address,
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
         market_ref: &Market,
@@ -618,18 +618,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let integrator_fee;
         let pool_fee = 0;
         let results_in_state_transition = false;
-        if (input_is_base) { // If selling, no possibility of state transition.
+        if (is_sell) { // If selling, no possibility of state transition.
             let amm_quote_output;
             if (starts_in_bonding_curve) { // Selling to CLAMM only.
                 amm_quote_output = cpamm_simple_swap_output_amount(
                     input_amount,
-                    input_is_base,
+                    is_sell,
                     market_ref.clamm_virtual_reserves,
                 );
             } else { // Selling to CPAMM only.
                 amm_quote_output = cpamm_simple_swap_output_amount(
                     input_amount,
-                    input_is_base,
+                    is_sell,
                     market_ref.cpamm_real_reserves,
                 );
                 pool_fee = get_bps_fee(amm_quote_output, POOL_FEE_RATE_BPS);
@@ -647,7 +647,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 if (quote_volume < max_quote_volume_in_clamm) {
                     base_volume = cpamm_simple_swap_output_amount(
                         quote_volume,
-                        input_is_base,
+                        is_sell,
                         market_ref.clamm_virtual_reserves,
                     );
                 } else { // Max quote has been deposited to bonding curve.
@@ -659,7 +659,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                         // Evaluate swap against CPAMM with newly locked liquidity.
                         let cpamm_base_output = cpamm_simple_swap_output_amount(
                             remaining_quote_volume,
-                            input_is_base,
+                            is_sell,
                             Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
                         );
                         pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
@@ -669,7 +669,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             } else { // Buying from CPAMM only.
                 let cpamm_base_output = cpamm_simple_swap_output_amount(
                     quote_volume,
-                    input_is_base,
+                    is_sell,
                     market_ref.cpamm_real_reserves,
                 );
                 pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
@@ -681,7 +681,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_id: market_ref.market_id,
             swapper,
             input_amount,
-            input_is_base,
+            is_sell,
             integrator,
             integrator_fee_rate_bps,
             net_proceeds,
@@ -780,10 +780,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     inline fun cpamm_simple_swap_output_amount(
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         reserves: Reserves
     ): u64 {
-        let (numerator_coefficient, denominator_addend) = if (input_is_base)
+        let (numerator_coefficient, denominator_addend) = if (is_sell)
             (reserves.quote, reserves.base) else (reserves.base, reserves.quote);
         let numerator = (input_amount as u128) * (numerator_coefficient as u128);
         let denominator = (input_amount as u128) + (denominator_addend as u128);
