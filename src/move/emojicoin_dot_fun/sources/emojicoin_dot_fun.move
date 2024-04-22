@@ -38,16 +38,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     // Generated automatically by blackpaper calculations script.
     const MARKET_CAP: u64 = 4_500_000_000_000;
-    const EMOJICOIN_REMAINDER: u64 = 100_000_000_000_000_000;
-    const EMOJICOIN_SUPPLY: u64 = 450_000_000_000_000_000;
-    const LP_TOKENS_INITIAL: u64 = 316_227_766_016_837;
+    const EMOJICOIN_REMAINDER: u64 = 10_000_000_000_000_000;
+    const EMOJICOIN_SUPPLY: u64 = 45_000_000_000_000_000;
+    const LP_TOKENS_INITIAL: u64 = 100_000_000_000_000;
     const BASE_REAL_FLOOR: u64 = 0;
     const QUOTE_REAL_FLOOR: u64 = 0;
-    const BASE_REAL_CEILING: u64 = 350_000_000_000_000_000;
+    const BASE_REAL_CEILING: u64 = 35_000_000_000_000_000;
     const QUOTE_REAL_CEILING: u64 = 1_000_000_000_000;
-    const BASE_VIRTUAL_FLOOR: u64 = 140_000_000_000_000_000;
+    const BASE_VIRTUAL_FLOOR: u64 = 14_000_000_000_000_000;
     const QUOTE_VIRTUAL_FLOOR: u64 = 400_000_000_000;
-    const BASE_VIRTUAL_CEILING: u64 = 490_000_000_000_000_000;
+    const BASE_VIRTUAL_CEILING: u64 = 49_000_000_000_000_000;
     const QUOTE_VIRTUAL_CEILING: u64 = 1_400_000_000_000;
     const POOL_FEE_RATE_BPS: u8 = 25;
 
@@ -121,9 +121,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[resource_group = ObjectGroup]
-    struct LPCoinCapabilities<phantom CoinType, phantom LP_CoinType> has key {
-        burn: BurnCapability<LP_CoinType>,
-        mint: MintCapability<LP_CoinType>,
+    struct LPCoinCapabilities<phantom Emojicoin, phantom EmojicoinLP> has key {
+        burn: BurnCapability<EmojicoinLP>,
+        mint: MintCapability<EmojicoinLP>,
     }
 
     #[event]
@@ -202,17 +202,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (market_address, market_signer)
     }
 
-    inline fun valid_coin_types<CoinType, LP_CoinType>(market_address: address): bool {
-        let emoji_type = &type_info::type_of<CoinType>();
-        let lp_type = &type_info::type_of<LP_CoinType>();
+    inline fun valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address): bool {
+        let emoji_type = &type_info::type_of<Emojicoin>();
+        let lp_type = &type_info::type_of<EmojicoinLP>();
 
         type_info::account_address(emoji_type) == market_address    &&
         type_info::account_address(lp_type) == market_address       &&
         type_info::module_name(emoji_type) == COIN_FACTORY_AS_BYTES &&
         type_info::module_name(lp_type) == COIN_FACTORY_AS_BYTES    &&
         type_info::struct_name(emoji_type) == EMOJICOIN_STRUCT_NAME &&
-        type_info::struct_name(lp_type) == EMOJICOIN_LP_STRUCT_NAME &&
-        *emoji_type != *lp_type
+        type_info::struct_name(lp_type) == EMOJICOIN_LP_STRUCT_NAME
     }
 
     inline fun get_verified_emoji_bytes(
@@ -226,70 +225,55 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             assert!(table::contains(supported_emojis_ref, emoji), E_NOT_SUPPORTED_EMOJI);
             vector::append(&mut verified_bytes, emoji);
         };
-        assert!(vector::length(&verified_bytes) <= (MAX_SYMBOL_LENGTH as u64), E_EMOJI_BYTES_TOO_LONG);
+        assert!(
+            vector::length(&verified_bytes) <= (MAX_SYMBOL_LENGTH as u64),
+            E_EMOJI_BYTES_TOO_LONG
+        );
 
         verified_bytes
     }
 
-    inline fun assert_valid_coin_types<CoinType, LP_CoinType>(market_address: address) {
+    inline fun assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address) {
         assert!(
-            exists<LPCoinCapabilities<CoinType, LP_CoinType>>(market_address),
+            exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address),
             E_INVALID_COIN_TYPES
         );
     }
 
-    inline fun ensure_coins_initialized<CoinType, LP_CoinType>(
+    inline fun ensure_coins_initialized<Emojicoin, EmojicoinLP>(
         market_ref: &Market,
         market_signer: &signer,
+        market_address: address,
     ) {
-        let market_address = market_ref.market_address;
-        // The Market resource will only ever exist on valid market addresses, and there will only
-        // ever exist one LPCoinCapabilities<CoinType, LP_CoinType> for a given Market.
-        // Thus if an address has both a Market and an LPCoinCapabilities<CoinType, LP_CoinType>
-        // resource, we know that those types must be valid for the given market address, and we
-        // can return early without calling the expensive `type_info` assertions below.
-        if (exists<LPCoinCapabilities<CoinType, LP_CoinType>>(market_address)) {
-            // Silently return.
-        } else {
-            assert!(valid_coin_types<CoinType, LP_CoinType>(market_address), E_INVALID_COIN_TYPES);
-            // Each object must also have an Aptos Account resource at its address, as specified
-            // by the coin.move module.
-            aptos_account::create_account(market_address);
-            coin::register<AptosCoin>(market_signer);
-
-            // Now that we've verified that the type arguments are valid, we can initialize the two
-            // coin types and create the LPCoinCapabilities<CoinType, LP_CoinType> resource at the
-            // market address.
-            let symbol_bytes = market_ref.emoji_bytes;
-            let symbol = string::utf8(symbol_bytes);
+        if (!exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address)) {
+            assert!(valid_coin_types<Emojicoin, EmojicoinLP>(market_address), E_INVALID_COIN_TYPES);
+            let symbol = string::utf8(market_ref.emoji_bytes);
 
             // Initialize emojicoin with fixed supply, throw away capabilities.
-            let (burn_cap, freeze_cap, mint_cap) = coin::initialize<CoinType>(
+            let (burn_cap, freeze_cap, mint_cap) = coin::initialize<Emojicoin>(
                 market_signer,
-                get_name(symbol, EMOJICOIN_NAME_SUFFIX),
+                get_coin_name(symbol, EMOJICOIN_NAME_SUFFIX),
                 symbol,
                 DECIMALS,
                 MONITOR_SUPPLY
             );
-            let emojicoins = coin::mint<CoinType>(EMOJICOIN_SUPPLY, &mint_cap);
+            let emojicoins = coin::mint<Emojicoin>(EMOJICOIN_SUPPLY, &mint_cap);
             aptos_account::deposit_coins(market_address, emojicoins);
             coin::destroy_freeze_cap(freeze_cap);
             coin::destroy_mint_cap(mint_cap);
             coin::destroy_burn_cap(burn_cap);
 
             // Initialize LP coin, storing only burn and mint capabilities.
-            let (burn_cap, freeze_cap, mint_cap) = coin::initialize<LP_CoinType>(
+            let (burn_cap, freeze_cap, mint_cap) = coin::initialize<EmojicoinLP>(
                 market_signer,
-                get_name(symbol, EMOJICOIN_LP_NAME_SUFFIX),
+                get_coin_name(symbol, EMOJICOIN_LP_NAME_SUFFIX),
                 symbol,
                 DECIMALS,
                 MONITOR_SUPPLY
             );
-            coin::register<LP_CoinType>(market_signer);
+            coin::register<EmojicoinLP>(market_signer);
             coin::destroy_freeze_cap(freeze_cap);
-
-            // Create the unique LPCoinCapabilities<CoinType, LP_CoinType> resource.
-            move_to(market_signer, LPCoinCapabilities<CoinType, LP_CoinType> {
+            move_to(market_signer, LPCoinCapabilities<Emojicoin, EmojicoinLP> {
                 burn: burn_cap,
                 mint: mint_cap,
             });
@@ -297,7 +281,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     }
 
-    inline fun get_name(symbol: String, suffix_bytes: vector<u8>): String {
+    inline fun get_coin_name(symbol: String, suffix_bytes: vector<u8>): String {
         string::append_utf8(&mut symbol, suffix_bytes);
         symbol
     }
@@ -312,7 +296,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (market_ref_mut, market_signer)
     }
 
-    public entry fun swap<B, Q, LP>(
+    public entry fun swap<Emojicoin, EmojicoinLP>(
         market_address: address,
         swapper: &signer,
         input_amount: u64,
@@ -321,7 +305,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator_fee_rate_bps: u8,
     ) acquires LPCoinCapabilities, Market {
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
-        ensure_coins_initialized<B, LP>(market_ref_mut, &market_signer);
+        ensure_coins_initialized<Emojicoin, EmojicoinLP>(
+            market_ref_mut,
+            &market_signer,
+            market_address
+        );
         let swapper_address = signer::address_of(swapper);
         let event = simulate_swap_inner(
             swapper_address,
@@ -332,11 +320,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_ref_mut,
         );
         let quote;
-        coin::register<B>(swapper); // In case user calls swap sell but hasn't registered store.
+        aptos_account::create_account(swapper_address); // For better feedback if no account yet.
         if (input_is_base) { // If selling, no possibility of state transition.
-            coin::transfer<B>(swapper, market_address, input_amount);
+            coin::register<Emojicoin>(swapper); // For better feedback if insufficient funds.
+            coin::transfer<Emojicoin>(swapper, market_address, input_amount);
             let quote_leaving_market = event.quote_volume + event.integrator_fee;
-            quote = coin::withdraw<Q>(&market_signer, quote_leaving_market);
+            quote = coin::withdraw<AptosCoin>(&market_signer, quote_leaving_market);
             let net_proceeds = coin::extract(&mut quote, event.quote_volume);
             aptos_account::deposit_coins(swapper_address, net_proceeds);
             let reserves_ref_mut = if (event.starts_in_bonding_curve)
@@ -345,12 +334,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             reserves_ref_mut.base = reserves_ref_mut.base + event.input_amount;
             reserves_ref_mut.quote = reserves_ref_mut.quote - quote_leaving_market;
         } else { // If buying, might need to buy through the state transition.
-            quote = coin::withdraw<Q>(swapper, input_amount);
+            quote = coin::withdraw<AptosCoin>(swapper, input_amount);
             coin::deposit(market_address, coin::extract(&mut quote, event.quote_volume));
-            aptos_account::transfer_coins<B>(&market_signer, swapper_address, event.base_volume);
+            aptos_account::transfer_coins<Emojicoin>(
+                &market_signer,
+                swapper_address,
+                event.base_volume
+            );
             if (event.results_in_state_transition) { // Buy with state transition.
-                let lp_coins = mint_lp_coins<B, LP>(market_address, LP_TOKENS_INITIAL);
-                coin::deposit<LP>(market_address, lp_coins);
+                let lp_coins =
+                    mint_lp_coins<Emojicoin, EmojicoinLP>(market_address, LP_TOKENS_INITIAL);
+                coin::deposit<EmojicoinLP>(market_address, lp_coins);
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
                 let quote_to_transition =
                     QUOTE_VIRTUAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
@@ -375,13 +369,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         event::emit(event);
     }
 
-    public entry fun provide_liquidity<B, Q, LP>(
+    public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
         market_address: address,
         provider: &signer,
         quote_amount: u64,
     ) acquires LPCoinCapabilities, Market {
         let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
-        assert_valid_coin_types<B, LP>(market_address);
+        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
         let provider_address = signer::address_of(provider);
         let event = simulate_provide_liquidity_inner(
             provider_address,
@@ -390,9 +384,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
 
         // Transfer coins.
-        coin::transfer<B>(provider, market_address, event.base_amount);
-        coin::transfer<Q>(provider, market_address, event.quote_amount);
-        let lp_coins = mint_lp_coins<B, LP>(market_ref_mut.market_address, event.lp_coin_amount);
+        coin::transfer<Emojicoin>(provider, market_address, event.base_amount);
+        coin::transfer<AptosCoin>(provider, market_address, event.quote_amount);
+        let lp_coins = mint_lp_coins<Emojicoin, EmojicoinLP>(
+            market_ref_mut.market_address,
+            event.lp_coin_amount
+        );
         aptos_account::deposit_coins(provider_address, lp_coins);
 
         // Update state.
@@ -404,15 +401,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         event::emit(event);
     }
 
-    public entry fun remove_liquidity<B, Q, LP>(
+    public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
         market_address: address,
         provider: &signer,
         lp_coin_amount: u64,
     ) acquires LPCoinCapabilities, Market {
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
-        assert_valid_coin_types<B, LP>(market_address);
+        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
         let provider_address = signer::address_of(provider);
-        let event = simulate_remove_liquidity_inner<B, Q>(
+        let event = simulate_remove_liquidity_inner<Emojicoin>(
             provider_address,
             lp_coin_amount,
             market_ref_mut
@@ -421,12 +418,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Transfer coins.
         let base_total = event.base_amount + event.pro_rata_base_donation_claim_amount;
         let quote_total = event.quote_amount + event.pro_rata_quote_donation_claim_amount;
-        coin::transfer<B>(&market_signer, provider_address, base_total);
-        coin::transfer<Q>(&market_signer, provider_address, quote_total);
+        coin::transfer<Emojicoin>(&market_signer, provider_address, base_total);
+        coin::transfer<AptosCoin>(&market_signer, provider_address, quote_total);
 
         // Burn coins by first withdrawing them from provider's coin store, to trigger event.
-        let lp_coins = coin::withdraw<LP>(provider, event.lp_coin_amount);
-        burn_lp_coin<B, LP>(market_ref_mut.market_address, lp_coins);
+        let lp_coins = coin::withdraw<EmojicoinLP>(provider, event.lp_coin_amount);
+        burn_lp_coin<Emojicoin, EmojicoinLP>(market_ref_mut.market_address, lp_coins);
 
         // Update state.
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
@@ -459,12 +456,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[view]
-    /// Checks if an individual emoji is supported. Note that this does *not*
-    /// check if multiple concatenated emojis are valid.
-    public fun is_a_supported_emoji(hex_bytes: vector<u8>): bool acquires Registry, RegistryAddress {
-        let registry_address = borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address;
-        let registry = borrow_global<Registry>(registry_address);
-        table::contains(&registry.supported_emojis, hex_bytes)
+    /// Checks if an individual emoji is supported.
+    public fun is_a_supported_emoji(hex_bytes: vector<u8>): bool
+    acquires Registry, RegistryAddress {
+        table::contains(&borrow_registry_ref().supported_emojis, hex_bytes)
+    }
+
+    #[view]
+    /// Checks if a sequence of emojis is supported.
+    public fun is_supported_emoji_sequence(emojis: vector<vector<u8>>): bool
+    acquires Registry, RegistryAddress {
+        let symbol_length = 0;
+        let supported_emojis_ref = &borrow_registry_ref().supported_emojis;
+        for (i in 0..vector::length(&emojis)) {
+            let emoji_bytes_ref = vector::borrow(&emojis, i);
+            if (!table::contains(supported_emojis_ref, *emoji_bytes_ref)) return false;
+            symbol_length = symbol_length + vector::length(emoji_bytes_ref);
+        };
+        symbol_length <= (MAX_SYMBOL_LENGTH as u64)
     }
 
     #[view]
@@ -504,14 +513,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[view]
-    public fun simulate_remove_liquidity<B, Q>(
+    public fun simulate_remove_liquidity<Emojicoin>(
         market_address: address,
         provider: address,
         lp_coin_amount: u64,
     ): Liquidity
     acquires Market {
         assert!(exists<Market>(market_address), E_NO_MARKET);
-        simulate_remove_liquidity_inner<B, Q>(
+        simulate_remove_liquidity_inner<Emojicoin>(
             provider,
             lp_coin_amount,
             borrow_global(market_address),
@@ -522,35 +531,30 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address
     }
 
+    inline fun borrow_registry_ref(): &Registry acquires Registry, RegistryAddress {
+        borrow_global<Registry>(borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address)
+    }
+
     inline fun borrow_registry_ref_mut(): &mut Registry acquires Registry, RegistryAddress {
         borrow_global_mut<Registry>(
             borrow_global<RegistryAddress>(@emojicoin_dot_fun).registry_address
         )
     }
 
-    inline fun burn_lp_coin_from<CoinType, LP_CoinType>(
+    inline fun burn_lp_coin<Emojicoin, EmojicoinLP>(
         market_address: address,
-        account_addr: address,
-        amount: u64,
+        coin: Coin<EmojicoinLP>,
     ) acquires LPCoinCapabilities {
-        let coin_caps = borrow_global<LPCoinCapabilities<CoinType, LP_CoinType>>(market_address);
-        coin::burn_from<LP_CoinType>(account_addr, amount, &coin_caps.burn);
+        let coin_caps = borrow_global<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address);
+        coin::burn<EmojicoinLP>(coin, &coin_caps.burn);
     }
 
-    inline fun burn_lp_coin<CoinType, LP_CoinType>(
-        market_address: address,
-        coin: Coin<LP_CoinType>,
-    ) acquires LPCoinCapabilities {
-        let coin_caps = borrow_global<LPCoinCapabilities<CoinType, LP_CoinType>>(market_address);
-        coin::burn<LP_CoinType>(coin, &coin_caps.burn);
-    }
-
-    inline fun mint_lp_coins<CoinType, LP_CoinType>(
+    inline fun mint_lp_coins<Emojicoin, EmojicoinLP>(
         market_address: address,
         amount: u64,
-    ): Coin<LP_CoinType> acquires LPCoinCapabilities {
-        let coin_caps = borrow_global<LPCoinCapabilities<CoinType, LP_CoinType>>(market_address);
-        coin::mint<LP_CoinType>(amount, &coin_caps.mint)
+    ): Coin<EmojicoinLP> acquires LPCoinCapabilities {
+        let coin_caps = borrow_global<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address);
+        coin::mint<EmojicoinLP>(amount, &coin_caps.mint)
     }
 
     inline fun simulate_swap_inner(
@@ -678,7 +682,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun simulate_remove_liquidity_inner<B, Q>(
+    inline fun simulate_remove_liquidity_inner<Emojicoin>(
         provider: address,
         lp_coin_amount: u64,
         market_ref: &Market,
@@ -701,8 +705,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Check to see if base or quote donations have been sent to market coin stores.
         let market_address = market_ref.market_address;
-        let market_balance_base_u128 = (coin::balance<B>(market_address) as u128);
-        let market_balance_quote_u128 = (coin::balance<Q>(market_address) as u128);
+        let market_balance_base_u128 = (coin::balance<Emojicoin>(market_address) as u128);
+        let market_balance_quote_u128 = (coin::balance<AptosCoin>(market_address) as u128);
         let base_donations_u128 = market_balance_base_u128 - base_reserves_u128;
         let quote_donations_u128= market_balance_quote_u128 - quote_reserves_u128;
         let pro_rata_base_donation_claim_amount =
@@ -753,9 +757,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[test_only]
-    public fun get_EMOJICOIN_SUPPLY(): u64 {
-        EMOJICOIN_SUPPLY
-    }
+    public fun get_EMOJICOIN_SUPPLY(): u64 { EMOJICOIN_SUPPLY }
 
     #[test]
     fun test_cpamm_simple_swap_output_amount() {
@@ -825,8 +827,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             x"f09f9190f09f8fbe", // Open hands medium dark skin tone, 1F450 1F3FE.
             x"f09fa4b0f09f8fbc", // Pregnant woman medium light skin tone, 1F930 1F3FC.
             x"f09f9faa",         // Purple square, 1F7EA.
-            // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
-            x"f09f91abf09f8fbe",
+            x"f09f91abf09f8fbe", // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
             x"f09f91a9f09f8fbe", // Woman medium dark skin tone, 1F469 1F3FE.
             x"f09fa795f09f8fbd", // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
             x"f09fa490",         // Zipper mouth face, 1F910.
@@ -844,7 +845,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Minimally qualified "head shaking horizontally".
         assert!(!is_a_supported_emoji(x"f09f9982e2808de28694"), 0);
 
-        // Specifically test a supported emoji, add some bunk data to it, and make sure it doesn't work still.
+        // Specifically test a supported emoji, add some bunk data to it, and make sure it no longer
+        // works.
         assert!(is_a_supported_emoji(x"e29d97"), 0);
         assert!(!is_a_supported_emoji(x"e29d97ff"), 0);
         assert!(!is_a_supported_emoji(x"ffe29d97"), 0);
@@ -860,19 +862,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Duplicate types should be invalid.
         assert!(!valid_coin_types<TestEmojicoin, TestEmojicoin>(@emojicoin_dot_fun), 0);
         // Duplicate LP types should be invalid.
-        assert!(!valid_coin_types<TestEmojicoinLP, TestEmojicoinLP>(@emojicoin_dot_fun), 1);
+        assert!(!valid_coin_types<TestEmojicoinLP, TestEmojicoinLP>(@emojicoin_dot_fun), 0);
         // A bad Emojicoin type should be invalid.
-        assert!(!valid_coin_types<BadType, TestEmojicoinLP>(@emojicoin_dot_fun), 2);
+        assert!(!valid_coin_types<BadType, TestEmojicoinLP>(@emojicoin_dot_fun), 0);
         // A bad EmojicoinLP type should be invalid.
-        assert!(!valid_coin_types<TestEmojicoin, BadType>(@emojicoin_dot_fun), 3);
+        assert!(!valid_coin_types<TestEmojicoin, BadType>(@emojicoin_dot_fun), 0);
         // Backwards coin types that are otherwise valid should be invalid.
-        assert!(!valid_coin_types<TestEmojicoinLP, TestEmojicoin>(@emojicoin_dot_fun), 4);
+        assert!(!valid_coin_types<TestEmojicoinLP, TestEmojicoin>(@emojicoin_dot_fun), 0);
         // An invalid module for the Emojicoin type should be invalid.
-        assert!(!valid_coin_types<BadModuleEmojicoin, TestEmojicoinLP>(@emojicoin_dot_fun), 5);
+        assert!(!valid_coin_types<BadModuleEmojicoin, TestEmojicoinLP>(@emojicoin_dot_fun), 0);
         // An invalid module for the EmojicoinLP type should be invalid.
-        assert!(!valid_coin_types<TestEmojicoin, BadModuleEmojicoinLP>(@emojicoin_dot_fun), 6);
+        assert!(!valid_coin_types<TestEmojicoin, BadModuleEmojicoinLP>(@emojicoin_dot_fun), 0);
         // A market address that doesn't match the types should be invalid.
-        assert!(!valid_coin_types<TestEmojicoin, TestEmojicoinLP>(@0xc1de), 7);
+        assert!(!valid_coin_types<TestEmojicoin, TestEmojicoinLP>(@0xc1de), 0);
     }
 
     #[test(deployer=@emojicoin_dot_fun), expected_failure(abort_code = E_INVALID_COIN_TYPES)]
@@ -890,6 +892,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         ensure_coins_initialized<BadModuleEmojicoin, BadModuleEmojicoinLP>(
             market_ref_mut,
             &market_signer,
+            market_address,
         );
     }
 }
