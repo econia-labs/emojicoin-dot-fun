@@ -1,5 +1,6 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
+    use aptos_framework::aggregator_v2::{Self, Aggregator};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::code;
@@ -92,6 +93,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         clamm_virtual_reserves: Reserves,
         cpamm_real_reserves: Reserves,
         lp_coin_supply: u128,
+        cumulative_base_volume: u128,
+        cumulative_quote_volume: u128,
     }
 
     #[resource_group = ObjectGroup]
@@ -101,6 +104,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
+        cumulative_quote_volume: Aggregator<u128>,
+        total_quote_locked: Aggregator<u128>,
     }
 
     #[event]
@@ -108,7 +113,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_id: u64,
         swapper: address,
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
         net_proceeds: u64,
@@ -194,6 +199,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 Reserves { base: BASE_VIRTUAL_CEILING, quote: QUOTE_VIRTUAL_FLOOR },
             cpamm_real_reserves: Reserves { base: 0, quote: 0 },
             lp_coin_supply: 0,
+            cumulative_base_volume: 0,
+            cumulative_quote_volume: 0,
         });
         // Update registry.
         smart_table::add(markets_by_emoji_bytes_ref_mut, emoji_bytes, market_address);
@@ -300,10 +307,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         swapper: &signer,
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
-    ) acquires LPCoinCapabilities, Market {
+    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         ensure_coins_initialized<Emojicoin, EmojicoinLP>(
             market_ref_mut,
@@ -314,26 +321,41 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let event = simulate_swap_inner(
             swapper_address,
             input_amount,
-            input_is_base,
+            is_sell,
             integrator,
             integrator_fee_rate_bps,
             market_ref_mut,
         );
         let quote;
         aptos_account::create_account(swapper_address); // For better feedback if no account yet.
-        if (input_is_base) { // If selling, no possibility of state transition.
+
+        // Prepare variables relevant to global amounts, as they are used in branching logic too.
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let quote_volume_as_u128 = (event.quote_volume as u128);
+        let total_quote_locked_ref_mut = &mut registry_ref_mut.total_quote_locked;
+
+        if (is_sell) { // If selling, no possibility of state transition.
+
+            // Transfer funds.
             coin::register<Emojicoin>(swapper); // For better feedback if insufficient funds.
             coin::transfer<Emojicoin>(swapper, market_address, input_amount);
             let quote_leaving_market = event.quote_volume + event.integrator_fee;
             quote = coin::withdraw<AptosCoin>(&market_signer, quote_leaving_market);
             let net_proceeds = coin::extract(&mut quote, event.quote_volume);
             aptos_account::deposit_coins(swapper_address, net_proceeds);
+
+            // Update reserves.
             let reserves_ref_mut = if (event.starts_in_bonding_curve)
                 &mut market_ref_mut.clamm_virtual_reserves else
                 &mut market_ref_mut.cpamm_real_reserves;
             reserves_ref_mut.base = reserves_ref_mut.base + event.input_amount;
             reserves_ref_mut.quote = reserves_ref_mut.quote - quote_leaving_market;
+
+            // Update global total quote locked.
+            aggregator_v2::try_sub(total_quote_locked_ref_mut, (quote_leaving_market as u128));
         } else { // If buying, might need to buy through the state transition.
+
+            // Transfer funds.
             quote = coin::withdraw<AptosCoin>(swapper, input_amount);
             coin::deposit(market_address, coin::extract(&mut quote, event.quote_volume));
             aptos_account::transfer_coins<Emojicoin>(
@@ -342,9 +364,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 event.base_volume
             );
             if (event.results_in_state_transition) { // Buy with state transition.
+                // Mint initial liquidity provider coins.
                 let lp_coins =
                     mint_lp_coins<Emojicoin, EmojicoinLP>(market_address, LP_TOKENS_INITIAL);
                 coin::deposit<EmojicoinLP>(market_address, lp_coins);
+
+                // Update reserve amounts.
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
                 let quote_to_transition =
                     QUOTE_VIRTUAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
@@ -356,16 +381,26 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 let cpamm_real_reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
                 cpamm_real_reserves_ref_mut.base = EMOJICOIN_REMAINDER - base_out_of_cpamm;
                 cpamm_real_reserves_ref_mut.quote = QUOTE_REAL_CEILING + quote_into_cpamm;
-            } else { // Buy without state transition.
+            } else { // Buy without state transition: update reserve amounts.
                 let reserves_ref_mut = if (event.starts_in_bonding_curve)
                     &mut market_ref_mut.clamm_virtual_reserves else
                     &mut market_ref_mut.cpamm_real_reserves;
                 reserves_ref_mut.base = reserves_ref_mut.base - event.base_volume;
                 reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_volume;
-
             };
+
+            // Update global total quote locked.
+            aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
         };
         aptos_account::deposit_coins(integrator, quote);
+
+        // Update cumulative volume.
+        market_ref_mut.cumulative_base_volume =
+            market_ref_mut.cumulative_base_volume + (event.base_volume as u128);
+        market_ref_mut.cumulative_quote_volume =
+            market_ref_mut.cumulative_quote_volume + quote_volume_as_u128;
+        aggregator_v2::try_add(&mut registry_ref_mut.cumulative_quote_volume, quote_volume_as_u128);
+
         event::emit(event);
     }
 
@@ -373,7 +408,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         provider: &signer,
         quote_amount: u64,
-    ) acquires LPCoinCapabilities, Market {
+    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
         let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
         assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
         let provider_address = signer::address_of(provider);
@@ -392,20 +427,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
         aptos_account::deposit_coins(provider_address, lp_coins);
 
-        // Update state.
+        // Update market state.
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
         reserves_ref_mut.base = reserves_ref_mut.base + event.base_amount;
         reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_amount;
         market_ref_mut.lp_coin_supply =
             market_ref_mut.lp_coin_supply + (event.lp_coin_amount as u128);
         event::emit(event);
+
+        // Update global total quote locked.
+        let total_quote_locked_ref_mut = &mut borrow_registry_ref_mut().total_quote_locked;
+        aggregator_v2::try_add(total_quote_locked_ref_mut, (event.quote_amount as u128));
     }
 
     public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
         market_address: address,
         provider: &signer,
         lp_coin_amount: u64,
-    ) acquires LPCoinCapabilities, Market {
+    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
         let provider_address = signer::address_of(provider);
@@ -423,15 +462,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Burn coins by first withdrawing them from provider's coin store, to trigger event.
         let lp_coins = coin::withdraw<EmojicoinLP>(provider, event.lp_coin_amount);
-        burn_lp_coin<Emojicoin, EmojicoinLP>(market_ref_mut.market_address, lp_coins);
+        burn_lp_coins<Emojicoin, EmojicoinLP>(market_ref_mut.market_address, lp_coins);
 
-        // Update state.
+        // Update market state.
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
         reserves_ref_mut.base = reserves_ref_mut.base - event.base_amount;
         reserves_ref_mut.quote = reserves_ref_mut.quote - event.quote_amount;
         market_ref_mut.lp_coin_supply =
             market_ref_mut.lp_coin_supply - (event.lp_coin_amount as u128);
         event::emit(event);
+
+        // Update global total quote locked.
+        let total_quote_locked_ref_mut = &mut borrow_registry_ref_mut().total_quote_locked;
+        aggregator_v2::try_sub(total_quote_locked_ref_mut, (event.quote_amount as u128));
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
@@ -446,6 +489,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             markets_by_emoji_bytes: smart_table::new(),
             markets_by_market_id: smart_table::new(),
             extend_ref,
+            cumulative_quote_volume: aggregator_v2::create_unbounded_aggregator<u128>(),
+            total_quote_locked: aggregator_v2::create_unbounded_aggregator<u128>(),
         };
 
         // Load supported emojis into registry.
@@ -481,7 +526,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
         swapper: address,
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
     ): Swap
@@ -490,7 +535,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         simulate_swap_inner(
             swapper,
             input_amount,
-            input_is_base,
+            is_sell,
             integrator,
             integrator_fee_rate_bps,
             borrow_global(market_address),
@@ -541,7 +586,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         )
     }
 
-    inline fun burn_lp_coin<Emojicoin, EmojicoinLP>(
+    inline fun burn_lp_coins<Emojicoin, EmojicoinLP>(
         market_address: address,
         coin: Coin<EmojicoinLP>,
     ) acquires LPCoinCapabilities {
@@ -560,7 +605,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     inline fun simulate_swap_inner(
         swapper: address,
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
         market_ref: &Market,
@@ -573,18 +618,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let integrator_fee;
         let pool_fee = 0;
         let results_in_state_transition = false;
-        if (input_is_base) { // If selling, no possibility of state transition.
+        if (is_sell) { // If selling, no possibility of state transition.
             let amm_quote_output;
             if (starts_in_bonding_curve) { // Selling to CLAMM only.
                 amm_quote_output = cpamm_simple_swap_output_amount(
                     input_amount,
-                    input_is_base,
+                    is_sell,
                     market_ref.clamm_virtual_reserves,
                 );
             } else { // Selling to CPAMM only.
                 amm_quote_output = cpamm_simple_swap_output_amount(
                     input_amount,
-                    input_is_base,
+                    is_sell,
                     market_ref.cpamm_real_reserves,
                 );
                 pool_fee = get_bps_fee(amm_quote_output, POOL_FEE_RATE_BPS);
@@ -602,7 +647,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 if (quote_volume < max_quote_volume_in_clamm) {
                     base_volume = cpamm_simple_swap_output_amount(
                         quote_volume,
-                        input_is_base,
+                        is_sell,
                         market_ref.clamm_virtual_reserves,
                     );
                 } else { // Max quote has been deposited to bonding curve.
@@ -614,7 +659,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                         // Evaluate swap against CPAMM with newly locked liquidity.
                         let cpamm_base_output = cpamm_simple_swap_output_amount(
                             remaining_quote_volume,
-                            input_is_base,
+                            is_sell,
                             Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
                         );
                         pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
@@ -624,7 +669,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             } else { // Buying from CPAMM only.
                 let cpamm_base_output = cpamm_simple_swap_output_amount(
                     quote_volume,
-                    input_is_base,
+                    is_sell,
                     market_ref.cpamm_real_reserves,
                 );
                 pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
@@ -636,7 +681,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_id: market_ref.market_id,
             swapper,
             input_amount,
-            input_is_base,
+            is_sell,
             integrator,
             integrator_fee_rate_bps,
             net_proceeds,
@@ -735,10 +780,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     inline fun cpamm_simple_swap_output_amount(
         input_amount: u64,
-        input_is_base: bool,
+        is_sell: bool,
         reserves: Reserves
     ): u64 {
-        let (numerator_coefficient, denominator_addend) = if (input_is_base)
+        let (numerator_coefficient, denominator_addend) = if (is_sell)
             (reserves.quote, reserves.base) else (reserves.base, reserves.quote);
         let numerator = (input_amount as u128) * (numerator_coefficient as u128);
         let denominator = (input_amount as u128) + (denominator_addend as u128);
