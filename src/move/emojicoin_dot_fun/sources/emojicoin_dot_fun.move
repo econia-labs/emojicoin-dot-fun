@@ -462,7 +462,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Burn coins by first withdrawing them from provider's coin store, to trigger event.
         let lp_coins = coin::withdraw<EmojicoinLP>(provider, event.lp_coin_amount);
-        burn_lp_coin<Emojicoin, EmojicoinLP>(market_ref_mut.market_address, lp_coins);
+        burn_lp_coins<Emojicoin, EmojicoinLP>(market_ref_mut.market_address, lp_coins);
 
         // Update market state.
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
@@ -586,7 +586,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         )
     }
 
-    inline fun burn_lp_coin<Emojicoin, EmojicoinLP>(
+    inline fun burn_lp_coins<Emojicoin, EmojicoinLP>(
         market_address: address,
         coin: Coin<EmojicoinLP>,
     ) acquires LPCoinCapabilities {
