@@ -121,9 +121,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[resource_group = ObjectGroup]
-    struct LPCoinCapabilities<phantom CoinType, phantom LP_CoinType> has key {
-        burn: BurnCapability<LP_CoinType>,
-        mint: MintCapability<LP_CoinType>,
+    struct LPCoinCapabilities<phantom Emojicoin, phantom EmojicoinLP> has key {
+        burn: BurnCapability<EmojicoinLP>,
+        mint: MintCapability<EmojicoinLP>,
     }
 
     #[event]
