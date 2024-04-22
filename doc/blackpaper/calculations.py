@@ -1,7 +1,7 @@
 # cspell:words texttt
 from math import isclose, sqrt
 
-A = 100_000.0
+A = 10_000.0
 R = 3.5**2
 T = 10_000.0
 
