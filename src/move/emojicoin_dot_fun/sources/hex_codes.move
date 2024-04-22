@@ -5,8 +5,7 @@ module emojicoin_dot_fun::hex_codes {
     friend emojicoin_dot_fun::emojicoin_dot_fun;
 
     public(friend) inline fun get_supported_emojis(): vector<vector<u8>> {
-
-        vector<vector<u8>> [
+        vector[
             x"f09fa587",              // 1st place medal [1F947]
             x"f09fa588",              // 2nd place medal [1F948]
             x"f09fa589",              // 3rd place medal [1F949]
@@ -2315,7 +2314,7 @@ module emojicoin_dot_fun::hex_codes {
     }
 
     inline fun get_split_metadata_bytes(): vector<vector<u8>> {
-        vector<vector<u8>> [
+        vector[
             x"0b436f696e466163746f72790200000000000000004045343632464342353243444532383332423539373445423344384637434230303043363642433646323834393930334137464333334243363332423736354545f7011f8b08000000000002ff7d50cb6ec32010bcf31511f760f75aa987aaad7f22b2ac35ac1d1ac3221e6efaf7059bf412257b62869961d81328e531040c3d93a4ed30818ce47f0f6f073e708686bef5c62b8ac3946ce5d949a143abd04a8d41bcbb48a1f360f087fca567b38e45788ed185d7a6c9f09c4621c9345094c705c6508f923c8a2ce0cce35a4c06b4b5987148a3d2be50bbd2d08acd747ba4dafff15da7af5bf54f8a5db23d5b48c252e28468eefeb5dbd7e39375b4d7b1ce83bdb45759a7a439901798b16736372cd71f59deed719c25377b5038385ab4dce2b53129c2b820672bfaa069cb7c11ad6839fb036f6f8134a7010000010c636f696e5f666163746f72790000000400000000000000000000000000000000000000000000000000000000000000010e4170746f734672616d65776f726b00000000000000000000000000000000000000000000000000000000000000010b4170746f735374646c696200000000000000000000000000000000000000000000000000000000000000010a4d6f76655374646c6962",
             // Interpolate the BCS encoding of address @emojicoin_dot_fun here.
             x"0f456d6f6a69636f696e446f7446756e00",
@@ -2323,7 +2322,7 @@ module emojicoin_dot_fun::hex_codes {
     }
 
     inline fun get_split_module_bytes(): vector<vector<u8>> {
-        vector<vector<u8>> [
+        vector[
             x"a11ceb0b0600000005010002020208070a2f0839200a590a000000010000000200000c636f696e5f666163746f727909456d6f6a69636f696e0b456d6f6a69636f696e4c500b64756d6d795f6669656c64",
             // Interpolate the BCS encoding of address @coin_factory here.
             x"0002010301010201030100",
@@ -2333,7 +2332,7 @@ module emojicoin_dot_fun::hex_codes {
     public(friend) inline fun get_publish_code(publisher_addr: address): (vector<u8>, vector<u8>) {
         // Interpolate into metadata.
         let metadata_bytes = get_split_metadata_bytes();
-        let replaced_metadata = vector<u8> [];
+        let replaced_metadata = vector[];
         vector::reverse(&mut metadata_bytes);
         vector::append(&mut replaced_metadata, vector::pop_back(&mut metadata_bytes));
         vector::append(&mut replaced_metadata, bcs::to_bytes(&@emojicoin_dot_fun));
@@ -2341,7 +2340,7 @@ module emojicoin_dot_fun::hex_codes {
 
         // Interpolate into module bytecode.
         let module_bytecode = get_split_module_bytes();
-        let replaced_bytecode = vector<u8> [];
+        let replaced_bytecode = vector[];
         vector::reverse(&mut module_bytecode);
         vector::append(&mut replaced_bytecode, vector::pop_back(&mut module_bytecode));
         vector::append(&mut replaced_bytecode, bcs::to_bytes(&publisher_addr));
