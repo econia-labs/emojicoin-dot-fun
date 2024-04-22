@@ -226,7 +226,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             assert!(table::contains(supported_emojis_ref, emoji), E_NOT_SUPPORTED_EMOJI);
             vector::append(&mut verified_bytes, emoji);
         };
-        assert!(vector::length(&verified_bytes) <= (MAX_SYMBOL_LENGTH as u64), E_EMOJI_BYTES_TOO_LONG);
+        assert!(
+            vector::length(&verified_bytes) <= (MAX_SYMBOL_LENGTH as u64),
+            E_EMOJI_BYTES_TOO_LONG
+        );
 
         verified_bytes
     }
