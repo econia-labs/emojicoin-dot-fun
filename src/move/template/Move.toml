@@ -3,5 +3,5 @@ template = "_"
 
 [package]
 name = 'Template'
-upgrade_policy = "immutable"
+upgrade_policy = "compatible"
 version = '0.0.1'

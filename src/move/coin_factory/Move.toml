@@ -16,5 +16,5 @@ market_address = "0xbbbbbbbb"
 
 [package]
 name = "CoinFactory"
-upgrade_policy = "immutable"
+upgrade_policy = "compatible"
 version = "1.0.0"

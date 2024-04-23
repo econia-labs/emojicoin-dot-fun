@@ -12,5 +12,5 @@ emojicoin_dot_fun = "0xc0de"
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
 name = "EmojicoinDotFun"
-upgrade_policy = "immutable"
+upgrade_policy = "compatible"
 version = "1.0.0"
