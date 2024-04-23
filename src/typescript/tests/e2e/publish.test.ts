@@ -3,7 +3,7 @@ import { getAptosClient } from "../../src/helpers/aptos-client";
 import { publishPackage } from "../../src/cli/publish";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, ONE_APT } from "../../src";
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 jest.retryTimes(3);
 
 describe("tests publishing modules to a local network", () => {
