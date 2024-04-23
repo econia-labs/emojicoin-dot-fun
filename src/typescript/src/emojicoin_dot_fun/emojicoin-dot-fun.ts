@@ -63,7 +63,7 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    moduleAddress: AccountAddressInput; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: AccountAddressInput;
     market_address: AccountAddressInput; // &signer
     provider: AccountAddressInput; // address
     quote_amount: Uint64; // u64
@@ -168,7 +168,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    moduleAddress: AccountAddressInput; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: AccountAddressInput;
     registrant: AccountAddressInput; // &signer
     emojis: Array<HexInput>; // vector<vector<u8>>
     integrator: AccountAddressInput; // address
@@ -267,7 +267,7 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    moduleAddress: AccountAddressInput; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: AccountAddressInput;
     market_address: AccountAddressInput; // &signer
     provider: AccountAddressInput; // address
     lp_coin_amount: Uint64; // u64
@@ -378,7 +378,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    moduleAddress: AccountAddressInput; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: AccountAddressInput;
     market_address: AccountAddressInput; // &signer
     swapper: AccountAddressInput; // address
     input_amount: Uint64; // u64
@@ -497,7 +497,7 @@ export class IsASupportedEmoji extends ViewFunctionPayloadBuilder<[boolean]> {
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: string;
 
     hex_bytes: HexInput; // vector<u8>
   }) {
@@ -536,7 +536,7 @@ export class IsSupportedEmojiSequence extends ViewFunctionPayloadBuilder<[boolea
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: string;
 
     emojis: Array<HexInput>; // vector<vector<u8>>
   }) {
@@ -579,7 +579,7 @@ export class SimulateProvideLiquidity extends ViewFunctionPayloadBuilder<[MoveVa
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: string;
 
     market_address: string; // address
     provider: string; // address
@@ -626,7 +626,7 @@ export class SimulateRemoveLiquidity extends ViewFunctionPayloadBuilder<[MoveVal
   public readonly typeTags: [TypeTag]; // [Emojicoin]
 
   constructor(args: {
-    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: string;
 
     market_address: string; // address
     provider: string; // address
@@ -683,7 +683,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[MoveValue]> {
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
+    moduleAddress: string;
 
     market_address: string; // address
     swapper: string; // address
