@@ -13,7 +13,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "unused-imports"],
   rules: {
     quotes: ["error", "double"],
     "max-len": ["error", 100],
@@ -40,6 +40,7 @@ module.exports = {
       "warn",
       { argsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_" },
     ],
+    "unused-imports/no-unused-imports": "error",
     "@typescript-eslint/consistent-type-imports": [
       "error",
       { prefer: "type-imports", fixStyle: "inline-type-imports" },

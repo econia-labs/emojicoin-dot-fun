@@ -1,8 +1,4 @@
-// Copyright © Aptos Foundation
-// SPDX-License-Identifier: Apache-2.0
-
 /* eslint-disable max-len */
-/* eslint-disable @typescript-eslint/naming-convention */
 import {
   AccountAddress,
   MoveVector,
@@ -32,7 +28,7 @@ import {
 
 export type ProvideLiquidityPayloadMoveArguments = {
   provider: AccountAddress;
-  quote_amount: U64;
+  quoteAmount: U64;
 };
 
 /**
@@ -63,21 +59,21 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    moduleAddress: AccountAddressInput;
-    market_address: AccountAddressInput; // &signer
+    moduleAddress: AccountAddressInput; // The module address. You can turn this option off in your config.yaml.
+    marketAddress: AccountAddressInput; // &signer
     provider: AccountAddressInput; // address
-    quote_amount: Uint64; // u64
+    quoteAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // optional fee payer account to sponsor the transaction
   }) {
     super();
-    const { moduleAddress, market_address, provider, quote_amount, typeTags, feePayer } = args;
+    const { moduleAddress, marketAddress, provider, quoteAmount, typeTags, feePayer } = args;
     this.moduleAddress = AccountAddress.from(moduleAddress);
-    this.primarySender = AccountAddress.from(market_address);
+    this.primarySender = AccountAddress.from(marketAddress);
 
     this.args = {
       provider: AccountAddress.from(provider),
-      quote_amount: new U64(quote_amount),
+      quoteAmount: new U64(quoteAmount),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -88,9 +84,9 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
   static async builder(args: {
     moduleAddress: AccountAddressInput;
     aptosConfig: AptosConfig;
-    market_address: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // &signer
     provider: AccountAddressInput; // address
-    quote_amount: Uint64; // u64
+    quoteAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
@@ -111,20 +107,20 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
   static async submit(args: {
     moduleAddress: AccountAddressInput;
     aptosConfig: AptosConfig;
-    market_address: Account; // &signer
+    marketAddress: Account; // &signer
     provider: AccountAddressInput; // address
-    quote_amount: Uint64; // u64
+    quoteAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
     waitForTransactionOptions?: WaitForTransactionOptions;
   }): Promise<UserTransactionResponse> {
-    const { market_address: primarySigner, waitForTransactionOptions, feePayer } = args;
+    const { marketAddress: primarySigner, waitForTransactionOptions, feePayer } = args;
 
     const transactionBuilder = await ProvideLiquidity.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
-      market_address: primarySigner.accountAddress,
+      marketAddress: primarySigner.accountAddress,
     });
     const response = await transactionBuilder.submit({
       primarySigner,
@@ -168,7 +164,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    moduleAddress: AccountAddressInput;
+    moduleAddress: AccountAddressInput; // The module address. You can turn this option off in your config.yaml.
     registrant: AccountAddressInput; // &signer
     emojis: Array<HexInput>; // vector<vector<u8>>
     integrator: AccountAddressInput; // address
@@ -236,7 +232,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
 
 export type RemoveLiquidityPayloadMoveArguments = {
   provider: AccountAddress;
-  lp_coin_amount: U64;
+  lpCoinAmount: U64;
 };
 
 /**
@@ -267,21 +263,21 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    moduleAddress: AccountAddressInput;
-    market_address: AccountAddressInput; // &signer
+    moduleAddress: AccountAddressInput; // The module address. You can turn this option off in your config.yaml.
+    marketAddress: AccountAddressInput; // &signer
     provider: AccountAddressInput; // address
-    lp_coin_amount: Uint64; // u64
+    lpCoinAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // optional fee payer account to sponsor the transaction
   }) {
     super();
-    const { moduleAddress, market_address, provider, lp_coin_amount, typeTags, feePayer } = args;
+    const { moduleAddress, marketAddress, provider, lpCoinAmount, typeTags, feePayer } = args;
     this.moduleAddress = AccountAddress.from(moduleAddress);
-    this.primarySender = AccountAddress.from(market_address);
+    this.primarySender = AccountAddress.from(marketAddress);
 
     this.args = {
       provider: AccountAddress.from(provider),
-      lp_coin_amount: new U64(lp_coin_amount),
+      lpCoinAmount: new U64(lpCoinAmount),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -292,9 +288,9 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
   static async builder(args: {
     moduleAddress: AccountAddressInput;
     aptosConfig: AptosConfig;
-    market_address: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // &signer
     provider: AccountAddressInput; // address
-    lp_coin_amount: Uint64; // u64
+    lpCoinAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
@@ -315,20 +311,20 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
   static async submit(args: {
     moduleAddress: AccountAddressInput;
     aptosConfig: AptosConfig;
-    market_address: Account; // &signer
+    marketAddress: Account; // &signer
     provider: AccountAddressInput; // address
-    lp_coin_amount: Uint64; // u64
+    lpCoinAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
     waitForTransactionOptions?: WaitForTransactionOptions;
   }): Promise<UserTransactionResponse> {
-    const { market_address: primarySigner, waitForTransactionOptions, feePayer } = args;
+    const { marketAddress: primarySigner, waitForTransactionOptions, feePayer } = args;
 
     const transactionBuilder = await RemoveLiquidity.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
-      market_address: primarySigner.accountAddress,
+      marketAddress: primarySigner.accountAddress,
     });
     const response = await transactionBuilder.submit({
       primarySigner,
@@ -341,10 +337,10 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
 
 export type SwapPayloadMoveArguments = {
   swapper: AccountAddress;
-  input_amount: U64;
-  is_sell: Bool;
+  inputAmount: U64;
+  isSell: Bool;
   integrator: AccountAddress;
-  integrator_fee_rate_bps: U8;
+  integratorFeeRateBps: U8;
 };
 
 /**
@@ -378,37 +374,37 @@ export class Swap extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    moduleAddress: AccountAddressInput;
-    market_address: AccountAddressInput; // &signer
+    moduleAddress: AccountAddressInput; // The module address. You can turn this option off in your config.yaml.
+    marketAddress: AccountAddressInput; // &signer
     swapper: AccountAddressInput; // address
-    input_amount: Uint64; // u64
-    is_sell: boolean; // bool
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integrator_fee_rate_bps: Uint8; // u8
+    integratorFeeRateBps: Uint8; // u8
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // optional fee payer account to sponsor the transaction
   }) {
     super();
     const {
       moduleAddress,
-      market_address,
+      marketAddress,
       swapper,
-      input_amount,
-      is_sell,
+      inputAmount,
+      isSell,
       integrator,
-      integrator_fee_rate_bps,
+      integratorFeeRateBps,
       typeTags,
       feePayer,
     } = args;
     this.moduleAddress = AccountAddress.from(moduleAddress);
-    this.primarySender = AccountAddress.from(market_address);
+    this.primarySender = AccountAddress.from(marketAddress);
 
     this.args = {
       swapper: AccountAddress.from(swapper),
-      input_amount: new U64(input_amount),
-      is_sell: new Bool(is_sell),
+      inputAmount: new U64(inputAmount),
+      isSell: new Bool(isSell),
       integrator: AccountAddress.from(integrator),
-      integrator_fee_rate_bps: new U8(integrator_fee_rate_bps),
+      integratorFeeRateBps: new U8(integratorFeeRateBps),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -419,12 +415,12 @@ export class Swap extends EntryFunctionPayloadBuilder {
   static async builder(args: {
     moduleAddress: AccountAddressInput;
     aptosConfig: AptosConfig;
-    market_address: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // &signer
     swapper: AccountAddressInput; // address
-    input_amount: Uint64; // u64
-    is_sell: boolean; // bool
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integrator_fee_rate_bps: Uint8; // u8
+    integratorFeeRateBps: Uint8; // u8
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
@@ -445,23 +441,23 @@ export class Swap extends EntryFunctionPayloadBuilder {
   static async submit(args: {
     moduleAddress: AccountAddressInput;
     aptosConfig: AptosConfig;
-    market_address: Account; // &signer
+    marketAddress: Account; // &signer
     swapper: AccountAddressInput; // address
-    input_amount: Uint64; // u64
-    is_sell: boolean; // bool
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integrator_fee_rate_bps: Uint8; // u8
+    integratorFeeRateBps: Uint8; // u8
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
     waitForTransactionOptions?: WaitForTransactionOptions;
   }): Promise<UserTransactionResponse> {
-    const { market_address: primarySigner, waitForTransactionOptions, feePayer } = args;
+    const { marketAddress: primarySigner, waitForTransactionOptions, feePayer } = args;
 
     const transactionBuilder = await Swap.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
-      market_address: primarySigner.accountAddress,
+      marketAddress: primarySigner.accountAddress,
     });
     const response = await transactionBuilder.submit({
       primarySigner,
@@ -473,7 +469,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
 }
 
 export type IsASupportedEmojiPayloadMoveArguments = {
-  hex_bytes: HexInput;
+  hexBytes: HexInput;
 };
 
 /**
@@ -497,16 +493,16 @@ export class IsASupportedEmoji extends ViewFunctionPayloadBuilder<[boolean]> {
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    moduleAddress: string;
+    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
 
-    hex_bytes: HexInput; // vector<u8>
+    hexBytes: HexInput; // vector<u8>
   }) {
     super();
-    const { moduleAddress, hex_bytes } = args;
+    const { moduleAddress, hexBytes } = args;
     this.moduleAddress = AccountAddress.from(moduleAddress);
 
     this.args = {
-      hex_bytes: Hex.fromHexInput(hex_bytes).toUint8Array(),
+      hexBytes: Hex.fromHexInput(hexBytes).toUint8Array(),
     };
   }
 }
@@ -536,7 +532,7 @@ export class IsSupportedEmojiSequence extends ViewFunctionPayloadBuilder<[boolea
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    moduleAddress: string;
+    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
 
     emojis: Array<HexInput>; // vector<vector<u8>>
   }) {
@@ -551,9 +547,9 @@ export class IsSupportedEmojiSequence extends ViewFunctionPayloadBuilder<[boolea
 }
 
 export type SimulateProvideLiquidityPayloadMoveArguments = {
-  market_address: string;
+  marketAddress: string;
   provider: string;
-  quote_amount: string;
+  quoteAmount: string;
 };
 
 /**
@@ -579,28 +575,28 @@ export class SimulateProvideLiquidity extends ViewFunctionPayloadBuilder<[MoveVa
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    moduleAddress: string;
+    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
 
-    market_address: string; // address
+    marketAddress: string; // address
     provider: string; // address
-    quote_amount: string; // u64
+    quoteAmount: string; // u64
   }) {
     super();
-    const { moduleAddress, market_address, provider, quote_amount } = args;
+    const { moduleAddress, marketAddress, provider, quoteAmount } = args;
     this.moduleAddress = AccountAddress.from(moduleAddress);
 
     this.args = {
-      market_address: AccountAddress.from(market_address).toString(),
+      marketAddress: AccountAddress.from(marketAddress).toString(),
       provider: AccountAddress.from(provider).toString(),
-      quote_amount: BigInt(quote_amount).toString(),
+      quoteAmount: BigInt(quoteAmount).toString(),
     };
   }
 }
 
 export type SimulateRemoveLiquidityPayloadMoveArguments = {
-  market_address: string;
+  marketAddress: string;
   provider: string;
-  lp_coin_amount: string;
+  lpCoinAmount: string;
 };
 
 /**
@@ -626,21 +622,21 @@ export class SimulateRemoveLiquidity extends ViewFunctionPayloadBuilder<[MoveVal
   public readonly typeTags: [TypeTag]; // [Emojicoin]
 
   constructor(args: {
-    moduleAddress: string;
+    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
 
-    market_address: string; // address
+    marketAddress: string; // address
     provider: string; // address
-    lp_coin_amount: string; // u64
+    lpCoinAmount: string; // u64
     typeTags: [TypeTagInput]; // [Emojicoin]
   }) {
     super();
-    const { moduleAddress, market_address, provider, lp_coin_amount, typeTags } = args;
+    const { moduleAddress, marketAddress, provider, lpCoinAmount, typeTags } = args;
     this.moduleAddress = AccountAddress.from(moduleAddress);
 
     this.args = {
-      market_address: AccountAddress.from(market_address).toString(),
+      marketAddress: AccountAddress.from(marketAddress).toString(),
       provider: AccountAddress.from(provider).toString(),
-      lp_coin_amount: BigInt(lp_coin_amount).toString(),
+      lpCoinAmount: BigInt(lpCoinAmount).toString(),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -649,12 +645,12 @@ export class SimulateRemoveLiquidity extends ViewFunctionPayloadBuilder<[MoveVal
 }
 
 export type SimulateSwapPayloadMoveArguments = {
-  market_address: string;
+  marketAddress: string;
   swapper: string;
-  input_amount: string;
-  is_sell: boolean;
+  inputAmount: string;
+  isSell: boolean;
   integrator: string;
-  integrator_fee_rate_bps: Uint8;
+  integratorFeeRateBps: Uint8;
 };
 
 /**
@@ -683,34 +679,34 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[MoveValue]> {
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    moduleAddress: string;
+    moduleAddress: string; // The module address. You can turn this option off in your config.yaml.
 
-    market_address: string; // address
+    marketAddress: string; // address
     swapper: string; // address
-    input_amount: string; // u64
-    is_sell: boolean; // bool
+    inputAmount: string; // u64
+    isSell: boolean; // bool
     integrator: string; // address
-    integrator_fee_rate_bps: Uint8; // u8
+    integratorFeeRateBps: Uint8; // u8
   }) {
     super();
     const {
       moduleAddress,
-      market_address,
+      marketAddress,
       swapper,
-      input_amount,
-      is_sell,
+      inputAmount,
+      isSell,
       integrator,
-      integrator_fee_rate_bps,
+      integratorFeeRateBps,
     } = args;
     this.moduleAddress = AccountAddress.from(moduleAddress);
 
     this.args = {
-      market_address: AccountAddress.from(market_address).toString(),
+      marketAddress: AccountAddress.from(marketAddress).toString(),
       swapper: AccountAddress.from(swapper).toString(),
-      input_amount: BigInt(input_amount).toString(),
-      is_sell,
+      inputAmount: BigInt(inputAmount).toString(),
+      isSell,
       integrator: AccountAddress.from(integrator).toString(),
-      integrator_fee_rate_bps,
+      integratorFeeRateBps,
     };
   }
 }

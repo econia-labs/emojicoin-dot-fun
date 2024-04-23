@@ -1,5 +1,3 @@
-import { type AccountAddress } from "@aptos-labs/ts-sdk";
-
 export interface Result {
   transaction_hash: string;
   gas_used: number;
@@ -20,7 +18,7 @@ export type PublishPackageResult = {
   transaction_hash: string;
   gas_used: number;
   gas_unit_price: number;
-  sender: AccountAddress;
+  sender: string;
   sequence_number: number;
   success: boolean;
   timestamp_us: number; // Microseconds.

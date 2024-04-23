@@ -1,16 +1,18 @@
 import { execSync } from "child_process";
 import {
-  AccountAddress,
   type AccountAddressInput,
   Hex,
-  type Network,
+  Network,
   NetworkToNodeAPI,
   type PrivateKey,
+  Account,
+  Ed25519PrivateKey,
 } from "@aptos-labs/ts-sdk";
 import path from "path";
-import { MAX_GAS_FOR_PUBLISH } from "../utils";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, MAX_GAS_FOR_PUBLISH, ONE_APT } from "../utils";
 import { getGitRoot } from "../utils/helpers";
 import { type PublishPackageResult, type ResultJSON } from "./types";
+import { getAptosClient } from "../helpers";
 
 export async function publishPackage(args: {
   pk: PrivateKey;
@@ -66,7 +68,7 @@ export async function publishPackage(args: {
     transaction_hash: result.transaction_hash,
     gas_used: Number(result.gas_used),
     gas_unit_price: Number(result.gas_unit_price),
-    sender: AccountAddress.from(result.sender),
+    sender: result.sender,
     sequence_number: Number(result.sequence_number),
     success: Boolean(result.success),
     timestamp_us: Number(result.timestamp_us), // Microseconds.
@@ -97,4 +99,42 @@ function extractJsonFromText(originalCommand: string, text: string): ResultJSON 
   /* eslint-disable-next-line no-console */
   console.error(`Command: ${originalCommand}`);
   return null;
+}
+
+export async function publishForTest(pk: string): Promise<PublishPackageResult> {
+  const { aptos } = getAptosClient();
+  const publisher = Account.fromPrivateKey({
+    privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
+  });
+
+  await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
+  await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
+  await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
+
+  const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
+  const packageName = moduleName;
+  return publishPackage({
+    pk: publisher.privateKey,
+    includedArtifacts: "none",
+    namedAddresses: {
+      [packageName]: publisher.accountAddress,
+    },
+    network: Network.LOCAL,
+    packageDirRelativeToRoot: `src/move/${packageName}`,
+  });
+}
+
+export async function getModuleExists(
+  publisherAddress: AccountAddressInput,
+  moduleName: string
+): Promise<boolean> {
+  const { aptos } = getAptosClient();
+  const abiExists =
+    typeof (
+      await aptos.account.getAccountModule({
+        accountAddress: publisherAddress,
+        moduleName,
+      })
+    ).abi !== "undefined";
+  return abiExists;
 }

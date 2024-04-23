@@ -1,21 +1,19 @@
-import { Account, Network, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { getAptosClient } from "../../src/helpers/aptos-client";
-import { publishPackage } from "../../src/cli/publish";
+import { AccountAddress, Network, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { getModuleExists, publishPackage } from "../../src/cli/publish";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, ONE_APT } from "../../src";
+import getHelpers from "../helpers";
 
 jest.setTimeout(60000);
 jest.retryTimes(3);
 
 describe("tests publishing modules to a local network", () => {
-  const { aptos } = getAptosClient();
-  const publisher = Account.generate();
-
-  beforeAll(async () => {
-    await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
-    await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
-  });
+  const { aptos, publisher, publishPackageResult } = getHelpers();
 
   it("publishes a nearly blank smart contract", async () => {
+    await aptos.fundAccount({
+      accountAddress: publisher.accountAddress.toString(),
+      amount: ONE_APT,
+    });
     const moduleName = "main";
     const packageName = "template";
     const publishResult = await publishPackage({
@@ -28,7 +26,9 @@ describe("tests publishing modules to a local network", () => {
       packageDirRelativeToRoot: `src/move/${packageName}`,
     });
 
-    expect(publishResult.sender.toStringLong()).toEqual(publisher.accountAddress.toStringLong());
+    expect(AccountAddress.from(publishResult.sender).toStringLong()).toEqual(
+      publisher.accountAddress.toStringLong()
+    );
     expect(publishResult.success).toEqual(true);
 
     const transactionHash = publishResult.transaction_hash;
@@ -40,22 +40,17 @@ describe("tests publishing modules to a local network", () => {
       moduleName,
     });
     expect(accountResources.abi).toBeDefined();
+
+    const moduleExists = await getModuleExists(publisher.accountAddress, moduleName);
+    expect(moduleExists).toBe(true);
   });
 
   it("publishes the emojicoin_dot_fun smart contract", async () => {
-    const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
-    const packageName = moduleName;
-    const publishResult = await publishPackage({
-      pk: publisher.privateKey,
-      includedArtifacts: "none",
-      namedAddresses: {
-        [packageName]: publisher.accountAddress,
-      },
-      network: Network.LOCAL,
-      packageDirRelativeToRoot: `src/move/${packageName}`,
-    });
+    const publishResult = publishPackageResult;
 
-    expect(publishResult.sender.toStringLong()).toEqual(publisher.accountAddress.toStringLong());
+    expect(AccountAddress.from(publishResult.sender).toStringLong()).toEqual(
+      publisher.accountAddress.toStringLong()
+    );
     expect(publishResult.success).toEqual(true);
 
     const transactionHash = publishResult.transaction_hash;
@@ -64,8 +59,13 @@ describe("tests publishing modules to a local network", () => {
 
     const accountResources = await aptos.getAccountModule({
       accountAddress: publisher.accountAddress,
-      moduleName,
+      moduleName: EMOJICOIN_DOT_FUN_MODULE_NAME,
     });
     expect(accountResources.abi).toBeDefined();
+    const moduleExists = await getModuleExists(
+      publisher.accountAddress,
+      EMOJICOIN_DOT_FUN_MODULE_NAME
+    );
+    expect(moduleExists).toBe(true);
   });
 });

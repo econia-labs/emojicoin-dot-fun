@@ -1,7 +1,4 @@
-import { Account, Network, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { getAptosClient } from "../../src/helpers/aptos-client";
-import { fundAccounts } from "../../src/helpers/fund-accounts";
-import { publishPackage } from "../../src/cli/publish";
+import { Account, AccountAddress, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
@@ -10,33 +7,20 @@ import {
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
+import getHelpers from "../helpers";
 
 jest.setTimeout(30000);
 
 describe("registers a market successfully", () => {
-  const { aptos } = getAptosClient();
-  const publisher = Account.generate();
-  const user = Account.generate();
-
-  beforeAll(async () => {
-    await fundAccounts(aptos, [publisher, user]);
-    await fundAccounts(aptos, [publisher]);
-  });
+  const { aptos, publisher, publishPackageResult } = getHelpers();
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
     const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
-    const packageName = moduleName;
-    const publishResult = await publishPackage({
-      pk: publisher.privateKey,
-      includedArtifacts: "none",
-      namedAddresses: {
-        [packageName]: publisher.accountAddress,
-      },
-      network: Network.LOCAL,
-      packageDirRelativeToRoot: `src/move/${packageName}`,
-    });
+    const publishResult = publishPackageResult;
 
-    expect(publishResult.sender.toStringLong()).toEqual(publisher.accountAddress.toStringLong());
+    expect(AccountAddress.from(publishResult.sender).toStringLong()).toEqual(
+      publisher.accountAddress.toStringLong()
+    );
     expect(publishResult.success).toEqual(true);
 
     const transactionHash = publishResult.transaction_hash;
