@@ -1,22 +1,21 @@
 import { Account, Network, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { getAptosClient } from "../../src/helpers/aptos-client";
-import { fundAccounts } from "../../src/helpers/fund-accounts";
 import { publishPackage } from "../../src/cli/publish";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, ONE_APT } from "../../src";
 
 jest.setTimeout(30000);
+jest.retryTimes(3);
 
 describe("tests publishing modules to a local network", () => {
   const { aptos } = getAptosClient();
   const publisher = Account.generate();
-  const user = Account.generate();
 
   beforeAll(async () => {
-    await fundAccounts(aptos, [publisher, user]);
-    await fundAccounts(aptos, [publisher]);
+    await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
+    await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
   });
 
-  it.only("publishes a nearly blank smart contract", async () => {
+  it("publishes a nearly blank smart contract", async () => {
     const moduleName = "main";
     const packageName = "template";
     const publishResult = await publishPackage({
@@ -43,7 +42,7 @@ describe("tests publishing modules to a local network", () => {
     expect(accountResources.abi).toBeDefined();
   });
 
-  it.only("publishes the emojicoin_dot_fun smart contract", async () => {
+  it("publishes the emojicoin_dot_fun smart contract", async () => {
     const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
     const packageName = moduleName;
     const publishResult = await publishPackage({
