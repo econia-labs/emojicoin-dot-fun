@@ -30,6 +30,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const EMOJICOIN_LP_STRUCT_NAME: vector<u8> = b"EmojicoinLP";
     const EMOJICOIN_NAME_SUFFIX: vector<u8> = b" emojicoin";
     const EMOJICOIN_LP_NAME_SUFFIX: vector<u8> = b" emojicoin LP";
+    const REGISTRY_NAME: vector<u8> = b"Registry";
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
@@ -478,7 +479,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
-        let constructor_ref = object::create_object(@emojicoin_dot_fun);
+        let constructor_ref = object::create_named_object(emojicoin_dot_fun, REGISTRY_NAME);
         let extend_ref = object::generate_extend_ref(&constructor_ref);
         let registry_signer = object::generate_signer(&constructor_ref);
         let registry_address = object::address_from_constructor_ref(&constructor_ref);
