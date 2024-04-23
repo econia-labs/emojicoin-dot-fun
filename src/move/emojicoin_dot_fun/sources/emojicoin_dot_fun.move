@@ -226,7 +226,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         registry_ref: &Registry,
         emojis: vector<vector<u8>>,
     ): vector<u8> {
-        let supported_emojis_ref: &Table<vector<u8>, u8> = &registry_ref.supported_emojis;
+        let supported_emojis_ref = &registry_ref.supported_emojis;
         let verified_bytes = vector[];
         for (i in 0..vector::length(&emojis)) {
             let emoji = *vector::borrow(&emojis, i);
