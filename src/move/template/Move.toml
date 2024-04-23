@@ -4,3 +4,4 @@ template = "_"
 [package]
 name = 'Template'
 version = '0.0.1'
+upgrade_policy = "immutable"

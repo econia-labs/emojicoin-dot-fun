@@ -10,7 +10,7 @@ import {
 import path from "path";
 import { MAX_GAS_FOR_PUBLISH } from "../utils";
 import { getGitRoot } from "../utils/helpers";
-import { type PublishPackageResult, type ResultJSON } from "../types";
+import { type PublishPackageResult, type ResultJSON } from "./types";
 
 export async function publishPackage(args: {
   pk: PrivateKey;

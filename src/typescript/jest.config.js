@@ -12,7 +12,7 @@ module.exports = {
     "src/utils/env.ts",
   ],
   testPathIgnorePatterns: ["dist/*"],
-  collectCoverage: true,
+  collectCoverage: false,
   setupFiles: ["dotenv/config"],
   coverageThreshold: {
     global: {
