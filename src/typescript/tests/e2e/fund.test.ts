@@ -1,9 +1,4 @@
-import {
-  Account,
-  AccountAddress,
-  isUserTransactionResponse,
-  type EntryFunctionPayloadResponse,
-} from "@aptos-labs/ts-sdk";
+import { Account, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { getAptosClient } from "../../src/helpers/aptos-client";
 
 import { ONE_APT } from "../../src/utils";

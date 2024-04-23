@@ -1,22 +1,8 @@
-import {
-  Account,
-  AptosConfig,
-  Hex,
-  InputViewFunctionData,
-  LedgerVersionArg,
-  MimeType,
-  MoveValue,
-  Network,
-  Serializer,
-  generateViewFunctionPayload,
-  isUserTransactionResponse,
-  postAptosFullNode,
-} from "@aptos-labs/ts-sdk";
+import { Account, Network } from "@aptos-labs/ts-sdk";
 import { getAptosClient } from "../../src/helpers/aptos-client";
 import { fundAccounts } from "../../src/helpers/fund-accounts";
 import { publishPackage } from "../../src/cli/publish";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
-import { RegisterMarket } from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import * as EmojicoinDotFun from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 
 jest.setTimeout(30000);

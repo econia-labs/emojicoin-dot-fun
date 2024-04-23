@@ -3,11 +3,12 @@ import { getAptosClient } from "../../src/helpers/aptos-client";
 import { fundAccounts } from "../../src/helpers/fund-accounts";
 import { publishPackage } from "../../src/cli/publish";
 import {
+  COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   deriveEmojicoinPublisherAddress,
+  getMarketResource,
   getRegistryAddress,
 } from "../../src";
-import { RegisterMarket } from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 
 jest.setTimeout(30000);
@@ -22,7 +23,7 @@ describe("registers a market successfully", () => {
     await fundAccounts(aptos, [publisher]);
   });
 
-  it.only("publishes the emojicoin_dot_fun smart contract", async () => {
+  it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
     const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
     const packageName = moduleName;
     const publishResult = await publishPackage({
@@ -52,7 +53,7 @@ describe("registers a market successfully", () => {
 
     const emojis = ["f09fa693", "f09fa79f"];
 
-    const txResponse = await RegisterMarket.submit({
+    const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
       moduleAddress: publisher.accountAddress,
       aptosConfig: aptos.config,
       registrant: publisher,
@@ -75,5 +76,44 @@ describe("registers a market successfully", () => {
     const publisherObjectResources = await aptos.getAccountResources({
       accountAddress: derivedNamedObjectAddress,
     });
+
+    expect(publisherObjectResources).toBeDefined();
+
+    const marketObjectMarketResource = await getMarketResource({
+      aptos,
+      moduleAddress: publisher.accountAddress,
+      objectAddress: derivedNamedObjectAddress,
+    });
+
+    expect(marketObjectMarketResource.emoji_bytes.toString()).toEqual(`0x${emojis[0]}${emojis[1]}`);
+    expect(marketObjectMarketResource.extend_ref.self.toStringLong()).toEqual(
+      derivedNamedObjectAddress.toStringLong()
+    );
+    expect(marketObjectMarketResource.market_id).toEqual(1n);
+    expect(marketObjectMarketResource.lp_coin_supply).toEqual(0n);
+
+    const marketObjectResources = await aptos.getAccountModule({
+      accountAddress: derivedNamedObjectAddress,
+      moduleName: COIN_FACTORY_MODULE_NAME,
+    });
+    const structAbis = marketObjectResources.abi?.structs;
+    const expectedStructAbis = [
+      {
+        name: "Emojicoin",
+        is_native: false,
+        abilities: [],
+        generic_type_params: [],
+        fields: [{ name: "dummy_field", type: "bool" }],
+      },
+      {
+        name: "EmojicoinLP",
+        is_native: false,
+        abilities: [],
+        generic_type_params: [],
+        fields: [{ name: "dummy_field", type: "bool" }],
+      },
+    ];
+    expect(structAbis).toBeDefined();
+    expect(structAbis).toStrictEqual(expectedStructAbis);
   });
 });

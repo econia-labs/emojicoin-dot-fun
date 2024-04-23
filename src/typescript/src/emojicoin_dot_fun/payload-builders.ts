@@ -122,11 +122,16 @@ export class EntryFunctionTransactionBuilder {
   }
 
   /**
-   * Helper function to print out relevant transaction info with an easy way to filter out fields
+   * Helper function to print out relevant transaction info with an easy way to filter out fields.
+   *
+   * These are intended to be chained declaratively. For example:
+   *    const response = await builder.submit(...).responseInfo(["hash", "success"]);
+   *
    * @param response The transaction response for a user submitted transaction
    * @param optionsArray An array of keys to print out from the transaction response
    * @returns the transaction info as an object
    */
+  /* eslint-disable-next-line class-methods-use-this */ // This is intended to be chained.
   responseInfo(
     response: UserTransactionResponse,
     optionsArray?: Array<keyof UserTransactionResponse>

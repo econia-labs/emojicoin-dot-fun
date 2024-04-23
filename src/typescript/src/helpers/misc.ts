@@ -4,7 +4,8 @@ import {
   type Aptos,
   Hex,
   type HexInput,
-  MoveVector,
+  type Uint64,
+  type Uint128,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, OBJECT_FROM_SEED_ADDRESS_SCHEME } from "../utils";
@@ -45,10 +46,9 @@ export function createNamedObjectAddress(args: {
   const creatorAddress = AccountAddress.from(args.creator);
   const seed = Hex.fromHexInput(args.seed).toUint8Array();
   const serializedCreatorAddress = creatorAddress.bcsToBytes();
-  const serializedSeed = MoveVector.U8(seed).bcsToBytes();
   const serialized = new Uint8Array([
     ...serializedCreatorAddress,
-    ...serializedSeed,
+    ...seed,
     ...OBJECT_FROM_SEED_ADDRESS_SCHEME.toUint8Array(),
   ]);
 
@@ -66,4 +66,54 @@ export async function getRegistryAddress(args: {
     resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::RegistryAddress`,
   });
   return registryAddressResource.registry_address;
+}
+
+export type MarketResource = {
+  market_id: Uint64;
+  market_address: AccountAddress;
+  emoji_bytes: Hex;
+  extend_ref: ExtendRef;
+  clamm_virtual_reserves: Reserves;
+  cpamm_real_reserves: Reserves;
+  lp_coin_supply: Uint128;
+};
+
+export type ExtendRef = {
+  self: AccountAddress;
+};
+
+export type Reserves = {
+  base: Uint64;
+  quote: Uint64;
+};
+
+export async function getMarketResource(args: {
+  aptos: Aptos;
+  moduleAddress: AccountAddressInput;
+  objectAddress: AccountAddressInput;
+}): Promise<MarketResource> {
+  const { aptos } = args;
+  const moduleAddress = AccountAddress.from(args.moduleAddress);
+  const objectAddress = AccountAddress.from(args.objectAddress);
+  const marketResource = await aptos.getAccountResource({
+    accountAddress: objectAddress,
+    resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Market`,
+  });
+  return {
+    market_id: BigInt(marketResource.market_id),
+    market_address: AccountAddress.from(marketResource.market_address),
+    emoji_bytes: Hex.fromHexString(marketResource.emoji_bytes),
+    extend_ref: {
+      self: AccountAddress.from(marketResource.extend_ref.self),
+    },
+    clamm_virtual_reserves: {
+      base: BigInt(marketResource.clamm_virtual_reserves.base),
+      quote: BigInt(marketResource.clamm_virtual_reserves.quote),
+    },
+    cpamm_real_reserves: {
+      base: BigInt(marketResource.cpamm_real_reserves.base),
+      quote: BigInt(marketResource.cpamm_real_reserves.quote),
+    },
+    lp_coin_supply: BigInt(marketResource.lp_coin_supply),
+  };
 }
