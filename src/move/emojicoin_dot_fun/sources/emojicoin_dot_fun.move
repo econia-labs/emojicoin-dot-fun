@@ -98,6 +98,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         cumulative_quote_volume: u128,
     }
 
+    struct GlobalStats has store {
+        cumulative_quote_volume: Aggregator<u128>,
+        total_quote_locked: Aggregator<u128>,
+        market_cap: Aggregator<u128>,
+        fully_diluted_value: Aggregator<u128>,
+    }
+
     #[resource_group = ObjectGroup]
     struct Registry has key {
         registry_address: address,
@@ -105,8 +112,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
-        cumulative_quote_volume: Aggregator<u128>,
-        total_quote_locked: Aggregator<u128>,
+        global_stats: GlobalStats,
     }
 
     #[event]
@@ -333,7 +339,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Prepare variables relevant to global amounts, as they are used in branching logic too.
         let registry_ref_mut = borrow_registry_ref_mut();
         let quote_volume_as_u128 = (event.quote_volume as u128);
-        let total_quote_locked_ref_mut = &mut registry_ref_mut.total_quote_locked;
+        let global_total_quote_locked_ref_mut =
+            &mut registry_ref_mut.global_stats.total_quote_locked;
 
         if (is_sell) { // If selling, no possibility of state transition.
 
@@ -353,7 +360,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             reserves_ref_mut.quote = reserves_ref_mut.quote - quote_leaving_market;
 
             // Update global total quote locked.
-            aggregator_v2::try_sub(total_quote_locked_ref_mut, (quote_leaving_market as u128));
+            aggregator_v2::try_sub(
+                global_total_quote_locked_ref_mut,
+                (quote_leaving_market as u128)
+            );
         } else { // If buying, might need to buy through the state transition.
 
             // Transfer funds.
@@ -391,7 +401,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             };
 
             // Update global total quote locked.
-            aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
+            aggregator_v2::try_add(global_total_quote_locked_ref_mut, quote_volume_as_u128);
         };
         aptos_account::deposit_coins(integrator, quote);
 
@@ -400,7 +410,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_ref_mut.cumulative_base_volume + (event.base_volume as u128);
         market_ref_mut.cumulative_quote_volume =
             market_ref_mut.cumulative_quote_volume + quote_volume_as_u128;
-        aggregator_v2::try_add(&mut registry_ref_mut.cumulative_quote_volume, quote_volume_as_u128);
+        let global_quote_volume = &mut registry_ref_mut.global_stats.cumulative_quote_volume;
+        aggregator_v2::try_add(global_quote_volume, quote_volume_as_u128);
 
         event::emit(event);
     }
@@ -437,8 +448,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         event::emit(event);
 
         // Update global total quote locked.
-        let total_quote_locked_ref_mut = &mut borrow_registry_ref_mut().total_quote_locked;
-        aggregator_v2::try_add(total_quote_locked_ref_mut, (event.quote_amount as u128));
+        let global_total_quote_locked_ref_mut =
+            &mut borrow_registry_ref_mut().global_stats.total_quote_locked;
+        aggregator_v2::try_add(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
     }
 
     public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
@@ -474,8 +486,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         event::emit(event);
 
         // Update global total quote locked.
-        let total_quote_locked_ref_mut = &mut borrow_registry_ref_mut().total_quote_locked;
-        aggregator_v2::try_sub(total_quote_locked_ref_mut, (event.quote_amount as u128));
+        let global_total_quote_locked_ref_mut =
+            &mut borrow_registry_ref_mut().global_stats.total_quote_locked;
+        aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
@@ -490,8 +503,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             markets_by_emoji_bytes: smart_table::new(),
             markets_by_market_id: smart_table::new(),
             extend_ref,
-            cumulative_quote_volume: aggregator_v2::create_unbounded_aggregator<u128>(),
-            total_quote_locked: aggregator_v2::create_unbounded_aggregator<u128>(),
+            global_stats: GlobalStats {
+                cumulative_quote_volume: aggregator_v2::create_unbounded_aggregator<u128>(),
+                total_quote_locked: aggregator_v2::create_unbounded_aggregator<u128>(),
+                market_cap: aggregator_v2::create_unbounded_aggregator<u128>(),
+                fully_diluted_value: aggregator_v2::create_unbounded_aggregator<u128>(),
+            }
         };
 
         // Load supported emojis into registry.
