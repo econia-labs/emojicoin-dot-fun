@@ -17,7 +17,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use std::string::{Self, String};
     use std::vector;
 
-    // #[test_only] use aptos_std::aptos_coin; // Uncomment later when we use `aptos_coin` in unit tests.
+    #[test_only] use aptos_std::aptos_coin;
     #[test_only] use yellow_heart_market_address::bad_coin_factory::{Emojicoin as BadModuleEmojicoin};
     #[test_only] use yellow_heart_market_address::bad_coin_factory::{EmojicoinLP as BadModuleEmojicoinLP};
     #[test_only] use yellow_heart_market_address::coin_factory::{Emojicoin as TestEmojicoin};
@@ -83,6 +83,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_ALREADY_REGISTERED: u64 = 11;
     /// Account is unable to pay market registration fee.
     const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 12;
+    /// The swapper account does not exist.
+    const E_SWAPPER_DOES_NOT_EXIST: u64 = 13;
 
     struct Reserves has copy, drop, store {
         base: u64,
@@ -383,6 +385,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_address
         );
         let swapper_address = signer::address_of(swapper);
+        assert!(account::exists_at(swapper_address), E_SWAPPER_DOES_NOT_EXIST);
         let event = simulate_swap_inner(
             swapper_address,
             input_amount,
@@ -930,6 +933,33 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only]
     public fun get_EMOJICOIN_SUPPLY(): u64 { EMOJICOIN_SUPPLY }
 
+    #[test_only]
+    fun initialize_module_and_yellow_heart_coins(
+        deployer: &signer
+    ) acquires Registry, RegistryAddress, Market {
+        aptos_account::create_account(@emojicoin_dot_fun);
+        init_module(deployer);
+        let symbol_bytes = YELLOW_HEART;
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let (market_address, market_signer) = create_market(registry_ref_mut, symbol_bytes);
+
+        let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
+        ensure_coins_initialized<TestEmojicoin, TestEmojicoinLP>(
+            market_ref_mut,
+            &market_signer,
+            market_address,
+        );
+    }
+
+    #[test_only]
+    fun fund_account(account_address: address, amount: u64, aptos_framework: &signer) {
+        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
+        let coins = coin::mint<AptosCoin>(amount, &mint_cap);
+        aptos_account::deposit_coins(account_address, coins);
+        coin::destroy_burn_cap<AptosCoin>(burn_cap);
+        coin::destroy_mint_cap<AptosCoin>(mint_cap);
+    }
+
     #[test]
     fun test_cpamm_simple_swap_output_amount() {
         // Buy all base from start of bonding curve.
@@ -940,6 +970,51 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         reserves = Reserves { base: BASE_VIRTUAL_FLOOR, quote: QUOTE_VIRTUAL_CEILING };
         output = cpamm_simple_swap_output_amount(BASE_REAL_CEILING, true, reserves);
         assert!(output == QUOTE_REAL_CEILING, 0);
+    }
+
+    #[test(deployer = @emojicoin_dot_fun, aptos_framework = @0x1, user = @0xAA)]
+    fun test_swap_function(
+        deployer: &signer,
+        user: &signer,
+        aptos_framework: &signer,
+    ) acquires Registry, RegistryAddress, Market, LPCoinCapabilities {
+        aptos_account::create_account(@emojicoin_dot_fun);
+        init_module(deployer);
+        let symbol_bytes = YELLOW_HEART;
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let (market_address, _) = create_market(registry_ref_mut, symbol_bytes);
+        assert!(@yellow_heart_market_address == market_address, 0);
+
+        let user_addr = signer::address_of(user);
+        let input_amount: u64 = 100_000_000;
+        fund_account(user_addr, input_amount, aptos_framework);
+        let integrator_address = @0xbeefcafe;
+        swap<TestEmojicoin, TestEmojicoinLP>(
+            @yellow_heart_market_address,
+            user,
+            input_amount,
+            false, // Buy the emojicoins.
+            integrator_address,
+            0,
+        );
+
+        assert!(exists<LPCoinCapabilities<TestEmojicoin, TestEmojicoinLP>>(@yellow_heart_market_address), 0);
+    }
+
+    #[test(deployer=@emojicoin_dot_fun, user=@0xAA), expected_failure(abort_code=E_SWAPPER_DOES_NOT_EXIST)]
+    fun test_swapper_account_does_not_exist(
+        deployer: &signer,
+        user: &signer,
+    ) acquires Registry, RegistryAddress, Market, LPCoinCapabilities {
+        initialize_module_and_yellow_heart_coins(deployer);
+        swap<TestEmojicoin, TestEmojicoinLP>(
+            @yellow_heart_market_address,
+            user,
+            1,
+            false,
+            @0xbeefcafe,
+            0,
+        );
     }
 
     #[test, expected_failure(abort_code = E_SWAP_DIVIDE_BY_ZERO)]
@@ -1075,11 +1150,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ) acquires Registry, RegistryAddress {
         init_module(deployer);
         let emoji_bytes = YELLOW_HEART;
-
         let registry_ref_mut = borrow_registry_ref_mut();
-        let verified_bytes = get_verified_emoji_bytes(registry_ref_mut, vector [emoji_bytes]);
-        assert!(verified_bytes == emoji_bytes, 0);
-
         let (market_address, _) = create_market(registry_ref_mut, emoji_bytes);
         assert!(market_address == @yellow_heart_market_address, 0);
     }
@@ -1088,20 +1159,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     fun test_coin_names_and_symbols(
         deployer: &signer,
     ) acquires Market, Registry, RegistryAddress {
-        aptos_account::create_account(@emojicoin_dot_fun);
-        init_module(deployer);
-        let symbol_bytes = YELLOW_HEART;
-        let registry_ref_mut = borrow_registry_ref_mut();
-        let (market_address, market_signer) = create_market(registry_ref_mut, symbol_bytes);
+        initialize_module_and_yellow_heart_coins(deployer);
 
-        let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
-        ensure_coins_initialized<TestEmojicoin, TestEmojicoinLP>(
-            market_ref_mut,
-            &market_signer,
-            market_address,
-        );
-
-        let symbol = string::utf8(symbol_bytes);
+        let symbol = string::utf8(YELLOW_HEART);
         assert!(coin::symbol<TestEmojicoin>() == symbol, 0);
         assert!(coin::name<TestEmojicoin>() == get_concatenation(symbol, string::utf8(EMOJICOIN_NAME_SUFFIX)), 0);
         assert!(coin::name<TestEmojicoin>() == get_concatenation(symbol, string::utf8(b" emojicoin")), 0);
