@@ -9,6 +9,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_framework::event;
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
     use aptos_std::smart_table::{Self, SmartTable};
+    use aptos_std::string_utils;
     use aptos_std::table::{Self, Table};
     use aptos_std::type_info;
     use emojicoin_dot_fun::hex_codes;
@@ -16,12 +17,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use std::string::{Self, String};
     use std::vector;
 
-    #[test_only] use aptos_std::aptos_coin;
-    #[test_only] use emojicoin_dot_fun::bad_coin_factory::{Emojicoin as BadModuleEmojicoin};
-    #[test_only] use emojicoin_dot_fun::bad_coin_factory::{EmojicoinLP as BadModuleEmojicoinLP};
-    #[test_only] use emojicoin_dot_fun::coin_factory::{Emojicoin as TestEmojicoin};
-    #[test_only] use emojicoin_dot_fun::coin_factory::{EmojicoinLP as TestEmojicoinLP};
-    #[test_only] use emojicoin_dot_fun::coin_factory::BadType;
+    // #[test_only] use aptos_std::aptos_coin; // Uncomment later when we use `aptos_coin` in unit tests.
+    #[test_only] use yellow_heart_market_address::bad_coin_factory::{Emojicoin as BadModuleEmojicoin};
+    #[test_only] use yellow_heart_market_address::bad_coin_factory::{EmojicoinLP as BadModuleEmojicoinLP};
+    #[test_only] use yellow_heart_market_address::coin_factory::{Emojicoin as TestEmojicoin};
+    #[test_only] use yellow_heart_market_address::coin_factory::{EmojicoinLP as TestEmojicoinLP};
+    #[test_only] use yellow_heart_market_address::coin_factory::BadType;
+    #[test_only] const YELLOW_HEART: vector<u8> = x"f09f929b";
 
     const MAX_SYMBOL_LENGTH: u8 = 10;
     const DECIMALS: u8 = 8;
@@ -30,8 +32,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const EMOJICOIN_STRUCT_NAME: vector<u8> = b"Emojicoin";
     const EMOJICOIN_LP_STRUCT_NAME: vector<u8> = b"EmojicoinLP";
     const EMOJICOIN_NAME_SUFFIX: vector<u8> = b" emojicoin";
-    const EMOJICOIN_LP_NAME_SUFFIX: vector<u8> = b" emojicoin LP";
     const REGISTRY_NAME: vector<u8> = b"Registry";
+    const EMOJICOIN_LP_NAME_PREFIX: vector<u8> = b"Emojicoin ";
+    const EMOJICOIN_LP_SYMBOL_PREFIX: vector<u8> = b"LP-";
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
@@ -319,7 +322,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             // Initialize emojicoin with fixed supply, throw away capabilities.
             let (burn_cap, freeze_cap, mint_cap) = coin::initialize<Emojicoin>(
                 market_signer,
-                get_coin_name(symbol, EMOJICOIN_NAME_SUFFIX),
+                get_concatenation(symbol, string::utf8(EMOJICOIN_NAME_SUFFIX)),
                 symbol,
                 DECIMALS,
                 MONITOR_SUPPLY
@@ -330,11 +333,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             coin::destroy_mint_cap(mint_cap);
             coin::destroy_burn_cap(burn_cap);
 
+            let market_id_str = string_utils::to_string(&market_ref.market_id);
+            let lp_symbol = get_concatenation(string::utf8(EMOJICOIN_LP_SYMBOL_PREFIX), market_id_str);
             // Initialize LP coin, storing only burn and mint capabilities.
             let (burn_cap, freeze_cap, mint_cap) = coin::initialize<EmojicoinLP>(
                 market_signer,
-                get_coin_name(symbol, EMOJICOIN_LP_NAME_SUFFIX),
-                symbol,
+                get_concatenation(string::utf8(EMOJICOIN_LP_NAME_PREFIX), lp_symbol),
+                lp_symbol,
                 DECIMALS,
                 MONITOR_SUPPLY
             );
@@ -348,9 +353,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     }
 
-    inline fun get_coin_name(symbol: String, suffix_bytes: vector<u8>): String {
-        string::append_utf8(&mut symbol, suffix_bytes);
-        symbol
+    inline fun get_concatenation(base: String, additional: String): String {
+        string::append(&mut base, additional);
+        base
     }
 
     inline fun get_market_ref_mut_and_signer_checked(market_address: address): (
@@ -951,18 +956,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
-    #[test(deployer = @emojicoin_dot_fun, user = @0xFA, aptos_framework = @0x1)]
+    #[test(deployer = @emojicoin_dot_fun)]
     fun test_register_market_with_complex_emoji_happy_path(
         deployer: &signer,
-        user: &signer,
-        aptos_framework: &signer,
     ) acquires Registry, RegistryAddress {
-        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
-        let coins = coin::mint<AptosCoin>(MARKET_REGISTRATION_FEE, &mint_cap);
-        aptos_account::deposit_coins(signer::address_of(user), coins);
-        coin::destroy_burn_cap<AptosCoin>(burn_cap);
-        coin::destroy_mint_cap<AptosCoin>(mint_cap);
-
         init_module(deployer);
         let emojis = vector<vector<u8>> [
             x"e29aa1",           // High voltage.
@@ -1020,7 +1017,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test]
     fun test_valid_coin_types() {
-        assert!(valid_coin_types<TestEmojicoin, TestEmojicoinLP>(@emojicoin_dot_fun), 0);
+        assert!(valid_coin_types<TestEmojicoin, TestEmojicoinLP>(@yellow_heart_market_address), 0);
     }
 
     #[test]
@@ -1049,7 +1046,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ) acquires Market, Registry, RegistryAddress {
         aptos_account::create_account(@emojicoin_dot_fun);
         init_module(deployer);
-        let symbol_bytes = x"f09f929b"; // Yellow heart.
+        let symbol_bytes = YELLOW_HEART;
         let registry = borrow_registry_ref_mut();
         let (market_address, market_signer) = create_market(registry, symbol_bytes);
         let (market_ref_mut, dupe_signer) = get_market_ref_mut_and_signer_checked(market_address);
@@ -1061,17 +1058,57 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_address,
         );
     }
-}
 
-#[test_only]
-module emojicoin_dot_fun::coin_factory {
-    struct Emojicoin {}
-    struct EmojicoinLP {}
-    struct BadType {}
-}
+    #[test]
+    fun test_concatenation() {
+        let base = string::utf8(b"base");
+        let additional = string::utf8(b" additional");
+        let concatenated = get_concatenation(base, additional);
+        assert!(concatenated == string::utf8(b"base additional"), 0);
+        // Ensure the base string was not mutated.
+        assert!(base == string::utf8(b"base"), 0);
+    }
 
-#[test_only]
-module emojicoin_dot_fun::bad_coin_factory {
-    struct Emojicoin {}
-    struct EmojicoinLP {}
+    #[test(deployer=@emojicoin_dot_fun)]
+    fun test_yellow_heart_market_address(
+        deployer: &signer,
+    ) acquires Registry, RegistryAddress {
+        init_module(deployer);
+        let emoji_bytes = YELLOW_HEART;
+
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let verified_bytes = get_verified_emoji_bytes(registry_ref_mut, vector [emoji_bytes]);
+        assert!(verified_bytes == emoji_bytes, 0);
+
+        let (market_address, _) = create_market(registry_ref_mut, emoji_bytes);
+        assert!(market_address == @yellow_heart_market_address, 0);
+    }
+
+    #[test(deployer=@emojicoin_dot_fun)]
+    fun test_coin_names_and_symbols(
+        deployer: &signer,
+    ) acquires Market, Registry, RegistryAddress {
+        aptos_account::create_account(@emojicoin_dot_fun);
+        init_module(deployer);
+        let symbol_bytes = YELLOW_HEART;
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let (market_address, market_signer) = create_market(registry_ref_mut, symbol_bytes);
+
+        let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
+        ensure_coins_initialized<TestEmojicoin, TestEmojicoinLP>(
+            market_ref_mut,
+            &market_signer,
+            market_address,
+        );
+
+        let symbol = string::utf8(symbol_bytes);
+        assert!(coin::symbol<TestEmojicoin>() == symbol, 0);
+        assert!(coin::name<TestEmojicoin>() == get_concatenation(symbol, string::utf8(EMOJICOIN_NAME_SUFFIX)), 0);
+        assert!(coin::name<TestEmojicoin>() == get_concatenation(symbol, string::utf8(b" emojicoin")), 0);
+        let lp_symbol = string::utf8(b"LP-1");
+        let lp_name = string::utf8(b"Emojicoin LP-1");
+        assert!(coin::symbol<TestEmojicoinLP>() == lp_symbol, 0);
+        assert!(coin::name<TestEmojicoinLP>() == get_concatenation(string::utf8(EMOJICOIN_LP_NAME_PREFIX), lp_symbol), 0);
+        assert!(coin::name<TestEmojicoinLP>() == lp_name, 0);
+    }
 }

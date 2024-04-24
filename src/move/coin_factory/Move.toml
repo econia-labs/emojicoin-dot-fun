@@ -7,12 +7,12 @@ git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
-[dependencies.EmojicoinDotFun]
-local = "../emojicoin_dot_fun"
-
 [dev-addresses]
 emojicoin_dot_fun = "0xcccccccc"
 market_address = "0xbbbbbbbb"
+
+[dev-dependencies.EmojicoinDotFun]
+local = "../emojicoin_dot_fun"
 
 [package]
 name = "CoinFactory"

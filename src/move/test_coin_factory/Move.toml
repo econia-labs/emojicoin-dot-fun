@@ -1,5 +1,4 @@
 [addresses]
-emojicoin_dot_fun = "_"
 yellow_heart_market_address = "0x6ba9e8b95825fffbfcc3fc743ec7461c13f334f8b3d5c0a30988b6d4399a003a"
 
 [dependencies.AptosFramework]
@@ -7,14 +6,7 @@ git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
-[dev-addresses]
-emojicoin_dot_fun = "0xc0de"
-
-[dev-dependencies.TestCoinFactory]
-local = "../test_coin_factory"
-
 [package]
-authors = ["Econia Labs (developers@econialabs.com)"]
-name = "EmojicoinDotFun"
+name = "TestCoinFactory"
 upgrade_policy = "compatible"
 version = "1.0.0"
