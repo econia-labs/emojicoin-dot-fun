@@ -952,7 +952,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[test_only]
-    fun fund_account(account_address: address, amount: u64, aptos_framework: &signer) {
+    inline fun fund_account(account_address: address, amount: u64, aptos_framework: &signer) {
         let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
         let coins = coin::mint<AptosCoin>(amount, &mint_cap);
         aptos_account::deposit_coins(account_address, coins);
