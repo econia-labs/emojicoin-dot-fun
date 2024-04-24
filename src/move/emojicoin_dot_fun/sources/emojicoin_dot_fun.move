@@ -262,34 +262,46 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
-    inline fun fdv_market_cap(
-        price_numerator: u64,
-        price_denominator: u64,
-        circulating_supply: u64,
+    inline fun fdv_market_cap_start_end(
+        reserves_start: Reserves,
+        reserves_end: Reserves,
+        supply_minuend: u64,
     ): (
-        u128,
-        u128,
+        u128, // FDV at start.
+        u128, // Market cap at start.
+        u128, // FDV at end.
+        u128, // Market cap at end.
     ) {
+        let (fdv_start, market_cap_start) = fdv_market_cap(reserves_start, supply_minuend);
+        let (fdv_end, market_cap_end) = fdv_market_cap(reserves_end, supply_minuend);
+        (fdv_start, market_cap_start, fdv_end, market_cap_end)
+    }
+
+    inline fun fdv_market_cap(
+        reserves: Reserves,
+        supply_minuend: u64,
+    ): (
+        u128, // FDV.
+        u128, // Market cap.
+    ) {
+        let base = reserves.base;
+        let quote = reserves.quote;
         (
-            mul_div(price_numerator, EMOJICOIN_SUPPLY, price_denominator), // FDV.
-            mul_div(price_numerator, circulating_supply, price_denominator), // Market cap.
+            mul_div(quote, EMOJICOIN_SUPPLY, base), // FDV.
+            mul_div(quote, supply_minuend - base, base), // Market cap.
         )
     }
 
-    inline fun circulating_supply_price(
-        supply_minuend: u64,
-        base_reserves_ref_mut: &mut u64,
-        quote_reserves_ref_mut: &mut u64,
+    inline fun assign_supply_minuend_reserves_ref_mut(
+        market_ref_mut: &mut Market,
+        starts_in_bonding_curve: bool
     ): (
         u64,
-        u64,
-        u64,
+        &mut Reserves,
     ) {
-        (
-            supply_minuend - *base_reserves_ref_mut, // Circulating supply.
-            *quote_reserves_ref_mut, // Price numerator.
-            *base_reserves_ref_mut, // Price denominator.
-        )
+        if (starts_in_bonding_curve)
+            (BASE_VIRTUAL_CEILING, &mut market_ref_mut.clamm_virtual_reserves) else
+            (EMOJICOIN_SUPPLY, &mut market_ref_mut.cpamm_real_reserves)
     }
 
     inline fun ensure_coins_initialized<Emojicoin, EmojicoinLP>(
@@ -393,48 +405,28 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             let net_proceeds = coin::extract(&mut quote, event.quote_volume);
             aptos_account::deposit_coins(swapper_address, net_proceeds);
 
-            // Get affected reserves and minuend for circulating supply calculaton.
-            let (reserves_ref_mut, supply_minuend) = if (event.starts_in_bonding_curve) {
-                (&mut market_ref_mut.clamm_virtual_reserves, BASE_VIRTUAL_CEILING)
-            } else {
-                (&mut market_ref_mut.cpamm_real_reserves, EMOJICOIN_SUPPLY)
-            };
-            let base_reserves_ref_mut = &mut reserves_ref_mut.base;
-            let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
-
-            // Get spot price, circulating supply at start.
-            let (circulating_supply_start, price_numerator_start, price_denominator_start) =
-                circulating_supply_price(
-                    supply_minuend,
-                    base_reserves_ref_mut,
-                    quote_reserves_ref_mut
+            // Get minuend for circulating supply calculations and affected reserves.
+            let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
+                    market_ref_mut,
+                    event.starts_in_bonding_curve,
                 );
 
             // Update reserve amounts.
-            *base_reserves_ref_mut = *base_reserves_ref_mut + event.input_amount;
-            *quote_reserves_ref_mut = *quote_reserves_ref_mut - quote_leaving_market;
-
-            // Get spot price, circulating supply at end.
-            let (circulating_supply_end, price_numerator_end, price_denominator_end) =
-                circulating_supply_price(
-                    supply_minuend,
-                    base_reserves_ref_mut,
-                    quote_reserves_ref_mut
-                );
+            let reserves_start = *reserves_ref_mut;
+            let reserves_end = reserves_start;
+            reserves_end.base = reserves_end.base + event.input_amount;
+            reserves_end.quote = reserves_end.base - quote_leaving_market;
+            *reserves_ref_mut = reserves_end;
 
             // Get FDV, market cap at start and end.
-            let (fdv_start, market_cap_start) = fdv_market_cap(
-                price_numerator_start,
-                circulating_supply_start,
-                price_denominator_start
-            );
-            let (fdv_end, market_cap_end) =
-                fdv_market_cap(price_numerator_end, circulating_supply_end, price_denominator_end);
+            let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+                fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
 
             // Update global stats.
             aggregator_v2::try_sub(total_quote_locked_ref_mut, (quote_leaving_market as u128));
             aggregator_v2::try_sub(market_cap_ref_mut, market_cap_start - market_cap_end);
             aggregator_v2::try_sub(fdv_ref_mut, fdv_start - fdv_end);
+
         } else { // If buying, might need to buy through the state transition.
 
             // Transfer funds.
@@ -463,13 +455,38 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 let cpamm_real_reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
                 cpamm_real_reserves_ref_mut.base = EMOJICOIN_REMAINDER - base_out_of_cpamm;
                 cpamm_real_reserves_ref_mut.quote = QUOTE_REAL_CEILING + quote_into_cpamm;
-            } else { // Buy without state transition: update reserve amounts.
-                let reserves_ref_mut = if (event.starts_in_bonding_curve)
-                    &mut market_ref_mut.clamm_virtual_reserves else
-                    &mut market_ref_mut.cpamm_real_reserves;
-                reserves_ref_mut.base = reserves_ref_mut.base - event.base_volume;
-                reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_volume;
+
+            } else { // Buy without state transition.
+
+            // Get minuend for circulating supply calculations and affected reserves.
+            let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
+                    market_ref_mut,
+                    event.starts_in_bonding_curve,
+                );
+
+                // Update reserve amounts.
+                let reserves_start = *reserves_ref_mut;
+                let reserves_end = reserves_start;
+                reserves_end.base = reserves_end.base - event.base_volume;
+                reserves_end.quote = reserves_end.quote + event.quote_volume;
+                let reserves_end = *reserves_ref_mut;
+
+                // Get FDV, market cap at start and end.
+                let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+                    fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
+
             };
+
+            /*
+            // Get FDV, market cap at start and end.
+            let (fdv_start, market_cap_start) = fdv_market_cap(
+                price_numerator_start,
+                circulating_supply_start,
+                price_denominator_start
+            );
+            let (fdv_end, market_cap_end) =
+                fdv_market_cap(price_numerator_end, circulating_supply_end, price_denominator_end);
+            */
 
             // Update global total quote locked.
             aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
