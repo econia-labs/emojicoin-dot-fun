@@ -6,9 +6,10 @@ import {
   type HexInput,
   type Uint64,
   type Uint128,
+  DeriveScheme,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME, OBJECT_FROM_SEED_ADDRESS_SCHEME } from "../utils";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../utils";
 
 /**
  * Sleep the current thread for the given amount of time
@@ -46,13 +47,13 @@ export function createNamedObjectAddress(args: {
   const creatorAddress = AccountAddress.from(args.creator);
   const seed = Hex.fromHexInput(args.seed).toUint8Array();
   const serializedCreatorAddress = creatorAddress.bcsToBytes();
-  const serialized = new Uint8Array([
+  const preImage = new Uint8Array([
     ...serializedCreatorAddress,
     ...seed,
-    ...OBJECT_FROM_SEED_ADDRESS_SCHEME.toUint8Array(),
+    DeriveScheme.DeriveObjectAddressFromSeed,
   ]);
 
-  return AccountAddress.from(sha3_256(serialized));
+  return AccountAddress.from(sha3_256(preImage));
 }
 
 export async function getRegistryAddress(args: {

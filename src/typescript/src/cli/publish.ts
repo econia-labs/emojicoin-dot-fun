@@ -96,8 +96,11 @@ function extractJsonFromText(originalCommand: string, text: string): ResultJSON 
     }
   }
 
-  /* eslint-disable-next-line no-console */
+  /* eslint-disable no-console */
   console.error(`Command: ${originalCommand}`);
+  console.error("Result:");
+  console.error(text);
+  /* eslint-enable no-console */
   return null;
 }
 
