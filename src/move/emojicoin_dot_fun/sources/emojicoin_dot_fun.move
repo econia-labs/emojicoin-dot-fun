@@ -33,7 +33,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const EMOJICOIN_LP_STRUCT_NAME: vector<u8> = b"EmojicoinLP";
     const EMOJICOIN_NAME_SUFFIX: vector<u8> = b" emojicoin";
     const REGISTRY_NAME: vector<u8> = b"Registry";
-    const EMOJICOIN_LP_NAME_PREFIX: vector<u8> = b"Emojicoin ";
+    const EMOJICOIN_LP_NAME_SUFFIX: vector<u8> = b" emojicoin";
     const EMOJICOIN_LP_SYMBOL_PREFIX: vector<u8> = b"LP-";
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
@@ -340,7 +340,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             // Initialize LP coin, storing only burn and mint capabilities.
             let (burn_cap, freeze_cap, mint_cap) = coin::initialize<EmojicoinLP>(
                 market_signer,
-                get_concatenation(string::utf8(EMOJICOIN_LP_NAME_PREFIX), lp_symbol),
+                get_concatenation(lp_symbol, string::utf8(EMOJICOIN_LP_NAME_SUFFIX)),
                 lp_symbol,
                 DECIMALS,
                 MONITOR_SUPPLY
@@ -1166,9 +1166,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(coin::name<TestEmojicoin>() == get_concatenation(symbol, string::utf8(EMOJICOIN_NAME_SUFFIX)), 0);
         assert!(coin::name<TestEmojicoin>() == get_concatenation(symbol, string::utf8(b" emojicoin")), 0);
         let lp_symbol = string::utf8(b"LP-1");
-        let lp_name = string::utf8(b"Emojicoin LP-1");
+        let lp_name = string::utf8(b"LP-1 emojicoin");
         assert!(coin::symbol<TestEmojicoinLP>() == lp_symbol, 0);
-        assert!(coin::name<TestEmojicoinLP>() == get_concatenation(string::utf8(EMOJICOIN_LP_NAME_PREFIX), lp_symbol), 0);
+        assert!(coin::name<TestEmojicoinLP>() == get_concatenation(lp_symbol, string::utf8(EMOJICOIN_LP_NAME_SUFFIX)), 0);
         assert!(coin::name<TestEmojicoinLP>() == lp_name, 0);
     }
 }

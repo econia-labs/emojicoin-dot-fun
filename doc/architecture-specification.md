@@ -86,7 +86,13 @@ These keywords `SHALL` be in `monospace` for ease of identification.
    constant product calculations.
 1. Each Emojicoin's `symbol` field `SHALL` use hex-encoded UTF8.
 1. Each Emojicoin's `name` field `SHALL` use the format `<symbol> emojicoin`
-   where `<symbol>` is identical to the bytes from the `symbol` field.
+   where `<symbol>` is identical to the bytes from its `symbol` field.
+1. Each Emojicoin `SHALL` have a unique liquidity provider coin (LP coin)
+   associated with it.
+1. Each LP coin's `symbol` field `SHALL` use the format `LP-<market ID>`
+   where `<market ID>` is the corresponding market's `market_id`.
+1. Each LP coin's `name` field `SHALL` use the format `<symbol> emojicoin`
+   where `<symbol>` is identical to the bytes from its `symbol` field.
 
 ## Global tracking
 
