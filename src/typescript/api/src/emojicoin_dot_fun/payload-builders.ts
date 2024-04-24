@@ -25,12 +25,7 @@ import {
   MultiSigTransactionPayload,
   type MoveValue,
 } from "@aptos-labs/ts-sdk";
-import { type WalletSignTransactionFunction } from "./types";
-
-export interface TransactionBuilder {
-  builder: (...args: any[]) => Promise<EntryFunctionTransactionBuilder>;
-  submit: (...args: any[]) => Promise<UserTransactionResponse>;
-}
+import { type WalletSignTransactionFunction } from ".";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;
@@ -51,9 +46,9 @@ export class EntryFunctionTransactionBuilder {
 
   /**
    *
-   * @param signer either a local Account or a callback function that returns AccountAuthenticator
-   * @param asFeePayer whether or not the signer is the fee payer
-   * @returns a Promise<AccountAuthenticator>
+   * @param signer either a local Account or a callback function that returns AccountAuthenticator.
+   * @param asFeePayer whether or not the signer is the fee payer.
+   * @returns Promise<AccountAuthenticator>
    */
   async sign(
     signer: Account | WalletSignTransactionFunction,
@@ -72,7 +67,7 @@ export class EntryFunctionTransactionBuilder {
     return signer(this.rawTransactionInput, asFeePayer);
   }
 
-  // To be used by a static `submit` where the user enters named signer arguments
+  // To be used by a static `submit` where the user enters named signer arguments.
   async submit(args: {
     primarySigner: Account | WalletSignTransactionFunction | AccountAuthenticator;
     secondarySigners?: Array<Account | WalletSignTransactionFunction | AccountAuthenticator>;
@@ -127,9 +122,9 @@ export class EntryFunctionTransactionBuilder {
    * These are intended to be chained declaratively. For example:
    *    const response = await builder.submit(...).responseInfo(["hash", "success"]);
    *
-   * @param response The transaction response for a user submitted transaction
-   * @param optionsArray An array of keys to print out from the transaction response
-   * @returns the transaction info as an object
+   * @param response The transaction response for a user submitted transaction.
+   * @param optionsArray An array of keys to print out from the transaction response.
+   * @returns the transaction info as an object.
    */
   /* eslint-disable-next-line class-methods-use-this */ // This is intended to be chained.
   responseInfo(

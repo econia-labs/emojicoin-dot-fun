@@ -13,7 +13,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "unused-imports"],
+  plugins: ["@typescript-eslint", "unused-imports", "import"],
   rules: {
     quotes: ["error", "double"],
     "max-len": ["error", 100],
@@ -41,6 +41,14 @@ module.exports = {
       { argsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_" },
     ],
     "unused-imports/no-unused-imports": "error",
+    "import/no-unused-modules": [
+      "warn",
+      {
+        missingExports: true,
+        unusedExports: true,
+        ignoreExports: ["tests/**/*", "**/index.ts", "src/emojicoin_dot_fun/types.ts"],
+      },
+    ],
     "@typescript-eslint/consistent-type-imports": [
       "error",
       { prefer: "type-imports", fixStyle: "inline-type-imports" },

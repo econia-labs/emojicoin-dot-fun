@@ -9,10 +9,10 @@ import {
   Ed25519PrivateKey,
 } from "@aptos-labs/ts-sdk";
 import path from "path";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME, MAX_GAS_FOR_PUBLISH, ONE_APT } from "../utils";
-import { getGitRoot } from "../utils/helpers";
 import { type PublishPackageResult, type ResultJSON } from "./types";
-import { getAptosClient } from "../helpers";
+import { getAptosClient } from "./aptos-client";
+import { getGitRoot } from "./helpers";
+import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
 
 export async function publishPackage(args: {
   pk: PrivateKey;

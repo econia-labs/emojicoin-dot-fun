@@ -1,3 +1,5 @@
+import { type Account, type Aptos } from "@aptos-labs/ts-sdk";
+
 export interface Result {
   transaction_hash: string;
   gas_used: number;
@@ -24,4 +26,10 @@ export type PublishPackageResult = {
   timestamp_us: number; // Microseconds.
   version: number;
   vm_status: string;
+};
+
+export type TestHelpers = {
+  aptos: Aptos;
+  publisher: Account;
+  publishPackageResult: PublishPackageResult;
 };

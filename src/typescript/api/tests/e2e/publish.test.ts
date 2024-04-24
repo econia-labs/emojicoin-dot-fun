@@ -1,13 +1,13 @@
 import { AccountAddress, Network, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { getModuleExists, publishPackage } from "../../src/cli/publish";
+import { getModuleExists, publishPackage } from "../utils/publish";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, ONE_APT } from "../../src";
-import getHelpers from "../helpers";
+import { getTestHelpers } from "../utils";
 
 jest.setTimeout(60000);
 jest.retryTimes(3);
 
 describe("tests publishing modules to a local network", () => {
-  const { aptos, publisher, publishPackageResult } = getHelpers();
+  const { aptos, publisher, publishPackageResult } = getTestHelpers();
 
   it("publishes a nearly blank smart contract", async () => {
     await aptos.fundAccount({

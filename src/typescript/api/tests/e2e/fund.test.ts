@@ -1,5 +1,6 @@
 import { Account, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { getAptosClient, ONE_APT } from "../../src";
+import { ONE_APT } from "../../src";
+import { getAptosClient } from "../utils";
 
 jest.setTimeout(10000);
 

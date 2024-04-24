@@ -4,7 +4,7 @@ import {
   MoveVector,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { ONE_APT } from "../utils";
+import { ONE_APT } from "../../src";
 
 // Instead of calling the faucet for each account, we fund one twice and have it distribute them
 // evenly among the rest with the `batch_transfer` function.

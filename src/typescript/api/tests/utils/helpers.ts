@@ -1,15 +1,9 @@
-import { type Aptos, Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
+import { Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
 import fs from "fs";
 import path from "path";
-import { getAptosClient } from "../../src";
-import { type PublishPackageResult } from "../../src/cli/types";
-import { getGitRoot } from "../../src/utils/helpers";
-
-export type TestHelpers = {
-  aptos: Aptos;
-  publisher: Account;
-  publishPackageResult: PublishPackageResult;
-};
+import findGitRoot from "find-git-root";
+import { getAptosClient } from "./aptos-client";
+import { type TestHelpers } from "./types";
 
 /**
  * Facilitates the usage of a constant Aptos Account and client for testing the publishing
@@ -17,7 +11,7 @@ export type TestHelpers = {
  * just store these things in the globalThis and get them from this function.
  * @returns TestHelpers
  */
-export default function getHelpers(): TestHelpers {
+export function getTestHelpers(): TestHelpers {
   const { aptos } = getAptosClient();
 
   const pkPath = path.join(getGitRoot(), ".tmp", ".pk");
@@ -32,4 +26,15 @@ export default function getHelpers(): TestHelpers {
     publisher,
     publishPackageResult,
   };
+}
+
+/**
+ * Returns the path to the root of the repository by removing
+ * the .git directory from the path.
+ *
+ * @returns the path to the closest .git directory.
+ */
+export function getGitRoot(): string {
+  const gitRoot = findGitRoot(process.cwd());
+  return path.dirname(gitRoot);
 }

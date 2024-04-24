@@ -7,12 +7,12 @@ import {
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import getHelpers from "../helpers";
+import { getTestHelpers } from "../utils";
 
 jest.setTimeout(30000);
 
 describe("registers a market successfully", () => {
-  const { aptos, publisher, publishPackageResult } = getHelpers();
+  const { aptos, publisher, publishPackageResult } = getTestHelpers();
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
     const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;

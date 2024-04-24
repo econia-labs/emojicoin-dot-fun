@@ -1,11 +1,11 @@
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import * as EmojicoinDotFun from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import getHelpers from "../helpers";
+import { getTestHelpers } from "../utils";
 
 jest.setTimeout(30000);
 
 describe("it tests view functions", () => {
-  const { aptos, publisher, publishPackageResult } = getHelpers();
+  const { aptos, publisher, publishPackageResult } = getTestHelpers();
 
   it("it tests several different emojis that are and aren't supported", async () => {
     const publishResult = publishPackageResult;

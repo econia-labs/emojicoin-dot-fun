@@ -10,8 +10,8 @@ import {
 
 export type Option<T> = [T] | [];
 
-export type ObjectAddress = AccountAddressInput;
-
+// Because the @aptos-labs/ts-sdk does not let you use a `number` for `Uint64`,
+// we coalesce the types here.
 export type Uint8 = number;
 export type Uint16 = number;
 export type Uint32 = number;
@@ -34,9 +34,10 @@ export type InputTypes =
   | Array<InputTypes>;
 export type TypeTagInput = string | TypeTag;
 
+export type ObjectAddress = AccountAddressInput;
 export type MoveObject = AccountAddress;
 
-// for clarity in JSON view function return response types
+// For clarity in JSON view function return response types.
 export type Uint64String = string;
 export type Uint128String = string;
 export type Uint256String = string;
@@ -45,7 +46,7 @@ export type ObjectAddressStruct = {
   inner: string;
 };
 
-// This is supposed to match some function in the wallet adapter
+// This is supposed to match some function in the wallet adapter. Not tested yet.
 export type WalletSignTransactionFunction = (...args: any[]) => Promise<AccountAuthenticator>;
 
 export type AccountAuthenticatorWithData = {
