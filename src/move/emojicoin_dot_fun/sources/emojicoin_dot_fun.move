@@ -437,24 +437,41 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 swapper_address,
                 event.base_volume
             );
+
+            // Declare FDV and market cap amounts at start and end.
+            let (fdv_start, market_cap_start, fdv_end, market_cap_end);
+
             if (event.results_in_state_transition) { // Buy with state transition.
                 // Mint initial liquidity provider coins.
                 let lp_coins =
                     mint_lp_coins<Emojicoin, EmojicoinLP>(market_address, LP_TOKENS_INITIAL);
                 coin::deposit<EmojicoinLP>(market_address, lp_coins);
 
-                // Update reserve amounts.
+                // Assign minuend for circulating supply calculations.
+                let supply_minuend_start = BASE_VIRTUAL_CEILING;
+                let supply_minuend_end = EMOJICOIN_SUPPLY;
+
+                // Determine CLAMM transition variables, then zero out CLAMM reserves.
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
-                let quote_to_transition =
-                    QUOTE_VIRTUAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
-                let base_left_in_clamm = clamm_virtual_reserves_ref_mut.base - BASE_VIRTUAL_FLOOR;
+                let reserves_start = *clamm_virtual_reserves_ref_mut;
+                let quote_to_transition = QUOTE_VIRTUAL_CEILING - reserves_start.quote;
+                let base_left_in_clamm = reserves_start.base - BASE_VIRTUAL_FLOOR;
+                *clamm_virtual_reserves_ref_mut = Reserves { base: 0, quote: 0 };
+
+                // Determine ending CPAMM reserve amounts after seeding with initial liquidity.
                 let quote_into_cpamm = event.quote_volume - quote_to_transition;
                 let base_out_of_cpamm = event.base_volume - base_left_in_clamm;
-                clamm_virtual_reserves_ref_mut.base = 0;
-                clamm_virtual_reserves_ref_mut.quote = 0;
-                let cpamm_real_reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
-                cpamm_real_reserves_ref_mut.base = EMOJICOIN_REMAINDER - base_out_of_cpamm;
-                cpamm_real_reserves_ref_mut.quote = QUOTE_REAL_CEILING + quote_into_cpamm;
+                let reserves_end = Reserves {
+                    base: EMOJICOIN_REMAINDER - base_out_of_cpamm,
+                    quote: QUOTE_REAL_CEILING + quote_into_cpamm,
+                };
+                market_ref_mut.cpamm_real_reserves = reserves_end;
+
+                // Get FDV and market cap at start and end.
+                (fdv_start, market_cap_start) =
+                    fdv_market_cap(reserves_start, supply_minuend_start);
+                (fdv_end, market_cap_end) =
+                    fdv_market_cap(reserves_end, supply_minuend_end);
 
             } else { // Buy without state transition.
 
@@ -472,24 +489,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 let reserves_end = *reserves_ref_mut;
 
                 // Get FDV, market cap at start and end.
-                let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+                (fdv_start, market_cap_start, fdv_end, market_cap_end) =
                     fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
 
             };
 
-            /*
-            // Get FDV, market cap at start and end.
-            let (fdv_start, market_cap_start) = fdv_market_cap(
-                price_numerator_start,
-                circulating_supply_start,
-                price_denominator_start
-            );
-            let (fdv_end, market_cap_end) =
-                fdv_market_cap(price_numerator_end, circulating_supply_end, price_denominator_end);
-            */
-
-            // Update global total quote locked.
+            // Update global stats.
             aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
+            aggregator_v2::try_add(market_cap_ref_mut, market_cap_end - market_cap_start);
+            aggregator_v2::try_add(fdv_ref_mut, fdv_end - fdv_start);
         };
         aptos_account::deposit_coins(integrator, quote);
 
