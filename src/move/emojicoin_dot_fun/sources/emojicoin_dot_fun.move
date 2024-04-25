@@ -83,8 +83,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_ALREADY_REGISTERED: u64 = 11;
     /// Account is unable to pay market registration fee.
     const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 12;
-    /// The swapper account does not exist.
-    const E_SWAPPER_DOES_NOT_EXIST: u64 = 13;
 
     struct Reserves has copy, drop, store {
         base: u64,
@@ -327,7 +325,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 get_concatenation(symbol, string::utf8(EMOJICOIN_NAME_SUFFIX)),
                 symbol,
                 DECIMALS,
-                MONITOR_SUPPLY
+                MONITOR_SUPPLY,
             );
             let emojicoins = coin::mint<Emojicoin>(EMOJICOIN_SUPPLY, &mint_cap);
             aptos_account::deposit_coins(market_address, emojicoins);
@@ -336,14 +334,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             coin::destroy_burn_cap(burn_cap);
 
             let market_id_str = string_utils::to_string(&market_ref.market_id);
-            let lp_symbol = get_concatenation(string::utf8(EMOJICOIN_LP_SYMBOL_PREFIX), market_id_str);
+            let lp_symbol = get_concatenation(
+                string::utf8(EMOJICOIN_LP_SYMBOL_PREFIX),
+                market_id_str,
+            );
             // Initialize LP coin, storing only burn and mint capabilities.
             let (burn_cap, freeze_cap, mint_cap) = coin::initialize<EmojicoinLP>(
                 market_signer,
                 get_concatenation(lp_symbol, string::utf8(EMOJICOIN_LP_NAME_SUFFIX)),
                 lp_symbol,
                 DECIMALS,
-                MONITOR_SUPPLY
+                MONITOR_SUPPLY,
             );
             coin::register<EmojicoinLP>(market_signer);
             coin::destroy_freeze_cap(freeze_cap);
@@ -382,10 +383,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         ensure_coins_initialized<Emojicoin, EmojicoinLP>(
             market_ref_mut,
             &market_signer,
-            market_address
+            market_address,
         );
         let swapper_address = signer::address_of(swapper);
-        assert!(account::exists_at(swapper_address), E_SWAPPER_DOES_NOT_EXIST);
         let event = simulate_swap_inner(
             swapper_address,
             input_amount,
@@ -405,7 +405,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
 
         // Create for swapper an account with AptosCoin store if it doesn't exist.
-        if (account::exists_at(swapper_address)) {
+        if (!account::exists_at(swapper_address)) {
             aptos_account::create_account(swapper_address);
         };
         coin::register<AptosCoin>(swapper);
@@ -450,7 +450,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             aptos_account::transfer_coins<Emojicoin>(
                 &market_signer,
                 swapper_address,
-                event.base_volume
+                event.base_volume,
             );
 
             // Declare FDV and market cap amounts at start and end.
@@ -538,7 +538,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let event = simulate_provide_liquidity_inner(
             provider_address,
             quote_amount,
-            market_ref_mut
+            market_ref_mut,
         );
 
         // Transfer coins.
@@ -546,7 +546,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::transfer<AptosCoin>(provider, market_address, event.quote_amount);
         let lp_coins = mint_lp_coins<Emojicoin, EmojicoinLP>(
             market_ref_mut.market_address,
-            event.lp_coin_amount
+            event.lp_coin_amount,
         );
         aptos_account::deposit_coins(provider_address, lp_coins);
 
@@ -575,7 +575,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let event = simulate_remove_liquidity_inner<Emojicoin>(
             provider_address,
             lp_coin_amount,
-            market_ref_mut
+            market_ref_mut,
         );
 
         // Transfer coins.
@@ -882,7 +882,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let market_balance_base_u128 = (coin::balance<Emojicoin>(market_address) as u128);
         let market_balance_quote_u128 = (coin::balance<AptosCoin>(market_address) as u128);
         let base_donations_u128 = market_balance_base_u128 - base_reserves_u128;
-        let quote_donations_u128= market_balance_quote_u128 - quote_reserves_u128;
+        let quote_donations_u128 = market_balance_quote_u128 - quote_reserves_u128;
         let pro_rata_base_donation_claim_amount =
             (((lp_coin_amount_u128 * base_donations_u128) / lp_coin_supply) as u64);
         let pro_rata_quote_donation_claim_amount =
@@ -998,21 +998,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             0,
         );
 
-        assert!(exists<LPCoinCapabilities<TestEmojicoin, TestEmojicoinLP>>(@yellow_heart_market_address), 0);
-    }
-
-    #[test(deployer=@emojicoin_dot_fun, user=@0xAA), expected_failure(abort_code=E_SWAPPER_DOES_NOT_EXIST)]
-    fun test_swapper_account_does_not_exist(
-        deployer: &signer,
-        user: &signer,
-    ) acquires Registry, RegistryAddress, Market, LPCoinCapabilities {
-        initialize_module_and_yellow_heart_coins(deployer);
-        swap<TestEmojicoin, TestEmojicoinLP>(
-            @yellow_heart_market_address,
-            user,
-            1,
-            false,
-            @0xbeefcafe,
+        assert!(
+            exists<LPCoinCapabilities<TestEmojicoin, TestEmojicoinLP>>(
+                @yellow_heart_market_address
+            ),
             0,
         );
     }
@@ -1115,7 +1104,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(!valid_coin_types<TestEmojicoin, TestEmojicoinLP>(@0xc1de), 0);
     }
 
-    #[test(deployer=@emojicoin_dot_fun), expected_failure(abort_code = E_INVALID_COIN_TYPES)]
+    #[test(deployer = @emojicoin_dot_fun), expected_failure(abort_code = E_INVALID_COIN_TYPES)]
     fun test_initialize_coin_types_validates_coin_types(
         deployer: &signer
     ) acquires Market, Registry, RegistryAddress {
@@ -1144,7 +1133,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(base == string::utf8(b"base"), 0);
     }
 
-    #[test(deployer=@emojicoin_dot_fun)]
+    #[test(deployer = @emojicoin_dot_fun)]
     fun test_yellow_heart_market_address(
         deployer: &signer,
     ) acquires Registry, RegistryAddress {
@@ -1152,23 +1141,25 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let emoji_bytes = YELLOW_HEART;
         let registry_ref_mut = borrow_registry_ref_mut();
         let (market_address, _) = create_market(registry_ref_mut, emoji_bytes);
+        // If this test fails, it's because we've changed either the way we create
+        // the registry object address or the market address, and the hard-coded
+        // emoji market addresses need to be recalculated and updated.
         assert!(market_address == @yellow_heart_market_address, 0);
     }
 
-    #[test(deployer=@emojicoin_dot_fun)]
+    #[test(deployer = @emojicoin_dot_fun)]
     fun test_coin_names_and_symbols(
         deployer: &signer,
     ) acquires Market, Registry, RegistryAddress {
         initialize_module_and_yellow_heart_coins(deployer);
 
         let symbol = string::utf8(YELLOW_HEART);
+        let emojicoin_name = get_concatenation(symbol, string::utf8(EMOJICOIN_NAME_SUFFIX));
         assert!(coin::symbol<TestEmojicoin>() == symbol, 0);
-        assert!(coin::name<TestEmojicoin>() == get_concatenation(symbol, string::utf8(EMOJICOIN_NAME_SUFFIX)), 0);
-        assert!(coin::name<TestEmojicoin>() == get_concatenation(symbol, string::utf8(b" emojicoin")), 0);
+        assert!(coin::name<TestEmojicoin>() == emojicoin_name, 0);
         let lp_symbol = string::utf8(b"LP-1");
         let lp_name = string::utf8(b"LP-1 emojicoin");
         assert!(coin::symbol<TestEmojicoinLP>() == lp_symbol, 0);
-        assert!(coin::name<TestEmojicoinLP>() == get_concatenation(lp_symbol, string::utf8(EMOJICOIN_LP_NAME_SUFFIX)), 0);
         assert!(coin::name<TestEmojicoinLP>() == lp_name, 0);
     }
 }
