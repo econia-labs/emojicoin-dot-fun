@@ -1,6 +1,5 @@
 [addresses]
 emojicoin_dot_fun = "_"
-yellow_heart_market_address = "0xc050f3cc6b85ef42a2fb3ab073f6343c32b19c3c25f876c8ab3eb2c07aca1972"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
@@ -10,8 +9,14 @@ subdir = "aptos-move/framework/aptos-framework"
 [dev-addresses]
 emojicoin_dot_fun = "0xc0de"
 
-[dev-dependencies.TestCoinFactory]
-local = "../test_coin_factory"
+[dev-dependencies.BlackCatCoinFactory]
+local = "../test_coin_factories/black_cat"
+
+[dev-dependencies.BlackHeartCoinFactory]
+local = "../test_coin_factories/black_heart"
+
+[dev-dependencies.YellowHeartCoinFactory]
+local = "../test_coin_factories/yellow_heart"
 
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
