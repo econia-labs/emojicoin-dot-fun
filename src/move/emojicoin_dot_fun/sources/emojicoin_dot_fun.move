@@ -988,7 +988,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let user_addr = signer::address_of(user);
         let input_amount: u64 = 100_000_000;
         fund_account(user_addr, input_amount, aptos_framework);
-        let integrator_address = @0xbeefcafe;
+        let integrator_address = @0xf00dcafe;
         swap<TestEmojicoin, TestEmojicoinLP>(
             @yellow_heart_market_address,
             user,
