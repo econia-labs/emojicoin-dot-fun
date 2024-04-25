@@ -18,34 +18,35 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use std::vector;
 
     #[test_only] use aptos_std::aptos_coin;
-    #[test_only] use yellow_heart_market::coin_factory::{
-        Emojicoin as YellowHeartEmojicoin,
-        EmojicoinLP as YellowHeartEmojicoinLP,
-        BadType,
+    #[test_only] use black_cat_market::coin_factory::{
+        Emojicoin as BlackCatEmojicoin,
+        EmojicoinLP as BlackCatEmojicoinLP,
     };
     #[test_only] use black_heart_market::coin_factory::{
         Emojicoin as BlackHeartEmojicoin,
         EmojicoinLP as BlackHeartEmojicoinLP,
     };
-    #[test_only] use black_cat_market::coin_factory::{
-        Emojicoin as BlackCatEmojicoin,
-        EmojicoinLP as BlackCatEmojicoinLP,
+
+    #[test_only] use yellow_heart_market::coin_factory::{
+        Emojicoin as YellowHeartEmojicoin,
+        EmojicoinLP as YellowHeartEmojicoinLP,
+        BadType,
     };
-
-    #[test_only] const YELLOW_HEART: vector<u8> = x"f09f929b";
-    #[test_only] const BLACK_HEART: vector<u8> = x"f09f96a4";
     #[test_only] const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
+    #[test_only] const BLACK_HEART: vector<u8> = x"f09f96a4";
+    #[test_only] const YELLOW_HEART: vector<u8> = x"f09f929b";
 
-    const MAX_SYMBOL_LENGTH: u8 = 10;
     const DECIMALS: u8 = 8;
+    const MAX_SYMBOL_LENGTH: u8 = 10;
     const MONITOR_SUPPLY: bool = true;
+
     const COIN_FACTORY_AS_BYTES: vector<u8> = b"coin_factory";
-    const EMOJICOIN_STRUCT_NAME: vector<u8> = b"Emojicoin";
-    const EMOJICOIN_LP_STRUCT_NAME: vector<u8> = b"EmojicoinLP";
     const EMOJICOIN_NAME_SUFFIX: vector<u8> = b" emojicoin";
-    const REGISTRY_NAME: vector<u8> = b"Registry";
+    const EMOJICOIN_STRUCT_NAME: vector<u8> = b"Emojicoin";
     const EMOJICOIN_LP_NAME_SUFFIX: vector<u8> = b" emojicoin LP";
+    const EMOJICOIN_LP_STRUCT_NAME: vector<u8> = b"EmojicoinLP";
     const EMOJICOIN_LP_SYMBOL_PREFIX: vector<u8> = b"LP-";
+    const REGISTRY_NAME: vector<u8> = b"Registry";
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
