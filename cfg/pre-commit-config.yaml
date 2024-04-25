@@ -18,6 +18,11 @@ repos:
     types:
     - 'shell'
   -
+    entry: './src/sh/cargo-format.sh'
+    id: 'rust-formatter'
+    language: 'rust'
+    name: 'rust Formatter'
+  -
     entry: './src/sh/python-lint/poetry-check.sh'
     id: 'local-poetry-check'
     language: 'script'

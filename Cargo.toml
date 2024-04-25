@@ -1,14 +1,14 @@
 [workspace]
-resolver = "2"
 members = [
-  "allowlister3000",
+  "src/rust/*"
 ]
+resolver = "2"
 
 [workspace.package]
 authors = ["Econia Labs <developers@econialabs.com>"]
-license = "Apache License"
+edition = "2021"
 homepage = "https://www.econialabs.com/"
+license = "Apache License"
 publish = false
 repository = "https://github.com/econia-labs/emojicoin-dot-fun"
-edition = "2021"
 rust-version = "1.70"
