@@ -91,8 +91,9 @@ These keywords `SHALL` be in `monospace` for ease of identification.
    associated with it.
 1. Each LP coin's `symbol` field `SHALL` use the format `LP-<market ID>`
    where `<market ID>` is the corresponding market's `market_id`.
-1. Each LP coin's `name` field `SHALL` use the format `<symbol> emojicoin`
-   where `<symbol>` is identical to the bytes from its `symbol` field.
+1. Each LP coin's `name` field `SHALL` use the format `<symbol> emojicoin LP`
+   where `<symbol>` is identical to the bytes from the corresponding emojicoin's
+   `symbol` field.
 
 ## Global tracking
 

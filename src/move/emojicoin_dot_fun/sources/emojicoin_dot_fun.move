@@ -53,7 +53,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const EMOJICOIN_LP_STRUCT_NAME: vector<u8> = b"EmojicoinLP";
     const EMOJICOIN_NAME_SUFFIX: vector<u8> = b" emojicoin";
     const REGISTRY_NAME: vector<u8> = b"Registry";
-    const EMOJICOIN_LP_NAME_SUFFIX: vector<u8> = b" emojicoin";
+    const EMOJICOIN_LP_NAME_SUFFIX: vector<u8> = b" emojicoin LP";
     const EMOJICOIN_LP_SYMBOL_PREFIX: vector<u8> = b"LP-";
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
@@ -361,7 +361,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             // Initialize LP coin, storing only burn and mint capabilities.
             let (burn_cap, freeze_cap, mint_cap) = coin::initialize<EmojicoinLP>(
                 market_signer,
-                get_concatenation(lp_symbol, string::utf8(EMOJICOIN_LP_NAME_SUFFIX)),
+                get_concatenation(symbol, string::utf8(EMOJICOIN_LP_NAME_SUFFIX)),
                 lp_symbol,
                 DECIMALS,
                 MONITOR_SUPPLY,
@@ -1192,22 +1192,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let lp_symbol_1 = get_concatenation(utf8(EMOJICOIN_LP_SYMBOL_PREFIX), utf8(b"1"));
         let lp_symbol_2 = get_concatenation(utf8(EMOJICOIN_LP_SYMBOL_PREFIX), utf8(b"2"));
         let lp_symbol_3 = get_concatenation(utf8(EMOJICOIN_LP_SYMBOL_PREFIX), utf8(b"3"));
-        let lp_name_1 = get_concatenation(lp_symbol_1, utf8(EMOJICOIN_LP_NAME_SUFFIX));
-        let lp_name_2 = get_concatenation(lp_symbol_2, utf8(EMOJICOIN_LP_NAME_SUFFIX));
-        let lp_name_3 = get_concatenation(lp_symbol_3, utf8(EMOJICOIN_LP_NAME_SUFFIX));
+        let lp_name_1 = get_concatenation(symbol_1, utf8(EMOJICOIN_LP_NAME_SUFFIX));
+        let lp_name_2 = get_concatenation(symbol_2, utf8(EMOJICOIN_LP_NAME_SUFFIX));
+        let lp_name_3 = get_concatenation(symbol_3, utf8(EMOJICOIN_LP_NAME_SUFFIX));
+        assert!(utf8(b"LP-1") == lp_symbol_1, 0);
+        assert!(utf8(b"LP-2") == lp_symbol_2, 0);
+        assert!(utf8(b"LP-3") == lp_symbol_3, 0);
         assert!(coin::symbol<YellowHeartEmojicoinLP>() == lp_symbol_1, 0);
         assert!(coin::symbol<BlackHeartEmojicoinLP>() == lp_symbol_2, 0);
         assert!(coin::symbol<BlackCatEmojicoinLP>() == lp_symbol_3, 0);
         assert!(coin::name<YellowHeartEmojicoinLP>() == lp_name_1, 0);
         assert!(coin::name<BlackHeartEmojicoinLP>() == lp_name_2, 0);
         assert!(coin::name<BlackCatEmojicoinLP>() == lp_name_3, 0);
-
-        // Ensure that the prefix and suffix consts above produce the expected values per the spec.
-        assert!(utf8(b"LP-1") == lp_symbol_1, 0);
-        assert!(utf8(b"LP-2") == lp_symbol_2, 0);
-        assert!(utf8(b"LP-3") == lp_symbol_3, 0);
-        assert!(utf8(b"LP-1 emojicoin") == lp_name_1, 0);
-        assert!(utf8(b"LP-2 emojicoin") == lp_name_2, 0);
-        assert!(utf8(b"LP-3 emojicoin") == lp_name_3, 0);
     }
 }
