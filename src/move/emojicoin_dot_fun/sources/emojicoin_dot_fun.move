@@ -1,6 +1,7 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_framework::aggregator_v2::{Self, Aggregator};
+    use aptos_framework::account;
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::code;
@@ -30,6 +31,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const EMOJICOIN_LP_STRUCT_NAME: vector<u8> = b"EmojicoinLP";
     const EMOJICOIN_NAME_SUFFIX: vector<u8> = b" emojicoin";
     const EMOJICOIN_LP_NAME_SUFFIX: vector<u8> = b" emojicoin LP";
+    const REGISTRY_NAME: vector<u8> = b"Registry";
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
@@ -97,6 +99,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         cumulative_quote_volume: u128,
     }
 
+    struct GlobalStats has store {
+        cumulative_quote_volume: Aggregator<u128>,
+        total_quote_locked: Aggregator<u128>,
+        market_cap: Aggregator<u128>,
+        fully_diluted_value: Aggregator<u128>,
+    }
+
     #[resource_group = ObjectGroup]
     struct Registry has key {
         registry_address: address,
@@ -104,8 +113,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
-        cumulative_quote_volume: Aggregator<u128>,
-        total_quote_locked: Aggregator<u128>,
+        global_stats: GlobalStats,
     }
 
     #[event]
@@ -225,7 +233,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         registry_ref: &Registry,
         emojis: vector<vector<u8>>,
     ): vector<u8> {
-        let supported_emojis_ref: &Table<vector<u8>, u8> = &registry_ref.supported_emojis;
+        let supported_emojis_ref = &registry_ref.supported_emojis;
         let verified_bytes = vector[];
         for (i in 0..vector::length(&emojis)) {
             let emoji = *vector::borrow(&emojis, i);
@@ -240,11 +248,63 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         verified_bytes
     }
 
+    inline fun mul_div(
+        a: u64,
+        b: u64,
+        c: u64,
+    ): u128 {
+        (a as u128) * (b as u128) / (c as u128)
+    }
+
     inline fun assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address) {
         assert!(
             exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address),
             E_INVALID_COIN_TYPES
         );
+    }
+
+    inline fun fdv_market_cap_start_end(
+        reserves_start: Reserves,
+        reserves_end: Reserves,
+        supply_minuend: u64,
+    ): (
+        u128, // FDV at start.
+        u128, // Market cap at start.
+        u128, // FDV at end.
+        u128, // Market cap at end.
+    ) {
+        let (fdv_start, market_cap_start) = fdv_market_cap(reserves_start, supply_minuend);
+        let (fdv_end, market_cap_end) = fdv_market_cap(reserves_end, supply_minuend);
+        (fdv_start, market_cap_start, fdv_end, market_cap_end)
+    }
+
+    inline fun fdv_market_cap(
+        reserves: Reserves,
+        supply_minuend: u64,
+    ): (
+        u128, // FDV.
+        u128, // Market cap.
+    ) {
+        let base = reserves.base;
+        let quote = reserves.quote;
+        (
+            mul_div(quote, EMOJICOIN_SUPPLY, base), // FDV.
+            mul_div(quote, supply_minuend - base, base), // Market cap.
+        )
+    }
+
+    inline fun assign_supply_minuend_reserves_ref_mut(
+        market_ref_mut: &mut Market,
+        starts_in_bonding_curve: bool
+    ): (
+        u64,
+        &mut Reserves,
+    ) {
+        if (starts_in_bonding_curve) {
+            (BASE_VIRTUAL_CEILING, &mut market_ref_mut.clamm_virtual_reserves)
+        } else {
+            (EMOJICOIN_SUPPLY, &mut market_ref_mut.cpamm_real_reserves)
+        }
     }
 
     inline fun ensure_coins_initialized<Emojicoin, EmojicoinLP>(
@@ -326,13 +386,21 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             integrator_fee_rate_bps,
             market_ref_mut,
         );
-        let quote;
-        aptos_account::create_account(swapper_address); // For better feedback if no account yet.
 
-        // Prepare variables relevant to global amounts, as they are used in branching logic too.
+        // Prepare local variables.
+        let quote;
         let registry_ref_mut = borrow_registry_ref_mut();
         let quote_volume_as_u128 = (event.quote_volume as u128);
-        let total_quote_locked_ref_mut = &mut registry_ref_mut.total_quote_locked;
+        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
+        let total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
+        let market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
+        let fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
+
+        // Create for swapper an account with AptosCoin store if it doesn't exist.
+        if (account::exists_at(swapper_address)) {
+            aptos_account::create_account(swapper_address);
+        };
+        coin::register<AptosCoin>(swapper);
 
         if (is_sell) { // If selling, no possibility of state transition.
 
@@ -344,15 +412,28 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             let net_proceeds = coin::extract(&mut quote, event.quote_volume);
             aptos_account::deposit_coins(swapper_address, net_proceeds);
 
-            // Update reserves.
-            let reserves_ref_mut = if (event.starts_in_bonding_curve)
-                &mut market_ref_mut.clamm_virtual_reserves else
-                &mut market_ref_mut.cpamm_real_reserves;
-            reserves_ref_mut.base = reserves_ref_mut.base + event.input_amount;
-            reserves_ref_mut.quote = reserves_ref_mut.quote - quote_leaving_market;
+            // Get minuend for circulating supply calculations and affected reserves.
+            let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
+                    market_ref_mut,
+                    event.starts_in_bonding_curve,
+                );
 
-            // Update global total quote locked.
+            // Update reserve amounts.
+            let reserves_start = *reserves_ref_mut;
+            let reserves_end = reserves_start;
+            reserves_end.base = reserves_end.base + event.input_amount;
+            reserves_end.quote = reserves_end.base - quote_leaving_market;
+            *reserves_ref_mut = reserves_end;
+
+            // Get FDV, market cap at start and end.
+            let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+                fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
+
+            // Update global stats.
             aggregator_v2::try_sub(total_quote_locked_ref_mut, (quote_leaving_market as u128));
+            aggregator_v2::try_sub(market_cap_ref_mut, market_cap_start - market_cap_end);
+            aggregator_v2::try_sub(fdv_ref_mut, fdv_start - fdv_end);
+
         } else { // If buying, might need to buy through the state transition.
 
             // Transfer funds.
@@ -363,34 +444,67 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 swapper_address,
                 event.base_volume
             );
+
+            // Declare FDV and market cap amounts at start and end.
+            let (fdv_start, market_cap_start, fdv_end, market_cap_end);
+
             if (event.results_in_state_transition) { // Buy with state transition.
                 // Mint initial liquidity provider coins.
                 let lp_coins =
                     mint_lp_coins<Emojicoin, EmojicoinLP>(market_address, LP_TOKENS_INITIAL);
                 coin::deposit<EmojicoinLP>(market_address, lp_coins);
 
-                // Update reserve amounts.
+                // Assign minuend for circulating supply calculations.
+                let supply_minuend_start = BASE_VIRTUAL_CEILING;
+                let supply_minuend_end = EMOJICOIN_SUPPLY;
+
+                // Determine CLAMM transition variables, then zero out CLAMM reserves.
                 let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
-                let quote_to_transition =
-                    QUOTE_VIRTUAL_CEILING - clamm_virtual_reserves_ref_mut.quote;
-                let base_left_in_clamm = clamm_virtual_reserves_ref_mut.base - BASE_VIRTUAL_FLOOR;
+                let reserves_start = *clamm_virtual_reserves_ref_mut;
+                let quote_to_transition = QUOTE_VIRTUAL_CEILING - reserves_start.quote;
+                let base_left_in_clamm = reserves_start.base - BASE_VIRTUAL_FLOOR;
+                *clamm_virtual_reserves_ref_mut = Reserves { base: 0, quote: 0 };
+
+                // Determine ending CPAMM reserve amounts after seeding with initial liquidity.
                 let quote_into_cpamm = event.quote_volume - quote_to_transition;
                 let base_out_of_cpamm = event.base_volume - base_left_in_clamm;
-                clamm_virtual_reserves_ref_mut.base = 0;
-                clamm_virtual_reserves_ref_mut.quote = 0;
-                let cpamm_real_reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
-                cpamm_real_reserves_ref_mut.base = EMOJICOIN_REMAINDER - base_out_of_cpamm;
-                cpamm_real_reserves_ref_mut.quote = QUOTE_REAL_CEILING + quote_into_cpamm;
-            } else { // Buy without state transition: update reserve amounts.
-                let reserves_ref_mut = if (event.starts_in_bonding_curve)
-                    &mut market_ref_mut.clamm_virtual_reserves else
-                    &mut market_ref_mut.cpamm_real_reserves;
-                reserves_ref_mut.base = reserves_ref_mut.base - event.base_volume;
-                reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_volume;
+                let reserves_end = Reserves {
+                    base: EMOJICOIN_REMAINDER - base_out_of_cpamm,
+                    quote: QUOTE_REAL_CEILING + quote_into_cpamm,
+                };
+                market_ref_mut.cpamm_real_reserves = reserves_end;
+
+                // Get FDV and market cap at start and end.
+                (fdv_start, market_cap_start) =
+                    fdv_market_cap(reserves_start, supply_minuend_start);
+                (fdv_end, market_cap_end) =
+                    fdv_market_cap(reserves_end, supply_minuend_end);
+
+            } else { // Buy without state transition.
+
+                // Get minuend for circulating supply calculations and affected reserves.
+                let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
+                        market_ref_mut,
+                        event.starts_in_bonding_curve,
+                    );
+
+                // Update reserve amounts.
+                let reserves_start = *reserves_ref_mut;
+                let reserves_end = reserves_start;
+                reserves_end.base = reserves_end.base - event.base_volume;
+                reserves_end.quote = reserves_end.quote + event.quote_volume;
+                let reserves_end = *reserves_ref_mut;
+
+                // Get FDV, market cap at start and end.
+                (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+                    fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
+
             };
 
-            // Update global total quote locked.
+            // Update global stats.
             aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
+            aggregator_v2::try_add(market_cap_ref_mut, market_cap_end - market_cap_start);
+            aggregator_v2::try_add(fdv_ref_mut, fdv_end - fdv_start);
         };
         aptos_account::deposit_coins(integrator, quote);
 
@@ -399,7 +513,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_ref_mut.cumulative_base_volume + (event.base_volume as u128);
         market_ref_mut.cumulative_quote_volume =
             market_ref_mut.cumulative_quote_volume + quote_volume_as_u128;
-        aggregator_v2::try_add(&mut registry_ref_mut.cumulative_quote_volume, quote_volume_as_u128);
+        let global_quote_volume = &mut registry_ref_mut.global_stats.cumulative_quote_volume;
+        aggregator_v2::try_add(global_quote_volume, quote_volume_as_u128);
 
         event::emit(event);
     }
@@ -436,8 +551,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         event::emit(event);
 
         // Update global total quote locked.
-        let total_quote_locked_ref_mut = &mut borrow_registry_ref_mut().total_quote_locked;
-        aggregator_v2::try_add(total_quote_locked_ref_mut, (event.quote_amount as u128));
+        let global_total_quote_locked_ref_mut =
+            &mut borrow_registry_ref_mut().global_stats.total_quote_locked;
+        aggregator_v2::try_add(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
     }
 
     public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
@@ -473,12 +589,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         event::emit(event);
 
         // Update global total quote locked.
-        let total_quote_locked_ref_mut = &mut borrow_registry_ref_mut().total_quote_locked;
-        aggregator_v2::try_sub(total_quote_locked_ref_mut, (event.quote_amount as u128));
+        let global_total_quote_locked_ref_mut =
+            &mut borrow_registry_ref_mut().global_stats.total_quote_locked;
+        aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
-        let constructor_ref = object::create_object(@emojicoin_dot_fun);
+        let constructor_ref = object::create_named_object(emojicoin_dot_fun, REGISTRY_NAME);
         let extend_ref = object::generate_extend_ref(&constructor_ref);
         let registry_signer = object::generate_signer(&constructor_ref);
         let registry_address = object::address_from_constructor_ref(&constructor_ref);
@@ -489,8 +606,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             markets_by_emoji_bytes: smart_table::new(),
             markets_by_market_id: smart_table::new(),
             extend_ref,
-            cumulative_quote_volume: aggregator_v2::create_unbounded_aggregator<u128>(),
-            total_quote_locked: aggregator_v2::create_unbounded_aggregator<u128>(),
+            global_stats: GlobalStats {
+                cumulative_quote_volume: aggregator_v2::create_unbounded_aggregator<u128>(),
+                total_quote_locked: aggregator_v2::create_unbounded_aggregator<u128>(),
+                market_cap: aggregator_v2::create_unbounded_aggregator<u128>(),
+                fully_diluted_value: aggregator_v2::create_unbounded_aggregator<u128>(),
+            }
         };
 
         // Load supported emojis into registry.
