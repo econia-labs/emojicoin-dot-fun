@@ -1076,7 +1076,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(!is_a_supported_emoji(x"fe0f"), 0);
         assert!(!is_a_supported_emoji(x"1234"), 0);
         assert!(!is_a_supported_emoji(x"f0fabcdefabcdeff0f"), 0);
-        assert!(!is_a_supported_emoji(x"f0beefcafef0"), 0);
+        assert!(!is_a_supported_emoji(x"f0f00dcafef0"), 0);
         // Minimally qualified "head shaking horizontally".
         assert!(!is_a_supported_emoji(x"f09f9982e2808de28694"), 0);
 
