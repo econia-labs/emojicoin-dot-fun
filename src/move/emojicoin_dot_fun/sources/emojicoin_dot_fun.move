@@ -117,8 +117,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     struct GlobalStats has store {
         cumulative_quote_volume: Aggregator<u128>,
         total_quote_locked: Aggregator<u128>,
+        total_value_locked: Aggregator<u128>,
         market_cap: Aggregator<u128>,
         fully_diluted_value: Aggregator<u128>,
+        cumulative_integrator_fees: Aggregator<u128>,
     }
 
     #[resource_group = ObjectGroup]
@@ -629,8 +631,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             global_stats: GlobalStats {
                 cumulative_quote_volume: aggregator_v2::create_unbounded_aggregator<u128>(),
                 total_quote_locked: aggregator_v2::create_unbounded_aggregator<u128>(),
+                total_value_locked: aggregator_v2::create_unbounded_aggregator<u128>(),
                 market_cap: aggregator_v2::create_unbounded_aggregator<u128>(),
                 fully_diluted_value: aggregator_v2::create_unbounded_aggregator<u128>(),
+                cumulative_integrator_fees: aggregator_v2::create_unbounded_aggregator<u128>(),
             }
         };
 
