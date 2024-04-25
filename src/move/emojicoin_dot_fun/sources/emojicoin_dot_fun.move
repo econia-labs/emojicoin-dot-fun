@@ -18,16 +18,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use std::vector;
 
     #[test_only] use aptos_std::aptos_coin;
-    #[test_only] use yellow_heart_market_address::coin_factory::{
+    #[test_only] use yellow_heart_market::coin_factory::{
         Emojicoin as YellowHeartEmojicoin,
         EmojicoinLP as YellowHeartEmojicoinLP,
         BadType,
     };
-    #[test_only] use black_heart_market_address::coin_factory::{
+    #[test_only] use black_heart_market::coin_factory::{
         Emojicoin as BlackHeartEmojicoin,
         EmojicoinLP as BlackHeartEmojicoinLP,
     };
-    #[test_only] use black_cat_market_address::coin_factory::{
+    #[test_only] use black_cat_market::coin_factory::{
         Emojicoin as BlackCatEmojicoin,
         EmojicoinLP as BlackCatEmojicoinLP,
     };
@@ -991,14 +991,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let symbol_bytes = YELLOW_HEART;
         let registry_ref_mut = borrow_registry_ref_mut();
         let (market_address, _) = create_market(registry_ref_mut, symbol_bytes);
-        assert!(@yellow_heart_market_address == market_address, 0);
+        assert!(@yellow_heart_market == market_address, 0);
 
         let user_addr = signer::address_of(user);
         let input_amount: u64 = 100_000_000;
         fund_account(user_addr, input_amount, aptos_framework);
         let integrator_address = @0xf00dcafe;
         swap<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(
-            @yellow_heart_market_address,
+            @yellow_heart_market,
             user,
             input_amount,
             false, // Buy the emojicoins.
@@ -1008,7 +1008,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         assert!(
             exists<LPCoinCapabilities<YellowHeartEmojicoin, YellowHeartEmojicoinLP>>(
-                @yellow_heart_market_address
+                @yellow_heart_market
             ),
             0,
         );
@@ -1089,15 +1089,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test]
     fun test_valid_coin_types() {
-        assert_valid_coin_types<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(
-            @yellow_heart_market_address,
-        );
-        assert_valid_coin_types<BlackHeartEmojicoin, BlackHeartEmojicoinLP>(
-            @black_heart_market_address,
-        );
-        assert_valid_coin_types<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            @black_cat_market_address,
-        );
+        valid_coin_types<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(@yellow_heart_market);
+        valid_coin_types<BlackHeartEmojicoin, BlackHeartEmojicoinLP>(@black_heart_market);
+        valid_coin_types<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market);
     }
 
     #[test]
@@ -1157,9 +1151,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // If this test fails, it's because we've changed either the way we create the
         // registry object address or the market object address, and the hard-coded
         // emoji market addresses need to be recalculated and updated.
-        assert!(yellow_heart_market_address == @yellow_heart_market_address, 0);
-        assert!(black_heart_market_address == @black_heart_market_address, 0);
-        assert!(black_cat_market_address == @black_cat_market_address, 0);
+        assert!(yellow_heart_market_address == @yellow_heart_market, 0);
+        assert!(black_heart_market_address == @black_heart_market, 0);
+        assert!(black_cat_market_address == @black_cat_market, 0);
     }
 
     #[test(deployer = @emojicoin_dot_fun)]
