@@ -1,6 +1,7 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
     use aptos_framework::aggregator_v2::{Self, Aggregator};
+    use aptos_framework::account;
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::code;
@@ -299,9 +300,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         u64,
         &mut Reserves,
     ) {
-        if (starts_in_bonding_curve)
-            (BASE_VIRTUAL_CEILING, &mut market_ref_mut.clamm_virtual_reserves) else
+        if (starts_in_bonding_curve) {
+            (BASE_VIRTUAL_CEILING, &mut market_ref_mut.clamm_virtual_reserves)
+        } else {
             (EMOJICOIN_SUPPLY, &mut market_ref_mut.cpamm_real_reserves)
+        }
     }
 
     inline fun ensure_coins_initialized<Emojicoin, EmojicoinLP>(
@@ -393,7 +396,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
         let fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
 
-        aptos_account::create_account(swapper_address); // For better feedback if no account yet.
+        // Create for swapper an account with AptosCoin store if it doesn't exist.
+        if (account::exists_at(swapper_address)) {
+            aptos_account::create_account(swapper_address);
+        };
+        coin::register<AptosCoin>(swapper);
 
         if (is_sell) { // If selling, no possibility of state transition.
 
@@ -475,11 +482,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
             } else { // Buy without state transition.
 
-            // Get minuend for circulating supply calculations and affected reserves.
-            let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
-                    market_ref_mut,
-                    event.starts_in_bonding_curve,
-                );
+                // Get minuend for circulating supply calculations and affected reserves.
+                let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
+                        market_ref_mut,
+                        event.starts_in_bonding_curve,
+                    );
 
                 // Update reserve amounts.
                 let reserves_start = *reserves_ref_mut;
