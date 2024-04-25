@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = [
+  "allowlister3000",
+]
+
+[workspace.package]
+authors = ["Econia Labs <developers@econialabs.com>"]
+license = "Apache License"
+homepage = "https://www.econialabs.com/"
+publish = false
+repository = "https://github.com/econia-labs/emojicoin-dot-fun"
+edition = "2021"
+rust-version = "1.70"
