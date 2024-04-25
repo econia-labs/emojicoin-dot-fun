@@ -5,7 +5,7 @@ import os
 import subprocess
 from pathlib import Path
 
-COIN_FACTORY = "coin_factory"
+MARKET_ADDRESS = "market_address"
 EMOJICOIN_DOT_FUN = "emojicoin_dot_fun"
 PACKAGE_BYTECODE_PATH = "json/build_publish_payload.json"
 SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
@@ -13,13 +13,13 @@ METADATA_K, CODE_K = "metadata", "code"
 
 # Mapping of named addresses to placeholder addresses for generating Move bytecode.
 named_addresses = [
-    # coin_factory
+    # market_address
     "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
     # emojicoin_dot_fun
     "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
 ]
 NAMED_ADDRESSES = {
-    COIN_FACTORY: named_addresses[0],
+    MARKET_ADDRESS: named_addresses[0],
     EMOJICOIN_DOT_FUN: named_addresses[1],
 }
 
@@ -136,8 +136,8 @@ if __name__ == "__main__":
     if bytecode.startswith("0x"):
         bytecode = bytecode[2:]
 
-    assert NAMED_ADDRESSES[COIN_FACTORY] not in metadata
-    assert NAMED_ADDRESSES[COIN_FACTORY] in bytecode
+    assert NAMED_ADDRESSES[MARKET_ADDRESS] not in metadata
+    assert NAMED_ADDRESSES[MARKET_ADDRESS] in bytecode
 
     bytecode_lines = split_and_replace_named_addresses([bytecode], NAMED_ADDRESSES)
 

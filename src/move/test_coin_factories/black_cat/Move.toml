@@ -1,0 +1,12 @@
+[addresses]
+black_cat_market = "0xcc15b5b6854ea547e516461dca1b6616697c570240f980e964a0739f8dba74cf"
+
+[dev-dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[package]
+name = "BlackCatCoinFactory"
+upgrade_policy = "compatible"
+version = "1.0.0"

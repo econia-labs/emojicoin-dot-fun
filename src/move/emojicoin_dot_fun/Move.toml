@@ -9,8 +9,17 @@ subdir = "aptos-move/framework/aptos-framework"
 [dev-addresses]
 emojicoin_dot_fun = "0xc0de"
 
+[dev-dependencies.BlackCatCoinFactory]
+local = "../test_coin_factories/black_cat"
+
+[dev-dependencies.BlackHeartCoinFactory]
+local = "../test_coin_factories/black_heart"
+
+[dev-dependencies.YellowHeartCoinFactory]
+local = "../test_coin_factories/yellow_heart"
+
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
 name = "EmojicoinDotFun"
-upgrade_policy = "immutable"
+upgrade_policy = "compatible"
 version = "1.0.0"

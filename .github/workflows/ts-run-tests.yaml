@@ -1,6 +1,7 @@
 ---
 env:
   START_LOCAL_NODE_FOR_TEST: 'true'
+  TS_API_DIR: 'src/typescript/api'
 jobs:
   ts-run-tests:
     runs-on: 'ubuntu-latest'

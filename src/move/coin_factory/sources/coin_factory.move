@@ -1,4 +1,4 @@
-module coin_factory::coin_factory {
+module market_address::coin_factory {
     struct Emojicoin {}
     struct EmojicoinLP {}
 
@@ -13,8 +13,8 @@ module coin_factory::coin_factory {
         let emojicoin_type_info = type_info::type_of<Emojicoin>();
         let lp_type_info = type_info::type_of<EmojicoinLP>();
 
-        assert!(@coin_factory == type_info::account_address(&emojicoin_type_info), 0);
-        assert!(@coin_factory == type_info::account_address(&lp_type_info), 0);
+        assert!(@market_address == type_info::account_address(&emojicoin_type_info), 0);
+        assert!(@market_address == type_info::account_address(&lp_type_info), 0);
         assert!(module_name == type_info::module_name(&emojicoin_type_info), 0);
         assert!(module_name == type_info::module_name(&lp_type_info), 0);
         assert!(emojicoin_struct == type_info::struct_name(&emojicoin_type_info), 0);
