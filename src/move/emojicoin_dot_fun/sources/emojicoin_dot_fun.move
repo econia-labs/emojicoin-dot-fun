@@ -1089,7 +1089,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test]
     fun test_valid_coin_types() {
-        assert!(valid_coin_types<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(@yellow_heart_market_address), 0);
+        assert_valid_coin_types<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(
+            @yellow_heart_market_address,
+        );
+        assert_valid_coin_types<BlackHeartEmojicoin, BlackHeartEmojicoinLP>(
+            @black_heart_market_address,
+        );
+        assert_valid_coin_types<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            @black_cat_market_address,
+        );
     }
 
     #[test]
