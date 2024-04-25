@@ -53,3 +53,27 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
+
+#[cfg(test)]
+mod test {
+    use crate::sanitize;
+
+    #[test]
+    fn test_sanitize() {
+        assert_eq!("0x1", sanitize(String::from("0x1")));
+        assert_eq!("0x1", sanitize(String::from("0x01")));
+        assert_eq!("0x1", sanitize(String::from("0x0000000001")));
+        assert_eq!("0x0", sanitize(String::from("0x0")));
+        assert_eq!("0x0", sanitize(String::from("0x00")));
+        assert_eq!(
+            "0x0",
+            sanitize(String::from("0x000000000000000000000000000"))
+        );
+        assert_eq!(
+            "0xfc63b2498d85356f03b68820e78e65633b2fd0a71ca98db79e50ce2ebc1877",
+            sanitize(String::from(
+                "0x00fc63b2498d85356f03b68820e78e65633b2fd0a71ca98db79e50ce2ebc1877"
+            ))
+        );
+    }
+}
