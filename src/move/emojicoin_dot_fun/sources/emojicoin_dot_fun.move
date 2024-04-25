@@ -18,19 +18,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use std::vector;
 
     #[test_only] use aptos_std::aptos_coin;
-    #[test_only]
-    use 0xc050f3cc6b85ef42a2fb3ab073f6343c32b19c3c25f876c8ab3eb2c07aca1972::coin_factory::{
+    #[test_only] use yellow_heart_market_address::coin_factory::{
         Emojicoin as YellowHeartEmojicoin,
         EmojicoinLP as YellowHeartEmojicoinLP,
         BadType,
     };
-    #[test_only]
-    use 0xf4c8175ca990f11c733b43b9bad3bc4139908190b80d591ecfd40eba3bc82708::coin_factory::{
+    #[test_only] use black_heart_market_address::coin_factory::{
         Emojicoin as BlackHeartEmojicoin,
         EmojicoinLP as BlackHeartEmojicoinLP,
     };
-    #[test_only]
-    use 0xcc15b5b6854ea547e516461dca1b6616697c570240f980e964a0739f8dba74cf::coin_factory::{
+    #[test_only] use black_cat_market_address::coin_factory::{
         Emojicoin as BlackCatEmojicoin,
         EmojicoinLP as BlackCatEmojicoinLP,
     };
@@ -38,12 +35,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] const YELLOW_HEART: vector<u8> = x"f09f929b";
     #[test_only] const BLACK_HEART: vector<u8> = x"f09f96a4";
     #[test_only] const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
-    #[test_only] const YELLOW_HEART_MARKET_ADDRESS: address =
-        @0xc050f3cc6b85ef42a2fb3ab073f6343c32b19c3c25f876c8ab3eb2c07aca1972;
-    #[test_only] const BLACK_HEART_MARKET_ADDRESS: address =
-        @0xf4c8175ca990f11c733b43b9bad3bc4139908190b80d591ecfd40eba3bc82708;
-    #[test_only] const BLACK_CAT_MARKET_ADDRESS: address =
-        @0xcc15b5b6854ea547e516461dca1b6616697c570240f980e964a0739f8dba74cf;
 
     const MAX_SYMBOL_LENGTH: u8 = 10;
     const DECIMALS: u8 = 8;
@@ -1155,12 +1146,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let (yellow_heart_market_address, _) = create_market(registry_ref_mut, YELLOW_HEART);
         let (black_heart_market_address, _) = create_market(registry_ref_mut, BLACK_HEART);
         let (black_cat_market_address, _) = create_market(registry_ref_mut, BLACK_CAT);
-        // If this test fails, it's because we've changed either the way we create
-        // the registry object address or the market address, and the hard-coded
+        // If this test fails, it's because we've changed either the way we create the
+        // registry object address or the market object address, and the hard-coded
         // emoji market addresses need to be recalculated and updated.
-        assert!(yellow_heart_market_address == YELLOW_HEART_MARKET_ADDRESS, 0);
-        assert!(black_heart_market_address == BLACK_HEART_MARKET_ADDRESS, 0);
-        assert!(black_cat_market_address == BLACK_CAT_MARKET_ADDRESS, 0);
+        assert!(yellow_heart_market_address == @yellow_heart_market_address, 0);
+        assert!(black_heart_market_address == @black_heart_market_address, 0);
+        assert!(black_cat_market_address == @black_cat_market_address, 0);
     }
 
     #[test(deployer = @emojicoin_dot_fun)]
