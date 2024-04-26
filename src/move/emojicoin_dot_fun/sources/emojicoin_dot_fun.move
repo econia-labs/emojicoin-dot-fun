@@ -470,7 +470,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             aggregator_v2::try_sub(market_cap_ref_mut, market_cap_start - market_cap_end);
             aggregator_v2::try_sub(fdv_ref_mut, fdv_start - fdv_end);
 
-            // Update cumuative pool fees.
+            // Update cumulative pool fees.
             let local_cumulative_pool_fees_quote_ref_mut =
                 &mut market_ref_mut.cumulative_pool_fees_quote;
             *local_cumulative_pool_fees_quote_ref_mut =
