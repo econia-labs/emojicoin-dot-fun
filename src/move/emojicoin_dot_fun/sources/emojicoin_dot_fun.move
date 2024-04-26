@@ -419,9 +419,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Prepare local variables.
         let quote;
-        let registry_ref_mut = borrow_registry_ref_mut();
         let quote_volume_as_u128 = (event.quote_volume as u128);
-        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
+        let global_stats_ref_mut = &mut borrow_registry_ref_mut().global_stats;
         let total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
         let market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
         let fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
@@ -431,6 +430,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             aptos_account::create_account(swapper_address);
         };
         coin::register<AptosCoin>(swapper);
+
+        // Get TVL at start of swap.
+        let tvl_start = if (event.starts_in_bonding_curve) {
+            tvl_clamm(market_ref_mut.clamm_virtual_reserves)
+        } else {
+            tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote)
+        };
 
         if (is_sell) { // If selling, no possibility of state transition.
 
@@ -489,6 +495,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 let lp_coins =
                     mint_lp_coins<Emojicoin, EmojicoinLP>(market_address, LP_TOKENS_INITIAL);
                 coin::deposit<EmojicoinLP>(market_address, lp_coins);
+                market_ref_mut.lp_coin_supply = (LP_TOKENS_INITIAL as u128);
 
                 // Assign minuend for circulating supply calculations.
                 let supply_minuend_start = BASE_VIRTUAL_CEILING;
@@ -571,6 +578,23 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let global_cumulative_integrator_fees_ref_mut =
             &mut global_stats_ref_mut.cumulative_integrator_fees;
         aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, integrator_fee_as_u128);
+
+        // Update global TVL amounts.
+        let tvl_end = if (market_ref_mut.lp_coin_supply == 0) {
+            tvl_clamm(market_ref_mut.clamm_virtual_reserves)
+        } else {
+            tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote)
+        };
+        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
+        if (tvl_end > tvl_start) {
+            let tvl_increase = tvl_end - tvl_start;
+            aggregator_v2::try_add(global_total_value_locked_ref_mut, tvl_increase);
+        } else {
+            let tvl_decrease = tvl_start - tvl_end;
+            aggregator_v2::try_sub(global_total_value_locked_ref_mut, tvl_decrease);
+        };
+
+        event::emit(event);
     }
 
     public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
@@ -598,16 +622,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Update market state.
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
+        let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
+        let start_quote = *quote_reserves_ref_mut;
+        let start_tvl = tvl_cpamm(start_quote);
         reserves_ref_mut.base = reserves_ref_mut.base + event.base_amount;
-        reserves_ref_mut.quote = reserves_ref_mut.quote + event.quote_amount;
+        *quote_reserves_ref_mut = start_quote + event.quote_amount;
         market_ref_mut.lp_coin_supply =
             market_ref_mut.lp_coin_supply + (event.lp_coin_amount as u128);
-        event::emit(event);
+        let end_tvl = tvl_cpamm(*quote_reserves_ref_mut);
 
-        // Update global total quote locked.
-        let global_total_quote_locked_ref_mut =
-            &mut borrow_registry_ref_mut().global_stats.total_quote_locked;
+        // Update global total quote locked, TVL.
+        let global_stats_ref_mut = &mut borrow_registry_ref_mut().global_stats;
+        let global_total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
+        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
+        let delta_tvl = end_tvl - start_tvl;
         aggregator_v2::try_add(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
+        aggregator_v2::try_add(global_total_value_locked_ref_mut, delta_tvl);
+
+        event::emit(event);
     }
 
     public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
@@ -636,16 +668,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Update market state.
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
+        let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
+        let start_quote = *quote_reserves_ref_mut;
+        let start_tvl = tvl_cpamm(start_quote);
         reserves_ref_mut.base = reserves_ref_mut.base - event.base_amount;
-        reserves_ref_mut.quote = reserves_ref_mut.quote - event.quote_amount;
+        *quote_reserves_ref_mut = start_quote - event.quote_amount;
         market_ref_mut.lp_coin_supply =
             market_ref_mut.lp_coin_supply - (event.lp_coin_amount as u128);
-        event::emit(event);
+        let end_tvl = tvl_cpamm(*quote_reserves_ref_mut);
 
-        // Update global total quote locked.
-        let global_total_quote_locked_ref_mut =
-            &mut borrow_registry_ref_mut().global_stats.total_quote_locked;
+        // Update global total quote locked, TVL.
+        let global_stats_ref_mut = &mut borrow_registry_ref_mut().global_stats;
+        let global_total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
+        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
+        let delta_tvl = start_tvl - end_tvl;
         aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
+        aggregator_v2::try_sub(global_total_value_locked_ref_mut, delta_tvl);
+
+        event::emit(event);
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
@@ -967,6 +1007,30 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(denominator > 0, E_SWAP_DIVIDE_BY_ZERO);
         let result = numerator / denominator;
         (result as u64)
+    }
+
+    inline fun tvl_clamm(
+        virtual_reserves: Reserves,
+    ): u128 {
+        let quote_virtual = virtual_reserves.quote;
+        let quote_real = quote_virtual - QUOTE_VIRTUAL_FLOOR;
+        if (quote_real == 0) { // Report no TVL if no one has bought into bonding curve.
+            0
+        } else {
+            let base_virtual = virtual_reserves.base;
+            // Determine total amount of all base still locked in the market.
+            let base_real = base_virtual - BASE_VIRTUAL_FLOOR + EMOJICOIN_REMAINDER;
+            // Convert to an effective quote value via multiplying by spot price.
+            let base_real_denominated_in_quote = mul_div(quote_virtual, base_real, base_virtual);
+            (quote_real as u128) + base_real_denominated_in_quote
+        }
+    }
+
+    inline fun tvl_cpamm(
+        real_quote_reserves: u64,
+    ): u128 {
+        // Base reserves priced in quote are equal to the value of quote reserves.
+        2 * (real_quote_reserves as u128)
     }
 
     #[test_only]
