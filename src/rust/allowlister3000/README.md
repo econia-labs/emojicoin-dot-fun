@@ -38,16 +38,16 @@ Compute Engine virtual machine.
 
 #### Step 1
 
-Create a VM on GCP by following [the official
-documentation](https://cloud.google.com/compute/docs/instances/create-start-instance).
+Create a VM on GCP by following [the official documentation][gcp-vm-docs].
 
 #### Step 2
 
 Compile the AllowLister3K by running `cargo build --release`. Note that if you
 are not on an x86, you might need to specifically tell the Rust compiler to
 compile for x86 (add `--target x86_64-unknown-linux-gnu` to the command, and
-make sure the `x86_64-unknown-linux-gnu` target is install by running `rustup
-target list` then optionally `rustup target install x86_64-unknown-linux-gnu`).
+make sure the `x86_64-unknown-linux-gnu` target is install by running
+`rustup target list` then optionally
+`rustup target install x86_64-unknown-linux-gnu`).
 
 Note that if you compiled with `--target x86_64-unknown-linux-gnu`, the binary
 will be saved at `target/x86_64-unknown-linux-gnu/release/allowlister3000`
@@ -99,3 +99,5 @@ nohup bash -c 'ALLOWLIST_FILE=./allowlist.txt /allowlister3000 &!'
 
 Run `curl IP:3000/0x...` to check that the AllowLister3K is working properly.
 To get `IP`, you can run `gcloud compute instances list`.
+
+[gcp-vm-docs]: https://cloud.google.com/compute/docs/instances/create-start-instance
