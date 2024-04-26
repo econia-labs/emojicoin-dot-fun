@@ -7,13 +7,19 @@ use axum::{
 use std::{collections::HashSet, sync::Arc};
 use tower_http::cors::{Any, CorsLayer};
 
+// The index of the first piece of actual data in a hex address.
+const FIRST_HEX_CHAR: usize = 2;
+
+// The maximum length of a hex address (0x + 64 chars).
+const MAX_ADDRESS_LENGTH: usize = 66;
+
 fn sanitize(mut address: String) -> String {
     loop {
         if address == "0x" {
             break String::from("0x0");
         }
         if address.starts_with("0x0") {
-            address.remove(2);
+            address.remove(FIRST_HEX_CHAR);
         } else {
             break address;
         }
@@ -24,7 +30,7 @@ async fn allowlist(
     Path(address): Path<String>,
     State(state): State<Arc<HashSet<String>>>,
 ) -> String {
-    if address.len() > 66 || !address.starts_with("0x") {
+    if address.len() > MAX_ADDRESS_LENGTH || !address.starts_with("0x") {
         false.to_string()
     } else {
         state.contains(&sanitize(address)).to_string()
