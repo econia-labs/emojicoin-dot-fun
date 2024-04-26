@@ -112,6 +112,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         lp_coin_supply: u128,
         cumulative_base_volume: u128,
         cumulative_quote_volume: u128,
+        cumulative_integrator_fees: u128,
+        cumulative_pool_fees_base: u128,
+        cumulative_pool_fees_quote: u128,
     }
 
     struct GlobalStats has store {
@@ -226,6 +229,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             lp_coin_supply: 0,
             cumulative_base_volume: 0,
             cumulative_quote_volume: 0,
+            cumulative_integrator_fees: (MARKET_REGISTRATION_FEE as u128),
+            cumulative_pool_fees_base: 0,
+            cumulative_pool_fees_quote: 0,
         });
         // Update registry.
         smart_table::add(markets_by_emoji_bytes_ref_mut, emoji_bytes, market_address);
@@ -393,6 +399,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator: address,
         integrator_fee_rate_bps: u8,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+
+        // Mutably borrow market, check its coin types, then simulate a swap.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         ensure_coins_initialized<Emojicoin, EmojicoinLP>(
             market_ref_mut,
@@ -455,6 +463,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             aggregator_v2::try_sub(total_quote_locked_ref_mut, (quote_leaving_market as u128));
             aggregator_v2::try_sub(market_cap_ref_mut, market_cap_start - market_cap_end);
             aggregator_v2::try_sub(fdv_ref_mut, fdv_start - fdv_end);
+
+            // Update cumuative pool fees.
+            let local_cumulative_pool_fees_quote_ref_mut =
+                &mut market_ref_mut.cumulative_pool_fees_quote;
+            *local_cumulative_pool_fees_quote_ref_mut =
+                *local_cumulative_pool_fees_quote_ref_mut + (event.pool_fee as u128);
 
         } else { // If buying, might need to buy through the state transition.
 
@@ -527,18 +541,36 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
             aggregator_v2::try_add(market_cap_ref_mut, market_cap_end - market_cap_start);
             aggregator_v2::try_add(fdv_ref_mut, fdv_end - fdv_start);
+
+            // Update cumulative pool fees.
+            let local_cumulative_pool_fees_base_ref_mut =
+                &mut market_ref_mut.cumulative_pool_fees_base;
+            *local_cumulative_pool_fees_base_ref_mut =
+                *local_cumulative_pool_fees_base_ref_mut + (event.pool_fee as u128);
         };
-        aptos_account::deposit_coins(integrator, quote);
 
-        // Update cumulative volume.
-        market_ref_mut.cumulative_base_volume =
-            market_ref_mut.cumulative_base_volume + (event.base_volume as u128);
-        market_ref_mut.cumulative_quote_volume =
-            market_ref_mut.cumulative_quote_volume + quote_volume_as_u128;
-        let global_quote_volume = &mut registry_ref_mut.global_stats.cumulative_quote_volume;
-        aggregator_v2::try_add(global_quote_volume, quote_volume_as_u128);
+        aptos_account::deposit_coins(integrator, quote); // Deposit integrator's fees.
 
-        event::emit(event);
+        // Update cumulative volume locally and globally.
+        let local_cumulative_base_volume_ref_mut = &mut market_ref_mut.cumulative_base_volume;
+        let local_cumulative_quote_volume_ref_mut = &mut market_ref_mut.cumulative_quote_volume;
+        *local_cumulative_base_volume_ref_mut =
+            *local_cumulative_base_volume_ref_mut + (event.base_volume as u128);
+        *local_cumulative_quote_volume_ref_mut =
+            *local_cumulative_quote_volume_ref_mut + quote_volume_as_u128;
+        let global_cumulative_quote_volume_ref_mut =
+            &mut global_stats_ref_mut.cumulative_quote_volume;
+        aggregator_v2::try_add(global_cumulative_quote_volume_ref_mut, quote_volume_as_u128);
+
+        // Update integrator fees locally and globally.
+        let integrator_fee_as_u128 = (event.integrator_fee as u128);
+        let local_cumulative_integrator_fees_ref_mut =
+            &mut market_ref_mut.cumulative_integrator_fees;
+        *local_cumulative_integrator_fees_ref_mut =
+            *local_cumulative_integrator_fees_ref_mut + integrator_fee_as_u128;
+        let global_cumulative_integrator_fees_ref_mut =
+            &mut global_stats_ref_mut.cumulative_integrator_fees;
+        aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, integrator_fee_as_u128);
     }
 
     public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
