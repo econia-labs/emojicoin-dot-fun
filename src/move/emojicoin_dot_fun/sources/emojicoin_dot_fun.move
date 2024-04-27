@@ -1,6 +1,6 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
-    use aptos_framework::aggregator_v2::{Self, Aggregator};
+    use aptos_framework::aggregator_v2::{Self, Aggregator, AggregatorSnapshot};
     use aptos_framework::account;
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
@@ -8,6 +8,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_framework::coin::{Self, BurnCapability, Coin, MintCapability};
     use aptos_framework::event;
     use aptos_framework::object::{Self, ExtendRef, ObjectGroup};
+    use aptos_framework::timestamp;
     use aptos_std::smart_table::{Self, SmartTable};
     use aptos_std::string_utils;
     use aptos_std::table::{Self, Table};
@@ -35,6 +36,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
     #[test_only] const BLACK_HEART: vector<u8> = x"f09f96a4";
     #[test_only] const YELLOW_HEART: vector<u8> = x"f09f929b";
+    #[test_only] const MICROSECONDS_PER_SECOND: u64 = 1_000_000;
 
     const DECIMALS: u8 = 8;
     const MAX_SYMBOL_LENGTH: u8 = 10;
@@ -50,6 +52,22 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
+    const SHIFT_Q64: u8 = 64;
+
+    const TRIGGER_MARKET_REGISTRATION: u8 = 0;
+    const TRIGGER_SWAP: u8 = 1;
+    const TRIGGER_PROVIDE_LIQUIDITY: u8 = 2;
+    const TRIGGER_REMOVE_LIQUIDITY: u8 = 3;
+    const TRIGGER_CHAT: u8 = 4;
+
+    const PERIOD_INSTANTANEOUS: u64 = 0;
+    const PERIOD_1M: u64 = 60_000_000;
+    const PERIOD_5M: u64 = 300_000_000;
+    const PERIOD_15M: u64 = 900_000_000;
+    const PERIOD_30M: u64 = 1_800_000_000;
+    const PERIOD_1H: u64 = 3_600_000_000;
+    const PERIOD_4H: u64 = 14_400_000_000;
+    const PERIOD_1D: u64 = 86_400_000_000;
 
     /// Denominated in `AptosCoin`.
     const MARKET_REGISTRATION_FEE: u64 = 100_000_000;
@@ -96,6 +114,43 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// Account is unable to pay market registration fee.
     const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 12;
 
+    struct CumulativeStats has copy, drop, store {
+        base_volume: u128,
+        quote_volume: u128,
+        integrator_fees: u128,
+        pool_fees_base: u128,
+        pool_fees_quote: u128,
+    }
+
+    struct LastSwap has copy, drop, store {
+        is_sell: bool,
+        avg_execution_price_q64: u128,
+        base_volume: u64,
+        quote_volume: u64,
+    }
+
+    struct MarketMetadata has copy, drop, store {
+        market_id: u64,
+        market_address: address,
+        emoji_bytes: vector<u8>,
+    }
+
+    struct PeriodicStateTracker has store {
+        init_time: u64,
+        period: u64,
+        open_price_q64: u128,
+        high_price_q64: u128,
+        close_price_q64: u128,
+        low_price_q64: u128,
+        volume_base: u128,
+        volume_quote: u128,
+        integrator_fees: u128,
+        pool_fees_base: u128,
+        pool_fees_quote: u128,
+        tvl_start: u128,
+        lp_coins_start: u128,
+    }
+
     struct Reserves has copy, drop, store {
         base: u64,
         quote: u64,
@@ -103,18 +158,55 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[resource_group = ObjectGroup]
     struct Market has key {
-        market_id: u64,
-        market_address: address,
-        emoji_bytes: vector<u8>,
+        metadata: MarketMetadata,
+        nonce: u64,
         extend_ref: ExtendRef,
         clamm_virtual_reserves: Reserves,
         cpamm_real_reserves: Reserves,
         lp_coin_supply: u128,
-        cumulative_base_volume: u128,
-        cumulative_quote_volume: u128,
-        cumulative_integrator_fees: u128,
-        cumulative_pool_fees_base: u128,
-        cumulative_pool_fees_quote: u128,
+        cumulative_stats: CumulativeStats,
+        last_swap: LastSwap,
+        periodic_state_trackers: vector<PeriodicStateTracker>,
+    }
+
+    struct PeriodicStats has drop, store {
+        open_price_q64: u128,
+        high_price_q64: u128,
+        close_price_q64: u128,
+        low_price_q64: u128,
+        volume_base: u128,
+        volume_quote: u128,
+        integrator_fees: u128,
+        pool_fees_base: u128,
+        pool_fees_quote: u128,
+        tvl_per_lp_coin_growth_q64: u128,
+    }
+
+    struct InstantaneousStats has drop, store {
+        total_quote_locked: u128,
+        total_value_locked: u128,
+        market_cap: u128,
+        fully_diluted_value: u128,
+    }
+
+    struct StateMetadata has drop, store {
+        market_nonce: u64,
+        emit_time: u64,
+        period: u64,
+        trigger: u8,
+    }
+
+    #[event]
+    struct State has drop, store {
+        market_metadata: MarketMetadata,
+        state_metadata: StateMetadata,
+        clamm_virtual_reserves: Reserves,
+        cpamm_real_reserves: Reserves,
+        lp_coin_supply: u128,
+        cumulative_stats: CumulativeStats,
+        instantaneous_stats: InstantaneousStats,
+        periodic_stats: PeriodicStats,
+        last_swap: LastSwap,
     }
 
     struct GlobalStats has store {
@@ -134,6 +226,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
         global_stats: GlobalStats,
+        last_global_state_emit_time: u64,
+    }
+
+    #[event]
+    struct GlobalState has drop, store {
+        emit_time: u64,
+        cumulative_quote_volume: AggregatorSnapshot<u128>,
+        total_quote_locked: AggregatorSnapshot<u128>,
+        total_value_locked: AggregatorSnapshot<u128>,
+        market_cap: AggregatorSnapshot<u128>,
+        fully_diluted_value: AggregatorSnapshot<u128>,
+        cumulative_integrator_fees: AggregatorSnapshot<u128>,
     }
 
     #[event]
@@ -147,6 +251,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         net_proceeds: u64,
         base_volume: u64,
         quote_volume: u64,
+        avg_execution_price_q64: u128,
         integrator_fee: u64,
         pool_fee: u64,
         starts_in_bonding_curve: bool,
@@ -219,19 +324,56 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         let market_id = 1 + smart_table::length(markets_by_emoji_bytes_ref_mut);
         move_to(&market_signer, Market {
-            market_id,
-            market_address,
-            emoji_bytes,
+            metadata : MarketMetadata {
+                market_id,
+                market_address,
+                emoji_bytes,
+            },
+            nonce: 0,
             extend_ref: market_extend_ref,
             clamm_virtual_reserves:
                 Reserves { base: BASE_VIRTUAL_CEILING, quote: QUOTE_VIRTUAL_FLOOR },
             cpamm_real_reserves: Reserves { base: 0, quote: 0 },
             lp_coin_supply: 0,
-            cumulative_base_volume: 0,
-            cumulative_quote_volume: 0,
-            cumulative_integrator_fees: (MARKET_REGISTRATION_FEE as u128),
-            cumulative_pool_fees_base: 0,
-            cumulative_pool_fees_quote: 0,
+            cumulative_stats: CumulativeStats {
+                base_volume: 0,
+                quote_volume: 0,
+                integrator_fees: (MARKET_REGISTRATION_FEE as u128),
+                pool_fees_base: 0,
+                pool_fees_quote: 0,
+            },
+            last_swap: LastSwap {
+                is_sell: false,
+                avg_execution_price_q64: 0,
+                base_volume: 0,
+                quote_volume: 0,
+            },
+            periodic_state_trackers: vector::map(
+                vector[
+                    PERIOD_1M,
+                    PERIOD_5M,
+                    PERIOD_15M,
+                    PERIOD_30M,
+                    PERIOD_1H,
+                    PERIOD_4H,
+                    PERIOD_1D,
+                ],
+                |period| PeriodicStateTracker {
+                    init_time: timestamp::now_microseconds(),
+                    period,
+                    open_price_q64: 0,
+                    high_price_q64: 0,
+                    close_price_q64: 0,
+                    low_price_q64: 0,
+                    volume_base: 0,
+                    volume_quote: 0,
+                    integrator_fees: 0,
+                    pool_fees_base: 0,
+                    pool_fees_quote: 0,
+                    tvl_start: 0,
+                    lp_coins_start: 0,
+                }
+            ),
         });
         // Update registry.
         smart_table::add(markets_by_emoji_bytes_ref_mut, emoji_bytes, market_address);
@@ -337,7 +479,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ) {
         if (!exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address)) {
             assert!(valid_coin_types<Emojicoin, EmojicoinLP>(market_address), E_INVALID_COIN_TYPES);
-            let symbol = string::utf8(market_ref.emoji_bytes);
+            let symbol = string::utf8(market_ref.metadata.emoji_bytes);
 
             // Initialize emojicoin with fixed supply, throw away capabilities.
             let (burn_cap, freeze_cap, mint_cap) = coin::initialize<Emojicoin>(
@@ -353,7 +495,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             coin::destroy_mint_cap(mint_cap);
             coin::destroy_burn_cap(burn_cap);
 
-            let market_id_str = string_utils::to_string(&market_ref.market_id);
+            let market_id_str = string_utils::to_string(&market_ref.metadata.market_id);
             let lp_symbol = get_concatenation(
                 string::utf8(EMOJICOIN_LP_SYMBOL_PREFIX),
                 market_id_str,
@@ -420,6 +562,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Prepare local variables.
         let quote;
         let quote_volume_as_u128 = (event.quote_volume as u128);
+        let local_cumulative_stats_ref_mut = &mut market_ref_mut.cumulative_stats;
         let global_stats_ref_mut = &mut borrow_registry_ref_mut().global_stats;
         let total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
         let market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
@@ -472,7 +615,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
             // Update cumulative pool fees.
             let local_cumulative_pool_fees_quote_ref_mut =
-                &mut market_ref_mut.cumulative_pool_fees_quote;
+                &mut local_cumulative_stats_ref_mut.pool_fees_quote;
             *local_cumulative_pool_fees_quote_ref_mut =
                 *local_cumulative_pool_fees_quote_ref_mut + (event.pool_fee as u128);
 
@@ -551,7 +694,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
             // Update cumulative pool fees.
             let local_cumulative_pool_fees_base_ref_mut =
-                &mut market_ref_mut.cumulative_pool_fees_base;
+                &mut local_cumulative_stats_ref_mut.pool_fees_base;
             *local_cumulative_pool_fees_base_ref_mut =
                 *local_cumulative_pool_fees_base_ref_mut + (event.pool_fee as u128);
         };
@@ -559,8 +702,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         aptos_account::deposit_coins(integrator, quote); // Deposit integrator's fees.
 
         // Update cumulative volume locally and globally.
-        let local_cumulative_base_volume_ref_mut = &mut market_ref_mut.cumulative_base_volume;
-        let local_cumulative_quote_volume_ref_mut = &mut market_ref_mut.cumulative_quote_volume;
+        let local_cumulative_base_volume_ref_mut = &mut local_cumulative_stats_ref_mut.base_volume;
+        let local_cumulative_quote_volume_ref_mut =
+            &mut local_cumulative_stats_ref_mut.quote_volume;
         *local_cumulative_base_volume_ref_mut =
             *local_cumulative_base_volume_ref_mut + (event.base_volume as u128);
         *local_cumulative_quote_volume_ref_mut =
@@ -572,7 +716,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Update integrator fees locally and globally.
         let integrator_fee_as_u128 = (event.integrator_fee as u128);
         let local_cumulative_integrator_fees_ref_mut =
-            &mut market_ref_mut.cumulative_integrator_fees;
+            &mut local_cumulative_stats_ref_mut.integrator_fees;
         *local_cumulative_integrator_fees_ref_mut =
             *local_cumulative_integrator_fees_ref_mut + integrator_fee_as_u128;
         let global_cumulative_integrator_fees_ref_mut =
@@ -615,7 +759,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::transfer<Emojicoin>(provider, market_address, event.base_amount);
         coin::transfer<AptosCoin>(provider, market_address, event.quote_amount);
         let lp_coins = mint_lp_coins<Emojicoin, EmojicoinLP>(
-            market_ref_mut.market_address,
+            market_ref_mut.metadata.market_address,
             event.lp_coin_amount,
         );
         aptos_account::deposit_coins(provider_address, lp_coins);
@@ -664,7 +808,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Burn coins by first withdrawing them from provider's coin store, to trigger event.
         let lp_coins = coin::withdraw<EmojicoinLP>(provider, event.lp_coin_amount);
-        burn_lp_coins<Emojicoin, EmojicoinLP>(market_ref_mut.market_address, lp_coins);
+        burn_lp_coins<Emojicoin, EmojicoinLP>(market_ref_mut.metadata.market_address, lp_coins);
 
         // Update market state.
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
@@ -707,7 +851,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 market_cap: aggregator_v2::create_unbounded_aggregator<u128>(),
                 fully_diluted_value: aggregator_v2::create_unbounded_aggregator<u128>(),
                 cumulative_integrator_fees: aggregator_v2::create_unbounded_aggregator<u128>(),
-            }
+            },
+            last_global_state_emit_time: 0,
         };
 
         // Load supported emojis into registry.
@@ -895,7 +1040,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             net_proceeds = base_volume;
         };
         Swap {
-            market_id: market_ref.market_id,
+            market_id: market_ref.metadata.market_id,
             swapper,
             input_amount,
             is_sell,
@@ -904,6 +1049,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             net_proceeds,
             base_volume,
             quote_volume,
+            // Ideally this would be an inline function, but that strangely breaks the compiler.
+            avg_execution_price_q64: ((quote_volume as u128) << SHIFT_Q64) / (base_volume as u128),
             integrator_fee,
             pool_fee,
             starts_in_bonding_curve,
@@ -933,7 +1080,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(lp_coin_amount_u128 <= U64_MAX_AS_u128, E_PROVIDE_TOO_MANY_LP_COINS);
 
         Liquidity {
-            market_id: market_ref.market_id,
+            market_id: market_ref.metadata.market_id,
             provider,
             base_amount: (base_amount_u128 as u64),
             quote_amount,
@@ -966,7 +1113,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let quote_amount = ((lp_coin_amount_u128 * quote_reserves_u128 / lp_coin_supply) as u64);
 
         // Check to see if base or quote donations have been sent to market coin stores.
-        let market_address = market_ref.market_address;
+        let market_address = market_ref.metadata.market_address;
         let market_balance_base_u128 = (coin::balance<Emojicoin>(market_address) as u128);
         let market_balance_quote_u128 = (coin::balance<AptosCoin>(market_address) as u128);
         let base_donations_u128 = market_balance_base_u128 - base_reserves_u128;
@@ -977,7 +1124,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             (((lp_coin_amount_u128 * quote_donations_u128) / lp_coin_supply) as u64);
 
         Liquidity {
-            market_id: market_ref.market_id,
+            market_id: market_ref.metadata.market_id,
             provider,
             base_amount,
             quote_amount,
@@ -1069,6 +1216,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::destroy_mint_cap<AptosCoin>(mint_cap);
     }
 
+    #[test_only]
+    fun init_module_for_testing() {
+        let framework_signer = account::create_signer_for_test(@aptos_framework);
+        let emojicoin_dot_fun_signer = account::create_signer_for_test(@emojicoin_dot_fun);
+        timestamp::set_time_has_started_for_testing(&framework_signer);
+        init_module(&emojicoin_dot_fun_signer);
+    }
+
     #[test]
     fun test_cpamm_simple_swap_output_amount() {
         // Buy all base from start of bonding curve.
@@ -1081,14 +1236,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(output == QUOTE_REAL_CEILING, 0);
     }
 
-    #[test(deployer = @emojicoin_dot_fun, aptos_framework = @0x1, user = @0xAA)]
+    #[test(aptos_framework = @0x1, user = @0xAA)]
     fun test_swap_function(
-        deployer: &signer,
         user: &signer,
         aptos_framework: &signer,
     ) acquires Registry, RegistryAddress, Market, LPCoinCapabilities {
         aptos_account::create_account(@emojicoin_dot_fun);
-        init_module(deployer);
+        init_module_for_testing();
         let symbol_bytes = YELLOW_HEART;
         let registry_ref_mut = borrow_registry_ref_mut();
         let (market_address, _) = create_market(registry_ref_mut, symbol_bytes);
@@ -1129,11 +1283,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
-    #[test(deployer = @emojicoin_dot_fun)]
-    fun test_register_market_with_complex_emoji_happy_path(
-        deployer: &signer,
-    ) acquires Registry, RegistryAddress {
-        init_module(deployer);
+    #[test]
+    fun test_register_market_with_complex_emoji_happy_path() acquires Registry, RegistryAddress {
+        init_module_for_testing();
         let emojis = vector<vector<u8>> [
             x"e29aa1",           // High voltage.
             x"f09f96a5efb88f",   // Desktop computer.
@@ -1152,10 +1304,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(utf8_emoji == string::utf8(x"e29aa1f09f96a5efb88f"), 0);
     }
 
-    #[test(deployer = @emojicoin_dot_fun)]
-    fun test_supported_emoji_happy_path(deployer: &signer) acquires Registry, RegistryAddress {
+    #[test]
+    fun test_supported_emoji_happy_path() acquires Registry, RegistryAddress {
         aptos_account::create_account(@emojicoin_dot_fun);
-        init_module(deployer);
+        init_module_for_testing();
         let various_emojis = vector<vector<u8>> [
             x"f09f868e",         // AB button blood type, 1F18E.
             x"f09fa6bbf09f8fbe", // Ear with hearing aid medium dark skin tone, 1F9BB 1F3FE.
@@ -1211,12 +1363,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(!valid_coin_types<BlackCatEmojicoin, BlackCatEmojicoinLP>(@0xc1de), 0);
     }
 
-    #[test(deployer = @emojicoin_dot_fun), expected_failure(abort_code = E_INVALID_COIN_TYPES)]
-    fun test_initialize_coin_types_validates_coin_types(
-        deployer: &signer
-    ) acquires Market, Registry, RegistryAddress {
+    #[test, expected_failure(abort_code = E_INVALID_COIN_TYPES)]
+    fun test_initialize_coin_types_validates_coin_types()
+    acquires Market, Registry, RegistryAddress {
         aptos_account::create_account(@emojicoin_dot_fun);
-        init_module(deployer);
+        init_module_for_testing();
         let symbol_bytes = YELLOW_HEART;
         let registry = borrow_registry_ref_mut();
         let (market_address, market_signer) = create_market(registry, symbol_bytes);
@@ -1240,11 +1391,20 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(base == string::utf8(b"base"), 0);
     }
 
-    #[test(deployer = @emojicoin_dot_fun)]
-    fun test_hard_coded_emoji_market_addresses(
-        deployer: &signer,
-    ) acquires Registry, RegistryAddress {
-        init_module(deployer);
+    #[test]
+    fun test_period_times() {
+        assert!(PERIOD_1M == 60 * MICROSECONDS_PER_SECOND, 0);
+        assert!(PERIOD_5M == 5 * 60 * MICROSECONDS_PER_SECOND, 0);
+        assert!(PERIOD_15M == 15 * 60 * MICROSECONDS_PER_SECOND, 0);
+        assert!(PERIOD_30M == 30 * 60 * MICROSECONDS_PER_SECOND, 0);
+        assert!(PERIOD_1H == 60 * 60 * MICROSECONDS_PER_SECOND, 0);
+        assert!(PERIOD_4H == 4 * 60 * 60 * MICROSECONDS_PER_SECOND, 0);
+        assert!(PERIOD_1D == 24 * 60 * 60 * MICROSECONDS_PER_SECOND, 0);
+    }
+
+    #[test]
+    fun test_hard_coded_emoji_market_addresses() acquires Registry, RegistryAddress {
+        init_module_for_testing();
         let registry_ref_mut = borrow_registry_ref_mut();
         let (yellow_heart_market_address, _) = create_market(registry_ref_mut, YELLOW_HEART);
         let (black_heart_market_address, _) = create_market(registry_ref_mut, BLACK_HEART);
@@ -1257,13 +1417,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(black_cat_market_address == @black_cat_market, 0);
     }
 
-    #[test(deployer = @emojicoin_dot_fun)]
-    fun test_coin_names_and_symbols(
-        deployer: &signer,
-    ) acquires Market, Registry, RegistryAddress {
+    #[test]
+    fun test_coin_names_and_symbols() acquires Market, Registry, RegistryAddress {
         use std::string::{utf8};
         aptos_account::create_account(@emojicoin_dot_fun);
-        init_module(deployer);
+        init_module_for_testing();
         create_market_and_init_coins<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(YELLOW_HEART);
         create_market_and_init_coins<BlackHeartEmojicoin, BlackHeartEmojicoinLP>(BLACK_HEART);
         create_market_and_init_coins<BlackCatEmojicoin, BlackCatEmojicoinLP>(BLACK_CAT);
