@@ -120,6 +120,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator_fees: u128,
         pool_fees_base: u128,
         pool_fees_quote: u128,
+        n_swaps: u64,
+        n_chat_messages: u64,
     }
 
     struct LastSwap has copy, drop, store {
@@ -154,6 +156,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator_fees: u128,
         pool_fees_base: u128,
         pool_fees_quote: u128,
+        n_swaps: u64,
+        n_chat_messages: u64,
+        starts_in_bonding_curve: bool,
+        ends_in_bonding_curve: bool,
         tvl_to_lp_coin_ratio_start: TVLtoLPCoinRatio,
         tvl_to_lp_coin_ratio_end: TVLtoLPCoinRatio,
     }
@@ -182,10 +188,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     struct PeriodicStateMetadata has drop, store {
-        market_nonce: u64,
         start_time: u64,
         period: u64,
         emit_time: u64,
+        emit_market_nonce: u64,
         trigger: u8,
     }
 
@@ -202,6 +208,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator_fees: u128,
         pool_fees_base: u128,
         pool_fees_quote: u128,
+        n_swaps: u64,
+        n_chat_messages: u64,
+        starts_in_bonding_curve: bool,
+        ends_in_bonding_curve: bool,
         tvl_per_lp_coin_growth_q64: u128,
     }
 
@@ -237,6 +247,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_cap: Aggregator<u128>,
         fully_diluted_value: Aggregator<u128>,
         cumulative_integrator_fees: Aggregator<u128>,
+        cumulative_swaps: Aggregator<u64>,
+        cumulative_chat_messages: Aggregator<u64>,
     }
 
     #[resource_group = ObjectGroup]
@@ -261,6 +273,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_cap: AggregatorSnapshot<u128>,
         fully_diluted_value: AggregatorSnapshot<u128>,
         cumulative_integrator_fees: AggregatorSnapshot<u128>,
+        cumulative_swaps: AggregatorSnapshot<u64>,
+        cumulative_chat_messages: AggregatorSnapshot<u64>,
     }
 
     #[event]
@@ -389,6 +403,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 integrator_fees: (MARKET_REGISTRATION_FEE as u128),
                 pool_fees_base: 0,
                 pool_fees_quote: 0,
+                n_swaps: 0,
+                n_chat_messages: 0,
             },
             last_swap: LastSwap {
                 is_sell: false,
@@ -420,6 +436,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                     integrator_fees: (MARKET_REGISTRATION_FEE as u128),
                     pool_fees_base: 0,
                     pool_fees_quote: 0,
+                    n_swaps: 0,
+                    n_chat_messages: 0,
+                    starts_in_bonding_curve: true,
+                    ends_in_bonding_curve: true,
                     tvl_to_lp_coin_ratio_start: TVLtoLPCoinRatio { tvl: 0, lp_coins: 0 },
                     tvl_to_lp_coin_ratio_end: TVLtoLPCoinRatio { tvl: 0, lp_coins: 0 },
                 }
@@ -780,9 +800,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             &mut global_stats_ref_mut.cumulative_integrator_fees;
         aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, integrator_fee_as_u128);
 
+        // Update number of swaps locally and globally.
+        let local_cumulative_n_swaps = &mut local_cumulative_stats_ref_mut.n_swaps;
+        *local_cumulative_n_swaps = *local_cumulative_n_swaps + 1;
+        let global_cumulative_swaps_ref_mut = &mut global_stats_ref_mut.cumulative_swaps;
+        aggregator_v2::try_add(global_cumulative_swaps_ref_mut, 1);
+
         // Update global TVL amounts.
         let lp_coin_supply = market_ref_mut.lp_coin_supply;
-        let tvl_end = if (lp_coin_supply == 0) {
+        let ends_in_bonding_curve = lp_coin_supply != 0;
+        let tvl_end = if (ends_in_bonding_curve) {
             tvl_clamm(market_ref_mut.clamm_virtual_reserves)
         } else {
             tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote)
@@ -835,6 +862,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 tracker_ref_mut.pool_fees_quote + pool_fees_quote_as_u128;
             tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl_end;
             tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+            tracker_ref_mut.n_swaps = tracker_ref_mut.n_swaps + 1;
+            tracker_ref_mut.ends_in_bonding_curve = ends_in_bonding_curve;
         });
         event::emit(event);
 
@@ -1009,6 +1038,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 market_cap: aggregator_v2::create_unbounded_aggregator<u128>(),
                 fully_diluted_value: aggregator_v2::create_unbounded_aggregator<u128>(),
                 cumulative_integrator_fees: aggregator_v2::create_unbounded_aggregator<u128>(),
+                cumulative_swaps: aggregator_v2::create_unbounded_aggregator<u64>(),
+                cumulative_chat_messages: aggregator_v2::create_unbounded_aggregator<u64>(),
             },
         };
 
@@ -1029,6 +1060,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_cap: aggregator_v2::create_snapshot(0),
             fully_diluted_value: aggregator_v2::create_snapshot(0),
             cumulative_integrator_fees: aggregator_v2::create_snapshot(0),
+            cumulative_swaps: aggregator_v2::create_snapshot(0),
+            cumulative_chat_messages: aggregator_v2::create_snapshot(0),
         });
 
     }
@@ -1143,6 +1176,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Check periodic state tracker period lapses.
         let lp_coin_supply = market_ref_mut.lp_coin_supply;
+        let in_bonding_curve = lp_coin_supply == 0;
         vector::for_each_mut(&mut market_ref_mut.periodic_state_trackers, |e| {
             // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
             let tracker_ref_mut: &mut PeriodicStateTracker = e;
@@ -1166,6 +1200,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 tracker_ref_mut.integrator_fees = 0;
                 tracker_ref_mut.pool_fees_base = 0;
                 tracker_ref_mut.pool_fees_quote = 0;
+                tracker_ref_mut.n_swaps = 0;
+                tracker_ref_mut.n_chat_messages = 0;
+                tracker_ref_mut.starts_in_bonding_curve = in_bonding_curve;
+                tracker_ref_mut.ends_in_bonding_curve = in_bonding_curve;
                 tracker_ref_mut.tvl_to_lp_coin_ratio_start.tvl = tvl;
                 tracker_ref_mut.tvl_to_lp_coin_ratio_start.lp_coins = lp_coin_supply;
                 tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
@@ -1197,6 +1235,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                     aggregator_v2::snapshot(&global_stats_ref.fully_diluted_value),
                 cumulative_integrator_fees:
                     aggregator_v2::snapshot(&global_stats_ref.cumulative_integrator_fees),
+                cumulative_swaps:
+                    aggregator_v2::snapshot(&global_stats_ref.cumulative_swaps),
+                cumulative_chat_messages:
+                    aggregator_v2::snapshot(&global_stats_ref.cumulative_chat_messages),
             });
         };
     }
@@ -1233,9 +1275,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         event::emit(PeriodicState {
             market_metadata: *market_metadata_ref,
             periodic_state_metadata: PeriodicStateMetadata {
-                market_nonce: nonce,
                 start_time: tracker_ref.start_time,
                 emit_time: time,
+                emit_market_nonce: nonce,
                 period: tracker_ref.period,
                 trigger,
             },
@@ -1248,6 +1290,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             integrator_fees: tracker_ref.integrator_fees,
             pool_fees_base: tracker_ref.pool_fees_base,
             pool_fees_quote: tracker_ref.pool_fees_quote,
+            n_swaps: tracker_ref.n_swaps,
+            n_chat_messages: tracker_ref.n_chat_messages,
+            starts_in_bonding_curve: tracker_ref.starts_in_bonding_curve,
+            ends_in_bonding_curve: tracker_ref.ends_in_bonding_curve,
             tvl_per_lp_coin_growth_q64: tvl_per_lp_coin_growth_q64(
                 tracker_ref.tvl_to_lp_coin_ratio_start,
                 tracker_ref.tvl_to_lp_coin_ratio_end,
@@ -1537,6 +1583,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             let tracker_ref_mut: &mut PeriodicStateTracker = e;
             tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
             tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+            tracker_ref_mut.ends_in_bonding_curve = false;
         });
 
         // Get instantaneous stats, bump market state.
