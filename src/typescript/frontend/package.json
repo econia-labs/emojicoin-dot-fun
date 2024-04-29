@@ -66,10 +66,10 @@
     "build-prod": "chmod +x ./scripts/build-prod.sh && ./scripts/build-prod.sh",
     "build-storybook": "storybook build",
     "eject": "react-app-rewired eject",
-    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc.js",
+    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
     "lint": "eslint -c .eslintrc.json --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "npm run lint -- --fix",
-    "prepare": "husky install",
+    "prepare": "cd ../../../ && husky install",
     "start": "react-app-rewired start",
     "storybook": "storybook dev -p 6006",
     "test": "react-app-rewired test"
