@@ -14,6 +14,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_std::table::{Self, Table};
     use aptos_std::type_info;
     use emojicoin_dot_fun::hex_codes;
+    use std::option::{Self, Option};
     use std::signer;
     use std::string::{Self, String};
     use std::vector;
@@ -274,6 +275,21 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         global_stats: GlobalStats,
     }
 
+    struct RegistryView has drop, store {
+        registry_address: address,
+        nonce: u64,
+        last_bump_time: u64,
+        n_markets: u64,
+        cumulative_quote_volume: AggregatorSnapshot<u128>,
+        total_quote_locked: AggregatorSnapshot<u128>,
+        total_value_locked: AggregatorSnapshot<u128>,
+        market_cap: AggregatorSnapshot<u128>,
+        fully_diluted_value: AggregatorSnapshot<u128>,
+        cumulative_integrator_fees: AggregatorSnapshot<u128>,
+        cumulative_swaps: AggregatorSnapshot<u64>,
+        cumulative_chat_messages: AggregatorSnapshot<u64>,
+    }
+
     #[event]
     struct GlobalState has drop, store {
         emit_time: u64,
@@ -429,6 +445,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_FEE;
         assert!(can_pay_fee, E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE);
         aptos_account::transfer(registrant, integrator, MARKET_REGISTRATION_FEE);
+
+        // Update global integrator fees.
+        let global_cumulative_integrator_fees_ref_mut =
+            &mut registry_ref_mut.global_stats.cumulative_integrator_fees;
+        let fee = (MARKET_REGISTRATION_FEE as u128);
+        aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, fee);
 
         // Bump state.
         let market_ref_mut = borrow_global_mut<Market>(market_address);
@@ -1154,6 +1176,72 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[view]
+    public fun registry_address(): address acquires RegistryAddress { get_registry_address() }
+
+    #[view]
+    public fun registry_view(): RegistryView acquires Registry, RegistryAddress {
+        let registry_ref = borrow_registry_ref();
+        RegistryView {
+            registry_address: registry_ref.registry_address,
+            nonce: registry_ref.sequence_info.nonce,
+            last_bump_time: registry_ref.sequence_info.last_bump_time,
+            n_markets: smart_table::length(&registry_ref.markets_by_market_id),
+            cumulative_quote_volume:
+                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_quote_volume),
+            total_quote_locked:
+                aggregator_v2::snapshot(&registry_ref.global_stats.total_quote_locked),
+            total_value_locked:
+                aggregator_v2::snapshot(&registry_ref.global_stats.total_value_locked),
+            market_cap:
+                aggregator_v2::snapshot(&registry_ref.global_stats.market_cap),
+            fully_diluted_value:
+                aggregator_v2::snapshot(&registry_ref.global_stats.fully_diluted_value),
+            cumulative_integrator_fees:
+                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_integrator_fees),
+            cumulative_swaps:
+                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_swaps),
+            cumulative_chat_messages:
+                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_chat_messages),
+        }
+    }
+
+    #[view]
+    public fun market_metadata_by_emoji_bytes(emoji_bytes: vector<u8>): Option<MarketMetadata>
+    acquires Market, Registry, RegistryAddress {
+        let registry_ref = borrow_registry_ref();
+        let markets_by_emoji_bytes_ref = &registry_ref.markets_by_emoji_bytes;
+        if (smart_table::contains(markets_by_emoji_bytes_ref, emoji_bytes)) {
+            let market_address = *smart_table::borrow(markets_by_emoji_bytes_ref, emoji_bytes);
+            option::some(borrow_global<Market>(market_address).metadata)
+        } else {
+            option::none()
+        }
+    }
+
+    #[view]
+    public fun market_metadata_by_market_address(market_address: address): Option<MarketMetadata>
+    acquires Market {
+        if (exists<Market>(market_address)) {
+            option::some(borrow_global<Market>(market_address).metadata)
+        } else {
+            option::none()
+        }
+    }
+
+    #[view]
+    public fun market_metadata_by_market_id(market_id: u64): Option<MarketMetadata>
+    acquires Market, Registry, RegistryAddress {
+        let registry_ref = borrow_registry_ref();
+        let markets_by_market_id_ref = &registry_ref.markets_by_market_id;
+        if (smart_table::contains(markets_by_market_id_ref, market_id)) {
+            let market_address = *smart_table::borrow(markets_by_market_id_ref, market_id);
+            option::some(borrow_global<Market>(market_address).metadata)
+        } else {
+            option::none()
+        }
+    }
+
+    #[view]
     public fun simulate_swap(
         market_address: address,
         swapper: address,
@@ -1201,6 +1289,63 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             provider,
             lp_coin_amount,
             borrow_global(market_address),
+        )
+    }
+
+    public fun unpack_market_metadata(metadata: MarketMetadata): (
+        u64,
+        address,
+        vector<u8>,
+    ) {
+        let MarketMetadata {
+            market_id,
+            market_address,
+            emoji_bytes,
+        } = metadata;
+        (market_id, market_address, emoji_bytes)
+    }
+
+    public fun unpack_registry_view(registry_view: RegistryView): (
+        address,
+        u64,
+        u64,
+        u64,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u64>,
+        AggregatorSnapshot<u64>,
+    ) {
+        let RegistryView {
+            registry_address,
+            nonce,
+            last_bump_time,
+            n_markets,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        } = registry_view;
+        (
+            registry_address,
+            nonce,
+            last_bump_time,
+            n_markets,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
         )
     }
 
