@@ -69,12 +69,19 @@ describe("registers a market successfully", () => {
       objectAddress: derivedNamedObjectAddress,
     });
 
-    expect(marketObjectMarketResource.emoji_bytes.toString()).toEqual(`0x${emojis[0]}${emojis[1]}`);
-    expect(marketObjectMarketResource.extend_ref.self.toStringLong()).toEqual(
-      derivedNamedObjectAddress.toStringLong()
-    );
-    expect(marketObjectMarketResource.market_id).toEqual(1n);
-    expect(marketObjectMarketResource.lp_coin_supply).toEqual(0n);
+    const {
+      market_id: marketId,
+      market_address: marketAddress,
+      emoji_bytes: emojiBytes,
+    } = marketObjectMarketResource.metadata;
+
+    const { lp_coin_supply: lpCoinSupply, extend_ref: extendRef } = marketObjectMarketResource;
+
+    expect(marketId).toEqual(1n);
+    expect(emojiBytes.toString()).toEqual(`0x${emojis[0]}${emojis[1]}`);
+    expect(extendRef.self.toStringLong()).toEqual(derivedNamedObjectAddress.toStringLong());
+    expect(extendRef.self.toStringLong()).toEqual(marketAddress.toStringLong());
+    expect(lpCoinSupply).toEqual(0n);
 
     const marketObjectResources = await aptos.getAccountModule({
       accountAddress: derivedNamedObjectAddress,
