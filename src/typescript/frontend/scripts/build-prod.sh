@@ -2,7 +2,7 @@
 
 # Remove existing robots.txt if it exists
 if [ -f public/robots.txt ]; then
-    rm public/robots.txt
+	rm public/robots.txt
 fi
 
 # Copy production robots.txt
