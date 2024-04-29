@@ -54,11 +54,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
     const SHIFT_Q64: u8 = 64;
 
-    const TRIGGER_MARKET_REGISTRATION: u8 = 0;
-    const TRIGGER_SWAP: u8 = 1;
-    const TRIGGER_PROVIDE_LIQUIDITY: u8 = 2;
-    const TRIGGER_REMOVE_LIQUIDITY: u8 = 3;
-    const TRIGGER_CHAT: u8 = 4;
+    const TRIGGER_PACKAGE_PUBLICATION: u8 = 0;
+    const TRIGGER_MARKET_REGISTRATION: u8 = 1;
+    const TRIGGER_SWAP: u8 = 2;
+    const TRIGGER_PROVIDE_LIQUIDITY: u8 = 3;
+    const TRIGGER_REMOVE_LIQUIDITY: u8 = 4;
+    const TRIGGER_CHAT: u8 = 5;
 
     const PERIOD_INSTANTANEOUS: u64 = 0;
     const PERIOD_1M: u64 = 60_000_000;
@@ -127,6 +128,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         avg_execution_price_q64: u128,
         base_volume: u64,
         quote_volume: u64,
+        nonce: u64,
+        time: u64,
     }
 
     struct MarketMetadata has copy, drop, store {
@@ -135,20 +138,25 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         emoji_bytes: vector<u8>,
     }
 
+    struct TVLtoLPCoinRatio has copy, drop, store {
+        tvl: u128,
+        lp_coins: u128,
+    }
+
     struct PeriodicStateTracker has store {
-        init_time: u64,
+        start_time: u64,
         period: u64,
         open_price_q64: u128,
         high_price_q64: u128,
-        close_price_q64: u128,
         low_price_q64: u128,
+        close_price_q64: u128,
         volume_base: u128,
         volume_quote: u128,
         integrator_fees: u128,
         pool_fees_base: u128,
         pool_fees_quote: u128,
-        tvl_start: u128,
-        lp_coins_start: u128,
+        tvl_to_lp_coin_ratio_start: TVLtoLPCoinRatio,
+        tvl_to_lp_coin_ratio_end: TVLtoLPCoinRatio,
     }
 
     struct Reserves has copy, drop, store {
@@ -156,10 +164,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         quote: u64,
     }
 
+    struct SequenceInfo has drop, store {
+        nonce: u64,
+        last_bump_time: u64,
+    }
+
     #[resource_group = ObjectGroup]
     struct Market has key {
         metadata: MarketMetadata,
-        nonce: u64,
+        sequence_info: SequenceInfo,
         extend_ref: ExtendRef,
         clamm_virtual_reserves: Reserves,
         cpamm_real_reserves: Reserves,
@@ -169,11 +182,22 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         periodic_state_trackers: vector<PeriodicStateTracker>,
     }
 
-    struct PeriodicStats has drop, store {
+    struct PeriodicStateMetadata has drop, store {
+        market_nonce: u64,
+        start_time: u64,
+        period: u64,
+        emit_time: u64,
+        trigger: u8,
+    }
+
+    #[event]
+    struct PeriodicState has drop, store {
+        market_metadata: MarketMetadata,
+        periodic_state_metadata: PeriodicStateMetadata,
         open_price_q64: u128,
         high_price_q64: u128,
-        close_price_q64: u128,
         low_price_q64: u128,
+        close_price_q64: u128,
         volume_base: u128,
         volume_quote: u128,
         integrator_fees: u128,
@@ -196,6 +220,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         trigger: u8,
     }
 
+
     #[event]
     struct State has drop, store {
         market_metadata: MarketMetadata,
@@ -205,7 +230,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         lp_coin_supply: u128,
         cumulative_stats: CumulativeStats,
         instantaneous_stats: InstantaneousStats,
-        periodic_stats: PeriodicStats,
         last_swap: LastSwap,
     }
 
@@ -221,17 +245,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[resource_group = ObjectGroup]
     struct Registry has key {
         registry_address: address,
+        sequence_info: SequenceInfo,
         supported_emojis: Table<vector<u8>, u8>,
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
         global_stats: GlobalStats,
-        last_global_state_emit_time: u64,
     }
 
     #[event]
     struct GlobalState has drop, store {
         emit_time: u64,
+        registry_nonce: u64,
+        trigger: u8,
         cumulative_quote_volume: AggregatorSnapshot<u128>,
         total_quote_locked: AggregatorSnapshot<u128>,
         total_value_locked: AggregatorSnapshot<u128>,
@@ -243,6 +269,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[event]
     struct Swap has copy, drop, store {
         market_id: u64,
+        time: u64,
+        market_nonce: u64,
         swapper: address,
         input_amount: u64,
         is_sell: bool,
@@ -267,6 +295,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[event]
     struct Liquidity has copy, drop, store {
         market_id: u64,
+        time: u64,
+        market_nonce: u64,
         provider: address,
         base_amount: u64,
         quote_amount: u64,
@@ -284,8 +314,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         registrant: &signer,
         emojis: vector<vector<u8>>,
         integrator: address,
-    ) acquires Registry, RegistryAddress {
+    ) acquires Market, Registry, RegistryAddress {
         let registry_ref_mut = borrow_registry_ref_mut();
+
         // Verify well-formed emoji bytes.
         let emoji_bytes = get_verified_emoji_bytes(registry_ref_mut, emojis);
 
@@ -308,6 +339,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_FEE;
         assert!(can_pay_fee, E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE);
         aptos_account::transfer(registrant, integrator, MARKET_REGISTRATION_FEE);
+
+        let market_ref_mut = borrow_global_mut<Market>(market_address);
+        let time = market_ref_mut.sequence_info.last_bump_time;
+        bump_state(market_ref_mut, registry_ref_mut, time, TRIGGER_MARKET_REGISTRATION);
     }
 
     inline fun create_market(
@@ -321,15 +356,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let market_address = object::address_from_constructor_ref(&market_constructor_ref);
         let market_signer = object::generate_signer(&market_constructor_ref);
         let market_extend_ref = object::generate_extend_ref(&market_constructor_ref);
-
         let market_id = 1 + smart_table::length(markets_by_emoji_bytes_ref_mut);
+
+        let time = timestamp::now_microseconds();
         move_to(&market_signer, Market {
             metadata : MarketMetadata {
                 market_id,
                 market_address,
                 emoji_bytes,
             },
-            nonce: 0,
+            sequence_info: SequenceInfo {
+                last_bump_time: timestamp::now_microseconds(),
+                nonce: 0,
+            },
             extend_ref: market_extend_ref,
             clamm_virtual_reserves:
                 Reserves { base: BASE_VIRTUAL_CEILING, quote: QUOTE_VIRTUAL_FLOOR },
@@ -347,6 +386,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 avg_execution_price_q64: 0,
                 base_volume: 0,
                 quote_volume: 0,
+                nonce: 0,
+                time,
             },
             periodic_state_trackers: vector::map(
                 vector[
@@ -359,19 +400,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                     PERIOD_1D,
                 ],
                 |period| PeriodicStateTracker {
-                    init_time: timestamp::now_microseconds(),
+                    start_time: last_period_boundary(time, period),
                     period,
                     open_price_q64: 0,
                     high_price_q64: 0,
-                    close_price_q64: 0,
                     low_price_q64: 0,
+                    close_price_q64: 0,
                     volume_base: 0,
                     volume_quote: 0,
-                    integrator_fees: 0,
+                    integrator_fees: (MARKET_REGISTRATION_FEE as u128),
                     pool_fees_base: 0,
                     pool_fees_quote: 0,
-                    tvl_start: 0,
-                    lp_coins_start: 0,
+                    tvl_to_lp_coin_ratio_start: TVLtoLPCoinRatio { tvl: 0, lp_coins: 0 },
+                    tvl_to_lp_coin_ratio_end: TVLtoLPCoinRatio { tvl: 0, lp_coins: 0 },
                 }
             ),
         });
@@ -562,11 +603,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Prepare local variables.
         let quote;
         let quote_volume_as_u128 = (event.quote_volume as u128);
+        let base_volume_as_u128 = (event.base_volume as u128);
         let local_cumulative_stats_ref_mut = &mut market_ref_mut.cumulative_stats;
-        let global_stats_ref_mut = &mut borrow_registry_ref_mut().global_stats;
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
         let total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
         let market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
         let fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
+        let pool_fees_base_as_u128 = 0;
+        let pool_fees_quote_as_u128 = 0;
 
         // Create for swapper an account with AptosCoin store if it doesn't exist.
         if (!account::exists_at(swapper_address)) {
@@ -616,8 +661,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             // Update cumulative pool fees.
             let local_cumulative_pool_fees_quote_ref_mut =
                 &mut local_cumulative_stats_ref_mut.pool_fees_quote;
+            pool_fees_quote_as_u128 = (event.pool_fee as u128);
             *local_cumulative_pool_fees_quote_ref_mut =
-                *local_cumulative_pool_fees_quote_ref_mut + (event.pool_fee as u128);
+                *local_cumulative_pool_fees_quote_ref_mut + pool_fees_quote_as_u128;
 
         } else { // If buying, might need to buy through the state transition.
 
@@ -695,8 +741,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             // Update cumulative pool fees.
             let local_cumulative_pool_fees_base_ref_mut =
                 &mut local_cumulative_stats_ref_mut.pool_fees_base;
+            let pool_fees_base_as_u128 = (event.pool_fee as u128);
             *local_cumulative_pool_fees_base_ref_mut =
-                *local_cumulative_pool_fees_base_ref_mut + (event.pool_fee as u128);
+                *local_cumulative_pool_fees_base_ref_mut + pool_fees_base_as_u128;
         };
 
         aptos_account::deposit_coins(integrator, quote); // Deposit integrator's fees.
@@ -706,7 +753,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let local_cumulative_quote_volume_ref_mut =
             &mut local_cumulative_stats_ref_mut.quote_volume;
         *local_cumulative_base_volume_ref_mut =
-            *local_cumulative_base_volume_ref_mut + (event.base_volume as u128);
+            *local_cumulative_base_volume_ref_mut + base_volume_as_u128;
         *local_cumulative_quote_volume_ref_mut =
             *local_cumulative_quote_volume_ref_mut + quote_volume_as_u128;
         let global_cumulative_quote_volume_ref_mut =
@@ -724,7 +771,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, integrator_fee_as_u128);
 
         // Update global TVL amounts.
-        let tvl_end = if (market_ref_mut.lp_coin_supply == 0) {
+        let lp_coin_supply = market_ref_mut.lp_coin_supply;
+        let tvl_end = if (lp_coin_supply == 0) {
             tvl_clamm(market_ref_mut.clamm_virtual_reserves)
         } else {
             tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote)
@@ -738,7 +786,76 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             aggregator_v2::try_sub(global_total_value_locked_ref_mut, tvl_decrease);
         };
 
+        // Update last swap info.
+        let last_swap_ref_mut = &mut market_ref_mut.last_swap;
+        let avg_execution_price_q64 = event.avg_execution_price_q64;
+        *last_swap_ref_mut = LastSwap {
+            is_sell,
+            avg_execution_price_q64,
+            base_volume: event.base_volume,
+            quote_volume: event.quote_volume,
+            nonce: event.market_nonce,
+            time: event.time,
+        };
+
+        // Update periodic state trackers.
+        let time = event.time;
+        vector::for_each_mut(&mut market_ref_mut.periodic_state_trackers, |e| {
+            // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
+            let tracker_ref_mut: &mut PeriodicStateTracker = e;
+            let period = tracker_ref_mut.period;
+            // If tracker period has not yet lapsed.
+            if (time - tracker_ref_mut.start_time < tracker_ref_mut.period) {
+                if (tracker_ref_mut.open_price_q64 == 0) {
+                    tracker_ref_mut.open_price_q64 = avg_execution_price_q64;
+                };
+                if (tracker_ref_mut.high_price_q64 < avg_execution_price_q64) {
+                    tracker_ref_mut.high_price_q64 = avg_execution_price_q64;
+                };
+                if (tracker_ref_mut.low_price_q64 == 0 ||
+                    tracker_ref_mut.low_price_q64 > avg_execution_price_q64) {
+                    tracker_ref_mut.low_price_q64 = avg_execution_price_q64;
+                };
+                tracker_ref_mut.close_price_q64 = avg_execution_price_q64;
+                tracker_ref_mut.volume_base =
+                    tracker_ref_mut.volume_base + base_volume_as_u128;
+                tracker_ref_mut.volume_quote =
+                    tracker_ref_mut.volume_quote + quote_volume_as_u128;
+                tracker_ref_mut.integrator_fees =
+                    tracker_ref_mut.integrator_fees + integrator_fee_as_u128;
+                tracker_ref_mut.pool_fees_base =
+                    tracker_ref_mut.pool_fees_base + pool_fees_base_as_u128;
+                tracker_ref_mut.pool_fees_quote =
+                    tracker_ref_mut.pool_fees_quote + pool_fees_quote_as_u128;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl_end;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+            } else { // If a new tracker period has begun.
+                emit_periodic_state(
+                    &market_ref_mut.metadata,
+                    event.market_nonce,
+                    time,
+                    TRIGGER_SWAP,
+                    tracker_ref_mut,
+                );
+                tracker_ref_mut.start_time = last_period_boundary(time, period);
+                tracker_ref_mut.open_price_q64 = avg_execution_price_q64;
+                tracker_ref_mut.high_price_q64 = avg_execution_price_q64;
+                tracker_ref_mut.low_price_q64 = avg_execution_price_q64;
+                tracker_ref_mut.close_price_q64 = avg_execution_price_q64;
+                tracker_ref_mut.volume_base = base_volume_as_u128;
+                tracker_ref_mut.volume_quote = quote_volume_as_u128;
+                tracker_ref_mut.integrator_fees = integrator_fee_as_u128;
+                tracker_ref_mut.pool_fees_base = pool_fees_base_as_u128;
+                tracker_ref_mut.pool_fees_quote = pool_fees_quote_as_u128;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_start.tvl = tvl_end;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_start.lp_coins = lp_coin_supply;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl_end;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+            }
+        });
+
         event::emit(event);
+        bump_state(market_ref_mut, registry_ref_mut, time, TRIGGER_SWAP);
     }
 
     public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
@@ -746,6 +863,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         provider: &signer,
         quote_amount: u64,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+
+        // Sanitize inputs, set up local variables.
         let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
         assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
         let provider_address = signer::address_of(provider);
@@ -754,6 +873,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             quote_amount,
             market_ref_mut,
         );
+        let registry_ref_mut = borrow_registry_ref_mut();
 
         // Transfer coins.
         coin::transfer<Emojicoin>(provider, market_address, event.base_amount);
@@ -768,22 +888,32 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
         let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
         let start_quote = *quote_reserves_ref_mut;
-        let start_tvl = tvl_cpamm(start_quote);
+        let tvl_start = tvl_cpamm(start_quote);
         reserves_ref_mut.base = reserves_ref_mut.base + event.base_amount;
         *quote_reserves_ref_mut = start_quote + event.quote_amount;
-        market_ref_mut.lp_coin_supply =
-            market_ref_mut.lp_coin_supply + (event.lp_coin_amount as u128);
-        let end_tvl = tvl_cpamm(*quote_reserves_ref_mut);
+        let lp_coin_supply = market_ref_mut.lp_coin_supply + (event.lp_coin_amount as u128);
+        market_ref_mut.lp_coin_supply = lp_coin_supply;
+        let tvl_end = tvl_cpamm(*quote_reserves_ref_mut);
 
         // Update global total quote locked, TVL.
-        let global_stats_ref_mut = &mut borrow_registry_ref_mut().global_stats;
+        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
         let global_total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
         let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
-        let delta_tvl = end_tvl - start_tvl;
+        let delta_tvl = tvl_end - tvl_start;
         aggregator_v2::try_add(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
         aggregator_v2::try_add(global_total_value_locked_ref_mut, delta_tvl);
 
+        update_periodic_state_trackers_for_liquidity_provision_operation(
+            &market_ref_mut.metadata,
+            event.market_nonce,
+            event.time,
+            TRIGGER_PROVIDE_LIQUIDITY,
+            tvl_end,
+            lp_coin_supply,
+            &mut market_ref_mut.periodic_state_trackers,
+        );
         event::emit(event);
+        bump_state(market_ref_mut, registry_ref_mut, event.time, TRIGGER_PROVIDE_LIQUIDITY);
     }
 
     public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
@@ -791,6 +921,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         provider: &signer,
         lp_coin_amount: u64,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+
+        // Sanitize inputs, set up local variables.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
         let provider_address = signer::address_of(provider);
@@ -799,6 +931,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             lp_coin_amount,
             market_ref_mut,
         );
+        let registry_ref_mut = borrow_registry_ref_mut();
 
         // Transfer coins.
         let base_total = event.base_amount + event.pro_rata_base_donation_claim_amount;
@@ -814,22 +947,32 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
         let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
         let start_quote = *quote_reserves_ref_mut;
-        let start_tvl = tvl_cpamm(start_quote);
+        let tvl_start = tvl_cpamm(start_quote);
         reserves_ref_mut.base = reserves_ref_mut.base - event.base_amount;
         *quote_reserves_ref_mut = start_quote - event.quote_amount;
-        market_ref_mut.lp_coin_supply =
-            market_ref_mut.lp_coin_supply - (event.lp_coin_amount as u128);
-        let end_tvl = tvl_cpamm(*quote_reserves_ref_mut);
+        let lp_coin_supply = market_ref_mut.lp_coin_supply - (event.lp_coin_amount as u128);
+        market_ref_mut.lp_coin_supply = lp_coin_supply;
+        let tvl_end = tvl_cpamm(*quote_reserves_ref_mut);
 
         // Update global total quote locked, TVL.
-        let global_stats_ref_mut = &mut borrow_registry_ref_mut().global_stats;
+        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
         let global_total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
         let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
-        let delta_tvl = start_tvl - end_tvl;
+        let delta_tvl = tvl_start - tvl_end;
         aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
         aggregator_v2::try_sub(global_total_value_locked_ref_mut, delta_tvl);
 
+        update_periodic_state_trackers_for_liquidity_provision_operation(
+            &market_ref_mut.metadata,
+            event.market_nonce,
+            event.time,
+            TRIGGER_REMOVE_LIQUIDITY,
+            tvl_end,
+            lp_coin_supply,
+            &mut market_ref_mut.periodic_state_trackers,
+        );
         event::emit(event);
+        bump_state(market_ref_mut, registry_ref_mut, event.time, TRIGGER_REMOVE_LIQUIDITY);
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
@@ -838,8 +981,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let registry_signer = object::generate_signer(&constructor_ref);
         let registry_address = object::address_from_constructor_ref(&constructor_ref);
         move_to(emojicoin_dot_fun, RegistryAddress { registry_address });
+        let time = timestamp::now_microseconds();
         let registry = Registry {
             registry_address,
+            sequence_info: SequenceInfo { last_bump_time: time, nonce: 0 },
             supported_emojis: table::new(),
             markets_by_emoji_bytes: smart_table::new(),
             markets_by_market_id: smart_table::new(),
@@ -852,7 +997,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 fully_diluted_value: aggregator_v2::create_unbounded_aggregator<u128>(),
                 cumulative_integrator_fees: aggregator_v2::create_unbounded_aggregator<u128>(),
             },
-            last_global_state_emit_time: 0,
         };
 
         // Load supported emojis into registry.
@@ -860,6 +1004,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             table::add(&mut registry.supported_emojis, *emoji_bytes_ref, 0);
         });
         move_to(&registry_signer, registry);
+
+        // Emit global state.
+        event::emit(GlobalState {
+            emit_time: time,
+            registry_nonce: 0,
+            trigger: TRIGGER_PACKAGE_PUBLICATION,
+            cumulative_quote_volume: aggregator_v2::create_snapshot(0),
+            total_quote_locked: aggregator_v2::create_snapshot(0),
+            total_value_locked: aggregator_v2::create_snapshot(0),
+            market_cap: aggregator_v2::create_snapshot(0),
+            fully_diluted_value: aggregator_v2::create_snapshot(0),
+            cumulative_integrator_fees: aggregator_v2::create_snapshot(0),
+        });
     }
 
     #[view]
@@ -956,6 +1113,61 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::burn<EmojicoinLP>(coin, &coin_caps.burn);
     }
 
+    inline fun bump_state(
+        market_ref_mut: &mut Market,
+        registry_ref_mut: &mut Registry,
+        bump_time: u64,
+        trigger: u8,
+    ) {
+        // Update market sequence info.
+        let market_sequence_info_ref_mut = &mut market_ref_mut.sequence_info;
+        let nonce = market_sequence_info_ref_mut.nonce;
+        market_sequence_info_ref_mut.nonce = nonce + 1;
+        market_sequence_info_ref_mut.last_bump_time = bump_time;
+
+        // Skip periodic state trackers if trigger was swap or liquidity
+        // Abstract the global state call so that can call from init_module too
+    }
+
+    inline fun emit_periodic_state(
+        market_metadata_ref: &MarketMetadata,
+        market_nonce_after_bump: u64,
+        emit_time: u64,
+        trigger: u8,
+        tracker_ref: &PeriodicStateTracker,
+    ) {
+        event::emit(PeriodicState {
+            market_metadata: *market_metadata_ref,
+            periodic_state_metadata: PeriodicStateMetadata {
+                market_nonce: market_nonce_after_bump,
+                start_time: tracker_ref.start_time,
+                emit_time,
+                period: tracker_ref.period,
+                trigger,
+            },
+            open_price_q64: tracker_ref.open_price_q64,
+            high_price_q64: tracker_ref.high_price_q64,
+            low_price_q64: tracker_ref.low_price_q64,
+            close_price_q64: tracker_ref.close_price_q64,
+            volume_base: tracker_ref.volume_base,
+            volume_quote: tracker_ref.volume_quote,
+            integrator_fees: tracker_ref.integrator_fees,
+            pool_fees_base: tracker_ref.pool_fees_base,
+            pool_fees_quote: tracker_ref.pool_fees_quote,
+            tvl_per_lp_coin_growth_q64: tvl_per_lp_coin_growth_q64(
+                tracker_ref.tvl_to_lp_coin_ratio_start,
+                tracker_ref.tvl_to_lp_coin_ratio_end,
+            ),
+        });
+    }
+
+    inline fun last_period_boundary(
+        time: u64,
+        period: u64,
+    ): u64 {
+        (time / period) * period
+    }
+
     inline fun mint_lp_coins<Emojicoin, EmojicoinLP>(
         market_address: address,
         amount: u64,
@@ -964,7 +1176,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         coin::mint<EmojicoinLP>(amount, &coin_caps.mint)
     }
 
-    inline fun simulate_swap_inner(
+    // Ideally this would be inline, but unfortunately that breaks the compiler.
+    fun simulate_swap_inner(
         swapper: address,
         input_amount: u64,
         is_sell: bool,
@@ -1041,6 +1254,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
         Swap {
             market_id: market_ref.metadata.market_id,
+            time: timestamp::now_microseconds(),
+            market_nonce: market_ref.sequence_info.nonce + 1,
             swapper,
             input_amount,
             is_sell,
@@ -1081,6 +1296,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         Liquidity {
             market_id: market_ref.metadata.market_id,
+            time: timestamp::now_microseconds(),
+            market_nonce: market_ref.sequence_info.nonce + 1,
             provider,
             base_amount: (base_amount_u128 as u64),
             quote_amount,
@@ -1125,6 +1342,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         Liquidity {
             market_id: market_ref.metadata.market_id,
+            time: timestamp::now_microseconds(),
+            market_nonce: market_ref.sequence_info.nonce + 1,
             provider,
             base_amount,
             quote_amount,
@@ -1178,6 +1397,79 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ): u128 {
         // Base reserves priced in quote are equal to the value of quote reserves.
         2 * (real_quote_reserves as u128)
+    }
+
+    /// `a :=` TVL at start
+    /// `b :=` LP coins at start
+    /// `c :=` TVL at end
+    /// `d :=` LP coins at end
+    ///
+    /// Growth in TVL per LP coin symbolically evalutes to:
+    /// `(a / b) / (c / d)`
+    /// `(a * d) / (b * c)`
+    ///
+    /// Numerator should be shifted by `SHIFT_Q64` so that the result is in Q64 format.
+    ///
+    /// While all terms can technically be `u128`, in practice they will all be `u64`, and even if
+    /// a few terms require a few extra bits, there should not be any overflow.
+    inline fun tvl_per_lp_coin_growth_q64(
+        start: TVLtoLPCoinRatio,
+        end: TVLtoLPCoinRatio,
+    ): u128 {
+        let a = start.tvl;
+        let b = start.lp_coins;
+        let c = end.tvl;
+        let d = end.lp_coins;
+        if (b == 0 || c == 0) {
+            0
+        } else {
+            let numerator = (a as u256) * (d as u256);
+            let denominator = (b as u256) * (c as u256);
+            (((numerator << SHIFT_Q64) / denominator) as u128)
+        }
+    }
+
+    inline fun update_periodic_state_trackers_for_liquidity_provision_operation(
+        market_metadata_ref: &MarketMetadata,
+        market_nonce_after_bump: u64,
+        emit_time: u64,
+        trigger: u8,
+        tvl: u128,
+        lp_coin_supply: u128,
+        periodic_state_trackers_ref_mut: &mut vector<PeriodicStateTracker>,
+    ) {
+        vector::for_each_mut(periodic_state_trackers_ref_mut, |e| {
+            // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
+            let tracker_ref_mut: &mut PeriodicStateTracker = e;
+            let period = tracker_ref_mut.period;
+            // If tracker period has not yet lapsed.
+            if (emit_time - tracker_ref_mut.start_time < tracker_ref_mut.period) {
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+            } else { // If a new tracker period has begun.
+                emit_periodic_state(
+                    market_metadata_ref,
+                    market_nonce_after_bump,
+                    emit_time,
+                    trigger,
+                    tracker_ref_mut,
+                );
+                tracker_ref_mut.start_time = last_period_boundary(emit_time, period);
+                tracker_ref_mut.open_price_q64 = 0;
+                tracker_ref_mut.high_price_q64 = 0;
+                tracker_ref_mut.low_price_q64 = 0;
+                tracker_ref_mut.close_price_q64 = 0;
+                tracker_ref_mut.volume_base = 0;
+                tracker_ref_mut.volume_quote = 0;
+                tracker_ref_mut.integrator_fees = 0;
+                tracker_ref_mut.pool_fees_base = 0;
+                tracker_ref_mut.pool_fees_quote = 0;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_start.tvl = tvl;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_start.lp_coins = lp_coin_supply;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+            }
+        });
     }
 
     #[test_only]
