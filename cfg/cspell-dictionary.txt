@@ -1,4 +1,5 @@
 aland
+allowlister
 aptos
 barthelemy
 bento
@@ -8,6 +9,7 @@ burkina
 caicos
 clamm
 clipperton
+clippy
 counterparties
 cpamm
 cunha
@@ -21,6 +23,7 @@ eswatini
 faso
 fleur
 futuna
+gcloud
 hamsa
 ivoire
 keycap
@@ -35,12 +38,14 @@ melilla
 merperson
 moai
 nazar
+nohup
 octa
 oden
 permissionless
 precommit
 presale
 rica
+rustup
 sint
 struct
 subdir

@@ -135,6 +135,7 @@ repos:
   -
     args:
     - '--autofix'
+    exclude: 'Cargo.lock'
     id: 'pretty-format-toml'
   repo: 'https://github.com/macisamuele/language-formatters-pre-commit-hooks'
   rev: 'v2.12.0'
@@ -174,4 +175,26 @@ repos:
     id: 'latexindent'
   repo: 'https://github.com/cmhughes/latexindent.pl'
   rev: 'V3.23.7'
+-
+  hooks:
+  -
+    args:
+    - '--manifest-path'
+    - 'src/rust/Cargo.toml'
+    - '--'
+    id: 'fmt'
+  -
+    args:
+    - '--manifest-path'
+    - 'src/rust/Cargo.toml'
+    - '--'
+    id: 'cargo-check'
+  -
+    args:
+    - '--manifest-path'
+    - 'src/rust/Cargo.toml'
+    - '--'
+    id: 'clippy'
+  repo: 'https://github.com/doublify/pre-commit-rust'
+  rev: 'v1.0'
 ...

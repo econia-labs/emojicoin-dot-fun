@@ -1,0 +1,11 @@
+# cspell:word allowlister
+
+[dependencies]
+axum = "0.7.5"
+tokio = {version = "1.37.0", features = ["rt-multi-thread"]}
+tower-http = {version = "0.5.2", features = ["cors"]}
+
+[package]
+edition = "2021"
+name = "allowlister3000"
+version = "0.1.0"
