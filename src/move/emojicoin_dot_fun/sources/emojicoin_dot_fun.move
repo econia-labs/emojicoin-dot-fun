@@ -1500,7 +1500,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// `c :=` TVL at end
     /// `d :=` LP coins at end
     ///
-    /// Growth in TVL per LP coin symbolically evalutes to:
+    /// Growth in TVL per LP coin symbolically evaluates to:
     /// `(a / b) / (c / d)`
     /// `(a * d) / (b * c)`
     ///
@@ -1541,7 +1541,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
         });
 
-        // Get instananeous stats, bump market state.
+        // Get instantaneous stats, bump market state.
         let (fdv, market_cap) = fdv_market_cap(real_reserves, EMOJICOIN_SUPPLY);
         bump_market_state(
             market_ref_mut,
