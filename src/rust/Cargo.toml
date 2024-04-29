@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "src/rust/*"
+  "allowlister3000"
 ]
 resolver = "2"
 

@@ -9,6 +9,7 @@ burkina
 caicos
 clamm
 clipperton
+clippy
 counterparties
 cpamm
 cunha

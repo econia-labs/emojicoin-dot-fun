@@ -18,11 +18,6 @@ repos:
     types:
     - 'shell'
   -
-    entry: './src/sh/cargo-format.sh'
-    id: 'rust-formatter'
-    language: 'rust'
-    name: 'rust Formatter'
-  -
     entry: './src/sh/python-lint/poetry-check.sh'
     id: 'local-poetry-check'
     language: 'script'
@@ -180,4 +175,26 @@ repos:
     id: 'latexindent'
   repo: 'https://github.com/cmhughes/latexindent.pl'
   rev: 'V3.23.7'
+-
+  hooks:
+  -
+    args:
+    - '--manifest-path'
+    - 'src/rust/Cargo.toml'
+    - '--'
+    id: 'fmt'
+  -
+    args:
+    - '--manifest-path'
+    - 'src/rust/Cargo.toml'
+    - '--'
+    id: 'cargo-check'
+  -
+    args:
+    - '--manifest-path'
+    - 'src/rust/Cargo.toml'
+    - '--'
+    id: 'clippy'
+  repo: 'https://github.com/doublify/pre-commit-rust'
+  rev: 'v1.0'
 ...
