@@ -1,0 +1,31 @@
+# cspell:word eslintcache
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.eslintcache
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+yarn.lock
+package-lock.json
+
+public/sitemap.xml
+
+package-lock.json
+yarn.lock
+/build
+.idea
