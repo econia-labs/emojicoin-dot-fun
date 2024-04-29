@@ -196,6 +196,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[event]
+    struct Chat has drop, store {
+        market_metadata: MarketMetadata,
+        emit_time: u64,
+        emit_market_nonce: u64,
+        user: address,
+        message: vector<vector<u8>>,
+        user_emojicoin_balance: u64,
+        circulating_supply: u64,
+        balance_as_fraction_of_circulating_supply_q64: u128,
+    }
+
+    #[event]
     struct PeriodicState has drop, store {
         market_metadata: MarketMetadata,
         periodic_state_metadata: PeriodicStateMetadata,
@@ -319,6 +331,73 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     struct RegistryAddress has key {
         registry_address: address,
+    }
+
+    public entry fun chat<Emojicoin, EmojicoinLP>(
+        user: &signer,
+        message: vector<vector<u8>>,
+        market_address: address,
+    ) acquires Market, Registry, RegistryAddress {
+
+        // Mutably borrow market and check its coin types.
+        let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
+        ensure_coins_initialized<Emojicoin, EmojicoinLP>(
+            market_ref_mut,
+            &market_signer,
+            market_address,
+        );
+
+        // Prep local variables.
+        let user_address = signer::address_of(user);
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let lp_coin_supply = market_ref_mut.lp_coin_supply;
+        let in_bonding_curve = lp_coin_supply == 0;
+
+        // Trigger periodic state.
+        let time = timestamp::now_microseconds();
+        let tvl = tvl(market_ref_mut, in_bonding_curve);
+        let trigger = TRIGGER_CHAT;
+        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl);
+
+        // Update number of chat messages locally and globally.
+        let local_cumulative_stats_ref_mut = &mut market_ref_mut.cumulative_stats;
+        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
+        let local_cumulative_n_chat_messages = &mut local_cumulative_stats_ref_mut.n_chat_messages;
+        *local_cumulative_n_chat_messages = *local_cumulative_n_chat_messages + 1;
+        let global_cumulative_chat_messages_ref_mut =
+            &mut global_stats_ref_mut.cumulative_chat_messages;
+        aggregator_v2::try_add(global_cumulative_chat_messages_ref_mut, 1);
+
+        // Emit chat event.
+        let (supply_minuend, reserves_ref_mut) =
+            assign_supply_minuend_reserves_ref_mut(market_ref_mut, in_bonding_curve);
+        let circulating_supply = supply_minuend - reserves_ref_mut.base;
+        let user_emojicoin_balance = coin::balance<Emojicoin>(user_address);
+        event::emit(Chat {
+            market_metadata: market_ref_mut.metadata,
+            emit_time: time,
+            emit_market_nonce: market_ref_mut.sequence_info.nonce,
+            user: user_address,
+            message,
+            user_emojicoin_balance,
+            circulating_supply,
+            balance_as_fraction_of_circulating_supply_q64:
+                ((user_emojicoin_balance as u128) << SHIFT_Q64) / (circulating_supply as u128),
+        });
+
+        // Bump market state.
+        let (fdv, market_cap) = fdv_market_cap(*reserves_ref_mut, supply_minuend);
+        let total_quote_locked = total_quote_locked(market_ref_mut, in_bonding_curve);
+        bump_market_state(
+            market_ref_mut,
+            trigger,
+            InstantaneousStats {
+                total_quote_locked: total_quote_locked,
+                total_value_locked: tvl,
+                market_cap: market_cap,
+                fully_diluted_value: fdv,
+            },
+        );
     }
 
     public entry fun register_market(
@@ -585,7 +664,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 mint: mint_cap,
             });
         };
-
     }
 
     inline fun get_concatenation(base: String, additional: String): String {
@@ -630,11 +708,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
 
         // Get TVL before swap, use it to update periodic state.
-        let tvl_start = if (event.starts_in_bonding_curve) {
-            tvl_clamm(market_ref_mut.clamm_virtual_reserves)
-        } else {
-            tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote)
-        };
+        let starts_in_bonding_curve = event.starts_in_bonding_curve;
+        let tvl_start = tvl(market_ref_mut, starts_in_bonding_curve);
         let registry_ref_mut = borrow_registry_ref_mut();
         let time = event.time;
         let trigger = TRIGGER_SWAP;
@@ -650,8 +725,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
         let pool_fees_base_as_u128 = 0;
         let pool_fees_quote_as_u128 = 0;
-        let (quote, total_quote_locked_end, fdv_start, market_cap_start, fdv_end, market_cap_end);
-        let starts_in_bonding_curve = event.starts_in_bonding_curve;
+        let (quote, fdv_start, market_cap_start, fdv_end, market_cap_end);
+        let results_in_state_transition = event.results_in_state_transition;
+        let ends_in_bonding_curve = !starts_in_bonding_curve || results_in_state_transition;
 
         // Create for swapper an account with AptosCoin store if it doesn't exist.
         if (!account::exists_at(swapper_address)) {
@@ -671,9 +747,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
             // Get minuend for circulating supply calculations and affected reserves.
             let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
-                    market_ref_mut,
-                    starts_in_bonding_curve,
-                );
+                market_ref_mut,
+                starts_in_bonding_curve,
+            );
 
             // Update reserve amounts.
             let reserves_start = *reserves_ref_mut;
@@ -709,7 +785,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 event.base_volume,
             );
 
-            if (event.results_in_state_transition) { // Buy with state transition.
+            if (results_in_state_transition) { // Buy with state transition.
                 // Mint initial liquidity provider coins.
                 let lp_coins =
                     mint_lp_coins<Emojicoin, EmojicoinLP>(market_address, LP_TOKENS_INITIAL);
@@ -746,9 +822,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
                 // Get minuend for circulating supply calculations and affected reserves.
                 let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
-                        market_ref_mut,
-                        starts_in_bonding_curve,
-                    );
+                    market_ref_mut,
+                    starts_in_bonding_curve,
+                );
 
                 // Update reserve amounts.
                 let reserves_start = *reserves_ref_mut;
@@ -808,12 +884,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Update global TVL amounts.
         let lp_coin_supply = market_ref_mut.lp_coin_supply;
-        let ends_in_bonding_curve = lp_coin_supply != 0;
-        let tvl_end = if (ends_in_bonding_curve) {
-            tvl_clamm(market_ref_mut.clamm_virtual_reserves)
-        } else {
-            tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote)
-        };
+        let tvl_end = tvl(market_ref_mut, ends_in_bonding_curve);
         let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
         if (tvl_end > tvl_start) {
             let tvl_increase = tvl_end - tvl_start;
@@ -832,7 +903,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             base_volume: event.base_volume,
             quote_volume: event.quote_volume,
             nonce: event.market_nonce,
-            time: event.time,
+            time: time,
         };
 
         // Update periodic state trackers, emit swap event.
@@ -868,12 +939,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         event::emit(event);
 
         // Get ending total quote locked, bump market state.
-        if (starts_in_bonding_curve && !event.results_in_state_transition) {
-            total_quote_locked_end =
-                market_ref_mut.clamm_virtual_reserves.quote - QUOTE_VIRTUAL_FLOOR;
-        } else {
-            total_quote_locked_end = market_ref_mut.cpamm_real_reserves.quote;
-        };
+        let total_quote_locked_end = total_quote_locked(market_ref_mut, ends_in_bonding_curve);
         bump_market_state(
             market_ref_mut,
             trigger,
@@ -1513,6 +1579,28 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(denominator > 0, E_SWAP_DIVIDE_BY_ZERO);
         let result = numerator / denominator;
         (result as u64)
+    }
+
+    inline fun total_quote_locked(
+        market_ref: &Market,
+        in_bonding_curve: bool,
+    ): u64 {
+        if (in_bonding_curve) {
+            market_ref.clamm_virtual_reserves.quote - QUOTE_VIRTUAL_FLOOR
+        } else {
+            market_ref.cpamm_real_reserves.quote
+        }
+    }
+
+    inline fun tvl(
+        market_ref: &Market,
+        in_bonding_curve: bool,
+    ): u128 {
+        if (in_bonding_curve) {
+            tvl_clamm(market_ref.clamm_virtual_reserves)
+        } else {
+            tvl_cpamm(market_ref.cpamm_real_reserves.quote)
+        }
     }
 
     inline fun tvl_clamm(
