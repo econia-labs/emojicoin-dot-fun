@@ -61,7 +61,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const TRIGGER_REMOVE_LIQUIDITY: u8 = 4;
     const TRIGGER_CHAT: u8 = 5;
 
-    const PERIOD_INSTANTANEOUS: u64 = 0;
     const PERIOD_1M: u64 = 60_000_000;
     const PERIOD_5M: u64 = 300_000_000;
     const PERIOD_15M: u64 = 900_000_000;
