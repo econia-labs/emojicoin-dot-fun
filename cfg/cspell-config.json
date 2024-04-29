@@ -7,10 +7,23 @@
       "addWords": true,
       "name": "project-words",
       "path": "./cspell-dictionary.txt"
+    },
+    {
+      "addWords": true,
+      "name": "frontend-words",
+      "path": "./cspell-frontend-dictionary.txt"
     }
   ],
   "ignorePaths": [
     "/project-words.txt",
     "../src/typescript/api/pnpm-lock.yaml"
+  ],
+  "overrides": [
+    {
+      "dictionaries": [
+        "frontend-words"
+      ],
+      "filename": "**/src/typescript/frontend/**/*.{css,html,ts,tsx,js,jsx,json}"
+    }
   ]
 }
