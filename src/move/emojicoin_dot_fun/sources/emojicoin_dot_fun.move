@@ -218,7 +218,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         trigger: u8,
     }
 
-
     #[event]
     struct State has drop, store {
         market_metadata: MarketMetadata,
