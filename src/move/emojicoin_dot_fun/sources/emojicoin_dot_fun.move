@@ -1499,8 +1499,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// `d :=` LP coins at end
     ///
     /// Growth in TVL per LP coin symbolically evaluates to:
-    /// `(a / b) / (c / d)`
-    /// `(a * d) / (b * c)`
+    /// `(c / d) / (a / b)`
+    /// `(b * c) / (a * d)`
     ///
     /// Numerator should be shifted by `SHIFT_Q64` so that the result is in Q64 format.
     ///
@@ -1514,11 +1514,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let b = start.lp_coins;
         let c = end.tvl;
         let d = end.lp_coins;
-        if (b == 0 || c == 0) {
+        if (a == 0 || d == 0) {
             0
         } else {
-            let numerator = (a as u256) * (d as u256);
-            let denominator = (b as u256) * (c as u256);
+            let numerator = (b as u256) * (c as u256);
+            let denominator = (a as u256) * (d as u256);
             (((numerator << SHIFT_Q64) / denominator) as u128)
         }
     }
