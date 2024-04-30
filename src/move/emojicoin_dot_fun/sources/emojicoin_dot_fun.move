@@ -224,6 +224,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[event]
+    struct MarketRegistration has copy, drop, store {
+        market_metadata: MarketMetadata,
+        time: u64,
+        registrant: address,
+        integrator: address,
+    }
+
+    #[event]
     struct PeriodicState has copy, drop, store {
         market_metadata: MarketMetadata,
         periodic_state_metadata: PeriodicStateMetadata,
@@ -472,6 +480,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let time = timestamp::now_microseconds();
         let trigger = TRIGGER_MARKET_REGISTRATION;
         trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, 0);
+        event::emit(MarketRegistration {
+            market_metadata: market_ref_mut.metadata,
+            time,
+            registrant: registrant_address,
+            integrator,
+        });
         bump_market_state(
             market_ref_mut,
             TRIGGER_MARKET_REGISTRATION,
