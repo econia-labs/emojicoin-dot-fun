@@ -42,3 +42,9 @@ export interface DropdownMenuProps extends Omit<BoxProps, "onClick"> {
   values?: Option[];
   onClick: (option: Option) => void;
 }
+
+export interface DropdownMenuItemProps extends Omit<DropdownMenuProps, "options"> {
+  index: number;
+  option: Option;
+  title: string;
+}

@@ -14,9 +14,9 @@ export const variantStyles = ({ theme, color, variant, isLoading }: ThemedProps)
       color: ${({ theme }) => (color ? theme.colors[color] : theme.colors.econiaBlue)};
 
       &:not([disabled]):hover {
-        color: ${theme.colors.blue};
+        color: ${theme.colors.econiaBlue};
         ${Svg} {
-          fill: ${theme.colors.blue};
+          fill: ${theme.colors.econiaBlue};
         }
       }
 

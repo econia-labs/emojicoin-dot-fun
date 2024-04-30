@@ -9,12 +9,12 @@ export const StyledBtn = styled.div`
 
   &:hover {
     ${Text} {
-      color: ${({ theme }) => theme.colors.blue};
+      color: ${({ theme }) => theme.colors.econiaBlue};
     }
 
     ${Svg} {
       path {
-        fill: ${({ theme }) => theme.colors.blue};
+        fill: ${({ theme }) => theme.colors.econiaBlue};
       }
     }
   }

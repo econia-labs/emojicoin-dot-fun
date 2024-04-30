@@ -31,12 +31,14 @@ const Header: React.FC = () => {
               {NAVIGATE_LINKS.map(({ title, path }) => {
                 return (
                   <Link key={title} href={path}>
-                    <Button>{t(title)}</Button>
+                    <Button scale="lg">{t(title)}</Button>
                   </Link>
                 );
               })}
 
-              <Button onClick={walletHandler}>05I34OT0ff9C</Button>
+              <Button onClick={walletHandler} scale="lg">
+                05I34OT0ff9C
+              </Button>
             </FlexGap>
           )}
         </Flex>
