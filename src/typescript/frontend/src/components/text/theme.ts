@@ -15,14 +15,17 @@ export const styles = (theme: DefaultTheme) => {
     [scales.display1]: css`
       font-size: 95px;
       line-height: 96px;
+      font-family: ${theme.fonts.formaM};
     `,
     [scales.display2]: css`
       font-size: 64px;
       line-height: 64px;
+      font-family: ${theme.fonts.formaM};
     `,
     [scales.display3]: css`
       font-size: 48px;
       line-height: 65px;
+      font-family: ${theme.fonts.formaM};
     `,
     [scales.display4]: css`
       font-size: 28px;
@@ -59,10 +62,12 @@ export const styles = (theme: DefaultTheme) => {
     [scales.heading1]: css`
       font-size: 28px;
       line-height: 18px;
+      font-family: ${theme.fonts.formaM};
     `,
     [scales.heading2]: css`
       font-size: 20px;
       line-height: 18px;
+      font-family: ${theme.fonts.formaM};
     `,
     [scales.bodyLarge]: css`
       font-size: 16px;

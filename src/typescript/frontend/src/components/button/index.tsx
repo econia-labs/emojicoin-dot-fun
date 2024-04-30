@@ -1,4 +1,5 @@
 import React from "react";
+import { useScramble } from "use-scramble";
 
 import StyledButton from "./styled";
 import { SpinnerIcon } from "components/svg";
@@ -11,9 +12,13 @@ export const getExternalLinkProps = () => ({
 });
 
 const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): JSX.Element => {
-  const { startIcon, endIcon, children, isLoading, disabled, external, ...rest } = props;
+  const { startIcon, endIcon, children, isLoading, disabled, external, isScramble = true, ...rest } = props;
   const isDisabled = isLoading || disabled;
   const internalProps = external ? getExternalLinkProps() : {};
+
+  const { ref, replay } = useScramble({
+    text: isScramble ? `{ ${children} }` : undefined,
+  });
 
   return (
     <StyledButton
@@ -22,6 +27,9 @@ const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): 
       type={props.type || "button"}
       disabled={isDisabled}
       $isLoading={isLoading}
+      ref={isScramble ? ref : undefined}
+      onMouseOver={isScramble ? replay : undefined}
+      onFocus={isScramble ? replay : undefined}
     >
       {isLoading ? (
         <SpinnerIcon />
@@ -32,7 +40,7 @@ const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): 
               mr: "0.5rem",
             })}
 
-          {`{ ${children} }`}
+          {!isScramble ? `{ ${children} }` : null}
 
           {React.isValidElement(endIcon) &&
             React.cloneElement(endIcon, {

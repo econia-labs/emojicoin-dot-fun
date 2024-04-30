@@ -62,7 +62,7 @@ const EmojiTable: React.FC = () => {
     <Column>
       <StyledTHWrapper>
         <StyledTH>
-          <InputGroup label="Search" variant="fantom" forId="search" isShowError={false}>
+          <InputGroup label="Search:" variant="fantom" forId="search" isShowError={false}>
             <Input id="search" />
           </InputGroup>
 
