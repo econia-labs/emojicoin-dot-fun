@@ -58,6 +58,11 @@
   },
   "main": "src/index.tsx",
   "name": "econia-labs",
+  "overrides": {
+    "react-scripts": {
+      "typescript": "^5"
+    }
+  },
   "private": true,
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
