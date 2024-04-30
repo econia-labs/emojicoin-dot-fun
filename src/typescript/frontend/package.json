@@ -33,6 +33,11 @@
     "web-vitals": "^2.1.4",
     "yup": "^1.2.0"
   },
+  "overrides": {
+    "react-scripts": {
+      "typescript": "^5"
+    }
+  },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@storybook/preset-create-react-app": "^7.4.1",
