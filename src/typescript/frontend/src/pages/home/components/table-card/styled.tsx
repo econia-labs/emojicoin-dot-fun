@@ -62,7 +62,7 @@ export const StyledItemWrapper = styled.div`
     content: "";
     display: block;
     width: 100vw;
-    background-color: ${({ theme }) => theme.colors.darkGrey}; /* Цвет линии */
+    background-color: ${({ theme }) => theme.colors.darkGrey}; /* Line color. */
     height: 1px;
     transform: translateX(-100%);
   }
