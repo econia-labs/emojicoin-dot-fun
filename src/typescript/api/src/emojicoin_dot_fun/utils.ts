@@ -69,10 +69,20 @@ export async function getRegistryAddress(args: {
   return registryAddressResource.registry_address;
 }
 
-export type MarketResource = {
+export type MarketMetadata = {
   market_id: Uint64;
   market_address: AccountAddress;
   emoji_bytes: Hex;
+};
+
+export type SequenceInfo = {
+  nonce: Uint64;
+  last_bump_time: Uint64;
+};
+
+export type MarketResource = {
+  metadata: MarketMetadata;
+  sequence_info: SequenceInfo;
   extend_ref: ExtendRef;
   clamm_virtual_reserves: Reserves;
   cpamm_real_reserves: Reserves;
@@ -101,9 +111,15 @@ export async function getMarketResource(args: {
     resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Market`,
   });
   return {
-    market_id: BigInt(marketResource.market_id),
-    market_address: AccountAddress.from(marketResource.market_address),
-    emoji_bytes: Hex.fromHexString(marketResource.emoji_bytes),
+    metadata: {
+      market_id: BigInt(marketResource.metadata.market_id),
+      market_address: AccountAddress.from(marketResource.metadata.market_address),
+      emoji_bytes: Hex.fromHexString(marketResource.metadata.emoji_bytes),
+    },
+    sequence_info: {
+      nonce: BigInt(marketResource.sequence_info.nonce),
+      last_bump_time: BigInt(marketResource.sequence_info.last_bump_time),
+    },
     extend_ref: {
       self: AccountAddress.from(marketResource.extend_ref.self),
     },

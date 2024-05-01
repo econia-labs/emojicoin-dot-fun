@@ -1,8 +1,16 @@
 {
-  "name": "econia-labs",
-  "main": "src/index.tsx",
-  "version": "0.0.1",
-  "private": true,
+  "browserslist": {
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
+  },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "@reduxjs/toolkit": "^1.9.5",
@@ -22,35 +30,9 @@
     "styled-components": "^6.1.8",
     "styled-system": "^5.1.5",
     "stylis": "^4.3.1",
+    "use-scramble": "^2.2.15",
     "web-vitals": "^2.1.4",
     "yup": "^1.2.0"
-  },
-  "scripts": {
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "build-dev": "chmod +x ./scripts/build-dev.sh && ./scripts/build-dev.sh",
-    "build-prod": "chmod +x ./scripts/build-prod.sh && ./scripts/build-prod.sh",
-    "test": "react-app-rewired test",
-    "eject": "react-app-rewired eject",
-    "lint": "eslint -c .eslintrc.json --ext .js,.jsx,.ts,.tsx .",
-    "lint:fix": "npm run lint -- --fix",
-    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc.js",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "prepare": "husky install",
-    "analyze": "source-map-explorer 'build/static/js/*.js'"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
@@ -74,5 +56,29 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "main": "src/index.tsx",
+  "name": "econia-labs",
+  "overrides": {
+    "react-scripts": {
+      "typescript": "^5"
+    }
+  },
+  "private": true,
+  "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "build": "react-app-rewired build",
+    "build-dev": "chmod +x ./scripts/build-dev.sh && ./scripts/build-dev.sh",
+    "build-prod": "chmod +x ./scripts/build-prod.sh && ./scripts/build-prod.sh",
+    "build-storybook": "storybook build",
+    "eject": "react-app-rewired eject",
+    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
+    "lint": "eslint -c .eslintrc.json --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "npm run lint -- --fix",
+    "prepare": "cd ../../../ && husky install",
+    "start": "react-app-rewired start",
+    "storybook": "storybook dev -p 6006",
+    "test": "react-app-rewired test"
+  },
+  "version": "0.0.1"
 }

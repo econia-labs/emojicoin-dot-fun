@@ -63,7 +63,8 @@ export const fontWeight = {
 
 export const fonts = {
   pixelar: "Pixelar",
-  forma: "FormaDJRDisplay",
+  forma: "FormaDJRMicro",
+  formaM: "FormaDJRDisplayMedium",
 } as const;
 
 export default {

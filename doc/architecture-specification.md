@@ -41,14 +41,14 @@ These keywords `SHALL` be in `monospace` for ease of identification.
    capitalization of each emojicoin market.
 1. A `State` event `SHALL` be emitted for every operation, to enable fetching
    market state as of the most recent event.
-1. Each market `SHALL` track a vector of internal `PeriodicState` event
+1. Each market `SHALL` track a vector of internal `PeriodicStateTracker`
    accumulators, to enable volume and price versus times charts, with an
-   internal variable for the last time the event was emitted. Each granularity,
-   for example `1min`, `30min`, `1hr`, `6hr`, and `24hr`, `SHALL` track the last
-   time it was emitted, and use integer time truncation to check that a new
-   period has not started. When an operation results in a new period, a
-   `PeriodicState` event `SHALL` be emitted for each granularity that has
-   lapsed.
+   internal variable for the period start time and the period length including
+   `1M`, `5M`, `15M`, `30M`, `1H`, `4H`, and `1D`. Integer time truncation
+   `SHALL` be used to check that a new period has started, and when an operation
+   results in a new period, a `PeriodicState` event `SHALL` be emitted for each
+   granularity that has lapsed.
+1. A `GlobalState` event for the entire protocol `SHALL` be emitted each day.
 1. A view function shall enable enable lookup of global total value locked,
    number of emojicoin markets, and cumulative volume, via aggregators when
    necessary.
@@ -58,13 +58,17 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 1. Simulation functions `SHALL` be paired with simulation commitment functions
    such that results can be applied during runtime, using the same logic as
    view function indexing functions.
-1. Events `SHALL` include timestamps for chronological indexing.
+1. Events `SHALL` include timestamps for chronological indexing, expressed in
+   UNIX microseconds.
 1. Events `SHALL` include information for fees charged, accumulated at the
    market and global level.
 1. The total number of trades `SHALL` be indexed at the market and global level.
 1. Cumulative fees `SHALL` be indexed at the market and global level.
-1. Liquidity provider APR `SHALL` be tracked by comparing the ratio of liquidity
-   to issued liquidity provider tokens over time.
+1. Prices `SHALL` be expressed in `Q64` notation.
+1. Liquidity provider APR `SHALL` be tracked by comparing the ratio of total
+   value locked to issued liquidity provider tokens over time. `PeriodicState`
+   events `SHALL` express the growth in the TVL/LP coin ratio in `Q64` notation.
+1. The registry and each market `SHALL` implement a 1-indexed nonce.
 
 ## Frontend
 

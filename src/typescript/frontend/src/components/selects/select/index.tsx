@@ -1,5 +1,7 @@
 import React from "react";
 
+import { useScramble } from "use-scramble";
+
 import { DropdownSelectWrapper } from "./styled";
 import { Text, FlexGap } from "components";
 
@@ -18,8 +20,12 @@ export const Select: React.FC<SelectProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  const { ref, replay } = useScramble({
+    text: `${title}`,
+  });
+
   return (
-    <DropdownSelectWrapper ref={targetRef} {...wrapperProps}>
+    <DropdownSelectWrapper ref={targetRef} onMouseEnter={replay} {...wrapperProps}>
       <FlexGap gap="8px" ellipsis>
         <Text textScale="pixelHeading3" color="darkGrey">
           {"{"}
@@ -29,9 +35,7 @@ export const Select: React.FC<SelectProps> = ({
         </Text>
 
         {!title ? null : typeof title === "string" ? (
-          <Text textScale="pixelHeading3" {...titleProps} ellipsis>
-            {t(title)}
-          </Text>
+          <Text textScale="pixelHeading3" {...titleProps} ellipsis ref={ref}></Text>
         ) : (
           React.isValidElement(title) && title
         )}

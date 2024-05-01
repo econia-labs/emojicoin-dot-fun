@@ -2,13 +2,8 @@
   "env": {
     "browser": true,
     "es2021": true,
-    "node": true,
-    "jest": true
-  },
-  "parser": "@typescript-eslint/parser",
-  "globals": {
-    "JSX": true,
-    "React": true
+    "jest": true,
+    "node": true
   },
   "extends": [
     "eslint:recommended",
@@ -16,6 +11,11 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended"
   ],
+  "globals": {
+    "JSX": true,
+    "React": true
+  },
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -23,26 +23,11 @@
     "ecmaVersion": 13,
     "sourceType": "module"
   },
-  "plugins": ["react", "@typescript-eslint"],
+  "plugins": [
+    "react",
+    "@typescript-eslint"
+  ],
   "rules": {
-    "react/prop-types": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "caughtErrorsIgnorePattern": "^_"
-      }
-    ],
-    "@typescript-eslint/no-use-before-define": 0,
-    "no-console": [
-      "warn",
-      {
-        "allow": ["warn", "error", "debug"]
-      }
-    ],
-    "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/no-empty-interface": "off",
     "@typescript-eslint/ban-types": [
       "error",
       {
@@ -52,7 +37,29 @@
         }
       }
     ],
-    "no-unreachable": "error"
+    "@typescript-eslint/no-empty-interface": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/no-use-before-define": 0,
+    "no-console": [
+      "warn",
+      {
+        "allow": [
+          "warn",
+          "error",
+          "debug"
+        ]
+      }
+    ],
+    "no-unreachable": "error",
+    "react/prop-types": "off"
   },
   "settings": {
     "react": {

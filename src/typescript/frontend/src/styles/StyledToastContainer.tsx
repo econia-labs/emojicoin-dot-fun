@@ -34,7 +34,7 @@ const StyledContainer = styled(ToastContainer)`
   .Toastify__toast-icon {
   }
 
-  /** handle the notificaiton color and the text color based on the theme **/
+  /** handle the notification color and the text color based on the theme **/
   .Toastify__toast-theme--dark {
   }
   .Toastify__toast-theme--light {
