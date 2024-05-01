@@ -174,7 +174,7 @@ def get_viable_emojis(
             "version": base_emoji_data["version"],
             "code_points": qualifications["fully_qualified"]["code_points"],
         }
-        
+
         if fully_qualified["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
             extended_viable_emojis[name] = data
         else:

@@ -24,6 +24,7 @@
     "tree-kill": "^1.2.2",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.8.1",
     "typescript": "5.3.3"
   },
   "files": [
@@ -43,6 +44,7 @@
     "fmt": "pnpm _fmt --write",
     "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",
     "lint-fix": "pnpm lint --fix",
+    "merkle": "pnpm tsx src/emojicoin_dot_fun/merkle-tree.ts",
     "test": "pnpm jest",
     "unit-test": "pnpm jest tests/unit"
   },
