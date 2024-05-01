@@ -19,6 +19,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use std::string::{Self, String};
     use std::vector;
 
+/*
     #[test_only] use aptos_std::aptos_coin;
     #[test_only] use black_cat_market::coin_factory::{
         Emojicoin as BlackCatEmojicoin,
@@ -38,6 +39,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] const BLACK_HEART: vector<u8> = x"f09f96a4";
     #[test_only] const YELLOW_HEART: vector<u8> = x"f09f929b";
     #[test_only] const MICROSECONDS_PER_SECOND: u64 = 1_000_000;
+*/
 
     const DECIMALS: u8 = 8;
     const MAX_SYMBOL_LENGTH: u8 = 10;
@@ -2180,6 +2182,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             },
         );
     }
+
+
+    #[test_only] public fun init_module_for_testing(account: &signer) { init_module(account) }
 
 /*
     #[test_only]
