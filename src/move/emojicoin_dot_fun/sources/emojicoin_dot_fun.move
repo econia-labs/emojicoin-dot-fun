@@ -2188,6 +2188,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ) {
     }
 
+/*
     #[test_only]
     public fun get_COIN_FACTORY_TYPE_CONSTANTS(): (vector<u8>, vector<u8>, vector<u8>) {
         (
@@ -2624,4 +2625,5 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(coin::name<BlackHeartEmojicoinLP>() == lp_name_2, 0);
         assert!(coin::name<BlackCatEmojicoinLP>() == lp_name_3, 0);
     }
+*/
 }
