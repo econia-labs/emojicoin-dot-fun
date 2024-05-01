@@ -1,15 +1,15 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 
-import { Page, Header, Footer } from "components";
+import { Header, Footer, Column } from "components";
 
 const MainOutlet: React.FC = () => {
   return (
-    <Page maxWidth="100%" px="0px">
+    <Column maxWidth="100%" px="0px" height="100vh">
       <Header />
       <Outlet />
       <Footer />
-    </Page>
+    </Column>
   );
 };
 

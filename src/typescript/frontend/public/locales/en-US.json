@@ -14,5 +14,12 @@
   "Mkt. Cap:": "Mkt. Cap:",
   "Not found Page": "Not found Page",
   "Search:": "Search:",
-  "Sort:": "Sort:"
+  "Sort:": "Sort:",
+  "Select Emoji": "Select Emoji",
+  "Emojicoin Name:": "Emojicoin Name:",
+  "Emojicoin symbol (ticker) :": "Emojicoin symbol (ticker) :",
+  "Cost to deploy:": "Cost to deploy:",
+  "Launch Emojicoin": "Launch Emojicoin",
+  "Pick up to two, due to byte limitations not all combinations are supported.": "Pick up to two, due to byte limitations not all combinations are supported."
+}
 }

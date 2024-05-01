@@ -42,7 +42,6 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
         >
           {emojiName}
         </Text>
-        {tooltipEmojiName}
 
         <Flex>
           <Column width="50%">
@@ -66,6 +65,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
           </Column>
         </Flex>
       </StyledInnerItem>
+      {tooltipEmojiName}
     </StyledItemWrapper>
   );
 };
