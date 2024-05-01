@@ -146,12 +146,17 @@ def get_zwj_emojis(data_url: str) -> dict[str, EmojiData]:
 def get_viable_emojis(
     base_emojis: dict[str, QualifiedEmojiData],
     zwj_emojis: dict[str, EmojiData],
-) -> dict[str, EmojiData]:
+) -> tuple[dict[str, EmojiData], dict[str, EmojiData]]:
     """
     Aggregates and deduplicates all emojis that are fully qualified.
+
+    Returns a tuple of two dictionaries:
+    - The first contains all fully qualified emojis less than or equal to 10 bytes.
+    - The second contains all fully qualified emojis that are greater than 10 bytes.
     """
 
-    viable_emojis: dict[str, EmojiData] = {}
+    symbol_viable_emojis: dict[str, EmojiData] = {}
+    extended_viable_emojis: dict[str, EmojiData] = {}
     all_base_code_points: set[str] = set()
     for name, base_emoji_data in base_emojis.items():
         qualifications = base_emoji_data["qualifications"]
@@ -163,14 +168,17 @@ def get_viable_emojis(
         if "fully_qualified" not in qualifications:
             continue
         fully_qualified = qualifications["fully_qualified"]
-        if fully_qualified["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
-            continue
 
-        viable_emojis[name] = {
+        data: EmojiData = {
             "emoji": base_emoji_data["emoji"],
             "version": base_emoji_data["version"],
             "code_points": qualifications["fully_qualified"]["code_points"],
         }
+        
+        if fully_qualified["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
+            extended_viable_emojis[name] = data
+        else:
+            symbol_viable_emojis[name] = data
 
     for name, zwj_emoji_data in tuple(zwj_emojis.items()):
         code_points_string = "".join(zwj_emoji_data["code_points"]["as_unicode"])
@@ -179,6 +187,9 @@ def get_viable_emojis(
         if name in base_emojis or code_points_string in all_base_code_points:
             continue
 
-        viable_emojis[name] = zwj_emoji_data
+        if zwj_emoji_data["code_points"]["num_bytes"] > SYMBOL_MAX_BYTES:
+            extended_viable_emojis[name] = zwj_emoji_data
+        else:
+            symbol_viable_emojis[name] = zwj_emoji_data
 
-    return viable_emojis
+    return (symbol_viable_emojis, extended_viable_emojis)
