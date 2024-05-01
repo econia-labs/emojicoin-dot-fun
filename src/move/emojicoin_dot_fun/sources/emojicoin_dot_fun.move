@@ -2181,13 +2181,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
-    inline fun update_periodic_state_trackers_for_liquidity_provision_operation(
-        tvl: u128,
-        lp_coin_supply: u128,
-        periodic_state_trackers_ref_mut: &mut vector<PeriodicStateTracker>,
-    ) {
-    }
-
 /*
     #[test_only]
     public fun get_COIN_FACTORY_TYPE_CONSTANTS(): (vector<u8>, vector<u8>, vector<u8>) {
