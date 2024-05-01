@@ -15,8 +15,8 @@ const MainCard: React.FC = () => {
   });
 
   return (
-    <Flex justifyContent="center">
-      <FlexGap gap="50px" alignItems="center">
+    <Flex justifyContent="center" width="100%" maxWidth="1295px">
+      <Flex alignItems="center">
         <Flex alignItems="center">
           <Image src="/images/half-planet.webp" aspectRatio={1} width="500px" />
           <StyledBorder>
@@ -56,7 +56,7 @@ const MainCard: React.FC = () => {
             <Text textScale="display4">11.11M</Text>
           </FlexGap>
         </Column>
-      </FlexGap>
+      </Flex>
     </Flex>
   );
 };
