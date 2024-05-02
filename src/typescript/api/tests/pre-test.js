@@ -5,7 +5,8 @@ const path = require("path");
 const {
   LocalNode,
   publishForTest,
-  getGitRoot
+  PK_PATH,
+  PUBLISH_RES_PATH,
 } = require("./utils");
 
 module.exports = async function setup() {
@@ -14,13 +15,11 @@ module.exports = async function setup() {
     globalThis.__LOCAL_NODE__ = localNode;
     await localNode.run();
   }
-  const pkPath = path.resolve(path.join(getGitRoot(), ".tmp", ".pk"));
-  const publishResPath = path.resolve(path.join(getGitRoot(), ".tmp", ".publish_result"));
-  fs.mkdirSync(path.dirname(pkPath), { recursive: true });
-  fs.mkdirSync(path.dirname(publishResPath), { recursive: true });
+  fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
+  fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });
 
   const pk = Account.generate().privateKey.toString();
-  fs.writeFileSync(pkPath, pk);
+  fs.writeFileSync(PK_PATH, pk);
   const publishResult = JSON.stringify(await publishForTest(pk), null, 2);
-  fs.writeFileSync(publishResPath, publishResult);
+  fs.writeFileSync(PUBLISH_RES_PATH, publishResult);
 };
