@@ -65,7 +65,7 @@ export const StyledBlock = styled.div`
     position: absolute;
     width: 100vw;
     bottom: 0;
-    background-color: ${({ theme }) => theme.colors.darkGrey};
+    background-color: ${({ theme }) => theme.colors.error};
     height: 1px;
     transform: translateX(-50%);
   }

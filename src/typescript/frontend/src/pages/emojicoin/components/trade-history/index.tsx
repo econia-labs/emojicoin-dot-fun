@@ -1,16 +1,33 @@
 import React from "react";
 
-import { Text } from "components";
-// import { useTranslation } from "context";
+import { useTranslation } from "context";
+import { HEADERS, DATA } from "./constants";
+import { TableRowDesktop } from "./componenta";
+
+import { Table, Th, TBody, THead, StyledTradeHistory } from "./styled";
+
 const TradeHistory: React.FC = () => {
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
 
   return (
-    <div>
-      <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
-        Table
-      </Text>
-    </div>
+    <StyledTradeHistory id="lolka123">
+      <Table>
+        <THead>
+          <tr>
+            {HEADERS.map((th, index) => (
+              <Th width={th.width} key={index}>
+                {t(th.text)}
+              </Th>
+            ))}
+          </tr>
+        </THead>
+        <TBody>
+          {[...DATA, ...DATA, ...DATA, ...DATA, ...DATA].map((item, index) => (
+            <TableRowDesktop key={index} item={item} />
+          ))}
+        </TBody>
+      </Table>
+    </StyledTradeHistory>
   );
 };
 

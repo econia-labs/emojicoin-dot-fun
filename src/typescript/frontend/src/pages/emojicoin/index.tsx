@@ -24,7 +24,7 @@ const EmojicoinPage: React.FC = () => {
       <StyledContentWrapper>
         <StyledContentInner>
           <StyledContentColumn width="60%">
-            <StyledBlock>
+            <StyledBlock id="1111">
               <StyledContentHeader>
                 <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
                   {t("Price Chart")}
@@ -38,7 +38,7 @@ const EmojicoinPage: React.FC = () => {
               </StyledBlockWrapper>
             </StyledBlock>
 
-            <StyledBlock>
+            <StyledBlock id="2222">
               <StyledContentHeader>
                 <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
                   {t("Trade History")}
@@ -52,7 +52,7 @@ const EmojicoinPage: React.FC = () => {
           </StyledContentColumn>
 
           <StyledContentColumn width="40%">
-            <StyledBlock>
+            <StyledBlock id="3333">
               <StyledContentHeader>
                 <Flex width="100%" justifyContent="center">
                   <Button scale="lg">{t("Provide liquidity")}</Button>
@@ -64,7 +64,7 @@ const EmojicoinPage: React.FC = () => {
               </StyledBlockWrapper>
             </StyledBlock>
 
-            <StyledBlock>
+            <StyledBlock id="4444">
               <StyledContentHeader>
                 <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
                   {t("Chat")}

@@ -29,7 +29,7 @@ const TradeEmojicoin: React.FC = () => {
             </Text>
 
             <InputGroup isShowError={false} height="22px" scale="sm">
-              <InputNumeric borderColor="black" p="0px !important" onUserInput={() => {}} />
+              <InputNumeric borderColor="transparent" p="0px !important" onUserInput={() => {}} />
             </InputGroup>
           </Column>
 
@@ -49,7 +49,7 @@ const TradeEmojicoin: React.FC = () => {
             </Text>
 
             <InputGroup isShowError={false} height="22px" scale="sm">
-              <InputNumeric borderColor="black" p="0px !important" onUserInput={() => {}} />
+              <InputNumeric borderColor="transparent" p="0px !important" onUserInput={() => {}} />
             </InputGroup>
           </Column>
 

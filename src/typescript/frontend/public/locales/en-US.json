@@ -30,5 +30,10 @@
   "Trade Emojicoin": "Trade Emojicoin",
   "Swap": "Swap",
   "You pay": "You pay",
-  "You receive": "You receive"
+  "You receive": "You receive",
+  "Rank": "Rank",
+  "Apt": "Apt",
+  "Type": "Type",
+  "Date": "Date",
+  "Transaction": "Transaction"
 }
