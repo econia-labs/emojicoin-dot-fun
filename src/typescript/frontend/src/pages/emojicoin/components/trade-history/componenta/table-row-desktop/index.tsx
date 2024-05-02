@@ -4,15 +4,26 @@ import { Flex, Text } from "components";
 
 import { Tr, Td } from "../../styled";
 import { TableRowDesktopProps } from "./types";
+import { useTooltip } from "hooks";
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
+  const { targetRef, tooltip } = useTooltip(
+    <Text color="black" textScale="pixelHeading4" textTransform="uppercase">
+      {item.rank}
+    </Text>,
+    {
+      placement: "top",
+    },
+  );
+
   return (
     <Tr>
       <Td>
-        <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.rank}
+        <Flex justifyContent="center">
+          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ref={targetRef}>
+            {item.rankIcon}
           </Text>
+          {tooltip}
         </Flex>
       </Td>
       <Td>

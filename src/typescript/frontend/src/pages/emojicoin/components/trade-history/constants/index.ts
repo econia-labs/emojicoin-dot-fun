@@ -27,7 +27,8 @@ export const HEADERS = [
 
 export const DATA = [
   {
-    rank: "🐳",
+    rankIcon: "🐳",
+    rank: "based",
     apt: "1.0213",
     emoji: "11.11M",
     type: "Buy",
@@ -35,7 +36,8 @@ export const DATA = [
     transaction: "0x6743dd86424cca2c45678uyggy6ugv",
   },
   {
-    rank: "🐡",
+    rankIcon: "🐡",
+    rank: "n00b",
     apt: "1.0213",
     emoji: "11.11M",
     type: "Buy",
@@ -43,7 +45,8 @@ export const DATA = [
     transaction: "0x6743dd86424cca2c45678uyggy6ugv",
   },
   {
-    rank: "🐬",
+    rankIcon: "🐬",
+    rank: "lfg",
     apt: "1.0213",
     emoji: "11.11M",
     type: "Buy",

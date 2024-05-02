@@ -21,16 +21,6 @@ export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdPro
   text-transform: uppercase;
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
 
-  // &:after {
-  //   content: "";
-  //   position: absolute;
-  //   bottom: 0;
-  //   left: 0;
-  //   right: 0;
-  //   height: 1px;
-  //   background-color: ${({ theme }) => theme.colors.black};
-  // }
-
   &:nth-child(1) {
     padding-inline-start: 24px;
 
@@ -55,6 +45,11 @@ export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdPro
 export const Tr = styled.tr`
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
+
+  &:last-child {
+    border-bottom: none;
+  }
+
   ${layout}
 `;
 
@@ -63,16 +58,6 @@ export const Td = styled.td<TdProps>`
   padding: 12px;
   vertical-align: middle;
   position: relative;
-
-  // &:after {
-  //   content: "";
-  //   position: absolute;
-  //   bottom: 0;
-  //   left: 0;
-  //   right: 0;
-  //   height: 1px;
-  //   background-color: ${({ theme }) => theme.colors.black};
-  // }
 
   &:nth-child(1) {
     padding-inline-start: 24px;

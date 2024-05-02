@@ -1,25 +1,23 @@
 import styled from "styled-components";
-import { Column } from "components";
+import { Flex } from "components";
 
 export const StyledContentWrapper = styled.div`
   display: flex;
   justify-content: center;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
 `;
 export const StyledContentInner = styled.div`
   display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 1362px;
-  border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
 `;
 
-export const StyledContentColumn = styled(Column)`
+export const StyledContentColumn = styled(Flex)`
   display: flex;
-  flex-direction: column;
 
-  &:first-child {
-    border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  }
+  border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
 `;
 
 export const StyledContentHeader = styled.div`
@@ -55,18 +53,11 @@ export const StyledBlockWrapper = styled.div`
   min-height: 320px;
 `;
 
-export const StyledBlock = styled.div`
+export const StyledBlock = styled(Flex)`
   display: flex;
   flex-direction: column;
 
-  &:after {
-    content: "";
-    display: block;
-    position: absolute;
-    width: 100vw;
-    bottom: 0;
-    background-color: ${({ theme }) => theme.colors.error};
-    height: 1px;
-    transform: translateX(-50%);
+  &:first-child {
+    border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
   }
 `;

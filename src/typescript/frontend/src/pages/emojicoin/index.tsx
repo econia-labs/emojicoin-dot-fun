@@ -23,8 +23,8 @@ const EmojicoinPage: React.FC = () => {
 
       <StyledContentWrapper>
         <StyledContentInner>
-          <StyledContentColumn width="60%">
-            <StyledBlock id="1111">
+          <StyledContentColumn>
+            <StyledBlock width="57%">
               <StyledContentHeader>
                 <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
                   {t("Price Chart")}
@@ -38,21 +38,7 @@ const EmojicoinPage: React.FC = () => {
               </StyledBlockWrapper>
             </StyledBlock>
 
-            <StyledBlock id="2222">
-              <StyledContentHeader>
-                <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
-                  {t("Trade History")}
-                </Text>
-              </StyledContentHeader>
-
-              <StyledBlockWrapper>
-                <TradeHistory />
-              </StyledBlockWrapper>
-            </StyledBlock>
-          </StyledContentColumn>
-
-          <StyledContentColumn width="40%">
-            <StyledBlock id="3333">
+            <StyledBlock width="43%">
               <StyledContentHeader>
                 <Flex width="100%" justifyContent="center">
                   <Button scale="lg">{t("Provide liquidity")}</Button>
@@ -63,8 +49,22 @@ const EmojicoinPage: React.FC = () => {
                 <TradeEmojicoin />
               </StyledBlockWrapper>
             </StyledBlock>
+          </StyledContentColumn>
 
-            <StyledBlock id="4444">
+          <StyledContentColumn>
+            <StyledBlock width="57%">
+              <StyledContentHeader>
+                <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+                  {t("Trade History")}
+                </Text>
+              </StyledContentHeader>
+
+              <StyledBlockWrapper>
+                <TradeHistory />
+              </StyledBlockWrapper>
+            </StyledBlock>
+
+            <StyledBlock width="43%">
               <StyledContentHeader>
                 <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
                   {t("Chat")}
