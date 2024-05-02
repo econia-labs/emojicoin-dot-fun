@@ -119,8 +119,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_NOT_SUPPORTED_CHAT_EMOJI: u64 = 13;
     /// The constructed chat message exceeds the maximum length.
     const E_CHAT_MESSAGE_TOO_LONG: u64 = 14;
-    /// All chat emojis have already been added.
-    const E_ALL_CHAT_EMOJIS_ADDED: u64 = 15;
 
     struct CumulativeStats has copy, drop, store {
         base_volume: u128,
@@ -299,7 +297,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         registry_address: address,
         sequence_info: SequenceInfo,
         coin_symbol_emojis: Table<vector<u8>, u8>,
-        chat_emojis: SmartTable<vector<u8>, u8>,
+        chat_emojis: Table<vector<u8>, u8>,
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
@@ -506,18 +504,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let (metadata_bytecode, module_bytecode) = hex_codes::get_publish_code(market_address);
         code::publish_package_txn(&market_signer, metadata_bytecode, vector[module_bytecode]);
 
-        // Charge registrant.
+        // Only charge the registrant if they have to pay for initializing the chat emojis.
+        // Otherwise, waive the register market fee, since the gas costs of initializing them
+        // is roughly the same.
         let registrant_address = signer::address_of(registrant);
-        let can_pay_fee =
-            coin::is_account_registered<AptosCoin>(registrant_address) &&
-            coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_FEE;
-        assert!(can_pay_fee, E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE);
-        aptos_account::transfer(registrant, integrator, MARKET_REGISTRATION_FEE);
+        let fee = if (ensure_chat_emojis_initialized(registry_ref_mut)) {
+            0
+        } else {
+            let can_pay_fee =
+                coin::is_account_registered<AptosCoin>(registrant_address) &&
+                coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_FEE;
+            assert!(can_pay_fee, E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE);
+            aptos_account::transfer(registrant, integrator, MARKET_REGISTRATION_FEE);
+            (MARKET_REGISTRATION_FEE as u128)
+        };
 
         // Update global integrator fees.
         let global_cumulative_integrator_fees_ref_mut =
             &mut registry_ref_mut.global_stats.cumulative_integrator_fees;
-        let fee = (MARKET_REGISTRATION_FEE as u128);
         aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, fee);
 
         // Bump state.
@@ -1214,34 +1218,23 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
-    /// Since `init_module` will go over the transaction execution limit if we try to add the chat
-    /// emojis in the same transaction, we need to push the remaining chat emojis into the registry
-    /// post module publication.
-    /// We only add emojis that are not already in the registry by starting at the last index added
-    /// plus one, i.e., the current length of the chat emojis smart table.
-    public entry fun add_remaining_chat_emojis(
-        amount: u64,
-    ) acquires Registry, RegistryAddress {
-        let registry_ref_mut = borrow_registry_ref_mut();
+    /// A crank function to add all chat emojis to the registry if they haven't been added yet.
+    /// Returns true if the chat emojis were added, false otherwise.
+    inline fun ensure_chat_emojis_initialized(
+        registry_ref_mut: &mut Registry
+    ): bool acquires Registry, RegistryAddress {
         let chat_emojis_ref_mut = &mut registry_ref_mut.chat_emojis;
 
-        let next_idx = smart_table::length(chat_emojis_ref_mut);
         let chat_emojis = hex_codes::get_chat_emojis();
-        let num_chat_emojis = vector::length(&chat_emojis);
-        assert!(next_idx < num_chat_emojis, E_ALL_CHAT_EMOJIS_ADDED);
-
-        // AKA: let last_idx = min(next_idx + amount, num_chat_emojis);
-        let last_idx = if (next_idx + amount < num_chat_emojis) {
-            next_idx + amount
+        let emoji_0 = *vector::borrow(&chat_emojis, 0);
+        if (table::contains(chat_emojis_ref_mut, emoji_0)) {
+            false
         } else {
-            num_chat_emojis
-        };
-
-        // The next index to add is equal to the length of the smart table.
-        for (i in next_idx..last_idx) {
-            let emoji_bytes = *vector::borrow(&chat_emojis, i);
-            smart_table::add(chat_emojis_ref_mut, emoji_bytes, 0);
-        };
+            vector::for_each(chat_emojis, |emoji| {
+                table::add(chat_emojis_ref_mut, emoji, 0);
+            });
+            true
+        }
     }
 
     fun init_module(emojicoin_dot_fun: &signer) {
@@ -1260,7 +1253,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 nonce: 1,
             },
             coin_symbol_emojis: table::new(),
-            chat_emojis: smart_table::new(),
+            chat_emojis: table::new(),
             markets_by_emoji_bytes: smart_table::new(),
             markets_by_market_id: smart_table::new(),
             extend_ref,
@@ -1312,7 +1305,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     public fun is_a_supported_chat_emoji(
         hex_bytes: vector<u8>
     ): bool acquires Registry, RegistryAddress {
-        smart_table::contains(&borrow_registry_ref().chat_emojis, hex_bytes)
+        table::contains(&borrow_registry_ref().chat_emojis, hex_bytes)
     }
 
     #[view]
@@ -2520,8 +2513,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let (black_cat_market_address, _) = create_market(registry_ref_mut, BLACK_CAT);
         let user_address = signer::address_of(user);
         aptos_account::create_account(user_address);
-        // The function should handle the overflow (there are only ~1400 auxiliary chat emojis).
-        add_remaining_chat_emojis(2000);
+        ensure_chat_emojis_initialized(registry_ref_mut);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             user,
             vector<vector<u8>> [
