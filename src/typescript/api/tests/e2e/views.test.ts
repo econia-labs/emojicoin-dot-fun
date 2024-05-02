@@ -22,7 +22,7 @@ describe("it tests view functions", () => {
     );
 
     const testIsSupported = async (hex: HexInput, expected: boolean) => {
-      const view = new EmojicoinDotFun.IsASupportedEmoji({
+      const view = new EmojicoinDotFun.IsASupportedSymbolEmoji({
         moduleAddress: publisher.accountAddress.toStringLong(),
         hexBytes: hex,
       });

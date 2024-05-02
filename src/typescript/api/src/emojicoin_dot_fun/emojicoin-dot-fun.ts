@@ -475,18 +475,18 @@ export type IsASupportedEmojiPayloadMoveArguments = {
 /**
  *```
  *  #[view]
- *  public fun is_a_supported_emoji(
+ *  public fun is_a_supported_symbol_emoji(
  *     hex_bytes: vector<u8>,
  *  ): bool
  *```
  * */
 
-export class IsASupportedEmoji extends ViewFunctionPayloadBuilder<[boolean]> {
+export class IsASupportedSymbolEmoji extends ViewFunctionPayloadBuilder<[boolean]> {
   public readonly moduleAddress: AccountAddress;
 
   public readonly moduleName = "emojicoin_dot_fun";
 
-  public readonly functionName = "is_a_supported_emoji";
+  public readonly functionName = "is_a_supported_symbol_emoji";
 
   public readonly args: IsASupportedEmojiPayloadMoveArguments;
 
