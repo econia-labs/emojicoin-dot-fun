@@ -1,15 +1,13 @@
 [addresses]
-emojicoin_dot_fun = "_"
 market_address = "_"
 
-[dependencies.AptosFramework]
+[dev-addresses]
+market_address = "0xaaa"
+
+[dev-dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
-
-[dev-addresses]
-emojicoin_dot_fun = "0xcccccccc"
-market_address = "0xbbbbbbbb"
 
 [dev-dependencies.EmojicoinDotFun]
 local = "../emojicoin_dot_fun"
