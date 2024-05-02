@@ -9,6 +9,7 @@
 import json
 import pathlib
 import sys
+from typing import Any
 
 from unidecode import unidecode
 
@@ -18,9 +19,12 @@ from data_types.type_defs import EmojiData, QualifiedEmojiData
 BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
 ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
 MOVE_CONSTS_DATA_FILE = "data/move_consts.txt"
+MOVE_CONSTS_EXTENDED_DATA_FILE = "data/move_consts_extended.txt"
 AUXILIARY_EMOJIS_DATA_FILE = "data/auxiliary_emojis.json"
 BASE_EMOJIS_DATA_FILE = "data/base_emojis.json"
 ZWJ_EMOJIS_DATA_FILE = "data/zwj_emojis.json"
+VIABLE_EMOJIS_DATA_FILE = "data/viable_emojis.json"
+VIABLE_EMOJIS_EXTENDED_DATA_FILE = "data/viable_emojis_extended.json"
 TAB = " " * 4
 
 
@@ -101,6 +105,17 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
     )
 
 
+def ensure_write_to_file(data: str | dict[str, Any], fp_str: str, indent: int = 3):
+    fp = pathlib.Path(fp_str)
+    pathlib.Path(fp.parent).mkdir(exist_ok=True)
+
+    with open(fp_str, "w") as outfile:
+        if isinstance(data, str):
+            _ = outfile.write(data)
+        else:
+            json.dump(data, outfile, indent=indent)
+
+
 if __name__ == "__main__":
     base_emoji_dict: dict[str, QualifiedEmojiData]
     zwj_emoji_dict: dict[str, EmojiData]
@@ -109,39 +124,23 @@ if __name__ == "__main__":
         base_emoji_dict = json.load(open(BASE_EMOJIS_DATA_FILE, "r"))
     else:
         base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
-        json.dump(base_emoji_dict, open(BASE_EMOJIS_DATA_FILE, "w"), indent=3)
+        ensure_write_to_file(base_emoji_dict, BASE_EMOJIS_DATA_FILE)
 
     if pathlib.Path(ZWJ_EMOJIS_DATA_FILE).exists():
         zwj_emoji_dict = json.load(open(ZWJ_EMOJIS_DATA_FILE, "r"))
     else:
         zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
-        json.dump(zwj_emoji_dict, open(ZWJ_EMOJIS_DATA_FILE, "w"), indent=3)
+        ensure_write_to_file(zwj_emoji_dict, ZWJ_EMOJIS_DATA_FILE)
 
     symbol_emojis, extended_emojis = data_parser.get_viable_emojis(
         base_emoji_dict, zwj_emoji_dict
     )
 
-    json.dump(symbol_emojis, open("data/viable_emojis.json", "w"), indent=3)
-    json.dump(extended_emojis, open("data/viable_emojis_extended.json", "w"), indent=3)
+    ensure_write_to_file(symbol_emojis, VIABLE_EMOJIS_DATA_FILE)
+    ensure_write_to_file(extended_emojis, VIABLE_EMOJIS_EXTENDED_DATA_FILE)
 
-    generated_code = generate_move_code({**symbol_emojis})
-    fp = pathlib.Path(MOVE_CONSTS_DATA_FILE)
-    pathlib.Path(fp.parent).mkdir(exist_ok=True)
+    generated_code = generate_move_code(symbol_emojis)
+    ensure_write_to_file(generated_code, MOVE_CONSTS_DATA_FILE)
 
-    with open(fp, "w") as outfile:
-        _ = outfile.write(generated_code)
-
-    # Generate the extended emoji set Move code.
     extended_generated_code = generate_move_code(extended_emojis)
-    extended_fp = pathlib.Path(MOVE_CONSTS_DATA_FILE.replace(".txt", "_extended.txt"))
-    pathlib.Path(extended_fp.parent).mkdir(exist_ok=True)
-    with open(extended_fp, "w") as outfile:
-        _ = outfile.write(extended_generated_code)
-
-    auxiliary_emojis = [
-        "".join(x for x in y["code_points"]["as_hex"]) for y in extended_emojis.values()
-    ]
-    auxiliary_emojis.sort()
-
-    with open(AUXILIARY_EMOJIS_DATA_FILE, "w") as outfile:
-        json.dump(auxiliary_emojis, outfile, indent=3)
+    ensure_write_to_file(extended_generated_code, MOVE_CONSTS_EXTENDED_DATA_FILE)
