@@ -6,9 +6,9 @@
 # Helper file for converting all of the data in the Unicode Emoji data files
 # to Move-friendly constants.
 
+import json
 import pathlib
 import sys
-import json
 
 from unidecode import unidecode
 
@@ -100,26 +100,29 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
         ]
     )
 
+
 if __name__ == "__main__":
     base_emoji_dict: dict[str, QualifiedEmojiData]
     zwj_emoji_dict: dict[str, EmojiData]
 
     if pathlib.Path(BASE_EMOJIS_DATA_FILE).exists():
-        base_emoji_dict = json.load(open(BASE_EMOJIS_DATA_FILE, 'r'))
+        base_emoji_dict = json.load(open(BASE_EMOJIS_DATA_FILE, "r"))
     else:
         base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
-        json.dump(base_emoji_dict, open(BASE_EMOJIS_DATA_FILE, 'w'), indent=3)
+        json.dump(base_emoji_dict, open(BASE_EMOJIS_DATA_FILE, "w"), indent=3)
 
     if pathlib.Path(ZWJ_EMOJIS_DATA_FILE).exists():
-        zwj_emoji_dict = json.load(open(ZWJ_EMOJIS_DATA_FILE, 'r'))
+        zwj_emoji_dict = json.load(open(ZWJ_EMOJIS_DATA_FILE, "r"))
     else:
         zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
-        json.dump(zwj_emoji_dict, open(ZWJ_EMOJIS_DATA_FILE, 'w'), indent=3)
+        json.dump(zwj_emoji_dict, open(ZWJ_EMOJIS_DATA_FILE, "w"), indent=3)
 
-    symbol_emojis, extended_emojis = data_parser.get_viable_emojis(base_emoji_dict, zwj_emoji_dict)
+    symbol_emojis, extended_emojis = data_parser.get_viable_emojis(
+        base_emoji_dict, zwj_emoji_dict
+    )
 
-    json.dump(symbol_emojis, open('data/viable_emojis.json', 'w'), indent=3)
-    json.dump(extended_emojis, open('data/viable_emojis_extended.json', 'w'), indent=3)
+    json.dump(symbol_emojis, open("data/viable_emojis.json", "w"), indent=3)
+    json.dump(extended_emojis, open("data/viable_emojis_extended.json", "w"), indent=3)
 
     generated_code = generate_move_code({**symbol_emojis})
     fp = pathlib.Path(MOVE_CONSTS_DATA_FILE)
@@ -136,7 +139,7 @@ if __name__ == "__main__":
         _ = outfile.write(extended_generated_code)
 
     auxiliary_emojis = [
-        ''.join(x for x in y["code_points"]['as_hex']) for y in extended_emojis.values()
+        "".join(x for x in y["code_points"]["as_hex"]) for y in extended_emojis.values()
     ]
     auxiliary_emojis.sort()
 

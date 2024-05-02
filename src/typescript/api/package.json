@@ -2,8 +2,7 @@
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.13.0",
     "@noble/hashes": "^1.4.0",
-    "find-git-root": "^1.0.4",
-    "merkletreejs": "^0.3.11"
+    "find-git-root": "^1.0.4"
   },
   "description": "TypeScript SDK for Econia's Emojicoin Dot Fun",
   "devDependencies": {
@@ -44,7 +43,6 @@
     "fmt": "pnpm _fmt --write",
     "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",
     "lint-fix": "pnpm lint --fix",
-    "merkle": "pnpm tsx src/emojicoin_dot_fun/merkle-tree.ts",
     "test": "pnpm jest",
     "unit-test": "pnpm jest tests/unit"
   },
