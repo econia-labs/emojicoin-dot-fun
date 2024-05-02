@@ -41,7 +41,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     const DECIMALS: u8 = 8;
     const MAX_SYMBOL_LENGTH: u8 = 10;
-    const MAX_CHAT_MESSAGE_LENGTH: u8 = 255;
+    const MAX_CHAT_MESSAGE_LENGTH: u8 = 100;
     const MONITOR_SUPPLY: bool = true;
 
     const COIN_FACTORY_AS_BYTES: vector<u8> = b"coin_factory";
@@ -391,6 +391,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         market_address: address,
     ) acquires Market, Registry, RegistryAddress {
 
+        assert!(
+            vector::length(&emoji_indices_sequence) <= (MAX_CHAT_MESSAGE_LENGTH as u64),
+            E_CHAT_MESSAGE_TOO_LONG,
+        );
+
         // Mutably borrow market and check its coin types.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         ensure_coins_initialized<Emojicoin, EmojicoinLP>(
@@ -414,11 +419,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             let emoji = *vector::borrow(&emoji_bytes, (idx as u64));
             string::append_utf8(&mut message, emoji);
         });
-
-        assert!(
-            string::length(&message) <= (MAX_CHAT_MESSAGE_LENGTH as u64),
-            E_CHAT_MESSAGE_TOO_LONG,
-        );
 
         // Prep local variables.
         let user_address = signer::address_of(user);
@@ -2453,6 +2453,20 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             },
             0
         );
+
+        // Post a max length chat message.
+        let one_hundred_zeroes = vector [];
+        for (i in 0..100) {
+            vector::push_back(&mut one_hundred_zeroes, 0);
+        };
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            user,
+            vector<vector<u8>> [
+                x"f09f9088e2808de2ac9b", // Black cat.
+            ],
+            one_hundred_zeroes,
+            black_cat_market_address,
+        );
     }
 
     #[test(user = @0xfa), expected_failure(abort_code = E_NOT_SUPPORTED_CHAT_EMOJI)]
@@ -2489,16 +2503,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             vector<vector<u8>> [
                 x"f09f8dba", // Beer mug.
             ],
-            // 64 beer mugs, which is 256 bytes and should be too long.
+            // 101 beer mugs, which is one emoji too long.
             vector<u8> [
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0,
             ],
             black_cat_market_address,
         );
