@@ -19,13 +19,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use std::string::{Self, String};
     use std::vector;
 
-/*
-    #[test_only] use aptos_std::aptos_coin;
-    #[test_only] const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
-    #[test_only] const BLACK_HEART: vector<u8> = x"f09f96a4";
-    #[test_only] const YELLOW_HEART: vector<u8> = x"f09f929b";
-*/
-
     const DECIMALS: u8 = 8;
     const MAX_SYMBOL_LENGTH: u8 = 10;
     const MAX_CHAT_MESSAGE_LENGTH: u8 = 100;
@@ -2192,6 +2185,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_EMOJICOIN_STRUCT_NAME(): vector<u8> { EMOJICOIN_STRUCT_NAME }
     #[test_only] public fun get_EMOJICOIN_LP_STRUCT_NAME(): vector<u8> { EMOJICOIN_LP_STRUCT_NAME }
     #[test_only] public fun get_MAX_SYMBOL_LENGTH(): u8 { MAX_SYMBOL_LENGTH }
+    #[test_only] public fun get_MARKET_REGISTRATION_FEE(): u64 { MARKET_REGISTRATION_FEE }
     #[test_only] public fun get_MICROSECONDS_PER_SECOND(): u64 { MICROSECONDS_PER_SECOND }
     #[test_only] public fun get_PERIOD_1M(): u64 { PERIOD_1M }
     #[test_only] public fun get_PERIOD_5M(): u64 { PERIOD_5M }
@@ -2203,6 +2197,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
+
+    #[test_only] public fun get_verified_symbol_emoji_bytes_test_only(emojis: vector<vector<u8>>):
+    vector<u8> acquires Registry, RegistryAddress {
+        get_verified_symbol_emoji_bytes(borrow_registry_ref(), emojis)
+    }
 
     #[test_only] public fun init_module_test_only(account: &signer) { init_module(account) }
 

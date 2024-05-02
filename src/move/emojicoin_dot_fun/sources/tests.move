@@ -1,6 +1,6 @@
 #[test_only] module emojicoin_dot_fun::tests {
 
-    use aptos_framework::account;
+    use aptos_framework::account::{Self, create_signer_for_test as get_signer};
     use aptos_framework::coin::{Self, BurnCapability, Coin, MintCapability};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::{Self, AptosCoin};
@@ -20,6 +20,7 @@
         get_BASE_VIRTUAL_CEILING,
         get_BASE_VIRTUAL_FLOOR,
         get_MAX_SYMBOL_LENGTH,
+        get_MARKET_REGISTRATION_FEE,
         get_MICROSECONDS_PER_SECOND,
         get_PERIOD_1M,
         get_PERIOD_5M,
@@ -32,8 +33,13 @@
         get_QUOTE_VIRTUAL_CEILING,
         get_QUOTE_VIRTUAL_FLOOR,
         get_concatenation_test_only,
-        pack_Reserves,
+        get_verified_symbol_emoji_bytes_test_only as get_verified_symbol_emoji_bytes,
         init_module_test_only as init_module,
+        is_a_supported_symbol_emoji,
+        market_metadata_by_emoji_bytes,
+        pack_Reserves,
+        register_market,
+        unpack_market_metadata,
         valid_coin_types_test_only as valid_coin_types,
     };
     use emojicoin_dot_fun::hex_codes::{
@@ -48,6 +54,7 @@
         BadType,
     };
     use std::bcs;
+    use std::option;
     use std::string;
     use std::vector;
 
@@ -56,12 +63,30 @@
         mint_cap: MintCapability<AptosCoin>,
     }
 
+    // Test market emoji bytes.
+    const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
+    const BLACK_HEART: vector<u8> = x"f09f96a4";
+    const YELLOW_HEART: vector<u8> = x"f09f929b";
+
+    const USER: address = @0xaaa;
+    const INTEGRATOR: address = @0xbbb;
+
+    public fun assert_test_market_address(
+        emoji_bytes: vector<vector<u8>>,
+        hard_coded_address: address,
+    ) acquires AptosCoinCapStore {
+        mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_FEE());
+        register_market(&get_signer(USER), emoji_bytes, INTEGRATOR);
+        let concatenated_bytes = get_verified_symbol_emoji_bytes(emoji_bytes);
+        let metadata = option::destroy_some(market_metadata_by_emoji_bytes(concatenated_bytes));
+        let (_, derived_market_address, _) = unpack_market_metadata(metadata);
+        assert!(derived_market_address == hard_coded_address, 0);
+    }
+
     public fun init_package() {
-        let framework_signer = account::create_signer_for_test(@aptos_framework);
-        let emojicoin_dot_fun_signer = account::create_signer_for_test(@emojicoin_dot_fun);
         aptos_account::create_account(@emojicoin_dot_fun);
-        timestamp::set_time_has_started_for_testing(&framework_signer);
-        init_module(&emojicoin_dot_fun_signer);
+        timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
+        init_module(&get_signer(@emojicoin_dot_fun));
     }
 
     public fun mint_aptos_coin(amount: u64): Coin<AptosCoin> acquires AptosCoinCapStore {
@@ -133,6 +158,13 @@
         assert!(module_bytecode == expected_module_bytecode, 0);
     }
 
+    #[test] fun derived_test_market_addresses() acquires AptosCoinCapStore {
+        init_package();
+        assert_test_market_address(vector[BLACK_CAT], @black_cat_market);
+        assert_test_market_address(vector[BLACK_HEART], @black_heart_market);
+        assert_test_market_address(vector[YELLOW_HEART], @yellow_heart_market);
+    }
+
     #[test] fun period_times() {
         let ms_per_s = get_MICROSECONDS_PER_SECOND();
         assert!(get_PERIOD_1M() == 60 * ms_per_s, 0);
@@ -142,6 +174,39 @@
         assert!(get_PERIOD_1H() == 60 * 60 * ms_per_s, 0);
         assert!(get_PERIOD_4H() == 4 * 60 * 60 * ms_per_s, 0);
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
+    }
+
+    #[test] fun supported_emojis_() {
+        init_package();
+        let various_emojis = vector<vector<u8>> [
+            x"f09f868e",         // AB button blood type, 1F18E.
+            x"f09fa6bbf09f8fbe", // Ear with hearing aid medium dark skin tone, 1F9BB 1F3FE.
+            x"f09f87a7f09f87b9", // Flag Bhutan, 1F1E7 1F1F9.
+            x"f09f9190f09f8fbe", // Open hands medium dark skin tone, 1F450 1F3FE.
+            x"f09fa4b0f09f8fbc", // Pregnant woman medium light skin tone, 1F930 1F3FC.
+            x"f09f9faa",         // Purple square, 1F7EA.
+            x"f09f91abf09f8fbe", // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
+            x"f09f91a9f09f8fbe", // Woman medium dark skin tone, 1F469 1F3FE.
+            x"f09fa795f09f8fbd", // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
+            x"f09fa490",         // Zipper mouth face, 1F910.
+        ];
+        vector::for_each(various_emojis, |bytes| {
+            assert!(is_a_supported_symbol_emoji(bytes), 0);
+        });
+
+        // Test unsupported emojis.
+        assert!(!is_a_supported_symbol_emoji(x"0000"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"fe0f"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"1234"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"f0fabcdefabcdeff0f"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"f0f00dcafef0"), 0);
+        // Minimally qualified "head shaking horizontally".
+        assert!(!is_a_supported_symbol_emoji(x"f09f9982e2808de28694"), 0);
+
+        // Verify a supported emoji, add some bunk data to it, then verity it is no longer allowed.
+        assert!(is_a_supported_symbol_emoji(x"e29d97"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"e29d97ff"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"ffe29d97"), 0);
     }
 
     #[test] fun valid_coin_types_all_invalid() {
