@@ -401,15 +401,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_address,
         );
 
-        let registry_ref_mut = borrow_registry_ref_mut();
-        let coin_symbol_emojis_ref = &registry_ref_mut.coin_symbol_emojis;
-        let chat_emojis_ref = &registry_ref_mut.chat_emojis;
-
         // Verify all emoji bytes are either coin symbol emojis or chat emojis.
         assert!(
             vector::all(&emoji_bytes, |emoji| {
-                table::contains(coin_symbol_emojis_ref, *emoji) ||
-                smart_table::contains(chat_emojis_ref, *emoji)
+                is_a_supported_symbol_emoji(*emoji) ||
+                is_a_supported_chat_emoji(*emoji)
             }),
             E_NOT_SUPPORTED_CHAT_EMOJI,
         );
@@ -428,6 +424,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Prep local variables.
         let user_address = signer::address_of(user);
+        let registry_ref_mut = borrow_registry_ref_mut();
         let lp_coin_supply = market_ref_mut.lp_coin_supply;
         let in_bonding_curve = lp_coin_supply == 0;
 
@@ -1308,44 +1305,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     /// Checks if an individual emoji is supported as a coin symbol.
-    public fun is_a_supported_symbol_emoji(hex_bytes: vector<u8>): bool
-    acquires Registry, RegistryAddress {
+    public fun is_a_supported_symbol_emoji(
+        hex_bytes: vector<u8>
+    ): bool acquires Registry, RegistryAddress {
         table::contains(&borrow_registry_ref().coin_symbol_emojis, hex_bytes)
     }
 
     #[view]
     /// Checks if an individual emoji is supported for usage in chat.
-    public fun is_a_supported_chat_emoji(hex_bytes: vector<u8>): bool
-    acquires Registry, RegistryAddress {
+    public fun is_a_supported_chat_emoji(
+        hex_bytes: vector<u8>
+    ): bool acquires Registry, RegistryAddress {
         smart_table::contains(&borrow_registry_ref().chat_emojis, hex_bytes)
-    }
-
-    #[view]
-    /// Checks if a sequence of symbol emojis is supported.
-    public fun is_supported_symbol_emoji_sequence(emojis: vector<vector<u8>>): bool
-    acquires Registry, RegistryAddress {
-        let symbol_length = 0;
-        let coin_symbol_emojis_ref = &borrow_registry_ref().coin_symbol_emojis;
-        for (i in 0..vector::length(&emojis)) {
-            let emoji_bytes_ref = vector::borrow(&emojis, i);
-            if (!table::contains(coin_symbol_emojis_ref, *emoji_bytes_ref)) return false;
-            symbol_length = symbol_length + vector::length(emoji_bytes_ref);
-        };
-        symbol_length <= (MAX_SYMBOL_LENGTH as u64)
-    }
-
-    #[view]
-    /// Checks if a sequence of chat emojis is supported.
-    public fun is_supported_chat_emoji_sequence(emojis: vector<vector<u8>>): bool
-    acquires Registry, RegistryAddress {
-        let message_length = 0;
-        let chat_emojis_ref = &borrow_registry_ref().chat_emojis;
-        for (i in 0..vector::length(&emojis)) {
-            let emoji_bytes_ref = vector::borrow(&emojis, i);
-            if (!smart_table::contains(chat_emojis_ref, *emoji_bytes_ref)) return false;
-            message_length = message_length + vector::length(emoji_bytes_ref);
-        };
-        message_length <= (MAX_CHAT_MESSAGE_LENGTH as u64)
     }
 
     #[view]
@@ -2561,11 +2532,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 x"f09fa791e2808df09f9a80", // Astronaut.
                 x"f09fa6b8f09f8fbee2808de29982efb88f", // Man superhero: medium-dark skin tone.
             ],
-            vector<u8> [ 0, 1, 1, 0 ],
+            vector<u8> [ 0, 1 ],
             black_cat_market_address,
         );
         let events_emitted = event::emitted_events<Chat>();
         let chat_event = vector::pop_back(&mut events_emitted);
+        assert!(
+            chat_event.message ==
+                string::utf8(x"f09fa791e2808df09f9a80f09fa6b8f09f8fbee2808de29982efb88f"),
+            0
+        );
     }
 
     #[test(user = @0xfa), expected_failure(abort_code = E_NOT_SUPPORTED_CHAT_EMOJI)]
