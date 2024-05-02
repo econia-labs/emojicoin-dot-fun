@@ -27,7 +27,7 @@ const LaunchEmojicoinPage: React.FC = () => {
   });
 
   const { targetRef: targetRefLabel, tooltip: labelTooltip } = useTooltip(
-    t("Pick up to two, due to byte limitations not all combinations are supported."),
+    t("Pick one to five emojis; due to byte limitations not all combinations are supported."),
     {
       placement: "top",
     },

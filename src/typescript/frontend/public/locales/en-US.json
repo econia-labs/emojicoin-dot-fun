@@ -6,20 +6,19 @@
   "Anime:": "Anime:",
   "Bump Order": "Bump Order",
   "Copied": "Copied",
+  "Cost to deploy:": "Cost to deploy:",
   "Econia Labs": "Econia Labs",
+  "Emojicoin Name:": "Emojicoin Name:",
+  "Emojicoin symbol (ticker) :": "Emojicoin symbol (ticker) :",
   "Fail to copy": "Fail to copy",
   "Go to home page": "Go to home page",
   "Home": "Home",
+  "Launch Emojicoin": "Launch Emojicoin",
   "Market Cap": "Market Cap",
   "Mkt. Cap:": "Mkt. Cap:",
   "Not found Page": "Not found Page",
+  "Pick one to five emojis; due to byte limitations not all combinations are supported.": "Pick one to five emojis; due to byte limitations not all combinations are supported.",
   "Search:": "Search:",
-  "Sort:": "Sort:",
   "Select Emoji": "Select Emoji",
-  "Emojicoin Name:": "Emojicoin Name:",
-  "Emojicoin symbol (ticker) :": "Emojicoin symbol (ticker) :",
-  "Cost to deploy:": "Cost to deploy:",
-  "Launch Emojicoin": "Launch Emojicoin",
-  "Pick up to two, due to byte limitations not all combinations are supported.": "Pick up to two, due to byte limitations not all combinations are supported."
-}
+  "Sort:": "Sort:"
 }
