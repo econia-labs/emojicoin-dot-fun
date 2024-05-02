@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
+from typing import Sequence
 
 FLAG_ADDRESS = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
 MARKET_NAMED_ADDRESS = "market_address"
@@ -11,6 +12,7 @@ COIN_FACTORY_NAMED_ADDRESS = "coin_factory"
 PACKAGE_BYTECODE_PATH = "json/build_publish_payload.json"
 SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
 METADATA_K, CODE_K = "metadata", "code"
+
 
 def ensure_parent_directories_exist(s: str) -> Path:
     fp = Path(s)
@@ -49,7 +51,7 @@ def split_and_replace_named_addresses(
     return lines_to_replace
 
 
-def compare_contents_and_log(fp: Path, new_data: dict[str, list[str]]) -> None:
+def compare_contents_and_log(fp: Path, new_data: dict[str, Sequence[str]]) -> None:
     metadata_bytes_changed = False
     module_bytes_changed = False
 
@@ -123,7 +125,9 @@ if __name__ == "__main__":
 
     assert FLAG_ADDRESS not in metadata
 
-    bytecode_lines = split_and_replace_named_addresses([bytecode], {MARKET_NAMED_ADDRESS: FLAG_ADDRESS})
+    bytecode_lines = split_and_replace_named_addresses(
+        [bytecode], {MARKET_NAMED_ADDRESS: FLAG_ADDRESS}
+    )
 
     new_data = {
         METADATA_K: metadata,
