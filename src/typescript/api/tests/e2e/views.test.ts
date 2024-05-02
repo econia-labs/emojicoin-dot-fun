@@ -2,7 +2,7 @@ import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import * as EmojicoinDotFun from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getTestHelpers } from "../utils";
 
-jest.setTimeout(30000);
+jest.setTimeout(15000);
 
 describe("it tests view functions", () => {
   const { aptos, publisher, publishPackageResult } = getTestHelpers();

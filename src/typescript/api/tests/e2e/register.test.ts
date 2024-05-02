@@ -6,10 +6,10 @@ import {
   getMarketResource,
   getRegistryAddress,
 } from "../../src";
-import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
+import { EmojicoinDotFun, ONE_APT } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
 
-jest.setTimeout(30000);
+jest.setTimeout(20000);
 
 describe("registers a market successfully", () => {
   const { aptos, publisher, publishPackageResult } = getTestHelpers();
@@ -43,6 +43,10 @@ describe("registers a market successfully", () => {
       registrant: publisher,
       emojis,
       integrator: randomIntegrator.accountAddress,
+      options: {
+        maxGasAmount: ONE_APT / 100,
+        gasUnitPrice: 100,
+      },
     });
 
     expect(txResponse.success).toBe(true);

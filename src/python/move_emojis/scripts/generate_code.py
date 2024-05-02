@@ -1,63 +1,22 @@
-# cspell:words alnum
-# cspell:words príncipe
-# cspell:words tomé
-# cspell:words unidecode
-
 # Helper file for converting all of the data in the Unicode Emoji data files
 # to Move-friendly constants.
 
 import json
 import pathlib
-import sys
 from typing import Any
-
-from unidecode import unidecode
 
 import utils.data_parser as data_parser
 from data_types.type_defs import EmojiData, QualifiedEmojiData
 
 BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
 ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
-MOVE_CONSTS_DATA_FILE = "data/move_consts.txt"
-MOVE_CONSTS_EXTENDED_DATA_FILE = "data/move_consts_extended.txt"
-AUXILIARY_EMOJIS_DATA_FILE = "data/auxiliary_emojis.json"
-BASE_EMOJIS_DATA_FILE = "data/base_emojis.json"
-ZWJ_EMOJIS_DATA_FILE = "data/zwj_emojis.json"
-VIABLE_EMOJIS_DATA_FILE = "data/viable_emojis.json"
-VIABLE_EMOJIS_EXTENDED_DATA_FILE = "data/viable_emojis_extended.json"
+SYMBOL_EMOJI_MOVE_CONSTS_FILE = "data/move_consts_symbol_emojis.txt"
+CHAT_EMOJI_MOVE_CONSTS_FILE = "data/move_consts_chat_emojis.txt"
+BASE_EMOJIS_FILE = "data/base_emojis.json"
+ZWJ_EMOJIS_FILE = "data/zwj_emojis.json"
+SYMBOL_EMOJIS_FILE = "data/symbol_emojis.json"
+CHAT_EMOJIS_FILE = "data/chat_emojis.json"
 TAB = " " * 4
-
-
-def to_ascii_dict(viable_emojis: dict[str, EmojiData]) -> dict[str, str]:
-    """
-    Convert all viable emojis to a dictionary where the key is the emoji name
-    in its ascii representation and the value is the emoji's hex string.
-
-    We cannot use the original Unicode names as the Move variable names because
-    Move code only accepts ascii characters, so we convert them with the
-    unidecode library.
-
-    Example:
-    ::
-    "flag: São Tomé & Príncipe": "f09f87b8f09f87b9"
-    ::
-    becomes
-    ::
-    {
-        "Flag: Sao Tome & Principe": "f09f87b8f09f87b9",
-    }
-    """
-    emoji_name_to_hex: dict[str, str] = {}
-    for name, data in viable_emojis.items():
-        ascii_name = unidecode(name)
-        ascii_name = ascii_name[0].upper() + ascii_name[1:]
-        hex_string = "".join(data["code_points"]["as_hex"])
-        if ascii_name in emoji_name_to_hex:
-            print(f"ERROR: duplicate constant name: {ascii_name}")
-            sys.exit(1)
-        emoji_name_to_hex[ascii_name] = hex_string
-
-    return emoji_name_to_hex
 
 
 def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
@@ -67,9 +26,9 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
         hex_str = "".join(data["code_points"]["as_hex"])
         original_unicode_points[hex_str] = data["code_points"]["as_unicode"]
 
-    ascii_names_to_hex = to_ascii_dict(viable_emojis)
+    ascii_names_to_hex = data_parser.to_ascii_dict(viable_emojis)
 
-    return_open = f"{TAB*2}vector<vector<u8>> ["
+    return_open = f"{TAB*2}vector ["
     # The hex bytes args, the aka vector<vector<u8>> args.
     args_and_comments: list[tuple[str, str]] = []
 
@@ -120,27 +79,31 @@ if __name__ == "__main__":
     base_emoji_dict: dict[str, QualifiedEmojiData]
     zwj_emoji_dict: dict[str, EmojiData]
 
-    if pathlib.Path(BASE_EMOJIS_DATA_FILE).exists():
-        base_emoji_dict = json.load(open(BASE_EMOJIS_DATA_FILE, "r"))
+    if pathlib.Path(BASE_EMOJIS_FILE).exists():
+        base_emoji_dict = json.load(open(BASE_EMOJIS_FILE, "r"))
     else:
         base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
-        ensure_write_to_file(base_emoji_dict, BASE_EMOJIS_DATA_FILE)
+        ensure_write_to_file(base_emoji_dict, BASE_EMOJIS_FILE)
 
-    if pathlib.Path(ZWJ_EMOJIS_DATA_FILE).exists():
-        zwj_emoji_dict = json.load(open(ZWJ_EMOJIS_DATA_FILE, "r"))
+    if pathlib.Path(ZWJ_EMOJIS_FILE).exists():
+        zwj_emoji_dict = json.load(open(ZWJ_EMOJIS_FILE, "r"))
     else:
         zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
-        ensure_write_to_file(zwj_emoji_dict, ZWJ_EMOJIS_DATA_FILE)
+        ensure_write_to_file(zwj_emoji_dict, ZWJ_EMOJIS_FILE)
 
     symbol_emojis, extended_emojis = data_parser.get_viable_emojis(
         base_emoji_dict, zwj_emoji_dict
     )
 
-    ensure_write_to_file(symbol_emojis, VIABLE_EMOJIS_DATA_FILE)
-    ensure_write_to_file(extended_emojis, VIABLE_EMOJIS_EXTENDED_DATA_FILE)
+    # In order to fit our package within the 64 kB limit, we need to omit
+    # some of the larger extended emojis.
+    data_parser.remove_large_extended_emojis(extended_emojis)
+
+    ensure_write_to_file(symbol_emojis, SYMBOL_EMOJIS_FILE)
+    ensure_write_to_file(extended_emojis, CHAT_EMOJIS_FILE)
 
     generated_code = generate_move_code(symbol_emojis)
-    ensure_write_to_file(generated_code, MOVE_CONSTS_DATA_FILE)
+    ensure_write_to_file(generated_code, SYMBOL_EMOJI_MOVE_CONSTS_FILE)
 
     extended_generated_code = generate_move_code(extended_emojis)
-    ensure_write_to_file(extended_generated_code, MOVE_CONSTS_EXTENDED_DATA_FILE)
+    ensure_write_to_file(extended_generated_code, CHAT_EMOJI_MOVE_CONSTS_FILE)
