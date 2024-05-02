@@ -6,7 +6,7 @@
 ---
 env:
   POETRY_VERSION: '1.8.2'
-  PYTHON_VERSION: '3.9'
+  PYTHON_VERSION: '3.10'
 jobs:
   pre-commit:
     runs-on: 'ubuntu-latest'

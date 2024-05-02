@@ -1,4 +1,2 @@
-data/move_consts.txt
-data/base_emojis.json
-data/viable_emojis.json
-data/zwj_emojis.json
+data/*.txt
+data/*.json

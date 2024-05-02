@@ -41,6 +41,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     const DECIMALS: u8 = 8;
     const MAX_SYMBOL_LENGTH: u8 = 10;
+    const MAX_CHAT_MESSAGE_LENGTH: u8 = 100;
     const MONITOR_SUPPLY: bool = true;
 
     const COIN_FACTORY_AS_BYTES: vector<u8> = b"coin_factory";
@@ -106,14 +107,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_REMOVE_TOO_MANY_LP_COINS: u64 = 7;
     /// The type arguments passed in are invalid.
     const E_INVALID_COIN_TYPES: u64 = 8;
-    /// Provided bytes do not indicate a supported emoji.
-    const E_NOT_SUPPORTED_EMOJI: u64 = 9;
+    /// Provided bytes do not indicate a supported coin symbol emoji.
+    const E_NOT_SUPPORTED_SYMBOL_EMOJI: u64 = 9;
     /// Too many bytes in emoji symbol.
     const E_EMOJI_BYTES_TOO_LONG: u64 = 10;
     /// Market is already registered.
     const E_ALREADY_REGISTERED: u64 = 11;
     /// Account is unable to pay market registration fee.
     const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 12;
+    /// Provided bytes do not indicate a supported chat emoji.
+    const E_NOT_SUPPORTED_CHAT_EMOJI: u64 = 13;
+    /// The constructed chat message exceeds the maximum length.
+    const E_CHAT_MESSAGE_TOO_LONG: u64 = 14;
 
     struct CumulativeStats has copy, drop, store {
         base_volume: u128,
@@ -217,7 +222,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         emit_time: u64,
         emit_market_nonce: u64,
         user: address,
-        message: vector<vector<u8>>,
+        message: String,
         user_emojicoin_balance: u64,
         circulating_supply: u64,
         balance_as_fraction_of_circulating_supply_q64: u128,
@@ -291,7 +296,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     struct Registry has key {
         registry_address: address,
         sequence_info: SequenceInfo,
-        supported_emojis: Table<vector<u8>, u8>,
+        coin_symbol_emojis: Table<vector<u8>, u8>,
+        chat_emojis: Table<vector<u8>, u8>,
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
@@ -372,11 +378,23 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         registry_address: address,
     }
 
+    /// Constructs a chat message from a sequence of emojis emitted as an event.
+    /// Example:
+    ///     emoji_bytes: [ x"00", x"01", x"02" ], // Pretend these are valid emojis.
+    ///     emoji_indices_sequence: [ 0, 1, 2, 2, 2, 1, 2, 1 ],
+    /// This would result in a message of:
+    ///     [ x"00", x"01", x"02", x"02", x"02", x"01", x"02", x"01" ]
     public entry fun chat<Emojicoin, EmojicoinLP>(
         user: &signer,
-        message: vector<vector<u8>>,
+        emoji_bytes: vector<vector<u8>>, // The individual emojis to use.
+        emoji_indices_sequence: vector<u8>, // Sequence of indices used to construct a chat message.
         market_address: address,
     ) acquires Market, Registry, RegistryAddress {
+
+        assert!(
+            vector::length(&emoji_indices_sequence) <= (MAX_CHAT_MESSAGE_LENGTH as u64),
+            E_CHAT_MESSAGE_TOO_LONG,
+        );
 
         // Mutably borrow market and check its coin types.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
@@ -385,6 +403,22 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             &market_signer,
             market_address,
         );
+
+        // Verify all emoji bytes are either coin symbol emojis or chat emojis.
+        assert!(
+            vector::all(&emoji_bytes, |emoji| {
+                is_a_supported_symbol_emoji(*emoji) ||
+                is_a_supported_chat_emoji(*emoji)
+            }),
+            E_NOT_SUPPORTED_CHAT_EMOJI,
+        );
+
+        // Construct the chat message from the emoji indices.
+        let message: String = string::utf8(b"");
+        vector::for_each(emoji_indices_sequence, |idx| {
+            let emoji = *vector::borrow(&emoji_bytes, (idx as u64));
+            string::append_utf8(&mut message, emoji);
+        });
 
         // Prep local variables.
         let user_address = signer::address_of(user);
@@ -411,7 +445,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let (supply_minuend, reserves_ref) =
             assign_supply_minuend_reserves_ref(market_ref_mut, in_bonding_curve);
         let circulating_supply = supply_minuend - reserves_ref.base;
-        let user_emojicoin_balance = coin::balance<Emojicoin>(user_address);
+        let user_emojicoin_balance = if (!coin::is_account_registered<Emojicoin>(user_address)) {
+            coin::register<Emojicoin>(user);
+            0
+        } else {
+            coin::balance<Emojicoin>(user_address)
+        };
+        let balance_as_fraction = if (circulating_supply == 0) {
+            0
+        } else {
+            ((user_emojicoin_balance as u128) << SHIFT_Q64) / (circulating_supply as u128)
+        };
         event::emit(Chat {
             market_metadata: market_ref_mut.metadata,
             emit_time: time,
@@ -420,8 +464,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             message,
             user_emojicoin_balance,
             circulating_supply,
-            balance_as_fraction_of_circulating_supply_q64:
-                ((user_emojicoin_balance as u128) << SHIFT_Q64) / (circulating_supply as u128),
+            balance_as_fraction_of_circulating_supply_q64: balance_as_fraction,
         });
 
         // Bump market state.
@@ -447,7 +490,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let registry_ref_mut = borrow_registry_ref_mut();
 
         // Verify well-formed emoji bytes.
-        let emoji_bytes = get_verified_emoji_bytes(registry_ref_mut, emojis);
+        let emoji_bytes = get_verified_symbol_emoji_bytes(registry_ref_mut, emojis);
 
         // Verify market is not already registered.
         let markets_by_emoji_bytes_ref = &registry_ref_mut.markets_by_emoji_bytes;
@@ -461,18 +504,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let (metadata_bytecode, module_bytecode) = hex_codes::get_publish_code(market_address);
         code::publish_package_txn(&market_signer, metadata_bytecode, vector[module_bytecode]);
 
-        // Charge registrant.
+        // Only charge the registrant if they have to pay for initializing the chat emojis.
+        // Otherwise, waive the register market fee, since the gas costs of initializing them
+        // is roughly the same.
         let registrant_address = signer::address_of(registrant);
-        let can_pay_fee =
-            coin::is_account_registered<AptosCoin>(registrant_address) &&
-            coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_FEE;
-        assert!(can_pay_fee, E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE);
-        aptos_account::transfer(registrant, integrator, MARKET_REGISTRATION_FEE);
+        let fee = if (ensure_chat_emojis_initialized(registry_ref_mut)) {
+            0
+        } else {
+            let can_pay_fee =
+                coin::is_account_registered<AptosCoin>(registrant_address) &&
+                coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_FEE;
+            assert!(can_pay_fee, E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE);
+            aptos_account::transfer(registrant, integrator, MARKET_REGISTRATION_FEE);
+            (MARKET_REGISTRATION_FEE as u128)
+        };
 
         // Update global integrator fees.
         let global_cumulative_integrator_fees_ref_mut =
             &mut registry_ref_mut.global_stats.cumulative_integrator_fees;
-        let fee = (MARKET_REGISTRATION_FEE as u128);
         aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, fee);
 
         // Bump state.
@@ -610,15 +659,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         type_info::struct_name(lp_type) == EMOJICOIN_LP_STRUCT_NAME
     }
 
-    inline fun get_verified_emoji_bytes(
+    inline fun get_verified_symbol_emoji_bytes(
         registry_ref: &Registry,
         emojis: vector<vector<u8>>,
     ): vector<u8> {
-        let supported_emojis_ref = &registry_ref.supported_emojis;
+        let coin_symbol_emojis_ref = &registry_ref.coin_symbol_emojis;
         let verified_bytes = vector[];
         for (i in 0..vector::length(&emojis)) {
             let emoji = *vector::borrow(&emojis, i);
-            assert!(table::contains(supported_emojis_ref, emoji), E_NOT_SUPPORTED_EMOJI);
+            assert!(table::contains(coin_symbol_emojis_ref, emoji), E_NOT_SUPPORTED_SYMBOL_EMOJI);
             vector::append(&mut verified_bytes, emoji);
         };
         assert!(
@@ -1169,6 +1218,25 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
+    /// A crank function to add all chat emojis to the registry if they haven't been added yet.
+    /// Returns true if the chat emojis were added, false otherwise.
+    inline fun ensure_chat_emojis_initialized(
+        registry_ref_mut: &mut Registry
+    ): bool acquires Registry, RegistryAddress {
+        let chat_emojis_ref_mut = &mut registry_ref_mut.chat_emojis;
+
+        let chat_emojis = hex_codes::get_chat_emojis();
+        let emoji_0 = *vector::borrow(&chat_emojis, 0);
+        if (table::contains(chat_emojis_ref_mut, emoji_0)) {
+            false
+        } else {
+            vector::for_each(chat_emojis, |emoji| {
+                table::add(chat_emojis_ref_mut, emoji, 0);
+            });
+            true
+        }
+    }
+
     fun init_module(emojicoin_dot_fun: &signer) {
         let constructor_ref = object::create_named_object(emojicoin_dot_fun, REGISTRY_NAME);
         let extend_ref = object::generate_extend_ref(&constructor_ref);
@@ -1184,7 +1252,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 last_bump_time: last_period_boundary(time, PERIOD_1D),
                 nonce: 1,
             },
-            supported_emojis: table::new(),
+            coin_symbol_emojis: table::new(),
+            chat_emojis: table::new(),
             markets_by_emoji_bytes: smart_table::new(),
             markets_by_market_id: smart_table::new(),
             extend_ref,
@@ -1201,9 +1270,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
 
         // Load supported emojis into registry.
-        vector::for_each_ref(&hex_codes::get_supported_emojis(), |emoji_bytes_ref| {
-            table::add(&mut registry.supported_emojis, *emoji_bytes_ref, 0);
+        vector::for_each_ref(&hex_codes::get_coin_symbol_emojis(), |emoji_bytes_ref| {
+            table::add(&mut registry.coin_symbol_emojis, *emoji_bytes_ref, 0);
         });
+
         move_to(&registry_signer, registry);
 
         // Emit global state.
@@ -1220,28 +1290,22 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             cumulative_swaps: aggregator_v2::create_snapshot(0),
             cumulative_chat_messages: aggregator_v2::create_snapshot(0),
         });
-
     }
 
     #[view]
-    /// Checks if an individual emoji is supported.
-    public fun is_a_supported_emoji(hex_bytes: vector<u8>): bool
-    acquires Registry, RegistryAddress {
-        table::contains(&borrow_registry_ref().supported_emojis, hex_bytes)
+    /// Checks if an individual emoji is supported as a coin symbol.
+    public fun is_a_supported_symbol_emoji(
+        hex_bytes: vector<u8>
+    ): bool acquires Registry, RegistryAddress {
+        table::contains(&borrow_registry_ref().coin_symbol_emojis, hex_bytes)
     }
 
     #[view]
-    /// Checks if a sequence of emojis is supported.
-    public fun is_supported_emoji_sequence(emojis: vector<vector<u8>>): bool
-    acquires Registry, RegistryAddress {
-        let symbol_length = 0;
-        let supported_emojis_ref = &borrow_registry_ref().supported_emojis;
-        for (i in 0..vector::length(&emojis)) {
-            let emoji_bytes_ref = vector::borrow(&emojis, i);
-            if (!table::contains(supported_emojis_ref, *emoji_bytes_ref)) return false;
-            symbol_length = symbol_length + vector::length(emoji_bytes_ref);
-        };
-        symbol_length <= (MAX_SYMBOL_LENGTH as u64)
+    /// Checks if an individual emoji is supported for usage in chat.
+    public fun is_a_supported_chat_emoji(
+        hex_bytes: vector<u8>
+    ): bool acquires Registry, RegistryAddress {
+        table::contains(&borrow_registry_ref().chat_emojis, hex_bytes)
     }
 
     #[view]
@@ -2219,9 +2283,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[test]
-    fun test_all_supported_emojis_under_10_bytes() {
-        let all_supported_emojis = hex_codes::get_supported_emojis();
-        vector::for_each(all_supported_emojis, |bytes| {
+    fun test_all_coin_symbol_emojis_under_10_bytes() {
+        let all_coin_symbol_emojis = hex_codes::get_coin_symbol_emojis();
+        vector::for_each(all_coin_symbol_emojis, |bytes| {
             let emoji_as_string = string::utf8(bytes);
             assert!(string::length(&emoji_as_string) <= (MAX_SYMBOL_LENGTH as u64), 0);
         });
@@ -2236,7 +2300,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         ];
 
         let registry_ref_mut = borrow_registry_ref_mut();
-        let emoji_bytes = get_verified_emoji_bytes(registry_ref_mut, emojis);
+        let emoji_bytes = get_verified_symbol_emoji_bytes(registry_ref_mut, emojis);
 
         // Verify market is not already registered.
         let markets_by_emoji_bytes_ref_mut = &mut registry_ref_mut.markets_by_emoji_bytes;
@@ -2249,7 +2313,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[test]
-    fun test_supported_emoji_happy_path() acquires Registry, RegistryAddress {
+    fun test_supported_symbol_emoji_happy_path() acquires Registry, RegistryAddress {
         aptos_account::create_account(@emojicoin_dot_fun);
         init_module_for_testing();
         let various_emojis = vector<vector<u8>> [
@@ -2265,23 +2329,23 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             x"f09fa490",         // Zipper mouth face, 1F910.
         ];
         vector::for_each(various_emojis, |bytes| {
-            assert!(is_a_supported_emoji(bytes), 0);
+            assert!(is_a_supported_symbol_emoji(bytes), 0);
         });
 
         // Test unsupported emojis.
-        assert!(!is_a_supported_emoji(x"0000"), 0);
-        assert!(!is_a_supported_emoji(x"fe0f"), 0);
-        assert!(!is_a_supported_emoji(x"1234"), 0);
-        assert!(!is_a_supported_emoji(x"f0fabcdefabcdeff0f"), 0);
-        assert!(!is_a_supported_emoji(x"f0f00dcafef0"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"0000"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"fe0f"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"1234"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"f0fabcdefabcdeff0f"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"f0f00dcafef0"), 0);
         // Minimally qualified "head shaking horizontally".
-        assert!(!is_a_supported_emoji(x"f09f9982e2808de28694"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"f09f9982e2808de28694"), 0);
 
         // Specifically test a supported emoji, add some bunk data to it, and make sure it no longer
         // works.
-        assert!(is_a_supported_emoji(x"e29d97"), 0);
-        assert!(!is_a_supported_emoji(x"e29d97ff"), 0);
-        assert!(!is_a_supported_emoji(x"ffe29d97"), 0);
+        assert!(is_a_supported_symbol_emoji(x"e29d97"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"e29d97ff"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"ffe29d97"), 0);
     }
 
     #[test]
@@ -2344,6 +2408,165 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(PERIOD_1H == 60 * 60 * MICROSECONDS_PER_SECOND, 0);
         assert!(PERIOD_4H == 4 * 60 * 60 * MICROSECONDS_PER_SECOND, 0);
         assert!(PERIOD_1D == 24 * 60 * 60 * MICROSECONDS_PER_SECOND, 0);
+    }
+
+    #[test(user = @0xfa)]
+    fun test_chat_message_happy_path(
+        user: &signer,
+    ) acquires Registry, RegistryAddress, Market {
+        init_module_for_testing();
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let (black_cat_market_address, _) = create_market(registry_ref_mut, BLACK_CAT);
+        let user_address = signer::address_of(user);
+        aptos_account::create_account(user_address);
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            user,
+            vector<vector<u8>> [
+                x"f09f98b6", // Cat face.
+                x"f09f98b7", // Cat face with tears of joy.
+                x"f09f98b8", // Cat face with wry smile.
+                x"f09f9088e2808de2ac9b", // Black cat.
+                x"f09f9294", // Broken heart.
+            ],
+            vector<u8> [ 3, 0, 2, 2, 1, 4 ],
+            black_cat_market_address,
+        );
+
+        let events_emitted = event::emitted_events<Chat>();
+        let chat_event = vector::pop_back(&mut events_emitted);
+        assert!(
+            chat_event == Chat {
+                market_metadata: MarketMetadata {
+                    market_id: 1,
+                    market_address: black_cat_market_address,
+                    emoji_bytes: BLACK_CAT,
+                },
+                emit_time: 0,
+                emit_market_nonce: 1,
+                user: user_address,
+                message: string::utf8(
+                    x"f09f9088e2808de2ac9bf09f98b6f09f98b8f09f98b8f09f98b7f09f9294"
+                ),
+                user_emojicoin_balance: 0,
+                circulating_supply: 0,
+                balance_as_fraction_of_circulating_supply_q64: 0,
+            },
+            0
+        );
+
+        // Post a max length chat message.
+        let one_hundred_zeroes = vector [];
+        for (i in 0..100) {
+            vector::push_back(&mut one_hundred_zeroes, 0);
+        };
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            user,
+            vector<vector<u8>> [
+                x"f09f9088e2808de2ac9b", // Black cat.
+            ],
+            one_hundred_zeroes,
+            black_cat_market_address,
+        );
+    }
+
+    #[test(user = @0xfa), expected_failure(abort_code = E_NOT_SUPPORTED_CHAT_EMOJI)]
+    fun test_chat_message_not_supported_chat_emoji(
+        user: &signer,
+    ) acquires Registry, RegistryAddress, Market {
+        init_module_for_testing();
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let (black_cat_market_address, _) = create_market(registry_ref_mut, BLACK_CAT);
+        let user_address = signer::address_of(user);
+        aptos_account::create_account(user_address);
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            user,
+            vector<vector<u8>> [
+                x"f09f98b7", // Cat face with tears of joy.
+                x"f09f", // Invalid emoji.
+            ],
+            vector<u8> [ 0, 1 ],
+            black_cat_market_address,
+        );
+    }
+
+    #[test(user = @0xfa), expected_failure(abort_code = E_CHAT_MESSAGE_TOO_LONG)]
+    fun test_chat_message_too_long(
+        user: &signer,
+    ) acquires Registry, RegistryAddress, Market {
+        init_module_for_testing();
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let (black_cat_market_address, _) = create_market(registry_ref_mut, BLACK_CAT);
+        let user_address = signer::address_of(user);
+        aptos_account::create_account(user_address);
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            user,
+            vector<vector<u8>> [
+                x"f09f8dba", // Beer mug.
+            ],
+            // 101 beer mugs, which is one emoji too long.
+            vector<u8> [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0,
+            ],
+            black_cat_market_address,
+        );
+    }
+
+    #[test(user = @0xfa)]
+    fun test_auxiliary_emoji_in_chat_message(
+        user: &signer,
+    ) acquires Registry, RegistryAddress, Market {
+        init_module_for_testing();
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let (black_cat_market_address, _) = create_market(registry_ref_mut, BLACK_CAT);
+        let user_address = signer::address_of(user);
+        aptos_account::create_account(user_address);
+        ensure_chat_emojis_initialized(registry_ref_mut);
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            user,
+            vector<vector<u8>> [
+                x"f09fa791e2808df09f9a80", // Astronaut.
+                x"f09fa6b8f09f8fbee2808de29982efb88f", // Man superhero: medium-dark skin tone.
+            ],
+            vector<u8> [ 0, 1 ],
+            black_cat_market_address,
+        );
+        let events_emitted = event::emitted_events<Chat>();
+        let chat_event = vector::pop_back(&mut events_emitted);
+        assert!(
+            chat_event.message ==
+                string::utf8(x"f09fa791e2808df09f9a80f09fa6b8f09f8fbee2808de29982efb88f"),
+            0
+        );
+    }
+
+    #[test(user = @0xfa), expected_failure(abort_code = E_NOT_SUPPORTED_CHAT_EMOJI)]
+    fun test_auxiliary_emoji_in_chat_message_not_yet_added(
+        user: &signer,
+    ) acquires Registry, RegistryAddress, Market {
+        init_module_for_testing();
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let (black_cat_market_address, _) = create_market(registry_ref_mut, BLACK_CAT);
+        let user_address = signer::address_of(user);
+        aptos_account::create_account(user_address);
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            user,
+            vector<vector<u8>> [
+                x"f09fa791e2808df09f9a80", // Astronaut.
+                x"f09fa6b8f09f8fbee2808de29982efb88f", // Man superhero: medium-dark skin tone.
+            ],
+            vector<u8> [ 0, 1, 1, 0 ],
+            black_cat_market_address,
+        );
     }
 
     #[test]

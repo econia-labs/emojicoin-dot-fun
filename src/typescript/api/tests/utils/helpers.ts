@@ -5,6 +5,12 @@ import findGitRoot from "find-git-root";
 import { getAptosClient } from "./aptos-client";
 import { type TestHelpers } from "./types";
 
+export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/api/tests");
+export const PK_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", ".pk"));
+export const PUBLISH_RES_PATH = path.resolve(
+  path.join(TS_UNIT_TEST_DIR, ".tmp", ".publish_result")
+);
+
 /**
  * Facilitates the usage of a constant Aptos Account and client for testing the publishing
  * flow. Instead of having to republish every account for every test that needs it, we can
@@ -14,12 +20,9 @@ import { type TestHelpers } from "./types";
 export function getTestHelpers(): TestHelpers {
   const { aptos } = getAptosClient();
 
-  const pkPath = path.join(getGitRoot(), ".tmp", ".pk");
-  const publishResPath = path.join(getGitRoot(), ".tmp", ".publish_result");
-
-  const pk = fs.readFileSync(path.resolve(pkPath)).toString();
+  const pk = fs.readFileSync(PK_PATH).toString();
   const publisher = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey(pk) });
-  const publishPackageResult = JSON.parse(fs.readFileSync(path.resolve(publishResPath)).toString());
+  const publishPackageResult = JSON.parse(fs.readFileSync(PUBLISH_RES_PATH).toString());
 
   return {
     aptos,
