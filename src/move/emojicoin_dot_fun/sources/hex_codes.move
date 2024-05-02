@@ -3566,20 +3566,23 @@ module emojicoin_dot_fun::hex_codes {
         (replaced_metadata, replaced_bytecode)
     }
 
-    #[test]
-    fun test_get_publish_code() {
-        let publisher_address = @0x0000012345789abcdef012345789abcdef012345789abcdef012345789abcdef;
-        let (metadata_bytecode, module_bytecode) = get_publish_code(publisher_address);
-        assert!(@emojicoin_dot_fun == @0xc0de, 0);
-
-        let test_metadata_bytecode = *vector::borrow(&get_split_metadata_bytes(), 0);
-        vector::append(&mut test_metadata_bytecode, bcs::to_bytes(&@0xc0de));
-        vector::append(&mut test_metadata_bytecode, *vector::borrow(&get_split_metadata_bytes(), 1));
-
-        let test_module_bytecode = *vector::borrow(&get_split_module_bytes(), 0);
-        vector::append(&mut test_module_bytecode, bcs::to_bytes(&publisher_address));
-        vector::append(&mut test_module_bytecode, *vector::borrow(&get_split_module_bytes(), 1));
-        assert!(metadata_bytecode == test_metadata_bytecode, 1);
-        assert!(module_bytecode == test_module_bytecode, 2);
+    #[test_only] public fun get_split_metadata_bytes_test_only(): vector<vector<u8>> {
+        get_split_metadata_bytes()
     }
+
+    #[test_only] public fun get_split_module_bytes_test_only(): vector<vector<u8>> {
+        get_split_module_bytes()
+    }
+
+    #[test_only] public fun get_coin_symbol_emojis_test_only(): vector<vector<u8>> {
+        get_coin_symbol_emojis()
+    }
+
+    #[test_only] public fun get_publish_code_test_only(publisher_addr: address): (
+        vector<u8>,
+        vector<u8>,
+    ) {
+        get_publish_code(publisher_addr)
+    }
+
 }
