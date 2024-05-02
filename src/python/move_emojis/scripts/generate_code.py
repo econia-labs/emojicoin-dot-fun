@@ -8,16 +8,19 @@
 
 import pathlib
 import sys
+import json
 
 from unidecode import unidecode
 
 import utils.data_parser as data_parser
-from data_types.type_defs import EmojiData
+from data_types.type_defs import EmojiData, QualifiedEmojiData
 
 BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
 ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
 MOVE_CONSTS_DATA_FILE = "data/move_consts.txt"
 AUXILIARY_EMOJIS_DATA_FILE = "data/auxiliary_emojis.json"
+BASE_EMOJIS_DATA_FILE = "data/base_emojis.json"
+ZWJ_EMOJIS_DATA_FILE = "data/zwj_emojis.json"
 TAB = " " * 4
 
 
@@ -97,13 +100,24 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
         ]
     )
 
-
 if __name__ == "__main__":
-    base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
-    zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
+    base_emoji_dict: dict[str, QualifiedEmojiData]
+    zwj_emoji_dict: dict[str, EmojiData]
+
+    if pathlib.Path(BASE_EMOJIS_DATA_FILE).exists():
+        base_emoji_dict = json.load(open(BASE_EMOJIS_DATA_FILE, 'r'))
+    else:
+        base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
+        json.dump(base_emoji_dict, open(BASE_EMOJIS_DATA_FILE, 'w'), indent=3)
+
+    if pathlib.Path(ZWJ_EMOJIS_DATA_FILE).exists():
+        zwj_emoji_dict = json.load(open(ZWJ_EMOJIS_DATA_FILE, 'r'))
+    else:
+        zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
+        json.dump(zwj_emoji_dict, open(ZWJ_EMOJIS_DATA_FILE, 'w'), indent=3)
+
     symbol_emojis, extended_emojis = data_parser.get_viable_emojis(base_emoji_dict, zwj_emoji_dict)
 
-    import json
     json.dump(symbol_emojis, open('data/viable_emojis.json', 'w'), indent=3)
     json.dump(extended_emojis, open('data/viable_emojis_extended.json', 'w'), indent=3)
 
