@@ -1,47 +1,72 @@
 import styled from "styled-components";
+import { Column } from "components";
 
 export const StyledContentWrapper = styled.div`
   display: flex;
-  border: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  justify-content: center;
 `;
-
-export const StyledContentColumn = styled.div`
+export const StyledContentInner = styled.div`
   display: flex;
-  flex-direction: column;
-  width: 60%;
+  width: 100%;
+  max-width: 1362px;
   border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
 `;
 
+export const StyledContentColumn = styled(Column)`
+  display: flex;
+  flex-direction: column;
+
+  &:first-child {
+    border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  }
+`;
+
 export const StyledContentHeader = styled.div`
   display: flex;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  height: 45px;
+  align-items: center;
+  position: relative;
+  padding: 0 21px;
+
+  &:after,
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100vw;
+    background-color: ${({ theme }) => theme.colors.darkGrey};
+    height: 1px;
+    transform: translateX(-50%);
+  }
+
+  &:after {
+    top: 0;
+  }
+
+  &:before {
+    bottom: 0;
+  }
 `;
 
 export const StyledBlockWrapper = styled.div`
   display: flex;
   justify-content: center;
   min-height: 320px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
 `;
 
-export const StyledInput = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.darkGrey};
-`;
-
-export const StyledArrowWrapper = styled.div`
+export const StyledBlock = styled.div`
   display: flex;
-  border-radius: ${({ theme }) => theme.radii.circle};
-  border: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  padding: 12px;
-  width: 37px;
-  height: 37px;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 50%;
-  transform: translateY(-50%) translateX(-50%);
-  background-color: ${({ theme }) => theme.colors.black};
+  flex-direction: column;
+
+  &:after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100vw;
+    bottom: 0;
+    background-color: ${({ theme }) => theme.colors.darkGrey};
+    height: 1px;
+    transform: translateX(-50%);
+  }
 `;
