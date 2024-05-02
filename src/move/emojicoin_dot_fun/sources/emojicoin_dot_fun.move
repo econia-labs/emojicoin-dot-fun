@@ -1214,15 +1214,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
-    /// Since `init_module` will go over the transaction execution limit
-    /// if we try to add the chat emojis in the same transaction, we need to
-    /// allow anyone to push the remaining chat emojis into the registry post
-    /// module publication.
-    /// This allows us to add the chat emojis in batches for much cheaper, since
-    /// we can use a smart table instead of a table.
-    /// We only add emojis that are not already in the registry by starting at
-    /// the index of the last chat emoji added, which is always equal to
-    /// the length of the smart table.
+    /// Since `init_module` will go over the transaction execution limit if we try to add the chat
+    /// emojis in the same transaction, we need to push the remaining chat emojis into the registry
+    /// post module publication.
+    /// We only add emojis that are not already in the registry by starting at the last index added
+    /// plus one, i.e., the current length of the chat emojis smart table.
     public entry fun add_remaining_chat_emojis(
         amount: u64,
     ) acquires Registry, RegistryAddress {
