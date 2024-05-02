@@ -467,6 +467,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         emojis: vector<vector<u8>>,
         integrator: address,
     ) acquires Market, Registry, RegistryAddress {
+        register_market_inner(registrant, emojis, integrator, true);
+    }
+
+    fun register_market_inner(
+        registrant: &signer,
+        emojis: vector<vector<u8>>,
+        integrator: address,
+        publish_code: bool,
+    ) acquires Market, Registry, RegistryAddress {
         let registry_ref_mut = borrow_registry_ref_mut();
 
         // Verify well-formed emoji bytes.
@@ -480,9 +489,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Create the Market object and add it to the registry.
         let (market_address, market_signer) = create_market(registry_ref_mut, emoji_bytes);
 
-        // Publish coin types at market address.
-        let (metadata_bytecode, module_bytecode) = hex_codes::get_publish_code(market_address);
-        code::publish_package_txn(&market_signer, metadata_bytecode, vector[module_bytecode]);
+        // Publish coin types at market address, unless publication disabled for testing.
+        if (publish_code) {
+            let (metadata_bytecode, module_bytecode) = hex_codes::get_publish_code(market_address);
+            code::publish_package_txn(&market_signer, metadata_bytecode, vector[module_bytecode]);
+        };
 
         // Only charge the registrant if they have to pay for initializing the chat emojis.
         // Otherwise, waive the register market fee, since the gas costs of initializing them
@@ -2207,6 +2218,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test_only] public fun pack_Reserves(base: u64, quote: u64): Reserves {
         Reserves { base, quote }
+    }
+
+    #[test_only] public fun register_market_without_publish(
+        registrant: &signer,
+        emojis: vector<vector<u8>>,
+        integrator: address,
+    ) acquires Market, Registry, RegistryAddress {
+        register_market_inner(registrant, emojis, integrator, false);
     }
 
     #[test_only] public fun valid_coin_types_test_only<Emojicoin, EmojicoinLP>(

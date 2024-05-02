@@ -99,7 +99,7 @@ if __name__ == "__main__":
             "--json-output-file",
             json_path,
             "--named-addresses",
-            named_addresses_args,
+            f"coin_factory={NAMED_ADDRESSES[MARKET_ADDRESS]}",
             "--assume-yes",
             "--included-artifacts=none",
         ],

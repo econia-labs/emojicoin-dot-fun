@@ -1,7 +1,6 @@
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{Self, create_signer_for_test as get_signer};
-    use aptos_framework::code;
     use aptos_framework::coin::{Self, BurnCapability, Coin, MintCapability};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::{Self, AptosCoin};
@@ -14,12 +13,19 @@
         Emojicoin as BlackHeartEmojicoin,
         EmojicoinLP as BlackHeartEmojicoinLP,
     };
+    use coin_factory::coin_factory::{
+        Emojicoin as CoinFactoryEmojicoin,
+        EmojicoinLP as CoinFactoryEmojicoinLP,
+    };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         Self,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
         get_BASE_REAL_CEILING,
         get_BASE_VIRTUAL_CEILING,
         get_BASE_VIRTUAL_FLOOR,
+        get_COIN_FACTORY_AS_BYTES,
+        get_EMOJICOIN_STRUCT_NAME,
+        get_EMOJICOIN_LP_STRUCT_NAME,
         get_MAX_SYMBOL_LENGTH,
         get_MARKET_REGISTRATION_FEE,
         get_MICROSECONDS_PER_SECOND,
@@ -40,11 +46,12 @@
         market_metadata_by_emoji_bytes,
         pack_Reserves,
         register_market,
+        register_market_without_publish,
         unpack_market_metadata,
         valid_coin_types_test_only as valid_coin_types,
     };
     use emojicoin_dot_fun::hex_codes::{
-        get_split_metadata_bytes_test_only as get_split_metadata_bytes,
+        get_metadata_bytes_test_only as get_metadata_bytes,
         get_split_module_bytes_test_only as get_split_module_bytes,
         get_coin_symbol_emojis_test_only as get_coin_symbol_emojis,
         get_publish_code_test_only as get_publish_code,
@@ -57,6 +64,7 @@
     use std::bcs;
     use std::option;
     use std::string;
+    use std::type_info;
     use std::vector;
 
     struct AptosCoinCapStore has key {
@@ -75,9 +83,14 @@
     public fun assert_test_market_address(
         emoji_bytes: vector<vector<u8>>,
         hard_coded_address: address,
+        publish_code: bool,
     ) acquires AptosCoinCapStore {
         mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_FEE());
-        register_market(&get_signer(USER), emoji_bytes, INTEGRATOR);
+        if (publish_code) { // Only one publication operation allowed per transaction.
+            register_market(&get_signer(USER), emoji_bytes, INTEGRATOR);
+        } else {
+            register_market_without_publish(&get_signer(USER), emoji_bytes, INTEGRATOR);
+        };
         let concatenated_bytes = get_verified_symbol_emoji_bytes(emoji_bytes);
         let metadata = option::destroy_some(market_metadata_by_emoji_bytes(concatenated_bytes));
         let (_, derived_market_address, _) = unpack_market_metadata(metadata);
@@ -88,21 +101,6 @@
         aptos_account::create_account(@emojicoin_dot_fun);
         timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
         init_module(&get_signer(@emojicoin_dot_fun));
-    }
-
-    /// Publishes the dependency stub package at dependency addresses for the coin factory.
-    public fun publish_mock_dependencies() {
-        let metadata = x"0f456d6f6a69636f696e446f7446756e0200000000000000004037373843433637354446434336444144323743313531354643413538464342363731444538353336353233334234413136393345373130353932393845313836741f8b08000000000002ff15cb310a85300c00d03da7902eddc47f80bfa9971091d80689daa634ade0edd5f5c19bd0fb4caaa43368a96bf36fcc6200a684eec08d668818e8553b04d9d909c75eca58a3859ab68c9e962427bbfb8b1c422db89e64e0a2ac2cf18bbfb66b3b0b0f95c552106a000000010473747562261f8b08000000000002ffcbcd4f29cd4955282e294db2b202910ad5b55c00fe8ddac71500000000000000";
-        code::publish_package_txn_for_testing(
-            &get_signer(@0x1),
-            metadata,
-            vector[x"a11ceb0b06000000030100020702050807200000046d61696e000000000000000000000000000000000000000000000000000000000000000100"],
-        );
-        code::publish_package_txn_for_testing(
-            &get_signer(@0xc0de),
-            metadata,
-            vector[x"a11ceb0b06000000030100020702050807200000046d61696e000000000000000000000000000000000000000000000000000000000000c0de00"],
-        );
     }
 
     public fun mint_aptos_coin(amount: u64): Coin<AptosCoin> acquires AptosCoinCapStore {
@@ -135,6 +133,22 @@
         assert!(base == string::utf8(b"base"), 0);
     }
 
+    #[test] fun coin_factory_type_info() {
+        let module_name = get_COIN_FACTORY_AS_BYTES();
+        let emojicoin_struct = get_EMOJICOIN_STRUCT_NAME();
+        let emojicoin_lp_struct = get_EMOJICOIN_LP_STRUCT_NAME();
+
+        let emojicoin_type_info = type_info::type_of<CoinFactoryEmojicoin>();
+        let lp_type_info = type_info::type_of<CoinFactoryEmojicoinLP>();
+
+        assert!(@coin_factory == type_info::account_address(&emojicoin_type_info), 0);
+        assert!(@coin_factory == type_info::account_address(&lp_type_info), 0);
+        assert!(module_name == type_info::module_name(&emojicoin_type_info), 0);
+        assert!(module_name == type_info::module_name(&lp_type_info), 0);
+        assert!(emojicoin_struct == type_info::struct_name(&emojicoin_type_info), 0);
+        assert!(emojicoin_lp_struct == type_info::struct_name(&lp_type_info), 0);
+    }
+
     #[test] fun cpamm_simple_swap_output_amount_buy_sell_all() {
         // Buy all base from start of bonding curve.
         let reserves = pack_Reserves(get_BASE_VIRTUAL_CEILING(), get_QUOTE_VIRTUAL_FLOOR());
@@ -155,12 +169,7 @@
 
     #[test] fun get_publish_code_expected() {
         let market_address = @0xabcdef0123456789;
-
-        // Manually construct expected metadata bytecode.
-        let split_metadata_bytes = get_split_metadata_bytes();
-        let expected_metadata_bytecode = *vector::borrow(&split_metadata_bytes, 0);
-        vector::append(&mut expected_metadata_bytecode, bcs::to_bytes(&@emojicoin_dot_fun));
-        vector::append(&mut expected_metadata_bytecode, *vector::borrow(&split_metadata_bytes, 1));
+        let expected_metadata_bytecode = get_metadata_bytes();
 
         // Manually construct expected module bytecode.
         let split_module_bytes = get_split_module_bytes();
@@ -174,12 +183,12 @@
         assert!(module_bytecode == expected_module_bytecode, 0);
     }
 
+    // Verify hard-coded test market addresses, derived from `@emojicoin_dot_fun` dev address.
     #[test] fun derived_test_market_addresses() acquires AptosCoinCapStore {
         init_package();
-        publish_mock_dependencies();
-        assert_test_market_address(vector[BLACK_CAT], @black_cat_market);
-        assert_test_market_address(vector[BLACK_HEART], @black_heart_market);
-        assert_test_market_address(vector[YELLOW_HEART], @yellow_heart_market);
+        assert_test_market_address(vector[BLACK_CAT], @black_cat_market, true);
+        assert_test_market_address(vector[BLACK_HEART], @black_heart_market, false);
+        assert_test_market_address(vector[YELLOW_HEART], @yellow_heart_market, false);
     }
 
     #[test] fun period_times() {
