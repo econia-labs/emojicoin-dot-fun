@@ -1,7 +1,0 @@
-[addresses]
-template = "_"
-
-[package]
-name = 'Template'
-upgrade_policy = "compatible"
-version = '0.0.1'

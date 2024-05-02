@@ -2,9 +2,7 @@
 emojicoin_dot_fun = "_"
 
 [dependencies.AptosFramework]
-git = "https://github.com/aptos-labs/aptos-core.git"
-rev = "mainnet"
-subdir = "aptos-move/framework/aptos-framework"
+local = "../../../../aptos-core/aptos-move/framework/aptos-framework"
 
 [dev-addresses]
 emojicoin_dot_fun = "0xc0de"

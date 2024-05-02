@@ -1,0 +1,7 @@
+[addresses]
+stub = "_"
+
+[package]
+name = 'EmojicoinDotFun'
+upgrade_policy = "immutable"
+version = '1.0.0'

@@ -1,6 +1,7 @@
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{Self, create_signer_for_test as get_signer};
+    use aptos_framework::code;
     use aptos_framework::coin::{Self, BurnCapability, Coin, MintCapability};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::{Self, AptosCoin};
@@ -89,6 +90,21 @@
         init_module(&get_signer(@emojicoin_dot_fun));
     }
 
+    /// Publishes the dependency stub package at dependency addresses for the coin factory.
+    public fun publish_mock_dependencies() {
+        let metadata = x"0f456d6f6a69636f696e446f7446756e0200000000000000004037373843433637354446434336444144323743313531354643413538464342363731444538353336353233334234413136393345373130353932393845313836741f8b08000000000002ff15cb310a85300c00d03da7902eddc47f80bfa9971091d80689daa634ade0edd5f5c19bd0fb4caaa43368a96bf36fcc6200a684eec08d668818e8553b04d9d909c75eca58a3859ab68c9e962427bbfb8b1c422db89e64e0a2ac2cf18bbfb66b3b0b0f95c552106a000000010473747562261f8b08000000000002ffcbcd4f29cd4955282e294db2b202910ad5b55c00fe8ddac71500000000000000";
+        code::publish_package_txn_for_testing(
+            &get_signer(@0x1),
+            metadata,
+            vector[x"a11ceb0b06000000030100020702050807200000046d61696e000000000000000000000000000000000000000000000000000000000000000100"],
+        );
+        code::publish_package_txn_for_testing(
+            &get_signer(@0xc0de),
+            metadata,
+            vector[x"a11ceb0b06000000030100020702050807200000046d61696e000000000000000000000000000000000000000000000000000000000000c0de00"],
+        );
+    }
+
     public fun mint_aptos_coin(amount: u64): Coin<AptosCoin> acquires AptosCoinCapStore {
         if (!exists<AptosCoinCapStore>(@aptos_framework)) {
             let framework_signer = account::create_signer_for_test(@aptos_framework);
@@ -160,6 +176,7 @@
 
     #[test] fun derived_test_market_addresses() acquires AptosCoinCapStore {
         init_package();
+        publish_mock_dependencies();
         assert_test_market_address(vector[BLACK_CAT], @black_cat_market);
         assert_test_market_address(vector[BLACK_HEART], @black_heart_market);
         assert_test_market_address(vector[YELLOW_HEART], @yellow_heart_market);
@@ -176,7 +193,7 @@
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
     }
 
-    #[test] fun supported_emojis_() {
+    #[test] fun supported_emojis() {
         init_package();
         let various_emojis = vector<vector<u8>> [
             x"f09f868e",         // AB button blood type, 1F18E.
