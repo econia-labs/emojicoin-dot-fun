@@ -8,7 +8,7 @@ import { StyledClickItem, StyledContainer, StyledSocialWrapper } from "./styled"
 
 const Footer: React.FC = () => {
   return (
-    <Container>
+    <Container width="100%">
       <Flex justifyContent="center">
         <StyledContainer>
           <StyledSocialWrapper>

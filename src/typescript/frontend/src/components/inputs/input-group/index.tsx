@@ -27,7 +27,8 @@ export const InputGroup: React.FC<InputGroupProps> = ({
             as={variant === variants.FANTOM ? "label" : undefined}
             textScale="heading1"
             color="white"
-            mb="8px"
+            mb="20px"
+            textTransform="uppercase"
             htmlFor={forId}
           >
             {label}

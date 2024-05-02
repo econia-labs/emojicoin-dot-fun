@@ -1,7 +1,7 @@
 import React from "react";
 // Components
-import { Column, Container, Box } from "components";
-import { ClientsSlider, MainCard, EmojiTable } from "./components";
+import { Column, Container, Box, ClientsSlider } from "components";
+import { MainCard, EmojiTable } from "./components";
 
 const HomePage: React.FC = () => {
   return (
