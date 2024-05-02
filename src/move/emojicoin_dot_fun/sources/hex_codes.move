@@ -3541,12 +3541,12 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
-    public(friend) inline fun get_publish_code(publisher_addr: address): (vector<u8>, vector<u8>) {
+    public(friend) inline fun get_publish_code(market_address: address): (vector<u8>, vector<u8>) {
         // Interpolate market address into module bytecode.
         let split_bytecode = get_split_module_bytes();
         let epilogue = vector::pop_back(&mut split_bytecode);
         let module_bytecode = vector::pop_back(&mut split_bytecode);
-        vector::append(&mut module_bytecode, bcs::to_bytes(&publisher_addr));
+        vector::append(&mut module_bytecode, bcs::to_bytes(&market_address));
         vector::append(&mut module_bytecode, epilogue);
 
         (get_metadata_bytes(), module_bytecode)
@@ -3564,11 +3564,11 @@ module emojicoin_dot_fun::hex_codes {
         get_coin_symbol_emojis()
     }
 
-    #[test_only] public fun get_publish_code_test_only(publisher_addr: address): (
+    #[test_only] public fun get_publish_code_test_only(market_address: address): (
         vector<u8>,
         vector<u8>,
     ) {
-        get_publish_code(publisher_addr)
+        get_publish_code(market_address)
     }
 
 }
