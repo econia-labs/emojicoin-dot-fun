@@ -75,8 +75,10 @@ const LaunchEmojicoinPage: React.FC = () => {
   };
 
   const cursorPositioning = () => {
-    input!.focus();
-    input!.selectionStart = input!.value.length;
+    if (input) {
+      input.focus();
+      input.selectionStart = input.value.length;
+    }
   };
 
   useEffect(() => {
