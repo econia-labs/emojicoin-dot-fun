@@ -2,7 +2,9 @@
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
     use aptos_framework::aptos_account;
+    use aptos_framework::coin;
     use aptos_framework::timestamp;
+    use aptos_std::string_utils;
     use black_cat_market::coin_factory::{
         Emojicoin as BlackCatEmojicoin,
         EmojicoinLP as BlackCatEmojicoinLP,
@@ -17,13 +19,19 @@
     };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         Self,
+        MarketMetadata,
+        assert_valid_coin_types_test_only as assert_valid_coin_types,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
+        exists_lp_coin_capabilities,
         get_BASE_REAL_CEILING,
         get_BASE_VIRTUAL_CEILING,
         get_BASE_VIRTUAL_FLOOR,
         get_COIN_FACTORY_AS_BYTES,
         get_EMOJICOIN_STRUCT_NAME,
+        get_EMOJICOIN_LP_NAME_SUFFIX,
         get_EMOJICOIN_LP_STRUCT_NAME,
+        get_EMOJICOIN_LP_SYMBOL_PREFIX,
+        get_EMOJICOIN_NAME_SUFFIX,
         get_MAX_SYMBOL_LENGTH,
         get_MARKET_REGISTRATION_FEE,
         get_MICROSECONDS_PER_SECOND,
@@ -37,14 +45,15 @@
         get_QUOTE_REAL_CEILING,
         get_QUOTE_VIRTUAL_CEILING,
         get_QUOTE_VIRTUAL_FLOOR,
-        get_concatenation_test_only,
-        get_verified_symbol_emoji_bytes_test_only as get_verified_symbol_emoji_bytes,
+        get_concatenation_test_only as get_concatenation,
+        verified_symbol_emoji_bytes,
         init_module_test_only as init_module,
         is_a_supported_symbol_emoji,
         market_metadata_by_emoji_bytes,
         pack_Reserves,
         register_market,
         register_market_without_publish,
+        swap,
         unpack_market_metadata,
         valid_coin_types_test_only as valid_coin_types,
     };
@@ -64,7 +73,7 @@
     };
     use std::bcs;
     use std::option;
-    use std::string;
+    use std::string::{Self, utf8};
     use std::type_info;
     use std::vector;
 
@@ -73,8 +82,11 @@
     const BLACK_HEART: vector<u8> = x"f09f96a4";
     const YELLOW_HEART: vector<u8> = x"f09f929b";
 
-    const USER: address = @0xaaa;
-    const INTEGRATOR: address = @0xbbb;
+    const SWAP_BUY: bool = false;
+    const SWAP_SELL: bool = true;
+
+    const USER: address = @0xaaaaa;
+    const INTEGRATOR: address = @0xbbbbb;
 
     public fun assert_test_market_address(
         emoji_bytes: vector<vector<u8>>,
@@ -87,10 +99,41 @@
         } else {
             register_market_without_publish(&get_signer(USER), emoji_bytes, INTEGRATOR);
         };
-        let concatenated_bytes = get_verified_symbol_emoji_bytes(emoji_bytes);
-        let metadata = option::destroy_some(market_metadata_by_emoji_bytes(concatenated_bytes));
-        let (_, derived_market_address, _) = unpack_market_metadata(metadata);
+        let derived_market_address = address_for_registered_market_by_emoji_bytes(emoji_bytes);
         assert!(derived_market_address == hard_coded_address, 0);
+    }
+
+    public fun assert_coin_name_and_symbol<Emojicoin, EmojicoinLP>(
+        emoji_bytes: vector<vector<u8>>,
+        expected_lp_symbol: vector<u8>,
+    ) {
+        init_market_and_coins_via_swap<Emojicoin, EmojicoinLP>(emoji_bytes);
+
+        // Test emojicoin name and symbol.
+        let symbol = utf8(verified_symbol_emoji_bytes(emoji_bytes));
+        let name = get_concatenation(symbol, utf8(get_EMOJICOIN_NAME_SUFFIX()));
+        assert!(coin::symbol<Emojicoin>() == symbol, 0);
+        assert!(coin::name<Emojicoin>() == name, 0);
+
+        // Test LP coin name and symbols.
+        let market_id = market_id_for_registered_market_by_emoji_bytes(emoji_bytes);
+        let lp_symbol = get_concatenation(
+            utf8(get_EMOJICOIN_LP_SYMBOL_PREFIX()),
+            string_utils::to_string(&market_id),
+        );
+        assert!(utf8(expected_lp_symbol) == lp_symbol, 0);
+        let lp_name = get_concatenation(symbol, utf8(get_EMOJICOIN_LP_NAME_SUFFIX()));
+        assert!(coin::symbol<EmojicoinLP>() == lp_symbol, 0);
+        assert!(coin::name<EmojicoinLP>() == lp_name, 0);
+    }
+
+    public fun address_for_registered_market_by_emoji_bytes(
+        emoji_bytes: vector<vector<u8>>,
+    ): address {
+        let (_, market_address, _) = unpack_market_metadata(
+            metadata_for_registered_market_by_emoji_bytes(emoji_bytes)
+        );
+        market_address
     }
 
     public fun init_package() {
@@ -99,21 +142,70 @@
         init_module(&get_signer(@emojicoin_dot_fun));
     }
 
+    public fun init_market(
+        emoji_bytes: vector<vector<u8>>,
+    ) {
+        mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_FEE());
+        register_market_without_publish(&get_signer(USER), emoji_bytes, INTEGRATOR);
+    }
+
+    public fun init_market_and_coins_via_swap<Emojicoin, EmojicoinLP>(
+        emoji_bytes: vector<vector<u8>>,
+    ) {
+        init_market(emoji_bytes);
+        let input_amount = 100;
+        let integrator_fee_rate_bps = 0;
+        swap<Emojicoin, EmojicoinLP>(
+            address_for_registered_market_by_emoji_bytes(emoji_bytes),
+            &get_signer(USER),
+            input_amount,
+            SWAP_BUY,
+            INTEGRATOR,
+            integrator_fee_rate_bps,
+        );
+    }
+
+    public fun market_id_for_registered_market_by_emoji_bytes(
+        emoji_bytes: vector<vector<u8>>,
+    ): u64 {
+        let (market_id, _, _) = unpack_market_metadata(
+            metadata_for_registered_market_by_emoji_bytes(emoji_bytes)
+        );
+        market_id
+    }
+
+    public fun metadata_for_registered_market_by_emoji_bytes(
+        emoji_bytes: vector<vector<u8>>,
+    ): MarketMetadata {
+         option::destroy_some(
+            market_metadata_by_emoji_bytes(verified_symbol_emoji_bytes(emoji_bytes))
+        )
+    }
+
     #[test] fun all_supported_emojis_under_10_bytes() {
         let max_symbol_length = (get_MAX_SYMBOL_LENGTH() as u64);
         vector::for_each(get_coin_symbol_emojis(), |bytes| {
-            let emoji_as_string = string::utf8(bytes);
+            let emoji_as_string = utf8(bytes);
             assert!(string::length(&emoji_as_string) <= max_symbol_length, 0);
         });
     }
 
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_INVALID_COIN_TYPES,
+        location = emojicoin_dot_fun
+    )] fun assert_valid_coin_types_bad_types() {
+        init_package();
+        init_market(vector[YELLOW_HEART]);
+        assert_valid_coin_types<BadType, BadType>(@yellow_heart_market);
+    }
+
     #[test] fun concatenation() {
-        let base = string::utf8(b"base");
-        let additional = string::utf8(b" additional");
-        let concatenated = get_concatenation_test_only(base, additional);
-        assert!(concatenated == string::utf8(b"base additional"), 0);
+        let base = utf8(b"base");
+        let additional = utf8(b" additional");
+        let concatenated = get_concatenation(base, additional);
+        assert!(concatenated == utf8(b"base additional"), 0);
         // Ensure the base string was not mutated.
-        assert!(base == string::utf8(b"base"), 0);
+        assert!(base == utf8(b"base"), 0);
     }
 
     #[test] fun coin_factory_type_info() {
@@ -130,6 +222,23 @@
         assert!(module_name == type_info::module_name(&lp_type_info), 0);
         assert!(emojicoin_struct == type_info::struct_name(&emojicoin_type_info), 0);
         assert!(emojicoin_lp_struct == type_info::struct_name(&lp_type_info), 0);
+    }
+
+    #[test] fun coin_names_and_symbols() {
+        init_package();
+
+        assert_coin_name_and_symbol<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            vector[BLACK_CAT],
+            b"LP-1",
+        );
+        assert_coin_name_and_symbol<BlackHeartEmojicoin, BlackHeartEmojicoinLP>(
+            vector[BLACK_HEART],
+            b"LP-2",
+        );
+        assert_coin_name_and_symbol<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(
+            vector[YELLOW_HEART],
+            b"LP-3",
+        );
     }
 
     #[test] fun cpamm_simple_swap_output_amount_buy_sell_all() {
@@ -150,6 +259,14 @@
         cpamm_simple_swap_output_amount(0, true, pack_Reserves(0, 16));
     }
 
+    // Verify hard-coded test market addresses, derived from `@emojicoin_dot_fun` dev address.
+    #[test] fun derived_test_market_addresses() {
+        init_package();
+        assert_test_market_address(vector[BLACK_CAT], @black_cat_market, true);
+        assert_test_market_address(vector[BLACK_HEART], @black_heart_market, false);
+        assert_test_market_address(vector[YELLOW_HEART], @yellow_heart_market, false);
+    }
+
     #[test] fun get_publish_code_expected() {
         let market_address = @0xabcdef0123456789;
         let expected_metadata_bytecode = get_metadata_bytes();
@@ -166,14 +283,6 @@
         assert!(module_bytecode == expected_module_bytecode, 0);
     }
 
-    // Verify hard-coded test market addresses, derived from `@emojicoin_dot_fun` dev address.
-    #[test] fun derived_test_market_addresses() {
-        init_package();
-        assert_test_market_address(vector[BLACK_CAT], @black_cat_market, true);
-        assert_test_market_address(vector[BLACK_HEART], @black_heart_market, false);
-        assert_test_market_address(vector[YELLOW_HEART], @yellow_heart_market, false);
-    }
-
     #[test] fun period_times() {
         let ms_per_s = get_MICROSECONDS_PER_SECOND();
         assert!(get_PERIOD_1M() == 60 * ms_per_s, 0);
@@ -183,6 +292,23 @@
         assert!(get_PERIOD_1H() == 60 * 60 * ms_per_s, 0);
         assert!(get_PERIOD_4H() == 4 * 60 * 60 * ms_per_s, 0);
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
+    }
+
+    #[test] fun register_market_with_compound_emoji_sequence() {
+        init_package();
+        let emojis = vector[
+            x"e29aa1",           // High voltage.
+            x"f09f96a5efb88f",   // Desktop computer.
+        ];
+        let concatenated_bytes = verified_symbol_emoji_bytes(emojis);
+
+        // Verify market is not already registered, register, then verify is registered.
+        assert!(market_metadata_by_emoji_bytes(concatenated_bytes) == option::none(), 0);
+        init_market(emojis);
+        let market_metadata =
+            option::destroy_some(market_metadata_by_emoji_bytes(concatenated_bytes));
+        let (_, _, market_metadata_byes) = unpack_market_metadata(market_metadata);
+        assert!(market_metadata_byes == concatenated_bytes, 0);
     }
 
     #[test] fun supported_symbol_emojis() {
@@ -217,6 +343,19 @@
         assert!(!is_a_supported_symbol_emoji(x"e29d97ff"), 0);
         assert!(!is_a_supported_symbol_emoji(x"ffe29d97"), 0);
     }
+
+    #[test] fun swap_initializes_coin_capabilities() {
+        init_package();
+        let emoji_bytes = vector[YELLOW_HEART];
+        init_market_and_coins_via_swap<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(emoji_bytes);
+        assert!(
+            exists_lp_coin_capabilities<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(
+                @yellow_heart_market
+            ),
+            0,
+        );
+    }
+
 
     #[test] fun valid_coin_types_all_invalid() {
         // Duplicate types should be invalid.

@@ -1461,6 +1461,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         )
     }
 
+    #[view]
+    public fun verified_symbol_emoji_bytes(emojis: vector<vector<u8>>): vector<u8>
+    acquires Registry, RegistryAddress {
+        get_verified_symbol_emoji_bytes(borrow_registry_ref(), emojis)
+    }
+
     public fun tvl_per_lp_coin_growth_q64(
         start: TVLtoLPCoinRatio,
         end: TVLtoLPCoinRatio,
@@ -2192,12 +2198,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test_only] const MICROSECONDS_PER_SECOND: u64 = 1_000_000;
 
+    #[test_only] public fun assert_valid_coin_types_test_only<Emojicoin, EmojicoinLP>(
+        market_address: address,
+    ) {
+        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address)
+    }
+
     #[test_only] public fun cpamm_simple_swap_output_amount_test_only(
         input_amount: u64,
         is_sell: bool,
         reserves: Reserves,
     ): u64 {
         cpamm_simple_swap_output_amount(input_amount, is_sell, reserves)
+    }
+
+    #[test_only] public fun exists_lp_coin_capabilities<Emojicoin, EmojicoinLP>(
+        market_address: address,
+    ): bool {
+        exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address)
     }
 
     #[test_only] public fun get_concatenation_test_only(
@@ -2212,7 +2230,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_BASE_VIRTUAL_FLOOR(): u64 { BASE_VIRTUAL_FLOOR }
     #[test_only] public fun get_COIN_FACTORY_AS_BYTES(): vector<u8> { COIN_FACTORY_AS_BYTES }
     #[test_only] public fun get_EMOJICOIN_STRUCT_NAME(): vector<u8> { EMOJICOIN_STRUCT_NAME }
+    #[test_only] public fun get_EMOJICOIN_LP_NAME_SUFFIX(): vector<u8> { EMOJICOIN_LP_NAME_SUFFIX }
     #[test_only] public fun get_EMOJICOIN_LP_STRUCT_NAME(): vector<u8> { EMOJICOIN_LP_STRUCT_NAME }
+    #[test_only] public fun get_EMOJICOIN_LP_SYMBOL_PREFIX(): vector<u8> {
+        EMOJICOIN_LP_SYMBOL_PREFIX
+    }
+    #[test_only] public fun get_EMOJICOIN_LP_NAME(): vector<u8> {
+        EMOJICOIN_LP_NAME_SUFFIX
+    }
+    #[test_only] public fun get_EMOJICOIN_NAME_SUFFIX(): vector<u8> { EMOJICOIN_NAME_SUFFIX }
     #[test_only] public fun get_MAX_SYMBOL_LENGTH(): u8 { MAX_SYMBOL_LENGTH }
     #[test_only] public fun get_MARKET_REGISTRATION_FEE(): u64 { MARKET_REGISTRATION_FEE }
     #[test_only] public fun get_MICROSECONDS_PER_SECOND(): u64 { MICROSECONDS_PER_SECOND }
@@ -2226,11 +2252,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
-
-    #[test_only] public fun get_verified_symbol_emoji_bytes_test_only(emojis: vector<vector<u8>>):
-    vector<u8> acquires Registry, RegistryAddress {
-        get_verified_symbol_emoji_bytes(borrow_registry_ref(), emojis)
-    }
 
     #[test_only] public fun init_module_test_only(account: &signer) { init_module(account) }
 
@@ -2253,114 +2274,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
 /*
-    #[test(aptos_framework = @0x1, user = @0xAA)]
-    fun test_swap_function(
-        user: &signer,
-        aptos_framework: &signer,
-    ) acquires Registry, RegistryAddress, Market, LPCoinCapabilities {
-        aptos_account::create_account(@emojicoin_dot_fun);
-        init_module_for_testing();
-        let symbol_bytes = YELLOW_HEART;
-        let registry_ref_mut = borrow_registry_ref_mut();
-        let (market_address, _) = create_market(registry_ref_mut, symbol_bytes);
-        assert!(@yellow_heart_market == market_address, 0);
-
-        let user_addr = signer::address_of(user);
-        let input_amount: u64 = 100_000_000;
-        fund_account(user_addr, input_amount, aptos_framework);
-        let integrator_address = @0xf00dcafe;
-        swap<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(
-            @yellow_heart_market,
-            user,
-            input_amount,
-            false, // Buy the emojicoins.
-            integrator_address,
-            0,
-        );
-
-        assert!(
-            exists<LPCoinCapabilities<YellowHeartEmojicoin, YellowHeartEmojicoinLP>>(
-                @yellow_heart_market
-            ),
-            0,
-        );
-    }
-
-    #[test]
-    fun test_register_market_with_complex_emoji_happy_path() acquires Registry, RegistryAddress {
-        init_module_for_testing();
-        let emojis = vector<vector<u8>> [
-            x"e29aa1",           // High voltage.
-            x"f09f96a5efb88f",   // Desktop computer.
-        ];
-
-        let registry_ref_mut = borrow_registry_ref_mut();
-        let emoji_bytes = get_verified_symbol_emoji_bytes(registry_ref_mut, emojis);
-
-        // Verify market is not already registered.
-        let markets_by_emoji_bytes_ref_mut = &mut registry_ref_mut.markets_by_emoji_bytes;
-        let already_registered = smart_table::contains(markets_by_emoji_bytes_ref_mut, emoji_bytes);
-        assert!(!already_registered, E_ALREADY_REGISTERED);
-
-        create_market(registry_ref_mut, emoji_bytes);
-        let utf8_emoji = string::utf8(emoji_bytes);
-        assert!(utf8_emoji == string::utf8(x"e29aa1f09f96a5efb88f"), 0);
-    }
-
-    #[test]
-    fun test_supported_symbol_emoji_happy_path() acquires Registry, RegistryAddress {
-        aptos_account::create_account(@emojicoin_dot_fun);
-        init_module_for_testing();
-        let various_emojis = vector<vector<u8>> [
-            x"f09f868e",         // AB button blood type, 1F18E.
-            x"f09fa6bbf09f8fbe", // Ear with hearing aid medium dark skin tone, 1F9BB 1F3FE.
-            x"f09f87a7f09f87b9", // Flag Bhutan, 1F1E7 1F1F9.
-            x"f09f9190f09f8fbe", // Open hands medium dark skin tone, 1F450 1F3FE.
-            x"f09fa4b0f09f8fbc", // Pregnant woman medium light skin tone, 1F930 1F3FC.
-            x"f09f9faa",         // Purple square, 1F7EA.
-            x"f09f91abf09f8fbe", // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
-            x"f09f91a9f09f8fbe", // Woman medium dark skin tone, 1F469 1F3FE.
-            x"f09fa795f09f8fbd", // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
-            x"f09fa490",         // Zipper mouth face, 1F910.
-        ];
-        vector::for_each(various_emojis, |bytes| {
-            assert!(is_a_supported_symbol_emoji(bytes), 0);
-        });
-
-        // Test unsupported emojis.
-        assert!(!is_a_supported_symbol_emoji(x"0000"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"fe0f"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"1234"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"f0fabcdefabcdeff0f"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"f0f00dcafef0"), 0);
-        // Minimally qualified "head shaking horizontally".
-        assert!(!is_a_supported_symbol_emoji(x"f09f9982e2808de28694"), 0);
-
-        // Specifically test a supported emoji, add some bunk data to it, and make sure it no longer
-        // works.
-        assert!(is_a_supported_symbol_emoji(x"e29d97"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"e29d97ff"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"ffe29d97"), 0);
-    }
-
-    #[test, expected_failure(abort_code = E_INVALID_COIN_TYPES)]
-    fun test_initialize_coin_types_validates_coin_types()
-    acquires Market, Registry, RegistryAddress {
-        aptos_account::create_account(@emojicoin_dot_fun);
-        init_module_for_testing();
-        let symbol_bytes = YELLOW_HEART;
-        let registry = borrow_registry_ref_mut();
-        let (market_address, market_signer) = create_market(registry, symbol_bytes);
-        let (market_ref_mut, dupe_signer) = get_market_ref_mut_and_signer_checked(market_address);
-        assert!(signer::address_of(&market_signer) == signer::address_of(&dupe_signer), 0);
-
-        ensure_coins_initialized<BadType, BadType>(
-            market_ref_mut,
-            &market_signer,
-            market_address,
-        );
-    }
-
     #[test(user = @0xfa)]
     fun test_chat_message_happy_path(
         user: &signer,
@@ -2520,45 +2433,5 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
-    #[test]
-    fun test_coin_names_and_symbols() acquires Market, Registry, RegistryAddress {
-        use std::string::{utf8};
-        aptos_account::create_account(@emojicoin_dot_fun);
-        init_module_for_testing();
-        create_market_and_init_coins<YellowHeartEmojicoin, YellowHeartEmojicoinLP>(YELLOW_HEART);
-        create_market_and_init_coins<BlackHeartEmojicoin, BlackHeartEmojicoinLP>(BLACK_HEART);
-        create_market_and_init_coins<BlackCatEmojicoin, BlackCatEmojicoinLP>(BLACK_CAT);
-
-        // Test the names and symbols for regular emoji coins.
-        let symbol_1 = utf8(YELLOW_HEART);
-        let symbol_2 = utf8(BLACK_HEART);
-        let symbol_3 = utf8(BLACK_CAT);
-        let name_1 = get_concatenation(symbol_1, utf8(EMOJICOIN_NAME_SUFFIX));
-        let name_2 = get_concatenation(symbol_2, utf8(EMOJICOIN_NAME_SUFFIX));
-        let name_3 = get_concatenation(symbol_3, utf8(EMOJICOIN_NAME_SUFFIX));
-        assert!(coin::symbol<YellowHeartEmojicoin>() == symbol_1, 0);
-        assert!(coin::symbol<BlackHeartEmojicoin>() == symbol_2, 0);
-        assert!(coin::symbol<BlackCatEmojicoin>() == symbol_3, 0);
-        assert!(coin::name<YellowHeartEmojicoin>() == name_1, 0);
-        assert!(coin::name<BlackHeartEmojicoin>() == name_2, 0);
-        assert!(coin::name<BlackCatEmojicoin>() == name_3, 0);
-
-        // Test the names and symbols for LP coins.
-        let lp_symbol_1 = get_concatenation(utf8(EMOJICOIN_LP_SYMBOL_PREFIX), utf8(b"1"));
-        let lp_symbol_2 = get_concatenation(utf8(EMOJICOIN_LP_SYMBOL_PREFIX), utf8(b"2"));
-        let lp_symbol_3 = get_concatenation(utf8(EMOJICOIN_LP_SYMBOL_PREFIX), utf8(b"3"));
-        let lp_name_1 = get_concatenation(symbol_1, utf8(EMOJICOIN_LP_NAME_SUFFIX));
-        let lp_name_2 = get_concatenation(symbol_2, utf8(EMOJICOIN_LP_NAME_SUFFIX));
-        let lp_name_3 = get_concatenation(symbol_3, utf8(EMOJICOIN_LP_NAME_SUFFIX));
-        assert!(utf8(b"LP-1") == lp_symbol_1, 0);
-        assert!(utf8(b"LP-2") == lp_symbol_2, 0);
-        assert!(utf8(b"LP-3") == lp_symbol_3, 0);
-        assert!(coin::symbol<YellowHeartEmojicoinLP>() == lp_symbol_1, 0);
-        assert!(coin::symbol<BlackHeartEmojicoinLP>() == lp_symbol_2, 0);
-        assert!(coin::symbol<BlackCatEmojicoinLP>() == lp_symbol_3, 0);
-        assert!(coin::name<YellowHeartEmojicoinLP>() == lp_name_1, 0);
-        assert!(coin::name<BlackHeartEmojicoinLP>() == lp_name_2, 0);
-        assert!(coin::name<BlackCatEmojicoinLP>() == lp_name_3, 0);
-    }
 */
 }
