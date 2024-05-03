@@ -36,9 +36,6 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 
 ## Indexing
 
-1. The user interface `SHALL` rely solely on the Aptos GraphQL endpoint for
-   indexing purposes, enabling for example a leaderboard based on market
-   capitalization of each emojicoin market.
 1. A `State` event `SHALL` be emitted for every operation, to enable fetching
    market state as of the most recent event.
 1. Each market `SHALL` track a vector of internal `PeriodicStateTracker`
