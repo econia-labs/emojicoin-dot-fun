@@ -12,7 +12,7 @@ import {
   StyledBlock,
 } from "./styled";
 
-import { MainInfo, TradeEmojicoin, TradeHistory } from "./components";
+import { Chat, MainInfo, TradeEmojicoin, TradeHistory } from "./components";
 
 const EmojicoinPage: React.FC = () => {
   const { t } = useTranslation();
@@ -72,9 +72,7 @@ const EmojicoinPage: React.FC = () => {
               </StyledContentHeader>
 
               <StyledBlockWrapper>
-                <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
-                  Chat
-                </Text>
+                <Chat />
               </StyledBlockWrapper>
             </StyledBlock>
           </StyledContentColumn>

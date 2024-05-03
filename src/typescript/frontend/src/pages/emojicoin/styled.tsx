@@ -6,6 +6,7 @@ export const StyledContentWrapper = styled.div`
   justify-content: center;
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
 `;
+
 export const StyledContentInner = styled.div`
   display: flex;
   flex-direction: column;
@@ -22,7 +23,7 @@ export const StyledContentColumn = styled(Flex)`
 
 export const StyledContentHeader = styled.div`
   display: flex;
-  height: 45px;
+  min-height: 45px;
   align-items: center;
   position: relative;
   padding: 0 21px;
@@ -51,6 +52,7 @@ export const StyledBlockWrapper = styled.div`
   display: flex;
   justify-content: center;
   min-height: 320px;
+  height: 100%;
 `;
 
 export const StyledBlock = styled(Flex)`

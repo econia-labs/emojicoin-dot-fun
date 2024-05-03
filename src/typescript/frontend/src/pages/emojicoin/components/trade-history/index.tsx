@@ -10,7 +10,7 @@ const TradeHistory: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <StyledTradeHistory id="lolka123">
+    <StyledTradeHistory>
       <Table>
         <THead>
           <tr>
