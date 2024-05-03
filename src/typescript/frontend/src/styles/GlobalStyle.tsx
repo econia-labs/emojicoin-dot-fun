@@ -74,11 +74,12 @@ html, body, div, span, applet, object, iframe,
 
   /* Scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 12px;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: ${({ theme }) => theme.colors.darkGrey};
-    border-radius: ${({ theme }) => theme.radii.medium};
+    background-color: ${({ theme }) => theme.colors.econiaBlue};
+    border-radius: 5px;
+    border: 3px solid ${({ theme }) => theme.colors.black};
   }
 
   body {

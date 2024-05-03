@@ -1,6 +1,7 @@
-import { AnyAction, Dispatch, Middleware, configureStore } from "@reduxjs/toolkit";
+// import { AnyAction, Dispatch, Middleware, configureStore } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { createLogger } from "redux-logger";
+// import { createLogger } from "redux-logger";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 
 import rootReducer from "./rootReducer";
@@ -8,9 +9,9 @@ import rootReducer from "./rootReducer";
 const middleware =
   process.env.NODE_ENV === "development"
     ? [
-        createLogger({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        }) as Middleware<{}, any, Dispatch<AnyAction>>,
+        // createLogger({
+        //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // }) as Middleware<{}, any, Dispatch<AnyAction>>,
       ]
     : [];
 

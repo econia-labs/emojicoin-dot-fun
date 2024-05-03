@@ -21,5 +21,19 @@
   "Pick one to five emojis; due to byte limitations not all combinations are supported.": "Pick one to five emojis; due to byte limitations not all combinations are supported.",
   "Search:": "Search:",
   "Select Emoji": "Select Emoji",
-  "Sort:": "Sort:"
+  "Sort:": "Sort:",
+  "Search": "Search",
+  "Price Chart": "Price Chart",
+  "Trade History": "Trade History",
+  "Provide liquidity": "Provide liquidity",
+  "Chat": "Chat",
+  "Trade Emojicoin": "Trade Emojicoin",
+  "Swap": "Swap",
+  "You pay": "You pay",
+  "You receive": "You receive",
+  "Rank": "Rank",
+  "Apt": "Apt",
+  "Type": "Type",
+  "Date": "Date",
+  "Transaction": "Transaction"
 }

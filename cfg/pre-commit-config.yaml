@@ -110,6 +110,9 @@ repos:
   -
     args:
     - '--autofix'
+    exclude: |
+      (?x)
+      ^src/typescript/frontend/public/locales/.*\.json$
     id: 'pretty-format-json'
   - id: 'trailing-whitespace'
   repo: 'https://github.com/pre-commit/pre-commit-hooks'
@@ -161,6 +164,8 @@ repos:
     args:
     - '--config'
     - 'cfg/cspell-config.json'
+    - '--quiet'
+    - '--gitignore'
     id: 'cspell'
   repo: 'https://github.com/streetsidesoftware/cspell-cli'
   rev: 'v8.6.0'
