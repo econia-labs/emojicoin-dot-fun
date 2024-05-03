@@ -43,7 +43,7 @@ const getBorderStyles = ({ error, isTouched, borderColor, theme }: BorderProps) 
 
 export const Input = styled.input<InputProps>`
   background-color: transparent;
-  border-radius: ${({ theme }) => theme.radii.semiMedium};
+  border-radius: ${({ theme }) => theme.radii.xSmall};
   color: ${({ theme }) => theme.colors.white};
   font-family: ${({ theme }) => theme.fonts.forma};
   display: block;

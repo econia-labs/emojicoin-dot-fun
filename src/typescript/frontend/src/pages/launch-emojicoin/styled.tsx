@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Text } from "components";
 
 export const StyledEmojiPickerWrapper = styled.div`
   .epr-main {
@@ -43,6 +44,7 @@ export const StyledEmojiPickerWrapper = styled.div`
 
     .epr_-3yva2a {
       border-top: none;
+
       :nth-child(2) {
         font-family: ${({ theme }) => theme.fonts.pixelar};
         font-size: 20px;
@@ -51,4 +53,31 @@ export const StyledEmojiPickerWrapper = styled.div`
       }
     }
   }
+`;
+
+export const Arrow = styled.div`
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: ${({ theme }) => theme.colors.econiaBlue};
+  bottom: -5px;
+  left: 50%;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+  border-right: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+  transform: rotate(45deg);
+`;
+
+export const StyledPrompt = styled.div<{ isVisible: boolean }>`
+  display: ${({ isVisible }) => (isVisible ? "flex" : "none")};
+  width: 100%;
+  position: absolute;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: ${({ theme }) => theme.colors.econiaBlue};
+  border-radius: ${({ theme }) => theme.radii.small};
+  top: calc(-100% - 20px);
+`;
+
+export const StyledFieldName = styled(Text)`
+  white-space: nowrap;
 `;

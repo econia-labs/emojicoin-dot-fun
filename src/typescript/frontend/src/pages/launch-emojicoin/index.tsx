@@ -1,12 +1,14 @@
-import React, { useEffect } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import EmojiPicker, { Theme, EmojiClickData } from "emoji-picker-react";
+import emojiRegex from "emoji-regex";
 
 import { useThemeContext, useTranslation } from "context";
 import { useValidationSchema } from "./hooks";
 import { useForm, useTooltip } from "hooks";
 
+import { CloseIcon } from "components/svg";
 import { Button, ClientsSlider, Column, Flex, FlexGap, Input, InputGroup, Text } from "components";
-import { StyledEmojiPickerWrapper } from "./styled";
+import { Arrow, StyledEmojiPickerWrapper, StyledPrompt, StyledFieldName } from "./styled";
 
 import { getTooltipStyles } from "./theme";
 
@@ -14,8 +16,7 @@ const LaunchEmojicoinPage: React.FC = () => {
   const { t } = useTranslation();
   const { theme } = useThemeContext();
 
-  const input = document.querySelector("input");
-
+  const [isPromptVisible, seIisPromptVisible] = useState(true);
   const { validationSchema, initialValues } = useValidationSchema();
   const { values, errors, touched, fieldProps, setFieldValue } = useForm({
     initialValues,
@@ -26,22 +27,15 @@ const LaunchEmojicoinPage: React.FC = () => {
     },
   });
 
-  const names = values.emojiList.map(emoji => emoji.names[0]).join(",");
-  const tickers = values.emojiList.map(emoji => emoji.emoji).join(",");
-
-  const { targetRef: targetRefLabel, tooltip: labelTooltip } = useTooltip(
-    t("Pick one to five emojis; due to byte limitations not all combinations are supported."),
-    {
-      placement: "top",
-    },
-  );
+  const names = values.emojiList.map(emoji => emoji.names[0]).join(", ");
+  const tickers = values.emojiList.map(emoji => emoji.emoji).join(", ");
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
     isEllipsis: true,
   });
 
-  const { targetRef, tooltip } = useTooltip(
+  const { targetRef, tooltip, targetElement } = useTooltip(
     <StyledEmojiPickerWrapper>
       <EmojiPicker
         searchPlaceholder={t("Search:")}
@@ -64,36 +58,31 @@ const LaunchEmojicoinPage: React.FC = () => {
   };
 
   const inputProhibition = async (event: KeyboardEvent) => {
-    if (event.key !== "Backspace") {
+    if (event.key !== "Backspace" && event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
       event.preventDefault();
-    } else {
-      const newEmojiValue = values.emoji.slice(0, -1);
-      const newEmojiListValue = values.emojiList.slice(0, -1);
-      await setFieldValue("emoji", newEmojiValue);
-      await setFieldValue("emojiList", newEmojiListValue);
-    }
-  };
-
-  const cursorPositioning = () => {
-    if (input) {
-      input.focus();
-      input.selectionStart = input.value.length;
     }
   };
 
   useEffect(() => {
-    if (input) {
-      input.addEventListener("keydown", inputProhibition);
-      input.addEventListener("click", cursorPositioning);
+    if (targetElement) {
+      targetElement.addEventListener("keydown", inputProhibition);
     }
 
     return () => {
-      if (input) {
-        input.removeEventListener("keydown", inputProhibition);
-        input.removeEventListener("click", cursorPositioning);
+      if (targetElement) {
+        targetElement.removeEventListener("keydown", inputProhibition);
       }
     };
-  }, [input, values]);
+  }, [targetElement, values]);
+
+  const onInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    fieldProps("emoji").onChange(e);
+
+    const emojiArr = e.target.value.match(emojiRegex()) ?? [];
+    const newEmojiList = emojiArr.map(string => values.emojiList.find(item => item.emoji === string));
+
+    await setFieldValue("emojiList", newEmojiList);
+  };
 
   return (
     <Column pt="120px" flexGrow="1">
@@ -101,18 +90,35 @@ const LaunchEmojicoinPage: React.FC = () => {
 
       <Flex justifyContent="center" alignItems="center" height="100%">
         <Column width="100%" maxWidth="414px">
-          <Flex ref={targetRefLabel}>
+          <Flex position="relative">
+            <StyledPrompt isVisible={isPromptVisible}>
+              <Text textScale="pixelHeading4" color="black" textTransform="uppercase">
+                {t("Pick one to five emojis; due to byte limitations not all combinations are supported.")}
+              </Text>
+
+              <Flex height="100%" alignItems="start">
+                <CloseIcon
+                  width="11px"
+                  cursor="pointer"
+                  mt="4px"
+                  onClick={() => {
+                    seIisPromptVisible(false);
+                  }}
+                />
+              </Flex>
+              <Arrow />
+            </StyledPrompt>
+
             <InputGroup label={t("Select Emoji")} error={errors.emoji} isTouched={touched.emoji}>
-              <Input {...fieldProps("emoji")} autoComplete="off" ref={targetRef} />
+              <Input {...fieldProps("emoji")} onChange={onInputChange} autoComplete="off" ref={targetRef} />
             </InputGroup>
-            {labelTooltip}
           </Flex>
           {tooltip}
 
           <FlexGap gap="8px" mb="5px">
-            <Text textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
+            <StyledFieldName textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
               {t("Emojicoin Name:")}
-            </Text>
+            </StyledFieldName>
             <Text textScale="bodyLarge" textTransform="uppercase" ellipsis ref={targetRefEmojiName}>
               {names}
             </Text>
@@ -120,9 +126,9 @@ const LaunchEmojicoinPage: React.FC = () => {
           </FlexGap>
 
           <FlexGap gap="8px" mb="5px">
-            <Text textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
+            <StyledFieldName textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
               {t("Emojicoin symbol (ticker) :")}
-            </Text>
+            </StyledFieldName>
             <Text textScale="bodyLarge" textTransform="uppercase">
               {tickers}
             </Text>
