@@ -214,6 +214,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         time: u64,
         registrant: address,
         integrator: address,
+        integrator_fee: u64,
     }
 
     #[event]
@@ -492,25 +493,29 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             code::publish_package_txn(&market_signer, metadata_bytecode, vector[module_bytecode]);
         };
 
-        // Only charge the registrant if they have to pay for initializing the chat emojis.
-        // Otherwise, waive the register market fee, since the gas costs of initializing them
-        // is roughly the same.
+        // Waive market registration fee if registrant assumes the gas cost of initializing the
+        // supplemental chat emojis table during the registration of the first market, an operation
+        // that is roughly equal in cost to the static market registration fee. Else, charge fee.
         let registrant_address = signer::address_of(registrant);
-        let fee = if (ensure_supplemental_chat_emojis_initialized(registry_ref_mut)) {
+        let registrant_assumes_cost_of_initializing_supplemental_chat_emojis =
+            ensure_supplemental_chat_emojis_initialized(registry_ref_mut);
+        let integrator_fee = if (registrant_assumes_cost_of_initializing_supplemental_chat_emojis) {
             0
         } else {
+            let fee = MARKET_REGISTRATION_FEE;
             let can_pay_fee =
                 coin::is_account_registered<AptosCoin>(registrant_address) &&
-                coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_FEE;
+                coin::balance<AptosCoin>(registrant_address) >= fee;
             assert!(can_pay_fee, E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE);
-            aptos_account::transfer(registrant, integrator, MARKET_REGISTRATION_FEE);
-            (MARKET_REGISTRATION_FEE as u128)
-        };
+            aptos_account::transfer(registrant, integrator, fee);
 
-        // Update global integrator fees.
-        let global_cumulative_integrator_fees_ref_mut =
-            &mut registry_ref_mut.global_stats.cumulative_integrator_fees;
-        aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, fee);
+            // Update global integrator fees.
+            let global_cumulative_integrator_fees_ref_mut =
+                &mut registry_ref_mut.global_stats.cumulative_integrator_fees;
+            aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, (fee as u128));
+
+            fee
+        };
 
         // Bump state.
         let market_ref_mut = borrow_global_mut<Market>(market_address);
@@ -522,6 +527,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             time,
             registrant: registrant_address,
             integrator,
+            integrator_fee,
         });
         bump_market_state(
             market_ref_mut,
