@@ -1,20 +1,12 @@
 [addresses]
-emojicoin_dot_fun = "_"
-market_address = "_"
+coin_factory = "_"
 
-[dependencies.AptosFramework]
+[dev-dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
-[dev-addresses]
-emojicoin_dot_fun = "0xcccccccc"
-market_address = "0xbbbbbbbb"
-
-[dev-dependencies.EmojicoinDotFun]
-local = "../emojicoin_dot_fun"
-
 [package]
-name = "CoinFactory"
-upgrade_policy = "compatible"
+name = "EmojicoinDotFunCoinFactory"
+upgrade_policy = "immutable"
 version = "1.0.0"

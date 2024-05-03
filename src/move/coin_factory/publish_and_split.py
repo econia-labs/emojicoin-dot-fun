@@ -4,24 +4,14 @@ import json
 import os
 import subprocess
 from pathlib import Path
+from typing import Sequence
 
-MARKET_ADDRESS = "market_address"
-EMOJICOIN_DOT_FUN = "emojicoin_dot_fun"
+FLAG_ADDRESS = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+MARKET_NAMED_ADDRESS = "market_address"
+COIN_FACTORY_NAMED_ADDRESS = "coin_factory"
 PACKAGE_BYTECODE_PATH = "json/build_publish_payload.json"
 SPLIT_BYTECODE_PATH = "json/split_bytecode.json"
 METADATA_K, CODE_K = "metadata", "code"
-
-# Mapping of named addresses to placeholder addresses for generating Move bytecode.
-named_addresses = [
-    # market_address
-    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-    # emojicoin_dot_fun
-    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-]
-NAMED_ADDRESSES = {
-    MARKET_ADDRESS: named_addresses[0],
-    EMOJICOIN_DOT_FUN: named_addresses[1],
-}
 
 
 def ensure_parent_directories_exist(s: str) -> Path:
@@ -61,7 +51,7 @@ def split_and_replace_named_addresses(
     return lines_to_replace
 
 
-def compare_contents_and_log(fp: Path, new_data: dict[str, list[str]]) -> None:
+def compare_contents_and_log(fp: Path, new_data: dict[str, Sequence[str]]) -> None:
     metadata_bytes_changed = False
     module_bytes_changed = False
 
@@ -86,7 +76,6 @@ def compare_contents_and_log(fp: Path, new_data: dict[str, list[str]]) -> None:
 #  - Run this script from the coin factory module directory (where the `Move.toml` is)
 if __name__ == "__main__":
     json_path = ensure_parent_directories_exist(PACKAGE_BYTECODE_PATH)
-    named_addresses_args = ",".join([f"{k}={v}" for k, v in NAMED_ADDRESSES.items()])
     try:
         file_contents_last_updated = os.path.getmtime(PACKAGE_BYTECODE_PATH)
     except FileNotFoundError:
@@ -99,7 +88,7 @@ if __name__ == "__main__":
             "--json-output-file",
             json_path,
             "--named-addresses",
-            named_addresses_args,
+            f"{COIN_FACTORY_NAMED_ADDRESS}={FLAG_ADDRESS}",
             "--assume-yes",
             "--included-artifacts=none",
         ],
@@ -127,8 +116,6 @@ if __name__ == "__main__":
     if metadata.startswith("0x"):
         metadata = metadata[2:]
 
-    metadata_lines = split_and_replace_named_addresses([metadata], NAMED_ADDRESSES)
-
     bytecode_array: list[str] = cli_json_publish_output["args"][1]["value"]
     assert len(bytecode_array) == 1
     bytecode = bytecode_array[0]
@@ -136,13 +123,14 @@ if __name__ == "__main__":
     if bytecode.startswith("0x"):
         bytecode = bytecode[2:]
 
-    assert NAMED_ADDRESSES[MARKET_ADDRESS] not in metadata
-    assert NAMED_ADDRESSES[MARKET_ADDRESS] in bytecode
+    assert FLAG_ADDRESS not in metadata
 
-    bytecode_lines = split_and_replace_named_addresses([bytecode], NAMED_ADDRESSES)
+    bytecode_lines = split_and_replace_named_addresses(
+        [bytecode], {MARKET_NAMED_ADDRESS: FLAG_ADDRESS}
+    )
 
-    new_data: dict[str, list[str]] = {
-        METADATA_K: metadata_lines,
+    new_data = {
+        METADATA_K: metadata,
         CODE_K: bytecode_lines,
     }
     split_bytecode_path = ensure_parent_directories_exist(SPLIT_BYTECODE_PATH)

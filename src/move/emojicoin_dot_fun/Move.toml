@@ -7,6 +7,7 @@ rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
 [dev-addresses]
+coin_factory = "0xaaaa"
 emojicoin_dot_fun = "0xc0de"
 
 [dev-dependencies.BlackCatCoinFactory]
@@ -14,6 +15,9 @@ local = "../test_coin_factories/black_cat"
 
 [dev-dependencies.BlackHeartCoinFactory]
 local = "../test_coin_factories/black_heart"
+
+[dev-dependencies.EmojicoinDotFunCoinFactory]
+local = "../coin_factory"
 
 [dev-dependencies.YellowHeartCoinFactory]
 local = "../test_coin_factories/yellow_heart"

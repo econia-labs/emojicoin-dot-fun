@@ -2313,7 +2313,7 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
-    public(friend) inline fun get_chat_emojis(): vector<vector<u8>> {
+    public(friend) inline fun get_supplemental_chat_emojis(): vector<vector<u8>> {
         vector [
             x"f09fa791e2808df09f8ea8",                                    // Artist [1F9D1 200D 1F3A8]
             x"f09fa791f09f8fbfe2808df09f8ea8",                            // Artist: dark skin tone [1F9D1 1F3FF 200D 1F3A8]
@@ -3529,13 +3529,8 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
-
-    inline fun get_split_metadata_bytes(): vector<vector<u8>> {
-        vector[
-            x"0b436f696e466163746f72790100000000000000004034323438464543373042333736393141444146454538433538363532333230434635363134384545424145334441383143463943314636353542384645324436fb011f8b08000000000002ff8550bb6ec3300cdcf51581f6c8ee5aa043d1d63f1118062d318e6a4914f47093bfafd4285d12209cf8b83b927700a502c688716468e95b4bd26e5294a66376bbb71d9f38b310564c5343b6263b28f4e8143aa9318a779f280e012cfe505847b6e85481a7947c7cedba529ef22c24d90e2a726f608e2d95145014006701b74ab2a09dc352c73c2b1d6aeb8ab4b46177bc2d69f4fffaeea6afdb3f9f9486ec46664882a972427477cf5ee9dbfe9921fd59b678e44c7f9e5b543d0f72850547e6ca8d75fc51c4069089c285b3ec97000a274f46cb4b1d177f3c243d1be46cc31035fdad7c11bde839fb05ce4e380dac010000010c636f696e5f666163746f72790000000400000000000000000000000000000000000000000000000000000000000000010e4170746f734672616d65776f726b00000000000000000000000000000000000000000000000000000000000000010b4170746f735374646c696200000000000000000000000000000000000000000000000000000000000000010a4d6f76655374646c6962",
-            // Interpolate the BCS encoding of address @emojicoin_dot_fun here.
-            x"0f456d6f6a69636f696e446f7446756e00",
-        ]
+    inline fun get_metadata_bytes(): vector<u8> {
+        x"1a456d6f6a69636f696e446f7446756e436f696e466163746f72790200000000000000004044444231324644444631333830363943363442343332433944354131333034424531363033373839414538323637373330423244393939373942363744363733d2011f8b08000000000002ff3d8fc14ec3301044effe8acaf73ae58ac40101f9892a8a36f6365d1a7bad5d3b88bfc7a685dbcce88d76e70c2108aaa24ec633a5f902beb07c1f5e0e76b6c69c03eec7801953c0e409d5bde6c23a0a44fc62b94d66a5d2e16b29599f87a1d96b5d9ce73840278f1b2cfa909e055d03ac11dc7b2902a584cd6b5d02498fee64e41d87cbdf9147fddff7bf32f81bac3899d4c25efc88fc497dc23b97b1a6b7a6c6fb166b6a5e0502ce9937f2bfdb28c65a60d9d09a1d4589534f9fdcc99dacf9019ac891a815010000010c636f696e5f666163746f72790000000000"
     }
 
     inline fun get_split_module_bytes(): vector<vector<u8>> {
@@ -3546,40 +3541,34 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
-    public(friend) inline fun get_publish_code(publisher_addr: address): (vector<u8>, vector<u8>) {
-        // Interpolate into metadata.
-        let metadata_bytes = get_split_metadata_bytes();
-        let replaced_metadata = vector[];
-        vector::reverse(&mut metadata_bytes);
-        vector::append(&mut replaced_metadata, vector::pop_back(&mut metadata_bytes));
-        vector::append(&mut replaced_metadata, bcs::to_bytes(&@emojicoin_dot_fun));
-        vector::append(&mut replaced_metadata, vector::pop_back(&mut metadata_bytes));
+    public(friend) inline fun get_publish_code(market_address: address): (vector<u8>, vector<u8>) {
+        // Interpolate market address into module bytecode.
+        let split_bytecode = get_split_module_bytes();
+        let epilogue = vector::pop_back(&mut split_bytecode);
+        let module_bytecode = vector::pop_back(&mut split_bytecode);
+        vector::append(&mut module_bytecode, bcs::to_bytes(&market_address));
+        vector::append(&mut module_bytecode, epilogue);
 
-        // Interpolate into module bytecode.
-        let module_bytecode = get_split_module_bytes();
-        let replaced_bytecode = vector[];
-        vector::reverse(&mut module_bytecode);
-        vector::append(&mut replaced_bytecode, vector::pop_back(&mut module_bytecode));
-        vector::append(&mut replaced_bytecode, bcs::to_bytes(&publisher_addr));
-        vector::append(&mut replaced_bytecode, vector::pop_back(&mut module_bytecode));
-
-        (replaced_metadata, replaced_bytecode)
+        (get_metadata_bytes(), module_bytecode)
     }
 
-    #[test]
-    fun test_get_publish_code() {
-        let publisher_address = @0x0000012345789abcdef012345789abcdef012345789abcdef012345789abcdef;
-        let (metadata_bytecode, module_bytecode) = get_publish_code(publisher_address);
-        assert!(@emojicoin_dot_fun == @0xc0de, 0);
-
-        let test_metadata_bytecode = *vector::borrow(&get_split_metadata_bytes(), 0);
-        vector::append(&mut test_metadata_bytecode, bcs::to_bytes(&@0xc0de));
-        vector::append(&mut test_metadata_bytecode, *vector::borrow(&get_split_metadata_bytes(), 1));
-
-        let test_module_bytecode = *vector::borrow(&get_split_module_bytes(), 0);
-        vector::append(&mut test_module_bytecode, bcs::to_bytes(&publisher_address));
-        vector::append(&mut test_module_bytecode, *vector::borrow(&get_split_module_bytes(), 1));
-        assert!(metadata_bytecode == test_metadata_bytecode, 1);
-        assert!(module_bytecode == test_module_bytecode, 2);
+    #[test_only] public fun get_metadata_bytes_test_only(): vector<u8> {
+        get_metadata_bytes()
     }
+
+    #[test_only] public fun get_split_module_bytes_test_only(): vector<vector<u8>> {
+        get_split_module_bytes()
+    }
+
+    #[test_only] public fun get_coin_symbol_emojis_test_only(): vector<vector<u8>> {
+        get_coin_symbol_emojis()
+    }
+
+    #[test_only] public fun get_publish_code_test_only(market_address: address): (
+        vector<u8>,
+        vector<u8>,
+    ) {
+        get_publish_code(market_address)
+    }
+
 }

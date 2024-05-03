@@ -8,5 +8,5 @@ subdir = "aptos-move/framework/aptos-framework"
 
 [package]
 name = "YellowHeartCoinFactory"
-upgrade_policy = "compatible"
+upgrade_policy = "immutable"
 version = "1.0.0"
