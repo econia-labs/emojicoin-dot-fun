@@ -23,6 +23,7 @@ const LaunchEmojicoinPage: React.FC = () => {
     validationSchema,
     enableReinitialize: true,
     onSubmit(values) {
+      /* eslint-disable-next-line no-console */
       console.log("values", values);
     },
   });

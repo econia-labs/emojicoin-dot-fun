@@ -18,6 +18,7 @@ const Header: React.FC = () => {
   const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
 
   const walletHandler = () => {
+    /* eslint-disable-next-line no-console */
     console.log("walletHandler");
   };
 
