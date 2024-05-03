@@ -14,7 +14,7 @@ const MESSAGE_LIST = [
     incoming: true,
   },
   {
-    user: "heyhey.APT",
+    user: "hey_hey.APT",
     text: "🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤",
     userRank: "🐡",
     incoming: false,
@@ -26,7 +26,7 @@ const MESSAGE_LIST = [
     incoming: true,
   },
   {
-    user: "heyhey.APT",
+    user: "hey_hey.APT",
     text: "orem ipsum dolor sit amet.",
     userRank: "🐡",
     incoming: false,
@@ -37,6 +37,7 @@ const Chat: React.FC = () => {
   const { theme } = useThemeContext();
 
   const loadMoreMessages = () => {
+    /* eslint-disable-next-line no-console */
     console.log("loadMoreMessages");
   };
 

@@ -2,7 +2,7 @@ import React from "react";
 
 import { useTranslation } from "context";
 import { HEADERS, DATA } from "./constants";
-import { TableRowDesktop } from "./componenta";
+import { TableRowDesktop } from "./components";
 
 import { Table, Th, TBody, THead, StyledTradeHistory } from "./styled";
 

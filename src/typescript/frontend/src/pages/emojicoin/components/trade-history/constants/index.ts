@@ -33,7 +33,7 @@ export const DATA = [
     emoji: "11.11M",
     type: "Buy",
     date: "date",
-    transaction: "0x6743dd86424cca2c45678uyggy6ugv",
+    transaction: "0x6743dd86424cca2c456786",
   },
   {
     rankIcon: "🐡",
@@ -42,7 +42,7 @@ export const DATA = [
     emoji: "11.11M",
     type: "Buy",
     date: "date",
-    transaction: "0x6743dd86424cca2c45678uyggy6ugv",
+    transaction: "0x6743dd86424cca2c456787",
   },
   {
     rankIcon: "🐬",
@@ -51,6 +51,6 @@ export const DATA = [
     emoji: "11.11M",
     type: "Buy",
     date: "date",
-    transaction: "0x6743dd86424cca2c45678uyggy6ugv",
+    transaction: "0x6743dd86424cca2c456788",
   },
 ];
