@@ -55,7 +55,6 @@
         is_a_supported_chat_emoji,
         is_a_supported_symbol_emoji,
         market_metadata_by_emoji_bytes,
-        pack_market_metadata,
         pack_reserves,
         register_market,
         register_market_without_publish,
@@ -85,7 +84,7 @@
     use std::vector;
 
     struct TestChat has copy, drop, store {
-        market_metadata: MarketMetadata,
+        market_metadata: TestMarketMetadata,
         emit_time: u64,
         emit_market_nonce: u64,
         user: address,
@@ -135,7 +134,7 @@
             circulating_supply,
             balance_as_fraction_of_circulating_supply_q64,
         ) = unpack_chat(chat);
-        assert!(market_metadata == test_chat.market_metadata, 0);
+        assert_market_metadata(test_chat.market_metadata, market_metadata);
         assert!(emit_time == test_chat.emit_time, 0);
         assert!(emit_market_nonce == test_chat.emit_market_nonce, 0);
         assert!(user == test_chat.user, 0);
@@ -196,16 +195,6 @@
         let lp_name = get_concatenation(symbol, utf8(get_EMOJICOIN_LP_NAME_SUFFIX()));
         assert!(coin::symbol<EmojicoinLP>() == lp_symbol, 0);
         assert!(coin::name<EmojicoinLP>() == lp_name, 0);
-    }
-
-    public fun get_market_metadata(
-        test_metadata: TestMarketMetadata,
-    ): MarketMetadata {
-        pack_market_metadata(
-            test_metadata.market_id,
-            test_metadata.market_address,
-            test_metadata.emoji_bytes,
-        )
     }
 
     public fun init_package() {
@@ -321,11 +310,11 @@
 
         // Assert the emitted chat events.
         let events_emitted = event::emitted_events<Chat>();
-        let market_metadata = get_market_metadata(TestMarketMetadata {
+        let market_metadata = TestMarketMetadata {
             market_id: 1,
             market_address: @black_cat_market,
             emoji_bytes: BLACK_CAT,
-        });
+        };
         assert_chat(
             TestChat {
                 market_metadata,

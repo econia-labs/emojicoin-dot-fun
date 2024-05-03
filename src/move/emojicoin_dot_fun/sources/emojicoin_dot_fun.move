@@ -2257,18 +2257,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test_only] public fun init_module_test_only(account: &signer) { init_module(account) }
 
-    #[test_only] public fun pack_market_metadata(
-        market_id: u64,
-        market_address: address,
-        emoji_bytes: vector<u8>,
-    ): MarketMetadata {
-        MarketMetadata {
-            market_id,
-            market_address,
-            emoji_bytes,
-        }
-    }
-
     #[test_only] public fun pack_reserves(base: u64, quote: u64): Reserves {
         Reserves { base, quote }
     }
