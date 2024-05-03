@@ -15,7 +15,7 @@ const Header: React.FC = () => {
   const { pathname } = useLocation();
 
   const currentPath = pathname.split("/")[1];
-  const linksForCurrentPage = NAVIGATE_LINKS.filter((link)=> link.path !== currentPath)
+  const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
 
   const walletHandler = () => {
     console.log("walletHandler");
