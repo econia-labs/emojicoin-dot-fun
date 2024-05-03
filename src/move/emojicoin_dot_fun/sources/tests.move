@@ -55,6 +55,7 @@
         is_a_supported_chat_emoji,
         is_a_supported_symbol_emoji,
         market_metadata_by_emoji_bytes,
+        pack_market_metadata,
         pack_reserves,
         register_market,
         register_market_without_publish,
@@ -94,6 +95,12 @@
         balance_as_fraction_of_circulating_supply_q64: u128,
     }
 
+    struct TestMarketMetadata has copy, drop, store {
+        market_id: u64,
+        market_address: address,
+        emoji_bytes: vector<u8>,
+    }
+
     // Test market emoji bytes.
     const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
     const BLACK_HEART: vector<u8> = x"f09f96a4";
@@ -104,6 +111,15 @@
 
     const USER: address = @0xaaaaa;
     const INTEGRATOR: address = @0xbbbbb;
+
+    public fun address_for_registered_market_by_emoji_bytes(
+        emoji_bytes: vector<vector<u8>>,
+    ): address {
+        let (_, market_address, _) = unpack_market_metadata(
+            metadata_for_registered_market_by_emoji_bytes(emoji_bytes)
+        );
+        market_address
+    }
 
     public fun assert_chat(
         test_chat: TestChat,
@@ -131,6 +147,16 @@
                 test_chat.balance_as_fraction_of_circulating_supply_q64,
             0
         );
+    }
+
+    public fun assert_market_metadata(
+        test_metadata: TestMarketMetadata,
+        metadata: MarketMetadata,
+    ) {
+        let (market_id, market_address, emoji_bytes) = unpack_market_metadata(metadata);
+        assert!(market_id == test_metadata.market_id, 0);
+        assert!(market_address == test_metadata.market_address, 0);
+        assert!(emoji_bytes == test_metadata.emoji_bytes, 0);
     }
 
     public fun assert_test_market_address(
@@ -172,13 +198,14 @@
         assert!(coin::name<EmojicoinLP>() == lp_name, 0);
     }
 
-    public fun address_for_registered_market_by_emoji_bytes(
-        emoji_bytes: vector<vector<u8>>,
-    ): address {
-        let (_, market_address, _) = unpack_market_metadata(
-            metadata_for_registered_market_by_emoji_bytes(emoji_bytes)
-        );
-        market_address
+    public fun get_market_metadata(
+        test_metadata: TestMarketMetadata,
+    ): MarketMetadata {
+        pack_market_metadata(
+            test_metadata.market_id,
+            test_metadata.market_address,
+            test_metadata.emoji_bytes,
+        )
     }
 
     public fun init_package() {
@@ -294,9 +321,14 @@
 
         // Assert the emitted chat events.
         let events_emitted = event::emitted_events<Chat>();
+        let market_metadata = get_market_metadata(TestMarketMetadata {
+            market_id: 1,
+            market_address: @black_cat_market,
+            emoji_bytes: BLACK_CAT,
+        });
         assert_chat(
             TestChat {
-                market_metadata: metadata_for_registered_market_by_emoji_bytes(vector[BLACK_CAT]),
+                market_metadata,
                 emit_time: 0,
                 emit_market_nonce: 2,
                 user: USER,
@@ -309,7 +341,7 @@
         );
         assert_chat(
             TestChat {
-                market_metadata: metadata_for_registered_market_by_emoji_bytes(vector[BLACK_CAT]),
+                market_metadata,
                 emit_time: 0,
                 emit_market_nonce: 3,
                 user: USER,
