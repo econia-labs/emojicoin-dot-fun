@@ -1,9 +1,7 @@
 #[test_only] module emojicoin_dot_fun::tests {
 
-    use aptos_framework::account::{Self, create_signer_for_test as get_signer};
-    use aptos_framework::coin::{Self, BurnCapability, Coin, MintCapability};
+    use aptos_framework::account::{create_signer_for_test as get_signer};
     use aptos_framework::aptos_account;
-    use aptos_framework::aptos_coin::{Self, AptosCoin};
     use aptos_framework::timestamp;
     use black_cat_market::coin_factory::{
         Emojicoin as BlackCatEmojicoin,
@@ -56,6 +54,9 @@
         get_coin_symbol_emojis_test_only as get_coin_symbol_emojis,
         get_publish_code_test_only as get_publish_code,
     };
+    use emojicoin_dot_fun::test_acquisitions::{
+        mint_aptos_coin_to,
+    };
     use yellow_heart_market::coin_factory::{
         Emojicoin as YellowHeartEmojicoin,
         EmojicoinLP as YellowHeartEmojicoinLP,
@@ -66,11 +67,6 @@
     use std::string;
     use std::type_info;
     use std::vector;
-
-    struct AptosCoinCapStore has key {
-        burn_cap: BurnCapability<AptosCoin>,
-        mint_cap: MintCapability<AptosCoin>,
-    }
 
     // Test market emoji bytes.
     const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
@@ -84,7 +80,7 @@
         emoji_bytes: vector<vector<u8>>,
         hard_coded_address: address,
         publish_code: bool,
-    ) acquires AptosCoinCapStore {
+    ) {
         mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_FEE());
         if (publish_code) { // Only one publication operation allowed per transaction.
             register_market(&get_signer(USER), emoji_bytes, INTEGRATOR);
@@ -101,19 +97,6 @@
         aptos_account::create_account(@emojicoin_dot_fun);
         timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
         init_module(&get_signer(@emojicoin_dot_fun));
-    }
-
-    public fun mint_aptos_coin(amount: u64): Coin<AptosCoin> acquires AptosCoinCapStore {
-        if (!exists<AptosCoinCapStore>(@aptos_framework)) {
-            let framework_signer = account::create_signer_for_test(@aptos_framework);
-            let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(&framework_signer);
-            move_to(&framework_signer, AptosCoinCapStore { burn_cap, mint_cap });
-        };
-        coin::mint(amount, &borrow_global<AptosCoinCapStore>(@aptos_framework).mint_cap)
-    }
-
-    public fun mint_aptos_coin_to(recipient: address, amount: u64) acquires AptosCoinCapStore {
-        aptos_account::deposit_coins(recipient, mint_aptos_coin(amount))
     }
 
     #[test] fun all_supported_emojis_under_10_bytes() {
@@ -184,7 +167,7 @@
     }
 
     // Verify hard-coded test market addresses, derived from `@emojicoin_dot_fun` dev address.
-    #[test] fun derived_test_market_addresses() acquires AptosCoinCapStore {
+    #[test] fun derived_test_market_addresses() {
         init_package();
         assert_test_market_address(vector[BLACK_CAT], @black_cat_market, true);
         assert_test_market_address(vector[BLACK_HEART], @black_heart_market, false);
