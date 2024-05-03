@@ -3,6 +3,7 @@
     use aptos_framework::account::{create_signer_for_test as get_signer};
     use aptos_framework::aptos_account;
     use aptos_framework::coin;
+    use aptos_framework::event;
     use aptos_framework::timestamp;
     use aptos_std::string_utils;
     use black_cat_market::coin_factory::{
@@ -18,9 +19,11 @@
         EmojicoinLP as CoinFactoryEmojicoinLP,
     };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
+        Chat,
         Self,
         MarketMetadata,
         assert_valid_coin_types_test_only as assert_valid_coin_types,
+        chat,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
         exists_lp_coin_capabilities,
         get_BASE_REAL_CEILING,
@@ -32,6 +35,7 @@
         get_EMOJICOIN_LP_STRUCT_NAME,
         get_EMOJICOIN_LP_SYMBOL_PREFIX,
         get_EMOJICOIN_NAME_SUFFIX,
+        get_MAX_CHAT_MESSAGE_LENGTH,
         get_MAX_SYMBOL_LENGTH,
         get_MARKET_REGISTRATION_FEE,
         get_MICROSECONDS_PER_SECOND,
@@ -48,13 +52,15 @@
         get_concatenation_test_only as get_concatenation,
         verified_symbol_emoji_bytes,
         init_module_test_only as init_module,
+        is_a_supported_chat_emoji,
         is_a_supported_symbol_emoji,
         market_metadata_by_emoji_bytes,
-        pack_Reserves,
+        pack_reserves,
         register_market,
         register_market_without_publish,
         swap,
         unpack_market_metadata,
+        unpack_chat,
         valid_coin_types_test_only as valid_coin_types,
     };
     use emojicoin_dot_fun::hex_codes::{
@@ -73,9 +79,20 @@
     };
     use std::bcs;
     use std::option;
-    use std::string::{Self, utf8};
+    use std::string::{Self, String, utf8};
     use std::type_info;
     use std::vector;
+
+    struct TestChat has copy, drop, store {
+        market_metadata: MarketMetadata,
+        emit_time: u64,
+        emit_market_nonce: u64,
+        user: address,
+        message: String,
+        user_emojicoin_balance: u64,
+        circulating_supply: u64,
+        balance_as_fraction_of_circulating_supply_q64: u128,
+    }
 
     // Test market emoji bytes.
     const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
@@ -87,6 +104,34 @@
 
     const USER: address = @0xaaaaa;
     const INTEGRATOR: address = @0xbbbbb;
+
+    public fun assert_chat(
+        test_chat: TestChat,
+        chat: Chat,
+    ) {
+        let (
+            market_metadata,
+            emit_time,
+            emit_market_nonce,
+            user,
+            message,
+            user_emojicoin_balance,
+            circulating_supply,
+            balance_as_fraction_of_circulating_supply_q64,
+        ) = unpack_chat(chat);
+        assert!(market_metadata == test_chat.market_metadata, 0);
+        assert!(emit_time == test_chat.emit_time, 0);
+        assert!(emit_market_nonce == test_chat.emit_market_nonce, 0);
+        assert!(user == test_chat.user, 0);
+        assert!(message == test_chat.message, 0);
+        assert!(user_emojicoin_balance == test_chat.user_emojicoin_balance, 0);
+        assert!(circulating_supply == test_chat.circulating_supply, 0);
+        assert!(
+            balance_as_fraction_of_circulating_supply_q64 ==
+                test_chat.balance_as_fraction_of_circulating_supply_q64,
+            0
+        );
+    }
 
     public fun assert_test_market_address(
         emoji_bytes: vector<vector<u8>>,
@@ -199,6 +244,125 @@
         assert_valid_coin_types<BadType, BadType>(@yellow_heart_market);
     }
 
+    #[test] fun chat_complex_emoji_sequences() {
+        init_package();
+        let emojis = vector[
+            x"f09fa791e2808df09f9a80", // Astronaut.
+            x"f09fa6b8f09f8fbee2808de29982efb88f", // Man superhero: medium-dark skin tone.
+        ];
+
+        // Verify neither supplemental chat emoji is supported before first market is registered.
+        assert!(!vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
+
+        // Register a market, verify both emojis supported in chat.
+        init_market(vector[BLACK_CAT]);
+        assert!(vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            emojis,
+            vector[1, 0],
+            @black_cat_market,
+        );
+
+        // Chat again with a longer message.
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            vector<vector<u8>> [
+                x"f09f98b6", // Cat face.
+                x"f09f98b7", // Cat face with tears of joy.
+                x"f09f98b8", // Cat face with wry smile.
+                x"f09f9088e2808de2ac9b", // Black cat.
+                x"f09f9294", // Broken heart.
+            ],
+            vector[ 3, 0, 2, 2, 1, 4 ],
+            @black_cat_market,
+        );
+
+        // Post a max length chat message.
+        let emoji_indices_sequence = vector[];
+        for (i in 0..get_MAX_CHAT_MESSAGE_LENGTH()) {
+            vector::push_back(&mut emoji_indices_sequence, 0);
+        };
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            vector<vector<u8>> [
+                x"f09f9088e2808de2ac9b", // Black cat.
+            ],
+            emoji_indices_sequence,
+            @black_cat_market,
+        );
+
+        // Assert the emitted chat events.
+        let events_emitted = event::emitted_events<Chat>();
+        assert_chat(
+            TestChat {
+                market_metadata: metadata_for_registered_market_by_emoji_bytes(vector[BLACK_CAT]),
+                emit_time: 0,
+                emit_market_nonce: 2,
+                user: USER,
+                message: utf8(x"f09fa6b8f09f8fbee2808de29982efb88ff09fa791e2808df09f9a80"),
+                user_emojicoin_balance: 0,
+                circulating_supply: 0,
+                balance_as_fraction_of_circulating_supply_q64: 0,
+            },
+            *vector::borrow(&events_emitted, 0),
+        );
+        assert_chat(
+            TestChat {
+                market_metadata: metadata_for_registered_market_by_emoji_bytes(vector[BLACK_CAT]),
+                emit_time: 0,
+                emit_market_nonce: 3,
+                user: USER,
+                message: utf8(x"f09f9088e2808de2ac9bf09f98b6f09f98b8f09f98b8f09f98b7f09f9294"),
+                user_emojicoin_balance: 0,
+                circulating_supply: 0,
+                balance_as_fraction_of_circulating_supply_q64: 0,
+            },
+            *vector::borrow(&events_emitted, 1),
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NOT_SUPPORTED_CHAT_EMOJI,
+        location = emojicoin_dot_fun
+    )] fun chat_message_invalid_emoji() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            vector<vector<u8>> [
+                x"f09f98b7", // Cat face with tears of joy.
+                x"f09f", // Invalid emoji.
+            ],
+            vector[ 0, 1],
+            @black_cat_market,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_CHAT_MESSAGE_TOO_LONG,
+        location = emojicoin_dot_fun
+    )] fun chat_message_too_long() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+
+        // Try to send a chat message that is one emoji too long.
+        let emojis = vector[
+            x"f09f8dba", // Beer mug.
+        ];
+        let emoji_indices_sequence = vector[];
+        for (i in 0..(get_MAX_CHAT_MESSAGE_LENGTH() + 1)) {
+            vector::push_back(&mut emoji_indices_sequence, 0);
+        };
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            emojis,
+            emoji_indices_sequence,
+            @black_cat_market,
+        );
+    }
+
     #[test] fun concatenation() {
         let base = utf8(b"base");
         let additional = utf8(b" additional");
@@ -243,11 +407,11 @@
 
     #[test] fun cpamm_simple_swap_output_amount_buy_sell_all() {
         // Buy all base from start of bonding curve.
-        let reserves = pack_Reserves(get_BASE_VIRTUAL_CEILING(), get_QUOTE_VIRTUAL_FLOOR());
+        let reserves = pack_reserves(get_BASE_VIRTUAL_CEILING(), get_QUOTE_VIRTUAL_FLOOR());
         let output = cpamm_simple_swap_output_amount(get_QUOTE_REAL_CEILING(), false, reserves);
         assert!(output == get_BASE_REAL_CEILING(), 0);
         // Sell all base to a bonding curve that is theoretically complete but has not transitioned.
-        reserves = pack_Reserves(get_BASE_VIRTUAL_FLOOR(), get_QUOTE_VIRTUAL_CEILING());
+        reserves = pack_reserves(get_BASE_VIRTUAL_FLOOR(), get_QUOTE_VIRTUAL_CEILING());
         output = cpamm_simple_swap_output_amount(get_BASE_REAL_CEILING(), true, reserves);
         assert!(output == get_QUOTE_REAL_CEILING(), 0);
     }
@@ -256,7 +420,7 @@
         abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_SWAP_DIVIDE_BY_ZERO,
         location = emojicoin_dot_fun
     )] fun cpamm_simple_swap_output_amount_divide_by_zero() {
-        cpamm_simple_swap_output_amount(0, true, pack_Reserves(0, 16));
+        cpamm_simple_swap_output_amount(0, true, pack_reserves(0, 16));
     }
 
     // Verify hard-coded test market addresses, derived from `@emojicoin_dot_fun` dev address.
@@ -355,7 +519,6 @@
             0,
         );
     }
-
 
     #[test] fun valid_coin_types_all_invalid() {
         // Duplicate types should be invalid.
