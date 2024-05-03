@@ -502,7 +502,7 @@
         // Minimally qualified "head shaking horizontally".
         assert!(!is_a_supported_symbol_emoji(x"f09f9982e2808de28694"), 0);
 
-        // Verify a supported emoji, add some bunk data to it, then verity it is no longer allowed.
+        // Verify a supported emoji, add invalid data to it, then verify it is no longer allowed.
         assert!(is_a_supported_symbol_emoji(x"e29d97"), 0);
         assert!(!is_a_supported_symbol_emoji(x"e29d97ff"), 0);
         assert!(!is_a_supported_symbol_emoji(x"ffe29d97"), 0);
