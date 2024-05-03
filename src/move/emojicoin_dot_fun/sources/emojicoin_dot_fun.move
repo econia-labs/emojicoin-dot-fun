@@ -38,10 +38,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     const TRIGGER_PACKAGE_PUBLICATION: u8 = 0;
     const TRIGGER_MARKET_REGISTRATION: u8 = 1;
-    const TRIGGER_SWAP: u8 = 2;
-    const TRIGGER_PROVIDE_LIQUIDITY: u8 = 3;
-    const TRIGGER_REMOVE_LIQUIDITY: u8 = 4;
-    const TRIGGER_CHAT: u8 = 5;
+    const TRIGGER_SWAP_BUY: u8 = 2;
+    const TRIGGER_SWAP_SELL: u8 = 3;
+    const TRIGGER_PROVIDE_LIQUIDITY: u8 = 4;
+    const TRIGGER_REMOVE_LIQUIDITY: u8 = 5;
+    const TRIGGER_CHAT: u8 = 6;
 
     const PERIOD_1M: u64 = 60_000_000;
     const PERIOD_5M: u64 = 300_000_000;
@@ -852,7 +853,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let tvl_start = tvl(market_ref_mut, starts_in_bonding_curve);
         let registry_ref_mut = borrow_registry_ref_mut();
         let time = event.time;
-        let trigger = TRIGGER_SWAP;
+        let trigger = if (is_sell) TRIGGER_SWAP_SELL else TRIGGER_SWAP_BUY;
         trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
 
         // Prepare local variables.
