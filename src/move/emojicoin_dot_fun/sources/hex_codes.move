@@ -2313,7 +2313,7 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
-    public(friend) inline fun get_chat_emojis(): vector<vector<u8>> {
+    public(friend) inline fun get_supplemental_chat_emojis(): vector<vector<u8>> {
         vector [
             x"f09fa791e2808df09f8ea8",                                    // Artist [1F9D1 200D 1F3A8]
             x"f09fa791f09f8fbfe2808df09f8ea8",                            // Artist: dark skin tone [1F9D1 1F3FF 200D 1F3A8]

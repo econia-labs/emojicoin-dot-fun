@@ -202,7 +202,7 @@
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
     }
 
-    #[test] fun supported_emojis() {
+    #[test] fun supported_symbol_emojis() {
         init_package();
         let various_emojis = vector<vector<u8>> [
             x"f09f868e",         // AB button blood type, 1F18E.
@@ -258,5 +258,4 @@
             0
         );
     }
-
 }

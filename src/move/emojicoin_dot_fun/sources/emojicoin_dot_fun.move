@@ -277,7 +277,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         registry_address: address,
         sequence_info: SequenceInfo,
         coin_symbol_emojis: Table<vector<u8>, u8>,
-        chat_emojis: Table<vector<u8>, u8>,
+        supplemental_chat_emojis: Table<vector<u8>, u8>,
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
         markets_by_market_id: SmartTable<u64, address>,
         extend_ref: ExtendRef,
@@ -384,12 +384,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_address,
         );
 
-        // Verify all emoji bytes are either coin symbol emojis or chat emojis.
+        // Verify all emoji bytes are supported as chat emojis.
         assert!(
-            vector::all(&emoji_bytes, |emoji| {
-                is_a_supported_symbol_emoji(*emoji) ||
-                is_a_supported_chat_emoji(*emoji)
-            }),
+            vector::all(&emoji_bytes, |emoji| { is_a_supported_chat_emoji(*emoji) }),
             E_NOT_SUPPORTED_CHAT_EMOJI,
         );
 
@@ -499,7 +496,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Otherwise, waive the register market fee, since the gas costs of initializing them
         // is roughly the same.
         let registrant_address = signer::address_of(registrant);
-        let fee = if (ensure_chat_emojis_initialized(registry_ref_mut)) {
+        let fee = if (ensure_supplemental_chat_emojis_initialized(registry_ref_mut)) {
             0
         } else {
             let can_pay_fee =
@@ -712,6 +709,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             mul_div(quote, EMOJICOIN_SUPPLY, base), // FDV.
             mul_div(quote, supply_minuend - base, base), // Market cap.
         )
+    }
+
+    inline fun is_a_supported_chat_emoji_inner(emoji: vector<u8>): bool {
+        let registry_ref = borrow_registry_ref();
+        table::contains(&registry_ref.coin_symbol_emojis, emoji) ||
+        table::contains(&registry_ref.supplemental_chat_emojis, emoji)
     }
 
     inline fun assign_supply_minuend_reserves_ref_mut(
@@ -1209,20 +1212,20 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
-    /// A crank function to add all chat emojis to the registry if they haven't been added yet.
-    /// Returns true if the chat emojis were added, false otherwise.
-    inline fun ensure_chat_emojis_initialized(
+    /// Adds all supplemental chat emojis to the registry if they haven't been added yet. Returns
+    /// true if the supplemental chat emojis were added, false otherwise.
+    inline fun ensure_supplemental_chat_emojis_initialized(
         registry_ref_mut: &mut Registry
     ): bool acquires Registry, RegistryAddress {
-        let chat_emojis_ref_mut = &mut registry_ref_mut.chat_emojis;
+        let supplemental_chat_emojis_ref_mut = &mut registry_ref_mut.supplemental_chat_emojis;
 
-        let chat_emojis = hex_codes::get_chat_emojis();
-        let emoji_0 = *vector::borrow(&chat_emojis, 0);
-        if (table::contains(chat_emojis_ref_mut, emoji_0)) {
+        let supplemental_chat_emojis = hex_codes::get_supplemental_chat_emojis();
+        let emoji_0 = *vector::borrow(&supplemental_chat_emojis, 0);
+        if (table::contains(supplemental_chat_emojis_ref_mut, emoji_0)) {
             false
         } else {
-            vector::for_each(chat_emojis, |emoji| {
-                table::add(chat_emojis_ref_mut, emoji, 0);
+            vector::for_each(supplemental_chat_emojis, |emoji| {
+                table::add(supplemental_chat_emojis_ref_mut, emoji, 0);
             });
             true
         }
@@ -1244,7 +1247,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 nonce: 1,
             },
             coin_symbol_emojis: table::new(),
-            chat_emojis: table::new(),
+            supplemental_chat_emojis: table::new(),
             markets_by_emoji_bytes: smart_table::new(),
             markets_by_market_id: smart_table::new(),
             extend_ref,
@@ -1260,9 +1263,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             },
         };
 
-        // Load supported emojis into registry.
+        // Load supported coin symbol emojis into registry.
+        let coin_symbol_emojis_ref_mut = &mut registry.coin_symbol_emojis;
         vector::for_each_ref(&hex_codes::get_coin_symbol_emojis(), |emoji_bytes_ref| {
-            table::add(&mut registry.coin_symbol_emojis, *emoji_bytes_ref, 0);
+            table::add(coin_symbol_emojis_ref_mut, *emoji_bytes_ref, 0);
         });
 
         move_to(&registry_signer, registry);
@@ -1292,11 +1296,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[view]
+    /// Checks if an individual emoji is supported for usage in chat only.
+    public fun is_a_supplemental_chat_emoji(
+        hex_bytes: vector<u8>
+    ): bool acquires Registry, RegistryAddress {
+        table::contains(&borrow_registry_ref().supplemental_chat_emojis, hex_bytes)
+    }
+
+    #[view]
     /// Checks if an individual emoji is supported for usage in chat.
     public fun is_a_supported_chat_emoji(
         hex_bytes: vector<u8>
     ): bool acquires Registry, RegistryAddress {
-        table::contains(&borrow_registry_ref().chat_emojis, hex_bytes)
+        is_a_supported_chat_emoji(hex_bytes)
     }
 
     #[view]
