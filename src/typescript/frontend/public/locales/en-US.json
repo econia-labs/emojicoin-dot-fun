@@ -5,6 +5,7 @@
   "Alltime Vol": "Alltime Vol",
   "Anime:": "Anime:",
   "Bump Order": "Bump Order",
+  "Byte limit reached": "Byte limit reached",
   "Copied": "Copied",
   "Cost to deploy:": "Cost to deploy:",
   "Econia Labs": "Econia Labs",
@@ -20,6 +21,5 @@
   "Pick one to five emojis; due to byte limitations not all combinations are supported.": "Pick one to five emojis; due to byte limitations not all combinations are supported.",
   "Search:": "Search:",
   "Select Emoji": "Select Emoji",
-  "Sort:": "Sort:",
-  "Byte limit reached": "Byte limit reached"
+  "Sort:": "Sort:"
 }
