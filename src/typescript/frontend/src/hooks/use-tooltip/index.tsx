@@ -79,6 +79,7 @@ const useTooltip = (content: React.ReactNode, options?: TooltipOptions) => {
     tooltip: AnimatedTooltip,
     tooltipVisible: visible,
     setVisible,
+    targetElement,
   };
 };
 

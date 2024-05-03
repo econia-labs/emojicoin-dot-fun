@@ -43,6 +43,7 @@ export const transitions = {
 } as const;
 
 export const radii = {
+  xSmall: "3px",
   small: "6px",
   semiMedium: "8px",
   medium: "16px",

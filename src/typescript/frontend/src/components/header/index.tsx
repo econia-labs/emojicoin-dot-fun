@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 
 import { StyledContainer, StyledClickItem } from "./styled";
 import { Container, Flex, FlexGap, Link, Button } from "components";
@@ -11,8 +12,13 @@ import { ROUTES } from "../../router/routes";
 const Header: React.FC = () => {
   const { t } = useTranslation();
   const { isDesktop } = useMatchBreakpoints();
+  const { pathname } = useLocation();
+
+  const currentPath = pathname.split("/")[1];
+  const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
 
   const walletHandler = () => {
+    /* eslint-disable-next-line no-console */
     console.log("walletHandler");
   };
 
@@ -28,7 +34,7 @@ const Header: React.FC = () => {
 
           {isDesktop && (
             <FlexGap gap="16px">
-              {NAVIGATE_LINKS.map(({ title, path }) => {
+              {linksForCurrentPage.map(({ title, path }) => {
                 return (
                   <Link key={title} href={path}>
                     <Button scale="lg">{t(title)}</Button>

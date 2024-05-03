@@ -16,6 +16,7 @@
     "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.5.0",
     "emoji-picker-react": "^4.9.2",
+    "emoji-regex": "^10.3.0",
     "formik": "^2.4.4",
     "framer-motion": "^10.16.4",
     "react": "^18.2.0",
