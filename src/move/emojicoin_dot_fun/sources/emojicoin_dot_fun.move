@@ -2251,6 +2251,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_PERIOD_1H(): u64 { PERIOD_1H }
     #[test_only] public fun get_PERIOD_4H(): u64 { PERIOD_4H }
     #[test_only] public fun get_PERIOD_1D(): u64 { PERIOD_1D }
+    #[test_only] public fun get_REGISTRY_NAME(): vector<u8> { REGISTRY_NAME }
+    #[test_only] public fun get_TRIGGER_MARKET_REGISTRATION(): u8 { TRIGGER_MARKET_REGISTRATION }
+    #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
@@ -2300,6 +2303,49 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             user_emojicoin_balance,
             circulating_supply,
             balance_as_fraction_of_circulating_supply_q64,
+        )
+    }
+
+    #[test_only] public fun unpack_global_state(
+        global_state: GlobalState,
+    ): (
+        u64,
+        u64,
+        u8,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u64>,
+        AggregatorSnapshot<u64>,
+    ) {
+        let GlobalState {
+            emit_time,
+            registry_nonce,
+            trigger,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        } = global_state;
+        (
+            emit_time,
+            registry_nonce,
+            trigger,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
         )
     }
 

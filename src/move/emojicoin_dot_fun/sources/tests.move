@@ -1,9 +1,11 @@
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
+    use aptos_framework::aggregator_v2::read_snapshot;
     use aptos_framework::aptos_account;
     use aptos_framework::coin;
-    use aptos_framework::event;
+    use aptos_framework::event::{emitted_events};
+    use aptos_framework::object;
     use aptos_framework::timestamp;
     use aptos_std::string_utils;
     use black_cat_market::coin_factory::{
@@ -21,7 +23,9 @@
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         Chat,
         Self,
+        GlobalState,
         MarketMetadata,
+        RegistryView,
         assert_valid_coin_types_test_only as assert_valid_coin_types,
         chat,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
@@ -49,6 +53,9 @@
         get_QUOTE_REAL_CEILING,
         get_QUOTE_VIRTUAL_CEILING,
         get_QUOTE_VIRTUAL_FLOOR,
+        get_REGISTRY_NAME,
+        get_TRIGGER_MARKET_REGISTRATION,
+        get_TRIGGER_PACKAGE_PUBLICATION,
         get_concatenation_test_only as get_concatenation,
         verified_symbol_emoji_bytes,
         init_module_test_only as init_module,
@@ -58,9 +65,12 @@
         pack_reserves,
         register_market,
         register_market_without_publish,
+        registry_view,
         swap,
         unpack_market_metadata,
         unpack_chat,
+        unpack_global_state,
+        unpack_registry_view,
         valid_coin_types_test_only as valid_coin_types,
     };
     use emojicoin_dot_fun::hex_codes::{
@@ -94,10 +104,39 @@
         balance_as_fraction_of_circulating_supply_q64: u128,
     }
 
+    struct TestGlobalState has copy, drop, store {
+        emit_time: u64,
+        registry_nonce: u64,
+        trigger: u8,
+        cumulative_quote_volume: u128,
+        total_quote_locked: u128,
+        total_value_locked: u128,
+        market_cap: u128,
+        fully_diluted_value: u128,
+        cumulative_integrator_fees: u128,
+        cumulative_swaps: u64,
+        cumulative_chat_messages: u64,
+    }
+
     struct TestMarketMetadata has copy, drop, store {
         market_id: u64,
         market_address: address,
         emoji_bytes: vector<u8>,
+    }
+
+    struct TestRegistryView  has copy, drop, store {
+        registry_address: address,
+        nonce: u64,
+        last_bump_time: u64,
+        n_markets: u64,
+        cumulative_quote_volume: u128,
+        total_quote_locked: u128,
+        total_value_locked: u128,
+        market_cap: u128,
+        fully_diluted_value: u128,
+        cumulative_integrator_fees: u128,
+        cumulative_swaps: u64,
+        cumulative_chat_messages: u64,
     }
 
     // Test market emoji bytes.
@@ -156,6 +195,74 @@
         assert!(market_id == test_metadata.market_id, 0);
         assert!(market_address == test_metadata.market_address, 0);
         assert!(emoji_bytes == test_metadata.emoji_bytes, 0);
+    }
+
+    public fun assert_registry_view(
+        test_registry_view: TestRegistryView,
+        registry_view: RegistryView,
+    ) {
+        let (
+            registry_address,
+            nonce,
+            last_bump_time,
+            n_markets,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        ) = unpack_registry_view(registry_view);
+        assert!(registry_address == test_registry_view.registry_address, 0);
+        assert!(nonce == test_registry_view.nonce, 0);
+        assert!(last_bump_time == test_registry_view.last_bump_time, 0);
+        assert!(n_markets == test_registry_view.n_markets, 0);
+        assert!(read_snapshot(&cumulative_quote_volume)
+            == test_registry_view.cumulative_quote_volume, 0);
+        assert!(read_snapshot(&total_quote_locked) == test_registry_view.total_quote_locked, 0);
+        assert!(read_snapshot(&total_value_locked) == test_registry_view.total_value_locked, 0);
+        assert!(read_snapshot(&market_cap) == test_registry_view.market_cap, 0);
+        assert!(read_snapshot(&fully_diluted_value) == test_registry_view.fully_diluted_value, 0);
+        assert!(read_snapshot(&cumulative_integrator_fees)
+            == test_registry_view.cumulative_integrator_fees, 0);
+        assert!(read_snapshot(&cumulative_swaps) == test_registry_view.cumulative_swaps, 0);
+        assert!(read_snapshot(&cumulative_chat_messages)
+            == test_registry_view.cumulative_chat_messages, 0);
+    }
+
+    public fun assert_global_state(
+        test_global_state: TestGlobalState,
+        global_state: GlobalState
+    ) {
+        let (
+            emit_time,
+            registry_nonce,
+            trigger,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        ) = unpack_global_state(global_state);
+        assert!(emit_time == test_global_state.emit_time, 0);
+        assert!(registry_nonce == test_global_state.registry_nonce, 0);
+        assert!(trigger == test_global_state.trigger, 0);
+        assert!(read_snapshot(&cumulative_quote_volume)
+            == test_global_state.cumulative_quote_volume, 0);
+        assert!(read_snapshot(&total_quote_locked) == test_global_state.total_quote_locked, 0);
+        assert!(read_snapshot(&total_value_locked) == test_global_state.total_value_locked, 0);
+        assert!(read_snapshot(&market_cap) == test_global_state.market_cap, 0);
+        assert!(read_snapshot(&fully_diluted_value) == test_global_state.fully_diluted_value, 0);
+        assert!(read_snapshot(&cumulative_integrator_fees)
+            == test_global_state.cumulative_integrator_fees, 0);
+        assert!(read_snapshot(&cumulative_swaps) == test_global_state.cumulative_swaps, 0);
+        assert!(read_snapshot(&cumulative_chat_messages)
+            == test_global_state.cumulative_chat_messages, 0);
     }
 
     public fun assert_test_market_address(
@@ -309,7 +416,7 @@
         );
 
         // Assert the emitted chat events.
-        let events_emitted = event::emitted_events<Chat>();
+        let events_emitted = emitted_events<Chat>();
         let market_metadata = TestMarketMetadata {
             market_id: 1,
             market_address: @black_cat_market,
@@ -466,6 +573,53 @@
         let (metadata_bytecode, module_bytecode) = get_publish_code(market_address);
         assert!(metadata_bytecode == expected_metadata_bytecode, 0);
         assert!(module_bytecode == expected_module_bytecode, 0);
+    }
+
+    #[test] fun init_module_comprehensive_state_assertion() {
+        timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
+        // Set init time to something other than a daily boundary.
+        let one_day_and_one_hour = get_PERIOD_1D() + get_PERIOD_1H();
+        timestamp::update_global_time_for_test(one_day_and_one_hour);
+        // Manually derive registry address from object seed.
+        let registry_address =
+            object::create_object_address(&@emojicoin_dot_fun, get_REGISTRY_NAME());
+        // Initialize the module, assert state.
+        init_module(&get_signer(@emojicoin_dot_fun));
+        assert_registry_view(
+            TestRegistryView {
+                registry_address,
+                nonce: 1,
+                last_bump_time: get_PERIOD_1D(),
+                n_markets: 0,
+                cumulative_quote_volume: 0,
+                total_quote_locked: 0,
+                total_value_locked: 0,
+                market_cap: 0,
+                fully_diluted_value: 0,
+                cumulative_integrator_fees: 0,
+                cumulative_swaps: 0,
+                cumulative_chat_messages: 0,
+            },
+            registry_view(),
+        );
+        let global_state_events = emitted_events<GlobalState>();
+        assert!(vector::length(&global_state_events) == 1, 0);
+        assert_global_state(
+            TestGlobalState {
+                emit_time: one_day_and_one_hour,
+                registry_nonce: 1,
+                trigger: get_TRIGGER_PACKAGE_PUBLICATION(),
+                cumulative_quote_volume: 0,
+                total_quote_locked: 0,
+                total_value_locked: 0,
+                market_cap: 0,
+                fully_diluted_value: 0,
+                cumulative_integrator_fees: 0,
+                cumulative_swaps: 0,
+                cumulative_chat_messages: 0,
+            },
+            vector::pop_back(&mut global_state_events),
+        );
     }
 
     #[test] fun period_times() {
