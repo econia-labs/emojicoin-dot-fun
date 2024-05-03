@@ -42,6 +42,9 @@
     "fmt": "pnpm _fmt --write",
     "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",
     "lint-fix": "pnpm lint --fix",
+    "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
+    "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
+    "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
     "test": "pnpm jest",
     "unit-test": "pnpm jest tests/unit"
   },
