@@ -1282,6 +1282,15 @@
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
     }
 
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_ALREADY_REGISTERED,
+        location = emojicoin_dot_fun
+    )] fun register_market_already_registered() {
+        init_package();
+        register_market(&get_signer(USER), vector[BLACK_CAT], INTEGRATOR);
+        register_market(&get_signer(USER), vector[BLACK_CAT], INTEGRATOR);
+    }
+
     #[test] fun register_market_comprehensive_state_assertion() {
 
         // Initialize module with nonzero time that truncates for some periods.
@@ -1432,6 +1441,15 @@
         assert_state(state_1, *vector::borrow(&state_events, 0));
         assert_state(state_2, *vector::borrow(&state_events, 1));
 
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE,
+        location = emojicoin_dot_fun
+    )] fun register_market_unable_to_pay_market_registration_fee() {
+        init_package();
+        register_market(&get_signer(USER), vector[BLACK_CAT], INTEGRATOR);
+        register_market_without_publish(&get_signer(USER), vector[BLACK_HEART], INTEGRATOR);
     }
 
     #[test] fun register_market_with_compound_emoji_sequence() {
