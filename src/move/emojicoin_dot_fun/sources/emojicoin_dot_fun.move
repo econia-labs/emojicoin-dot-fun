@@ -519,8 +519,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             fee
         };
 
-        // Bump state.
+        // Update global FDV.
         let market_ref_mut = borrow_global_mut<Market>(market_address);
+        let fdv = fdv(market_ref_mut.clamm_virtual_reserves);
+        let fdv_ref_mut = &mut registry_ref_mut.global_stats.fully_diluted_value;
+        aggregator_v2::try_add(fdv_ref_mut, fdv);
+
+        // Update registry nonce, but not last bump time since state only bumps out once per day.
+        let registry_nonce_ref_mut = &mut registry_ref_mut.sequence_info.nonce;
+        let registry_nonce = *registry_nonce_ref_mut + 1;
+        *registry_nonce_ref_mut = registry_nonce;
+
+        // Bump state.
         let time = timestamp::now_microseconds();
         let trigger = TRIGGER_MARKET_REGISTRATION;
         trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, 0);
@@ -538,7 +548,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 total_quote_locked: 0,
                 total_value_locked: 0,
                 market_cap: 0,
-                fully_diluted_value: 0,
+                fully_diluted_value: fdv,
             },
         );
     }
@@ -705,6 +715,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let (fdv_start, market_cap_start) = fdv_market_cap(reserves_start, supply_minuend);
         let (fdv_end, market_cap_end) = fdv_market_cap(reserves_end, supply_minuend);
         (fdv_start, market_cap_start, fdv_end, market_cap_end)
+    }
+
+    inline fun fdv(
+        reserves: Reserves,
+    ): u128 {
+        mul_div(reserves.quote, EMOJICOIN_SUPPLY, reserves.base)
     }
 
     inline fun fdv_market_cap(

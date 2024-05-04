@@ -2,7 +2,6 @@
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
     use aptos_framework::aggregator_v2::read_snapshot;
-    use aptos_framework::aptos_account;
     use aptos_framework::coin;
     use aptos_framework::event::{emitted_events};
     use aptos_framework::object;
@@ -1173,10 +1172,26 @@
     }
 
     #[test] fun register_market_comprehensive_state_assertion() {
-        init_package();
 
-        // Register simple market, assert market state.
-        let time = get_PERIOD_1H();
+        // Initialize module with nonzero time that truncates for some periods.
+        timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
+        let one_day_and_one_hour = get_PERIOD_1D() + get_PERIOD_1H();
+        let time = one_day_and_one_hour;
+        timestamp::update_global_time_for_test(time);
+        init_module(&get_signer(@emojicoin_dot_fun));
+
+        // Assert registry view.
+        let registry_view = base_registry_view();
+        registry_view.nonce = 1;
+        registry_view.last_bump_time = get_PERIOD_1D();
+        registry_view.n_markets = 0;
+        assert_registry_view(
+            registry_view,
+            registry_view(),
+        );
+
+        // Register simple market one second later, assert market state.
+        time = time + get_MICROSECONDS_PER_SECOND();
         timestamp::update_global_time_for_test(time);
         register_market(&get_signer(USER), vector[BLACK_CAT], INTEGRATOR);
         let market_view = base_market_view();
@@ -1186,18 +1201,27 @@
         apply_periodic_state_tracker_start_times(
             &mut market_view.periodic_state_trackers,
             PeriodicStateTrackerStartTimes {
-                period_1D: 0,
-                period_4H: 0,
-                period_1H: get_PERIOD_1H(),
-                period_30M: get_PERIOD_1H(),
-                period_15M: get_PERIOD_1H(),
-                period_5M: get_PERIOD_1H(),
-                period_1M: get_PERIOD_1H(),
+                period_1D: get_PERIOD_1D(),
+                period_4H: get_PERIOD_1D(),
+                period_1H: one_day_and_one_hour,
+                period_30M: one_day_and_one_hour,
+                period_15M: one_day_and_one_hour,
+                period_5M: one_day_and_one_hour,
+                period_1M: one_day_and_one_hour,
             }
         );
         assert_market_view(
             market_view,
             market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market),
+        );
+
+        // Assert registry view.
+        registry_view.nonce = 2;
+        registry_view.n_markets = 1;
+        registry_view.fully_diluted_value = fdv_for_newly_registered_market();
+        assert_registry_view(
+            registry_view,
+            registry_view(),
         );
 
         // Set next market registration time such that all periodic state trackers will truncate
@@ -1241,6 +1265,17 @@
             market_view,
             market_view<BlackHeartEmojicoin, BlackHeartEmojicoinLP>(@black_heart_market),
         );
+
+        // Assert registry view.
+        registry_view.nonce = 3;
+        registry_view.n_markets = 2;
+        registry_view.fully_diluted_value = 2 * fdv_for_newly_registered_market();
+        registry_view.cumulative_integrator_fees = (get_MARKET_REGISTRATION_FEE() as u128);
+        assert_registry_view(
+            registry_view,
+            registry_view(),
+        );
+
     }
 
     #[test] fun register_market_with_compound_emoji_sequence() {
