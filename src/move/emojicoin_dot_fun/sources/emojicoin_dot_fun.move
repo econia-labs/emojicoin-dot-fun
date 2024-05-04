@@ -555,7 +555,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
-    inline fun instantaneous_stats(market_ref: &Market): InstantaneousStats {
+    /*inline*/ fun instantaneous_stats(market_ref: &Market): InstantaneousStats {
         let lp_coin_supply = market_ref.lp_coin_supply;
         let in_bonding_curve = lp_coin_supply == 0;
         let total_quote_locked = total_quote_locked(market_ref, in_bonding_curve);
@@ -571,7 +571,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun create_market(
+    /*inline*/ fun create_market(
         registry_ref_mut: &mut Registry,
         emoji_bytes: vector<u8>,
     ): (address, signer) {
@@ -658,7 +658,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (market_address, market_signer)
     }
 
-    inline fun valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address): bool {
+    /*inline*/ fun valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address): bool {
         let emoji_type = &type_info::type_of<Emojicoin>();
         let lp_type = &type_info::type_of<EmojicoinLP>();
 
@@ -670,7 +670,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         type_info::struct_name(lp_type) == EMOJICOIN_LP_STRUCT_NAME
     }
 
-    inline fun get_verified_symbol_emoji_bytes(
+    /*inline*/ fun get_verified_symbol_emoji_bytes(
         registry_ref: &Registry,
         emojis: vector<vector<u8>>,
     ): vector<u8> {
@@ -689,7 +689,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         verified_bytes
     }
 
-    inline fun mul_div(
+    /*inline*/ fun mul_div(
         a: u64,
         b: u64,
         c: u64,
@@ -697,14 +697,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (a as u128) * (b as u128) / (c as u128)
     }
 
-    inline fun assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address) {
+    /*inline*/ fun assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address) {
         assert!(
             exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address),
             E_INVALID_COIN_TYPES
         );
     }
 
-    inline fun fdv_market_cap_start_end(
+    /*inline*/ fun fdv_market_cap_start_end(
         reserves_start: Reserves,
         reserves_end: Reserves,
         supply_minuend: u64,
@@ -719,13 +719,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (fdv_start, market_cap_start, fdv_end, market_cap_end)
     }
 
-    inline fun fdv(
+    /*inline*/ fun fdv(
         reserves: Reserves,
     ): u128 {
         mul_div(reserves.quote, EMOJICOIN_SUPPLY, reserves.base)
     }
 
-    inline fun fdv_market_cap(
+    /*inline*/ fun fdv_market_cap(
         reserves: Reserves,
         supply_minuend: u64,
     ): (
@@ -774,7 +774,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun ensure_coins_initialized<Emojicoin, EmojicoinLP>(
+    /*inline*/ fun ensure_coins_initialized<Emojicoin, EmojicoinLP>(
         market_ref: &Market,
         market_signer: &signer,
         market_address: address,
@@ -819,7 +819,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
     }
 
-    inline fun get_concatenation(base: String, additional: String): String {
+    /*inline*/ fun get_concatenation(base: String, additional: String): String {
         string::append(&mut base, additional);
         base
     }
@@ -1753,7 +1753,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         )
     }
 
-    inline fun burn_lp_coins<Emojicoin, EmojicoinLP>(
+    /*inline*/ fun burn_lp_coins<Emojicoin, EmojicoinLP>(
         market_address: address,
         coin: Coin<EmojicoinLP>,
     ) acquires LPCoinCapabilities {
@@ -1844,7 +1844,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
     }
 
-    inline fun bump_market_state(
+    /*inline*/ fun bump_market_state(
         market_ref: &Market,
         trigger: u8,
         instantaneous_stats: InstantaneousStats,
@@ -1866,7 +1866,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
-    inline fun emit_periodic_state(
+    /*inline*/ fun emit_periodic_state(
         market_metadata_ref: &MarketMetadata,
         nonce: u64,
         time: u64,
@@ -1902,14 +1902,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
-    inline fun last_period_boundary(
+    /*inline*/ fun last_period_boundary(
         time: u64,
         period: u64,
     ): u64 {
         (time / period) * period
     }
 
-    inline fun mint_lp_coins<Emojicoin, EmojicoinLP>(
+    /*inline*/ fun mint_lp_coins<Emojicoin, EmojicoinLP>(
         market_address: address,
         amount: u64,
     ): Coin<EmojicoinLP> acquires LPCoinCapabilities {
@@ -2014,7 +2014,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun simulate_provide_liquidity_inner(
+    /*inline*/ fun simulate_provide_liquidity_inner(
         provider: address,
         quote_amount: u64,
         market_ref: &Market,
@@ -2049,7 +2049,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun simulate_remove_liquidity_inner<Emojicoin>(
+    /*inline*/ fun simulate_remove_liquidity_inner<Emojicoin>(
         provider: address,
         lp_coin_amount: u64,
         market_ref: &Market,
@@ -2095,14 +2095,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun get_bps_fee(
+    /*inline*/ fun get_bps_fee(
         principal: u64,
         fee_rate_bps: u8,
     ): u64 {
         ((((principal as u128) * (fee_rate_bps as u128)) / BASIS_POINTS_PER_UNIT) as u64)
     }
 
-    inline fun cpamm_simple_swap_output_amount(
+    /*inline*/ fun cpamm_simple_swap_output_amount(
         input_amount: u64,
         is_sell: bool,
         reserves: Reserves
@@ -2116,7 +2116,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (result as u64)
     }
 
-    inline fun total_quote_locked(
+    /*inline*/ fun total_quote_locked(
         market_ref: &Market,
         in_bonding_curve: bool,
     ): u64 {
@@ -2127,7 +2127,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun tvl(
+    /*inline*/ fun tvl(
         market_ref: &Market,
         in_bonding_curve: bool,
     ): u128 {
@@ -2138,7 +2138,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun tvl_clamm(
+    /*inline*/ fun tvl_clamm(
         virtual_reserves: Reserves,
     ): u128 {
         let quote_virtual = virtual_reserves.quote;
@@ -2155,7 +2155,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun tvl_cpamm(
+    /*inline*/ fun tvl_cpamm(
         real_quote_reserves: u64,
     ): u128 {
         // Base reserves priced in quote are equal to the value of quote reserves.
@@ -2175,7 +2175,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ///
     /// While all terms can technically be `u128`, in practice they will all be `u64`, and even if
     /// a few terms require a few extra bits, there should not be any overflow.
-    inline fun tvl_per_lp_coin_growth_q64_inline(
+    /*inline*/ fun tvl_per_lp_coin_growth_q64_inline(
         start: TVLtoLPCoinRatio,
         end: TVLtoLPCoinRatio,
     ): u128 {
@@ -2192,7 +2192,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun liquidity_provision_operation_epilogue(
+    /*inline*/ fun liquidity_provision_operation_epilogue(
         tvl: u128,
         lp_coin_supply: u128,
         total_quote_locked: u64,
