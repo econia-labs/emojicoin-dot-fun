@@ -2005,7 +2005,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             net_proceeds,
             base_volume,
             quote_volume,
-            // Ideally this would be an inline function, but that strangely breaks the compiler.
+            // Ideally this would be inline, but that strangely breaks the compiler.
             avg_execution_price_q64: ((quote_volume as u128) << SHIFT_Q64) / (base_volume as u128),
             integrator_fee,
             pool_fee,
