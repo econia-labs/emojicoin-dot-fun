@@ -408,7 +408,7 @@
         assert!(lp_coin_supply == test_market_view.lp_coin_supply, 0);
         assert!(in_bonding_curve == test_market_view.in_bonding_curve, 0);
         assert_cumulative_stats(test_market_view.cumulative_stats, cumulative_stats);
-        assert_instaneous_stats(test_market_view.instantaneous_stats, instantaneous_stats);
+        assert_instantaneous_stats(test_market_view.instantaneous_stats, instantaneous_stats);
         assert_last_swap(test_market_view.last_swap, last_swap);
         assert!(vector::length(&periodic_state_trackers) ==
             vector::length(&test_market_view.periodic_state_trackers), 0);
@@ -649,20 +649,20 @@
         assert!(n_chat_messages == test_cumulative_stats.n_chat_messages, 0);
     }
 
-    public fun assert_instaneous_stats(
-        test_instaneous_stats: TestInstantaneousStats,
-        instaneous_stats: InstantaneousStats,
+    public fun assert_instantaneous_stats(
+        test_instantaneous_stats: TestInstantaneousStats,
+        instantaneous_stats: InstantaneousStats,
     ) {
         let (
             total_quote_locked,
             total_value_locked,
             market_cap,
             fully_diluted_value,
-        ) = unpack_instantaneous_stats(instaneous_stats);
-        assert!(total_quote_locked == test_instaneous_stats.total_quote_locked, 0);
-        assert!(total_value_locked == test_instaneous_stats.total_value_locked, 0);
-        assert!(market_cap == test_instaneous_stats.market_cap, 0);
-        assert!(fully_diluted_value == test_instaneous_stats.fully_diluted_value, 0);
+        ) = unpack_instantaneous_stats(instantaneous_stats);
+        assert!(total_quote_locked == test_instantaneous_stats.total_quote_locked, 0);
+        assert!(total_value_locked == test_instantaneous_stats.total_value_locked, 0);
+        assert!(market_cap == test_instantaneous_stats.market_cap, 0);
+        assert!(fully_diluted_value == test_instantaneous_stats.fully_diluted_value, 0);
     }
 
     public fun assert_last_swap(
@@ -705,7 +705,7 @@
         assert_reserves(test_state.cpamm_real_reserves, cpamm_real_reserves);
         assert!(lp_coin_supply == test_state.lp_coin_supply, 0);
         assert_cumulative_stats(test_state.cumulative_stats, cumulative_stats);
-        assert_instaneous_stats(test_state.instantaneous_stats, instantaneous_stats);
+        assert_instantaneous_stats(test_state.instantaneous_stats, instantaneous_stats);
         assert_last_swap(test_state.last_swap, last_swap);
     }
 
