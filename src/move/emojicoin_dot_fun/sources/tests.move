@@ -75,6 +75,7 @@
         market_view,
         market_metadata_by_emoji_bytes,
         pack_reserves,
+        registry_address,
         register_market,
         register_market_without_publish,
         registry_view,
@@ -716,6 +717,22 @@
         vector::borrow_mut(periodic_state_trackers_ref_mut, 6).start_time = start_times.period_1D;
     }
 
+    public fun base_global_state(): TestGlobalState {
+        TestGlobalState {
+            emit_time: 0,
+            registry_nonce: 1,
+            trigger: get_TRIGGER_PACKAGE_PUBLICATION(),
+            cumulative_quote_volume: 0,
+            total_quote_locked: 0,
+            total_value_locked: 0,
+            market_cap: 0,
+            fully_diluted_value: 0,
+            cumulative_integrator_fees: 0,
+            cumulative_swaps: 0,
+            cumulative_chat_messages: 0,
+        }
+    }
+
     public fun base_market_view(): TestMarketView {
         TestMarketView {
             metadata: TestMarketMetadata {
@@ -793,6 +810,23 @@
                 tvl: 0,
                 lp_coins: 0,
             },
+        }
+    }
+
+    public fun base_registry_view(): TestRegistryView {
+        TestRegistryView {
+            registry_address: registry_address(),
+            nonce: 1,
+            last_bump_time: 0,
+            n_markets: 0,
+            cumulative_quote_volume: 0,
+            total_quote_locked: 0,
+            total_value_locked: 0,
+            market_cap: 0,
+            fully_diluted_value: 0,
+            cumulative_integrator_fees: 0,
+            cumulative_swaps: 0,
+            cumulative_chat_messages: 0,
         }
     }
 
@@ -1095,47 +1129,34 @@
 
     #[test] fun init_module_comprehensive_state_assertion() {
         timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
+
         // Set init time to something other than a daily boundary.
         let one_day_and_one_hour = get_PERIOD_1D() + get_PERIOD_1H();
         timestamp::update_global_time_for_test(one_day_and_one_hour);
-        // Manually derive registry address from object seed.
-        let registry_address =
-            object::create_object_address(&@emojicoin_dot_fun, get_REGISTRY_NAME());
+
         // Initialize the module, assert state.
         init_module(&get_signer(@emojicoin_dot_fun));
+
+        // Manually derive registry address from object seed, assert it.
+        let registry_address =
+            object::create_object_address(&@emojicoin_dot_fun, get_REGISTRY_NAME());
+        assert!(registry_address == registry_address(), 0);
+
+        // Assert registry view.
+        let registry_view = base_registry_view();
+        registry_view.last_bump_time = get_PERIOD_1D();
         assert_registry_view(
-            TestRegistryView {
-                registry_address,
-                nonce: 1,
-                last_bump_time: get_PERIOD_1D(),
-                n_markets: 0,
-                cumulative_quote_volume: 0,
-                total_quote_locked: 0,
-                total_value_locked: 0,
-                market_cap: 0,
-                fully_diluted_value: 0,
-                cumulative_integrator_fees: 0,
-                cumulative_swaps: 0,
-                cumulative_chat_messages: 0,
-            },
+            registry_view,
             registry_view(),
         );
+
+        // Assert global state event emission.
         let global_state_events = emitted_events<GlobalState>();
         assert!(vector::length(&global_state_events) == 1, 0);
+        let global_state = base_global_state();
+        global_state.emit_time = one_day_and_one_hour;
         assert_global_state(
-            TestGlobalState {
-                emit_time: one_day_and_one_hour,
-                registry_nonce: 1,
-                trigger: get_TRIGGER_PACKAGE_PUBLICATION(),
-                cumulative_quote_volume: 0,
-                total_quote_locked: 0,
-                total_value_locked: 0,
-                market_cap: 0,
-                fully_diluted_value: 0,
-                cumulative_integrator_fees: 0,
-                cumulative_swaps: 0,
-                cumulative_chat_messages: 0,
-            },
+            global_state,
             vector::pop_back(&mut global_state_events),
         );
     }
@@ -1151,7 +1172,7 @@
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
     }
 
-    #[test] fun register_market_complex_state_assertion() {
+    #[test] fun register_market_comprehensive_state_assertion() {
         init_package();
 
         // Register simple market, assert market state.
