@@ -1421,11 +1421,12 @@
 
         // Assert state events.
         let state_1 = base_state();
-        let state_1.market_metadata = market_metadata_1;
-        let state_1.state_metadata.bump_time = market_1_registration_time;
+        state_1.market_metadata = market_metadata_1;
+        state_1.state_metadata.bump_time = market_1_registration_time;
         let state_2 = base_state();
-        let state_2.market_metadata = market_metadata_2;
-        let state_2.state_metadata.bump_time = market_2_registration_time;
+        state_2.market_metadata = market_metadata_2;
+        state_2.state_metadata.bump_time = market_2_registration_time;
+        state_2.cumulative_stats.integrator_fees = (get_MARKET_REGISTRATION_FEE() as u128);
         let state_events = emitted_events<State>();
         assert!(vector::length(&market_registration_events) == 2, 0);
         assert_state(state_1, *vector::borrow(&state_events, 0));
