@@ -488,6 +488,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Create the Market object and add it to the registry.
         let (market_address, market_signer) = create_market(registry_ref_mut, emoji_bytes);
+        let market_ref_mut = borrow_global_mut<Market>(market_address);
+
+        // Trigger periodic state in case global state has lapsed.
+        let time = timestamp::now_microseconds();
+        let trigger = TRIGGER_MARKET_REGISTRATION;
+        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, 0);
 
         // Publish coin types at market address, unless publication disabled for testing.
         if (publish_code) {
@@ -520,7 +526,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
 
         // Update global FDV.
-        let market_ref_mut = borrow_global_mut<Market>(market_address);
         let fdv = fdv(market_ref_mut.clamm_virtual_reserves);
         let fdv_ref_mut = &mut registry_ref_mut.global_stats.fully_diluted_value;
         aggregator_v2::try_add(fdv_ref_mut, fdv);
@@ -531,9 +536,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         *registry_nonce_ref_mut = registry_nonce;
 
         // Bump state.
-        let time = timestamp::now_microseconds();
-        let trigger = TRIGGER_MARKET_REGISTRATION;
-        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, 0);
         event::emit(MarketRegistration {
             market_metadata: market_ref_mut.metadata,
             time,
@@ -2472,6 +2474,59 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             emit_time,
             emit_market_nonce,
             period,
+            trigger,
+        )
+    }
+
+    #[test_only] public fun unpack_state(
+        state: State,
+    ): (
+        MarketMetadata,
+        StateMetadata,
+        Reserves,
+        Reserves,
+        u128,
+        CumulativeStats,
+        InstantaneousStats,
+        LastSwap,
+    ) {
+        let State {
+            market_metadata,
+            state_metadata,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            cumulative_stats,
+            instantaneous_stats,
+            last_swap,
+        } = state;
+        (
+            market_metadata,
+            state_metadata,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            cumulative_stats,
+            instantaneous_stats,
+            last_swap,
+        )
+    }
+
+    #[test_only] public fun unpack_state_metadata(
+        state_metadata: StateMetadata,
+    ): (
+        u64,
+        u64,
+        u8,
+    ) {
+        let StateMetadata {
+            market_nonce,
+            bump_time,
+            trigger,
+        } = state_metadata;
+        (
+            market_nonce,
+            bump_time,
             trigger,
         )
     }
