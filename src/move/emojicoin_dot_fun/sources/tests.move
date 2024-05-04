@@ -21,11 +21,22 @@
         EmojicoinLP as CoinFactoryEmojicoinLP,
     };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
-        Chat,
         Self,
+        Chat,
+        CumulativeStats,
         GlobalState,
+        InstantaneousStats,
+        LastSwap,
         MarketMetadata,
+        MarketRegistration,
+        MarketView,
+        PeriodicState,
+        PeriodicStateMetadata,
+        PeriodicStateTracker,
         RegistryView,
+        TVLtoLPCoinRatio,
+        Reserves,
+        SequenceInfo,
         assert_valid_coin_types_test_only as assert_valid_coin_types,
         chat,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
@@ -39,6 +50,7 @@
         get_EMOJICOIN_LP_STRUCT_NAME,
         get_EMOJICOIN_LP_SYMBOL_PREFIX,
         get_EMOJICOIN_NAME_SUFFIX,
+        get_EMOJICOIN_SUPPLY,
         get_MAX_CHAT_MESSAGE_LENGTH,
         get_MAX_SYMBOL_LENGTH,
         get_MARKET_REGISTRATION_FEE,
@@ -57,21 +69,33 @@
         get_TRIGGER_MARKET_REGISTRATION,
         get_TRIGGER_PACKAGE_PUBLICATION,
         get_concatenation_test_only as get_concatenation,
-        verified_symbol_emoji_bytes,
         init_module_test_only as init_module,
         is_a_supported_chat_emoji,
         is_a_supported_symbol_emoji,
+        market_view,
         market_metadata_by_emoji_bytes,
         pack_reserves,
         register_market,
         register_market_without_publish,
         registry_view,
         swap,
-        unpack_market_metadata,
         unpack_chat,
+        unpack_cumulative_stats,
         unpack_global_state,
+        unpack_instantaneous_stats,
+        unpack_last_swap,
+        unpack_market_metadata,
+        unpack_market_registration,
+        unpack_market_view,
+        unpack_periodic_state,
+        unpack_periodic_state_metadata,
+        unpack_periodic_state_tracker,
         unpack_registry_view,
+        unpack_reserves,
+        unpack_sequence_info,
+        unpack_tvl_to_lp_coin_ratio,
         valid_coin_types_test_only as valid_coin_types,
+        verified_symbol_emoji_bytes,
     };
     use emojicoin_dot_fun::hex_codes::{
         get_metadata_bytes_test_only as get_metadata_bytes,
@@ -93,6 +117,16 @@
     use std::type_info;
     use std::vector;
 
+    struct PeriodicStateTrackerStartTimes has copy, drop, store {
+        period_1M: u64,
+        period_5M: u64,
+        period_15M: u64,
+        period_30M: u64,
+        period_1H: u64,
+        period_4H: u64,
+        period_1D: u64,
+    }
+
     struct TestChat has copy, drop, store {
         market_metadata: TestMarketMetadata,
         emit_time: u64,
@@ -102,6 +136,16 @@
         user_emojicoin_balance: u64,
         circulating_supply: u64,
         balance_as_fraction_of_circulating_supply_q64: u128,
+    }
+
+    struct TestCumulativeStats has copy, drop, store {
+        base_volume: u128,
+        quote_volume: u128,
+        integrator_fees: u128,
+        pool_fees_base: u128,
+        pool_fees_quote: u128,
+        n_swaps: u64,
+        n_chat_messages: u64,
     }
 
     struct TestGlobalState has copy, drop, store {
@@ -118,13 +162,100 @@
         cumulative_chat_messages: u64,
     }
 
+    struct TestInstantaneousStats has copy, drop, store {
+        total_quote_locked: u64,
+        total_value_locked: u128,
+        market_cap: u128,
+        fully_diluted_value: u128,
+    }
+
+    struct TestLastSwap has copy, drop, store {
+        is_sell: bool,
+        avg_execution_price_q64: u128,
+        base_volume: u64,
+        quote_volume: u64,
+        nonce: u64,
+        time: u64,
+    }
+
     struct TestMarketMetadata has copy, drop, store {
         market_id: u64,
         market_address: address,
         emoji_bytes: vector<u8>,
     }
 
-    struct TestRegistryView  has copy, drop, store {
+    struct TestMarketRegistration has copy, drop, store {
+        market_metadata: TestMarketMetadata,
+        time: u64,
+        registrant: address,
+        integrator: address,
+        integrator_fee: u64,
+    }
+
+    struct TestMarketView has copy, drop, store {
+        metadata: TestMarketMetadata,
+        sequence_info: TestSequenceInfo,
+        clamm_virtual_reserves: TestReserves,
+        cpamm_real_reserves: TestReserves,
+        lp_coin_supply: u128,
+        in_bonding_curve: bool,
+        cumulative_stats: TestCumulativeStats,
+        instantaneous_stats: TestInstantaneousStats,
+        last_swap: TestLastSwap,
+        periodic_state_trackers: vector<TestPeriodicStateTracker>,
+        aptos_coin_balance: u64,
+        emojicoin_balance: u64,
+        emojicoin_lp_balance: u64,
+    }
+
+    struct TestPeriodicState has copy, drop, store {
+        market_metadata: TestMarketMetadata,
+        periodic_state_metadata: TestPeriodicStateMetadata,
+        open_price_q64: u128,
+        high_price_q64: u128,
+        low_price_q64: u128,
+        close_price_q64: u128,
+        volume_base: u128,
+        volume_quote: u128,
+        integrator_fees: u128,
+        pool_fees_base: u128,
+        pool_fees_quote: u128,
+        n_swaps: u64,
+        n_chat_messages: u64,
+        starts_in_bonding_curve: bool,
+        ends_in_bonding_curve: bool,
+        tvl_per_lp_coin_growth_q64: u128,
+    }
+
+    struct TestPeriodicStateTracker has copy, drop, store {
+        start_time: u64,
+        period: u64,
+        open_price_q64: u128,
+        high_price_q64: u128,
+        low_price_q64: u128,
+        close_price_q64: u128,
+        volume_base: u128,
+        volume_quote: u128,
+        integrator_fees: u128,
+        pool_fees_base: u128,
+        pool_fees_quote: u128,
+        n_swaps: u64,
+        n_chat_messages: u64,
+        starts_in_bonding_curve: bool,
+        ends_in_bonding_curve: bool,
+        tvl_to_lp_coin_ratio_start: TestTVLtoLPCoinRatio,
+        tvl_to_lp_coin_ratio_end: TestTVLtoLPCoinRatio,
+    }
+
+    struct TestPeriodicStateMetadata has copy, drop, store {
+        start_time: u64,
+        period: u64,
+        emit_time: u64,
+        emit_market_nonce: u64,
+        trigger: u8,
+    }
+
+    struct TestRegistryView has copy, drop, store {
         registry_address: address,
         nonce: u64,
         last_bump_time: u64,
@@ -137,6 +268,21 @@
         cumulative_integrator_fees: u128,
         cumulative_swaps: u64,
         cumulative_chat_messages: u64,
+    }
+
+    struct TestTVLtoLPCoinRatio has copy, drop, store {
+        tvl: u128,
+        lp_coins: u128,
+    }
+
+    struct TestReserves has copy, drop, store {
+        base: u64,
+        quote: u64,
+    }
+
+    struct TestSequenceInfo has copy, drop, store {
+        nonce: u64,
+        last_bump_time: u64,
     }
 
     // Test market emoji bytes.
@@ -197,6 +343,47 @@
         assert!(emoji_bytes == test_metadata.emoji_bytes, 0);
     }
 
+    public fun assert_market_view(
+        test_market_view: TestMarketView,
+        market_view: MarketView,
+    ) {
+        let (
+            metadata,
+            sequence_info,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            in_bonding_curve,
+            cumulative_stats,
+            instantaneous_stats,
+            last_swap,
+            periodic_state_trackers,
+            aptos_coin_balance,
+            emojicoin_balance,
+            emojicoin_lp_balance,
+        ) = unpack_market_view(market_view);
+        assert_market_metadata(test_market_view.metadata, metadata);
+        assert_sequence_info(test_market_view.sequence_info, sequence_info);
+        assert_reserves(test_market_view.clamm_virtual_reserves, clamm_virtual_reserves);
+        assert_reserves(test_market_view.cpamm_real_reserves, cpamm_real_reserves);
+        assert!(lp_coin_supply == test_market_view.lp_coin_supply, 0);
+        assert!(in_bonding_curve == test_market_view.in_bonding_curve, 0);
+        assert_cumulative_stats(test_market_view.cumulative_stats, cumulative_stats);
+        assert_instaneous_stats(test_market_view.instantaneous_stats, instantaneous_stats);
+        assert_last_swap(test_market_view.last_swap, last_swap);
+        assert!(vector::length(&periodic_state_trackers) ==
+            vector::length(&test_market_view.periodic_state_trackers), 0);
+        for (i in 0..vector::length(&periodic_state_trackers)) {
+            assert_periodic_state_tracker(
+                *vector::borrow(&test_market_view.periodic_state_trackers, i),
+                *vector::borrow(&periodic_state_trackers, i),
+            );
+        };
+        assert!(aptos_coin_balance == test_market_view.aptos_coin_balance, 0);
+        assert!(emojicoin_balance == test_market_view.emojicoin_balance, 0);
+        assert!(emojicoin_lp_balance == test_market_view.emojicoin_lp_balance, 0);
+    }
+
     public fun assert_registry_view(
         test_registry_view: TestRegistryView,
         registry_view: RegistryView,
@@ -232,6 +419,24 @@
             == test_registry_view.cumulative_chat_messages, 0);
     }
 
+    public fun assert_market_registration(
+        test_market_registration: TestMarketRegistration,
+        market_registration: MarketRegistration,
+    ) {
+        let (
+            market_metadata,
+            time,
+            registrant,
+            integrator,
+            integrator_fee,
+        ) = unpack_market_registration(market_registration);
+        assert_market_metadata(test_market_registration.market_metadata, market_metadata);
+        assert!(time == test_market_registration.time, 0);
+        assert!(registrant == test_market_registration.registrant, 0);
+        assert!(integrator == test_market_registration.integrator, 0);
+        assert!(integrator_fee == test_market_registration.integrator_fee, 0);
+    }
+
     public fun assert_global_state(
         test_global_state: TestGlobalState,
         global_state: GlobalState
@@ -263,6 +468,200 @@
         assert!(read_snapshot(&cumulative_swaps) == test_global_state.cumulative_swaps, 0);
         assert!(read_snapshot(&cumulative_chat_messages)
             == test_global_state.cumulative_chat_messages, 0);
+    }
+
+    public fun assert_periodic_state(
+        test_periodic_state: TestPeriodicState,
+        periodic_state: PeriodicState,
+    ) {
+        let (
+            market_metadata,
+            periodic_state_metadata,
+            open_price_q64,
+            high_price_q64,
+            low_price_q64,
+            close_price_q64,
+            volume_base,
+            volume_quote,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+            starts_in_bonding_curve,
+            ends_in_bonding_curve,
+            tvl_per_lp_coin_growth_q64,
+        ) = unpack_periodic_state(periodic_state);
+        assert_market_metadata(test_periodic_state.market_metadata, market_metadata);
+        assert_periodic_state_metadata(
+            test_periodic_state.periodic_state_metadata,
+            periodic_state_metadata,
+        );
+        assert!(open_price_q64 == test_periodic_state.open_price_q64, 0);
+        assert!(high_price_q64 == test_periodic_state.high_price_q64, 0);
+        assert!(low_price_q64 == test_periodic_state.low_price_q64, 0);
+        assert!(close_price_q64 == test_periodic_state.close_price_q64, 0);
+        assert!(volume_base == test_periodic_state.volume_base, 0);
+        assert!(volume_quote == test_periodic_state.volume_quote, 0);
+        assert!(integrator_fees == test_periodic_state.integrator_fees, 0);
+        assert!(pool_fees_base == test_periodic_state.pool_fees_base, 0);
+        assert!(pool_fees_quote == test_periodic_state.pool_fees_quote, 0);
+        assert!(n_swaps == test_periodic_state.n_swaps, 0);
+        assert!(n_chat_messages == test_periodic_state.n_chat_messages, 0);
+        assert!(starts_in_bonding_curve == test_periodic_state.starts_in_bonding_curve, 0);
+        assert!(ends_in_bonding_curve == test_periodic_state.ends_in_bonding_curve, 0);
+        assert!(tvl_per_lp_coin_growth_q64 == test_periodic_state.tvl_per_lp_coin_growth_q64, 0);
+    }
+
+    public fun assert_periodic_state_metadata(
+        test_periodic_state_metadata: TestPeriodicStateMetadata,
+        periodic_state_metadata: PeriodicStateMetadata,
+    ) {
+        let (
+            start_time,
+            period,
+            emit_time,
+            emit_market_nonce,
+            trigger,
+        ) = unpack_periodic_state_metadata(periodic_state_metadata);
+        assert!(start_time == test_periodic_state_metadata.start_time, 0);
+        assert!(period == test_periodic_state_metadata.period, 0);
+        assert!(emit_time == test_periodic_state_metadata.emit_time, 0);
+        assert!(emit_market_nonce == test_periodic_state_metadata.emit_market_nonce, 0);
+        assert!(trigger == test_periodic_state_metadata.trigger, 0);
+    }
+
+    public fun assert_periodic_state_tracker(
+        test_periodic_state_tracker: TestPeriodicStateTracker,
+        periodic_state_tracker: PeriodicStateTracker,
+    ) {
+        let (
+            start_time,
+            period,
+            open_price_q64,
+            high_price_q64,
+            low_price_q64,
+            close_price_q64,
+            volume_base,
+            volume_quote,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+            starts_in_bonding_curve,
+            ends_in_bonding_curve,
+            tvl_to_lp_coin_ratio_start,
+            tvl_to_lp_coin_ratio_end,
+        ) = unpack_periodic_state_tracker(periodic_state_tracker);
+        assert!(start_time == test_periodic_state_tracker.start_time, 0);
+        assert!(period == test_periodic_state_tracker.period, 0);
+        assert!(open_price_q64 == test_periodic_state_tracker.open_price_q64, 0);
+        assert!(high_price_q64 == test_periodic_state_tracker.high_price_q64, 0);
+        assert!(low_price_q64 == test_periodic_state_tracker.low_price_q64, 0);
+        assert!(close_price_q64 == test_periodic_state_tracker.close_price_q64, 0);
+        assert!(volume_base == test_periodic_state_tracker.volume_base, 0);
+        assert!(volume_quote == test_periodic_state_tracker.volume_quote, 0);
+        assert!(integrator_fees == test_periodic_state_tracker.integrator_fees, 0);
+        assert!(pool_fees_base == test_periodic_state_tracker.pool_fees_base, 0);
+        assert!(pool_fees_quote == test_periodic_state_tracker.pool_fees_quote, 0);
+        assert!(n_swaps == test_periodic_state_tracker.n_swaps, 0);
+        assert!(n_chat_messages == test_periodic_state_tracker.n_chat_messages, 0);
+        assert!(starts_in_bonding_curve == test_periodic_state_tracker.starts_in_bonding_curve, 0);
+        assert!(ends_in_bonding_curve == test_periodic_state_tracker.ends_in_bonding_curve, 0);
+        assert_tvl_to_lp_coin_ratio(
+            test_periodic_state_tracker.tvl_to_lp_coin_ratio_start,
+            tvl_to_lp_coin_ratio_start,
+        );
+        assert_tvl_to_lp_coin_ratio(
+            test_periodic_state_tracker.tvl_to_lp_coin_ratio_end,
+            tvl_to_lp_coin_ratio_end,
+        );
+    }
+
+    public fun assert_reserves(
+        test_reserves: TestReserves,
+        reserves: Reserves,
+    ) {
+        let (base, quote) = unpack_reserves(reserves);
+        assert!(base == test_reserves.base, 0);
+        assert!(quote == test_reserves.quote, 0);
+    }
+
+    public fun assert_sequence_info(
+        test_sequence_info: TestSequenceInfo,
+        sequence_info: SequenceInfo,
+    ) {
+        let (nonce, last_bump_time) = unpack_sequence_info(sequence_info);
+        assert!(nonce == test_sequence_info.nonce, 0);
+        assert!(last_bump_time == test_sequence_info.last_bump_time, 0);
+    }
+
+    public fun assert_tvl_to_lp_coin_ratio(
+        test_tvl_to_lp_coin_ratio: TestTVLtoLPCoinRatio,
+        tvl_to_lp_coin_ratio: TVLtoLPCoinRatio,
+    ) {
+        let (tvl, lp_coins) = unpack_tvl_to_lp_coin_ratio(tvl_to_lp_coin_ratio);
+        assert!(tvl == test_tvl_to_lp_coin_ratio.tvl, 0);
+        assert!(lp_coins == test_tvl_to_lp_coin_ratio.lp_coins, 0);
+    }
+
+    public fun assert_cumulative_stats(
+        test_cumulative_stats: TestCumulativeStats,
+        cumulative_stats: CumulativeStats,
+    ) {
+        let (
+            base_volume,
+            quote_volume,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+        ) = unpack_cumulative_stats(cumulative_stats);
+        assert!(base_volume == test_cumulative_stats.base_volume, 0);
+        assert!(quote_volume == test_cumulative_stats.quote_volume, 0);
+        assert!(integrator_fees == test_cumulative_stats.integrator_fees, 0);
+        assert!(pool_fees_base == test_cumulative_stats.pool_fees_base, 0);
+        assert!(pool_fees_quote == test_cumulative_stats.pool_fees_quote, 0);
+        assert!(n_swaps == test_cumulative_stats.n_swaps, 0);
+        assert!(n_chat_messages == test_cumulative_stats.n_chat_messages, 0);
+    }
+
+    public fun assert_instaneous_stats(
+        test_instaneous_stats: TestInstantaneousStats,
+        instaneous_stats: InstantaneousStats,
+    ) {
+        let (
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+        ) = unpack_instantaneous_stats(instaneous_stats);
+        assert!(total_quote_locked == test_instaneous_stats.total_quote_locked, 0);
+        assert!(total_value_locked == test_instaneous_stats.total_value_locked, 0);
+        assert!(market_cap == test_instaneous_stats.market_cap, 0);
+        assert!(fully_diluted_value == test_instaneous_stats.fully_diluted_value, 0);
+    }
+
+    public fun assert_last_swap(
+        test_last_swap: TestLastSwap,
+        last_swap: LastSwap,
+    ) {
+        let (
+            is_sell,
+            avg_execution_price_q64,
+            base_volume,
+            quote_volume,
+            nonce,
+            time,
+        ) = unpack_last_swap(last_swap);
+        assert!(is_sell == test_last_swap.is_sell, 0);
+        assert!(avg_execution_price_q64 == test_last_swap.avg_execution_price_q64, 0);
+        assert!(base_volume == test_last_swap.base_volume, 0);
+        assert!(quote_volume == test_last_swap.quote_volume, 0);
+        assert!(nonce == test_last_swap.nonce, 0);
+        assert!(time == test_last_swap.time, 0);
     }
 
     public fun assert_test_market_address(
@@ -304,8 +703,109 @@
         assert!(coin::name<EmojicoinLP>() == lp_name, 0);
     }
 
+    public fun apply_periodic_state_tracker_start_times(
+        periodic_state_trackers_ref_mut: &mut vector<TestPeriodicStateTracker>,
+        start_times: PeriodicStateTrackerStartTimes,
+    ) {
+        vector::borrow_mut(periodic_state_trackers_ref_mut, 0).start_time = start_times.period_1M;
+        vector::borrow_mut(periodic_state_trackers_ref_mut, 1).start_time = start_times.period_5M;
+        vector::borrow_mut(periodic_state_trackers_ref_mut, 2).start_time = start_times.period_15M;
+        vector::borrow_mut(periodic_state_trackers_ref_mut, 3).start_time = start_times.period_30M;
+        vector::borrow_mut(periodic_state_trackers_ref_mut, 4).start_time = start_times.period_1H;
+        vector::borrow_mut(periodic_state_trackers_ref_mut, 5).start_time = start_times.period_4H;
+        vector::borrow_mut(periodic_state_trackers_ref_mut, 6).start_time = start_times.period_1D;
+    }
+
+    public fun base_market_view(): TestMarketView {
+        TestMarketView {
+            metadata: TestMarketMetadata {
+                market_id: 1,
+                market_address: @0x0,
+                emoji_bytes: vector[],
+            },
+            sequence_info: TestSequenceInfo {
+                nonce: 1,
+                last_bump_time: 0,
+            },
+            clamm_virtual_reserves: TestReserves {
+                base: get_BASE_VIRTUAL_CEILING(),
+                quote: get_QUOTE_VIRTUAL_FLOOR(),
+            },
+            cpamm_real_reserves: TestReserves {
+                base: 0,
+                quote: 0,
+            },
+            lp_coin_supply: 0,
+            in_bonding_curve: true,
+            cumulative_stats: TestCumulativeStats {
+                base_volume: 0,
+                quote_volume: 0,
+                integrator_fees: 0,
+                pool_fees_base: 0,
+                pool_fees_quote: 0,
+                n_swaps: 0,
+                n_chat_messages: 0,
+            },
+            instantaneous_stats: TestInstantaneousStats {
+                total_quote_locked: 0,
+                total_value_locked: 0,
+                market_cap: 0,
+                fully_diluted_value: fdv_for_newly_registered_market(),
+            },
+            last_swap: TestLastSwap {
+                is_sell: false,
+                avg_execution_price_q64: 0,
+                base_volume: 0,
+                quote_volume: 0,
+                nonce: 0,
+                time: 0,
+            },
+            periodic_state_trackers:
+                vectorize_periodic_state_tracker_base(base_periodic_state_tracker()),
+            aptos_coin_balance: 0,
+            emojicoin_balance: get_EMOJICOIN_SUPPLY(),
+            emojicoin_lp_balance: 0,
+        }
+    }
+
+    public fun base_periodic_state_tracker(): TestPeriodicStateTracker {
+        TestPeriodicStateTracker {
+            start_time: 0,
+            period: 0,
+            open_price_q64: 0,
+            high_price_q64: 0,
+            low_price_q64: 0,
+            close_price_q64: 0,
+            volume_base: 0,
+            volume_quote: 0,
+            integrator_fees: 0,
+            pool_fees_base: 0,
+            pool_fees_quote: 0,
+            n_swaps: 0,
+            n_chat_messages: 0,
+            starts_in_bonding_curve: true,
+            ends_in_bonding_curve: true,
+            tvl_to_lp_coin_ratio_start: TestTVLtoLPCoinRatio {
+                tvl: 0,
+                lp_coins: 0,
+            },
+            tvl_to_lp_coin_ratio_end: TestTVLtoLPCoinRatio {
+                tvl: 0,
+                lp_coins: 0,
+            },
+        }
+    }
+
+    public fun fdv_for_newly_registered_market(): u128 {
+        (
+            (
+                (get_QUOTE_VIRTUAL_FLOOR() as u256) * (get_EMOJICOIN_SUPPLY() as u256) /
+                (get_BASE_VIRTUAL_CEILING() as u256)
+            ) as u128
+        )
+    }
+
     public fun init_package() {
-        aptos_account::create_account(@emojicoin_dot_fun);
         timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
         init_module(&get_signer(@emojicoin_dot_fun));
     }
@@ -348,6 +848,24 @@
          option::destroy_some(
             market_metadata_by_emoji_bytes(verified_symbol_emoji_bytes(emoji_bytes))
         )
+    }
+
+    public fun vectorize_periodic_state_tracker_base(
+        base: TestPeriodicStateTracker
+    ): vector<TestPeriodicStateTracker> {
+        vector::map(vector[
+            get_PERIOD_1M(),
+            get_PERIOD_5M(),
+            get_PERIOD_15M(),
+            get_PERIOD_30M(),
+            get_PERIOD_1H(),
+            get_PERIOD_4H(),
+            get_PERIOD_1D(),
+        ], |period| {
+            let periodic_state_tracker = copy base;
+            periodic_state_tracker.period = period;
+            periodic_state_tracker
+        })
     }
 
     #[test] fun all_supported_emojis_under_10_bytes() {
@@ -633,11 +1151,82 @@
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
     }
 
+    #[test] fun register_market_complex_state_assertion() {
+        init_package();
+
+        // Register simple market, assert market state.
+        let time = get_PERIOD_1H();
+        timestamp::update_global_time_for_test(time);
+        register_market(&get_signer(USER), vector[BLACK_CAT], INTEGRATOR);
+        let market_view = base_market_view();
+        market_view.metadata.market_address = @black_cat_market;
+        market_view.metadata.emoji_bytes = BLACK_CAT;
+        market_view.sequence_info.last_bump_time = time;
+        apply_periodic_state_tracker_start_times(
+            &mut market_view.periodic_state_trackers,
+            PeriodicStateTrackerStartTimes {
+                period_1D: 0,
+                period_4H: 0,
+                period_1H: get_PERIOD_1H(),
+                period_30M: get_PERIOD_1H(),
+                period_15M: get_PERIOD_1H(),
+                period_5M: get_PERIOD_1H(),
+                period_1M: get_PERIOD_1H(),
+            }
+        );
+        assert_market_view(
+            market_view,
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market),
+        );
+
+        // Set next market registration time such that all periodic state trackers will truncate
+        // to last period boundary.
+        time = get_PERIOD_1D() + get_PERIOD_4H() + get_PERIOD_1H() + get_PERIOD_30M() +
+            get_PERIOD_15M() + get_PERIOD_5M() + get_PERIOD_1M() + 1;
+        let periodic_state_tracker_start_times = PeriodicStateTrackerStartTimes {
+            period_1D: get_PERIOD_1D(),
+            period_4H: get_PERIOD_1D() + get_PERIOD_4H(),
+            period_1H: get_PERIOD_1D() + get_PERIOD_4H() + get_PERIOD_1H(),
+            period_30M: get_PERIOD_1D() + get_PERIOD_4H() + get_PERIOD_1H() + get_PERIOD_30M(),
+            period_15M: get_PERIOD_1D() + get_PERIOD_4H() + get_PERIOD_1H() + get_PERIOD_30M() +
+                get_PERIOD_15M(),
+            period_5M: get_PERIOD_1D() + get_PERIOD_4H() + get_PERIOD_1H() + get_PERIOD_30M() +
+                get_PERIOD_15M() + get_PERIOD_5M(),
+            period_1M: get_PERIOD_1D() + get_PERIOD_4H() + get_PERIOD_1H() + get_PERIOD_30M() +
+                get_PERIOD_15M() + get_PERIOD_5M() + get_PERIOD_1M(),
+        };
+        timestamp::update_global_time_for_test(time);
+
+        // Register new market, assert state.
+        mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_FEE());
+        register_market_without_publish(&get_signer(USER), vector[BLACK_HEART], INTEGRATOR);
+        market_view.metadata = TestMarketMetadata {
+            market_id: 2,
+            market_address: @black_heart_market,
+            emoji_bytes: BLACK_HEART,
+        };
+        market_view.sequence_info.last_bump_time = time;
+        market_view.cumulative_stats.integrator_fees = (get_MARKET_REGISTRATION_FEE() as u128);
+        apply_periodic_state_tracker_start_times(
+            &mut market_view.periodic_state_trackers,
+            periodic_state_tracker_start_times,
+        );
+        vector::for_each_mut(&mut market_view.periodic_state_trackers, |e| {
+            let periodic_state_tracker_ref_mut: &mut TestPeriodicStateTracker = e;
+            periodic_state_tracker_ref_mut.integrator_fees =
+                (get_MARKET_REGISTRATION_FEE() as u128);
+        });
+        assert_market_view(
+            market_view,
+            market_view<BlackHeartEmojicoin, BlackHeartEmojicoinLP>(@black_heart_market),
+        );
+    }
+
     #[test] fun register_market_with_compound_emoji_sequence() {
         init_package();
         let emojis = vector[
-            x"e29aa1",           // High voltage.
-            x"f09f96a5efb88f",   // Desktop computer.
+            x"e29aa1",         // High voltage.
+            x"f09f96a5efb88f", // Desktop computer.
         ];
         let concatenated_bytes = verified_symbol_emoji_bytes(emojis);
 

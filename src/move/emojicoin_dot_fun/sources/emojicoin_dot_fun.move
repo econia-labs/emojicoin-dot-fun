@@ -185,6 +185,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         instantaneous_stats: InstantaneousStats,
         last_swap: LastSwap,
         periodic_state_trackers: vector<PeriodicStateTracker>,
+        aptos_coin_balance: u64,
         emojicoin_balance: u64,
         emojicoin_lp_balance: u64,
     }
@@ -571,6 +572,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let market_extend_ref = object::generate_extend_ref(&market_constructor_ref);
         let market_id = 1 + smart_table::length(markets_by_emoji_bytes_ref_mut);
 
+        // Only assess integrator fees for markets after the first.
+        let integrator_fees = if (market_id == 1) 0 else (MARKET_REGISTRATION_FEE as u128);
+
         let time = timestamp::now_microseconds();
         move_to(&market_signer, Market {
             metadata : MarketMetadata {
@@ -590,7 +594,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             cumulative_stats: CumulativeStats {
                 base_volume: 0,
                 quote_volume: 0,
-                integrator_fees: (MARKET_REGISTRATION_FEE as u128),
+                integrator_fees,
                 pool_fees_base: 0,
                 pool_fees_quote: 0,
                 n_swaps: 0,
@@ -602,7 +606,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 base_volume: 0,
                 quote_volume: 0,
                 nonce: 0,
-                time,
+                time: 0,
             },
             periodic_state_trackers: vector::map(
                 vector[
@@ -623,7 +627,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                     close_price_q64: 0,
                     volume_base: 0,
                     volume_quote: 0,
-                    integrator_fees: (MARKET_REGISTRATION_FEE as u128),
+                    integrator_fees,
                     pool_fees_base: 0,
                     pool_fees_quote: 0,
                     n_swaps: 0,
@@ -1406,6 +1410,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             instantaneous_stats: instantaneous_stats(market_ref),
             last_swap: market_ref.last_swap,
             periodic_state_trackers: market_ref.periodic_state_trackers,
+            aptos_coin_balance: coin::balance<AptosCoin>(market_address),
             emojicoin_balance: coin::balance<Emojicoin>(market_address),
             emojicoin_lp_balance: coin::balance<EmojicoinLP>(market_address),
         }
@@ -1564,6 +1569,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         vector<PeriodicStateTracker>,
         u64,
         u64,
+        u64,
     ) {
         let MarketView {
             metadata,
@@ -1576,6 +1582,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             instantaneous_stats,
             last_swap,
             periodic_state_trackers,
+            aptos_coin_balance,
             emojicoin_balance,
             emojicoin_lp_balance,
         } = market_view;
@@ -1590,6 +1597,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             instantaneous_stats,
             last_swap,
             periodic_state_trackers,
+            aptos_coin_balance,
             emojicoin_balance,
             emojicoin_lp_balance,
         )
@@ -1615,8 +1623,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         TVLtoLPCoinRatio,
     ) {
         let PeriodicStateTracker {
-            period,
             start_time,
+            period,
             open_price_q64,
             high_price_q64,
             low_price_q64,
@@ -1634,8 +1642,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             tvl_to_lp_coin_ratio_end,
         } = periodic_state_tracker;
         (
-            period,
             start_time,
+            period,
             open_price_q64,
             high_price_q64,
             low_price_q64,
@@ -2240,6 +2248,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         EMOJICOIN_LP_NAME_SUFFIX
     }
     #[test_only] public fun get_EMOJICOIN_NAME_SUFFIX(): vector<u8> { EMOJICOIN_NAME_SUFFIX }
+    #[test_only] public fun get_EMOJICOIN_SUPPLY(): u64 { EMOJICOIN_SUPPLY }
     #[test_only] public fun get_MAX_CHAT_MESSAGE_LENGTH(): u64 { MAX_CHAT_MESSAGE_LENGTH }
     #[test_only] public fun get_MAX_SYMBOL_LENGTH(): u8 { MAX_SYMBOL_LENGTH }
     #[test_only] public fun get_MARKET_REGISTRATION_FEE(): u64 { MARKET_REGISTRATION_FEE }
@@ -2346,6 +2355,108 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             cumulative_integrator_fees,
             cumulative_swaps,
             cumulative_chat_messages,
+        )
+    }
+
+    #[test_only] public fun unpack_market_registration(
+        market_registration: MarketRegistration,
+    ): (
+        MarketMetadata,
+        u64,
+        address,
+        address,
+        u64,
+    ) {
+        let MarketRegistration {
+            market_metadata,
+            time,
+            registrant,
+            integrator,
+            integrator_fee,
+        } = market_registration;
+        (market_metadata, time, registrant, integrator, integrator_fee)
+    }
+
+    #[test_only] public fun unpack_periodic_state(
+        periodic_state: PeriodicState,
+    ): (
+        MarketMetadata,
+        PeriodicStateMetadata,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u64,
+        u64,
+        bool,
+        bool,
+        u128,
+    ) {
+        let PeriodicState {
+            market_metadata,
+            periodic_state_metadata,
+            open_price_q64,
+            high_price_q64,
+            low_price_q64,
+            close_price_q64,
+            volume_base,
+            volume_quote,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+            starts_in_bonding_curve,
+            ends_in_bonding_curve,
+            tvl_per_lp_coin_growth_q64,
+        } = periodic_state;
+        (
+            market_metadata,
+            periodic_state_metadata,
+            open_price_q64,
+            high_price_q64,
+            low_price_q64,
+            close_price_q64,
+            volume_base,
+            volume_quote,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+            starts_in_bonding_curve,
+            ends_in_bonding_curve,
+            tvl_per_lp_coin_growth_q64,
+        )
+    }
+
+    #[test_only] public fun unpack_periodic_state_metadata(
+        periodic_state_metadata: PeriodicStateMetadata,
+    ): (
+        u64,
+        u64,
+        u64,
+        u64,
+        u8,
+    ) {
+        let PeriodicStateMetadata {
+            start_time,
+            emit_time,
+            emit_market_nonce,
+            period,
+            trigger,
+        } = periodic_state_metadata;
+        (
+            start_time,
+            emit_time,
+            emit_market_nonce,
+            period,
+            trigger,
         )
     }
 
