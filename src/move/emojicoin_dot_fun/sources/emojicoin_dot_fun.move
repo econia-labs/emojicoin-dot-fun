@@ -525,7 +525,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let fdv_ref_mut = &mut registry_ref_mut.global_stats.fully_diluted_value;
         aggregator_v2::try_add(fdv_ref_mut, fdv);
 
-        // Update registry nonce, but not last bump time since state only bumps out once per day.
+        // Update registry nonce, but not last bump time since global state only bumps once per day.
         let registry_nonce_ref_mut = &mut registry_ref_mut.sequence_info.nonce;
         let registry_nonce = *registry_nonce_ref_mut + 1;
         *registry_nonce_ref_mut = registry_nonce;

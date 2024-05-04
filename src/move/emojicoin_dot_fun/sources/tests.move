@@ -343,6 +343,24 @@
         assert!(emoji_bytes == test_metadata.emoji_bytes, 0);
     }
 
+    public fun assert_market_registration(
+        test_market_registration: TestMarketRegistration,
+        market_registration: MarketRegistration,
+    ) {
+        let (
+            market_metadata,
+            time,
+            registrant,
+            integrator,
+            integrator_fee,
+        ) = unpack_market_registration(market_registration);
+        assert_market_metadata(test_market_registration.market_metadata, market_metadata);
+        assert!(time == test_market_registration.time, 0);
+        assert!(registrant == test_market_registration.registrant, 0);
+        assert!(integrator == test_market_registration.integrator, 0);
+        assert!(integrator_fee == test_market_registration.integrator_fee, 0);
+    }
+
     public fun assert_market_view(
         test_market_view: TestMarketView,
         market_view: MarketView,
@@ -417,24 +435,6 @@
         assert!(read_snapshot(&cumulative_swaps) == test_registry_view.cumulative_swaps, 0);
         assert!(read_snapshot(&cumulative_chat_messages)
             == test_registry_view.cumulative_chat_messages, 0);
-    }
-
-    public fun assert_market_registration(
-        test_market_registration: TestMarketRegistration,
-        market_registration: MarketRegistration,
-    ) {
-        let (
-            market_metadata,
-            time,
-            registrant,
-            integrator,
-            integrator_fee,
-        ) = unpack_market_registration(market_registration);
-        assert_market_metadata(test_market_registration.market_metadata, market_metadata);
-        assert!(time == test_market_registration.time, 0);
-        assert!(registrant == test_market_registration.registrant, 0);
-        assert!(integrator == test_market_registration.integrator, 0);
-        assert!(integrator_fee == test_market_registration.integrator_fee, 0);
     }
 
     public fun assert_global_state(
@@ -732,13 +732,17 @@
         }
     }
 
+    public fun base_market_metadata(): TestMarketMetadata {
+        TestMarketMetadata {
+            market_id: 1,
+            market_address: @0x0,
+            emoji_bytes: vector[],
+        }
+    }
+
     public fun base_market_view(): TestMarketView {
         TestMarketView {
-            metadata: TestMarketMetadata {
-                market_id: 1,
-                market_address: @0x0,
-                emoji_bytes: vector[],
-            },
+            metadata: base_market_metadata(),
             sequence_info: TestSequenceInfo {
                 nonce: 1,
                 last_bump_time: 0,
@@ -826,6 +830,16 @@
             cumulative_integrator_fees: 0,
             cumulative_swaps: 0,
             cumulative_chat_messages: 0,
+        }
+    }
+
+    public fun base_market_registration(): TestMarketRegistration {
+        TestMarketRegistration {
+            market_metadata: base_market_metadata(),
+            time: 0,
+            registrant: USER,
+            integrator: INTEGRATOR,
+            integrator_fee: 0,
         }
     }
 
@@ -1195,8 +1209,12 @@
         timestamp::update_global_time_for_test(time);
         register_market(&get_signer(USER), vector[BLACK_CAT], INTEGRATOR);
         let market_view = base_market_view();
-        market_view.metadata.market_address = @black_cat_market;
-        market_view.metadata.emoji_bytes = BLACK_CAT;
+        let market_metadata_1 = TestMarketMetadata {
+            market_id: 1,
+            market_address: @black_cat_market,
+            emoji_bytes: BLACK_CAT,
+        };
+        market_view.metadata = market_metadata_1;
         market_view.sequence_info.last_bump_time = time;
         apply_periodic_state_tracker_start_times(
             &mut market_view.periodic_state_trackers,
@@ -1245,11 +1263,12 @@
         // Register new market, assert state.
         mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_FEE());
         register_market_without_publish(&get_signer(USER), vector[BLACK_HEART], INTEGRATOR);
-        market_view.metadata = TestMarketMetadata {
+        let market_metadata_2 = TestMarketMetadata {
             market_id: 2,
             market_address: @black_heart_market,
             emoji_bytes: BLACK_HEART,
         };
+        market_view.metadata = market_metadata_2;
         market_view.sequence_info.last_bump_time = time;
         market_view.cumulative_stats.integrator_fees = (get_MARKET_REGISTRATION_FEE() as u128);
         apply_periodic_state_tracker_start_times(
@@ -1276,6 +1295,30 @@
             registry_view(),
         );
 
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert market registration events.
+        let market_registration_1 = base_market_registration();
+        market_registration_1.market_metadata = market_metadata_1;
+        market_registration_1.time = one_day_and_one_hour + get_MICROSECONDS_PER_SECOND();
+        let market_registration_2 = base_market_registration();
+        market_registration_2.market_metadata = market_metadata_2;
+        market_registration_2.time = time;
+        market_registration_2.integrator_fee = get_MARKET_REGISTRATION_FEE();
+        let market_registration_events = emitted_events<MarketRegistration>();
+        assert!(vector::length(&market_registration_events) == 2, 0);
+        assert_market_registration(
+            market_registration_1,
+            *vector::borrow(&market_registration_events, 0),
+        );
+        assert_market_registration(
+            market_registration_2,
+            *vector::borrow(&market_registration_events, 1),
+        );
     }
 
     #[test] fun register_market_with_compound_emoji_sequence() {
