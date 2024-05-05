@@ -317,6 +317,10 @@
     const USER: address = @0xaaaaa;
     const INTEGRATOR: address = @0xbbbbb;
 
+    // Constants for a simple buy against a new market, used to set up assorted tests.
+    const SIMPLE_BUY_BASE_DIVISOR: u64 = 10;
+    const SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS: u64 = 50;
+
     public fun address_for_registered_market_by_emoji_bytes(
         emoji_bytes: vector<vector<u8>>,
     ): address {
@@ -1500,6 +1504,31 @@
         assert!(is_a_supported_symbol_emoji(x"e29d97"), 0);
         assert!(!is_a_supported_symbol_emoji(x"e29d97ff"), 0);
         assert!(!is_a_supported_symbol_emoji(x"ffe29d97"), 0);
+    }
+
+    #[test] fun simple_buy_amounts() {
+        // Define base input amount as a fraction of the amount required to leave bonding curve.
+        let input_amount = (get_BASE_REAL_CEILING() / SIMPLE_BUY_BASE_DIVISOR as u128);
+
+        // Define terms via simple CPAMM equation from whitepaper.
+        let b_0 = (get_BASE_VIRTUAL_CEILING() as u128);
+        let q_in = input_amount;
+        let q_0 = (get_QUOTE_VIRTUAL_FLOOR() as u128);
+
+        let numerator = b_0 * q_in;
+        let denominator = q_0 + q_in;
+
+        // Assert that rounding will indeed take place, such that output will be truncated and
+        // rounding effects will be assumed by swapper.
+        assert!(numerator % denominator != 0, 0);
+        let output_amount = numerator / denominator;
+
+        // Assert that integrator fee also results in truncation, but note that this does not leak
+        // funds from pool because the fee is ultimately assessed on the quote output amount.
+        assert!(output_amount % (SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS as u128) != 0, 0);
+        let integrator_fee = output_amount / (SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS as u128);
+        assert!(integrator_fee > 0, 0);
+
     }
 
     #[test] fun swap_initializes_coin_capabilities() {
