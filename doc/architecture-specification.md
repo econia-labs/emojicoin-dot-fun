@@ -36,11 +36,9 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 
 ## Indexing
 
-1. The user interface `SHALL` rely solely on the Aptos GraphQL endpoint for
-   indexing purposes, enabling for example a leaderboard based on market
-   capitalization of each emojicoin market.
 1. A `State` event `SHALL` be emitted for every operation, to enable fetching
-   market state as of the most recent event.
+   market state as of the most recent event, with the market's last bump time
+   tracking the most recent emission.
 1. Each market `SHALL` track a vector of internal `PeriodicStateTracker`
    accumulators, to enable volume and price versus times charts, with an
    internal variable for the period start time and the period length including
@@ -48,7 +46,8 @@ These keywords `SHALL` be in `monospace` for ease of identification.
    `SHALL` be used to check that a new period has started, and when an operation
    results in a new period, a `PeriodicState` event `SHALL` be emitted for each
    granularity that has lapsed.
-1. A `GlobalState` event for the entire protocol `SHALL` be emitted each day.
+1. A `GlobalState` event for the entire protocol `SHALL` be emitted each day,
+   with the registry's last bump time tracking the most recent emission.
 1. A view function shall enable enable lookup of global total value locked,
    number of emojicoin markets, and cumulative volume, via aggregators when
    necessary.
@@ -68,7 +67,8 @@ These keywords `SHALL` be in `monospace` for ease of identification.
 1. Liquidity provider APR `SHALL` be tracked by comparing the ratio of total
    value locked to issued liquidity provider tokens over time. `PeriodicState`
    events `SHALL` express the growth in the TVL/LP coin ratio in `Q64` notation.
-1. The registry and each market `SHALL` implement a 1-indexed nonce.
+1. The registry and each market `SHALL` implement a 1-indexed nonce, updated
+   whenever state is mutated.
 
 ## Frontend
 

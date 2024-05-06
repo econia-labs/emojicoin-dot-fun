@@ -38,10 +38,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     const TRIGGER_PACKAGE_PUBLICATION: u8 = 0;
     const TRIGGER_MARKET_REGISTRATION: u8 = 1;
-    const TRIGGER_SWAP: u8 = 2;
-    const TRIGGER_PROVIDE_LIQUIDITY: u8 = 3;
-    const TRIGGER_REMOVE_LIQUIDITY: u8 = 4;
-    const TRIGGER_CHAT: u8 = 5;
+    const TRIGGER_SWAP_BUY: u8 = 2;
+    const TRIGGER_SWAP_SELL: u8 = 3;
+    const TRIGGER_PROVIDE_LIQUIDITY: u8 = 4;
+    const TRIGGER_REMOVE_LIQUIDITY: u8 = 5;
+    const TRIGGER_CHAT: u8 = 6;
 
     const PERIOD_1M: u64 = 60_000_000;
     const PERIOD_5M: u64 = 300_000_000;
@@ -184,6 +185,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         instantaneous_stats: InstantaneousStats,
         last_swap: LastSwap,
         periodic_state_trackers: vector<PeriodicStateTracker>,
+        aptos_coin_balance: u64,
         emojicoin_balance: u64,
         emojicoin_lp_balance: u64,
     }
@@ -486,6 +488,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Create the Market object and add it to the registry.
         let (market_address, market_signer) = create_market(registry_ref_mut, emoji_bytes);
+        let market_ref_mut = borrow_global_mut<Market>(market_address);
+
+        // Trigger periodic state in case global state has lapsed.
+        let time = timestamp::now_microseconds();
+        let trigger = TRIGGER_MARKET_REGISTRATION;
+        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, 0);
 
         // Publish coin types at market address, unless publication disabled for testing.
         if (publish_code) {
@@ -517,11 +525,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             fee
         };
 
+        // Update global FDV.
+        let fdv = fdv(market_ref_mut.clamm_virtual_reserves);
+        let fdv_ref_mut = &mut registry_ref_mut.global_stats.fully_diluted_value;
+        aggregator_v2::try_add(fdv_ref_mut, fdv);
+
+        // Update registry nonce, but not last bump time since global state only bumps once per day.
+        let registry_nonce_ref_mut = &mut registry_ref_mut.sequence_info.nonce;
+        let registry_nonce = *registry_nonce_ref_mut + 1;
+        *registry_nonce_ref_mut = registry_nonce;
+
         // Bump state.
-        let market_ref_mut = borrow_global_mut<Market>(market_address);
-        let time = timestamp::now_microseconds();
-        let trigger = TRIGGER_MARKET_REGISTRATION;
-        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, 0);
         event::emit(MarketRegistration {
             market_metadata: market_ref_mut.metadata,
             time,
@@ -536,12 +550,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 total_quote_locked: 0,
                 total_value_locked: 0,
                 market_cap: 0,
-                fully_diluted_value: 0,
+                fully_diluted_value: fdv,
             },
         );
     }
 
-    inline fun instantaneous_stats(market_ref: &Market): InstantaneousStats {
+    /*inline*/ fun instantaneous_stats(market_ref: &Market): InstantaneousStats {
         let lp_coin_supply = market_ref.lp_coin_supply;
         let in_bonding_curve = lp_coin_supply == 0;
         let total_quote_locked = total_quote_locked(market_ref, in_bonding_curve);
@@ -557,7 +571,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun create_market(
+    /*inline*/ fun create_market(
         registry_ref_mut: &mut Registry,
         emoji_bytes: vector<u8>,
     ): (address, signer) {
@@ -569,6 +583,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let market_signer = object::generate_signer(&market_constructor_ref);
         let market_extend_ref = object::generate_extend_ref(&market_constructor_ref);
         let market_id = 1 + smart_table::length(markets_by_emoji_bytes_ref_mut);
+
+        // Only assess integrator fees for markets after the first.
+        let integrator_fees = if (market_id == 1) 0 else (MARKET_REGISTRATION_FEE as u128);
 
         let time = timestamp::now_microseconds();
         move_to(&market_signer, Market {
@@ -589,7 +606,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             cumulative_stats: CumulativeStats {
                 base_volume: 0,
                 quote_volume: 0,
-                integrator_fees: (MARKET_REGISTRATION_FEE as u128),
+                integrator_fees,
                 pool_fees_base: 0,
                 pool_fees_quote: 0,
                 n_swaps: 0,
@@ -601,7 +618,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 base_volume: 0,
                 quote_volume: 0,
                 nonce: 0,
-                time,
+                time: 0,
             },
             periodic_state_trackers: vector::map(
                 vector[
@@ -622,7 +639,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                     close_price_q64: 0,
                     volume_base: 0,
                     volume_quote: 0,
-                    integrator_fees: (MARKET_REGISTRATION_FEE as u128),
+                    integrator_fees,
                     pool_fees_base: 0,
                     pool_fees_quote: 0,
                     n_swaps: 0,
@@ -641,7 +658,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (market_address, market_signer)
     }
 
-    inline fun valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address): bool {
+    /*inline*/ fun valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address): bool {
         let emoji_type = &type_info::type_of<Emojicoin>();
         let lp_type = &type_info::type_of<EmojicoinLP>();
 
@@ -653,7 +670,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         type_info::struct_name(lp_type) == EMOJICOIN_LP_STRUCT_NAME
     }
 
-    inline fun get_verified_symbol_emoji_bytes(
+    /*inline*/ fun get_verified_symbol_emoji_bytes(
         registry_ref: &Registry,
         emojis: vector<vector<u8>>,
     ): vector<u8> {
@@ -672,7 +689,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         verified_bytes
     }
 
-    inline fun mul_div(
+    /*inline*/ fun mul_div(
         a: u64,
         b: u64,
         c: u64,
@@ -680,14 +697,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (a as u128) * (b as u128) / (c as u128)
     }
 
-    inline fun assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address) {
+    /*inline*/ fun assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address) {
         assert!(
             exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address),
             E_INVALID_COIN_TYPES
         );
     }
 
-    inline fun fdv_market_cap_start_end(
+    /*inline*/ fun fdv_market_cap_start_end(
         reserves_start: Reserves,
         reserves_end: Reserves,
         supply_minuend: u64,
@@ -702,7 +719,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (fdv_start, market_cap_start, fdv_end, market_cap_end)
     }
 
-    inline fun fdv_market_cap(
+    /*inline*/ fun fdv(
+        reserves: Reserves,
+    ): u128 {
+        mul_div(reserves.quote, EMOJICOIN_SUPPLY, reserves.base)
+    }
+
+    /*inline*/ fun fdv_market_cap(
         reserves: Reserves,
         supply_minuend: u64,
     ): (
@@ -751,7 +774,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun ensure_coins_initialized<Emojicoin, EmojicoinLP>(
+    /*inline*/ fun ensure_coins_initialized<Emojicoin, EmojicoinLP>(
         market_ref: &Market,
         market_signer: &signer,
         market_address: address,
@@ -796,7 +819,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
     }
 
-    inline fun get_concatenation(base: String, additional: String): String {
+    /*inline*/ fun get_concatenation(base: String, additional: String): String {
         string::append(&mut base, additional);
         base
     }
@@ -852,7 +875,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let tvl_start = tvl(market_ref_mut, starts_in_bonding_curve);
         let registry_ref_mut = borrow_registry_ref_mut();
         let time = event.time;
-        let trigger = TRIGGER_SWAP;
+        let trigger = if (is_sell) TRIGGER_SWAP_SELL else TRIGGER_SWAP_BUY;
         trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
 
         // Prepare local variables.
@@ -1405,6 +1428,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             instantaneous_stats: instantaneous_stats(market_ref),
             last_swap: market_ref.last_swap,
             periodic_state_trackers: market_ref.periodic_state_trackers,
+            aptos_coin_balance: coin::balance<AptosCoin>(market_address),
             emojicoin_balance: coin::balance<Emojicoin>(market_address),
             emojicoin_lp_balance: coin::balance<EmojicoinLP>(market_address),
         }
@@ -1563,6 +1587,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         vector<PeriodicStateTracker>,
         u64,
         u64,
+        u64,
     ) {
         let MarketView {
             metadata,
@@ -1575,6 +1600,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             instantaneous_stats,
             last_swap,
             periodic_state_trackers,
+            aptos_coin_balance,
             emojicoin_balance,
             emojicoin_lp_balance,
         } = market_view;
@@ -1589,6 +1615,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             instantaneous_stats,
             last_swap,
             periodic_state_trackers,
+            aptos_coin_balance,
             emojicoin_balance,
             emojicoin_lp_balance,
         )
@@ -1614,8 +1641,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         TVLtoLPCoinRatio,
     ) {
         let PeriodicStateTracker {
-            period,
             start_time,
+            period,
             open_price_q64,
             high_price_q64,
             low_price_q64,
@@ -1633,8 +1660,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             tvl_to_lp_coin_ratio_end,
         } = periodic_state_tracker;
         (
-            period,
             start_time,
+            period,
             open_price_q64,
             high_price_q64,
             low_price_q64,
@@ -1726,7 +1753,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         )
     }
 
-    inline fun burn_lp_coins<Emojicoin, EmojicoinLP>(
+    /*inline*/ fun burn_lp_coins<Emojicoin, EmojicoinLP>(
         market_address: address,
         coin: Coin<EmojicoinLP>,
     ) acquires LPCoinCapabilities {
@@ -1817,7 +1844,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         };
     }
 
-    inline fun bump_market_state(
+    /*inline*/ fun bump_market_state(
         market_ref: &Market,
         trigger: u8,
         instantaneous_stats: InstantaneousStats,
@@ -1839,7 +1866,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
-    inline fun emit_periodic_state(
+    /*inline*/ fun emit_periodic_state(
         market_metadata_ref: &MarketMetadata,
         nonce: u64,
         time: u64,
@@ -1875,14 +1902,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
     }
 
-    inline fun last_period_boundary(
+    /*inline*/ fun last_period_boundary(
         time: u64,
         period: u64,
     ): u64 {
         (time / period) * period
     }
 
-    inline fun mint_lp_coins<Emojicoin, EmojicoinLP>(
+    /*inline*/ fun mint_lp_coins<Emojicoin, EmojicoinLP>(
         market_address: address,
         amount: u64,
     ): Coin<EmojicoinLP> acquires LPCoinCapabilities {
@@ -1978,7 +2005,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             net_proceeds,
             base_volume,
             quote_volume,
-            // Ideally this would be an inline function, but that strangely breaks the compiler.
+            // Ideally this would be inline, but that strangely breaks the compiler.
             avg_execution_price_q64: ((quote_volume as u128) << SHIFT_Q64) / (base_volume as u128),
             integrator_fee,
             pool_fee,
@@ -1987,7 +2014,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun simulate_provide_liquidity_inner(
+    /*inline*/ fun simulate_provide_liquidity_inner(
         provider: address,
         quote_amount: u64,
         market_ref: &Market,
@@ -2022,7 +2049,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun simulate_remove_liquidity_inner<Emojicoin>(
+    /*inline*/ fun simulate_remove_liquidity_inner<Emojicoin>(
         provider: address,
         lp_coin_amount: u64,
         market_ref: &Market,
@@ -2068,14 +2095,14 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun get_bps_fee(
+    /*inline*/ fun get_bps_fee(
         principal: u64,
         fee_rate_bps: u8,
     ): u64 {
         ((((principal as u128) * (fee_rate_bps as u128)) / BASIS_POINTS_PER_UNIT) as u64)
     }
 
-    inline fun cpamm_simple_swap_output_amount(
+    /*inline*/ fun cpamm_simple_swap_output_amount(
         input_amount: u64,
         is_sell: bool,
         reserves: Reserves
@@ -2089,7 +2116,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (result as u64)
     }
 
-    inline fun total_quote_locked(
+    /*inline*/ fun total_quote_locked(
         market_ref: &Market,
         in_bonding_curve: bool,
     ): u64 {
@@ -2100,7 +2127,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun tvl(
+    /*inline*/ fun tvl(
         market_ref: &Market,
         in_bonding_curve: bool,
     ): u128 {
@@ -2111,7 +2138,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun tvl_clamm(
+    /*inline*/ fun tvl_clamm(
         virtual_reserves: Reserves,
     ): u128 {
         let quote_virtual = virtual_reserves.quote;
@@ -2128,7 +2155,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun tvl_cpamm(
+    /*inline*/ fun tvl_cpamm(
         real_quote_reserves: u64,
     ): u128 {
         // Base reserves priced in quote are equal to the value of quote reserves.
@@ -2148,7 +2175,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ///
     /// While all terms can technically be `u128`, in practice they will all be `u64`, and even if
     /// a few terms require a few extra bits, there should not be any overflow.
-    inline fun tvl_per_lp_coin_growth_q64_inline(
+    /*inline*/ fun tvl_per_lp_coin_growth_q64_inline(
         start: TVLtoLPCoinRatio,
         end: TVLtoLPCoinRatio,
     ): u128 {
@@ -2165,7 +2192,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    inline fun liquidity_provision_operation_epilogue(
+    /*inline*/ fun liquidity_provision_operation_epilogue(
         tvl: u128,
         lp_coin_supply: u128,
         total_quote_locked: u64,
@@ -2239,6 +2266,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         EMOJICOIN_LP_NAME_SUFFIX
     }
     #[test_only] public fun get_EMOJICOIN_NAME_SUFFIX(): vector<u8> { EMOJICOIN_NAME_SUFFIX }
+    #[test_only] public fun get_EMOJICOIN_SUPPLY(): u64 { EMOJICOIN_SUPPLY }
     #[test_only] public fun get_MAX_CHAT_MESSAGE_LENGTH(): u64 { MAX_CHAT_MESSAGE_LENGTH }
     #[test_only] public fun get_MAX_SYMBOL_LENGTH(): u8 { MAX_SYMBOL_LENGTH }
     #[test_only] public fun get_MARKET_REGISTRATION_FEE(): u64 { MARKET_REGISTRATION_FEE }
@@ -2250,6 +2278,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_PERIOD_1H(): u64 { PERIOD_1H }
     #[test_only] public fun get_PERIOD_4H(): u64 { PERIOD_4H }
     #[test_only] public fun get_PERIOD_1D(): u64 { PERIOD_1D }
+    #[test_only] public fun get_REGISTRY_NAME(): vector<u8> { REGISTRY_NAME }
+    #[test_only] public fun get_TRIGGER_MARKET_REGISTRATION(): u8 { TRIGGER_MARKET_REGISTRATION }
+    #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
@@ -2299,6 +2330,204 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             user_emojicoin_balance,
             circulating_supply,
             balance_as_fraction_of_circulating_supply_q64,
+        )
+    }
+
+    #[test_only] public fun unpack_global_state(
+        global_state: GlobalState,
+    ): (
+        u64,
+        u64,
+        u8,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u64>,
+        AggregatorSnapshot<u64>,
+    ) {
+        let GlobalState {
+            emit_time,
+            registry_nonce,
+            trigger,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        } = global_state;
+        (
+            emit_time,
+            registry_nonce,
+            trigger,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        )
+    }
+
+    #[test_only] public fun unpack_market_registration(
+        market_registration: MarketRegistration,
+    ): (
+        MarketMetadata,
+        u64,
+        address,
+        address,
+        u64,
+    ) {
+        let MarketRegistration {
+            market_metadata,
+            time,
+            registrant,
+            integrator,
+            integrator_fee,
+        } = market_registration;
+        (market_metadata, time, registrant, integrator, integrator_fee)
+    }
+
+    #[test_only] public fun unpack_periodic_state(
+        periodic_state: PeriodicState,
+    ): (
+        MarketMetadata,
+        PeriodicStateMetadata,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u64,
+        u64,
+        bool,
+        bool,
+        u128,
+    ) {
+        let PeriodicState {
+            market_metadata,
+            periodic_state_metadata,
+            open_price_q64,
+            high_price_q64,
+            low_price_q64,
+            close_price_q64,
+            volume_base,
+            volume_quote,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+            starts_in_bonding_curve,
+            ends_in_bonding_curve,
+            tvl_per_lp_coin_growth_q64,
+        } = periodic_state;
+        (
+            market_metadata,
+            periodic_state_metadata,
+            open_price_q64,
+            high_price_q64,
+            low_price_q64,
+            close_price_q64,
+            volume_base,
+            volume_quote,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+            starts_in_bonding_curve,
+            ends_in_bonding_curve,
+            tvl_per_lp_coin_growth_q64,
+        )
+    }
+
+    #[test_only] public fun unpack_periodic_state_metadata(
+        periodic_state_metadata: PeriodicStateMetadata,
+    ): (
+        u64,
+        u64,
+        u64,
+        u64,
+        u8,
+    ) {
+        let PeriodicStateMetadata {
+            start_time,
+            emit_time,
+            emit_market_nonce,
+            period,
+            trigger,
+        } = periodic_state_metadata;
+        (
+            start_time,
+            emit_time,
+            emit_market_nonce,
+            period,
+            trigger,
+        )
+    }
+
+    #[test_only] public fun unpack_state(
+        state: State,
+    ): (
+        MarketMetadata,
+        StateMetadata,
+        Reserves,
+        Reserves,
+        u128,
+        CumulativeStats,
+        InstantaneousStats,
+        LastSwap,
+    ) {
+        let State {
+            market_metadata,
+            state_metadata,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            cumulative_stats,
+            instantaneous_stats,
+            last_swap,
+        } = state;
+        (
+            market_metadata,
+            state_metadata,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            cumulative_stats,
+            instantaneous_stats,
+            last_swap,
+        )
+    }
+
+    #[test_only] public fun unpack_state_metadata(
+        state_metadata: StateMetadata,
+    ): (
+        u64,
+        u64,
+        u8,
+    ) {
+        let StateMetadata {
+            market_nonce,
+            bump_time,
+            trigger,
+        } = state_metadata;
+        (
+            market_nonce,
+            bump_time,
+            trigger,
         )
     }
 
