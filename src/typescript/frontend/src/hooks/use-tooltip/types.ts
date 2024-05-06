@@ -19,6 +19,7 @@ export interface TooltipOptions {
   isEllipsis?: boolean;
   isInitiallyOpened?: boolean;
   hideTimeout?: number;
+  showTimeout?: number;
   customStyles?: { tooltip?: CSSProperties; arrow?: CSSProperties };
 }
 
@@ -28,4 +29,5 @@ export type useSubscriptionEventsHandlersProps = {
   trigger: TriggerType;
   isInitiallyOpened?: boolean;
   hideTimeout: number;
+  showTimeout: number;
 };

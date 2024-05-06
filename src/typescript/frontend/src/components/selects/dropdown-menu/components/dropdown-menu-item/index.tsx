@@ -19,6 +19,8 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
 }) => {
   const { ref, replay } = useScramble({
     text: `${title}`,
+    overdrive: false,
+    speed: 0.5,
   });
 
   return (

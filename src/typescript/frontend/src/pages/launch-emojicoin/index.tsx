@@ -36,6 +36,11 @@ const LaunchEmojicoinPage: React.FC = () => {
     isEllipsis: true,
   });
 
+  const { targetRef: targetRefEmojiTicker, tooltip: tooltipEmojiTicker } = useTooltip(undefined, {
+    placement: "top",
+    isEllipsis: true,
+  });
+
   const { targetRef, tooltip, targetElement } = useTooltip(
     <StyledEmojiPickerWrapper>
       <EmojiPicker
@@ -130,9 +135,10 @@ const LaunchEmojicoinPage: React.FC = () => {
             <StyledFieldName textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
               {t("Emojicoin symbol (ticker) :")}
             </StyledFieldName>
-            <Text textScale="bodyLarge" textTransform="uppercase">
+            <Text textScale="bodyLarge" textTransform="uppercase" ellipsis ref={targetRefEmojiTicker}>
               {tickers}
             </Text>
+            {tooltipEmojiTicker}
           </FlexGap>
 
           <Flex justifyContent="center">

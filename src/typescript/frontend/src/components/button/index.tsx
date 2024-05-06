@@ -18,6 +18,8 @@ const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): 
 
   const { ref, replay } = useScramble({
     text: isScramble ? `{ ${children} }` : undefined,
+    overdrive: false,
+    speed: 0.5,
   });
 
   return (
