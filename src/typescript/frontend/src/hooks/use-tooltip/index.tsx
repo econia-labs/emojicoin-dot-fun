@@ -19,6 +19,7 @@ const useTooltip = (content: React.ReactNode, options?: TooltipOptions) => {
     tooltipOffset = [0, 10],
     isEllipsis = false,
     hideTimeout = 100,
+    showTimeout = 400,
     isInitiallyOpened = false,
     customStyles = {},
   } = options ?? {};
@@ -32,6 +33,7 @@ const useTooltip = (content: React.ReactNode, options?: TooltipOptions) => {
     trigger,
     isInitiallyOpened,
     hideTimeout,
+    showTimeout,
   });
 
   const { styles, attributes } = usePopper(targetElement, tooltipElement, {
