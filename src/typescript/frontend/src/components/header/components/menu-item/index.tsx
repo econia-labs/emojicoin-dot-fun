@@ -12,6 +12,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, width }) => {
 
   const { ref, replay } = useScramble({
     text: `{ ${t(title)} }`,
+    overdrive: false,
+    speed: 0.5,
   });
 
   return (

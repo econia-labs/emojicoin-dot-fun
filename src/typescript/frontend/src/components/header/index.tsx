@@ -21,6 +21,8 @@ const Header: React.FC = () => {
 
   const { ref, replay } = useScramble({
     text: "{ 05I34OT0ff9C }",
+    overdrive: false,
+    speed: 0.5,
   });
 
   const walletHandler = () => {

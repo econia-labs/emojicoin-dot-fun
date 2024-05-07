@@ -14,6 +14,8 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => 
 
   const { ref, replay } = useScramble({
     text: `${t(item.text)}`,
+    overdrive: false,
+    speed: 0.5,
   });
 
   return (
