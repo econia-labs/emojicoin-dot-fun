@@ -1,10 +1,10 @@
 import React from "react";
 
-import { Flex, Text } from "components";
-
-import { Tr, Td } from "../../styled";
-import { TableRowDesktopProps } from "./types";
 import { useTooltip } from "hooks";
+
+import { Flex, Text, Tr, Td } from "components";
+
+import { TableRowDesktopProps } from "./types";
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
   const { targetRef, tooltip } = useTooltip(

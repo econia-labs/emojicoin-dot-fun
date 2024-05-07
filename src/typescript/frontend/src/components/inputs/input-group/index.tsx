@@ -17,6 +17,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
   isShowError = true,
   variant,
   forId,
+  textScale = "heading1",
   ...props
 }) => {
   return (
@@ -25,7 +26,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
         {label && (
           <Text
             as={variant === variants.FANTOM ? "label" : undefined}
-            textScale="heading1"
+            textScale={textScale}
             color="white"
             mb="20px"
             textTransform="uppercase"

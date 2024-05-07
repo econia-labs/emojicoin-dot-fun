@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect } from "react";
 import EmojiPicker, { Theme, EmojiClickData } from "emoji-picker-react";
 import emojiRegex from "emoji-regex";
 
@@ -6,9 +6,8 @@ import { useThemeContext, useTranslation } from "context";
 import { useValidationSchema } from "./hooks";
 import { useForm, useTooltip } from "hooks";
 
-import { CloseIcon } from "components/svg";
-import { Button, ClientsSlider, Column, Flex, FlexGap, Input, InputGroup, Text } from "components";
-import { Arrow, StyledEmojiPickerWrapper, StyledPrompt, StyledFieldName } from "./styled";
+import { Button, ClientsSlider, Column, Flex, FlexGap, Input, InputGroup, Text, Prompt } from "components";
+import { StyledEmojiPickerWrapper, StyledFieldName } from "./styled";
 
 import { getTooltipStyles } from "./theme";
 
@@ -16,7 +15,6 @@ const LaunchEmojicoinPage: React.FC = () => {
   const { t } = useTranslation();
   const { theme } = useThemeContext();
 
-  const [isPromptVisible, seIisPromptVisible] = useState(true);
   const { validationSchema, initialValues } = useValidationSchema();
   const { values, errors, touched, fieldProps, setFieldValue } = useForm({
     initialValues,
@@ -92,23 +90,7 @@ const LaunchEmojicoinPage: React.FC = () => {
       <Flex justifyContent="center" alignItems="center" height="100%">
         <Column width="100%" maxWidth="414px">
           <Flex position="relative">
-            <StyledPrompt isVisible={isPromptVisible}>
-              <Text textScale="pixelHeading4" color="black" textTransform="uppercase">
-                {t("Pick one to five emojis; due to byte limitations not all combinations are supported.")}
-              </Text>
-
-              <Flex height="100%" alignItems="start">
-                <CloseIcon
-                  width="11px"
-                  cursor="pointer"
-                  mt="4px"
-                  onClick={() => {
-                    seIisPromptVisible(false);
-                  }}
-                />
-              </Flex>
-              <Arrow />
-            </StyledPrompt>
+            <Prompt text="Pick one to five emojis; due to byte limitations not all combinations are supported." />
 
             <InputGroup label={t("Select Emoji")} error={errors.emoji} isTouched={touched.emoji}>
               <Input {...fieldProps("emoji")} onChange={onInputChange} autoComplete="off" ref={targetRef} />

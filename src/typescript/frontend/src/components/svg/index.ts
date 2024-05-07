@@ -9,5 +9,6 @@ export { default as Planet } from "./icons/Planet";
 export { default as Arrow } from "./icons/Arrow";
 export { default as CheckIcon } from "./icons/Check";
 export { default as InfoIcon } from "./icons/Info";
+export { default as Arrows } from "./icons/Arrows";
 
 export { CloseIconWithHover } from "./components";

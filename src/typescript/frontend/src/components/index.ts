@@ -20,3 +20,5 @@ export { StyledLink } from "./link/styled";
 export { default as Checkbox } from "./checkbox";
 export { SingleSelect, MultipleSelect } from "./selects";
 export { default as ClientsSlider } from "./clients-slider";
+export { Table, Th, Tr, Td } from "./table";
+export { default as Prompt } from "./prompt";

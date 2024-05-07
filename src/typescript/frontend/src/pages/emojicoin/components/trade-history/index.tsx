@@ -3,8 +3,9 @@ import React from "react";
 import { useTranslation } from "context";
 import { HEADERS, DATA } from "./constants";
 import { TableRowDesktop } from "./components";
+import { Table, Text, Th } from "components";
 
-import { Table, Th, TBody, THead, StyledTradeHistory } from "./styled";
+import { StyledTradeHistory } from "./styled";
 
 const TradeHistory: React.FC = () => {
   const { t } = useTranslation();
@@ -12,20 +13,22 @@ const TradeHistory: React.FC = () => {
   return (
     <StyledTradeHistory>
       <Table>
-        <THead>
+        <thead>
           <tr>
             {HEADERS.map((th, index) => (
               <Th width={th.width} key={index}>
-                {t(th.text)}
+                <Text textScale="bodyLarge" textTransform="uppercase" color="econiaBlue" $fontWeight="regular">
+                  {t(th.text)}
+                </Text>
               </Th>
             ))}
           </tr>
-        </THead>
-        <TBody>
+        </thead>
+        <tbody>
           {[...DATA, ...DATA, ...DATA, ...DATA, ...DATA].map((item, index) => (
             <TableRowDesktop key={index} item={item} />
           ))}
-        </TBody>
+        </tbody>
       </Table>
     </StyledTradeHistory>
   );
