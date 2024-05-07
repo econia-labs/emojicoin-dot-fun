@@ -39,6 +39,11 @@ const LaunchEmojicoinPage: React.FC = () => {
   const { targetRef: targetRefEmojiTicker, tooltip: tooltipEmojiTicker } = useTooltip(undefined, {
     placement: "top",
     isEllipsis: true,
+    customStyles: {
+      tooltip: {
+        lineHeight: "normal",
+      },
+    },
   });
 
   const { targetRef, tooltip, targetElement } = useTooltip(
