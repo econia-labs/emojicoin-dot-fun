@@ -22,6 +22,8 @@ export const Select: React.FC<SelectProps> = ({
 
   const { ref, replay } = useScramble({
     text: `${title}`,
+    overdrive: false,
+    speed: 0.5,
   });
 
   return (

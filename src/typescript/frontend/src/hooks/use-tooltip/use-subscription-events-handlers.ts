@@ -8,6 +8,7 @@ export const useSubscriptionEventsHandlers = ({
   trigger,
   isInitiallyOpened,
   hideTimeout,
+  showTimeout,
 }: useSubscriptionEventsHandlersProps) => {
   const [visible, setVisible] = useState(isInitiallyOpened);
 
@@ -15,6 +16,7 @@ export const useSubscriptionEventsHandlers = ({
     e.stopPropagation();
     e.preventDefault();
     setVisible(false);
+    debouncedShow.cancel();
   };
 
   const showTooltip = (e: Event) => {
@@ -40,30 +42,34 @@ export const useSubscriptionEventsHandlers = ({
     hideTooltip(e);
   }, hideTimeout);
 
+  const debouncedShow = debounce(e => {
+    showTooltip(e);
+  }, showTimeout);
+
   // Trigger = hover
   useEffect(() => {
     if (targetElement === null || trigger !== "hover") return undefined;
 
-    targetElement.addEventListener("mouseenter", showTooltip);
+    targetElement.addEventListener("mouseenter", debouncedShow);
     targetElement.addEventListener("mouseleave", debouncedHide);
 
     return () => {
-      targetElement.removeEventListener("mouseenter", showTooltip);
+      targetElement.removeEventListener("mouseenter", debouncedShow);
       targetElement.removeEventListener("mouseleave", debouncedHide);
     };
-  }, [trigger, targetElement, debouncedHide, showTooltip]);
+  }, [trigger, targetElement, debouncedHide, debouncedShow]);
 
   // Keep tooltip open when cursor moves from the targetElement to the tooltip
   useEffect(() => {
     if (tooltipElement === null || trigger !== "hover") return undefined;
 
-    tooltipElement.addEventListener("mouseenter", showTooltip);
+    tooltipElement.addEventListener("mouseenter", debouncedShow);
     tooltipElement.addEventListener("mouseleave", debouncedHide);
     return () => {
       tooltipElement.removeEventListener("mouseenter", showTooltip);
       tooltipElement.removeEventListener("mouseleave", debouncedHide);
     };
-  }, [trigger, tooltipElement, debouncedHide, showTooltip]);
+  }, [trigger, tooltipElement, debouncedHide, debouncedShow]);
 
   // Trigger = click
   useEffect(() => {
@@ -99,13 +105,13 @@ export const useSubscriptionEventsHandlers = ({
   useEffect(() => {
     if (targetElement === null || trigger !== "focus") return undefined;
 
-    targetElement.addEventListener("focus", showTooltip);
+    targetElement.addEventListener("focus", debouncedShow);
     targetElement.addEventListener("blur", debouncedHide);
     return () => {
-      targetElement.removeEventListener("focus", showTooltip);
+      targetElement.removeEventListener("focus", debouncedShow);
       targetElement.removeEventListener("blur", debouncedHide);
     };
-  }, [trigger, targetElement, showTooltip, debouncedHide]);
+  }, [trigger, targetElement, debouncedShow, debouncedHide]);
 
   return { visible, setVisible };
 };
