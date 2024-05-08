@@ -232,7 +232,7 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
       payload: entryFunction,
       options,
     });
-    return viewRequest;
+    return viewRequest as T;
   }
 
   argsToArray(): Array<EntryFunctionArgumentTypes> {
