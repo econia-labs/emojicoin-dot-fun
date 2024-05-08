@@ -47,7 +47,7 @@ const LaunchEmojicoinPage: React.FC = () => {
   const { targetRef, tooltip, targetElement } = useTooltip(
     <StyledEmojiPickerWrapper>
       <EmojiPicker
-        searchPlaceholder={t("Search:")}
+        searchPlaceholder=""
         onEmojiClick={emoji => onEmojiClickHandler(emoji)}
         theme={Theme.DARK}
         skinTonesDisabled
@@ -62,8 +62,11 @@ const LaunchEmojicoinPage: React.FC = () => {
   );
 
   const onEmojiClickHandler = async (emoji: EmojiClickData) => {
-    await setFieldValue("emoji", values.emoji + emoji.emoji);
-    await setFieldValue("emojiList", [...values.emojiList, emoji]);
+    const valueLength = values.emoji.match(emojiRegex())?.length ?? 0;
+    if (valueLength < 5) {
+      await setFieldValue("emoji", values.emoji + emoji.emoji);
+      await setFieldValue("emojiList", [...values.emojiList, emoji]);
+    }
   };
 
   const inputProhibition = async (event: KeyboardEvent) => {
@@ -94,7 +97,7 @@ const LaunchEmojicoinPage: React.FC = () => {
   };
 
   return (
-    <Column pt="120px" flexGrow="1">
+    <Column pt="85px" flexGrow="1">
       <ClientsSlider />
 
       <Flex justifyContent="center" alignItems="center" height="100%">
@@ -122,7 +125,7 @@ const LaunchEmojicoinPage: React.FC = () => {
             <StyledFieldName textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
               {t("Emojicoin symbol (ticker) :")}
             </StyledFieldName>
-            <Text textScale="bodyLarge" textTransform="uppercase" ellipsis ref={targetRefEmojiTicker}>
+            <Text textScale="bodyLarge" textTransform="uppercase" lineHeight="20px" ellipsis ref={targetRefEmojiTicker}>
               {tickers}
             </Text>
             {tooltipEmojiTicker}
@@ -134,7 +137,7 @@ const LaunchEmojicoinPage: React.FC = () => {
             </Text>
           </Flex>
 
-          <Flex justifyContent="center">
+          <Flex justifyContent="center" mt="18px">
             <Button scale="lg">{t("Launch Emojicoin")}</Button>
           </Flex>
         </Column>

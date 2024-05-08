@@ -78,7 +78,7 @@ html, body, div, span, applet, object, iframe,
   }
   ::-webkit-scrollbar-thumb {
     background-color: ${({ theme }) => theme.colors.econiaBlue};
-    border-radius: 5px;
+    border-radius: 4px;
     border: 3px solid ${({ theme }) => theme.colors.black};
   }
 

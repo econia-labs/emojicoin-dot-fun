@@ -14,7 +14,7 @@ const Prompt: React.FC<PromptProps> = ({ text }) => {
 
   return (
     <StyledPrompt isVisible={isPromptVisible}>
-      <Text textScale="pixelHeading4" color="black" textTransform="uppercase">
+      <Text textScale="pixelHeading4" lineHeight="20px" color="black" textTransform="uppercase">
         {t(text)}
       </Text>
 

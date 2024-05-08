@@ -2,13 +2,14 @@ import styled from "styled-components";
 
 export const Arrow = styled.div`
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: 20px;
+  height: 20px;
   background: ${({ theme }) => theme.colors.econiaBlue};
-  bottom: -5px;
+  bottom: -8px;
   left: 50%;
   border-bottom: 1px solid ${({ theme }) => theme.colors.econiaBlue};
   border-right: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+  border-radius: ${({ theme }) => theme.radii.xSmall};
   transform: rotate(45deg);
 `;
 

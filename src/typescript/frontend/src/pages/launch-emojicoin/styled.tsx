@@ -5,20 +5,32 @@ export const StyledEmojiPickerWrapper = styled.div`
   .epr-main {
     background-color: ${({ theme }) => theme.colors.black};
     border-color: ${({ theme }) => theme.colors.darkGrey};
+    border-radius: ${({ theme }) => theme.radii.xSmall};
 
     .epr-search-container {
       .epr-icn-search {
-        display: none;
+        background-image: none;
+
+        &:before {
+          display: block;
+          width: 55px;
+          content: "Search:";
+          font-family: ${({ theme }) => theme.fonts.pixelar};
+          font-size: 20px;
+        }
       }
 
       .epr-btn-clear-search {
+        display: none;
       }
 
       input {
         background-color: ${({ theme }) => theme.colors.econiaBlue};
         border-color: ${({ theme }) => theme.colors.econiaBlue};
+        border-radius: ${({ theme }) => theme.radii.xSmall};
+
         color: ${({ theme }) => theme.colors.black};
-        padding: 8px;
+        padding: 8px 8px 8px 65px;
       }
 
       input::placeholder {

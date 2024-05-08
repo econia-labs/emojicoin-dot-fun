@@ -66,6 +66,7 @@ export const fonts = {
   pixelar: "Pixelar",
   forma: "FormaDJRMicro",
   formaM: "FormaDJRDisplayMedium",
+  formaDR: "FormaDJRDisplayRegular",
 } as const;
 
 export default {
