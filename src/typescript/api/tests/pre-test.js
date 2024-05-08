@@ -20,16 +20,12 @@ module.exports = async function setup() {
 
   if (process.env.RANDOMIZE_PUBLISHER === "true") {
     const account = Account.generate();
-    process.env.PUBLISHER_PK = Hex.fromHexInput(
-      account.privateKey.toUint8Array()
-    ).toStringWithoutPrefix();
-    process.env.MODULE_ADDRESS = account.accountAddress.toStringWithoutPrefix();
+    process.env.PUBLISHER_PK = account.privateKey.toString();
+    process.env.MODULE_ADDRESS = account.accountAddress.toString();
   }
-  const pk = (process.env.PUBLISHER_PK ?? '').trim();
-  process.env.MODULE_ADDRESS = Account.fromPrivateKey({
-    privateKey: new Ed25519PrivateKey(pk),
-    legacy: true,
-  }).accountAddress.toStringWithoutPrefix();
+  const pk = process.env.PUBLISHER_PK;
+  const derivedAccount = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey(pk) })
+  process.env.MODULE_ADDRESS = derivedAccount.accountAddress.toString();
   if (!pk) {
     throw new Error("Please provide a private key for testing");
   };
