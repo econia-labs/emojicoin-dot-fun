@@ -1,7 +1,8 @@
 import { ReactElement } from "react";
-import { SpaceProps, LayoutProps } from "styled-system";
+import { SpaceProps, LayoutProps, ResponsiveValue } from "styled-system";
 
 import { Scales } from "components/inputs/input/types";
+import { Scales as TextScales } from "components/text/types";
 
 export const variants = {
   FANTOM: "fantom",
@@ -21,6 +22,7 @@ export interface InputGroupProps extends SpaceProps, LayoutProps {
   isShowError?: boolean;
   variant?: Variant;
   forId?: string;
+  textScale?: ResponsiveValue<TextScales>;
 }
 
 export interface StyledInputGroupProps extends LayoutProps {
