@@ -18,6 +18,7 @@ import {
   type WaitForTransactionOptions,
   type UserTransactionResponse,
   type MoveValue,
+  type LedgerVersionArg,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -599,6 +600,15 @@ export class IsASupplementalChatEmoji extends ViewFunctionPayloadBuilder<[boolea
       hexBytes: MoveVector.U8(hexBytes),
     };
   }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    hexBytes: HexInput; // vector<u8>
+    options?: LedgerVersionArg;
+  }): Promise<boolean> {
+    const [res] = await new IsASupplementalChatEmoji(args).submit(args);
+    return res;
+  }
 }
 
 export type IsASupportedChatEmojiPayloadMoveArguments = {
@@ -634,6 +644,15 @@ export class IsASupportedChatEmoji extends ViewFunctionPayloadBuilder<[boolean]>
     this.args = {
       hexBytes: MoveVector.U8(hexBytes),
     };
+  }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    hexBytes: HexInput; // vector<u8>
+    options?: LedgerVersionArg;
+  }): Promise<boolean> {
+    const [res] = await new IsASupportedChatEmoji(args).submit(args);
+    return res;
   }
 }
 
@@ -671,6 +690,15 @@ export class IsASupportedSymbolEmoji extends ViewFunctionPayloadBuilder<[boolean
       hexBytes: MoveVector.U8(hexBytes),
     };
   }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    hexBytes: HexInput; // vector<u8>
+    options?: LedgerVersionArg;
+  }): Promise<boolean> {
+    const [res] = await new IsASupportedSymbolEmoji(args).submit(args);
+    return res;
+  }
 }
 
 export type MarketMetadataByEmojiBytesPayloadMoveArguments = {
@@ -706,6 +734,15 @@ export class MarketMetadataByEmojiBytes extends ViewFunctionPayloadBuilder<[Opti
     this.args = {
       emojiBytes: MoveVector.U8(emojiBytes),
     };
+  }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    emojiBytes: HexInput; // vector<u8>
+    options?: LedgerVersionArg;
+  }): Promise<Option<MoveValue>> {
+    const [res] = await new MarketMetadataByEmojiBytes(args).submit(args);
+    return res;
   }
 }
 
@@ -743,6 +780,15 @@ export class MarketMetadataByMarketAddress extends ViewFunctionPayloadBuilder<[O
       marketAddress: AccountAddress.from(marketAddress),
     };
   }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    marketAddress: AccountAddressInput; // address
+    options?: LedgerVersionArg;
+  }): Promise<Option<MoveValue>> {
+    const [res] = await new MarketMetadataByMarketAddress(args).submit(args);
+    return res;
+  }
 }
 
 export type MarketMetadataByMarketIdPayloadMoveArguments = {
@@ -778,6 +824,15 @@ export class MarketMetadataByMarketId extends ViewFunctionPayloadBuilder<[Option
     this.args = {
       marketId: new U64(marketId),
     };
+  }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    marketId: Uint64; // u64
+    options?: LedgerVersionArg;
+  }): Promise<Option<MoveValue>> {
+    const [res] = await new MarketMetadataByMarketId(args).submit(args);
+    return res;
   }
 }
 
@@ -819,6 +874,16 @@ export class MarketView extends ViewFunctionPayloadBuilder<[MoveValue]> {
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
     ) as [TypeTag, TypeTag];
   }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    marketAddress: AccountAddressInput; // address
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
+    options?: LedgerVersionArg;
+  }): Promise<MoveValue> {
+    const [res] = await new MarketView(args).submit(args);
+    return res;
+  }
 }
 
 /**
@@ -844,6 +909,14 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
 
     this.args = {};
   }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    options?: LedgerVersionArg;
+  }): Promise<AccountAddressString> {
+    const [res] = await new RegistryAddress().submit(args);
+    return res;
+  }
 }
 
 /**
@@ -868,6 +941,14 @@ export class RegistryView extends ViewFunctionPayloadBuilder<[MoveValue]> {
     super();
 
     this.args = {};
+  }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    options?: LedgerVersionArg;
+  }): Promise<MoveValue> {
+    const [res] = await new RegistryView().submit(args);
+    return res;
   }
 }
 
@@ -912,6 +993,17 @@ export class SimulateProvideLiquidity extends ViewFunctionPayloadBuilder<[MoveVa
       provider: AccountAddress.from(provider),
       quoteAmount: new U64(quoteAmount),
     };
+  }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    marketAddress: AccountAddressInput; // address
+    provider: AccountAddressInput; // address
+    quoteAmount: Uint64; // u64
+    options?: LedgerVersionArg;
+  }): Promise<MoveValue> {
+    const [res] = await new SimulateProvideLiquidity(args).submit(args);
+    return res;
   }
 }
 
@@ -960,6 +1052,18 @@ export class SimulateRemoveLiquidity extends ViewFunctionPayloadBuilder<[MoveVal
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
     ) as [TypeTag];
+  }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    marketAddress: AccountAddressInput; // address
+    provider: AccountAddressInput; // address
+    lpCoinAmount: Uint64; // u64
+    typeTags: [TypeTagInput]; // [Emojicoin]
+    options?: LedgerVersionArg;
+  }): Promise<MoveValue> {
+    const [res] = await new SimulateRemoveLiquidity(args).submit(args);
+    return res;
   }
 }
 
@@ -1017,6 +1121,20 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[MoveValue]> {
       integratorFeeRateBps: new U8(integratorFeeRateBps),
     };
   }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    marketAddress: AccountAddressInput; // address
+    swapper: AccountAddressInput; // address
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
+    integrator: AccountAddressInput; // address
+    integratorFeeRateBps: Uint8; // u8
+    options?: LedgerVersionArg;
+  }): Promise<MoveValue> {
+    const [res] = await new SimulateSwap(args).submit(args);
+    return res;
+  }
 }
 
 export type VerifiedSymbolEmojiBytesPayloadMoveArguments = {
@@ -1052,5 +1170,14 @@ export class VerifiedSymbolEmojiBytes extends ViewFunctionPayloadBuilder<[string
     this.args = {
       emojis: new MoveVector(emojis.map((argA) => MoveVector.U8(argA))),
     };
+  }
+
+  static async submit(args: {
+    aptos: Aptos | AptosConfig;
+    emojis: Array<HexInput>; // vector<vector<u8>>
+    options?: LedgerVersionArg;
+  }): Promise<string> {
+    const [res] = await new VerifiedSymbolEmojiBytes(args).submit(args);
+    return res;
   }
 }

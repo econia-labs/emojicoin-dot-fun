@@ -23,7 +23,9 @@ import {
   type MoveValue,
   MimeType,
   postAptosFullNode,
+  type AptosConfig,
 } from "@aptos-labs/ts-sdk";
+import { toConfig } from "./utils";
 import { type WalletSignTransactionFunction } from ".";
 
 export class EntryFunctionTransactionBuilder {
@@ -33,6 +35,7 @@ export class EntryFunctionTransactionBuilder {
 
   public readonly rawTransactionInput: AnyRawTransaction;
 
+  // TODO: This should probably be private, if it's possible.
   constructor(
     payloadBuilder: EntryFunctionPayloadBuilder,
     aptos: Aptos,
@@ -216,7 +219,7 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
     };
   }
 
-  async submit(args: { aptos: Aptos; options?: LedgerVersionArg }): Promise<T> {
+  async submit(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }): Promise<T> {
     const entryFunction = EntryFunction.build(
       `${this.moduleAddress.toString()}::${this.moduleName}`,
       this.functionName,
@@ -224,21 +227,37 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
       this.argsToArray()
     );
     const { aptos, options } = args;
-    const serializer = new Serializer();
-    entryFunction.serialize(serializer);
-    const bytes = serializer.toUint8Array();
-    const { data } = await postAptosFullNode<Uint8Array, MoveValue[]>({
-      aptosConfig: aptos.config,
-      path: "view",
-      originMethod: "view",
-      contentType: MimeType.BCS_VIEW_FUNCTION,
-      params: { ledger_version: options?.ledgerVersion },
-      body: bytes,
+    const viewRequest = await postBCSViewFunction<T>({
+      aptosConfig: aptos,
+      payload: entryFunction,
+      options,
     });
-    return data as T;
+    return viewRequest;
   }
 
   argsToArray(): Array<EntryFunctionArgumentTypes> {
     return Object.keys(this.args).map((field) => this.args[field as keyof typeof this.args]);
   }
+}
+
+/* eslint-disable-next-line import/no-unused-modules */
+export async function postBCSViewFunction<T extends Array<MoveValue>>(args: {
+  aptosConfig: Aptos | AptosConfig;
+  payload: EntryFunction;
+  options?: LedgerVersionArg;
+}): Promise<T> {
+  const { payload, options } = args;
+  const aptosConfig = toConfig(args.aptosConfig);
+  const serializer = new Serializer();
+  payload.serialize(serializer);
+  const bytes = serializer.toUint8Array();
+  const { data } = await postAptosFullNode<Uint8Array, MoveValue[]>({
+    aptosConfig,
+    path: "view",
+    originMethod: "view",
+    contentType: MimeType.BCS_VIEW_FUNCTION,
+    params: { ledger_version: options?.ledgerVersion },
+    body: bytes,
+  });
+  return data as T;
 }

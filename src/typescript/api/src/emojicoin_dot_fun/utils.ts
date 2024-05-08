@@ -1,7 +1,7 @@
 import {
   AccountAddress,
   type AccountAddressInput,
-  type Aptos,
+  Aptos,
   Hex,
   type HexInput,
   type Uint64,
@@ -9,6 +9,7 @@ import {
   DeriveScheme,
   type TypeTag,
   parseTypeTag,
+  type AptosConfig,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
 import { COIN_FACTORY_MODULE_NAME, EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "./consts";
@@ -21,6 +22,10 @@ export async function sleep(timeMs: number): Promise<null> {
   return new Promise((resolve) => {
     setTimeout(resolve, timeMs);
   });
+}
+
+export function toConfig(aptos: Aptos | AptosConfig): AptosConfig {
+  return aptos instanceof Aptos ? aptos.config : aptos;
 }
 
 /**

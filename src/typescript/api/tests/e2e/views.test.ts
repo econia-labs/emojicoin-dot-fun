@@ -22,10 +22,11 @@ describe("view functions", () => {
     );
 
     const testIsSupported = async (hex: HexInput, expected: boolean) => {
-      const view = new EmojicoinDotFun.IsASupportedSymbolEmoji({
+      const supported = await EmojicoinDotFun.IsASupportedSymbolEmoji.submit({
+        aptos,
         hexBytes: hex,
       });
-      expect(await view.submit({ aptos })).toEqual([expected]);
+      expect(supported).toEqual(expected);
     };
 
     await testIsSupported("e298afefb88f", true);
@@ -42,12 +43,13 @@ describe("view functions", () => {
 
   it("tests verified symbol emoji bytes", async () => {
     const emojis = ["f09fa693", "f09fa79f"];
-    const response = await new EmojicoinDotFun.VerifiedSymbolEmojiBytes({
+    const response = await EmojicoinDotFun.VerifiedSymbolEmojiBytes.submit({
+      aptos,
       emojis,
-    }).submit({ aptos });
+    });
     const expectedHexString = "0xf09fa693f09fa79f";
     const expectedHexBytes = Hex.fromHexString(expectedHexString).toUint8Array();
-    expect(response[0]).toEqual(expectedHexString);
+    expect(response).toEqual(expectedHexString);
     expect(Hex.fromHexString(emojis.join("")).toUint8Array()).toEqual(expectedHexBytes);
   });
 });
