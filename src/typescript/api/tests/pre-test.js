@@ -18,7 +18,10 @@ module.exports = async function setup() {
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
   fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });
 
-  const pk = Account.generate().privateKey.toString();
+  const pk = process.env.PUBLISHER_PK;
+  if (!pk) {
+    throw new Error("Please provide a private key for testing");
+  };
   fs.writeFileSync(PK_PATH, pk);
   const publishResult = JSON.stringify(await publishForTest(pk), null, 2);
   fs.writeFileSync(PUBLISH_RES_PATH, publishResult);

@@ -38,7 +38,6 @@ describe("registers a market successfully", () => {
     const emojis = ["f09fa693", "f09fa79f"];
 
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
-      moduleAddress: publisher.accountAddress,
       aptosConfig: aptos.config,
       registrant: publisher,
       emojis,
