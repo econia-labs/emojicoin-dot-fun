@@ -7,9 +7,11 @@ import {
   type Uint64,
   type Uint128,
   DeriveScheme,
+  type TypeTag,
+  parseTypeTag,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./consts";
+import { COIN_FACTORY_MODULE_NAME, EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "./consts";
 
 /**
  * Sleep the current thread for the given amount of time
@@ -67,6 +69,31 @@ export async function getRegistryAddress(args: {
     resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::RegistryAddress`,
   });
   return registryAddressResource.registry_address;
+}
+
+/**
+ * Get the derived market address and TypeTags for the given registry address and symbol bytes.
+ *
+ * @param registryAddress The contract's registry address.
+ * @param symbolBytes The emojicoin's full symbol bytes.
+ * @returns The derived market address and TypeTags.
+ */
+export function getEmojicoinMarketAddressAndTypeTags(args: {
+  registryAddress: AccountAddressInput;
+  symbolBytes: HexInput;
+}): [AccountAddress, TypeTag, TypeTag] {
+  const registryAddress = AccountAddress.from(args.registryAddress);
+  const symbolBytes = Hex.fromHexInput(args.symbolBytes);
+  const marketAddress = deriveEmojicoinPublisherAddress({
+    registryAddress,
+    emojis: [symbolBytes.toStringWithoutPrefix()],
+  });
+
+  return [
+    marketAddress,
+    parseTypeTag(`${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::Emojicoin`),
+    parseTypeTag(`${marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::EmojicoinLP`),
+  ];
 }
 
 export type MarketMetadata = {
@@ -134,3 +161,34 @@ export async function getMarketResource(args: {
     lp_coin_supply: BigInt(marketResource.lp_coin_supply),
   };
 }
+
+export type ChatEvent = {
+  market_metadata: MarketMetadata;
+  emit_time: Uint64;
+  emit_market_nonce: Uint64;
+  user: AccountAddress;
+  message: string;
+  user_emojicoin_balance: Uint64;
+  circulating_supply: Uint64;
+  balance_as_fraction_of_circulating_supply_q64: Uint128;
+};
+
+export const chatEventTypeTag = (): TypeTag =>
+  parseTypeTag(`${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Chat`);
+
+export const parseChatEvent = (data: any): ChatEvent => ({
+  market_metadata: {
+    market_id: BigInt(data.market_metadata.market_id),
+    market_address: AccountAddress.from(data.market_metadata.market_address),
+    emoji_bytes: Hex.fromHexString(data.market_metadata.emoji_bytes),
+  },
+  emit_time: BigInt(data.emit_time),
+  emit_market_nonce: BigInt(data.emit_market_nonce),
+  user: data.user,
+  message: data.message,
+  user_emojicoin_balance: BigInt(data.user_emojicoin_balance),
+  circulating_supply: BigInt(data.circulating_supply),
+  balance_as_fraction_of_circulating_supply_q64: BigInt(
+    data.balance_as_fraction_of_circulating_supply_q64
+  ),
+});

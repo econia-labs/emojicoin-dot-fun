@@ -1,13 +1,13 @@
-import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
+import { AccountAddress, Hex, type HexInput } from "@aptos-labs/ts-sdk";
 import * as EmojicoinDotFun from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getTestHelpers } from "../utils";
 
 jest.setTimeout(15000);
 
-describe("it tests view functions", () => {
+describe("view functions", () => {
   const { aptos, publisher, publishPackageResult } = getTestHelpers();
 
-  it("it tests several different emojis that are and aren't supported", async () => {
+  it("tests several different emojis that are and aren't supported", async () => {
     const publishResult = publishPackageResult;
 
     expect(AccountAddress.from(publishResult.sender).toStringLong()).toEqual(
@@ -38,5 +38,16 @@ describe("it tests view functions", () => {
     await testIsSupported("e2ad90", true);
     await testIsSupported("e2ad90ff", false);
     await testIsSupported("00e2ad90ff", false);
+  });
+
+  it("tests verified symbol emoji bytes", async () => {
+    const emojis = ["f09fa693", "f09fa79f"];
+    const response = await new EmojicoinDotFun.VerifiedSymbolEmojiBytes({
+      emojis,
+    }).submit({ aptos });
+    const expectedHexString = "0xf09fa693f09fa79f";
+    const expectedHexBytes = Hex.fromHexString(expectedHexString).toUint8Array();
+    expect(response[0]).toEqual(expectedHexString);
+    expect(Hex.fromHexString(emojis.join("")).toUint8Array()).toEqual(expectedHexBytes);
   });
 });
