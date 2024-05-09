@@ -1,5 +1,6 @@
 import { Placement, Padding } from "@popperjs/core";
 import { CSSProperties } from "react";
+import { Colors } from "theme/types";
 
 export interface TooltipRefs {
   targetRef: React.Dispatch<React.SetStateAction<HTMLElement | null>>;
@@ -21,6 +22,7 @@ export interface TooltipOptions {
   hideTimeout?: number;
   showTimeout?: number;
   customStyles?: { tooltip?: CSSProperties; arrow?: CSSProperties };
+  arrowBorderColor?: keyof Colors;
 }
 
 export type useSubscriptionEventsHandlersProps = {

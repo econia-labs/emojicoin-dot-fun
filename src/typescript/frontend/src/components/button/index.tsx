@@ -3,6 +3,7 @@ import { useScramble } from "use-scramble";
 
 import StyledButton from "./styled";
 import { SpinnerIcon } from "components/svg";
+import { FlexGap, Text } from "components";
 
 import { ButtonProps } from "./types";
 
@@ -12,12 +13,12 @@ export const getExternalLinkProps = () => ({
 });
 
 const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): JSX.Element => {
-  const { startIcon, endIcon, children, isLoading, disabled, external, isScramble = true, ...rest } = props;
+  const { startIcon, endIcon, children, isLoading, disabled, external, isScramble = true, scale, ...rest } = props;
   const isDisabled = isLoading || disabled;
   const internalProps = external ? getExternalLinkProps() : {};
 
   const { ref, replay } = useScramble({
-    text: isScramble ? `{ ${children} }` : undefined,
+    text: isScramble ? `${children}` : undefined,
     overdrive: false,
     speed: 0.5,
   });
@@ -29,7 +30,8 @@ const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): 
       type={props.type || "button"}
       disabled={isDisabled}
       $isLoading={isLoading}
-      ref={isScramble ? ref : undefined}
+      scale={scale}
+      // ref={isScramble ? ref : undefined}
       onMouseOver={isScramble ? replay : undefined}
       onFocus={isScramble ? replay : undefined}
     >
@@ -42,7 +44,36 @@ const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): 
               mr: "0.5rem",
             })}
 
-          {!isScramble ? `{ ${children} }` : null}
+          {/*{!isScramble ? `{ ${children} }` : null}*/}
+          {!isScramble ? (
+            `{ ${children} }`
+          ) : (
+            <FlexGap gap="8px" onMouseOver={replay}>
+              <Text
+                textScale="pixelHeading4"
+                color="econiaBlue"
+                textTransform="uppercase"
+                fontSize={scale === "sm" ? "20px" : "24px"}
+              >
+                {"{ "}
+              </Text>
+              <Text
+                textScale="pixelHeading4"
+                color="econiaBlue"
+                textTransform="uppercase"
+                fontSize={scale === "sm" ? "20px" : "24px"}
+                ref={isScramble ? ref : undefined}
+              />
+              <Text
+                textScale="pixelHeading4"
+                color="econiaBlue"
+                textTransform="uppercase"
+                fontSize={scale === "sm" ? "20px" : "24px"}
+              >
+                {" }"}
+              </Text>
+            </FlexGap>
+          )}
 
           {React.isValidElement(endIcon) &&
             React.cloneElement(endIcon, {

@@ -39,7 +39,11 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => 
         >
           {t(item.text)}
         </Text>
-        {item.sortBy && <Arrows width="15px" color="econiaBlue" />}
+        {item.sortBy && (
+          <Flex my="-3px">
+            <Arrows width="15px" color="econiaBlue" />
+          </Flex>
+        )}
       </FlexGap>
     </Flex>
   );

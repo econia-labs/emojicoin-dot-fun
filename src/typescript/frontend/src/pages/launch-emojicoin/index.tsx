@@ -1,19 +1,16 @@
 import React, { ChangeEvent, useEffect } from "react";
-import EmojiPicker, { Theme, EmojiClickData } from "emoji-picker-react";
+import { EmojiClickData } from "emoji-picker-react";
 import emojiRegex from "emoji-regex";
 
-import { useThemeContext, useTranslation } from "context";
+import { useTranslation } from "context";
 import { useValidationSchema } from "./hooks";
-import { useForm, useTooltip } from "hooks";
+import { useForm, useTooltip, useEmojicoinPicker } from "hooks";
 
 import { Button, ClientsSlider, Column, Flex, FlexGap, Input, InputGroup, Text, Prompt } from "components";
-import { StyledEmojiPickerWrapper, StyledFieldName } from "./styled";
-
-import { getTooltipStyles } from "./theme";
+import { StyledFieldName } from "./styled";
 
 const LaunchEmojicoinPage: React.FC = () => {
   const { t } = useTranslation();
-  const { theme } = useThemeContext();
 
   const { validationSchema, initialValues } = useValidationSchema();
   const { values, errors, touched, fieldProps, setFieldValue } = useForm({
@@ -44,23 +41,6 @@ const LaunchEmojicoinPage: React.FC = () => {
     },
   });
 
-  const { targetRef, tooltip, targetElement } = useTooltip(
-    <StyledEmojiPickerWrapper>
-      <EmojiPicker
-        searchPlaceholder=""
-        onEmojiClick={emoji => onEmojiClickHandler(emoji)}
-        theme={Theme.DARK}
-        skinTonesDisabled
-        lazyLoadEmojis
-      />
-    </StyledEmojiPickerWrapper>,
-    {
-      placement: "bottom",
-      customStyles: getTooltipStyles(theme),
-      trigger: "click",
-    },
-  );
-
   const onEmojiClickHandler = async (emoji: EmojiClickData) => {
     const valueLength = values.emoji.match(emojiRegex())?.length ?? 0;
     if (valueLength < 5) {
@@ -68,6 +48,11 @@ const LaunchEmojicoinPage: React.FC = () => {
       await setFieldValue("emojiList", [...values.emojiList, emoji]);
     }
   };
+
+  const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
+    onEmojiClick: onEmojiClickHandler,
+    placement: "bottom",
+  });
 
   const inputProhibition = async (event: KeyboardEvent) => {
     if (event.key !== "Backspace" && event.key !== "ArrowLeft" && event.key !== "ArrowRight") {

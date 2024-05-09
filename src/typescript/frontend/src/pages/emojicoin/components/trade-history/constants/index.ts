@@ -1,26 +1,26 @@
 export const HEADERS = [
   {
-    width: "10%",
+    width: "100px",
     text: "Rank",
   },
   {
-    width: "11%",
+    width: "100px",
     text: "Apt",
   },
   {
-    width: "10%",
+    width: "100px",
     text: "🖤",
   },
   {
-    width: "10%",
+    width: "100px",
     text: "Type",
   },
   {
-    width: "10%",
+    width: "100px",
     text: "Date",
   },
   {
-    width: "51%",
+    width: "38%",
     text: "Transaction",
   },
 ];

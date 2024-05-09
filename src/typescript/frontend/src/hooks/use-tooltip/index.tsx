@@ -22,6 +22,7 @@ const useTooltip = (content: React.ReactNode, options?: TooltipOptions) => {
     showTimeout = 400,
     isInitiallyOpened = false,
     customStyles = {},
+    arrowBorderColor = "econiaBlue",
   } = options ?? {};
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
   const [tooltipElement, setTooltipElement] = useState<HTMLElement | null>(null);
@@ -56,6 +57,7 @@ const useTooltip = (content: React.ReactNode, options?: TooltipOptions) => {
       transition={{ duration: 0.3 }}
       ref={setTooltipElement}
       style={{ ...customStyles?.tooltip, ...styles.popper }}
+      arrowBorderColor={arrowBorderColor}
       {...attributes.popper}
     >
       <>{content || targetElement?.innerHTML}</>

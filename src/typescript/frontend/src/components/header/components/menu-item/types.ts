@@ -1,5 +1,5 @@
 export type MenuItemProps = {
   title: string;
-  path: string;
   width: string;
+  onClick?: () => void;
 };
