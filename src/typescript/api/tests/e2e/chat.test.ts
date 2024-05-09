@@ -1,13 +1,9 @@
 import { Account } from "@aptos-labs/ts-sdk";
 import { getRegistryAddress } from "../../src";
-import {
-  EmojicoinDotFun,
-  ONE_APT,
-  chatEventTypeTag,
-  getEmojicoinMarketAddressAndTypeTags,
-  parseChatEvent,
-} from "../../src/emojicoin_dot_fun";
+import { EmojicoinDotFun, ONE_APT } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
+import { chatEventTypeTag, parseChatEvent } from "../../src/types/contract";
+import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 
 jest.setTimeout(20000);
 
@@ -56,7 +52,7 @@ describe("emits a chat message event successfully", () => {
       chatEmojis.map(async ([hex, _]) => {
         const [isSupported] = await new EmojicoinDotFun.IsASupportedChatEmoji({
           hexBytes: hex,
-        }).submit({ aptos });
+        }).view({ aptos });
         expect(isSupported).toBe(true);
       })
     );
@@ -68,7 +64,7 @@ describe("emits a chat message event successfully", () => {
     });
 
     // Get the black cat emojicoin market address and TypeTags.
-    const [marketAddress, emojicoin, emojicoinLP] = getEmojicoinMarketAddressAndTypeTags({
+    const { marketAddress, emojicoin, emojicoinLP } = getEmojicoinMarketAddressAndTypeTags({
       registryAddress,
       symbolBytes: blackCatEmoji,
     });

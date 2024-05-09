@@ -22,7 +22,7 @@ describe("view functions", () => {
     );
 
     const testIsSupported = async (hex: HexInput, expected: boolean) => {
-      const supported = await EmojicoinDotFun.IsASupportedSymbolEmoji.submit({
+      const supported = await EmojicoinDotFun.IsASupportedSymbolEmoji.view({
         aptos,
         hexBytes: hex,
       });
@@ -43,7 +43,7 @@ describe("view functions", () => {
 
   it("tests verified symbol emoji bytes", async () => {
     const emojis = ["f09fa693", "f09fa79f"];
-    const response = await EmojicoinDotFun.VerifiedSymbolEmojiBytes.submit({
+    const response = await EmojicoinDotFun.VerifiedSymbolEmojiBytes.view({
       aptos,
       emojis,
     });

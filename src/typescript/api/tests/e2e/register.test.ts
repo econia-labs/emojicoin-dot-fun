@@ -3,11 +3,11 @@ import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   deriveEmojicoinPublisherAddress,
-  getMarketResource,
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun, ONE_APT } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
+import { getMarketResource } from "../../src/types/contract";
 
 jest.setTimeout(20000);
 

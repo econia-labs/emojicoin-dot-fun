@@ -25,8 +25,8 @@ import {
   postAptosFullNode,
   type AptosConfig,
 } from "@aptos-labs/ts-sdk";
-import { toConfig } from "./utils";
 import { type WalletSignTransactionFunction } from ".";
+import { toConfig } from "./utils";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;
@@ -219,7 +219,7 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
     };
   }
 
-  async submit(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }): Promise<T> {
+  async view(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }): Promise<T> {
     const entryFunction = EntryFunction.build(
       `${this.moduleAddress.toString()}::${this.moduleName}`,
       this.functionName,
