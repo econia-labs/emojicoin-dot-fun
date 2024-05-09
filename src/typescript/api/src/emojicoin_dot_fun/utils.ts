@@ -8,7 +8,7 @@ import {
   type AptosConfig,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
-import { COIN_FACTORY_MODULE_NAME, EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "./consts";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./consts";
 
 /**
  * Sleep the current thread for the given amount of time
