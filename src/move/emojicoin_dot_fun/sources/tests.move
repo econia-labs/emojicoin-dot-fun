@@ -1,3 +1,12 @@
+// This module contains assorted mock structs used to canonicalize variable naming during state
+// assertions, since the mocked structs themselves cannot be packed in this module (structs can
+// only be packed inside the module that defines them). Mock struct names begin with `Mock`.
+//
+// Mock structs contain an associated test function for asserting that their fields match those of
+// the corresponding struct defined in the main file. These test functions begin with `assert_`.
+//
+// Base struct values are defined via functions starting with `base_`, corresponding to default
+// values that require the minimum number of field modifications for testing.
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
