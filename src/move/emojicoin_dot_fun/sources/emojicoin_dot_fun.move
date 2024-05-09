@@ -994,7 +994,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 let reserves_end = reserves_start;
                 reserves_end.base = reserves_end.base - event.base_volume;
                 reserves_end.quote = reserves_end.quote + event.quote_volume;
-                let reserves_end = *reserves_ref_mut;
+                *reserves_ref_mut = reserves_end;
 
                 // Get FDV, market cap at start and end.
                 (fdv_start, market_cap_start, fdv_end, market_cap_end) =
