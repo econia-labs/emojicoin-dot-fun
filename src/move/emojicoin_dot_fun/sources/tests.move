@@ -346,6 +346,16 @@
         results_in_state_transition: bool,
     }
 
+    struct SwapSetupCaseTestFlow has copy, drop, store {
+        simulated_swap: Swap,
+        mock_swap: MockSwap,
+        user: address,
+        integrator: address,
+        mock_market_view: MockMarketView,
+        mock_registry_view: MockRegistryView,
+        mock_state: MockState,
+    }
+
     // Test market emoji bytes.
     const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
     const BLACK_HEART: vector<u8> = x"f09f96a4";
@@ -1469,6 +1479,40 @@
         )
     }
 
+    public fun swap_setup_case_test_flow(
+        flow: SwapSetupCaseTestFlow
+    ) {
+        // Assert simulated swap matches expected swap.
+        assert_swap(flow.mock_swap, flow.simulated_swap);
+
+        // Assert only one swap event emitted, and that it matches simulated swap.
+        let swap_events = emitted_events<Swap>();
+        assert!(vector::length(&swap_events) == 1, 0);
+        assert!(flow.simulated_swap == vector::pop_back(&mut swap_events), 0);
+
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert only two state events emitted, one from market registration and one from swap.
+        assert!(vector::length(&emitted_events<State>()) == 2, 0);
+
+        // Assert coin balance updates for user and integrator.
+        assert!(coin::balance<BlackCatEmojicoin>(flow.user) == flow.mock_swap.net_proceeds, 0);
+        assert!(coin::balance<AptosCoin>(flow.user) == 0, 0);
+        assert!(coin::balance<AptosCoin>(flow.integrator) == flow.mock_swap.integrator_fee, 0);
+
+        // Assert market and registry views, emitted state event.
+        assert_market_view(
+            flow.mock_market_view,
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+        assert_registry_view(flow.mock_registry_view, registry_view());
+        assert_state(flow.mock_state, vector::pop_back(&mut emitted_events<State>()));
+    }
+
     public fun vectorize_periodic_state_tracker_base(
         base: MockPeriodicStateTracker
     ): vector<MockPeriodicStateTracker> {
@@ -2016,49 +2060,15 @@
     }
 
     #[test] fun swap_exact_transition() {
-        // Assert simulated swap from before actual swap execution.
-        let simulated_swap = init_package_then_exact_transition();
-        let mock_swap = base_swap_exact_transition();
-        assert_swap(mock_swap, simulated_swap);
-
-        // Assert only one swap event emitted, and that it matches simulated swap.
-        let swap_events = emitted_events<Swap>();
-        assert!(vector::length(&swap_events) == 1, 0);
-        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
-
-        // Assert only one global state event emitted (from package publication).
-        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
-
-        // Assert no periodic state events emitted.
-        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
-
-        // Assert only two state events emitted, one from market registration and one from swap.
-        assert!(vector::length(&emitted_events<State>()) == 2, 0);
-
-        // Assert coin balance updates for user and integrator.
-        assert!(
-            coin::balance<BlackCatEmojicoin>(EXACT_TRANSITION_USER) == mock_swap.net_proceeds,
-            0,
-        );
-        assert!(coin::balance<AptosCoin>(EXACT_TRANSITION_USER) == 0, 0);
-        assert!(
-            coin::balance<AptosCoin>(EXACT_TRANSITION_INTEGRATOR) == mock_swap.integrator_fee,
-            0,
-        );
-
-        // Assert market and registry views, emitted state event.
-        assert_market_view(
-            base_market_view_exact_transition(),
-            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
-        );
-        assert_registry_view(
-            base_registry_view_exact_transition(),
-            registry_view()
-        );
-        assert_state(
-            base_state_exact_transition(),
-            vector::pop_back(&mut emitted_events<State>()),
-        );
+        swap_setup_case_test_flow(SwapSetupCaseTestFlow {
+            simulated_swap: init_package_then_exact_transition(),
+            mock_swap: base_swap_exact_transition(),
+            user: EXACT_TRANSITION_USER,
+            integrator: EXACT_TRANSITION_INTEGRATOR,
+            mock_market_view: base_market_view_exact_transition(),
+            mock_registry_view: base_registry_view_exact_transition(),
+            mock_state: base_state_exact_transition(),
+        })
     }
 
     #[test] fun swap_initializes_coin_capabilities() {
@@ -2074,43 +2084,15 @@
     }
 
     #[test] fun swap_simple_buy() {
-        // Assert simulated swap from before actual swap execution.
-        let simulated_swap = init_package_then_simple_buy();
-        let mock_swap = base_swap_simple_buy();
-        assert_swap(mock_swap, simulated_swap);
-
-        // Assert only one swap event emitted, and that it matches simulated swap.
-        let swap_events = emitted_events<Swap>();
-        assert!(vector::length(&swap_events) == 1, 0);
-        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
-
-        // Assert only one global state event emitted (from package publication).
-        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
-
-        // Assert no periodic state events emitted.
-        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
-
-        // Assert only two state events emitted, one from market registration and one from swap.
-        assert!(vector::length(&emitted_events<State>()) == 2, 0);
-
-        // Assert coin balance updates for user and integrator.
-        assert!(coin::balance<BlackCatEmojicoin>(SIMPLE_BUY_USER) == mock_swap.net_proceeds, 0);
-        assert!(coin::balance<AptosCoin>(SIMPLE_BUY_USER) == 0, 0);
-        assert!(coin::balance<AptosCoin>(SIMPLE_BUY_INTEGRATOR) == mock_swap.integrator_fee, 0);
-
-        // Assert market and registry views, emitted state event.
-        assert_market_view(
-            base_market_view_simple_buy(),
-            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
-        );
-        assert_registry_view(
-            base_registry_view_simple_buy(),
-            registry_view()
-        );
-        assert_state(
-            base_state_simple_buy(),
-            vector::pop_back(&mut emitted_events<State>()),
-        );
+        swap_setup_case_test_flow(SwapSetupCaseTestFlow {
+            simulated_swap: init_package_then_simple_buy(),
+            mock_swap: base_swap_simple_buy(),
+            user: SIMPLE_BUY_USER,
+            integrator: SIMPLE_BUY_INTEGRATOR,
+            mock_market_view: base_market_view_simple_buy(),
+            mock_registry_view: base_registry_view_simple_buy(),
+            mock_state: base_state_simple_buy(),
+        })
     }
 
     #[test] fun valid_coin_types_all_invalid() {
