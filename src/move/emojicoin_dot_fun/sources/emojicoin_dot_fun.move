@@ -1729,6 +1729,62 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (base, quote)
     }
 
+    public fun unpack_swap(swap: Swap): (
+        u64,
+        u64,
+        u64,
+        address,
+        u64,
+        bool,
+        address,
+        u8,
+        u64,
+        u64,
+        u64,
+        u128,
+        u64,
+        u64,
+        bool,
+        bool,
+    ) {
+        let Swap {
+            market_id,
+            time,
+            market_nonce,
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64,
+            integrator_fee,
+            pool_fee,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        } = swap;
+        (
+            market_id,
+            time,
+            market_nonce,
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64,
+            integrator_fee,
+            pool_fee,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        )
+    }
+
     public fun unpack_sequence_info(sequence_info: SequenceInfo): (u64, u64) {
         let SequenceInfo { nonce, last_bump_time } = sequence_info;
         (nonce, last_bump_time)
@@ -2245,6 +2301,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address)
     }
 
+    #[test_only] public fun get_bps_fee_test_only(
+        principal: u64,
+        fee_rate_bps: u8,
+    ): u64 {
+        get_bps_fee(principal, fee_rate_bps)
+    }
+
     #[test_only] public fun get_concatenation_test_only(
         base: String,
         additional: String,
@@ -2255,6 +2318,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_BASE_REAL_CEILING(): u64 { BASE_REAL_CEILING }
     #[test_only] public fun get_BASE_VIRTUAL_CEILING(): u64 { BASE_VIRTUAL_CEILING }
     #[test_only] public fun get_BASE_VIRTUAL_FLOOR(): u64 { BASE_VIRTUAL_FLOOR }
+    #[test_only] public fun get_BASIS_POINTS_PER_UNIT(): u128 { BASIS_POINTS_PER_UNIT }
     #[test_only] public fun get_COIN_FACTORY_AS_BYTES(): vector<u8> { COIN_FACTORY_AS_BYTES }
     #[test_only] public fun get_EMOJICOIN_STRUCT_NAME(): vector<u8> { EMOJICOIN_STRUCT_NAME }
     #[test_only] public fun get_EMOJICOIN_LP_NAME_SUFFIX(): vector<u8> { EMOJICOIN_LP_NAME_SUFFIX }

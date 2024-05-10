@@ -47,6 +47,7 @@
         SequenceInfo,
         State,
         StateMetadata,
+        Swap,
         assert_valid_coin_types_test_only as assert_valid_coin_types,
         chat,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
@@ -54,6 +55,7 @@
         get_BASE_REAL_CEILING,
         get_BASE_VIRTUAL_CEILING,
         get_BASE_VIRTUAL_FLOOR,
+        get_BASIS_POINTS_PER_UNIT,
         get_COIN_FACTORY_AS_BYTES,
         get_EMOJICOIN_STRUCT_NAME,
         get_EMOJICOIN_LP_NAME_SUFFIX,
@@ -78,6 +80,7 @@
         get_REGISTRY_NAME,
         get_TRIGGER_MARKET_REGISTRATION,
         get_TRIGGER_PACKAGE_PUBLICATION,
+        get_bps_fee_test_only as get_bps_fee,
         get_concatenation_test_only as get_concatenation,
         init_module_test_only as init_module,
         is_a_supported_chat_emoji,
@@ -89,6 +92,7 @@
         register_market,
         register_market_without_publish,
         registry_view,
+        simulate_swap,
         swap,
         unpack_chat,
         unpack_cumulative_stats,
@@ -106,6 +110,7 @@
         unpack_sequence_info,
         unpack_state,
         unpack_state_metadata,
+        unpack_swap,
         unpack_tvl_to_lp_coin_ratio,
         valid_coin_types_test_only as valid_coin_types,
         verified_symbol_emoji_bytes,
@@ -315,6 +320,25 @@
         trigger: u8,
     }
 
+    struct MockSwap has copy, drop, store {
+        market_id: u64,
+        time: u64,
+        market_nonce: u64,
+        swapper: address,
+        input_amount: u64,
+        is_sell: bool,
+        integrator: address,
+        integrator_fee_rate_bps: u8,
+        net_proceeds: u64,
+        base_volume: u64,
+        quote_volume: u64,
+        avg_execution_price_q64: u128,
+        integrator_fee: u64,
+        pool_fee: u64,
+        starts_in_bonding_curve: bool,
+        results_in_state_transition: bool,
+    }
+
     // Test market emoji bytes.
     const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
     const BLACK_HEART: vector<u8> = x"f09f96a4";
@@ -327,8 +351,12 @@
     const INTEGRATOR: address = @0xbbbbb;
 
     // Constants for a simple buy against a new market, used to set up assorted tests.
-    const SIMPLE_BUY_BASE_DIVISOR: u64 = 10;
-    const SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS: u64 = 50;
+    const SIMPLE_BUY_INPUT_AMOUNT: u64 = 111_111_111_111;
+    const SIMPLE_BUY_INTEGRATOR: address = @0xddddd;
+    const SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS: u8 = 50;
+    const SIMPLE_BUY_QUOTE_DIVISOR: u64 = 9;
+    const SIMPLE_BUY_TIME: u64 = 500_000;
+    const SIMPLE_BUY_USER: address = @0xccccc;
 
     public fun address_for_registered_market_by_emoji_bytes(
         emoji_bytes: vector<vector<u8>>,
@@ -732,6 +760,46 @@
         assert!(trigger == mock_state_metadata.trigger, 0);
     }
 
+    public fun assert_swap(
+        mock_swap: MockSwap,
+        swap: Swap,
+    ) {
+        let (
+            market_id,
+            time,
+            market_nonce,
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64,
+            integrator_fee,
+            pool_fee,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        ) = unpack_swap(swap);
+        assert!(market_id == mock_swap.market_id, 0);
+        assert!(time == mock_swap.time, 0);
+        assert!(market_nonce == mock_swap.market_nonce, 0);
+        assert!(swapper == mock_swap.swapper, 0);
+        assert!(input_amount == mock_swap.input_amount, 0);
+        assert!(is_sell == mock_swap.is_sell, 0);
+        assert!(integrator == mock_swap.integrator, 0);
+        assert!(integrator_fee_rate_bps == mock_swap.integrator_fee_rate_bps, 0);
+        assert!(net_proceeds == mock_swap.net_proceeds, 0);
+        assert!(base_volume == mock_swap.base_volume, 0);
+        assert!(quote_volume == mock_swap.quote_volume, 0);
+        assert!(avg_execution_price_q64 == mock_swap.avg_execution_price_q64, 0);
+        assert!(integrator_fee == mock_swap.integrator_fee, 0);
+        assert!(pool_fee == mock_swap.pool_fee, 0);
+        assert!(starts_in_bonding_curve == mock_swap.starts_in_bonding_curve, 0);
+        assert!(results_in_state_transition == mock_swap.results_in_state_transition, 0);
+    }
+
     public fun assert_test_market_address(
         emoji_bytes: vector<vector<u8>>,
         hard_coded_address: address,
@@ -946,6 +1014,37 @@
         }
     }
 
+    public fun base_swap_simple_buy(): MockSwap {
+        let integrator_fee =
+            get_bps_fee(SIMPLE_BUY_INPUT_AMOUNT, SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS);
+        let quote_volume = SIMPLE_BUY_INPUT_AMOUNT - integrator_fee;
+
+        // Define base volume via constant product terms from simple CPAMM equation in blackpaper.
+        let b_0 = (get_BASE_VIRTUAL_CEILING() as u128);
+        let q_in = (quote_volume as u128);
+        let q_0 = (get_QUOTE_VIRTUAL_FLOOR() as u128);
+        let base_volume = (((b_0 * q_in) / (q_0 + q_in)) as u64);
+
+        MockSwap {
+            market_id: 1,
+            time: SIMPLE_BUY_TIME,
+            market_nonce: 2,
+            swapper: SIMPLE_BUY_USER,
+            input_amount: SIMPLE_BUY_INPUT_AMOUNT,
+            is_sell: false,
+            integrator: SIMPLE_BUY_INTEGRATOR,
+            integrator_fee_rate_bps: SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
+            net_proceeds: base_volume,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64: ((quote_volume as u128) << 64) / (base_volume as u128),
+            integrator_fee,
+            pool_fee: 0,
+            starts_in_bonding_curve: true,
+            results_in_state_transition: false,
+        }
+    }
+
     public fun base_tvl_to_lp_coin_ratio(): MockTVLtoLPCoinRatio {
         MockTVLtoLPCoinRatio {
             tvl: 0,
@@ -960,11 +1059,6 @@
                 (get_BASE_VIRTUAL_CEILING() as u256)
             ) as u128
         )
-    }
-
-    public fun init_package() {
-        timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
-        init_module(&get_signer(@emojicoin_dot_fun));
     }
 
     public fun init_market(
@@ -988,6 +1082,36 @@
             INTEGRATOR,
             integrator_fee_rate_bps,
         );
+    }
+
+    public fun init_package() {
+        timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
+        init_module(&get_signer(@emojicoin_dot_fun));
+    }
+
+    public fun init_package_then_simple_buy(): Swap {
+        init_package();
+        timestamp::update_global_time_for_test(SIMPLE_BUY_TIME);
+        init_market(vector[BLACK_CAT]);
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        let market_address = address_for_registered_market_by_emoji_bytes(vector[BLACK_CAT]);
+        let simulated_swap = simulate_swap(
+            market_address,
+            SIMPLE_BUY_USER,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            SIMPLE_BUY_INTEGRATOR,
+            SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
+        );
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            market_address,
+            &get_signer(SIMPLE_BUY_USER),
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            SIMPLE_BUY_INTEGRATOR,
+            SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
+        );
+        simulated_swap
     }
 
     public fun market_id_for_registered_market_by_emoji_bytes(
@@ -1040,6 +1164,14 @@
         init_package();
         init_market(vector[YELLOW_HEART]);
         assert_valid_coin_types<BadType, BadType>(@yellow_heart_market);
+    }
+
+    #[test] fun bps_fee_assorted() {
+        assert!(get_BASIS_POINTS_PER_UNIT() == 10_000, 0);
+        assert!(get_bps_fee(10_000, 5) == 5, 0);
+        assert!(get_bps_fee(100_000, 20) == 200, 0);
+        assert!(get_bps_fee(50_000, 40) == 200, 0);
+        assert!(get_bps_fee(50_000, 1) == 5, 0);
     }
 
     #[test] fun chat_complex_emoji_sequences() {
@@ -1516,12 +1648,25 @@
     }
 
     #[test] fun simple_buy_amounts() {
-        // Define base input amount as a fraction of the amount required to leave bonding curve.
-        let input_amount = (get_BASE_REAL_CEILING() / SIMPLE_BUY_BASE_DIVISOR as u128);
+        // Check quote input amount as a fraction of the amount required to leave bonding curve.
+        assert!(SIMPLE_BUY_INPUT_AMOUNT == get_QUOTE_REAL_CEILING() / SIMPLE_BUY_QUOTE_DIVISOR, 0);
 
-        // Define terms via simple CPAMM equation from whitepaper.
+        // Check nonzero integrator fee requires integer truncation.
+        assert!(
+            (SIMPLE_BUY_INPUT_AMOUNT * (SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS as u64))
+                % (get_BASIS_POINTS_PER_UNIT() as u64) != 0,
+            0
+        );
+        let integrator_fee =
+            get_bps_fee(SIMPLE_BUY_INPUT_AMOUNT, SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS);
+        assert!(integrator_fee > 0, 0);
+
+        // Get input amount to CLAMM after integrator fee assessed on quote input.
+        let input_amount = SIMPLE_BUY_INPUT_AMOUNT - integrator_fee;
+
+        // Define terms via simple CPAMM equation from blackpaper.
         let b_0 = (get_BASE_VIRTUAL_CEILING() as u128);
-        let q_in = input_amount;
+        let q_in = (input_amount as u128);
         let q_0 = (get_QUOTE_VIRTUAL_FLOOR() as u128);
 
         let numerator = b_0 * q_in;
@@ -1530,14 +1675,6 @@
         // Assert that rounding will indeed take place, such that output will be truncated and
         // rounding effects will be assumed by swapper.
         assert!(numerator % denominator != 0, 0);
-        let output_amount = numerator / denominator;
-
-        // Assert that integrator fee also results in truncation, but note that this does not leak
-        // funds from pool because the fee is ultimately assessed on the quote output amount.
-        assert!(output_amount % (SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS as u128) != 0, 0);
-        let integrator_fee = output_amount / (SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS as u128);
-        assert!(integrator_fee > 0, 0);
-
     }
 
     #[test] fun swap_initializes_coin_capabilities() {
@@ -1550,6 +1687,11 @@
             ),
             0,
         );
+    }
+
+    #[test] fun swap_simple_buy() {
+        let simulated_swap = init_package_then_simple_buy();
+        assert_swap(base_swap_simple_buy(), simulated_swap);
     }
 
     #[test] fun valid_coin_types_all_invalid() {
