@@ -346,6 +346,13 @@
         results_in_state_transition: bool,
     }
 
+    struct SwapGeneralCaseTestFlow has copy, drop, store {
+        mock_swap: MockSwap,
+        mock_market_view: MockMarketView,
+        mock_registry_view: MockRegistryView,
+        mock_state: MockState,
+    }
+
     struct SwapSetupCaseTestFlow has copy, drop, store {
         simulated_swap: Swap,
         mock_swap: MockSwap,
@@ -361,11 +368,14 @@
     const BLACK_HEART: vector<u8> = x"f09f96a4";
     const YELLOW_HEART: vector<u8> = x"f09f929b";
 
+    // Polarity based on `is_sell` argument for swap functions in main file.
     const SWAP_BUY: bool = false;
     const SWAP_SELL: bool = true;
 
+    // For general case tests.
     const USER: address = @0xaaaaa;
     const INTEGRATOR: address = @0xbbbbb;
+    const GENERAL_CASE_SWAP_TIME: u64 = 700_000;
 
     // Constants for a simple buy against a new market (does not result in state transition), used
     // for assorted test setup.
@@ -381,7 +391,7 @@
     const EXACT_TRANSITION_INPUT_AMOUNT: u64 = 1_000_000_000_000;
     const EXACT_TRANSITION_INTEGRATOR: address = @0xeeeee;
     const EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS: u8 = 0;
-    const EXACT_TRANSITION_TIME: u64 = 500_000;
+    const EXACT_TRANSITION_TIME: u64 = 600_000;
     const EXACT_TRANSITION_USER: address = @0xfffff;
 
     public fun address_for_registered_market_by_emoji_bytes(
@@ -1479,6 +1489,67 @@
         )
     }
 
+    public fun swap_general_case_test_flow(
+        flow: SwapGeneralCaseTestFlow
+    ) {
+
+        // Update global time, simulate swap, then execute swap.
+        timestamp::update_global_time_for_test(GENERAL_CASE_SWAP_TIME);
+        let market_address = base_market_metadata().market_address;
+        let simulated_swap = simulate_swap(
+            market_address,
+            USER,
+            flow.mock_swap.input_amount,
+            flow.mock_swap.is_sell,
+            flow.mock_swap.integrator,
+            flow.mock_swap.integrator_fee_rate_bps,
+        );
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            market_address,
+            &get_signer(USER),
+            flow.mock_swap.input_amount,
+            flow.mock_swap.is_sell,
+            flow.mock_swap.integrator,
+            flow.mock_swap.integrator_fee_rate_bps,
+        );
+
+        // Assert simulated swap matches expected swap.
+        assert_swap(flow.mock_swap, simulated_swap);
+
+        // Assert only two swap events emitted, and that final one matches simulated swap.
+        let swap_events = emitted_events<Swap>();
+        assert!(vector::length(&swap_events) == 2, 0);
+        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
+
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert only 3 state events emitted: one from market registration, one from setup swap,
+        // and one from general case swap.
+        assert!(vector::length(&emitted_events<State>()) == 3, 0);
+
+        // Assert coin balance updates for user and integrator.
+        let (user_emojicoin_balance, user_apt_balance) = if (flow.mock_swap.is_sell) {
+            (0, flow.mock_swap.net_proceeds)
+        } else {
+            (flow.mock_swap.net_proceeds, 0)
+        };
+        assert!(coin::balance<BlackCatEmojicoin>(USER) == user_emojicoin_balance, 0);
+        assert!(coin::balance<AptosCoin>(USER) == user_apt_balance, 0);
+        assert!(coin::balance<AptosCoin>(INTEGRATOR) == flow.mock_swap.integrator_fee, 0);
+
+        // Assert market and registry views, emitted state event.
+        assert_market_view(
+            flow.mock_market_view,
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+        assert_registry_view(flow.mock_registry_view, registry_view());
+        assert_state(flow.mock_state, vector::pop_back(&mut emitted_events<State>()));
+    }
+
     public fun swap_setup_case_test_flow(
         flow: SwapSetupCaseTestFlow
     ) {
@@ -1496,7 +1567,7 @@
         // Assert no periodic state events emitted.
         assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
 
-        // Assert only two state events emitted, one from market registration and one from swap.
+        // Assert only two state events emitted: one from market registration and one from swap.
         assert!(vector::length(&emitted_events<State>()) == 2, 0);
 
         // Assert coin balance updates for user and integrator.
