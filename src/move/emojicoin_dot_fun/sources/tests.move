@@ -357,7 +357,7 @@
     const USER: address = @0xaaaaa;
     const INTEGRATOR: address = @0xbbbbb;
 
-    // Constants for a simple buy against a new market (does not result in state transtiion), used
+    // Constants for a simple buy against a new market (does not result in state transition), used
     // for assorted test setup.
     const SIMPLE_BUY_INPUT_AMOUNT: u64 = 111_111_111_111;
     const SIMPLE_BUY_INTEGRATOR: address = @0xddddd;
