@@ -530,11 +530,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let fdv_ref_mut = &mut registry_ref_mut.global_stats.fully_diluted_value;
         aggregator_v2::try_add(fdv_ref_mut, fdv);
 
-        // Update registry nonce, but not last bump time since global state only bumps once per day.
-        let registry_nonce_ref_mut = &mut registry_ref_mut.sequence_info.nonce;
-        let registry_nonce = *registry_nonce_ref_mut + 1;
-        *registry_nonce_ref_mut = registry_nonce;
-
         // Bump state.
         event::emit(MarketRegistration {
             market_metadata: market_ref_mut.metadata,
@@ -1868,13 +1863,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             };
         });
 
-        // Check global state tracker period lapse.
+        // Increment registry nonce.
         let registry_sequence_info_ref_mut = &mut registry_ref_mut.sequence_info;
+        let registry_nonce_ref_mut = &mut registry_sequence_info_ref_mut.nonce;
+        let registry_nonce = *registry_nonce_ref_mut + 1;
+        *registry_nonce_ref_mut = registry_nonce;
+
+        // Check global state tracker period lapse.
         let last_registry_bump_time = registry_sequence_info_ref_mut.last_bump_time;
         if (time - last_registry_bump_time >= PERIOD_1D) {
             registry_sequence_info_ref_mut.last_bump_time = time;
-            let registry_nonce = registry_sequence_info_ref_mut.nonce + 1;
-            registry_sequence_info_ref_mut.nonce = registry_nonce;
             let global_stats_ref = &registry_ref_mut.global_stats;
             event::emit(GlobalState {
                 emit_time: time,
