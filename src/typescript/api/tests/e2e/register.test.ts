@@ -3,11 +3,11 @@ import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   deriveEmojicoinPublisherAddress,
-  getMarketResource,
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun, ONE_APT } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
+import { getMarketResource } from "../../src/types/contract";
 
 jest.setTimeout(20000);
 
@@ -38,7 +38,6 @@ describe("registers a market successfully", () => {
     const emojis = ["f09fa693", "f09fa79f"];
 
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
-      moduleAddress: publisher.accountAddress,
       aptosConfig: aptos.config,
       registrant: publisher,
       emojis,

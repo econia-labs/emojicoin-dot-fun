@@ -113,6 +113,7 @@ export async function publishForTest(pk: string): Promise<PublishPackageResult> 
   await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
   await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
   await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
+  await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
 
   const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
   const packageName = moduleName;

@@ -6,8 +6,6 @@ import {
   type AccountAddress,
   EntryFunction,
   type EntryFunctionArgumentTypes,
-  Identifier,
-  ModuleId,
   MultiSig,
   TransactionPayloadEntryFunction,
   type TypeTag,
@@ -15,17 +13,20 @@ import {
   type UserTransactionResponse,
   type WaitForTransactionOptions,
   Serializable,
-  type Serializer,
+  Serializer,
   type EntryFunctionPayloadResponse,
   type AnyRawTransaction,
   AccountAuthenticator,
-  type SimpleEntryFunctionArgumentTypes,
   type InputViewFunctionData,
   TransactionPayloadMultiSig,
   MultiSigTransactionPayload,
   type MoveValue,
+  MimeType,
+  postAptosFullNode,
+  type AptosConfig,
 } from "@aptos-labs/ts-sdk";
 import { type WalletSignTransactionFunction } from ".";
+import { toConfig } from "./utils";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;
@@ -34,6 +35,7 @@ export class EntryFunctionTransactionBuilder {
 
   public readonly rawTransactionInput: AnyRawTransaction;
 
+  // TODO: This should probably be private, if it's possible.
   constructor(
     payloadBuilder: EntryFunctionPayloadBuilder,
     aptos: Aptos,
@@ -46,14 +48,15 @@ export class EntryFunctionTransactionBuilder {
 
   /**
    *
-   * @param signer either a local Account or a callback function that returns AccountAuthenticator.
+   * @param signer a local Account or a callback function that returns an AccountAuthenticator.
    * @param asFeePayer whether or not the signer is the fee payer.
-   * @returns Promise<AccountAuthenticator>
+   * @returns a Promise<AccountAuthenticator>
    */
   async sign(
     signer: Account | WalletSignTransactionFunction,
     asFeePayer?: boolean
   ): Promise<AccountAuthenticator> {
+    /* eslint-disable-next-line no-prototype-builtins */
     if (signer.hasOwnProperty("privateKey") || signer instanceof Account) {
       const signingFunction = asFeePayer
         ? this.aptos.transaction.signAsFeePayer
@@ -89,6 +92,7 @@ export class EntryFunctionTransactionBuilder {
         if (signer instanceof AccountAuthenticator) {
           secondarySendersAuthenticators.push(signer);
         } else {
+          /* eslint-disable-next-line no-await-in-loop */
           secondarySendersAuthenticators.push(await this.sign(signer));
         }
       }
@@ -152,7 +156,7 @@ export class EntryFunctionTransactionBuilder {
 }
 
 export abstract class EntryFunctionPayloadBuilder extends Serializable {
-  public abstract moduleAddress: AccountAddress;
+  public abstract readonly moduleAddress: AccountAddress;
 
   public abstract readonly moduleName: string;
 
@@ -171,9 +175,9 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
   createPayload(
     multisigAddress?: AccountAddress
   ): TransactionPayloadEntryFunction | TransactionPayloadMultiSig {
-    const entryFunction = new EntryFunction(
-      new ModuleId(this.moduleAddress, new Identifier(this.moduleName)),
-      new Identifier(this.functionName),
+    const entryFunction = EntryFunction.build(
+      `${this.moduleAddress.toString()}::${this.moduleName}`,
+      this.functionName,
       this.typeTags,
       this.argsToArray()
     );
@@ -195,7 +199,7 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
 }
 
 export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
-  public abstract moduleAddress: AccountAddress;
+  public abstract readonly moduleAddress: AccountAddress;
 
   public abstract readonly moduleName: string;
 
@@ -215,16 +219,45 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
     };
   }
 
-  async submit(args: { aptos: Aptos; options?: LedgerVersionArg }): Promise<T> {
+  async view(args: { aptos: Aptos | AptosConfig; options?: LedgerVersionArg }): Promise<T> {
+    const entryFunction = EntryFunction.build(
+      `${this.moduleAddress.toString()}::${this.moduleName}`,
+      this.functionName,
+      this.typeTags,
+      this.argsToArray()
+    );
     const { aptos, options } = args;
-    const viewRequest = await aptos.view<T>({
-      payload: this.toPayload(),
+    const viewRequest = await postBCSViewFunction<T>({
+      aptosConfig: aptos,
+      payload: entryFunction,
       options,
     });
     return viewRequest;
   }
 
-  argsToArray(): Array<SimpleEntryFunctionArgumentTypes> {
+  argsToArray(): Array<EntryFunctionArgumentTypes> {
     return Object.keys(this.args).map((field) => this.args[field as keyof typeof this.args]);
   }
+}
+
+/* eslint-disable-next-line import/no-unused-modules */
+export async function postBCSViewFunction<T extends Array<MoveValue>>(args: {
+  aptosConfig: Aptos | AptosConfig;
+  payload: EntryFunction;
+  options?: LedgerVersionArg;
+}): Promise<T> {
+  const { payload, options } = args;
+  const aptosConfig = toConfig(args.aptosConfig);
+  const serializer = new Serializer();
+  payload.serialize(serializer);
+  const bytes = serializer.toUint8Array();
+  const { data } = await postAptosFullNode<Uint8Array, MoveValue[]>({
+    aptosConfig,
+    path: "view",
+    originMethod: "view",
+    contentType: MimeType.BCS_VIEW_FUNCTION,
+    params: { ledger_version: options?.ledgerVersion },
+    body: bytes,
+  });
+  return data as T;
 }
