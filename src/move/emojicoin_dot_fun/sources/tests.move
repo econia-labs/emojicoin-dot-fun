@@ -6,7 +6,8 @@
 // the corresponding struct defined in the main file. These test functions begin with `assert_`.
 //
 // Base struct values are defined via functions starting with `base_`, corresponding to default
-// values that require the minimum number of field modifications for testing.
+// values that require the minimum number of field modifications for testing. For some testing cases
+// that are reused across multiple tests, there are additional base struct functions.
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
@@ -81,6 +82,7 @@
         get_REGISTRY_NAME,
         get_TRIGGER_MARKET_REGISTRATION,
         get_TRIGGER_PACKAGE_PUBLICATION,
+        get_TRIGGER_SWAP_BUY,
         get_bps_fee_test_only as get_bps_fee,
         get_concatenation_test_only as get_concatenation,
         init_module_test_only as init_module,
@@ -957,6 +959,18 @@
         }
     }
 
+    public fun base_last_swap_simple_buy(): MockLastSwap {
+        let swap = base_swap_simple_buy();
+        MockLastSwap {
+            is_sell: SWAP_BUY,
+            avg_execution_price_q64: swap.avg_execution_price_q64,
+            base_volume: swap.base_volume,
+            quote_volume: swap.quote_volume,
+            nonce: base_sequence_info_simple_buy().nonce,
+            time: SIMPLE_BUY_TIME,
+        }
+    }
+
     public fun base_market_metadata(): MockMarketMetadata {
         MockMarketMetadata {
             market_id: 1,
@@ -1000,19 +1014,13 @@
     public fun base_market_view_simple_buy(): MockMarketView {
         let swap = base_swap_simple_buy();
         let market_view = base_market_view();
-        market_view.sequence_info =
-            MockSequenceInfo { nonce: 2, last_bump_time: SIMPLE_BUY_TIME };
+        market_view.sequence_info = base_sequence_info_simple_buy();
         market_view.clamm_virtual_reserves = base_clamm_virtual_reserves_simple_buy();
         market_view.cumulative_stats = base_cumulative_stats_simple_buy();
         market_view.instantaneous_stats = base_instantaneous_stats_simple_buy();
-        market_view.last_swap = MockLastSwap {
-            is_sell: false,
-            avg_execution_price_q64: swap.avg_execution_price_q64,
-            base_volume: swap.base_volume,
-            quote_volume: swap.quote_volume,
-            nonce: market_view.sequence_info.nonce,
-            time: SIMPLE_BUY_TIME,
-        };
+        market_view.last_swap = base_last_swap_simple_buy();
+        market_view.periodic_state_trackers =
+            vectorize_periodic_state_tracker_base(base_periodic_state_tracker_simple_buy());
         market_view.aptos_coin_balance = swap.quote_volume;
         market_view.emojicoin_balance = get_EMOJICOIN_SUPPLY() - swap.base_volume;
         market_view
@@ -1040,6 +1048,29 @@
         }
     }
 
+    public fun base_periodic_state_tracker_simple_buy(): MockPeriodicStateTracker {
+        let swap = base_swap_simple_buy();
+        MockPeriodicStateTracker {
+            start_time: 0,
+            period: 0,
+            open_price_q64: swap.avg_execution_price_q64,
+            high_price_q64: swap.avg_execution_price_q64,
+            low_price_q64: swap.avg_execution_price_q64,
+            close_price_q64: swap.avg_execution_price_q64,
+            volume_base: (swap.base_volume as u128),
+            volume_quote: (swap.quote_volume as u128),
+            integrator_fees: (swap.integrator_fee as u128),
+            pool_fees_base: 0,
+            pool_fees_quote: 0,
+            n_swaps: 1,
+            n_chat_messages: 0,
+            starts_in_bonding_curve: true,
+            ends_in_bonding_curve: true,
+            tvl_to_lp_coin_ratio_start: base_tvl_to_lp_coin_ratio(),
+            tvl_to_lp_coin_ratio_end: base_tvl_to_lp_coin_ratio_simple_buy(),
+        }
+    }
+
     public fun base_registry_view(): MockRegistryView {
         MockRegistryView {
             registry_address: registry_address(),
@@ -1057,6 +1088,39 @@
         }
     }
 
+    public fun base_registry_view_simple_buy(): MockRegistryView {
+        let swap = base_swap_simple_buy();
+        let instantaneous_stats = base_instantaneous_stats_simple_buy();
+        MockRegistryView {
+            registry_address: registry_address(),
+            nonce: 3,
+            last_bump_time: 0,
+            n_markets: 1,
+            cumulative_quote_volume: (swap.quote_volume as u128),
+            total_quote_locked: (swap.quote_volume as u128),
+            total_value_locked: instantaneous_stats.total_value_locked,
+            market_cap: instantaneous_stats.market_cap,
+            fully_diluted_value: instantaneous_stats.fully_diluted_value,
+            cumulative_integrator_fees: (swap.integrator_fee as u128),
+            cumulative_swaps: 1,
+            cumulative_chat_messages: 0,
+        }
+    }
+
+    public fun base_sequence_info(): MockSequenceInfo {
+        MockSequenceInfo {
+            nonce: 1,
+            last_bump_time: 0,
+        }
+    }
+
+    public fun base_sequence_info_simple_buy(): MockSequenceInfo {
+        MockSequenceInfo {
+            nonce: 2,
+            last_bump_time: SIMPLE_BUY_TIME,
+        }
+    }
+
     public fun base_state(): MockState {
         MockState {
             market_metadata: base_market_metadata(),
@@ -1070,11 +1134,29 @@
         }
     }
 
+    public fun base_state_simple_buy(): MockState {
+        let state = base_state();
+        state.state_metadata = base_state_metadata_simple_buy();
+        state.clamm_virtual_reserves = base_clamm_virtual_reserves_simple_buy();
+        state.cumulative_stats = base_cumulative_stats_simple_buy();
+        state.instantaneous_stats = base_instantaneous_stats_simple_buy();
+        state.last_swap = base_last_swap_simple_buy();
+        state
+    }
+
     public fun base_state_metadata(): MockStateMetadata {
         MockStateMetadata {
             market_nonce: 1,
             bump_time: 0,
             trigger: get_TRIGGER_MARKET_REGISTRATION(),
+        }
+    }
+
+    public fun base_state_metadata_simple_buy(): MockStateMetadata {
+        MockStateMetadata {
+            market_nonce: 2,
+            bump_time: SIMPLE_BUY_TIME,
+            trigger: get_TRIGGER_SWAP_BUY(),
         }
     }
 
@@ -1095,7 +1177,7 @@
             market_nonce: 2,
             swapper: SIMPLE_BUY_USER,
             input_amount: SIMPLE_BUY_INPUT_AMOUNT,
-            is_sell: false,
+            is_sell: SWAP_BUY,
             integrator: SIMPLE_BUY_INTEGRATOR,
             integrator_fee_rate_bps: SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
             net_proceeds: base_volume,
@@ -1112,6 +1194,14 @@
     public fun base_tvl_to_lp_coin_ratio(): MockTVLtoLPCoinRatio {
         MockTVLtoLPCoinRatio {
             tvl: 0,
+            lp_coins: 0,
+        }
+    }
+
+    public fun base_tvl_to_lp_coin_ratio_simple_buy(): MockTVLtoLPCoinRatio {
+        let instantaneous_stats = base_instantaneous_stats_simple_buy();
+        MockTVLtoLPCoinRatio {
+            tvl: instantaneous_stats.total_value_locked,
             lp_coins: 0,
         }
     }
@@ -1778,10 +1868,18 @@
         assert!(coin::balance<AptosCoin>(SIMPLE_BUY_USER) == 0, 0);
         assert!(coin::balance<AptosCoin>(SIMPLE_BUY_INTEGRATOR) == mock_swap.integrator_fee, 0);
 
-        // Assert market view.
+        // Assert market and registry views, emitted state event.
         assert_market_view(
             base_market_view_simple_buy(),
             market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+        assert_registry_view(
+            base_registry_view_simple_buy(),
+            registry_view()
+        );
+        assert_state(
+            base_state_simple_buy(),
+            vector::pop_back(&mut emitted_events<State>()),
         );
 
     }

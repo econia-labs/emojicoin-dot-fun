@@ -2343,6 +2343,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_REGISTRY_NAME(): vector<u8> { REGISTRY_NAME }
     #[test_only] public fun get_TRIGGER_MARKET_REGISTRATION(): u8 { TRIGGER_MARKET_REGISTRATION }
     #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
+    #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
