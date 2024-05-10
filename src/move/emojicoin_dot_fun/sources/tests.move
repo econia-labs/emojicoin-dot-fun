@@ -2015,6 +2015,52 @@
         assert!(numerator % denominator != 0, 0);
     }
 
+    #[test] fun swap_exact_transition() {
+        // Assert simulated swap from before actual swap execution.
+        let simulated_swap = init_package_then_exact_transition();
+        let mock_swap = base_swap_exact_transition();
+        assert_swap(mock_swap, simulated_swap);
+
+        // Assert only one swap event emitted, and that it matches simulated swap.
+        let swap_events = emitted_events<Swap>();
+        assert!(vector::length(&swap_events) == 1, 0);
+        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
+
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert only two state events emitted, one from market registration and one from swap.
+        assert!(vector::length(&emitted_events<State>()) == 2, 0);
+
+        // Assert coin balance updates for user and integrator.
+        assert!(
+            coin::balance<BlackCatEmojicoin>(EXACT_TRANSITION_USER) == mock_swap.net_proceeds,
+            0,
+        );
+        assert!(coin::balance<AptosCoin>(EXACT_TRANSITION_USER) == 0, 0);
+        assert!(
+            coin::balance<AptosCoin>(EXACT_TRANSITION_INTEGRATOR) == mock_swap.integrator_fee,
+            0,
+        );
+
+        // Assert market and registry views, emitted state event.
+        assert_market_view(
+            base_market_view_exact_transition(),
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+        assert_registry_view(
+            base_registry_view_exact_transition(),
+            registry_view()
+        );
+        assert_state(
+            base_state_exact_transition(),
+            vector::pop_back(&mut emitted_events<State>()),
+        );
+    }
+
     #[test] fun swap_initializes_coin_capabilities() {
         init_package();
         let emoji_bytes = vector[YELLOW_HEART];
@@ -2063,52 +2109,6 @@
         );
         assert_state(
             base_state_simple_buy(),
-            vector::pop_back(&mut emitted_events<State>()),
-        );
-    }
-
-    #[test] fun swap_exact_transition() {
-        // Assert simulated swap from before actual swap execution.
-        let simulated_swap = init_package_then_exact_transition();
-        let mock_swap = base_swap_exact_transition();
-        assert_swap(mock_swap, simulated_swap);
-
-        // Assert only one swap event emitted, and that it matches simulated swap.
-        let swap_events = emitted_events<Swap>();
-        assert!(vector::length(&swap_events) == 1, 0);
-        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
-
-        // Assert only one global state event emitted (from package publication).
-        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
-
-        // Assert no periodic state events emitted.
-        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
-
-        // Assert only two state events emitted, one from market registration and one from swap.
-        assert!(vector::length(&emitted_events<State>()) == 2, 0);
-
-        // Assert coin balance updates for user and integrator.
-        assert!(
-            coin::balance<BlackCatEmojicoin>(EXACT_TRANSITION_USER) == mock_swap.net_proceeds,
-            0,
-        );
-        assert!(coin::balance<AptosCoin>(EXACT_TRANSITION_USER) == 0, 0);
-        assert!(
-            coin::balance<AptosCoin>(EXACT_TRANSITION_INTEGRATOR) == mock_swap.integrator_fee,
-            0,
-        );
-
-        // Assert market and registry views, emitted state event.
-        assert_market_view(
-            base_market_view_exact_transition(),
-            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
-        );
-        assert_registry_view(
-            base_registry_view_exact_transition(),
-            registry_view()
-        );
-        assert_state(
-            base_state_exact_transition(),
             vector::pop_back(&mut emitted_events<State>()),
         );
     }
