@@ -55,6 +55,25 @@ const Chat: React.FC = () => {
     autoFocusSearch: false,
   });
 
+  // const onKeyDownHandler = (e: KeyboardEvent) => {
+  const onKeyDownHandler = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      setMessageList([
+        {
+          user: "hey_hey.APT",
+          text: (e.target as unknown as HTMLTextAreaElement).value,
+          userRank: "🐡",
+          incoming: false,
+        },
+        ...messageList,
+      ]);
+      (e.target as unknown as HTMLTextAreaElement).value = "";
+    } else if (e.key !== "Backspace" && e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
+      e.preventDefault();
+    }
+  }
+
   return (
     <Column width="100%">
       <Flex flexGrow="1" width="100%" overflowY="auto" maxHeight="267px" flexDirection="column-reverse">
@@ -85,21 +104,7 @@ const Chat: React.FC = () => {
         <InputGroup>
           <Textarea
             ref={targetRef}
-            onKeyDown={e => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                setMessageList([
-                  {
-                    user: "hey_hey.APT",
-                    text: (e.target as unknown as HTMLTextAreaElement).value,
-                    userRank: "🐡",
-                    incoming: false,
-                  },
-                  ...messageList,
-                ]);
-                (e.target as unknown as HTMLTextAreaElement).value = "";
-              }
-            }}
+            onKeyDown={onKeyDownHandler}
           />
         </InputGroup>
       </Flex>
