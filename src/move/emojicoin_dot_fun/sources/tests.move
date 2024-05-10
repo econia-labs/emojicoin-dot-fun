@@ -6,8 +6,10 @@
 // the corresponding struct defined in the main file. These test functions begin with `assert_`.
 //
 // Base struct values are defined via functions starting with `base_`, corresponding to default
-// values that require the minimum number of field modifications for testing. For some testing cases
-// that are reused across multiple tests, there are additional base struct functions.
+// values that require the minimum number of field modifications for testing.
+//
+// For some testing cases that are reused across multiple tests, there are additional base struct
+// functions: see constants starting with `SIMPLE_BUY_` and `EXACT_TRANSITION_` for more.
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
