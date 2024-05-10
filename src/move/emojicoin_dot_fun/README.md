@@ -1,7 +1,13 @@
 # emojicoin dot fun
 
-This package is just within the bounds of max publication gas, and cost roughly
+This package is just within the bounds of max publication gas, and costs roughly
 1 APT to publish during testing.
+
+Keep in mind that the account sending the publish transaction needs to hold
+more APT if you set the max gas to more than 1 APT.
+
+For example, at `---max-gas 2000000` with `--gas-unit-price 100`, your account
+needs to have at least 2 APT to be able to publish, even if it only costs 1 APT.
 
 ## Signer-signer publication
 
@@ -24,7 +30,7 @@ aptos init --profile emojicoin-testnet
 Store the single signer account address:
 
 ```sh
-SIGNER=<GENERATED_ACCOUNT_ADDRESS>
+export SIGNER=<GENERATED_ACCOUNT_ADDRESS>
 ```
 
 Fund the account to ensure sufficient gas for publication:
@@ -47,7 +53,7 @@ aptos multisig create \
 Store the multisig address:
 
 ```sh
-MULTISIG=<GENERATED_MULTISIG_ADDRESS>
+export MULTISIG=<GENERATED_MULTISIG_ADDRESS>
 ```
 
 Build the publish payload:
