@@ -890,7 +890,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let pool_fees_quote_as_u128 = 0;
         let (quote, fdv_start, market_cap_start, fdv_end, market_cap_end);
         let results_in_state_transition = event.results_in_state_transition;
-        let ends_in_bonding_curve = !starts_in_bonding_curve || results_in_state_transition;
+        let ends_in_bonding_curve = starts_in_bonding_curve && !results_in_state_transition;
 
         // Create for swapper an account with AptosCoin store if it doesn't exist.
         if (!account::exists_at(swapper_address)) {
