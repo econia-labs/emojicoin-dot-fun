@@ -2328,7 +2328,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         EMOJICOIN_LP_NAME_SUFFIX
     }
     #[test_only] public fun get_EMOJICOIN_NAME_SUFFIX(): vector<u8> { EMOJICOIN_NAME_SUFFIX }
+    #[test_only] public fun get_EMOJICOIN_REMAINDER(): u64 { EMOJICOIN_REMAINDER }
     #[test_only] public fun get_EMOJICOIN_SUPPLY(): u64 { EMOJICOIN_SUPPLY }
+    #[test_only] public fun get_LP_TOKENS_INITIAL(): u64 { LP_TOKENS_INITIAL }
     #[test_only] public fun get_MAX_CHAT_MESSAGE_LENGTH(): u64 { MAX_CHAT_MESSAGE_LENGTH }
     #[test_only] public fun get_MAX_SYMBOL_LENGTH(): u8 { MAX_SYMBOL_LENGTH }
     #[test_only] public fun get_MARKET_REGISTRATION_FEE(): u64 { MARKET_REGISTRATION_FEE }

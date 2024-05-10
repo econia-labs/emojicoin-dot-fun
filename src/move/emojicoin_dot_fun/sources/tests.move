@@ -64,7 +64,9 @@
         get_EMOJICOIN_LP_STRUCT_NAME,
         get_EMOJICOIN_LP_SYMBOL_PREFIX,
         get_EMOJICOIN_NAME_SUFFIX,
+        get_EMOJICOIN_REMAINDER,
         get_EMOJICOIN_SUPPLY,
+        get_LP_TOKENS_INITIAL,
         get_MAX_CHAT_MESSAGE_LENGTH,
         get_MAX_SYMBOL_LENGTH,
         get_MARKET_REGISTRATION_FEE,
@@ -353,13 +355,22 @@
     const USER: address = @0xaaaaa;
     const INTEGRATOR: address = @0xbbbbb;
 
-    // Constants for a simple buy against a new market, used to set up assorted tests.
+    // Constants for a simple buy against a new market (does not result in state transtiion), used
+    // for assorted test setup.
     const SIMPLE_BUY_INPUT_AMOUNT: u64 = 111_111_111_111;
     const SIMPLE_BUY_INTEGRATOR: address = @0xddddd;
     const SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS: u8 = 50;
     const SIMPLE_BUY_QUOTE_DIVISOR: u64 = 9;
     const SIMPLE_BUY_TIME: u64 = 500_000;
     const SIMPLE_BUY_USER: address = @0xccccc;
+
+    // Constants for a swap buy against a new market that results in an exact state transition (no
+    // buying after the state transition), used for assorted test setup.
+    const EXACT_TRANSITION_INPUT_AMOUNT: u64 = 1_000_000_000_000;
+    const EXACT_TRANSITION_INTEGRATOR: address = @0xeeeee;
+    const EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS: u8 = 0;
+    const EXACT_TRANSITION_TIME: u64 = 500_000;
+    const EXACT_TRANSITION_USER: address = @0xfffff;
 
     public fun address_for_registered_market_by_emoji_bytes(
         emoji_bytes: vector<vector<u8>>,
@@ -870,11 +881,16 @@
         }
     }
 
+    public fun base_clamm_virtual_reserves_exact_transition(): MockReserves {
+        MockReserves { base: 0, quote: 0 }
+    }
+
     public fun base_cpamm_real_reserves(): MockReserves {
-        MockReserves {
-            base: 0,
-            quote: 0,
-        }
+        MockReserves { base: 0, quote: 0 }
+    }
+
+    public fun base_cpamm_real_reserves_exact_transition(): MockReserves {
+        MockReserves { base: get_EMOJICOIN_REMAINDER(), quote: get_QUOTE_REAL_CEILING() }
     }
 
     public fun base_cumulative_stats(): MockCumulativeStats {
@@ -895,6 +911,18 @@
             base_volume: (swap.base_volume as u128),
             quote_volume: (swap.quote_volume as u128),
             integrator_fees: (swap.integrator_fee as u128),
+            pool_fees_base: 0,
+            pool_fees_quote: 0,
+            n_swaps: 1,
+            n_chat_messages: 0,
+        }
+    }
+
+    public fun base_cumulative_stats_exact_transition(): MockCumulativeStats {
+        MockCumulativeStats {
+            base_volume: (get_BASE_REAL_CEILING() as u128),
+            quote_volume: (get_QUOTE_REAL_CEILING() as u128),
+            integrator_fees: 0,
             pool_fees_base: 0,
             pool_fees_quote: 0,
             n_swaps: 1,
@@ -948,6 +976,17 @@
         }
     }
 
+    public fun base_instantaneous_stats_exact_transition(): MockInstantaneousStats {
+        let price_quote = (get_QUOTE_REAL_CEILING() as u128);
+        let price_base = (get_EMOJICOIN_REMAINDER() as u128);
+        MockInstantaneousStats {
+            total_quote_locked: get_QUOTE_REAL_CEILING(),
+            total_value_locked: ((2 * get_QUOTE_REAL_CEILING()) as u128),
+            market_cap: (price_quote) * (get_BASE_REAL_CEILING() as u128) / (price_base),
+            fully_diluted_value: (price_quote) * (get_EMOJICOIN_SUPPLY() as u128) / (price_base),
+        }
+    }
+
     public fun base_last_swap(): MockLastSwap {
         MockLastSwap {
             is_sell: false,
@@ -968,6 +1007,18 @@
             quote_volume: swap.quote_volume,
             nonce: base_sequence_info_simple_buy().nonce,
             time: SIMPLE_BUY_TIME,
+        }
+    }
+
+    public fun base_last_swap_exact_transition(): MockLastSwap {
+        let swap = base_swap_exact_transition();
+        MockLastSwap {
+            is_sell: SWAP_BUY,
+            avg_execution_price_q64: swap.avg_execution_price_q64,
+            base_volume: swap.base_volume,
+            quote_volume: swap.quote_volume,
+            nonce: base_sequence_info_exact_transition().nonce,
+            time: EXACT_TRANSITION_TIME,
         }
     }
 
@@ -1026,6 +1077,26 @@
         market_view
     }
 
+    public fun base_market_view_exact_transition(): MockMarketView {
+        MockMarketView {
+            metadata: base_market_metadata(),
+            sequence_info: base_sequence_info_exact_transition(),
+            clamm_virtual_reserves: base_clamm_virtual_reserves_exact_transition(),
+            cpamm_real_reserves: base_cpamm_real_reserves_exact_transition(),
+            lp_coin_supply: (get_LP_TOKENS_INITIAL() as u128),
+            in_bonding_curve: false,
+            cumulative_stats: base_cumulative_stats_exact_transition(),
+            instantaneous_stats: base_instantaneous_stats_exact_transition(),
+            last_swap: base_last_swap_exact_transition(),
+            periodic_state_trackers: vectorize_periodic_state_tracker_base(
+                base_periodic_state_tracker_exact_transition()
+            ),
+            aptos_coin_balance: get_QUOTE_REAL_CEILING(),
+            emojicoin_balance: get_EMOJICOIN_REMAINDER(),
+            emojicoin_lp_balance: get_LP_TOKENS_INITIAL(),
+        }
+    }
+
     public fun base_periodic_state_tracker(): MockPeriodicStateTracker {
         MockPeriodicStateTracker {
             start_time: 0,
@@ -1050,25 +1121,33 @@
 
     public fun base_periodic_state_tracker_simple_buy(): MockPeriodicStateTracker {
         let swap = base_swap_simple_buy();
-        MockPeriodicStateTracker {
-            start_time: 0,
-            period: 0,
-            open_price_q64: swap.avg_execution_price_q64,
-            high_price_q64: swap.avg_execution_price_q64,
-            low_price_q64: swap.avg_execution_price_q64,
-            close_price_q64: swap.avg_execution_price_q64,
-            volume_base: (swap.base_volume as u128),
-            volume_quote: (swap.quote_volume as u128),
-            integrator_fees: (swap.integrator_fee as u128),
-            pool_fees_base: 0,
-            pool_fees_quote: 0,
-            n_swaps: 1,
-            n_chat_messages: 0,
-            starts_in_bonding_curve: true,
-            ends_in_bonding_curve: true,
-            tvl_to_lp_coin_ratio_start: base_tvl_to_lp_coin_ratio(),
-            tvl_to_lp_coin_ratio_end: base_tvl_to_lp_coin_ratio_simple_buy(),
-        }
+        let periodic_state_tracker = base_periodic_state_tracker();
+        periodic_state_tracker.open_price_q64 = swap.avg_execution_price_q64;
+        periodic_state_tracker.high_price_q64 = swap.avg_execution_price_q64;
+        periodic_state_tracker.low_price_q64 = swap.avg_execution_price_q64;
+        periodic_state_tracker.close_price_q64 = swap.avg_execution_price_q64;
+        periodic_state_tracker.volume_base = (swap.base_volume as u128);
+        periodic_state_tracker.volume_quote = (swap.quote_volume as u128);
+        periodic_state_tracker.integrator_fees = (swap.integrator_fee as u128);
+        periodic_state_tracker.n_swaps = 1;
+        periodic_state_tracker.tvl_to_lp_coin_ratio_end = base_tvl_to_lp_coin_ratio_simple_buy();
+        periodic_state_tracker
+    }
+
+    public fun base_periodic_state_tracker_exact_transition(): MockPeriodicStateTracker {
+        let swap = base_swap_exact_transition();
+        let periodic_state_tracker = base_periodic_state_tracker_simple_buy();
+        periodic_state_tracker.open_price_q64 = swap.avg_execution_price_q64;
+        periodic_state_tracker.high_price_q64 = swap.avg_execution_price_q64;
+        periodic_state_tracker.low_price_q64 = swap.avg_execution_price_q64;
+        periodic_state_tracker.close_price_q64 = swap.avg_execution_price_q64;
+        periodic_state_tracker.volume_base = (swap.base_volume as u128);
+        periodic_state_tracker.volume_quote = (swap.quote_volume as u128);
+        periodic_state_tracker.integrator_fees = 0;
+        periodic_state_tracker.ends_in_bonding_curve = false;
+        periodic_state_tracker.tvl_to_lp_coin_ratio_end =
+            base_tvl_to_lp_coin_ratio_exact_transition();
+        periodic_state_tracker
     }
 
     public fun base_registry_view(): MockRegistryView {
@@ -1107,6 +1186,25 @@
         }
     }
 
+    public fun base_registry_view_exact_transition(): MockRegistryView {
+        let swap = base_swap_exact_transition();
+        let instantaneous_stats = base_instantaneous_stats_exact_transition();
+        MockRegistryView {
+            registry_address: registry_address(),
+            nonce: 3,
+            last_bump_time: 0,
+            n_markets: 1,
+            cumulative_quote_volume: (swap.quote_volume as u128),
+            total_quote_locked: (swap.quote_volume as u128),
+            total_value_locked: instantaneous_stats.total_value_locked,
+            market_cap: instantaneous_stats.market_cap,
+            fully_diluted_value: instantaneous_stats.fully_diluted_value,
+            cumulative_integrator_fees: 0,
+            cumulative_swaps: 1,
+            cumulative_chat_messages: 0,
+        }
+    }
+
     public fun base_sequence_info(): MockSequenceInfo {
         MockSequenceInfo {
             nonce: 1,
@@ -1118,6 +1216,13 @@
         MockSequenceInfo {
             nonce: 2,
             last_bump_time: SIMPLE_BUY_TIME,
+        }
+    }
+
+    public fun base_sequence_info_exact_transition(): MockSequenceInfo {
+        MockSequenceInfo {
+            nonce: 2,
+            last_bump_time: EXACT_TRANSITION_TIME,
         }
     }
 
@@ -1144,6 +1249,19 @@
         state
     }
 
+    public fun base_state_exact_transition(): MockState {
+        MockState {
+            market_metadata: base_market_metadata(),
+            state_metadata: base_state_metadata_exact_transition(),
+            clamm_virtual_reserves: base_clamm_virtual_reserves_exact_transition(),
+            cpamm_real_reserves: base_cpamm_real_reserves_exact_transition(),
+            lp_coin_supply: (get_LP_TOKENS_INITIAL() as u128),
+            cumulative_stats: base_cumulative_stats_exact_transition(),
+            instantaneous_stats: base_instantaneous_stats_exact_transition(),
+            last_swap: base_last_swap_exact_transition(),
+        }
+    }
+
     public fun base_state_metadata(): MockStateMetadata {
         MockStateMetadata {
             market_nonce: 1,
@@ -1157,6 +1275,37 @@
             market_nonce: 2,
             bump_time: SIMPLE_BUY_TIME,
             trigger: get_TRIGGER_SWAP_BUY(),
+        }
+    }
+
+    public fun base_state_metadata_exact_transition(): MockStateMetadata {
+        MockStateMetadata {
+            market_nonce: 2,
+            bump_time: EXACT_TRANSITION_TIME,
+            trigger: get_TRIGGER_SWAP_BUY(),
+        }
+    }
+
+    public fun base_swap_exact_transition(): MockSwap {
+        let base_volume = get_BASE_REAL_CEILING();
+        let quote_volume = get_QUOTE_REAL_CEILING();
+        MockSwap {
+            market_id: 1,
+            time: EXACT_TRANSITION_TIME,
+            market_nonce: 2,
+            swapper: EXACT_TRANSITION_USER,
+            input_amount: EXACT_TRANSITION_INPUT_AMOUNT,
+            is_sell: SWAP_BUY,
+            integrator: EXACT_TRANSITION_INTEGRATOR,
+            integrator_fee_rate_bps: EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
+            net_proceeds: base_volume,
+            base_volume,
+            quote_volume: get_QUOTE_REAL_CEILING(),
+            avg_execution_price_q64: ((quote_volume as u128) << 64) / (base_volume as u128),
+            integrator_fee: 0,
+            pool_fee: 0,
+            starts_in_bonding_curve: true,
+            results_in_state_transition: true,
         }
     }
 
@@ -1206,6 +1355,14 @@
         }
     }
 
+    public fun base_tvl_to_lp_coin_ratio_exact_transition(): MockTVLtoLPCoinRatio {
+        let instantaneous_stats = base_instantaneous_stats_exact_transition();
+        MockTVLtoLPCoinRatio {
+            tvl: instantaneous_stats.total_value_locked,
+            lp_coins: (get_LP_TOKENS_INITIAL() as u128),
+        }
+    }
+
     public fun fdv_for_newly_registered_market(): u128 {
         (
             (
@@ -1248,7 +1405,7 @@
         timestamp::update_global_time_for_test(SIMPLE_BUY_TIME);
         init_market(vector[BLACK_CAT]);
         mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
-        let market_address = address_for_registered_market_by_emoji_bytes(vector[BLACK_CAT]);
+        let market_address = base_market_metadata().market_address;
         let simulated_swap = simulate_swap(
             market_address,
             SIMPLE_BUY_USER,
@@ -1264,6 +1421,31 @@
             SWAP_BUY,
             SIMPLE_BUY_INTEGRATOR,
             SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
+        );
+        simulated_swap
+    }
+
+    public fun init_package_then_exact_transition(): Swap {
+        init_package();
+        timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME);
+        init_market(vector[BLACK_CAT]);
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
+        let market_address = base_market_metadata().market_address;
+        let simulated_swap = simulate_swap(
+            market_address,
+            EXACT_TRANSITION_USER,
+            EXACT_TRANSITION_INPUT_AMOUNT,
+            SWAP_BUY,
+            EXACT_TRANSITION_INTEGRATOR,
+            EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
+        );
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            market_address,
+            &get_signer(EXACT_TRANSITION_USER),
+            EXACT_TRANSITION_INPUT_AMOUNT,
+            SWAP_BUY,
+            EXACT_TRANSITION_INTEGRATOR,
+            EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
         );
         simulated_swap
     }
@@ -1881,7 +2063,52 @@
             base_state_simple_buy(),
             vector::pop_back(&mut emitted_events<State>()),
         );
+    }
 
+    #[test] fun swap_exact_transition() {
+        // Assert simulated swap from before actual swap execution.
+        let simulated_swap = init_package_then_exact_transition();
+        let mock_swap = base_swap_exact_transition();
+        assert_swap(mock_swap, simulated_swap);
+
+        // Assert only one swap event emitted, and that it matches simulated swap.
+        let swap_events = emitted_events<Swap>();
+        assert!(vector::length(&swap_events) == 1, 0);
+        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
+
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert only two state events emitted, one from market registration and one from swap.
+        assert!(vector::length(&emitted_events<State>()) == 2, 0);
+
+        // Assert coin balance updates for user and integrator.
+        assert!(
+            coin::balance<BlackCatEmojicoin>(EXACT_TRANSITION_USER) == mock_swap.net_proceeds,
+            0,
+        );
+        assert!(coin::balance<AptosCoin>(EXACT_TRANSITION_USER) == 0, 0);
+        assert!(
+            coin::balance<AptosCoin>(EXACT_TRANSITION_INTEGRATOR) == mock_swap.integrator_fee,
+            0,
+        );
+
+        // Assert market and registry views, emitted state event.
+        assert_market_view(
+            base_market_view_exact_transition(),
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+        assert_registry_view(
+            base_registry_view_exact_transition(),
+            registry_view()
+        );
+        assert_state(
+            base_state_exact_transition(),
+            vector::pop_back(&mut emitted_events<State>()),
+        );
     }
 
     #[test] fun valid_coin_types_all_invalid() {
