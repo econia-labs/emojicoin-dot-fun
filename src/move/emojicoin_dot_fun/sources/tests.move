@@ -11,6 +11,7 @@
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
     use aptos_framework::aggregator_v2::read_snapshot;
+    use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
     use aptos_framework::event::{emitted_events};
     use aptos_framework::object;
@@ -859,6 +860,14 @@
         }
     }
 
+    public fun base_clamm_virtual_reserves_simple_buy(): MockReserves {
+        let swap = base_swap_simple_buy();
+        MockReserves {
+            base: get_BASE_VIRTUAL_CEILING() - swap.base_volume,
+            quote: get_QUOTE_VIRTUAL_FLOOR() + swap.quote_volume,
+        }
+    }
+
     public fun base_cpamm_real_reserves(): MockReserves {
         MockReserves {
             base: 0,
@@ -878,12 +887,16 @@
         }
     }
 
-    public fun base_instantaneous_stats(): MockInstantaneousStats {
-        MockInstantaneousStats {
-            total_quote_locked: 0,
-            total_value_locked: 0,
-            market_cap: 0,
-            fully_diluted_value: fdv_for_newly_registered_market(),
+    public fun base_cumulative_stats_simple_buy(): MockCumulativeStats {
+        let swap = base_swap_simple_buy();
+        MockCumulativeStats {
+            base_volume: (swap.base_volume as u128),
+            quote_volume: (swap.quote_volume as u128),
+            integrator_fees: (swap.integrator_fee as u128),
+            pool_fees_base: 0,
+            pool_fees_quote: 0,
+            n_swaps: 1,
+            n_chat_messages: 0,
         }
     }
 
@@ -903,6 +916,36 @@
         }
     }
 
+    public fun base_instantaneous_stats(): MockInstantaneousStats {
+        MockInstantaneousStats {
+            total_quote_locked: 0,
+            total_value_locked: 0,
+            market_cap: 0,
+            fully_diluted_value: fdv_for_newly_registered_market(),
+        }
+    }
+
+    public fun base_instantaneous_stats_simple_buy(): MockInstantaneousStats {
+        let clamm_virtual_reserves = base_clamm_virtual_reserves_simple_buy();
+        let swap = base_swap_simple_buy();
+        let total_quote_locked = swap.quote_volume;
+        let total_base_locked = get_EMOJICOIN_SUPPLY() - swap.base_volume;
+        let price_base = (clamm_virtual_reserves.base as u128);
+        let price_quote = (clamm_virtual_reserves.quote as u128);
+        let total_base_locked_denominated_in_quote =
+            (((total_base_locked as u128) * price_quote) / price_base);
+        let total_value_locked =
+            (total_quote_locked as u128) + total_base_locked_denominated_in_quote;
+        let market_cap = (((swap.base_volume as u128) * price_quote) / price_base);
+        let fully_diluted_value = (((get_EMOJICOIN_SUPPLY() as u128) * price_quote) / price_base);
+        MockInstantaneousStats {
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+        }
+    }
+
     public fun base_last_swap(): MockLastSwap {
         MockLastSwap {
             is_sell: false,
@@ -917,8 +960,8 @@
     public fun base_market_metadata(): MockMarketMetadata {
         MockMarketMetadata {
             market_id: 1,
-            market_address: @0x0,
-            emoji_bytes: vector[],
+            market_address: @black_cat_market,
+            emoji_bytes: BLACK_CAT,
         }
     }
 
@@ -952,6 +995,27 @@
             emojicoin_balance: get_EMOJICOIN_SUPPLY(),
             emojicoin_lp_balance: 0,
         }
+    }
+
+    public fun base_market_view_simple_buy(): MockMarketView {
+        let swap = base_swap_simple_buy();
+        let market_view = base_market_view();
+        market_view.sequence_info =
+            MockSequenceInfo { nonce: 2, last_bump_time: SIMPLE_BUY_TIME };
+        market_view.clamm_virtual_reserves = base_clamm_virtual_reserves_simple_buy();
+        market_view.cumulative_stats = base_cumulative_stats_simple_buy();
+        market_view.instantaneous_stats = base_instantaneous_stats_simple_buy();
+        market_view.last_swap = MockLastSwap {
+            is_sell: false,
+            avg_execution_price_q64: swap.avg_execution_price_q64,
+            base_volume: swap.base_volume,
+            quote_volume: swap.quote_volume,
+            nonce: market_view.sequence_info.nonce,
+            time: SIMPLE_BUY_TIME,
+        };
+        market_view.aptos_coin_balance = swap.quote_volume;
+        market_view.emojicoin_balance = get_EMOJICOIN_SUPPLY() - swap.base_volume;
+        market_view
     }
 
     public fun base_periodic_state_tracker(): MockPeriodicStateTracker {
@@ -1690,8 +1754,36 @@
     }
 
     #[test] fun swap_simple_buy() {
+        // Assert simulated swap from before actual swap execution.
         let simulated_swap = init_package_then_simple_buy();
-        assert_swap(base_swap_simple_buy(), simulated_swap);
+        let mock_swap = base_swap_simple_buy();
+        assert_swap(mock_swap, simulated_swap);
+
+        // Assert only one swap event emitted, and that it matches simulated swap.
+        let swap_events = emitted_events<Swap>();
+        assert!(vector::length(&swap_events) == 1, 0);
+        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
+
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert only two state events emitted, one from market registration and one from swap.
+        assert!(vector::length(&emitted_events<State>()) == 2, 0);
+
+        // Assert coin balance updates for user and integrator.
+        assert!(coin::balance<BlackCatEmojicoin>(SIMPLE_BUY_USER) == mock_swap.net_proceeds, 0);
+        assert!(coin::balance<AptosCoin>(SIMPLE_BUY_USER) == 0, 0);
+        assert!(coin::balance<AptosCoin>(SIMPLE_BUY_INTEGRATOR) == mock_swap.integrator_fee, 0);
+
+        // Assert market view.
+        assert_market_view(
+            base_market_view_simple_buy(),
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+
     }
 
     #[test] fun valid_coin_types_all_invalid() {
