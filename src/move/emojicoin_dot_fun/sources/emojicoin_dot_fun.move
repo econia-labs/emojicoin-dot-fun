@@ -2352,6 +2352,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_PERIOD_1H(): u64 { PERIOD_1H }
     #[test_only] public fun get_PERIOD_4H(): u64 { PERIOD_4H }
     #[test_only] public fun get_PERIOD_1D(): u64 { PERIOD_1D }
+    #[test_only] public fun get_POOL_FEE_RATE_BPS(): u8 { POOL_FEE_RATE_BPS }
     #[test_only] public fun get_REGISTRY_NAME(): vector<u8> { REGISTRY_NAME }
     #[test_only] public fun get_TRIGGER_MARKET_REGISTRATION(): u8 { TRIGGER_MARKET_REGISTRATION }
     #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
