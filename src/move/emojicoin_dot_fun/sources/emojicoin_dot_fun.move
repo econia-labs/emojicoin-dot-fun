@@ -426,6 +426,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             assign_supply_minuend_reserves_ref(market_ref_mut, in_bonding_curve);
         let circulating_supply = supply_minuend - reserves_ref.base;
         let user_emojicoin_balance = if (!coin::is_account_registered<Emojicoin>(user_address)) {
+            if (!account::exists_at(user_address)) {
+                aptos_account::create_account(user_address);
+            };
             coin::register<Emojicoin>(user);
             0
         } else {
@@ -757,12 +760,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     inline fun assign_supply_minuend_reserves_ref(
         market_ref: &Market,
-        starts_in_bonding_curve: bool
+        in_bonding_curve: bool
     ): (
         u64,
         &Reserves,
     ) {
-        if (starts_in_bonding_curve) {
+        if (in_bonding_curve) {
             (BASE_VIRTUAL_CEILING, &market_ref.clamm_virtual_reserves)
         } else {
             (EMOJICOIN_SUPPLY, &market_ref.cpamm_real_reserves)
@@ -913,7 +916,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             let reserves_start = *reserves_ref_mut;
             let reserves_end = reserves_start;
             reserves_end.base = reserves_end.base + event.input_amount;
-            reserves_end.quote = reserves_end.base - quote_leaving_market;
+            reserves_end.quote = reserves_end.quote - quote_leaving_market;
             *reserves_ref_mut = reserves_end;
 
             // Get FDV, market cap at start and end.
@@ -2299,6 +2302,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address)
     }
 
+    #[test_only] public fun fdv_market_cap_test_only(
+        real_reserves: Reserves,
+        emojicoin_supply: u64,
+    ): (u128, u128) {
+        fdv_market_cap(real_reserves, emojicoin_supply)
+    }
+
     #[test_only] public fun get_bps_fee_test_only(
         principal: u64,
         fee_rate_bps: u8,
@@ -2346,6 +2356,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_TRIGGER_MARKET_REGISTRATION(): u8 { TRIGGER_MARKET_REGISTRATION }
     #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
     #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
+    #[test_only] public fun get_TRIGGER_SWAP_SELL(): u8 { TRIGGER_SWAP_SELL }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
@@ -2362,6 +2373,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator: address,
     ) acquires Market, Registry, RegistryAddress {
         register_market_inner(registrant, emojis, integrator, false);
+    }
+
+    #[test_only] public fun tvl_clamm_test_only(virtual_reserves: Reserves): u128 {
+        tvl_clamm(virtual_reserves)
     }
 
     #[test_only] public fun unpack_chat(
