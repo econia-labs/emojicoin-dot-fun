@@ -1754,10 +1754,12 @@
                     start_time: setup_periodic_state_tracker.start_time,
                     period: 0,
                     open_price_q64: setup_periodic_state_tracker.open_price_q64,
-                    high_price_q64: if (flow.is_sell) setup_periodic_state_tracker.high_price_q64
-                        else avg_execution_price_q64,
-                    low_price_q64: if (flow.is_sell) avg_execution_price_q64 else
-                        setup_periodic_state_tracker.low_price_q64,
+                    high_price_q64: if
+                        (avg_execution_price_q64 > setup_periodic_state_tracker.high_price_q64)
+                        avg_execution_price_q64 else setup_periodic_state_tracker.high_price_q64,
+                    low_price_q64: if
+                        (avg_execution_price_q64 < setup_periodic_state_tracker.low_price_q64)
+                        avg_execution_price_q64 else setup_periodic_state_tracker.low_price_q64,
                     close_price_q64: avg_execution_price_q64,
                     volume_base:
                         setup_periodic_state_tracker.volume_base + (base_volume as u128),
@@ -2469,6 +2471,14 @@
             setup_is_simple_buy: true,
             is_sell: true,
             input_amount: base_swap_simple_buy().net_proceeds,
+        })
+    }
+
+    #[test] fun swap_simple_buy_then_sell_back_half() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: true,
+            input_amount: base_swap_simple_buy().net_proceeds / 2,
         })
     }
 
