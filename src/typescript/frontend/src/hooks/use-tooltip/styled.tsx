@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { motion } from "framer-motion";
+import { Colors } from "theme/types";
 
 const PADDING = 16;
 
@@ -9,7 +10,7 @@ export const Arrow = styled.div`
   background: ${({ theme }) => theme.colors.econiaBlue};
 `;
 
-export const StyledTooltip = styled(motion.div)`
+export const StyledTooltip = styled(motion.div)<{ arrowBorderColor: keyof Colors }>`
   padding: ${PADDING}px;
   border-radius: ${({ theme }) => theme.radii.semiMedium};
   max-width: calc(320px - (${PADDING}px * 2));
@@ -26,25 +27,33 @@ export const StyledTooltip = styled(motion.div)`
 
   &[data-popper-placement^="top"] > ${Arrow} {
     bottom: -5px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.econiaBlue};
-    border-right: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+    border-bottom: 1px solid
+      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+    border-right: 1px solid
+      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
   }
 
   &[data-popper-placement^="bottom"] > ${Arrow} {
     top: -5px;
-    border-top: 1px solid ${({ theme }) => theme.colors.econiaBlue};
-    border-left: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+    border-top: 1px solid
+      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+    border-left: 1px solid
+      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
   }
 
   &[data-popper-placement^="left"] > ${Arrow} {
     right: -5px;
-    border-top: 1px solid ${({ theme }) => theme.colors.econiaBlue};
-    border-right: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+    border-top: 1px solid
+      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+    border-right: 1px solid
+      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
   }
 
   &[data-popper-placement^="right"] > ${Arrow} {
     left: -5px;
-    border-bottom: 1px solid ${({ theme }) => theme.colors.econiaBlue};
-    border-left: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+    border-bottom: 1px solid
+      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+    border-left: 1px solid
+      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
   }
 `;

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Box, Flex, Text, Button } from "components";
+import { Box, Flex, Text, Button, ClientsSlider } from "components";
 import { useTranslation } from "context";
 
 import {
@@ -18,7 +18,9 @@ const EmojicoinPage: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <Box pt="120px">
+    <Box pt="85px">
+      <ClientsSlider />
+
       <MainInfo />
 
       <StyledContentWrapper>

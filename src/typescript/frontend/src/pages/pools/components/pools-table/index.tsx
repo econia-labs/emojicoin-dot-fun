@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { isEqual } from "lodash";
 
 import { TableRowDesktop, TableHeader } from "./components";
-import { Table, Th } from "components";
+import { Table, Th, ThInner, HeaderTr, TBody } from "components";
 import { StyledPoolsWrapper } from "./styled";
 
 import { HEADERS, DATA } from "./constants";
@@ -24,22 +24,24 @@ const PoolsTable: React.FC = () => {
   };
 
   return (
-    <StyledPoolsWrapper>
+    <StyledPoolsWrapper id="lolka123">
       <Table>
         <thead>
-          <tr>
+          <HeaderTr>
             {HEADERS.map((th, index) => (
-              <Th width={th.width} p="5px 12px" key={index}>
-                <TableHeader item={th} isLast={HEADERS.length - 1 === index} sortData={sortData} />
+              <Th width={th.width} key={index}>
+                <ThInner>
+                  <TableHeader item={th} isLast={HEADERS.length - 1 === index} sortData={sortData} />
+                </ThInner>
               </Th>
             ))}
-          </tr>
+          </HeaderTr>
         </thead>
-        <tbody>
+        <TBody height="calc(100vh - 353px)">
           {dataMock.map((item, index) => (
             <TableRowDesktop key={index} item={item} />
           ))}
-        </tbody>
+        </TBody>
       </Table>
     </StyledPoolsWrapper>
   );

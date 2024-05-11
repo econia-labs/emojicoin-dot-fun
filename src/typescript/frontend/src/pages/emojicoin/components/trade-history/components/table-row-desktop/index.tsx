@@ -18,43 +18,48 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
   return (
     <Tr>
-      <Td>
-        <Flex justifyContent="center">
+      <Td width="100px">
+        <Flex px="12px">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ref={targetRef}>
             {item.rankIcon}
           </Text>
           {tooltip}
         </Flex>
       </Td>
-      <Td>
+
+      <Td width="100px">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.apt}
           </Text>
         </Flex>
       </Td>
-      <Td>
+
+      <Td width="100px">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.emoji}
           </Text>
         </Flex>
       </Td>
-      <Td>
+
+      <Td width="100px">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.type}
           </Text>
         </Flex>
       </Td>
-      <Td>
+
+      <Td width="100px">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.date}
           </Text>
         </Flex>
       </Td>
-      <Td>
+
+      <Td width="37%">
         <Flex justifyContent="end">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.transaction}

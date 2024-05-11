@@ -72,6 +72,7 @@ export const styles = (theme: DefaultTheme) => {
     [scales.bodyLarge]: css`
       font-size: 16px;
       line-height: 18px;
+      font-family: ${theme.fonts.formaDR};
     `,
     [scales.bodySmall]: css`
       font-size: 12px;

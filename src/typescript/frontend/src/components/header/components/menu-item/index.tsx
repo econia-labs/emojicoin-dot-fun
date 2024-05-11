@@ -3,21 +3,24 @@ import { useScramble } from "use-scramble";
 
 import { useTranslation } from "context";
 
-import { Link, Text } from "components";
+import { FlexGap, Text } from "components";
 
 import { MenuItemProps } from "./types";
 
-const MenuItem: React.FC<MenuItemProps> = ({ title, path, width }) => {
+const MenuItem: React.FC<MenuItemProps> = ({ title, width, onClick = () => {} }) => {
   const { t } = useTranslation();
 
   const { ref, replay } = useScramble({
-    text: `{ ${t(title)} }`,
+    text: `${t(title)}`,
     overdrive: false,
     speed: 0.5,
   });
 
   return (
-    <Link key={title} href={path} onMouseOver={replay}>
+    <FlexGap gap="8px" onMouseOver={replay} onClick={onClick}>
+      <Text textScale="pixelHeading4" color="econiaBlue" textTransform="uppercase" fontSize="24px">
+        {"{ "}
+      </Text>
       <Text
         textScale="pixelHeading4"
         color="econiaBlue"
@@ -28,7 +31,10 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, width }) => {
         ref={ref}
         ellipsis
       />
-    </Link>
+      <Text textScale="pixelHeading4" color="econiaBlue" textTransform="uppercase" fontSize="24px">
+        {" }"}
+      </Text>
+    </FlexGap>
   );
 };
 

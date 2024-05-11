@@ -6,7 +6,6 @@ export const Arrow = styled.div`
   position: absolute;
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
-  right: -5px;
 `;
 
 export const StyledMessageInner = styled.div`
@@ -37,6 +36,8 @@ export const StyledMessageContainer = styled.div<{ isIncoming: boolean }>`
 
   ${Arrow} {
     background: ${({ theme, isIncoming }) => (isIncoming ? theme.colors.econiaBlue : theme.colors.blue)};
+    left: ${({ isIncoming }) => (isIncoming ? "-5px" : undefined)};
+    right: ${({ isIncoming }) => (isIncoming ? undefined : "-5px")};
   }
 
   ${StyledUserNameWrapper} {

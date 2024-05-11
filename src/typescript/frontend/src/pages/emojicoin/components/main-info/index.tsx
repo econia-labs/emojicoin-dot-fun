@@ -2,17 +2,24 @@ import React from "react";
 
 import { Flex, Text, Column, FlexGap } from "components";
 import { useTranslation } from "context";
+import { useTooltip } from "../../../../hooks";
 
 const MainInfo: React.FC = () => {
   const { t } = useTranslation();
 
+  const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
+    placement: "top",
+    isEllipsis: true,
+  });
+
   return (
     <Flex justifyContent="center">
       <Flex py="83px" justifyContent="space-around" width="100%" maxWidth="1362px">
-        <Column width="60%" px="44px">
-          <Text textScale="display2" mb="4px">
+        <Column width="60%" px="44px" justifyContent="space-between">
+          <Text textScale="display2" ellipsis ref={targetRefEmojiName}>
             BLACK HEART
           </Text>
+          {tooltipEmojiName}
 
           <Text textScale="display2">🖤</Text>
         </Column>

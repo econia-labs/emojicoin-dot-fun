@@ -12,8 +12,6 @@ export const getTooltipStyles = (theme: DefaultTheme) => {
     },
     arrow: {
       background: theme.colors.black,
-      borderTop: `1px solid ${theme.colors.darkGrey}`,
-      borderLeft: `1px solid ${theme.colors.darkGrey}`,
     },
   };
 };

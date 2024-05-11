@@ -1,19 +1,17 @@
 import React, { ChangeEvent, useEffect } from "react";
-import EmojiPicker, { Theme, EmojiClickData } from "emoji-picker-react";
+import { EmojiClickData } from "emoji-picker-react";
 import emojiRegex from "emoji-regex";
 
-import { useThemeContext, useTranslation } from "context";
+import { useTranslation } from "context";
 import { useValidationSchema } from "./hooks";
-import { useForm, useTooltip } from "hooks";
+import { useForm, useTooltip, useEmojicoinPicker } from "hooks";
 
 import { Button, ClientsSlider, Column, Flex, FlexGap, Input, InputGroup, Text, Prompt } from "components";
-import { StyledEmojiPickerWrapper, StyledFieldName } from "./styled";
-
-import { getTooltipStyles } from "./theme";
+import { StyledFieldName } from "./styled";
+import { isDisallowedEventKey } from "pages/emojicoin/emoji-picker-inputs";
 
 const LaunchEmojicoinPage: React.FC = () => {
   const { t } = useTranslation();
-  const { theme } = useThemeContext();
 
   const { validationSchema, initialValues } = useValidationSchema();
   const { values, errors, touched, fieldProps, setFieldValue } = useForm({
@@ -44,30 +42,21 @@ const LaunchEmojicoinPage: React.FC = () => {
     },
   });
 
-  const { targetRef, tooltip, targetElement } = useTooltip(
-    <StyledEmojiPickerWrapper>
-      <EmojiPicker
-        searchPlaceholder={t("Search:")}
-        onEmojiClick={emoji => onEmojiClickHandler(emoji)}
-        theme={Theme.DARK}
-        skinTonesDisabled
-        lazyLoadEmojis
-      />
-    </StyledEmojiPickerWrapper>,
-    {
-      placement: "bottom",
-      customStyles: getTooltipStyles(theme),
-      trigger: "click",
-    },
-  );
-
   const onEmojiClickHandler = async (emoji: EmojiClickData) => {
-    await setFieldValue("emoji", values.emoji + emoji.emoji);
-    await setFieldValue("emojiList", [...values.emojiList, emoji]);
+    const valueLength = values.emoji.match(emojiRegex())?.length ?? 0;
+    if (valueLength < 5) {
+      await setFieldValue("emoji", values.emoji + emoji.emoji);
+      await setFieldValue("emojiList", [...values.emojiList, emoji]);
+    }
   };
 
+  const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
+    onEmojiClick: onEmojiClickHandler,
+    placement: "bottom",
+  });
+
   const inputProhibition = async (event: KeyboardEvent) => {
-    if (event.key !== "Backspace" && event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+    if (isDisallowedEventKey(event)) {
       event.preventDefault();
     }
   };
@@ -94,7 +83,7 @@ const LaunchEmojicoinPage: React.FC = () => {
   };
 
   return (
-    <Column pt="120px" flexGrow="1">
+    <Column pt="85px" flexGrow="1">
       <ClientsSlider />
 
       <Flex justifyContent="center" alignItems="center" height="100%">
@@ -122,7 +111,7 @@ const LaunchEmojicoinPage: React.FC = () => {
             <StyledFieldName textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
               {t("Emojicoin symbol (ticker) :")}
             </StyledFieldName>
-            <Text textScale="bodyLarge" textTransform="uppercase" ellipsis ref={targetRefEmojiTicker}>
+            <Text textScale="bodyLarge" textTransform="uppercase" lineHeight="20px" ellipsis ref={targetRefEmojiTicker}>
               {tickers}
             </Text>
             {tooltipEmojiTicker}
@@ -134,7 +123,7 @@ const LaunchEmojicoinPage: React.FC = () => {
             </Text>
           </Flex>
 
-          <Flex justifyContent="center">
+          <Flex justifyContent="center" mt="18px">
             <Button scale="lg">{t("Launch Emojicoin")}</Button>
           </Flex>
         </Column>

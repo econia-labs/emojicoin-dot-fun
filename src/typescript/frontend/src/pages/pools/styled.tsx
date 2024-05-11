@@ -41,6 +41,9 @@ export const StyledHeaderInner = styled.div`
 
 export const StyledInner = styled(Flex)`
   position: relative;
+  &:last-child {
+    border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  }
 
   &:before {
     content: "";
@@ -50,9 +53,6 @@ export const StyledInner = styled(Flex)`
     background-color: ${({ theme }) => theme.colors.darkGrey};
     height: 1px;
     transform: translateX(-50%);
-  }
-
-  &:before {
     bottom: 0;
   }
 `;

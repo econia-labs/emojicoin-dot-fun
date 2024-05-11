@@ -48,7 +48,7 @@ export const Input = styled.input<InputProps>`
   font-family: ${({ theme }) => theme.fonts.forma};
   display: block;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 400;
   height: ${getHeight};
   outline: 0;
   padding: 0 14px;

@@ -24,7 +24,7 @@ const TradeEmojicoin: React.FC = () => {
       <StyledInputContainer isForce={isForce}>
         <StyledInputWrapper>
           <Column>
-            <Text textScale="pixelHeading4" mb="-6px" color="lightGrey" textTransform="uppercase">
+            <Text textScale="pixelHeading4" mb="-6px" color="lightGrey" lineHeight="20px" textTransform="uppercase">
               {t("You pay")}
             </Text>
 
@@ -39,12 +39,12 @@ const TradeEmojicoin: React.FC = () => {
         </StyledInputWrapper>
 
         <StyledArrowWrapper onClick={switchHandler}>
-          <Arrow width="18px" rotate="90deg" color="lightGrey" />
+          <Arrow width="18px" rotate={isForce ? "90deg" : "-90deg"} color="lightGrey" />
         </StyledArrowWrapper>
 
         <StyledInputWrapper>
           <Column>
-            <Text textScale="pixelHeading4" mb="-6px" color="lightGrey" textTransform="uppercase">
+            <Text textScale="pixelHeading4" mb="-6px" color="lightGrey" lineHeight="20px" textTransform="uppercase">
               {t("You receive")}
             </Text>
 
