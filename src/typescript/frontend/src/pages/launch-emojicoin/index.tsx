@@ -8,6 +8,7 @@ import { useForm, useTooltip, useEmojicoinPicker } from "hooks";
 
 import { Button, ClientsSlider, Column, Flex, FlexGap, Input, InputGroup, Text, Prompt } from "components";
 import { StyledFieldName } from "./styled";
+import { isDisallowedEventKey } from "pages/emojicoin/emoji-picker-inputs";
 
 const LaunchEmojicoinPage: React.FC = () => {
   const { t } = useTranslation();
@@ -55,7 +56,7 @@ const LaunchEmojicoinPage: React.FC = () => {
   });
 
   const inputProhibition = async (event: KeyboardEvent) => {
-    if (event.key !== "Backspace" && event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+    if (isDisallowedEventKey(event)) {
       event.preventDefault();
     }
   };

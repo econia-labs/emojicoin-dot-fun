@@ -7,6 +7,7 @@ import { useThemeContext } from "context";
 
 import { Flex, InputGroup, Textarea, Column, Loader } from "components";
 import { MessageContainer } from "./components";
+import { isDisallowedEventKey } from "pages/emojicoin/emoji-picker-inputs";
 
 const MESSAGE_LIST = [
   {
@@ -69,7 +70,7 @@ const Chat: React.FC = () => {
         ...messageList,
       ]);
       (e.target as unknown as HTMLTextAreaElement).value = "";
-    } else if (e.key !== "Backspace" && e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
+    } else if (isDisallowedEventKey(e)) {
       e.preventDefault();
     }
   }
