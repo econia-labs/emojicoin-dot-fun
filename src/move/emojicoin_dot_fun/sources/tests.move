@@ -1804,7 +1804,7 @@
             state_metadata: MockStateMetadata {
                 market_nonce: mock_swap.market_nonce,
                 bump_time: GENERAL_CASE_SWAP_TIME,
-                trigger: get_TRIGGER_SWAP_SELL(),
+                trigger: if (flow.is_sell) get_TRIGGER_SWAP_SELL() else get_TRIGGER_SWAP_BUY(),
             },
             clamm_virtual_reserves: mock_market_view.clamm_virtual_reserves,
             cpamm_real_reserves: mock_market_view.cpamm_real_reserves,
@@ -2480,6 +2480,15 @@
             is_sell: true,
             input_amount: base_swap_simple_buy().net_proceeds / 2,
         })
+    }
+
+    #[test] fun swap_simple_buy_then_buy_to_exact_state_transition() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: false,
+            input_amount: get_QUOTE_VIRTUAL_CEILING() -
+                base_market_view_simple_buy().clamm_virtual_reserves.quote,
+        });
     }
 
     #[test] fun valid_coin_types_all_invalid() {
