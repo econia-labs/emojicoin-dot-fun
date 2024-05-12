@@ -12,6 +12,11 @@
 // functions: see constants starting with `SIMPLE_BUY_` and `EXACT_TRANSITION_` for more. These two
 // sets of constants are tested individually via `swap_setup_case_test_flow()`, and are then used to
 // fixture assorted tests that call on `swap_general_case_test_flow()`.
+//
+// The authors of the Aptos Framework insist on naming their error codes without a leading
+// underscore delimiter and have thus triggered the spell checker, which is escaped below.
+//
+// cspell:word EINSUFFICIENT
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
