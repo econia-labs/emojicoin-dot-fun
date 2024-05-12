@@ -1008,7 +1008,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             // Update cumulative pool fees.
             let local_cumulative_pool_fees_base_ref_mut =
                 &mut local_cumulative_stats_ref_mut.pool_fees_base;
-            let pool_fees_base_as_u128 = (event.pool_fee as u128);
+            pool_fees_base_as_u128 = (event.pool_fee as u128);
             *local_cumulative_pool_fees_base_ref_mut =
                 *local_cumulative_pool_fees_base_ref_mut + pool_fees_base_as_u128;
         };

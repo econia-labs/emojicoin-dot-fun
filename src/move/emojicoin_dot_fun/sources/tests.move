@@ -9,7 +9,9 @@
 // values that require the minimum number of field modifications for testing.
 //
 // For some testing cases that are reused across multiple tests, there are additional base struct
-// functions: see constants starting with `SIMPLE_BUY_` and `EXACT_TRANSITION_` for more.
+// functions: see constants starting with `SIMPLE_BUY_` and `EXACT_TRANSITION_` for more. These two
+// sets of constants are tested individually via `swap_setup_case_test_flow()`, and are then used to
+// fixture assorted tests that call on `swap_general_case_test_flow()`.
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
@@ -1507,6 +1509,15 @@
         pack_reserves(mock_reserves.base, mock_reserves.quote)
     }
 
+    public fun swap_general_case_follow_up_input_amount_to_trigger_state_transition(): u64 {
+        let quote_to_transition = ((get_QUOTE_VIRTUAL_CEILING() -
+            base_market_view_simple_buy().clamm_virtual_reserves.quote) as u128);
+        ((
+            (get_BASIS_POINTS_PER_UNIT() * quote_to_transition) /
+            (get_BASIS_POINTS_PER_UNIT() - (INTEGRATOR_FEE_RATE_BPS as u128))
+        ) as u64)
+    }
+
     public fun swap_general_case_test_flow(
         flow: SwapGeneralCaseTestFlow
     ) {
@@ -1588,7 +1599,9 @@
             let q_out_clamm = cpamm_simple_swap_output_amount(
                 flow.input_amount,
                 SWAP_SELL,
-                pack_mock_reserves(setup_market_view.clamm_virtual_reserves)
+                pack_mock_reserves(if (starts_in_bonding_curve)
+                    clamm_virtual_reserves else cpamm_real_reserves
+                ),
             );
             integrator_fee = get_bps_fee(q_out_clamm, INTEGRATOR_FEE_RATE_BPS);
             if (!starts_in_bonding_curve)
@@ -1627,12 +1640,11 @@
                 };
             } else { // Buy against bonding curve, might require a state transition.
                 let quote_volume_before_state_transition =
-                    get_QUOTE_VIRTUAL_CEILING() - setup_market_view.clamm_virtual_reserves.quote;
-                // If a state transition, need to swap in two ways.
+                    get_QUOTE_VIRTUAL_CEILING() - clamm_virtual_reserves.quote;
+                // If a state transition, need to swap against CLAMM then CPAMM.
                 if (quote_volume >= quote_volume_before_state_transition) {
                     results_in_state_transition = true;
-                    base_volume =
-                        get_BASE_VIRTUAL_CEILING() - setup_market_view.clamm_virtual_reserves.base;
+                    base_volume = clamm_virtual_reserves.base - get_BASE_VIRTUAL_FLOOR();
                     let remaining_quote_volume =
                         quote_volume - quote_volume_before_state_transition;
                     cpamm_real_reserves = if (remaining_quote_volume > 0) {
@@ -1692,7 +1704,7 @@
             lp_coin_supply = (get_LP_TOKENS_INITIAL() as u128);
             total_value_locked = (2 * (cpamm_real_reserves.quote as u128));
             (fully_diluted_value, market_cap) =
-                fdv_market_cap(pack_mock_reserves(cpamm_real_reserves), get_EMOJICOIN_REMAINDER());
+                fdv_market_cap(pack_mock_reserves(cpamm_real_reserves), get_EMOJICOIN_SUPPLY());
         };
 
         // Declare mock structs for general swap case test flow.
@@ -1771,7 +1783,7 @@
                     pool_fees_quote: (pool_fee_quote as u128),
                     n_swaps: setup_periodic_state_tracker.n_swaps + 1,
                     n_chat_messages: 0,
-                    starts_in_bonding_curve,
+                    starts_in_bonding_curve: setup_periodic_state_tracker.starts_in_bonding_curve,
                     ends_in_bonding_curve,
                     tvl_to_lp_coin_ratio_start:
                         setup_periodic_state_tracker.tvl_to_lp_coin_ratio_start,
@@ -1808,12 +1820,11 @@
             },
             clamm_virtual_reserves: mock_market_view.clamm_virtual_reserves,
             cpamm_real_reserves: mock_market_view.cpamm_real_reserves,
-            lp_coin_supply: 0,
+            lp_coin_supply: lp_coin_supply,
             cumulative_stats: mock_market_view.cumulative_stats,
             instantaneous_stats: mock_market_view.instantaneous_stats,
             last_swap: mock_market_view.last_swap,
         };
-
 
         // Assert simulated swap matches expected swap.
         assert_swap(mock_swap, simulated_swap);
@@ -2428,6 +2439,15 @@
         // Assert that rounding will indeed take place, such that output will be truncated and
         // rounding effects will be assumed by swapper.
         assert!(numerator % denominator != 0, 0);
+
+        // Determine swap input amount for follow up swap with general fee amount such that follow
+        // up swap will result in an exact state transition.
+        let input_amount = swap_general_case_follow_up_input_amount_to_trigger_state_transition();
+        let integrator_fee_rate = get_bps_fee(input_amount, INTEGRATOR_FEE_RATE_BPS);
+        let quote_to_clamm = input_amount - integrator_fee_rate;
+        let quote_to_transition = get_QUOTE_VIRTUAL_CEILING() -
+            base_market_view_simple_buy().clamm_virtual_reserves.quote;
+        assert!(quote_to_clamm == quote_to_transition, 0);
     }
 
     #[test] fun swap_exact_transition() {
@@ -2439,6 +2459,38 @@
             mock_market_view: base_market_view_exact_transition(),
             mock_registry_view: base_registry_view_exact_transition(),
             mock_state: base_state_exact_transition(),
+        })
+    }
+
+    #[test] fun swap_exact_state_transition_then_buy_large() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: false,
+            is_sell: false,
+            input_amount: get_QUOTE_REAL_CEILING() / 2,
+        })
+    }
+
+    #[test] fun swap_exact_state_transition_then_buy_small() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: false,
+            is_sell: false,
+            input_amount: get_QUOTE_REAL_CEILING() / 100,
+        })
+    }
+
+    #[test] fun swap_exact_transition_then_sell_all() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: false,
+            is_sell: true,
+            input_amount: base_swap_exact_transition().net_proceeds,
+        })
+    }
+
+    #[test] fun swap_exact_transition_then_sell_half() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: false,
+            is_sell: true,
+            input_amount: base_swap_exact_transition().net_proceeds / 2,
         })
     }
 
@@ -2486,8 +2538,52 @@
         swap_general_case_test_flow(SwapGeneralCaseTestFlow {
             setup_is_simple_buy: true,
             is_sell: false,
-            input_amount: get_QUOTE_VIRTUAL_CEILING() -
-                base_market_view_simple_buy().clamm_virtual_reserves.quote,
+            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition(),
+        });
+        let market_view = market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market);
+        let (
+            _,
+            _,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            in_bonding_curve,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            emojicoin_lp_balance,
+        ) = unpack_market_view(market_view);
+        assert_reserves(
+            base_market_view_exact_transition().clamm_virtual_reserves,
+            clamm_virtual_reserves,
+        );
+        assert_reserves(
+            base_market_view_exact_transition().cpamm_real_reserves,
+            cpamm_real_reserves,
+        );
+        assert!((lp_coin_supply as u64) == get_LP_TOKENS_INITIAL(), 0);
+        assert!(!in_bonding_curve, 0);
+        assert!(emojicoin_lp_balance == get_LP_TOKENS_INITIAL(), 0);
+    }
+
+    #[test] fun swap_simple_buy_then_buy_past_state_transition_large() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: false,
+            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition() +
+                get_QUOTE_REAL_CEILING() / 10,
+        });
+    }
+
+    #[test] fun swap_simple_buy_then_buy_past_state_transition_small() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: false,
+            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition() +
+                1,
         });
     }
 
