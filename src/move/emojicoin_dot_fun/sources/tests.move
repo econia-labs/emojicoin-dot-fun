@@ -2507,12 +2507,55 @@
     }
 
     #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun simulate_swap_no_market() {
+        simulate_swap(
+            @0x0,
+            USER,
+            1,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_SWAP_INPUT_ZERO,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun simulate_swap_no_size() {
+        init_package_then_simple_buy();
+        simulate_swap(
+            base_market_metadata().market_address,
+            USER,
+            0,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
         abort_code = 65542, // 0x1 << 16 + 6, error:invalid_argument(EINSUFFICIENT_BALANCE)
         location = aptos_framework::coin,
     )] fun swap_no_base() {
         init_package_then_simple_buy();
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             base_market_metadata().market_address,
+            &get_signer(USER),
+            1,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun swap_no_market() {
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            @0x0,
             &get_signer(USER),
             1,
             SWAP_SELL,
