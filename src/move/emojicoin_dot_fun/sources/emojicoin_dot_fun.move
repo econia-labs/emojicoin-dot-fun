@@ -1074,11 +1074,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             if (tracker_ref_mut.open_price_q64 == 0) {
                 tracker_ref_mut.open_price_q64 = avg_execution_price_q64;
             };
-            if (tracker_ref_mut.high_price_q64 < avg_execution_price_q64) {
+            if (avg_execution_price_q64 > tracker_ref_mut.high_price_q64) {
                 tracker_ref_mut.high_price_q64 = avg_execution_price_q64;
             };
             if (tracker_ref_mut.low_price_q64 == 0 ||
-                tracker_ref_mut.low_price_q64 > avg_execution_price_q64) {
+                avg_execution_price_q64 < tracker_ref_mut.low_price_q64) {
                 tracker_ref_mut.low_price_q64 = avg_execution_price_q64;
             };
             tracker_ref_mut.close_price_q64 = avg_execution_price_q64;

@@ -2506,6 +2506,36 @@
         );
     }
 
+    #[test, expected_failure(
+        abort_code = 65542, // 0x1 << 16 + 6, error:invalid_argument(EINSUFFICIENT_BALANCE)
+        location = aptos_framework::coin,
+    )] fun swap_no_base() {
+        init_package_then_simple_buy();
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            base_market_metadata().market_address,
+            &get_signer(USER),
+            1,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = 65542, // 0x1 << 16 + 6, error:invalid_argument(EINSUFFICIENT_BALANCE)
+        location = aptos_framework::coin,
+    )] fun swap_no_quote() {
+        init_package_then_simple_buy();
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            base_market_metadata().market_address,
+            &get_signer(USER),
+            1,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
     #[test] fun swap_simple_buy() {
         swap_setup_case_test_flow(SwapSetupCaseTestFlow {
             simulated_swap: init_package_then_simple_buy(),
