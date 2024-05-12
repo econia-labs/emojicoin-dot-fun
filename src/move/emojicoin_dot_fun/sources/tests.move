@@ -16,7 +16,7 @@
 // The authors of the Aptos Framework insist on naming their error codes without a leading
 // underscore delimiter and have thus triggered the spell checker, which is escaped below.
 //
-// cspell:word EINSUFFICIENT
+// cspell:word EINSUFFICIENT_BALANCE
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
