@@ -4,6 +4,7 @@ import { TextProps } from "components/text/types";
 
 export const scales = {
   MD: "md",
+  SM: "sm",
 } as const;
 
 export type Scale = (typeof scales)[keyof typeof scales];

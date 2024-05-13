@@ -32,8 +32,6 @@ export const variantStyles = ({ theme, variant }: ThemedProps) => {
       ${Text} {
         font-family: ${({ theme }) => theme.fonts.pixelar};
         text-transform: uppercase;
-        font-size: 32px;
-        line-height: 40px;
         font-family: ${theme.fonts.pixelar};
         color: ${theme.colors.lightGrey};
         margin-bottom: 0;

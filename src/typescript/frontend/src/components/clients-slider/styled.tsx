@@ -24,7 +24,6 @@ export const StyledSliderWrapper = styled(Box)`
       display: block;
     }
 
-    //  lolka
     ${({ theme }) => theme.mediaQueries.largeHeight} {
       width: ${({ theme }) => `calc((150vw - ${theme.siteWidth}px) / 2)`};
     }

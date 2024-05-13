@@ -8,4 +8,11 @@ export const styles = {
     positionLeft: "3px",
     positionRight: "22px",
   },
+  [scales.SM]: {
+    width: "28px",
+    height: "14px",
+    circleWidth: "10px",
+    positionLeft: "1px",
+    positionRight: "22px",
+  },
 };
