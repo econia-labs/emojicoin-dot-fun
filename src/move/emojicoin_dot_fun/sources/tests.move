@@ -1922,6 +1922,41 @@
         assert_state(flow.mock_state, vector::pop_back(&mut emitted_events<State>()));
     }
 
+    public fun swap_simulation_buy_cpamm(setup: SwapSimulationSetup): SwapSimulationResult {
+        // Determine integrator fee and resultant quote volume.
+        let integrator_fee = get_bps_fee(setup.input_amount, INTEGRATOR_FEE_RATE_BPS);
+        let quote_volume = setup.input_amount - integrator_fee;
+
+        // Get amount of base that comes out of CPAMM.
+        let base_out_cpamm = cpamm_simple_swap_output_amount(
+            quote_volume,
+            SWAP_BUY,
+            pack_mock_reserves(setup.cpamm_real_reserves),
+        );
+
+        // Determine pool fee, deducted from net proceeds.
+        let pool_fee_base = get_bps_fee(base_out_cpamm, get_POOL_FEE_RATE_BPS());
+        let base_volume = base_out_cpamm - pool_fee_base;
+
+        // Return result.
+        SwapSimulationResult {
+            integrator_fee,
+            pool_fee_base,
+            pool_fee_quote: 0,
+            net_proceeds: base_volume,
+            base_volume,
+            quote_volume,
+            clamm_virtual_reserves: setup.clamm_virtual_reserves,
+            cpamm_real_reserves: MockReserves {
+                base: setup.cpamm_real_reserves.base - base_volume,
+                quote: setup.cpamm_real_reserves.quote + quote_volume,
+            },
+            results_in_state_transition: false,
+            market_aptos_coin_balance: setup.market_aptos_coin_balance + quote_volume,
+            market_emojicoin_balance: setup.market_emojicoin_balance - base_volume,
+        }
+    }
+
     public fun swap_simulation_sell(setup: SwapSimulationSetup): SwapSimulationResult {
         // Get amount of quote that comes out of bonding curve for given base input.
         let quote_out_clamm = cpamm_simple_swap_output_amount(
