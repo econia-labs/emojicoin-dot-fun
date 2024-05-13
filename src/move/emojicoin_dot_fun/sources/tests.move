@@ -161,6 +161,29 @@
         period_1D: u64,
     }
 
+    struct SwapSimulationSetup has copy, drop, store {
+        input_amount: u64,
+        starts_in_bonding_curve: bool,
+        clamm_virtual_reserves: MockReserves,
+        cpamm_real_reserves: MockReserves,
+        market_aptos_coin_balance: u64,
+        market_emojicoin_balance: u64,
+    }
+
+    struct SwapSimulationResult has copy, drop, store {
+        integrator_fee: u64,
+        pool_fee_base: u64,
+        pool_fee_quote: u64,
+        net_proceeds: u64,
+        base_volume: u64,
+        quote_volume: u64,
+        clamm_virtual_reserves: MockReserves,
+        cpamm_real_reserves: MockReserves,
+        results_in_state_transition: bool,
+        market_aptos_coin_balance: u64,
+        market_emojicoin_balance: u64,
+    }
+
     struct MockChat has copy, drop, store {
         market_metadata: MockMarketMetadata,
         emit_time: u64,
@@ -1897,6 +1920,64 @@
         );
         assert_registry_view(flow.mock_registry_view, registry_view());
         assert_state(flow.mock_state, vector::pop_back(&mut emitted_events<State>()));
+    }
+
+    public fun swap_simulation_sell(setup: SwapSimulationSetup): SwapSimulationResult {
+        // Get amount of quote that comes out of bonding curve for given base input.
+        let quote_out_clamm = cpamm_simple_swap_output_amount(
+            setup.input_amount,
+            SWAP_SELL,
+            pack_mock_reserves(if (setup.starts_in_bonding_curve)
+                setup.clamm_virtual_reserves else setup.cpamm_real_reserves
+            ),
+        );
+        // Calculate integrator fee and resultant pool fee.
+        let integrator_fee = get_bps_fee(quote_out_clamm, INTEGRATOR_FEE_RATE_BPS);
+        let pool_fee_quote = if (setup.starts_in_bonding_curve) {
+            0
+        } else {
+            get_bps_fee(quote_out_clamm, get_POOL_FEE_RATE_BPS())
+        };
+
+        // Determine volume amounts, and amount of quote leaving the market.
+        let quote_volume = quote_out_clamm - integrator_fee - pool_fee_quote;
+        let base_volume = setup.input_amount;
+        let net_proceeds = quote_volume;
+        let quote_leaving_market = quote_out_clamm - pool_fee_quote;
+
+        // Determine final reserves amounts, based on if sell starts in bonding curve.
+        let (clamm_virtual_reserves, cpamm_real_reserves) = if (setup.starts_in_bonding_curve) {
+            (
+                MockReserves {
+                    base: setup.clamm_virtual_reserves.base + base_volume,
+                    quote: setup.clamm_virtual_reserves.quote - quote_leaving_market,
+                },
+                setup.cpamm_real_reserves,
+            )
+        } else {
+            (
+                setup.clamm_virtual_reserves,
+                MockReserves {
+                    base: setup.cpamm_real_reserves.base + base_volume,
+                    quote: setup.cpamm_real_reserves.quote - quote_leaving_market,
+                },
+            )
+        };
+
+        // Pack, return result.
+        SwapSimulationResult {
+            integrator_fee,
+            pool_fee_base: 0,
+            pool_fee_quote,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            results_in_state_transition: false,
+            market_aptos_coin_balance: setup.market_aptos_coin_balance - quote_leaving_market,
+            market_emojicoin_balance: setup.market_emojicoin_balance + base_volume,
+        }
     }
 
     public fun vectorize_periodic_state_tracker_base(
