@@ -5,9 +5,10 @@ import { EmojiClickData } from "emoji-picker-react";
 import { useEmojicoinPicker } from "hooks";
 import { useThemeContext } from "context";
 
+import {isDisallowedEventKey} from "utils";
+
 import { Flex, InputGroup, Textarea, Column, Loader } from "components";
 import { MessageContainer } from "./components";
-import { isDisallowedEventKey } from "pages/emojicoin/emoji-picker-inputs";
 
 const MESSAGE_LIST = [
   {

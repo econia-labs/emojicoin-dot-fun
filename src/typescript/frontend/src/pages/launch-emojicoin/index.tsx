@@ -6,9 +6,10 @@ import { useTranslation } from "context";
 import { useValidationSchema } from "./hooks";
 import { useForm, useTooltip, useEmojicoinPicker } from "hooks";
 
+import { isDisallowedEventKey } from "utils";
+
 import { Button, ClientsSlider, Column, Flex, FlexGap, Input, InputGroup, Text, Prompt } from "components";
 import { StyledFieldName } from "./styled";
-import { isDisallowedEventKey } from "pages/emojicoin/emoji-picker-inputs";
 
 const LaunchEmojicoinPage: React.FC = () => {
   const { t } = useTranslation();
