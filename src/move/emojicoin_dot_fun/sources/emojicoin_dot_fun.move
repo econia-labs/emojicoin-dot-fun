@@ -2303,10 +2303,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[test_only] public fun fdv_market_cap_test_only(
-        real_reserves: Reserves,
-        emojicoin_supply: u64,
+        reserves: Reserves,
+        supply_minuend: u64,
     ): (u128, u128) {
-        fdv_market_cap(real_reserves, emojicoin_supply)
+        fdv_market_cap(reserves, supply_minuend)
     }
 
     #[test_only] public fun get_bps_fee_test_only(

@@ -489,11 +489,11 @@
 
     public fun assert_fdv_market_cap(
         mock_reserves: MockReserves,
-        supply_minuend: u64,
+        supply_minued: u64,
         fdv_expected: u128,
-        market_cap_expected: u128
+        market_cap_expected: u128,
     ) {
-        let (fdv, market_cap) = fdv_market_cap(pack_mock_reserves(mock_reserves), supply_minuend);
+        let (fdv, market_cap) = fdv_market_cap(pack_mock_reserves(mock_reserves), supply_minued);
         assert!(fdv == fdv_expected, 0);
         assert!(market_cap == market_cap_expected, 0);
     }
@@ -1667,14 +1667,16 @@
             total_value_locked = tvl_clamm(pack_mock_reserves(clamm_virtual_reserves));
             (fully_diluted_value, market_cap) = fdv_market_cap(
                 pack_mock_reserves(clamm_virtual_reserves),
-                get_BASE_VIRTUAL_CEILING(),
+                get_BASE_VIRTUAL_CEILING(), // Subtract virtual base for circulating supply.
             );
         } else {
             total_quote_locked = cpamm_real_reserves.quote;
             lp_coin_supply = (get_LP_TOKENS_INITIAL() as u128);
             total_value_locked = (2 * (cpamm_real_reserves.quote as u128));
-            (fully_diluted_value, market_cap) =
-                fdv_market_cap(pack_mock_reserves(cpamm_real_reserves), get_EMOJICOIN_SUPPLY());
+            (fully_diluted_value, market_cap) = fdv_market_cap(
+                pack_mock_reserves(cpamm_real_reserves),
+                get_EMOJICOIN_SUPPLY(), // Subtract real base for circulating supply.
+            );
         };
 
         // Declare mock structs for general swap case test flow.
@@ -2282,6 +2284,49 @@
         assert_test_market_address(vector[BLACK_CAT], @black_cat_market, true);
         assert_test_market_address(vector[BLACK_HEART], @black_heart_market, false);
         assert_test_market_address(vector[YELLOW_HEART], @yellow_heart_market, false);
+    }
+
+    #[test] fun fdv_market_cap_clamm() {
+        // Set up reserves for market still in bonding curve.
+        let quote_in = 100;
+        let base_out = 200;
+        let reserves = MockReserves {
+            base: get_BASE_VIRTUAL_CEILING() - base_out,
+            quote: get_QUOTE_VIRTUAL_FLOOR() + quote_in,
+        };
+
+        // Circulating supply is base virtual ceiling less virtual base reserves.
+        let supply_minuend = get_BASE_VIRTUAL_CEILING();
+        let circulating_supply = ((supply_minuend - reserves.base) as u128);
+
+        // Price is ratio of virtual quote to base.
+        let price_numerator = (reserves.quote as u128);
+        let price_denominator = (reserves.base as u128);
+
+        // FDV is total supply at current price, market cap is circulating supply.
+        let fdv = (price_numerator * (get_EMOJICOIN_SUPPLY() as u128)) / price_denominator;
+        let market_cap = (price_numerator * circulating_supply) / price_denominator;
+
+        assert_fdv_market_cap(reserves, supply_minuend, fdv, market_cap);
+
+        // Repeat for market in CPAMM.
+        reserves = MockReserves {
+            base: get_BASE_REAL_CEILING() - 500,
+            quote: get_QUOTE_REAL_CEILING() + 2000,
+        };
+
+        supply_minuend = get_EMOJICOIN_SUPPLY();
+        circulating_supply = ((supply_minuend - reserves.base) as u128);
+
+        // Price is ratio of real quote to base.
+        price_numerator = (reserves.quote as u128);
+        price_denominator = (reserves.base as u128);
+
+        // FDV is total supply at current price, market cap is circulating supply.
+        fdv = (price_numerator * (get_EMOJICOIN_SUPPLY() as u128)) / price_denominator;
+        market_cap = (price_numerator * circulating_supply) / price_denominator;
+
+        assert_fdv_market_cap(reserves, supply_minuend, fdv, market_cap);
     }
 
     #[test] fun get_publish_code_expected() {
