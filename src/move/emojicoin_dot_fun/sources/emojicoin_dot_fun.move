@@ -1133,6 +1133,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let trigger = TRIGGER_PROVIDE_LIQUIDITY;
         trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
 
+        // Store reserves at start of operation.
+        let reserves_start = market_ref_mut.cpamm_real_reserves;
+
         // Transfer coins.
         coin::transfer<Emojicoin>(provider, market_address, event.base_amount);
         coin::transfer<AptosCoin>(provider, market_address, event.quote_amount);
@@ -1160,13 +1163,25 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         aggregator_v2::try_add(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
         aggregator_v2::try_add(global_total_value_locked_ref_mut, delta_tvl);
 
+        // Get FDV, market cap, at start and end of operation, update global stats accordingly.
+        let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut, EMOJICOIN_SUPPLY);
+        update_global_fdv_market_cap_for_liquidity_operation(
+            fdv_start,
+            market_cap_start,
+            fdv_end,
+            market_cap_end,
+            global_stats_ref_mut,
+        );
+
         // Emit liquidity provision event, follow up on periodic state trackers/market state.
         event::emit(event);
         liquidity_provision_operation_epilogue(
             tvl_end,
+            fdv_end,
+            market_cap_end,
             lp_coin_supply,
-            *quote_reserves_ref_mut,
-            *reserves_ref_mut,
+            reserves_ref_mut.quote,
             trigger,
             market_ref_mut,
         );
@@ -1194,6 +1209,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let time = event.time;
         let trigger = TRIGGER_REMOVE_LIQUIDITY;
         trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
+
+        // Store reserves at start of operation.
+        let reserves_start = market_ref_mut.cpamm_real_reserves;
 
         // Transfer coins.
         let base_total = event.base_amount + event.pro_rata_base_donation_claim_amount;
@@ -1224,13 +1242,26 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
         aggregator_v2::try_sub(global_total_value_locked_ref_mut, delta_tvl);
 
+        // Get FDV, market cap, at start and end of operation.
+        let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut,EMOJICOIN_SUPPLY);
+
+        update_global_fdv_market_cap_for_liquidity_operation(
+            fdv_start,
+            market_cap_start,
+            fdv_end,
+            market_cap_end,
+            global_stats_ref_mut,
+        );
+
         // Emit liquidity provision event, follow up on periodic state trackers/market state.
         event::emit(event);
         liquidity_provision_operation_epilogue(
             tvl_end,
+            fdv_end,
+            market_cap_end,
             lp_coin_supply,
-            *quote_reserves_ref_mut,
-            *reserves_ref_mut,
+            reserves_ref_mut.quote,
             trigger,
             market_ref_mut,
         );
@@ -2290,9 +2321,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     /*inline*/ fun liquidity_provision_operation_epilogue(
         tvl: u128,
+        fdv: u128,
+        market_cap: u128,
         lp_coin_supply: u128,
         total_quote_locked: u64,
-        real_reserves: Reserves,
         trigger: u8,
         market_ref_mut: &mut Market,
     ) {
@@ -2306,7 +2338,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
 
         // Get instantaneous stats, bump market state.
-        let (fdv, market_cap) = fdv_market_cap(real_reserves, EMOJICOIN_SUPPLY);
         bump_market_state(
             market_ref_mut,
             trigger,
@@ -2317,6 +2348,34 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 fully_diluted_value: fdv,
             },
         );
+    }
+
+    /*inline*/ fun update_global_fdv_market_cap_for_liquidity_operation(
+        fdv_start: u128,
+        market_cap_start: u128,
+        fdv_end: u128,
+        market_cap_end: u128,
+        global_stats_ref_mut: &mut GlobalStats
+    ) {
+        // Declare fields to update.
+        let global_fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
+        let global_market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
+
+        // Although FDV and market cap shouldn't change in a theoretical sense during a liquidity
+        // provision or removal operation (since circulating supply and price haven't changed),
+        // their numeric values may deviate slightly due to integer truncation (since price is a
+        // result of CPAMM reserve amounts). Hence the global values must be updated to prevent the
+        // accumulation of rounding errors.
+        if (fdv_end > fdv_start) {
+            aggregator_v2::try_add(global_fdv_ref_mut, fdv_end - fdv_start);
+        } else {
+            aggregator_v2::try_sub(global_fdv_ref_mut, fdv_start - fdv_end);
+        };
+        if (market_cap_end > market_cap_start) {
+            aggregator_v2::try_add(global_market_cap_ref_mut, market_cap_end - market_cap_start);
+        } else {
+            aggregator_v2::try_sub(global_market_cap_ref_mut, market_cap_start - market_cap_end);
+        };
     }
 
     #[test_only] const MICROSECONDS_PER_SECOND: u64 = 1_000_000;
