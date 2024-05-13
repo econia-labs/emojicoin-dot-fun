@@ -2810,13 +2810,27 @@
     }
 
     #[test] fun tvl_clamm_expected() {
-        // Verify TVL with market having no quote above virtual floor.
         assert_tvl_clamm(
             MockReserves{
                 base: get_BASE_VIRTUAL_CEILING(),
                 quote: get_QUOTE_VIRTUAL_FLOOR(),
             },
             0,
+        );
+
+        let base_out = 10;
+        let quote_in = 50;
+        let reserves = MockReserves{
+            base: get_BASE_VIRTUAL_CEILING() - base_out,
+            quote: get_QUOTE_VIRTUAL_FLOOR() + quote_in,
+        };
+        let base_real_in_bonding_curve = get_BASE_REAL_CEILING() - base_out;
+        let base_locked = base_real_in_bonding_curve + get_EMOJICOIN_REMAINDER();
+        let base_denominated_in_quote =
+            ((base_locked as u128) * (reserves.quote as u128)) / (reserves.base as u128);
+        assert_tvl_clamm(
+            reserves,
+            (quote_in as u128) + base_denominated_in_quote,
         );
     }
 
