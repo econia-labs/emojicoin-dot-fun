@@ -13,9 +13,6 @@
 // sets of constants are tested individually via `swap_setup_case_test_flow()`, and are then used to
 // fixture assorted tests that call on `swap_general_case_test_flow()`.
 //
-// The authors of the Aptos Framework insist on naming their error codes without a leading
-// underscore delimiter and have thus triggered the spell checker, which is escaped below.
-//
 // cspell:word EINSUFFICIENT_BALANCE
 #[test_only] module emojicoin_dot_fun::tests {
 
