@@ -2466,7 +2466,7 @@
         timestamp::update_global_time_for_test(time);
 
         // Determine amount of quote to provide.
-        let quote_amount = get_QUOTE_REAL_CEILING() / 10;
+        let quote_amount = get_QUOTE_REAL_CEILING() / 1_000;
 
         // Get base amount, for no trunction during proportion calculation.
         let proportion_numerator =
@@ -2524,8 +2524,8 @@
             pro_rata_quote_donation_claim_amount: 0,
         };
 
-        let periodic_state_tracker = setup_periodic_state_tracker;
-        periodic_state_tracker.tvl_to_lp_coin_ratio_end = MockTVLtoLPCoinRatio {
+        let mock_periodic_state_tracker = setup_periodic_state_tracker;
+        mock_periodic_state_tracker.tvl_to_lp_coin_ratio_end = MockTVLtoLPCoinRatio {
             tvl: total_value_locked,
             lp_coins: lp_coin_supply
         };
@@ -2549,7 +2549,7 @@
             },
             last_swap: setup_market_view.last_swap,
             periodic_state_trackers:
-                vectorize_periodic_state_tracker_base(periodic_state_tracker),
+                vectorize_periodic_state_tracker_base(mock_periodic_state_tracker),
             aptos_coin_balance: setup_market_view.aptos_coin_balance + quote_amount,
             emojicoin_balance: setup_market_view.emojicoin_balance + base_amount,
             emojicoin_lp_balance: setup_market_view.emojicoin_lp_balance,
@@ -2611,10 +2611,60 @@
         // Assert market and registry views, emitted state event.
         assert_market_view(
             mock_market_view,
-            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market),
         );
         assert_registry_view(mock_registry_view, registry_view());
         assert_state(mock_state, vector::pop_back(&mut emitted_events<State>()));
+
+        // Store assertion structs for continued value testing.
+        let new_market_view = mock_market_view;
+        let new_registry_view = mock_registry_view;
+        let new_periodic_state_tracker = mock_periodic_state_tracker;
+        let new_state = mock_state;
+
+        // Advance timer for checking simulator returns.
+        let time = time + 1;
+        timestamp::update_global_time_for_test(time);
+
+        // Declare new amount of quote to provide.
+        quote_amount = 123;
+
+        // Get base amount, for trunction present during proportion calculation.
+        proportion_numerator =
+            (new_market_view.cpamm_real_reserves.base as u128) * (quote_amount as u128);
+        proportion_denominator = (new_market_view.cpamm_real_reserves.quote as u128);
+        std::debug::print(&proportion_numerator);
+        std::debug::print(&proportion_denominator);
+        assert!(proportion_numerator % proportion_denominator != 0, 0);
+        base_amount = ((proportion_numerator / proportion_denominator) as u64) + 1;
+
+        // Determine amount of liquidity tokens provided.
+        lp_coin_amount = ((
+            (quote_amount as u128) * (new_market_view.lp_coin_supply as u128) /
+            (new_market_view.cpamm_real_reserves.quote as u128)
+        ) as u64);
+
+        // Simulate, then assert liquidity.
+        simulated_liquidity = simulate_provide_liquidity(
+            market_address,
+            USER,
+            quote_amount
+        );
+        assert_liquidity(
+            MockLiquidity {
+                market_id,
+                time,
+                market_nonce: new_market_view.sequence_info.nonce + 1,
+                provider: USER,
+                base_amount,
+                quote_amount,
+                lp_coin_amount,
+                liquidity_provided: true,
+                pro_rata_base_donation_claim_amount: 0,
+                pro_rata_quote_donation_claim_amount: 0,
+            },
+            simulated_liquidity,
+        );
 
     }
 
