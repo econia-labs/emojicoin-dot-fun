@@ -487,6 +487,17 @@
         assert!(coin::name<EmojicoinLP>() == lp_name, 0);
     }
 
+    public fun assert_fdv_market_cap(
+        mock_reserves: MockReserves,
+        supply_minuend: u64,
+        fdv_expected: u128,
+        market_cap_expected: u128
+    ) {
+        let (fdv, market_cap) = fdv_market_cap(pack_mock_reserves(mock_reserves), supply_minuend);
+        assert!(fdv == fdv_expected, 0);
+        assert!(market_cap == market_cap_expected, 0);
+    }
+
     public fun assert_global_state(
         mock_global_state: MockGlobalState,
         global_state: GlobalState
