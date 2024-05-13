@@ -35,6 +35,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
     const SHIFT_Q64: u8 = 64;
+    const HI_128: u128 = 0xffffffffffffffffffffffffffffffff;
 
     const TRIGGER_PACKAGE_PUBLICATION: u8 = 0;
     const TRIGGER_MARKET_REGISTRATION: u8 = 1;
@@ -80,26 +81,22 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_STILL_IN_BONDING_CURVE: u64 = 3;
     /// No quote amount given during liquidity provision/removal.
     const E_LIQUIDITY_NO_QUOTE: u64 = 4;
-    /// Providing quote amount as liquidity would require more base than existing supply.
-    const E_PROVIDE_BASE_TOO_SCARCE: u64 = 5;
-    /// Providing quote amount as liquidity would result in LP coin overflow.
-    const E_PROVIDE_TOO_MANY_LP_COINS: u64 = 6;
-    /// Remove liquidity operation specified more LP coins than existing supply.
-    const E_REMOVE_TOO_MANY_LP_COINS: u64 = 7;
+    /// No LP coin amount given during liquidity provision/removal.
+    const E_LIQUIDITY_NO_LP_COINS: u64 = 5;
     /// The type arguments passed in are invalid.
-    const E_INVALID_COIN_TYPES: u64 = 8;
+    const E_INVALID_COIN_TYPES: u64 = 6;
     /// Provided bytes do not indicate a supported coin symbol emoji.
-    const E_NOT_SUPPORTED_SYMBOL_EMOJI: u64 = 9;
+    const E_NOT_SUPPORTED_SYMBOL_EMOJI: u64 = 7;
     /// Too many bytes in emoji symbol.
-    const E_EMOJI_BYTES_TOO_LONG: u64 = 10;
+    const E_EMOJI_BYTES_TOO_LONG: u64 = 8;
     /// Market is already registered.
-    const E_ALREADY_REGISTERED: u64 = 11;
+    const E_ALREADY_REGISTERED: u64 = 9;
     /// Account is unable to pay market registration fee.
-    const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 12;
+    const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 10;
     /// Provided bytes do not indicate a supported chat emoji.
-    const E_NOT_SUPPORTED_CHAT_EMOJI: u64 = 13;
+    const E_NOT_SUPPORTED_CHAT_EMOJI: u64 = 11;
     /// The constructed chat message exceeds the maximum length.
-    const E_CHAT_MESSAGE_TOO_LONG: u64 = 14;
+    const E_CHAT_MESSAGE_TOO_LONG: u64 = 12;
 
     struct CumulativeStats has copy, drop, store {
         base_volume: u128,
@@ -2084,13 +2081,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let quote_amount_u128 = (quote_amount as u128);
 
         // Proportional base amount: (base_reserves / quote_reserves) * (quote_amount).
-        let base_amount_u128 = (base_reserves_u128 * quote_amount_u128) / quote_reserves_u128;
-        assert!(base_amount_u128 <= (EMOJICOIN_SUPPLY as u128), E_PROVIDE_BASE_TOO_SCARCE);
+        let base_amount_numerator = (base_reserves_u128 * quote_amount_u128);
+        let base_amount_denominator = quote_reserves_u128;
+
+        // Have LP assume the effects of truncation by rounding up to nearest base subunit.
+        let remainder = base_amount_numerator % base_amount_denominator;
+        let round_if_needed = 1 - ((remainder ^ HI_128) / HI_128);
+        let base_amount_u128 = (base_amount_numerator / base_amount_denominator) + round_if_needed;
 
         // Proportional LP coins to mint: (quote_amount / quote_reserves) * (lp_coin_supply).
         let lp_coin_amount_u128 =
             (quote_amount_u128 * market_ref.lp_coin_supply) / quote_reserves_u128;
-        assert!(lp_coin_amount_u128 <= U64_MAX_AS_u128, E_PROVIDE_TOO_MANY_LP_COINS);
 
         Liquidity {
             market_id: market_ref.metadata.market_id,
@@ -2115,7 +2116,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let lp_coin_amount_u128 = (lp_coin_amount as u128);
 
         assert!(lp_coin_supply > 0, E_STILL_IN_BONDING_CURVE);
-        assert!(lp_coin_amount_u128 <= lp_coin_supply, E_REMOVE_TOO_MANY_LP_COINS);
+        assert!(lp_coin_amount > 0, E_LIQUIDITY_NO_LP_COINS);
 
         let reserves_ref = market_ref.cpamm_real_reserves;
         let base_reserves_u128 = (reserves_ref.base as u128);
