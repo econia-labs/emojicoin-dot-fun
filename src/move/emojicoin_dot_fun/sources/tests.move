@@ -1608,105 +1608,35 @@
             INTEGRATOR_FEE_RATE_BPS,
         );
 
-        // Determine volume/fee amounts based on simulated swap.
-        let integrator_fee;
-        let pool_fee_base = 0;
-        let pool_fee_quote = 0;
-        let net_proceeds;
-        let base_volume;
-        let quote_volume;
-        let results_in_state_transition = false;
-        let clamm_virtual_reserves = setup_market_view.clamm_virtual_reserves;
-        let cpamm_real_reserves = setup_market_view.cpamm_real_reserves;
-        let market_aptos_coin_balance;
-        let market_emojicoin_balance;
-        if (flow.is_sell) { // No opportunity for state transition.
-            let q_out_clamm = cpamm_simple_swap_output_amount(
-                flow.input_amount,
-                SWAP_SELL,
-                pack_mock_reserves(if (starts_in_bonding_curve)
-                    clamm_virtual_reserves else cpamm_real_reserves
-                ),
-            );
-            integrator_fee = get_bps_fee(q_out_clamm, INTEGRATOR_FEE_RATE_BPS);
-            if (!starts_in_bonding_curve)
-                pool_fee_quote = get_bps_fee(q_out_clamm, get_POOL_FEE_RATE_BPS());
-            let quote_leaving_market = q_out_clamm - pool_fee_quote;
-            quote_volume = q_out_clamm - integrator_fee - pool_fee_quote;
-            base_volume = flow.input_amount;
-            net_proceeds = quote_volume;
-            if (starts_in_bonding_curve) {
-                clamm_virtual_reserves = MockReserves {
-                    base: clamm_virtual_reserves.base + base_volume,
-                    quote: clamm_virtual_reserves.quote - quote_leaving_market,
-                };
-            } else {
-                cpamm_real_reserves = MockReserves {
-                    base: cpamm_real_reserves.base + base_volume,
-                    quote: cpamm_real_reserves.quote - quote_leaving_market,
-                };
-            };
-            market_aptos_coin_balance = setup_market_view.aptos_coin_balance - quote_leaving_market;
-            market_emojicoin_balance = setup_market_view.emojicoin_balance + base_volume;
-        } else { // Swap buy.
-            integrator_fee = get_bps_fee(flow.input_amount, INTEGRATOR_FEE_RATE_BPS);
-            quote_volume = flow.input_amount - integrator_fee;
-            if (!starts_in_bonding_curve) { // In CPAMM, no opportunity for state transition.
-                let b_out = cpamm_simple_swap_output_amount(
-                    quote_volume,
-                    SWAP_BUY,
-                    pack_mock_reserves(setup_market_view.cpamm_real_reserves)
-                );
-                pool_fee_base = get_bps_fee(b_out, get_POOL_FEE_RATE_BPS());
-                base_volume = b_out - pool_fee_base;
-                cpamm_real_reserves = MockReserves {
-                    base: cpamm_real_reserves.base - base_volume,
-                    quote: cpamm_real_reserves.quote + quote_volume,
-                };
-            } else { // Buy against bonding curve, might require a state transition.
-                let quote_volume_before_state_transition =
-                    get_QUOTE_VIRTUAL_CEILING() - clamm_virtual_reserves.quote;
-                // If a state transition, need to swap against CLAMM then CPAMM.
-                if (quote_volume >= quote_volume_before_state_transition) {
-                    results_in_state_transition = true;
-                    base_volume = clamm_virtual_reserves.base - get_BASE_VIRTUAL_FLOOR();
-                    let remaining_quote_volume =
-                        quote_volume - quote_volume_before_state_transition;
-                    cpamm_real_reserves = if (remaining_quote_volume > 0) {
-                        let b_out_cpamm = cpamm_simple_swap_output_amount(
-                            remaining_quote_volume,
-                            SWAP_BUY,
-                            pack_mock_reserves(base_cpamm_real_reserves_exact_transition())
-                        );
-                        pool_fee_base = get_bps_fee(b_out_cpamm, get_POOL_FEE_RATE_BPS());
-                        let base_volume_cpamm = b_out_cpamm - pool_fee_base;
-                        base_volume = base_volume + base_volume_cpamm;
-                        MockReserves {
-                            base: base_cpamm_real_reserves_exact_transition().base -
-                                base_volume_cpamm,
-                            quote: base_cpamm_real_reserves_exact_transition().quote +
-                                remaining_quote_volume
-                        }
-                    } else { // Exact state transition
-                        base_cpamm_real_reserves_exact_transition()
-                    };
-                    clamm_virtual_reserves = MockReserves { base: 0, quote: 0 };
-                } else { // Buy against bonding curve, no state transition.
-                    base_volume = cpamm_simple_swap_output_amount(
-                        quote_volume,
-                        SWAP_BUY,
-                        pack_mock_reserves(setup_market_view.clamm_virtual_reserves)
-                    );
-                    clamm_virtual_reserves = MockReserves {
-                        base: clamm_virtual_reserves.base - base_volume,
-                        quote: clamm_virtual_reserves.quote + quote_volume,
-                    };
-                }
-            };
-            net_proceeds = base_volume;
-            market_aptos_coin_balance = setup_market_view.aptos_coin_balance + quote_volume;
-            market_emojicoin_balance = setup_market_view.emojicoin_balance - base_volume;
+        // Simulate core swap values.
+        let swap_simulation_setup = SwapSimulationSetup {
+            input_amount: flow.input_amount,
+            starts_in_bonding_curve,
+            clamm_virtual_reserves: setup_market_view.clamm_virtual_reserves,
+            cpamm_real_reserves: setup_market_view.cpamm_real_reserves,
+            market_aptos_coin_balance: setup_market_view.aptos_coin_balance,
+            market_emojicoin_balance: setup_market_view.emojicoin_balance,
         };
+        let result = if (flow.is_sell) {
+            swap_simulation_sell(swap_simulation_setup)
+        } else {
+            if (starts_in_bonding_curve) {
+                swap_simulation_buy_clamm(swap_simulation_setup)
+            } else {
+                swap_simulation_buy_cpamm(swap_simulation_setup)
+            }
+        };
+        let integrator_fee = result.integrator_fee;
+        let pool_fee_base = result.pool_fee_base;
+        let pool_fee_quote = result.pool_fee_quote;
+        let net_proceeds = result.net_proceeds;
+        let base_volume = result.base_volume;
+        let quote_volume = result.quote_volume;
+        let results_in_state_transition = result.results_in_state_transition;
+        let clamm_virtual_reserves = result.clamm_virtual_reserves;
+        let cpamm_real_reserves = result.cpamm_real_reserves;
+        let market_aptos_coin_balance = result.market_aptos_coin_balance;
+        let market_emojicoin_balance = result.market_emojicoin_balance;
         let avg_execution_price_q64 = ((quote_volume as u128) << 64) / (base_volume as u128);
 
         // Determine if ends in bonding curve, LP coins/instantaneous stats.
@@ -2798,20 +2728,30 @@
         })
     }
 
-    #[test] fun swap_simple_buy_then_sell_back_all() {
+    #[test] fun swap_simple_buy_then_buy_past_state_transition_large() {
         swap_general_case_test_flow(SwapGeneralCaseTestFlow {
             setup_is_simple_buy: true,
-            is_sell: true,
-            input_amount: base_swap_simple_buy().net_proceeds,
-        })
+            is_sell: false,
+            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition() +
+                get_QUOTE_REAL_CEILING() / 10,
+        });
     }
 
-    #[test] fun swap_simple_buy_then_sell_back_half() {
+    #[test] fun swap_simple_buy_then_buy_past_state_transition_small() {
         swap_general_case_test_flow(SwapGeneralCaseTestFlow {
             setup_is_simple_buy: true,
-            is_sell: true,
-            input_amount: base_swap_simple_buy().net_proceeds / 2,
-        })
+            is_sell: false,
+            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition() +
+                1,
+        });
+    }
+
+    #[test] fun swap_simple_buy_then_buy_small() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: false,
+            input_amount: SIMPLE_BUY_INPUT_AMOUNT,
+        });
     }
 
     #[test] fun swap_simple_buy_then_buy_to_exact_state_transition() {
@@ -2849,22 +2789,20 @@
         assert!(emojicoin_lp_balance == get_LP_TOKENS_INITIAL(), 0);
     }
 
-    #[test] fun swap_simple_buy_then_buy_past_state_transition_large() {
+    #[test] fun swap_simple_buy_then_sell_back_all() {
         swap_general_case_test_flow(SwapGeneralCaseTestFlow {
             setup_is_simple_buy: true,
-            is_sell: false,
-            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition() +
-                get_QUOTE_REAL_CEILING() / 10,
-        });
+            is_sell: true,
+            input_amount: base_swap_simple_buy().net_proceeds,
+        })
     }
 
-    #[test] fun swap_simple_buy_then_buy_past_state_transition_small() {
+    #[test] fun swap_simple_buy_then_sell_back_half() {
         swap_general_case_test_flow(SwapGeneralCaseTestFlow {
             setup_is_simple_buy: true,
-            is_sell: false,
-            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition() +
-                1,
-        });
+            is_sell: true,
+            input_amount: base_swap_simple_buy().net_proceeds / 2,
+        })
     }
 
     #[test] fun valid_coin_types_all_invalid() {
