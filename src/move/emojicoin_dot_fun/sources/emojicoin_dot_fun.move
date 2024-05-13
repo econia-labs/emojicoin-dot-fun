@@ -1556,6 +1556,44 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (is_sell, avg_execution_price_q64, base_volume, quote_volume, nonce, time)
     }
 
+    public fun unpack_liquidity(liquidity: Liquidity): (
+        u64,
+        u64,
+        u64,
+        address,
+        u64,
+        u64,
+        u64,
+        bool,
+        u64,
+        u64,
+    ) {
+        let Liquidity {
+            market_id,
+            time,
+            market_nonce,
+            provider,
+            base_amount,
+            quote_amount,
+            lp_coin_amount,
+            liquidity_provided,
+            pro_rata_base_donation_claim_amount,
+            pro_rata_quote_donation_claim_amount,
+        } = liquidity;
+        (
+            market_id,
+            time,
+            market_nonce,
+            provider,
+            base_amount,
+            quote_amount,
+            lp_coin_amount,
+            liquidity_provided,
+            pro_rata_base_donation_claim_amount,
+            pro_rata_quote_donation_claim_amount,
+        )
+    }
+
     public fun unpack_market_metadata(metadata: MarketMetadata): (
         u64,
         address,
@@ -2359,6 +2397,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
     #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
     #[test_only] public fun get_TRIGGER_SWAP_SELL(): u8 { TRIGGER_SWAP_SELL }
+    #[test_only] public fun get_TRIGGER_PROVIDE_LIQUIDITY(): u8 { TRIGGER_PROVIDE_LIQUIDITY }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
