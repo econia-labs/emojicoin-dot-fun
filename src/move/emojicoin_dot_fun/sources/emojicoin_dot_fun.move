@@ -530,11 +530,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let fdv_ref_mut = &mut registry_ref_mut.global_stats.fully_diluted_value;
         aggregator_v2::try_add(fdv_ref_mut, fdv);
 
-        // Update registry nonce, but not last bump time since global state only bumps once per day.
-        let registry_nonce_ref_mut = &mut registry_ref_mut.sequence_info.nonce;
-        let registry_nonce = *registry_nonce_ref_mut + 1;
-        *registry_nonce_ref_mut = registry_nonce;
-
         // Bump state.
         event::emit(MarketRegistration {
             market_metadata: market_ref_mut.metadata,
@@ -890,7 +885,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let pool_fees_quote_as_u128 = 0;
         let (quote, fdv_start, market_cap_start, fdv_end, market_cap_end);
         let results_in_state_transition = event.results_in_state_transition;
-        let ends_in_bonding_curve = !starts_in_bonding_curve || results_in_state_transition;
+        let ends_in_bonding_curve = starts_in_bonding_curve && !results_in_state_transition;
 
         // Create for swapper an account with AptosCoin store if it doesn't exist.
         if (!account::exists_at(swapper_address)) {
@@ -994,7 +989,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 let reserves_end = reserves_start;
                 reserves_end.base = reserves_end.base - event.base_volume;
                 reserves_end.quote = reserves_end.quote + event.quote_volume;
-                let reserves_end = *reserves_ref_mut;
+                *reserves_ref_mut = reserves_end;
 
                 // Get FDV, market cap at start and end.
                 (fdv_start, market_cap_start, fdv_end, market_cap_end) =
@@ -1729,6 +1724,62 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         (base, quote)
     }
 
+    public fun unpack_swap(swap: Swap): (
+        u64,
+        u64,
+        u64,
+        address,
+        u64,
+        bool,
+        address,
+        u8,
+        u64,
+        u64,
+        u64,
+        u128,
+        u64,
+        u64,
+        bool,
+        bool,
+    ) {
+        let Swap {
+            market_id,
+            time,
+            market_nonce,
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64,
+            integrator_fee,
+            pool_fee,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        } = swap;
+        (
+            market_id,
+            time,
+            market_nonce,
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64,
+            integrator_fee,
+            pool_fee,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        )
+    }
+
     public fun unpack_sequence_info(sequence_info: SequenceInfo): (u64, u64) {
         let SequenceInfo { nonce, last_bump_time } = sequence_info;
         (nonce, last_bump_time)
@@ -1812,13 +1863,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             };
         });
 
-        // Check global state tracker period lapse.
+        // Increment registry nonce.
         let registry_sequence_info_ref_mut = &mut registry_ref_mut.sequence_info;
+        let registry_nonce_ref_mut = &mut registry_sequence_info_ref_mut.nonce;
+        let registry_nonce = *registry_nonce_ref_mut + 1;
+        *registry_nonce_ref_mut = registry_nonce;
+
+        // Check global state tracker period lapse.
         let last_registry_bump_time = registry_sequence_info_ref_mut.last_bump_time;
         if (time - last_registry_bump_time >= PERIOD_1D) {
             registry_sequence_info_ref_mut.last_bump_time = time;
-            let registry_nonce = registry_sequence_info_ref_mut.nonce + 1;
-            registry_sequence_info_ref_mut.nonce = registry_nonce;
             let global_stats_ref = &registry_ref_mut.global_stats;
             event::emit(GlobalState {
                 emit_time: time,
@@ -2245,6 +2299,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address)
     }
 
+    #[test_only] public fun get_bps_fee_test_only(
+        principal: u64,
+        fee_rate_bps: u8,
+    ): u64 {
+        get_bps_fee(principal, fee_rate_bps)
+    }
+
     #[test_only] public fun get_concatenation_test_only(
         base: String,
         additional: String,
@@ -2255,6 +2316,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_BASE_REAL_CEILING(): u64 { BASE_REAL_CEILING }
     #[test_only] public fun get_BASE_VIRTUAL_CEILING(): u64 { BASE_VIRTUAL_CEILING }
     #[test_only] public fun get_BASE_VIRTUAL_FLOOR(): u64 { BASE_VIRTUAL_FLOOR }
+    #[test_only] public fun get_BASIS_POINTS_PER_UNIT(): u128 { BASIS_POINTS_PER_UNIT }
     #[test_only] public fun get_COIN_FACTORY_AS_BYTES(): vector<u8> { COIN_FACTORY_AS_BYTES }
     #[test_only] public fun get_EMOJICOIN_STRUCT_NAME(): vector<u8> { EMOJICOIN_STRUCT_NAME }
     #[test_only] public fun get_EMOJICOIN_LP_NAME_SUFFIX(): vector<u8> { EMOJICOIN_LP_NAME_SUFFIX }
@@ -2266,7 +2328,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         EMOJICOIN_LP_NAME_SUFFIX
     }
     #[test_only] public fun get_EMOJICOIN_NAME_SUFFIX(): vector<u8> { EMOJICOIN_NAME_SUFFIX }
+    #[test_only] public fun get_EMOJICOIN_REMAINDER(): u64 { EMOJICOIN_REMAINDER }
     #[test_only] public fun get_EMOJICOIN_SUPPLY(): u64 { EMOJICOIN_SUPPLY }
+    #[test_only] public fun get_LP_TOKENS_INITIAL(): u64 { LP_TOKENS_INITIAL }
     #[test_only] public fun get_MAX_CHAT_MESSAGE_LENGTH(): u64 { MAX_CHAT_MESSAGE_LENGTH }
     #[test_only] public fun get_MAX_SYMBOL_LENGTH(): u8 { MAX_SYMBOL_LENGTH }
     #[test_only] public fun get_MARKET_REGISTRATION_FEE(): u64 { MARKET_REGISTRATION_FEE }
@@ -2281,6 +2345,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_REGISTRY_NAME(): vector<u8> { REGISTRY_NAME }
     #[test_only] public fun get_TRIGGER_MARKET_REGISTRATION(): u8 { TRIGGER_MARKET_REGISTRATION }
     #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
+    #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }

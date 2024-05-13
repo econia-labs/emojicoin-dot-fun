@@ -31,16 +31,17 @@ poetry --version >/dev/null 2>&1 || {
 	exit 1
 }
 
+# Attempt to install the poetry dependencies.
+poetry install --no-root || {
+	echo "Poetry install failed."
+	exit 1
+}
+
 # Check if `poetry.lock` is consistent with `pyproject.toml`.
 # We run both commands in case their version of poetry doesn't
 # support `poetry check --lock`.
-poetry check --lock || poetry lock --check --quiet || {
-	# Attempt to install the poetry dependencies.
-	poetry install --no-root || {
-		echo "Poetry install failed."
-		exit 1
-	}
-
+poetry check --lock || poetry lock --check || {
+	echo 'Poetry lock file is out of date. Running `poetry lock --no-update`...'
 	poetry lock --no-update || {
 		echo "Poetry lock failed."
 		exit 1
