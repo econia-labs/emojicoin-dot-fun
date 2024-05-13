@@ -463,6 +463,121 @@
         );
     }
 
+    public fun assert_coin_name_and_symbol<Emojicoin, EmojicoinLP>(
+        emoji_bytes: vector<vector<u8>>,
+        expected_lp_symbol: vector<u8>,
+    ) {
+        init_market_and_coins_via_swap<Emojicoin, EmojicoinLP>(emoji_bytes);
+
+        // Test emojicoin name and symbol.
+        let symbol = utf8(verified_symbol_emoji_bytes(emoji_bytes));
+        let name = get_concatenation(symbol, utf8(get_EMOJICOIN_NAME_SUFFIX()));
+        assert!(coin::symbol<Emojicoin>() == symbol, 0);
+        assert!(coin::name<Emojicoin>() == name, 0);
+
+        // Test LP coin name and symbols.
+        let market_id = market_id_for_registered_market_by_emoji_bytes(emoji_bytes);
+        let lp_symbol = get_concatenation(
+            utf8(get_EMOJICOIN_LP_SYMBOL_PREFIX()),
+            string_utils::to_string(&market_id),
+        );
+        assert!(utf8(expected_lp_symbol) == lp_symbol, 0);
+        let lp_name = get_concatenation(symbol, utf8(get_EMOJICOIN_LP_NAME_SUFFIX()));
+        assert!(coin::symbol<EmojicoinLP>() == lp_symbol, 0);
+        assert!(coin::name<EmojicoinLP>() == lp_name, 0);
+    }
+
+    public fun assert_global_state(
+        mock_global_state: MockGlobalState,
+        global_state: GlobalState
+    ) {
+        let (
+            emit_time,
+            registry_nonce,
+            trigger,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        ) = unpack_global_state(global_state);
+        assert!(emit_time == mock_global_state.emit_time, 0);
+        assert!(registry_nonce == mock_global_state.registry_nonce, 0);
+        assert!(trigger == mock_global_state.trigger, 0);
+        assert!(read_snapshot(&cumulative_quote_volume)
+            == mock_global_state.cumulative_quote_volume, 0);
+        assert!(read_snapshot(&total_quote_locked) == mock_global_state.total_quote_locked, 0);
+        assert!(read_snapshot(&total_value_locked) == mock_global_state.total_value_locked, 0);
+        assert!(read_snapshot(&market_cap) == mock_global_state.market_cap, 0);
+        assert!(read_snapshot(&fully_diluted_value) == mock_global_state.fully_diluted_value, 0);
+        assert!(read_snapshot(&cumulative_integrator_fees)
+            == mock_global_state.cumulative_integrator_fees, 0);
+        assert!(read_snapshot(&cumulative_swaps) == mock_global_state.cumulative_swaps, 0);
+        assert!(read_snapshot(&cumulative_chat_messages)
+            == mock_global_state.cumulative_chat_messages, 0);
+    }
+
+    public fun assert_cumulative_stats(
+        mock_cumulative_stats: MockCumulativeStats,
+        cumulative_stats: CumulativeStats,
+    ) {
+        let (
+            base_volume,
+            quote_volume,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+        ) = unpack_cumulative_stats(cumulative_stats);
+        assert!(base_volume == mock_cumulative_stats.base_volume, 0);
+        assert!(quote_volume == mock_cumulative_stats.quote_volume, 0);
+        assert!(integrator_fees == mock_cumulative_stats.integrator_fees, 0);
+        assert!(pool_fees_base == mock_cumulative_stats.pool_fees_base, 0);
+        assert!(pool_fees_quote == mock_cumulative_stats.pool_fees_quote, 0);
+        assert!(n_swaps == mock_cumulative_stats.n_swaps, 0);
+        assert!(n_chat_messages == mock_cumulative_stats.n_chat_messages, 0);
+    }
+
+    public fun assert_instantaneous_stats(
+        mock_instantaneous_stats: MockInstantaneousStats,
+        instantaneous_stats: InstantaneousStats,
+    ) {
+        let (
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+        ) = unpack_instantaneous_stats(instantaneous_stats);
+        assert!(total_quote_locked == mock_instantaneous_stats.total_quote_locked, 0);
+        assert!(total_value_locked == mock_instantaneous_stats.total_value_locked, 0);
+        assert!(market_cap == mock_instantaneous_stats.market_cap, 0);
+        assert!(fully_diluted_value == mock_instantaneous_stats.fully_diluted_value, 0);
+    }
+
+    public fun assert_last_swap(
+        mock_last_swap: MockLastSwap,
+        last_swap: LastSwap,
+    ) {
+        let (
+            is_sell,
+            avg_execution_price_q64,
+            base_volume,
+            quote_volume,
+            nonce,
+            time,
+        ) = unpack_last_swap(last_swap);
+        assert!(is_sell == mock_last_swap.is_sell, 0);
+        assert!(avg_execution_price_q64 == mock_last_swap.avg_execution_price_q64, 0);
+        assert!(base_volume == mock_last_swap.base_volume, 0);
+        assert!(quote_volume == mock_last_swap.quote_volume, 0);
+        assert!(nonce == mock_last_swap.nonce, 0);
+        assert!(time == mock_last_swap.time, 0);
+    }
+
     public fun assert_market_metadata(
         mock_metadata: MockMarketMetadata,
         metadata: MarketMetadata,
@@ -530,74 +645,6 @@
         assert!(aptos_coin_balance == mock_market_view.aptos_coin_balance, 0);
         assert!(emojicoin_balance == mock_market_view.emojicoin_balance, 0);
         assert!(emojicoin_lp_balance == mock_market_view.emojicoin_lp_balance, 0);
-    }
-
-    public fun assert_registry_view(
-        mock_registry_view: MockRegistryView,
-        registry_view: RegistryView,
-    ) {
-        let (
-            registry_address,
-            nonce,
-            last_bump_time,
-            n_markets,
-            cumulative_quote_volume,
-            total_quote_locked,
-            total_value_locked,
-            market_cap,
-            fully_diluted_value,
-            cumulative_integrator_fees,
-            cumulative_swaps,
-            cumulative_chat_messages,
-        ) = unpack_registry_view(registry_view);
-        assert!(registry_address == mock_registry_view.registry_address, 0);
-        assert!(nonce == mock_registry_view.nonce, 0);
-        assert!(last_bump_time == mock_registry_view.last_bump_time, 0);
-        assert!(n_markets == mock_registry_view.n_markets, 0);
-        assert!(read_snapshot(&cumulative_quote_volume)
-            == mock_registry_view.cumulative_quote_volume, 0);
-        assert!(read_snapshot(&total_quote_locked) == mock_registry_view.total_quote_locked, 0);
-        assert!(read_snapshot(&total_value_locked) == mock_registry_view.total_value_locked, 0);
-        assert!(read_snapshot(&market_cap) == mock_registry_view.market_cap, 0);
-        assert!(read_snapshot(&fully_diluted_value) == mock_registry_view.fully_diluted_value, 0);
-        assert!(read_snapshot(&cumulative_integrator_fees)
-            == mock_registry_view.cumulative_integrator_fees, 0);
-        assert!(read_snapshot(&cumulative_swaps) == mock_registry_view.cumulative_swaps, 0);
-        assert!(read_snapshot(&cumulative_chat_messages)
-            == mock_registry_view.cumulative_chat_messages, 0);
-    }
-
-    public fun assert_global_state(
-        mock_global_state: MockGlobalState,
-        global_state: GlobalState
-    ) {
-        let (
-            emit_time,
-            registry_nonce,
-            trigger,
-            cumulative_quote_volume,
-            total_quote_locked,
-            total_value_locked,
-            market_cap,
-            fully_diluted_value,
-            cumulative_integrator_fees,
-            cumulative_swaps,
-            cumulative_chat_messages,
-        ) = unpack_global_state(global_state);
-        assert!(emit_time == mock_global_state.emit_time, 0);
-        assert!(registry_nonce == mock_global_state.registry_nonce, 0);
-        assert!(trigger == mock_global_state.trigger, 0);
-        assert!(read_snapshot(&cumulative_quote_volume)
-            == mock_global_state.cumulative_quote_volume, 0);
-        assert!(read_snapshot(&total_quote_locked) == mock_global_state.total_quote_locked, 0);
-        assert!(read_snapshot(&total_value_locked) == mock_global_state.total_value_locked, 0);
-        assert!(read_snapshot(&market_cap) == mock_global_state.market_cap, 0);
-        assert!(read_snapshot(&fully_diluted_value) == mock_global_state.fully_diluted_value, 0);
-        assert!(read_snapshot(&cumulative_integrator_fees)
-            == mock_global_state.cumulative_integrator_fees, 0);
-        assert!(read_snapshot(&cumulative_swaps) == mock_global_state.cumulative_swaps, 0);
-        assert!(read_snapshot(&cumulative_chat_messages)
-            == mock_global_state.cumulative_chat_messages, 0);
     }
 
     public fun assert_periodic_state(
@@ -709,6 +756,41 @@
         );
     }
 
+    public fun assert_registry_view(
+        mock_registry_view: MockRegistryView,
+        registry_view: RegistryView,
+    ) {
+        let (
+            registry_address,
+            nonce,
+            last_bump_time,
+            n_markets,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        ) = unpack_registry_view(registry_view);
+        assert!(registry_address == mock_registry_view.registry_address, 0);
+        assert!(nonce == mock_registry_view.nonce, 0);
+        assert!(last_bump_time == mock_registry_view.last_bump_time, 0);
+        assert!(n_markets == mock_registry_view.n_markets, 0);
+        assert!(read_snapshot(&cumulative_quote_volume)
+            == mock_registry_view.cumulative_quote_volume, 0);
+        assert!(read_snapshot(&total_quote_locked) == mock_registry_view.total_quote_locked, 0);
+        assert!(read_snapshot(&total_value_locked) == mock_registry_view.total_value_locked, 0);
+        assert!(read_snapshot(&market_cap) == mock_registry_view.market_cap, 0);
+        assert!(read_snapshot(&fully_diluted_value) == mock_registry_view.fully_diluted_value, 0);
+        assert!(read_snapshot(&cumulative_integrator_fees)
+            == mock_registry_view.cumulative_integrator_fees, 0);
+        assert!(read_snapshot(&cumulative_swaps) == mock_registry_view.cumulative_swaps, 0);
+        assert!(read_snapshot(&cumulative_chat_messages)
+            == mock_registry_view.cumulative_chat_messages, 0);
+    }
+
     public fun assert_reserves(
         mock_reserves: MockReserves,
         reserves: Reserves,
@@ -725,73 +807,6 @@
         let (nonce, last_bump_time) = unpack_sequence_info(sequence_info);
         assert!(nonce == mock_sequence_info.nonce, 0);
         assert!(last_bump_time == mock_sequence_info.last_bump_time, 0);
-    }
-
-    public fun assert_tvl_to_lp_coin_ratio(
-        mock_tvl_to_lp_coin_ratio: MockTVLtoLPCoinRatio,
-        tvl_to_lp_coin_ratio: TVLtoLPCoinRatio,
-    ) {
-        let (tvl, lp_coins) = unpack_tvl_to_lp_coin_ratio(tvl_to_lp_coin_ratio);
-        assert!(tvl == mock_tvl_to_lp_coin_ratio.tvl, 0);
-        assert!(lp_coins == mock_tvl_to_lp_coin_ratio.lp_coins, 0);
-    }
-
-    public fun assert_cumulative_stats(
-        mock_cumulative_stats: MockCumulativeStats,
-        cumulative_stats: CumulativeStats,
-    ) {
-        let (
-            base_volume,
-            quote_volume,
-            integrator_fees,
-            pool_fees_base,
-            pool_fees_quote,
-            n_swaps,
-            n_chat_messages,
-        ) = unpack_cumulative_stats(cumulative_stats);
-        assert!(base_volume == mock_cumulative_stats.base_volume, 0);
-        assert!(quote_volume == mock_cumulative_stats.quote_volume, 0);
-        assert!(integrator_fees == mock_cumulative_stats.integrator_fees, 0);
-        assert!(pool_fees_base == mock_cumulative_stats.pool_fees_base, 0);
-        assert!(pool_fees_quote == mock_cumulative_stats.pool_fees_quote, 0);
-        assert!(n_swaps == mock_cumulative_stats.n_swaps, 0);
-        assert!(n_chat_messages == mock_cumulative_stats.n_chat_messages, 0);
-    }
-
-    public fun assert_instantaneous_stats(
-        mock_instantaneous_stats: MockInstantaneousStats,
-        instantaneous_stats: InstantaneousStats,
-    ) {
-        let (
-            total_quote_locked,
-            total_value_locked,
-            market_cap,
-            fully_diluted_value,
-        ) = unpack_instantaneous_stats(instantaneous_stats);
-        assert!(total_quote_locked == mock_instantaneous_stats.total_quote_locked, 0);
-        assert!(total_value_locked == mock_instantaneous_stats.total_value_locked, 0);
-        assert!(market_cap == mock_instantaneous_stats.market_cap, 0);
-        assert!(fully_diluted_value == mock_instantaneous_stats.fully_diluted_value, 0);
-    }
-
-    public fun assert_last_swap(
-        mock_last_swap: MockLastSwap,
-        last_swap: LastSwap,
-    ) {
-        let (
-            is_sell,
-            avg_execution_price_q64,
-            base_volume,
-            quote_volume,
-            nonce,
-            time,
-        ) = unpack_last_swap(last_swap);
-        assert!(is_sell == mock_last_swap.is_sell, 0);
-        assert!(avg_execution_price_q64 == mock_last_swap.avg_execution_price_q64, 0);
-        assert!(base_volume == mock_last_swap.base_volume, 0);
-        assert!(quote_volume == mock_last_swap.quote_volume, 0);
-        assert!(nonce == mock_last_swap.nonce, 0);
-        assert!(time == mock_last_swap.time, 0);
     }
 
     public fun assert_state(
@@ -883,28 +898,17 @@
         assert!(derived_market_address == hard_coded_address, 0);
     }
 
-    public fun assert_coin_name_and_symbol<Emojicoin, EmojicoinLP>(
-        emoji_bytes: vector<vector<u8>>,
-        expected_lp_symbol: vector<u8>,
+    public fun assert_tvl_to_lp_coin_ratio(
+        mock_tvl_to_lp_coin_ratio: MockTVLtoLPCoinRatio,
+        tvl_to_lp_coin_ratio: TVLtoLPCoinRatio,
     ) {
-        init_market_and_coins_via_swap<Emojicoin, EmojicoinLP>(emoji_bytes);
+        let (tvl, lp_coins) = unpack_tvl_to_lp_coin_ratio(tvl_to_lp_coin_ratio);
+        assert!(tvl == mock_tvl_to_lp_coin_ratio.tvl, 0);
+        assert!(lp_coins == mock_tvl_to_lp_coin_ratio.lp_coins, 0);
+    }
 
-        // Test emojicoin name and symbol.
-        let symbol = utf8(verified_symbol_emoji_bytes(emoji_bytes));
-        let name = get_concatenation(symbol, utf8(get_EMOJICOIN_NAME_SUFFIX()));
-        assert!(coin::symbol<Emojicoin>() == symbol, 0);
-        assert!(coin::name<Emojicoin>() == name, 0);
-
-        // Test LP coin name and symbols.
-        let market_id = market_id_for_registered_market_by_emoji_bytes(emoji_bytes);
-        let lp_symbol = get_concatenation(
-            utf8(get_EMOJICOIN_LP_SYMBOL_PREFIX()),
-            string_utils::to_string(&market_id),
-        );
-        assert!(utf8(expected_lp_symbol) == lp_symbol, 0);
-        let lp_name = get_concatenation(symbol, utf8(get_EMOJICOIN_LP_NAME_SUFFIX()));
-        assert!(coin::symbol<EmojicoinLP>() == lp_symbol, 0);
-        assert!(coin::name<EmojicoinLP>() == lp_name, 0);
+    public fun assert_tvl_clamm(mock_reserves: MockReserves, tvl: u128) {
+        assert!(tvl == tvl_clamm(pack_mock_reserves(mock_reserves)), 0);
     }
 
     public fun apply_periodic_state_tracker_start_times(
@@ -1461,31 +1465,6 @@
         init_module(&get_signer(@emojicoin_dot_fun));
     }
 
-    public fun init_package_then_simple_buy(): Swap {
-        init_package();
-        timestamp::update_global_time_for_test(SIMPLE_BUY_TIME);
-        init_market(vector[BLACK_CAT]);
-        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
-        let market_address = base_market_metadata().market_address;
-        let simulated_swap = simulate_swap(
-            market_address,
-            SIMPLE_BUY_USER,
-            SIMPLE_BUY_INPUT_AMOUNT,
-            SWAP_BUY,
-            SIMPLE_BUY_INTEGRATOR,
-            SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
-        );
-        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            market_address,
-            &get_signer(SIMPLE_BUY_USER),
-            SIMPLE_BUY_INPUT_AMOUNT,
-            SWAP_BUY,
-            SIMPLE_BUY_INTEGRATOR,
-            SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
-        );
-        simulated_swap
-    }
-
     public fun init_package_then_exact_transition(): Swap {
         init_package();
         timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME);
@@ -1507,6 +1486,31 @@
             SWAP_BUY,
             EXACT_TRANSITION_INTEGRATOR,
             EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
+        );
+        simulated_swap
+    }
+
+    public fun init_package_then_simple_buy(): Swap {
+        init_package();
+        timestamp::update_global_time_for_test(SIMPLE_BUY_TIME);
+        init_market(vector[BLACK_CAT]);
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        let market_address = base_market_metadata().market_address;
+        let simulated_swap = simulate_swap(
+            market_address,
+            SIMPLE_BUY_USER,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            SIMPLE_BUY_INTEGRATOR,
+            SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
+        );
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            market_address,
+            &get_signer(SIMPLE_BUY_USER),
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            SIMPLE_BUY_INTEGRATOR,
+            SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
         );
         simulated_swap
     }
@@ -2803,6 +2807,17 @@
             is_sell: true,
             input_amount: base_swap_simple_buy().net_proceeds / 2,
         })
+    }
+
+    #[test] fun tvl_clamm_expected() {
+        // Verify TVL with market having no quote above virtual floor.
+        assert_tvl_clamm(
+            MockReserves{
+                base: get_BASE_VIRTUAL_CEILING(),
+                quote: get_QUOTE_VIRTUAL_FLOOR(),
+            },
+            0,
+        );
     }
 
     #[test] fun valid_coin_types_all_invalid() {
