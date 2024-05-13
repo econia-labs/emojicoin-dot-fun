@@ -15,8 +15,12 @@ export const StyledSocialWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 48px 0;
+  padding: 24px 0;
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+
+  ${({ theme }) => theme.mediaQueries.tablet} {
+    padding: 48px 0;
+  }
 `;
 
 export const StyledClickItem = styled.div`

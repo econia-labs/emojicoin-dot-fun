@@ -54,6 +54,7 @@ const LaunchEmojicoinPage: React.FC = () => {
   const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
     onEmojiClick: onEmojiClickHandler,
     placement: "bottom",
+    width: 343,
   });
 
   const inputProhibition = async (event: KeyboardEvent) => {
@@ -84,7 +85,7 @@ const LaunchEmojicoinPage: React.FC = () => {
   };
 
   return (
-    <Column pt="85px" flexGrow="1">
+    <Column pt="85px"  flexGrow="1" px={{ _: "16px", mobileL: "24px" }}>
       <ClientsSlider />
 
       <Flex justifyContent="center" alignItems="center" height="100%">
@@ -99,20 +100,20 @@ const LaunchEmojicoinPage: React.FC = () => {
           {tooltip}
 
           <FlexGap gap="8px" mb="5px">
-            <StyledFieldName textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
+            <StyledFieldName textScale={{_: "bodySmall", tablet: "bodyLarge"}} color="lightGrey" textTransform="uppercase">
               {t("Emojicoin Name:")}
             </StyledFieldName>
-            <Text textScale="bodyLarge" textTransform="uppercase" ellipsis ref={targetRefEmojiName}>
+            <Text textScale={{_: "bodySmall", tablet: "bodyLarge"}} textTransform="uppercase" ellipsis ref={targetRefEmojiName}>
               {names}
             </Text>
             {tooltipEmojiName}
           </FlexGap>
 
           <FlexGap gap="8px" mb="5px">
-            <StyledFieldName textScale="bodyLarge" color="lightGrey" textTransform="uppercase">
+            <StyledFieldName textScale={{_: "bodySmall", tablet: "bodyLarge"}} color="lightGrey" textTransform="uppercase">
               {t("Emojicoin symbol (ticker) :")}
             </StyledFieldName>
-            <Text textScale="bodyLarge" textTransform="uppercase" lineHeight="20px" ellipsis ref={targetRefEmojiTicker}>
+            <Text textScale={{_: "bodySmall", tablet: "bodyLarge"}} textTransform="uppercase" lineHeight="20px" ellipsis ref={targetRefEmojiTicker}>
               {tickers}
             </Text>
             {tooltipEmojiTicker}

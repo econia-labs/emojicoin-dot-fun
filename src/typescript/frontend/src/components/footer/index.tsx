@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
               $fontWeight="bold"
               fontSize={{ _: "8px", tablet: "15px" }}
               textTransform="uppercase"
-              py="25px"
+              py={{_: "16px", tablet: "24px"}}
             >
               Copyright © 2024 | MADE WITH 🖤 BY
             </Text>
@@ -43,7 +43,7 @@ const Footer: React.FC = () => {
               $fontWeight="bold"
               fontSize={{ _: "8px", tablet: "15px" }}
               textTransform="uppercase"
-              py="25px"
+              py={{_: "16px", tablet: "24px"}}
             >
               | ALL RIGHTS RESERVED.
             </Text>
