@@ -1242,10 +1242,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
         aggregator_v2::try_sub(global_total_value_locked_ref_mut, delta_tvl);
 
-        // Get FDV, market cap, at start and end of operation.
+        // Get FDV, market cap, at start and end of operation, update global stats accordingly.
         let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
             fdv_market_cap_start_end(reserves_start, *reserves_ref_mut,EMOJICOIN_SUPPLY);
-
         update_global_fdv_market_cap_for_liquidity_operation(
             fdv_start,
             market_cap_start,
