@@ -19,7 +19,7 @@ export class Inbox {
    *
    * @returns Promise<null>
    */
-  stop(): Promise<null> {
+  static stop(): Promise<null> {
     const cliCommand = "docker";
     const cliArgs = [
       "compose",
@@ -42,8 +42,8 @@ export class Inbox {
       console.log(str);
     });
 
-    let p: Promise<null> = new Promise(r => {
-      childProcess.on('close', () => {
+    const p: Promise<null> = new Promise(r => {
+      childProcess.on("close", () => {
         r(null);
       })
     });
@@ -144,7 +144,7 @@ export class Inbox {
    *
    * @returns Promise<null>
    */
-  async clearState(): Promise<null> {
+  static async clearState(): Promise<null> {
     const cliCommand = "docker";
     const cliArgs = [
       "volume",
@@ -166,8 +166,8 @@ export class Inbox {
       console.log(str);
     });
 
-    let p: Promise<null> = new Promise(r => {
-      childProcess.on('close', () => {
+    const p: Promise<null> = new Promise(r => {
+      childProcess.on("close", () => {
         r(null);
       })
     });
