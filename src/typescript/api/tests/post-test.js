@@ -8,5 +8,9 @@ module.exports = async function () {
     // that weren't stopped in our tests, we kill all the descendent processes
     // of the node process, including the node process itself
     aptosNode.stop();
+
+    const inbox = globalThis.__INBOX__;
+    await inbox.stop();
+    await inbox.clearState();
   }
 };

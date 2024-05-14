@@ -1,9 +1,10 @@
 import { Account } from "@aptos-labs/ts-sdk";
 import { getRegistryAddress } from "../../src";
-import { EmojicoinDotFun, ONE_APT } from "../../src/emojicoin_dot_fun";
+import { EmojicoinDotFun, INBOX_URL, ONE_APT, sleep } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
 import { chatEventTypeTag, parseChatEvent } from "../../src/types/contract";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
+import { PostgrestClient } from "@supabase/postgrest-js";
 
 jest.setTimeout(20000);
 
@@ -110,5 +111,12 @@ describe("emits a chat message event successfully", () => {
     expect(secondChatEventJSON).toBeDefined();
     const secondChatEvent = parseChatEvent(secondChatEventJSON);
     expect(secondChatEvent.message).toEqual(indices.map((i) => chatEmojis[i][1]).join(""));
+
+    const postgrest = new PostgrestClient(INBOX_URL);
+
+    // Wait to make sure events were processed and saved by Inbox.
+    await sleep(1000);
+    const res = await postgrest.from('inbox_events').select('type');
+    expect(res.data?.length).toBeGreaterThan(0);
   });
 });

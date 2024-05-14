@@ -10,6 +10,7 @@ export const MAX_GAS_FOR_PUBLISH = 1500000;
 export const COIN_FACTORY_MODULE_NAME = "coin_factory";
 export const EMOJICOIN_DOT_FUN_MODULE_NAME = "emojicoin_dot_fun";
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.MODULE_ADDRESS!))();
+export const INBOX_URL = process.env.INBOX_URL!;
 export const DEFAULT_REGISTER_MARKET_GAS_OPTIONS = {
   maxGasAmount: ONE_APT / 100,
   gasUnitPrice: 100,
