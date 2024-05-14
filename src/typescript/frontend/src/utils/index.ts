@@ -1,6 +1,5 @@
 export { checkIsEllipsis } from "./check-is-ellipsis";
 export { parseErrorFromBE } from "./error-parser";
-export { lazyLoad } from "./loadable";
 export { getFileNameFromSrc } from "./get-file-name-from-src";
 export {
   removeLangParamFromPathname,
@@ -8,5 +7,5 @@ export {
   cutLocaleFromRoute,
   getLocaleFromRoute,
 } from "./pathname-helpers";
-export { shouldForwardProp, getStylesFromResponsiveValue } from "./styled-components-helpers";
+export { getStylesFromResponsiveValue } from "./styled-components-helpers";
 export { isDisallowedEventKey } from "./check-is-disallowed-event-key";

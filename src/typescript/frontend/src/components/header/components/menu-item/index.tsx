@@ -3,9 +3,10 @@ import { useScramble } from "use-scramble";
 
 import { useTranslation } from "context";
 
-import { FlexGap, Text } from "components";
+import { Text } from "components/text";
+import { FlexGap } from "@/containers";
 
-import { MenuItemProps } from "./types";
+import { type MenuItemProps } from "./types";
 
 const MenuItem: React.FC<MenuItemProps> = ({ title, width, onClick = () => {} }) => {
   const { t } = useTranslation();

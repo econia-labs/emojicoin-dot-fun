@@ -3,7 +3,7 @@ import React from "react";
 import { DropdownMenuWrapper } from "./styled";
 import { DropdownMenuItem } from "./components";
 
-import { DropdownMenuProps } from "../types";
+import { type DropdownMenuProps } from "../types";
 
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onClick,

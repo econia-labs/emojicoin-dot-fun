@@ -63,13 +63,13 @@ export const fontWeight = {
 } as const;
 
 export const fonts = {
-  pixelar: "Pixelar",
-  forma: "FormaDJRMicro",
-  formaM: "FormaDJRDisplayMedium",
-  formaDR: "FormaDJRDisplayRegular",
+  pixelar: "var(--font-pixelar)",
+  forma: "var(--font-forma)",
+  formaM: "var(--font-formaM)",
+  formaDR: "var(--font-formaDR)",
 } as const;
 
-export default {
+const theme = {
   siteWidth,
   breakpoints,
   mediaQueries,
@@ -81,3 +81,5 @@ export default {
   gradients,
   transitions,
 };
+
+export default theme;

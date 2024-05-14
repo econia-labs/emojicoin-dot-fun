@@ -1,4 +1,4 @@
-import { ErrorInErrorsArrayFromBE } from "services/types";
+import { type ErrorInErrorsArrayFromBE } from "services/types";
 
 export const parseErrorFromBE = (item: ErrorInErrorsArrayFromBE[]) => {
   const errorsArr: string[] = [];

@@ -1,7 +1,7 @@
-import { ResponsiveValue } from "styled-system";
+import { type ResponsiveValue } from "styled-system";
 
-import { BoxProps } from "components/layout/components/types";
-import { SkeletonProps } from "components/skeleton/types";
+import { type BoxProps } from "components/layout/components/types";
+import { type SkeletonProps } from "components/skeleton/types";
 
 export type ImageDimensions = {
   variant?: SkeletonProps["variant"];

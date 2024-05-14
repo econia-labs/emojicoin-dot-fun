@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import { space, typography } from "styled-system";
-import { InputProps, scales, ThemedProps, BorderProps } from "./types";
+import { type InputProps, scales, type ThemedProps, type BorderProps } from "./types";
 
 const getHeight = ({ scale }: ThemedProps) => {
   switch (scale) {
@@ -41,7 +41,9 @@ export const getBorderStyles = ({ error, isTouched, borderColor, theme }: Border
   `;
 };
 
-export const Input = styled.input<InputProps>`
+export const Input = styled.input.attrs<InputProps>(({ scale = "md" }) => ({
+  scale,
+}))`
   background-color: transparent;
   border-radius: ${({ theme }) => theme.radii.xSmall};
   color: ${({ theme }) => theme.colors.white};
@@ -79,7 +81,3 @@ export const Input = styled.input<InputProps>`
   ${typography}
   ${space}
 `;
-
-Input.defaultProps = {
-  scale: "md",
-};

@@ -1,5 +1,5 @@
-import { ChangeEvent } from "react";
-import { FormikValues, FormikErrors, FormikTouched } from "formik";
+import { type ChangeEvent } from "react";
+import { type FormikValues, type FormikErrors, type FormikTouched } from "formik";
 
 export interface FieldProps<Values> {
   value: string;

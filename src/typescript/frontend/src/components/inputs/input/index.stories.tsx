@@ -1,5 +1,6 @@
 import { scales } from "./types";
-import { Input as StyledInput, Row } from "components";
+import { Row } from "@/containers";
+import { Input as StyledInput } from "components";
 
 export default {
   title: "Components/Inputs/Input",

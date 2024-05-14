@@ -1,7 +1,7 @@
 import React from "react";
 import { StyledCloseIcon } from "./styled";
-import { CloseIcon } from "components/svg";
-import { CloseIconWithHoverProps } from "./types";
+import CloseIcon from "components/svg/icons/Close";
+import { type CloseIconWithHoverProps } from "./types";
 
 export const CloseIconWithHover: React.FC<CloseIconWithHoverProps> = ({ onClick, ...props }) => {
   return (

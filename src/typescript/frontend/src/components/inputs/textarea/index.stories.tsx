@@ -1,4 +1,5 @@
-import { Textarea as StyledTextarea, Row } from "components";
+import { Row } from "@/containers";
+import { Textarea as StyledTextarea } from "components";
 
 export default {
   title: "Components/Inputs/Textarea",

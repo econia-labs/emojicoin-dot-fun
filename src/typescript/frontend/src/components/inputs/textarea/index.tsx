@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { space, typography } from "styled-system";
 
-import { TextareaProps } from "./types";
+import { type TextareaProps } from "./types";
 
 export const Textarea = styled.textarea<TextareaProps>`
   height: 52px;

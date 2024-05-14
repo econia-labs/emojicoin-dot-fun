@@ -3,7 +3,7 @@ import { space, typography, layout, opacity, flexbox } from "styled-system";
 import { fontWeights, styles } from "./theme";
 import { getStylesFromResponsiveValue } from "utils";
 
-import { Scales, TextProps, ThemedProps } from "./types";
+import { type Scales, type TextProps, type ThemedProps } from "./types";
 
 export const getEllipsis = ({ ellipsis }: ThemedProps) => {
   if (ellipsis) {
@@ -23,7 +23,9 @@ export const wordBreak = ({ wordBreak }: ThemedProps) => {
   }
 };
 
-export const Text = styled.p<TextProps>`
+export const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
+  textScale,
+}))`
   color: ${({ theme, color }) => (color ? theme.colors[color] : theme.colors.white)};
   font-family: ${({ theme }) => theme.fonts.forma};
   text-transform: ${({ textTransform }) => textTransform};
@@ -39,7 +41,5 @@ export const Text = styled.p<TextProps>`
   ${opacity}
   ${flexbox}
 `;
-
-Text.defaultProps = { textScale: "display6" };
 
 export default Text;

@@ -1,9 +1,8 @@
 import React, { cloneElement } from "react";
-
 import { InputError, InputIcon, InputWrapper, StyledInputGroup, InputInner } from "./styled";
-import { Text } from "components";
+import { Text } from "components/text";
 
-import { InputGroupProps, variants } from "./types";
+import { type InputGroupProps, variants } from "./types";
 import { scales as inputScales } from "components/inputs/input/types";
 
 export const InputGroup: React.FC<InputGroupProps> = ({

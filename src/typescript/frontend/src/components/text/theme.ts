@@ -1,9 +1,9 @@
-import { css, DefaultTheme } from "styled-components";
-import { system, Config } from "styled-system";
+import { css, type DefaultTheme } from "styled-components";
+import { system, type Config } from "styled-system";
 
 import { scales } from "./types";
 import { fontWeight } from "theme/base";
-import { FontWeight } from "theme/types";
+import { type FontWeight } from "theme/types";
 
 export const styles = (theme: DefaultTheme) => {
   return {
@@ -72,7 +72,6 @@ export const styles = (theme: DefaultTheme) => {
     [scales.bodyLarge]: css`
       font-size: 16px;
       line-height: 18px;
-      font-family: ${theme.fonts.formaDR};
     `,
     [scales.bodySmall]: css`
       font-size: 12px;

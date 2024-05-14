@@ -1,5 +1,5 @@
-import { PropsWithChildren } from "react";
-import { FlexboxProps, SpaceProps } from "styled-system";
+import { type PropsWithChildren } from "react";
+import { type FlexboxProps, type SpaceProps } from "styled-system";
 
 export interface CloseModalWrapperProps
   extends SpaceProps,

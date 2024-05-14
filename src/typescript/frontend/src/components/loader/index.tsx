@@ -1,9 +1,8 @@
 import React from "react";
 
-import { Flex } from "components";
-import { SpinnerIcon } from "components/svg";
-
-import { FlexProps } from "components/layout/components/types";
+import { Flex } from "@/containers";
+import { type FlexProps } from "components/layout/components/types";
+import SpinnerIcon from "components/svg/icons/Spinner";
 
 const Loader: React.FC<FlexProps> = props => {
   return (

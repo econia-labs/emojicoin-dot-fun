@@ -1,12 +1,15 @@
+"use client";
+
 import React, { useState } from "react";
 
-import { useTranslation } from "context";
+import { useTranslation } from "context/language-context";
 
-import { CloseIcon } from "components/svg";
-import { Flex, Text } from "components";
+import CloseIcon from "components/svg/icons/Close";
+import { Flex } from "@/containers";
+import { Text } from "components/text";
 import { Arrow, StyledPrompt } from "./styled";
 
-import { PromptProps } from "./types";
+import { type PromptProps } from "./types";
 
 const Prompt: React.FC<PromptProps> = ({ text }) => {
   const { t } = useTranslation();

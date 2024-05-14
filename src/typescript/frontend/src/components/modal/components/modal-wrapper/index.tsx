@@ -2,7 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 
 import { StyledModalWrapper, StyledModalContainer } from "./styled";
-import { ModalWrapperProps } from "./types";
+import { type ModalWrapperProps } from "./types";
 import { appearanceAnimationMap, appearanceAnimationVariants } from "theme";
 
 const ModalWrapper: React.FC<ModalWrapperProps> = ({ children, id, onOutsideClick }) => {

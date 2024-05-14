@@ -1,5 +1,5 @@
-import React, { PropsWithChildren } from "react";
-import translations from "../../../public/locales/en-US.json";
+import { type ReactElement, type PropsWithChildren } from "react";
+import type translations from "../../../public/locales/en-US.json";
 
 export type ContextData = {
   [key: string]: string | number;
@@ -26,4 +26,4 @@ export type TranslationKey = keyof typeof translations | (string & MaybeObject);
 
 export type TranslateFunction = (key: TranslationKey, data?: ContextData) => string;
 
-export interface LanguageContextProviderProps extends PropsWithChildren<{ fallback: React.ReactElement }> {}
+export interface LanguageContextProviderProps extends PropsWithChildren<{ fallback: ReactElement }> {}

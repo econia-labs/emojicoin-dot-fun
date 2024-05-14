@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { space, typography, layout, opacity, border, shadow, variant } from "styled-system";
 import { scaleVariants, variantStyles } from "./theme";
 
-import { ButtonProps } from "./types";
+import { type ButtonProps } from "./types";
 
 const StyledButton = styled.button<ButtonProps>`
   border-radius: ${({ theme }) => theme.radii.semiMedium};

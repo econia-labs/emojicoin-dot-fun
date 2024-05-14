@@ -3,11 +3,12 @@ import React from "react";
 import { useHideOverflow } from "hooks";
 
 import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
-import { Flex, Link } from "components";
-import { MobileSocialLinks } from "./components";
+import { Link } from "components/link";
+import { Flex } from "@/containers";
+import { MobileSocialLinks } from "./components/mobile-social-links";
 import { MobileMenuItem } from "../index";
 
-import { MobileMenuProps } from "./types";
+import { type MobileMenuProps } from "./types";
 
 import { slideVariants } from "./animations";
 

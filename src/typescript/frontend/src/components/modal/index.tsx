@@ -1,9 +1,11 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { AnimatePresence, usePresence } from "framer-motion";
 
 import { hideModal } from "store/modal";
 import { useAppDispatch, useAppSelector } from "store/store";
-import { ModalWrapper } from "./components";
+import ModalWrapper from "components/modal/components/modal-wrapper";
 import { components } from "./constants";
 
 import { useHideOverflow } from "./hooks";
@@ -17,6 +19,7 @@ const Modal: React.FC = () => {
 
   useEffect(() => {
     !isPresent && setTimeout(safeToRemove, 1000);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [isPresent]);
 
   const dispatch = useAppDispatch();

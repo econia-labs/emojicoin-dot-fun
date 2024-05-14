@@ -1,12 +1,21 @@
+"use client";
+
 import React from "react";
 
 import { StyledCheckbox, StyledInput, CustomCheckbox } from "./styled";
-import { CheckIcon } from "components/svg";
-import { Text } from "components";
+import CheckIcon from "components/svg/icons/Check";
+import { Text } from "components/text";
 
-import { CheckboxProps } from "./types";
+import { type CheckboxProps } from "./types";
 
-const Checkbox: React.FC<CheckboxProps> = ({ label, checked, icon, disabled, onChange, ...props }) => {
+const Checkbox: React.FC<CheckboxProps> = ({
+  label,
+  checked,
+  icon = <CheckIcon width="16px" />,
+  disabled,
+  onChange,
+  ...props
+}) => {
   return (
     <StyledCheckbox {...props} disabled={disabled}>
       <StyledInput type="checkbox" checked={checked} disabled={disabled} onChange={onChange} />
@@ -24,10 +33,6 @@ const Checkbox: React.FC<CheckboxProps> = ({ label, checked, icon, disabled, onC
       )}
     </StyledCheckbox>
   );
-};
-
-Checkbox.defaultProps = {
-  icon: <CheckIcon width="16px" />,
 };
 
 export default Checkbox;

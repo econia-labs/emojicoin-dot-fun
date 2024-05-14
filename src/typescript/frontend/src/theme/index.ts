@@ -4,16 +4,16 @@ export { default as light } from "./light";
 export { appearanceAnimationVariants, appearanceAnimationMap, scaleAnimation } from "./animations";
 
 import {
-  Breakpoints,
-  Colors,
-  Fonts,
-  FontWeight,
-  MediaQueries,
-  Radii,
-  Shadows,
-  ZIndices,
-  Gradients,
-  Transitions,
+  type Breakpoints,
+  type Colors,
+  type Fonts,
+  type FontWeight,
+  type MediaQueries,
+  type Radii,
+  type Shadows,
+  type ZIndices,
+  type Gradients,
+  type Transitions,
 } from "./types";
 
 export interface CustomTheme {

@@ -1,6 +1,6 @@
 // import { AnyAction, Dispatch, Middleware, configureStore } from "@reduxjs/toolkit";
 import { configureStore } from "@reduxjs/toolkit";
-import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { type TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 // import { createLogger } from "redux-logger";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 

@@ -1,7 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 
-import { Row, Text } from "components";
+import { Row } from "@/containers";
+import { Text } from "components";
+
 import { useTooltip } from "hooks";
 
 export default {

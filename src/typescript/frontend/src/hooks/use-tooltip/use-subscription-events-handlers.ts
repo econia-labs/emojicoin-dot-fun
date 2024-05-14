@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import debounce from "lodash/debounce";
-import { useSubscriptionEventsHandlersProps } from "./types";
+import { type useSubscriptionEventsHandlersProps } from "./types";
 
 export const useSubscriptionEventsHandlers = ({
   targetElement,
@@ -12,32 +12,6 @@ export const useSubscriptionEventsHandlers = ({
 }: useSubscriptionEventsHandlersProps) => {
   const [visible, setVisible] = useState(isInitiallyOpened);
 
-  const hideTooltip = (e: Event) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setVisible(false);
-    debouncedShow.cancel();
-  };
-
-  const showTooltip = (e: Event) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setVisible(true);
-    debouncedHide.cancel();
-  };
-
-  const toggleTooltip = (e: Event) => {
-    if (tooltipElement?.contains(e.target as Node) && targetElement?.contains(e.target as Node)) {
-      // Should be handled in component with useTooltip hook
-      // Ex.: const { targetRef, tooltip, setVisible } = useTooltip(...)
-      //      function onDropdownMenuClick() {setVisible(false);}
-      return;
-    }
-
-    e.stopPropagation();
-    setVisible(!visible);
-  };
-
   const debouncedHide = debounce(e => {
     hideTooltip(e);
   }, hideTimeout);
@@ -45,6 +19,41 @@ export const useSubscriptionEventsHandlers = ({
   const debouncedShow = debounce(e => {
     showTooltip(e);
   }, showTimeout);
+
+  const hideTooltip = useCallback(
+    (e: Event) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setVisible(false);
+      debouncedShow.cancel();
+    },
+    [debouncedShow],
+  );
+
+  const showTooltip = useCallback(
+    (e: Event) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setVisible(true);
+      debouncedHide.cancel();
+    },
+    [debouncedHide],
+  );
+
+  const toggleTooltip = useCallback(
+    (e: Event) => {
+      if (tooltipElement?.contains(e.target as Node) && targetElement?.contains(e.target as Node)) {
+        // Should be handled in component with useTooltip hook
+        // Ex.: const { targetRef, tooltip, setVisible } = useTooltip(...)
+        //      function onDropdownMenuClick() {setVisible(false);}
+        return;
+      }
+
+      e.stopPropagation();
+      setVisible(v => !v);
+    },
+    [tooltipElement, targetElement, setVisible],
+  );
 
   // Trigger = hover
   useEffect(() => {
@@ -69,7 +78,7 @@ export const useSubscriptionEventsHandlers = ({
       tooltipElement.removeEventListener("mouseenter", showTooltip);
       tooltipElement.removeEventListener("mouseleave", debouncedHide);
     };
-  }, [trigger, tooltipElement, debouncedHide, debouncedShow]);
+  }, [trigger, tooltipElement, debouncedHide, debouncedShow, showTooltip]);
 
   // Trigger = click
   useEffect(() => {

@@ -1,9 +1,14 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { useTranslation } from "context";
-import { Heading, Page, Text, Box, Row } from "components";
+import { Box, Row } from "@/containers";
+import { Heading } from "components";
+import { Text } from "components/text";
+import { Page } from "components/layout/components/page";
 
-import { fetchLocale } from "./helpers";
+import fetchLocale from "lib/fetch-locale";
 
 export default {
   title: "Context/LanguageContext",

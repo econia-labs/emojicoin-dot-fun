@@ -1,4 +1,4 @@
-import { NAVIGATE_LINKS } from "../../constants";
+import { type NAVIGATE_LINKS } from "../../constants";
 
 export interface MobileMenuProps {
   isOpen: boolean;

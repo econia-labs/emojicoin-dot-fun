@@ -1,10 +1,14 @@
+"use client";
+
 import React from "react";
 
 import { useMatchBreakpoints } from "hooks";
+import { Container, FlexGap, Flex } from "@/containers";
+import { Text } from "components/text";
 
-import { Container, FlexGap, Text, Flex } from "components";
-import { SocialLinks } from "./components";
-import { LogoIcon, EconiaLabsLogoIcon } from "components/svg";
+import { SocialLinks } from "./components/social-links";
+import LogoIcon from "components/svg/icons/LogoIcon";
+import EconiaLabsLogoIcon from "components/svg/icons/EconiaLabsLogoIcon";
 
 import { StyledClickItem, StyledContainer, StyledSocialWrapper } from "./styled";
 
@@ -31,7 +35,7 @@ const Footer: React.FC = () => {
               $fontWeight="bold"
               fontSize={{ _: "8px", tablet: "15px" }}
               textTransform="uppercase"
-              py={{_: "16px", tablet: "24px"}}
+              py={{ _: "16px", tablet: "24px" }}
             >
               Copyright © 2024 | MADE WITH 🖤 BY
             </Text>
@@ -43,7 +47,7 @@ const Footer: React.FC = () => {
               $fontWeight="bold"
               fontSize={{ _: "8px", tablet: "15px" }}
               textTransform="uppercase"
-              py={{_: "16px", tablet: "24px"}}
+              py={{ _: "16px", tablet: "24px" }}
             >
               | ALL RIGHTS RESERVED.
             </Text>

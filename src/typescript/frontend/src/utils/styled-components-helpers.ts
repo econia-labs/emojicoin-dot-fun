@@ -1,19 +1,5 @@
-import isPropValid from "@emotion/is-prop-valid";
-import { ResponsiveValue } from "styled-system";
-
+import { type ResponsiveValue } from "styled-system";
 import { breakpointMap } from "theme/base";
-
-import { StyledTarget } from "styled-components/dist/types";
-
-// In new v6 version of styled-components shouldForwardProp is no longer provided by default
-export const shouldForwardProp = (propName: string, target: StyledTarget<"web">) => {
-  if (typeof target === "string") {
-    // For HTML elements, forward the prop if it is a valid HTML attribute
-    return isPropValid(propName);
-  }
-  // For other elements, forward all props
-  return true;
-};
 
 const createMediaQuery = (n: number) => `@media screen and (min-width: ${n}px)`;
 

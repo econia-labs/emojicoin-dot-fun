@@ -1,9 +1,10 @@
-import styled, { css, DefaultTheme } from "styled-components";
+import styled, { css, type DefaultTheme } from "styled-components";
 
-import { Box, Text } from "components";
+import { Box } from "@/containers";
+import { Text } from "components/text";
 
-import { InputGroupProps, InputIconProps, InputInnerProps, StyledInputGroupProps } from "./types";
-import { Scales, scales as inputScales } from "components/inputs/input/types";
+import { type InputGroupProps, type InputIconProps, type InputInnerProps, type StyledInputGroupProps } from "./types";
+import { type Scales, scales as inputScales } from "components/inputs/input/types";
 
 export interface ThemedProps extends Pick<InputGroupProps, "variant"> {
   theme: DefaultTheme;

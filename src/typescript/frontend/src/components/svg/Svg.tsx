@@ -1,7 +1,7 @@
 import styled, { css, keyframes } from "styled-components";
 import { space } from "styled-system";
 import { rotate } from "./theme";
-import { SvgProps } from "./types";
+import { type SvgProps } from "./types";
 
 const rotateAnimation = keyframes`
   from {
@@ -16,7 +16,14 @@ const spinStyle = css`
   animation: ${rotateAnimation} 2s linear infinite;
 `;
 
-const Svg = styled.svg<SvgProps>`
+const Svg = styled.svg.attrs<SvgProps>(
+  ({ spin = false, color = "white", width = "20px", xmlns = "http://www.w3.org/2000/svg" }) => ({
+    spin,
+    color,
+    width,
+    xmlns,
+  }),
+)`
   align-self: center;
   fill: ${({ theme, color }) => color && theme.colors[color]};
   flex-shrink: 0;
@@ -25,12 +32,5 @@ const Svg = styled.svg<SvgProps>`
   ${rotate}
   ${space}
 `;
-
-Svg.defaultProps = {
-  spin: false,
-  color: "white",
-  width: "20px",
-  xmlns: "http://www.w3.org/2000/svg",
-};
 
 export default Svg;

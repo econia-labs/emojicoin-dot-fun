@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Checkbox, Heading } from "components";
-import { InfoIcon } from "components/svg";
+import Heading from "components/heading";
+import Checkbox from "components/checkbox";
+import InfoIcon from "components/svg/icons/Info";
 
 export default {
   title: "Components/Checkboxes",

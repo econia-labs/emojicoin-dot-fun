@@ -1,5 +1,15 @@
-import { mediaQueries, shadows, radii, zIndices, fontWeight, fonts, breakpoints, gradients, transitions } from "./base";
-import { baseColors, darkColors } from "./colors";
+import {
+  type mediaQueries,
+  type shadows,
+  type radii,
+  type zIndices,
+  type fontWeight,
+  type fonts,
+  type breakpoints,
+  type gradients,
+  type transitions,
+} from "./base";
+import { type baseColors, type darkColors } from "./colors";
 
 export type MediaQueries = typeof mediaQueries;
 

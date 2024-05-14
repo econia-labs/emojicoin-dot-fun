@@ -1,8 +1,8 @@
-import { ElementType } from "react";
-import { DefaultTheme } from "styled-components";
-import { SpaceProps, TypographyProps } from "styled-system";
-import { Colors } from "theme/types";
-import { PolymorphicComponentProps } from "types";
+import { type ElementType } from "react";
+import { type DefaultTheme } from "styled-components";
+import { type SpaceProps, type TypographyProps } from "styled-system";
+import { type Colors } from "theme/types";
+import { type PolymorphicComponentProps } from "types";
 
 export const scales = {
   SM: "sm",

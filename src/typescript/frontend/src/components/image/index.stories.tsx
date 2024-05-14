@@ -1,4 +1,5 @@
-import { Image, Flex, Column } from "components";
+import { Flex, Column } from "@/containers";
+import { Image } from "components";
 
 export default {
   title: "Assets/Images",
@@ -19,6 +20,7 @@ export const Images = () => {
               src={`/images/${img}`}
               width={{ _: "200px", tablet: "500px" }}
               aspectRatio={{ _: 0.8733, tablet: 0.8 }}
+              alt={"test image"}
             />
           </Flex>
         );

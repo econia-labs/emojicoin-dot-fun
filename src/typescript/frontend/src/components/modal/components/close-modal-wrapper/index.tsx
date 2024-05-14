@@ -1,9 +1,10 @@
+"use client";
+
 import React from "react";
 
-import { Flex } from "components";
-import { CloseIconWithHover } from "components/svg";
-
-import { CloseModalWrapperProps } from "./types";
+import { Flex } from "@/containers";
+import { CloseIconWithHover } from "components/svg/components/close-icon-with-hover";
+import { type CloseModalWrapperProps } from "./types";
 
 const CloseModalWrapper: React.FC<CloseModalWrapperProps> = ({ children, closeModalHandler, ...props }) => {
   return (

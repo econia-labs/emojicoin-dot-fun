@@ -1,21 +1,31 @@
+"use client";
+
 import React from "react";
 import { useScramble } from "use-scramble";
 
 import StyledButton from "./styled";
-import { SpinnerIcon } from "components/svg";
-import { FlexGap, Text } from "components";
+import SpinnerIcon from "components/svg/icons/Spinner";
+import { Text } from "components/text";
+import { FlexGap } from "@/containers";
 
-import { ButtonProps } from "./types";
+import { type ButtonProps } from "./types";
+import { EXTERNAL_LINK_PROPS } from "components/link";
 
-export const getExternalLinkProps = () => ({
-  target: "_blank",
-  rel: "noreferrer noopener",
-});
-
-const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): JSX.Element => {
-  const { startIcon, endIcon, children, isLoading, disabled, external, isScramble = true, scale, ...rest } = props;
+const Button = <E extends React.ElementType = "button">({
+  startIcon,
+  endIcon,
+  children,
+  isLoading = false,
+  disabled = false,
+  external,
+  isScramble = true,
+  scale = "sm",
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  variant = "outline",
+  ...rest
+}: ButtonProps<E>): JSX.Element => {
   const isDisabled = isLoading || disabled;
-  const internalProps = external ? getExternalLinkProps() : {};
+  const internalProps = external ? EXTERNAL_LINK_PROPS : {};
 
   const { ref, replay } = useScramble({
     text: isScramble ? `${children}` : undefined,
@@ -27,7 +37,7 @@ const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): 
     <StyledButton
       {...internalProps}
       {...rest}
-      type={props.type || "button"}
+      type={rest.type || "button"}
       disabled={isDisabled}
       $isLoading={isLoading}
       scale={scale}
@@ -83,13 +93,6 @@ const Button = <E extends React.ElementType = "button">(props: ButtonProps<E>): 
       )}
     </StyledButton>
   );
-};
-
-Button.defaultProps = {
-  isLoading: false,
-  variant: "outline",
-  scale: "sm",
-  disabled: false,
 };
 
 export default Button;

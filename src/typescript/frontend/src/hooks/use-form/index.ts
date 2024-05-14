@@ -1,7 +1,7 @@
-import { ChangeEvent } from "react";
-import { useFormik, FormikConfig, FormikValues } from "formik";
+import { type ChangeEvent } from "react";
+import { useFormik, type FormikConfig, type FormikValues } from "formik";
 
-import { FieldProps } from "./types";
+import { type FieldProps } from "./types";
 /**
  * Is used to simplify the process of managing form state and handling form submissions in a React component.
  */

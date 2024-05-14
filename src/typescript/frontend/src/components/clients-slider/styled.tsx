@@ -1,8 +1,6 @@
 import styled from "styled-components";
 import { clearfixDisplayNone } from "styles";
-// Components
-import { Box } from "components";
-// Animations
+import { Box } from "@/containers";
 import { sliderAutoplay } from "./animations";
 
 export const StyledSliderWrapper = styled(Box)`

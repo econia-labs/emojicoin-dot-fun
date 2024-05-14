@@ -3,11 +3,12 @@ import React from "react";
 import { useScramble } from "use-scramble";
 
 import { DropdownSelectWrapper } from "./styled";
-import { Text, FlexGap } from "components";
+import { FlexGap } from "@/containers";
+import { Text } from "components/text";
 
 import { useTranslation } from "context";
 
-import { SelectProps } from "../types";
+import { type SelectProps } from "../types";
 
 export const Select: React.FC<SelectProps> = ({
   targetRef,

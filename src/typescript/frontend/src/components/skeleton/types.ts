@@ -1,4 +1,4 @@
-import { BoxProps } from "components/layout/components/types";
+import { type BoxProps } from "components/layout/components/types";
 
 export const animation = {
   WAVES: "waves",

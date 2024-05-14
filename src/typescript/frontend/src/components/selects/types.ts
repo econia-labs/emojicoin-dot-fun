@@ -1,7 +1,7 @@
-import { BoxProps } from "components/layout/components/types";
-import { SvgProps } from "components/svg/types";
-import { TextProps } from "components/text/types";
-import { TooltipOptions } from "hooks/use-tooltip/types";
+import { type BoxProps } from "components/layout/components/types";
+import { type SvgProps } from "components/svg/types";
+import { type TextProps } from "components/text/types";
+import { type TooltipOptions } from "hooks/use-tooltip/types";
 
 export type Option = {
   title: string;

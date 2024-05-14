@@ -3,10 +3,11 @@ import React from "react";
 import { useScramble } from "use-scramble";
 
 import { StyledDropdownMenuItem, DropdownMenuInner } from "./styled";
-import { Checkbox, Text } from "components";
-import { Arrow } from "components/svg";
+import Checkbox from "components/checkbox";
+import { Text } from "components/text";
+import Arrow from "components/svg/icons/Arrow";
 
-import { DropdownMenuItemProps } from "components/selects/types";
+import { type DropdownMenuItemProps } from "components/selects/types";
 
 export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
   onClick,

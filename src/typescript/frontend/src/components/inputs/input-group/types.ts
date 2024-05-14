@@ -1,8 +1,8 @@
-import { ReactElement } from "react";
-import { SpaceProps, LayoutProps, ResponsiveValue } from "styled-system";
+import { type ReactElement } from "react";
+import { type SpaceProps, type LayoutProps, type ResponsiveValue } from "styled-system";
 
-import { Scales } from "components/inputs/input/types";
-import { Scales as TextScales } from "components/text/types";
+import { type Scales } from "components/inputs/input/types";
+import { type Scales as TextScales } from "components/text/types";
 
 export const variants = {
   FANTOM: "fantom",

@@ -1,6 +1,7 @@
 import React from "react";
 
-import { Flex, Text } from "components";
+import { Flex } from "@/containers";
+import { Text } from "components/text";
 
 export default {
   title: "Components/Icons",
@@ -8,6 +9,7 @@ export default {
 
 const context = require.context("components/svg", true, /.tsx$/);
 const components: {
+  /* eslint-disable-next-line @typescript-eslint/consistent-type-imports */
   [key: string]: typeof import("./Svg");
 } = context.keys().reduce((accum, path) => {
   const file = path.substring(2).replace(".tsx", "");
