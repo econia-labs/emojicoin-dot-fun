@@ -2450,6 +2450,66 @@
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
     }
 
+    #[test] fun provide_liquidity_with_truncation() {
+        // Invoke an exact transition, then have simple buy user buy against the CPAMM.
+        init_package_then_exact_transition();
+        timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME + 1);
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            SIMPLE_BUY_INTEGRATOR,
+            SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
+        );
+
+        // Get the new CPAMM reserves.
+        let  ( _, _, _, cpamm_real_reserves, _, _, _, _, _, _, _, _, _) = unpack_market_view(
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+        let (base, quote) = unpack_reserves(cpamm_real_reserves);
+        let cpamm_real_reserves = MockReserves { base, quote };
+
+        // Declare new amount of quote to provide.
+        let quote_amount = SIMPLE_BUY_INPUT_AMOUNT / 10;
+
+        // Get base amount, for trunction present during proportion calculation.
+        let proportion_numerator =
+            (cpamm_real_reserves.base as u128) * (quote_amount as u128);
+        let proportion_denominator = (cpamm_real_reserves.quote as u128);
+        assert!(proportion_numerator % proportion_denominator != 0, 0);
+        let base_amount = ((proportion_numerator / proportion_denominator) as u64) + 1;
+
+        // Determine amount of liquidity tokens provided.
+        let lp_coin_amount = ((
+            (quote_amount as u128) * (get_LP_TOKENS_INITIAL() as u128) /
+            (cpamm_real_reserves.quote as u128)
+        ) as u64);
+
+        // Assert liquidity provision simulation.
+        timestamp::update_global_time_for_test(PROVIDE_LIQUIDITY_TIME);
+        assert_liquidity(
+            MockLiquidity {
+                market_id: base_market_metadata().market_id,
+                time: PROVIDE_LIQUIDITY_TIME,
+                market_nonce: base_sequence_info_exact_transition().nonce + 2,
+                provider: USER,
+                base_amount,
+                quote_amount,
+                lp_coin_amount,
+                liquidity_provided: true,
+                pro_rata_base_donation_claim_amount: 0,
+                pro_rata_quote_donation_claim_amount: 0,
+            },
+            simulate_provide_liquidity(
+                @black_cat_market,
+                USER,
+                quote_amount,
+            ),
+        );
+    }
+
     #[test] fun provide_remove_liquidity() {
 
         // Trigger an exact state transition, then store base values.
@@ -2466,7 +2526,7 @@
         timestamp::update_global_time_for_test(time);
 
         // Determine amount of quote to provide.
-        let quote_amount = 123_456;
+        let quote_amount = get_QUOTE_REAL_CEILING() / 10;
 
         // Get base amount, for no trunction during proportion calculation.
         let proportion_numerator =
@@ -2625,47 +2685,6 @@
         // Advance timer for checking simulator returns.
         let time = time + 1;
         timestamp::update_global_time_for_test(time);
-
-        // Declare new amount of quote to provide.
-        quote_amount = 123;
-
-        // Get base amount, for trunction present during proportion calculation.
-        proportion_numerator =
-            (new_market_view.cpamm_real_reserves.base as u128) * (quote_amount as u128);
-        proportion_denominator = (new_market_view.cpamm_real_reserves.quote as u128);
-        std::debug::print(&proportion_numerator);
-        std::debug::print(&proportion_denominator);
-        assert!(proportion_numerator % proportion_denominator != 0, 0);
-        base_amount = ((proportion_numerator / proportion_denominator) as u64) + 1;
-
-        // Determine amount of liquidity tokens provided.
-        lp_coin_amount = ((
-            (quote_amount as u128) * (new_market_view.lp_coin_supply as u128) /
-            (new_market_view.cpamm_real_reserves.quote as u128)
-        ) as u64);
-
-        // Simulate, then assert liquidity.
-        simulated_liquidity = simulate_provide_liquidity(
-            market_address,
-            USER,
-            quote_amount
-        );
-        assert_liquidity(
-            MockLiquidity {
-                market_id,
-                time,
-                market_nonce: new_market_view.sequence_info.nonce + 1,
-                provider: USER,
-                base_amount,
-                quote_amount,
-                lp_coin_amount,
-                liquidity_provided: true,
-                pro_rata_base_donation_claim_amount: 0,
-                pro_rata_quote_donation_claim_amount: 0,
-            },
-            simulated_liquidity,
-        );
-
     }
 
     #[test, expected_failure(
