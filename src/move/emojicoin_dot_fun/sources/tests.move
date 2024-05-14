@@ -2280,6 +2280,18 @@
         );
     }
 
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun chat_no_market() {
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            vector[vector[]],
+            vector[],
+            @0x0,
+        );
+    }
+
     #[test] fun concatenation() {
         let base = utf8(b"base");
         let additional = utf8(b" additional");
