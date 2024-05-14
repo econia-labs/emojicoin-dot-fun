@@ -366,9 +366,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ///     [ x"00", x"01", x"02", x"02", x"02", x"01", x"02", x"01" ]
     public entry fun chat<Emojicoin, EmojicoinLP>(
         user: &signer,
+        market_address: address,
         emoji_bytes: vector<vector<u8>>, // The individual emojis to use.
         emoji_indices_sequence: vector<u8>, // Sequence of indices used to construct a chat message.
-        market_address: address,
     ) acquires Market, Registry, RegistryAddress {
 
         assert!(

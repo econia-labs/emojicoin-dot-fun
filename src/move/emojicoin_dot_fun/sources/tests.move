@@ -2171,14 +2171,15 @@
         assert!(vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @black_cat_market,
             emojis,
             vector[1, 0],
-            @black_cat_market,
         );
 
         // Chat again with a longer message.
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @black_cat_market,
             vector<vector<u8>> [
                 x"f09f98b6", // Cat face.
                 x"f09f98b7", // Cat face with tears of joy.
@@ -2187,7 +2188,6 @@
                 x"f09f9294", // Broken heart.
             ],
             vector[ 3, 0, 2, 2, 1, 4 ],
-            @black_cat_market,
         );
 
         // Post a max length chat message.
@@ -2197,11 +2197,11 @@
         };
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @black_cat_market,
             vector<vector<u8>> [
                 x"f09f9088e2808de2ac9b", // Black cat.
             ],
             emoji_indices_sequence,
-            @black_cat_market,
         );
 
         // Assert the emitted chat events.
@@ -2248,12 +2248,12 @@
 
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @black_cat_market,
             vector<vector<u8>> [
                 x"f09f98b7", // Cat face with tears of joy.
                 x"f09f", // Invalid emoji.
             ],
             vector[ 0, 1],
-            @black_cat_market,
         );
     }
 
@@ -2274,9 +2274,9 @@
         };
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @black_cat_market,
             emojis,
             emoji_indices_sequence,
-            @black_cat_market,
         );
     }
 
@@ -2286,9 +2286,9 @@
     )] fun chat_no_market() {
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @0x0,
             vector[vector[]],
             vector[],
-            @0x0,
         );
     }
 
