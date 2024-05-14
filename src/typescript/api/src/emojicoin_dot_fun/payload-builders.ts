@@ -112,12 +112,12 @@ export class EntryFunctionTransactionBuilder {
       additionalSignersAuthenticators: secondarySendersAuthenticators ?? [],
     });
 
-    const userTransactionResponse = await this.aptos.waitForTransaction({
+    const userTransactionResponse = (await this.aptos.waitForTransaction({
       transactionHash: pendingTransaction.hash,
       options,
-    });
+    })) as UserTransactionResponse;
 
-    return userTransactionResponse as UserTransactionResponse;
+    return userTransactionResponse;
   }
 
   /**

@@ -8,7 +8,9 @@ import {
   type TypeTag,
 } from "@aptos-labs/ts-sdk";
 
-export type Option<T> = [T] | [];
+export type Option<T> = {
+  vec: [T] | [];
+};
 
 // Because the @aptos-labs/ts-sdk does not let you use a `number` for `Uint64`,
 // we coalesce the types here.
