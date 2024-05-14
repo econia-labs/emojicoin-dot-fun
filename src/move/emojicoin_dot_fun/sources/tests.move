@@ -539,11 +539,11 @@
 
     public fun assert_fdv_market_cap(
         mock_reserves: MockReserves,
-        supply_minued: u64,
+        supply_minuend: u64,
         fdv_expected: u128,
         market_cap_expected: u128,
     ) {
-        let (fdv, market_cap) = fdv_market_cap(pack_mock_reserves(mock_reserves), supply_minued);
+        let (fdv, market_cap) = fdv_market_cap(pack_mock_reserves(mock_reserves), supply_minuend);
         assert!(fdv == fdv_expected, 0);
         assert!(market_cap == market_cap_expected, 0);
     }
@@ -2513,7 +2513,7 @@
         // Declare new amount of quote to provide.
         let quote_amount = SIMPLE_BUY_INPUT_AMOUNT / 10;
 
-        // Get base amount, for trunction present during proportion calculation.
+        // Get base amount, for truncation present during proportion calculation.
         let proportion_numerator =
             (cpamm_real_reserves.base as u128) * (quote_amount as u128);
         let proportion_denominator = (cpamm_real_reserves.quote as u128);
@@ -2567,7 +2567,7 @@
         // Determine amount of quote to provide.
         let quote_amount = get_QUOTE_REAL_CEILING() / 10;
 
-        // Get base amount, for no trunction during proportion calculation.
+        // Get base amount, for no truncation during proportion calculation.
         let proportion_numerator =
             (setup_market_view.cpamm_real_reserves.base as u128) * (quote_amount as u128);
         let proportion_denominator = (setup_market_view.cpamm_real_reserves.quote as u128);
