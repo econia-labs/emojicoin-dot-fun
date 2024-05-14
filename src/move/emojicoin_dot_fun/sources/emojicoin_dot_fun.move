@@ -840,8 +840,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     public entry fun swap<Emojicoin, EmojicoinLP>(
-        market_address: address,
         swapper: &signer,
+        market_address: address,
         input_amount: u64,
         is_sell: bool,
         integrator: address,
@@ -1111,8 +1111,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
-        market_address: address,
         provider: &signer,
+        market_address: address,
         quote_amount: u64,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
 
@@ -1188,8 +1188,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
-        market_address: address,
         provider: &signer,
+        market_address: address,
         lp_coin_amount: u64,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
 

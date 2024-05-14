@@ -1520,8 +1520,8 @@
         mint_aptos_coin_to(USER, input_amount);
         let integrator_fee_rate_bps = 0;
         swap<Emojicoin, EmojicoinLP>(
-            address_for_registered_market_by_emoji_bytes(emoji_bytes),
             &get_signer(USER),
+            address_for_registered_market_by_emoji_bytes(emoji_bytes),
             input_amount,
             SWAP_BUY,
             INTEGRATOR,
@@ -1549,8 +1549,8 @@
             EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
         );
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            market_address,
             &get_signer(EXACT_TRANSITION_USER),
+            market_address,
             EXACT_TRANSITION_INPUT_AMOUNT,
             SWAP_BUY,
             EXACT_TRANSITION_INTEGRATOR,
@@ -1574,8 +1574,8 @@
             SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
         );
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            market_address,
             &get_signer(SIMPLE_BUY_USER),
+            market_address,
             SIMPLE_BUY_INPUT_AMOUNT,
             SWAP_BUY,
             SIMPLE_BUY_INTEGRATOR,
@@ -1673,8 +1673,8 @@
             INTEGRATOR_FEE_RATE_BPS,
         );
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            market_address,
             &get_signer(USER),
+            market_address,
             flow.input_amount,
             flow.is_sell,
             INTEGRATOR,
@@ -2466,7 +2466,7 @@
         timestamp::update_global_time_for_test(time);
 
         // Determine amount of quote to provide.
-        let quote_amount = get_QUOTE_REAL_CEILING() / 1_000;
+        let quote_amount = 123_456;
 
         // Get base amount, for no trunction during proportion calculation.
         let proportion_numerator =
@@ -2496,8 +2496,8 @@
             quote_amount
         );
         provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            market_address,
             &get_signer(USER),
+            market_address,
             quote_amount,
         );
 
@@ -3018,8 +3018,8 @@
     )] fun swap_no_base() {
         init_package_then_simple_buy();
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            base_market_metadata().market_address,
             &get_signer(USER),
+            base_market_metadata().market_address,
             1,
             SWAP_SELL,
             INTEGRATOR,
@@ -3032,8 +3032,8 @@
         location = emojicoin_dot_fun::emojicoin_dot_fun,
     )] fun swap_no_market() {
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            @0x0,
             &get_signer(USER),
+            @0x0,
             1,
             SWAP_SELL,
             INTEGRATOR,
@@ -3047,8 +3047,8 @@
     )] fun swap_no_quote() {
         init_package_then_simple_buy();
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            base_market_metadata().market_address,
             &get_signer(USER),
+            base_market_metadata().market_address,
             1,
             SWAP_BUY,
             INTEGRATOR,
