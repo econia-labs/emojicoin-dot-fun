@@ -111,6 +111,7 @@
         register_market_without_publish,
         registry_view,
         simulate_provide_liquidity,
+        simulate_remove_liquidity,
         simulate_swap,
         swap,
         tvl_clamm_test_only as tvl_clamm,
@@ -1541,8 +1542,8 @@
         mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
         let market_address = base_market_metadata().market_address;
         let simulated_swap = simulate_swap(
-            market_address,
             EXACT_TRANSITION_USER,
+            market_address,
             EXACT_TRANSITION_INPUT_AMOUNT,
             SWAP_BUY,
             EXACT_TRANSITION_INTEGRATOR,
@@ -1566,8 +1567,8 @@
         mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
         let market_address = base_market_metadata().market_address;
         let simulated_swap = simulate_swap(
-            market_address,
             SIMPLE_BUY_USER,
+            market_address,
             SIMPLE_BUY_INPUT_AMOUNT,
             SWAP_BUY,
             SIMPLE_BUY_INTEGRATOR,
@@ -1665,8 +1666,8 @@
         timestamp::update_global_time_for_test(GENERAL_CASE_SWAP_TIME);
         let market_address = base_market_metadata().market_address;
         let simulated_swap = simulate_swap(
-            market_address,
             USER,
+            market_address,
             flow.input_amount,
             flow.is_sell,
             INTEGRATOR,
@@ -2503,8 +2504,8 @@
                 pro_rata_quote_donation_claim_amount: 0,
             },
             simulate_provide_liquidity(
-                @black_cat_market,
                 USER,
+                @black_cat_market,
                 quote_amount,
             ),
         );
@@ -2551,8 +2552,8 @@
 
         // Simulate, then provide liquidity.
         let simulated_liquidity = simulate_provide_liquidity(
-            market_address,
             USER,
+            market_address,
             quote_amount
         );
         provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
@@ -2677,6 +2678,7 @@
         assert_state(mock_state, vector::pop_back(&mut emitted_events<State>()));
 
         // Store assertion structs for continued value testing.
+        let new_liquidity = mock_liquidity;
         let new_market_view = mock_market_view;
         let new_registry_view = mock_registry_view;
         let new_periodic_state_tracker = mock_periodic_state_tracker;
@@ -2685,6 +2687,20 @@
         // Advance timer for checking simulator returns.
         let time = time + 1;
         timestamp::update_global_time_for_test(time);
+
+        // Assert simulator return for burning all liquidity tokens.
+        new_liquidity.time = time;
+        new_liquidity.market_nonce = new_liquidity.market_nonce + 1;
+        new_liquidity.liquidity_provided = false;
+        assert_liquidity(
+            new_liquidity,
+            simulate_remove_liquidity<BlackCatEmojicoin>(
+                USER,
+                @black_cat_market,
+                lp_coin_amount,
+            ),
+        );
+
     }
 
     #[test, expected_failure(
@@ -3007,8 +3023,8 @@
         location = emojicoin_dot_fun::emojicoin_dot_fun,
     )] fun simulate_swap_no_market() {
         simulate_swap(
-            @0x0,
             USER,
+            @0x0,
             1,
             SWAP_SELL,
             INTEGRATOR,
@@ -3022,8 +3038,8 @@
     )] fun simulate_swap_no_size() {
         init_package_then_simple_buy();
         simulate_swap(
-            base_market_metadata().market_address,
             USER,
+            base_market_metadata().market_address,
             0,
             SWAP_SELL,
             INTEGRATOR,

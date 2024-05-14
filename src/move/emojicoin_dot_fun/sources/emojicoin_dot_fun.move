@@ -1461,8 +1461,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun simulate_swap(
-        market_address: address,
         swapper: address,
+        market_address: address,
         input_amount: u64,
         is_sell: bool,
         integrator: address,
@@ -1482,8 +1482,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun simulate_provide_liquidity(
-        market_address: address,
         provider: address,
+        market_address: address,
         quote_amount: u64,
     ): Liquidity
     acquires Market {
@@ -1497,8 +1497,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun simulate_remove_liquidity<Emojicoin>(
-        market_address: address,
         provider: address,
+        market_address: address,
         lp_coin_amount: u64,
     ): Liquidity
     acquires Market {
