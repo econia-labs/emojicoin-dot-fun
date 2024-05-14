@@ -42,6 +42,8 @@ nohup
 octa
 oden
 permissionless
+postg
+postgrest
 precommit
 presale
 rica
@@ -50,6 +52,7 @@ sint
 struct
 structs
 subdir
+supabase
 supervillain
 tanabata
 tokelau
