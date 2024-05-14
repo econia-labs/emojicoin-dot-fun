@@ -18,6 +18,7 @@
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
     use aptos_framework::aggregator_v2::read_snapshot;
+    use aptos_framework::account;
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
@@ -2156,7 +2157,7 @@
         assert!(get_bps_fee(50_000, 1) == 5, 0);
     }
 
-    #[test] fun chat_complex_emoji_sequences() {
+    #[test] fun chat_complex() {
         init_package();
         let emojis = vector[
             x"f09fa791e2808df09f9a80", // Astronaut.
@@ -2166,19 +2167,32 @@
         // Verify neither supplemental chat emoji is supported before first market is registered.
         assert!(!vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
 
-        // Register a market, verify both emojis supported in chat.
+        // Register a market, verify both emojis supported in chat. Do with exact transition user
+        // who does not yet have an Aptos account initialized.
         init_market(vector[BLACK_CAT]);
         assert!(vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
+        assert!(!account::exists_at(EXACT_TRANSITION_USER), 0);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            &get_signer(USER),
+            &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,
             emojis,
             vector[1, 0],
         );
 
-        // Chat again with a longer message.
+        // Provide the exact transition user with Aptos coins, then execute exact transition.
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
+            EXACT_TRANSITION_INPUT_AMOUNT,
+            SWAP_BUY,
+            EXACT_TRANSITION_INTEGRATOR,
+            EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
+        );
+
+        // Chat again with a longer message from exact transition user.
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            &get_signer(USER),
+            &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,
             vector<vector<u8>> [
                 x"f09f98b6", // Cat face.
@@ -2190,11 +2204,12 @@
             vector[ 3, 0, 2, 2, 1, 4 ],
         );
 
-        // Post a max length chat message.
+        // Post a max length chat message from generic user, after registering Aptos account.
         let emoji_indices_sequence = vector[];
         for (i in 0..get_MAX_CHAT_MESSAGE_LENGTH()) {
             vector::push_back(&mut emoji_indices_sequence, 0);
         };
+        aptos_account::create_account(USER);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
             @black_cat_market,
@@ -2216,7 +2231,7 @@
                 market_metadata,
                 emit_time: 0,
                 emit_market_nonce: 2,
-                user: USER,
+                user: EXACT_TRANSITION_USER,
                 message: utf8(x"f09fa6b8f09f8fbee2808de29982efb88ff09fa791e2808df09f9a80"),
                 user_emojicoin_balance: 0,
                 circulating_supply: 0,
@@ -2228,14 +2243,32 @@
             MockChat {
                 market_metadata,
                 emit_time: 0,
-                emit_market_nonce: 3,
-                user: USER,
+                emit_market_nonce: 4,
+                user: EXACT_TRANSITION_USER,
                 message: utf8(x"f09f9088e2808de2ac9bf09f98b6f09f98b8f09f98b8f09f98b7f09f9294"),
-                user_emojicoin_balance: 0,
-                circulating_supply: 0,
-                balance_as_fraction_of_circulating_supply_q64: 0,
+                user_emojicoin_balance: get_BASE_REAL_CEILING(),
+                circulating_supply: get_BASE_REAL_CEILING(),
+                balance_as_fraction_of_circulating_supply_q64:
+                    ((get_BASE_REAL_CEILING() as u128) << 64) / (get_BASE_REAL_CEILING() as u128),
             },
             *vector::borrow(&events_emitted, 1),
+        );
+        let message_bytes = vector[];
+        for (i in 0..get_MAX_CHAT_MESSAGE_LENGTH()) {
+            vector::append(&mut message_bytes, x"f09f9088e2808de2ac9b");
+        };
+        assert_chat(
+            MockChat {
+                market_metadata,
+                emit_time: 0,
+                emit_market_nonce: 5,
+                user: USER,
+                message: utf8(message_bytes),
+                user_emojicoin_balance: 0,
+                circulating_supply: get_BASE_REAL_CEILING(),
+                balance_as_fraction_of_circulating_supply_q64: 0
+            },
+            *vector::borrow(&events_emitted, 2),
         );
     }
 
