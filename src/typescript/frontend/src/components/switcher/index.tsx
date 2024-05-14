@@ -16,7 +16,7 @@ export const Switcher: React.FC<SwitcherProps> = ({
 }) => {
   return (
     <StyledCheckbox {...props} disabled={disabled}>
-      <StyledSwitcher checked={checked} scale={scale ?? "md"}>
+      <StyledSwitcher checked={checked} scale={scale}>
         <Checkbox type="checkbox" checked={checked} disabled={disabled} onChange={onChange} />
         <Slider {...{ checked, disabled, scale }} />
       </StyledSwitcher>

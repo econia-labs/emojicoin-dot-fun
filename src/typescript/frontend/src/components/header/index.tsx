@@ -19,9 +19,15 @@ import { slideTopVariants } from "./animations";
 import { type HeaderProps } from "./types";
 import { useTranslation } from "context/language-context";
 
+import { usePathname } from 'next/navigation'
+
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
   const { t } = useTranslation();
+    const pathname = usePathname()
+
+    const currentPath = pathname.split("/")[1];
+    const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
 
   const walletHandler = () => {
     /* eslint-disable-next-line no-console */
@@ -60,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
 
           {isDesktop && (
             <FlexGap gap="24px" alignItems="center">
-              {NAVIGATE_LINKS.map(({ title, path, width }) => {
+              {linksForCurrentPage.map(({ title, path, width }) => {
                 return (
                   <Link key={title} href={path}>
                     <MenuItem width={width} title={title} />
@@ -81,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
       <MobileMenu
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        linksForCurrentPage={NAVIGATE_LINKS}
+        linksForCurrentPage={linksForCurrentPage}
         offsetHeight={offsetHeight}
         walletHandler={walletHandler}
       />

@@ -42,6 +42,8 @@ next-env.d.ts
 
 public/sitemap.xml
 
+package-lock.json
+yarn.lock
 /build
 .idea
 

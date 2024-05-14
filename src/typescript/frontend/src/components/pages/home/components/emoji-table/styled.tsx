@@ -47,7 +47,6 @@ export const StyledTHFilters = styled.div`
 export const StyledWrapper = styled.div`
   display: flex;
   justify-content: center;
-  padding: 0 74px;
   margin-bottom: 40px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
 

@@ -20,7 +20,6 @@ const Button = <E extends React.ElementType = "button">({
   external,
   isScramble = true,
   scale = "sm",
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   variant = "outline",
   ...rest
 }: ButtonProps<E>): JSX.Element => {
@@ -37,11 +36,11 @@ const Button = <E extends React.ElementType = "button">({
     <StyledButton
       {...internalProps}
       {...rest}
+      varian={variant}
       type={rest.type || "button"}
       disabled={isDisabled}
       $isLoading={isLoading}
       scale={scale}
-      // ref={isScramble ? ref : undefined}
       onMouseOver={isScramble ? replay : undefined}
       onFocus={isScramble ? replay : undefined}
     >
@@ -54,7 +53,6 @@ const Button = <E extends React.ElementType = "button">({
               mr: "0.5rem",
             })}
 
-          {/*{!isScramble ? `{ ${children} }` : null}*/}
           {!isScramble ? (
             `{ ${children} }`
           ) : (
