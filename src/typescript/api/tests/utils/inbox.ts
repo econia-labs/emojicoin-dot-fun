@@ -21,12 +21,7 @@ export class Inbox {
    */
   static stop(): Promise<null> {
     const cliCommand = "docker";
-    const cliArgs = [
-      "compose",
-      "-p",
-      "emojicoin-inbox-test",
-      "down",
-    ];
+    const cliArgs = ["compose", "-p", "emojicoin-inbox-test", "down"];
 
     const childProcess = spawn(cliCommand, cliArgs);
 
@@ -42,10 +37,10 @@ export class Inbox {
       console.log(str);
     });
 
-    const p: Promise<null> = new Promise(r => {
+    const p: Promise<null> = new Promise((r) => {
       childProcess.on("close", () => {
         r(null);
-      })
+      });
     });
 
     return p;
@@ -146,11 +141,7 @@ export class Inbox {
    */
   static async clearState(): Promise<null> {
     const cliCommand = "docker";
-    const cliArgs = [
-      "volume",
-      "rm",
-      "emojicoin-inbox-test_db",
-    ];
+    const cliArgs = ["volume", "rm", "emojicoin-inbox-test_db"];
 
     const childProcess = spawn(cliCommand, cliArgs);
 
@@ -166,10 +157,10 @@ export class Inbox {
       console.log(str);
     });
 
-    const p: Promise<null> = new Promise(r => {
+    const p: Promise<null> = new Promise((r) => {
       childProcess.on("close", () => {
         r(null);
-      })
+      });
     });
 
     return p;
