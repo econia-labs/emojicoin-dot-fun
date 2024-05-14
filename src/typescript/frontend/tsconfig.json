@@ -20,9 +20,12 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "paths": {
-      "@/fonts/*": ["styles/fonts/*"],
-      "@/containers": ["components/layout/components/index.ts"],
-      "@": ["./internal.ts"],
+      "@/containers": [
+        "components/layout/components/index.ts"
+      ],
+      "@/fonts/*": [
+        "styles/fonts/*"
+      ]
     },
     "plugins": [
       {
