@@ -1244,7 +1244,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
         // Get FDV, market cap, at start and end of operation, update global stats accordingly.
         let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
-            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut,EMOJICOIN_SUPPLY);
+            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut, EMOJICOIN_SUPPLY);
         update_global_fdv_market_cap_for_liquidity_operation(
             fdv_start,
             market_cap_start,
