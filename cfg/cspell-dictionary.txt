@@ -48,10 +48,10 @@ rica
 rustup
 sint
 struct
-structs
 subdir
 supervillain
 tanabata
 tokelau
 turkiye
+vercel
 xbtmatt
