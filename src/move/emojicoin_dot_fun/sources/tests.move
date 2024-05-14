@@ -2454,6 +2454,41 @@
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
     }
 
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun provide_liquidity_no_market() {
+        provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            1,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_LIQUIDITY_NO_QUOTE,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun provide_liquidity_no_quote() {
+        init_package_then_exact_transition();
+        provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            0,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_STILL_IN_BONDING_CURVE,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun provide_liquidity_still_in_bonding_curve() {
+        init_package_then_simple_buy();
+        provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            1
+        );
+    }
+
     #[test] fun provide_liquidity_with_truncation() {
         // Invoke an exact transition, then have simple buy user buy against the CPAMM.
         init_package_then_exact_transition();
@@ -2514,7 +2549,7 @@
         );
     }
 
-    #[test] fun provide_then_simulate_remove_then_remove_liquidity() {
+    #[test] fun provide_then_simulate_remove_then_remove_liquidity_with_donations() {
 
         // Trigger an exact state transition, then store base values.
         init_package_then_exact_transition();
@@ -2857,7 +2892,6 @@
         );
         assert_registry_view(mock_registry_view, registry_view());
         assert_state(mock_state, vector::pop_back(&mut emitted_events<State>()));
-
     }
 
     #[test, expected_failure(
@@ -3047,37 +3081,39 @@
         assert!(market_metadata_byes == concatenated_bytes, 0);
     }
 
-    #[test] fun supported_symbol_emojis() {
-        init_package();
-        let various_emojis = vector<vector<u8>> [
-            x"f09f868e",         // AB button blood type, 1F18E.
-            x"f09fa6bbf09f8fbe", // Ear with hearing aid medium dark skin tone, 1F9BB 1F3FE.
-            x"f09f87a7f09f87b9", // Flag Bhutan, 1F1E7 1F1F9.
-            x"f09f9190f09f8fbe", // Open hands medium dark skin tone, 1F450 1F3FE.
-            x"f09fa4b0f09f8fbc", // Pregnant woman medium light skin tone, 1F930 1F3FC.
-            x"f09f9faa",         // Purple square, 1F7EA.
-            x"f09f91abf09f8fbe", // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
-            x"f09f91a9f09f8fbe", // Woman medium dark skin tone, 1F469 1F3FE.
-            x"f09fa795f09f8fbd", // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
-            x"f09fa490",         // Zipper mouth face, 1F910.
-        ];
-        vector::for_each(various_emojis, |bytes| {
-            assert!(is_a_supported_symbol_emoji(bytes), 0);
-        });
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_LIQUIDITY_NO_LP_COINS,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun remove_liquidity_no_lp_coins() {
+        init_package_then_exact_transition();
+        remove_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            0,
+        );
+    }
 
-        // Test unsupported emojis.
-        assert!(!is_a_supported_symbol_emoji(x"0000"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"fe0f"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"1234"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"f0fabcdefabcdeff0f"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"f0f00dcafef0"), 0);
-        // Minimally qualified "head shaking horizontally".
-        assert!(!is_a_supported_symbol_emoji(x"f09f9982e2808de28694"), 0);
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun remove_liquidity_no_market() {
+        remove_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            1,
+        );
+    }
 
-        // Verify a supported emoji, add invalid data to it, then verify it is no longer allowed.
-        assert!(is_a_supported_symbol_emoji(x"e29d97"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"e29d97ff"), 0);
-        assert!(!is_a_supported_symbol_emoji(x"ffe29d97"), 0);
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_STILL_IN_BONDING_CURVE,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun remove_liquidity_still_in_bonding_curve() {
+        init_package_then_simple_buy();
+        remove_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            1
+        );
     }
 
     #[test] fun simple_buy_amounts() {
@@ -3117,6 +3153,53 @@
         let quote_to_transition = get_QUOTE_VIRTUAL_CEILING() -
             base_market_view_simple_buy().clamm_virtual_reserves.quote;
         assert!(quote_to_clamm == quote_to_transition, 0);
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun simulate_provide_liquidity_no_market() {
+        simulate_provide_liquidity(USER, @black_cat_market, 1);
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun simulate_remove_liquidity_no_market() {
+        simulate_remove_liquidity<BlackCatEmojicoin>(USER, @black_cat_market, 1);
+    }
+
+    #[test] fun supported_symbol_emojis() {
+        init_package();
+        let various_emojis = vector<vector<u8>> [
+            x"f09f868e",         // AB button blood type, 1F18E.
+            x"f09fa6bbf09f8fbe", // Ear with hearing aid medium dark skin tone, 1F9BB 1F3FE.
+            x"f09f87a7f09f87b9", // Flag Bhutan, 1F1E7 1F1F9.
+            x"f09f9190f09f8fbe", // Open hands medium dark skin tone, 1F450 1F3FE.
+            x"f09fa4b0f09f8fbc", // Pregnant woman medium light skin tone, 1F930 1F3FC.
+            x"f09f9faa",         // Purple square, 1F7EA.
+            x"f09f91abf09f8fbe", // Woman and man holding hands medium dark skin tone, 1F46B 1F3FE.
+            x"f09f91a9f09f8fbe", // Woman medium dark skin tone, 1F469 1F3FE.
+            x"f09fa795f09f8fbd", // Woman with headscarf medium skin tone, 1F9D5 1F3FD.
+            x"f09fa490",         // Zipper mouth face, 1F910.
+        ];
+        vector::for_each(various_emojis, |bytes| {
+            assert!(is_a_supported_symbol_emoji(bytes), 0);
+        });
+
+        // Test unsupported emojis.
+        assert!(!is_a_supported_symbol_emoji(x"0000"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"fe0f"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"1234"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"f0fabcdefabcdeff0f"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"f0f00dcafef0"), 0);
+        // Minimally qualified "head shaking horizontally".
+        assert!(!is_a_supported_symbol_emoji(x"f09f9982e2808de28694"), 0);
+
+        // Verify a supported emoji, add invalid data to it, then verify it is no longer allowed.
+        assert!(is_a_supported_symbol_emoji(x"e29d97"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"e29d97ff"), 0);
+        assert!(!is_a_supported_symbol_emoji(x"ffe29d97"), 0);
     }
 
     #[test] fun swap_exact_transition() {
