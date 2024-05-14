@@ -9,7 +9,7 @@ import { StyledEmojiPickerWrapper } from "./styled";
 import { getTooltipStyles } from "./theme";
 import { useEmojicoinPickerProps } from "./types";
 
-const useEmojicoinPicker = ({ onEmojiClick, placement = "auto", autoFocusSearch = true }: useEmojicoinPickerProps) => {
+const useEmojicoinPicker = ({ onEmojiClick, placement = "auto", autoFocusSearch = true, width = 350 }: useEmojicoinPickerProps) => {
   const { theme } = useThemeContext();
 
   const { targetRef, tooltip, targetElement } = useTooltip(
@@ -21,6 +21,7 @@ const useEmojicoinPicker = ({ onEmojiClick, placement = "auto", autoFocusSearch 
         skinTonesDisabled
         lazyLoadEmojis
         autoFocusSearch={autoFocusSearch}
+        width={width}
       />
     </StyledEmojiPickerWrapper>,
     {

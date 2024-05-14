@@ -24,7 +24,7 @@ const PoolsTable: React.FC = () => {
   };
 
   return (
-    <StyledPoolsWrapper id="lolka123">
+    <StyledPoolsWrapper>
       <Table>
         <thead>
           <HeaderTr>

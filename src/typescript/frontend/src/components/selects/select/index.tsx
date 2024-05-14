@@ -29,19 +29,19 @@ export const Select: React.FC<SelectProps> = ({
   return (
     <DropdownSelectWrapper ref={targetRef} onMouseEnter={replay} {...wrapperProps}>
       <FlexGap gap="8px" ellipsis>
-        <Text textScale="pixelHeading3" color="darkGrey">
+        <Text textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }} color="darkGrey">
           {"{"}
         </Text>
-        <Text textScale="pixelHeading3" {...placeholderProps} ellipsis>
+        <Text textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }} {...placeholderProps} ellipsis>
           {t(placeholder)}
         </Text>
 
         {!title ? null : typeof title === "string" ? (
-          <Text textScale="pixelHeading3" {...titleProps} ellipsis ref={ref}></Text>
+          <Text textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }} {...titleProps} ellipsis ref={ref}></Text>
         ) : (
           React.isValidElement(title) && title
         )}
-        <Text textScale="pixelHeading3" color="darkGrey">
+        <Text textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }} color="darkGrey">
           {"}"}
         </Text>
       </FlexGap>

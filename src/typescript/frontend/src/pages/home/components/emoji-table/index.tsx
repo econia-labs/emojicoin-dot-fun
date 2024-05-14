@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 
 import { useTranslation } from "context";
+import { useMatchBreakpoints } from "hooks";
 
 import { Column, Text, FlexGap, Switcher, SingleSelect, Input, InputGroup } from "components";
 import { ButtonsBlock } from "./components";
 import { TableCard } from "../index";
 import { StyledTHWrapper, StyledTH, StyledTHFilters, StyledWrapper, StyledInner } from "./styled";
 import { DropdownMenu } from "components/selects";
+
 import { Option } from "components/selects/types";
 
 const ITEMS_LIST_MOKS = [
@@ -53,6 +55,13 @@ const EmojiTable: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<Option | null>(options[1]);
   const [isChecked, setIsChecked] = useState(true);
   const { t } = useTranslation();
+  const { isMobile, isLaptopL } = useMatchBreakpoints();
+
+  const list = isLaptopL
+    ? [...ITEMS_LIST_MOKS, ...ITEMS_LIST_MOKS, ...ITEMS_LIST_MOKS, ...ITEMS_LIST_MOKS]
+    : isMobile
+      ? ITEMS_LIST_MOKS
+      : [...ITEMS_LIST_MOKS, ...ITEMS_LIST_MOKS].slice(0, 9);
 
   const handler = () => {
     setIsChecked(!isChecked);
@@ -62,13 +71,19 @@ const EmojiTable: React.FC = () => {
     <Column>
       <StyledTHWrapper>
         <StyledTH>
-          <InputGroup label="Search:" variant="fantom" forId="search" isShowError={false}>
+          <InputGroup
+            label="Search:"
+            textScale={{ _: "heading2", laptopL: "heading1" }}
+            variant="fantom"
+            forId="search"
+            isShowError={false}
+          >
             <Input id="search" />
           </InputGroup>
 
           <StyledTHFilters>
             <SingleSelect
-              wrapperProps={{ width: "300px" }}
+              wrapperProps={{ width: isLaptopL ? "300px" : "210px" }}
               title={selectedOption?.title}
               value={selectedOption}
               setValue={setSelectedOption}
@@ -81,11 +96,15 @@ const EmojiTable: React.FC = () => {
             />
 
             <FlexGap gap="12px">
-              <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+              <Text
+                textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
+                color="lightGrey"
+                textTransform="uppercase"
+              >
                 {t("Anime:")}
               </Text>
 
-              <Switcher checked={isChecked} onChange={handler} />
+              <Switcher checked={isChecked} onChange={handler} scale={isLaptopL ? "md" : "sm"} />
             </FlexGap>
           </StyledTHFilters>
         </StyledTH>
@@ -93,20 +112,18 @@ const EmojiTable: React.FC = () => {
 
       <StyledWrapper>
         <StyledInner>
-          {[...ITEMS_LIST_MOKS, ...ITEMS_LIST_MOKS, ...ITEMS_LIST_MOKS, ...ITEMS_LIST_MOKS].map(
-            ({ emoji, emojiName, marketCap, volume24h }, index) => {
-              return (
-                <TableCard
-                  index={index + 1}
-                  emoji={emoji}
-                  emojiName={emojiName}
-                  marketCap={marketCap}
-                  volume24h={volume24h}
-                  key={index}
-                />
-              );
-            },
-          )}
+          {list.map(({ emoji, emojiName, marketCap, volume24h }, index) => {
+            return (
+              <TableCard
+                index={index + 1}
+                emoji={emoji}
+                emojiName={emojiName}
+                marketCap={marketCap}
+                volume24h={volume24h}
+                key={index}
+              />
+            );
+          })}
         </StyledInner>
       </StyledWrapper>
 

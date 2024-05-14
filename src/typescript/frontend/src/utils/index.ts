@@ -9,3 +9,4 @@ export {
   getLocaleFromRoute,
 } from "./pathname-helpers";
 export { shouldForwardProp, getStylesFromResponsiveValue } from "./styled-components-helpers";
+export { isDisallowedEventKey } from "./check-is-disallowed-event-key";

@@ -6,6 +6,17 @@ type State = {
   [key: string]: boolean;
 };
 
+type isMediaQueries = {
+  isDesktop: boolean;
+  isLaptop: boolean;
+  isLaptopL: boolean;
+  isMobile: boolean;
+  isMobileL: boolean;
+  isMobileM: boolean;
+  isMobileS: boolean;
+  isTablet: boolean;
+};
+
 const mediaQueries: MediaQueries = (() => {
   let prevMinWidth = 0;
   let prevSize = Object.keys(breakpointMap)[0];
@@ -104,7 +115,7 @@ const useMatchBreakpoints = () => {
   }, []);
 
   return {
-    ...state,
+    ...(state as isMediaQueries),
     isMobile: state.isMobileS || state.isMobileM || state.isMobileL,
     isDesktop: state.isLaptop || state.isLaptopL,
     isTablet: state.isTablet,

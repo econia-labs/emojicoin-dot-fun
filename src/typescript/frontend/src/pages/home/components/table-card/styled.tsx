@@ -32,60 +32,68 @@ export const StyledInnerItem = styled.div`
 `;
 
 export const StyledItemWrapper = styled.div`
-  width: 20%;
+  width: 100%;
   max-width: 259px;
   border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
 
-  &:nth-of-type(n + 2) {
-    border-left: 0;
-  }
-
-  &:nth-of-type(n + 6) {
-    border-top: 0;
-  }
-
-  &:nth-of-type(5n + 6) {
-    border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  }
-
-  &:nth-child(5n)::after {
+  &:after {
     content: "";
     display: block;
-    width: 100vw;
+    width: 200vw;
     background-color: ${({ theme }) => theme.colors.darkGrey};
     height: 1px;
+    transform: translateX(-50%);
   }
 
-  &:nth-of-type(5n + 1)::after {
-    content: "";
-    display: block;
-    width: 100vw;
-    background-color: ${({ theme }) => theme.colors.darkGrey}; /* Line color. */
-    height: 1px;
-    transform: translateX(-100%);
+  ${({ theme }) => theme.mediaQueries.tablet} {
+    width: 33%;
+
+    &:nth-of-type(n + 2) {
+      border-left: none;
+    }
+
+    &:nth-of-type(n + 7) {
+      &:after {
+        display: none;
+      }
+    }
+
+    &:nth-of-type(3n + 4) {
+      border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
+    }
   }
-`;
 
-export const StyledHiddenContent = styled.div`
-  position: absolute;
-  background-color: ${({ theme }) => theme.colors.black};
-  transition-delay: 0.3s;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  margin: 1px;
-  opacity: 0;
-  z-index: 5;
-  transition: opacity 0.3s ease-in;
-  text-transform: none;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
+  ${({ theme }) => theme.mediaQueries.laptopL} {
+    width: 20%;
 
-  &:hover {
-    opacity: 1;
+    &:after {
+      display: none;
+    }
+
+    &:nth-of-type(n + 2) {
+      border-left: none;
+    }
+
+    &:nth-of-type(5n + 6) {
+      border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
+    }
+
+    &:nth-of-type(5n - 2) {
+      &:after {
+        content: "";
+        display: block;
+        width: 200vw;
+        background-color: ${({ theme }) => theme.colors.darkGrey};
+        height: 1px;
+        transform: translateX(-50%);
+      }
+    }
+
+    &:nth-of-type(n + 16) {
+      &:after {
+        display: none;
+      }
+    }
   }
 `;
