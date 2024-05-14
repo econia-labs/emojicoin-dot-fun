@@ -1,6 +1,4 @@
-// Copyright © Aptos Foundation
-// SPDX-License-Identifier: Apache-2.0
-
+/* eslint-disable import/no-unused-modules */
 import {
   type AccountAddress,
   type AccountAddressInput,

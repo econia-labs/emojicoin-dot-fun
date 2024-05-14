@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import {
   AccountAddress,
   type AccountAddressInput,
@@ -41,13 +42,13 @@ export function toTypeTag(
   return parseTypeTag(`${address.toString()}::${moduleName}::${structName}`);
 }
 
-interface KnownEvent<T> {
+interface KnownEvent {
   MODULE_ADDRESS: AccountAddress;
   MODULE_NAME: string;
   STRUCT_NAME: string;
 }
 
-export function knownEventTypeTagString<T>(e: KnownEvent<T>): string {
+export function knownEventTypeTagString(e: KnownEvent): string {
   return toTypeTag(e.MODULE_ADDRESS, e.MODULE_NAME, e.STRUCT_NAME).toString();
 }
 
@@ -212,7 +213,7 @@ export type ChatEventFields = {
   emitMarketNonce: Uint64;
   user: AccountAddress;
   message: string;
-  userEmojicoinBbalance: Uint64;
+  userEmojicoinBalance: Uint64;
   circulatingSupply: Uint64;
   balanceAsFractionOfCirculatingSupplyQ64: Uint128;
 };
@@ -236,7 +237,7 @@ export class ChatEvent extends Event {
       emitMarketNonce: BigInt(event.data.emit_market_nonce),
       user: AccountAddress.from(event.data.user),
       message: event.data.message,
-      userEmojicoinBbalance: BigInt(event.data.user_emojicoin_balance),
+      userEmojicoinBalance: BigInt(event.data.user_emojicoin_balance),
       circulatingSupply: BigInt(event.data.circulating_supply),
       balanceAsFractionOfCirculatingSupplyQ64: BigInt(
         event.data.balance_as_fraction_of_circulating_supply_q64

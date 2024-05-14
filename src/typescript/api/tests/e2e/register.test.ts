@@ -72,11 +72,7 @@ describe("registers a market successfully", () => {
       objectAddress: derivedNamedObjectAddress,
     });
 
-    const {
-      marketId,
-      marketAddress,
-      emojiBytes,
-    } = marketObjectMarketResource.metadata;
+    const { marketId, marketAddress, emojiBytes } = marketObjectMarketResource.metadata;
 
     const { lpCoinSupply, extendRef } = marketObjectMarketResource;
 

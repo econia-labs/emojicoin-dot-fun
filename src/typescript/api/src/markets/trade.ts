@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
-
+/* eslint-disable import/no-unused-modules */
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import {
   Account,
   type UserTransactionResponse,
   AccountAddress,
   Ed25519PrivateKey,
   APTOS_COIN,
-  Aptos,
+  type Aptos,
 } from "@aptos-labs/ts-sdk";
 import { TextDecoder } from "util";
 import {
@@ -23,11 +24,15 @@ import {
   QUOTE_VIRTUAL_FLOOR,
 } from "../emojicoin_dot_fun";
 import { getTestHelpers, publishForTest } from "../../tests/utils";
-import { MarketMetadataByEmojiBytes, MarketView, Swap } from "../emojicoin_dot_fun/emojicoin-dot-fun";
-import { BatchTransferCoins, ExistsAt, Mint } from "./batch_transfer";
+import {
+  MarketMetadataByEmojiBytes,
+  MarketView,
+  Swap,
+} from "../emojicoin_dot_fun/emojicoin-dot-fun";
+import { BatchTransferCoins, ExistsAt, Mint } from "./coin-transfers";
 import { type Events } from "../emojicoin_dot_fun/events";
 import { getRandomEmoji } from "./get-random-emoji";
-import { EmojicoinInfo } from "../types/contract";
+import { type EmojicoinInfo } from "../types/contract";
 
 const NUM_TRADERS = 500;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
@@ -41,10 +46,9 @@ const PUBLISHER = Account.fromPrivateKey({
   privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK!),
 });
 
-async function main() {
+async function trade() {
   const { asActualEmoji, emojiBytes } = getRandomEmoji();
   const { aptos } = getTestHelpers();
-
   const registryAddress = await setupTest(aptos);
 
   // Create distributors that will bear the sequence number for each transaction.
@@ -69,9 +73,7 @@ async function main() {
 
   // Await each chunk of traders trading.
   for (let i = 0; i <= NUM_TRADERS / CHUNK_SIZE; i += 1) {
-    console.log(
-      `-----------------------------------BATCH ${i}-----------------------------------`
-    );
+    console.log(`-----------------------------------BATCH ${i}-----------------------------------`);
     const tradersChunk = TRADERS.slice(CHUNK_SIZE * i, (i + 1) * CHUNK_SIZE);
     const trades = tradersChunk.map((t) => {
       try {
@@ -102,6 +104,7 @@ async function main() {
       }
     });
 
+    /* eslint-disable-next-line no-await-in-loop */
     const tradeResults = (await Promise.all(trades))
       .filter((v): v is [UserTransactionResponse, Events] => typeof v !== "undefined")
       .sort((tx_a, tx_b) => {
@@ -127,20 +130,26 @@ async function main() {
           b: BigInt(ONE_APT),
           decimals: 3,
         }).toFixed(3);
+        const spendOnBondingCurve = `${aptSpent} APT spent on bonding curve.`;
+        const quoteLeft = `${quoteLeftBeforeTransition} to go before the bonding curve ends!`;
         const s =
           `Trade for ${swap.swapper.toString()} completed for emoji market: ${emoji}` +
           ` with market ID: ${state.marketMetadata.marketId}` +
           ` at version: ${Number(res.version)}. ${
             !swap.resultsInStateTransition
-              ? `${aptSpent} APT spent on bonding curve. ${quoteLeftBeforeTransition} to go before the bonding curve ends!`
+              ? `${spendOnBondingCurve} ${quoteLeft}`
               : "We're already in the CPAMM!"
           }`;
         console.debug(s);
       }
-      const outOfBondingCurve = events.swapEvents.some((event) => event.fields.resultsInStateTransition);
+      const outOfBondingCurve = events.swapEvents.some(
+        (event) => event.fields.resultsInStateTransition
+      );
 
       if (outOfBondingCurve) {
-        console.log(`${res.sender.toString()} pushed us out of the bonding curve! Transaction hash: ${res.hash}`);
+        console.log(
+          `${res.sender.toString()} moved the market out of the bonding curve! Tx hash: ${res.hash}`
+        );
       }
     });
   }
@@ -151,25 +160,23 @@ async function main() {
     marketAddress,
     typeTags: [emojicoin, emojicoinLP],
   });
-;
   console.log("Market data:");
   console.log(res);
-
-  return;
 }
 
 // --------------------------------------------------------------------------------------
 //                              Setup and helper functions
 // --------------------------------------------------------------------------------------
 
-const setupTest = async(aptos: Aptos): Promise<AccountAddress> => {
+const setupTest = async (aptos: Aptos): Promise<AccountAddress> => {
   // Fund the publisher account if it doesn't exist yet.
-  const fundIfExists = (ExistsAt.view({ aptos, addr: PUBLISHER.accountAddress }).then((exists) => {
+  const fundIfExists = ExistsAt.view({ aptos, addr: PUBLISHER.accountAddress }).then((exists) => {
     if (!exists) {
       console.log("Publisher account doesn't exist yet. Funding...");
       return aptos.fundAccount({ accountAddress: PUBLISHER.accountAddress, amount: ONE_APT });
     }
-  }));
+    return null;
+  });
   await fundIfExists;
 
   // Fund the publisher account with a large amount of APT.
@@ -202,7 +209,7 @@ const setupTest = async(aptos: Aptos): Promise<AccountAddress> => {
     await publishForTest(PUBLISHER.privateKey.toString());
     return await getRegistryAddress({ aptos, moduleAddress: MODULE_ADDRESS });
   }
-}
+};
 
 const getOrRegisterMarket = async ({
   aptos,
@@ -236,7 +243,7 @@ const getOrRegisterMarket = async ({
   });
 
   return emojicoinInfo;
-}
+};
 
 const fundTraders = async (aptos: Aptos, distributors: Account[]) => {
   await BatchTransferCoins.submit({
@@ -254,7 +261,7 @@ const fundTraders = async (aptos: Aptos, distributors: Account[]) => {
       aptosConfig: aptos.config,
       from: distributors[i],
       recipients: chunk.map((t) => t.accountAddress),
-      amounts: chunk.map((t) => BigInt(TRADER_INITIAL_BALANCE)),
+      amounts: chunk.map((_) => BigInt(TRADER_INITIAL_BALANCE)),
       feePayer: distributors[i],
       typeTags: [APTOS_COIN],
     });
@@ -270,6 +277,6 @@ const fundTraders = async (aptos: Aptos, distributors: Account[]) => {
   console.log(`Distributed coins to all ${TRADERS.length} traders`);
 
   return res;
-}
+};
 
-main();
+trade();

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import {
   AccountAddress,
   type AccountAddressInput,
@@ -10,9 +11,30 @@ import {
   type Uint8,
 } from "@aptos-labs/ts-sdk";
 import { type ExtendRef, type SequenceInfo } from "./core";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../emojicoin_dot_fun";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../emojicoin_dot_fun/consts";
 
 // Structs specific to `emojicoin_dot_fun`.
+
+export const isMarketMetadata = (v: any): v is MarketMetadata =>
+  typeof v.marketId === "bigint" &&
+  v.marketAddress instanceof AccountAddress &&
+  v.emojiBytes instanceof Hex;
+
+export type MarketMetadata = {
+  marketId: Uint64;
+  marketAddress: AccountAddress;
+  emojiBytes: Hex;
+};
+
+export const toMarketMetadata = (data: {
+  market_id: string;
+  market_address: string;
+  emoji_bytes: string;
+}): MarketMetadata => ({
+  marketId: BigInt(data.market_id),
+  marketAddress: AccountAddress.from(data.market_address),
+  emojiBytes: Hex.fromHexString(data.emoji_bytes),
+});
 
 export type MarketResource = {
   metadata: MarketMetadata;
@@ -103,27 +125,6 @@ export type EmojicoinInfo = {
   emojicoinLP: TypeTag;
 };
 
-export const isMarketMetadata = (v: any): v is MarketMetadata =>
-  typeof v.marketId === "bigint" &&
-  v.marketAddress instanceof AccountAddress &&
-  v.emojiBytes instanceof Hex;
-
-export type MarketMetadata = {
-  marketId: Uint64;
-  marketAddress: AccountAddress;
-  emojiBytes: Hex;
-};
-
-export const toMarketMetadata = (data: {
-  market_id: string;
-  market_address: string;
-  emoji_bytes: string;
-}): MarketMetadata => ({
-  marketId: BigInt(data.market_id),
-  marketAddress: AccountAddress.from(data.market_address),
-  emojiBytes: Hex.fromHexString(data.emoji_bytes),
-});
-
 export const toPeriodicStateMetadata = (data: {
   start_time: string;
   period: string;
@@ -177,7 +178,7 @@ export type LastSwap = {
 
 export type SupportedAggregatorSnapshotTypes = Uint64 | Uint128;
 
-export type AggregatorSnapshot<SupportedAggregatorSnapshotTypes> = {
+export type AggregatorSnapshot = {
   value: SupportedAggregatorSnapshotTypes;
 };
 

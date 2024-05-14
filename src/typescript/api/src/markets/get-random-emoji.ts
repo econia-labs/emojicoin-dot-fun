@@ -5,9 +5,11 @@ import { Hex } from "@aptos-labs/ts-sdk";
 //   cd <GIT_ROOT>/emojicoin/src/python/move_emojis
 //   poetry install && poetry run python -m scripts.generate_code
 //
+// @ts-ignore
 import emojiJsonData from "../../../../python/move_emojis/data/symbol_emojis.json";
 
-export type EmojiData = {
+/* eslint-disable-next-line import/no-unused-modules */
+export type EmojiJSONData = {
   emoji: string;
   version: string;
   code_points: {
@@ -17,25 +19,23 @@ export type EmojiData = {
   };
 };
 
-const EMOJI_JSON_DATA: Array<EmojiData> = Object.keys(emojiJsonData).map(
+const EMOJI_JSON_DATA: Array<EmojiJSONData> = Object.keys(emojiJsonData).map(
   (k) => emojiJsonData[k as keyof typeof emojiJsonData]
 );
 const decoder = new TextDecoder("utf-8");
 
-
 export const getRandomEmoji = (): {
-    asActualEmoji: string;
-    emojiBytes: Uint8Array;
+  asActualEmoji: string;
+  emojiBytes: Uint8Array;
 } => {
-    let i = 0;
-    const randomIndex = Math.floor(EMOJI_JSON_DATA.length * Math.random());
-    const randomEmoji = EMOJI_JSON_DATA[randomIndex];
-    
-    const emoji = randomEmoji.code_points.as_hex.join("");
-    const emojiBytes = Hex.fromHexInput(emoji).toUint8Array();
+  const randomIndex = Math.floor(EMOJI_JSON_DATA.length * Math.random());
+  const randomEmoji = EMOJI_JSON_DATA[randomIndex];
 
-    return {
-      asActualEmoji: decoder.decode(emojiBytes),
-      emojiBytes,
-    };
-}
+  const emoji = randomEmoji.code_points.as_hex.join("");
+  const emojiBytes = Hex.fromHexInput(emoji).toUint8Array();
+
+  return {
+    asActualEmoji: decoder.decode(emojiBytes),
+    emojiBytes,
+  };
+};
