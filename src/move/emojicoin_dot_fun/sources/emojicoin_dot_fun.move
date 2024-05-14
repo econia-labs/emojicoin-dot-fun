@@ -2456,6 +2456,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
     #[test_only] public fun get_TRIGGER_SWAP_SELL(): u8 { TRIGGER_SWAP_SELL }
     #[test_only] public fun get_TRIGGER_PROVIDE_LIQUIDITY(): u8 { TRIGGER_PROVIDE_LIQUIDITY }
+    #[test_only] public fun get_TRIGGER_REMOVE_LIQUIDITY(): u8 { TRIGGER_REMOVE_LIQUIDITY }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }

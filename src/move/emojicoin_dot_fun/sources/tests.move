@@ -95,6 +95,7 @@
         get_TRIGGER_MARKET_REGISTRATION,
         get_TRIGGER_PACKAGE_PUBLICATION,
         get_TRIGGER_PROVIDE_LIQUIDITY,
+        get_TRIGGER_REMOVE_LIQUIDITY,
         get_TRIGGER_SWAP_BUY,
         get_TRIGGER_SWAP_SELL,
         get_bps_fee_test_only as get_bps_fee,
@@ -110,6 +111,7 @@
         register_market,
         register_market_without_publish,
         registry_view,
+        remove_liquidity,
         simulate_provide_liquidity,
         simulate_remove_liquidity,
         simulate_swap,
@@ -433,6 +435,7 @@
     const INTEGRATOR_FEE_RATE_BPS: u8 = 25;
     const GENERAL_CASE_SWAP_TIME: u64 = 700_000;
     const PROVIDE_LIQUIDITY_TIME: u64 = 800_000;
+    const REMOVE_LIQUIDITY_TIME: u64 = 900_000;
 
     // Constants for a simple buy against a new market (does not result in state transition), used
     // for assorted test setup.
@@ -2511,7 +2514,7 @@
         );
     }
 
-    #[test] fun provide_remove_liquidity() {
+    #[test] fun provide_then_simulate_remove_then_remove_liquidity() {
 
         // Trigger an exact state transition, then store base values.
         init_package_then_exact_transition();
@@ -2604,7 +2607,7 @@
             cumulative_stats: setup_market_view.cumulative_stats,
             instantaneous_stats: MockInstantaneousStats {
                 total_quote_locked: cpamm_real_reserves.quote,
-                total_value_locked: (cpamm_real_reserves.quote as u128) * 2,
+                total_value_locked,
                 market_cap,
                 fully_diluted_value: fdv,
             },
@@ -2684,22 +2687,176 @@
         let new_periodic_state_tracker = mock_periodic_state_tracker;
         let new_state = mock_state;
 
-        // Advance timer for checking simulator returns.
-        let time = time + 1;
+        // Advance timer.
+        let time = REMOVE_LIQUIDITY_TIME;
         timestamp::update_global_time_for_test(time);
 
         // Assert simulator return for burning all liquidity tokens.
-        new_liquidity.time = time;
-        new_liquidity.market_nonce = new_liquidity.market_nonce + 1;
-        new_liquidity.liquidity_provided = false;
+        let mock_simulated_liquidity = new_liquidity;
+        mock_simulated_liquidity.time = time;
+        mock_simulated_liquidity.market_nonce = mock_simulated_liquidity.market_nonce + 1;
+        mock_simulated_liquidity.liquidity_provided = false;
         assert_liquidity(
-            new_liquidity,
+            mock_simulated_liquidity,
             simulate_remove_liquidity<BlackCatEmojicoin>(
                 USER,
                 @black_cat_market,
                 lp_coin_amount,
             ),
         );
+
+        // Donate base and quote to the market, with base coming from exact transition buyer.
+        let base_donations = get_BASE_REAL_CEILING() / 2;
+        coin::transfer<BlackCatEmojicoin>(
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
+            base_donations,
+        );
+        let quote_donations = get_QUOTE_REAL_CEILING() / 10;
+        mint_aptos_coin_to(@black_cat_market, quote_amount);
+
+        // Have liquidity provider redeem half of their liquidity tokens.
+        let lp_coin_amount = lp_coin_amount / 2;
+        let base_amount = base_amount / 2;
+        let quote_amount = quote_amount / 2;
+        let lp_coin_supply = new_market_view.lp_coin_supply;
+        let pro_rata_base_donation_claim_amount = ((
+            ((base_donations as u128) * (lp_coin_amount as u128)) / lp_coin_supply
+        ) as u64);
+        let pro_rata_quote_donation_claim_amount = ((
+            ((quote_donations as u128) * (lp_coin_amount as u128)) / lp_coin_supply
+        ) as u64);
+
+        // Simulate, then remove liquidity.
+        simulated_liquidity = simulate_remove_liquidity<BlackCatEmojicoin>(
+            USER,
+            market_address,
+            lp_coin_amount,
+        );
+        remove_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            market_address,
+            lp_coin_amount,
+        );
+
+        // Calculate CPAMM real reserves, instantaneous stats after removal.
+        cpamm_real_reserves = MockReserves {
+            base: new_market_view.cpamm_real_reserves.base - base_amount,
+            quote: new_market_view.cpamm_real_reserves.quote - quote_amount,
+        };
+        (fdv, market_cap) = fdv_market_cap_cpamm(cpamm_real_reserves);
+        total_value_locked = (cpamm_real_reserves.quote as u128) * 2;
+        lp_coin_supply = lp_coin_supply - (lp_coin_amount as u128);
+
+        // Pack new structs to assert.
+        mock_liquidity = MockLiquidity {
+            market_id,
+            time,
+            market_nonce: mock_liquidity.market_nonce + 1,
+            provider: USER,
+            base_amount,
+            quote_amount,
+            lp_coin_amount,
+            liquidity_provided: false,
+            pro_rata_base_donation_claim_amount,
+            pro_rata_quote_donation_claim_amount,
+        };
+
+        mock_periodic_state_tracker = new_periodic_state_tracker;
+        mock_periodic_state_tracker.tvl_to_lp_coin_ratio_end = MockTVLtoLPCoinRatio {
+            tvl: total_value_locked,
+            lp_coins: lp_coin_supply
+        };
+
+        mock_market_view = MockMarketView {
+            metadata: new_market_view.metadata,
+            sequence_info: MockSequenceInfo {
+                nonce: new_market_view.sequence_info.nonce + 1,
+                last_bump_time: REMOVE_LIQUIDITY_TIME
+            },
+            clamm_virtual_reserves: new_market_view.clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            in_bonding_curve: false,
+            cumulative_stats: new_market_view.cumulative_stats,
+            instantaneous_stats: MockInstantaneousStats {
+                total_quote_locked: cpamm_real_reserves.quote,
+                total_value_locked,
+                market_cap,
+                fully_diluted_value: fdv,
+            },
+            last_swap: new_market_view.last_swap,
+            periodic_state_trackers:
+                vectorize_periodic_state_tracker_base(mock_periodic_state_tracker),
+            aptos_coin_balance: new_market_view.aptos_coin_balance + quote_donations
+                - quote_amount - pro_rata_quote_donation_claim_amount,
+            emojicoin_balance: new_market_view.emojicoin_balance + base_donations
+                - base_amount - pro_rata_base_donation_claim_amount,
+            emojicoin_lp_balance: (lp_coin_supply as u64) - lp_coin_amount,
+        };
+
+        mock_registry_view = MockRegistryView {
+            registry_address: new_registry_view.registry_address,
+            nonce: new_registry_view.nonce + 1,
+            last_bump_time: new_registry_view.last_bump_time,
+            n_markets: new_registry_view.n_markets,
+            cumulative_quote_volume: mock_market_view.cumulative_stats.quote_volume,
+            total_quote_locked: (mock_market_view.instantaneous_stats.total_quote_locked as u128),
+            total_value_locked: mock_market_view.instantaneous_stats.total_value_locked,
+            market_cap: mock_market_view.instantaneous_stats.market_cap,
+            fully_diluted_value: mock_market_view.instantaneous_stats.fully_diluted_value,
+            cumulative_integrator_fees: mock_market_view.cumulative_stats.integrator_fees,
+            cumulative_swaps: mock_market_view.cumulative_stats.n_swaps,
+            cumulative_chat_messages: 0,
+        };
+
+        mock_state = MockState {
+            market_metadata: new_state.market_metadata,
+            state_metadata: MockStateMetadata {
+                market_nonce: mock_liquidity.market_nonce,
+                bump_time: REMOVE_LIQUIDITY_TIME,
+                trigger: get_TRIGGER_REMOVE_LIQUIDITY(),
+            },
+            clamm_virtual_reserves: mock_market_view.clamm_virtual_reserves,
+            cpamm_real_reserves: mock_market_view.cpamm_real_reserves,
+            lp_coin_supply: lp_coin_supply,
+            cumulative_stats: mock_market_view.cumulative_stats,
+            instantaneous_stats: mock_market_view.instantaneous_stats,
+            last_swap: mock_market_view.last_swap,
+        };
+
+        // Assert user balances.
+        assert!(coin::balance<BlackCatEmojicoin>(USER) ==
+            base_amount + pro_rata_base_donation_claim_amount, 0);
+        assert!(coin::balance<AptosCoin>(USER) ==
+            quote_amount + pro_rata_quote_donation_claim_amount, 0);
+        assert!(coin::balance<BlackCatEmojicoinLP>(USER) == lp_coin_amount, 0);
+
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert simulated liquidity return matches mock liquidity event.
+        assert_liquidity(mock_liquidity, simulated_liquidity);
+
+        // Assert only two liquidity events emitted, and that final one matches mock event.
+        let liquidity_events = emitted_events<Liquidity>();
+        assert!(vector::length(&liquidity_events) == 2, 0);
+        assert!(simulated_liquidity == vector::pop_back(&mut liquidity_events), 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert only 4 state events emitted: one from market registration, one from setup swap,
+        // one from liquidity provision event, and one from liquidity remove event.
+        assert!(vector::length(&emitted_events<State>()) == 4, 0);
+
+        // Assert market and registry views, emitted state event.
+        assert_market_view(
+            mock_market_view,
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market),
+        );
+        assert_registry_view(mock_registry_view, registry_view());
+        assert_state(mock_state, vector::pop_back(&mut emitted_events<State>()));
 
     }
 
