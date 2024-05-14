@@ -9,11 +9,16 @@
 // values that require the minimum number of field modifications for testing.
 //
 // For some testing cases that are reused across multiple tests, there are additional base struct
-// functions: see constants starting with `SIMPLE_BUY_` and `EXACT_TRANSITION_` for more.
+// functions: see constants starting with `SIMPLE_BUY_` and `EXACT_TRANSITION_` for more. These two
+// sets of constants are tested individually via `swap_setup_case_test_flow()`, and are then used to
+// fixture assorted tests that call on `swap_general_case_test_flow()`.
+//
+// cspell:word EINSUFFICIENT_BALANCE
 #[test_only] module emojicoin_dot_fun::tests {
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
     use aptos_framework::aggregator_v2::read_snapshot;
+    use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
     use aptos_framework::event::{emitted_events};
@@ -56,6 +61,7 @@
         chat,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
         exists_lp_coin_capabilities,
+        fdv_market_cap_test_only as fdv_market_cap,
         get_BASE_REAL_CEILING,
         get_BASE_VIRTUAL_CEILING,
         get_BASE_VIRTUAL_FLOOR,
@@ -80,6 +86,7 @@
         get_PERIOD_1H,
         get_PERIOD_4H,
         get_PERIOD_1D,
+        get_POOL_FEE_RATE_BPS,
         get_QUOTE_REAL_CEILING,
         get_QUOTE_VIRTUAL_CEILING,
         get_QUOTE_VIRTUAL_FLOOR,
@@ -87,6 +94,7 @@
         get_TRIGGER_MARKET_REGISTRATION,
         get_TRIGGER_PACKAGE_PUBLICATION,
         get_TRIGGER_SWAP_BUY,
+        get_TRIGGER_SWAP_SELL,
         get_bps_fee_test_only as get_bps_fee,
         get_concatenation_test_only as get_concatenation,
         init_module_test_only as init_module,
@@ -101,6 +109,7 @@
         registry_view,
         simulate_swap,
         swap,
+        tvl_clamm_test_only as tvl_clamm,
         unpack_chat,
         unpack_cumulative_stats,
         unpack_global_state,
@@ -150,6 +159,29 @@
         period_1H: u64,
         period_4H: u64,
         period_1D: u64,
+    }
+
+    struct SwapSimulationSetup has copy, drop, store {
+        input_amount: u64,
+        starts_in_bonding_curve: bool,
+        clamm_virtual_reserves: MockReserves,
+        cpamm_real_reserves: MockReserves,
+        market_aptos_coin_balance: u64,
+        market_emojicoin_balance: u64,
+    }
+
+    struct SwapSimulationResult has copy, drop, store {
+        integrator_fee: u64,
+        pool_fee_base: u64,
+        pool_fee_quote: u64,
+        net_proceeds: u64,
+        base_volume: u64,
+        quote_volume: u64,
+        clamm_virtual_reserves: MockReserves,
+        cpamm_real_reserves: MockReserves,
+        results_in_state_transition: bool,
+        market_aptos_coin_balance: u64,
+        market_emojicoin_balance: u64,
     }
 
     struct MockChat has copy, drop, store {
@@ -346,16 +378,36 @@
         results_in_state_transition: bool,
     }
 
+    struct SwapGeneralCaseTestFlow has copy, drop, store {
+        setup_is_simple_buy: bool,
+        is_sell: bool,
+        input_amount: u64,
+    }
+
+    struct SwapSetupCaseTestFlow has copy, drop, store {
+        simulated_swap: Swap,
+        mock_swap: MockSwap,
+        user: address,
+        integrator: address,
+        mock_market_view: MockMarketView,
+        mock_registry_view: MockRegistryView,
+        mock_state: MockState,
+    }
+
     // Test market emoji bytes.
     const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
     const BLACK_HEART: vector<u8> = x"f09f96a4";
     const YELLOW_HEART: vector<u8> = x"f09f929b";
 
+    // Polarity based on `is_sell` argument for swap functions in main file.
     const SWAP_BUY: bool = false;
     const SWAP_SELL: bool = true;
 
+    // For general case tests.
     const USER: address = @0xaaaaa;
     const INTEGRATOR: address = @0xbbbbb;
+    const INTEGRATOR_FEE_RATE_BPS: u8 = 25;
+    const GENERAL_CASE_SWAP_TIME: u64 = 700_000;
 
     // Constants for a simple buy against a new market (does not result in state transition), used
     // for assorted test setup.
@@ -371,7 +423,7 @@
     const EXACT_TRANSITION_INPUT_AMOUNT: u64 = 1_000_000_000_000;
     const EXACT_TRANSITION_INTEGRATOR: address = @0xeeeee;
     const EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS: u8 = 0;
-    const EXACT_TRANSITION_TIME: u64 = 500_000;
+    const EXACT_TRANSITION_TIME: u64 = 600_000;
     const EXACT_TRANSITION_USER: address = @0xfffff;
 
     public fun address_for_registered_market_by_emoji_bytes(
@@ -1154,7 +1206,7 @@
 
     public fun base_registry_view(): MockRegistryView {
         MockRegistryView {
-            registry_address: registry_address(),
+            registry_address: derived_registry_address(),
             nonce: 1,
             last_bump_time: 0,
             n_markets: 0,
@@ -1173,7 +1225,7 @@
         let swap = base_swap_simple_buy();
         let instantaneous_stats = base_instantaneous_stats_simple_buy();
         MockRegistryView {
-            registry_address: registry_address(),
+            registry_address: derived_registry_address(),
             nonce: 3,
             last_bump_time: 0,
             n_markets: 1,
@@ -1192,7 +1244,7 @@
         let swap = base_swap_exact_transition();
         let instantaneous_stats = base_instantaneous_stats_exact_transition();
         MockRegistryView {
-            registry_address: registry_address(),
+            registry_address: derived_registry_address(),
             nonce: 3,
             last_bump_time: 0,
             n_markets: 1,
@@ -1365,6 +1417,10 @@
         }
     }
 
+    public fun derived_registry_address(): address {
+        object::create_object_address(&@emojicoin_dot_fun, get_REGISTRY_NAME())
+    }
+
     public fun fdv_for_newly_registered_market(): u128 {
         (
             (
@@ -1377,7 +1433,9 @@
     public fun init_market(
         emoji_bytes: vector<vector<u8>>,
     ) {
-        mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_FEE());
+        let registry_view = registry_view();
+        let (_, _, _, n_markets, _, _, _, _, _, _, _, _,) = unpack_registry_view(registry_view);
+        if (n_markets > 0) mint_aptos_coin_to(USER, get_MARKET_REGISTRATION_FEE());
         register_market_without_publish(&get_signer(USER), emoji_bytes, INTEGRATOR);
     }
 
@@ -1386,6 +1444,7 @@
     ) {
         init_market(emoji_bytes);
         let input_amount = 100;
+        mint_aptos_coin_to(USER, input_amount);
         let integrator_fee_rate_bps = 0;
         swap<Emojicoin, EmojicoinLP>(
             address_for_registered_market_by_emoji_bytes(emoji_bytes),
@@ -1467,6 +1526,512 @@
          option::destroy_some(
             market_metadata_by_emoji_bytes(verified_symbol_emoji_bytes(emoji_bytes))
         )
+    }
+
+    public fun pack_mock_reserves(
+        mock_reserves: MockReserves
+    ): Reserves {
+        pack_reserves(mock_reserves.base, mock_reserves.quote)
+    }
+
+    public fun swap_general_case_follow_up_input_amount_to_trigger_state_transition(): u64 {
+        let quote_to_transition = ((get_QUOTE_VIRTUAL_CEILING() -
+            base_market_view_simple_buy().clamm_virtual_reserves.quote) as u128);
+        ((
+            (get_BASIS_POINTS_PER_UNIT() * quote_to_transition) /
+            (get_BASIS_POINTS_PER_UNIT() - (INTEGRATOR_FEE_RATE_BPS as u128))
+        ) as u64)
+    }
+
+    public fun swap_general_case_test_flow(
+        flow: SwapGeneralCaseTestFlow
+    ) {
+        // Determine base structs at end of setup swap, if swap starts in bonding curve.
+        let (
+            setup_swap,
+            setup_market_view,
+            setup_registry_view,
+            setup_periodic_state_tracker,
+            setup_state,
+            starts_in_bonding_curve,
+        ) = if (flow.setup_is_simple_buy) {
+            init_package_then_simple_buy();
+            (
+                base_swap_simple_buy(),
+                base_market_view_simple_buy(),
+                base_registry_view_simple_buy(),
+                base_periodic_state_tracker_simple_buy(),
+                base_state_simple_buy(),
+                true,
+            )
+        } else {
+            init_package_then_exact_transition();
+            (
+                base_swap_exact_transition(),
+                base_market_view_exact_transition(),
+                base_registry_view_exact_transition(),
+                base_periodic_state_tracker_exact_transition(),
+                base_state_exact_transition(),
+                false,
+            )
+        };
+
+        // Fund general case swap user with input amount.
+        if (flow.is_sell) {
+            let sender = if (flow.setup_is_simple_buy) SIMPLE_BUY_USER else EXACT_TRANSITION_USER;
+            aptos_account::transfer_coins<BlackCatEmojicoin>(
+                &get_signer(sender),
+                USER,
+                flow.input_amount
+            );
+        } else {
+            mint_aptos_coin_to(USER, flow.input_amount);
+        };
+
+        // Update global time, simulate swap, then execute swap.
+        timestamp::update_global_time_for_test(GENERAL_CASE_SWAP_TIME);
+        let market_address = base_market_metadata().market_address;
+        let simulated_swap = simulate_swap(
+            market_address,
+            USER,
+            flow.input_amount,
+            flow.is_sell,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            market_address,
+            &get_signer(USER),
+            flow.input_amount,
+            flow.is_sell,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+
+        // Simulate core swap values.
+        let swap_simulation_setup = SwapSimulationSetup {
+            input_amount: flow.input_amount,
+            starts_in_bonding_curve,
+            clamm_virtual_reserves: setup_market_view.clamm_virtual_reserves,
+            cpamm_real_reserves: setup_market_view.cpamm_real_reserves,
+            market_aptos_coin_balance: setup_market_view.aptos_coin_balance,
+            market_emojicoin_balance: setup_market_view.emojicoin_balance,
+        };
+        let result = if (flow.is_sell) {
+            swap_simulation_sell(swap_simulation_setup)
+        } else {
+            if (starts_in_bonding_curve) {
+                swap_simulation_buy_clamm(swap_simulation_setup)
+            } else {
+                swap_simulation_buy_cpamm(swap_simulation_setup)
+            }
+        };
+        let integrator_fee = result.integrator_fee;
+        let pool_fee_base = result.pool_fee_base;
+        let pool_fee_quote = result.pool_fee_quote;
+        let net_proceeds = result.net_proceeds;
+        let base_volume = result.base_volume;
+        let quote_volume = result.quote_volume;
+        let results_in_state_transition = result.results_in_state_transition;
+        let clamm_virtual_reserves = result.clamm_virtual_reserves;
+        let cpamm_real_reserves = result.cpamm_real_reserves;
+        let market_aptos_coin_balance = result.market_aptos_coin_balance;
+        let market_emojicoin_balance = result.market_emojicoin_balance;
+        let avg_execution_price_q64 = ((quote_volume as u128) << 64) / (base_volume as u128);
+
+        // Determine if ends in bonding curve, LP coins/instantaneous stats.
+        let ends_in_bonding_curve = starts_in_bonding_curve && !results_in_state_transition;
+        let lp_coin_supply;
+        let total_quote_locked;
+        let total_value_locked;
+        let fully_diluted_value;
+        let market_cap;
+        if (ends_in_bonding_curve) {
+            total_quote_locked = clamm_virtual_reserves.quote - get_QUOTE_VIRTUAL_FLOOR();
+            lp_coin_supply = 0;
+            total_value_locked = tvl_clamm(pack_mock_reserves(clamm_virtual_reserves));
+            (fully_diluted_value, market_cap) = fdv_market_cap(
+                pack_mock_reserves(clamm_virtual_reserves),
+                get_BASE_VIRTUAL_CEILING(),
+            );
+        } else {
+            total_quote_locked = cpamm_real_reserves.quote;
+            lp_coin_supply = (get_LP_TOKENS_INITIAL() as u128);
+            total_value_locked = (2 * (cpamm_real_reserves.quote as u128));
+            (fully_diluted_value, market_cap) =
+                fdv_market_cap(pack_mock_reserves(cpamm_real_reserves), get_EMOJICOIN_SUPPLY());
+        };
+
+        // Declare mock structs for general swap case test flow.
+        let mock_swap = MockSwap {
+            market_id: setup_swap.market_id,
+            time: GENERAL_CASE_SWAP_TIME,
+            market_nonce: setup_swap.market_nonce + 1,
+            swapper: USER,
+            input_amount: flow.input_amount,
+            is_sell: flow.is_sell,
+            integrator: INTEGRATOR,
+            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64,
+            integrator_fee,
+            pool_fee: if (flow.is_sell) pool_fee_quote else pool_fee_base,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        };
+        let mock_market_view = MockMarketView {
+            metadata: setup_market_view.metadata,
+            sequence_info: MockSequenceInfo {
+                nonce: setup_market_view.sequence_info.nonce + 1,
+                last_bump_time: GENERAL_CASE_SWAP_TIME,
+            },
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            in_bonding_curve: ends_in_bonding_curve,
+            cumulative_stats: MockCumulativeStats {
+                base_volume: setup_market_view.cumulative_stats.base_volume + (base_volume as u128),
+                quote_volume:
+                    setup_market_view.cumulative_stats.quote_volume + (quote_volume as u128),
+                integrator_fees:
+                    setup_market_view.cumulative_stats.integrator_fees + (integrator_fee as u128),
+                pool_fees_base: (pool_fee_base as u128),
+                pool_fees_quote: (pool_fee_quote as u128),
+                n_swaps: setup_market_view.cumulative_stats.n_swaps + 1,
+                n_chat_messages: 0,
+            },
+            instantaneous_stats: MockInstantaneousStats {
+                total_quote_locked,
+                total_value_locked,
+                market_cap,
+                fully_diluted_value,
+            },
+            last_swap: MockLastSwap {
+                is_sell: mock_swap.is_sell,
+                avg_execution_price_q64,
+                base_volume,
+                quote_volume,
+                nonce: mock_swap.market_nonce,
+                time: mock_swap.time,
+            },
+            periodic_state_trackers: vectorize_periodic_state_tracker_base(
+                MockPeriodicStateTracker {
+                    start_time: setup_periodic_state_tracker.start_time,
+                    period: 0,
+                    open_price_q64: setup_periodic_state_tracker.open_price_q64,
+                    high_price_q64: if
+                        (avg_execution_price_q64 > setup_periodic_state_tracker.high_price_q64)
+                        avg_execution_price_q64 else setup_periodic_state_tracker.high_price_q64,
+                    low_price_q64: if
+                        (avg_execution_price_q64 < setup_periodic_state_tracker.low_price_q64)
+                        avg_execution_price_q64 else setup_periodic_state_tracker.low_price_q64,
+                    close_price_q64: avg_execution_price_q64,
+                    volume_base:
+                        setup_periodic_state_tracker.volume_base + (base_volume as u128),
+                    volume_quote:
+                        setup_periodic_state_tracker.volume_quote + (quote_volume as u128),
+                    integrator_fees:
+                        setup_periodic_state_tracker.integrator_fees + (integrator_fee as u128),
+                    pool_fees_base: (pool_fee_base as u128),
+                    pool_fees_quote: (pool_fee_quote as u128),
+                    n_swaps: setup_periodic_state_tracker.n_swaps + 1,
+                    n_chat_messages: 0,
+                    starts_in_bonding_curve: setup_periodic_state_tracker.starts_in_bonding_curve,
+                    ends_in_bonding_curve,
+                    tvl_to_lp_coin_ratio_start:
+                        setup_periodic_state_tracker.tvl_to_lp_coin_ratio_start,
+                    tvl_to_lp_coin_ratio_end: MockTVLtoLPCoinRatio {
+                        tvl: total_value_locked,
+                        lp_coins: (lp_coin_supply as u128),
+                    },
+                },
+            ),
+            aptos_coin_balance: market_aptos_coin_balance,
+            emojicoin_balance: market_emojicoin_balance,
+            emojicoin_lp_balance: (lp_coin_supply as u64),
+        };
+        let mock_registry_view = MockRegistryView {
+            registry_address: setup_registry_view.registry_address,
+            nonce: setup_registry_view.nonce + 1,
+            last_bump_time: setup_registry_view.last_bump_time,
+            n_markets: setup_registry_view.n_markets,
+            cumulative_quote_volume: mock_market_view.cumulative_stats.quote_volume,
+            total_quote_locked: (mock_market_view.instantaneous_stats.total_quote_locked as u128),
+            total_value_locked: mock_market_view.instantaneous_stats.total_value_locked,
+            market_cap: mock_market_view.instantaneous_stats.market_cap,
+            fully_diluted_value: mock_market_view.instantaneous_stats.fully_diluted_value,
+            cumulative_integrator_fees: mock_market_view.cumulative_stats.integrator_fees,
+            cumulative_swaps: mock_market_view.cumulative_stats.n_swaps,
+            cumulative_chat_messages: 0,
+        };
+        let mock_state = MockState {
+            market_metadata: setup_state.market_metadata,
+            state_metadata: MockStateMetadata {
+                market_nonce: mock_swap.market_nonce,
+                bump_time: GENERAL_CASE_SWAP_TIME,
+                trigger: if (flow.is_sell) get_TRIGGER_SWAP_SELL() else get_TRIGGER_SWAP_BUY(),
+            },
+            clamm_virtual_reserves: mock_market_view.clamm_virtual_reserves,
+            cpamm_real_reserves: mock_market_view.cpamm_real_reserves,
+            lp_coin_supply: lp_coin_supply,
+            cumulative_stats: mock_market_view.cumulative_stats,
+            instantaneous_stats: mock_market_view.instantaneous_stats,
+            last_swap: mock_market_view.last_swap,
+        };
+
+        // Assert simulated swap matches expected swap.
+        assert_swap(mock_swap, simulated_swap);
+
+        // Assert only two swap events emitted, and that final one matches simulated swap.
+        let swap_events = emitted_events<Swap>();
+        assert!(vector::length(&swap_events) == 2, 0);
+        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
+
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert only 3 state events emitted: one from market registration, one from setup swap,
+        // and one from general case swap.
+        assert!(vector::length(&emitted_events<State>()) == 3, 0);
+
+        // Assert coin balance updates for user and integrator.
+        let (user_emojicoin_balance, user_apt_balance) = if (flow.is_sell) {
+            (0, mock_swap.net_proceeds)
+        } else {
+            (mock_swap.net_proceeds, 0)
+        };
+        assert!(coin::balance<BlackCatEmojicoin>(USER) == user_emojicoin_balance, 0);
+        assert!(coin::balance<AptosCoin>(USER) == user_apt_balance, 0);
+        assert!(coin::balance<AptosCoin>(INTEGRATOR) == mock_swap.integrator_fee, 0);
+
+        // Assert market and registry views, emitted state event.
+        assert_market_view(
+            mock_market_view,
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+        assert_registry_view(mock_registry_view, registry_view());
+        assert_state(mock_state, vector::pop_back(&mut emitted_events<State>()));
+    }
+
+    public fun swap_setup_case_test_flow(
+        flow: SwapSetupCaseTestFlow
+    ) {
+        // Assert simulated swap matches expected swap.
+        assert_swap(flow.mock_swap, flow.simulated_swap);
+
+        // Assert only one swap event emitted, and that it matches simulated swap.
+        let swap_events = emitted_events<Swap>();
+        assert!(vector::length(&swap_events) == 1, 0);
+        assert!(flow.simulated_swap == vector::pop_back(&mut swap_events), 0);
+
+        // Assert only one global state event emitted (from package publication).
+        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+
+        // Assert no periodic state events emitted.
+        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+
+        // Assert only two state events emitted: one from market registration and one from swap.
+        assert!(vector::length(&emitted_events<State>()) == 2, 0);
+
+        // Assert coin balance updates for user and integrator.
+        assert!(coin::balance<BlackCatEmojicoin>(flow.user) == flow.mock_swap.net_proceeds, 0);
+        assert!(coin::balance<AptosCoin>(flow.user) == 0, 0);
+        assert!(coin::balance<AptosCoin>(flow.integrator) == flow.mock_swap.integrator_fee, 0);
+
+        // Assert market and registry views, emitted state event.
+        assert_market_view(
+            flow.mock_market_view,
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+        );
+        assert_registry_view(flow.mock_registry_view, registry_view());
+        assert_state(flow.mock_state, vector::pop_back(&mut emitted_events<State>()));
+    }
+
+    public fun swap_simulation_buy_clamm(setup: SwapSimulationSetup): SwapSimulationResult {
+        // Determine integrator fee and resultant quote volume.
+        let integrator_fee = get_bps_fee(setup.input_amount, INTEGRATOR_FEE_RATE_BPS);
+        let quote_volume = setup.input_amount - integrator_fee;
+
+        // Determine how much quote volume can happen before a state transition.
+        let quote_volume_before_state_transition =
+            get_QUOTE_VIRTUAL_CEILING() - setup.clamm_virtual_reserves.quote;
+
+        // Assume reserves are constant, then only modify those that change.
+        let clamm_virtual_reserves = setup.clamm_virtual_reserves;
+        let cpamm_real_reserves = setup.cpamm_real_reserves;
+
+        // Assume no base pool fees, unless state transition occurs.
+        let pool_fee_base = 0;
+
+        // Declare variables to be assigned later
+        let base_volume;
+        let results_in_state_transition;
+
+        // Evaluate results based on if state transition happens.
+        if (quote_volume >= quote_volume_before_state_transition) { // If transition occurs.
+            results_in_state_transition = true;
+
+            // Base volume is at least all remaining base in the bonding curve.
+            base_volume = clamm_virtual_reserves.base - get_BASE_VIRTUAL_FLOOR();
+
+            // Determine how much quote volume is left after the state transition, if any.
+            let remaining_quote_volume = quote_volume - quote_volume_before_state_transition;
+
+            // Flag that nothing is left in the bonding curve.
+            clamm_virtual_reserves = MockReserves { base: 0, quote: 0 };
+
+            // Determining effects on CPAMM based on if there is any quote volume left to fill.
+            cpamm_real_reserves = if (remaining_quote_volume > 0) {
+
+                // Determine base out of CPAMM before pool fees, and pool fees.
+                let base_out_cpamm = cpamm_simple_swap_output_amount(
+                    remaining_quote_volume,
+                    SWAP_BUY,
+                    pack_mock_reserves(base_cpamm_real_reserves_exact_transition())
+                );
+                pool_fee_base = get_bps_fee(base_out_cpamm, get_POOL_FEE_RATE_BPS());
+
+                // Determine CPAMM base volume, total base volume, and new CPAMM reserves.
+                let base_volume_cpamm = base_out_cpamm - pool_fee_base;
+                base_volume = base_volume + base_volume_cpamm;
+                MockReserves {
+                    base: base_cpamm_real_reserves_exact_transition().base - base_volume_cpamm,
+                    quote:
+                        base_cpamm_real_reserves_exact_transition().quote + remaining_quote_volume,
+                }
+
+            } else { // If there was an exact state transition.
+                base_cpamm_real_reserves_exact_transition()
+            }
+
+        } else { // If no state transition happens.
+            results_in_state_transition = false;
+
+            // Get base volume coming out of bonding curve.
+            base_volume = cpamm_simple_swap_output_amount(
+                quote_volume,
+                SWAP_BUY,
+                pack_mock_reserves(setup.clamm_virtual_reserves)
+            );
+            clamm_virtual_reserves = MockReserves {
+                base: clamm_virtual_reserves.base - base_volume,
+                quote: clamm_virtual_reserves.quote + quote_volume,
+            };
+        };
+
+        // Return result.
+        SwapSimulationResult {
+            integrator_fee,
+            pool_fee_base,
+            pool_fee_quote: 0,
+            net_proceeds: base_volume,
+            base_volume,
+            quote_volume,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            results_in_state_transition,
+            market_aptos_coin_balance: setup.market_aptos_coin_balance + quote_volume,
+            market_emojicoin_balance: setup.market_emojicoin_balance - base_volume,
+        }
+
+    }
+
+    public fun swap_simulation_buy_cpamm(setup: SwapSimulationSetup): SwapSimulationResult {
+        // Determine integrator fee and resultant quote volume.
+        let integrator_fee = get_bps_fee(setup.input_amount, INTEGRATOR_FEE_RATE_BPS);
+        let quote_volume = setup.input_amount - integrator_fee;
+
+        // Get amount of base that comes out of CPAMM.
+        let base_out_cpamm = cpamm_simple_swap_output_amount(
+            quote_volume,
+            SWAP_BUY,
+            pack_mock_reserves(setup.cpamm_real_reserves),
+        );
+
+        // Determine pool fee, deducted from net proceeds.
+        let pool_fee_base = get_bps_fee(base_out_cpamm, get_POOL_FEE_RATE_BPS());
+        let base_volume = base_out_cpamm - pool_fee_base;
+
+        // Return result.
+        SwapSimulationResult {
+            integrator_fee,
+            pool_fee_base,
+            pool_fee_quote: 0,
+            net_proceeds: base_volume,
+            base_volume,
+            quote_volume,
+            clamm_virtual_reserves: setup.clamm_virtual_reserves,
+            cpamm_real_reserves: MockReserves {
+                base: setup.cpamm_real_reserves.base - base_volume,
+                quote: setup.cpamm_real_reserves.quote + quote_volume,
+            },
+            results_in_state_transition: false,
+            market_aptos_coin_balance: setup.market_aptos_coin_balance + quote_volume,
+            market_emojicoin_balance: setup.market_emojicoin_balance - base_volume,
+        }
+    }
+
+    public fun swap_simulation_sell(setup: SwapSimulationSetup): SwapSimulationResult {
+        // Get amount of quote that comes out of bonding curve for given base input.
+        let quote_out_clamm = cpamm_simple_swap_output_amount(
+            setup.input_amount,
+            SWAP_SELL,
+            pack_mock_reserves(if (setup.starts_in_bonding_curve)
+                setup.clamm_virtual_reserves else setup.cpamm_real_reserves
+            ),
+        );
+        // Calculate integrator fee and resultant pool fee.
+        let integrator_fee = get_bps_fee(quote_out_clamm, INTEGRATOR_FEE_RATE_BPS);
+        let pool_fee_quote = if (setup.starts_in_bonding_curve) {
+            0
+        } else {
+            get_bps_fee(quote_out_clamm, get_POOL_FEE_RATE_BPS())
+        };
+
+        // Determine volume amounts, and amount of quote leaving the market.
+        let quote_volume = quote_out_clamm - integrator_fee - pool_fee_quote;
+        let base_volume = setup.input_amount;
+        let net_proceeds = quote_volume;
+        let quote_leaving_market = quote_out_clamm - pool_fee_quote;
+
+        // Determine final reserves amounts, based on if sell starts in bonding curve.
+        let (clamm_virtual_reserves, cpamm_real_reserves) = if (setup.starts_in_bonding_curve) {
+            (
+                MockReserves {
+                    base: setup.clamm_virtual_reserves.base + base_volume,
+                    quote: setup.clamm_virtual_reserves.quote - quote_leaving_market,
+                },
+                setup.cpamm_real_reserves,
+            )
+        } else {
+            (
+                setup.clamm_virtual_reserves,
+                MockReserves {
+                    base: setup.cpamm_real_reserves.base + base_volume,
+                    quote: setup.cpamm_real_reserves.quote - quote_leaving_market,
+                },
+            )
+        };
+
+        // Pack, return result.
+        SwapSimulationResult {
+            integrator_fee,
+            pool_fee_base: 0,
+            pool_fee_quote,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            results_in_state_transition: false,
+            market_aptos_coin_balance: setup.market_aptos_coin_balance - quote_leaving_market,
+            market_emojicoin_balance: setup.market_emojicoin_balance + base_volume,
+        }
     }
 
     public fun vectorize_periodic_state_tracker_base(
@@ -1731,9 +2296,7 @@
         init_module(&get_signer(@emojicoin_dot_fun));
 
         // Manually derive registry address from object seed, assert it.
-        let registry_address =
-            object::create_object_address(&@emojicoin_dot_fun, get_REGISTRY_NAME());
-        assert!(registry_address == registry_address(), 0);
+        assert!(derived_registry_address() == registry_address(), 0);
 
         // Assert registry view.
         let registry_view = base_registry_view();
@@ -2013,52 +2576,59 @@
         // Assert that rounding will indeed take place, such that output will be truncated and
         // rounding effects will be assumed by swapper.
         assert!(numerator % denominator != 0, 0);
+
+        // Determine swap input amount for follow up swap with general fee amount such that follow
+        // up swap will result in an exact state transition.
+        let input_amount = swap_general_case_follow_up_input_amount_to_trigger_state_transition();
+        let integrator_fee_rate = get_bps_fee(input_amount, INTEGRATOR_FEE_RATE_BPS);
+        let quote_to_clamm = input_amount - integrator_fee_rate;
+        let quote_to_transition = get_QUOTE_VIRTUAL_CEILING() -
+            base_market_view_simple_buy().clamm_virtual_reserves.quote;
+        assert!(quote_to_clamm == quote_to_transition, 0);
     }
 
     #[test] fun swap_exact_transition() {
-        // Assert simulated swap from before actual swap execution.
-        let simulated_swap = init_package_then_exact_transition();
-        let mock_swap = base_swap_exact_transition();
-        assert_swap(mock_swap, simulated_swap);
+        swap_setup_case_test_flow(SwapSetupCaseTestFlow {
+            simulated_swap: init_package_then_exact_transition(),
+            mock_swap: base_swap_exact_transition(),
+            user: EXACT_TRANSITION_USER,
+            integrator: EXACT_TRANSITION_INTEGRATOR,
+            mock_market_view: base_market_view_exact_transition(),
+            mock_registry_view: base_registry_view_exact_transition(),
+            mock_state: base_state_exact_transition(),
+        })
+    }
 
-        // Assert only one swap event emitted, and that it matches simulated swap.
-        let swap_events = emitted_events<Swap>();
-        assert!(vector::length(&swap_events) == 1, 0);
-        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
+    #[test] fun swap_exact_state_transition_then_buy_large() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: false,
+            is_sell: false,
+            input_amount: get_QUOTE_REAL_CEILING() / 2,
+        })
+    }
 
-        // Assert only one global state event emitted (from package publication).
-        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+    #[test] fun swap_exact_state_transition_then_buy_small() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: false,
+            is_sell: false,
+            input_amount: get_QUOTE_REAL_CEILING() / 100,
+        })
+    }
 
-        // Assert no periodic state events emitted.
-        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+    #[test] fun swap_exact_transition_then_sell_all() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: false,
+            is_sell: true,
+            input_amount: base_swap_exact_transition().net_proceeds,
+        })
+    }
 
-        // Assert only two state events emitted, one from market registration and one from swap.
-        assert!(vector::length(&emitted_events<State>()) == 2, 0);
-
-        // Assert coin balance updates for user and integrator.
-        assert!(
-            coin::balance<BlackCatEmojicoin>(EXACT_TRANSITION_USER) == mock_swap.net_proceeds,
-            0,
-        );
-        assert!(coin::balance<AptosCoin>(EXACT_TRANSITION_USER) == 0, 0);
-        assert!(
-            coin::balance<AptosCoin>(EXACT_TRANSITION_INTEGRATOR) == mock_swap.integrator_fee,
-            0,
-        );
-
-        // Assert market and registry views, emitted state event.
-        assert_market_view(
-            base_market_view_exact_transition(),
-            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
-        );
-        assert_registry_view(
-            base_registry_view_exact_transition(),
-            registry_view()
-        );
-        assert_state(
-            base_state_exact_transition(),
-            vector::pop_back(&mut emitted_events<State>()),
-        );
+    #[test] fun swap_exact_transition_then_sell_half() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: false,
+            is_sell: true,
+            input_amount: base_swap_exact_transition().net_proceeds / 2,
+        })
     }
 
     #[test] fun swap_initializes_coin_capabilities() {
@@ -2073,44 +2643,166 @@
         );
     }
 
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun simulate_swap_no_market() {
+        simulate_swap(
+            @0x0,
+            USER,
+            1,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_SWAP_INPUT_ZERO,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun simulate_swap_no_size() {
+        init_package_then_simple_buy();
+        simulate_swap(
+            base_market_metadata().market_address,
+            USER,
+            0,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = 65542, // 0x1 << 16 + 6, error:invalid_argument(EINSUFFICIENT_BALANCE)
+        location = aptos_framework::coin,
+    )] fun swap_no_base() {
+        init_package_then_simple_buy();
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            base_market_metadata().market_address,
+            &get_signer(USER),
+            1,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun swap_no_market() {
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            @0x0,
+            &get_signer(USER),
+            1,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = 65542, // 0x1 << 16 + 6, error:invalid_argument(EINSUFFICIENT_BALANCE)
+        location = aptos_framework::coin,
+    )] fun swap_no_quote() {
+        init_package_then_simple_buy();
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            base_market_metadata().market_address,
+            &get_signer(USER),
+            1,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
     #[test] fun swap_simple_buy() {
-        // Assert simulated swap from before actual swap execution.
-        let simulated_swap = init_package_then_simple_buy();
-        let mock_swap = base_swap_simple_buy();
-        assert_swap(mock_swap, simulated_swap);
+        swap_setup_case_test_flow(SwapSetupCaseTestFlow {
+            simulated_swap: init_package_then_simple_buy(),
+            mock_swap: base_swap_simple_buy(),
+            user: SIMPLE_BUY_USER,
+            integrator: SIMPLE_BUY_INTEGRATOR,
+            mock_market_view: base_market_view_simple_buy(),
+            mock_registry_view: base_registry_view_simple_buy(),
+            mock_state: base_state_simple_buy(),
+        })
+    }
 
-        // Assert only one swap event emitted, and that it matches simulated swap.
-        let swap_events = emitted_events<Swap>();
-        assert!(vector::length(&swap_events) == 1, 0);
-        assert!(simulated_swap == vector::pop_back(&mut swap_events), 0);
+    #[test] fun swap_simple_buy_then_buy_past_state_transition_large() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: false,
+            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition() +
+                get_QUOTE_REAL_CEILING() / 10,
+        });
+    }
 
-        // Assert only one global state event emitted (from package publication).
-        assert!(vector::length(&emitted_events<GlobalState>()) == 1, 0);
+    #[test] fun swap_simple_buy_then_buy_past_state_transition_small() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: false,
+            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition() +
+                1,
+        });
+    }
 
-        // Assert no periodic state events emitted.
-        assert!(vector::is_empty(&emitted_events<PeriodicState>()), 0);
+    #[test] fun swap_simple_buy_then_buy_small() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: false,
+            input_amount: SIMPLE_BUY_INPUT_AMOUNT,
+        });
+    }
 
-        // Assert only two state events emitted, one from market registration and one from swap.
-        assert!(vector::length(&emitted_events<State>()) == 2, 0);
-
-        // Assert coin balance updates for user and integrator.
-        assert!(coin::balance<BlackCatEmojicoin>(SIMPLE_BUY_USER) == mock_swap.net_proceeds, 0);
-        assert!(coin::balance<AptosCoin>(SIMPLE_BUY_USER) == 0, 0);
-        assert!(coin::balance<AptosCoin>(SIMPLE_BUY_INTEGRATOR) == mock_swap.integrator_fee, 0);
-
-        // Assert market and registry views, emitted state event.
-        assert_market_view(
-            base_market_view_simple_buy(),
-            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+    #[test] fun swap_simple_buy_then_buy_to_exact_state_transition() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: false,
+            input_amount: swap_general_case_follow_up_input_amount_to_trigger_state_transition(),
+        });
+        let market_view = market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market);
+        let (
+            _,
+            _,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            in_bonding_curve,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            emojicoin_lp_balance,
+        ) = unpack_market_view(market_view);
+        assert_reserves(
+            base_market_view_exact_transition().clamm_virtual_reserves,
+            clamm_virtual_reserves,
         );
-        assert_registry_view(
-            base_registry_view_simple_buy(),
-            registry_view()
+        assert_reserves(
+            base_market_view_exact_transition().cpamm_real_reserves,
+            cpamm_real_reserves,
         );
-        assert_state(
-            base_state_simple_buy(),
-            vector::pop_back(&mut emitted_events<State>()),
-        );
+        assert!((lp_coin_supply as u64) == get_LP_TOKENS_INITIAL(), 0);
+        assert!(!in_bonding_curve, 0);
+        assert!(emojicoin_lp_balance == get_LP_TOKENS_INITIAL(), 0);
+    }
+
+    #[test] fun swap_simple_buy_then_sell_back_all() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: true,
+            input_amount: base_swap_simple_buy().net_proceeds,
+        })
+    }
+
+    #[test] fun swap_simple_buy_then_sell_back_half() {
+        swap_general_case_test_flow(SwapGeneralCaseTestFlow {
+            setup_is_simple_buy: true,
+            is_sell: true,
+            input_amount: base_swap_simple_buy().net_proceeds / 2,
+        })
     }
 
     #[test] fun valid_coin_types_all_invalid() {
