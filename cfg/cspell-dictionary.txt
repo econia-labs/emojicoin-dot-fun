@@ -48,6 +48,7 @@ rica
 rustup
 sint
 struct
+structs
 subdir
 supervillain
 tanabata
