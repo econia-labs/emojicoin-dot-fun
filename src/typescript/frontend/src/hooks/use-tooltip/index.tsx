@@ -1,9 +1,11 @@
+"use client";
+
 import React, { useState } from "react";
 import { usePopper } from "react-popper";
 import { AnimatePresence } from "framer-motion";
 
 import { Arrow, StyledTooltip } from "./styled";
-import { TooltipOptions } from "./types";
+import { type TooltipOptions } from "./types";
 import { useSubscriptionEventsHandlers } from "./use-subscription-events-handlers";
 import { checkIsEllipsis } from "utils";
 import { appearanceAnimationMap, appearanceAnimationVariants } from "theme";

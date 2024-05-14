@@ -1,5 +1,8 @@
 import styled from "styled-components";
-import { Box, Column, Container, Flex, Text, FlexGap, Page, Heading, Row, RowBetween } from "components";
+import { Text } from "components/text";
+import Heading from "components/heading";
+import { Box, Column, Container, Flex, FlexGap, Row, RowBetween } from "@/containers";
+import { Page } from "components/layout/components/page";
 
 export default {
   title: "Components/Layout",

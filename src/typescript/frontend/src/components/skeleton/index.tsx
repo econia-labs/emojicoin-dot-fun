@@ -1,11 +1,16 @@
 import styled from "styled-components";
 
-import { Box } from "components";
+import { Box } from "@/containers";
 import { variantStyles } from "./theme";
 
-import { animation, SkeletonProps, variant as VARIANT } from "./types";
+import { animation as animation$1, type SkeletonProps, variant as VARIANT } from "./types";
 
-const StyledSkelton = styled(Box)<SkeletonProps>`
+const StyledSkeleton = styled(Box).attrs<SkeletonProps>(
+  ({ variant = VARIANT.RECT, animation = animation$1.PULSE }) => ({
+    variant,
+    animation,
+  }),
+)`
   background-color: ${({ theme }) => theme.colors.lightGrey};
   border-radius: ${({ variant, theme }) => (variant === VARIANT.CIRCLE ? theme.radii.circle : theme.radii.small)};
 
@@ -21,9 +26,4 @@ const StyledSkelton = styled(Box)<SkeletonProps>`
   ${({ animation }) => variantStyles(animation)};
 `;
 
-StyledSkelton.defaultProps = {
-  variant: VARIANT.RECT,
-  animation: animation.PULSE,
-};
-
-export default StyledSkelton;
+export default StyledSkeleton;

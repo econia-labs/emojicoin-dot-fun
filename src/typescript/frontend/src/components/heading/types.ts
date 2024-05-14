@@ -1,5 +1,5 @@
-import { TextProps } from "components/text/types";
-import { ResponsiveValue } from "styled-system";
+import { type TextProps } from "components/text/types";
+import { type ResponsiveValue } from "styled-system";
 
 export const scales = {
   h1: "h1",

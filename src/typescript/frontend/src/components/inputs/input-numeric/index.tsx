@@ -1,7 +1,7 @@
 import React from "react";
-import { Input } from "components";
+import { Input } from "components/inputs/input";
 import { REGEX } from "configs";
-import { InputProps } from "components/inputs/input/types";
+import { type InputProps } from "components/inputs/input/types";
 
 export const InputNumeric = <E extends React.ElementType = "input">({
   onUserInput,

@@ -1,9 +1,19 @@
+"use client";
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 import { EN, languages, LOCAL_STORAGE_KEYS } from "configs";
-import { fetchLocale, getLanguageCodeFromLS, translatedTextIncludesVariable } from "./helpers";
+import { getLanguageCodeFromLocalStorage, translatedTextIncludesVariable } from "./helpers";
 
-import { ContextApi, ContextData, ContextType, Language, TranslationKey, LanguageContextProviderProps } from "./types";
+import {
+  type ContextApi,
+  type ContextData,
+  type ContextType,
+  type Language,
+  type TranslationKey,
+  type LanguageContextProviderProps,
+} from "./types";
+import { fetchLocale } from "lib/fetch-locale";
 
 const initialState: ContextType = {
   isFetching: true,
@@ -28,7 +38,7 @@ const LanguageContext = createContext<ContextApi | null>(null);
 
 const LanguageContextProvider: React.FC<LanguageContextProviderProps> = ({ fallback, children }) => {
   const [state, setState] = useState(() => {
-    const codeFromStorage = getLanguageCodeFromLS();
+    const codeFromStorage = getLanguageCodeFromLocalStorage();
 
     return {
       ...initialState,
@@ -40,7 +50,7 @@ const LanguageContextProvider: React.FC<LanguageContextProviderProps> = ({ fallb
 
   const fetchInitialLocales = async () => {
     // TODO - recheck to remove double logic from line 35
-    let codeFromStorage = getLanguageCodeFromLS();
+    let codeFromStorage = getLanguageCodeFromLocalStorage();
 
     if (!(codeFromStorage in languages)) {
       codeFromStorage = EN.locale;

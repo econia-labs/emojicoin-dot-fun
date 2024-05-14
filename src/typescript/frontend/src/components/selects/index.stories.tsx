@@ -4,7 +4,7 @@ import { DropdownMenu } from "./";
 import SingleSelect from "./single-select";
 import MultipleSelect from "./multiple-select";
 
-import { Option } from "./types";
+import { type Option } from "./types";
 
 export default {
   title: "Components/Dropdowns",

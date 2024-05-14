@@ -1,6 +1,10 @@
 import styled from "styled-components";
 
-import { Button, Heading, Page, Text, Column, Row } from "components";
+import { Column, Row } from "@/containers";
+import { Button, Heading } from "components";
+import { Text } from "components/text";
+import { Page } from "components/layout/components/page";
+
 import { useThemeContext } from "context";
 
 export default {

@@ -1,7 +1,14 @@
-import { DefaultTheme } from "styled-components";
-import { LayoutProps, SpaceProps, TypographyProps, OpacityProps, FlexboxProps, ResponsiveValue } from "styled-system";
+import { type DefaultTheme } from "styled-components";
+import {
+  type LayoutProps,
+  type SpaceProps,
+  type TypographyProps,
+  type OpacityProps,
+  type FlexboxProps,
+  type ResponsiveValue,
+} from "styled-system";
 
-import { Colors, FontWeight } from "theme/types";
+import { type Colors, type FontWeight } from "theme/types";
 
 export interface ThemedProps extends TextProps {
   theme: DefaultTheme;

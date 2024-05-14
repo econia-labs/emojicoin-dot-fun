@@ -1,4 +1,4 @@
-import { Language } from "context/language-context/types";
+import { type Language } from "context/language-context/types";
 
 export const EN: Language = { locale: "en-US", language: "English", code: "en" };
 

@@ -3,8 +3,8 @@ import { showModal } from "store/modal";
 
 import { Button } from "components";
 
-import { TestModalProps } from "./components/test-modal/types";
-import { ModalProps } from "store/modal/types";
+import { type TestModalProps } from "./components/test-modal/types";
+import { type ModalProps } from "store/modal/types";
 
 export default {
   title: "Components/Modals",

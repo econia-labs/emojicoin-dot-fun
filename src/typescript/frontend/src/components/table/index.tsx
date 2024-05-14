@@ -1,6 +1,7 @@
 import styled, { css } from "styled-components";
-import { layout, LayoutProps, space, SpaceProps, typography, TypographyProps } from "styled-system";
-import { Flex, Text } from "components";
+import { layout, type LayoutProps, space, type SpaceProps, typography, type TypographyProps } from "styled-system";
+import { Flex } from "@/containers";
+import { Text } from "components/text";
 
 interface TdProps extends TypographyProps, SpaceProps, LayoutProps {}
 

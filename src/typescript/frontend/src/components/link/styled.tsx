@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import { layout, space } from "styled-system";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 import Text from "components/text";
 
-import { LinkProps } from "./types";
+import { type LinkProps } from "./types";
 
 export const StyledLink = styled(Text)<LinkProps>`
   display: flex;

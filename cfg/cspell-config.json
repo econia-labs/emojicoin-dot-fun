@@ -15,8 +15,7 @@
     }
   ],
   "ignorePaths": [
-    "/project-words.txt",
-    "../src/typescript/api/pnpm-lock.yaml"
+    "/project-words.txt"
   ],
   "overrides": [
     {

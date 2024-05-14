@@ -1,5 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ModalNames, ModalState, ShowModalProps } from "./types";
+"use client";
+
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { ModalNames, type ModalState, type ShowModalProps } from "./types";
 
 const initialState: ModalState<undefined> = {
   modalName: null,

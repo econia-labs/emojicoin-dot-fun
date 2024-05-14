@@ -1,6 +1,7 @@
-// Components + styling
-import { Text } from "components";
-import { Planet } from "components/svg";
+"use client";
+
+import { Text } from "components/text";
+import Planet from "components/svg/icons/Planet";
 import { StyledSliderWrapper, StyledClientsWrapper, StyledClientsWrapperIn, StyledClientsItem } from "./styled";
 
 const ClientsSlider: React.FC = () => {
@@ -16,7 +17,6 @@ const ClientsSlider: React.FC = () => {
                 <Text textScale="pixelHeading3" textTransform="uppercase" color={"econiaBlue"}>
                   {clientsLogo}
                 </Text>
-
                 <Planet />
               </StyledClientsItem>
             ),

@@ -1,27 +1,33 @@
+"use client";
+
 import React from "react";
-import { useLocation } from "react-router-dom";
-
 import { useMatchBreakpoints } from "hooks";
-import { useTranslation } from "context";
 
-import { Button, Container, Flex, FlexGap, Link } from "components";
-import { LogoIcon, CloseIcon } from "../svg";
-import { MenuItem, MobileMenu } from "./components";
+import Link from "components/link/component";
+import Button from "components/button";
+import { Flex, FlexGap, Container } from "@/containers";
+import LogoIcon from "../svg/icons/LogoIcon";
+import CloseIcon from "../svg/icons/Close";
+import MenuItem from "components/header/components/menu-item";
+import { MobileMenu } from "components/header/components/mobile-menu";
 import { StyledContainer, StyledClickItem, StyledMobileHeader } from "./styled";
 
 import { ROUTES } from "router/routes";
 import { NAVIGATE_LINKS } from "./constants";
 import { slideTopVariants } from "./animations";
 
-import { HeaderProps } from "./types";
+import { type HeaderProps } from "./types";
+import { useTranslation } from "context/language-context";
+
+import { usePathname } from 'next/navigation'
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
-  const { pathname } = useLocation();
   const { t } = useTranslation();
+    const pathname = usePathname()
 
-  const currentPath = pathname.split("/")[1];
-  const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
+    const currentPath = pathname.split("/")[1];
+    const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
 
   const walletHandler = () => {
     /* eslint-disable-next-line no-console */
@@ -67,8 +73,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
                   </Link>
                 );
               })}
-
-              <MenuItem title="05I34OT0ff9C" width="120px" onClick={walletHandler} />
+              <MenuItem title="0x2634...faf9" width="120px" onClick={walletHandler} />
             </FlexGap>
           )}
 
@@ -79,7 +84,6 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
           )}
         </Flex>
       </Container>
-
       <MobileMenu
         isOpen={isOpen}
         setIsOpen={setIsOpen}

@@ -1,7 +1,6 @@
-import { css, DefaultTheme } from "styled-components";
-
-import { ButtonProps, scales } from "./types";
-import { Svg } from "components/svg";
+import { css, type DefaultTheme } from "styled-components";
+import Svg from "components/svg/Svg";
+import { type ButtonProps, scales } from "./types";
 
 export interface ThemedProps extends ButtonProps {
   theme: DefaultTheme;

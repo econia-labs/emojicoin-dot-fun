@@ -1,8 +1,8 @@
-import { AxiosResponse, isAxiosError } from "axios";
+import { type AxiosResponse, isAxiosError } from "axios";
 import { toast } from "react-toastify";
 
 import { getInstance } from "./axios";
-import { ErrorResult } from "./types";
+import { type ErrorResult } from "./types";
 import { parseErrorFromBE } from "utils";
 
 import { replaceWithNewErrorMessages } from "./utils";

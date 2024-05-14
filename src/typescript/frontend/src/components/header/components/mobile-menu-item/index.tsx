@@ -3,10 +3,10 @@ import { useScramble } from "use-scramble";
 
 import { useTranslation } from "context";
 
-import { Text } from "components";
-import { Arrow } from "components/svg";
+import { Text } from "components/text";
+import Arrow from "components/svg/icons/Arrow";
 
-import { MobileMenuItemProps } from "./types";
+import { type MobileMenuItemProps } from "./types";
 import { StyledItemWrapper } from "./styled";
 
 const MobileMenuItem: React.FC<MobileMenuItemProps> = ({ title, onClick = () => {} }) => {

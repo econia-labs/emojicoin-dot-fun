@@ -1,4 +1,4 @@
-import { Config, system } from "styled-system";
+import { type Config, system } from "styled-system";
 
 const config: Config = {
   rotate: true,

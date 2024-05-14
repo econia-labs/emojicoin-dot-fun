@@ -11,7 +11,7 @@ div {
 h1,
 h2,
 p {
-  font-family: "Pixelar";
+  font-family: var(--font-pixelar);
 }
 
 .error-container {
@@ -35,30 +35,4 @@ p {
 .error-container__sub-title {
   font-size: 1.5rem;
   margin-bottom: 8px;
-}
-
-.error-container__button {
-  font-family: "Pixelar" !important;
-  border-radius: 8px;
-  font-weight: 900;
-  position: relative;
-  -webkit-box-align: center;
-  align-items: center;
-  cursor: pointer;
-  display: inline-flex;
-  font-family: inherit;
-  -webkit-box-pack: center;
-  justify-content: center;
-  outline: 0px;
-  transition: all 0.3s ease 0s;
-  width: fit-content;
-  padding: 9px 24px;
-  min-width: 100px;
-  font-size: 16px;
-  line-height: 22px;
-  background-color: rgb(107, 130, 224);
-  border: 1px solid rgb(107, 130, 224);
-  color: rgb(255, 255, 255);
-  margin-top: 12px;
-  margin-bottom: 12px;
 }

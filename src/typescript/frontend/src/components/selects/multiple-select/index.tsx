@@ -1,7 +1,10 @@
+"use client";
+
 import React, { useState } from "react";
 
-import { Button, Column } from "components";
-import { Arrow } from "components/svg";
+import Button from "components/button";
+import { Column } from "@/containers";
+import Arrow from "components/svg/icons/Arrow";
 import { Select } from "../select";
 import { StyledButtonsWrapper } from "./styled";
 
@@ -10,8 +13,8 @@ import { useTooltip } from "hooks";
 import { useThemeContext, useTranslation } from "context";
 import { getTooltipStyles } from "../theme";
 
-import { MultipleSelectProps, Option } from "../types";
-import { TooltipOptions } from "hooks/use-tooltip/types";
+import { type MultipleSelectProps, type Option } from "../types";
+import { type TooltipOptions } from "hooks/use-tooltip/types";
 
 const MultipleSelect: React.FC<MultipleSelectProps> = ({
   titleProps,

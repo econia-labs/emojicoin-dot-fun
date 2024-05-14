@@ -1,11 +1,11 @@
+"use client";
+
 import React, { useState } from "react";
-// Components + styling
-import { ResponsiveBox, Skeleton } from "components";
+import Skeleton from "components/skeleton";
+import { ResponsiveBox } from "components/layout/components/responsive-box";
 import { StyledImage } from "./styled";
-// Utils
 import { getFileNameFromSrc } from "utils";
-// Types
-import { ImageProps } from "./types";
+import { type ImageProps } from "./types";
 
 const Image: React.FC<ImageProps> = ({ src, width, alt, variant, animation, aspectRatio, ...props }) => {
   const [isLoading, setLoading] = useState(true);

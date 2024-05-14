@@ -1,13 +1,16 @@
+"use client";
+
 import React from "react";
 
-import { Text, Heading } from "components";
+import Heading from "components/heading";
+import { Text } from "components/text";
 import { StyledModalWrapper } from "../styled";
 import CloseModalWrapper from "../close-modal-wrapper";
 
 import { useAppDispatch, useAppSelector } from "store/store";
 import { hideModal } from "store/modal";
 
-import { TestModalProps } from "./types";
+import { type TestModalProps } from "./types";
 
 const TestModal: React.FC = () => {
   const { title } = useAppSelector(state => state.modal.props as unknown as TestModalProps);

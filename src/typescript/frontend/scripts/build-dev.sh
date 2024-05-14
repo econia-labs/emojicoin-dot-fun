@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Remove existing robots.txt if it exists
-if [ -f public/robots.txt ]; then
-	rm public/robots.txt
+if [ -f ../src/app/robots.txt ]; then
+	rm ../src/app/public/robots.txt
 fi
 
 # Copy development robots.txt
-cp public/robots.dev.txt public/robots.txt
+cp robots/robots.dev.txt ../src/app/robots.txt
 
 # Build the app
-npm run build
+pnpm run build

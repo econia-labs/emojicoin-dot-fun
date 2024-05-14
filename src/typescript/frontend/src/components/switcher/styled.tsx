@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { Scale } from "./types";
+import { type Scale } from "./types";
 
 import { styles } from "./theme";
 import { space } from "styled-system";

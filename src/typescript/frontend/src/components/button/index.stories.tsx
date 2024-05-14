@@ -1,6 +1,7 @@
 import React from "react";
 
-import { Button, Box, Row } from "components";
+import Button from "components/button";
+import { Box, Row } from "@/containers";
 import { variants, scales } from "./types";
 import { CloseIcon } from "components/svg";
 
