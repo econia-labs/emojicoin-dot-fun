@@ -18,7 +18,6 @@ module.exports = async function setup() {
 
     // This is not done in parallel as Inbox requires the local node to be up first
     const inbox = new Inbox();
-    globalThis.__INBOX__ = inbox;
     await inbox.run();
   }
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });

@@ -45,6 +45,8 @@ export class LocalNode {
       "--force-restart",
       "--assume-yes",
       "--with-indexer-api",
+      "--bind-to",
+      "0.0.0.0",
     ];
 
     const childProcess = spawn(cliCommand, cliArgs);
