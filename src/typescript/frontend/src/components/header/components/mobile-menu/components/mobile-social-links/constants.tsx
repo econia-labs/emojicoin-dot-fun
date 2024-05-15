@@ -6,5 +6,5 @@ import { LINKS } from "configs";
 export const SOCIAL_ICONS = [
   { icon: GitHubOutlineIcon, href: LINKS.github },
   { icon: TwitterOutlineIcon, href: LINKS.twitter },
-  { icon: PlanetOutline, href: LINKS.econialabs },
+  { icon: PlanetOutline, href: LINKS.econia_labs },
 ];
