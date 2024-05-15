@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# cspell:words colorama
-# cspell:words lightblack
-# cspell:words lightgreen
-# cspell:words lightred
-# cspell:words lightwhite
+# cspell:word colorama
+# cspell:word lightblack
+# cspell:word lightgreen
+# cspell:word lightred
+# cspell:word lightwhite
 import os
 import re
 import sys
@@ -80,11 +80,6 @@ def main():
         # Check the file name as a Path object against the regex pattern.
         just_file_name = file_path.name.rstrip(extension)
         if not re.match(regex, just_file_name):
-            print(rel_dir)
-            print(ignore_dirs)
-            print(rel_dir in ignore_dirs)
-            print(file_path.name)
-
             file_dir = file_path.parent
             colored_dir = Fore.LIGHTBLACK_EX + str(file_dir) + "/"
             colored_fp = Fore.LIGHTWHITE_EX + file_path.name

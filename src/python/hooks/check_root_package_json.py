@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# cspell:words colorama
-# cspell:words lightblack
+# cspell:word colorama
+# cspell:word lightblack
 import json
 import os
 import sys
@@ -49,6 +49,7 @@ def main(fix_version=False):
             root_package_json["packageManager"] = frontend_pnpm_version
             with open(root_package_json_path, "w") as f:
                 json.dump(root_package_json, f, indent=2)
+                _ = f.write("\n")
     else:
         if different_versions:
             ERROR_STRING = Fore.RED + "ERROR:" + Fore.RESET
