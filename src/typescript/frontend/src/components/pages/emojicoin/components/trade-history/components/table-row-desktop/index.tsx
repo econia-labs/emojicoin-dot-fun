@@ -21,7 +21,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
   return (
     <Tr>
-      <Td width="100px">
+      <Td width="12.5%">
         <Flex px="12px">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ref={targetRef}>
             {item.rankIcon}
@@ -30,7 +30,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="100px">
+      <Td width="12.5%">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.apt}
@@ -38,7 +38,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="100px">
+      <Td width="13%">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.emoji}
@@ -46,7 +46,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="100px">
+      <Td width="12.5%">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.type}
@@ -54,7 +54,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="100px">
+      <Td width="12.5%">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.date}

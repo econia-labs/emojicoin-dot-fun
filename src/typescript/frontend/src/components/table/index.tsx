@@ -62,14 +62,7 @@ export const Tr = styled.tr<TrProps>`
   border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
   display: block;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:first-child {
-    border-top: none;
-  }
+  width: 100%;
 
   &:hover {
     ${getBorderOnHover}
@@ -78,7 +71,25 @@ export const Tr = styled.tr<TrProps>`
   ${layout}
 `;
 
+export const TrWrapper = styled.div`
+  display: flex;
+  width: 100%;
+
+  &:last-child {
+    ${Tr} {
+      border-bottom: none;
+    }
+  }
+
+  &:first-child {
+    ${Tr} {
+      border-top: none;
+    }
+  }
+`;
+
 export const Td = styled.td<TdProps>`
+  display: inline-block;
   color: ${({ theme }) => theme.colors.lightGrey};
   padding: 7px;
   vertical-align: middle;

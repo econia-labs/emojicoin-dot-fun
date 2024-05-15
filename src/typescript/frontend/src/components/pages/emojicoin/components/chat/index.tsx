@@ -60,7 +60,6 @@ const Chat: React.FC = () => {
     autoFocusSearch: false,
   });
 
-  // const onKeyDownHandler = (e: KeyboardEvent) => {
   const onKeyDownHandler = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();

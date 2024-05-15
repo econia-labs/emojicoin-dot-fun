@@ -35,7 +35,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
   return (
     <Tr hover>
-      <Td p="7px 12px" width="130px">
+      <Td p="7px 12px" width="11.5%">
         <Flex justifyContent="start">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefPool}>
             {item.pool}
@@ -44,7 +44,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td p="7px 12px" width="26%">
+      <Td p="7px 12px" width="26.5%">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefAllTime}>
             {item.allTime} APT
@@ -53,7 +53,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td p="7px 12px" width="150px">
+      <Td p="7px 12px" width="18%">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefVol24}>
             {item.vol24} APT
@@ -62,7 +62,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td p="7px 12px" width="33%">
+      <Td p="7px 12px" width="15%">
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefTvl}>
             {item.tvl} APT
@@ -71,7 +71,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td p="7px 12px" width="130px">
+      <Td p="7px 12px" width="29%">
         <Flex justifyContent="end">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefApr}>
             {item.apr}%

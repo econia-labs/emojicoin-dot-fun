@@ -1,22 +1,22 @@
 export const HEADERS = [
   {
-    width: "100px",
+    width: "12.5%",
     text: "Rank",
   },
   {
-    width: "100px",
+    width: "12.5%",
     text: "Apt",
   },
   {
-    width: "100px",
+    width: "12.5%",
     text: "🖤",
   },
   {
-    width: "100px",
+    width: "12.5%",
     text: "Type",
   },
   {
-    width: "100px",
+    width: "12.5%",
     text: "Date",
   },
   {

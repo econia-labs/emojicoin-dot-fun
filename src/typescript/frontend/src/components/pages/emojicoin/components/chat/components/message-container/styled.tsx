@@ -21,8 +21,12 @@ export const StyledMessageWrapper = styled.div`
   flex-direction: column;
   margin-bottom: 11px;
   width: 100%;
-  max-width: 65%;
+  max-width: 160px;
   height: fit-content;
+
+  ${({ theme }) => theme.mediaQueries.tablet} {
+    max-width: 317px;
+  }
 `;
 
 export const StyledUserNameWrapper = styled.div`
