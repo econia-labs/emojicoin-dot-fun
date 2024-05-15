@@ -9,8 +9,6 @@ runs:
       node-version-file: '${{ env.TS_API_DIR }}/.node-version'
       registry-url: 'https://registry.npmjs.org'
   - uses: 'pnpm/action-setup@v2'
-    with:
-      version: '8.9.0'
   - run: |
       cd ${{ env.TS_API_DIR }} &&
       pnpm install --frozen-lockfile && pnpm _fmt --check
