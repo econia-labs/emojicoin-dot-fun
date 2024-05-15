@@ -17,14 +17,15 @@ export default function StyledComponentsRegistry({ children }: { children: React
     return <>{styles}</>;
   });
 
-  if (typeof window !== "undefined") return <>{children}</>;
-
   const shouldForwardProp = (propName: string, target: StyledTarget<"web">) => {
     return typeof target === "string" ? isPropValid(propName) : true;
   };
 
   return (
-    <StyleSheetManager sheet={styledComponentsStyleSheet.instance} shouldForwardProp={shouldForwardProp}>
+    <StyleSheetManager
+      sheet={typeof window === "undefined" ? styledComponentsStyleSheet.instance : undefined}
+      shouldForwardProp={shouldForwardProp}
+    >
       {children}
     </StyleSheetManager>
   );

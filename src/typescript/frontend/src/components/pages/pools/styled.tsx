@@ -8,16 +8,32 @@ export const StyledPoolsPage = styled.div`
   align-items: center;
   padding-top: 120px;
   flex-grow: 1;
-  max-height: calc(100vh - 200px);
+
+  ${({ theme }) => theme.mediaQueries.laptopL} {
+    max-height: calc(100vh - 200px);
+  }
 `;
 
 export const StyledWrapper = styled.div`
   display: flex;
-  width: 100%;
+  flex-direction: column;
   height: 100%;
   max-width: 1362px;
   border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  margin-left: 10px;
+  margin-right: 10px;
+
+  ${({ theme }) => theme.mediaQueries.tablet} {
+    margin-left: 30px;
+    margin-right: 30px;
+  }
+
+  ${({ theme }) => theme.mediaQueries.laptopL} {
+    flex-direction: row;
+    margin-left: 0;
+    margin-right: 0;
+  }
 `;
 
 export const StyledHeader = styled.div`
@@ -27,6 +43,18 @@ export const StyledHeader = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
   justify-content: center;
+  padding-left: 10px;
+  padding-right: 10px;
+
+  ${({ theme }) => theme.mediaQueries.tablet} {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
+  ${({ theme }) => theme.mediaQueries.laptopL} {
+    padding-left: 0;
+    padding-right: 0;
+  }
 `;
 
 export const StyledHeaderInner = styled.div`
@@ -41,18 +69,30 @@ export const StyledHeaderInner = styled.div`
 
 export const StyledInner = styled(Flex)`
   position: relative;
-  &:last-child {
-    border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  }
 
   &:before {
     content: "";
     display: block;
     position: absolute;
-    width: 100vw;
+    width: 120vw;
     background-color: ${({ theme }) => theme.colors.darkGrey};
     height: 1px;
-    transform: translateX(-50%);
-    bottom: 0;
+    transform: translateX(-10%);
+    bottom: -1px;
   }
+
+  ${({ theme }) => theme.mediaQueries.laptopL} {
+    &:last-child {
+      border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
+    }
+  }
+`;
+
+export const StyledSubHeader = styled.div`
+  display: flex;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 100%;
+  height: 43px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
 `;
