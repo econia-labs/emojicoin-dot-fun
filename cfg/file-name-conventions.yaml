@@ -13,7 +13,11 @@ filetypes:
   .test.ts: 'kebab-case'
   .toml: 'PascalCase'
   .ts: 'kebab-case'
+  .tsx: '*'
   .yaml: 'kebab-case'
+ignore_directories:
+- 'src/typescript/frontend/public/fonts'
+- 'src/typescript/frontend/public/locales'
 ignore_files:
 - '.env'
 - '.env.example'
@@ -24,5 +28,7 @@ ignore_files:
 - '.node-version'
 - '.prettierignore'
 - '.prettierrc.cjs'
+- '.prettierrc.js'
 - 'pyproject.toml'
+- 'Cargo.lock'
 ...

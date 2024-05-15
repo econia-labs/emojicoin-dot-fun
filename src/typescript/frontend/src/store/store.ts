@@ -4,7 +4,7 @@ import { type TypedUseSelectorHook, useDispatch, useSelector } from "react-redux
 // import { createLogger } from "redux-logger";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 
-import rootReducer from "./rootReducer";
+import rootReducer from "./root-reducer";
 
 const middleware =
   process.env.NODE_ENV === "development"

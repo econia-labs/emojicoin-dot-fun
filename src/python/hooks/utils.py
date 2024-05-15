@@ -1,5 +1,6 @@
 # cspell:words zsplit
 import os
+from pathlib import Path
 
 from identify import identify
 from pre_commit import git as precommit_git
@@ -14,8 +15,15 @@ def is_non_empty_string(s: str):
     return len(s) > 0
 
 
+def get_git_root_relative() -> str:
+    # Remove `.git` from the file path.
+    parent = Path((precommit_git.get_git_dir())).parent
+
+    return str(parent.resolve())
+
+
 def get_git_root() -> str:
-    return precommit_git.get_root()
+    return str(Path(precommit_git.get_root()).resolve())
 
 
 def git_ls_files(abs_paths=False) -> list[str]:

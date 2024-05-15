@@ -46,10 +46,12 @@ def main():
     config = load_config()
     default_case = config.get("default", "snake_case")
     filetypes = config.get("filetypes", {})
+    rel_root = utils.get_git_root_relative()
     if len(filetypes) == 0:
         warning_msg = f"No filetypes defined in {config_path}"
         print(WARNING_STRING, warning_msg)
     ignore_files = set(config.get("ignore_files", {}))
+    ignore_dirs = set(config.get("ignore_directories", {}))
 
     # Validate the user supplied naming conventions against known conventions.
     user_supplied_cases = set(filetypes.values()).union({default_case})
@@ -70,12 +72,19 @@ def main():
         case = filetypes.get(extension, default_case)
         regex = CASE_REGEXES.get(case, default_case)
 
-        if file_path.name in ignore_files:
+        rel_dir = file_path.parent.relative_to(rel_root)
+        is_ignored_dir = str(rel_dir) in ignore_dirs
+        if file_path.name in ignore_files or is_ignored_dir:
             continue
 
         # Check the file name as a Path object against the regex pattern.
         just_file_name = file_path.name.rstrip(extension)
         if not re.match(regex, just_file_name):
+            print(rel_dir)
+            print(ignore_dirs)
+            print(rel_dir in ignore_dirs)
+            print(file_path.name)
+
             file_dir = file_path.parent
             colored_dir = Fore.LIGHTBLACK_EX + str(file_dir) + "/"
             colored_fp = Fore.LIGHTWHITE_EX + file_path.name
