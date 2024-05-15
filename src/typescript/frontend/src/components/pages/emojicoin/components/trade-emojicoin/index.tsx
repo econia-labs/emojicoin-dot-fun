@@ -21,7 +21,7 @@ const TradeEmojicoin: React.FC = () => {
 
   return (
     <Column width="100%" maxWidth="414px" height="100%" justifyContent="center">
-      <Text textScale="heading1" color="white" textTransform="uppercase" pb="17px">
+      <Text textScale={{ _: "heading2", tablet: "heading1" }} color="white" textTransform="uppercase" pb="17px">
         {t("Trade Emojicoin")}
       </Text>
 
@@ -37,7 +37,7 @@ const TradeEmojicoin: React.FC = () => {
             </InputGroup>
           </Column>
 
-          <Text textScale="pixelHeading3" color="lightGrey">
+          <Text textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }} color="lightGrey">
             APT
           </Text>
         </StyledInputWrapper>

@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import { isEqual } from "lodash";
 
 import { TableRowDesktop, TableHeader } from "./components";
-import { Table, Th, ThInner, HeaderTr, TBody } from "components";
+import { Table, Th, ThInner, HeaderTr, TBody, TrWrapper } from "components";
 import { StyledPoolsWrapper } from "./styled";
+import { Flex } from "@/containers";
 
 import { HEADERS, DATA } from "./constants";
 
@@ -30,18 +31,22 @@ const PoolsTable: React.FC = () => {
       <Table>
         <thead>
           <HeaderTr>
-            {HEADERS.map((th, index) => (
-              <Th width={th.width} key={index}>
-                <ThInner>
-                  <TableHeader item={th} isLast={HEADERS.length - 1 === index} sortData={sortData} />
-                </ThInner>
-              </Th>
-            ))}
+            <Flex>
+              {HEADERS.map((th, index) => (
+                <Th width={th.width} key={index}>
+                  <ThInner>
+                    <TableHeader item={th} isLast={HEADERS.length - 1 === index} sortData={sortData} />
+                  </ThInner>
+                </Th>
+              ))}
+            </Flex>
           </HeaderTr>
         </thead>
         <TBody height="calc(100vh - 353px)">
           {dataMock.map((item, index) => (
-            <TableRowDesktop key={index} item={item} />
+            <TrWrapper key={index}>
+              <TableRowDesktop item={item} />
+            </TrWrapper>
           ))}
         </TBody>
       </Table>

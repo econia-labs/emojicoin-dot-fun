@@ -1,6 +1,6 @@
 export const HEADERS = [
   {
-    width: "130px",
+    width: "12%",
     text: "Pool",
   },
   {
@@ -9,17 +9,17 @@ export const HEADERS = [
     sortBy: "allTime",
   },
   {
-    width: "150px",
+    width: "18%",
     text: "24h vol",
     sortBy: "vol24",
   },
   {
-    width: "32%",
+    width: "15%",
     text: "Tvl",
     sortBy: "tvl",
   },
   {
-    width: "130px",
+    width: "29%",
     text: "Apr",
     sortBy: "apr",
   },
