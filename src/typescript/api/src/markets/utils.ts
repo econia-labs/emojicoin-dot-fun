@@ -76,3 +76,21 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
 
   return { marketAddress, emojicoin, emojicoinLP };
 };
+
+export const divideWithPrecision = (args: {
+  a: bigint | number;
+  b: bigint | number;
+  decimals?: number;
+}): number => {
+  const decimals = args.decimals ?? 3;
+  const a = BigInt(args.a);
+  const b = BigInt(args.b);
+  const f = BigInt(10 ** decimals);
+  return Number((a * f) / b) / Number(f);
+};
+
+export const truncateAddress = (input: AccountAddressInput): string => {
+  const t = AccountAddress.from(input);
+  const s = t.toString();
+  return `${s.substring(0, 6)}...${s.substring(s.length - 4, s.length)}`;
+};

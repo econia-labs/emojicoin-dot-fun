@@ -6,9 +6,21 @@ import {
   type HexInput,
   DeriveScheme,
   type AptosConfig,
+  type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./consts";
+import {
+  ChatEvent,
+  Event,
+  type Events,
+  GlobalStateEvent,
+  LiquidityEvent,
+  MarketRegistrationEvent,
+  PeriodicStateEvent,
+  StateEvent,
+  SwapEvent,
+} from "./events";
 
 /**
  * Sleep the current thread for the given amount of time
@@ -74,4 +86,48 @@ export async function getRegistryAddress(args: {
     resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::RegistryAddress`,
   });
   return registryAddressResource.registry_address;
+}
+
+export function getEvents(response: UserTransactionResponse): Events {
+  const events: Events = {
+    swapEvents: [],
+    chatEvents: [],
+    marketRegistrationEvents: [],
+    periodicStateEvents: [],
+    stateEvents: [],
+    globalStateEvents: [],
+    liquidityEvents: [],
+    events: [],
+  };
+
+  response.events.forEach((eventData) => {
+    const event = Event.fromJSON(eventData);
+    switch (event.type.toString()) {
+      case SwapEvent.STRUCT_STRING:
+        events.swapEvents.push(event as SwapEvent);
+        break;
+      case ChatEvent.STRUCT_STRING:
+        events.chatEvents.push(event as ChatEvent);
+        break;
+      case MarketRegistrationEvent.STRUCT_STRING:
+        events.marketRegistrationEvents.push(event as MarketRegistrationEvent);
+        break;
+      case PeriodicStateEvent.STRUCT_STRING:
+        events.periodicStateEvents.push(event as PeriodicStateEvent);
+        break;
+      case StateEvent.STRUCT_STRING:
+        events.stateEvents.push(event as StateEvent);
+        break;
+      case GlobalStateEvent.STRUCT_STRING:
+        events.globalStateEvents.push(event as GlobalStateEvent);
+        break;
+      case LiquidityEvent.STRUCT_STRING:
+        events.liquidityEvents.push(event as LiquidityEvent);
+        break;
+      default:
+        events.events.push(event as Event);
+        break;
+    }
+  });
+  return events;
 }

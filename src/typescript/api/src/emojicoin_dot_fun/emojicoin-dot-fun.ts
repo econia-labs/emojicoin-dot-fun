@@ -142,15 +142,15 @@ export class Chat extends EntryFunctionPayloadBuilder {
 }
 
 export type ProvideLiquidityPayloadMoveArguments = {
-  provider: AccountAddress;
+  marketAddress: AccountAddress;
   quoteAmount: U64;
 };
 
 /**
  *```
  *  public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
- *     market_address: &signer,
- *     provider: address,
+ *     provider: &signer,
+ *     market_address: address,
  *     quote_amount: u64,
  *  )
  *```
@@ -174,18 +174,18 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    marketAddress: AccountAddressInput; // &signer
-    provider: AccountAddressInput; // address
+    provider: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
     quoteAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
     super();
-    const { marketAddress, provider, quoteAmount, typeTags, feePayer } = args;
-    this.primarySender = AccountAddress.from(marketAddress);
+    const { provider, marketAddress, quoteAmount, typeTags, feePayer } = args;
+    this.primarySender = AccountAddress.from(provider);
 
     this.args = {
-      provider: AccountAddress.from(provider),
+      marketAddress: AccountAddress.from(marketAddress),
       quoteAmount: new U64(quoteAmount),
     };
     this.typeTags = typeTags.map((typeTag) =>
@@ -196,8 +196,8 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
 
   static async builder(args: {
     aptosConfig: AptosConfig;
-    marketAddress: AccountAddressInput; // &signer
-    provider: AccountAddressInput; // address
+    provider: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
     quoteAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
@@ -218,20 +218,20 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
 
   static async submit(args: {
     aptosConfig: AptosConfig;
-    marketAddress: Account; // &signer
-    provider: AccountAddressInput; // address
+    provider: Account; // &signer
+    marketAddress: AccountAddressInput; // address
     quoteAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
     waitForTransactionOptions?: WaitForTransactionOptions;
   }): Promise<UserTransactionResponse> {
-    const { marketAddress: primarySigner, waitForTransactionOptions, feePayer } = args;
+    const { provider: primarySigner, waitForTransactionOptions, feePayer } = args;
 
     const transactionBuilder = await ProvideLiquidity.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
-      marketAddress: primarySigner.accountAddress,
+      provider: primarySigner.accountAddress,
     });
     const response = await transactionBuilder.submit({
       primarySigner,
@@ -338,15 +338,15 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
 }
 
 export type RemoveLiquidityPayloadMoveArguments = {
-  provider: AccountAddress;
+  marketAddress: AccountAddress;
   lpCoinAmount: U64;
 };
 
 /**
  *```
  *  public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
- *     market_address: &signer,
- *     provider: address,
+ *     provider: &signer,
+ *     market_address: address,
  *     lp_coin_amount: u64,
  *  )
  *```
@@ -370,18 +370,18 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    marketAddress: AccountAddressInput; // &signer
-    provider: AccountAddressInput; // address
+    provider: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
     lpCoinAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
     super();
-    const { marketAddress, provider, lpCoinAmount, typeTags, feePayer } = args;
-    this.primarySender = AccountAddress.from(marketAddress);
+    const { provider, marketAddress, lpCoinAmount, typeTags, feePayer } = args;
+    this.primarySender = AccountAddress.from(provider);
 
     this.args = {
-      provider: AccountAddress.from(provider),
+      marketAddress: AccountAddress.from(marketAddress),
       lpCoinAmount: new U64(lpCoinAmount),
     };
     this.typeTags = typeTags.map((typeTag) =>
@@ -392,8 +392,8 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
 
   static async builder(args: {
     aptosConfig: AptosConfig;
-    marketAddress: AccountAddressInput; // &signer
-    provider: AccountAddressInput; // address
+    provider: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
     lpCoinAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
@@ -414,20 +414,20 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
 
   static async submit(args: {
     aptosConfig: AptosConfig;
-    marketAddress: Account; // &signer
-    provider: AccountAddressInput; // address
+    provider: Account; // &signer
+    marketAddress: AccountAddressInput; // address
     lpCoinAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
     waitForTransactionOptions?: WaitForTransactionOptions;
   }): Promise<UserTransactionResponse> {
-    const { marketAddress: primarySigner, waitForTransactionOptions, feePayer } = args;
+    const { provider: primarySigner, waitForTransactionOptions, feePayer } = args;
 
     const transactionBuilder = await RemoveLiquidity.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
-      marketAddress: primarySigner.accountAddress,
+      provider: primarySigner.accountAddress,
     });
     const response = await transactionBuilder.submit({
       primarySigner,
@@ -439,7 +439,7 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
 }
 
 export type SwapPayloadMoveArguments = {
-  swapper: AccountAddress;
+  marketAddress: AccountAddress;
   inputAmount: U64;
   isSell: Bool;
   integrator: AccountAddress;
@@ -449,8 +449,8 @@ export type SwapPayloadMoveArguments = {
 /**
  *```
  *  public entry fun swap<Emojicoin, EmojicoinLP>(
- *     market_address: &signer,
- *     swapper: address,
+ *     swapper: &signer,
+ *     market_address: address,
  *     input_amount: u64,
  *     is_sell: bool,
  *     integrator: address,
@@ -477,8 +477,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
   public readonly feePayer?: AccountAddress;
 
   private constructor(args: {
-    marketAddress: AccountAddressInput; // &signer
-    swapper: AccountAddressInput; // address
+    swapper: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
@@ -488,8 +488,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
   }) {
     super();
     const {
-      marketAddress,
       swapper,
+      marketAddress,
       inputAmount,
       isSell,
       integrator,
@@ -497,10 +497,10 @@ export class Swap extends EntryFunctionPayloadBuilder {
       typeTags,
       feePayer,
     } = args;
-    this.primarySender = AccountAddress.from(marketAddress);
+    this.primarySender = AccountAddress.from(swapper);
 
     this.args = {
-      swapper: AccountAddress.from(swapper),
+      marketAddress: AccountAddress.from(marketAddress),
       inputAmount: new U64(inputAmount),
       isSell: new Bool(isSell),
       integrator: AccountAddress.from(integrator),
@@ -514,8 +514,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
 
   static async builder(args: {
     aptosConfig: AptosConfig;
-    marketAddress: AccountAddressInput; // &signer
-    swapper: AccountAddressInput; // address
+    swapper: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
@@ -539,8 +539,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
 
   static async submit(args: {
     aptosConfig: AptosConfig;
-    marketAddress: Account; // &signer
-    swapper: AccountAddressInput; // address
+    swapper: Account; // &signer
+    marketAddress: AccountAddressInput; // address
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
@@ -550,12 +550,12 @@ export class Swap extends EntryFunctionPayloadBuilder {
     options?: InputGenerateTransactionOptions;
     waitForTransactionOptions?: WaitForTransactionOptions;
   }): Promise<UserTransactionResponse> {
-    const { marketAddress: primarySigner, waitForTransactionOptions, feePayer } = args;
+    const { swapper: primarySigner, waitForTransactionOptions, feePayer } = args;
 
     const transactionBuilder = await Swap.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
-      marketAddress: primarySigner.accountAddress,
+      swapper: primarySigner.accountAddress,
     });
     const response = await transactionBuilder.submit({
       primarySigner,

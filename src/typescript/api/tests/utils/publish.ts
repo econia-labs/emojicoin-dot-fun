@@ -110,11 +110,16 @@ export async function publishForTest(pk: string): Promise<PublishPackageResult> 
     privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
   });
 
-  await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
-  await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
-  await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
-  await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
+  let publisherBalance = await aptos.account
+    .getAccountAPTAmount({ accountAddress: publisher.accountAddress })
+    .catch((_) => 0);
 
+  const APT_REQUIRED_FOR_TESTS = 4;
+  while (publisherBalance < APT_REQUIRED_FOR_TESTS * ONE_APT) {
+    /* eslint-disable-next-line no-await-in-loop */
+    await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
+    publisherBalance += ONE_APT;
+  }
   const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
   const packageName = moduleName;
   return publishPackage({

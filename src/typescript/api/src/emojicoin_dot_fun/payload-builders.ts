@@ -112,12 +112,12 @@ export class EntryFunctionTransactionBuilder {
       additionalSignersAuthenticators: secondarySendersAuthenticators ?? [],
     });
 
-    const userTransactionResponse = await this.aptos.waitForTransaction({
+    const userTransactionResponse = (await this.aptos.waitForTransaction({
       transactionHash: pendingTransaction.hash,
       options,
-    });
+    })) as UserTransactionResponse;
 
-    return userTransactionResponse as UserTransactionResponse;
+    return userTransactionResponse;
   }
 
   /**
@@ -232,7 +232,7 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
       payload: entryFunction,
       options,
     });
-    return viewRequest;
+    return viewRequest as T;
   }
 
   argsToArray(): Array<EntryFunctionArgumentTypes> {

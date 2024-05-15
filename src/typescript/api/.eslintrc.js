@@ -17,7 +17,7 @@ module.exports = {
   rules: {
     quotes: ["error", "double"],
     "max-len": ["error", 100],
-    "import/extensions": ["error", "never"],
+    "import/extensions": "off",
     "import/no-commonjs": ["error", { allowRequire: false, allowPrimitiveModules: false }],
     "import/no-extraneous-dependencies": [
       "error",
@@ -46,7 +46,7 @@ module.exports = {
       {
         missingExports: true,
         unusedExports: true,
-        ignoreExports: ["tests/**/*", "**/index.ts", "src/emojicoin_dot_fun/types.ts"],
+        ignoreExports: ["tests/**/*", "**/index.ts"],
       },
     ],
     "@typescript-eslint/consistent-type-imports": [
