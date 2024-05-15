@@ -25,6 +25,28 @@ export const HEADERS = [
   },
 ];
 
+export const MOBILE_HEADERS = [
+  {
+    width: "25%",
+    text: "Pool",
+  },
+  {
+    width: "30%",
+    text: "All-time vol",
+    sortBy: "allTime",
+  },
+  {
+    width: "25%",
+    text: "Tvl",
+    sortBy: "tvl",
+  },
+  {
+    width: "20%",
+    text: "Apr",
+    sortBy: "apr",
+  },
+];
+
 export const DATA = [
   {
     pool: "🖤",

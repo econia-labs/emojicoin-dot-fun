@@ -2,6 +2,7 @@ import React from "react";
 import { useScramble } from "use-scramble";
 
 import { useTranslation } from "context";
+import { useMatchBreakpoints } from "hooks";
 
 import { FlexGap, Flex } from "@/containers";
 import { Text } from "components/text";
@@ -13,6 +14,7 @@ import { type DataType } from "../../types";
 
 const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => {
   const { t } = useTranslation();
+  const { isMobile } = useMatchBreakpoints();
 
   const { ref, replay } = useScramble({
     text: `${t(item.text)}`,
@@ -41,11 +43,11 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => 
         >
           {t(item.text)}
         </Text>
-        {item.sortBy && (
+        {item.sortBy && !isMobile ? (
           <Flex my="-3px">
             <Arrows width="15px" color="econiaBlue" />
           </Flex>
-        )}
+        ) : null}
       </FlexGap>
     </Flex>
   );

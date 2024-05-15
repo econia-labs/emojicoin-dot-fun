@@ -20,7 +20,7 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2
     <FlexGap gap="12px" width="fit-content">
       <Flex cursor="pointer">
         <Text
-          textScale="pixelHeading3"
+          textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
           textTransform="uppercase"
           color={isActive ? "lightGrey" : "darkGrey"}
           onClick={clickHandler}
@@ -31,7 +31,7 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2
 
       <Flex cursor="pointer">
         <Text
-          textScale="pixelHeading3"
+          textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
           textTransform="uppercase"
           color={isActive ? "darkGrey" : "lightGrey"}
           onClick={clickHandler}

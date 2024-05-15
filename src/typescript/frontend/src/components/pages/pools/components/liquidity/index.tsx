@@ -14,7 +14,7 @@ const Liquidity: React.FC = () => {
   const { theme } = useThemeContext();
 
   return (
-    <Flex width="100%" justifyContent="center">
+    <Flex width="100%" justifyContent="center" p="64px 33px">
       <Column width="100%" maxWidth="414px" justifyContent="center">
         <Text textScale="heading1" textTransform="uppercase" mb="16px">
           {t("Add liquidity")}
@@ -22,7 +22,7 @@ const Liquidity: React.FC = () => {
 
         <StyledAddLiquidityWrapper>
           <Flex p="7px 20px">
-            <InputGroup isShowError={false} height="22px" scale="sm">
+            <InputGroup isShowError={false} height="22px" scale="sm" pt="6px">
               <InputNumeric borderColor="transparent" p="0px !important" onUserInput={() => {}} />
             </InputGroup>
 
@@ -32,7 +32,7 @@ const Liquidity: React.FC = () => {
           </Flex>
 
           <Flex p="7px 20px" borderTop={`1px solid ${theme.colors.darkGrey}`}>
-            <InputGroup isShowError={false} height="22px" scale="sm">
+            <InputGroup isShowError={false} height="22px" scale="sm" pt="6px">
               <InputNumeric borderColor="transparent" p="0px !important" onUserInput={() => {}} />
             </InputGroup>
 
