@@ -114,18 +114,6 @@ export class Event {
     return new Event(event);
   }
 
-  // [util.inspect.custom](depth: number, options: util.InspectOptionsStylized): string {
-  //   const newOptions = {
-  //     ...options,
-  //     depth: null,
-  //     colors: true,
-  //   };
-  //   let res = '';
-  //   res += 'type: ' + newOptions.stylize(this.type.toString(), 'special') + '\n';
-  //   res += 'data: ' + util.inspect({ ...this.data }, newOptions) + '\n';
-  //   return res;
-  // }
-
   toJSON(): any {
     const d: Record<string, any> = {};
     Object.keys(this.data).forEach((field) => {
@@ -531,6 +519,7 @@ export class LiquidityEvent extends Event {
   LiquidityEvent,
 ].forEach((e) => EventTypeFactoryMap.set(knownEventTypeTagString(e), e.from));
 
+// To pretty print Aptos SDK classes, we can update the object prototype's inspect method.
 const updateInspect = (obj: any, styleType: util.Style): void => {
   Object.setPrototypeOf(obj.prototype, {
     [util.inspect.custom](_: number, options: util.InspectOptionsStylized): string {

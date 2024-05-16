@@ -12,13 +12,6 @@ import { CandlestickResolution } from "../emojicoin_dot_fun/consts";
 /* eslint-disable-next-line */
 export const getPeriodicStateEvents = ({ after = new Date() }: { after: Date }) => {};
 
-// const postgrest = new PostgrestClient(INBOX_URL);
-
-// // Wait to make sure events were processed and saved by Inbox.
-// await sleep(1000);
-// const res = await postgrest.from("inbox_events").select("type");
-// expect(res.data?.length).toBeGreaterThan(0);
-
 export const getAllMarkets = async ({
   inboxUrl = INBOX_URL,
   limit = LIMIT,
