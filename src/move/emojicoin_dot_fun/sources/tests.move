@@ -2510,8 +2510,9 @@
         let (base, quote) = unpack_reserves(cpamm_real_reserves);
         let cpamm_real_reserves = MockReserves { base, quote };
 
-        // Declare new amount of quote to provide.
-        let quote_amount = SIMPLE_BUY_INPUT_AMOUNT / 10;
+        // Declare an arbitrary amount of quote to provide: a fraction of the amount of quote
+        // required to exit the bonding curve.
+        let quote_amount = get_QUOTE_REAL_CEILING() / 10;
 
         // Get base amount, for truncation present during proportion calculation.
         let proportion_numerator =
@@ -2520,7 +2521,12 @@
         assert!(proportion_numerator % proportion_denominator != 0, 0);
         let base_amount = ((proportion_numerator / proportion_denominator) as u64) + 1;
 
-        // Determine amount of liquidity tokens provided.
+        // Determine amount of liquidity provider coins provided, such that the proportion of new
+        // LP coins to preexisting LP coins is the same as the proportion of quote input to
+        // preexisting locked quote:
+        //
+        // l_out / l_old = q_in / q_old
+        // l_out = q_in * l_old / q_old
         let lp_coin_amount = ((
             (quote_amount as u128) * (get_LP_TOKENS_INITIAL() as u128) /
             (cpamm_real_reserves.quote as u128)
