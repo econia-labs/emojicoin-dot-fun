@@ -97,6 +97,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_NOT_SUPPORTED_CHAT_EMOJI: u64 = 11;
     /// The constructed chat message exceeds the maximum length.
     const E_CHAT_MESSAGE_TOO_LONG: u64 = 12;
+    /// The chat message is empty.
+    const E_CHAT_MESSAGE_EMPTY: u64 = 13;
+    /// The given emoji index is out of bounds.
+    const E_INVALID_EMOJI_INDEX: u64 = 14;
 
     struct CumulativeStats has copy, drop, store {
         base_volume: u128,
@@ -371,11 +375,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         emoji_indices_sequence: vector<u8>, // Sequence of indices used to construct a chat message.
     ) acquires Market, Registry, RegistryAddress {
 
-        assert!(
-            vector::length(&emoji_indices_sequence) <= MAX_CHAT_MESSAGE_LENGTH,
-            E_CHAT_MESSAGE_TOO_LONG,
-        );
-
         // Mutably borrow market and check its coin types.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         ensure_coins_initialized<Emojicoin, EmojicoinLP>(
@@ -384,16 +383,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_address,
         );
 
-        // Verify all emoji bytes are supported as chat emojis.
-        assert!(
-            vector::all(&emoji_bytes, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }),
-            E_NOT_SUPPORTED_CHAT_EMOJI,
-        );
+        // Verify chat message length.
+        let message_length = vector::length(&emoji_indices_sequence);
+        assert!(message_length <= MAX_CHAT_MESSAGE_LENGTH, E_CHAT_MESSAGE_TOO_LONG);
+        assert!(message_length > 0, E_CHAT_MESSAGE_EMPTY);
 
-        // Construct the chat message from the emoji indices.
+        // Construct the chat message from the emoji indices, checking for well-formedness.
         let message: String = string::utf8(b"");
+        let n_emojis = vector::length(&emoji_bytes);
         vector::for_each(emoji_indices_sequence, |idx| {
+            assert!((idx as u64) < n_emojis, E_INVALID_EMOJI_INDEX);
             let emoji = *vector::borrow(&emoji_bytes, (idx as u64));
+            assert!(is_a_supported_chat_emoji(emoji), E_NOT_SUPPORTED_CHAT_EMOJI);
             string::append_utf8(&mut message, emoji);
         });
 

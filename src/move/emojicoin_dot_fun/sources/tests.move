@@ -2310,6 +2310,23 @@
     }
 
     #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_CHAT_MESSAGE_EMPTY,
+        location = emojicoin_dot_fun
+    )] fun chat_message_empty() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            vector<vector<u8>> [
+                x"f09f98b7", // Cat face with tears of joy.
+            ],
+            vector[],
+        );
+    }
+
+    #[test, expected_failure(
         abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NOT_SUPPORTED_CHAT_EMOJI,
         location = emojicoin_dot_fun
     )] fun chat_message_invalid_emoji() {
@@ -2323,7 +2340,24 @@
                 x"f09f98b7", // Cat face with tears of joy.
                 x"f09f", // Invalid emoji.
             ],
-            vector[ 0, 1],
+            vector[0, 1],
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_INVALID_EMOJI_INDEX,
+        location = emojicoin_dot_fun
+    )] fun chat_message_invalid_emoji_index() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            vector<vector<u8>> [
+                x"f09f98b7", // Cat face with tears of joy.
+            ],
+            vector[1],
         );
     }
 
