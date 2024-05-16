@@ -2,6 +2,7 @@
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.13.0",
     "@noble/hashes": "^1.4.0",
+    "@supabase/postgrest-js": "^1.15.2",
     "find-git-root": "^1.0.4"
   },
   "description": "TypeScript SDK for Econia's Emojicoin Dot Fun",

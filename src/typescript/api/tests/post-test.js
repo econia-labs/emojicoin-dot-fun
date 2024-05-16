@@ -1,4 +1,6 @@
 require("dotenv").config();
+let inbox = require("./utils/inbox.ts");
+
 module.exports = async function () {
   // Check if the current local node process is
   // from within this node testing environment
@@ -8,5 +10,8 @@ module.exports = async function () {
     // that weren't stopped in our tests, we kill all the descendent processes
     // of the node process, including the node process itself
     aptosNode.stop();
+
+    await inbox.Inbox.stop();
+    await inbox.Inbox.clearState();
   }
 };

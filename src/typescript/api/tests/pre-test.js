@@ -3,6 +3,7 @@ const { Account, Hex, Ed25519PrivateKey } = require("@aptos-labs/ts-sdk");
 const fs = require("fs");
 const path = require("path");
 const {
+  Inbox,
   LocalNode,
   publishForTest,
   PK_PATH,
@@ -14,6 +15,10 @@ module.exports = async function setup() {
     const localNode = new LocalNode();
     globalThis.__LOCAL_NODE__ = localNode;
     await localNode.run();
+
+    // This is not done in parallel as Inbox requires the local node to be up first
+    const inbox = new Inbox();
+    await inbox.run();
   }
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
   fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });

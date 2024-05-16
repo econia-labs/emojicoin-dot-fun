@@ -5,6 +5,7 @@ barthelemy
 bento
 blackpaper
 bouvet
+buildx
 burkina
 caicos
 clamm
@@ -37,11 +38,14 @@ mayen
 melilla
 merperson
 moai
+mybuilder
 nazar
 nohup
 octa
 oden
 permissionless
+postg
+postgrest
 precommit
 presale
 rica
@@ -50,6 +54,7 @@ sint
 struct
 structs
 subdir
+supabase
 supervillain
 tanabata
 tokelau

@@ -1,0 +1,3 @@
+[submodule "src/inbox"]
+	path = src/inbox
+	url = git@github.com:econia-labs/inbox.git

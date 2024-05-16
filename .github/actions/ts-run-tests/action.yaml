@@ -22,6 +22,7 @@ runs:
       # This is important for ensuring that any temporary directories are
       # created in a location that actually supports mounting.
       # See here: https://stackoverflow.com/a/76523941/3846032.
+      INBOX_URL: 'http://localhost:3000'
       TMPDIR: '${{ runner.temp }}'
     name: 'pnpm-test'
     uses: 'nick-fields/retry@7f8f3d9f0f62fe5925341be21c2e8314fd4f7c7c'
