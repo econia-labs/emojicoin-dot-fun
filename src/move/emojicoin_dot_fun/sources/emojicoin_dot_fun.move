@@ -418,6 +418,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             &mut global_stats_ref_mut.cumulative_chat_messages;
         aggregator_v2::try_add(global_cumulative_chat_messages_ref_mut, 1);
 
+        // Update periodic state trackers.
+        vector::for_each_mut(&mut market_ref_mut.periodic_state_trackers, |e| {
+            // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
+            let tracker_ref_mut: &mut PeriodicStateTracker = e;
+            tracker_ref_mut.n_chat_messages = tracker_ref_mut.n_chat_messages + 1;
+        });
+
         // Emit chat event.
         let (supply_minuend, reserves_ref) =
             assign_supply_minuend_reserves_ref(market_ref_mut, in_bonding_curve);
@@ -2451,12 +2458,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_PERIOD_1D(): u64 { PERIOD_1D }
     #[test_only] public fun get_POOL_FEE_RATE_BPS(): u8 { POOL_FEE_RATE_BPS }
     #[test_only] public fun get_REGISTRY_NAME(): vector<u8> { REGISTRY_NAME }
+    #[test_only] public fun get_TRIGGER_CHAT(): u8 { TRIGGER_CHAT }
     #[test_only] public fun get_TRIGGER_MARKET_REGISTRATION(): u8 { TRIGGER_MARKET_REGISTRATION }
     #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
-    #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
-    #[test_only] public fun get_TRIGGER_SWAP_SELL(): u8 { TRIGGER_SWAP_SELL }
     #[test_only] public fun get_TRIGGER_PROVIDE_LIQUIDITY(): u8 { TRIGGER_PROVIDE_LIQUIDITY }
     #[test_only] public fun get_TRIGGER_REMOVE_LIQUIDITY(): u8 { TRIGGER_REMOVE_LIQUIDITY }
+    #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
+    #[test_only] public fun get_TRIGGER_SWAP_SELL(): u8 { TRIGGER_SWAP_SELL }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }

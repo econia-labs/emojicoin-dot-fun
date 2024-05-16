@@ -93,6 +93,7 @@
         get_QUOTE_VIRTUAL_CEILING,
         get_QUOTE_VIRTUAL_FLOOR,
         get_REGISTRY_NAME,
+        get_TRIGGER_CHAT,
         get_TRIGGER_MARKET_REGISTRATION,
         get_TRIGGER_PACKAGE_PUBLICATION,
         get_TRIGGER_PROVIDE_LIQUIDITY,
@@ -2181,6 +2182,7 @@
 
         // Provide the exact transition user with Aptos coins, then execute exact transition.
         mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
+        timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME);
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,
@@ -2191,6 +2193,7 @@
         );
 
         // Chat again with a longer message from exact transition user.
+        timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME + 1);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,
@@ -2210,6 +2213,7 @@
             vector::push_back(&mut emoji_indices_sequence, 0);
         };
         aptos_account::create_account(USER);
+        timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME + 2);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
             @black_cat_market,
@@ -2242,7 +2246,7 @@
         assert_chat(
             MockChat {
                 market_metadata,
-                emit_time: 0,
+                emit_time: EXACT_TRANSITION_TIME + 1,
                 emit_market_nonce: 4,
                 user: EXACT_TRANSITION_USER,
                 message: utf8(x"f09f9088e2808de2ac9bf09f98b6f09f98b8f09f98b8f09f98b7f09f9294"),
@@ -2260,7 +2264,7 @@
         assert_chat(
             MockChat {
                 market_metadata,
-                emit_time: 0,
+                emit_time: EXACT_TRANSITION_TIME + 2,
                 emit_market_nonce: 5,
                 user: USER,
                 message: utf8(message_bytes),
@@ -2270,6 +2274,39 @@
             },
             *vector::borrow(&events_emitted, 2),
         );
+
+        // Verify local and global values, emitted state event.
+        let mock_market_view = base_market_view_exact_transition();
+        let mock_registry_view = base_registry_view_exact_transition();
+        let mock_periodic_state_tracker = base_periodic_state_tracker_exact_transition();
+        let mock_state = base_state_exact_transition();
+
+        mock_periodic_state_tracker.n_chat_messages = 3;
+        mock_market_view.cumulative_stats.n_chat_messages = 3;
+        mock_market_view.last_swap.nonce = mock_market_view.last_swap.nonce + 1;
+        mock_market_view.sequence_info.nonce = mock_market_view.sequence_info.nonce + 3;
+        mock_market_view.sequence_info.last_bump_time = EXACT_TRANSITION_TIME + 2;
+        mock_market_view.periodic_state_trackers =
+            vectorize_periodic_state_tracker_base(mock_periodic_state_tracker);
+
+        mock_registry_view.cumulative_chat_messages = 3;
+        mock_registry_view.nonce = mock_registry_view.nonce + 3;
+
+        mock_state.cumulative_stats = mock_market_view.cumulative_stats;
+        mock_state.state_metadata = MockStateMetadata {
+            market_nonce: mock_market_view.sequence_info.nonce,
+            bump_time: EXACT_TRANSITION_TIME + 2,
+            trigger: get_TRIGGER_CHAT(),
+        };
+        mock_state.last_swap = mock_market_view.last_swap;
+
+        assert_market_view(
+            mock_market_view,
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market),
+        );
+        assert_registry_view(mock_registry_view, registry_view());
+        assert_state(mock_state, vector::pop_back(&mut emitted_events<State>()));
+
     }
 
     #[test, expected_failure(
