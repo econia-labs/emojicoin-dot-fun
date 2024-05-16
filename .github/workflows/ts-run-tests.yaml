@@ -12,6 +12,8 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v3'
+      with:
+        submodules: 'recursive'
     - uses: './.github/actions/ts-run-tests'
 name: 'Run the TypeScript E2E and unit tests with a local testnet'
 'on':
