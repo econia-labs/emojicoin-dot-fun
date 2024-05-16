@@ -5,6 +5,7 @@ barthelemy
 bento
 blackpaper
 bouvet
+buildx
 burkina
 caicos
 clamm
@@ -37,6 +38,7 @@ mayen
 melilla
 merperson
 moai
+mybuilder
 nazar
 nohup
 octa

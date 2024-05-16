@@ -5,7 +5,7 @@ export class Inbox {
   // This is enough to start Inbox, but not to build it. It is recommended
   // to first build the docker images using `docker compose -f compose.yaml
   // build` manually.
-  readonly MAXIMUM_WAIT_TIME_SEC = 75;
+  readonly MAXIMUM_WAIT_TIME_SEC = 750;
 
   // PostgREST URL.
   readonly READINESS_ENDPOINT = "http://127.0.0.1:3000/";
