@@ -42,7 +42,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             );
           })}
 
-          <MobileMenuItem title="05I34OT0ff9C" onClick={walletHandler} />
+          <MobileMenuItem title="05I34OT0ff9C" onClick={walletHandler} borderBottom={false} />
         </MobileMenuInner>
 
         <Flex position="absolute" bottom="60px" justifyContent="center" width="100%">

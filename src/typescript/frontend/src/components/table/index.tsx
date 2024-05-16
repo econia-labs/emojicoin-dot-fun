@@ -13,17 +13,18 @@ const getBorderOnHover = ({ hover }: TrProps) => {
   if (hover) {
     return css`
       border-bottom: 1px solid ${({ theme }) => theme.colors.econiaBlue};
-      border-top: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+      border-top: 1px solid ${({ theme }) => theme.colors.econiaBlue} !important;
     `;
   }
 };
 
-export const Table = styled.table<SpaceProps>`
+export const Table = styled.table<SpaceProps & LayoutProps>`
   table-layout: fixed;
   max-width: 100%;
   width: 100%;
 
   ${space}
+  ${layout}
 `;
 
 export const ThInner = styled(Flex)`
@@ -61,18 +62,21 @@ export const Tr = styled.tr<TrProps>`
   border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  display: block;
+  display: flex;
   width: 100%;
 
   &:hover {
     ${getBorderOnHover}
   }
 
+  &:first-child {
+    border-top: 1px solid ${({ theme }) => theme.colors.transparent};
+  }
+
   ${layout}
 `;
 
-export const TrWrapper = styled.div`
-  display: flex;
+export const TrWrapper = styled(Flex)`
   width: 100%;
 
   &:last-child {
@@ -109,11 +113,12 @@ export const Td = styled.td<TdProps>`
 `;
 
 export const HeaderTr = styled.tr`
-  display: block;
+  display: flex;
 `;
 
 export const TBody = styled.tbody<LayoutProps>`
-  display: block;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
   width: 100%;
 

@@ -19,19 +19,31 @@ import { slideTopVariants } from "./animations";
 import { type HeaderProps } from "./types";
 import { useTranslation } from "context/language-context";
 
-import { usePathname } from 'next/navigation'
+import { usePathname } from "next/navigation";
+import { showModal } from "store/modal";
+import { type ModalProps } from "store/modal/types";
+import { type WalletModalProps } from "../modal/components/wallet-modal/types";
+import { useAppDispatch } from "store/store";
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
   const { t } = useTranslation();
-    const pathname = usePathname()
+  const pathname = usePathname();
+  const dispatch = useAppDispatch();
 
-    const currentPath = pathname.split("/")[1];
-    const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
+  const currentPath = pathname.split("/")[1];
+  const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
 
   const walletHandler = () => {
-    /* eslint-disable-next-line no-console */
-    console.log("walletHandler");
+    const _showModal = showModal as ModalProps<WalletModalProps>;
+
+    dispatch(
+      _showModal({
+        modalName: "walletModal",
+        rootId: "modal",
+        props: { items: [{ title: "Copy address" }, { title: "Disconnect" }] },
+      }),
+    );
   };
 
   const { offsetHeight } = document.getElementById("header") ?? { offsetHeight: 0 };

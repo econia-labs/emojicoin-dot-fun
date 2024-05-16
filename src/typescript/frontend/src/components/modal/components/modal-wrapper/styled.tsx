@@ -21,7 +21,7 @@ export const StyledModalContainer = styled(motion.div)`
   ${({ theme }) => theme.mediaQueries.tablet} {
     margin: 24px 32px;
   }
-  background-color: ${({ theme }) => theme.colors.blue};
-  border-radius: 16px;
+  background-color: ${({ theme }) => theme.colors.econiaBlue};
+  border-radius: ${({ theme }) => theme.radii.xSmall};
   cursor: initial;
 `;

@@ -13,7 +13,7 @@ const CloseModalWrapper: React.FC<CloseModalWrapperProps> = ({ children, closeMo
         {children}
       </Flex>
 
-      <CloseIconWithHover onClick={closeModalHandler} />
+      <CloseIconWithHover width="10px" color="black" onClick={closeModalHandler} />
     </Flex>
   );
 };

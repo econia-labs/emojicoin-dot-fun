@@ -6,7 +6,7 @@ import { type CloseIconWithHoverProps } from "./types";
 export const CloseIconWithHover: React.FC<CloseIconWithHoverProps> = ({ onClick, ...props }) => {
   return (
     <StyledCloseIcon onClick={onClick}>
-      <CloseIcon {...props} />
+      <CloseIcon {...props} color="black" />
     </StyledCloseIcon>
   );
 };

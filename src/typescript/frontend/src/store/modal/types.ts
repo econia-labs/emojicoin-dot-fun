@@ -17,6 +17,7 @@ export type ShowModalProps<T> = {
 
 export enum ModalNames {
   testModal = "testModal",
+  walletModal = "walletModal",
 }
 
 export interface ModalProps<T> extends ActionCreatorWithPayload<ShowModalProps<T>, string> {}

@@ -21,7 +21,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
   return (
     <Tr>
-      <Td width="12.5%">
+      <Td width="12.5%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex px="12px">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ref={targetRef}>
             {item.rankIcon}
@@ -30,7 +30,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="12.5%">
+      <Td width="12.5%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.apt}
@@ -38,7 +38,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="13%">
+      <Td width="13%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.emoji}
@@ -46,7 +46,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="12.5%">
+      <Td width="12.5%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.type}
@@ -54,7 +54,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="12.5%">
+      <Td width="12.5%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.date}
@@ -62,7 +62,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="37%">
+      <Td width="37%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex justifyContent="end">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.transaction}

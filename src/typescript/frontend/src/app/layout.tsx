@@ -18,11 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html>
       <body className={fontsClassName}>
         <StyledComponentsRegistry>
-          <Providers>
-            {children}
-            {/* <div id="modal"></div> */}
-          </Providers>
+          <Providers>{children}</Providers>
         </StyledComponentsRegistry>
+        <div id="modal"></div>
       </body>
     </html>
   );

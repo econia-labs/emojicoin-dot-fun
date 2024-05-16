@@ -9,10 +9,10 @@ import LanguageContextProvider from "./language-context";
 import store from "store/store";
 import Loader from "components/loader";
 import Modal from "components/modal";
-import { Column } from "@/containers";
 import Header from "components/header";
 import Footer from "components/footer";
 import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoints";
+import { StyledContentWrapper } from "./styled";
 
 const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();
@@ -30,11 +30,11 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <Provider store={store}>
             <Modal />
             <StyledToastContainer />
-            <Column maxWidth="100vw" px="0px" height="100vh" overflowX="hidden">
+            <StyledContentWrapper>
               <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
               {children}
               <Footer />
-            </Column>
+            </StyledContentWrapper>
           </Provider>
         </LanguageContextProvider>
       </Suspense>

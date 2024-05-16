@@ -6,9 +6,8 @@ import { isEqual } from "lodash";
 import { useMatchBreakpoints } from "hooks";
 
 import { TableRowDesktop, TableHeader } from "./components";
-import { Table, Th, ThInner, HeaderTr, TBody, TrWrapper } from "components";
+import { Table, Th, ThInner, HeaderTr, TBody } from "components";
 import { StyledPoolsWrapper } from "./styled";
-import { Flex } from "@/containers";
 
 import { HEADERS, DATA, MOBILE_HEADERS } from "./constants";
 
@@ -35,22 +34,18 @@ const PoolsTable: React.FC = () => {
       <Table>
         <thead>
           <HeaderTr>
-            <Flex>
-              {headers.map((th, index) => (
-                <Th width={th.width} key={index}>
-                  <ThInner>
-                    <TableHeader item={th} isLast={HEADERS.length - 1 === index} sortData={sortData} />
-                  </ThInner>
-                </Th>
-              ))}
-            </Flex>
+            {headers.map((th, index) => (
+              <Th width={th.width} key={index}>
+                <ThInner>
+                  <TableHeader item={th} isLast={HEADERS.length - 1 === index} sortData={sortData} />
+                </ThInner>
+              </Th>
+            ))}
           </HeaderTr>
         </thead>
         <TBody height={{ _: "calc(50vh)", laptopL: "calc(100vh - 353px)" }}>
           {dataMock.map((item, index) => (
-            <TrWrapper key={index}>
-              <TableRowDesktop item={item} />
-            </TrWrapper>
+            <TableRowDesktop key={index} item={item} />
           ))}
         </TBody>
       </Table>
