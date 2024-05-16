@@ -48,6 +48,17 @@ repos:
   -
     entry: |
       './src/sh/python-lint/run-in-poetry-subdir.sh'
+      'poetry run python -m check_root_package_json'
+      'Please run src/sh/python-lint/format.sh and fix the errors.'
+    id: 'check_root_package_json'
+    language: 'script'
+    name: 'check root package json'
+    pass_filenames: false
+    types:
+    - 'python'
+  -
+    entry: |
+      './src/sh/python-lint/run-in-poetry-subdir.sh'
       'poetry run autoflake -c --remove-all-unused-imports
       --remove-unused-variables --ignore-init-module-imports'
       'Please run src/sh/python-lint/format.sh and fix the errors.'

@@ -49,6 +49,7 @@ def main():
         "poetry run flake8": ("", utils.is_python_file),
         "poetry run mypy": ("", utils.is_python_file),
         "poetry run python -m file_name_conventions": ("", always_true),
+        "poetry run python -m check_root_package_json": ("--fix", always_true),
     }
 
     return_statuses: dict[str, str] = {}

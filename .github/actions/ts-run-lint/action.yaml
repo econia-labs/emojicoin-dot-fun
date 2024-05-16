@@ -10,7 +10,7 @@ runs:
       registry-url: 'https://registry.npmjs.org'
   - uses: 'pnpm/action-setup@v2'
     with:
-      version: '8.9.0'
+      package_json_file: '${{ env.TS_API_DIR }}/package.json'
   - run: |
       cd ${{ env.TS_API_DIR }} &&
       pnpm install --frozen-lockfile && pnpm lint
