@@ -47,6 +47,8 @@
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
     "test": "pnpm jest",
+    "test-candlesticks": "npx tsx src/queries/candlesticks.ts",
+    "test-trade": "npx tsx src/markets/trade.ts",
     "unit-test": "pnpm jest tests/unit"
   },
   "version": "0.0.1"

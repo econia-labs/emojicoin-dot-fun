@@ -21,6 +21,7 @@ import {
   StateEvent,
   SwapEvent,
 } from "./events";
+import util from "util";
 
 /**
  * Sleep the current thread for the given amount of time
@@ -101,7 +102,7 @@ export function getEvents(response: UserTransactionResponse): Events {
   };
 
   response.events.forEach((eventData) => {
-    const event = Event.fromJSON(eventData);
+    const event = Event.from(eventData);
     switch (event.type.toString()) {
       case SwapEvent.STRUCT_STRING:
         events.swapEvents.push(event as SwapEvent);

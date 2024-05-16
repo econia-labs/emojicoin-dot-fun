@@ -21,7 +21,7 @@ import {
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "../emojicoin_dot_fun/payload-builders";
-import { type TypeTagInput } from "../emojicoin_dot_fun";
+import { Uint64String, type TypeTagInput } from "../emojicoin_dot_fun";
 
 export type MintPayloadMoveArguments = {
   dstAddr: AccountAddress;
@@ -361,6 +361,52 @@ export class ExistsAt extends ViewFunctionPayloadBuilder<[boolean]> {
     options?: LedgerVersionArg;
   }): Promise<boolean> {
     const [res] = await new ExistsAt(args).view(args);
+    return res;
+  }
+}
+
+
+export type BalancePayloadMoveArguments = {
+  owner: AccountAddress;
+};
+
+/**
+ *```
+ *  #[view]
+ *  public fun balance<CoinType>(
+ *     owner: address,
+ *  ): u64
+ *```
+ **/
+
+export class Balance extends ViewFunctionPayloadBuilder<[Uint64String]> {
+  public readonly moduleAddress = AccountAddress.ONE;
+  public readonly moduleName = "coin";
+  public readonly functionName = "balance";
+  public readonly args: BalancePayloadMoveArguments;
+  public readonly typeTags: [TypeTag]; // [CoinType]
+
+  constructor(args: {
+    owner: AccountAddressInput; // address
+    typeTags: [TypeTagInput]; // [CoinType]
+  }) {
+    super();
+    const { owner, typeTags } = args;
+
+    this.args = {
+      owner: AccountAddress.from(owner),
+    };
+    this.typeTags = typeTags.map((typeTag) =>
+      typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag,
+    ) as [TypeTag];
+  }
+  static async view(args: {
+    aptos: Aptos | AptosConfig;
+    owner: AccountAddressInput; // address
+    typeTags: [TypeTagInput]; // [CoinType]
+    options?: LedgerVersionArg;
+  }): Promise<Uint64String> {
+    const [res] = await new Balance(args).view(args);
     return res;
   }
 }

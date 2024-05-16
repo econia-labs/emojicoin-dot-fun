@@ -2,11 +2,12 @@
 import {
   AccountAddress,
   type AccountAddressInput,
-  type TypeTag,
+  TypeTag,
   type Uint128,
   type Uint64,
   type Uint8,
   parseTypeTag,
+  Hex,
 } from "@aptos-labs/ts-sdk";
 import {
   type CumulativeStats,
@@ -27,6 +28,7 @@ import {
   toStateMetadata,
 } from "../types/contract";
 import { type EventJSON } from "../types/core";
+import util from 'util';
 
 type GUID = {
   creationNumber: Uint64;
@@ -42,15 +44,20 @@ export function toTypeTag(
   return parseTypeTag(`${address.toString()}::${moduleName}::${structName}`);
 }
 
-interface KnownEvent {
+export interface KnownEventInterface {
   MODULE_ADDRESS: AccountAddress;
   MODULE_NAME: string;
   STRUCT_NAME: string;
+  STRUCT_STRING: string;
 }
 
-export function knownEventTypeTagString(e: KnownEvent): string {
+export function knownEventTypeTagString(e: KnownEventInterface): string {
   return toTypeTag(e.MODULE_ADDRESS, e.MODULE_NAME, e.STRUCT_NAME).toString();
 }
+
+// AtLeastHasData is a type that ensures that the data field is present
+// in the EventJSON object.
+export type AtLeastHasData = Pick<EventJSON, "data"> & Partial<Omit<EventJSON, "data">>;
 
 export function isKnownEventType(e: Event): e is KnownEventType {
   return (
@@ -86,51 +93,46 @@ export type Events = {
   events: Event[];
 };
 
+/**
+ * A general Event class to encapsulate any event emitted in a smart contract.
+ * In order to parallelize events the GUID and sequence number are now filled
+ * in with useless data, so we don't store those fields.
+ */
 export class Event {
-  public readonly guid: GUID;
-
-  public readonly sequenceNumber: Uint64;
-
   public readonly type: TypeTag;
 
-  public readonly fields: any;
+  public readonly data: any;
 
   constructor(event: EventJSON) {
-    this.guid = {
-      creationNumber: BigInt(event.guid.creation_number),
-      accountAddress: AccountAddress.from(event.guid.account_address),
-    };
-    this.sequenceNumber = BigInt(event.sequence_number);
     this.type = parseTypeTag(event.type);
-    this.fields = event.data;
+    this.data = event.data;
   }
 
-  static fromJSON(event: EventJSON): Event | KnownEventType {
-    const eventType = parseTypeTag(event.type);
-    switch (eventType.toString()) {
-      case SwapEvent.STRUCT_STRING:
-        return new SwapEvent(event);
-      case ChatEvent.STRUCT_STRING:
-        return new ChatEvent(event);
-      case MarketRegistrationEvent.STRUCT_STRING:
-        return new MarketRegistrationEvent(event);
-      case PeriodicStateEvent.STRUCT_STRING:
-        return new PeriodicStateEvent(event);
-      case StateEvent.STRUCT_STRING:
-        return new StateEvent(event);
-      case GlobalStateEvent.STRUCT_STRING:
-        return new GlobalStateEvent(event);
-      case LiquidityEvent.STRUCT_STRING:
-        return new LiquidityEvent(event);
-      default:
-        return new Event(event);
+  static from(event: EventJSON): Event | KnownEventType {
+    if (EventTypeFactoryMap.has(event.type)) {
+      const from = EventTypeFactoryMap.get(event.type)!;
+      return from(event);
+    } else {
+      return new Event(event);
     }
   }
 
+  // [util.inspect.custom](depth: number, options: util.InspectOptionsStylized): string {
+  //   const newOptions = {
+  //     ...options,
+  //     depth: null,
+  //     colors: true,
+  //   };
+  //   let res = '';
+  //   res += 'type: ' + newOptions.stylize(this.type.toString(), 'special') + '\n';
+  //   res += 'data: ' + util.inspect({ ...this.data }, newOptions) + '\n';
+  //   return res;
+  // }
+
   toJSON(): any {
     const d: Record<string, any> = {};
-    Object.keys(this.fields).forEach((field) => {
-      const val = this.fields[field as keyof typeof this.fields];
+    Object.keys(this.data).forEach((field) => {
+      const val = this.data[field as keyof typeof this.data];
       if (typeof val === "bigint") {
         d[field] = val < Number.MAX_SAFE_INTEGER ? Number(val) : val.toString();
       } else if (val instanceof AccountAddress) {
@@ -150,6 +152,7 @@ export class Event {
     return d;
   }
 }
+
 
 const EMOJICOIN_DOT_FUN_MODULE_ADDRESS = AccountAddress.from(process.env.MODULE_ADDRESS!);
 const EMOJICOIN_DOT_FUN_MODULE_NAME = process.env.EMOJICOIN_DOT_FUN_MODULE_NAME!;
@@ -182,11 +185,11 @@ export class SwapEvent extends Event {
 
   public static readonly STRUCT_STRING = knownEventTypeTagString(SwapEvent);
 
-  public readonly fields: SwapEventFields;
+  public readonly data: SwapEventFields;
 
-  public constructor(event: EventJSON) {
+  private constructor(event: EventJSON) {
     super(event);
-    this.fields = {
+    this.data = {
       marketId: BigInt(event.data.market_id),
       time: BigInt(event.data.time),
       marketNonce: BigInt(event.data.market_nonce),
@@ -204,6 +207,16 @@ export class SwapEvent extends Event {
       startsInBondingCurve: event.data.starts_in_bonding_curve,
       resultsInStateTransition: event.data.results_in_state_transition,
     };
+  }
+
+  static from(event: AtLeastHasData): SwapEvent {
+    if (event.type && event.type !== SwapEvent.STRUCT_STRING) {
+      throw new Error(`Expected ${SwapEvent.STRUCT_STRING}, got ${event.type}`);
+    }
+    return new SwapEvent({
+      type: SwapEvent.STRUCT_STRING,
+      data: event.data,
+    });
   }
 }
 
@@ -227,11 +240,11 @@ export class ChatEvent extends Event {
 
   public static readonly STRUCT_STRING = knownEventTypeTagString(ChatEvent);
 
-  public readonly fields: ChatEventFields;
+  public readonly data: ChatEventFields;
 
-  public constructor(event: EventJSON) {
+  private constructor(event: EventJSON) {
     super(event);
-    this.fields = {
+    this.data = {
       marketMetadata: toMarketMetadata(event.data.market_metadata),
       emitTime: BigInt(event.data.emit_time),
       emitMarketNonce: BigInt(event.data.emit_market_nonce),
@@ -243,6 +256,16 @@ export class ChatEvent extends Event {
         event.data.balance_as_fraction_of_circulating_supply_q64
       ),
     };
+  }
+
+  static from(event: AtLeastHasData): ChatEvent {
+    if (event.type && event.type !== ChatEvent.STRUCT_STRING) {
+      throw new Error(`Expected ${ChatEvent.STRUCT_STRING}, got ${event.type}`);
+    }
+    return new ChatEvent({
+      type: ChatEvent.STRUCT_STRING,
+      data: event.data,
+    });
   }
 }
 
@@ -263,17 +286,27 @@ export class MarketRegistrationEvent extends Event {
 
   public static readonly STRUCT_STRING = knownEventTypeTagString(MarketRegistrationEvent);
 
-  public readonly fields: MarketRegistrationEventFields;
+  public readonly data: MarketRegistrationEventFields;
 
-  public constructor(event: EventJSON) {
+  private constructor(event: EventJSON) {
     super(event);
-    this.fields = {
+    this.data = {
       marketMetadata: toMarketMetadata(event.data.market_metadata),
       time: BigInt(event.data.time),
       registrant: AccountAddress.from(event.data.registrant),
       integrator: AccountAddress.from(event.data.integrator),
       integratorFee: BigInt(event.data.integrator_fee),
     };
+  }
+
+  static from(event: AtLeastHasData): MarketRegistrationEvent {
+    if (event.type && event.type !== MarketRegistrationEvent.STRUCT_STRING) {
+      throw new Error(`Expected ${MarketRegistrationEvent.STRUCT_STRING}, got ${event.type}`);
+    }
+    return new MarketRegistrationEvent({
+      type: MarketRegistrationEvent.STRUCT_STRING,
+      data: event.data,
+    });
   }
 }
 
@@ -305,11 +338,11 @@ export class PeriodicStateEvent extends Event {
 
   public static readonly STRUCT_STRING = knownEventTypeTagString(PeriodicStateEvent);
 
-  public readonly fields: PeriodicStateEventFields;
+  public readonly data: PeriodicStateEventFields;
 
-  public constructor(event: EventJSON) {
+  private constructor(event: EventJSON) {
     super(event);
-    this.fields = {
+    this.data = {
       marketMetadata: toMarketMetadata(event.data.market_metadata),
       periodicStateMetadata: toPeriodicStateMetadata(event.data.periodic_state_metadata),
       openPriceQ64: BigInt(event.data.open_price_q64),
@@ -327,6 +360,16 @@ export class PeriodicStateEvent extends Event {
       endsInBondingCurve: event.data.ends_in_bonding_curve,
       tvlPerLpCoinGrowthQ64: BigInt(event.data.tvl_per_lp_coin_growth_q64),
     };
+  }
+
+  static from(event: AtLeastHasData): PeriodicStateEvent {
+    if (event.type && event.type !== PeriodicStateEvent.STRUCT_STRING) {
+      throw new Error(`Expected ${PeriodicStateEvent.STRUCT_STRING}, got ${event.type}`);
+    }
+    return new PeriodicStateEvent({
+      type: PeriodicStateEvent.STRUCT_STRING,
+      data: event.data,
+    });
   }
 }
 
@@ -350,11 +393,11 @@ export class StateEvent extends Event {
 
   public static readonly STRUCT_STRING = knownEventTypeTagString(StateEvent);
 
-  public readonly fields: StateEventFields;
+  public readonly data: StateEventFields;
 
-  public constructor(event: EventJSON) {
+  private constructor(event: EventJSON) {
     super(event);
-    this.fields = {
+    this.data = {
       marketMetadata: toMarketMetadata(event.data.market_metadata),
       stateMetadata: toStateMetadata(event.data.state_metadata),
       clammVirtualReserves: toReserves(event.data.clamm_virtual_reserves),
@@ -364,6 +407,16 @@ export class StateEvent extends Event {
       instantaneousStats: toInstantaneousStats(event.data.instantaneous_stats),
       lastSwap: toLastSwap(event.data.last_swap),
     };
+  }
+
+  static from(event: AtLeastHasData): StateEvent {
+    if (event.type && event.type !== StateEvent.STRUCT_STRING) {
+      throw new Error(`Expected ${StateEvent.STRUCT_STRING}, got ${event.type}`);
+    }
+    return new StateEvent({
+      type: StateEvent.STRUCT_STRING,
+      data: event.data,
+    });
   }
 }
 
@@ -390,11 +443,11 @@ export class GlobalStateEvent extends Event {
 
   public static readonly STRUCT_STRING = knownEventTypeTagString(GlobalStateEvent);
 
-  public readonly fields: GlobalStateEventFields;
+  public readonly data: GlobalStateEventFields;
 
-  public constructor(event: EventJSON) {
+  private constructor(event: EventJSON) {
     super(event);
-    this.fields = {
+    this.data = {
       emitTime: BigInt(event.data.emit_time),
       registryNonce: BigInt(event.data.registry_nonce),
       trigger: Number(event.data.trigger),
@@ -407,6 +460,16 @@ export class GlobalStateEvent extends Event {
       cumulativeSwaps: toAggregatorSnapshot(event.data.cumulative_swaps),
       cumulativeChatMessages: toAggregatorSnapshot(event.data.cumulative_chat_messages),
     };
+  }
+
+  static from(event: AtLeastHasData): GlobalStateEvent {
+    if (event.type && event.type !== GlobalStateEvent.STRUCT_STRING) {
+      throw new Error(`Expected ${GlobalStateEvent.STRUCT_STRING}, got ${event.type}`);
+    }
+    return new GlobalStateEvent({
+      type: GlobalStateEvent.STRUCT_STRING,
+      data: event.data,
+    });
   }
 }
 
@@ -432,11 +495,11 @@ export class LiquidityEvent extends Event {
 
   public static readonly STRUCT_STRING = knownEventTypeTagString(LiquidityEvent);
 
-  public readonly fields: LiquidityEventFields;
+  public readonly data: LiquidityEventFields;
 
-  public constructor(event: EventJSON) {
+  private constructor(event: EventJSON) {
     super(event);
-    this.fields = {
+    this.data = {
       marketId: BigInt(event.data.market_id),
       time: BigInt(event.data.time),
       marketNonce: BigInt(event.data.market_nonce),
@@ -449,4 +512,49 @@ export class LiquidityEvent extends Event {
       proRataQuoteDonationClaimAmount: BigInt(event.data.pro_rata_quote_donation_claim_amount),
     };
   }
+
+  static from(event: AtLeastHasData): LiquidityEvent {
+    if (event.type && event.type !== LiquidityEvent.STRUCT_STRING) {
+      throw new Error(`Expected ${LiquidityEvent.STRUCT_STRING}, got ${event.type}`);
+    }
+    return new LiquidityEvent({
+      type: LiquidityEvent.STRUCT_STRING,
+      data: event.data,
+    });
+  }
 }
+
+export const EventTypeFactoryMap = new Map<string, (e: EventJSON) => KnownEventType>(
+  [
+    SwapEvent,
+    ChatEvent,
+    MarketRegistrationEvent,
+    PeriodicStateEvent,
+    StateEvent,
+    GlobalStateEvent,
+    LiquidityEvent,
+  ].map((e) => [knownEventTypeTagString(e), e.from])
+);
+
+const DEFAULT_OPTIONS = {
+  depth: null,
+  colors: true,
+};
+
+const updateInspect = (obj: any, styleType: util.Style): void => {
+  Object.setPrototypeOf(obj.prototype, {
+    [util.inspect.custom](depth: number, options: util.InspectOptionsStylized): string {
+      const newOptions = {
+        ...options,
+        ...DEFAULT_OPTIONS,
+      };
+      const _ = depth;
+      const stylized = newOptions.stylize(this.toString(), styleType);
+      return `${obj.name} { ${stylized} }`;
+    }
+  });
+}
+
+updateInspect(AccountAddress, 'undefined');
+updateInspect(Hex, 'special');
+updateInspect(TypeTag, 'date');

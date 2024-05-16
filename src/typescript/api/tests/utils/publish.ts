@@ -7,12 +7,14 @@ import {
   type PrivateKey,
   Account,
   Ed25519PrivateKey,
+  APTOS_COIN,
 } from "@aptos-labs/ts-sdk";
 import path from "path";
 import { type PublishPackageResult, type ResultJSON } from "./types";
 import { getAptosClient } from "./aptos-client";
 import { getGitRoot } from "./helpers";
 import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
+import { Balance } from "../../src/markets/coin-transfers";
 
 export async function publishPackage(args: {
   pk: PrivateKey;
@@ -110,15 +112,17 @@ export async function publishForTest(pk: string): Promise<PublishPackageResult> 
     privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
   });
 
-  let publisherBalance = await aptos.account
-    .getAccountAPTAmount({ accountAddress: publisher.accountAddress })
-    .catch((_) => 0);
+  let publisherBalance = BigInt(await Balance.view({
+    aptos,
+    owner: publisher.accountAddress,
+    typeTags: [APTOS_COIN],
+  }));
 
   const APT_REQUIRED_FOR_TESTS = 4;
   while (publisherBalance < APT_REQUIRED_FOR_TESTS * ONE_APT) {
     /* eslint-disable-next-line no-await-in-loop */
     await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT });
-    publisherBalance += ONE_APT;
+    publisherBalance += BigInt(ONE_APT);
   }
   const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
   const packageName = moduleName;

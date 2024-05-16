@@ -3,7 +3,12 @@ import dotenv from "dotenv";
 import path from "path";
 import { getGitRoot } from "../../tests/utils/helpers";
 
-dotenv.config();
+if (process.env.VERCEL !== "1") {
+  const envPath = path.join(getGitRoot(), "src/typescript/api", ".env");
+  const localEnvPath = path.join(envPath, ".env.local");
+  dotenv.config({ path: localEnvPath });
+  dotenv.config({ path: envPath });
+}
 
 export const ONE_APT = 1 * 10 ** 8;
 export const MAX_GAS_FOR_PUBLISH = 1500000;
@@ -30,3 +35,17 @@ export const QUOTE_VIRTUAL_FLOOR = 400_000_000_000n;
 export const BASE_VIRTUAL_CEILING = 49_000_000_000_000_000n;
 export const QUOTE_VIRTUAL_CEILING = 1_400_000_000_000n;
 export const POOL_FEE_RATE_BPS = 25;
+
+export enum CandlestickResolution {
+  PERIOD_1S = "1000000",
+  PERIOD_5S = "5000000",
+  PERIOD_15S = "15000000",
+  PERIOD_30S = "30000000",
+  PERIOD_1M = "60000000",
+  PERIOD_5M = "300000000",
+  PERIOD_15M = "900000000",
+  PERIOD_30M = "1800000000",
+  PERIOD_1H = "3600000000",
+  PERIOD_4H = "14400000000",
+  PERIOD_1D = "86400000000",
+}

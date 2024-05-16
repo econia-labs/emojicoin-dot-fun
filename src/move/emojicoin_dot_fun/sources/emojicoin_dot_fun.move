@@ -45,6 +45,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const TRIGGER_REMOVE_LIQUIDITY: u8 = 5;
     const TRIGGER_CHAT: u8 = 6;
 
+    const PERIOD_1S: u64 = 1_000_000;
+    const PERIOD_5S: u64 = 5_000_000;
+    const PERIOD_15S: u64 = 15_000_000;
+    const PERIOD_30S: u64 = 30_000_000;
     const PERIOD_1M: u64 = 60_000_000;
     const PERIOD_5M: u64 = 300_000_000;
     const PERIOD_15M: u64 = 900_000_000;
@@ -630,6 +634,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             },
             periodic_state_trackers: vector::map(
                 vector[
+                    PERIOD_1S,
+                    PERIOD_5S,
+                    PERIOD_15S,
+                    PERIOD_30S,
                     PERIOD_1M,
                     PERIOD_5M,
                     PERIOD_15M,

@@ -23,7 +23,7 @@ import {
   getEvents,
   QUOTE_VIRTUAL_FLOOR,
 } from "../emojicoin_dot_fun";
-import { getTestHelpers, publishForTest } from "../../tests/utils";
+import { getAptosClient, publishForTest } from "../../tests/utils";
 import {
   MarketMetadataByEmojiBytes,
   MarketView,
@@ -34,9 +34,9 @@ import { type Events } from "../emojicoin_dot_fun/events";
 import { getRandomEmoji } from "./get-random-emoji";
 import { type EmojicoinInfo } from "../types/contract";
 
-const NUM_TRADERS = 500;
+const NUM_TRADERS = 2000;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
-const CHUNK_SIZE = 50;
+const CHUNK_SIZE = 100;
 const TRADER_INITIAL_BALANCE = ONE_APT * 10;
 const DISTRIBUTOR_NECESSARY_BALANCE = CHUNK_SIZE * TRADER_INITIAL_BALANCE;
 const MAX_U64 = 18446744073709551615n;
@@ -48,7 +48,7 @@ const PUBLISHER = Account.fromPrivateKey({
 
 async function trade() {
   const { asActualEmoji, emojiBytes } = getRandomEmoji();
-  const { aptos } = getTestHelpers();
+  const { aptos } = getAptosClient();
   const registryAddress = await setupTest(aptos);
 
   // Create distributors that will bear the sequence number for each transaction.
@@ -115,8 +115,8 @@ async function trade() {
 
     tradeResults.forEach((tx) => {
       const [res, events] = tx;
-      const state = events.stateEvents[0] ? events.stateEvents[0].fields : null;
-      const swap = events.swapEvents[0] ? events.swapEvents[0].fields : null;
+      const state = events.stateEvents[0] ? events.stateEvents[0].data : null;
+      const swap = events.swapEvents[0] ? events.swapEvents[0].data : null;
       if (state && swap) {
         const textDecoder = new TextDecoder("utf-8");
         const emoji = textDecoder.decode(state.marketMetadata.emojiBytes.toUint8Array());
@@ -143,7 +143,7 @@ async function trade() {
         console.debug(s);
       }
       const outOfBondingCurve = events.swapEvents.some(
-        (event) => event.fields.resultsInStateTransition
+        (event) => event.data.resultsInStateTransition
       );
 
       if (outOfBondingCurve) {
@@ -184,7 +184,7 @@ const setupTest = async (aptos: Aptos): Promise<AccountAddress> => {
     accountAddress: PUBLISHER.accountAddress,
   });
 
-  const maxFundAmount = MAX_U64 - BigInt(publisherBalance);
+  const maxFundAmount = MAX_U64 - BigInt(publisherBalance) - 1n;
   if (maxFundAmount > 0) {
     try {
       await Mint.submit({
