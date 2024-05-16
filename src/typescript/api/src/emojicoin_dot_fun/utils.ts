@@ -21,7 +21,6 @@ import {
   StateEvent,
   SwapEvent,
 } from "./events";
-import util from "util";
 
 /**
  * Sleep the current thread for the given amount of time

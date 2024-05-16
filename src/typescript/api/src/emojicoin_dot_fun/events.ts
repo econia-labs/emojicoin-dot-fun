@@ -9,6 +9,7 @@ import {
   parseTypeTag,
   Hex,
 } from "@aptos-labs/ts-sdk";
+import util from "util";
 import {
   type CumulativeStats,
   type InstantaneousStats,
@@ -28,12 +29,6 @@ import {
   toStateMetadata,
 } from "../types/contract";
 import { type EventJSON } from "../types/core";
-import util from 'util';
-
-type GUID = {
-  creationNumber: Uint64;
-  accountAddress: AccountAddress;
-};
 
 export function toTypeTag(
   addressInput: AccountAddressInput,
@@ -54,6 +49,9 @@ export interface KnownEventInterface {
 export function knownEventTypeTagString(e: KnownEventInterface): string {
   return toTypeTag(e.MODULE_ADDRESS, e.MODULE_NAME, e.STRUCT_NAME).toString();
 }
+
+// Initialized with keys: values at the bottom of this file.
+const EventTypeFactoryMap: Map<string, (e: EventJSON) => KnownEventType> = new Map();
 
 // AtLeastHasData is a type that ensures that the data field is present
 // in the EventJSON object.
@@ -112,9 +110,8 @@ export class Event {
     if (EventTypeFactoryMap.has(event.type)) {
       const from = EventTypeFactoryMap.get(event.type)!;
       return from(event);
-    } else {
-      return new Event(event);
     }
+    return new Event(event);
   }
 
   // [util.inspect.custom](depth: number, options: util.InspectOptionsStylized): string {
@@ -152,7 +149,6 @@ export class Event {
     return d;
   }
 }
-
 
 const EMOJICOIN_DOT_FUN_MODULE_ADDRESS = AccountAddress.from(process.env.MODULE_ADDRESS!);
 const EMOJICOIN_DOT_FUN_MODULE_NAME = process.env.EMOJICOIN_DOT_FUN_MODULE_NAME!;
@@ -524,37 +520,31 @@ export class LiquidityEvent extends Event {
   }
 }
 
-export const EventTypeFactoryMap = new Map<string, (e: EventJSON) => KnownEventType>(
-  [
-    SwapEvent,
-    ChatEvent,
-    MarketRegistrationEvent,
-    PeriodicStateEvent,
-    StateEvent,
-    GlobalStateEvent,
-    LiquidityEvent,
-  ].map((e) => [knownEventTypeTagString(e), e.from])
-);
-
-const DEFAULT_OPTIONS = {
-  depth: null,
-  colors: true,
-};
+// Set up the EventTypeFactoryMap.
+[
+  SwapEvent,
+  ChatEvent,
+  MarketRegistrationEvent,
+  PeriodicStateEvent,
+  StateEvent,
+  GlobalStateEvent,
+  LiquidityEvent,
+].forEach((e) => EventTypeFactoryMap.set(knownEventTypeTagString(e), e.from));
 
 const updateInspect = (obj: any, styleType: util.Style): void => {
   Object.setPrototypeOf(obj.prototype, {
-    [util.inspect.custom](depth: number, options: util.InspectOptionsStylized): string {
+    [util.inspect.custom](_: number, options: util.InspectOptionsStylized): string {
       const newOptions = {
         ...options,
-        ...DEFAULT_OPTIONS,
+        depth: null,
+        colors: true,
       };
-      const _ = depth;
       const stylized = newOptions.stylize(this.toString(), styleType);
       return `${obj.name} { ${stylized} }`;
-    }
+    },
   });
-}
+};
 
-updateInspect(AccountAddress, 'undefined');
-updateInspect(Hex, 'special');
-updateInspect(TypeTag, 'date');
+updateInspect(AccountAddress, "undefined");
+updateInspect(Hex, "special");
+updateInspect(TypeTag, "date");

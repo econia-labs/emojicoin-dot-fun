@@ -112,11 +112,13 @@ export async function publishForTest(pk: string): Promise<PublishPackageResult> 
     privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
   });
 
-  let publisherBalance = BigInt(await Balance.view({
-    aptos,
-    owner: publisher.accountAddress,
-    typeTags: [APTOS_COIN],
-  }));
+  let publisherBalance = BigInt(
+    await Balance.view({
+      aptos,
+      owner: publisher.accountAddress,
+      typeTags: [APTOS_COIN],
+    })
+  );
 
   const APT_REQUIRED_FOR_TESTS = 4;
   while (publisherBalance < APT_REQUIRED_FOR_TESTS * ONE_APT) {
