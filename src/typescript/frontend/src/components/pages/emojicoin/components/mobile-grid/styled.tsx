@@ -4,8 +4,8 @@ export const StyledMobileContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   border: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  margin-left: 9px;
-  margin-right: 9px;
+  margin-left: 30px;
+  margin-right: 30px;
 `;
 
 export const StyledMobileContentInner = styled.div`

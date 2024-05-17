@@ -6,7 +6,6 @@ export const StyledModalWrapper = styled.div`
   padding: 12px;
 
   ${({ theme }) => theme.mediaQueries.tablet} {
-    padding: 24px;
     width: 418px;
   }
 
@@ -14,5 +13,5 @@ export const StyledModalWrapper = styled.div`
   justify-content: center;
   align-items: center;
   border: 1px solid ${({ theme }) => theme.colors.black};
-  border-radius: 16px;
+  border-radius: ${({ theme }) => theme.radii.xSmall};
 `;

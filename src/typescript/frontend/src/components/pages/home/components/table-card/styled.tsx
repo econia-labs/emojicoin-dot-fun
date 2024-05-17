@@ -32,10 +32,11 @@ export const StyledInnerItem = styled.div`
 `;
 
 export const StyledItemWrapper = styled.div`
-  width: 100%;
+  width: 259px;
   max-width: 259px;
-  border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  box-shadow:
+    -0.5px 0 0 ${({ theme }) => theme.colors.darkGrey},
+    0.5px 0 0 ${({ theme }) => theme.colors.darkGrey};
 
   &:after {
     content: "";
@@ -44,56 +45,5 @@ export const StyledItemWrapper = styled.div`
     background-color: ${({ theme }) => theme.colors.darkGrey};
     height: 1px;
     transform: translateX(-50%);
-  }
-
-  ${({ theme }) => theme.mediaQueries.tablet} {
-    width: 33%;
-
-    &:nth-of-type(n + 2) {
-      border-left: none;
-    }
-
-    &:nth-of-type(n + 7) {
-      &:after {
-        display: none;
-      }
-    }
-
-    &:nth-of-type(3n + 4) {
-      border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-    }
-  }
-
-  ${({ theme }) => theme.mediaQueries.laptopL} {
-    width: 20%;
-
-    &:after {
-      display: none;
-    }
-
-    &:nth-of-type(n + 2) {
-      border-left: none;
-    }
-
-    &:nth-of-type(5n + 6) {
-      border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-    }
-
-    &:nth-of-type(5n - 2) {
-      &:after {
-        content: "";
-        display: block;
-        width: 200vw;
-        background-color: ${({ theme }) => theme.colors.darkGrey};
-        height: 1px;
-        transform: translateX(-50%);
-      }
-    }
-
-    &:nth-of-type(n + 16) {
-      &:after {
-        display: none;
-      }
-    }
   }
 `;

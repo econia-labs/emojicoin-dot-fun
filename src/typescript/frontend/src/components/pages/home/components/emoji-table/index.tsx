@@ -9,10 +9,10 @@ import { Switcher } from "components/switcher";
 import SingleSelect from "components/selects/single-select";
 import { Input } from "components/inputs/input";
 import { InputGroup } from "components/inputs/input-group";
-import { Column, FlexGap } from "@/containers";
+import { Column, Flex, FlexGap } from "@/containers";
 import { ButtonsBlock } from "./components";
 import TableCard from "../table-card";
-import { StyledTHWrapper, StyledTH, StyledTHFilters, StyledWrapper, StyledInner } from "./styled";
+import { StyledTHWrapper, StyledTH, StyledTHFilters, StyledWrapper, StyledGrid } from "./styled";
 import { DropdownMenu } from "components/selects";
 import { type Option } from "components/selects/types";
 
@@ -116,20 +116,22 @@ const EmojiTable: React.FC = () => {
       </StyledTHWrapper>
 
       <StyledWrapper>
-        <StyledInner>
-          {list.map(({ emoji, emojiName, marketCap, volume24h }, index) => {
-            return (
-              <TableCard
-                index={index + 1}
-                emoji={emoji}
-                emojiName={emojiName}
-                marketCap={marketCap}
-                volume24h={volume24h}
-                key={index}
-              />
-            );
-          })}
-        </StyledInner>
+        <Flex width="100%" maxWidth="1813px" justifyContent="center">
+          <StyledGrid>
+            {list.map(({ emoji, emojiName, marketCap, volume24h }, index) => {
+              return (
+                <TableCard
+                  index={index + 1}
+                  emoji={emoji}
+                  emojiName={emojiName}
+                  marketCap={marketCap}
+                  volume24h={volume24h}
+                  key={index}
+                />
+              );
+            })}
+          </StyledGrid>
+        </Flex>
       </StyledWrapper>
 
       <ButtonsBlock />
