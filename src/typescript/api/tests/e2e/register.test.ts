@@ -17,6 +17,7 @@ describe("registers a market successfully", () => {
 
   beforeAll(async () => {
     await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
+    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
   });
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
