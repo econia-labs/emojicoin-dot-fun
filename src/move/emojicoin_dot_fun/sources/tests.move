@@ -103,6 +103,7 @@
         get_bps_fee_test_only as get_bps_fee,
         get_concatenation_test_only as get_concatenation,
         init_module_test_only as init_module,
+        is_a_supplemental_chat_emoji,
         is_a_supported_chat_emoji,
         is_a_supported_symbol_emoji,
         market_view,
@@ -2208,11 +2209,13 @@
 
         // Verify neither supplemental chat emoji is supported before first market is registered.
         assert!(!vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
+        assert!(!vector::all(&emojis, |emoji_ref| { is_a_supplemental_chat_emoji(*emoji_ref) }), 0);
 
         // Register a market, verify both emojis supported in chat. Do with exact transition user
         // who does not yet have an Aptos account initialized.
         init_market(vector[BLACK_CAT]);
         assert!(vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
+        assert!(vector::all(&emojis, |emoji_ref| { is_a_supplemental_chat_emoji(*emoji_ref) }), 0);
         assert!(!account::exists_at(EXACT_TRANSITION_USER), 0);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
@@ -2505,6 +2508,23 @@
         assert_test_market_address(vector[YELLOW_HEART], @yellow_heart_market, false);
     }
 
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_INVALID_COIN_TYPES,
+        location = emojicoin_dot_fun
+    )] fun ensure_coins_initialized_invalid_coin_types() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        swap<BlackCatEmojicoinLP, BlackCatEmojicoin>(
+            &get_signer(USER),
+            @black_cat_market,
+            1,
+            SWAP_BUY,
+            SIMPLE_BUY_INTEGRATOR,
+            SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
+        );
+
+    }
+
     #[test] fun fdv_market_cap_expected() {
         // Set up reserves for market still in bonding curve.
         let quote_in = 100;
@@ -2598,6 +2618,13 @@
             global_state,
             vector::pop_back(&mut global_state_events),
         );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun
+    )] fun market_view_no_market() {
+        market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market);
     }
 
     #[test] fun period_times() {
@@ -4197,5 +4224,24 @@
             valid_coin_types<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market),
             0
         );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_EMOJI_BYTES_TOO_LONG,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun verified_symbol_emoji_bytes_emoji_bytes_too_long() {
+        init_package();
+        verified_symbol_emoji_bytes(vector[
+            x"f09f9088e2808de2ac9b", // Black cat.
+            x"f09f9088e2808de2ac9b", // Black cat.
+        ]);
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NOT_SUPPORTED_SYMBOL_EMOJI,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun verified_symbol_emoji_bytes_not_supported_symbol_emoji() {
+        init_package();
+        verified_symbol_emoji_bytes(vector[x"00"]);
     }
 }
