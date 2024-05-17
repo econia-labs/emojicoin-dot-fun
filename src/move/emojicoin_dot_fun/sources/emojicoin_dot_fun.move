@@ -393,7 +393,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(message_length <= MAX_CHAT_MESSAGE_LENGTH, E_CHAT_MESSAGE_TOO_LONG);
         assert!(message_length > 0, E_CHAT_MESSAGE_EMPTY);
 
-        // Construct the chat message from the emoji indices, checking for well-formedness.
+        // Construct the chat message from the emoji indices, checking index and emoji validity.
         let message: String = string::utf8(b"");
         let n_emojis = vector::length(&emoji_bytes);
         vector::for_each(emoji_indices_sequence, |idx| {
