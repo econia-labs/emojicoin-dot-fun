@@ -2658,16 +2658,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ) {
         let PeriodicStateMetadata {
             start_time,
+            period,
             emit_time,
             emit_market_nonce,
-            period,
             trigger,
         } = periodic_state_metadata;
         (
             start_time,
+            period,
             emit_time,
             emit_market_nonce,
-            period,
             trigger,
         )
     }
