@@ -35,6 +35,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const U64_MAX_AS_u128: u128 = 0xffffffffffffffff;
     const BASIS_POINTS_PER_UNIT: u128 = 10_000;
     const SHIFT_Q64: u8 = 64;
+    const HI_128: u128 = 0xffffffffffffffffffffffffffffffff;
 
     const TRIGGER_PACKAGE_PUBLICATION: u8 = 0;
     const TRIGGER_MARKET_REGISTRATION: u8 = 1;
@@ -80,26 +81,22 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_STILL_IN_BONDING_CURVE: u64 = 3;
     /// No quote amount given during liquidity provision/removal.
     const E_LIQUIDITY_NO_QUOTE: u64 = 4;
-    /// Providing quote amount as liquidity would require more base than existing supply.
-    const E_PROVIDE_BASE_TOO_SCARCE: u64 = 5;
-    /// Providing quote amount as liquidity would result in LP coin overflow.
-    const E_PROVIDE_TOO_MANY_LP_COINS: u64 = 6;
-    /// Remove liquidity operation specified more LP coins than existing supply.
-    const E_REMOVE_TOO_MANY_LP_COINS: u64 = 7;
+    /// No LP coin amount given during liquidity provision/removal.
+    const E_LIQUIDITY_NO_LP_COINS: u64 = 5;
     /// The type arguments passed in are invalid.
-    const E_INVALID_COIN_TYPES: u64 = 8;
+    const E_INVALID_COIN_TYPES: u64 = 6;
     /// Provided bytes do not indicate a supported coin symbol emoji.
-    const E_NOT_SUPPORTED_SYMBOL_EMOJI: u64 = 9;
+    const E_NOT_SUPPORTED_SYMBOL_EMOJI: u64 = 7;
     /// Too many bytes in emoji symbol.
-    const E_EMOJI_BYTES_TOO_LONG: u64 = 10;
+    const E_EMOJI_BYTES_TOO_LONG: u64 = 8;
     /// Market is already registered.
-    const E_ALREADY_REGISTERED: u64 = 11;
+    const E_ALREADY_REGISTERED: u64 = 9;
     /// Account is unable to pay market registration fee.
-    const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 12;
+    const E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE: u64 = 10;
     /// Provided bytes do not indicate a supported chat emoji.
-    const E_NOT_SUPPORTED_CHAT_EMOJI: u64 = 13;
+    const E_NOT_SUPPORTED_CHAT_EMOJI: u64 = 11;
     /// The constructed chat message exceeds the maximum length.
-    const E_CHAT_MESSAGE_TOO_LONG: u64 = 14;
+    const E_CHAT_MESSAGE_TOO_LONG: u64 = 12;
 
     struct CumulativeStats has copy, drop, store {
         base_volume: u128,
@@ -843,8 +840,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     public entry fun swap<Emojicoin, EmojicoinLP>(
-        market_address: address,
         swapper: &signer,
+        market_address: address,
         input_amount: u64,
         is_sell: bool,
         integrator: address,
@@ -1114,8 +1111,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
-        market_address: address,
         provider: &signer,
+        market_address: address,
         quote_amount: u64,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
 
@@ -1135,6 +1132,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let time = event.time;
         let trigger = TRIGGER_PROVIDE_LIQUIDITY;
         trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
+
+        // Store reserves at start of operation.
+        let reserves_start = market_ref_mut.cpamm_real_reserves;
 
         // Transfer coins.
         coin::transfer<Emojicoin>(provider, market_address, event.base_amount);
@@ -1163,21 +1163,33 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         aggregator_v2::try_add(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
         aggregator_v2::try_add(global_total_value_locked_ref_mut, delta_tvl);
 
+        // Get FDV, market cap, at start and end of operation, update global stats accordingly.
+        let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut, EMOJICOIN_SUPPLY);
+        update_global_fdv_market_cap_for_liquidity_operation(
+            fdv_start,
+            market_cap_start,
+            fdv_end,
+            market_cap_end,
+            global_stats_ref_mut,
+        );
+
         // Emit liquidity provision event, follow up on periodic state trackers/market state.
         event::emit(event);
         liquidity_provision_operation_epilogue(
             tvl_end,
+            fdv_end,
+            market_cap_end,
             lp_coin_supply,
-            *quote_reserves_ref_mut,
-            *reserves_ref_mut,
+            reserves_ref_mut.quote,
             trigger,
             market_ref_mut,
         );
     }
 
     public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
-        market_address: address,
         provider: &signer,
+        market_address: address,
         lp_coin_amount: u64,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
 
@@ -1197,6 +1209,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let time = event.time;
         let trigger = TRIGGER_REMOVE_LIQUIDITY;
         trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
+
+        // Store reserves at start of operation.
+        let reserves_start = market_ref_mut.cpamm_real_reserves;
 
         // Transfer coins.
         let base_total = event.base_amount + event.pro_rata_base_donation_claim_amount;
@@ -1227,13 +1242,25 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
         aggregator_v2::try_sub(global_total_value_locked_ref_mut, delta_tvl);
 
+        // Get FDV, market cap, at start and end of operation, update global stats accordingly.
+        let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut, EMOJICOIN_SUPPLY);
+        update_global_fdv_market_cap_for_liquidity_operation(
+            fdv_start,
+            market_cap_start,
+            fdv_end,
+            market_cap_end,
+            global_stats_ref_mut,
+        );
+
         // Emit liquidity provision event, follow up on periodic state trackers/market state.
         event::emit(event);
         liquidity_provision_operation_epilogue(
             tvl_end,
+            fdv_end,
+            market_cap_end,
             lp_coin_supply,
-            *quote_reserves_ref_mut,
-            *reserves_ref_mut,
+            reserves_ref_mut.quote,
             trigger,
             market_ref_mut,
         );
@@ -1434,8 +1461,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun simulate_swap(
-        market_address: address,
         swapper: address,
+        market_address: address,
         input_amount: u64,
         is_sell: bool,
         integrator: address,
@@ -1455,8 +1482,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun simulate_provide_liquidity(
-        market_address: address,
         provider: address,
+        market_address: address,
         quote_amount: u64,
     ): Liquidity
     acquires Market {
@@ -1470,8 +1497,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[view]
     public fun simulate_remove_liquidity<Emojicoin>(
-        market_address: address,
         provider: address,
+        market_address: address,
         lp_coin_amount: u64,
     ): Liquidity
     acquires Market {
@@ -1557,6 +1584,44 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             time,
         } = last_swap;
         (is_sell, avg_execution_price_q64, base_volume, quote_volume, nonce, time)
+    }
+
+    public fun unpack_liquidity(liquidity: Liquidity): (
+        u64,
+        u64,
+        u64,
+        address,
+        u64,
+        u64,
+        u64,
+        bool,
+        u64,
+        u64,
+    ) {
+        let Liquidity {
+            market_id,
+            time,
+            market_nonce,
+            provider,
+            base_amount,
+            quote_amount,
+            lp_coin_amount,
+            liquidity_provided,
+            pro_rata_base_donation_claim_amount,
+            pro_rata_quote_donation_claim_amount,
+        } = liquidity;
+        (
+            market_id,
+            time,
+            market_nonce,
+            provider,
+            base_amount,
+            quote_amount,
+            lp_coin_amount,
+            liquidity_provided,
+            pro_rata_base_donation_claim_amount,
+            pro_rata_quote_donation_claim_amount,
+        )
     }
 
     public fun unpack_market_metadata(metadata: MarketMetadata): (
@@ -2084,13 +2149,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let quote_amount_u128 = (quote_amount as u128);
 
         // Proportional base amount: (base_reserves / quote_reserves) * (quote_amount).
-        let base_amount_u128 = (base_reserves_u128 * quote_amount_u128) / quote_reserves_u128;
-        assert!(base_amount_u128 <= (EMOJICOIN_SUPPLY as u128), E_PROVIDE_BASE_TOO_SCARCE);
+        let base_amount_numerator = (base_reserves_u128 * quote_amount_u128);
+        let base_amount_denominator = quote_reserves_u128;
+
+        // Have LP assume the effects of truncation by rounding up to nearest base subunit.
+        let remainder = base_amount_numerator % base_amount_denominator;
+        let round_if_needed = 1 - ((remainder ^ HI_128) / HI_128);
+        let base_amount_u128 = (base_amount_numerator / base_amount_denominator) + round_if_needed;
 
         // Proportional LP coins to mint: (quote_amount / quote_reserves) * (lp_coin_supply).
         let lp_coin_amount_u128 =
             (quote_amount_u128 * market_ref.lp_coin_supply) / quote_reserves_u128;
-        assert!(lp_coin_amount_u128 <= U64_MAX_AS_u128, E_PROVIDE_TOO_MANY_LP_COINS);
 
         Liquidity {
             market_id: market_ref.metadata.market_id,
@@ -2115,7 +2184,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let lp_coin_amount_u128 = (lp_coin_amount as u128);
 
         assert!(lp_coin_supply > 0, E_STILL_IN_BONDING_CURVE);
-        assert!(lp_coin_amount_u128 <= lp_coin_supply, E_REMOVE_TOO_MANY_LP_COINS);
+        assert!(lp_coin_amount > 0, E_LIQUIDITY_NO_LP_COINS);
 
         let reserves_ref = market_ref.cpamm_real_reserves;
         let base_reserves_u128 = (reserves_ref.base as u128);
@@ -2251,9 +2320,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     /*inline*/ fun liquidity_provision_operation_epilogue(
         tvl: u128,
+        fdv: u128,
+        market_cap: u128,
         lp_coin_supply: u128,
         total_quote_locked: u64,
-        real_reserves: Reserves,
         trigger: u8,
         market_ref_mut: &mut Market,
     ) {
@@ -2267,7 +2337,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         });
 
         // Get instantaneous stats, bump market state.
-        let (fdv, market_cap) = fdv_market_cap(real_reserves, EMOJICOIN_SUPPLY);
         bump_market_state(
             market_ref_mut,
             trigger,
@@ -2278,6 +2347,34 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 fully_diluted_value: fdv,
             },
         );
+    }
+
+    /*inline*/ fun update_global_fdv_market_cap_for_liquidity_operation(
+        fdv_start: u128,
+        market_cap_start: u128,
+        fdv_end: u128,
+        market_cap_end: u128,
+        global_stats_ref_mut: &mut GlobalStats
+    ) {
+        // Declare fields to update.
+        let global_fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
+        let global_market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
+
+        // Although FDV and market cap shouldn't change in a theoretical sense during a liquidity
+        // provision or removal operation (since circulating supply and price haven't changed),
+        // their numeric values may deviate slightly due to integer truncation (since price is a
+        // result of CPAMM reserve amounts). Hence the global values must be updated to prevent the
+        // accumulation of rounding errors.
+        if (fdv_end > fdv_start) {
+            aggregator_v2::try_add(global_fdv_ref_mut, fdv_end - fdv_start);
+        } else {
+            aggregator_v2::try_sub(global_fdv_ref_mut, fdv_start - fdv_end);
+        };
+        if (market_cap_end > market_cap_start) {
+            aggregator_v2::try_add(global_market_cap_ref_mut, market_cap_end - market_cap_start);
+        } else {
+            aggregator_v2::try_sub(global_market_cap_ref_mut, market_cap_start - market_cap_end);
+        };
     }
 
     #[test_only] const MICROSECONDS_PER_SECOND: u64 = 1_000_000;
@@ -2303,10 +2400,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[test_only] public fun fdv_market_cap_test_only(
-        real_reserves: Reserves,
-        emojicoin_supply: u64,
+        reserves: Reserves,
+        supply_minuend: u64,
     ): (u128, u128) {
-        fdv_market_cap(real_reserves, emojicoin_supply)
+        fdv_market_cap(reserves, supply_minuend)
     }
 
     #[test_only] public fun get_bps_fee_test_only(
@@ -2358,6 +2455,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
     #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
     #[test_only] public fun get_TRIGGER_SWAP_SELL(): u8 { TRIGGER_SWAP_SELL }
+    #[test_only] public fun get_TRIGGER_PROVIDE_LIQUIDITY(): u8 { TRIGGER_PROVIDE_LIQUIDITY }
+    #[test_only] public fun get_TRIGGER_REMOVE_LIQUIDITY(): u8 { TRIGGER_REMOVE_LIQUIDITY }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
