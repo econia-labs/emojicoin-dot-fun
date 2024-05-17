@@ -35,10 +35,8 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
 
   const walletHandler = () => {
-    const _showModal = showModal as ModalProps<WalletModalProps>;
-
     dispatch(
-      _showModal({
+      (showModal as ModalProps<WalletModalProps>)({
         modalName: "walletModal",
         rootId: "modal",
         props: { items: [{ title: "Copy address" }, { title: "Disconnect" }] },
