@@ -162,6 +162,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         last_bump_time: u64,
     }
 
+    struct ParallelizableSequenceInfo has drop, store {
+        nonce: Aggregator<u64>,
+        last_bump_time: u64,
+    }
+
     #[resource_group = ObjectGroup]
     struct Market has key {
         metadata: MarketMetadata,
@@ -279,7 +284,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[resource_group = ObjectGroup]
     struct Registry has key {
         registry_address: address,
-        sequence_info: SequenceInfo,
+        sequence_info: ParallelizableSequenceInfo,
         coin_symbol_emojis: Table<vector<u8>, u8>,
         supplemental_chat_emojis: Table<vector<u8>, u8>,
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
@@ -290,7 +295,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     struct RegistryView has drop, store {
         registry_address: address,
-        nonce: u64,
+        nonce: AggregatorSnapshot<u64>,
         last_bump_time: u64,
         n_markets: u64,
         cumulative_quote_volume: AggregatorSnapshot<u128>,
@@ -306,7 +311,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[event]
     struct GlobalState has drop, store {
         emit_time: u64,
-        registry_nonce: u64,
+        registry_nonce: AggregatorSnapshot<u64>,
         trigger: u8,
         cumulative_quote_volume: AggregatorSnapshot<u128>,
         total_quote_locked: AggregatorSnapshot<u128>,
@@ -1302,11 +1307,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let time = timestamp::now_microseconds();
         let registry = Registry {
             registry_address,
-            sequence_info: SequenceInfo {
+            sequence_info: ParallelizableSequenceInfo {
                 // Set last bump time to a period boundary so that the first bump of global state
                 // takes place the next period boundary.
                 last_bump_time: last_period_boundary(time, PERIOD_1D),
-                nonce: 1,
+                nonce: aggregator_v2::create_unbounded_aggregator(),
             },
             coin_symbol_emojis: table::new(),
             supplemental_chat_emojis: table::new(),
@@ -1324,6 +1329,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 cumulative_chat_messages: aggregator_v2::create_unbounded_aggregator<u64>(),
             },
         };
+        aggregator_v2::try_add(&mut registry.sequence_info.nonce, 1);
 
         // Load supported coin symbol emojis into registry.
         let coin_symbol_emojis_ref_mut = &mut registry.coin_symbol_emojis;
@@ -1336,7 +1342,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Emit global state.
         event::emit(GlobalState {
             emit_time: time,
-            registry_nonce: 1,
+            registry_nonce: aggregator_v2::create_snapshot(1),
             trigger: TRIGGER_PACKAGE_PUBLICATION,
             cumulative_quote_volume: aggregator_v2::create_snapshot(0),
             total_quote_locked: aggregator_v2::create_snapshot(0),
@@ -1381,7 +1387,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let registry_ref = borrow_registry_ref();
         RegistryView {
             registry_address: registry_ref.registry_address,
-            nonce: registry_ref.sequence_info.nonce,
+            nonce: aggregator_v2::snapshot(&registry_ref.sequence_info.nonce),
             last_bump_time: registry_ref.sequence_info.last_bump_time,
             n_markets: smart_table::length(&registry_ref.markets_by_market_id),
             cumulative_quote_volume:
@@ -1753,7 +1759,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     public fun unpack_registry_view(registry_view: RegistryView): (
         address,
-        u64,
+        AggregatorSnapshot<u64>,
         u64,
         u64,
         AggregatorSnapshot<u128>,
@@ -1942,8 +1948,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Increment registry nonce.
         let registry_sequence_info_ref_mut = &mut registry_ref_mut.sequence_info;
         let registry_nonce_ref_mut = &mut registry_sequence_info_ref_mut.nonce;
-        let registry_nonce = *registry_nonce_ref_mut + 1;
-        *registry_nonce_ref_mut = registry_nonce;
+        aggregator_v2::try_add(registry_nonce_ref_mut, 1);
 
         // Check global state tracker period lapse.
         let last_registry_bump_time = registry_sequence_info_ref_mut.last_bump_time;
@@ -1952,7 +1957,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             let global_stats_ref = &registry_ref_mut.global_stats;
             event::emit(GlobalState {
                 emit_time: time,
-                registry_nonce,
+                registry_nonce: aggregator_v2::snapshot(registry_nonce_ref_mut),
                 trigger,
                 cumulative_quote_volume:
                     aggregator_v2::snapshot(&global_stats_ref.cumulative_quote_volume),
@@ -2526,7 +2531,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         global_state: GlobalState,
     ): (
         u64,
-        u64,
+        AggregatorSnapshot<u64>,
         u8,
         AggregatorSnapshot<u128>,
         AggregatorSnapshot<u128>,

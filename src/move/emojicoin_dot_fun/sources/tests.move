@@ -568,7 +568,7 @@
             cumulative_chat_messages,
         ) = unpack_global_state(global_state);
         assert!(emit_time == mock_global_state.emit_time, 0);
-        assert!(registry_nonce == mock_global_state.registry_nonce, 0);
+        assert!(read_snapshot(&registry_nonce) == mock_global_state.registry_nonce, 0);
         assert!(trigger == mock_global_state.trigger, 0);
         assert!(read_snapshot(&cumulative_quote_volume)
             == mock_global_state.cumulative_quote_volume, 0);
@@ -846,7 +846,7 @@
             cumulative_chat_messages,
         ) = unpack_registry_view(registry_view);
         assert!(registry_address == mock_registry_view.registry_address, 0);
-        assert!(nonce == mock_registry_view.nonce, 0);
+        assert!(read_snapshot(&nonce) == mock_registry_view.nonce, 0);
         assert!(last_bump_time == mock_registry_view.last_bump_time, 0);
         assert!(n_markets == mock_registry_view.n_markets, 0);
         assert!(read_snapshot(&cumulative_quote_volume)
