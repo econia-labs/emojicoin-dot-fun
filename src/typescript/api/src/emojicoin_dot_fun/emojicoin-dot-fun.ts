@@ -35,18 +35,18 @@ import {
 import { MODULE_ADDRESS } from "./consts";
 
 export type ChatPayloadMoveArguments = {
+  marketAddress: AccountAddress;
   emojiBytes: MoveVector<MoveVector<U8>>;
   emojiIndicesSequence: MoveVector<U8>;
-  marketAddress: AccountAddress;
 };
 
 /**
  *```
  *  public entry fun chat<Emojicoin, EmojicoinLP>(
  *     user: &signer,
+ *     market_address: address,
  *     emoji_bytes: vector<vector<u8>>,
  *     emoji_indices_sequence: vector<u8>,
- *     market_address: address,
  *  )
  *```
  * */
@@ -70,9 +70,9 @@ export class Chat extends EntryFunctionPayloadBuilder {
 
   private constructor(args: {
     user: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
     emojiBytes: Array<HexInput>; // vector<vector<u8>>
     emojiIndicesSequence: HexInput; // vector<u8>
-    marketAddress: AccountAddressInput; // address
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
@@ -81,9 +81,9 @@ export class Chat extends EntryFunctionPayloadBuilder {
     this.primarySender = AccountAddress.from(user);
 
     this.args = {
+      marketAddress: AccountAddress.from(marketAddress),
       emojiBytes: new MoveVector(emojiBytes.map((argA) => MoveVector.U8(argA))),
       emojiIndicesSequence: MoveVector.U8(emojiIndicesSequence),
-      marketAddress: AccountAddress.from(marketAddress),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -94,9 +94,9 @@ export class Chat extends EntryFunctionPayloadBuilder {
   static async builder(args: {
     aptosConfig: AptosConfig;
     user: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
     emojiBytes: Array<HexInput>; // vector<vector<u8>>
     emojiIndicesSequence: HexInput; // vector<u8>
-    marketAddress: AccountAddressInput; // address
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
@@ -117,9 +117,9 @@ export class Chat extends EntryFunctionPayloadBuilder {
   static async submit(args: {
     aptosConfig: AptosConfig;
     user: Account; // &signer
+    marketAddress: AccountAddressInput; // address
     emojiBytes: Array<HexInput>; // vector<vector<u8>>
     emojiIndicesSequence: HexInput; // vector<u8>
-    marketAddress: AccountAddressInput; // address
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;

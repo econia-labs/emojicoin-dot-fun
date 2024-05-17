@@ -13,6 +13,12 @@ jest.setTimeout(20000);
 
 describe("registers a market successfully", () => {
   const { aptos, publisher, publishPackageResult } = getTestHelpers();
+  const user = Account.generate();
+
+  beforeAll(async () => {
+    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
+    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
+  });
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
     const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
@@ -39,7 +45,7 @@ describe("registers a market successfully", () => {
 
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
-      registrant: publisher,
+      registrant: user,
       emojis,
       integrator: randomIntegrator.accountAddress,
       options: {

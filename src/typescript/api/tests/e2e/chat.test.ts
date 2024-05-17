@@ -38,7 +38,7 @@ describe("emits a chat message event successfully", () => {
     // Register a market.
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
-      registrant: publisher,
+      registrant: user,
       emojis: [blackCatEmoji],
       integrator: randomIntegrator.accountAddress,
       options: {
@@ -74,9 +74,9 @@ describe("emits a chat message event successfully", () => {
     const chatResponse = await EmojicoinDotFun.Chat.submit({
       aptosConfig: aptos.config,
       user,
+      marketAddress,
       emojiBytes: chatEmojis.map(([hex, _]) => hex),
       emojiIndicesSequence: new Uint8Array([0, 1]),
-      marketAddress,
       typeTags: [emojicoin, emojicoinLP],
     });
 
@@ -98,9 +98,9 @@ describe("emits a chat message event successfully", () => {
     const secondChatResponse = await EmojicoinDotFun.Chat.submit({
       aptosConfig: aptos.config,
       user,
+      marketAddress,
       emojiBytes: chatEmojis.map(([hex, _]) => hex),
       emojiIndicesSequence: new Uint8Array(indices),
-      marketAddress,
       typeTags: [emojicoin, emojicoinLP],
     });
 
