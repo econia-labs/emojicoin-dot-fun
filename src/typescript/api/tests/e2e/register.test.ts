@@ -15,7 +15,7 @@ describe("registers a market successfully", () => {
   const { aptos, publisher, publishPackageResult } = getTestHelpers();
   const user = Account.generate();
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
   });
 
