@@ -97,6 +97,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_NOT_SUPPORTED_CHAT_EMOJI: u64 = 11;
     /// The constructed chat message exceeds the maximum length.
     const E_CHAT_MESSAGE_TOO_LONG: u64 = 12;
+    /// The chat message is empty.
+    const E_CHAT_MESSAGE_EMPTY: u64 = 13;
+    /// The given emoji index is out of bounds.
+    const E_INVALID_EMOJI_INDEX: u64 = 14;
 
     struct CumulativeStats has copy, drop, store {
         base_volume: u128,
@@ -155,6 +159,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     struct SequenceInfo has copy, drop, store {
         nonce: u64,
+        last_bump_time: u64,
+    }
+
+    struct ParallelizableSequenceInfo has drop, store {
+        nonce: Aggregator<u64>,
         last_bump_time: u64,
     }
 
@@ -275,7 +284,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[resource_group = ObjectGroup]
     struct Registry has key {
         registry_address: address,
-        sequence_info: SequenceInfo,
+        sequence_info: ParallelizableSequenceInfo,
         coin_symbol_emojis: Table<vector<u8>, u8>,
         supplemental_chat_emojis: Table<vector<u8>, u8>,
         markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
@@ -286,7 +295,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     struct RegistryView has drop, store {
         registry_address: address,
-        nonce: u64,
+        nonce: AggregatorSnapshot<u64>,
         last_bump_time: u64,
         n_markets: u64,
         cumulative_quote_volume: AggregatorSnapshot<u128>,
@@ -302,7 +311,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[event]
     struct GlobalState has drop, store {
         emit_time: u64,
-        registry_nonce: u64,
+        registry_nonce: AggregatorSnapshot<u64>,
         trigger: u8,
         cumulative_quote_volume: AggregatorSnapshot<u128>,
         total_quote_locked: AggregatorSnapshot<u128>,
@@ -366,15 +375,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ///     [ x"00", x"01", x"02", x"02", x"02", x"01", x"02", x"01" ]
     public entry fun chat<Emojicoin, EmojicoinLP>(
         user: &signer,
+        market_address: address,
         emoji_bytes: vector<vector<u8>>, // The individual emojis to use.
         emoji_indices_sequence: vector<u8>, // Sequence of indices used to construct a chat message.
-        market_address: address,
     ) acquires Market, Registry, RegistryAddress {
-
-        assert!(
-            vector::length(&emoji_indices_sequence) <= MAX_CHAT_MESSAGE_LENGTH,
-            E_CHAT_MESSAGE_TOO_LONG,
-        );
 
         // Mutably borrow market and check its coin types.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
@@ -384,16 +388,18 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             market_address,
         );
 
-        // Verify all emoji bytes are supported as chat emojis.
-        assert!(
-            vector::all(&emoji_bytes, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }),
-            E_NOT_SUPPORTED_CHAT_EMOJI,
-        );
+        // Verify chat message length.
+        let message_length = vector::length(&emoji_indices_sequence);
+        assert!(message_length <= MAX_CHAT_MESSAGE_LENGTH, E_CHAT_MESSAGE_TOO_LONG);
+        assert!(message_length > 0, E_CHAT_MESSAGE_EMPTY);
 
-        // Construct the chat message from the emoji indices.
+        // Construct the chat message from the emoji indices, checking index and emoji validity.
         let message: String = string::utf8(b"");
+        let n_emojis = vector::length(&emoji_bytes);
         vector::for_each(emoji_indices_sequence, |idx| {
+            assert!((idx as u64) < n_emojis, E_INVALID_EMOJI_INDEX);
             let emoji = *vector::borrow(&emoji_bytes, (idx as u64));
+            assert!(is_a_supported_chat_emoji(emoji), E_NOT_SUPPORTED_CHAT_EMOJI);
             string::append_utf8(&mut message, emoji);
         });
 
@@ -417,6 +423,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let global_cumulative_chat_messages_ref_mut =
             &mut global_stats_ref_mut.cumulative_chat_messages;
         aggregator_v2::try_add(global_cumulative_chat_messages_ref_mut, 1);
+
+        // Update periodic state trackers.
+        vector::for_each_mut(&mut market_ref_mut.periodic_state_trackers, |e| {
+            // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
+            let tracker_ref_mut: &mut PeriodicStateTracker = e;
+            tracker_ref_mut.n_chat_messages = tracker_ref_mut.n_chat_messages + 1;
+        });
 
         // Emit chat event.
         let (supply_minuend, reserves_ref) =
@@ -1294,11 +1307,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let time = timestamp::now_microseconds();
         let registry = Registry {
             registry_address,
-            sequence_info: SequenceInfo {
+            sequence_info: ParallelizableSequenceInfo {
                 // Set last bump time to a period boundary so that the first bump of global state
                 // takes place the next period boundary.
                 last_bump_time: last_period_boundary(time, PERIOD_1D),
-                nonce: 1,
+                nonce: aggregator_v2::create_unbounded_aggregator(),
             },
             coin_symbol_emojis: table::new(),
             supplemental_chat_emojis: table::new(),
@@ -1316,6 +1329,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 cumulative_chat_messages: aggregator_v2::create_unbounded_aggregator<u64>(),
             },
         };
+        aggregator_v2::try_add(&mut registry.sequence_info.nonce, 1);
 
         // Load supported coin symbol emojis into registry.
         let coin_symbol_emojis_ref_mut = &mut registry.coin_symbol_emojis;
@@ -1328,7 +1342,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Emit global state.
         event::emit(GlobalState {
             emit_time: time,
-            registry_nonce: 1,
+            registry_nonce: aggregator_v2::create_snapshot(1),
             trigger: TRIGGER_PACKAGE_PUBLICATION,
             cumulative_quote_volume: aggregator_v2::create_snapshot(0),
             total_quote_locked: aggregator_v2::create_snapshot(0),
@@ -1373,7 +1387,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let registry_ref = borrow_registry_ref();
         RegistryView {
             registry_address: registry_ref.registry_address,
-            nonce: registry_ref.sequence_info.nonce,
+            nonce: aggregator_v2::snapshot(&registry_ref.sequence_info.nonce),
             last_bump_time: registry_ref.sequence_info.last_bump_time,
             n_markets: smart_table::length(&registry_ref.markets_by_market_id),
             cumulative_quote_volume:
@@ -1745,7 +1759,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     public fun unpack_registry_view(registry_view: RegistryView): (
         address,
-        u64,
+        AggregatorSnapshot<u64>,
         u64,
         u64,
         AggregatorSnapshot<u128>,
@@ -1934,8 +1948,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         // Increment registry nonce.
         let registry_sequence_info_ref_mut = &mut registry_ref_mut.sequence_info;
         let registry_nonce_ref_mut = &mut registry_sequence_info_ref_mut.nonce;
-        let registry_nonce = *registry_nonce_ref_mut + 1;
-        *registry_nonce_ref_mut = registry_nonce;
+        aggregator_v2::try_add(registry_nonce_ref_mut, 1);
 
         // Check global state tracker period lapse.
         let last_registry_bump_time = registry_sequence_info_ref_mut.last_bump_time;
@@ -1944,7 +1957,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             let global_stats_ref = &registry_ref_mut.global_stats;
             event::emit(GlobalState {
                 emit_time: time,
-                registry_nonce,
+                registry_nonce: aggregator_v2::snapshot(registry_nonce_ref_mut),
                 trigger,
                 cumulative_quote_volume:
                     aggregator_v2::snapshot(&global_stats_ref.cumulative_quote_volume),
@@ -2451,12 +2464,13 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_PERIOD_1D(): u64 { PERIOD_1D }
     #[test_only] public fun get_POOL_FEE_RATE_BPS(): u8 { POOL_FEE_RATE_BPS }
     #[test_only] public fun get_REGISTRY_NAME(): vector<u8> { REGISTRY_NAME }
+    #[test_only] public fun get_TRIGGER_CHAT(): u8 { TRIGGER_CHAT }
     #[test_only] public fun get_TRIGGER_MARKET_REGISTRATION(): u8 { TRIGGER_MARKET_REGISTRATION }
     #[test_only] public fun get_TRIGGER_PACKAGE_PUBLICATION(): u8 { TRIGGER_PACKAGE_PUBLICATION }
-    #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
-    #[test_only] public fun get_TRIGGER_SWAP_SELL(): u8 { TRIGGER_SWAP_SELL }
     #[test_only] public fun get_TRIGGER_PROVIDE_LIQUIDITY(): u8 { TRIGGER_PROVIDE_LIQUIDITY }
     #[test_only] public fun get_TRIGGER_REMOVE_LIQUIDITY(): u8 { TRIGGER_REMOVE_LIQUIDITY }
+    #[test_only] public fun get_TRIGGER_SWAP_BUY(): u8 { TRIGGER_SWAP_BUY }
+    #[test_only] public fun get_TRIGGER_SWAP_SELL(): u8 { TRIGGER_SWAP_SELL }
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
@@ -2517,7 +2531,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         global_state: GlobalState,
     ): (
         u64,
-        u64,
+        AggregatorSnapshot<u64>,
         u8,
         AggregatorSnapshot<u128>,
         AggregatorSnapshot<u128>,

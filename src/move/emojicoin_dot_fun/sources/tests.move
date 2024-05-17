@@ -18,6 +18,7 @@
 
     use aptos_framework::account::{create_signer_for_test as get_signer};
     use aptos_framework::aggregator_v2::read_snapshot;
+    use aptos_framework::account;
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
@@ -92,6 +93,7 @@
         get_QUOTE_VIRTUAL_CEILING,
         get_QUOTE_VIRTUAL_FLOOR,
         get_REGISTRY_NAME,
+        get_TRIGGER_CHAT,
         get_TRIGGER_MARKET_REGISTRATION,
         get_TRIGGER_PACKAGE_PUBLICATION,
         get_TRIGGER_PROVIDE_LIQUIDITY,
@@ -566,7 +568,7 @@
             cumulative_chat_messages,
         ) = unpack_global_state(global_state);
         assert!(emit_time == mock_global_state.emit_time, 0);
-        assert!(registry_nonce == mock_global_state.registry_nonce, 0);
+        assert!(read_snapshot(&registry_nonce) == mock_global_state.registry_nonce, 0);
         assert!(trigger == mock_global_state.trigger, 0);
         assert!(read_snapshot(&cumulative_quote_volume)
             == mock_global_state.cumulative_quote_volume, 0);
@@ -844,7 +846,7 @@
             cumulative_chat_messages,
         ) = unpack_registry_view(registry_view);
         assert!(registry_address == mock_registry_view.registry_address, 0);
-        assert!(nonce == mock_registry_view.nonce, 0);
+        assert!(read_snapshot(&nonce) == mock_registry_view.nonce, 0);
         assert!(last_bump_time == mock_registry_view.last_bump_time, 0);
         assert!(n_markets == mock_registry_view.n_markets, 0);
         assert!(read_snapshot(&cumulative_quote_volume)
@@ -2156,7 +2158,7 @@
         assert!(get_bps_fee(50_000, 1) == 5, 0);
     }
 
-    #[test] fun chat_complex_emoji_sequences() {
+    #[test] fun chat_complex() {
         init_package();
         let emojis = vector[
             x"f09fa791e2808df09f9a80", // Astronaut.
@@ -2166,19 +2168,35 @@
         // Verify neither supplemental chat emoji is supported before first market is registered.
         assert!(!vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
 
-        // Register a market, verify both emojis supported in chat.
+        // Register a market, verify both emojis supported in chat. Do with exact transition user
+        // who does not yet have an Aptos account initialized.
         init_market(vector[BLACK_CAT]);
         assert!(vector::all(&emojis, |emoji_ref| { is_a_supported_chat_emoji(*emoji_ref) }), 0);
+        assert!(!account::exists_at(EXACT_TRANSITION_USER), 0);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            &get_signer(USER),
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
             emojis,
             vector[1, 0],
-            @black_cat_market,
         );
 
-        // Chat again with a longer message.
+        // Provide the exact transition user with Aptos coins, then execute exact transition.
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
+        timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
+            EXACT_TRANSITION_INPUT_AMOUNT,
+            SWAP_BUY,
+            EXACT_TRANSITION_INTEGRATOR,
+            EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
+        );
+
+        // Chat again with a longer message from exact transition user.
+        timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME + 1);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            &get_signer(USER),
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
             vector<vector<u8>> [
                 x"f09f98b6", // Cat face.
                 x"f09f98b7", // Cat face with tears of joy.
@@ -2187,21 +2205,22 @@
                 x"f09f9294", // Broken heart.
             ],
             vector[ 3, 0, 2, 2, 1, 4 ],
-            @black_cat_market,
         );
 
-        // Post a max length chat message.
+        // Post a max length chat message from generic user, after registering Aptos account.
         let emoji_indices_sequence = vector[];
         for (i in 0..get_MAX_CHAT_MESSAGE_LENGTH()) {
             vector::push_back(&mut emoji_indices_sequence, 0);
         };
+        aptos_account::create_account(USER);
+        timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME + 2);
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @black_cat_market,
             vector<vector<u8>> [
                 x"f09f9088e2808de2ac9b", // Black cat.
             ],
             emoji_indices_sequence,
-            @black_cat_market,
         );
 
         // Assert the emitted chat events.
@@ -2216,7 +2235,7 @@
                 market_metadata,
                 emit_time: 0,
                 emit_market_nonce: 2,
-                user: USER,
+                user: EXACT_TRANSITION_USER,
                 message: utf8(x"f09fa6b8f09f8fbee2808de29982efb88ff09fa791e2808df09f9a80"),
                 user_emojicoin_balance: 0,
                 circulating_supply: 0,
@@ -2227,15 +2246,83 @@
         assert_chat(
             MockChat {
                 market_metadata,
-                emit_time: 0,
-                emit_market_nonce: 3,
-                user: USER,
+                emit_time: EXACT_TRANSITION_TIME + 1,
+                emit_market_nonce: 4,
+                user: EXACT_TRANSITION_USER,
                 message: utf8(x"f09f9088e2808de2ac9bf09f98b6f09f98b8f09f98b8f09f98b7f09f9294"),
-                user_emojicoin_balance: 0,
-                circulating_supply: 0,
-                balance_as_fraction_of_circulating_supply_q64: 0,
+                user_emojicoin_balance: get_BASE_REAL_CEILING(),
+                circulating_supply: get_BASE_REAL_CEILING(),
+                balance_as_fraction_of_circulating_supply_q64:
+                    ((get_BASE_REAL_CEILING() as u128) << 64) / (get_BASE_REAL_CEILING() as u128),
             },
             *vector::borrow(&events_emitted, 1),
+        );
+        let message_bytes = vector[];
+        for (i in 0..get_MAX_CHAT_MESSAGE_LENGTH()) {
+            vector::append(&mut message_bytes, x"f09f9088e2808de2ac9b");
+        };
+        assert_chat(
+            MockChat {
+                market_metadata,
+                emit_time: EXACT_TRANSITION_TIME + 2,
+                emit_market_nonce: 5,
+                user: USER,
+                message: utf8(message_bytes),
+                user_emojicoin_balance: 0,
+                circulating_supply: get_BASE_REAL_CEILING(),
+                balance_as_fraction_of_circulating_supply_q64: 0
+            },
+            *vector::borrow(&events_emitted, 2),
+        );
+
+        // Verify local and global values, emitted state event.
+        let mock_market_view = base_market_view_exact_transition();
+        let mock_registry_view = base_registry_view_exact_transition();
+        let mock_periodic_state_tracker = base_periodic_state_tracker_exact_transition();
+        let mock_state = base_state_exact_transition();
+
+        mock_periodic_state_tracker.n_chat_messages = 3;
+        mock_market_view.cumulative_stats.n_chat_messages = 3;
+        mock_market_view.last_swap.nonce = mock_market_view.last_swap.nonce + 1;
+        mock_market_view.sequence_info.nonce = mock_market_view.sequence_info.nonce + 3;
+        mock_market_view.sequence_info.last_bump_time = EXACT_TRANSITION_TIME + 2;
+        mock_market_view.periodic_state_trackers =
+            vectorize_periodic_state_tracker_base(mock_periodic_state_tracker);
+
+        mock_registry_view.cumulative_chat_messages = 3;
+        mock_registry_view.nonce = mock_registry_view.nonce + 3;
+
+        mock_state.cumulative_stats = mock_market_view.cumulative_stats;
+        mock_state.state_metadata = MockStateMetadata {
+            market_nonce: mock_market_view.sequence_info.nonce,
+            bump_time: EXACT_TRANSITION_TIME + 2,
+            trigger: get_TRIGGER_CHAT(),
+        };
+        mock_state.last_swap = mock_market_view.last_swap;
+
+        assert_market_view(
+            mock_market_view,
+            market_view<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market),
+        );
+        assert_registry_view(mock_registry_view, registry_view());
+        assert_state(mock_state, vector::pop_back(&mut emitted_events<State>()));
+
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_CHAT_MESSAGE_EMPTY,
+        location = emojicoin_dot_fun
+    )] fun chat_message_empty() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            vector<vector<u8>> [
+                x"f09f98b7", // Cat face with tears of joy.
+            ],
+            vector[],
         );
     }
 
@@ -2248,12 +2335,29 @@
 
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @black_cat_market,
             vector<vector<u8>> [
                 x"f09f98b7", // Cat face with tears of joy.
                 x"f09f", // Invalid emoji.
             ],
-            vector[ 0, 1],
+            vector[0, 1],
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_INVALID_EMOJI_INDEX,
+        location = emojicoin_dot_fun
+    )] fun chat_message_invalid_emoji_index() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
             @black_cat_market,
+            vector<vector<u8>> [
+                x"f09f98b7", // Cat face with tears of joy.
+            ],
+            vector[1],
         );
     }
 
@@ -2274,9 +2378,21 @@
         };
         chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(USER),
+            @black_cat_market,
             emojis,
             emoji_indices_sequence,
-            @black_cat_market,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun chat_no_market() {
+        chat<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @0x0,
+            vector[vector[]],
+            vector[],
         );
     }
 

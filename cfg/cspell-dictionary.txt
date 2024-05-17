@@ -43,6 +43,7 @@ nazar
 nohup
 octa
 oden
+parallelizable
 permissionless
 postg
 postgrest
