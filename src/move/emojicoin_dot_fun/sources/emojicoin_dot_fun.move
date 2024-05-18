@@ -109,6 +109,179 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// The given emoji index is out of bounds.
     const E_INVALID_EMOJI_INDEX: u64 = 14;
 
+    /// Exists at package address, tracks the address of the registry object.
+    struct RegistryAddress has key {
+        registry_address: address,
+    }
+
+    #[resource_group = ObjectGroup]
+    struct Registry has key {
+        registry_address: address,
+        sequence_info: ParallelizableSequenceInfo,
+        coin_symbol_emojis: Table<vector<u8>, u8>,
+        supplemental_chat_emojis: Table<vector<u8>, u8>,
+        markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
+        markets_by_market_id: SmartTable<u64, address>,
+        extend_ref: ExtendRef,
+        global_stats: GlobalStats,
+    }
+
+    #[resource_group = ObjectGroup]
+    struct Market has key {
+        metadata: MarketMetadata,
+        sequence_info: SequenceInfo,
+        extend_ref: ExtendRef,
+        clamm_virtual_reserves: Reserves,
+        cpamm_real_reserves: Reserves,
+        lp_coin_supply: u128,
+        cumulative_stats: CumulativeStats,
+        last_swap: LastSwap,
+        periodic_state_trackers: vector<PeriodicStateTracker>,
+    }
+
+    #[resource_group = ObjectGroup]
+    /// Exists at object address for a market.
+    struct LPCoinCapabilities<phantom Emojicoin, phantom EmojicoinLP> has key {
+        burn: BurnCapability<EmojicoinLP>,
+        mint: MintCapability<EmojicoinLP>,
+    }
+
+    #[event]
+    /// Emitted globally whenever a one-day period lapses.
+    struct GlobalState has drop, store {
+        emit_time: u64,
+        registry_nonce: AggregatorSnapshot<u64>,
+        trigger: u8,
+        cumulative_quote_volume: AggregatorSnapshot<u128>,
+        total_quote_locked: AggregatorSnapshot<u128>,
+        total_value_locked: AggregatorSnapshot<u128>,
+        market_cap: AggregatorSnapshot<u128>,
+        fully_diluted_value: AggregatorSnapshot<u128>,
+        cumulative_integrator_fees: AggregatorSnapshot<u128>,
+        cumulative_swaps: AggregatorSnapshot<u64>,
+        cumulative_chat_messages: AggregatorSnapshot<u64>,
+    }
+
+    #[event]
+    /// Emitted for each operation in a market.
+    struct State has copy, drop, store {
+        market_metadata: MarketMetadata,
+        state_metadata: StateMetadata,
+        clamm_virtual_reserves: Reserves,
+        cpamm_real_reserves: Reserves,
+        lp_coin_supply: u128,
+        cumulative_stats: CumulativeStats,
+        instantaneous_stats: InstantaneousStats,
+        last_swap: LastSwap,
+    }
+
+    #[event]
+    /// Emitted for a market when a specific period lapses.
+    struct PeriodicState has copy, drop, store {
+        market_metadata: MarketMetadata,
+        periodic_state_metadata: PeriodicStateMetadata,
+        open_price_q64: u128,
+        high_price_q64: u128,
+        low_price_q64: u128,
+        close_price_q64: u128,
+        volume_base: u128,
+        volume_quote: u128,
+        integrator_fees: u128,
+        pool_fees_base: u128,
+        pool_fees_quote: u128,
+        n_swaps: u64,
+        n_chat_messages: u64,
+        starts_in_bonding_curve: bool,
+        ends_in_bonding_curve: bool,
+        tvl_per_lp_coin_growth_q64: u128,
+    }
+
+    #[event]
+    struct MarketRegistration has copy, drop, store {
+        market_metadata: MarketMetadata,
+        time: u64,
+        registrant: address,
+        integrator: address,
+        integrator_fee: u64,
+    }
+
+    #[event]
+    struct Swap has copy, drop, store {
+        market_id: u64,
+        time: u64,
+        market_nonce: u64,
+        swapper: address,
+        input_amount: u64,
+        is_sell: bool,
+        integrator: address,
+        integrator_fee_rate_bps: u8,
+        net_proceeds: u64,
+        base_volume: u64,
+        quote_volume: u64,
+        avg_execution_price_q64: u128,
+        integrator_fee: u64,
+        pool_fee: u64,
+        starts_in_bonding_curve: bool,
+        results_in_state_transition: bool,
+    }
+
+    #[event]
+    struct Chat has copy, drop, store {
+        market_metadata: MarketMetadata,
+        emit_time: u64,
+        emit_market_nonce: u64,
+        user: address,
+        message: String,
+        user_emojicoin_balance: u64,
+        circulating_supply: u64,
+        balance_as_fraction_of_circulating_supply_q64: u128,
+    }
+
+    #[event]
+    struct Liquidity has copy, drop, store {
+        market_id: u64,
+        time: u64,
+        market_nonce: u64,
+        provider: address,
+        base_amount: u64,
+        quote_amount: u64,
+        lp_coin_amount: u64,
+        liquidity_provided: bool,
+        pro_rata_base_donation_claim_amount: u64,
+        pro_rata_quote_donation_claim_amount: u64,
+    }
+
+    struct RegistryView has drop, store {
+        registry_address: address,
+        nonce: AggregatorSnapshot<u64>,
+        last_bump_time: u64,
+        n_markets: u64,
+        cumulative_quote_volume: AggregatorSnapshot<u128>,
+        total_quote_locked: AggregatorSnapshot<u128>,
+        total_value_locked: AggregatorSnapshot<u128>,
+        market_cap: AggregatorSnapshot<u128>,
+        fully_diluted_value: AggregatorSnapshot<u128>,
+        cumulative_integrator_fees: AggregatorSnapshot<u128>,
+        cumulative_swaps: AggregatorSnapshot<u64>,
+        cumulative_chat_messages: AggregatorSnapshot<u64>,
+    }
+
+    struct MarketView has copy, drop, store {
+        metadata: MarketMetadata,
+        sequence_info: SequenceInfo,
+        clamm_virtual_reserves: Reserves,
+        cpamm_real_reserves: Reserves,
+        lp_coin_supply: u128,
+        in_bonding_curve: bool,
+        cumulative_stats: CumulativeStats,
+        instantaneous_stats: InstantaneousStats,
+        last_swap: LastSwap,
+        periodic_state_trackers: vector<PeriodicStateTracker>,
+        aptos_coin_balance: u64,
+        emojicoin_balance: u64,
+        emojicoin_lp_balance: u64,
+    }
+
     struct CumulativeStats has copy, drop, store {
         base_volume: u128,
         quote_volume: u128,
@@ -117,6 +290,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         pool_fees_quote: u128,
         n_swaps: u64,
         n_chat_messages: u64,
+    }
+
+    struct GlobalStats has drop, store {
+        cumulative_quote_volume: Aggregator<u128>,
+        total_quote_locked: Aggregator<u128>,
+        total_value_locked: Aggregator<u128>,
+        market_cap: Aggregator<u128>,
+        fully_diluted_value: Aggregator<u128>,
+        cumulative_integrator_fees: Aggregator<u128>,
+        cumulative_swaps: Aggregator<u64>,
+        cumulative_chat_messages: Aggregator<u64>,
+    }
+
+    struct InstantaneousStats has copy, drop, store {
+        total_quote_locked: u64,
+        total_value_locked: u128,
+        market_cap: u128,
+        fully_diluted_value: u128,
     }
 
     struct LastSwap has copy, drop, store {
@@ -134,9 +325,17 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         emoji_bytes: vector<u8>,
     }
 
-    struct TVLtoLPCoinRatio has copy, drop, store {
-        tvl: u128,
-        lp_coins: u128,
+    struct ParallelizableSequenceInfo has drop, store {
+        nonce: Aggregator<u64>,
+        last_bump_time: u64,
+    }
+
+    struct PeriodicStateMetadata has copy, drop, store {
+        start_time: u64,
+        period: u64,
+        emit_time: u64,
+        emit_market_nonce: u64,
+        trigger: u8,
     }
 
     struct PeriodicStateTracker has copy, drop, store {
@@ -169,209 +368,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         last_bump_time: u64,
     }
 
-    struct ParallelizableSequenceInfo has drop, store {
-        nonce: Aggregator<u64>,
-        last_bump_time: u64,
-    }
-
-    #[resource_group = ObjectGroup]
-    struct Market has key {
-        metadata: MarketMetadata,
-        sequence_info: SequenceInfo,
-        extend_ref: ExtendRef,
-        clamm_virtual_reserves: Reserves,
-        cpamm_real_reserves: Reserves,
-        lp_coin_supply: u128,
-        cumulative_stats: CumulativeStats,
-        last_swap: LastSwap,
-        periodic_state_trackers: vector<PeriodicStateTracker>,
-    }
-
-    struct MarketView has copy, drop, store {
-        metadata: MarketMetadata,
-        sequence_info: SequenceInfo,
-        clamm_virtual_reserves: Reserves,
-        cpamm_real_reserves: Reserves,
-        lp_coin_supply: u128,
-        in_bonding_curve: bool,
-        cumulative_stats: CumulativeStats,
-        instantaneous_stats: InstantaneousStats,
-        last_swap: LastSwap,
-        periodic_state_trackers: vector<PeriodicStateTracker>,
-        aptos_coin_balance: u64,
-        emojicoin_balance: u64,
-        emojicoin_lp_balance: u64,
-    }
-
-    struct PeriodicStateMetadata has copy, drop, store {
-        start_time: u64,
-        period: u64,
-        emit_time: u64,
-        emit_market_nonce: u64,
-        trigger: u8,
-    }
-
-    #[event]
-    struct Chat has copy, drop, store {
-        market_metadata: MarketMetadata,
-        emit_time: u64,
-        emit_market_nonce: u64,
-        user: address,
-        message: String,
-        user_emojicoin_balance: u64,
-        circulating_supply: u64,
-        balance_as_fraction_of_circulating_supply_q64: u128,
-    }
-
-    #[event]
-    struct MarketRegistration has copy, drop, store {
-        market_metadata: MarketMetadata,
-        time: u64,
-        registrant: address,
-        integrator: address,
-        integrator_fee: u64,
-    }
-
-    #[event]
-    struct PeriodicState has copy, drop, store {
-        market_metadata: MarketMetadata,
-        periodic_state_metadata: PeriodicStateMetadata,
-        open_price_q64: u128,
-        high_price_q64: u128,
-        low_price_q64: u128,
-        close_price_q64: u128,
-        volume_base: u128,
-        volume_quote: u128,
-        integrator_fees: u128,
-        pool_fees_base: u128,
-        pool_fees_quote: u128,
-        n_swaps: u64,
-        n_chat_messages: u64,
-        starts_in_bonding_curve: bool,
-        ends_in_bonding_curve: bool,
-        tvl_per_lp_coin_growth_q64: u128,
-    }
-
-    struct InstantaneousStats has copy, drop, store {
-        total_quote_locked: u64,
-        total_value_locked: u128,
-        market_cap: u128,
-        fully_diluted_value: u128,
-    }
-
     struct StateMetadata has copy, drop, store {
         market_nonce: u64,
         bump_time: u64,
         trigger: u8,
     }
 
-    #[event]
-    struct State has copy, drop, store {
-        market_metadata: MarketMetadata,
-        state_metadata: StateMetadata,
-        clamm_virtual_reserves: Reserves,
-        cpamm_real_reserves: Reserves,
-        lp_coin_supply: u128,
-        cumulative_stats: CumulativeStats,
-        instantaneous_stats: InstantaneousStats,
-        last_swap: LastSwap,
-    }
-
-    struct GlobalStats has drop, store {
-        cumulative_quote_volume: Aggregator<u128>,
-        total_quote_locked: Aggregator<u128>,
-        total_value_locked: Aggregator<u128>,
-        market_cap: Aggregator<u128>,
-        fully_diluted_value: Aggregator<u128>,
-        cumulative_integrator_fees: Aggregator<u128>,
-        cumulative_swaps: Aggregator<u64>,
-        cumulative_chat_messages: Aggregator<u64>,
-    }
-
-    #[resource_group = ObjectGroup]
-    struct Registry has key {
-        registry_address: address,
-        sequence_info: ParallelizableSequenceInfo,
-        coin_symbol_emojis: Table<vector<u8>, u8>,
-        supplemental_chat_emojis: Table<vector<u8>, u8>,
-        markets_by_emoji_bytes: SmartTable<vector<u8>, address>,
-        markets_by_market_id: SmartTable<u64, address>,
-        extend_ref: ExtendRef,
-        global_stats: GlobalStats,
-    }
-
-    struct RegistryView has drop, store {
-        registry_address: address,
-        nonce: AggregatorSnapshot<u64>,
-        last_bump_time: u64,
-        n_markets: u64,
-        cumulative_quote_volume: AggregatorSnapshot<u128>,
-        total_quote_locked: AggregatorSnapshot<u128>,
-        total_value_locked: AggregatorSnapshot<u128>,
-        market_cap: AggregatorSnapshot<u128>,
-        fully_diluted_value: AggregatorSnapshot<u128>,
-        cumulative_integrator_fees: AggregatorSnapshot<u128>,
-        cumulative_swaps: AggregatorSnapshot<u64>,
-        cumulative_chat_messages: AggregatorSnapshot<u64>,
-    }
-
-    #[event]
-    struct GlobalState has drop, store {
-        emit_time: u64,
-        registry_nonce: AggregatorSnapshot<u64>,
-        trigger: u8,
-        cumulative_quote_volume: AggregatorSnapshot<u128>,
-        total_quote_locked: AggregatorSnapshot<u128>,
-        total_value_locked: AggregatorSnapshot<u128>,
-        market_cap: AggregatorSnapshot<u128>,
-        fully_diluted_value: AggregatorSnapshot<u128>,
-        cumulative_integrator_fees: AggregatorSnapshot<u128>,
-        cumulative_swaps: AggregatorSnapshot<u64>,
-        cumulative_chat_messages: AggregatorSnapshot<u64>,
-    }
-
-    #[event]
-    struct Swap has copy, drop, store {
-        market_id: u64,
-        time: u64,
-        market_nonce: u64,
-        swapper: address,
-        input_amount: u64,
-        is_sell: bool,
-        integrator: address,
-        integrator_fee_rate_bps: u8,
-        net_proceeds: u64,
-        base_volume: u64,
-        quote_volume: u64,
-        avg_execution_price_q64: u128,
-        integrator_fee: u64,
-        pool_fee: u64,
-        starts_in_bonding_curve: bool,
-        results_in_state_transition: bool,
-    }
-
-    #[resource_group = ObjectGroup]
-    struct LPCoinCapabilities<phantom Emojicoin, phantom EmojicoinLP> has key {
-        burn: BurnCapability<EmojicoinLP>,
-        mint: MintCapability<EmojicoinLP>,
-    }
-
-    #[event]
-    struct Liquidity has copy, drop, store {
-        market_id: u64,
-        time: u64,
-        market_nonce: u64,
-        provider: address,
-        base_amount: u64,
-        quote_amount: u64,
-        lp_coin_amount: u64,
-        liquidity_provided: bool,
-        pro_rata_base_donation_claim_amount: u64,
-        pro_rata_quote_donation_claim_amount: u64,
-    }
-
-    struct RegistryAddress has key {
-        registry_address: address,
+    struct TVLtoLPCoinRatio has copy, drop, store {
+        tvl: u128,
+        lp_coins: u128,
     }
 
     /// Constructs a chat message from a sequence of emojis emitted as an event.
