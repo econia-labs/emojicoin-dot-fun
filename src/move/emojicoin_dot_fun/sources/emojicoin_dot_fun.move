@@ -2404,47 +2404,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     #[test_only] const MICROSECONDS_PER_SECOND: u64 = 1_000_000;
 
-    #[test_only] public fun assert_valid_coin_types_test_only<Emojicoin, EmojicoinLP>(
-        market_address: address,
-    ) {
-        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address)
-    }
-
-    #[test_only] public fun cpamm_simple_swap_output_amount_test_only(
-        input_amount: u64,
-        is_sell: bool,
-        reserves: Reserves,
-    ): u64 {
-        cpamm_simple_swap_output_amount(input_amount, is_sell, reserves)
-    }
-
-    #[test_only] public fun exists_lp_coin_capabilities<Emojicoin, EmojicoinLP>(
-        market_address: address,
-    ): bool {
-        exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address)
-    }
-
-    #[test_only] public fun fdv_market_cap_test_only(
-        reserves: Reserves,
-        supply_minuend: u64,
-    ): (u128, u128) {
-        fdv_market_cap(reserves, supply_minuend)
-    }
-
-    #[test_only] public fun get_bps_fee_test_only(
-        principal: u64,
-        fee_rate_bps: u8,
-    ): u64 {
-        get_bps_fee(principal, fee_rate_bps)
-    }
-
-    #[test_only] public fun get_concatenation_test_only(
-        base: String,
-        additional: String,
-    ): String {
-        get_concatenation(base, additional)
-    }
-
     #[test_only] public fun get_BASE_REAL_CEILING(): u64 { BASE_REAL_CEILING }
     #[test_only] public fun get_BASE_VIRTUAL_CEILING(): u64 { BASE_VIRTUAL_CEILING }
     #[test_only] public fun get_BASE_VIRTUAL_FLOOR(): u64 { BASE_VIRTUAL_FLOOR }
@@ -2486,6 +2445,47 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_QUOTE_REAL_CEILING(): u64 { QUOTE_REAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_CEILING(): u64 { QUOTE_VIRTUAL_CEILING }
     #[test_only] public fun get_QUOTE_VIRTUAL_FLOOR(): u64 { QUOTE_VIRTUAL_FLOOR }
+
+    #[test_only] public fun assert_valid_coin_types_test_only<Emojicoin, EmojicoinLP>(
+        market_address: address,
+    ) {
+        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address)
+    }
+
+    #[test_only] public fun cpamm_simple_swap_output_amount_test_only(
+        input_amount: u64,
+        is_sell: bool,
+        reserves: Reserves,
+    ): u64 {
+        cpamm_simple_swap_output_amount(input_amount, is_sell, reserves)
+    }
+
+    #[test_only] public fun exists_lp_coin_capabilities<Emojicoin, EmojicoinLP>(
+        market_address: address,
+    ): bool {
+        exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address)
+    }
+
+    #[test_only] public fun fdv_market_cap_test_only(
+        reserves: Reserves,
+        supply_minuend: u64,
+    ): (u128, u128) {
+        fdv_market_cap(reserves, supply_minuend)
+    }
+
+    #[test_only] public fun get_bps_fee_test_only(
+        principal: u64,
+        fee_rate_bps: u8,
+    ): u64 {
+        get_bps_fee(principal, fee_rate_bps)
+    }
+
+    #[test_only] public fun get_concatenation_test_only(
+        base: String,
+        additional: String,
+    ): String {
+        get_concatenation(base, additional)
+    }
 
     #[test_only] public fun init_module_test_only(account: &signer) { init_module(account) }
 
