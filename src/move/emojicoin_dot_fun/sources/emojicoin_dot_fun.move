@@ -1,7 +1,7 @@
 module emojicoin_dot_fun::emojicoin_dot_fun {
 
-    use aptos_framework::aggregator_v2::{Self, Aggregator, AggregatorSnapshot};
     use aptos_framework::account;
+    use aptos_framework::aggregator_v2::{Self, Aggregator, AggregatorSnapshot};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::code;
