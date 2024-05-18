@@ -108,7 +108,10 @@
         is_a_supported_symbol_emoji,
         market_view,
         market_metadata_by_emoji_bytes,
+        market_metadata_by_market_address,
+        market_metadata_by_market_id,
         pack_reserves,
+        pack_tvl_to_lp_coin_ratio,
         provide_liquidity,
         registry_address,
         register_market,
@@ -120,6 +123,7 @@
         simulate_swap,
         swap,
         tvl_clamm_test_only as tvl_clamm,
+        tvl_per_lp_coin_growth_q64,
         unpack_chat,
         unpack_cumulative_stats,
         unpack_global_state,
@@ -2620,6 +2624,35 @@
         );
     }
 
+    #[test] fun market_metadata_assorted() {
+        init_package();
+
+        // Assert all metadata empty before market is registered.
+        assert!(market_metadata_by_emoji_bytes(BLACK_CAT) == option::none(), 0);
+        assert!(market_metadata_by_market_address(@black_cat_market) == option::none(), 0);
+        assert!(market_metadata_by_market_id(1) == option::none(), 0);
+
+        // Register market, verify all getters return same metadata.
+        init_market(vector[BLACK_CAT]);
+        let mock_market_metadata = MockMarketMetadata {
+            market_id: 1,
+            market_address: @black_cat_market,
+            emoji_bytes: BLACK_CAT,
+        };
+        assert_market_metadata(
+            mock_market_metadata,
+            option::destroy_some(market_metadata_by_emoji_bytes(BLACK_CAT)),
+        );
+        assert_market_metadata(
+            mock_market_metadata,
+            option::destroy_some(market_metadata_by_market_address(@black_cat_market)),
+        );
+        assert_market_metadata(
+            mock_market_metadata,
+            option::destroy_some(market_metadata_by_market_id(1)),
+        );
+    }
+
     #[test, expected_failure(
         abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
         location = emojicoin_dot_fun
@@ -3746,11 +3779,24 @@
         let ( _, _, _, _, _, _, provide_liquidity_lp_coin_amount, _, _, _) =
             unpack_liquidity(vector::pop_back(&mut emitted_events<Liquidity>()));
 
-        // Get TVL per LP coin growth during the period.
+        // Get TVL per LP coin growth during the period, verify it matches that of helper function.
         let tvl_to_lp_coin_ratio_2 = tvl_to_lp_coin_ratio();
         let tvl_per_lp_coin_growth_q64_1_2 = tvl_per_lp_coin_growth_q64_during_current_period(
             tvl_to_lp_coin_ratio_1,
             tvl_to_lp_coin_ratio_2,
+        );
+        assert!(
+            tvl_per_lp_coin_growth_q64_1_2 == tvl_per_lp_coin_growth_q64(
+                pack_tvl_to_lp_coin_ratio(
+                    tvl_to_lp_coin_ratio_1.tvl,
+                    tvl_to_lp_coin_ratio_1.lp_coins,
+                ),
+                pack_tvl_to_lp_coin_ratio(
+                    tvl_to_lp_coin_ratio_2.tvl,
+                    tvl_to_lp_coin_ratio_2.lp_coins,
+                ),
+            ),
+            0,
         );
 
         // Advance timer to next 1 minute boundary, remove liquidity.
