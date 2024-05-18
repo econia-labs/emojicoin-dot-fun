@@ -12,7 +12,6 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { type ExtendRef, type SequenceInfo } from "./core";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../emojicoin_dot_fun/consts";
-import { Uint128String, Uint64String } from "../emojicoin_dot_fun";
 
 // Structs specific to `emojicoin_dot_fun`.
 
@@ -177,10 +176,6 @@ export type LastSwap = {
   time: Uint64;
 };
 
-export type AggregatorSnapshot<T> = {
-  value: T;
-};
-
 export const toStateMetadata = (data: {
   market_nonce: string;
   bump_time: string;
@@ -271,32 +266,17 @@ export type RegistryViewData = {
   cumulativeChatMessages: Uint128;
 };
 
-export type RegistryViewJSONData = {
-  registryAddress: string;
-  nonce: Uint64String;
-  lastBumpTime: Uint64String;
-  nMarkets: Uint64String;
-  cumulativeQuoteVolume: AggregatorSnapshot<Uint128String>;
-  totalQuoteLocked: AggregatorSnapshot<Uint128String>;
-  totalValueLocked: AggregatorSnapshot<Uint128String>;
-  marketCap: Uint128String;
-  fullyDilutedValue: AggregatorSnapshot<Uint128String>;
-  cumulativeIntegratorFees: AggregatorSnapshot<Uint128String>;
-  cumulativeSwaps: AggregatorSnapshot<Uint128String>;
-  cumulativeChatMessages: AggregatorSnapshot<Uint128String>;
-};
-
 export const toRegistryViewData = (data: any): RegistryViewData => ({
-    registryAddress: AccountAddress.from(data.registry_address),
-    nonce: toAggregatorSnapshot(data.nonce),
-    lastBumpTime: BigInt(data.last_bump_time),
-    nMarkets: BigInt(data.n_markets),
-    cumulativeQuoteVolume: toAggregatorSnapshot(data.cumulative_quote_volume),
-    totalQuoteLocked: toAggregatorSnapshot(data.total_quote_locked),
-    totalValueLocked: toAggregatorSnapshot(data.total_value_locked),
-    marketCap: toAggregatorSnapshot(data.market_cap),
-    fullyDilutedValue: toAggregatorSnapshot(data.fully_diluted_value),
-    cumulativeIntegratorFees: toAggregatorSnapshot(data.cumulative_integrator_fees),
-    cumulativeSwaps: toAggregatorSnapshot(data.cumulative_swaps),
-    cumulativeChatMessages: toAggregatorSnapshot(data.cumulative_chat_messages),
-  });
+  registryAddress: AccountAddress.from(data.registry_address),
+  nonce: toAggregatorSnapshot(data.nonce),
+  lastBumpTime: BigInt(data.last_bump_time),
+  nMarkets: BigInt(data.n_markets),
+  cumulativeQuoteVolume: toAggregatorSnapshot(data.cumulative_quote_volume),
+  totalQuoteLocked: toAggregatorSnapshot(data.total_quote_locked),
+  totalValueLocked: toAggregatorSnapshot(data.total_value_locked),
+  marketCap: toAggregatorSnapshot(data.market_cap),
+  fullyDilutedValue: toAggregatorSnapshot(data.fully_diluted_value),
+  cumulativeIntegratorFees: toAggregatorSnapshot(data.cumulative_integrator_fees),
+  cumulativeSwaps: toAggregatorSnapshot(data.cumulative_swaps),
+  cumulativeChatMessages: toAggregatorSnapshot(data.cumulative_chat_messages),
+});

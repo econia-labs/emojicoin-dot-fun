@@ -26,6 +26,8 @@ import {
   type Uint8,
   type Uint64,
   type AccountAddressString,
+  type Uint128String,
+  type Uint64String,
 } from "./types";
 import {
   ViewFunctionPayloadBuilder,
@@ -33,7 +35,7 @@ import {
   EntryFunctionTransactionBuilder,
 } from "./payload-builders";
 import { MODULE_ADDRESS } from "./consts";
-import { type RegistryViewJSONData } from "../types/contract";
+import { type AggregatorSnapshot } from "../types/core";
 
 export type ChatPayloadMoveArguments = {
   marketAddress: AccountAddress;
@@ -919,6 +921,21 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
     return res;
   }
 }
+
+export type RegistryViewJSONData = {
+  registryAddress: string;
+  nonce: Uint64String;
+  lastBumpTime: Uint64String;
+  nMarkets: Uint64String;
+  cumulativeQuoteVolume: AggregatorSnapshot<Uint128String>;
+  totalQuoteLocked: AggregatorSnapshot<Uint128String>;
+  totalValueLocked: AggregatorSnapshot<Uint128String>;
+  marketCap: Uint128String;
+  fullyDilutedValue: AggregatorSnapshot<Uint128String>;
+  cumulativeIntegratorFees: AggregatorSnapshot<Uint128String>;
+  cumulativeSwaps: AggregatorSnapshot<Uint128String>;
+  cumulativeChatMessages: AggregatorSnapshot<Uint128String>;
+};
 
 /**
  *```

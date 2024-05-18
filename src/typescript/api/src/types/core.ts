@@ -16,3 +16,7 @@ export type EventJSON = {
   type: string;
   data: any;
 };
+
+export type AggregatorSnapshot<T> = {
+  value: T;
+};
