@@ -4,7 +4,7 @@ module emojicoin_dot_fun::hex_codes {
     use std::bcs;
     friend emojicoin_dot_fun::emojicoin_dot_fun;
 
-    public(friend) inline fun get_coin_symbol_emojis(): vector<vector<u8>> {
+    public inline fun get_coin_symbol_emojis(): vector<vector<u8>> {
         vector [
             x"f09fa587",              // 1st place medal [1F947]
             x"f09fa588",              // 2nd place medal [1F948]
@@ -2313,7 +2313,7 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
-    public(friend) inline fun get_supplemental_chat_emojis(): vector<vector<u8>> {
+    public inline fun get_supplemental_chat_emojis(): vector<vector<u8>> {
         vector [
             x"f09fa791e2808df09f8ea8",                                    // Artist [1F9D1 200D 1F3A8]
             x"f09fa791f09f8fbfe2808df09f8ea8",                            // Artist: dark skin tone [1F9D1 1F3FF 200D 1F3A8]
@@ -3529,6 +3529,17 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
+    public(friend) inline fun get_publish_code(market_address: address): (vector<u8>, vector<u8>) {
+        // Interpolate market address into module bytecode.
+        let split_bytecode = get_split_module_bytes();
+        let epilogue = vector::pop_back(&mut split_bytecode);
+        let module_bytecode = vector::pop_back(&mut split_bytecode);
+        vector::append(&mut module_bytecode, bcs::to_bytes(&market_address));
+        vector::append(&mut module_bytecode, epilogue);
+
+        (get_metadata_bytes(), module_bytecode)
+    }
+
     inline fun get_metadata_bytes(): vector<u8> {
         x"1a456d6f6a69636f696e446f7446756e436f696e466163746f72790200000000000000004044444231324644444631333830363943363442343332433944354131333034424531363033373839414538323637373330423244393939373942363744363733d2011f8b08000000000002ff3d8fc14ec3301044effe8acaf73ae58ac40101f9892a8a36f6365d1a7bad5d3b88bfc7a685dbcce88d76e70c2108aaa24ec633a5f902beb07c1f5e0e76b6c69c03eec7801953c0e409d5bde6c23a0a44fc62b94d66a5d2e16b29599f87a1d96b5d9ce73840278f1b2cfa909e055d03ac11dc7b2902a584cd6b5d02498fee64e41d87cbdf9147fddff7bf32f81bac3899d4c25efc88fc497dc23b97b1a6b7a6c6fb166b6a5e0502ce9937f2bfdb28c65a60d9d09a1d4589534f9fdcc99dacf9019ac891a815010000010c636f696e5f666163746f72790000000000"
     }
@@ -3541,27 +3552,12 @@ module emojicoin_dot_fun::hex_codes {
         ]
     }
 
-    public(friend) inline fun get_publish_code(market_address: address): (vector<u8>, vector<u8>) {
-        // Interpolate market address into module bytecode.
-        let split_bytecode = get_split_module_bytes();
-        let epilogue = vector::pop_back(&mut split_bytecode);
-        let module_bytecode = vector::pop_back(&mut split_bytecode);
-        vector::append(&mut module_bytecode, bcs::to_bytes(&market_address));
-        vector::append(&mut module_bytecode, epilogue);
-
-        (get_metadata_bytes(), module_bytecode)
+    #[test_only] public fun get_coin_symbol_emojis_test_only(): vector<vector<u8>> {
+        get_coin_symbol_emojis()
     }
 
     #[test_only] public fun get_metadata_bytes_test_only(): vector<u8> {
         get_metadata_bytes()
-    }
-
-    #[test_only] public fun get_split_module_bytes_test_only(): vector<vector<u8>> {
-        get_split_module_bytes()
-    }
-
-    #[test_only] public fun get_coin_symbol_emojis_test_only(): vector<vector<u8>> {
-        get_coin_symbol_emojis()
     }
 
     #[test_only] public fun get_publish_code_test_only(market_address: address): (
@@ -3569,6 +3565,10 @@ module emojicoin_dot_fun::hex_codes {
         vector<u8>,
     ) {
         get_publish_code(market_address)
+    }
+
+    #[test_only] public fun get_split_module_bytes_test_only(): vector<vector<u8>> {
+        get_split_module_bytes()
     }
 
 }
