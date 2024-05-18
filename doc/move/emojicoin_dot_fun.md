@@ -34,6 +34,7 @@
 -  [Function `register_market`](#0xc0de_emojicoin_dot_fun_register_market)
 -  [Function `swap`](#0xc0de_emojicoin_dot_fun_swap)
 -  [Function `chat`](#0xc0de_emojicoin_dot_fun_chat)
+    -  [Example](#@Example_1)
 -  [Function `provide_liquidity`](#0xc0de_emojicoin_dot_fun_provide_liquidity)
 -  [Function `remove_liquidity`](#0xc0de_emojicoin_dot_fun_remove_liquidity)
 -  [Function `is_a_supported_symbol_emoji`](#0xc0de_emojicoin_dot_fun_is_a_supported_symbol_emoji)
@@ -2545,11 +2546,23 @@ Named object seed for the registry.
 ## Function `chat`
 
 Constructs a chat message from a sequence of emojis emitted as an event.
-Example:
-emoji_bytes: [ x"00", x"01", x"02" ], // Pretend these are valid emojis.
-emoji_indices_sequence: [ 0, 1, 2, 2, 2, 1, 2, 1 ],
-This would result in a message of:
-[ x"00", x"01", x"02", x"02", x"02", x"01", x"02", x"01" ]
+
+
+<a id="@Example_1"></a>
+
+### Example
+
+
+```move
+let emoji_bytes = vector[
+x"e28fb0", // Alarm clock
+x"e29a93", // Anchor
+x"e29992", // Aquarius
+];
+let emoji_indices_sequence = vector[0, 1, 2, 2, 1, 0];
+```
+
+produces the message <code>[x"e28fb0", x"e29a93", x"e29992", x"e29992", x"e29a93", x"e28fb0"]</code>.
 
 
 <pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_chat">chat</a>&lt;Emojicoin, EmojicoinLP&gt;(user: &<a href="">signer</a>, market_address: <b>address</b>, emoji_bytes: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;, emoji_indices_sequence: <a href="">vector</a>&lt;u8&gt;)
@@ -5338,14 +5351,15 @@ real_quote_reserves: u64,
 
 ## Function `tvl_per_lp_coin_growth_q64_inline`
 
-<code>a :=</code> TVL at start
-<code>b :=</code> LP coins at start
-<code>c :=</code> TVL at end
-<code>d :=</code> LP coins at end
+- $a :=$ TVL at start
+- $b :=$ LP coins at start
+- $c :=$ TVL at end
+- $d :=$ LP coins at end
 
 Growth in TVL per LP coin symbolically evaluates to:
-<code>(c / d) / (a / b)</code>
-<code>(b * c) / (a * d)</code>
+
+$$\frac{\frac{c}{d}}{\frac{a}{b}}$$
+$$\frac{b \cdot c}{a \cdot d}$$
 
 Numerator should be shifted by <code><a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SHIFT_Q64">SHIFT_Q64</a></code> so that the result is in Q64 format.
 

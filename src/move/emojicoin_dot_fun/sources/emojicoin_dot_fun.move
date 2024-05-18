@@ -659,11 +659,19 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     /// Constructs a chat message from a sequence of emojis emitted as an event.
-    /// Example:
-    ///     emoji_bytes: [ x"00", x"01", x"02" ], // Pretend these are valid emojis.
-    ///     emoji_indices_sequence: [ 0, 1, 2, 2, 2, 1, 2, 1 ],
-    /// This would result in a message of:
-    ///     [ x"00", x"01", x"02", x"02", x"02", x"01", x"02", x"01" ]
+    ///
+    /// # Example
+    ///
+    /// ```move
+    /// let emoji_bytes = vector[
+    ///     x"e28fb0", // Alarm clock
+    ///     x"e29a93", // Anchor
+    ///     x"e29992", // Aquarius
+    /// ];
+    /// let emoji_indices_sequence = vector[0, 1, 2, 2, 1, 0];
+    /// ```
+    ///
+    /// produces the message `[x"e28fb0", x"e29a93", x"e29992", x"e29992", x"e29a93", x"e28fb0"]`.
     public entry fun chat<Emojicoin, EmojicoinLP>(
         user: &signer,
         market_address: address,
@@ -2332,14 +2340,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         2 * (real_quote_reserves as u128)
     }
 
-    /// `a :=` TVL at start
-    /// `b :=` LP coins at start
-    /// `c :=` TVL at end
-    /// `d :=` LP coins at end
+    /// - $a :=$ TVL at start
+    /// - $b :=$ LP coins at start
+    /// - $c :=$ TVL at end
+    /// - $d :=$ LP coins at end
     ///
     /// Growth in TVL per LP coin symbolically evaluates to:
-    /// `(c / d) / (a / b)`
-    /// `(b * c) / (a * d)`
+    ///
+    /// $$\frac{\frac{c}{d}}{\frac{a}{b}}$$
+    /// $$\frac{b \cdot c}{a \cdot d}$$
     ///
     /// Numerator should be shifted by `SHIFT_Q64` so that the result is in Q64 format.
     ///
