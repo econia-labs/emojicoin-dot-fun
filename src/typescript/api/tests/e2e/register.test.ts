@@ -7,7 +7,7 @@ import {
 } from "../../src";
 import { EmojicoinDotFun, ONE_APT } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
-import { getMarketResource } from "../../src/types/contract";
+import { getMarketResource, toRegistryViewData } from "../../src/types/contract";
 
 jest.setTimeout(20000);
 
@@ -42,6 +42,11 @@ describe("registers a market successfully", () => {
     const randomIntegrator = Account.generate();
 
     const emojis = ["f09fa693", "f09fa79f"];
+
+    // Get the registry data before registering a market.
+    const registryViewJSONData = await EmojicoinDotFun.RegistryView.view({ aptos });
+    const registryViewData = toRegistryViewData(registryViewJSONData);
+    const numMarketsBefore = registryViewData.nMarkets;
 
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
@@ -82,8 +87,8 @@ describe("registers a market successfully", () => {
 
     const { lpCoinSupply, extendRef } = marketObjectMarketResource;
 
-    expect(marketId).toEqual(1n);
-    expect(emojiBytes.toString()).toEqual(`0x${emojis[0]}${emojis[1]}`);
+    expect(marketId).toEqual(numMarketsBefore + 1n);
+    expect(emojiBytes.toString()).toEqual(`0x${emojis.join("")}`);
     expect(extendRef.self.toStringLong()).toEqual(derivedNamedObjectAddress.toStringLong());
     expect(extendRef.self.toStringLong()).toEqual(marketAddress.toStringLong());
     expect(lpCoinSupply).toEqual(0n);
