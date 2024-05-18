@@ -33,6 +33,7 @@ import {
   EntryFunctionTransactionBuilder,
 } from "./payload-builders";
 import { MODULE_ADDRESS } from "./consts";
+import { type RegistryViewJSONData } from "../types/contract";
 
 export type ChatPayloadMoveArguments = {
   marketAddress: AccountAddress;
@@ -926,7 +927,7 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
  *```
  * */
 
-export class RegistryView extends ViewFunctionPayloadBuilder<[MoveValue]> {
+export class RegistryView extends ViewFunctionPayloadBuilder<[RegistryViewJSONData]> {
   public readonly moduleAddress = MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
@@ -946,7 +947,7 @@ export class RegistryView extends ViewFunctionPayloadBuilder<[MoveValue]> {
   static async view(args: {
     aptos: Aptos | AptosConfig;
     options?: LedgerVersionArg;
-  }): Promise<MoveValue> {
+  }): Promise<RegistryViewJSONData> {
     const [res] = await new RegistryView().view(args);
     return res;
   }

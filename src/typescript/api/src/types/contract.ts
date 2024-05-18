@@ -12,6 +12,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { type ExtendRef, type SequenceInfo } from "./core";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../emojicoin_dot_fun/consts";
+import { Uint128String, Uint64String } from "../emojicoin_dot_fun";
 
 // Structs specific to `emojicoin_dot_fun`.
 
@@ -176,10 +177,8 @@ export type LastSwap = {
   time: Uint64;
 };
 
-export type SupportedAggregatorSnapshotTypes = Uint64 | Uint128;
-
-export type AggregatorSnapshot = {
-  value: SupportedAggregatorSnapshotTypes;
+export type AggregatorSnapshot<T> = {
+  value: T;
 };
 
 export const toStateMetadata = (data: {
@@ -239,3 +238,65 @@ export const toLastSwap = (data: {
 });
 
 export const toAggregatorSnapshot = (data: { value: string }) => BigInt(data.value);
+
+/**
+ * @see emojicoin_dot_fun.move
+ * struct RegistryView has drop, store {
+ *     registry_address: address,
+ *     nonce: AggregatorSnapshot<u64>,
+ *     last_bump_time: u64,
+ *     n_markets: u64,
+ *     cumulative_quote_volume: AggregatorSnapshot<u128>,
+ *     total_quote_locked: AggregatorSnapshot<u128>,
+ *     total_value_locked: AggregatorSnapshot<u128>,
+ *     market_cap: AggregatorSnapshot<u128>,
+ *     fully_diluted_value: AggregatorSnapshot<u128>,
+ *     cumulative_integrator_fees: AggregatorSnapshot<u128>,
+ *     cumulative_swaps: AggregatorSnapshot<u64>,
+ *     cumulative_chat_messages: AggregatorSnapshot<u64>,
+ * }
+ */
+export type RegistryViewData = {
+  registryAddress: AccountAddress;
+  nonce: Uint64;
+  lastBumpTime: Uint64;
+  nMarkets: Uint64;
+  cumulativeQuoteVolume: Uint128;
+  totalQuoteLocked: Uint128;
+  totalValueLocked: Uint128;
+  marketCap: Uint128;
+  fullyDilutedValue: Uint128;
+  cumulativeIntegratorFees: Uint128;
+  cumulativeSwaps: Uint128;
+  cumulativeChatMessages: Uint128;
+};
+
+export type RegistryViewJSONData = {
+  registryAddress: string;
+  nonce: Uint64String;
+  lastBumpTime: Uint64String;
+  nMarkets: Uint64String;
+  cumulativeQuoteVolume: AggregatorSnapshot<Uint128String>;
+  totalQuoteLocked: AggregatorSnapshot<Uint128String>;
+  totalValueLocked: AggregatorSnapshot<Uint128String>;
+  marketCap: Uint128String;
+  fullyDilutedValue: AggregatorSnapshot<Uint128String>;
+  cumulativeIntegratorFees: AggregatorSnapshot<Uint128String>;
+  cumulativeSwaps: AggregatorSnapshot<Uint128String>;
+  cumulativeChatMessages: AggregatorSnapshot<Uint128String>;
+};
+
+export const toRegistryViewData = (data: any): RegistryViewData => ({
+    registryAddress: AccountAddress.from(data.registry_address),
+    nonce: toAggregatorSnapshot(data.nonce),
+    lastBumpTime: BigInt(data.last_bump_time),
+    nMarkets: BigInt(data.n_markets),
+    cumulativeQuoteVolume: toAggregatorSnapshot(data.cumulative_quote_volume),
+    totalQuoteLocked: toAggregatorSnapshot(data.total_quote_locked),
+    totalValueLocked: toAggregatorSnapshot(data.total_value_locked),
+    marketCap: toAggregatorSnapshot(data.market_cap),
+    fullyDilutedValue: toAggregatorSnapshot(data.fully_diluted_value),
+    cumulativeIntegratorFees: toAggregatorSnapshot(data.cumulative_integrator_fees),
+    cumulativeSwaps: toAggregatorSnapshot(data.cumulative_swaps),
+    cumulativeChatMessages: toAggregatorSnapshot(data.cumulative_chat_messages),
+  });
