@@ -660,23 +660,25 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
     /// Constructs a chat message from a sequence of emojis emitted as an event.
     ///
+    /// # Emoji arguments
+    ///
+    /// - `emoji_bytes`: The individual emojis to use.
+    /// - `emoji_indices_sequence`: Sequence of indices used to construct a chat message.
+    ///
     /// # Example
     ///
     /// ```move
-    /// let emoji_bytes = vector[
-    ///     x"e28fb0", // Alarm clock
-    ///     x"e29a93", // Anchor
-    ///     x"e29992", // Aquarius
-    /// ];
+    /// let emoji_bytes = vector[x"e29a93", x"e29992", x"e28fb0"];
+    /// //                       ^ Anchor   ^ Aquarius ^ Alarm clock
     /// let emoji_indices_sequence = vector[0, 1, 2, 2, 1, 0];
     /// ```
     ///
-    /// produces the message `[x"e28fb0", x"e29a93", x"e29992", x"e29992", x"e29a93", x"e28fb0"]`.
+    /// produces the message `[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992", x"e29a93"]`.
     public entry fun chat<Emojicoin, EmojicoinLP>(
         user: &signer,
         market_address: address,
-        emoji_bytes: vector<vector<u8>>, // The individual emojis to use.
-        emoji_indices_sequence: vector<u8>, // Sequence of indices used to construct a chat message.
+        emoji_bytes: vector<vector<u8>>,
+        emoji_indices_sequence: vector<u8>,
     ) acquires Market, Registry, RegistryAddress {
 
         // Mutably borrow market and check its coin types.

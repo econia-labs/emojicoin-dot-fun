@@ -34,7 +34,8 @@
 -  [Function `register_market`](#0xc0de_emojicoin_dot_fun_register_market)
 -  [Function `swap`](#0xc0de_emojicoin_dot_fun_swap)
 -  [Function `chat`](#0xc0de_emojicoin_dot_fun_chat)
-    -  [Example](#@Example_1)
+    -  [Emoji arguments](#@Emoji_arguments_1)
+    -  [Example](#@Example_2)
 -  [Function `provide_liquidity`](#0xc0de_emojicoin_dot_fun_provide_liquidity)
 -  [Function `remove_liquidity`](#0xc0de_emojicoin_dot_fun_remove_liquidity)
 -  [Function `is_a_supported_symbol_emoji`](#0xc0de_emojicoin_dot_fun_is_a_supported_symbol_emoji)
@@ -2548,21 +2549,27 @@ Named object seed for the registry.
 Constructs a chat message from a sequence of emojis emitted as an event.
 
 
-<a id="@Example_1"></a>
+<a id="@Emoji_arguments_1"></a>
+
+### Emoji arguments
+
+
+- <code>emoji_bytes</code>: The individual emojis to use.
+- <code>emoji_indices_sequence</code>: Sequence of indices used to construct a chat message.
+
+
+<a id="@Example_2"></a>
 
 ### Example
 
 
 ```move
-let emoji_bytes = vector[
-x"e28fb0", // Alarm clock
-x"e29a93", // Anchor
-x"e29992", // Aquarius
-];
+let emoji_bytes = vector[x"e29a93", x"e29992", x"e28fb0"];
+//                       ^ Anchor   ^ Aquarius ^ Alarm clock
 let emoji_indices_sequence = vector[0, 1, 2, 2, 1, 0];
 ```
 
-produces the message <code>[x"e28fb0", x"e29a93", x"e29992", x"e29992", x"e29a93", x"e28fb0"]</code>.
+produces the message <code>[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992", x"e29a93"]</code>.
 
 
 <pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_chat">chat</a>&lt;Emojicoin, EmojicoinLP&gt;(user: &<a href="">signer</a>, market_address: <b>address</b>, emoji_bytes: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;, emoji_indices_sequence: <a href="">vector</a>&lt;u8&gt;)
@@ -2576,8 +2583,8 @@ produces the message <code>[x"e28fb0", x"e29a93", x"e29992", x"e29992", x"e29a93
 <pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_chat">chat</a>&lt;Emojicoin, EmojicoinLP&gt;(
     user: &<a href="">signer</a>,
     market_address: <b>address</b>,
-    emoji_bytes: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;, // The individual emojis <b>to</b> <b>use</b>.
-    emoji_indices_sequence: <a href="">vector</a>&lt;u8&gt;, // Sequence of indices used <b>to</b> construct a chat message.
+    emoji_bytes: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;,
+    emoji_indices_sequence: <a href="">vector</a>&lt;u8&gt;,
 ) <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistryAddress">RegistryAddress</a> {
 
     // Mutably borrow market and check its <a href="">coin</a> types.
