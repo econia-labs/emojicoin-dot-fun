@@ -922,6 +922,523 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
+    #[view]
+    /// Checks if an individual emoji is supported as a coin symbol.
+    public fun is_a_supported_symbol_emoji(
+        hex_bytes: vector<u8>
+    ): bool acquires Registry, RegistryAddress {
+        table::contains(&borrow_registry_ref().coin_symbol_emojis, hex_bytes)
+    }
+
+    #[view]
+    /// Checks if an individual emoji is supported for usage in chat.
+    public fun is_a_supported_chat_emoji(
+        hex_bytes: vector<u8>
+    ): bool acquires Registry, RegistryAddress {
+        is_a_supported_chat_emoji_inner(hex_bytes)
+    }
+
+    #[view]
+    /// Checks if an individual emoji is supported for usage in chat only.
+    public fun is_a_supplemental_chat_emoji(
+        hex_bytes: vector<u8>
+    ): bool acquires Registry, RegistryAddress {
+        table::contains(&borrow_registry_ref().supplemental_chat_emojis, hex_bytes)
+    }
+
+    #[view]
+    public fun verified_symbol_emoji_bytes(emojis: vector<vector<u8>>): vector<u8>
+    acquires Registry, RegistryAddress {
+        get_verified_symbol_emoji_bytes(borrow_registry_ref(), emojis)
+    }
+
+    #[view]
+    public fun registry_address(): address acquires RegistryAddress { get_registry_address() }
+
+    #[view]
+    public fun registry_view(): RegistryView acquires Registry, RegistryAddress {
+        let registry_ref = borrow_registry_ref();
+        RegistryView {
+            registry_address: registry_ref.registry_address,
+            nonce: aggregator_v2::snapshot(&registry_ref.sequence_info.nonce),
+            last_bump_time: registry_ref.sequence_info.last_bump_time,
+            n_markets: smart_table::length(&registry_ref.markets_by_market_id),
+            cumulative_quote_volume:
+                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_quote_volume),
+            total_quote_locked:
+                aggregator_v2::snapshot(&registry_ref.global_stats.total_quote_locked),
+            total_value_locked:
+                aggregator_v2::snapshot(&registry_ref.global_stats.total_value_locked),
+            market_cap:
+                aggregator_v2::snapshot(&registry_ref.global_stats.market_cap),
+            fully_diluted_value:
+                aggregator_v2::snapshot(&registry_ref.global_stats.fully_diluted_value),
+            cumulative_integrator_fees:
+                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_integrator_fees),
+            cumulative_swaps:
+                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_swaps),
+            cumulative_chat_messages:
+                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_chat_messages),
+        }
+    }
+
+    public fun unpack_registry_view(registry_view: RegistryView): (
+        address,
+        AggregatorSnapshot<u64>,
+        u64,
+        u64,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u128>,
+        AggregatorSnapshot<u64>,
+        AggregatorSnapshot<u64>,
+    ) {
+        let RegistryView {
+            registry_address,
+            nonce,
+            last_bump_time,
+            n_markets,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        } = registry_view;
+        (
+            registry_address,
+            nonce,
+            last_bump_time,
+            n_markets,
+            cumulative_quote_volume,
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+            cumulative_integrator_fees,
+            cumulative_swaps,
+            cumulative_chat_messages,
+        )
+    }
+
+    #[view]
+    public fun market_metadata_by_emoji_bytes(emoji_bytes: vector<u8>): Option<MarketMetadata>
+    acquires Market, Registry, RegistryAddress {
+        let registry_ref = borrow_registry_ref();
+        let markets_by_emoji_bytes_ref = &registry_ref.markets_by_emoji_bytes;
+        if (smart_table::contains(markets_by_emoji_bytes_ref, emoji_bytes)) {
+            let market_address = *smart_table::borrow(markets_by_emoji_bytes_ref, emoji_bytes);
+            option::some(borrow_global<Market>(market_address).metadata)
+        } else {
+            option::none()
+        }
+    }
+
+    #[view]
+    public fun market_metadata_by_market_address(market_address: address): Option<MarketMetadata>
+    acquires Market {
+        if (exists<Market>(market_address)) {
+            option::some(borrow_global<Market>(market_address).metadata)
+        } else {
+            option::none()
+        }
+    }
+
+    #[view]
+    public fun market_metadata_by_market_id(market_id: u64): Option<MarketMetadata>
+    acquires Market, Registry, RegistryAddress {
+        let registry_ref = borrow_registry_ref();
+        let markets_by_market_id_ref = &registry_ref.markets_by_market_id;
+        if (smart_table::contains(markets_by_market_id_ref, market_id)) {
+            let market_address = *smart_table::borrow(markets_by_market_id_ref, market_id);
+            option::some(borrow_global<Market>(market_address).metadata)
+        } else {
+            option::none()
+        }
+    }
+
+    public fun unpack_market_metadata(metadata: MarketMetadata): (
+        u64,
+        address,
+        vector<u8>,
+    ) {
+        let MarketMetadata {
+            market_id,
+            market_address,
+            emoji_bytes,
+        } = metadata;
+        (market_id, market_address, emoji_bytes)
+    }
+
+    #[view]
+    public fun market_view<Emojicoin, EmojicoinLP>(market_address: address): MarketView
+    acquires Market {
+        let (market_ref, market_signer) = get_market_ref_and_signer_checked(market_address);
+        ensure_coins_initialized<Emojicoin, EmojicoinLP>(
+            market_ref,
+            &market_signer,
+            market_address,
+        );
+        let lp_coin_supply = market_ref.lp_coin_supply;
+        let in_bonding_curve = lp_coin_supply == 0;
+        MarketView {
+            metadata: market_ref.metadata,
+            sequence_info: market_ref.sequence_info,
+            clamm_virtual_reserves: market_ref.clamm_virtual_reserves,
+            cpamm_real_reserves: market_ref.cpamm_real_reserves,
+            lp_coin_supply,
+            in_bonding_curve,
+            cumulative_stats: market_ref.cumulative_stats,
+            instantaneous_stats: instantaneous_stats(market_ref),
+            last_swap: market_ref.last_swap,
+            periodic_state_trackers: market_ref.periodic_state_trackers,
+            aptos_coin_balance: coin::balance<AptosCoin>(market_address),
+            emojicoin_balance: coin::balance<Emojicoin>(market_address),
+            emojicoin_lp_balance: coin::balance<EmojicoinLP>(market_address),
+        }
+    }
+
+    public fun unpack_market_view(market_view: MarketView): (
+        MarketMetadata,
+        SequenceInfo,
+        Reserves,
+        Reserves,
+        u128,
+        bool,
+        CumulativeStats,
+        InstantaneousStats,
+        LastSwap,
+        vector<PeriodicStateTracker>,
+        u64,
+        u64,
+        u64,
+    ) {
+        let MarketView {
+            metadata,
+            sequence_info,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            in_bonding_curve,
+            cumulative_stats,
+            instantaneous_stats,
+            last_swap,
+            periodic_state_trackers,
+            aptos_coin_balance,
+            emojicoin_balance,
+            emojicoin_lp_balance,
+        } = market_view;
+        (
+            metadata,
+            sequence_info,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            lp_coin_supply,
+            in_bonding_curve,
+            cumulative_stats,
+            instantaneous_stats,
+            last_swap,
+            periodic_state_trackers,
+            aptos_coin_balance,
+            emojicoin_balance,
+            emojicoin_lp_balance,
+        )
+    }
+
+    #[view]
+    public fun simulate_swap(
+        swapper: address,
+        market_address: address,
+        input_amount: u64,
+        is_sell: bool,
+        integrator: address,
+        integrator_fee_rate_bps: u8,
+    ): Swap
+    acquires Market {
+        assert!(exists<Market>(market_address), E_NO_MARKET);
+        simulate_swap_inner(
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            borrow_global(market_address),
+        )
+    }
+
+    public fun unpack_swap(swap: Swap): (
+        u64,
+        u64,
+        u64,
+        address,
+        u64,
+        bool,
+        address,
+        u8,
+        u64,
+        u64,
+        u64,
+        u128,
+        u64,
+        u64,
+        bool,
+        bool,
+    ) {
+        let Swap {
+            market_id,
+            time,
+            market_nonce,
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64,
+            integrator_fee,
+            pool_fee,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        } = swap;
+        (
+            market_id,
+            time,
+            market_nonce,
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            avg_execution_price_q64,
+            integrator_fee,
+            pool_fee,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        )
+    }
+
+    #[view]
+    public fun simulate_provide_liquidity(
+        provider: address,
+        market_address: address,
+        quote_amount: u64,
+    ): Liquidity
+    acquires Market {
+        assert!(exists<Market>(market_address), E_NO_MARKET);
+        simulate_provide_liquidity_inner(
+            provider,
+            quote_amount,
+            borrow_global(market_address),
+        )
+    }
+
+    #[view]
+    public fun simulate_remove_liquidity<Emojicoin>(
+        provider: address,
+        market_address: address,
+        lp_coin_amount: u64,
+    ): Liquidity
+    acquires Market {
+        assert!(exists<Market>(market_address), E_NO_MARKET);
+        simulate_remove_liquidity_inner<Emojicoin>(
+            provider,
+            lp_coin_amount,
+            borrow_global(market_address),
+        )
+    }
+
+    public fun unpack_liquidity(liquidity: Liquidity): (
+        u64,
+        u64,
+        u64,
+        address,
+        u64,
+        u64,
+        u64,
+        bool,
+        u64,
+        u64,
+    ) {
+        let Liquidity {
+            market_id,
+            time,
+            market_nonce,
+            provider,
+            base_amount,
+            quote_amount,
+            lp_coin_amount,
+            liquidity_provided,
+            pro_rata_base_donation_claim_amount,
+            pro_rata_quote_donation_claim_amount,
+        } = liquidity;
+        (
+            market_id,
+            time,
+            market_nonce,
+            provider,
+            base_amount,
+            quote_amount,
+            lp_coin_amount,
+            liquidity_provided,
+            pro_rata_base_donation_claim_amount,
+            pro_rata_quote_donation_claim_amount,
+        )
+    }
+
+    public fun tvl_per_lp_coin_growth_q64(
+        start: TVLtoLPCoinRatio,
+        end: TVLtoLPCoinRatio,
+    ): u128 {
+        tvl_per_lp_coin_growth_q64_inline(start, end)
+    }
+
+    public fun unpack_cumulative_stats(cumulative_stats: CumulativeStats): (
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u64,
+        u64,
+    ) {
+        let CumulativeStats {
+            base_volume,
+            quote_volume,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+        } = cumulative_stats;
+        (
+            base_volume,
+            quote_volume,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+        )
+    }
+
+    public fun unpack_instantaneous_stats(instantaneous_stats: InstantaneousStats): (
+        u64,
+        u128,
+        u128,
+        u128,
+    ) {
+        let InstantaneousStats {
+            total_quote_locked,
+            total_value_locked,
+            market_cap,
+            fully_diluted_value,
+        } = instantaneous_stats;
+        (total_quote_locked, total_value_locked, market_cap, fully_diluted_value)
+    }
+
+    public fun unpack_last_swap(last_swap: LastSwap): (
+        bool,
+        u128,
+        u64,
+        u64,
+        u64,
+        u64,
+    ) {
+        let LastSwap {
+            is_sell,
+            avg_execution_price_q64,
+            base_volume,
+            quote_volume,
+            nonce,
+            time,
+        } = last_swap;
+        (is_sell, avg_execution_price_q64, base_volume, quote_volume, nonce, time)
+    }
+
+    public fun unpack_periodic_state_tracker(periodic_state_tracker: PeriodicStateTracker): (
+        u64,
+        u64,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u128,
+        u64,
+        u64,
+        bool,
+        bool,
+        TVLtoLPCoinRatio,
+        TVLtoLPCoinRatio,
+    ) {
+        let PeriodicStateTracker {
+            start_time,
+            period,
+            open_price_q64,
+            high_price_q64,
+            low_price_q64,
+            close_price_q64,
+            volume_base,
+            volume_quote,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+            starts_in_bonding_curve,
+            ends_in_bonding_curve,
+            tvl_to_lp_coin_ratio_start,
+            tvl_to_lp_coin_ratio_end,
+        } = periodic_state_tracker;
+        (
+            start_time,
+            period,
+            open_price_q64,
+            high_price_q64,
+            low_price_q64,
+            close_price_q64,
+            volume_base,
+            volume_quote,
+            integrator_fees,
+            pool_fees_base,
+            pool_fees_quote,
+            n_swaps,
+            n_chat_messages,
+            starts_in_bonding_curve,
+            ends_in_bonding_curve,
+            tvl_to_lp_coin_ratio_start,
+            tvl_to_lp_coin_ratio_end,
+        )
+    }
+
+    public fun unpack_reserves(reserves: Reserves): (u64, u64) {
+        let Reserves { base, quote } = reserves;
+        (base, quote)
+    }
+
+    public fun unpack_sequence_info(sequence_info: SequenceInfo): (u64, u64) {
+        let SequenceInfo { nonce, last_bump_time } = sequence_info;
+        (nonce, last_bump_time)
+    }
+
+    public fun unpack_tvl_to_lp_coin_ratio(tvl_to_lp_coin_ratio: TVLtoLPCoinRatio): (u128, u128) {
+        let TVLtoLPCoinRatio { tvl, lp_coins } = tvl_to_lp_coin_ratio;
+        (tvl, lp_coins)
+    }
+
     fun register_market_inner(
         registrant: &signer,
         emojis: vector<vector<u8>>,
@@ -1365,523 +1882,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             cumulative_swaps: aggregator_v2::create_snapshot(0),
             cumulative_chat_messages: aggregator_v2::create_snapshot(0),
         });
-    }
-
-    #[view]
-    /// Checks if an individual emoji is supported as a coin symbol.
-    public fun is_a_supported_symbol_emoji(
-        hex_bytes: vector<u8>
-    ): bool acquires Registry, RegistryAddress {
-        table::contains(&borrow_registry_ref().coin_symbol_emojis, hex_bytes)
-    }
-
-    #[view]
-    /// Checks if an individual emoji is supported for usage in chat only.
-    public fun is_a_supplemental_chat_emoji(
-        hex_bytes: vector<u8>
-    ): bool acquires Registry, RegistryAddress {
-        table::contains(&borrow_registry_ref().supplemental_chat_emojis, hex_bytes)
-    }
-
-    #[view]
-    /// Checks if an individual emoji is supported for usage in chat.
-    public fun is_a_supported_chat_emoji(
-        hex_bytes: vector<u8>
-    ): bool acquires Registry, RegistryAddress {
-        is_a_supported_chat_emoji_inner(hex_bytes)
-    }
-
-    #[view]
-    public fun registry_address(): address acquires RegistryAddress { get_registry_address() }
-
-    #[view]
-    public fun registry_view(): RegistryView acquires Registry, RegistryAddress {
-        let registry_ref = borrow_registry_ref();
-        RegistryView {
-            registry_address: registry_ref.registry_address,
-            nonce: aggregator_v2::snapshot(&registry_ref.sequence_info.nonce),
-            last_bump_time: registry_ref.sequence_info.last_bump_time,
-            n_markets: smart_table::length(&registry_ref.markets_by_market_id),
-            cumulative_quote_volume:
-                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_quote_volume),
-            total_quote_locked:
-                aggregator_v2::snapshot(&registry_ref.global_stats.total_quote_locked),
-            total_value_locked:
-                aggregator_v2::snapshot(&registry_ref.global_stats.total_value_locked),
-            market_cap:
-                aggregator_v2::snapshot(&registry_ref.global_stats.market_cap),
-            fully_diluted_value:
-                aggregator_v2::snapshot(&registry_ref.global_stats.fully_diluted_value),
-            cumulative_integrator_fees:
-                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_integrator_fees),
-            cumulative_swaps:
-                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_swaps),
-            cumulative_chat_messages:
-                aggregator_v2::snapshot(&registry_ref.global_stats.cumulative_chat_messages),
-        }
-    }
-
-    #[view]
-    public fun market_metadata_by_emoji_bytes(emoji_bytes: vector<u8>): Option<MarketMetadata>
-    acquires Market, Registry, RegistryAddress {
-        let registry_ref = borrow_registry_ref();
-        let markets_by_emoji_bytes_ref = &registry_ref.markets_by_emoji_bytes;
-        if (smart_table::contains(markets_by_emoji_bytes_ref, emoji_bytes)) {
-            let market_address = *smart_table::borrow(markets_by_emoji_bytes_ref, emoji_bytes);
-            option::some(borrow_global<Market>(market_address).metadata)
-        } else {
-            option::none()
-        }
-    }
-
-    #[view]
-    public fun market_metadata_by_market_address(market_address: address): Option<MarketMetadata>
-    acquires Market {
-        if (exists<Market>(market_address)) {
-            option::some(borrow_global<Market>(market_address).metadata)
-        } else {
-            option::none()
-        }
-    }
-
-    #[view]
-    public fun market_metadata_by_market_id(market_id: u64): Option<MarketMetadata>
-    acquires Market, Registry, RegistryAddress {
-        let registry_ref = borrow_registry_ref();
-        let markets_by_market_id_ref = &registry_ref.markets_by_market_id;
-        if (smart_table::contains(markets_by_market_id_ref, market_id)) {
-            let market_address = *smart_table::borrow(markets_by_market_id_ref, market_id);
-            option::some(borrow_global<Market>(market_address).metadata)
-        } else {
-            option::none()
-        }
-    }
-
-    #[view]
-    public fun market_view<Emojicoin, EmojicoinLP>(market_address: address): MarketView
-    acquires Market {
-        let (market_ref, market_signer) = get_market_ref_and_signer_checked(market_address);
-        ensure_coins_initialized<Emojicoin, EmojicoinLP>(
-            market_ref,
-            &market_signer,
-            market_address,
-        );
-        let lp_coin_supply = market_ref.lp_coin_supply;
-        let in_bonding_curve = lp_coin_supply == 0;
-        MarketView {
-            metadata: market_ref.metadata,
-            sequence_info: market_ref.sequence_info,
-            clamm_virtual_reserves: market_ref.clamm_virtual_reserves,
-            cpamm_real_reserves: market_ref.cpamm_real_reserves,
-            lp_coin_supply,
-            in_bonding_curve,
-            cumulative_stats: market_ref.cumulative_stats,
-            instantaneous_stats: instantaneous_stats(market_ref),
-            last_swap: market_ref.last_swap,
-            periodic_state_trackers: market_ref.periodic_state_trackers,
-            aptos_coin_balance: coin::balance<AptosCoin>(market_address),
-            emojicoin_balance: coin::balance<Emojicoin>(market_address),
-            emojicoin_lp_balance: coin::balance<EmojicoinLP>(market_address),
-        }
-    }
-
-    #[view]
-    public fun simulate_swap(
-        swapper: address,
-        market_address: address,
-        input_amount: u64,
-        is_sell: bool,
-        integrator: address,
-        integrator_fee_rate_bps: u8,
-    ): Swap
-    acquires Market {
-        assert!(exists<Market>(market_address), E_NO_MARKET);
-        simulate_swap_inner(
-            swapper,
-            input_amount,
-            is_sell,
-            integrator,
-            integrator_fee_rate_bps,
-            borrow_global(market_address),
-        )
-    }
-
-    #[view]
-    public fun simulate_provide_liquidity(
-        provider: address,
-        market_address: address,
-        quote_amount: u64,
-    ): Liquidity
-    acquires Market {
-        assert!(exists<Market>(market_address), E_NO_MARKET);
-        simulate_provide_liquidity_inner(
-            provider,
-            quote_amount,
-            borrow_global(market_address),
-        )
-    }
-
-    #[view]
-    public fun simulate_remove_liquidity<Emojicoin>(
-        provider: address,
-        market_address: address,
-        lp_coin_amount: u64,
-    ): Liquidity
-    acquires Market {
-        assert!(exists<Market>(market_address), E_NO_MARKET);
-        simulate_remove_liquidity_inner<Emojicoin>(
-            provider,
-            lp_coin_amount,
-            borrow_global(market_address),
-        )
-    }
-
-    #[view]
-    public fun verified_symbol_emoji_bytes(emojis: vector<vector<u8>>): vector<u8>
-    acquires Registry, RegistryAddress {
-        get_verified_symbol_emoji_bytes(borrow_registry_ref(), emojis)
-    }
-
-    public fun tvl_per_lp_coin_growth_q64(
-        start: TVLtoLPCoinRatio,
-        end: TVLtoLPCoinRatio,
-    ): u128 {
-        tvl_per_lp_coin_growth_q64_inline(start, end)
-    }
-
-    public fun unpack_cumulative_stats(cumulative_stats: CumulativeStats): (
-        u128,
-        u128,
-        u128,
-        u128,
-        u128,
-        u64,
-        u64,
-    ) {
-        let CumulativeStats {
-            base_volume,
-            quote_volume,
-            integrator_fees,
-            pool_fees_base,
-            pool_fees_quote,
-            n_swaps,
-            n_chat_messages,
-        } = cumulative_stats;
-        (
-            base_volume,
-            quote_volume,
-            integrator_fees,
-            pool_fees_base,
-            pool_fees_quote,
-            n_swaps,
-            n_chat_messages,
-        )
-    }
-
-    public fun unpack_instantaneous_stats(instantaneous_stats: InstantaneousStats): (
-        u64,
-        u128,
-        u128,
-        u128,
-    ) {
-        let InstantaneousStats {
-            total_quote_locked,
-            total_value_locked,
-            market_cap,
-            fully_diluted_value,
-        } = instantaneous_stats;
-        (total_quote_locked, total_value_locked, market_cap, fully_diluted_value)
-    }
-
-    public fun unpack_last_swap(last_swap: LastSwap): (
-        bool,
-        u128,
-        u64,
-        u64,
-        u64,
-        u64,
-    ) {
-        let LastSwap {
-            is_sell,
-            avg_execution_price_q64,
-            base_volume,
-            quote_volume,
-            nonce,
-            time,
-        } = last_swap;
-        (is_sell, avg_execution_price_q64, base_volume, quote_volume, nonce, time)
-    }
-
-    public fun unpack_liquidity(liquidity: Liquidity): (
-        u64,
-        u64,
-        u64,
-        address,
-        u64,
-        u64,
-        u64,
-        bool,
-        u64,
-        u64,
-    ) {
-        let Liquidity {
-            market_id,
-            time,
-            market_nonce,
-            provider,
-            base_amount,
-            quote_amount,
-            lp_coin_amount,
-            liquidity_provided,
-            pro_rata_base_donation_claim_amount,
-            pro_rata_quote_donation_claim_amount,
-        } = liquidity;
-        (
-            market_id,
-            time,
-            market_nonce,
-            provider,
-            base_amount,
-            quote_amount,
-            lp_coin_amount,
-            liquidity_provided,
-            pro_rata_base_donation_claim_amount,
-            pro_rata_quote_donation_claim_amount,
-        )
-    }
-
-    public fun unpack_market_metadata(metadata: MarketMetadata): (
-        u64,
-        address,
-        vector<u8>,
-    ) {
-        let MarketMetadata {
-            market_id,
-            market_address,
-            emoji_bytes,
-        } = metadata;
-        (market_id, market_address, emoji_bytes)
-    }
-
-    public fun unpack_market_view(market_view: MarketView): (
-        MarketMetadata,
-        SequenceInfo,
-        Reserves,
-        Reserves,
-        u128,
-        bool,
-        CumulativeStats,
-        InstantaneousStats,
-        LastSwap,
-        vector<PeriodicStateTracker>,
-        u64,
-        u64,
-        u64,
-    ) {
-        let MarketView {
-            metadata,
-            sequence_info,
-            clamm_virtual_reserves,
-            cpamm_real_reserves,
-            lp_coin_supply,
-            in_bonding_curve,
-            cumulative_stats,
-            instantaneous_stats,
-            last_swap,
-            periodic_state_trackers,
-            aptos_coin_balance,
-            emojicoin_balance,
-            emojicoin_lp_balance,
-        } = market_view;
-        (
-            metadata,
-            sequence_info,
-            clamm_virtual_reserves,
-            cpamm_real_reserves,
-            lp_coin_supply,
-            in_bonding_curve,
-            cumulative_stats,
-            instantaneous_stats,
-            last_swap,
-            periodic_state_trackers,
-            aptos_coin_balance,
-            emojicoin_balance,
-            emojicoin_lp_balance,
-        )
-    }
-
-    public fun unpack_periodic_state_tracker(periodic_state_tracker: PeriodicStateTracker): (
-        u64,
-        u64,
-        u128,
-        u128,
-        u128,
-        u128,
-        u128,
-        u128,
-        u128,
-        u128,
-        u128,
-        u64,
-        u64,
-        bool,
-        bool,
-        TVLtoLPCoinRatio,
-        TVLtoLPCoinRatio,
-    ) {
-        let PeriodicStateTracker {
-            start_time,
-            period,
-            open_price_q64,
-            high_price_q64,
-            low_price_q64,
-            close_price_q64,
-            volume_base,
-            volume_quote,
-            integrator_fees,
-            pool_fees_base,
-            pool_fees_quote,
-            n_swaps,
-            n_chat_messages,
-            starts_in_bonding_curve,
-            ends_in_bonding_curve,
-            tvl_to_lp_coin_ratio_start,
-            tvl_to_lp_coin_ratio_end,
-        } = periodic_state_tracker;
-        (
-            start_time,
-            period,
-            open_price_q64,
-            high_price_q64,
-            low_price_q64,
-            close_price_q64,
-            volume_base,
-            volume_quote,
-            integrator_fees,
-            pool_fees_base,
-            pool_fees_quote,
-            n_swaps,
-            n_chat_messages,
-            starts_in_bonding_curve,
-            ends_in_bonding_curve,
-            tvl_to_lp_coin_ratio_start,
-            tvl_to_lp_coin_ratio_end,
-        )
-    }
-
-    public fun unpack_registry_view(registry_view: RegistryView): (
-        address,
-        AggregatorSnapshot<u64>,
-        u64,
-        u64,
-        AggregatorSnapshot<u128>,
-        AggregatorSnapshot<u128>,
-        AggregatorSnapshot<u128>,
-        AggregatorSnapshot<u128>,
-        AggregatorSnapshot<u128>,
-        AggregatorSnapshot<u128>,
-        AggregatorSnapshot<u64>,
-        AggregatorSnapshot<u64>,
-    ) {
-        let RegistryView {
-            registry_address,
-            nonce,
-            last_bump_time,
-            n_markets,
-            cumulative_quote_volume,
-            total_quote_locked,
-            total_value_locked,
-            market_cap,
-            fully_diluted_value,
-            cumulative_integrator_fees,
-            cumulative_swaps,
-            cumulative_chat_messages,
-        } = registry_view;
-        (
-            registry_address,
-            nonce,
-            last_bump_time,
-            n_markets,
-            cumulative_quote_volume,
-            total_quote_locked,
-            total_value_locked,
-            market_cap,
-            fully_diluted_value,
-            cumulative_integrator_fees,
-            cumulative_swaps,
-            cumulative_chat_messages,
-        )
-    }
-
-    public fun unpack_reserves(reserves: Reserves): (u64, u64) {
-        let Reserves { base, quote } = reserves;
-        (base, quote)
-    }
-
-    public fun unpack_swap(swap: Swap): (
-        u64,
-        u64,
-        u64,
-        address,
-        u64,
-        bool,
-        address,
-        u8,
-        u64,
-        u64,
-        u64,
-        u128,
-        u64,
-        u64,
-        bool,
-        bool,
-    ) {
-        let Swap {
-            market_id,
-            time,
-            market_nonce,
-            swapper,
-            input_amount,
-            is_sell,
-            integrator,
-            integrator_fee_rate_bps,
-            net_proceeds,
-            base_volume,
-            quote_volume,
-            avg_execution_price_q64,
-            integrator_fee,
-            pool_fee,
-            starts_in_bonding_curve,
-            results_in_state_transition,
-        } = swap;
-        (
-            market_id,
-            time,
-            market_nonce,
-            swapper,
-            input_amount,
-            is_sell,
-            integrator,
-            integrator_fee_rate_bps,
-            net_proceeds,
-            base_volume,
-            quote_volume,
-            avg_execution_price_q64,
-            integrator_fee,
-            pool_fee,
-            starts_in_bonding_curve,
-            results_in_state_transition,
-        )
-    }
-
-    public fun unpack_sequence_info(sequence_info: SequenceInfo): (u64, u64) {
-        let SequenceInfo { nonce, last_bump_time } = sequence_info;
-        (nonce, last_bump_time)
-    }
-
-    public fun unpack_tvl_to_lp_coin_ratio(tvl_to_lp_coin_ratio: TVLtoLPCoinRatio): (u128, u128) {
-        let TVLtoLPCoinRatio { tvl, lp_coins } = tvl_to_lp_coin_ratio;
-        (tvl, lp_coins)
     }
 
     inline fun get_registry_address(): address {
