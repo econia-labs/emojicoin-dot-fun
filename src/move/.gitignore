@@ -3,3 +3,4 @@
 *.trace
 **/build/
 **/coin_factory/json
+*/doc/*
