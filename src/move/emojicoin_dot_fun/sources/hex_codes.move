@@ -1,7 +1,7 @@
 // cspell:ignoreRegExp /FA[ABCDEF]{2}/
 module emojicoin_dot_fun::hex_codes {
-    use std::vector;
     use std::bcs;
+    use std::vector;
     friend emojicoin_dot_fun::emojicoin_dot_fun;
 
     public inline fun get_coin_symbol_emojis(): vector<vector<u8>> {
