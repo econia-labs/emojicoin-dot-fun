@@ -379,6 +379,285 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         lp_coins: u128,
     }
 
+    public entry fun register_market(
+        registrant: &signer,
+        emojis: vector<vector<u8>>,
+        integrator: address,
+    ) acquires Market, Registry, RegistryAddress {
+        register_market_inner(registrant, emojis, integrator, true);
+    }
+
+    public entry fun swap<Emojicoin, EmojicoinLP>(
+        swapper: &signer,
+        market_address: address,
+        input_amount: u64,
+        is_sell: bool,
+        integrator: address,
+        integrator_fee_rate_bps: u8,
+    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+
+        // Mutably borrow market, check its coin types, then simulate a swap.
+        let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
+        ensure_coins_initialized<Emojicoin, EmojicoinLP>(
+            market_ref_mut,
+            &market_signer,
+            market_address,
+        );
+        let swapper_address = signer::address_of(swapper);
+        let event = simulate_swap_inner(
+            swapper_address,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            market_ref_mut,
+        );
+
+        // Get TVL before swap, use it to update periodic state.
+        let starts_in_bonding_curve = event.starts_in_bonding_curve;
+        let tvl_start = tvl(market_ref_mut, starts_in_bonding_curve);
+        let registry_ref_mut = borrow_registry_ref_mut();
+        let time = event.time;
+        let trigger = if (is_sell) TRIGGER_SWAP_SELL else TRIGGER_SWAP_BUY;
+        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
+
+        // Prepare local variables.
+        let quote_volume_as_u128 = (event.quote_volume as u128);
+        let base_volume_as_u128 = (event.base_volume as u128);
+        let local_cumulative_stats_ref_mut = &mut market_ref_mut.cumulative_stats;
+        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
+        let total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
+        let market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
+        let fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
+        let pool_fees_base_as_u128 = 0;
+        let pool_fees_quote_as_u128 = 0;
+        let (quote, fdv_start, market_cap_start, fdv_end, market_cap_end);
+        let results_in_state_transition = event.results_in_state_transition;
+        let ends_in_bonding_curve = starts_in_bonding_curve && !results_in_state_transition;
+
+        // Create for swapper an account with AptosCoin store if it doesn't exist.
+        if (!account::exists_at(swapper_address)) {
+            aptos_account::create_account(swapper_address);
+        };
+        coin::register<AptosCoin>(swapper);
+
+        if (is_sell) { // If selling, no possibility of state transition.
+
+            // Transfer funds.
+            coin::register<Emojicoin>(swapper); // For better feedback if insufficient funds.
+            coin::transfer<Emojicoin>(swapper, market_address, input_amount);
+            let quote_leaving_market = event.quote_volume + event.integrator_fee;
+            quote = coin::withdraw<AptosCoin>(&market_signer, quote_leaving_market);
+            let net_proceeds = coin::extract(&mut quote, event.quote_volume);
+            aptos_account::deposit_coins(swapper_address, net_proceeds);
+
+            // Get minuend for circulating supply calculations and affected reserves.
+            let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
+                market_ref_mut,
+                starts_in_bonding_curve,
+            );
+
+            // Update reserve amounts.
+            let reserves_start = *reserves_ref_mut;
+            let reserves_end = reserves_start;
+            reserves_end.base = reserves_end.base + event.input_amount;
+            reserves_end.quote = reserves_end.quote - quote_leaving_market;
+            *reserves_ref_mut = reserves_end;
+
+            // Get FDV, market cap at start and end.
+            (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+                fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
+
+            // Update global stats.
+            aggregator_v2::try_sub(total_quote_locked_ref_mut, (quote_leaving_market as u128));
+            aggregator_v2::try_sub(market_cap_ref_mut, market_cap_start - market_cap_end);
+            aggregator_v2::try_sub(fdv_ref_mut, fdv_start - fdv_end);
+
+            // Update cumulative pool fees.
+            let local_cumulative_pool_fees_quote_ref_mut =
+                &mut local_cumulative_stats_ref_mut.pool_fees_quote;
+            pool_fees_quote_as_u128 = (event.pool_fee as u128);
+            *local_cumulative_pool_fees_quote_ref_mut =
+                *local_cumulative_pool_fees_quote_ref_mut + pool_fees_quote_as_u128;
+
+        } else { // If buying, might need to buy through the state transition.
+
+            // Transfer funds.
+            quote = coin::withdraw<AptosCoin>(swapper, input_amount);
+            coin::deposit(market_address, coin::extract(&mut quote, event.quote_volume));
+            aptos_account::transfer_coins<Emojicoin>(
+                &market_signer,
+                swapper_address,
+                event.base_volume,
+            );
+
+            if (results_in_state_transition) { // Buy with state transition.
+                // Mint initial liquidity provider coins.
+                let lp_coins =
+                    mint_lp_coins<Emojicoin, EmojicoinLP>(market_address, LP_TOKENS_INITIAL);
+                coin::deposit<EmojicoinLP>(market_address, lp_coins);
+                market_ref_mut.lp_coin_supply = (LP_TOKENS_INITIAL as u128);
+
+                // Assign minuend for circulating supply calculations.
+                let supply_minuend_start = BASE_VIRTUAL_CEILING;
+                let supply_minuend_end = EMOJICOIN_SUPPLY;
+
+                // Determine CLAMM transition variables, then zero out CLAMM reserves.
+                let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
+                let reserves_start = *clamm_virtual_reserves_ref_mut;
+                let quote_to_transition = QUOTE_VIRTUAL_CEILING - reserves_start.quote;
+                let base_left_in_clamm = reserves_start.base - BASE_VIRTUAL_FLOOR;
+                *clamm_virtual_reserves_ref_mut = Reserves { base: 0, quote: 0 };
+
+                // Determine ending CPAMM reserve amounts after seeding with initial liquidity.
+                let quote_into_cpamm = event.quote_volume - quote_to_transition;
+                let base_out_of_cpamm = event.base_volume - base_left_in_clamm;
+                let reserves_end = Reserves {
+                    base: EMOJICOIN_REMAINDER - base_out_of_cpamm,
+                    quote: QUOTE_REAL_CEILING + quote_into_cpamm,
+                };
+                market_ref_mut.cpamm_real_reserves = reserves_end;
+
+                // Get FDV and market cap at start and end.
+                (fdv_start, market_cap_start) =
+                    fdv_market_cap(reserves_start, supply_minuend_start);
+                (fdv_end, market_cap_end) =
+                    fdv_market_cap(reserves_end, supply_minuend_end);
+
+            } else { // Buy without state transition.
+
+                // Get minuend for circulating supply calculations and affected reserves.
+                let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
+                    market_ref_mut,
+                    starts_in_bonding_curve,
+                );
+
+                // Update reserve amounts.
+                let reserves_start = *reserves_ref_mut;
+                let reserves_end = reserves_start;
+                reserves_end.base = reserves_end.base - event.base_volume;
+                reserves_end.quote = reserves_end.quote + event.quote_volume;
+                *reserves_ref_mut = reserves_end;
+
+                // Get FDV, market cap at start and end.
+                (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+                    fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
+
+            };
+
+            // Update global stats.
+            aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
+            aggregator_v2::try_add(market_cap_ref_mut, market_cap_end - market_cap_start);
+            aggregator_v2::try_add(fdv_ref_mut, fdv_end - fdv_start);
+
+            // Update cumulative pool fees.
+            let local_cumulative_pool_fees_base_ref_mut =
+                &mut local_cumulative_stats_ref_mut.pool_fees_base;
+            pool_fees_base_as_u128 = (event.pool_fee as u128);
+            *local_cumulative_pool_fees_base_ref_mut =
+                *local_cumulative_pool_fees_base_ref_mut + pool_fees_base_as_u128;
+        };
+
+        aptos_account::deposit_coins(integrator, quote); // Deposit integrator's fees.
+
+        // Update cumulative volume locally and globally.
+        let local_cumulative_base_volume_ref_mut = &mut local_cumulative_stats_ref_mut.base_volume;
+        let local_cumulative_quote_volume_ref_mut =
+            &mut local_cumulative_stats_ref_mut.quote_volume;
+        *local_cumulative_base_volume_ref_mut =
+            *local_cumulative_base_volume_ref_mut + base_volume_as_u128;
+        *local_cumulative_quote_volume_ref_mut =
+            *local_cumulative_quote_volume_ref_mut + quote_volume_as_u128;
+        let global_cumulative_quote_volume_ref_mut =
+            &mut global_stats_ref_mut.cumulative_quote_volume;
+        aggregator_v2::try_add(global_cumulative_quote_volume_ref_mut, quote_volume_as_u128);
+
+        // Update integrator fees locally and globally.
+        let integrator_fee_as_u128 = (event.integrator_fee as u128);
+        let local_cumulative_integrator_fees_ref_mut =
+            &mut local_cumulative_stats_ref_mut.integrator_fees;
+        *local_cumulative_integrator_fees_ref_mut =
+            *local_cumulative_integrator_fees_ref_mut + integrator_fee_as_u128;
+        let global_cumulative_integrator_fees_ref_mut =
+            &mut global_stats_ref_mut.cumulative_integrator_fees;
+        aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, integrator_fee_as_u128);
+
+        // Update number of swaps locally and globally.
+        let local_cumulative_n_swaps = &mut local_cumulative_stats_ref_mut.n_swaps;
+        *local_cumulative_n_swaps = *local_cumulative_n_swaps + 1;
+        let global_cumulative_swaps_ref_mut = &mut global_stats_ref_mut.cumulative_swaps;
+        aggregator_v2::try_add(global_cumulative_swaps_ref_mut, 1);
+
+        // Update global TVL amounts.
+        let lp_coin_supply = market_ref_mut.lp_coin_supply;
+        let tvl_end = tvl(market_ref_mut, ends_in_bonding_curve);
+        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
+        if (tvl_end > tvl_start) {
+            let tvl_increase = tvl_end - tvl_start;
+            aggregator_v2::try_add(global_total_value_locked_ref_mut, tvl_increase);
+        } else {
+            let tvl_decrease = tvl_start - tvl_end;
+            aggregator_v2::try_sub(global_total_value_locked_ref_mut, tvl_decrease);
+        };
+
+        // Update last swap info.
+        let last_swap_ref_mut = &mut market_ref_mut.last_swap;
+        let avg_execution_price_q64 = event.avg_execution_price_q64;
+        *last_swap_ref_mut = LastSwap {
+            is_sell,
+            avg_execution_price_q64,
+            base_volume: event.base_volume,
+            quote_volume: event.quote_volume,
+            nonce: event.market_nonce,
+            time: time,
+        };
+
+        // Update periodic state trackers, emit swap event.
+        vector::for_each_mut(&mut market_ref_mut.periodic_state_trackers, |e| {
+            // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
+            let tracker_ref_mut: &mut PeriodicStateTracker = e;
+            if (tracker_ref_mut.open_price_q64 == 0) {
+                tracker_ref_mut.open_price_q64 = avg_execution_price_q64;
+            };
+            if (avg_execution_price_q64 > tracker_ref_mut.high_price_q64) {
+                tracker_ref_mut.high_price_q64 = avg_execution_price_q64;
+            };
+            if (tracker_ref_mut.low_price_q64 == 0 ||
+                avg_execution_price_q64 < tracker_ref_mut.low_price_q64) {
+                tracker_ref_mut.low_price_q64 = avg_execution_price_q64;
+            };
+            tracker_ref_mut.close_price_q64 = avg_execution_price_q64;
+            tracker_ref_mut.volume_base =
+                tracker_ref_mut.volume_base + base_volume_as_u128;
+            tracker_ref_mut.volume_quote =
+                tracker_ref_mut.volume_quote + quote_volume_as_u128;
+            tracker_ref_mut.integrator_fees =
+                tracker_ref_mut.integrator_fees + integrator_fee_as_u128;
+            tracker_ref_mut.pool_fees_base =
+                tracker_ref_mut.pool_fees_base + pool_fees_base_as_u128;
+            tracker_ref_mut.pool_fees_quote =
+                tracker_ref_mut.pool_fees_quote + pool_fees_quote_as_u128;
+            tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl_end;
+            tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+            tracker_ref_mut.n_swaps = tracker_ref_mut.n_swaps + 1;
+            tracker_ref_mut.ends_in_bonding_curve = ends_in_bonding_curve;
+        });
+        event::emit(event);
+
+        // Get ending total quote locked, bump market state.
+        let total_quote_locked_end = total_quote_locked(market_ref_mut, ends_in_bonding_curve);
+        bump_market_state(
+            market_ref_mut,
+            trigger,
+            InstantaneousStats {
+                total_quote_locked: total_quote_locked_end,
+                total_value_locked: tvl_end,
+                market_cap: market_cap_end,
+                fully_diluted_value: fdv_end,
+            },
+        );
+    }
+
     /// Constructs a chat message from a sequence of emojis emitted as an event.
     /// Example:
     ///     emoji_bytes: [ x"00", x"01", x"02" ], // Pretend these are valid emojis.
@@ -487,12 +766,160 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
-    public entry fun register_market(
-        registrant: &signer,
-        emojis: vector<vector<u8>>,
-        integrator: address,
-    ) acquires Market, Registry, RegistryAddress {
-        register_market_inner(registrant, emojis, integrator, true);
+    public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
+        provider: &signer,
+        market_address: address,
+        quote_amount: u64,
+    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+
+        // Sanitize inputs, set up local variables.
+        let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
+        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
+        let provider_address = signer::address_of(provider);
+        let event = simulate_provide_liquidity_inner(
+            provider_address,
+            quote_amount,
+            market_ref_mut,
+        );
+        let registry_ref_mut = borrow_registry_ref_mut();
+
+        // Get TVL before operations, use it to update periodic state.
+        let tvl_start = tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote);
+        let time = event.time;
+        let trigger = TRIGGER_PROVIDE_LIQUIDITY;
+        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
+
+        // Store reserves at start of operation.
+        let reserves_start = market_ref_mut.cpamm_real_reserves;
+
+        // Transfer coins.
+        coin::transfer<Emojicoin>(provider, market_address, event.base_amount);
+        coin::transfer<AptosCoin>(provider, market_address, event.quote_amount);
+        let lp_coins = mint_lp_coins<Emojicoin, EmojicoinLP>(
+            market_ref_mut.metadata.market_address,
+            event.lp_coin_amount,
+        );
+        aptos_account::deposit_coins(provider_address, lp_coins);
+
+        // Update market state.
+        let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
+        let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
+        let start_quote = *quote_reserves_ref_mut;
+        reserves_ref_mut.base = reserves_ref_mut.base + event.base_amount;
+        *quote_reserves_ref_mut = start_quote + event.quote_amount;
+        let lp_coin_supply = market_ref_mut.lp_coin_supply + (event.lp_coin_amount as u128);
+        market_ref_mut.lp_coin_supply = lp_coin_supply;
+        let tvl_end = tvl_cpamm(*quote_reserves_ref_mut);
+
+        // Update global total quote locked, TVL.
+        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
+        let global_total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
+        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
+        let delta_tvl = tvl_end - tvl_start;
+        aggregator_v2::try_add(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
+        aggregator_v2::try_add(global_total_value_locked_ref_mut, delta_tvl);
+
+        // Get FDV, market cap, at start and end of operation, update global stats accordingly.
+        let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut, EMOJICOIN_SUPPLY);
+        update_global_fdv_market_cap_for_liquidity_operation(
+            fdv_start,
+            market_cap_start,
+            fdv_end,
+            market_cap_end,
+            global_stats_ref_mut,
+        );
+
+        // Emit liquidity provision event, follow up on periodic state trackers/market state.
+        event::emit(event);
+        liquidity_provision_operation_epilogue(
+            tvl_end,
+            fdv_end,
+            market_cap_end,
+            lp_coin_supply,
+            reserves_ref_mut.quote,
+            trigger,
+            market_ref_mut,
+        );
+    }
+
+    public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
+        provider: &signer,
+        market_address: address,
+        lp_coin_amount: u64,
+    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+
+        // Sanitize inputs, set up local variables.
+        let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
+        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
+        let provider_address = signer::address_of(provider);
+        let event = simulate_remove_liquidity_inner<Emojicoin>(
+            provider_address,
+            lp_coin_amount,
+            market_ref_mut,
+        );
+        let registry_ref_mut = borrow_registry_ref_mut();
+
+        // Get TVL before operations, use it to update periodic state.
+        let tvl_start = tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote);
+        let time = event.time;
+        let trigger = TRIGGER_REMOVE_LIQUIDITY;
+        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
+
+        // Store reserves at start of operation.
+        let reserves_start = market_ref_mut.cpamm_real_reserves;
+
+        // Transfer coins.
+        let base_total = event.base_amount + event.pro_rata_base_donation_claim_amount;
+        let quote_total = event.quote_amount + event.pro_rata_quote_donation_claim_amount;
+        coin::transfer<Emojicoin>(&market_signer, provider_address, base_total);
+        coin::transfer<AptosCoin>(&market_signer, provider_address, quote_total);
+
+        // Burn coins by first withdrawing them from provider's coin store, to trigger event.
+        let lp_coins = coin::withdraw<EmojicoinLP>(provider, event.lp_coin_amount);
+        burn_lp_coins<Emojicoin, EmojicoinLP>(market_ref_mut.metadata.market_address, lp_coins);
+
+        // Update market state.
+        let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
+        let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
+        let start_quote = *quote_reserves_ref_mut;
+        let tvl_start = tvl_cpamm(start_quote);
+        reserves_ref_mut.base = reserves_ref_mut.base - event.base_amount;
+        *quote_reserves_ref_mut = start_quote - event.quote_amount;
+        let lp_coin_supply = market_ref_mut.lp_coin_supply - (event.lp_coin_amount as u128);
+        market_ref_mut.lp_coin_supply = lp_coin_supply;
+        let tvl_end = tvl_cpamm(*quote_reserves_ref_mut);
+
+        // Update global total quote locked, TVL.
+        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
+        let global_total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
+        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
+        let delta_tvl = tvl_start - tvl_end;
+        aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
+        aggregator_v2::try_sub(global_total_value_locked_ref_mut, delta_tvl);
+
+        // Get FDV, market cap, at start and end of operation, update global stats accordingly.
+        let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
+            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut, EMOJICOIN_SUPPLY);
+        update_global_fdv_market_cap_for_liquidity_operation(
+            fdv_start,
+            market_cap_start,
+            fdv_end,
+            market_cap_end,
+            global_stats_ref_mut,
+        );
+
+        // Emit liquidity provision event, follow up on periodic state trackers/market state.
+        event::emit(event);
+        liquidity_provision_operation_epilogue(
+            tvl_end,
+            fdv_end,
+            market_cap_end,
+            lp_coin_supply,
+            reserves_ref_mut.quote,
+            trigger,
+            market_ref_mut,
+        );
     }
 
     fun register_market_inner(
@@ -862,433 +1289,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let market_ref = borrow_global<Market>(market_address);
         let market_signer = object::generate_signer_for_extending(&market_ref.extend_ref);
         (market_ref, market_signer)
-    }
-
-    public entry fun swap<Emojicoin, EmojicoinLP>(
-        swapper: &signer,
-        market_address: address,
-        input_amount: u64,
-        is_sell: bool,
-        integrator: address,
-        integrator_fee_rate_bps: u8,
-    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
-
-        // Mutably borrow market, check its coin types, then simulate a swap.
-        let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
-        ensure_coins_initialized<Emojicoin, EmojicoinLP>(
-            market_ref_mut,
-            &market_signer,
-            market_address,
-        );
-        let swapper_address = signer::address_of(swapper);
-        let event = simulate_swap_inner(
-            swapper_address,
-            input_amount,
-            is_sell,
-            integrator,
-            integrator_fee_rate_bps,
-            market_ref_mut,
-        );
-
-        // Get TVL before swap, use it to update periodic state.
-        let starts_in_bonding_curve = event.starts_in_bonding_curve;
-        let tvl_start = tvl(market_ref_mut, starts_in_bonding_curve);
-        let registry_ref_mut = borrow_registry_ref_mut();
-        let time = event.time;
-        let trigger = if (is_sell) TRIGGER_SWAP_SELL else TRIGGER_SWAP_BUY;
-        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
-
-        // Prepare local variables.
-        let quote_volume_as_u128 = (event.quote_volume as u128);
-        let base_volume_as_u128 = (event.base_volume as u128);
-        let local_cumulative_stats_ref_mut = &mut market_ref_mut.cumulative_stats;
-        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
-        let total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
-        let market_cap_ref_mut = &mut global_stats_ref_mut.market_cap;
-        let fdv_ref_mut = &mut global_stats_ref_mut.fully_diluted_value;
-        let pool_fees_base_as_u128 = 0;
-        let pool_fees_quote_as_u128 = 0;
-        let (quote, fdv_start, market_cap_start, fdv_end, market_cap_end);
-        let results_in_state_transition = event.results_in_state_transition;
-        let ends_in_bonding_curve = starts_in_bonding_curve && !results_in_state_transition;
-
-        // Create for swapper an account with AptosCoin store if it doesn't exist.
-        if (!account::exists_at(swapper_address)) {
-            aptos_account::create_account(swapper_address);
-        };
-        coin::register<AptosCoin>(swapper);
-
-        if (is_sell) { // If selling, no possibility of state transition.
-
-            // Transfer funds.
-            coin::register<Emojicoin>(swapper); // For better feedback if insufficient funds.
-            coin::transfer<Emojicoin>(swapper, market_address, input_amount);
-            let quote_leaving_market = event.quote_volume + event.integrator_fee;
-            quote = coin::withdraw<AptosCoin>(&market_signer, quote_leaving_market);
-            let net_proceeds = coin::extract(&mut quote, event.quote_volume);
-            aptos_account::deposit_coins(swapper_address, net_proceeds);
-
-            // Get minuend for circulating supply calculations and affected reserves.
-            let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
-                market_ref_mut,
-                starts_in_bonding_curve,
-            );
-
-            // Update reserve amounts.
-            let reserves_start = *reserves_ref_mut;
-            let reserves_end = reserves_start;
-            reserves_end.base = reserves_end.base + event.input_amount;
-            reserves_end.quote = reserves_end.quote - quote_leaving_market;
-            *reserves_ref_mut = reserves_end;
-
-            // Get FDV, market cap at start and end.
-            (fdv_start, market_cap_start, fdv_end, market_cap_end) =
-                fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
-
-            // Update global stats.
-            aggregator_v2::try_sub(total_quote_locked_ref_mut, (quote_leaving_market as u128));
-            aggregator_v2::try_sub(market_cap_ref_mut, market_cap_start - market_cap_end);
-            aggregator_v2::try_sub(fdv_ref_mut, fdv_start - fdv_end);
-
-            // Update cumulative pool fees.
-            let local_cumulative_pool_fees_quote_ref_mut =
-                &mut local_cumulative_stats_ref_mut.pool_fees_quote;
-            pool_fees_quote_as_u128 = (event.pool_fee as u128);
-            *local_cumulative_pool_fees_quote_ref_mut =
-                *local_cumulative_pool_fees_quote_ref_mut + pool_fees_quote_as_u128;
-
-        } else { // If buying, might need to buy through the state transition.
-
-            // Transfer funds.
-            quote = coin::withdraw<AptosCoin>(swapper, input_amount);
-            coin::deposit(market_address, coin::extract(&mut quote, event.quote_volume));
-            aptos_account::transfer_coins<Emojicoin>(
-                &market_signer,
-                swapper_address,
-                event.base_volume,
-            );
-
-            if (results_in_state_transition) { // Buy with state transition.
-                // Mint initial liquidity provider coins.
-                let lp_coins =
-                    mint_lp_coins<Emojicoin, EmojicoinLP>(market_address, LP_TOKENS_INITIAL);
-                coin::deposit<EmojicoinLP>(market_address, lp_coins);
-                market_ref_mut.lp_coin_supply = (LP_TOKENS_INITIAL as u128);
-
-                // Assign minuend for circulating supply calculations.
-                let supply_minuend_start = BASE_VIRTUAL_CEILING;
-                let supply_minuend_end = EMOJICOIN_SUPPLY;
-
-                // Determine CLAMM transition variables, then zero out CLAMM reserves.
-                let clamm_virtual_reserves_ref_mut = &mut market_ref_mut.clamm_virtual_reserves;
-                let reserves_start = *clamm_virtual_reserves_ref_mut;
-                let quote_to_transition = QUOTE_VIRTUAL_CEILING - reserves_start.quote;
-                let base_left_in_clamm = reserves_start.base - BASE_VIRTUAL_FLOOR;
-                *clamm_virtual_reserves_ref_mut = Reserves { base: 0, quote: 0 };
-
-                // Determine ending CPAMM reserve amounts after seeding with initial liquidity.
-                let quote_into_cpamm = event.quote_volume - quote_to_transition;
-                let base_out_of_cpamm = event.base_volume - base_left_in_clamm;
-                let reserves_end = Reserves {
-                    base: EMOJICOIN_REMAINDER - base_out_of_cpamm,
-                    quote: QUOTE_REAL_CEILING + quote_into_cpamm,
-                };
-                market_ref_mut.cpamm_real_reserves = reserves_end;
-
-                // Get FDV and market cap at start and end.
-                (fdv_start, market_cap_start) =
-                    fdv_market_cap(reserves_start, supply_minuend_start);
-                (fdv_end, market_cap_end) =
-                    fdv_market_cap(reserves_end, supply_minuend_end);
-
-            } else { // Buy without state transition.
-
-                // Get minuend for circulating supply calculations and affected reserves.
-                let (supply_minuend, reserves_ref_mut) = assign_supply_minuend_reserves_ref_mut(
-                    market_ref_mut,
-                    starts_in_bonding_curve,
-                );
-
-                // Update reserve amounts.
-                let reserves_start = *reserves_ref_mut;
-                let reserves_end = reserves_start;
-                reserves_end.base = reserves_end.base - event.base_volume;
-                reserves_end.quote = reserves_end.quote + event.quote_volume;
-                *reserves_ref_mut = reserves_end;
-
-                // Get FDV, market cap at start and end.
-                (fdv_start, market_cap_start, fdv_end, market_cap_end) =
-                    fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
-
-            };
-
-            // Update global stats.
-            aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
-            aggregator_v2::try_add(market_cap_ref_mut, market_cap_end - market_cap_start);
-            aggregator_v2::try_add(fdv_ref_mut, fdv_end - fdv_start);
-
-            // Update cumulative pool fees.
-            let local_cumulative_pool_fees_base_ref_mut =
-                &mut local_cumulative_stats_ref_mut.pool_fees_base;
-            pool_fees_base_as_u128 = (event.pool_fee as u128);
-            *local_cumulative_pool_fees_base_ref_mut =
-                *local_cumulative_pool_fees_base_ref_mut + pool_fees_base_as_u128;
-        };
-
-        aptos_account::deposit_coins(integrator, quote); // Deposit integrator's fees.
-
-        // Update cumulative volume locally and globally.
-        let local_cumulative_base_volume_ref_mut = &mut local_cumulative_stats_ref_mut.base_volume;
-        let local_cumulative_quote_volume_ref_mut =
-            &mut local_cumulative_stats_ref_mut.quote_volume;
-        *local_cumulative_base_volume_ref_mut =
-            *local_cumulative_base_volume_ref_mut + base_volume_as_u128;
-        *local_cumulative_quote_volume_ref_mut =
-            *local_cumulative_quote_volume_ref_mut + quote_volume_as_u128;
-        let global_cumulative_quote_volume_ref_mut =
-            &mut global_stats_ref_mut.cumulative_quote_volume;
-        aggregator_v2::try_add(global_cumulative_quote_volume_ref_mut, quote_volume_as_u128);
-
-        // Update integrator fees locally and globally.
-        let integrator_fee_as_u128 = (event.integrator_fee as u128);
-        let local_cumulative_integrator_fees_ref_mut =
-            &mut local_cumulative_stats_ref_mut.integrator_fees;
-        *local_cumulative_integrator_fees_ref_mut =
-            *local_cumulative_integrator_fees_ref_mut + integrator_fee_as_u128;
-        let global_cumulative_integrator_fees_ref_mut =
-            &mut global_stats_ref_mut.cumulative_integrator_fees;
-        aggregator_v2::try_add(global_cumulative_integrator_fees_ref_mut, integrator_fee_as_u128);
-
-        // Update number of swaps locally and globally.
-        let local_cumulative_n_swaps = &mut local_cumulative_stats_ref_mut.n_swaps;
-        *local_cumulative_n_swaps = *local_cumulative_n_swaps + 1;
-        let global_cumulative_swaps_ref_mut = &mut global_stats_ref_mut.cumulative_swaps;
-        aggregator_v2::try_add(global_cumulative_swaps_ref_mut, 1);
-
-        // Update global TVL amounts.
-        let lp_coin_supply = market_ref_mut.lp_coin_supply;
-        let tvl_end = tvl(market_ref_mut, ends_in_bonding_curve);
-        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
-        if (tvl_end > tvl_start) {
-            let tvl_increase = tvl_end - tvl_start;
-            aggregator_v2::try_add(global_total_value_locked_ref_mut, tvl_increase);
-        } else {
-            let tvl_decrease = tvl_start - tvl_end;
-            aggregator_v2::try_sub(global_total_value_locked_ref_mut, tvl_decrease);
-        };
-
-        // Update last swap info.
-        let last_swap_ref_mut = &mut market_ref_mut.last_swap;
-        let avg_execution_price_q64 = event.avg_execution_price_q64;
-        *last_swap_ref_mut = LastSwap {
-            is_sell,
-            avg_execution_price_q64,
-            base_volume: event.base_volume,
-            quote_volume: event.quote_volume,
-            nonce: event.market_nonce,
-            time: time,
-        };
-
-        // Update periodic state trackers, emit swap event.
-        vector::for_each_mut(&mut market_ref_mut.periodic_state_trackers, |e| {
-            // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
-            let tracker_ref_mut: &mut PeriodicStateTracker = e;
-            if (tracker_ref_mut.open_price_q64 == 0) {
-                tracker_ref_mut.open_price_q64 = avg_execution_price_q64;
-            };
-            if (avg_execution_price_q64 > tracker_ref_mut.high_price_q64) {
-                tracker_ref_mut.high_price_q64 = avg_execution_price_q64;
-            };
-            if (tracker_ref_mut.low_price_q64 == 0 ||
-                avg_execution_price_q64 < tracker_ref_mut.low_price_q64) {
-                tracker_ref_mut.low_price_q64 = avg_execution_price_q64;
-            };
-            tracker_ref_mut.close_price_q64 = avg_execution_price_q64;
-            tracker_ref_mut.volume_base =
-                tracker_ref_mut.volume_base + base_volume_as_u128;
-            tracker_ref_mut.volume_quote =
-                tracker_ref_mut.volume_quote + quote_volume_as_u128;
-            tracker_ref_mut.integrator_fees =
-                tracker_ref_mut.integrator_fees + integrator_fee_as_u128;
-            tracker_ref_mut.pool_fees_base =
-                tracker_ref_mut.pool_fees_base + pool_fees_base_as_u128;
-            tracker_ref_mut.pool_fees_quote =
-                tracker_ref_mut.pool_fees_quote + pool_fees_quote_as_u128;
-            tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl_end;
-            tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
-            tracker_ref_mut.n_swaps = tracker_ref_mut.n_swaps + 1;
-            tracker_ref_mut.ends_in_bonding_curve = ends_in_bonding_curve;
-        });
-        event::emit(event);
-
-        // Get ending total quote locked, bump market state.
-        let total_quote_locked_end = total_quote_locked(market_ref_mut, ends_in_bonding_curve);
-        bump_market_state(
-            market_ref_mut,
-            trigger,
-            InstantaneousStats {
-                total_quote_locked: total_quote_locked_end,
-                total_value_locked: tvl_end,
-                market_cap: market_cap_end,
-                fully_diluted_value: fdv_end,
-            },
-        );
-    }
-
-    public entry fun provide_liquidity<Emojicoin, EmojicoinLP>(
-        provider: &signer,
-        market_address: address,
-        quote_amount: u64,
-    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
-
-        // Sanitize inputs, set up local variables.
-        let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
-        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
-        let provider_address = signer::address_of(provider);
-        let event = simulate_provide_liquidity_inner(
-            provider_address,
-            quote_amount,
-            market_ref_mut,
-        );
-        let registry_ref_mut = borrow_registry_ref_mut();
-
-        // Get TVL before operations, use it to update periodic state.
-        let tvl_start = tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote);
-        let time = event.time;
-        let trigger = TRIGGER_PROVIDE_LIQUIDITY;
-        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
-
-        // Store reserves at start of operation.
-        let reserves_start = market_ref_mut.cpamm_real_reserves;
-
-        // Transfer coins.
-        coin::transfer<Emojicoin>(provider, market_address, event.base_amount);
-        coin::transfer<AptosCoin>(provider, market_address, event.quote_amount);
-        let lp_coins = mint_lp_coins<Emojicoin, EmojicoinLP>(
-            market_ref_mut.metadata.market_address,
-            event.lp_coin_amount,
-        );
-        aptos_account::deposit_coins(provider_address, lp_coins);
-
-        // Update market state.
-        let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
-        let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
-        let start_quote = *quote_reserves_ref_mut;
-        reserves_ref_mut.base = reserves_ref_mut.base + event.base_amount;
-        *quote_reserves_ref_mut = start_quote + event.quote_amount;
-        let lp_coin_supply = market_ref_mut.lp_coin_supply + (event.lp_coin_amount as u128);
-        market_ref_mut.lp_coin_supply = lp_coin_supply;
-        let tvl_end = tvl_cpamm(*quote_reserves_ref_mut);
-
-        // Update global total quote locked, TVL.
-        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
-        let global_total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
-        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
-        let delta_tvl = tvl_end - tvl_start;
-        aggregator_v2::try_add(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
-        aggregator_v2::try_add(global_total_value_locked_ref_mut, delta_tvl);
-
-        // Get FDV, market cap, at start and end of operation, update global stats accordingly.
-        let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
-            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut, EMOJICOIN_SUPPLY);
-        update_global_fdv_market_cap_for_liquidity_operation(
-            fdv_start,
-            market_cap_start,
-            fdv_end,
-            market_cap_end,
-            global_stats_ref_mut,
-        );
-
-        // Emit liquidity provision event, follow up on periodic state trackers/market state.
-        event::emit(event);
-        liquidity_provision_operation_epilogue(
-            tvl_end,
-            fdv_end,
-            market_cap_end,
-            lp_coin_supply,
-            reserves_ref_mut.quote,
-            trigger,
-            market_ref_mut,
-        );
-    }
-
-    public entry fun remove_liquidity<Emojicoin, EmojicoinLP>(
-        provider: &signer,
-        market_address: address,
-        lp_coin_amount: u64,
-    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
-
-        // Sanitize inputs, set up local variables.
-        let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
-        assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
-        let provider_address = signer::address_of(provider);
-        let event = simulate_remove_liquidity_inner<Emojicoin>(
-            provider_address,
-            lp_coin_amount,
-            market_ref_mut,
-        );
-        let registry_ref_mut = borrow_registry_ref_mut();
-
-        // Get TVL before operations, use it to update periodic state.
-        let tvl_start = tvl_cpamm(market_ref_mut.cpamm_real_reserves.quote);
-        let time = event.time;
-        let trigger = TRIGGER_REMOVE_LIQUIDITY;
-        trigger_periodic_state(market_ref_mut, registry_ref_mut, time, trigger, tvl_start);
-
-        // Store reserves at start of operation.
-        let reserves_start = market_ref_mut.cpamm_real_reserves;
-
-        // Transfer coins.
-        let base_total = event.base_amount + event.pro_rata_base_donation_claim_amount;
-        let quote_total = event.quote_amount + event.pro_rata_quote_donation_claim_amount;
-        coin::transfer<Emojicoin>(&market_signer, provider_address, base_total);
-        coin::transfer<AptosCoin>(&market_signer, provider_address, quote_total);
-
-        // Burn coins by first withdrawing them from provider's coin store, to trigger event.
-        let lp_coins = coin::withdraw<EmojicoinLP>(provider, event.lp_coin_amount);
-        burn_lp_coins<Emojicoin, EmojicoinLP>(market_ref_mut.metadata.market_address, lp_coins);
-
-        // Update market state.
-        let reserves_ref_mut = &mut market_ref_mut.cpamm_real_reserves;
-        let quote_reserves_ref_mut = &mut reserves_ref_mut.quote;
-        let start_quote = *quote_reserves_ref_mut;
-        let tvl_start = tvl_cpamm(start_quote);
-        reserves_ref_mut.base = reserves_ref_mut.base - event.base_amount;
-        *quote_reserves_ref_mut = start_quote - event.quote_amount;
-        let lp_coin_supply = market_ref_mut.lp_coin_supply - (event.lp_coin_amount as u128);
-        market_ref_mut.lp_coin_supply = lp_coin_supply;
-        let tvl_end = tvl_cpamm(*quote_reserves_ref_mut);
-
-        // Update global total quote locked, TVL.
-        let global_stats_ref_mut = &mut registry_ref_mut.global_stats;
-        let global_total_quote_locked_ref_mut = &mut global_stats_ref_mut.total_quote_locked;
-        let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
-        let delta_tvl = tvl_start - tvl_end;
-        aggregator_v2::try_sub(global_total_quote_locked_ref_mut, (event.quote_amount as u128));
-        aggregator_v2::try_sub(global_total_value_locked_ref_mut, delta_tvl);
-
-        // Get FDV, market cap, at start and end of operation, update global stats accordingly.
-        let (fdv_start, market_cap_start, fdv_end, market_cap_end) =
-            fdv_market_cap_start_end(reserves_start, *reserves_ref_mut, EMOJICOIN_SUPPLY);
-        update_global_fdv_market_cap_for_liquidity_operation(
-            fdv_start,
-            market_cap_start,
-            fdv_end,
-            market_cap_end,
-            global_stats_ref_mut,
-        );
-
-        // Emit liquidity provision event, follow up on periodic state trackers/market state.
-        event::emit(event);
-        liquidity_provision_operation_epilogue(
-            tvl_end,
-            fdv_end,
-            market_cap_end,
-            lp_coin_supply,
-            reserves_ref_mut.quote,
-            trigger,
-            market_ref_mut,
-        );
     }
 
     /// Adds all supplemental chat emojis to the registry if they haven't been added yet. Returns
