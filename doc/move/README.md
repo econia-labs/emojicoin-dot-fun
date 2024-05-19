@@ -4,7 +4,7 @@ To generate, run from repository root:
 
 ```sh
 move_dir=src/move/emojicoin_dot_fun
-doc_dir=doc/move/
+doc_dir=doc/move/emojicoin_dot_fun
 aptos move document \
     --dev \
     --include-dep-diagram \
