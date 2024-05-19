@@ -1,9 +1,10 @@
-/** @type {import("ts-jest/dist/types").InitialOptionsTsJest} */
+/** @type {import("jest").Config} */
 module.exports = {
   preset: "ts-jest",
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
+  workerThreads: true,
   testEnvironment: "node",
   coveragePathIgnorePatterns: [
     "src/cli/local-node.ts",
