@@ -42,7 +42,7 @@
     "e2e-test": "pnpm jest tests/e2e",
     "fmt": "pnpm _fmt --write",
     "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",
-    "lint-fix": "pnpm lint --fix",
+    "lint:fix": "pnpm lint --fix",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
