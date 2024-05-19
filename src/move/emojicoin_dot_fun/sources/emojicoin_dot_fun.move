@@ -1586,6 +1586,188 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         );
     }
 
+    // Ideally this would be inline, but unfortunately that breaks the compiler.
+    fun simulate_swap_inner(
+        swapper: address,
+        input_amount: u64,
+        is_sell: bool,
+        integrator: address,
+        integrator_fee_rate_bps: u8,
+        market_ref: &Market,
+    ): Swap {
+        assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
+        let starts_in_bonding_curve = market_ref.lp_coin_supply == 0;
+        let net_proceeds;
+        let base_volume;
+        let quote_volume;
+        let integrator_fee;
+        let pool_fee = 0;
+        let results_in_state_transition = false;
+        if (is_sell) { // If selling, no possibility of state transition.
+            let amm_quote_output;
+            if (starts_in_bonding_curve) { // Selling to CLAMM only.
+                amm_quote_output = cpamm_simple_swap_output_amount(
+                    input_amount,
+                    is_sell,
+                    market_ref.clamm_virtual_reserves,
+                );
+            } else { // Selling to CPAMM only.
+                amm_quote_output = cpamm_simple_swap_output_amount(
+                    input_amount,
+                    is_sell,
+                    market_ref.cpamm_real_reserves,
+                );
+                pool_fee = get_bps_fee(amm_quote_output, POOL_FEE_RATE_BPS);
+            };
+            integrator_fee = get_bps_fee(amm_quote_output, integrator_fee_rate_bps);
+            base_volume = input_amount;
+            quote_volume = amm_quote_output - pool_fee - integrator_fee;
+            net_proceeds = quote_volume;
+        } else { // If buying, there may be a state transition.
+            integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
+            quote_volume = input_amount - integrator_fee;
+            if (starts_in_bonding_curve) {
+                let max_quote_volume_in_clamm =
+                    QUOTE_VIRTUAL_CEILING - market_ref.clamm_virtual_reserves.quote;
+                if (quote_volume < max_quote_volume_in_clamm) {
+                    base_volume = cpamm_simple_swap_output_amount(
+                        quote_volume,
+                        is_sell,
+                        market_ref.clamm_virtual_reserves,
+                    );
+                } else { // Max quote has been deposited to bonding curve.
+                    results_in_state_transition = true;
+                    // Clear out remaining base.
+                    base_volume = market_ref.clamm_virtual_reserves.base - BASE_VIRTUAL_FLOOR;
+                    let remaining_quote_volume = quote_volume - max_quote_volume_in_clamm;
+                    if (remaining_quote_volume > 0) { // Keep buying against CPAMM.
+                        // Evaluate swap against CPAMM with newly locked liquidity.
+                        let cpamm_base_output = cpamm_simple_swap_output_amount(
+                            remaining_quote_volume,
+                            is_sell,
+                            Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
+                        );
+                        pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
+                        base_volume = base_volume + cpamm_base_output - pool_fee;
+                    };
+                };
+            } else { // Buying from CPAMM only.
+                let cpamm_base_output = cpamm_simple_swap_output_amount(
+                    quote_volume,
+                    is_sell,
+                    market_ref.cpamm_real_reserves,
+                );
+                pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
+                base_volume = cpamm_base_output - pool_fee;
+            };
+            net_proceeds = base_volume;
+        };
+        Swap {
+            market_id: market_ref.metadata.market_id,
+            time: timestamp::now_microseconds(),
+            market_nonce: market_ref.sequence_info.nonce + 1,
+            swapper,
+            input_amount,
+            is_sell,
+            integrator,
+            integrator_fee_rate_bps,
+            net_proceeds,
+            base_volume,
+            quote_volume,
+            // Ideally this would be inline, but that strangely breaks the compiler.
+            avg_execution_price_q64: ((quote_volume as u128) << SHIFT_Q64) / (base_volume as u128),
+            integrator_fee,
+            pool_fee,
+            starts_in_bonding_curve,
+            results_in_state_transition,
+        }
+    }
+
+    // Ideally this would be inline, but unfortunately that breaks the compiler.
+    fun trigger_periodic_state(
+        market_ref_mut: &mut Market,
+        registry_ref_mut: &mut Registry,
+        time: u64,
+        trigger: u8,
+        tvl: u128,
+    ) {
+        // Update market sequence info.
+        let market_sequence_info_ref_mut = &mut market_ref_mut.sequence_info;
+        let nonce = market_sequence_info_ref_mut.nonce + 1;
+        market_sequence_info_ref_mut.nonce = nonce;
+        market_sequence_info_ref_mut.last_bump_time = time;
+
+        // Check periodic state tracker period lapses.
+        let lp_coin_supply = market_ref_mut.lp_coin_supply;
+        let in_bonding_curve = lp_coin_supply == 0;
+        vector::for_each_mut(&mut market_ref_mut.periodic_state_trackers, |e| {
+            // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
+            let tracker_ref_mut: &mut PeriodicStateTracker = e;
+            let period = tracker_ref_mut.period;
+            // If tracker period has lapsed, emit a periodic state event and reset the tracker.
+            if (time - tracker_ref_mut.start_time >= period) {
+                emit_periodic_state(
+                    &market_ref_mut.metadata,
+                    nonce,
+                    time,
+                    trigger,
+                    tracker_ref_mut,
+                );
+                tracker_ref_mut.start_time = last_period_boundary(time, period);
+                tracker_ref_mut.open_price_q64 = 0;
+                tracker_ref_mut.high_price_q64 = 0;
+                tracker_ref_mut.low_price_q64 = 0;
+                tracker_ref_mut.close_price_q64 = 0;
+                tracker_ref_mut.volume_base = 0;
+                tracker_ref_mut.volume_quote = 0;
+                tracker_ref_mut.integrator_fees = 0;
+                tracker_ref_mut.pool_fees_base = 0;
+                tracker_ref_mut.pool_fees_quote = 0;
+                tracker_ref_mut.n_swaps = 0;
+                tracker_ref_mut.n_chat_messages = 0;
+                tracker_ref_mut.starts_in_bonding_curve = in_bonding_curve;
+                tracker_ref_mut.ends_in_bonding_curve = in_bonding_curve;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_start.tvl = tvl;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_start.lp_coins = lp_coin_supply;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
+                tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+            };
+        });
+
+        // Increment registry nonce.
+        let registry_sequence_info_ref_mut = &mut registry_ref_mut.sequence_info;
+        let registry_nonce_ref_mut = &mut registry_sequence_info_ref_mut.nonce;
+        aggregator_v2::try_add(registry_nonce_ref_mut, 1);
+
+        // Check global state tracker period lapse.
+        let last_registry_bump_time = registry_sequence_info_ref_mut.last_bump_time;
+        if (time - last_registry_bump_time >= PERIOD_1D) {
+            registry_sequence_info_ref_mut.last_bump_time = time;
+            let global_stats_ref = &registry_ref_mut.global_stats;
+            event::emit(GlobalState {
+                emit_time: time,
+                registry_nonce: aggregator_v2::snapshot(registry_nonce_ref_mut),
+                trigger,
+                cumulative_quote_volume:
+                    aggregator_v2::snapshot(&global_stats_ref.cumulative_quote_volume),
+                total_quote_locked:
+                    aggregator_v2::snapshot(&global_stats_ref.total_quote_locked),
+                total_value_locked:
+                    aggregator_v2::snapshot(&global_stats_ref.total_value_locked),
+                market_cap:
+                    aggregator_v2::snapshot(&global_stats_ref.market_cap),
+                fully_diluted_value:
+                    aggregator_v2::snapshot(&global_stats_ref.fully_diluted_value),
+                cumulative_integrator_fees:
+                    aggregator_v2::snapshot(&global_stats_ref.cumulative_integrator_fees),
+                cumulative_swaps:
+                    aggregator_v2::snapshot(&global_stats_ref.cumulative_swaps),
+                cumulative_chat_messages:
+                    aggregator_v2::snapshot(&global_stats_ref.cumulative_chat_messages),
+            });
+        };
+    }
+
     /*inline*/ fun assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address: address) {
         assert!(
             exists<LPCoinCapabilities<Emojicoin, EmojicoinLP>>(market_address),
@@ -2114,103 +2296,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         }
     }
 
-    // Ideally this would be inline, but unfortunately that breaks the compiler.
-    fun simulate_swap_inner(
-        swapper: address,
-        input_amount: u64,
-        is_sell: bool,
-        integrator: address,
-        integrator_fee_rate_bps: u8,
-        market_ref: &Market,
-    ): Swap {
-        assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
-        let starts_in_bonding_curve = market_ref.lp_coin_supply == 0;
-        let net_proceeds;
-        let base_volume;
-        let quote_volume;
-        let integrator_fee;
-        let pool_fee = 0;
-        let results_in_state_transition = false;
-        if (is_sell) { // If selling, no possibility of state transition.
-            let amm_quote_output;
-            if (starts_in_bonding_curve) { // Selling to CLAMM only.
-                amm_quote_output = cpamm_simple_swap_output_amount(
-                    input_amount,
-                    is_sell,
-                    market_ref.clamm_virtual_reserves,
-                );
-            } else { // Selling to CPAMM only.
-                amm_quote_output = cpamm_simple_swap_output_amount(
-                    input_amount,
-                    is_sell,
-                    market_ref.cpamm_real_reserves,
-                );
-                pool_fee = get_bps_fee(amm_quote_output, POOL_FEE_RATE_BPS);
-            };
-            integrator_fee = get_bps_fee(amm_quote_output, integrator_fee_rate_bps);
-            base_volume = input_amount;
-            quote_volume = amm_quote_output - pool_fee - integrator_fee;
-            net_proceeds = quote_volume;
-        } else { // If buying, there may be a state transition.
-            integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
-            quote_volume = input_amount - integrator_fee;
-            if (starts_in_bonding_curve) {
-                let max_quote_volume_in_clamm =
-                    QUOTE_VIRTUAL_CEILING - market_ref.clamm_virtual_reserves.quote;
-                if (quote_volume < max_quote_volume_in_clamm) {
-                    base_volume = cpamm_simple_swap_output_amount(
-                        quote_volume,
-                        is_sell,
-                        market_ref.clamm_virtual_reserves,
-                    );
-                } else { // Max quote has been deposited to bonding curve.
-                    results_in_state_transition = true;
-                    // Clear out remaining base.
-                    base_volume = market_ref.clamm_virtual_reserves.base - BASE_VIRTUAL_FLOOR;
-                    let remaining_quote_volume = quote_volume - max_quote_volume_in_clamm;
-                    if (remaining_quote_volume > 0) { // Keep buying against CPAMM.
-                        // Evaluate swap against CPAMM with newly locked liquidity.
-                        let cpamm_base_output = cpamm_simple_swap_output_amount(
-                            remaining_quote_volume,
-                            is_sell,
-                            Reserves { base: EMOJICOIN_REMAINDER, quote: QUOTE_REAL_CEILING },
-                        );
-                        pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
-                        base_volume = base_volume + cpamm_base_output - pool_fee;
-                    };
-                };
-            } else { // Buying from CPAMM only.
-                let cpamm_base_output = cpamm_simple_swap_output_amount(
-                    quote_volume,
-                    is_sell,
-                    market_ref.cpamm_real_reserves,
-                );
-                pool_fee = get_bps_fee(cpamm_base_output, POOL_FEE_RATE_BPS);
-                base_volume = cpamm_base_output - pool_fee;
-            };
-            net_proceeds = base_volume;
-        };
-        Swap {
-            market_id: market_ref.metadata.market_id,
-            time: timestamp::now_microseconds(),
-            market_nonce: market_ref.sequence_info.nonce + 1,
-            swapper,
-            input_amount,
-            is_sell,
-            integrator,
-            integrator_fee_rate_bps,
-            net_proceeds,
-            base_volume,
-            quote_volume,
-            // Ideally this would be inline, but that strangely breaks the compiler.
-            avg_execution_price_q64: ((quote_volume as u128) << SHIFT_Q64) / (base_volume as u128),
-            integrator_fee,
-            pool_fee,
-            starts_in_bonding_curve,
-            results_in_state_transition,
-        }
-    }
-
     /*inline*/ fun total_quote_locked(
         market_ref: &Market,
         in_bonding_curve: bool,
@@ -2220,91 +2305,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         } else {
             market_ref.cpamm_real_reserves.quote
         }
-    }
-
-    // Ideally this would be inline, but unfortunately that breaks the compiler.
-    fun trigger_periodic_state(
-        market_ref_mut: &mut Market,
-        registry_ref_mut: &mut Registry,
-        time: u64,
-        trigger: u8,
-        tvl: u128,
-    ) {
-        // Update market sequence info.
-        let market_sequence_info_ref_mut = &mut market_ref_mut.sequence_info;
-        let nonce = market_sequence_info_ref_mut.nonce + 1;
-        market_sequence_info_ref_mut.nonce = nonce;
-        market_sequence_info_ref_mut.last_bump_time = time;
-
-        // Check periodic state tracker period lapses.
-        let lp_coin_supply = market_ref_mut.lp_coin_supply;
-        let in_bonding_curve = lp_coin_supply == 0;
-        vector::for_each_mut(&mut market_ref_mut.periodic_state_trackers, |e| {
-            // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
-            let tracker_ref_mut: &mut PeriodicStateTracker = e;
-            let period = tracker_ref_mut.period;
-            // If tracker period has lapsed, emit a periodic state event and reset the tracker.
-            if (time - tracker_ref_mut.start_time >= period) {
-                emit_periodic_state(
-                    &market_ref_mut.metadata,
-                    nonce,
-                    time,
-                    trigger,
-                    tracker_ref_mut,
-                );
-                tracker_ref_mut.start_time = last_period_boundary(time, period);
-                tracker_ref_mut.open_price_q64 = 0;
-                tracker_ref_mut.high_price_q64 = 0;
-                tracker_ref_mut.low_price_q64 = 0;
-                tracker_ref_mut.close_price_q64 = 0;
-                tracker_ref_mut.volume_base = 0;
-                tracker_ref_mut.volume_quote = 0;
-                tracker_ref_mut.integrator_fees = 0;
-                tracker_ref_mut.pool_fees_base = 0;
-                tracker_ref_mut.pool_fees_quote = 0;
-                tracker_ref_mut.n_swaps = 0;
-                tracker_ref_mut.n_chat_messages = 0;
-                tracker_ref_mut.starts_in_bonding_curve = in_bonding_curve;
-                tracker_ref_mut.ends_in_bonding_curve = in_bonding_curve;
-                tracker_ref_mut.tvl_to_lp_coin_ratio_start.tvl = tvl;
-                tracker_ref_mut.tvl_to_lp_coin_ratio_start.lp_coins = lp_coin_supply;
-                tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
-                tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
-            };
-        });
-
-        // Increment registry nonce.
-        let registry_sequence_info_ref_mut = &mut registry_ref_mut.sequence_info;
-        let registry_nonce_ref_mut = &mut registry_sequence_info_ref_mut.nonce;
-        aggregator_v2::try_add(registry_nonce_ref_mut, 1);
-
-        // Check global state tracker period lapse.
-        let last_registry_bump_time = registry_sequence_info_ref_mut.last_bump_time;
-        if (time - last_registry_bump_time >= PERIOD_1D) {
-            registry_sequence_info_ref_mut.last_bump_time = time;
-            let global_stats_ref = &registry_ref_mut.global_stats;
-            event::emit(GlobalState {
-                emit_time: time,
-                registry_nonce: aggregator_v2::snapshot(registry_nonce_ref_mut),
-                trigger,
-                cumulative_quote_volume:
-                    aggregator_v2::snapshot(&global_stats_ref.cumulative_quote_volume),
-                total_quote_locked:
-                    aggregator_v2::snapshot(&global_stats_ref.total_quote_locked),
-                total_value_locked:
-                    aggregator_v2::snapshot(&global_stats_ref.total_value_locked),
-                market_cap:
-                    aggregator_v2::snapshot(&global_stats_ref.market_cap),
-                fully_diluted_value:
-                    aggregator_v2::snapshot(&global_stats_ref.fully_diluted_value),
-                cumulative_integrator_fees:
-                    aggregator_v2::snapshot(&global_stats_ref.cumulative_integrator_fees),
-                cumulative_swaps:
-                    aggregator_v2::snapshot(&global_stats_ref.cumulative_swaps),
-                cumulative_chat_messages:
-                    aggregator_v2::snapshot(&global_stats_ref.cumulative_chat_messages),
-            });
-        };
     }
 
     /*inline*/ fun tvl(

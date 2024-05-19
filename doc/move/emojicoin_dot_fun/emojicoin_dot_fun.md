@@ -66,6 +66,8 @@
 -  [Function `unpack_tvl_to_lp_coin_ratio`](#0xc0de_emojicoin_dot_fun_unpack_tvl_to_lp_coin_ratio)
 -  [Function `init_module`](#0xc0de_emojicoin_dot_fun_init_module)
 -  [Function `register_market_inner`](#0xc0de_emojicoin_dot_fun_register_market_inner)
+-  [Function `simulate_swap_inner`](#0xc0de_emojicoin_dot_fun_simulate_swap_inner)
+-  [Function `trigger_periodic_state`](#0xc0de_emojicoin_dot_fun_trigger_periodic_state)
 -  [Function `assert_valid_coin_types`](#0xc0de_emojicoin_dot_fun_assert_valid_coin_types)
 -  [Function `assign_supply_minuend_reserves_ref`](#0xc0de_emojicoin_dot_fun_assign_supply_minuend_reserves_ref)
 -  [Function `assign_supply_minuend_reserves_ref_mut`](#0xc0de_emojicoin_dot_fun_assign_supply_minuend_reserves_ref_mut)
@@ -95,9 +97,7 @@
 -  [Function `mul_div`](#0xc0de_emojicoin_dot_fun_mul_div)
 -  [Function `simulate_provide_liquidity_inner`](#0xc0de_emojicoin_dot_fun_simulate_provide_liquidity_inner)
 -  [Function `simulate_remove_liquidity_inner`](#0xc0de_emojicoin_dot_fun_simulate_remove_liquidity_inner)
--  [Function `simulate_swap_inner`](#0xc0de_emojicoin_dot_fun_simulate_swap_inner)
 -  [Function `total_quote_locked`](#0xc0de_emojicoin_dot_fun_total_quote_locked)
--  [Function `trigger_periodic_state`](#0xc0de_emojicoin_dot_fun_trigger_periodic_state)
 -  [Function `tvl`](#0xc0de_emojicoin_dot_fun_tvl)
 -  [Function `tvl_clamm`](#0xc0de_emojicoin_dot_fun_tvl_clamm)
 -  [Function `tvl_cpamm`](#0xc0de_emojicoin_dot_fun_tvl_cpamm)
@@ -4005,6 +4005,220 @@ Checks if an individual emoji is supported for usage in chat only.
 
 
 
+<a id="0xc0de_emojicoin_dot_fun_simulate_swap_inner"></a>
+
+## Function `simulate_swap_inner`
+
+
+
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>(swapper: <b>address</b>, input_amount: u64, is_sell: bool, integrator: <b>address</b>, integrator_fee_rate_bps: u8, market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">emojicoin_dot_fun::Market</a>): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">emojicoin_dot_fun::Swap</a>
+</code></pre>
+
+
+
+##### Implementation
+
+
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>(
+    swapper: <b>address</b>,
+    input_amount: u64,
+    is_sell: bool,
+    integrator: <b>address</b>,
+    integrator_fee_rate_bps: u8,
+    market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">Swap</a> {
+    <b>assert</b>!(input_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_INPUT_ZERO">E_SWAP_INPUT_ZERO</a>);
+    <b>let</b> starts_in_bonding_curve = market_ref.lp_coin_supply == 0;
+    <b>let</b> net_proceeds;
+    <b>let</b> base_volume;
+    <b>let</b> quote_volume;
+    <b>let</b> integrator_fee;
+    <b>let</b> pool_fee = 0;
+    <b>let</b> results_in_state_transition = <b>false</b>;
+    <b>if</b> (is_sell) { // If selling, no possibility of state transition.
+        <b>let</b> amm_quote_output;
+        <b>if</b> (starts_in_bonding_curve) { // Selling <b>to</b> CLAMM only.
+            amm_quote_output = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
+                input_amount,
+                is_sell,
+                market_ref.clamm_virtual_reserves,
+            );
+        } <b>else</b> { // Selling <b>to</b> CPAMM only.
+            amm_quote_output = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
+                input_amount,
+                is_sell,
+                market_ref.cpamm_real_reserves,
+            );
+            pool_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(amm_quote_output, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_POOL_FEE_RATE_BPS">POOL_FEE_RATE_BPS</a>);
+        };
+        integrator_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(amm_quote_output, integrator_fee_rate_bps);
+        base_volume = input_amount;
+        quote_volume = amm_quote_output - pool_fee - integrator_fee;
+        net_proceeds = quote_volume;
+    } <b>else</b> { // If buying, there may be a state transition.
+        integrator_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(input_amount, integrator_fee_rate_bps);
+        quote_volume = input_amount - integrator_fee;
+        <b>if</b> (starts_in_bonding_curve) {
+            <b>let</b> max_quote_volume_in_clamm =
+                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_CEILING">QUOTE_VIRTUAL_CEILING</a> - market_ref.clamm_virtual_reserves.quote;
+            <b>if</b> (quote_volume &lt; max_quote_volume_in_clamm) {
+                base_volume = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
+                    quote_volume,
+                    is_sell,
+                    market_ref.clamm_virtual_reserves,
+                );
+            } <b>else</b> { // Max quote <b>has</b> been deposited <b>to</b> bonding curve.
+                results_in_state_transition = <b>true</b>;
+                // Clear out remaining base.
+                base_volume = market_ref.clamm_virtual_reserves.base - <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_FLOOR">BASE_VIRTUAL_FLOOR</a>;
+                <b>let</b> remaining_quote_volume = quote_volume - max_quote_volume_in_clamm;
+                <b>if</b> (remaining_quote_volume &gt; 0) { // Keep buying against CPAMM.
+                    // Evaluate swap against CPAMM <b>with</b> newly locked liquidity.
+                    <b>let</b> cpamm_base_output = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
+                        remaining_quote_volume,
+                        is_sell,
+                        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a> { base: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_REMAINDER">EMOJICOIN_REMAINDER</a>, quote: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_REAL_CEILING">QUOTE_REAL_CEILING</a> },
+                    );
+                    pool_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(cpamm_base_output, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_POOL_FEE_RATE_BPS">POOL_FEE_RATE_BPS</a>);
+                    base_volume = base_volume + cpamm_base_output - pool_fee;
+                };
+            };
+        } <b>else</b> { // Buying from CPAMM only.
+            <b>let</b> cpamm_base_output = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
+                quote_volume,
+                is_sell,
+                market_ref.cpamm_real_reserves,
+            );
+            pool_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(cpamm_base_output, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_POOL_FEE_RATE_BPS">POOL_FEE_RATE_BPS</a>);
+            base_volume = cpamm_base_output - pool_fee;
+        };
+        net_proceeds = base_volume;
+    };
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">Swap</a> {
+        market_id: market_ref.metadata.market_id,
+        time: <a href="_now_microseconds">timestamp::now_microseconds</a>(),
+        market_nonce: market_ref.sequence_info.nonce + 1,
+        swapper,
+        input_amount,
+        is_sell,
+        integrator,
+        integrator_fee_rate_bps,
+        net_proceeds,
+        base_volume,
+        quote_volume,
+        // Ideally this would be inline, but that strangely breaks the compiler.
+        avg_execution_price_q64: ((quote_volume <b>as</b> u128) &lt;&lt; <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SHIFT_Q64">SHIFT_Q64</a>) / (base_volume <b>as</b> u128),
+        integrator_fee,
+        pool_fee,
+        starts_in_bonding_curve,
+        results_in_state_transition,
+    }
+}
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_trigger_periodic_state"></a>
+
+## Function `trigger_periodic_state`
+
+
+
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_trigger_periodic_state">trigger_periodic_state</a>(market_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">emojicoin_dot_fun::Market</a>, registry_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">emojicoin_dot_fun::Registry</a>, time: u64, trigger: u8, tvl: u128)
+</code></pre>
+
+
+
+##### Implementation
+
+
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_trigger_periodic_state">trigger_periodic_state</a>(
+    market_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+    registry_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>,
+    time: u64,
+    trigger: u8,
+    tvl: u128,
+) {
+    // Update market sequence info.
+    <b>let</b> market_sequence_info_ref_mut = &<b>mut</b> market_ref_mut.sequence_info;
+    <b>let</b> nonce = market_sequence_info_ref_mut.nonce + 1;
+    market_sequence_info_ref_mut.nonce = nonce;
+    market_sequence_info_ref_mut.last_bump_time = time;
+
+    // Check periodic state tracker period lapses.
+    <b>let</b> lp_coin_supply = market_ref_mut.lp_coin_supply;
+    <b>let</b> in_bonding_curve = lp_coin_supply == 0;
+    <a href="_for_each_mut">vector::for_each_mut</a>(&<b>mut</b> market_ref_mut.periodic_state_trackers, |e| {
+        // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
+        <b>let</b> tracker_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateTracker">PeriodicStateTracker</a> = e;
+        <b>let</b> period = tracker_ref_mut.period;
+        // If tracker period <b>has</b> lapsed, emit a periodic state <a href="">event</a> and reset the tracker.
+        <b>if</b> (time - tracker_ref_mut.start_time &gt;= period) {
+            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_emit_periodic_state">emit_periodic_state</a>(
+                &market_ref_mut.metadata,
+                nonce,
+                time,
+                trigger,
+                tracker_ref_mut,
+            );
+            tracker_ref_mut.start_time = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_last_period_boundary">last_period_boundary</a>(time, period);
+            tracker_ref_mut.open_price_q64 = 0;
+            tracker_ref_mut.high_price_q64 = 0;
+            tracker_ref_mut.low_price_q64 = 0;
+            tracker_ref_mut.close_price_q64 = 0;
+            tracker_ref_mut.volume_base = 0;
+            tracker_ref_mut.volume_quote = 0;
+            tracker_ref_mut.integrator_fees = 0;
+            tracker_ref_mut.pool_fees_base = 0;
+            tracker_ref_mut.pool_fees_quote = 0;
+            tracker_ref_mut.n_swaps = 0;
+            tracker_ref_mut.n_chat_messages = 0;
+            tracker_ref_mut.starts_in_bonding_curve = in_bonding_curve;
+            tracker_ref_mut.ends_in_bonding_curve = in_bonding_curve;
+            tracker_ref_mut.tvl_to_lp_coin_ratio_start.tvl = tvl;
+            tracker_ref_mut.tvl_to_lp_coin_ratio_start.lp_coins = lp_coin_supply;
+            tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
+            tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+        };
+    });
+
+    // Increment registry nonce.
+    <b>let</b> registry_sequence_info_ref_mut = &<b>mut</b> registry_ref_mut.sequence_info;
+    <b>let</b> registry_nonce_ref_mut = &<b>mut</b> registry_sequence_info_ref_mut.nonce;
+    <a href="_try_add">aggregator_v2::try_add</a>(registry_nonce_ref_mut, 1);
+
+    // Check <b>global</b> state tracker period lapse.
+    <b>let</b> last_registry_bump_time = registry_sequence_info_ref_mut.last_bump_time;
+    <b>if</b> (time - last_registry_bump_time &gt;= <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_1D">PERIOD_1D</a>) {
+        registry_sequence_info_ref_mut.last_bump_time = time;
+        <b>let</b> global_stats_ref = &registry_ref_mut.global_stats;
+        <a href="_emit">event::emit</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_GlobalState">GlobalState</a> {
+            emit_time: time,
+            registry_nonce: <a href="_snapshot">aggregator_v2::snapshot</a>(registry_nonce_ref_mut),
+            trigger,
+            cumulative_quote_volume:
+                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.cumulative_quote_volume),
+            total_quote_locked:
+                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.total_quote_locked),
+            total_value_locked:
+                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.total_value_locked),
+            market_cap:
+                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.market_cap),
+            fully_diluted_value:
+                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.fully_diluted_value),
+            cumulative_integrator_fees:
+                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.cumulative_integrator_fees),
+            cumulative_swaps:
+                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.cumulative_swaps),
+            cumulative_chat_messages:
+                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.cumulative_chat_messages),
+        });
+    };
+}
+</code></pre>
+
+
+
 <a id="0xc0de_emojicoin_dot_fun_assert_valid_coin_types"></a>
 
 ## Function `assert_valid_coin_types`
@@ -5026,119 +5240,6 @@ pro_rata_quote_donation_claim_amount,
 
 
 
-<a id="0xc0de_emojicoin_dot_fun_simulate_swap_inner"></a>
-
-## Function `simulate_swap_inner`
-
-
-
-<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>(swapper: <b>address</b>, input_amount: u64, is_sell: bool, integrator: <b>address</b>, integrator_fee_rate_bps: u8, market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">emojicoin_dot_fun::Market</a>): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">emojicoin_dot_fun::Swap</a>
-</code></pre>
-
-
-
-##### Implementation
-
-
-<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>(
-    swapper: <b>address</b>,
-    input_amount: u64,
-    is_sell: bool,
-    integrator: <b>address</b>,
-    integrator_fee_rate_bps: u8,
-    market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
-): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">Swap</a> {
-    <b>assert</b>!(input_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_INPUT_ZERO">E_SWAP_INPUT_ZERO</a>);
-    <b>let</b> starts_in_bonding_curve = market_ref.lp_coin_supply == 0;
-    <b>let</b> net_proceeds;
-    <b>let</b> base_volume;
-    <b>let</b> quote_volume;
-    <b>let</b> integrator_fee;
-    <b>let</b> pool_fee = 0;
-    <b>let</b> results_in_state_transition = <b>false</b>;
-    <b>if</b> (is_sell) { // If selling, no possibility of state transition.
-        <b>let</b> amm_quote_output;
-        <b>if</b> (starts_in_bonding_curve) { // Selling <b>to</b> CLAMM only.
-            amm_quote_output = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
-                input_amount,
-                is_sell,
-                market_ref.clamm_virtual_reserves,
-            );
-        } <b>else</b> { // Selling <b>to</b> CPAMM only.
-            amm_quote_output = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
-                input_amount,
-                is_sell,
-                market_ref.cpamm_real_reserves,
-            );
-            pool_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(amm_quote_output, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_POOL_FEE_RATE_BPS">POOL_FEE_RATE_BPS</a>);
-        };
-        integrator_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(amm_quote_output, integrator_fee_rate_bps);
-        base_volume = input_amount;
-        quote_volume = amm_quote_output - pool_fee - integrator_fee;
-        net_proceeds = quote_volume;
-    } <b>else</b> { // If buying, there may be a state transition.
-        integrator_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(input_amount, integrator_fee_rate_bps);
-        quote_volume = input_amount - integrator_fee;
-        <b>if</b> (starts_in_bonding_curve) {
-            <b>let</b> max_quote_volume_in_clamm =
-                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_CEILING">QUOTE_VIRTUAL_CEILING</a> - market_ref.clamm_virtual_reserves.quote;
-            <b>if</b> (quote_volume &lt; max_quote_volume_in_clamm) {
-                base_volume = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
-                    quote_volume,
-                    is_sell,
-                    market_ref.clamm_virtual_reserves,
-                );
-            } <b>else</b> { // Max quote <b>has</b> been deposited <b>to</b> bonding curve.
-                results_in_state_transition = <b>true</b>;
-                // Clear out remaining base.
-                base_volume = market_ref.clamm_virtual_reserves.base - <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_FLOOR">BASE_VIRTUAL_FLOOR</a>;
-                <b>let</b> remaining_quote_volume = quote_volume - max_quote_volume_in_clamm;
-                <b>if</b> (remaining_quote_volume &gt; 0) { // Keep buying against CPAMM.
-                    // Evaluate swap against CPAMM <b>with</b> newly locked liquidity.
-                    <b>let</b> cpamm_base_output = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
-                        remaining_quote_volume,
-                        is_sell,
-                        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a> { base: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_REMAINDER">EMOJICOIN_REMAINDER</a>, quote: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_REAL_CEILING">QUOTE_REAL_CEILING</a> },
-                    );
-                    pool_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(cpamm_base_output, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_POOL_FEE_RATE_BPS">POOL_FEE_RATE_BPS</a>);
-                    base_volume = base_volume + cpamm_base_output - pool_fee;
-                };
-            };
-        } <b>else</b> { // Buying from CPAMM only.
-            <b>let</b> cpamm_base_output = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
-                quote_volume,
-                is_sell,
-                market_ref.cpamm_real_reserves,
-            );
-            pool_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(cpamm_base_output, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_POOL_FEE_RATE_BPS">POOL_FEE_RATE_BPS</a>);
-            base_volume = cpamm_base_output - pool_fee;
-        };
-        net_proceeds = base_volume;
-    };
-    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">Swap</a> {
-        market_id: market_ref.metadata.market_id,
-        time: <a href="_now_microseconds">timestamp::now_microseconds</a>(),
-        market_nonce: market_ref.sequence_info.nonce + 1,
-        swapper,
-        input_amount,
-        is_sell,
-        integrator,
-        integrator_fee_rate_bps,
-        net_proceeds,
-        base_volume,
-        quote_volume,
-        // Ideally this would be inline, but that strangely breaks the compiler.
-        avg_execution_price_q64: ((quote_volume <b>as</b> u128) &lt;&lt; <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SHIFT_Q64">SHIFT_Q64</a>) / (base_volume <b>as</b> u128),
-        integrator_fee,
-        pool_fee,
-        starts_in_bonding_curve,
-        results_in_state_transition,
-    }
-}
-</code></pre>
-
-
-
 <a id="0xc0de_emojicoin_dot_fun_total_quote_locked"></a>
 
 ## Function `total_quote_locked`
@@ -5162,107 +5263,6 @@ market_ref.clamm_virtual_reserves.quote - <a href="emojicoin_dot_fun.md#0xc0de_e
 } <b>else</b> {
 market_ref.cpamm_real_reserves.quote
 }
-}
-</code></pre>
-
-
-
-<a id="0xc0de_emojicoin_dot_fun_trigger_periodic_state"></a>
-
-## Function `trigger_periodic_state`
-
-
-
-<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_trigger_periodic_state">trigger_periodic_state</a>(market_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">emojicoin_dot_fun::Market</a>, registry_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">emojicoin_dot_fun::Registry</a>, time: u64, trigger: u8, tvl: u128)
-</code></pre>
-
-
-
-##### Implementation
-
-
-<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_trigger_periodic_state">trigger_periodic_state</a>(
-    market_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
-    registry_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>,
-    time: u64,
-    trigger: u8,
-    tvl: u128,
-) {
-    // Update market sequence info.
-    <b>let</b> market_sequence_info_ref_mut = &<b>mut</b> market_ref_mut.sequence_info;
-    <b>let</b> nonce = market_sequence_info_ref_mut.nonce + 1;
-    market_sequence_info_ref_mut.nonce = nonce;
-    market_sequence_info_ref_mut.last_bump_time = time;
-
-    // Check periodic state tracker period lapses.
-    <b>let</b> lp_coin_supply = market_ref_mut.lp_coin_supply;
-    <b>let</b> in_bonding_curve = lp_coin_supply == 0;
-    <a href="_for_each_mut">vector::for_each_mut</a>(&<b>mut</b> market_ref_mut.periodic_state_trackers, |e| {
-        // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
-        <b>let</b> tracker_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateTracker">PeriodicStateTracker</a> = e;
-        <b>let</b> period = tracker_ref_mut.period;
-        // If tracker period <b>has</b> lapsed, emit a periodic state <a href="">event</a> and reset the tracker.
-        <b>if</b> (time - tracker_ref_mut.start_time &gt;= period) {
-            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_emit_periodic_state">emit_periodic_state</a>(
-                &market_ref_mut.metadata,
-                nonce,
-                time,
-                trigger,
-                tracker_ref_mut,
-            );
-            tracker_ref_mut.start_time = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_last_period_boundary">last_period_boundary</a>(time, period);
-            tracker_ref_mut.open_price_q64 = 0;
-            tracker_ref_mut.high_price_q64 = 0;
-            tracker_ref_mut.low_price_q64 = 0;
-            tracker_ref_mut.close_price_q64 = 0;
-            tracker_ref_mut.volume_base = 0;
-            tracker_ref_mut.volume_quote = 0;
-            tracker_ref_mut.integrator_fees = 0;
-            tracker_ref_mut.pool_fees_base = 0;
-            tracker_ref_mut.pool_fees_quote = 0;
-            tracker_ref_mut.n_swaps = 0;
-            tracker_ref_mut.n_chat_messages = 0;
-            tracker_ref_mut.starts_in_bonding_curve = in_bonding_curve;
-            tracker_ref_mut.ends_in_bonding_curve = in_bonding_curve;
-            tracker_ref_mut.tvl_to_lp_coin_ratio_start.tvl = tvl;
-            tracker_ref_mut.tvl_to_lp_coin_ratio_start.lp_coins = lp_coin_supply;
-            tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
-            tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
-        };
-    });
-
-    // Increment registry nonce.
-    <b>let</b> registry_sequence_info_ref_mut = &<b>mut</b> registry_ref_mut.sequence_info;
-    <b>let</b> registry_nonce_ref_mut = &<b>mut</b> registry_sequence_info_ref_mut.nonce;
-    <a href="_try_add">aggregator_v2::try_add</a>(registry_nonce_ref_mut, 1);
-
-    // Check <b>global</b> state tracker period lapse.
-    <b>let</b> last_registry_bump_time = registry_sequence_info_ref_mut.last_bump_time;
-    <b>if</b> (time - last_registry_bump_time &gt;= <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_1D">PERIOD_1D</a>) {
-        registry_sequence_info_ref_mut.last_bump_time = time;
-        <b>let</b> global_stats_ref = &registry_ref_mut.global_stats;
-        <a href="_emit">event::emit</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_GlobalState">GlobalState</a> {
-            emit_time: time,
-            registry_nonce: <a href="_snapshot">aggregator_v2::snapshot</a>(registry_nonce_ref_mut),
-            trigger,
-            cumulative_quote_volume:
-                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.cumulative_quote_volume),
-            total_quote_locked:
-                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.total_quote_locked),
-            total_value_locked:
-                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.total_value_locked),
-            market_cap:
-                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.market_cap),
-            fully_diluted_value:
-                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.fully_diluted_value),
-            cumulative_integrator_fees:
-                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.cumulative_integrator_fees),
-            cumulative_swaps:
-                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.cumulative_swaps),
-            cumulative_chat_messages:
-                <a href="_snapshot">aggregator_v2::snapshot</a>(&global_stats_ref.cumulative_chat_messages),
-        });
-    };
 }
 </code></pre>
 
