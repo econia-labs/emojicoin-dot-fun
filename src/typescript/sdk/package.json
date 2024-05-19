@@ -46,7 +46,7 @@
     "build": "pnpm clean && tsc",
     "check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "e2e-test": "pnpm jest tests/e2e",
+    "e2e-test": "pnpm jest --runInBand tests/e2e",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
     "generate-data": "pnpm tsx src/utils/mock-data.ts",
