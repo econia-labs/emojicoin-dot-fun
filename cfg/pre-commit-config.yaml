@@ -7,6 +7,7 @@
 # cspell:word mypy
 # cspell:word shfmt
 ---
+exclude: 'doc\/move\/emojicoin_dot_fun\/.+' # Ignore DocGen.
 repos:
 -
   hooks:
