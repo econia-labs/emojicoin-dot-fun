@@ -25,5 +25,5 @@ local = "../test_coin_factories/yellow_heart"
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
 name = "EmojicoinDotFun"
-upgrade_policy = "compatible"
+upgrade_policy = "immutable"
 version = "1.0.0"
