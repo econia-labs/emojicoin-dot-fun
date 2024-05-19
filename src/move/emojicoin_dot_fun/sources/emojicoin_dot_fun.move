@@ -2349,8 +2349,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ///
     /// Growth in TVL per LP coin symbolically evaluates to:
     ///
-    /// $$\frac{\frac{c}{d}}{\frac{a}{b}}$$
-    /// $$\frac{b \cdot c}{a \cdot d}$$
+    /// $$\frac{\frac{c}{d}}{\frac{a}{b}} = \frac{b \cdot c}{a \cdot d}$$
     ///
     /// Numerator should be shifted by `SHIFT_Q64` so that the result is in Q64 format.
     ///

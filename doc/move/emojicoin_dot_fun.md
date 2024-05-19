@@ -5365,8 +5365,7 @@ real_quote_reserves: u64,
 
 Growth in TVL per LP coin symbolically evaluates to:
 
-$$\frac{\frac{c}{d}}{\frac{a}{b}}$$
-$$\frac{b \cdot c}{a \cdot d}$$
+$$\frac{\frac{c}{d}}{\frac{a}{b}} = \frac{b \cdot c}{a \cdot d}$$
 
 Numerator should be shifted by <code><a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SHIFT_Q64">SHIFT_Q64</a></code> so that the result is in Q64 format.
 
