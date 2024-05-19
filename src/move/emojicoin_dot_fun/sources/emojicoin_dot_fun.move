@@ -2481,6 +2481,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         Reserves { base, quote }
     }
 
+    #[test_only] public fun pack_tvl_to_lp_coin_ratio(tvl: u128, lp_coins: u128): TVLtoLPCoinRatio {
+        TVLtoLPCoinRatio { tvl, lp_coins }
+    }
+
     #[test_only] public fun register_market_without_publish(
         registrant: &signer,
         emojis: vector<vector<u8>>,
@@ -2658,16 +2662,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ) {
         let PeriodicStateMetadata {
             start_time,
+            period,
             emit_time,
             emit_market_nonce,
-            period,
             trigger,
         } = periodic_state_metadata;
         (
             start_time,
+            period,
             emit_time,
             emit_market_nonce,
-            period,
             trigger,
         )
     }
