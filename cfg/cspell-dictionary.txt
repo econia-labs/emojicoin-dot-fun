@@ -59,6 +59,7 @@ supabase
 supervillain
 tanabata
 tokelau
+tradingview
 turkiye
 vercel
 xbtmatt

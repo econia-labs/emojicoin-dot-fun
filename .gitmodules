@@ -1,6 +1,7 @@
 [submodule "src/inbox"]
 	path = src/inbox
-	url = git@github.com:econia-labs/inbox.git
+	url = https://github.com/econia-labs/inbox.git
 [submodule "src/typescript/frontend/public/static"]
 	path = src/typescript/frontend/public/static
-	url = git@github.com:tradingview/charting_library.git
+	url = https://github.com/tradingview/charting_library.git
+	ignore = all
