@@ -31,12 +31,11 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "main": "dist/src/index.js",
-  "typings": "dist/src/index.d.ts",
   "files": [
     "dist"
   ],
   "license": "Apache-2.0",
+  "main": "dist/src/index.js",
   "name": "@econia-labs/emojicoin-sdk",
   "overrides": {
     "cacheable-request": {
@@ -59,5 +58,6 @@
     "test": "pnpm jest",
     "unit-test": "pnpm jest tests/unit"
   },
+  "typings": "dist/src/index.d.ts",
   "version": "0.0.1"
 }

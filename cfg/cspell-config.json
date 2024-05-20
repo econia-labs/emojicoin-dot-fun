@@ -15,7 +15,9 @@
     }
   ],
   "ignorePaths": [
-    "/project-words.txt"
+    "/project-words.txt",
+    "**/package.json",
+    "**/pnpm-lock.yaml"
   ],
   "overrides": [
     {

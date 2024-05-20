@@ -1,3 +1,5 @@
+---
 packages:
-  - "sdk"
-  - "frontend"
+- 'sdk'
+- 'frontend'
+...
