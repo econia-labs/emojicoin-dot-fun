@@ -22,11 +22,13 @@ pnpm run dev
 pnpm run build
 ```
 
-### To debug
+### To run the production app
 
 ```bash
-pnpm run build:debug
+pnpm run start --port 3001
 ```
+
+We use `--port 3001` as an example here. You can use whatever you want, but generally the `postgrest` api occupies `port 3000`.
 
 This project uses [`next/font`].
 
