@@ -3,4 +3,4 @@
 	url = git@github.com:econia-labs/inbox.git
 [submodule "src/typescript/frontend/public/static"]
 	path = src/typescript/frontend/public/static
-	url = https://github.com/tradingview/charting_library.git
+	url = git@github.com:tradingview/charting_library.git
