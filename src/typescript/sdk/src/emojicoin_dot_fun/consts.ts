@@ -1,7 +1,5 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import dotenv from "dotenv";
-import path from "path";
-import { getGitRoot } from "../../tests/utils/helpers";
 
 dotenv.config();
 
@@ -15,8 +13,6 @@ export const DEFAULT_REGISTER_MARKET_GAS_OPTIONS = {
   maxGasAmount: ONE_APT / 100,
   gasUnitPrice: 100,
 };
-export const MARKET_DATA_DIR = path.join(getGitRoot(), "src/typescript/api/src/markets/data");
-
 export const MARKET_CAP = 4_500_000_000_000n;
 export const EMOJICOIN_REMAINDER = 10_000_000_000_000_000n;
 export const EMOJICOIN_SUPPLY = 45_000_000_000_000_000n;

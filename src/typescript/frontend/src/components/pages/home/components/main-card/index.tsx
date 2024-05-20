@@ -29,6 +29,7 @@ const MainCard: React.FC = () => {
             aspectRatio={1.4}
             width={{ _: "460px", tablet: "340px", laptopL: "650px" }}
             ml={{ _: "12px", tablet: "-45px" }}
+            alt="Planet"
           />
 
           <StyledEmoji

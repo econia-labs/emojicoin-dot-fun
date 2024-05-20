@@ -15,7 +15,8 @@
       "esnext"
     ],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
@@ -25,6 +26,12 @@
       ],
       "@/fonts/*": [
         "styles/fonts/*"
+      ],
+      "@/sdk/*": [
+        "../../sdk/src/*"
+      ],
+      "@/static/*": [
+        "../public/static/*"
       ]
     },
     "plugins": [
@@ -36,7 +43,7 @@
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
-    "target": "ES6"
+    "target": "esnext"
   },
   "exclude": [
     "node_modules"
