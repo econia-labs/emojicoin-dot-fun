@@ -15,6 +15,7 @@
     "@emotion/is-prop-valid": "^1.2.2",
     "@popperjs/core": "^2.11.8",
     "@reduxjs/toolkit": "^1.9.5",
+    "@econia-labs/emojicoin-sdk": "workspace:*",
     "axios": "^1.5.0",
     "emoji-picker-react": "^4.9.2",
     "emoji-regex": "^10.3.0",
@@ -65,7 +66,7 @@
     "typescript": "5.4.3",
     "webpack": "^5.88.2"
   },
-  "name": "econia-labs",
+  "name": "@econia-labs/emojicoin-dot-fun",
   "packageManager": "pnpm@9.1.1+sha512.14e915759c11f77eac07faba4d019c193ec8637229e62ec99eefb7cf3c3b75c64447882b7c485142451ee3a6b408059cdfb7b7fa0341b975f12d0f7629c71195",
   "private": true,
   "scripts": {
@@ -76,7 +77,7 @@
     "build-storybook": "storybook build",
     "build:debug": "export BUILD_DEBUG=true && pnpm clean && next build --no-lint --no-mangling --debug && export BUILD_DEBUG=\"\"",
     "clean": "rm -rf .next",
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
     "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",

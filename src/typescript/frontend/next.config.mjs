@@ -30,6 +30,7 @@ const nextConfig = {
         styledComponents: true
     },
     ...(isDebug ? debugConfigOptions : {}),
+    transpilePackages: ['@repo/api']
 }
 
 export default nextConfig;

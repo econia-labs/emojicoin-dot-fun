@@ -13,8 +13,12 @@ import {
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
 import Chat from "../chat";
+import { type ChartContainerProps } from "components/charts/types";
+import Chart from "components/charts/private/Chart";
 
-const MobileGrid: React.FC = () => {
+export interface MobileGridProps extends ChartContainerProps {}
+
+const MobileGrid = (props: MobileGridProps) => {
   const [tab, setTab] = useState(1);
   const { t } = useTranslation();
 
@@ -28,9 +32,7 @@ const MobileGrid: React.FC = () => {
         </StyledMobileContentHeader>
 
         <StyledMobileContentInner>
-          <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
-            Chart
-          </Text>
+          <Chart {...props} marketID={0} />
         </StyledMobileContentInner>
       </StyledMobileContentBlock>
 

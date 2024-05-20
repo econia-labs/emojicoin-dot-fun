@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { Flex } from "@/containers";
 import { Text, Button } from "components";
@@ -17,9 +17,19 @@ import {
 import Chat from "../chat";
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
+import { type ChartContainerProps } from "components/charts/types";
+import dynamic from "next/dynamic";
+// import { Chart } from "components/charts/private/Chart";
 
-const DesktopGrid: React.FC = () => {
+const Chart = dynamic(() => import("components/charts/private/Chart"), { ssr: false });
+export interface DesktopGridProps extends ChartContainerProps {}
+
+const DesktopGrid = (props: DesktopGridProps) => {
   const { t } = useTranslation();
+
+  useEffect(() =>{
+    console.log("isScriptReady", props.isScriptReady);
+  }, [props.isScriptReady]);
 
   return (
     <StyledContentWrapper>
@@ -37,9 +47,7 @@ const DesktopGrid: React.FC = () => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
-                Chart
-              </Text>
+              <Chart {...props} marketID={2} />
             </StyledBlockWrapper>
           </StyledBlock>
 
