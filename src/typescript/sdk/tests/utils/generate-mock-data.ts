@@ -38,24 +38,52 @@ const ONE_APTn = BigInt(ONE_APT);
 
 export const MOCK_DATA_MARKET_EMOJIS = ["f09fa5b0", "f09fa5b0"];
 
-export let generateMockData = async (aptos: Aptos, account: Account) => {
-  const emojis = ["f09fa5b0", "f09fa5b0"];
+const concatEmoji = (a: string[]) => {
+  return a.map((v) => Hex.fromHexInput(v).toStringWithoutPrefix()).join("")
+};
 
+export let generateMockData = async (aptos: Aptos, account: Account) => {
   const registryAddress = await getRegistryAddress({
     aptos,
     moduleAddress: account.accountAddress,
   });
 
-  const lazyEmojicoin: Lazy<EmojicoinInfo> = new Lazy(() => getEmojicoinMarketAddressAndTypeTags({
+  let accounts = [0,1,2,3,4,5].map(_ => Account.generate());
+
+  for(const account of accounts) {
+    await aptos.fundAccount({ accountAddress: account.accountAddress, amount: 100000000 * ONE_APT });
+  }
+
+  const lazyEmojicoin0: Lazy<EmojicoinInfo> = new Lazy(() => getEmojicoinMarketAddressAndTypeTags({
     registryAddress,
-    symbolBytes: emojis.map((v) => Hex.fromHexInput(v).toStringWithoutPrefix()).join(""),
+    symbolBytes: concatEmoji(["f09fa5b0", "f09fa5b0"]),
+  }));
+  const lazyEmojicoin1: Lazy<EmojicoinInfo> = new Lazy(() => getEmojicoinMarketAddressAndTypeTags({
+    registryAddress,
+    symbolBytes: concatEmoji(["f09f9094"]),
+  }));
+  const lazyEmojicoin2: Lazy<EmojicoinInfo> = new Lazy(() => getEmojicoinMarketAddressAndTypeTags({
+    registryAddress,
+    symbolBytes: concatEmoji(["f09f8f81"]),
   }));
 
   const actions: Action[] = [{
     type: 'registerMarket',
     data: {
-      emojis,
-      account,
+      emojis: ["f09fa5b0", "f09fa5b0"],
+      account: accounts[0],
+    }
+  },{
+    type: 'registerMarket',
+    data: {
+      emojis: ["f09f9094"],
+      account: accounts[1],
+    }
+  },{
+    type: 'registerMarket',
+    data: {
+      emojis: ["f09f8f81"],
+      account: accounts[2],
     }
   }];
 
@@ -63,35 +91,117 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
     actions.push({
       type: 'swap',
       data: {
-        account,
-        emojicoin: lazyEmojicoin,
+        account: accounts[Number(i) % 3],
+        emojicoin: lazyEmojicoin0,
+        isSell: false,
+        inputAmount: i * ONE_APTn * 100n,
+      },
+    })
+  }
+
+  for(let i = 1n; i <= 100n; i++) {
+    actions.push({
+      type: 'swap',
+      data: {
+        account: accounts[Number(i) % 3],
+        emojicoin: lazyEmojicoin1,
+        isSell: false,
+        inputAmount: i * ONE_APTn * 10n,
+      },
+    })
+  }
+
+  for(let i = 1n; i <= 100n; i++) {
+    actions.push({
+      type: 'swap',
+      data: {
+        account: accounts[Number(i) % 3],
+        emojicoin: lazyEmojicoin2,
         isSell: false,
         inputAmount: i * ONE_APTn,
       },
     })
   }
 
-  //for(let i = 0n; i < 10n; i++) {
-  //  actions.push({
-  //    type: 'provideLiquidity',
-  //    data: {
-  //      account,
-  //      emojicoin: lazyEmojicoin,
-  //      quoteAmount: 100n * ONE_APTn,
-  //    },
-  //  })
-  //}
-  //
-  //for(let i = 0n; i < 5n; i++) {
-  //  actions.push({
-  //    type: 'removeLiquidity',
-  //    data: {
-  //      account,
-  //      emojicoin: lazyEmojicoin,
-  //      lpCoinAmount: 100n * ONE_APTn,
-  //    },
-  //  })
-  //}
+  actions.push({
+    type: 'swap',
+    data: {
+      account: accounts[0],
+      emojicoin: lazyEmojicoin0,
+      isSell: false,
+      inputAmount: ONE_APTn,
+    },
+  })
+
+  actions.push({
+    type: 'swap',
+    data: {
+      account: accounts[0],
+      emojicoin: lazyEmojicoin1,
+      isSell: false,
+      inputAmount: ONE_APTn,
+    },
+  })
+
+  actions.push({
+    type: 'swap',
+    data: {
+      account: accounts[0],
+      emojicoin: lazyEmojicoin2,
+      isSell: false,
+      inputAmount: ONE_APTn,
+    },
+  })
+
+  // Creating whale
+  actions.push({
+    type: 'swap',
+    data: {
+      account: accounts[3],
+      emojicoin: lazyEmojicoin0,
+      isSell: false,
+      inputAmount: ONE_APTn * 100000n,
+    },
+  })
+  // Creating dolphin
+  actions.push({
+    type: 'swap',
+    data: {
+      account: accounts[4],
+      emojicoin: lazyEmojicoin0,
+      isSell: false,
+      inputAmount: ONE_APTn * 2000n,
+    },
+  })
+  // Creating puffer fish
+  actions.push({
+    type: 'swap',
+    data: {
+      account: accounts[5],
+      emojicoin: lazyEmojicoin0,
+      isSell: false,
+      inputAmount: ONE_APTn * 10n,
+    },
+  })
+
+  for(let i = 0n; i < 10n; i++) {
+    actions.push({
+      type: 'provideLiquidity',
+      data: {
+        account: accounts[0],
+        emojicoin: lazyEmojicoin0,
+        quoteAmount: (i + (i % 2n == 0n ? 1000n : 500n)) * ONE_APTn,
+      },
+    })
+    actions.push({
+      type: 'removeLiquidity',
+      data: {
+        account: accounts[0],
+        emojicoin: lazyEmojicoin0,
+        lpCoinAmount: (i + (i % 2n == 0n ? 500n : 1000n)) * ONE_APTn,
+      },
+    })
+  }
 
   await execute(aptos, account, actions);
 
