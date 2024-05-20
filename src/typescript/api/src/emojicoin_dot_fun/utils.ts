@@ -9,7 +9,7 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./consts";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./const";
 import {
   ChatEvent,
   Event,

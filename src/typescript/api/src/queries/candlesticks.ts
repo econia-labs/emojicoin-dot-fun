@@ -1,46 +1,12 @@
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import { PostgrestClient } from "@supabase/postgrest-js";
-import { INBOX_URL, LIMIT, ORDER_BY, TABLE_NAME } from "./consts";
-import {
-  type Event,
-  MarketRegistrationEvent,
-  PeriodicStateEvent,
-} from "../emojicoin_dot_fun/events";
-import { CandlestickResolution } from "../emojicoin_dot_fun/consts";
+import { INBOX_URL, LIMIT, ORDER_BY, TABLE_NAME } from "./const";
+import { PeriodicStateEvent } from "../emojicoin_dot_fun/events";
+import { type CandlestickResolution } from "../emojicoin_dot_fun/const";
 
 /* eslint-disable-next-line */
 export const getPeriodicStateEvents = ({ after = new Date() }: { after: Date }) => {};
-
-export const getAllMarkets = async ({
-  inboxUrl = INBOX_URL,
-  limit = LIMIT,
-}: {
-  inboxUrl?: string;
-  limit?: number;
-}) => {
-  if (!inboxUrl) {
-    throw new Error(`Invalid inboxUrl: ${inboxUrl}`);
-  }
-  const postgrest = new PostgrestClient(inboxUrl);
-
-  const aggregated: Event[] = [];
-  let go = true;
-  while (go) {
-    const offset = aggregated.length;
-    const [count, data] = await postgrest
-      .from(TABLE_NAME)
-      .select("*")
-      .filter("type", "eq", MarketRegistrationEvent.STRUCT_STRING)
-      .order("transaction_version", ORDER_BY.DESC)
-      .range(offset, offset + limit - 1)
-      .then((res) => [res.count ?? 0, res.data ?? []] as const);
-
-    aggregated.push(...data.map((v) => MarketRegistrationEvent.from(v)));
-    go = count !== 0;
-  }
-  return aggregated;
-};
 
 /**
  * `postgrest` requires string values to be wrapped in double quotes
@@ -67,20 +33,20 @@ const wrap = (val: number | bigint | string): string => {
   }
 };
 
-export const getAllCandlesticks = async ({
-  marketID,
-  resolution,
-  inboxUrl = INBOX_URL,
-  limit = LIMIT,
-}: {
+export type CandlestickQueryArgs = {
   marketID: number;
   resolution: CandlestickResolution;
   inboxUrl?: string;
   limit?: number;
-}) => {
-  if (!inboxUrl) {
-    throw new Error(`Invalid inboxUrl: ${inboxUrl}`);
-  }
+};
+
+export const getAllCandlesticks = async (args: CandlestickQueryArgs): Promise<Array<PeriodicStateEvent>> => {
+  const {
+    marketID,
+    resolution,
+    inboxUrl = INBOX_URL,
+    limit = LIMIT
+  } = args;
   const postgrest = new PostgrestClient(inboxUrl);
 
   const aggregated: PeriodicStateEvent[] = [];
@@ -101,25 +67,5 @@ export const getAllCandlesticks = async ({
     go = count !== 0;
   }
 
-  // console.log(aggregated);
   return aggregated;
 };
-
-const main = async () => {
-  const markets = await getAllMarkets({});
-  markets.forEach((m) => {
-    console.log(m);
-  });
-  const res = await getAllCandlesticks({
-    marketID: 4,
-    resolution: CandlestickResolution.PERIOD_1S,
-  });
-
-  res.forEach((_) => {
-    // console.log(r);
-  });
-
-  console.log(res.length);
-};
-
-main();

@@ -1,5 +1,5 @@
 require("dotenv").config();
-let inbox = require("./utils/inbox.ts");
+const { Inbox } = require("./utils");
 
 module.exports = async function () {
   // Check if the current local node process is

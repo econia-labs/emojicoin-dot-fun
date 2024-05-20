@@ -1,27 +1,24 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import dotenv from "dotenv";
 import path from "path";
-import { getGitRoot } from "../../tests/utils/helpers";
 
-if (process.env.VERCEL !== "1") {
-  const envPath = path.join(getGitRoot(), "src/typescript/api", ".env");
-  const localEnvPath = path.join(envPath, ".env.local");
-  dotenv.config({ path: localEnvPath });
-  dotenv.config({ path: envPath });
-}
+const envPath = path.join(
+  __dirname,
+  "..",
+  "..",
+  ".env",
+);
+dotenv.config({ path: envPath });
 
 export const ONE_APT = 1 * 10 ** 8;
 export const MAX_GAS_FOR_PUBLISH = 1500000;
 export const COIN_FACTORY_MODULE_NAME = "coin_factory";
 export const EMOJICOIN_DOT_FUN_MODULE_NAME = "emojicoin_dot_fun";
-export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.MODULE_ADDRESS!))();
-export const INBOX_URL = process.env.INBOX_URL!;
+export const MODULE_ADDRESS = AccountAddress.from("0x4bab58978ec1b1bef032eeb285ad47a6a9b997d646c19b598c35f46b26ff9ece");
 export const DEFAULT_REGISTER_MARKET_GAS_OPTIONS = {
   maxGasAmount: ONE_APT / 100,
   gasUnitPrice: 100,
 };
-export const MARKET_DATA_DIR = path.join(getGitRoot(), "src/typescript/api/src/markets/data");
-
 export const MARKET_CAP = 4_500_000_000_000n;
 export const EMOJICOIN_REMAINDER = 10_000_000_000_000_000n;
 export const EMOJICOIN_SUPPLY = 45_000_000_000_000_000n;

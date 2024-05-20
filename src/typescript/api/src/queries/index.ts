@@ -1,2 +1,3 @@
-export * from "./consts";
+export * from "./const";
 export * from "./candlesticks";
+export { default as getMarketData } from "./markets";

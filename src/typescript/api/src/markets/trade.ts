@@ -4,7 +4,7 @@
 import {
   Account,
   type UserTransactionResponse,
-  AccountAddress,
+  type AccountAddress,
   Ed25519PrivateKey,
   APTOS_COIN,
   type Aptos,
@@ -23,6 +23,7 @@ import {
   getEvents,
   QUOTE_VIRTUAL_FLOOR,
 } from "../emojicoin_dot_fun";
+import { MODULE_ADDRESS } from "../emojicoin_dot_fun/const";
 import { getAptosClient, publishForTest } from "../../tests/utils";
 import {
   MarketMetadataByEmojiBytes,
@@ -31,23 +32,22 @@ import {
 } from "../emojicoin_dot_fun/emojicoin-dot-fun";
 import { BatchTransferCoins, ExistsAt, Mint } from "./coin-transfers";
 import { type Events } from "../emojicoin_dot_fun/events";
-import { getRandomEmoji } from "./get-random-emoji";
 import { type EmojicoinInfo } from "../types/contract";
+import { getRandomEmoji } from "../emoji_data/utils";
 
-const NUM_TRADERS = 2000;
+const NUM_TRADERS = 500;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
-const CHUNK_SIZE = 100;
+const CHUNK_SIZE = 50;
 const TRADER_INITIAL_BALANCE = ONE_APT * 10;
 const DISTRIBUTOR_NECESSARY_BALANCE = CHUNK_SIZE * TRADER_INITIAL_BALANCE;
 const MAX_U64 = 18446744073709551615n;
 const NUM_DISTRIBUTORS = NUM_TRADERS / CHUNK_SIZE;
-const MODULE_ADDRESS = AccountAddress.from(process.env.MODULE_ADDRESS!);
 const PUBLISHER = Account.fromPrivateKey({
   privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK!),
 });
 
 async function trade() {
-  const { asActualEmoji, emojiBytes } = getRandomEmoji();
+  const { emoji, emojiBytes } = getRandomEmoji();
   const { aptos } = getAptosClient();
   const registryAddress = await setupTest(aptos);
 
@@ -59,7 +59,7 @@ async function trade() {
     aptos,
     emojiBytes,
     registryAddress,
-    asActualEmoji,
+    emoji,
   });
 
   console.log(`Market address: ${marketAddress}`);
@@ -119,7 +119,7 @@ async function trade() {
       const swap = events.swapEvents[0] ? events.swapEvents[0].data : null;
       if (state && swap) {
         const textDecoder = new TextDecoder("utf-8");
-        const emoji = textDecoder.decode(state.marketMetadata.emojiBytes.toUint8Array());
+        const decodedEmoji = textDecoder.decode(state.marketMetadata.emojiBytes);
         const aptSpent = divideWithPrecision({
           a: state.clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
           b: ONE_APT,
@@ -133,8 +133,8 @@ async function trade() {
         const spendOnBondingCurve = `${aptSpent} APT spent on bonding curve.`;
         const quoteLeft = `${quoteLeftBeforeTransition} to go before the bonding curve ends!`;
         const s =
-          `Trade for ${swap.swapper.toString()} completed for emoji market: ${emoji}` +
-          ` with market ID: ${state.marketMetadata.marketId}` +
+          `Trade for ${swap.swapper.toString()} completed for emoji market: ${decodedEmoji}` +
+          ` with market ID: ${state.marketMetadata.marketID}` +
           ` at version: ${Number(res.version)}. ${
             !swap.resultsInStateTransition
               ? `${spendOnBondingCurve} ${quoteLeft}`
@@ -215,19 +215,19 @@ const getOrRegisterMarket = async ({
   aptos,
   emojiBytes,
   registryAddress,
-  asActualEmoji,
+  emoji,
 }: {
   aptos: Aptos;
   emojiBytes: Uint8Array;
   registryAddress: AccountAddress;
-  asActualEmoji: string;
+  emoji: string;
 }): Promise<EmojicoinInfo> => {
   const emojicoinInfo = await MarketMetadataByEmojiBytes.view({
     aptos,
     emojiBytes,
   }).then((res) => {
     if (res.vec.pop()) {
-      console.log(`Market already exists for emoji: ${asActualEmoji}`);
+      console.log(`Market already exists for emoji: ${emoji}`);
       return getEmojicoinMarketAddressAndTypeTags({
         registryAddress,
         symbolBytes: emojiBytes,

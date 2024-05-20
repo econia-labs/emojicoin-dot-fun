@@ -249,7 +249,12 @@ export async function postBCSViewFunction<T extends Array<MoveValue>>(args: {
   const { payload, options } = args;
   const aptosConfig = toConfig(args.aptosConfig);
   const serializer = new Serializer();
+  // console.log("payload", payload);
+  // console.log("payload", (payload.args[0] as AccountAddress));
+  // console.log(AccountAddress.TWO.bcsToBytes());
+  // console.log("payload", Object.getPrototypeOf(payload.args[0] as AccountAddress));
   payload.serialize(serializer);
+  // console.log("payload", payload);
   const bytes = serializer.toUint8Array();
   const { data } = await postAptosFullNode<Uint8Array, MoveValue[]>({
     aptosConfig,

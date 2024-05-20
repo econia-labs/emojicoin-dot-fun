@@ -44,7 +44,7 @@ export async function publishPackage(args: {
   const pkString = new Hex(pk.toUint8Array()).toStringWithoutPrefix();
 
   const shellArgs = [
-    aptosExecutableAvailable ? "npx aptos" : "aptos",
+    aptosExecutableAvailable ? "npx @aptos-labs/aptos-cli" : "aptos",
     "move",
     "publish",
     ...["--named-addresses", namedAddressesString],

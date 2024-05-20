@@ -34,7 +34,7 @@ import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
 } from "./payload-builders";
-import { MODULE_ADDRESS } from "./consts";
+import { MODULE_ADDRESS } from "./const";
 import { type AggregatorSnapshot } from "../types/core";
 
 export type ChatPayloadMoveArguments = {

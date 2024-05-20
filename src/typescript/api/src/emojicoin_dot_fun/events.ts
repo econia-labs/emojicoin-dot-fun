@@ -29,6 +29,7 @@ import {
   toStateMetadata,
 } from "../types/contract";
 import { type EventJSON } from "../types/core";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "./const";
 
 export function toTypeTag(
   addressInput: AccountAddressInput,
@@ -126,7 +127,7 @@ export class Event {
         d[field] = Array.from(val);
       } else if (isMarketMetadata(val)) {
         d[field] = {
-          marketId: val.marketId.toString(),
+          marketId: val.marketID.toString(),
           emojiBytes: val.emojiBytes.toString(),
           marketAddress: val.marketAddress.toString(),
         };
@@ -137,9 +138,6 @@ export class Event {
     return d;
   }
 }
-
-const EMOJICOIN_DOT_FUN_MODULE_ADDRESS = AccountAddress.from(process.env.MODULE_ADDRESS!);
-const EMOJICOIN_DOT_FUN_MODULE_NAME = process.env.EMOJICOIN_DOT_FUN_MODULE_NAME!;
 
 export type SwapEventFields = {
   marketId: Uint64;
@@ -161,7 +159,7 @@ export type SwapEventFields = {
 };
 
 export class SwapEvent extends Event {
-  public static readonly MODULE_ADDRESS = EMOJICOIN_DOT_FUN_MODULE_ADDRESS;
+  public static readonly MODULE_ADDRESS = MODULE_ADDRESS;
 
   public static readonly MODULE_NAME = EMOJICOIN_DOT_FUN_MODULE_NAME;
 
@@ -216,7 +214,7 @@ export type ChatEventFields = {
 };
 
 export class ChatEvent extends Event {
-  public static readonly MODULE_ADDRESS = EMOJICOIN_DOT_FUN_MODULE_ADDRESS;
+  public static readonly MODULE_ADDRESS = MODULE_ADDRESS;
 
   public static readonly MODULE_NAME = EMOJICOIN_DOT_FUN_MODULE_NAME;
 
@@ -262,7 +260,7 @@ export type MarketRegistrationEventFields = {
 };
 
 export class MarketRegistrationEvent extends Event {
-  public static readonly MODULE_ADDRESS = EMOJICOIN_DOT_FUN_MODULE_ADDRESS;
+  public static readonly MODULE_ADDRESS = MODULE_ADDRESS;
 
   public static readonly MODULE_NAME = EMOJICOIN_DOT_FUN_MODULE_NAME;
 
@@ -314,7 +312,7 @@ export type PeriodicStateEventFields = {
 };
 
 export class PeriodicStateEvent extends Event {
-  public static readonly MODULE_ADDRESS = EMOJICOIN_DOT_FUN_MODULE_ADDRESS;
+  public static readonly MODULE_ADDRESS = MODULE_ADDRESS;
 
   public static readonly MODULE_NAME = EMOJICOIN_DOT_FUN_MODULE_NAME;
 
@@ -369,7 +367,7 @@ export type StateEventFields = {
 };
 
 export class StateEvent extends Event {
-  public static readonly MODULE_ADDRESS = EMOJICOIN_DOT_FUN_MODULE_ADDRESS;
+  public static readonly MODULE_ADDRESS = MODULE_ADDRESS;
 
   public static readonly MODULE_NAME = EMOJICOIN_DOT_FUN_MODULE_NAME;
 
@@ -419,7 +417,7 @@ export type GlobalStateEventFields = {
 };
 
 export class GlobalStateEvent extends Event {
-  public static readonly MODULE_ADDRESS = EMOJICOIN_DOT_FUN_MODULE_ADDRESS;
+  public static readonly MODULE_ADDRESS = MODULE_ADDRESS;
 
   public static readonly MODULE_NAME = EMOJICOIN_DOT_FUN_MODULE_NAME;
 
@@ -471,7 +469,7 @@ export type LiquidityEventFields = {
 };
 
 export class LiquidityEvent extends Event {
-  public static readonly MODULE_ADDRESS = EMOJICOIN_DOT_FUN_MODULE_ADDRESS;
+  public static readonly MODULE_ADDRESS = MODULE_ADDRESS;
 
   public static readonly MODULE_NAME = EMOJICOIN_DOT_FUN_MODULE_NAME;
 
@@ -521,17 +519,18 @@ export class LiquidityEvent extends Event {
 
 // To pretty print Aptos SDK classes, we can update the object prototype's inspect method.
 const updateInspect = (obj: any, styleType: util.Style): void => {
-  Object.setPrototypeOf(obj.prototype, {
-    [util.inspect.custom](_: number, options: util.InspectOptionsStylized): string {
-      const newOptions = {
-        ...options,
-        depth: null,
-        colors: true,
-      };
-      const stylized = newOptions.stylize(this.toString(), styleType);
-      return `${obj.name} { ${stylized} }`;
-    },
-  });
+  if (!obj.prototype) {
+    throw new Error("Cannot update inspect for a class without a prototype");
+  }
+  obj.prototype[util.inspect.custom] = function(_: number, options: util.InspectOptionsStylized): string {
+    const newOptions = {
+      ...options,
+      depth: null,
+      colors: true,
+    };
+    const stylized = newOptions.stylize(this.toString(), styleType);
+    return `${obj.name} { ${stylized} }`;
+  };
 };
 
 updateInspect(AccountAddress, "undefined");

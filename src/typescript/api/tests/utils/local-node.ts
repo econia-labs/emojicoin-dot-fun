@@ -39,7 +39,7 @@ export class LocalNode {
   start() {
     const cliCommand = "npx";
     const cliArgs = [
-      "aptos",
+      "@aptos-labs/aptos-cli",
       "node",
       "run-local-testnet",
       "--force-restart",

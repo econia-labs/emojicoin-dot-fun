@@ -11,19 +11,19 @@ import {
   type Uint8,
 } from "@aptos-labs/ts-sdk";
 import { type ExtendRef, type SequenceInfo } from "./core";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../emojicoin_dot_fun/consts";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../emojicoin_dot_fun/const";
 
 // Structs specific to `emojicoin_dot_fun`.
 
 export const isMarketMetadata = (v: any): v is MarketMetadata =>
-  typeof v.marketId === "bigint" &&
+  typeof v.marketID === "bigint" &&
   v.marketAddress instanceof AccountAddress &&
   v.emojiBytes instanceof Hex;
 
 export type MarketMetadata = {
-  marketId: Uint64;
-  marketAddress: AccountAddress;
-  emojiBytes: Hex;
+  marketID: Uint64;
+  marketAddress: string;
+  emojiBytes: Uint8Array;
 };
 
 export const toMarketMetadata = (data: {
@@ -31,9 +31,9 @@ export const toMarketMetadata = (data: {
   market_address: string;
   emoji_bytes: string;
 }): MarketMetadata => ({
-  marketId: BigInt(data.market_id),
-  marketAddress: AccountAddress.from(data.market_address),
-  emojiBytes: Hex.fromHexString(data.emoji_bytes),
+  marketID: BigInt(data.market_id),
+  marketAddress: data.market_address,
+  emojiBytes: Hex.fromHexString(data.emoji_bytes).toUint8Array(),
 });
 
 export type MarketResource = {
@@ -68,11 +68,7 @@ export async function getMarketResource(args: {
     resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Market`,
   });
   return {
-    metadata: {
-      marketId: BigInt(marketResource.metadata.market_id),
-      marketAddress: AccountAddress.from(marketResource.metadata.market_address),
-      emojiBytes: Hex.fromHexString(marketResource.metadata.emoji_bytes),
-    },
+    metadata: toMarketMetadata(marketResource.metadata),
     sequenceInfo: {
       nonce: BigInt(marketResource.sequence_info.nonce),
       last_bump_time: BigInt(marketResource.sequence_info.last_bump_time),

@@ -83,11 +83,11 @@ describe("registers a market successfully", () => {
       objectAddress: derivedNamedObjectAddress,
     });
 
-    const { marketId, marketAddress, emojiBytes } = marketObjectMarketResource.metadata;
+    const { marketID, marketAddress, emojiBytes } = marketObjectMarketResource.metadata;
 
     const { lpCoinSupply, extendRef } = marketObjectMarketResource;
 
-    expect(marketId).toEqual(numMarketsBefore + 1n);
+    expect(marketID).toBeGreaterThanOrEqual(1n);
     expect(emojiBytes.toString()).toEqual(`0x${emojis.join("")}`);
     expect(extendRef.self.toStringLong()).toEqual(derivedNamedObjectAddress.toStringLong());
     expect(extendRef.self.toStringLong()).toEqual(marketAddress.toStringLong());

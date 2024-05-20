@@ -1,7 +1,8 @@
 import { Account } from "@aptos-labs/ts-sdk";
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { getRegistryAddress } from "../../src";
-import { EmojicoinDotFun, INBOX_URL, ONE_APT, sleep } from "../../src/emojicoin_dot_fun";
+import { EmojicoinDotFun, ONE_APT, sleep } from "../../src/emojicoin_dot_fun";
+import { INBOX_URL } from "../../src/queries";
 import { getTestHelpers } from "../utils";
 import { chatEventTypeTag, parseChatEvent } from "../../src/types/contract";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
