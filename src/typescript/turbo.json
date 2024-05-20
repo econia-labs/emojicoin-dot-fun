@@ -16,16 +16,16 @@
     "dev": {
       "cache": false
     },
-    "lint": {
-      "outputs": []
-    },
-    "lint:fix": {
-      "outputs": []
-    },
     "format": {
       "outputs": []
     },
     "format:check": {
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
       "outputs": []
     },
     "test": {
