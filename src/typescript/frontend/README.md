@@ -28,7 +28,8 @@ pnpm run build
 pnpm run start --port 3001
 ```
 
-We use `--port 3001` as an example here. You can use whatever you want, but generally the `postgrest` api occupies `port 3000`.
+We use `--port 3001` as an example here because generally the `postgrest` api
+occupies `port 3000`. You can choose any port you want.
 
 This project uses [`next/font`].
 
