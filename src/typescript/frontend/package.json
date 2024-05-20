@@ -78,7 +78,7 @@
     "build:debug": "export BUILD_DEBUG=true && pnpm clean && next build --no-lint --no-mangling --debug && export BUILD_DEBUG=\"\"",
     "clean": "rm -rf .next",
     "dev": "next dev --turbo",
-    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
+    "format": "prettier './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
     "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",

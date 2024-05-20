@@ -5,7 +5,7 @@ import findGitRoot from "find-git-root";
 import { getAptosClient } from "./aptos-client";
 import { type TestHelpers } from "./types";
 
-export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/api/tests");
+export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/sdk/tests");
 export const PK_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", ".pk"));
 export const PUBLISH_RES_PATH = path.resolve(
   path.join(TS_UNIT_TEST_DIR, ".tmp", ".publish_result")

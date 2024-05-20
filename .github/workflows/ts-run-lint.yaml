@@ -1,6 +1,6 @@
 ---
 env:
-  TS_API_DIR: 'src/typescript/api'
+  TS_DIR: 'src/typescript'
 jobs:
   ts-run-lint:
     runs-on: 'ubuntu-latest'

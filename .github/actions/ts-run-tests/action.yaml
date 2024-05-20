@@ -8,15 +8,15 @@ runs:
   # Install node and pnpm.
   - uses: 'actions/setup-node@v3'
     with:
-      node-version-file: '${{ env.TS_API_DIR }}/.node-version'
+      node-version-file: '${{ env.TS_DIR }}/.node-version'
       registry-url: 'https://registry.npmjs.org'
   - uses: 'pnpm/action-setup@v2'
     with:
-      package_json_file: '${{ env.TS_API_DIR }}/package.json'
+      package_json_file: '${{ env.TS_DIR }}/package.json'
   # Run package install. If install fails, it probably means the updated
   # lockfile was not included in the commit.
   - run: |
-      cd ${{ env.TS_API_DIR }} && pnpm install --frozen-lockfile
+      cd ${{ env.TS_DIR }} && pnpm install --frozen-lockfile
     shell: 'bash'
   - env:
       # This is important for ensuring that any temporary directories are
@@ -27,8 +27,7 @@ runs:
     name: 'pnpm-test'
     uses: 'nick-fields/retry@7f8f3d9f0f62fe5925341be21c2e8314fd4f7c7c'
     with:
-      # Run `pnpm run build` here before the tests to fail fast if possible.
-      command: 'cd ${{ env.TS_API_DIR }} && pnpm run build && pnpm run test'
+      command: 'cd ${{ env.TS_DIR }} && pnpm run test'
       max_attempts: 2
       timeout_minutes: 10
   - if: 'failure()'

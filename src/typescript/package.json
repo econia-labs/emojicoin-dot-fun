@@ -14,9 +14,10 @@
     "build": "pnpm run clean && turbo run build",
     "clean": "turbo run clean && pnpm i",
     "dev": "turbo run dev --no-cache --parallel --continue",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "turbo run format -- --write",
+    "format:check": "turbo run format -- --check",
     "lint": "turbo run lint",
-    "lint:fix": "turbo run lint:fix",
+    "lint:fix": "turbo run lint -- --fix",
     "test": "turbo run test"
   },
   "version": "0.0.0",

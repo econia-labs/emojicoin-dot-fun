@@ -1,4 +1,3 @@
-# cspell:word TMPDIR
 ---
 name: |
   Run the TypeScript formatter
@@ -6,14 +5,14 @@ runs:
   steps:
   - uses: 'actions/setup-node@v3'
     with:
-      node-version-file: '${{ env.TS_API_DIR }}/.node-version'
+      node-version-file: '${{ env.TS_DIR }}/.node-version'
       registry-url: 'https://registry.npmjs.org'
   - uses: 'pnpm/action-setup@v2'
     with:
-      package_json_file: '${{ env.TS_API_DIR }}/package.json'
+      package_json_file: '${{ env.TS_DIR }}/package.json'
   - run: |
-      cd ${{ env.TS_API_DIR }} &&
-      pnpm install --frozen-lockfile && pnpm _fmt --check
+      cd ${{ env.TS_DIR }} &&
+      pnpm install --frozen-lockfile && pnpm format:check
     shell: 'bash'
   using: 'composite'
 ...
