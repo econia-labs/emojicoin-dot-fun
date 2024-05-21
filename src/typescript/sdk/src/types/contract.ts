@@ -7,7 +7,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../emojicoin_dot_fun/const";
 import { toMarketResource, type ContractTypes } from "./contract-types";
-import JSONTypes from "./json-types";
+import type JSONTypes from "./json-types";
 
 export type EmojicoinInfo = {
   marketAddress: AccountAddress;

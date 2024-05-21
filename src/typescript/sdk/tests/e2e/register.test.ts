@@ -85,7 +85,7 @@ describe("registers a market successfully", () => {
 
     expect(market_id).toBeGreaterThanOrEqual(1n);
     expect(Hex.fromHexInput(emoji_bytes).toString()).toEqual(`0x${emojis.join("")}`);
-    expect(emoji_bytes).toEqual(Hex.fromHexString(emojis.join()).toUint8Array());
+    expect(emoji_bytes).toEqual(Hex.fromHexString(emojis.join("")).toUint8Array());
     expect(normalizeAddress(extend_ref.self)).toEqual(normalizeAddress(derivedNamedObjectAddress));
     expect(normalizeAddress(extend_ref.self)).toEqual(normalizeAddress(market_address));
     expect(lp_coin_supply).toEqual(0n);

@@ -33,7 +33,7 @@ import {
   EntryFunctionTransactionBuilder,
 } from "./payload-builders";
 import { MODULE_ADDRESS } from "./const";
-import JSONTypes from "../types/json-types";
+import type JSONTypes from "../types/json-types";
 
 export type ChatPayloadMoveArguments = {
   marketAddress: AccountAddress;
