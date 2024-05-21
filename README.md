@@ -17,6 +17,7 @@ git submodule update --init --recursive src/inbox
 ```
 
 If you do have access to the `charting_library` repository:
+
 ```shell
 git submodule update --init --recursive
 ```
