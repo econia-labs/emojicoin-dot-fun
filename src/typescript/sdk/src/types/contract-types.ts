@@ -71,7 +71,7 @@ export namespace ContractTypes {
     lp_coin_supply: bigint;
     cumulative_stats: CumulativeStats;
     last_swap: LastSwap;
-    periodic_state_trackers: PeriodicStateTracker;
+    periodic_state_trackers: Array<PeriodicStateTracker>;
   };
 
   export type MarketMetadata = {
@@ -334,7 +334,7 @@ export const toMarketResource = (data: JSONTypes.MarketResource): ContractTypes.
   lp_coin_supply: BigInt(data.lp_coin_supply),
   cumulative_stats: toCumulativeStats(data.cumulative_stats),
   last_swap: toLastSwap(data.last_swap),
-  periodic_state_trackers: toPeriodicStateTracker(data.periodic_state_trackers),
+  periodic_state_trackers: data.periodic_state_trackers.map(v => toPeriodicStateTracker(v)),
 });
 
 export const toPeriodicStateMetadata = (

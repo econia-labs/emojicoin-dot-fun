@@ -1,4 +1,4 @@
-import { Account, AccountAddress, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { Account, AccountAddress, Hex, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
@@ -84,7 +84,8 @@ describe("registers a market successfully", () => {
     const { lp_coin_supply, extend_ref } = marketObjectMarketResource;
 
     expect(market_id).toBeGreaterThanOrEqual(1n);
-    expect(emoji_bytes.toString()).toEqual(`0x${emojis.join("")}`);
+    expect(Hex.fromHexInput(emoji_bytes).toString()).toEqual(`0x${emojis.join("")}`);
+    expect(emoji_bytes).toEqual(Hex.fromHexString(emojis.join()).toUint8Array());
     expect(normalizeAddress(extend_ref.self)).toEqual(normalizeAddress(derivedNamedObjectAddress));
     expect(normalizeAddress(extend_ref.self)).toEqual(normalizeAddress(market_address));
     expect(lp_coin_supply).toEqual(0n);

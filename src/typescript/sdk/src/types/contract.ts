@@ -6,7 +6,8 @@ import {
   type TypeTag,
 } from "@aptos-labs/ts-sdk";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../emojicoin_dot_fun/const";
-import { type ContractTypes } from "./contract-types";
+import { toMarketResource, type ContractTypes } from "./contract-types";
+import JSONTypes from "./json-types";
 
 export type EmojicoinInfo = {
   marketAddress: AccountAddress;
@@ -22,9 +23,10 @@ export async function getMarketResource(args: {
   const { aptos } = args;
   const moduleAddress = AccountAddress.from(args.moduleAddress);
   const objectAddress = AccountAddress.from(args.objectAddress);
-  const marketResource = await aptos.getAccountResource<ContractTypes.MarketResource>({
+  const marketResource = await aptos.getAccountResource<JSONTypes.MarketResource>({
     accountAddress: objectAddress,
     resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Market`,
   });
-  return marketResource;
+
+  return toMarketResource(marketResource);
 }

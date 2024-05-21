@@ -87,7 +87,7 @@ namespace JSONTypes {
     lp_coin_supply: Uint128String;
     cumulative_stats: CumulativeStats;
     last_swap: LastSwap;
-    periodic_state_trackers: PeriodicStateTracker;
+    periodic_state_trackers: Array<PeriodicStateTracker>;
   };
 
   export type MarketMetadata = {
