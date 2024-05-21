@@ -1,6 +1,6 @@
 # Reproducing the TypeScript `symbol-emojis.json` data
 
-To reproduce the data in `src/typescript/sdk/src/emoji_data/symbol-emojis.json`
+To reproduce the data in the TypeScript JSON data file `symbol-emojis.json`
 `cd` to the root of the repo then run the following commands.
 
 ```shell
