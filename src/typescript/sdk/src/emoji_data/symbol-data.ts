@@ -1,14 +1,8 @@
 import { normalizeHex } from "../utils";
 import AllSymbolEmojiJSON from "./symbol-emojis.json";
-import { SymbolEmojiData } from "./types";
+import { type SymbolEmojiData } from "./types";
 
 const encoder = new TextEncoder();
-
-export const getRandomEmoji = (): SymbolEmojiData => {
-  const randomIndex = Math.floor(values.length * Math.random());
-  return values[randomIndex];
-};
-
 const values: SymbolEmojiData[] = Object.entries(AllSymbolEmojiJSON).map(([name, emoji]) => {
   const bytes = encoder.encode(emoji);
   const hex = normalizeHex(bytes);
@@ -31,4 +25,9 @@ export const SYMBOL_DATA = {
   hasName: (v: string) => nameMap.has(v),
   hasHex: (v: `0x${string}`) => hexMap.has(v),
   hasEmoji: (v: string) => emojiMap.has(v),
+};
+
+export const getRandomEmoji = (): SymbolEmojiData => {
+  const randomIndex = Math.floor(values.length * Math.random());
+  return values[randomIndex];
 };

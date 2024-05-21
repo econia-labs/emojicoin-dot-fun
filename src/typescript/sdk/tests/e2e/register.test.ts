@@ -2,10 +2,11 @@ import { Account, AccountAddress, Hex, isUserTransactionResponse } from "@aptos-
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
+  ONE_APT,
   deriveEmojicoinPublisherAddress,
   getRegistryAddress,
 } from "../../src";
-import { EmojicoinDotFun, ONE_APT } from "../../src/emojicoin_dot_fun";
+import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
 import { getMarketResource } from "../../src/types/contract";
 import { normalizeAddress } from "../../src/utils/account-address";

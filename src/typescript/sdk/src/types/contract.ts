@@ -5,7 +5,7 @@ import {
   type Aptos,
   type TypeTag,
 } from "@aptos-labs/ts-sdk";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../emojicoin_dot_fun/const";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
 import { toMarketResource, type ContractTypes } from "./contract-types";
 import type JSONTypes from "./json-types";
 

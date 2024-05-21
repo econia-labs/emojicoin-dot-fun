@@ -1,4 +1,4 @@
-import AllSymbolEmojiJSON from "./symbol-emojis.json";
+import type AllSymbolEmojiJSON from "./symbol-emojis.json";
 
 export type AllSymbolEmojiData = typeof AllSymbolEmojiJSON;
 export type SymbolEmojiData = {

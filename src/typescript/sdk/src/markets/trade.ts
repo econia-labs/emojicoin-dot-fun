@@ -16,13 +16,7 @@ import {
   registerMarketAndGetEmojicoinInfo,
   truncateAddress,
 } from "./utils";
-import {
-  ONE_APT,
-  QUOTE_VIRTUAL_CEILING,
-  getRegistryAddress,
-  getEvents,
-  QUOTE_VIRTUAL_FLOOR,
-} from "../emojicoin_dot_fun";
+import { getRegistryAddress, getEvents } from "../emojicoin_dot_fun";
 import { getTestHelpers, publishForTest } from "../../tests/utils";
 import {
   MarketMetadataByEmojiBytes,
@@ -32,7 +26,8 @@ import {
 import { BatchTransferCoins, ExistsAt, Mint } from "../emojicoin_dot_fun/aptos-framework";
 import { type Events } from "../emojicoin_dot_fun/events";
 import { type EmojicoinInfo } from "../types/contract";
-import { getRandomEmoji } from "../emoji_data/utils";
+import { getRandomEmoji } from "../emoji_data/symbol-data";
+import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING } from "../const";
 
 const NUM_TRADERS = 500;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());

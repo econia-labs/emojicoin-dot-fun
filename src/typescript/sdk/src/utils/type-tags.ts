@@ -5,7 +5,7 @@ import {
   parseTypeTag,
   type TypeTagStruct,
 } from "@aptos-labs/ts-sdk";
-import { MODULE_ADDRESS, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../emojicoin_dot_fun/const";
+import { MODULE_ADDRESS, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
 
 export function toTypeTag(
   addressInput: AccountAddressInput,

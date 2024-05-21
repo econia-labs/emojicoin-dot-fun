@@ -1,7 +1,7 @@
-import { Hex, type HexInput } from "@aptos-labs/ts-sdk";
+import { type HexInput } from "@aptos-labs/ts-sdk";
 import { isHexInput, normalizeHex } from "../utils/hex";
 import { SYMBOL_DATA } from "./symbol-data";
-import { SymbolEmojiData, EmojiName } from "./types";
+import { type SymbolEmojiData, type EmojiName } from "./types";
 
 /**
  *

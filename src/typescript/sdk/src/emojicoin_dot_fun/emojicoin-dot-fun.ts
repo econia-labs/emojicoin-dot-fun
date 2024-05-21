@@ -32,7 +32,7 @@ import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
 } from "./payload-builders";
-import { MODULE_ADDRESS } from "./const";
+import { MODULE_ADDRESS } from "../const";
 import type JSONTypes from "../types/json-types";
 
 export type ChatPayloadMoveArguments = {
