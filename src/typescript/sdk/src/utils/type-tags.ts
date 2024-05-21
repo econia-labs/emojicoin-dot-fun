@@ -48,6 +48,7 @@ export const TYPE_TAGS = {
   StateEvent: toEmojicoinStructTag("State"),
   GlobalStateEvent: toEmojicoinStructTag("GlobalState"),
   LiquidityEvent: toEmojicoinStructTag("Liquidity"),
+  Registry: toEmojicoinStructTag("Registry"),
 } as const;
 
 export const STRUCT_STRINGS = {
@@ -58,4 +59,5 @@ export const STRUCT_STRINGS = {
   StateEvent: TYPE_TAGS.StateEvent.toString(),
   GlobalStateEvent: TYPE_TAGS.GlobalStateEvent.toString(),
   LiquidityEvent: TYPE_TAGS.LiquidityEvent.toString(),
+  Registry: TYPE_TAGS.Registry.toString(),
 } as const;

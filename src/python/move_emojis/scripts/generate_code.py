@@ -10,12 +10,12 @@ from data_types.type_defs import EmojiData, QualifiedEmojiData
 
 BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
 ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
-SYMBOL_EMOJI_MOVE_CONSTS_FILE = "data/move_consts_symbol_emojis.txt"
-CHAT_EMOJI_MOVE_CONSTS_FILE = "data/move_consts_chat_emojis.txt"
-BASE_EMOJIS_FILE = "data/base_emojis.json"
-ZWJ_EMOJIS_FILE = "data/zwj_emojis.json"
-SYMBOL_EMOJIS_FILE = "data/symbol_emojis.json"
-CHAT_EMOJIS_FILE = "data/chat_emojis.json"
+SYMBOL_EMOJI_MOVE_CONSTS_FILE = "data/move-consts-symbol-emojis.txt"
+CHAT_EMOJI_MOVE_CONSTS_FILE = "data/move-consts-chat-emojis.txt"
+BASE_EMOJIS_FILE = "data/base-emojis.json"
+ZWJ_EMOJIS_FILE = "data/zwj-emojis.json"
+SYMBOL_EMOJIS_FILE = "data/symbol-emojis.json"
+CHAT_EMOJIS_FILE = "data/chat-emojis.json"
 TAB = " " * 4
 
 
