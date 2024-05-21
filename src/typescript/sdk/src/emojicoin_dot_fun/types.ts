@@ -45,6 +45,7 @@ export type AccountAddressString = string;
 export type ObjectAddressStruct = {
   inner: string;
 };
+export type HexString = string;
 
 // This is supposed to match some function in the wallet adapter. Not tested yet.
 export type WalletSignTransactionFunction = (...args: any[]) => Promise<AccountAuthenticator>;

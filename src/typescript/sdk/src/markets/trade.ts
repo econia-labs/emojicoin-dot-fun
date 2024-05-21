@@ -115,18 +115,18 @@ async function trade() {
 
     tradeResults.forEach((tx) => {
       const [res, events] = tx;
-      const state = events.stateEvents[0] ? events.stateEvents[0].fields : null;
-      const swap = events.swapEvents[0] ? events.swapEvents[0].fields : null;
+      const state = events.stateEvents[0] ? events.stateEvents[0] : null;
+      const swap = events.swapEvents[0] ? events.swapEvents[0] : null;
       if (state && swap) {
         const textDecoder = new TextDecoder("utf-8");
-        const emoji = textDecoder.decode(state.marketMetadata.emojiBytes.toUint8Array());
+        const emoji = textDecoder.decode(state.market_metadata.emoji_bytes);
         const aptSpent = divideWithPrecision({
-          a: state.clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
+          a: state.clamm_virtual_reserves.quote - QUOTE_VIRTUAL_FLOOR,
           b: ONE_APT,
           decimals: 3,
         }).toFixed(3);
         const quoteLeftBeforeTransition = divideWithPrecision({
-          a: QUOTE_VIRTUAL_CEILING - state.clammVirtualReserves.quote,
+          a: QUOTE_VIRTUAL_CEILING - state.clamm_virtual_reserves.quote,
           b: BigInt(ONE_APT),
           decimals: 3,
         }).toFixed(3);
@@ -134,16 +134,16 @@ async function trade() {
         const quoteLeft = `${quoteLeftBeforeTransition} to go before the bonding curve ends!`;
         const s =
           `Trade for ${swap.swapper.toString()} completed for emoji market: ${emoji}` +
-          ` with market ID: ${state.marketMetadata.marketId}` +
+          ` with market ID: ${state.market_metadata.market_id}` +
           ` at version: ${Number(res.version)}. ${
-            !swap.resultsInStateTransition
+            !swap.results_in_state_transition
               ? `${spendOnBondingCurve} ${quoteLeft}`
               : "We're already in the CPAMM!"
           }`;
         console.debug(s);
       }
       const outOfBondingCurve = events.swapEvents.some(
-        (event) => event.fields.resultsInStateTransition
+        (event) => event.results_in_state_transition
       );
 
       if (outOfBondingCurve) {

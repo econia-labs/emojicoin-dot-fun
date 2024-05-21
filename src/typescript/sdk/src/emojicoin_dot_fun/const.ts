@@ -1,13 +1,24 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+// Load environment variables from .env file if we're not running in CI/CD or
+// from Vercel.
+const GITHUB_ACTIONS = process.env.GITHUB_ACTIONS === "true";
+const VERCEL = process.env.VERCEL === "1";
+const inActionsOrVercel = GITHUB_ACTIONS || VERCEL;
+if (!inActionsOrVercel) {
+  const envPath = path.join(__dirname, "..", "..", ".env");
+  dotenv.config({ path: envPath });
+}
 
 export const ONE_APT = 1 * 10 ** 8;
 export const MAX_GAS_FOR_PUBLISH = 1500000;
 export const COIN_FACTORY_MODULE_NAME = "coin_factory";
 export const EMOJICOIN_DOT_FUN_MODULE_NAME = "emojicoin_dot_fun";
-export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.MODULE_ADDRESS!))();
+export const MODULE_ADDRESS = AccountAddress.from(
+  "0x4bab58978ec1b1bef032eeb285ad47a6a9b997d646c19b598c35f46b26ff9ece"
+);
 export const INBOX_URL = process.env.INBOX_URL!;
 export const DEFAULT_REGISTER_MARKET_GAS_OPTIONS = {
   maxGasAmount: ONE_APT / 100,

@@ -9,18 +9,10 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./consts";
-import {
-  ChatEvent,
-  Event,
-  type Events,
-  GlobalStateEvent,
-  LiquidityEvent,
-  MarketRegistrationEvent,
-  PeriodicStateEvent,
-  StateEvent,
-  SwapEvent,
-} from "./events";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./const";
+import { TYPE_TAGS } from "../types/type-tags";
+import { type Events, converter, toGenericEvent } from "./events";
+import { type ContractTypes } from "../types";
 
 /**
  * Sleep the current thread for the given amount of time
@@ -100,33 +92,37 @@ export function getEvents(response: UserTransactionResponse): Events {
     events: [],
   };
 
-  response.events.forEach((eventData) => {
-    const event = Event.fromJSON(eventData);
-    switch (event.type.toString()) {
-      case SwapEvent.STRUCT_STRING:
-        events.swapEvents.push(event as SwapEvent);
+  response.events.forEach((event) => {
+    if (!converter.has(event.type)) {
+      const res = toGenericEvent(event);
+      events.events.push(res);
+    }
+    const conversionFunction = converter.get(event.type)!;
+    const data = conversionFunction(event);
+    switch (event.type) {
+      case TYPE_TAGS.SwapEvent.toString():
+        events.swapEvents.push(data as ContractTypes.SwapEvent);
         break;
-      case ChatEvent.STRUCT_STRING:
-        events.chatEvents.push(event as ChatEvent);
+      case TYPE_TAGS.ChatEvent.toString():
+        events.chatEvents.push(data as ContractTypes.ChatEvent);
         break;
-      case MarketRegistrationEvent.STRUCT_STRING:
-        events.marketRegistrationEvents.push(event as MarketRegistrationEvent);
+      case TYPE_TAGS.MarketRegistrationEvent.toString():
+        events.marketRegistrationEvents.push(data as ContractTypes.MarketRegistrationEvent);
         break;
-      case PeriodicStateEvent.STRUCT_STRING:
-        events.periodicStateEvents.push(event as PeriodicStateEvent);
+      case TYPE_TAGS.PeriodicStateEvent.toString():
+        events.periodicStateEvents.push(data as ContractTypes.PeriodicStateEvent);
         break;
-      case StateEvent.STRUCT_STRING:
-        events.stateEvents.push(event as StateEvent);
+      case TYPE_TAGS.StateEvent.toString():
+        events.stateEvents.push(data as ContractTypes.StateEvent);
         break;
-      case GlobalStateEvent.STRUCT_STRING:
-        events.globalStateEvents.push(event as GlobalStateEvent);
+      case TYPE_TAGS.GlobalStateEvent.toString():
+        events.globalStateEvents.push(data as ContractTypes.GlobalStateEvent);
         break;
-      case LiquidityEvent.STRUCT_STRING:
-        events.liquidityEvents.push(event as LiquidityEvent);
+      case TYPE_TAGS.LiquidityEvent.toString():
+        events.liquidityEvents.push(data as ContractTypes.LiquidityEvent);
         break;
       default:
-        events.events.push(event as Event);
-        break;
+        throw new Error(`Unknown event type: ${event.type}`);
     }
   });
   return events;

@@ -8,6 +8,7 @@ import {
 import { EmojicoinDotFun, ONE_APT } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
 import { getMarketResource } from "../../src/types/contract";
+import { normalizeAddress } from "../../src/utils/account-address";
 
 jest.setTimeout(20000);
 
@@ -78,15 +79,15 @@ describe("registers a market successfully", () => {
       objectAddress: derivedNamedObjectAddress,
     });
 
-    const { marketId, marketAddress, emojiBytes } = marketObjectMarketResource.metadata;
+    const { market_id, market_address, emoji_bytes } = marketObjectMarketResource.metadata;
 
-    const { lpCoinSupply, extendRef } = marketObjectMarketResource;
+    const { lp_coin_supply, extend_ref } = marketObjectMarketResource;
 
-    expect(marketId).toBeGreaterThanOrEqual(1n);
-    expect(emojiBytes.toString()).toEqual(`0x${emojis.join("")}`);
-    expect(extendRef.self.toStringLong()).toEqual(derivedNamedObjectAddress.toStringLong());
-    expect(extendRef.self.toStringLong()).toEqual(marketAddress.toStringLong());
-    expect(lpCoinSupply).toEqual(0n);
+    expect(market_id).toBeGreaterThanOrEqual(1n);
+    expect(emoji_bytes.toString()).toEqual(`0x${emojis.join("")}`);
+    expect(normalizeAddress(extend_ref.self)).toEqual(normalizeAddress(derivedNamedObjectAddress));
+    expect(normalizeAddress(extend_ref.self)).toEqual(normalizeAddress(market_address));
+    expect(lp_coin_supply).toEqual(0n);
 
     const marketObjectResources = await aptos.getAccountModule({
       accountAddress: derivedNamedObjectAddress,
