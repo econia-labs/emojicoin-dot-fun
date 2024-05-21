@@ -29,10 +29,10 @@ import {
   MarketView,
   Swap,
 } from "../emojicoin_dot_fun/emojicoin-dot-fun";
-import { BatchTransferCoins, ExistsAt, Mint } from "./coin-transfers";
+import { BatchTransferCoins, ExistsAt, Mint } from "../emojicoin_dot_fun/aptos-framework";
 import { type Events } from "../emojicoin_dot_fun/events";
-import { getRandomEmoji } from "./get-random-emoji";
 import { type EmojicoinInfo } from "../types/contract";
+import { getRandomEmoji } from "../emoji_data/utils";
 
 const NUM_TRADERS = 500;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
@@ -47,7 +47,7 @@ const PUBLISHER = Account.fromPrivateKey({
 });
 
 async function trade() {
-  const { asActualEmoji, emojiBytes } = getRandomEmoji();
+  const { emoji: asActualEmoji, bytes: emojiBytes } = getRandomEmoji();
   const { aptos } = getTestHelpers();
   const registryAddress = await setupTest(aptos);
 

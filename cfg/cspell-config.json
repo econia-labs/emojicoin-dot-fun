@@ -17,7 +17,8 @@
   "ignorePaths": [
     "/project-words.txt",
     "**/package.json",
-    "**/pnpm-lock.yaml"
+    "**/pnpm-lock.yaml",
+    "../src/typescript/sdk/src/emoji_data/symbol-emojis.json"
   ],
   "overrides": [
     {

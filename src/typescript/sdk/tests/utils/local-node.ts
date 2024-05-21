@@ -1,6 +1,6 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "child_process";
 import kill from "tree-kill";
-import { sleep } from "../../src/emojicoin_dot_fun/utils";
+import { sleep } from "../../src/utils";
 
 export class LocalNode {
   readonly MAXIMUM_WAIT_TIME_SEC = 75;

@@ -20,8 +20,8 @@ import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
-} from "../emojicoin_dot_fun/payload-builders";
-import { type TypeTagInput } from "../emojicoin_dot_fun";
+} from "./payload-builders";
+import { type TypeTagInput } from ".";
 
 export type MintPayloadMoveArguments = {
   dstAddr: AccountAddress;

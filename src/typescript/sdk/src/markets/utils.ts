@@ -10,13 +10,13 @@ import {
   parseTypeTag,
 } from "@aptos-labs/ts-sdk";
 import {
-  toConfig,
   DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
   EmojicoinDotFun,
   COIN_FACTORY_MODULE_NAME,
   deriveEmojicoinPublisherAddress,
 } from "../emojicoin_dot_fun";
 import { type EmojicoinInfo } from "../types/contract";
+import { toConfig } from "../utils/misc";
 
 /**
  * Get the derived market address and TypeTags for the given registry address and symbol bytes.

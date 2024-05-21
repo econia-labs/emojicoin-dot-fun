@@ -1,36 +1,16 @@
 import {
   AccountAddress,
   type AccountAddressInput,
-  Aptos,
+  type Aptos,
   Hex,
-  type HexInput,
-  DeriveScheme,
-  type AptosConfig,
   type UserTransactionResponse,
+  MoveString,
 } from "@aptos-labs/ts-sdk";
-import { sha3_256 } from "@noble/hashes/sha3";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./const";
-import { TYPE_TAGS } from "../types/type-tags";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "./const";
 import { type Events, converter, toGenericEvent } from "./events";
 import { type ContractTypes } from "../types";
-
-/**
- * Sleep the current thread for the given amount of time
- * @param timeMs time in milliseconds to sleep
- */
-export async function sleep(timeMs: number): Promise<null> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, timeMs);
-  });
-}
-
-export function toAptos(aptos: Aptos | AptosConfig): Aptos {
-  return aptos instanceof Aptos ? aptos : new Aptos(aptos);
-}
-
-export function toConfig(aptos: Aptos | AptosConfig): AptosConfig {
-  return aptos instanceof Aptos ? aptos.config : aptos;
-}
+import { TYPE_TAGS } from "../utils/type-tags";
+import { createNamedObjectAddress } from "../utils/misc";
 
 /**
  * Derives the object address from the given emoji hex codes vector<u8> seed and
@@ -51,22 +31,21 @@ export function deriveEmojicoinPublisherAddress(args: {
   });
 }
 
-export function createNamedObjectAddress(args: {
-  creator: AccountAddressInput;
-  seed: HexInput;
-}): AccountAddress {
-  const creatorAddress = AccountAddress.from(args.creator);
-  const seed = Hex.fromHexInput(args.seed).toUint8Array();
-  const serializedCreatorAddress = creatorAddress.bcsToBytes();
-  const preImage = new Uint8Array([
-    ...serializedCreatorAddress,
-    ...seed,
-    DeriveScheme.DeriveObjectAddressFromSeed,
-  ]);
+// Note that the conversion to string bytes below doesn't work if the length of the string is > 255.
+const registryNameBytes = new MoveString("Registry").bcsToBytes().slice(1);
+// Named object seed for the registry address.
+export const REGISTRY_ADDRESS = createNamedObjectAddress({
+  creator: MODULE_ADDRESS,
+  seed: registryNameBytes,
+});
 
-  return AccountAddress.from(sha3_256(preImage));
-}
-
+/**
+ * Consider simply using the `REGISTRY_ADDRESS` derived constant value instead of this function, as
+ * it mostly exists for e2e testing.
+ *
+ * @param args
+ * @returns the on-chain registry address value
+ */
 export async function getRegistryAddress(args: {
   aptos: Aptos;
   moduleAddress: AccountAddressInput;

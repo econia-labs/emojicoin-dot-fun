@@ -11,7 +11,7 @@ import {
   toStateEvent,
   toSwapEvent,
 } from "../types/contract-types";
-import { TYPE_TAGS } from "../types/type-tags";
+import { TYPE_TAGS } from "../utils/type-tags";
 
 export type Events = {
   swapEvents: ContractTypes.SwapEvent[];

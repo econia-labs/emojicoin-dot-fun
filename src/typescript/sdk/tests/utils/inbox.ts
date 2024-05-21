@@ -1,5 +1,5 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "child_process";
-import { sleep } from "../../src/emojicoin_dot_fun/utils";
+import { sleep } from "../../src/utils";
 
 export class Inbox {
   // This is enough to start Inbox, but not to build it. It is recommended

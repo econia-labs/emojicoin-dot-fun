@@ -1,10 +1,11 @@
 import { Account } from "@aptos-labs/ts-sdk";
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { getRegistryAddress, toChatEvent } from "../../src";
-import { EmojicoinDotFun, INBOX_URL, ONE_APT, sleep } from "../../src/emojicoin_dot_fun";
+import { EmojicoinDotFun, INBOX_URL, ONE_APT } from "../../src/emojicoin_dot_fun";
+import { sleep } from "../../src/utils";
 import { getTestHelpers } from "../utils";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
-import { STRUCT_STRINGS } from "../../src/types/type-tags";
+import { STRUCT_STRINGS } from "../../src/utils/type-tags";
 
 jest.setTimeout(20000);
 
