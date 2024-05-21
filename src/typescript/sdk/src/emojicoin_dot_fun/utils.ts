@@ -1,44 +1,16 @@
 import {
   AccountAddress,
   type AccountAddressInput,
-  Aptos,
+  type Aptos,
   Hex,
-  type HexInput,
-  DeriveScheme,
-  type AptosConfig,
   type UserTransactionResponse,
+  MoveString,
 } from "@aptos-labs/ts-sdk";
-import { sha3_256 } from "@noble/hashes/sha3";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "./consts";
-import {
-  ChatEvent,
-  Event,
-  type Events,
-  GlobalStateEvent,
-  LiquidityEvent,
-  MarketRegistrationEvent,
-  PeriodicStateEvent,
-  StateEvent,
-  SwapEvent,
-} from "./events";
-
-/**
- * Sleep the current thread for the given amount of time
- * @param timeMs time in milliseconds to sleep
- */
-export async function sleep(timeMs: number): Promise<null> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, timeMs);
-  });
-}
-
-export function toAptos(aptos: Aptos | AptosConfig): Aptos {
-  return aptos instanceof Aptos ? aptos : new Aptos(aptos);
-}
-
-export function toConfig(aptos: Aptos | AptosConfig): AptosConfig {
-  return aptos instanceof Aptos ? aptos.config : aptos;
-}
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
+import { type Events, converter, toGenericEvent } from "./events";
+import { type ContractTypes } from "../types";
+import { TYPE_TAGS } from "../utils/type-tags";
+import { createNamedObjectAddress } from "../utils/misc";
 
 /**
  * Derives the object address from the given emoji hex codes vector<u8> seed and
@@ -59,22 +31,21 @@ export function deriveEmojicoinPublisherAddress(args: {
   });
 }
 
-export function createNamedObjectAddress(args: {
-  creator: AccountAddressInput;
-  seed: HexInput;
-}): AccountAddress {
-  const creatorAddress = AccountAddress.from(args.creator);
-  const seed = Hex.fromHexInput(args.seed).toUint8Array();
-  const serializedCreatorAddress = creatorAddress.bcsToBytes();
-  const preImage = new Uint8Array([
-    ...serializedCreatorAddress,
-    ...seed,
-    DeriveScheme.DeriveObjectAddressFromSeed,
-  ]);
+// Note that the conversion to string bytes below doesn't work if the length of the string is > 255.
+const registryNameBytes = new MoveString("Registry").bcsToBytes().slice(1);
+// Named object seed for the registry address.
+export const REGISTRY_ADDRESS = createNamedObjectAddress({
+  creator: MODULE_ADDRESS,
+  seed: registryNameBytes,
+});
 
-  return AccountAddress.from(sha3_256(preImage));
-}
-
+/**
+ * Consider simply using the `REGISTRY_ADDRESS` derived constant value instead of this function, as
+ * it mostly exists for e2e testing.
+ *
+ * @param args
+ * @returns the on-chain registry address value
+ */
 export async function getRegistryAddress(args: {
   aptos: Aptos;
   moduleAddress: AccountAddressInput;
@@ -100,33 +71,37 @@ export function getEvents(response: UserTransactionResponse): Events {
     events: [],
   };
 
-  response.events.forEach((eventData) => {
-    const event = Event.fromJSON(eventData);
-    switch (event.type.toString()) {
-      case SwapEvent.STRUCT_STRING:
-        events.swapEvents.push(event as SwapEvent);
+  response.events.forEach((event) => {
+    if (!converter.has(event.type)) {
+      const res = toGenericEvent(event);
+      events.events.push(res);
+    }
+    const conversionFunction = converter.get(event.type)!;
+    const data = conversionFunction(event);
+    switch (event.type) {
+      case TYPE_TAGS.SwapEvent.toString():
+        events.swapEvents.push(data as ContractTypes.SwapEvent);
         break;
-      case ChatEvent.STRUCT_STRING:
-        events.chatEvents.push(event as ChatEvent);
+      case TYPE_TAGS.ChatEvent.toString():
+        events.chatEvents.push(data as ContractTypes.ChatEvent);
         break;
-      case MarketRegistrationEvent.STRUCT_STRING:
-        events.marketRegistrationEvents.push(event as MarketRegistrationEvent);
+      case TYPE_TAGS.MarketRegistrationEvent.toString():
+        events.marketRegistrationEvents.push(data as ContractTypes.MarketRegistrationEvent);
         break;
-      case PeriodicStateEvent.STRUCT_STRING:
-        events.periodicStateEvents.push(event as PeriodicStateEvent);
+      case TYPE_TAGS.PeriodicStateEvent.toString():
+        events.periodicStateEvents.push(data as ContractTypes.PeriodicStateEvent);
         break;
-      case StateEvent.STRUCT_STRING:
-        events.stateEvents.push(event as StateEvent);
+      case TYPE_TAGS.StateEvent.toString():
+        events.stateEvents.push(data as ContractTypes.StateEvent);
         break;
-      case GlobalStateEvent.STRUCT_STRING:
-        events.globalStateEvents.push(event as GlobalStateEvent);
+      case TYPE_TAGS.GlobalStateEvent.toString():
+        events.globalStateEvents.push(data as ContractTypes.GlobalStateEvent);
         break;
-      case LiquidityEvent.STRUCT_STRING:
-        events.liquidityEvents.push(event as LiquidityEvent);
+      case TYPE_TAGS.LiquidityEvent.toString():
+        events.liquidityEvents.push(data as ContractTypes.LiquidityEvent);
         break;
       default:
-        events.events.push(event as Event);
-        break;
+        throw new Error(`Unknown event type: ${event.type}`);
     }
   });
   return events;

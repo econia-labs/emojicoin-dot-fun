@@ -16,6 +16,8 @@ module.exports = {
   plugins: ["@typescript-eslint", "unused-imports", "import"],
   rules: {
     quotes: ["error", "double"],
+    // We disable the following rule to distinguish Move/JSON types from TS types.
+    "@typescript-eslint/naming-convention": "off",
     "max-len": ["error", 100],
     "import/extensions": "off",
     "import/no-commonjs": ["error", { allowRequire: false, allowPrimitiveModules: false }],

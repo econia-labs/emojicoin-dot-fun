@@ -3,6 +3,9 @@ const { Account, Hex, Ed25519PrivateKey } = require("@aptos-labs/ts-sdk");
 const fs = require("fs");
 const path = require("path");
 const {
+  getPublisherPKForTest,
+} = require("../src/const")
+const {
   Inbox,
   LocalNode,
   publishForTest,
@@ -23,14 +26,7 @@ module.exports = async function setup() {
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
   fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });
 
-  if (process.env.RANDOMIZE_PUBLISHER === "true") {
-    const account = Account.generate();
-    process.env.PUBLISHER_PK = account.privateKey.toString();
-    process.env.MODULE_ADDRESS = account.accountAddress.toString();
-  }
-  const pk = process.env.PUBLISHER_PK;
-  const derivedAccount = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey(pk) })
-  process.env.MODULE_ADDRESS = derivedAccount.accountAddress.toString();
+  const pk = getPublisherPKForTest();
   if (!pk) {
     throw new Error("Please provide a private key for testing");
   };

@@ -4,7 +4,6 @@ env:
     4bab58978ec1b1bef032eeb285ad47a6a9b997d646c19b598c35f46b26ff9ece
   PUBLISHER_PK: |-
     29479e9e5fe47ba9a8af509dd6da1f907510bcf8917bfb19b7079d8c63c0b720
-  RANDOMIZE_PUBLISHER: 'false'
   START_LOCAL_NODE_FOR_TEST: 'true'
   TS_DIR: 'src/typescript'
 jobs:

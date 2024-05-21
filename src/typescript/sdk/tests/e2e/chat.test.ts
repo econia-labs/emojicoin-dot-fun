@@ -1,10 +1,12 @@
 import { Account } from "@aptos-labs/ts-sdk";
 import { PostgrestClient } from "@supabase/postgrest-js";
-import { getRegistryAddress } from "../../src";
-import { EmojicoinDotFun, INBOX_URL, ONE_APT, sleep } from "../../src/emojicoin_dot_fun";
+import { INBOX_URL, ONE_APT } from "../../src/const";
+import { getRegistryAddress, toChatEvent } from "../../src";
+import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
+import { sleep } from "../../src/utils";
 import { getTestHelpers } from "../utils";
-import { chatEventTypeTag, parseChatEvent } from "../../src/types/contract";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
+import { STRUCT_STRINGS } from "../../src/utils/type-tags";
 
 jest.setTimeout(20000);
 
@@ -82,9 +84,9 @@ describe("emits a chat message event successfully", () => {
 
     let { success, events } = chatResponse;
     expect(success).toBe(true);
-    const chatEventJSON = events.find((e) => e.type === chatEventTypeTag().toString())?.data;
+    const chatEventJSON = events.find((e) => e.type === STRUCT_STRINGS.ChatEvent)?.data;
     expect(chatEventJSON).toBeDefined();
-    const chatEvent = parseChatEvent(chatEventJSON);
+    const chatEvent = toChatEvent(chatEventJSON);
     // Ensure that an event is emitted and the message is correct.
     expect(chatEvent.message).toEqual("🧑‍🚀🦸🏾‍♂️");
 
@@ -107,9 +109,9 @@ describe("emits a chat message event successfully", () => {
     // Parse the event data and ensure that the message is correct.
     ({ success, events } = secondChatResponse);
     expect(success).toBe(true);
-    const secondChatEventJSON = events.find((e) => e.type === chatEventTypeTag().toString())?.data;
+    const secondChatEventJSON = events.find((e) => e.type === STRUCT_STRINGS.ChatEvent)?.data;
     expect(secondChatEventJSON).toBeDefined();
-    const secondChatEvent = parseChatEvent(secondChatEventJSON);
+    const secondChatEvent = toChatEvent(secondChatEventJSON);
     expect(secondChatEvent.message).toEqual(indices.map((i) => chatEmojis[i][1]).join(""));
 
     const postgrest = new PostgrestClient(INBOX_URL);
