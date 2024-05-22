@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { layout, type LayoutProps } from 'styled-system'
 
 export const StyledTHWrapper = styled.div`
   display: flex;
@@ -8,7 +9,7 @@ export const StyledTHWrapper = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
 `;
 
-export const StyledTH = styled.div`
+export const StyledTH = styled.div<LayoutProps>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -23,10 +24,8 @@ export const StyledTH = styled.div`
     padding: 0 20px;
     margin: 0 30px;
   }
-
-  ${({ theme }) => theme.mediaQueries.laptopL} {
-    max-width: 1815px;
-  }
+  
+  ${layout}
 `;
 
 export const StyledTHFilters = styled.div`

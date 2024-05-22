@@ -10,7 +10,7 @@ import LogoIcon from "../svg/icons/LogoIcon";
 import CloseIcon from "../svg/icons/Close";
 import MenuItem from "components/header/components/menu-item";
 import { MobileMenu } from "components/header/components/mobile-menu";
-import { StyledContainer, StyledClickItem, StyledMobileHeader } from "./styled";
+import { StyledContainer, StyledClickItem, StyledMobileHeader, StyledCloseIcon } from "./styled";
 
 import { ROUTES } from "router/routes";
 import { NAVIGATE_LINKS } from "./constants";
@@ -63,7 +63,9 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
           </StyledClickItem>
         </Link>
 
-        <CloseIcon color="black" width="19px" onClick={handleCloseMobileMenu} />
+        <StyledCloseIcon>
+          <CloseIcon color="black" width="19px" onClick={handleCloseMobileMenu} />
+        </StyledCloseIcon>
       </StyledMobileHeader>
 
       <Container>

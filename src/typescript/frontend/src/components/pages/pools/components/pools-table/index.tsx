@@ -3,19 +3,22 @@
 import React, { useState } from "react";
 import { isEqual } from "lodash";
 
-import { useMatchBreakpoints } from "hooks";
+import { useElementDimensions, useMatchBreakpoints } from "hooks";
 
 import { TableRowDesktop, TableHeader } from "./components";
-import { Table, Th, ThInner, HeaderTr, TBody } from "components";
+import { Table, Th, EmptyTr, ThInner, HeaderTr, TBody } from "components";
 import { StyledPoolsWrapper } from "./styled";
 
 import { HEADERS, DATA, MOBILE_HEADERS } from "./constants";
 
 import { type DataType } from "./types";
+import { getEmptyListTr } from "utils";
 
 const PoolsTable: React.FC = () => {
-  const { isMobile } = useMatchBreakpoints();
   const [dataMock, setDataMock] = useState<DataType[]>([...DATA, ...DATA, ...DATA, ...DATA, ...DATA]);
+  // const [dataMock, setDataMock] = useState<DataType[]>([...DATA]);
+  const { isMobile } = useMatchBreakpoints();
+  const { offsetHeight: poolsTableBodyHeight } = useElementDimensions("poolsTableBody");
 
   const headers = isMobile ? MOBILE_HEADERS : HEADERS;
   const sortData = (sortBy: Exclude<keyof DataType, "pool">) => {
@@ -43,10 +46,15 @@ const PoolsTable: React.FC = () => {
             ))}
           </HeaderTr>
         </thead>
-        <TBody height={{ _: "calc(50vh)", laptopL: "calc(100vh - 353px)" }}>
+        <TBody
+          height={{ _: "calc(50vh)", laptopL: "calc(100vh - 353px)" }}
+          maxHeight={{ _: "204px", tablet: "340px", laptopL: "unset" }}
+          id="poolsTableBody"
+        >
           {dataMock.map((item, index) => (
             <TableRowDesktop key={index} item={item} />
           ))}
+          {getEmptyListTr(poolsTableBodyHeight, dataMock.length, EmptyTr)}
         </TBody>
       </Table>
     </StyledPoolsWrapper>

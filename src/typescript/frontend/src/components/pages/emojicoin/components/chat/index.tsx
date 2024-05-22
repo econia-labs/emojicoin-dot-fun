@@ -58,6 +58,7 @@ const Chat: React.FC = () => {
   const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
     onEmojiClick: onEmojiClickHandler,
     autoFocusSearch: false,
+    width: 288,
   });
 
   const onKeyDownHandler = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

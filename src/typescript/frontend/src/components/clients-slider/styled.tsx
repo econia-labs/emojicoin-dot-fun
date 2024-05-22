@@ -1,57 +1,31 @@
 import styled from "styled-components";
-import { clearfixDisplayNone } from "styles";
-import { Box } from "@/containers";
 import { sliderAutoplay } from "./animations";
+import { Text } from "components/text";
 
-export const StyledSliderWrapper = styled(Box)`
+export const StyledSliderContainer = styled.div`
   width: 100%;
-  position: relative;
-
-  &::before,
-  &::after {
-    ${clearfixDisplayNone}
-    width: 16.875rem;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: ${({ theme }) => theme.zIndices.dropdown - 1};
-    transition: ${({ theme }) => theme.transitions.default};
-
-    ${({ theme }) => theme.mediaQueries.tablet} {
-      display: block;
-    }
-
-    ${({ theme }) => theme.mediaQueries.largeHeight} {
-      width: ${({ theme }) => `calc((150vw - ${theme.siteWidth}px) / 2)`};
-    }
-  }
-
-  &::after {
-    left: auto;
-    right: 0;
-    transform: scale(-1);
-  }
 `;
 
-export const StyledClientsWrapper = styled(Box)`
+export const StyledWrapper = styled.div`
   overflow: hidden;
-  position: relative;
   width: 100%;
 `;
 
-export const StyledClientsWrapperIn = styled(Box)`
+export const StyledInner = styled.div`
   display: flex;
   gap: 16px;
-  height: 40px;
-  animation: ${sliderAutoplay} 24s linear infinite;
+  animation: ${sliderAutoplay} 18s linear infinite;
 `;
 
-export const StyledClientsItem = styled(Box)`
+export const StyledItem = styled.div`
   align-items: center;
   display: flex;
   justify-content: center;
   height: 40px;
   min-width: fit-content;
   gap: 16px;
+`;
+
+export const StyledText = styled(Text)`
+  white-space: nowrap;
 `;

@@ -3,8 +3,11 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "context";
+
+import { Text } from "components";
 import styled from "styled-components";
 import { Page } from "components/layout/components/page";
+import Button from "components/button";
 
 export const StyledNotFoundPage = styled(Page)`
   min-height: 100vh;
@@ -24,9 +27,9 @@ const NotFoundComponent: React.FC = () => {
 
   return (
     <StyledNotFoundPage>
-      <h1>{t("Not found Page")} 404</h1>
+        <Text textScale="pixelDisplay1" textTransform="uppercase">{t("Not found Page")} 404</Text>
 
-      <button onClick={onClickHandler}>{t("Go to home page")}</button>
+      <Button onClick={onClickHandler} scale="lg">{t("Go to home page")}</Button>
     </StyledNotFoundPage>
   );
 };

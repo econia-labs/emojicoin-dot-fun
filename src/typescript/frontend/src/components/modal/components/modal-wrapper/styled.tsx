@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 export const StyledModalWrapper = styled(motion.div)`
   background-color: ${({ theme }) => theme.colors.black + "66"};
+  backdrop-filter: blur(5px);
   position: fixed;
   top: 0;
   left: 0;

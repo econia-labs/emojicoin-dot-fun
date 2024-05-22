@@ -61,7 +61,7 @@ const LaunchEmojicoin: React.FC = () => {
   const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
     onEmojiClick: onEmojiClickHandler,
     placement: "bottom",
-    width: 343,
+    width: 288,
   });
 
   const inputProhibition = async (event: KeyboardEvent) => {
@@ -92,10 +92,10 @@ const LaunchEmojicoin: React.FC = () => {
   };
 
   return (
-    <Column pt="85px" flexGrow="1" px={{ _: "16px", mobileL: "24px" }}>
+    <Column pt="85px" flexGrow="1">
       <ClientsSlider />
 
-      <Flex justifyContent="center" alignItems="center" height="100%">
+      <Flex justifyContent="center" alignItems="center" height="100%" px={{ _: "16px", mobileL: "24px" }}>
         <Column width="100%" maxWidth="414px">
           <Flex position="relative">
             <Prompt text="Pick one to five emojis; due to byte limitations not all combinations are supported." />

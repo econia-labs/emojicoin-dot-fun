@@ -1,16 +1,20 @@
 import React from "react";
 
 import { useTranslation } from "context";
+import { useElementDimensions } from "hooks";
+import { getEmptyListTr } from "utils";
 
 import { TableRowDesktop } from "./components";
-import { Table, Text, Th, ThInner, HeaderTr, TBody } from "components";
+import { Table, Text, Th, ThInner, HeaderTr, TBody, EmptyTr } from "components";
 import { StyledTradeHistory } from "./styled";
 
 import { HEADERS, DATA } from "./constants";
 
 const TradeHistory: React.FC = () => {
   const { t } = useTranslation();
+  const { offsetHeight: tradeHistoryTableBodyHeight } = useElementDimensions("tradeHistoryTableBody");
 
+  const data = [...DATA, ...DATA, ...DATA, ...DATA, ...DATA];
   return (
     <StyledTradeHistory>
       <Table minWidth="700px">
@@ -27,10 +31,11 @@ const TradeHistory: React.FC = () => {
             ))}
           </HeaderTr>
         </thead>
-        <TBody height="309px">
-          {[...DATA, ...DATA, ...DATA, ...DATA, ...DATA].map((item, index) => (
+        <TBody height="309px" id="tradeHistoryTableBody">
+          {data.map((item, index) => (
             <TableRowDesktop key={index} item={item} />
           ))}
+          {getEmptyListTr(tradeHistoryTableBodyHeight, data.length, EmptyTr)}
         </TBody>
       </Table>
     </StyledTradeHistory>
