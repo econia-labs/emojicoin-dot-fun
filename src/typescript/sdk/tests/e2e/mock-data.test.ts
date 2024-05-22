@@ -1,7 +1,7 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { INBOX_URL, ONE_APT, deriveEmojicoinPublisherAddress, getRegistryAddress, sleep } from "../../src";
 import { getTestHelpers } from "../utils";
-import { MOCK_DATA_MARKET_EMOJIS, generateMockData } from "../utils/generate-mock-data";
+import { MOCK_DATA_MARKETS_EMOJIS, generateMockData } from "../utils/generate-mock-data";
 import { getMarketResource } from "../../src/types/contract";
 
 jest.setTimeout(10000000);
@@ -20,10 +20,9 @@ describe("tests a simple faucet fund account request", () => {
       aptos,
       moduleAddress: publisher.accountAddress,
     });
-
     const derivedNamedObjectAddress = deriveEmojicoinPublisherAddress({
       registryAddress,
-      emojis: MOCK_DATA_MARKET_EMOJIS,
+      emojis: MOCK_DATA_MARKETS_EMOJIS[0],
     });
 
     const marketObjectMarketResource = await getMarketResource({
@@ -42,6 +41,7 @@ describe("tests a simple faucet fund account request", () => {
       .from("inbox_events")
       .select("*")
       .like("indexed_type", "%::emojicoin_dot_fun::Swap")
+      .eq("data->>is_sell", false)
       .eq("data->>market_id", `${marketObjectMarketResource.metadata.marketID}`);
 
     expect(res.data).toBeDefined();
