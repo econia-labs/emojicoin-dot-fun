@@ -85,7 +85,7 @@ export class Lazy<T> {
   }
 
   get(): T {
-    if(this.data === null) {
+    if (this.data === null) {
       this.data = this.generator();
     }
     return this.data;
@@ -100,7 +100,7 @@ export class LazyPromise<T> {
   }
 
   async get(): Promise<T> {
-    if(this.data === null) {
+    if (this.data === null) {
       this.data = await this.generator();
     }
     return this.data;
