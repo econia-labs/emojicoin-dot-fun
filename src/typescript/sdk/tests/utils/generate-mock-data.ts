@@ -1,7 +1,11 @@
-import { Account, HexInput, type Aptos, Uint64, Hex } from "@aptos-labs/ts-sdk";
-import { EmojicoinDotFun, TypeTagInput, getRegistryAddress } from "../../src/emojicoin_dot_fun";
+import { Account, type HexInput, type Aptos, type Uint64, Hex } from "@aptos-labs/ts-sdk";
+import {
+  EmojicoinDotFun,
+  type TypeTagInput,
+  getRegistryAddress,
+} from "../../src/emojicoin_dot_fun";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets";
-import { EmojicoinInfo } from "../../src/types/contract";
+import type { EmojicoinInfo } from "../../src/types/contract";
 import { Lazy, ONE_APT } from "../../src";
 
 type RegisterMarketAction = {
@@ -42,22 +46,21 @@ type Action =
   | { type: "swap"; data: SwapAction }
   | { type: "chat"; data: ChatAction };
 
-const ONE_APTn = BigInt(ONE_APT);
+const ONE_APTN = BigInt(ONE_APT);
 
 export const MOCK_DATA_MARKETS_EMOJIS = [["f09fa5b0", "f09fa5b0"], ["f09f9094"], ["f09f8f81"]];
 
-const concatEmoji = (a: Array<HexInput>) => {
-  return a.map((v) => Hex.fromHexInput(v).toStringWithoutPrefix()).join("");
-};
+const concatEmoji = (a: Array<HexInput>) =>
+  a.map((v) => Hex.fromHexInput(v).toStringWithoutPrefix()).join("");
 
-export let generateMockData = async (aptos: Aptos, account: Account) => {
+export const generateMockData = async (aptos: Aptos, publisher: Account) => {
   const registryAddress = await getRegistryAddress({
     aptos,
-    moduleAddress: account.accountAddress,
+    moduleAddress: publisher.accountAddress,
   });
 
   // Create and fund accounts
-  let accounts = [0, 1, 2, 3, 4, 5].map((_) => Account.generate());
+  const accounts = [0, 1, 2, 3, 4, 5].map((_) => Account.generate());
   for (const account of accounts) {
     await aptos.fundAccount({
       accountAddress: account.accountAddress,
@@ -65,19 +68,20 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
     });
   }
 
-  let emojicoins = MOCK_DATA_MARKETS_EMOJIS.map((e) => {
-    return new Lazy(() =>
-      getEmojicoinMarketAddressAndTypeTags({
-        registryAddress,
-        symbolBytes: concatEmoji(e),
-      })
-    );
-  });
+  const emojicoins = MOCK_DATA_MARKETS_EMOJIS.map(
+    (e) =>
+      new Lazy(() =>
+        getEmojicoinMarketAddressAndTypeTags({
+          registryAddress,
+          symbolBytes: concatEmoji(e),
+        })
+      )
+  );
 
   // Register all markets by accounts 0, 1 and 2
   let n = 0;
   const actions: Action[] = MOCK_DATA_MARKETS_EMOJIS.map((e) => {
-    let data: {
+    const data: {
       type: "registerMarket";
       data: RegisterMarketAction;
     } = {
@@ -100,7 +104,7 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
           account: accounts[Number(j) % 3],
           emojicoin: emojicoins[i - 1],
           isSell: false,
-          inputAmount: j * ONE_APTn * BigInt(Math.pow(10, emojicoins.length - i)),
+          inputAmount: j * ONE_APTN * BigInt(10 ** (emojicoins.length - i)),
         },
       });
     }
@@ -114,7 +118,7 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
         account: accounts[0],
         emojicoin,
         isSell: false,
-        inputAmount: ONE_APTn,
+        inputAmount: ONE_APTN,
       },
     });
   }
@@ -127,7 +131,7 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
         account: accounts[0],
         emojicoin,
         isSell: true,
-        inputAmount: ONE_APTn * 3n,
+        inputAmount: ONE_APTN * 3n,
       },
     });
   }
@@ -139,7 +143,7 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
       account: accounts[3],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTn * 100000n,
+      inputAmount: ONE_APTN * 100000n,
     },
   });
 
@@ -150,7 +154,7 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
       account: accounts[4],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTn * 2000n,
+      inputAmount: ONE_APTN * 2000n,
     },
   });
 
@@ -161,7 +165,7 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
       account: accounts[5],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTn * 10n,
+      inputAmount: ONE_APTN * 10n,
     },
   });
 
@@ -172,7 +176,7 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
       data: {
         account: accounts[0],
         emojicoin: emojicoins[0],
-        quoteAmount: (i + (i % 2n == 0n ? 1000n : 500n)) * ONE_APTn,
+        quoteAmount: (i + (i % 2n === 0n ? 1000n : 500n)) * ONE_APTN,
       },
     });
     actions.push({
@@ -180,7 +184,7 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
       data: {
         account: accounts[0],
         emojicoin: emojicoins[0],
-        lpCoinAmount: (i + (i % 2n == 0n ? 500n : 1000n)) * ONE_APTn,
+        lpCoinAmount: (i + (i % 2n === 0n ? 500n : 1000n)) * ONE_APTN,
       },
     });
   }
@@ -203,9 +207,10 @@ export let generateMockData = async (aptos: Aptos, account: Account) => {
   await execute(aptos, actions);
 };
 
-const getTypeTags = (lazy: Lazy<EmojicoinInfo>): [TypeTagInput, TypeTagInput] => {
-  return [lazy.get().emojicoin, lazy.get().emojicoinLP];
-};
+const getTypeTags = (lazy: Lazy<EmojicoinInfo>): [TypeTagInput, TypeTagInput] => [
+  lazy.get().emojicoin,
+  lazy.get().emojicoinLP,
+];
 
 async function execute(aptos: Aptos, actions: Action[]) {
   const defaultTx = {
@@ -216,18 +221,16 @@ async function execute(aptos: Aptos, actions: Action[]) {
     },
     integrator: Account.generate().accountAddress,
   };
-  const defaultTxWithMarket = (emojicoin: Lazy<EmojicoinInfo>) => {
-    return {
-      aptosConfig: aptos.config,
-      marketAddress: emojicoin.get().marketAddress,
-      typeTags: getTypeTags(emojicoin),
-      options: {
-        maxGasAmount: ONE_APT / 100,
-        gasUnitPrice: 100,
-      },
-      integrator: Account.generate().accountAddress,
-    };
-  };
+  const defaultTxWithMarket = (emojicoin: Lazy<EmojicoinInfo>) => ({
+    aptosConfig: aptos.config,
+    marketAddress: emojicoin.get().marketAddress,
+    typeTags: getTypeTags(emojicoin),
+    options: {
+      maxGasAmount: ONE_APT / 100,
+      gasUnitPrice: 100,
+    },
+    integrator: Account.generate().accountAddress,
+  });
   for (const action of actions) {
     if (action.type === "registerMarket") {
       await EmojicoinDotFun.RegisterMarket.submit({

@@ -55,7 +55,7 @@ describe("tests a simple faucet fund account request", () => {
 
     expect(res.data).toBeDefined();
 
-    let data = res.data!;
+    const data = res.data!;
 
     expect(data.length).toBe(104);
 
@@ -68,7 +68,7 @@ describe("tests a simple faucet fund account request", () => {
     expectedSum += BigInt(ONE_APT) * 100000n;
     expectedSum += BigInt(ONE_APT) * 2000n;
     expectedSum += BigInt(ONE_APT) * 10n;
-    let sum = data.reduce((prev, curr) => prev + BigInt(curr.data.quote_volume), 0n);
+    const sum = data.reduce((prev, curr) => prev + BigInt(curr.data.quote_volume), 0n);
     expect(sum).toBe(expectedSum);
   });
 });

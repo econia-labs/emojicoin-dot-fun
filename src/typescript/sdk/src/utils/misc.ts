@@ -79,7 +79,9 @@ export const divideWithPrecision = (args: {
 
 export class Lazy<T> {
   generator: () => T;
+
   data: T | null = null;
+
   constructor(generator: () => T) {
     this.generator = generator;
   }
@@ -94,7 +96,9 @@ export class Lazy<T> {
 
 export class LazyPromise<T> {
   generator: () => Promise<T>;
+
   data: T | null = null;
+
   constructor(generator: () => Promise<T>) {
     this.generator = generator;
   }
