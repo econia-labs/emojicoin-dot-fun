@@ -5,7 +5,6 @@ import styled from "styled-components";
 import { scaleAnimation } from "theme";
 
 export const StyledContainer = styled.div`
-  //background: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%);
   background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.85) 60%, rgba(0, 0, 0, 1) 100%);
   position: fixed;
   top: 0;

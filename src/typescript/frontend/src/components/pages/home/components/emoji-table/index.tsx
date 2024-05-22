@@ -15,7 +15,7 @@ import TableCard from "../table-card";
 import { StyledTHWrapper, StyledTH, StyledTHFilters, StyledWrapper, StyledGrid } from "./styled";
 import { DropdownMenu } from "components/selects";
 import { type Option } from "components/selects/types";
-import { isDisallowedEventKey } from "../../../../../utils";
+import { isDisallowedEventKey } from "utils";
 
 const ITEMS_LIST_MOKS = [
   {

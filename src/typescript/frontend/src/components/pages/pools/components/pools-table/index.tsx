@@ -16,7 +16,6 @@ import { getEmptyListTr } from "utils";
 
 const PoolsTable: React.FC = () => {
   const [dataMock, setDataMock] = useState<DataType[]>([...DATA, ...DATA, ...DATA, ...DATA, ...DATA]);
-  // const [dataMock, setDataMock] = useState<DataType[]>([...DATA]);
   const { isMobile } = useMatchBreakpoints();
   const { offsetHeight: poolsTableBodyHeight } = useElementDimensions("poolsTableBody");
 
