@@ -49,7 +49,7 @@ export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdPro
 
   &:nth-last-child(1) {
     ${ThInner} {
-      padding-inline-end: 30px;
+      padding-inline-end: 34px;
       justify-content: end;
     }
   }

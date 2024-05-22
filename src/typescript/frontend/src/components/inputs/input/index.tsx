@@ -10,6 +10,8 @@ const getHeight = ({ scale }: ThemedProps) => {
       return "48px";
     case scales.MD:
       return "44px";
+    case scales.XM:
+      return "38px";
   }
 };
 

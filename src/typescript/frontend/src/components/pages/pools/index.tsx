@@ -24,7 +24,7 @@ export const Pools = () => {
   const { targetRef, tooltip } = useEmojicoinPicker({
     onEmojiClick: () => {},
     placement: "bottom",
-    width: 288,
+    width: 272,
   });
 
   const onInputChange = (e: React.KeyboardEvent<HTMLInputElement>) => {

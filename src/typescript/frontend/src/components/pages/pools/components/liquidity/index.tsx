@@ -5,8 +5,7 @@ import React from "react";
 import { useThemeContext, useTranslation } from "context";
 
 import { Flex, Column } from "@/containers";
-// import { Text, InputNumeric, InputGroup, Button, Prompt } from "components";
-import { Text, InputNumeric, InputGroup, Button } from "components";
+import { Text, InputNumeric, InputGroup, Button, Prompt } from "components";
 
 import { StyledAddLiquidityWrapper } from "./styled";
 
@@ -36,7 +35,7 @@ const Liquidity: React.FC = () => {
             </Text>
           </Flex>
 
-          <Flex p={{ _: "2px 20px", tablet: "7px 20px" }} borderTop={`1px solid ${theme.colors.darkGrey}`}>
+          <Flex p={{ _: "0px 20px", tablet: "5px 20px" }} borderTop={`1px solid ${theme.colors.darkGrey}`}>
             <InputGroup isShowError={false} height="22px" scale="sm" pt={{ _: "3px", tablet: "6px" }}>
               <InputNumeric borderColor="transparent" p="0px !important" onUserInput={() => {}} />
             </InputGroup>
@@ -53,8 +52,8 @@ const Liquidity: React.FC = () => {
           </Flex>
         </StyledAddLiquidityWrapper>
 
-        <Flex width="100%" justifyContent="center" mb="37px" position="relative">
-          {/*<Prompt text="Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity." />*/}
+        <Flex width="100%" justifyContent="center" mb={{_: "17px", tablet: "37px"}} position="relative">
+          <Prompt text="Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity." />
 
           <Button scale="lg">{t("Add liquidity")}</Button>
         </Flex>

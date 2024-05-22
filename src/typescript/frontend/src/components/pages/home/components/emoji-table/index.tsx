@@ -122,7 +122,7 @@ const EmojiTable: React.FC = () => {
   const { targetRef, tooltip } = useEmojicoinPicker({
     onEmojiClick: () => {},
     placement: "bottom",
-    width: 288,
+    width: 272,
   });
 
   const handler = () => {

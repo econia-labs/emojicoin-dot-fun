@@ -16,28 +16,29 @@ const MainInfo: React.FC = () => {
   return (
     <Flex justifyContent="center">
       <Flex
-        py={{ _: "37px", tablet: "66px", laptopL: "83px" }}
+        py={{ _: "17px", tablet: "37px", laptopL: "68px" }}
         justifyContent="space-around"
         flexDirection={{ _: "column", tablet: "row" }}
+        px={{_: "30px", laptopL: "44px"}}
         width="100%"
         maxWidth="1362px"
       >
         <FlexGap
-          gap="12px"
-          width={{ _: "100%", tablet: "60%" }}
-          px={{ _: "30px", laptopL: "44px" }}
+          gap={{_: "12px", tablet: "4px"}}
+          width={{ _: "100%", tablet: "58%", laptopL: "65%" }}
           flexDirection={{ _: "row", tablet: "column" }}
           justifyContent={{ _: "", tablet: "space-between" }}
+          mb="8px"
         >
           <Text textScale={{ _: "display4", tablet: "display2" }} ellipsis ref={targetRefEmojiName}>
             BLACK HEART
           </Text>
           {tooltipEmojiName}
 
-          <Text textScale={{ _: "display4", tablet: "display2" }}>🖤</Text>
+          <Text textScale={{ _: "display4", tablet: "display2" }} fontSize="24px">🖤</Text>
         </FlexGap>
 
-        <Column width={{ _: "100%", tablet: "40%" }} px={{ _: "30px", laptopL: "5%" }}>
+        <Column width={{ _: "100%", tablet: "42%", laptopL: "35%" }} mt="-8px">
           <FlexGap gap="8px">
             <Text textScale={{ _: "display6", tablet: "display4" }} color="lightGrey" textTransform="uppercase">
               {t("Mkt. Cap:")}

@@ -1,19 +1,19 @@
 "use client";
 
-import { Box, Container, Column } from "@/containers";
+import { Box, Column, Flex } from "@/containers";
 import ClientsSlider from "components/clients-slider";
 import EmojiTable from "./components/emoji-table";
 import MainCard from "./components/main-card";
 
 const Home = () => {
   return (
-    <Box pt="120px">
+    <Box pt="93px">
       <Column mb="31px">
         <ClientsSlider />
 
-        <Container width="100%">
+        <Flex px={{ _: "16px", mobileL: "24px" }} mx="auto" width="100%" maxWidth="100%" justifyContent="center">
           <MainCard />
-        </Container>
+        </Flex>
 
         <ClientsSlider />
       </Column>

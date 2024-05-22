@@ -28,13 +28,13 @@ const MESSAGE_LIST = [
   },
   {
     user: "KIKI.APT",
-    text: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos, voluptates?",
+    text: "🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤",
     userRank: "🐳",
     incoming: true,
   },
   {
     user: "MATT.APT",
-    text: "orem ipsum dolor sit amet.",
+    text: "🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤",
     userRank: "🐡",
     incoming: false,
   },
@@ -58,7 +58,7 @@ const Chat: React.FC = () => {
   const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
     onEmojiClick: onEmojiClickHandler,
     autoFocusSearch: false,
-    width: 288,
+    width: 272,
   });
 
   const onKeyDownHandler = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -80,8 +80,8 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <Column width="100%">
-      <Flex flexGrow="1" width="100%" overflowY="auto" maxHeight="267px" flexDirection="column-reverse">
+    <Column width="100%" flexGrow={1}>
+      <Flex flexGrow="1" width="100%" overflowY="auto" maxHeight="328px" flexDirection="column-reverse">
         <InfiniteScroll
           next={loadMoreMessages}
           hasMore={false}
@@ -106,7 +106,7 @@ const Chat: React.FC = () => {
       </Flex>
 
       <Flex>
-        <InputGroup>
+        <InputGroup isShowError={false}>
           <Textarea ref={targetRef} onKeyDown={onKeyDownHandler} />
         </InputGroup>
       </Flex>

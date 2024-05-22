@@ -18,7 +18,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
     <StyledMessageContainer isIncoming={message.incoming}>
       <StyledMessageWrapper>
         <StyledMessageInner>
-          <Text textScale="bodySmall" color="black">
+          <Text textScale="bodySmall" color="black" pt="2px">
             {message.text}
           </Text>
 

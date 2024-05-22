@@ -31,7 +31,7 @@ const TradeHistory: React.FC = () => {
             ))}
           </HeaderTr>
         </thead>
-        <TBody height="309px" id="tradeHistoryTableBody">
+        <TBody height={{_: "272px", tablet: "340px"}} id="tradeHistoryTableBody">
           {data.map((item, index) => (
             <TableRowDesktop key={index} item={item} />
           ))}
