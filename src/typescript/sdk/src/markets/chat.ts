@@ -11,24 +11,23 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { TextDecoder } from "util";
 import {
-  divideWithPrecision,
   getEmojicoinMarketAddressAndTypeTags,
   registerMarketAndGetEmojicoinInfo,
   truncateAddress,
 } from "./utils";
 import { getRegistryAddress, getEvents } from "../emojicoin_dot_fun";
 import { getTestHelpers, publishForTest } from "../../tests/utils";
-import { MarketMetadataByEmojiBytes, Swap } from "../emojicoin_dot_fun/emojicoin-dot-fun";
+import { Chat, MarketMetadataByEmojiBytes } from "../emojicoin_dot_fun/emojicoin-dot-fun";
 import { BatchTransferCoins, ExistsAt } from "../emojicoin_dot_fun/aptos-framework";
 import { type Events } from "../emojicoin_dot_fun/events";
 import { type EmojicoinInfo } from "../types/contract";
 import { getRandomEmoji } from "../emoji_data/symbol-data";
-import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING } from "../const";
+import { ONE_APT } from "../const";
 
-const NUM_TRADERS = 500 * 10;
+const NUM_TRADERS = 500;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
-const CHUNK_SIZE = 100;
-const TRADER_INITIAL_BALANCE = ONE_APT * 10;
+const CHUNK_SIZE = 50;
+const TRADER_INITIAL_BALANCE = ONE_APT * 0.2;
 const DISTRIBUTOR_NECESSARY_BALANCE = CHUNK_SIZE * TRADER_INITIAL_BALANCE;
 const NUM_DISTRIBUTORS = NUM_TRADERS / CHUNK_SIZE;
 const MODULE_ADDRESS = AccountAddress.from(process.env.MODULE_ADDRESS!);
@@ -56,36 +55,35 @@ async function trade() {
   console.log(`Emojicoin TypeTag: ${emojicoin.toString()}`);
   console.log(`EmojicoinLP TypeTag: ${emojicoinLP.toString()}`);
 
-  // Each trade is a buy for some amount between 50% and 100% of their APT balance.
-  const amount = Math.floor(TRADER_INITIAL_BALANCE * (0.5 + Math.random() * 0.5));
-  // All buys.
-  const isSell = false;
-
   // Await each chunk of traders trading.
   for (let i = 0; i <= NUM_TRADERS / CHUNK_SIZE; i += 1) {
     console.log(`-----------------------------------BATCH ${i}-----------------------------------`);
     const tradersChunk = TRADERS.slice(CHUNK_SIZE * i, (i + 1) * CHUNK_SIZE);
     const trades = tradersChunk.map((t) => {
       try {
-        const randIdx = Math.floor(Math.random() * distributors.length);
+        const chatEmojiBytes = Array.from({ length: Math.random() * 5 + 1 }).map(
+          () => getRandomEmoji().bytes
+        );
 
-        const swap = Swap.submit({
+        const indices = Array.from({ length: chatEmojiBytes.length * 2 }).map(() =>
+          Math.floor(Math.random() * chatEmojiBytes.length)
+        );
+
+        const chat = Chat.submit({
           aptosConfig: aptos.config,
+          user: t,
           marketAddress,
-          swapper: t,
-          inputAmount: amount,
-          isSell,
-          integrator: PUBLISHER.accountAddress,
-          integratorFeeRateBps: 0,
+          emojiBytes: chatEmojiBytes,
+          emojiIndicesSequence: new Uint8Array(indices),
           typeTags: [emojicoin, emojicoinLP],
-          feePayer: distributors[randIdx],
           waitForTransactionOptions: {
             checkSuccess: true,
             waitForIndexer: false,
             timeoutSecs: 20,
           },
         });
-        return swap.then((res) => {
+
+        return chat.then((res) => {
           const events = getEvents(res);
           return [res, events];
         });
@@ -105,41 +103,18 @@ async function trade() {
 
     tradeResults.forEach((tx) => {
       const [res, events] = tx;
-      const state = events.stateEvents[0] ? events.stateEvents[0] : null;
-      const swap = events.swapEvents[0] ? events.swapEvents[0] : null;
-      if (state && swap) {
+      const chat = events.chatEvents[0] ? events.chatEvents[0] : null;
+      if (chat) {
         const textDecoder = new TextDecoder("utf-8");
-        const emoji = textDecoder.decode(state.market_metadata.emoji_bytes);
-        const aptSpent = divideWithPrecision({
-          a: state.clamm_virtual_reserves.quote - QUOTE_VIRTUAL_FLOOR,
-          b: ONE_APT,
-          decimals: 3,
-        }).toFixed(3);
-        const quoteLeftBeforeTransition = divideWithPrecision({
-          a: QUOTE_VIRTUAL_CEILING - state.clamm_virtual_reserves.quote,
-          b: BigInt(ONE_APT),
-          decimals: 3,
-        }).toFixed(3);
-        const spendOnBondingCurve = `${aptSpent} APT spent on bonding curve.`;
-        const quoteLeft = `${quoteLeftBeforeTransition} to go before the bonding curve ends!`;
+        const emoji = textDecoder.decode(chat.market_metadata.emoji_bytes);
+        const balAsFraction = chat.balance_as_fraction_of_circulating_supply_q64;
         const s =
-          `Trade for ${swap.swapper.toString()} completed for emoji market: ${emoji}` +
-          ` with market ID: ${state.market_metadata.market_id}` +
-          ` at version: ${Number(res.version)}. ${
-            !swap.results_in_state_transition
-              ? `${spendOnBondingCurve} ${quoteLeft}`
-              : "We're already in the CPAMM!"
-          }`;
-        console.debug(s);
-      }
-      const outOfBondingCurve = events.swapEvents.some(
-        (event) => event.results_in_state_transition
-      );
+          `Chat message sent from ${chat.user} for emoji market: ${emoji}` +
+          ` with market ID: ${chat.market_metadata.market_id}` +
+          ` at version: ${Number(res.version)}. User owns ${balAsFraction}%` +
+          ` of the circulating supply: ${chat.circulating_supply}. User says "${chat.message}"`;
 
-      if (outOfBondingCurve) {
-        console.log(
-          `${res.sender.toString()} moved the market out of the bonding curve! Tx hash: ${res.hash}`
-        );
+        console.debug(s);
       }
     });
   }

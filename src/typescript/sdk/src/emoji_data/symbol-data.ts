@@ -1,3 +1,4 @@
+import { type HexInput } from "@aptos-labs/ts-sdk";
 import { normalizeHex } from "../utils";
 import AllSymbolEmojiJSON from "./symbol-emojis.json";
 import { type SymbolEmojiData } from "./types";
@@ -20,10 +21,10 @@ const emojiMap = new Map<string, SymbolEmojiData>(values.map((v) => [v.emoji, v]
 
 export const SYMBOL_DATA = {
   byName: (v: string) => nameMap.get(v),
-  byHex: (v: `0x${string}`) => hexMap.get(v),
+  byHex: (v: HexInput) => hexMap.get(normalizeHex(v)),
   byEmoji: (v: string) => emojiMap.get(v),
   hasName: (v: string) => nameMap.has(v),
-  hasHex: (v: `0x${string}`) => hexMap.has(v),
+  hasHex: (v: HexInput) => hexMap.has(normalizeHex(v)),
   hasEmoji: (v: string) => emojiMap.has(v),
 };
 

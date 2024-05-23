@@ -71,13 +71,14 @@ export function getEvents(response: UserTransactionResponse): Events {
     events: [],
   };
 
-  response.events.forEach((event) => {
+  response.events.forEach((event): void => {
     if (!converter.has(event.type)) {
       const res = toGenericEvent(event);
       events.events.push(res);
+      return;
     }
     const conversionFunction = converter.get(event.type)!;
-    const data = conversionFunction(event);
+    const data = conversionFunction(event.data);
     switch (event.type) {
       case TYPE_TAGS.SwapEvent.toString():
         events.swapEvents.push(data as ContractTypes.SwapEvent);

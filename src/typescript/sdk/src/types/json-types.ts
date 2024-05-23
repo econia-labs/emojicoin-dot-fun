@@ -243,3 +243,12 @@ namespace JSONTypes {
 }
 
 export default JSONTypes;
+
+export type JSONEventTypes =
+  | JSONTypes.SwapEvent
+  | JSONTypes.ChatEvent
+  | JSONTypes.MarketRegistrationEvent
+  | JSONTypes.PeriodicStateEvent
+  | JSONTypes.StateEvent
+  | JSONTypes.GlobalStateEvent
+  | JSONTypes.LiquidityEvent;
