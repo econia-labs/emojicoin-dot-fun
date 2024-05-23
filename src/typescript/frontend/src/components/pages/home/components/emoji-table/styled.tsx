@@ -24,7 +24,7 @@ export const StyledTH = styled.div<LayoutProps>`
     padding: 0 20px;
     margin: 0 30px;
   }
-  
+
   ${layout}
 `;
 
