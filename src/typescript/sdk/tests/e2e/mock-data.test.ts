@@ -2,6 +2,7 @@ import { PostgrestClient } from "@supabase/postgrest-js";
 import {
   INBOX_URL,
   ONE_APT,
+  ONE_APTN,
   deriveEmojicoinPublisherAddress,
   getRegistryAddress,
   sleep,
@@ -46,28 +47,28 @@ describe("tests a simple faucet fund account request", () => {
     await sleep(1000);
 
     // Get swaps on one market.
-    const res = await postgrest
+    const swaps = await postgrest
       .from("inbox_events")
       .select("*")
       .like("indexed_type", "%::emojicoin_dot_fun::Swap")
       .eq("data->>is_sell", false)
       .eq("data->>market_id", `${marketObjectMarketResource.metadata.marketID}`);
 
-    expect(res.data).toBeDefined();
+    expect(swaps.data).toBeDefined();
 
-    const data = res.data!;
+    const data = swaps.data!;
 
     expect(data.length).toBe(104);
 
     let expectedSum = 0n;
-    for (let i = 1n; i <= 100n; i++) {
+    for (let i = 1n; i <= 100n; i += 1n) {
       expectedSum += i;
     }
-    expectedSum *= BigInt(ONE_APT) * 100n;
-    expectedSum += BigInt(ONE_APT);
-    expectedSum += BigInt(ONE_APT) * 100000n;
-    expectedSum += BigInt(ONE_APT) * 2000n;
-    expectedSum += BigInt(ONE_APT) * 10n;
+    expectedSum *= ONE_APTN * 100n;
+    expectedSum += ONE_APTN;
+    expectedSum += ONE_APTN * 50000n;
+    expectedSum += ONE_APTN * 200000n;
+    expectedSum += ONE_APTN * 100n;
     const sum = data.reduce((prev, curr) => prev + BigInt(curr.data.quote_volume), 0n);
     expect(sum).toBe(expectedSum);
   });

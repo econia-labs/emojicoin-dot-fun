@@ -6,7 +6,7 @@ import {
 } from "../../src/emojicoin_dot_fun";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets";
 import type { EmojicoinInfo } from "../../src/types/contract";
-import { Lazy, ONE_APT } from "../../src";
+import { Lazy, ONE_APT, ONE_APTN } from "../../src";
 
 type RegisterMarketAction = {
   emojis: Array<HexInput>;
@@ -46,8 +46,6 @@ type Action =
   | { type: "swap"; data: SwapAction }
   | { type: "chat"; data: ChatAction };
 
-const ONE_APTN = BigInt(ONE_APT);
-
 export const MOCK_DATA_MARKETS_EMOJIS = [["f09fa5b0", "f09fa5b0"], ["f09f9094"], ["f09f8f81"]];
 
 const concatEmoji = (a: Array<HexInput>) =>
@@ -62,9 +60,10 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
   // Create and fund accounts
   const accounts = [0, 1, 2, 3, 4, 5].map((_) => Account.generate());
   for (const account of accounts) {
+    /* eslint-disable-next-line no-await-in-loop */
     await aptos.fundAccount({
       accountAddress: account.accountAddress,
-      amount: 100000000 * ONE_APT,
+      amount: 100_000_000_000 * ONE_APT,
     });
   }
 
@@ -91,13 +90,13 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
         account: accounts[n],
       },
     };
-    n++;
+    n += 1;
     return data;
   });
 
   // Make 100 swaps by all accounts on each market
-  for (let i = 1; i <= emojicoins.length; i++) {
-    for (let j = 1n; j <= 100n; j++) {
+  for (let i = 1; i <= emojicoins.length; i += 1) {
+    for (let j = 1n; j <= 100n; j += 1n) {
       actions.push({
         type: "swap",
         data: {
@@ -136,55 +135,84 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
     });
   }
 
-  // Creating whale
+  // Sell back some tokens to bring prices to a reasonable amount
+  actions.push({
+    type: "swap",
+    data: {
+      account: accounts[0],
+      emojicoin: emojicoins[0],
+      isSell: true,
+      inputAmount: 14000000000000000n,
+    },
+  });
+  actions.push({
+    type: "swap",
+    data: {
+      account: accounts[1],
+      emojicoin: emojicoins[0],
+      isSell: true,
+      inputAmount: 14000000000000000n,
+    },
+  });
+  actions.push({
+    type: "swap",
+    data: {
+      account: accounts[2],
+      emojicoin: emojicoins[0],
+      isSell: true,
+      inputAmount: 14000000000000000n,
+    },
+  });
+
+  // Creating whale (~42.17% of supply)
   actions.push({
     type: "swap",
     data: {
       account: accounts[3],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTN * 100000n,
+      inputAmount: ONE_APTN * 50000n,
     },
   });
 
-  // Creating dolphin
+  // Creating dolphin (~3.12% of supply)
   actions.push({
     type: "swap",
     data: {
       account: accounts[4],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTN * 2000n,
+      inputAmount: ONE_APTN * 200000n,
     },
   });
 
-  // Creating puffer fish
+  // Creating puffer fish (~0.0003% of supply)
   actions.push({
     type: "swap",
     data: {
       account: accounts[5],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTN * 10n,
+      inputAmount: ONE_APTN * 100n,
     },
   });
 
   // Provide and remove some liquidity
-  for (let i = 0n; i < 10n; i++) {
+  for (let i = 0n; i < 10n; i += 1n) {
     actions.push({
       type: "provideLiquidity",
       data: {
-        account: accounts[0],
+        account: accounts[3],
         emojicoin: emojicoins[0],
-        quoteAmount: (i + (i % 2n === 0n ? 1000n : 500n)) * ONE_APTN,
+        quoteAmount: (i + (i % 2n === 0n ? 1000000n : 500000n)) * ONE_APTN,
       },
     });
     actions.push({
       type: "removeLiquidity",
       data: {
-        account: accounts[0],
+        account: accounts[3],
         emojicoin: emojicoins[0],
-        lpCoinAmount: (i + (i % 2n === 0n ? 500n : 1000n)) * ONE_APTN,
+        lpCoinAmount: (i + (i % 2n === 0n ? 50n : 100n)) * ONE_APTN,
       },
     });
   }
@@ -233,39 +261,55 @@ async function execute(aptos: Aptos, actions: Action[]) {
   });
   for (const action of actions) {
     if (action.type === "registerMarket") {
+      /* eslint-disable-next-line no-await-in-loop */
       await EmojicoinDotFun.RegisterMarket.submit({
         ...defaultTx,
         registrant: action.data.account,
         emojis: action.data.emojis,
-      }).catch(console.error);
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
     } else if (action.type === "swap") {
+      /* eslint-disable-next-line no-await-in-loop */
       await EmojicoinDotFun.Swap.submit({
         ...defaultTxWithMarket(action.data.emojicoin),
         swapper: action.data.account,
         inputAmount: action.data.inputAmount,
         isSell: action.data.isSell,
         integratorFeeRateBps: 0,
-      }).catch(console.error);
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
     } else if (action.type === "provideLiquidity") {
+      /* eslint-disable-next-line no-await-in-loop */
       await EmojicoinDotFun.ProvideLiquidity.submit({
         ...defaultTxWithMarket(action.data.emojicoin),
         provider: action.data.account,
         quoteAmount: action.data.quoteAmount,
-      }).catch(console.error);
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
     } else if (action.type === "removeLiquidity") {
+      /* eslint-disable-next-line no-await-in-loop */
       await EmojicoinDotFun.RemoveLiquidity.submit({
         ...defaultTxWithMarket(action.data.emojicoin),
         provider: action.data.account,
         lpCoinAmount: action.data.lpCoinAmount,
-      }).catch(console.error);
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
     } else if (action.type === "chat") {
+      /* eslint-disable-next-line no-await-in-loop */
       await EmojicoinDotFun.Chat.submit({
         ...defaultTxWithMarket(action.data.emojicoin),
         user: action.data.account,
         emojiBytes: action.data.emojiBytes,
         emojiIndicesSequence: action.data.emojiIndicesSequence,
-      }).catch(console.error);
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
     } else {
+      /* eslint-disable-next-line no-console */
       console.error("Got wrong action type.");
     }
   }
