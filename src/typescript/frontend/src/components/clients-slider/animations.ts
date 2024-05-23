@@ -6,6 +6,6 @@ export const sliderAutoplay = keyframes`
   }
 
   100% {
-    transform: translateX(-72rem);
+    transform: translateX(-905px);
   }
 `;

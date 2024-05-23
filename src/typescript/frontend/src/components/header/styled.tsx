@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { scaleAnimation } from "theme";
 
 export const StyledContainer = styled.div`
-  background: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%);
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.85) 60%, rgba(0, 0, 0, 1) 100%);
   position: fixed;
   top: 0;
   left: 0;
@@ -30,4 +30,14 @@ export const StyledMobileHeader = styled(motion.div)`
   padding: 24px;
   align-items: center;
   justify-content: space-between;
+`;
+
+export const StyledCloseIcon = styled.div`
+  display: flex;
+  cursor: pointer;
+  transition: all 0.3s ease-out;
+
+  &:hover {
+    transform: rotate(180deg);
+  }
 `;

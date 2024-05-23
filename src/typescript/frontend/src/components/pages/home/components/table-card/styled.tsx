@@ -1,9 +1,29 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { Svg, Text } from "components";
+
+const getHovered = ({ isEmpty }) => {
+  if (!isEmpty) {
+    return css`
+      border: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+
+      ${Svg} {
+        g {
+          path {
+            fill: ${({ theme }) => theme.colors.econiaBlue};
+          }
+        }
+      }
+
+      ${StyledColoredText} {
+        color: ${({ theme }) => theme.colors.econiaBlue};
+      }
+    `;
+  }
+};
 
 export const StyledColoredText = styled(Text)``;
 
-export const StyledInnerItem = styled.div`
+export const StyledInnerItem = styled.div<{ isEmpty: boolean }>`
   width: 100%;
   height: 100%;
   display: flex;
@@ -11,23 +31,11 @@ export const StyledInnerItem = styled.div`
   padding: 10px 19px;
   position: relative;
   overflow: hidden;
-  cursor: pointer;
+  cursor: ${({ isEmpty }) => !isEmpty && "pointer"};
   border: 1px solid ${({ theme }) => theme.colors.transparent};
 
   &:hover {
-    border: 1px solid ${({ theme }) => theme.colors.econiaBlue};
-
-    ${Svg} {
-      g {
-        path {
-          fill: ${({ theme }) => theme.colors.econiaBlue};
-        }
-      }
-    }
-
-    ${StyledColoredText} {
-      color: ${({ theme }) => theme.colors.econiaBlue};
-    }
+    ${getHovered}
   }
 `;
 

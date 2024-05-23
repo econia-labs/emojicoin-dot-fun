@@ -4,7 +4,7 @@ import { space, typography } from "styled-system";
 import { type TextareaProps } from "./types";
 
 export const Textarea = styled.textarea<TextareaProps>`
-  height: 52px;
+  height: 45px;
   background-color: transparent;
   color: ${({ theme }) => theme.colors.white};
   font-family: ${({ theme }) => theme.fonts.forma};
@@ -13,11 +13,14 @@ export const Textarea = styled.textarea<TextareaProps>`
   font-size: 16px;
   font-weight: 600;
   outline: 0;
-  padding: 16px;
+  padding: 10px 18px;
   width: 100%;
   border: none;
-
   border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.white};

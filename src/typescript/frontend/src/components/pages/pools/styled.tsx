@@ -6,7 +6,7 @@ export const StyledPoolsPage = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-top: 120px;
+  padding-top: 93px;
   flex-grow: 1;
 
   ${({ theme }) => theme.mediaQueries.laptopL} {
@@ -21,13 +21,8 @@ export const StyledWrapper = styled.div`
   max-width: 1362px;
   border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  margin-left: 10px;
-  margin-right: 10px;
-
-  ${({ theme }) => theme.mediaQueries.tablet} {
-    margin-left: 30px;
-    margin-right: 30px;
-  }
+  margin-left: 30px;
+  margin-right: 30px;
 
   ${({ theme }) => theme.mediaQueries.laptopL} {
     flex-direction: row;
@@ -39,16 +34,15 @@ export const StyledWrapper = styled.div`
 export const StyledHeader = styled.div`
   display: flex;
   width: 100%;
-  min-height: 45px;
+  min-height: 34px;
   border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
   justify-content: center;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 30px;
+  padding-right: 30px;
 
   ${({ theme }) => theme.mediaQueries.tablet} {
-    padding-left: 30px;
-    padding-right: 30px;
+    min-height: 45px;
   }
 
   ${({ theme }) => theme.mediaQueries.laptopL} {
@@ -90,9 +84,13 @@ export const StyledInner = styled(Flex)`
 
 export const StyledSubHeader = styled.div`
   display: flex;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 30px;
+  padding-right: 30px;
   width: 100%;
-  height: 43px;
+  height: 33px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+
+  ${({ theme }) => theme.mediaQueries.tablet} {
+    height: 43px;
+  }
 `;

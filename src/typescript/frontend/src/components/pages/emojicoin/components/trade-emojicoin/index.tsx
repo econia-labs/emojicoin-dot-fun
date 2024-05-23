@@ -57,7 +57,13 @@ const TradeEmojicoin: React.FC = () => {
             </InputGroup>
           </Column>
 
-          <Text textScale="pixelHeading3" color="lightGrey">
+          <Text
+            textScale="pixelHeading3"
+            fontSize={{ _: "24px", tablet: "30px" }}
+            lineHeight="34px"
+            pt="6px"
+            color="lightGrey"
+          >
             🖤
           </Text>
         </StyledInputWrapper>

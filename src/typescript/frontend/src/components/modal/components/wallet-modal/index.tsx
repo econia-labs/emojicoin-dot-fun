@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
 import { StyledModalWrapper } from "../styled";
 import CloseModalWrapper from "../close-modal-wrapper";
@@ -14,6 +14,7 @@ import { type WalletModalProps } from "./types";
 
 const WalletModal: React.FC = () => {
   const { items } = useAppSelector(state => state.modal.props as unknown as WalletModalProps);
+  const [itemsList, setItemsList] = useState(items);
 
   const dispatch = useAppDispatch();
 
@@ -21,13 +22,24 @@ const WalletModal: React.FC = () => {
     dispatch(hideModal());
   };
 
+  const onCopyAddressClick = (index: number) => {
+    if (index === 0) {
+      setItemsList([{ title: "Copied!" }, { title: "Disconnect" }]);
+    }
+  };
+
   return (
     <StyledModalWrapper>
       <CloseModalWrapper closeModalHandler={closeModalHandler} />
 
       <Column p="10px" width="100%">
-        {items.map(({ title }, index) => (
-          <MobileMenuItem title={title} key={index} borderBottom={items.length - 1 !== index} />
+        {itemsList.map(({ title }, index) => (
+          <MobileMenuItem
+            title={title}
+            key={index}
+            onClick={() => onCopyAddressClick(index)}
+            borderBottom={items.length - 1 !== index}
+          />
         ))}
       </Column>
     </StyledModalWrapper>

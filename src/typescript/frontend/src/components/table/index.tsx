@@ -49,7 +49,7 @@ export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdPro
 
   &:nth-last-child(1) {
     ${ThInner} {
-      padding-inline-end: 30px;
+      padding-inline-end: 34px;
       justify-content: end;
     }
   }
@@ -61,7 +61,6 @@ export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdPro
 export const Tr = styled.tr<TrProps>`
   border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
-  border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
   display: flex;
   width: 100%;
 
@@ -71,6 +70,20 @@ export const Tr = styled.tr<TrProps>`
 
   &:first-child {
     border-top: 1px solid ${({ theme }) => theme.colors.transparent};
+  }
+
+  ${layout}
+`;
+
+export const EmptyTr = styled.tr<TrProps>`
+  border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
+  display: flex;
+  width: 100%;
+  min-height: 34px;
+
+  &:last-child {
+    border-bottom: none;
   }
 
   ${layout}
@@ -121,6 +134,10 @@ export const TBody = styled.tbody<LayoutProps>`
   flex-direction: column;
   overflow: auto;
   width: 100%;
+
+  &::-webkit-scrollbar-track {
+    border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  }
 
   ${layout}
 `;

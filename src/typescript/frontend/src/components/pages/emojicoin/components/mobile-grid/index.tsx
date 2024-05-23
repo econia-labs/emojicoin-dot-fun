@@ -61,7 +61,7 @@ const MobileGrid: React.FC = () => {
           {tab === 1 ? (
             <TradeHistory />
           ) : tab === 2 ? (
-            <Flex width="100%" justifyContent="center" px="35px">
+            <Flex width="100%" justifyContent="center" px="17px">
               <TradeEmojicoin />
             </Flex>
           ) : (

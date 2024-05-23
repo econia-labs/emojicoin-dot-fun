@@ -6,7 +6,13 @@ export const StyledInputWrapper = styled.div`
   justify-content: space-between;
   border: 1px solid ${({ theme }) => theme.colors.darkGrey};
   border-radius: ${({ theme }) => theme.radii.xSmall};
-  padding: 8px 18px;
+  padding: 7px 18px;
+  align-items: center;
+  height: 55px;
+
+  ${({ theme }) => theme.mediaQueries.tablet} {
+    align-items: unset;
+  }
 `;
 
 export const StyledArrowWrapper = styled.div`
@@ -26,10 +32,20 @@ export const StyledArrowWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.black};
   cursor: pointer;
 
-  &:hover {
+  &:active {
     ${Svg} {
       path {
         fill: ${({ theme }) => theme.colors.econiaBlue};
+      }
+    }
+  }
+
+  ${({ theme }) => theme.mediaQueries.laptopL} {
+    &:hover {
+      ${Svg} {
+        path {
+          fill: ${({ theme }) => theme.colors.econiaBlue};
+        }
       }
     }
   }

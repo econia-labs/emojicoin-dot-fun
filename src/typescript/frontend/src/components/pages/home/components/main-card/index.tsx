@@ -3,9 +3,13 @@ import React from "react";
 import { useTranslation } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
 import { Column, Flex, FlexGap } from "@/containers";
-import { Text } from "components/text";
-import Image from "components/image";
-import { StyledEmoji } from "./styled";
+import {
+  StyledEmoji,
+  StyledPixelHeadingText,
+  StyledDisplayFontText,
+  StyledMarketDataText,
+  StyledImage,
+} from "./styled";
 
 const MainCard: React.FC = () => {
   const { t } = useTranslation();
@@ -16,104 +20,50 @@ const MainCard: React.FC = () => {
   });
 
   return (
-    <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1295px">
+    <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1872px">
       <Flex
         alignItems="center"
-        justifyContent="space-between"
+        justifyContent="center"
         maxWidth="100%"
+        width="100%"
         flexDirection={{ _: "column", tablet: "row" }}
       >
-        <Flex alignItems="center" position="relative">
-          <Image
-            src="/images/planet.webp"
-            aspectRatio={1.4}
-            width={{ _: "460px", tablet: "340px", laptopL: "650px" }}
-            ml={{ _: "12px", tablet: "-45px" }}
-            alt="Planet"
-          />
+        <Flex alignItems="center" position="relative" ml="-8%">
+          <StyledImage src="/images/planet-home.webp" aspectRatio={1.6} alt="Planet" />
 
-          <StyledEmoji
-            pt="32px"
-            textAlign="center"
-            fontSize={{ _: "75px", laptopL: "128px" }}
-            textScale="pixelDisplay1"
-          >
-            🖤
-          </StyledEmoji>
+          <StyledEmoji textAlign="center">🖤</StyledEmoji>
         </Flex>
 
-        <Column maxWidth="100%">
-          <Text textScale="pixelHeading1" color="darkGrey">
+        <Column maxWidth="100%" ellipsis>
+          <StyledPixelHeadingText textScale="pixelHeading1" color="darkGrey">
             01
-          </Text>
-          <Text
-            textScale={{ _: "display2", laptopL: "display1" }}
-            mb={{ _: "8px", tablet: "0px" }}
-            ref={targetRefEmojiName}
-            ellipsis
-            maxWidth="653px"
-          >
+          </StyledPixelHeadingText>
+          <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
             BLACK HEART
-          </Text>
-          {tooltipEmojiName}
+          </StyledDisplayFontText>
 
           <FlexGap gap="8px">
-            <Text
-              textScale={{ _: "display5", tablet: "display4" }}
-              lineHeight={{ _: "20px", tablet: "48px" }}
-              color="darkGrey"
-              textTransform="uppercase"
-              mb={{ _: "6px", tablet: "0px" }}
-            >
+            <StyledMarketDataText color="darkGrey" textTransform="uppercase">
               {t("Mkt. Cap:")}
-            </Text>
-            <Text
-              textScale={{ _: "display5", tablet: "display4" }}
-              lineHeight={{ _: "20px", tablet: "48px" }}
-              mb={{ _: "6px", tablet: "0px" }}
-            >
-              11.11M
-            </Text>
+            </StyledMarketDataText>
+            <StyledMarketDataText>11.11M</StyledMarketDataText>
           </FlexGap>
 
           <FlexGap gap="8px">
-            <Text
-              textScale={{ _: "display5", tablet: "display4" }}
-              lineHeight={{ _: "20px", tablet: "48px" }}
-              color="darkGrey"
-              textTransform="uppercase"
-              mb={{ _: "6px", tablet: "0px" }}
-            >
+            <StyledMarketDataText color="darkGrey" textTransform="uppercase">
               {t("24 hour vol:")}
-            </Text>
-            <Text
-              textScale={{ _: "display5", tablet: "display4" }}
-              lineHeight={{ _: "20px", tablet: "48px" }}
-              mb={{ _: "6px", tablet: "0px" }}
-            >
-              11.11M
-            </Text>
+            </StyledMarketDataText>
+            <StyledMarketDataText>11.11M</StyledMarketDataText>
           </FlexGap>
 
           <FlexGap gap="8px">
-            <Text
-              textScale={{ _: "display5", tablet: "display4" }}
-              lineHeight={{ _: "20px", tablet: "48px" }}
-              color="darkGrey"
-              textTransform="uppercase"
-              mb={{ _: "6px", tablet: "0px" }}
-            >
+            <StyledMarketDataText color="darkGrey" textTransform="uppercase">
               {t("All-time vol:")}
-            </Text>
-            <Text
-              textScale={{ _: "display5", tablet: "display4" }}
-              lineHeight={{ _: "20px", tablet: "48px" }}
-              mb={{ _: "6px", tablet: "0px" }}
-            >
-              11.11M
-            </Text>
+            </StyledMarketDataText>
+            <StyledMarketDataText>11.11M</StyledMarketDataText>
           </FlexGap>
         </Column>
+        {tooltipEmojiName}
       </Flex>
     </Flex>
   );

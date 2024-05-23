@@ -36,7 +36,13 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
       }}
     >
       <DropdownMenuInner>
-        <Text textScale="pixelHeading3" color="black" textTransform="uppercase" ref={ref} ellipsis>
+        <Text
+          textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
+          color="black"
+          textTransform="uppercase"
+          ref={ref}
+          ellipsis
+        >
           {title}
         </Text>
 

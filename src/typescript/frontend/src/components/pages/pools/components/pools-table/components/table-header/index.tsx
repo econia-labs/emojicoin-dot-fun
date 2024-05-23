@@ -34,7 +34,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => 
         ellipsis
       >
         <Text
-          textScale="bodyLarge"
+          textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
           textTransform="uppercase"
           color="econiaBlue"
           $fontWeight="regular"
