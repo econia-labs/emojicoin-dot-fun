@@ -1,7 +1,23 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const useElementDimensions = (id: string) => {
   const [elementSize, setElementSize] = useState({ offsetHeight: 0, offsetWidth: 0 });
+
+  const updateElementSize = useCallback(() => {
+    const element = document.getElementById(id);
+    if (element) {
+      setElementSize({
+        offsetHeight: element.offsetHeight,
+        offsetWidth: element.offsetWidth,
+      });
+    }
+  }, [id]);
+
+  const handleResize = useCallback(() => {
+    setTimeout(() => {
+      updateElementSize();
+    }, 500);
+  }, [updateElementSize]);
 
   useEffect(() => {
     updateElementSize();
@@ -11,19 +27,7 @@ const useElementDimensions = (id: string) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
-
-  const updateElementSize = () => {
-    const { offsetHeight, offsetWidth } = document.getElementById(id) ?? { offsetHeight: 0, offsetWidth: 0 };
-    setElementSize({ offsetHeight, offsetWidth });
-  };
-
-  const handleResize = () => {
-    // Need to use timeout, because after resize header height is includes mobile header height and desktop header height
-    setTimeout(() => {
-      updateElementSize();
-    }, 500);
-  };
+  }, [updateElementSize, handleResize]);
 
   return elementSize;
 };
