@@ -1,4 +1,4 @@
-import { Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
+import { Account, Ed25519PrivateKey, Hex } from "@aptos-labs/ts-sdk";
 import fs from "fs";
 import path from "path";
 import findGitRoot from "find-git-root";
@@ -21,7 +21,9 @@ export function getTestHelpers(): TestHelpers {
   const { aptos } = getAptosClient();
 
   const pk = fs.readFileSync(PK_PATH).toString();
-  const publisher = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey(pk) });
+  const publisher = Account.fromPrivateKey({
+    privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
+  });
   const publishPackageResult = JSON.parse(fs.readFileSync(PUBLISH_RES_PATH).toString());
 
   return {

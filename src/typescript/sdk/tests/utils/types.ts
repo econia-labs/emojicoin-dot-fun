@@ -1,4 +1,4 @@
-import { type Account, type Aptos } from "@aptos-labs/ts-sdk";
+import { Ed25519Account, type Account, type Aptos } from "@aptos-labs/ts-sdk";
 
 export interface Result {
   transaction_hash: string;
@@ -30,6 +30,6 @@ export type PublishPackageResult = {
 
 export type TestHelpers = {
   aptos: Aptos;
-  publisher: Account;
+  publisher: Ed25519Account;
   publishPackageResult: PublishPackageResult;
 };

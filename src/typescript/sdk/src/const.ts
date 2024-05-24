@@ -11,7 +11,8 @@ if (!VERCEL) {
   dotenv.config({ path: envPath });
   // If the publisher private key is not set by now, throw an error.
   if (!process.env.PUBLISHER_PK) {
-    throw new Error("Missing PUBLISHER_PK environment variable for test.");
+    console.warn("Missing PUBLISHER_PK environment variable for test, using the default value.");
+    process.env.PUBLISHER_PK = "29479e9e5fe47ba9a8af509dd6da1f907510bcf8917bfb19b7079d8c63c0b720";
   }
 
   // Get the derived account from the private key.
