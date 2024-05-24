@@ -1,4 +1,4 @@
-import { Ed25519Account, type Account, type Aptos } from "@aptos-labs/ts-sdk";
+import { type Ed25519Account, type Aptos } from "@aptos-labs/ts-sdk";
 
 export interface Result {
   transaction_hash: string;
