@@ -17,7 +17,7 @@ import { NAVIGATE_LINKS } from "./constants";
 import { slideTopVariants } from "./animations";
 
 import { type HeaderProps } from "./types";
-import { useTranslation } from "context/language-context";
+import { translationFunction } from "context/language-context";
 
 import { usePathname } from "next/navigation";
 import { showModal } from "store/modal";
@@ -27,7 +27,7 @@ import { useAppDispatch } from "store/store";
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
-  const { t } = useTranslation();
+  const { t } = translationFunction();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
 

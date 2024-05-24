@@ -1,0 +1,129 @@
+/* cspell:disable */
+
+.med-pixel-text {
+  font-size: 20px;
+  line-height: 25px;
+  font-family: var(--font-pixelar);
+}
+
+@media screen and (min-width: 768px) {
+  .med-pixel-text {
+    font-size: 22px;
+    line-height: 27px;
+    font-family: var(--font-pixelar);
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .med-pixel-text {
+    font-size: 24px;
+    line-height: 30px;
+    font-family: var(--font-pixelar);
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .med-pixel-text {
+    font-size: 32px;
+    line-height: 40px;
+    font-family: var(--font-pixelar);
+  }
+}
+
+.icon-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.1ch;
+  width: 1.1ch;
+}
+
+.pixel-display-1 {
+  font-family: var(--font-pixelar);
+  font-size: 128px;
+  line-height: 160px;
+}
+
+.display-1 {
+  font-size: 95px;
+  line-height: 96px;
+  font-family: var(--font-formaM);
+}
+
+.display-2 {
+  font-size: 64px;
+  line-height: 64px;
+  font-family: var(--font-formaM);
+}
+
+.display-3 {
+  font-size: 48px;
+  line-height: 65px;
+  font-family: var(--font-formaM);
+}
+
+.display-4 {
+  font-size: 28px;
+  line-height: 48px;
+}
+
+.display-5 {
+  font-size: 20px;
+  line-height: 48px;
+}
+
+.display-6 {
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.pixel-heading-1 {
+  font-size: 64px;
+  line-height: 48px;
+  font-family: var(--font-pixelar);
+}
+
+.pixel-heading-2 {
+  font-size: 40px;
+  line-height: 50px;
+  font-family: var(--font-pixelar);
+}
+
+.pixel-heading-3 {
+  font-size: 32px;
+  line-height: 40px;
+  font-family: var(--font-pixelar);
+}
+
+.pixel-heading-4 {
+  font-size: 20px;
+  line-height: 25px;
+  font-family: var(--font-pixelar);
+}
+
+.heading-1 {
+  font-size: 28px;
+  line-height: 18px;
+  font-family: var(--font-formaM);
+}
+
+.heading-2 {
+  font-size: 20px;
+  line-height: 18px;
+  font-family: var(--font-formaM);
+}
+
+.body-large {
+  font-size: 16px;
+  line-height: 18px;
+}
+
+.body-small {
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.body-xsmall {
+  font-size: 10px;
+  line-height: 18px;
+}

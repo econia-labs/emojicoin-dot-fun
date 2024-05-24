@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Flex, Column } from "@/containers";
 import { Text, Button, InputGroup, InputNumeric } from "components";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import { StyledInputWrapper, StyledArrowWrapper, StyledInputContainer } from "./styled";
 import { Arrow } from "components/svg";
@@ -13,7 +13,7 @@ import { Arrow } from "components/svg";
 const TradeEmojicoin: React.FC = () => {
   const [isForce, setIsForce] = useState(true);
 
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const switchHandler = () => {
     setIsForce(!isForce);

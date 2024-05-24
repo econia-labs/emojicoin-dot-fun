@@ -1,7 +1,10 @@
+"use client";
+
 import styled, { css, keyframes } from "styled-components";
 import { space } from "styled-system";
 import { rotate } from "./theme";
 import { type SvgProps } from "./types";
+import { darkColors } from "theme/colors";
 
 const rotateAnimation = keyframes`
   from {
@@ -24,6 +27,14 @@ const Svg = styled.svg.attrs<SvgProps>(
     xmlns,
   }),
 )`
+  &:hover {
+    border: 1px solid ${darkColors.econiaBlue};
+    g {
+      path {
+        fill: ${darkColors.econiaBlue};
+      }
+    }
+  }
   align-self: center;
   fill: ${({ theme, color }) => color && theme.colors[color]};
   flex-shrink: 0;

@@ -1,7 +1,7 @@
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 import { useMatchBreakpoints } from "hooks";
 
 import { FlexGap, Flex } from "@/containers";
@@ -13,7 +13,7 @@ import { type TableHeaderProps } from "./types";
 import { type DataType } from "../../types";
 
 const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
   const { isMobile } = useMatchBreakpoints();
 
   const { ref, replay } = useScramble({

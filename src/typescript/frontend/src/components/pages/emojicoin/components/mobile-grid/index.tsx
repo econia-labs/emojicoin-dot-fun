@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { Flex, FlexGap } from "@/containers";
 import { Text } from "components";
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import {
   StyledMobileContentWrapper,
@@ -16,7 +16,7 @@ import Chat from "../chat";
 
 const MobileGrid: React.FC = () => {
   const [tab, setTab] = useState(1);
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   return (
     <StyledMobileContentWrapper>

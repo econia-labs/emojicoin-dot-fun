@@ -2,11 +2,11 @@ import React from "react";
 
 import { Flex, Column, FlexGap } from "@/containers";
 import { Text } from "components/text";
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 import { useTooltip } from "hooks";
 
 const MainInfo: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
@@ -19,12 +19,12 @@ const MainInfo: React.FC = () => {
         py={{ _: "17px", tablet: "37px", laptopL: "68px" }}
         justifyContent="space-around"
         flexDirection={{ _: "column", tablet: "row" }}
-        px={{_: "30px", laptopL: "44px"}}
+        px={{ _: "30px", laptopL: "44px" }}
         width="100%"
         maxWidth="1362px"
       >
         <FlexGap
-          gap={{_: "12px", tablet: "4px"}}
+          gap={{ _: "12px", tablet: "4px" }}
           width={{ _: "100%", tablet: "58%", laptopL: "65%" }}
           flexDirection={{ _: "row", tablet: "column" }}
           justifyContent={{ _: "", tablet: "space-between" }}
@@ -35,7 +35,9 @@ const MainInfo: React.FC = () => {
           </Text>
           {tooltipEmojiName}
 
-          <Text textScale={{ _: "display4", tablet: "display2" }} fontSize="24px">🖤</Text>
+          <Text textScale={{ _: "display4", tablet: "display2" }} fontSize="24px">
+            🖤
+          </Text>
         </FlexGap>
 
         <Column width={{ _: "100%", tablet: "42%", laptopL: "35%" }} mt="-8px">

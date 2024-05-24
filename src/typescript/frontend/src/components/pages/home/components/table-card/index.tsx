@@ -1,6 +1,8 @@
+"use client";
+
 import React from "react";
 
-import { useTranslation } from "context/language-context";
+import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
 import Arrow from "components/svg/icons/Arrow";
 import { Column, Flex } from "@/containers";
@@ -11,7 +13,7 @@ import { StyledInnerItem, StyledColoredText, StyledItemWrapper } from "./styled"
 import { type TableCardProps } from "./types";
 
 const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCap, volume24h }) => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",

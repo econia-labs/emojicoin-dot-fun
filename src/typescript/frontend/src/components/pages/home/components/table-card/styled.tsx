@@ -1,27 +1,13 @@
-import styled, { css } from "styled-components";
-import { Svg, Text } from "components";
+import Text from "components/text";
+import styled from "styled-components";
+import { darkColors } from "theme/colors";
 
-const getHovered = ({ isEmpty }) => {
-  if (!isEmpty) {
-    return css`
-      border: 1px solid ${({ theme }) => theme.colors.econiaBlue};
-
-      ${Svg} {
-        g {
-          path {
-            fill: ${({ theme }) => theme.colors.econiaBlue};
-          }
-        }
-      }
-
-      ${StyledColoredText} {
-        color: ${({ theme }) => theme.colors.econiaBlue};
-      }
-    `;
+export const StyledColoredText = styled(Text)`
+  &:hover {
+    border: 1px solid ${darkColors.econiaBlue};
+    color: ${darkColors.econiaBlue};
   }
-};
-
-export const StyledColoredText = styled(Text)``;
+`;
 
 export const StyledInnerItem = styled.div<{ isEmpty: boolean }>`
   width: 100%;
@@ -35,13 +21,11 @@ export const StyledInnerItem = styled.div<{ isEmpty: boolean }>`
   border: 1px solid ${({ theme }) => theme.colors.transparent};
 
   &:hover {
-    ${getHovered}
+    border: 1px solid ${darkColors.econiaBlue};
   }
 `;
 
 export const StyledItemWrapper = styled.div`
-  width: 259px;
-  max-width: 259px;
   box-shadow:
     -0.5px 0 0 ${({ theme }) => theme.colors.darkGrey},
     0.5px 0 0 ${({ theme }) => theme.colors.darkGrey};

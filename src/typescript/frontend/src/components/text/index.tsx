@@ -1,9 +1,8 @@
 import styled, { css } from "styled-components";
 import { space, typography, layout, opacity, flexbox } from "styled-system";
-import { fontWeights, styles } from "./theme";
-import { getStylesFromResponsiveValue } from "utils";
+import { fontWeights, textStyles } from "./theme";
 
-import { type Scales, type TextProps, type ThemedProps } from "./types";
+import { type scales, type TextProps, type ThemedProps } from "./types";
 
 export const getEllipsis = ({ ellipsis }: ThemedProps) => {
   if (ellipsis) {
@@ -30,7 +29,7 @@ export const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
   font-family: ${({ theme }) => theme.fonts.forma};
   text-transform: ${({ textTransform }) => textTransform};
 
-  ${({ textScale, theme }) => textScale && getStylesFromResponsiveValue<Scales>(textScale, styles(theme))}
+  ${({ textScale }) => textScale && textStyles(textScale as keyof typeof scales)}
 
   ${fontWeights}
   ${wordBreak}
@@ -40,6 +39,15 @@ export const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
   ${layout}
   ${opacity}
   ${flexbox}
+
+  ${({ className }) =>
+    className &&
+    css`
+      &.${className} {
+        font-family: inherit;
+        font-size: inherit;
+      }
+    `}
 `;
 
 export default Text;

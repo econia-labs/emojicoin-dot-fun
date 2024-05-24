@@ -1,32 +1,9 @@
+"use client";
+
 import styled from "styled-components";
-import { layout, type LayoutProps } from 'styled-system'
-
-export const StyledTHWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
-`;
-
-export const StyledTH = styled.div<LayoutProps>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  justify-content: space-between;
-  margin: 5px 30px;
-
-  ${({ theme }) => theme.mediaQueries.tablet} {
-    flex-direction: row;
-    border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-    border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
-    padding: 0 20px;
-    margin: 0 30px;
-  }
-
-  ${layout}
-`;
+import base from "theme/base";
+import { darkColors } from "theme/colors";
+import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
 
 export const StyledTHFilters = styled.div`
   display: flex;
@@ -35,24 +12,106 @@ export const StyledTHFilters = styled.div`
   justify-content: space-between;
   margin-bottom: 8px;
 
-  ${({ theme }) => theme.mediaQueries.tablet} {
+  ${base.mediaQueries.tablet} {
     width: unset;
     margin-bottom: unset;
   }
 `;
 
-export const StyledWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 40px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  padding: 0 30px;
-`;
-
 export const StyledGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, 259px);
-  width: fit-content;
-  max-width: 100%;
-  gap: 1px 0;
+  grid-template-columns: repeat(auto-fill, ${EMOJI_GRID_ITEM_WIDTH}px);
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+`;
+
+const PADDING = 40;
+
+export const OutermostContainer = styled.div`
+  display: flex;
+  padding: 0 ${PADDING}px;
+  border-top: 1px solid ${darkColors.darkGrey};
+`;
+
+export const OuterContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+`;
+
+export const InnerGridContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: ${MAX_WIDTH}px;
+  justify-items: center;
+`;
+
+// There's no modulo in CSS, so we have to provide the breakpoints manually per # of items per grid.
+// Max width is 1813px so we stop at 1813px.
+let width = EMOJI_GRID_ITEM_WIDTH;
+let mediaQueries = "";
+while (width < MAX_WIDTH) {
+  mediaQueries += `
+  @media (min-width: ${width + PADDING * 2}px) {
+    padding-left: calc((100vw - ${PADDING * 2 + width}px) / 2);
+    padding-right: calc((100vw - ${PADDING * 2 + width}px) / 2);
+  }`;
+  width += EMOJI_GRID_ITEM_WIDTH;
+}
+
+export const Header = styled.div`
+  display: flex;
+  position: relative;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+
+  ${mediaQueries}
+
+  @media (min-width: ${MAX_WIDTH + PADDING * 2}px) {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+`;
+
+const WrapperCss = `
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    border-bottom: 1px solid ${darkColors.darkGrey};
+    width: 200vw;
+  }
+`;
+
+export const SearchWrapper = styled.div`
+  ${WrapperCss}
+  justify-content: left;
+  padding-left: 20px;
+  border-left: 1px solid ${darkColors.darkGrey};
+  margin-left: -1px;
+
+  &:after {
+    left: 0;
+  }
+`;
+
+export const FilterOptionsWrapper = styled.div`
+  ${WrapperCss}
+  justify-content: right;
+  padding-right: 20px;
+  border-right: 1px solid ${darkColors.darkGrey};
+  margin-right: -1px;
+
+  &:after {
+    right: 0;
+  }
 `;

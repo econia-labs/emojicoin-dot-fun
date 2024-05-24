@@ -5,7 +5,6 @@ import { Provider } from "react-redux";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle, StyledToastContainer } from "styles";
 import ThemeContextProvider, { useThemeContext } from "./theme-context";
-import LanguageContextProvider from "./language-context";
 import store from "store/store";
 import Loader from "components/loader";
 import Modal from "components/modal";
@@ -26,17 +25,15 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <Suspense fallback={<Loader />}>
-        <LanguageContextProvider fallback={<Loader />}>
-          <Provider store={store}>
-            <Modal />
-            <StyledToastContainer />
-            <StyledContentWrapper>
-              <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-              {children}
-              <Footer />
-            </StyledContentWrapper>
-          </Provider>
-        </LanguageContextProvider>
+        <Provider store={store}>
+          <Modal />
+          <StyledToastContainer />
+          <StyledContentWrapper>
+            <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+            {children}
+            <Footer />
+          </StyledContentWrapper>
+        </Provider>
       </Suspense>
     </ThemeProvider>
   );

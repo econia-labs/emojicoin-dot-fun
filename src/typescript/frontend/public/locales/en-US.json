@@ -54,5 +54,8 @@
   "Copy address": "Copy address",
   "Disconnect": "Disconnect",
   "Copied!": "Copied!",
-  "Animate:": "Animate:"
+  "Animate:": "Animate:",
+  "Server is not responding.": "Server is not responding.",
+  "Your request exceeded the time limit for processing.": "Your request exceeded the time limit for processing.",
+  "Check the internet connection and try again.": "Check the internet connection and try again."
 }

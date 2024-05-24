@@ -21,7 +21,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
   return (
     <Tr>
-      <Td width={{_: "12.5%", laptopL: "13%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "12.5%", laptopL: "13%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex px="12px">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ref={targetRef}>
             {item.rankIcon}
@@ -30,7 +30,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width={{_: "12.5%", laptopL : "13.5%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "12.5%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.apt}
@@ -38,7 +38,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width={{_: "13%", laptopL: "13.5%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "13%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.emoji}
@@ -46,7 +46,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width={{_: "12.5%", laptopL: "13%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "12.5%", laptopL: "13%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.type}
@@ -62,7 +62,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width={{_: "37%", laptopL: "35%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "37%", laptopL: "35%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex justifyContent="end">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
             {item.transaction}

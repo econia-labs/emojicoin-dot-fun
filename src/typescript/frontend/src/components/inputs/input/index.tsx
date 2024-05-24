@@ -82,4 +82,13 @@ export const Input = styled.input.attrs<InputProps>(({ scale = "md" }) => ({
 
   ${typography}
   ${space}
+
+  ${({ className }) =>
+    className &&
+    css`
+      &.${className} {
+        font-family: inherit;
+        font-size: inherit;
+      }
+    `}
 `;

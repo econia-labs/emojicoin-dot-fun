@@ -1,11 +1,11 @@
 import { toast } from "react-toastify";
 
-import { useTranslation } from "context/language-context";
+import { translationFunction } from "context/language-context";
 /**
  * Helps to copy content into click board
  */
 const useCopyContent = () => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const copyContentHandler = async (text: string) => {
     try {

@@ -2,7 +2,8 @@
 
 import React from "react";
 
-import { useThemeContext, useTranslation } from "context";
+import { useThemeContext } from "context";
+import { translationFunction } from "context/language-context";
 
 import { Flex, Column } from "@/containers";
 import { Text, InputNumeric, InputGroup, Button, Prompt } from "components";
@@ -10,7 +11,7 @@ import { Text, InputNumeric, InputGroup, Button, Prompt } from "components";
 import { StyledAddLiquidityWrapper } from "./styled";
 
 const Liquidity: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
   const { theme } = useThemeContext();
 
   return (
@@ -52,7 +53,7 @@ const Liquidity: React.FC = () => {
           </Flex>
         </StyledAddLiquidityWrapper>
 
-        <Flex width="100%" justifyContent="center" mb={{_: "17px", tablet: "37px"}} position="relative">
+        <Flex width="100%" justifyContent="center" mb={{ _: "17px", tablet: "37px" }} position="relative">
           <Prompt text="Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity." />
 
           <Button scale="lg">{t("Add liquidity")}</Button>

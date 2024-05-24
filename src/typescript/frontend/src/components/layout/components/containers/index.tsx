@@ -1,16 +1,18 @@
+"use client";
+
 import styled, { css } from "styled-components";
 import { border, layout, position, space, flexbox } from "styled-system";
 import React, { type PropsWithChildren } from "react";
-import { useThemeContext } from "context/theme-context";
 import {
   type ColumnProps,
   type RowProps,
   type BoxProps,
-  type BoxThemedProps,
   type FlexGapProps,
   type FlexProps,
+  type BoxThemedProps,
 } from "@/containers";
 import { system } from "styled-system";
+import { siteWidth } from "theme/base";
 
 export const getEllipsis = ({ ellipsis }: BoxThemedProps) => {
   if (ellipsis) {
@@ -45,10 +47,8 @@ export const Flex = styled(Box)<FlexProps>`
 `;
 
 export const Container: React.FC<PropsWithChildren<BoxProps>> = ({ children, ...props }) => {
-  const { theme } = useThemeContext();
-
   return (
-    <Box px={{ _: "16px", mobileL: "24px" }} mx="auto" maxWidth={theme.siteWidth} {...props}>
+    <Box px={{ _: "16px", mobileL: "24px" }} mx="auto" maxWidth={siteWidth} {...props}>
       {children}
     </Box>
   );

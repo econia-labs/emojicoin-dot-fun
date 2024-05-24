@@ -45,10 +45,10 @@ export const StyledMobileContentHeader = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
   padding: 3px 10px;
 
-    ${({ theme }) => theme.mediaQueries.tablet} {
-        min-height: 45px;
-        align-items: center;
-    }
+  ${({ theme }) => theme.mediaQueries.tablet} {
+    min-height: 45px;
+    align-items: center;
+  }
 
   &:after,
   &:before {

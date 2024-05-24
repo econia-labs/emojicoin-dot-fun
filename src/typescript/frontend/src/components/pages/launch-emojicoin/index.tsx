@@ -4,7 +4,7 @@ import React, { type ChangeEvent, useEffect } from "react";
 import { type EmojiClickData } from "emoji-picker-react";
 import emojiRegex from "emoji-regex";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 import { useValidationSchema } from "./hooks";
 import { useForm, useTooltip, useEmojicoinPicker } from "hooks";
 import { isDisallowedEventKey } from "utils";
@@ -19,7 +19,7 @@ import { Column, Flex, FlexGap } from "@/containers";
 import { StyledFieldName } from "./styled";
 
 const LaunchEmojicoin: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const { validationSchema, initialValues } = useValidationSchema();
   const { values, errors, touched, fieldProps, setFieldValue } = useForm({
