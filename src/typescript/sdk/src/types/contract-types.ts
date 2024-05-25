@@ -406,9 +406,7 @@ export const toChatEvent = (data: JSONTypes.ChatEvent): ContractTypes.ChatEvent 
   message: data.message,
   userEmojicoinBalance: BigInt(data.user_emojicoin_balance),
   circulatingSupply: BigInt(data.circulating_supply),
-  balanceAsFractionOfCirculatingSupply: BigInt(
-    data.balance_as_fraction_of_circulating_supply_q64
-  ),
+  balanceAsFractionOfCirculatingSupply: BigInt(data.balance_as_fraction_of_circulating_supply_q64),
 });
 
 export const toMarketRegistrationEvent = (

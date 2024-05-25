@@ -1,40 +1,49 @@
 import { type CandlestickResolution } from "../const";
 
+export enum UnitOfTime {
+  Nanoseconds,
+  Microseconds,
+  Milliseconds,
+  Seconds,
+  Minutes,
+  Hours,
+  Days,
+}
+
+const UNIT_OF_TIME_MULTIPLIERS: Record<UnitOfTime, number> = {
+  [UnitOfTime.Nanoseconds]: 1_000_000,
+  [UnitOfTime.Microseconds]: 1_000,
+  [UnitOfTime.Milliseconds]: 1,
+  [UnitOfTime.Seconds]: 1 / 1000,
+  [UnitOfTime.Minutes]: 1 / (1000 * 60),
+  [UnitOfTime.Hours]: 1 / (1000 * 60 * 60),
+  [UnitOfTime.Days]: 1 / (1000 * 60 * 60 * 24),
+};
+
 /**
- * Sleep the current thread for the given amount of time
- * @param timeMs time in milliseconds to sleep
+ * Sleep the current thread for the given amount of time, with an optional specifier
+ * for the unit of time.
+ *
+ *
+ * @param amount the numeric amount of time to sleep
+ * @param unitOfTime the unit of time to sleep for
+ * @default unitOfTime milliseconds.
+ *
  */
-export async function sleep(timeMs: number): Promise<null> {
+export async function sleep(
+  amount: number,
+  unitOfTime: UnitOfTime = UnitOfTime.Milliseconds
+): Promise<null> {
   return new Promise((resolve) => {
-    setTimeout(resolve, timeMs);
+    setTimeout(resolve, amount * UNIT_OF_TIME_MULTIPLIERS[unitOfTime]);
   });
 }
-
-export enum TimeUnits {
-  nanoseconds,
-  microseconds,
-  milliseconds,
-  seconds,
-  minutes,
-  hours,
-  days,
-}
-
-const TIME_UNIT_FACTORS: Map<TimeUnits, number> = new Map([
-  [TimeUnits.nanoseconds, 1_000_000],
-  [TimeUnits.microseconds, 1_000],
-  [TimeUnits.milliseconds, 1],
-  [TimeUnits.seconds, 1 / 1000],
-  [TimeUnits.minutes, 1 / (1000 * 60)],
-  [TimeUnits.hours, 1 / (1000 * 60 * 60)],
-  [TimeUnits.days, 1 / (1000 * 60 * 60 * 24)],
-]);
 
 /**
  *
  * The number of <TimeUnits> since the Unix epoch. Note that this function returns a floating point.
  *
- * @param granularity
+ * @param unitOfTime
  * @returns the floating point value of <TimeUnits> since the Unix epoch.
  *
  * @example
@@ -45,17 +54,13 @@ const TIME_UNIT_FACTORS: Map<TimeUnits, number> = new Map([
  * // `time` is the number of days since the Unix epoch.
  * ```
  */
-export function now(granularity: TimeUnits) {
-  if (!TIME_UNIT_FACTORS.has(granularity)) {
-    throw new Error(`Invalid granularity: ${granularity}`);
-  }
-  return Date.now() * TIME_UNIT_FACTORS.get(granularity)!;
+export function now(unitOfTime: UnitOfTime) {
+  return Date.now() * UNIT_OF_TIME_MULTIPLIERS[unitOfTime];
 }
 
 export function getCurrentPeriodBoundary(period: CandlestickResolution) {
   // All CandlestickPeriods are in microseconds.
-  const granularity = TimeUnits.microseconds;
-  return Math.floor(now(granularity) / period) * period;
+  return Math.floor(now(UnitOfTime.Microseconds) / period) * period;
 }
 
 export const divideWithPrecision = (args: {
