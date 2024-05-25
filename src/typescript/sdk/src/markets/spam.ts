@@ -16,10 +16,7 @@ import {
   AptosConfig,
 } from "@aptos-labs/ts-sdk";
 import { TextDecoder } from "util";
-import {
-  getEmojicoinMarketAddressAndTypeTags,
-  registerMarketAndGetEmojicoinInfo,
-} from "./utils";
+import { getEmojicoinMarketAddressAndTypeTags, registerMarketAndGetEmojicoinInfo } from "./utils";
 import { getRegistryAddress, getEvents } from "../emojicoin_dot_fun";
 import { publishForTest } from "../../tests/utils";
 import { Chat, MarketMetadataByEmojiBytes, Swap } from "../emojicoin_dot_fun/emojicoin-dot-fun";
