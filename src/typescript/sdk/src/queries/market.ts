@@ -36,12 +36,12 @@ export const getMarketData = async ({
     {};
   const { markets } = await paginateMarketRegistrations({ inboxUrl });
   markets
-    .filter((m) => SYMBOL_DATA.hasHex(m.market_metadata.emoji_bytes))
+    .filter((m) => SYMBOL_DATA.hasHex(m.marketMetadata.emojiBytes))
     .forEach((m) => {
-      const marketID = m.market_metadata.market_id.toString();
+      const marketID = m.marketMetadata.marketID.toString();
       res[marketID] = {
-        ...m.market_metadata,
-        ...SYMBOL_DATA.byHex(m.market_metadata.emoji_bytes)!,
+        ...m.marketMetadata,
+        ...SYMBOL_DATA.byHex(m.marketMetadata.emojiBytes)!,
       };
     });
   return res;

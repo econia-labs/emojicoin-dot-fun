@@ -57,6 +57,7 @@ const getPossibleGUIDAndSequenceNumber = (
         account_address: event.guid.account_address,
       }
     : undefined;
+  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const sequence_number = event.sequence_number ? BigInt(event.sequence_number) : undefined;
   const res = {
     guid,

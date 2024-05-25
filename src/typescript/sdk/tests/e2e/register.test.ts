@@ -80,16 +80,16 @@ describe("registers a market successfully", () => {
       objectAddress: derivedNamedObjectAddress,
     });
 
-    const { market_id, market_address, emoji_bytes } = marketObjectMarketResource.metadata;
+    const { marketID, marketAddress, emojiBytes } = marketObjectMarketResource.metadata;
 
-    const { lp_coin_supply, extend_ref } = marketObjectMarketResource;
+    const { lpCoinSupply, extendRef } = marketObjectMarketResource;
 
-    expect(market_id).toBeGreaterThanOrEqual(1n);
-    expect(Hex.fromHexInput(emoji_bytes).toString()).toEqual(`0x${emojis.join("")}`);
-    expect(emoji_bytes).toEqual(Hex.fromHexString(emojis.join("")).toUint8Array());
-    expect(normalizeAddress(extend_ref.self)).toEqual(normalizeAddress(derivedNamedObjectAddress));
-    expect(normalizeAddress(extend_ref.self)).toEqual(normalizeAddress(market_address));
-    expect(lp_coin_supply).toEqual(0n);
+    expect(marketID).toBeGreaterThanOrEqual(1n);
+    expect(Hex.fromHexInput(emojiBytes).toString()).toEqual(`0x${emojis.join("")}`);
+    expect(emojiBytes).toEqual(Hex.fromHexString(emojis.join("")).toUint8Array());
+    expect(normalizeAddress(extendRef.self)).toEqual(normalizeAddress(derivedNamedObjectAddress));
+    expect(normalizeAddress(extendRef.self)).toEqual(normalizeAddress(marketAddress));
+    expect(lpCoinSupply).toEqual(0n);
 
     const marketObjectResources = await aptos.getAccountModule({
       accountAddress: derivedNamedObjectAddress,
