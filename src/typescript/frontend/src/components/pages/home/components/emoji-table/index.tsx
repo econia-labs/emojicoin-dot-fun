@@ -15,9 +15,14 @@ import SearchComponent from "./components/Search";
 import FilterOptions from "./components/FilterOptions";
 import { type SymbolEmojiData } from "@/sdk/emoji_data";
 import { type ContractTypes } from "@/sdk/types";
+import { toDecimalsAPT } from "lib/utils/decimals";
 
 export interface EmojiTableProps {
-  markets: Array<ContractTypes.MarketView & SymbolEmojiData>;
+  markets: Array<{
+    market: ContractTypes.MarketView;
+    emoji: SymbolEmojiData;
+    volume24H: bigint;
+  }>;
 }
 
 const EmojiTable = async (props: EmojiTableProps) => {
@@ -37,12 +42,12 @@ const EmojiTable = async (props: EmojiTableProps) => {
             {props.markets.map(v => {
               return (
                 <TableCard
-                  index={Number(v.metadata.market_id)}
-                  emoji={v.emoji}
-                  emojiName={v.name}
-                  marketCap={v.instantaneous_stats.market_cap.toString()}
-                  volume24h={v.cumulative_stats.quote_volume.toString()}
-                  key={v.metadata.market_id.toString()}
+                  index={Number(v.market.metadata.market_id)}
+                  emoji={v.emoji.emoji}
+                  emojiName={v.emoji.name}
+                  marketCap={toDecimalsAPT(v.market.instantaneous_stats.market_cap, 2)}
+                  volume24h={toDecimalsAPT(v.market.cumulative_stats.quote_volume, 2)}
+                  key={v.market.metadata.market_id.toString()}
                 />
               );
             })}

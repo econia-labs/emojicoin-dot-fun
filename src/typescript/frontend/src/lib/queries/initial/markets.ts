@@ -41,17 +41,17 @@ const getInitialMarketData = async () => {
   }
 
   const marketViews = (await Promise.all(asyncResults)).map(v => ({
-    ...SYMBOL_DATA.byHex(v.metadata.emoji_bytes)!,
-    ...toMarketView(v),
+    emoji: SYMBOL_DATA.byHex(v.metadata.emoji_bytes)!,
+    market: toMarketView(v),
     // TODO: Replace this with a real value later.
     volume24H: BigInt(Math.floor(Math.random() * 1337 ** 4)),
   }));
 
   // Sort by market cap.
   marketViews.sort((m1, m2) =>
-    m2.instantaneous_stats.market_cap < m1.instantaneous_stats.market_cap
+    m2.market.instantaneous_stats.market_cap < m1.market.instantaneous_stats.market_cap
       ? -1
-      : m2.instantaneous_stats.market_cap > m1.instantaneous_stats.market_cap
+      : m2.market.instantaneous_stats.market_cap > m1.market.instantaneous_stats.market_cap
         ? 1
         : 0,
   );

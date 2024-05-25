@@ -16,16 +16,20 @@ import { type ContractTypes } from "@/sdk/types/contract-types";
 import { type SymbolEmojiData } from "@/sdk/emoji_data";
 import { toDecimalsAPT } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
+import "./module.css";
 
 export interface MainCardProps {
-  featuredMarket?: ContractTypes.MarketView &
-    SymbolEmojiData & {
-      volume24H: bigint;
-    };
+  featured?: {
+    market: ContractTypes.MarketView;
+    emoji: SymbolEmojiData;
+    volume24H: bigint;
+  };
 }
 
 const MainCard = (props: MainCardProps) => {
   const { t } = translationFunction();
+
+  const featured = props.featured;
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
@@ -41,28 +45,35 @@ const MainCard = (props: MainCardProps) => {
         width="100%"
         flexDirection={{ _: "column", tablet: "row" }}
       >
-        <Flex alignItems="center" position="relative" ml="-8%">
-          <StyledImage src="/images/planet-home.webp" aspectRatio={1.6} alt="Planet" />
+        <div
+          style={{
+            position: "relative",
+            alignItems: "center",
+            marginLeft: "-8%",
+            display: "flex",
+          }}
+        >
+          <StyledImage id="hero-image" src="/images/planet-home.webp" aspectRatio={1.6} alt="Planet" />
 
-          <StyledEmoji textAlign="center">{props.featuredMarket?.emoji || "🖤"}</StyledEmoji>
-        </Flex>
+          <StyledEmoji>{featured?.emoji.emoji || "🖤"}</StyledEmoji>
+        </div>
 
         <Column maxWidth="100%" ellipsis>
           <StyledPixelHeadingText textScale="pixelHeading1" color="darkGrey">
-            {props.featuredMarket?.metadata.market_id || "01"}
+            {featured?.market.metadata.market_id || "01"}
           </StyledPixelHeadingText>
           <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
-            {(props.featuredMarket?.name || "BLACK HEART").toUpperCase()}
+            {(featured?.emoji.name || "BLACK HEART").toUpperCase()}
           </StyledDisplayFontText>
 
           <FlexGap gap="8px">
-            {typeof props.featuredMarket !== "undefined" && (
+            {typeof featured !== "undefined" && (
               <>
                 <StyledMarketDataText color="darkGrey" textTransform="uppercase">
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(props.featuredMarket!.instantaneous_stats.market_cap, 2)}{" "}
+                  {toDecimalsAPT(featured!.market.instantaneous_stats.market_cap, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
@@ -70,26 +81,26 @@ const MainCard = (props: MainCardProps) => {
           </FlexGap>
 
           <FlexGap gap="8px">
-            {typeof props.featuredMarket !== "undefined" && (
+            {typeof featured !== "undefined" && (
               <>
                 <StyledMarketDataText color="darkGrey" textTransform="uppercase">
                   {t("24 hour vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(props.featuredMarket!.volume24H, 2)} <AptosIconBlack className={"icon-inline"} />
+                  {toDecimalsAPT(featured?.volume24H, 2) || "143.31"} <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
             )}
           </FlexGap>
 
           <FlexGap gap="8px">
-            {typeof props.featuredMarket !== "undefined" && (
+            {typeof featured !== "undefined" && (
               <>
                 <StyledMarketDataText color="darkGrey" textTransform="uppercase">
                   {t("All-time vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(props.featuredMarket!.cumulative_stats.quote_volume, 2)}{" "}
+                  {toDecimalsAPT(featured!.market.cumulative_stats.quote_volume, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>

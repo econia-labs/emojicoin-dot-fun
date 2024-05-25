@@ -1,0 +1,15 @@
+@keyframes image-pulse {
+  0% {
+    filter: drop-shadow(0 0 0.01vmin rgba(205, 47, 141, 0.2)) brightness(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 0.015vmin rgba(205, 47, 141, 0.4)) brightness(1.15);
+  }
+  100% {
+    filter: drop-shadow(0 0 0.01vmin rgba(205, 47, 141, 0.2)) brightness(1);
+  }
+}
+
+#hero-image {
+  animation: image-pulse 4s infinite ease-in-out;
+}
