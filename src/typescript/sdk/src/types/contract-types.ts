@@ -1,6 +1,7 @@
-import { Hex } from "@aptos-labs/ts-sdk";
+import { hexToBytes } from "@noble/hashes/utils";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
+import { fromAggregatorSnapshot } from "./core";
 
 export namespace ContractTypes {
   export type ExtendRef = {
@@ -43,8 +44,17 @@ export namespace ContractTypes {
 
   export type RegistryView = {
     registry_address: AccountAddressString;
+    nonce: bigint;
     last_bump_time: bigint;
     n_markets: bigint;
+    cumulative_quote_volume: bigint;
+    total_quote_locked: bigint;
+    total_value_locked: bigint;
+    market_cap: bigint;
+    fully_diluted_value: bigint;
+    cumulative_integrator_fees: bigint;
+    cumulative_swaps: bigint;
+    cumulative_chat_messages: bigint;
   };
 
   export type MarketView = {
@@ -57,6 +67,7 @@ export namespace ContractTypes {
     cumulative_stats: CumulativeStats;
     instantaneous_stats: InstantaneousStats;
     last_swap: LastSwap;
+    periodic_state_trackers: Array<PeriodicStateTracker>;
     aptos_coin_balance: bigint;
     emojicoin_balance: bigint;
     emojicoin_lp_balance: bigint;
@@ -163,14 +174,6 @@ export namespace ContractTypes {
     integrator_fee: bigint;
   };
 
-  export type PeriodicStateMeta = {
-    start_time: bigint;
-    period: bigint;
-    emit_time: bigint;
-    emit_market_nonce: bigint;
-    trigger: number;
-  };
-
   export type PeriodicStateEvent = {
     market_metadata: MarketMetadata;
     periodic_state_metadata: PeriodicStateMetadata;
@@ -203,7 +206,16 @@ export namespace ContractTypes {
 
   export type GlobalStateEvent = {
     emit_time: bigint;
+    registry_nonce: bigint;
     trigger: number;
+    cumulative_quote_volume: bigint;
+    total_quote_locked: bigint;
+    total_value_locked: bigint;
+    market_cap: bigint;
+    fully_diluted_value: bigint;
+    cumulative_integrator_fees: bigint;
+    cumulative_swaps: bigint;
+    cumulative_chat_messages: bigint;
   };
 
   export type LiquidityEvent = {
@@ -268,16 +280,29 @@ export const toRegistryAddress = (
   registry_address: data.registry_address,
 });
 
+const strToBigInt = (data: string): bigint => BigInt(data);
+
 export const toRegistryView = (data: JSONTypes.RegistryView): ContractTypes.RegistryView => ({
   registry_address: data.registry_address,
+  nonce: fromAggregatorSnapshot(data.nonce, strToBigInt),
   last_bump_time: BigInt(data.last_bump_time),
   n_markets: BigInt(data.n_markets),
+  cumulative_quote_volume: fromAggregatorSnapshot(data.cumulative_quote_volume, strToBigInt),
+  total_quote_locked: fromAggregatorSnapshot(data.total_quote_locked, strToBigInt),
+  total_value_locked: fromAggregatorSnapshot(data.total_value_locked, strToBigInt),
+  market_cap: fromAggregatorSnapshot(data.market_cap, strToBigInt),
+  fully_diluted_value: fromAggregatorSnapshot(data.fully_diluted_value, strToBigInt),
+  cumulative_integrator_fees: fromAggregatorSnapshot(data.cumulative_integrator_fees, strToBigInt),
+  cumulative_swaps: fromAggregatorSnapshot(data.cumulative_swaps, strToBigInt),
+  cumulative_chat_messages: fromAggregatorSnapshot(data.cumulative_chat_messages, strToBigInt),
 });
 
 export const toMarketMetadata = (data: JSONTypes.MarketMetadata): ContractTypes.MarketMetadata => ({
   market_id: BigInt(data.market_id),
   market_address: data.market_address,
-  emoji_bytes: Hex.fromHexInput(data.emoji_bytes).toUint8Array(),
+  emoji_bytes: hexToBytes(
+    data.emoji_bytes.startsWith("0x") ? data.emoji_bytes.slice(2) : data.emoji_bytes
+  ),
 });
 
 export const toCumulativeStats = (
@@ -320,6 +345,7 @@ export const toMarketView = (data: JSONTypes.MarketView): ContractTypes.MarketVi
   cumulative_stats: toCumulativeStats(data.cumulative_stats),
   instantaneous_stats: toInstantaneousStats(data.instantaneous_stats),
   last_swap: toLastSwap(data.last_swap),
+  periodic_state_trackers: data.periodic_state_trackers.map((v) => toPeriodicStateTracker(v)),
   aptos_coin_balance: BigInt(data.aptos_coin_balance),
   emojicoin_balance: BigInt(data.emojicoin_balance),
   emojicoin_lp_balance: BigInt(data.emojicoin_lp_balance),
@@ -396,8 +422,8 @@ export const toMarketRegistrationEvent = (
 });
 
 export const toPeriodicStateMeta = (
-  data: JSONTypes.PeriodicStateMeta
-): ContractTypes.PeriodicStateMeta => ({
+  data: JSONTypes.PeriodicStateMetadata
+): ContractTypes.PeriodicStateMetadata => ({
   start_time: BigInt(data.start_time),
   period: BigInt(data.period),
   emit_time: BigInt(data.emit_time),
@@ -441,7 +467,16 @@ export const toGlobalStateEvent = (
   data: JSONTypes.GlobalStateEvent
 ): ContractTypes.GlobalStateEvent => ({
   emit_time: BigInt(data.emit_time),
-  trigger: Number(data.trigger),
+  registry_nonce: fromAggregatorSnapshot(data.registry_nonce, strToBigInt),
+  trigger: data.trigger,
+  cumulative_quote_volume: fromAggregatorSnapshot(data.cumulative_quote_volume, strToBigInt),
+  total_quote_locked: fromAggregatorSnapshot(data.total_quote_locked, strToBigInt),
+  total_value_locked: fromAggregatorSnapshot(data.total_value_locked, strToBigInt),
+  market_cap: fromAggregatorSnapshot(data.market_cap, strToBigInt),
+  fully_diluted_value: fromAggregatorSnapshot(data.fully_diluted_value, strToBigInt),
+  cumulative_integrator_fees: fromAggregatorSnapshot(data.cumulative_integrator_fees, strToBigInt),
+  cumulative_swaps: fromAggregatorSnapshot(data.cumulative_swaps, strToBigInt),
+  cumulative_chat_messages: fromAggregatorSnapshot(data.cumulative_chat_messages, strToBigInt),
 });
 
 export const toLiquidityEvent = (data: JSONTypes.LiquidityEvent): ContractTypes.LiquidityEvent => ({
@@ -476,7 +511,6 @@ export type AnyContractType =
   | ContractTypes.SwapEvent
   | ContractTypes.ChatEvent
   | ContractTypes.MarketRegistrationEvent
-  | ContractTypes.PeriodicStateMeta
   | ContractTypes.PeriodicStateEvent
   | ContractTypes.StateEvent
   | ContractTypes.GlobalStateEvent

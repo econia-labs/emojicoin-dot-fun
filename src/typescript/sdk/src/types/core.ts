@@ -19,7 +19,22 @@ export type AggregatorSnapshot<T> = {
   value: T;
 };
 
-export const toAggregatorSnapshot = (data: { value: string }) => BigInt(data.value);
+/**
+ * A function that unwraps the value inside an AggregatorSnapshot JSON type `T1` and converts it to
+ * a value of type `T2` using the provided conversion function.
+ *
+ * You must pass in a function that can convert the data field of the
+ * `AggregatorSnapshot<T1>` to a value of type `T2`.
+ *
+ * @param data
+ * @param fn
+ * @returns a `value: T2`
+ * @see AggregatorSnapshot
+ */
+export const fromAggregatorSnapshot: <T1, T2>(
+  data: AggregatorSnapshot<T1>,
+  fn: (d: any) => T2
+) => T2 = (data, fn) => fn(data.value);
 
 export type GUID = {
   creation_number: bigint;
