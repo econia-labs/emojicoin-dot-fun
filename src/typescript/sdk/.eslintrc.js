@@ -4,7 +4,7 @@ module.exports = {
     es2021: true,
     node: true,
   },
-  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js"],
+  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js", "spam.ts"],
   extends: ["airbnb-base", "airbnb-typescript/base", "prettier"],
   parser: "@typescript-eslint/parser",
   parserOptions: {

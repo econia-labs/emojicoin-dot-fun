@@ -67,7 +67,7 @@ export const QUOTE_VIRTUAL_CEILING = 1_400_000_000_000n;
 export const POOL_FEE_RATE_BPS = 25;
 export const MARKET_REGISTRATION_FEE = 100_000_000n;
 
-// For the emoji coin.
+// For APT coin and for each emojicoin.
 export const DECIMALS = 8;
 
 // Emoji sequence length constraints.

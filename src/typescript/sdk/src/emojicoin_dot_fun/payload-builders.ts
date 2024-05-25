@@ -26,7 +26,7 @@ import {
   type AptosConfig,
 } from "@aptos-labs/ts-sdk";
 import { type WalletSignTransactionFunction } from ".";
-import { toConfig } from "../utils/misc";
+import { toConfig } from "../utils/aptos-utils";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;

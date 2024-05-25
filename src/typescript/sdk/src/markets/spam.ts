@@ -1,0 +1,431 @@
+/* eslint-disable no-console */
+/* eslint-disable import/no-unused-modules */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
+// Helper script used to generate lots of trade and chat data.
+// TODO: Add liquidity provision and removal.
+
+import {
+  Account,
+  type UserTransactionResponse,
+  AccountAddress,
+  Ed25519PrivateKey,
+  APTOS_COIN,
+  type Aptos,
+  TypeTag,
+  AptosConfig,
+} from "@aptos-labs/ts-sdk";
+import { TextDecoder } from "util";
+import {
+  getEmojicoinMarketAddressAndTypeTags,
+  registerMarketAndGetEmojicoinInfo,
+} from "./utils";
+import { getRegistryAddress, getEvents } from "../emojicoin_dot_fun";
+import { publishForTest } from "../../tests/utils";
+import { Chat, MarketMetadataByEmojiBytes, Swap } from "../emojicoin_dot_fun/emojicoin-dot-fun";
+import { BatchTransferCoins, ExistsAt } from "../emojicoin_dot_fun/aptos-framework";
+import { type Events } from "../emojicoin_dot_fun/events";
+import { type EmojicoinInfo } from "../types/contract";
+import { getRandomEmoji } from "../emoji_data/symbol-data";
+import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING } from "../const";
+import { SymbolEmojiData, getEmojiData } from "../emoji_data";
+import { divideWithPrecision, sleep } from "../utils/misc";
+import { getAptos } from "../utils/aptos-client";
+import { truncateAddress } from "../utils/aptos-utils";
+
+const NUM_TRADERS = 400;
+const TRADES_PER_TRADER = 6;
+const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
+const CHUNK_SIZE = 50;
+const TRADER_INITIAL_BALANCE = ONE_APT * 100;
+const DISTRIBUTOR_NECESSARY_BALANCE = CHUNK_SIZE * TRADER_INITIAL_BALANCE;
+const NUM_DISTRIBUTORS = NUM_TRADERS / CHUNK_SIZE;
+const MODULE_ADDRESS = AccountAddress.from(process.env.MODULE_ADDRESS!);
+const PUBLISHER = Account.fromPrivateKey({
+  privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK!),
+});
+
+if (!(NUM_TRADERS % CHUNK_SIZE === 0)) {
+  throw new Error("NUM_TRADERS must be divisible by CHUNK_SIZE");
+}
+
+async function spam() {
+  const aptos = getAptos(process.env.APTOS_NETWORK!);
+  const registryAddress = await setupTest(aptos);
+
+  // Create distributors that will bear the sequence number for each transaction.
+  const distributors = Array.from({ length: NUM_DISTRIBUTORS }).map(() => Account.generate());
+
+  // --------------------------------------------------------------------------------------
+  //                      Fund all traders and register multiple markets
+  // --------------------------------------------------------------------------------------
+
+  // Must wait for the sequence number info for `PUBLISHER` to sync.
+  await fundTraders(aptos, distributors);
+
+  // Now have the publisher register all markets sequentially.
+  const numMarketsToRegister = 20;
+  const markets = new Array<EmojicoinInfo & SymbolEmojiData>();
+  /* eslint-disable no-await-in-loop */
+  for (let i = 0; i < numMarketsToRegister; i += 1) {
+    const { bytes, emoji } = getRandomEmoji();
+    const res = await ensurePublisherHasRegisteredMarket({
+      aptos,
+      emojiBytes: bytes,
+      registryAddress,
+      emoji,
+    }).then((r) => {
+      console.log(`Registered market at ${r.marketAddress} for emoji: ${emoji}`);
+      return {
+        ...r,
+        ...getEmojiData(emoji)!,
+      };
+    });
+    markets.push(res);
+  }
+
+  // --------------------------------------------------------------------------------------
+  //                  Have all traders submit N trades and N chat messages
+  //                             where N = TRADES_PER_TRADER
+  // --------------------------------------------------------------------------------------
+
+  const allTradeResults = Array<Promise<[UserTransactionResponse, Events][]>>();
+  for (let i = 0; i <= NUM_TRADERS / CHUNK_SIZE; i += 1) {
+    await sleep(i * 1000);
+    console.log(`-----------------------------------BATCH ${i}-----------------------------------`);
+    const tradersChunk = TRADERS.slice(CHUNK_SIZE * i, (i + 1) * CHUNK_SIZE);
+    const trades = tradersChunk.map((t) => {
+      // Save 2% of the balance for gas fees.
+      const totalTradedAmount = BigInt(TRADER_INITIAL_BALANCE * 0.8);
+      const amounts = generateRandomTrades({
+        numTrades: TRADES_PER_TRADER,
+        totalTradeAmount: totalTradedAmount,
+      });
+      const market = markets[Math.floor(Math.random() * markets.length)];
+
+      // In case we ever want to loop this entire loop, you could fetch the user's sequence number
+      // here instead of assuming it's 0.
+      const sequenceNumber = 0;
+      const results = amounts.map(async (amt, i) => {
+        try {
+          await sleep(Math.random() * 1000 + 1000);
+          const { swap, chat } = await submitTradeAndRandomChatMessage({
+            aptosConfig: aptos.config,
+            sequenceNumber: sequenceNumber + i * 2,
+            marketAddress: market.marketAddress,
+            typeTags: [market.emojicoin, market.emojicoinLP],
+            user: t,
+            tradeInputs: {
+              inputAmount: amt,
+              isSell: amt < 0n,
+              integrator: PUBLISHER.accountAddress,
+              integratorFeeRateBps: 0,
+            },
+          });
+
+          return swap.then(async (res) => {
+            const chatEvents = (await chat).events;
+            res.events.push(...chatEvents);
+            const events = getEvents(res);
+            return [res, events];
+          });
+        } catch (e) {
+          return undefined;
+        }
+      });
+      return Promise.all(results);
+    });
+
+    const tradeResults = Promise.all(trades).then((res) => {
+      const curated = res
+        .flat()
+        .filter((v): v is [UserTransactionResponse, Events] => typeof v !== "undefined")
+        .toSorted((tx_a, tx_b) => {
+          const a = Number(tx_a[0].version);
+          const b = Number(tx_b[0].version);
+          return a - b;
+        });
+      printTradeResults(curated);
+      return curated;
+    });
+    allTradeResults.push(tradeResults);
+  }
+  const res = await Promise.all(allTradeResults);
+  console.log("All trades and chats submitted! Total # trades: ", res.flat().length);
+  // --------------------------------------------
+  //           Finish trade and chats
+  // --------------------------------------------
+}
+
+// --------------------------------------------------------------------------------------
+//                              Setup and helper functions
+// --------------------------------------------------------------------------------------
+
+const setupTest = async (aptos: Aptos): Promise<AccountAddress> => {
+  // Fund the publisher account if it doesn't exist yet.
+  const fundIfExists = ExistsAt.view({ aptos, addr: PUBLISHER.accountAddress }).then((exists) => {
+    if (!exists) {
+      console.log("Publisher account doesn't exist yet. Funding...");
+      return aptos.fundAccount({ accountAddress: PUBLISHER.accountAddress, amount: ONE_APT });
+    }
+    return null;
+  });
+  await fundIfExists;
+
+  try {
+    const safeFundAmount = 1000000 * ONE_APT;
+    await aptos.fundAccount({
+      accountAddress: PUBLISHER.accountAddress,
+      amount: Number(safeFundAmount),
+    });
+    console.log(`Funded publisher account with ${safeFundAmount} APT`);
+  } catch (e) {
+    console.error(e);
+    console.error("Failed to fund publisher. Is the Aptos framework using a custom mint function?");
+  }
+
+  try {
+    return await getRegistryAddress({ aptos, moduleAddress: MODULE_ADDRESS });
+  } catch (e) {
+    // Not published yet, let's publish.
+    await publishForTest(PUBLISHER.privateKey.toString());
+    return await getRegistryAddress({ aptos, moduleAddress: MODULE_ADDRESS });
+  }
+};
+
+const ensurePublisherHasRegisteredMarket = async ({
+  aptos,
+  emojiBytes,
+  registryAddress,
+  emoji,
+}: {
+  aptos: Aptos;
+  emojiBytes: Uint8Array;
+  registryAddress: AccountAddress;
+  emoji: string;
+}): Promise<EmojicoinInfo> => {
+  const emojicoinInfo = await MarketMetadataByEmojiBytes.view({
+    aptos,
+    emojiBytes,
+  }).then((res) => {
+    if (res.vec.pop()) {
+      console.log(`Market already exists for emoji: ${emoji}`);
+      return getEmojicoinMarketAddressAndTypeTags({
+        registryAddress,
+        symbolBytes: emojiBytes,
+      });
+    }
+    return registerMarketAndGetEmojicoinInfo({
+      aptos,
+      registryAddress,
+      emojis: [emojiBytes],
+      sender: PUBLISHER,
+      integrator: PUBLISHER.accountAddress,
+    });
+  });
+
+  return emojicoinInfo;
+};
+
+const fundTraders = async (aptos: Aptos, distributors: Account[]) => {
+  await BatchTransferCoins.submit({
+    aptosConfig: aptos.config,
+    from: PUBLISHER,
+    recipients: distributors.map((d) => d.accountAddress),
+    amounts: distributors.map((_) => BigInt(DISTRIBUTOR_NECESSARY_BALANCE + ONE_APT)),
+    typeTags: [APTOS_COIN],
+  }).then((res) => console.log("Distributed coins to distributors. tx version:", res.version));
+
+  const fundTraderResults: Array<Promise<UserTransactionResponse>> = [];
+  for (let i = 0; i < NUM_TRADERS / CHUNK_SIZE; i += 1) {
+    const chunk = TRADERS.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+    const res = BatchTransferCoins.submit({
+      aptosConfig: aptos.config,
+      from: distributors[i],
+      recipients: chunk.map((t) => t.accountAddress),
+      amounts: chunk.map((_) => BigInt(TRADER_INITIAL_BALANCE)),
+      feePayer: distributors[i],
+      typeTags: [APTOS_COIN],
+    });
+
+    const addr = truncateAddress(distributors[i].accountAddress.toString());
+
+    console.log(`Funding ${CHUNK_SIZE} traders with distributor[${i}]... => ${addr}`);
+    res.then((r) => console.log(`Funding complete! version: ${r.version}: ${i}`));
+    fundTraderResults.push(res);
+  }
+
+  const res = await Promise.all(fundTraderResults);
+  console.log(`Distributed coins to all ${TRADERS.length} traders`);
+
+  return res;
+};
+
+const submitTradeAndRandomChatMessage = async (args: {
+  aptosConfig: AptosConfig;
+  sequenceNumber: number;
+  marketAddress: AccountAddress;
+  typeTags: [TypeTag, TypeTag];
+  user: Account;
+  tradeInputs: {
+    inputAmount: bigint;
+    isSell: boolean;
+    integrator: AccountAddress;
+    integratorFeeRateBps: number;
+  };
+}) => {
+  const sharedArgs = {
+    aptosConfig: args.aptosConfig,
+    marketAddress: args.marketAddress,
+    typeTags: args.typeTags,
+    waitForTransactionOptions: {
+      checkSuccess: false,
+      waitForIndexer: false,
+      timeoutSecs: 20,
+    },
+  };
+  const swap = Swap.submit({
+    ...sharedArgs,
+    swapper: args.user,
+    inputAmount: args.tradeInputs.inputAmount,
+    isSell: args.tradeInputs.isSell,
+    integrator: PUBLISHER.accountAddress,
+    integratorFeeRateBps: 0,
+    options: {
+      accountSequenceNumber: args.sequenceNumber,
+    },
+  });
+
+  await sleep(Math.random() * 1000 + 1000);
+
+  const chat = Chat.submit({
+    ...sharedArgs,
+    ...generateRandomChatMessage({}),
+    user: args.user,
+    options: {
+      accountSequenceNumber: args.sequenceNumber + 1,
+    },
+  });
+
+  return {
+    swap,
+    chat,
+  };
+};
+
+const generateRandomTrades = ({
+  numTrades,
+  totalTradeAmount,
+}: {
+  numTrades: number;
+  totalTradeAmount: bigint;
+}): bigint[] => {
+  if (numTrades % 2 !== 0 && numTrades !== 1) {
+    throw new Error("N must be an even number to ensure paired buy/sell trades.");
+  }
+
+  const trades: bigint[] = Array.from({ length: numTrades });
+  let remainingPercentage = 100;
+  const buyPercentages: number[] = [];
+
+  // Generate random buy percentages that sum up to 100
+  for (let i = 0; i < numTrades / 2; i++) {
+    const maxPercentage = remainingPercentage - (numTrades / 2 - i - 1);
+    const buyPercentage = Math.random() * (maxPercentage - 1) + 1;
+    buyPercentages.push(buyPercentage);
+    remainingPercentage -= buyPercentage;
+  }
+
+  // Adjust the last buy percentage to exactly sum to 100
+  buyPercentages[buyPercentages.length - 1] += remainingPercentage;
+
+  // Create buy trades
+  for (let i = 0; i < buyPercentages.length; i++) {
+    trades[i * 2] = (totalTradeAmount * BigInt(Math.floor(buyPercentages[i]))) / 100n;
+    trades[i * 2 + 1] = BigInt(Math.floor(Math.random() * 100)) * trades[i * 2];
+  }
+
+  return trades;
+};
+
+const generateRandomChatMessage = ({
+  uniqueEmojis = 5,
+  messageLength = 10,
+}: {
+  uniqueEmojis?: number;
+  messageLength?: number;
+}): {
+  emojiBytes: Uint8Array[];
+  emojiIndicesSequence: Uint8Array;
+} => {
+  if (uniqueEmojis < 1 || messageLength < 1) {
+    throw new Error("Can't send an empty chat message!");
+  }
+
+  const chatEmojiBytes = Array.from({ length: uniqueEmojis }).map(() => getRandomEmoji().bytes);
+
+  const indices = Array.from({ length: messageLength }).map(() =>
+    Math.floor(Math.random() * chatEmojiBytes.length)
+  );
+
+  return {
+    emojiBytes: chatEmojiBytes,
+    emojiIndicesSequence: new Uint8Array(indices),
+  };
+};
+
+const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]>) => {
+  tradeResults.forEach((tx) => {
+    const [res, events] = tx;
+    const eventNum = Math.floor(Number(res.sequence_number) / 2);
+    const state = events.stateEvents[0] ? events.stateEvents[0] : null;
+    const swap = events.swapEvents[0] ? events.swapEvents[0] : null;
+    if (state && swap) {
+      const textDecoder = new TextDecoder("utf-8");
+      const emoji = textDecoder.decode(state.market_metadata.emoji_bytes);
+      const aptSpent = divideWithPrecision({
+        a: state.clamm_virtual_reserves.quote - QUOTE_VIRTUAL_FLOOR,
+        b: ONE_APT,
+        decimals: 3,
+      }).toFixed(3);
+      const quoteLeftBeforeTransition = divideWithPrecision({
+        a: QUOTE_VIRTUAL_CEILING - state.clamm_virtual_reserves.quote,
+        b: BigInt(ONE_APT),
+        decimals: 3,
+      }).toFixed(3);
+      const spendOnBondingCurve = `${aptSpent} APT in bonding curve.`;
+      const quoteLeft = `${quoteLeftBeforeTransition} to go before we transition into CPAMM!`;
+      const s =
+        `Trade #${eventNum} for ${swap.swapper.toString()} completed for emoji market: ${emoji}` +
+        ` with market ID: ${state.market_metadata.market_id}` +
+        ` at version: ${Number(res.version)}. ${
+          !swap.results_in_state_transition
+            ? `${spendOnBondingCurve} ${quoteLeft}`
+            : "We're already in the CPAMM!"
+        }`;
+      console.debug(s);
+    }
+    const chat = events.chatEvents[0] ? events.chatEvents[0] : null;
+    if (chat) {
+      const textDecoder = new TextDecoder("utf-8");
+      const emoji = textDecoder.decode(chat.market_metadata.emoji_bytes);
+      const balAsFraction = chat.balance_as_fraction_of_circulating_supply_q64;
+      const s =
+        `Chat message sent from ${chat.user} for emoji market: ${emoji}` +
+        ` with market ID: ${chat.market_metadata.market_id}` +
+        ` at version: ${Number(res.version)}. User owns ${balAsFraction}%` +
+        ` of the circulating supply: ${chat.circulating_supply}. User says "${chat.message}"`;
+
+      console.debug(s);
+    }
+    const outOfBondingCurve = events.swapEvents.some((event) => event.results_in_state_transition);
+
+    if (outOfBondingCurve) {
+      console.log(
+        `${res.sender.toString()} moved the market out of the bonding curve! Tx hash: ${res.hash}`
+      );
+    }
+  });
+};
+
+spam().then(() => console.log("Done!"));

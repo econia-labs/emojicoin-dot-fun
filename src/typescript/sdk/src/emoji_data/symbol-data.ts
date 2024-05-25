@@ -1,5 +1,5 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
-import { normalizeHex } from "../utils";
+import { normalizeHex } from "../utils/hex";
 import AllSymbolEmojiJSON from "./symbol-emojis.json";
 import { type SymbolEmojiData } from "./types";
 

@@ -1,13 +1,3 @@
-import {
-  Aptos,
-  type AptosConfig,
-  type AccountAddressInput,
-  type HexInput,
-  AccountAddress,
-  Hex,
-  DeriveScheme,
-} from "@aptos-labs/ts-sdk";
-import { sha3_256 } from "@noble/hashes/sha3";
 import { type CandlestickResolution } from "../const";
 
 /**
@@ -68,26 +58,14 @@ export function getCurrentPeriodBoundary(period: CandlestickResolution) {
   return Math.floor(now(granularity) / period) * period;
 }
 
-export function toAptos(aptos: Aptos | AptosConfig): Aptos {
-  return aptos instanceof Aptos ? aptos : new Aptos(aptos);
-}
-
-export function toConfig(aptos: Aptos | AptosConfig): AptosConfig {
-  return aptos instanceof Aptos ? aptos.config : aptos;
-}
-
-export function createNamedObjectAddress(args: {
-  creator: AccountAddressInput;
-  seed: HexInput;
-}): AccountAddress {
-  const creatorAddress = AccountAddress.from(args.creator);
-  const seed = Hex.fromHexInput(args.seed).toUint8Array();
-  const serializedCreatorAddress = creatorAddress.bcsToBytes();
-  const preImage = new Uint8Array([
-    ...serializedCreatorAddress,
-    ...seed,
-    DeriveScheme.DeriveObjectAddressFromSeed,
-  ]);
-
-  return AccountAddress.from(sha3_256(preImage));
-}
+export const divideWithPrecision = (args: {
+  a: bigint | number;
+  b: bigint | number;
+  decimals: number;
+}): number => {
+  const { decimals } = args;
+  const a = BigInt(args.a);
+  const b = BigInt(args.b);
+  const f = BigInt(10 ** decimals);
+  return Number((a * f) / b) / Number(f);
+};
