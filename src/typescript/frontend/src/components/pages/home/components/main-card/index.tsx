@@ -60,7 +60,7 @@ const MainCard = (props: MainCardProps) => {
 
         <Column maxWidth="100%" ellipsis>
           <StyledPixelHeadingText textScale="pixelHeading1" color="darkGrey">
-            {featured?.market.metadata.market_id || "01"}
+            {featured?.market.metadata.marketID || "01"}
           </StyledPixelHeadingText>
           <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
             {(featured?.emoji.name || "BLACK HEART").toUpperCase()}
@@ -73,7 +73,7 @@ const MainCard = (props: MainCardProps) => {
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured!.market.instantaneous_stats.market_cap, 2)}{" "}
+                  {toDecimalsAPT(featured!.market.instantaneousStats.marketCap, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
@@ -100,7 +100,7 @@ const MainCard = (props: MainCardProps) => {
                   {t("All-time vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured!.market.cumulative_stats.quote_volume, 2)}{" "}
+                  {toDecimalsAPT(featured!.market.cumulativeStats.quoteVolume, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>

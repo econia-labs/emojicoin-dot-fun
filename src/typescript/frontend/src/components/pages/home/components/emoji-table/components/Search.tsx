@@ -25,6 +25,7 @@ export const SearchComponent = () => {
         variant="fantom"
         forId="search"
         isShowError={false}
+        className="med-pixel-text"
       >
         <Input className="med-pixel-text" id="search" autoComplete="off" onKeyDown={onInputChange} ref={targetRef} />
       </InputGroup>
