@@ -22,9 +22,9 @@ const Home = async () => {
     }));
     // Sort by market cap.
     markets.sort((m1, m2) =>
-      m2.market.instantaneous_stats.market_cap < m1.market.instantaneous_stats.market_cap
+      m2.market.instantaneousStats.marketCap < m1.market.instantaneousStats.marketCap
         ? -1
-        : m2.market.instantaneous_stats.market_cap > m1.market.instantaneous_stats.market_cap
+        : m2.market.instantaneousStats.marketCap > m1.market.instantaneousStats.marketCap
           ? 1
           : 0,
     );

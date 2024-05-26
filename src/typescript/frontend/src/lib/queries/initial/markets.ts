@@ -9,8 +9,8 @@ import { APTOS_NETWORK } from "lib/env";
 const getInitialMarketData = async () => {
   const { markets } = await paginateMarketRegistrations();
   const data = markets.map(m => ({
-    marketID: m.market_metadata.market_id,
-    marketAddress: m.market_metadata.market_address,
+    marketID: m.marketMetadata.marketID,
+    marketAddress: m.marketMetadata.marketAddress,
   }));
 
   const sliced = data.slice(0, 100).map(d => {
@@ -49,9 +49,9 @@ const getInitialMarketData = async () => {
 
   // Sort by market cap.
   marketViews.sort((m1, m2) =>
-    m2.market.instantaneous_stats.market_cap < m1.market.instantaneous_stats.market_cap
+    m2.market.instantaneousStats.marketCap < m1.market.instantaneousStats.marketCap
       ? -1
-      : m2.market.instantaneous_stats.market_cap > m1.market.instantaneous_stats.market_cap
+      : m2.market.instantaneousStats.marketCap > m1.market.instantaneousStats.marketCap
         ? 1
         : 0,
   );

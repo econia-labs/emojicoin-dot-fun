@@ -42,12 +42,12 @@ const EmojiTable = async (props: EmojiTableProps) => {
             {props.markets.map(v => {
               return (
                 <TableCard
-                  index={Number(v.market.metadata.market_id)}
+                  index={Number(v.market.metadata.marketID)}
                   emoji={v.emoji.emoji}
                   emojiName={v.emoji.name}
-                  marketCap={toDecimalsAPT(v.market.instantaneous_stats.market_cap, 2)}
-                  volume24h={toDecimalsAPT(v.market.cumulative_stats.quote_volume, 2)}
-                  key={v.market.metadata.market_id.toString()}
+                  marketCap={toDecimalsAPT(v.market.instantaneousStats.marketCap, 2)}
+                  volume24h={toDecimalsAPT(v.market.cumulativeStats.quoteVolume, 2)}
+                  key={v.market.metadata.marketID.toString()}
                 />
               );
             })}
