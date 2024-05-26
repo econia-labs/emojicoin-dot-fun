@@ -1,7 +1,7 @@
 import { type CandlestickResolution } from "../const";
 
+// No nanoseconds because dealing with overflow is a pain (aka using a bigint) and we don't need it.
 export enum UnitOfTime {
-  Nanoseconds,
   Microseconds,
   Milliseconds,
   Seconds,
@@ -10,8 +10,8 @@ export enum UnitOfTime {
   Days,
 }
 
-const UNIT_OF_TIME_MULTIPLIERS: Record<UnitOfTime, number> = {
-  [UnitOfTime.Nanoseconds]: 1_000_000,
+// No nanoseconds because dealing with overflow is a pain (aka using a bigint) and we don't need it.
+export const UNIT_OF_TIME_MULTIPLIERS: Record<UnitOfTime, number> = {
   [UnitOfTime.Microseconds]: 1_000,
   [UnitOfTime.Milliseconds]: 1,
   [UnitOfTime.Seconds]: 1 / 1000,
@@ -41,26 +41,28 @@ export async function sleep(
 
 /**
  *
- * The number of <TimeUnits> since the Unix epoch. Note that this function returns a floating point.
+ * This is a helper function to specify the unit of time for `Date.now()`.
  *
- * @param unitOfTime
- * @returns the floating point value of <TimeUnits> since the Unix epoch.
+ * Note that this function returns a fractional, floating point value.
+ *
+ * @param unitOfTime {@link UnitOfTime}
+ * @returns the elapsed {@link UnitOfTime} since the Unix epoch, as a floating point number.
  *
  * @example
  * ```
- * const time = now(TimeUnits.sec);
+ * const time = now(UnitOfTime.Seconds);
  * // `time` is the number of seconds since the Unix epoch.
- * const time = now(TimeUnits.day);
+ * const time = now(UnitOfTime.Days);
  * // `time` is the number of days since the Unix epoch.
  * ```
  */
-export function now(unitOfTime: UnitOfTime) {
+export function getTime(unitOfTime: UnitOfTime) {
   return Date.now() * UNIT_OF_TIME_MULTIPLIERS[unitOfTime];
 }
 
 export function getCurrentPeriodBoundary(period: CandlestickResolution) {
   // All CandlestickPeriods are in microseconds.
-  return Math.floor(now(UnitOfTime.Microseconds) / period) * period;
+  return Math.floor(getTime(UnitOfTime.Microseconds) / period) * period;
 }
 
 export const divideWithPrecision = (args: {

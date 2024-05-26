@@ -1,5 +1,5 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
-import { isHexInput, normalizeHex } from "../utils/hex";
+import { normalizeHex } from "../utils/hex";
 import { SYMBOL_DATA } from "./symbol-data";
 import { type SymbolEmojiData, type EmojiName } from "./types";
 
@@ -53,5 +53,11 @@ export const isValidEmoji = (emoji: string): boolean => SYMBOL_DATA.hasEmoji(emo
  * isValidSymbolHex(new Uint8Array([ 240, 159, 159, 165 ])); // true
  * ```
  */
-export const isValidEmojiHex = (input: HexInput) =>
-  isHexInput(input) && SYMBOL_DATA.hasHex(normalizeHex(input));
+export const isValidEmojiHex = (input: HexInput) => {
+  try {
+    SYMBOL_DATA.hasHex(normalizeHex(input));
+    return true;
+  } catch (e) {
+    return false;
+  }
+};

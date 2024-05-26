@@ -36,10 +36,7 @@ export const wrap = (val: number | bigint | string): string => {
 };
 
 export const getMostRecentMarketEvent =
-  async (): Promise<ContractTypes.MarketRegistrationEvent> => {
+  async (): Promise<ContractTypes.MarketRegistrationEvent | null> => {
     const { markets } = await paginateMarketRegistrations();
-    if (!markets.length) {
-      throw new Error("No markets found");
-    }
-    return markets.at(0)!;
+    return markets.length > 0 ? markets[0] : null;
   };
