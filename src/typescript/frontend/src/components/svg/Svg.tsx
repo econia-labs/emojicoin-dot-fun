@@ -28,7 +28,6 @@ const Svg = styled.svg.attrs<SvgProps>(
   }),
 )`
   &:hover {
-    border: 1px solid ${darkColors.econiaBlue};
     g {
       path {
         fill: ${darkColors.econiaBlue};

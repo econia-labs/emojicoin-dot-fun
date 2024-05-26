@@ -4,11 +4,10 @@ import React from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
-import Arrow from "components/svg/icons/Arrow";
 import { Column, Flex } from "@/containers";
 import { Text } from "components/text";
 
-import { StyledInnerItem, StyledColoredText, StyledItemWrapper } from "./styled";
+import { StyledArrow, StyledInnerItem, StyledColoredText, StyledItemWrapper } from "./styled";
 
 import { type TableCardProps } from "./types";
 import "./module.css";
@@ -32,7 +31,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
                   {index < 10 ? `0${index}` : index}
                 </StyledColoredText>
 
-                <Arrow width="21px" />
+                <StyledArrow />
               </Flex>
 
               <Text textScale="pixelHeading1" textAlign="center" mb="22px">
