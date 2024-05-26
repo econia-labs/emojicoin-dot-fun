@@ -10,7 +10,7 @@ import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
 import { type Events, converter, toGenericEvent } from "./events";
 import { type ContractTypes } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
-import { createNamedObjectAddress } from "../utils/misc";
+import { createNamedObjectAddress } from "../utils/aptos-utils";
 
 /**
  * Derives the object address from the given emoji hex codes vector<u8> seed and
@@ -71,13 +71,14 @@ export function getEvents(response: UserTransactionResponse): Events {
     events: [],
   };
 
-  response.events.forEach((event) => {
+  response.events.forEach((event): void => {
     if (!converter.has(event.type)) {
       const res = toGenericEvent(event);
       events.events.push(res);
+      return;
     }
     const conversionFunction = converter.get(event.type)!;
-    const data = conversionFunction(event);
+    const data = conversionFunction(event.data);
     switch (event.type) {
       case TYPE_TAGS.SwapEvent.toString():
         events.swapEvents.push(data as ContractTypes.SwapEvent);

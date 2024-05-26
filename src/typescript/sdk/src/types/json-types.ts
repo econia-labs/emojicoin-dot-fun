@@ -176,14 +176,6 @@ namespace JSONTypes {
     integrator_fee: Uint64String;
   };
 
-  export type PeriodicStateMeta = {
-    start_time: Uint64String;
-    period: Uint64String;
-    emit_time: Uint64String;
-    emit_market_nonce: Uint64String;
-    trigger: Uint8;
-  };
-
   export type PeriodicStateEvent = {
     market_metadata: MarketMetadata;
     periodic_state_metadata: PeriodicStateMetadata;
@@ -243,3 +235,12 @@ namespace JSONTypes {
 }
 
 export default JSONTypes;
+
+export type JSONEventTypes =
+  | JSONTypes.SwapEvent
+  | JSONTypes.ChatEvent
+  | JSONTypes.MarketRegistrationEvent
+  | JSONTypes.PeriodicStateEvent
+  | JSONTypes.StateEvent
+  | JSONTypes.GlobalStateEvent
+  | JSONTypes.LiquidityEvent;

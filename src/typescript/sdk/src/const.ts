@@ -67,7 +67,7 @@ export const QUOTE_VIRTUAL_CEILING = 1_400_000_000_000n;
 export const POOL_FEE_RATE_BPS = 25;
 export const MARKET_REGISTRATION_FEE = 100_000_000n;
 
-// For the emoji coin.
+// For APT coin and for each emojicoin.
 export const DECIMALS = 8;
 
 // Emoji sequence length constraints.
@@ -75,11 +75,15 @@ export const MAX_CHAT_MESSAGE_LENGTH = 100;
 export const MAX_SYMBOL_LENGTH = 10;
 
 export enum CandlestickResolution {
-  PERIOD_1M = "60000000",
-  PERIOD_5M = "300000000",
-  PERIOD_15M = "900000000",
-  PERIOD_30M = "1800000000",
-  PERIOD_1H = "3600000000",
-  PERIOD_4H = "14400000000",
-  PERIOD_1D = "86400000000",
+  PERIOD_1S = 1000000,
+  PERIOD_5S = 5000000,
+  PERIOD_15S = 15000000,
+  PERIOD_30S = 30000000,
+  PERIOD_1M = 60000000,
+  PERIOD_5M = 300000000,
+  PERIOD_15M = 900000000,
+  PERIOD_30M = 1800000000,
+  PERIOD_1H = 3600000000,
+  PERIOD_4H = 14400000000,
+  PERIOD_1D = 864000000000,
 }

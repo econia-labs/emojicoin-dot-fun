@@ -4,7 +4,7 @@ module.exports = {
     es2021: true,
     node: true,
   },
-  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js"],
+  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js", "spam.ts"],
   extends: ["airbnb-base", "airbnb-typescript/base", "prettier"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -16,8 +16,6 @@ module.exports = {
   plugins: ["@typescript-eslint", "unused-imports", "import"],
   rules: {
     quotes: ["error", "double"],
-    // We disable the following rule to distinguish Move/JSON types from TS types.
-    "@typescript-eslint/naming-convention": "off",
     "max-len": ["error", 100],
     "import/extensions": "off",
     "import/no-commonjs": ["error", { allowRequire: false, allowPrimitiveModules: false }],

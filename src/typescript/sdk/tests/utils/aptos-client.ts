@@ -1,5 +1,6 @@
 import { Aptos, AptosConfig, Network, NetworkToNetworkName } from "@aptos-labs/ts-sdk";
 
+/* eslint-disable import/no-unused-modules */
 export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
   aptos: Aptos;
   config: AptosConfig;

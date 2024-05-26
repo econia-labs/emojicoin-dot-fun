@@ -12,6 +12,7 @@ import {
   toSwapEvent,
 } from "../types/contract-types";
 import { TYPE_TAGS } from "../utils/type-tags";
+import { type JSONEventTypes } from "../types/json-types";
 
 export type Events = {
   swapEvents: ContractTypes.SwapEvent[];
@@ -24,7 +25,7 @@ export type Events = {
   events: AptosEvent[];
 };
 
-export const converter: Map<string, (event: EventJSON) => EventTypes> = new Map();
+export const converter: Map<string, (data: JSONEventTypes) => EventTypes> = new Map();
 [
   [TYPE_TAGS.SwapEvent, toSwapEvent] as const,
   [TYPE_TAGS.ChatEvent, toChatEvent] as const,
@@ -34,7 +35,7 @@ export const converter: Map<string, (event: EventJSON) => EventTypes> = new Map(
   [TYPE_TAGS.GlobalStateEvent, toGlobalStateEvent] as const,
   [TYPE_TAGS.LiquidityEvent, toLiquidityEvent] as const,
 ].forEach(([tag, fn]) => {
-  converter.set(tag.toString(), (event: EventJSON) => fn(event.data));
+  converter.set(tag.toString(), (data: JSONEventTypes) => fn(data as any));
 });
 
 export type AptosEvent = {
@@ -56,6 +57,7 @@ const getPossibleGUIDAndSequenceNumber = (
         account_address: event.guid.account_address,
       }
     : undefined;
+  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const sequence_number = event.sequence_number ? BigInt(event.sequence_number) : undefined;
   const res = {
     guid,
@@ -81,7 +83,7 @@ export const toEvent = (event: EventJSON): AptosEvent => {
     return toGenericEvent(event);
   }
   const conversionFunction = converter.get(event.type)!;
-  const data = conversionFunction(event);
+  const data = conversionFunction(event.data);
   return {
     ...getPossibleGUIDAndSequenceNumber(event),
     type: event.type,
