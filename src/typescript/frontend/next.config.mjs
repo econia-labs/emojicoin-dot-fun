@@ -30,7 +30,16 @@ const nextConfig = {
         styledComponents: true
     },
     ...(isDebug ? debugConfigOptions : {}),
-    transpilePackages: ['@/sdk']
+    transpilePackages: ['@/sdk'],
+    redirects: async () => {
+        return [
+            {
+                source: '/emojicoin',
+                destination: '/emojicoin/0',
+                permanent: true,
+            },
+        ];
+    }
 }
 
 export default nextConfig;

@@ -53,6 +53,7 @@
     "./src/**/*.ts",
     "./src/**/*.tsx",
     ".next/types/**/*.ts",
-    "./dist/types/**/*.ts"
+    "./dist/types/**/*.ts",
+    "src/app/emojicoin/[market]/not-found.tsx"
   ]
 }

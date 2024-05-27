@@ -19,6 +19,7 @@
     "full-clean": "rm -rf node_modules && rm -rf .turbo && rm -rf sdk/.turbo && rm -rf sdk/node_modules && rm -rf frontend/.turbo && rm -rf frontend/node_modules && rm -rf frontend/.next",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
+    "start": "turbo run start",
     "test": "turbo run test"
   },
   "version": "0.0.0",

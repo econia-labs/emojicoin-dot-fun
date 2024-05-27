@@ -11,6 +11,8 @@ import { StyledArrow, StyledInnerItem, StyledColoredText, StyledItemWrapper } fr
 
 import { type TableCardProps } from "./types";
 import "./module.css";
+import Link from "next/link";
+import { ROUTES } from "router/routes";
 
 const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCap, volume24h }) => {
   const { t } = translationFunction();
@@ -21,7 +23,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
   });
 
   return (
-    <div id="grid-emoji-card">
+    <Link id="grid-emoji-card" href={`${ROUTES.emojicoin}/${index}`}>
       <StyledItemWrapper>
         <StyledInnerItem id="grid-emoji-card" isEmpty={!emoji}>
           {emoji && (
@@ -75,7 +77,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
         </StyledInnerItem>
         {tooltipEmojiName}
       </StyledItemWrapper>
-    </div>
+    </Link>
   );
 };
 

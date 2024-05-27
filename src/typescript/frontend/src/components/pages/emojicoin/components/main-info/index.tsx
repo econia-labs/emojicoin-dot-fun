@@ -4,8 +4,13 @@ import { Flex, Column, FlexGap } from "@/containers";
 import { translationFunction } from "context/language-context";
 import { useTooltip } from "hooks";
 import { StyledHeaderEmoji, StyledHeaderText, StyledStatsText } from "./styled";
+import { type EmojicoinProps } from "../../types";
+import { toDecimalsAPT } from "lib/utils/decimals";
+import AptosIconBlack from "components/svg/icons/AptosBlack";
 
-const MainInfo = () => {
+type NonNullableEmojicoinProps = Omit<EmojicoinProps, "data"> & { data: NonNullable<EmojicoinProps["data"]> };
+
+const MainInfo = (props: NonNullableEmojicoinProps) => {
   const { t } = translationFunction();
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
@@ -31,11 +36,11 @@ const MainInfo = () => {
           mb="8px"
         >
           <StyledHeaderText ellipsis ref={targetRefEmojiName}>
-            BLACK HEART
+            {props.data.emoji.name}
           </StyledHeaderText>
           {tooltipEmojiName}
 
-          <StyledHeaderEmoji>🖤</StyledHeaderEmoji>
+          <StyledHeaderEmoji>{props.data.emoji.emoji}</StyledHeaderEmoji>
         </FlexGap>
 
         <Column width={{ _: "100%", tablet: "42%", laptopL: "35%" }} mt="-8px">
@@ -47,7 +52,11 @@ const MainInfo = () => {
             >
               {t("Mkt. Cap:")}
             </StyledStatsText>
-            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>11.11M</StyledStatsText>
+            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
+              {toDecimalsAPT(props.data.market.instantaneousStats.marketCap, 2)}
+              &nbsp;
+              <AptosIconBlack className={"icon-inline"} />
+            </StyledStatsText>
           </FlexGap>
 
           <FlexGap gap="8px">
@@ -58,7 +67,12 @@ const MainInfo = () => {
             >
               {t("24 hour vol:")}
             </StyledStatsText>
-            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>11.11M</StyledStatsText>
+            {/* TODO: Replace `fullyDilutedValue` here to display 24H volume. */}
+            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
+              {toDecimalsAPT(props.data.market.instantaneousStats.fullyDilutedValue, 2)}
+              &nbsp;
+              <AptosIconBlack className={"icon-inline"} />
+            </StyledStatsText>
           </FlexGap>
 
           <FlexGap gap="8px">
@@ -69,7 +83,11 @@ const MainInfo = () => {
             >
               {t("All-time vol:")}
             </StyledStatsText>
-            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>11.11M</StyledStatsText>
+            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
+              {toDecimalsAPT(props.data.market.cumulativeStats.quoteVolume, 2)}
+              &nbsp;
+              <AptosIconBlack className={"icon-inline"} />
+            </StyledStatsText>
           </FlexGap>
         </Column>
       </Flex>

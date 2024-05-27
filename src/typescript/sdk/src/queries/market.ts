@@ -1,7 +1,6 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { INBOX_URL } from "../const";
 import { SYMBOL_DATA, type SymbolEmojiData } from "../emoji_data";
-import { type Uint64String } from "../emojicoin_dot_fun";
 import { TABLE_NAME, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { type ContractTypes, type JSONTypes, toMarketRegistrationEvent } from "../types";
@@ -27,20 +26,20 @@ export const paginateMarketRegistrations = async (
   };
 };
 
-export const getMarketData = async ({
-  data,
-  inboxUrl = INBOX_URL,
-}: {
-  data: Awaited<ReturnType<typeof paginateMarketRegistrations>>,
-  inboxUrl?: string;
-}) => {
-  const res: Record<string, ContractTypes.MarketMetadata & SymbolEmojiData> =
-    {};
+/**
+ * Gets the market data as a map of marketID to market metadata.
+ * @param param0
+ * @returns
+ */
+export const getMarketData = async (
+  data: Awaited<ReturnType<typeof paginateMarketRegistrations>>
+) => {
+  const res: Record<string, ContractTypes.MarketMetadata & SymbolEmojiData> = {};
   const { markets } = data;
   markets
     .filter((m) => SYMBOL_DATA.hasHex(m.marketMetadata.emojiBytes))
     .forEach((m) => {
-      const marketID = m.marketMetadata.marketID;
+      const { marketID } = m.marketMetadata;
       res[marketID.toString()] = {
         ...m.marketMetadata,
         ...SYMBOL_DATA.byHex(m.marketMetadata.emojiBytes)!,

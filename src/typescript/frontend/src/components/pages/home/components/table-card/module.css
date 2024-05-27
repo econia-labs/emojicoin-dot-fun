@@ -16,7 +16,7 @@
   &:hover {
     animation: card-pulse 1s infinite ease-in-out;
     filter: brightness(1.05) !important;
-    background: #71738613;
+    background: #00031e13;
     box-shadow: 0 0 14px 11px rgba(8, 108, 217, 0.1);
   }
 }

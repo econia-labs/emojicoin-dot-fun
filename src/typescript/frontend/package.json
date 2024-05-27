@@ -73,7 +73,7 @@
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
-    "start": "next start"
+    "start": "next start --port 3001"
   },
   "version": "0.0.1"
 }
