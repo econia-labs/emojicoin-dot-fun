@@ -1,11 +1,11 @@
 import React from "react";
 
 import { Flex, Column, FlexGap } from "@/containers";
-import { Text } from "components/text";
 import { translationFunction } from "context/language-context";
 import { useTooltip } from "hooks";
+import { StyledHeaderEmoji, StyledHeaderText, StyledStatsText } from "./styled";
 
-const MainInfo: React.FC = () => {
+const MainInfo = () => {
   const { t } = translationFunction();
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
@@ -30,36 +30,46 @@ const MainInfo: React.FC = () => {
           justifyContent={{ _: "", tablet: "space-between" }}
           mb="8px"
         >
-          <Text textScale={{ _: "display4", tablet: "display2" }} ellipsis ref={targetRefEmojiName}>
+          <StyledHeaderText ellipsis ref={targetRefEmojiName}>
             BLACK HEART
-          </Text>
+          </StyledHeaderText>
           {tooltipEmojiName}
 
-          <Text textScale={{ _: "display4", tablet: "display2" }} fontSize="24px">
-            🖤
-          </Text>
+          <StyledHeaderEmoji>🖤</StyledHeaderEmoji>
         </FlexGap>
 
         <Column width={{ _: "100%", tablet: "42%", laptopL: "35%" }} mt="-8px">
           <FlexGap gap="8px">
-            <Text textScale={{ _: "display6", tablet: "display4" }} color="lightGrey" textTransform="uppercase">
+            <StyledStatsText
+              textScale={{ _: "display6", tablet: "display4" }}
+              color="lightGrey"
+              textTransform="uppercase"
+            >
               {t("Mkt. Cap:")}
-            </Text>
-            <Text textScale={{ _: "display6", tablet: "display4" }}>11.11M</Text>
+            </StyledStatsText>
+            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>11.11M</StyledStatsText>
           </FlexGap>
 
           <FlexGap gap="8px">
-            <Text textScale={{ _: "display6", tablet: "display4" }} color="lightGrey" textTransform="uppercase">
+            <StyledStatsText
+              textScale={{ _: "display6", tablet: "display4" }}
+              color="lightGrey"
+              textTransform="uppercase"
+            >
               {t("24 hour vol:")}
-            </Text>
-            <Text textScale={{ _: "display6", tablet: "display4" }}>11.11M</Text>
+            </StyledStatsText>
+            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>11.11M</StyledStatsText>
           </FlexGap>
 
           <FlexGap gap="8px">
-            <Text textScale={{ _: "display6", tablet: "display4" }} color="lightGrey" textTransform="uppercase">
+            <StyledStatsText
+              textScale={{ _: "display6", tablet: "display4" }}
+              color="lightGrey"
+              textTransform="uppercase"
+            >
               {t("All-time vol:")}
-            </Text>
-            <Text textScale={{ _: "display6", tablet: "display4" }}>11.11M</Text>
+            </StyledStatsText>
+            <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>11.11M</StyledStatsText>
           </FlexGap>
         </Column>
       </Flex>

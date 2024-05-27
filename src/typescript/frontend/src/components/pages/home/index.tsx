@@ -2,33 +2,19 @@ import { Box, Column, Flex } from "@/containers";
 import ClientsSlider from "components/clients-slider";
 import EmojiTable from "./components/emoji-table";
 import MainCard from "./components/main-card";
-import getInitialMarketData from "lib/queries/initial/markets";
-import { type JSONTypes, toMarketView } from "@/sdk/types";
-import { getEmojiData } from "@/sdk/emoji_data";
+import { type SymbolEmojiData } from "@/sdk/emoji_data";
+import { type ContractTypes } from "@/sdk/types/contract-types";
 
-const Home = async () => {
-  let markets = await getInitialMarketData();
+export interface HomeProps {
+  markets: Array<{
+    market: ContractTypes.MarketView;
+    emoji: SymbolEmojiData;
+    volume24H: bigint;
+  }>;
+}
 
-  // Fallback to use for production data because we don't have a remote database endpoint right now.
-  if (process.env.INBOX_URL === "http://localhost:3000" && process.env.VERCEL === "1") {
-    console.warn("Warning: The `inbox` endpoint URL is set to `localhost` in production. Using sample market data.");
-    const sampleDataURL = "https://sample-data.sfo3.cdn.digitaloceanspaces.com/data.json";
-    const response = await fetch(sampleDataURL);
-    const data: Array<JSONTypes.MarketView> = await response.json();
-    markets = data.map(market => ({
-      market: toMarketView(market),
-      emoji: getEmojiData(market.metadata.emoji_bytes)!,
-      volume24H: BigInt(Math.floor(Math.random() * 1337 ** 3)),
-    }));
-    // Sort by market cap.
-    markets.sort((m1, m2) =>
-      m2.market.instantaneousStats.marketCap < m1.market.instantaneousStats.marketCap
-        ? -1
-        : m2.market.instantaneousStats.marketCap > m1.market.instantaneousStats.marketCap
-          ? 1
-          : 0,
-    );
-  }
+const Home = async (props: HomeProps) => {
+  const markets = props.markets;
 
   const featuredMarket = markets.toReversed().pop();
   const gridMarkets = markets.slice(1);

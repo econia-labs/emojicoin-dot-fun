@@ -28,18 +28,20 @@ export const paginateMarketRegistrations = async (
 };
 
 export const getMarketData = async ({
+  data,
   inboxUrl = INBOX_URL,
 }: {
+  data: Awaited<ReturnType<typeof paginateMarketRegistrations>>,
   inboxUrl?: string;
-}): Promise<Record<Uint64String, ContractTypes.MarketMetadata & (SymbolEmojiData | undefined)>> => {
-  const res: Record<Uint64String, ContractTypes.MarketMetadata & (SymbolEmojiData | undefined)> =
+}) => {
+  const res: Record<string, ContractTypes.MarketMetadata & SymbolEmojiData> =
     {};
-  const { markets } = await paginateMarketRegistrations({ inboxUrl });
+  const { markets } = data;
   markets
     .filter((m) => SYMBOL_DATA.hasHex(m.marketMetadata.emojiBytes))
     .forEach((m) => {
-      const marketID = m.marketMetadata.marketID.toString();
-      res[marketID] = {
+      const marketID = m.marketMetadata.marketID;
+      res[marketID.toString()] = {
         ...m.marketMetadata,
         ...SYMBOL_DATA.byHex(m.marketMetadata.emojiBytes)!,
       };
