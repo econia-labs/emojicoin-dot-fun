@@ -39,31 +39,20 @@
     "yup": "^1.2.0"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^1.3.5",
-    "@storybook/addon-essentials": "8.1.0-beta.0",
-    "@storybook/addon-interactions": "8.1.0-beta.0",
-    "@storybook/addon-links": "8.1.0-beta.0",
-    "@storybook/addon-onboarding": "8.1.0-beta.0",
-    "@storybook/blocks": "8.1.0-beta.0",
-    "@storybook/nextjs": "8.1.0-beta.0",
-    "@storybook/react": "8.1.0-beta.0",
-    "@storybook/test": "8.1.0-beta.0",
     "@types/lodash": "^4.17.0",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
     "@types/redux-logger": "^3.0.9",
     "@types/styled-system": "^5.1.17",
-    "@types/webpack-env": "^1.18.0",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
     "eslint": "^8.49.0",
     "eslint-config-next": "^14.2.3",
-    "eslint-plugin-storybook": "^0.8.0",
-    "prettier": "^3.0.3",
-    "source-map-explorer": "^2.5.3",
-    "storybook": "8.1.0-beta.0",
-    "typescript": "5.4.3",
-    "webpack": "^5.88.2"
+    "prettier": "^3.2.5",
+    "typescript": "5.3.3"
+  },
+  "engines": {
+    "node": ">=v20.12.2"
   },
   "name": "@econia-labs/emojicoin-dot-fun",
   "packageManager": "pnpm@9.1.1+sha512.14e915759c11f77eac07faba4d019c193ec8637229e62ec99eefb7cf3c3b75c64447882b7c485142451ee3a6b408059cdfb7b7fa0341b975f12d0f7629c71195",
@@ -74,7 +63,6 @@
     "build": "next build",
     "build-dev": "chmod +x ./scripts/build-dev.sh && ./scripts/build-dev.sh",
     "build-prod": "chmod +x ./scripts/build-prod.sh && ./scripts/build-prod.sh",
-    "build-storybook": "storybook build",
     "build:debug": "export BUILD_DEBUG=true && pnpm clean && next build --no-lint --no-mangling --debug && export BUILD_DEBUG=\"\"",
     "clean": "rm -rf .next",
     "dev": "next dev --turbo",
@@ -85,8 +73,7 @@
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
-    "start": "next start",
-    "storybook": "storybook dev -p 6006"
+    "start": "next start"
   },
   "version": "0.0.1"
 }
