@@ -1,4 +1,4 @@
-import { HexInput } from "@aptos-labs/ts-sdk";
+import { type HexInput } from "@aptos-labs/ts-sdk";
 import { type CandlestickResolution } from "../const";
 import { normalizeHex } from "./hex";
 
@@ -84,13 +84,13 @@ export const ADDRESS_FULL_CHAR_LENGTH = 64;
 export const truncateAddress = (input: HexInput): string => {
   let s;
   if (typeof input === "string") {
-    if (input.startsWith('0x')) {
+    if (input.startsWith("0x")) {
       s = input.slice(2);
     } else {
       s = input;
     }
     if (s.length < ADDRESS_FULL_CHAR_LENGTH) {
-      s = '0'.repeat(ADDRESS_FULL_CHAR_LENGTH - s.length) + s;
+      s = "0".repeat(ADDRESS_FULL_CHAR_LENGTH - s.length) + s;
     }
     s = `0x${s}`;
   } else {
