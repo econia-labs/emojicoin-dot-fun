@@ -32,6 +32,27 @@ interface EmojicoinPageProps {
 
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   console.warn("Building page route:", params.params.market);
+
+  const markets = await getInitialMarketData();
+  const foundMarket = markets.find(m => m.market.metadata.marketID.toString() === params.params.market);
+  // If market is in the top 100 markets, it'll have already been fetched and cached.
+  // Use the data.
+  if (foundMarket) {
+    console.warn("Found market in top 100 markets:", foundMarket.market.metadata.marketID.toString());
+    const { market, emoji } = foundMarket;
+    const chatData = await getInitialChatData(market.metadata.marketID);
+
+    return (
+      <Emojicoin
+        data={{
+          chats: chatData,
+          emoji,
+          market,
+        }}
+      />
+    );
+  }
+
   const marketID = BigInt(params.params.market);
   const aptos = getAptos(APTOS_NETWORK);
   // TODO: Optimize these calls..? If we index by market ID in the db it'll be much quicker to just
