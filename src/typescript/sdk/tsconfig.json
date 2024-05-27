@@ -34,7 +34,7 @@
   },
   "exclude": [
     "node_modules",
-    "./src/markets/spam.ts"
+    "src/utils/mock-data.ts"
   ],
   "include": [
     "src"
