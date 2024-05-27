@@ -4,13 +4,11 @@ import { Flex, Column, FlexGap } from "@/containers";
 import { translationFunction } from "context/language-context";
 import { useTooltip } from "hooks";
 import { StyledHeaderEmoji, StyledHeaderText, StyledStatsText } from "./styled";
-import { type EmojicoinProps } from "../../types";
 import { toDecimalsAPT } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
+import { type MainInfoProps } from "../../types";
 
-type NonNullableEmojicoinProps = Omit<EmojicoinProps, "data"> & { data: NonNullable<EmojicoinProps["data"]> };
-
-const MainInfo = (props: NonNullableEmojicoinProps) => {
+const MainInfo = (props: MainInfoProps) => {
   const { t } = translationFunction();
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {

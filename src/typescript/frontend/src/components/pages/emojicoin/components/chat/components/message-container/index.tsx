@@ -15,7 +15,7 @@ import { type MessageContainerProps } from "./types";
 
 const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
   return (
-    <StyledMessageContainer isIncoming={message.incoming}>
+    <StyledMessageContainer fromAnotherUser={message.fromAnotherUser}>
       <StyledMessageWrapper>
         <StyledMessageInner>
           <Text textScale="bodySmall" color="black" pt="2px">

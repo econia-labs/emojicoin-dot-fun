@@ -8,11 +8,13 @@ import { Flex } from "@/containers";
 import { Text, Tr, Td } from "components";
 
 import { type TableRowDesktopProps } from "./types";
+import { truncateAddress } from "@/sdk/utils/misc";
+import { toDecimalsAPT } from "lib/utils/decimals";
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
   const { targetRef, tooltip } = useTooltip(
     <Text color="black" textScale="pixelHeading4" textTransform="uppercase">
-      {item.rank}
+      {item.emoji}
     </Text>,
     {
       placement: "top",
@@ -33,39 +35,43 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
       <Td width={{ _: "12.5%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.apt}
+            {toDecimalsAPT(item.apt, 3)}
           </Text>
         </Flex>
       </Td>
 
-      <Td width={{ _: "13%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "23%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.emoji}
+            {toDecimalsAPT(item.emoji, 3)}
           </Text>
         </Flex>
       </Td>
 
-      <Td width={{ _: "12.5%", laptopL: "13%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", marginRight: 10 }}
+        width={{ _: "12.5%", laptopL: "13%" }}
+        minWidth={{ _: "10px", laptopL: "unset" }}
+      >
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+          <Text textScale="bodySmall" color={item.type === "sell" ? "error" : "green"} textTransform="uppercase">
             {item.type}
           </Text>
         </Flex>
       </Td>
 
-      <Td width="12.5%" minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width="20%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.date}
+            {item.date.toLocaleString()}
           </Text>
         </Flex>
       </Td>
 
-      <Td width={{ _: "37%", laptopL: "35%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "20%", laptopL: "35%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex justifyContent="end">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.transaction}
+            {truncateAddress(item.transaction)}
           </Text>
         </Flex>
       </Td>

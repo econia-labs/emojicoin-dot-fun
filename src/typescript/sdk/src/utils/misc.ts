@@ -1,4 +1,6 @@
+import { HexInput } from "@aptos-labs/ts-sdk";
 import { type CandlestickResolution } from "../const";
+import { normalizeHex } from "./hex";
 
 // No nanoseconds because dealing with overflow is a pain (aka using a bigint) and we don't need it.
 export enum UnitOfTime {
@@ -75,4 +77,25 @@ export const divideWithPrecision = (args: {
   const b = BigInt(args.b);
   const f = BigInt(10 ** decimals);
   return Number((a * f) / b) / Number(f);
+};
+
+export const ADDRESS_FULL_CHAR_LENGTH = 64;
+
+export const truncateAddress = (input: HexInput): string => {
+  let s;
+  if (typeof input === "string") {
+    if (input.startsWith('0x')) {
+      s = input.slice(2);
+    } else {
+      s = input;
+    }
+    if (s.length < ADDRESS_FULL_CHAR_LENGTH) {
+      s = '0'.repeat(ADDRESS_FULL_CHAR_LENGTH - s.length) + s;
+    }
+    s = `0x${s}`;
+  } else {
+    s = input;
+  }
+  const res = normalizeHex(s);
+  return `${res.substring(0, 6)}...${res.substring(res.length - 4, res.length)}`;
 };

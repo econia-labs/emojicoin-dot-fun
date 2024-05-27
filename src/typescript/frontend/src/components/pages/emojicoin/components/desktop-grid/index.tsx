@@ -17,8 +17,9 @@ import {
 import Chat from "../chat";
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
+import { type GridProps } from "../../types";
 
-const DesktopGrid: React.FC = () => {
+const DesktopGrid = (props: GridProps) => {
   const { t } = translationFunction();
 
   return (
@@ -51,7 +52,7 @@ const DesktopGrid: React.FC = () => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <TradeEmojicoin />
+              <TradeEmojicoin data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
         </StyledContentColumn>
@@ -65,7 +66,7 @@ const DesktopGrid: React.FC = () => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <TradeHistory />
+              <TradeHistory data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
 
@@ -77,7 +78,7 @@ const DesktopGrid: React.FC = () => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <Chat />
+              <Chat data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
         </StyledContentColumn>

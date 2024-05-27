@@ -1,4 +1,12 @@
 export type TableRowDesktopProps = {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  item: any;
+  item: {
+    rankIcon: string;
+    rankName: string;
+    apt: string;
+    emoji: string;
+    type: string;
+    price: string;
+    date: Date;
+    transaction: string;
+  };
 };

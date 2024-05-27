@@ -42,7 +42,7 @@ import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING } from "../const";
 import { type SymbolEmojiData, getEmojiData } from "../emoji_data";
 import { divideWithPrecision, sleep } from "./misc";
 import { getAptos } from "./aptos-client";
-import { truncateAddress } from "./aptos-utils";
+import { truncateAddress } from "./misc";
 
 const NUM_TRADERS = 400;
 const TRADES_PER_TRADER = 6;

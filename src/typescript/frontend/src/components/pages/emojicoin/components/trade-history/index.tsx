@@ -8,13 +8,25 @@ import { TableRowDesktop } from "./components";
 import { Table, Text, Th, ThInner, HeaderTr, TBody, EmptyTr } from "components";
 import { StyledTradeHistory } from "./styled";
 
-import { HEADERS, DATA } from "./constants";
+import { HEADERS } from "./constants";
+import { type TradeHistoryProps } from "../../types";
+import { toDecimalsAPT } from "lib/utils/decimals";
+import { rankFromAPTAmount } from "lib/utils/rank";
 
-const TradeHistory: React.FC = () => {
+const TradeHistory = (props: TradeHistoryProps) => {
   const { t } = translationFunction();
   const { offsetHeight: tradeHistoryTableBodyHeight } = useElementDimensions("tradeHistoryTableBody");
 
-  const data = [...DATA, ...DATA, ...DATA, ...DATA, ...DATA];
+  const data = props.data.swaps.map(v => ({
+    ...rankFromAPTAmount(Number(toDecimalsAPT(v.quoteVolume, 3))),
+    apt: v.quoteVolume.toString(),
+    emoji: v.baseVolume.toString(),
+    type: v.isSell ? "sell" : "buy",
+    price: v.avgExecutionPrice.toString(),
+    date: new Date(Number(v.time / 1000n)),
+    transaction: "0x1234", // TODO: Pass tx hash down the component tree.
+  }));
+
   return (
     <StyledTradeHistory>
       <Table minWidth="700px">

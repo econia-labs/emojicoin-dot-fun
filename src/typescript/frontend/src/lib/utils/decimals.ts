@@ -1,7 +1,13 @@
 import { divideWithPrecision } from "@/sdk/utils/misc";
 import { DECIMALS } from "lib/const";
 
-const toDecimalsAPT = (n: number | bigint, displayDecimals?: number): string => {
+const toDecimalsAPT = (input: number | bigint | string, displayDecimals?: number): string => {
+  let n: number | bigint;
+  if (typeof input === "string") {
+    n = BigInt(input);
+  } else {
+    n = input;
+  }
   const num = divideWithPrecision({
     a: n,
     b: Math.pow(10, DECIMALS),

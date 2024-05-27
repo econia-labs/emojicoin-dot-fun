@@ -23,7 +23,7 @@ const Emojicoin = (props: EmojicoinProps) => {
       {typeof props.data !== "undefined" ? (
         <>
           <MainInfo data={props.data} />
-          {isLaptopL ? <DesktopGrid /> : <MobileGrid />}
+          {isLaptopL ? <DesktopGrid data={props.data} /> : <MobileGrid data={props.data} />}
         </>
       ) : (
         <EmojiNotFound />

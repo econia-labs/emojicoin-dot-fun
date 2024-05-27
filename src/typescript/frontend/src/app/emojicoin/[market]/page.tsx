@@ -7,20 +7,16 @@ import { type EmojicoinProps } from "components/pages/emojicoin/types";
 import { APTOS_NETWORK, SHORT_REVALIDATE } from "lib/env";
 import getInitialChatData from "lib/queries/initial/chats";
 import getInitialMarketData from "lib/queries/initial/markets";
+import getInitialSwapData from "lib/queries/initial/swaps";
 
 // We will revalidate the data cache every hour. This can be adjusted later based on how much data is fetched.
 export const revalidate = SHORT_REVALIDATE ? 10 : 3600;
 
 export const generateStaticParams = async () => {
-  // TODO: Fix this. This should be returning static data but it's not.
-  try {
-    const markets = await getInitialMarketData();
-    return markets.map(market => ({
-      market: market.market.metadata.marketID.toString(),
-    }));
-  } catch (e) {
-    return [];
-  }
+  const markets = await getInitialMarketData();
+  return markets.map(market => ({
+    market: market.market.metadata.marketID.toString(),
+  }));
 };
 
 interface EmojicoinPageProps {
@@ -31,20 +27,19 @@ interface EmojicoinPageProps {
 }
 
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
-  console.warn("Building page route:", params.params.market);
-
   const markets = await getInitialMarketData();
   const foundMarket = markets.find(m => m.market.metadata.marketID.toString() === params.params.market);
   // If market is in the top 100 markets, it'll have already been fetched and cached.
   // Use the data.
   if (foundMarket) {
-    console.warn("Found market in top 100 markets:", foundMarket.market.metadata.marketID.toString());
     const { market, emoji } = foundMarket;
     const chatData = await getInitialChatData(market.metadata.marketID);
+    const swapData = await getInitialSwapData(market.metadata.marketID);
 
     return (
       <Emojicoin
         data={{
+          swaps: swapData,
           chats: chatData,
           emoji,
           market,
@@ -71,9 +66,11 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
       marketAddress: metadata.market_address,
     });
     const chatData = getInitialChatData(marketID);
+    const swapData = getInitialSwapData(marketID);
 
-    await Promise.all([marketView, chatData]).then(([market, chats]) => {
+    await Promise.all([marketView, chatData, swapData]).then(([market, chats, swaps]) => {
       componentProps.data = {
+        swaps,
         chats,
         emoji: SYMBOL_DATA.byHex(metadata.emoji_bytes)!,
         market: toMarketView(market),

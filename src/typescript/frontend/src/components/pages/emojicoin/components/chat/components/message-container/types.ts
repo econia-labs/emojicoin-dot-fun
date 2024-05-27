@@ -6,5 +6,5 @@ export type MessageType = {
   user: string;
   text: string;
   userRank: string;
-  incoming: boolean;
+  fromAnotherUser: boolean;
 };
