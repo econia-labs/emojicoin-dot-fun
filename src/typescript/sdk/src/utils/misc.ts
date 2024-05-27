@@ -12,12 +12,12 @@ export enum UnitOfTime {
 
 // No nanoseconds because dealing with overflow is a pain (aka using a bigint) and we don't need it.
 export const UNIT_OF_TIME_MULTIPLIERS: Record<UnitOfTime, number> = {
-  [UnitOfTime.Microseconds]: 1_000,
+  [UnitOfTime.Microseconds]: 1 / 1000,
   [UnitOfTime.Milliseconds]: 1,
-  [UnitOfTime.Seconds]: 1 / 1000,
-  [UnitOfTime.Minutes]: 1 / (1000 * 60),
-  [UnitOfTime.Hours]: 1 / (1000 * 60 * 60),
-  [UnitOfTime.Days]: 1 / (1000 * 60 * 60 * 24),
+  [UnitOfTime.Seconds]: 1000,
+  [UnitOfTime.Minutes]: 1000 * 60,
+  [UnitOfTime.Hours]: 1000 * 60 * 60,
+  [UnitOfTime.Days]: 1000 * 60 * 60 * 24,
 };
 
 /**
@@ -50,14 +50,14 @@ export async function sleep(
  *
  * @example
  * ```
- * const time = now(UnitOfTime.Seconds);
+ * const time = getTime(UnitOfTime.Seconds);
  * // `time` is the number of seconds since the Unix epoch.
- * const time = now(UnitOfTime.Days);
+ * const time = getTime(UnitOfTime.Days);
  * // `time` is the number of days since the Unix epoch.
  * ```
  */
 export function getTime(unitOfTime: UnitOfTime) {
-  return Date.now() * UNIT_OF_TIME_MULTIPLIERS[unitOfTime];
+  return Date.now() / UNIT_OF_TIME_MULTIPLIERS[unitOfTime];
 }
 
 export function getCurrentPeriodBoundary(period: CandlestickResolution) {
