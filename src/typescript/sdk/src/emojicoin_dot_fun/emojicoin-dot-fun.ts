@@ -888,8 +888,8 @@ export class MarketView extends ViewFunctionPayloadBuilder<[JSONTypes.MarketView
     options?: LedgerVersionArg;
   }): Promise<JSONTypes.MarketView> {
     const marketAddress = AccountAddress.from(args.marketAddress);
-    const emojicoin = parseTypeTag(`${marketAddress.toString()}::emojicoin_dot_fun::Emojicoin`);
-    const emojicoinLP = parseTypeTag(`${marketAddress.toString()}::emojicoin_dot_fun::EmojicoinLP`);
+    const emojicoin = parseTypeTag(`${marketAddress.toString()}::coin_factory::Emojicoin`);
+    const emojicoinLP = parseTypeTag(`${marketAddress.toString()}::coin_factory::EmojicoinLP`);
     const [res] = await new MarketView({
       ...args,
       typeTags: [emojicoin, emojicoinLP],

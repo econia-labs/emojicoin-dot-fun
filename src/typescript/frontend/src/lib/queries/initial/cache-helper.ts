@@ -10,13 +10,13 @@ import { SHORT_REVALIDATE } from "lib/env";
  * endpoint is not set up yet.
  *
  */
-export const fetchInitialWithFallback = async <T, T2>({
+export const fetchInitialWithFallback = async <T1, T2>({
   functionArgs,
   queryFunction,
   endpoint,
 }: {
   functionArgs: T2;
-  queryFunction: (args: T2) => Promise<T>;
+  queryFunction: (args: T2) => Promise<T1>;
   endpoint: string | URL;
 }) => {
   const vercel = process.env.VERCEL === "1";
@@ -25,16 +25,13 @@ export const fetchInitialWithFallback = async <T, T2>({
   // For the inner cache, since it may be used elsewhere independently.
   const revalidate = INITIAL_REVALIDATION_TIMES[SHORT_REVALIDATE ? "short" : "long"];
 
-  let fn: (args: T2) => Promise<T>;
+  let fn: (args: T2) => Promise<T1>;
 
-  if (vercel && local) {
+  if ((vercel && local) || process.env.NEXT_PUBLIC_FORCE_STATIC_FETCH === "true") {
     console.warn("Warning: This vercel build is using `localhost:3000` as the inbox endpoint.");
     console.warn("Using sample market data.");
 
-    fn = async () => (await fetch(endpoint, { next: { revalidate } })) as T;
-    console.log('-'.repeat(100));
-    console.log(functionArgs);
-    console.log(fn(functionArgs));
+    fn = async (_args: T2) => fetch(endpoint, { next: { revalidate } }).then(r => r.json().then(j => j as T1));
   } else {
     fn = queryFunction;
   }

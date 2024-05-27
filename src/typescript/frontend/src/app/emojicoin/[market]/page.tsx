@@ -31,7 +31,7 @@ interface EmojicoinPageProps {
 }
 
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
-  console.log("Building page route:", params.params.market);
+  console.warn("Building page route:", params.params.market);
   const marketID = BigInt(params.params.market);
   const aptos = getAptos(APTOS_NETWORK);
   // TODO: Optimize these calls..? If we index by market ID in the db it'll be much quicker to just
