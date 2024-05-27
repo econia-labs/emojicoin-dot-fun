@@ -2,8 +2,19 @@
 /* eslint-disable import/no-unused-modules */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
-// Helper script used to generate lots of trade and chat data.
-// TODO: Add liquidity provision and removal.
+/*
+ * Helper script used to generate lots of trade and chat data.
+ *
+ * Run with `pnpm tsx <THIS_FILE>` or `pnpm run generate-data`.
+ *
+ * This assumes you already have a docker instance running with the postgrest API URL at
+ * the env variable `INBOX_URL`.
+ *
+ * It also implicitly uses the `START_NODE_FOR_TEST` env variable to determine whether or not to
+ * start a new Aptos node for the test. This is similar to how the e2e unit tests work.
+ *
+ * TODO: Add liquidity provision and removal.
+ * */
 
 import {
   Account,
@@ -12,11 +23,14 @@ import {
   Ed25519PrivateKey,
   APTOS_COIN,
   type Aptos,
-  TypeTag,
-  AptosConfig,
+  type TypeTag,
+  type AptosConfig,
 } from "@aptos-labs/ts-sdk";
 import { TextDecoder } from "util";
-import { getEmojicoinMarketAddressAndTypeTags, registerMarketAndGetEmojicoinInfo } from "./utils";
+import {
+  getEmojicoinMarketAddressAndTypeTags,
+  registerMarketAndGetEmojicoinInfo,
+} from "../markets/utils";
 import { getRegistryAddress, getEvents } from "../emojicoin_dot_fun";
 import { publishForTest } from "../../tests/utils";
 import { Chat, MarketMetadataByEmojiBytes, Swap } from "../emojicoin_dot_fun/emojicoin-dot-fun";
@@ -25,10 +39,10 @@ import { type Events } from "../emojicoin_dot_fun/events";
 import { type EmojicoinInfo } from "../types/contract";
 import { getRandomEmoji } from "../emoji_data/symbol-data";
 import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING } from "../const";
-import { SymbolEmojiData, getEmojiData } from "../emoji_data";
-import { divideWithPrecision, sleep } from "../utils/misc";
-import { getAptos } from "../utils/aptos-client";
-import { truncateAddress } from "../utils/aptos-utils";
+import { type SymbolEmojiData, getEmojiData } from "../emoji_data";
+import { divideWithPrecision, sleep } from "./misc";
+import { getAptos } from "./aptos-client";
+import { truncateAddress } from "./aptos-utils";
 
 const NUM_TRADERS = 400;
 const TRADES_PER_TRADER = 6;
@@ -46,7 +60,7 @@ if (!(NUM_TRADERS % CHUNK_SIZE === 0)) {
   throw new Error("NUM_TRADERS must be divisible by CHUNK_SIZE");
 }
 
-async function spam() {
+async function main() {
   const aptos = getAptos(process.env.APTOS_NETWORK!);
   const registryAddress = await setupTest(aptos);
 
@@ -103,12 +117,12 @@ async function spam() {
       // In case we ever want to loop this entire loop, you could fetch the user's sequence number
       // here instead of assuming it's 0.
       const sequenceNumber = 0;
-      const results = amounts.map(async (amt, i) => {
+      const results = amounts.map(async (amt, ii) => {
         try {
           await sleep(Math.random() * 1000 + 1000);
           const { swap, chat } = await submitTradeAndRandomChatMessage({
             aptosConfig: aptos.config,
-            sequenceNumber: sequenceNumber + i * 2,
+            sequenceNumber: sequenceNumber + ii * 2,
             marketAddress: market.marketAddress,
             typeTags: [market.emojicoin, market.emojicoinLP],
             user: t,
@@ -120,7 +134,7 @@ async function spam() {
             },
           });
 
-          return swap.then(async (res) => {
+          return await swap.then(async (res) => {
             const chatEvents = (await chat).events;
             res.events.push(...chatEvents);
             const events = getEvents(res);
@@ -136,12 +150,12 @@ async function spam() {
     const tradeResults = Promise.all(trades).then((res) => {
       const curated = res
         .flat()
-        .filter((v): v is [UserTransactionResponse, Events] => typeof v !== "undefined")
-        .toSorted((tx_a, tx_b) => {
-          const a = Number(tx_a[0].version);
-          const b = Number(tx_b[0].version);
-          return a - b;
-        });
+        .filter((v): v is [UserTransactionResponse, Events] => typeof v !== "undefined");
+      curated.sort((tx_a, tx_b) => {
+        const a = Number(tx_a[0].version);
+        const b = Number(tx_b[0].version);
+        return a - b;
+      });
       printTradeResults(curated);
       return curated;
     });
@@ -318,26 +332,26 @@ const generateRandomTrades = ({
   totalTradeAmount: bigint;
 }): bigint[] => {
   if (numTrades % 2 !== 0 && numTrades !== 1) {
-    throw new Error("N must be an even number to ensure paired buy/sell trades.");
+    throw new Error("`numTrades` must be an even number to ensure paired buy/sell trades.");
   }
 
   const trades: bigint[] = Array.from({ length: numTrades });
   let remainingPercentage = 100;
   const buyPercentages: number[] = [];
 
-  // Generate random buy percentages that sum up to 100
-  for (let i = 0; i < numTrades / 2; i++) {
+  // Generate random buy percentages that sum up to 100.
+  for (let i = 0; i < numTrades / 2; i += 1) {
     const maxPercentage = remainingPercentage - (numTrades / 2 - i - 1);
     const buyPercentage = Math.random() * (maxPercentage - 1) + 1;
     buyPercentages.push(buyPercentage);
     remainingPercentage -= buyPercentage;
   }
 
-  // Adjust the last buy percentage to exactly sum to 100
+  // Adjust the last buy percentage to exactly sum to 100.
   buyPercentages[buyPercentages.length - 1] += remainingPercentage;
 
-  // Create buy trades
-  for (let i = 0; i < buyPercentages.length; i++) {
+  // Create buy trades.
+  for (let i = 0; i < buyPercentages.length; i += 1) {
     trades[i * 2] = (totalTradeAmount * BigInt(Math.floor(buyPercentages[i]))) / 100n;
     trades[i * 2 + 1] = BigInt(Math.floor(Math.random() * 100)) * trades[i * 2];
   }
@@ -379,14 +393,14 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
     const swap = events.swapEvents[0] ? events.swapEvents[0] : null;
     if (state && swap) {
       const textDecoder = new TextDecoder("utf-8");
-      const emoji = textDecoder.decode(state.market_metadata.emoji_bytes);
+      const emoji = textDecoder.decode(state.marketMetadata.emojiBytes);
       const aptSpent = divideWithPrecision({
-        a: state.clamm_virtual_reserves.quote - QUOTE_VIRTUAL_FLOOR,
+        a: state.clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
         b: ONE_APT,
         decimals: 3,
       }).toFixed(3);
       const quoteLeftBeforeTransition = divideWithPrecision({
-        a: QUOTE_VIRTUAL_CEILING - state.clamm_virtual_reserves.quote,
+        a: QUOTE_VIRTUAL_CEILING - state.clammVirtualReserves.quote,
         b: BigInt(ONE_APT),
         decimals: 3,
       }).toFixed(3);
@@ -394,9 +408,9 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
       const quoteLeft = `${quoteLeftBeforeTransition} to go before we transition into CPAMM!`;
       const s =
         `Trade #${eventNum} for ${swap.swapper.toString()} completed for emoji market: ${emoji}` +
-        ` with market ID: ${state.market_metadata.market_id}` +
+        ` with market ID: ${state.marketMetadata.marketID}` +
         ` at version: ${Number(res.version)}. ${
-          !swap.results_in_state_transition
+          !swap.resultsInStateTransition
             ? `${spendOnBondingCurve} ${quoteLeft}`
             : "We're already in the CPAMM!"
         }`;
@@ -405,17 +419,17 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
     const chat = events.chatEvents[0] ? events.chatEvents[0] : null;
     if (chat) {
       const textDecoder = new TextDecoder("utf-8");
-      const emoji = textDecoder.decode(chat.market_metadata.emoji_bytes);
-      const balAsFraction = chat.balance_as_fraction_of_circulating_supply_q64;
+      const emoji = textDecoder.decode(chat.marketMetadata.emojiBytes);
+      const balAsFraction = chat.balanceAsFractionOfCirculatingSupply;
       const s =
         `Chat message sent from ${chat.user} for emoji market: ${emoji}` +
-        ` with market ID: ${chat.market_metadata.market_id}` +
+        ` with market ID: ${chat.marketMetadata.marketID}` +
         ` at version: ${Number(res.version)}. User owns ${balAsFraction}%` +
-        ` of the circulating supply: ${chat.circulating_supply}. User says "${chat.message}"`;
+        ` of the circulating supply: ${chat.circulatingSupply}. User says "${chat.message}"`;
 
       console.debug(s);
     }
-    const outOfBondingCurve = events.swapEvents.some((event) => event.results_in_state_transition);
+    const outOfBondingCurve = events.swapEvents.some((event) => event.resultsInStateTransition);
 
     if (outOfBondingCurve) {
       console.log(
@@ -425,4 +439,4 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
   });
 };
 
-spam().then(() => console.log("Done!"));
+main().then(() => console.log("\nDone!"));
