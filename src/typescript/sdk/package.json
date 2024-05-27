@@ -51,6 +51,7 @@
     "e2e-test": "pnpm jest tests/e2e",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
+    "generate-data": "pnpm tsx src/utils/mock-data.ts",
     "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",
     "lint:fix": "pnpm lint --fix",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
