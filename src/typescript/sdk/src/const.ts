@@ -28,6 +28,9 @@ if (!VERCEL) {
   if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
     throw new Error("Missing NEXT_PUBLIC_MODULE_ADDRESS environment variable.");
   }
+  if (process.env.NEXT_PUBLIC_MODULE_ADDRESS !== process.env.MODULE_ADDRESS) {
+    throw new Error("NEXT_PUBLIC_MODULE_ADDRESS and MODULE_ADDRESS environment variables do not match.");
+  }
   // TODO: Verify this works as expected.
   // Regardless, it will likely error out if it isn't loaded first.
   process.env.MODULE_ADDRESS = process.env.NEXT_PUBLIC_MODULE_ADDRESS;
