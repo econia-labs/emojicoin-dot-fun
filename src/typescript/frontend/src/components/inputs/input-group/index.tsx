@@ -30,6 +30,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
             mb="20px"
             textTransform="uppercase"
             htmlFor={forId}
+            className={props.className}
           >
             {label}
           </Text>

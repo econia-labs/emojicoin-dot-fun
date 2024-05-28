@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { Flex, FlexGap } from "@/containers";
 import { Text } from "components";
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import {
   StyledMobileContentWrapper,
@@ -13,10 +13,11 @@ import {
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
 import Chat from "../chat";
+import { type GridProps } from "../../types";
 
-const MobileGrid: React.FC = () => {
+const MobileGrid = (props: GridProps) => {
   const [tab, setTab] = useState(1);
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   return (
     <StyledMobileContentWrapper>
@@ -59,13 +60,13 @@ const MobileGrid: React.FC = () => {
 
         <StyledMobileContentInner>
           {tab === 1 ? (
-            <TradeHistory />
+            <TradeHistory data={props.data} />
           ) : tab === 2 ? (
             <Flex width="100%" justifyContent="center" px="17px">
-              <TradeEmojicoin />
+              <TradeEmojicoin data={props.data} />
             </Flex>
           ) : (
-            <Chat />
+            <Chat data={props.data} />
           )}
         </StyledMobileContentInner>
       </StyledMobileContentBlock>

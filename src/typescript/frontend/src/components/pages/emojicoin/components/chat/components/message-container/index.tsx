@@ -12,10 +12,12 @@ import {
 } from "./styled";
 
 import { type MessageContainerProps } from "./types";
+import { EXTERNAL_LINK_PROPS } from "components/link";
+import { toExplorerLink } from "lib/utils/explorer-link";
 
 const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
   return (
-    <StyledMessageContainer isIncoming={message.incoming}>
+    <StyledMessageContainer fromAnotherUser={message.fromAnotherUser}>
       <StyledMessageWrapper>
         <StyledMessageInner>
           <Text textScale="bodySmall" color="black" pt="2px">
@@ -27,9 +29,11 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
 
         <StyledUserNameWrapper>
           <FlexGap gap="10px">
-            <Text textScale="pixelHeading4" color="lightGrey" textTransform="uppercase">
-              {message.user}
-            </Text>
+            <a {...EXTERNAL_LINK_PROPS} href={toExplorerLink({ value: message.version, type: "version" })}>
+              <Text textScale="pixelHeading4" color="lightGrey" textTransform="uppercase">
+                {message.user}
+              </Text>
+            </a>
 
             <Text textScale="pixelHeading4" color="lightGrey" textTransform="uppercase">
               {message.userRank}

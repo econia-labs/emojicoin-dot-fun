@@ -43,4 +43,5 @@ export interface TextProps extends SpaceProps, TypographyProps, LayoutProps, Opa
   textScale?: ResponsiveValue<Scales>;
   direction?: "ltr" | "rtl";
   wordBreak?: React.CSSProperties["wordBreak"];
+  className?: string;
 }

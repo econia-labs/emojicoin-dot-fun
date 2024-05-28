@@ -1,87 +1,88 @@
-import { css, type DefaultTheme } from "styled-components";
 import { system, type Config } from "styled-system";
 
 import { scales } from "./types";
 import { fontWeight } from "theme/base";
 import { type FontWeight } from "theme/types";
 
-export const styles = (theme: DefaultTheme) => {
-  return {
-    [scales.pixelDisplay1]: css`
-      font-family: ${theme.fonts.pixelar};
+export const textStyles = (k: keyof typeof scales) => {
+  const st = {
+    [scales.pixelDisplay1]: `
+      font-family: var(--font-pixelar);
       font-size: 128px;
       line-height: 160px;
     `,
-    [scales.display1]: css`
+    [scales.display1]: `
       font-size: 95px;
       line-height: 96px;
-      font-family: ${theme.fonts.formaM};
+      font-family: var(--font-formaM);
     `,
-    [scales.display2]: css`
+    [scales.display2]: `
       font-size: 64px;
       line-height: 64px;
-      font-family: ${theme.fonts.formaM};
+      font-family: var(--font-formaM);
     `,
-    [scales.display3]: css`
+    [scales.display3]: `
       font-size: 48px;
       line-height: 65px;
-      font-family: ${theme.fonts.formaM};
+      font-family: var(--font-formaM);
     `,
-    [scales.display4]: css`
+    [scales.display4]: `
       font-size: 28px;
       line-height: 48px;
     `,
-    [scales.display5]: css`
+    [scales.display5]: `
       font-size: 20px;
       line-height: 48px;
     `,
-    [scales.display6]: css`
+    [scales.display6]: `
       font-size: 15px;
       line-height: 20px;
     `,
-    [scales.pixelHeading1]: css`
+    [scales.pixelHeading1]: `
       font-size: 64px;
       line-height: 48px;
-      font-family: ${theme.fonts.pixelar};
+      font-family: var(--font-pixelar);
     `,
-    [scales.pixelHeading2]: css`
+    [scales.pixelHeading2]: `
       font-size: 40px;
       line-height: 50px;
-      font-family: ${theme.fonts.pixelar};
+      font-family: var(--font-pixelar);
     `,
-    [scales.pixelHeading3]: css`
+    [scales.pixelHeading3]: `
       font-size: 32px;
       line-height: 40px;
-      font-family: ${theme.fonts.pixelar};
+      font-family: var(--font-pixelar);
     `,
-    [scales.pixelHeading4]: css`
+    [scales.pixelHeading4]: `
       font-size: 20px;
       line-height: 25px;
-      font-family: ${theme.fonts.pixelar};
+      font-family: var(--font-pixelar);
     `,
-    [scales.heading1]: css`
+    [scales.heading1]: `
       font-size: 28px;
       line-height: 18px;
-      font-family: ${theme.fonts.formaM};
+      font-family: var(--font-formaM);
     `,
-    [scales.heading2]: css`
+    [scales.heading2]: `
       font-size: 20px;
       line-height: 18px;
-      font-family: ${theme.fonts.formaM};
+      font-family: var(--font-formaM);
     `,
-    [scales.bodyLarge]: css`
+    [scales.bodyLarge]: `
       font-size: 16px;
       line-height: 18px;
     `,
-    [scales.bodySmall]: css`
+    [scales.bodySmall]: `
       font-size: 12px;
       line-height: 18px;
     `,
-    [scales.bodyXSmall]: css`
+    [scales.bodyXSmall]: `
       font-size: 10px;
       line-height: 18px;
     `,
   };
+
+  return st[k];
 };
 
 const config: Config = {

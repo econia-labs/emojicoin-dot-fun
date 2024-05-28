@@ -36,16 +36,11 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
       }}
     >
       <DropdownMenuInner>
-        <Text
-          textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
-          color="black"
-          textTransform="uppercase"
-          ref={ref}
-          ellipsis
-        >
-          {title}
-        </Text>
-
+        <div ref={ref} className="med-pixel-text">
+          <Text color="black" textTransform="uppercase" ellipsis>
+            {title}
+          </Text>
+        </div>
         {isMultiple && values ? (
           <Checkbox
             ml="2px"

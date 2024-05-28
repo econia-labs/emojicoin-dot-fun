@@ -1,47 +1,24 @@
-import { Account, AccountAddress, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 import dotenv from "dotenv";
 import path from "path";
-import { getGitRoot } from "../tests/utils/helpers";
 
-// Load environment variables from .env file if we're not running a deployment on Vercel.
-const VERCEL = process.env.VERCEL === "1";
+export const VERCEL = process.env.VERCEL === "1";
 if (!VERCEL) {
-  // For local development and GitHub Actions CI/CD.
-  const envPath = path.join(getGitRoot(), "src", "typescript", "sdk", ".env");
-  dotenv.config({ path: envPath });
-  // If the publisher private key is not set by now, throw an error.
-  if (!process.env.PUBLISHER_PK) {
-    /* eslint-disable-next-line no-console */
-    console.warn("Missing PUBLISHER_PK environment variable for test, using the default value.");
-    process.env.PUBLISHER_PK = "29479e9e5fe47ba9a8af509dd6da1f907510bcf8917bfb19b7079d8c63c0b720";
-  }
-
-  // Get the derived account from the private key.
-  const derivedAccount = Account.fromPrivateKey({
-    privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK),
-  });
-
-  // Update the MODULE_ADDRESS env variable to the derived account address.
-  process.env.MODULE_ADDRESS = derivedAccount.accountAddress.toString();
-} else {
-  // For Vercel deployments.
-  if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
-    throw new Error("Missing NEXT_PUBLIC_MODULE_ADDRESS environment variable.");
-  }
-  // TODO: Verify this works as expected.
-  // Regardless, it will likely error out if it isn't loaded first.
-  process.env.MODULE_ADDRESS = process.env.NEXT_PUBLIC_MODULE_ADDRESS;
+  // Synchronous require is necessary here.
+  /* eslint-disable global-require */
+  const { getGitRoot } = require("../tests/utils/helpers");
+  const sdkPath = path.join(getGitRoot(), "src", "typescript", "sdk", ".env");
+  dotenv.config({ path: sdkPath });
+  const frontendPath = path.join(getGitRoot(), "src", "typescript", "frontend", ".env");
+  dotenv.config({ path: frontendPath });
 }
 
-// Import this in `pre-test.js` to force it to load the environment variables before running tests.
-export const getPublisherPKForTest = () => process.env.PUBLISHER_PK;
-
-if (!process.env.MODULE_ADDRESS) {
-  throw new Error("Missing MODULE_ADDRESS environment variable");
+if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
+  throw new Error("Missing NEXT_PUBLIC_MODULE_ADDRESS environment variable");
 } else if (!process.env.INBOX_URL) {
   throw new Error("Missing INBOX_URL environment variable");
 }
-export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.MODULE_ADDRESS))();
+export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const INBOX_URL = process.env.INBOX_URL!;
 
 export const ONE_APT = 1 * 10 ** 8;

@@ -19,6 +19,7 @@ export interface BoxProps extends BorderProps, LayoutProps, PositionProps, Space
   ellipsis?: boolean;
   cursor?: React.CSSProperties["cursor"];
   pointerEvents?: React.CSSProperties["pointerEvents"];
+  className?: string;
 }
 
 export interface BoxThemedProps extends BoxProps {

@@ -10,12 +10,12 @@ import {
 } from "./query-helper";
 import { wrap } from "./utils";
 
-export const paginateUserSwapEvents = async (
+export const paginateSwapEvents = async (
   args: Omit<AggregateQueryResultsArgs, "query"> & {
     swapper?: string;
     marketID?: number | bigint;
   }
-): Promise<EventsAndErrors<ContractTypes.SwapEvent>> => {
+) => {
   const { inboxUrl = INBOX_URL, swapper, marketID } = args;
 
   let query = new PostgrestClient(inboxUrl)
@@ -24,18 +24,20 @@ export const paginateUserSwapEvents = async (
     .filter("type", "eq", STRUCT_STRINGS.SwapEvent)
     .order("transaction_version", ORDER_BY.DESC);
 
-  query = marketID ? query.eq("data->market_metadata->market_id", wrap(marketID)) : query;
+  query = marketID ? query.eq("data->market_id", wrap(marketID)) : query;
   query = swapper ? query.eq("data->swapper", wrap(swapper)) : query;
 
-  const res = await aggregateQueryResults<JSONTypes.SwapEvent>({
+  const { data, errors } = await aggregateQueryResults<JSONTypes.SwapEvent>({
     ...args,
     query,
   });
 
-  return {
-    events: res.data.map((e) => toSwapEvent(e)),
-    errors: res.errors,
-  };
+  if (errors.some((e) => e)) {
+    /* eslint-disable-next-line no-console */
+    console.warn("Error fetching chat events", errors);
+  }
+
+  return data;
 };
 
 // These will always be distinct, so `distinct on` is not necessary.

@@ -10,11 +10,12 @@ import { StyledButtonsWrapper } from "./styled";
 
 import { useTooltip } from "hooks";
 
-import { useThemeContext, useTranslation } from "context";
+import { useThemeContext } from "context";
 import { getTooltipStyles } from "../theme";
 
 import { type MultipleSelectProps, type Option } from "../types";
 import { type TooltipOptions } from "hooks/use-tooltip/types";
+import { translationFunction } from "context/language-context";
 
 const MultipleSelect: React.FC<MultipleSelectProps> = ({
   titleProps,
@@ -37,7 +38,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
   const [selectedOptions, setSelectedOptions] = useState(value);
 
   const { theme } = useThemeContext();
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const DropdownComponent = dropdownComponent;
 

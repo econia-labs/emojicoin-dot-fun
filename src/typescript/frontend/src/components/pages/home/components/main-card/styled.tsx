@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Text } from "components/text";
 import Image from "components/image";
 
-export const StyledEmoji = styled(Text)`
+export const StyledEmoji = styled.div`
   position: absolute;
   left: 61%;
   transform: translateX(-50%);

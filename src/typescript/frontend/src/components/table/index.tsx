@@ -9,11 +9,13 @@ interface TrProps extends LayoutProps {
   hover?: boolean;
 }
 
-const getBorderOnHover = ({ hover }: TrProps) => {
+const getStylesOnHover = ({ hover }: TrProps) => {
   if (hover) {
     return css`
       border-bottom: 1px solid ${({ theme }) => theme.colors.econiaBlue};
       border-top: 1px solid ${({ theme }) => theme.colors.econiaBlue} !important;
+      filter: brightness(1.2);
+      background-color: rgba(255, 255, 255, 0.02);
     `;
   }
 };
@@ -65,7 +67,7 @@ export const Tr = styled.tr<TrProps>`
   width: 100%;
 
   &:hover {
-    ${getBorderOnHover}
+    ${getStylesOnHover}
   }
 
   &:first-child {

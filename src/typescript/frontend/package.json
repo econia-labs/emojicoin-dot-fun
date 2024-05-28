@@ -16,7 +16,6 @@
     "@emotion/is-prop-valid": "^1.2.2",
     "@popperjs/core": "^2.11.8",
     "@reduxjs/toolkit": "^1.9.5",
-    "axios": "^1.5.0",
     "emoji-picker-react": "^4.9.2",
     "emoji-regex": "^10.3.0",
     "formik": "^2.4.4",
@@ -59,13 +58,10 @@
   "private": true,
   "scripts": {
     "_format": "prettier './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
-    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "build": "next build",
-    "build-dev": "chmod +x ./scripts/build-dev.sh && ./scripts/build-dev.sh",
-    "build-prod": "chmod +x ./scripts/build-prod.sh && ./scripts/build-prod.sh",
-    "build:debug": "export BUILD_DEBUG=true && pnpm clean && next build --no-lint --no-mangling --debug && export BUILD_DEBUG=\"\"",
+    "build:debug": "BUILD_DEBUG=true && pnpm clean && next build --no-lint --no-mangling --debug",
     "clean": "rm -rf .next",
-    "dev": "next dev --turbo",
+    "dev": "NODE_OPTIONS='--inspect' next dev --turbo",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
     "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
@@ -73,7 +69,7 @@
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
-    "start": "next start"
+    "start": "next start --port 3001"
   },
   "version": "0.0.1"
 }

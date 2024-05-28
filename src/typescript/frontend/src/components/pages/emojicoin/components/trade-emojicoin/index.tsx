@@ -5,15 +5,17 @@ import React, { useState } from "react";
 import { Flex, Column } from "@/containers";
 import { Text, Button, InputGroup, InputNumeric } from "components";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import { StyledInputWrapper, StyledArrowWrapper, StyledInputContainer } from "./styled";
 import { Arrow } from "components/svg";
+import { type TradeEmojicoinProps } from "../../types";
+import AptosIconBlack from "components/svg/icons/AptosBlack";
 
-const TradeEmojicoin: React.FC = () => {
+const TradeEmojicoin = (props: TradeEmojicoinProps) => {
   const [isForce, setIsForce] = useState(true);
 
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const switchHandler = () => {
     setIsForce(!isForce);
@@ -38,7 +40,7 @@ const TradeEmojicoin: React.FC = () => {
           </Column>
 
           <Text textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }} color="lightGrey">
-            APT
+            <AptosIconBlack style={{ marginTop: 5, marginRight: 3 }} height="27px" width="27px" />
           </Text>
         </StyledInputWrapper>
 
@@ -64,7 +66,7 @@ const TradeEmojicoin: React.FC = () => {
             pt="6px"
             color="lightGrey"
           >
-            🖤
+            {props.data.emoji.emoji}
           </Text>
         </StyledInputWrapper>
       </StyledInputContainer>

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useScramble } from "use-scramble";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 import { Flex, FlexGap } from "@/containers";
 import { Text } from "components/text";
 
@@ -11,7 +11,7 @@ import { type TableHeaderSwitcherPops } from "./types";
 
 const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2 }) => {
   const [isActive, setIsActive] = useState(true);
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const { ref: ref1, replay: replay1 } = useScramble({
     text: `${t(title1)}`,

@@ -22,6 +22,8 @@ const Image: React.FC<ImageProps> = ({ src, width, alt, variant, animation, aspe
         onLoad={() => {
           setLoading(false);
         }}
+        className={props.className}
+        id={props.id}
       />
     </ResponsiveBox>
   );

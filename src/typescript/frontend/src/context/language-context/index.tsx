@@ -1,142 +1,22 @@
-"use client";
+import translations from "../../../public/locales/en-US.json";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+export const simpleTranslation = (s: keyof typeof translations) => translations[s];
 
-import { EN, languages, LOCAL_STORAGE_KEYS } from "configs";
-import { getLanguageCodeFromLocalStorage, translatedTextIncludesVariable } from "./helpers";
-
-import {
-  type ContextApi,
-  type ContextData,
-  type ContextType,
-  type Language,
-  type TranslationKey,
-  type LanguageContextProviderProps,
-} from "./types";
-import { fetchLocale } from "lib/fetch-locale";
-
-const initialState: ContextType = {
-  isFetching: true,
-  currentLanguage: EN,
-};
-
-const langKey = LOCAL_STORAGE_KEYS.language;
-// TODO add type into MAP
-export const languageMap = new Map();
-
-// function to translate text not in components
-// Usage: const translate = t(language);
-//        translate("Some Text")
-export const t = (currentLanguage: string | null | undefined) => (key: string) => {
-  const translationSet = languageMap.get(currentLanguage) ?? languageMap.get(EN.locale);
-  const translatedText = translationSet && translationSet[key] ? translationSet[key] : key;
-
-  return translatedText;
-};
-
-const LanguageContext = createContext<ContextApi | null>(null);
-
-const LanguageContextProvider: React.FC<LanguageContextProviderProps> = ({ fallback, children }) => {
-  const [state, setState] = useState(() => {
-    const codeFromStorage = getLanguageCodeFromLocalStorage();
-
-    return {
-      ...initialState,
-      currentLanguage: codeFromStorage in languages ? languages[codeFromStorage as keyof typeof languages] : EN,
-    };
-  });
-
-  const { currentLanguage } = state;
-
-  const fetchInitialLocales = async () => {
-    // TODO - recheck to remove double logic from line 35
-    let codeFromStorage = getLanguageCodeFromLocalStorage();
-
-    if (!(codeFromStorage in languages)) {
-      codeFromStorage = EN.locale;
-    }
-
-    const initialLocale = await fetchLocale(codeFromStorage);
-
-    if (initialLocale) {
-      languageMap.set(codeFromStorage, { ...initialLocale });
-      localStorage.setItem(langKey, codeFromStorage);
-    }
-
-    setState(prevState => ({
-      ...prevState,
-      isFetching: false,
-    }));
-  };
-
-  useEffect(() => {
-    fetchInitialLocales();
-  }, []);
-
-  const changeLanguage = useCallback(async (language: Language) => {
-    if (!languageMap.has(language.locale)) {
-      setState(prevState => ({
-        ...prevState,
-        isFetching: true,
-      }));
-
-      const locale = await fetchLocale(language.locale);
-
-      if (locale) {
-        const enLocale = languageMap.get(EN.locale);
-        languageMap.set(language.locale, { ...enLocale, ...locale });
-      }
-
-      localStorage.setItem(langKey, language.locale);
-
-      setState(prevState => ({
-        ...prevState,
-        isFetching: false,
-        currentLanguage: language,
-      }));
-    } else {
-      localStorage.setItem(langKey, language.locale);
-      setState(prevState => ({
-        ...prevState,
-        isFetching: false,
-        currentLanguage: language,
-      }));
-    }
-  }, []);
-
-  const translate = useCallback(
-    (key: TranslationKey, data?: ContextData) => {
-      const translationSet = languageMap.get(currentLanguage.locale) ?? languageMap.get(EN.locale);
-      const translatedText = translationSet && translationSet[key] ? translationSet[key] : key;
-
-      // Check the existence of at least one combination of %%, separated by 1 or more non space characters
-      const includesVariable = translatedTextIncludesVariable(translatedText);
-
-      if (includesVariable && data) {
-        let interpolatedText = translatedText;
-        Object.keys(data).forEach(dataKey => {
-          const templateKey = new RegExp(`%${dataKey}%`, "g");
-          interpolatedText = interpolatedText.replace(templateKey, data[dataKey].toString());
-        });
-
-        return interpolatedText;
-      }
-
-      return translatedText;
-    },
-    [currentLanguage],
-  );
-
-  if (state.isFetching && fallback) {
-    return fallback;
-  }
-
-  return (
-    <LanguageContext.Provider value={{ ...state, changeLanguage, t: translate }}>{children}</LanguageContext.Provider>
-  );
-};
-
-export const useTranslation = () => {
+/**
+ * There is no reason to pollute the entire codebase with useContext(LanguageContext) when we only have
+ * a single language context. To avoid heavily refactoring the entire app, we'll just have `useTranslation` return
+ * the context value.
+ *
+ * If we want to provide the translation later, we can re-add this hook and make it so that it returns a component
+ * <p> that wraps the children with the context provider. This way we can isolate server components from client
+ * components without polluting the entire app.
+ *
+ * For now, since we only provide English translations, there's no reason to even have a context provider anywhere.
+ *
+ * @returns a translated string, not a function.
+ */
+export const translationFunction = () => {
+  /*
   const languageContext = useContext(LanguageContext);
 
   if (languageContext === null) {
@@ -144,6 +24,9 @@ export const useTranslation = () => {
   }
 
   return languageContext;
-};
+  */
 
-export default LanguageContextProvider;
+  return {
+    t: (s: string) => translations[s] ?? s,
+  };
+};

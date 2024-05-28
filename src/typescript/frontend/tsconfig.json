@@ -24,14 +24,8 @@
       "@/containers": [
         "components/layout/components/index.ts"
       ],
-      "@/fonts/*": [
-        "styles/fonts/*"
-      ],
       "@/sdk/*": [
         "../../sdk/src/*"
-      ],
-      "@/static/*": [
-        "../public/static/*"
       ]
     },
     "plugins": [
