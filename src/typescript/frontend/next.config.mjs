@@ -31,7 +31,6 @@ const nextConfig = {
   },
   compiler: {
     styledComponents: DEBUG ? styledComponentsConfig : true,
-    removeConsole: !DEBUG,
   },
   ...(DEBUG ? debugConfigOptions : {}),
   transpilePackages: ["@/sdk"],
