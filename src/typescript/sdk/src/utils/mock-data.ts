@@ -127,7 +127,6 @@ async function main() {
             user: t,
             tradeInputs: {
               inputAmount: amt,
-              // isSell: amt < 0n, // Determined automatically by `amt` < 0n.
               integrator: PUBLISHER.accountAddress,
               integratorFeeRateBps: 0,
             },
