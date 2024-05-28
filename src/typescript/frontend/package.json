@@ -65,7 +65,7 @@
     "build-prod": "chmod +x ./scripts/build-prod.sh && ./scripts/build-prod.sh",
     "build:debug": "export BUILD_DEBUG=true && pnpm clean && next build --no-lint --no-mangling --debug && export BUILD_DEBUG=\"\"",
     "clean": "rm -rf .next",
-    "dev": "next dev --turbo",
+    "dev": "NODE_OPTIONS='--inspect' next dev --turbo",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
     "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
