@@ -38,7 +38,7 @@ export const StyledColoredText = styled(Text)`
   border: 1px solid ${({ theme }) => theme.colors.transparent};
 
   ${StyledItemWrapper}:hover & {
-    color: var(--econia-blue);
+    color: ${darkColors.econiaBlue};
   }
 `;
 

@@ -6,7 +6,3 @@ export const ROUTES = {
   launchEmojicoin: "/launch-emojicoin",
   pools: "/pools",
 } as const;
-
-export const ROUTE_PARAMS = {};
-
-export const SEARCH_PARAMS = {};
