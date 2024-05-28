@@ -1,32 +1,38 @@
 import { Account, AccountAddress, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
 import dotenv from "dotenv";
 import path from "path";
-import { getGitRoot } from "../tests/utils/helpers";
-
-// Load environment variables from .env file if we're not running a deployment on Vercel.
-const VERCEL = process.env.VERCEL === "1";
-if (!VERCEL) {
-  // For local development and GitHub Actions CI/CD.
-  const envPath = path.join(getGitRoot(), "src", "typescript", "sdk", ".env");
-  dotenv.config({ path: envPath });
-  // If the publisher private key is not set by now, throw an error.
-  if (!process.env.PUBLISHER_PK) {
-    /* eslint-disable-next-line no-console */
-    console.warn("Missing PUBLISHER_PK environment variable for test, using the default value.");
-    process.env.PUBLISHER_PK = "29479e9e5fe47ba9a8af509dd6da1f907510bcf8917bfb19b7079d8c63c0b720";
-  }
-
-  // Get the derived account from the private key.
-  const derivedAccount = Account.fromPrivateKey({
-    privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK),
-  });
-
-  // Update the MODULE_ADDRESS env variable to the derived account address.
-  process.env.MODULE_ADDRESS = derivedAccount.accountAddress.toString();
-}
 
 // Import this in `pre-test.js` to force it to load the environment variables before running tests.
-export const getPublisherPKForTest = () => process.env.PUBLISHER_PK;
+export const getPublisherPKForTest = async () => {
+  // Load environment variables from .env file if we're not running a deployment on Vercel.
+  const VERCEL = process.env.VERCEL === "1";
+  if (!VERCEL) {
+    const getGitRoot = await import("../tests/utils/helpers").then((m) => m.getGitRoot);
+    console.warn("Vercel is not running, loading environment variables from .env file.");
+    // For local development and GitHub Actions CI/CD.
+    const envPath = path.join(getGitRoot(), "src", "typescript", "sdk", ".env");
+    dotenv.config({ path: envPath });
+    // If the publisher private key is not set by now, throw an error.
+    if (!process.env.PUBLISHER_PK) {
+      /* eslint-disable-next-line no-console */
+      console.warn("Missing PUBLISHER_PK environment variable for test, using the default value.");
+      process.env.PUBLISHER_PK = "29479e9e5fe47ba9a8af509dd6da1f907510bcf8917bfb19b7079d8c63c0b720";
+    }
+
+    // Get the derived account from the private key.
+    const derivedAccount = Account.fromPrivateKey({
+      privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK),
+    });
+
+    // Update the MODULE_ADDRESS env variable to the derived account address.
+    process.env.MODULE_ADDRESS = derivedAccount.accountAddress.toString();
+
+    return process.env.PUBLISHER_PK;
+  }
+
+  console.warn("This should never be reached.");
+  return null;
+}
 
 if (!process.env.MODULE_ADDRESS) {
   throw new Error("Missing MODULE_ADDRESS environment variable");
