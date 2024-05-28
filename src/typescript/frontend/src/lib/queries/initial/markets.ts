@@ -11,6 +11,10 @@ import { SAMPLE_DATA_BASE_URL } from "./const";
 export const fetchTopMarkets = cache(async () => {
   if (process.env.NEXT_PUBLIC_FORCE_STATIC_FETCH === "true") {
     const res = await fetch(new URL("top-market-data.json", SAMPLE_DATA_BASE_URL));
+    console.debug(
+      "Vercel logs need to show up here.Vercel logs need to show up here.Vercel logs need to show up here.",
+    );
+    console.log(res);
     const data = (await res.json()).data;
     return data.map(v => ({
       state: toStateEvent(v.data),
