@@ -23,17 +23,6 @@ if (!VERCEL) {
 
   // Update the MODULE_ADDRESS env variable to the derived account address.
   process.env.MODULE_ADDRESS = derivedAccount.accountAddress.toString();
-} else {
-  // For Vercel deployments.
-  if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
-    throw new Error("Missing NEXT_PUBLIC_MODULE_ADDRESS environment variable.");
-  }
-  if (process.env.NEXT_PUBLIC_MODULE_ADDRESS !== process.env.MODULE_ADDRESS) {
-    throw new Error("NEXT_PUBLIC_MODULE_ADDRESS and MODULE_ADDRESS environment variables do not match.");
-  }
-  // TODO: Verify this works as expected.
-  // Regardless, it will likely error out if it isn't loaded first.
-  process.env.MODULE_ADDRESS = process.env.NEXT_PUBLIC_MODULE_ADDRESS;
 }
 
 // Import this in `pre-test.js` to force it to load the environment variables before running tests.
