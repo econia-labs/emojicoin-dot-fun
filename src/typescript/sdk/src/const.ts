@@ -4,6 +4,8 @@ import path from "path";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (!VERCEL) {
+  // Synchronous require is necessary here.
+  /* eslint-disable global-require */
   const { getGitRoot } = require("../tests/utils/helpers");
   const sdkPath = path.join(getGitRoot(), "src", "typescript", "sdk", ".env");
   dotenv.config({ path: sdkPath });
