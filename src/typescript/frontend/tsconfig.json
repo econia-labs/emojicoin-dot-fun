@@ -24,14 +24,8 @@
       "@/containers": [
         "components/layout/components/index.ts"
       ],
-      "@/fonts/*": [
-        "styles/fonts/*"
-      ],
       "@/sdk/*": [
         "../../sdk/src/*"
-      ],
-      "@/static/*": [
-        "../public/static/*"
       ]
     },
     "plugins": [
@@ -53,7 +47,6 @@
     "./src/**/*.ts",
     "./src/**/*.tsx",
     ".next/types/**/*.ts",
-    "./dist/types/**/*.ts",
-    "src/app/emojicoin/[market]/not-found.tsx"
+    "./dist/types/**/*.ts"
   ]
 }
