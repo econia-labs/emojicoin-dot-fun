@@ -38,7 +38,7 @@ import { BatchTransferCoins, ExistsAt } from "../emojicoin_dot_fun/aptos-framewo
 import { type Events } from "../emojicoin_dot_fun/events";
 import { type EmojicoinInfo } from "../types/contract";
 import { getRandomEmoji } from "../emoji_data/symbol-data";
-import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING } from "../const";
+import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING, MODULE_ADDRESS } from "../const";
 import { type SymbolEmojiData, getEmojiData } from "../emoji_data";
 import { divideWithPrecision, sleep } from "./misc";
 import { getAptos } from "./aptos-client";
@@ -51,7 +51,6 @@ const CHUNK_SIZE = 60;
 const TRADER_INITIAL_BALANCE = ONE_APT * 100;
 const DISTRIBUTOR_NECESSARY_BALANCE = CHUNK_SIZE * TRADER_INITIAL_BALANCE;
 const NUM_DISTRIBUTORS = NUM_TRADERS / CHUNK_SIZE;
-const MODULE_ADDRESS = AccountAddress.from(process.env.MODULE_ADDRESS!);
 const PUBLISHER = Account.fromPrivateKey({
   privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK!),
 });

@@ -3,12 +3,10 @@ const { Account, Hex, Ed25519PrivateKey } = require("@aptos-labs/ts-sdk");
 const fs = require("fs");
 const path = require("path");
 const {
-  getPublisherPKForTest,
-} = require("../src/const")
-const {
   Inbox,
   LocalNode,
   publishForTest,
+  getPublisherPKForTest,
   PK_PATH,
   PUBLISH_RES_PATH,
 } = require("./utils");

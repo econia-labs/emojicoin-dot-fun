@@ -1,16 +1,12 @@
 // @ts-check
 
-const isDebug = process.env.BUILD_DEBUG === "true";
-// Turbo must be off for the below.
-const styledComponentConfigOptions = {
+const DEBUG = process.env.BUILD_DEBUG === "true";
+const styledComponentsConfig = {
   displayName: true,
   ssr: true,
   fileName: true,
   minify: false,
 };
-if (isDebug) {
-  console.log("Using build debug.");
-}
 const debugConfigOptions = {
   productionBrowserSourceMaps: true,
   outputFileTracing: true,
@@ -20,7 +16,6 @@ const debugConfigOptions = {
     serverMinification: false,
     serverSourceMaps: true,
   },
-  // styledComponents: isDebug ? { ...styledComponentConfigOptions } : true,
 };
 
 /** @type {import('next').NextConfig} */
@@ -35,10 +30,10 @@ const nextConfig = {
     tsconfigPath: "tsconfig.json",
   },
   compiler: {
-    styledComponents: true,
+    styledComponents: DEBUG ? styledComponentsConfig : true,
     removeConsole: false,
   },
-  ...(isDebug ? debugConfigOptions : {}),
+  ...(DEBUG ? debugConfigOptions : {}),
   transpilePackages: ["@/sdk"],
   redirects: async () => {
     return [
