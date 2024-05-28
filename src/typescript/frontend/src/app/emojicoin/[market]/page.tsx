@@ -1,6 +1,7 @@
 import Emojicoin from "components/pages/emojicoin";
 import { SHORT_REVALIDATE } from "lib/env";
 import getInitialChatData from "lib/queries/initial/chats";
+import { SAMPLE_DATA_BASE_URL } from "lib/queries/initial/const";
 import { fetchTopMarkets } from "lib/queries/initial/markets";
 import { fetchLastMarketState } from "lib/queries/initial/state";
 import getInitialSwapData from "lib/queries/initial/swaps";
@@ -13,6 +14,11 @@ type StaticParams = {
 };
 
 export const generateStaticParams = async (): Promise<Array<StaticParams>> => {
+  const res = await fetch(new URL("top-market-data.json", SAMPLE_DATA_BASE_URL));
+  const data2 = await res.json();
+  console.warn(new URL("top-market-data.json", SAMPLE_DATA_BASE_URL));
+  console.warn(res);
+  console.warn(data2);
   const data = await fetchTopMarkets();
   return data.map(v => ({
     market: v.state.marketMetadata.marketID.toString(),
