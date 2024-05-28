@@ -25,6 +25,11 @@ const debugConfigOptions = {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
