@@ -28,9 +28,6 @@ export const fetchInitialWithFallback = async <T1, T2>({
   let fn: (args: T2) => Promise<T1>;
 
   if ((vercel && local) || process.env.NEXT_PUBLIC_FORCE_STATIC_FETCH === "true") {
-    console.warn("Warning: This vercel build is using `localhost:3000` as the inbox endpoint.");
-    console.warn("Using sample market data.");
-
     fn = async (_args: T2) => fetch(endpoint, { next: { revalidate } }).then(r => r.json().then(j => j as T1));
   } else {
     fn = queryFunction;

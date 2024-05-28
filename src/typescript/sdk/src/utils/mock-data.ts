@@ -44,10 +44,10 @@ import { divideWithPrecision, sleep } from "./misc";
 import { getAptos } from "./aptos-client";
 import { truncateAddress } from "./misc";
 
-const NUM_TRADERS = 400;
-const TRADES_PER_TRADER = 6;
+const NUM_TRADERS = 900;
+const TRADES_PER_TRADER = 4;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
-const CHUNK_SIZE = 50;
+const CHUNK_SIZE = 60;
 const TRADER_INITIAL_BALANCE = ONE_APT * 100;
 const DISTRIBUTOR_NECESSARY_BALANCE = CHUNK_SIZE * TRADER_INITIAL_BALANCE;
 const NUM_DISTRIBUTORS = NUM_TRADERS / CHUNK_SIZE;
@@ -102,7 +102,7 @@ async function main() {
 
   const allTradeResults = Array<Promise<[UserTransactionResponse, Events][]>>();
   for (let i = 0; i <= NUM_TRADERS / CHUNK_SIZE; i += 1) {
-    await sleep(i * 1000);
+    await sleep(2000);
     console.log(`-----------------------------------BATCH ${i}-----------------------------------`);
     const tradersChunk = TRADERS.slice(CHUNK_SIZE * i, (i + 1) * CHUNK_SIZE);
     const trades = tradersChunk.map((t) => {
@@ -128,7 +128,7 @@ async function main() {
             user: t,
             tradeInputs: {
               inputAmount: amt,
-              isSell: amt < 0n,
+              // isSell: amt < 0n, // Determined automatically by `amt` < 0n.
               integrator: PUBLISHER.accountAddress,
               integratorFeeRateBps: 0,
             },
@@ -280,7 +280,6 @@ const submitTradeAndRandomChatMessage = async (args: {
   user: Account;
   tradeInputs: {
     inputAmount: bigint;
-    isSell: boolean;
     integrator: AccountAddress;
     integratorFeeRateBps: number;
   };
@@ -292,14 +291,15 @@ const submitTradeAndRandomChatMessage = async (args: {
     waitForTransactionOptions: {
       checkSuccess: false,
       waitForIndexer: false,
-      timeoutSecs: 20,
+      timeoutSecs: 600,
     },
   };
+  const amt = args.tradeInputs.inputAmount;
   const swap = Swap.submit({
     ...sharedArgs,
     swapper: args.user,
-    inputAmount: args.tradeInputs.inputAmount,
-    isSell: args.tradeInputs.isSell,
+    inputAmount: amt < 0n ? -10000n * amt : amt,
+    isSell: amt < 0n,
     integrator: PUBLISHER.accountAddress,
     integratorFeeRateBps: 0,
     options: {
@@ -353,7 +353,10 @@ const generateRandomTrades = ({
   // Create buy trades.
   for (let i = 0; i < buyPercentages.length; i += 1) {
     trades[i * 2] = (totalTradeAmount * BigInt(Math.floor(buyPercentages[i]))) / 100n;
-    trades[i * 2 + 1] = BigInt(Math.floor(Math.random() * 100)) * trades[i * 2];
+    const isSellMultiplier = Math.random() > 0.5 ? 1n : -1n;
+    // The sell % is the % of the previous buy.
+    const sellPercentage = Math.floor(Math.random() * 50);
+    trades[i * 2 + 1] = BigInt(sellPercentage) * trades[i * 2] * isSellMultiplier;
   }
 
   return trades;
@@ -404,12 +407,24 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
         b: BigInt(ONE_APT),
         decimals: 3,
       }).toFixed(3);
-      const spendOnBondingCurve = `${aptSpent} APT in bonding curve.`;
+      const input = divideWithPrecision({
+        a: swap.inputAmount * (swap.isSell ? -1n : 1n),
+        b: BigInt(ONE_APT),
+        decimals: 1,
+      }).toFixed(3);
+      const lastPrice = divideWithPrecision({
+        a: 1,
+        b: state.lastSwap.avgExecutionPrice,
+        decimals: 10,
+      });
+      const buyOrSellText = swap.isSell ? `📉 -${input} ${emoji}` : `📈 +${input} APT at an avg`;
+      const lastPriceText = `price of ${lastPrice / 10} APT/${emoji}`;
+      const spendOnBondingCurve = `${buyOrSellText} ${lastPriceText} ${input} ${aptSpent} APT in bonding curve.`;
       const quoteLeft = `${quoteLeftBeforeTransition} to go before we transition into CPAMM!`;
       const s =
-        `Trade #${eventNum} for ${swap.swapper.toString()} completed for emoji market: ${emoji}` +
-        ` with market ID: ${state.marketMetadata.marketID}` +
-        ` at version: ${Number(res.version)}. ${
+        `tx[${res.version}] Trade #${eventNum} for ${truncateAddress(swap.swapper)} completed for` +
+        `emoji market: ${emoji} with market ID: ${state.marketMetadata.marketID}` +
+        `${
           !swap.resultsInStateTransition
             ? `${spendOnBondingCurve} ${quoteLeft}`
             : "We're already in the CPAMM!"
@@ -420,11 +435,15 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
     if (chat) {
       const textDecoder = new TextDecoder("utf-8");
       const emoji = textDecoder.decode(chat.marketMetadata.emojiBytes);
-      const balAsFraction = chat.balanceAsFractionOfCirculatingSupply;
+      const balAsFraction = divideWithPrecision({
+        a: chat.userEmojicoinBalance,
+        b: chat.circulatingSupply,
+        decimals: 2,
+      });
       const s =
-        `Chat message sent from ${chat.user} for emoji market: ${emoji}` +
+        `tx[${res.version}] Chat message sent from ${truncateAddress(chat.user)} for emoji market: ${emoji}` +
         ` with market ID: ${chat.marketMetadata.marketID}` +
-        ` at version: ${Number(res.version)}. User owns ${balAsFraction}%` +
+        ` User owns ${balAsFraction}%` +
         ` of the circulating supply: ${chat.circulatingSupply}. User says "${chat.message}"`;
 
       console.debug(s);

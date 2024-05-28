@@ -1,8 +1,8 @@
 import Home from "components/pages/home";
-import getInitialMarketData from "lib/queries/initial/markets";
+import { fetchTopMarkets } from "lib/queries/initial/markets";
 
 export default async function HomePage() {
-  const markets = await getInitialMarketData();
+  const data = await fetchTopMarkets();
 
-  return <Home markets={markets} />;
+  return <Home data={data} />;
 }

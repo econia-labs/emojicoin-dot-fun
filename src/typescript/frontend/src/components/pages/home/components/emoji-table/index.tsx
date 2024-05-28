@@ -13,16 +13,11 @@ import {
 } from "./styled";
 import SearchComponent from "./components/Search";
 import FilterOptions from "./components/FilterOptions";
-import { type SymbolEmojiData } from "@/sdk/emoji_data";
-import { type ContractTypes } from "@/sdk/types";
 import { toDecimalsAPT } from "lib/utils/decimals";
+import { type MarketStateProps } from "../../types";
 
 export interface EmojiTableProps {
-  markets: Array<{
-    market: ContractTypes.MarketView;
-    emoji: SymbolEmojiData;
-    volume24H: bigint;
-  }>;
+  data: Array<MarketStateProps>;
 }
 
 const EmojiTable = async (props: EmojiTableProps) => {
@@ -39,15 +34,15 @@ const EmojiTable = async (props: EmojiTableProps) => {
             </FilterOptionsWrapper>
           </Header>
           <StyledGrid>
-            {props.markets.map(v => {
+            {props.data.map(market => {
               return (
                 <TableCard
-                  index={Number(v.market.metadata.marketID)}
-                  emoji={v.emoji.emoji}
-                  emojiName={v.emoji.name}
-                  marketCap={toDecimalsAPT(v.market.instantaneousStats.marketCap, 2)}
-                  volume24h={toDecimalsAPT(v.market.cumulativeStats.quoteVolume, 2)}
-                  key={v.market.metadata.marketID.toString()}
+                  index={Number(market.state.marketMetadata.marketID)}
+                  emoji={market.emoji.emoji}
+                  emojiName={market.emoji.name}
+                  marketCap={toDecimalsAPT(market.state.instantaneousStats.marketCap, 2)}
+                  volume24h={toDecimalsAPT(market.state.cumulativeStats.quoteVolume, 2)}
+                  key={market.state.marketMetadata.marketID.toString()}
                 />
               );
             })}

@@ -24,6 +24,7 @@ const Chat = (props: ChatProps) => {
       text: chat.message,
       userRank: chat.user.at(-1)?.toLowerCase() === "f" ? "🐳" : "🐡", // TODO: Fix random assignment of status.
       fromAnotherUser: chat.user !== "local user's address", // TODO: Actually check this value later.
+      version: chat.version,
     })),
   );
 
@@ -53,6 +54,7 @@ const Chat = (props: ChatProps) => {
           text: (e.target as unknown as HTMLTextAreaElement).value,
           userRank: "🐡",
           fromAnotherUser: false,
+          version: 0x1234, // TODO: Fix this when submission is implemented.
         },
         ...messageList,
       ]);

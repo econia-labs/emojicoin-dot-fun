@@ -7,4 +7,5 @@ export type MessageType = {
   text: string;
   userRank: string;
   fromAnotherUser: boolean;
+  version: number;
 };

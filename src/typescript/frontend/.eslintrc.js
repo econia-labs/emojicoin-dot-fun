@@ -26,6 +26,7 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "import"],
   rules: {
+    "react/no-unknown-property": ["error", { ignore: ["jsx"] }],
     "import/no-cycle": [
       "error",
       {

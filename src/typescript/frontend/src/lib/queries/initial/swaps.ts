@@ -1,19 +1,18 @@
-import { toSwapEvent, type JSONTypes } from "@/sdk/types";
+import { toSwapEvent } from "@/sdk/types";
 import { paginateSwapEvents } from "@/sdk/queries/swap";
 import { cache } from "react";
 import { fetchInitialWithFallback } from "./cache-helper";
 import { SAMPLE_DATA_BASE_URL } from "./const";
 
-const getInitialSwapData = cache(async (marketID: bigint | number) => {
-  const swapEvents: Array<JSONTypes.SwapEvent> = await fetchInitialWithFallback({
+const getInitialSwapData = cache(async (marketID: string) => {
+  const swapEvents = await fetchInitialWithFallback({
     functionArgs: {
-      marketID,
+      marketID: BigInt(marketID),
     },
     queryFunction: paginateSwapEvents,
     endpoint: new URL(`swap-data-${Number(marketID)}.json`, SAMPLE_DATA_BASE_URL),
   });
-
-  return swapEvents.map(swap => toSwapEvent(swap));
+  return swapEvents.map(swap => ({ ...toSwapEvent(swap), version: swap.version }));
 });
 
 export default getInitialSwapData;

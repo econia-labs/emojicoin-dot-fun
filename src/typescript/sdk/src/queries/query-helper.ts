@@ -23,6 +23,7 @@ export type AggregateQueryResultsArgs = {
 
 type InnerResponseType<T> = Array<{
   data: T;
+  transaction_version: number;
 }>;
 
 /**
@@ -43,9 +44,9 @@ type InnerResponseType<T> = Array<{
  */
 export const aggregateQueryResults = async <T>(
   args: Omit<AggregateQueryResultsArgs, "inboxUrl">
-): Promise<QueryResponse<T>> => {
+): Promise<QueryResponse<T & { version: number }>> => {
   const { query, maxNumQueries = Infinity } = args;
-  const aggregated: T[] = [];
+  const aggregated: (T & { version: number })[] = [];
   const errors: (PostgrestError | null)[] = [];
 
   let i = 0;
@@ -59,14 +60,14 @@ export const aggregateQueryResults = async <T>(
       error: res.error,
     }));
 
-    aggregated.push(...events.map((e) => e.data));
+    aggregated.push(...events.map((e) => ({ ...e.data, version: e.transaction_version })));
     shouldContinue = events.length === LIMIT;
     errors.push(error);
     i += 1;
   }
 
   return {
-    data: aggregated as T[],
+    data: aggregated,
     errors,
   };
 };

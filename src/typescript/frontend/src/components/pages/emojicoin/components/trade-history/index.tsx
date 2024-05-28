@@ -24,7 +24,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
     type: v.isSell ? "sell" : "buy",
     price: v.avgExecutionPrice.toString(),
     date: new Date(Number(v.time / 1000n)),
-    transaction: "0x1234", // TODO: Pass tx hash down the component tree.
+    version: v.version, // TODO: Pass tx hash down the component tree.
   }));
 
   return (

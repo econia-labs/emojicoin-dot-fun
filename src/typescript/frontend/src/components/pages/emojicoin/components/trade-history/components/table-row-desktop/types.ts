@@ -7,6 +7,6 @@ export type TableRowDesktopProps = {
     type: string;
     price: string;
     date: Date;
-    transaction: string;
+    version: number;
   };
 };

@@ -1,11 +1,15 @@
 import { type SymbolEmojiData } from "@/sdk/emoji_data";
 import { type ContractTypes } from "@/sdk/types";
 
+export interface WithVersion {
+  version: number;
+}
 interface DataProps {
-  swaps: Array<ContractTypes.SwapEvent>;
-  chats: Array<ContractTypes.ChatEvent>;
+  swaps: Array<ContractTypes.SwapEvent & { version: number }>;
+  chats: Array<ContractTypes.ChatEvent & { version: number }>;
   emoji: SymbolEmojiData;
-  market: ContractTypes.MarketView;
+  market: ContractTypes.MarketRegistrationEvent & { version: number };
+  state: ContractTypes.StateEvent & { version: number };
 }
 
 export interface EmojicoinProps {

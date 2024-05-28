@@ -8,8 +8,8 @@ import { Flex } from "@/containers";
 import { Text, Tr, Td } from "components";
 
 import { type TableRowDesktopProps } from "./types";
-import { truncateAddress } from "@/sdk/utils/misc";
 import { toDecimalsAPT } from "lib/utils/decimals";
+import { ExplorerLinkCustom } from "./styled";
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
   const { targetRef, tooltip } = useTooltip(
@@ -22,7 +22,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
   );
 
   return (
-    <Tr>
+    <Tr hover={true}>
       <Td width={{ _: "12.5%", laptopL: "13%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex px="12px">
           <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ref={targetRef}>
@@ -67,12 +67,13 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
           </Text>
         </Flex>
       </Td>
-
       <Td width={{ _: "20%", laptopL: "35%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
-        <Flex justifyContent="end">
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {truncateAddress(item.transaction)}
-          </Text>
+        <Flex justifyContent="end" className="trade-entry">
+          <ExplorerLinkCustom style={{ display: "inline-block" }} value={item.version} type="txn">
+            <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+              {item.version}
+            </Text>
+          </ExplorerLinkCustom>
         </Flex>
       </Td>
     </Tr>

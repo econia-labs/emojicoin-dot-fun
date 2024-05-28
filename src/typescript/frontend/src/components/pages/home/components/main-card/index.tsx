@@ -12,18 +12,15 @@ import {
   StyledMarketDataText,
   StyledImage,
 } from "./styled";
-import { type ContractTypes } from "@/sdk/types/contract-types";
-import { type SymbolEmojiData } from "@/sdk/emoji_data";
 import { toDecimalsAPT } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
+import { type MarketStateProps } from "../../types";
+import Link from "next/link";
+import { ROUTES } from "router/routes";
 
 export interface MainCardProps {
-  featured?: {
-    market: ContractTypes.MarketView;
-    emoji: SymbolEmojiData;
-    volume24H: bigint;
-  };
+  featured?: MarketStateProps;
 }
 
 const MainCard = (props: MainCardProps) => {
@@ -45,7 +42,8 @@ const MainCard = (props: MainCardProps) => {
         width="100%"
         flexDirection={{ _: "column", tablet: "row" }}
       >
-        <div
+        <Link
+          href={`${ROUTES.emojicoin}/${props.featured?.state.marketMetadata.marketID.toString()}`}
           style={{
             position: "relative",
             alignItems: "center",
@@ -56,11 +54,11 @@ const MainCard = (props: MainCardProps) => {
           <StyledImage id="hero-image" src="/images/planet-home.webp" aspectRatio={1.6} alt="Planet" />
 
           <StyledEmoji>{featured?.emoji.emoji || "🖤"}</StyledEmoji>
-        </div>
+        </Link>
 
         <Column maxWidth="100%" ellipsis>
           <StyledPixelHeadingText textScale="pixelHeading1" color="darkGrey">
-            {featured?.market.metadata.marketID || "01"}
+            {featured?.state.marketMetadata.marketID || "01"}
           </StyledPixelHeadingText>
           <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
             {(featured?.emoji.name || "BLACK HEART").toUpperCase()}
@@ -73,7 +71,7 @@ const MainCard = (props: MainCardProps) => {
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured!.market.instantaneousStats.marketCap, 2)}{" "}
+                  {toDecimalsAPT(featured!.state.instantaneousStats.marketCap, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
@@ -100,7 +98,7 @@ const MainCard = (props: MainCardProps) => {
                   {t("All-time vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured!.market.cumulativeStats.quoteVolume, 2)}{" "}
+                  {toDecimalsAPT(featured!.state.cumulativeStats.quoteVolume, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>

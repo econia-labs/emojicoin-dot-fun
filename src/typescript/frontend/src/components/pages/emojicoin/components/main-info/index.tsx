@@ -51,7 +51,7 @@ const MainInfo = (props: MainInfoProps) => {
               {t("Mkt. Cap:")}
             </StyledStatsText>
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.market.instantaneousStats.marketCap, 2)}
+              {toDecimalsAPT(props.data.state.instantaneousStats.totalValueLocked, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>
@@ -67,7 +67,7 @@ const MainInfo = (props: MainInfoProps) => {
             </StyledStatsText>
             {/* TODO: Replace `fullyDilutedValue` here to display 24H volume. */}
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.market.instantaneousStats.fullyDilutedValue, 2)}
+              {toDecimalsAPT(props.data.state.instantaneousStats.fullyDilutedValue, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>
@@ -82,7 +82,7 @@ const MainInfo = (props: MainInfoProps) => {
               {t("All-time vol:")}
             </StyledStatsText>
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.market.cumulativeStats.quoteVolume, 2)}
+              {toDecimalsAPT(props.data.state.cumulativeStats.quoteVolume, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>
