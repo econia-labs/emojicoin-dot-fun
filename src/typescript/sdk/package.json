@@ -5,7 +5,8 @@
     "@noble/hashes": "^1.4.0",
     "@supabase/postgrest-js": "^1.15.2",
     "dotenv": "^16.4.5",
-    "find-git-root": "^1.0.4"
+    "find-git-root": "^1.0.4",
+    "postgres": "^3.4.4"
   },
   "description": "TypeScript SDK for Econia's Emojicoin Dot Fun",
   "devDependencies": {
@@ -46,7 +47,7 @@
     "build": "pnpm clean && tsc",
     "check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "e2e-test": "pnpm jest --runInBand tests/e2e",
+    "e2e-test": "pnpm jest --detectOpenHandles --runInBand tests/e2e",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
     "generate-data": "pnpm tsx src/utils/mock-data.ts",
