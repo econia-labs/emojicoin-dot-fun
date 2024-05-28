@@ -1,4 +1,7 @@
+/* eslint-disable no-await-in-loop */
 import { Account, type HexInput, type Aptos, type Uint64, Hex } from "@aptos-labs/ts-sdk";
+import type { Sql } from "postgres";
+import postgres from "postgres";
 import {
   EmojicoinDotFun,
   type TypeTagInput,
@@ -8,8 +11,6 @@ import {
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets";
 import type { EmojicoinInfo } from "../../src/types/contract";
 import { Lazy, ONE_APT, ONE_APTN, getMarketResource } from "../../src";
-import type { Sql } from "postgres";
-import postgres from "postgres";
 
 type RegisterMarketAction = {
   emojis: Array<HexInput>;
@@ -51,8 +52,274 @@ type Action =
 
 export const MOCK_DATA_MARKETS_EMOJIS = [["f09fa5b0", "f09fa5b0"], ["f09f9094"], ["f09f8f81"]];
 
+type MarketMetadata = {
+  market_id: bigint;
+  market_address: string;
+  emoji_bytes: string;
+};
+
+type PeriodicStateMetadata = {
+  start_time: bigint;
+  period: bigint;
+  emit_time: bigint;
+  emit_market_nonce: bigint;
+  trigger: bigint;
+};
+
+type PeriodicState = {
+  market_metadata: MarketMetadata;
+  periodic_state_metadata: PeriodicStateMetadata;
+  open_price_q64: bigint;
+  high_price_q64: bigint;
+  low_price_q64: bigint;
+  close_price_q64: bigint;
+  volume_base: bigint;
+  volume_quote: bigint;
+  integrator_fees: bigint;
+  pool_fees_base: bigint;
+  pool_fees_quote: bigint;
+  n_swaps: bigint;
+  n_chat_messages: bigint;
+  starts_in_bonding_curve: boolean;
+  ends_in_bonding_curve: boolean;
+  tvl_per_lp_coin_growth_q64: bigint;
+};
+
+const insertPeriodicState = async (
+  state: PeriodicState,
+  account: string,
+  eventType: string,
+  sql: Sql
+) => {
+  const seq = Number(100000n + state.periodic_state_metadata.emit_market_nonce);
+  const time = new Date(Number(state.periodic_state_metadata.emit_time) / 1000);
+  const res = await sql`
+    INSERT INTO events VALUES (${seq}, 6, ${account}, ${seq}, ${seq}, ${eventType}, ${sql.json(JSON.parse(JSON.stringify(state, (_, v) => (typeof v === "bigint" ? v.toString() : v))))}, ${time.toISOString()}, 0, ${eventType})
+  `;
+};
+
+const generatePeriodicStates = async (
+  emojicoin: Lazy<EmojicoinInfo>,
+  emojiBytes: string,
+  marketId: bigint,
+  account: string,
+  eventType: string,
+  sql: Sql
+) => {
+  const marketMetadata: MarketMetadata = {
+    market_id: marketId,
+    market_address: emojicoin.get().marketAddress.toString(),
+    emoji_bytes: emojiBytes,
+  };
+  const now = BigInt(new Date().getTime()) * 1000n;
+  const minute = 60_000_000n;
+  let nonce = 1n;
+  let openPrice = 0n;
+  let highPrice = 0n;
+  let lowPrice = 0n;
+  let closePrice = 0n;
+  let volumeBase = 0n;
+  let volumeQuote = 0n;
+  let nSwaps = 0n;
+  let nChats = 0n;
+  let sum = 0n;
+  const events = [];
+  const eventsAll = [];
+  for (let i = 7 * 24 * 60; i > 10; i -= 1) {
+    const startTime = BigInt(now - minute * BigInt(i));
+    const emitTime = startTime + minute;
+    const emitMarketNonce = nonce + 1n;
+    nonce += 1n;
+
+    const periodicStateMetadata: PeriodicStateMetadata = {
+      start_time: startTime,
+      period: minute,
+      emit_time: emitTime,
+      emit_market_nonce: emitMarketNonce,
+      trigger: 0n,
+    };
+
+    const q64 = (n: bigint) => n;
+
+    highPrice = 1000n + BigInt(Math.round(Math.random() * 100));
+    lowPrice = 1000n - BigInt(Math.round(Math.random() * 100));
+    openPrice = closePrice;
+    let diff =
+      (BigInt(Math.round(Math.random() * 100)) % (lowPrice - 1000n || 1n)) *
+      (Math.random() > 0.5 ? -1n : 1n);
+    if (diff < 0) {
+      diff %= lowPrice - 1000n || 1n;
+    } else {
+      diff %= highPrice - 1000n || 1n;
+    }
+    closePrice = 1000n + diff;
+
+    volumeBase = 1000n * BigInt(Math.round(Math.random() * 10));
+    volumeQuote = volumeBase * ((closePrice + openPrice) / 2n);
+    const startsInBondingCurve = sum < ONE_APTN * 10_000n;
+    sum += volumeBase;
+    const integratorFees = volumeBase * 1000n;
+
+    let poolFeesBase: bigint;
+    let poolFeesQuote: bigint;
+
+    if (sum >= ONE_APTN * 10_000n) {
+      poolFeesBase = volumeBase * 1000n;
+      poolFeesQuote = poolFeesBase * ((closePrice + openPrice) / 2n);
+    } else {
+      poolFeesBase = 0n;
+      poolFeesQuote = 0n;
+    }
+
+    nSwaps = BigInt(Math.round(Math.random() * 10));
+    nChats = BigInt(Math.round(Math.random() * 20));
+
+    const endsInBondingCurve = sum >= ONE_APTN * 10_000n;
+
+    const periodicState: PeriodicState = {
+      market_metadata: marketMetadata,
+      periodic_state_metadata: periodicStateMetadata,
+      open_price_q64: q64(openPrice),
+      high_price_q64: q64(highPrice),
+      low_price_q64: q64(lowPrice),
+      close_price_q64: q64(closePrice),
+      volume_base: volumeBase,
+      volume_quote: volumeQuote,
+      integrator_fees: integratorFees,
+      pool_fees_base: poolFeesBase,
+      pool_fees_quote: poolFeesQuote,
+      n_swaps: nSwaps,
+      n_chat_messages: nChats,
+      starts_in_bonding_curve: startsInBondingCurve,
+      ends_in_bonding_curve: endsInBondingCurve,
+      tvl_per_lp_coin_growth_q64: 0n,
+    };
+
+    events.push(periodicState);
+    eventsAll.push(periodicState);
+
+    const unq64 = (n_q64: bigint) => n_q64;
+
+    const factors = [5, 15, 30, 60, 60 * 4, 60 * 24];
+    for (const factor of factors) {
+      if (7 * 24 * 60 - (i % factor) === 0) {
+        const lasts = events.slice(events.length - factor, events.length);
+        const emitMarketNonce = nonce + 1n;
+        nonce += 1n;
+        const periodicStateMetadata2: PeriodicStateMetadata = {
+          start_time: periodicStateMetadata.emit_time - minute * BigInt(factor),
+          period: minute * BigInt(factor),
+          emit_time: periodicStateMetadata.emit_time,
+          emit_market_nonce: emitMarketNonce,
+          trigger: 0n,
+        };
+        const periodicState: PeriodicState = {
+          market_metadata: marketMetadata,
+          periodic_state_metadata: periodicStateMetadata2,
+          open_price_q64: q64(lasts.reduce((prev, curr) => prev + unq64(curr.open_price_q64), 0n)),
+          high_price_q64: q64(lasts.reduce((prev, curr) => prev + unq64(curr.high_price_q64), 0n)),
+          low_price_q64: q64(lasts.reduce((prev, curr) => prev + unq64(curr.low_price_q64), 0n)),
+          close_price_q64: q64(
+            lasts.reduce((prev, curr) => prev + unq64(curr.close_price_q64), 0n)
+          ),
+          volume_base: lasts.reduce((prev, curr) => prev + curr.volume_base, 0n),
+          volume_quote: lasts.reduce((prev, curr) => prev + curr.volume_quote, 0n),
+          integrator_fees: lasts.reduce((prev, curr) => prev + curr.integrator_fees, 0n),
+          pool_fees_base: lasts.reduce((prev, curr) => prev + curr.pool_fees_base, 0n),
+          pool_fees_quote: lasts.reduce((prev, curr) => prev + curr.pool_fees_quote, 0n),
+          n_swaps: lasts.reduce((prev, curr) => prev + curr.n_swaps, 0n),
+          n_chat_messages: lasts.reduce((prev, curr) => prev + curr.n_chat_messages, 0n),
+          starts_in_bonding_curve: lasts[0].starts_in_bonding_curve,
+          ends_in_bonding_curve: lasts[factor].ends_in_bonding_curve,
+          tvl_per_lp_coin_growth_q64: 0n,
+        };
+        eventsAll.push(periodicState);
+      }
+    }
+  }
+
+  for (const event of eventsAll) {
+    await insertPeriodicState(event, account, eventType, sql);
+  }
+};
+
 const concatEmoji = (a: Array<HexInput>) =>
   a.map((v) => Hex.fromHexInput(v).toStringWithoutPrefix()).join("");
+
+const getTypeTags = (lazy: Lazy<EmojicoinInfo>): [TypeTagInput, TypeTagInput] => [
+  lazy.get().emojicoin,
+  lazy.get().emojicoinLP,
+];
+
+async function execute(aptos: Aptos, actions: Action[]) {
+  const defaultTx = {
+    aptosConfig: aptos.config,
+    options: {
+      maxGasAmount: ONE_APT / 100,
+      gasUnitPrice: 100,
+    },
+    integrator: Account.generate().accountAddress,
+  };
+  const defaultTxWithMarket = (emojicoin: Lazy<EmojicoinInfo>) => ({
+    aptosConfig: aptos.config,
+    marketAddress: emojicoin.get().marketAddress,
+    typeTags: getTypeTags(emojicoin),
+    options: {
+      maxGasAmount: ONE_APT / 100,
+      gasUnitPrice: 100,
+    },
+    integrator: Account.generate().accountAddress,
+  });
+  for (const action of actions) {
+    if (action.type === "registerMarket") {
+      await EmojicoinDotFun.RegisterMarket.submit({
+        ...defaultTx,
+        registrant: action.data.account,
+        emojis: action.data.emojis,
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
+    } else if (action.type === "swap") {
+      await EmojicoinDotFun.Swap.submit({
+        ...defaultTxWithMarket(action.data.emojicoin),
+        swapper: action.data.account,
+        inputAmount: action.data.inputAmount,
+        isSell: action.data.isSell,
+        integratorFeeRateBps: 0,
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
+    } else if (action.type === "provideLiquidity") {
+      await EmojicoinDotFun.ProvideLiquidity.submit({
+        ...defaultTxWithMarket(action.data.emojicoin),
+        provider: action.data.account,
+        quoteAmount: action.data.quoteAmount,
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
+    } else if (action.type === "removeLiquidity") {
+      await EmojicoinDotFun.RemoveLiquidity.submit({
+        ...defaultTxWithMarket(action.data.emojicoin),
+        provider: action.data.account,
+        lpCoinAmount: action.data.lpCoinAmount,
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
+    } else if (action.type === "chat") {
+      await EmojicoinDotFun.Chat.submit({
+        ...defaultTxWithMarket(action.data.emojicoin),
+        user: action.data.account,
+        emojiBytes: action.data.emojiBytes,
+        emojiIndicesSequence: action.data.emojiIndicesSequence,
+      })
+        /* eslint-disable-next-line no-console */
+        .catch(console.error);
+    } else {
+      /* eslint-disable-next-line no-console */
+      console.error("Got wrong action type.");
+    }
+  }
+}
 
 export const generateMockData = async (aptos: Aptos, publisher: Account) => {
   const registryAddress = await getRegistryAddress({
@@ -63,7 +330,6 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
   // Create and fund accounts
   const accounts = [0, 1, 2, 3, 4, 5].map((_) => Account.generate());
   for (const account of accounts) {
-    /* eslint-disable-next-line no-await-in-loop */
     await aptos.fundAccount({
       accountAddress: account.accountAddress,
       amount: 100_000_000_000 * ONE_APT,
@@ -258,278 +524,4 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
     `${marketObjectMarketResource.metadata.marketAddress}::emojicoin_dot_fun::PeriodicState`,
     sql
   );
-};
-
-const getTypeTags = (lazy: Lazy<EmojicoinInfo>): [TypeTagInput, TypeTagInput] => [
-  lazy.get().emojicoin,
-  lazy.get().emojicoinLP,
-];
-
-async function execute(aptos: Aptos, actions: Action[]) {
-  const defaultTx = {
-    aptosConfig: aptos.config,
-    options: {
-      maxGasAmount: ONE_APT / 100,
-      gasUnitPrice: 100,
-    },
-    integrator: Account.generate().accountAddress,
-  };
-  const defaultTxWithMarket = (emojicoin: Lazy<EmojicoinInfo>) => ({
-    aptosConfig: aptos.config,
-    marketAddress: emojicoin.get().marketAddress,
-    typeTags: getTypeTags(emojicoin),
-    options: {
-      maxGasAmount: ONE_APT / 100,
-      gasUnitPrice: 100,
-    },
-    integrator: Account.generate().accountAddress,
-  });
-  for (const action of actions) {
-    if (action.type === "registerMarket") {
-      /* eslint-disable-next-line no-await-in-loop */
-      await EmojicoinDotFun.RegisterMarket.submit({
-        ...defaultTx,
-        registrant: action.data.account,
-        emojis: action.data.emojis,
-      })
-        /* eslint-disable-next-line no-console */
-        .catch(console.error);
-    } else if (action.type === "swap") {
-      /* eslint-disable-next-line no-await-in-loop */
-      await EmojicoinDotFun.Swap.submit({
-        ...defaultTxWithMarket(action.data.emojicoin),
-        swapper: action.data.account,
-        inputAmount: action.data.inputAmount,
-        isSell: action.data.isSell,
-        integratorFeeRateBps: 0,
-      })
-        /* eslint-disable-next-line no-console */
-        .catch(console.error);
-    } else if (action.type === "provideLiquidity") {
-      /* eslint-disable-next-line no-await-in-loop */
-      await EmojicoinDotFun.ProvideLiquidity.submit({
-        ...defaultTxWithMarket(action.data.emojicoin),
-        provider: action.data.account,
-        quoteAmount: action.data.quoteAmount,
-      })
-        /* eslint-disable-next-line no-console */
-        .catch(console.error);
-    } else if (action.type === "removeLiquidity") {
-      /* eslint-disable-next-line no-await-in-loop */
-      await EmojicoinDotFun.RemoveLiquidity.submit({
-        ...defaultTxWithMarket(action.data.emojicoin),
-        provider: action.data.account,
-        lpCoinAmount: action.data.lpCoinAmount,
-      })
-        /* eslint-disable-next-line no-console */
-        .catch(console.error);
-    } else if (action.type === "chat") {
-      /* eslint-disable-next-line no-await-in-loop */
-      await EmojicoinDotFun.Chat.submit({
-        ...defaultTxWithMarket(action.data.emojicoin),
-        user: action.data.account,
-        emojiBytes: action.data.emojiBytes,
-        emojiIndicesSequence: action.data.emojiIndicesSequence,
-      })
-        /* eslint-disable-next-line no-console */
-        .catch(console.error);
-    } else {
-      /* eslint-disable-next-line no-console */
-      console.error("Got wrong action type.");
-    }
-  }
-}
-
-type MarketMetadata = {
-  market_id: bigint;
-  market_address: string;
-  emoji_bytes: string;
-};
-
-type PeriodicStateMetadata = {
-  start_time: bigint;
-  period: bigint;
-  emit_time: bigint;
-  emit_market_nonce: bigint;
-  trigger: bigint;
-};
-
-type PeriodicState = {
-  market_metadata: MarketMetadata;
-  periodic_state_metadata: PeriodicStateMetadata;
-  open_price_q64: bigint;
-  high_price_q64: bigint;
-  low_price_q64: bigint;
-  close_price_q64: bigint;
-  volume_base: bigint;
-  volume_quote: bigint;
-  integrator_fees: bigint;
-  pool_fees_base: bigint;
-  pool_fees_quote: bigint;
-  n_swaps: bigint;
-  n_chat_messages: bigint;
-  starts_in_bonding_curve: boolean;
-  ends_in_bonding_curve: boolean;
-  tvl_per_lp_coin_growth_q64: bigint;
-};
-
-const generatePeriodicStates = async (
-  emojicoin: Lazy<EmojicoinInfo>,
-  emojiBytes: string,
-  marketId: bigint,
-  account: string,
-  eventType: string,
-  sql: Sql
-) => {
-  const marketMetadata: MarketMetadata = {
-    market_id: marketId,
-    market_address: emojicoin.get().marketAddress.toString(),
-    emoji_bytes: emojiBytes,
-  };
-  const now = BigInt(new Date().getTime()) * 1000n;
-  const minute = 60_000_000n;
-  let nonce = 1n;
-  let openPrice = 0n;
-  let highPrice = 0n;
-  let lowPrice = 0n;
-  let closePrice = 0n;
-  let volumeBase = 0n;
-  let volumeQuote = 0n;
-  let nSwaps = 0n;
-  let nChats = 0n;
-  let sum = 0n;
-  let events = [];
-  let eventsAll = [];
-  for (let i = 7 * 24 * 60; i > 10; i -= 1) {
-    const startTime = BigInt(now - minute * BigInt(i));
-    const emitTime = startTime + minute;
-    const emitMarketNonce = nonce + 1n;
-    nonce += 1n;
-
-    const periodicStateMetadata: PeriodicStateMetadata = {
-      start_time: startTime,
-      period: minute,
-      emit_time: emitTime,
-      emit_market_nonce: emitMarketNonce,
-      trigger: 0n,
-    };
-
-    const q64 = (n: bigint) => {
-      return n;
-    };
-
-    highPrice = 1000n + BigInt(Math.round(Math.random() * 100));
-    lowPrice = 1000n - BigInt(Math.round(Math.random() * 100));
-    openPrice = closePrice;
-    let diff =
-      (BigInt(Math.round(Math.random() * 100)) % (lowPrice - 1000n || 1n)) * (Math.random() > 0.5 ? -1n : 1n);
-    if (diff < 0) {
-      diff %= lowPrice - 1000n || 1n;
-    } else {
-      diff %= highPrice - 1000n || 1n;
-    }
-    closePrice = 1000n + diff;
-
-    volumeBase = 1000n * BigInt(Math.round(Math.random() * 10));
-    volumeQuote = volumeBase * ((closePrice + openPrice) / 2n);
-    const startsInBondingCurve = sum < ONE_APTN * 10_000n;
-    sum += volumeBase;
-    const integratorFees = volumeBase * 1000n;
-
-    let poolFeesBase: bigint;
-    let poolFeesQuote: bigint;
-
-    if (sum >= ONE_APTN * 10_000n) {
-      poolFeesBase = volumeBase * 1000n;
-      poolFeesQuote = poolFeesBase * ((closePrice + openPrice) / 2n);
-    } else {
-      poolFeesBase = 0n;
-      poolFeesQuote = 0n;
-    }
-
-    nSwaps = BigInt(Math.round(Math.random() * 10));
-    nChats = BigInt(Math.round(Math.random() * 20));
-
-    const endsInBondingCurve = sum >= ONE_APTN * 10_000n;
-
-    const periodicState: PeriodicState = {
-      market_metadata: marketMetadata,
-      periodic_state_metadata: periodicStateMetadata,
-      open_price_q64: q64(openPrice),
-      high_price_q64: q64(highPrice),
-      low_price_q64: q64(lowPrice),
-      close_price_q64: q64(closePrice),
-      volume_base: volumeBase,
-      volume_quote: volumeQuote,
-      integrator_fees: integratorFees,
-      pool_fees_base: poolFeesBase,
-      pool_fees_quote: poolFeesQuote,
-      n_swaps: nSwaps,
-      n_chat_messages: nChats,
-      starts_in_bonding_curve: startsInBondingCurve,
-      ends_in_bonding_curve: endsInBondingCurve,
-      tvl_per_lp_coin_growth_q64: 0n,
-    };
-
-    events.push(periodicState);
-    eventsAll.push(periodicState);
-
-    const unq64 = (q64: bigint) => {
-      return q64;
-    };
-
-    const factors = [5, 15, 30, 60, 60 * 4, 60 * 24];
-    for (const factor of factors) {
-      if (7 * 24 * 60 - (i % factor) == 0) {
-        const lasts = events.slice(events.length - factor, events.length);
-        const emitMarketNonce = nonce + 1n;
-        nonce += 1n;
-        const periodicStateMetadata2: PeriodicStateMetadata = {
-          start_time: periodicStateMetadata.emit_time - minute * BigInt(factor),
-          period: minute * BigInt(factor),
-          emit_time: periodicStateMetadata.emit_time,
-          emit_market_nonce: emitMarketNonce,
-          trigger: 0n,
-        };
-        const periodicState: PeriodicState = {
-          market_metadata: marketMetadata,
-          periodic_state_metadata: periodicStateMetadata2,
-          open_price_q64: q64(lasts.reduce((prev, curr) => prev + unq64(curr.open_price_q64), 0n)),
-          high_price_q64: q64(lasts.reduce((prev, curr) => prev + unq64(curr.high_price_q64), 0n)),
-          low_price_q64: q64(lasts.reduce((prev, curr) => prev + unq64(curr.low_price_q64), 0n)),
-          close_price_q64: q64(
-            lasts.reduce((prev, curr) => prev + unq64(curr.close_price_q64), 0n)
-          ),
-          volume_base: lasts.reduce((prev, curr) => prev + curr.volume_base, 0n),
-          volume_quote: lasts.reduce((prev, curr) => prev + curr.volume_quote, 0n),
-          integrator_fees: lasts.reduce((prev, curr) => prev + curr.integrator_fees, 0n),
-          pool_fees_base: lasts.reduce((prev, curr) => prev + curr.pool_fees_base, 0n),
-          pool_fees_quote: lasts.reduce((prev, curr) => prev + curr.pool_fees_quote, 0n),
-          n_swaps: lasts.reduce((prev, curr) => prev + curr.n_swaps, 0n),
-          n_chat_messages: lasts.reduce((prev, curr) => prev + curr.n_chat_messages, 0n),
-          starts_in_bonding_curve: lasts[0].starts_in_bonding_curve,
-          ends_in_bonding_curve: lasts[factor].ends_in_bonding_curve,
-          tvl_per_lp_coin_growth_q64: 0n,
-        };
-        eventsAll.push(periodicState);
-      }
-    }
-  }
-
-  for (const event of eventsAll) {
-    await insertPeriodicState(event, account, eventType, sql);
-  }
-};
-
-const insertPeriodicState = async (
-  state: PeriodicState,
-  account: string,
-  eventType: string,
-  sql: Sql
-) => {
-  const seq = Number(100000n + state.periodic_state_metadata.emit_market_nonce);
-  const time = new Date(Number(state.periodic_state_metadata.emit_time) / 1000);
-  const res = await sql`
-    INSERT INTO events VALUES (${seq}, 6, ${account}, ${seq}, ${seq}, ${eventType}, ${sql.json(JSON.parse(JSON.stringify(state, (_, v) => typeof v === 'bigint' ? v.toString() : v)))}, ${time.toISOString()}, 0, ${eventType})
-  `;
 };
