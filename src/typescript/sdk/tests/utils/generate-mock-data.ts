@@ -139,7 +139,7 @@ const generatePeriodicStates = async (
       trigger: 0n,
     };
 
-    const q64 = (n: bigint) => n;
+    const q64 = (n: bigint) => BigInt(Number(n) * (1 << 64));
 
     highPrice = 1000n + BigInt(Math.round(Math.random() * 100));
     lowPrice = 1000n - BigInt(Math.round(Math.random() * 100));
@@ -198,7 +198,7 @@ const generatePeriodicStates = async (
     events.push(periodicState);
     eventsAll.push(periodicState);
 
-    const unq64 = (n_q64: bigint) => n_q64;
+    const unq64 = (n_q64: bigint) => BigInt(Number(n_q64) / (1 << 64));
 
     const factors = [5, 15, 30, 60, 60 * 4, 60 * 24];
     for (const factor of factors) {
