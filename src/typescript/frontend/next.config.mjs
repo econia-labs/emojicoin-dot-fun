@@ -16,22 +16,22 @@ const debugConfigOptions = {
     serverMinification: false,
     serverSourceMaps: true,
   },
-};
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
   logging: {
     fetches: {
       fullUrl: true,
     },
   },
+};
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
   },
   compiler: {
     styledComponents: DEBUG ? styledComponentsConfig : true,
-    removeConsole: false,
+    removeConsole: !DEBUG,
   },
   ...(DEBUG ? debugConfigOptions : {}),
   transpilePackages: ["@/sdk"],
