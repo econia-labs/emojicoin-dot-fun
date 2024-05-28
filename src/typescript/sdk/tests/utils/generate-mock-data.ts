@@ -93,8 +93,27 @@ const insertPeriodicState = async (
 ) => {
   const seq = Number(100000n + state.periodic_state_metadata.emit_market_nonce);
   const time = new Date(Number(state.periodic_state_metadata.emit_time) / 1000);
-  const res = await sql`
-    INSERT INTO events VALUES (${seq}, 6, ${account}, ${seq}, ${seq}, ${eventType}, ${sql.json(JSON.parse(JSON.stringify(state, (_, v) => (typeof v === "bigint" ? v.toString() : v))))}, ${time.toISOString()}, 0, ${eventType})
+  await sql`
+    INSERT INTO events
+    VALUES (
+      ${seq},
+      6,
+      ${account},
+      ${seq},
+      ${seq},
+      ${eventType},
+      ${sql.json(
+        JSON.parse(
+          JSON.stringify(
+            state,
+            (_, v) => (typeof v === "bigint" ? v.toString() : v)
+          )
+        )
+      )},
+      ${time.toISOString()},
+      0,
+      ${eventType}
+    )
   `;
 };
 
@@ -139,6 +158,7 @@ const generatePeriodicStates = async (
       trigger: 0n,
     };
 
+    /* eslint-disable no-bitwise */
     const q64 = (n: bigint) => BigInt(Number(n) * (1 << 64));
 
     highPrice = 1000n + BigInt(Math.round(Math.random() * 100));
@@ -198,22 +218,23 @@ const generatePeriodicStates = async (
     events.push(periodicState);
     eventsAll.push(periodicState);
 
+    /* eslint-disable no-bitwise */
     const unq64 = (n_q64: bigint) => BigInt(Number(n_q64) / (1 << 64));
 
     const factors = [5, 15, 30, 60, 60 * 4, 60 * 24];
     for (const factor of factors) {
       if (7 * 24 * 60 - (i % factor) === 0) {
         const lasts = events.slice(events.length - factor, events.length);
-        const emitMarketNonce = nonce + 1n;
+        const emitMarketNonce2 = nonce + 1n;
         nonce += 1n;
         const periodicStateMetadata2: PeriodicStateMetadata = {
           start_time: periodicStateMetadata.emit_time - minute * BigInt(factor),
           period: minute * BigInt(factor),
           emit_time: periodicStateMetadata.emit_time,
-          emit_market_nonce: emitMarketNonce,
+          emit_market_nonce: emitMarketNonce2,
           trigger: 0n,
         };
-        const periodicState: PeriodicState = {
+        const periodicState2: PeriodicState = {
           market_metadata: marketMetadata,
           periodic_state_metadata: periodicStateMetadata2,
           open_price_q64: q64(lasts.reduce((prev, curr) => prev + unq64(curr.open_price_q64), 0n)),
@@ -233,7 +254,7 @@ const generatePeriodicStates = async (
           ends_in_bonding_curve: lasts[factor].ends_in_bonding_curve,
           tvl_per_lp_coin_growth_q64: 0n,
         };
-        eventsAll.push(periodicState);
+        eventsAll.push(periodicState2);
       }
     }
   }
