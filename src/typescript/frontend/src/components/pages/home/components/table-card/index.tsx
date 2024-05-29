@@ -53,7 +53,11 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
 
               <Flex>
                 <Column width="50%">
-                  <StyledColoredText textScale="bodySmall" color="lightGray" textTransform="uppercase">
+                  <StyledColoredText
+                    textScale="bodySmall"
+                    color="lightGray"
+                    textTransform="uppercase"
+                  >
                     {t("Market Cap")}
                   </StyledColoredText>
 
@@ -63,7 +67,11 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
                 </Column>
 
                 <Column width="50%">
-                  <StyledColoredText textScale="bodySmall" color="lightGray" textTransform="uppercase">
+                  <StyledColoredText
+                    textScale="bodySmall"
+                    color="lightGray"
+                    textTransform="uppercase"
+                  >
                     {t("24h Volume")}
                   </StyledColoredText>
 

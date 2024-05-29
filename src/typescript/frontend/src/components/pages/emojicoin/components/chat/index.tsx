@@ -19,13 +19,13 @@ const Chat = (props: ChatProps) => {
   const { theme } = useThemeContext();
   // TODO: Resolve address to Aptos name, store in state.
   const [messageList, setMessageList] = useState(
-    props.data.chats.map(chat => ({
+    props.data.chats.map((chat) => ({
       user: truncateAddress(chat.user),
       text: chat.message,
       userRank: chat.user.at(-1)?.toLowerCase() === "f" ? "🐳" : "🐡", // TODO: Fix random assignment of status.
       fromAnotherUser: chat.user !== "local user's address", // TODO: Actually check this value later.
       version: chat.version,
-    })),
+    }))
   );
 
   const loadMoreMessages = () => {
@@ -35,7 +35,8 @@ const Chat = (props: ChatProps) => {
 
   const onEmojiClickHandler = (emoji: EmojiClickData) => {
     if (targetElement) {
-      (targetElement as HTMLTextAreaElement).value = (targetElement as HTMLTextAreaElement).value + emoji.emoji;
+      (targetElement as HTMLTextAreaElement).value =
+        (targetElement as HTMLTextAreaElement).value + emoji.emoji;
     }
   };
 
@@ -66,7 +67,13 @@ const Chat = (props: ChatProps) => {
 
   return (
     <Column width="100%" flexGrow={1}>
-      <Flex flexGrow="1" width="100%" overflowY="auto" maxHeight="328px" flexDirection="column-reverse">
+      <Flex
+        flexGrow="1"
+        width="100%"
+        overflowY="auto"
+        maxHeight="328px"
+        flexDirection="column-reverse"
+      >
         <InfiniteScroll
           next={loadMoreMessages}
           hasMore={false}

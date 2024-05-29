@@ -39,7 +39,8 @@ export const StyledMessageContainer = styled.div<{ fromAnotherUser: boolean }>`
   justify-content: ${({ fromAnotherUser }) => (fromAnotherUser ? "start" : "end")};
 
   ${Arrow} {
-    background: ${({ theme, fromAnotherUser }) => (fromAnotherUser ? theme.colors.econiaBlue : theme.colors.blue)};
+    background: ${({ theme, fromAnotherUser }) =>
+      fromAnotherUser ? theme.colors.econiaBlue : theme.colors.blue};
     left: ${({ fromAnotherUser }) => (fromAnotherUser ? "-4px" : undefined)};
     right: ${({ fromAnotherUser }) => (fromAnotherUser ? undefined : "-5px")};
   }

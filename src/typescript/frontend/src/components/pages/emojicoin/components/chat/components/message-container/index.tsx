@@ -29,7 +29,10 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
 
         <StyledUserNameWrapper>
           <FlexGap gap="10px">
-            <a {...EXTERNAL_LINK_PROPS} href={toExplorerLink({ value: message.version, type: "version" })}>
+            <a
+              {...EXTERNAL_LINK_PROPS}
+              href={toExplorerLink({ value: message.version, type: "version" })}
+            >
               <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
                 {message.user}
               </Text>

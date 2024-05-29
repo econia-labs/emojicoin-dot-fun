@@ -29,7 +29,7 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
       key={index}
       disabled={value === option}
       onMouseEnter={replay}
-      onClick={e => {
+      onClick={(e) => {
         e.preventDefault();
 
         onClick(option);

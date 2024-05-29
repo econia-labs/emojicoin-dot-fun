@@ -27,7 +27,13 @@ export const SearchComponent = () => {
         isShowError={false}
         className="med-pixel-text"
       >
-        <Input className="med-pixel-text" id="search" autoComplete="off" onKeyDown={onInputChange} ref={targetRef} />
+        <Input
+          className="med-pixel-text"
+          id="search"
+          autoComplete="off"
+          onKeyDown={onInputChange}
+          ref={targetRef}
+        />
       </InputGroup>
       {tooltip}
     </>

@@ -25,9 +25,8 @@ const Svg = styled.svg.attrs<SvgProps>(
     color,
     width,
     xmlns,
-  }),
+  })
 )`
-
   align-self: center;
   fill: ${({ theme, color }) => color && theme.colors[color]};
   flex-shrink: 0;

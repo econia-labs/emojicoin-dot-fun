@@ -34,7 +34,10 @@ export interface BaseButtonProps
       isScramble?: boolean;
     }> {}
 
-export type ButtonProps<P extends ElementType = "button"> = PolymorphicComponentProps<P, BaseButtonProps>;
+export type ButtonProps<P extends ElementType = "button"> = PolymorphicComponentProps<
+  P,
+  BaseButtonProps
+>;
 
 export interface ThemedProps extends ButtonProps {
   theme: DefaultTheme;

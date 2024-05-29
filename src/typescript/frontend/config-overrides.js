@@ -9,7 +9,7 @@ module.exports = function override(webpackConfig) {
   });
 
   webpackConfig.resolve.plugins = webpackConfig.resolve.plugins.filter(
-    plugin => !(plugin instanceof ModuleScopePlugin),
+    (plugin) => !(plugin instanceof ModuleScopePlugin)
   );
 
   webpackConfig.ignoreWarnings = [/Failed to parse source map/];

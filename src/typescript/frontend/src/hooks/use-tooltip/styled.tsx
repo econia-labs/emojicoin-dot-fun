@@ -28,32 +28,40 @@ export const StyledTooltip = styled(motion.div)<{ arrowBorderColor: keyof Colors
   &[data-popper-placement^="top"] > ${Arrow} {
     bottom: -5px;
     border-bottom: 1px solid
-      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+      ${({ theme, arrowBorderColor }) =>
+        arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue};
     border-right: 1px solid
-      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+      ${({ theme, arrowBorderColor }) =>
+        arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue};
   }
 
   &[data-popper-placement^="bottom"] > ${Arrow} {
     top: -5px;
     border-top: 1px solid
-      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+      ${({ theme, arrowBorderColor }) =>
+        arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue};
     border-left: 1px solid
-      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+      ${({ theme, arrowBorderColor }) =>
+        arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue};
   }
 
   &[data-popper-placement^="left"] > ${Arrow} {
     right: -5px;
     border-top: 1px solid
-      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+      ${({ theme, arrowBorderColor }) =>
+        arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue};
     border-right: 1px solid
-      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+      ${({ theme, arrowBorderColor }) =>
+        arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue};
   }
 
   &[data-popper-placement^="right"] > ${Arrow} {
     left: -5px;
     border-bottom: 1px solid
-      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+      ${({ theme, arrowBorderColor }) =>
+        arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue};
     border-left: 1px solid
-      ${({ theme, arrowBorderColor }) => (arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue)};
+      ${({ theme, arrowBorderColor }) =>
+        arrowBorderColor ? theme.colors[arrowBorderColor] : theme.colors.econiaBlue};
   }
 `;

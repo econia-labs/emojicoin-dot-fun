@@ -51,7 +51,12 @@ const MainCard = (props: MainCardProps) => {
             display: "flex",
           }}
         >
-          <StyledImage id="hero-image" src="/images/planet-home.webp" aspectRatio={1.6} alt="Planet" />
+          <StyledImage
+            id="hero-image"
+            src="/images/planet-home.webp"
+            aspectRatio={1.6}
+            alt="Planet"
+          />
 
           <StyledEmoji>{featured?.emoji.emoji || "🖤"}</StyledEmoji>
         </Link>
@@ -85,7 +90,8 @@ const MainCard = (props: MainCardProps) => {
                   {t("24 hour vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured?.volume24H, 2) || "143.31"} <AptosIconBlack className={"icon-inline"} />
+                  {toDecimalsAPT(featured?.volume24H, 2) || "143.31"}{" "}
+                  <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
             )}

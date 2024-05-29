@@ -39,19 +39,31 @@ const MobileGrid = (props: GridProps) => {
         <StyledMobileContentHeader>
           <FlexGap gap="20px" width="fit-content">
             <Flex cursor="pointer" onClick={() => setTab(1)}>
-              <Text textScale="pixelHeading4" color={tab === 1 ? "lightGray" : "darkGray"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 1 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Trade History")}
               </Text>
             </Flex>
 
             <Flex cursor="pointer" onClick={() => setTab(2)}>
-              <Text textScale="pixelHeading4" color={tab === 2 ? "lightGray" : "darkGray"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 2 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Swap")}
               </Text>
             </Flex>
 
             <Flex cursor="pointer" onClick={() => setTab(3)}>
-              <Text textScale="pixelHeading4" color={tab === 3 ? "lightGray" : "darkGray"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 3 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Chat")}
               </Text>
             </Flex>

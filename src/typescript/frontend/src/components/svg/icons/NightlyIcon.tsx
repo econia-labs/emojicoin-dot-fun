@@ -29,8 +29,7 @@ const NightlyIcon = () => {
           </clipPath>
           <g
             style={{
-              clipPath:
-                "url(#SVGID_00000147181236294084442980000018432114069927631271_)",
+              clipPath: "url(#SVGID_00000147181236294084442980000018432114069927631271_)",
             }}
           >
             <path

@@ -15,7 +15,13 @@ import { type DataType } from "./types";
 import { getEmptyListTr } from "utils";
 
 const PoolsTable: React.FC = () => {
-  const [dataMock, setDataMock] = useState<DataType[]>([...DATA, ...DATA, ...DATA, ...DATA, ...DATA]);
+  const [dataMock, setDataMock] = useState<DataType[]>([
+    ...DATA,
+    ...DATA,
+    ...DATA,
+    ...DATA,
+    ...DATA,
+  ]);
   const { isMobile } = useMatchBreakpoints();
   const { offsetHeight: poolsTableBodyHeight } = useElementDimensions("poolsTableBody");
 
@@ -39,7 +45,11 @@ const PoolsTable: React.FC = () => {
             {headers.map((th, index) => (
               <Th width={th.width} key={index}>
                 <ThInner>
-                  <TableHeader item={th} isLast={HEADERS.length - 1 === index} sortData={sortData} />
+                  <TableHeader
+                    item={th}
+                    isLast={HEADERS.length - 1 === index}
+                    sortData={sortData}
+                  />
                 </ThInner>
               </Th>
             ))}

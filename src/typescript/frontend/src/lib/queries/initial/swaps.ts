@@ -12,7 +12,7 @@ const getInitialSwapData = cache(async (marketID: string) => {
     queryFunction: paginateSwapEvents,
     endpoint: new URL(`swap-data-${Number(marketID)}.json`, SAMPLE_DATA_BASE_URL),
   });
-  return swapEvents.map(swap => ({ ...toSwapEvent(swap), version: swap.version }));
+  return swapEvents.map((swap) => ({ ...toSwapEvent(swap), version: swap.version }));
 });
 
 export default getInitialSwapData;

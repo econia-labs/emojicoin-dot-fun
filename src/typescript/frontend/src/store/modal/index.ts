@@ -21,7 +21,10 @@ export const modalSlice = createSlice({
       state.clickOutsideHandler = action.payload.clickOutsideHandler;
     },
 
-    partialUpdateModalProps: <T>(state: ModalState<T>, action: PayloadAction<ShowModalProps<T>["props"]>) => {
+    partialUpdateModalProps: <T>(
+      state: ModalState<T>,
+      action: PayloadAction<ShowModalProps<T>["props"]>
+    ) => {
       state.props = action.payload ? { ...state.props, ...action.payload } : state.props;
     },
 

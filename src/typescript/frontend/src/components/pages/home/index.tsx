@@ -19,7 +19,13 @@ const Home = async (props: HomeProps) => {
       <Column mb="31px">
         <ClientsSlider />
 
-        <Flex px={{ _: "16px", mobileL: "24px" }} mx="auto" width="100%" maxWidth="100%" justifyContent="center">
+        <Flex
+          px={{ _: "16px", mobileL: "24px" }}
+          mx="auto"
+          width="100%"
+          maxWidth="100%"
+          justifyContent="center"
+        >
           <MainCard featured={featured} />
         </Flex>
 

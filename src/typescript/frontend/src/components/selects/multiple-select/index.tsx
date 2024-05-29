@@ -50,7 +50,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
 
   const onSelectHandler = (option: Option) => {
     if (selectedOptions.includes(option)) {
-      setSelectedOptions(selectedOptions.filter(item => item !== option));
+      setSelectedOptions(selectedOptions.filter((item) => item !== option));
     } else {
       setSelectedOptions([...selectedOptions, option]);
     }
@@ -95,7 +95,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
     {
       ...defaultTooltipOptions,
       ...tooltipOptions,
-    },
+    }
   );
 
   function onDropdownMenuClick(option: Option) {

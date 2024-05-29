@@ -81,9 +81,7 @@ export function ConnectWalletContextProvider({ children }: PropsWithChildren) {
                     key={wallet.name}
                     className={
                       WalletItemClassName +
-                      (wallet.name !== activeWallet?.name
-                        ? " hover:bg-black"
-                        : " hover:bg-black")
+                      (wallet.name !== activeWallet?.name ? " hover:bg-black" : " hover:bg-black")
                     }
                     onClick={() => {
                       try {

@@ -37,12 +37,17 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
   };
 
   const { targetRef, tooltip, setVisible } = useTooltip(
-    <DropdownComponent options={options} value={value} onClick={onDropdownMenuClick} {...dropdownWrapperProps} />,
+    <DropdownComponent
+      options={options}
+      value={value}
+      onClick={onDropdownMenuClick}
+      {...dropdownWrapperProps}
+    />,
 
     {
       ...defaultTooltipOptions,
       ...tooltipOptions,
-    },
+    }
   );
 
   function onDropdownMenuClick(option: Option) {

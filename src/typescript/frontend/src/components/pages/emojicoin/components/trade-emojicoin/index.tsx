@@ -23,14 +23,25 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
 
   return (
     <Column width="100%" maxWidth="414px" height="100%" justifyContent="center">
-      <Text textScale={{ _: "heading2", tablet: "heading1" }} color="white" textTransform="uppercase" pb="17px">
+      <Text
+        textScale={{ _: "heading2", tablet: "heading1" }}
+        color="white"
+        textTransform="uppercase"
+        pb="17px"
+      >
         {t("Trade Emojicoin")}
       </Text>
 
       <StyledInputContainer isForce={isForce}>
         <StyledInputWrapper>
           <Column>
-            <Text textScale="pixelHeading4" mb="-6px" color="lightGray" lineHeight="20px" textTransform="uppercase">
+            <Text
+              textScale="pixelHeading4"
+              mb="-6px"
+              color="lightGray"
+              lineHeight="20px"
+              textTransform="uppercase"
+            >
               {t("You pay")}
             </Text>
 
@@ -50,7 +61,13 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
 
         <StyledInputWrapper>
           <Column>
-            <Text textScale="pixelHeading4" mb="-6px" color="lightGray" lineHeight="20px" textTransform="uppercase">
+            <Text
+              textScale="pixelHeading4"
+              mb="-6px"
+              color="lightGray"
+              lineHeight="20px"
+              textTransform="uppercase"
+            >
               {t("You receive")}
             </Text>
 

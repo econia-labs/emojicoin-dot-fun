@@ -45,7 +45,10 @@ const Icon: React.FC<SvgProps> = ({ ...props }) => {
         d="M78.2092 4.48682H78.917L80.1506 7.92721H79.5903L79.2807 7.02779H77.8455L77.5359 7.92721H76.9707L78.2092 4.48682ZM79.1332 6.57563L78.5779 4.98322H78.5484L77.993 6.57563H79.1332Z"
         fill={theme.colors.white}
       />
-      <path d="M73.4785 4.48682H73.9995V7.45539H75.4936V7.92721H73.4785V4.48682Z" fill={theme.colors.white} />
+      <path
+        d="M73.4785 4.48682H73.9995V7.45539H75.4936V7.92721H73.4785V4.48682Z"
+        fill={theme.colors.white}
+      />
       <path
         fillRule="evenodd"
         clipRule="evenodd"

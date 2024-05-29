@@ -12,7 +12,7 @@ export const fetchTopMarkets = cache(async () => {
   if (process.env.NEXT_PUBLIC_FORCE_STATIC_FETCH === "true") {
     const res = await fetch(new URL("top-market-data.json", SAMPLE_DATA_BASE_URL));
     const data = (await res.json()).data;
-    return data.map(v => ({
+    return data.map((v) => ({
       state: toStateEvent(v.data),
       emoji: SYMBOL_DATA.byHex(v.data.market_metadata.emoji_bytes)!,
       version: v.version,
@@ -22,7 +22,7 @@ export const fetchTopMarkets = cache(async () => {
 
   const res = await getTopMarkets();
 
-  return res.data.map(v => ({
+  return res.data.map((v) => ({
     state: toStateEvent(v.data),
     emoji: SYMBOL_DATA.byHex(v.data.market_metadata.emoji_bytes)!,
     version: v.version,
@@ -32,13 +32,15 @@ export const fetchTopMarkets = cache(async () => {
 
 const getInitialMarketData = async () => {
   const { markets } = await paginateMarketRegistrations();
-  const data = markets.map(m => ({
+  const data = markets.map((m) => ({
     marketID: m.marketMetadata.marketID,
     marketAddress: m.marketMetadata.marketAddress,
     version: m.version,
   }));
 
-  const addresses = data.slice(0, 100).map(v => ({ address: v.marketAddress, version: v.version }));
+  const addresses = data
+    .slice(0, 100)
+    .map((v) => ({ address: v.marketAddress, version: v.version }));
   const aptos = getAptos(APTOS_NETWORK);
 
   const marketViews: Array<Promise<JSONTypes.MarketView & { version: number }>> = [];
@@ -49,7 +51,7 @@ const getInitialMarketData = async () => {
       MarketView.view({
         aptos,
         marketAddress: addresses[i].address,
-      }).then(res => ({ ...res, version: addresses[i].version })),
+      }).then((res) => ({ ...res, version: addresses[i].version }))
     );
   }
 
@@ -63,7 +65,7 @@ const fetchInitialMarketData = cache(async () => {
     endpoint: new URL("market-registration-data.json", SAMPLE_DATA_BASE_URL),
   });
 
-  const markets = marketViews.map(mkt => ({
+  const markets = marketViews.map((mkt) => ({
     emoji: SYMBOL_DATA.byHex(mkt.metadata.emoji_bytes)!,
     market: toMarketView(mkt),
     volume24H: BigInt(Math.floor(Math.random() * 1337 ** 4)), // TODO: Replace with actual volume.
@@ -75,7 +77,7 @@ const fetchInitialMarketData = cache(async () => {
       ? -1
       : m2.market.instantaneousStats.marketCap > m1.market.instantaneousStats.marketCap
         ? 1
-        : 0,
+        : 0
   );
 
   return markets;

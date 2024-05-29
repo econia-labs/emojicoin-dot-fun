@@ -50,9 +50,7 @@ export const BaseModal: React.FC<
                 {showCloseButton && (
                   <div
                     className={`absolute right-0 top-0 !z-50 flex h-[50px] w-[50px] cursor-pointer items-center justify-center border-b border-l transition-all [&>svg>path]:stroke-neutral-500 [&>svg>path]:transition-all [&>svg>path]:hover:stroke-neutral-100 ${
-                      hoveringOnCloseButton
-                        ? ""
-                        : ""
+                      hoveringOnCloseButton ? "" : ""
                     }`}
                     onClick={onClose}
                     onMouseEnter={() => setHoveringOnCloseButton(true)}

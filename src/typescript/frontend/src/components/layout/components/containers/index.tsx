@@ -25,7 +25,8 @@ export const getEllipsis = ({ ellipsis }: BoxThemedProps) => {
 };
 
 export const Box = styled.div<BoxProps>`
-  background-color: ${({ theme, $backgroundColor }) => $backgroundColor && theme.colors[$backgroundColor]};
+  background-color: ${({ theme, $backgroundColor }) =>
+    $backgroundColor && theme.colors[$backgroundColor]};
   cursor: ${({ cursor }) => cursor && cursor};
   pointer-events: ${({ pointerEvents }) => pointerEvents && pointerEvents};
 

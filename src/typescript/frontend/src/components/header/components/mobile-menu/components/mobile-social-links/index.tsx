@@ -7,7 +7,7 @@ import { SOCIAL_ICONS } from "./constants";
 
 import { type FlexGapProps } from "components/layout/components/types";
 
-export const MobileSocialLinks: React.FC<FlexGapProps> = props => {
+export const MobileSocialLinks: React.FC<FlexGapProps> = (props) => {
   return (
     <FlexGap gap="12px" justifyContent="flex-end" {...props}>
       {SOCIAL_ICONS.map(({ icon: Icon, href }, index) => (

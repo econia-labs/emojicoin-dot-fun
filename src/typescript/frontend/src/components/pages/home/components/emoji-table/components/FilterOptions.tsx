@@ -24,7 +24,7 @@ export const FilterOptionsComponent = () => {
   const { isLaptopL } = useMatchBreakpoints();
 
   const handler = () => {
-    setIsChecked(v => !v);
+    setIsChecked((v) => !v);
   };
 
   return (
@@ -38,7 +38,11 @@ export const FilterOptionsComponent = () => {
         options={options}
         dropdownWrapperProps={{ width: "250px" }}
         titleProps={{ color: "darkGray", textTransform: "uppercase" }}
-        placeholderProps={{ textTransform: "uppercase", color: "lightGray", className: "med-pixel-text" }}
+        placeholderProps={{
+          textTransform: "uppercase",
+          color: "lightGray",
+          className: "med-pixel-text",
+        }}
         placeholder="Sort:"
       />
 

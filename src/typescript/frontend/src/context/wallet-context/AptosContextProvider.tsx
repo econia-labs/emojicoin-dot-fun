@@ -32,7 +32,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       const transaction = args[0];
 
       try {
-        transaction.data.functionArguments = transaction.data.functionArguments.map(arg => {
+        transaction.data.functionArguments = transaction.data.functionArguments.map((arg) => {
           if (typeof arg === "bigint") {
             return arg.toString();
           } else {
@@ -58,7 +58,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         }
       }
     },
-    [adapterSignAndSubmitTxn, aptosClient],
+    [adapterSignAndSubmitTxn, aptosClient]
   );
 
   const value: AptosContextState = {

@@ -29,7 +29,9 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => 
         gap="10px"
         alignItems="center"
         width="fit-content"
-        onClick={item.sortBy ? () => sortData(item.sortBy as Exclude<keyof DataType, "pool">) : () => {}}
+        onClick={
+          item.sortBy ? () => sortData(item.sortBy as Exclude<keyof DataType, "pool">) : () => {}
+        }
         onMouseEnter={replay}
         ellipsis
       >

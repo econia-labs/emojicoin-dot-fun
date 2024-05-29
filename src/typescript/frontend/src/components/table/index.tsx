@@ -1,5 +1,12 @@
 import styled, { css } from "styled-components";
-import { layout, type LayoutProps, space, type SpaceProps, typography, type TypographyProps } from "styled-system";
+import {
+  layout,
+  type LayoutProps,
+  space,
+  type SpaceProps,
+  typography,
+  type TypographyProps,
+} from "styled-system";
 import { Flex } from "@containers";
 import { Text } from "components/text";
 

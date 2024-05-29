@@ -23,7 +23,8 @@ export const StyledInput = styled.input`
 export const CustomCheckbox = styled.div<CheckProps>`
   width: 24px;
   height: 24px;
-  border: 1px solid ${({ theme, disabled }) => (disabled ? theme.colors.lightGray : theme.colors.darkGray)};
+  border: 1px solid
+    ${({ theme, disabled }) => (disabled ? theme.colors.lightGray : theme.colors.darkGray)};
   background-color: ${({ theme, checked, disabled }) =>
     disabled ? theme.colors.lightGray : checked ? theme.colors.blue : "transparent"};
   border-radius: ${({ theme }) => theme.radii.semiMedium};

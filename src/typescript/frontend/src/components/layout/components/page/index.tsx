@@ -35,7 +35,7 @@ type Languages = {
  */
 export async function getGenerateMetadataFunction(
   { params, searchParams }: Props,
-  parent: ResolvingMetadata,
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const [_, __] = [searchParams, parent];
 
@@ -54,7 +54,9 @@ export async function getGenerateMetadataFunction(
 
   const defaultMetadata = getDefaultMetadata();
 
-  const translatedTitle = await (params.id ? translateWithDefault("Home") : translateWithDefault(DEFAULT_TITLE));
+  const translatedTitle = await (params.id
+    ? translateWithDefault("Home")
+    : translateWithDefault(DEFAULT_TITLE));
 
   return {
     ...defaultMetadata,

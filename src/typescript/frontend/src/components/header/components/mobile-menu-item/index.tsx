@@ -9,7 +9,11 @@ import Arrow from "components/svg/icons/Arrow";
 import { type MobileMenuItemProps } from "./types";
 import { StyledItemWrapper } from "./styled";
 
-const MobileMenuItem: React.FC<MobileMenuItemProps> = ({ title, onClick = () => {}, borderBottom = true }) => {
+const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
+  title,
+  onClick = () => {},
+  borderBottom = true,
+}) => {
   const { t } = translationFunction();
 
   const { ref, replay } = useScramble({

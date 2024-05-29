@@ -2,13 +2,7 @@ import React from "react";
 
 const RiseIcon = () => {
   return (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M15.9999 29.2705C23.3291 29.2705 29.2705 23.329 29.2705 15.9999C29.2705 8.67071 23.3291 2.72925 15.9999 2.72925C8.67071 2.72925 2.72925 8.67071 2.72925 15.9999C2.72925 23.329 8.67071 29.2705 15.9999 29.2705Z"
         fill="currentColor"

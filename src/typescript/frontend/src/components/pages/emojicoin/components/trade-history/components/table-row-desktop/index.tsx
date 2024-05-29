@@ -18,7 +18,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
     </Text>,
     {
       placement: "top",
-    },
+    }
   );
 
   return (
@@ -54,7 +54,11 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         minWidth={{ _: "10px", laptopL: "unset" }}
       >
         <Flex>
-          <Text textScale="bodySmall" color={item.type === "sell" ? "error" : "green"} textTransform="uppercase">
+          <Text
+            textScale="bodySmall"
+            color={item.type === "sell" ? "error" : "green"}
+            textTransform="uppercase"
+          >
             {item.type}
           </Text>
         </Flex>
