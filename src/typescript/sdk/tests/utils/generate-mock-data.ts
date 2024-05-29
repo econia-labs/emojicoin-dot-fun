@@ -139,7 +139,8 @@ const generatePeriodicStates = async (
   let sum = 0n;
   const events = [];
   const eventsAll = [];
-  for (let i = 7 * 24 * 60; i > 10; i -= 1) {
+  const weekInMinutes = 7 * 24 * 60;
+  for (let i = weekInMinutes; i > 10; i -= 1) {
     const startTime = BigInt(now - minute * BigInt(i));
     const emitTime = startTime + minute;
     const emitMarketNonce = nonce + 1n;
@@ -216,7 +217,8 @@ const generatePeriodicStates = async (
     /* eslint-disable no-bitwise */
     const unq64 = (n_q64: bigint) => BigInt(Number(n_q64) / (1 << 64));
 
-    const factors = [5, 15, 30, 60, 60 * 4, 60 * 24];
+    const hourInMinutes = 60;
+    const factors = [5, 15, 30, 60, hourInMinutes * 4, hourInMinutes * 24];
     for (const factor of factors) {
       if (7 * 24 * 60 - (i % factor) === 0) {
         const lasts = events.slice(events.length - factor, events.length);
