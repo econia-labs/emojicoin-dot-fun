@@ -169,6 +169,9 @@ importers:
 
   sdk:
     dependencies:
+      '@aptos-labs/ts-sdk':
+        specifier: ^1.16.0
+        version: 1.16.0
       '@keyvhq/core':
         specifier: ^2.1.1
         version: 2.1.1

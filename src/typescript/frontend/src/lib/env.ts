@@ -1,4 +1,4 @@
-import { Network } from "@aptos-labs/wallet-adapter-react";
+import { type Network } from "@aptos-labs/wallet-adapter-react";
 
 let APTOS_NETWORK: Network;
 let SHORT_REVALIDATE: boolean;

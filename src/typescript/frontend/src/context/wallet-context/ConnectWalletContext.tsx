@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 
 import { BaseModal } from "components/modal/BaseModal";
 import { WalletItem, isSupportedWallet, walletSort } from "./WalletItem";
-import { disconnect } from "process";
 
 export type ConnectWalletContextState = {
   connectWallet: () => void;

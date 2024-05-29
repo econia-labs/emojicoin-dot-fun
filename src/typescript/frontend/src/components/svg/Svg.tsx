@@ -4,7 +4,6 @@ import styled, { css, keyframes } from "styled-components";
 import { space } from "styled-system";
 import { rotate } from "./theme";
 import { type SvgProps } from "./types";
-import { darkColors } from "theme/colors";
 
 const rotateAnimation = keyframes`
   from {

@@ -13,7 +13,6 @@ import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoin
 import { StyledContentWrapper } from "./styled";
 import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { ConnectWalletContextProvider } from "./wallet-context/ConnectWalletContext";
-import { PetraWallet } from "petra-plugin-wallet-adapter";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
