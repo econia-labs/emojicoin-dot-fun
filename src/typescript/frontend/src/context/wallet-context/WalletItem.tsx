@@ -42,20 +42,24 @@ type ScrambledProps = {
   text: string;
   active: boolean;
   hover: boolean;
+  installed: boolean;
 };
 
-const ScrambledRow: React.FC<ScrambledProps> = ({ text, active, hover }) => {
+const ScrambledRow: React.FC<ScrambledProps> = ({ text, active, hover, installed }) => {
   const [enabled, setEnabled] = useState(false);
 
-  const display = ({ text, active, hover }: ScrambledProps) => {
-    if (active) {
-      return hover ? "Disconnect" : `${text} Wallet`;
+  const display = ({ text, active, hover, installed }: ScrambledProps) => {
+    if (!installed) {
+      return `Install ${text} Wallet`;
     }
-    return hover ? "Connect" : `${text} Wallet`;
+    if (active) {
+      return hover ? "Disconnect" : ` ${text} Wallet`;
+    }
+    return hover ? "Connect" : ` ${text} Wallet`;
   };
 
   const { ref, replay } = useScramble({
-    text: display({ text, active, hover }),
+    text: display({ text, active, hover, installed }),
     overdrive: true,
     overflow: true,
     speed: 0.7,
@@ -91,11 +95,12 @@ export const WalletItem: React.FC<{
       {WALLET_ICON[wallet.name.toLowerCase()]}
       <div className={WalletNameClassName}>
         <div>
-          {wallet.readyState === WalletReadyState.NotDetected ? (
-            `Install ${wallet.name} Wallet`
-          ) : (
-            <ScrambledRow active={wallet.name === current?.name} text={wallet.name} hover={hover} />
-          )}
+          <ScrambledRow
+            active={wallet.name === current?.name}
+            text={wallet.name}
+            installed={wallet.readyState === WalletReadyState.Installed}
+            hover={hover}
+          />
         </div>
       </div>
       <div className={ArrowDivClassName}>
