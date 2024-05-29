@@ -10,7 +10,7 @@ import {
   type FlexGapProps,
   type FlexProps,
   type BoxThemedProps,
-} from "@/containers";
+} from "@containers";
 import { system } from "styled-system";
 import { siteWidth } from "theme/base";
 

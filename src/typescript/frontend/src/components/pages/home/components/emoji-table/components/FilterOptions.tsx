@@ -1,6 +1,6 @@
 "use client";
 
-import { FlexGap } from "@/containers";
+import { FlexGap } from "@containers";
 import { SingleSelect, DropdownMenu } from "components/selects";
 import { Switcher } from "components/switcher";
 import { translationFunction } from "context/language-context";
@@ -37,13 +37,13 @@ export const FilterOptionsComponent = () => {
         dropdownComponent={DropdownMenu}
         options={options}
         dropdownWrapperProps={{ width: "250px" }}
-        titleProps={{ color: "darkGrey", textTransform: "uppercase" }}
-        placeholderProps={{ textTransform: "uppercase", color: "lightGrey", className: "med-pixel-text" }}
+        titleProps={{ color: "darkGray", textTransform: "uppercase" }}
+        placeholderProps={{ textTransform: "uppercase", color: "lightGray", className: "med-pixel-text" }}
         placeholder="Sort:"
       />
 
       <FlexGap gap="12px" className={"med-pixel-text"}>
-        <Text className={"med-pixel-text"} color="lightGrey" textTransform="uppercase">
+        <Text className={"med-pixel-text"} color="lightGray" textTransform="uppercase">
           {t("Anime:")}
         </Text>
 

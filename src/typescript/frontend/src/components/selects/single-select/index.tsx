@@ -15,7 +15,7 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
   title,
   titleProps,
   placeholder = "Please select...",
-  placeholderProps = { color: "lightGrey" },
+  placeholderProps = { color: "lightGray" },
   dropdownComponent,
   dropdownWrapperProps,
   wrapperProps,

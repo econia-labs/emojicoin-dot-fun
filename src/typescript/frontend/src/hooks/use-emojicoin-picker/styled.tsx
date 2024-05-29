@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const StyledEmojiPickerWrapper = styled.div`
   .epr-main {
     background-color: ${({ theme }) => theme.colors.black};
-    border-color: ${({ theme }) => theme.colors.darkGrey};
+    border-color: ${({ theme }) => theme.colors.darkGray};
     border-radius: ${({ theme }) => theme.radii.xSmall};
 
     .epr-search-container {

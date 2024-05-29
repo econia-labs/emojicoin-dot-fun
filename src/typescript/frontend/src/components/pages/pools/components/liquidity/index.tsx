@@ -5,7 +5,7 @@ import React from "react";
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
 
-import { Flex, Column } from "@/containers";
+import { Flex, Column } from "@containers";
 import { Text, InputNumeric, InputGroup, Button, Prompt } from "components";
 
 import { StyledAddLiquidityWrapper } from "./styled";
@@ -29,14 +29,14 @@ const Liquidity: React.FC = () => {
 
             <Text
               textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
             >
               apt
             </Text>
           </Flex>
 
-          <Flex p={{ _: "0px 20px", tablet: "5px 20px" }} borderTop={`1px solid ${theme.colors.darkGrey}`}>
+          <Flex p={{ _: "0px 20px", tablet: "5px 20px" }} borderTop={`1px solid ${theme.colors.darkGray}`}>
             <InputGroup isShowError={false} height="22px" scale="sm" pt={{ _: "3px", tablet: "6px" }}>
               <InputNumeric borderColor="transparent" p="0px !important" onUserInput={() => {}} />
             </InputGroup>
@@ -44,7 +44,7 @@ const Liquidity: React.FC = () => {
             <Text
               textScale="pixelHeading3"
               fontSize={{ _: "24px", tablet: "32px" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
               pt="4px"
             >

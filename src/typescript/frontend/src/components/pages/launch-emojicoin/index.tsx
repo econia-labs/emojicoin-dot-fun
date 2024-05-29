@@ -15,7 +15,7 @@ import { InputGroup } from "components/inputs/input-group";
 import { Text } from "components/text";
 import Button from "components/button";
 import ClientsSlider from "components/clients-slider";
-import { Column, Flex, FlexGap } from "@/containers";
+import { Column, Flex, FlexGap } from "@containers";
 import { StyledFieldName } from "./styled";
 
 const LaunchEmojicoin: React.FC = () => {
@@ -109,7 +109,7 @@ const LaunchEmojicoin: React.FC = () => {
           <FlexGap gap="8px" mb="5px">
             <StyledFieldName
               textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
             >
               {t("Emojicoin Name:")}
@@ -128,7 +128,7 @@ const LaunchEmojicoin: React.FC = () => {
           <FlexGap gap="8px" mb="5px">
             <StyledFieldName
               textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
             >
               {t("Emojicoin symbol (ticker) :")}
@@ -146,7 +146,7 @@ const LaunchEmojicoin: React.FC = () => {
           </FlexGap>
 
           <Flex justifyContent="center">
-            <Text textScale="pixelHeading4" color="darkGrey" textTransform="uppercase">
+            <Text textScale="pixelHeading4" color="darkGray" textTransform="uppercase">
               {t("Cost to deploy:")}
             </Text>
           </Flex>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UnitOfTime, getTime } from "@/sdk/utils/misc";
+import { UnitOfTime, getTime } from "@sdk/utils/misc";
 import { cache } from "react";
 import { INITIAL_REVALIDATION_TIMES } from "./const";
 import { SHORT_REVALIDATE } from "lib/env";

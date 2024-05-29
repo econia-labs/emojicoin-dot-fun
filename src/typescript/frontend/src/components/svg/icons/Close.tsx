@@ -3,7 +3,7 @@ import Svg from "components/svg/Svg";
 import { type SvgProps } from "../types";
 import { useThemeContext } from "context";
 
-const Icon: React.FC<SvgProps> = ({ color = "darkGrey", ...props }) => {
+const Close: React.FC<SvgProps> = ({ color = "darkGray", ...props }) => {
   const { theme } = useThemeContext();
 
   return (
@@ -16,4 +16,4 @@ const Icon: React.FC<SvgProps> = ({ color = "darkGrey", ...props }) => {
   );
 };
 
-export default Icon;
+export default Close;

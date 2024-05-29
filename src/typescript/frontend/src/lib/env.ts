@@ -1,8 +1,15 @@
-let APTOS_NETWORK: string;
+import { Network } from "@aptos-labs/wallet-adapter-react";
+
+let APTOS_NETWORK: Network;
 let SHORT_REVALIDATE: boolean;
 
 if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
-  APTOS_NETWORK = process.env.NEXT_PUBLIC_APTOS_NETWORK;
+  const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
+  if (["mainnet", "testnet", "devnet", "local", "custom"].includes(network)) {
+    APTOS_NETWORK = network as Network;
+  } else {
+    throw new Error(`Invalid network: ${network}`);
+  }
 } else {
   throw new Error("Environment variable NEXT_PUBLIC_APTOS_NETWORK is undefined.");
 }

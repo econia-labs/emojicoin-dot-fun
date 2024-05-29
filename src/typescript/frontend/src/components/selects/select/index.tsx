@@ -3,7 +3,7 @@ import React from "react";
 import { useScramble } from "use-scramble";
 
 import { DropdownSelectWrapper } from "./styled";
-import { FlexGap } from "@/containers";
+import { FlexGap } from "@containers";
 import { Text } from "components/text";
 
 import { translationFunction } from "context/language-context";
@@ -30,7 +30,7 @@ export const Select: React.FC<SelectProps> = ({
   return (
     <DropdownSelectWrapper ref={targetRef} onMouseEnter={replay} {...wrapperProps}>
       <FlexGap gap="8px" ellipsis>
-        <Text className={"med-pixel-text"} color="darkGrey">
+        <Text className={"med-pixel-text"} color="darkGray">
           {"{"}
         </Text>
         <Text className={"med-pixel-text"} {...placeholderProps} ellipsis>
@@ -42,7 +42,7 @@ export const Select: React.FC<SelectProps> = ({
         ) : (
           React.isValidElement(title) && title
         )}
-        <Text className={"med-pixel-text"} color="darkGrey">
+        <Text className={"med-pixel-text"} color="darkGray">
           {"}"}
         </Text>
       </FlexGap>

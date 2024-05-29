@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 
 import Button from "components/button";
-import { Column } from "@/containers";
+import { Column } from "@containers";
 import Arrow from "components/svg/icons/Arrow";
 import { Select } from "../select";
 import { StyledButtonsWrapper } from "./styled";
@@ -20,7 +20,7 @@ import { translationFunction } from "context/language-context";
 const MultipleSelect: React.FC<MultipleSelectProps> = ({
   titleProps,
   placeholder = "Please select...",
-  placeholderProps = { color: "lightGrey" },
+  placeholderProps = { color: "lightGray" },
   dropdownComponent,
   dropdownWrapperProps,
   wrapperProps,

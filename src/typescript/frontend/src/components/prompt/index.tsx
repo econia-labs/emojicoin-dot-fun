@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { translationFunction } from "context/language-context";
 
 import CloseIcon from "components/svg/icons/Close";
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { Text } from "components/text";
 import { Arrow, StyledPrompt } from "./styled";
 

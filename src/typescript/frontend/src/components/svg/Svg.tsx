@@ -27,13 +27,7 @@ const Svg = styled.svg.attrs<SvgProps>(
     xmlns,
   }),
 )`
-  &:hover {
-    g {
-      path {
-        fill: ${darkColors.econiaBlue};
-      }
-    }
-  }
+
   align-self: center;
   fill: ${({ theme, color }) => color && theme.colors[color]};
   flex-shrink: 0;

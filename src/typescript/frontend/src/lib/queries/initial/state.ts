@@ -1,8 +1,8 @@
 import { cache } from "react";
-import { getLastMarketState } from "@/sdk/queries/state";
-import { SYMBOL_DATA } from "@/sdk/emoji_data";
+import { getLastMarketState } from "@sdk/queries/state";
+import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { SAMPLE_DATA_BASE_URL } from "./const";
-import { toMarketRegistrationEvent, toStateEvent } from "@/sdk/types";
+import { toMarketRegistrationEvent, toStateEvent } from "@sdk/types";
 
 export const staticLastSwap = async (marketID: string) => {
   try {

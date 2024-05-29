@@ -4,8 +4,6 @@ export { default as Text } from "./text";
 export { default as Heading } from "./heading";
 export { default as Button } from "./button/index";
 export { default as Svg } from "./svg/Svg";
-export { default as Modal } from "./modal";
-export { ModalWrapper } from "./modal/components";
 export { Input, InputGroup, InputNumeric, Textarea } from "./inputs";
 export { default as Skeleton } from "./skeleton";
 export { default as Image } from "./image";

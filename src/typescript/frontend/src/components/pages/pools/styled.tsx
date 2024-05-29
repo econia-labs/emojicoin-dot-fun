@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 
 export const StyledPoolsPage = styled.div`
   display: flex;
@@ -19,8 +19,8 @@ export const StyledWrapper = styled.div`
   flex-direction: column;
   height: 100%;
   max-width: 1362px;
-  border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-left: 1px solid ${({ theme }) => theme.colors.darkGray};
+  border-right: 1px solid ${({ theme }) => theme.colors.darkGray};
   margin-left: 30px;
   margin-right: 30px;
 
@@ -35,8 +35,8 @@ export const StyledHeader = styled.div`
   display: flex;
   width: 100%;
   min-height: 34px;
-  border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-top: 1px solid ${({ theme }) => theme.colors.darkGray};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
   justify-content: center;
   padding-left: 30px;
   padding-right: 30px;
@@ -56,8 +56,8 @@ export const StyledHeaderInner = styled.div`
   align-items: center;
   max-width: 1362px;
   width: 100%;
-  border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-left: 1px solid ${({ theme }) => theme.colors.darkGray};
+  border-right: 1px solid ${({ theme }) => theme.colors.darkGray};
   padding: 0 21px;
 `;
 
@@ -69,7 +69,7 @@ export const StyledInner = styled(Flex)`
     display: block;
     position: absolute;
     width: 120vw;
-    background-color: ${({ theme }) => theme.colors.darkGrey};
+    background-color: ${({ theme }) => theme.colors.darkGray};
     height: 1px;
     transform: translateX(-10%);
     bottom: -1px;
@@ -77,7 +77,7 @@ export const StyledInner = styled(Flex)`
 
   ${({ theme }) => theme.mediaQueries.laptopL} {
     &:last-child {
-      border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
+      border-left: 1px solid ${({ theme }) => theme.colors.darkGray};
     }
   }
 `;
@@ -88,7 +88,7 @@ export const StyledSubHeader = styled.div`
   padding-right: 30px;
   width: 100%;
   height: 33px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
 
   ${({ theme }) => theme.mediaQueries.tablet} {
     height: 43px;

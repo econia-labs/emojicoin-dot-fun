@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "prettier": "^3.2.5",
+    "tsx": "^4.11.0",
     "turbo": "latest"
   },
   "license": "Apache-2.0",
@@ -26,5 +27,8 @@
   "workspaces": [
     "sdk",
     "frontend"
-  ]
+  ],
+  "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.16.0"
+  }
 }

@@ -4,7 +4,7 @@ import React from "react";
 
 import { useTooltip } from "hooks";
 
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { Text, Tr, Td } from "components";
 
 import { type TableRowDesktopProps } from "./types";
@@ -25,7 +25,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
     <Tr hover={true}>
       <Td width={{ _: "12.5%", laptopL: "13%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex px="12px">
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ref={targetRef}>
+          <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ref={targetRef}>
             {item.rankIcon}
           </Text>
           {tooltip}
@@ -34,7 +34,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
       <Td width={{ _: "12.5%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+          <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
             {toDecimalsAPT(item.apt, 3)}
           </Text>
         </Flex>
@@ -42,7 +42,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
       <Td width={{ _: "23%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+          <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
             {toDecimalsAPT(item.emoji, 3)}
           </Text>
         </Flex>
@@ -62,7 +62,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
       <Td width="20%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+          <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
             {item.date.toLocaleString()}
           </Text>
         </Flex>
@@ -70,7 +70,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
       <Td width={{ _: "20%", laptopL: "35%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex justifyContent="end" className="trade-entry">
           <ExplorerLinkCustom style={{ display: "inline-block" }} value={item.version} type="txn">
-            <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+            <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
               {item.version}
             </Text>
           </ExplorerLinkCustom>

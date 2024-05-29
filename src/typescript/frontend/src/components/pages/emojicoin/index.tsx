@@ -4,7 +4,7 @@ import React from "react";
 
 import { useMatchBreakpoints } from "hooks";
 
-import { Box } from "@/containers";
+import { Box } from "@containers";
 import { ClientsSlider } from "components";
 
 import MainInfo from "./components/main-info";

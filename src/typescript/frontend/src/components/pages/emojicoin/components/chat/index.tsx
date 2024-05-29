@@ -8,12 +8,12 @@ import { useEmojicoinPicker } from "hooks";
 import { useThemeContext } from "context";
 import { isDisallowedEventKey } from "utils";
 
-import { Flex, Column } from "@/containers";
+import { Flex, Column } from "@containers";
 import { InputGroup, Textarea, Loader } from "components";
 
 import { MessageContainer } from "./components";
 import { type ChatProps } from "../../types";
-import { truncateAddress } from "@/sdk/utils/misc";
+import { truncateAddress } from "@sdk/utils/misc";
 
 const Chat = (props: ChatProps) => {
   const { theme } = useThemeContext();
@@ -79,7 +79,7 @@ const Chat = (props: ChatProps) => {
           }
           style={{
             padding: "0px 21px",
-            borderRight: `1px solid ${theme.colors.darkGrey}`,
+            borderRight: `1px solid ${theme.colors.darkGray}`,
             display: "flex",
             flexDirection: "column-reverse",
           }}

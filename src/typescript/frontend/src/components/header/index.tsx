@@ -5,7 +5,7 @@ import { useMatchBreakpoints } from "hooks";
 
 import Link from "components/link/component";
 import Button from "components/button";
-import { Flex, FlexGap, Container } from "@/containers";
+import { Flex, FlexGap, Container } from "@containers";
 import LogoIcon from "../svg/icons/LogoIcon";
 import CloseIcon from "../svg/icons/Close";
 import MenuItem from "components/header/components/menu-item";
@@ -19,30 +19,13 @@ import { slideTopVariants } from "./animations";
 import { type HeaderProps } from "./types";
 import { translationFunction } from "context/language-context";
 
-import { usePathname } from "next/navigation";
-import { showModal } from "store/modal";
-import { type ModalProps } from "store/modal/types";
-import { type WalletModalProps } from "../modal/components/wallet-modal/types";
-import { useAppDispatch } from "store/store";
+import ConnectWalletButton from "./wallet-button/ConnectWalletButton";
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
   const { t } = translationFunction();
-  const pathname = usePathname();
-  const dispatch = useAppDispatch();
 
-  const currentPath = pathname.split("/")[1];
-  const linksForCurrentPage = NAVIGATE_LINKS.filter(link => link.path !== currentPath);
-
-  const walletHandler = () => {
-    dispatch(
-      (showModal as ModalProps<WalletModalProps>)({
-        modalName: "walletModal",
-        rootId: "modal",
-        props: { items: [{ title: "Copy address" }, { title: "Disconnect" }] },
-      }),
-    );
-  };
+  const linksForCurrentPage = NAVIGATE_LINKS;
 
   const { offsetHeight } = document.getElementById("header") ?? { offsetHeight: 0 };
 
@@ -85,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
                   </Link>
                 );
               })}
-              <MenuItem title="0x2634...faf9" width="120px" onClick={walletHandler} />
+              <ConnectWalletButton />
             </FlexGap>
           )}
 
@@ -101,7 +84,6 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
         setIsOpen={setIsOpen}
         linksForCurrentPage={linksForCurrentPage}
         offsetHeight={offsetHeight}
-        walletHandler={walletHandler}
       />
     </StyledContainer>
   );

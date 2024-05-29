@@ -4,7 +4,7 @@ import Svg from "components/svg/Svg";
 
 export const StyledBtn = styled.div`
   display: flex;
-  color: ${({ theme }) => theme.colors.darkGrey};
+  color: ${({ theme }) => theme.colors.darkGray};
   cursor: pointer;
   gap: 12px;
 

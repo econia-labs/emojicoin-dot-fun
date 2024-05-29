@@ -4,7 +4,7 @@ import { useScramble } from "use-scramble";
 import { translationFunction } from "context/language-context";
 import { useMatchBreakpoints } from "hooks";
 
-import { FlexGap, Flex } from "@/containers";
+import { FlexGap, Flex } from "@containers";
 import { Text } from "components/text";
 
 import { Arrows } from "components/svg";

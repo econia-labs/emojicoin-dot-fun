@@ -1,5 +1,5 @@
-import { toChatEvent } from "@/sdk/types";
-import { paginateChatEvents } from "@/sdk/queries/chat";
+import { toChatEvent } from "@sdk/types";
+import { paginateChatEvents } from "@sdk/queries/chat";
 import { cache } from "react";
 import { fetchInitialWithFallback } from "./cache-helper";
 import { SAMPLE_DATA_BASE_URL } from "./const";

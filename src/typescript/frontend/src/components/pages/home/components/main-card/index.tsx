@@ -4,7 +4,7 @@ import React from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
-import { Column, Flex, FlexGap } from "@/containers";
+import { Column, Flex, FlexGap } from "@containers";
 import {
   StyledEmoji,
   StyledPixelHeadingText,
@@ -57,7 +57,7 @@ const MainCard = (props: MainCardProps) => {
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <StyledPixelHeadingText textScale="pixelHeading1" color="darkGrey">
+          <StyledPixelHeadingText textScale="pixelHeading1" color="darkGray">
             {featured?.state.marketMetadata.marketID || "01"}
           </StyledPixelHeadingText>
           <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
@@ -67,7 +67,7 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGrey" textTransform="uppercase">
+                <StyledMarketDataText color="darkGray" textTransform="uppercase">
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
@@ -81,7 +81,7 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGrey" textTransform="uppercase">
+                <StyledMarketDataText color="darkGray" textTransform="uppercase">
                   {t("24 hour vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
@@ -94,7 +94,7 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGrey" textTransform="uppercase">
+                <StyledMarketDataText color="darkGray" textTransform="uppercase">
                   {t("All-time vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>

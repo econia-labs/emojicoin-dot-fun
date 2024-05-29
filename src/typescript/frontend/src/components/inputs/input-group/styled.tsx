@@ -1,6 +1,6 @@
 import styled, { css, type DefaultTheme } from "styled-components";
 
-import { Box } from "@/containers";
+import { Box } from "@containers";
 import { Text } from "components/text";
 
 import { type InputGroupProps, type InputIconProps, type InputInnerProps, type StyledInputGroupProps } from "./types";
@@ -34,7 +34,7 @@ export const variantStyles = ({ theme, variant }: ThemedProps) => {
         font-family: ${({ theme }) => theme.fonts.pixelar};
         text-transform: uppercase;
         font-family: ${theme.fonts.pixelar};
-        color: ${theme.colors.lightGrey};
+        color: ${theme.colors.lightGray};
         margin-bottom: 0;
       }
 

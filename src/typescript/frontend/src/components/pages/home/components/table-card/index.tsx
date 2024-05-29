@@ -4,7 +4,7 @@ import React from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
-import { Column, Flex } from "@/containers";
+import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 
 import { StyledArrow, StyledInnerItem, StyledColoredText, StyledItemWrapper } from "./styled";
@@ -29,7 +29,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
           {emoji && (
             <>
               <Flex justifyContent="space-between" mb="7px">
-                <StyledColoredText textScale="pixelHeading2" color="darkGrey">
+                <StyledColoredText textScale="pixelHeading2" color="darkGray">
                   {index < 10 ? `0${index}` : index}
                 </StyledColoredText>
 
@@ -53,7 +53,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
 
               <Flex>
                 <Column width="50%">
-                  <StyledColoredText textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+                  <StyledColoredText textScale="bodySmall" color="lightGray" textTransform="uppercase">
                     {t("Market Cap")}
                   </StyledColoredText>
 
@@ -63,7 +63,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
                 </Column>
 
                 <Column width="50%">
-                  <StyledColoredText textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+                  <StyledColoredText textScale="bodySmall" color="lightGray" textTransform="uppercase">
                     {t("24h Volume")}
                   </StyledColoredText>
 

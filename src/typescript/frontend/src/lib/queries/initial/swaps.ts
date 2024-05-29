@@ -1,5 +1,5 @@
-import { toSwapEvent } from "@/sdk/types";
-import { paginateSwapEvents } from "@/sdk/queries/swap";
+import { toSwapEvent } from "@sdk/types";
+import { paginateSwapEvents } from "@sdk/queries/swap";
 import { cache } from "react";
 import { fetchInitialWithFallback } from "./cache-helper";
 import { SAMPLE_DATA_BASE_URL } from "./const";

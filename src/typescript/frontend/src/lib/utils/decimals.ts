@@ -1,4 +1,4 @@
-import { divideWithPrecision } from "@/sdk/utils/misc";
+import { divideWithPrecision } from "@sdk/utils/misc";
 import { DECIMALS } from "lib/const";
 
 const toDecimalsAPT = (input: number | bigint | string, displayDecimals?: number): string => {

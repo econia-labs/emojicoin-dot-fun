@@ -3,7 +3,7 @@
 import React from "react";
 
 import { languageList, EN } from "configs";
-import { Container } from "@/containers";
+import { Container } from "@containers";
 
 import { type PageProps } from "../types";
 import { DEFAULT_TITLE, getDefaultMetadata } from "configs/meta";

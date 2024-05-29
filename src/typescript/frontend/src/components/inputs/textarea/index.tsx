@@ -16,7 +16,7 @@ export const Textarea = styled.textarea<TextareaProps>`
   padding: 10px 18px;
   width: 100%;
   border: none;
-  border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-top: 1px solid ${({ theme }) => theme.colors.darkGray};
 
   &::-webkit-scrollbar {
     display: none;
@@ -28,9 +28,9 @@ export const Textarea = styled.textarea<TextareaProps>`
   }
 
   &:disabled {
-    background-color: ${({ theme }) => theme.colors.darkGrey};
+    background-color: ${({ theme }) => theme.colors.darkGray};
     box-shadow: none;
-    color: ${({ theme }) => theme.colors.darkGrey}24;
+    color: ${({ theme }) => theme.colors.darkGray}24;
     cursor: not-allowed;
     border: none;
   }

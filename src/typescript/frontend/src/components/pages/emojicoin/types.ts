@@ -1,5 +1,5 @@
-import { type SymbolEmojiData } from "@/sdk/emoji_data";
-import { type ContractTypes } from "@/sdk/types";
+import { type SymbolEmojiData } from "@sdk/emoji_data";
+import { type ContractTypes } from "@sdk/types";
 
 export interface WithVersion {
   version: number;

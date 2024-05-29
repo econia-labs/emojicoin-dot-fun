@@ -1,8 +1,8 @@
-import { SYMBOL_DATA } from "@/sdk/emoji_data/";
-import { MarketView } from "@/sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import { type JSONTypes, toMarketView, toStateEvent } from "@/sdk/types";
-import { paginateMarketRegistrations, getTopMarkets } from "@/sdk/queries/market";
-import { getAptos } from "@/sdk/utils/aptos-client";
+import { SYMBOL_DATA } from "@sdk/emoji_data/";
+import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { type JSONTypes, toMarketView, toStateEvent } from "@sdk/types";
+import { paginateMarketRegistrations, getTopMarkets } from "@sdk/queries/market";
+import { getAptos } from "@sdk/utils/aptos-client";
 import { APTOS_NETWORK } from "lib/env";
 import { cache } from "react";
 import fetchInitialWithFallback from "./cache-helper";

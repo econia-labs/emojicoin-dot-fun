@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FlexGap } from "@/containers";
+import { FlexGap } from "@containers";
 import { StyledIcon } from "./styled";
 
 import { SOCIAL_ICONS } from "./constants";

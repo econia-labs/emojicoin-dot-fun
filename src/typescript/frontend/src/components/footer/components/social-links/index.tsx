@@ -3,7 +3,7 @@ import React from "react";
 import { StyledIcon } from "./styled";
 
 import { SOCIAL_ICONS } from "components/footer/constants";
-import { FlexGap } from "@/containers";
+import { FlexGap } from "@containers";
 import { type FlexGapProps } from "components/layout/components/types";
 
 export const SocialLinks: React.FC<FlexGapProps> = props => {
