@@ -15,9 +15,10 @@ import { rankFromAPTAmount } from "lib/utils/rank";
 
 const TradeHistory = (props: TradeHistoryProps) => {
   const { t } = translationFunction();
-  const { offsetHeight: tradeHistoryTableBodyHeight } = useElementDimensions("tradeHistoryTableBody");
+  const { offsetHeight: tradeHistoryTableBodyHeight } =
+    useElementDimensions("tradeHistoryTableBody");
 
-  const data = props.data.swaps.map(v => ({
+  const data = props.data.swaps.map((v) => ({
     ...rankFromAPTAmount(Number(toDecimalsAPT(v.quoteVolume, 3))),
     apt: v.quoteVolume.toString(),
     emoji: v.baseVolume.toString(),
@@ -35,7 +36,12 @@ const TradeHistory = (props: TradeHistoryProps) => {
             {HEADERS.map((th, index) => (
               <Th width={th.width} minWidth="100px" key={index}>
                 <ThInner>
-                  <Text textScale="bodyLarge" textTransform="uppercase" color="econiaBlue" $fontWeight="regular">
+                  <Text
+                    textScale="bodyLarge"
+                    textTransform="uppercase"
+                    color="econiaBlue"
+                    $fontWeight="regular"
+                  >
                     {t(th.text)}
                   </Text>
                 </ThInner>

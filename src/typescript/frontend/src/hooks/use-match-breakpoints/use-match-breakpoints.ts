@@ -23,32 +23,38 @@ const mediaQueries: MediaQueries = (() => {
   let prevMinWidth = 0;
   let prevSize = Object.keys(breakpointMap)[0];
 
-  return (Object.keys(breakpointMap) as Array<keyof typeof breakpointMap>).reduce((accum, size, index) => {
-    const minWidth = prevMinWidth;
-    const sizeToSet = prevSize;
-    const breakpoint = breakpointMap[size] - 1;
+  return (Object.keys(breakpointMap) as Array<keyof typeof breakpointMap>).reduce(
+    (accum, size, index) => {
+      const minWidth = prevMinWidth;
+      const sizeToSet = prevSize;
+      const breakpoint = breakpointMap[size] - 1;
 
-    // Min width for next iteration
-    prevMinWidth = breakpointMap[size];
-    // sizeToSet for next iteration
-    prevSize = size;
+      // Min width for next iteration
+      prevMinWidth = breakpointMap[size];
+      // sizeToSet for next iteration
+      prevSize = size;
 
-    // When sizeToSet is the smallest size, min width has to be 0
-    if (sizeToSet === Object.keys(breakpointMap)[0]) {
-      return { ...accum, [sizeToSet]: `(min-width: ${0}px) and (max-width: ${breakpoint}px)` };
-    }
+      // When sizeToSet is the smallest size, min width has to be 0
+      if (sizeToSet === Object.keys(breakpointMap)[0]) {
+        return { ...accum, [sizeToSet]: `(min-width: ${0}px) and (max-width: ${breakpoint}px)` };
+      }
 
-    // Largest size in the last iteration, except setting sizeToSet, also has to set last mediaQuery with only a min-width breakpoint
-    if (index === Object.keys(breakpointMap).length - 1) {
+      // Largest size in the last iteration, except setting sizeToSet, also has to set last mediaQuery with only a min-width breakpoint
+      if (index === Object.keys(breakpointMap).length - 1) {
+        return {
+          ...accum,
+          [sizeToSet]: `(min-width: ${minWidth}px) and (max-width: ${breakpoint}px)`,
+          [size]: `(min-width: ${prevMinWidth}px)`,
+        };
+      }
+
       return {
         ...accum,
         [sizeToSet]: `(min-width: ${minWidth}px) and (max-width: ${breakpoint}px)`,
-        [size]: `(min-width: ${prevMinWidth}px)`,
       };
-    }
-
-    return { ...accum, [sizeToSet]: `(min-width: ${minWidth}px) and (max-width: ${breakpoint}px)` };
-  }, {} as MediaQueries);
+    },
+    {} as MediaQueries
+  );
 })();
 
 // Returns from breakpoints xs => isXs
@@ -64,7 +70,8 @@ const getState = () => {
       };
     }
 
-    const mql = typeof window?.matchMedia === "function" ? window.matchMedia(mediaQueries[size]) : null;
+    const mql =
+      typeof window?.matchMedia === "function" ? window.matchMedia(mediaQueries[size]) : null;
 
     return { ...accum, [key]: mql?.matches ?? false };
   }, {});
@@ -78,16 +85,16 @@ const useMatchBreakpoints = () => {
 
   useEffect(() => {
     // Create listeners for each media query returning a function to unsubscribe
-    const handlers = (Object.keys(mediaQueries) as Array<keyof MediaQueries>).map(size => {
+    const handlers = (Object.keys(mediaQueries) as Array<keyof MediaQueries>).map((size) => {
       let mql: MediaQueryList;
       let handler: (matchMediaQuery: MediaQueryListEvent) => void;
 
       if (typeof window?.matchMedia === "function") {
         mql = window.matchMedia(mediaQueries[size]);
 
-        handler = matchMediaQuery => {
+        handler = (matchMediaQuery) => {
           const key = getKey(size);
-          setState(prevState => ({
+          setState((prevState) => ({
             ...prevState,
             [key]: matchMediaQuery.matches,
           }));
@@ -110,7 +117,7 @@ const useMatchBreakpoints = () => {
     setState(getState());
 
     return () => {
-      handlers.forEach(unsubscribe => {
+      handlers.forEach((unsubscribe) => {
         unsubscribe();
       });
     };

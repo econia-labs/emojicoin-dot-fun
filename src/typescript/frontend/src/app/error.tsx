@@ -4,6 +4,12 @@
 
 import { ErrorBoundaryFallback } from "components/error-boundary";
 
-export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   return <ErrorBoundaryFallback error={error} resetError={reset} />;
 }

@@ -30,8 +30,8 @@ const useEmojicoinPicker = ({
       placement: placement,
       customStyles: getTooltipStyles(theme),
       trigger: "click",
-      arrowBorderColor: "darkGrey",
-    },
+      arrowBorderColor: "darkGray",
+    }
   );
 
   return { targetRef, tooltip, targetElement };

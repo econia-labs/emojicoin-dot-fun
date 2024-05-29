@@ -4,7 +4,7 @@ import React from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
-import { Column, Flex, FlexGap } from "@/containers";
+import { Column, Flex, FlexGap } from "@containers";
 import {
   StyledEmoji,
   StyledPixelHeadingText,
@@ -51,13 +51,18 @@ const MainCard = (props: MainCardProps) => {
             display: "flex",
           }}
         >
-          <StyledImage id="hero-image" src="/images/planet-home.webp" aspectRatio={1.6} alt="Planet" />
+          <StyledImage
+            id="hero-image"
+            src="/images/planet-home.webp"
+            aspectRatio={1.6}
+            alt="Planet"
+          />
 
           <StyledEmoji>{featured?.emoji.emoji || "🖤"}</StyledEmoji>
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <StyledPixelHeadingText textScale="pixelHeading1" color="darkGrey">
+          <StyledPixelHeadingText textScale="pixelHeading1" color="darkGray">
             {featured?.state.marketMetadata.marketID || "01"}
           </StyledPixelHeadingText>
           <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
@@ -67,7 +72,7 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGrey" textTransform="uppercase">
+                <StyledMarketDataText color="darkGray" textTransform="uppercase">
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
@@ -81,11 +86,12 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGrey" textTransform="uppercase">
+                <StyledMarketDataText color="darkGray" textTransform="uppercase">
                   {t("24 hour vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured?.volume24H, 2) || "143.31"} <AptosIconBlack className={"icon-inline"} />
+                  {toDecimalsAPT(featured?.volume24H, 2) || "143.31"}{" "}
+                  <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
             )}
@@ -94,7 +100,7 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGrey" textTransform="uppercase">
+                <StyledMarketDataText color="darkGray" textTransform="uppercase">
                   {t("All-time vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>

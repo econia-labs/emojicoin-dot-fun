@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const useHideOverflow = ({ trigger }: { trigger: boolean }) => {
+export const useHideOverflow = ({ trigger }: { trigger: boolean }) => {
   useEffect(() => {
     if (trigger) {
       document.body.style.overflowY = "hidden";

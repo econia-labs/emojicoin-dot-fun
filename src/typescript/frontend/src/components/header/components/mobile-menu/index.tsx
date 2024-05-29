@@ -1,23 +1,23 @@
 import React from "react";
 
-import { useHideOverflow } from "hooks";
+import { useHideOverflow } from "@hooks/use-hide-overflow";
 
 import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
 import { Link } from "components/link";
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { MobileSocialLinks } from "./components/mobile-social-links";
 import { MobileMenuItem } from "../index";
 
 import { type MobileMenuProps } from "./types";
 
 import { slideVariants } from "./animations";
+import ConnectWalletButton from "components/header/wallet-button/ConnectWalletButton";
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
   setIsOpen,
   linksForCurrentPage,
   offsetHeight,
-  walletHandler,
 }) => {
   useHideOverflow({ trigger: isOpen });
 
@@ -42,7 +42,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             );
           })}
 
-          <MobileMenuItem title="05I34OT0ff9C" onClick={walletHandler} borderBottom={false} />
+          <ConnectWalletButton mobile={true} />
         </MobileMenuInner>
 
         <Flex position="absolute" bottom="60px" justifyContent="center" width="100%">

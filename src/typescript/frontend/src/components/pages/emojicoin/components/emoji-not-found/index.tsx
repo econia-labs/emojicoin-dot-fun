@@ -1,4 +1,4 @@
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { Text } from "components/text";
 import { translationFunction } from "context/language-context";
 

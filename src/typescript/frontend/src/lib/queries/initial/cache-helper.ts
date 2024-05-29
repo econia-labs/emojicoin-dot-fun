@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UnitOfTime, getTime } from "@/sdk/utils/misc";
+import { UnitOfTime, getTime } from "@sdk/utils/misc";
 import { cache } from "react";
 import { INITIAL_REVALIDATION_TIMES } from "./const";
 import { SHORT_REVALIDATE } from "lib/env";
@@ -28,14 +28,16 @@ export const fetchInitialWithFallback = async <T1, T2>({
   let fn: (args: T2) => Promise<T1>;
 
   if ((vercel && local) || process.env.NEXT_PUBLIC_FORCE_STATIC_FETCH === "true") {
-    fn = async (_args: T2) => fetch(endpoint, { next: { revalidate } }).then(r => r.json().then(j => j as T1));
+    fn = async (_args: T2) =>
+      fetch(endpoint, { next: { revalidate } }).then((r) => r.json().then((j) => j as T1));
   } else {
     fn = queryFunction;
   }
 
   const currentHour = Math.floor(getTime(UnitOfTime.Hours));
   const cachedFunction = cache(
-    async (args: { vercel: boolean; local: boolean; time: number; functionArgs: T2 }) => await fn(args.functionArgs),
+    async (args: { vercel: boolean; local: boolean; time: number; functionArgs: T2 }) =>
+      await fn(args.functionArgs)
   );
   return await cachedFunction({
     vercel: vercel,

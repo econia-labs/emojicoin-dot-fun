@@ -25,6 +25,9 @@ const debugConfigOptions = {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    "INBOX_URL": process.env.INBOX_URL ?? "http://localhost:3000",
+  },
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
@@ -33,7 +36,7 @@ const nextConfig = {
     styledComponents: DEBUG ? styledComponentsConfig : true,
   },
   ...(DEBUG ? debugConfigOptions : {}),
-  transpilePackages: ["@/sdk"],
+  transpilePackages: ["@sdk"],
   redirects: async () => {
     return [
       {

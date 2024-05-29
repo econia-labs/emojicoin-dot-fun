@@ -34,7 +34,12 @@ export const variantStyles = (animation: Animation = "pulse") => {
       &:before {
         content: "";
         position: absolute;
-        background-image: linear-gradient(90deg, transparent, rgba(243, 243, 243, 0.5), transparent);
+        background-image: linear-gradient(
+          90deg,
+          transparent,
+          rgba(243, 243, 243, 0.5),
+          transparent
+        );
         top: 0;
         left: -9.375rem;
         height: 100%;

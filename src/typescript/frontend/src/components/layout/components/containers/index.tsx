@@ -10,7 +10,7 @@ import {
   type FlexGapProps,
   type FlexProps,
   type BoxThemedProps,
-} from "@/containers";
+} from "@containers";
 import { system } from "styled-system";
 import { siteWidth } from "theme/base";
 
@@ -25,7 +25,8 @@ export const getEllipsis = ({ ellipsis }: BoxThemedProps) => {
 };
 
 export const Box = styled.div<BoxProps>`
-  background-color: ${({ theme, $backgroundColor }) => $backgroundColor && theme.colors[$backgroundColor]};
+  background-color: ${({ theme, $backgroundColor }) =>
+    $backgroundColor && theme.colors[$backgroundColor]};
   cursor: ${({ cursor }) => cursor && cursor};
   pointer-events: ${({ pointerEvents }) => pointerEvents && pointerEvents};
 

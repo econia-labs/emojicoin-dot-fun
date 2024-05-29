@@ -5,8 +5,8 @@ export const baseColors = {
 export const lightColors = {
   ...baseColors,
   white: "#FFFFFF",
-  lightGrey: "#717386",
-  darkGrey: "#33343D",
+  lightGray: "#717386",
+  darkGray: "#33343D",
   black: "#000000",
   blue: "#64A7FF",
   green: "#2FA90F",
@@ -19,8 +19,8 @@ export const lightColors = {
 export const darkColors = {
   ...baseColors,
   white: "#FFFFFF",
-  lightGrey: "#717386",
-  darkGrey: "#33343D",
+  lightGray: "#717386",
+  darkGray: "#33343D",
   black: "#000000",
   blue: "#64A7FF",
   green: "#2FA90F",

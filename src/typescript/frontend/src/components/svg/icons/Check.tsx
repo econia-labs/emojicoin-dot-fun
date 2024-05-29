@@ -3,7 +3,7 @@ import Svg from "components/svg/Svg";
 import { type SvgProps } from "../types";
 import { useThemeContext } from "context";
 
-const Icon: React.FC<SvgProps> = ({ color = "lightGrey", ...props }) => {
+const Icon: React.FC<SvgProps> = ({ color = "lightGray", ...props }) => {
   const { theme } = useThemeContext();
 
   return (

@@ -3,7 +3,7 @@ import { languageList } from "configs";
 export const removeLangParamFromPathname = (pathname: string, language?: string) => {
   return pathname
     .split("/")
-    .filter(item => item !== language)
+    .filter((item) => item !== language)
     .join("/");
 };
 
@@ -16,8 +16,8 @@ export const cutLocaleFromRoute = (pathname: string) => {
 };
 
 export const getLocaleFromRoute = (pathname: string) => {
-  const maybeLanguageParam = pathname.split("/").filter(item => !!item)[0];
-  if (languageList.some(item => item.locale === maybeLanguageParam)) {
+  const maybeLanguageParam = pathname.split("/").filter((item) => !!item)[0];
+  if (languageList.some((item) => item.locale === maybeLanguageParam)) {
     return maybeLanguageParam;
   }
   return "";

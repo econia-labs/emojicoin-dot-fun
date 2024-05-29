@@ -26,6 +26,7 @@ fleur
 futuna
 gcloud
 hamsa
+headlessui
 ivoire
 keycap
 khanda

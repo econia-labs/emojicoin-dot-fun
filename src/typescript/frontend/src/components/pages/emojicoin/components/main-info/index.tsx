@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Flex, Column, FlexGap } from "@/containers";
+import { Flex, Column, FlexGap } from "@containers";
 import { translationFunction } from "context/language-context";
 import { useTooltip } from "hooks";
 import { StyledHeaderEmoji, StyledHeaderText, StyledStatsText } from "./styled";
@@ -45,7 +45,7 @@ const MainInfo = (props: MainInfoProps) => {
           <FlexGap gap="8px">
             <StyledStatsText
               textScale={{ _: "display6", tablet: "display4" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
             >
               {t("Mkt. Cap:")}
@@ -60,7 +60,7 @@ const MainInfo = (props: MainInfoProps) => {
           <FlexGap gap="8px">
             <StyledStatsText
               textScale={{ _: "display6", tablet: "display4" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
             >
               {t("24 hour vol:")}
@@ -76,7 +76,7 @@ const MainInfo = (props: MainInfoProps) => {
           <FlexGap gap="8px">
             <StyledStatsText
               textScale={{ _: "display6", tablet: "display4" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
             >
               {t("All-time vol:")}

@@ -1,7 +1,7 @@
 import { RankIcon, RankName } from "components/pages/emojicoin/components/trade-history/constants";
 
 export const rankFromAPTAmount = (
-  amount: number | bigint,
+  amount: number | bigint
 ): {
   rankIcon: RankIcon;
   rankName: RankName;

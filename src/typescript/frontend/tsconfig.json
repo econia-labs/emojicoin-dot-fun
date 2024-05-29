@@ -21,10 +21,16 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "paths": {
-      "@/containers": [
+      "@containers": [
         "components/layout/components/index.ts"
       ],
-      "@/sdk/*": [
+      "@hooks/*": [
+        "hooks/*"
+      ],
+      "@icons/*": [
+        "components/svg/icons/*"
+      ],
+      "@sdk/*": [
         "../../sdk/src/*"
       ]
     },

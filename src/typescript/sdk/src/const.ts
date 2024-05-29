@@ -1,12 +1,10 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import dotenv from "dotenv";
 import path from "path";
+import { getGitRoot } from "./utils/git-root";
 
 export const VERCEL = process.env.VERCEL === "1";
-if (!VERCEL) {
-  // Synchronous require is necessary here.
-  /* eslint-disable global-require */
-  const { getGitRoot } = require("../tests/utils/helpers");
+if (!VERCEL && typeof process === "object" && process.title.endsWith("node")) {
   const sdkPath = path.join(getGitRoot(), "src", "typescript", "sdk", ".env");
   dotenv.config({ path: sdkPath });
   const frontendPath = path.join(getGitRoot(), "src", "typescript", "frontend", ".env");

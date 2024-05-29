@@ -1,17 +1,23 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
+// cspell:word martianwallet
+// cspell:word pontem
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { Provider } from "react-redux";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle, StyledToastContainer } from "styles";
 import ThemeContextProvider, { useThemeContext } from "./theme-context";
 import store from "store/store";
 import Loader from "components/loader";
-import Modal from "components/modal";
 import Header from "components/header";
 import Footer from "components/footer";
 import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoints";
 import { StyledContentWrapper } from "./styled";
+import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
+import { ConnectWalletContextProvider } from "./wallet-context/ConnectWalletContext";
+import { PontemWallet } from "@pontem/wallet-adapter-plugin";
+import { RiseWallet } from "@rise-wallet/wallet-adapter";
+import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 
 const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();
@@ -21,20 +27,25 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const isMobileMenuOpen = isOpen && !isDesktop;
 
+  const wallets = useMemo(() => [new PontemWallet(), new RiseWallet(), new MartianWallet()], []);
+
   return (
     <ThemeProvider theme={theme}>
-      <GlobalStyle />
-      <Suspense fallback={<Loader />}>
-        <Provider store={store}>
-          <Modal />
-          <StyledToastContainer />
-          <StyledContentWrapper>
-            <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-            {children}
-            <Footer />
-          </StyledContentWrapper>
-        </Provider>
-      </Suspense>
+      <AptosWalletAdapterProvider plugins={wallets} autoConnect>
+        <ConnectWalletContextProvider>
+          <GlobalStyle />
+          <Suspense fallback={<Loader />}>
+            <Provider store={store}>
+              <StyledToastContainer />
+              <StyledContentWrapper>
+                <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                {children}
+                <Footer />
+              </StyledContentWrapper>
+            </Provider>
+          </Suspense>
+        </ConnectWalletContextProvider>
+      </AptosWalletAdapterProvider>
     </ThemeProvider>
   );
 };

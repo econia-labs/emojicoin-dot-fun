@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Flex, FlexGap } from "@/containers";
+import { Flex, FlexGap } from "@containers";
 import { Text } from "components";
 import { translationFunction } from "context/language-context";
 
@@ -23,13 +23,13 @@ const MobileGrid = (props: GridProps) => {
     <StyledMobileContentWrapper>
       <StyledMobileContentBlock>
         <StyledMobileContentHeader>
-          <Text textScale="pixelHeading4" color="lightGrey" textTransform="uppercase">
+          <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
             {t("Price Chart")}
           </Text>
         </StyledMobileContentHeader>
 
         <StyledMobileContentInner>
-          <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+          <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
             Chart
           </Text>
         </StyledMobileContentInner>
@@ -39,19 +39,31 @@ const MobileGrid = (props: GridProps) => {
         <StyledMobileContentHeader>
           <FlexGap gap="20px" width="fit-content">
             <Flex cursor="pointer" onClick={() => setTab(1)}>
-              <Text textScale="pixelHeading4" color={tab === 1 ? "lightGrey" : "darkGrey"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 1 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Trade History")}
               </Text>
             </Flex>
 
             <Flex cursor="pointer" onClick={() => setTab(2)}>
-              <Text textScale="pixelHeading4" color={tab === 2 ? "lightGrey" : "darkGrey"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 2 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Swap")}
               </Text>
             </Flex>
 
             <Flex cursor="pointer" onClick={() => setTab(3)}>
-              <Text textScale="pixelHeading4" color={tab === 3 ? "lightGrey" : "darkGrey"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 3 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Chat")}
               </Text>
             </Flex>

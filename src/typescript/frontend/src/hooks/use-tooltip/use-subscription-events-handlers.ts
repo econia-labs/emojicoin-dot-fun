@@ -12,11 +12,11 @@ export const useSubscriptionEventsHandlers = ({
 }: useSubscriptionEventsHandlersProps) => {
   const [visible, setVisible] = useState(isInitiallyOpened);
 
-  const debouncedHide = debounce(e => {
+  const debouncedHide = debounce((e) => {
     hideTooltip(e);
   }, hideTimeout);
 
-  const debouncedShow = debounce(e => {
+  const debouncedShow = debounce((e) => {
     showTooltip(e);
   }, showTimeout);
 
@@ -27,7 +27,7 @@ export const useSubscriptionEventsHandlers = ({
       setVisible(false);
       debouncedShow.cancel();
     },
-    [debouncedShow],
+    [debouncedShow]
   );
 
   const showTooltip = useCallback(
@@ -37,7 +37,7 @@ export const useSubscriptionEventsHandlers = ({
       setVisible(true);
       debouncedHide.cancel();
     },
-    [debouncedHide],
+    [debouncedHide]
   );
 
   const toggleTooltip = useCallback(
@@ -50,9 +50,9 @@ export const useSubscriptionEventsHandlers = ({
       }
 
       e.stopPropagation();
-      setVisible(v => !v);
+      setVisible((v) => !v);
     },
-    [tooltipElement, targetElement, setVisible],
+    [tooltipElement, targetElement, setVisible]
   );
 
   // Trigger = hover

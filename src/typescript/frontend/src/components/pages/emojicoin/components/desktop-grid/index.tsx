@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { Text, Button } from "components";
 
 import { translationFunction } from "context/language-context";
@@ -30,7 +30,7 @@ const DesktopGrid = (props: GridProps) => {
             <StyledContentHeader>
               <Text
                 textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }}
-                color="lightGrey"
+                color="lightGray"
                 textTransform="uppercase"
               >
                 {t("Price Chart")}
@@ -38,7 +38,7 @@ const DesktopGrid = (props: GridProps) => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
                 Chart
               </Text>
             </StyledBlockWrapper>
@@ -60,7 +60,7 @@ const DesktopGrid = (props: GridProps) => {
         <StyledContentColumn>
           <StyledBlock width="57%">
             <StyledContentHeader>
-              <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
                 {t("Trade History")}
               </Text>
             </StyledContentHeader>
@@ -72,7 +72,7 @@ const DesktopGrid = (props: GridProps) => {
 
           <StyledBlock width="43%">
             <StyledContentHeader>
-              <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
                 {t("Chat")}
               </Text>
             </StyledContentHeader>

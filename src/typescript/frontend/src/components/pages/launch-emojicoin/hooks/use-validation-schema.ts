@@ -12,7 +12,7 @@ const useValidationSchema = () => {
   const { t } = translationFunction();
 
   const validationSchema = yup.object().shape({
-    emoji: yup.string().test("emoji", `${t("Byte limit reached")}`, value => {
+    emoji: yup.string().test("emoji", `${t("Byte limit reached")}`, (value) => {
       const encoder = new TextEncoder();
       const bytes = encoder.encode(value);
       return bytes.length <= 10;

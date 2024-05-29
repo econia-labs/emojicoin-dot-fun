@@ -35,4 +35,7 @@ export interface BorderProps extends ThemedProps {
   borderColor?: keyof Colors;
 }
 
-export type InputProps<P extends ElementType = "input"> = PolymorphicComponentProps<P, BaseInputProps>;
+export type InputProps<P extends ElementType = "input"> = PolymorphicComponentProps<
+  P,
+  BaseInputProps
+>;

@@ -31,7 +31,7 @@ const PADDING = 40;
 export const OutermostContainer = styled.div`
   display: flex;
   padding: 0 ${PADDING}px;
-  border-top: 1px solid ${darkColors.darkGrey};
+  border-top: 1px solid ${darkColors.darkGray};
 `;
 
 export const OuterContainer = styled.div`
@@ -87,7 +87,7 @@ const WrapperCss = `
     content: "";
     position: absolute;
     bottom: 0;
-    border-bottom: 1px solid ${darkColors.darkGrey};
+    border-bottom: 1px solid ${darkColors.darkGray};
     width: 200vw;
   }
 `;
@@ -96,7 +96,7 @@ export const SearchWrapper = styled.div`
   ${WrapperCss}
   justify-content: left;
   padding-left: 20px;
-  border-left: 1px solid ${darkColors.darkGrey};
+  border-left: 1px solid ${darkColors.darkGray};
   margin-left: -1px;
 
   &:after {
@@ -108,7 +108,7 @@ export const FilterOptionsWrapper = styled.div`
   ${WrapperCss}
   justify-content: right;
   padding-right: 20px;
-  border-right: 1px solid ${darkColors.darkGrey};
+  border-right: 1px solid ${darkColors.darkGray};
   margin-right: -1px;
 
   &:after {

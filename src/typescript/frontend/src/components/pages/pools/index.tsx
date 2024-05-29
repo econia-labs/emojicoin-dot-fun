@@ -4,7 +4,7 @@ import React from "react";
 
 import { useEmojicoinPicker, useMatchBreakpoints } from "hooks";
 
-import { FlexGap } from "@/containers";
+import { FlexGap } from "@containers";
 import { Input } from "components/inputs/input";
 import { InputGroup } from "components/inputs/input-group";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";

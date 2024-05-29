@@ -15,7 +15,7 @@ import { InputGroup } from "components/inputs/input-group";
 import { Text } from "components/text";
 import Button from "components/button";
 import ClientsSlider from "components/clients-slider";
-import { Column, Flex, FlexGap } from "@/containers";
+import { Column, Flex, FlexGap } from "@containers";
 import { StyledFieldName } from "./styled";
 
 const LaunchEmojicoin: React.FC = () => {
@@ -32,8 +32,8 @@ const LaunchEmojicoin: React.FC = () => {
     },
   });
 
-  const names = values.emojiList.map(emoji => emoji.names[0]).join(", ");
-  const tickers = values.emojiList.map(emoji => emoji.emoji).join(", ");
+  const names = values.emojiList.map((emoji) => emoji.names[0]).join(", ");
+  const tickers = values.emojiList.map((emoji) => emoji.emoji).join(", ");
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
@@ -86,7 +86,9 @@ const LaunchEmojicoin: React.FC = () => {
     fieldProps("emoji").onChange(e);
 
     const emojiArr = e.target.value.match(emojiRegex()) ?? [];
-    const newEmojiList = emojiArr.map(string => values.emojiList.find(item => item.emoji === string));
+    const newEmojiList = emojiArr.map((string) =>
+      values.emojiList.find((item) => item.emoji === string)
+    );
 
     await setFieldValue("emojiList", newEmojiList);
   };
@@ -100,8 +102,18 @@ const LaunchEmojicoin: React.FC = () => {
           <Flex position="relative">
             <Prompt text="Pick one to five emojis; due to byte limitations not all combinations are supported." />
 
-            <InputGroup label={t("Select Emoji")} error={errors.emoji} isTouched={touched.emoji} scale="xm">
-              <Input {...fieldProps("emoji")} onChange={onInputChange} autoComplete="off" ref={targetRef} />
+            <InputGroup
+              label={t("Select Emoji")}
+              error={errors.emoji}
+              isTouched={touched.emoji}
+              scale="xm"
+            >
+              <Input
+                {...fieldProps("emoji")}
+                onChange={onInputChange}
+                autoComplete="off"
+                ref={targetRef}
+              />
             </InputGroup>
           </Flex>
           {tooltip}
@@ -109,7 +121,7 @@ const LaunchEmojicoin: React.FC = () => {
           <FlexGap gap="8px" mb="5px">
             <StyledFieldName
               textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
             >
               {t("Emojicoin Name:")}
@@ -128,7 +140,7 @@ const LaunchEmojicoin: React.FC = () => {
           <FlexGap gap="8px" mb="5px">
             <StyledFieldName
               textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              color="lightGrey"
+              color="lightGray"
               textTransform="uppercase"
             >
               {t("Emojicoin symbol (ticker) :")}
@@ -146,7 +158,7 @@ const LaunchEmojicoin: React.FC = () => {
           </FlexGap>
 
           <Flex justifyContent="center">
-            <Text textScale="pixelHeading4" color="darkGrey" textTransform="uppercase">
+            <Text textScale="pixelHeading4" color="darkGray" textTransform="uppercase">
               {t("Cost to deploy:")}
             </Text>
           </Flex>

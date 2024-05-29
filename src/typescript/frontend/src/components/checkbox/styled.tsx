@@ -23,9 +23,10 @@ export const StyledInput = styled.input`
 export const CustomCheckbox = styled.div<CheckProps>`
   width: 24px;
   height: 24px;
-  border: 1px solid ${({ theme, disabled }) => (disabled ? theme.colors.lightGrey : theme.colors.darkGrey)};
+  border: 1px solid
+    ${({ theme, disabled }) => (disabled ? theme.colors.lightGray : theme.colors.darkGray)};
   background-color: ${({ theme, checked, disabled }) =>
-    disabled ? theme.colors.lightGrey : checked ? theme.colors.blue : "transparent"};
+    disabled ? theme.colors.lightGray : checked ? theme.colors.blue : "transparent"};
   border-radius: ${({ theme }) => theme.radii.semiMedium};
   display: flex;
   align-items: center;
@@ -34,6 +35,6 @@ export const CustomCheckbox = styled.div<CheckProps>`
 
   &:not([disabled]):hover {
     border: 1px solid ${({ theme }) => theme.colors.blue};
-    background-color: ${({ theme, checked }) => !checked && theme.colors.lightGrey};
+    background-color: ${({ theme, checked }) => !checked && theme.colors.lightGray};
   }
 `;

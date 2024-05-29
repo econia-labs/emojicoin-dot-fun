@@ -18,12 +18,12 @@ const getHeight = ({ scale }: ThemedProps) => {
 export const getBorderStyles = ({ error, isTouched, borderColor, theme }: BorderProps) => {
   if (error && isTouched) {
     return css`
-      border: 1px solid ${theme.colors.darkGrey};
+      border: 1px solid ${theme.colors.darkGray};
       &:focus {
-        border: 1px solid ${theme.colors.darkGrey} !important;
+        border: 1px solid ${theme.colors.darkGray} !important;
       }
       &:hover {
-        border: 1px solid ${theme.colors.darkGrey} !important;
+        border: 1px solid ${theme.colors.darkGray} !important;
       }
     `;
   } else if (borderColor) {
@@ -39,7 +39,7 @@ export const getBorderStyles = ({ error, isTouched, borderColor, theme }: Border
   }
 
   return css`
-    border: 1px solid ${theme.colors.darkGrey};
+    border: 1px solid ${theme.colors.darkGray};
   `;
 };
 
@@ -59,24 +59,24 @@ export const Input = styled.input.attrs<InputProps>(({ scale = "md" }) => ({
   width: 100%;
 
   &::placeholder {
-    color: ${({ theme }) => theme.colors.darkGrey};
+    color: ${({ theme }) => theme.colors.darkGray};
     opacity: 0.6;
   }
 
   &:disabled {
-    background-color: ${({ theme }) => theme.colors.lightGrey};
+    background-color: ${({ theme }) => theme.colors.lightGray};
     box-shadow: none;
-    color: ${({ theme }) => theme.colors.darkGrey}24;
+    color: ${({ theme }) => theme.colors.darkGray}24;
     cursor: not-allowed;
     border: none;
   }
 
   &:focus:not(:disabled) {
-    border: 1px solid ${({ theme }) => theme.colors.darkGrey};
+    border: 1px solid ${({ theme }) => theme.colors.darkGray};
   }
 
   &:hover:not(:disabled) {
-    border: 1px solid ${({ theme }) => theme.colors.darkGrey};
+    border: 1px solid ${({ theme }) => theme.colors.darkGray};
   }
   ${getBorderStyles}
 

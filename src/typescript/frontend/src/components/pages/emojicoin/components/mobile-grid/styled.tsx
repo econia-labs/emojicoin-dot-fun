@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const StyledMobileContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  border: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border: 1px solid ${({ theme }) => theme.colors.darkGray};
   margin-left: 30px;
   margin-right: 30px;
 `;
@@ -18,7 +18,7 @@ export const StyledMobileContentInner = styled.div`
     display: block;
     position: absolute;
     width: 1200vw;
-    background-color: ${({ theme }) => theme.colors.darkGrey};
+    background-color: ${({ theme }) => theme.colors.darkGray};
     height: 1px;
     transform: translateX(-20%);
   }
@@ -34,7 +34,7 @@ export const StyledMobileContentBlock = styled.div`
 
   &:not(:last-child) {
     ${StyledMobileContentInner} {
-      border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+      border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
     }
   }
 `;
@@ -42,7 +42,7 @@ export const StyledMobileContentBlock = styled.div`
 export const StyledMobileContentHeader = styled.div`
   display: flex;
   position: relative;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
   padding: 3px 10px;
 
   ${({ theme }) => theme.mediaQueries.tablet} {
@@ -56,7 +56,7 @@ export const StyledMobileContentHeader = styled.div`
     display: block;
     position: absolute;
     width: 1200vw;
-    background-color: ${({ theme }) => theme.colors.darkGrey};
+    background-color: ${({ theme }) => theme.colors.darkGray};
     height: 1px;
     transform: translateX(-20%);
   }

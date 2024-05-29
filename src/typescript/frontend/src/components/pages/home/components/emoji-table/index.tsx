@@ -34,7 +34,7 @@ const EmojiTable = async (props: EmojiTableProps) => {
             </FilterOptionsWrapper>
           </Header>
           <StyledGrid>
-            {props.data.map(market => {
+            {props.data.map((market) => {
               return (
                 <TableCard
                   index={Number(market.state.marketMetadata.marketID)}

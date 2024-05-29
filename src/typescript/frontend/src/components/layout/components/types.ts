@@ -14,7 +14,12 @@ import { type Colors } from "theme/types";
 
 export interface ColumnProps extends FlexProps {}
 
-export interface BoxProps extends BorderProps, LayoutProps, PositionProps, SpaceProps, HTMLAttributes<HTMLDivElement> {
+export interface BoxProps
+  extends BorderProps,
+    LayoutProps,
+    PositionProps,
+    SpaceProps,
+    HTMLAttributes<HTMLDivElement> {
   $backgroundColor?: keyof Colors;
   ellipsis?: boolean;
   cursor?: React.CSSProperties["cursor"];

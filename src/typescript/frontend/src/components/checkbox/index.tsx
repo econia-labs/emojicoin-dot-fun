@@ -25,7 +25,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
       </CustomCheckbox>
 
       {typeof label === "string" ? (
-        <Text textScale="display6" color="lightGrey" mx="18px">
+        <Text textScale="display6" color="lightGray" mx="18px">
           {label}
         </Text>
       ) : (

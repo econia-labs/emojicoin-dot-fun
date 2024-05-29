@@ -6,6 +6,6 @@ export const StyledTradeHistory = styled.div`
   overflow-x: auto;
 
   &::-webkit-scrollbar-track {
-    border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
+    border-top: 1px solid ${({ theme }) => theme.colors.darkGray};
   }
 `;

@@ -5,14 +5,14 @@ import { darkColors } from "theme/colors";
 
 export const StyledItemWrapper = styled.div`
   box-shadow:
-    -0.5px 0 0 ${({ theme }) => theme.colors.darkGrey},
-    0.5px 0 0 ${({ theme }) => theme.colors.darkGrey};
+    -0.5px 0 0 ${({ theme }) => theme.colors.darkGray},
+    0.5px 0 0 ${({ theme }) => theme.colors.darkGray};
 
   &:after {
     content: "";
     display: block;
     width: 200vw;
-    background-color: ${({ theme }) => theme.colors.darkGrey};
+    background-color: ${({ theme }) => theme.colors.darkGray};
     height: 1px;
     transform: translateX(-50%);
   }
