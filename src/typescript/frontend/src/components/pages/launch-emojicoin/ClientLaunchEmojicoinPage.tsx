@@ -17,8 +17,9 @@ import Button from "components/button";
 import ClientsSlider from "components/clients-slider";
 import { Column, Flex, FlexGap } from "@containers";
 import { StyledFieldName } from "./styled";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 
-const LaunchEmojicoin: React.FC = () => {
+const ClientLaunchEmojicoinPage: React.FC = () => {
   const { t } = translationFunction();
 
   const { validationSchema, initialValues } = useValidationSchema();
@@ -164,7 +165,9 @@ const LaunchEmojicoin: React.FC = () => {
           </Flex>
 
           <Flex justifyContent="center" mt="18px">
-            <Button scale="lg">{t("Launch Emojicoin")}</Button>
+            <ButtonWithConnectWalletFallback>
+              <Button scale="lg">{t("Launch Emojicoin")}</Button>
+            </ButtonWithConnectWalletFallback>
           </Flex>
         </Column>
       </Flex>
@@ -172,4 +175,4 @@ const LaunchEmojicoin: React.FC = () => {
   );
 };
 
-export default LaunchEmojicoin;
+export default ClientLaunchEmojicoinPage;

@@ -19,7 +19,7 @@ import { slideTopVariants } from "./animations";
 import { type HeaderProps } from "./types";
 import { translationFunction } from "context/language-context";
 
-import ConnectWalletButton from "./wallet-button/ConnectWalletButton";
+import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton";
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
@@ -68,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
                   </Link>
                 );
               })}
-              <ConnectWalletButton />
+              <ButtonWithConnectWalletFallback />
             </FlexGap>
           )}
 

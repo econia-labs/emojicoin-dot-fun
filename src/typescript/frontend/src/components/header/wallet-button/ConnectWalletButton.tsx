@@ -12,7 +12,7 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
 
 const DEFAULT_TEXT = "Connect Wallet";
 
-export const ConnectWalletButton: React.FC<ConnectWalletProps> = ({
+export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   mobile,
   children,
   className,
@@ -98,4 +98,4 @@ export const ConnectWalletButton: React.FC<ConnectWalletProps> = ({
   );
 };
 
-export default ConnectWalletButton;
+export default ButtonWithConnectWalletFallback;

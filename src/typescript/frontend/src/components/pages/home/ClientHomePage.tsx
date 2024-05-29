@@ -8,7 +8,7 @@ export interface HomeProps {
   data: Array<MarketStateProps>;
 }
 
-const Home = async (props: HomeProps) => {
+const ClientHomePage = async (props: HomeProps) => {
   const data = props.data;
 
   const featured = data.toReversed().pop();
@@ -37,4 +37,4 @@ const Home = async (props: HomeProps) => {
   );
 };
 
-export default Home;
+export default ClientHomePage;

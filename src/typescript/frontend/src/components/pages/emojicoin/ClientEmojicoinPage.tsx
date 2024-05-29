@@ -13,7 +13,7 @@ import MobileGrid from "./components/mobile-grid";
 import { type EmojicoinProps } from "./types";
 import { EmojiNotFound } from "./components/emoji-not-found";
 
-const Emojicoin = (props: EmojicoinProps) => {
+const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isLaptopL } = useMatchBreakpoints();
 
   return (
@@ -32,4 +32,4 @@ const Emojicoin = (props: EmojicoinProps) => {
   );
 };
 
-export default Emojicoin;
+export default ClientEmojicoinPage;
