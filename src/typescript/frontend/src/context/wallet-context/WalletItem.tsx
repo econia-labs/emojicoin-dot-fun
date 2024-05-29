@@ -1,3 +1,4 @@
+// cspell:word pontem
 import {
   type Wallet,
   WalletReadyState,

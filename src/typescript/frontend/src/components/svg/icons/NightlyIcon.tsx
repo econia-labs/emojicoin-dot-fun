@@ -1,3 +1,4 @@
+// cspell:word SVGID
 import React from "react";
 
 const NightlyIcon = () => {

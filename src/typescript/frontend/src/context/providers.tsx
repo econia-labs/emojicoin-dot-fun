@@ -1,5 +1,7 @@
 "use client";
 
+// cspell:word martianwallet
+// cspell:word pontem
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { Provider } from "react-redux";
 import { ThemeProvider } from "styled-components";
