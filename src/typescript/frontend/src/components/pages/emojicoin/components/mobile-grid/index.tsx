@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
-import { Flex, FlexGap } from "@/containers";
+import { Flex, FlexGap } from "@containers";
 import { Text } from "components";
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import {
   StyledMobileContentWrapper,
@@ -13,22 +13,23 @@ import {
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
 import Chat from "../chat";
+import { type GridProps } from "../../types";
 
-const MobileGrid: React.FC = () => {
+const MobileGrid = (props: GridProps) => {
   const [tab, setTab] = useState(1);
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   return (
     <StyledMobileContentWrapper>
       <StyledMobileContentBlock>
         <StyledMobileContentHeader>
-          <Text textScale="pixelHeading4" color="lightGrey" textTransform="uppercase">
+          <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
             {t("Price Chart")}
           </Text>
         </StyledMobileContentHeader>
 
         <StyledMobileContentInner>
-          <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+          <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
             Chart
           </Text>
         </StyledMobileContentInner>
@@ -38,19 +39,31 @@ const MobileGrid: React.FC = () => {
         <StyledMobileContentHeader>
           <FlexGap gap="20px" width="fit-content">
             <Flex cursor="pointer" onClick={() => setTab(1)}>
-              <Text textScale="pixelHeading4" color={tab === 1 ? "lightGrey" : "darkGrey"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 1 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Trade History")}
               </Text>
             </Flex>
 
             <Flex cursor="pointer" onClick={() => setTab(2)}>
-              <Text textScale="pixelHeading4" color={tab === 2 ? "lightGrey" : "darkGrey"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 2 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Swap")}
               </Text>
             </Flex>
 
             <Flex cursor="pointer" onClick={() => setTab(3)}>
-              <Text textScale="pixelHeading4" color={tab === 3 ? "lightGrey" : "darkGrey"} textTransform="uppercase">
+              <Text
+                textScale="pixelHeading4"
+                color={tab === 3 ? "lightGray" : "darkGray"}
+                textTransform="uppercase"
+              >
                 {t("Chat")}
               </Text>
             </Flex>
@@ -59,13 +72,13 @@ const MobileGrid: React.FC = () => {
 
         <StyledMobileContentInner>
           {tab === 1 ? (
-            <TradeHistory />
+            <TradeHistory data={props.data} />
           ) : tab === 2 ? (
             <Flex width="100%" justifyContent="center" px="17px">
-              <TradeEmojicoin />
+              <TradeEmojicoin data={props.data} />
             </Flex>
           ) : (
-            <Chat />
+            <Chat data={props.data} />
           )}
         </StyledMobileContentInner>
       </StyledMobileContentBlock>

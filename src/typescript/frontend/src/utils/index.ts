@@ -1,5 +1,4 @@
 export { checkIsEllipsis } from "./check-is-ellipsis";
-export { parseErrorFromBE } from "./error-parser";
 export { getFileNameFromSrc } from "./get-file-name-from-src";
 export {
   removeLangParamFromPathname,

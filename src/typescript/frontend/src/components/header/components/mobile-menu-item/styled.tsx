@@ -3,7 +3,7 @@ import styled, { css } from "styled-components";
 const getBorderBottom = ({ borderBottom }) => {
   if (borderBottom) {
     return css`
-      border-bottom: 1px dashed ${({ theme }) => theme.colors.darkGrey};
+      border-bottom: 1px dashed ${({ theme }) => theme.colors.darkGray};
     `;
   }
 };

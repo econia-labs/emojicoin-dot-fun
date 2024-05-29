@@ -1,7 +1,7 @@
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import { Text } from "components/text";
 import Arrow from "components/svg/icons/Arrow";
@@ -9,8 +9,12 @@ import Arrow from "components/svg/icons/Arrow";
 import { type MobileMenuItemProps } from "./types";
 import { StyledItemWrapper } from "./styled";
 
-const MobileMenuItem: React.FC<MobileMenuItemProps> = ({ title, onClick = () => {}, borderBottom = true }) => {
-  const { t } = useTranslation();
+const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
+  title,
+  onClick = () => {},
+  borderBottom = true,
+}) => {
+  const { t } = translationFunction();
 
   const { ref, replay } = useScramble({
     text: `${t(title)}`,

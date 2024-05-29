@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 import { type ResponsiveBoxProps } from "./types";
 import { aspectRatio } from "./theme";
-import { Box } from "@/containers";
+import { Box } from "@containers";
 
 export const ResponsiveBoxWrapper = styled(Box)<ResponsiveBoxProps>`
   position: relative;

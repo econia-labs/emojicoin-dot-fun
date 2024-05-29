@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import { Text } from "components";
 import styled from "styled-components";
@@ -18,7 +18,7 @@ export const StyledNotFoundPage = styled(Page)`
 `;
 
 const NotFoundComponent: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
   const router = useRouter();
 
   const onClickHandler = () => {
@@ -27,9 +27,13 @@ const NotFoundComponent: React.FC = () => {
 
   return (
     <StyledNotFoundPage>
-        <Text textScale="pixelDisplay1" textTransform="uppercase">{t("Not found Page")} 404</Text>
+      <Text textScale="pixelDisplay1" textTransform="uppercase">
+        {t("Not found Page")} 404
+      </Text>
 
-      <Button onClick={onClickHandler} scale="lg">{t("Go to home page")}</Button>
+      <Button onClick={onClickHandler} scale="lg">
+        {t("Go to home page")}
+      </Button>
     </StyledNotFoundPage>
   );
 };

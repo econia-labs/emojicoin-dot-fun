@@ -7,7 +7,15 @@ import { StyledImage } from "./styled";
 import { getFileNameFromSrc } from "utils";
 import { type ImageProps } from "./types";
 
-const Image: React.FC<ImageProps> = ({ src, width, alt, variant, animation, aspectRatio, ...props }) => {
+const Image: React.FC<ImageProps> = ({
+  src,
+  width,
+  alt,
+  variant,
+  animation,
+  aspectRatio,
+  ...props
+}) => {
   const [isLoading, setLoading] = useState(true);
   const altDescription = getFileNameFromSrc(src);
 
@@ -22,6 +30,8 @@ const Image: React.FC<ImageProps> = ({ src, width, alt, variant, animation, aspe
         onLoad={() => {
           setLoading(false);
         }}
+        className={props.className}
+        id={props.id}
       />
     </ResponsiveBox>
   );

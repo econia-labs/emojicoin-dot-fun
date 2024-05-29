@@ -3,7 +3,7 @@
 import React from "react";
 
 import { useMatchBreakpoints } from "hooks";
-import { Container, FlexGap, Flex } from "@/containers";
+import { Container, FlexGap, Flex } from "@containers";
 import { Text } from "components/text";
 
 import { SocialLinks } from "./components/social-links";

@@ -1,0 +1,43 @@
+/* cspell:disable */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.med-pixel-text {
+  font-size: 20px;
+  line-height: 25px;
+  font-family: var(--font-pixelar);
+}
+
+@media screen and (min-width: 768px) {
+  .med-pixel-text {
+    font-size: 22px;
+    line-height: 27px;
+    font-family: var(--font-pixelar);
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .med-pixel-text {
+    font-size: 24px;
+    line-height: 30px;
+    font-family: var(--font-pixelar);
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .med-pixel-text {
+    font-size: 32px;
+    line-height: 40px;
+    font-family: var(--font-pixelar);
+  }
+}
+
+.icon-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.1ch;
+  width: 1.1ch;
+}

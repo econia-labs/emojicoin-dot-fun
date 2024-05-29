@@ -6,7 +6,9 @@ export interface FieldProps<Values> {
   name: string;
   multiple?: boolean | undefined;
   checked?: boolean | undefined;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => Promise<FormikErrors<Values & FormikValues>> | Promise<void>;
+  onChange: (
+    e: ChangeEvent<HTMLInputElement>
+  ) => Promise<FormikErrors<Values & FormikValues>> | Promise<void>;
   onBlur: () => Promise<FormikErrors<Values & FormikValues>> | Promise<void>;
   onFocus: () => Promise<FormikErrors<Values & FormikValues>> | Promise<void>;
 }
@@ -21,12 +23,12 @@ export interface ComponentFormProps<Values> {
   setFieldValue: <T>(
     field: string,
     value: T,
-    shouldValidate?: boolean,
+    shouldValidate?: boolean
   ) => Promise<void> | Promise<FormikErrors<Values & FormikValues>>;
   setFieldTouched: (
     field: string,
     touched?: boolean,
-    shouldValidate?: boolean,
+    shouldValidate?: boolean
   ) => Promise<FormikErrors<Values>> | Promise<void>;
   setFieldError: (field: string, value: string | undefined) => void;
 }

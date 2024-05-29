@@ -4,7 +4,7 @@ import { Svg } from "components/svg";
 export const StyledInputWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  border: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border: 1px solid ${({ theme }) => theme.colors.darkGray};
   border-radius: ${({ theme }) => theme.radii.xSmall};
   padding: 7px 18px;
   align-items: center;
@@ -18,7 +18,7 @@ export const StyledInputWrapper = styled.div`
 export const StyledArrowWrapper = styled.div`
   display: flex;
   border-radius: ${({ theme }) => theme.radii.circle};
-  border: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border: 1px solid ${({ theme }) => theme.colors.darkGray};
   padding: 12px;
   width: 37px;
   height: 37px;

@@ -33,9 +33,3 @@ export function createNamedObjectAddress(args: {
 
   return AccountAddress.from(sha3_256(preImage));
 }
-
-export const truncateAddress = (input: AccountAddressInput): string => {
-  const t = AccountAddress.from(input);
-  const s = t.toString();
-  return `${s.substring(0, 6)}...${s.substring(s.length - 4, s.length)}`;
-};

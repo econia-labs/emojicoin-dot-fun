@@ -16,6 +16,11 @@ export const InputNumeric = <E extends React.ElementType = "input">({
   };
 
   return (
-    <Input inputMode="decimal" pattern="^(?!\.)[0-9]*[.,]?[0-9]*$" onChange={event => onChangeText(event)} {...props} />
+    <Input
+      inputMode="decimal"
+      pattern="^(?!\.)[0-9]*[.,]?[0-9]*$"
+      onChange={(event) => onChangeText(event)}
+      {...props}
+    />
   );
 };

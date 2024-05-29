@@ -2,17 +2,17 @@
 
 import React, { useState } from "react";
 
-import { useTranslation } from "context/language-context";
+import { translationFunction } from "context/language-context";
 
 import CloseIcon from "components/svg/icons/Close";
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { Text } from "components/text";
 import { Arrow, StyledPrompt } from "./styled";
 
 import { type PromptProps } from "./types";
 
 const Prompt: React.FC<PromptProps> = ({ text }) => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
   const [isPromptVisible, setIsPromptVisible] = useState(true);
 
   return (

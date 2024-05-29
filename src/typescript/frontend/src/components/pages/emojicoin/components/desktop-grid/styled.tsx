@@ -1,10 +1,10 @@
 import styled from "styled-components";
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 
 export const StyledContentWrapper = styled.div`
   display: flex;
   justify-content: center;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
 `;
 
 export const StyledContentInner = styled.div`
@@ -17,8 +17,8 @@ export const StyledContentInner = styled.div`
 export const StyledContentColumn = styled(Flex)`
   display: flex;
 
-  border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
-  border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-left: 1px solid ${({ theme }) => theme.colors.darkGray};
+  border-right: 1px solid ${({ theme }) => theme.colors.darkGray};
 `;
 
 export const StyledContentHeader = styled.div`
@@ -34,7 +34,7 @@ export const StyledContentHeader = styled.div`
     display: block;
     position: absolute;
     width: 100vw;
-    background-color: ${({ theme }) => theme.colors.darkGrey};
+    background-color: ${({ theme }) => theme.colors.darkGray};
     height: 1px;
     transform: translateX(-50%);
   }
@@ -60,6 +60,6 @@ export const StyledBlock = styled(Flex)`
   flex-direction: column;
 
   &:first-child {
-    border-right: 1px solid ${({ theme }) => theme.colors.darkGrey};
+    border-right: 1px solid ${({ theme }) => theme.colors.darkGray};
   }
 `;

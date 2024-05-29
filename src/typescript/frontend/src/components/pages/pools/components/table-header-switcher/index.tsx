@@ -3,15 +3,15 @@
 import React, { useState } from "react";
 import { useScramble } from "use-scramble";
 
-import { useTranslation } from "context";
-import { Flex, FlexGap } from "@/containers";
+import { translationFunction } from "context/language-context";
+import { Flex, FlexGap } from "@containers";
 import { Text } from "components/text";
 
 import { type TableHeaderSwitcherPops } from "./types";
 
 const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2 }) => {
   const [isActive, setIsActive] = useState(true);
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const { ref: ref1, replay: replay1 } = useScramble({
     text: `${t(title1)}`,
@@ -35,7 +35,7 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2
         <Text
           textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
           textTransform="uppercase"
-          color={isActive ? "lightGrey" : "darkGrey"}
+          color={isActive ? "lightGray" : "darkGray"}
           onClick={clickHandler}
           ref={ref1}
         ></Text>
@@ -45,7 +45,7 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2
         <Text
           textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
           textTransform="uppercase"
-          color={isActive ? "darkGrey" : "lightGrey"}
+          color={isActive ? "darkGray" : "lightGray"}
           onClick={clickHandler}
           ref={ref2}
         ></Text>

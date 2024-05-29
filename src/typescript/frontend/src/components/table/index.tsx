@@ -1,6 +1,13 @@
 import styled, { css } from "styled-components";
-import { layout, type LayoutProps, space, type SpaceProps, typography, type TypographyProps } from "styled-system";
-import { Flex } from "@/containers";
+import {
+  layout,
+  type LayoutProps,
+  space,
+  type SpaceProps,
+  typography,
+  type TypographyProps,
+} from "styled-system";
+import { Flex } from "@containers";
 import { Text } from "components/text";
 
 interface TdProps extends TypographyProps, SpaceProps, LayoutProps {}
@@ -9,11 +16,13 @@ interface TrProps extends LayoutProps {
   hover?: boolean;
 }
 
-const getBorderOnHover = ({ hover }: TrProps) => {
+const getStylesOnHover = ({ hover }: TrProps) => {
   if (hover) {
     return css`
       border-bottom: 1px solid ${({ theme }) => theme.colors.econiaBlue};
       border-top: 1px solid ${({ theme }) => theme.colors.econiaBlue} !important;
+      filter: brightness(1.2);
+      background-color: rgba(255, 255, 255, 0.02);
     `;
   }
 };
@@ -30,7 +39,7 @@ export const Table = styled.table<SpaceProps & LayoutProps>`
 export const ThInner = styled(Flex)`
   display: flex;
   padding: 7px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
 `;
 
 export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdProps>`
@@ -59,13 +68,13 @@ export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdPro
 `;
 
 export const Tr = styled.tr<TrProps>`
-  border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-top: 1px solid ${({ theme }) => theme.colors.darkGray};
   border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
   display: flex;
   width: 100%;
 
   &:hover {
-    ${getBorderOnHover}
+    ${getStylesOnHover}
   }
 
   &:first-child {
@@ -76,7 +85,7 @@ export const Tr = styled.tr<TrProps>`
 `;
 
 export const EmptyTr = styled.tr<TrProps>`
-  border-top: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-top: 1px solid ${({ theme }) => theme.colors.darkGray};
   border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
   display: flex;
   width: 100%;
@@ -107,7 +116,7 @@ export const TrWrapper = styled(Flex)`
 
 export const Td = styled.td<TdProps>`
   display: inline-block;
-  color: ${({ theme }) => theme.colors.lightGrey};
+  color: ${({ theme }) => theme.colors.lightGray};
   padding: 7px;
   vertical-align: middle;
   position: relative;
@@ -136,7 +145,7 @@ export const TBody = styled.tbody<LayoutProps>`
   width: 100%;
 
   &::-webkit-scrollbar-track {
-    border-left: 1px solid ${({ theme }) => theme.colors.darkGrey};
+    border-left: 1px solid ${({ theme }) => theme.colors.darkGray};
   }
 
   ${layout}

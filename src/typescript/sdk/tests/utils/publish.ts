@@ -11,8 +11,8 @@ import {
 import path from "path";
 import { type PublishPackageResult, type ResultJSON } from "./types";
 import { getAptosClient } from "./aptos-client";
-import { getGitRoot } from "./helpers";
 import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
+import { getGitRoot } from "../../src/utils/git-root";
 
 export async function publishPackage(args: {
   pk: PrivateKey;

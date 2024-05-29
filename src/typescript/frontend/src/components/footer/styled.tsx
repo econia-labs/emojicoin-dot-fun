@@ -16,7 +16,7 @@ export const StyledSocialWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 24px 0;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGrey};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
 
   ${({ theme }) => theme.mediaQueries.tablet} {
     padding: 48px 0;

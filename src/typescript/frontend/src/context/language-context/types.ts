@@ -26,4 +26,5 @@ export type TranslationKey = keyof typeof translations | (string & MaybeObject);
 
 export type TranslateFunction = (key: TranslationKey, data?: ContextData) => string;
 
-export interface LanguageContextProviderProps extends PropsWithChildren<{ fallback: ReactElement }> {}
+export interface LanguageContextProviderProps
+  extends PropsWithChildren<{ fallback: ReactElement }> {}

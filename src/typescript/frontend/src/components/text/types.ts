@@ -35,7 +35,12 @@ export const scales = {
 
 export type Scales = (typeof scales)[keyof typeof scales];
 
-export interface TextProps extends SpaceProps, TypographyProps, LayoutProps, OpacityProps, FlexboxProps {
+export interface TextProps
+  extends SpaceProps,
+    TypographyProps,
+    LayoutProps,
+    OpacityProps,
+    FlexboxProps {
   color?: keyof Colors;
   ellipsis?: boolean;
   $fontWeight?: ResponsiveValue<keyof FontWeight>;
@@ -43,4 +48,5 @@ export interface TextProps extends SpaceProps, TypographyProps, LayoutProps, Opa
   textScale?: ResponsiveValue<Scales>;
   direction?: "ltr" | "rtl";
   wordBreak?: React.CSSProperties["wordBreak"];
+  className?: string;
 }

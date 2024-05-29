@@ -3,7 +3,7 @@
 import React from "react";
 
 import { languageList, EN } from "configs";
-import { Container } from "@/containers";
+import { Container } from "@containers";
 
 import { type PageProps } from "../types";
 import { DEFAULT_TITLE, getDefaultMetadata } from "configs/meta";
@@ -35,7 +35,7 @@ type Languages = {
  */
 export async function getGenerateMetadataFunction(
   { params, searchParams }: Props,
-  parent: ResolvingMetadata,
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const [_, __] = [searchParams, parent];
 
@@ -54,7 +54,9 @@ export async function getGenerateMetadataFunction(
 
   const defaultMetadata = getDefaultMetadata();
 
-  const translatedTitle = await (params.id ? translateWithDefault("Home") : translateWithDefault(DEFAULT_TITLE));
+  const translatedTitle = await (params.id
+    ? translateWithDefault("Home")
+    : translateWithDefault(DEFAULT_TITLE));
 
   return {
     ...defaultMetadata,

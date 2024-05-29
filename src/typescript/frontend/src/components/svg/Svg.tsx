@@ -1,3 +1,5 @@
+"use client";
+
 import styled, { css, keyframes } from "styled-components";
 import { space } from "styled-system";
 import { rotate } from "./theme";
@@ -22,7 +24,7 @@ const Svg = styled.svg.attrs<SvgProps>(
     color,
     width,
     xmlns,
-  }),
+  })
 )`
   align-self: center;
   fill: ${({ theme, color }) => color && theme.colors[color]};

@@ -2,18 +2,20 @@
 
 import React, { useState } from "react";
 
-import { Flex, Column } from "@/containers";
+import { Flex, Column } from "@containers";
 import { Text, Button, InputGroup, InputNumeric } from "components";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import { StyledInputWrapper, StyledArrowWrapper, StyledInputContainer } from "./styled";
 import { Arrow } from "components/svg";
+import { type TradeEmojicoinProps } from "../../types";
+import AptosIconBlack from "components/svg/icons/AptosBlack";
 
-const TradeEmojicoin: React.FC = () => {
+const TradeEmojicoin = (props: TradeEmojicoinProps) => {
   const [isForce, setIsForce] = useState(true);
 
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const switchHandler = () => {
     setIsForce(!isForce);
@@ -21,14 +23,25 @@ const TradeEmojicoin: React.FC = () => {
 
   return (
     <Column width="100%" maxWidth="414px" height="100%" justifyContent="center">
-      <Text textScale={{ _: "heading2", tablet: "heading1" }} color="white" textTransform="uppercase" pb="17px">
+      <Text
+        textScale={{ _: "heading2", tablet: "heading1" }}
+        color="white"
+        textTransform="uppercase"
+        pb="17px"
+      >
         {t("Trade Emojicoin")}
       </Text>
 
       <StyledInputContainer isForce={isForce}>
         <StyledInputWrapper>
           <Column>
-            <Text textScale="pixelHeading4" mb="-6px" color="lightGrey" lineHeight="20px" textTransform="uppercase">
+            <Text
+              textScale="pixelHeading4"
+              mb="-6px"
+              color="lightGray"
+              lineHeight="20px"
+              textTransform="uppercase"
+            >
               {t("You pay")}
             </Text>
 
@@ -37,18 +50,24 @@ const TradeEmojicoin: React.FC = () => {
             </InputGroup>
           </Column>
 
-          <Text textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }} color="lightGrey">
-            APT
+          <Text textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }} color="lightGray">
+            <AptosIconBlack style={{ marginTop: 5, marginRight: 3 }} height="27px" width="27px" />
           </Text>
         </StyledInputWrapper>
 
         <StyledArrowWrapper onClick={switchHandler}>
-          <Arrow width="18px" rotate={isForce ? "90deg" : "-90deg"} color="lightGrey" />
+          <Arrow width="18px" rotate={isForce ? "90deg" : "-90deg"} color="lightGray" />
         </StyledArrowWrapper>
 
         <StyledInputWrapper>
           <Column>
-            <Text textScale="pixelHeading4" mb="-6px" color="lightGrey" lineHeight="20px" textTransform="uppercase">
+            <Text
+              textScale="pixelHeading4"
+              mb="-6px"
+              color="lightGray"
+              lineHeight="20px"
+              textTransform="uppercase"
+            >
               {t("You receive")}
             </Text>
 
@@ -62,9 +81,9 @@ const TradeEmojicoin: React.FC = () => {
             fontSize={{ _: "24px", tablet: "30px" }}
             lineHeight="34px"
             pt="6px"
-            color="lightGrey"
+            color="lightGray"
           >
-            🖤
+            {props.data.emoji.emoji}
           </Text>
         </StyledInputWrapper>
       </StyledInputContainer>

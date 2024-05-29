@@ -1,9 +1,9 @@
 import React from "react";
 
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { Text, Button } from "components";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 
 import {
   StyledContentWrapper,
@@ -17,9 +17,10 @@ import {
 import Chat from "../chat";
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
+import { type GridProps } from "../../types";
 
-const DesktopGrid: React.FC = () => {
-  const { t } = useTranslation();
+const DesktopGrid = (props: GridProps) => {
+  const { t } = translationFunction();
 
   return (
     <StyledContentWrapper>
@@ -29,7 +30,7 @@ const DesktopGrid: React.FC = () => {
             <StyledContentHeader>
               <Text
                 textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }}
-                color="lightGrey"
+                color="lightGray"
                 textTransform="uppercase"
               >
                 {t("Price Chart")}
@@ -37,7 +38,7 @@ const DesktopGrid: React.FC = () => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
                 Chart
               </Text>
             </StyledBlockWrapper>
@@ -51,7 +52,7 @@ const DesktopGrid: React.FC = () => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <TradeEmojicoin />
+              <TradeEmojicoin data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
         </StyledContentColumn>
@@ -59,25 +60,25 @@ const DesktopGrid: React.FC = () => {
         <StyledContentColumn>
           <StyledBlock width="57%">
             <StyledContentHeader>
-              <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
                 {t("Trade History")}
               </Text>
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <TradeHistory />
+              <TradeHistory data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
 
           <StyledBlock width="43%">
             <StyledContentHeader>
-              <Text textScale="pixelHeading3" color="lightGrey" textTransform="uppercase">
+              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
                 {t("Chat")}
               </Text>
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <Chat />
+              <Chat data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
         </StyledContentColumn>

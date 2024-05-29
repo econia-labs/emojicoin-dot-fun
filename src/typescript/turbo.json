@@ -28,6 +28,12 @@
     "lint:fix": {
       "outputs": []
     },
+    "start": {
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": []
+    },
     "test": {
       "outputs": []
     }

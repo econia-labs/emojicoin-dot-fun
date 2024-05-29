@@ -5,5 +5,4 @@ export interface MobileMenuProps {
   setIsOpen: (arg: boolean) => void;
   linksForCurrentPage: (typeof NAVIGATE_LINKS)[number][];
   offsetHeight: number;
-  walletHandler: () => void;
 }

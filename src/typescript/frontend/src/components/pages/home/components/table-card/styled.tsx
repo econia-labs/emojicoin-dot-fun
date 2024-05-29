@@ -1,27 +1,22 @@
-import styled, { css } from "styled-components";
-import { Svg, Text } from "components";
+import { Arrow } from "components/svg";
+import Text from "components/text";
+import styled from "styled-components";
+import { darkColors } from "theme/colors";
 
-const getHovered = ({ isEmpty }) => {
-  if (!isEmpty) {
-    return css`
-      border: 1px solid ${({ theme }) => theme.colors.econiaBlue};
+export const StyledItemWrapper = styled.div`
+  box-shadow:
+    -0.5px 0 0 ${({ theme }) => theme.colors.darkGray},
+    0.5px 0 0 ${({ theme }) => theme.colors.darkGray};
 
-      ${Svg} {
-        g {
-          path {
-            fill: ${({ theme }) => theme.colors.econiaBlue};
-          }
-        }
-      }
-
-      ${StyledColoredText} {
-        color: ${({ theme }) => theme.colors.econiaBlue};
-      }
-    `;
+  &:after {
+    content: "";
+    display: block;
+    width: 200vw;
+    background-color: ${({ theme }) => theme.colors.darkGray};
+    height: 1px;
+    transform: translateX(-50%);
   }
-};
-
-export const StyledColoredText = styled(Text)``;
+`;
 
 export const StyledInnerItem = styled.div<{ isEmpty: boolean }>`
   width: 100%;
@@ -34,24 +29,27 @@ export const StyledInnerItem = styled.div<{ isEmpty: boolean }>`
   cursor: ${({ isEmpty }) => !isEmpty && "pointer"};
   border: 1px solid ${({ theme }) => theme.colors.transparent};
 
-  &:hover {
-    ${getHovered}
+  ${StyledItemWrapper}:hover & {
+    border: 1px solid ${darkColors.econiaBlue};
   }
 `;
 
-export const StyledItemWrapper = styled.div`
-  width: 259px;
-  max-width: 259px;
-  box-shadow:
-    -0.5px 0 0 ${({ theme }) => theme.colors.darkGrey},
-    0.5px 0 0 ${({ theme }) => theme.colors.darkGrey};
+export const StyledColoredText = styled(Text)`
+  border: 1px solid ${({ theme }) => theme.colors.transparent};
 
-  &:after {
-    content: "";
-    display: block;
-    width: 200vw;
-    background-color: ${({ theme }) => theme.colors.darkGrey};
-    height: 1px;
-    transform: translateX(-50%);
+  ${StyledItemWrapper}:hover & {
+    color: ${darkColors.econiaBlue};
+  }
+`;
+
+export const StyledArrow = styled(Arrow)`
+  width: 21px;
+
+  ${StyledItemWrapper}:hover & {
+    g {
+      path {
+        fill: ${darkColors.econiaBlue};
+      }
+    }
   }
 `;

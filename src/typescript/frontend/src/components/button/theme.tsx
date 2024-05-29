@@ -24,11 +24,11 @@ export const variantStyles = ({ theme, color, variant, isLoading }: ThemedProps)
       }
 
       &:disabled {
-        color: ${!isLoading && theme.colors.darkGrey};
+        color: ${!isLoading && theme.colors.darkGray};
         cursor: not-allowed;
 
         ${Svg} {
-          fill: ${!isLoading && theme.colors.darkGrey};
+          fill: ${!isLoading && theme.colors.darkGray};
         }
       }
     `,

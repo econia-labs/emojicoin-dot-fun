@@ -1,10 +1,10 @@
 import React from "react";
 import { useScramble } from "use-scramble";
 
-import { useTranslation } from "context";
+import { translationFunction } from "context/language-context";
 import { useMatchBreakpoints } from "hooks";
 
-import { FlexGap, Flex } from "@/containers";
+import { FlexGap, Flex } from "@containers";
 import { Text } from "components/text";
 
 import { Arrows } from "components/svg";
@@ -13,7 +13,7 @@ import { type TableHeaderProps } from "./types";
 import { type DataType } from "../../types";
 
 const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => {
-  const { t } = useTranslation();
+  const { t } = translationFunction();
   const { isMobile } = useMatchBreakpoints();
 
   const { ref, replay } = useScramble({
@@ -29,7 +29,9 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => 
         gap="10px"
         alignItems="center"
         width="fit-content"
-        onClick={item.sortBy ? () => sortData(item.sortBy as Exclude<keyof DataType, "pool">) : () => {}}
+        onClick={
+          item.sortBy ? () => sortData(item.sortBy as Exclude<keyof DataType, "pool">) : () => {}
+        }
         onMouseEnter={replay}
         ellipsis
       >

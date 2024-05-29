@@ -4,69 +4,80 @@ import React from "react";
 
 import { useTooltip } from "hooks";
 
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { Text, Tr, Td } from "components";
 
 import { type TableRowDesktopProps } from "./types";
+import { toDecimalsAPT } from "lib/utils/decimals";
+import { ExplorerLinkCustom } from "./styled";
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
   const { targetRef, tooltip } = useTooltip(
     <Text color="black" textScale="pixelHeading4" textTransform="uppercase">
-      {item.rank}
+      {item.emoji}
     </Text>,
     {
       placement: "top",
-    },
+    }
   );
 
   return (
-    <Tr>
-      <Td width={{_: "12.5%", laptopL: "13%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+    <Tr hover={true}>
+      <Td width={{ _: "12.5%", laptopL: "13%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex px="12px">
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ref={targetRef}>
+          <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ref={targetRef}>
             {item.rankIcon}
           </Text>
           {tooltip}
         </Flex>
       </Td>
 
-      <Td width={{_: "12.5%", laptopL : "13.5%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "12.5%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.apt}
+          <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
+            {toDecimalsAPT(item.apt, 3)}
           </Text>
         </Flex>
       </Td>
 
-      <Td width={{_: "13%", laptopL: "13.5%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width={{ _: "23%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.emoji}
+          <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
+            {toDecimalsAPT(item.emoji, 3)}
           </Text>
         </Flex>
       </Td>
 
-      <Td width={{_: "12.5%", laptopL: "13%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", marginRight: 10 }}
+        width={{ _: "12.5%", laptopL: "13%" }}
+        minWidth={{ _: "10px", laptopL: "unset" }}
+      >
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
+          <Text
+            textScale="bodySmall"
+            color={item.type === "sell" ? "error" : "green"}
+            textTransform="uppercase"
+          >
             {item.type}
           </Text>
         </Flex>
       </Td>
 
-      <Td width="12.5%" minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width="20%" minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.date}
+          <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
+            {item.date.toLocaleString()}
           </Text>
         </Flex>
       </Td>
-
-      <Td width={{_: "37%", laptopL: "35%"}} minWidth={{ _: "100px", laptopL: "unset" }}>
-        <Flex justifyContent="end">
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase">
-            {item.transaction}
-          </Text>
+      <Td width={{ _: "20%", laptopL: "35%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
+        <Flex justifyContent="end" className="trade-entry">
+          <ExplorerLinkCustom style={{ display: "inline-block" }} value={item.version} type="txn">
+            <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
+              {item.version}
+            </Text>
+          </ExplorerLinkCustom>
         </Flex>
       </Td>
     </Tr>

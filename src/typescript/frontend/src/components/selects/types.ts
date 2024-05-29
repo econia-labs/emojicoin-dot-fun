@@ -17,7 +17,8 @@ export interface SingleSelectProps extends Omit<SelectProps, "targetRef" | "tool
   setValue: (values: Option) => void;
 }
 
-export interface MultipleSelectProps extends Omit<SingleSelectProps, "value" | "setValue" | "title"> {
+export interface MultipleSelectProps
+  extends Omit<SingleSelectProps, "value" | "setValue" | "title"> {
   value: Option[];
   title?: string | React.ReactNode;
   setValue: (values: Option[]) => void;

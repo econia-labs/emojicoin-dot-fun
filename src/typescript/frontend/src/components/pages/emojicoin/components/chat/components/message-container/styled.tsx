@@ -21,7 +21,6 @@ export const StyledMessageWrapper = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 11px;
-  width: 100%;
   max-width: 160px;
   height: fit-content;
 
@@ -34,22 +33,24 @@ export const StyledUserNameWrapper = styled.div`
   display: flex;
 `;
 
-export const StyledMessageContainer = styled.div<{ isIncoming: boolean }>`
+export const StyledMessageContainer = styled.div<{ fromAnotherUser: boolean }>`
   display: flex;
   width: 100%;
-  justify-content: ${({ isIncoming }) => (isIncoming ? "start" : "end")};
+  justify-content: ${({ fromAnotherUser }) => (fromAnotherUser ? "start" : "end")};
 
   ${Arrow} {
-    background: ${({ theme, isIncoming }) => (isIncoming ? theme.colors.econiaBlue : theme.colors.blue)};
-    left: ${({ isIncoming }) => (isIncoming ? "-4px" : undefined)};
-    right: ${({ isIncoming }) => (isIncoming ? undefined : "-5px")};
+    background: ${({ theme, fromAnotherUser }) =>
+      fromAnotherUser ? theme.colors.econiaBlue : theme.colors.blue};
+    left: ${({ fromAnotherUser }) => (fromAnotherUser ? "-4px" : undefined)};
+    right: ${({ fromAnotherUser }) => (fromAnotherUser ? undefined : "-5px")};
   }
 
   ${StyledUserNameWrapper} {
-    justify-content: ${({ isIncoming }) => (isIncoming ? "start" : "end")};
+    justify-content: ${({ fromAnotherUser }) => (fromAnotherUser ? "start" : "end")};
   }
 
   ${StyledMessageInner} {
-    background-color: ${({ theme, isIncoming }) => (isIncoming ? theme.colors.econiaBlue : theme.colors.blue)};
+    background-color: ${({ theme, fromAnotherUser }) =>
+      fromAnotherUser ? theme.colors.econiaBlue : theme.colors.blue};
   }
 `;

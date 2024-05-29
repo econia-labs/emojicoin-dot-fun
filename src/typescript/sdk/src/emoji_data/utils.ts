@@ -8,6 +8,8 @@ import { type SymbolEmojiData, type EmojiName } from "./types";
  * A function that returns an emoji's data from any input that could represent a single
  * emoji, be its hex string, name, emoji character, or Uint8Array bytes.
  *
+ * If you know the input type, consider using the more specific map {@link SYMBOL_DATA}.
+ *
  * @param input any input that could represent an emoji
  * @returns SymbolEmoji if the input is a valid emoji, otherwise undefined.
  *

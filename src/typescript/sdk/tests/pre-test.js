@@ -3,12 +3,10 @@ const { Account, Hex, Ed25519PrivateKey } = require("@aptos-labs/ts-sdk");
 const fs = require("fs");
 const path = require("path");
 const {
-  getPublisherPKForTest,
-} = require("../src/const")
-const {
   Inbox,
   LocalNode,
   publishForTest,
+  getPublisherPKForTest,
   PK_PATH,
   PUBLISH_RES_PATH,
 } = require("./utils");
@@ -26,7 +24,7 @@ module.exports = async function setup() {
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
   fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });
 
-  const pk = getPublisherPKForTest();
+  const pk = await getPublisherPKForTest();
   if (!pk) {
     throw new Error("Please provide a private key for testing");
   };

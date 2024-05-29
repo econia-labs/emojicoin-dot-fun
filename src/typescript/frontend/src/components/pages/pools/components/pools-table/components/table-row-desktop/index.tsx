@@ -2,7 +2,7 @@ import React from "react";
 
 import { useMatchBreakpoints, useTooltip } from "hooks";
 
-import { Flex } from "@/containers";
+import { Flex } from "@containers";
 import { Text, Tr, Td } from "components";
 
 import { type TableRowDesktopProps } from "./types";
@@ -39,7 +39,13 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
     <Tr hover>
       <Td p="7px 12px" width={{ _: "25%", tablet: "11.5%" }}>
         <Flex justifyContent="start">
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefPool}>
+          <Text
+            textScale="bodySmall"
+            color="lightGray"
+            textTransform="uppercase"
+            ellipsis
+            ref={targetRefPool}
+          >
             {item.pool}
           </Text>
           {poolTooltip}
@@ -48,7 +54,13 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
       <Td p="7px 12px" width={{ _: "30%", tablet: "26.5%" }}>
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefAllTime}>
+          <Text
+            textScale="bodySmall"
+            color="lightGray"
+            textTransform="uppercase"
+            ellipsis
+            ref={targetRefAllTime}
+          >
             {item.allTime} APT
           </Text>
           {allTimeTooltip}
@@ -58,7 +70,13 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
       {!isMobile && (
         <Td p="7px 12px" width="18%">
           <Flex>
-            <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefVol24}>
+            <Text
+              textScale="bodySmall"
+              color="lightGray"
+              textTransform="uppercase"
+              ellipsis
+              ref={targetRefVol24}
+            >
               {item.vol24} APT
             </Text>
             {vol24Tooltip}
@@ -68,7 +86,13 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
       <Td p="7px 12px" width={{ _: "25%", tablet: "15%" }}>
         <Flex>
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefTvl}>
+          <Text
+            textScale="bodySmall"
+            color="lightGray"
+            textTransform="uppercase"
+            ellipsis
+            ref={targetRefTvl}
+          >
             {item.tvl} APT
           </Text>
           {tvlTooltip}
@@ -77,7 +101,13 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
       <Td p="7px 12px" width={{ _: "20%", tablet: "29%" }}>
         <Flex justifyContent="end">
-          <Text textScale="bodySmall" color="lightGrey" textTransform="uppercase" ellipsis ref={targetRefApr}>
+          <Text
+            textScale="bodySmall"
+            color="lightGray"
+            textTransform="uppercase"
+            ellipsis
+            ref={targetRefApr}
+          >
             {item.apr}%
           </Text>
           {aprTooltip}

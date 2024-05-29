@@ -21,17 +21,17 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "paths": {
-      "@/containers": [
+      "@containers": [
         "components/layout/components/index.ts"
       ],
-      "@/fonts/*": [
-        "styles/fonts/*"
+      "@hooks/*": [
+        "hooks/*"
       ],
-      "@/sdk/*": [
+      "@icons/*": [
+        "components/svg/icons/*"
+      ],
+      "@sdk/*": [
         "../../sdk/src/*"
-      ],
-      "@/static/*": [
-        "../public/static/*"
       ]
     },
     "plugins": [

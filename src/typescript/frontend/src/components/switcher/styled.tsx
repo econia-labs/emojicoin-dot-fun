@@ -24,7 +24,7 @@ export const Slider = styled.span<{ checked: boolean; disabled?: boolean; scale?
   background-color: ${({ theme }) => theme.colors.transparent};
   border-radius: 15px;
   transition: all 0.3s ease-out;
-  border: ${({ theme }) => `1px solid ${theme.colors.darkGrey}`};
+  border: ${({ theme }) => `1px solid ${theme.colors.darkGray}`};
   // styles for moved check part
 
   &:before {
@@ -35,7 +35,7 @@ export const Slider = styled.span<{ checked: boolean; disabled?: boolean; scale?
     width: ${({ scale }) => scale && styles[scale].circleWidth};
     height: ${({ scale }) => scale && styles[scale].circleWidth};
     border-radius: 100%;
-    background-color: ${({ theme }) => theme.colors.lightGrey};
+    background-color: ${({ theme }) => theme.colors.lightGray};
 
     transition: all 0.3s ease-out;
   }

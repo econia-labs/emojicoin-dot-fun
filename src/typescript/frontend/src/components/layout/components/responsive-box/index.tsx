@@ -11,7 +11,7 @@ export const ResponsiveBox = forwardRef<HTMLDivElement, ResponsiveBoxProps>(
         <ContentWrapper>{children}</ContentWrapper>
       </ResponsiveBoxWrapper>
     );
-  },
+  }
 );
 
 ResponsiveBox.displayName = "ResponsiveBox";

@@ -796,8 +796,8 @@ export class MarketMetadataByMarketAddress extends ViewFunctionPayloadBuilder<
   }
 }
 
-export type MarketMetadataByMarketIdPayloadMoveArguments = {
-  marketId: U64;
+export type MarketMetadataByMarketIDPayloadMoveArguments = {
+  marketID: U64;
 };
 
 /**
@@ -809,7 +809,7 @@ export type MarketMetadataByMarketIdPayloadMoveArguments = {
  *```
  * */
 
-export class MarketMetadataByMarketId extends ViewFunctionPayloadBuilder<
+export class MarketMetadataByMarketID extends ViewFunctionPayloadBuilder<
   [Option<JSONTypes.MarketMetadata>]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
@@ -818,27 +818,27 @@ export class MarketMetadataByMarketId extends ViewFunctionPayloadBuilder<
 
   public readonly functionName = "market_metadata_by_market_id";
 
-  public readonly args: MarketMetadataByMarketIdPayloadMoveArguments;
+  public readonly args: MarketMetadataByMarketIDPayloadMoveArguments;
 
   public readonly typeTags: [] = [];
 
   constructor(args: {
-    marketId: Uint64; // u64
+    marketID: Uint64; // u64
   }) {
     super();
-    const { marketId } = args;
+    const { marketID } = args;
 
     this.args = {
-      marketId: new U64(marketId),
+      marketID: new U64(marketID),
     };
   }
 
   static async view(args: {
     aptos: Aptos | AptosConfig;
-    marketId: Uint64; // u64
+    marketID: Uint64; // u64
     options?: LedgerVersionArg;
   }): Promise<Option<JSONTypes.MarketMetadata>> {
-    const [res] = await new MarketMetadataByMarketId(args).view(args);
+    const [res] = await new MarketMetadataByMarketID(args).view(args);
     return res;
   }
 }
@@ -885,10 +885,15 @@ export class MarketView extends ViewFunctionPayloadBuilder<[JSONTypes.MarketView
   static async view(args: {
     aptos: Aptos | AptosConfig;
     marketAddress: AccountAddressInput; // address
-    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     options?: LedgerVersionArg;
   }): Promise<JSONTypes.MarketView> {
-    const [res] = await new MarketView(args).view(args);
+    const marketAddress = AccountAddress.from(args.marketAddress);
+    const emojicoin = parseTypeTag(`${marketAddress.toString()}::coin_factory::Emojicoin`);
+    const emojicoinLP = parseTypeTag(`${marketAddress.toString()}::coin_factory::EmojicoinLP`);
+    const [res] = await new MarketView({
+      ...args,
+      typeTags: [emojicoin, emojicoinLP],
+    }).view(args);
     return res;
   }
 }

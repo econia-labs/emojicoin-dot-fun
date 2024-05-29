@@ -8,41 +8,25 @@ import { useEmojicoinPicker } from "hooks";
 import { useThemeContext } from "context";
 import { isDisallowedEventKey } from "utils";
 
-import { Flex, Column } from "@/containers";
+import { Flex, Column } from "@containers";
 import { InputGroup, Textarea, Loader } from "components";
 
 import { MessageContainer } from "./components";
+import { type ChatProps } from "../../types";
+import { truncateAddress } from "@sdk/utils/misc";
 
-const MESSAGE_LIST = [
-  {
-    user: "KIKI.APT",
-    text: "🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤",
-    userRank: "🐳",
-    incoming: true,
-  },
-  {
-    user: "MATT.APT",
-    text: "🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤",
-    userRank: "🐡",
-    incoming: false,
-  },
-  {
-    user: "KIKI.APT",
-    text: "🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤",
-    userRank: "🐳",
-    incoming: true,
-  },
-  {
-    user: "MATT.APT",
-    text: "🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤🖤",
-    userRank: "🐡",
-    incoming: false,
-  },
-];
-
-const Chat: React.FC = () => {
+const Chat = (props: ChatProps) => {
   const { theme } = useThemeContext();
-  const [messageList, setMessageList] = useState([...MESSAGE_LIST, ...MESSAGE_LIST, ...MESSAGE_LIST]);
+  // TODO: Resolve address to Aptos name, store in state.
+  const [messageList, setMessageList] = useState(
+    props.data.chats.map((chat) => ({
+      user: truncateAddress(chat.user),
+      text: chat.message,
+      userRank: chat.user.at(-1)?.toLowerCase() === "f" ? "🐳" : "🐡", // TODO: Fix random assignment of status.
+      fromAnotherUser: chat.user !== "local user's address", // TODO: Actually check this value later.
+      version: chat.version,
+    }))
+  );
 
   const loadMoreMessages = () => {
     /* eslint-disable-next-line no-console */
@@ -51,7 +35,8 @@ const Chat: React.FC = () => {
 
   const onEmojiClickHandler = (emoji: EmojiClickData) => {
     if (targetElement) {
-      (targetElement as HTMLTextAreaElement).value = (targetElement as HTMLTextAreaElement).value + emoji.emoji;
+      (targetElement as HTMLTextAreaElement).value =
+        (targetElement as HTMLTextAreaElement).value + emoji.emoji;
     }
   };
 
@@ -69,7 +54,8 @@ const Chat: React.FC = () => {
           user: "hey_hey.APT",
           text: (e.target as unknown as HTMLTextAreaElement).value,
           userRank: "🐡",
-          incoming: false,
+          fromAnotherUser: false,
+          version: 0x1234, // TODO: Fix this when submission is implemented.
         },
         ...messageList,
       ]);
@@ -81,7 +67,13 @@ const Chat: React.FC = () => {
 
   return (
     <Column width="100%" flexGrow={1}>
-      <Flex flexGrow="1" width="100%" overflowY="auto" maxHeight="328px" flexDirection="column-reverse">
+      <Flex
+        flexGrow="1"
+        width="100%"
+        overflowY="auto"
+        maxHeight="328px"
+        flexDirection="column-reverse"
+      >
         <InfiniteScroll
           next={loadMoreMessages}
           hasMore={false}
@@ -94,7 +86,7 @@ const Chat: React.FC = () => {
           }
           style={{
             padding: "0px 21px",
-            borderRight: `1px solid ${theme.colors.darkGrey}`,
+            borderRight: `1px solid ${theme.colors.darkGray}`,
             display: "flex",
             flexDirection: "column-reverse",
           }}

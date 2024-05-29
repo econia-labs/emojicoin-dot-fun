@@ -1,7 +1,13 @@
 "use client";
 
 import Planet from "components/svg/icons/Planet";
-import { StyledSliderContainer, StyledWrapper, StyledInner, StyledItem, StyledText } from "./styled";
+import {
+  StyledSliderContainer,
+  StyledWrapper,
+  StyledInner,
+  StyledItem,
+  StyledText,
+} from "./styled";
 
 const ClientsSlider: React.FC = () => {
   const clientsLogoList = ["Universal ownership", "Universal Blockchain", "Universal language"];

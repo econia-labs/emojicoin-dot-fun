@@ -3,23 +3,24 @@
 import React, { useState } from "react";
 
 import Button from "components/button";
-import { Column } from "@/containers";
+import { Column } from "@containers";
 import Arrow from "components/svg/icons/Arrow";
 import { Select } from "../select";
 import { StyledButtonsWrapper } from "./styled";
 
 import { useTooltip } from "hooks";
 
-import { useThemeContext, useTranslation } from "context";
+import { useThemeContext } from "context";
 import { getTooltipStyles } from "../theme";
 
 import { type MultipleSelectProps, type Option } from "../types";
 import { type TooltipOptions } from "hooks/use-tooltip/types";
+import { translationFunction } from "context/language-context";
 
 const MultipleSelect: React.FC<MultipleSelectProps> = ({
   titleProps,
   placeholder = "Please select...",
-  placeholderProps = { color: "lightGrey" },
+  placeholderProps = { color: "lightGray" },
   dropdownComponent,
   dropdownWrapperProps,
   wrapperProps,
@@ -37,7 +38,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
   const [selectedOptions, setSelectedOptions] = useState(value);
 
   const { theme } = useThemeContext();
-  const { t } = useTranslation();
+  const { t } = translationFunction();
 
   const DropdownComponent = dropdownComponent;
 
@@ -49,7 +50,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
 
   const onSelectHandler = (option: Option) => {
     if (selectedOptions.includes(option)) {
-      setSelectedOptions(selectedOptions.filter(item => item !== option));
+      setSelectedOptions(selectedOptions.filter((item) => item !== option));
     } else {
       setSelectedOptions([...selectedOptions, option]);
     }
@@ -94,7 +95,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
     {
       ...defaultTooltipOptions,
       ...tooltipOptions,
-    },
+    }
   );
 
   function onDropdownMenuClick(option: Option) {

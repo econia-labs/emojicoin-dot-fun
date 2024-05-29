@@ -20,7 +20,13 @@ export const InputGroup: React.FC<InputGroupProps> = ({
   ...props
 }) => {
   return (
-    <StyledInputGroup scale={scale} width="100%" hasStartIcon={!!startIcon} hasEndIcon={!!endIcon} {...props}>
+    <StyledInputGroup
+      scale={scale}
+      width="100%"
+      hasStartIcon={!!startIcon}
+      hasEndIcon={!!endIcon}
+      {...props}
+    >
       <InputInner variant={variant}>
         {label && (
           <Text
@@ -30,6 +36,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
             mb="20px"
             textTransform="uppercase"
             htmlFor={forId}
+            className={props.className}
           >
             {label}
           </Text>
@@ -48,7 +55,9 @@ export const InputGroup: React.FC<InputGroupProps> = ({
         </InputWrapper>
       </InputInner>
 
-      {isShowError && <InputError textScale="bodyXSmall">{error && isTouched ? error : " "}</InputError>}
+      {isShowError && (
+        <InputError textScale="bodyXSmall">{error && isTouched ? error : " "}</InputError>
+      )}
     </StyledInputGroup>
   );
 };
