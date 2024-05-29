@@ -103,12 +103,7 @@ const insertPeriodicState = async (
       ${seq},
       ${eventType},
       ${sql.json(
-        JSON.parse(
-          JSON.stringify(
-            state,
-            (_, v) => (typeof v === "bigint" ? v.toString() : v)
-          )
-        )
+        JSON.parse(JSON.stringify(state, (_, v) => (typeof v === "bigint" ? v.toString() : v)))
       )},
       ${time.toISOString()},
       0,
