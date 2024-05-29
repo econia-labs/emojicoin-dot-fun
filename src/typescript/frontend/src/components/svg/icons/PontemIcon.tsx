@@ -1,3 +1,4 @@
+// cspell:word pontem
 import React from "react";
 
 const PontemIcon = () => {
