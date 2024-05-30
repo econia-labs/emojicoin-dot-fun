@@ -1,6 +1,6 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import {
-  INBOX_URL,
+  LOCAL_INBOX_URL,
   ONE_APT,
   ONE_APTN,
   deriveEmojicoinPublisherAddress,
@@ -41,7 +41,7 @@ describe("tests a simple faucet fund account request", () => {
       objectAddress: derivedNamedObjectAddress,
     });
 
-    const postgrest = new PostgrestClient(INBOX_URL);
+    const postgrest = new PostgrestClient(LOCAL_INBOX_URL);
 
     // Wait to make sure events were processed and saved by Inbox.
     await sleep(1000);

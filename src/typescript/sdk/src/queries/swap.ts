@@ -1,5 +1,5 @@
-import { PostgrestClient } from "@supabase/postgrest-js";
-import { INBOX_URL } from "../const";
+import "server-only";
+
 import { type ContractTypes, type JSONTypes, toSwapEvent } from "../types";
 import { STRUCT_STRINGS } from "../utils";
 import { TABLE_NAME, ORDER_BY } from "./const";
@@ -9,6 +9,7 @@ import {
   aggregateQueryResults,
 } from "./query-helper";
 import { wrap } from "./utils";
+import { postgrest } from "./inbox-url";
 
 export const paginateSwapEvents = async (
   args: Omit<AggregateQueryResultsArgs, "query"> & {
@@ -16,9 +17,9 @@ export const paginateSwapEvents = async (
     marketID?: number | bigint;
   }
 ) => {
-  const { inboxUrl = INBOX_URL, swapper, marketID } = args;
+  const { swapper, marketID } = args;
 
-  let query = new PostgrestClient(inboxUrl)
+  let query = postgrest
     .from(TABLE_NAME)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.SwapEvent)
@@ -44,9 +45,6 @@ export const paginateSwapEvents = async (
 export const getAllPostBondingCurveMarkets = async (
   args: Omit<AggregateQueryResultsArgs, "query">
 ): Promise<EventsAndErrors<ContractTypes.SwapEvent>> => {
-  const inboxUrl = args?.inboxUrl ?? INBOX_URL;
-  const postgrest = new PostgrestClient(inboxUrl);
-
   const res = await aggregateQueryResults<JSONTypes.SwapEvent>({
     ...args,
     query: postgrest

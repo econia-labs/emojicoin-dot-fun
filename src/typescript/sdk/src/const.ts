@@ -1,14 +1,15 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 
+export const VERCEL = process.env.VERCEL === "1";
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
   throw new Error("Missing NEXT_PUBLIC_MODULE_ADDRESS environment variable");
-} else if (!process.env.INBOX_URL) {
-  throw new Error("Missing INBOX_URL environment variable");
 }
-export const VERCEL = process.env.VERCEL === "1";
+if (typeof window !== "undefined" && typeof process.env.INBOX_URL !== "undefined") {
+  throw new Error("The `inbox` endpoint should not be exposed to any client components.");
+}
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
-export const INBOX_URL = process.env.INBOX_URL!;
 
+export const LOCAL_INBOX_URL = process.env.INBOX_URL ?? "http://localhost:3000";
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APTN = BigInt(ONE_APT);
 export const MAX_GAS_FOR_PUBLISH = 1500000;

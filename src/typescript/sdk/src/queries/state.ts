@@ -1,11 +1,11 @@
-import { PostgrestClient } from "@supabase/postgrest-js";
+import "server-only";
+
 import {
   type ContractTypes,
   toGlobalStateEvent,
   toStateEvent,
   toMarketRegistrationEvent,
 } from "../types/contract-types";
-import { INBOX_URL } from "../const";
 import { STRUCT_STRINGS } from "../utils/type-tags";
 import { TABLE_NAME, ORDER_BY } from "./const";
 import { wrap } from "./utils";
@@ -15,17 +15,10 @@ import {
   aggregateQueryResults,
 } from "./query-helper";
 import type JSONTypes from "../types/json-types";
+import { postgrest } from "./inbox-url";
 
-export const getLastMarketState = async ({
-  marketID,
-  inboxUrl = INBOX_URL,
-}: {
-  marketID: string;
-  inboxUrl?: string;
-}) => {
-  const postgrest = new PostgrestClient(inboxUrl);
-
-  const { state, version: stateEventVersion } = await postgrest
+export const getLastMarketState = async ({ marketID }: { marketID: string }) => {
+  const { state, version: stateVersion } = await postgrest
     .from(TABLE_NAME)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.StateEvent)
@@ -38,7 +31,7 @@ export const getLastMarketState = async ({
       _stateError: r.error,
     }));
 
-  const { market, version: marketRegistrationVersion } = await postgrest
+  const { market, version: mktRegistrationVersion } = await postgrest
     .from(TABLE_NAME)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.MarketRegistrationEvent)
@@ -62,11 +55,11 @@ export const getLastMarketState = async ({
   return {
     state: {
       ...toStateEvent(state),
-      version: stateEventVersion as number,
+      version: stateVersion as number,
     },
     market: {
       ...toMarketRegistrationEvent(market!),
-      version: marketRegistrationVersion as number,
+      version: mktRegistrationVersion as number,
     },
   };
 };
@@ -74,9 +67,6 @@ export const getLastMarketState = async ({
 export const paginateGlobalStateEvents = async (
   args: Omit<AggregateQueryResultsArgs, "query">
 ): Promise<EventsAndErrors<ContractTypes.GlobalStateEvent>> => {
-  const inboxUrl = args?.inboxUrl ?? INBOX_URL;
-  const postgrest = new PostgrestClient(inboxUrl);
-
   const res = await aggregateQueryResults<JSONTypes.GlobalStateEvent>({
     ...args,
     query: postgrest
@@ -94,15 +84,12 @@ export const paginateGlobalStateEvents = async (
 
 export type PaginateStateEventsByMarketIDQueryArgs = {
   marketID: number | bigint;
-  inboxUrl?: string;
 };
 
 export const paginateStateEventsByMarketID = async (
   args: PaginateStateEventsByMarketIDQueryArgs
 ): Promise<EventsAndErrors<ContractTypes.StateEvent>> => {
-  const { inboxUrl = INBOX_URL, marketID } = args;
-  const postgrest = new PostgrestClient(inboxUrl);
-
+  const { marketID } = args;
   const res = await aggregateQueryResults<JSONTypes.StateEvent>({
     query: postgrest
       .from(TABLE_NAME)

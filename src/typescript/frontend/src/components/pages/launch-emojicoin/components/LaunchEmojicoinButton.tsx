@@ -30,6 +30,9 @@ export const LaunchEmojicoinButton = ({ emojis }: { emojis: Array<HexInput> }) =
       <Button onClick={handleClick} scale="lg">
         {t("Launch Emojicoin")}
       </Button>
+      <Button>
+        {"is this vercel? " + process.env.VERCEL === "1" + " or maybe .....? " + process.env.VERCEL}
+      </Button>
     </ButtonWithConnectWalletFallback>
   );
 };

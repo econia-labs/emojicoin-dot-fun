@@ -1,3 +1,5 @@
+"use server";
+
 import { toSwapEvent } from "@sdk/types";
 import { paginateSwapEvents } from "@sdk/queries/swap";
 import { cache } from "react";

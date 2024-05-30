@@ -1,7 +1,7 @@
 import { AptosApiError, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { type NetworkInfo } from "@aptos-labs/wallet-adapter-react";
 import { CandlestickResolution } from "@sdk/const";
-import { getCurrentPeriodBoundary } from "@sdk/utils";
+import { getCurrentPeriodBoundary } from "@sdk/utils/misc";
 import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
 import { ExplorerLink } from "components/link/component";

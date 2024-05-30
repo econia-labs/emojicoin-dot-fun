@@ -8,7 +8,7 @@
  * Run with `pnpm tsx <THIS_FILE>` or `pnpm run generate-data`.
  *
  * This assumes you already have a docker instance running with the postgrest API URL at
- * the env variable `INBOX_URL`.
+ * the env variable `LOCAL_INBOX_URL`.
  *
  * It also implicitly uses the `START_NODE_FOR_TEST` env variable to determine whether or not to
  * start a new Aptos node for the test. This is similar to how the e2e unit tests work.

@@ -1,7 +1,6 @@
-/* eslint-disable no-console */
-/* eslint-disable no-await-in-loop */
-import { PostgrestClient } from "@supabase/postgrest-js";
-import { type CandlestickResolution, INBOX_URL } from "../const";
+import "server-only";
+
+import { type CandlestickResolution } from "../const";
 import { TABLE_NAME, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { wrap } from "./utils";
@@ -11,18 +10,18 @@ import {
   type EventsAndErrors,
   aggregateQueryResults,
 } from "./query-helper";
+import { postgrest } from "./inbox-url";
 
 export type CandlestickQueryArgs = {
   marketID: bigint | number;
   resolution?: CandlestickResolution;
-  inboxUrl?: string;
 };
 
 export const paginateCandlesticks = async (
   args: CandlestickQueryArgs & Omit<AggregateQueryResultsArgs, "query">
 ): Promise<EventsAndErrors<ContractTypes.PeriodicStateEvent>> => {
-  const { marketID, resolution, inboxUrl = INBOX_URL } = args;
-  let query = new PostgrestClient(inboxUrl)
+  const { marketID, resolution } = args;
+  let query = postgrest
     .from(TABLE_NAME)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.PeriodicStateEvent)

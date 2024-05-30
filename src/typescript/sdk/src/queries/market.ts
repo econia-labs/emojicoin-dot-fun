@@ -1,10 +1,12 @@
-import { PostgrestClient } from "@supabase/postgrest-js";
-import { INBOX_URL, MODULE_ADDRESS } from "../const";
+import "server-only";
+
+import { MODULE_ADDRESS } from "../const";
 import { SYMBOL_DATA, type SymbolEmojiData } from "../emoji_data";
 import { TABLE_NAME, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { type ContractTypes, type JSONTypes, toMarketRegistrationEvent } from "../types";
 import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-helper";
+import { postgrest } from "./inbox-url";
 
 export type TopMarketsDataResponse = Array<{
   data: JSONTypes.StateEvent;
@@ -19,8 +21,7 @@ export type TopMarketsDataResponse = Array<{
  * @param args
  * @returns
  */
-export const getTopMarkets = async (inboxUrl: string = INBOX_URL) => {
-  const postgrest = new PostgrestClient(inboxUrl);
+export const getTopMarkets = async () => {
   const res = await postgrest
     .rpc("get_top_markets", {
       module_address: MODULE_ADDRESS.toString(),
@@ -28,7 +29,12 @@ export const getTopMarkets = async (inboxUrl: string = INBOX_URL) => {
     .select("*");
   const { data } = res;
   return {
-    data: data ? data.map((v) => ({ data: v.data, version: v.transaction_version })) : [],
+    data: data
+      ? data.map((v) => ({
+          data: v.data as JSONTypes.StateEvent,
+          version: Number(v.transaction_version),
+        }))
+      : [],
     error: res.error,
   };
 };
@@ -36,8 +42,6 @@ export const getTopMarkets = async (inboxUrl: string = INBOX_URL) => {
 export const paginateMarketRegistrations = async (
   args?: Omit<AggregateQueryResultsArgs, "query">
 ) => {
-  const inboxUrl = args?.inboxUrl ?? INBOX_URL;
-  const postgrest = new PostgrestClient(inboxUrl);
   const res = await aggregateQueryResults<JSONTypes.MarketRegistrationEvent>({
     ...args,
     query: postgrest

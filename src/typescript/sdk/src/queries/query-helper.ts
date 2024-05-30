@@ -1,3 +1,5 @@
+import "server-only";
+
 import { type PostgrestError, type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { LIMIT, type TABLE_NAME } from "./const";
 
@@ -18,7 +20,6 @@ export type EventsAndErrors<T> = {
 export type AggregateQueryResultsArgs = {
   query: PostgrestFilterBuilder<any, any, any, typeof TABLE_NAME, unknown>;
   maxNumQueries?: number;
-  inboxUrl?: string;
 };
 
 type InnerResponseType<T> = Array<{
@@ -43,7 +44,7 @@ type InnerResponseType<T> = Array<{
  *
  */
 export const aggregateQueryResults = async <T>(
-  args: Omit<AggregateQueryResultsArgs, "inboxUrl">
+  args: AggregateQueryResultsArgs
 ): Promise<QueryResponse<T & { version: number }>> => {
   const { query, maxNumQueries = Infinity } = args;
   const aggregated: (T & { version: number })[] = [];

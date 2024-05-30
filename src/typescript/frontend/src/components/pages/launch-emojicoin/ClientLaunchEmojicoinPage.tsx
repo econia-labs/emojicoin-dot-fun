@@ -17,7 +17,7 @@ import ClientsSlider from "components/clients-slider";
 import { Column, Flex, FlexGap } from "@containers";
 import { StyledFieldName } from "./styled";
 import { LaunchEmojicoinButton } from "./components/LaunchEmojicoinButton";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 
 const ClientLaunchEmojicoinPage: React.FC = () => {
   const { t } = translationFunction();

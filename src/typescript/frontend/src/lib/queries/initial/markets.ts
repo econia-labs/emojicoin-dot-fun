@@ -1,3 +1,5 @@
+"use server";
+
 import { SYMBOL_DATA } from "@sdk/emoji_data/";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { type JSONTypes, toMarketView, toStateEvent } from "@sdk/types";
@@ -9,9 +11,12 @@ import { SAMPLE_DATA_BASE_URL } from "./const";
 import { getAptos } from "lib/utils/aptos-client";
 
 export const fetchTopMarkets = cache(async () => {
-  if (process.env.NEXT_PUBLIC_FORCE_STATIC_FETCH === "true") {
+  if (process.env.FORCE_STATIC_FETCH === "true") {
     const res = await fetch(new URL("top-market-data.json", SAMPLE_DATA_BASE_URL));
-    const data = (await res.json()).data;
+    const data = (await res.json()).data as Array<{
+      data: JSONTypes.StateEvent;
+      version: number;
+    }>;
     return data.map((v) => ({
       state: toStateEvent(v.data),
       emoji: SYMBOL_DATA.byHex(v.data.market_metadata.emoji_bytes)!,
