@@ -2,4 +2,5 @@
 packages:
 - 'sdk'
 - 'frontend'
+- 'packages/*'
 ...

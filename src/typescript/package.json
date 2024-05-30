@@ -1,8 +1,10 @@
 {
   "dependencies": {
-    "@aptos-labs/ts-sdk": "^1.16.0"
+    "@aptos-labs/ts-sdk": "^1.16.0",
+    "@types/node": "^20.12.13"
   },
   "devDependencies": {
+    "@aptos-labs/eslint-config-adapter": "workspace:*",
     "prettier": "^3.2.5",
     "tsx": "^4.11.0",
     "turbo": "latest"
@@ -30,6 +32,7 @@
   "version": "0.0.0",
   "workspaces": [
     "sdk",
-    "frontend"
+    "frontend",
+    "packages/*"
   ]
 }

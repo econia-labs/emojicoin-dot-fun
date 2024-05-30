@@ -12,7 +12,7 @@
     ]
   },
   "dependencies": {
-    "@aptos-labs/wallet-adapter-react": "^2.5.1",
+    "@aptos-labs/wallet-adapter-react": "workspace:*",
     "@econia-labs/emojicoin-sdk": "workspace:*",
     "@emotion/is-prop-valid": "^1.2.2",
     "@headlessui/react": "^2.0.4",
