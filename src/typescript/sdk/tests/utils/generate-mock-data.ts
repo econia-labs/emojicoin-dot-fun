@@ -94,7 +94,7 @@ const insertPeriodicState = async (
   const seq = Number(100000n + state.periodic_state_metadata.emit_market_nonce);
   const time = new Date(Number(state.periodic_state_metadata.emit_time) / 1000);
   await sql`
-    INSERT INTO events
+    INSERT INTO inbox_events
     VALUES (
       ${seq},
       6,
@@ -539,7 +539,7 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
     concatEmoji(MOCK_DATA_MARKETS_EMOJIS[2]),
     marketObjectMarketResource.metadata.marketID,
     publisher.accountAddress.toString(),
-    `${marketObjectMarketResource.metadata.marketAddress}::emojicoin_dot_fun::PeriodicState`,
+    `${publisher.accountAddress.toString()}::emojicoin_dot_fun::PeriodicState`,
     sql
   );
 };
