@@ -1,5 +1,5 @@
-import LaunchEmojicoin from "components/pages/launch-emojicoin";
+import ClientLaunchEmojicoinPage from '../../components/pages/launch-emojicoin/ClientLaunchEmojicoinPage';
 
 export default function LaunchEmojicoinPage() {
-  return <LaunchEmojicoin />;
+  return <ClientLaunchEmojicoinPage />;
 }

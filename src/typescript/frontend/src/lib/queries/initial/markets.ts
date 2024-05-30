@@ -2,11 +2,11 @@ import { SYMBOL_DATA } from "@sdk/emoji_data/";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { type JSONTypes, toMarketView, toStateEvent } from "@sdk/types";
 import { paginateMarketRegistrations, getTopMarkets } from "@sdk/queries/market";
-import { getAptos } from "@sdk/utils/aptos-client";
 import { APTOS_NETWORK } from "lib/env";
 import { cache } from "react";
 import fetchInitialWithFallback from "./cache-helper";
 import { SAMPLE_DATA_BASE_URL } from "./const";
+import { getAptos } from "lib/utils/aptos-client";
 
 export const fetchTopMarkets = cache(async () => {
   if (process.env.NEXT_PUBLIC_FORCE_STATIC_FETCH === "true") {

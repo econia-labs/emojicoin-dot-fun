@@ -88,7 +88,9 @@ export const WalletItem: React.FC<{
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }> = ({ wallet, className, onClick }) => {
   const [hover, setHover] = useState<boolean>(false);
-  const { wallet: current } = useWallet();
+  const { wallet: current,  } = useWallet();
+
+  console.warn(wallet.readyState);
 
   const inner = (
     <>
@@ -98,7 +100,7 @@ export const WalletItem: React.FC<{
           <ScrambledRow
             active={wallet.name === current?.name}
             text={wallet.name}
-            installed={wallet.readyState === WalletReadyState.Installed}
+            installed={wallet.readyState === WalletReadyState.Installed || wallet.readyState === WalletReadyState.Loadable}
             hover={hover}
           />
         </div>

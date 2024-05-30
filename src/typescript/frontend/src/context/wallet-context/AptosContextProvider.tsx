@@ -1,15 +1,27 @@
-import { type Aptos, type PendingTransactionResponse } from "@aptos-labs/ts-sdk";
+import { AptosApiError, type Aptos, type PendingTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { createContext, type PropsWithChildren, useCallback, useContext, useMemo } from "react";
 import { toast } from "react-toastify";
 
-import { getAptos } from "@sdk/utils/aptos-client";
 import { APTOS_NETWORK } from "lib/env";
+import {
+  type EntryFunctionPayloadBuilder,
+  EntryFunctionTransactionBuilder,
+} from "@sdk/emojicoin_dot_fun/payload-builders";
+import { getAptos } from "lib/utils/aptos-client";
+import { checkNetworkAndToast, parseAPIErrorAndToast } from "./toasts";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 
+export type BuilderFunction = () => Promise<
+  EntryFunctionPayloadBuilder | EntryFunctionTransactionBuilder
+>;
+
 export type AptosContextState = {
-  aptosClient: Aptos;
+  client: Aptos;
+  helper: (
+    builderFn: BuilderFunction
+  ) => ReturnType<WalletContextState["signAndSubmitTransaction"]>;
   signAndSubmitTransaction: WalletContextState["signAndSubmitTransaction"];
   account: WalletContextState["account"];
 };
@@ -18,14 +30,45 @@ export const AptosContext = createContext<AptosContextState | undefined>(undefin
 
 export function AptosContextProvider({ children }: PropsWithChildren) {
   const { signAndSubmitTransaction: adapterSignAndSubmitTxn, account, network } = useWallet();
-  const aptosClient = useMemo(() => {
-    if (network?.name !== APTOS_NETWORK) {
-      const warningMessage = "Your wallet network is different from the dapp's network.";
-      const toAvoidMessage = `To avoid undefined behavior, please set your wallet network to ${APTOS_NETWORK}`;
-      toast.warning(`${warningMessage} ${toAvoidMessage}`);
+
+  const client = useMemo(() => {
+    if (checkNetworkAndToast(network)) {
+      return getAptos(network.name);
     }
-    return getAptos(network?.name ?? APTOS_NETWORK);
+    return getAptos(APTOS_NETWORK);
   }, [network]);
+
+  const helper = useCallback(
+    async (builderFn: BuilderFunction) => {
+      if (!checkNetworkAndToast(network, true)) {
+        return
+      }
+      try {
+        const builder = await builderFn();
+        const input =
+          builder instanceof EntryFunctionTransactionBuilder
+            ? builder.payloadBuilder.toInputPayload()
+            : builder.toInputPayload();
+        const res: PendingTransactionResponse = await adapterSignAndSubmitTxn(input);
+        try {
+          await client.waitForTransaction({
+            transactionHash: res.hash,
+          });
+          toast.success("Transaction confirmed");
+          return true;
+        } catch (error) {
+          toast.error("Transaction failed");
+          console.error(error);
+          return false;
+        }
+      } catch (error: unknown) {
+        if (error instanceof AptosApiError) {
+          parseAPIErrorAndToast(network, error);
+        }
+      }
+    },
+    [adapterSignAndSubmitTxn, client, network]
+  );
 
   const signAndSubmitTransaction = useCallback(
     async (...args: Parameters<WalletContextState["signAndSubmitTransaction"]>) => {
@@ -41,7 +84,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         });
         const res: PendingTransactionResponse = await adapterSignAndSubmitTxn(transaction);
         try {
-          await aptosClient.waitForTransaction({
+          await client.waitForTransaction({
             transactionHash: res.hash,
           });
           toast.success("Transaction confirmed");
@@ -58,12 +101,13 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         }
       }
     },
-    [adapterSignAndSubmitTxn, aptosClient]
+    [adapterSignAndSubmitTxn, client]
   );
 
   const value: AptosContextState = {
-    aptosClient,
+    client,
     account,
+    helper,
     signAndSubmitTransaction,
   };
 

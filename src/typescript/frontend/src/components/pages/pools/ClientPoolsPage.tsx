@@ -18,7 +18,7 @@ import {
 } from "components/pages/pools/styled";
 import { isDisallowedEventKey } from "utils";
 
-export const Pools = () => {
+export const ClientPoolsPage = () => {
   const { isMobile } = useMatchBreakpoints();
 
   const { targetRef, tooltip } = useEmojicoinPicker({
@@ -97,4 +97,4 @@ export const Pools = () => {
   );
 };
 
-export default Pools;
+export default ClientPoolsPage;

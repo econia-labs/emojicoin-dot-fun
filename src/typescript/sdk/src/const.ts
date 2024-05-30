@@ -1,21 +1,11 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import dotenv from "dotenv";
-import path from "path";
-import { getGitRoot } from "./utils/git-root";
-
-export const VERCEL = process.env.VERCEL === "1";
-if (!VERCEL && typeof process === "object" && process.title.endsWith("node")) {
-  const sdkPath = path.join(getGitRoot(), "src", "typescript", "sdk", ".env");
-  dotenv.config({ path: sdkPath });
-  const frontendPath = path.join(getGitRoot(), "src", "typescript", "frontend", ".env");
-  dotenv.config({ path: frontendPath });
-}
 
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
   throw new Error("Missing NEXT_PUBLIC_MODULE_ADDRESS environment variable");
 } else if (!process.env.INBOX_URL) {
   throw new Error("Missing INBOX_URL environment variable");
 }
+export const VERCEL = process.env.VERCEL === "1";
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const INBOX_URL = process.env.INBOX_URL!;
 

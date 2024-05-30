@@ -24,6 +24,9 @@ import {
   MimeType,
   postAptosFullNode,
   type AptosConfig,
+  type InputGenerateTransactionOptions,
+  type InputGenerateTransactionPayloadData,
+  type AccountAddressInput,
 } from "@aptos-labs/ts-sdk";
 import { type WalletSignTransactionFunction } from ".";
 import { toConfig } from "../utils/aptos-utils";
@@ -155,6 +158,13 @@ export class EntryFunctionTransactionBuilder {
   }
 }
 
+/* eslint-disable-next-line import/no-unused-modules */
+export type WalletInputTransactionData = {
+  sender?: AccountAddressInput;
+  data: InputGenerateTransactionPayloadData;
+  options?: InputGenerateTransactionOptions;
+};
+
 export abstract class EntryFunctionPayloadBuilder extends Serializable {
   public abstract readonly moduleAddress: AccountAddress;
 
@@ -187,6 +197,24 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
       );
     }
     return new TransactionPayloadEntryFunction(entryFunction);
+  }
+
+  toInputPayload(args?: {
+    multisigAddress?: AccountAddress;
+    options?: InputGenerateTransactionOptions;
+  }): WalletInputTransactionData {
+    const { multisigAddress, options } = args ?? {};
+    return {
+      sender: this.primarySender,
+      data: {
+        multisigAddress,
+        function: `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`,
+        typeArguments: this.typeTags,
+        functionArguments: this.argsToArray(),
+        abi: undefined,
+      },
+      options,
+    };
   }
 
   argsToArray(): Array<EntryFunctionArgumentTypes> {

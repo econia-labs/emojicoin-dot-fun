@@ -32,7 +32,7 @@ import {
   registerMarketAndGetEmojicoinInfo,
 } from "../markets/utils";
 import { getRegistryAddress, getEvents } from "../emojicoin_dot_fun";
-import { publishForTest } from "../../tests/utils";
+import { getAptosClient, publishForTest } from "../../tests/utils";
 import { Chat, MarketMetadataByEmojiBytes, Swap } from "../emojicoin_dot_fun/emojicoin-dot-fun";
 import { BatchTransferCoins, ExistsAt } from "../emojicoin_dot_fun/aptos-framework";
 import { type Events } from "../emojicoin_dot_fun/events";
@@ -41,7 +41,6 @@ import { getRandomEmoji } from "../emoji_data/symbol-data";
 import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING, MODULE_ADDRESS } from "../const";
 import { type SymbolEmojiData, getEmojiData } from "../emoji_data";
 import { divideWithPrecision, sleep } from "./misc";
-import { getAptos } from "./aptos-client";
 import { truncateAddress } from "./misc";
 
 const NUM_TRADERS = 900;
@@ -60,7 +59,7 @@ if (!(NUM_TRADERS % CHUNK_SIZE === 0)) {
 }
 
 async function main() {
-  const aptos = getAptos(process.env.APTOS_NETWORK!);
+  const { aptos } = getAptosClient();
   const registryAddress = await setupTest(aptos);
 
   // Create distributors that will bear the sequence number for each transaction.

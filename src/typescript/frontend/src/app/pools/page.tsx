@@ -1,5 +1,5 @@
-import Pools from "components/pages/pools";
+import ClientPoolsPage from "components/pages/pools/ClientPoolsPage";
 
 export default function PoolsPage() {
-  return <Pools />;
+  return <ClientPoolsPage />;
 }

@@ -13,11 +13,11 @@ import Prompt from "components/prompt";
 import { Input } from "components/inputs/input";
 import { InputGroup } from "components/inputs/input-group";
 import { Text } from "components/text";
-import Button from "components/button";
 import ClientsSlider from "components/clients-slider";
 import { Column, Flex, FlexGap } from "@containers";
 import { StyledFieldName } from "./styled";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { LaunchEmojicoinButton } from "./components/LaunchEmojicoinButton";
+import { SYMBOL_DATA } from "@sdk/emoji_data";
 
 const ClientLaunchEmojicoinPage: React.FC = () => {
   const { t } = translationFunction();
@@ -165,9 +165,7 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
           </Flex>
 
           <Flex justifyContent="center" mt="18px">
-            <ButtonWithConnectWalletFallback>
-              <Button scale="lg">{t("Launch Emojicoin")}</Button>
-            </ButtonWithConnectWalletFallback>
+            <LaunchEmojicoinButton emojis={values.emojiList.map(e => SYMBOL_DATA.byEmoji(e.emoji)!.hex)} />
           </Flex>
         </Column>
       </Flex>
