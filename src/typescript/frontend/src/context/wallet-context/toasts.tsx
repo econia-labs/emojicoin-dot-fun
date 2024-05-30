@@ -1,16 +1,20 @@
-import { AptosApiError } from "@aptos-labs/ts-sdk";
+import { AptosApiError, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { type NetworkInfo } from "@aptos-labs/wallet-adapter-react";
 import { CandlestickResolution } from "@sdk/const";
 import { getCurrentPeriodBoundary } from "@sdk/utils";
 import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
+import { ExplorerLink } from "components/link/component";
 
 const debouncedToastKey = (s: string, debouncePeriod: CandlestickResolution) => {
   const periodBoundary = getCurrentPeriodBoundary(debouncePeriod);
-  return `${s}-${periodBoundary}`
-}
+  return `${s}-${periodBoundary}`;
+};
 
-export const checkNetworkAndToast = (network: NetworkInfo | null, ignoreNull = true): network is NetworkInfo => {
+export const checkNetworkAndToast = (
+  network: NetworkInfo | null,
+  ignoreNull = true
+): network is NetworkInfo => {
   if (!network) {
     if (!ignoreNull) {
       toast.info("Please connect your wallet.", {
@@ -53,17 +57,46 @@ export const parseAPIErrorAndToast = (network: NetworkInfo, error: AptosApiError
       const message = (
         <div className="flex flex-col">
           <div className="inline">
-            {"Your account doesn't exist on "}
+            {"Your account doesn't exist on the "}
             <p className="font-forma inline font-bold text-orange-500 drop-shadow-text">
               {network.name}
             </p>
-            {". Have you created an account?"}
+            {" network. Have you created an account?"}
           </div>
         </div>
-      )
+      );
       toast.error(message, {
         toastId: debouncedToastKey("account-not-found", CandlestickResolution.PERIOD_15S),
       });
     }
   }
-}
+};
+
+export const successfulTransactionToast = (
+  response: UserTransactionResponse,
+  network: NetworkInfo
+) => {
+  const message = (
+    <>
+      <div className="flex flex-col cursor-text">
+        <div className="inline">
+          {"Transaction confirmed! "}
+          <ExplorerLink
+            className="font-forma inline font-bold text-orange-500 drop-shadow-text"
+            network={network.name}
+            value={response.hash}
+            type="transaction"
+          >
+            {response.hash}
+          </ExplorerLink>
+        </div>
+      </div>
+    </>
+  );
+  toast.success(message, {
+    toastId: debouncedToastKey("transaction-success", CandlestickResolution.PERIOD_1S),
+    className: "cursor-text",
+    closeOnClick: false,
+    autoClose: 8000,
+  });
+};

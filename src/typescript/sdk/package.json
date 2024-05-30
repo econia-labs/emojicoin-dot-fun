@@ -43,9 +43,10 @@
   "packageManager": "pnpm@9.1.1+sha512.14e915759c11f77eac07faba4d019c193ec8637229e62ec99eefb7cf3c3b75c64447882b7c485142451ee3a6b408059cdfb7b7fa0341b975f12d0f7629c71195",
   "scripts": {
     "_format": "prettier 'src/**/*.ts' 'tests/**/*.ts' '.eslintrc.js'",
-    "build": "pnpm clean && tsc",
+    "build": "tsc",
+    "build:clean": "pnpm run clean && pnpm i && tsc",
     "check": "tsc --noEmit",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "e2e-test": "pnpm jest tests/e2e",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",

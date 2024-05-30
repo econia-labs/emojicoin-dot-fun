@@ -3,7 +3,7 @@ import getInitialChatData from "lib/queries/initial/chats";
 import { fetchTopMarkets } from "lib/queries/initial/markets";
 import { fetchLastMarketState } from "lib/queries/initial/state";
 import getInitialSwapData from "lib/queries/initial/swaps";
-import ClientEmojicoinPage from 'components/pages/emojicoin/ClientEmojicoinPage';
+import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 
 // We will revalidate the data cache every hour. This can be adjusted later based on how much data is fetched.
 export const revalidate = SHORT_REVALIDATE ? 10 : 3600;

@@ -204,14 +204,20 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
     options?: InputGenerateTransactionOptions;
   }): WalletInputTransactionData {
     const { multisigAddress, options } = args ?? {};
+    const multiSigData =
+      typeof multisigAddress !== "undefined"
+        ? {
+            multisigAddress,
+          }
+        : {};
     return {
       sender: this.primarySender,
       data: {
-        multisigAddress,
+        ...multiSigData,
         function: `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`,
         typeArguments: this.typeTags,
         functionArguments: this.argsToArray(),
-        abi: undefined,
+        // abi: undefined, // TODO: Add pre-defined ABIs.
       },
       options,
     };

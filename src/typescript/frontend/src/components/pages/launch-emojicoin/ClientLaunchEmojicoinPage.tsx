@@ -165,7 +165,9 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
           </Flex>
 
           <Flex justifyContent="center" mt="18px">
-            <LaunchEmojicoinButton emojis={values.emojiList.map(e => SYMBOL_DATA.byEmoji(e.emoji)!.hex)} />
+            <LaunchEmojicoinButton
+              emojis={values.emojiList.map((e) => SYMBOL_DATA.byEmoji(e.emoji)!.hex)}
+            />
           </Flex>
         </Column>
       </Flex>

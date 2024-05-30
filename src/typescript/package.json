@@ -15,8 +15,9 @@
     "keyv": "npm:@keyvhq/core@2.1.1"
   },
   "scripts": {
-    "build": "pnpm run clean && turbo run build",
-    "clean": "turbo run clean && pnpm i",
+    "build": "pnpm i && turbo run build",
+    "build:clean": "turbo run clean && rm -rf node_modules && pnpm i && pnpm run build",
+    "clean": "turbo run clean && rm -rf node_modules && pnpm i",
     "dev": "turbo run dev --no-cache --parallel --continue",
     "format": "turbo run format -- --write",
     "format:check": "turbo run format -- --check",

@@ -70,8 +70,8 @@
   "scripts": {
     "_format": "prettier './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
     "build": "next build",
-    "build:debug": "BUILD_DEBUG=true && pnpm clean && next build --no-lint --no-mangling --debug",
-    "clean": "rm -rf .next",
+    "build:debug": "BUILD_DEBUG=true && pnpm clean && pnpm i && next build --no-lint --no-mangling --debug",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbo",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
