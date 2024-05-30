@@ -41,7 +41,7 @@ const nextConfig = {
     return [
       {
         source: "/emojicoin",
-        destination: "/emojicoin/0",
+        destination: "/emojicoin/1",
         permanent: true,
       },
     ];

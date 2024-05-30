@@ -28,7 +28,12 @@ export const getTopMarkets = async (inboxUrl: string = INBOX_URL) => {
     .select("*");
   const { data } = res;
   return {
-    data: data ? data.map((v) => ({ data: v.data, version: v.transaction_version })) : [],
+    data: data
+      ? data.map((v) => ({
+          data: v.data as JSONTypes.StateEvent,
+          version: Number(v.transaction_version),
+        }))
+      : [],
     error: res.error,
   };
 };
