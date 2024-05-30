@@ -12,8 +12,8 @@
     ]
   },
   "dependencies": {
-    "@aptos-labs/ts-sdk": "^1.18.0",
-    "@aptos-labs/wallet-adapter-react": "^3.0.3",
+    "@aptos-labs/ts-sdk": "^1.16.0",
+    "@aptos-labs/wallet-adapter-react": "workspace:*",
     "@econia-labs/emojicoin-sdk": "workspace:*",
     "@emotion/is-prop-valid": "^1.2.2",
     "@headlessui/react": "^2.0.4",
