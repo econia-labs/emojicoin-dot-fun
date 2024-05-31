@@ -1,4 +1,3 @@
-require("dotenv").config();
 const { Account, Hex, Ed25519PrivateKey } = require("@aptos-labs/ts-sdk");
 const fs = require("fs");
 const path = require("path");

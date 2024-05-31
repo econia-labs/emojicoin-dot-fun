@@ -46,7 +46,7 @@ module.exports = {
       {
         missingExports: true,
         unusedExports: true,
-        ignoreExports: ["tests/**/*", "**/index.ts"],
+        ignoreExports: ["tests/**/*", "**/index.ts", "src/types/server-only.d.ts"],
       },
     ],
     "@typescript-eslint/consistent-type-imports": [

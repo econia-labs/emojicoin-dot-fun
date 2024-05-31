@@ -1,8 +1,9 @@
 {
   "dependencies": {
-    "@aptos-labs/ts-sdk": "^1.16.0"
+    "@aptos-labs/ts-sdk": "^1.17.0"
   },
   "devDependencies": {
+    "dotenv-cli": "^7.4.2",
     "prettier": "^3.2.5",
     "tsx": "^4.11.0",
     "turbo": "latest"
@@ -15,17 +16,17 @@
     "keyv": "npm:@keyvhq/core@2.1.1"
   },
   "scripts": {
-    "build": "pnpm i && turbo run build",
-    "build:clean": "turbo run clean && pnpm i && pnpm run build",
+    "build": "pnpm i && dotenv -e .env.local -e .env -- turbo run build",
+    "build:clean": "turbo run clean && pnpm i && dotenv -e .env.local -e .env -- pnpm run build",
     "clean": "turbo run clean && pnpm i",
-    "dev": "turbo run dev --no-cache --parallel --continue",
+    "dev": "dotenv -e .env.local -e .env -- turbo run dev --no-cache --parallel --continue",
     "format": "turbo run format -- --write",
     "format:check": "turbo run format -- --check",
     "full-clean": "rm -rf node_modules && rm -rf .turbo && rm -rf sdk/.turbo && rm -rf sdk/node_modules && rm -rf frontend/.turbo && rm -rf frontend/node_modules && rm -rf frontend/.next",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
-    "start": "turbo run start",
-    "test": "turbo run test"
+    "start": "dotenv -e .env.local -e .env -- turbo run start",
+    "test": "dotenv -e .env.test -- turbo run test"
   },
   "version": "0.0.0",
   "workspaces": [

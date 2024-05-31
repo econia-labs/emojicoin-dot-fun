@@ -13,10 +13,10 @@ const debouncedToastKey = (s: string, debouncePeriod: CandlestickResolution) => 
 
 export const checkNetworkAndToast = (
   network: NetworkInfo | null,
-  ignoreNull = true
+  notifyIfDisconnected = true
 ): network is NetworkInfo => {
   if (!network) {
-    if (!ignoreNull) {
+    if (!notifyIfDisconnected) {
       toast.info("Please connect your wallet.", {
         toastId: debouncedToastKey("connect-wallet", CandlestickResolution.PERIOD_15S),
       });

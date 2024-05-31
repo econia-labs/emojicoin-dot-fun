@@ -1,4 +1,3 @@
-require("dotenv").config();
 let inbox = require("./utils/inbox.ts");
 
 module.exports = async function () {

@@ -2,7 +2,12 @@ import { AccountAddress } from "@aptos-labs/ts-sdk";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
-  throw new Error("Missing NEXT_PUBLIC_MODULE_ADDRESS environment variable");
+  let msg = `\n\n${"-".repeat(61)}\n\nMissing NEXT_PUBLIC_MODULE_ADDRESS environment variable\n`;
+  if (!VERCEL) {
+    msg += "Please run this project from the top-level, parent directory.\n";
+  }
+  msg += `\n${"-".repeat(61)}\n`;
+  throw new Error(msg);
 }
 if (typeof window !== "undefined" && typeof process.env.INBOX_URL !== "undefined") {
   throw new Error("The `inbox` endpoint should not be exposed to any client components.");

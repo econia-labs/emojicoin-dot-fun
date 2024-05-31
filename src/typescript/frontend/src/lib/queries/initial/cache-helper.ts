@@ -32,8 +32,7 @@ export const fetchInitialWithFallback = async <T1, T2>({
 
   const currentHour = Math.floor(getTime(UnitOfTime.Hours));
   const cachedFunction = cache(
-    async (args: { time: number; functionArgs: T2 }) =>
-      await fn(args.functionArgs)
+    async (args: { time: number; functionArgs: T2 }) => await fn(args.functionArgs)
   );
   return await cachedFunction({
     time: currentHour,

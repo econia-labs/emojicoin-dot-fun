@@ -4,82 +4,128 @@ import {
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { type NetworkInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import { createContext, type PropsWithChildren, useCallback, useContext, useMemo } from "react";
 import { toast } from "react-toastify";
 
 import { APTOS_NETWORK } from "lib/env";
-import {
-  type EntryFunctionPayloadBuilder,
-  EntryFunctionTransactionBuilder,
-} from "@sdk/emojicoin_dot_fun/payload-builders";
+import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { getAptos } from "lib/utils/aptos-client";
 import { checkNetworkAndToast, parseAPIErrorAndToast, successfulTransactionToast } from "./toasts";
 
 type WalletContextState = ReturnType<typeof useWallet>;
+type SubmissionResponse = Promise<{
+  response: PendingTransactionResponse | UserTransactionResponse | null;
+  error: unknown;
+} | null>;
 
 export type AptosContextState = {
-  client: Aptos;
-  submitWithBuilder: (
-    builderFn: () => Promise<EntryFunctionPayloadBuilder | EntryFunctionTransactionBuilder>
-  ) => ReturnType<WalletContextState["signAndSubmitTransaction"]>;
+  aptos: Aptos;
+  submit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
+  signThenSubmit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
   account: WalletContextState["account"];
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
 export function AptosContextProvider({ children }: PropsWithChildren) {
-  const { signAndSubmitTransaction: adapterSignAndSubmitTxn, account, network } = useWallet();
+  const {
+    signAndSubmitTransaction: adapterSignAndSubmitTxn,
+    account,
+    network,
+    submitTransaction,
+    signTransaction,
+  } = useWallet();
 
-  const client = useMemo(() => {
+  const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
       return getAptos(network.name);
     }
     return getAptos(APTOS_NETWORK);
   }, [network]);
 
-  const submitWithBuilder = useCallback(
+  const handleTransactionSubmission = useCallback(
     async (
-      builderFn: () => Promise<EntryFunctionPayloadBuilder | EntryFunctionTransactionBuilder>
+      network: NetworkInfo,
+      trySubmit: () => Promise<{ aptos: Aptos; res: PendingTransactionResponse }>
     ) => {
-      if (checkNetworkAndToast(network, true)) {
+      let response: PendingTransactionResponse | UserTransactionResponse | null = null;
+      let error: unknown;
+      try {
+        const { aptos, res } = await trySubmit();
+        response = res;
         try {
-          const builder = await builderFn();
-          const input =
-            builder instanceof EntryFunctionTransactionBuilder
-              ? builder.payloadBuilder.toInputPayload()
-              : builder.toInputPayload();
-          const res: PendingTransactionResponse = await adapterSignAndSubmitTxn(input);
-          try {
-            const response = await client.waitForTransaction({
-              transactionHash: res.hash,
-            });
-            successfulTransactionToast(response as UserTransactionResponse, network);
-            return response;
-          } catch (error) {
-            toast.error("Transaction failed");
-            console.error(error);
-            return error;
-          }
-        } catch (error: unknown) {
-          if (error instanceof AptosApiError) {
-            parseAPIErrorAndToast(network, error);
-          } else {
-            console.error(error);
-          }
-          return error;
+          const awaitedResponse = (await aptos.waitForTransaction({
+            transactionHash: res.hash,
+          })) as UserTransactionResponse;
+          successfulTransactionToast(awaitedResponse, network);
+          response = awaitedResponse;
+        } catch (e) {
+          toast.error("Transaction failed");
+          console.error(e);
+          error = e;
         }
+      } catch (e: unknown) {
+        if (e instanceof AptosApiError) {
+          parseAPIErrorAndToast(network, e);
+        } else {
+          console.error(e);
+        }
+        error = e;
       }
+      return { response, error };
+    },
+    []
+  );
 
+  const submit = useCallback(
+    async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
+      if (checkNetworkAndToast(network, true)) {
+        const trySubmit = async () => {
+          const builder = await builderFn();
+          const input = builder.payloadBuilder.toInputPayload();
+          return adapterSignAndSubmitTxn(input).then((res) => ({
+            aptos: builder.aptos,
+            res,
+          }));
+        };
+
+        return await handleTransactionSubmission(network, trySubmit);
+      }
       return null;
     },
-    [adapterSignAndSubmitTxn, client, network]
+    [network, handleTransactionSubmission, adapterSignAndSubmitTxn]
+  );
+
+  // To manually enforce explicit gas options, we can use this transaction submission flow.
+  // Note that you need to pass the options to the builder, not here. It's possible to do it here, but it's
+  // unnecessary to support that and I'm not gonna write the code for it.
+  const signThenSubmit = useCallback(
+    async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
+      if (checkNetworkAndToast(network, true)) {
+        const trySubmit = async () => {
+          const builder = await builderFn();
+          const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
+          return submitTransaction({
+            transaction: builder.rawTransactionInput,
+            senderAuthenticator,
+          }).then((res) => ({
+            aptos: builder.aptos,
+            res,
+          }));
+        };
+        return await handleTransactionSubmission(network, trySubmit);
+      }
+      return null;
+    },
+    [network, handleTransactionSubmission, signTransaction, submitTransaction]
   );
 
   const value: AptosContextState = {
-    client,
+    aptos,
     account,
-    submitWithBuilder,
+    submit,
+    signThenSubmit,
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;

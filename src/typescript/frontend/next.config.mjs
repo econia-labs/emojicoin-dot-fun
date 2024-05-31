@@ -25,9 +25,6 @@ const debugConfigOptions = {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    APTOS_NETWORK: "testnet",
-  },
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
