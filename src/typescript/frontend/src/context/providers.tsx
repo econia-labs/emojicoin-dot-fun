@@ -5,7 +5,7 @@
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { Provider } from "react-redux";
 import { ThemeProvider } from "styled-components";
-import { GlobalStyle, StyledToastContainer } from "styles";
+import { GlobalStyle } from "styles";
 import ThemeContextProvider, { useThemeContext } from "./theme-context";
 import store from "store/store";
 import Loader from "components/loader";
@@ -18,6 +18,8 @@ import { ConnectWalletContextProvider } from "./wallet-context/ConnectWalletCont
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
+import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
+import StyledToaster from "styles/StyledToaster";
 
 const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();
@@ -33,17 +35,19 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <ThemeProvider theme={theme}>
       <AptosWalletAdapterProvider plugins={wallets} autoConnect>
         <ConnectWalletContextProvider>
-          <GlobalStyle />
-          <Suspense fallback={<Loader />}>
-            <Provider store={store}>
-              <StyledToastContainer />
-              <StyledContentWrapper>
-                <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                {children}
-                <Footer />
-              </StyledContentWrapper>
-            </Provider>
-          </Suspense>
+          <AptosContextProvider>
+            <GlobalStyle />
+            <Suspense fallback={<Loader />}>
+              <Provider store={store}>
+                <StyledToaster />
+                <StyledContentWrapper>
+                  <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                  {children}
+                  <Footer />
+                </StyledContentWrapper>
+              </Provider>
+            </Suspense>
+          </AptosContextProvider>
         </ConnectWalletContextProvider>
       </AptosWalletAdapterProvider>
     </ThemeProvider>

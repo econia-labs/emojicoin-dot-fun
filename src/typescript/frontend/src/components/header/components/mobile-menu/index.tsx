@@ -11,7 +11,7 @@ import { MobileMenuItem } from "../index";
 import { type MobileMenuProps } from "./types";
 
 import { slideVariants } from "./animations";
-import ConnectWalletButton from "components/header/wallet-button/ConnectWalletButton";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
@@ -42,7 +42,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             );
           })}
 
-          <ConnectWalletButton mobile={true} />
+          <ButtonWithConnectWalletFallback mobile={true} />
         </MobileMenuInner>
 
         <Flex position="absolute" bottom="60px" justifyContent="center" width="100%">

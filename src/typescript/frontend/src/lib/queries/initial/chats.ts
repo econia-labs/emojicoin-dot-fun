@@ -1,3 +1,5 @@
+"use server";
+
 import { toChatEvent } from "@sdk/types";
 import { paginateChatEvents } from "@sdk/queries/chat";
 import { cache } from "react";

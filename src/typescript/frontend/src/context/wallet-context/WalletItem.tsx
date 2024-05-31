@@ -90,6 +90,8 @@ export const WalletItem: React.FC<{
   const [hover, setHover] = useState<boolean>(false);
   const { wallet: current } = useWallet();
 
+  console.warn(wallet.readyState);
+
   const inner = (
     <>
       {WALLET_ICON[wallet.name.toLowerCase()]}
@@ -98,7 +100,10 @@ export const WalletItem: React.FC<{
           <ScrambledRow
             active={wallet.name === current?.name}
             text={wallet.name}
-            installed={wallet.readyState === WalletReadyState.Installed}
+            installed={
+              wallet.readyState === WalletReadyState.Installed ||
+              wallet.readyState === WalletReadyState.Loadable
+            }
             hover={hover}
           />
         </div>

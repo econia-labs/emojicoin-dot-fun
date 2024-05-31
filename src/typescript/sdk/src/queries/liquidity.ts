@@ -1,5 +1,5 @@
-import { PostgrestClient } from "@supabase/postgrest-js";
-import { INBOX_URL } from "../const";
+import "server-only";
+
 import { type ContractTypes, type JSONTypes, toLiquidityEvent } from "../types";
 import { STRUCT_STRINGS } from "../utils";
 import { TABLE_NAME, ORDER_BY } from "./const";
@@ -9,6 +9,7 @@ import {
   aggregateQueryResults,
 } from "./query-helper";
 import { wrap } from "./utils";
+import { postgrest } from "./inbox-url";
 
 export enum LiquidityEventType {
   Provide,
@@ -19,14 +20,13 @@ export type LiquidityEventQueryArgs = {
   user?: string;
   marketID?: number | bigint;
   liquidityEventType?: LiquidityEventType;
-  inboxUrl?: string;
 };
 
 export const paginateLiquidityEvents = async (
   args: LiquidityEventQueryArgs & Omit<AggregateQueryResultsArgs, "query">
 ): Promise<EventsAndErrors<ContractTypes.LiquidityEvent>> => {
-  const { user, marketID, liquidityEventType, inboxUrl = INBOX_URL } = args;
-  let query = new PostgrestClient(inboxUrl)
+  const { user, marketID, liquidityEventType } = args;
+  let query = postgrest
     .from(TABLE_NAME)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.LiquidityEvent)

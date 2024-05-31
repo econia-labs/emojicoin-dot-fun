@@ -1,3 +1,5 @@
+import "server-only";
+
 import { type ContractTypes } from "../types";
 import { paginateMarketRegistrations } from "./market";
 

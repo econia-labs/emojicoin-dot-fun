@@ -1,9 +1,9 @@
 import { Account, Ed25519PrivateKey, Hex } from "@aptos-labs/ts-sdk";
 import fs from "fs";
 import path from "path";
+import findGitRoot from "find-git-root";
 import { getAptosClient } from "./aptos-client";
 import { type TestHelpers } from "./types";
-import { getGitRoot } from "../../src/utils/git-root";
 
 export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/sdk/tests");
 export const PK_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", ".pk"));
@@ -31,4 +31,15 @@ export function getTestHelpers(): TestHelpers {
     publisher,
     publishPackageResult,
   };
+}
+
+/**
+ * Returns the path to the root of the repository by removing
+ * the .git directory from the path.
+ *
+ * @returns the path to the closest .git directory.
+ */
+export function getGitRoot(): string {
+  const gitRoot = findGitRoot(process.cwd());
+  return path.dirname(gitRoot);
 }

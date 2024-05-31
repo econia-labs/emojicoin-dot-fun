@@ -13,12 +13,13 @@ import Prompt from "components/prompt";
 import { Input } from "components/inputs/input";
 import { InputGroup } from "components/inputs/input-group";
 import { Text } from "components/text";
-import Button from "components/button";
 import ClientsSlider from "components/clients-slider";
 import { Column, Flex, FlexGap } from "@containers";
 import { StyledFieldName } from "./styled";
+import { LaunchEmojicoinButton } from "./components/LaunchEmojicoinButton";
+import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 
-const LaunchEmojicoin: React.FC = () => {
+const ClientLaunchEmojicoinPage: React.FC = () => {
   const { t } = translationFunction();
 
   const { validationSchema, initialValues } = useValidationSchema();
@@ -164,7 +165,9 @@ const LaunchEmojicoin: React.FC = () => {
           </Flex>
 
           <Flex justifyContent="center" mt="18px">
-            <Button scale="lg">{t("Launch Emojicoin")}</Button>
+            <LaunchEmojicoinButton
+              emojis={values.emojiList.map((e) => SYMBOL_DATA.byEmoji(e.emoji)!.hex)}
+            />
           </Flex>
         </Column>
       </Flex>
@@ -172,4 +175,4 @@ const LaunchEmojicoin: React.FC = () => {
   );
 };
 
-export default LaunchEmojicoin;
+export default ClientLaunchEmojicoinPage;

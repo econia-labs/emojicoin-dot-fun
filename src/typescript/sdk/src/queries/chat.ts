@@ -1,21 +1,21 @@
-import { PostgrestClient } from "@supabase/postgrest-js";
-import { INBOX_URL } from "../const";
+import "server-only";
+
 import { TABLE_NAME, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { type JSONTypes } from "../types";
 import { wrap } from "./utils";
 import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-helper";
+import { postgrest } from "./inbox-url";
 
 export type ChatEventQueryArgs = {
   marketID: number | bigint;
-  inboxUrl?: string;
 };
 
 export const paginateChatEvents = async (
   args: ChatEventQueryArgs & Omit<AggregateQueryResultsArgs, "query">
 ) => {
-  const { marketID, inboxUrl = INBOX_URL } = args;
-  const query = new PostgrestClient(inboxUrl)
+  const { marketID } = args;
+  const query = postgrest
     .from(TABLE_NAME)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.ChatEvent)

@@ -12,7 +12,7 @@
     ]
   },
   "dependencies": {
-    "@aptos-labs/wallet-adapter-react": "^2.5.1",
+    "@aptos-labs/wallet-adapter-react": "^3.0.2",
     "@econia-labs/emojicoin-sdk": "workspace:*",
     "@emotion/is-prop-valid": "^1.2.2",
     "@headlessui/react": "^2.0.4",
@@ -37,6 +37,7 @@
     "react-toastify": "^9.1.3",
     "redux": "^5.0.1",
     "redux-logger": "^3.0.6",
+    "server-only": "^0.0.1",
     "socket.io-client": "^4.7.2",
     "styled-components": "^6.1.8",
     "styled-system": "^5.1.5",
@@ -70,8 +71,8 @@
   "scripts": {
     "_format": "prettier './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
     "build": "next build",
-    "build:debug": "BUILD_DEBUG=true && pnpm clean && next build --no-lint --no-mangling --debug",
-    "clean": "rm -rf .next",
+    "build:debug": "BUILD_DEBUG=true && pnpm clean && pnpm i && next build --no-lint --no-mangling --debug",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbo",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",

@@ -25,9 +25,6 @@ const debugConfigOptions = {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    "INBOX_URL": process.env.INBOX_URL ?? "http://localhost:3000",
-  },
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
@@ -41,7 +38,7 @@ const nextConfig = {
     return [
       {
         source: "/emojicoin",
-        destination: "/emojicoin/0",
+        destination: "/emojicoin/1",
         permanent: true,
       },
     ];

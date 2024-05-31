@@ -1,6 +1,6 @@
 import { Account } from "@aptos-labs/ts-sdk";
 import { PostgrestClient } from "@supabase/postgrest-js";
-import { INBOX_URL, ONE_APT } from "../../src/const";
+import { LOCAL_INBOX_URL, ONE_APT } from "../../src/const";
 import { getRegistryAddress, toChatEvent } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { sleep } from "../../src/utils";
@@ -114,7 +114,7 @@ describe("emits a chat message event successfully", () => {
     const secondChatEvent = toChatEvent(secondChatEventJSON);
     expect(secondChatEvent.message).toEqual(indices.map((i) => chatEmojis[i][1]).join(""));
 
-    const postgrest = new PostgrestClient(INBOX_URL);
+    const postgrest = new PostgrestClient(LOCAL_INBOX_URL);
 
     // Wait to make sure events were processed and saved by Inbox.
     await sleep(1000);

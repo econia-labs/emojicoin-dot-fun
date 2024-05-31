@@ -14,7 +14,6 @@ module.exports = {
   ],
   testPathIgnorePatterns: ["dist/*"],
   collectCoverage: false,
-  setupFiles: ["dotenv/config"],
   coverageThreshold: {
     global: {
       branches: 50,

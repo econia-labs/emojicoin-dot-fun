@@ -1,3 +1,5 @@
+"use server";
+
 import { cache } from "react";
 import { getLastMarketState } from "@sdk/queries/state";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
@@ -25,7 +27,7 @@ export const staticLastSwap = async (marketID: string) => {
 };
 
 export const fetchLastMarketState = cache(async (marketID: string) => {
-  if (process.env.NEXT_PUBLIC_FORCE_STATIC_FETCH === "true") {
+  if (process.env.FORCE_STATIC_FETCH === "true") {
     return staticLastSwap(marketID);
   }
 

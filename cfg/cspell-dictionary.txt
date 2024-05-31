@@ -42,6 +42,7 @@ merperson
 moai
 mybuilder
 nazar
+nextjs
 nohup
 octa
 oden

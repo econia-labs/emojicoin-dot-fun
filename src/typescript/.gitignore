@@ -3,3 +3,6 @@ build/**
 dist/**
 .next/**
 node_modules/
+.env*.local
+**/*.env*.local
+.env

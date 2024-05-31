@@ -5,11 +5,11 @@ import MainCard from "./components/main-card";
 import { type MarketStateProps } from "./types";
 
 export interface HomeProps {
-  data: Array<MarketStateProps>;
+  data?: Array<MarketStateProps>;
 }
 
-const Home = async (props: HomeProps) => {
-  const data = props.data;
+const ClientHomePage = async (props: HomeProps) => {
+  const data = props.data ?? [];
 
   const featured = data.toReversed().pop();
   const gridMarkets = data.slice(1);
@@ -37,4 +37,4 @@ const Home = async (props: HomeProps) => {
   );
 };
 
-export default Home;
+export default ClientHomePage;

@@ -1,24 +1,20 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import dotenv from "dotenv";
-import path from "path";
-import { getGitRoot } from "./utils/git-root";
 
 export const VERCEL = process.env.VERCEL === "1";
-if (!VERCEL && typeof process === "object" && process.title.endsWith("node")) {
-  const sdkPath = path.join(getGitRoot(), "src", "typescript", "sdk", ".env");
-  dotenv.config({ path: sdkPath });
-  const frontendPath = path.join(getGitRoot(), "src", "typescript", "frontend", ".env");
-  dotenv.config({ path: frontendPath });
-}
-
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
-  throw new Error("Missing NEXT_PUBLIC_MODULE_ADDRESS environment variable");
-} else if (!process.env.INBOX_URL) {
-  throw new Error("Missing INBOX_URL environment variable");
+  let msg = `\n\n${"-".repeat(61)}\n\nMissing NEXT_PUBLIC_MODULE_ADDRESS environment variable\n`;
+  if (!VERCEL) {
+    msg += "Please run this project from the top-level, parent directory.\n";
+  }
+  msg += `\n${"-".repeat(61)}\n`;
+  throw new Error(msg);
+}
+if (typeof window !== "undefined" && typeof process.env.INBOX_URL !== "undefined") {
+  throw new Error("The `inbox` endpoint should not be exposed to any client components.");
 }
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
-export const INBOX_URL = process.env.INBOX_URL!;
 
+export const LOCAL_INBOX_URL = process.env.INBOX_URL ?? "http://localhost:3000";
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APTN = BigInt(ONE_APT);
 export const MAX_GAS_FOR_PUBLISH = 1500000;

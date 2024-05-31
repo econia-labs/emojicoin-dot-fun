@@ -1,70 +1,131 @@
-import { type Aptos, type PendingTransactionResponse } from "@aptos-labs/ts-sdk";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import {
+  AptosApiError,
+  type Aptos,
+  type PendingTransactionResponse,
+  type UserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
+import { type NetworkInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import { createContext, type PropsWithChildren, useCallback, useContext, useMemo } from "react";
 import { toast } from "react-toastify";
 
-import { getAptos } from "@sdk/utils/aptos-client";
 import { APTOS_NETWORK } from "lib/env";
+import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
+import { getAptos } from "lib/utils/aptos-client";
+import { checkNetworkAndToast, parseAPIErrorAndToast, successfulTransactionToast } from "./toasts";
 
 type WalletContextState = ReturnType<typeof useWallet>;
+type SubmissionResponse = Promise<{
+  response: PendingTransactionResponse | UserTransactionResponse | null;
+  error: unknown;
+} | null>;
 
 export type AptosContextState = {
-  aptosClient: Aptos;
-  signAndSubmitTransaction: WalletContextState["signAndSubmitTransaction"];
+  aptos: Aptos;
+  submit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
+  signThenSubmit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
   account: WalletContextState["account"];
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
 export function AptosContextProvider({ children }: PropsWithChildren) {
-  const { signAndSubmitTransaction: adapterSignAndSubmitTxn, account, network } = useWallet();
-  const aptosClient = useMemo(() => {
-    if (network?.name !== APTOS_NETWORK) {
-      const warningMessage = "Your wallet network is different from the dapp's network.";
-      const toAvoidMessage = `To avoid undefined behavior, please set your wallet network to ${APTOS_NETWORK}`;
-      toast.warning(`${warningMessage} ${toAvoidMessage}`);
+  const {
+    signAndSubmitTransaction: adapterSignAndSubmitTxn,
+    account,
+    network,
+    submitTransaction,
+    signTransaction,
+  } = useWallet();
+
+  const aptos = useMemo(() => {
+    if (checkNetworkAndToast(network)) {
+      return getAptos(network.name);
     }
-    return getAptos(network?.name ?? APTOS_NETWORK);
+    return getAptos(APTOS_NETWORK);
   }, [network]);
 
-  const signAndSubmitTransaction = useCallback(
-    async (...args: Parameters<WalletContextState["signAndSubmitTransaction"]>) => {
-      const transaction = args[0];
-
+  const handleTransactionSubmission = useCallback(
+    async (
+      network: NetworkInfo,
+      trySubmit: () => Promise<{ aptos: Aptos; res: PendingTransactionResponse }>
+    ) => {
+      let response: PendingTransactionResponse | UserTransactionResponse | null = null;
+      let error: unknown;
       try {
-        transaction.data.functionArguments = transaction.data.functionArguments.map((arg) => {
-          if (typeof arg === "bigint") {
-            return arg.toString();
-          } else {
-            return arg;
-          }
-        });
-        const res: PendingTransactionResponse = await adapterSignAndSubmitTxn(transaction);
+        const { aptos, res } = await trySubmit();
+        response = res;
         try {
-          await aptosClient.waitForTransaction({
+          const awaitedResponse = (await aptos.waitForTransaction({
             transactionHash: res.hash,
-          });
-          toast.success("Transaction confirmed");
-          return true;
-        } catch (error) {
+          })) as UserTransactionResponse;
+          successfulTransactionToast(awaitedResponse, network);
+          response = awaitedResponse;
+        } catch (e) {
           toast.error("Transaction failed");
-          console.error(error);
-          return false;
+          console.error(e);
+          error = e;
         }
-        //eslint-disable-next-line
-      } catch (error: any) {
-        if (error && error?.includes("Account not found")) {
-          toast.error("You need APT balance!");
+      } catch (e: unknown) {
+        if (e instanceof AptosApiError) {
+          parseAPIErrorAndToast(network, e);
+        } else {
+          console.error(e);
         }
+        error = e;
       }
+      return { response, error };
     },
-    [adapterSignAndSubmitTxn, aptosClient]
+    []
+  );
+
+  const submit = useCallback(
+    async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
+      if (checkNetworkAndToast(network, true)) {
+        const trySubmit = async () => {
+          const builder = await builderFn();
+          const input = builder.payloadBuilder.toInputPayload();
+          return adapterSignAndSubmitTxn(input).then((res) => ({
+            aptos: builder.aptos,
+            res,
+          }));
+        };
+
+        return await handleTransactionSubmission(network, trySubmit);
+      }
+      return null;
+    },
+    [network, handleTransactionSubmission, adapterSignAndSubmitTxn]
+  );
+
+  // To manually enforce explicit gas options, we can use this transaction submission flow.
+  // Note that you need to pass the options to the builder, not here. It's possible to do it here, but it's
+  // unnecessary to support that and I'm not gonna write the code for it.
+  const signThenSubmit = useCallback(
+    async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
+      if (checkNetworkAndToast(network, true)) {
+        const trySubmit = async () => {
+          const builder = await builderFn();
+          const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
+          return submitTransaction({
+            transaction: builder.rawTransactionInput,
+            senderAuthenticator,
+          }).then((res) => ({
+            aptos: builder.aptos,
+            res,
+          }));
+        };
+        return await handleTransactionSubmission(network, trySubmit);
+      }
+      return null;
+    },
+    [network, handleTransactionSubmission, signTransaction, submitTransaction]
   );
 
   const value: AptosContextState = {
-    aptosClient,
+    aptos,
     account,
-    signAndSubmitTransaction,
+    submit,
+    signThenSubmit,
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;

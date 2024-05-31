@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  .Toastify__toast-container > * {
+    font-family: var(--font-forma) !important;
+    line-height: 1.4rem;
+  }
+}
+
 .med-pixel-text {
   font-size: 20px;
   line-height: 25px;

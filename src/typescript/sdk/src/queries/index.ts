@@ -1,3 +1,5 @@
+import "server-only";
+
 export * from "./const";
 export * from "./utils";
 export * from "./candlestick";
