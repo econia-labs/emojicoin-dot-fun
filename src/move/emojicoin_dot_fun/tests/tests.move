@@ -4284,6 +4284,14 @@
     }
 
     #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_EMOJI_BYTES_EMPTY,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun verified_symbol_emoji_bytes_emoji_bytes_empty() {
+        init_package();
+        verified_symbol_emoji_bytes(vector[]);
+    }
+
+    #[test, expected_failure(
         abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NOT_SUPPORTED_SYMBOL_EMOJI,
         location = emojicoin_dot_fun::emojicoin_dot_fun,
     )] fun verified_symbol_emoji_bytes_not_supported_symbol_emoji() {

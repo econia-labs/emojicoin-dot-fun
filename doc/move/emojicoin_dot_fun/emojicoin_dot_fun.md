@@ -1855,6 +1855,16 @@ The constructed chat message exceeds the maximum length.
 
 
 
+<a id="0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_EMPTY"></a>
+
+No emoji bytes specified.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_EMPTY">E_EMOJI_BYTES_EMPTY</a>: u64 = 15;
+</code></pre>
+
+
+
 <a id="0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_TOO_LONG"></a>
 
 Too many bytes in emoji symbol.
@@ -4233,11 +4243,11 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_assert_valid_coin_types">assert_valid_coin_types</a>&lt;Emojicoin, EmojicoinLP&gt;(market_address: <b>address</b>) {
-    <b>assert</b>!(
-        <b>exists</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt;&gt;(market_address),
-        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_INVALID_COIN_TYPES">E_INVALID_COIN_TYPES</a>
-    );
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_assert_valid_coin_types">assert_valid_coin_types</a>&lt;Emojicoin, EmojicoinLP&gt;(market_address: <b>address</b>) {
+<b>assert</b>!(
+<b>exists</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt;&gt;(market_address),
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_INVALID_COIN_TYPES">E_INVALID_COIN_TYPES</a>
+);
 }
 </code></pre>
 
@@ -4363,26 +4373,26 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_bump_market_state">bump_market_state</a>(
-    market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
-    trigger: u8,
-    instantaneous_stats: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_InstantaneousStats">InstantaneousStats</a>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_bump_market_state">bump_market_state</a>(
+market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+trigger: u8,
+instantaneous_stats: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_InstantaneousStats">InstantaneousStats</a>,
 ) {
-    <b>let</b> sequence_info_ref = &market_ref.sequence_info;
-    <a href="_emit">event::emit</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_State">State</a> {
-        market_metadata: market_ref.metadata,
-        state_metadata: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_StateMetadata">StateMetadata</a> {
-            market_nonce: sequence_info_ref.nonce,
-            bump_time: sequence_info_ref.last_bump_time,
-            trigger,
-        },
-        clamm_virtual_reserves: market_ref.clamm_virtual_reserves,
-        cpamm_real_reserves: market_ref.cpamm_real_reserves,
-        lp_coin_supply: market_ref.lp_coin_supply,
-        cumulative_stats: market_ref.cumulative_stats,
-        instantaneous_stats,
-        last_swap: market_ref.last_swap,
-    });
+<b>let</b> sequence_info_ref = &market_ref.sequence_info;
+<a href="_emit">event::emit</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_State">State</a> {
+market_metadata: market_ref.metadata,
+state_metadata: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_StateMetadata">StateMetadata</a> {
+ market_nonce: sequence_info_ref.nonce,
+ bump_time: sequence_info_ref.last_bump_time,
+ trigger,
+},
+clamm_virtual_reserves: market_ref.clamm_virtual_reserves,
+cpamm_real_reserves: market_ref.cpamm_real_reserves,
+lp_coin_supply: market_ref.lp_coin_supply,
+cumulative_stats: market_ref.cumulative_stats,
+instantaneous_stats,
+last_swap: market_ref.last_swap,
+});
 }
 </code></pre>
 
@@ -4402,12 +4412,12 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_burn_lp_coins">burn_lp_coins</a>&lt;Emojicoin, EmojicoinLP&gt;(
-    market_address: <b>address</b>,
-    <a href="">coin</a>: Coin&lt;EmojicoinLP&gt;,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_burn_lp_coins">burn_lp_coins</a>&lt;Emojicoin, EmojicoinLP&gt;(
+market_address: <b>address</b>,
+<a href="">coin</a>: Coin&lt;EmojicoinLP&gt;,
 ) <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a> {
-    <b>let</b> coin_caps = <b>borrow_global</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt;&gt;(market_address);
-    <a href="_burn">coin::burn</a>&lt;EmojicoinLP&gt;(<a href="">coin</a>, &coin_caps.burn);
+<b>let</b> coin_caps = <b>borrow_global</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt;&gt;(market_address);
+<a href="_burn">coin::burn</a>&lt;EmojicoinLP&gt;(<a href="">coin</a>, &coin_caps.burn);
 }
 </code></pre>
 
@@ -4427,18 +4437,18 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
-    input_amount: u64,
-    is_sell: bool,
-    reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_cpamm_simple_swap_output_amount">cpamm_simple_swap_output_amount</a>(
+input_amount: u64,
+is_sell: bool,
+reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>
 ): u64 {
-    <b>let</b> (numerator_coefficient, denominator_addend) = <b>if</b> (is_sell)
-        (reserves.quote, reserves.base) <b>else</b> (reserves.base, reserves.quote);
-    <b>let</b> numerator = (input_amount <b>as</b> u128) * (numerator_coefficient <b>as</b> u128);
-    <b>let</b> denominator = (input_amount <b>as</b> u128) + (denominator_addend <b>as</b> u128);
-    <b>assert</b>!(denominator &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_DIVIDE_BY_ZERO">E_SWAP_DIVIDE_BY_ZERO</a>);
-    <b>let</b> result = numerator / denominator;
-    (result <b>as</b> u64)
+<b>let</b> (numerator_coefficient, denominator_addend) = <b>if</b> (is_sell)
+(reserves.quote, reserves.base) <b>else</b> (reserves.base, reserves.quote);
+<b>let</b> numerator = (input_amount <b>as</b> u128) * (numerator_coefficient <b>as</b> u128);
+<b>let</b> denominator = (input_amount <b>as</b> u128) + (denominator_addend <b>as</b> u128);
+<b>assert</b>!(denominator &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_DIVIDE_BY_ZERO">E_SWAP_DIVIDE_BY_ZERO</a>);
+<b>let</b> result = numerator / denominator;
+(result <b>as</b> u64)
 }
 </code></pre>
 
@@ -4458,91 +4468,91 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_create_market">create_market</a>(
-    registry_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>,
-    emoji_bytes: <a href="">vector</a>&lt;u8&gt;,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_create_market">create_market</a>(
+registry_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>,
+emoji_bytes: <a href="">vector</a>&lt;u8&gt;,
 ): (<b>address</b>, <a href="">signer</a>) {
-    // Create market <a href="">object</a>.
-    <b>let</b> registry_signer = <a href="_generate_signer_for_extending">object::generate_signer_for_extending</a>(&registry_ref_mut.extend_ref);
-    <b>let</b> markets_by_emoji_bytes_ref_mut = &<b>mut</b> registry_ref_mut.markets_by_emoji_bytes;
-    <b>let</b> market_constructor_ref = <a href="_create_named_object">object::create_named_object</a>(&registry_signer, emoji_bytes);
-    <b>let</b> market_address = <a href="_address_from_constructor_ref">object::address_from_constructor_ref</a>(&market_constructor_ref);
-    <b>let</b> market_signer = <a href="_generate_signer">object::generate_signer</a>(&market_constructor_ref);
-    <b>let</b> market_extend_ref = <a href="_generate_extend_ref">object::generate_extend_ref</a>(&market_constructor_ref);
-    <b>let</b> market_id = 1 + <a href="_length">smart_table::length</a>(markets_by_emoji_bytes_ref_mut);
+// Create market <a href="">object</a>.
+<b>let</b> registry_signer = <a href="_generate_signer_for_extending">object::generate_signer_for_extending</a>(&registry_ref_mut.extend_ref);
+<b>let</b> markets_by_emoji_bytes_ref_mut = &<b>mut</b> registry_ref_mut.markets_by_emoji_bytes;
+<b>let</b> market_constructor_ref = <a href="_create_named_object">object::create_named_object</a>(&registry_signer, emoji_bytes);
+<b>let</b> market_address = <a href="_address_from_constructor_ref">object::address_from_constructor_ref</a>(&market_constructor_ref);
+<b>let</b> market_signer = <a href="_generate_signer">object::generate_signer</a>(&market_constructor_ref);
+<b>let</b> market_extend_ref = <a href="_generate_extend_ref">object::generate_extend_ref</a>(&market_constructor_ref);
+<b>let</b> market_id = 1 + <a href="_length">smart_table::length</a>(markets_by_emoji_bytes_ref_mut);
 
-    // Only assess integrator fees for markets after the first.
-    <b>let</b> integrator_fees = <b>if</b> (market_id == 1) 0 <b>else</b> (<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MARKET_REGISTRATION_FEE">MARKET_REGISTRATION_FEE</a> <b>as</b> u128);
+// Only assess integrator fees for markets after the first.
+<b>let</b> integrator_fees = <b>if</b> (market_id == 1) 0 <b>else</b> (<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MARKET_REGISTRATION_FEE">MARKET_REGISTRATION_FEE</a> <b>as</b> u128);
 
-    <b>let</b> time = <a href="_now_microseconds">timestamp::now_microseconds</a>();
-    <b>move_to</b>(&market_signer, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> {
-        metadata : <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MarketMetadata">MarketMetadata</a> {
-            market_id,
-            market_address,
-            emoji_bytes,
-        },
-        sequence_info: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SequenceInfo">SequenceInfo</a> {
-            last_bump_time: <a href="_now_microseconds">timestamp::now_microseconds</a>(),
-            nonce: 0,
-        },
-        extend_ref: market_extend_ref,
-        clamm_virtual_reserves:
-            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a> { base: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_CEILING">BASE_VIRTUAL_CEILING</a>, quote: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_FLOOR">QUOTE_VIRTUAL_FLOOR</a> },
-        cpamm_real_reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a> { base: 0, quote: 0 },
-        lp_coin_supply: 0,
-        cumulative_stats: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_CumulativeStats">CumulativeStats</a> {
-            base_volume: 0,
-            quote_volume: 0,
-            integrator_fees,
-            pool_fees_base: 0,
-            pool_fees_quote: 0,
-            n_swaps: 0,
-            n_chat_messages: 0,
-        },
-        last_swap: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LastSwap">LastSwap</a> {
-            is_sell: <b>false</b>,
-            avg_execution_price_q64: 0,
-            base_volume: 0,
-            quote_volume: 0,
-            nonce: 0,
-            time: 0,
-        },
-        periodic_state_trackers: <a href="_map">vector::map</a>(
-            <a href="">vector</a>[
-                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_1M">PERIOD_1M</a>,
-                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_5M">PERIOD_5M</a>,
-                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_15M">PERIOD_15M</a>,
-                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_30M">PERIOD_30M</a>,
-                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_1H">PERIOD_1H</a>,
-                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_4H">PERIOD_4H</a>,
-                <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_1D">PERIOD_1D</a>,
-            ],
-            |period| <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateTracker">PeriodicStateTracker</a> {
-                start_time: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_last_period_boundary">last_period_boundary</a>(time, period),
-                period,
-                open_price_q64: 0,
-                high_price_q64: 0,
-                low_price_q64: 0,
-                close_price_q64: 0,
-                volume_base: 0,
-                volume_quote: 0,
-                integrator_fees,
-                pool_fees_base: 0,
-                pool_fees_quote: 0,
-                n_swaps: 0,
-                n_chat_messages: 0,
-                starts_in_bonding_curve: <b>true</b>,
-                ends_in_bonding_curve: <b>true</b>,
-                tvl_to_lp_coin_ratio_start: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_TVLtoLPCoinRatio">TVLtoLPCoinRatio</a> { tvl: 0, lp_coins: 0 },
-                tvl_to_lp_coin_ratio_end: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_TVLtoLPCoinRatio">TVLtoLPCoinRatio</a> { tvl: 0, lp_coins: 0 },
-            }
-        ),
-    });
-    // Update registry.
-    <a href="_add">smart_table::add</a>(markets_by_emoji_bytes_ref_mut, emoji_bytes, market_address);
-    <a href="_add">smart_table::add</a>(&<b>mut</b> registry_ref_mut.markets_by_market_id, market_id, market_address);
+<b>let</b> time = <a href="_now_microseconds">timestamp::now_microseconds</a>();
+<b>move_to</b>(&market_signer, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> {
+metadata : <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MarketMetadata">MarketMetadata</a> {
+ market_id,
+ market_address,
+ emoji_bytes,
+},
+sequence_info: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SequenceInfo">SequenceInfo</a> {
+ last_bump_time: <a href="_now_microseconds">timestamp::now_microseconds</a>(),
+ nonce: 0,
+},
+extend_ref: market_extend_ref,
+clamm_virtual_reserves:
+ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a> { base: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_CEILING">BASE_VIRTUAL_CEILING</a>, quote: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_FLOOR">QUOTE_VIRTUAL_FLOOR</a> },
+cpamm_real_reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a> { base: 0, quote: 0 },
+lp_coin_supply: 0,
+cumulative_stats: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_CumulativeStats">CumulativeStats</a> {
+ base_volume: 0,
+ quote_volume: 0,
+ integrator_fees,
+ pool_fees_base: 0,
+ pool_fees_quote: 0,
+ n_swaps: 0,
+ n_chat_messages: 0,
+},
+last_swap: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LastSwap">LastSwap</a> {
+ is_sell: <b>false</b>,
+ avg_execution_price_q64: 0,
+ base_volume: 0,
+ quote_volume: 0,
+ nonce: 0,
+ time: 0,
+},
+periodic_state_trackers: <a href="_map">vector::map</a>(
+ <a href="">vector</a>[
+     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_1M">PERIOD_1M</a>,
+     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_5M">PERIOD_5M</a>,
+     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_15M">PERIOD_15M</a>,
+     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_30M">PERIOD_30M</a>,
+     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_1H">PERIOD_1H</a>,
+     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_4H">PERIOD_4H</a>,
+     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_1D">PERIOD_1D</a>,
+ ],
+ |period| <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateTracker">PeriodicStateTracker</a> {
+     start_time: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_last_period_boundary">last_period_boundary</a>(time, period),
+     period,
+     open_price_q64: 0,
+     high_price_q64: 0,
+     low_price_q64: 0,
+     close_price_q64: 0,
+     volume_base: 0,
+     volume_quote: 0,
+     integrator_fees,
+     pool_fees_base: 0,
+     pool_fees_quote: 0,
+     n_swaps: 0,
+     n_chat_messages: 0,
+     starts_in_bonding_curve: <b>true</b>,
+     ends_in_bonding_curve: <b>true</b>,
+     tvl_to_lp_coin_ratio_start: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_TVLtoLPCoinRatio">TVLtoLPCoinRatio</a> { tvl: 0, lp_coins: 0 },
+     tvl_to_lp_coin_ratio_end: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_TVLtoLPCoinRatio">TVLtoLPCoinRatio</a> { tvl: 0, lp_coins: 0 },
+ }
+),
+});
+// Update registry.
+<a href="_add">smart_table::add</a>(markets_by_emoji_bytes_ref_mut, emoji_bytes, market_address);
+<a href="_add">smart_table::add</a>(&<b>mut</b> registry_ref_mut.markets_by_market_id, market_id, market_address);
 
-    (market_address, market_signer)
+(market_address, market_signer)
 }
 </code></pre>
 
@@ -4562,40 +4572,40 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_emit_periodic_state">emit_periodic_state</a>(
-    market_metadata_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MarketMetadata">MarketMetadata</a>,
-    nonce: u64,
-    time: u64,
-    trigger: u8,
-    tracker_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateTracker">PeriodicStateTracker</a>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_emit_periodic_state">emit_periodic_state</a>(
+market_metadata_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MarketMetadata">MarketMetadata</a>,
+nonce: u64,
+time: u64,
+trigger: u8,
+tracker_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateTracker">PeriodicStateTracker</a>,
 ) {
-    <a href="_emit">event::emit</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicState">PeriodicState</a> {
-        market_metadata: *market_metadata_ref,
-        periodic_state_metadata: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateMetadata">PeriodicStateMetadata</a> {
-            start_time: tracker_ref.start_time,
-            emit_time: time,
-            emit_market_nonce: nonce,
-            period: tracker_ref.period,
-            trigger,
-        },
-        open_price_q64: tracker_ref.open_price_q64,
-        high_price_q64: tracker_ref.high_price_q64,
-        low_price_q64: tracker_ref.low_price_q64,
-        close_price_q64: tracker_ref.close_price_q64,
-        volume_base: tracker_ref.volume_base,
-        volume_quote: tracker_ref.volume_quote,
-        integrator_fees: tracker_ref.integrator_fees,
-        pool_fees_base: tracker_ref.pool_fees_base,
-        pool_fees_quote: tracker_ref.pool_fees_quote,
-        n_swaps: tracker_ref.n_swaps,
-        n_chat_messages: tracker_ref.n_chat_messages,
-        starts_in_bonding_curve: tracker_ref.starts_in_bonding_curve,
-        ends_in_bonding_curve: tracker_ref.ends_in_bonding_curve,
-        tvl_per_lp_coin_growth_q64: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_per_lp_coin_growth_q64_inline">tvl_per_lp_coin_growth_q64_inline</a>(
-            tracker_ref.tvl_to_lp_coin_ratio_start,
-            tracker_ref.tvl_to_lp_coin_ratio_end,
-        ),
-    });
+<a href="_emit">event::emit</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicState">PeriodicState</a> {
+market_metadata: *market_metadata_ref,
+periodic_state_metadata: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateMetadata">PeriodicStateMetadata</a> {
+ start_time: tracker_ref.start_time,
+ emit_time: time,
+ emit_market_nonce: nonce,
+ period: tracker_ref.period,
+ trigger,
+},
+open_price_q64: tracker_ref.open_price_q64,
+high_price_q64: tracker_ref.high_price_q64,
+low_price_q64: tracker_ref.low_price_q64,
+close_price_q64: tracker_ref.close_price_q64,
+volume_base: tracker_ref.volume_base,
+volume_quote: tracker_ref.volume_quote,
+integrator_fees: tracker_ref.integrator_fees,
+pool_fees_base: tracker_ref.pool_fees_base,
+pool_fees_quote: tracker_ref.pool_fees_quote,
+n_swaps: tracker_ref.n_swaps,
+n_chat_messages: tracker_ref.n_chat_messages,
+starts_in_bonding_curve: tracker_ref.starts_in_bonding_curve,
+ends_in_bonding_curve: tracker_ref.ends_in_bonding_curve,
+tvl_per_lp_coin_growth_q64: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_per_lp_coin_growth_q64_inline">tvl_per_lp_coin_growth_q64_inline</a>(
+ tracker_ref.tvl_to_lp_coin_ratio_start,
+ tracker_ref.tvl_to_lp_coin_ratio_end,
+),
+});
 }
 </code></pre>
 
@@ -4615,49 +4625,49 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_ensure_coins_initialized">ensure_coins_initialized</a>&lt;Emojicoin, EmojicoinLP&gt;(
-    market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
-    market_signer: &<a href="">signer</a>,
-    market_address: <b>address</b>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_ensure_coins_initialized">ensure_coins_initialized</a>&lt;Emojicoin, EmojicoinLP&gt;(
+market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+market_signer: &<a href="">signer</a>,
+market_address: <b>address</b>,
 ) {
-    <b>if</b> (!<b>exists</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt;&gt;(market_address)) {
-        <b>assert</b>!(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_valid_coin_types">valid_coin_types</a>&lt;Emojicoin, EmojicoinLP&gt;(market_address), <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_INVALID_COIN_TYPES">E_INVALID_COIN_TYPES</a>);
-        <b>let</b> symbol = <a href="_utf8">string::utf8</a>(market_ref.metadata.emoji_bytes);
+<b>if</b> (!<b>exists</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt;&gt;(market_address)) {
+<b>assert</b>!(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_valid_coin_types">valid_coin_types</a>&lt;Emojicoin, EmojicoinLP&gt;(market_address), <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_INVALID_COIN_TYPES">E_INVALID_COIN_TYPES</a>);
+<b>let</b> symbol = <a href="_utf8">string::utf8</a>(market_ref.metadata.emoji_bytes);
 
-        // Initialize emojicoin <b>with</b> fixed supply, throw away capabilities.
-        <b>let</b> (burn_cap, freeze_cap, mint_cap) = <a href="_initialize">coin::initialize</a>&lt;Emojicoin&gt;(
-            market_signer,
-            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_concatenation">get_concatenation</a>(symbol, <a href="_utf8">string::utf8</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_NAME_SUFFIX">EMOJICOIN_NAME_SUFFIX</a>)),
-            symbol,
-            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_DECIMALS">DECIMALS</a>,
-            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MONITOR_SUPPLY">MONITOR_SUPPLY</a>,
-        );
-        <b>let</b> emojicoins = <a href="_mint">coin::mint</a>&lt;Emojicoin&gt;(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_SUPPLY">EMOJICOIN_SUPPLY</a>, &mint_cap);
-        <a href="_deposit_coins">aptos_account::deposit_coins</a>(market_address, emojicoins);
-        <a href="_destroy_freeze_cap">coin::destroy_freeze_cap</a>(freeze_cap);
-        <a href="_destroy_mint_cap">coin::destroy_mint_cap</a>(mint_cap);
-        <a href="_destroy_burn_cap">coin::destroy_burn_cap</a>(burn_cap);
+// Initialize emojicoin <b>with</b> fixed supply, throw away capabilities.
+<b>let</b> (burn_cap, freeze_cap, mint_cap) = <a href="_initialize">coin::initialize</a>&lt;Emojicoin&gt;(
+ market_signer,
+ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_concatenation">get_concatenation</a>(symbol, <a href="_utf8">string::utf8</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_NAME_SUFFIX">EMOJICOIN_NAME_SUFFIX</a>)),
+ symbol,
+ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_DECIMALS">DECIMALS</a>,
+ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MONITOR_SUPPLY">MONITOR_SUPPLY</a>,
+);
+<b>let</b> emojicoins = <a href="_mint">coin::mint</a>&lt;Emojicoin&gt;(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_SUPPLY">EMOJICOIN_SUPPLY</a>, &mint_cap);
+<a href="_deposit_coins">aptos_account::deposit_coins</a>(market_address, emojicoins);
+<a href="_destroy_freeze_cap">coin::destroy_freeze_cap</a>(freeze_cap);
+<a href="_destroy_mint_cap">coin::destroy_mint_cap</a>(mint_cap);
+<a href="_destroy_burn_cap">coin::destroy_burn_cap</a>(burn_cap);
 
-        <b>let</b> market_id_str = <a href="_to_string">string_utils::to_string</a>(&market_ref.metadata.market_id);
-        <b>let</b> lp_symbol = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_concatenation">get_concatenation</a>(
-            <a href="_utf8">string::utf8</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_LP_SYMBOL_PREFIX">EMOJICOIN_LP_SYMBOL_PREFIX</a>),
-            market_id_str,
-        );
-        // Initialize LP <a href="">coin</a>, storing only burn and mint capabilities.
-        <b>let</b> (burn_cap, freeze_cap, mint_cap) = <a href="_initialize">coin::initialize</a>&lt;EmojicoinLP&gt;(
-            market_signer,
-            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_concatenation">get_concatenation</a>(symbol, <a href="_utf8">string::utf8</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_LP_NAME_SUFFIX">EMOJICOIN_LP_NAME_SUFFIX</a>)),
-            lp_symbol,
-            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_DECIMALS">DECIMALS</a>,
-            <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MONITOR_SUPPLY">MONITOR_SUPPLY</a>,
-        );
-        <a href="_register">coin::register</a>&lt;EmojicoinLP&gt;(market_signer);
-        <a href="_destroy_freeze_cap">coin::destroy_freeze_cap</a>(freeze_cap);
-        <b>move_to</b>(market_signer, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt; {
-            burn: burn_cap,
-            mint: mint_cap,
-        });
-    };
+<b>let</b> market_id_str = <a href="_to_string">string_utils::to_string</a>(&market_ref.metadata.market_id);
+<b>let</b> lp_symbol = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_concatenation">get_concatenation</a>(
+ <a href="_utf8">string::utf8</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_LP_SYMBOL_PREFIX">EMOJICOIN_LP_SYMBOL_PREFIX</a>),
+ market_id_str,
+);
+// Initialize LP <a href="">coin</a>, storing only burn and mint capabilities.
+<b>let</b> (burn_cap, freeze_cap, mint_cap) = <a href="_initialize">coin::initialize</a>&lt;EmojicoinLP&gt;(
+ market_signer,
+ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_concatenation">get_concatenation</a>(symbol, <a href="_utf8">string::utf8</a>(<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_LP_NAME_SUFFIX">EMOJICOIN_LP_NAME_SUFFIX</a>)),
+ lp_symbol,
+ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_DECIMALS">DECIMALS</a>,
+ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MONITOR_SUPPLY">MONITOR_SUPPLY</a>,
+);
+<a href="_register">coin::register</a>&lt;EmojicoinLP&gt;(market_signer);
+<a href="_destroy_freeze_cap">coin::destroy_freeze_cap</a>(freeze_cap);
+<b>move_to</b>(market_signer, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt; {
+ burn: burn_cap,
+ mint: mint_cap,
+});
+};
 }
 </code></pre>
 
@@ -4713,10 +4723,10 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv">fdv</a>(
-    reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv">fdv</a>(
+reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
 ): u128 {
-    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(reserves.quote, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_SUPPLY">EMOJICOIN_SUPPLY</a>, reserves.base)
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(reserves.quote, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_SUPPLY">EMOJICOIN_SUPPLY</a>, reserves.base)
 }
 </code></pre>
 
@@ -4736,19 +4746,19 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(
-    reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
-    supply_minuend: u64,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(
+reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
+supply_minuend: u64,
 ): (
-    u128, // FDV.
-    u128, // <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> cap.
+u128, // FDV.
+u128, // <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> cap.
 ) {
-    <b>let</b> base = reserves.base;
-    <b>let</b> quote = reserves.quote;
-    (
-        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(quote, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_SUPPLY">EMOJICOIN_SUPPLY</a>, base), // FDV.
-        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(quote, supply_minuend - base, base), // <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> cap.
-    )
+<b>let</b> base = reserves.base;
+<b>let</b> quote = reserves.quote;
+(
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(quote, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_SUPPLY">EMOJICOIN_SUPPLY</a>, base), // FDV.
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(quote, supply_minuend - base, base), // <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> cap.
+)
 }
 </code></pre>
 
@@ -4768,19 +4778,19 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap_start_end">fdv_market_cap_start_end</a>(
-    reserves_start: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
-    reserves_end: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
-    supply_minuend: u64,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap_start_end">fdv_market_cap_start_end</a>(
+reserves_start: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
+reserves_end: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
+supply_minuend: u64,
 ): (
-    u128, // FDV at start.
-    u128, // <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> cap at start.
-    u128, // FDV at end.
-    u128, // <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> cap at end.
+u128, // FDV at start.
+u128, // <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> cap at start.
+u128, // FDV at end.
+u128, // <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> cap at end.
 ) {
-    <b>let</b> (fdv_start, market_cap_start) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(reserves_start, supply_minuend);
-    <b>let</b> (fdv_end, market_cap_end) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(reserves_end, supply_minuend);
-    (fdv_start, market_cap_start, fdv_end, market_cap_end)
+<b>let</b> (fdv_start, market_cap_start) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(reserves_start, supply_minuend);
+<b>let</b> (fdv_end, market_cap_end) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(reserves_end, supply_minuend);
+(fdv_start, market_cap_start, fdv_end, market_cap_end)
 }
 </code></pre>
 
@@ -4800,11 +4810,11 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(
-    principal: u64,
-    fee_rate_bps: u8,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(
+principal: u64,
+fee_rate_bps: u8,
 ): u64 {
-    ((((principal <b>as</b> u128) * (fee_rate_bps <b>as</b> u128)) / <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASIS_POINTS_PER_UNIT">BASIS_POINTS_PER_UNIT</a>) <b>as</b> u64)
+((((principal <b>as</b> u128) * (fee_rate_bps <b>as</b> u128)) / <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASIS_POINTS_PER_UNIT">BASIS_POINTS_PER_UNIT</a>) <b>as</b> u64)
 }
 </code></pre>
 
@@ -4824,9 +4834,9 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_concatenation">get_concatenation</a>(base: String, additional: String): String {
-    <a href="_append">string::append</a>(&<b>mut</b> base, additional);
-    base
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_concatenation">get_concatenation</a>(base: String, additional: String): String {
+<a href="_append">string::append</a>(&<b>mut</b> base, additional);
+base
 }
 </code></pre>
 
@@ -4921,23 +4931,24 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_verified_symbol_emoji_bytes">get_verified_symbol_emoji_bytes</a>(
-    registry_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>,
-    emojis: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_verified_symbol_emoji_bytes">get_verified_symbol_emoji_bytes</a>(
+registry_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>,
+emojis: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;,
 ): <a href="">vector</a>&lt;u8&gt; {
-    <b>let</b> coin_symbol_emojis_ref = &registry_ref.coin_symbol_emojis;
-    <b>let</b> verified_bytes = <a href="">vector</a>[];
-    for (i in 0..<a href="_length">vector::length</a>(&emojis)) {
-        <b>let</b> emoji = *<a href="_borrow">vector::borrow</a>(&emojis, i);
-        <b>assert</b>!(<a href="_contains">table::contains</a>(coin_symbol_emojis_ref, emoji), <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_NOT_SUPPORTED_SYMBOL_EMOJI">E_NOT_SUPPORTED_SYMBOL_EMOJI</a>);
-        <a href="_append">vector::append</a>(&<b>mut</b> verified_bytes, emoji);
-    };
-    <b>assert</b>!(
-        <a href="_length">vector::length</a>(&verified_bytes) &lt;= (<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MAX_SYMBOL_LENGTH">MAX_SYMBOL_LENGTH</a> <b>as</b> u64),
-        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_TOO_LONG">E_EMOJI_BYTES_TOO_LONG</a>
-    );
+<b>let</b> coin_symbol_emojis_ref = &registry_ref.coin_symbol_emojis;
+<b>let</b> verified_bytes = <a href="">vector</a>[];
+for (i in 0..<a href="_length">vector::length</a>(&emojis)) {
+<b>let</b> emoji = *<a href="_borrow">vector::borrow</a>(&emojis, i);
+<b>assert</b>!(<a href="_contains">table::contains</a>(coin_symbol_emojis_ref, emoji), <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_NOT_SUPPORTED_SYMBOL_EMOJI">E_NOT_SUPPORTED_SYMBOL_EMOJI</a>);
+<a href="_append">vector::append</a>(&<b>mut</b> verified_bytes, emoji);
+};
+<b>assert</b>!(!<a href="_is_empty">vector::is_empty</a>(&verified_bytes), <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_EMPTY">E_EMOJI_BYTES_EMPTY</a>);
+<b>assert</b>!(
+<a href="_length">vector::length</a>(&verified_bytes) &lt;= (<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MAX_SYMBOL_LENGTH">MAX_SYMBOL_LENGTH</a> <b>as</b> u64),
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_EMOJI_BYTES_TOO_LONG">E_EMOJI_BYTES_TOO_LONG</a>
+);
 
-    verified_bytes
+verified_bytes
 }
 </code></pre>
 
@@ -4957,20 +4968,20 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_instantaneous_stats">instantaneous_stats</a>(market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_InstantaneousStats">InstantaneousStats</a> {
-    <b>let</b> lp_coin_supply = market_ref.lp_coin_supply;
-    <b>let</b> in_bonding_curve = lp_coin_supply == 0;
-    <b>let</b> total_quote_locked = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_total_quote_locked">total_quote_locked</a>(market_ref, in_bonding_curve);
-    <b>let</b> tvl = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl">tvl</a>(market_ref, in_bonding_curve);
-    <b>let</b> (supply_minuend, reserves_ref) =
-        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_assign_supply_minuend_reserves_ref">assign_supply_minuend_reserves_ref</a>(market_ref, in_bonding_curve);
-    <b>let</b> (fdv, market_cap) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(*reserves_ref, supply_minuend);
-    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_InstantaneousStats">InstantaneousStats</a> {
-        total_quote_locked,
-        total_value_locked: tvl,
-        market_cap,
-        fully_diluted_value: fdv,
-    }
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_instantaneous_stats">instantaneous_stats</a>(market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_InstantaneousStats">InstantaneousStats</a> {
+<b>let</b> lp_coin_supply = market_ref.lp_coin_supply;
+<b>let</b> in_bonding_curve = lp_coin_supply == 0;
+<b>let</b> total_quote_locked = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_total_quote_locked">total_quote_locked</a>(market_ref, in_bonding_curve);
+<b>let</b> tvl = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl">tvl</a>(market_ref, in_bonding_curve);
+<b>let</b> (supply_minuend, reserves_ref) =
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_assign_supply_minuend_reserves_ref">assign_supply_minuend_reserves_ref</a>(market_ref, in_bonding_curve);
+<b>let</b> (fdv, market_cap) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(*reserves_ref, supply_minuend);
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_InstantaneousStats">InstantaneousStats</a> {
+total_quote_locked,
+total_value_locked: tvl,
+market_cap,
+fully_diluted_value: fdv,
+}
 }
 </code></pre>
 
@@ -5013,11 +5024,11 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_last_period_boundary">last_period_boundary</a>(
-    time: u64,
-    period: u64,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_last_period_boundary">last_period_boundary</a>(
+time: u64,
+period: u64,
 ): u64 {
-    (time / period) * period
+(time / period) * period
 }
 </code></pre>
 
@@ -5037,35 +5048,35 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_liquidity_provision_operation_epilogue">liquidity_provision_operation_epilogue</a>(
-    tvl: u128,
-    fdv: u128,
-    market_cap: u128,
-    lp_coin_supply: u128,
-    total_quote_locked: u64,
-    trigger: u8,
-    market_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_liquidity_provision_operation_epilogue">liquidity_provision_operation_epilogue</a>(
+tvl: u128,
+fdv: u128,
+market_cap: u128,
+lp_coin_supply: u128,
+total_quote_locked: u64,
+trigger: u8,
+market_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
 ) {
-    // Update periodic state trackers.
-    <a href="_for_each_mut">vector::for_each_mut</a>(&<b>mut</b> market_ref_mut.periodic_state_trackers, |e| {
-        // Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
-        <b>let</b> tracker_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateTracker">PeriodicStateTracker</a> = e;
-        tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
-        tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
-        tracker_ref_mut.ends_in_bonding_curve = <b>false</b>;
-    });
+// Update periodic state trackers.
+<a href="_for_each_mut">vector::for_each_mut</a>(&<b>mut</b> market_ref_mut.periodic_state_trackers, |e| {
+// Type declaration per https://github.com/aptos-labs/aptos-core/issues/9508.
+<b>let</b> tracker_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PeriodicStateTracker">PeriodicStateTracker</a> = e;
+tracker_ref_mut.tvl_to_lp_coin_ratio_end.tvl = tvl;
+tracker_ref_mut.tvl_to_lp_coin_ratio_end.lp_coins = lp_coin_supply;
+tracker_ref_mut.ends_in_bonding_curve = <b>false</b>;
+});
 
-    // Get instantaneous stats, bump market state.
-    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_bump_market_state">bump_market_state</a>(
-        market_ref_mut,
-        trigger,
-        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_InstantaneousStats">InstantaneousStats</a> {
-            total_quote_locked,
-            total_value_locked: tvl,
-            market_cap: market_cap,
-            fully_diluted_value: fdv,
-        },
-    );
+// Get instantaneous stats, bump market state.
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_bump_market_state">bump_market_state</a>(
+market_ref_mut,
+trigger,
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_InstantaneousStats">InstantaneousStats</a> {
+ total_quote_locked,
+ total_value_locked: tvl,
+ market_cap: market_cap,
+ fully_diluted_value: fdv,
+},
+);
 }
 </code></pre>
 
@@ -5085,12 +5096,12 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mint_lp_coins">mint_lp_coins</a>&lt;Emojicoin, EmojicoinLP&gt;(
-    market_address: <b>address</b>,
-    amount: u64,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mint_lp_coins">mint_lp_coins</a>&lt;Emojicoin, EmojicoinLP&gt;(
+market_address: <b>address</b>,
+amount: u64,
 ): Coin&lt;EmojicoinLP&gt; <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a> {
-    <b>let</b> coin_caps = <b>borrow_global</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt;&gt;(market_address);
-    <a href="_mint">coin::mint</a>&lt;EmojicoinLP&gt;(amount, &coin_caps.mint)
+<b>let</b> coin_caps = <b>borrow_global</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>&lt;Emojicoin, EmojicoinLP&gt;&gt;(market_address);
+<a href="_mint">coin::mint</a>&lt;EmojicoinLP&gt;(amount, &coin_caps.mint)
 }
 </code></pre>
 
@@ -5110,12 +5121,12 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(
-    a: u64,
-    b: u64,
-    c: u64,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(
+a: u64,
+b: u64,
+c: u64,
 ): u128 {
-    (a <b>as</b> u128) * (b <b>as</b> u128) / (c <b>as</b> u128)
+(a <b>as</b> u128) * (b <b>as</b> u128) / (c <b>as</b> u128)
 }
 </code></pre>
 
@@ -5135,43 +5146,43 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_provide_liquidity_inner">simulate_provide_liquidity_inner</a>(
-    provider: <b>address</b>,
-    quote_amount: u64,
-    market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_provide_liquidity_inner">simulate_provide_liquidity_inner</a>(
+provider: <b>address</b>,
+quote_amount: u64,
+market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
 ): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Liquidity">Liquidity</a> {
-    <b>assert</b>!(market_ref.lp_coin_supply &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_STILL_IN_BONDING_CURVE">E_STILL_IN_BONDING_CURVE</a>);
-    <b>assert</b>!(quote_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_LIQUIDITY_NO_QUOTE">E_LIQUIDITY_NO_QUOTE</a>);
-    <b>let</b> reserves_ref = market_ref.cpamm_real_reserves;
-    <b>let</b> base_reserves_u128 = (reserves_ref.base <b>as</b> u128);
-    <b>let</b> quote_reserves_u128 = (reserves_ref.quote <b>as</b> u128);
-    <b>let</b> quote_amount_u128 = (quote_amount <b>as</b> u128);
+<b>assert</b>!(market_ref.lp_coin_supply &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_STILL_IN_BONDING_CURVE">E_STILL_IN_BONDING_CURVE</a>);
+<b>assert</b>!(quote_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_LIQUIDITY_NO_QUOTE">E_LIQUIDITY_NO_QUOTE</a>);
+<b>let</b> reserves_ref = market_ref.cpamm_real_reserves;
+<b>let</b> base_reserves_u128 = (reserves_ref.base <b>as</b> u128);
+<b>let</b> quote_reserves_u128 = (reserves_ref.quote <b>as</b> u128);
+<b>let</b> quote_amount_u128 = (quote_amount <b>as</b> u128);
 
-    // Proportional base amount: (base_reserves / quote_reserves) * (quote_amount).
-    <b>let</b> base_amount_numerator = (base_reserves_u128 * quote_amount_u128);
-    <b>let</b> base_amount_denominator = quote_reserves_u128;
+// Proportional base amount: (base_reserves / quote_reserves) * (quote_amount).
+<b>let</b> base_amount_numerator = (base_reserves_u128 * quote_amount_u128);
+<b>let</b> base_amount_denominator = quote_reserves_u128;
 
-    // Have LP <b>assume</b> the effects of truncation by rounding up <b>to</b> nearest base subunit.
-    <b>let</b> remainder = base_amount_numerator % base_amount_denominator;
-    <b>let</b> round_if_needed = 1 - ((remainder ^ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_HI_128">HI_128</a>) / <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_HI_128">HI_128</a>);
-    <b>let</b> base_amount_u128 = (base_amount_numerator / base_amount_denominator) + round_if_needed;
+// Have LP <b>assume</b> the effects of truncation by rounding up <b>to</b> nearest base subunit.
+<b>let</b> remainder = base_amount_numerator % base_amount_denominator;
+<b>let</b> round_if_needed = 1 - ((remainder ^ <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_HI_128">HI_128</a>) / <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_HI_128">HI_128</a>);
+<b>let</b> base_amount_u128 = (base_amount_numerator / base_amount_denominator) + round_if_needed;
 
-    // Proportional LP coins <b>to</b> mint: (quote_amount / quote_reserves) * (lp_coin_supply).
-    <b>let</b> lp_coin_amount_u128 =
-        (quote_amount_u128 * market_ref.lp_coin_supply) / quote_reserves_u128;
+// Proportional LP coins <b>to</b> mint: (quote_amount / quote_reserves) * (lp_coin_supply).
+<b>let</b> lp_coin_amount_u128 =
+(quote_amount_u128 * market_ref.lp_coin_supply) / quote_reserves_u128;
 
-    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Liquidity">Liquidity</a> {
-        market_id: market_ref.metadata.market_id,
-        time: <a href="_now_microseconds">timestamp::now_microseconds</a>(),
-        market_nonce: market_ref.sequence_info.nonce + 1,
-        provider,
-        base_amount: (base_amount_u128 <b>as</b> u64),
-        quote_amount,
-        lp_coin_amount: (lp_coin_amount_u128 <b>as</b> u64),
-        liquidity_provided: <b>true</b>,
-        pro_rata_base_donation_claim_amount: 0,
-        pro_rata_quote_donation_claim_amount: 0,
-    }
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Liquidity">Liquidity</a> {
+market_id: market_ref.metadata.market_id,
+time: <a href="_now_microseconds">timestamp::now_microseconds</a>(),
+market_nonce: market_ref.sequence_info.nonce + 1,
+provider,
+base_amount: (base_amount_u128 <b>as</b> u64),
+quote_amount,
+lp_coin_amount: (lp_coin_amount_u128 <b>as</b> u64),
+liquidity_provided: <b>true</b>,
+pro_rata_base_donation_claim_amount: 0,
+pro_rata_quote_donation_claim_amount: 0,
+}
 }
 </code></pre>
 
@@ -5191,50 +5202,50 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_remove_liquidity_inner">simulate_remove_liquidity_inner</a>&lt;Emojicoin&gt;(
-    provider: <b>address</b>,
-    lp_coin_amount: u64,
-    market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_remove_liquidity_inner">simulate_remove_liquidity_inner</a>&lt;Emojicoin&gt;(
+provider: <b>address</b>,
+lp_coin_amount: u64,
+market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
 ): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Liquidity">Liquidity</a> {
-    <b>let</b> lp_coin_supply = market_ref.lp_coin_supply;
-    <b>let</b> lp_coin_amount_u128 = (lp_coin_amount <b>as</b> u128);
+<b>let</b> lp_coin_supply = market_ref.lp_coin_supply;
+<b>let</b> lp_coin_amount_u128 = (lp_coin_amount <b>as</b> u128);
 
-    <b>assert</b>!(lp_coin_supply &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_STILL_IN_BONDING_CURVE">E_STILL_IN_BONDING_CURVE</a>);
-    <b>assert</b>!(lp_coin_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_LIQUIDITY_NO_LP_COINS">E_LIQUIDITY_NO_LP_COINS</a>);
+<b>assert</b>!(lp_coin_supply &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_STILL_IN_BONDING_CURVE">E_STILL_IN_BONDING_CURVE</a>);
+<b>assert</b>!(lp_coin_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_LIQUIDITY_NO_LP_COINS">E_LIQUIDITY_NO_LP_COINS</a>);
 
-    <b>let</b> reserves_ref = market_ref.cpamm_real_reserves;
-    <b>let</b> base_reserves_u128 = (reserves_ref.base <b>as</b> u128);
-    <b>let</b> quote_reserves_u128 = (reserves_ref.quote <b>as</b> u128);
+<b>let</b> reserves_ref = market_ref.cpamm_real_reserves;
+<b>let</b> base_reserves_u128 = (reserves_ref.base <b>as</b> u128);
+<b>let</b> quote_reserves_u128 = (reserves_ref.quote <b>as</b> u128);
 
-    // Proportional base amount: (lp_coin_amount / lp_coin_supply) * (base_reserves).
-    <b>let</b> base_amount = ((lp_coin_amount_u128 * base_reserves_u128 / lp_coin_supply) <b>as</b> u64);
+// Proportional base amount: (lp_coin_amount / lp_coin_supply) * (base_reserves).
+<b>let</b> base_amount = ((lp_coin_amount_u128 * base_reserves_u128 / lp_coin_supply) <b>as</b> u64);
 
-    // Proportional quote amount: (lp_coin_amount / lp_coin_supply) * (quote_reserves).
-    <b>let</b> quote_amount = ((lp_coin_amount_u128 * quote_reserves_u128 / lp_coin_supply) <b>as</b> u64);
+// Proportional quote amount: (lp_coin_amount / lp_coin_supply) * (quote_reserves).
+<b>let</b> quote_amount = ((lp_coin_amount_u128 * quote_reserves_u128 / lp_coin_supply) <b>as</b> u64);
 
-    // Check <b>to</b> see <b>if</b> base or quote donations have been sent <b>to</b> market <a href="">coin</a> stores.
-    <b>let</b> market_address = market_ref.metadata.market_address;
-    <b>let</b> market_balance_base_u128 = (<a href="_balance">coin::balance</a>&lt;Emojicoin&gt;(market_address) <b>as</b> u128);
-    <b>let</b> market_balance_quote_u128 = (<a href="_balance">coin::balance</a>&lt;AptosCoin&gt;(market_address) <b>as</b> u128);
-    <b>let</b> base_donations_u128 = market_balance_base_u128 - base_reserves_u128;
-    <b>let</b> quote_donations_u128 = market_balance_quote_u128 - quote_reserves_u128;
-    <b>let</b> pro_rata_base_donation_claim_amount =
-        (((lp_coin_amount_u128 * base_donations_u128) / lp_coin_supply) <b>as</b> u64);
-    <b>let</b> pro_rata_quote_donation_claim_amount =
-        (((lp_coin_amount_u128 * quote_donations_u128) / lp_coin_supply) <b>as</b> u64);
+// Check <b>to</b> see <b>if</b> base or quote donations have been sent <b>to</b> market <a href="">coin</a> stores.
+<b>let</b> market_address = market_ref.metadata.market_address;
+<b>let</b> market_balance_base_u128 = (<a href="_balance">coin::balance</a>&lt;Emojicoin&gt;(market_address) <b>as</b> u128);
+<b>let</b> market_balance_quote_u128 = (<a href="_balance">coin::balance</a>&lt;AptosCoin&gt;(market_address) <b>as</b> u128);
+<b>let</b> base_donations_u128 = market_balance_base_u128 - base_reserves_u128;
+<b>let</b> quote_donations_u128 = market_balance_quote_u128 - quote_reserves_u128;
+<b>let</b> pro_rata_base_donation_claim_amount =
+(((lp_coin_amount_u128 * base_donations_u128) / lp_coin_supply) <b>as</b> u64);
+<b>let</b> pro_rata_quote_donation_claim_amount =
+(((lp_coin_amount_u128 * quote_donations_u128) / lp_coin_supply) <b>as</b> u64);
 
-    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Liquidity">Liquidity</a> {
-        market_id: market_ref.metadata.market_id,
-        time: <a href="_now_microseconds">timestamp::now_microseconds</a>(),
-        market_nonce: market_ref.sequence_info.nonce + 1,
-        provider,
-        base_amount,
-        quote_amount,
-        lp_coin_amount,
-        liquidity_provided: <b>false</b>,
-        pro_rata_base_donation_claim_amount,
-        pro_rata_quote_donation_claim_amount,
-    }
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Liquidity">Liquidity</a> {
+market_id: market_ref.metadata.market_id,
+time: <a href="_now_microseconds">timestamp::now_microseconds</a>(),
+market_nonce: market_ref.sequence_info.nonce + 1,
+provider,
+base_amount,
+quote_amount,
+lp_coin_amount,
+liquidity_provided: <b>false</b>,
+pro_rata_base_donation_claim_amount,
+pro_rata_quote_donation_claim_amount,
+}
 }
 </code></pre>
 
@@ -5254,15 +5265,15 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_total_quote_locked">total_quote_locked</a>(
-    market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
-    in_bonding_curve: bool,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_total_quote_locked">total_quote_locked</a>(
+market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+in_bonding_curve: bool,
 ): u64 {
-    <b>if</b> (in_bonding_curve) {
-        market_ref.clamm_virtual_reserves.quote - <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_FLOOR">QUOTE_VIRTUAL_FLOOR</a>
-    } <b>else</b> {
-        market_ref.cpamm_real_reserves.quote
-    }
+<b>if</b> (in_bonding_curve) {
+market_ref.clamm_virtual_reserves.quote - <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_FLOOR">QUOTE_VIRTUAL_FLOOR</a>
+} <b>else</b> {
+market_ref.cpamm_real_reserves.quote
+}
 }
 </code></pre>
 
@@ -5282,15 +5293,15 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl">tvl</a>(
-    market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
-    in_bonding_curve: bool,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl">tvl</a>(
+market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+in_bonding_curve: bool,
 ): u128 {
-    <b>if</b> (in_bonding_curve) {
-        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_clamm">tvl_clamm</a>(market_ref.clamm_virtual_reserves)
-    } <b>else</b> {
-        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_cpamm">tvl_cpamm</a>(market_ref.cpamm_real_reserves.quote)
-    }
+<b>if</b> (in_bonding_curve) {
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_clamm">tvl_clamm</a>(market_ref.clamm_virtual_reserves)
+} <b>else</b> {
+<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_cpamm">tvl_cpamm</a>(market_ref.cpamm_real_reserves.quote)
+}
 }
 </code></pre>
 
@@ -5310,21 +5321,21 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_clamm">tvl_clamm</a>(
-    virtual_reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_clamm">tvl_clamm</a>(
+virtual_reserves: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Reserves">Reserves</a>,
 ): u128 {
-    <b>let</b> quote_virtual = virtual_reserves.quote;
-    <b>let</b> quote_real = quote_virtual - <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_FLOOR">QUOTE_VIRTUAL_FLOOR</a>;
-    <b>if</b> (quote_real == 0) { // Report no TVL <b>if</b> no one <b>has</b> bought into bonding curve.
-        0
-    } <b>else</b> {
-        <b>let</b> base_virtual = virtual_reserves.base;
-        // Determine total amount of all base still locked in the market.
-        <b>let</b> base_real = base_virtual - <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_FLOOR">BASE_VIRTUAL_FLOOR</a> + <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_REMAINDER">EMOJICOIN_REMAINDER</a>;
-        // Convert <b>to</b> an effective quote value via multiplying by spot price.
-        <b>let</b> base_real_denominated_in_quote = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(quote_virtual, base_real, base_virtual);
-        (quote_real <b>as</b> u128) + base_real_denominated_in_quote
-    }
+<b>let</b> quote_virtual = virtual_reserves.quote;
+<b>let</b> quote_real = quote_virtual - <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_FLOOR">QUOTE_VIRTUAL_FLOOR</a>;
+<b>if</b> (quote_real == 0) { // Report no TVL <b>if</b> no one <b>has</b> bought into bonding curve.
+0
+} <b>else</b> {
+<b>let</b> base_virtual = virtual_reserves.base;
+// Determine total amount of all base still locked in the market.
+<b>let</b> base_real = base_virtual - <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_FLOOR">BASE_VIRTUAL_FLOOR</a> + <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_REMAINDER">EMOJICOIN_REMAINDER</a>;
+// Convert <b>to</b> an effective quote value via multiplying by spot price.
+<b>let</b> base_real_denominated_in_quote = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_mul_div">mul_div</a>(quote_virtual, base_real, base_virtual);
+(quote_real <b>as</b> u128) + base_real_denominated_in_quote
+}
 }
 </code></pre>
 
@@ -5344,11 +5355,11 @@ true if the supplemental chat emojis were added, false otherwise.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_cpamm">tvl_cpamm</a>(
-    real_quote_reserves: u64,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_cpamm">tvl_cpamm</a>(
+real_quote_reserves: u64,
 ): u128 {
-    // Base reserves priced in quote are equal <b>to</b> the value of quote reserves.
-    2 * (real_quote_reserves <b>as</b> u128)
+// Base reserves priced in quote are equal <b>to</b> the value of quote reserves.
+2 * (real_quote_reserves <b>as</b> u128)
 }
 </code></pre>
 
@@ -5381,21 +5392,21 @@ a few terms require a few extra bits, there should not be any overflow.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_per_lp_coin_growth_q64_inline">tvl_per_lp_coin_growth_q64_inline</a>(
-    start: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_TVLtoLPCoinRatio">TVLtoLPCoinRatio</a>,
-    end: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_TVLtoLPCoinRatio">TVLtoLPCoinRatio</a>,
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl_per_lp_coin_growth_q64_inline">tvl_per_lp_coin_growth_q64_inline</a>(
+start: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_TVLtoLPCoinRatio">TVLtoLPCoinRatio</a>,
+end: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_TVLtoLPCoinRatio">TVLtoLPCoinRatio</a>,
 ): u128 {
-    <b>let</b> a = start.tvl;
-    <b>let</b> b = start.lp_coins;
-    <b>let</b> c = end.tvl;
-    <b>let</b> d = end.lp_coins;
-    <b>if</b> (a == 0 || d == 0) {
-        0
-    } <b>else</b> {
-        <b>let</b> numerator = (b <b>as</b> u256) * (c <b>as</b> u256);
-        <b>let</b> denominator = (a <b>as</b> u256) * (d <b>as</b> u256);
-        (((numerator &lt;&lt; <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SHIFT_Q64">SHIFT_Q64</a>) / denominator) <b>as</b> u128)
-    }
+<b>let</b> a = start.tvl;
+<b>let</b> b = start.lp_coins;
+<b>let</b> c = end.tvl;
+<b>let</b> d = end.lp_coins;
+<b>if</b> (a == 0 || d == 0) {
+0
+} <b>else</b> {
+<b>let</b> numerator = (b <b>as</b> u256) * (c <b>as</b> u256);
+<b>let</b> denominator = (a <b>as</b> u256) * (d <b>as</b> u256);
+(((numerator &lt;&lt; <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SHIFT_Q64">SHIFT_Q64</a>) / denominator) <b>as</b> u128)
+}
 }
 </code></pre>
 
@@ -5415,32 +5426,32 @@ a few terms require a few extra bits, there should not be any overflow.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_update_global_fdv_market_cap_for_liquidity_operation">update_global_fdv_market_cap_for_liquidity_operation</a>(
-    fdv_start: u128,
-    market_cap_start: u128,
-    fdv_end: u128,
-    market_cap_end: u128,
-    global_stats_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_GlobalStats">GlobalStats</a>
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_update_global_fdv_market_cap_for_liquidity_operation">update_global_fdv_market_cap_for_liquidity_operation</a>(
+fdv_start: u128,
+market_cap_start: u128,
+fdv_end: u128,
+market_cap_end: u128,
+global_stats_ref_mut: &<b>mut</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_GlobalStats">GlobalStats</a>
 ) {
-    // Declare fields <b>to</b> <b>update</b>.
-    <b>let</b> global_fdv_ref_mut = &<b>mut</b> global_stats_ref_mut.fully_diluted_value;
-    <b>let</b> global_market_cap_ref_mut = &<b>mut</b> global_stats_ref_mut.market_cap;
+// Declare fields <b>to</b> <b>update</b>.
+<b>let</b> global_fdv_ref_mut = &<b>mut</b> global_stats_ref_mut.fully_diluted_value;
+<b>let</b> global_market_cap_ref_mut = &<b>mut</b> global_stats_ref_mut.market_cap;
 
-    // Although FDV and market cap shouldn't change in a theoretical sense during a liquidity
-    // provision or removal operation (since circulating supply and price haven't changed),
-    // their numeric values may deviate slightly due <b>to</b> integer truncation (since price is a
-    // result of CPAMM reserve amounts). Hence the <b>global</b> values must be updated <b>to</b> prevent the
-    // accumulation of rounding errors.
-    <b>if</b> (fdv_end &gt; fdv_start) {
-        <a href="_try_add">aggregator_v2::try_add</a>(global_fdv_ref_mut, fdv_end - fdv_start);
-    } <b>else</b> {
-        <a href="_try_sub">aggregator_v2::try_sub</a>(global_fdv_ref_mut, fdv_start - fdv_end);
-    };
-    <b>if</b> (market_cap_end &gt; market_cap_start) {
-        <a href="_try_add">aggregator_v2::try_add</a>(global_market_cap_ref_mut, market_cap_end - market_cap_start);
-    } <b>else</b> {
-        <a href="_try_sub">aggregator_v2::try_sub</a>(global_market_cap_ref_mut, market_cap_start - market_cap_end);
-    };
+// Although FDV and market cap shouldn't change in a theoretical sense during a liquidity
+// provision or removal operation (since circulating supply and price haven't changed),
+// their numeric values may deviate slightly due <b>to</b> integer truncation (since price is a
+// result of CPAMM reserve amounts). Hence the <b>global</b> values must be updated <b>to</b> prevent the
+// accumulation of rounding errors.
+<b>if</b> (fdv_end &gt; fdv_start) {
+<a href="_try_add">aggregator_v2::try_add</a>(global_fdv_ref_mut, fdv_end - fdv_start);
+} <b>else</b> {
+<a href="_try_sub">aggregator_v2::try_sub</a>(global_fdv_ref_mut, fdv_start - fdv_end);
+};
+<b>if</b> (market_cap_end &gt; market_cap_start) {
+<a href="_try_add">aggregator_v2::try_add</a>(global_market_cap_ref_mut, market_cap_end - market_cap_start);
+} <b>else</b> {
+<a href="_try_sub">aggregator_v2::try_sub</a>(global_market_cap_ref_mut, market_cap_start - market_cap_end);
+};
 }
 </code></pre>
 
@@ -5460,15 +5471,15 @@ a few terms require a few extra bits, there should not be any overflow.
 ##### Implementation
 
 
-<pre><code>inline <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_valid_coin_types">valid_coin_types</a>&lt;Emojicoin, EmojicoinLP&gt;(market_address: <b>address</b>): bool {
-    <b>let</b> emoji_type = &<a href="_type_of">type_info::type_of</a>&lt;Emojicoin&gt;();
-    <b>let</b> lp_type = &<a href="_type_of">type_info::type_of</a>&lt;EmojicoinLP&gt;();
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_valid_coin_types">valid_coin_types</a>&lt;Emojicoin, EmojicoinLP&gt;(market_address: <b>address</b>): bool {
+<b>let</b> emoji_type = &<a href="_type_of">type_info::type_of</a>&lt;Emojicoin&gt;();
+<b>let</b> lp_type = &<a href="_type_of">type_info::type_of</a>&lt;EmojicoinLP&gt;();
 
-    <a href="_account_address">type_info::account_address</a>(emoji_type) == market_address    &&
-    <a href="_account_address">type_info::account_address</a>(lp_type) == market_address       &&
-    <a href="_module_name">type_info::module_name</a>(emoji_type) == <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_COIN_FACTORY_AS_BYTES">COIN_FACTORY_AS_BYTES</a> &&
-    <a href="_module_name">type_info::module_name</a>(lp_type) == <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_COIN_FACTORY_AS_BYTES">COIN_FACTORY_AS_BYTES</a>    &&
-    <a href="_struct_name">type_info::struct_name</a>(emoji_type) == <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_STRUCT_NAME">EMOJICOIN_STRUCT_NAME</a> &&
-    <a href="_struct_name">type_info::struct_name</a>(lp_type) == <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_LP_STRUCT_NAME">EMOJICOIN_LP_STRUCT_NAME</a>
+<a href="_account_address">type_info::account_address</a>(emoji_type) == market_address    &&
+<a href="_account_address">type_info::account_address</a>(lp_type) == market_address       &&
+<a href="_module_name">type_info::module_name</a>(emoji_type) == <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_COIN_FACTORY_AS_BYTES">COIN_FACTORY_AS_BYTES</a> &&
+<a href="_module_name">type_info::module_name</a>(lp_type) == <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_COIN_FACTORY_AS_BYTES">COIN_FACTORY_AS_BYTES</a>    &&
+<a href="_struct_name">type_info::struct_name</a>(emoji_type) == <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_STRUCT_NAME">EMOJICOIN_STRUCT_NAME</a> &&
+<a href="_struct_name">type_info::struct_name</a>(lp_type) == <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_LP_STRUCT_NAME">EMOJICOIN_LP_STRUCT_NAME</a>
 }
 </code></pre>
