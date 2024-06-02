@@ -1,8 +1,8 @@
 import "server-only";
 
-import { type ContractTypes, type JSONTypes, toLiquidityEvent } from "../types";
+import { type Types, type JSONTypes, toLiquidityEvent } from "../types";
 import { STRUCT_STRINGS } from "../utils";
-import { TABLE_NAME, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
 import {
   type AggregateQueryResultsArgs,
   type EventsAndErrors,
@@ -24,10 +24,10 @@ export type LiquidityEventQueryArgs = {
 
 export const paginateLiquidityEvents = async (
   args: LiquidityEventQueryArgs & Omit<AggregateQueryResultsArgs, "query">
-): Promise<EventsAndErrors<ContractTypes.LiquidityEvent>> => {
+): Promise<EventsAndErrors<Types.LiquidityEvent>> => {
   const { user, marketID, liquidityEventType } = args;
   let query = postgrest
-    .from(TABLE_NAME)
+    .from(INBOX_EVENTS_TABLE)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.LiquidityEvent)
     .order("transaction_version", ORDER_BY.DESC);

@@ -8,7 +8,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
 import { type Events, converter, toGenericEvent } from "./events";
-import { type ContractTypes } from "../types";
+import { type Types } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
 
@@ -81,25 +81,25 @@ export function getEvents(response: UserTransactionResponse): Events {
     const data = conversionFunction(event.data);
     switch (event.type) {
       case TYPE_TAGS.SwapEvent.toString():
-        events.swapEvents.push(data as ContractTypes.SwapEvent);
+        events.swapEvents.push(data as Types.SwapEvent);
         break;
       case TYPE_TAGS.ChatEvent.toString():
-        events.chatEvents.push(data as ContractTypes.ChatEvent);
+        events.chatEvents.push(data as Types.ChatEvent);
         break;
       case TYPE_TAGS.MarketRegistrationEvent.toString():
-        events.marketRegistrationEvents.push(data as ContractTypes.MarketRegistrationEvent);
+        events.marketRegistrationEvents.push(data as Types.MarketRegistrationEvent);
         break;
       case TYPE_TAGS.PeriodicStateEvent.toString():
-        events.periodicStateEvents.push(data as ContractTypes.PeriodicStateEvent);
+        events.periodicStateEvents.push(data as Types.PeriodicStateEvent);
         break;
       case TYPE_TAGS.StateEvent.toString():
-        events.stateEvents.push(data as ContractTypes.StateEvent);
+        events.stateEvents.push(data as Types.StateEvent);
         break;
       case TYPE_TAGS.GlobalStateEvent.toString():
-        events.globalStateEvents.push(data as ContractTypes.GlobalStateEvent);
+        events.globalStateEvents.push(data as Types.GlobalStateEvent);
         break;
       case TYPE_TAGS.LiquidityEvent.toString():
-        events.liquidityEvents.push(data as ContractTypes.LiquidityEvent);
+        events.liquidityEvents.push(data as Types.LiquidityEvent);
         break;
       default:
         throw new Error(`Unknown event type: ${event.type}`);

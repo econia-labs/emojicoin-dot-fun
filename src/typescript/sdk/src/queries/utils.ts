@@ -1,6 +1,6 @@
 import "server-only";
 
-import { type ContractTypes } from "../types";
+import { type Types } from "../types";
 import { paginateMarketRegistrations } from "./market";
 
 /**
@@ -37,8 +37,7 @@ export const wrap = (val: number | bigint | string): string => {
   }
 };
 
-export const getMostRecentMarketEvent =
-  async (): Promise<ContractTypes.MarketRegistrationEvent | null> => {
-    const { markets } = await paginateMarketRegistrations();
-    return markets.length > 0 ? markets[0] : null;
-  };
+export const getMostRecentMarketEvent = async (): Promise<Types.MarketRegistrationEvent | null> => {
+  const { markets } = await paginateMarketRegistrations();
+  return markets.length > 0 ? markets[0] : null;
+};

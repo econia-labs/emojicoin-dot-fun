@@ -1,8 +1,8 @@
 import getInitialChatData from "lib/queries/initial/chats";
-import { fetchTopMarkets } from "lib/queries/initial/markets";
-import { fetchLastMarketState } from "lib/queries/initial/state";
+import { fetchLatestMarketState } from "lib/queries/initial/state";
 import getInitialSwapData from "lib/queries/initial/swaps";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
+import fetchMarketData from "lib/queries/initial/market-data";
 
 // We will revalidate the data cache every hour. This can be adjusted later based on how much data is fetched.
 export const revalidate = process.env.SHORT_REVALIDATE === "true" ? 10 : 3600;
@@ -12,9 +12,9 @@ type StaticParams = {
 };
 
 export const generateStaticParams = async (): Promise<Array<StaticParams>> => {
-  const data = await fetchTopMarkets();
-  return data.map((v) => ({
-    market: v.state.marketMetadata.marketID.toString(),
+  const data = await fetchMarketData();
+  return data.slice(1).map((v) => ({
+    market: v.marketID.toString(),
   }));
 };
 
@@ -25,20 +25,16 @@ interface EmojicoinPageProps {
 
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const marketID = params.params.market;
-  const res = await fetchLastMarketState(marketID);
-
+  const res = await fetchLatestMarketState(marketID);
   if (res) {
     const chatData = await getInitialChatData(marketID);
     const swapData = await getInitialSwapData(marketID);
-
     return (
       <ClientEmojicoinPage
         data={{
           swaps: swapData,
           chats: chatData,
-          emoji: res.emoji,
-          state: res.state,
-          market: res.market,
+          ...res,
         }}
       />
     );

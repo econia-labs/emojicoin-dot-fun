@@ -83,7 +83,7 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
             pt="6px"
             color="lightGray"
           >
-            {props.data.emoji.emoji}
+            {props.data.emoji}
           </Text>
         </StyledInputWrapper>
       </StyledInputContainer>

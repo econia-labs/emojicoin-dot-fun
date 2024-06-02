@@ -9,6 +9,29 @@ import {
 import { type AggregatorSnapshot } from "./core";
 
 namespace JSONTypes {
+  // One row in the `inbox_latest_state` table.
+  export type InboxLatestState = StateEvent & {
+    transaction_version: number;
+    marketID: number;
+  };
+
+  // Query return type for `market_data` view.
+  export type MarketDataView = {
+    market_id: number;
+    market_cap: number;
+    bump_time: number;
+    transaction_version: number;
+    n_swaps: number;
+    n_chat_messages: number;
+    clamm_virtual_reserves: Reserves;
+    cpamm_real_reserves: Reserves;
+    lp_coin_supply: number;
+    avg_execution_price_q64: number;
+    emoji_bytes: `0x${string}`;
+    all_time_volume: number;
+    daily_volume: number;
+  };
+
   export type ExtendRef = {
     self: AccountAddressString;
   };

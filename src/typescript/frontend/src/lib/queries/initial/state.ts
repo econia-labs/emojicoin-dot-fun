@@ -1,7 +1,7 @@
 "use server";
 
 import { cache } from "react";
-import { getLastMarketState } from "@sdk/queries/state";
+import { getLatestMarketState } from "@sdk/queries/state";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { SAMPLE_DATA_BASE_URL } from "./const";
 import { toMarketRegistrationEvent, toStateEvent } from "@sdk/types";
@@ -26,18 +26,13 @@ export const staticLastSwap = async (marketID: string) => {
   }
 };
 
-export const fetchLastMarketState = cache(async (marketID: string) => {
-  if (process.env.FORCE_STATIC_FETCH === "true") {
-    return staticLastSwap(marketID);
-  }
-
-  const res = await getLastMarketState({ marketID });
+export const fetchLatestMarketState = cache(async (marketID: string) => {
+  const res = await getLatestMarketState({ marketID });
 
   return res
     ? {
-        state: res.state,
-        market: res.market,
-        emoji: SYMBOL_DATA.byHex(res.market.marketMetadata.emojiBytes)!,
+        ...res,
+        ...SYMBOL_DATA.byHex(res?.emojiBytes)!,
       }
     : null;
 });

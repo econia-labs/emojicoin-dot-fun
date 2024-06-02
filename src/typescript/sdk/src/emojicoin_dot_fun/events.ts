@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unused-modules */
 import { type GUID, type EventJSON } from "../types/core";
 import {
-  type ContractTypes,
+  type Types,
   type EventTypes,
   toChatEvent,
   toGlobalStateEvent,
@@ -10,18 +10,18 @@ import {
   toPeriodicStateEvent,
   toStateEvent,
   toSwapEvent,
-} from "../types/contract-types";
+} from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { type JSONEventTypes } from "../types/json-types";
 
 export type Events = {
-  swapEvents: ContractTypes.SwapEvent[];
-  chatEvents: ContractTypes.ChatEvent[];
-  marketRegistrationEvents: ContractTypes.MarketRegistrationEvent[];
-  periodicStateEvents: ContractTypes.PeriodicStateEvent[];
-  stateEvents: ContractTypes.StateEvent[];
-  globalStateEvents: ContractTypes.GlobalStateEvent[];
-  liquidityEvents: ContractTypes.LiquidityEvent[];
+  swapEvents: Types.SwapEvent[];
+  chatEvents: Types.ChatEvent[];
+  marketRegistrationEvents: Types.MarketRegistrationEvent[];
+  periodicStateEvents: Types.PeriodicStateEvent[];
+  stateEvents: Types.StateEvent[];
+  globalStateEvents: Types.GlobalStateEvent[];
+  liquidityEvents: Types.LiquidityEvent[];
   events: AptosEvent[];
 };
 

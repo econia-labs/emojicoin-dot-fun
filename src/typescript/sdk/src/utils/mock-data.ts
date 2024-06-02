@@ -26,30 +26,33 @@ import {
   type TypeTag,
   type AptosConfig,
 } from "@aptos-labs/ts-sdk";
-import { TextDecoder } from "util";
 import {
   getEmojicoinMarketAddressAndTypeTags,
   registerMarketAndGetEmojicoinInfo,
 } from "../markets/utils";
 import { getRegistryAddress, getEvents } from "../emojicoin_dot_fun";
-import { getAptosClient, publishForTest } from "../../tests/utils";
+import { getTestHelpers, publishForTest } from "../../tests/utils";
 import { Chat, MarketMetadataByEmojiBytes, Swap } from "../emojicoin_dot_fun/emojicoin-dot-fun";
 import { BatchTransferCoins, ExistsAt } from "../emojicoin_dot_fun/aptos-framework";
 import { type Events } from "../emojicoin_dot_fun/events";
 import { type EmojicoinInfo } from "../types/contract";
-import { getRandomEmoji } from "../emoji_data/symbol-data";
+import { SYMBOL_DATA, getRandomEmoji } from "../emoji_data/symbol-data";
 import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING, MODULE_ADDRESS } from "../const";
 import { type SymbolEmojiData, getEmojiData } from "../emoji_data";
 import { divideWithPrecision, sleep } from "./misc";
 import { truncateAddress } from "./misc";
 
-const NUM_TRADERS = 900;
+const NUM_TRADERS = 500;
 const TRADES_PER_TRADER = 4;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
-const CHUNK_SIZE = 60;
-const TRADER_INITIAL_BALANCE = ONE_APT * 100;
+const CHUNK_SIZE = 25;
+const TRADER_INITIAL_BALANCE = ONE_APT * 1000;
+const TRADER_GAS_RESERVES = ONE_APT * 0.02;
 const DISTRIBUTOR_NECESSARY_BALANCE = CHUNK_SIZE * TRADER_INITIAL_BALANCE;
 const NUM_DISTRIBUTORS = NUM_TRADERS / CHUNK_SIZE;
+const { aptos, publisher } = getTestHelpers();
+
+// const PUBLISHER = publisher;
 const PUBLISHER = Account.fromPrivateKey({
   privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK!),
 });
@@ -58,8 +61,11 @@ if (!(NUM_TRADERS % CHUNK_SIZE === 0)) {
   throw new Error("NUM_TRADERS must be divisible by CHUNK_SIZE");
 }
 
+if (TRADER_INITIAL_BALANCE < TRADER_GAS_RESERVES) {
+  throw new Error("TRADER_INITIAL_BALANCE must be greater than TRADER_GAS_RESERVES");
+}
+
 async function main() {
-  const { aptos } = getAptosClient();
   const registryAddress = await setupTest(aptos);
 
   // Create distributors that will bear the sequence number for each transaction.
@@ -92,6 +98,7 @@ async function main() {
     });
     markets.push(res);
   }
+  console.log(`Registered ${numMarketsToRegister} markets!`);
 
   // --------------------------------------------------------------------------------------
   //                  Have all traders submit N trades and N chat messages
@@ -105,7 +112,7 @@ async function main() {
     const tradersChunk = TRADERS.slice(CHUNK_SIZE * i, (i + 1) * CHUNK_SIZE);
     const trades = tradersChunk.map((t) => {
       // Save 2% of the balance for gas fees.
-      const totalTradedAmount = BigInt(TRADER_INITIAL_BALANCE * 0.8);
+      const totalTradedAmount = BigInt((TRADER_INITIAL_BALANCE - TRADER_GAS_RESERVES) * 0.95); // 5% buffer.
       const amounts = generateRandomTrades({
         numTrades: TRADES_PER_TRADER,
         totalTradeAmount: totalTradedAmount,
@@ -131,12 +138,27 @@ async function main() {
             },
           });
 
-          return await swap.then(async (res) => {
-            const chatEvents = (await chat).events;
-            res.events.push(...chatEvents);
-            const events = getEvents(res);
-            return [res, events];
-          });
+          return await swap
+            .then(async (res) => {
+              try {
+                const chatEvents = (await chat).events;
+                res.events.push(...chatEvents);
+              } catch (e) {
+                console.dir(
+                  { s: t.accountAddress.toString(), m: "failed to submit chat message", err: e },
+                  { depth: 3 }
+                );
+              }
+              const events = getEvents(res);
+              return [res, events];
+            })
+            .catch((e) => {
+              console.dir(
+                { s: t.accountAddress.toString(), m: "failed to submit trade", err: e },
+                { depth: 3 }
+              );
+              return undefined;
+            });
         } catch (e) {
           return undefined;
         }
@@ -288,7 +310,7 @@ const submitTradeAndRandomChatMessage = async (args: {
     waitForTransactionOptions: {
       checkSuccess: false,
       waitForIndexer: false,
-      timeoutSecs: 600,
+      timeoutSecs: 60,
     },
   };
   const amt = args.tradeInputs.inputAmount;
@@ -301,6 +323,8 @@ const submitTradeAndRandomChatMessage = async (args: {
     integratorFeeRateBps: 0,
     options: {
       accountSequenceNumber: args.sequenceNumber,
+      maxGasAmount: TRADER_GAS_RESERVES / 100,
+      gasUnitPrice: 100,
     },
   });
 
@@ -312,6 +336,8 @@ const submitTradeAndRandomChatMessage = async (args: {
     user: args.user,
     options: {
       accountSequenceNumber: args.sequenceNumber + 1,
+      maxGasAmount: TRADER_GAS_RESERVES / 100,
+      gasUnitPrice: 100,
     },
   });
 
@@ -392,8 +418,7 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
     const state = events.stateEvents[0] ? events.stateEvents[0] : null;
     const swap = events.swapEvents[0] ? events.swapEvents[0] : null;
     if (state && swap) {
-      const textDecoder = new TextDecoder("utf-8");
-      const emoji = textDecoder.decode(state.marketMetadata.emojiBytes);
+      const emoji = SYMBOL_DATA.byHex(state.marketMetadata.emojiBytes)!.emoji;
       const aptSpent = divideWithPrecision({
         a: state.clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
         b: ONE_APT,
@@ -430,8 +455,7 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
     }
     const chat = events.chatEvents[0] ? events.chatEvents[0] : null;
     if (chat) {
-      const textDecoder = new TextDecoder("utf-8");
-      const emoji = textDecoder.decode(chat.marketMetadata.emojiBytes);
+      const emoji = SYMBOL_DATA.byHex(chat.marketMetadata.emojiBytes)!.emoji;
       const balAsFraction = divideWithPrecision({
         a: chat.userEmojicoinBalance,
         b: chat.circulatingSupply,

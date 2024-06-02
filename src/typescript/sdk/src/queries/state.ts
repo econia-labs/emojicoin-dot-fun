@@ -1,13 +1,8 @@
 import "server-only";
 
-import {
-  type ContractTypes,
-  toGlobalStateEvent,
-  toStateEvent,
-  toMarketRegistrationEvent,
-} from "../types/contract-types";
+import { type Types, toGlobalStateEvent, toStateEvent, toMarketDataView } from "../types";
 import { STRUCT_STRINGS } from "../utils/type-tags";
-import { TABLE_NAME, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, MARKET_DATA_VIEW, ORDER_BY } from "./const";
 import { wrap } from "./utils";
 import {
   type AggregateQueryResultsArgs,
@@ -17,60 +12,34 @@ import {
 import type JSONTypes from "../types/json-types";
 import { postgrest } from "./inbox-url";
 
-export const getLastMarketState = async ({ marketID }: { marketID: string }) => {
-  const { state, version: stateVersion } = await postgrest
-    .from(TABLE_NAME)
-    .select("*")
-    .filter("type", "eq", STRUCT_STRINGS.StateEvent)
-    .filter("data->market_metadata->>market_id", "eq", marketID)
-    .order("transaction_version", ORDER_BY.DESC)
-    .limit(1)
-    .then((r) => ({
-      version: r.data && r.data[0] ? r.data[0].transaction_version : null,
-      state: r.data && r.data[0] ? (r.data[0].data as JSONTypes.StateEvent) : null,
-      _stateError: r.error,
-    }));
-
-  const { market, version: mktRegistrationVersion } = await postgrest
-    .from(TABLE_NAME)
-    .select("*")
-    .filter("type", "eq", STRUCT_STRINGS.MarketRegistrationEvent)
-    .filter("data->market_metadata->>market_id", "eq", marketID)
-    .then((r) => ({
-      version: r.data && r.data[0] ? r.data[0].transaction_version : null,
-      market: r.data && r.data[0] ? (r.data[0].data as JSONTypes.MarketRegistrationEvent) : null,
-      _marketError: r.error,
-    }));
-
-  if ((!state && market) || (state && !market)) {
-    throw new Error(
-      "Market and state data are inconsistent. They should both either exist or not exist." +
-        "Make sure the `.next` and `.turbo` caches are clear and try again."
-    );
+export const getLatestMarketState = async ({
+  marketID,
+}: {
+  marketID: string | number | bigint;
+}) => {
+  if (BigInt(marketID) > Number.MAX_SAFE_INTEGER) {
+    throw new Error("Too many market IDs to convert to a `Number` safely.");
   }
 
-  if (!state) {
-    return null;
-  }
-  return {
-    state: {
-      ...toStateEvent(state),
-      version: stateVersion as number,
-    },
-    market: {
-      ...toMarketRegistrationEvent(market!),
-      version: mktRegistrationVersion as number,
-    },
-  };
+  const { latestState } = await postgrest
+    .from(MARKET_DATA_VIEW)
+    .select("*")
+    .filter("marketID", "eq", Number(marketID))
+    .then((r) => ({
+      latestState: r.data && r.data[0] ? (r.data[0] as JSONTypes.MarketDataView) : null,
+      _error: r.error,
+    }));
+
+  return latestState ? toMarketDataView(latestState) : null;
 };
 
 export const paginateGlobalStateEvents = async (
   args: Omit<AggregateQueryResultsArgs, "query">
-): Promise<EventsAndErrors<ContractTypes.GlobalStateEvent>> => {
+): Promise<EventsAndErrors<Types.GlobalStateEvent>> => {
   const res = await aggregateQueryResults<JSONTypes.GlobalStateEvent>({
     ...args,
     query: postgrest
-      .from(TABLE_NAME)
+      .from(INBOX_EVENTS_TABLE)
       .select("*")
       .filter("type", "eq", STRUCT_STRINGS.GlobalStateEvent)
       .order("transaction_version", ORDER_BY.DESC),
@@ -88,11 +57,11 @@ export type PaginateStateEventsByMarketIDQueryArgs = {
 
 export const paginateStateEventsByMarketID = async (
   args: PaginateStateEventsByMarketIDQueryArgs
-): Promise<EventsAndErrors<ContractTypes.StateEvent>> => {
+): Promise<EventsAndErrors<Types.StateEvent>> => {
   const { marketID } = args;
   const res = await aggregateQueryResults<JSONTypes.StateEvent>({
     query: postgrest
-      .from(TABLE_NAME)
+      .from(INBOX_EVENTS_TABLE)
       .select("*")
       .filter("type", "eq", STRUCT_STRINGS.StateEvent)
       .eq("data->market_metadata->market_id", wrap(marketID))

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { type PostgrestError, type PostgrestFilterBuilder } from "@supabase/postgrest-js";
-import { LIMIT, type TABLE_NAME } from "./const";
+import { LIMIT, type INBOX_EVENTS_TABLE } from "./const";
 
 /* eslint-disable-next-line import/no-unused-modules */
 export type QueryResponse<T> = {
@@ -18,7 +18,7 @@ export type EventsAndErrors<T> = {
 };
 
 export type AggregateQueryResultsArgs = {
-  query: PostgrestFilterBuilder<any, any, any, typeof TABLE_NAME, unknown>;
+  query: PostgrestFilterBuilder<any, any, any, typeof INBOX_EVENTS_TABLE, unknown>;
   maxNumQueries?: number;
 };
 
