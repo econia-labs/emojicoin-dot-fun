@@ -22,10 +22,18 @@ export type AggregateQueryResultsArgs = {
   maxNumQueries?: number;
 };
 
-type InnerResponseType<T> = Array<{
+type JSONResponseType<T> = {
   data: T;
   transaction_version: number;
-}>;
+};
+
+type CustomQueryResponseType<T> = T & { transaction_version: number };
+
+type InnerResponseType<T> = Array<JSONResponseType<T> | CustomQueryResponseType<T>>;
+
+const hasJSONData = <T>(
+  data: JSONResponseType<T> | CustomQueryResponseType<T>
+): data is JSONResponseType<T> => "data" in data;
 
 /**
  * Since most `getAll` queries are similar, we can abstract the shared logic into a helper function.
@@ -61,7 +69,11 @@ export const aggregateQueryResults = async <T>(
       error: res.error,
     }));
 
-    aggregated.push(...events.map((e) => ({ ...e.data, version: e.transaction_version })));
+    // TODO: Clean this up later. JSON queries have two nested data fields, while custom
+    // queries/views only have one (because of the postgrest API response).
+    aggregated.push(
+      ...events.map((e) => ({ ...(hasJSONData(e) ? e.data : e), version: e.transaction_version }))
+    );
     shouldContinue = events.length === LIMIT;
     errors.push(error);
     i += 1;

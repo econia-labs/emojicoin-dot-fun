@@ -13,7 +13,7 @@ type StaticParams = {
 
 export const generateStaticParams = async (): Promise<Array<StaticParams>> => {
   const data = await fetchMarketData();
-  return data.slice(1).map((v) => ({
+  return data.map((v) => ({
     market: v.marketID.toString(),
   }));
 };
