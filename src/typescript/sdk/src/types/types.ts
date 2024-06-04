@@ -2,6 +2,7 @@ import { hexToBytes } from "@noble/hashes/utils";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
+import { normalizeAddress } from "../utils";
 
 export namespace Types {
   export type ExtendRef = {
@@ -240,6 +241,7 @@ export namespace Types {
   // Query return type for `market_data` view.
   export type MarketDataView = {
     marketID: number;
+    marketAddress: `0x${string}`;
     marketCap: number;
     bumpTime: number;
     version: number;
@@ -513,6 +515,7 @@ export const toInboxLatestState = (data: JSONTypes.InboxLatestState): Types.Inbo
 
 export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDataView => ({
   marketID: Number(data.market_id),
+  marketAddress: normalizeAddress(data.market_address),
   marketCap: Number(data.market_cap),
   bumpTime: Number(data.bump_time),
   version: Number(data.transaction_version),

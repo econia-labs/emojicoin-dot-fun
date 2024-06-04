@@ -55,5 +55,5 @@ export const StyledInputContainer = styled.div<{ isForce: boolean }>`
   display: flex;
   position: relative;
   gap: 19px;
-  flex-direction: ${({ isForce }) => (isForce ? "column" : "column-reverse")};
+  flex-direction: column;
 `;

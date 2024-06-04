@@ -90,8 +90,6 @@ export const WalletItem: React.FC<{
   const [hover, setHover] = useState<boolean>(false);
   const { wallet: current } = useWallet();
 
-  console.warn(wallet.readyState);
-
   const inner = (
     <>
       {WALLET_ICON[wallet.name.toLowerCase()]}

@@ -1,7 +1,7 @@
 const REGEX = {
   includesVariableRegex: new RegExp(/%\S+?%/, "gm"),
-  numericInputRegex: /^[0-9]*[.,]?[0-9]*$/,
-  onlyNumbers: /^[0-9]*$/,
+  numericInputRegex: /^\d*[.,]?\d*$/,
+  onlyNumbers: /^\d*$/,
 };
 
 export default REGEX;

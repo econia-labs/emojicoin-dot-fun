@@ -15,11 +15,15 @@ import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoin
 import { StyledContentWrapper } from "./styled";
 import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { ConnectWalletContextProvider } from "./wallet-context/ConnectWalletContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
+// import { AptosConnectWalletPlugin } from "@aptos-connect/wallet-adapter-plugin";
+// import { APTOS_NETWORK } from "lib/env";
 import StyledToaster from "styles/StyledToaster";
+import { PetraWallet } from "petra-plugin-wallet-adapter";
 
 const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();
@@ -29,27 +33,40 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const isMobileMenuOpen = isOpen && !isDesktop;
 
-  const wallets = useMemo(() => [new PontemWallet(), new RiseWallet(), new MartianWallet()], []);
+  const wallets = useMemo(
+    () => [
+      new PetraWallet(),
+      new PontemWallet(),
+      new RiseWallet(),
+      new MartianWallet(),
+      // new AptosConnectWalletPlugin({ network: APTOS_NETWORK }),
+    ],
+    []
+  );
+
+  const queryClient = new QueryClient();
 
   return (
     <ThemeProvider theme={theme}>
-      <AptosWalletAdapterProvider plugins={wallets} autoConnect>
-        <ConnectWalletContextProvider>
-          <AptosContextProvider>
-            <GlobalStyle />
-            <Suspense fallback={<Loader />}>
-              <Provider store={store}>
-                <StyledToaster />
-                <StyledContentWrapper>
-                  <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                  {children}
-                  <Footer />
-                </StyledContentWrapper>
-              </Provider>
-            </Suspense>
-          </AptosContextProvider>
-        </ConnectWalletContextProvider>
-      </AptosWalletAdapterProvider>
+      <QueryClientProvider client={queryClient}>
+        <AptosWalletAdapterProvider plugins={wallets} autoConnect>
+          <ConnectWalletContextProvider>
+            <AptosContextProvider>
+              <GlobalStyle />
+              <Suspense fallback={<Loader />}>
+                <Provider store={store}>
+                  <StyledToaster />
+                  <StyledContentWrapper>
+                    <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                    {children}
+                    <Footer />
+                  </StyledContentWrapper>
+                </Provider>
+              </Suspense>
+            </AptosContextProvider>
+          </ConnectWalletContextProvider>
+        </AptosWalletAdapterProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 };

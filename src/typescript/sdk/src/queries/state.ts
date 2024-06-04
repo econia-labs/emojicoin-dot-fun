@@ -24,7 +24,7 @@ export const getLatestMarketState = async ({
   const { latestState } = await postgrest
     .from(MARKET_DATA_VIEW)
     .select("*")
-    .filter("marketID", "eq", Number(marketID))
+    .filter("market_id", "eq", Number(marketID))
     .then((r) => ({
       latestState: r.data && r.data[0] ? (r.data[0] as JSONTypes.MarketDataView) : null,
       _error: r.error,

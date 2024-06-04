@@ -4,7 +4,7 @@ import { Flex, Column, FlexGap } from "@containers";
 import { translationFunction } from "context/language-context";
 import { useTooltip } from "hooks";
 import { StyledHeaderEmoji, StyledHeaderText, StyledStatsText } from "./styled";
-import { toDecimalsAPT } from "lib/utils/decimals";
+import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
 
@@ -51,7 +51,7 @@ const MainInfo = (props: MainInfoProps) => {
               {t("Mkt. Cap:")}
             </StyledStatsText>
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.marketCap, 2)}
+              {toCoinDecimalString(props.data.marketCap, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>
@@ -66,7 +66,7 @@ const MainInfo = (props: MainInfoProps) => {
               {t("24 hour vol:")}
             </StyledStatsText>
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.dailyVolume, 2)}
+              {toCoinDecimalString(props.data.dailyVolume, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>
@@ -81,7 +81,7 @@ const MainInfo = (props: MainInfoProps) => {
               {t("All-time vol:")}
             </StyledStatsText>
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.allTimeVolume, 2)}
+              {toCoinDecimalString(props.data.allTimeVolume, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>

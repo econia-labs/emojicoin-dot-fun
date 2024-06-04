@@ -8,9 +8,9 @@ import { TableRowDesktop } from "./components";
 import { Table, Text, Th, ThInner, HeaderTr, TBody, EmptyTr } from "components";
 import { StyledTradeHistory } from "./styled";
 
-import { HEADERS } from "./constants";
+import { getHeaders } from "./misc";
 import { type TradeHistoryProps } from "../../types";
-import { toDecimalsAPT } from "lib/utils/decimals";
+import { toCoinDecimalString } from "lib/utils/decimals";
 import { rankFromAPTAmount } from "lib/utils/rank";
 
 const TradeHistory = (props: TradeHistoryProps) => {
@@ -19,7 +19,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
     useElementDimensions("tradeHistoryTableBody");
 
   const data = props.data.swaps.map((v) => ({
-    ...rankFromAPTAmount(Number(toDecimalsAPT(v.quoteVolume, 3))),
+    ...rankFromAPTAmount(Number(toCoinDecimalString(v.quoteVolume, 3))),
     apt: v.quoteVolume.toString(),
     emoji: v.baseVolume.toString(),
     type: v.isSell ? "sell" : "buy",
@@ -33,7 +33,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
       <Table minWidth="700px">
         <thead>
           <HeaderTr>
-            {HEADERS.map((th, index) => (
+            {getHeaders(props.data.emoji).map((th, index) => (
               <Th width={th.width} minWidth="100px" key={index}>
                 <ThInner>
                   <Text

@@ -25,6 +25,12 @@ export const HEADERS = [
   },
 ];
 
+export const getHeaders = (emoji: string) => {
+  const headers = HEADERS;
+  headers[2].text = emoji;
+  return headers;
+};
+
 export enum RankIcon {
   based = "🐳",
   n00b = "🐡",

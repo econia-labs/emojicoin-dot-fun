@@ -18,6 +18,7 @@ namespace JSONTypes {
   // Query return type for `market_data` view.
   export type MarketDataView = {
     market_id: number;
+    market_address: `0x${string}`;
     market_cap: number;
     bump_time: number;
     transaction_version: number;

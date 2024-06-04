@@ -12,7 +12,8 @@
     ]
   },
   "dependencies": {
-    "@aptos-labs/wallet-adapter-react": "^3.0.2",
+    "@aptos-labs/ts-sdk": "^1.18.0",
+    "@aptos-labs/wallet-adapter-react": "^3.0.3",
     "@econia-labs/emojicoin-sdk": "workspace:*",
     "@emotion/is-prop-valid": "^1.2.2",
     "@headlessui/react": "^2.0.4",
@@ -22,6 +23,9 @@
     "@popperjs/core": "^2.11.8",
     "@reduxjs/toolkit": "^1.9.5",
     "@rise-wallet/wallet-adapter": "^0.1.2",
+    "@tanstack/react-query": "^5.40.0",
+    "@types/big.js": "^6.2.2",
+    "big.js": "^6.2.1",
     "emoji-picker-react": "^4.9.2",
     "emoji-regex": "^10.3.0",
     "formik": "^2.4.4",

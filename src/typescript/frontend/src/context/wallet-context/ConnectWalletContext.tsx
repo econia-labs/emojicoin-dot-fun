@@ -23,7 +23,7 @@ const AutoConnect = () => {
     if (!account && localStorage.getItem("AptosWalletName")) {
       const f = async () => {
         try {
-          await connect(localStorage.getItem("AptosWalletName") as WalletName);
+          connect(localStorage.getItem("AptosWalletName") as WalletName);
         } catch (error) {
           if (t) {
             clearInterval(t);

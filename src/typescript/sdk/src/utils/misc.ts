@@ -67,18 +67,6 @@ export function getCurrentPeriodBoundary(period: CandlestickResolution) {
   return Math.floor(getTime(UnitOfTime.Microseconds) / period) * period;
 }
 
-export const divideWithPrecision = (args: {
-  a: bigint | number;
-  b: bigint | number;
-  decimals: number;
-}): number => {
-  const { decimals } = args;
-  const a = BigInt(args.a);
-  const b = BigInt(args.b);
-  const f = BigInt(10 ** decimals);
-  return Number((a * f) / b) / Number(f);
-};
-
 export const ADDRESS_FULL_CHAR_LENGTH = 64;
 
 export const truncateAddress = (input: HexInput): string => {

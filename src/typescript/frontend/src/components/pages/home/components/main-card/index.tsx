@@ -12,7 +12,7 @@ import {
   StyledMarketDataText,
   StyledImage,
 } from "./styled";
-import { toDecimalsAPT } from "lib/utils/decimals";
+import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
 import Link from "next/link";
@@ -76,7 +76,7 @@ const MainCard = (props: MainCardProps) => {
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured!.marketCap, 2)}{" "}
+                  {toCoinDecimalString(featured!.marketCap, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
@@ -90,7 +90,7 @@ const MainCard = (props: MainCardProps) => {
                   {t("24 hour vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured?.dailyVolume, 2) || "143.31"}{" "}
+                  {toCoinDecimalString(featured?.dailyVolume, 2) || "143.31"}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
@@ -104,7 +104,7 @@ const MainCard = (props: MainCardProps) => {
                   {t("All-time vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toDecimalsAPT(featured!.allTimeVolume, 2)}{" "}
+                  {toCoinDecimalString(featured!.allTimeVolume, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>

@@ -1,4 +1,4 @@
-import { RankIcon, RankName } from "components/pages/emojicoin/components/trade-history/constants";
+import { RankIcon, RankName } from "components/pages/emojicoin/components/trade-history/misc";
 
 export const rankFromAPTAmount = (
   amount: number | bigint

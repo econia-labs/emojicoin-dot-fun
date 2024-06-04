@@ -2,6 +2,7 @@ import { type Network } from "@aptos-labs/wallet-adapter-react";
 
 let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;
+let INTEGRATOR_FEE_RATE_BPS: number;
 
 if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
@@ -20,6 +21,12 @@ if (process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS) {
   throw new Error("Environment variable NEXT_PUBLIC_INTEGRATOR_ADDRESS is undefined.");
 }
 
+if (process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS) {
+  INTEGRATOR_FEE_RATE_BPS = Number(process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS);
+} else {
+  throw new Error("Environment variable NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS is undefined.");
+}
+
 const vercel = process.env.VERCEL === "1";
 const local = process.env.INBOX_URL === "http://localhost:3000";
 if (vercel && local) {
@@ -28,4 +35,4 @@ if (vercel && local) {
   );
 }
 
-export { APTOS_NETWORK, INTEGRATOR_ADDRESS };
+export { APTOS_NETWORK, INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS };

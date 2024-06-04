@@ -13,6 +13,7 @@ type StaticParams = {
 
 export const generateStaticParams = async (): Promise<Array<StaticParams>> => {
   const data = await fetchMarketData();
+
   return data.map((v) => ({
     market: v.marketID.toString(),
   }));
@@ -26,6 +27,7 @@ interface EmojicoinPageProps {
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const marketID = params.params.market;
   const res = await fetchLatestMarketState(marketID);
+
   if (res) {
     const chatData = await getInitialChatData(marketID);
     const swapData = await getInitialSwapData(marketID);
