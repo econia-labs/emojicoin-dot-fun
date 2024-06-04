@@ -22,6 +22,7 @@ import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 // import { APTOS_NETWORK } from "lib/env";
 import StyledToaster from "styles/StyledToaster";
 import { PetraWallet } from "petra-plugin-wallet-adapter";
+import { EventStoreProvider } from "./store-context";
 
 const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();
@@ -47,21 +48,23 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <AptosWalletAdapterProvider plugins={wallets} autoConnect>
-          <ConnectWalletContextProvider>
-            <AptosContextProvider>
-              <GlobalStyle />
-              <Suspense fallback={<Loader />}>
-                <StyledToaster />
-                <StyledContentWrapper>
-                  <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                  {children}
-                  <Footer />
-                </StyledContentWrapper>
-              </Suspense>
-            </AptosContextProvider>
-          </ConnectWalletContextProvider>
-        </AptosWalletAdapterProvider>
+        <EventStoreProvider>
+          <AptosWalletAdapterProvider plugins={wallets} autoConnect>
+            <ConnectWalletContextProvider>
+              <AptosContextProvider>
+                <GlobalStyle />
+                <Suspense fallback={<Loader />}>
+                  <StyledToaster />
+                  <StyledContentWrapper>
+                    <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                    {children}
+                    <Footer />
+                  </StyledContentWrapper>
+                </Suspense>
+              </AptosContextProvider>
+            </ConnectWalletContextProvider>
+          </AptosWalletAdapterProvider>
+        </EventStoreProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

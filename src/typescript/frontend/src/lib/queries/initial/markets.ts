@@ -9,6 +9,7 @@ import { cache } from "react";
 import fetchInitialWithFallback from "./cache-helper";
 import { SAMPLE_DATA_BASE_URL } from "./const";
 import { getAptos } from "lib/utils/aptos-client";
+import { compareBigInt } from "../../../../../sdk/src/utils/compare-bigint";
 
 export const fetchTopMarkets = cache(async () => {
   if (process.env.FORCE_STATIC_FETCH === "true") {
@@ -78,11 +79,7 @@ const fetchInitialMarketData = cache(async () => {
 
   // Sort by market cap.
   markets.sort((m1, m2) =>
-    m2.market.instantaneousStats.marketCap < m1.market.instantaneousStats.marketCap
-      ? -1
-      : m2.market.instantaneousStats.marketCap > m1.market.instantaneousStats.marketCap
-        ? 1
-        : 0
+    compareBigInt(m2.market.instantaneousStats.marketCap, m1.market.instantaneousStats.marketCap)
   );
 
   return markets;

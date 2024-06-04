@@ -28,6 +28,7 @@ futuna
 gcloud
 hamsa
 headlessui
+immer
 ivoire
 keycap
 khanda
@@ -66,3 +67,4 @@ tradingview
 turkiye
 vercel
 xbtmatt
+zustand
