@@ -12,9 +12,13 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { EmojicoinDotFun, deriveEmojicoinPublisherAddress } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
-import { COIN_FACTORY_MODULE_NAME, DEFAULT_REGISTER_MARKET_GAS_OPTIONS, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
-import { Types, toMarketResource } from "../types/types";
-import JSONTypes from "../types/json-types";
+import {
+  COIN_FACTORY_MODULE_NAME,
+  DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+  EMOJICOIN_DOT_FUN_MODULE_NAME,
+} from "../const";
+import { type Types, toMarketResource } from "../types/types";
+import type JSONTypes from "../types/json-types";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;

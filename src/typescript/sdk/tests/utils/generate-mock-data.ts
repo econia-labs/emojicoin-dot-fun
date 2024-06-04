@@ -9,7 +9,7 @@ import {
   deriveEmojicoinPublisherAddress,
 } from "../../src/emojicoin_dot_fun";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets";
-import { Lazy, ONE_APT, ONE_APTN, Types, getMarketResource } from "../../src";
+import { Lazy, ONE_APT, ONE_APTN, type Types, getMarketResource } from "../../src";
 
 type RegisterMarketAction = {
   emojis: Array<HexInput>;

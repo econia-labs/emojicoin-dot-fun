@@ -4,27 +4,27 @@ import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";
 
 export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
-    const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
-    const sparklerControls = useAnimation();
-    const progressControls = useAnimation();
+  const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
+  const sparklerControls = useAnimation();
+  const progressControls = useAnimation();
 
-    useEffect(() => {
-      progressControls.start({
-        width: `${progress}%`,
-        transition: { type: 'spring', stiffness: 100, damping: 20 },
-      });
+  useEffect(() => {
+    progressControls.start({
+      width: `${progress}%`,
+      transition: { type: "spring", stiffness: 100, damping: 20 },
+    });
 
-      sparklerControls.start({
-        opacity: [0.6, 1, 0.6],
-        transition: { duration: 0.5, repeat: Infinity, repeatType: 'mirror' },
-      });
-    }, [progress, progressControls, sparklerControls]);
+    sparklerControls.start({
+      opacity: [0.6, 1, 0.6],
+      transition: { duration: 0.5, repeat: Infinity, repeatType: "mirror" },
+    });
+  }, [progress, progressControls, sparklerControls]);
 
-    useEffect(() => {
-      const percentage = getBondingCurveProgress(data.clammVirtualReserves);
-      setProgress(percentage);
+  useEffect(() => {
+    const percentage = getBondingCurveProgress(data.clammVirtualReserves);
+    setProgress(percentage);
     /* eslint-disable-next-line */
-    }, [data.clammVirtualReserves, data.numSwaps]);
+  }, [data.clammVirtualReserves, data.numSwaps]);
 
   return (
     <div className="relative w-full h-6 bg-gray-300 rounded-full overflow-hidden">
