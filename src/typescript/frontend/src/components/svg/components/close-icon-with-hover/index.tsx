@@ -12,8 +12,8 @@ export const StyledCloseIcon = styled.div`
 
   &:hover > svg {
     transition: inherit;
-    scale: 1.25;
-    rotate: 90deg;
+    scale: 1.15;
+    filter: brightness(1.2);
   }
 `;
 

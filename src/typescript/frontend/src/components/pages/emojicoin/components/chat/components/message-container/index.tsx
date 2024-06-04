@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { FlexGap } from "@containers";
 import { Text } from "components/text";
@@ -14,11 +14,24 @@ import {
 import { type MessageContainerProps } from "./types";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { normalizeAddress, truncateAddress } from "@sdk/utils";
 
 const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
+  const { account } = useAptos();
+  const [fromAnotherUser, setFromAnotherUser] = useState(true);
+  useEffect(() => {
+    if (!account) {
+      setFromAnotherUser(true);
+      return;
+    }
+    const normalized = normalizeAddress(account.address);
+    setFromAnotherUser(normalized !== message.sender);
+  }, [account, fromAnotherUser, message]);
+
   return (
-    <StyledMessageContainer fromAnotherUser={message.fromAnotherUser}>
-      <StyledMessageWrapper>
+    <StyledMessageContainer fromAnotherUser={fromAnotherUser}>
+      <StyledMessageWrapper fromAnotherUser={fromAnotherUser}>
         <StyledMessageInner>
           <Text textScale="bodySmall" color="black" pt="2px">
             {message.text}
@@ -34,12 +47,12 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
               href={toExplorerLink({ value: message.version, type: "version" })}
             >
               <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
-                {message.user}
+                {truncateAddress(message.sender)}
               </Text>
             </a>
 
             <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
-              {message.userRank}
+              {message.senderRank}
             </Text>
           </FlexGap>
         </StyledUserNameWrapper>

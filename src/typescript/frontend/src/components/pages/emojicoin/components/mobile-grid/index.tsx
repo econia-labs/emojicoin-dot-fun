@@ -12,7 +12,7 @@ import {
 } from "./styled";
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
-import Chat from "../chat";
+import ChatBox from "../chat";
 import { type GridProps } from "../../types";
 
 const MobileGrid = (props: GridProps) => {
@@ -78,7 +78,7 @@ const MobileGrid = (props: GridProps) => {
               <TradeEmojicoin data={props.data} />
             </Flex>
           ) : (
-            <Chat data={props.data} />
+            <ChatBox data={props.data} />
           )}
         </StyledMobileContentInner>
       </StyledMobileContentBlock>

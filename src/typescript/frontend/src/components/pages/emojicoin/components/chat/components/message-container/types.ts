@@ -3,9 +3,8 @@ export type MessageContainerProps = {
 };
 
 export type MessageType = {
-  user: string;
+  sender: string;
   text: string;
-  userRank: string;
-  fromAnotherUser: boolean;
+  senderRank: string;
   version: number;
 };

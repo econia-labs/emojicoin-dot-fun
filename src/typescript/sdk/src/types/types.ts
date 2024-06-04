@@ -309,13 +309,13 @@ export const toPeriodicStateTracker = (
 });
 
 export const toRegistryAddress = (data: JSONTypes.RegistryAddress): Types.RegistryAddress => ({
-  registryAddress: data.registry_address,
+  registryAddress: normalizeAddress(data.registry_address),
 });
 
 const strToBigInt = (data: string): bigint => BigInt(data);
 
 export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView => ({
-  registryAddress: data.registry_address,
+  registryAddress: normalizeAddress(data.registry_address),
   nonce: fromAggregatorSnapshot(data.nonce, strToBigInt),
   lastBumpTime: BigInt(data.last_bump_time),
   numMarkets: BigInt(data.n_markets),
@@ -331,7 +331,7 @@ export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView
 
 export const toMarketMetadata = (data: JSONTypes.MarketMetadata): Types.MarketMetadata => ({
   marketID: BigInt(data.market_id),
-  marketAddress: data.market_address,
+  marketAddress: normalizeAddress(data.market_address),
   emojiBytes: hexToBytes(
     data.emoji_bytes.startsWith("0x") ? data.emoji_bytes.slice(2) : data.emoji_bytes
   ),
@@ -434,7 +434,7 @@ export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.C
   marketMetadata: toMarketMetadata(data.market_metadata),
   emitTime: BigInt(data.emit_time),
   emitMarketNonce: BigInt(data.emit_market_nonce),
-  user: data.user,
+  user: normalizeAddress(data.user),
   message: data.message,
   userEmojicoinBalance: BigInt(data.user_emojicoin_balance),
   circulatingSupply: BigInt(data.circulating_supply),
@@ -448,8 +448,8 @@ export const toMarketRegistrationEvent = (
   version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   time: BigInt(data.time),
-  registrant: data.registrant,
-  integrator: data.integrator,
+  registrant: normalizeAddress(data.registrant),
+  integrator: normalizeAddress(data.integrator),
   integratorFee: BigInt(data.integrator_fee),
 });
 
