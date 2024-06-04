@@ -13,9 +13,7 @@ import { InputGroup, Textarea, Loader } from "components";
 
 import { MessageContainer } from "./components";
 import { type ChatProps } from "../../types";
-import { truncateAddress } from "@sdk/utils/misc";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { normalizeAddress } from "@sdk/utils";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
@@ -97,7 +95,7 @@ const ChatBox = (props: ChatProps) => {
       console.warn(response);
       setMessageList([
         {
-          sender: account.ansName ?? truncateAddress(account.address),
+          sender: account.ansName ?? account.address,
           text: emojiText,
           senderRank: "🐡",
           version: Number(response.version),
@@ -106,7 +104,7 @@ const ChatBox = (props: ChatProps) => {
       ]);
     }
     handleClear();
-  }
+  };
 
   const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && account) {
@@ -116,7 +114,6 @@ const ChatBox = (props: ChatProps) => {
     } else if (isDisallowedEventKey(e)) {
       e.preventDefault();
     }
-    console.log(e.target);
   };
 
   return (
