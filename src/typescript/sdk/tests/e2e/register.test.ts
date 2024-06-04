@@ -4,11 +4,11 @@ import {
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   ONE_APT,
   deriveEmojicoinPublisherAddress,
+  getMarketResource,
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { getTestHelpers } from "../utils";
-import { getMarketResource } from "../../src/types/contract";
 import { normalizeAddress } from "../../src/utils/account-address";
 
 jest.setTimeout(20000);

@@ -35,18 +35,19 @@ import { getTestHelpers, publishForTest } from "../../tests/utils";
 import { Chat, MarketMetadataByEmojiBytes, Swap } from "../emojicoin_dot_fun/emojicoin-dot-fun";
 import { BatchTransferCoins, ExistsAt } from "../emojicoin_dot_fun/aptos-framework";
 import { type Events } from "../emojicoin_dot_fun/events";
-import { type EmojicoinInfo } from "../types/contract";
 import { SYMBOL_DATA, getRandomEmoji } from "../emoji_data/symbol-data";
 import { ONE_APT, QUOTE_VIRTUAL_FLOOR, QUOTE_VIRTUAL_CEILING, MODULE_ADDRESS } from "../const";
 import { type SymbolEmojiData, getEmojiData } from "../emoji_data";
-import { divideWithPrecision, sleep } from "./misc";
+import { sleep } from "./misc";
 import { truncateAddress } from "./misc";
+import Big from "big.js";
+import { Types } from "../types";
 
 const NUM_TRADERS = 500;
 const TRADES_PER_TRADER = 4;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
 const CHUNK_SIZE = 25;
-const TRADER_INITIAL_BALANCE = ONE_APT * 1000;
+const TRADER_INITIAL_BALANCE = ONE_APT * 10;
 const TRADER_GAS_RESERVES = ONE_APT * 0.02;
 const DISTRIBUTOR_NECESSARY_BALANCE = CHUNK_SIZE * TRADER_INITIAL_BALANCE;
 const NUM_DISTRIBUTORS = NUM_TRADERS / CHUNK_SIZE;
@@ -80,7 +81,7 @@ async function main() {
 
   // Now have the publisher register all markets sequentially.
   const numMarketsToRegister = 20;
-  const markets = new Array<EmojicoinInfo & SymbolEmojiData>();
+  const markets = new Array<Types.EmojicoinInfo & SymbolEmojiData>();
   /* eslint-disable no-await-in-loop */
   for (let i = 0; i < numMarketsToRegister; i += 1) {
     const { bytes, emoji } = getRandomEmoji();
@@ -233,7 +234,7 @@ const ensurePublisherHasRegisteredMarket = async ({
   emojiBytes: Uint8Array;
   registryAddress: AccountAddress;
   emoji: string;
-}): Promise<EmojicoinInfo> => {
+}): Promise<Types.EmojicoinInfo> => {
   const emojicoinInfo = await MarketMetadataByEmojiBytes.view({
     aptos,
     emojiBytes,
@@ -423,24 +424,24 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
         a: state.clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
         b: ONE_APT,
         decimals: 3,
-      }).toFixed(3);
+      });
       const quoteLeftBeforeTransition = divideWithPrecision({
         a: QUOTE_VIRTUAL_CEILING - state.clammVirtualReserves.quote,
         b: BigInt(ONE_APT),
         decimals: 3,
-      }).toFixed(3);
+      });
       const input = divideWithPrecision({
         a: swap.inputAmount * (swap.isSell ? -1n : 1n),
         b: BigInt(ONE_APT),
         decimals: 1,
-      }).toFixed(3);
+      });
       const lastPrice = divideWithPrecision({
         a: 1,
         b: state.lastSwap.avgExecutionPrice,
         decimals: 10,
       });
       const buyOrSellText = swap.isSell ? `📉 -${input} ${emoji}` : `📈 +${input} APT at an avg`;
-      const lastPriceText = `price of ${lastPrice / 10} APT/${emoji}`;
+      const lastPriceText = `price of ${lastPrice} APT/${emoji}`;
       const spendOnBondingCurve = `${buyOrSellText} ${lastPriceText} ${input} ${aptSpent} APT in bonding curve.`;
       const quoteLeft = `${quoteLeftBeforeTransition} to go before we transition into CPAMM!`;
       const s =
@@ -472,11 +473,22 @@ const printTradeResults = (tradeResults: Array<[UserTransactionResponse, Events]
     const outOfBondingCurve = events.swapEvents.some((event) => event.resultsInStateTransition);
 
     if (outOfBondingCurve) {
-      console.log(
-        `${res.sender.toString()} moved the market out of the bonding curve! Tx hash: ${res.hash}`
-      );
+      const sender = res.sender.toString();
+      const msg = `${sender} moved the market out of the bonding curve! Tx hash: ${res.hash}`;
+      console.log(`${"-".repeat(120)}\n${msg}${"-".repeat(120)}\n`);
     }
   });
+};
+
+const divideWithPrecision = (args: {
+  a: string | number | bigint;
+  b: string | number | bigint;
+  decimals: number;
+}) => {
+  const a = args.a.toString();
+  const b = args.b.toString();
+  const decimals = args.decimals;
+  return Big(a).div(Big(b)).toFixed(decimals);
 };
 
 main().then(() => console.log("\nDone!"));

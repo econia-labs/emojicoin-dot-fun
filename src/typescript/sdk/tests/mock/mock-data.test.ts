@@ -9,7 +9,7 @@ import {
 } from "../../src";
 import { getTestHelpers } from "../utils";
 import { MOCK_DATA_MARKETS_EMOJIS, generateMockData } from "../utils/generate-mock-data";
-import { getMarketResource } from "../../src/types/contract";
+import { getMarketResource } from "../../src/markets/utils";
 
 jest.setTimeout(10000000);
 

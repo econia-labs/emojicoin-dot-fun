@@ -1,5 +1,5 @@
 import Big from "big.js";
-import { DECIMALS } from "lib/const";
+import { DECIMALS } from "@sdk/const";
 
 // Converts a number to its representation in coin decimals.
 // Both APT and emojicoins use a fixed number of decimals: 8.

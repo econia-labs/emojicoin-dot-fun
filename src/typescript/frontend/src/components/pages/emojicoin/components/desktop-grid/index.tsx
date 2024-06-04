@@ -1,7 +1,6 @@
 import React from "react";
 
-import { Flex } from "@containers";
-import { Text, Button } from "components";
+import { Text } from "components";
 
 import { translationFunction } from "context/language-context";
 
@@ -18,6 +17,7 @@ import Chat from "../chat";
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
+import { LiquidityButton } from "../trade-emojicoin/components/LiquidityButton";
 
 const DesktopGrid = (props: GridProps) => {
   const { t } = translationFunction();
@@ -45,11 +45,7 @@ const DesktopGrid = (props: GridProps) => {
           </StyledBlock>
 
           <StyledBlock width="43%">
-            <StyledContentHeader>
-              <Flex width="100%" justifyContent="center">
-                <Button scale="lg">{t("Provide liquidity")}</Button>
-              </Flex>
-            </StyledContentHeader>
+            <LiquidityButton data={props.data} />
 
             <StyledBlockWrapper>
               <TradeEmojicoin data={props.data} />

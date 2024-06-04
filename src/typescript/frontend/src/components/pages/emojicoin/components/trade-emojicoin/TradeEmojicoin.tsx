@@ -28,28 +28,27 @@ const getInputDisplay = ({
   aptAmount?: AnyNumber;
   emojiAmount?: AnyNumber;
 }) => {
-  // For the first input
+  // For the first input:
+  // If it's a sell, the first input is the emojicoin amount.
+  // If it's a buy, the first input is the APT amount.
   if (firstOrSecond === "first") {
-    // If it's a sell, the first input is the emojicoin amount.
     if (isSell) {
       return Number(toCoinDecimalString(emojiAmount, 10));
     }
-    // If it's a buy, the first input is the APT amount.
     return Number(toCoinDecimalString(aptAmount, 10));
   }
-  // For the second input
+  // For the second input:
   // If it's a sell, the second input is the APT amount.
+  // If it's a buy, the second input is the emojicoin amount.
   if (isSell) {
     return Number(toCoinDecimalString(aptAmount, 10));
   }
-  // If it's a buy, the second input is the emojicoin amount.
   return Number(toCoinDecimalString(emojiAmount, 10));
 };
 
 const TradeEmojicoin = (props: TradeEmojicoinProps) => {
   const [isSell, setIsSell] = useState(true);
   const { t } = translationFunction();
-  // const [displayAmount, setDisplayAmount] = useState("10000");
   const [inputAmount, setInputAmount] = useState<bigint>(fromCoinDecimals("10000"));
   const { emojiAmount, aptAmount, simulatedSwap } = useSimulateSwap({
     marketAddress: props.data.marketAddress,
@@ -64,20 +63,17 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
     if (!simulatedSwap) {
       return;
     }
-    // console.log(simulatedSwap);
     const price = simulatedSwap.avgExecutionPrice;
     const base = toNominalPrice(price);
     const quote = toQuotePrice(price);
     setBasePrice(base);
     setQuotePrice(quote);
-    // console.log(basePrice, " APT / emoji");
-    // console.log(quotePrice, " emoji / APT");
   }, [simulatedSwap]);
 
   const [basePrice, setBasePrice] = useState(
-    toNominalPrice(simulatedSwap?.avgExecutionPrice ?? inputAmount.toString() ?? "10000")
-  ); // 1 emoji / X APT
-  const [quotePrice, setQuotePrice] = useState(toQuotePrice(basePrice)); // 1 APT / X emoji
+    toNominalPrice(simulatedSwap?.avgExecutionPrice ?? inputAmount.toString())
+  );
+  const [quotePrice, setQuotePrice] = useState(toQuotePrice(basePrice));
   console.warn(basePrice, quotePrice, "base and quote prices");
 
   const handleInputAmount = useCallback((n: string) => {

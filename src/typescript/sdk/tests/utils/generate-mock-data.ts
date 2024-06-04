@@ -9,8 +9,7 @@ import {
   deriveEmojicoinPublisherAddress,
 } from "../../src/emojicoin_dot_fun";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets";
-import type { EmojicoinInfo } from "../../src/types/contract";
-import { Lazy, ONE_APT, ONE_APTN, getMarketResource } from "../../src";
+import { Lazy, ONE_APT, ONE_APTN, Types, getMarketResource } from "../../src";
 
 type RegisterMarketAction = {
   emojis: Array<HexInput>;
@@ -19,26 +18,26 @@ type RegisterMarketAction = {
 
 type ProvideLiquidityAction = {
   account: Account;
-  emojicoin: Lazy<EmojicoinInfo>;
+  emojicoin: Lazy<Types.EmojicoinInfo>;
   quoteAmount: Uint64;
 };
 
 type RemoveLiquidityAction = {
   account: Account;
-  emojicoin: Lazy<EmojicoinInfo>;
+  emojicoin: Lazy<Types.EmojicoinInfo>;
   lpCoinAmount: Uint64;
 };
 
 type SwapAction = {
   account: Account;
-  emojicoin: Lazy<EmojicoinInfo>;
+  emojicoin: Lazy<Types.EmojicoinInfo>;
   inputAmount: Uint64;
   isSell: boolean;
 };
 
 type ChatAction = {
   account: Account;
-  emojicoin: Lazy<EmojicoinInfo>;
+  emojicoin: Lazy<Types.EmojicoinInfo>;
   emojiBytes: Array<HexInput>;
   emojiIndicesSequence: HexInput;
 };
@@ -113,7 +112,7 @@ const insertPeriodicState = async (
 };
 
 const generatePeriodicStates = async (
-  emojicoin: Lazy<EmojicoinInfo>,
+  emojicoin: Lazy<Types.EmojicoinInfo>,
   emojiBytes: string,
   marketId: bigint,
   account: string,
@@ -264,7 +263,7 @@ const generatePeriodicStates = async (
 const concatEmoji = (a: Array<HexInput>) =>
   a.map((v) => Hex.fromHexInput(v).toStringWithoutPrefix()).join("");
 
-const getTypeTags = (lazy: Lazy<EmojicoinInfo>): [TypeTagInput, TypeTagInput] => [
+const getTypeTags = (lazy: Lazy<Types.EmojicoinInfo>): [TypeTagInput, TypeTagInput] => [
   lazy.get().emojicoin,
   lazy.get().emojicoinLP,
 ];
@@ -278,7 +277,7 @@ async function execute(aptos: Aptos, actions: Action[]) {
     },
     integrator: Account.generate().accountAddress,
   };
-  const defaultTxWithMarket = (emojicoin: Lazy<EmojicoinInfo>) => ({
+  const defaultTxWithMarket = (emojicoin: Lazy<Types.EmojicoinInfo>) => ({
     aptosConfig: aptos.config,
     marketAddress: emojicoin.get().marketAddress,
     typeTags: getTypeTags(emojicoin),

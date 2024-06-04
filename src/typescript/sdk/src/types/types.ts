@@ -2,9 +2,20 @@ import { hexToBytes } from "@noble/hashes/utils";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
-import { normalizeAddress } from "../utils";
+import { normalizeAddress } from "../utils/account-address";
+import {
+  type AccountAddress,
+  type TypeTag,
+} from "@aptos-labs/ts-sdk";
+
 
 export namespace Types {
+  export type EmojicoinInfo = {
+    marketAddress: AccountAddress;
+    emojicoin: TypeTag;
+    emojicoinLP: TypeTag;
+  };
+
   export type ExtendRef = {
     self: AccountAddressString;
   };
