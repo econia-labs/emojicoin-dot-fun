@@ -4,9 +4,9 @@ let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;
 let INTEGRATOR_FEE_RATE_BPS: number;
 
-const ALLOWLISTER3K_URL: string | undefined = process.env.NEXT_PUBLIC_ALLOWLISTER3K_URL;
-const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_WHITELIST_ENABLED === "true";
-const GALXE_CAMPAIGN_ID: string | undefined = process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_ID;
+const ALLOWLISTER3K_URL: string | undefined = process.env.ALLOWLISTER3K_URL;
+const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_ALLOWLIST_ENABLED === "true";
+const GALXE_CAMPAIGN_ID: string | undefined = process.env.GALXE_CAMPAIGN_ID;
 
 if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
