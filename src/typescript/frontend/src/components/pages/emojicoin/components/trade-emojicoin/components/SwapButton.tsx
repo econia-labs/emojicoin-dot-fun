@@ -5,7 +5,6 @@ import { Swap } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { toCoinTypes } from "@sdk/markets/utils";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 export const SwapButton = ({
   inputAmount,
@@ -18,7 +17,6 @@ export const SwapButton = ({
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
-  const { signAndSubmitTransaction } = useWallet();
 
   const handleClick = async () => {
     if (!account) {
@@ -36,8 +34,7 @@ export const SwapButton = ({
         integratorFeeRateBps: INTEGRATOR_FEE_RATE_BPS,
         typeTags: [emojicoin, emojicoinLP],
       });
-    const res = await submit(builderLambda);
-    console.warn(res);
+    await submit(builderLambda);
   };
 
   return (
