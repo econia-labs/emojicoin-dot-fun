@@ -3,11 +3,9 @@
 // cspell:word martianwallet
 // cspell:word pontem
 import React, { Suspense, useEffect, useMemo, useState } from "react";
-import { Provider } from "react-redux";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "styles";
 import ThemeContextProvider, { useThemeContext } from "./theme-context";
-import store from "store/store";
 import Loader from "components/loader";
 import Header from "components/header";
 import Footer from "components/footer";
@@ -54,14 +52,12 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <AptosContextProvider>
               <GlobalStyle />
               <Suspense fallback={<Loader />}>
-                <Provider store={store}>
-                  <StyledToaster />
-                  <StyledContentWrapper>
-                    <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                    {children}
-                    <Footer />
-                  </StyledContentWrapper>
-                </Provider>
+                <StyledToaster />
+                <StyledContentWrapper>
+                  <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                  {children}
+                  <Footer />
+                </StyledContentWrapper>
               </Suspense>
             </AptosContextProvider>
           </ConnectWalletContextProvider>
