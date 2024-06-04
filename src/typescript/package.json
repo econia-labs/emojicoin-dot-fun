@@ -3,7 +3,7 @@
     "@aptos-labs/ts-sdk": "^1.16.0"
   },
   "devDependencies": {
-    "@aptos-labs/eslint-config-adapter": "workspace:*",
+    "@types/node": "^20.14.1",
     "dotenv-cli": "^7.4.2",
     "prettier": "^3.2.5",
     "tsx": "^4.11.0",
@@ -32,7 +32,6 @@
   "version": "0.0.0",
   "workspaces": [
     "sdk",
-    "frontend",
-    "packages/*"
+    "frontend"
   ]
 }
