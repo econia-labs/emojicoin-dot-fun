@@ -86,7 +86,7 @@ describe("emits a chat message event successfully", () => {
     expect(success).toBe(true);
     const chatEventJSON = events.find((e) => e.type === STRUCT_STRINGS.ChatEvent)?.data;
     expect(chatEventJSON).toBeDefined();
-    const chatEvent = toChatEvent(chatEventJSON);
+    const chatEvent = toChatEvent(chatEventJSON, Number(chatResponse.version));
     // Ensure that an event is emitted and the message is correct.
     expect(chatEvent.message).toEqual("🧑‍🚀🦸🏾‍♂️");
 
@@ -111,7 +111,7 @@ describe("emits a chat message event successfully", () => {
     expect(success).toBe(true);
     const secondChatEventJSON = events.find((e) => e.type === STRUCT_STRINGS.ChatEvent)?.data;
     expect(secondChatEventJSON).toBeDefined();
-    const secondChatEvent = toChatEvent(secondChatEventJSON);
+    const secondChatEvent = toChatEvent(secondChatEventJSON, Number(chatResponse.version));
     expect(secondChatEvent.message).toEqual(indices.map((i) => chatEmojis[i][1]).join(""));
 
     const postgrest = new PostgrestClient(LOCAL_INBOX_URL);

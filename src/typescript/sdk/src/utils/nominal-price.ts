@@ -8,9 +8,9 @@ const DECIMALS = 16;
 export const toNominalPrice = (
   avgExecutionPriceQ64: string | number | bigint,
   decimals: number = DECIMALS
-) => Big(avgExecutionPriceQ64.toString()).div(Q64_BASE).toFixed(decimals);
+) => Number(Big(avgExecutionPriceQ64.toString()).div(Q64_BASE).toFixed(decimals));
 
 export const toQuotePrice = (
   avgExecutionPriceQ64: string | number | bigint,
   decimals: number = DECIMALS
-) => Big(Q64_BASE).div(avgExecutionPriceQ64.toString()).toFixed(decimals);
+) => Number(Big(Q64_BASE).div(avgExecutionPriceQ64.toString()).toFixed(decimals));
