@@ -78,7 +78,7 @@ export function getEvents(response: UserTransactionResponse): Events {
       return;
     }
     const conversionFunction = converter.get(event.type)!;
-    const data = conversionFunction(event.data);
+    const data = conversionFunction(event.data, Number(response.version));
     switch (event.type) {
       case TYPE_TAGS.SwapEvent.toString():
         events.swapEvents.push(data as Types.SwapEvent);

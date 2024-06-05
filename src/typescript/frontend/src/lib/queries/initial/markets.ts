@@ -19,7 +19,7 @@ export const fetchTopMarkets = cache(async () => {
       version: number;
     }>;
     return data.map((v) => ({
-      state: toStateEvent(v.data),
+      state: toStateEvent(v.data, v.version),
       emoji: SYMBOL_DATA.byHex(v.data.market_metadata.emoji_bytes)!,
       version: v.version,
       volume24H: BigInt(Math.floor(Math.random() * 1337 ** 4)),
@@ -29,7 +29,7 @@ export const fetchTopMarkets = cache(async () => {
   const res = await getTopMarkets();
 
   return res.data.map((v) => ({
-    state: toStateEvent(v.data),
+    state: toStateEvent(v.data, v.version),
     emoji: SYMBOL_DATA.byHex(v.data.market_metadata.emoji_bytes)!,
     version: v.version,
     volume24H: BigInt(Math.floor(Math.random() * 1337 ** 4)),

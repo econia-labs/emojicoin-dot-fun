@@ -30,15 +30,15 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
   }, [props?.data]);
 
   useEffect(() => {
-    console.log("client emojicoin page sees the change in marketData :)", marketData);
+    console.debug("client emojicoin page sees the change in marketData", marketData);
   }, [marketData]);
 
   useEffect(() => {
-    console.log("client emojicoin page sees the change in swapEvents :)", swapEvents);
+    console.debug("client emojicoin page sees the change in swapEvents", swapEvents);
   }, [swapEvents]);
 
   useEffect(() => {
-    console.log("client emojicoin page sees the change in chatEvents :)", chatEvents);
+    console.debug("client emojicoin page sees the change in chatEvents", chatEvents);
   }, [chatEvents]);
 
   return (

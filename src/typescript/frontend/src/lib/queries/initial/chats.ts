@@ -15,7 +15,7 @@ const getInitialChatData = cache(async (marketID: string) => {
     endpoint: new URL(`chat-data-${Number(marketID)}.json`, SAMPLE_DATA_BASE_URL),
   });
 
-  return chatEvents.map((chat) => ({ ...toChatEvent(chat), version: chat.version }));
+  return chatEvents.map((chat) => toChatEvent(chat, chat.version));
 });
 
 export default getInitialChatData;

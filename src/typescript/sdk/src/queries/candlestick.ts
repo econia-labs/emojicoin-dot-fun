@@ -34,7 +34,7 @@ export const paginateCandlesticks = async (
   });
 
   return {
-    events: res.data.map((e) => toPeriodicStateEvent(e)),
+    events: res.data.map((e) => toPeriodicStateEvent(e, e.version)),
     errors: res.errors,
   };
 };

@@ -31,7 +31,7 @@ const getLatestReserves = (args: {
 
 export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
   const marketData = useEventStore((s) => s.getMarket(data.marketID).marketData);
-  const stateEvents = useEventStore((s) => s.getMarket(data.marketID).stateEvents);
+  const stateEvents = useEventStore((s) => s.getMarket(data.marketID).stateEvents.events);
 
   const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
   const sparklerControls = useAnimation();

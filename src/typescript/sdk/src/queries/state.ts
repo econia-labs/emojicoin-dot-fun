@@ -46,7 +46,7 @@ export const paginateGlobalStateEvents = async (
   });
 
   return {
-    events: res.data.map((e) => toGlobalStateEvent(e)),
+    events: res.data.map((e) => toGlobalStateEvent(e, e.version)),
     errors: res.errors,
   };
 };
@@ -69,7 +69,7 @@ export const paginateStateEventsByMarketID = async (
   });
 
   return {
-    events: res.data.map((e) => toStateEvent(e)),
+    events: res.data.map((e) => toStateEvent(e, e.version)),
     errors: res.errors,
   };
 };

@@ -4,7 +4,7 @@
     "INBOX_URL",
     "SHORT_REVALIDATE"
   ],
-  "tasks": {
+  "pipeline": {
     "build": {
       "dependsOn": [
         "^build"

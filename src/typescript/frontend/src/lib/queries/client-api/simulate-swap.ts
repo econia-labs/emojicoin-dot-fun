@@ -52,7 +52,7 @@ export const useSimulateSwap = (args: {
     staleTime: Infinity,
   });
 
-  const simulatedSwap = data ? toSwapEvent(data) : undefined;
+  const simulatedSwap = data ? toSwapEvent(data, -1) : undefined;
   if (!simulatedSwap) {
     return {
       emojiAmount: undefined,

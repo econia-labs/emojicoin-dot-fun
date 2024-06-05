@@ -9,7 +9,7 @@
     "dotenv-cli": "^7.4.2",
     "prettier": "^3.2.5",
     "tsx": "^4.11.0",
-    "turbo": "latest"
+    "turbo": "^1.13.4"
   },
   "license": "Apache-2.0",
   "name": "@econia-labs/emojicoin",

@@ -52,7 +52,7 @@ export const paginateMarketRegistrations = async (
   });
 
   return {
-    markets: res.data.map((e) => ({ ...toMarketRegistrationEvent(e), version: e.version })),
+    markets: res.data.map((e) => toMarketRegistrationEvent(e, e.version)),
     errors: res.errors,
   };
 };

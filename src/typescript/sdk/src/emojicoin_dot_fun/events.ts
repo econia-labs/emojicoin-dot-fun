@@ -25,7 +25,8 @@ export type Events = {
   events: AptosEvent[];
 };
 
-export const converter: Map<string, (data: JSONEventTypes) => AnyEmojicoinEvent> = new Map();
+export const converter: Map<string, (data: JSONEventTypes, version: number) => AnyEmojicoinEvent> =
+  new Map();
 [
   [TYPE_TAGS.SwapEvent, toSwapEvent] as const,
   [TYPE_TAGS.ChatEvent, toChatEvent] as const,
@@ -35,7 +36,9 @@ export const converter: Map<string, (data: JSONEventTypes) => AnyEmojicoinEvent>
   [TYPE_TAGS.GlobalStateEvent, toGlobalStateEvent] as const,
   [TYPE_TAGS.LiquidityEvent, toLiquidityEvent] as const,
 ].forEach(([tag, fn]) => {
-  converter.set(tag.toString(), (data: JSONEventTypes) => fn(data as any));
+  converter.set(tag.toString(), (data: JSONEventTypes, version: number) =>
+    fn(data as any, version)
+  );
 });
 
 export type AptosEvent = {
@@ -77,16 +80,3 @@ export const toGenericEvent = (event: EventJSON): AptosEvent => ({
   type: event.type,
   data: event.data,
 });
-
-export const toEvent = (event: EventJSON): AptosEvent => {
-  if (!converter.has(event.type)) {
-    return toGenericEvent(event);
-  }
-  const conversionFunction = converter.get(event.type)!;
-  const data = conversionFunction(event.data);
-  return {
-    ...getPossibleGUIDAndSequenceNumber(event),
-    type: event.type,
-    data,
-  };
-};

@@ -56,7 +56,7 @@ export const getAllPostBondingCurveMarkets = async (
   });
 
   return {
-    events: res.data.map((e) => toSwapEvent(e)),
+    events: res.data.map((e) => toSwapEvent(e, e.version)),
     errors: res.errors,
   };
 };

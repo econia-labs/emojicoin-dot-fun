@@ -180,9 +180,6 @@ export const createEventStore = (initialState: EventState = defaultState) => {
   );
 };
 
-// Don't feel like making this explicit types, but also don't want to repeat
-// 300 lines of code for no reason.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const pushHelper = <T extends AnyEmojicoinEvent>({
   data,
   get,
@@ -236,4 +233,3 @@ const pushHelper = <T extends AnyEmojicoinEvent>({
     });
   });
 };
-/* eslint-enable @typescript-eslint/no-explicit-any */

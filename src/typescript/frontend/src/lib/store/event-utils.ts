@@ -15,7 +15,7 @@ export function storeEvents(store: EventStore, data: Awaited<SubmissionResponse>
     if (typeof conversionFunction !== "function") {
       return;
     }
-    const data = conversionFunction(event.data);
+    const data = conversionFunction(event.data, Number(response.version));
     switch (event.type) {
       case TYPE_TAGS.SwapEvent.toString():
         store.addSwapEvents(data as Types.SwapEvent);

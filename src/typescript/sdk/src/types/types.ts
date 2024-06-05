@@ -5,6 +5,10 @@ import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { normalizeAddress } from "../utils/account-address";
 
+type WithVersion = {
+  version: number;
+};
+
 export namespace Types {
   export type EmojicoinInfo = {
     marketAddress: AccountAddress;
@@ -144,7 +148,7 @@ export namespace Types {
     time: bigint;
   };
 
-  export type SwapEvent = {
+  export type SwapEvent = WithVersion & {
     marketID: bigint;
     time: bigint;
     marketNonce: bigint;
@@ -163,7 +167,7 @@ export namespace Types {
     resultsInStateTransition: boolean;
   };
 
-  export type ChatEvent = {
+  export type ChatEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     emitTime: bigint;
     emitMarketNonce: bigint;
@@ -174,7 +178,7 @@ export namespace Types {
     balanceAsFractionOfCirculatingSupply: bigint;
   };
 
-  export type MarketRegistrationEvent = {
+  export type MarketRegistrationEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     time: bigint;
     registrant: AccountAddressString;
@@ -182,7 +186,7 @@ export namespace Types {
     integratorFee: bigint;
   };
 
-  export type PeriodicStateEvent = {
+  export type PeriodicStateEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     periodicStateMetadata: PeriodicStateMetadata;
     open: bigint;
@@ -201,7 +205,7 @@ export namespace Types {
     tvlPerLPCoinGrowth: bigint;
   };
 
-  export type StateEvent = {
+  export type StateEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     stateMetadata: StateMetadata;
     clammVirtualReserves: Reserves;
@@ -212,7 +216,7 @@ export namespace Types {
     lastSwap: LastSwap;
   };
 
-  export type GlobalStateEvent = {
+  export type GlobalStateEvent = WithVersion & {
     emitTime: bigint;
     registryNonce: bigint;
     trigger: number;
@@ -226,7 +230,7 @@ export namespace Types {
     cumulativeChatMessages: bigint;
   };
 
-  export type LiquidityEvent = {
+  export type LiquidityEvent = WithVersion & {
     marketID: bigint;
     time: bigint;
     marketNonce: bigint;
@@ -405,7 +409,8 @@ export const toStateMetadata = (data: JSONTypes.StateMetadata): Types.StateMetad
   trigger: Number(data.trigger),
 });
 
-export const toSwapEvent = (data: JSONTypes.SwapEvent): Types.SwapEvent => ({
+export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.SwapEvent => ({
+  version,
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
@@ -424,7 +429,8 @@ export const toSwapEvent = (data: JSONTypes.SwapEvent): Types.SwapEvent => ({
   resultsInStateTransition: data.results_in_state_transition,
 });
 
-export const toChatEvent = (data: JSONTypes.ChatEvent): Types.ChatEvent => ({
+export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.ChatEvent => ({
+  version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   emitTime: BigInt(data.emit_time),
   emitMarketNonce: BigInt(data.emit_market_nonce),
@@ -436,8 +442,10 @@ export const toChatEvent = (data: JSONTypes.ChatEvent): Types.ChatEvent => ({
 });
 
 export const toMarketRegistrationEvent = (
-  data: JSONTypes.MarketRegistrationEvent
+  data: JSONTypes.MarketRegistrationEvent,
+  version: number
 ): Types.MarketRegistrationEvent => ({
+  version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   time: BigInt(data.time),
   registrant: data.registrant,
@@ -456,8 +464,10 @@ export const toPeriodicStateMeta = (
 });
 
 export const toPeriodicStateEvent = (
-  data: JSONTypes.PeriodicStateEvent
+  data: JSONTypes.PeriodicStateEvent,
+  version: number
 ): Types.PeriodicStateEvent => ({
+  version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   periodicStateMetadata: toPeriodicStateMetadata(data.periodic_state_metadata),
   open: BigInt(data.open_price_q64),
@@ -476,7 +486,8 @@ export const toPeriodicStateEvent = (
   tvlPerLPCoinGrowth: BigInt(data.tvl_per_lp_coin_growth_q64),
 });
 
-export const toStateEvent = (data: JSONTypes.StateEvent): Types.StateEvent => ({
+export const toStateEvent = (data: JSONTypes.StateEvent, version: number): Types.StateEvent => ({
+  version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   stateMetadata: toStateMetadata(data.state_metadata),
   clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
@@ -487,7 +498,11 @@ export const toStateEvent = (data: JSONTypes.StateEvent): Types.StateEvent => ({
   lastSwap: toLastSwap(data.last_swap),
 });
 
-export const toGlobalStateEvent = (data: JSONTypes.GlobalStateEvent): Types.GlobalStateEvent => ({
+export const toGlobalStateEvent = (
+  data: JSONTypes.GlobalStateEvent,
+  version: number
+): Types.GlobalStateEvent => ({
+  version,
   emitTime: BigInt(data.emit_time),
   registryNonce: fromAggregatorSnapshot(data.registry_nonce, strToBigInt),
   trigger: data.trigger,
@@ -501,7 +516,11 @@ export const toGlobalStateEvent = (data: JSONTypes.GlobalStateEvent): Types.Glob
   cumulativeChatMessages: fromAggregatorSnapshot(data.cumulative_chat_messages, strToBigInt),
 });
 
-export const toLiquidityEvent = (data: JSONTypes.LiquidityEvent): Types.LiquidityEvent => ({
+export const toLiquidityEvent = (
+  data: JSONTypes.LiquidityEvent,
+  version: number
+): Types.LiquidityEvent => ({
+  version,
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
@@ -515,7 +534,7 @@ export const toLiquidityEvent = (data: JSONTypes.LiquidityEvent): Types.Liquidit
 });
 
 export const toInboxLatestState = (data: JSONTypes.InboxLatestState): Types.InboxLatestState => ({
-  ...toStateEvent(data),
+  ...toStateEvent(data, data.transaction_version),
   version: data.transaction_version,
   marketID: data.marketID,
 });

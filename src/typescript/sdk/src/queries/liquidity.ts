@@ -42,7 +42,7 @@ export const paginateLiquidityEvents = async (
   const { data, errors } = await aggregateQueryResults<JSONTypes.LiquidityEvent>({ query });
 
   return {
-    events: data.map((e) => toLiquidityEvent(e)),
+    events: data.map((e) => toLiquidityEvent(e, e.version)),
     errors,
   };
 };
