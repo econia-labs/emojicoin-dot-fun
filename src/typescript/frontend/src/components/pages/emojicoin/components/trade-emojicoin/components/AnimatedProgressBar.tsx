@@ -12,7 +12,7 @@ const getLatestReserves = (args: {
   storeStateEvents: Array<Types.StateEvent>;
 }) => {
   const { propsData, storeMarketData, storeStateEvents } = args;
-  const latestStoreState = storeStateEvents.at(-1);
+  const latestStoreState = storeStateEvents[0];
   const reserves: Array<[Types.Reserves, bigint]> = [
     [propsData.clammVirtualReserves, BigInt(propsData.numSwaps)],
   ];

@@ -16,30 +16,15 @@ import { useEventStore } from "context/store-context";
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isLaptopL } = useMatchBreakpoints();
   const { addMarketData, addChatEvents, addSwapEvents } = useEventStore((s) => s);
-  const marketData = useEventStore((s) => s.getMarket(props.data.marketID).marketData);
-  const swapEvents = useEventStore((s) => s.getMarket(props.data.marketID).swapEvents);
-  const chatEvents = useEventStore((s) => s.getMarket(props.data.marketID).chatEvents);
 
   useEffect(() => {
     if (props.data) {
       addMarketData(props.data);
-      props.data.chats.forEach(addChatEvents);
-      props.data.swaps.forEach(addSwapEvents);
+      props.data.chats.forEach((v) => addChatEvents({ data: v }));
+      props.data.swaps.forEach((v) => addSwapEvents({ data: v }));
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [props?.data]);
-
-  useEffect(() => {
-    console.debug("client emojicoin page sees the change in marketData", marketData);
-  }, [marketData]);
-
-  useEffect(() => {
-    console.debug("client emojicoin page sees the change in swapEvents", swapEvents);
-  }, [swapEvents]);
-
-  useEffect(() => {
-    console.debug("client emojicoin page sees the change in chatEvents", chatEvents);
-  }, [chatEvents]);
 
   return (
     <Box pt="85px">
