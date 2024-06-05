@@ -68,7 +68,6 @@ const fetchInitialMarketData = cache(async () => {
   const marketViews = await fetchInitialWithFallback({
     functionArgs: undefined,
     queryFunction: getInitialMarketData,
-    endpoint: new URL("market-registration-data.json", SAMPLE_DATA_BASE_URL),
   });
 
   const markets = marketViews.map((mkt) => ({

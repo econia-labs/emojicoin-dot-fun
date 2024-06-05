@@ -1,5 +1,5 @@
 import ClientPoolsPage from "components/pages/pools/ClientPoolsPage";
-import { REVALIDATION_TIME } from "lib/env";
+import { REVALIDATION_TIME } from "lib/build-env";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "auto";
