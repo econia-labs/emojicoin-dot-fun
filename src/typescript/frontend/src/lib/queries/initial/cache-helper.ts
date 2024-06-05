@@ -1,7 +1,7 @@
 "use server";
 
 import { UnitOfTime, getTime } from "@sdk/utils/misc";
-import { REVALIDATION_TIME } from "lib/env";
+import { REVALIDATION_TIME } from "lib/build-env";
 import { cache } from "react";
 
 /**

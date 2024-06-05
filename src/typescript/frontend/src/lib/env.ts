@@ -3,7 +3,6 @@ import { type Network } from "@aptos-labs/wallet-adapter-react";
 let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;
 let INTEGRATOR_FEE_RATE_BPS: number;
-let REVALIDATION_TIME: number;
 
 if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
@@ -36,10 +35,4 @@ if (vercel && local) {
   );
 }
 
-if (process.env.REVALIDATION_TIME) {
-  REVALIDATION_TIME = Number(process.env.REVALIDATION_TIME);
-} else {
-  throw new Error("Environment variable REVALIDATION_TIME is undefined.");
-}
-
-export { APTOS_NETWORK, INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS, REVALIDATION_TIME };
+export { APTOS_NETWORK, INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS };

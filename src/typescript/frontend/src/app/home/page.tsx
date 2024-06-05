@@ -1,5 +1,5 @@
 import ClientHomePage from "components/pages/home/ClientHomePage";
-import { REVALIDATION_TIME } from "lib/env";
+import { REVALIDATION_TIME } from "lib/build-env";
 import fetchMarketData from "lib/queries/initial/market-data";
 
 export const revalidate = REVALIDATION_TIME;
