@@ -13,7 +13,7 @@ import {
   StyledBlock,
 } from "./styled";
 
-import Chat from "../chat";
+import ChatBox from "../chat";
 import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
@@ -74,7 +74,7 @@ const DesktopGrid = (props: GridProps) => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <Chat data={props.data} />
+              <ChatBox data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
         </StyledContentColumn>

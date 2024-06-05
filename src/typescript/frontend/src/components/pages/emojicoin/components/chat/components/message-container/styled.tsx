@@ -17,7 +17,7 @@ export const StyledMessageInner = styled.div`
   margin: 0 7px 11px 7px;
 `;
 
-export const StyledMessageWrapper = styled.div`
+export const StyledMessageWrapper = styled.div<{ fromAnotherUser: boolean }>`
   display: flex;
   flex-direction: column;
   margin-bottom: 11px;
@@ -27,6 +27,8 @@ export const StyledMessageWrapper = styled.div`
   ${({ theme }) => theme.mediaQueries.tablet} {
     max-width: 317px;
   }
+
+  align-items: ${({ fromAnotherUser }) => (fromAnotherUser ? "start" : "end")};
 `;
 
 export const StyledUserNameWrapper = styled.div`
@@ -50,6 +52,7 @@ export const StyledMessageContainer = styled.div<{ fromAnotherUser: boolean }>`
   }
 
   ${StyledMessageInner} {
+    width: fit-content;
     background-color: ${({ theme, fromAnotherUser }) =>
       fromAnotherUser ? theme.colors.econiaBlue : theme.colors.blue};
   }

@@ -7,6 +7,7 @@ import EmojiNotFoundPage from "./not-found";
 
 // We will revalidate the data cache every hour. This can be adjusted later based on how much data is fetched.
 export const revalidate = process.env.SHORT_REVALIDATE === "true" ? 10 : 3600;
+export const dynamic = "auto";
 
 type StaticParams = {
   market: string;
