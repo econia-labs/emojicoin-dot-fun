@@ -1,7 +1,8 @@
 import ClientHomePage from "components/pages/home/ClientHomePage";
+import { REVALIDATION_TIME } from "lib/env";
 import fetchMarketData from "lib/queries/initial/market-data";
 
-export const revalidate = process.env.SHORT_REVALIDATE === "true" ? 10 : 3600;
+export const revalidate = REVALIDATION_TIME;
 export const dynamic = "auto";
 
 export default async function HomePage() {

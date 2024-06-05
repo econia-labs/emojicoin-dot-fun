@@ -4,9 +4,9 @@ import getInitialSwapData from "lib/queries/initial/swaps";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import fetchMarketData from "lib/queries/initial/market-data";
 import EmojiNotFoundPage from "./not-found";
+import { REVALIDATION_TIME } from "lib/env";
 
-// We will revalidate the data cache every hour. This can be adjusted later based on how much data is fetched.
-export const revalidate = process.env.SHORT_REVALIDATE === "true" ? 10 : 3600;
+export const revalidate = REVALIDATION_TIME;
 export const dynamic = "auto";
 
 type StaticParams = {

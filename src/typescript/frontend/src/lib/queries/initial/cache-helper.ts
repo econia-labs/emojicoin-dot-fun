@@ -1,8 +1,8 @@
 "use server";
 
 import { UnitOfTime, getTime } from "@sdk/utils/misc";
+import { REVALIDATION_TIME } from "lib/env";
 import { cache } from "react";
-import { INITIAL_REVALIDATION_TIMES } from "./const";
 
 /**
  * A helper function to either cache data or fetch it from a static source, because the production
@@ -18,8 +18,7 @@ export const fetchInitialWithFallback = async <T1, T2>({
   endpoint: string | URL;
 }) => {
   // For the inner cache, since it may be used elsewhere independently.
-  const shortRevalidate = process.env.SHORT_REVALIDATE === "true";
-  const revalidate = INITIAL_REVALIDATION_TIMES[shortRevalidate ? "short" : "long"];
+  const revalidate = REVALIDATION_TIME;
 
   let fn: (args: T2) => Promise<T1>;
 
