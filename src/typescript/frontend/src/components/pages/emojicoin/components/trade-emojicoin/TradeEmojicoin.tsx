@@ -8,7 +8,6 @@ import { Text, InputGroup, InputNumeric } from "components";
 import { translationFunction } from "context/language-context";
 
 import { StyledInputWrapper, StyledArrowWrapper, StyledInputContainer } from "./styled";
-import { Arrow } from "components/svg";
 import { type TradeEmojicoinProps } from "../../types";
 import { toNominalPrice, toQuotePrice } from "@sdk/utils/nominal-price";
 import { useSimulateSwap } from "lib/queries/client-api/simulate-swap";
@@ -16,6 +15,7 @@ import { fromCoinDecimals, toCoinDecimalString } from "lib/utils/decimals";
 import { AptosInputLabel, EmojiInputLabel } from "./components/InputLabels";
 import { type AnyNumber } from "@sdk/emojicoin_dot_fun/types";
 import { SwapButton } from "./components/SwapButton";
+import BidirectionalArrowIcon from "@icons/BidirectionalArrow";
 
 const getInputDisplay = ({
   firstOrSecond,
@@ -139,7 +139,7 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
         </StyledInputWrapper>
 
         <StyledArrowWrapper onClick={() => switchHandler(isSell)}>
-          <Arrow width="18px" rotate={isSell ? "90deg" : "-90deg"} color="lightGray" />
+          <BidirectionalArrowIcon className="text-white rotate-90 scale-[1.3]" />
         </StyledArrowWrapper>
 
         <StyledInputWrapper>
