@@ -45,5 +45,6 @@ export const getBondingCurveProgress = (clammVirtualReserves: Types.Reserves) =>
   return Big(clammVirtualReserves.quote.toString())
     .sub(QUOTE_VIRTUAL_FLOOR.toString())
     .div(QUOTE_REAL_CEILING.toString())
-    .mul(100);
+    .mul(100)
+    .toNumber();
 };

@@ -14,7 +14,7 @@ import { getAptos } from "lib/utils/aptos-client";
 import { checkNetworkAndToast, parseAPIErrorAndToast, successfulTransactionToast } from "./toasts";
 
 type WalletContextState = ReturnType<typeof useWallet>;
-type SubmissionResponse = Promise<{
+export type SubmissionResponse = Promise<{
   response: PendingTransactionResponse | UserTransactionResponse | null;
   error: unknown;
 } | null>;

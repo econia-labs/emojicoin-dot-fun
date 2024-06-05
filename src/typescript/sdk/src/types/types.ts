@@ -561,7 +561,7 @@ export type AnyContractType =
   | Types.GlobalStateEvent
   | Types.LiquidityEvent;
 
-export type EventTypes =
+export type AnyEmojicoinEvent =
   | Types.SwapEvent
   | Types.ChatEvent
   | Types.MarketRegistrationEvent

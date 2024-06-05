@@ -73,8 +73,7 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
   const [basePrice, setBasePrice] = useState(
     toNominalPrice(simulatedSwap?.avgExecutionPrice ?? inputAmount.toString())
   );
-  const [quotePrice, setQuotePrice] = useState(toQuotePrice(basePrice));
-  console.warn(basePrice, quotePrice, "base and quote prices");
+  const [_quotePrice, setQuotePrice] = useState(toQuotePrice(basePrice));
 
   const handleInputAmount = useCallback((n: string) => {
     setInputAmount(fromCoinDecimals(n));

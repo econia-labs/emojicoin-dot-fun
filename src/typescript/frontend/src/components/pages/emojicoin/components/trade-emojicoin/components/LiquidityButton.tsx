@@ -15,14 +15,18 @@ export const LiquidityButton = (props: GridProps) => {
   });
 
   return (
-    <StyledContentHeader>
+    <>
       {!isInBondingCurve(props.data) ? (
-        <Flex width="100%" justifyContent="center">
-          <Button scale="lg">{t("Provide liquidity")}</Button>
-        </Flex>
+        <StyledContentHeader>
+          <Flex width="100%" justifyContent="center">
+            <Button scale="lg">{t("Provide liquidity")}</Button>
+          </Flex>
+        </StyledContentHeader>
       ) : (
-        <AnimatedProgressBar data={props.data} />
+        <StyledContentHeader className="!p-0">
+          <AnimatedProgressBar data={props.data} />
+        </StyledContentHeader>
       )}
-    </StyledContentHeader>
+    </>
   );
 };

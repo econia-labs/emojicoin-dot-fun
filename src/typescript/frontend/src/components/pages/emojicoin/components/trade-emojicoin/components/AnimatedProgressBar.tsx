@@ -4,13 +4,12 @@ import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";
 import { type Types } from "@sdk/types/types";
-import { type EventState } from "@store/event-store";
 import { compareBigInt } from "@sdk/utils/compare-bigint";
 
 const getLatestReserves = (args: {
   propsData: Types.MarketDataView;
-  storeMarketData?: EventState["events"][keyof EventState["events"]]["marketData"];
-  storeStateEvents: EventState["events"][keyof EventState["events"]]["stateEvents"];
+  storeMarketData?: Types.MarketDataView;
+  storeStateEvents: Array<Types.StateEvent>;
 }) => {
   const { propsData, storeMarketData, storeStateEvents } = args;
   const latestStoreState = storeStateEvents.at(-1);
@@ -26,54 +25,58 @@ const getLatestReserves = (args: {
       BigInt(latestStoreState.cumulativeStats.numSwaps),
     ]);
   }
-  reserves.sort((a, b) => compareBigInt(a[1], b[1]));
+  reserves.sort((a, b) => compareBigInt(a[1], b[1])).reverse();
   return reserves[0][0];
 };
 
 export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
-  const market = useEventStore((s) => s.getMarket(data.marketID));
+  const marketData = useEventStore((s) => s.getMarket(data.marketID).marketData);
+  const stateEvents = useEventStore((s) => s.getMarket(data.marketID).stateEvents);
 
   const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
   const sparklerControls = useAnimation();
-  const progressControls = useAnimation();
+  const progressBarControls = useAnimation();
+  const shimmerControls = useAnimation();
 
   useEffect(() => {
-    progressControls.start({
+    progressBarControls.start({
       width: `${progress}%`,
-      transition: { type: "spring", stiffness: 100, damping: 20 },
+      filter: `brightness(${1 + 3 * (progress / 100)}) hue-rotate(${progress * 3}deg)`,
+      transition: {
+        width: { type: "spring", stiffness: 100, damping: 20 },
+        filter: { duration: 1.2, repeat: Infinity, repeatType: "mirror" },
+      },
     });
 
     sparklerControls.start({
       opacity: [0.6, 1, 0.6],
       transition: { duration: 0.5, repeat: Infinity, repeatType: "mirror" },
     });
-  }, [progress, progressControls, sparklerControls]);
+  }, [progress, progressBarControls, sparklerControls]);
 
   useEffect(() => {
-    console.log("data", data);
-    console.log("events", market);
     const clammVirtualReserves = getLatestReserves({
       propsData: data,
-      storeMarketData: market?.marketData,
-      storeStateEvents: market?.stateEvents ?? [],
+      storeMarketData: marketData,
+      storeStateEvents: stateEvents ?? [],
     });
     const percentage = getBondingCurveProgress(clammVirtualReserves);
     setProgress(percentage);
     /* eslint-disable-next-line */
-  }, [data.clammVirtualReserves, data.numSwaps, market]);
+  }, [data.clammVirtualReserves, data.numSwaps, marketData, stateEvents]);
 
   return (
-    <div className="relative w-full h-6 bg-gray-300 rounded-full overflow-hidden">
+    <motion.div className="relative w-full drop-shadow-voltage rounded-sm overflow-hidden h-[100%] !p-0">
       <motion.div
-        className="absolute top-0 left-0 h-full bg-blue-500"
-        style={{ width: `${progress}%` }}
-        animate={progressControls}
+        className="absolute top-0 left-0 h-full bg-ec-blue"
+        style={{ opacity: 1, width: `${progress}%`, filter: "brightness(1) hue-rotate(0deg)" }}
+        animate={progressBarControls}
       >
         <motion.div
-          className="absolute top-0 right-0 h-full w-4 bg-yellow-400 rounded-full"
-          animate={sparklerControls}
+          className="absolute top-0 right-0 h-full w-4 bg-ec-blue "
+          animate={shimmerControls}
         />
       </motion.div>
-    </div>
+    </motion.div>
   );
 };

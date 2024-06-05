@@ -23,6 +23,9 @@ import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import StyledToaster from "styles/StyledToaster";
 import { PetraWallet } from "petra-plugin-wallet-adapter";
 import { EventStoreProvider } from "./store-context";
+import { enableMapSet } from "immer";
+
+enableMapSet();
 
 const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();

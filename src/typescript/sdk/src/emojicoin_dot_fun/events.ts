@@ -2,7 +2,7 @@
 import { type GUID, type EventJSON } from "../types/core";
 import {
   type Types,
-  type EventTypes,
+  type AnyEmojicoinEvent,
   toChatEvent,
   toGlobalStateEvent,
   toLiquidityEvent,
@@ -25,7 +25,7 @@ export type Events = {
   events: AptosEvent[];
 };
 
-export const converter: Map<string, (data: JSONEventTypes) => EventTypes> = new Map();
+export const converter: Map<string, (data: JSONEventTypes) => AnyEmojicoinEvent> = new Map();
 [
   [TYPE_TAGS.SwapEvent, toSwapEvent] as const,
   [TYPE_TAGS.ChatEvent, toChatEvent] as const,

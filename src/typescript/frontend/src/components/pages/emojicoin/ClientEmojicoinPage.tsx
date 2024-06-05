@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import { useMatchBreakpoints } from "hooks";
 
@@ -11,23 +11,41 @@ import MainInfo from "./components/main-info";
 import DesktopGrid from "./components/desktop-grid";
 import MobileGrid from "./components/mobile-grid";
 import { type EmojicoinProps } from "./types";
-import { EmojiNotFound } from "./components/emoji-not-found";
+import { useEventStore } from "context/store-context";
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isLaptopL } = useMatchBreakpoints();
+  const { addMarketData, addChatEvents, addSwapEvents } = useEventStore((s) => s);
+  const marketData = useEventStore((s) => s.getMarket(props.data.marketID).marketData);
+  const swapEvents = useEventStore((s) => s.getMarket(props.data.marketID).swapEvents);
+  const chatEvents = useEventStore((s) => s.getMarket(props.data.marketID).chatEvents);
+
+  useEffect(() => {
+    if (props.data) {
+      addMarketData(props.data);
+      props.data.chats.forEach(addChatEvents);
+      props.data.swaps.forEach(addSwapEvents);
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [props?.data]);
+
+  useEffect(() => {
+    console.log("client emojicoin page sees the change in marketData :)", marketData);
+  }, [marketData]);
+
+  useEffect(() => {
+    console.log("client emojicoin page sees the change in swapEvents :)", swapEvents);
+  }, [swapEvents]);
+
+  useEffect(() => {
+    console.log("client emojicoin page sees the change in chatEvents :)", chatEvents);
+  }, [chatEvents]);
 
   return (
     <Box pt="85px">
       <ClientsSlider />
-
-      {typeof props.data !== "undefined" ? (
-        <>
-          <MainInfo data={props.data} />
-          {isLaptopL ? <DesktopGrid data={props.data} /> : <MobileGrid data={props.data} />}
-        </>
-      ) : (
-        <EmojiNotFound />
-      )}
+      <MainInfo data={props.data} />
+      {isLaptopL ? <DesktopGrid data={props.data} /> : <MobileGrid data={props.data} />}
     </Box>
   );
 };

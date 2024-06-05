@@ -10,7 +10,7 @@ interface DataProps extends SymbolEmojiData, Types.MarketDataView {
 }
 
 export interface EmojicoinProps {
-  data?: DataProps;
+  data: DataProps;
 }
 
 export interface MainInfoProps {

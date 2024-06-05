@@ -3,6 +3,7 @@ import { fetchLatestMarketState } from "lib/queries/initial/state";
 import getInitialSwapData from "lib/queries/initial/swaps";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import fetchMarketData from "lib/queries/initial/market-data";
+import EmojiNotFoundPage from "./not-found";
 
 // We will revalidate the data cache every hour. This can be adjusted later based on how much data is fetched.
 export const revalidate = process.env.SHORT_REVALIDATE === "true" ? 10 : 3600;
@@ -42,7 +43,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     );
   }
 
-  return <ClientEmojicoinPage />;
+  return <EmojiNotFoundPage />;
 };
 
 export default EmojicoinPage;
