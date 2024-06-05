@@ -31,8 +31,11 @@ describe("sleep utility function with units of time", () => {
     });
     const res = await Promise.all(results);
     res.forEach((r) => {
-      // The difference between end time and start time should be less than 5 milliseconds.
-      expect(r).toBeGreaterThanOrEqual(100);
+      // The difference between end time and start time should be 100 milliseconds, with a grace
+      // period of 5 ms after the expected time.
+      // However, due to rounding errors, this will sometimes appear as having occurred before
+      // 100 ms, so we allow a 1 ms leeway (99) on the lower end.
+      expect(r).toBeGreaterThanOrEqual(99);
       expect(r).toBeLessThanOrEqual(105);
     });
   });
