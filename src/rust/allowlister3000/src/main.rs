@@ -1,14 +1,16 @@
+// cspell:word pkill
+// cspell:word sigusr
 use axum::{
     extract::{Path, State},
     http::Method,
     routing::get,
     Router,
 };
+use futures::stream::StreamExt;
 use signal_hook::consts::SIGUSR1;
 use signal_hook_tokio::Signals;
-use futures::stream::StreamExt;
-use tokio::sync::RwLock;
 use std::{collections::HashSet, sync::Arc};
+use tokio::sync::RwLock;
 use tower_http::cors::{Any, CorsLayer};
 
 // The index of the first piece of actual data in a hex address.
@@ -55,7 +57,7 @@ async fn handle_signals(mut signals: Signals, allowlist_set: Arc<RwLock<HashSet<
         match signal {
             SIGUSR1 => {
                 *allowlist_set.write().await = read_allowlist();
-            },
+            }
             _ => unreachable!(),
         }
     }
