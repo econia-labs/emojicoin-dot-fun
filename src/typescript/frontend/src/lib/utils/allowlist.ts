@@ -1,6 +1,7 @@
 import "server-only";
 
-import { ALLOWLISTER3K_URL, GALXE_CAMPAIGN_ID, IS_ALLOWLIST_ENABLED } from "lib/env";
+import { IS_ALLOWLIST_ENABLED } from "lib/env";
+import { ALLOWLISTER3K_URL, GALXE_CAMPAIGN_ID } from "lib/build-env";
 
 export const GALXE_URL = "https://graphigo.prd.galaxy.eco/query";
 

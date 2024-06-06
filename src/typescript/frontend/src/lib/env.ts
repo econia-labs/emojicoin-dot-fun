@@ -4,9 +4,7 @@ let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;
 let INTEGRATOR_FEE_RATE_BPS: number;
 
-const ALLOWLISTER3K_URL: string | undefined = process.env.ALLOWLISTER3K_URL;
 const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_ALLOWLIST_ENABLED === "true";
-const GALXE_CAMPAIGN_ID: string | undefined = process.env.GALXE_CAMPAIGN_ID;
 
 if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
@@ -31,10 +29,6 @@ if (process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS) {
   throw new Error("Environment variable NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS is undefined.");
 }
 
-if (IS_ALLOWLIST_ENABLED && ALLOWLISTER3K_URL === undefined && GALXE_CAMPAIGN_ID === undefined) {
-  throw new Error("Allowlist is enabled but no allowlist provider is set.");
-}
-
 const vercel = process.env.VERCEL === "1";
 const local = process.env.INBOX_URL === "http://localhost:3000";
 if (vercel && local) {
@@ -47,7 +41,5 @@ export {
   APTOS_NETWORK,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
-  ALLOWLISTER3K_URL,
-  GALXE_CAMPAIGN_ID,
   IS_ALLOWLIST_ENABLED,
 };
