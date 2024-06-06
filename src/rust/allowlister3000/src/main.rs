@@ -4,6 +4,10 @@ use axum::{
     routing::get,
     Router,
 };
+use signal_hook::consts::SIGUSR1;
+use signal_hook_tokio::Signals;
+use futures::stream::StreamExt;
+use tokio::sync::RwLock;
 use std::{collections::HashSet, sync::Arc};
 use tower_http::cors::{Any, CorsLayer};
 
@@ -28,26 +32,41 @@ fn sanitize(mut address: String) -> String {
 
 async fn allowlist(
     Path(address): Path<String>,
-    State(state): State<Arc<HashSet<String>>>,
+    State(state): State<Arc<RwLock<HashSet<String>>>>,
 ) -> String {
     if address.len() > MAX_ADDRESS_LENGTH || !address.starts_with("0x") {
         false.to_string()
     } else {
-        state.contains(&sanitize(address)).to_string()
+        state.read().await.contains(&sanitize(address)).to_string()
     }
 }
 
-#[tokio::main]
-async fn main() {
-    let mut set = HashSet::new();
+fn read_allowlist() -> HashSet<String> {
     std::fs::read_to_string(std::env::var("ALLOWLIST_FILE").unwrap())
         .unwrap()
         .lines()
         .map(str::to_string)
         .map(sanitize)
-        .for_each(|l| {
-            set.insert(l);
-        });
+        .collect()
+}
+
+async fn handle_signals(mut signals: Signals, allowlist_set: Arc<RwLock<HashSet<String>>>) {
+    while let Some(signal) = signals.next().await {
+        match signal {
+            SIGUSR1 => {
+                *allowlist_set.write().await = read_allowlist();
+            },
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    let set = Arc::new(RwLock::new(read_allowlist()));
+    let signals = Signals::new(&[SIGUSR1]).unwrap();
+    let handle = signals.handle();
+    let signals_task = tokio::spawn(handle_signals(signals, set.clone()));
     let cors = CorsLayer::new()
         .allow_methods([Method::GET])
         .allow_origin(Any)
@@ -55,9 +74,11 @@ async fn main() {
     let app = Router::new()
         .route("/:address", get(allowlist))
         .layer(cors)
-        .with_state(Arc::new(set));
+        .with_state(set);
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
+    signals_task.await.unwrap();
+    handle.close();
 }
 
 #[cfg(test)]

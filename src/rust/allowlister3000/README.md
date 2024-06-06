@@ -13,6 +13,9 @@ then start the program by running `cargo run --release`.
 To update the allowlist, add the desired address(es) to the allowlist file.
 Then, **restart the program**.
 
+Alternatively, you can use `pkill -USR1 allowlister3000` to send a `SIGUSR1`
+signal to the program, which will reload the file without quitting.
+
 ## Allowlist format
 
 The allowlist file format is just a plain text file with one address per line.
