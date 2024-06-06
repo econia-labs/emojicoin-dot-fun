@@ -2,10 +2,10 @@ import { Box, Column, Flex } from "@containers";
 import ClientsSlider from "components/clients-slider";
 import EmojiTable from "./components/emoji-table";
 import MainCard from "./components/main-card";
-import { type MarketStateProps } from "./types";
+import type fetchMarketData from "lib/queries/initial/market-data";
 
 export interface HomeProps {
-  data?: Array<MarketStateProps>;
+  data?: Awaited<ReturnType<typeof fetchMarketData>>;
 }
 
 const ClientHomePage = async (props: HomeProps) => {

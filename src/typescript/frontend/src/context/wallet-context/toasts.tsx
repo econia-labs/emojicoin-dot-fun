@@ -23,6 +23,9 @@ export const checkNetworkAndToast = (
     }
     return false;
   }
+  if (network.name.toLowerCase() === "localhost" && APTOS_NETWORK === "local") {
+    return true;
+  }
   if (network.name !== APTOS_NETWORK && typeof network.name !== "undefined") {
     const message = (
       <div className="flex flex-col">

@@ -24,7 +24,7 @@ export const Textarea = styled.textarea<TextareaProps>`
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.white};
-    opacity: 0.6;
+    opacity: 0.8;
   }
 
   &:disabled {

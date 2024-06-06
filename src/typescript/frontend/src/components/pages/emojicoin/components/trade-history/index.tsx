@@ -8,32 +8,36 @@ import { TableRowDesktop } from "./components";
 import { Table, Text, Th, ThInner, HeaderTr, TBody, EmptyTr } from "components";
 import { StyledTradeHistory } from "./styled";
 
-import { HEADERS } from "./constants";
+import { getHeaders } from "./misc";
 import { type TradeHistoryProps } from "../../types";
-import { toDecimalsAPT } from "lib/utils/decimals";
+import { toCoinDecimalString } from "lib/utils/decimals";
 import { rankFromAPTAmount } from "lib/utils/rank";
+import { useEventStore } from "context/store-context";
+import { type TableRowDesktopProps } from "./components/table-row-desktop/types";
+import { type Types } from "@sdk/types/types";
+
+const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
+  ...rankFromAPTAmount(Number(toCoinDecimalString(value.quoteVolume, 3))),
+  apt: value.quoteVolume.toString(),
+  emoji: value.baseVolume.toString(),
+  type: value.isSell ? "sell" : "buy",
+  price: value.avgExecutionPrice.toString(),
+  date: new Date(Number(value.time / 1000n)),
+  version: value.version,
+});
 
 const TradeHistory = (props: TradeHistoryProps) => {
   const { t } = translationFunction();
   const { offsetHeight: tradeHistoryTableBodyHeight } =
     useElementDimensions("tradeHistoryTableBody");
 
-  const data = props.data.swaps.map((v) => ({
-    ...rankFromAPTAmount(Number(toDecimalsAPT(v.quoteVolume, 3))),
-    apt: v.quoteVolume.toString(),
-    emoji: v.baseVolume.toString(),
-    type: v.isSell ? "sell" : "buy",
-    price: v.avgExecutionPrice.toString(),
-    date: new Date(Number(v.time / 1000n)),
-    version: v.version, // TODO: Pass tx hash down the component tree.
-  }));
-
+  const swaps = useEventStore((s) => s.getMarket(props.data.marketID).swapEvents.events);
   return (
     <StyledTradeHistory>
       <Table minWidth="700px">
         <thead>
           <HeaderTr>
-            {HEADERS.map((th, index) => (
+            {getHeaders(props.data.emoji).map((th, index) => (
               <Th width={th.width} minWidth="100px" key={index}>
                 <ThInner>
                   <Text
@@ -50,10 +54,10 @@ const TradeHistory = (props: TradeHistoryProps) => {
           </HeaderTr>
         </thead>
         <TBody height={{ _: "272px", tablet: "340px" }} id="tradeHistoryTableBody">
-          {data.map((item, index) => (
-            <TableRowDesktop key={index} item={item} />
+          {swaps.map((item, index) => (
+            <TableRowDesktop key={index} item={toTableItem(item)} />
           ))}
-          {getEmptyListTr(tradeHistoryTableBodyHeight, data.length, EmptyTr)}
+          {getEmptyListTr(tradeHistoryTableBodyHeight, swaps.length, EmptyTr)}
         </TBody>
       </Table>
     </StyledTradeHistory>

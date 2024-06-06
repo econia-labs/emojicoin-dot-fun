@@ -4,7 +4,7 @@ import { Flex, Column, FlexGap } from "@containers";
 import { translationFunction } from "context/language-context";
 import { useTooltip } from "hooks";
 import { StyledHeaderEmoji, StyledHeaderText, StyledStatsText } from "./styled";
-import { toDecimalsAPT } from "lib/utils/decimals";
+import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
 
@@ -34,11 +34,11 @@ const MainInfo = (props: MainInfoProps) => {
           mb="8px"
         >
           <StyledHeaderText ellipsis ref={targetRefEmojiName}>
-            {props.data.emoji.name}
+            {props.data.name}
           </StyledHeaderText>
           {tooltipEmojiName}
 
-          <StyledHeaderEmoji>{props.data.emoji.emoji}</StyledHeaderEmoji>
+          <StyledHeaderEmoji>{props.data.emoji}</StyledHeaderEmoji>
         </FlexGap>
 
         <Column width={{ _: "100%", tablet: "42%", laptopL: "35%" }} mt="-8px">
@@ -51,7 +51,7 @@ const MainInfo = (props: MainInfoProps) => {
               {t("Mkt. Cap:")}
             </StyledStatsText>
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.state.instantaneousStats.totalValueLocked, 2)}
+              {toCoinDecimalString(props.data.marketCap, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>
@@ -65,9 +65,8 @@ const MainInfo = (props: MainInfoProps) => {
             >
               {t("24 hour vol:")}
             </StyledStatsText>
-            {/* TODO: Replace `fullyDilutedValue` here to display 24H volume. */}
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.state.instantaneousStats.fullyDilutedValue, 2)}
+              {toCoinDecimalString(props.data.dailyVolume, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>
@@ -82,7 +81,7 @@ const MainInfo = (props: MainInfoProps) => {
               {t("All-time vol:")}
             </StyledStatsText>
             <StyledStatsText textScale={{ _: "display6", tablet: "display4" }}>
-              {toDecimalsAPT(props.data.state.cumulativeStats.quoteVolume, 2)}
+              {toCoinDecimalString(props.data.allTimeVolume, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </StyledStatsText>

@@ -1,8 +1,12 @@
 import ClientHomePage from "components/pages/home/ClientHomePage";
-import { fetchTopMarkets } from "lib/queries/initial/markets";
+import { REVALIDATION_TIME } from "lib/build-env";
+import fetchMarketData from "lib/queries/initial/market-data";
+
+export const revalidate = REVALIDATION_TIME;
+export const dynamic = "auto";
 
 export default async function HomePage() {
-  const data = await fetchTopMarkets();
+  const data = await fetchMarketData();
 
   return <ClientHomePage data={data} />;
 }

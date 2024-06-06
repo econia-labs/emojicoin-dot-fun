@@ -1,9 +1,21 @@
 import { hexToBytes } from "@noble/hashes/utils";
+import { type AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
+import { normalizeAddress } from "../utils/account-address";
 
-export namespace ContractTypes {
+type WithVersion = {
+  version: number;
+};
+
+export namespace Types {
+  export type EmojicoinInfo = {
+    marketAddress: AccountAddress;
+    emojicoin: TypeTag;
+    emojicoinLP: TypeTag;
+  };
+
   export type ExtendRef = {
     self: AccountAddressString;
   };
@@ -136,7 +148,7 @@ export namespace ContractTypes {
     time: bigint;
   };
 
-  export type SwapEvent = {
+  export type SwapEvent = WithVersion & {
     marketID: bigint;
     time: bigint;
     marketNonce: bigint;
@@ -155,7 +167,7 @@ export namespace ContractTypes {
     resultsInStateTransition: boolean;
   };
 
-  export type ChatEvent = {
+  export type ChatEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     emitTime: bigint;
     emitMarketNonce: bigint;
@@ -166,7 +178,7 @@ export namespace ContractTypes {
     balanceAsFractionOfCirculatingSupply: bigint;
   };
 
-  export type MarketRegistrationEvent = {
+  export type MarketRegistrationEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     time: bigint;
     registrant: AccountAddressString;
@@ -174,7 +186,7 @@ export namespace ContractTypes {
     integratorFee: bigint;
   };
 
-  export type PeriodicStateEvent = {
+  export type PeriodicStateEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     periodicStateMetadata: PeriodicStateMetadata;
     open: bigint;
@@ -193,7 +205,7 @@ export namespace ContractTypes {
     tvlPerLPCoinGrowth: bigint;
   };
 
-  export type StateEvent = {
+  export type StateEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     stateMetadata: StateMetadata;
     clammVirtualReserves: Reserves;
@@ -204,7 +216,7 @@ export namespace ContractTypes {
     lastSwap: LastSwap;
   };
 
-  export type GlobalStateEvent = {
+  export type GlobalStateEvent = WithVersion & {
     emitTime: bigint;
     registryNonce: bigint;
     trigger: number;
@@ -218,7 +230,7 @@ export namespace ContractTypes {
     cumulativeChatMessages: bigint;
   };
 
-  export type LiquidityEvent = {
+  export type LiquidityEvent = WithVersion & {
     marketID: bigint;
     time: bigint;
     marketNonce: bigint;
@@ -230,31 +242,53 @@ export namespace ContractTypes {
     proRataBaseDonationClaimAmount: bigint;
     proRataQuoteDonationClaimAmount: bigint;
   };
+
+  // One row in the `inbox_latest_state` table.
+  export type InboxLatestState = StateEvent & {
+    version: number;
+    marketID: number;
+  };
+
+  // Query return type for `market_data` view.
+  export type MarketDataView = {
+    marketID: number;
+    marketAddress: `0x${string}`;
+    marketCap: number;
+    bumpTime: number;
+    version: number;
+    numSwaps: number;
+    numChatMessages: number;
+    clammVirtualReserves: Reserves;
+    cpammRealReserves: Reserves;
+    lpCoinSupply: number;
+    avgExecutionPrice: number;
+    emojiBytes: `0x${string}`;
+    allTimeVolume: number;
+    dailyVolume: number;
+  };
 }
-export const toExtendRef = (data: JSONTypes.ExtendRef): ContractTypes.ExtendRef => ({
+export const toExtendRef = (data: JSONTypes.ExtendRef): Types.ExtendRef => ({
   self: data.self,
 });
 
-export const toSequenceInfo = (data: JSONTypes.SequenceInfo): ContractTypes.SequenceInfo => ({
+export const toSequenceInfo = (data: JSONTypes.SequenceInfo): Types.SequenceInfo => ({
   nonce: BigInt(data.nonce),
   lastBumpTime: BigInt(data.last_bump_time),
 });
 
-export const toTVLtoLPCoinRatio = (
-  data: JSONTypes.TVLtoLPCoinRatio
-): ContractTypes.TVLtoLPCoinRatio => ({
+export const toTVLtoLPCoinRatio = (data: JSONTypes.TVLtoLPCoinRatio): Types.TVLtoLPCoinRatio => ({
   tvl: BigInt(data.tvl),
   lpCoins: BigInt(data.lp_coins),
 });
 
-export const toReserves = (data: JSONTypes.Reserves): ContractTypes.Reserves => ({
+export const toReserves = (data: JSONTypes.Reserves): Types.Reserves => ({
   base: BigInt(data.base),
   quote: BigInt(data.quote),
 });
 
 export const toPeriodicStateTracker = (
   data: JSONTypes.PeriodicStateTracker
-): ContractTypes.PeriodicStateTracker => ({
+): Types.PeriodicStateTracker => ({
   startTime: BigInt(data.start_time),
   period: BigInt(data.period),
   open: BigInt(data.open_price_q64),
@@ -274,16 +308,14 @@ export const toPeriodicStateTracker = (
   coinRatioEnd: toTVLtoLPCoinRatio(data.tvl_to_lp_coin_ratio_end),
 });
 
-export const toRegistryAddress = (
-  data: JSONTypes.RegistryAddress
-): ContractTypes.RegistryAddress => ({
-  registryAddress: data.registry_address,
+export const toRegistryAddress = (data: JSONTypes.RegistryAddress): Types.RegistryAddress => ({
+  registryAddress: normalizeAddress(data.registry_address),
 });
 
 const strToBigInt = (data: string): bigint => BigInt(data);
 
-export const toRegistryView = (data: JSONTypes.RegistryView): ContractTypes.RegistryView => ({
-  registryAddress: data.registry_address,
+export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView => ({
+  registryAddress: normalizeAddress(data.registry_address),
   nonce: fromAggregatorSnapshot(data.nonce, strToBigInt),
   lastBumpTime: BigInt(data.last_bump_time),
   numMarkets: BigInt(data.n_markets),
@@ -297,17 +329,15 @@ export const toRegistryView = (data: JSONTypes.RegistryView): ContractTypes.Regi
   cumulativeChatMessages: fromAggregatorSnapshot(data.cumulative_chat_messages, strToBigInt),
 });
 
-export const toMarketMetadata = (data: JSONTypes.MarketMetadata): ContractTypes.MarketMetadata => ({
+export const toMarketMetadata = (data: JSONTypes.MarketMetadata): Types.MarketMetadata => ({
   marketID: BigInt(data.market_id),
-  marketAddress: data.market_address,
+  marketAddress: normalizeAddress(data.market_address),
   emojiBytes: hexToBytes(
     data.emoji_bytes.startsWith("0x") ? data.emoji_bytes.slice(2) : data.emoji_bytes
   ),
 });
 
-export const toCumulativeStats = (
-  data: JSONTypes.CumulativeStats
-): ContractTypes.CumulativeStats => ({
+export const toCumulativeStats = (data: JSONTypes.CumulativeStats): Types.CumulativeStats => ({
   baseVolume: BigInt(data.base_volume),
   quoteVolume: BigInt(data.quote_volume),
   integratorFees: BigInt(data.integrator_fees),
@@ -319,14 +349,14 @@ export const toCumulativeStats = (
 
 export const toInstantaneousStats = (
   data: JSONTypes.InstantaneousStats
-): ContractTypes.InstantaneousStats => ({
+): Types.InstantaneousStats => ({
   totalQuoteLocked: BigInt(data.total_quote_locked),
   totalValueLocked: BigInt(data.total_value_locked),
   marketCap: BigInt(data.market_cap),
   fullyDilutedValue: BigInt(data.fully_diluted_value),
 });
 
-export const toLastSwap = (data: JSONTypes.LastSwap): ContractTypes.LastSwap => ({
+export const toLastSwap = (data: JSONTypes.LastSwap): Types.LastSwap => ({
   isSell: data.is_sell,
   avgExecutionPrice: BigInt(data.avg_execution_price_q64),
   baseVolume: BigInt(data.base_volume),
@@ -335,7 +365,7 @@ export const toLastSwap = (data: JSONTypes.LastSwap): ContractTypes.LastSwap => 
   time: BigInt(data.time),
 });
 
-export const toMarketView = (data: JSONTypes.MarketView): ContractTypes.MarketView => ({
+export const toMarketView = (data: JSONTypes.MarketView): Types.MarketView => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
   clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
@@ -351,7 +381,7 @@ export const toMarketView = (data: JSONTypes.MarketView): ContractTypes.MarketVi
   emojicoinLPBalance: BigInt(data.emojicoin_lp_balance),
 });
 
-export const toMarketResource = (data: JSONTypes.MarketResource): ContractTypes.MarketResource => ({
+export const toMarketResource = (data: JSONTypes.MarketResource): Types.MarketResource => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
   extendRef: toExtendRef(data.extend_ref),
@@ -365,7 +395,7 @@ export const toMarketResource = (data: JSONTypes.MarketResource): ContractTypes.
 
 export const toPeriodicStateMetadata = (
   data: JSONTypes.PeriodicStateMetadata
-): ContractTypes.PeriodicStateMetadata => ({
+): Types.PeriodicStateMetadata => ({
   startTime: BigInt(data.start_time),
   period: BigInt(data.period),
   emitTime: BigInt(data.emit_time),
@@ -373,13 +403,14 @@ export const toPeriodicStateMetadata = (
   trigger: Number(data.trigger),
 });
 
-export const toStateMetadata = (data: JSONTypes.StateMetadata): ContractTypes.StateMetadata => ({
+export const toStateMetadata = (data: JSONTypes.StateMetadata): Types.StateMetadata => ({
   marketNonce: BigInt(data.market_nonce),
   bumpTime: BigInt(data.bump_time),
   trigger: Number(data.trigger),
 });
 
-export const toSwapEvent = (data: JSONTypes.SwapEvent): ContractTypes.SwapEvent => ({
+export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.SwapEvent => ({
+  version,
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
@@ -398,11 +429,12 @@ export const toSwapEvent = (data: JSONTypes.SwapEvent): ContractTypes.SwapEvent 
   resultsInStateTransition: data.results_in_state_transition,
 });
 
-export const toChatEvent = (data: JSONTypes.ChatEvent): ContractTypes.ChatEvent => ({
+export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.ChatEvent => ({
+  version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   emitTime: BigInt(data.emit_time),
   emitMarketNonce: BigInt(data.emit_market_nonce),
-  user: data.user,
+  user: normalizeAddress(data.user),
   message: data.message,
   userEmojicoinBalance: BigInt(data.user_emojicoin_balance),
   circulatingSupply: BigInt(data.circulating_supply),
@@ -410,18 +442,20 @@ export const toChatEvent = (data: JSONTypes.ChatEvent): ContractTypes.ChatEvent 
 });
 
 export const toMarketRegistrationEvent = (
-  data: JSONTypes.MarketRegistrationEvent
-): ContractTypes.MarketRegistrationEvent => ({
+  data: JSONTypes.MarketRegistrationEvent,
+  version: number
+): Types.MarketRegistrationEvent => ({
+  version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   time: BigInt(data.time),
-  registrant: data.registrant,
-  integrator: data.integrator,
+  registrant: normalizeAddress(data.registrant),
+  integrator: normalizeAddress(data.integrator),
   integratorFee: BigInt(data.integrator_fee),
 });
 
 export const toPeriodicStateMeta = (
   data: JSONTypes.PeriodicStateMetadata
-): ContractTypes.PeriodicStateMetadata => ({
+): Types.PeriodicStateMetadata => ({
   startTime: BigInt(data.start_time),
   period: BigInt(data.period),
   emitTime: BigInt(data.emit_time),
@@ -430,8 +464,10 @@ export const toPeriodicStateMeta = (
 });
 
 export const toPeriodicStateEvent = (
-  data: JSONTypes.PeriodicStateEvent
-): ContractTypes.PeriodicStateEvent => ({
+  data: JSONTypes.PeriodicStateEvent,
+  version: number
+): Types.PeriodicStateEvent => ({
+  version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   periodicStateMetadata: toPeriodicStateMetadata(data.periodic_state_metadata),
   open: BigInt(data.open_price_q64),
@@ -450,7 +486,8 @@ export const toPeriodicStateEvent = (
   tvlPerLPCoinGrowth: BigInt(data.tvl_per_lp_coin_growth_q64),
 });
 
-export const toStateEvent = (data: JSONTypes.StateEvent): ContractTypes.StateEvent => ({
+export const toStateEvent = (data: JSONTypes.StateEvent, version: number): Types.StateEvent => ({
+  version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   stateMetadata: toStateMetadata(data.state_metadata),
   clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
@@ -462,8 +499,10 @@ export const toStateEvent = (data: JSONTypes.StateEvent): ContractTypes.StateEve
 });
 
 export const toGlobalStateEvent = (
-  data: JSONTypes.GlobalStateEvent
-): ContractTypes.GlobalStateEvent => ({
+  data: JSONTypes.GlobalStateEvent,
+  version: number
+): Types.GlobalStateEvent => ({
+  version,
   emitTime: BigInt(data.emit_time),
   registryNonce: fromAggregatorSnapshot(data.registry_nonce, strToBigInt),
   trigger: data.trigger,
@@ -477,7 +516,11 @@ export const toGlobalStateEvent = (
   cumulativeChatMessages: fromAggregatorSnapshot(data.cumulative_chat_messages, strToBigInt),
 });
 
-export const toLiquidityEvent = (data: JSONTypes.LiquidityEvent): ContractTypes.LiquidityEvent => ({
+export const toLiquidityEvent = (
+  data: JSONTypes.LiquidityEvent,
+  version: number
+): Types.LiquidityEvent => ({
+  version,
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
@@ -490,35 +533,58 @@ export const toLiquidityEvent = (data: JSONTypes.LiquidityEvent): ContractTypes.
   proRataQuoteDonationClaimAmount: BigInt(data.pro_rata_quote_donation_claim_amount),
 });
 
-export type AnyContractType =
-  | ContractTypes.ExtendRef
-  | ContractTypes.SequenceInfo
-  | ContractTypes.TVLtoLPCoinRatio
-  | ContractTypes.PeriodicStateTracker
-  | ContractTypes.RegistryAddress
-  | ContractTypes.RegistryView
-  | ContractTypes.MarketView
-  | ContractTypes.MarketResource
-  | ContractTypes.MarketMetadata
-  | ContractTypes.Reserves
-  | ContractTypes.PeriodicStateMetadata
-  | ContractTypes.StateMetadata
-  | ContractTypes.CumulativeStats
-  | ContractTypes.InstantaneousStats
-  | ContractTypes.LastSwap
-  | ContractTypes.SwapEvent
-  | ContractTypes.ChatEvent
-  | ContractTypes.MarketRegistrationEvent
-  | ContractTypes.PeriodicStateEvent
-  | ContractTypes.StateEvent
-  | ContractTypes.GlobalStateEvent
-  | ContractTypes.LiquidityEvent;
+export const toInboxLatestState = (data: JSONTypes.InboxLatestState): Types.InboxLatestState => ({
+  ...toStateEvent(data, data.transaction_version),
+  version: data.transaction_version,
+  marketID: data.marketID,
+});
 
-export type EventTypes =
-  | ContractTypes.SwapEvent
-  | ContractTypes.ChatEvent
-  | ContractTypes.MarketRegistrationEvent
-  | ContractTypes.PeriodicStateEvent
-  | ContractTypes.StateEvent
-  | ContractTypes.GlobalStateEvent
-  | ContractTypes.LiquidityEvent;
+export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDataView => ({
+  marketID: Number(data.market_id),
+  marketAddress: normalizeAddress(data.market_address),
+  marketCap: Number(data.market_cap),
+  bumpTime: Number(data.bump_time),
+  version: Number(data.transaction_version),
+  numSwaps: Number(data.n_swaps),
+  numChatMessages: Number(data.n_chat_messages),
+  clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
+  cpammRealReserves: toReserves(data.cpamm_real_reserves),
+  lpCoinSupply: Number(data.lp_coin_supply),
+  avgExecutionPrice: Number(data.avg_execution_price_q64),
+  allTimeVolume: Number(data.all_time_volume),
+  dailyVolume: Number(data.daily_volume),
+  emojiBytes: data.emoji_bytes,
+});
+
+export type AnyContractType =
+  | Types.ExtendRef
+  | Types.SequenceInfo
+  | Types.TVLtoLPCoinRatio
+  | Types.PeriodicStateTracker
+  | Types.RegistryAddress
+  | Types.RegistryView
+  | Types.MarketView
+  | Types.MarketResource
+  | Types.MarketMetadata
+  | Types.Reserves
+  | Types.PeriodicStateMetadata
+  | Types.StateMetadata
+  | Types.CumulativeStats
+  | Types.InstantaneousStats
+  | Types.LastSwap
+  | Types.SwapEvent
+  | Types.ChatEvent
+  | Types.MarketRegistrationEvent
+  | Types.PeriodicStateEvent
+  | Types.StateEvent
+  | Types.GlobalStateEvent
+  | Types.LiquidityEvent;
+
+export type AnyEmojicoinEvent =
+  | Types.SwapEvent
+  | Types.ChatEvent
+  | Types.MarketRegistrationEvent
+  | Types.PeriodicStateEvent
+  | Types.StateEvent
+  | Types.GlobalStateEvent
+  | Types.LiquidityEvent;

@@ -1,25 +1,44 @@
 import React from "react";
 import { Input } from "components/inputs/input";
-import { REGEX } from "configs";
 import { type InputProps } from "components/inputs/input/types";
+
+const NUMBERS = new Set("0123456789");
 
 export const InputNumeric = <E extends React.ElementType = "input">({
   onUserInput,
   ...props
 }: InputProps<E> & { onUserInput: (value: string) => void }): JSX.Element => {
-  const onChangeText = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.replace(/,/g, ".");
+  const [input, setInput] = React.useState("");
 
-    if (REGEX.numericInputRegex.test(value)) {
-      onUserInput(value);
+  const onChangeText = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value.replace(/,/g, ".").replace(/^0+/, "0");
+
+    let hasDecimal = false;
+    let s = "";
+    for (const char of value) {
+      if (char === ".") {
+        if (!hasDecimal) {
+          s += char;
+        } else {
+          hasDecimal = true;
+        }
+      } else if (NUMBERS.has(char)) {
+        s += char;
+      }
+    }
+
+    if (s === "" || !isNaN(Number(s))) {
+      setInput(s);
+      onUserInput(s);
     }
   };
 
   return (
     <Input
       inputMode="decimal"
-      pattern="^(?!\.)[0-9]*[.,]?[0-9]*$"
+      pattern="^\d*\.?\d*$"
       onChange={(event) => onChangeText(event)}
+      value={input}
       {...props}
     />
   );

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { TABLE_NAME, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { type JSONTypes } from "../types";
 import { wrap } from "./utils";
@@ -16,7 +16,7 @@ export const paginateChatEvents = async (
 ) => {
   const { marketID } = args;
   const query = postgrest
-    .from(TABLE_NAME)
+    .from(INBOX_EVENTS_TABLE)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.ChatEvent)
     .eq("data->market_metadata->market_id", wrap(marketID))

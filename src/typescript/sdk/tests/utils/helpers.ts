@@ -15,6 +15,10 @@ export const PUBLISH_RES_PATH = path.resolve(
  * Facilitates the usage of a constant Aptos Account and client for testing the publishing
  * flow. Instead of having to republish every account for every test that needs it, we can
  * just store these things in the globalThis and get them from this function.
+ *
+ * NOTE: This function returns test specific data, so using it will result in unexpected behavior
+ * unless you know what you're doing.
+ *
  * @returns TestHelpers
  */
 export function getTestHelpers(): TestHelpers {

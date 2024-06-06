@@ -1,8 +1,8 @@
 import "server-only";
 
-import { type ContractTypes, type JSONTypes, toSwapEvent } from "../types";
+import { type Types, type JSONTypes, toSwapEvent } from "../types";
 import { STRUCT_STRINGS } from "../utils";
-import { TABLE_NAME, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
 import {
   type AggregateQueryResultsArgs,
   type EventsAndErrors,
@@ -20,7 +20,7 @@ export const paginateSwapEvents = async (
   const { swapper, marketID } = args;
 
   let query = postgrest
-    .from(TABLE_NAME)
+    .from(INBOX_EVENTS_TABLE)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.SwapEvent)
     .order("transaction_version", ORDER_BY.DESC);
@@ -44,11 +44,11 @@ export const paginateSwapEvents = async (
 // These will always be distinct, so `distinct on` is not necessary.
 export const getAllPostBondingCurveMarkets = async (
   args: Omit<AggregateQueryResultsArgs, "query">
-): Promise<EventsAndErrors<ContractTypes.SwapEvent>> => {
+): Promise<EventsAndErrors<Types.SwapEvent>> => {
   const res = await aggregateQueryResults<JSONTypes.SwapEvent>({
     ...args,
     query: postgrest
-      .from(TABLE_NAME)
+      .from(INBOX_EVENTS_TABLE)
       .select("*")
       .filter("type", "eq", STRUCT_STRINGS.SwapEvent)
       .filter("data->results_in_state_transition", "eq", true)
@@ -56,7 +56,7 @@ export const getAllPostBondingCurveMarkets = async (
   });
 
   return {
-    events: res.data.map((e) => toSwapEvent(e)),
+    events: res.data.map((e) => toSwapEvent(e, e.version)),
     errors: res.errors,
   };
 };

@@ -2,7 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
     "INBOX_URL",
-    "SHORT_REVALIDATE"
+    "REVALIDATION_TIME"
   ],
   "pipeline": {
     "build": {

@@ -11,9 +11,14 @@ import {
   type TypeTag,
 } from "@aptos-labs/ts-sdk";
 import { EmojicoinDotFun, deriveEmojicoinPublisherAddress } from "../emojicoin_dot_fun";
-import { type EmojicoinInfo } from "../types/contract";
 import { toConfig } from "../utils/aptos-utils";
-import { COIN_FACTORY_MODULE_NAME, DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "../const";
+import {
+  COIN_FACTORY_MODULE_NAME,
+  DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+  EMOJICOIN_DOT_FUN_MODULE_NAME,
+} from "../const";
+import { type Types, toMarketResource } from "../types/types";
+import type JSONTypes from "../types/json-types";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
@@ -39,7 +44,7 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
 export function getEmojicoinMarketAddressAndTypeTags(args: {
   registryAddress: AccountAddressInput;
   symbolBytes: HexInput;
-}): EmojicoinInfo {
+}): Types.EmojicoinInfo {
   const registryAddress = AccountAddress.from(args.registryAddress);
   const symbolBytes = Hex.fromHexInput(args.symbolBytes);
   const marketAddress = deriveEmojicoinPublisherAddress({
@@ -63,7 +68,7 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
   sender: Account;
   integrator: AccountAddressInput;
   options?: InputGenerateTransactionOptions;
-}): Promise<EmojicoinInfo> => {
+}): Promise<Types.EmojicoinInfo> => {
   const { aptos, emojis, sender, integrator } = args;
   const aptosConfig = toConfig(aptos);
   const options = args.options || DEFAULT_REGISTER_MARKET_GAS_OPTIONS;
@@ -87,3 +92,19 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
 
   return { marketAddress, emojicoin, emojicoinLP };
 };
+
+export async function getMarketResource(args: {
+  aptos: Aptos;
+  moduleAddress: AccountAddressInput;
+  objectAddress: AccountAddressInput;
+}): Promise<Types.MarketResource> {
+  const { aptos } = args;
+  const moduleAddress = AccountAddress.from(args.moduleAddress);
+  const objectAddress = AccountAddress.from(args.objectAddress);
+  const marketResource = await aptos.getAccountResource<JSONTypes.MarketResource>({
+    accountAddress: objectAddress,
+    resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Market`,
+  });
+
+  return toMarketResource(marketResource);
+}

@@ -32,6 +32,9 @@
       ],
       "@sdk/*": [
         "../../sdk/src/*"
+      ],
+      "@store/*": [
+        "lib/store/*"
       ]
     },
     "plugins": [

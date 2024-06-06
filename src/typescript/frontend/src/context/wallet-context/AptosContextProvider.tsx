@@ -12,9 +12,11 @@ import { APTOS_NETWORK } from "lib/env";
 import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { getAptos } from "lib/utils/aptos-client";
 import { checkNetworkAndToast, parseAPIErrorAndToast, successfulTransactionToast } from "./toasts";
+import { useEventStore } from "context/store-context";
+import { storeEvents } from "@store/event-utils";
 
 type WalletContextState = ReturnType<typeof useWallet>;
-type SubmissionResponse = Promise<{
+export type SubmissionResponse = Promise<{
   response: PendingTransactionResponse | UserTransactionResponse | null;
   error: unknown;
 } | null>;
@@ -36,6 +38,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     submitTransaction,
     signTransaction,
   } = useWallet();
+  const store = useEventStore((state) => state);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
@@ -73,9 +76,11 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         }
         error = e;
       }
+      // Store any relevant events in the state event store for all components to see.
+      storeEvents(store, { response, error });
       return { response, error };
     },
-    []
+    [store]
   );
 
   const submit = useCallback(

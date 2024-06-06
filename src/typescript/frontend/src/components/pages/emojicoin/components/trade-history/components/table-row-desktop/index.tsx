@@ -8,7 +8,7 @@ import { Flex } from "@containers";
 import { Text, Tr, Td } from "components";
 
 import { type TableRowDesktopProps } from "./types";
-import { toDecimalsAPT } from "lib/utils/decimals";
+import { toCoinDecimalString } from "lib/utils/decimals";
 import { ExplorerLinkCustom } from "./styled";
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
@@ -35,7 +35,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
       <Td width={{ _: "12.5%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
-            {toDecimalsAPT(item.apt, 3)}
+            {toCoinDecimalString(item.apt, 3)}
           </Text>
         </Flex>
       </Td>
@@ -43,7 +43,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
       <Td width={{ _: "23%", laptopL: "13.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex>
           <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
-            {toDecimalsAPT(item.emoji, 3)}
+            {toCoinDecimalString(item.emoji, 3)}
           </Text>
         </Flex>
       </Td>

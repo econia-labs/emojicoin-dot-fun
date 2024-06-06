@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { Svg } from "components/svg";
+import { motion } from "framer-motion";
 
 export const StyledInputWrapper = styled.div`
   display: flex;
@@ -15,7 +16,7 @@ export const StyledInputWrapper = styled.div`
   }
 `;
 
-export const StyledArrowWrapper = styled.div`
+export const StyledArrowWrapper = styled(motion.div)`
   display: flex;
   border-radius: ${({ theme }) => theme.radii.circle};
   border: 1px solid ${({ theme }) => theme.colors.darkGray};
@@ -55,5 +56,5 @@ export const StyledInputContainer = styled.div<{ isForce: boolean }>`
   display: flex;
   position: relative;
   gap: 19px;
-  flex-direction: ${({ isForce }) => (isForce ? "column" : "column-reverse")};
+  flex-direction: column;
 `;

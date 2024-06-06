@@ -114,7 +114,7 @@ export async function publishForTest(pk: string): Promise<PublishPackageResult> 
     .getAccountAPTAmount({ accountAddress: publisher.accountAddress })
     .catch((_) => 0);
 
-  if (process.env.APTOS_NETWORK !== "local") {
+  if (process.env.NEXT_PUBLIC_APTOS_NETWORK !== "local") {
     const APT_REQUIRED_FOR_TESTS = 4;
     while (publisherBalance < APT_REQUIRED_FOR_TESTS * ONE_APT) {
       /* eslint-disable-next-line no-await-in-loop */

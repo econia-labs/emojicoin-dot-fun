@@ -5,11 +5,12 @@ export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
   aptos: Aptos;
   config: AptosConfig;
 } {
-  const networkRaw = process.env.APTOS_NETWORK;
+  const networkRaw = process.env.NEXT_PUBLIC_APTOS_NETWORK;
   const network = networkRaw ? NetworkToNetworkName[networkRaw] : Network.LOCAL;
   if (!network) {
+    const r = networkRaw;
     throw new Error(
-      `Unknown network, confirm the APTOS_NETWORK environment variable is valid: ${networkRaw}`
+      `Unknown network, confirm NEXT_PUBLIC_APTOS_NETWORK environment variable is valid: ${r}`
     );
   }
   const config = new AptosConfig({

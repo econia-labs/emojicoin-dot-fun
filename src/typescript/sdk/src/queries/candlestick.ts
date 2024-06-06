@@ -1,10 +1,10 @@
 import "server-only";
 
 import { type CandlestickResolution } from "../const";
-import { TABLE_NAME, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { wrap } from "./utils";
-import { type ContractTypes, type JSONTypes, toPeriodicStateEvent } from "../types";
+import { type Types, type JSONTypes, toPeriodicStateEvent } from "../types";
 import {
   type AggregateQueryResultsArgs,
   type EventsAndErrors,
@@ -19,10 +19,10 @@ export type CandlestickQueryArgs = {
 
 export const paginateCandlesticks = async (
   args: CandlestickQueryArgs & Omit<AggregateQueryResultsArgs, "query">
-): Promise<EventsAndErrors<ContractTypes.PeriodicStateEvent>> => {
+): Promise<EventsAndErrors<Types.PeriodicStateEvent>> => {
   const { marketID, resolution } = args;
   let query = postgrest
-    .from(TABLE_NAME)
+    .from(INBOX_EVENTS_TABLE)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.PeriodicStateEvent)
     .eq("data->market_metadata->market_id", wrap(marketID))
@@ -34,7 +34,7 @@ export const paginateCandlesticks = async (
   });
 
   return {
-    events: res.data.map((e) => toPeriodicStateEvent(e)),
+    events: res.data.map((e) => toPeriodicStateEvent(e, e.version)),
     errors: res.errors,
   };
 };

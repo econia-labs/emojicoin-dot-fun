@@ -1,8 +1,8 @@
 /* eslint-disable import/no-unused-modules */
 import { type GUID, type EventJSON } from "../types/core";
 import {
-  type ContractTypes,
-  type EventTypes,
+  type Types,
+  type AnyEmojicoinEvent,
   toChatEvent,
   toGlobalStateEvent,
   toLiquidityEvent,
@@ -10,22 +10,23 @@ import {
   toPeriodicStateEvent,
   toStateEvent,
   toSwapEvent,
-} from "../types/contract-types";
+} from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { type JSONEventTypes } from "../types/json-types";
 
 export type Events = {
-  swapEvents: ContractTypes.SwapEvent[];
-  chatEvents: ContractTypes.ChatEvent[];
-  marketRegistrationEvents: ContractTypes.MarketRegistrationEvent[];
-  periodicStateEvents: ContractTypes.PeriodicStateEvent[];
-  stateEvents: ContractTypes.StateEvent[];
-  globalStateEvents: ContractTypes.GlobalStateEvent[];
-  liquidityEvents: ContractTypes.LiquidityEvent[];
+  swapEvents: Types.SwapEvent[];
+  chatEvents: Types.ChatEvent[];
+  marketRegistrationEvents: Types.MarketRegistrationEvent[];
+  periodicStateEvents: Types.PeriodicStateEvent[];
+  stateEvents: Types.StateEvent[];
+  globalStateEvents: Types.GlobalStateEvent[];
+  liquidityEvents: Types.LiquidityEvent[];
   events: AptosEvent[];
 };
 
-export const converter: Map<string, (data: JSONEventTypes) => EventTypes> = new Map();
+export const converter: Map<string, (data: JSONEventTypes, version: number) => AnyEmojicoinEvent> =
+  new Map();
 [
   [TYPE_TAGS.SwapEvent, toSwapEvent] as const,
   [TYPE_TAGS.ChatEvent, toChatEvent] as const,
@@ -35,7 +36,9 @@ export const converter: Map<string, (data: JSONEventTypes) => EventTypes> = new 
   [TYPE_TAGS.GlobalStateEvent, toGlobalStateEvent] as const,
   [TYPE_TAGS.LiquidityEvent, toLiquidityEvent] as const,
 ].forEach(([tag, fn]) => {
-  converter.set(tag.toString(), (data: JSONEventTypes) => fn(data as any));
+  converter.set(tag.toString(), (data: JSONEventTypes, version: number) =>
+    fn(data as any, version)
+  );
 });
 
 export type AptosEvent = {
@@ -77,16 +80,3 @@ export const toGenericEvent = (event: EventJSON): AptosEvent => ({
   type: event.type,
   data: event.data,
 });
-
-export const toEvent = (event: EventJSON): AptosEvent => {
-  if (!converter.has(event.type)) {
-    return toGenericEvent(event);
-  }
-  const conversionFunction = converter.get(event.type)!;
-  const data = conversionFunction(event.data);
-  return {
-    ...getPossibleGUIDAndSequenceNumber(event),
-    type: event.type,
-    data,
-  };
-};
