@@ -25,6 +25,7 @@ eswatini
 faso
 fleur
 futuna
+galxe
 gcloud
 hamsa
 headlessui

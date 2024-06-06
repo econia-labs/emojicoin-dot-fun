@@ -4,6 +4,8 @@ let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;
 let INTEGRATOR_FEE_RATE_BPS: number;
 
+const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_ALLOWLIST_ENABLED === "true";
+
 if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
   if (["mainnet", "testnet", "devnet", "local", "custom"].includes(network)) {
@@ -35,4 +37,9 @@ if (vercel && local) {
   );
 }
 
-export { APTOS_NETWORK, INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS };
+export {
+  APTOS_NETWORK,
+  INTEGRATOR_ADDRESS,
+  INTEGRATOR_FEE_RATE_BPS,
+  IS_ALLOWLIST_ENABLED,
+};
