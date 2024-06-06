@@ -7,8 +7,8 @@ const BidirectionalArrowIcon = (props: SVGProps<SVGSVGElement>) => (
     viewBox="0 0 24 24"
     strokeWidth={2}
     stroke="currentColor"
-    className={props.className}
     {...props}
+    className={props.className}
   >
     <path
       strokeLinecap="round"

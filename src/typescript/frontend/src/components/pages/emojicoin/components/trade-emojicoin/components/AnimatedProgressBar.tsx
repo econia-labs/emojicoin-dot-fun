@@ -71,15 +71,18 @@ export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
 
   return (
     <motion.div className="relative flex w-full rounded-sm h-[100%] !p-0">
-      <motion.span
+      <motion.div
         style={{
           filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
         }}
-        className="relative flex my-auto mx-[2ch] uppercase text-2xl text-nowrap text-ellipsis text-white opacity-[0.9]"
+        className="relative flex my-auto mx-[2ch] opacity-[0.9]"
         animate={flickerControls}
       >
-        {`Bonding progress: ${progress.toFixed(1)}%`}
-      </motion.span>
+        <span className="uppercase text-2xl text-nowrap text-ellipsis text-light-gray">
+          Bonding progress:&nbsp;
+        </span>
+        <span className="uppercase text-2xl text-nowrap text-ellipsis text-white">{`${progress.toFixed(1)}%`}</span>
+      </motion.div>
       <motion.div
         className="absolute drop-shadow-voltage bottom-0 bg-blue h-[1px]"
         style={{ width: "0%", filter: "brightness(1) hue-rotate(0deg)" }}

@@ -58,6 +58,7 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
     isSell,
     numSwaps: props.data.numSwaps,
   });
+  const [hoverArrow, setHoverArrow] = useState(false);
 
   useEffect(() => {
     if (!simulatedSwap) {
@@ -138,8 +139,26 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
           {isSell ? <EmojiInputLabel emoji={props.data.emoji} /> : <AptosInputLabel />}
         </StyledInputWrapper>
 
-        <StyledArrowWrapper onClick={() => switchHandler(isSell)}>
-          <BidirectionalArrowIcon className="text-white rotate-90 scale-[1.3]" />
+        <StyledArrowWrapper
+          className="hover:border-ec-blue transition-all duration-200"
+          onClick={() => switchHandler(isSell)}
+          onMouseOver={() => setHoverArrow(true)}
+          onMouseOut={() => setHoverArrow(false)}
+        >
+          <div
+            style={{
+              rotate: hoverArrow ? "180deg" : "0deg",
+              transition: "200ms",
+              color: hoverArrow ? "white" : "",
+            }}
+            className={`relative w-full h-full ${hoverArrow ? "rotate-180 text-white" : "rotate-0 text-light-gray"}`}
+          >
+            <BidirectionalArrowIcon
+              strokeWidth={2.3}
+              className="rotate-90 scale-[1.5]"
+              strokeLinecap="square"
+            />
+          </div>
         </StyledArrowWrapper>
 
         <StyledInputWrapper>
