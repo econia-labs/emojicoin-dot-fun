@@ -85,7 +85,7 @@ export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
         style={{ width: "0%", filter: "brightness(1) hue-rotate(0deg)" }}
         animate={progressBarControls}
       ></motion.div>
-      <div className="absolute bottom-0 left-0 h-full w-[0%]" style={{ width: `${progress}%` }}>
+      <motion.div className="absolute bottom-0 left-0 h-full w-[0%]" style={{ width: `${progress}%` }} animate={progressBarControls}>
         <motion.svg
           width="20"
           height="20"
@@ -109,7 +109,7 @@ export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
             strokeWidth={1}
           />
         </motion.svg>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
