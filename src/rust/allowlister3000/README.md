@@ -1,3 +1,8 @@
+<!---
+cspell:word pkill
+cspell:word sigusr
+-->
+
 # AllowLister3K
 
 AllowLister3K is a simple web server that will respond with either `true` or
@@ -12,6 +17,9 @@ then start the program by running `cargo run --release`.
 
 To update the allowlist, add the desired address(es) to the allowlist file.
 Then, **restart the program**.
+
+Alternatively, you can use `pkill -USR1 allowlister3000` to send a `SIGUSR1`
+signal to the program, which will reload the file without quitting.
 
 ## Allowlist format
 
@@ -99,5 +107,16 @@ nohup bash -c 'ALLOWLIST_FILE=./allowlist.txt /allowlister3000 &!'
 
 Run `curl IP:3000/0x...` to check that the AllowLister3K is working properly.
 To get `IP`, you can run `gcloud compute instances list`.
+
+#### Adding in new addresses
+
+To add a new address:
+
+```sh
+gcloud config set project YOUR-PROJECT-ID
+gcloud compute ssh root@allowlister3000
+echo 0x123456 >> allowlist.txt
+pkill -USR1 allowlister3000
+```
 
 [gcp-vm-docs]: https://cloud.google.com/compute/docs/instances/create-start-instance
