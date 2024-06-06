@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";
 import { type Types } from "@sdk/types/types";
 import { compareBigInt } from "@sdk/utils/compare-bigint";
+import { darkColors } from "theme/colors";
 
 const getLatestReserves = (args: {
   propsData: Types.MarketDataView;
@@ -34,9 +35,8 @@ export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
   const stateEvents = useEventStore((s) => s.getMarket(data.marketID).stateEvents.events);
 
   const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
-  const sparklerControls = useAnimation();
   const progressBarControls = useAnimation();
-  const shimmerControls = useAnimation();
+  const flickerControls = useAnimation();
 
   useEffect(() => {
     progressBarControls.start({
@@ -48,11 +48,15 @@ export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
       },
     });
 
-    sparklerControls.start({
-      opacity: [0.6, 1, 0.6],
-      transition: { duration: 0.5, repeat: Infinity, repeatType: "mirror" },
+    flickerControls.start({
+      opacity: [0.9, 1, 0.95, 1],
+      filter: [0, 0.4, 0.2, 0].map(
+        (v) =>
+          `brightness(${1.1 + v}) drop-shadow(0 0 ${v * 16}px ${darkColors.blue}77) hue-rotate(${v * 180}deg`
+      ),
+      transition: { duration: 1, repeat: 4, ease: "linear", repeatType: "mirror" },
     });
-  }, [progress, progressBarControls, sparklerControls]);
+  }, [progress, progressBarControls, flickerControls]);
 
   useEffect(() => {
     const clammVirtualReserves = getLatestReserves({
@@ -66,17 +70,46 @@ export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
   }, [data.clammVirtualReserves, data.numSwaps, marketData, stateEvents]);
 
   return (
-    <motion.div className="relative w-full drop-shadow-voltage rounded-sm overflow-hidden h-[100%] !p-0">
-      <motion.div
-        className="absolute top-0 left-0 h-full bg-ec-blue"
-        style={{ opacity: 1, width: `${progress}%`, filter: "brightness(1) hue-rotate(0deg)" }}
-        animate={progressBarControls}
+    <motion.div className="relative flex w-full rounded-sm h-[100%] !p-0">
+      <motion.span
+        style={{
+          filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
+        }}
+        className="relative flex my-auto mx-[2ch] uppercase text-2xl text-nowrap text-ellipsis text-white opacity-[0.9]"
+        animate={flickerControls}
       >
-        <motion.div
-          className="absolute top-0 right-0 h-full w-4 bg-ec-blue "
-          animate={shimmerControls}
-        />
-      </motion.div>
+        {`Bonding progress: ${progress.toFixed(1)}%`}
+      </motion.span>
+      <motion.div
+        className="absolute drop-shadow-voltage bottom-0 bg-blue h-[1px]"
+        style={{ width: "0%", filter: "brightness(1) hue-rotate(0deg)" }}
+        animate={progressBarControls}
+      ></motion.div>
+      <div className="absolute bottom-0 left-0 h-full w-[0%]" style={{ width: `${progress}%` }}>
+        <motion.svg
+          width="20"
+          height="20"
+          className="absolute bottom-0 overflow-visible z-1 ml-[100%] opacity-100 w-0"
+          style={{ filter: "brightness(1) hue-rotate(0deg)" }}
+          animate={progressBarControls}
+        >
+          <motion.circle
+            cx={0}
+            cy={20}
+            initial={{ r: 0 }}
+            animate={{ r: 3.5 }}
+            transition={{
+              type: "spring",
+              stiffness: 50,
+              damping: 10,
+            }}
+            fill="black"
+            stroke={darkColors.blue}
+            className="drop-shadow-voltage"
+            strokeWidth={1}
+          />
+        </motion.svg>
+      </div>
     </motion.div>
   );
 };

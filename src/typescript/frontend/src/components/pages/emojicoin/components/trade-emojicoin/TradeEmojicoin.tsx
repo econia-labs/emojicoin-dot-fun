@@ -47,7 +47,7 @@ const getInputDisplay = ({
 };
 
 const TradeEmojicoin = (props: TradeEmojicoinProps) => {
-  const [isSell, setIsSell] = useState(true);
+  const [isSell, setIsSell] = useState(false);
   const { t } = translationFunction();
   const [inputAmount, setInputAmount] = useState<bigint>(fromCoinDecimals("10000"));
   const { emojiAmount, aptAmount, simulatedSwap } = useSimulateSwap({
