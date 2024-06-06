@@ -4,7 +4,7 @@ import getInitialSwapData from "lib/queries/initial/swaps";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import fetchMarketData from "lib/queries/initial/market-data";
 import EmojiNotFoundPage from "./not-found";
-import { REVALIDATION_TIME } from "lib/build-env";
+import { REVALIDATION_TIME } from "lib/server-env";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "auto";
