@@ -30,6 +30,7 @@
     "framer-motion": "^10.16.4",
     "immer": "^10.1.1",
     "lodash": "^4.17.0",
+    "mqtt": "^5.7.0",
     "next": "^14.2.3",
     "petra-plugin-wallet-adapter": "^0.4.5",
     "react": "^18.3.1",
