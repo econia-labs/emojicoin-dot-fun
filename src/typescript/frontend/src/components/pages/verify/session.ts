@@ -2,38 +2,25 @@
 
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,
-  COOKIE_FOR_ACCOUNT_SCHEME,
-  COOKIE_FOR_PUBKEY,
-  COOKIE_FOR_SIGNATURE,
+  COOKIE_FOR_HASHED_ADDRESS,
   COOKIE_LENGTH,
-  signingSchemeToString,
 } from "./session-info";
 import { cookies } from "next/headers";
-import { type SigningScheme } from "@aptos-labs/ts-sdk";
+import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import { hashAddress } from "./verify";
+import { isAllowListed } from "lib/utils/allowlist";
+import { redirect } from "next/navigation";
+import { ROUTES } from "router/routes";
 
-export const createSession = (args: {
-  pubkey: string;
-  signature: string;
-  scheme: SigningScheme;
-  address: string;
-}) => {
-  const { pubkey, signature, scheme, address } = args;
+export const createSession = async (address: AccountAddressString) => {
+  const hashed = await hashAddress(address);
 
-  cookies().set(COOKIE_FOR_SIGNATURE, signature, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: COOKIE_LENGTH,
-    path: "/",
-  });
+  const allowlisted = await isAllowListed(address);
+  if (!allowlisted) {
+    return null;
+  }
 
-  cookies().set(COOKIE_FOR_PUBKEY, pubkey, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: COOKIE_LENGTH,
-    path: "/",
-  });
-
-  cookies().set(COOKIE_FOR_ACCOUNT_SCHEME, signingSchemeToString(scheme), {
+  cookies().set(COOKIE_FOR_HASHED_ADDRESS, hashed, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: COOKIE_LENGTH,
@@ -46,4 +33,11 @@ export const createSession = (args: {
     maxAge: COOKIE_LENGTH,
     path: "/",
   });
+
+  redirect(ROUTES.home);
+
+  return {
+    address,
+    hashed,
+  };
 };

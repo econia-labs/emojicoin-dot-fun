@@ -2,7 +2,7 @@ import "server-only";
 
 import { type Types, type JSONTypes, toSwapEvent } from "../types";
 import { STRUCT_STRINGS } from "../utils";
-import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
 import {
   type AggregateQueryResultsArgs,
   type EventsAndErrors,
@@ -52,6 +52,7 @@ export const getAllPostBondingCurveMarkets = async (
       .select("*")
       .filter("type", "eq", STRUCT_STRINGS.SwapEvent)
       .filter("data->results_in_state_transition", "eq", true)
+      .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
       .order("transaction_version", ORDER_BY.DESC),
   });
 

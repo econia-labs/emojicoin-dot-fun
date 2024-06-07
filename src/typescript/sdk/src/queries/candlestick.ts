@@ -1,7 +1,7 @@
 import "server-only";
 
 import { type CandlestickResolution } from "../const";
-import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { wrap } from "./utils";
 import { type Types, type JSONTypes, toPeriodicStateEvent } from "../types";
@@ -26,11 +26,13 @@ export const paginateCandlesticks = async (
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.PeriodicStateEvent)
     .eq("data->market_metadata->market_id", wrap(marketID))
+    .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);
   query = resolution ? query.eq("data->periodic_state_metadata->period", wrap(resolution)) : query;
 
   const res = await aggregateQueryResults<JSONTypes.PeriodicStateEvent>({
     query,
+    ...args,
   });
 
   return {

@@ -20,6 +20,7 @@ export type EventsAndErrors<T> = {
 export type AggregateQueryResultsArgs = {
   query: PostgrestFilterBuilder<any, any, any, typeof INBOX_EVENTS_TABLE, unknown>;
   maxNumQueries?: number;
+  maxTotalRows?: number;
 };
 
 type JSONResponseType<T> = {
@@ -54,14 +55,14 @@ const hasJSONData = <T>(
 export const aggregateQueryResults = async <T>(
   args: AggregateQueryResultsArgs
 ): Promise<QueryResponse<T & { version: number }>> => {
-  const { query, maxNumQueries = Infinity } = args;
+  const { query, maxNumQueries = Infinity, maxTotalRows = Infinity } = args;
   const aggregated: (T & { version: number })[] = [];
   const errors: (PostgrestError | null)[] = [];
 
   let i = 0;
   let shouldContinue = true;
 
-  while (shouldContinue && i < maxNumQueries) {
+  while (shouldContinue && i < maxNumQueries && aggregated.length < maxTotalRows) {
     const offset = aggregated.length;
     /* eslint-disable-next-line no-await-in-loop */
     const { events, error } = await query.range(offset, offset + LIMIT - 1).then((res) => ({

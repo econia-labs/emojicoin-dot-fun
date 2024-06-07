@@ -19,6 +19,7 @@
     "@headlessui/react": "^2.0.4",
     "@headlessui/tailwindcss": "^0.2.0",
     "@martianwallet/aptos-wallet-adapter": "^0.0.5",
+    "@noble/hashes": "^1.4.0",
     "@pontem/wallet-adapter-plugin": "^0.2.1",
     "@popperjs/core": "^2.11.8",
     "@rise-wallet/wallet-adapter": "^0.1.2",

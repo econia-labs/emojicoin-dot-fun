@@ -2,7 +2,7 @@ import "server-only";
 
 import { type Types, type JSONTypes, toLiquidityEvent } from "../types";
 import { STRUCT_STRINGS } from "../utils";
-import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
 import {
   type AggregateQueryResultsArgs,
   type EventsAndErrors,
@@ -30,6 +30,7 @@ export const paginateLiquidityEvents = async (
     .from(INBOX_EVENTS_TABLE)
     .select("*")
     .filter("type", "eq", STRUCT_STRINGS.LiquidityEvent)
+    .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);
 
   // If these arguments are provided, add them to the query filters.
@@ -39,7 +40,10 @@ export const paginateLiquidityEvents = async (
     ? query.eq("data->liquidity_provided", wrap(liquidityEventType))
     : query;
 
-  const { data, errors } = await aggregateQueryResults<JSONTypes.LiquidityEvent>({ query });
+  const { data, errors } = await aggregateQueryResults<JSONTypes.LiquidityEvent>({
+    query,
+    ...args,
+  });
 
   return {
     events: data.map((e) => toLiquidityEvent(e, e.version)),

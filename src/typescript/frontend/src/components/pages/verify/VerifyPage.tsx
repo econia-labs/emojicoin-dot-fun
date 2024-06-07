@@ -1,65 +1,85 @@
 "use client";
 
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { darkColors } from "theme";
-import { getTimeByWeekFloored, messageToSign } from "./session-info";
-import { verifySignatureAndCreateSession } from "./verify";
-import { AccountAddress } from "@aptos-labs/ts-sdk";
-import ConnectedInfo from "./ConnectedInfo";
-import { useRouter } from "next/navigation";
-import { ROUTES } from "router/routes";
+import { createSession } from "./session";
+import { EXTERNAL_LINK_PROPS } from "components/link";
+import { useScramble } from "use-scramble";
 
 export const ClientVerifyPage = () => {
   const { account } = useAptos();
-  const { connected, signMessage } = useWallet();
-  const router = useRouter();
+  const { connected } = useWallet();
+  const [enabled, setEnabled] = useState(false);
 
-  const handleClick = useCallback(async () => {
-    if (!account) {
-      return;
-    }
-    const res = await signMessage({
-      address: true,
-      application: false,
-      chainId: false,
-      message: messageToSign,
-      nonce: getTimeByWeekFloored(),
-    });
-    const signature = res.signature.toString();
-    const pubkey = account.publicKey;
-    const authenticated = await verifySignatureAndCreateSession({
-      pubkey,
-      signature,
-      address: AccountAddress.from(account.address).toString(),
-    });
+  const verify = useCallback(async (account: AccountInfo) => {
+    await createSession(account.address);
+  }, []);
 
-    if (authenticated) {
-      router.push(ROUTES.home);
+  useEffect(() => {
+    if (connected && account) {
+      verify(account);
     }
-  }, [signMessage, account, router]);
+  }, [account, connected, verify]);
+
+  const { ref, replay } = useScramble({
+    text: "Access Denied - Join Here",
+    overdrive: false,
+    overflow: true,
+    speed: 0.6,
+    onAnimationStart: () => setEnabled(false),
+    onAnimationEnd: () => setEnabled(true),
+  });
+
+  const handleReplay = useCallback(() => {
+    if (enabled) {
+      replay();
+    }
+  }, [enabled, replay]);
 
   return (
     <>
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
+          position: "absolute",
+          top: 0,
+          left: 0,
           width: "100vw",
-          textTransform: "uppercase",
-          color: darkColors.econiaBlue,
-          gap: "1rem",
-          fontSize: "1.5rem",
+          height: "100vh",
+          backgroundColor: darkColors.black,
+          zIndex: 50,
         }}
       >
-        <ButtonWithConnectWalletFallback>
-          <ConnectedInfo connected={connected} handleClick={handleClick} className="text-ec-blue" />
-        </ButtonWithConnectWalletFallback>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100vw",
+            height: "100vh",
+            textTransform: "uppercase",
+            color: darkColors.econiaBlue,
+            gap: "1rem",
+            fontSize: "1.5rem",
+          }}
+        >
+          <ButtonWithConnectWalletFallback>
+            <div className="flex flex-row">
+              <span className="px-2.5">{"{"}</span>
+              <a
+                ref={ref}
+                href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
+                className="uppercase"
+                onMouseOver={handleReplay}
+                {...EXTERNAL_LINK_PROPS}
+              />
+              <span className="px-2.5">{"}"}</span>
+            </div>
+          </ButtonWithConnectWalletFallback>
+        </div>
       </div>
     </>
   );

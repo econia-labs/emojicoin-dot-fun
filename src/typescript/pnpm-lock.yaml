@@ -54,6 +54,9 @@ importers:
       '@martianwallet/aptos-wallet-adapter':
         specifier: ^0.0.5
         version: 0.0.5
+      '@noble/hashes':
+        specifier: ^1.4.0
+        version: 1.4.0
       '@pontem/wallet-adapter-plugin':
         specifier: ^0.2.1
         version: 0.2.1

@@ -5,6 +5,9 @@ import { getLatestMarketState } from "@sdk/queries/state";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 
 export const fetchLatestMarketState = cache(async (marketID: string) => {
+  if (!marketID) {
+    return null;
+  }
   const res = await getLatestMarketState({ marketID });
 
   return res
