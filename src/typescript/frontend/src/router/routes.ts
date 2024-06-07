@@ -5,4 +5,5 @@ export const ROUTES = {
   emojicoin: "/emojicoin",
   launchEmojicoin: "/launch-emojicoin",
   pools: "/pools",
+  verify: "/verify",
 } as const;
