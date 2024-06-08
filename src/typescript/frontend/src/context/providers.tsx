@@ -29,7 +29,6 @@ enableMapSet();
 
 const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();
-
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
 

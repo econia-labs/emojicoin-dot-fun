@@ -10,6 +10,7 @@ export enum UnitOfTime {
   Minutes,
   Hours,
   Days,
+  Weeks,
 }
 
 // No nanoseconds because dealing with overflow is a pain (aka using a bigint) and we don't need it.
@@ -20,6 +21,7 @@ export const UNIT_OF_TIME_MULTIPLIERS: Record<UnitOfTime, number> = {
   [UnitOfTime.Minutes]: 1000 * 60,
   [UnitOfTime.Hours]: 1000 * 60 * 60,
   [UnitOfTime.Days]: 1000 * 60 * 60 * 24,
+  [UnitOfTime.Weeks]: 1000 * 60 * 60 * 24 * 7,
 };
 
 /**

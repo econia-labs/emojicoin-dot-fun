@@ -8,6 +8,9 @@ import { REVALIDATION_TIME } from "lib/server-env";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "auto";
+const NUM_MARKETS = 100;
+const CHAT_DATA_ROWS = 100;
+const SWAP_DATA_ROWS = 100;
 
 type StaticParams = {
   market: string;
@@ -16,7 +19,7 @@ type StaticParams = {
 export const generateStaticParams = async (): Promise<Array<StaticParams>> => {
   const data = await fetchMarketData();
 
-  return data.map((v) => ({
+  return data.slice(NUM_MARKETS).map((v) => ({
     market: v.marketID.toString(),
   }));
 };
@@ -31,8 +34,8 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const res = await fetchLatestMarketState(marketID);
 
   if (res) {
-    const chatData = await getInitialChatData(marketID);
-    const swapData = await getInitialSwapData(marketID);
+    const chatData = await getInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
+    const swapData = await getInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
     return (
       <ClientEmojicoinPage
         data={{

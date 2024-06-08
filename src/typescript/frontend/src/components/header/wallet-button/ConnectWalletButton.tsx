@@ -8,6 +8,8 @@ import { useScramble } from "use-scramble";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
+  onClick?: () => void;
+  buttonTextIfConnected?: string;
 }
 
 const DEFAULT_TEXT = "Connect Wallet";
@@ -16,6 +18,8 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   mobile,
   children,
   className,
+  onClick,
+  buttonTextIfConnected,
 }) => {
   const { connected, account } = useWallet();
   const { connectWallet } = useConnectWallet();
@@ -28,15 +32,17 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
     let str = DEFAULT_TEXT;
     if (connected) {
       if (account) {
-        str = truncateAddress(account.address);
+        // If there's no button text provided, we just show the truncated address.
+        // Keep in mind this only shows if no children are passed to the component.
+        str = buttonTextIfConnected ?? truncateAddress(account.address);
       } else {
-        str = t("Connected");
+        str = buttonTextIfConnected ?? t("Connected");
       }
     } else {
       str = t("Connect Wallet");
     }
     return str;
-  }, [connected, account, t]);
+  }, [connected, account, t, buttonTextIfConnected]);
 
   useEffect(() => {
     setWidth(`${text.length}ch`);
@@ -68,7 +74,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
           className={className}
           onClick={(e) => {
             e.preventDefault();
-            connectWallet();
+            onClick ? onClick() : connectWallet();
             handleReplay();
           }}
           onMouseOver={handleReplay}
@@ -77,7 +83,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
             {connected ? (
               <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
             ) : (
-              <div className="pr-[1ch]">{"{"}</div>
+              <div className="pr-2.5">{"{"}</div>
             )}
             <p
               className="uppercase whitespace-nowrap text-overflow-ellipsis overflow-hidden"
@@ -87,7 +93,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
             {connected ? (
               <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
             ) : (
-              <div className="pl-[1ch]">{"}"}</div>
+              <div className="pl-2.5">{"}"}</div>
             )}
           </div>
         </Button>

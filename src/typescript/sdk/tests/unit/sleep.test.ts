@@ -8,6 +8,7 @@ describe("sleep utility function with units of time", () => {
     expect(UNIT_OF_TIME_MULTIPLIERS[UnitOfTime.Minutes]).toBeCloseTo(1000 * 60, 1);
     expect(UNIT_OF_TIME_MULTIPLIERS[UnitOfTime.Hours]).toBeCloseTo(1000 * 60 * 60, 1);
     expect(UNIT_OF_TIME_MULTIPLIERS[UnitOfTime.Days]).toBeCloseTo(1000 * 60 * 60 * 24, 1);
+    expect(UNIT_OF_TIME_MULTIPLIERS[UnitOfTime.Weeks]).toBeCloseTo(1000 * 60 * 60 * 24 * 7, 1);
   });
 
   it("sleeps one tenth of a second for each unit of time", async () => {
@@ -18,6 +19,7 @@ describe("sleep utility function with units of time", () => {
       [UnitOfTime.Minutes, 0.1 / 60],
       [UnitOfTime.Hours, 0.1 / (60 * 60)],
       [UnitOfTime.Days, 0.1 / (60 * 60 * 24)],
+      [UnitOfTime.Weeks, 0.1 / (60 * 60 * 24 * 7)],
     ] as const;
 
     // Note that jest screws up the `startTime` values if you don't index each start time.
