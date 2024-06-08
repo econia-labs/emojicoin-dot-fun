@@ -13,25 +13,37 @@ export const ClientVerifyPage = () => {
   const { account } = useAptos();
   const { connected } = useWallet();
   const [enabled, setEnabled] = useState(false);
-
-  const verify = useCallback(async (account: AccountInfo) => {
-    await createSession(account.address);
-  }, []);
-
-  useEffect(() => {
-    if (connected && account) {
-      verify(account);
-    }
-  }, [account, connected, verify]);
+  const [verified, setVerified] = useState<boolean | null>(null);
 
   const { ref, replay } = useScramble({
-    text: "Access Denied - Join Here",
+    text:
+      verified === true
+        ? "Access Granted"
+        : verified === false
+          ? "Access Denied - Join Here"
+          : "Verifying...",
     overdrive: false,
     overflow: true,
     speed: 0.6,
     onAnimationStart: () => setEnabled(false),
     onAnimationEnd: () => setEnabled(true),
   });
+
+  const verify = useCallback(
+    async (account: AccountInfo) => {
+      const res = await createSession(account.address);
+      setVerified(res);
+      replay();
+    },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    []
+  );
+
+  useEffect(() => {
+    if (connected && account) {
+      verify(account);
+    }
+  }, [account, connected, verify]);
 
   const handleReplay = useCallback(() => {
     if (enabled) {

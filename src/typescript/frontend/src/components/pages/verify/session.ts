@@ -17,7 +17,7 @@ export const createSession = async (address: AccountAddressString) => {
 
   const allowlisted = await isAllowListed(address);
   if (!allowlisted) {
-    return null;
+    return false;
   }
 
   cookies().set(COOKIE_FOR_HASHED_ADDRESS, hashed, {
@@ -35,9 +35,5 @@ export const createSession = async (address: AccountAddressString) => {
   });
 
   redirect(ROUTES.home);
-
-  return {
-    address,
-    hashed,
-  };
+  return true;
 };
