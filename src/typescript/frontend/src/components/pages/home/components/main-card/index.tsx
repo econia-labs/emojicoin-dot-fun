@@ -43,7 +43,7 @@ const MainCard = (props: MainCardProps) => {
         flexDirection={{ _: "column", tablet: "row" }}
       >
         <Link
-          href={`${ROUTES.emojicoin}/${props.featured?.marketID.toString()}`}
+          href={`${ROUTES.market}/${props.featured?.marketID.toString()}`}
           style={{
             position: "relative",
             alignItems: "center",

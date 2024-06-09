@@ -23,7 +23,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
   });
 
   return (
-    <Link id="grid-emoji-card" href={`${ROUTES.emojicoin}/${index}`}>
+    <Link id="grid-emoji-card" href={`${ROUTES.market}/${index}`}>
       <StyledItemWrapper>
         <StyledInnerItem id="grid-emoji-card" isEmpty={!emoji}>
           {emoji && (
