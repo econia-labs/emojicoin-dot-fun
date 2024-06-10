@@ -1,4 +1,4 @@
-import { ValueOf } from "../utils/utility-types";
+import { type ValueOf } from "../utils/utility-types";
 
 export const INBOX_EVENTS_TABLE = "inbox_events";
 export const MARKET_DATA_VIEW = "market_data";

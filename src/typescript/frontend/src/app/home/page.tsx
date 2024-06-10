@@ -1,9 +1,14 @@
 import { type OrderByStrings } from "@sdk/queries/const";
+import EmojiTable from "components/pages/home/components/emoji-table";
 import MainCard from "components/pages/home/components/main-card";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import cached from "lib/queries/cached";
 import fetchSortedMarketData, { fetchFeaturedMarket } from "lib/queries/sorting/market-data";
-import { MarketDataSortBy, toPostgrestQueryParam, type SortByPageQueryParams } from "lib/queries/sorting/types";
+import {
+  MarketDataSortBy,
+  toPostgrestQueryParam,
+  type SortByPageQueryParams,
+} from "lib/queries/sorting/types";
 import { REVALIDATION_TIME } from "lib/server-env";
 
 export const revalidate = REVALIDATION_TIME;
@@ -66,6 +71,9 @@ export default async function Home({ searchParams, children }: HomePageParams) {
         {children}
         <TextCarousel />
       </div>
+
+      {/* Should we pop featured off or just leave it in the grid? Much simpler to do the former. */}
+      <EmojiTable data={markets} />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 "use server";
+// cspell:word Fullnode
 
 import { SYMBOL_DATA } from "@sdk/emoji_data/";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
@@ -10,18 +11,8 @@ import fetchInitialWithFallback from "./cache-helper";
 import { getAptos } from "lib/utils/aptos-client";
 import { compareBigInt } from "@sdk/utils/compare-bigint";
 
-export const fetchTopMarkets = cache(async () => {
-  const res = await getTopMarkets();
-
-  return res.data.map((v) => ({
-    state: toStateEvent(v.data, v.version),
-    emoji: SYMBOL_DATA.byHex(v.data.market_metadata.emoji_bytes)!,
-    version: v.version,
-    volume24H: BigInt(Math.floor(Math.random() * 1337 ** 4)),
-  }));
-});
-
-const getInitialMarketData = async () => {
+const getInitialMarketDataFromFullnode = async () => {
+  // TODO: Change this to not rely on our indexer at all, but entirely on the fullnode API.
   const { markets } = await paginateMarketRegistrations();
   const data = markets.map((m) => ({
     marketID: m.marketMetadata.marketID,
@@ -49,10 +40,10 @@ const getInitialMarketData = async () => {
   return await Promise.all(marketViews);
 };
 
-const fetchInitialMarketData = cache(async () => {
+const fetchInitialMarketDataFromFullnode = cache(async () => {
   const marketViews = await fetchInitialWithFallback({
     functionArgs: undefined,
-    queryFunction: getInitialMarketData,
+    queryFunction: getInitialMarketDataFromFullnode,
   });
 
   const markets = marketViews.map((mkt) => ({
@@ -69,4 +60,4 @@ const fetchInitialMarketData = cache(async () => {
   return markets;
 });
 
-export default fetchInitialMarketData;
+export default fetchInitialMarketDataFromFullnode;
