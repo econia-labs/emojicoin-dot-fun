@@ -52,19 +52,11 @@ export type SortByPostgrestQueryParams =
 export const toPageQueryParam = (
   sortBy: SortByPostgrestQueryParams | MarketDataSortBy | SortByPageQueryParams
 ): SortByPageQueryParams => {
-  // TODO: Remove later.
-  if (!sortByFilters[sortBy]) {
-    console.warn("Incorrect enum/string value passed to query/param conversion function");
-  }
-  return sortByFilters[sortBy].forPageQueryParams ?? undefined;
+  return sortByFilters[sortBy].forPageQueryParams ?? sortBy;
 };
 
 export const toPostgrestQueryParam = (
   sortBy: SortByPageQueryParams | MarketDataSortBy | SortByPostgrestQueryParams
 ): SortByPostgrestQueryParams => {
-  // TODO: Remove later.
-  if (!sortByFilters[sortBy]) {
-    console.warn("Incorrect enum/string value passed to query/param conversion function");
-  }
-  return sortByFilters[sortBy]?.forPostgrestQuery ?? undefined;
+  return sortByFilters[sortBy]?.forPostgrestQuery ?? sortBy;
 };

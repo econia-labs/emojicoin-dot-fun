@@ -1,4 +1,4 @@
-import Planet from "@icons/PlanetSVG";
+import Planet from "@icons/Planet";
 
 const Item = ({ children }: { children: React.ReactNode }) => {
   return (

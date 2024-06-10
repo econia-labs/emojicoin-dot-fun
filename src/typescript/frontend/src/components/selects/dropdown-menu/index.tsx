@@ -11,6 +11,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   options,
   isMultiple,
   values,
+  onHover,
   ...props
 }) => {
   return (
@@ -22,6 +23,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
           <DropdownMenuItem
             key={index}
             onClick={onClick}
+            onHover={onHover}
             value={value}
             isMultiple={isMultiple}
             values={values}

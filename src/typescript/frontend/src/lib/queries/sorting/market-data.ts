@@ -105,9 +105,6 @@ type CachedArgs = {
 const fetchSortedMarketData = async (args: CachedArgs) => {
   const { page, sortBy, orderBy, inBondingCurve } = args;
 
-  console.log("fetchSortedMarketData", page, sortBy, orderBy, inBondingCurve);
-  console.log("calculateOffset", calculateOffset(page));
-
   const {
     data: jsonData,
     error: _,

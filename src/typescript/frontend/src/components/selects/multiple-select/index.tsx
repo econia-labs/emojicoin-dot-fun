@@ -34,6 +34,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
     .join(", "),
   options,
   setValue,
+  onHover,
 }) => {
   const [selectedOptions, setSelectedOptions] = useState(value);
 
@@ -69,6 +70,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
           onClick={onDropdownMenuClick}
           isMultiple
           values={selectedOptions}
+          onHover={onHover}
           {...dropdownWrapperProps}
         />
 

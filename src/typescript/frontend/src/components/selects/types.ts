@@ -15,6 +15,7 @@ export interface SingleSelectProps extends Omit<SelectProps, "targetRef" | "tool
   options: Option[];
   value: Option | null;
   setValue: (values: Option) => void;
+  onHover: (value: Option) => void;
 }
 
 export interface MultipleSelectProps
@@ -22,6 +23,7 @@ export interface MultipleSelectProps
   value: Option[];
   title?: string | React.ReactNode;
   setValue: (values: Option[]) => void;
+  onHover: (value: Option) => void;
 }
 
 export type SelectProps = {
@@ -42,10 +44,12 @@ export interface DropdownMenuProps extends Omit<BoxProps, "onClick"> {
   isMultiple?: boolean;
   values?: Option[];
   onClick: (option: Option) => void;
+  onHover: (value: Option) => void;
 }
 
 export interface DropdownMenuItemProps extends Omit<DropdownMenuProps, "options"> {
   index: number;
   option: Option;
   title: string;
+  onHover: (value: Option) => void;
 }

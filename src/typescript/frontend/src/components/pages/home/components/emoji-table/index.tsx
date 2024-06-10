@@ -18,6 +18,7 @@ import type fetchMarketData from "lib/queries/initial/market-data";
 
 export interface EmojiTableProps {
   data: Awaited<ReturnType<typeof fetchMarketData>>;
+  totalNumberOfMarkets: number;
 }
 
 const EmojiTable = async (props: EmojiTableProps) => {

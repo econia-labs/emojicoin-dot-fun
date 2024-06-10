@@ -35,7 +35,7 @@ export const Slider = styled.span<{ checked: boolean; disabled?: boolean; scale?
     width: ${({ scale }) => scale && styles[scale].circleWidth};
     height: ${({ scale }) => scale && styles[scale].circleWidth};
     border-radius: 100%;
-    background-color: ${({ theme }) => theme.colors.lightGray};
+    background-color: ${({ theme }) => theme.colors.econiaBlue};
 
     transition: all 0.3s ease-out;
   }
@@ -52,7 +52,7 @@ export const Checkbox = styled.input<{ checked?: boolean }>`
   }
   &:checked + ${Slider}:before {
     transform: ${({ checked }) => checked && "translateX(-140%)"};
-    background-color: ${({ theme }) => theme.colors.econiaBlue};
+    background-color: ${({ theme }) => theme.colors.lightGray};
   }
 `;
 

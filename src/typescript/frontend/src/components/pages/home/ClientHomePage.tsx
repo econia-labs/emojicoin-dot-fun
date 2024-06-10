@@ -6,6 +6,7 @@ import { ClientsSlider } from "components";
 
 export interface HomeProps {
   data?: Awaited<ReturnType<typeof fetchMarketData>>;
+  totalNumberOfMarkets: number;
 }
 
 const ClientHomePage = async (props: HomeProps) => {
@@ -32,7 +33,7 @@ const ClientHomePage = async (props: HomeProps) => {
         <ClientsSlider />
       </Column>
 
-      <EmojiTable data={gridMarkets} />
+      <EmojiTable data={gridMarkets} totalNumberOfMarkets={totalNumberOfMarkets} />
     </Box>
   );
 };
