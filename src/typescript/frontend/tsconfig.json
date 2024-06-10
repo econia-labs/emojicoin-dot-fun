@@ -9,11 +9,7 @@
     "incremental": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
@@ -21,21 +17,11 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "paths": {
-      "@containers": [
-        "components/layout/components/index.ts"
-      ],
-      "@hooks/*": [
-        "hooks/*"
-      ],
-      "@icons/*": [
-        "components/svg/icons/*"
-      ],
-      "@sdk/*": [
-        "../../sdk/src/*"
-      ],
-      "@store/*": [
-        "lib/store/*"
-      ]
+      "@containers": ["components/layout/components/index.ts"],
+      "@hooks/*": ["hooks/*"],
+      "@icons/*": ["components/svg/icons/*"],
+      "@sdk/*": ["../../sdk/src/*"],
+      "@store/*": ["lib/store/*"]
     },
     "plugins": [
       {
@@ -48,9 +34,7 @@
     "strictNullChecks": true,
     "target": "esnext"
   },
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "include": [
     "next-env.d.ts",
     "./src/**/*.ts",

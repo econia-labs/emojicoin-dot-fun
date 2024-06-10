@@ -15,6 +15,12 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "unused-imports", "import"],
   rules: {
+    "no-console": [
+      "warn",
+      {
+        allow: ["warn", "error", "debug", "clear", "trace"],
+      },
+    ],
     quotes: ["error", "double"],
     "max-len": ["error", 100],
     "import/extensions": "off",

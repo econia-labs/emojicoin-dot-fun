@@ -13,11 +13,11 @@ import Prompt from "components/prompt";
 import { Input } from "components/inputs/input";
 import { InputGroup } from "components/inputs/input-group";
 import { Text } from "components/text";
-import ClientsSlider from "components/clients-slider";
 import { Column, Flex, FlexGap } from "@containers";
 import { StyledFieldName } from "./styled";
 import { LaunchEmojicoinButton } from "./components/LaunchEmojicoinButton";
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
+import { ClientsSlider } from "components";
 
 const ClientLaunchEmojicoinPage: React.FC = () => {
   const { t } = translationFunction();

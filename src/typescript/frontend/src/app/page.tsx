@@ -1,5 +1,5 @@
 import Home from "./home/page";
 
 export default function HomePage() {
-  return <Home />;
+  return <Home params={{}}> </Home>;
 }

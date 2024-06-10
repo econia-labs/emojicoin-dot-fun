@@ -34,15 +34,6 @@ const nextConfig = {
   },
   ...(DEBUG ? debugConfigOptions : {}),
   transpilePackages: ["@sdk"],
-  redirects: async () => {
-    return [
-      {
-        source: "/emojicoin",
-        destination: "/emojicoin/1",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default nextConfig;

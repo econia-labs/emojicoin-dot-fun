@@ -20,6 +20,9 @@ module.exports = {
       },
       screens: {
         tall: { raw: "(min-height: 960px)" },
+        "mobile-sm": "320px",
+        "mobile-md": "375px",
+        "mobile-lg": "425px",
         sm: "640.1px",
         md: "768.1px",
         lg: "1024.1px",
@@ -62,10 +65,15 @@ module.exports = {
         "60%": { opacity: "0.9", transform: "scale(1.03) hue-rotate(-40deg) brightness(1.15)" },
         "100%": { opacity: "0.85", transform: "scale(1.02) hue-rotate(20deg) brightness(1.25)" },
       },
+      carousel: {
+        "0%": { transform: "translateX(0)" },
+        "100%": { transform: "translateX(-4527.83)" },
+      },
     },
     animation: {
       fadeIn: "fadeIn 2s ease-in-out forwards",
       flicker: "flicker 1s infinite",
+      carousel: "carousel 88.407s linear infinite",
     },
   },
   plugins: [require("@headlessui/tailwindcss")],

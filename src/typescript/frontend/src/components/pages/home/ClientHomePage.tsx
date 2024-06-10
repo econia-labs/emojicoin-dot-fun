@@ -1,8 +1,8 @@
 import { Box, Column, Flex } from "@containers";
-import ClientsSlider from "components/clients-slider";
 import EmojiTable from "./components/emoji-table";
 import MainCard from "./components/main-card";
 import type fetchMarketData from "lib/queries/initial/market-data";
+import { ClientsSlider } from "components";
 
 export interface HomeProps {
   data?: Awaited<ReturnType<typeof fetchMarketData>>;

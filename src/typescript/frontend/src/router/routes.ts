@@ -1,5 +1,6 @@
 export const ROUTES = {
   root: "/",
+  api: "/api",
   home: "/home",
   market: "/market",
   launch: "/launch",
