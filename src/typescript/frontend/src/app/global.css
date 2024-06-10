@@ -40,11 +40,3 @@
     font-family: var(--font-pixelar);
   }
 }
-
-.icon-inline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 1.1ch;
-  width: 1.1ch;
-}

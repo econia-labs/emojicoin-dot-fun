@@ -67,7 +67,7 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2
       '@tanstack/react-query':
-        specifier: ^5.40.0
+        specifier: ^5.40.1
         version: 5.40.1(react@18.3.1)
       big.js:
         specifier: ^6.2.1
@@ -149,7 +149,7 @@ importers:
         specifier: ^20.12.12
         version: 20.14.2
       '@types/react':
-        specifier: ^18.3.2
+        specifier: ^18.3.3
         version: 18.3.3
       '@types/react-dom':
         specifier: ^18.3.0

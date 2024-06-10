@@ -1,6 +1,6 @@
 import * as React from "react";
 const AptosIconBlack = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" id="aptos-svg-black" viewBox="0 0 500 500" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" {...props}>
     <defs>
       <style>{".b{fill:#fff}"}</style>
     </defs>

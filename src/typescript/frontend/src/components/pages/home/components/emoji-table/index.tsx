@@ -14,13 +14,14 @@ import {
 import SearchComponent from "./components/Search";
 import FilterOptions from "./components/FilterOptions";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import type fetchMarketData from "lib/queries/initial/market-data";
+import type fetchSortedMarketData from "lib/queries/sorting/market-data";
 
 export interface EmojiTableProps {
-  data: Awaited<ReturnType<typeof fetchMarketData>>;
+  data: Awaited<ReturnType<typeof fetchSortedMarketData>>["markets"];
+  totalNumberOfMarkets: number;
 }
 
-const EmojiTable = async (props: EmojiTableProps) => {
+const EmojiTable = (props: EmojiTableProps) => {
   return (
     <OutermostContainer>
       <OuterContainer>
@@ -37,7 +38,8 @@ const EmojiTable = async (props: EmojiTableProps) => {
             {props.data.map((market) => {
               return (
                 <TableCard
-                  index={Number(market.marketID)}
+                  index={market.index}
+                  marketID={Number(market.marketID)}
                   emoji={market.emoji}
                   emojiName={market.name}
                   marketCap={toCoinDecimalString(market.marketCap, 2)}

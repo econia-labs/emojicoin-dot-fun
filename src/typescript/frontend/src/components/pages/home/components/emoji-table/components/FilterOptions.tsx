@@ -6,19 +6,49 @@ import { Switcher } from "components/switcher";
 import { translationFunction } from "context/language-context";
 import { StyledTHFilters } from "../styled";
 import { useMatchBreakpoints } from "hooks";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Text } from "components/text";
 import { type Option } from "components/selects/types";
+import { MarketDataSortBy, toPageQueryParam } from "lib/queries/sorting/types";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { getSortQueryPath } from "lib/queries/sorting/query-params";
 
-const options: Option[] = [
-  { title: "Market Cap", value: "Market Cap" },
-  { title: "Bump Order", value: "Bump Order" },
-  { title: "24h Volume", value: "24h Volume" },
-  { title: "Alltime Vol", value: "Alltime Vol" },
+const titleFromValue: Record<MarketDataSortBy, string> = {
+  [MarketDataSortBy.MarketCap]: "Market Cap",
+  [MarketDataSortBy.BumpOrder]: "Bump Order",
+  [MarketDataSortBy.DailyVolume]: "24h Volume",
+  [MarketDataSortBy.AllTimeVolume]: "Alltime Vol",
+  [MarketDataSortBy.Price]: "Price",
+};
+
+type MyOption = {
+  title: string;
+  value: MarketDataSortBy;
+};
+
+const options: Array<MyOption> = [
+  { title: titleFromValue[MarketDataSortBy.MarketCap], value: MarketDataSortBy.MarketCap },
+  { title: titleFromValue[MarketDataSortBy.BumpOrder], value: MarketDataSortBy.BumpOrder },
+  { title: titleFromValue[MarketDataSortBy.DailyVolume], value: MarketDataSortBy.DailyVolume },
+  { title: titleFromValue[MarketDataSortBy.AllTimeVolume], value: MarketDataSortBy.AllTimeVolume },
+  // TODO: Add price..?
 ];
 
+const queryParamToOption = (value: string): MyOption => {
+  let option = options.find((o) => toPageQueryParam(o.value) === (value as MarketDataSortBy));
+  if (!option) {
+    option = options.find((o) => toPageQueryParam(o.value) === MarketDataSortBy.MarketCap)!;
+  }
+  return option;
+};
+
 export const FilterOptionsComponent = () => {
-  const [selectedOption, setSelectedOption] = useState<Option | null>(options[0]);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const initialOption = queryParamToOption(searchParams.get("sort") ?? "");
+  const [selectedOption, setSelectedOption] = useState<MyOption>(initialOption);
   const [isChecked, setIsChecked] = useState(true);
   const { t } = translationFunction();
   const { isLaptopL } = useMatchBreakpoints();
@@ -27,14 +57,36 @@ export const FilterOptionsComponent = () => {
     setIsChecked((v) => !v);
   };
 
+  const handleQueryParams = useCallback(
+    (option: Option | MyOption, routerFunction: keyof AppRouterInstance) => {
+      const newPath = getSortQueryPath({
+        value: toPageQueryParam((option as MyOption).value),
+        searchParams,
+        pathname,
+      });
+      if (routerFunction === "push") {
+        setSelectedOption(option as MyOption);
+        router.push(newPath, { scroll: false });
+      } else if (routerFunction === "prefetch") {
+        router.prefetch(newPath);
+      }
+    },
+    [searchParams, pathname, router]
+  );
+
   return (
     <StyledTHFilters>
       <SingleSelect
         wrapperProps={{ width: isLaptopL ? "300px" : "210px", className: "med-pixel-text" }}
         title={selectedOption?.title}
         value={selectedOption}
-        setValue={setSelectedOption}
+        setValue={(option: MyOption | Option) => handleQueryParams(option, "push")}
         dropdownComponent={DropdownMenu}
+        onHover={(option: MyOption | Option) => {
+          if (option) {
+            handleQueryParams(option, "prefetch");
+          }
+        }}
         options={options}
         dropdownWrapperProps={{ width: "250px" }}
         titleProps={{ color: "darkGray", textTransform: "uppercase" }}
@@ -48,7 +100,7 @@ export const FilterOptionsComponent = () => {
 
       <FlexGap gap="12px" className={"med-pixel-text"}>
         <Text className={"med-pixel-text"} color="lightGray" textTransform="uppercase">
-          {t("Anime:")}
+          {t("Animate:")}
         </Text>
 
         <Switcher checked={isChecked} onChange={handler} scale={isLaptopL ? "md" : "sm"} />

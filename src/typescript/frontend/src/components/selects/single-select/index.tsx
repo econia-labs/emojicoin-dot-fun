@@ -25,6 +25,7 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
   value,
   options,
   setValue,
+  onHover,
 }) => {
   const { theme } = useThemeContext();
 
@@ -41,6 +42,7 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
       options={options}
       value={value}
       onClick={onDropdownMenuClick}
+      onHover={onHover}
       {...dropdownWrapperProps}
     />,
 

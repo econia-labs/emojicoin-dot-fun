@@ -22,7 +22,7 @@ import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 // import { APTOS_NETWORK } from "lib/env";
 import StyledToaster from "styles/StyledToaster";
 import { PetraWallet } from "petra-plugin-wallet-adapter";
-import { EventStoreProvider } from "./store-context";
+import { EventStoreProvider, MarketDataProvider } from "./store-context";
 import { enableMapSet } from "immer";
 
 enableMapSet();
@@ -51,21 +51,23 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <EventStoreProvider>
-          <AptosWalletAdapterProvider plugins={wallets} autoConnect>
-            <ConnectWalletContextProvider>
-              <AptosContextProvider>
-                <GlobalStyle />
-                <Suspense fallback={<Loader />}>
-                  <StyledToaster />
-                  <StyledContentWrapper>
-                    <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                    {children}
-                    <Footer />
-                  </StyledContentWrapper>
-                </Suspense>
-              </AptosContextProvider>
-            </ConnectWalletContextProvider>
-          </AptosWalletAdapterProvider>
+          <MarketDataProvider>
+            <AptosWalletAdapterProvider plugins={wallets} autoConnect>
+              <ConnectWalletContextProvider>
+                <AptosContextProvider>
+                  <GlobalStyle />
+                  <Suspense fallback={<Loader />}>
+                    <StyledToaster />
+                    <StyledContentWrapper>
+                      <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                      {children}
+                      <Footer />
+                    </StyledContentWrapper>
+                  </Suspense>
+                </AptosContextProvider>
+              </ConnectWalletContextProvider>
+            </AptosWalletAdapterProvider>
+          </MarketDataProvider>
         </EventStoreProvider>
       </QueryClientProvider>
     </ThemeProvider>

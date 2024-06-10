@@ -1,9 +1,9 @@
 export const ROUTES = {
   root: "/",
+  api: "/api",
   home: "/home",
-  connectWallet: "/connect-wallet",
-  emojicoin: "/emojicoin",
-  launchEmojicoin: "/launch-emojicoin",
+  market: "/market",
+  launch: "/launch",
   pools: "/pools",
   verify: "/verify",
 } as const;

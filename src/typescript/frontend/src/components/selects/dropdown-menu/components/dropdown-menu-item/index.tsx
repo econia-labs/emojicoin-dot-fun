@@ -17,6 +17,7 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
   index,
   option,
   title,
+  onHover,
 }) => {
   const { ref, replay } = useScramble({
     text: `${title}`,
@@ -28,10 +29,13 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
     <StyledDropdownMenuItem
       key={index}
       disabled={value === option}
-      onMouseEnter={replay}
+      onMouseEnter={(e) => {
+        e.stopPropagation();
+        onHover(option);
+        replay();
+      }}
       onClick={(e) => {
         e.preventDefault();
-
         onClick(option);
       }}
     >

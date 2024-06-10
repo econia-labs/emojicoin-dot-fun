@@ -5,13 +5,13 @@ import React, { useEffect } from "react";
 import { useMatchBreakpoints } from "hooks";
 
 import { Box } from "@containers";
-import { ClientsSlider } from "components";
 
-import MainInfo from "./components/main-info";
 import DesktopGrid from "./components/desktop-grid";
 import MobileGrid from "./components/mobile-grid";
 import { type EmojicoinProps } from "./types";
 import { useEventStore } from "context/store-context";
+import TextCarousel from "components/text-carousel/TextCarousel";
+import MainInfo from "./components/main-info/MainInfo";
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isLaptopL } = useMatchBreakpoints();
@@ -28,7 +28,7 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
 
   return (
     <Box pt="85px">
-      <ClientsSlider />
+      <TextCarousel />
       <MainInfo data={props.data} />
       {isLaptopL ? <DesktopGrid data={props.data} /> : <MobileGrid data={props.data} />}
     </Box>
