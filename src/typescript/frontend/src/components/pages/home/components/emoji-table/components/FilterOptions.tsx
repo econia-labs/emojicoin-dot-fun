@@ -35,11 +35,20 @@ const options: Array<MyOption> = [
   // TODO: Add price..?
 ];
 
+const queryParamToOption = (value: string): MyOption => {
+  let option = options.find((o) => toPageQueryParam(o.value) === (value as MarketDataSortBy));
+  if (!option) {
+    option = options.find((o) => toPageQueryParam(o.value) === MarketDataSortBy.MarketCap)!;
+  }
+  return option;
+};
+
 export const FilterOptionsComponent = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [selectedOption, setSelectedOption] = useState<MyOption | null>(options[0]);
+  const initialOption = queryParamToOption(searchParams.get("sort") ?? "");
+  const [selectedOption, setSelectedOption] = useState<MyOption>(initialOption);
   const [isChecked, setIsChecked] = useState(true);
   const { t } = translationFunction();
   const { isLaptopL } = useMatchBreakpoints();
