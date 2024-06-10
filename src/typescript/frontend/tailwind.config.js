@@ -68,7 +68,7 @@ module.exports = {
       },
       carousel: {
         "0%": { transform: "translateX(0)" },
-        "100%": { transform: "translateX(-4527.83)" },
+        "100%": { transform: "translateX(-4527.83px)" },
       },
     },
     animation: {
