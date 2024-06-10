@@ -8,6 +8,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
 
+export const dynamic = "force-dynamic";
+
 const Verify = async () => {
   const hashed = cookies().get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = cookies().get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;

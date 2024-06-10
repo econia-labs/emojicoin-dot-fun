@@ -1,11 +1,33 @@
 import { type OrderByStrings } from "@sdk/queries/const";
 import { toPageQueryParam, type SortByPageQueryParams } from "./types";
+import { MARKETS_PER_PAGE } from "./const";
 
 export type HomePageSearchParams = {
   page: string;
   sort: SortByPageQueryParams;
   order: OrderByStrings;
   bonding: boolean;
+};
+
+export const calculatePageNumber = ({
+  page,
+  numMarkets,
+  prev,
+}: {
+  page?: string | null;
+  numMarkets: number;
+  prev: boolean;
+}) => {
+  const currentPage = Number(page ?? 1);
+  const newPage = prev ? currentPage - 1 : currentPage + 1;
+  const lastPage = Math.ceil(numMarkets / MARKETS_PER_PAGE);
+
+  if (newPage === 0 && prev) {
+    return lastPage;
+  } else if (newPage > lastPage) {
+    return 1;
+  }
+  return newPage;
 };
 
 export const getSortQueryPath = ({
@@ -24,16 +46,24 @@ export const getSortQueryPath = ({
 };
 
 export const getPageQueryPath = ({
-  value,
+  prev,
   searchParams,
   pathname,
+  numMarkets,
 }: {
-  value: string;
+  prev: boolean;
   searchParams: URLSearchParams;
   pathname: string;
+  numMarkets: number;
 }) => {
+  const page = calculatePageNumber({
+    page: searchParams.get("page"),
+    numMarkets,
+    prev,
+  });
+
   const params = new URLSearchParams(searchParams.toString());
-  params.set("page" as keyof HomePageSearchParams, value);
+  params.set("page" as keyof HomePageSearchParams, page.toString());
   return `${pathname}?${params.toString()}`;
 };
 

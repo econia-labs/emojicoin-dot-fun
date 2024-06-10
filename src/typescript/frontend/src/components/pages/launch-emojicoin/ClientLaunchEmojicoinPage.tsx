@@ -17,7 +17,7 @@ import { Column, Flex, FlexGap } from "@containers";
 import { StyledFieldName } from "./styled";
 import { LaunchEmojicoinButton } from "./components/LaunchEmojicoinButton";
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
-import { ClientsSlider } from "components";
+import TextCarousel from "components/text-carousel/TextCarousel";
 
 const ClientLaunchEmojicoinPage: React.FC = () => {
   const { t } = translationFunction();
@@ -96,7 +96,7 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
 
   return (
     <Column pt="85px" flexGrow="1">
-      <ClientsSlider />
+      <TextCarousel />
 
       <Flex justifyContent="center" alignItems="center" height="100%" px="24px">
         <Column width="100%" maxWidth="414px">

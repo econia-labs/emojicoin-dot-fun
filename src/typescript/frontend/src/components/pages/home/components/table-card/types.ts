@@ -4,4 +4,5 @@ export type TableCardProps = {
   emojiName: string;
   marketCap: string;
   volume24h: string;
+  marketID: number;
 };

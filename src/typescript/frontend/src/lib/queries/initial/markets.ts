@@ -3,8 +3,8 @@
 
 import { SYMBOL_DATA } from "@sdk/emoji_data/";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import { type JSONTypes, toMarketView, toStateEvent } from "@sdk/types";
-import { paginateMarketRegistrations, getTopMarkets } from "@sdk/queries/market";
+import { type JSONTypes, toMarketView } from "@sdk/types";
+import { paginateMarketRegistrations } from "@sdk/queries/market";
 import { APTOS_NETWORK } from "lib/env";
 import { cache } from "react";
 import fetchInitialWithFallback from "./cache-helper";

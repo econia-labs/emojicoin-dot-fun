@@ -55,10 +55,11 @@ export const FilterOptionsComponent = () => {
         searchParams,
         pathname,
       });
-
-      router[routerFunction](newPath);
       if (routerFunction === "push") {
         setSelectedOption(option as MyOption);
+        router.push(newPath, { scroll: false });
+      } else if (routerFunction === "prefetch") {
+        router.prefetch(newPath);
       }
     },
     [searchParams, pathname, router]

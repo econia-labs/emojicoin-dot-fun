@@ -14,7 +14,14 @@ import "./module.css";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
 
-const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCap, volume24h }) => {
+const TableCard: React.FC<TableCardProps> = ({
+  index,
+  emoji,
+  emojiName,
+  marketCap,
+  volume24h,
+  marketID,
+}) => {
   const { t } = translationFunction();
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
@@ -23,7 +30,7 @@ const TableCard: React.FC<TableCardProps> = ({ index, emoji, emojiName, marketCa
   });
 
   return (
-    <Link id="grid-emoji-card" href={`${ROUTES.market}/${index}`}>
+    <Link id="grid-emoji-card" href={`${ROUTES.market}/${marketID}`}>
       <StyledItemWrapper>
         <StyledInnerItem id="grid-emoji-card" isEmpty={!emoji}>
           {emoji && (

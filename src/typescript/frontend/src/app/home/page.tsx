@@ -8,7 +8,7 @@ import { MarketDataSortBy, toPostgrestQueryParam } from "lib/queries/sorting/typ
 import { REVALIDATION_TIME } from "lib/server-env";
 
 export const revalidate = REVALIDATION_TIME;
-export const dynamic = "auto";
+export const dynamic = "force-dynamic";
 
 const fetchMarketData = cached(async (page: string) => fetchMarketData(page));
 interface HomePageParams {
@@ -52,7 +52,7 @@ export default async function Home({ searchParams, children }: HomePageParams) {
       <div className="flex-col mb-[31px]">
         <TextCarousel />
         <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full">
-          <MainCard featured={featured} />
+          <MainCard featured={featured} totalNumberOfMarkets={count} />
         </div>
         {children}
         <TextCarousel />

@@ -12,6 +12,7 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      typography: {},
       fontFamily: {
         pixelar: ["var(--font-pixelar)", ...fontFamily.sans],
         forma: ["var(--font-forma)", ...fontFamily.sans],
@@ -24,10 +25,10 @@ module.exports = {
         "mobile-md": "375px",
         "mobile-lg": "425px",
         sm: "640.1px",
-        md: "768.1px",
-        lg: "1024.1px",
-        xl: "1280.1px",
-        xxl: "1536.1px",
+        md: "768.1px", // tablet
+        lg: "1024.1px", // laptop
+        xl: "1440px", // laptop L
+        // Note largeHeight is redundant. It literally is 1441px.
       },
       boxShadow: {
         pretty:
@@ -76,5 +77,104 @@ module.exports = {
       carousel: "carousel 88.407s linear infinite",
     },
   },
-  plugins: [require("@headlessui/tailwindcss")],
+  plugins: [
+    require("@headlessui/tailwindcss"),
+    function ({ addUtilities }) {
+      const newUtilities = {
+        ".pixel-display-1": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "128px",
+          lineHeight: "160px",
+        },
+        ".display-1": {
+          fontFamily: "var(--font-formaM)",
+          fontSize: "95px",
+          lineHeight: "96px",
+        },
+        ".display-2": {
+          fontFamily: "var(--font-formaM)",
+          fontSize: "64px",
+          lineHeight: "64px",
+        },
+        ".display-3": {
+          fontFamily: "var(--font-formaM)",
+          fontSize: "48px",
+          lineHeight: "65px",
+        },
+        ".display-4": {
+          fontSize: "28px",
+          lineHeight: "48px",
+        },
+        ".display-5": {
+          fontSize: "20px",
+          lineHeight: "48px",
+        },
+        ".display-6": {
+          fontSize: "15px",
+          lineHeight: "20px",
+        },
+        ".pixel-heading-1": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "64px",
+          lineHeight: "48px",
+        },
+        ".pixel-heading-2": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "40px",
+          lineHeight: "50px",
+        },
+        ".pixel-heading-3": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "32px",
+          lineHeight: "40px",
+        },
+        ".pixel-heading-4": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "20px",
+          lineHeight: "25px",
+        },
+        ".heading-1": {
+          fontFamily: "var(--font-formaM)",
+          fontSize: "28px",
+          lineHeight: "18px",
+        },
+        ".heading-2": {
+          fontFamily: "var(--font-formaM)",
+          fontSize: "20px",
+          lineHeight: "18px",
+        },
+        ".body-lg": {
+          fontSize: "16px",
+          lineHeight: "18px",
+        },
+        ".body-sm": {
+          fontSize: "12px",
+          lineHeight: "18px",
+        },
+        ".body-xs": {
+          fontSize: "10px",
+          lineHeight: "18px",
+        },
+        ".svg-icon": {
+          alignSelf: "center",
+          flexShrink: 0,
+          transition: "all 0.3s ease",
+        },
+        ".ellipses": {
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        },
+        ".icon-inline": {
+          display: "inline-flex",
+          verticalAlign: "unset",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "1.1ch",
+          width: "1.1ch",
+        },
+      };
+      addUtilities(newUtilities, ["responsive"]);
+    },
+  ],
 };

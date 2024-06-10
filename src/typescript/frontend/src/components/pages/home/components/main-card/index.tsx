@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
@@ -17,16 +17,22 @@ import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
-import type fetchMarketData from "lib/queries/initial/market-data";
+import { useMarketData } from "context/store-context";
+import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 
 export interface MainCardProps {
-  featured?: Awaited<ReturnType<typeof fetchMarketData>>[number];
+  featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
+  totalNumberOfMarkets: number;
 }
 
-const MainCard = (props: MainCardProps) => {
-  const { t } = translationFunction();
+const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
+  const setNumMarkets = useMarketData((s) => s.setNumMarkets);
 
-  const featured = props.featured;
+  useEffect(() => {
+    setNumMarkets(totalNumberOfMarkets);
+  }, [totalNumberOfMarkets, setNumMarkets]);
+
+  const { t } = translationFunction();
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
@@ -43,7 +49,7 @@ const MainCard = (props: MainCardProps) => {
         flexDirection={{ _: "column", tablet: "row" }}
       >
         <Link
-          href={`${ROUTES.market}/${props.featured?.marketID.toString()}`}
+          href={`${ROUTES.market}/${featured?.marketID.toString()}`}
           style={{
             position: "relative",
             alignItems: "center",
@@ -63,7 +69,7 @@ const MainCard = (props: MainCardProps) => {
 
         <Column maxWidth="100%" ellipsis>
           <StyledPixelHeadingText textScale="pixelHeading1" color="darkGray">
-            {featured?.marketID || "01"}
+            {"01"}
           </StyledPixelHeadingText>
           <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
             {(featured?.name || "BLACK HEART").toUpperCase()}
