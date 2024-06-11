@@ -15,8 +15,8 @@ const getHeight = ({ scale }: ThemedProps) => {
   }
 };
 
-export const getBorderStyles = ({ error, isTouched, borderColor, theme }: BorderProps) => {
-  if (error && isTouched) {
+export const getBorderStyles = ({ error, touched, borderColor, theme }: BorderProps) => {
+  if (error && touched) {
     return css`
       border: 1px solid ${theme.colors.lightGray};
       &:focus {

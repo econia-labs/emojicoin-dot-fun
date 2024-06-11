@@ -20,7 +20,7 @@ export type Variants = (typeof variants)[keyof typeof variants];
 
 export interface BaseInputProps extends SpaceProps, TypographyProps {
   scale?: Scales;
-  isTouched?: boolean;
+  touched?: boolean;
   backgroundColor?: keyof Colors;
   error?: boolean;
   variant?: Variants;

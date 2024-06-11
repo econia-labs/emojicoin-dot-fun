@@ -106,7 +106,7 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
             <InputGroup
               label={t("Select Emoji")}
               error={errors.emoji}
-              isTouched={touched.emoji}
+              touched={touched.emoji}
               scale="xm"
             >
               <Input

@@ -12,7 +12,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
   children,
   error,
   label,
-  isTouched,
+  touched,
   isShowError = true,
   variant,
   forId,
@@ -45,7 +45,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
         <InputWrapper>
           {startIcon && <InputIcon scale={scale}>{startIcon}</InputIcon>}
 
-          {cloneElement(children, { scale, error, isTouched })}
+          {cloneElement(children, { scale, error, touched })}
 
           {endIcon && (
             <InputIcon scale={scale} isEndIcon>
@@ -56,7 +56,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
       </InputInner>
 
       {isShowError && (
-        <InputError textScale="bodyXSmall">{error && isTouched ? error : " "}</InputError>
+        <InputError textScale="bodyXSmall">{error && touched ? error : " "}</InputError>
       )}
     </StyledInputGroup>
   );
