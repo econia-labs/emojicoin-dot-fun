@@ -49,7 +49,6 @@ const EmojiTable = (props: EmojiTableProps) => {
               );
             })}
           </StyledGrid>
-
           <ButtonsBlock />
         </InnerGridContainer>
       </OuterContainer>
