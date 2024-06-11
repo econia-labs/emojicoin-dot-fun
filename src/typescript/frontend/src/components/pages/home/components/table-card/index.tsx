@@ -13,17 +13,17 @@ import { type TableCardProps } from "./types";
 import "./module.css";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
+import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 
 const TableCard: React.FC<TableCardProps> = ({
   index,
-  emoji,
-  emojiName,
+  symbol,
+  emojis,
   marketCap,
   volume24h,
   marketID,
 }) => {
   const { t } = translationFunction();
-
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
     isEllipsis: true,
@@ -32,63 +32,49 @@ const TableCard: React.FC<TableCardProps> = ({
   return (
     <Link id="grid-emoji-card" href={`${ROUTES.market}/${marketID}`}>
       <StyledItemWrapper>
-        <StyledInnerItem id="grid-emoji-card" isEmpty={!emoji}>
-          {emoji && (
-            <>
-              <Flex justifyContent="space-between" mb="7px">
-                <StyledColoredText textScale="pixelHeading2" color="darkGray">
-                  {index < 10 ? `0${index}` : index}
-                </StyledColoredText>
+        <StyledInnerItem id="grid-emoji-card" isEmpty={emojis.length === 0}>
+          <Flex justifyContent="space-between" mb="7px">
+            <StyledColoredText textScale="pixelHeading2" color="darkGray">
+              {index < 10 ? `0${index}` : index}
+            </StyledColoredText>
 
-                <StyledArrow />
-              </Flex>
+            <StyledArrow />
+          </Flex>
 
-              <Text textScale="pixelHeading1" textAlign="center" mb="22px">
-                {emoji}
+          <Text textScale="pixelHeading1" textAlign="center" mb="22px">
+            {symbol}
+          </Text>
+          <Text
+            textScale="display4"
+            textTransform="uppercase"
+            $fontWeight="bold"
+            mb="6px"
+            ellipsis
+            ref={targetRefEmojiName}
+          >
+            {emojisToName(emojis)}
+          </Text>
+          <Flex>
+            <Column width="50%">
+              <StyledColoredText textScale="bodySmall" color="lightGray" textTransform="uppercase">
+                {t("Market Cap")}
+              </StyledColoredText>
+
+              <Text textScale="bodySmall" textTransform="uppercase">
+                {marketCap + " APT"}
               </Text>
+            </Column>
 
-              <Text
-                textScale="display4"
-                textTransform="uppercase"
-                $fontWeight="bold"
-                mb="6px"
-                ellipsis
-                ref={targetRefEmojiName}
-              >
-                {emojiName}
+            <Column width="50%">
+              <StyledColoredText textScale="bodySmall" color="lightGray" textTransform="uppercase">
+                {t("24h Volume")}
+              </StyledColoredText>
+
+              <Text textScale="bodySmall" textTransform="uppercase">
+                {volume24h + " APT"}
               </Text>
-
-              <Flex>
-                <Column width="50%">
-                  <StyledColoredText
-                    textScale="bodySmall"
-                    color="lightGray"
-                    textTransform="uppercase"
-                  >
-                    {t("Market Cap")}
-                  </StyledColoredText>
-
-                  <Text textScale="bodySmall" textTransform="uppercase">
-                    {marketCap + " APT"}
-                  </Text>
-                </Column>
-
-                <Column width="50%">
-                  <StyledColoredText
-                    textScale="bodySmall"
-                    color="lightGray"
-                    textTransform="uppercase"
-                  >
-                    {t("24h Volume")}
-                  </StyledColoredText>
-
-                  <Text textScale="bodySmall" textTransform="uppercase">
-                    {volume24h + " APT"}
-                  </Text>
-                </Column>
-              </Flex>
-            </>
-          )}
+            </Column>
+          </Flex>
         </StyledInnerItem>
         {tooltipEmojiName}
       </StyledItemWrapper>

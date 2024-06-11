@@ -19,6 +19,7 @@ import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { useMarketData } from "context/store-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
+import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 
 export interface MainCardProps {
   featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
@@ -64,7 +65,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
             alt="Planet"
           />
 
-          <StyledEmoji>{featured?.emoji || "🖤"}</StyledEmoji>
+          <StyledEmoji>{featured?.symbol ?? "🖤"}</StyledEmoji>
         </Link>
 
         <Column maxWidth="100%" ellipsis>
@@ -72,7 +73,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
             {"01"}
           </StyledPixelHeadingText>
           <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
-            {(featured?.name || "BLACK HEART").toUpperCase()}
+            {(featured ? emojisToName(featured.emojis) : "BLACK HEART").toUpperCase()}
           </StyledDisplayFontText>
 
           <FlexGap gap="8px">
@@ -82,7 +83,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toCoinDecimalString(featured!.marketCap, 2)}{" "}
+                  {toCoinDecimalString(featured?.marketCap ?? 0, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>
@@ -96,7 +97,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
                   {t("24 hour vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toCoinDecimalString(featured?.dailyVolume, 2) || "143.31"}{" "}
+                  {toCoinDecimalString(featured?.dailyVolume ?? 0, 2)}{" "}
                   <AptosIconBlack className={"icon-inline"} />
                 </StyledMarketDataText>
               </>

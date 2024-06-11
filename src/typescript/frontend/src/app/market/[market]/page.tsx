@@ -32,11 +32,17 @@ interface EmojicoinPageProps {
   searchParams: {};
 }
 
+/**
+ * Note that our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
+ * That is, if you paste the emoji 💅🏾 into the URL, it becomes %F0%9F%92%85%F0%9F%8F%BE.
+ * Whereas the actual emoji bytes are: 0xf09f9285f09f8fbe.
+ */
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
-  const marketID = params.params.market;
-  const res = await fetchLatestMarketState(marketID);
+  const { market } = params.params;
+  const res = await fetchLatestMarketState(market);
 
   if (res) {
+    const marketID = res.marketID.toString();
     const chatData = await getInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
     const swapData = await getInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
     return (

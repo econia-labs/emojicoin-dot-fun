@@ -2,18 +2,18 @@
 
 import { cache } from "react";
 import { getLatestMarketState } from "@sdk/queries/state";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { symbolBytesToEmojis } from "@sdk/emoji_data";
 
-export const fetchLatestMarketState = cache(async (marketID: string) => {
-  if (!marketID) {
+export const fetchLatestMarketState = cache(async (emojiBytesOrMarketID: string) => {
+  if (!emojiBytesOrMarketID || emojiBytesOrMarketID === "") {
     return null;
   }
-  const res = await getLatestMarketState({ marketID });
+  const res = await getLatestMarketState(emojiBytesOrMarketID);
 
   return res
     ? {
         ...res,
-        ...SYMBOL_DATA.byHex(res?.emojiBytes)!,
+        ...symbolBytesToEmojis(res.emojiBytes),
       }
     : null;
 });
