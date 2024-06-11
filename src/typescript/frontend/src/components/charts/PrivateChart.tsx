@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import path from "path";
 import { getEmptyGroupedCandlesticks } from "@sdk/queries/client-utils/candlestick";
+import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
@@ -69,22 +70,22 @@ export const Chart = async (props: ChartContainerProps) => {
       },
       searchSymbols: async (userInput, _exchange, _symbolType, onResultReadyCallback) => {
         // const marketIDs = Array.from(marketMap.keys());
-        const data = Array.from(marketMap.entries()).map(([marketID, emoji]) => {
+        const data = Array.from(marketMap.entries()).map(([marketID, emojis]) => {
           return {
             marketID,
-            emoji: symbolBytesToEmojis(emoji),
+            emojis: symbolBytesToEmojis(emojis),
           };
         });
         // TODO: Consider storing this in state..? It depends if we need to reconstruct it elsewhere,
         // and if it generally carries a high cost/complexity to compute.
         // Could also combine the map and filter into a single reduce.
-        const symbols = data.reduce<SearchSymbolResultItem[]>((acc, { marketID, emoji }) => {
+        const symbols = data.reduce<SearchSymbolResultItem[]>((acc, { marketID, emojis: item }) => {
           const symbol = {
-            description: `Market #${marketID}: ${emoji.name}`,
+            description: `Market #${marketID}: ${item.symbol}`,
             exchange: EXCHANGE_NAME,
-            full_name: `${EXCHANGE_NAME}:${emoji.name}`,
-            symbol: emoji.emoji,
-            ticker: emoji.emoji,
+            full_name: `${EXCHANGE_NAME}:${emojisToName(item.emojis)}`,
+            symbol: item.symbol,
+            ticker: item.symbol,
             type: "crypto",
           };
           if (
