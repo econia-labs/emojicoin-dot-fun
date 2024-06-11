@@ -18,7 +18,7 @@ export const checkNetworkAndToast = (
   if (!network) {
     if (!notifyIfDisconnected) {
       toast.info("Please connect your wallet.", {
-        toastId: debouncedToastKey("connect-wallet", CandlestickResolution.PERIOD_15S),
+        toastId: debouncedToastKey("connect-wallet", CandlestickResolution.PERIOD_1M),
       });
     }
     return false;
@@ -48,7 +48,7 @@ export const checkNetworkAndToast = (
       </div>
     );
     toast.warning(message, {
-      toastId: debouncedToastKey("network-warning", CandlestickResolution.PERIOD_15S),
+      toastId: debouncedToastKey("network-warning", CandlestickResolution.PERIOD_1M),
     });
   }
   return true;
@@ -69,7 +69,7 @@ export const parseAPIErrorAndToast = (network: NetworkInfo, error: AptosApiError
         </div>
       );
       toast.error(message, {
-        toastId: debouncedToastKey("account-not-found", CandlestickResolution.PERIOD_15S),
+        toastId: debouncedToastKey("account-not-found", CandlestickResolution.PERIOD_1M),
       });
     }
   }
@@ -97,7 +97,7 @@ export const successfulTransactionToast = (
     </>
   );
   toast.success(message, {
-    toastId: debouncedToastKey("transaction-success", CandlestickResolution.PERIOD_1S),
+    toastId: debouncedToastKey("transaction-success", CandlestickResolution.PERIOD_1M),
     className: "cursor-text",
     closeOnClick: false,
     autoClose: 8000,
