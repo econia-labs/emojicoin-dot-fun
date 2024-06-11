@@ -14,12 +14,12 @@ export const fetchInitialWithFallback = async <T1, T2>({
   functionArgs: T2;
   queryFunction: (args: T2) => Promise<T1>;
 }) => {
-  const currentHour = Math.floor(getTime(UnitOfTime.Hours));
+  const currentMinute = Math.floor(getTime(UnitOfTime.Minutes));
   const cachedFunction = cache(
     async (args: { time: number; functionArgs: T2 }) => await queryFunction(args.functionArgs)
   );
   return await cachedFunction({
-    time: currentHour,
+    time: currentMinute,
     functionArgs,
   });
 };

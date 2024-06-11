@@ -1,21 +1,58 @@
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { isString, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { converter } from "@sdk/emojicoin_dot_fun/events";
 import { TYPE_TAGS } from "@sdk/utils";
 import { type AnyEmojicoinEvent, type Types } from "@sdk/types/types";
-import { type EventStore } from "./event-store";
+import { type EventActions, type EventStore } from "./event-store";
 import { type SubmissionResponse } from "context/wallet-context/AptosContextProvider";
+
+import { isValidSymbol } from "@sdk/emoji_data/utils";
+import { type AnyNumberString } from "@sdk-types";
+
+export const marketIDToSymbol = (args: {
+  marketID: AnyNumberString;
+  getter: EventActions["getSymbolFromMarketID"];
+}): string | undefined => {
+  const { marketID, getter } = args;
+  return getter(marketID.toString());
+};
+
+/**
+ * First tries to resolve the input as a symbol, then as a market ID.
+ * @param args
+ * @returns
+ */
+export const resolveToEmojiSymbol = (args: {
+  userInput: AnyNumberString;
+  getSymbolFromMarketID: EventActions["getSymbolFromMarketID"];
+}): string | undefined => {
+  const { userInput, getSymbolFromMarketID: getter } = args;
+  if (isString(userInput) && isValidSymbol(userInput)) {
+    return userInput;
+  }
+  try {
+    const marketID = Number.parseInt(userInput.toString());
+    if (isNaN(marketID)) {
+      return undefined;
+    }
+    return marketIDToSymbol({ marketID, getter });
+  } catch (e) {
+    return undefined;
+  }
+};
 
 export function storeEvents(store: EventStore, data: Awaited<SubmissionResponse>): void {
   const response = data?.response;
   if (!response || !isUserTransactionResponse(response)) {
     return;
   }
-  response.events.forEach((event): void => {
+  const filtered = response.events.filter((event) => converter.has(event.type));
+  const version = Number(response.version);
+  filtered.forEach((event): void => {
     const conversionFunction = converter.get(event.type);
     if (typeof conversionFunction !== "function") {
       return;
     }
-    const data = conversionFunction(event.data, Number(response.version));
+    const data = conversionFunction(event.data, version);
     switch (event.type) {
       case TYPE_TAGS.SwapEvent.toString():
         store.addSwapEvents({ data: data as Types.SwapEvent });

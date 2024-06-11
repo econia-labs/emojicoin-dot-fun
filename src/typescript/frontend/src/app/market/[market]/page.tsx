@@ -1,6 +1,7 @@
 import getInitialChatData from "lib/queries/initial/chats";
 import { fetchLatestMarketState } from "lib/queries/initial/state";
 import getInitialSwapData from "lib/queries/initial/swaps";
+import getInitialCandlesticks from "lib/queries/initial/candlesticks";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 // import fetchMarketData from "lib/queries/initial/market-data";
 import EmojiNotFoundPage from "./not-found";
@@ -12,6 +13,11 @@ export const dynamic = "force-dynamic";
 const CHAT_DATA_ROWS = 100;
 const SWAP_DATA_ROWS = 100;
 
+/**
+ * Our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
+ * That is, if you paste the emoji 💅🏾 into the URL, it becomes %F0%9F%92%85%F0%9F%8F%BE.
+ * Whereas the actual emoji bytes are: 0xf09f9285f09f8fbe.
+ */
 type StaticParams = {
   market: string;
 };
@@ -45,11 +51,13 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const marketID = res.marketID.toString();
     const chatData = await getInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
     const swapData = await getInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
+    const candlesticks = await getInitialCandlesticks(marketID);
     return (
       <ClientEmojicoinPage
         data={{
           swaps: swapData,
           chats: chatData,
+          candlesticks,
           ...res,
         }}
       />

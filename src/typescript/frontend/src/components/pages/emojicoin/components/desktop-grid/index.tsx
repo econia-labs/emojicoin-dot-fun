@@ -18,6 +18,7 @@ import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
 import { LiquidityButton } from "../trade-emojicoin/components/LiquidityButton";
+import ChartContainer from "components/charts/ChartContainer";
 
 const DesktopGrid = (props: GridProps) => {
   const { t } = translationFunction();
@@ -27,23 +28,10 @@ const DesktopGrid = (props: GridProps) => {
       <StyledContentInner>
         <StyledContentColumn>
           <StyledBlock width="57%">
-            <StyledContentHeader>
-              <Text
-                textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }}
-                color="lightGray"
-                textTransform="uppercase"
-              >
-                {t("Price Chart")}
-              </Text>
-            </StyledContentHeader>
-
             <StyledBlockWrapper>
-              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
-                Chart
-              </Text>
+              <ChartContainer {...props.data} marketID={props.data.marketID.toString()} />
             </StyledBlockWrapper>
           </StyledBlock>
-
           <StyledBlock width="43%">
             <LiquidityButton data={props.data} />
 

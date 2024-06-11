@@ -30,8 +30,14 @@
       "@icons/*": [
         "components/svg/icons/*"
       ],
+      "@sdk-types": [
+        "../../sdk/src/types/index.ts"
+      ],
       "@sdk/*": [
         "../../sdk/src/*"
+      ],
+      "@static/*": [
+        "../public/static/*"
       ],
       "@store/*": [
         "lib/store/*"

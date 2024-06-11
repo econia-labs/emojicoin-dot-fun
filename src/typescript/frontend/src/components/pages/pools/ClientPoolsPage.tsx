@@ -21,6 +21,8 @@ import { isDisallowedEventKey } from "utils";
 export const ClientPoolsPage = () => {
   const { isMobile } = useMatchBreakpoints();
 
+  // TODO: Initialize market state data here (and any other data that goes in the event store).
+
   const { targetRef, tooltip } = useEmojicoinPicker({
     onEmojiClick: () => {},
     placement: "bottom",

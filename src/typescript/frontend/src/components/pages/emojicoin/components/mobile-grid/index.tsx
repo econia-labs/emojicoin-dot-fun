@@ -22,17 +22,9 @@ const MobileGrid = (props: GridProps) => {
   return (
     <StyledMobileContentWrapper>
       <StyledMobileContentBlock>
-        <StyledMobileContentHeader>
-          <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
-            {t("Price Chart")}
-          </Text>
-        </StyledMobileContentHeader>
+        <StyledMobileContentHeader></StyledMobileContentHeader>
 
-        <StyledMobileContentInner>
-          <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
-            Chart
-          </Text>
-        </StyledMobileContentInner>
+        <StyledMobileContentInner></StyledMobileContentInner>
       </StyledMobileContentBlock>
 
       <StyledMobileContentBlock>

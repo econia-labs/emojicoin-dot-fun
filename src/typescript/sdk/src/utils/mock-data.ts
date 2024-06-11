@@ -25,6 +25,7 @@ import {
   type Aptos,
   type TypeTag,
   type AptosConfig,
+  HexInput,
 } from "@aptos-labs/ts-sdk";
 import {
   getEmojicoinMarketAddressAndTypeTags,
@@ -43,9 +44,13 @@ import { truncateAddress } from "./misc";
 import Big from "big.js";
 import { Types } from "../types";
 
+const NUM_MARKETS = 1;
 const NUM_TRADERS = 500;
 const TRADES_PER_TRADER = 4;
 const TRADERS: Array<Account> = Array.from({ length: NUM_TRADERS }, () => Account.generate());
+const nextSequenceNumber = new Map<string, number>(
+  TRADERS.map((t) => [t.accountAddress.toString(), -2])
+);
 const CHUNK_SIZE = 25;
 const TRADER_INITIAL_BALANCE = ONE_APT * 10;
 const TRADER_GAS_RESERVES = ONE_APT * 0.02;
@@ -80,11 +85,12 @@ async function main() {
   await fundTraders(aptos, distributors);
 
   // Now have the publisher register all markets sequentially.
-  const numMarketsToRegister = 20;
   const markets = new Array<Types.EmojicoinInfo & SymbolEmojiData>();
   /* eslint-disable no-await-in-loop */
-  for (let i = 0; i < numMarketsToRegister; i += 1) {
-    const { bytes, emoji } = getRandomEmoji();
+  for (let i = 0; i < NUM_MARKETS; i += 1) {
+    // const { bytes, emoji } = getRandomEmoji();
+    const emoji = SYMBOL_DATA.byName("FREE button")!.emoji;
+    const bytes = SYMBOL_DATA.byEmoji(emoji)!.hex;
     const res = await ensurePublisherHasRegisteredMarket({
       aptos,
       emojiBytes: bytes,
@@ -99,7 +105,7 @@ async function main() {
     });
     markets.push(res);
   }
-  console.log(`Registered ${numMarketsToRegister} markets!`);
+  console.log(`Registered ${NUM_MARKETS} markets!`);
 
   // --------------------------------------------------------------------------------------
   //                  Have all traders submit N trades and N chat messages
@@ -122,13 +128,13 @@ async function main() {
 
       // In case we ever want to loop this entire loop, you could fetch the user's sequence number
       // here instead of assuming it's 0.
-      const sequenceNumber = 0;
       const results = amounts.map(async (amt, ii) => {
         try {
+          const latestSequenceNumber = nextSequenceNumber.get(t.accountAddress.toString())! + 2;
           await sleep(Math.random() * 1000 + 1000);
           const { swap, chat } = await submitTradeAndRandomChatMessage({
             aptosConfig: aptos.config,
-            sequenceNumber: sequenceNumber + ii * 2,
+            sequenceNumber: latestSequenceNumber + ii * 2,
             marketAddress: market.marketAddress,
             typeTags: [market.emojicoin, market.emojicoinLP],
             user: t,
@@ -151,6 +157,10 @@ async function main() {
                 );
               }
               const events = getEvents(res);
+              const seqNum = Number(res.sequence_number);
+              if (nextSequenceNumber.get(t.accountAddress.toString())! < seqNum) {
+                nextSequenceNumber.set(t.accountAddress.toString(), seqNum);
+              }
               return [res, events];
             })
             .catch((e) => {
@@ -231,7 +241,7 @@ const ensurePublisherHasRegisteredMarket = async ({
   emoji,
 }: {
   aptos: Aptos;
-  emojiBytes: Uint8Array;
+  emojiBytes: HexInput;
   registryAddress: AccountAddress;
   emoji: string;
 }): Promise<Types.EmojicoinInfo> => {
@@ -491,4 +501,14 @@ const divideWithPrecision = (args: {
   return Big(a).div(Big(b)).toFixed(decimals);
 };
 
-main().then(() => console.log("\nDone!"));
+const runForever = async () => {
+  while (true) {
+    try {
+      await main();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+};
+
+runForever().then(() => console.log("Done!"));

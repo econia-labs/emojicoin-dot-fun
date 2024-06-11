@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
@@ -14,16 +14,23 @@ import "./module.css";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+import { useEventStore } from "context/store-context";
 
 const TableCard: React.FC<TableCardProps> = ({
   index,
+  marketID,
   symbol,
   emojis,
   marketCap,
   volume24h,
-  marketID,
 }) => {
   const { t } = translationFunction();
+  const initMarket = useEventStore((s) => s.maybeInitializeMarket);
+  useEffect(() => {
+    initMarket(marketID);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [marketID]);
+
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
     isEllipsis: true,
