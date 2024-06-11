@@ -17,7 +17,7 @@ export interface InputGroupProps extends SpaceProps, LayoutProps {
   children: JSX.Element;
   error?: string;
   label?: string;
-  isTouched?: boolean;
+  touched?: boolean;
   disabled?: boolean;
   isShowError?: boolean;
   variant?: Variant;

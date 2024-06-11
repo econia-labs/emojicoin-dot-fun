@@ -5,6 +5,7 @@ import { useTooltip } from "hooks";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
+import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 
 const innerWrapper = `flex flex-col md:flex-row justify-around w-full max-w-[1362px] px-[30px] lg:px-[44px] py-[17px]
 md:py-[37px] xl:py-[68px]`;
@@ -29,11 +30,11 @@ const MainInfo = (props: MainInfoProps) => {
             ref={targetRefEmojiName}
             className=" text-white uppercase ellipses md:display-2 display-4"
           >
-            {props.data.name}
+            {emojisToName(props.data.emojis)}
           </div>
           {tooltipEmojiName}
 
-          <div className="text-[24px] md:display-2">{props.data.emoji}</div>
+          <div className="text-[24px] md:display-2">{props.data.symbol}</div>
         </div>
 
         <div className={statsWrapper}>

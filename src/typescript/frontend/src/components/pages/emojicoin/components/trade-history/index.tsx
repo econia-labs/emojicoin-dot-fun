@@ -31,13 +31,13 @@ const TradeHistory = (props: TradeHistoryProps) => {
   const { offsetHeight: tradeHistoryTableBodyHeight } =
     useElementDimensions("tradeHistoryTableBody");
 
-  const swaps = useEventStore((s) => s.getMarket(props.data.marketID).swapEvents.events);
+  const swaps = useEventStore((s) => s.getMarket(props.data.marketID)?.swapEvents.events ?? []);
   return (
     <StyledTradeHistory>
       <Table minWidth="700px">
         <thead>
           <HeaderTr>
-            {getHeaders(props.data.emoji).map((th, index) => (
+            {getHeaders(props.data.symbol).map((th, index) => (
               <Th width={th.width} minWidth="100px" key={index}>
                 <ThInner>
                   <Text

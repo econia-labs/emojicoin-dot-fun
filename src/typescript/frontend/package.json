@@ -76,7 +76,7 @@
     "build": "next build",
     "build:debug": "BUILD_DEBUG=true && pnpm clean && pnpm i && next build --no-lint --no-mangling --debug",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
-    "dev": "NODE_OPTIONS='--inspect' next dev --turbo",
+    "dev": "NODE_OPTIONS='--inspect' next dev --turbo --port 3001",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
     "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
