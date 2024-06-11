@@ -15,14 +15,27 @@ import MainInfo from "./components/main-info/MainInfo";
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isLaptopL } = useMatchBreakpoints();
-  const { addMarketData, addChatEvents, addSwapEvents } = useEventStore((s) => s);
+  const {
+    addMarketData,
+    addChatEvents,
+    addSwapEvents,
+    addPeriodicStateEvents,
+    maybeInitializeMarket,
+  } = useEventStore((s) => s);
 
   useEffect(() => {
     if (props.data) {
+      maybeInitializeMarket(props.data.marketID);
       addMarketData(props.data);
-      props.data.chats.forEach((v) => addChatEvents({ data: v }));
-      props.data.swaps.forEach((v) => addSwapEvents({ data: v }));
+      addChatEvents({ data: props.data.chats, sorted: true });
+      addSwapEvents({ data: props.data.swaps, sorted: true });
+      addPeriodicStateEvents({ data: props.data.candlesticks, sorted: true });
+      console.debug(props.data);
+      console.debug(props.data.chats);
+      console.debug(props.data.swaps);
+      console.debug(props.data.candlesticks);
     }
+
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [props?.data]);
 

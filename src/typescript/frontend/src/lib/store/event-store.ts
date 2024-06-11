@@ -4,6 +4,12 @@ import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
 import { type WritableDraft } from "immer";
 import { mergeSortedEvents } from "./event-utils";
+import { type AnyNumberString } from "@sdk-types";
+import {
+  getEmptyGroupedCandlesticks,
+  type GroupedPeriodicStateEvents,
+} from "@sdk/queries/client-utils/candlestick";
+import { type CandlestickResolution } from "@sdk/const";
 
 type SwapEvent = Types.SwapEvent;
 type ChatEvent = Types.ChatEvent;
@@ -21,7 +27,7 @@ export type EventsWithUUIDs = {
   swapEvents: { events: SwapEvent[]; eventUUIDs: Set<string> };
   chatEvents: { events: ChatEvent[]; eventUUIDs: Set<string> };
   marketRegistrationEvents: { events: MarketRegistrationEvent[]; eventUUIDs: Set<string> };
-  periodicStateEvents: { events: PeriodicStateEvent[]; eventUUIDs: Set<string> };
+  periodicStateEvents: { events: GroupedPeriodicStateEvents; eventUUIDs: Set<string> };
   stateEvents: { events: StateEvent[]; eventUUIDs: Set<string> };
   liquidityEvents: { events: LiquidityEvent[]; eventUUIDs: Set<string> };
 };
@@ -31,24 +37,38 @@ export type MarketStateValueType = EventsWithUUIDs & {
 };
 
 export type EventState = {
-  markets: Map<string, MarketStateValueType>;
+  markets: Map<MarketIDString, MarketStateValueType>;
+  symbolToMarketID: Map<SymbolString, MarketIDString>;
+  marketIDToSymbol: Map<MarketIDString, SymbolString>;
   globalStateEvents: { events: GlobalStateEvent[]; eventUUIDs: Set<string> };
 };
 
-export type AnyNumberString = number | string | bigint;
+// The type of the `set((state) => ...)` function for the `immer` library.
+export type ImmerSetEventStoreFunction = (
+  nextStateOrUpdater:
+    | EventStore
+    | Partial<EventStore>
+    | ((state: WritableDraft<EventStore>) => void),
+  shouldReplace?: boolean | undefined
+) => void;
+
 type ArrayOrElement<T> = T | T[];
 type AddEventsType<T> = ({ data, sorted }: { data: ArrayOrElement<T>; sorted?: boolean }) => void;
 
+// Type aliases for more specificity.
+type MarketIDString = string;
+type SymbolString = string;
+
 export type EventActions = {
-  setMarket: (marketID: AnyNumberString, data: MarketStateValueType) => void;
-  /**
-   * Note that this function has side effects and is technically an upsert.
-   * If the market doesn't exist in the map, it will be created.
-   * @param marketID
-   * @param data
-   * @returns the new market data, possibly an empty market if it was just created
-   */
-  getMarket: (marketID: AnyNumberString, d?: MarketStateValueType) => MarketStateValueType;
+  setMarket: (marketID: AnyNumberString, data?: MarketStateValueType) => void;
+  maybeInitializeMarket: (marketID: AnyNumberString) => void;
+  getMarket: (marketID: AnyNumberString) => MarketStateValueType | undefined;
+  getFrozenSymbols: () => Array<SymbolString>;
+  getSymbols: () => Map<SymbolString, MarketIDString>;
+  getFrozenMarketIDs: () => Array<MarketIDString>;
+  getMarketIDs: () => Map<MarketIDString, SymbolString>;
+  getMarketIDFromSymbol: (symbol: SymbolString) => MarketIDString | undefined;
+  getSymbolFromMarketID: (marketID: AnyNumberString | MarketIDString) => SymbolString | undefined;
   addMarketData: (d: MarketDataView) => void;
   addGlobalStateEvents: AddEventsType<GlobalStateEvent>;
   addSwapEvents: AddEventsType<SwapEvent>;
@@ -64,18 +84,43 @@ const ensureArray = <T>(value: ArrayOrElement<T>): T[] => (Array.isArray(value) 
 
 export const initializeEventStore = (): EventState => ({
   markets: new Map(),
+  symbolToMarketID: new Map(),
+  marketIDToSymbol: new Map(),
   globalStateEvents: { events: [], eventUUIDs: new Set() },
 });
 
-export const initializeEmptyMarket = (): MarketStateValueType => ({
+export const getInitialMarketState = (): MarketStateValueType => ({
   swapEvents: { events: [], eventUUIDs: new Set() },
   liquidityEvents: { events: [], eventUUIDs: new Set() },
   stateEvents: { events: [], eventUUIDs: new Set() },
-  periodicStateEvents: { events: [], eventUUIDs: new Set() },
+  periodicStateEvents: { events: getEmptyGroupedCandlesticks(), eventUUIDs: new Set() },
   chatEvents: { events: [], eventUUIDs: new Set() },
   marketRegistrationEvents: { events: [], eventUUIDs: new Set() },
   marketData: undefined,
 });
+
+// Should this just be in `createEventStore` and called within there?
+// Unsure if `immer` is 💯 like that, i.e., composable.
+// Either way, adding a market and adding the mapping from symbol to market ID
+// needs to be coupled.
+// We also add the mapping from market ID to symbol here.
+export const setMarketHelper = (args: {
+  marketID: AnyNumberString;
+  set: ImmerSetEventStoreFunction;
+  data?: MarketStateValueType;
+}) => {
+  const { set } = args;
+  const data = args.data ?? getInitialMarketState();
+  const marketID = args.marketID.toString();
+  set((state) => {
+    state.markets.set(marketID.toString(), data);
+    const emojiBytes = data.marketData?.emojiBytes;
+    if (emojiBytes && state.symbolToMarketID.has(emojiBytes)) {
+      state.symbolToMarketID.set(emojiBytes, marketID);
+      state.marketIDToSymbol.set(marketID, emojiBytes);
+    }
+  });
+};
 
 export const defaultState: EventState = initializeEventStore();
 
@@ -84,24 +129,51 @@ export const createEventStore = (initialState: EventState = defaultState) => {
     immer((set, get) => ({
       ...initialState,
       setMarket: (marketID, data) =>
-        set((state) => {
-          state.markets.set(marketID.toString(), data);
+        setMarketHelper({
+          marketID,
+          data,
+          set,
         }),
-      getMarket: (marketID, data) => {
-        if (get().markets.has(marketID.toString())) {
-          return get().markets.get(marketID.toString())!;
+      maybeInitializeMarket: (marketID) => {
+        if (!get().markets.has(marketID.toString())) {
+          setMarketHelper({
+            marketID,
+            set,
+          });
         }
-        const newMarket = data ?? initializeEmptyMarket();
-        set((state) => {
-          state.markets.set(marketID.toString(), newMarket);
-        });
-        return newMarket;
+      },
+      /**
+       * Gets the current values in the map without triggering state updates when it changes.
+       * @returns
+       */
+      getFrozenSymbols: () => Array.from(get().symbolToMarketID.keys()),
+      /**
+       * Gets the current values in the map without triggering state updates when it changes.
+       * @returns
+       */
+      getFrozenMarketIDs: () => Array.from(get().marketIDToSymbol.keys()),
+      getSymbols: () => get().symbolToMarketID, // These should see state updates.
+      getMarketIDs: () => get().marketIDToSymbol, // These should see state updates.
+      getMarketIDFromSymbol: (symbol) => get().symbolToMarketID.get(symbol),
+      getSymbolFromMarketID: (marketID) => get().marketIDToSymbol.get(marketID.toString()),
+      getMarket: (marketID) => {
+        // To avoid unnecessary side effects (state updates and thus re-renders),
+        // we only set the market if it doesn't exist.
+        // if (!get().markets.has(marketID.toString())) {
+        //   setMarketHelper({
+        //     marketID,
+        //     set,
+        //     data,
+        //   });
+        // }
+        return get().markets.get(marketID.toString())!;
       },
       addMarketData: (data) => {
         const marketID = data.marketID.toString();
         if (!get().markets.has(marketID)) {
-          set((state) => {
-            state.markets.set(marketID, initializeEmptyMarket());
+          setMarketHelper({
+            marketID,
+            set,
           });
         }
         return set((state) => {
@@ -164,17 +236,6 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           sorted,
         });
       },
-      addPeriodicStateEvents: ({ data, sorted }) => {
-        pushHelper({
-          data,
-          get,
-          set,
-          getMarketID: (e) => e.marketMetadata.marketID.toString(),
-          uuid: (e) => e.periodicStateMetadata.emitMarketNonce.toString(),
-          field: "periodicStateEvents",
-          sorted,
-        });
-      },
       addChatEvents: ({ data, sorted }) => {
         pushHelper({
           data,
@@ -197,10 +258,68 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           sorted,
         });
       },
+      addPeriodicStateEvents: ({ data, sorted }) => {
+        const events = ensureArray(data);
+        if (events.length === 0) {
+          return;
+        }
+        const marketID = events[0].marketMetadata.marketID.toString();
+        if (!get().markets.has(marketID)) {
+          setMarketHelper({
+            marketID,
+            set,
+          });
+        }
+
+        const market = get().markets.get(marketID)!;
+        const immutableUUIDs = market.periodicStateEvents.eventUUIDs;
+        const [filteredEvents, filteredUUIDs] = [
+          getEmptyGroupedCandlesticks(),
+          new Array<string>(),
+        ];
+
+        events.forEach((e) => {
+          const id = `${e.periodicStateMetadata.period}_${e.periodicStateMetadata.emitMarketNonce}`;
+          if (!immutableUUIDs.has(id)) {
+            filteredEvents[Number(e.periodicStateMetadata.period) as CandlestickResolution].push(e);
+            filteredUUIDs.push(id);
+          }
+        });
+
+        if (filteredUUIDs.length === 0) {
+          return;
+        }
+
+        if (!sorted) {
+          // Sort in descending order.
+          Object.keys(filteredEvents).forEach((key) => {
+            filteredEvents[Number(key) as CandlestickResolution].sort(
+              (a, b) => b.version - a.version
+            );
+          });
+        }
+
+        return set((state) => {
+          Object.keys(state.markets.get(marketID)!.periodicStateEvents.events).forEach((key) => {
+            const field = Number(key) as CandlestickResolution;
+            state.markets.get(marketID)!.periodicStateEvents.events[field] = mergeSortedEvents(
+              state.markets.get(marketID)!.periodicStateEvents.events[field],
+              filteredEvents[field]
+            );
+          });
+          state.markets.get(marketID)!.periodicStateEvents.eventUUIDs = new Set([
+            ...state.markets.get(marketID)!.periodicStateEvents.eventUUIDs,
+            ...filteredUUIDs,
+          ]);
+        });
+      },
     }))
   );
 };
 
+// We run this function any time a contract event that is associated with a market ID
+// is added to the event store. This function is responsible for pushing the event into the store
+// and handling all of the state updates and initializations/side effects that should come with it.
 const pushHelper = <T extends AnyEmojicoinEvent>({
   data,
   get,
@@ -220,13 +339,7 @@ const pushHelper = <T extends AnyEmojicoinEvent>({
 }: {
   data: ArrayOrElement<T>;
   get: () => EventStore;
-  set: (
-    nextStateOrUpdater:
-      | EventStore
-      | Partial<EventStore>
-      | ((state: WritableDraft<EventStore>) => void),
-    shouldReplace?: boolean | undefined
-  ) => void;
+  set: ImmerSetEventStoreFunction;
   getMarketID: (e: Array<T>[number]) => string;
   uuid: (e: Array<T>[number]) => string;
   field: keyof Omit<Events, "events">;
@@ -239,8 +352,9 @@ const pushHelper = <T extends AnyEmojicoinEvent>({
 
   const marketID = getMarketID(events[0]);
   if (!get().markets.has(marketID)) {
-    set((state) => {
-      state.markets.set(marketID, initializeEmptyMarket());
+    setMarketHelper({
+      marketID,
+      set,
     });
   }
 

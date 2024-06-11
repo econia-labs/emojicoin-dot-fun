@@ -1,4 +1,4 @@
-import "server-only";
+"use server";
 
 import { type CandlestickResolution } from "../const";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";

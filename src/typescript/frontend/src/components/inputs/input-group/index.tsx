@@ -1,3 +1,4 @@
+// cspell:word istouched
 import React, { cloneElement } from "react";
 import { InputError, InputIcon, InputWrapper, StyledInputGroup, InputInner } from "./styled";
 import { Text } from "components/text";

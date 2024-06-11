@@ -10,6 +10,7 @@ import { Text, Tr, Td } from "components";
 import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { ExplorerLinkCustom } from "./styled";
+import { toNominalPrice } from "@sdk/utils/nominal-price";
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
   const { targetRef, tooltip } = useTooltip(
@@ -50,7 +51,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
 
       <Td
         style={{ display: "flex", alignItems: "center", justifyContent: "center", marginRight: 10 }}
-        width={{ _: "12.5%", laptopL: "13%" }}
+        width={{ _: "12.5%", laptopL: "6%" }}
         minWidth={{ _: "10px", laptopL: "unset" }}
       >
         <Flex>
@@ -64,14 +65,26 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
         </Flex>
       </Td>
 
-      <Td width="20%" minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width="22.5%" minWidth={{ _: "100px", laptopL: "unset" }} className="ml-[10px]">
         <Flex>
           <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">
             {item.date.toLocaleString()}
           </Text>
         </Flex>
       </Td>
-      <Td width={{ _: "20%", laptopL: "35%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
+      <Td width="12.5%" minWidth={{ _: "100px", laptopL: "unset" }}>
+        <Flex>
+          <Text
+            textScale="bodySmall"
+            color="lightGray"
+            textTransform="uppercase"
+            className="ml-[-19px]"
+          >
+            {toNominalPrice(item.price).toFixed(7)}
+          </Text>
+        </Flex>
+      </Td>
+      <Td width={{ _: "20%", laptopL: "16.5%" }} minWidth={{ _: "100px", laptopL: "unset" }}>
         <Flex justifyContent="end" className="trade-entry">
           <ExplorerLinkCustom style={{ display: "inline-block" }} value={item.version} type="txn">
             <Text textScale="bodySmall" color="lightGray" textTransform="uppercase">

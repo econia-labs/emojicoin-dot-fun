@@ -49,6 +49,7 @@
     "_format": "prettier 'src/**/*.ts' 'tests/**/*.ts' '.eslintrc.js'",
     "build": "tsc",
     "build:clean": "pnpm run clean && pnpm i && tsc",
+    "build:debug": "pnpm run build:clean",
     "check": "tsc --noEmit",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "e2e-test": "dotenv -e ../.env.test -- pnpm jest tests/e2e",

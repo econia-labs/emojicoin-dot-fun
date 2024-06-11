@@ -15,6 +15,12 @@
         ".next/**"
       ]
     },
+    "build:debug": {
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": []
+    },
     "clean": {
       "outputs": []
     },

@@ -16,11 +16,15 @@ export const HEADERS = [
     text: "Type",
   },
   {
-    width: "12.5%",
+    width: "17.5%",
     text: "Date",
   },
   {
-    width: "38%",
+    width: "12.5%",
+    text: "Price",
+  },
+  {
+    width: "20.5%",
     text: "Transaction",
   },
 ];

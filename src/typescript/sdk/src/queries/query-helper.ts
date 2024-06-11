@@ -42,7 +42,7 @@ const hasJSONData = <T>(
  *
  * **NOTE**: This function will auto-paginate and override any `.range(...)` filter in `query`.
  *
- * **NOTE**: This will query infinitely unless you specify `maxNumQueries`.
+ * **NOTE**: This will paginate a max number of NUM_QUERIES_HARD_CAP times.
  *
  * @param args
  *  @type `T`: The type of data returned from the query in `data: Array<T>`

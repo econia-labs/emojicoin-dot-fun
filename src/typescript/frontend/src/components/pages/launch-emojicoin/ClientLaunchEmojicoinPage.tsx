@@ -1,4 +1,5 @@
 "use client";
+// cspell:word istouched
 
 import React, { type ChangeEvent, useEffect } from "react";
 import { type EmojiClickData } from "emoji-picker-react";

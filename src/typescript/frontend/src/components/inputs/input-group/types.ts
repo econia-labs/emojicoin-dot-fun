@@ -1,3 +1,4 @@
+// cspell:word istouched
 import { type ReactElement } from "react";
 import { type SpaceProps, type LayoutProps, type ResponsiveValue } from "styled-system";
 

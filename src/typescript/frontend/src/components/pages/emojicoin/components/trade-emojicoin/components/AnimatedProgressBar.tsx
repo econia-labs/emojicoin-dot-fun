@@ -30,13 +30,17 @@ const getLatestReserves = (args: {
   return reserves[0][0];
 };
 
-export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
-  const marketData = useEventStore((s) => s.getMarket(data.marketID).marketData);
-  const stateEvents = useEventStore((s) => s.getMarket(data.marketID).stateEvents.events);
-
+export const AnimatedProgressBar = (props: GridProps) => {
+  const data = props.data;
+  const marketData = useEventStore((s) => s.getMarket(data.marketID)?.marketData);
+  const stateEvents = useEventStore((s) => s.getMarket(data.marketID)?.stateEvents.events);
   const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
   const progressBarControls = useAnimation();
   const flickerControls = useAnimation();
+
+  useEffect(() => {
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   useEffect(() => {
     progressBarControls.start({
@@ -59,13 +63,15 @@ export const AnimatedProgressBar: React.FC<GridProps> = ({ data }) => {
   }, [progress, progressBarControls, flickerControls]);
 
   useEffect(() => {
-    const clammVirtualReserves = getLatestReserves({
-      propsData: data,
-      storeMarketData: marketData,
-      storeStateEvents: stateEvents ?? [],
-    });
-    const percentage = getBondingCurveProgress(clammVirtualReserves);
-    setProgress(percentage);
+    if (marketData && stateEvents) {
+      const clammVirtualReserves = getLatestReserves({
+        propsData: data,
+        storeMarketData: marketData,
+        storeStateEvents: stateEvents ?? [],
+      });
+      const percentage = getBondingCurveProgress(clammVirtualReserves);
+      setProgress(percentage);
+    }
     /* eslint-disable-next-line */
   }, [data.clammVirtualReserves, data.numSwaps, marketData, stateEvents]);
 

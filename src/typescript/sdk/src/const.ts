@@ -47,10 +47,6 @@ export const MAX_CHAT_MESSAGE_LENGTH = 100;
 export const MAX_SYMBOL_LENGTH = 10;
 
 export enum CandlestickResolution {
-  PERIOD_1S = 1000000,
-  PERIOD_5S = 5000000,
-  PERIOD_15S = 15000000,
-  PERIOD_30S = 30000000,
   PERIOD_1M = 60000000,
   PERIOD_5M = 300000000,
   PERIOD_15M = 900000000,
@@ -59,3 +55,15 @@ export enum CandlestickResolution {
   PERIOD_4H = 14400000000,
   PERIOD_1D = 86400000000,
 }
+
+export const ResolutionToPeriod: Record<CandlestickResolution, CandlestickResolution> = {
+  [CandlestickResolution.PERIOD_1M]: CandlestickResolution.PERIOD_1M,
+  [CandlestickResolution.PERIOD_5M]: CandlestickResolution.PERIOD_5M,
+  [CandlestickResolution.PERIOD_15M]: CandlestickResolution.PERIOD_15M,
+  [CandlestickResolution.PERIOD_30M]: CandlestickResolution.PERIOD_30M,
+  [CandlestickResolution.PERIOD_1H]: CandlestickResolution.PERIOD_1H,
+  [CandlestickResolution.PERIOD_4H]: CandlestickResolution.PERIOD_4H,
+  [CandlestickResolution.PERIOD_1D]: CandlestickResolution.PERIOD_1D,
+};
+
+export const VALID_RESOLUTIONS = new Set(Object.values(CandlestickResolution));

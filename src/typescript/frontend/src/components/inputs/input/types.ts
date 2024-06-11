@@ -1,3 +1,4 @@
+// cspell:word istouched
 import { type ElementType } from "react";
 import { type DefaultTheme } from "styled-components";
 import { type SpaceProps, type TypographyProps } from "styled-system";

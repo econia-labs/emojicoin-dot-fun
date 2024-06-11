@@ -4,8 +4,11 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { normalizeAddress } from "../utils/account-address";
+import { toNominalPrice } from "../utils/nominal-price";
 
-type WithVersion = {
+export type AnyNumberString = number | string | bigint;
+
+export type WithVersion = {
   version: number;
 };
 
@@ -189,10 +192,10 @@ export namespace Types {
   export type PeriodicStateEvent = WithVersion & {
     marketMetadata: MarketMetadata;
     periodicStateMetadata: PeriodicStateMetadata;
-    open: bigint;
-    high: bigint;
-    low: bigint;
-    close: bigint;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
     volumeBase: bigint;
     volumeQuote: bigint;
     integratorFees: bigint;
@@ -470,10 +473,10 @@ export const toPeriodicStateEvent = (
   version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   periodicStateMetadata: toPeriodicStateMetadata(data.periodic_state_metadata),
-  open: BigInt(data.open_price_q64),
-  high: BigInt(data.high_price_q64),
-  low: BigInt(data.low_price_q64),
-  close: BigInt(data.close_price_q64),
+  open: toNominalPrice(data.open_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
+  high: toNominalPrice(data.high_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
+  low: toNominalPrice(data.low_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
+  close: toNominalPrice(data.close_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
   volumeBase: BigInt(data.volume_base),
   volumeQuote: BigInt(data.volume_quote),
   integratorFees: BigInt(data.integrator_fees),

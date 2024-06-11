@@ -1,3 +1,4 @@
+// cspell:word istouched
 import styled, { css } from "styled-components";
 import { space, typography } from "styled-system";
 import { type InputProps, scales, type ThemedProps, type BorderProps } from "./types";
