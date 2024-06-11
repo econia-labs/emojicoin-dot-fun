@@ -1,10 +1,19 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["INBOX_URL", "REVALIDATION_TIME", "ALLOWLISTER3K_URL"],
+  "globalEnv": [
+    "INBOX_URL",
+    "REVALIDATION_TIME",
+    "ALLOWLISTER3K_URL"
+  ],
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
     },
     "clean": {
       "outputs": []
@@ -25,7 +34,9 @@
       "outputs": []
     },
     "start": {
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "outputs": []
     },
     "test": {
