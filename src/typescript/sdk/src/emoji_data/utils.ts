@@ -99,11 +99,32 @@ export const symbolToEmojis = (symbol: string): Array<SymbolEmojiData> => {
   return emojis as Array<SymbolEmojiData>;
 };
 
-export const symbolBytesToEmojis = (symbol: `0x${string}`) => {
-  const hex = symbol.startsWith("0x") ? symbol.slice(2) : symbol;
-  const bytes = Buffer.from(hex, "hex");
-  const symbolString = new TextDecoder().decode(bytes);
-  return { emojis: symbolToEmojis(symbolString), symbol: symbolString };
+export const symbolBytesToEmojis = (symbol: string | Uint8Array | Uint8Array[]) => {
+  if (symbol instanceof Uint8Array) {
+    const symbolString = new TextDecoder().decode(symbol);
+    return { emojis: symbolToEmojis(symbolString), symbol: symbolString };
+  }
+  if (Array.isArray(symbol)) {
+    const flattened = symbol.flatMap((x) => Array.from(x.values()));
+    const symbolString = new TextDecoder().decode(new Uint8Array(flattened));
+    return { emojis: symbolToEmojis(symbolString), symbol: symbolString };
+  }
+  try {
+    // Try to parse the string as hex.
+    const hex = symbol.startsWith("0x") ? symbol.slice(2) : symbol;
+    const bytes = Buffer.from(hex, "hex");
+    const symbolString = new TextDecoder().decode(bytes);
+    return { emojis: symbolToEmojis(symbolString), symbol: symbolString };
+  } catch (e) {
+    const emojis = getEmojisInString(symbol);
+    return {
+      emojis: emojis
+        .map((emoji) => getEmojiData(emoji))
+        .filter((data) => typeof data !== "undefined")
+        .map((data) => data as SymbolEmojiData), // Explicit cast because we know it's defined.
+      symbol,
+    };
+  }
 };
 
 /**

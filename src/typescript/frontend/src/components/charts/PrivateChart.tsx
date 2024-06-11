@@ -22,13 +22,14 @@ import {
   widget,
 } from "@static/charting_library";
 import { getClientTimezone } from "lib/chart-utils";
-import { SYMBOL_DATA } from "@econia-labs/emojicoin-sdk";
+import { symbolBytesToEmojis } from "@econia-labs/emojicoin-sdk";
 import { type ChartContainerProps } from "./types";
 import { resolveToEmojiSymbol } from "@store/event-utils";
 import { useEventStore } from "context/store-context";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import path from "path";
+import { getEmptyGroupedCandlesticks } from "@sdk/queries/client-utils/candlestick";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
@@ -40,19 +41,25 @@ const configurationData: DatafeedConfiguration = {
   ],
 };
 
+// The general approach here will be to use data fetched from the endpoint within the datafeed to populate the chart
+// candlestick data. It will handle all of the data fetching possible until the very last candlestick, which is not
+// provided by the endpoint.
+// After that, we do not use the datafeed to fetch anymore, because mqtt will handle streaming the data through the
+// websocket protocol to the datafeed websocket stream.
+// If the user refreshes the page, we will fetch the data from the endpoint again, and then repeat the process.
+// TODO: Figure out if this is inefficient and if there's a way to reconcile data retrieved from mqtt with the datafeed.
+
 export const Chart = async (props: ChartContainerProps) => {
   const getSymbolFromMarketID = useEventStore((s) => s.getSymbolFromMarketID);
   const getMarketIDFromSymbol = useEventStore((s) => s.getMarketIDFromSymbol);
   const marketMap = useEventStore((s) => s.getMarketIDs()); // TODO: See if these trigger state updates / re-renders?
-  // const symbolMap = useEventStore((s) => s.getSymbols()); // TODO: See if these trigger state updates / re-renders?
   const candlesticks = useEventStore(
-    (s) => s.getMarket(props.marketID)?.periodicStateEvents.events ?? []
+    (s) => s.getMarket(props.marketID)?.periodicStateEvents.events ?? getEmptyGroupedCandlesticks()
   );
   // const lastSwap = useEventStore((s) => s.getMarket(props.marketID)?.swapEvents.events.at(0));
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
   const symbol = props.symbol;
 
   const datafeed: IBasicDataFeed = useMemo(
@@ -65,7 +72,7 @@ export const Chart = async (props: ChartContainerProps) => {
         const data = Array.from(marketMap.entries()).map(([marketID, emoji]) => {
           return {
             marketID,
-            emoji: SYMBOL_DATA.byEmoji(emoji)!,
+            emoji: symbolBytesToEmojis(emoji),
           };
         });
         // TODO: Consider storing this in state..? It depends if we need to reconstruct it elsewhere,
@@ -194,10 +201,10 @@ export const Chart = async (props: ChartContainerProps) => {
       ) => {},
       unsubscribeBars: async (_subscriberUID) => {},
     }),
-    [symbol, props.marketID, candlesticks] // eslint-disable-line react-hooks/exhaustive-deps
+    [symbol, props.marketID] // eslint-disable-line react-hooks/exhaustive-deps
   );
   useEffect(() => {
-    console.debug("new candlesticks", datafeed);
+    console.debug("data feed rerendered, this should generally not happen..?", datafeed);
   }, [datafeed]);
 
   useEffect(() => {
