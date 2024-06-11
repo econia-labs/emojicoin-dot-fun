@@ -49,7 +49,7 @@ const getInputDisplay = ({
 const TradeEmojicoin = (props: TradeEmojicoinProps) => {
   const [isSell, setIsSell] = useState(false);
   const { t } = translationFunction();
-  const [inputAmount, setInputAmount] = useState<bigint>(fromCoinDecimals("10000"));
+  const [inputAmount, setInputAmount] = useState<bigint>(fromCoinDecimals("1"));
   const { emojiAmount, aptAmount, simulatedSwap } = useSimulateSwap({
     marketAddress: props.data.marketAddress,
     // After the first query, we can use the input amount to simulate the swap.
@@ -136,7 +136,7 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
             </InputGroup>
           </Column>
 
-          {isSell ? <EmojiInputLabel emoji={props.data.emoji} /> : <AptosInputLabel />}
+          {isSell ? <EmojiInputLabel emoji={props.data.symbol} /> : <AptosInputLabel />}
         </StyledInputWrapper>
 
         <StyledArrowWrapper
@@ -186,7 +186,7 @@ const TradeEmojicoin = (props: TradeEmojicoinProps) => {
               />
             </InputGroup>
           </Column>
-          {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={props.data.emoji} />}
+          {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={props.data.symbol} />}
         </StyledInputWrapper>
       </StyledInputContainer>
 

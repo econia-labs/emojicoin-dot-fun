@@ -6,6 +6,7 @@
     "@supabase/postgrest-js": "^1.15.2",
     "@types/big.js": "^6.2.2",
     "big.js": "^6.2.1",
+    "emoji-regex": "^10.3.0",
     "find-git-root": "^1.0.4",
     "postgres": "^3.4.4",
     "server-only": "^0.0.1"

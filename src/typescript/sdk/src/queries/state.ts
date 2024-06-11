@@ -11,8 +11,25 @@ import {
 } from "./query-helper";
 import type JSONTypes from "../types/json-types";
 import { postgrest } from "./inbox-url";
+import { normalizeHex } from "../utils/hex";
 
-export const getLatestMarketState = async ({
+export const getLatestMarketStateByEmojiBytes = async ({ bytes }: { bytes: string }) => {
+  // When you paste an emoji into the URL, it gets encoded as a percent-encoded string.
+  // So the emoji containing bytes 0xf09f93b7 becomes %f0%9f%93%b7.
+  const hex = normalizeHex(bytes.replaceAll("%", ""));
+  const { latestState } = await postgrest
+    .from(MARKET_DATA_VIEW)
+    .select("*")
+    .filter("emoji_bytes", "eq", hex)
+    .then((r) => ({
+      latestState: r.data && r.data[0] ? (r.data[0] as JSONTypes.MarketDataView) : null,
+      _error: r.error,
+    }));
+
+  return latestState ? toMarketDataView(latestState) : null;
+};
+
+export const getLatestMarketStateByMarketID = async ({
   marketID,
 }: {
   marketID: string | number | bigint;
@@ -31,6 +48,14 @@ export const getLatestMarketState = async ({
     }));
 
   return latestState ? toMarketDataView(latestState) : null;
+};
+
+export const getLatestMarketState = async (emojiBytesOrMarketID: string | number | bigint) => {
+  const input = emojiBytesOrMarketID.toString();
+  if (input.includes("%")) {
+    return getLatestMarketStateByEmojiBytes({ bytes: input });
+  }
+  return getLatestMarketStateByMarketID({ marketID: input });
 };
 
 export const paginateGlobalStateEvents = async (

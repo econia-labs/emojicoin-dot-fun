@@ -38,10 +38,7 @@ const EmojiTable = (props: EmojiTableProps) => {
             {props.data.map((market) => {
               return (
                 <TableCard
-                  index={market.index}
-                  marketID={Number(market.marketID)}
-                  emoji={market.emoji}
-                  emojiName={market.name}
+                  {...market}
                   marketCap={toCoinDecimalString(market.marketCap, 2)}
                   volume24h={toCoinDecimalString(market.dailyVolume, 2)}
                   key={market.marketID.toString()}

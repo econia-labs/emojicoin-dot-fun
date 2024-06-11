@@ -5,7 +5,7 @@ import { type JSONTypes, toMarketDataView } from "@sdk/types";
 import { toPostgrestQueryParam, type GetSortedMarketDataQueryArgs } from "./types";
 import cached from "../cached";
 import { MARKETS_PER_PAGE } from "./const";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { REVALIDATION_TIME } from "lib/server-env";
 
 const getSortedMarketData = async ({
@@ -88,7 +88,7 @@ export const fetchFeaturedMarket = async (
     typeof data?.at(0) !== "undefined" && data.length > 0
       ? {
           ...toMarketDataView(data[0]),
-          ...SYMBOL_DATA.byHex(data[0].emoji_bytes)!,
+          ...symbolBytesToEmojis(data[0].emoji_bytes)!,
         }
       : undefined
   );
@@ -146,7 +146,7 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
   return {
     markets: jsonData.slice(start, end).map((v: JSONTypes.MarketDataView, i) => ({
       ...toMarketDataView(v),
-      ...SYMBOL_DATA.byHex(v.emoji_bytes)!,
+      ...symbolBytesToEmojis(v.emoji_bytes)!,
       index: indexOffset + i + 1,
     })),
     count: count ?? 0,

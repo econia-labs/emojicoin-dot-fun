@@ -4,9 +4,11 @@ import { type Types } from "@sdk/types";
 export interface WithVersion {
   version: number;
 }
-interface DataProps extends SymbolEmojiData, Types.MarketDataView {
-  swaps: Array<Types.SwapEvent & { version: number }>;
-  chats: Array<Types.ChatEvent & { version: number }>;
+interface DataProps extends Types.MarketDataView {
+  swaps: Array<Types.SwapEvent>;
+  chats: Array<Types.ChatEvent>;
+  emojis: Array<SymbolEmojiData>;
+  symbol: string;
 }
 
 export interface EmojicoinProps {

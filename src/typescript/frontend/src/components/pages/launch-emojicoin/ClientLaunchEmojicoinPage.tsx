@@ -33,7 +33,7 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
     },
   });
 
-  const names = values.emojiList.map((emoji) => emoji.names[0]).join(", ");
+  const names = values.emojiList.map((emoji) => emoji.names).join(", ");
   const tickers = values.emojiList.map((emoji) => emoji.emoji).join(", ");
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
