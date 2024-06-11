@@ -98,7 +98,7 @@ export const Chart = async (props: ChartContainerProps) => {
           resolveToEmojiSymbol({ userInput: symbolName, getSymbolFromMarketID }) ?? symbolName;
         const resolvedMarketID = getMarketIDFromSymbol(symbol) ?? props.marketID;
         if (props.marketID !== resolvedMarketID) {
-          const newRoute = path.join(ROUTES.emojicoin, resolvedMarketID.toString());
+          const newRoute = path.join(ROUTES.market, resolvedMarketID.toString());
           router.push(newRoute);
         }
 
