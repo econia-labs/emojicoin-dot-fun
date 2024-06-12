@@ -5,15 +5,16 @@ import { Swap } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { toCoinTypes } from "@sdk/markets/utils";
+import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 
 export const SwapButton = ({
   inputAmount,
   isSell,
   marketAddress,
 }: {
-  inputAmount: bigint;
+  inputAmount: bigint | number | string;
   isSell: boolean;
-  marketAddress: `0x${string}`;
+  marketAddress: AccountAddressString;
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
@@ -28,7 +29,7 @@ export const SwapButton = ({
         aptosConfig: aptos.config,
         swapper: account.address,
         marketAddress,
-        inputAmount,
+        inputAmount: BigInt(inputAmount),
         isSell,
         integrator: INTEGRATOR_ADDRESS,
         integratorFeeRateBps: INTEGRATOR_FEE_RATE_BPS,

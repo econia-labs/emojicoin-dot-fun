@@ -1,6 +1,6 @@
 import { Flex } from "@containers";
 import { type GridProps } from "components/pages/emojicoin/types";
-import { StyledContentHeader } from "../../desktop-grid/styled";
+import { StyledContentHeader } from "../desktop-grid/styled";
 import Button from "components/button";
 import { translationFunction } from "context/language-context";
 import { isInBondingCurve } from "utils/bonding-curve";

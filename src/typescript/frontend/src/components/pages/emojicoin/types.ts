@@ -27,11 +27,11 @@ export interface GridProps {
 export interface ChatProps {
   data: Omit<DataProps, "swaps">;
 }
-
-export interface TradeEmojicoinProps {
-  data: Omit<DataProps, "chats" | "swaps">;
+export interface SwapComponentProps {
+  emojicoin: string;
+  marketAddress: string;
+  numSwaps: number;
 }
-
 export interface TradeHistoryProps {
   data: Omit<DataProps, "chats">;
 }
