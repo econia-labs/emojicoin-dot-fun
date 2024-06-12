@@ -91,7 +91,6 @@ export default function SwapComponent({ emojicoin, marketAddress, numSwaps }: Sw
       e.stopPropagation();
       return;
     }
-    console.log(e.target.value);
     setInputAmount(e.target.value);
   };
 
