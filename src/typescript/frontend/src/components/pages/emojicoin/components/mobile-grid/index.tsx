@@ -10,10 +10,10 @@ import {
   StyledMobileContentHeader,
   StyledMobileContentInner,
 } from "./styled";
-import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
 import ChatBox from "../chat";
 import { type GridProps } from "../../types";
+import SwapComponent from "../trade-emojicoin/SwapComponent";
 
 const MobileGrid = (props: GridProps) => {
   const [tab, setTab] = useState(1);
@@ -67,7 +67,11 @@ const MobileGrid = (props: GridProps) => {
             <TradeHistory data={props.data} />
           ) : tab === 2 ? (
             <Flex width="100%" justifyContent="center" px="17px">
-              <TradeEmojicoin data={props.data} />
+              <SwapComponent
+                emojicoin={props.data.symbol}
+                marketAddress={props.data.marketAddress}
+                numSwaps={props.data.numSwaps}
+              />
             </Flex>
           ) : (
             <ChatBox data={props.data} />

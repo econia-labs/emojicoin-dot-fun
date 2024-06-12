@@ -173,6 +173,21 @@ module.exports = {
           height: "1.1ch",
           width: "1.1ch",
         },
+        ".radii-xs": {
+          borderRadius: "3px",
+        },
+        ".radii-sm": {
+          borderRadius: "6px",
+        },
+        ".radii-md": {
+          borderRadius: "8px",
+        },
+        ".radii-lg": {
+          borderRadius: "16px",
+        },
+        ".radii-circle": {
+          borderRadius: "50%",
+        },
       };
       addUtilities(newUtilities, ["responsive"]);
     },

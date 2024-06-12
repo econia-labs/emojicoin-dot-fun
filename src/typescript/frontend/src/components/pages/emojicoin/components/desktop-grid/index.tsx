@@ -14,11 +14,11 @@ import {
 } from "./styled";
 
 import ChatBox from "../chat";
-import TradeEmojicoin from "../trade-emojicoin";
 import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
-import { LiquidityButton } from "../trade-emojicoin/components/LiquidityButton";
+import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
 import ChartContainer from "components/charts/ChartContainer";
+import SwapComponent from "../trade-emojicoin/SwapComponent";
 
 const DesktopGrid = (props: GridProps) => {
   const { t } = translationFunction();
@@ -36,7 +36,11 @@ const DesktopGrid = (props: GridProps) => {
             <LiquidityButton data={props.data} />
 
             <StyledBlockWrapper>
-              <TradeEmojicoin data={props.data} />
+              <SwapComponent
+                emojicoin={props.data.symbol}
+                marketAddress={props.data.marketAddress}
+                numSwaps={props.data.numSwaps}
+              />
             </StyledBlockWrapper>
           </StyledBlock>
         </StyledContentColumn>
