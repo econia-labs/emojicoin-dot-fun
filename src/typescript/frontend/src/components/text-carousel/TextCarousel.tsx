@@ -8,14 +8,14 @@ const Item = ({ children }: { children: React.ReactNode }) => {
     </div>
   );
 };
-
 const TextCarousel = () => {
   const messages = ["Universal ownership", "Universal blockchain", "Universal language"];
-  const firstCarousel = messages
-    .flatMap((message) => Array.from({ length: 5 }, () => message))
+
+  const firstCarousel = Array.from({ length: 5 }, () => messages)
+    .flatMap((m) => m)
     .map((message, index) => <Item key={`first::${message}::${index}`}>{message}</Item>);
-  const secondCarousel = messages
-    .flatMap((message) => Array.from({ length: 5 }, () => message))
+  const secondCarousel = Array.from({ length: 5 }, () => messages)
+    .flatMap((m) => m)
     .map((message, index) => <Item key={`second::${message}::${index}`}>{message}</Item>);
 
   return (
