@@ -1,5 +1,6 @@
 import { Arrow } from "components/svg";
 import Text from "components/text";
+import { motion } from "framer-motion";
 import styled from "styled-components";
 import { darkColors } from "theme/colors";
 
@@ -18,7 +19,7 @@ export const StyledItemWrapper = styled.div`
   }
 `;
 
-export const StyledInnerItem = styled.div<{ isEmpty: boolean }>`
+export const StyledInnerItem = styled(motion.div)<{ isEmpty: boolean }>`
   width: 100%;
   height: 100%;
   display: flex;

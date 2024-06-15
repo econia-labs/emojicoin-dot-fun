@@ -15,6 +15,7 @@ import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useAnimationControls } from "framer-motion";
 // import { useEventStore, useWebSocketClient } from "context/websockets-context";
 
 const TableCard: React.FC<TableCardProps> = ({
@@ -26,14 +27,66 @@ const TableCard: React.FC<TableCardProps> = ({
   volume24h,
 }) => {
   const { t } = translationFunction();
-  // const { maybeInitializeMarket: initMarket } = useEventStore((s) => s);
   const events = useEventStore((s) => s);
-  // const chats = useEventStore((s) => s.markets[marketID]?.chatEvents.events ?? []);
+  // const market = useEventStore((s)
+  const { swaps, chats } = useEventStore((s) => {
+    const market = s.getMarket(marketID.toString());
+    return {
+      swaps: market ? market.swapEvents : [],
+      chats: market ? market.chatEvents : [],
+    };
+  });
   const { subscribe, unsubscribe, subscriptions } = useWebSocketClient((s) => s);
+  const controls = useAnimationControls();
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    if (swaps.length === 0) return;
+    controls
+      .start({
+        filter: [null, "brightness(1.15)"],
+        boxShadow: [null, "0 0 14px 11px #CD2F8DCC"],
+        transition: {
+          duration: 1,
+        },
+      })
+      .then(() => {
+        controls.start({
+          filter: [null, "brightness(1)"],
+          boxShadow: [null, "0 0 0 0 #00000000"],
+          transition: {
+            duration: 2,
+            ease: "easeOut",
+          },
+        });
+      });
+  }, [swaps]);
+
+  // filter: brightness(1.05);
+  // box-shadow: 0 0 14px 11px rgba(8, 108, 217, 0.1);
 
   useEffect(() => {
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
+    if (chats.length === 0) return;
+    controls
+      .start({
+        filter: [null, "brightness(1.15)"],
+        boxShadow: [null, "0 0 14px 11px #2FA90FCC"],
+        transition: {
+          duration: 1,
+        },
+      })
+      .then(() => {
+        controls.start({
+          filter: [null, "brightness(1)"],
+          boxShadow: [null, "0 0 0 0 #00000000"],
+          transition: {
+            duration: 2,
+            ease: "easeOut",
+          },
+        });
+      });
+  }, [chats]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   useDebugValue(subscriptions);
 
@@ -58,7 +111,12 @@ const TableCard: React.FC<TableCardProps> = ({
   return (
     <Link id="grid-emoji-card" href={`${ROUTES.market}/${marketID}`}>
       <StyledItemWrapper>
-        <StyledInnerItem id="grid-emoji-card" isEmpty={emojis.length === 0}>
+        <StyledInnerItem
+          id="grid-emoji-card"
+          isEmpty={emojis.length === 0}
+          animate={controls}
+          style={{ boxShadow: "0 0 0 0 #00000000" }}
+        >
           <Flex justifyContent="space-between" mb="7px">
             <StyledColoredText textScale="pixelHeading2" color="darkGray">
               {index < 10 ? `0${index}` : index}
@@ -68,7 +126,7 @@ const TableCard: React.FC<TableCardProps> = ({
           </Flex>
 
           <Text textScale="pixelHeading1" textAlign="center" mb="22px">
-            {symbol}
+            <span>{symbol}</span>
           </Text>
           <Text
             textScale="display4"
