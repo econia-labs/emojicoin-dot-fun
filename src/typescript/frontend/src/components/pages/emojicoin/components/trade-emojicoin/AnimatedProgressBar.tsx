@@ -1,5 +1,5 @@
 import { type GridProps } from "components/pages/emojicoin/types";
-import { useEventStore } from "context/store-context";
+import { useEventStore } from "context/websockets-context";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";
@@ -10,7 +10,7 @@ import { darkColors } from "theme/colors";
 const getLatestReserves = (args: {
   propsData: Types.MarketDataView;
   storeMarketData?: Types.MarketDataView;
-  storeStateEvents: Array<Types.StateEvent>;
+  storeStateEvents: readonly Types.StateEvent[];
 }) => {
   const { propsData, storeMarketData, storeStateEvents } = args;
   const latestStoreState = storeStateEvents[0];
@@ -33,7 +33,7 @@ const getLatestReserves = (args: {
 export const AnimatedProgressBar = (props: GridProps) => {
   const data = props.data;
   const marketData = useEventStore((s) => s.getMarket(data.marketID)?.marketData);
-  const stateEvents = useEventStore((s) => s.getMarket(data.marketID)?.stateEvents.events);
+  const stateEvents = useEventStore((s) => s.getMarket(data.marketID)?.stateEvents);
   const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
   const progressBarControls = useAnimation();
   const flickerControls = useAnimation();

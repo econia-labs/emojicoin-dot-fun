@@ -10,7 +10,7 @@ import Loader from "components/loader";
 import Header from "components/header";
 import Footer from "components/footer";
 import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoints";
-import { StyledContentWrapper } from "./styled";
+import ContentWrapper from "./ContentWrapper";
 import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { ConnectWalletContextProvider } from "./wallet-context/ConnectWalletContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,7 +22,10 @@ import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 // import { APTOS_NETWORK } from "lib/env";
 import StyledToaster from "styles/StyledToaster";
 import { PetraWallet } from "petra-plugin-wallet-adapter";
-import { EventStoreProvider, MarketDataProvider } from "./store-context";
+import {
+  WebSocketEventsProvider,
+  MarketDataProvider,
+} from "./websockets-context/WebSocketContextProvider";
 import { enableMapSet } from "immer";
 
 enableMapSet();
@@ -50,7 +53,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <EventStoreProvider>
+        <WebSocketEventsProvider>
           <MarketDataProvider>
             <AptosWalletAdapterProvider plugins={wallets} autoConnect>
               <ConnectWalletContextProvider>
@@ -58,17 +61,17 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <GlobalStyle />
                   <Suspense fallback={<Loader />}>
                     <StyledToaster />
-                    <StyledContentWrapper>
+                    <ContentWrapper>
                       <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
                       {children}
                       <Footer />
-                    </StyledContentWrapper>
+                    </ContentWrapper>
                   </Suspense>
                 </AptosContextProvider>
               </ConnectWalletContextProvider>
             </AptosWalletAdapterProvider>
           </MarketDataProvider>
-        </EventStoreProvider>
+        </WebSocketEventsProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

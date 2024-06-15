@@ -1,7 +1,6 @@
 "use client";
 
 import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
-import { useSimulateSwap } from "lib/queries/client-api/simulate-swap";
 import { type PropsWithChildren, useEffect, useState } from "react";
 import FlipInputsArrow from "./FlipInputsArrow";
 import { Column, Row } from "components/layout/components/FlexContainers";
@@ -9,6 +8,7 @@ import { SwapButton } from "./SwapButton";
 import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
+import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -129,7 +129,8 @@ export default function SwapComponent({ emojicoin, marketAddress, numSwaps }: Sw
               <div className={grayLabel}>You receive</div>
               <div className="h-[22px] w-full">
                 <div
-                  className={inputAndOutputStyles + " mt-[8px] ml-[1px]"}
+                  onClick={() => setIsSell((v) => !v)}
+                  className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
                   style={{ opacity: isLoading ? 0.6 : 1 }}
                 >
                   {/* Scrambled swap result output below. */}

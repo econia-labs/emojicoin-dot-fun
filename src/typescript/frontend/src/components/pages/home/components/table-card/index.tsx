@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useDebugValue, useEffect } from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
@@ -14,7 +14,8 @@ import "./module.css";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore } from "context/store-context";
+import { useEventStore, useWebSocketClient } from "context/websockets-context";
+// import { useEventStore, useWebSocketClient } from "context/websockets-context";
 
 const TableCard: React.FC<TableCardProps> = ({
   index,
@@ -25,11 +26,29 @@ const TableCard: React.FC<TableCardProps> = ({
   volume24h,
 }) => {
   const { t } = translationFunction();
-  const initMarket = useEventStore((s) => s.maybeInitializeMarket);
+  // const { maybeInitializeMarket: initMarket } = useEventStore((s) => s);
+  const events = useEventStore((s) => s);
+  // const chats = useEventStore((s) => s.markets[marketID]?.chatEvents.events ?? []);
+  const { subscribe, unsubscribe, subscriptions } = useWebSocketClient((s) => s);
+
   useEffect(() => {
-    initMarket(marketID);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [marketID]);
+  }, []);
+
+  useDebugValue(subscriptions);
+
+  useEffect(() => {
+    events.initializeMarket(marketID, symbol);
+    console.debug("Subscribing to events for marketID:", marketID);
+    subscribe.chat(marketID);
+    subscribe.swap(marketID, null);
+    return () => {
+      console.debug(`Unsubscribing from events for marketID: ${marketID}`);
+      unsubscribe.chat(marketID);
+      unsubscribe.swap(marketID, null);
+    };
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",

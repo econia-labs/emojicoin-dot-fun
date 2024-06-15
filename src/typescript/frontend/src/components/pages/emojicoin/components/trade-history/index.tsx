@@ -12,7 +12,7 @@ import { getHeaders } from "./misc";
 import { type TradeHistoryProps } from "../../types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { rankFromAPTAmount } from "lib/utils/rank";
-import { useEventStore } from "context/store-context";
+import { useEventStore } from "context/websockets-context";
 import { type TableRowDesktopProps } from "./components/table-row-desktop/types";
 import { type Types } from "@sdk/types/types";
 
@@ -20,9 +20,9 @@ const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   ...rankFromAPTAmount(Number(toCoinDecimalString(value.quoteVolume, 3))),
   apt: value.quoteVolume.toString(),
   emoji: value.baseVolume.toString(),
+  date: new Date(Number(value.time / 1000n)),
   type: value.isSell ? "sell" : "buy",
   price: value.avgExecutionPrice.toString(),
-  date: new Date(Number(value.time / 1000n)),
   version: value.version,
 });
 
@@ -31,7 +31,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
   const { offsetHeight: tradeHistoryTableBodyHeight } =
     useElementDimensions("tradeHistoryTableBody");
 
-  const swaps = useEventStore((s) => s.getMarket(props.data.marketID)?.swapEvents.events ?? []);
+  const swaps = useEventStore((s) => s.getMarket(props.data.marketID)?.swapEvents ?? []);
   return (
     <StyledTradeHistory>
       <Table minWidth="700px">

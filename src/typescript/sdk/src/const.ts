@@ -56,14 +56,14 @@ export enum CandlestickResolution {
   PERIOD_1D = 86400000000,
 }
 
-export const ResolutionToPeriod: Record<CandlestickResolution, CandlestickResolution> = {
-  [CandlestickResolution.PERIOD_1M]: CandlestickResolution.PERIOD_1M,
-  [CandlestickResolution.PERIOD_5M]: CandlestickResolution.PERIOD_5M,
-  [CandlestickResolution.PERIOD_15M]: CandlestickResolution.PERIOD_15M,
-  [CandlestickResolution.PERIOD_30M]: CandlestickResolution.PERIOD_30M,
-  [CandlestickResolution.PERIOD_1H]: CandlestickResolution.PERIOD_1H,
-  [CandlestickResolution.PERIOD_4H]: CandlestickResolution.PERIOD_4H,
-  [CandlestickResolution.PERIOD_1D]: CandlestickResolution.PERIOD_1D,
+export const toCandlestickResolution: Record<number, CandlestickResolution> = {
+  60000000: CandlestickResolution.PERIOD_1M,
+  300000000: CandlestickResolution.PERIOD_5M,
+  900000000: CandlestickResolution.PERIOD_15M,
+  1800000000: CandlestickResolution.PERIOD_30M,
+  3600000000: CandlestickResolution.PERIOD_1H,
+  14400000000: CandlestickResolution.PERIOD_4H,
+  86400000000: CandlestickResolution.PERIOD_1D,
 };
 
 export const VALID_RESOLUTIONS = new Set(Object.values(CandlestickResolution));

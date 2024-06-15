@@ -12,7 +12,7 @@ import {
   toSwapEvent,
 } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
-import { type JSONEventTypes } from "../types/json-types";
+import { type AnyEmojicoinJSONEvent } from "../types/json-types";
 
 export type Events = {
   swapEvents: Types.SwapEvent[];
@@ -25,8 +25,10 @@ export type Events = {
   events: AptosEvent[];
 };
 
-export const converter: Map<string, (data: JSONEventTypes, version: number) => AnyEmojicoinEvent> =
-  new Map();
+export const converter: Map<
+  string,
+  (data: AnyEmojicoinJSONEvent, version: number) => AnyEmojicoinEvent
+> = new Map();
 [
   [TYPE_TAGS.SwapEvent, toSwapEvent] as const,
   [TYPE_TAGS.ChatEvent, toChatEvent] as const,
@@ -36,7 +38,7 @@ export const converter: Map<string, (data: JSONEventTypes, version: number) => A
   [TYPE_TAGS.GlobalStateEvent, toGlobalStateEvent] as const,
   [TYPE_TAGS.LiquidityEvent, toLiquidityEvent] as const,
 ].forEach(([tag, fn]) => {
-  converter.set(tag.toString(), (data: JSONEventTypes, version: number) =>
+  converter.set(tag.toString(), (data: AnyEmojicoinJSONEvent, version: number) =>
     fn(data as any, version)
   );
 });

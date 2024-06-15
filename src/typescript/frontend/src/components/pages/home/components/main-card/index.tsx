@@ -17,7 +17,7 @@ import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
-import { useMarketData } from "context/store-context";
+import { useMarketData } from "context/websockets-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 
