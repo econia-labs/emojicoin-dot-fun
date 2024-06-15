@@ -27,6 +27,7 @@ import {
   MarketDataProvider,
 } from "./websockets-context/WebSocketContextProvider";
 import { enableMapSet } from "immer";
+import { ConnectToWebSockets } from "./ConnectToWebSockets";
 
 enableMapSet();
 
@@ -48,6 +49,10 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     []
   );
 
+  // TODO: Make fetch queries here and pass the data to the event store..?
+  // It's possible we can also pass a promise down from the server components
+  // to the clients and then add those to the store as they stream in.
+
   const queryClient = new QueryClient();
 
   return (
@@ -59,6 +64,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <ConnectWalletContextProvider>
                 <AptosContextProvider>
                   <GlobalStyle />
+                  <ConnectToWebSockets />
                   <Suspense fallback={<Loader />}>
                     <StyledToaster />
                     <ContentWrapper>

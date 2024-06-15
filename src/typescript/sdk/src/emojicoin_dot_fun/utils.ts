@@ -81,7 +81,7 @@ export type DeserializedEventData = {
   version: number;
 };
 
-// TODO: Add support for MarketDataView and any others non-event types.
+// TODO: Add support for MarketDataView and any other non-event types.
 export function deserializeBufferedEvent<T extends AnyEmojicoinEvent>(data: Buffer) {
   const msg = data.toString();
   const json = JSON.parse(msg);

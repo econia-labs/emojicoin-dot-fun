@@ -27,7 +27,7 @@ const ButtonsBlock: React.FC = () => {
         numMarkets,
       });
       if (routerFunction === "push") {
-        console.log("pushing new path:", newPath);
+        console.debug("pushing new path:", newPath);
         router.push(newPath, { scroll: false });
       } else if (routerFunction === "prefetch") {
         router.prefetch(newPath);

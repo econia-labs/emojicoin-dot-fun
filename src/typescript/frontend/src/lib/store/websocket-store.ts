@@ -14,11 +14,12 @@ export type ClientState = {
   connected: boolean;
   disconnected: boolean;
   reconnecting: boolean;
+  received: number;
 };
 
 export type ClientActions = {
-  connectSafely: (eventStore: EventStore) => void;
-  closeSafely: () => void;
+  connect: (eventStore: EventStore) => void;
+  close: () => void;
   unsubscribeAll: () => void;
   updateConnection: () => void;
   subscribe: {
@@ -64,36 +65,46 @@ const unsub = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
   });
 };
 export const createWebSocketClientStore = () => {
-  return createStore<WebSocketClientStore>((set) => ({
+  return createStore<WebSocketClientStore>((set, get) => ({
     client: mqtt.connect(MQTT_URL, {
       protocol: "wss",
       manualConnect: true,
     }),
-    connectSafely: (eventStore: EventStore) => {
-      set((state) => {
-        if (!state.client.connected) {
-          state.client.connect();
-        }
-        state.client.on("message", (topic, data) => {
+    stream: [],
+    received: 0,
+    connect: (eventStore: EventStore) => {
+      const client = get().client;
+      const connected = client.connected;
+      if (!connected) {
+        client.connect();
+        client.on("message", (topic, data) => {
           console.debug("Received message from topic:", topic);
-          eventStore.pushEventFromWebSocket(data);
+          try {
+            eventStore.pushEventFromWebSocket(data);
+            set((state) => ({
+              received: state.received + 1,
+            }));
+          } catch (e) {
+            console.error("Error parsing message from topic:", topic, e);
+          }
         });
-        return {
-          connected: true,
-          disconnected: false,
-          reconnecting: false,
-        };
-      });
+
+        client.on("connect", () => {
+          set({ connected: true });
+        });
+        client.on("disconnect", () => {
+          set({ disconnected: true });
+        });
+        client.on("reconnect", () => {
+          set({ reconnecting: true });
+        });
+        client.on("error", (err) => {
+          console.error("Error with MQTT client:", err);
+        });
+      }
     },
-    closeSafely: () => {
-      set((state) => {
-        state.client.end();
-        return {
-          connected: false,
-          disconnected: true,
-          reconnecting: false,
-        };
-      });
+    close: () => {
+      get().client.end();
     },
     subscriptions: new Set<string>(),
     unsubscribeAll: () => {
