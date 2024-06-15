@@ -188,6 +188,9 @@ module.exports = {
         ".radii-circle": {
           borderRadius: "50%",
         },
+        ".no-overflow-anchoring": {
+          overflowAnchor: "none",
+        },
       };
       addUtilities(newUtilities, ["responsive"]);
     },

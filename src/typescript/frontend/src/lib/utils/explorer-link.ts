@@ -2,11 +2,11 @@ import { APTOS_NETWORK } from "lib/env";
 
 export const toExplorerLink = ({
   value,
-  type,
+  linkType: type,
   network = APTOS_NETWORK,
 }: {
   value: string | number;
-  type: "acc" | "account" | "transaction" | "version" | "txn";
+  linkType: "acc" | "account" | "transaction" | "version" | "txn";
   network?: string;
 }) => {
   if (type === "account" || type === "acc") {
