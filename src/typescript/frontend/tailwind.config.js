@@ -21,14 +21,13 @@ module.exports = {
       },
       screens: {
         tall: { raw: "(min-height: 960px)" },
-        "mobile-sm": "320px",
-        "mobile-md": "375px",
+        xs: "0px",
         "mobile-lg": "425px",
         sm: "640.1px",
         md: "768.1px", // tablet
         lg: "1024.1px", // laptop
         xl: "1440px", // laptop L
-        // Note largeHeight is redundant. It literally is 1441px.
+        xll: "1441px", // desktop
       },
       boxShadow: {
         pretty:
@@ -37,7 +36,10 @@ module.exports = {
       dropShadow: {
         text: "0 1px 2px #000000dd",
         voltage: "1px 0 5px #ffffff99",
-        // emoji: "0 0 21px #87FFFF66",
+        green: "0 0 2px #2FA90F",
+        red: "0 0 2px #F3263E",
+        white: "0 0 2px #FFFFFF",
+        gray: "0 0 2px #717386",
       },
     },
     colors: {

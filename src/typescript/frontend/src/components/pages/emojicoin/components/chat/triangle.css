@@ -1,0 +1,38 @@
+#picker {
+  --pos-size: 10px;
+  --neg-size: -20px;
+
+  position: relative;
+
+  ::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: var(--pos-size) solid transparent;
+    border-bottom: var(--pos-size) solid transparent;
+    border-left: var(--pos-size) solid transparent;
+    border-right: var(--pos-size) solid transparent;
+  }
+
+  @media screen and (max-width: 1440px) {
+    ::after {
+      bottom: var(--neg-size);
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: var(--ec-blue);
+    }
+  }
+
+  @media screen and (min-width: 1441px) {
+    ::after {
+      right: var(--neg-size);
+      /* While top: 50% and translateY(-50%) would set it exactly halfway up,
+         we want it to be at the bottom in this case. The other values
+         are here as an example in case we modify this, which is likely. */
+      top: 94%;
+      transform: translateY(-100%);
+      border-left-color: var(--ec-blue);
+    }
+  }
+}

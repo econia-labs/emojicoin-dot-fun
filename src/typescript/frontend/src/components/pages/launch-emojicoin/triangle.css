@@ -1,0 +1,20 @@
+#picker {
+  --pos-size: 10px;
+  --neg-size: -20px;
+
+  position: relative;
+
+  ::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: var(--pos-size) solid transparent;
+    border-bottom: var(--pos-size) solid transparent;
+    border-left: var(--pos-size) solid transparent;
+    border-right: var(--pos-size) solid transparent;
+    top: var(--neg-size);
+    left: 50%;
+    border-bottom-color: var(--ec-blue);
+  }
+}

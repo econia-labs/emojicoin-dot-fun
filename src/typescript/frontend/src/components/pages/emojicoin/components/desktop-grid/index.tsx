@@ -13,7 +13,7 @@ import {
   StyledBlock,
 } from "./styled";
 
-import ChatBox from "../chat";
+import ChatBox from "../chat/ChatComponent";
 import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
 import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";

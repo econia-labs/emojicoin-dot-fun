@@ -1,38 +1,34 @@
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import Button from "components/button";
-import { translationFunction } from "context/language-context";
 import { RegisterMarket, RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import {
-  type PendingTransactionResponse,
-  type UserTransactionResponse,
-  type HexInput,
-} from "@aptos-labs/ts-sdk";
+import { type PendingTransactionResponse, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
+import useInputStore from "@store/input-store";
+import { SYMBOL_DATA } from "@sdk/emoji_data";
 
-export const LaunchEmojicoinButton = ({ emojis }: { emojis: Array<HexInput> }) => {
-  const { t } = translationFunction();
+export const useRegisterMarket = () => {
+  const emojis = useInputStore((state) => state.emojis);
   const { aptos, account, submit, signThenSubmit } = useAptos();
+  const clear = useInputStore((state) => state.clear);
 
-  const handleClick = async () => {
+  const registerMarket = async () => {
     if (!account) {
       return;
     }
-    let _res: PendingTransactionResponse | UserTransactionResponse | null = null;
-    let _txFlowError: unknown;
+    let res: PendingTransactionResponse | UserTransactionResponse | null = null;
+    let error: unknown;
     const builderArgs = {
       aptosConfig: aptos.config,
       registrant: account.address,
-      emojis,
+      emojis: emojis.map((e) => SYMBOL_DATA.byEmoji(e)!.bytes),
       integrator: INTEGRATOR_ADDRESS,
     };
     try {
       const builderLambda = () => RegisterMarket.builder(builderArgs);
       await submit(builderLambda).then((r) => {
-        _res = r?.response ?? null;
-        _txFlowError = r?.error;
+        res = r?.response ?? null;
+        error = r?.error;
       });
     } catch (e) {
       // TODO: Check if this works.
@@ -51,18 +47,18 @@ export const LaunchEmojicoinButton = ({ emojis }: { emojis: Array<HexInput> }) =
 
       if (registryView.numMarkets === 0n) {
         await signThenSubmit(builderLambda).then((r) => {
-          _res = r?.response ?? null;
-          _txFlowError = r?.error;
+          res = r?.response ?? null;
+          error = r?.error;
         });
       }
     }
+
+    if (res) {
+      clear();
+    } else {
+      console.error("Error registering market:", error);
+    }
   };
 
-  return (
-    <ButtonWithConnectWalletFallback>
-      <Button onClick={handleClick} scale="lg">
-        {t("Launch Emojicoin")}
-      </Button>
-    </ButtonWithConnectWalletFallback>
-  );
+  return registerMarket;
 };

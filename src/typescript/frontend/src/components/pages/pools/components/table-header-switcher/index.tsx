@@ -7,9 +7,9 @@ import { translationFunction } from "context/language-context";
 import { Flex, FlexGap } from "@containers";
 import { Text } from "components/text";
 
-import { type TableHeaderSwitcherPops } from "./types";
+import { type TableHeaderSwitcherProps } from "./types";
 
-const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2 }) => {
+const TableHeaderSwitcher: React.FC<TableHeaderSwitcherProps> = ({ title1, title2 }) => {
   const [isActive, setIsActive] = useState(true);
   const { t } = translationFunction();
 
