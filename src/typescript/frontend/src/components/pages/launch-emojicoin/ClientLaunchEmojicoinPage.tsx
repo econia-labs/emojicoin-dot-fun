@@ -1,194 +1,133 @@
 "use client";
-// cspell:word istouched
 
-import React, { type ChangeEvent, useEffect, useState } from "react";
-import { type EmojiClickData } from "emoji-picker-react";
-import emojiRegex from "emoji-regex";
-
+import Button from "components/button";
 import { translationFunction } from "context/language-context";
-import { useValidationSchema } from "./hooks";
-import { useForm, useEmojicoinPicker } from "hooks";
-import { isDisallowedEventKey } from "utils";
-
-import Prompt from "components/prompt";
-import { Input } from "components/inputs/input";
-import { InputGroup } from "components/inputs/input-group";
-import { Text } from "components/text";
-import { Column, Flex, FlexGap } from "@containers";
-import { StyledFieldName } from "./styled";
-import { LaunchEmojicoinButton } from "./components/LaunchEmojicoinButton";
+import { Column, Flex } from "@containers";
+import { useRegisterMarket } from "./hooks/use-register-market";
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 import TextCarousel from "components/text-carousel/TextCarousel";
-import { fetchLatestMarketState } from "lib/queries/initial/state";
-import { symbolToEmojis } from "@sdk/emoji_data";
+import useInputStore from "@store/input-store";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
+import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
+import { MAX_SYMBOL_LENGTH } from "@sdk/const";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-const ClientLaunchEmojicoinPage: React.FC = () => {
+const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
+
+const sum = (emojis: string[]) => sumBytes(emojis);
+const textColorBySum = (sum: number) => {
+  if (sum === 0 || sum > 10) {
+    return "text-error";
+  }
+  return "text-green";
+};
+
+const ClientLaunchEmojicoinPage = () => {
   const { t } = translationFunction();
+  const { emojis, setMode } = useInputStore((state) => ({
+    emojis: state.emojis,
+    setMode: state.setMode,
+  }));
+  const registerMarket = useRegisterMarket();
+  const length = sum(emojis);
+  const invalid = length === 0 || length >= 10;
 
-  const { validationSchema, initialValues } = useValidationSchema();
-  const { values, errors, touched, fieldProps, setFieldValue } = useForm({
-    initialValues,
-    validationSchema,
-    enableReinitialize: true,
-    onSubmit(values) {
-      /* eslint-disable-next-line no-console */
-      console.log("values", values);
-    },
-  });
-
-  const names = values.emojiList.map((emoji) => symbolToEmojis(emoji.emoji)[0].name).join(", ");
-  const tickers = values.emojiList.map((emoji) => emoji.emoji).join("");
-
-  const [marketID, setMarketID] = useState<number>();
-
-  const updateMarketID = (emojis: EmojiClickData[]) => {
-    if (emojis.length === 0) {
-      setMarketID(undefined);
-    } else {
-      const byteArray = emojis
-        .map((e) => SYMBOL_DATA.byEmoji(e.emoji)!.hex.substring(2))
-        .reduce((a, b) => `${a}${b}`);
-
-      fetchLatestMarketState(byteArray).then((res) =>
-        res ? setMarketID(res.marketID) : setMarketID(undefined)
-      );
-    }
-  };
-
-  const onEmojiClickHandler = async (emoji: EmojiClickData) => {
-    const valueLength = values.emoji.match(emojiRegex())?.length ?? 0;
-    if (valueLength < 5) {
-      await setFieldValue("emoji", values.emoji + emoji.emoji);
-      const newEmojiList = [...values.emojiList, emoji];
-      await setFieldValue("emojiList", newEmojiList);
-      updateMarketID(newEmojiList);
-    } else {
-      setMarketID(undefined);
-    }
-  };
-
-  const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
-    onEmojiClick: onEmojiClickHandler,
-    placement: "bottom",
-    width: 272,
-  });
-
-  const inputProhibition = async (event: KeyboardEvent) => {
-    if (isDisallowedEventKey(event)) {
-      event.preventDefault();
-    }
-  };
+  const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
-    if (targetElement) {
-      targetElement.addEventListener("keydown", inputProhibition);
-    }
+    setMode("register");
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
-    return () => {
-      if (targetElement) {
-        targetElement.removeEventListener("keydown", inputProhibition);
-      }
-    };
-  }, [targetElement, values]);
-
-  const onInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    fieldProps("emoji").onChange(e);
-
-    const emojiArr = e.target.value.match(emojiRegex()) ?? [];
-    const newEmojiList = emojiArr.map((string) =>
-      values.emojiList.find((item) => item.emoji === string)
-    );
-
-    if (values.emojiList.length > newEmojiList.length) {
-      updateMarketID(newEmojiList as EmojiClickData[]);
-    }
-    await setFieldValue("emojiList", newEmojiList);
-  };
+  useEffect(() => {
+    setNonce((n) => n + 1);
+  }, [length]);
 
   return (
     <Column pt="85px" flexGrow="1">
       <TextCarousel />
 
-      <Flex justifyContent="center" alignItems="center" height="100%" px="24px">
+      <div className="flex justify-center items-center h-full px-6">
         <Column width="100%" maxWidth="414px">
           <Flex position="relative">
-            <Prompt text="Pick one to five emojis; due to byte limitations not all combinations are supported." />
-
-            <InputGroup
-              label={t("Select Emoji")}
-              error={values.emoji.length > 0 ? errors.emoji : undefined}
-              touched={touched.emoji}
-              scale="xm"
-            >
-              <Input
-                {...fieldProps("emoji")}
-                onChange={onInputChange}
-                autoComplete="off"
-                ref={targetRef}
+            <Column className="relative" width="100%" flexGrow={1}>
+              <EmojiPickerWithInput
+                handleClick={registerMarket}
+                pickerButtonClassName="top-[220px] bg-black"
+                inputClassName="!border !border-solid !border-light-gray bg-black"
+                closeIconSide="right"
+                inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
+                showSend={false}
+                wrapWithConnectButton={false}
               />
-            </InputGroup>
-          </Flex>
-          {tooltip}
-
-          <FlexGap gap="8px" mb="5px">
-            <StyledFieldName
-              textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              color="lightGray"
-              textTransform="uppercase"
-            >
-              {t("Emojicoin Name:")}
-            </StyledFieldName>
-            <Text
-              textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              textTransform="uppercase"
-              ellipsis
-              title={names.toUpperCase()}
-            >
-              {names}
-            </Text>
-          </FlexGap>
-
-          <FlexGap gap="8px" mb="5px">
-            <StyledFieldName
-              textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              color="lightGray"
-              textTransform="uppercase"
-            >
-              {t("Emojicoin symbol (ticker) :")}
-            </StyledFieldName>
-            <Text
-              textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              textTransform="uppercase"
-              lineHeight="20px"
-              ellipsis
-              title={tickers.toUpperCase()}
-            >
-              {tickers}
-            </Text>
-          </FlexGap>
-
-          <Flex justifyContent="center">
-            <Text textScale="pixelHeading4" color="darkGray" textTransform="uppercase">
-              {t("Cost to deploy:")} ~1 APT
-            </Text>
+            </Column>
           </Flex>
 
-          <Flex justifyContent="center" mt="18px">
-            <LaunchEmojicoinButton
-              emojis={values.emojiList.map((e) => SYMBOL_DATA.byEmoji(e.emoji)!.hex)}
-              marketID={marketID}
-              onCreate={(id) => {
-                setMarketID(Number(id));
+          <div className="flex pixel-heading-4 uppercase">
+            <motion.span
+              key={nonce}
+              animate={{
+                scale: [1, 1.25, 1],
+                transition: { duration: 0.1, repeat: 0 },
               }}
-              disabled={
-                values.emojiList.length === 0 ||
-                Boolean(errors.emoji?.length) ||
-                Boolean(errors.emojiList?.length)
+              style={{ scale: 1 }}
+              className={textColorBySum(length)}
+            >
+              {length}
+            </motion.span>
+            <span className="text-white -rotate-[30deg]">{"/"}</span>
+            <span className="text-white">{`${MAX_SYMBOL_LENGTH} bytes`}</span>
+          </div>
+
+          <div className="flex">
+            <div className={labelClassName}>{t("Emojicoin Name:")}</div>
+            <div className="body-sm md:body-lg uppercase ellipses text-white font-forma ml-[0.5ch]">
+              {emojis.map((e) => SYMBOL_DATA.byEmoji(e)?.name).join(", ")}
+            </div>
+          </div>
+
+          <div className="flex">
+            <div className={labelClassName}>{t("Emojicoin Symbol:")}</div>
+            <div
+              className={
+                "body-sm md:body-lg uppercase whitespace-normal text-ellipsis text-white font-forma " +
+                "ml-[0.5ch] leading-6 "
               }
-            />
-          </Flex>
+            >
+              {emojis.join(", ")}
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center m-auto pt-2">
+            <div className="pixel-heading-4 text-dark-gray uppercase">
+              {t("Cost to deploy:")} <span>1 APT</span>
+            </div>
+          </div>
+
+          <div
+            className={"flex flex-col justify-center m-auto"}
+            onMouseEnter={() => {
+              // Trigger a re-render to re-animate the byte length if it's invalid.
+              if (invalid) {
+                setNonce((n) => n + 1);
+              }
+            }}
+          >
+            <ButtonWithConnectWalletFallback>
+              <Button
+                disabled={invalid}
+                onClick={registerMarket}
+                scale="lg"
+                style={{ cursor: invalid ? "not-allowed" : "pointer" }}
+              >
+                {t("Launch Emojicoin")}
+              </Button>
+            </ButtonWithConnectWalletFallback>
+          </div>
         </Column>
-      </Flex>
+      </div>
     </Column>
   );
 };

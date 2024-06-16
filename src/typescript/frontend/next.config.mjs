@@ -1,4 +1,9 @@
 // @ts-check
+import analyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = analyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const DEBUG = process.env.BUILD_DEBUG === "true";
 const styledComponentsConfig = {
@@ -36,4 +41,4 @@ const nextConfig = {
   transpilePackages: ["@sdk"],
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);
