@@ -13,6 +13,14 @@ This is text. Hello `kristina-in-monospace`!
 
 In a paragraph: 🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆
 
+## Equations
+
+Inline mode: $x = \frac{a}{b}$
+
+Display mode:
+
+$$x = \frac{a}{b}$$
+
 ## Mermaid diagram
 
 ```mermaid
@@ -70,9 +78,6 @@ class rest-service yellow;
 This sentence uses reference links: [independent audits].
 
 ## A table
-
-The Econia Move package is persisted indefinitely on both Aptos mainnet and
-testnet at the following multisig addresses:
 
 | A column | Account address |
 | -------- | --------------- |

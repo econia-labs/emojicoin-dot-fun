@@ -9,9 +9,9 @@ const math = require('remark-math');
 const katex = require('rehype-katex');
 
 module.exports = {
-  title: "Econia Docs",
-  tagline: "Documentation for the Econia protocol",
-  url: "https://econia.dev",
+  title: "emojicoin dot fun Docs",
+  tagline: "Documentation for emojicoin dot fun",
+  url: "https://no.yes",
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
@@ -82,7 +82,7 @@ module.exports = {
       image: "img/social-preview.jpg",
       navbar: {
         logo: {
-          alt: "Econia Logo",
+          alt: "Header",
           src: "img/header.svg",
           width: "156px",
           height: "24px",
