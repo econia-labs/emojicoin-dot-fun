@@ -71,12 +71,13 @@ This sentence uses reference links: [independent audits].
 
 ## A table
 
-The Econia Move package is persisted indefinitely on both Aptos mainnet and testnet at the following multisig addresses:
+The Econia Move package is persisted indefinitely on both Aptos mainnet and
+testnet at the following multisig addresses:
 
-| Chain     | Account address                                                      |
-| --------- | -------------------------------------------------------------------- |
-| [mainnet] | [0xc0deb00c405f84c85dc13442e305df75d1288100cdd82675695f6148c7ece51c] |
-| [testnet] | [0xc0de11113b427d35ece1d8991865a941c0578b0f349acabbe9753863c24109ff] |
+| A column | Account address |
+| -------- | --------------- |
+| Hi       | `hey`           |
+| There    | `you`           |
 
 :::tip
 
@@ -98,7 +99,7 @@ This is a caution admonition.
 
 Check out this monospace code block:
 
-> ```
+> ```text
 >                                    1001 [35 -> 38]
 >                                   /    \
 >               [50 -> 60 -> 55] 1000    1003 [20]
@@ -125,15 +126,8 @@ This is a list where each item is a reference link:
 - [Medium]
 - [Twitter]
 
-[0xc0de11113b427d35ece1d8991865a941c0578b0f349acabbe9753863c24109ff]: https://explorer.aptoslabs.com/account/0xc0de11113b427d35ece1d8991865a941c0578b0f349acabbe9753863c24109ff?network=testnet
-[0xc0deb00c405f84c85dc13442e305df75d1288100cdd82675695f6148c7ece51c]: https://explorer.aptoslabs.com/account/0xc0deb00c405f84c85dc13442e305df75d1288100cdd82675695f6148c7ece51c?network=mainnet
-[aptos]: https://aptos.dev
 [discord]: https://discord.gg/econia
 [github]: https://github.com/econia-labs/econia
 [independent audits]: security
-[mainnet]: https://github.com/econia-labs/econia/tree/mainnet
 [medium]: https://medium.com/econialabs
-[permissionless faucet]: https://github.com/econia-labs/econia/tree/v4.1.0-audited/src/move/faucet/sources
-[teach yourself move on aptos]: https://github.com/econia-labs/teach-yourself-move
-[testnet]: https://github.com/econia-labs/econia/tree/testnet
 [twitter]: https://twitter.com/econialabs

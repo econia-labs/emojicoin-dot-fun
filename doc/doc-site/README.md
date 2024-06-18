@@ -22,8 +22,7 @@
    pnpm start
    ```
 
-1. Open http://localhost:3000
+1. Open <http://localhost:3000>
 
-[docusaurus]: https://docusaurus.io/
 [homebrew]: https://brew.sh
 [pnpm]: https://pnpm.io/
