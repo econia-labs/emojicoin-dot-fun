@@ -3,88 +3,25 @@ module.exports = {
     'welcome',
     {
       type: 'category',
-      label: 'Move modules',
-      link: {
-        type: 'doc',
-        id: 'move/modules'
-      },
-      items: [
-        'move/changelog'
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Design overview',
-      link: {
-        type: 'doc',
-        id: 'overview/index'
-      },
-      items: [
-        'overview/orders',
-        'overview/registry',
-        'overview/incentives',
-        'overview/market-accounts',
-        'overview/matching'
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Move APIs',
-      link: {
-        type: 'doc',
-        id: 'apis/index'
-      },
-      items: [
-        'apis/registration',
-        'apis/assets',
-        'apis/trading',
-        'apis/integrators',
-        'apis/utility'
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Off-chain interfaces',
+      label: 'Generated index type category',
       link: {
         type: 'generated-index'
       },
       items: [
-        'off-chain/events',
-        'off-chain/python-sdk',
-        'off-chain/rust-sdk',
-        {
-          type: 'category',
-          label: 'Data service stack',
-          link: {
-            type: 'doc',
-            id: 'off-chain/dss/data-service-stack'
-          },
-          items: [
-            'off-chain/dss/changelog',
-            'off-chain/dss/rest-api',
-            'off-chain/dss/mqtt',
-            'off-chain/dss/gcp',
-            'off-chain/dss/terraform',
-            'off-chain/dss/ci-cd',
-          ]
-        },
+        'this-is-a-subdir/some-doc-page',
       ]
     },
     {
       type: 'category',
-      label: 'Integrator resources',
+      label: 'Doc type category',
       link: {
-        type: 'generated-index'
+        type: 'doc',
+        id: 'this-is-another-subdir/index'
       },
       items: [
-        'integrators/econia-labs',
-        'integrators/pyth',
-        'integrators/bridges',
-        'integrators/reference-frontend'
+        'this-is-another-subdir/some-other-doc-page',
       ]
     },
-    'security',
-    'logo',
-    'glossary'
+    'security'
   ]
 }
