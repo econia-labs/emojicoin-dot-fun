@@ -5,7 +5,7 @@ hide_title: true
 description: Documentation for emojicoin dot fun
 ---
 
-![Check out this alt text](/img/EconiaBanner.svg)
+![Check out this alt text](/img/banner.svg)
 
 This is text.
 

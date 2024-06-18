@@ -27,7 +27,7 @@ module.exports = {
           sidebarCollapsible: false,
           sidebarCollapsed: false,
           routeBasePath: "/",
-          editUrl: "https://github.com/econia-labs/econia/tree/main/doc/doc-site/",
+          editUrl: "https://github.com/econia-labs/emojicoin-dot-fun/tree/main/doc/doc-site/",
           breadcrumbs: false,
           showLastUpdateAuthor: false,
           showLastUpdateTime: false,
@@ -75,11 +75,11 @@ module.exports = {
         { name: "og:image:width", content: "1200" },
         { name: "og:image:height", content: "630" }
       ],
-      image: "img/EconiaPreview.jpeg",
+      image: "img/social-preview.jpg",
       navbar: {
         logo: {
           alt: "Econia Logo",
-          src: "img/EconiaHeader.svg",
+          src: "img/header.svg",
           width: "156px",
           height: "24px",
         },

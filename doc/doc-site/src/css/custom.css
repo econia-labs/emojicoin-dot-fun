@@ -19,7 +19,7 @@
   --ifm-navbar-height: 72px;
   --ifm-navbar-background-color: #020202;
   --ifm-navbar-padding-horizontal: 22px;
-  --ifm-navbar-search-input-icon: url(/img/SearchIcon.svg);
+  --ifm-navbar-search-input-icon: url(/img/search-icon.svg);
   --ifm-navbar-search-input-background-color: #020202;
 
   --ifm-menu-color-background-active: #020202;
@@ -202,6 +202,7 @@ th {
   .welcome-heading {
     display: none;
   }
+
   .welcome-heading-mobile {
     display: block;
   }
@@ -225,6 +226,7 @@ th {
   transition: all 300ms ease, transform 300ms ease, color 300ms ease,
     -webkit-transform 300ms ease;
 }
+
 .link-card:hover {
   border: 1px solid var(--ifm-color-primary);
   text-decoration: none;
