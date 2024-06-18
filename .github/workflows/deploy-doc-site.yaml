@@ -49,7 +49,7 @@ jobs:
         accountId: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}'
         apiToken: '${{ secrets.CLOUDFLARE_API_TOKEN }}'
         directory: 'doc/doc-site/build'
-        gitHubToken: '${{ secrets.GITHUB_TOKEN }}'
+        # gitHubToken: '${{ secrets.GITHUB_TOKEN }}'
         projectName: 'emojicoin-dot-fun-docs'
 name: 'Build and deploy docs site'
 'on':
