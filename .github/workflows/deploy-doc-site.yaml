@@ -54,7 +54,7 @@ jobs:
         projectName: 'emojicoin-dot-fun-docs'
 name: 'Build and deploy docs site'
 'on':
-  push:
+  pull_request: # Changed from `push` for testing
     branches:
     - 'main'
     paths:
