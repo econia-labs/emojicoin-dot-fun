@@ -21,7 +21,9 @@ Inline mode: $x = \frac{a}{b}$
 
 Display mode:
 
-$$x = \frac{a}{b}$$
+$$
+x = \frac{a}{b}
+$$
 
 ## Mermaid diagram
 
@@ -135,6 +137,6 @@ This is a list where each item is a reference link:
 
 [discord]: https://discord.gg/econia
 [github]: https://github.com/econia-labs/econia
-[the security page]: security
 [medium]: https://medium.com/econialabs
+[the security page]: security
 [twitter]: https://twitter.com/econialabs

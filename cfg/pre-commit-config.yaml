@@ -135,6 +135,7 @@ repos:
   - additional_dependencies:
     - 'mdformat-gfm'
     - 'mdformat-frontmatter'
+    - 'mdformat-myst'
     id: 'mdformat'
   repo: 'https://github.com/executablebooks/mdformat'
   rev: '0.7.17'
