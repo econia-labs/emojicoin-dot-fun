@@ -1,6 +1,6 @@
 ---
 jobs:
-  verify-docs-site-build:
+  build-docs:
     defaults:
       run:
         working-directory: 'doc/doc-site'
