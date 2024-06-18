@@ -5,31 +5,13 @@ hide_title: true
 description: Documentation for emojicoin dot fun
 ---
 
-<div className="welcome-heading">
-    <div>
-        <h2 style={{ marginBottom: "40px" }}>Welcome</h2>
-        <img height={68} width={432} src="/img/EconiaBanner.svg" />
-        <p style={{ marginTop: "20px" }}>e·co·ni·a | /ə'känēə/</p>
-    </div>
-    <img width={240} src="/img/CodeIllustration.png" />
-</div>
-
-<div className="welcome-heading-mobile">
-    <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-    }}>
-        <h2 style={{ marginBottom: "40px" }}>Welcome</h2>
-        <img width={94} src="/img/CodeIllustration.png" />
-    </div>
-    <img height={68} width={432} src="/img/EconiaBanner.svg" />
-    <p style={{ marginTop: "20px" }}>e·co·ni·a | /ə'känēə/</p>
-</div>
+![Check out this alt text](/img/EconiaBanner.svg)
 
 This is text.
 
-This is also text
+## Emojis in a header 🍆🍆🍆
+
+In a paragraph: 🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆
 
 ## Mermaid diagram
 
