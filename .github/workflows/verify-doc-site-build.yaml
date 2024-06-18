@@ -1,33 +1,29 @@
 ---
 jobs:
-  test-deploy:
+  verify-docs-site-build:
     defaults:
       run:
         working-directory: 'doc/doc-site'
-    name: 'Test docs site build'
     runs-on: 'ubuntu-latest'
     steps:
     -
       uses: 'actions/checkout@v3'
     -
-      name: 'Install Node.js'
       uses: 'actions/setup-node@v3'
       with:
         node-version: 20
     -
-      id: 'pnpm-install'
-      name: 'Install pnpm'
       uses: 'pnpm/action-setup@v2'
       with:
         run_install: false
         version: '9.1.2'
     -
-      name: 'Install dependencies'
+      id: 'pnpm-install'
       run: 'pnpm install --frozen-lockfile'
     -
-      name: 'Build Docusaurus page'
+      id: 'pnpm-build'
       run: 'pnpm build'
-name: 'Build docs site'
+name: 'Verify docs site build'
 'on':
   pull_request:
     branches:
