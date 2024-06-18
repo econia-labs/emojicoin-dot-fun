@@ -11,7 +11,7 @@ const katex = require('rehype-katex');
 module.exports = {
   title: "emojicoin dot fun Docs",
   tagline: "Documentation for emojicoin dot fun",
-  url: "https://no.yes",
+  url: "https://docs.emojicoin.fun",
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",

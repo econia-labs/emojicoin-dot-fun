@@ -34,7 +34,7 @@
   "engines": {
     "node": ">=16.14"
   },
-  "name": "econia-docs",
+  "name": "emojicoin-dot-fun-docs",
   "private": true,
   "scripts": {
     "build": "docusaurus build",

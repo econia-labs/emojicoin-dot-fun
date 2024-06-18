@@ -1,4 +1,4 @@
-# Econia Docs
+# emojicoin dot fun Docs
 
 ## Building locally
 
