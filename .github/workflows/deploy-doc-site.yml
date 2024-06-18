@@ -1,66 +1,64 @@
 ---
-name: Build and deploy doc site
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - doc/doc-site/**
-      - .github/workflows/deploy-doc-site.yml
-  workflow_dispatch:
-
 jobs:
   build:
-    runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: doc/doc-site
-
+        working-directory: 'doc/doc-site'
     permissions:
-      contents: read
-      deployments: write
-
+      contents: 'read'
+      deployments: 'write'
+    runs-on: 'ubuntu-latest'
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
-        id: pnpm-install
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Docusaurus page
-        run: pnpm build
-
-      - name: Publish to Cloudflare Pages
-        uses: cloudflare/pages-action@1
-        with:
-          projectName: econia-docs
-          directory: doc/doc-site/build
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+    -
+      uses: 'actions/checkout@v3'
+    -
+      name: 'Install Node.js'
+      uses: 'actions/setup-node@v3'
+      with:
+        node-version: 20
+    -
+      id: 'pnpm-install'
+      name: 'Install pnpm'
+      uses: 'pnpm/action-setup@v2'
+      with:
+        run_install: false
+        version: 8
+    -
+      id: 'pnpm-cache'
+      name: 'Get pnpm store directory'
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      shell: 'bash'
+    -
+      name: 'Setup pnpm cache'
+      uses: 'actions/cache@v3'
+      with:
+        key: '${{ runner.os }}-pnpm-store-${{ hashFiles("**/pnpm-lock.yaml") }}'
+        path: '${{ steps.pnpm-cache.outputs.STORE_PATH }}'
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+    -
+      name: 'Install dependencies'
+      run: 'pnpm install --frozen-lockfile'
+    -
+      name: 'Build Docusaurus page'
+      run: 'pnpm build'
+    -
+      name: 'Publish to Cloudflare Pages'
+      uses: 'cloudflare/pages-action@1'
+      with:
+        accountId: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}'
+        apiToken: '${{ secrets.CLOUDFLARE_API_TOKEN }}'
+        directory: 'doc/doc-site/build'
+        gitHubToken: '${{ secrets.GITHUB_TOKEN }}'
+        projectName: 'emojicoin-dot-fun-docs'
+name: 'Build and deploy docs site'
+'on':
+  push:
+    branches:
+    - 'main'
+    paths:
+    - 'doc/doc-site/**'
+    - '.github/workflows/deploy-doc-site.yml'
+  workflow_dispatch: null
+...
