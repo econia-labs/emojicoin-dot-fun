@@ -7,7 +7,7 @@ description: Documentation for emojicoin dot fun
 
 ![Check out this alt text](/img/banner.svg)
 
-This is text.
+This is text. Hello `kristina-in-monospace`!
 
 ## Emojis in a header 🍆🍆🍆
 
