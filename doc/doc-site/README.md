@@ -1,7 +1,5 @@
 # Econia Docs
 
-Econia's docs are built using [Docusaurus].
-
 ## Building locally
 
 1. Install [Homebrew] or a similar package manager.
@@ -25,14 +23,6 @@ Econia's docs are built using [Docusaurus].
    ```
 
 1. Open http://localhost:3000
-
-## Updating API docs
-
-With data service stack running per `/src/docker/README.md`, run in this directory:
-
-```sh
-curl localhost:3000 > openapi.json
-```
 
 [docusaurus]: https://docusaurus.io/
 [homebrew]: https://brew.sh
