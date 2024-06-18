@@ -23,6 +23,6 @@ name: 'Verify docs site build'
     - 'main'
     paths:
     - 'doc/doc-site/**'
-    - '.github/workflows/deploy-doc-site.yml'
+    - '.github/workflows/verify-doc-site-build.yaml'
   workflow_dispatch: null
 ...
