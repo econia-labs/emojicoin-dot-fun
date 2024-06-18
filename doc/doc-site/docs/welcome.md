@@ -1,6 +1,6 @@
 ---
 slug: /
-title: Welcome
+title: 🍆 Welcome 🍆
 hide_title: true
 description: Documentation for emojicoin dot fun
 ---
