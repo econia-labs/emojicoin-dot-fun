@@ -9,9 +9,11 @@ description: Documentation for emojicoin dot fun
 
 This is text. Hello `kristina-in-monospace`!
 
-## Emojis in a header 🍆🍆🍆
+## 🍆🍆🍆 Hello
 
-In a paragraph: 🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆
+That's right, you can use emojis in a header.
+
+Or in a paragraph: 🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆🍆
 
 ## Equations
 
@@ -73,9 +75,9 @@ class ws-service yellow;
 class rest-service yellow;
 ```
 
-## Header
+## Reference link
 
-This sentence uses reference links: [independent audits].
+This sentence uses reference links: [the security page].
 
 ## A table
 
@@ -133,6 +135,6 @@ This is a list where each item is a reference link:
 
 [discord]: https://discord.gg/econia
 [github]: https://github.com/econia-labs/econia
-[independent audits]: security
+[the security page]: security
 [medium]: https://medium.com/econialabs
 [twitter]: https://twitter.com/econialabs

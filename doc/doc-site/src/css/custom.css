@@ -149,7 +149,6 @@ th {
 }
 
 .pagination-nav__link:hover {
-  /* TODO: The image moves on hover */
   transform: translate3d(0px, -3px, 0.01px);
 }
 
