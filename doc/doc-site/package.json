@@ -47,5 +47,5 @@
     "write-heading-ids": "docusaurus write-heading-ids",
     "write-translations": "docusaurus write-translations"
   },
-  "version": "0.0.0"
+  "version": "1.0.0"
 }
