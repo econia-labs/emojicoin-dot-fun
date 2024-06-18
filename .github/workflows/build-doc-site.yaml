@@ -1,0 +1,39 @@
+name: 'Build docs site'
+
+on:
+  pull_request:
+    branches:
+    - 'main'
+    paths:
+    - 'doc/doc-site/**'
+    - '.github/workflows/deploy-doc-site.yml'
+  workflow_dispatch: null
+
+jobs:
+  test-deploy:
+    defaults:
+      run:
+        working-directory: 'doc/doc-site'
+    name: 'Test docs site build'
+    runs-on: ubuntu-latest
+    steps:
+    -
+      uses: 'actions/checkout@v3'
+    -
+      name: 'Install Node.js'
+      uses: 'actions/setup-node@v3'
+      with:
+        node-version: 20
+    -
+      id: 'pnpm-install'
+      name: 'Install pnpm'
+      uses: 'pnpm/action-setup@v2'
+      with:
+        run_install: false
+        version: 8
+    -
+      name: 'Install dependencies'
+      run: 'pnpm install --frozen-lockfile'
+    -
+      name: 'Build Docusaurus page'
+      run: 'pnpm build'
