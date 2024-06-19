@@ -155,6 +155,8 @@ export const createEventStore = (initialState: EventState = defaultState) => {
         });
       },
       // Because these often come from queries, we only do state updates in chunks with arrays.
+      // Note that the events here are assumed to be sorted in descending order already, aka
+      // latest first.
       pushEvents: (events: Array<AnyEmojicoinEvent>) => {
         if (events.length === 0) return;
         set((state) => {
@@ -189,6 +191,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
         });
       },
       // We generally push WebSocket events one at a time.
+      // Note that we `unshift` here because we add the latest event to the front of the array.
       pushEventFromWebSocket: (buffer) => {
         try {
           const json = JSON.parse(buffer.toString()) as DBJsonData<AnyEmojicoinJSONEvent>;
@@ -197,22 +200,22 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           if (!data) return;
           if (get().guids.has(data.event.guid)) return;
           set((state) => {
-            state.firehose.push(data.event);
+            state.firehose.unshift(data.event);
             state.guids.add(data.event.guid);
             if (isGlobalStateEventFromDB(json)) return;
             if (!data.marketID) throw new Error("No market ID found in event.");
             if (!state.markets.has(data.marketID)) initializeMarketDraft(state, data.marketID);
             const market = state.markets.get(data.marketID)!;
             if (isSwapEventFromDB(json)) {
-              market.swapEvents.push(data.event as Types.SwapEvent);
+              market.swapEvents.unshift(data.event as Types.SwapEvent);
             } else if (isStateEventFromDB(json)) {
-              market.stateEvents.push(data.event as Types.StateEvent);
+              market.stateEvents.unshift(data.event as Types.StateEvent);
             } else if (isChatEventFromDB(json)) {
-              market.chatEvents.push(data.event as Types.ChatEvent);
+              market.chatEvents.unshift(data.event as Types.ChatEvent);
             } else if (isLiquidityEventFromDB(json)) {
-              market.liquidityEvents.push(data.event as Types.LiquidityEvent);
+              market.liquidityEvents.unshift(data.event as Types.LiquidityEvent);
             } else if (isMarketRegistrationEventFromDB(json)) {
-              state.marketRegistrationEvents.push(data.event as Types.MarketRegistrationEvent);
+              state.marketRegistrationEvents.unshift(data.event as Types.MarketRegistrationEvent);
             } else if (isPeriodicStateEventFromDB(json)) {
               const event = data.event as Types.PeriodicStateEvent;
               const period = Number(event.periodicStateMetadata.period);
@@ -220,7 +223,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
               if (!market[resolution]) {
                 market[resolution] = [event];
               } else {
-                market[resolution].push(event);
+                market[resolution].unshift(event);
               }
             }
           });

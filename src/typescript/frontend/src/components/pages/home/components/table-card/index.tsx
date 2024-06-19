@@ -64,11 +64,13 @@ const TableCard: React.FC<TableCardProps> = ({
     console.debug("Subscribing to events for marketID:", marketID);
     subscribe.chat(marketID);
     subscribe.swap(marketID, null);
+    subscribe.liquidity(marketID);
 
     return () => {
       console.debug(`Unsubscribing from events for marketID: ${marketID}`);
       unsubscribe.chat(marketID);
       unsubscribe.swap(marketID, null);
+      unsubscribe.liquidity(marketID);
     };
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */

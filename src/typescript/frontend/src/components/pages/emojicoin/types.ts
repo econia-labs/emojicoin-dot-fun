@@ -30,7 +30,8 @@ export interface ChatProps {
 export interface SwapComponentProps {
   emojicoin: string;
   marketAddress: string;
-  numSwaps: number;
+  marketID: string;
+  initNumSwaps: number;
 }
 export interface TradeHistoryProps {
   data: Omit<DataProps, "chats">;

@@ -9,6 +9,7 @@ import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
+import { useEventStore } from "context/websockets-context";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -35,12 +36,21 @@ const inputAndOutputStyles = `
   border-transparent !p-0 text-white
 `;
 
-export default function SwapComponent({ emojicoin, marketAddress, numSwaps }: SwapComponentProps) {
+export default function SwapComponent({
+  emojicoin,
+  marketAddress,
+  marketID,
+  initNumSwaps,
+}: SwapComponentProps) {
   const [inputAmount, setInputAmount] = useState("1");
   const [outputAmount, setOutputAmount] = useState("0"); // TODO: Use calculation for initial value...?
   const [previous, setPrevious] = useState(inputAmount);
   const [isLoading, setIsLoading] = useState(false);
   const [isSell, setIsSell] = useState(false);
+
+  const numSwaps = useEventStore(
+    (s) => s.getMarket(marketID.toString())?.swapEvents.length ?? initNumSwaps
+  );
 
   const swapResult = useSimulateSwap({
     marketAddress,

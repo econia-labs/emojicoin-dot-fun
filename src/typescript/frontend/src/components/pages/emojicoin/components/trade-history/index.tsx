@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { translationFunction } from "context/language-context";
 import { useElementDimensions } from "hooks";
@@ -12,7 +12,7 @@ import { getHeaders } from "./misc";
 import { type TradeHistoryProps } from "../../types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { rankFromAPTAmount } from "lib/utils/rank";
-import { useEventStore } from "context/websockets-context";
+import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import { type TableRowDesktopProps } from "./components/table-row-desktop/types";
 import { type Types } from "@sdk/types/types";
 
@@ -30,8 +30,21 @@ const TradeHistory = (props: TradeHistoryProps) => {
   const { t } = translationFunction();
   const { offsetHeight: tradeHistoryTableBodyHeight } =
     useElementDimensions("tradeHistoryTableBody");
+  const marketID = props.data.marketID;
 
-  const swaps = useEventStore((s) => s.getMarket(props.data.marketID)?.swapEvents ?? []);
+  const swaps = useEventStore((s) => {
+    const market = s.getMarket(marketID.toString());
+    return market ? market.swapEvents : [];
+  });
+  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    subscribe.swap(marketID, null);
+    return () => unsubscribe.swap(marketID, null);
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   return (
     <StyledTradeHistory>
       <Table minWidth="700px">
