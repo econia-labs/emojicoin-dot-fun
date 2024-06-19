@@ -1,6 +1,4 @@
 #grid-emoji-card {
-  transition: all 0.31s;
-
   &:hover {
     filter: brightness(1.05);
     background: #00031e13;
