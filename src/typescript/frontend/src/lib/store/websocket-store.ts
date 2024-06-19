@@ -44,7 +44,7 @@ export type ClientActions = {
 
 export type WebSocketClientStore = ClientState & ClientActions;
 
-const sub = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
+const subscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
   return set((state) => {
     state.client.subscribe(topic);
     const newSubscriptions = new Set(state.subscriptions);
@@ -54,7 +54,7 @@ const sub = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
     };
   });
 };
-const unsub = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
+const unsubscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
   return set((state) => {
     state.client.unsubscribe(topic);
     const newSubscriptions = new Set(state.subscriptions);
@@ -127,22 +127,22 @@ export const createWebSocketClientStore = () => {
     disconnected: false as boolean,
     reconnecting: false as boolean,
     subscribe: {
-      chat: (m) => sub(set, TopicBuilder.chatTopic(m)),
-      swap: (m, st) => sub(set, TopicBuilder.swapTopic(m, st)),
-      periodicState: (m, p) => sub(set, TopicBuilder.periodicState(m, p)),
-      marketRegistration: (m) => sub(set, TopicBuilder.marketRegistrationTopic(m)),
-      state: (m) => sub(set, TopicBuilder.stateTopic(m)),
-      liquidity: (m) => sub(set, TopicBuilder.liquidityTopic(m)),
-      globalState: () => sub(set, TopicBuilder.globalStateTopic()),
+      chat: (m) => subscribeHelper(set, TopicBuilder.chatTopic(m)),
+      swap: (m, st) => subscribeHelper(set, TopicBuilder.swapTopic(m, st)),
+      periodicState: (m, p) => subscribeHelper(set, TopicBuilder.periodicState(m, p)),
+      marketRegistration: (m) => subscribeHelper(set, TopicBuilder.marketRegistrationTopic(m)),
+      state: (m) => subscribeHelper(set, TopicBuilder.stateTopic(m)),
+      liquidity: (m) => subscribeHelper(set, TopicBuilder.liquidityTopic(m)),
+      globalState: () => subscribeHelper(set, TopicBuilder.globalStateTopic()),
     },
     unsubscribe: {
-      chat: (m) => unsub(set, TopicBuilder.chatTopic(m)),
-      swap: (m, st) => unsub(set, TopicBuilder.swapTopic(m, st)),
-      periodicState: (m, p) => unsub(set, TopicBuilder.periodicState(m, p)),
-      marketRegistration: (m) => unsub(set, TopicBuilder.marketRegistrationTopic(m)),
-      state: (m) => unsub(set, TopicBuilder.stateTopic(m)),
-      liquidity: (m) => unsub(set, TopicBuilder.liquidityTopic(m)),
-      globalState: () => unsub(set, TopicBuilder.globalStateTopic()),
+      chat: (m) => unsubscribeHelper(set, TopicBuilder.chatTopic(m)),
+      swap: (m, st) => unsubscribeHelper(set, TopicBuilder.swapTopic(m, st)),
+      periodicState: (m, p) => unsubscribeHelper(set, TopicBuilder.periodicState(m, p)),
+      marketRegistration: (m) => unsubscribeHelper(set, TopicBuilder.marketRegistrationTopic(m)),
+      state: (m) => unsubscribeHelper(set, TopicBuilder.stateTopic(m)),
+      liquidity: (m) => unsubscribeHelper(set, TopicBuilder.liquidityTopic(m)),
+      globalState: () => unsubscribeHelper(set, TopicBuilder.globalStateTopic()),
     },
   }));
 };

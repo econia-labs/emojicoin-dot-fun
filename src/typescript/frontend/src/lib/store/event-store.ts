@@ -177,11 +177,12 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             } else if (isMarketRegistrationEvent(event)) {
               state.marketRegistrationEvents.push(event);
             } else if (isPeriodicStateEvent(event)) {
-              const reso = toCandlestickResolution[Number(event.periodicStateMetadata.period)];
-              if (!market[reso]) {
-                market[reso] = [event];
+              const period = Number(event.periodicStateMetadata.period);
+              const resolution = toCandlestickResolution[period];
+              if (!market[resolution]) {
+                market[resolution] = [event];
               } else {
-                market[reso].push(event);
+                market[resolution].push(event);
               }
             }
           });
@@ -215,11 +216,11 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             } else if (isPeriodicStateEventFromDB(json)) {
               const event = data.event as Types.PeriodicStateEvent;
               const period = Number(event.periodicStateMetadata.period);
-              const reso = toCandlestickResolution[period];
-              if (!market[reso]) {
-                market[reso] = [event];
+              const resolution = toCandlestickResolution[period];
+              if (!market[resolution]) {
+                market[resolution] = [event];
               } else {
-                market[reso].push(event);
+                market[resolution].push(event);
               }
             }
           });
