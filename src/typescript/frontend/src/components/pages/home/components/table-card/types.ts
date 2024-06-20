@@ -5,6 +5,7 @@ export type TableCardProps = {
   symbol: string;
   marketID: number;
   emojis: Array<SymbolEmojiData>;
-  marketCap: string;
-  volume24h: string;
+  staticNumSwaps: string;
+  staticMarketCap: string;
+  staticVolume24H: string;
 };

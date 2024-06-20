@@ -20,6 +20,7 @@ import { ROUTES } from "router/routes";
 import { useEventStore, useMarketData, useWebSocketClient } from "context/websockets-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+import { useLabelScrambler } from "../animation-config";
 
 export interface MainCardProps {
   featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
@@ -27,6 +28,7 @@ export interface MainCardProps {
 }
 
 const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
+  const { t } = translationFunction();
   const setNumMarkets = useMarketData((s) => s.setNumMarkets);
 
   const marketID = featured?.marketID.toString() ?? "-1";
@@ -36,7 +38,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
   // See the other todo note with the same tag.
   const [marketCap, setMarketCap] = useState(BigInt(featured?.marketCap ?? 0));
-  const [rough24HourVolume, setRough24HourVolume] = useState(BigInt(featured?.dailyVolume ?? 0));
+  const [roughDailyVolume, setRoughDailyVolume] = useState(BigInt(featured?.dailyVolume ?? 0));
   const [roughAllTimeVolume, setRoughAllTimeVolume] = useState(
     BigInt(featured?.allTimeVolume ?? 0)
   );
@@ -51,7 +53,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
     }
 
     // TODO: Fix ASAP. This **will** become inaccurate over time.
-    setRough24HourVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
+    setRoughDailyVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
     setRoughAllTimeVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
   }, [featured, stateEvents]);
 
@@ -66,12 +68,14 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
     setNumMarkets(totalNumberOfMarkets);
   }, [totalNumberOfMarkets, setNumMarkets]);
 
-  const { t } = translationFunction();
-
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
     isEllipsis: true,
   });
+
+  const { ref: marketCapRef } = useLabelScrambler(marketCap);
+  const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);
+  const { ref: allTimeVolumeRef } = useLabelScrambler(roughAllTimeVolume);
 
   return (
     <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1872px">
@@ -116,7 +120,11 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toCoinDecimalString(marketCap, 2)} <AptosIconBlack className={"icon-inline"} />
+                  <div className="flex flex-row items-center justify-center">
+                    <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
+                    &nbsp;
+                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                  </div>
                 </StyledMarketDataText>
               </>
             )}
@@ -129,8 +137,11 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
                   {t("24 hour vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toCoinDecimalString(rough24HourVolume, 2)}{" "}
-                  <AptosIconBlack className={"icon-inline"} />
+                  <div className="flex flex-row items-center justify-center">
+                    <div ref={dailyVolumeRef}>{toCoinDecimalString(roughDailyVolume, 2)}</div>
+                    &nbsp;
+                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                  </div>
                 </StyledMarketDataText>
               </>
             )}
@@ -143,8 +154,11 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
                   {t("All-time vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toCoinDecimalString(roughAllTimeVolume, 2)}{" "}
-                  <AptosIconBlack className={"icon-inline"} />
+                  <div className="flex flex-row items-center justify-center">
+                    <div ref={allTimeVolumeRef}>{toCoinDecimalString(roughAllTimeVolume, 2)}</div>
+                    &nbsp;
+                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                  </div>
                 </StyledMarketDataText>
               </>
             )}

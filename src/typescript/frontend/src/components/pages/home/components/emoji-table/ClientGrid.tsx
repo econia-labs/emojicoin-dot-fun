@@ -1,4 +1,3 @@
-import { toCoinDecimalString } from "lib/utils/decimals";
 import TableCard from "../table-card";
 import { StyledGrid } from "./styled";
 import { type EmojiTableProps } from "./index";
@@ -11,8 +10,9 @@ export const ClientGrid = ({ data }: Omit<EmojiTableProps, "totalNumberOfMarkets
           return (
             <TableCard
               {...market}
-              marketCap={toCoinDecimalString(market.marketCap, 2)}
-              volume24h={toCoinDecimalString(market.dailyVolume, 2)}
+              staticMarketCap={market.marketCap.toString()}
+              staticVolume24H={market.dailyVolume.toString()}
+              staticNumSwaps={market.numSwaps.toString()}
               key={market.marketID.toString()}
             />
           );

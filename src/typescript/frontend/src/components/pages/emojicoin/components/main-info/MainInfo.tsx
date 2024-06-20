@@ -7,6 +7,7 @@ import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useLabelScrambler } from "components/pages/home/components/animation-config";
 
 const innerWrapper = `flex flex-col md:flex-row justify-around w-full max-w-[1362px] px-[30px] lg:px-[44px] py-[17px]
 md:py-[37px] xl:py-[68px]`;
@@ -28,7 +29,7 @@ const MainInfo = (props: MainInfoProps) => {
   // reduce the amount of calls we'd have to make while keeping the data very up to date and accurate.
   // Right now we add the volume from any incoming events, which is basically a rough estimate and may be inaccurate.
   const [marketCap, setMarketCap] = useState(BigInt(props.data.marketCap));
-  const [rough24HourVolume, setRough24HourVolume] = useState(BigInt(props.data.dailyVolume));
+  const [roughDailyVolume, setRoughDailyVolume] = useState(BigInt(props.data.dailyVolume));
   const [roughAllTimeVolume, setRoughAllTimeVolume] = useState(BigInt(props.data.allTimeVolume));
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const MainInfo = (props: MainInfoProps) => {
 
     // TODO: Fix ASAP. This **will** become inaccurate over time, because it doesn't evict stale data from the rolling
     // volume. It's just a rough estimate to simulate live 24h rolling volume.
-    setRough24HourVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
+    setRoughDailyVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
     setRoughAllTimeVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
   }, [props.data, stateEvents]);
 
@@ -57,6 +58,10 @@ const MainInfo = (props: MainInfoProps) => {
     placement: "top",
     isEllipsis: true,
   });
+
+  const { ref: marketCapRef } = useLabelScrambler(marketCap);
+  const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);
+  const { ref: allTimeVolumeRef } = useLabelScrambler(roughAllTimeVolume);
 
   return (
     <div className="flex justify-center">
@@ -77,27 +82,33 @@ const MainInfo = (props: MainInfoProps) => {
           <div className="flex gap-[8px]">
             <div className={statsTextClasses + " text-light-gray"}>{t("Mkt. Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              {toCoinDecimalString(marketCap, 2)}
-              &nbsp;
-              <AptosIconBlack className="icon-inline" />
+              <div className="flex flex-row justify-center items-center">
+                <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
+                &nbsp;
+                <AptosIconBlack className="icon-inline mb-[0.3ch]" />
+              </div>
             </div>
           </div>
 
           <div className="flex gap-[8px]">
             <div className={statsTextClasses + " text-light-gray"}>{t("24 hour vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              {toCoinDecimalString(rough24HourVolume, 2)}
-              &nbsp;
-              <AptosIconBlack className={"icon-inline"} />
+              <div className="flex flex-row justify-center items-center">
+                <div ref={dailyVolumeRef}>{toCoinDecimalString(roughDailyVolume, 2)}</div>
+                &nbsp;
+                <AptosIconBlack className="icon-inline mb-[0.3ch]" />
+              </div>
             </div>
           </div>
 
           <div className="flex gap-[8px]">
             <div className={statsTextClasses + " text-light-gray"}>{t("All-time vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              {toCoinDecimalString(roughAllTimeVolume, 2)}
-              &nbsp;
-              <AptosIconBlack className={"icon-inline"} />
+              <div className="flex flex-row justify-center items-center">
+                <div ref={allTimeVolumeRef}>{toCoinDecimalString(roughAllTimeVolume, 2)}</div>
+                &nbsp;
+                <AptosIconBlack className="icon-inline mb-[0.3ch]" />
+              </div>
             </div>
           </div>
         </div>

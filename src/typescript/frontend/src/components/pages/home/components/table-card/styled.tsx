@@ -28,11 +28,6 @@ export const StyledInnerItem = styled(motion.div)<{ isEmpty: boolean }>`
   position: relative;
   overflow: hidden;
   cursor: ${({ isEmpty }) => !isEmpty && "pointer"};
-  border: 1px solid ${({ theme }) => theme.colors.transparent};
-
-  ${StyledItemWrapper}:hover & {
-    border: 1px solid ${darkColors.econiaBlue};
-  }
 `;
 
 export const StyledColoredText = styled(Text)`
