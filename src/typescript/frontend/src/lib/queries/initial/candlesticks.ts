@@ -1,24 +1,20 @@
 "use server";
 
 import { paginateCandlesticks } from "@sdk/queries/candlestick";
-import { cache } from "react";
-import { fetchInitialWithFallback } from "./cache-helper";
-import { type GroupedPeriodicStateEvents } from "@sdk/queries/client-utils/candlestick";
+import { type AnyNumberString, toPeriodicStateEvent } from "@sdk-types";
 
-// To use the type so we can link it in the JSDoc.
-let _: GroupedPeriodicStateEvents;
-
-/**
- * @see {@link GroupedPeriodicStateEvents}
- */
-const getInitialCandlesticks = cache(async (marketID: string) => {
-  const candlesticks = await fetchInitialWithFallback({
-    functionArgs: {
-      marketID: BigInt(marketID),
-    },
-    queryFunction: paginateCandlesticks,
+const fetchInitialCandlestickData = async (args: {
+  marketID: AnyNumberString;
+  maxTotalRows?: number;
+  maxNumQueries?: number;
+}) => {
+  const { marketID, maxTotalRows, maxNumQueries } = args;
+  const candlesticks = await paginateCandlesticks({
+    marketID,
+    maxTotalRows,
+    maxNumQueries,
   });
-  return candlesticks.events;
-});
+  return candlesticks.map((candlestick) => toPeriodicStateEvent(candlestick, candlestick.version));
+};
 
-export default getInitialCandlesticks;
+export default fetchInitialCandlestickData;

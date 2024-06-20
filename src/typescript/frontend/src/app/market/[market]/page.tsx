@@ -1,17 +1,16 @@
-import getInitialChatData from "lib/queries/initial/chats";
 import { fetchLatestMarketState } from "lib/queries/initial/state";
-import getInitialSwapData from "lib/queries/initial/swaps";
-import getInitialCandlesticks from "lib/queries/initial/candlesticks";
+import fetchInitialSwapData from "lib/queries/initial/swaps";
+import fetchInitialCandlesticks from "lib/queries/initial/candlesticks";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
-// import fetchMarketData from "lib/queries/initial/market-data";
 import EmojiNotFoundPage from "./not-found";
+import fetchInitialChatData from "lib/queries/initial/chats";
 import { REVALIDATION_TIME } from "lib/server-env";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
-// const NUM_MARKETS = 100;
 const CHAT_DATA_ROWS = 100;
 const SWAP_DATA_ROWS = 100;
+const CANDLESTICK_DATA_ROWS = 500;
 
 /**
  * Our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
@@ -22,16 +21,7 @@ type StaticParams = {
   market: string;
 };
 
-// TODO: Bring back static params, but coalesce the top 50 markets across all filters
-// and then build those pages only.
-
-// export const generateStaticParams = async (): Promise<Array<StaticParams>> => {
-//   const data = await fetchMarketData();
-
-//   return data.map((v) => ({
-//     market: v.marketID.toString(),
-//   }));
-// };
+// TODO: Bring back static params or caching with invalidation by some identifier for recent events having happened.
 
 interface EmojicoinPageProps {
   params: StaticParams;
@@ -49,9 +39,9 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
 
   if (res) {
     const marketID = res.marketID.toString();
-    const chatData = await getInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
-    const swapData = await getInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
-    const candlesticks = await getInitialCandlesticks(marketID);
+    const chatData = await fetchInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
+    const swapData = await fetchInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
+    const candlesticks = await fetchInitialCandlesticks({ marketID, maxTotalRows: CANDLESTICK_DATA_ROWS });
     return (
       <ClientEmojicoinPage
         data={{
