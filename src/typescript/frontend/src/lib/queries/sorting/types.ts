@@ -7,6 +7,8 @@ export enum MarketDataSortBy {
   DailyVolume = "daily_vol",
   AllTimeVolume = "all_time_vol",
   Price = "price",
+  Apr = "apr",
+  Tvl = "tvl",
 }
 
 export type GetSortedMarketDataQueryArgs = {
@@ -39,15 +41,32 @@ export const sortByFilters = {
     forPageQueryParams: "price",
     forPostgrestQuery: "avg_execution_price_q64",
   },
+  [MarketDataSortBy.Apr]: {
+    forPageQueryParams: "apr",
+    forPostgrestQuery: "tvl_per_lp_coin_growth_q64",
+  },
+  [MarketDataSortBy.Tvl]: {
+    forPageQueryParams: "tvl",
+    forPostgrestQuery: "cpamm_real_reserves_quote",
+  },
 } as const;
 
-export type SortByPageQueryParams = "market_cap" | "bump" | "daily_vol" | "all_time_vol" | "price";
+export type SortByPageQueryParams =
+  | "market_cap"
+  | "bump"
+  | "daily_vol"
+  | "all_time_vol"
+  | "price"
+  | "apr"
+  | "tvl";
 export type SortByPostgrestQueryParams =
   | "market_cap"
   | "bump_time"
   | "daily_volume"
   | "all_time_volume"
-  | "avg_execution_price_q64";
+  | "avg_execution_price_q64"
+  | "tvl_per_lp_coin_growth_q64"
+  | "cpamm_real_reserves_quote";
 
 export const toPageQueryParam = (
   sortBy: SortByPostgrestQueryParams | MarketDataSortBy | SortByPageQueryParams

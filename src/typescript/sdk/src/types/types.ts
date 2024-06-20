@@ -88,8 +88,10 @@ export namespace Types {
   export type MarketView = {
     metadata: MarketMetadata;
     sequenceInfo: SequenceInfo;
-    clammVirtualReserves: Reserves;
-    cpammRealReserves: Reserves;
+    clammVirtualReservesBase: bigint;
+    clammVirtualReservesQuote: bigint;
+    cpammRealReservesBase: bigint;
+    cpammRealReservesQuote: bigint;
     lpCoinSupply: bigint;
     inBondingCurve: boolean;
     cumulativeStats: CumulativeStats;
@@ -105,8 +107,10 @@ export namespace Types {
     metadata: MarketMetadata;
     sequenceInfo: SequenceInfo;
     extendRef: ExtendRef;
-    clammVirtualReserves: Reserves;
-    cpammRealReserves: Reserves;
+    clammVirtualReservesBase: bigint;
+    clammVirtualReservesQuote: bigint;
+    cpammRealReservesBase: bigint;
+    cpammRealReservesQuote: bigint;
     lpCoinSupply: bigint;
     cumulativeStats: CumulativeStats;
     lastSwap: LastSwap;
@@ -280,13 +284,16 @@ export namespace Types {
     version: number;
     numSwaps: number;
     numChatMessages: number;
-    clammVirtualReserves: Reserves;
-    cpammRealReserves: Reserves;
+    clammVirtualReservesBase: number;
+    clammVirtualReservesQuote: number;
+    cpammRealReservesBase: number;
+    cpammRealReservesQuote: number;
     lpCoinSupply: number;
     avgExecutionPrice: number;
     emojiBytes: `0x${string}`;
     allTimeVolume: number;
     dailyVolume: number;
+    tvlPerLpCoinGrowth: number;
   };
 }
 export const toExtendRef = (data: JSONTypes.ExtendRef): Types.ExtendRef => ({
@@ -390,8 +397,10 @@ export const toLastSwap = (data: JSONTypes.LastSwap): Types.LastSwap => ({
 export const toMarketView = (data: JSONTypes.MarketView): Types.MarketView => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
-  clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
-  cpammRealReserves: toReserves(data.cpamm_real_reserves),
+  clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves_base),
+  clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves_quote),
+  cpammRealReservesBase: BigInt(data.cpamm_real_reserves_base),
+  cpammRealReservesQuote: BigInt(data.cpamm_real_reserves_quote),
   lpCoinSupply: BigInt(data.lp_coin_supply),
   inBondingCurve: data.in_bonding_curve,
   cumulativeStats: toCumulativeStats(data.cumulative_stats),
@@ -407,8 +416,10 @@ export const toMarketResource = (data: JSONTypes.MarketResource): Types.MarketRe
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
   extendRef: toExtendRef(data.extend_ref),
-  clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
-  cpammRealReserves: toReserves(data.cpamm_real_reserves),
+  clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves_base),
+  clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves_quote),
+  cpammRealReservesBase: BigInt(data.cpamm_real_reserves_base),
+  cpammRealReservesQuote: BigInt(data.cpamm_real_reserves_quote),
   lpCoinSupply: BigInt(data.lp_coin_supply),
   cumulativeStats: toCumulativeStats(data.cumulative_stats),
   lastSwap: toLastSwap(data.last_swap),
@@ -571,13 +582,16 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
   version: Number(data.transaction_version),
   numSwaps: Number(data.n_swaps),
   numChatMessages: Number(data.n_chat_messages),
-  clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
-  cpammRealReserves: toReserves(data.cpamm_real_reserves),
+  clammVirtualReservesBase: Number(data.clamm_virtual_reserves_base),
+  clammVirtualReservesQuote: Number(data.clamm_virtual_reserves_quote),
+  cpammRealReservesBase: Number(data.cpamm_real_reserves_base),
+  cpammRealReservesQuote: Number(data.cpamm_real_reserves_quote),
   lpCoinSupply: Number(data.lp_coin_supply),
   avgExecutionPrice: Number(data.avg_execution_price_q64),
   allTimeVolume: Number(data.all_time_volume),
   dailyVolume: Number(data.daily_volume),
   emojiBytes: data.emoji_bytes,
+  tvlPerLpCoinGrowth: Number(data.tvl_per_lp_coin_growth_q64 / 2 ** 64),
 });
 
 export type AnyContractType =

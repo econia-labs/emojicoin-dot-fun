@@ -14,6 +14,7 @@ interface TdProps extends TypographyProps, SpaceProps, LayoutProps {}
 
 interface TrProps extends LayoutProps {
   hover?: boolean;
+  selected?: boolean;
 }
 
 const getStylesOnHover = ({ hover }: TrProps) => {
@@ -23,6 +24,17 @@ const getStylesOnHover = ({ hover }: TrProps) => {
       border-top: 1px solid ${({ theme }) => theme.colors.econiaBlue} !important;
       filter: brightness(1.2);
       background-color: rgba(255, 255, 255, 0.02);
+    `;
+  }
+};
+
+const getStylesOnSelected = ({ selected }: TrProps) => {
+  if (selected) {
+    return css`
+      background-color: ${({ theme }) => theme.colors.econiaBlue} !important;
+      * {
+        color: black;
+      }
     `;
   }
 };
@@ -39,7 +51,6 @@ export const Table = styled.table<SpaceProps & LayoutProps>`
 export const ThInner = styled(Flex)`
   display: flex;
   padding: 7px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
 `;
 
 export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdProps>`
@@ -49,6 +60,7 @@ export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdPro
   background-color: ${({ theme }) => theme.colors.black};
   z-index: 1;
   text-transform: uppercase;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
 
   &:nth-child(1) {
     ${ThInner} {
@@ -72,6 +84,7 @@ export const Tr = styled.tr<TrProps>`
   border-bottom: 1px solid ${({ theme }) => theme.colors.transparent};
   display: flex;
   width: 100%;
+  ${getStylesOnSelected}
 
   &:hover {
     ${getStylesOnHover}

@@ -20,7 +20,6 @@ const getSortedMarketData = async ({
     .from("market_data")
     .select("*", count ? { count: "exact" } : undefined)
     .range(offset, offset + limit - 1)
-    .limit(limit)
     .order(toPostgrestQueryParam(sortBy), toOrderBy(orderBy));
 
   switch (inBondingCurve) {

@@ -24,13 +24,16 @@ namespace JSONTypes {
     transaction_version: number;
     n_swaps: number;
     n_chat_messages: number;
-    clamm_virtual_reserves: Reserves;
-    cpamm_real_reserves: Reserves;
+    clamm_virtual_reserves_base: Uint64String;
+    clamm_virtual_reserves_quote: Uint64String;
+    cpamm_real_reserves_base: Uint64String;
+    cpamm_real_reserves_quote: Uint64String;
     lp_coin_supply: number;
     avg_execution_price_q64: number;
     emoji_bytes: `0x${string}`;
     all_time_volume: number;
     daily_volume: number;
+    tvl_per_lp_coin_growth_q64: number;
   };
 
   export type ExtendRef = {
@@ -89,8 +92,10 @@ namespace JSONTypes {
   export type MarketView = {
     metadata: MarketMetadata;
     sequence_info: SequenceInfo;
-    clamm_virtual_reserves: Reserves;
-    cpamm_real_reserves: Reserves;
+    clamm_virtual_reserves_base: Uint64String;
+    clamm_virtual_reserves_quote: Uint64String;
+    cpamm_real_reserves_base: Uint64String;
+    cpamm_real_reserves_quote: Uint64String;
     lp_coin_supply: Uint128String;
     in_bonding_curve: boolean;
     cumulative_stats: CumulativeStats;
@@ -106,8 +111,10 @@ namespace JSONTypes {
     metadata: MarketMetadata;
     sequence_info: SequenceInfo;
     extend_ref: ExtendRef;
-    clamm_virtual_reserves: Reserves;
-    cpamm_real_reserves: Reserves;
+    clamm_virtual_reserves_base: Uint64String;
+    clamm_virtual_reserves_quote: Uint64String;
+    cpamm_real_reserves_base: Uint64String;
+    cpamm_real_reserves_quote: Uint64String;
     lp_coin_supply: Uint128String;
     cumulative_stats: CumulativeStats;
     last_swap: LastSwap;
