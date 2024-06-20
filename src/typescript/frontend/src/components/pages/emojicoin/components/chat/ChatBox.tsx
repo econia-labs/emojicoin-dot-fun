@@ -17,13 +17,15 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import { CloseIconWithHover } from "components/svg";
+import { Arrow, CloseIconWithHover } from "components/svg";
 import SendIcon from "@icons/SendIcon";
 import emojiRegex from "emoji-regex";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
+import { motion } from "framer-motion";
+import ClosePixelated from "@icons/ClosePixelated";
 
 const convertChatMessageToEmojiAndIndices = (message: string) => {
   const emojiArr = message.match(emojiRegex()) ?? [];
@@ -67,10 +69,19 @@ const ChatBox = (props: ChatProps) => {
   };
 
   const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
-    onEmojiClick: onEmojiClickHandler,
+    onEmojiClick: (emoji) => {
+      onEmojiClickHandler(emoji);
+      focusTextArea();
+    },
     autoFocusSearch: false,
     width: 272,
   });
+
+  const focusTextArea = () => {
+    if (targetElement) {
+      (targetElement as HTMLTextAreaElement).focus();
+    }
+  };
 
   const handleClear = () => {
     if (targetElement) {
@@ -153,21 +164,35 @@ const ChatBox = (props: ChatProps) => {
         <ButtonWithConnectWalletFallback className="mt-2">
           <InputGroup isShowError={false}>
             <div className="flex-row relative items-center justify-center">
-              <Textarea
-                className="!pt-[16px] !pl-[4.25ch]"
-                ref={targetRef}
-                onKeyDown={onKeyDownHandler}
-              />
-              <CloseIconWithHover
-                className="absolute top-1/2 -translate-y-1/2 left-[1ch] !w-[21px]"
-                color="white"
-                onClick={handleClear}
-              ></CloseIconWithHover>
-              <SendIcon
-                onClick={() => sendChatMessage((targetElement as HTMLTextAreaElement).value)}
-                className="absolute top-1/2 -translate-y-1/2 right-[1ch] !w-[21px] !h-[21px] !mr-2 hover:cursor-pointer"
-                color="white"
-              />
+              <div className="relative h-[45px]">
+                <div
+                  className={
+                    "flex flex-row absolute items-center justify-between h-full w-full " +
+                    "border-0 border-t-[1px] border-solid border-dark-gray"
+                  }
+                >
+                  <motion.div
+                    whileTap={{ scale: 0.85 }}
+                    className="flex items-center justify-center relative h-full ml-[2ch] pr-[1ch] hover:cursor-pointer"
+                    onClick={handleClear}
+                  >
+                    <ClosePixelated className="w-[16px] h-[17px] text-white" />
+                  </motion.div>
+                  <Textarea
+                    autoFocus={true}
+                    className="relative !pt-[16px] px-[4px]"
+                    ref={targetRef}
+                    onKeyDown={onKeyDownHandler}
+                  />
+                  <motion.div
+                    whileTap={{ scale: 0.85 }}
+                    onClick={() => sendChatMessage((targetElement as HTMLTextAreaElement).value)}
+                    className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer"
+                  >
+                    <Arrow className="!w-[21px] !h-[21px]" color="white" />
+                  </motion.div>
+                </div>
+              </div>
             </div>
           </InputGroup>
         </ButtonWithConnectWalletFallback>
