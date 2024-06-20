@@ -587,11 +587,11 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
   cpammRealReservesBase: Number(data.cpamm_real_reserves_base),
   cpammRealReservesQuote: Number(data.cpamm_real_reserves_quote),
   lpCoinSupply: Number(data.lp_coin_supply),
-  avgExecutionPrice: Number(data.avg_execution_price_q64),
+  avgExecutionPrice: Number(data.last_swap_avg_execution_price_q64),
   allTimeVolume: Number(data.all_time_volume),
   dailyVolume: Number(data.daily_volume),
   emojiBytes: data.emoji_bytes,
-  tvlPerLpCoinGrowth: Number(data.tvl_per_lp_coin_growth_q64 / 2 ** 64),
+  tvlPerLpCoinGrowth: Number(data.one_day_tvl_per_lp_coin_growth_q64 / 2 ** 64),
 });
 
 export type AnyContractType =

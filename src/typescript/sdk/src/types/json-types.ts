@@ -29,11 +29,11 @@ namespace JSONTypes {
     cpamm_real_reserves_base: Uint64String;
     cpamm_real_reserves_quote: Uint64String;
     lp_coin_supply: number;
-    avg_execution_price_q64: number;
+    last_swap_avg_execution_price_q64: number;
     emoji_bytes: `0x${string}`;
     all_time_volume: number;
     daily_volume: number;
-    tvl_per_lp_coin_growth_q64: number;
+    one_day_tvl_per_lp_coin_growth_q64: number;
   };
 
   export type ExtendRef = {

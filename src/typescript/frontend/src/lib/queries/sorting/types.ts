@@ -39,11 +39,11 @@ export const sortByFilters = {
   },
   [MarketDataSortBy.Price]: {
     forPageQueryParams: "price",
-    forPostgrestQuery: "avg_execution_price_q64",
+    forPostgrestQuery: "last_swap_avg_execution_price_q64",
   },
   [MarketDataSortBy.Apr]: {
     forPageQueryParams: "apr",
-    forPostgrestQuery: "tvl_per_lp_coin_growth_q64",
+    forPostgrestQuery: "one_day_tvl_per_lp_coin_growth_q64",
   },
   [MarketDataSortBy.Tvl]: {
     forPageQueryParams: "tvl",
@@ -64,8 +64,8 @@ export type SortByPostgrestQueryParams =
   | "bump_time"
   | "daily_volume"
   | "all_time_volume"
-  | "avg_execution_price_q64"
-  | "tvl_per_lp_coin_growth_q64"
+  | "last_swap_avg_execution_price_q64"
+  | "one_day_tvl_per_lp_coin_growth_q64"
   | "cpamm_real_reserves_quote";
 
 export const toPageQueryParam = (
