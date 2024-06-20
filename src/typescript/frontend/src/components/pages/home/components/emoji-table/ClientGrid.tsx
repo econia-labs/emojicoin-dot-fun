@@ -1,4 +1,4 @@
-import TableCard from "../table-card";
+import TableCard from "../table-card/TableCard";
 import { StyledGrid } from "./styled";
 import { type EmojiTableProps } from "./index";
 

@@ -110,14 +110,24 @@ export const scrambleConfig = {
   overdrive: false,
   overflow: true,
   speed: 0.6,
-  ignore: [...". APT"],
   playOnMount: false,
 };
 
-export const useLabelScrambler = (value: AnyNumberString | Big) => {
+export const useLabelScrambler = (value: AnyNumberString | Big, suffix: string = "") => {
+  // Ignore all characters in the suffix, as long as they are not numbers.
+  const ignore = ["."];
+  const numberSet = new Set("0123456789");
+  const suffixSet = new Set(suffix);
+  for (const char of suffixSet) {
+    if (!numberSet.has(char)) {
+      ignore.push(char);
+    }
+  }
+
   const scrambler = useScramble({
-    text: toCoinDecimalString(value.toString(), 2),
+    text: toCoinDecimalString(value.toString(), 2) + suffix,
     ...scrambleConfig,
+    ignore,
   });
 
   return scrambler;

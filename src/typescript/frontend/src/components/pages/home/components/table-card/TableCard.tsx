@@ -112,8 +112,8 @@ const TableCard: React.FC<TableCardProps> = ({
     isEllipsis: true,
   });
 
-  const { ref: marketCapRef } = useLabelScrambler(marketCap);
-  const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);
+  const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
+  const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
 
   return (
     <Link id="grid-emoji-card" className="group" href={`${ROUTES.market}/${marketID}`}>
