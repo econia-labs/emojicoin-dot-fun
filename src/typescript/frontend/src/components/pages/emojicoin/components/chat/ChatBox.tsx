@@ -173,10 +173,10 @@ const ChatBox = (props: ChatProps) => {
                 >
                   <motion.div
                     whileTap={{ scale: 0.85 }}
-                    className="flex items-center justify-center relative h-full ml-[2ch] pr-[1ch] hover:cursor-pointer"
+                    className="flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer"
                     onClick={handleClear}
                   >
-                    <ClosePixelated className="w-[16px] h-[17px] text-white" />
+                    <ClosePixelated className="w-[15px] h-[16px] text-white" />
                   </motion.div>
                   <Textarea
                     autoFocus={true}
@@ -187,7 +187,7 @@ const ChatBox = (props: ChatProps) => {
                   <motion.div
                     whileTap={{ scale: 0.85 }}
                     onClick={() => sendChatMessage((targetElement as HTMLTextAreaElement).value)}
-                    className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer"
+                    className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
                   >
                     <Arrow className="!w-[21px] !h-[21px]" color="white" />
                   </motion.div>
