@@ -1,6 +1,7 @@
 # cspell:word autofix
 # cspell:word autoflake
 # cspell:word isort
+# cspell:word frontmatter
 # cspell:word latexindent
 # cspell:word markdownlint
 # cspell:word mdformat
@@ -133,6 +134,8 @@ repos:
   hooks:
   - additional_dependencies:
     - 'mdformat-gfm'
+    - 'mdformat-frontmatter'
+    - 'mdformat-myst'
     id: 'mdformat'
   repo: 'https://github.com/executablebooks/mdformat'
   rev: '0.7.17'

@@ -1,0 +1,258 @@
+/**
+ cspell:word infima
+ cspell:word jost
+ cspell:word sublabel
+ cspell:word sublist
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #086cd9;
+  --ifm-color-primary-dark: #086cd9;
+  --ifm-color-primary-darker: #086cd9;
+  --ifm-color-primary-darkest: #086cd9;
+  --ifm-color-primary-light: #086cd9;
+  --ifm-color-primary-lighter: #086cd9;
+  --ifm-color-primary-lightest: #086cd9;
+  --ifm-code-font-size: 95%;
+  --ifm-font-family-base: "Roboto Mono", monospace;
+
+  --ifm-navbar-height: 72px;
+  --ifm-navbar-background-color: #020202;
+  --ifm-navbar-padding-horizontal: 22px;
+  --ifm-navbar-search-input-icon: url(/img/search-icon.svg);
+  --ifm-navbar-search-input-background-color: #020202;
+
+  --ifm-menu-color-background-active: #020202;
+  --ifm-menu-color-background-hover: #020202;
+
+  --ifm-h2-font-size: 48px;
+  --ifm-h2-line-height: 58px;
+
+  --ifm-heading-color: #ffffff;
+  --ifm-heading-font-family: "Jost", sans-serif;
+  --ifm-heading-font-weight: bold;
+  --ifm-heading-line-height: 58px;
+
+  --ifm-spacing-horizontal: 40px;
+  --ifm-spacing-horizontal: 40px;
+
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --ifm-card-border-radius: 0px;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme="dark"] {
+  --ifm-color-primary: #086cd9;
+  --ifm-color-primary-dark: #086cd9;
+  --ifm-color-primary-darker: #086cd9;
+  --ifm-color-primary-darkest: #086cd9;
+  --ifm-color-primary-light: #086cd9;
+  --ifm-color-primary-lighter: #086cd9;
+  --ifm-color-primary-lightest: #086cd9;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+html {
+  background: #020202;
+  background-image: url("https://global-uploads.webflow.com/62fce47e1be865a7155ff71c/633467a79910d8300a274060_bg-noise.png");
+}
+
+.navbar {
+  border-bottom: 1px solid #565656;
+  display: flex;
+  justify-content: center;
+  background-image: url("https://global-uploads.webflow.com/62fce47e1be865a7155ff71c/633467a79910d8300a274060_bg-noise.png");
+}
+
+.navbar__inner {
+  max-width: 1600px;
+}
+
+.padding-top--md {
+  padding-top: 40px !important;
+}
+
+.main-wrapper {
+  width: 100%;
+  max-width: 1600px;
+  align-self: center;
+}
+
+.navbar__search-input {
+  border-radius: 0px;
+  border: 1px solid #aaaaaa;
+  color: #ffffff;
+  padding: "8px 8px 0px 36px";
+  width: 252px;
+  height: 36px;
+}
+
+.navbar__search-input::placeholder {
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.menu__list {
+  margin-right: 4px;
+}
+
+.menu__link {
+  border-radius: 0px;
+  color: #aaa;
+}
+
+.menu__link:hover {
+  color: var(--ifm-color-primary);
+}
+
+.menu__link--active:not(.menu__link--sublist) {
+  color: #ffffff;
+}
+
+.menu__link--active:hover:not(.menu__link--sublist) {
+  color: var(--ifm-color-primary);
+}
+
+.customTable {
+  width: 100%;
+  display: table;
+}
+
+th {
+  text-align: left;
+}
+
+.table-of-contents__link {
+  color: #aaa;
+}
+
+.table-of-contents__link--active {
+  color: #ffffff;
+}
+
+.pagination-nav {
+  gap: 16px;
+}
+
+.pagination-nav__link {
+  border-radius: 0px;
+  padding: 0px;
+  border: none;
+  transition: background-color 300ms ease, transform 300ms ease,
+    color 300ms ease, -webkit-transform 300ms ease;
+}
+
+.pagination-nav__link:hover {
+  transform: translate3d(0px, -3px, 0.01px);
+}
+
+.pagination-nav__sublabel {
+  display: none;
+}
+
+.pagination-nav__link--prev {
+  text-align: left;
+  background: #161616;
+  color: #ffffff;
+}
+
+.pagination-nav__link--prev:hover {
+  color: #ffffff;
+}
+
+.pagination-nav__link--next {
+  text-align: right;
+  background: #ffffff;
+  color: #161616;
+}
+
+.pagination-nav__link--next:hover {
+  color: #161616;
+}
+
+.pagination-nav__label {
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: normal;
+  padding: 12px 8px;
+  line-height: 20px;
+}
+
+.card {
+  --ifm-color-emphasis-200: #565656;
+}
+
+.welcome-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--ifm-leading);
+}
+
+.welcome-heading-mobile {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--ifm-leading);
+}
+
+@media (max-width: 768px) {
+  .welcome-heading {
+    display: none;
+  }
+
+  .welcome-heading-mobile {
+    display: block;
+  }
+}
+
+.link-card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 40px;
+  gap: 24px;
+}
+
+.link-card {
+  background-color: #020202;
+  padding: 36px;
+  width: 400px;
+  height: 200px;
+  cursor: pointer;
+  border: 1px solid #565656;
+  transition: all 300ms ease, transform 300ms ease, color 300ms ease,
+    -webkit-transform 300ms ease;
+}
+
+.link-card:hover {
+  border: 1px solid var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.link-card-title {
+  display: block;
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 32px;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.link-card-description {
+  display: block;
+  font-family: "Roboto Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #dadada;
+}
