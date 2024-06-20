@@ -10,10 +10,6 @@ export default async function middleware(request: NextRequest) {
   const hashed = request.cookies.get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = request.cookies.get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;
 
-  if (process.env.LET_ME_IN === "true") {
-    return NextResponse.next();
-  }
-
   if (!hashed || !address) {
     return NextResponse.redirect(new URL(ROUTES.verify, request.url));
   }
