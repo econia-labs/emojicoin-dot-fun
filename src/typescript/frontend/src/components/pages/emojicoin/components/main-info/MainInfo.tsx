@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { translationFunction } from "context/language-context";
 import { useTooltip } from "hooks";
@@ -6,6 +6,7 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+import { useEventStore, useWebSocketClient } from "context/websockets-context";
 
 const innerWrapper = `flex flex-col md:flex-row justify-around w-full max-w-[1362px] px-[30px] lg:px-[44px] py-[17px]
 md:py-[37px] xl:py-[68px]`;
@@ -16,6 +17,40 @@ const statsTextClasses = "display-6 md:display-4 uppercase ellipses font-forma";
 
 const MainInfo = (props: MainInfoProps) => {
   const { t } = translationFunction();
+
+  const marketID = props.data.marketID.toString();
+  const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
+  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+
+  // TODO: Add to this in state. You can keep track of this yourself, technically.
+  // It would require some reconciliation between the data from server and data in store, but it would drastically
+  // reduce the amount of calls we'd have to make while keeping the data very up to date and accurate.
+  // Right now we add the volume from any incoming events, which is basically a rough estimate and may be inaccurate.
+  const [marketCap, setMarketCap] = useState(BigInt(props.data.marketCap));
+  const [rough24HourVolume, setRough24HourVolume] = useState(BigInt(props.data.dailyVolume));
+  const [roughAllTimeVolume, setRoughAllTimeVolume] = useState(BigInt(props.data.allTimeVolume));
+
+  useEffect(() => {
+    if (stateEvents.length === 0) return;
+    const latestEvent = stateEvents.at(0)!;
+    const numSwapsInStore = latestEvent?.cumulativeStats.numSwaps ?? 0;
+    if (numSwapsInStore > props.data.numSwaps) {
+      const marketCapInStore = latestEvent.instantaneousStats.marketCap;
+      setMarketCap(marketCapInStore);
+    }
+
+    // TODO: Fix ASAP. This **will** become wildly inaccurate, because it doesn't evict stale data from the rolling
+    // volume. It's just a rough estimate to simulate live 24h rolling volume.
+    setRough24HourVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
+    setRoughAllTimeVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
+  }, [props.data, stateEvents]);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    subscribe.state(marketID);
+    return () => unsubscribe.state(marketID);
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
@@ -41,7 +76,7 @@ const MainInfo = (props: MainInfoProps) => {
           <div className="flex gap-[8px]">
             <div className={statsTextClasses + " text-light-gray"}>{t("Mkt. Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              {toCoinDecimalString(props.data.marketCap, 2)}
+              {toCoinDecimalString(marketCap, 2)}
               &nbsp;
               <AptosIconBlack className="icon-inline" />
             </div>
@@ -50,7 +85,7 @@ const MainInfo = (props: MainInfoProps) => {
           <div className="flex gap-[8px]">
             <div className={statsTextClasses + " text-light-gray"}>{t("24 hour vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              {toCoinDecimalString(props.data.dailyVolume, 2)}
+              {toCoinDecimalString(rough24HourVolume, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </div>
@@ -59,7 +94,7 @@ const MainInfo = (props: MainInfoProps) => {
           <div className="flex gap-[8px]">
             <div className={statsTextClasses + " text-light-gray"}>{t("All-time vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
-              {toCoinDecimalString(props.data.allTimeVolume, 2)}
+              {toCoinDecimalString(roughAllTimeVolume, 2)}
               &nbsp;
               <AptosIconBlack className={"icon-inline"} />
             </div>

@@ -1,4 +1,3 @@
-
 export const ECONIA_BLUE = "rgba(8, 108, 217, 1)";
 export const GREEN = "rgba(47, 169, 15, 1)";
 export const PINK = "rgba(205, 47, 141, 1)";
@@ -30,5 +29,5 @@ export const variants = {
   liquidities: {
     boxShadow: `0 0 14px 11px ${ECONIA_BLUE}`,
     transition: transitionIn,
-  }
+  },
 };

@@ -6,7 +6,6 @@ import { type SvgProps } from "../types";
 import { darkColors } from "theme";
 
 const Icon: React.FC<SvgProps> = ({ color = "darkGray", ...props }) => {
-
   return (
     <Svg viewBox="0 0 19 22" color="transparent" {...props}>
       <g clipPath="url(#clip0_14173_4961)">
