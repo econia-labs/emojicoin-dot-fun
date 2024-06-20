@@ -1,5 +1,5 @@
-import { useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
-import { createContext, type PropsWithChildren, useContext, useEffect, useState } from "react";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { createContext, type PropsWithChildren, useContext, useState } from "react";
 import { toast } from "react-toastify";
 
 import { BaseModal } from "components/modal/BaseModal";
@@ -16,35 +16,6 @@ const WalletItemClassName =
   "transition-all hover:text-ec-blue " +
   "text-black group";
 
-let t: NodeJS.Timeout | null = null;
-const AutoConnect = () => {
-  const { account, connect } = useWallet();
-  useEffect(() => {
-    if (!account && localStorage.getItem("AptosWalletName")) {
-      const f = async () => {
-        try {
-          connect(localStorage.getItem("AptosWalletName") as WalletName);
-        } catch (error) {
-          if (t) {
-            clearInterval(t);
-          }
-        }
-      };
-      f();
-      t = setInterval(f, 100);
-    } else if (t) {
-      clearInterval(t);
-    }
-    return () => {
-      if (t) {
-        clearInterval(t);
-      }
-    };
-  }, [account]); /* eslint-disable-line react-hooks/exhaustive-deps */
-
-  return null;
-};
-
 export function ConnectWalletContextProvider({ children }: PropsWithChildren) {
   const { connect, wallet: activeWallet, wallets, disconnect } = useWallet();
   const [open, setOpen] = useState<boolean>(false);
@@ -56,7 +27,6 @@ export function ConnectWalletContextProvider({ children }: PropsWithChildren) {
 
   return (
     <ConnectWalletContext.Provider value={value}>
-      <AutoConnect />
       {children}
       <BaseModal
         className="md:w-[430px]"
