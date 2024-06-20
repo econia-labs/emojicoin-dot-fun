@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { type EmojiClickData } from "emoji-picker-react";
 
@@ -22,6 +22,7 @@ import SendIcon from "@icons/SendIcon";
 import emojiRegex from "emoji-regex";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { useEventStore, useWebSocketClient } from "context/websockets-context";
 
 const convertChatMessageToEmojiAndIndices = (message: string) => {
   const emojiArr = message.match(emojiRegex()) ?? [];
@@ -41,15 +42,16 @@ const convertChatMessageToEmojiAndIndices = (message: string) => {
 const ChatBox = (props: ChatProps) => {
   const { theme } = useThemeContext();
   const { aptos, account, submit } = useAptos();
-  // TODO: Resolve address to Aptos name, store in state.
-  const [messageList, setMessageList] = useState(
-    props.data.chats.map((chat) => ({
-      sender: chat.user,
-      text: chat.message,
-      senderRank: chat.user.at(-1)?.toLowerCase() === "f" ? "🐳" : "🐡", // TODO: Check balance as fraction of circ supply
-      version: chat.version,
-    }))
-  );
+  const marketID = props.data.marketID.toString();
+  const chats = useEventStore((s) => s.getMarket(marketID)?.chatEvents ?? props.data.chats);
+  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    subscribe.chat(marketID);
+    return () => unsubscribe.chat(marketID);
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const loadMoreMessages = () => {
     /* eslint-disable-next-line no-console */
@@ -93,15 +95,6 @@ const ChatBox = (props: ChatProps) => {
     const { response, error: _ } = (await submit(builderLambda)) ?? {};
     if (response && isUserTransactionResponse(response)) {
       console.warn(response);
-      setMessageList([
-        {
-          sender: account.ansName ?? account.address,
-          text: emojiText,
-          senderRank: "🐡",
-          version: Number(response.version),
-        },
-        ...messageList,
-      ]);
     }
     handleClear();
   };
@@ -142,7 +135,15 @@ const ChatBox = (props: ChatProps) => {
             flexDirection: "column-reverse",
           }}
         >
-          {messageList.map((message, index) => {
+          {chats.map((chat, index) => {
+            const message = {
+              // TODO: Resolve address to Aptos name, store in state.
+              sender: chat.user,
+              text: chat.message,
+              // TODO: Check balance as fraction of circ supply
+              senderRank: chat.user.at(-1)?.toLowerCase() === "f" ? "🐳" : "🐡",
+              version: chat.version,
+            };
             return <MessageContainer message={message} key={index} />;
           })}
         </InfiniteScroll>

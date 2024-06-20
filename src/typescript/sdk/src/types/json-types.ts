@@ -6,7 +6,7 @@ import {
   type Uint128String,
   type HexString,
 } from "../emojicoin_dot_fun/types";
-import { type AggregatorSnapshot } from "./core";
+import { type EventJSON, type AggregatorSnapshot } from "./core";
 
 namespace JSONTypes {
   // One row in the `inbox_latest_state` table.
@@ -260,7 +260,7 @@ namespace JSONTypes {
 
 export default JSONTypes;
 
-export type JSONEventTypes =
+export type AnyEmojicoinJSONEvent =
   | JSONTypes.SwapEvent
   | JSONTypes.ChatEvent
   | JSONTypes.MarketRegistrationEvent
@@ -268,3 +268,25 @@ export type JSONEventTypes =
   | JSONTypes.StateEvent
   | JSONTypes.GlobalStateEvent
   | JSONTypes.LiquidityEvent;
+
+export function isJSONSwapEvent(e: EventJSON): boolean {
+  return e.type.startsWith("Swap");
+}
+export function isJSONChatEvent(e: EventJSON): boolean {
+  return e.type.startsWith("Chat");
+}
+export function isJSONMarketRegistrationEvent(e: EventJSON): boolean {
+  return e.type.startsWith("MarketRegistration");
+}
+export function isJSONPeriodicStateEvent(e: EventJSON): boolean {
+  return e.type.startsWith("PeriodicState");
+}
+export function isJSONStateEvent(e: EventJSON): boolean {
+  return e.type.startsWith("State");
+}
+export function isJSONGlobalStateEvent(e: EventJSON): boolean {
+  return e.type.startsWith("GlobalState");
+}
+export function isJSONLiquidityEvent(e: EventJSON): boolean {
+  return e.type.startsWith("Liquidity");
+}

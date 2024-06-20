@@ -8,9 +8,11 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
 import { type Events, converter, toGenericEvent } from "./events";
-import { type Types } from "../types";
+import { type AnyEmojicoinEvent, type AnyEmojicoinEventName, type Types } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
+import { type AnyEmojicoinJSONEvent } from "../types/json-types";
+import { type AccountAddressString } from "./types";
 
 /**
  * Derives the object address from the given emoji hex codes vector<u8> seed and
@@ -57,6 +59,48 @@ export async function getRegistryAddress(args: {
     resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::RegistryAddress`,
   });
   return registryAddressResource.registry_address;
+}
+
+export interface DBJsonData<T extends AnyEmojicoinJSONEvent> {
+  account_address: string;
+  creation_number: string;
+  data: T;
+  transaction_version: number;
+  transaction_block_height: number;
+  type: `0x${string}::${string}::${string}`;
+  event_index: number;
+  event_name: `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::${string}`;
+  inserted_at: null;
+  sequence_number: number;
+}
+
+export type DeserializedEventData = {
+  address: AccountAddressString;
+  data: AnyEmojicoinEvent;
+  type: AnyEmojicoinEventName;
+  version: number;
+};
+
+// TODO: Add support for MarketDataView and any other non-event types.
+export function deserializeBufferedEvent<T extends AnyEmojicoinEvent>(data: Buffer) {
+  const msg = data.toString();
+  const json = JSON.parse(msg);
+  return webSocketJsonToEvent<T>(json);
+}
+
+export function webSocketJsonToEvent<T extends AnyEmojicoinEvent>(
+  event: DBJsonData<AnyEmojicoinJSONEvent>
+): DeserializedEventData | undefined {
+  const fn = converter.get(event.type);
+  if (fn) {
+    return {
+      address: AccountAddress.from(event.account_address).toString(),
+      data: fn(event.data, event.transaction_version) as T,
+      type: event.event_name as AnyEmojicoinEventName,
+      version: event.transaction_version,
+    };
+  }
+  return undefined;
 }
 
 export function getEvents(response: UserTransactionResponse): Events {

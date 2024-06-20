@@ -1,12 +1,40 @@
 import { isString, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { converter } from "@sdk/emojicoin_dot_fun/events";
-import { TYPE_TAGS } from "@sdk/utils";
-import { type AnyEmojicoinEvent, type Types } from "@sdk/types/types";
-import { type EventActions, type EventStore } from "./event-store";
+import {
+  type AnyEmojicoinEventName,
+  toChatEvent,
+  toGlobalStateEvent,
+  toLiquidityEvent,
+  toMarketRegistrationEvent,
+  toPeriodicStateEvent,
+  toStateEvent,
+  toSwapEvent,
+  type AnyEmojicoinEvent,
+  type Types,
+} from "@sdk/types/types";
+import { type EventActions } from "./event-store";
 import { type SubmissionResponse } from "context/wallet-context/AptosContextProvider";
 
-import { isValidSymbol } from "@sdk/emoji_data/utils";
+import { isValidSymbol, symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { type AnyNumberString } from "@sdk-types";
+import type JSONTypes from "@sdk/types/json-types";
+import { type DBJsonData } from "@sdk/emojicoin_dot_fun/utils";
+import {
+  type AnyEmojicoinJSONEvent,
+  isJSONChatEvent,
+  isJSONGlobalStateEvent,
+  isJSONLiquidityEvent,
+  isJSONMarketRegistrationEvent,
+  isJSONPeriodicStateEvent,
+  isJSONStateEvent,
+  isJSONSwapEvent,
+} from "@sdk/types/json-types";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "@sdk/const";
+
+export type AddEventsType<T> = ({ data, sorted }: { data: readonly T[]; sorted?: boolean }) => void;
+
+// Type aliases for more specificity.
+export type MarketIDString = string;
+export type SymbolString = string;
 
 export const marketIDToSymbol = (args: {
   marketID: AnyNumberString;
@@ -40,49 +68,56 @@ export const resolveToEmojiSymbol = (args: {
   }
 };
 
-export function storeEvents(store: EventStore, data: Awaited<SubmissionResponse>): void {
+if (MODULE_ADDRESS.toStringWithoutPrefix().startsWith("0")) {
+  console.error("-".repeat(80) + "\n");
+  console.error("Module address starts with zero. This will lead to indexing and parsing errors.");
+  console.error("-".repeat(80) + "\n");
+}
+
+const eventSet = new Set([
+  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Swap`,
+  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Chat`,
+  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::MarketRegistration`,
+  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::PeriodicState`,
+  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::State`,
+  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::GlobalState`,
+  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Liquidity`,
+]);
+
+export function filterNonContractEvents(data: Awaited<SubmissionResponse>): AnyEmojicoinEvent[] {
   const response = data?.response;
   if (!response || !isUserTransactionResponse(response)) {
-    return;
+    return [];
   }
-  const filtered = response.events.filter((event) => converter.has(event.type));
-  const version = Number(response.version);
-  filtered.forEach((event): void => {
-    const conversionFunction = converter.get(event.type);
-    if (typeof conversionFunction !== "function") {
-      return;
+  const filtered = response.events.reduce((acc, event) => {
+    if (eventSet.has(event.type)) {
+      const version = Number(response.version);
+      const { data } = event;
+
+      if (isJSONSwapEvent(event)) {
+        acc.push(toSwapEvent(data, version));
+      } else if (isJSONChatEvent(event)) {
+        acc.push(toChatEvent(data, version));
+      } else if (isJSONMarketRegistrationEvent(event)) {
+        acc.push(toMarketRegistrationEvent(data, version));
+      } else if (isJSONPeriodicStateEvent(event)) {
+        acc.push(toPeriodicStateEvent(data, version));
+      } else if (isJSONStateEvent(event)) {
+        acc.push(toStateEvent(data, version));
+      } else if (isJSONGlobalStateEvent(event)) {
+        acc.push(toGlobalStateEvent(data, version));
+      } else if (isJSONLiquidityEvent(event)) {
+        acc.push(toLiquidityEvent(data, version));
+      }
     }
-    const data = conversionFunction(event.data, version);
-    switch (event.type) {
-      case TYPE_TAGS.SwapEvent.toString():
-        store.addSwapEvents({ data: data as Types.SwapEvent });
-        break;
-      case TYPE_TAGS.ChatEvent.toString():
-        store.addChatEvents({ data: data as Types.ChatEvent });
-        break;
-      case TYPE_TAGS.MarketRegistrationEvent.toString():
-        store.addMarketRegistrationEvents({ data: data as Types.MarketRegistrationEvent });
-        break;
-      case TYPE_TAGS.PeriodicStateEvent.toString():
-        store.addPeriodicStateEvents({ data: data as Types.PeriodicStateEvent });
-        break;
-      case TYPE_TAGS.StateEvent.toString():
-        store.addStateEvents({ data: data as Types.StateEvent });
-        break;
-      case TYPE_TAGS.GlobalStateEvent.toString():
-        store.addGlobalStateEvents({ data: data as Types.GlobalStateEvent });
-        break;
-      case TYPE_TAGS.LiquidityEvent.toString():
-        store.addLiquidityEvents({ data: data as Types.LiquidityEvent });
-        break;
-      default:
-        throw new Error(`Unknown event type: ${event.type}`);
-    }
-  });
+    return acc;
+  }, [] as AnyEmojicoinEvent[]);
+
+  return filtered;
 }
 
 export const mergeSortedEvents = <T extends AnyEmojicoinEvent>(
-  existing: T[],
+  existing: readonly T[],
   incoming: T[]
 ): T[] => {
   const merged: T[] = [];
@@ -107,4 +142,185 @@ export const mergeSortedEvents = <T extends AnyEmojicoinEvent>(
   }
 
   return merged;
+};
+
+type AnyDBJsonEvent = DBJsonData<AnyEmojicoinJSONEvent>;
+type DBSwapEvent = DBJsonData<JSONTypes.SwapEvent>;
+type DBChatEvent = DBJsonData<JSONTypes.ChatEvent>;
+type DBMarketRegistrationEvent = DBJsonData<JSONTypes.MarketRegistrationEvent>;
+type DBPeriodicStateEvent = DBJsonData<JSONTypes.PeriodicStateEvent>;
+type DBStateEvent = DBJsonData<JSONTypes.StateEvent>;
+type DBGlobalStateEvent = DBJsonData<JSONTypes.GlobalStateEvent>;
+type DBLiquidityEvent = DBJsonData<JSONTypes.LiquidityEvent>;
+
+export function isSwapEventFromDB(e: AnyDBJsonEvent): e is DBSwapEvent {
+  return e.event_name === "emojicoin_dot_fun::Swap";
+}
+export function isChatEventFromDB(e: AnyDBJsonEvent): e is DBChatEvent {
+  return e.event_name === "emojicoin_dot_fun::Chat";
+}
+export function isMarketRegistrationEventFromDB(e: AnyDBJsonEvent): e is DBMarketRegistrationEvent {
+  return e.event_name === "emojicoin_dot_fun::MarketRegistration";
+}
+export function isPeriodicStateEventFromDB(e: AnyDBJsonEvent): e is DBPeriodicStateEvent {
+  return e.event_name === "emojicoin_dot_fun::PeriodicState";
+}
+export function isStateEventFromDB(e: AnyDBJsonEvent): e is DBStateEvent {
+  return e.event_name === "emojicoin_dot_fun::State";
+}
+export function isGlobalStateEventFromDB(e: AnyDBJsonEvent): e is DBGlobalStateEvent {
+  return e.event_name === "emojicoin_dot_fun::GlobalState";
+}
+export function isLiquidityEventFromDB(e: AnyDBJsonEvent): e is DBLiquidityEvent {
+  return e.event_name === "emojicoin_dot_fun::Liquidity";
+}
+
+export type EventDeserializationFunction<
+  T extends AnyEmojicoinJSONEvent,
+  U extends AnyEmojicoinEvent,
+> = (
+  data: DBJsonData<T>,
+  version: number
+) => { event: U; marketID?: MarketIDString; symbol?: SymbolString };
+
+export function deserializeEvent(
+  data: AnyDBJsonEvent,
+  version: number
+): { event: AnyEmojicoinEvent; marketID?: undefined; symbol?: undefined } | undefined;
+export function deserializeEvent(
+  data: DBJsonData<JSONTypes.SwapEvent>,
+  version: number
+): { event: Types.SwapEvent; marketID: MarketIDString };
+export function deserializeEvent(
+  data: DBJsonData<JSONTypes.ChatEvent>,
+  version: number
+): { event: Types.ChatEvent; marketID: MarketIDString; symbol: SymbolString };
+export function deserializeEvent(
+  data: DBJsonData<JSONTypes.MarketRegistrationEvent>,
+  version: number
+): {
+  event: Types.MarketRegistrationEvent;
+  marketID: MarketIDString;
+  symbol: SymbolString;
+};
+export function deserializeEvent(
+  data: DBJsonData<JSONTypes.PeriodicStateEvent>,
+  version: number
+): {
+  event: Types.PeriodicStateEvent;
+  marketID: MarketIDString;
+  symbol: SymbolString;
+};
+export function deserializeEvent(
+  data: DBJsonData<JSONTypes.StateEvent>,
+  version: number
+): { event: Types.StateEvent; marketID: MarketIDString; symbol: SymbolString };
+export function deserializeEvent(
+  data: DBJsonData<JSONTypes.GlobalStateEvent>,
+  version: number
+): { event: Types.GlobalStateEvent; marketID: undefined; symbol: undefined };
+export function deserializeEvent(
+  data: DBJsonData<JSONTypes.LiquidityEvent>,
+  version: number
+): { event: Types.LiquidityEvent; marketID: MarketIDString };
+export function deserializeEvent<T extends AnyEmojicoinJSONEvent, U extends AnyEmojicoinEvent>(
+  data: DBJsonData<T>,
+  version: number
+) {
+  const conversion = deserializationMap[data.event_name];
+  if (!conversion) {
+    console.warn(`No conversion function found for event type: ${data.event_name}`);
+    return undefined;
+  }
+  return conversion(data, version) as ReturnType<EventDeserializationFunction<T, U>>;
+}
+
+export type WebSocketConversionFunction<
+  T1 extends AnyEmojicoinJSONEvent,
+  T2 extends AnyEmojicoinEvent,
+> = (
+  data: DBJsonData<T1>,
+  version: number
+) =>
+  | {
+      event: T2;
+      marketID: MarketIDString;
+      symbol: SymbolString;
+    }
+  | {
+      event: T2;
+      marketID: MarketIDString;
+    }
+  | {
+      event: T2;
+    };
+
+export const deserializationMap: Record<
+  AnyEmojicoinEventName,
+  WebSocketConversionFunction<AnyEmojicoinJSONEvent, AnyEmojicoinEvent>
+> = {
+  ["emojicoin_dot_fun::Swap"]: (data, version) => {
+    const json = data.data as JSONTypes.SwapEvent;
+    const event = toSwapEvent(json, version);
+    const marketID = event.marketID.toString();
+    return {
+      event,
+      marketID,
+    };
+  },
+  ["emojicoin_dot_fun::Chat"]: (data, version) => {
+    const json = data.data as JSONTypes.ChatEvent;
+    const event = toChatEvent(json, version);
+    const marketID = event.marketMetadata.marketID.toString();
+    return {
+      event,
+      marketID,
+      symbol: symbolBytesToEmojis(event.marketMetadata.emojiBytes).symbol,
+    };
+  },
+  ["emojicoin_dot_fun::MarketRegistration"]: (data, version) => {
+    const json = data.data as JSONTypes.MarketRegistrationEvent;
+    const event = toMarketRegistrationEvent(json, version);
+    const marketID = event.marketMetadata.marketID.toString();
+    return {
+      event,
+      marketID,
+      symbol: symbolBytesToEmojis(event.marketMetadata.emojiBytes).symbol,
+    };
+  },
+  ["emojicoin_dot_fun::PeriodicState"]: (data, version) => {
+    const json = data.data as JSONTypes.PeriodicStateEvent;
+    const event = toPeriodicStateEvent(json, version);
+    const marketID = event.marketMetadata.marketID.toString();
+    return {
+      event,
+      marketID,
+      symbol: symbolBytesToEmojis(event.marketMetadata.emojiBytes).symbol,
+    };
+  },
+  ["emojicoin_dot_fun::State"]: (data, version) => {
+    const json = data.data as JSONTypes.StateEvent;
+    const event = toStateEvent(json, version);
+    const marketID = event.marketMetadata.marketID.toString();
+    return {
+      event,
+      marketID,
+      symbol: symbolBytesToEmojis(event.marketMetadata.emojiBytes).symbol,
+    };
+  },
+  ["emojicoin_dot_fun::GlobalState"]: (data, version) => {
+    const json = data.data as JSONTypes.GlobalStateEvent;
+    const event = toGlobalStateEvent(json, version);
+    return {
+      event,
+    };
+  },
+  ["emojicoin_dot_fun::Liquidity"]: (data, version) => {
+    const json = data.data as JSONTypes.LiquidityEvent;
+    const event = toLiquidityEvent(json, version);
+    return {
+      event,
+      marketID: event.marketID.toString(),
+    };
+  },
 };
