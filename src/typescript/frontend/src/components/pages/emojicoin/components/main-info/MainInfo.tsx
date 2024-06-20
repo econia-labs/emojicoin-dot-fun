@@ -22,7 +22,8 @@ const MainInfo = (props: MainInfoProps) => {
   const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
 
-  // TODO: Add to this in state. You can keep track of this yourself, technically.
+  // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
+  // Add to this in state. You can keep track of this yourself, technically.
   // It would require some reconciliation between the data from server and data in store, but it would drastically
   // reduce the amount of calls we'd have to make while keeping the data very up to date and accurate.
   // Right now we add the volume from any incoming events, which is basically a rough estimate and may be inaccurate.
@@ -39,7 +40,7 @@ const MainInfo = (props: MainInfoProps) => {
       setMarketCap(marketCapInStore);
     }
 
-    // TODO: Fix ASAP. This **will** become wildly inaccurate, because it doesn't evict stale data from the rolling
+    // TODO: Fix ASAP. This **will** become inaccurate over time, because it doesn't evict stale data from the rolling
     // volume. It's just a rough estimate to simulate live 24h rolling volume.
     setRough24HourVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
     setRoughAllTimeVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
