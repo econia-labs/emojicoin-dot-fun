@@ -4,10 +4,9 @@ import { type CandlestickResolution } from "../const";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { wrap } from "./utils";
-import { type Types, type JSONTypes, toPeriodicStateEvent } from "../types";
+import { type JSONTypes } from "../types";
 import {
   type AggregateQueryResultsArgs,
-  type EventsAndErrors,
   aggregateQueryResults,
 } from "./query-helper";
 import { postgrest } from "./inbox-url";

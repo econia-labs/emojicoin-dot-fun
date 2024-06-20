@@ -24,9 +24,7 @@ import { paginateMarketRegistrations } from "./market";
  *   .eq("column", s(1))
  *
  */
-export const wrap = (val: number | bigint | string): string => {
-  return `"${val.toString()}"`;
-};
+export const wrap = (val: number | bigint | string): string => `"${val.toString()}"`;
 
 export const getMostRecentMarketEvent = async (): Promise<Types.MarketRegistrationEvent | null> => {
   const { markets } = await paginateMarketRegistrations();

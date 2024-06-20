@@ -41,7 +41,10 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const marketID = res.marketID.toString();
     const chatData = await fetchInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
     const swapData = await fetchInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
-    const candlesticks = await fetchInitialCandlesticks({ marketID, maxTotalRows: CANDLESTICK_DATA_ROWS });
+    const candlesticks = await fetchInitialCandlesticks({
+      marketID,
+      maxTotalRows: CANDLESTICK_DATA_ROWS,
+    });
     return (
       <ClientEmojicoinPage
         data={{
