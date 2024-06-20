@@ -107,10 +107,8 @@ export namespace Types {
     metadata: MarketMetadata;
     sequenceInfo: SequenceInfo;
     extendRef: ExtendRef;
-    clammVirtualReservesBase: bigint;
-    clammVirtualReservesQuote: bigint;
-    cpammRealReservesBase: bigint;
-    cpammRealReservesQuote: bigint;
+    clammVirtualReserves: Reserves;
+    cpammRealReserves: Reserves;
     lpCoinSupply: bigint;
     cumulativeStats: CumulativeStats;
     lastSwap: LastSwap;
@@ -416,10 +414,8 @@ export const toMarketResource = (data: JSONTypes.MarketResource): Types.MarketRe
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
   extendRef: toExtendRef(data.extend_ref),
-  clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves_base),
-  clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves_quote),
-  cpammRealReservesBase: BigInt(data.cpamm_real_reserves_base),
-  cpammRealReservesQuote: BigInt(data.cpamm_real_reserves_quote),
+  clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
+  cpammRealReserves: toReserves(data.cpamm_real_reserves),
   lpCoinSupply: BigInt(data.lp_coin_supply),
   cumulativeStats: toCumulativeStats(data.cumulative_stats),
   lastSwap: toLastSwap(data.last_swap),

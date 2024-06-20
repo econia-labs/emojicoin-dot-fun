@@ -111,10 +111,8 @@ namespace JSONTypes {
     metadata: MarketMetadata;
     sequence_info: SequenceInfo;
     extend_ref: ExtendRef;
-    clamm_virtual_reserves_base: Uint64String;
-    clamm_virtual_reserves_quote: Uint64String;
-    cpamm_real_reserves_base: Uint64String;
-    cpamm_real_reserves_quote: Uint64String;
+    clamm_virtual_reserves: Reserves;
+    cpamm_real_reserves: Reserves;
     lp_coin_supply: Uint128String;
     cumulative_stats: CumulativeStats;
     last_swap: LastSwap;
