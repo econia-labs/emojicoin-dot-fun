@@ -23,6 +23,7 @@ import emojiRegex from "emoji-regex";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 
 const convertChatMessageToEmojiAndIndices = (message: string) => {
   const emojiArr = message.match(emojiRegex()) ?? [];
@@ -140,8 +141,7 @@ const ChatBox = (props: ChatProps) => {
               // TODO: Resolve address to Aptos name, store in state.
               sender: chat.user,
               text: chat.message,
-              // TODO: Check balance as fraction of circ supply
-              senderRank: chat.user.at(-1)?.toLowerCase() === "f" ? "🐳" : "🐡",
+              senderRank: getRankFromChatEvent(chat).rankIcon,
               version: chat.version,
             };
             return <MessageContainer message={message} key={index} />;

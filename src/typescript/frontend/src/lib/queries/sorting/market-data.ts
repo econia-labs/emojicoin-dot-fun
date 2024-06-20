@@ -72,7 +72,7 @@ export const fetchFeaturedMarket = async (
     keys,
     {
       tags: ["featured-market"],
-      revalidate: REVALIDATION_TIME,
+      revalidate: Math.max(REVALIDATION_TIME, 1),
     }
   )();
 
@@ -142,7 +142,7 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
     keys,
     {
       tags: ["sorted-markets"],
-      revalidate: REVALIDATION_TIME,
+      revalidate: Math.max(REVALIDATION_TIME, 1),
     }
   )();
 

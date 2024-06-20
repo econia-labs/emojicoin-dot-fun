@@ -11,7 +11,7 @@ import {
   StyledMobileContentInner,
 } from "./styled";
 import TradeHistory from "../trade-history";
-import ChatBox from "../chat";
+import ChatBox from "../chat/ChatBox";
 import { type GridProps } from "../../types";
 import SwapComponent from "../trade-emojicoin/SwapComponent";
 
