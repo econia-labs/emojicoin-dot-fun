@@ -39,7 +39,8 @@ const DesktopGrid = (props: GridProps) => {
               <SwapComponent
                 emojicoin={props.data.symbol}
                 marketAddress={props.data.marketAddress}
-                numSwaps={props.data.numSwaps}
+                marketID={props.data.marketID.toString()}
+                initNumSwaps={props.data.numSwaps}
               />
             </StyledBlockWrapper>
           </StyledBlock>

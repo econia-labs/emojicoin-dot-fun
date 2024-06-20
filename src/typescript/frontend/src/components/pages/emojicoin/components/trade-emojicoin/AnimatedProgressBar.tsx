@@ -1,5 +1,5 @@
 import { type GridProps } from "components/pages/emojicoin/types";
-import { useEventStore } from "context/store-context";
+import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";
@@ -10,7 +10,7 @@ import { darkColors } from "theme/colors";
 const getLatestReserves = (args: {
   propsData: Types.MarketDataView;
   storeMarketData?: Types.MarketDataView;
-  storeStateEvents: Array<Types.StateEvent>;
+  storeStateEvents: readonly Types.StateEvent[];
 }) => {
   const { propsData, storeMarketData, storeStateEvents } = args;
   const latestStoreState = storeStateEvents[0];
@@ -32,9 +32,38 @@ const getLatestReserves = (args: {
 
 export const AnimatedProgressBar = (props: GridProps) => {
   const data = props.data;
-  const marketData = useEventStore((s) => s.getMarket(data.marketID)?.marketData);
-  const stateEvents = useEventStore((s) => s.getMarket(data.marketID)?.stateEvents.events);
+  const marketID = data.marketID.toString();
+  const { marketData, stateEvents } = useEventStore((s) => ({
+    marketData: s.getMarket(marketID)?.marketData,
+    stateEvents: s.getMarket(marketID)?.stateEvents ?? [],
+  }));
+
+  // Set the initial progress with data passed in from props, aka server component data.
   const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
+
+  // Then track the latest progress from the store.
+  useEffect(() => {
+    if (marketData && stateEvents) {
+      const clammVirtualReserves = getLatestReserves({
+        propsData: data,
+        storeMarketData: marketData,
+        storeStateEvents: stateEvents ?? [],
+      });
+      const percentage = getBondingCurveProgress(clammVirtualReserves);
+      setProgress(percentage);
+    }
+    /* eslint-disable-next-line */
+  }, [data, marketData, stateEvents]);
+
+  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    subscribe.state(marketID);
+    return () => unsubscribe.state(marketID);
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   const progressBarControls = useAnimation();
   const flickerControls = useAnimation();
 
@@ -61,19 +90,6 @@ export const AnimatedProgressBar = (props: GridProps) => {
       transition: { duration: 1, repeat: 4, ease: "linear", repeatType: "mirror" },
     });
   }, [progress, progressBarControls, flickerControls]);
-
-  useEffect(() => {
-    if (marketData && stateEvents) {
-      const clammVirtualReserves = getLatestReserves({
-        propsData: data,
-        storeMarketData: marketData,
-        storeStateEvents: stateEvents ?? [],
-      });
-      const percentage = getBondingCurveProgress(clammVirtualReserves);
-      setProgress(percentage);
-    }
-    /* eslint-disable-next-line */
-  }, [data.clammVirtualReserves, data.numSwaps, marketData, stateEvents]);
 
   return (
     <motion.div className="relative flex w-full rounded-sm h-[100%] !p-0">

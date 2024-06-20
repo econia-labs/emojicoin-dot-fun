@@ -37,6 +37,7 @@ module.exports = {
       dropShadow: {
         text: "0 1px 2px #000000dd",
         voltage: "1px 0 5px #ffffff99",
+        // emoji: "0 0 21px #87FFFF66",
       },
     },
     colors: {
@@ -187,6 +188,9 @@ module.exports = {
         },
         ".radii-circle": {
           borderRadius: "50%",
+        },
+        ".no-overflow-anchoring": {
+          overflowAnchor: "none",
         },
       };
       addUtilities(newUtilities, ["responsive"]);

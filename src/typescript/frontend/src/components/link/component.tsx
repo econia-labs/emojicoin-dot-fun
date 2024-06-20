@@ -19,7 +19,7 @@ export const ExplorerLink = ({
   style?: React.CSSProperties;
   className?: string;
 }) => {
-  const href = toExplorerLink({ value, type, network });
+  const href = toExplorerLink({ value, linkType: type, network });
   return (
     <a
       style={style}

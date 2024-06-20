@@ -27,6 +27,7 @@ fleur
 futuna
 galxe
 gcloud
+guids
 hamsa
 headlessui
 immer
@@ -67,5 +68,6 @@ tokelau
 tradingview
 turkiye
 vercel
+websockets
 xbtmatt
 zustand

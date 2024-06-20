@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
@@ -17,9 +17,10 @@ import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
-import { useMarketData } from "context/store-context";
+import { useEventStore, useMarketData, useWebSocketClient } from "context/websockets-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+import { useLabelScrambler } from "../animation-config";
 
 export interface MainCardProps {
   featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
@@ -27,18 +28,54 @@ export interface MainCardProps {
 }
 
 const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
+  const { t } = translationFunction();
   const setNumMarkets = useMarketData((s) => s.setNumMarkets);
+
+  const marketID = featured?.marketID.toString() ?? "-1";
+  const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
+  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+
+  // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
+  // See the other todo note with the same tag.
+  const [marketCap, setMarketCap] = useState(BigInt(featured?.marketCap ?? 0));
+  const [roughDailyVolume, setRoughDailyVolume] = useState(BigInt(featured?.dailyVolume ?? 0));
+  const [roughAllTimeVolume, setRoughAllTimeVolume] = useState(
+    BigInt(featured?.allTimeVolume ?? 0)
+  );
+
+  useEffect(() => {
+    if (stateEvents.length === 0) return;
+    const latestEvent = stateEvents.at(0)!;
+    const numSwapsInStore = latestEvent?.cumulativeStats.numSwaps ?? 0;
+    if (numSwapsInStore > (featured?.numSwaps ?? -1)) {
+      const marketCapInStore = latestEvent.instantaneousStats.marketCap;
+      setMarketCap(marketCapInStore);
+    }
+
+    // TODO: Fix ASAP. This **will** become inaccurate over time.
+    setRoughDailyVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
+    setRoughAllTimeVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
+  }, [featured, stateEvents]);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    subscribe.state(marketID);
+    return () => unsubscribe.state(marketID);
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   useEffect(() => {
     setNumMarkets(totalNumberOfMarkets);
   }, [totalNumberOfMarkets, setNumMarkets]);
 
-  const { t } = translationFunction();
-
   const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
     placement: "top",
     isEllipsis: true,
   });
+
+  const { ref: marketCapRef } = useLabelScrambler(marketCap);
+  const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);
+  const { ref: allTimeVolumeRef } = useLabelScrambler(roughAllTimeVolume);
 
   return (
     <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1872px">
@@ -50,7 +87,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
         flexDirection={{ _: "column", tablet: "row" }}
       >
         <Link
-          href={`${ROUTES.market}/${featured?.marketID.toString()}`}
+          href={featured ? `${ROUTES.market}/${featured?.marketID.toString()}` : ROUTES.home}
           style={{
             position: "relative",
             alignItems: "center",
@@ -83,8 +120,11 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
                   {t("Mkt. Cap:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toCoinDecimalString(featured?.marketCap ?? 0, 2)}{" "}
-                  <AptosIconBlack className={"icon-inline"} />
+                  <div className="flex flex-row items-center justify-center">
+                    <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
+                    &nbsp;
+                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                  </div>
                 </StyledMarketDataText>
               </>
             )}
@@ -97,8 +137,11 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
                   {t("24 hour vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toCoinDecimalString(featured?.dailyVolume ?? 0, 2)}{" "}
-                  <AptosIconBlack className={"icon-inline"} />
+                  <div className="flex flex-row items-center justify-center">
+                    <div ref={dailyVolumeRef}>{toCoinDecimalString(roughDailyVolume, 2)}</div>
+                    &nbsp;
+                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                  </div>
                 </StyledMarketDataText>
               </>
             )}
@@ -111,8 +154,11 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
                   {t("All-time vol:")}
                 </StyledMarketDataText>
                 <StyledMarketDataText>
-                  {toCoinDecimalString(featured!.allTimeVolume, 2)}{" "}
-                  <AptosIconBlack className={"icon-inline"} />
+                  <div className="flex flex-row items-center justify-center">
+                    <div ref={allTimeVolumeRef}>{toCoinDecimalString(roughAllTimeVolume, 2)}</div>
+                    &nbsp;
+                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                  </div>
                 </StyledMarketDataText>
               </>
             )}

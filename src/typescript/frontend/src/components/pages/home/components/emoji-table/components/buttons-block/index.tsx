@@ -10,7 +10,7 @@ import { StyledBtn } from "./styled";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getPageQueryPath } from "lib/queries/sorting/query-params";
 import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { useMarketData } from "context/store-context";
+import { useMarketData } from "context/websockets-context";
 
 const ButtonsBlock: React.FC = () => {
   const pathname = usePathname();
@@ -27,6 +27,7 @@ const ButtonsBlock: React.FC = () => {
         numMarkets,
       });
       if (routerFunction === "push") {
+        console.debug("pushing new path:", newPath);
         router.push(newPath, { scroll: false });
       } else if (routerFunction === "prefetch") {
         router.prefetch(newPath);
