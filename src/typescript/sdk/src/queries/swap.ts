@@ -14,7 +14,7 @@ import { postgrest } from "./inbox-url";
 export const paginateSwapEvents = async (
   args: Omit<AggregateQueryResultsArgs, "query"> & {
     swapper?: string;
-    marketID?: number | bigint;
+    marketID?: number | bigint | string;
   }
 ) => {
   const { swapper, marketID } = args;

@@ -5,10 +5,12 @@ import { Big } from "big.js";
 const Q64_BASE = Big((1n << 64n).toString());
 const DECIMALS = 16;
 
+export const q64ToBig = (q64: string | number | bigint) => Big(q64.toString()).div(Q64_BASE);
+
 export const toNominalPrice = (
   avgExecutionPriceQ64: string | number | bigint,
   decimals: number = DECIMALS
-) => Number(Big(avgExecutionPriceQ64.toString()).div(Q64_BASE).toFixed(decimals));
+) => Number(q64ToBig(avgExecutionPriceQ64).toFixed(decimals));
 
 export const toQuotePrice = (
   avgExecutionPriceQ64: string | number | bigint,

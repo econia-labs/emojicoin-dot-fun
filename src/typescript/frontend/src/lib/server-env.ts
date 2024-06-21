@@ -17,9 +17,11 @@ if (
   throw new Error("Allowlist is enabled but no allowlist provider is set.");
 }
 
+if (typeof process.env.REVALIDATION_TIME === "undefined") {
+  throw new Error("Environment variable REVALIDATION_TIME is undefined.");
+}
+
 export const ALLOWLISTER3K_URL: string | undefined = process.env.ALLOWLISTER3K_URL;
 export const GALXE_CAMPAIGN_ID: string | undefined = process.env.GALXE_CAMPAIGN_ID;
-export const REVALIDATION_TIME: number | undefined = process.env.REVALIDATION_TIME
-  ? Number(process.env.REVALIDATION_TIME)
-  : undefined;
+export const REVALIDATION_TIME: number = Number(process.env.REVALIDATION_TIME);
 export const HASH_SEED: string = process.env.HASH_SEED;
