@@ -92,13 +92,11 @@ const TableCard: React.FC<TableCardProps> = ({
   }, [liquidityEvents]);
 
   useEffect(() => {
-    console.debug("Subscribing to events for marketID:", marketID);
     events.initializeMarket(marketID, symbol);
     subscribe.chat(marketID);
     subscribe.state(marketID);
     subscribe.liquidity(marketID);
 
-    console.debug(`Unsubscribing from events for marketID: ${marketID}`);
     return () => {
       unsubscribe.chat(marketID);
       unsubscribe.state(marketID);

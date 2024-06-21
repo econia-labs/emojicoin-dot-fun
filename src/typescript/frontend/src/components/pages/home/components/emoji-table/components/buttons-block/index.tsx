@@ -27,8 +27,11 @@ const ButtonsBlock: React.FC = () => {
         numMarkets,
       });
       if (routerFunction === "push") {
-        console.debug("pushing new path:", newPath);
+        // TODO: Refactor the dropdown Single/MultiSelect stuff entirely into a `next/Link` component.
+        // Currently it's a mess which is why we have to use router.push() && router.refresh();
+        // Instead of just using <Link href={..} />
         router.push(newPath, { scroll: false });
+        router.refresh();
       } else if (routerFunction === "prefetch") {
         router.prefetch(newPath);
       }
