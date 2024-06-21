@@ -1,3 +1,4 @@
+import { toOrderBy } from "@sdk/queries/const";
 import fetchSortedMarketData from "lib/queries/sorting/market-data";
 import type { SortByPostgrestQueryParams } from "lib/queries/sorting/types";
 import { stringifyJSON } from "utils";
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
   const data = await fetchSortedMarketData({
     page,
     inBondingCurve: false,
-    orderBy,
+    orderBy: toOrderBy(orderBy),
     sortBy,
   });
   return new Response(stringifyJSON(data));
