@@ -68,9 +68,9 @@ export const FilterOptionsComponent = () => {
       });
       if (routerFunction === "push") {
         setSelectedOption(option as MyOption);
-        // TODO: Refactor the dropdown Single/MultiSelect stuff entirely into a `next/Link` component.
-        // Currently it's a mess which is why we have to use router.push() && router.refresh();
-        // Instead of just using <Link href={..} />
+        // TODO: Consider refactoring the dropdown Single/MultiSelect stuff entirely into a `next/Link` component.
+        // It's possible this is actually the only way to do this because I don't think `next/Link` automatically
+        // refreshes, but we can look into it.
         router.push(newPath, { scroll: false });
         router.refresh();
       } else if (routerFunction === "prefetch") {
