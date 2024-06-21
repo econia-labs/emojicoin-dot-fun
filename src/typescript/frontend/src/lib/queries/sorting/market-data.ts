@@ -78,8 +78,6 @@ export const fetchFeaturedMarket = async (
 
   const data = res.data;
 
-  console.log(data);
-
   if (typeof data?.at(0) !== "undefined" && data.length > 0) {
     return {
       ...toMarketDataView(data[0]),

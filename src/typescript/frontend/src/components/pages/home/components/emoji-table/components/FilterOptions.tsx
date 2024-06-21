@@ -13,7 +13,6 @@ import { MarketDataSortBy, toPageQueryParam } from "lib/queries/sorting/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { getSortQueryPath } from "lib/queries/sorting/query-params";
-import Link from "next/link";
 
 const titleFromValue: Record<MarketDataSortBy, string> = {
   [MarketDataSortBy.MarketCap]: "Market Cap",
