@@ -24,7 +24,6 @@ git clone \
 	--depth 1
 
 # Move files to submodule directory, clean up.
-cd charting_libary
-mv * $TRADING_VIEW_SUBMODULE_PATH/
-cd ../..
+cd ..
+mv tmp/charting_library * $TRADING_VIEW_SUBMODULE_PATH/
 rm -rf tmp
