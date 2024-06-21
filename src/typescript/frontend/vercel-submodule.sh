@@ -17,15 +17,14 @@ rm -rf tmp || true
 mkdir tmp
 cd tmp
 
-# Check out submodule
+# Check out submodule.
 git clone \
 	https://$GITHUB_ACCESS_TOKEN@github.com/$TRADING_VIEW_REPO_OWNER/charting_library.git \
 	--branch master \
 	--depth 1
 
-# Cleanup the repository and move the files to the submodule directory.
-cd ..
-rm -rf tmp/.git
-ls
-mv tmp/charting_library * $SUBMODULE_PATH/
+# Move files to submodule directory, clean up.
+cd charting_libary
+mv * $TRADING_VIEW_SUBMODULE_PATH/
+cd ../..
 rm -rf tmp
