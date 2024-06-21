@@ -7,6 +7,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
 
 export default async function middleware(request: NextRequest) {
+  const pathname = new URL(request.url).pathname;
+  if (
+    pathname === "/social-preview.png" ||
+    pathname === "/webclip.png" ||
+    pathname === "/icon.png"
+  ) {
+    return NextResponse.next();
+  }
   const hashed = request.cookies.get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = request.cookies.get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;
 
