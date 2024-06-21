@@ -14,15 +14,24 @@ const getLatestReserves = (args: {
 }) => {
   const { propsData, storeMarketData, storeStateEvents } = args;
   const latestStoreState = storeStateEvents[0];
-  const reserves: Array<[Types.Reserves, bigint]> = [
-    [propsData.clammVirtualReserves, BigInt(propsData.numSwaps)],
+  const reserves: Array<[[number, number], bigint]> = [
+    [
+      [propsData.clammVirtualReservesBase, propsData.clammVirtualReservesQuote],
+      BigInt(propsData.numSwaps),
+    ],
   ];
   if (storeMarketData) {
-    reserves.push([storeMarketData.clammVirtualReserves, BigInt(storeMarketData.numSwaps)]);
+    reserves.push([
+      [storeMarketData.clammVirtualReservesBase, storeMarketData.clammVirtualReservesQuote],
+      BigInt(storeMarketData.numSwaps),
+    ]);
   }
   if (latestStoreState) {
     reserves.push([
-      latestStoreState.clammVirtualReserves,
+      [
+        Number(latestStoreState.clammVirtualReserves.base),
+        Number(latestStoreState.clammVirtualReserves.quote),
+      ],
       BigInt(latestStoreState.cumulativeStats.numSwaps),
     ]);
   }
@@ -39,7 +48,7 @@ export const AnimatedProgressBar = (props: GridProps) => {
   }));
 
   // Set the initial progress with data passed in from props, aka server component data.
-  const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
+  const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReservesQuote));
 
   // Then track the latest progress from the store.
   useEffect(() => {
@@ -49,7 +58,7 @@ export const AnimatedProgressBar = (props: GridProps) => {
         storeMarketData: marketData,
         storeStateEvents: stateEvents ?? [],
       });
-      const percentage = getBondingCurveProgress(clammVirtualReserves);
+      const percentage = getBondingCurveProgress(clammVirtualReserves[1]);
       setProgress(percentage);
     }
     /* eslint-disable-next-line */

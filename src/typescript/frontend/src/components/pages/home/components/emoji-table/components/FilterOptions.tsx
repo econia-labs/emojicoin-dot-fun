@@ -20,6 +20,8 @@ const titleFromValue: Record<MarketDataSortBy, string> = {
   [MarketDataSortBy.DailyVolume]: "24h Volume",
   [MarketDataSortBy.AllTimeVolume]: "Alltime Vol",
   [MarketDataSortBy.Price]: "Price",
+  [MarketDataSortBy.Apr]: "APR",
+  [MarketDataSortBy.Tvl]: "TVL",
 };
 
 type MyOption = {

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
@@ -9,15 +9,40 @@ import { Flex, Column } from "@containers";
 import { Text, InputNumeric, InputGroup, Button, Prompt } from "components";
 
 import { StyledAddLiquidityWrapper } from "./styled";
+import { ProvideLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import type fetchSortedMarketData from "lib/queries/sorting/market-data";
+import { toCoinDecimalString } from "lib/utils/decimals";
+import {
+  AptosInputLabel,
+  EmojiInputLabel,
+} from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { toActualCoinDecimals } from "lib/utils/decimals";
+import { toCoinTypes } from "@sdk/markets/utils";
+import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { useSimulateProvideLiquidity } from "lib/hooks/queries/use-simulate-provide-liquidity";
 
-const Liquidity: React.FC = () => {
+type LiquidityProps = {
+  market: Awaited<ReturnType<typeof fetchSortedMarketData>>["markets"][0] | undefined;
+};
+
+const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
   const { t } = translationFunction();
   const { theme } = useThemeContext();
+
+  const [liquidity, setLiquidity] = useState<number>(0);
+
+  const { aptos, account, submit } = useAptos();
+
+  const provideLiquidityResult = useSimulateProvideLiquidity({
+    marketAddress: market?.marketAddress,
+    quoteAmount: toActualCoinDecimals({ num: liquidity }),
+  });
 
   return (
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
       <Column width="100%" maxWidth="414px" justifyContent="center">
-        <Text textScale={{ _: "heading2", tablet: "heading1" }} textTransform="uppercase" mb="16px">
+        <Text textScale="heading1" textTransform="uppercase" mb="16px">
           {t("Add liquidity")}
         </Text>
 
@@ -29,16 +54,15 @@ const Liquidity: React.FC = () => {
               scale="sm"
               mt={{ _: "-3px", tablet: "6px" }}
             >
-              <InputNumeric borderColor="transparent" p="0px !important" onUserInput={() => {}} />
+              <InputNumeric
+                borderColor="transparent"
+                p="0px !important"
+                onUserInput={(e) => {
+                  setLiquidity(Number(e));
+                }}
+              />
             </InputGroup>
-
-            <Text
-              textScale={{ _: "pixelHeading4", tablet: "pixelHeading3" }}
-              color="lightGray"
-              textTransform="uppercase"
-            >
-              apt
-            </Text>
+            <AptosInputLabel />
           </Flex>
 
           <Flex
@@ -49,20 +73,24 @@ const Liquidity: React.FC = () => {
               isShowError={false}
               height="22px"
               scale="sm"
-              pt={{ _: "3px", tablet: "6px" }}
+              pt={{ _: "-3px", tablet: "6px" }}
             >
-              <InputNumeric borderColor="transparent" p="0px !important" onUserInput={() => {}} />
+              <InputNumeric
+                disabled
+                borderColor="transparent"
+                p="0px !important"
+                onUserInput={() => {}}
+                value={toCoinDecimalString(provideLiquidityResult ?? 0n, 4)}
+              />
             </InputGroup>
 
-            <Text
-              textScale="pixelHeading3"
-              fontSize={{ _: "24px", tablet: "32px" }}
-              color="lightGray"
-              textTransform="uppercase"
-              pt="4px"
-            >
-              🖤
-            </Text>
+            {market ? (
+              <EmojiInputLabel emoji={market.symbol} />
+            ) : (
+              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase" pt="4px">
+                -
+              </Text>
+            )}
           </Flex>
         </StyledAddLiquidityWrapper>
 
@@ -74,10 +102,32 @@ const Liquidity: React.FC = () => {
         >
           <Prompt text="Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity." />
 
-          <Button scale="lg">{t("Add liquidity")}</Button>
+          <ButtonWithConnectWalletFallback>
+            <Button
+              scale="lg"
+              disabled={(market ? false : true) || !liquidity}
+              onClick={async () => {
+                if (!account) {
+                  return;
+                }
+                const { emojicoin, emojicoinLP } = toCoinTypes(market!.marketAddress);
+                const builderLambda = () =>
+                  ProvideLiquidity.builder({
+                    aptosConfig: aptos.config,
+                    provider: account.address,
+                    marketAddress: market!.marketAddress,
+                    quoteAmount: BigInt(liquidity),
+                    typeTags: [emojicoin, emojicoinLP],
+                  });
+                await submit(builderLambda);
+              }}
+            >
+              {t("Add liquidity")}
+            </Button>
+          </ButtonWithConnectWalletFallback>
         </Flex>
 
-        <Text textScale={{ _: "heading2", tablet: "heading1" }} textTransform="uppercase" mb="16px">
+        <Text textScale="heading1" textTransform="uppercase" mb="16px">
           {t("Reserves")}
         </Text>
 
@@ -85,30 +135,24 @@ const Liquidity: React.FC = () => {
           <Flex
             p={{ _: "10px 12px 7px 10px", tablet: "18px 25px 7px 25px" }}
             justifyContent="space-between"
+            alignItems="center"
           >
-            <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              apt
-            </Text>
+            <AptosInputLabel />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              11,111,111
+              {market ? toCoinDecimalString(market.cpammRealReservesQuote, 2) : "-"}
             </Text>
           </Flex>
 
           <Flex
             p={{ _: "0px 12px 10px 12px", tablet: "0px 25px 18px 25px" }}
             justifyContent="space-between"
+            alignItems="center"
           >
-            <Text
-              textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
-              textTransform="uppercase"
-              textAlign="start"
-            >
-              🖤
-            </Text>
+            {market ? <EmojiInputLabel emoji={market.symbol} /> : "-"}
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              111,111,111
+              {market ? toCoinDecimalString(market.cpammRealReservesBase, 2) : "-"}
             </Text>
           </Flex>
         </StyledAddLiquidityWrapper>
