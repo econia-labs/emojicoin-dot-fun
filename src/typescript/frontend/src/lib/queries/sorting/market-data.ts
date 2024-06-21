@@ -1,6 +1,6 @@
 "use server";
 import { postgrest } from "@sdk/queries/inbox-url";
-import { LIMIT, ORDER_BY, toOrderBy } from "@sdk/queries/const";
+import { LIMIT, ORDER_BY, toOrderByString } from "@sdk/queries/const";
 import { type JSONTypes, toMarketDataView } from "@sdk/types";
 import { toPostgrestQueryParam, type GetSortedMarketDataQueryArgs } from "./types";
 import cached from "../cached";
@@ -14,13 +14,14 @@ const getSortedMarketData = async ({
   orderBy,
   sortBy,
   inBondingCurve = null,
-  count,
+  exactCount,
 }: GetSortedMarketDataQueryArgs) => {
   let query = postgrest
     .from("market_data")
-    .select("*", count ? { count: "exact" } : undefined)
+    .select("*", exactCount ? { count: "exact" } : undefined)
     .range(offset, offset + limit - 1)
-    .order(toPostgrestQueryParam(sortBy), toOrderBy(orderBy));
+    .limit(limit)
+    .order(toPostgrestQueryParam(sortBy), orderBy);
 
   switch (inBondingCurve) {
     case true:
@@ -40,57 +41,52 @@ const getSortedMarketData = async ({
   }));
 };
 
-const cachedFetchSortedMarketData = cached(
-  async ({ limit, offset, sortBy, orderBy, inBondingCurve }: GetSortedMarketDataQueryArgs) =>
-    getSortedMarketData({
-      limit,
-      offset,
-      sortBy,
-      orderBy: toOrderBy(orderBy),
-      inBondingCurve,
-      count: true,
-    }),
-  ["sorted-markets"],
-  {
-    // TODO: Revalidate this tag when the # of markets changes.
-    tags: ["sorted-markets"],
-    revalidate: REVALIDATION_TIME,
-  }
-);
-
-export const cachedFeaturedMarket = cached(
-  async ({
-    sortBy,
-    orderBy,
-    inBondingCurve,
-  }: Omit<GetSortedMarketDataQueryArgs, "limit" | "offset">) =>
-    getSortedMarketData({
-      limit: 1,
-      offset: 0,
-      sortBy,
-      orderBy: toOrderBy(orderBy),
-      inBondingCurve,
-      count: false,
-    }),
-  ["featured-market"],
-  {
-    tags: ["featured-market"],
-    // We can force a revalidate every 30 seconds.
-    revalidate: REVALIDATION_TIME,
-  }
-);
-
 export const fetchFeaturedMarket = async (
   args: Omit<GetSortedMarketDataQueryArgs, "limit" | "offset">
-) =>
-  cachedFeaturedMarket(args).then(({ data }) =>
-    typeof data?.at(0) !== "undefined" && data.length > 0
-      ? {
-          ...toMarketDataView(data[0]),
-          ...symbolBytesToEmojis(data[0].emoji_bytes)!,
-        }
-      : undefined
-  );
+) => {
+  const limit = 1;
+  const offset = 0;
+  const exactCount = false;
+  const { sortBy, orderBy, inBondingCurve } = args;
+
+  const keys = [
+    "featured-market",
+    limit,
+    offset,
+    sortBy,
+    toOrderByString(orderBy),
+    inBondingCurve,
+    exactCount,
+  ].map(String);
+
+  const res = await cached(
+    () =>
+      getSortedMarketData({
+        limit,
+        offset,
+        sortBy,
+        orderBy,
+        inBondingCurve,
+        exactCount,
+      }),
+    keys,
+    {
+      tags: ["featured-market"],
+      revalidate: REVALIDATION_TIME,
+    }
+  )();
+
+  const data = res.data;
+
+  if (typeof data?.at(0) !== "undefined" && data.length > 0) {
+    return {
+      ...toMarketDataView(data[0]),
+      ...symbolBytesToEmojis(data[0].emoji_bytes)!,
+    };
+  } else {
+    return undefined;
+  }
+};
 
 // If you get 500 rows per response, you need to place each request to paginate into
 // a bucket that fits into some 500 rows.
@@ -111,7 +107,7 @@ const calculateIndex = ({
   givenIndex: number;
   orderBy: GetSortedMarketDataQueryArgs["orderBy"];
   totalNumMarkets: number;
-}) => (toOrderBy(orderBy) === ORDER_BY.DESC ? givenIndex : totalNumMarkets - givenIndex);
+}) => (orderBy === ORDER_BY.DESC ? givenIndex : totalNumMarkets - givenIndex);
 
 type CachedArgs = {
   page: number;
@@ -122,17 +118,33 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
 
   const offset = calculateOffset(page);
 
-  const {
-    data: jsonData,
-    error: _,
-    count,
-  } = await cachedFetchSortedMarketData({
-    limit: LIMIT,
+  const [limit, exactCount] = [LIMIT, true] as const;
+  const keys = [
+    "sorted-markets",
+    limit,
     offset,
     sortBy,
-    orderBy,
+    toOrderByString(orderBy),
     inBondingCurve,
-  });
+    exactCount,
+  ].map(String);
+
+  const { data, count } = await cached(
+    () =>
+      getSortedMarketData({
+        limit,
+        offset,
+        sortBy,
+        orderBy,
+        inBondingCurve,
+        exactCount,
+      }),
+    keys,
+    {
+      tags: ["sorted-markets"],
+      revalidate: REVALIDATION_TIME,
+    }
+  )();
 
   const start = ((page - 1) * MARKETS_PER_PAGE) % LIMIT;
   const end = start + MARKETS_PER_PAGE;
@@ -143,7 +155,7 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
   });
 
   return {
-    markets: jsonData.slice(start, end).map((v: JSONTypes.MarketDataView, i) => ({
+    markets: data.slice(start, end).map((v: JSONTypes.MarketDataView, i) => ({
       ...toMarketDataView(v),
       ...symbolBytesToEmojis(v.emoji_bytes)!,
       index: indexOffset + i + 1,

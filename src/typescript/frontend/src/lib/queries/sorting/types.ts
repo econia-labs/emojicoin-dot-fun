@@ -1,4 +1,4 @@
-import { type ORDER_BY, type OrderByStrings } from "@sdk/queries/const";
+import { type ORDER_BY } from "@sdk/queries/const";
 import { type ValueOf } from "@sdk/utils/utility-types";
 
 export enum MarketDataSortBy {
@@ -14,10 +14,10 @@ export enum MarketDataSortBy {
 export type GetSortedMarketDataQueryArgs = {
   limit?: number;
   offset: number;
-  orderBy: OrderByStrings | ValueOf<typeof ORDER_BY>;
+  orderBy: ValueOf<typeof ORDER_BY>;
   sortBy: MarketDataSortBy | SortByPostgrestQueryParams;
   inBondingCurve: boolean | null;
-  count?: boolean;
+  exactCount?: boolean;
 };
 
 export const sortByFilters = {
