@@ -60,7 +60,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <QueryClientProvider client={queryClient}>
         <WebSocketEventsProvider>
           <MarketDataProvider>
-            <AptosWalletAdapterProvider plugins={wallets} autoConnect>
+            <AptosWalletAdapterProvider plugins={wallets} autoConnect={true}>
               <ConnectWalletContextProvider>
                 <AptosContextProvider>
                   <GlobalStyle />
