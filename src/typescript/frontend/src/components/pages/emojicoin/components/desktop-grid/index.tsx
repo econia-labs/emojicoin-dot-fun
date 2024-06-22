@@ -29,7 +29,11 @@ const DesktopGrid = (props: GridProps) => {
         <StyledContentColumn>
           <StyledBlock width="57%">
             <StyledBlockWrapper>
-              <ChartContainer {...props.data} marketID={props.data.marketID.toString()} />
+              <ChartContainer
+                symbol={props.data.symbol}
+                emojis={props.data.emojis}
+                marketID={props.data.marketID.toString()}
+              />
             </StyledBlockWrapper>
           </StyledBlock>
           <StyledBlock width="43%">

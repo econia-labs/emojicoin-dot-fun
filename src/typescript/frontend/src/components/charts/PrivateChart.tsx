@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import {
+  DAY_TO_CANDLESTICK_RESOLUTION,
   EXCHANGE_NAME,
   MS_IN_ONE_DAY,
   TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -21,14 +22,13 @@ import {
   widget,
 } from "@static/charting_library";
 import { getClientTimezone } from "lib/chart-utils";
-import { type Types, symbolBytesToEmojis } from "@econia-labs/emojicoin-sdk";
 import { type ChartContainerProps } from "./types";
-import { resolveToEmojiSymbol } from "@store/event-utils";
-import { useEventStore } from "context/websockets-context";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import path from "path";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
+import { type EventStore } from "@store/event-store";
+import { fetchAllCandlesticksInTimeRange } from "lib/queries/charting/candlesticks-in-time-range";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
@@ -48,11 +48,12 @@ const configurationData: DatafeedConfiguration = {
 // If the user refreshes the page, we will fetch the data from the endpoint again, and then repeat the process.
 // TODO: Figure out if this is inefficient and if there's a way to reconcile data retrieved from mqtt with the datafeed.
 
-export const Chart = async (props: ChartContainerProps) => {
-  const getSymbolFromMarketID = useEventStore((s) => s.getSymbolFromMarketID);
-  const getMarketIDFromSymbol = useEventStore((s) => s.getMarketIDFromSymbol);
-  const marketMap = useEventStore((s) => s.getMarketIDs()); // TODO: See if these trigger state updates / re-renders?
-  // const lastSwap = useEventStore((s) => s.getMarket(props.marketID)?.swapEvents.events.at(0));
+export const Chart = async (
+  props: ChartContainerProps & {
+    markets: EventStore["marketMetadataMap"];
+    symbols: Map<string, string>;
+  }
+) => {
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -64,46 +65,53 @@ export const Chart = async (props: ChartContainerProps) => {
         setTimeout(() => callback(configurationData));
       },
       searchSymbols: async (userInput, _exchange, _symbolType, onResultReadyCallback) => {
-        // const marketIDs = Array.from(marketMap.keys());
-        const data = Array.from(marketMap.entries()).map(([marketID, emojis]) => {
-          return {
-            marketID,
-            emojis: symbolBytesToEmojis(emojis),
-          };
-        });
-        // TODO: Consider storing this in state..? It depends if we need to reconstruct it elsewhere,
-        // and if it generally carries a high cost/complexity to compute.
-        // Could also combine the map and filter into a single reduce.
-        const symbols = data.reduce<SearchSymbolResultItem[]>((acc, { marketID, emojis: item }) => {
-          const symbol = {
-            description: `Market #${marketID}: ${item.symbol}`,
-            exchange: EXCHANGE_NAME,
-            full_name: `${EXCHANGE_NAME}:${emojisToName(item.emojis)}`,
-            symbol: item.symbol,
-            ticker: item.symbol,
-            type: "crypto",
-          };
-          if (
-            symbol.full_name.includes(userInput) ||
-            symbol.symbol.includes(userInput) ||
-            symbol.ticker.includes(userInput) ||
-            symbol.ticker.includes(resolveToEmojiSymbol({ userInput, getSymbolFromMarketID }) ?? "")
-          ) {
-            acc.push(symbol);
-          }
-          return acc;
-        }, []);
+        console.log("userInput in searchSymbols:", userInput);
+        const data = Array.from(props.markets.values());
+        // TODO: Use the new emoji picker search with this..?
+        const symbols = data.reduce<SearchSymbolResultItem[]>(
+          (acc, { marketID, emojis, symbol }) => {
+            const symbolForSearch = {
+              description: `Market #${marketID}: ${symbol}`,
+              exchange: EXCHANGE_NAME,
+              full_name: `${EXCHANGE_NAME}:${emojisToName(emojis)}`,
+              symbol,
+              ticker: symbol,
+              type: "crypto",
+            };
+            if (
+              symbolForSearch.full_name.includes(userInput) ||
+              symbolForSearch.symbol.includes(userInput) ||
+              symbolForSearch.ticker.includes(userInput) ||
+              marketID.includes(userInput) ||
+              userInput.includes(marketID)
+            ) {
+              acc.push(symbolForSearch);
+            }
+            return acc;
+          },
+          []
+        );
 
+        console.log(symbols);
         onResultReadyCallback(symbols);
       },
-      resolveSymbol: async (symbolName, onSymbolResolvedCallback) => {
-        const symbol =
-          resolveToEmojiSymbol({ userInput: symbolName, getSymbolFromMarketID }) ?? symbolName;
-        const resolvedMarketID = getMarketIDFromSymbol(symbol) ?? props.marketID;
-        if (props.marketID !== resolvedMarketID) {
-          const newRoute = path.join(ROUTES.market, resolvedMarketID.toString());
+      resolveSymbol: async (symbolName, onSymbolResolvedCallback, onErrorCallback) => {
+        console.debug("resolveSymbol:", symbolName);
+        // Try to look up the symbol as if it were a market ID and then as if it were the actual market symbol,
+        // aka, the emoji(s) symbol string.
+        const possibleMarketID = props.symbols.get(symbolName);
+        const metadata =
+          props.markets.get(symbolName) ??
+          (possibleMarketID ? props.markets.get(possibleMarketID) : null);
+        if (!metadata) {
+          return onErrorCallback("Symbol not found");
+        }
+        const { marketID, symbol } = metadata;
+        if (props.marketID !== marketID) {
+          const newRoute = path.join(ROUTES.market, marketID);
           console.debug(`[resolveSymbol]: Redirecting to ${newRoute}`);
           router.push(newRoute);
+          router.refresh();
         }
 
         const symbolInfo: LibrarySymbolInfo = {
@@ -132,10 +140,13 @@ export const Chart = async (props: ChartContainerProps) => {
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
         const { from, to } = periodParams;
         try {
-          // const resolutionEnum = DAY_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
-
-          // const data = candlesticks[resolutionEnum];
-          const data = new Array<Types.PeriodicStateEvent>();
+          const resolutionEnum = DAY_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
+          const data = await fetchAllCandlesticksInTimeRange({
+            marketID: props.marketID,
+            start: new Date(from * 1000),
+            end: new Date(to * 1000),
+            resolution: resolutionEnum,
+          });
 
           if (data.length < 1) {
             onHistoryCallback([], {
@@ -159,8 +170,6 @@ export const Chart = async (props: ChartContainerProps) => {
             return acc;
           }, []);
 
-          bars.sort((a, b) => a.time - b.time);
-
           // Need to figure out a way to add this last bar if it's not in the data.
           // Right now the whole chart rerenders...it actually does this even with
           // the candlesticks.
@@ -174,8 +183,6 @@ export const Chart = async (props: ChartContainerProps) => {
           //     volume: 0,
           //   })
           // }
-
-          console.warn(bars);
 
           console.warn(`[getBars]: returned ${bars.length} bar(s)`);
           onHistoryCallback(bars, {
@@ -201,6 +208,7 @@ export const Chart = async (props: ChartContainerProps) => {
     }),
     [symbol, props.marketID] // eslint-disable-line react-hooks/exhaustive-deps
   );
+
   useEffect(() => {
     console.debug("data feed rerendered, this should generally not happen..?", datafeed);
   }, [datafeed]);

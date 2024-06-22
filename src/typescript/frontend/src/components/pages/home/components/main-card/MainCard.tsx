@@ -9,7 +9,7 @@ import {
   StyledEmoji,
   StyledPixelHeadingText,
   StyledDisplayFontText,
-  StyledMarketDataText,
+  SubheaderText,
   StyledImage,
 } from "./styled";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -124,52 +124,52 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
 
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
-              <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
-                  {t("Mkt. Cap:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
-                  <div className="flex flex-row items-center justify-center">
-                    <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
-                    &nbsp;
-                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
-                  </div>
-                </StyledMarketDataText>
-              </>
+              <div className="flex flex-row items-center justify-center">
+                <SubheaderText color="darkGray" textTransform="uppercase">
+                  {t("Mkt. Cap:")}&nbsp;
+                </SubheaderText>
+                <SubheaderText ref={marketCapRef}>
+                  {toCoinDecimalString(marketCap, 2)}
+                </SubheaderText>
+                <SubheaderText>
+                  &nbsp;
+                  <AptosIconBlack className={"icon-inline m-auto"} />
+                </SubheaderText>
+              </div>
             )}
           </FlexGap>
 
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
-              <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
-                  {t("24 hour vol:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
-                  <div className="flex flex-row items-center justify-center">
-                    <div ref={dailyVolumeRef}>{toCoinDecimalString(roughDailyVolume, 2)}</div>
-                    &nbsp;
-                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
-                  </div>
-                </StyledMarketDataText>
-              </>
+              <div className="flex flex-row items-center justify-center">
+                <SubheaderText color="darkGray" textTransform="uppercase">
+                  {t("24 hour vol:")}&nbsp;
+                </SubheaderText>
+                <SubheaderText ref={dailyVolumeRef}>
+                  {toCoinDecimalString(roughDailyVolume, 2)}
+                </SubheaderText>
+                <SubheaderText>
+                  &nbsp;
+                  <AptosIconBlack className={"icon-inline m-auto"} />
+                </SubheaderText>
+              </div>
             )}
           </FlexGap>
 
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
-              <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
-                  {t("All-time vol:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
-                  <div className="flex flex-row items-center justify-center">
-                    <div ref={allTimeVolumeRef}>{toCoinDecimalString(roughAllTimeVolume, 2)}</div>
-                    &nbsp;
-                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
-                  </div>
-                </StyledMarketDataText>
-              </>
+              <div className="flex flex-row items-center justify-center">
+                <SubheaderText color="darkGray" textTransform="uppercase">
+                  {t("All-time vol:")}&nbsp;
+                </SubheaderText>
+                <SubheaderText ref={allTimeVolumeRef}>
+                  {toCoinDecimalString(roughAllTimeVolume, 2)}
+                </SubheaderText>
+                <SubheaderText>
+                  &nbsp;
+                  <AptosIconBlack className={"icon-inline m-auto"} />
+                </SubheaderText>
+              </div>
             )}
           </FlexGap>
         </Column>

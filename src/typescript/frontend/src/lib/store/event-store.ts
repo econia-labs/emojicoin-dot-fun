@@ -30,6 +30,7 @@ import {
 } from "./event-utils";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { type HexInput } from "@aptos-labs/ts-sdk";
+import { type DetailedMarketMetadata } from "lib/queries/types";
 
 type SwapEvent = Types.SwapEvent;
 type ChatEvent = Types.ChatEvent;
@@ -61,26 +62,31 @@ export type MarketStateValueType = EventsWithGUIDs & {
   marketData?: MarketDataView;
 };
 
+// Note the usage of readonly here (and above) is to prevent accidental mutations.
+// The readonly attribute doesn't indicate these will never change- just that they should only
+// be mutated by zustand/immer.
 export type EventState = {
-  guids: Set<string>;
+  guids: Readonly<Set<string>>;
   firehose: readonly AnyEmojicoinEvent[];
-  markets: Map<MarketIDString, MarketStateValueType>;
-  symbolToMarketID: Map<SymbolString, MarketIDString>;
-  marketIDToSymbol: Map<MarketIDString, SymbolString>;
-  globalStateEvents: GlobalStateEvent[];
+  markets: Readonly<Map<MarketIDString, MarketStateValueType>>;
+  symbols: Readonly<Map<SymbolString, MarketIDString>>;
+  globalStateEvents: readonly GlobalStateEvent[];
   marketRegistrationEvents: readonly MarketRegistrationEvent[];
+  // This will very rarely, if ever, be mutated. This is used primarily for supplying the
+  // TradingView chart with symbol search data.
+  marketMetadataMap: Readonly<Map<MarketIDString, DetailedMarketMetadata>>;
 };
 
 export type EventActions = {
   initializeMarket: (marketID: AnyNumberString, symbolOrBytes?: HexInput) => void;
   getMarket: (marketID: AnyNumberString) => MarketStateValueType | undefined;
+  getMarketMetadata: (marketID: AnyNumberString) => DetailedMarketMetadata | undefined;
   getSymbols: () => Map<SymbolString, MarketIDString>;
-  getMarketIDs: () => Map<MarketIDString, SymbolString>;
   getMarketIDFromSymbol: (symbol: SymbolString) => MarketIDString | undefined;
-  getSymbolFromMarketID: (marketID: AnyNumberString | MarketIDString) => SymbolString | undefined;
   pushEvents: (events: Array<AnyEmojicoinEvent>) => void;
   pushEventFromWebSocket: (buffer: Buffer) => void;
   addMarketData: (d: MarketDataView) => void;
+  initializeMarketMetadata: (data: Array<DetailedMarketMetadata>) => void;
 };
 
 export type EventStore = EventState & EventActions;
@@ -90,10 +96,10 @@ export const initializeEventStore = (): EventState => {
     guids: new Set(),
     firehose: [],
     markets: new Map(),
-    symbolToMarketID: new Map(),
-    marketIDToSymbol: new Map(),
+    symbols: new Map(),
     globalStateEvents: [],
     marketRegistrationEvents: [],
+    marketMetadataMap: new Map(),
   };
 };
 
@@ -125,8 +131,9 @@ export const initializeMarketDraft = (
   }
   if (symbolOrBytes) {
     const symbol = symbolBytesToEmojis(symbolOrBytes).symbol;
-    state.symbolToMarketID.set(symbol, id);
-    state.marketIDToSymbol.set(id, symbol);
+    if (!state.symbols.has(symbol)) {
+      state.symbols.set(symbol, id);
+    }
   }
 };
 
@@ -138,10 +145,8 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       ...initialState,
       initializeMarket: (marketID, symbolOrBytes) =>
         set((state) => initializeMarketDraft(state, marketID, symbolOrBytes)),
-      getSymbols: () => get().symbolToMarketID,
-      getMarketIDs: () => get().marketIDToSymbol,
-      getMarketIDFromSymbol: (symbol) => get().symbolToMarketID.get(symbol),
-      getSymbolFromMarketID: (marketID) => get().marketIDToSymbol.get(marketID.toString()),
+      getSymbols: () => get().symbols,
+      getMarketIDFromSymbol: (symbol) => get().symbols.get(symbol),
       getMarket: (marketID) => {
         return get().markets.get(marketID.toString())!;
       },
@@ -230,6 +235,24 @@ export const createEventStore = (initialState: EventState = defaultState) => {
         } catch (e) {
           console.error(e);
         }
+      },
+      initializeMarketMetadata: (markets) => {
+        set((state) => {
+          const entries = markets.map((m) => [m.marketID, m] as const);
+          state.marketMetadataMap = new Map(entries);
+          const newMarketMetadataMap = new Map<string, DetailedMarketMetadata>();
+          const newSymbolToMarketIDMap = new Map<string, string>();
+          markets.forEach((mkt) => {
+            const { marketID, symbol } = mkt;
+            newMarketMetadataMap.set(marketID, mkt);
+            newSymbolToMarketIDMap.set(symbol, marketID);
+          });
+          state.marketMetadataMap = newMarketMetadataMap;
+          state.symbols = newSymbolToMarketIDMap;
+        });
+      },
+      getMarketMetadata: (marketID) => {
+        return get().marketMetadataMap.get(marketID.toString());
       },
     }))
   );

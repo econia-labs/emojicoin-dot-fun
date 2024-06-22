@@ -1,5 +1,4 @@
 import { type SymbolEmojiData } from "@sdk/emoji_data";
-
 export interface ChartContainerProps {
   marketID: string;
   isScriptReady: boolean;

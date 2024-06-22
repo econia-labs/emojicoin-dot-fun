@@ -1,4 +1,4 @@
-import { isString, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   type AnyEmojicoinEventName,
   toChatEvent,
@@ -11,11 +11,9 @@ import {
   type AnyEmojicoinEvent,
   type Types,
 } from "@sdk/types/types";
-import { type EventActions } from "./event-store";
 import { type SubmissionResponse } from "context/wallet-context/AptosContextProvider";
 
-import { isValidSymbol, symbolBytesToEmojis } from "@sdk/emoji_data/utils";
-import { type AnyNumberString } from "@sdk-types";
+import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import type JSONTypes from "@sdk/types/json-types";
 import { type DBJsonData } from "@sdk/emojicoin_dot_fun/utils";
 import {
@@ -35,38 +33,6 @@ export type AddEventsType<T> = ({ data, sorted }: { data: readonly T[]; sorted?:
 // Type aliases for more specificity.
 export type MarketIDString = string;
 export type SymbolString = string;
-
-export const marketIDToSymbol = (args: {
-  marketID: AnyNumberString;
-  getter: EventActions["getSymbolFromMarketID"];
-}): string | undefined => {
-  const { marketID, getter } = args;
-  return getter(marketID.toString());
-};
-
-/**
- * First tries to resolve the input as a symbol, then as a market ID.
- * @param args
- * @returns
- */
-export const resolveToEmojiSymbol = (args: {
-  userInput: AnyNumberString;
-  getSymbolFromMarketID: EventActions["getSymbolFromMarketID"];
-}): string | undefined => {
-  const { userInput, getSymbolFromMarketID: getter } = args;
-  if (isString(userInput) && isValidSymbol(userInput)) {
-    return userInput;
-  }
-  try {
-    const marketID = Number.parseInt(userInput.toString());
-    if (isNaN(marketID)) {
-      return undefined;
-    }
-    return marketIDToSymbol({ marketID, getter });
-  } catch (e) {
-    return undefined;
-  }
-};
 
 if (MODULE_ADDRESS.toStringWithoutPrefix().startsWith("0")) {
   console.error("-".repeat(80) + "\n");

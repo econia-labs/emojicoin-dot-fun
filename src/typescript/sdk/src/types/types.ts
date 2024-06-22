@@ -273,6 +273,14 @@ export namespace Types {
     marketID: bigint;
   };
 
+  // Query return type for `inbox_periodic_state` view.
+  export type PeriodicStateView = Omit<PeriodicStateEvent, "marketID" | "version"> & {
+    marketID: number;
+    period: number;
+    startTime: number;
+    version: -1;
+  };
+
   // Query return type for `market_data` view.
   export type MarketDataView = {
     marketID: number;
@@ -568,6 +576,16 @@ export const toLiquidityEvent = (
 export const toInboxLatestState = (data: JSONTypes.InboxLatestState): Types.InboxLatestState => ({
   ...toStateEvent(data, data.transaction_version),
   version: data.transaction_version,
+});
+
+export const toPeriodicStateView = (
+  data: JSONTypes.PeriodicStateView
+): Types.PeriodicStateView => ({
+  ...toPeriodicStateEvent(data.data, -1),
+  marketID: data.market_id,
+  period: data.period,
+  startTime: data.start_time,
+  version: -1,
 });
 
 export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDataView => ({

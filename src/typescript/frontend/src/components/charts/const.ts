@@ -9,12 +9,15 @@ import {
   type ThemeName,
 } from "@static/charting_library";
 import { CandlestickResolution } from "@econia-labs/emojicoin-sdk";
-import { GREEN, PINK } from "theme/colors";
+import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
+import { hexToRgba } from "utils/hex-to-rgba";
 
 export const TV_CHARTING_LIBRARY_RESOLUTIONS = ["1", "5", "15", "30", "60", "4H", "1D"];
 
-export const PINK_OPACITY_HALF = `${PINK}80`;
-export const GREEN_OPACITY_HALF = `${GREEN}80`;
+export const PINK = hexToRgba(PINK_HEX);
+export const GREEN = hexToRgba(GREEN_HEX);
+export const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
+export const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
 export const DAY_TO_CANDLESTICK_RESOLUTION: { [key: string]: CandlestickResolution } = {
   "1D": CandlestickResolution.PERIOD_1D,

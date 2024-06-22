@@ -15,6 +15,14 @@ namespace JSONTypes {
     marketID: number;
   };
 
+  // Query return type for `inbox_periodic_state` view.
+  export type PeriodicStateView = {
+    market_id: number;
+    period: number;
+    start_time: number;
+    data: Omit<PeriodicStateEvent, "marketID" | "version">;
+  };
+
   // Query return type for `market_data` view.
   export type MarketDataView = {
     market_id: number;

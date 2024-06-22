@@ -93,7 +93,7 @@ export const StyledDisplayFontText = styled(Text)`
   }
 `;
 
-export const StyledMarketDataText = styled(Text)`
+export const SubheaderText = styled(Text)`
   font-size: 11px;
   line-height: unset;
   margin-bottom: 7px;

@@ -1,9 +1,9 @@
 import "server-only";
 
+/* eslint-disable import/no-unused-modules */
 import { type PostgrestError, type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { LIMIT, type INBOX_EVENTS_TABLE } from "./const";
 
-/* eslint-disable-next-line import/no-unused-modules */
 export type QueryResponse<T> = {
   data: T[];
   errors: (PostgrestError | null)[];
@@ -23,18 +23,20 @@ export type AggregateQueryResultsArgs = {
   maxTotalRows?: number;
 };
 
-type JSONResponseType<T> = {
+export type PostgrestJSONResponse<T> = {
   data: T;
   transaction_version: number;
 };
 
 type CustomQueryResponseType<T> = T & { transaction_version: number };
 
-type InnerResponseType<T> = Array<JSONResponseType<T> | CustomQueryResponseType<T>>;
+export type InnerPostgrestResponse<T> = Array<
+  PostgrestJSONResponse<T> | CustomQueryResponseType<T>
+>;
 
 const hasJSONData = <T>(
-  data: JSONResponseType<T> | CustomQueryResponseType<T>
-): data is JSONResponseType<T> => "data" in data;
+  data: PostgrestJSONResponse<T> | CustomQueryResponseType<T>
+): data is PostgrestJSONResponse<T> => "data" in data;
 
 /**
  * Since most `getAll` queries are similar, we can abstract the shared logic into a helper function.
@@ -66,7 +68,7 @@ export const aggregateQueryResults = async <T>(
     const offset = aggregated.length;
     /* eslint-disable-next-line no-await-in-loop */
     const { events, error } = await query.range(offset, offset + LIMIT - 1).then((res) => ({
-      events: (res.data ?? []) as InnerResponseType<T>,
+      events: (res.data ?? []) as InnerPostgrestResponse<T>,
       error: res.error,
     }));
 
