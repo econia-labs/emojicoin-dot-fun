@@ -1,7 +1,7 @@
 export const LINKS = {
-  facebook: "https://twitter.com/",
-  twitter: "https://twitter.com/",
-  instagram: "https://twitter.com/",
-  github: "https://github.com/",
+  x: "https://x.com/EconiaLabs",
+  github: "https://github.com/econia-labs/emojicoin-dot-fun",
   econia_labs: "https://econialabs.com/",
+  discord: "https://discord.gg/econia",
+  telegram: "https://discord.gg/econia",
 };
