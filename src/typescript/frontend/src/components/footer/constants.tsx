@@ -1,10 +1,10 @@
-import Facebook from "components/svg/icons/Facebook";
+import Discord from "@icons/Discord";
+import Telegram from "@icons/Telegram";
 import Twitter from "components/svg/icons/Twitter";
-import Instagram from "components/svg/icons/Instagram";
 import { LINKS } from "configs";
 
 export const SOCIAL_ICONS = [
-  { icon: Facebook, href: LINKS.facebook },
-  { icon: Twitter, href: LINKS.twitter },
-  { icon: Instagram, href: LINKS.instagram },
+  { icon: Discord, href: LINKS.discord },
+  { icon: Telegram, href: LINKS.telegram },
+  { icon: Twitter, href: LINKS.x },
 ];
