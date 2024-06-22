@@ -49,6 +49,7 @@ const useTooltip = (content: React.ReactNode, options?: TooltipOptions) => {
       { name: "offset", options: { offset: tooltipOffset } },
       { name: "preventOverflow", options: { padding: tooltipPadding } },
     ],
+    strategy: "fixed",
   });
 
   const tooltip = (
