@@ -51,11 +51,10 @@ export const getLatestMarketStateByMarketID = async ({
 };
 
 export const getLatestMarketState = async (emojiBytesOrMarketID: string | number | bigint) => {
-  const input = emojiBytesOrMarketID.toString();
-  if (input.includes("%")) {
-    return getLatestMarketStateByEmojiBytes({ bytes: input });
+  if (typeof emojiBytesOrMarketID === "string") {
+    return getLatestMarketStateByEmojiBytes({ bytes: emojiBytesOrMarketID });
   }
-  return getLatestMarketStateByMarketID({ marketID: input });
+  return getLatestMarketStateByMarketID({ marketID: emojiBytesOrMarketID });
 };
 
 export const paginateGlobalStateEvents = async (
