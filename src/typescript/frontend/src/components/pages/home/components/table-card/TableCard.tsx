@@ -58,6 +58,7 @@ const TableCard: React.FC<TableCardProps> = ({
   // worry about overflow with `number`.
   const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
   const [roughDailyVolume, setRoughDailyVolume] = useState(Big(staticVolume24H));
+  const [tooltipVisibility, setTooltipVisibility] = useState<boolean>(false);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
@@ -153,6 +154,14 @@ const TableCard: React.FC<TableCardProps> = ({
               mb="6px"
               ellipsis
               ref={targetRefEmojiName}
+              onMouseEnter={() => {
+                setTooltipVisibility(true);
+              }}
+              onMouseLeave={() => {
+                setTimeout(() => {
+                  setTooltipVisibility(false);
+                }, 400);
+              }}
             >
               {emojisToName(emojis)}
             </Text>
@@ -203,7 +212,9 @@ const TableCard: React.FC<TableCardProps> = ({
               </Column>
             </Flex>
           </StyledInnerItem>
-          {tooltipEmojiName}
+          <div style={{ visibility: tooltipVisibility ? "visible" : "hidden" }}>
+            {tooltipEmojiName}
+          </div>
         </motion.div>
       </StyledItemWrapper>
     </Link>
