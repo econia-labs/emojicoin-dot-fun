@@ -57,6 +57,10 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
     }
   };
 
+  const onClose = () => {
+    setVisible(false);
+  };
+
   const onApplyCLick = () => {
     setVisible(false);
     setValue(selectedOptions);
@@ -68,6 +72,7 @@ const MultipleSelect: React.FC<MultipleSelectProps> = ({
         <DropdownComponent
           options={options}
           onClick={onDropdownMenuClick}
+          onClose={onClose}
           isMultiple
           values={selectedOptions}
           onHover={onHover}

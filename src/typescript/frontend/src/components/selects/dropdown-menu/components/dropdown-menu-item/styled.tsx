@@ -24,6 +24,5 @@ export const StyledDropdownMenuItem = styled.div<{ disabled: boolean }>`
     disabled &&
     css`
       cursor: not-allowed;
-      background-color: ${({ theme }) => theme.colors.blue};
     `}
 `;
