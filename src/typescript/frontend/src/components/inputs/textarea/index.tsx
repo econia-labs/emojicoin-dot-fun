@@ -13,10 +13,8 @@ export const Textarea = styled.textarea<TextareaProps>`
   font-size: 16px;
   font-weight: 600;
   outline: 0;
-  padding: 10px 18px;
   width: 100%;
   border: none;
-  border-top: 1px solid ${({ theme }) => theme.colors.darkGray};
 
   &::-webkit-scrollbar {
     display: none;

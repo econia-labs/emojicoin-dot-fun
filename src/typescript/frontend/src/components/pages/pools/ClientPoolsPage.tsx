@@ -1,6 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+
+import useSWR from "swr";
 
 import { useEmojicoinPicker, useMatchBreakpoints } from "hooks";
 
@@ -16,9 +18,23 @@ import {
   StyledInner,
   StyledSubHeader,
 } from "components/pages/pools/styled";
-import { isDisallowedEventKey } from "utils";
+import { isDisallowedEventKey, parseJSON } from "utils";
+import type { SortByPageQueryParams } from "lib/queries/sorting/types";
+
+const fetcher = (...args: Parameters<typeof fetch>) =>
+  fetch(...args)
+    .then((res) => res.text())
+    .then((txt) => parseJSON(txt));
 
 export const ClientPoolsPage = () => {
+  const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
+  const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
+  const [selectedIndex, setSelectedIndex] = useState<number>();
+  const { data, error, isLoading } = useSWR(
+    `/pools/api?sortby=${sortBy}&orderby=${orderBy}`,
+    fetcher
+  );
+
   const { isMobile } = useMatchBreakpoints();
 
   // TODO: Initialize market state data here (and any other data that goes in the event store).
@@ -35,6 +51,11 @@ export const ClientPoolsPage = () => {
     }
   };
 
+  if (error) return <div>Error.</div>;
+  if (isLoading) return <div>Loading...</div>;
+
+  const markets = data.markets;
+
   return (
     <StyledPoolsPage>
       <StyledHeader>
@@ -42,7 +63,7 @@ export const ClientPoolsPage = () => {
           <FlexGap
             justifyContent={{ _: "unset", tablet: "space-between" }}
             width="100%"
-            maxWidth={{ _: "650px", laptopL: "57%" }}
+            maxWidth={{ _: "800px", laptopL: "57%" }}
             alignItems="center"
             gap="13px"
           >
@@ -53,7 +74,7 @@ export const ClientPoolsPage = () => {
             {!isMobile ? (
               <>
                 <InputGroup
-                  textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
+                  textScale="pixelHeading3"
                   variant="fantom"
                   width="unset"
                   isShowError={false}
@@ -88,11 +109,22 @@ export const ClientPoolsPage = () => {
 
       <StyledWrapper>
         <StyledInner width={{ _: "100%", laptopL: "57%" }}>
-          <PoolsTable />
+          <PoolsTable
+            data={markets}
+            sortBy={(s) => {
+              setSortBy(s);
+            }}
+            orderBy={(s) => {
+              setOrderBy(s);
+            }}
+            onSelect={(index) => {
+              setSelectedIndex(index);
+            }}
+          />
         </StyledInner>
 
         <StyledInner flexGrow={1} width={{ _: "100%", laptopL: "43%" }}>
-          <Liquidity />
+          <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
         </StyledInner>
       </StyledWrapper>
     </StyledPoolsPage>

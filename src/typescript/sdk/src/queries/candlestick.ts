@@ -4,22 +4,21 @@ import { type CandlestickResolution } from "../const";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
 import { STRUCT_STRINGS } from "../utils";
 import { wrap } from "./utils";
-import { type Types, type JSONTypes, toPeriodicStateEvent } from "../types";
+import { type JSONTypes } from "../types";
 import {
   type AggregateQueryResultsArgs,
-  type EventsAndErrors,
   aggregateQueryResults,
 } from "./query-helper";
 import { postgrest } from "./inbox-url";
 
 export type CandlestickQueryArgs = {
-  marketID: bigint | number;
+  marketID: bigint | number | string;
   resolution?: CandlestickResolution;
 };
 
 export const paginateCandlesticks = async (
   args: CandlestickQueryArgs & Omit<AggregateQueryResultsArgs, "query">
-): Promise<EventsAndErrors<Types.PeriodicStateEvent>> => {
+) => {
   const { marketID, resolution } = args;
   let query = postgrest
     .from(INBOX_EVENTS_TABLE)
@@ -30,13 +29,15 @@ export const paginateCandlesticks = async (
     .order("transaction_version", ORDER_BY.DESC);
   query = resolution ? query.eq("data->periodic_state_metadata->period", wrap(resolution)) : query;
 
-  const res = await aggregateQueryResults<JSONTypes.PeriodicStateEvent>({
+  const { data, errors } = await aggregateQueryResults<JSONTypes.PeriodicStateEvent>({
     query,
     ...args,
   });
 
-  return {
-    events: res.data.map((e) => toPeriodicStateEvent(e, e.version)),
-    errors: res.errors,
-  };
+  if (errors.some((e) => e)) {
+    /* eslint-disable-next-line no-console */
+    console.warn("Error fetching chat events", errors);
+  }
+
+  return data;
 };

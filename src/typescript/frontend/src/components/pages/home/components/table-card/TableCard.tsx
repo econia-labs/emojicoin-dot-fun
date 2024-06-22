@@ -87,18 +87,19 @@ const TableCard: React.FC<TableCardProps> = ({
 
   useEffect(() => {
     if (liquidityEvents.length === 0) return;
-    controls.start("liquidity").then(() => controls.start("initial"));
+    const latestEvent = liquidityEvents.at(0)!;
+    controls
+      .start(latestEvent.liquidityProvided ? "buy" : "sell")
+      .then(() => controls.start("initial"));
     return () => controls.stop();
   }, [liquidityEvents]);
 
   useEffect(() => {
-    console.debug("Subscribing to events for marketID:", marketID);
     events.initializeMarket(marketID, symbol);
     subscribe.chat(marketID);
     subscribe.state(marketID);
     subscribe.liquidity(marketID);
 
-    console.debug(`Unsubscribing from events for marketID: ${marketID}`);
     return () => {
       unsubscribe.chat(marketID);
       unsubscribe.state(marketID);

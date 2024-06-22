@@ -6,12 +6,12 @@ export const HEADERS = [
   {
     width: "26%",
     text: "All-time volume",
-    sortBy: "allTime",
+    sortBy: "all_time_vol",
   },
   {
     width: "18%",
     text: "24h vol",
-    sortBy: "vol24",
+    sortBy: "daily_vol",
   },
   {
     width: "15%",
@@ -33,7 +33,7 @@ export const MOBILE_HEADERS = [
   {
     width: "30%",
     text: "All-time vol",
-    sortBy: "allTime",
+    sortBy: "all_time_vol",
   },
   {
     width: "25%",

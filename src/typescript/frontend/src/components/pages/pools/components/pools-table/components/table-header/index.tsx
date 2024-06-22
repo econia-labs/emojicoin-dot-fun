@@ -10,9 +10,8 @@ import { Text } from "components/text";
 import { Arrows } from "components/svg";
 
 import { type TableHeaderProps } from "./types";
-import { type DataType } from "../../types";
 
-const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => {
+const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
   const { t } = translationFunction();
   const { isMobile } = useMatchBreakpoints();
 
@@ -29,9 +28,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => 
         gap="10px"
         alignItems="center"
         width="fit-content"
-        onClick={
-          item.sortBy ? () => sortData(item.sortBy as Exclude<keyof DataType, "pool">) : () => {}
-        }
+        onClick={onClick}
         onMouseEnter={replay}
         ellipsis
       >
@@ -46,8 +43,8 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, sortData }) => 
           {t(item.text)}
         </Text>
         {item.sortBy && !isMobile ? (
-          <Flex my="-3px">
-            <Arrows width="15px" color="econiaBlue" />
+          <Flex>
+            <Arrows color="econiaBlue" />
           </Flex>
         ) : null}
       </FlexGap>

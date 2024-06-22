@@ -6,8 +6,6 @@ import { useScramble } from "use-scramble";
 export const ECONIA_BLUE = "#086CD9";
 export const GREEN = "#2FA90F";
 export const PINK = "#CD2F8D";
-export const RED = "#B40000";
-export const RED_TEXT = "#C43333";
 
 export const transitionIn = {
   ease: "linear",
@@ -26,15 +24,7 @@ export const variants = {
     filter: "drop-shadow(0 0 0 #00000000)",
     transition: transitionOut,
   },
-  state: {
-    boxShadow: `0 0 14px 11px ${PINK}AA`,
-    transition: transitionIn,
-  },
   chats: {
-    boxShadow: `0 0 14px 11px ${PINK}AA`,
-    transition: transitionIn,
-  },
-  liquidity: {
     boxShadow: `0 0 14px 11px ${ECONIA_BLUE}AA`,
     transition: transitionIn,
   },
@@ -44,8 +34,8 @@ export const variants = {
     transition: transitionIn,
   },
   sell: {
-    boxShadow: `0 0 14px 11px ${RED}AA`,
-    filter: `drop-shadow(0 0 21px ${RED})AA`,
+    boxShadow: `0 0 14px 11px ${PINK}AA`,
+    filter: `drop-shadow(0 0 21px ${PINK})AA`,
     transition: transitionIn,
   },
 };
@@ -62,7 +52,7 @@ export const textVariants = {
     transition: transitionIn,
   },
   sell: {
-    color: `${RED_TEXT}FF`,
+    color: `${PINK}FF`,
     filter: "brightness(1.1) contrast(1.1)",
     transition: transitionIn,
   },
@@ -78,18 +68,10 @@ export const borderVariants = {
     transition: transitionIn,
   },
   sell: {
-    borderColor: RED,
+    borderColor: PINK,
     transition: transitionIn,
   },
   chats: {
-    borderColor: PINK,
-    transition: transitionIn,
-  },
-  state: {
-    borderColor: PINK,
-    transition: transitionIn,
-  },
-  liquidity: {
     borderColor: ECONIA_BLUE,
     transition: transitionIn,
   },

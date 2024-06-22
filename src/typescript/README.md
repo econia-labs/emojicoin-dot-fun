@@ -63,3 +63,30 @@ pnpm run full-clean
 
 Note this remove's each project's `node_modules`, although it does not remove
 the `pnpm-lock.yaml` file.
+
+## Vercel deployment
+
+To allow Vercel to clone the private submodule, you'll need to grant it access.
+
+On GitHub:
+
+1. Create a private personal fork of the charting library named
+   `charting_library`.
+1. Create a fine-grained personal access token:
+   1. Select repository access for only your `charting_library` fork.
+   1. Grant read-only access to `Repository permissions > Contents`.
+   1. Grant read-only access to `Repository permissions > Metadata`.
+
+On Vercel project settings:
+
+1. General settings:
+   1. `Build & Development Settings > Install Command`:
+      `pnpm run vercel-install`
+   1. `Root Directory`: `src/typescript/frontend`
+1. Environment variables:
+   1. All variables under `.env.example`.
+   1. `GITHUB_ACCESS_TOKEN`: the token you generated above.
+   1. `TRADING_VIEW_REPO_OWNER`: your GitHub username.
+
+This will allow Vercel to run the `frontend/vercel-install` script in order to
+download the charting library from your private personal fork.

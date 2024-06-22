@@ -8,7 +8,7 @@ import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-h
 import { postgrest } from "./inbox-url";
 
 export type ChatEventQueryArgs = {
-  marketID: number | bigint;
+  marketID: number | bigint | string;
 };
 
 export const paginateChatEvents = async (

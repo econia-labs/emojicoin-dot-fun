@@ -44,13 +44,9 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   );
 
   useEffect(() => {
-    if (stateEvents.length === 0) return;
+    if (stateEvents.length === 0 || !featured) return;
     const latestEvent = stateEvents.at(0)!;
-    const numSwapsInStore = latestEvent?.cumulativeStats.numSwaps ?? 0;
-    if (numSwapsInStore > (featured?.numSwaps ?? -1)) {
-      const marketCapInStore = latestEvent.instantaneousStats.marketCap;
-      setMarketCap(marketCapInStore);
-    }
+    setMarketCap(BigInt(featured.marketCap));
 
     // TODO: Fix ASAP. This **will** become inaccurate over time.
     setRoughDailyVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
@@ -60,8 +56,21 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.state(marketID);
-    return () => unsubscribe.state(marketID);
+    return () => {
+      unsubscribe.state(marketID);
+    };
   }, []);
+
+  useEffect(() => {
+    subscribe.state(marketID);
+    if (!featured) return;
+    setMarketCap(BigInt(featured.marketCap));
+    setRoughDailyVolume(BigInt(featured.dailyVolume));
+    setRoughAllTimeVolume(BigInt(featured.allTimeVolume));
+    return () => {
+      unsubscribe.state(marketID);
+    };
+  }, [featured, marketID]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
   useEffect(() => {
