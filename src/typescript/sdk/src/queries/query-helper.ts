@@ -34,7 +34,7 @@ export type InnerPostgrestResponse<T> = Array<
   PostgrestJSONResponse<T> | CustomQueryResponseType<T>
 >;
 
-const hasJSONData = <T>(
+export const hasJSONData = <T>(
   data: PostgrestJSONResponse<T> | CustomQueryResponseType<T>
 ): data is PostgrestJSONResponse<T> => "data" in data;
 

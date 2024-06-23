@@ -46,12 +46,19 @@ export type WebSocketClientStore = ClientState & ClientActions;
 
 const subscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
   return set((state) => {
-    state.client.subscribe(topic);
-    const newSubscriptions = new Set(state.subscriptions);
-    newSubscriptions.add(topic);
-    return {
-      subscriptions: newSubscriptions,
-    };
+    // Only subscribe in the client if we're not already subscribed.
+    if (!state.subscriptions.has(topic)) {
+      state.client.subscribe(topic);
+      const newSubscriptions = new Set(state.subscriptions);
+      newSubscriptions.add(topic);
+      return {
+        subscriptions: newSubscriptions,
+      };
+    } else {
+      return {
+        subscriptions: state.subscriptions,
+      };
+    }
   });
 };
 const unsubscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
@@ -67,7 +74,7 @@ const unsubscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: st
 export const createWebSocketClientStore = () => {
   return createStore<WebSocketClientStore>((set, get) => ({
     client: mqtt.connect(MQTT_URL, {
-      protocol: "wss",
+      // protocol: "wss", // This can be determined by the URL.
       manualConnect: true,
     }),
     stream: [],
@@ -78,7 +85,6 @@ export const createWebSocketClientStore = () => {
       if (!connected) {
         client.connect();
         client.on("message", (topic, data) => {
-          console.debug("Received message from topic:", topic);
           try {
             eventStore.pushEventFromWebSocket(data);
             set((state) => ({

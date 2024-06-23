@@ -19,7 +19,7 @@ export const GREEN = hexToRgba(GREEN_HEX);
 export const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
 export const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
-export const DAY_TO_CANDLESTICK_RESOLUTION: { [key: string]: CandlestickResolution } = {
+export const PERIOD_TO_CANDLESTICK_RESOLUTION: { [key: string]: CandlestickResolution } = {
   "1D": CandlestickResolution.PERIOD_1D,
   "30": CandlestickResolution.PERIOD_30M,
   "60": CandlestickResolution.PERIOD_1H,

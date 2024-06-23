@@ -4,7 +4,6 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { normalizeAddress } from "../utils/account-address";
-import { toNominalPrice } from "../utils/nominal-price";
 import { type EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
 
 export type AnyNumberString = number | string | bigint;
@@ -49,10 +48,10 @@ export namespace Types {
   export type PeriodicStateTracker = {
     startTime: bigint;
     period: bigint;
-    open: bigint;
-    high: bigint;
-    low: bigint;
-    close: bigint;
+    openPriceQ64: bigint;
+    highPriceQ64: bigint;
+    lowPriceQ64: bigint;
+    closePriceQ64: bigint;
     volumeBase: bigint;
     volumeQuote: bigint;
     integratorFees: bigint;
@@ -211,10 +210,10 @@ export namespace Types {
     WithVersionAndGUID & {
       marketMetadata: MarketMetadata;
       periodicStateMetadata: PeriodicStateMetadata;
-      open: number;
-      high: number;
-      low: number;
-      close: number;
+      openPriceQ64: bigint;
+      highPriceQ64: bigint;
+      lowPriceQ64: bigint;
+      closePriceQ64: bigint;
       volumeBase: bigint;
       volumeQuote: bigint;
       integratorFees: bigint;
@@ -326,10 +325,10 @@ export const toPeriodicStateTracker = (
 ): Types.PeriodicStateTracker => ({
   startTime: BigInt(data.start_time),
   period: BigInt(data.period),
-  open: BigInt(data.open_price_q64),
-  high: BigInt(data.high_price_q64),
-  low: BigInt(data.low_price_q64),
-  close: BigInt(data.close_price_q64),
+  openPriceQ64: BigInt(data.open_price_q64),
+  highPriceQ64: BigInt(data.high_price_q64),
+  lowPriceQ64: BigInt(data.low_price_q64),
+  closePriceQ64: BigInt(data.close_price_q64),
   volumeBase: BigInt(data.volume_base),
   volumeQuote: BigInt(data.volume_quote),
   integratorFees: BigInt(data.integrator_fees),
@@ -502,10 +501,10 @@ export const toPeriodicStateEvent = (
   version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   periodicStateMetadata: toPeriodicStateMetadata(data.periodic_state_metadata),
-  open: toNominalPrice(data.open_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
-  high: toNominalPrice(data.high_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
-  low: toNominalPrice(data.low_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
-  close: toNominalPrice(data.close_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
+  openPriceQ64: BigInt(data.open_price_q64),
+  highPriceQ64: BigInt(data.high_price_q64),
+  lowPriceQ64: BigInt(data.low_price_q64),
+  closePriceQ64: BigInt(data.close_price_q64),
   volumeBase: BigInt(data.volume_base),
   volumeQuote: BigInt(data.volume_quote),
   integratorFees: BigInt(data.integrator_fees),
@@ -641,6 +640,17 @@ export type AnyEmojicoinEvent =
   | Types.GlobalStateEvent
   | Types.LiquidityEvent;
 
+/**
+ * Event types that can all be part of a single market and placed into a typed homogenous structure.
+ * @see HomogenousContractEvents in sdk/src/emojicoin_dot_fun/events.ts
+ */
+export type AnyHomogenousEvent =
+  | Types.SwapEvent
+  | Types.ChatEvent
+  | Types.PeriodicStateEvent
+  | Types.StateEvent
+  | Types.LiquidityEvent;
+
 export type AnyEmojicoinEventName =
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Swap`
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Chat`
@@ -650,6 +660,9 @@ export type AnyEmojicoinEventName =
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::GlobalState`
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Liquidity`;
 
+export function isAnyEmojiCoinEvent(e: any): e is AnyEmojicoinEvent {
+  return typeof e?.guid === "string" && e.guid.includes("::");
+}
 export function isSwapEvent(e: AnyEmojicoinEvent): e is Types.SwapEvent {
   return e.guid.startsWith("Swap");
 }
@@ -672,4 +685,8 @@ export function isGlobalStateEvent(e: AnyEmojicoinEvent): e is Types.GlobalState
 }
 export function isLiquidityEvent(e: AnyEmojicoinEvent): e is Types.LiquidityEvent {
   return e.guid.startsWith("Liquidity");
+}
+
+export function isPeriodicStateView(e: any): e is Types.PeriodicStateView {
+  return typeof e.startTime === "number" && isPeriodicStateEvent(e);
 }

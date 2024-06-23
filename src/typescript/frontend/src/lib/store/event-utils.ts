@@ -1,4 +1,3 @@
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   type AnyEmojicoinEventName,
   toChatEvent,
@@ -11,22 +10,13 @@ import {
   type AnyEmojicoinEvent,
   type Types,
 } from "@sdk/types/types";
-import { type SubmissionResponse } from "context/wallet-context/AptosContextProvider";
 
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import type JSONTypes from "@sdk/types/json-types";
 import { type DBJsonData } from "@sdk/emojicoin_dot_fun/utils";
-import {
-  type AnyEmojicoinJSONEvent,
-  isJSONChatEvent,
-  isJSONGlobalStateEvent,
-  isJSONLiquidityEvent,
-  isJSONMarketRegistrationEvent,
-  isJSONPeriodicStateEvent,
-  isJSONStateEvent,
-  isJSONSwapEvent,
-} from "@sdk/types/json-types";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "@sdk/const";
+import { type AnyEmojicoinJSONEvent } from "@sdk/types/json-types";
+import { MODULE_ADDRESS, RESOLUTIONS_ARRAY } from "@sdk/const";
+import { type MarketStateValueType } from "./event-store";
 
 export type AddEventsType<T> = ({ data, sorted }: { data: readonly T[]; sorted?: boolean }) => void;
 
@@ -38,48 +28,6 @@ if (MODULE_ADDRESS.toStringWithoutPrefix().startsWith("0")) {
   console.error("-".repeat(80) + "\n");
   console.error("Module address starts with zero. This will lead to indexing and parsing errors.");
   console.error("-".repeat(80) + "\n");
-}
-
-const eventSet = new Set([
-  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Swap`,
-  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Chat`,
-  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::MarketRegistration`,
-  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::PeriodicState`,
-  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::State`,
-  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::GlobalState`,
-  `${MODULE_ADDRESS.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Liquidity`,
-]);
-
-export function filterNonContractEvents(data: Awaited<SubmissionResponse>): AnyEmojicoinEvent[] {
-  const response = data?.response;
-  if (!response || !isUserTransactionResponse(response)) {
-    return [];
-  }
-  const filtered = response.events.reduce((acc, event) => {
-    if (eventSet.has(event.type)) {
-      const version = Number(response.version);
-      const { data } = event;
-
-      if (isJSONSwapEvent(event)) {
-        acc.push(toSwapEvent(data, version));
-      } else if (isJSONChatEvent(event)) {
-        acc.push(toChatEvent(data, version));
-      } else if (isJSONMarketRegistrationEvent(event)) {
-        acc.push(toMarketRegistrationEvent(data, version));
-      } else if (isJSONPeriodicStateEvent(event)) {
-        acc.push(toPeriodicStateEvent(data, version));
-      } else if (isJSONStateEvent(event)) {
-        acc.push(toStateEvent(data, version));
-      } else if (isJSONGlobalStateEvent(event)) {
-        acc.push(toGlobalStateEvent(data, version));
-      } else if (isJSONLiquidityEvent(event)) {
-        acc.push(toLiquidityEvent(data, version));
-      }
-    }
-    return acc;
-  }, [] as AnyEmojicoinEvent[]);
-
-  return filtered;
 }
 
 export const mergeSortedEvents = <T extends AnyEmojicoinEvent>(
@@ -289,4 +237,8 @@ export const deserializationMap: Record<
       marketID: event.marketID.toString(),
     };
   },
+};
+
+export const getLatestBars = (market: MarketStateValueType) => {
+  return RESOLUTIONS_ARRAY.map((res) => ({ ...market[res]!.latestBar, period: res }));
 };

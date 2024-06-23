@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import {
-  DAY_TO_CANDLESTICK_RESOLUTION,
+  PERIOD_TO_CANDLESTICK_RESOLUTION,
   EXCHANGE_NAME,
   MS_IN_ONE_DAY,
   TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -29,6 +29,8 @@ import path from "path";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { type EventStore } from "@store/event-store";
 import { fetchAllCandlesticksInTimeRange } from "lib/queries/charting/candlesticks-in-time-range";
+import { useEventStore } from "context/websockets-context";
+import { toBar } from "@sdk/utils/candlestick-bars";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
@@ -39,6 +41,13 @@ const configurationData: DatafeedConfiguration = {
     },
   ],
 };
+
+const Debugger = (props: any) => {
+  return (
+    <>
+    </>
+  );
+}
 
 // The general approach here will be to use data fetched from the endpoint within the datafeed to populate the chart
 // candlestick data. It will handle all of the data fetching possible until the very last candlestick, which is not
@@ -58,6 +67,8 @@ export const Chart = async (
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const symbol = props.symbol;
+  const subscribeToResolution = useEventStore((s) => s.subscribeToResolution);
+  const unsubscribeFromResolution = useEventStore((s) => s.unsubscribeFromResolution);
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -118,7 +129,7 @@ export const Chart = async (
           ticker: symbol,
           name: symbol,
           description: symbol,
-          pricescale: 100,
+          pricescale: 10 ** 9,
           volume_precision: -Math.ceil(Math.log10(Number("0.00000100") * Number("100.00000000"))),
           minmov: 1,
           exchange: EXCHANGE_NAME,
@@ -140,7 +151,10 @@ export const Chart = async (
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
         const { from, to } = periodParams;
         try {
-          const resolutionEnum = DAY_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
+          const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
+
+          // TOOD: Consider that if our data is internally consistent and we run into issues with this, we can
+          // use the values in state to skip lots of the fetches by using the data we already have.
           const data = await fetchAllCandlesticksInTimeRange({
             marketID: props.marketID,
             start: new Date(from * 1000),
@@ -156,33 +170,12 @@ export const Chart = async (
           }
 
           const bars: Bar[] = data.reduce((acc: Bar[], event) => {
-            const time = Number(event.periodicStateMetadata.emitTime / 1000n);
-            if (time >= from * 1000 && time <= to * 1000) {
-              acc.push({
-                time: time,
-                open: Number(event.open) * 1000,
-                high: Number(event.high) * 1000,
-                low: Number(event.low) * 1000,
-                close: Number(event.close) * 1000,
-                volume: Number(event.volumeQuote),
-              });
+            const bar = toBar(event);
+            if (bar.time >= from * 1000 && bar.time <= to * 1000) {
+              acc.push(bar);
             }
             return acc;
           }, []);
-
-          // Need to figure out a way to add this last bar if it's not in the data.
-          // Right now the whole chart rerenders...it actually does this even with
-          // the candlesticks.
-          // if (lastSwap) {
-          //   bars.push({
-          //     time: Number(lastSwap.time / 1000n),
-          //     open: Number(lastSwap.avgExecutionPrice) * 1000,
-          //     high: Number(lastSwap.avgExecutionPrice) * 1000,
-          //     low: Number(lastSwap.avgExecutionPrice) * 1000,
-          //     close: Number(lastSwap.avgExecutionPrice) * 1000,
-          //     volume: 0,
-          //   })
-          // }
 
           console.warn(`[getBars]: returned ${bars.length} bar(s)`);
           onHistoryCallback(bars, {
@@ -195,16 +188,38 @@ export const Chart = async (
           }
         }
       },
-      // This is the function we should be using. Get bars is for the initial data
-      // but subscribe bars will be for the live data.
       subscribeBars: async (
-        _symbolInfo,
-        _resolution,
-        _onRealtimeCallback,
-        _subscribeUID,
-        _onResetCacheNeededCallback
-      ) => {},
-      unsubscribeBars: async (_subscriberUID) => {},
+        symbolInfo,
+        resolution,
+        onRealtimeCallback,
+        subscribeUID,
+        onResetCacheNeededCallback
+      ) => {
+        if (!symbolInfo.ticker) {
+          throw new Error(`No ticker for symbol: ${symbolInfo}`);
+        }
+        const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
+        console.debug("subscribeBars:", symbolInfo, resolution);
+        console.debug("onRealtimeCallback:", onRealtimeCallback);
+        subscribeToResolution({
+          symbol: symbolInfo.ticker,
+          resolution: resolutionEnum,
+          cb: onRealtimeCallback,
+        });
+        console.debug("subscribeUID:", subscribeUID);
+        console.debug("subscribeUonResetCacheNeededCallbackID:", onResetCacheNeededCallback);
+      },
+      unsubscribeBars: async (subscriberUID) => {
+        // subscriberUIDs come in the form of `${emoji}_#_$<period as string>`
+        // For exmaple: `🚀_#_5`
+        const [symbol, resolution] = subscriberUID.split("_#_");
+        const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution];
+        console.debug("unsubscribeBars:", symbol, resolution);
+        unsubscribeFromResolution({
+          symbol,
+          resolution: resolutionEnum,
+        });
+      },
     }),
     [symbol, props.marketID] // eslint-disable-line react-hooks/exhaustive-deps
   );

@@ -2,8 +2,8 @@
 import Script from "next/script";
 import { type ChartContainerProps } from "./types";
 import dynamic from "next/dynamic";
-import React from "react";
-import { useEventStore } from "context/websockets-context";
+import React, { useEffect } from "react";
+import { useEventStore, useWebSocketClient } from "context/websockets-context";
 
 const Chart = dynamic(() => import("./PrivateChart"), { ssr: true });
 const MemoizedChart = React.memo(Chart);
@@ -12,6 +12,15 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
   const [isScriptReady, setIsScriptReady] = React.useState(false);
   const marketMetadataMap = useEventStore((s) => s.marketMetadataMap);
   const allMarketSymbols = useEventStore((s) => s.symbols);
+  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+
+  useEffect(() => {
+    // For now just subscribe to all periodic state events instead of a sub-period.
+    // TODO: Consider subscribing only to specific periods.
+    subscribe.periodicState(props.marketID, null);
+    return () => unsubscribe.periodicState(props.marketID, null);
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [props.marketID]);
 
   return (
     <>
