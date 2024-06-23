@@ -1,10 +1,10 @@
-import GitHubOutlineIcon from "components/svg/icons/GitHubOutlineIcon";
 import TwitterOutlineIcon from "components/svg/icons/TwitterOutlineIcon";
-import PlanetOutline from "components/svg/icons/PlanetOutline";
 import { LINKS } from "configs";
+import DiscordOutlineIcon from "@icons/DiscordOutlineIcon";
+import TelegramOutlineIcon from "@icons/TelegramOutlineIcon";
 
 export const SOCIAL_ICONS = [
-  { icon: GitHubOutlineIcon, href: LINKS.github },
-  { icon: TwitterOutlineIcon, href: LINKS.twitter },
-  { icon: PlanetOutline, href: LINKS.econia_labs },
+  { icon: DiscordOutlineIcon, href: LINKS.discord },
+  { icon: TelegramOutlineIcon, href: LINKS.telegram },
+  { icon: TwitterOutlineIcon, href: LINKS.x },
 ];
