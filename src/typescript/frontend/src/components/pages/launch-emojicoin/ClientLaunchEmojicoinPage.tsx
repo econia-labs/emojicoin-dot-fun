@@ -55,19 +55,29 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
     },
   });
 
-  const onEmojiClickHandler = async (emoji: EmojiClickData) => {
-    const valueLength = values.emoji.match(emojiRegex())?.length ?? 0;
-    if (valueLength < 5) {
-      await setFieldValue("emoji", values.emoji + emoji.emoji);
-      await setFieldValue("emojiList", [...values.emojiList, emoji]);
-
-      const byteArray = [...values.emojiList, emoji]
+  const updateMarketID = (emojis: EmojiClickData[]) => {
+    if (emojis.length === 0) {
+      setMarketID(undefined);
+    } else {
+      const byteArray = emojis
         .map((e) => SYMBOL_DATA.byEmoji(e.emoji)!.hex.substring(2))
         .reduce((a, b) => `${a}${b}`);
 
       fetchLatestMarketState(byteArray).then((res) =>
         res ? setMarketID(res.marketID) : setMarketID(undefined)
       );
+    }
+  };
+
+  const onEmojiClickHandler = async (emoji: EmojiClickData) => {
+    const valueLength = values.emoji.match(emojiRegex())?.length ?? 0;
+    if (valueLength < 5) {
+      await setFieldValue("emoji", values.emoji + emoji.emoji);
+      const newEmojiList = [...values.emojiList, emoji];
+      await setFieldValue("emojiList", newEmojiList);
+      updateMarketID(newEmojiList);
+    } else {
+      setMarketID(undefined);
     }
   };
 
@@ -103,6 +113,9 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
       values.emojiList.find((item) => item.emoji === string)
     );
 
+    if (values.emojiList.length > newEmojiList.length) {
+      updateMarketID(newEmojiList as EmojiClickData[]);
+    }
     await setFieldValue("emojiList", newEmojiList);
   };
 
@@ -180,6 +193,14 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
             <LaunchEmojicoinButton
               emojis={values.emojiList.map((e) => SYMBOL_DATA.byEmoji(e.emoji)!.hex)}
               marketID={marketID}
+              onCreate={(id) => {
+                setMarketID(Number(id));
+              }}
+              disabled={
+                values.emojiList.length === 0 ||
+                Boolean(errors.emoji?.length) ||
+                Boolean(errors.emojiList?.length)
+              }
             />
           </Flex>
         </Column>

@@ -16,7 +16,14 @@ const useValidationSchema = () => {
     emoji: yup.string().test("emoji", `${t("Byte limit reached")}`, (value) => {
       const encoder = new TextEncoder();
       const bytes = encoder.encode(value);
-      return bytes.length <= 10 && SYMBOL_DATA.hasHex(bytes);
+      if (value) {
+        for (const c of value) {
+          if (!SYMBOL_DATA.hasHex(encoder.encode(c))) {
+            return false;
+          }
+        }
+      }
+      return bytes.length <= 10;
     }),
   });
 
