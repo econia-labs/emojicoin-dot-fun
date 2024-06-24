@@ -1,0 +1,42 @@
+---
+slug: /aptos-wallet-and-cex
+title: Getting Started (Aptos Wallet + CEX)
+hide_title: False
+description: Documentation for emojicoin dot fun
+---
+
+Use this guide if you are using an Aptos wallet and using Coinbase to onramp.
+1. Open Petra wallet and click Buy 
+
+![cex1](./images/cex1.png "cex1")
+
+2. Choose Coinbase Pay
+
+![cex2](./images/cex2.png "cex2")
+
+3. Click Buy or Transfer with Coinbase
+
+![cex2](./images/cex2.png "cex3")
+
+4. Login
+
+![cex4](./images/cex4.png "cex4")
+
+5. Choose transfer or buy new asset 
+
+![cex5](./images/cex5.png "cex5")
+
+6. Choose amount you want to buy or transfer
+
+![cex6](./images/cex6.png "cex6")
+
+7. Confirm purchase
+
+![cex7](./images/cex7.png "cex7")
+
+8. Wait a few seconds for the purchased APT to hit your wallet
+
+![cex8](./images/cex8.png "cex8")
+
+
+Congrats! You are now ready to start trading at Emojicoin.fun with the APT you now have in your wallet!
