@@ -1,7 +1,6 @@
 import "server-only";
 
 import { type Types, type JSONTypes, toSwapEvent } from "../types";
-import { STRUCT_STRINGS } from "../utils";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
 import {
   type AggregateQueryResultsArgs,
@@ -22,7 +21,7 @@ export const paginateSwapEvents = async (
   let query = postgrest
     .from(INBOX_EVENTS_TABLE)
     .select("*")
-    .filter("type", "eq", STRUCT_STRINGS.SwapEvent)
+    .filter("event_name", "eq", "emojicoin_dot_fun::Swap")
     .order("transaction_version", ORDER_BY.DESC);
 
   query = marketID ? query.eq("data->market_id", wrap(marketID)) : query;
@@ -50,7 +49,7 @@ export const getAllPostBondingCurveMarkets = async (
     query: postgrest
       .from(INBOX_EVENTS_TABLE)
       .select("*")
-      .filter("type", "eq", STRUCT_STRINGS.SwapEvent)
+      .filter("event_name", "eq", "emojicoin_dot_fun::Swap")
       .filter("data->results_in_state_transition", "eq", true)
       .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
       .order("transaction_version", ORDER_BY.DESC),

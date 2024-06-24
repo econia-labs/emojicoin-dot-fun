@@ -3,7 +3,6 @@ import "server-only";
 import { MODULE_ADDRESS } from "../const";
 import { SYMBOL_DATA, type SymbolEmojiData } from "../emoji_data";
 import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
-import { STRUCT_STRINGS } from "../utils";
 import { type Types, type JSONTypes, toMarketRegistrationEvent } from "../types";
 import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-helper";
 import { postgrest } from "./inbox-url";
@@ -47,7 +46,7 @@ export const paginateMarketRegistrations = async (
     query: postgrest
       .from(INBOX_EVENTS_TABLE)
       .select("*")
-      .filter("type", "eq", STRUCT_STRINGS.MarketRegistrationEvent)
+      .filter("event_name", "eq", "emojicoin_dot_fun::MarketRegistration")
       .order("transaction_version", ORDER_BY.DESC),
   });
 

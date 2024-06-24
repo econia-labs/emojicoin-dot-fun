@@ -2,7 +2,6 @@
 
 import { type CandlestickResolution } from "../const";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
-import { STRUCT_STRINGS } from "../utils";
 import { wrap } from "./utils";
 import { type JSONTypes } from "../types";
 import {
@@ -23,7 +22,7 @@ export const paginateCandlesticks = async (
   let query = postgrest
     .from(INBOX_EVENTS_TABLE)
     .select("*")
-    .filter("type", "eq", STRUCT_STRINGS.PeriodicStateEvent)
+    .filter("event_name", "eq", "emojicoin_dot_fun::PeriodicState")
     .eq("data->market_metadata->market_id", wrap(marketID))
     .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);
