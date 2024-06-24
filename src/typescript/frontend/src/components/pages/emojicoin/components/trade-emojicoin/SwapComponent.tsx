@@ -10,6 +10,7 @@ import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals"
 import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
 import { useEventStore } from "context/websockets-context";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -42,6 +43,7 @@ export default function SwapComponent({
   marketID,
   initNumSwaps,
 }: SwapComponentProps) {
+  const { isDesktop } = useMatchBreakpoints();
   const [inputAmount, setInputAmount] = useState("1");
   const [outputAmount, setOutputAmount] = useState("0"); // TODO: Use calculation for initial value...?
   const [previous, setPrevious] = useState(inputAmount);
@@ -107,7 +109,9 @@ export default function SwapComponent({
   return (
     <>
       <Column className="w-full max-w-[414px] h-full justify-center">
-        <div className="heading-2 md:heading-1 text-white uppercase pb-[17px]">
+        <div
+          className={`${isDesktop ? "heading-1" : "heading-2"} md:heading-1 text-white uppercase pb-[17px]`}
+        >
           {"Trade emojicoin"}
         </div>
 

@@ -1,3 +1,4 @@
+import { Text } from "components";
 import { type GridProps } from "components/pages/emojicoin/types";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import { motion, useAnimation } from "framer-motion";
@@ -6,6 +7,7 @@ import { getBondingCurveProgress } from "utils/bonding-curve";
 import { type Types } from "@sdk/types/types";
 import { compareBigInt } from "@sdk/utils/compare-bigint";
 import { darkColors } from "theme/colors";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const getLatestReserves = (args: {
   propsData: Types.MarketDataView;
@@ -40,6 +42,7 @@ const getLatestReserves = (args: {
 };
 
 export const AnimatedProgressBar = (props: GridProps) => {
+  const { isDesktop } = useMatchBreakpoints();
   const data = props.data;
   const marketID = data.marketID.toString();
   const { marketData, stateEvents } = useEventStore((s) => ({
@@ -103,16 +106,34 @@ export const AnimatedProgressBar = (props: GridProps) => {
   return (
     <motion.div className="relative flex w-full rounded-sm h-[100%] !p-0">
       <motion.div
-        style={{
-          filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
-        }}
+        style={
+          isDesktop
+            ? {
+                filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
+              }
+            : {
+                filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
+                width: "100%",
+                padding: ".7em",
+              }
+        }
         className="relative flex my-auto mx-[2ch] opacity-[0.9]"
         animate={flickerControls}
       >
-        <span className="uppercase text-2xl text-nowrap text-ellipsis text-light-gray">
+        <Text
+          textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
+          color="lightGray"
+          textTransform="uppercase"
+        >
           Bonding progress:&nbsp;
-        </span>
-        <span className="uppercase text-2xl text-nowrap text-ellipsis text-white">{`${progress.toFixed(1)}%`}</span>
+        </Text>
+        <Text
+          textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
+          color="white"
+          textTransform="uppercase"
+        >
+          {`${progress.toFixed(1)}%`}
+        </Text>
       </motion.div>
       <motion.div
         className="absolute drop-shadow-voltage bottom-0 bg-blue h-[1px]"
