@@ -27,13 +27,14 @@ export const StyledContentHeader = styled.div`
   align-items: center;
   position: relative;
   padding: 0 21px;
+  width: 100%;
 
   &:after,
   &:before {
     content: "";
     display: block;
     position: absolute;
-    width: 100vw;
+    width: 200vw;
     background-color: ${({ theme }) => theme.colors.darkGray};
     height: 1px;
     transform: translateX(-50%);

@@ -14,6 +14,7 @@ import TradeHistory from "../trade-history";
 import ChatBox from "../chat/ChatBox";
 import { type GridProps } from "../../types";
 import SwapComponent from "../trade-emojicoin/SwapComponent";
+import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
 
 const MobileGrid = (props: GridProps) => {
   const [tab, setTab] = useState(1);
@@ -62,22 +63,31 @@ const MobileGrid = (props: GridProps) => {
           </FlexGap>
         </StyledMobileContentHeader>
 
-        <StyledMobileContentInner>
-          {tab === 1 ? (
+        {tab === 1 ? (
+          <StyledMobileContentInner>
             <TradeHistory data={props.data} />
-          ) : tab === 2 ? (
-            <Flex width="100%" justifyContent="center" px="17px">
-              <SwapComponent
-                emojicoin={props.data.symbol}
-                marketAddress={props.data.marketAddress}
-                marketID={props.data.marketID.toString()}
-                initNumSwaps={props.data.numSwaps}
-              />
-            </Flex>
-          ) : (
+          </StyledMobileContentInner>
+        ) : tab === 2 ? (
+          <>
+            <div style={{ width: "100%" }}>
+              <LiquidityButton data={props.data} />
+            </div>
+            <StyledMobileContentInner>
+              <Flex width="100%" justifyContent="center" px="17px">
+                <SwapComponent
+                  emojicoin={props.data.symbol}
+                  marketAddress={props.data.marketAddress}
+                  marketID={props.data.marketID.toString()}
+                  initNumSwaps={props.data.numSwaps}
+                />
+              </Flex>
+            </StyledMobileContentInner>
+          </>
+        ) : (
+          <StyledMobileContentInner>
             <ChatBox data={props.data} />
-          )}
-        </StyledMobileContentInner>
+          </StyledMobileContentInner>
+        )}
       </StyledMobileContentBlock>
     </StyledMobileContentWrapper>
   );

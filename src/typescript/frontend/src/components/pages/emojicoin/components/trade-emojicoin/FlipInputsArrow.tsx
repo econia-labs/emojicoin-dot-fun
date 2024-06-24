@@ -29,11 +29,7 @@ const FlipInputsArrow = ({ onClick }) => {
         }}
         className={`relative w-full h-full ${hoverArrow ? "rotate-180 text-white" : "rotate-0 text-white"}`}
       >
-        <BidirectionalArrowIcon
-          strokeWidth={2.3}
-          className="rotate-90 scale-[1.5]"
-          strokeLinecap="square"
-        />
+        <BidirectionalArrowIcon strokeWidth={2.3} className="scale-[1.7]" strokeLinecap="square" />
       </div>
     </div>
   );
