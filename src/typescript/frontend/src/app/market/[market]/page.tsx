@@ -35,7 +35,7 @@ interface EmojicoinPageProps {
  */
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const { market } = params.params;
-  const res = await fetchLatestMarketState(market);
+  const res = await fetchLatestMarketState(BigInt(market));
 
   if (res) {
     const marketID = res.marketID.toString();
