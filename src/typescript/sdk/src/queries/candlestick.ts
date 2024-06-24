@@ -23,7 +23,7 @@ export const paginateCandlesticks = async (
   let query = postgrest
     .from(INBOX_EVENTS_TABLE)
     .select("*")
-    .filter("type", "eq", STRUCT_STRINGS.PeriodicStateEvent)
+    .filter("event_name", "eq", "emojicoin_dot_fun::PeriodicState")
     .eq("data->market_metadata->market_id", wrap(marketID))
     .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);

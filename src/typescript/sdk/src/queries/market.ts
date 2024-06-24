@@ -47,7 +47,7 @@ export const paginateMarketRegistrations = async (
     query: postgrest
       .from(INBOX_EVENTS_TABLE)
       .select("*")
-      .filter("type", "eq", STRUCT_STRINGS.MarketRegistrationEvent)
+      .filter("event_name", "eq", "emojicoin_dot_fun::MarketRegistration")
       .order("transaction_version", ORDER_BY.DESC),
   });
 

@@ -18,7 +18,7 @@ export const paginateChatEvents = async (
   const query = postgrest
     .from(INBOX_EVENTS_TABLE)
     .select("*")
-    .filter("type", "eq", STRUCT_STRINGS.ChatEvent)
+    .filter("event_name", "eq", "emojicoin_dot_fun::Chat")
     .eq("data->market_metadata->market_id", wrap(marketID))
     .limit(Math.min(LIMIT, maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);

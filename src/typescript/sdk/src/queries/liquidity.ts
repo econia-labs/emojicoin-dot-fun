@@ -29,7 +29,7 @@ export const paginateLiquidityEvents = async (
   let query = postgrest
     .from(INBOX_EVENTS_TABLE)
     .select("*")
-    .filter("type", "eq", STRUCT_STRINGS.LiquidityEvent)
+    .filter("event_name", "eq", "emojicoin_dot_fun::Liquidity")
     .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);
 
