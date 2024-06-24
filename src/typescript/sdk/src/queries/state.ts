@@ -1,7 +1,6 @@
 import "server-only";
 
 import { type Types, toGlobalStateEvent, toStateEvent, toMarketDataView } from "../types";
-import { STRUCT_STRINGS } from "../utils/type-tags";
 import { INBOX_EVENTS_TABLE, MARKET_DATA_VIEW, ORDER_BY } from "./const";
 import { wrap } from "./utils";
 import {

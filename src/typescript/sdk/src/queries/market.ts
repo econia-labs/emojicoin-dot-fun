@@ -3,7 +3,6 @@ import "server-only";
 import { MODULE_ADDRESS } from "../const";
 import { SYMBOL_DATA, type SymbolEmojiData } from "../emoji_data";
 import { INBOX_EVENTS_TABLE, ORDER_BY } from "./const";
-import { STRUCT_STRINGS } from "../utils";
 import { type Types, type JSONTypes, toMarketRegistrationEvent } from "../types";
 import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-helper";
 import { postgrest } from "./inbox-url";

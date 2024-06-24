@@ -1,7 +1,6 @@
 import "server-only";
 
 import { type Types, type JSONTypes, toSwapEvent } from "../types";
-import { STRUCT_STRINGS } from "../utils";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
 import {
   type AggregateQueryResultsArgs,

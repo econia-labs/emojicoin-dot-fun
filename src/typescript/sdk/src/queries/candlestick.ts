@@ -2,7 +2,6 @@
 
 import { type CandlestickResolution } from "../const";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
-import { STRUCT_STRINGS } from "../utils";
 import { wrap } from "./utils";
 import { type JSONTypes } from "../types";
 import {
