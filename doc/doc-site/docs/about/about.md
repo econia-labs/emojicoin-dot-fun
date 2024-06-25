@@ -1,6 +1,6 @@
 ---
 slug: /about
-title: 🍆About emojicoin.fun
+title: ⬛ About emojicoin.fun
 hide_title: False
 description: Documentation for emojicoin dot fun
 ---
