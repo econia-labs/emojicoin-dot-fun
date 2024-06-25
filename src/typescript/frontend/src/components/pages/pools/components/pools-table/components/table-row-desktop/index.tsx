@@ -6,8 +6,9 @@ import { Flex } from "@containers";
 import { Text, Tr, Td } from "components";
 
 import { type TableRowDesktopProps } from "./types";
+import { toCoinDecimalString } from "lib/utils/decimals";
 
-const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
+const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
   const { isMobile } = useMatchBreakpoints();
 
   const { targetRef: targetRefPool, tooltip: poolTooltip } = useTooltip(undefined, {
@@ -36,7 +37,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
   });
 
   return (
-    <Tr hover>
+    <Tr hover selected={selected} onClick={onClick}>
       <Td p="7px 12px" width={{ _: "25%", tablet: "11.5%" }}>
         <Flex justifyContent="start">
           <Text
@@ -46,7 +47,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
             ellipsis
             ref={targetRefPool}
           >
-            {item.pool}
+            {item.symbol}
           </Text>
           {poolTooltip}
         </Flex>
@@ -61,7 +62,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
             ellipsis
             ref={targetRefAllTime}
           >
-            {item.allTime} APT
+            {toCoinDecimalString(item.allTimeVolume, 2)} APT
           </Text>
           {allTimeTooltip}
         </Flex>
@@ -77,7 +78,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
               ellipsis
               ref={targetRefVol24}
             >
-              {item.vol24} APT
+              {toCoinDecimalString(item.dailyVolume, 2)} APT
             </Text>
             {vol24Tooltip}
           </Flex>
@@ -93,7 +94,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
             ellipsis
             ref={targetRefTvl}
           >
-            {item.tvl} APT
+            {toCoinDecimalString(item.cpammRealReservesQuote * 2, 2)} APT
           </Text>
           {tvlTooltip}
         </Flex>
@@ -108,7 +109,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item }) => {
             ellipsis
             ref={targetRefApr}
           >
-            {item.apr}%
+            {((item.tvlPerLpCoinGrowth ** 356 - 1) * 100).toFixed(4)}%
           </Text>
           {aprTooltip}
         </Flex>

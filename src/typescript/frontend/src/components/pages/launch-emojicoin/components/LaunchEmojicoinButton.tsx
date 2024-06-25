@@ -12,7 +12,13 @@ import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
 
-export const LaunchEmojicoinButton = ({ emojis }: { emojis: Array<HexInput> }) => {
+export const LaunchEmojicoinButton = ({
+  emojis,
+  marketID,
+}: {
+  emojis: Array<HexInput>;
+  marketID: number | undefined;
+}) => {
   const { t } = translationFunction();
   const { aptos, account, submit, signThenSubmit } = useAptos();
 
@@ -58,7 +64,11 @@ export const LaunchEmojicoinButton = ({ emojis }: { emojis: Array<HexInput> }) =
     }
   };
 
-  return (
+  return marketID !== undefined ? (
+    <a href={`/market/${marketID}`}>
+      <Button>Go to registered emojicoin</Button>
+    </a>
+  ) : (
     <ButtonWithConnectWalletFallback>
       <Button onClick={handleClick} scale="lg">
         {t("Launch Emojicoin")}

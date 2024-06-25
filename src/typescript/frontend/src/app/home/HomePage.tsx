@@ -1,5 +1,5 @@
 import EmojiTable from "components/pages/home/components/emoji-table";
-import MainCard from "components/pages/home/components/main-card";
+import MainCard from "components/pages/home/components/main-card/MainCard";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import type fetchSortedMarketData from "lib/queries/sorting/market-data";

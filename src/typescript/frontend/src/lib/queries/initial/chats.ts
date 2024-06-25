@@ -1,24 +1,26 @@
 "use server";
 
-import { toChatEvent } from "@sdk/types";
+import { type AnyNumberString, toChatEvent } from "@sdk/types";
 import { paginateChatEvents } from "@sdk/queries/chat";
-import { cache } from "react";
-import { fetchInitialWithFallback } from "./cache-helper";
 
-const getInitialChatData = cache(
-  async (args: { marketID: string; maxTotalRows?: number; maxNumQueries?: number }) => {
-    const { marketID, maxTotalRows, maxNumQueries } = args;
-    const chatEvents = await fetchInitialWithFallback({
-      functionArgs: {
-        marketID: BigInt(marketID),
-        maxTotalRows,
-        maxNumQueries,
-      },
-      queryFunction: paginateChatEvents,
-    });
+/**
+ * TODO: We could eventually cache this data by setting the revalidation tag to the number of chats
+ * for a given market. For now we don't cache anything to get fresh data every time, since we'd
+ * eventually make the fetch calls on the client anyway.
+ */
+const fetchInitialChatData = async (args: {
+  marketID: AnyNumberString;
+  maxTotalRows?: number;
+  maxNumQueries?: number;
+}) => {
+  const { marketID, maxTotalRows, maxNumQueries } = args;
+  const chatEvents = await paginateChatEvents({
+    marketID,
+    maxTotalRows,
+    maxNumQueries,
+  });
 
-    return chatEvents.map((chat) => toChatEvent(chat, chat.version));
-  }
-);
+  return chatEvents.map((chat) => toChatEvent(chat, chat.version));
+};
 
-export default getInitialChatData;
+export default fetchInitialChatData;

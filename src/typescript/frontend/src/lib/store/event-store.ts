@@ -1,15 +1,35 @@
-import { type Events } from "@sdk/emojicoin_dot_fun/events";
-import { type AnyEmojicoinEvent, type Types } from "@sdk/types/types";
+import {
+  isChatEvent,
+  isGlobalStateEvent,
+  isLiquidityEvent,
+  isMarketRegistrationEvent,
+  isPeriodicStateEvent,
+  isStateEvent,
+  isSwapEvent,
+  type AnyEmojicoinEvent,
+  type Types,
+} from "@sdk/types/types";
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
-import { type WritableDraft } from "immer";
-import { mergeSortedEvents } from "./event-utils";
 import { type AnyNumberString } from "@sdk-types";
+import { CandlestickResolution, toCandlestickResolution } from "@sdk/const";
+import { type DBJsonData } from "@sdk/emojicoin_dot_fun";
+import { type AnyEmojicoinJSONEvent } from "@sdk/types/json-types";
+import { type WritableDraft } from "immer";
 import {
-  getEmptyGroupedCandlesticks,
-  type GroupedPeriodicStateEvents,
-} from "@sdk/queries/client-utils/candlestick";
-import { type CandlestickResolution } from "@sdk/const";
+  type MarketIDString,
+  type SymbolString,
+  isSwapEventFromDB,
+  deserializeEvent,
+  isGlobalStateEventFromDB,
+  isStateEventFromDB,
+  isPeriodicStateEventFromDB,
+  isChatEventFromDB,
+  isLiquidityEventFromDB,
+  isMarketRegistrationEventFromDB,
+} from "./event-utils";
+import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import { type HexInput } from "@aptos-labs/ts-sdk";
 
 type SwapEvent = Types.SwapEvent;
 type ChatEvent = Types.ChatEvent;
@@ -23,369 +43,194 @@ type MarketDataView = Types.MarketDataView;
 // TODO: Pass data from server components down to client components
 // to reinitialize the store with the data from the server.
 
-export type EventsWithUUIDs = {
-  swapEvents: { events: SwapEvent[]; eventUUIDs: Set<string> };
-  chatEvents: { events: ChatEvent[]; eventUUIDs: Set<string> };
-  marketRegistrationEvents: { events: MarketRegistrationEvent[]; eventUUIDs: Set<string> };
-  periodicStateEvents: { events: GroupedPeriodicStateEvents; eventUUIDs: Set<string> };
-  stateEvents: { events: StateEvent[]; eventUUIDs: Set<string> };
-  liquidityEvents: { events: LiquidityEvent[]; eventUUIDs: Set<string> };
+export type EventsWithGUIDs = {
+  swapEvents: readonly SwapEvent[];
+  chatEvents: readonly ChatEvent[];
+  stateEvents: readonly StateEvent[];
+  liquidityEvents: readonly LiquidityEvent[];
+  [CandlestickResolution.PERIOD_1M]: readonly PeriodicStateEvent[];
+  [CandlestickResolution.PERIOD_5M]: readonly PeriodicStateEvent[];
+  [CandlestickResolution.PERIOD_15M]: readonly PeriodicStateEvent[];
+  [CandlestickResolution.PERIOD_30M]: readonly PeriodicStateEvent[];
+  [CandlestickResolution.PERIOD_1H]: readonly PeriodicStateEvent[];
+  [CandlestickResolution.PERIOD_4H]: readonly PeriodicStateEvent[];
+  [CandlestickResolution.PERIOD_1D]: readonly PeriodicStateEvent[];
 };
 
-export type MarketStateValueType = EventsWithUUIDs & {
+export type MarketStateValueType = EventsWithGUIDs & {
   marketData?: MarketDataView;
 };
 
 export type EventState = {
+  guids: Set<string>;
+  firehose: readonly AnyEmojicoinEvent[];
   markets: Map<MarketIDString, MarketStateValueType>;
   symbolToMarketID: Map<SymbolString, MarketIDString>;
   marketIDToSymbol: Map<MarketIDString, SymbolString>;
-  globalStateEvents: { events: GlobalStateEvent[]; eventUUIDs: Set<string> };
+  globalStateEvents: GlobalStateEvent[];
+  marketRegistrationEvents: readonly MarketRegistrationEvent[];
 };
 
-// The type of the `set((state) => ...)` function for the `immer` library.
-export type ImmerSetEventStoreFunction = (
-  nextStateOrUpdater:
-    | EventStore
-    | Partial<EventStore>
-    | ((state: WritableDraft<EventStore>) => void),
-  shouldReplace?: boolean | undefined
-) => void;
-
-type ArrayOrElement<T> = T | T[];
-type AddEventsType<T> = ({ data, sorted }: { data: ArrayOrElement<T>; sorted?: boolean }) => void;
-
-// Type aliases for more specificity.
-type MarketIDString = string;
-type SymbolString = string;
-
 export type EventActions = {
-  setMarket: (marketID: AnyNumberString, data?: MarketStateValueType) => void;
-  maybeInitializeMarket: (marketID: AnyNumberString) => void;
+  initializeMarket: (marketID: AnyNumberString, symbolOrBytes?: HexInput) => void;
   getMarket: (marketID: AnyNumberString) => MarketStateValueType | undefined;
-  getFrozenSymbols: () => Array<SymbolString>;
   getSymbols: () => Map<SymbolString, MarketIDString>;
-  getFrozenMarketIDs: () => Array<MarketIDString>;
   getMarketIDs: () => Map<MarketIDString, SymbolString>;
   getMarketIDFromSymbol: (symbol: SymbolString) => MarketIDString | undefined;
   getSymbolFromMarketID: (marketID: AnyNumberString | MarketIDString) => SymbolString | undefined;
+  pushEvents: (events: Array<AnyEmojicoinEvent>) => void;
+  pushEventFromWebSocket: (buffer: Buffer) => void;
   addMarketData: (d: MarketDataView) => void;
-  addGlobalStateEvents: AddEventsType<GlobalStateEvent>;
-  addSwapEvents: AddEventsType<SwapEvent>;
-  addLiquidityEvents: AddEventsType<LiquidityEvent>;
-  addStateEvents: AddEventsType<StateEvent>;
-  addPeriodicStateEvents: AddEventsType<PeriodicStateEvent>;
-  addChatEvents: AddEventsType<ChatEvent>;
-  addMarketRegistrationEvents: AddEventsType<MarketRegistrationEvent>;
 };
 
 export type EventStore = EventState & EventActions;
-const ensureArray = <T>(value: ArrayOrElement<T>): T[] => (Array.isArray(value) ? value : [value]);
 
-export const initializeEventStore = (): EventState => ({
-  markets: new Map(),
-  symbolToMarketID: new Map(),
-  marketIDToSymbol: new Map(),
-  globalStateEvents: { events: [], eventUUIDs: new Set() },
-});
-
-export const getInitialMarketState = (): MarketStateValueType => ({
-  swapEvents: { events: [], eventUUIDs: new Set() },
-  liquidityEvents: { events: [], eventUUIDs: new Set() },
-  stateEvents: { events: [], eventUUIDs: new Set() },
-  periodicStateEvents: { events: getEmptyGroupedCandlesticks(), eventUUIDs: new Set() },
-  chatEvents: { events: [], eventUUIDs: new Set() },
-  marketRegistrationEvents: { events: [], eventUUIDs: new Set() },
-  marketData: undefined,
-});
-
-// Should this just be in `createEventStore` and called within there?
-// Unsure if `immer` is 💯 like that, i.e., composable.
-// Either way, adding a market and adding the mapping from symbol to market ID
-// needs to be coupled.
-// We also add the mapping from market ID to symbol here.
-export const setMarketHelper = (args: {
-  marketID: AnyNumberString;
-  set: ImmerSetEventStoreFunction;
-  data?: MarketStateValueType;
-}) => {
-  const { set } = args;
-  const data = args.data ?? getInitialMarketState();
-  const marketID = args.marketID.toString();
-  set((state) => {
-    state.markets.set(marketID.toString(), data);
-    const emojiBytes = data.marketData?.emojiBytes;
-    if (emojiBytes && state.symbolToMarketID.has(emojiBytes)) {
-      state.symbolToMarketID.set(emojiBytes, marketID);
-      state.marketIDToSymbol.set(marketID, emojiBytes);
-    }
-  });
+export const initializeEventStore = (): EventState => {
+  return {
+    guids: new Set(),
+    firehose: [],
+    markets: new Map(),
+    symbolToMarketID: new Map(),
+    marketIDToSymbol: new Map(),
+    globalStateEvents: [],
+    marketRegistrationEvents: [],
+  };
 };
+
+export const getInitialMarketState = () => ({
+  swapEvents: [],
+  liquidityEvents: [],
+  stateEvents: [],
+  chatEvents: [],
+  marketData: undefined,
+  [CandlestickResolution.PERIOD_1M]: [],
+  [CandlestickResolution.PERIOD_5M]: [],
+  [CandlestickResolution.PERIOD_15M]: [],
+  [CandlestickResolution.PERIOD_30M]: [],
+  [CandlestickResolution.PERIOD_1H]: [],
+  [CandlestickResolution.PERIOD_4H]: [],
+  [CandlestickResolution.PERIOD_1D]: [],
+});
 
 export const defaultState: EventState = initializeEventStore();
 
+export const initializeMarketDraft = (
+  state: WritableDraft<EventState>,
+  marketID: AnyNumberString,
+  symbolOrBytes?: HexInput
+) => {
+  const id = marketID.toString();
+  if (!state.markets.has(id)) {
+    state.markets.set(id, getInitialMarketState());
+  }
+  if (symbolOrBytes) {
+    const symbol = symbolBytesToEmojis(symbolOrBytes).symbol;
+    state.symbolToMarketID.set(symbol, id);
+    state.marketIDToSymbol.set(id, symbol);
+  }
+};
+
+// This should REALLY use classes, I just didn't know you could use classes with
+// immer when making this.
 export const createEventStore = (initialState: EventState = defaultState) => {
   return createStore<EventStore>()(
     immer((set, get) => ({
       ...initialState,
-      setMarket: (marketID, data) =>
-        setMarketHelper({
-          marketID,
-          data,
-          set,
-        }),
-      maybeInitializeMarket: (marketID) => {
-        if (!get().markets.has(marketID.toString())) {
-          setMarketHelper({
-            marketID,
-            set,
-          });
-        }
-      },
-      /**
-       * Gets the current values in the map without triggering state updates when it changes.
-       * @returns
-       */
-      getFrozenSymbols: () => Array.from(get().symbolToMarketID.keys()),
-      /**
-       * Gets the current values in the map without triggering state updates when it changes.
-       * @returns
-       */
-      getFrozenMarketIDs: () => Array.from(get().marketIDToSymbol.keys()),
-      getSymbols: () => get().symbolToMarketID, // These should see state updates.
-      getMarketIDs: () => get().marketIDToSymbol, // These should see state updates.
+      initializeMarket: (marketID, symbolOrBytes) =>
+        set((state) => initializeMarketDraft(state, marketID, symbolOrBytes)),
+      getSymbols: () => get().symbolToMarketID,
+      getMarketIDs: () => get().marketIDToSymbol,
       getMarketIDFromSymbol: (symbol) => get().symbolToMarketID.get(symbol),
       getSymbolFromMarketID: (marketID) => get().marketIDToSymbol.get(marketID.toString()),
       getMarket: (marketID) => {
-        // To avoid unnecessary side effects (state updates and thus re-renders),
-        // we only set the market if it doesn't exist.
-        // if (!get().markets.has(marketID.toString())) {
-        //   setMarketHelper({
-        //     marketID,
-        //     set,
-        //     data,
-        //   });
-        // }
         return get().markets.get(marketID.toString())!;
       },
       addMarketData: (data) => {
         const marketID = data.marketID.toString();
         if (!get().markets.has(marketID)) {
-          setMarketHelper({
-            marketID,
-            set,
-          });
+          get().initializeMarket(marketID, data.emojiBytes);
         }
         return set((state) => {
           state.markets.get(marketID)!.marketData = data;
         });
       },
-      addGlobalStateEvents: ({ data, sorted }) => {
-        const currentUUIDs = get().globalStateEvents.eventUUIDs;
-        const events = ensureArray(data).filter((event) => {
-          const uuid = event.registryNonce.toString();
-          return !currentUUIDs.has(uuid);
-        });
-        if (events.length === 0) {
-          return;
-        }
-        if (!sorted) {
-          events.sort((a, b) => a.version - b.version);
-        }
-        return set((state) => {
-          const mutableUUIDs = state.globalStateEvents.eventUUIDs;
+      // Because these often come from queries, we only do state updates in chunks with arrays.
+      // Note that the events here are assumed to be sorted in descending order already, aka
+      // latest first.
+      pushEvents: (events: Array<AnyEmojicoinEvent>) => {
+        if (events.length === 0) return;
+        set((state) => {
           events.forEach((event) => {
-            const uuid = event.registryNonce.toString();
-            mutableUUIDs.add(uuid);
-            state.globalStateEvents.events.push(event);
+            if (state.guids.has(event.guid)) return;
+            state.firehose.push(event);
+            state.guids.add(event.guid);
+            if (isGlobalStateEvent(event)) return;
+            const marketID = event.marketID.toString();
+            if (!state.markets.has(marketID)) initializeMarketDraft(state, marketID);
+            const market = state.markets.get(marketID)!;
+            if (isSwapEvent(event)) {
+              market.swapEvents.push(event);
+            } else if (isStateEvent(event)) {
+              market.stateEvents.push(event);
+            } else if (isChatEvent(event)) {
+              market.chatEvents.push(event);
+            } else if (isLiquidityEvent(event)) {
+              market.liquidityEvents.push(event);
+            } else if (isMarketRegistrationEvent(event)) {
+              state.marketRegistrationEvents.push(event);
+            } else if (isPeriodicStateEvent(event)) {
+              const period = Number(event.periodicStateMetadata.period);
+              const resolution = toCandlestickResolution[period];
+              if (!market[resolution]) {
+                market[resolution] = [event];
+              } else {
+                market[resolution].push(event);
+              }
+            }
           });
-          // TODO: Optimize later.
-          state.globalStateEvents.events.sort((a, b) => b.version - a.version);
         });
       },
-      addSwapEvents: ({ data, sorted }) => {
-        pushHelper({
-          data,
-          get,
-          set,
-          getMarketID: (e) => e.marketID.toString(),
-          uuid: (e) => e.marketNonce.toString(),
-          field: "swapEvents",
-          sorted,
-        });
-      },
-      addLiquidityEvents: ({ data, sorted }) => {
-        pushHelper({
-          data,
-          get,
-          set,
-          getMarketID: (e) => e.marketID.toString(),
-          uuid: (e) => e.marketNonce.toString(),
-          field: "liquidityEvents",
-          sorted,
-        });
-      },
-      addStateEvents: ({ data, sorted }) => {
-        pushHelper({
-          data,
-          get,
-          set,
-          getMarketID: (e) => e.marketMetadata.marketID.toString(),
-          uuid: (e) => e.stateMetadata.marketNonce.toString(),
-          field: "stateEvents",
-          sorted,
-        });
-      },
-      addChatEvents: ({ data, sorted }) => {
-        pushHelper({
-          data,
-          get,
-          set,
-          getMarketID: (e) => e.marketMetadata.marketID.toString(),
-          uuid: (e) => e.emitMarketNonce.toString(),
-          field: "chatEvents",
-          sorted,
-        });
-      },
-      addMarketRegistrationEvents: ({ data, sorted }) => {
-        pushHelper({
-          data,
-          get,
-          set,
-          getMarketID: (e) => e.marketMetadata.marketID.toString(),
-          uuid: (e) => e.marketMetadata.marketID.toString(),
-          field: "marketRegistrationEvents",
-          sorted,
-        });
-      },
-      addPeriodicStateEvents: ({ data, sorted }) => {
-        const events = ensureArray(data);
-        if (events.length === 0) {
-          return;
-        }
-        const marketID = events[0].marketMetadata.marketID.toString();
-        if (!get().markets.has(marketID)) {
-          setMarketHelper({
-            marketID,
-            set,
+      // We generally push WebSocket events one at a time.
+      // Note that we `unshift` here because we add the latest event to the front of the array.
+      pushEventFromWebSocket: (buffer) => {
+        try {
+          const json = JSON.parse(buffer.toString()) as DBJsonData<AnyEmojicoinJSONEvent>;
+          if (!json) return;
+          const data = deserializeEvent(json, json.transaction_version);
+          if (!data) return;
+          if (get().guids.has(data.event.guid)) return;
+          set((state) => {
+            state.firehose.unshift(data.event);
+            state.guids.add(data.event.guid);
+            if (isGlobalStateEventFromDB(json)) return;
+            if (!data.marketID) throw new Error("No market ID found in event.");
+            if (!state.markets.has(data.marketID)) initializeMarketDraft(state, data.marketID);
+            const market = state.markets.get(data.marketID)!;
+            if (isSwapEventFromDB(json)) {
+              market.swapEvents.unshift(data.event as Types.SwapEvent);
+            } else if (isStateEventFromDB(json)) {
+              market.stateEvents.unshift(data.event as Types.StateEvent);
+            } else if (isChatEventFromDB(json)) {
+              market.chatEvents.unshift(data.event as Types.ChatEvent);
+            } else if (isLiquidityEventFromDB(json)) {
+              market.liquidityEvents.unshift(data.event as Types.LiquidityEvent);
+            } else if (isMarketRegistrationEventFromDB(json)) {
+              state.marketRegistrationEvents.unshift(data.event as Types.MarketRegistrationEvent);
+            } else if (isPeriodicStateEventFromDB(json)) {
+              const event = data.event as Types.PeriodicStateEvent;
+              const period = Number(event.periodicStateMetadata.period);
+              const resolution = toCandlestickResolution[period];
+              if (!market[resolution]) {
+                market[resolution] = [event];
+              } else {
+                market[resolution].unshift(event);
+              }
+            }
           });
+        } catch (e) {
+          console.error(e);
         }
-
-        const market = get().markets.get(marketID)!;
-        const immutableUUIDs = market.periodicStateEvents.eventUUIDs;
-        const [filteredEvents, filteredUUIDs] = [
-          getEmptyGroupedCandlesticks(),
-          new Array<string>(),
-        ];
-
-        events.forEach((e) => {
-          const id = `${e.periodicStateMetadata.period}_${e.periodicStateMetadata.emitMarketNonce}`;
-          if (!immutableUUIDs.has(id)) {
-            filteredEvents[Number(e.periodicStateMetadata.period) as CandlestickResolution].push(e);
-            filteredUUIDs.push(id);
-          }
-        });
-
-        if (filteredUUIDs.length === 0) {
-          return;
-        }
-
-        if (!sorted) {
-          // Sort in descending order.
-          Object.keys(filteredEvents).forEach((key) => {
-            filteredEvents[Number(key) as CandlestickResolution].sort(
-              (a, b) => b.version - a.version
-            );
-          });
-        }
-
-        return set((state) => {
-          Object.keys(state.markets.get(marketID)!.periodicStateEvents.events).forEach((key) => {
-            const field = Number(key) as CandlestickResolution;
-            state.markets.get(marketID)!.periodicStateEvents.events[field] = mergeSortedEvents(
-              state.markets.get(marketID)!.periodicStateEvents.events[field],
-              filteredEvents[field]
-            );
-          });
-          state.markets.get(marketID)!.periodicStateEvents.eventUUIDs = new Set([
-            ...state.markets.get(marketID)!.periodicStateEvents.eventUUIDs,
-            ...filteredUUIDs,
-          ]);
-        });
       },
     }))
   );
-};
-
-// We run this function any time a contract event that is associated with a market ID
-// is added to the event store. This function is responsible for pushing the event into the store
-// and handling all of the state updates and initializations/side effects that should come with it.
-const pushHelper = <T extends AnyEmojicoinEvent>({
-  data,
-  get,
-  set,
-  getMarketID,
-  /**
-   * This is really a unique identifier per market, per event type. So a market nonce
-   * that's shared across multiple event types is still valid as a UUID.
-   */
-  uuid,
-  field,
-  // We assume it's sorted by default, but we can override this in case for whatever reason
-  // we add unsorted data later.
-  // Note that to simplify the insertion process and keep it quick, all transaction versions
-  // lower than the current latest transaction version are not inserted into the store.
-  sorted = true,
-}: {
-  data: ArrayOrElement<T>;
-  get: () => EventStore;
-  set: ImmerSetEventStoreFunction;
-  getMarketID: (e: Array<T>[number]) => string;
-  uuid: (e: Array<T>[number]) => string;
-  field: keyof Omit<Events, "events">;
-  sorted?: boolean;
-}) => {
-  const events = ensureArray(data);
-  if (events.length === 0) {
-    return;
-  }
-
-  const marketID = getMarketID(events[0]);
-  if (!get().markets.has(marketID)) {
-    setMarketHelper({
-      marketID,
-      set,
-    });
-  }
-
-  const market = get().markets.get(marketID)!;
-  const immutableUUIDs = market[field].eventUUIDs;
-  const [filteredEvents, filteredUUIDs] = [new Array<T>(), new Array<string>()];
-  events.forEach((event) => {
-    const id = uuid(event);
-    if (!immutableUUIDs.has(id)) {
-      filteredEvents.push(event);
-      filteredUUIDs.push(id);
-    }
-  });
-
-  if (filteredEvents.length === 0) {
-    return;
-  }
-
-  if (!sorted) {
-    // Sort in descending order.
-    filteredEvents.sort((a, b) => b.version - a.version);
-  }
-
-  return set((state) => {
-    state.markets.get(marketID)![field].events = mergeSortedEvents(
-      state.markets.get(marketID)![field].events,
-      filteredEvents
-    );
-    state.markets.get(marketID)![field].eventUUIDs = new Set([
-      ...state.markets.get(marketID)![field].eventUUIDs,
-      ...filteredUUIDs,
-    ]);
-  });
 };

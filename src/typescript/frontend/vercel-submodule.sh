@@ -1,6 +1,9 @@
 #!/bin/sh
-SUBMODULE_GITHUB=github.com/tradingview/charting_library.git
-SUBMODULE_PATH=public/static
+TRADING_VIEW_SUBMODULE_PATH=public/static
+if [ "$TRADING_VIEW_REPO_OWNER" == "" ]; then
+	echo "Error: TRADING_VIEW_REPO_OWNER is empty. Set it in vercel."
+	exit 1
+fi
 if [ "$GITHUB_ACCESS_TOKEN" == "" ]; then
 	echo "Error: GITHUB_ACCESS_TOKEN is empty. Set it in vercel."
 	exit 1
@@ -14,15 +17,13 @@ rm -rf tmp || true
 mkdir tmp
 cd tmp
 
-# Initialize an empty repository and checkout the submodule.
-git init
-git remote add origin https://$GITHUB_ACCESS_TOKEN@$SUBMODULE_GITHUB
-git fetch origin master
-git checkout master
+# Check out submodule.
+git clone \
+	https://$GITHUB_ACCESS_TOKEN@github.com/$TRADING_VIEW_REPO_OWNER/charting_library.git \
+	--branch master \
+	--depth 1
 
-# Cleanup the repository and move the files to the submodule directory.
+# Move files to submodule directory, clean up.
 cd ..
-rm -rf tmp/.git
-ls
-mv tmp/* $SUBMODULE_PATH/
+mv tmp/charting_library/* $TRADING_VIEW_SUBMODULE_PATH/
 rm -rf tmp

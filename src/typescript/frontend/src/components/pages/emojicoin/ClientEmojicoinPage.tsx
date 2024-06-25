@@ -9,31 +9,21 @@ import { Box } from "@containers";
 import DesktopGrid from "./components/desktop-grid";
 import MobileGrid from "./components/mobile-grid";
 import { type EmojicoinProps } from "./types";
-import { useEventStore } from "context/store-context";
+import { useEventStore } from "context/websockets-context";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import MainInfo from "./components/main-info/MainInfo";
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isLaptopL } = useMatchBreakpoints();
-  const {
-    addMarketData,
-    addChatEvents,
-    addSwapEvents,
-    addPeriodicStateEvents,
-    maybeInitializeMarket,
-  } = useEventStore((s) => s);
+  const { addMarketData, initializeMarket, pushEvents } = useEventStore((s) => s);
 
   useEffect(() => {
     if (props.data) {
-      maybeInitializeMarket(props.data.marketID);
+      initializeMarket(props.data.marketID);
       addMarketData(props.data);
-      addChatEvents({ data: props.data.chats, sorted: true });
-      addSwapEvents({ data: props.data.swaps, sorted: true });
-      addPeriodicStateEvents({ data: props.data.candlesticks, sorted: true });
-      console.debug(props.data);
-      console.debug(props.data.chats);
-      console.debug(props.data.swaps);
-      console.debug(props.data.candlesticks);
+      pushEvents(props.data.swaps);
+      pushEvents(props.data.candlesticks);
+      pushEvents(props.data.chats);
     }
 
     /* eslint-disable-next-line react-hooks/exhaustive-deps */

@@ -1,3 +1,4 @@
+import { toOrderBy } from "@sdk/queries/const";
 import { type HomePageSearchParams } from "lib/queries/sorting/query-params";
 import { MarketDataSortBy, toPostgrestQueryParam } from "lib/queries/sorting/types";
 
@@ -18,12 +19,13 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
   const {
     page: pageInput,
     sort = MarketDataSortBy.MarketCap,
-    order: orderBy = "desc",
+    order = "desc",
     bonding: inBondingCurve = null,
   } = searchParams ?? {};
 
   const sortBy = toPostgrestQueryParam(sort);
   const page = safeParsePage(pageInput);
+  const orderBy = toOrderBy(order);
 
   return {
     page,

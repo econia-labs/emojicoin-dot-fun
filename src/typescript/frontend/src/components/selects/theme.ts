@@ -10,8 +10,5 @@ export const getTooltipStyles = (theme: DefaultTheme) => {
       borderRadius: "inherit",
       maxWidth: "100%",
     },
-    arrow: {
-      display: "none",
-    },
   };
 };

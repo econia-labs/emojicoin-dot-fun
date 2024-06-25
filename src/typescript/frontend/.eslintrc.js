@@ -32,6 +32,7 @@ module.exports = {
         ignoreExternal: true,
       },
     ],
+    "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/ban-types": [
       "error",
       {

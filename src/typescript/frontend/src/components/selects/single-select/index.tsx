@@ -42,6 +42,7 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
       options={options}
       value={value}
       onClick={onDropdownMenuClick}
+      onClose={onDropdownMenuClose}
       onHover={onHover}
       {...dropdownWrapperProps}
     />,
@@ -51,6 +52,10 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
       ...tooltipOptions,
     }
   );
+
+  function onDropdownMenuClose() {
+    setVisible(false);
+  }
 
   function onDropdownMenuClick(option: Option) {
     setVisible(false);

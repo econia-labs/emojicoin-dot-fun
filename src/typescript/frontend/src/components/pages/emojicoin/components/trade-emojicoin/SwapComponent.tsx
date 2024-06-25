@@ -1,7 +1,6 @@
 "use client";
 
 import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
-import { useSimulateSwap } from "lib/queries/client-api/simulate-swap";
 import { type PropsWithChildren, useEffect, useState } from "react";
 import FlipInputsArrow from "./FlipInputsArrow";
 import { Column, Row } from "components/layout/components/FlexContainers";
@@ -9,6 +8,9 @@ import { SwapButton } from "./SwapButton";
 import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
+import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
+import { useEventStore } from "context/websockets-context";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -35,12 +37,22 @@ const inputAndOutputStyles = `
   border-transparent !p-0 text-white
 `;
 
-export default function SwapComponent({ emojicoin, marketAddress, numSwaps }: SwapComponentProps) {
+export default function SwapComponent({
+  emojicoin,
+  marketAddress,
+  marketID,
+  initNumSwaps,
+}: SwapComponentProps) {
+  const { isDesktop } = useMatchBreakpoints();
   const [inputAmount, setInputAmount] = useState("1");
   const [outputAmount, setOutputAmount] = useState("0"); // TODO: Use calculation for initial value...?
   const [previous, setPrevious] = useState(inputAmount);
   const [isLoading, setIsLoading] = useState(false);
   const [isSell, setIsSell] = useState(false);
+
+  const numSwaps = useEventStore(
+    (s) => s.getMarket(marketID.toString())?.swapEvents.length ?? initNumSwaps
+  );
 
   const swapResult = useSimulateSwap({
     marketAddress,
@@ -97,7 +109,9 @@ export default function SwapComponent({ emojicoin, marketAddress, numSwaps }: Sw
   return (
     <>
       <Column className="w-full max-w-[414px] h-full justify-center">
-        <div className="heading-2 md:heading-1 text-white uppercase pb-[17px]">
+        <div
+          className={`${isDesktop ? "heading-1" : "heading-2"} md:heading-1 text-white uppercase pb-[17px]`}
+        >
           {"Trade emojicoin"}
         </div>
 
@@ -129,7 +143,8 @@ export default function SwapComponent({ emojicoin, marketAddress, numSwaps }: Sw
               <div className={grayLabel}>You receive</div>
               <div className="h-[22px] w-full">
                 <div
-                  className={inputAndOutputStyles + " mt-[8px] ml-[1px]"}
+                  onClick={() => setIsSell((v) => !v)}
+                  className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
                   style={{ opacity: isLoading ? 0.6 : 1 }}
                 >
                   {/* Scrambled swap result output below. */}

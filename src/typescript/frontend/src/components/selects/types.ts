@@ -44,10 +44,11 @@ export interface DropdownMenuProps extends Omit<BoxProps, "onClick"> {
   isMultiple?: boolean;
   values?: Option[];
   onClick: (option: Option) => void;
+  onClose: () => void;
   onHover: (value: Option) => void;
 }
 
-export interface DropdownMenuItemProps extends Omit<DropdownMenuProps, "options"> {
+export interface DropdownMenuItemProps extends Omit<Omit<DropdownMenuProps, "options">, "onClose"> {
   index: number;
   option: Option;
   title: string;

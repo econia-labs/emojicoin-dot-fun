@@ -1,21 +1,6 @@
-@keyframes card-pulse {
-  0% {
-    filter: drop-shadow(0 0 5px rgba(205, 47, 141, 0.2));
-  }
-  50% {
-    filter: drop-shadow(0 0 8px rgba(205, 47, 141, 0.4));
-  }
-  100% {
-    filter: drop-shadow(0 0 5px rgba(205, 47, 141, 0.2));
-  }
-}
-
 #grid-emoji-card {
-  transition: all 0.31s;
-
   &:hover {
-    animation: card-pulse 1s infinite ease-in-out;
-    filter: brightness(1.05) !important;
+    filter: brightness(1.05);
     background: #00031e13;
     box-shadow: 0 0 14px 11px rgba(8, 108, 217, 0.1);
   }

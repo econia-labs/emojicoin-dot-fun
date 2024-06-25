@@ -44,7 +44,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
           <FlexGap gap="10px">
             <a
               {...EXTERNAL_LINK_PROPS}
-              href={toExplorerLink({ value: message.version, type: "version" })}
+              href={toExplorerLink({ value: message.version, linkType: "version" })}
             >
               <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
                 {truncateAddress(message.sender)}

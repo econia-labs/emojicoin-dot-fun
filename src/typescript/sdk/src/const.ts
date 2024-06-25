@@ -56,7 +56,7 @@ export enum CandlestickResolution {
   PERIOD_1D = 86400000000,
 }
 
-export const ResolutionToPeriod: Record<CandlestickResolution, CandlestickResolution> = {
+export const toCandlestickResolution: Record<number, CandlestickResolution> = {
   [CandlestickResolution.PERIOD_1M]: CandlestickResolution.PERIOD_1M,
   [CandlestickResolution.PERIOD_5M]: CandlestickResolution.PERIOD_5M,
   [CandlestickResolution.PERIOD_15M]: CandlestickResolution.PERIOD_15M,

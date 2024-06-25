@@ -1,11 +1,5 @@
-import { connect } from "mqtt";
-import { MQTT_URL } from "./env";
-import { STRUCT_STRINGS } from "@sdk/utils";
-
-export const getMqttClient = () => {
-  return connect(MQTT_URL);
-};
-
+import { STRUCT_STRINGS } from "../../../sdk/src/utils/type-tags";
+import { type AnyNumberString } from "@sdk-types";
 export class TopicBuilder {
   /**
    * Build an MQTT topic.
@@ -36,10 +30,11 @@ export class TopicBuilder {
    */
   public static build(
     eventType: string | null,
-    marketId: number | null,
+    possibleMarketID: AnyNumberString | null,
     ...args: string[]
   ): string {
-    let topic = `${eventType !== null ? eventType : "+"}/${marketId !== null ? marketId : "+"}`;
+    const marketID = possibleMarketID ? possibleMarketID.toString() : null;
+    let topic = `${eventType !== null ? eventType : "+"}/${marketID !== null ? marketID : "+"}`;
     for (const arg of args) {
       topic = `${topic}/${arg}`;
     }
@@ -51,10 +46,10 @@ export class TopicBuilder {
    *
    * Null values will be replaced by a wildcard.
    */
-  public static periodicState(marketId: number | null, period: number | null) {
+  public static periodicState(marketID: AnyNumberString | null, period: number | null) {
     return TopicBuilder.build(
       STRUCT_STRINGS.PeriodicStateEvent,
-      marketId,
+      marketID,
       period !== null ? `${period}` : "+"
     );
   }
@@ -64,10 +59,13 @@ export class TopicBuilder {
    *
    * Null values will be replaced by a wildcard.
    */
-  public static swapTopic(marketId: number | null, resultsInStateTransition: boolean | null) {
+  public static swapTopic(
+    marketID: AnyNumberString | null,
+    resultsInStateTransition: boolean | null
+  ) {
     return TopicBuilder.build(
       STRUCT_STRINGS.SwapEvent,
-      marketId,
+      marketID,
       resultsInStateTransition !== null ? `${resultsInStateTransition}` : "+"
     );
   }
@@ -76,8 +74,8 @@ export class TopicBuilder {
    *
    * Null values will be replaced by a wildcard.
    */
-  public static marketRegistrationTopic(marketId: number | null) {
-    return TopicBuilder.build(STRUCT_STRINGS.MarketRegistrationEvent, marketId);
+  public static marketRegistrationTopic(marketID: AnyNumberString | null) {
+    return TopicBuilder.build(STRUCT_STRINGS.MarketRegistrationEvent, marketID);
   }
 
   /**
@@ -85,8 +83,8 @@ export class TopicBuilder {
    *
    * Null values will be replaced by a wildcard.
    */
-  public static chatTopic(marketId: number | null) {
-    return TopicBuilder.build(STRUCT_STRINGS.ChatEvent, marketId);
+  public static chatTopic(marketID: AnyNumberString | null) {
+    return TopicBuilder.build(STRUCT_STRINGS.ChatEvent, marketID);
   }
 
   /**
@@ -94,8 +92,8 @@ export class TopicBuilder {
    *
    * Null values will be replaced by a wildcard.
    */
-  public static stateTopic(marketId: number | null) {
-    return TopicBuilder.build(STRUCT_STRINGS.StateEvent, marketId);
+  public static stateTopic(marketID: AnyNumberString | null) {
+    return TopicBuilder.build(STRUCT_STRINGS.StateEvent, marketID);
   }
 
   /**
@@ -103,7 +101,14 @@ export class TopicBuilder {
    *
    * Null values will be replaced by a wildcard.
    */
-  public static liquidityTopic(marketId: number | null) {
-    return TopicBuilder.build(STRUCT_STRINGS.LiquidityEvent, marketId);
+  public static liquidityTopic(marketID: AnyNumberString | null) {
+    return TopicBuilder.build(STRUCT_STRINGS.LiquidityEvent, marketID);
+  }
+
+  /**
+   * Build an MQTT topic for Global State events.
+   */
+  public static globalStateTopic() {
+    return TopicBuilder.build(STRUCT_STRINGS.GlobalStateEvent, null);
   }
 }

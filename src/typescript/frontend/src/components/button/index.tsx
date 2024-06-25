@@ -59,7 +59,7 @@ const Button = <E extends React.ElementType = "button">({
             <FlexGap gap="8px" onMouseOver={replay}>
               <Text
                 textScale="pixelHeading4"
-                color="econiaBlue"
+                color={isDisabled ? "darkGray" : "econiaBlue"}
                 textTransform="uppercase"
                 fontSize={scale === "sm" ? "20px" : "24px"}
               >
@@ -67,14 +67,14 @@ const Button = <E extends React.ElementType = "button">({
               </Text>
               <Text
                 textScale="pixelHeading4"
-                color="econiaBlue"
+                color={isDisabled ? "darkGray" : "econiaBlue"}
                 textTransform="uppercase"
                 fontSize={scale === "sm" ? "20px" : "24px"}
                 ref={isScramble ? ref : undefined}
               />
               <Text
                 textScale="pixelHeading4"
-                color="econiaBlue"
+                color={isDisabled ? "darkGray" : "econiaBlue"}
                 textTransform="uppercase"
                 fontSize={scale === "sm" ? "20px" : "24px"}
               >

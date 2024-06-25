@@ -8,6 +8,7 @@ export const StyledPoolsPage = styled.div`
   align-items: center;
   padding-top: 93px;
   flex-grow: 1;
+  margin-top: 15px;
 
   ${({ theme }) => theme.mediaQueries.laptopL} {
     max-height: calc(100vh - 200px);

@@ -1,28 +1,39 @@
+import { Text } from "components";
 import { type GridProps } from "components/pages/emojicoin/types";
-import { useEventStore } from "context/store-context";
+import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";
 import { type Types } from "@sdk/types/types";
 import { compareBigInt } from "@sdk/utils/compare-bigint";
 import { darkColors } from "theme/colors";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const getLatestReserves = (args: {
   propsData: Types.MarketDataView;
   storeMarketData?: Types.MarketDataView;
-  storeStateEvents: Array<Types.StateEvent>;
+  storeStateEvents: readonly Types.StateEvent[];
 }) => {
   const { propsData, storeMarketData, storeStateEvents } = args;
   const latestStoreState = storeStateEvents[0];
-  const reserves: Array<[Types.Reserves, bigint]> = [
-    [propsData.clammVirtualReserves, BigInt(propsData.numSwaps)],
+  const reserves: Array<[[number, number], bigint]> = [
+    [
+      [propsData.clammVirtualReservesBase, propsData.clammVirtualReservesQuote],
+      BigInt(propsData.numSwaps),
+    ],
   ];
   if (storeMarketData) {
-    reserves.push([storeMarketData.clammVirtualReserves, BigInt(storeMarketData.numSwaps)]);
+    reserves.push([
+      [storeMarketData.clammVirtualReservesBase, storeMarketData.clammVirtualReservesQuote],
+      BigInt(storeMarketData.numSwaps),
+    ]);
   }
   if (latestStoreState) {
     reserves.push([
-      latestStoreState.clammVirtualReserves,
+      [
+        Number(latestStoreState.clammVirtualReserves.base),
+        Number(latestStoreState.clammVirtualReserves.quote),
+      ],
       BigInt(latestStoreState.cumulativeStats.numSwaps),
     ]);
   }
@@ -31,10 +42,40 @@ const getLatestReserves = (args: {
 };
 
 export const AnimatedProgressBar = (props: GridProps) => {
+  const { isDesktop } = useMatchBreakpoints();
   const data = props.data;
-  const marketData = useEventStore((s) => s.getMarket(data.marketID)?.marketData);
-  const stateEvents = useEventStore((s) => s.getMarket(data.marketID)?.stateEvents.events);
-  const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReserves));
+  const marketID = data.marketID.toString();
+  const { marketData, stateEvents } = useEventStore((s) => ({
+    marketData: s.getMarket(marketID)?.marketData,
+    stateEvents: s.getMarket(marketID)?.stateEvents ?? [],
+  }));
+
+  // Set the initial progress with data passed in from props, aka server component data.
+  const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReservesQuote));
+
+  // Then track the latest progress from the store.
+  useEffect(() => {
+    if (marketData && stateEvents) {
+      const clammVirtualReserves = getLatestReserves({
+        propsData: data,
+        storeMarketData: marketData,
+        storeStateEvents: stateEvents ?? [],
+      });
+      const percentage = getBondingCurveProgress(clammVirtualReserves[1]);
+      setProgress(percentage);
+    }
+    /* eslint-disable-next-line */
+  }, [data, marketData, stateEvents]);
+
+  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    subscribe.state(marketID);
+    return () => unsubscribe.state(marketID);
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   const progressBarControls = useAnimation();
   const flickerControls = useAnimation();
 
@@ -62,32 +103,37 @@ export const AnimatedProgressBar = (props: GridProps) => {
     });
   }, [progress, progressBarControls, flickerControls]);
 
-  useEffect(() => {
-    if (marketData && stateEvents) {
-      const clammVirtualReserves = getLatestReserves({
-        propsData: data,
-        storeMarketData: marketData,
-        storeStateEvents: stateEvents ?? [],
-      });
-      const percentage = getBondingCurveProgress(clammVirtualReserves);
-      setProgress(percentage);
-    }
-    /* eslint-disable-next-line */
-  }, [data.clammVirtualReserves, data.numSwaps, marketData, stateEvents]);
-
   return (
     <motion.div className="relative flex w-full rounded-sm h-[100%] !p-0">
       <motion.div
-        style={{
-          filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
-        }}
+        style={
+          isDesktop
+            ? {
+                filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
+              }
+            : {
+                filter: "brightness(1) drop-shadow(0 1px 2px #fff0)",
+                width: "100%",
+                padding: ".7em",
+              }
+        }
         className="relative flex my-auto mx-[2ch] opacity-[0.9]"
         animate={flickerControls}
       >
-        <span className="uppercase text-2xl text-nowrap text-ellipsis text-light-gray">
+        <Text
+          textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
+          color="lightGray"
+          textTransform="uppercase"
+        >
           Bonding progress:&nbsp;
-        </span>
-        <span className="uppercase text-2xl text-nowrap text-ellipsis text-white">{`${progress.toFixed(1)}%`}</span>
+        </Text>
+        <Text
+          textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
+          color="white"
+          textTransform="uppercase"
+        >
+          {`${progress.toFixed(1)}%`}
+        </Text>
       </motion.div>
       <motion.div
         className="absolute drop-shadow-voltage bottom-0 bg-blue h-[1px]"

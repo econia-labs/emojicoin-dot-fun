@@ -13,7 +13,7 @@ import {
   StyledBlock,
 } from "./styled";
 
-import ChatBox from "../chat";
+import ChatBox from "../chat/ChatBox";
 import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
 import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
@@ -39,7 +39,8 @@ const DesktopGrid = (props: GridProps) => {
               <SwapComponent
                 emojicoin={props.data.symbol}
                 marketAddress={props.data.marketAddress}
-                numSwaps={props.data.numSwaps}
+                marketID={props.data.marketID.toString()}
+                initNumSwaps={props.data.numSwaps}
               />
             </StyledBlockWrapper>
           </StyledBlock>

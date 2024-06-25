@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { isEqual } from "lodash";
 
 import { useElementDimensions, useMatchBreakpoints } from "hooks";
 
@@ -9,34 +8,30 @@ import { TableRowDesktop, TableHeader } from "./components";
 import { Table, Th, EmptyTr, ThInner, HeaderTr, TBody } from "components";
 import { StyledPoolsWrapper } from "./styled";
 
-import { HEADERS, DATA, MOBILE_HEADERS } from "./constants";
+import { HEADERS, MOBILE_HEADERS } from "./constants";
 
-import { type DataType } from "./types";
 import { getEmptyListTr } from "utils";
+import type fetchSortedMarketData from "lib/queries/sorting/market-data";
+import type { SortByPageQueryParams } from "lib/queries/sorting/types";
+import type { OrderByStrings } from "@sdk/queries/const";
 
-const PoolsTable: React.FC = () => {
-  const [dataMock, setDataMock] = useState<DataType[]>([
-    ...DATA,
-    ...DATA,
-    ...DATA,
-    ...DATA,
-    ...DATA,
-  ]);
+export interface PoolsTableProps {
+  data: Awaited<ReturnType<typeof fetchSortedMarketData>>["markets"];
+  sortBy: (sortBy: SortByPageQueryParams) => void;
+  orderBy: (orderBy: OrderByStrings) => void;
+  onSelect: (index: number) => void;
+}
+
+const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
   const { isMobile } = useMatchBreakpoints();
   const { offsetHeight: poolsTableBodyHeight } = useElementDimensions("poolsTableBody");
+  const [selectedRow, setSelectedRow] = useState<number>();
+  const [selectedSort, setSelectedSort] = useState<{
+    col: SortByPageQueryParams;
+    direction: OrderByStrings;
+  }>({ col: "all_time_vol", direction: "desc" });
 
   const headers = isMobile ? MOBILE_HEADERS : HEADERS;
-  const sortData = (sortBy: Exclude<keyof DataType, "pool">) => {
-    const arrCopy = [...dataMock];
-    const sortedData = arrCopy.sort((a, b) => b[sortBy] - a[sortBy]);
-
-    if (isEqual(sortedData, dataMock)) {
-      setDataMock(sortedData.reverse());
-    }
-
-    setDataMock(sortedData);
-  };
-
   return (
     <StyledPoolsWrapper>
       <Table>
@@ -48,7 +43,24 @@ const PoolsTable: React.FC = () => {
                   <TableHeader
                     item={th}
                     isLast={HEADERS.length - 1 === index}
-                    sortData={sortData}
+                    onClick={() => {
+                      if (th.sortBy) {
+                        if (th.sortBy === selectedSort.col) {
+                          const newDirection = selectedSort.direction === "desc" ? "asc" : "desc";
+                          props.orderBy(newDirection);
+                          setSelectedSort({ col: selectedSort.col, direction: newDirection });
+                        } else {
+                          props.sortBy(th.sortBy as SortByPageQueryParams);
+                          if (selectedSort.direction !== "desc") {
+                            props.orderBy("desc");
+                          }
+                          setSelectedSort({
+                            col: th.sortBy as SortByPageQueryParams,
+                            direction: "desc",
+                          });
+                        }
+                      }
+                    }}
                   />
                 </ThInner>
               </Th>
@@ -60,10 +72,18 @@ const PoolsTable: React.FC = () => {
           maxHeight={{ _: "204px", tablet: "340px", laptopL: "unset" }}
           id="poolsTableBody"
         >
-          {dataMock.map((item, index) => (
-            <TableRowDesktop key={index} item={item} />
+          {props.data.map((item, index) => (
+            <TableRowDesktop
+              key={index}
+              item={item}
+              selected={selectedRow == index}
+              onClick={() => {
+                setSelectedRow(index);
+                props.onSelect(index);
+              }}
+            />
           ))}
-          {getEmptyListTr(poolsTableBodyHeight, dataMock.length, EmptyTr)}
+          {getEmptyListTr(poolsTableBodyHeight, props.data.length, EmptyTr)}
         </TBody>
       </Table>
     </StyledPoolsWrapper>

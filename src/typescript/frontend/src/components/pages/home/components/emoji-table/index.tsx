@@ -1,9 +1,7 @@
 import React from "react";
 
 import { ButtonsBlock } from "./components";
-import TableCard from "../table-card";
 import {
-  StyledGrid,
   Header,
   InnerGridContainer,
   SearchWrapper,
@@ -13,8 +11,8 @@ import {
 } from "./styled";
 import SearchComponent from "./components/Search";
 import FilterOptions from "./components/FilterOptions";
-import { toCoinDecimalString } from "lib/utils/decimals";
 import type fetchSortedMarketData from "lib/queries/sorting/market-data";
+import { ClientGrid } from "./ClientGrid";
 
 export interface EmojiTableProps {
   data: Awaited<ReturnType<typeof fetchSortedMarketData>>["markets"];
@@ -34,18 +32,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <FilterOptions />
             </FilterOptionsWrapper>
           </Header>
-          <StyledGrid>
-            {props.data.map((market) => {
-              return (
-                <TableCard
-                  {...market}
-                  marketCap={toCoinDecimalString(market.marketCap, 2)}
-                  volume24h={toCoinDecimalString(market.dailyVolume, 2)}
-                  key={market.marketID.toString()}
-                />
-              );
-            })}
-          </StyledGrid>
+          <ClientGrid {...props} />
           <ButtonsBlock />
         </InnerGridContainer>
       </OuterContainer>

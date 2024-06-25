@@ -4,7 +4,6 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import {
-  DAY_TO_CANDLESTICK_RESOLUTION,
   EXCHANGE_NAME,
   MS_IN_ONE_DAY,
   TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -22,14 +21,13 @@ import {
   widget,
 } from "@static/charting_library";
 import { getClientTimezone } from "lib/chart-utils";
-import { symbolBytesToEmojis } from "@econia-labs/emojicoin-sdk";
+import { type Types, symbolBytesToEmojis } from "@econia-labs/emojicoin-sdk";
 import { type ChartContainerProps } from "./types";
 import { resolveToEmojiSymbol } from "@store/event-utils";
-import { useEventStore } from "context/store-context";
+import { useEventStore } from "context/websockets-context";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import path from "path";
-import { getEmptyGroupedCandlesticks } from "@sdk/queries/client-utils/candlestick";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 
 const configurationData: DatafeedConfiguration = {
@@ -54,9 +52,6 @@ export const Chart = async (props: ChartContainerProps) => {
   const getSymbolFromMarketID = useEventStore((s) => s.getSymbolFromMarketID);
   const getMarketIDFromSymbol = useEventStore((s) => s.getMarketIDFromSymbol);
   const marketMap = useEventStore((s) => s.getMarketIDs()); // TODO: See if these trigger state updates / re-renders?
-  const candlesticks = useEventStore(
-    (s) => s.getMarket(props.marketID)?.periodicStateEvents.events ?? getEmptyGroupedCandlesticks()
-  );
   // const lastSwap = useEventStore((s) => s.getMarket(props.marketID)?.swapEvents.events.at(0));
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
@@ -107,6 +102,7 @@ export const Chart = async (props: ChartContainerProps) => {
         const resolvedMarketID = getMarketIDFromSymbol(symbol) ?? props.marketID;
         if (props.marketID !== resolvedMarketID) {
           const newRoute = path.join(ROUTES.market, resolvedMarketID.toString());
+          console.debug(`[resolveSymbol]: Redirecting to ${newRoute}`);
           router.push(newRoute);
         }
 
@@ -136,9 +132,10 @@ export const Chart = async (props: ChartContainerProps) => {
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
         const { from, to } = periodParams;
         try {
-          const resolutionEnum = DAY_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
+          // const resolutionEnum = DAY_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
 
-          const data = candlesticks[resolutionEnum];
+          // const data = candlesticks[resolutionEnum];
+          const data = new Array<Types.PeriodicStateEvent>();
 
           if (data.length < 1) {
             onHistoryCallback([], {

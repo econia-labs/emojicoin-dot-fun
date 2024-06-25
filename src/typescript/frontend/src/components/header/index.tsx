@@ -53,14 +53,14 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
 
       <Container>
         <Flex my="30px" justifyContent="space-between" alignItems="center">
-          <Link href={ROUTES.home}>
+          <Link marginLeft="50px" href={ROUTES.home}>
             <StyledClickItem>
               <LogoIcon width="170px" cursor="pointer" />
             </StyledClickItem>
           </Link>
 
           {isDesktop && (
-            <FlexGap gap="24px" alignItems="center">
+            <FlexGap marginRight="50px" gap="24px" alignItems="center">
               {linksForCurrentPage.map(({ title, path, width }) => {
                 return (
                   <Link key={title} href={path}>
@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
           )}
 
           {!isDesktop && (
-            <Button scale="lg" onClick={() => setIsOpen(!isOpen)}>
+            <Button marginRight="50px" scale="lg" onClick={() => setIsOpen(!isOpen)}>
               {t("Menu")}
             </Button>
           )}
