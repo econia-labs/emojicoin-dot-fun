@@ -1,6 +1,6 @@
 ---
 slug: /emojicoin-LP
-title: 🍆 Emojicoin LP 🍆
+title: ⛲ Emojicoin LP 
 hide_title: False
 description: Documentation for emojicoin dot fun
 ---

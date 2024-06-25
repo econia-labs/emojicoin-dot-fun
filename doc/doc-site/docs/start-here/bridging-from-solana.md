@@ -1,6 +1,6 @@
 ---
 slug: /bridging-from-solana
-title: Bridging From Solana to Aptos
+title: 🌈 Bridging From Solana to Aptos
 hide_title: False
 description: Documentation for emojicoin dot fun
 ---

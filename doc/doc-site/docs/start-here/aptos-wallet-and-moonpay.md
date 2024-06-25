@@ -1,6 +1,6 @@
 ---
 slug: /aptos-wallet-and-moonpay
-title: Getting Started (Aptos Wallet + Moonpay)
+title: 🔥 Getting Started (Aptos Wallet + Moonpay)
 hide_title: False
 description: Documentation for emojicoin dot fun
 ---

@@ -1,6 +1,6 @@
 ---
 slug: /how-it-works
-title: 🍆 How It Works 🍆
+title: ⚙️ How It Works
 hide_title: False
 description: Documentation for emojicoin dot fun
 ---
@@ -36,5 +36,8 @@ For the emojicoin to reach a 45,000 APT market cap, it must have a net buy/sell 
 - The emojicoin in this LP is now available for users to liquidity farm, and of course still be available for trading. 
 
 We understand watching your child grow up is bittersweet, but it's a natural part of life and you should be proud of what you've accomplished (like breaking out of the bonding curve)!
+
+
+
 
  [Unicode emoji library]: https://www.unicode.org/emoji/charts/full-emoji-list.html

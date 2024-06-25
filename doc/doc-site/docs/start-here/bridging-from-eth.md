@@ -1,6 +1,6 @@
 ---
 slug: /bridging-from-eth
-title: Bridging From Ethereum to Aptos
+title: 🌈 Bridging From Ethereum to Aptos
 hide_title: False
 description: Documentation for emojicoin dot fun
 ---
@@ -25,8 +25,8 @@ Before we begin, you will need to have the following:
 6. Click on the "Bridge" button
 7. Review the transaction details and click on the "Confirm" button
 8. The bridge will be executed and your wrapped USDC (LayerZero) coins for Aptos will be deposited into your Aptos wallet
-![eth5](./images/eth5.png "eth5")
 9. Now heading over to Panora to swap WETH_lz to APT
+![eth5](./images/eth5.png "eth5")
 10. Connect wallet
 ![eth6](./images/eth6.png "eth6")
 11. Enter the amount of funds you would like to turn into APT

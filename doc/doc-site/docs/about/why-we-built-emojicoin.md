@@ -1,6 +1,6 @@
 ---
 slug: /why-we-built-emojicoin
-title: 🍆 Why We built emojicoin.fun 🍆
+title: 🛠️ Why We built emojicoin.fun
 hide_title: False
 description: Documentation for emojicoin dot fun
 ---

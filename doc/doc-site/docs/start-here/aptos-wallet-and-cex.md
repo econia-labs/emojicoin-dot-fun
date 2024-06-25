@@ -1,6 +1,6 @@
 ---
 slug: /aptos-wallet-and-cex
-title: Getting Started (Aptos Wallet + CEX)
+title: 👛 Getting Started (Aptos Wallet + CEX)
 hide_title: False
 description: Documentation for emojicoin dot fun
 ---
