@@ -20,6 +20,7 @@ import { LaunchEmojicoinButton } from "./components/LaunchEmojicoinButton";
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import { fetchLatestMarketState } from "lib/queries/initial/state";
+import { symbolToEmojis } from "@sdk/emoji_data";
 
 const ClientLaunchEmojicoinPage: React.FC = () => {
   const { t } = translationFunction();
@@ -35,7 +36,7 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
     },
   });
 
-  const names = values.emojiList.map((emoji) => emoji.names).join(", ");
+  const names = values.emojiList.map((emoji) => symbolToEmojis(emoji.emoji)[0].name).join(", ");
   const tickers = values.emojiList.map((emoji) => emoji.emoji).join(", ");
 
   const [marketID, setMarketID] = useState<number>();
@@ -185,7 +186,7 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
 
           <Flex justifyContent="center">
             <Text textScale="pixelHeading4" color="darkGray" textTransform="uppercase">
-              {t("Cost to deploy:")} ~1APT
+              {t("Cost to deploy:")} ~1 APT
             </Text>
           </Flex>
 

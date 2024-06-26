@@ -17,7 +17,7 @@ const useValidationSchema = () => {
       const encoder = new TextEncoder();
       const bytes = encoder.encode(value);
       if (value) {
-        for (const c of value) {
+        for (const c of [...new Intl.Segmenter().segment(value)].map((x) => x.segment)) {
           if (!SYMBOL_DATA.hasHex(encoder.encode(c))) {
             return false;
           }
