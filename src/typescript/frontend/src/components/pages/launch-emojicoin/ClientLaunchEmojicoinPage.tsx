@@ -37,7 +37,7 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
   });
 
   const names = values.emojiList.map((emoji) => symbolToEmojis(emoji.emoji)[0].name).join(", ");
-  const tickers = values.emojiList.map((emoji) => emoji.emoji).join(", ");
+  const tickers = values.emojiList.map((emoji) => emoji.emoji).join("");
 
   const [marketID, setMarketID] = useState<number>();
 
