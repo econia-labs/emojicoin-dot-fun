@@ -29,11 +29,11 @@ export const Select: React.FC<SelectProps> = ({
 
   return (
     <DropdownSelectWrapper onMouseEnter={replay} {...wrapperProps}>
-      <FlexGap gap="8px" ellipsis>
+      <FlexGap ref={targetRef} gap="8px" ellipsis>
         <Text className={"med-pixel-text"} color="darkGray">
           {"{"}
         </Text>
-        <Text ref={targetRef} className={"med-pixel-text"} {...placeholderProps} ellipsis>
+        <Text className={"med-pixel-text"} {...placeholderProps} ellipsis>
           {t(placeholder)}
         </Text>
 

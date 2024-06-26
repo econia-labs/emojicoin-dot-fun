@@ -1,20 +1,18 @@
 "use client";
 
 import styled from "styled-components";
-import base from "theme/base";
+import base, { breakpointsArray } from "theme/base";
 import { darkColors } from "theme/colors";
 import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
 
 export const StyledTHFilters = styled.div`
   display: flex;
-  align-items: baseline;
+  align-items: center;
   width: 100%;
   justify-content: space-between;
-  margin-bottom: 8px;
 
   ${base.mediaQueries.tablet} {
     width: unset;
-    margin-bottom: unset;
   }
 `;
 
@@ -72,6 +70,11 @@ export const Header = styled.div`
   ${mediaQueries}
 
   @media (min-width: ${MAX_WIDTH + PADDING * 2}px) {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  @media screen and (max-width: ${breakpointsArray[3]}) {
     padding-left: 0px;
     padding-right: 0px;
   }
