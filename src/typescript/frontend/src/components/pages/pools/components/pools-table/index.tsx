@@ -11,12 +11,12 @@ import { StyledPoolsWrapper } from "./styled";
 import { HEADERS, MOBILE_HEADERS } from "./constants";
 
 import { getEmptyListTr } from "utils";
-import type fetchSortedMarketData from "lib/queries/sorting/market-data";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import type { OrderByStrings } from "@sdk/queries/const";
+import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 
 export interface PoolsTableProps {
-  data: Awaited<ReturnType<typeof fetchSortedMarketData>>["markets"];
+  data: FetchSortedMarketDataReturn["markets"];
   sortBy: (sortBy: SortByPageQueryParams) => void;
   orderBy: (orderBy: OrderByStrings) => void;
   onSelect: (index: number) => void;
@@ -33,7 +33,7 @@ const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
   }>({ col: "all_time_vol", direction: "desc" });
 
   const headers = isMobile ? MOBILE_HEADERS : HEADERS;
-  let tableRef = useRef<HTMLTableSectionElement>(null);
+  const tableRef = useRef<HTMLTableSectionElement>(null);
   return (
     <StyledPoolsWrapper>
       <Table>
@@ -75,8 +75,11 @@ const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
           maxHeight={{ _: "204px", tablet: "340px", laptopL: "unset" }}
           id="poolsTableBody"
           onScroll={() => {
-            if(tableRef && tableRef.current) {
-              if(tableRef.current.offsetHeight + tableRef.current.scrollTop >= tableRef.current.scrollHeight) {
+            if (tableRef && tableRef.current) {
+              if (
+                tableRef.current.offsetHeight + tableRef.current.scrollTop >=
+                tableRef.current.scrollHeight
+              ) {
                 props.onEnd();
               }
             }

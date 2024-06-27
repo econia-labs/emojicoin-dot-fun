@@ -10,7 +10,6 @@ import { Text, InputNumeric, InputGroup, Button, Prompt } from "components";
 
 import { StyledAddLiquidityWrapper } from "./styled";
 import { ProvideLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import type fetchSortedMarketData from "lib/queries/sorting/market-data";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import {
   AptosInputLabel,
@@ -21,9 +20,10 @@ import { toActualCoinDecimals } from "lib/utils/decimals";
 import { toCoinTypes } from "@sdk/markets/utils";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useSimulateProvideLiquidity } from "lib/hooks/queries/use-simulate-provide-liquidity";
+import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 
 type LiquidityProps = {
-  market: Awaited<ReturnType<typeof fetchSortedMarketData>>["markets"][0] | undefined;
+  market: FetchSortedMarketDataReturn["markets"][0] | undefined;
 };
 
 const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
@@ -68,7 +68,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
         }
       });
     }
-  }, [market]);
+  }, [market, account, aptos]);
 
   return (
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
