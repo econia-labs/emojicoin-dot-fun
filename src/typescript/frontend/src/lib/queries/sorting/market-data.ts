@@ -94,7 +94,7 @@ export const fetchFeaturedMarket = async (
 // page 10, 11, 12, ... 19 are in the same bucket, aka the page.
 // To cache this correctly, we can use the page number as the key.
 const calculateOffset = (page: number) =>
-  Math.floor(((page - 1) * MARKETS_PER_PAGE) / LIMIT) * LIMIT;
+  (page - 1) * MARKETS_PER_PAGE;
 
 // Calculate the index of an individual element based on the page number.
 // If the query is sorted in descending order, the index will be reversed,
@@ -114,11 +114,11 @@ type CachedArgs = {
 } & Omit<GetSortedMarketDataQueryArgs, "limit" | "offset">;
 
 const fetchSortedMarketData = async (args: CachedArgs) => {
-  const { page, sortBy, orderBy, inBondingCurve } = args;
+  const { page, sortBy, orderBy, inBondingCurve, exactCount } = args;
 
   const offset = calculateOffset(page);
 
-  const [limit, exactCount] = [LIMIT, true] as const;
+  const limit = MARKETS_PER_PAGE;
   const keys = [
     "sorted-markets",
     limit,
@@ -146,8 +146,6 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
     }
   )();
 
-  const start = ((page - 1) * MARKETS_PER_PAGE) % LIMIT;
-  const end = start + MARKETS_PER_PAGE;
   const indexOffset = calculateIndex({
     givenIndex: (page - 1) * MARKETS_PER_PAGE,
     orderBy,
@@ -155,7 +153,7 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
   });
 
   return {
-    markets: data.slice(start, end).map((v: JSONTypes.MarketDataView, i) => ({
+    markets: data.map((v: JSONTypes.MarketDataView, i) => ({
       ...toMarketDataView(v),
       ...symbolBytesToEmojis(v.emoji_bytes)!,
       index: indexOffset + i + 1,
