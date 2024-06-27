@@ -1,8 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-
-import useSWR from "swr";
+import React, { useEffect, useState } from "react";
 
 import { useEmojicoinPicker, useMatchBreakpoints } from "hooks";
 
@@ -20,20 +18,39 @@ import {
 } from "components/pages/pools/styled";
 import { isDisallowedEventKey, parseJSON } from "utils";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
-
-const fetcher = (...args: Parameters<typeof fetch>) =>
-  fetch(...args)
-    .then((res) => res.text())
-    .then((txt) => parseJSON(txt));
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 
 export const ClientPoolsPage = () => {
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number>();
-  const { data, error, isLoading } = useSWR(
-    `/pools/api?sortby=${sortBy}&orderby=${orderBy}`,
-    fetcher
-  );
+  const [page, setPage] = useState<number>(1);
+  const [markets, setMarkets] = useState<any[]>([]);
+  const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    if(page === 1) {
+      fetch(`/pools/api?sortby=${sortBy}&orderby=${orderBy}&page=${page}`)
+        .then((res) => res.text())
+        .then((txt) => parseJSON(txt))
+        .then((data) => {
+          if(data.markets.length < MARKETS_PER_PAGE) {
+            setAllDataIsLoaded(true);
+          }
+          setMarkets([...data.markets]);
+        });
+    } else {
+      fetch(`/pools/api?sortby=${sortBy}&orderby=${orderBy}&page=${page}`)
+        .then((res) => res.text())
+        .then((txt) => parseJSON(txt))
+        .then((data) => {
+          if(data.markets.length < MARKETS_PER_PAGE) {
+            setAllDataIsLoaded(true);
+          }
+          setMarkets([...markets, ...data.markets]);
+        });
+    }
+  }, [page, orderBy, sortBy]);
 
   const { isMobile } = useMatchBreakpoints();
 
@@ -50,11 +67,6 @@ export const ClientPoolsPage = () => {
       e.preventDefault();
     }
   };
-
-  if (error) return <div>Error.</div>;
-  if (isLoading) return <div>Loading...</div>;
-
-  const markets = data.markets;
 
   return (
     <StyledPoolsPage>
@@ -113,12 +125,21 @@ export const ClientPoolsPage = () => {
             data={markets}
             sortBy={(s) => {
               setSortBy(s);
+              setPage(1);
+              setAllDataIsLoaded(false);
             }}
             orderBy={(s) => {
               setOrderBy(s);
+              setPage(1);
+              setAllDataIsLoaded(false);
             }}
             onSelect={(index) => {
               setSelectedIndex(index);
+            }}
+            onEnd={() => {
+              if(!allDataIsLoaded) {
+                setPage(page + 1);
+              }
             }}
           />
         </StyledInner>

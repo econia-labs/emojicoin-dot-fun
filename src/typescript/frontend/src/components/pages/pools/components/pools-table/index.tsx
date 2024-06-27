@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { useElementDimensions, useMatchBreakpoints } from "hooks";
 
@@ -20,6 +20,7 @@ export interface PoolsTableProps {
   sortBy: (sortBy: SortByPageQueryParams) => void;
   orderBy: (orderBy: OrderByStrings) => void;
   onSelect: (index: number) => void;
+  onEnd: () => void;
 }
 
 const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
@@ -32,6 +33,7 @@ const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
   }>({ col: "all_time_vol", direction: "desc" });
 
   const headers = isMobile ? MOBILE_HEADERS : HEADERS;
+  let tableRef = useRef<HTMLTableSectionElement>(null);
   return (
     <StyledPoolsWrapper>
       <Table>
@@ -68,9 +70,17 @@ const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
           </HeaderTr>
         </thead>
         <TBody
+          ref={tableRef}
           height={{ _: "calc(50vh)", laptopL: "calc(100vh - 353px)" }}
           maxHeight={{ _: "204px", tablet: "340px", laptopL: "unset" }}
           id="poolsTableBody"
+          onScroll={() => {
+            if(tableRef && tableRef.current) {
+              if(tableRef.current.offsetHeight + tableRef.current.scrollTop >= tableRef.current.scrollHeight) {
+                props.onEnd();
+              }
+            }
+          }}
         >
           {props.data.map((item, index) => (
             <TableRowDesktop
