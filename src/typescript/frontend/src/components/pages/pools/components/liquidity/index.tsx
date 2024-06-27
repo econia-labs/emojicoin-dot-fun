@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
@@ -31,6 +31,8 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
   const { theme } = useThemeContext();
 
   const [liquidity, setLiquidity] = useState<number>(0);
+  const [aptBalance, setAptBalance] = useState<number>();
+  const [emojiBalance, setEmojiBalance] = useState<number>();
 
   const { aptos, account, submit } = useAptos();
 
@@ -38,6 +40,35 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
     marketAddress: market?.marketAddress,
     quoteAmount: toActualCoinDecimals({ num: liquidity }),
   });
+
+  const enoughAssets = (apt: number, emoji: number) =>
+    aptBalance && emojiBalance && apt <= aptBalance && emoji <= emojiBalance;
+
+  useEffect(() => {
+    if (market) {
+      const emojicoin = `${market.marketAddress.toString()}::coin_factory::Emojicoin`;
+      const aptosBalance = aptos.view({
+        payload: {
+          function: "0x1::coin::balance",
+          typeArguments: ["0x1::aptos_coin::AptosCoin"],
+          functionArguments: [account?.address],
+        },
+      });
+      const emojicoinBalance = aptos.view({
+        payload: {
+          function: "0x1::coin::balance",
+          typeArguments: [emojicoin],
+          functionArguments: [account?.address],
+        },
+      });
+      Promise.all([aptosBalance, emojicoinBalance]).then(([apt, emojicoin]) => {
+        if (apt[0] && emojicoin[0]) {
+          setEmojiBalance(Number(emojicoin[0].toString()));
+          setAptBalance(Number(apt[0].toString()));
+        }
+      });
+    }
+  }, [market]);
 
   return (
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
@@ -105,7 +136,13 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           <ButtonWithConnectWalletFallback>
             <Button
               scale="lg"
-              disabled={(market ? false : true) || !liquidity}
+              disabled={
+                (market ? false : true) ||
+                !liquidity ||
+                !(provideLiquidityResult
+                  ? enoughAssets(liquidity, Number(provideLiquidityResult))
+                  : false)
+              }
               onClick={async () => {
                 if (!account) {
                   return;
@@ -116,7 +153,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
                     aptosConfig: aptos.config,
                     provider: account.address,
                     marketAddress: market!.marketAddress,
-                    quoteAmount: BigInt(liquidity),
+                    quoteAmount: BigInt(toActualCoinDecimals({ num: liquidity })),
                     typeTags: [emojicoin, emojicoinLP],
                   });
                 await submit(builderLambda);
