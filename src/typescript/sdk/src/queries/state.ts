@@ -1,7 +1,6 @@
 import "server-only";
 
 import { type Types, toGlobalStateEvent, toStateEvent, toMarketDataView } from "../types";
-import { STRUCT_STRINGS } from "../utils/type-tags";
 import { INBOX_EVENTS_TABLE, MARKET_DATA_VIEW, ORDER_BY } from "./const";
 import { wrap } from "./utils";
 import {
@@ -65,7 +64,7 @@ export const paginateGlobalStateEvents = async (
     query: postgrest
       .from(INBOX_EVENTS_TABLE)
       .select("*")
-      .filter("type", "eq", STRUCT_STRINGS.GlobalStateEvent)
+      .filter("event_name", "eq", "emojicoin_dot_fun::GlobalState")
       .order("transaction_version", ORDER_BY.DESC),
   });
 
@@ -87,7 +86,7 @@ export const paginateStateEventsByMarketID = async (
     query: postgrest
       .from(INBOX_EVENTS_TABLE)
       .select("*")
-      .filter("type", "eq", STRUCT_STRINGS.StateEvent)
+      .filter("event_name", "eq", "emojicoin_dot_fun::State")
       .eq("data->market_metadata->market_id", wrap(marketID))
       .order("transaction_version", ORDER_BY.DESC),
   });
