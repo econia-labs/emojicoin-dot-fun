@@ -5,7 +5,7 @@ export const styles = {
     width: "40px",
     height: "20px",
     circleWidth: "14px",
-    positionLeft: "3px",
+    positionLeft: "2px",
     positionRight: "22px",
   },
   [scales.SM]: {
