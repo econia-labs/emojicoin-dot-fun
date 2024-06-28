@@ -56,6 +56,7 @@ export const FilterOptionsComponent = () => {
   const { isLaptopL } = useMatchBreakpoints();
 
   const handler = () => {
+    console.log("handler called")
     setIsChecked((v) => !v);
   };
 
