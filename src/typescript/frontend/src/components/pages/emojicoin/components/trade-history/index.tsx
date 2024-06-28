@@ -15,6 +15,8 @@ import { getRankFromSwapEvent } from "lib/utils/get-user-rank";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import { type TableRowDesktopProps } from "./components/table-row-desktop/types";
 import { type Types } from "@sdk/types/types";
+import "./scrollbar.css";
+import { symbolBytesToEmojis } from "@sdk/emoji_data";
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   ...getRankFromSwapEvent(Number(toCoinDecimalString(value.quoteVolume, 3))),
@@ -25,6 +27,16 @@ const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   price: value.avgExecutionPrice.toString(),
   version: value.version,
 });
+
+const TableHeader =
+  "text-ec-blue position-sticky top-0 bg-black z-1 uppercase " +
+  "border border-solid border-b-dark-gray min-w-[100px] text-left body-lg";
+
+const TableBody =
+  "" +
+  "";
+
+
 
 const TradeHistory = (props: TradeHistoryProps) => {
   const { t } = translationFunction();
@@ -46,34 +58,54 @@ const TradeHistory = (props: TradeHistoryProps) => {
   /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
-    <StyledTradeHistory>
-      <Table minWidth="700px">
+    <div className="w-full h-full overflow-x-auto scrollbar-track">
+      <div className="table-fixed max-w-full w-full min-w-[700px]">
         <thead>
-          <HeaderTr>
-            {getHeaders(props.data.symbol).map((th, index) => (
-              <Th width={th.width} minWidth="100px" key={index}>
-                <ThInner>
-                  <Text
-                    textScale="bodyLarge"
-                    textTransform="uppercase"
-                    color="econiaBlue"
-                    $fontWeight="regular"
-                  >
-                    {t(th.text)}
-                  </Text>
-                </ThInner>
-              </Th>
-            ))}
-          </HeaderTr>
+          <tr className="flex">
+            <th className={`w-1/6 ${TableHeader}`}>Rank</th>
+            <th className={`w-1/6 ${TableHeader}`}>APT</th>
+            <th className={`w-1/6 ${TableHeader}`}>
+              {symbolBytesToEmojis(props.data.emojiBytes).symbol}
+            </th>
+            <th className={`w-1/6 ${TableHeader}`}>Type</th>
+            <th className={`w-1/6 ${TableHeader}`}>Date</th>
+            <th className={`w-1/6 ${TableHeader}`}>Price</th>
+            <th className={`w-1/6 ${TableHeader}`}>Transaction</th>
+          </tr>
         </thead>
-        <TBody height={{ _: "272px", tablet: "340px" }} id="tradeHistoryTableBody">
-          {swaps.map((item, index) => (
-            <TableRowDesktop key={index} item={toTableItem(item)} />
-          ))}
-          {getEmptyListTr(tradeHistoryTableBodyHeight, swaps.length, EmptyTr)}
-        </TBody>
-      </Table>
-    </StyledTradeHistory>
+        <tbody className="flex flex-col overflow-auto w-full scrollbar-track">
+
+        </tbody>
+      </div>
+    </div>
+    // <StyledTradeHistory>
+    //   <Table minWidth="700px">
+    //     <thead>
+    //       <HeaderTr>
+    //         {getHeaders(props.data.symbol).map((th, index) => (
+    //           <Th width={th.width} minWidth="100px" key={index}>
+    //             <ThInner>
+    //               <Text
+    //                 textScale="bodyLarge"
+    //                 textTransform="uppercase"
+    //                 color="econiaBlue"
+    //                 $fontWeight="regular"
+    //               >
+    //                 {t(th.text)}
+    //               </Text>
+    //             </ThInner>
+    //           </Th>
+    //         ))}
+    //       </HeaderTr>
+    //     </thead>
+    //     <TBody height={{ _: "272px", tablet: "340px" }} id="tradeHistoryTableBody">
+    //       {swaps.map((item, index) => (
+    //         <TableRowDesktop key={index} item={toTableItem(item)} />
+    //       ))}
+    //       {getEmptyListTr(tradeHistoryTableBodyHeight, swaps.length, EmptyTr)}
+    //     </TBody>
+    //   </Table>
+    // </StyledTradeHistory>
   );
 };
 
