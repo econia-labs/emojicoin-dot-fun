@@ -1,11 +1,10 @@
 import { type Metadata } from "next";
 
-export const DEFAULT_TITLE = "Emojicoin";
-export const OG_DESC = "Econia Labs' project is in progress";
+export const DEFAULT_TITLE = "emojicoin.fun";
+export const DEFAULT_DESCRIPTION = "Emojicoin degeneracy starts here";
 export const OG_IMAGES = "/social-preview.png";
 export const OG_TYPE = "website";
 export const TWITTER_CARD = "summary";
-export const TWITTER_DESC = "Econia Labs' project is in progress";
 export const TWITTER_IMAGES = "/social-preview.png";
 
 export const getDefaultMetadata = (): Metadata => {
@@ -33,18 +32,18 @@ export const getDefaultMetadata = (): Metadata => {
       url: "https://econialabs.com",
     },
     title: DEFAULT_TITLE,
-    description: "Econia Labs' project is in progress",
+    description: DEFAULT_DESCRIPTION,
     keywords: "aptos, tokens, emoji, emojicoins",
     openGraph: {
       title: DEFAULT_TITLE,
-      description: OG_DESC,
+      description: DEFAULT_DESCRIPTION,
       images: OG_IMAGES,
       type: OG_TYPE,
     },
     twitter: {
       card: TWITTER_CARD,
       title: DEFAULT_TITLE,
-      description: TWITTER_DESC,
+      description: DEFAULT_DESCRIPTION,
       images: TWITTER_IMAGES,
     },
     icons: {
