@@ -11,13 +11,31 @@ import {
 import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
+import { STRUCT_STRINGS } from "@sdk/utils";
+
+const getMarketIdFromResponse = (
+  response: PendingTransactionResponse | UserTransactionResponse | null | undefined
+) => {
+  if (response && Object.keys(response).includes("events")) {
+    const marketIdStr = (response as UserTransactionResponse).events.filter(
+      (e) => e.type === STRUCT_STRINGS.MarketRegistrationEvent
+    )[0].data["market_metadata"]["market_id"];
+    return Number(marketIdStr);
+  } else {
+    return undefined;
+  }
+};
 
 export const LaunchEmojicoinButton = ({
   emojis,
   marketID,
+  onCreate,
+  disabled,
 }: {
   emojis: Array<HexInput>;
   marketID: number | undefined;
+  onCreate?: (marketID: number) => void;
+  disabled: boolean;
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit, signThenSubmit } = useAptos();
@@ -36,10 +54,17 @@ export const LaunchEmojicoinButton = ({
     };
     try {
       const builderLambda = () => RegisterMarket.builder(builderArgs);
-      await submit(builderLambda).then((r) => {
-        _res = r?.response ?? null;
-        _txFlowError = r?.error;
-      });
+      await submit(builderLambda)
+        .then((r) => {
+          _res = r?.response ?? null;
+          _txFlowError = r?.error;
+          return getMarketIdFromResponse(r?.response);
+        })
+        .then((r) => {
+          if (r && onCreate) {
+            onCreate(r);
+          }
+        });
     } catch (e) {
       // TODO: Check if this works.
       // If the market registration fails, it's possibly because it's the first market and the gas limit
@@ -56,10 +81,17 @@ export const LaunchEmojicoinButton = ({
         });
 
       if (registryView.numMarkets === 0n) {
-        await signThenSubmit(builderLambda).then((r) => {
-          _res = r?.response ?? null;
-          _txFlowError = r?.error;
-        });
+        await signThenSubmit(builderLambda)
+          .then((r) => {
+            _res = r?.response ?? null;
+            _txFlowError = r?.error;
+            return getMarketIdFromResponse(r?.response);
+          })
+          .then((r) => {
+            if (r && onCreate) {
+              onCreate(r);
+            }
+          });
       }
     }
   };
@@ -70,7 +102,7 @@ export const LaunchEmojicoinButton = ({
     </a>
   ) : (
     <ButtonWithConnectWalletFallback>
-      <Button onClick={handleClick} scale="lg">
+      <Button onClick={handleClick} disabled={disabled} scale="lg">
         {t("Launch Emojicoin")}
       </Button>
     </ButtonWithConnectWalletFallback>
