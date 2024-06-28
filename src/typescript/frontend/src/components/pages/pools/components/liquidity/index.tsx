@@ -48,12 +48,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
 
         <StyledAddLiquidityWrapper>
           <Flex p={{ _: "10px 20px", tablet: "7px 20px" }}>
-            <InputGroup
-              isShowError={false}
-              height="22px"
-              scale="sm"
-              mt={{ _: "-3px", tablet: "6px" }}
-            >
+            <InputGroup isShowError={false} scale="sm">
               <InputNumeric
                 borderColor="transparent"
                 p="0px !important"
@@ -66,15 +61,10 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           </Flex>
 
           <Flex
-            p={{ _: "0px 20px", tablet: "5px 20px" }}
+            p={{ _: "10px 20px", tablet: "7px 20px" }}
             borderTop={`1px solid ${theme.colors.darkGray}`}
           >
-            <InputGroup
-              isShowError={false}
-              height="22px"
-              scale="sm"
-              pt={{ _: "-3px", tablet: "6px" }}
-            >
+            <InputGroup isShowError={false} scale="sm">
               <InputNumeric
                 disabled
                 borderColor="transparent"
@@ -84,13 +74,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
               />
             </InputGroup>
 
-            {market ? (
-              <EmojiInputLabel emoji={market.symbol} />
-            ) : (
-              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase" pt="4px">
-                -
-              </Text>
-            )}
+            {market ? <EmojiInputLabel emoji={market.symbol} /> : <EmojiInputLabel emoji="-" />}
           </Flex>
         </StyledAddLiquidityWrapper>
 
@@ -149,7 +133,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
             justifyContent="space-between"
             alignItems="center"
           >
-            {market ? <EmojiInputLabel emoji={market.symbol} /> : "-"}
+            {market ? <EmojiInputLabel emoji={market.symbol} /> : <EmojiInputLabel emoji="-" />}
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
               {market ? toCoinDecimalString(market.cpammRealReservesBase, 2) : "-"}

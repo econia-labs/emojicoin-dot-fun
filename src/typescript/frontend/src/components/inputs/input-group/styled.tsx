@@ -59,6 +59,7 @@ export const variantStyles = ({ theme, variant }: ThemedProps) => {
 };
 
 export const StyledInputGroup = styled(Box)<StyledInputGroupProps>`
+  place-content: center;
   input {
     padding-left: ${({ hasStartIcon, scale }) => getPadding(scale, hasStartIcon)};
     padding-right: ${({ hasEndIcon, scale }) => getPadding(scale, hasEndIcon)};
