@@ -7,6 +7,22 @@ export const DropdownMenuInner = styled.div`
   padding: 12px;
 `;
 
+export const StyledDropdownMenuClose = styled.div<{ disabled: boolean }>`
+  position: absolute;
+  right: 0.4em;
+  top: -0.2em;
+  display: flex;
+
+  &:hover {
+  }
+
+  ${({ disabled }) =>
+    disabled &&
+    css`
+      cursor: not-allowed;
+    `}
+`;
+
 export const StyledDropdownMenuItem = styled.div<{ disabled: boolean }>`
   padding: 0 18px;
   display: flex;
