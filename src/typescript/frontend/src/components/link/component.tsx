@@ -34,7 +34,7 @@ export const ExplorerLink = ({
   );
 };
 
-const Link: React.FC<LinkProps> = ({ external, href, underline = false, ...props }) => {
+const Link: React.FC<LinkProps> = ({ external, href, underline = false, target, ...props }) => {
   const internalProps = external ? EXTERNAL_LINK_PROPS : {};
   const ariaLabel =
     props.children && typeof props.children === "string" ? props.children : href || "link";
@@ -56,6 +56,7 @@ const Link: React.FC<LinkProps> = ({ external, href, underline = false, ...props
         href={href || ".."}
         aria-label={ariaLabel}
         underline={underline ? underline.toString() : undefined}
+        target={target}
       >
         <StyledLink as="span" {...internalProps} {...props} />
       </RouterLink>
