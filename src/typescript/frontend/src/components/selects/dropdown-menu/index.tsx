@@ -18,7 +18,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
 }) => {
   return (
     <DropdownMenuWrapper {...props}>
-      <StyledDropdownMenuClose disabled={false} key={"close"} onClick={onClose}>
+      <StyledDropdownMenuClose key="close" disabled={false} onClick={onClose}>
         <DropdownMenuInner
           className="flex"
           style={{ justifyContent: "end", margin: "0", padding: "0" }}
