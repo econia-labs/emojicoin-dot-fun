@@ -14,10 +14,6 @@ import { type Types } from "../../types";
 export type GroupedPeriodicStateEvents = Record<CandlestickResolution, Types.PeriodicStateEvent[]>;
 
 export const createEmptyGroupedCandlesticks = (): GroupedPeriodicStateEvents => ({
-  [CandlestickResolution.PERIOD_1S]: [],
-  [CandlestickResolution.PERIOD_5S]: [],
-  [CandlestickResolution.PERIOD_15S]: [],
-  [CandlestickResolution.PERIOD_30S]: [],
   [CandlestickResolution.PERIOD_1M]: [],
   [CandlestickResolution.PERIOD_5M]: [],
   [CandlestickResolution.PERIOD_15M]: [],

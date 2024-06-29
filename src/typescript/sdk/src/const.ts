@@ -51,10 +51,6 @@ export const MAX_SYMBOL_LENGTH = 10;
  * are all referred to interchangeably throughout this
  */
 export enum CandlestickResolution {
-  PERIOD_1S = 1000000,
-  PERIOD_5S = 5000000,
-  PERIOD_15S = 15000000,
-  PERIOD_30S = 30000000,
   PERIOD_1M = 60000000,
   PERIOD_5M = 300000000,
   PERIOD_15M = 900000000,
@@ -69,10 +65,6 @@ export enum CandlestickResolution {
  * If the number is invalid, the value returned will be undefined.
  */
 export const toCandlestickResolution = (num: number | bigint): CandlestickResolution => {
-  if (Number(num) === CandlestickResolution.PERIOD_1S) return CandlestickResolution.PERIOD_1S;
-  if (Number(num) === CandlestickResolution.PERIOD_5S) return CandlestickResolution.PERIOD_5S;
-  if (Number(num) === CandlestickResolution.PERIOD_15S) return CandlestickResolution.PERIOD_15S;
-  if (Number(num) === CandlestickResolution.PERIOD_30S) return CandlestickResolution.PERIOD_30S;
   if (Number(num) === CandlestickResolution.PERIOD_1M) return CandlestickResolution.PERIOD_1M;
   if (Number(num) === CandlestickResolution.PERIOD_5M) return CandlestickResolution.PERIOD_5M;
   if (Number(num) === CandlestickResolution.PERIOD_15M) return CandlestickResolution.PERIOD_15M;
@@ -84,10 +76,6 @@ export const toCandlestickResolution = (num: number | bigint): CandlestickResolu
 };
 
 export const RESOLUTIONS_ARRAY = [
-  CandlestickResolution.PERIOD_1S,
-  CandlestickResolution.PERIOD_5S,
-  CandlestickResolution.PERIOD_15S,
-  CandlestickResolution.PERIOD_30S,
   CandlestickResolution.PERIOD_1M,
   CandlestickResolution.PERIOD_5M,
   CandlestickResolution.PERIOD_15M,
@@ -99,14 +87,6 @@ export const RESOLUTIONS_ARRAY = [
 
 export const toResolutionKey = (resolution: CandlestickResolution) => {
   switch (resolution) {
-    case CandlestickResolution.PERIOD_1S:
-      return "PERIOD_1S";
-    case CandlestickResolution.PERIOD_5S:
-      return "PERIOD_5S";
-    case CandlestickResolution.PERIOD_15S:
-      return "PERIOD_15S";
-    case CandlestickResolution.PERIOD_30S:
-      return "PERIOD_30S";
     case CandlestickResolution.PERIOD_1M:
       return "PERIOD_1M";
     case CandlestickResolution.PERIOD_5M:

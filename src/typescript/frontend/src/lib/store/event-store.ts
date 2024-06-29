@@ -54,10 +54,6 @@ export type EventsWithGUIDs = {
   chatEvents: readonly ChatEvent[];
   stateEvents: readonly StateEvent[];
   liquidityEvents: readonly LiquidityEvent[];
-  [CandlestickResolution.PERIOD_1S]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_5S]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_15S]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_30S]: CandlestickResolutionData | undefined;
   [CandlestickResolution.PERIOD_1M]: CandlestickResolutionData | undefined;
   [CandlestickResolution.PERIOD_5M]: CandlestickResolutionData | undefined;
   [CandlestickResolution.PERIOD_15M]: CandlestickResolutionData | undefined;
@@ -148,10 +144,6 @@ export const createInitialMarketState = (): WritableDraft<MarketStateValueType> 
   stateEvents: [],
   chatEvents: [],
   marketData: undefined,
-  [CandlestickResolution.PERIOD_1S]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_5S]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_15S]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_30S]: createInitialCandlestickData(),
   [CandlestickResolution.PERIOD_1M]: createInitialCandlestickData(),
   [CandlestickResolution.PERIOD_5M]: createInitialCandlestickData(),
   [CandlestickResolution.PERIOD_15M]: createInitialCandlestickData(),
