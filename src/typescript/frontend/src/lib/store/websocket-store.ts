@@ -86,6 +86,7 @@ export const createWebSocketClientStore = () => {
         client.connect();
         client.on("message", (topic, data) => {
           try {
+            console.log("Received message from topic:", topic);
             eventStore.pushEventFromWebSocket(data);
             set((state) => ({
               received: state.received + 1,

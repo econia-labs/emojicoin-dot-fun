@@ -2,7 +2,12 @@ import { type AnyHomogenousEvent, type AnyEmojicoinEvent, type Types } from "@sd
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
 import { type AnyNumberString } from "@sdk-types";
-import { CandlestickResolution, RESOLUTIONS_ARRAY, toCandlestickResolution } from "@sdk/const";
+import {
+  CandlestickResolution,
+  RESOLUTIONS_ARRAY,
+  toCandlestickResolution,
+  toResolutionKey,
+} from "@sdk/const";
 import { type DBJsonData } from "@sdk/emojicoin_dot_fun";
 import { type AnyEmojicoinJSONEvent } from "@sdk/types/json-types";
 import { type WritableDraft } from "immer";
@@ -39,7 +44,7 @@ type MarketDataView = Types.MarketDataView;
 // to reinitialize the store with the data from the server.
 
 export type CandlestickResolutionData = {
-  events: readonly PeriodicStateEvent[];
+  candlesticks: readonly PeriodicStateEvent[];
   callback: SubscribeBarsCallback | undefined;
   latestBar: LatestBar | undefined;
 };
@@ -131,13 +136,13 @@ export const initializeEventStore = (): EventState => {
   };
 };
 
-const createInitialCandlestickData = () => ({
-  events: [] as PeriodicStateEvent[],
+const createInitialCandlestickData = (): WritableDraft<CandlestickResolutionData> => ({
+  candlesticks: [] as PeriodicStateEvent[],
   callback: undefined,
   latestBar: undefined,
 });
 
-export const createInitialMarketState = () => ({
+export const createInitialMarketState = (): WritableDraft<MarketStateValueType> => ({
   swapEvents: [],
   liquidityEvents: [],
   stateEvents: [],
@@ -175,37 +180,19 @@ export const initializeMarketHelper = (
   }
 };
 
-export const updateLatestBar = ({
-  state,
-  swap,
-}: {
-  state: WritableDraft<EventState>;
-  swap: Types.SwapEvent;
-}) => {
-  const marketID = swap.marketID.toString();
-  const market = state.markets.get(marketID);
-  if (!market) return;
-  const resolutions = Object.values(CandlestickResolution) as Array<CandlestickResolution>;
-  resolutions.forEach((resolution) => {
-    const data = market[resolution];
-    if (!data || !data.latestBar) {
-      console.error("No latest bar found for resolution:", resolution);
-      return;
-    }
-    // Return early if the swap event is stale or has already been recorded.
-    if (data.latestBar.marketNonce >= swap.marketNonce) {
-      console.warn("Stale swap event received.");
-      return;
-    }
-
-    const price = q64ToBig(swap.avgExecutionPrice).toNumber();
-    data.latestBar.close = price;
-    data.latestBar.high = Math.max(data.latestBar.high, price);
-    data.latestBar.low = Math.min(data.latestBar.low, price);
-    data.latestBar.marketNonce = swap.marketNonce;
-    data.latestBar.volume += Number(swap.baseVolume);
-  });
-};
+function deepClone(value) {
+  return typeof value === "object" && value !== null
+    ? Array.isArray(value)
+      ? value.map(deepClone)
+      : Object.keys(value).reduce(
+          (acc, key) => ({
+            ...acc,
+            [key]: deepClone(value[key]),
+          }),
+          {}
+        )
+    : value;
+}
 
 // TODO Consider that we should be using classes with this- it depends how difficult it is to use
 // with immer and RSC.
@@ -298,7 +285,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             const periodicEvents = events.candlesticks[resolution];
             const marketResolution = market[resolution]!;
             if (periodicEvents.length === 0) continue;
-            marketResolution.events.push(...periodicEvents);
+            marketResolution.candlesticks.push(...periodicEvents);
           }
         });
       },
@@ -320,12 +307,33 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             const market = state.markets.get(data.marketID)!;
             if (isSwapEventFromDB(json)) {
               const swap = data.event as Types.SwapEvent;
+              console.log(market.swapEvents.length);
+              console.log(market.swapEvents.slice(0, 3).map((e) => e.guid));
               market.swapEvents.unshift(swap);
+              console.log(swap.guid);
+              console.log(market.swapEvents[0].guid);
+              console.log(market.swapEvents.length);
               const resolutions = RESOLUTIONS_ARRAY;
               resolutions.forEach((resolution) => {
                 const data = market[resolution];
-                if (!data || !data.latestBar) return;
-                updateLatestBar({ state, swap });
+                console.log(data);
+                console.log(deepClone(data?.latestBar));
+                console.log(deepClone(data?.latestBar?.marketNonce));
+                console.log(swap.marketNonce);
+                if (data && data.latestBar && swap.marketNonce > data.latestBar.marketNonce) {
+                  const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+                  data.latestBar.close = price;
+                  data.latestBar.high = Math.max(data.latestBar.high, price);
+                  data.latestBar.low = Math.min(data.latestBar.low, price);
+                  data.latestBar.marketNonce = swap.marketNonce;
+                  data.latestBar.volume += Number(swap.baseVolume);
+                  if (data.callback) {
+                    const clone = deepClone(data.latestBar);
+                    data.callback(clone);
+                    console.log("callling callback from ", toResolutionKey(resolution), swap.guid);
+                  }
+                  console.log(toResolutionKey(resolution), swap.guid, data.latestBar);
+                }
               });
             } else if (isStateEventFromDB(json)) {
               market.stateEvents.unshift(data.event as Types.StateEvent);
@@ -344,11 +352,15 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                 market[resolution] = createInitialCandlestickData();
               }
               marketRes = market[resolution]!;
-              marketRes.events.unshift(event);
+              marketRes.candlesticks.unshift(event);
               marketRes.latestBar = createNewLatestBar(event);
+              console.log("latest bar???");
+              console.log("-".repeat(200));
+              console.log(marketRes.latestBar);
               if (marketRes.callback) {
                 // Ossify/finalize the current bar (make it immutable) by creating a new latest bar.
-                marketRes.callback(marketRes.latestBar);
+                const clone = deepClone(marketRes.latestBar);
+                marketRes.callback(clone);
               }
             }
           });
@@ -388,7 +400,8 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           const candlestickData = market[resolution]!;
           candlestickData.callback = cb;
           if (candlestickData.latestBar) {
-            cb(candlestickData.latestBar);
+            const clone = deepClone(candlestickData.latestBar);
+            candlestickData.callback(clone);
             console.log("Updating latest bar from subscribeToResolution.");
             console.debug("resolution", resolution);
             console.debug("latest bar", candlestickData.latestBar);
