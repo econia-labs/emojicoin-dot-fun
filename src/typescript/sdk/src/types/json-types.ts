@@ -97,13 +97,18 @@ namespace JSONTypes {
     cumulative_chat_messages: AggregatorSnapshot<Uint128String>;
   };
 
+  // The result of the contract's `market_view` view function. NOT the database view.
   export type MarketView = {
     metadata: MarketMetadata;
     sequence_info: SequenceInfo;
-    clamm_virtual_reserves_base: Uint64String;
-    clamm_virtual_reserves_quote: Uint64String;
-    cpamm_real_reserves_base: Uint64String;
-    cpamm_real_reserves_quote: Uint64String;
+    clamm_virtual_reserves: {
+      base: Uint64String;
+      quote: Uint64String;
+    };
+    cpamm_real_reserves: {
+      base: Uint64String;
+      quote: Uint64String;
+    };
     lp_coin_supply: Uint128String;
     in_bonding_curve: boolean;
     cumulative_stats: CumulativeStats;

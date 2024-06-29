@@ -84,6 +84,7 @@ export namespace Types {
     cumulativeChatMessages: bigint;
   };
 
+  // The result of the contract's `market_view` view function. NOT the database view.
   export type MarketView = {
     metadata: MarketMetadata;
     sequenceInfo: SequenceInfo;
@@ -402,10 +403,11 @@ export const toLastSwap = (data: JSONTypes.LastSwap): Types.LastSwap => ({
 export const toMarketView = (data: JSONTypes.MarketView): Types.MarketView => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
-  clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves_base),
-  clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves_quote),
-  cpammRealReservesBase: BigInt(data.cpamm_real_reserves_base),
-  cpammRealReservesQuote: BigInt(data.cpamm_real_reserves_quote),
+
+  clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves.base),
+  clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves.quote),
+  cpammRealReservesBase: BigInt(data.cpamm_real_reserves.base),
+  cpammRealReservesQuote: BigInt(data.cpamm_real_reserves.quote),
   lpCoinSupply: BigInt(data.lp_coin_supply),
   inBondingCurve: data.in_bonding_curve,
   cumulativeStats: toCumulativeStats(data.cumulative_stats),
