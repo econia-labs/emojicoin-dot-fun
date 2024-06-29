@@ -1,15 +1,15 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
-import { CandlestickResolution, toCandlestickResolution } from "../const";
+import Big from "big.js";
+import { type CandlestickResolution, toCandlestickResolution } from "../const";
 import { normalizeHex } from "./hex";
 import {
-  Types,
+  type Types,
   isAnyEmojiCoinEvent,
   isPeriodicStateEvent,
   isPeriodicStateView,
   isStateEvent,
   isSwapEvent,
 } from "../types";
-import Big from "big.js";
 
 // No nanoseconds because dealing with overflow is a pain (aka using a bigint) and we don't need it.
 export enum UnitOfTime {
@@ -142,7 +142,10 @@ export function getPeriodBoundary(
   return BigInt(boundary);
 }
 
-export function getPeriodBoundaryFromTime(microseconds: bigint, period: CandlestickResolution): number {
+export function getPeriodBoundaryFromTime(
+  microseconds: bigint,
+  period: CandlestickResolution
+): number {
   const time = BigInt(microseconds);
   // prettier-ignore
   return Big(time.toString())

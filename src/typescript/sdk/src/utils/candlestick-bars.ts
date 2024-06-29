@@ -1,8 +1,9 @@
 /* eslint-disable import/no-unused-modules */
-import { CandlestickResolution } from "../const";
-import { Types } from "../types";
+import Big from "big.js";
+import { type Types } from "../types";
 import { getPeriodBoundary } from "./misc";
 import { q64ToBig } from "./nominal-price";
+import { type CandlestickResolution } from "../const";
 
 export type Bar = {
   time: number;
@@ -14,13 +15,9 @@ export type Bar = {
 };
 
 export type LatestBar = Bar & {
-  periodBoundary: bigint;
-  guids: Set<string>; // The guids of all swap events that have been recorded in the latest bar.
+  period: CandlestickResolution;
+  marketNonce: bigint;
 };
-
-export const toBars = <T extends Types.PeriodicStateEvent | Types.PeriodicStateView>(
-  events: T | T[]
-) => (Array.isArray(events) ? events.map(toBar) : toBar(events));
 
 /**
  * Converting from a periodic state event or view to a bar is simple, because they are essentially
@@ -39,85 +36,12 @@ export const toBar = <T extends Types.PeriodicStateEvent | Types.PeriodicStateVi
   volume: Number(event.volumeQuote),
 });
 
-/**
- * When we don't have a bar for a resolution/period, we must make the LatestBar from a swap event.
- */
-export const swapToNewLatestBar = (
-  swap: Types.SwapEvent,
-  period: CandlestickResolution
-): LatestBar => {
-  const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+export const toBars = <T extends Types.PeriodicStateEvent | Types.PeriodicStateView>(
+  events: T | T[]
+) => (Array.isArray(events) ? events.map(toBar) : toBar(events));
 
-  const periodBoundary = getPeriodBoundary(swap, period);
-  const newPeriodBoundary = periodBoundary + BigInt(period);
-
-  return {
-    time: Number(newPeriodBoundary / 1000n),
-    open: price,
-    high: price,
-    low: price,
-    close: price,
-    volume: Number(swap.baseVolume),
-    periodBoundary: getPeriodBoundary(swap, period),
-    guids: new Set([swap.guid]),
-  };
-};
-
-/**
- * Creating a bar from an array of swaps is tricky in that we must not overwrite the time
- * value when adding new data to the candlestick bar, but we must record each bar's time
- * in order to accurately calculate the close price of the bar.
- */
-export const createLatestBarFromSwaps = (
-  swaps: Types.SwapEvent[],
-  period: CandlestickResolution
-): LatestBar => {
-  if (swaps.length === 0) {
-    throw new Error("Cannot create a bar from an empty array of swaps.");
-  }
-  // Sort and assert that the swaps are in descending order if in development mode.
-  // TODO: Remove this once the chart component is stable.
-  if (process.env.NODE_ENV === "development") {
-    const copy = [...swaps];
-    swaps.sort((a, b) => Number(a.time - b.time));
-    swaps.reverse();
-    for (let i = 0; i < swaps.length; i++) {
-      if (swaps[i] !== copy[i]) {
-        throw new Error("Swaps are not in ascending order.");
-      }
-    }
-  }
-
-  // Since we sorted in descending order, the first swap is the latest swap.
-  // Thus we set the open here once and don't set it again.
-  const initial = swaps.shift()!;
-  const bar = swapToNewLatestBar(initial, period);
-  const periodBoundaryInitial = bar.periodBoundary;
-
-  // Filter out swaps that aren't within the first event's period boundary, since it is
-  // the latest and we are only calculating the latest bar.
-  const filtered = swaps.filter(
-    (swap) => getPeriodBoundary(swap, period) === periodBoundaryInitial
-  );
-
-  for (const swap of filtered) {
-    if (bar.guids.has(swap.guid)) {
-      continue;
-    }
-
-    const price = q64ToBig(swap.avgExecutionPrice).toNumber();
-    bar.high = Math.max(bar.high, price);
-    bar.low = Math.min(bar.low, price);
-    bar.volume += Number(swap.baseVolume);
-    bar.guids.add(swap.guid);
-  }
-
-  // Set the close price to the last swap's price and time.
-  const lastSwap = filtered.length !== 0 ? filtered.at(-1)! : initial;
-  bar.close = q64ToBig(lastSwap.avgExecutionPrice).toNumber();
-
-  return bar;
-};
+export const getNextPeriodBoundary = (event: Types.PeriodicStateEvent): bigint =>
+  getPeriodBoundary(event, event.periodicStateMetadata.period) + event.periodicStateMetadata.period;
 
 export const createNewLatestBar = (event: Types.PeriodicStateEvent): LatestBar => {
   // Set the new bar's open, high, low, and close to the close price of the event triggering
@@ -128,16 +52,39 @@ export const createNewLatestBar = (event: Types.PeriodicStateEvent): LatestBar =
   const nextPeriodBoundary = getNextPeriodBoundary(event);
 
   return {
-    time: Number(nextPeriodBoundary / 1000n),
+    time: Big(nextPeriodBoundary.toString()).div(1000).toNumber(),
     open: price,
     high: price,
     low: price,
     close: price,
     volume: 0,
-    periodBoundary: nextPeriodBoundary,
-    guids: new Set<string>(),
+    period: Number(event.periodicStateMetadata.period),
+    marketNonce: event.periodicStateMetadata.emitMarketNonce,
   };
 };
 
-export const getNextPeriodBoundary = (event: Types.PeriodicStateEvent): bigint =>
-  getPeriodBoundary(event, event.periodicStateMetadata.period) + event.periodicStateMetadata.period;
+export const periodicStateTrackerToLatestBar = (
+  tracker: Types.PeriodicStateTracker,
+  marketNonce: bigint
+): LatestBar => {
+  const { startTime } = tracker;
+  return {
+    time: Big(startTime.toString()).div(1000).toNumber(),
+    open: q64ToBig(tracker.openPriceQ64).toNumber(),
+    high: q64ToBig(tracker.highPriceQ64).toNumber(),
+    low: q64ToBig(tracker.lowPriceQ64).toNumber(),
+    close: q64ToBig(tracker.closePriceQ64).toNumber(),
+    volume: Number(tracker.volumeQuote),
+    period: Number(tracker.period),
+    marketNonce,
+  };
+};
+
+export const marketViewToLatestBars = (marketView: Types.MarketView): LatestBar[] => {
+  const latestBars: LatestBar[] = [];
+  for (const tracker of marketView.periodicStateTrackers) {
+    const bar = periodicStateTrackerToLatestBar(tracker, marketView.sequenceInfo.nonce);
+    latestBars.push(bar);
+  }
+  return latestBars;
+};

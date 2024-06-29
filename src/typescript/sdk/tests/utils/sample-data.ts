@@ -1,4 +1,4 @@
-import { Types } from "../../src/types/types";
+import { type Types } from "../../src/types/types";
 
 export const SAMPLE_SWAP_EVENT: Types.SwapEvent = {
   marketID: 1n,

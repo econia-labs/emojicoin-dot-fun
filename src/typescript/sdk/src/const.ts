@@ -68,9 +68,7 @@ export enum CandlestickResolution {
  * A helper object to convert from an untyped number to a CandlestickResolution enum value.
  * If the number is invalid, the value returned will be undefined.
  */
-export const toCandlestickResolution = (
-  num: number | bigint
-): CandlestickResolution | undefined => {
+export const toCandlestickResolution = (num: number | bigint): CandlestickResolution => {
   if (Number(num) === CandlestickResolution.PERIOD_1S) return CandlestickResolution.PERIOD_1S;
   if (Number(num) === CandlestickResolution.PERIOD_5S) return CandlestickResolution.PERIOD_5S;
   if (Number(num) === CandlestickResolution.PERIOD_15S) return CandlestickResolution.PERIOD_15S;
@@ -82,7 +80,7 @@ export const toCandlestickResolution = (
   if (Number(num) === CandlestickResolution.PERIOD_1H) return CandlestickResolution.PERIOD_1H;
   if (Number(num) === CandlestickResolution.PERIOD_4H) return CandlestickResolution.PERIOD_4H;
   if (Number(num) === CandlestickResolution.PERIOD_1D) return CandlestickResolution.PERIOD_1D;
-  return undefined;
+  throw new Error(`Invalid candlestick resolution: ${num}`);
 };
 
 export const RESOLUTIONS_ARRAY = [
@@ -123,7 +121,7 @@ export const toResolutionKey = (resolution: CandlestickResolution) => {
       return "PERIOD_4H";
     case CandlestickResolution.PERIOD_1D:
       return "PERIOD_1D";
-    case default:
+    default:
       throw new Error(`Unknown resolution: ${resolution}`);
   }
-}
+};

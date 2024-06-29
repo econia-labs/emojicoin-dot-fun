@@ -8,13 +8,13 @@ const epochInMicroseconds = BigInt(epoch.getTime() * 1000);
 
 const microsecondFactor = 10n ** 6n;
 
-const PERIOD_1M = CandlestickResolution.PERIOD_1M;
-const PERIOD_5M = CandlestickResolution.PERIOD_5M;
-const PERIOD_15M = CandlestickResolution.PERIOD_15M;
-const PERIOD_30M = CandlestickResolution.PERIOD_30M;
-const PERIOD_1H = CandlestickResolution.PERIOD_1H;
-const PERIOD_4H = CandlestickResolution.PERIOD_4H;
-const PERIOD_1D = CandlestickResolution.PERIOD_1D;
+const { PERIOD_1M } = CandlestickResolution;
+const { PERIOD_5M } = CandlestickResolution;
+const { PERIOD_15M } = CandlestickResolution;
+const { PERIOD_30M } = CandlestickResolution;
+const { PERIOD_1H } = CandlestickResolution;
+const { PERIOD_4H } = CandlestickResolution;
+const { PERIOD_1D } = CandlestickResolution;
 
 describe("tests period boundaries", () => {
   it("calculates the first period boundary ever correctly for a swap event", () => {

@@ -42,13 +42,6 @@ const configurationData: DatafeedConfiguration = {
   ],
 };
 
-const Debugger = (props: any) => {
-  return (
-    <>
-    </>
-  );
-}
-
 // The general approach here will be to use data fetched from the endpoint within the datafeed to populate the chart
 // candlestick data. It will handle all of the data fetching possible until the very last candlestick, which is not
 // provided by the endpoint.

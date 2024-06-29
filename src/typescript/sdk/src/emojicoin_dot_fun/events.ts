@@ -21,7 +21,7 @@ import {
 } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { type AnyEmojicoinJSONEvent } from "../types/json-types";
-import { CandlestickResolution, EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
+import { type CandlestickResolution } from "../const";
 import {
   type GroupedPeriodicStateEvents,
   createEmptyGroupedCandlesticks,
@@ -44,8 +44,6 @@ export type HomogenousEventStructure = Omit<
   ContractEvents,
   "periodicStateEvents" | "globalStateEvents" | "marketRegistrationEvents"
 > & {
-  // A flag for type checking purposes, to ensure we've run the events
-  // through `toHomogenousEvents`.
   candlesticks: GroupedPeriodicStateEvents;
   homogenous: true;
   guids: Set<string>;
@@ -119,7 +117,7 @@ export const toHomogenousEvents = (
   });
   events.marketID = Array.from(marketIDs).at(0) ?? -1n;
   if (marketIDs.size > 1) {
-    throw new Error("All events must have the same market ID." + marketIDs.toString());
+    throw new Error(`All events must have the same market ID.${marketIDs.toString()}`);
   }
   if (events.marketID === -1n) {
     return undefined;

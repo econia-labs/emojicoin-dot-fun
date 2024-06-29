@@ -5,10 +5,7 @@ import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage"
 import EmojiNotFoundPage from "./not-found";
 import fetchInitialChatData from "lib/queries/initial/chats";
 import { REVALIDATION_TIME } from "lib/server-env";
-import { fetchLatestBars } from "@sdk/queries/candlestick";
-import { RESOLUTIONS_ARRAY } from "@sdk/const";
-import { LIMIT } from "@sdk/queries/const";
-import { type Types } from "@sdk-types";
+import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -48,27 +45,15 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
       marketID,
       maxTotalRows: CANDLESTICK_DATA_ROWS,
     });
-    const { swaps, latestBarData } = await fetchLatestBars({
-      marketID,
-      resolutions: RESOLUTIONS_ARRAY,
-      lastClose: candlesticks.at(0)?.closePriceQ64,
-    });
-    const swapData = new Array<Types.SwapEvent>();
-    // If the latest bars returns enough swaps, we can use that for swapData since it always returns the latest data.
-    if (swaps.length >= LIMIT) {
-      // Ensure we're getting the most recent swaps by slicing the last LIMIT swaps.
-      swapData.push(...swaps.slice(swaps.length - LIMIT));
-    } else {
-      const res = await fetchInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
-      swapData.push(...res);
-    }
+    const marketView = await fetchContractMarketView(res.marketAddress);
+    const swapData = await fetchInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
     return (
       <ClientEmojicoinPage
         data={{
           swaps: swapData,
           chats: chatData,
           candlesticks,
-          latestBarData,
+          marketView,
           ...res,
         }}
       />

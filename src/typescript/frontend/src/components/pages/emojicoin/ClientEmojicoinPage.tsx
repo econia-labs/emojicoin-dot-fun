@@ -1,11 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-
 import { useMatchBreakpoints } from "hooks";
-
 import { Box } from "@containers";
-
 import DesktopGrid from "./components/desktop-grid";
 import MobileGrid from "./components/mobile-grid";
 import { type EmojicoinProps } from "./types";
@@ -14,6 +11,7 @@ import TextCarousel from "components/text-carousel/TextCarousel";
 import MainInfo from "./components/main-info/MainInfo";
 import { getLatestBars } from "@store/event-utils";
 import { toHomogenousEvents } from "@sdk/emojicoin_dot_fun/events";
+import { marketViewToLatestBars } from "@sdk/utils/candlestick-bars";
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isLaptopL } = useMatchBreakpoints();
@@ -25,23 +23,18 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
 
   useEffect(() => {
     if (props.data) {
-      initializeMarket(props.data.marketID);
+      const marketID = props.data.marketID.toString();
+      initializeMarket(marketID);
       // Latest bars need to be set before calling `pushEvents`.
       const events = toHomogenousEvents(props.data.candlesticks, new Set<string>());
       if (events) {
         events.swapEvents = props.data.swaps;
         events.chatEvents = props.data.chats;
-        pushEvents({ eventsIn: events, latestBarData: props.data.latestBarData });
+        pushEvents(events);
       }
-
-      // setLatestBars({
-      // marketID: props.data.marketID.toString(),
-      // latestBarData: props.data.latestBarData,
-      // });
       addMarketData(props.data);
-      // pushEvents(props.data.candlesticks);
-      // pushEvents(props.data.swaps);
-      // pushEvents(props.data.chats);
+      const latestBars = marketViewToLatestBars(props.data.marketView);
+      setLatestBars({ marketID, latestBars });
       if (market) {
         const latestBars = getLatestBars(market);
         console.log(latestBars);
