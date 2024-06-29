@@ -8,5 +8,7 @@ export type TableRowDesktopProps = {
     price: string;
     date: Date;
     version: number;
+    swapper: string;
   };
+  showBorder: boolean;
 };
