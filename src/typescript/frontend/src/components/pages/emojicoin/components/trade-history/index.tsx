@@ -48,9 +48,9 @@ const TradeHistory = (props: TradeHistoryProps) => {
   return (
     <table className="flex flex-col table-fixed w-full">
       <thead className="relative w-full border-solid border-b-[1px] border-b-dark-gray">
-        <tr className="flex w-full pr-[9px] h-[33px]">
-          <ThWrapper className="flex w-[16%] md:w-[10%]">
-            <span className="flex m-auto">Rank</span>
+        <tr className={"flex w-full h-[33px]" + (swaps.length < 11 ? "" : " pr-[9px] ")}>
+          <ThWrapper className="flex min-w-[50px] ml-[10px] xl:ml-[21px]">
+            <span className="flex my-auto">Rank</span>
           </ThWrapper>
           <ThWrapper className="flex w-[5%]" />
           <ThWrapper className="flex w-[22%] md:w-[18%]">

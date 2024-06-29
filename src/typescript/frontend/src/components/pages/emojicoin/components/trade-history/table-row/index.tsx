@@ -52,22 +52,29 @@ const TableRow = ({ item, showBorder }: TableRowDesktopProps) => {
           (showBorder ? "" : " border-b-transparent")
         }
       />
-      <td className={`w-[16%] md:w-[10%] ${TableCellStyles}`}>
-        <div className="flex px-3 h-full">
+      <td
+        className={`min-w-[60px] xl:min-w-[71px] xl:ml-[0.5ch] xl:mr-[-0.5ch] ${TableCellStyles}`}
+      >
+        <div className="flex h-full">
           <span className="text-light-gray m-auto" ref={targetRef}>
             {item.rankIcon}
           </span>
           {tooltip}
         </div>
       </td>
-      <td className={`w-[5%] ${TableCellStyles}`}></td>
+      <td className={`w-[5%] md:w-[4.7%] ${TableCellStyles}`}></td>
       <TableRowTextItem className={`w-[22%] md:w-[18%] ${TableCellStyles}`}>
         <div className="ellipses">{toCoinDecimalString(item.apt, 3)}</div>
       </TableRowTextItem>
       <TableRowTextItem className={`w-[22%] md:w-[18%] ${TableCellStyles}`}>
         <div className="ellipses">{toCoinDecimalString(item.emoji, 3)}</div>
       </TableRowTextItem>
-      <TableRowTextItem className={`hidden md:inline-block w-[24%] ${TableCellStyles}`}>
+      <td className={`w-[0%] md:w-[0.3%] ${TableCellStyles}`}></td>
+      <TableRowTextItem
+        className={
+          `hidden md:inline-block w-[22%] ${TableCellStyles} ` + "xl:ml-[-0.5ch] xl:mr-[0.5ch]"
+        }
+      >
         {item.date.toLocaleString(undefined, {
           month: "2-digit" as const,
           day: "2-digit" as const,
@@ -77,7 +84,7 @@ const TableRow = ({ item, showBorder }: TableRowDesktopProps) => {
         })}
       </TableRowTextItem>
       <TableRowTextItem
-        className={`w-[22%] md:w-[18%] ${TableCellStyles}`}
+        className={`w-[22%] md:w-[18%] ${TableCellStyles} md:ml-[3ch] xl:ml-[0.5ch] xl:mr-[-0.5ch]`}
         color={item.type === "sell" ? darkColors.pink : darkColors.green}
       >
         {toNominalPrice(item.price).toFixed(9)}
