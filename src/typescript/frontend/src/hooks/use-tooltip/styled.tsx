@@ -12,7 +12,7 @@ export const Arrow = styled.div`
 
 export const StyledTooltip = styled(motion.div)<{ arrowBorderColor: keyof Colors }>`
   padding: ${PADDING}px;
-  border-radius: ${({ theme }) => theme.radii.semiMedium};
+  border-radius: ${({ theme }) => theme.radii.xSmall};
   max-width: calc(320px - (${PADDING}px * 2));
   z-index: ${({ theme }) => theme.zIndices.tooltip};
   background: ${({ theme }) => theme.colors.econiaBlue};
