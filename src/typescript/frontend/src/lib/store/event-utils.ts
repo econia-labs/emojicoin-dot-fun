@@ -59,35 +59,6 @@ export const mergeSortedEvents = <T extends AnyEmojicoinEvent>(
 };
 
 type AnyDBJsonEvent = DBJsonData<AnyEmojicoinJSONEvent>;
-type DBSwapEvent = DBJsonData<JSONTypes.SwapEvent>;
-type DBChatEvent = DBJsonData<JSONTypes.ChatEvent>;
-type DBMarketRegistrationEvent = DBJsonData<JSONTypes.MarketRegistrationEvent>;
-type DBPeriodicStateEvent = DBJsonData<JSONTypes.PeriodicStateEvent>;
-type DBStateEvent = DBJsonData<JSONTypes.StateEvent>;
-type DBGlobalStateEvent = DBJsonData<JSONTypes.GlobalStateEvent>;
-type DBLiquidityEvent = DBJsonData<JSONTypes.LiquidityEvent>;
-
-export function isSwapEventFromDB(e: AnyDBJsonEvent): e is DBSwapEvent {
-  return e.event_name === "emojicoin_dot_fun::Swap";
-}
-export function isChatEventFromDB(e: AnyDBJsonEvent): e is DBChatEvent {
-  return e.event_name === "emojicoin_dot_fun::Chat";
-}
-export function isMarketRegistrationEventFromDB(e: AnyDBJsonEvent): e is DBMarketRegistrationEvent {
-  return e.event_name === "emojicoin_dot_fun::MarketRegistration";
-}
-export function isPeriodicStateEventFromDB(e: AnyDBJsonEvent): e is DBPeriodicStateEvent {
-  return e.event_name === "emojicoin_dot_fun::PeriodicState";
-}
-export function isStateEventFromDB(e: AnyDBJsonEvent): e is DBStateEvent {
-  return e.event_name === "emojicoin_dot_fun::State";
-}
-export function isGlobalStateEventFromDB(e: AnyDBJsonEvent): e is DBGlobalStateEvent {
-  return e.event_name === "emojicoin_dot_fun::GlobalState";
-}
-export function isLiquidityEventFromDB(e: AnyDBJsonEvent): e is DBLiquidityEvent {
-  return e.event_name === "emojicoin_dot_fun::Liquidity";
-}
 
 export type EventDeserializationFunction<
   T extends AnyEmojicoinJSONEvent,

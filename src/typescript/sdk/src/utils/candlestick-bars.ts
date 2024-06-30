@@ -1,5 +1,6 @@
 /* eslint-disable import/no-unused-modules */
 import Big from "big.js";
+import { type AnyNumber } from "@aptos-labs/ts-sdk";
 import { type Types } from "../types";
 import { getPeriodBoundary } from "./misc";
 import { q64ToBig } from "./nominal-price";
@@ -87,4 +88,10 @@ export const marketViewToLatestBars = (marketView: Types.MarketView): LatestBar[
     latestBars.push(bar);
   }
   return latestBars;
+};
+
+export const isTimeWithinPeriod = (time: AnyNumber, period: AnyNumber): boolean => {
+  const periodStart = BigInt(period);
+  const periodEnd = BigInt(period) * 2n;
+  return time >= periodStart && time < periodEnd;
 };

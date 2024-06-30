@@ -42,14 +42,24 @@ const configurationData: DatafeedConfiguration = {
   ],
 };
 
-// The general approach here will be to use data fetched from the endpoint within the datafeed to populate the chart
-// candlestick data. It will handle all of the data fetching possible until the very last candlestick, which is not
-// provided by the endpoint.
-// After that, we do not use the datafeed to fetch anymore, because mqtt will handle streaming the data through the
-// websocket protocol to the datafeed websocket stream.
-// If the user refreshes the page, we will fetch the data from the endpoint again, and then repeat the process.
-// TODO: Figure out if this is inefficient and if there's a way to reconcile data retrieved from mqtt with the datafeed.
-
+/**
+ * The TradingView Chart component. This component is responsible for rendering the TradingView chart with the usage of
+ * the `datafeed` API. It also handles resolving market symbols from user input with the market metadata passed down
+ * from a server component/fetch in the form of the `EventStore["marketMetadataMap"]` data.
+ *
+ * TODO: Implement asynchronous symbol search/resolution with the `datafeed` API. This will allow users to search for
+ * markets that are created after the initial page load.
+ *
+ * TODO: We may want to periodically refresh the candlestick data and ensure it is valid/up to date
+ * with the on-chain data by polling the `market_view` endpoint. This would ensure that in the case of a dropped
+ * event or a broken websocket connection, the user would still generally have the most up-to-date data.
+ *
+ * Please see
+ * {@link https://github.com/econia-labs/emojicoin-dot-fun/tree/main/src/typescript/frontend/src/components/charts/README.md}
+ * for a more detailed explanation of the architectural data flow.
+ * @param props
+ * @returns
+ */
 export const Chart = async (
   props: ChartContainerProps & {
     markets: EventStore["marketMetadataMap"];
@@ -146,7 +156,7 @@ export const Chart = async (
         try {
           const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
 
-          // TOOD: Consider that if our data is internally consistent and we run into issues with this, we can
+          // TODO: Consider that if our data is internally consistent and we run into issues with this, we can
           // use the values in state to skip lots of the fetches by using the data we already have.
           const data = await fetchAllCandlesticksInTimeRange({
             marketID: props.marketID,
@@ -185,26 +195,22 @@ export const Chart = async (
         symbolInfo,
         resolution,
         onRealtimeCallback,
-        subscribeUID,
-        onResetCacheNeededCallback
+        _subscribeUID,
+        _onResetCacheNeededCallback
       ) => {
         if (!symbolInfo.ticker) {
           throw new Error(`No ticker for symbol: ${symbolInfo}`);
         }
         const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
-        console.debug("subscribeBars:", symbolInfo, resolution);
-        console.debug("onRealtimeCallback:", onRealtimeCallback);
         subscribeToResolution({
           symbol: symbolInfo.ticker,
           resolution: resolutionEnum,
           cb: onRealtimeCallback,
         });
-        console.debug("subscribeUID:", subscribeUID);
-        console.debug("subscribeUonResetCacheNeededCallbackID:", onResetCacheNeededCallback);
       },
       unsubscribeBars: async (subscriberUID) => {
         // subscriberUIDs come in the form of `${emoji}_#_$<period as string>`
-        // For exmaple: `🚀_#_5`
+        // For example: `🚀_#_5` for the `🚀` market for a resolution of period `5`.
         const [symbol, resolution] = subscriberUID.split("_#_");
         const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution];
         console.debug("unsubscribeBars:", symbol, resolution);
@@ -216,10 +222,6 @@ export const Chart = async (
     }),
     [symbol, props.marketID] // eslint-disable-line react-hooks/exhaustive-deps
   );
-
-  useEffect(() => {
-    console.debug("data feed rerendered, this should generally not happen..?", datafeed);
-  }, [datafeed]);
 
   useEffect(() => {
     if (!ref.current) {

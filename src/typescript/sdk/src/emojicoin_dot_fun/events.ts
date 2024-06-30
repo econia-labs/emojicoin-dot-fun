@@ -40,7 +40,7 @@ export type Events = {
 };
 
 export type ContractEvents = Omit<Events, "genericEvents">;
-export type HomogenousEventStructure = Omit<
+export type UniqueHomogenousEvents = Omit<
   ContractEvents,
   "periodicStateEvents" | "globalStateEvents" | "marketRegistrationEvents"
 > & {
@@ -61,7 +61,7 @@ export const createEmptyEvents = (): Events => ({
   genericEvents: [],
 });
 
-export const createEmptyHomogenousEvents = (): HomogenousEventStructure => ({
+export const createEmptyHomogenousEvents = (): UniqueHomogenousEvents => ({
   swapEvents: [],
   chatEvents: [],
   stateEvents: [],
@@ -73,23 +73,36 @@ export const createEmptyHomogenousEvents = (): HomogenousEventStructure => ({
 });
 
 /**
- * Converts an array of any emojicoin event to a homogenous structure of events, where each event
- * is placed into its respective category.
+ * Converts an array of emojicoin events that fall under a single market ID to a homogenous
+ * structure of event arrays, where each event is placed into its respective, typed category.
  *
  * If `guids` is passed, only events with guids that aren't in the set will be included in the
  * final result.
  *
- * It throws an error if the marketID is not the same for all events that have one.
+ * It also sorts each periodic state event into its respective candlestick period array.
  *
- * It also throws if any events are a GlobalStateEvent.
+ * It throws an error if the marketID is not the same for all events.
+ *
+ * It also throws if any events are a GlobalStateEvent or MarketRegistrationEvent, because they
+ * should be pushed individually to the event store with their respective `EventStore` push
+ * functions.
+ *
  * @param anyEventArray array of any emojicoin events
  * @param guidsForFiltering existing guids to filter out
- * @returns ContractEvents a homogenous structure of events
+ * @returns `ContractEvents` a homogenous structure of events
+ * @throws if the marketID is not the same for all events
+ * @throws if any events are GlobalStateEvents or MarketRegistrationEvents
  */
-export const toHomogenousEvents = (
+export const toUniqueHomogenousEvents = (
   anyEventArray: AnyHomogenousEvent[],
+  /**
+   * **NOTE**: This value *must* be provided to avoid duplicating data in the event store.
+   * @example
+   * const getGuids = useEventStore((s) => s.getGuids);
+   * const events = toHomogenousEvents(data, getGuids());
+   */
   guids: Set<string>
-): HomogenousEventStructure | undefined => {
+): UniqueHomogenousEvents | undefined => {
   const events = createEmptyHomogenousEvents();
   const marketIDs = new Set<bigint>();
 
@@ -97,7 +110,10 @@ export const toHomogenousEvents = (
     if (!guids.has(event.guid)) {
       events.guids.add(event.guid);
       if (isGlobalStateEvent(event) || isMarketRegistrationEvent(event)) {
-        throw new Error("GlobalStateEvent is not allowed as an input.");
+        throw new Error(
+          "GlobalStateEvents and MarketRegistrationEvents are not valid homogenous events." +
+            "They should be pushed individually to the event store."
+        );
       } else {
         marketIDs.add(event.marketID);
         if (isSwapEvent(event)) {
@@ -126,7 +142,7 @@ export const toHomogenousEvents = (
 };
 
 // TODO: Do we need this? Perhaps we could add a sorted check here as well.
-export const isHomogenous = (events: any): events is HomogenousEventStructure =>
+export const isHomogenous = (events: any): events is UniqueHomogenousEvents =>
   events.homogenous === true &&
   events.guids instanceof Set &&
   Array.isArray(events.swapEvents) &&

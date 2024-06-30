@@ -7,6 +7,7 @@ import { type AnyNumberString } from "../../../../sdk/src/types/types";
 import { TopicBuilder } from "../mqtt";
 import { MQTT_URL } from "lib/env";
 import { type EventStore } from "./event-store";
+import { deserializeEvent } from "./event-utils";
 
 export type ClientState = {
   client: MqttClient;
@@ -74,7 +75,8 @@ const unsubscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: st
 export const createWebSocketClientStore = () => {
   return createStore<WebSocketClientStore>((set, get) => ({
     client: mqtt.connect(MQTT_URL, {
-      // protocol: "wss", // This can be determined by the URL.
+      // Force the client to wait for us to manually call connect instead of doing it upon
+      // instantiation of the client object.
       manualConnect: true,
     }),
     stream: [],
@@ -84,10 +86,14 @@ export const createWebSocketClientStore = () => {
       const connected = client.connected;
       if (!connected) {
         client.connect();
-        client.on("message", (topic, data) => {
+        client.on("message", (topic, buffer) => {
           try {
-            console.log("Received message from topic:", topic);
-            eventStore.pushEventFromWebSocket(data);
+            console.log("Received a client-side message for topic:", topic);
+            const json = JSON.parse(buffer.toString());
+            if (!json) return;
+            const data = deserializeEvent(json, json.transaction_version);
+            if (!data) return;
+            eventStore.pushEventFromClient(data.event);
             set((state) => ({
               received: state.received + 1,
             }));

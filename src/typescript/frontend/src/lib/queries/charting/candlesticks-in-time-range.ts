@@ -31,8 +31,6 @@ export async function fetchAllCandlesticksInTimeRange(args: {
   const aggregate: Types.PeriodicStateView[] = [];
   let keepFetching = true;
 
-  console.debug("Fetching candlesticks in time range", { marketID, start, end, resolution, limit });
-
   const fetchData = async (
     resolve: (value: Types.PeriodicStateView[] | PromiseLike<Types.PeriodicStateView[]>) => void,
     reject: (reason?: string | Error) => void

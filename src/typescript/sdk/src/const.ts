@@ -47,8 +47,8 @@ export const MAX_CHAT_MESSAGE_LENGTH = 100;
 export const MAX_SYMBOL_LENGTH = 10;
 
 /**
- * Note that a period boundary, a candlestick resolution, a period, and a candlestick timeframe
- * are all referred to interchangeably throughout this
+ * Note that a period boundary, a candlestick resolution, a period, and a candlestick time frame
+ * are all referred to interchangeably throughout this codebase.
  */
 export enum CandlestickResolution {
   PERIOD_1M = 60000000,

@@ -1,4 +1,5 @@
 "use client";
+// cspell:word mkts
 
 import { MODULE_ADDRESS } from "@sdk/const";
 import { CloseIconWithHover } from "components/svg";

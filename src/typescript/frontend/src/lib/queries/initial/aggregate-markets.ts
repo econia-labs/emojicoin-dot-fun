@@ -44,7 +44,7 @@ export const fetchAggregateMarkets = async () => {
 
   while (shouldContinue) {
     const offset = aggregated.length;
-    const keytag = `aggregate-markets_${offset}_${LIMIT}`;
+    const keyAndTag = `aggregate-markets_${offset}_${LIMIT}`;
     /* eslint-disable-next-line no-await-in-loop */
     const { markets, error } = await cached(
       async () => {
@@ -65,9 +65,9 @@ export const fetchAggregateMarkets = async () => {
             error: r.error,
           }));
       },
-      [keytag],
+      [keyAndTag],
       {
-        tags: [keytag],
+        tags: [keyAndTag],
       }
     )();
     shouldContinue = markets.length === LIMIT;
@@ -76,7 +76,7 @@ export const fetchAggregateMarkets = async () => {
     // so that the next time this function is called, the last result is a cache miss.
     if (!shouldContinue) {
       // TODO: Check if this works as expected.
-      revalidateTag(keytag);
+      revalidateTag(keyAndTag);
     }
     aggregated.push(
       ...markets.map((m) => ({

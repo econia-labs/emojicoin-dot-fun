@@ -62,7 +62,7 @@ export const fetchCandlesticks = async ({
 };
 
 export const paginateCandlesticks = async (
-  args: SharedCandlestickQueryArgs &
+  args: Omit<SharedCandlestickQueryArgs, "resolution"> &
     Omit<AggregateQueryResultsArgs, "query"> & { resolution?: CandlestickResolution }
 ) => {
   const { marketID, resolution } = args;
