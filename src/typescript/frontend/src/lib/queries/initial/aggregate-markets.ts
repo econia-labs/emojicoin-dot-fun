@@ -7,6 +7,7 @@ import { REVALIDATION_TIME } from "lib/server-env";
 import { revalidateTag } from "next/cache";
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { type PostgrestError } from "@sdk/types/postgrest-types";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 
 export const fetchNumMarkets = async () => {
   return await cached(
@@ -36,8 +37,9 @@ export const fetchAggregateMarkets = async () => {
   let shouldContinue = true;
   const aggregated: Array<
     {
-      symbolBytes: `0x${string}`;
       marketID: string;
+      symbolBytes: `0x${string}`;
+      marketAddress: `0x${string}`;
     } & ReturnType<typeof symbolBytesToEmojis>
   > = [];
   const errors: (PostgrestError | null)[] = [];
@@ -53,7 +55,8 @@ export const fetchAggregateMarkets = async () => {
           .select(
             `
                 market_id,
-                emoji_bytes
+                emoji_bytes,
+                market_address
             `
           )
           .range(offset, offset + LIMIT - 1)
@@ -61,6 +64,7 @@ export const fetchAggregateMarkets = async () => {
             markets: (r.data ?? []).map((m) => ({
               marketID: m.market_id.toString(),
               symbolBytes: m.emoji_bytes as `0x${string}`,
+              marketAddress: AccountAddress.from(m.market_address).toString(),
             })),
             error: r.error,
           }));

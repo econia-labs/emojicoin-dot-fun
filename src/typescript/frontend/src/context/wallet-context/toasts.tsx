@@ -1,13 +1,13 @@
 import { AptosApiError, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { type NetworkInfo } from "@aptos-labs/wallet-adapter-react";
 import { CandlestickResolution } from "@sdk/const";
-import { getPeriodBoundaryFromTime } from "@sdk/utils/misc";
+import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
 import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
 import { ExplorerLink } from "components/link/component";
 
 const debouncedToastKey = (s: string, debouncePeriod: CandlestickResolution) => {
-  const periodBoundary = getPeriodBoundaryFromTime(
+  const periodBoundary = getPeriodStartTimeFromTime(
     BigInt(new Date().getTime() * 1000),
     debouncePeriod
   );

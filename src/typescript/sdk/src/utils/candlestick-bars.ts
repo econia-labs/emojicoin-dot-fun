@@ -2,7 +2,7 @@
 import Big from "big.js";
 import { type AnyNumber } from "@aptos-labs/ts-sdk";
 import { type Types } from "../types";
-import { getPeriodBoundary } from "./misc";
+import { getPeriodStartTime } from "./misc";
 import { q64ToBig } from "./nominal-price";
 import { type CandlestickResolution } from "../const";
 
@@ -29,7 +29,7 @@ export type LatestBar = Bar & {
 export const toBar = <T extends Types.PeriodicStateEvent | Types.PeriodicStateView>(
   event: T
 ): Bar => ({
-  time: Number(getPeriodBoundary(event, event.periodicStateMetadata.period) / 1000n),
+  time: Number(getPeriodStartTime(event, event.periodicStateMetadata.period) / 1000n),
   open: q64ToBig(event.openPriceQ64).toNumber(),
   high: q64ToBig(event.highPriceQ64).toNumber(),
   low: q64ToBig(event.lowPriceQ64).toNumber(),
@@ -41,20 +41,39 @@ export const toBars = <T extends Types.PeriodicStateEvent | Types.PeriodicStateV
   events: T | T[]
 ) => (Array.isArray(events) ? events.map(toBar) : toBar(events));
 
-export const getNextPeriodBoundary = (event: Types.PeriodicStateEvent): bigint =>
-  getPeriodBoundary(event, event.periodicStateMetadata.period) + event.periodicStateMetadata.period;
+export const createNewLatestBarFromSwap = (
+  swap: Types.SwapEvent,
+  resolution: CandlestickResolution,
+  previousClose?: number
+): LatestBar => {
+  // Set the new bar's open, high, low, and close to the close price of the event triggering
+  // the creation of the new bar.
+  const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+  const periodStartTime = getPeriodStartTime(swap, resolution);
 
-export const createNewLatestBar = (event: Types.PeriodicStateEvent): LatestBar => {
+  return {
+    time: Number(periodStartTime / 1000n),
+    open: previousClose ?? price,
+    high: price,
+    low: price,
+    close: price,
+    volume: Number(swap.baseVolume),
+    period: resolution,
+    marketNonce: swap.marketNonce,
+  };
+};
+
+export const createNewLatestBar = (
+  event: Types.PeriodicStateEvent,
+  previousClose?: number
+): LatestBar => {
   // Set the new bar's open, high, low, and close to the close price of the event triggering
   // the creation of the new bar.
   const price = q64ToBig(event.closePriceQ64).toNumber();
 
-  // Calculate the new period boundary for the new bar.
-  const nextPeriodBoundary = getNextPeriodBoundary(event);
-
   return {
-    time: Big(nextPeriodBoundary.toString()).div(1000).toNumber(),
-    open: price,
+    time: Number(event.periodicStateMetadata.period / 1000n),
+    open: previousClose ?? price,
     high: price,
     low: price,
     close: price,
@@ -75,7 +94,7 @@ export const periodicStateTrackerToLatestBar = (
     high: q64ToBig(tracker.highPriceQ64).toNumber(),
     low: q64ToBig(tracker.lowPriceQ64).toNumber(),
     close: q64ToBig(tracker.closePriceQ64).toNumber(),
-    volume: Number(tracker.volumeQuote),
+    volume: Number(tracker.volumeBase),
     period: Number(tracker.period),
     marketNonce,
   };
@@ -88,10 +107,4 @@ export const marketViewToLatestBars = (marketView: Types.MarketView): LatestBar[
     latestBars.push(bar);
   }
   return latestBars;
-};
-
-export const isTimeWithinPeriod = (time: AnyNumber, period: AnyNumber): boolean => {
-  const periodStart = BigInt(period);
-  const periodEnd = BigInt(period) * 2n;
-  return time >= periodStart && time < periodEnd;
 };

@@ -24,9 +24,9 @@ export const StoreOnClient = ({ markets }: StoreOnClientProps) => {
     setEvents(storeMarkets.get(pathname.split("/market/")?.[1]));
   }, [pathname, storeMarkets]);
 
-  useEffect(() => {
-    console.debug(events);
-  }, [events]);
+  // useEffect(() => {
+  //   console.debug(events);
+  // }, [events]);
 
   useEffect(() => {
     initialize(markets);

@@ -88,7 +88,7 @@ export const createWebSocketClientStore = () => {
         client.connect();
         client.on("message", (topic, buffer) => {
           try {
-            console.log("Received a client-side message for topic:", topic);
+            // console.log("Received a client-side message for topic:", topic);
             const json = JSON.parse(buffer.toString());
             if (!json) return;
             const data = deserializeEvent(json, json.transaction_version);

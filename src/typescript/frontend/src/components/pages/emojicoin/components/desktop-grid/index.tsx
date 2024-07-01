@@ -33,6 +33,7 @@ const DesktopGrid = (props: GridProps) => {
                 symbol={props.data.symbol}
                 emojis={props.data.emojis}
                 marketID={props.data.marketID.toString()}
+                marketAddress={props.data.marketAddress}
               />
             </StyledBlockWrapper>
           </StyledBlock>

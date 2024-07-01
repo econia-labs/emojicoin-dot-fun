@@ -24,10 +24,11 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
     if (props.data) {
       const marketID = props.data.marketID.toString();
       initializeMarket(marketID);
-      const events = toUniqueHomogenousEvents(props.data.candlesticks, getGuids());
+      const events = toUniqueHomogenousEvents(
+        [...props.data.swaps, ...props.data.chats],
+        getGuids()
+      );
       if (events) {
-        events.swapEvents = props.data.swaps;
-        events.chatEvents = props.data.chats;
         loadEvents(events);
       }
       addMarketData(props.data);

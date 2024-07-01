@@ -30,7 +30,15 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { type EventStore } from "@store/event-store";
 import { fetchAllCandlesticksInTimeRange } from "lib/queries/charting/candlesticks-in-time-range";
 import { useEventStore } from "context/websockets-context";
-import { toBar } from "@sdk/utils/candlestick-bars";
+import {
+  type LatestBar,
+  marketViewToLatestBars,
+  periodicStateTrackerToLatestBar,
+  toBar,
+} from "@sdk/utils/candlestick-bars";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { toMarketView } from "@sdk/types/types";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
@@ -72,6 +80,8 @@ export const Chart = async (
   const symbol = props.symbol;
   const subscribeToResolution = useEventStore((s) => s.subscribeToResolution);
   const unsubscribeFromResolution = useEventStore((s) => s.unsubscribeFromResolution);
+  const setLatestBars = useEventStore((s) => s.setLatestBars);
+  const { aptos } = useAptos();
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -79,7 +89,6 @@ export const Chart = async (
         setTimeout(() => callback(configurationData));
       },
       searchSymbols: async (userInput, _exchange, _symbolType, onResultReadyCallback) => {
-        console.log("userInput in searchSymbols:", userInput);
         const data = Array.from(props.markets.values());
         // TODO: Use the new emoji picker search with this..?
         const symbols = data.reduce<SearchSymbolResultItem[]>(
@@ -106,11 +115,9 @@ export const Chart = async (
           []
         );
 
-        console.log(symbols);
         onResultReadyCallback(symbols);
       },
       resolveSymbol: async (symbolName, onSymbolResolvedCallback, onErrorCallback) => {
-        console.debug("resolveSymbol:", symbolName);
         // Try to look up the symbol as if it were a market ID and then as if it were the actual market symbol,
         // aka, the emoji(s) symbol string.
         const possibleMarketID = props.symbols.get(symbolName);
@@ -138,7 +145,8 @@ export const Chart = async (
           exchange: EXCHANGE_NAME,
           listed_exchange: "",
           session: "24x7",
-          has_empty_bars: true,
+          // Note that `has_empty_bars` causes invalid `time order violation` errors if it's set to `true`.
+          // has_empty_bars: true,
           has_seconds: false,
           has_intraday: true,
           has_daily: true,
@@ -155,32 +163,80 @@ export const Chart = async (
         const { from, to } = periodParams;
         try {
           const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
-
-          // TODO: Consider that if our data is internally consistent and we run into issues with this, we can
-          // use the values in state to skip lots of the fetches by using the data we already have.
+          const start = new Date(from * 1000);
+          const end = new Date(to * 1000);
+          // TODO: Consider that if our data is internally consistent and we run into performance/scalability issues
+          // with this implementation below (fetching without regard for anything in state), we can store the values in
+          // state and coalesce that with the data we fetch from the server.
           const data = await fetchAllCandlesticksInTimeRange({
             marketID: props.marketID,
-            start: new Date(from * 1000),
-            end: new Date(to * 1000),
+            start,
+            end,
             resolution: resolutionEnum,
           });
 
-          if (data.length < 1) {
+          // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
+          // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
+          let latestBar: LatestBar | undefined;
+          if (end.getTime() - new Date().getTime() > 1000) {
+            // Fetch the current candlestick data from the Aptos fullnode in a view function. This fetch call should
+            // *never* be cached.
+            // Also, we specifically call this client-side because the server will get rate-limited if we call the
+            // fullnode from the server for each client.
+            const res = await MarketView.view({
+              aptos,
+              marketAddress: props.marketAddress,
+            });
+            const marketView = toMarketView(res);
+
+            // Convert the market view data to `latestBar[]` and set the latest bars in our EventStore to those values.
+            const latestBars = marketViewToLatestBars(marketView);
+            setLatestBars({ marketID: props.marketID, latestBars });
+
+            // Get the period-specific state tracker for the current resolution and set the latest bar on the chart
+            // (*not* just in state) to the latest bar from that tracker.
+            const tracker = marketView.periodicStateTrackers.find(
+              // These are most likely indexed in order, but in case they aren't, we use `find` here.
+              (v) => Number(v.period) === resolutionEnum
+            );
+            if (!tracker) {
+              throw new Error("This should never happen.");
+            }
+            const nonce = marketView.sequenceInfo.nonce;
+            latestBar = periodicStateTrackerToLatestBar(tracker, nonce);
+          }
+          // Filter the data so that all resulting bars are within the specified time range.
+          // Also, update the `open` price to the previous bar's `close` price if it exists.
+          // NOTE: Since `getBars` is called multiple times, this will result in several
+          // bars having incorrect `open` values. This isn't a big deal but may result in
+          // some visual inconsistencies in the chart.
+          const bars: Bar[] = data.reduce((acc: Bar[], event) => {
+            const bar = toBar(event);
+            if (bar.time >= from * 1000 && bar.time <= to * 1000) {
+              if (acc.at(-1)) {
+                bar.open = acc.at(-1)!.close;
+              }
+              acc.push(bar);
+            }
+            return acc;
+          }, []);
+
+          // Push the latest bar to the bars array if it exists and update its `open` value to be the previous bar's
+          // `close` if it's not the first/only bar.
+          if (latestBar) {
+            if (bars.at(-1)) {
+              latestBar.open = bars.at(-1)!.close;
+            }
+            bars.push(latestBar);
+          }
+
+          if (bars.length < 1) {
             onHistoryCallback([], {
               noData: true,
             });
             return;
           }
 
-          const bars: Bar[] = data.reduce((acc: Bar[], event) => {
-            const bar = toBar(event);
-            if (bar.time >= from * 1000 && bar.time <= to * 1000) {
-              acc.push(bar);
-            }
-            return acc;
-          }, []);
-
-          console.warn(`[getBars]: returned ${bars.length} bar(s)`);
           onHistoryCallback(bars, {
             noData: bars.length === 0,
           });
@@ -250,21 +306,6 @@ export const Chart = async (
         .setVisibleRange({
           from: startTimestamp,
           to: endTimestamp,
-        })
-        .then(() => {
-          const options: Intl.DateTimeFormatOptions = {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-          };
-          const from = new Date(startTimestamp * 1000);
-          const to = new Date(endTimestamp * 1000);
-          /* eslint-disable-next-line no-console */
-          console.debug(
-            "Visible range applied:",
-            `${from.toLocaleDateString("en-US", options)}`,
-            `- ${to.toLocaleDateString("en-US", options)}\n`
-          );
         })
         .catch((error) => {
           console.error("Error applying visible range:", error);

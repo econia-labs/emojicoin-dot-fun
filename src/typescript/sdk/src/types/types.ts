@@ -496,6 +496,14 @@ export const toMarketRegistrationEvent = (
   marketID: BigInt(data.market_metadata.market_id),
 });
 
+export const periodicViewToStateEvent = (
+  data: Types.PeriodicStateView
+): Types.PeriodicStateEvent => ({
+  ...data,
+  version: -1,
+  marketID: BigInt(data.marketID),
+});
+
 export const toPeriodicStateEvent = (
   data: JSONTypes.PeriodicStateEvent,
   version: number

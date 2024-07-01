@@ -101,7 +101,7 @@ export function getTime(unitOfTime: UnitOfTime) {
  * const periodBoundary = getPeriodBoundary(swap, CandlestickResolution.PERIOD_1M);
  * // The `periodBoundary` is equal to 2 minutes in microseconds.
  */
-export function getPeriodBoundary(
+export function getPeriodStartTime(
   event: Types.SwapEvent | Types.StateEvent | Types.PeriodicStateEvent | Types.PeriodicStateView,
   periodIn: CandlestickResolution | bigint | number
 ) {
@@ -138,11 +138,11 @@ export function getPeriodBoundary(
     period = periodIn;
   }
 
-  const boundary = getPeriodBoundaryFromTime(time, period);
+  const boundary = getPeriodStartTimeFromTime(time, period);
   return BigInt(boundary);
 }
 
-export function getPeriodBoundaryFromTime(
+export function getPeriodStartTimeFromTime(
   microseconds: bigint,
   period: CandlestickResolution
 ): number {

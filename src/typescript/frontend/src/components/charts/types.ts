@@ -4,4 +4,5 @@ export interface ChartContainerProps {
   isScriptReady: boolean;
   emojis: Array<SymbolEmojiData>;
   symbol: string;
+  marketAddress: `0x${string}`;
 }

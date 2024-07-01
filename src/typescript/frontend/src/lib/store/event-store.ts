@@ -28,14 +28,14 @@ import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-ap
 import {
   type LatestBar,
   createNewLatestBar,
-  getNextPeriodBoundary,
-  isTimeWithinPeriod,
+  createNewLatestBarFromSwap,
 } from "@sdk/utils/candlestick-bars";
 import { q64ToBig } from "@sdk/utils/nominal-price";
 import {
   toUniqueHomogenousEvents,
   type UniqueHomogenousEvents,
 } from "@sdk/emojicoin_dot_fun/events";
+import { getPeriodStartTime } from "@sdk/utils";
 
 type SwapEvent = Types.SwapEvent;
 type ChatEvent = Types.ChatEvent;
@@ -176,7 +176,7 @@ export const initializeMarketHelper = (
  * @param latestBar the latest bar to clone and pass to the callback. We reduce the scope/type to
  * only the fields that the callback needs, aka `Bar`, a subset of `LatestBar`.
  */
-const tryCallbackClonedLatestBar = (
+const callbackClonedLatestBarIfSubscribed = (
   cb: SubscribeBarsCallback | undefined,
   latestBar: WritableDraft<LatestBar>
 ) => {
@@ -322,17 +322,35 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                   if (!data) {
                     throw new Error("No candlestick data found for resolution.");
                   }
-                  // NOTE: We can't use `return` in this forEach, as zustand/immer seems to see it
-                  // as a no-mutation change and doesn't update the state, even if one of the
-                  // iterations mutates state.
-                  if (data.latestBar && swap.marketNonce > data.latestBar.marketNonce) {
+
+                  const swapPeriodStartTime = getPeriodStartTime(swap, resolution);
+                  const latestBarPeriodStartTime = BigInt(data.latestBar?.time ?? -1n) * 1000n;
+                  // Create a new bar if there is no latest bar or if the swap event's period start
+                  // time is newer than the current latest bar's period start time.
+                  const shouldCreateNewBar =
+                    !data.latestBar || swapPeriodStartTime > latestBarPeriodStartTime;
+                  if (shouldCreateNewBar) {
+                    const newLatestBar = createNewLatestBarFromSwap(
+                      swap,
+                      resolution,
+                      data.latestBar?.close
+                    );
+                    data.latestBar = newLatestBar;
+                    callbackClonedLatestBarIfSubscribed(data.callback, newLatestBar);
+                  } else if (swap.marketNonce >= data.latestBar!.marketNonce) {
+                    if (!data.latestBar) {
+                      throw new Error("This will never occur- it's just to satisfy TypeScript.");
+                    }
                     const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+                    data.latestBar.time = Number(getPeriodStartTime(swap, resolution) / 1000n);
                     data.latestBar.close = price;
                     data.latestBar.high = Math.max(data.latestBar.high, price);
                     data.latestBar.low = Math.min(data.latestBar.low, price);
                     data.latestBar.marketNonce = swap.marketNonce;
                     data.latestBar.volume += Number(swap.baseVolume);
-                    tryCallbackClonedLatestBar(data.callback, data.latestBar);
+                    // Note this results in `time order violation` errors if we set `has_empty_bars`
+                    // to `true` in the `LibrarySymbolInfo` configuration.
+                    callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar);
                   }
                 });
               } else if (isPeriodicStateEvent(event)) {
@@ -342,34 +360,40 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                   throw new Error("No candlestick data found for resolution.");
                 }
                 data.candlesticks.unshift(event);
-                data.latestBar = createNewLatestBar(event);
+                const newLatestBar = createNewLatestBar(event, data.latestBar?.close);
+                // Check if the new latest bar would be newer data than the current latest bar.
+                if (
+                  (data.latestBar?.marketNonce ?? -1n) < newLatestBar.marketNonce &&
+                  (data.latestBar?.time ?? -1) <= newLatestBar.time
+                ) {
+                  data.latestBar = newLatestBar;
+                  // We need to update the latest bar for all resolutions with any existing swap
+                  // data for the new given resolution's time span/time range.
+                  // NOTE: This assumes `swapEvents` is already sorted in descending order.
+                  market.swapEvents.forEach((swap) => {
+                    const emitTime = event.periodicStateMetadata.emitTime;
+                    const swapTime = swap.time;
+                    const period = BigInt(resolution);
+                    const swapInTimeRange = emitTime <= swapTime && swapTime <= emitTime + period;
 
-                // We now need to update the latest bar for all resolutions.
-                // We could fetch the latest bar from the server here, but since it's a new bar, we
-                // most likely already have the data in state or there simply is no data yet.
-                // We need to update the latest bar with the swap data for the new given resolution
-                // time span/range.
-                const nextPeriod = getNextPeriodBoundary(event);
-                market.swapEvents.forEach((swap) => {
-                  // This assumes `swapEvents` is already sorted in descending order.
-                  // NOTE: When a new periodic state event is emitted, the market nonce
-                  // for the swap event is actually exactly the same as the periodic state event,
-                  // hence why we use `>=` instead of just `>`.
-                  if (
-                    isTimeWithinPeriod(swap.time, nextPeriod) &&
-                    swap.marketNonce >= data.latestBar!.marketNonce
-                  ) {
-                    const price = q64ToBig(swap.avgExecutionPrice).toNumber();
-                    data.latestBar!.close = price;
-                    data.latestBar!.marketNonce = swap.marketNonce;
-                    data.latestBar!.high = Math.max(data.latestBar!.high, price);
-                    data.latestBar!.low = Math.min(data.latestBar!.low, price);
-                    data.latestBar!.volume += Number(swap.baseVolume);
-                  }
-                });
-
-                // Call the callback with the new latest bar.
-                tryCallbackClonedLatestBar(data.callback, data.latestBar!);
+                    // NOTE: When a new periodic state event is emitted, the market nonce
+                    // for the swap event is actually exactly the same as the periodic state event,
+                    // hence why we use `>=` instead of just `>`.
+                    if (swapInTimeRange && swap.marketNonce >= data.latestBar!.marketNonce) {
+                      const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+                      data.latestBar!.time = Number(getPeriodStartTime(swap, resolution) / 1000n);
+                      data.latestBar!.close = price;
+                      data.latestBar!.marketNonce = swap.marketNonce;
+                      data.latestBar!.high = Math.max(data.latestBar!.high, price);
+                      data.latestBar!.low = Math.min(data.latestBar!.low, price);
+                      data.latestBar!.volume += Number(swap.baseVolume);
+                    }
+                  });
+                  // Call the callback with the new latest bar.
+                  // Note this will result in a time order violation if we set the `has_empty_bars`
+                  // value to `true` in the `LibrarySymbolInfo` configuration.
+                  callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar!);
+                }
               }
             }
           }
@@ -405,9 +429,6 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           }
           const marketResolution = market[resolution]!;
           marketResolution.callback = cb;
-          if (marketResolution.latestBar) {
-            tryCallbackClonedLatestBar(marketResolution.callback, marketResolution.latestBar);
-          }
         });
       },
       unsubscribeFromResolution: ({ symbol, resolution }) => {

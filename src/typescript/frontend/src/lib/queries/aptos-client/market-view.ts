@@ -1,3 +1,5 @@
+"use server";
+
 import { toMarketView } from "@sdk-types";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptos } from "lib/utils/aptos-client";

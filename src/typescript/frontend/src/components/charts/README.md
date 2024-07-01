@@ -122,9 +122,7 @@ Here's what we check for before using new swap data to update the current
 latest bar:
 
 - Is the swap event in the correct time frame? We handle this by checking if
-  it was emitted between the period `startTime` and the period `endTime`, i.e.,
-  between `getCurrentPeriodBoundary()` and `getNextPeriodBoundary()` for the
-  current latest bar.
+  it was emitted between the period beginning and end for the current bar.
 - Has it already been accounted for? Since we store a unique `guid` for each
   event (calculated from unique event type characteristics and values like
   market/event nonces) added to the `EventStore`, and we know that the
