@@ -36,10 +36,10 @@ import {
   periodicStateTrackerToLatestBar,
   toBar,
 } from "@sdk/utils/candlestick-bars";
-import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { toMarketView } from "@sdk/types/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
+import { getAptosConfig } from "lib/utils/aptos-client";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
@@ -82,7 +82,6 @@ export const Chart = async (
   const subscribeToResolution = useEventStore((s) => s.subscribeToResolution);
   const unsubscribeFromResolution = useEventStore((s) => s.unsubscribeFromResolution);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
-  const { aptos } = useAptos();
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -187,7 +186,7 @@ export const Chart = async (
             // Also, we specifically call this client-side because the server will get rate-limited if we call the
             // fullnode from the server for each client.
             const res = await MarketView.view({
-              aptos,
+              aptos: getAptosConfig(),
               marketAddress: props.marketAddress,
             });
             const marketView = toMarketView(res);
