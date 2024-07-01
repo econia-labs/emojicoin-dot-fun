@@ -10,7 +10,13 @@ export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, inBondingCurve } = toHomePageParamsWithDefault(searchParams);
 
   const featured = await fetchFeaturedMarket({ sortBy, orderBy, inBondingCurve });
-  const sorted = await fetchSortedMarketData({ page, sortBy, orderBy, inBondingCurve });
+  const sorted = await fetchSortedMarketData({
+    page,
+    sortBy,
+    orderBy,
+    inBondingCurve,
+    exactCount: true,
+  });
 
   return <HomePageComponent featured={featured} markets={sorted.markets} count={sorted.count} />;
 }
