@@ -1,6 +1,5 @@
 /* eslint-disable import/no-unused-modules */
 import Big from "big.js";
-import { type AnyNumber } from "@aptos-labs/ts-sdk";
 import { type Types } from "../types";
 import { getPeriodStartTime } from "./misc";
 import { q64ToBig } from "./nominal-price";

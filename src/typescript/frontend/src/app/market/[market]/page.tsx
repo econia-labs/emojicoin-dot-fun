@@ -1,6 +1,5 @@
 import { fetchLatestMarketState } from "lib/queries/initial/state";
 import fetchInitialSwapData from "lib/queries/initial/swaps";
-import fetchInitialCandlesticks from "lib/queries/initial/candlesticks";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import EmojiNotFoundPage from "./not-found";
 import fetchInitialChatData from "lib/queries/initial/chats";

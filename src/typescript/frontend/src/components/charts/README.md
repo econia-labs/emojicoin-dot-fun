@@ -1,7 +1,5 @@
 <!---cspell:words OHLCV -->
 
-<!---cspell:words fullnode -->
-
 # Overview
 
 The `Chart` component for this project receives data from multiple data
