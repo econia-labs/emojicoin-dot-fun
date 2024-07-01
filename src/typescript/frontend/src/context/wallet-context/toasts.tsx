@@ -11,7 +11,7 @@ const debouncedToastKey = (s: string, debouncePeriod: CandlestickResolution) => 
     BigInt(new Date().getTime() * 1000),
     debouncePeriod
   );
-  return `${s}-${periodBoundary}`;
+  return `${s}-${Number(periodBoundary)}`;
 };
 
 export const checkNetworkAndToast = (

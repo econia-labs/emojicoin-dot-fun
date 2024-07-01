@@ -39,6 +39,7 @@ import {
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { toMarketView } from "@sdk/types/types";
+import { getPeriodStartTimeFromTime } from "@sdk/utils";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
@@ -175,10 +176,12 @@ export const Chart = async (
             resolution: resolutionEnum,
           });
 
+          const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
+
           // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
           // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
           let latestBar: LatestBar | undefined;
-          if (end.getTime() - new Date().getTime() > 1000) {
+          if (isFetchForMostRecentBars) {
             // Fetch the current candlestick data from the Aptos fullnode in a view function. This fetch call should
             // *never* be cached.
             // Also, we specifically call this client-side because the server will get rate-limited if we call the
@@ -230,11 +233,26 @@ export const Chart = async (
             bars.push(latestBar);
           }
 
-          if (bars.length < 1) {
-            onHistoryCallback([], {
-              noData: true,
-            });
-            return;
+          if (bars.length === 0) {
+            if (isFetchForMostRecentBars) {
+              // If this is the most recent bar fetch and there is literally zero trading activity thus far,
+              // we should create a single empty bar to get rid of the `No chart data` ghost error from showing.
+              const time = BigInt(new Date().getTime()) * 1000n;
+              const timeAsPeriod = getPeriodStartTimeFromTime(time, resolutionEnum) / 1000n;
+              bars.push({
+                time: Number(timeAsPeriod),
+                open: 0,
+                high: 0,
+                low: 0,
+                close: 0,
+                volume: 0,
+              });
+            } else {
+              onHistoryCallback([], {
+                noData: true,
+              });
+              return;
+            }
           }
 
           onHistoryCallback(bars, {

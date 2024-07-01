@@ -139,20 +139,17 @@ export function getPeriodStartTime(
   }
 
   const boundary = getPeriodStartTimeFromTime(time, period);
-  return BigInt(boundary);
+  return boundary;
 }
 
-export function getPeriodStartTimeFromTime(
-  microseconds: bigint,
-  period: CandlestickResolution
-): number {
+export function getPeriodStartTimeFromTime(microseconds: bigint, period: CandlestickResolution) {
   const time = BigInt(microseconds);
   // prettier-ignore
-  return Big(time.toString())
+  const res = Big(time.toString())
     .div(period)
     .round(0, Big.roundDown)
-    .mul(period)
-    .toNumber();
+    .mul(period);
+  return BigInt(res.toString());
 }
 
 export const ADDRESS_FULL_CHAR_LENGTH = 64;
