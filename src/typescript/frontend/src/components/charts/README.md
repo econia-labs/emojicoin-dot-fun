@@ -1,4 +1,4 @@
-<!---cspell:words OHLCV -->
+<!---cspell:word OHLCV -->
 
 # Overview
 
