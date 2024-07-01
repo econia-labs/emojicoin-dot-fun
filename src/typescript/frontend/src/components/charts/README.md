@@ -117,7 +117,7 @@ store them in state and visually update the latest bar data with the
 [subscribeBars] callback function provided by the datafeed API.
 
 We store this callback function in our [EventStore state] and call it whenever
-we receive an event in state _and_ the chart is subscribed to a market..
+we receive an event in state _and_ the chart is subscribed to a market.
 
 Since this function will error if it is used to update historical data, we must
 ensure that the data passed to it is valid and up to date lest we encounter a
