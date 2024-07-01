@@ -1,7 +1,6 @@
 "use client";
 
 import React, { type PropsWithChildren } from "react";
-import { useTooltip } from "hooks";
 import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { toNominalPrice } from "@sdk/utils/nominal-price";
