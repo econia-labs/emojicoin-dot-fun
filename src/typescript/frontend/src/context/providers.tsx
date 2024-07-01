@@ -18,10 +18,7 @@ import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
-// import { AptosConnectWalletPlugin } from "@aptos-connect/wallet-adapter-plugin";
-// import { APTOS_NETWORK } from "lib/env";
 import StyledToaster from "styles/StyledToaster";
-import { PetraWallet } from "petra-plugin-wallet-adapter";
 import {
   WebSocketEventsProvider,
   MarketDataProvider,
@@ -40,7 +37,6 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const wallets = useMemo(
     () => [
-      new PetraWallet(),
       new PontemWallet(),
       new RiseWallet(),
       new MartianWallet(),
