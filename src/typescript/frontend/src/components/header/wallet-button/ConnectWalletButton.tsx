@@ -5,6 +5,8 @@ import { translationFunction } from "context/language-context";
 import { useConnectWallet } from "context/wallet-context/ConnectWalletContext";
 import { useEffect, useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
+import { StyledItemWrapper } from "../components/mobile-menu-item/styled";
+import Arrow from "@icons/Arrow";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
@@ -67,41 +69,82 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
     // do something;
   }
 
-  return (
-    <>
-      {!connected || !children ? (
-        <Button
-          className={className}
-          onClick={(e) => {
-            e.preventDefault();
-            onClick ? onClick() : connectWallet();
-            handleReplay();
-          }}
-          onMouseOver={handleReplay}
-        >
-          <div className="flex flex-row text-ec-blue text-2xl">
-            {connected ? (
-              <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
-            ) : (
-              <div className="pr-2.5">{"{"}</div>
-            )}
-            <p
-              className="uppercase whitespace-nowrap text-overflow-ellipsis overflow-hidden"
-              style={{ width, maxWidth: width }}
-              ref={ref}
-            />
-            {connected ? (
-              <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
-            ) : (
-              <div className="pl-2.5">{"}"}</div>
-            )}
-          </div>
-        </Button>
-      ) : (
-        children
-      )}
-    </>
-  );
+  if (!mobile) {
+    return (
+      <>
+        {!connected || !children ? (
+          <Button
+            className={className}
+            onClick={(e) => {
+              e.preventDefault();
+              onClick ? onClick() : connectWallet();
+              handleReplay();
+            }}
+            onMouseOver={handleReplay}
+          >
+            <div className="flex flex-row text-ec-blue text-2xl">
+              {connected ? (
+                <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
+              ) : (
+                <div className="pr-2.5">{"{"}</div>
+              )}
+              <p
+                className="uppercase whitespace-nowrap text-overflow-ellipsis overflow-hidden"
+                style={{ width, maxWidth: width }}
+                ref={ref}
+              />
+              {connected ? (
+                <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
+              ) : (
+                <div className="pl-2.5">{"}"}</div>
+              )}
+            </div>
+          </Button>
+        ) : (
+          children
+        )}
+      </>
+    );
+  } else {
+    return (
+      <>
+        {!connected || !children ? (
+          <StyledItemWrapper onMouseOver={replay} onClick={onClick} borderBottom={true}>
+            <Button
+              className={className}
+              onClick={(e) => {
+                e.preventDefault();
+                onClick ? onClick() : connectWallet();
+                handleReplay();
+              }}
+              onMouseOver={handleReplay}
+            >
+              <div className="flex flex-row pixel-heading-3">
+                {connected && (
+                  <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">
+                    {"⚡"}
+                  </p>
+                )}
+                <p
+                  className="uppercase whitespace-nowrap text-overflow-ellipsis overflow-hidden"
+                  style={{ width, maxWidth: width }}
+                  ref={ref}
+                />
+                {connected && (
+                  <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">
+                    {"⚡"}
+                  </p>
+                )}
+              </div>
+            </Button>
+            <Arrow width="18px" color="black" />
+          </StyledItemWrapper>
+        ) : (
+          children
+        )}
+      </>
+    );
+  }
 };
 
 export default ButtonWithConnectWalletFallback;
