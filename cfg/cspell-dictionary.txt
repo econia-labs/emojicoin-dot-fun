@@ -24,6 +24,7 @@ emojicoins
 eswatini
 faso
 fleur
+fullnode
 futuna
 galxe
 gcloud

@@ -4,7 +4,6 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { normalizeAddress } from "../utils/account-address";
-import { toNominalPrice } from "../utils/nominal-price";
 import { type EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
 
 export type AnyNumberString = number | string | bigint;
@@ -49,10 +48,10 @@ export namespace Types {
   export type PeriodicStateTracker = {
     startTime: bigint;
     period: bigint;
-    open: bigint;
-    high: bigint;
-    low: bigint;
-    close: bigint;
+    openPriceQ64: bigint;
+    highPriceQ64: bigint;
+    lowPriceQ64: bigint;
+    closePriceQ64: bigint;
     volumeBase: bigint;
     volumeQuote: bigint;
     integratorFees: bigint;
@@ -85,6 +84,7 @@ export namespace Types {
     cumulativeChatMessages: bigint;
   };
 
+  // The result of the contract's `market_view` view function. NOT the database view.
   export type MarketView = {
     metadata: MarketMetadata;
     sequenceInfo: SequenceInfo;
@@ -211,10 +211,10 @@ export namespace Types {
     WithVersionAndGUID & {
       marketMetadata: MarketMetadata;
       periodicStateMetadata: PeriodicStateMetadata;
-      open: number;
-      high: number;
-      low: number;
-      close: number;
+      openPriceQ64: bigint;
+      highPriceQ64: bigint;
+      lowPriceQ64: bigint;
+      closePriceQ64: bigint;
       volumeBase: bigint;
       volumeQuote: bigint;
       integratorFees: bigint;
@@ -273,6 +273,14 @@ export namespace Types {
     marketID: bigint;
   };
 
+  // Query return type for `inbox_periodic_state` view.
+  export type PeriodicStateView = Omit<PeriodicStateEvent, "marketID" | "version"> & {
+    marketID: number;
+    period: number;
+    startTime: number;
+    version: -1;
+  };
+
   // Query return type for `market_data` view.
   export type MarketDataView = {
     marketID: number;
@@ -318,10 +326,10 @@ export const toPeriodicStateTracker = (
 ): Types.PeriodicStateTracker => ({
   startTime: BigInt(data.start_time),
   period: BigInt(data.period),
-  open: BigInt(data.open_price_q64),
-  high: BigInt(data.high_price_q64),
-  low: BigInt(data.low_price_q64),
-  close: BigInt(data.close_price_q64),
+  openPriceQ64: BigInt(data.open_price_q64),
+  highPriceQ64: BigInt(data.high_price_q64),
+  lowPriceQ64: BigInt(data.low_price_q64),
+  closePriceQ64: BigInt(data.close_price_q64),
   volumeBase: BigInt(data.volume_base),
   volumeQuote: BigInt(data.volume_quote),
   integratorFees: BigInt(data.integrator_fees),
@@ -395,10 +403,11 @@ export const toLastSwap = (data: JSONTypes.LastSwap): Types.LastSwap => ({
 export const toMarketView = (data: JSONTypes.MarketView): Types.MarketView => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
-  clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves_base),
-  clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves_quote),
-  cpammRealReservesBase: BigInt(data.cpamm_real_reserves_base),
-  cpammRealReservesQuote: BigInt(data.cpamm_real_reserves_quote),
+
+  clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves.base),
+  clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves.quote),
+  cpammRealReservesBase: BigInt(data.cpamm_real_reserves.base),
+  cpammRealReservesQuote: BigInt(data.cpamm_real_reserves.quote),
   lpCoinSupply: BigInt(data.lp_coin_supply),
   inBondingCurve: data.in_bonding_curve,
   cumulativeStats: toCumulativeStats(data.cumulative_stats),
@@ -487,6 +496,14 @@ export const toMarketRegistrationEvent = (
   marketID: BigInt(data.market_metadata.market_id),
 });
 
+export const periodicViewToStateEvent = (
+  data: Types.PeriodicStateView
+): Types.PeriodicStateEvent => ({
+  ...data,
+  version: -1,
+  marketID: BigInt(data.marketID),
+});
+
 export const toPeriodicStateEvent = (
   data: JSONTypes.PeriodicStateEvent,
   version: number
@@ -494,10 +511,10 @@ export const toPeriodicStateEvent = (
   version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   periodicStateMetadata: toPeriodicStateMetadata(data.periodic_state_metadata),
-  open: toNominalPrice(data.open_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
-  high: toNominalPrice(data.high_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
-  low: toNominalPrice(data.low_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
-  close: toNominalPrice(data.close_price_q64), // This is the nominal price, aka EMOJICOIN / APT.
+  openPriceQ64: BigInt(data.open_price_q64),
+  highPriceQ64: BigInt(data.high_price_q64),
+  lowPriceQ64: BigInt(data.low_price_q64),
+  closePriceQ64: BigInt(data.close_price_q64),
   volumeBase: BigInt(data.volume_base),
   volumeQuote: BigInt(data.volume_quote),
   integratorFees: BigInt(data.integrator_fees),
@@ -570,6 +587,16 @@ export const toInboxLatestState = (data: JSONTypes.InboxLatestState): Types.Inbo
   version: data.transaction_version,
 });
 
+export const toPeriodicStateView = (
+  data: JSONTypes.PeriodicStateView
+): Types.PeriodicStateView => ({
+  ...toPeriodicStateEvent(data.data, -1),
+  marketID: data.market_id,
+  period: data.period,
+  startTime: data.start_time,
+  version: -1,
+});
+
 export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDataView => ({
   marketID: Number(data.market_id),
   marketAddress: normalizeAddress(data.market_address),
@@ -623,6 +650,17 @@ export type AnyEmojicoinEvent =
   | Types.GlobalStateEvent
   | Types.LiquidityEvent;
 
+/**
+ * Event types that can all be part of a single market and placed into a typed homogenous structure.
+ * @see HomogenousContractEvents in sdk/src/emojicoin_dot_fun/events.ts
+ */
+export type AnyHomogenousEvent =
+  | Types.SwapEvent
+  | Types.ChatEvent
+  | Types.PeriodicStateEvent
+  | Types.StateEvent
+  | Types.LiquidityEvent;
+
 export type AnyEmojicoinEventName =
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Swap`
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Chat`
@@ -632,6 +670,9 @@ export type AnyEmojicoinEventName =
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::GlobalState`
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Liquidity`;
 
+export function isAnyEmojiCoinEvent(e: any): e is AnyEmojicoinEvent {
+  return typeof e?.guid === "string" && e.guid.includes("::");
+}
 export function isSwapEvent(e: AnyEmojicoinEvent): e is Types.SwapEvent {
   return e.guid.startsWith("Swap");
 }
@@ -654,4 +695,8 @@ export function isGlobalStateEvent(e: AnyEmojicoinEvent): e is Types.GlobalState
 }
 export function isLiquidityEvent(e: AnyEmojicoinEvent): e is Types.LiquidityEvent {
   return e.guid.startsWith("Liquidity");
+}
+
+export function isPeriodicStateView(e: any): e is Types.PeriodicStateView {
+  return typeof e.startTime === "number" && isPeriodicStateEvent(e);
 }

@@ -13,7 +13,7 @@ import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/pay
 import { getAptos } from "lib/utils/aptos-client";
 import { checkNetworkAndToast, parseAPIErrorAndToast, successfulTransactionToast } from "./toasts";
 import { useEventStore } from "context/websockets-context";
-import { filterNonContractEvents } from "@store/event-utils";
+import { getEvents } from "@sdk/emojicoin_dot_fun";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -38,7 +38,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     submitTransaction,
     signTransaction,
   } = useWallet();
-  const pushEvents = useEventStore((state) => state.pushEvents);
+  const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
@@ -77,11 +77,20 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         error = e;
       }
       // Store any relevant events in the state event store for all components to see.
-      const events = filterNonContractEvents({ response, error });
-      pushEvents(events);
+      const events = getEvents(response);
+      const flattenedEvents = [
+        ...events.globalStateEvents,
+        ...events.marketRegistrationEvents,
+        ...events.periodicStateEvents,
+        ...events.swapEvents,
+        ...events.chatEvents,
+        ...events.stateEvents,
+        ...events.liquidityEvents,
+      ];
+      flattenedEvents.forEach(pushEventFromClient);
       return { response, error };
     },
-    [pushEvents]
+    [pushEventFromClient]
   );
 
   const submit = useCallback(

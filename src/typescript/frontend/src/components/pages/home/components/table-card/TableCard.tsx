@@ -124,7 +124,7 @@ const TableCard: React.FC<TableCardProps> = ({
           variants={shouldAnimate ? variants : {}}
           style={{
             boxShadow: "0 0 0px 0px #00000000",
-            filter: "drop-shadow(0 0 0 #00000000)",
+            filter: "drop-shadow(0 0 0px #00000000)",
           }}
         >
           <StyledInnerItem

@@ -13,7 +13,7 @@ import { type Types } from "../../types";
  */
 export type GroupedPeriodicStateEvents = Record<CandlestickResolution, Types.PeriodicStateEvent[]>;
 
-export const getEmptyGroupedCandlesticks = (): GroupedPeriodicStateEvents => ({
+export const createEmptyGroupedCandlesticks = (): GroupedPeriodicStateEvents => ({
   [CandlestickResolution.PERIOD_1M]: [],
   [CandlestickResolution.PERIOD_5M]: [],
   [CandlestickResolution.PERIOD_15M]: [],
@@ -28,7 +28,7 @@ export const getEmptyGroupedCandlesticks = (): GroupedPeriodicStateEvents => ({
  * @see {@link GroupedPeriodicStateEvents}
  */
 export const toGroupedCandlesticks = (candlesticks: Types.PeriodicStateEvent[]) => {
-  const grouped = getEmptyGroupedCandlesticks();
+  const grouped = createEmptyGroupedCandlesticks();
 
   for (const candlestick of candlesticks) {
     const periodInEvent = Number(candlestick.periodicStateMetadata.period) as CandlestickResolution;
@@ -37,3 +37,10 @@ export const toGroupedCandlesticks = (candlesticks: Types.PeriodicStateEvent[]) 
 
   return grouped;
 };
+
+export const isGroupedCandlesticks = (
+  candlesticks: any
+): candlesticks is GroupedPeriodicStateEvents =>
+  Object.keys(candlesticks).every((key) =>
+    Object.values(CandlestickResolution).includes(key as any)
+  );

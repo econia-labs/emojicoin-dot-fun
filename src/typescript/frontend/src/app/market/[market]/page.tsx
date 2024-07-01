@@ -1,16 +1,15 @@
 import { fetchLatestMarketState } from "lib/queries/initial/state";
 import fetchInitialSwapData from "lib/queries/initial/swaps";
-import fetchInitialCandlesticks from "lib/queries/initial/candlesticks";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import EmojiNotFoundPage from "./not-found";
 import fetchInitialChatData from "lib/queries/initial/chats";
 import { REVALIDATION_TIME } from "lib/server-env";
+import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
 const CHAT_DATA_ROWS = 100;
 const SWAP_DATA_ROWS = 100;
-const CANDLESTICK_DATA_ROWS = 500;
 
 /**
  * Our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
@@ -40,17 +39,14 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   if (res) {
     const marketID = res.marketID.toString();
     const chatData = await fetchInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
+    const marketView = await fetchContractMarketView(res.marketAddress);
     const swapData = await fetchInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
-    const candlesticks = await fetchInitialCandlesticks({
-      marketID,
-      maxTotalRows: CANDLESTICK_DATA_ROWS,
-    });
     return (
       <ClientEmojicoinPage
         data={{
           swaps: swapData,
           chats: chatData,
-          candlesticks,
+          marketView,
           ...res,
         }}
       />

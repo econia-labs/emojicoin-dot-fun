@@ -9,15 +9,17 @@ import {
   type ThemeName,
 } from "@static/charting_library";
 import { CandlestickResolution } from "@econia-labs/emojicoin-sdk";
+import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
+import { hexToRgba } from "utils/hex-to-rgba";
 
 export const TV_CHARTING_LIBRARY_RESOLUTIONS = ["1", "5", "15", "30", "60", "4H", "1D"];
 
-export const GREEN = "rgba(110, 213, 163, 1.0)";
-export const RED = "rgba(240, 129, 129, 1.0)";
-export const GREEN_OPACITY_HALF = "rgba(110, 213, 163, 0.5)";
-export const RED_OPACITY_HALF = "rgba(240, 129, 129, 0.5)";
+export const PINK = hexToRgba(PINK_HEX);
+export const GREEN = hexToRgba(GREEN_HEX);
+export const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
+export const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
-export const DAY_TO_CANDLESTICK_RESOLUTION: { [key: string]: CandlestickResolution } = {
+export const PERIOD_TO_CANDLESTICK_RESOLUTION: { [key: string]: CandlestickResolution } = {
   "1D": CandlestickResolution.PERIOD_1D,
   "30": CandlestickResolution.PERIOD_30M,
   "60": CandlestickResolution.PERIOD_1H,
@@ -62,23 +64,23 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
     "paneProperties.background": "#000000",
     "scalesProperties.backgroundColor": "#000000",
     "mainSeriesProperties.barStyle.upColor": GREEN,
-    "mainSeriesProperties.barStyle.downColor": RED,
+    "mainSeriesProperties.barStyle.downColor": PINK,
     "mainSeriesProperties.candleStyle.upColor": GREEN,
-    "mainSeriesProperties.candleStyle.downColor": RED,
+    "mainSeriesProperties.candleStyle.downColor": PINK,
     "mainSeriesProperties.candleStyle.borderUpColor": GREEN,
-    "mainSeriesProperties.candleStyle.borderDownColor": RED,
+    "mainSeriesProperties.candleStyle.borderDownColor": PINK,
     "mainSeriesProperties.candleStyle.wickUpColor": GREEN,
-    "mainSeriesProperties.candleStyle.wickDownColor": RED,
+    "mainSeriesProperties.candleStyle.wickDownColor": PINK,
     "mainSeriesProperties.columnStyle.upColor": GREEN_OPACITY_HALF,
-    "mainSeriesProperties.columnStyle.downColor": RED_OPACITY_HALF,
+    "mainSeriesProperties.columnStyle.downColor": PINK_OPACITY_HALF,
     "mainSeriesProperties.hollowCandleStyle.upColor": GREEN,
-    "mainSeriesProperties.hollowCandleStyle.downColor": RED,
+    "mainSeriesProperties.hollowCandleStyle.downColor": PINK,
     "mainSeriesProperties.rangeStyle.upColor": GREEN,
-    "mainSeriesProperties.rangeStyle.downColor": RED,
+    "mainSeriesProperties.rangeStyle.downColor": PINK,
     "paneProperties.legendProperties.showVolume": true,
   },
   studies_overrides: {
-    "volume.volume.color.0": RED_OPACITY_HALF,
+    "volume.volume.color.0": PINK_OPACITY_HALF,
     "volume.volume.color.1": GREEN_OPACITY_HALF,
   },
   time_frames: [
