@@ -5,13 +5,7 @@ import React, { useEffect, useState } from "react";
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
 import { Column, Flex, FlexGap } from "@containers";
-import {
-  StyledEmoji,
-  StyledPixelHeadingText,
-  StyledDisplayFontText,
-  SubheaderText,
-  StyledImage,
-} from "./styled";
+import { StyledImage } from "./styled";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
@@ -141,9 +135,9 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
             {typeof featured !== "undefined" && (
               <>
                 <div className="text-dark-gray uppercase">
-                <div className="font-forma text-dark-gray market-data-text uppercase">
+                  <div className="font-forma text-dark-gray market-data-text uppercase">
                     {t("24 hour vol:")}
-                </div>
+                  </div>
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
