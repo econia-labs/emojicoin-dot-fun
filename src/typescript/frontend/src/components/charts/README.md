@@ -116,8 +116,51 @@ Once we've deserialized the stream buffer data into proper contract events, we
 store them in state and visually update the latest bar data with the
 [subscribeBars] callback function provided by the datafeed API.
 
-We store this callback function in our [EventStore state] and call it whenever
-we receive an event in state _and_ the chart is subscribed to a market.
+This function is created by the datafeed API specifically for each combination
+of a market and a candlestick time frame. We store this function in our
+[EventStore state] in the `EventStore` market ID map, which also has a
+corresponding `resolution` field containing an object that holds the callback
+function.
+
+For example, if our `EventStore` encounters a swap event for the market with a
+market ID of `3`, we iterate over all resolutions and check if we should update
+the latest bar and/or invoke the datafeed API callback function.
+
+Something like this:
+
+```typescript
+// We retrieve our data with the `zustand/immer` `set` function, since we are
+// possibly mutating the data in the form of updating the `latestBar` state.
+set((state) => {
+ // Logic to check if we've already processed the event
+ // ...
+
+  // For all periods/resolutions, i.e., 1m, 5m, 15m, 30m, 1h, 4h, 1d.
+  for (const resolution of RESOLUTIONS_ARRAY) {
+   const marketID = event.marketID.toString();
+   const market = state.markets.get(marketID);
+   const resolutionData = market[resolution];
+   if (resolutionData) {
+     // Process the data, possibly update or create a new latest bar...
+     // ...
+
+     // In essence, we eventually do this:
+     if (resolutionData.latestBar && resolutionData.callback) {
+      // Thus, our callback is only invoked if we are currently subscribed
+      // to that specific market ID + resolution combination.
+      resolutionData.callback(resolutionData.latestBar);
+     }
+   }
+ }
+});
+```
+
+If the event's corresponding market + resolution combination possesses a valid
+callback function in state, we call it, and thus the `Chart` component visually
+updates the latest bar for that specific market + resolution.
+
+The callback function is replaced with `undefined` whenever `unsubscribeBars` is
+called by the datafeed API.
 
 Since this function will error if it is used to update historical data, we must
 ensure that the data passed to it is valid and up to date lest we encounter a
