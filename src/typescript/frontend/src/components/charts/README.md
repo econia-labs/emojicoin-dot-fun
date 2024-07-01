@@ -43,10 +43,10 @@ To be clear: `candlestick`, `bar`, `candlestick bar`, `PeriodicStateEvent`,
 OHLCV candlestick.
 
 Each candlestick has a corresponding `period`, `resolution`, or `time frame`,
-all used interchangeably. The `periodBoundary` sometimes used in this repository
-most often refers to the start time of the `period`, although it can mean either
-side of a period boundary, i.e., the start _or_ the end time for a candlestick
-period.
+all used interchangeably. The `period boundary` sometimes used in this codebase
+most often refers to the `start time` of the `period`, although it can mean
+either side of a period boundary, i.e., the start _or_ the end time for a
+candlestick period.
 
 ## Datafeed API
 

@@ -84,22 +84,22 @@ export function getTime(unitOfTime: UnitOfTime) {
  * ```
  * // A swap event that occurred at exactly 1 minute after the epoch event.
  * const swap = { ...someSwapEvent, time: 1n * 60n * 1000n * 1000n };
- * const periodBoundary = getPeriodBoundary(swap, CandlestickResolution.PERIOD_1M);
- * // The `periodBoundary` is equal to 1 minute in microseconds, i.e., 60 * 1000 * 1000.
+ * const getPeriodStartTime = getgetPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * // The `getPeriodStartTime` is equal to 1 minute in microseconds, i.e., 60 * 1000 * 1000.
  *
  * // If the time is one microsecond before...
  * swap.time -= 1n;
- * const periodBoundary = getPeriodBoundary(swap, CandlestickResolution.PERIOD_1M);
- * // The `periodBoundary` is equal to 0 minutes in microseconds.
+ * const getPeriodStartTime = getgetPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * // The `getPeriodStartTime` is equal to 0 minutes in microseconds.
  *
  * // One minute later...
  * swap.time += 60n * 1000n * 1000n;
- * const periodBoundary = getPeriodBoundary(swap, CandlestickResolution.PERIOD_1M);
- * // The `periodBoundary` is equal to 1 minute in microseconds.
+ * const getPeriodStartTime = getgetPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * // The `getPeriodStartTime` is equal to 1 minute in microseconds.
  *
  * swap.time += 1n;
- * const periodBoundary = getPeriodBoundary(swap, CandlestickResolution.PERIOD_1M);
- * // The `periodBoundary` is equal to 2 minutes in microseconds.
+ * const getPeriodStartTime = getgetPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * // The `getPeriodStartTime` is equal to 2 minutes in microseconds.
  */
 export function getPeriodStartTime(
   event: Types.SwapEvent | Types.StateEvent | Types.PeriodicStateEvent | Types.PeriodicStateView,
