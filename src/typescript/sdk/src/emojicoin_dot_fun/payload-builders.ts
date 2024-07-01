@@ -30,6 +30,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { type WalletSignTransactionFunction } from ".";
 import { toConfig } from "../utils/aptos-utils";
+import serializeArgsToJSON from "./serialize-args-to-json";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;
@@ -210,13 +211,14 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
             multisigAddress,
           }
         : {};
+
     return {
       sender: this.primarySender,
       data: {
         ...multiSigData,
         function: `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`,
-        typeArguments: this.typeTags,
-        functionArguments: this.argsToArray(),
+        typeArguments: this.typeTags.map((t) => t.toString()),
+        functionArguments: serializeArgsToJSON(this.args),
         // abi: undefined, // TODO: Add pre-defined ABIs.
       },
       options,
