@@ -5,7 +5,7 @@
     "REVALIDATION_TIME",
     "ALLOWLISTER3K_URL"
   ],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": [
         "^build"

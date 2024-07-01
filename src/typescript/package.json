@@ -8,7 +8,7 @@
     "dotenv-cli": "^7.4.2",
     "prettier": "^3.3.2",
     "tsx": "^4.16.0",
-    "turbo": "^1.13.4"
+    "turbo": "^2.0.6"
   },
   "license": "Apache-2.0",
   "name": "@econia-labs/emojicoin",
@@ -34,5 +34,6 @@
   "workspaces": [
     "sdk",
     "frontend"
-  ]
+  ],
+  "packageManager": "pnpm@9.4.0"
 }
