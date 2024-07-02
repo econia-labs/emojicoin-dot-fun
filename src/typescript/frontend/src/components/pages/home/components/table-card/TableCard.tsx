@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 
 import { translationFunction } from "context/language-context";
-import useTooltip from "hooks/use-tooltip";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 
@@ -58,7 +57,6 @@ const TableCard: React.FC<TableCardProps> = ({
   // worry about overflow with `number`.
   const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
   const [roughDailyVolume, setRoughDailyVolume] = useState(Big(staticVolume24H));
-  const [tooltipVisibility, setTooltipVisibility] = useState<boolean>(false);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
@@ -109,11 +107,6 @@ const TableCard: React.FC<TableCardProps> = ({
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
 
@@ -153,15 +146,7 @@ const TableCard: React.FC<TableCardProps> = ({
               $fontWeight="bold"
               mb="6px"
               ellipsis
-              ref={targetRefEmojiName}
-              onMouseEnter={() => {
-                setTooltipVisibility(true);
-              }}
-              onMouseLeave={() => {
-                setTimeout(() => {
-                  setTooltipVisibility(false);
-                }, 400);
-              }}
+              title={emojisToName(emojis).toUpperCase()}
             >
               {emojisToName(emojis)}
             </Text>
@@ -212,9 +197,6 @@ const TableCard: React.FC<TableCardProps> = ({
               </Column>
             </Flex>
           </StyledInnerItem>
-          <div style={{ visibility: tooltipVisibility ? "visible" : "hidden" }}>
-            {tooltipEmojiName}
-          </div>
         </motion.div>
       </StyledItemWrapper>
     </Link>

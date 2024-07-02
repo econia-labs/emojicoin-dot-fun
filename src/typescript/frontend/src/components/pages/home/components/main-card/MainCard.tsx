@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 
 import { translationFunction } from "context/language-context";
-import useTooltip from "hooks/use-tooltip";
 import { Column, Flex, FlexGap } from "@containers";
 import { StyledImage } from "./styled";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -71,11 +70,6 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
     setNumMarkets(totalNumberOfMarkets);
   }, [totalNumberOfMarkets, setNumMarkets]);
 
-  const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
   const { ref: marketCapRef } = useLabelScrambler(marketCap);
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);
   const { ref: allTimeVolumeRef } = useLabelScrambler(roughAllTimeVolume);
@@ -110,7 +104,10 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
 
         <Column maxWidth="100%" ellipsis>
           <div className="pixel-heading-1 text-dark-gray pixel-heading-text">01</div>
-          <div className="display-font-text ellipses font-forma-bold" ref={targetRefEmojiName}>
+          <div
+            className="display-font-text ellipses font-forma-bold"
+            title={(featured ? emojisToName(featured.emojis) : "BLACK HEART").toUpperCase()}
+          >
             {(featured ? emojisToName(featured.emojis) : "BLACK HEART").toUpperCase()}
           </div>
 
@@ -167,7 +164,6 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
             )}
           </FlexGap>
         </Column>
-        {tooltipEmojiName}
       </Flex>
     </Flex>
   );

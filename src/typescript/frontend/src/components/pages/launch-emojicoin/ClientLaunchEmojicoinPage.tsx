@@ -7,7 +7,7 @@ import emojiRegex from "emoji-regex";
 
 import { translationFunction } from "context/language-context";
 import { useValidationSchema } from "./hooks";
-import { useForm, useTooltip, useEmojicoinPicker } from "hooks";
+import { useForm, useEmojicoinPicker } from "hooks";
 import { isDisallowedEventKey } from "utils";
 
 import Prompt from "components/prompt";
@@ -40,21 +40,6 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
   const tickers = values.emojiList.map((emoji) => emoji.emoji).join("");
 
   const [marketID, setMarketID] = useState<number>();
-
-  const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
-  const { targetRef: targetRefEmojiTicker, tooltip: tooltipEmojiTicker } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-    customStyles: {
-      tooltip: {
-        lineHeight: "normal",
-      },
-    },
-  });
 
   const updateMarketID = (emojis: EmojiClickData[]) => {
     if (emojis.length === 0) {
@@ -157,11 +142,10 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
               textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
               textTransform="uppercase"
               ellipsis
-              ref={targetRefEmojiName}
+              title={names.toUpperCase()}
             >
               {names}
             </Text>
-            {tooltipEmojiName}
           </FlexGap>
 
           <FlexGap gap="8px" mb="5px">
@@ -177,11 +161,10 @@ const ClientLaunchEmojicoinPage: React.FC = () => {
               textTransform="uppercase"
               lineHeight="20px"
               ellipsis
-              ref={targetRefEmojiTicker}
+              title={tickers.toUpperCase()}
             >
               {tickers}
             </Text>
-            {tooltipEmojiTicker}
           </FlexGap>
 
           <Flex justifyContent="center">
