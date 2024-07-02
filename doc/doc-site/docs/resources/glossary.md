@@ -14,7 +14,7 @@ Degenerate vocabulary you must know
 Where, ‘x’ and ‘y’ represent the quantities of two assets in a liquidity pool, and ‘k’ is a constant. 
 
 
-**Degen**: Someone who LARPS as a gambler but doesn't actually make any money. 
+**Degen**: pronunciation: DEE-jen (/ˈdiː.dʒɛn/). Someone who LARPS as a gambler but doesn't actually make any money. 
 - Tim: I love NFTs and Web3.  I'm such a degen. 
 
 **Degenerate**: Professional gambler that finds asymmetric opportunities that the rest of the market overlooks
