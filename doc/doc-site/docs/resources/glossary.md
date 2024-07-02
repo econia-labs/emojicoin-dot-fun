@@ -10,7 +10,7 @@ Degenerate vocabulary you must know
 
 **Concentrated Liquidity Automated Market Maker (CLAMM)**:More efficient AMM design where users have more control over price where liquidity is placed.
 
-**Constant Product Automated Market Maker (CPAMM)**: Most popular AMM desgin univ2 style.
+**Constant Product Automated Market Maker (CPAMM)**: The most popular AMM design- Uniswap v2 style.
 Where, ‘x’ and ‘y’ represent the quantities of two assets in a liquidity pool, and ‘k’ is a constant. 
 
 
