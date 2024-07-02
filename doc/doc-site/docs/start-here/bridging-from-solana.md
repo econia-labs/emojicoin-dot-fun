@@ -5,6 +5,6 @@ hide_title: False
 description: Documentation for emojicoin dot fun
 ---
 
-Stay tuned for future LayerZero Solana  Aptos Integration announcements.
+Stay tuned for future LayerZero Solana ↔️ Aptos Integration announcements.
 
 In the meantime see the resources below
