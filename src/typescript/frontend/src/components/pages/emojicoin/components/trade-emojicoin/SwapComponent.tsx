@@ -1,7 +1,7 @@
 "use client";
 
 import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
-import { type PropsWithChildren, useEffect, useState } from "react";
+import { type PropsWithChildren, useEffect, useState, useCallback } from "react";
 import FlipInputsArrow from "./FlipInputsArrow";
 import { Column, Row } from "components/layout/components/FlexContainers";
 import { SwapButton } from "./SwapButton";
@@ -49,6 +49,7 @@ export default function SwapComponent({
   const [previous, setPrevious] = useState(inputAmount);
   const [isLoading, setIsLoading] = useState(false);
   const [isSell, setIsSell] = useState(false);
+  const [submit, setSubmit] = useState<(() => Promise<void>) | null>(null);
 
   const numSwaps = useEventStore(
     (s) => s.getMarket(marketID.toString())?.swapEvents.length ?? initNumSwaps
@@ -106,6 +107,15 @@ export default function SwapComponent({
     setInputAmount(e.target.value);
   };
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && submit) {
+        submit();
+      }
+    },
+    [submit]
+  );
+
   return (
     <>
       <Column className="w-full max-w-[414px] h-full justify-center">
@@ -125,6 +135,7 @@ export default function SwapComponent({
                 min={0}
                 step={0.01}
                 onChange={handleInput}
+                onKeyDown={handleKeyDown}
                 type="number"
               ></input>
             </Column>
@@ -161,6 +172,7 @@ export default function SwapComponent({
             inputAmount={toActualCoinDecimals({ num: inputAmount })}
             marketAddress={marketAddress}
             isSell={isSell}
+            setSubmit={setSubmit}
           />
         </Row>
       </Column>

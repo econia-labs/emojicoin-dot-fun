@@ -30,12 +30,12 @@ export const Slider = styled.span<{ checked: boolean; disabled?: boolean; scale?
   &:before {
     content: "";
     position: absolute;
-    right: ${({ scale }) => scale && styles[scale].positionLeft};
+    left: ${({ scale }) => scale && styles[scale].positionLeft};
     bottom: ${({ scale }) => scale && styles[scale].positionLeft};
     width: ${({ scale }) => scale && styles[scale].circleWidth};
     height: ${({ scale }) => scale && styles[scale].circleWidth};
     border-radius: 100%;
-    background-color: ${({ theme }) => theme.colors.econiaBlue};
+    background-color: ${({ theme }) => theme.colors.lightGray};
 
     transition: all 0.3s ease-out;
   }
@@ -51,8 +51,8 @@ export const Checkbox = styled.input<{ checked?: boolean }>`
     outline: none;
   }
   &:checked + ${Slider}:before {
-    transform: ${({ checked }) => checked && "translateX(-140%)"};
-    background-color: ${({ theme }) => theme.colors.lightGray};
+    transform: ${({ checked }) => checked && "translateX(140%)"};
+    background-color: ${({ theme }) => theme.colors.econiaBlue};
   }
 `;
 

@@ -29,3 +29,14 @@ export const darkColors = {
   warning: "#FFB119",
   error: "#F3263E",
 } as const;
+
+export const WHITE = "#FFFFFF";
+export const LIGHT_GRAY = "#717386";
+export const DARK_GRAY = "#33343D";
+export const BLACK = "#000000";
+export const BLUE = "#64A7FF";
+export const GREEN = "#2FA90F";
+export const PINK = "#CD2F8D";
+export const ECONIA_BLUE = "#086CD9";
+export const WARNING = "#FFB119";
+export const ERROR = "#F3263E";

@@ -1,6 +1,17 @@
 import { type Types } from "@sdk-types";
 import { q64ToBig } from "@sdk/utils/nominal-price";
-import { RankIcon, RankName } from "components/pages/emojicoin/components/trade-history/misc";
+
+export enum RankIcon {
+  based = "🐳",
+  n00b = "🐡",
+  lfg = "🐬",
+}
+
+export enum RankName {
+  based = "based",
+  n00b = "n00b",
+  lfg = "lfg",
+}
 
 export const getRankFromSwapEvent = (
   amount: number | bigint

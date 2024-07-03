@@ -4,7 +4,7 @@ import { DropdownMenuWrapper } from "./styled";
 import { DropdownMenuItem } from "./components";
 
 import { type DropdownMenuProps } from "../types";
-import { DropdownMenuInner, StyledDropdownMenuItem } from "./components/dropdown-menu-item/styled";
+import { DropdownMenuInner, StyledDropdownMenuClose } from "./components/dropdown-menu-item/styled";
 
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onClick,
@@ -18,14 +18,14 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
 }) => {
   return (
     <DropdownMenuWrapper {...props}>
-      <StyledDropdownMenuItem disabled={false} key={"close"} onClick={onClose}>
+      <StyledDropdownMenuClose key="close" disabled={false} onClick={onClose}>
         <DropdownMenuInner
           className="flex"
           style={{ justifyContent: "end", margin: "0", padding: "0" }}
         >
-          <div className="med-pixel-text">X</div>
+          <div className="med-pixel-text lowercase">x</div>
         </DropdownMenuInner>
-      </StyledDropdownMenuItem>
+      </StyledDropdownMenuClose>
       {options.map((option, index) => {
         const { title } = option;
 

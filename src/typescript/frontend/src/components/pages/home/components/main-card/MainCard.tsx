@@ -5,13 +5,7 @@ import React, { useEffect, useState } from "react";
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
 import { Column, Flex, FlexGap } from "@containers";
-import {
-  StyledEmoji,
-  StyledPixelHeadingText,
-  StyledDisplayFontText,
-  StyledMarketDataText,
-  StyledImage,
-} from "./styled";
+import { StyledImage } from "./styled";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
@@ -111,30 +105,28 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
             alt="Planet"
           />
 
-          <StyledEmoji>{featured?.symbol ?? "🖤"}</StyledEmoji>
+          <div id="styled-emoji">{featured?.symbol ?? "🖤"}</div>
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <StyledPixelHeadingText textScale="pixelHeading1" color="darkGray">
-            {"01"}
-          </StyledPixelHeadingText>
-          <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
+          <div className="pixel-heading-1 text-dark-gray pixel-heading-text">01</div>
+          <div className="display-font-text ellipses font-forma-bold" ref={targetRefEmojiName}>
             {(featured ? emojisToName(featured.emojis) : "BLACK HEART").toUpperCase()}
-          </StyledDisplayFontText>
+          </div>
 
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
+                <div className="font-forma text-dark-gray market-data-text uppercase">
                   {t("Mkt. Cap:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
+                </div>
+                <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
                     <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
-                </StyledMarketDataText>
+                </div>
               </>
             )}
           </FlexGap>
@@ -142,16 +134,18 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
-                  {t("24 hour vol:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
+                <div className="text-dark-gray uppercase">
+                  <div className="font-forma text-dark-gray market-data-text uppercase">
+                    {t("24 hour vol:")}
+                  </div>
+                </div>
+                <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
                     <div ref={dailyVolumeRef}>{toCoinDecimalString(roughDailyVolume, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
-                </StyledMarketDataText>
+                </div>
               </>
             )}
           </FlexGap>
@@ -159,16 +153,16 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
+                <div className="font-forma text-dark-gray market-data-text uppercase">
                   {t("All-time vol:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
+                </div>
+                <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
                     <div ref={allTimeVolumeRef}>{toCoinDecimalString(roughAllTimeVolume, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
-                </StyledMarketDataText>
+                </div>
               </>
             )}
           </FlexGap>

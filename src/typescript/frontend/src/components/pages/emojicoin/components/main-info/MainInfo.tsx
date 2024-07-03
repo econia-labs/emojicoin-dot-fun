@@ -69,13 +69,13 @@ const MainInfo = (props: MainInfoProps) => {
         <div className={headerWrapper}>
           <div
             ref={targetRefEmojiName}
-            className=" text-white uppercase ellipses md:display-2 display-4"
+            className=" text-white uppercase ellipses display-4 font-forma-bold md:display-2"
           >
             {emojisToName(props.data.emojis)}
           </div>
           {tooltipEmojiName}
 
-          <div className="text-[24px] md:display-2">{props.data.symbol}</div>
+          <div className="text-[24px] md:display-2 my-auto">{props.data.symbol}</div>
         </div>
 
         <div className={statsWrapper}>

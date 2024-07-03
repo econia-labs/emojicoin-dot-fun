@@ -24,6 +24,7 @@ emojicoins
 eswatini
 faso
 fleur
+fullnode
 futuna
 galxe
 gcloud
@@ -51,6 +52,7 @@ octa
 oden
 parallelizable
 permissionless
+pkill
 postg
 postgrest
 precommit

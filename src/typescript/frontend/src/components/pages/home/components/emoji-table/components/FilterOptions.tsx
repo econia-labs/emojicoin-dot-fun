@@ -83,7 +83,11 @@ export const FilterOptionsComponent = () => {
   return (
     <StyledTHFilters>
       <SingleSelect
-        wrapperProps={{ width: isLaptopL ? "300px" : "210px", className: "med-pixel-text" }}
+        wrapperProps={{
+          width: isLaptopL ? "300px" : "unset",
+          marginRight: isLaptopL ? "inherit" : "20px",
+          className: "med-pixel-text",
+        }}
         title={selectedOption?.title}
         value={selectedOption}
         setValue={(option: MyOption | Option) => handleQueryParams(option, "push")}

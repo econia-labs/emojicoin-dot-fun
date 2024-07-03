@@ -1,0 +1,6 @@
+#grid-hover {
+  &:hover {
+    filter: brightness(1.05) saturate(1.1);
+    box-shadow: 0 0 9px 7px rgba(8, 108, 217, 0.1);
+  }
+}

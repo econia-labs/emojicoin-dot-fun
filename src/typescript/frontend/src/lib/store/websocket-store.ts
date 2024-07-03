@@ -7,6 +7,7 @@ import { type AnyNumberString } from "../../../../sdk/src/types/types";
 import { TopicBuilder } from "../mqtt";
 import { MQTT_URL } from "lib/env";
 import { type EventStore } from "./event-store";
+import { deserializeEvent } from "./event-utils";
 
 export type ClientState = {
   client: MqttClient;
@@ -46,12 +47,19 @@ export type WebSocketClientStore = ClientState & ClientActions;
 
 const subscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
   return set((state) => {
-    state.client.subscribe(topic);
-    const newSubscriptions = new Set(state.subscriptions);
-    newSubscriptions.add(topic);
-    return {
-      subscriptions: newSubscriptions,
-    };
+    // Only subscribe in the client if we're not already subscribed.
+    if (!state.subscriptions.has(topic)) {
+      state.client.subscribe(topic);
+      const newSubscriptions = new Set(state.subscriptions);
+      newSubscriptions.add(topic);
+      return {
+        subscriptions: newSubscriptions,
+      };
+    } else {
+      return {
+        subscriptions: state.subscriptions,
+      };
+    }
   });
 };
 const unsubscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: string) => {
@@ -67,7 +75,8 @@ const unsubscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: st
 export const createWebSocketClientStore = () => {
   return createStore<WebSocketClientStore>((set, get) => ({
     client: mqtt.connect(MQTT_URL, {
-      protocol: "wss",
+      // Force the client to wait for us to manually call connect instead of doing it upon
+      // instantiation of the client object.
       manualConnect: true,
     }),
     stream: [],
@@ -77,10 +86,14 @@ export const createWebSocketClientStore = () => {
       const connected = client.connected;
       if (!connected) {
         client.connect();
-        client.on("message", (topic, data) => {
-          console.debug("Received message from topic:", topic);
+        client.on("message", (topic, buffer) => {
           try {
-            eventStore.pushEventFromWebSocket(data);
+            // console.log("Received a client-side message for topic:", topic);
+            const json = JSON.parse(buffer.toString());
+            if (!json) return;
+            const data = deserializeEvent(json, json.transaction_version);
+            if (!data) return;
+            eventStore.pushEventFromClient(data.event);
             set((state) => ({
               received: state.received + 1,
             }));

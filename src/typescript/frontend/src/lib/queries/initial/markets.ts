@@ -1,5 +1,4 @@
 "use server";
-// cspell:word Fullnode
 
 import { SYMBOL_DATA } from "@sdk/emoji_data/";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";

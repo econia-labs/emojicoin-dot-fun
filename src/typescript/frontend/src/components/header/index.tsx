@@ -63,7 +63,11 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
             <FlexGap marginRight="50px" gap="24px" alignItems="center">
               {linksForCurrentPage.map(({ title, path, width }) => {
                 return (
-                  <Link key={title} href={path}>
+                  <Link
+                    key={title}
+                    href={path}
+                    target={path.startsWith("https://") ? "_blank" : undefined}
+                  >
                     <MenuItem width={width} title={title} />
                   </Link>
                 );

@@ -6,20 +6,23 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
 
 export const SwapButton = ({
   inputAmount,
   isSell,
   marketAddress,
+  setSubmit,
 }: {
   inputAmount: bigint | number | string;
   isSell: boolean;
   marketAddress: AccountAddressString;
+  setSubmit: Dispatch<SetStateAction<(() => Promise<void>) | null>>;
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
 
-  const handleClick = async () => {
+  const handleClick = useCallback(async () => {
     if (!account) {
       return;
     }
@@ -36,7 +39,11 @@ export const SwapButton = ({
         typeTags: [emojicoin, emojicoinLP],
       });
     await submit(builderLambda);
-  };
+  }, [account, aptos.config, inputAmount, isSell, marketAddress, submit]);
+
+  useEffect(() => {
+    setSubmit(() => handleClick);
+  }, [handleClick, setSubmit]);
 
   return (
     <ButtonWithConnectWalletFallback>
