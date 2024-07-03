@@ -7,7 +7,7 @@ runs:
     with:
       node-version-file: '${{ env.TS_DIR }}/.node-version'
       registry-url: 'https://registry.npmjs.org'
-  - uses: 'pnpm/action-setup@v2'
+  - uses: 'pnpm/action-setup@v4'
     with:
       package_json_file: '${{ env.TS_DIR }}/package.json'
   - run: |
