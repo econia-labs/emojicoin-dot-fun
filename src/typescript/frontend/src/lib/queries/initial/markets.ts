@@ -4,7 +4,6 @@ import { SYMBOL_DATA } from "@sdk/emoji_data/";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { type JSONTypes, toMarketView } from "@sdk/types";
 import { paginateMarketRegistrations } from "@sdk/queries/market";
-import { APTOS_NETWORK } from "lib/env";
 import { cache } from "react";
 import fetchInitialWithFallback from "./cache-helper";
 import { getAptos } from "lib/utils/aptos-client";
@@ -22,7 +21,7 @@ const getInitialMarketDataFromFullnode = async () => {
   const addresses = data
     .slice(0, 100)
     .map((v) => ({ address: v.marketAddress, version: v.version }));
-  const aptos = getAptos(APTOS_NETWORK);
+  const aptos = getAptos();
 
   const marketViews: Array<Promise<JSONTypes.MarketView & { version: number }>> = [];
 

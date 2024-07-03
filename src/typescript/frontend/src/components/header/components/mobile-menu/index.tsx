@@ -42,7 +42,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             );
           })}
 
-          <ButtonWithConnectWalletFallback mobile={true} />
+          <ButtonWithConnectWalletFallback className="w-full" mobile={true} />
         </MobileMenuInner>
 
         <Flex position="absolute" bottom="60px" justifyContent="center" width="100%">

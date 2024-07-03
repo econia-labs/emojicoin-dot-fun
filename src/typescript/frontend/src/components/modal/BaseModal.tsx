@@ -1,19 +1,18 @@
 import { Dialog, Transition, TransitionChild, DialogPanel, DialogTitle } from "@headlessui/react";
 import React, { Fragment, type PropsWithChildren } from "react";
-import { CloseIconWithHover } from "components/svg";
-import ChevronLeftIcon from "components/svg/icons/ChevronLeft";
+import ClosePixelated from "@icons/ClosePixelated";
+import { Arrow } from "components/svg";
 
 export const BaseModal: React.FC<
   PropsWithChildren<{
-    isOpen: boolean;
-    onClose: () => void;
-    onBack?: () => void;
     showCloseButton?: boolean;
     showBackButton?: boolean;
+    onBack?: () => void;
+    isOpen: boolean;
+    onClose: () => void;
     className?: string;
   }>
-> = ({ isOpen, onClose, onBack, showBackButton, showCloseButton, children, className }) => {
-  const [hoveringOnCloseButton, setHoveringOnCloseButton] = React.useState(false);
+> = ({ showCloseButton, showBackButton, onBack, isOpen, onClose, children, className }) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" open={isOpen} onClose={onClose}>
@@ -33,33 +32,34 @@ export const BaseModal: React.FC<
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <DialogPanel
               className={`w-full
-              ${className} ${
-                hoveringOnCloseButton ? "" : ""
-              } max-w-4xl transform border bg-black align-middle shadow-xl transition-all`}
+              ${className} max-w-4xl transform border bg-transparent align-middle shadow-xl`}
             >
-              <DialogTitle as="div">
-                {showBackButton && (
+              {showBackButton ? (
+                <DialogTitle as="div">
                   <div
-                    className="absolute left-[23px] top-[20px] flex cursor-pointer items-center justify-center gap-[9.53px] font-roboto-mono text-sm font-normal text-neutral-500 transition-all hover:text-white"
-                    onClick={onBack}
+                    className="absolute group left-0 top-0 !z-50 flex h-[70px] w-[70px] cursor-pointer items-center"
+                    onClick={() => (onBack ? onBack() : null)}
                   >
-                    <ChevronLeftIcon width={11} height={10} />
-                    Back
+                    <div className="flex m-auto rotate-180">
+                      <Arrow
+                        width={17}
+                        height={18}
+                        className="transition-all group-hover:w-[18px] group-hover:h-[19px] fill-black"
+                      />
+                    </div>
                   </div>
-                )}
-                {showCloseButton && (
+                </DialogTitle>
+              ) : null}
+              {showCloseButton ? (
+                <DialogTitle as="div">
                   <div
-                    className={`absolute right-0 top-0 !z-50 flex h-[50px] w-[50px] cursor-pointer items-center justify-center border-b border-l transition-all [&>svg>path]:stroke-neutral-500 [&>svg>path]:transition-all [&>svg>path]:hover:stroke-neutral-100 ${
-                      hoveringOnCloseButton ? "" : ""
-                    }`}
+                    className="absolute group right-0 top-0 !z-50 flex h-[70px] w-[70px] cursor-pointer items-center justify-center"
                     onClick={onClose}
-                    onMouseEnter={() => setHoveringOnCloseButton(true)}
-                    onMouseLeave={() => setHoveringOnCloseButton(false)}
                   >
-                    <CloseIconWithHover />
+                    <ClosePixelated className="w-[15px] h-[16px] transition-all group-hover:w-[18px] group-hover:h-[19px]" />
                   </div>
-                )}
-              </DialogTitle>
+                </DialogTitle>
+              ) : null}
               {children}
             </DialogPanel>
           </div>
