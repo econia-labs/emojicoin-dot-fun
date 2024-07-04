@@ -14,12 +14,19 @@ import NightlyIcon from "@icons/NightlyIcon";
 import { Arrow } from "components/svg";
 import { useScramble } from "use-scramble";
 
+const IconProps = {
+  width: 28,
+  height: 28,
+  className: "m-auto",
+};
+
 export const WALLET_ICON: { [key: string]: ReactElement } = {
-  petra: <PetraIcon />,
-  pontem: <PontemIcon />,
-  martian: <MartianIcon />,
-  rise: <RiseIcon />,
-  nightly: <NightlyIcon />,
+  petra: <PetraIcon {...IconProps} />,
+  pontem: <PontemIcon {...IconProps} />,
+  martian: <MartianIcon {...IconProps} />,
+  rise: <RiseIcon {...IconProps} />,
+  // Nightly isn't working currently- exclude by making the key different from the wallet name.
+  _nightly: <NightlyIcon {...IconProps} />,
 };
 
 export const walletSort = (
@@ -34,8 +41,7 @@ export const isSupportedWallet = (s: string) => {
   return Object.keys(WALLET_ICON).includes(s.toLowerCase());
 };
 
-const WalletNameClassName =
-  "group-hover:text-white ml-4 font-pixelar text-[20px] text-black uppercase flex";
+const WalletNameClassName = "ml-4 font-pixelar text-[20px] text-black uppercase flex";
 const ArrowDivClassName = "arrow-wrapper absolute right-0 p-[7px] transition-all text-black";
 
 type ScrambledProps = {
@@ -50,12 +56,12 @@ const ScrambledRow: React.FC<ScrambledProps> = ({ text, active, hover, installed
 
   const display = ({ text, active, hover, installed }: ScrambledProps) => {
     if (!installed) {
-      return `Install ${text} Wallet`;
+      return `Install ${text}`;
     }
     if (active) {
-      return hover ? "Disconnect" : ` ${text} Wallet`;
+      return hover ? `Disconnect from ${text}` : `${text}`;
     }
-    return hover ? "Connect" : ` ${text} Wallet`;
+    return hover ? `Connect to ${text}` : `${text}`;
   };
 
   const { ref, replay } = useScramble({
@@ -79,7 +85,7 @@ const ScrambledRow: React.FC<ScrambledProps> = ({ text, active, hover, installed
     }
   }, [hover]); /* eslint-disable-line react-hooks/exhaustive-deps */
 
-  return <p className={active && hover ? "text-lighter-gray" : ""} ref={ref} />;
+  return <p ref={ref} />;
 };
 
 export const WalletItem: React.FC<{
@@ -92,7 +98,9 @@ export const WalletItem: React.FC<{
 
   const inner = (
     <>
-      {WALLET_ICON[wallet.name.toLowerCase()]}
+      <div className="flex text-black rounded-[4px] w-[28px] h-[28px]">
+        {WALLET_ICON[wallet.name.toLowerCase()]}
+      </div>
       <div className={WalletNameClassName}>
         <div>
           <ScrambledRow
@@ -108,16 +116,16 @@ export const WalletItem: React.FC<{
       </div>
       <div className={ArrowDivClassName}>
         {wallet.name === current?.name ? (
-          <div className="group-hover:text-white">
-            <p className="absolute bottom-[-2px] right-[6px] inline-flex group-hover:hidden animate-flicker drop-shadow-text">
+          <>
+            <p className="absolute bottom-[-2px] right-[5px] mr-[1ch] inline-flex group-hover:hidden animate-flicker drop-shadow-text">
               {"⚡"}
             </p>
-            <p className="absolute bottom-[-2px] right-[8px] hidden group-hover:inline-flex scale-[0.75]">
+            <p className="absolute bottom-[-2px] right-[6px] mr-[1ch] hidden group-hover:inline-flex scale-[0.75]">
               {"❌"}
             </p>
-          </div>
+          </>
         ) : (
-          <Arrow className="fill-black group-hover:fill-white" />
+          <Arrow width={16} height={19} className="fill-black mr-[1ch]" />
         )}
       </div>
     </>

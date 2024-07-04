@@ -8,12 +8,16 @@ import { type NetworkInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import { createContext, type PropsWithChildren, useCallback, useContext, useMemo } from "react";
 import { toast } from "react-toastify";
 
-import { APTOS_NETWORK } from "lib/env";
 import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { getAptos } from "lib/utils/aptos-client";
-import { checkNetworkAndToast, parseAPIErrorAndToast, successfulTransactionToast } from "./toasts";
+import {
+  checkNetworkAndToast,
+  parseAPIErrorAndToast,
+  successfulTransactionToast,
+} from "components/wallet/toasts";
 import { useEventStore } from "context/websockets-context";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
+import { DEFAULT_TOAST_CONFIG } from "const";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -42,9 +46,9 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
-      return getAptos(network.name);
+      return getAptos();
     }
-    return getAptos(APTOS_NETWORK);
+    return getAptos();
   }, [network]);
 
   const handleTransactionSubmission = useCallback(
@@ -64,7 +68,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           successfulTransactionToast(awaitedResponse, network);
           response = awaitedResponse;
         } catch (e) {
-          toast.error("Transaction failed");
+          toast.error("Transaction failed", DEFAULT_TOAST_CONFIG);
           console.error(e);
           error = e;
         }

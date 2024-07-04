@@ -2,7 +2,6 @@
 
 import { type CandlestickResolution } from "../const";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY, PERIODIC_STATE_VIEW } from "./const";
-import { wrap } from "./utils";
 import { type Types, toPeriodicStateView, type JSONTypes } from "../types";
 import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-helper";
 import { postgrest } from "./inbox-url";
@@ -70,10 +69,10 @@ export const paginateCandlesticks = async (
     .from(INBOX_EVENTS_TABLE)
     .select("*")
     .filter("event_name", "eq", "emojicoin_dot_fun::PeriodicState")
-    .eq("data->market_metadata->market_id", wrap(marketID))
+    .eq("data->market_metadata->>market_id", marketID)
     .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);
-  query = resolution ? query.eq("data->periodic_state_metadata->period", wrap(resolution)) : query;
+  query = resolution ? query.eq("data->periodic_state_metadata->>period", resolution) : query;
 
   const { data, errors } = await aggregateQueryResults<JSONTypes.PeriodicStateEvent>({
     query,

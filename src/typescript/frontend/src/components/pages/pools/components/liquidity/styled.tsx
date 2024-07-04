@@ -6,4 +6,8 @@ export const StyledAddLiquidityWrapper = styled.div`
   border: ${({ theme }) => `1px solid ${theme.colors.darkGray}`};
   border-radius: ${({ theme }) => theme.radii.xSmall};
   margin-bottom: 17px;
+  #apt {
+    border-bottom: #33343d solid 1px;
+    border-bottom-radius: 0;
+  }
 `;

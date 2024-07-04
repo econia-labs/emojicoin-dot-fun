@@ -1,7 +1,7 @@
 // cspell:word SVGID
-import React from "react";
+import React, { type SVGProps } from "react";
 
-const NightlyIcon = () => {
+const NightlyIcon = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg
       height="27px"
@@ -12,6 +12,7 @@ const NightlyIcon = () => {
       y="0px"
       viewBox="0 0 960 960"
       xmlSpace="preserve"
+      {...props}
     >
       <style type="text/css">
         {`

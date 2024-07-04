@@ -132,26 +132,26 @@ Something like this:
 // We retrieve our data with the `zustand/immer` `set` function, since we are
 // possibly mutating the data in the form of updating the `latestBar` state.
 set((state) => {
- // Logic to check if we've already processed the event
- // ...
+  // Logic to check if we've already processed the event
+  // ...
 
   // For all periods/resolutions, i.e., 1m, 5m, 15m, 30m, 1h, 4h, 1d.
   for (const resolution of RESOLUTIONS_ARRAY) {
-   const marketID = event.marketID.toString();
-   const market = state.markets.get(marketID);
-   const resolutionData = market[resolution];
-   if (resolutionData) {
-     // Process the data, possibly update or create a new latest bar...
-     // ...
+    const marketID = event.marketID.toString();
+    const market = state.markets.get(marketID);
+    const resolutionData = market[resolution];
+    if (resolutionData) {
+      // Process the data, possibly update or create a new latest bar...
+      // ...
 
-     // In essence, we eventually do this:
-     if (resolutionData.latestBar && resolutionData.callback) {
-      // Thus, our callback is only invoked if we are currently subscribed
-      // to that specific market ID + resolution combination.
-      resolutionData.callback(resolutionData.latestBar);
-     }
-   }
- }
+      // In essence, we eventually do this:
+      if (resolutionData.latestBar && resolutionData.callback) {
+        // Thus, our callback is only invoked if we are currently subscribed
+        // to that specific market ID + resolution combination.
+        resolutionData.callback(resolutionData.latestBar);
+      }
+    }
+  }
 });
 ```
 

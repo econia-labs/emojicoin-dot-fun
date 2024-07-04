@@ -12,22 +12,20 @@ import Footer from "components/footer";
 import useMatchBreakpoints from "hooks/use-match-breakpoints/use-match-breakpoints";
 import ContentWrapper from "./ContentWrapper";
 import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
-import { ConnectWalletContextProvider } from "./wallet-context/ConnectWalletContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { PontemWallet } from "@pontem/wallet-adapter-plugin";
-import { RiseWallet } from "@rise-wallet/wallet-adapter";
-import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
-// import { AptosConnectWalletPlugin } from "@aptos-connect/wallet-adapter-plugin";
-// import { APTOS_NETWORK } from "lib/env";
 import StyledToaster from "styles/StyledToaster";
-import { PetraWallet } from "petra-plugin-wallet-adapter";
 import {
   WebSocketEventsProvider,
   MarketDataProvider,
 } from "./websockets-context/WebSocketContextProvider";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
+import { APTOS_NETWORK } from "lib/env";
+import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
+import { PontemWallet } from "@pontem/wallet-adapter-plugin";
+import { RiseWallet } from "@rise-wallet/wallet-adapter";
+import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 
 enableMapSet();
 
@@ -40,7 +38,6 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const wallets = useMemo(
     () => [
-      new PetraWallet(),
       new PontemWallet(),
       new RiseWallet(),
       new MartianWallet(),
@@ -48,7 +45,6 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     ],
     []
   );
-
   // TODO: Make fetch queries here and pass the data to the event store..?
   // It's possible we can also pass a promise down from the server components
   // to the clients and then add those to the store as they stream in.
@@ -60,8 +56,13 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <QueryClientProvider client={queryClient}>
         <WebSocketEventsProvider>
           <MarketDataProvider>
-            <AptosWalletAdapterProvider plugins={wallets} autoConnect={true}>
-              <ConnectWalletContextProvider>
+            <AptosWalletAdapterProvider
+              plugins={wallets}
+              autoConnect={true}
+              optInWallets={["Petra"]}
+              dappConfig={{ network: APTOS_NETWORK }}
+            >
+              <WalletModalContextProvider>
                 <AptosContextProvider>
                   <GlobalStyle />
                   <ConnectToWebSockets />
@@ -74,7 +75,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     </ContentWrapper>
                   </Suspense>
                 </AptosContextProvider>
-              </ConnectWalletContextProvider>
+              </WalletModalContextProvider>
             </AptosWalletAdapterProvider>
           </MarketDataProvider>
         </WebSocketEventsProvider>

@@ -19,6 +19,7 @@ import { slideTopVariants } from "./animations";
 import { type HeaderProps } from "./types";
 import { translationFunction } from "context/language-context";
 
+import WalletDropdownMenu from "components/wallet/WalletDropdownMenu";
 import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton";
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
@@ -72,7 +73,9 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
                   </Link>
                 );
               })}
-              <ButtonWithConnectWalletFallback />
+              <ButtonWithConnectWalletFallback>
+                <WalletDropdownMenu />
+              </ButtonWithConnectWalletFallback>
             </FlexGap>
           )}
 
