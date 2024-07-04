@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useMatchBreakpoints, useTooltip } from "hooks";
+import { useMatchBreakpoints } from "hooks";
 
 import { Flex } from "@containers";
 import { Text, Tr, Td } from "components";
@@ -11,31 +11,6 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
   const { isMobile } = useMatchBreakpoints();
 
-  const { targetRef: targetRefPool, tooltip: poolTooltip } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
-  const { targetRef: targetRefAllTime, tooltip: allTimeTooltip } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
-  const { targetRef: targetRefVol24, tooltip: vol24Tooltip } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
-  const { targetRef: targetRefTvl, tooltip: tvlTooltip } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
-  const { targetRef: targetRefApr, tooltip: aprTooltip } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
   return (
     <Tr hover selected={selected} onClick={onClick}>
       <Td p="7px 12px" width={{ _: "25%", tablet: "11.5%" }}>
@@ -45,11 +20,10 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             color="lightGray"
             textTransform="uppercase"
             ellipsis
-            ref={targetRefPool}
+            title={item.symbol.toUpperCase()}
           >
             {item.symbol}
           </Text>
-          {poolTooltip}
         </Flex>
       </Td>
 
@@ -60,11 +34,10 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             color="lightGray"
             textTransform="uppercase"
             ellipsis
-            ref={targetRefAllTime}
+            title={`${toCoinDecimalString(item.allTimeVolume, 2)} APT`}
           >
             {toCoinDecimalString(item.allTimeVolume, 2)} APT
           </Text>
-          {allTimeTooltip}
         </Flex>
       </Td>
 
@@ -76,11 +49,10 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               color="lightGray"
               textTransform="uppercase"
               ellipsis
-              ref={targetRefVol24}
+              title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
             >
               {toCoinDecimalString(item.dailyVolume, 2)} APT
             </Text>
-            {vol24Tooltip}
           </Flex>
         </Td>
       )}
@@ -92,11 +64,10 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             color="lightGray"
             textTransform="uppercase"
             ellipsis
-            ref={targetRefTvl}
+            title={`${toCoinDecimalString(item.cpammRealReservesQuote * 2, 2)} APT`}
           >
             {toCoinDecimalString(item.cpammRealReservesQuote * 2, 2)} APT
           </Text>
-          {tvlTooltip}
         </Flex>
       </Td>
 
@@ -107,11 +78,10 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             color="lightGray"
             textTransform="uppercase"
             ellipsis
-            ref={targetRefApr}
+            title={`${((item.tvlPerLpCoinGrowth ** 356 - 1) * 100).toFixed(4)}%`}
           >
             {((item.tvlPerLpCoinGrowth ** 356 - 1) * 100).toFixed(4)}%
           </Text>
-          {aprTooltip}
         </Flex>
       </Td>
     </Tr>

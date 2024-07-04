@@ -52,6 +52,7 @@ octa
 oden
 parallelizable
 permissionless
+pkill
 postg
 postgrest
 precommit

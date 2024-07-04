@@ -18,6 +18,14 @@ export type GetSortedMarketDataQueryArgs = {
   sortBy: MarketDataSortBy | SortByPostgrestQueryParams;
   inBondingCurve: boolean | null;
   exactCount?: boolean;
+  searchBytes?: string;
+};
+
+export type GetMySortedMarketDataQueryArgs = Omit<
+  GetSortedMarketDataQueryArgs,
+  "exactCount" | "inBondingCurve"
+> & {
+  account?: string;
 };
 
 export const sortByFilters = {

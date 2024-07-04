@@ -49,4 +49,5 @@ export interface TextProps
   direction?: "ltr" | "rtl";
   wordBreak?: React.CSSProperties["wordBreak"];
   className?: string;
+  title?: string;
 }

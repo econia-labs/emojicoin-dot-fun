@@ -7,7 +7,6 @@ import {
   type EventsAndErrors,
   aggregateQueryResults,
 } from "./query-helper";
-import { wrap } from "./utils";
 import { postgrest } from "./inbox-url";
 
 export enum LiquidityEventType {
@@ -33,11 +32,9 @@ export const paginateLiquidityEvents = async (
     .order("transaction_version", ORDER_BY.DESC);
 
   // If these arguments are provided, add them to the query filters.
-  query = user ? query.eq("data->provider", wrap(user)) : query;
-  query = marketID ? query.eq("data->market_id", wrap(marketID)) : query;
-  query = liquidityEventType
-    ? query.eq("data->liquidity_provided", wrap(liquidityEventType))
-    : query;
+  query = user ? query.eq("data->>provider", user) : query;
+  query = marketID ? query.eq("data->>market_id", marketID) : query;
+  query = liquidityEventType ? query.eq("data->>liquidity_provided", liquidityEventType) : query;
 
   const { data, errors } = await aggregateQueryResults<JSONTypes.LiquidityEvent>({
     query,
