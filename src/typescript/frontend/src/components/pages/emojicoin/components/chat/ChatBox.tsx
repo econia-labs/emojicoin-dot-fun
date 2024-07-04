@@ -145,9 +145,7 @@ const ChatBox = (props: ChatProps) => {
 
       <EmojiPickerWithInput
         handleClick={sendChatMessage}
-        closeIconSide="left"
         pickerButtonClassName={pickerClass}
-        // inputClassName="!pl-[5ch]"
         forChatInput={true}
       />
     </Column>

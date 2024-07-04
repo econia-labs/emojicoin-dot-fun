@@ -36,15 +36,13 @@ const ClientLaunchEmojicoinPage = () => {
 
       <div className="flex justify-center items-center h-full px-6">
         <Column width="100%" maxWidth="414px">
-          <Flex position="relative">
+          <Flex className="relative mb-1">
             <Column className="relative" width="100%" flexGrow={1}>
               <EmojiPickerWithInput
                 handleClick={registerMarket}
                 pickerButtonClassName="top-[220px] bg-black"
-                // inputClassName="!border !border-solid !border-light-gray bg-black"
-                closeIconSide="right"
+                inputClassName="!border !border-solid !border-light-gray bg-black rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
-                showSend={false}
                 forChatInput={false}
               />
             </Column>

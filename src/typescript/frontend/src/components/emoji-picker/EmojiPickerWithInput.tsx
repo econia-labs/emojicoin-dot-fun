@@ -46,12 +46,11 @@ const checkTargetAndStopDefaultPropagation = (
 export const EmojiPickerWithInput = ({
   handleClick,
   pickerButtonClassName,
-  closeIconSide,
   inputGroupProps,
   forChatInput,
+  inputClassName = "",
 }: {
   handleClick: (message: string) => Promise<void>;
-  closeIconSide: "left" | "right";
   pickerButtonClassName: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
@@ -162,8 +161,7 @@ export const EmojiPickerWithInput = ({
   };
 
   const closeIconClassName =
-    "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer" +
-    `${closeIconSide === "right" ? "right-3" : ""}`;
+    "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer"
 
   return (
     <Flex
@@ -182,7 +180,8 @@ export const EmojiPickerWithInput = ({
               <div
                 className={
                   "flex flex-row absolute items-center justify-between h-full w-full " +
-                  "border-0 border-t-[1px] border-solid border-dark-gray"
+                  "border-0 border-t-[1px] border-solid border-dark-gray " +
+                  inputClassName
                 }
               >
                 <motion.div
