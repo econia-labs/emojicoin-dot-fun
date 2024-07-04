@@ -1,9 +1,8 @@
 import { Flex } from "@containers";
-import SendIcon from "@icons/SendIcon";
 import useInputStore from "@store/input-store";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { InputGroup, Textarea } from "components/inputs";
-import { CloseIconWithHover } from "components/svg";
+import { Arrow, CloseIconWithHover } from "components/svg";
 import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
 import { motion } from "framer-motion";
 import { handleEmojiPickerInput } from "lib/utils/emoji-picker-selection";
@@ -17,12 +16,12 @@ import "./triangle.css";
  */
 const ConditionalWrapper = ({
   children,
-  wrapWithConnectButton,
+  forChatInput,
 }: {
   children: React.ReactNode;
-  wrapWithConnectButton?: boolean;
+  forChatInput?: boolean;
 }) => {
-  return wrapWithConnectButton ?? false ? (
+  return forChatInput ?? false ? (
     <ButtonWithConnectWalletFallback className="mt-2">{children}</ButtonWithConnectWalletFallback>
   ) : (
     <>{children}</>
@@ -36,7 +35,7 @@ export const EmojiPickerWithInput = ({
   inputGroupProps,
   inputClassName,
   showSend,
-  wrapWithConnectButton,
+  forChatInput,
 }: {
   handleClick: (message: string) => Promise<void>;
   closeIconSide: "left" | "right";
@@ -44,7 +43,7 @@ export const EmojiPickerWithInput = ({
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
   showSend?: boolean;
-  wrapWithConnectButton?: boolean;
+  forChatInput?: boolean;
 }) => {
   const { emojis, setEmojis, clear, mode } = useInputStore((s) => ({
     emojis: s.emojis,
@@ -113,7 +112,7 @@ export const EmojiPickerWithInput = ({
       className="justify-center"
       ref={inputRef}
     >
-      <ConditionalWrapper wrapWithConnectButton={wrapWithConnectButton}>
+      <ConditionalWrapper forChatInput={forChatInput}>
         <InputGroup isShowError={false} {...inputGroupProps}>
           <div className="flex-row relative items-center justify-center">
             <Textarea
@@ -128,7 +127,7 @@ export const EmojiPickerWithInput = ({
               onClick={clear}
             ></CloseIconWithHover>
             {showSend && (
-              <SendIcon
+              <Arrow
                 onClick={() => handleClick(emojis.join(""))}
                 className="absolute top-1/2 -translate-y-1/2 right-[1ch] !w-[21px] !h-[21px] !mr-2 hover:cursor-pointer"
                 color="white"

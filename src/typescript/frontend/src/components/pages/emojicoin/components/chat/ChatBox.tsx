@@ -16,6 +16,7 @@ import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import useInputStore from "@store/input-store";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
+import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 
 // TODO: Consolidate the two mappings in here into one with a single data source.
 const convertChatMessageToEmojiAndIndices = (
@@ -134,8 +135,7 @@ const ChatBox = (props: ChatProps) => {
               // TODO: Resolve address to Aptos name, store in state.
               sender: chat.user,
               text: chat.message,
-              // TODO: Check balance as fraction of circ supply
-              senderRank: chat.user.at(-1)?.toLowerCase() === "f" ? "🐳" : "🐡",
+              senderRank: getRankFromChatEvent(chat).rankIcon,
               version: chat.version,
             };
             return <MessageContainer message={message} key={index} />;
@@ -149,7 +149,7 @@ const ChatBox = (props: ChatProps) => {
         pickerButtonClassName={pickerClass}
         inputClassName="!pl-[5ch]"
         showSend={true}
-        wrapWithConnectButton={true}
+        forChatInput={true}
       />
     </Column>
   );

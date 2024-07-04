@@ -60,7 +60,7 @@ const ClientLaunchEmojicoinPage = () => {
                 closeIconSide="right"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
                 showSend={false}
-                wrapWithConnectButton={false}
+                forChatInput={false}
               />
             </Column>
           </Flex>
