@@ -1,6 +1,6 @@
 ---
 slug: /bridging
 title: Bridging
-hide_title: False
+hide_title: false
 description: Documentation for emojicoin dot fun
 ---

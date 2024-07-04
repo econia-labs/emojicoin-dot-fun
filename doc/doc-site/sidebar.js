@@ -38,7 +38,7 @@ module.exports = {
           ]
         },
         'start-here/how-to-trade-on-emojicoin',
-    
+
       ]
     },
     {
