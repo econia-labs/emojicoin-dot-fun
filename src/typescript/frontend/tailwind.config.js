@@ -21,13 +21,13 @@ module.exports = {
       },
       screens: {
         tall: { raw: "(min-height: 960px)" },
-        xs: "0px",
+        "mobile-sm": "320px",
+        "mobile-md": "375px",
         "mobile-lg": "425px",
         sm: "640.1px",
         md: "768.1px", // tablet
         lg: "1024.1px", // laptop
         xl: "1440px", // laptop L
-        xll: "1441px", // desktop
       },
       boxShadow: {
         pretty:
