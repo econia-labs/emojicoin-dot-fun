@@ -6,10 +6,14 @@ import { Arrow } from "components/svg";
 import ClosePixelated from "@icons/ClosePixelated";
 import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
 import { motion } from "framer-motion";
-import { handleEmojiPickerInput } from "lib/utils/emoji-picker-selection";
-import React, { useRef, useEffect, useState } from "react";
+import { insertEmojiTextInput, removeEmojiTextInput } from "lib/utils/handle-emoji-picker-input";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
 import "./triangle.css";
+import { getEmojisInString } from "@sdk/emoji_data/utils";
+import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { MAX_CHAT_MESSAGE_LENGTH } from "components/pages/emoji-picker/const";
+import { ColoredBytesIndicator } from "./ColoredBytesIndicator";
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -29,12 +33,23 @@ const ConditionalWrapper = ({
   );
 };
 
+const checkTargetAndStopDefaultPropagation = (
+  e: React.BaseSyntheticEvent,
+  textArea: HTMLElement | null
+) => {
+  if (e.target === textArea) {
+    e.preventDefault();
+    e.stopPropagation();
+    return textArea as HTMLTextAreaElement;
+  }
+  return;
+};
+
 export const EmojiPickerWithInput = ({
   handleClick,
   pickerButtonClassName,
   closeIconSide,
   inputGroupProps,
-  inputClassName,
   showSend,
   forChatInput,
 }: {
@@ -52,9 +67,9 @@ export const EmojiPickerWithInput = ({
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const emojis = useInputStore((s) => s.emojis);
-  const setEmojis = useInputStore((s) => s.setEmojis);
   const clear = useInputStore((s) => s.clear);
   const mode = useInputStore((s) => s.mode);
+  const setTextAreaRef = useInputStore((s) => s.setTextAreaRef);
   const setOnClickOutside = useInputStore((s) => s.setOnClickOutside);
 
   // Clear the input and set the onClickOutside event handler on mount.
@@ -75,36 +90,58 @@ export const EmojiPickerWithInput = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  useEffect(() => {
+    setTextAreaRef(textAreaRef.current);
+  }, [textAreaRef, setTextAreaRef]);
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      const target = checkTargetAndStopDefaultPropagation(e, textAreaRef.current);
+      if (!target) return;
+
+      const pastedText = e.clipboardData.getData("text");
+      const emojisToInsert = getEmojisInString(pastedText);
+      const filteredEmojis =
+        mode === "chat"
+          ? emojisToInsert
+          : emojisToInsert.filter((emoji) => SYMBOL_DATA.byEmoji(emoji));
+
+      insertEmojiTextInput(filteredEmojis);
+    },
+    [mode]
+  );
+
+  const handleCut = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const target = checkTargetAndStopDefaultPropagation(e, textAreaRef.current);
+    if (!target) return;
+
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+    const selected = target.value.slice(start, end);
+    navigator.clipboard.writeText(selected);
+    removeEmojiTextInput();
+  }, []);
+
   const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
+    if (!target) return;
     if (e.key === "Enter") {
       e.preventDefault();
       await handleClick(emojis.join(""));
+    } else if (e.ctrlKey || e.metaKey) {
+      if (!["c", "x", "v", "a"].includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+      } else {
+        // Let the event propagate.
+        return;
+      }
     } else if (e.key === "Backspace" || e.key === "Delete") {
       e.preventDefault();
-
-      const { newEmojis, newSelectionStart } = handleEmojiPickerInput({
-        key: e.key,
-        emojis,
-        target,
-      });
-
-      setEmojis(newEmojis);
-
-      // Reset the cursor position with a timeout delay, because `setEmojis` has to propagate through the state store
-      // and update the text in the textarea.
-      setTimeout(() => {
-        target.selectionStart = newSelectionStart;
-        target.selectionEnd = newSelectionStart;
-      }, 0);
+      removeEmojiTextInput(e.key);
     } else if (isDisallowedEventKey(e)) {
       e.preventDefault();
     }
-  };
-
-  const [selectionStart, setSelectionStart] = useState(0);
-  const handleTextSelect = (e: React.SyntheticEvent<HTMLTextAreaElement, Event>) => {
-    setSelectionStart((e.target as HTMLTextAreaElement).selectionStart);
   };
 
   useEffect(() => {
@@ -157,26 +194,36 @@ export const EmojiPickerWithInput = ({
                   <ClosePixelated className="w-[15px] h-[16px] text-white" />
                 </motion.div>
                 <Textarea
-                  autoFocus={true}
-                  // className={`!pt-[15px] ${inputClassName}`}
-                  className="relative !pt-[16px] px-[4px]"
-                  value={emojis.join("")}
-                  onSelect={handleTextSelect}
-                  onKeyDown={onKeyDownHandler}
+                  className="relative !pt-[16px] px-[4px] text-wrap whitespace-normal"
                   ref={textAreaRef}
+                  autoFocus={true}
+                  onPaste={handlePaste}
+                  onCut={handleCut}
+                  onKeyDown={onKeyDownHandler}
                 />
                 {showSend ? (
-                  <motion.div
-                    whileTap={{ scale: 0.85 }}
-                    onClick={() => {
-                      handleClick(emojis.join(""));
-                      setIsFocused(false);
-                    }}
-                    className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
-                    ref={sendButtonRef}
-                  >
-                    <Arrow className="!w-[21px] !h-[21px]" color="white" />
-                  </motion.div>
+                  <>
+                    <ColoredBytesIndicator
+                      emojis={emojis}
+                      numBytesThreshold={MAX_CHAT_MESSAGE_LENGTH}
+                    />
+                    <motion.div
+                      whileTap={{ scale: 0.85 }}
+                      onClick={() => {
+                        handleClick(emojis.join(""));
+                        setIsFocused(false);
+                      }}
+                      className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
+                      style={{
+                        cursor:
+                          emojis.length === 0 || emojis.length >= 100 ? "not-allowed" : "pointer",
+                        opacity: emojis.length === 0 || emojis.length >= 100 ? 0.2 : 1,
+                      }}
+                      ref={sendButtonRef}
+                    >
+                      <Arrow className="!w-[21px] !h-[21px]" color="white" />
+                    </motion.div>
+                  </>
                 ) : null}
               </div>
             </div>

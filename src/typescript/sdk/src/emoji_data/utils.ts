@@ -8,6 +8,7 @@ import { MAX_SYMBOL_LENGTH } from "../const";
 export const getEmojisInString = (symbols: string): Array<string> => {
   const regex = emojiRegex();
   const matches = symbols.matchAll(regex);
+  console.log(matches);
   return Array.from(matches).map((match) => match[0]);
 };
 

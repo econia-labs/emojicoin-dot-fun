@@ -4,16 +4,17 @@ import { create } from "zustand";
 export type InputState = {
   mode: "chat" | "register";
   emojis: string[];
-  picker: HTMLDivElement | null;
+  pickerRef: HTMLDivElement | null;
+  textAreaRef: HTMLTextAreaElement | null;
   chatEmojiData: Map<string, SymbolEmojiData>;
   onClickOutside: (e: MouseEvent) => void;
 };
 
 export type InputActions = {
   clear: () => void;
-  pushEmojis: (emoji: string) => void;
-  setEmojis: (emojis: string[]) => void;
-  setPicker: (value: HTMLDivElement | null) => void;
+  setEmojis: (emojis: string[], selection?: { start: number; end?: number }) => void;
+  setPickerRef: (value: HTMLDivElement | null) => void;
+  setTextAreaRef: (value: HTMLTextAreaElement | null) => void;
   setMode: (mode: "chat" | "register") => void;
   setOnClickOutside: (value: (e: MouseEvent) => void) => void;
   setChatEmojiData: (value: Map<string, SymbolEmojiData>) => void;
@@ -21,22 +22,48 @@ export type InputActions = {
 
 export type InputStore = InputState & InputActions;
 
-const defaultValues = {
+const defaultValues: InputState = {
   mode: "register" as InputState["mode"],
   emojis: [],
-  picker: null,
+  pickerRef: null,
+  textAreaRef: null,
   chatEmojiData: new Map<string, SymbolEmojiData>(),
   onClickOutside: (_e) => {},
 };
 
-export const useInputStore = create<InputStore>()((set) => ({
+export const useInputStore = create<InputStore>()((set, get) => ({
   ...defaultValues,
   setOnClickOutside: (value: (e: MouseEvent) => void) => set({ onClickOutside: value }),
   setMode: (value) => set({ mode: value }),
-  pushEmojis: (value: string) => set((state) => ({ emojis: [...state.emojis, value] })),
-  setEmojis: (value: string[]) => set({ emojis: value }),
-  clear: () => set({ emojis: [] }),
-  setPicker: (value: HTMLDivElement | null) => set({ picker: value }),
+  setEmojis: (emojis, selection) => {
+    const textAreaRef = get().textAreaRef;
+    if (textAreaRef) {
+      textAreaRef.value = emojis.join("");
+      if (selection) {
+        const start = selection.start;
+        const end = selection.end ?? selection.start;
+        textAreaRef.setSelectionRange(start, end);
+        // Ensure the cursor is placed at the correct position if React hasn't updated the DOM yet.
+        setTimeout(() => {
+          textAreaRef.setSelectionRange(start, end);
+        }, 0);
+      }
+    }
+    return set({ emojis });
+  },
+  clear: () => {
+    const textAreaRef = get().textAreaRef;
+    if (textAreaRef) {
+      textAreaRef.value = "";
+      textAreaRef.setSelectionRange(0, 0);
+    }
+    return set({ emojis: [] });
+  },
+  setPickerRef: (value: HTMLDivElement | null) => set({ pickerRef: value }),
+  setTextAreaRef: (value: HTMLTextAreaElement | null) => {
+    console.log("changing text area ref", value);
+    return set({ textAreaRef: value });
+  },
   setChatEmojiData: (value: Map<string, SymbolEmojiData>) => set({ chatEmojiData: value }),
 }));
 

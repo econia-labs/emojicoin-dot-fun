@@ -9,20 +9,12 @@ import TextCarousel from "components/text-carousel/TextCarousel";
 import useInputStore from "@store/input-store";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
+import { useEffect } from "react";
+import { ColoredBytesIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
-import { MAX_SYMBOL_LENGTH } from "@sdk/const";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { MAX_SYMBOL_LENGTH } from "../emoji-picker/const";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
-
-const sum = (emojis: string[]) => sumBytes(emojis);
-const textColorBySum = (sum: number) => {
-  if (sum === 0 || sum > 10) {
-    return "text-error";
-  }
-  return "text-green";
-};
 
 const ClientLaunchEmojicoinPage = () => {
   const { t } = translationFunction();
@@ -31,19 +23,13 @@ const ClientLaunchEmojicoinPage = () => {
     setMode: state.setMode,
   }));
   const registerMarket = useRegisterMarket();
-  const length = sum(emojis);
+  const length = sumBytes(emojis);
   const invalid = length === 0 || length >= 10;
-
-  const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
     setMode("register");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
-
-  useEffect(() => {
-    setNonce((n) => n + 1);
-  }, [length]);
 
   return (
     <Column pt="85px" flexGrow="1">
@@ -56,7 +42,7 @@ const ClientLaunchEmojicoinPage = () => {
               <EmojiPickerWithInput
                 handleClick={registerMarket}
                 pickerButtonClassName="top-[220px] bg-black"
-                inputClassName="!border !border-solid !border-light-gray bg-black"
+                // inputClassName="!border !border-solid !border-light-gray bg-black"
                 closeIconSide="right"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
                 showSend={false}
@@ -64,23 +50,7 @@ const ClientLaunchEmojicoinPage = () => {
               />
             </Column>
           </Flex>
-
-          <div className="flex pixel-heading-4 uppercase">
-            <motion.span
-              key={nonce}
-              animate={{
-                scale: [1, 1.25, 1],
-                transition: { duration: 0.1, repeat: 0 },
-              }}
-              style={{ scale: 1 }}
-              className={textColorBySum(length)}
-            >
-              {length}
-            </motion.span>
-            <span className="text-white -rotate-[30deg]">{"/"}</span>
-            <span className="text-white">{`${MAX_SYMBOL_LENGTH} bytes`}</span>
-          </div>
-
+          <ColoredBytesIndicator emojis={emojis} numBytesThreshold={MAX_SYMBOL_LENGTH} />
           <div className="flex">
             <div className={labelClassName}>{t("Emojicoin Name:")}</div>
             <div className="body-sm md:body-lg uppercase ellipses text-white font-forma ml-[0.5ch]">
@@ -106,15 +76,7 @@ const ClientLaunchEmojicoinPage = () => {
             </div>
           </div>
 
-          <div
-            className={"flex flex-col justify-center m-auto"}
-            onMouseEnter={() => {
-              // Trigger a re-render to re-animate the byte length if it's invalid.
-              if (invalid) {
-                setNonce((n) => n + 1);
-              }
-            }}
-          >
+          <div className={"flex flex-col justify-center m-auto"}>
             <ButtonWithConnectWalletFallback>
               <Button
                 disabled={invalid}

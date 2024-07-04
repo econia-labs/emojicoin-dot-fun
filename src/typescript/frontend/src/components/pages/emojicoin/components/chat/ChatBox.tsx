@@ -147,7 +147,7 @@ const ChatBox = (props: ChatProps) => {
         handleClick={sendChatMessage}
         closeIconSide="left"
         pickerButtonClassName={pickerClass}
-        inputClassName="!pl-[5ch]"
+        // inputClassName="!pl-[5ch]"
         showSend={true}
         forChatInput={true}
       />

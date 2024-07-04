@@ -6,9 +6,9 @@ import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { SYMBOL_DATA, type SymbolEmojiData } from "@sdk/emoji_data";
+import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
-import { MAX_CHAT_MESSAGE_LENGTH } from "./const";
+import { insertEmojiTextInput } from "lib/utils/handle-emoji-picker-input";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
 // TBH, we should probably just fork the library.
@@ -28,9 +28,10 @@ export const search = async (value: string): Promise<SearchResult> => {
 };
 
 export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
-  const { pushEmojis, setPicker, setChatEmojiData, mode, emojis, onClickOutside } = useInputStore(
-    (s) => s
-  );
+  const setPickerRef = useInputStore((s) => s.setPickerRef);
+  const setChatEmojiData = useInputStore((s) => s.setChatEmojiData);
+  const mode = useInputStore((s) => s.mode);
+  const onClickOutside = useInputStore((s) => s.onClickOutside);
   const host = document.querySelector("em-emoji-picker");
 
   // TODO: Verify that the length of this set is the same length as the valid chat emojis array in the Move contract.
@@ -68,8 +69,8 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
   }, []);
 
   useEffect(() => {
-    setPicker(host as HTMLDivElement);
-  }, [host, setPicker]);
+    setPickerRef(host as HTMLDivElement);
+  }, [host, setPickerRef]);
 
   const previewSelector = host?.shadowRoot?.querySelector("div.margin-l");
 
@@ -199,20 +200,8 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
           // TODO: Use this instead of the current "not allowed" emoji we're using..?
           // exceptEmojis={["🔥", "🚀", "🌙", "🌟", "🎉", "🎊", "🎈", "🎁", "🎆", "🎇"]}
           onEmojiSelect={(v: EmojiSelectorData) => {
-            const emojiString = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
-            const newEmojis = emojis.join("") + emojiString;
-            const text = new TextEncoder().encode(newEmojis);
-            const newByteLength = text.length;
-            if (mode === "chat" && newByteLength > MAX_CHAT_MESSAGE_LENGTH) return;
-            // For register we have visual indicators for max length, and it's really short,
-            // so we only cap the length to 10 total emojis instead of 10 bytes. This makes
-            // the line not break and the UX is overall more clear.
-            if (
-              mode === "register" &&
-              (emojis.length + 1 > 10 || !SYMBOL_DATA.hasEmoji(emojiString))
-            )
-              return;
-            pushEmojis(emojiString);
+            const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
+            insertEmojiTextInput([newEmoji]);
           }}
         />
       </div>
