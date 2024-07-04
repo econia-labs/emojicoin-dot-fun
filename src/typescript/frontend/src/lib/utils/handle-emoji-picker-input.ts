@@ -1,4 +1,4 @@
-import { MAX_CHAT_MESSAGE_LENGTH } from "components/pages/emoji-picker/const";
+import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import useInputStore from "../store/input-store";
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 import { getEmojisInString } from "@sdk/emoji_data";
@@ -30,12 +30,9 @@ export const insertEmojiTextInput = (textToInsert: string | string[]) => {
   const { mode, emojis, textAreaRef: target, setEmojis } = state;
 
   if (!target) return;
-
-  const filteredEmojis = sanitizer({
-    emojis,
-    textToInsert,
-    mode,
-  });
+  const parsedEmojis = Array.isArray(textToInsert) ? textToInsert : getEmojisInString(textToInsert);
+  const filteredEmojis =
+    mode === "chat" ? parsedEmojis : parsedEmojis.filter((emoji) => SYMBOL_DATA.byEmoji(emoji));
   if (filteredEmojis.length === 0) return;
 
   const { start, end } = calculateIndicesFromSelection(emojis, target);
@@ -47,19 +44,19 @@ export const insertEmojiTextInput = (textToInsert: string | string[]) => {
     .concat(emojis.slice(end));
 
   // Rename these variables for clarity and readability.
-  const initialStart = start;
+  const initialEnd = end;
   const numSelectedEmojis = end - start;
 
   // If nothing is selected, `numSelectedEmojis` will be 0, and thus the logic for
   // inserting when nothing is selected and when something is selected is functionally the same.
-  const newEmojiStart = initialStart + filteredEmojis.length - numSelectedEmojis;
+  const newEmojiEnd = initialEnd + filteredEmojis.length - numSelectedEmojis;
 
   // Find the new selection start based on the new indices.
   const indices = calculateEmojiIndices(newEmojis);
-  const newSelectionStart = indices[newEmojiStart];
+  const newSelectionEnd = indices[newEmojiEnd];
 
   setEmojis(newEmojis, {
-    start: newSelectionStart,
+    start: newSelectionEnd,
   });
 };
 
@@ -119,36 +116,4 @@ export const removeEmojiTextInput = (key?: string) => {
   setEmojis(newEmojis, {
     start: newSelectionStart,
   });
-};
-
-export const sanitizer = ({
-  emojis,
-  mode,
-  textToInsert,
-}: {
-  emojis: string[];
-  mode: "chat" | "register";
-  textToInsert: string | string[];
-}) => {
-  const newEmojis = Array.isArray(textToInsert) ? textToInsert : getEmojisInString(textToInsert);
-
-  // First ensure that the attempted input is valid.
-  const newEmojisSymbol = emojis.join("") + newEmojis.join("");
-  const text = new TextEncoder().encode(newEmojisSymbol);
-  const newByteLength = text.length;
-
-  // Ensure for chat messages that the message is not too long.
-  const invalidChatInput = mode === "chat" && newByteLength > MAX_CHAT_MESSAGE_LENGTH;
-
-  // Ensure for register market attempts that the new emoji is valid and that there are no
-  // more than 10 emojis so the line doesn't break. We allow > 10 bytes even though it's
-  // invalid because there is a visual indicator for an excessive byte length.
-  const newEmojiLength = emojis.length + newEmojis.length;
-  const anyInvalid = newEmojis.some((emoji) => !SYMBOL_DATA.hasEmoji(emoji));
-  const invalidRegisterInput = mode === "register" && (newEmojiLength > 10 || anyInvalid);
-
-  if (invalidChatInput || invalidRegisterInput) {
-    return [];
-  }
-  return newEmojis;
 };

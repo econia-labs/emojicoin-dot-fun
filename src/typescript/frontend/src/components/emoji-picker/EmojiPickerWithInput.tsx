@@ -10,9 +10,7 @@ import { insertEmojiTextInput, removeEmojiTextInput } from "lib/utils/handle-emo
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
 import "./triangle.css";
-import { getEmojisInString } from "@sdk/emoji_data/utils";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
-import { MAX_CHAT_MESSAGE_LENGTH } from "components/pages/emoji-picker/const";
+import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import { ColoredBytesIndicator } from "./ColoredBytesIndicator";
 
 /**
@@ -50,7 +48,6 @@ export const EmojiPickerWithInput = ({
   pickerButtonClassName,
   closeIconSide,
   inputGroupProps,
-  showSend,
   forChatInput,
 }: {
   handleClick: (message: string) => Promise<void>;
@@ -58,7 +55,6 @@ export const EmojiPickerWithInput = ({
   pickerButtonClassName: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
-  showSend?: boolean;
   forChatInput?: boolean;
 }) => {
   const [focused, setIsFocused] = useState(false);
@@ -71,6 +67,10 @@ export const EmojiPickerWithInput = ({
   const mode = useInputStore((s) => s.mode);
   const setTextAreaRef = useInputStore((s) => s.setTextAreaRef);
   const setOnClickOutside = useInputStore((s) => s.setOnClickOutside);
+
+  // Set the picker to be invisible initially, and then set it to visible when the input is focused the first time.
+  // We do this to show that the input field is active with a blinking cursor without having to display the picker.
+  const [invisible, setInvisible] = useState(true);
 
   // Clear the input and set the onClickOutside event handler on mount.
   useEffect(() => {
@@ -91,25 +91,27 @@ export const EmojiPickerWithInput = ({
   }, []);
 
   useEffect(() => {
-    setTextAreaRef(textAreaRef.current);
-  }, [textAreaRef, setTextAreaRef]);
+    if (textAreaRef.current) {
+      setTextAreaRef(textAreaRef.current);
+    }
+    // For some reason, sometimes the text area ref isn't set. This is a hacky way to try to ensure it is.
+    if (!textAreaRef.current) {
+      const textArea = document.getElementById("emoji-picker-text-area");
+      if (textArea) {
+        textAreaRef.current = textArea as HTMLTextAreaElement;
+        setTextAreaRef(textAreaRef.current);
+      }
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
-  const handlePaste = useCallback(
-    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-      const target = checkTargetAndStopDefaultPropagation(e, textAreaRef.current);
-      if (!target) return;
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const target = checkTargetAndStopDefaultPropagation(e, textAreaRef.current);
+    if (!target) return;
 
-      const pastedText = e.clipboardData.getData("text");
-      const emojisToInsert = getEmojisInString(pastedText);
-      const filteredEmojis =
-        mode === "chat"
-          ? emojisToInsert
-          : emojisToInsert.filter((emoji) => SYMBOL_DATA.byEmoji(emoji));
-
-      insertEmojiTextInput(filteredEmojis);
-    },
-    [mode]
-  );
+    const pastedText = e.clipboardData.getData("text");
+    insertEmojiTextInput(pastedText);
+  }, []);
 
   const handleCut = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const target = checkTargetAndStopDefaultPropagation(e, textAreaRef.current);
@@ -129,12 +131,10 @@ export const EmojiPickerWithInput = ({
       e.preventDefault();
       await handleClick(emojis.join(""));
     } else if (e.ctrlKey || e.metaKey) {
+      // Don't let the event propagate unless we're copying, cutting, pasting, or selecting all.
       if (!["c", "x", "v", "a"].includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
-      } else {
-        // Let the event propagate.
-        return;
       }
     } else if (e.key === "Backspace" || e.key === "Delete") {
       e.preventDefault();
@@ -194,19 +194,22 @@ export const EmojiPickerWithInput = ({
                   <ClosePixelated className="w-[15px] h-[16px] text-white" />
                 </motion.div>
                 <Textarea
-                  className="relative !pt-[16px] px-[4px] text-wrap whitespace-normal"
+                  id="emoji-picker-text-area"
+                  className="relative !pt-[16px] px-[4px] scroll-auto"
                   ref={textAreaRef}
                   autoFocus={true}
                   onPaste={handlePaste}
                   onCut={handleCut}
                   onKeyDown={onKeyDownHandler}
+                  onClick={() => {
+                    setInvisible(false);
+                    // To ensure the text area ref is set.
+                    setTextAreaRef(textAreaRef.current);
+                  }}
                 />
-                {showSend ? (
+                {forChatInput ? (
                   <>
-                    <ColoredBytesIndicator
-                      emojis={emojis}
-                      numBytesThreshold={MAX_CHAT_MESSAGE_LENGTH}
-                    />
+                    <ColoredBytesIndicator className="flex flex-row min-w-fit justify-end px-[1ch]" />
                     <motion.div
                       whileTap={{ scale: 0.85 }}
                       onClick={() => {
@@ -216,7 +219,9 @@ export const EmojiPickerWithInput = ({
                       className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
                       style={{
                         cursor:
-                          emojis.length === 0 || emojis.length >= 100 ? "not-allowed" : "pointer",
+                          emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS
+                            ? "not-allowed"
+                            : "pointer",
                         opacity: emojis.length === 0 || emojis.length >= 100 ? 0.2 : 1,
                       }}
                       ref={sendButtonRef}
@@ -231,10 +236,10 @@ export const EmojiPickerWithInput = ({
         </InputGroup>
       </ConditionalWrapper>
       <motion.button
-        animate={focused ? "visible" : "hidden"}
+        animate={invisible ? "hidden" : focused ? "visible" : "hidden"}
         variants={variants}
         style={{
-          opacity: 1,
+          opacity: 0, // Initially invisible.
           zIndex: focused ? 50 : -1,
           cursor: focused ? "auto" : "pointer",
           scale: focused ? 1 : 0,

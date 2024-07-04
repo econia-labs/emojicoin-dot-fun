@@ -12,7 +12,6 @@ import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { useEffect } from "react";
 import { ColoredBytesIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
-import { MAX_SYMBOL_LENGTH } from "../emoji-picker/const";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -50,7 +49,7 @@ const ClientLaunchEmojicoinPage = () => {
               />
             </Column>
           </Flex>
-          <ColoredBytesIndicator emojis={emojis} numBytesThreshold={MAX_SYMBOL_LENGTH} />
+          <ColoredBytesIndicator />
           <div className="flex">
             <div className={labelClassName}>{t("Emojicoin Name:")}</div>
             <div className="body-sm md:body-lg uppercase ellipses text-white font-forma ml-[0.5ch]">

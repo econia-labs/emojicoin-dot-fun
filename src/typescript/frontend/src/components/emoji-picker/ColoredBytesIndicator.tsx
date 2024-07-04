@@ -1,8 +1,9 @@
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
+import useInputStore from "@store/input-store";
+import { MAX_NUM_CHAT_EMOJIS, MAX_SYMBOL_LENGTH } from "components/pages/emoji-picker/const";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-const sum = (emojis: string[]) => sumBytes(emojis);
 const textColorBySum = (sum: number, threshold: number) => {
   if (sum === 0 || sum > threshold) {
     return "text-error";
@@ -10,14 +11,11 @@ const textColorBySum = (sum: number, threshold: number) => {
   return "text-green";
 };
 
-export const ColoredBytesIndicator = ({
-  emojis,
-  numBytesThreshold,
-}: {
-  emojis: string[];
-  numBytesThreshold: number;
-}) => {
-  const length = sum(emojis);
+export const ColoredBytesIndicator = ({ className = "" }: { className?: string }) => {
+  const mode = useInputStore((s) => s.mode);
+  const emojis = useInputStore((s) => s.emojis);
+  const length = mode === "register" ? sumBytes(emojis) : emojis.length;
+  const threshold = mode === "register" ? MAX_SYMBOL_LENGTH : MAX_NUM_CHAT_EMOJIS;
   const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
@@ -25,7 +23,7 @@ export const ColoredBytesIndicator = ({
   }, [length]);
 
   return (
-    <div className="flex pixel-heading-4 uppercase">
+    <div className={"flex pixel-heading-4 uppercase" + className}>
       <motion.span
         key={nonce}
         animate={{
@@ -33,12 +31,12 @@ export const ColoredBytesIndicator = ({
           transition: { duration: 0.1, repeat: 0 },
         }}
         style={{ scale: 1 }}
-        className={textColorBySum(length, numBytesThreshold)}
+        className={textColorBySum(length, threshold)}
       >
         {length}
       </motion.span>
       <span className="text-white -rotate-[30deg]">{"/"}</span>
-      <span className="text-white">{`${numBytesThreshold} bytes`}</span>
+      <span className="text-white">{`${threshold}${mode === "register" ? " bytes" : ""}`}</span>
     </div>
   );
 };

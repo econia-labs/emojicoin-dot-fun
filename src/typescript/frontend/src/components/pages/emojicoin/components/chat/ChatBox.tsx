@@ -148,7 +148,6 @@ const ChatBox = (props: ChatProps) => {
         closeIconSide="left"
         pickerButtonClassName={pickerClass}
         // inputClassName="!pl-[5ch]"
-        showSend={true}
         forChatInput={true}
       />
     </Column>
