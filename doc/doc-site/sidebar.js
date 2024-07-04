@@ -1,6 +1,5 @@
 module.exports = {
   docs: [
-    'welcome',
     {
       type: 'category',
       label: 'About',
@@ -27,6 +26,7 @@ module.exports = {
           items: [
             'start-here/how-to-download-petra',
             'start-here/aptos-wallet-and-moonpay',
+            'start-here/aptos-wallet-and-cex',
           ]
         },
         {
@@ -34,7 +34,7 @@ module.exports = {
           label: 'Bridging',
           items: [
             'start-here/bridging-from-eth',
-            'start-here/bridging-from-solana'
+            'start-here/bridging-from-solana',
           ]
         },
         'start-here/how-to-trade-on-emojicoin',

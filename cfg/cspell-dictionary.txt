@@ -59,6 +59,7 @@ presale
 rica
 rustup
 sint
+solana
 struct
 structs
 subdir

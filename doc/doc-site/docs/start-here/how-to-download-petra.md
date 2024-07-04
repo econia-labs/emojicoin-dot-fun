@@ -7,9 +7,7 @@ description: Documentation for emojicoin dot fun
 
 Use this guide for step by step instructions on how to download Petra wallet.
 
-Download Petra wallet
-
-1. Petra: Chrome Extension, Mobile App (App Store, Google Play)
+1. Download Petra Wallet: Chrome Extension, Mobile App (App Store, Google Play)
    ![petra1](./images/petra1.png "petra1")
 1. Add "Petra Aptos Wallet" pop-up
    ![petra2](./images/petra2.png "petra2")
@@ -18,4 +16,5 @@ Download Petra wallet
 1. Once wallet has been created,  pin it to the browser
    ![petra4](./images/petra4.png "petra4")
 
-Congrats! You are one step closer to trading on emojicoin.fun. Click below for the next steps of how to get APT into your wallet.
+Congrats! You are one step closer to trading on emojicoin.fun. Click below for
+the next steps of how to get APT into your wallet.

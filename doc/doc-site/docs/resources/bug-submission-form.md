@@ -5,4 +5,4 @@ hide_title: false
 description: Documentation for emojicoin dot fun
 ---
 
-Fill out the typefully form below to submit bugs: <https://form.typeform.com/to/mMylFJQo>
+Fill out the form to submit bugs: <https://form.typeform.com/to/mMylFJQo>
