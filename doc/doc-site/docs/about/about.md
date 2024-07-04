@@ -1,5 +1,5 @@
 ---
-slug: /about
+slug: /
 title: ⬛ About emojicoin.fun
 hide_title: false
 description: Documentation for emojicoin dot fun
