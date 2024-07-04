@@ -7,6 +7,7 @@ import { useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
 import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
+import { useThemeContext } from "context";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
@@ -24,6 +25,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   const { connected, account } = useWallet();
   const { connectWallet } = useWalletModal();
   const { t } = translationFunction();
+  const { theme } = useThemeContext();
 
   const [enabled, setEnabled] = useState(false);
 
@@ -72,6 +74,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
             handleReplay();
           }}
           onMouseOver={handleReplay}
+          style={{ borderBottom: `1px dashed ${theme.colors.darkGray}` }}
         >
           <div className="flex flex-row text-ec-blue text-2xl justify-between">
             <div className="flex flex-row">
