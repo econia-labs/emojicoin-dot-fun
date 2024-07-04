@@ -1,27 +1,57 @@
 module.exports = {
   docs: [
-    'welcome',
     {
       type: 'category',
-      label: 'Generated index type category',
+      label: 'About',
       link: {
         type: 'generated-index'
       },
       items: [
-        'this-is-a-subdir/some-doc-page',
+        'about/about',
+        'about/why-we-built-emojicoin',
+        'about/how-it-works',
+        'about/emojicoin-LP',
       ]
     },
     {
       type: 'category',
-      label: 'Doc type category',
+      label: 'Start Here',
       link: {
-        type: 'doc',
-        id: 'this-is-another-subdir/index'
+        type: 'generated-index'
       },
       items: [
-        'this-is-another-subdir/some-other-doc-page',
+        {
+          type: 'category',
+          label: 'Getting Started',
+          items: [
+            'start-here/how-to-download-petra',
+            'start-here/aptos-wallet-and-moonpay',
+            'start-here/aptos-wallet-and-cex',
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Bridging',
+          items: [
+            'start-here/bridging-from-eth',
+            'start-here/bridging-from-solana',
+          ]
+        },
+        'start-here/how-to-trade-on-emojicoin',
       ]
     },
-    'security'
+    {
+      type: 'category',
+      label: 'Resources',
+      link: {
+        type: 'generated-index'
+      },
+      items: [
+        'resources/glossary',
+        'resources/faq',
+        'resources/audit',
+        'resources/bug-submission-form',
+      ]
+    }
   ]
 }
