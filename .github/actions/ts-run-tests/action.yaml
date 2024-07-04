@@ -6,11 +6,11 @@ name: 'Run Typescript E2E tests'
 runs:
   steps:
   # Install node and pnpm.
-  - uses: 'actions/setup-node@v3'
+  - uses: 'actions/setup-node@v4'
     with:
       node-version-file: '${{ env.TS_DIR }}/.node-version'
       registry-url: 'https://registry.npmjs.org'
-  - uses: 'pnpm/action-setup@v2'
+  - uses: 'pnpm/action-setup@v4'
     with:
       package_json_file: '${{ env.TS_DIR }}/package.json'
   # Run package install. If install fails, it probably means the updated

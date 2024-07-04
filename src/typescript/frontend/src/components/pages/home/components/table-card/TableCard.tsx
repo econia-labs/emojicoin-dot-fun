@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 
 import { translationFunction } from "context/language-context";
-import useTooltip from "hooks/use-tooltip";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 
@@ -108,11 +107,6 @@ const TableCard: React.FC<TableCardProps> = ({
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
 
@@ -152,7 +146,7 @@ const TableCard: React.FC<TableCardProps> = ({
               $fontWeight="bold"
               mb="6px"
               ellipsis
-              ref={targetRefEmojiName}
+              title={emojisToName(emojis).toUpperCase()}
             >
               {emojisToName(emojis)}
             </Text>
@@ -203,7 +197,6 @@ const TableCard: React.FC<TableCardProps> = ({
               </Column>
             </Flex>
           </StyledInnerItem>
-          {tooltipEmojiName}
         </motion.div>
       </StyledItemWrapper>
     </Link>

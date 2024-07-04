@@ -1,10 +1,16 @@
-import { AptosApiError, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  AptosApiError,
+  NetworkToNetworkName,
+  NetworkToNodeAPI,
+  type UserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import { type NetworkInfo } from "@aptos-labs/wallet-adapter-react";
 import { CandlestickResolution } from "@sdk/const";
 import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
 import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
 import { ExplorerLink } from "components/link/component";
+import { DEFAULT_TOAST_CONFIG } from "const";
 
 const debouncedToastKey = (s: string, debouncePeriod: CandlestickResolution) => {
   const periodBoundary = getPeriodStartTimeFromTime(
@@ -21,6 +27,7 @@ export const checkNetworkAndToast = (
   if (!network) {
     if (!notifyIfDisconnected) {
       toast.info("Please connect your wallet.", {
+        ...DEFAULT_TOAST_CONFIG,
         toastId: debouncedToastKey("connect-wallet", CandlestickResolution.PERIOD_1M),
       });
     }
@@ -29,7 +36,17 @@ export const checkNetworkAndToast = (
   if (network.name.toLowerCase() === "localhost" && APTOS_NETWORK === "local") {
     return true;
   }
-  if (network.name !== APTOS_NETWORK && typeof network.name !== "undefined") {
+  const networkName = NetworkToNetworkName[APTOS_NETWORK];
+  const normalizedLocalWalletNetwork = (network.url ?? "")
+    .toLowerCase()
+    .replaceAll("127.0.0.1", "localhost");
+  const normalizedLocalApplicationNetwork = NetworkToNodeAPI[networkName]
+    .toLowerCase()
+    .replaceAll("127.0.0.1", "localhost")
+    .replaceAll("/v1", "")
+    .replaceAll("v1", "");
+  const isUsingLocalhost = normalizedLocalWalletNetwork === normalizedLocalApplicationNetwork;
+  if (!isUsingLocalhost && network.name !== APTOS_NETWORK && typeof network.name !== "undefined") {
     const message = (
       <div className="flex flex-col">
         <div>
@@ -51,6 +68,7 @@ export const checkNetworkAndToast = (
       </div>
     );
     toast.warning(message, {
+      ...DEFAULT_TOAST_CONFIG,
       toastId: debouncedToastKey("network-warning", CandlestickResolution.PERIOD_1M),
     });
   }
@@ -72,6 +90,7 @@ export const parseAPIErrorAndToast = (network: NetworkInfo, error: AptosApiError
         </div>
       );
       toast.error(message, {
+        ...DEFAULT_TOAST_CONFIG,
         toastId: debouncedToastKey("account-not-found", CandlestickResolution.PERIOD_1M),
       });
     }
@@ -100,9 +119,9 @@ export const successfulTransactionToast = (
     </>
   );
   toast.success(message, {
+    ...DEFAULT_TOAST_CONFIG,
     toastId: debouncedToastKey("transaction-success", CandlestickResolution.PERIOD_1M),
     className: "cursor-text",
     closeOnClick: false,
-    autoClose: 8000,
   });
 };

@@ -7,7 +7,6 @@ import {
   type EventsAndErrors,
   aggregateQueryResults,
 } from "./query-helper";
-import { wrap } from "./utils";
 import { postgrest } from "./inbox-url";
 
 export const paginateSwapEvents = async (
@@ -24,8 +23,8 @@ export const paginateSwapEvents = async (
     .filter("event_name", "eq", "emojicoin_dot_fun::Swap")
     .order("transaction_version", ORDER_BY.DESC);
 
-  query = marketID ? query.eq("data->market_id", wrap(marketID)) : query;
-  query = swapper ? query.eq("data->swapper", wrap(swapper)) : query;
+  query = marketID ? query.eq("data->>market_id", marketID.toString()) : query;
+  query = swapper ? query.eq("data->>swapper", swapper) : query;
 
   const { data, errors } = await aggregateQueryResults<JSONTypes.SwapEvent>({
     ...args,

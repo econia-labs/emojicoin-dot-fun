@@ -34,8 +34,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     >
       <MobileMenuWrapper offsetHeight={offsetHeight}>
         <MobileMenuInner>
-          <ButtonWithConnectWalletFallback mobile={true} />
-
+          <ButtonWithConnectWalletFallback className="w-full" mobile={true} />
           {linksForCurrentPage.map(({ title, path }) => {
             return (
               <Link key={title} href={path} onClick={handleCloseMobileMenu} width="100%">
