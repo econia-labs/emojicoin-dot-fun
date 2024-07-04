@@ -6,7 +6,7 @@ import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
 
 import { Flex, Column } from "@containers";
-import { Text, InputNumeric, InputGroup, Button, Prompt } from "components";
+import { Text, Button, Prompt } from "components";
 
 import { StyledAddLiquidityWrapper } from "./styled";
 import { ProvideLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
@@ -26,11 +26,11 @@ type LiquidityProps = {
   market: FetchSortedMarketDataReturn["markets"][0] | undefined;
 };
 
-const InnerWrapper = ({ children, id }: PropsWithChildren<{id: string}>) => (
-  <div id={id}
+const InnerWrapper = ({ children, id }: PropsWithChildren<{ id: string }>) => (
+  <div
+    id={id}
     className={
-      `flex justify-between px-[18px] py-[7px] items-center ` +
-      `h-[55px] md:items-stretch`
+      `flex justify-between px-[18px] py-[7px] items-center ` + `h-[55px] md:items-stretch`
     }
   >
     {children}
@@ -118,7 +118,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
               <input
                 className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
                 style={{
-                  color: theme.colors.lightGray + "99"
+                  color: theme.colors.lightGray + "99",
                 }}
                 value={toCoinDecimalString(provideLiquidityResult ?? 0n, 4)}
                 type="number"
