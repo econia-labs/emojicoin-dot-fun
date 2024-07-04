@@ -2,7 +2,8 @@ import { Flex } from "@containers";
 import useInputStore from "@store/input-store";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { InputGroup, Textarea } from "components/inputs";
-import { Arrow, CloseIconWithHover } from "components/svg";
+import { Arrow } from "components/svg";
+import ClosePixelated from "@icons/ClosePixelated";
 import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
 import { motion } from "framer-motion";
 import { handleEmojiPickerInput } from "lib/utils/emoji-picker-selection";
@@ -45,16 +46,32 @@ export const EmojiPickerWithInput = ({
   showSend?: boolean;
   forChatInput?: boolean;
 }) => {
-  const { emojis, setEmojis, clear, mode } = useInputStore((s) => ({
-    emojis: s.emojis,
-    setEmojis: s.setEmojis,
-    clear: s.clear,
-    mode: s.mode,
-  }));
+  const [focused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLDivElement | null>(null);
+  const sendButtonRef = useRef<HTMLDivElement | null>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const emojis = useInputStore((s) => s.emojis);
+  const setEmojis = useInputStore((s) => s.setEmojis);
+  const clear = useInputStore((s) => s.clear);
+  const mode = useInputStore((s) => s.mode);
+  const setOnClickOutside = useInputStore((s) => s.setOnClickOutside);
+
+  // Clear the input and set the onClickOutside event handler on mount.
   useEffect(() => {
     clear();
+
+    setOnClickOutside((e: MouseEvent) => {
+      if (inputRef.current) {
+        const target = e.target as Node;
+        const input = inputRef.current;
+
+        if (!input.contains(target)) {
+          setIsFocused(false);
+        }
+      }
+    });
+
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
@@ -85,13 +102,21 @@ export const EmojiPickerWithInput = ({
     }
   };
 
-  const [focused, setIsFocused] = useState(false);
+  const [selectionStart, setSelectionStart] = useState(0);
+  const handleTextSelect = (e: React.SyntheticEvent<HTMLTextAreaElement, Event>) => {
+    setSelectionStart((e.target as HTMLTextAreaElement).selectionStart);
+  };
+
+  useEffect(() => {
+    if (textAreaRef.current) {
+      textAreaRef.current.focus();
+    }
+  }, [emojis]);
 
   const variants = {
     visible: {
       opacity: 1,
       transition: { duration: 0.5 },
-      // TODO: Fix this when we fork the picker. This shadow DOM stuff is so bad to work with...
     },
     hidden: {
       opacity: 0,
@@ -100,14 +125,15 @@ export const EmojiPickerWithInput = ({
   };
 
   const closeIconClassName =
-    "absolute top-1/2 -translate-y-1/2 !w-[21px] " +
-    `${closeIconSide === "right" ? "right-3" : "left-[2.5ch]"}`;
+    "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer" +
+    `${closeIconSide === "right" ? "right-3" : ""}`;
 
   return (
     <Flex
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => {
-        setIsFocused(false);
+      onFocus={(e) => {
+        if (e.target !== sendButtonRef.current) {
+          setIsFocused(true);
+        }
       }}
       className="justify-center"
       ref={inputRef}
@@ -115,31 +141,49 @@ export const EmojiPickerWithInput = ({
       <ConditionalWrapper forChatInput={forChatInput}>
         <InputGroup isShowError={false} {...inputGroupProps}>
           <div className="flex-row relative items-center justify-center">
-            <Textarea
-              className={`!pt-[15px] ${inputClassName}`}
-              value={emojis.join("")}
-              placeholder=""
-              onKeyDown={onKeyDownHandler}
-            />
-            <CloseIconWithHover
-              className={closeIconClassName}
-              color="white"
-              onClick={clear}
-            ></CloseIconWithHover>
-            {showSend && (
-              <Arrow
-                onClick={() => handleClick(emojis.join(""))}
-                className="absolute top-1/2 -translate-y-1/2 right-[1ch] !w-[21px] !h-[21px] !mr-2 hover:cursor-pointer"
-                color="white"
-              />
-            )}
+            <div className="relative h-[45px]">
+              <div
+                className={
+                  "flex flex-row absolute items-center justify-between h-full w-full " +
+                  "border-0 border-t-[1px] border-solid border-dark-gray"
+                }
+              >
+                <motion.div
+                  whileTap={{ scale: 0.85 }}
+                  className={closeIconClassName}
+                  onClick={clear}
+                >
+                  {/* className={closeIconClassName} */}
+                  <ClosePixelated className="w-[15px] h-[16px] text-white" />
+                </motion.div>
+                <Textarea
+                  autoFocus={true}
+                  // className={`!pt-[15px] ${inputClassName}`}
+                  className="relative !pt-[16px] px-[4px]"
+                  value={emojis.join("")}
+                  onSelect={handleTextSelect}
+                  onKeyDown={onKeyDownHandler}
+                  ref={textAreaRef}
+                />
+                {showSend ? (
+                  <motion.div
+                    whileTap={{ scale: 0.85 }}
+                    onClick={() => {
+                      handleClick(emojis.join(""));
+                      setIsFocused(false);
+                    }}
+                    className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
+                    ref={sendButtonRef}
+                  >
+                    <Arrow className="!w-[21px] !h-[21px]" color="white" />
+                  </motion.div>
+                ) : null}
+              </div>
+            </div>
           </div>
         </InputGroup>
       </ConditionalWrapper>
       <motion.button
-        onBlur={() => {
-          setIsFocused(false);
-        }}
         animate={focused ? "visible" : "hidden"}
         variants={variants}
         style={{

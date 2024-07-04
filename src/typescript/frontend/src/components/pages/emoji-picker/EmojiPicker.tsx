@@ -1,8 +1,8 @@
 "use client";
 
 import { type HTMLAttributes, Suspense, useEffect } from "react";
-import { default as Picker } from "@emoji-mart/react";
 import useInputStore from "@store/input-store";
+import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
@@ -88,10 +88,10 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
               const text = node.textContent;
               // The `text` here is the short code the library uses, aka `:smile:` or `:rolling_on_the_floor_laughing:`
               if (text?.at(0) === ":" && text?.at(-1) === ":") {
-                // No matter what we need to replace the text, so let's just reset it to a colon if we can even find it.
+                // No matter what we need to replace the text, so let's just reset it if we can even find it.
                 // The main reason we do this is because if we don't, the bytes text content sometimes shows up appended
                 // to the end of the emoji.
-                node.textContent = ":";
+                node.textContent = "";
 
                 // Traverse the tree up and then down to the emoji element. This is a bit hacky,
                 // but I think it's faster than using a querySelector, and we know the structure
