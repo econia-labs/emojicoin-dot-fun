@@ -75,9 +75,9 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
   it("maps the emojis to their corresponding data given an input string", () => {
     const symbol = " 🎅🎅🏽🎅🏼🎅🏿   🌎🇧🇷 ⭐ ...";
     const emojiData = symbolToEmojis(symbol);
-    expect(emojiData).toHaveLength(7);
+    expect(emojiData.emojis).toHaveLength(7);
     const names = new Set(Object.keys(SymbolEmojiData));
-    emojiData.forEach((emoji) => {
+    emojiData.emojis.forEach((emoji) => {
       expect(names.has(emoji.name)).toBe(true);
     });
   });
