@@ -5,7 +5,6 @@ import EmojiNotFoundPage from "./not-found";
 import fetchInitialChatData from "lib/queries/initial/chats";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
-import Big from "big.js";
 import parseBigInt from "lib/utils/try-parse-bigint";
 
 export const revalidate = REVALIDATION_TIME;

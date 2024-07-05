@@ -1,6 +1,7 @@
 import { RegisterMarket, RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
+  AccountAddress,
   isUserTransactionResponse,
   type PendingTransactionResponse,
   type UserTransactionResponse,
@@ -14,12 +15,17 @@ import { useRouter } from "next/navigation";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
 import { ROUTES } from "router/routes";
 import path from "path";
+import { revalidateTagAction } from "lib/queries/cache-utils/revalidate";
+import { TAGS } from "lib/queries/cache-utils/tags";
+import { useEventStore } from "context/websockets-context";
+import { normalizeHex } from "@sdk/utils";
 
 export const useRegisterMarket = () => {
   const emojis = useInputStore((state) => state.emojis);
   const { aptos, account, submit, signThenSubmit } = useAptos();
   const clear = useInputStore((state) => state.clear);
   const router = useRouter();
+  const addToMarketMetadataMap = useEventStore((state) => state.addToMarketMetadataMap);
 
   const registerMarket = async () => {
     if (!account) {
@@ -65,10 +71,21 @@ export const useRegisterMarket = () => {
     if (res && isUserTransactionResponse(res)) {
       const events = getEvents(res);
       if (events.marketRegistrationEvents.length === 1) {
-        // const marketID = events.marketRegistrationEvents[0].marketID.toString();
-        const symbol = symbolBytesToEmojis(
+        const emojiData = symbolBytesToEmojis(
           events.marketRegistrationEvents[0].marketMetadata.emojiBytes
-        ).symbol;
+        );
+        const marketID = events.marketRegistrationEvents[0].marketID.toString();
+        const detailedMarketMetadata = {
+          marketID,
+          symbolBytes: normalizeHex(events.marketRegistrationEvents[0].marketMetadata.emojiBytes),
+          marketAddress: AccountAddress.from(
+            events.marketRegistrationEvents[0].marketMetadata.marketAddress
+          ).toString(),
+          ...emojiData,
+        };
+        addToMarketMetadataMap(detailedMarketMetadata);
+        const { symbol } = emojiData;
+        await revalidateTagAction(TAGS.RegisteredMarkets);
         const newPath = path.join(ROUTES.market, symbol);
         router.push(newPath);
         router.refresh();

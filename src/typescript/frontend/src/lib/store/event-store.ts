@@ -107,6 +107,7 @@ export type EventActions = {
   pushEventFromClient: (event: AnyEmojicoinEvent) => void;
   addMarketData: (d: MarketDataView) => void;
   setLatestBars: ({ marketID, latestBars }: SetLatestBarsArgs) => void;
+  addToMarketMetadataMap: (market: DetailedMarketMetadata) => void;
   initializeMarketMetadata: (data: Array<DetailedMarketMetadata>) => void;
   subscribeToResolution: ({ symbol, resolution, cb }: ResolutionSubscription) => void;
   unsubscribeFromResolution: ({ symbol, resolution }: Omit<ResolutionSubscription, "cb">) => void;
@@ -397,6 +398,12 @@ export const createEventStore = (initialState: EventState = defaultState) => {
               }
             }
           }
+        });
+      },
+      addToMarketMetadataMap: (market) => {
+        set((state) => {
+          state.marketMetadataMap.set(market.marketID, market);
+          state.symbols.set(market.symbol, market.marketID);
         });
       },
       initializeMarketMetadata: (markets) => {

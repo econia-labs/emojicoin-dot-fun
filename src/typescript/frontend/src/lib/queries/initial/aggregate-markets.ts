@@ -1,13 +1,14 @@
 "use server";
 
 import { LIMIT } from "@sdk/queries/const";
-import cached from "../cached";
 import { postgrest } from "@sdk/queries/inbox-url";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { revalidateTag } from "next/cache";
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { type PostgrestError } from "@sdk/types/postgrest-types";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
+import cached from "../cache-utils/cached";
+import { TAGS } from "lib/queries/cache-utils/tags";
 
 export const fetchNumMarkets = async () => {
   return await cached(
@@ -20,9 +21,9 @@ export const fetchNumMarkets = async () => {
       }
       return count;
     },
-    ["num-markets"],
+    [TAGS.RegisteredMarkets],
     {
-      tags: ["num-markets"],
+      tags: [TAGS.RegisteredMarkets],
       revalidate: REVALIDATION_TIME,
     }
   )();
