@@ -7,7 +7,6 @@ import { useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
 import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
-import { useThemeContext } from "context";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
@@ -25,7 +24,6 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   const { connected, account } = useWallet();
   const { connectWallet } = useWalletModal();
   const { t } = translationFunction();
-  const { theme } = useThemeContext();
 
   const [enabled, setEnabled] = useState(false);
 
@@ -61,13 +59,15 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
     }
   };
 
-  // Right now this is only used for mobile, because the desktop version is handled by the WalletDropdownMenu
-  // component. We leave the functionality for non-mobile here anyway in case we want to use it in the future.
+  // This component is used to display the `Connect Wallet` button and text with a scramble effect.
+  // We use it in both mobile and desktop components.
   return (
     <>
       {!connected || !children ? (
         <Button
-          className={className + (mobile ? " px-[9px] border-b border-b-dashed border-dark-gray" : "")}
+          className={
+            className + (mobile ? " px-[9px] border-b border-b-dashed border-dark-gray" : "")
+          }
           onClick={(e) => {
             e.preventDefault();
             onClick ? onClick() : connectWallet();
