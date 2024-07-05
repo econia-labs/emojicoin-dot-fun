@@ -1,4 +1,3 @@
-import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import useInputStore from "../store/input-store";
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 import { getEmojisInString } from "@sdk/emoji_data";

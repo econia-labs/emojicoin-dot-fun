@@ -109,7 +109,7 @@ export const successfulTransactionToast = (
           <ExplorerLink
             className="font-forma inline font-bold text-orange-500 drop-shadow-text"
             network={network.name}
-            value={(response.hash)}
+            value={response.hash}
             type="transaction"
           >
             {truncateAddress(response.hash, 8)}
