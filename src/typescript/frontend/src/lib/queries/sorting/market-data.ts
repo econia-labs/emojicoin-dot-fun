@@ -7,10 +7,11 @@ import {
   type GetSortedMarketDataQueryArgs,
   type GetMySortedMarketDataQueryArgs,
 } from "./types";
-import cached from "../cached";
+import cached from "../cache-utils/cached";
 import { MARKETS_PER_PAGE } from "./const";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { REVALIDATION_TIME } from "lib/server-env";
+import { TAGS } from "../cache-utils/tags";
 
 const getSortedMarketData = async ({
   limit = LIMIT,
@@ -105,7 +106,7 @@ export const fetchFeaturedMarket = async (
       }),
     keys,
     {
-      tags: ["featured-market"],
+      tags: [TAGS.FeaturedMarket],
       revalidate: Math.max(REVALIDATION_TIME, 1),
     }
   )();
@@ -176,7 +177,7 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
       }),
     keys,
     {
-      tags: ["sorted-markets"],
+      tags: [TAGS.SortedMarkets],
       revalidate: Math.max(REVALIDATION_TIME, 1),
     }
   )();
@@ -230,7 +231,7 @@ export const fetchMyPools = async (args: GetMyPoolsArgs) => {
       }),
     keys,
     {
-      tags: ["sorted-markets"],
+      tags: [TAGS.SortedMarkets],
       revalidate: Math.max(REVALIDATION_TIME, 1),
     }
   )();

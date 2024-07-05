@@ -133,6 +133,9 @@ export default function SwapComponent({
                 className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
                 value={inputAmount}
                 min={0}
+                // TODO: Fix this conversion so that it doesn't break upon multiplying by DECIMALS ** 10n
+                // in the `Big` library.
+                max={Number.MAX_SAFE_INTEGER}
                 step={0.01}
                 onChange={handleInput}
                 onKeyDown={handleKeyDown}

@@ -1,6 +1,4 @@
-import React from "react";
-
-import { useHideOverflow } from "@hooks/use-hide-overflow";
+import React, { useEffect } from "react";
 
 import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
 import { Link } from "components/link";
@@ -19,7 +17,16 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   linksForCurrentPage,
   offsetHeight,
 }) => {
-  useHideOverflow({ trigger: isOpen });
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
 
   const handleCloseMobileMenu = () => {
     setIsOpen(false);
