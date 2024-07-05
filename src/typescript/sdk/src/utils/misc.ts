@@ -155,7 +155,7 @@ export function getPeriodStartTimeFromTime(microseconds: bigint, period: Candles
 
 export const ADDRESS_FULL_CHAR_LENGTH = 64;
 
-export const truncateAddress = (input: HexInput): string => {
+export const truncateAddress = (input: HexInput, numChars: number = 4): string => {
   let s;
   if (typeof input === "string") {
     if (input.startsWith("0x")) {
@@ -171,7 +171,7 @@ export const truncateAddress = (input: HexInput): string => {
     s = input;
   }
   const res = normalizeHex(s);
-  return `${res.substring(0, 6)}...${res.substring(res.length - 4, res.length)}`;
+  return `${res.substring(0, numChars + 2)}...${res.substring(res.length - numChars, res.length)}`;
 };
 
 export class Lazy<T> {

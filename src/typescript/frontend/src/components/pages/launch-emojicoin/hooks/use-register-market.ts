@@ -62,8 +62,6 @@ export const useRegisterMarket = () => {
       }
     }
 
-    console.log(res);
-
     if (res && isUserTransactionResponse(res)) {
       const events = getEvents(res);
       if (events.marketRegistrationEvents.length === 1) {
@@ -73,6 +71,7 @@ export const useRegisterMarket = () => {
         ).symbol;
         const newPath = path.join(ROUTES.market, symbol);
         router.push(newPath);
+        router.refresh();
       }
       clear();
     } else {

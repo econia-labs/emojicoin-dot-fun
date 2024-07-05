@@ -9,9 +9,9 @@ import { motion } from "framer-motion";
 import { insertEmojiTextInput, removeEmojiTextInput } from "lib/utils/handle-emoji-picker-input";
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
-import "./triangle.css";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import { ColoredBytesIndicator } from "./ColoredBytesIndicator";
+import "./triangle.css";
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -66,10 +66,15 @@ export const EmojiPickerWithInput = ({
   const mode = useInputStore((s) => s.mode);
   const setTextAreaRef = useInputStore((s) => s.setTextAreaRef);
   const setOnClickOutside = useInputStore((s) => s.setOnClickOutside);
+  const pickerInvisible = useInputStore((s) => s.pickerInvisible);
+  const setPickerInvisible = useInputStore((s) => s.setPickerInvisible);
 
-  // Set the picker to be invisible initially, and then set it to visible when the input is focused the first time.
-  // We do this to show that the input field is active with a blinking cursor without having to display the picker.
-  const [invisible, setInvisible] = useState(true);
+  // Append a setPickerVisible(true) to the end of the handleClick function.
+  // Note that this is the txn submission function.
+  const handleSubmission = async (message: string) => {
+    setPickerInvisible(true);
+    await handleClick(message);
+  };
 
   // Clear the input and set the onClickOutside event handler on mount.
   useEffect(() => {
@@ -128,7 +133,7 @@ export const EmojiPickerWithInput = ({
     if (!target) return;
     if (e.key === "Enter") {
       e.preventDefault();
-      await handleClick(emojis.join(""));
+      await handleSubmission(emojis.join(""));
     } else if (e.ctrlKey || e.metaKey) {
       // Don't let the event propagate unless we're copying, cutting, pasting, or selecting all.
       if (!["c", "x", "v", "a"].includes(e.key)) {
@@ -161,7 +166,7 @@ export const EmojiPickerWithInput = ({
   };
 
   const closeIconClassName =
-    "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer"
+    "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer";
 
   return (
     <Flex
@@ -201,7 +206,7 @@ export const EmojiPickerWithInput = ({
                   onCut={handleCut}
                   onKeyDown={onKeyDownHandler}
                   onClick={() => {
-                    setInvisible(false);
+                    setPickerInvisible(false);
                     // To ensure the text area ref is set.
                     setTextAreaRef(textAreaRef.current);
                   }}
@@ -212,8 +217,10 @@ export const EmojiPickerWithInput = ({
                     <motion.div
                       whileTap={{ scale: 0.85 }}
                       onClick={() => {
-                        handleClick(emojis.join(""));
+                        handleSubmission(emojis.join(""));
                         setIsFocused(false);
+                        // Require the user to click on the text area to show the picker again.
+                        setPickerInvisible(true);
                       }}
                       className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
                       style={{
@@ -235,10 +242,10 @@ export const EmojiPickerWithInput = ({
         </InputGroup>
       </ConditionalWrapper>
       <motion.button
-        animate={invisible ? "hidden" : focused ? "visible" : "hidden"}
+        animate={pickerInvisible ? "hidden" : focused ? "visible" : "hidden"}
         variants={variants}
         style={{
-          opacity: 0, // Initially invisible.
+          opacity: 0, // Initially hidden.
           zIndex: focused ? 50 : -1,
           cursor: focused ? "auto" : "pointer",
           scale: focused ? 1 : 0,

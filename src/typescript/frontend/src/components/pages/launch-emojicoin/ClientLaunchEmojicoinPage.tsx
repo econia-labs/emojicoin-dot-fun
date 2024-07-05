@@ -22,6 +22,7 @@ const ClientLaunchEmojicoinPage = () => {
     setMode: state.setMode,
   }));
   const registerMarket = useRegisterMarket();
+  const setPickerInvisible = useInputStore((state) => state.setPickerInvisible);
   const length = sumBytes(emojis);
   const invalid = length === 0 || length >= 10;
 
@@ -77,7 +78,10 @@ const ClientLaunchEmojicoinPage = () => {
             <ButtonWithConnectWalletFallback>
               <Button
                 disabled={invalid}
-                onClick={registerMarket}
+                onClick={() => {
+                  setPickerInvisible(true);
+                  registerMarket();
+                }}
                 scale="lg"
                 style={{ cursor: invalid ? "not-allowed" : "pointer" }}
               >

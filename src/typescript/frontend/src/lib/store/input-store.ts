@@ -8,6 +8,7 @@ export type InputState = {
   textAreaRef: HTMLTextAreaElement | null;
   chatEmojiData: Map<string, SymbolEmojiData>;
   onClickOutside: (e: MouseEvent) => void;
+  pickerInvisible: boolean;
 };
 
 export type InputActions = {
@@ -18,12 +19,14 @@ export type InputActions = {
   setMode: (mode: "chat" | "register") => void;
   setOnClickOutside: (value: (e: MouseEvent) => void) => void;
   setChatEmojiData: (value: Map<string, SymbolEmojiData>) => void;
+  setPickerInvisible: (value: boolean) => void;
 };
 
 export type InputStore = InputState & InputActions;
 
 const defaultValues: InputState = {
   mode: "register" as InputState["mode"],
+  pickerInvisible: true,
   emojis: [],
   pickerRef: null,
   textAreaRef: null,
@@ -33,6 +36,7 @@ const defaultValues: InputState = {
 
 export const useInputStore = create<InputStore>()((set, get) => ({
   ...defaultValues,
+  setPickerInvisible: (value) => set({ pickerInvisible: value }),
   setOnClickOutside: (value: (e: MouseEvent) => void) => set({ onClickOutside: value }),
   setMode: (value) => set({ mode: value }),
   setEmojis: (emojis, selection) => {
@@ -61,7 +65,6 @@ export const useInputStore = create<InputStore>()((set, get) => ({
   },
   setPickerRef: (value: HTMLDivElement | null) => set({ pickerRef: value }),
   setTextAreaRef: (value: HTMLTextAreaElement | null) => {
-    console.log("changing text area ref", value);
     return set({ textAreaRef: value });
   },
   setChatEmojiData: (value: Map<string, SymbolEmojiData>) => set({ chatEmojiData: value }),
