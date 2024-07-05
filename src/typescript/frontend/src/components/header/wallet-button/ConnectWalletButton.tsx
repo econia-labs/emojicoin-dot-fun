@@ -67,14 +67,13 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
     <>
       {!connected || !children ? (
         <Button
-          className={className + (mobile ? " px-[9px]" : "")}
+          className={className + (mobile ? " px-[9px] border-b border-b-dashed border-dark-gray" : "")}
           onClick={(e) => {
             e.preventDefault();
             onClick ? onClick() : connectWallet();
             handleReplay();
           }}
           onMouseOver={handleReplay}
-          style={{ borderBottom: `1px dashed ${theme.colors.darkGray}` }}
         >
           <div className="flex flex-row text-ec-blue text-2xl justify-between">
             <div className="flex flex-row">
