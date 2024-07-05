@@ -11,7 +11,9 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import { ColoredBytesIndicator } from "./ColoredBytesIndicator";
+import { variants } from "./animation-variants";
 import "./triangle.css";
+import { checkTargetAndStopDefaultPropagation } from "./utils";
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -19,42 +21,28 @@ import "./triangle.css";
  */
 const ConditionalWrapper = ({
   children,
-  forChatInput,
+  mode,
 }: {
   children: React.ReactNode;
-  forChatInput?: boolean;
+  mode: "chat" | "register";
 }) => {
-  return forChatInput ?? false ? (
+  return mode === "chat" ? (
     <ButtonWithConnectWalletFallback className="mt-2">{children}</ButtonWithConnectWalletFallback>
   ) : (
     <>{children}</>
   );
 };
 
-const checkTargetAndStopDefaultPropagation = (
-  e: React.BaseSyntheticEvent,
-  textArea: HTMLElement | null
-) => {
-  if (e.target === textArea) {
-    e.preventDefault();
-    e.stopPropagation();
-    return textArea as HTMLTextAreaElement;
-  }
-  return;
-};
-
 export const EmojiPickerWithInput = ({
   handleClick,
   pickerButtonClassName,
   inputGroupProps,
-  forChatInput,
   inputClassName = "",
 }: {
   handleClick: (message: string) => Promise<void>;
   pickerButtonClassName: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
-  forChatInput?: boolean;
 }) => {
   const [focused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLDivElement | null>(null);
@@ -69,8 +57,7 @@ export const EmojiPickerWithInput = ({
   const pickerInvisible = useInputStore((s) => s.pickerInvisible);
   const setPickerInvisible = useInputStore((s) => s.setPickerInvisible);
 
-  // Append a setPickerVisible(true) to the end of the handleClick function.
-  // Note that this is the txn submission function.
+  // Append the picker visibility mutation to the end of the handleClick function.
   const handleSubmission = async (message: string) => {
     setPickerInvisible(true);
     await handleClick(message);
@@ -79,7 +66,6 @@ export const EmojiPickerWithInput = ({
   // Clear the input and set the onClickOutside event handler on mount.
   useEffect(() => {
     clear();
-
     setOnClickOutside((e: MouseEvent) => {
       if (inputRef.current) {
         const target = e.target as Node;
@@ -90,42 +76,30 @@ export const EmojiPickerWithInput = ({
         }
       }
     });
-
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   useEffect(() => {
-    if (textAreaRef.current) {
-      setTextAreaRef(textAreaRef.current);
-    }
-    // For some reason, sometimes the text area ref isn't set. This is a hacky way to try to ensure it is.
-    if (!textAreaRef.current) {
-      const textArea = document.getElementById("emoji-picker-text-area");
-      if (textArea) {
-        textAreaRef.current = textArea as HTMLTextAreaElement;
-        setTextAreaRef(textAreaRef.current);
-      }
-    }
+    if (textAreaRef.current) setTextAreaRef(textAreaRef.current);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const target = checkTargetAndStopDefaultPropagation(e, textAreaRef.current);
-    if (!target) return;
-
-    const pastedText = e.clipboardData.getData("text");
-    insertEmojiTextInput(pastedText);
+    if (checkTargetAndStopDefaultPropagation(e, textAreaRef.current)) {
+      const pastedText = e.clipboardData.getData("text");
+      insertEmojiTextInput(pastedText);
+    }
   }, []);
 
   const handleCut = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const target = checkTargetAndStopDefaultPropagation(e, textAreaRef.current);
-    if (!target) return;
-
-    const start = target.selectionStart;
-    const end = target.selectionEnd;
-    const selected = target.value.slice(start, end);
-    navigator.clipboard.writeText(selected);
-    removeEmojiTextInput();
+    if (target) {
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+      const selected = target.value.slice(start, end);
+      navigator.clipboard.writeText(selected);
+      removeEmojiTextInput();
+    }
   }, []);
 
   const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -154,17 +128,6 @@ export const EmojiPickerWithInput = ({
     }
   }, [emojis]);
 
-  const variants = {
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.5 },
-    },
-    hidden: {
-      opacity: 0,
-      transition: { duration: 0.5 },
-    },
-  };
-
   const closeIconClassName =
     "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer";
 
@@ -178,7 +141,7 @@ export const EmojiPickerWithInput = ({
       className="justify-center"
       ref={inputRef}
     >
-      <ConditionalWrapper forChatInput={forChatInput}>
+      <ConditionalWrapper mode={mode}>
         <InputGroup isShowError={false} {...inputGroupProps}>
           <div className="flex-row relative items-center justify-center">
             <div className="relative h-[45px]">
@@ -207,11 +170,10 @@ export const EmojiPickerWithInput = ({
                   onKeyDown={onKeyDownHandler}
                   onClick={() => {
                     setPickerInvisible(false);
-                    // To ensure the text area ref is set.
-                    setTextAreaRef(textAreaRef.current);
+                    setTextAreaRef(textAreaRef.current); // Ensure the ref is set.
                   }}
                 />
-                {forChatInput ? (
+                {mode === "chat" ? (
                   <>
                     <ColoredBytesIndicator className="flex flex-row min-w-fit justify-end px-[1ch]" />
                     <motion.div
@@ -219,7 +181,6 @@ export const EmojiPickerWithInput = ({
                       onClick={() => {
                         handleSubmission(emojis.join(""));
                         setIsFocused(false);
-                        // Require the user to click on the text area to show the picker again.
                         setPickerInvisible(true);
                       }}
                       className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"

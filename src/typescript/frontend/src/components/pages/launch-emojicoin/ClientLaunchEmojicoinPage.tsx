@@ -44,7 +44,6 @@ const ClientLaunchEmojicoinPage = () => {
                 pickerButtonClassName="top-[220px] bg-black"
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
-                forChatInput={false}
               />
             </Column>
           </Flex>

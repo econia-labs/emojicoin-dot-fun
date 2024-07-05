@@ -146,7 +146,6 @@ const ChatBox = (props: ChatProps) => {
       <EmojiPickerWithInput
         handleClick={sendChatMessage}
         pickerButtonClassName={pickerClass}
-        forChatInput={true}
       />
     </Column>
   );
