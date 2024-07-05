@@ -2,44 +2,48 @@
 
 import React, { useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { type EmojiClickData } from "emoji-picker-react";
-
-import { useEmojicoinPicker } from "hooks";
 import { useThemeContext } from "context";
-import { isDisallowedEventKey } from "utils";
-
 import { Flex, Column } from "@containers";
-import { InputGroup, Textarea, Loader } from "components";
-
+import { Loader } from "components";
 import { MessageContainer } from "./components";
 import { type ChatProps } from "../../types";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import { Arrow } from "components/svg";
 import emojiRegex from "emoji-regex";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import useInputStore from "@store/input-store";
+import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
-import { motion } from "framer-motion";
-import ClosePixelated from "@icons/ClosePixelated";
 
-const convertChatMessageToEmojiAndIndices = (message: string) => {
+const convertChatMessageToEmojiAndIndices = (
+  message: string,
+  mapping: Map<string, SymbolEmojiData>
+) => {
   const emojiArr = message.match(emojiRegex()) ?? [];
   const indices: Record<string, number> = {};
   const bytesArray: Uint8Array[] = [];
   const sequence: number[] = [];
+
   for (const emoji of emojiArr) {
+    if (!mapping.has(emoji)) {
+      throw new Error(`Emoji ${emoji} not found in mapping.`);
+    }
     if (indices[emoji] === undefined) {
       indices[emoji] = bytesArray.length;
-      bytesArray.push(SYMBOL_DATA.byEmoji(emoji)!.bytes);
+      bytesArray.push(mapping.get(emoji)!.bytes);
     }
     sequence.push(indices[emoji]);
   }
   return { emojiBytes: bytesArray, emojiIndicesSequence: sequence };
 };
+
+const pickerClass = `
+  absolute bottom-[55px] mb-[5px] xl:mb-0 xl:bottom-[-3.6%] bg-black
+  right-[50%] xl:right-full translate-x-[50%] xl:translate-x-0 mr-0
+`;
 
 const ChatBox = (props: ChatProps) => {
   const { theme } = useThemeContext();
@@ -54,46 +58,32 @@ const ChatBox = (props: ChatProps) => {
     return () => unsubscribe.chat(marketID);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
+  const { emojis, clear, chatEmojiData, setMode } = useInputStore((state) => ({
+    emojis: state.emojis,
+    clear: state.clear,
+    chatEmojiData: state.chatEmojiData,
+    setMode: state.setMode,
+  }));
+
+  useEffect(() => {
+    setMode("chat");
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   const loadMoreMessages = () => {
-    /* eslint-disable-next-line no-console */
-    console.log("loadMoreMessages");
+    // Paginate messages here.
   };
 
-  const onEmojiClickHandler = (emoji: EmojiClickData) => {
-    if (targetElement && SYMBOL_DATA.hasEmoji(emoji.emoji)) {
-      (targetElement as HTMLTextAreaElement).value =
-        (targetElement as HTMLTextAreaElement).value + emoji.emoji;
-    }
-  };
-
-  const { targetRef, tooltip, targetElement } = useEmojicoinPicker({
-    onEmojiClick: (emoji) => {
-      onEmojiClickHandler(emoji);
-      focusTextArea();
-    },
-    autoFocusSearch: false,
-    width: 272,
-  });
-
-  const focusTextArea = () => {
-    if (targetElement) {
-      (targetElement as HTMLTextAreaElement).focus();
-    }
-  };
-
-  const handleClear = () => {
-    if (targetElement) {
-      (targetElement as HTMLTextAreaElement).value = "";
-    }
-  };
-
-  const sendChatMessage = async (emojiText: string) => {
+  const sendChatMessage = async () => {
     if (!account) {
       return;
     }
+    const emojiText = emojis.join("");
     const { emojicoin, emojicoinLP } = toCoinTypes(props.data.marketAddress);
-    const { emojiBytes, emojiIndicesSequence } = convertChatMessageToEmojiAndIndices(emojiText);
+    const { emojiBytes, emojiIndicesSequence } = convertChatMessageToEmojiAndIndices(
+      emojiText,
+      chatEmojiData
+    );
     const builderLambda = () =>
       Chat.builder({
         aptosConfig: aptos.config,
@@ -107,21 +97,11 @@ const ChatBox = (props: ChatProps) => {
     if (response && isUserTransactionResponse(response)) {
       console.warn(response);
     }
-    handleClear();
-  };
-
-  const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && account) {
-      e.preventDefault();
-      const emojiText = (e.target as unknown as HTMLTextAreaElement).value;
-      await sendChatMessage(emojiText);
-    } else if (isDisallowedEventKey(e)) {
-      e.preventDefault();
-    }
+    clear();
   };
 
   return (
-    <Column width="100%" flexGrow={1}>
+    <Column className="relative" width="100%" flexGrow={1}>
       <Flex
         flexGrow="1"
         width="100%"
@@ -159,44 +139,7 @@ const ChatBox = (props: ChatProps) => {
         </InfiniteScroll>
       </Flex>
 
-      <Flex className="justify-center">
-        <ButtonWithConnectWalletFallback className="mt-2">
-          <InputGroup isShowError={false}>
-            <div className="flex-row relative items-center justify-center">
-              <div className="relative h-[45px]">
-                <div
-                  className={
-                    "flex flex-row absolute items-center justify-between h-full w-full " +
-                    "border-0 border-t-[1px] border-solid border-dark-gray"
-                  }
-                >
-                  <motion.div
-                    whileTap={{ scale: 0.85 }}
-                    className="flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer"
-                    onClick={handleClear}
-                  >
-                    <ClosePixelated className="w-[15px] h-[16px] text-white" />
-                  </motion.div>
-                  <Textarea
-                    autoFocus={true}
-                    className="relative !pt-[16px] px-[4px]"
-                    ref={targetRef}
-                    onKeyDown={onKeyDownHandler}
-                  />
-                  <motion.div
-                    whileTap={{ scale: 0.85 }}
-                    onClick={() => sendChatMessage((targetElement as HTMLTextAreaElement).value)}
-                    className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
-                  >
-                    <Arrow className="!w-[21px] !h-[21px]" color="white" />
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-          </InputGroup>
-        </ButtonWithConnectWalletFallback>
-      </Flex>
-      {tooltip}
+      <EmojiPickerWithInput handleClick={sendChatMessage} pickerButtonClassName={pickerClass} />
     </Column>
   );
 };

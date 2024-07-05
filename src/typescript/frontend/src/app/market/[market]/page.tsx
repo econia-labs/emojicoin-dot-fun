@@ -5,6 +5,7 @@ import EmojiNotFoundPage from "./not-found";
 import fetchInitialChatData from "lib/queries/initial/chats";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
+import parseBigInt from "lib/utils/try-parse-bigint";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -33,8 +34,10 @@ interface EmojicoinPageProps {
  * Whereas the actual emoji bytes are: 0xf09f9285f09f8fbe.
  */
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
-  const { market } = params.params;
-  const res = await fetchLatestMarketState(BigInt(market));
+  const { market: marketSlug } = params.params;
+  const parsed = parseBigInt(marketSlug);
+  const market = parsed ? BigInt(parsed) : marketSlug;
+  const res = await fetchLatestMarketState(market);
 
   if (res) {
     const marketID = res.marketID.toString();

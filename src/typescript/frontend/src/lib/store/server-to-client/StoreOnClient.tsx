@@ -2,18 +2,18 @@
 // cspell:word mkts
 
 import { MODULE_ADDRESS } from "@sdk/const";
+import { type RegisteredMarket } from "@sdk/emoji_data";
 import { CloseIconWithHover } from "components/svg";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
-import { type DetailedMarketMetadata } from "lib/queries/types";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export type StoreOnClientProps = {
-  markets: Array<DetailedMarketMetadata>;
+  markets: Array<RegisteredMarket>;
 };
 
 export const StoreOnClient = ({ markets }: StoreOnClientProps) => {
-  const initialize = useEventStore((s) => s.initializeMarketMetadata);
+  const initialize = useEventStore((s) => s.initializeRegisteredMarketsMap);
   const storeMarkets = useEventStore((s) => s.markets);
   const subscriptions = useWebSocketClient((s) => s.subscriptions);
   const pathname = usePathname();

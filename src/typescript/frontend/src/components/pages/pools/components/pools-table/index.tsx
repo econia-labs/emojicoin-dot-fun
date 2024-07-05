@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 
-import { useElementDimensions, useMatchBreakpoints } from "hooks";
+import { useMatchBreakpoints } from "hooks";
 
 import { TableRowDesktop, TableHeader } from "./components";
 import { Table, Th, EmptyTr, ThInner, HeaderTr, TBody } from "components";
@@ -14,6 +14,7 @@ import { getEmptyListTr } from "utils";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import type { OrderByStrings } from "@sdk/queries/const";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
+import useElementDimensions from "@hooks/use-element-dimensions";
 
 export interface PoolsTableProps {
   data: FetchSortedMarketDataReturn["markets"];

@@ -6,7 +6,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { type NetworkInfo } from "@aptos-labs/wallet-adapter-react";
 import { CandlestickResolution } from "@sdk/const";
-import { getPeriodStartTimeFromTime } from "@sdk/utils/misc";
+import { getPeriodStartTimeFromTime, truncateAddress } from "@sdk/utils/misc";
 import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
 import { ExplorerLink } from "components/link/component";
@@ -112,7 +112,7 @@ export const successfulTransactionToast = (
             value={response.hash}
             type="transaction"
           >
-            {response.hash}
+            {truncateAddress(response.hash, 8)}
           </ExplorerLink>
         </div>
       </div>

@@ -9,6 +9,8 @@
     font-family: var(--font-forma) !important;
     line-height: 1.4rem;
   }
+
+  --ec-blue: #086cd9;
 }
 
 .med-pixel-text {
