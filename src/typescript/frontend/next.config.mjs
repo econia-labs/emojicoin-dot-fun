@@ -12,6 +12,7 @@ const styledComponentsConfig = {
   fileName: true,
   minify: false,
 };
+/** @type {import('next').NextConfig} */
 const debugConfigOptions = {
   productionBrowserSourceMaps: true,
   outputFileTracing: true,
@@ -20,6 +21,10 @@ const debugConfigOptions = {
   experimental: {
     serverMinification: false,
     serverSourceMaps: true,
+    staleTimes: {
+      dynamic: 0, // Default is normally 30s.
+      static: 30, // Default is normally 180s.
+    },
   },
   logging: {
     fetches: {
