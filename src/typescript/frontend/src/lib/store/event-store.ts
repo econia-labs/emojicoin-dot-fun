@@ -21,9 +21,8 @@ import {
 } from "@sdk/const";
 import { type WritableDraft } from "immer";
 import { type MarketIDString, type SymbolString } from "./event-utils";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import { type RegisteredMarket, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { type HexInput } from "@aptos-labs/ts-sdk";
-import { type DetailedMarketMetadata } from "lib/queries/types";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import {
   type LatestBar,
@@ -82,7 +81,7 @@ export type EventState = {
   marketRegistrationEvents: readonly MarketRegistrationEvent[];
   // This should very rarely, if ever, be mutated. This is used primarily for supplying the
   // TradingView chart with symbol search data.
-  marketMetadataMap: Readonly<Map<MarketIDString, DetailedMarketMetadata>>;
+  marketMetadataMap: Readonly<Map<MarketIDString, RegisteredMarket>>;
 };
 
 type ResolutionSubscription = {
@@ -100,15 +99,15 @@ export type EventActions = {
   getGuids: () => Set<string>;
   initializeMarket: (marketID: AnyNumberString, symbolOrBytes?: HexInput) => void;
   getMarket: (marketID: AnyNumberString) => MarketStateValueType | undefined;
-  getMarketMetadata: (marketID: AnyNumberString) => DetailedMarketMetadata | undefined;
+  getRegisteredMarket: (marketID: AnyNumberString) => RegisteredMarket | undefined;
   getSymbols: () => Map<SymbolString, MarketIDString>;
   getMarketIDFromSymbol: (symbol: SymbolString) => MarketIDString | undefined;
   loadEventsFromServer: (eventsIn: Array<AnyHomogenousEvent> | UniqueHomogenousEvents) => void;
   pushEventFromClient: (event: AnyEmojicoinEvent) => void;
   addMarketData: (d: MarketDataView) => void;
   setLatestBars: ({ marketID, latestBars }: SetLatestBarsArgs) => void;
-  addToMarketMetadataMap: (market: DetailedMarketMetadata) => void;
-  initializeMarketMetadata: (data: Array<DetailedMarketMetadata>) => void;
+  addRegisteredMarket: (market: RegisteredMarket) => void;
+  initializeRegisteredMarketsMap: (data: Array<RegisteredMarket>) => void;
   subscribeToResolution: ({ symbol, resolution, cb }: ResolutionSubscription) => void;
   unsubscribeFromResolution: ({ symbol, resolution }: Omit<ResolutionSubscription, "cb">) => void;
   pushGlobalStateEvent: (event: GlobalStateEvent) => void;
@@ -400,17 +399,17 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           }
         });
       },
-      addToMarketMetadataMap: (market) => {
+      addRegisteredMarket: (market) => {
         set((state) => {
           state.marketMetadataMap.set(market.marketID, market);
           state.symbols.set(market.symbol, market.marketID);
         });
       },
-      initializeMarketMetadata: (markets) => {
+      initializeRegisteredMarketsMap: (markets) => {
         set((state) => {
           const entries = markets.map((m) => [m.marketID, m] as const);
           state.marketMetadataMap = new Map(entries);
-          const newMarketMetadataMap = new Map<string, DetailedMarketMetadata>();
+          const newMarketMetadataMap = new Map<string, RegisteredMarket>();
           const newSymbolToMarketIDMap = new Map<string, string>();
           markets.forEach((mkt) => {
             const { marketID, symbol } = mkt;
@@ -421,7 +420,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           state.symbols = newSymbolToMarketIDMap;
         });
       },
-      getMarketMetadata: (marketID) => {
+      getRegisteredMarket: (marketID) => {
         return get().marketMetadataMap.get(marketID.toString());
       },
       subscribeToResolution: ({ symbol, resolution, cb }) => {

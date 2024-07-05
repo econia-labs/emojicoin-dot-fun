@@ -17,7 +17,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   linksForCurrentPage,
   offsetHeight,
 }) => {
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";

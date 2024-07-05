@@ -143,10 +143,7 @@ const ChatBox = (props: ChatProps) => {
         </InfiniteScroll>
       </Flex>
 
-      <EmojiPickerWithInput
-        handleClick={sendChatMessage}
-        pickerButtonClassName={pickerClass}
-      />
+      <EmojiPickerWithInput handleClick={sendChatMessage} pickerButtonClassName={pickerClass} />
     </Column>
   );
 };

@@ -2,7 +2,7 @@ import { type HexInput } from "@aptos-labs/ts-sdk";
 import emojiRegex from "emoji-regex";
 import { normalizeHex } from "../utils/hex";
 import { SYMBOL_DATA } from "./symbol-data";
-import { type SymbolEmojiData, type EmojiName } from "./types";
+import { type SymbolEmojiData, type EmojiName, RegisteredMarket } from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
 export const getEmojisInString = (symbols: string): Array<string> => {

@@ -10,7 +10,7 @@ import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
 import useInputStore from "@store/input-store";
-import { SYMBOL_DATA, symbolBytesToEmojis } from "@sdk/emoji_data";
+import { type RegisteredMarket, SYMBOL_DATA, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { useRouter } from "next/navigation";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
 import { ROUTES } from "router/routes";
@@ -25,7 +25,7 @@ export const useRegisterMarket = () => {
   const { aptos, account, submit, signThenSubmit } = useAptos();
   const clear = useInputStore((state) => state.clear);
   const router = useRouter();
-  const addToMarketMetadataMap = useEventStore((state) => state.addToMarketMetadataMap);
+  const addRegisteredMarket = useEventStore((state) => state.addRegisteredMarket);
 
   const registerMarket = async () => {
     if (!account) {
@@ -75,7 +75,7 @@ export const useRegisterMarket = () => {
           events.marketRegistrationEvents[0].marketMetadata.emojiBytes
         );
         const marketID = events.marketRegistrationEvents[0].marketID.toString();
-        const detailedMarketMetadata = {
+        const market: RegisteredMarket = {
           marketID,
           symbolBytes: normalizeHex(events.marketRegistrationEvents[0].marketMetadata.emojiBytes),
           marketAddress: AccountAddress.from(
@@ -83,7 +83,7 @@ export const useRegisterMarket = () => {
           ).toString(),
           ...emojiData,
         };
-        addToMarketMetadataMap(detailedMarketMetadata);
+        addRegisteredMarket(market);
         const { symbol } = emojiData;
         await revalidateTagAction(TAGS.RegisteredMarkets);
         const newPath = path.join(ROUTES.market, symbol);
