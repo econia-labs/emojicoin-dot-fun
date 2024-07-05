@@ -11,14 +11,13 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
-import { SYMBOL_DATA, type SymbolEmojiData } from "@sdk/emoji_data";
+import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import useInputStore from "@store/input-store";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 
-// TODO: Consolidate the two mappings in here into one with a single data source.
 const convertChatMessageToEmojiAndIndices = (
   message: string,
   mapping: Map<string, SymbolEmojiData>
@@ -27,17 +26,14 @@ const convertChatMessageToEmojiAndIndices = (
   const indices: Record<string, number> = {};
   const bytesArray: Uint8Array[] = [];
   const sequence: number[] = [];
+
   for (const emoji of emojiArr) {
-    if (!mapping.has(emoji) && !SYMBOL_DATA.hasEmoji(emoji)) {
+    if (!mapping.has(emoji)) {
       throw new Error(`Emoji ${emoji} not found in mapping.`);
     }
     if (indices[emoji] === undefined) {
       indices[emoji] = bytesArray.length;
-      if (SYMBOL_DATA.hasEmoji(emoji)) {
-        bytesArray.push(SYMBOL_DATA.byEmoji(emoji)!.bytes);
-      } else {
-        bytesArray.push(mapping.get(emoji)!.bytes);
-      }
+      bytesArray.push(mapping.get(emoji)!.bytes);
     }
     sequence.push(indices[emoji]);
   }

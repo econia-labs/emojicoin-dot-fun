@@ -10,7 +10,7 @@ import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
 import useInputStore from "@store/input-store";
-import { type RegisteredMarket, SYMBOL_DATA, symbolBytesToEmojis } from "@sdk/emoji_data";
+import { type RegisteredMarket, SYMBOL_DATA, symbolToEmojis } from "@sdk/emoji_data";
 import { useRouter } from "next/navigation";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
 import { ROUTES } from "router/routes";
@@ -18,7 +18,6 @@ import path from "path";
 import { revalidateTagAction } from "lib/queries/cache-utils/revalidate";
 import { TAGS } from "lib/queries/cache-utils/tags";
 import { useEventStore } from "context/websockets-context";
-import { normalizeHex } from "@sdk/utils";
 
 export const useRegisterMarket = () => {
   const emojis = useInputStore((state) => state.emojis);
@@ -69,27 +68,30 @@ export const useRegisterMarket = () => {
     }
 
     if (res && isUserTransactionResponse(res)) {
+      // Parse the events from the transaction.
       const events = getEvents(res);
       if (events.marketRegistrationEvents.length === 1) {
-        const emojiData = symbolBytesToEmojis(
-          events.marketRegistrationEvents[0].marketMetadata.emojiBytes
-        );
-        const marketID = events.marketRegistrationEvents[0].marketID.toString();
+        // Add the market to the registered markets in state.
+        const event = events.marketRegistrationEvents[0];
+        const emojiData = symbolToEmojis(emojis);
+        const marketID = event.marketID.toString();
         const market: RegisteredMarket = {
           marketID,
-          symbolBytes: normalizeHex(events.marketRegistrationEvents[0].marketMetadata.emojiBytes),
-          marketAddress: AccountAddress.from(
-            events.marketRegistrationEvents[0].marketMetadata.marketAddress
-          ).toString(),
+          symbolBytes: `0x${emojiData.emojis.map((e) => e.hex.slice(2)).join("")}`,
+          marketAddress: AccountAddress.from(event.marketMetadata.marketAddress).toString(),
           ...emojiData,
         };
         addRegisteredMarket(market);
-        const { symbol } = emojiData;
+
+        // Revalidate the registered markets tag.
         await revalidateTagAction(TAGS.RegisteredMarkets);
-        const newPath = path.join(ROUTES.market, symbol);
+
+        // Redirect to the newly registered market page.
+        const newPath = path.join(ROUTES.market, emojiData.symbol);
         router.push(newPath);
         router.refresh();
       }
+      // Clear the emoji picker input.
       clear();
     } else {
       console.error("Error registering market:", error);
