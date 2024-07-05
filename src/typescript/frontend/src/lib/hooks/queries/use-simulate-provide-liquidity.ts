@@ -1,9 +1,12 @@
-import { type AnyNumber, type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import type { AnyNumber, AccountAddressString, TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { type Aptos } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { withResponseError } from "lib/hooks/queries/client";
-import { SimulateProvideLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import {
+  SimulateProvideLiquidity,
+  SimulateRemoveLiquidity,
+} from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 
 export const simulateProvideLiquidity = async (args: {
   aptos: Aptos;
@@ -42,10 +45,59 @@ export const useSimulateProvideLiquidity = (args: {
       invalid
         ? {
             base_amount: "0",
+            lp_coin_amount: "0",
           }
         : simulateProvideLiquidity({ aptos, ...args, marketAddress, quoteAmount }),
     staleTime: Infinity,
   });
 
-  return typeof data === "undefined" ? data : BigInt(data.base_amount);
+  return data;
+};
+
+export const simulateRemoveLiquidity = async (args: {
+  aptos: Aptos;
+  marketAddress: AccountAddressString;
+  lpCoinAmount: AnyNumber;
+  typeTags: [TypeTagInput];
+}) => {
+  return withResponseError(
+    SimulateRemoveLiquidity.view({
+      ...args,
+      provider: "0x0",
+    })
+  );
+};
+
+/**
+ * Simulate a liquidity provision with the view function.
+ * The only two params that the user can change are the marketAddress, and quoteAmount
+ */
+export const useSimulateRemoveLiquidity = (args: {
+  marketAddress: AccountAddressString | undefined;
+  lpCoinAmount: bigint | number | string;
+  typeTags: [TypeTagInput];
+}) => {
+  const { marketAddress } = args;
+  const { aptos } = useAptos();
+  const lpCoinAmount = BigInt(args.lpCoinAmount);
+  const invalid = lpCoinAmount === 0n || isNaN(Number(lpCoinAmount)) || marketAddress === undefined;
+
+  const { data } = useQuery({
+    queryKey: [
+      SimulateRemoveLiquidity.prototype.functionName,
+      aptos.config.network,
+      marketAddress,
+      lpCoinAmount.toString(),
+    ],
+    queryFn: () =>
+      invalid
+        ? {
+            base_amount: "0",
+            quote_amount: "0",
+          }
+        : simulateRemoveLiquidity({ aptos, ...args, marketAddress, lpCoinAmount }),
+    staleTime: Infinity,
+  });
+
+  return data;
 };

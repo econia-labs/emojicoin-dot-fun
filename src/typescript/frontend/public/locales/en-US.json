@@ -46,6 +46,7 @@
   "Top 20": "Top 20",
   "All": "All",
   "Add liquidity": "Add liquidity",
+  "Remove liquidity": "Remove liquidity",
   "Reserves": "Reserves",
   "Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity.": "Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity.",
   "Menu": "Menu",
