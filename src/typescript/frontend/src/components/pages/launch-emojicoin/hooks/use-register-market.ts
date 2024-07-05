@@ -1,22 +1,31 @@
 import { RegisterMarket, RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { type PendingTransactionResponse, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  isUserTransactionResponse,
+  type PendingTransactionResponse,
+  type UserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
 import useInputStore from "@store/input-store";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { SYMBOL_DATA, symbolBytesToEmojis } from "@sdk/emoji_data";
+import { useRouter } from "next/navigation";
+import { getEvents } from "@sdk/emojicoin_dot_fun";
+import { ROUTES } from "router/routes";
+import path from "path";
 
 export const useRegisterMarket = () => {
   const emojis = useInputStore((state) => state.emojis);
   const { aptos, account, submit, signThenSubmit } = useAptos();
   const clear = useInputStore((state) => state.clear);
+  const router = useRouter();
 
   const registerMarket = async () => {
     if (!account) {
       return;
     }
-    let res: PendingTransactionResponse | UserTransactionResponse | null = null;
+    let res: PendingTransactionResponse | UserTransactionResponse | undefined | null;
     let error: unknown;
     const builderArgs = {
       aptosConfig: aptos.config,
@@ -53,7 +62,18 @@ export const useRegisterMarket = () => {
       }
     }
 
-    if (res) {
+    console.log(res);
+
+    if (res && isUserTransactionResponse(res)) {
+      const events = getEvents(res);
+      if (events.marketRegistrationEvents.length === 1) {
+        // const marketID = events.marketRegistrationEvents[0].marketID.toString();
+        const symbol = symbolBytesToEmojis(
+          events.marketRegistrationEvents[0].marketMetadata.emojiBytes
+        ).symbol;
+        const newPath = path.join(ROUTES.market, symbol);
+        router.push(newPath);
+      }
       clear();
     } else {
       console.error("Error registering market:", error);

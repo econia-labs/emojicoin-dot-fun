@@ -41,7 +41,7 @@ const ClientLaunchEmojicoinPage = () => {
               <EmojiPickerWithInput
                 handleClick={registerMarket}
                 pickerButtonClassName="top-[220px] bg-black"
-                inputClassName="!border !border-solid !border-light-gray bg-black rounded-md !flex-row-reverse pl-3 pr-1.5"
+                inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
                 forChatInput={false}
               />
