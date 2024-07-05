@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
-import { useEmojicoinPicker, useMatchBreakpoints } from "hooks";
+import { useMatchBreakpoints } from "hooks";
 
 import { FlexGap } from "@containers";
 import { Input } from "components/inputs/input";
@@ -52,14 +52,6 @@ export const ClientPoolsPage = () => {
 
   const { isMobile } = useMatchBreakpoints();
 
-  // TODO: Initialize market state data here (and any other data that goes in the event store).
-
-  const { targetRef, tooltip } = useEmojicoinPicker({
-    onEmojiClick: () => {},
-    placement: "bottom",
-    width: 272,
-  });
-
   const onInputChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (isDisallowedEventKey(e)) {
       e.preventDefault();
@@ -99,9 +91,9 @@ export const ClientPoolsPage = () => {
                   label="Search pool:"
                   forId="searchPool"
                 >
-                  <Input id="searchPool" onKeyDown={onInputChange} ref={targetRef} />
+                  <Input id="searchPool" onKeyDown={onInputChange} />
                 </InputGroup>
-                {tooltip}
+                {"TODO"}
               </>
             ) : null}
           </FlexGap>
@@ -118,9 +110,9 @@ export const ClientPoolsPage = () => {
               label="Search:"
               forId="searchPool"
             >
-              <Input id="searchPool" onKeyDown={onInputChange} ref={targetRef} />
+              <Input id="searchPool" onKeyDown={onInputChange} />
             </InputGroup>
-            {tooltip}
+            {"TODO"}
           </StyledHeaderInner>
         </StyledSubHeader>
       ) : null}

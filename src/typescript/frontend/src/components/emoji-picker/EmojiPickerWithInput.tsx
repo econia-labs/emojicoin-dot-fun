@@ -70,7 +70,6 @@ export const EmojiPickerWithInput = ({
       if (inputRef.current) {
         const target = e.target as Node;
         const input = inputRef.current;
-
         if (!input.contains(target)) {
           setIsFocused(false);
         }
