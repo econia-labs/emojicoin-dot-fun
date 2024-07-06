@@ -96,7 +96,7 @@ const ChatBox = (props: ChatProps) => {
   };
 
   // TODO: Add infinite scroll to this.
-  // For now just don't render more than `HARD_LIMIT` swaps.
+  // For now just don't render more than `HARD_LIMIT` chats.
   const sortedChats = useMemo(() => {
     const HARD_LIMIT = 500;
     return toSortedDedupedEvents(props.data.chats, chats, "desc").slice(0, HARD_LIMIT);
