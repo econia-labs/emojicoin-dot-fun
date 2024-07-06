@@ -17,12 +17,11 @@ export const MobileMenuWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 100vh;
-  min-height: 100vh;
+  height: 100dvh;
   justify-content: center;
   align-items: center;
   background-color: ${ECONIA_BLUE};
-  padding: 60px 18px;
+  padding: 0 18px;
 `;
 
 export const MobileMenuInner = styled.div`

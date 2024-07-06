@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
 import { EXTERNAL_LINK_PROPS, Link } from "components/link";
-import { Flex } from "@containers";
 import { MobileSocialLinks } from "./components/mobile-social-links";
 import { MobileMenuItem } from "../index";
 
@@ -38,21 +37,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "clip";
-      document.body.style.margin = "0";
-      document.body.style.padding = "0";
-      document.body.style.boxSizing = "border-box";
-      
     } else {
       document.body.style.overflow = "auto";
-      document.body.style.margin = "unset";
-      document.body.style.padding = "unset";
-      document.body.style.boxSizing = "unset";
     }
     return () => {
       document.body.style.overflow = "auto";
-      document.body.style.margin = "unset";
-      document.body.style.padding = "unset";
-      document.body.style.boxSizing = "unset";
     };
   }, [isOpen]);
 
@@ -102,11 +91,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   };
 
   return (
-    <StyledMotion
-      initial="hidden"
-      animate={isOpen ? "visible" : "hidden"}
-      variants={slideVariants}
-    >
+    <StyledMotion initial="hidden" animate={isOpen ? "visible" : "hidden"} variants={slideVariants}>
       <MobileMenuWrapper>
         <MobileMenuInner>
           <ButtonWithConnectWalletFallback
@@ -159,9 +144,9 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           })}
         </MobileMenuInner>
 
-        <Flex position="absolute" bottom="60px" justifyContent="center" width="100%">
+        <div className="flex fixed bottom-[60px] justify-center w-full">
           <MobileSocialLinks />
-        </Flex>
+        </div>
       </MobileMenuWrapper>
     </StyledMotion>
   );
