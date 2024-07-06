@@ -1,6 +1,6 @@
 ---
 slug: /aptos-wallet-and-moonpay
-title: 🌕 Getting Started (Aptos Wallet + Moonpay)
+title: 🌕 Petra + Moonpay
 hide_title: false
 ---
 

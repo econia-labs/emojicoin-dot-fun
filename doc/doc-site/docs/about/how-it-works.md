@@ -2,25 +2,32 @@
 slug: /how-it-works
 title: ⚙️ How It Works
 hide_title: false
+description: Bonding Curve Enabled Launchpad
 ---
 
 ![gear](./gear-banner.png "gear")
 
-**Bonding Curve Enabled Launchpad**: When a new emojicoin launches, its pricing
+## Bonding Curve Enabled Launchpad
+
+When a new emojicoin launches, its pricing
 mechanics are defined as an abridged Concentrated Liquidity Automated Market
 Maker (CLAMM) with a single price range. Once the market cap of the emojicoin
 reaches 45,000 APT value, the money used to purchase the coin by traders is
 deployed to an emojicoin AMM pool.
 
-- The only coins that can be launched are emojicoins that are from the
-  standardized [Unicode emoji library].
-- **emojicoin AMM Pool**: The emojicoin AMM follows the popular and
-  standardized Uniswap v2 design.
-  \$$
-  X*Y=K
-  $\$
+## Emojicoin or Else
 
-## Example: The Life Cycle of the emojicoin — From Launchpad to Pool 🫃
+The only coins that can be launched are emojicoins that are from the
+standardized [Unicode emoji library].
+
+## Emojicoin AMM Pool
+
+The emojicoin AMM follows the popular and standardized Uniswap v2 design.
+$$
+X \cdot Y = K
+$$
+
+## Life Cycle of Emojicoin: Launchpad to Pool
 
 **Introduction**: Congratulations! You've decided to take on the daring journey
 of parenthood and give birth to a beautiful emojicoin. Econia is your favorite
@@ -31,12 +38,12 @@ Unlike birthing a human child, giving birth to your beautiful Econia emojicoin
 is painless and cheap by leveraging the Aptos blockchain. We'll now walk you
 through your emojicoin's lifecycle.
 
-### First Baby Steps — Launch your emojicoin
+### First Baby Steps: Launch your emojicoin
 
 - With just 1 APT, you can launch your emojicoin — We don't believe in screwing
   over new parents with expensive medical bills.
 
-### Growing up and raising your emojicoin  — Leaving the bonding curve
+### Growing Up: Exiting the Bonding Curve
 
 - Emojicoins are like just like humans, as they grow up and mature they want to
   leave the house to take the world on their own.
@@ -48,7 +55,7 @@ through your emojicoin's lifecycle.
   For the emojicoin to reach a 45,000 APT market cap, it must have a net
   buy/sell pressure of +10,000 APT.
 
-### Going to College and Joining emojicoin AMM Liquidity Pools
+### Going to College: Emojicoin Liquidity Pools
 
 - Once your emojicoin reaches a 45,000 APT market cap size, the coin's market
   experiences a 'state change' — The 10,000 APT used to purchase the coin is

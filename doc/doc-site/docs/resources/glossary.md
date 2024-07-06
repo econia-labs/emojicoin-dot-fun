@@ -2,6 +2,7 @@
 slug: /glossary
 title: 🐒 Glossary
 hide_title: false
+description: Degenerate vocabulary you must know.
 ---
 
 <!--- cspell:words degen -->

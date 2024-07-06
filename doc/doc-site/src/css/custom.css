@@ -11,8 +11,8 @@
 
 /* You can override the default Infima variables here. */
 @font-face {
-  font-family: 'Inter-Regular';
-  src: url('/static/img/fonts/Inter-Regular.woff2') format('woff2');
+  font-family: 'Inter-Bold';
+  src: url('/static/img/fonts/Inter-Bold.woff2') format('woff2');
 }
 
 @font-face {
@@ -31,7 +31,7 @@
 
   --ifm-code-font-size: 95%;
   --letter-spacing-medium: 0.03em;   /* 10% letter-spacing for medium font */
-  --ifm-font-family-medium: "Inter-Regular", sans-serif; /* Custom property for medium font */
+  --ifm-font-family-medium: "Inter-Bold", sans-serif; /* Custom property for medium font */
   --ifm-font-family-base: "Inter-Regular", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 
   --ifm-navbar-height: 72px;
@@ -72,7 +72,7 @@ h1, h2, h3, h4, h5, h6 {
 body {
   font-family: var(--ifm-font-family-base);
   letter-spacing: var(--letter-spacing-regular);
-  font-weight: 100; /* Ensure regular weight is applied */
+  font-weight: 400; /* Ensure regular weight is applied */
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -112,9 +112,9 @@ html {
 }
 
 .navbar__search-input {
-  border-radius: 0px;
-  border: 1px solid #aaaaaa;
-  color: #ffffff;
+  border-radius: 3px;
+  border: 1px solid #33343D;
+  color: #33343D;
   padding: "8px 8px 0px 36px";
   width: 252px;
   height: 36px;
@@ -122,7 +122,7 @@ html {
 
 .navbar__search-input::placeholder {
   text-transform: uppercase;
-  color: #ffffff;
+  color: #717386;
 }
 
 .menu__list {
@@ -156,7 +156,7 @@ th {
 }
 
 .table-of-contents__link {
-  color: #aaa;
+  color: #33343D;
 }
 
 .table-of-contents__link--active {
@@ -168,7 +168,7 @@ th {
 }
 
 .pagination-nav__link {
-  border-radius: 0px;
+  border-radius: 3px;
   padding: 0px;
   border: none;
   transition: background-color 300ms ease, transform 300ms ease,
@@ -185,28 +185,28 @@ th {
 
 .pagination-nav__link--prev {
   text-align: left;
-  background: #161616;
-  color: #ffffff;
+  background: #CD2F8D;
+  color: #000000;
 }
 
 .pagination-nav__link--prev:hover {
-  color: #ffffff;
+  color: #000000;
 }
 
 .pagination-nav__link--next {
   text-align: right;
-  background: #ffffff;
-  color: #161616;
+  background: #086CD9;
+  color: #000000;
 }
 
 .pagination-nav__link--next:hover {
-  color: #161616;
+  color: #0B0B0C;
 }
 
 .pagination-nav__label {
   text-transform: uppercase;
-  font-size: 14px;
-  font-weight: normal;
+  font-size: 16px;
+  font-weight: 700;
   padding: 12px 8px;
   line-height: 20px;
 }
@@ -250,13 +250,13 @@ th {
 }
 
 .link-card {
-  background-color: #020202;
+  background-color: #0B0B0C;
   border-radius: var(--ifm-card-border-radius); /* Apply card border radius */
   padding: 36px;
   width: 400px;
   height: 400px;
   cursor: pointer;
-  border: 1px solid #565656;
+  border: 1px solid #33343D;
   transition: all 300ms ease, transform 300ms ease, color 300ms ease, -webkit-transform 300ms ease;
   margin: 0; /* Ensure no extra margins are added */
 }
@@ -284,6 +284,6 @@ th {
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
-  color: #dadada;
+  color: #717386;
 }
 

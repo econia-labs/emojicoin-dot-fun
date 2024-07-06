@@ -2,6 +2,7 @@
 slug: /faq
 title: 💬 FAQ
 hide_title: false
+description: Nothing the emojicoin monkey says should be taken seriously.
 ---
 
 ![monkey](./monkey.png "monkey")

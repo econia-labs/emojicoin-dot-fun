@@ -1,6 +1,6 @@
 ---
 slug: /aptos-wallet-and-cex
-title: 🌐 Getting Started (Aptos Wallet + CEX)
+title: 🌐 Petra + CEX
 hide_title: false
 ---
 
