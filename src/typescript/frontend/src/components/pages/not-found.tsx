@@ -10,7 +10,7 @@ import { Page } from "components/layout/components/page";
 import Button from "components/button";
 
 export const StyledNotFoundPage = styled(Page)`
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: center;

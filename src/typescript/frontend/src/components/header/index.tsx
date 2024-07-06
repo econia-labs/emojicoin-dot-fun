@@ -86,12 +86,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
           )}
         </Flex>
       </Container>
-      <MobileMenu
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        linksForCurrentPage={linksForCurrentPage}
-        offsetHeight={offsetHeight}
-      />
+      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={linksForCurrentPage} />
     </StyledContainer>
   );
 };

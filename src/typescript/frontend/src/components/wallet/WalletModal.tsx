@@ -197,7 +197,7 @@ export const WalletModal = ({
 
   return (
     <BaseModal
-      className="md:w-[430px]"
+      className="w-[430px]"
       isOpen={open}
       onClose={handleClose}
       showBackButton={false}
