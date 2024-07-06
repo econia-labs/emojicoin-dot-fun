@@ -204,11 +204,13 @@ export const EmojiPickerWithInput = ({
       <motion.button
         animate={pickerInvisible ? "hidden" : focused ? "visible" : "hidden"}
         variants={variants}
+        initial={{
+          opacity: 0,
+          scale: 0,
+        }}
         style={{
-          opacity: 0, // Initially hidden.
           zIndex: focused ? 50 : -1,
           cursor: focused ? "auto" : "pointer",
-          scale: focused ? 1 : 0,
         }}
         className={`absolute z-50 ${pickerButtonClassName}`}
       >
