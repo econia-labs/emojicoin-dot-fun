@@ -27,7 +27,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
   setIsOpen,
   linksForCurrentPage,
-  offsetHeight,
 }) => {
   const { wallet, account, disconnect } = useWallet();
   const { copyAddress } = useAptos();
@@ -97,9 +96,8 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       initial="hidden"
       animate={isOpen ? "visible" : "hidden"}
       variants={slideVariants}
-      offsetHeight={offsetHeight}
     >
-      <MobileMenuWrapper offsetHeight={offsetHeight}>
+      <MobileMenuWrapper>
         <MobileMenuInner>
           <ButtonWithConnectWalletFallback
             className="w-full"
