@@ -48,9 +48,9 @@
 
   --ifm-heading-line-height: 35px;
 
-  /* 
+  /*
   --ifm-heading-color: #ffffff;
-  --ifm-heading-font-family: "Inter-Regular", sans-serif; 
+  --ifm-heading-font-family: "Inter-Regular", sans-serif;
   --ifm-heading-line-height: 58px;
   */
 
@@ -195,7 +195,7 @@ th {
 
 .pagination-nav__link--next {
   text-align: right;
-  background: #086CD9;
+  background: #2FA90F;
   color: #000000;
 }
 

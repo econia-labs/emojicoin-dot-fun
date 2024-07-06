@@ -14,15 +14,27 @@ caught the emojicoin bug.*
 
 A:  1 APT — About the cost of a bushel of bananas
 
+<!--- markdownlint-disable MD013 -->
+
 **Q: What is the market cap needed for an emojicoin to leave the bonding curve?**
+
+<!--- markdownlint-enable MD013 -->
 
 A:  45,000 APT Market Cap
 
+<!--- markdownlint-disable MD013 -->
+
 **Q: Assuming nobody sells their tokens, how much buy pressure is required for the Emojicoin reach a 45,000 APT market cap?**
+
+<!--- markdownlint-enable MD013 -->
 
 A:  10,000 APT
 
+<!--- markdownlint-disable MD013 -->
+
 **Q: If an Emojicoin market is already launched, can I launch a second one of the same Emoji?**
+
+<!--- markdownlint-enable MD013 -->
 
 A:  No, once a particular Emojicoin trading pair is launched, you cannot launch
 another. You should potentially explore launching Emojicoin combinations
