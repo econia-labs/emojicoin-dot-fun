@@ -24,7 +24,7 @@ const ClientLaunchEmojicoinPage = () => {
   const registerMarket = useRegisterMarket();
   const setPickerInvisible = useInputStore((state) => state.setPickerInvisible);
   const length = sumBytes(emojis);
-  const invalid = length === 0 || length >= 10;
+  const invalid = length === 0 || length > 10;
 
   useEffect(() => {
     setMode("register");

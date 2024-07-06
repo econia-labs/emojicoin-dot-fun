@@ -2,7 +2,7 @@ import { createContext, type PropsWithChildren, useContext, useState } from "rea
 import { WalletModal } from "components/wallet/WalletModal";
 
 export type WalletModalContextState = {
-  connectWallet: () => void;
+  openWalletModal: () => void;
 };
 
 export const WalletModalContext = createContext<WalletModalContextState | undefined>(undefined);
@@ -10,7 +10,7 @@ export const WalletModalContext = createContext<WalletModalContextState | undefi
 export function WalletModalContextProvider({ children }: PropsWithChildren) {
   const [open, setOpen] = useState<boolean>(false);
   const value: WalletModalContextState = {
-    connectWallet: () => {
+    openWalletModal: () => {
       setOpen(true);
     },
   };

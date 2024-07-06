@@ -30,6 +30,7 @@ export type AptosContextState = {
   submit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
   signThenSubmit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
   account: WalletContextState["account"];
+  copyAddress: () => void;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -50,6 +51,22 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     }
     return getAptos();
   }, [network]);
+
+  const copyAddress = useCallback(async () => {
+    if (!account?.address) return;
+    try {
+      await navigator.clipboard.writeText(account.address);
+      toast.success("Copied address to clipboard! 📋", {
+        pauseOnFocusLoss: false,
+        autoClose: 2000,
+      });
+    } catch {
+      toast.error("Failed to copy address to clipboard. 😓", {
+        pauseOnFocusLoss: false,
+        autoClose: 2000,
+      });
+    }
+  }, [account?.address]);
 
   const handleTransactionSubmission = useCallback(
     async (
@@ -145,6 +162,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     account,
     submit,
     signThenSubmit,
+    copyAddress,
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;
