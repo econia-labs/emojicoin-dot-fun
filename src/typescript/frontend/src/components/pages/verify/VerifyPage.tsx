@@ -59,9 +59,9 @@ export const ClientVerifyPage = () => {
 
   return (
     <>
-      <div className="absolute top-0 left-0 w-full h-full bg-black z-50 overflow-clip">
+      <div className="absolute top-0 left-0 w-full h-full bg-black z-50 overflow-hidden">
         <div className="flex items-center justify-center w-full h-full">
-          <div className="flex flex-col uppercase text-ec-blue gap-4 text-2xl">
+          <div className="flex flex-col justify-begin uppercase text-ec-blue gap-4 text-2xl">
             {connected && verified === false && (
               <motion.div
                 onMouseEnter={replayBack}
