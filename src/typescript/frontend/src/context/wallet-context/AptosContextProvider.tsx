@@ -1,11 +1,19 @@
 import {
   AptosApiError,
+  isPendingTransactionResponse,
   type Aptos,
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { type NetworkInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
-import { createContext, type PropsWithChildren, useCallback, useContext, useMemo } from "react";
+import {
+  createContext,
+  type PropsWithChildren,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "react-toastify";
 
 import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
@@ -18,6 +26,7 @@ import {
 import { useEventStore } from "context/websockets-context";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
+import { sleep, UnitOfTime } from "@sdk/utils";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -25,12 +34,24 @@ export type SubmissionResponse = Promise<{
   error: unknown;
 } | null>;
 
+export type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
+export type ResponseType = PendingTransactionResponse | UserTransactionResponse | unknown | null;
+export type EntryFunctionNames =
+  | "chat"
+  | "swap"
+  | "register_market"
+  | "provide_liquidity"
+  | "remove_liquidity";
+
 export type AptosContextState = {
   aptos: Aptos;
   submit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
   signThenSubmit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
   account: WalletContextState["account"];
   copyAddress: () => void;
+  status: TransactionStatus;
+  response: ResponseType;
+  functionName: EntryFunctionNames | null;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -44,6 +65,9 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     signTransaction,
   } = useWallet();
   const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
+  const [status, setStatus] = useState<TransactionStatus>("idle");
+  const [response, setResponse] = useState<ResponseType>(null);
+  const [functionName, setFunctionName] = useState<EntryFunctionNames | null>(null);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
@@ -78,16 +102,26 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       try {
         const { aptos, res } = await trySubmit();
         response = res;
+        setStatus("pending");
+        setResponse(res);
         try {
           const awaitedResponse = (await aptos.waitForTransaction({
             transactionHash: res.hash,
           })) as UserTransactionResponse;
+          setStatus("success");
+          setResponse(awaitedResponse);
           successfulTransactionToast(awaitedResponse, network);
           response = awaitedResponse;
         } catch (e) {
+          setStatus("error");
+          setResponse(e);
           toast.error("Transaction failed", DEFAULT_TOAST_CONFIG);
           console.error(e);
           error = e;
+        } finally {
+          await sleep(DEFAULT_TOAST_CONFIG.autoClose, UnitOfTime.Milliseconds);
+          setStatus("idle");
+          setResponse(null);
         }
       } catch (e: unknown) {
         if (e instanceof AptosApiError) {
@@ -119,6 +153,8 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       if (checkNetworkAndToast(network, true)) {
         const trySubmit = async () => {
           const builder = await builderFn();
+          setStatus("prompt");
+          setFunctionName(builder.payloadBuilder.functionName as EntryFunctionNames);
           const input = builder.payloadBuilder.toInputPayload();
           return adapterSignAndSubmitTxn(input).then((res) => ({
             aptos: builder.aptos,
@@ -141,6 +177,8 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       if (checkNetworkAndToast(network, true)) {
         const trySubmit = async () => {
           const builder = await builderFn();
+          setStatus("prompt");
+          setFunctionName(builder.payloadBuilder.functionName);
           const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
           return submitTransaction({
             transaction: builder.rawTransactionInput,
@@ -163,6 +201,9 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     submit,
     signThenSubmit,
     copyAddress,
+    status,
+    functionName,
+    response,
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;

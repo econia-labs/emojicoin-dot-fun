@@ -12,6 +12,7 @@ import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { useEffect } from "react";
 import { ColoredBytesIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -25,6 +26,7 @@ const ClientLaunchEmojicoinPage = () => {
   const setPickerInvisible = useInputStore((state) => state.setPickerInvisible);
   const length = sumBytes(emojis);
   const invalid = length === 0 || length > 10;
+  const { status, response, functionName } = useAptos();
 
   useEffect(() => {
     setMode("register");
