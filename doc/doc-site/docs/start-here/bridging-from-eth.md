@@ -2,7 +2,6 @@
 slug: /bridging-from-eth
 title: 🌈 Bridging From Ethereum to Aptos
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
 
 <!--- cspell:words Panora -->

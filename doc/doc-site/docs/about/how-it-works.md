@@ -2,8 +2,9 @@
 slug: /how-it-works
 title: ⚙️ How It Works
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
+
+![gear](./gear-banner.png "gear")
 
 **Bonding Curve Enabled Launchpad**: When a new emojicoin launches, its pricing
 mechanics are defined as an abridged Concentrated Liquidity Automated Market

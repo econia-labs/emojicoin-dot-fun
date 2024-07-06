@@ -1,8 +1,7 @@
 ---
 slug: /glossary
-title: 🍆 Glossary
+title: 🐒 Glossary
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
 
 <!--- cspell:words degen -->

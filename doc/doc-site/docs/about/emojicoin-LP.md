@@ -2,7 +2,6 @@
 slug: /emojicoin-LP
 title: ⛲ Emojicoin LP
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
 
 AMMs, such as those used on the emojicoin platform, enable the creation of

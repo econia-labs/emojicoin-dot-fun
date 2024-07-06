@@ -2,7 +2,6 @@
 slug: /why-we-built-emojicoin
 title: 🛠️ Why We built emojicoin.fun
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
 
 <!--- cspell:words memecoins -->

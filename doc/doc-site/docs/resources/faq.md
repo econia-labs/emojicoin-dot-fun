@@ -1,14 +1,13 @@
 ---
 slug: /faq
-title: 💬 Faq
+title: 💬 FAQ
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
 
+![monkey](./monkey.png "monkey")
 Please note this is not financial advice and nothing the emojicoin monkey says
 should be taken seriously. He just likes to listen to himself talk and has
 caught the emojicoin bug.
-![monkey](./monkey.png "monkey")
 
 ### Q: What is the cost to launch an Emojicoin?
 
