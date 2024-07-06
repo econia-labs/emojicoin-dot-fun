@@ -24,11 +24,7 @@ const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
   });
 
   return (
-    <StyledItemWrapper
-      onMouseOver={replay}
-      onClick={onClick}
-      borderBottom={borderBottom}
-    >
+    <StyledItemWrapper onMouseOver={replay} onClick={onClick} borderBottom={borderBottom}>
       <div className={withIcon?.className}>
         {withIcon?.icon}
         <Text
