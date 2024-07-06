@@ -66,7 +66,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
       {!connected || !children ? (
         <Button
           className={
-            className + (mobile ? " px-[9px] border-b border-b-dashed border-dark-gray" : "")
+            className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
           }
           onClick={(e) => {
             e.preventDefault();
