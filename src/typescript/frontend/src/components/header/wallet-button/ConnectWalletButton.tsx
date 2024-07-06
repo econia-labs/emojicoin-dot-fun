@@ -49,6 +49,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
     overdrive: false,
     speed: 0.5,
     ignore: [" "],
+    playOnMount: mobile,
     onAnimationStart: () => setEnabled(false),
     onAnimationEnd: () => setEnabled(true),
   });

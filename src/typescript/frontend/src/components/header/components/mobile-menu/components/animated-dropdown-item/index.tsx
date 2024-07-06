@@ -1,14 +1,11 @@
 import MobileMenuItem from "components/header/components/mobile-menu-item";
-import { type AnimationControls, motion } from "framer-motion";
+import {
+  type AnimationControls,
+  motion,
+  type TargetAndTransition,
+  type VariantLabels,
+} from "framer-motion";
 import { type ReactElement } from "react";
-
-export const AnimatedBorder = ({ controls }: { controls: AnimationControls }) => (
-  <motion.div
-    animate={controls}
-    initial={{ opacity: 0 }}
-    className="absolute border-b border-dashed border-b-dark-gray bg-transparent h-[1px] w-full"
-  />
-);
 
 export const AnimatedDropdownItem = ({
   title,
@@ -26,7 +23,12 @@ export const AnimatedDropdownItem = ({
   return (
     <>
       <div className="relative">
-        <motion.div className="overflow-hidden" animate={controls} initial={{ height: 0 }}>
+        <motion.div
+          className="overflow-hidden"
+          animate={controls}
+          initial={{ height: 0 }}
+          exit={{ height: 0 }}
+        >
           <MobileMenuItem
             title={title}
             withIcon={{
@@ -37,7 +39,12 @@ export const AnimatedDropdownItem = ({
             borderBottom={false}
           />
         </motion.div>
-        <AnimatedBorder controls={borderControls} />
+        <motion.div
+          animate={borderControls}
+          initial={{ opacity: 0 }}
+          exit={{ opacity: 0 }}
+          className="absolute border-b border-dashed border-b-dark-gray bg-transparent h-[1px] w-full"
+        />
       </div>
     </>
   );

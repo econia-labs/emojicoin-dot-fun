@@ -18,9 +18,8 @@ import {
 } from "@aptos-labs/wallet-adapter-react";
 import { Copy, LogOut, User } from "lucide-react";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
-import { motion, useAnimationControls } from "framer-motion";
+import { AnimatePresence, useAnimationControls } from "framer-motion";
 import AnimatedDropdownItem from "./components/animated-dropdown-item";
-import AnimatedBorder from "./components/animated-dropdown-item/AnimatedBorder";
 
 const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch]";
 
@@ -33,6 +32,9 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   const { wallet, account, disconnect } = useWallet();
   const { copyAddress } = useAptos();
   const { openWalletModal } = useWalletModal();
+  const subMenuControls = useAnimationControls();
+  const borderControls = useAnimationControls();
+  const [subMenuOpen, setSubMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -45,19 +47,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     };
   }, [isOpen]);
 
-  const handleCloseMobileMenu = () => {
-    setIsOpen(false);
-  };
-
-  const subMenuControls = useAnimationControls();
-  const borderControls = useAnimationControls();
-  const [subMenuOpen, setSubMenuOpen] = useState(false);
-
-  const handleCloseSubMenu = useCallback(() => {
-    setSubMenuOpen(false);
-    borderControls.start({ opacity: 0 });
-    subMenuControls.start({ height: 0 });
-  }, [subMenuControls, borderControls]);
+  useEffect(() => {
+    if (!isOpen) {
+      handleCloseSubMenu();
+    }
+    /* eslint-disable-next-line */
+  }, [isOpen]);
 
   useEffect(() => {
     if (!account) {
@@ -66,17 +61,28 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     /* eslint-disable-next-line */
   }, [account]);
 
+  const handleCloseMobileMenu = async () => {
+    await handleCloseSubMenu();
+    setIsOpen(false);
+  };
+
+  const handleCloseSubMenu = useCallback(async () => {
+    setSubMenuOpen(false);
+    await borderControls.start({ opacity: 0 });
+    await subMenuControls.start({ height: 0 });
+  }, [subMenuControls, borderControls]);
+
   const subMenuOnClick = async () => {
     if (!account) {
       openWalletModal();
     } else {
       if (!subMenuOpen) {
+        setSubMenuOpen(true);
         await borderControls.start({
           opacity: 1,
           transition: { delay: 0, duration: 0 },
         });
         await subMenuControls.start({ height: 40 });
-        setSubMenuOpen(true);
       } else {
         const a = borderControls.start({ opacity: 0 });
         const b = subMenuControls.start({ height: 0 });
@@ -100,30 +106,42 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             mobile={true}
             onClick={subMenuOnClick}
           />
-          {wallet && isAptosConnectWallet(wallet) && (
-            <a href={APTOS_CONNECT_ACCOUNT_URL} {...EXTERNAL_LINK_PROPS}>
-              <AnimatedDropdownItem
-                title="Account"
-                icon={<User className={IconClass} />}
-                controls={subMenuControls}
-                borderControls={borderControls}
-              />
-            </a>
-          )}
-          <AnimatedDropdownItem
-            title="Copy address"
-            icon={<Copy className={IconClass} />}
-            onClick={copyAddress}
-            controls={subMenuControls}
-            borderControls={borderControls}
-          />
-          <AnimatedDropdownItem
-            title="Disconnect"
-            icon={<LogOut className={IconClass} />}
-            onClick={disconnect}
-            controls={subMenuControls}
-            borderControls={borderControls}
-          />
+          <AnimatePresence>
+            {subMenuOpen && (
+              <>
+                {wallet && isAptosConnectWallet(wallet) && (
+                  <a
+                    key="aptos-connect-dropdown"
+                    href={APTOS_CONNECT_ACCOUNT_URL}
+                    {...EXTERNAL_LINK_PROPS}
+                  >
+                    <AnimatedDropdownItem
+                      title="Account"
+                      icon={<User className={IconClass} />}
+                      controls={subMenuControls}
+                      borderControls={borderControls}
+                    />
+                  </a>
+                )}
+                <AnimatedDropdownItem
+                  key="copy-address-dropdown"
+                  title="Copy address"
+                  icon={<Copy className={IconClass} />}
+                  onClick={copyAddress}
+                  controls={subMenuControls}
+                  borderControls={borderControls}
+                />
+                <AnimatedDropdownItem
+                  key="disconnect-dropdown"
+                  title="Disconnect"
+                  icon={<LogOut className={IconClass} />}
+                  onClick={disconnect}
+                  controls={subMenuControls}
+                  borderControls={borderControls}
+                />
+              </>
+            )}
+          </AnimatePresence>
           {linksForCurrentPage.map(({ title, path }, i) => {
             return (
               <Link key={title} href={path} onClick={handleCloseMobileMenu} width="100%">
