@@ -22,10 +22,11 @@ standardized [Unicode emoji library].
 
 ## Emojicoin AMM Pool
 
-The emojicoin AMM follows the popular and standardized Uniswap v2 design.
-\$$
+The emojicoin AMM follows the popular and standardized Uniswap v2 design:
+
+$$
 X \cdot Y = K
-$\$
+$$
 
 ## Life Cycle of Emojicoin: Launchpad to Pool
 
