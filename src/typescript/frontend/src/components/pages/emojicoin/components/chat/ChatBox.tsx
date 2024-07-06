@@ -62,7 +62,6 @@ const ChatBox = (props: ChatProps) => {
     return () => unsubscribe.chat(marketID);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
-  
 
   useEffect(() => {
     setMode("chat");

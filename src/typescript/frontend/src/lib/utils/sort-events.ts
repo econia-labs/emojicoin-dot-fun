@@ -24,58 +24,45 @@ export const sortByValue = <T extends bigint | number>(
   return order === "desc" ? -1 : 1;
 };
 
+type Chat = Types.ChatEvent;
+type Swap = Types.SwapEvent;
+type Liquidity = Types.LiquidityEvent;
+type State = Types.StateEvent;
+type PeriodicState = Types.PeriodicStateEvent;
+type MarketRegistration = Types.MarketRegistrationEvent;
+type GlobalState = Types.GlobalStateEvent;
+
 /**
- * This function sorts and returns a copied array.
+ * This function sorts an array. It does *NOT* mutate the original array.
  * NOTE: It assumes that the array is homogenous.
  */
-export const toSortedEvents = <
-  T extends
-    | Types.ChatEvent
-    | Types.SwapEvent
-    | Types.LiquidityEvent
-    | Types.StateEvent
-    | Types.PeriodicStateEvent
-    | Types.MarketRegistrationEvent
-    | Types.GlobalStateEvent,
->(
-  arr: readonly T[],
+export const sortEvents = <T extends AnyEmojicoinEvent>(
+  arr: T[],
   order: "asc" | "desc" = "desc"
-): T[] => {
+) => {
   if (arr.length <= 1) {
-    return [...arr];
+    return;
   } else {
     if (isChatEvent(arr[0])) {
-      return (arr as readonly Types.ChatEvent[]).toSorted((a, b) =>
-        sortByValue(a.emitMarketNonce, b.emitMarketNonce, order)
-      ) as T[];
+      (arr as Chat[]).sort((a, b) => sortByValue(a.emitMarketNonce, b.emitMarketNonce, order));
     } else if (isSwapEvent(arr[0])) {
-      return (arr as readonly Types.SwapEvent[]).toSorted((a, b) =>
-        sortByValue(a.marketNonce, b.marketNonce, order)
-      ) as T[];
+      (arr as Swap[]).sort((a, b) => sortByValue(a.marketNonce, b.marketNonce, order));
     } else if (isLiquidityEvent(arr[0])) {
-      return (arr as readonly Types.SwapEvent[]).toSorted((a, b) =>
-        sortByValue(a.marketNonce, b.marketNonce, order)
-      ) as T[];
+      (arr as Liquidity[]).sort((a, b) => sortByValue(a.marketNonce, b.marketNonce, order));
     } else if (isStateEvent(arr[0])) {
-      return (arr as readonly Types.StateEvent[]).toSorted((a, b) =>
-        sortByValue(a.lastSwap.nonce, b.lastSwap.nonce, order)
-      ) as T[];
+      (arr as State[]).sort((a, b) => sortByValue(a.lastSwap.nonce, b.lastSwap.nonce, order));
     } else if (isPeriodicStateEvent(arr[0])) {
-      return (arr as readonly Types.PeriodicStateEvent[]).toSorted((a, b) =>
+      (arr as PeriodicState[]).sort((a, b) =>
         sortByValue(
           a.periodicStateMetadata.emitMarketNonce,
           b.periodicStateMetadata.emitMarketNonce,
           order
         )
-      ) as T[];
+      );
     } else if (isMarketRegistrationEvent(arr[0])) {
-      return (arr as readonly Types.MarketRegistrationEvent[]).toSorted((a, b) =>
-        sortByValue(a.marketID, b.marketID, order)
-      ) as T[];
+      (arr as MarketRegistration[]).sort((a, b) => sortByValue(a.marketID, b.marketID, order));
     } else if (isGlobalStateEvent(arr[0])) {
-      return (arr as readonly Types.GlobalStateEvent[]).toSorted((a, b) =>
-        sortByValue(a.registryNonce, b.registryNonce, order)
-      ) as T[];
+      (arr as GlobalState[]).sort((a, b) => sortByValue(a.registryNonce, b.registryNonce, order));
     } else {
       throw new Error("Invalid array type.");
     }
@@ -121,5 +108,6 @@ export const toSortedDedupedEvents = <T extends AnyEmojicoinEvent>(
     recorded.add(event.guid);
     return true;
   });
-  return toSortedEvents(deduped, order);
+  sortEvents(deduped, order);
+  return deduped;
 };
