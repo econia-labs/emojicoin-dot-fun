@@ -22,7 +22,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   onClick,
 }) => {
   const { connected, account } = useWallet();
-  const { connectWallet } = useWalletModal();
+  const { openWalletModal } = useWalletModal();
   const { t } = translationFunction();
 
   const [enabled, setEnabled] = useState(false);
@@ -70,7 +70,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
           }
           onClick={(e) => {
             e.preventDefault();
-            onClick ? onClick() : connectWallet();
+            onClick ? onClick() : openWalletModal();
             handleReplay();
           }}
           onMouseOver={handleReplay}

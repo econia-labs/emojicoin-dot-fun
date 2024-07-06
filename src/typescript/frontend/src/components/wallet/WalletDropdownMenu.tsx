@@ -9,20 +9,21 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "components/dropdown-menu";
-import React, { useCallback, useMemo, useState } from "react";
-import { toast } from "react-toastify";
+import React, { useMemo, useState } from "react";
 import { User, Copy, LogOut } from "lucide-react";
 import { translationFunction } from "context/language-context";
 import { truncateAddress } from "@sdk/utils/misc";
 import { useScramble } from "use-scramble";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { WalletDropdownItem } from "./WalletDropdownItem";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 
 const WIDTH = "24ch";
 
 const WalletDropdownMenu = () => {
   const { t } = translationFunction();
   const { account, disconnect, wallet } = useWallet();
+  const { copyAddress } = useAptos();
   const [enabled, setEnabled] = useState(true);
 
   const text = useMemo(() => {
@@ -32,22 +33,6 @@ const WalletDropdownMenu = () => {
       return t("Connected");
     }
   }, [account, t]);
-
-  const copyAddress = useCallback(async () => {
-    if (!account?.address) return;
-    try {
-      await navigator.clipboard.writeText(account.address);
-      toast.success("Copied address to clipboard! 📋", {
-        pauseOnFocusLoss: false,
-        autoClose: 2000,
-      });
-    } catch {
-      toast.error("Failed to copy address to clipboard. 😓", {
-        pauseOnFocusLoss: false,
-        autoClose: 2000,
-      });
-    }
-  }, [account?.address]);
 
   const { ref, replay } = useScramble({
     text,
