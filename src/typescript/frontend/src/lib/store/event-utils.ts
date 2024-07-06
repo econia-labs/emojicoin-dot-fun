@@ -30,34 +30,6 @@ if (MODULE_ADDRESS.toStringWithoutPrefix().startsWith("0")) {
   console.error("-".repeat(80) + "\n");
 }
 
-export const mergeSortedEvents = <T extends AnyEmojicoinEvent>(
-  existing: readonly T[],
-  incoming: T[]
-): T[] => {
-  const merged: T[] = [];
-  let i = 0;
-  let j = 0;
-  while (i < existing.length && j < incoming.length) {
-    if (existing[i].version > incoming[j].version) {
-      merged.push(existing[i]);
-      i++;
-    } else {
-      merged.push(incoming[j]);
-      j++;
-    }
-  }
-  while (i < existing.length) {
-    merged.push(existing[i]);
-    i++;
-  }
-  while (j < incoming.length) {
-    merged.push(incoming[j]);
-    j++;
-  }
-
-  return merged;
-};
-
 type AnyDBJsonEvent = DBJsonData<AnyEmojicoinJSONEvent>;
 
 export type EventDeserializationFunction<

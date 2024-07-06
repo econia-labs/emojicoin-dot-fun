@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren, useEffect } from "react";
+import React, { type PropsWithChildren, useEffect, useMemo } from "react";
 
 import { type TradeHistoryProps } from "../../types";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -8,6 +8,7 @@ import { type Types } from "@sdk/types/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import TableRow from "./table-row";
 import { type TableRowDesktopProps } from "./table-row/types";
+import { toSortedDedupedEvents } from "lib/utils/sort-events";
 import "./trade-history.css";
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
@@ -32,10 +33,7 @@ const ThWrapper = ({ className, children }: { className: string } & PropsWithChi
 const TradeHistory = (props: TradeHistoryProps) => {
   const marketID = props.data.marketID;
 
-  const swaps = useEventStore((s) => {
-    const market = s.getMarket(marketID.toString());
-    return market ? market.swapEvents : [];
-  });
+  const swaps = useEventStore((s) => s.getMarket(marketID.toString())?.swapEvents ?? []);
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
 
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -45,10 +43,18 @@ const TradeHistory = (props: TradeHistoryProps) => {
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
+  // TODO: Add infinite scroll to this.
+  // For now just don't render more than `HARD_LIMIT` swaps.
+  const sortedSwaps = useMemo(() => {
+    const HARD_LIMIT = 500;
+    return toSortedDedupedEvents(props.data.swaps, swaps, "desc").slice(0, HARD_LIMIT);
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [props.data.swaps.length, swaps.length]);
+
   return (
     <table className="flex flex-col table-fixed w-full">
       <thead className="relative w-full border-solid border-b-[1px] border-b-dark-gray">
-        <tr className={"flex w-full h-[33px]" + (swaps.length < 11 ? "" : " pr-[9px] ")}>
+        <tr className={"flex w-full h-[33px]" + (sortedSwaps.length < 11 ? "" : " pr-[9px] ")}>
           <ThWrapper className="flex min-w-[50px] ml-[10px] xl:ml-[21px]">
             <span className="flex my-auto">Rank</span>
           </ThWrapper>
@@ -73,14 +79,14 @@ const TradeHistory = (props: TradeHistoryProps) => {
         </tr>
       </thead>
       <tbody className="flex flex-col overflow-auto scrollbar-track w-full h-[340px]">
-        {swaps.map((item, index) => (
+        {sortedSwaps.map((item, index) => (
           <TableRow
             key={index}
             item={toTableItem(item)}
-            showBorder={index !== swaps.length - 1 || swaps.length < 11}
+            showBorder={index !== sortedSwaps.length - 1 || sortedSwaps.length < 11}
           ></TableRow>
         ))}
-        {Array.from({ length: 10 - swaps.length }).map((_, index) => (
+        {Array.from({ length: 10 - sortedSwaps.length }).map((_, index) => (
           <tr
             key={`EMPTY_ROW::${index}`}
             className="flex min-h-[33px] border-b-dark-gray border-solid border-[1px]"

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useThemeContext } from "context";
 import { Flex, Column } from "@containers";
@@ -12,11 +12,11 @@ import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import useInputStore from "@store/input-store";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
+import { toSortedDedupedEvents } from "lib/utils/sort-events";
 
 const convertChatMessageToEmojiAndIndices = (
   message: string,
@@ -49,21 +49,19 @@ const ChatBox = (props: ChatProps) => {
   const { theme } = useThemeContext();
   const { aptos, account, submit } = useAptos();
   const marketID = props.data.marketID.toString();
+  const clear = useInputStore((state) => state.clear);
+  const setMode = useInputStore((state) => state.setMode);
+  const emojis = useInputStore((state) => state.emojis);
   const chats = useEventStore((s) => s.getMarket(marketID)?.chatEvents ?? props.data.chats);
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+  const chatEmojiData = useInputStore((state) => state.chatEmojiData);
+  const subscribe = useWebSocketClient((s) => s.subscribe);
+  const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
 
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.chat(marketID);
     return () => unsubscribe.chat(marketID);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
-  const { emojis, clear, chatEmojiData, setMode } = useInputStore((state) => ({
-    emojis: state.emojis,
-    clear: state.clear,
-    chatEmojiData: state.chatEmojiData,
-    setMode: state.setMode,
-  }));
 
   useEffect(() => {
     setMode("chat");
@@ -93,12 +91,17 @@ const ChatBox = (props: ChatProps) => {
         emojiIndicesSequence: new Uint8Array(emojiIndicesSequence),
         typeTags: [emojicoin, emojicoinLP],
       });
-    const { response, error: _ } = (await submit(builderLambda)) ?? {};
-    if (response && isUserTransactionResponse(response)) {
-      console.warn(response);
-    }
+    await submit(builderLambda);
     clear();
   };
+
+  // TODO: Add infinite scroll to this.
+  // For now just don't render more than `HARD_LIMIT` chats.
+  const sortedChats = useMemo(() => {
+    const HARD_LIMIT = 500;
+    return toSortedDedupedEvents(props.data.chats, chats, "desc").slice(0, HARD_LIMIT);
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [props.data.chats.length, chats.length]);
 
   return (
     <Column className="relative" width="100%" flexGrow={1}>
@@ -126,7 +129,7 @@ const ChatBox = (props: ChatProps) => {
             flexDirection: "column-reverse",
           }}
         >
-          {chats.map((chat, index) => {
+          {sortedChats.map((chat, index) => {
             const message = {
               // TODO: Resolve address to Aptos name, store in state.
               sender: chat.user,
