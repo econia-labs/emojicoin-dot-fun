@@ -5,6 +5,8 @@ hide_title: false
 description: In the ever-evolving landscape of defi, we are thrilled to introduce
 ---
 
+<!--- cspell:words defi -->
+
 ![about](./about.png "about")
 
 In the ever-evolving landscape of defi, we are
