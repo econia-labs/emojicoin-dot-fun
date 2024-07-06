@@ -2,8 +2,10 @@
 slug: /emojicoin-LP
 title: ⛲ Emojicoin LP
 hide_title: false
-description: Documentation for emojicoin dot fun
+description: AMMs, such as those used on the emojicoin platform, enable the creation
 ---
+
+![LP](./LP.png "LP")
 
 AMMs, such as those used on the emojicoin platform, enable the creation of
 liquidity pools containing tokens X and Y (e.g., emojicoin and APT).

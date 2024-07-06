@@ -1,13 +1,15 @@
 ---
 slug: /why-we-built-emojicoin
-title: 🛠️ Why We built emojicoin.fun
+title: 🛠️ Why We Built emojicoin.fun
 hide_title: false
-description: Documentation for emojicoin dot fun
+description: Accessibility, Fairness, and Fun
 ---
 
 <!--- cspell:words memecoins -->
 
 <!--- cspell:words presales -->
+
+![build](./build-banner.png "build")
 
 ## Accessibility, Fairness, and Fun
 
