@@ -1,6 +1,6 @@
 export const slideVariants = {
   hidden: {
-    y: "100vh",
+    y: "100dvh",
     opacity: 0,
   },
   visible: {

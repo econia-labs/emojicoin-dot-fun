@@ -19,7 +19,7 @@ p {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh;
 }
 
 .error-container__title {
