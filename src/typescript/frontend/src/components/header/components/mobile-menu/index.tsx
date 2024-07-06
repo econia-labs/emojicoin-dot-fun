@@ -37,12 +37,22 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = "clip";
+      document.body.style.margin = "0";
+      document.body.style.padding = "0";
+      document.body.style.boxSizing = "border-box";
+      
     } else {
       document.body.style.overflow = "auto";
+      document.body.style.margin = "unset";
+      document.body.style.padding = "unset";
+      document.body.style.boxSizing = "unset";
     }
     return () => {
       document.body.style.overflow = "auto";
+      document.body.style.margin = "unset";
+      document.body.style.padding = "unset";
+      document.body.style.boxSizing = "unset";
     };
   }, [isOpen]);
 

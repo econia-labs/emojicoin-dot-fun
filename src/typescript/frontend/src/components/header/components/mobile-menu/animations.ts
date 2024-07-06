@@ -8,7 +8,7 @@ export const slideVariants = {
     opacity: 1,
     transition: {
       duration: 0.3,
-      type: "easyInOut",
+      type: "easeInOut",
     },
   },
 };
