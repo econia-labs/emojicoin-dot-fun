@@ -28,3 +28,4 @@ hide_title: false
    ![how8](./images/how8.png "how8")
    Congrats you've just completed the life cycle of an emojicoin!
    Happy pumping!
+   

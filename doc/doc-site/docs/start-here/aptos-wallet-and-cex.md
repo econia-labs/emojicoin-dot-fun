@@ -24,3 +24,4 @@ Use this guide if you are using an Aptos wallet and using Coinbase to onramp.
    ![cex8](./images/cex8.png "cex8")
    Congrats! You are now ready to start trading at Emojicoin.fun with the
    APT you now have in your wallet!
+   

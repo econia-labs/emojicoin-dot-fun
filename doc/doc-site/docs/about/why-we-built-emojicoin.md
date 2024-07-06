@@ -45,3 +45,4 @@ description: Accessibility, Fairness, and Fun
   degenerately fun environment was to showcase what happens when a fun
   product idea leverages next-generation technology. Say goodbye to failed
   transactions and high gas fees — And try having fun for once.
+  
