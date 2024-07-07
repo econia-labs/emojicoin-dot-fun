@@ -1,12 +1,8 @@
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { normalizeHex, truncateAddress } from "@sdk/utils";
-import useInputStore from "@store/input-store";
-import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { normalizeHex } from "@sdk/utils";
+import { type AnimationSequence, useAnimate } from "framer-motion";
+import { useEffect, useMemo } from "react";
 
 const getClassName = (i: number) => `character-${i + 1}`;
-
-const wordsPerMinute = 600;
 
 const useCodeAnimator = (code: string, onAnimationEnd: () => void) => {
   const [scope, animate] = useAnimate();
@@ -15,10 +11,8 @@ const useCodeAnimator = (code: string, onAnimationEnd: () => void) => {
       [...code].map((_, i) => [
         `.${getClassName(i)}`,
         {
-          //   opacity: [0, 1],
           opacity: [0, 1],
           scale: [0, 1],
-          //   scale: [1, 1.5, 1],
         },
         {
           duration: 0,

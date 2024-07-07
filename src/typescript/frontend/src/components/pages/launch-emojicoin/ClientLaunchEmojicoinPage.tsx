@@ -8,7 +8,7 @@ import TextCarousel from "components/text-carousel/TextCarousel";
 import useInputStore from "@store/input-store";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
-import { useCallback, useEffect, useState } from "react";
+import { startTransition, useCallback, useEffect, useState } from "react";
 import { ColoredBytesIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -22,7 +22,6 @@ import AnimatedStatusIndicator from "./animated-status-indicator";
 import { AnimatedRegisterMarketCode } from "./animated-code";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { sleep, truncateAddress } from "@sdk/utils";
-import Script from "next/script";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -43,7 +42,6 @@ const ClientLaunchEmojicoinPage = () => {
   const { status } = useAptos();
   const { account } = useWallet();
   const [stage, setStage] = useState<"initial" | "loading" | "coding">("initial");
-  const [isScriptReady, setIsScriptReady] = useState(false);
 
   useEffect(() => {
     setMode("register");
@@ -69,10 +67,11 @@ const ClientLaunchEmojicoinPage = () => {
   }, [emojis]);
 
   const handleFinishCoding = () => {
-    const newPath = path.join(ROUTES.market, emojis.join(""));
-    router.push(newPath);
-    router.refresh();
-    clear();
+    startTransition(() => {
+      const newPath = path.join(ROUTES.market, emojis.join(""));
+      router.push(newPath);
+      clear();
+    });
   };
 
   useEffect(() => {
@@ -161,7 +160,7 @@ const ClientLaunchEmojicoinPage = () => {
                 <span className="pixel-heading-3 text-ec-blue uppercase">
                   Building your emojicoin...
                 </span>
-                <div className="relative pixel-heading-4">
+                <div className="relative">
                   <AnimatedStatusIndicator />
                 </div>
               </motion.div>
@@ -183,17 +182,6 @@ const ClientLaunchEmojicoinPage = () => {
               </motion.div>
             )}
           </AnimatePresence>
-          {(stage === "loading" || stage === "coding") && (
-            <Script
-              src="/static/datafeeds/udf/dist/bundle.js"
-              strategy="afterInteractive"
-              onLoad={() => {setIsScriptReady(true); console.log("script is ready. from onload")}}
-              onReady={() => {setIsScriptReady(true); console.log("script is ready. from on ready")}}
-              onError={(error) => {
-                console.error("Error loading bundle.js", error);
-              }}
-            />
-          )}
         </div>
       </div>
     </div>

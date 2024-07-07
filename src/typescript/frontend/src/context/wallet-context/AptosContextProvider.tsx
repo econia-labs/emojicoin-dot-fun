@@ -34,7 +34,7 @@ export type SubmissionResponse = Promise<{
 } | null>;
 
 export type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
-export type ResponseType = PendingTransactionResponse | UserTransactionResponse | unknown | null;
+export type ResponseType = Awaited<SubmissionResponse>;
 export type EntryFunctionNames =
   | "chat"
   | "swap"
@@ -49,7 +49,7 @@ export type AptosContextState = {
   account: WalletContextState["account"];
   copyAddress: () => void;
   status: TransactionStatus;
-  response: ResponseType;
+  lastResponse: ResponseType;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -64,7 +64,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   } = useWallet();
   const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
   const [status, setStatus] = useState<TransactionStatus>("idle");
-  const [response, setResponse] = useState<ResponseType>(null);
+  const [lastResponse, setLastResponse] = useState<ResponseType>(null);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
@@ -104,13 +104,11 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         const { aptos, res, functionName } = await trySubmit();
         response = res;
         setStatus("pending");
-        setResponse(res);
         try {
           const awaitedResponse = (await aptos.waitForTransaction({
             transactionHash: res.hash,
           })) as UserTransactionResponse;
           setStatus("success");
-          setResponse(awaitedResponse);
           // We handle the `register_market` indicators manually with the animation orchestration.
           if (functionName !== "register_market") {
             successfulTransactionToast(awaitedResponse, network);
@@ -118,14 +116,17 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           response = awaitedResponse;
         } catch (e) {
           setStatus("error");
-          setResponse(e);
           toast.error("Transaction failed", DEFAULT_TOAST_CONFIG);
           console.error(e);
           error = e;
         } finally {
+          setLastResponse({
+            response,
+            error: null,
+          });
           sleep(DEFAULT_TOAST_CONFIG.autoClose, UnitOfTime.Milliseconds).then(() => {
             setStatus("idle");
-            setResponse(null);
+            setLastResponse(null);
           });
         }
       } catch (e: unknown) {
@@ -207,7 +208,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     signThenSubmit,
     copyAddress,
     status,
-    response,
+    lastResponse,
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;
