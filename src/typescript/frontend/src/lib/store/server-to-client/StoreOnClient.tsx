@@ -19,20 +19,17 @@ export const StoreOnClient = ({ markets }: StoreOnClientProps) => {
   const pathname = usePathname();
   const [showDebugger, setShowDebugger] = useState(false);
 
-  const [events, setEvents] = useState(storeMarkets.get(pathname.split("/market/")?.[1] ?? ""));
+  const [_events, setEvents] = useState(storeMarkets.get(pathname.split("/market/")?.[1] ?? ""));
+  
   useEffect(() => {
     setEvents(storeMarkets.get(pathname.split("/market/")?.[1]));
   }, [pathname, storeMarkets]);
 
   useEffect(() => {
-    // console.debug(events);
-  }, [events]);
-
-  useEffect(() => {
     initialize(markets);
   }, [initialize, markets]);
 
-  return process.env.NODE_ENV === "development" ? (
+  return (
     <>
       <div className="fixed flex bottom-0 right-0 p-2 bg-black text-green text-xl">
         <div className="m-auto">{markets.length} mkts</div>
@@ -65,8 +62,6 @@ export const StoreOnClient = ({ markets }: StoreOnClientProps) => {
         </div>
       )}
     </>
-  ) : (
-    <></>
   );
 };
 

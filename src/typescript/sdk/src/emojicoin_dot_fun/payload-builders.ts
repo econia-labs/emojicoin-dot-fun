@@ -26,7 +26,7 @@ import {
   type AptosConfig,
   type InputGenerateTransactionOptions,
   type AccountAddressInput,
-  InputEntryFunctionData,
+  type InputEntryFunctionData,
 } from "@aptos-labs/ts-sdk";
 import { type WalletSignTransactionFunction } from ".";
 import { toConfig } from "../utils/aptos-utils";
