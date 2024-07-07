@@ -10,7 +10,7 @@ description: Bonding curve, state transition, and more
 ## Bonding curve, state transition, and more
 
 When a new emojicoin launches, its trading mechanics are dictated by a bonding
-curve where the price of the emojicion is a function of circulating supply.
+curve where the price of the emojicoin is a function of circulating supply.
 Specifically, the bonding curve is implemented as a concentrated liquidity
 automated market maker (CLAMM) with a single price range.
 
@@ -43,7 +43,7 @@ blockchain.
 
 ### First steps: launch your emojicoin
 
-Launching an emojicion costs just 1 APT! Note the following:
+Launching an emojicoin costs just 1 APT! Note the following:
 
 - Single emojis and emoji combinations are supposed, as long as the total number
   of bytes is 10 or less.

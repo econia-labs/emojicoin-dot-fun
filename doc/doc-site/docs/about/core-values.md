@@ -10,13 +10,12 @@ cspell:word memecoins
 cspell:word presales
 -->
 
-
 ![build](./build-banner.png "build")
 
 ## Accessibility, fairness, and fun
 
 - **Engagement**: Since emojis are universally recognized and loved,
-  emojicon.fun is instantly engaging and approachable. By using emojis as coin
+  emojicoin.fun is instantly engaging and approachable. By using emojis as coin
   symbols, emojicoin.fun lowers the barrier to entry for those who might find
   traditional crypto trading intimidating or too complex.
 
