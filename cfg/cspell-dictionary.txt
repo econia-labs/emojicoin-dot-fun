@@ -16,6 +16,7 @@ counterparties
 cpamm
 cunha
 dango
+defi
 devnet
 diya
 econia

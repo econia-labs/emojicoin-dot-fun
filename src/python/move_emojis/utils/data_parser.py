@@ -1,8 +1,8 @@
-# cspell:words alnum
-# cspell:words codepoint
-# cspell:words príncipe
-# cspell:words tomé
-# cspell:words unidecode
+# cspell:word alnum
+# cspell:word codepoint
+# cspell:word príncipe
+# cspell:word tomé
+# cspell:word unidecode
 
 # Helper file for converting all of the data in the Unicode Emoji data files
 # to Move-friendly constants.

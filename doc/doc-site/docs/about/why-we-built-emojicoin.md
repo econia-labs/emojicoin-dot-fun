@@ -5,9 +5,11 @@ hide_title: false
 description: Accessibility, Fairness, and Fun
 ---
 
-<!--- cspell:words memecoins -->
+<!---
+cspell:word memecoins
+cspell:word presales
+-->
 
-<!--- cspell:words presales -->
 
 ![build](./build-banner.png "build")
 

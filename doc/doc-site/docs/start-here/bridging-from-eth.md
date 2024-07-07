@@ -4,7 +4,7 @@ title: 🔷 Bridging From Ethereum
 hide_title: false
 ---
 
-<!--- cspell:words Panora -->
+<!--- cspell:word Panora -->
 
 Use this guide if you are bridging from Ethereum to Aptos.
 

@@ -5,11 +5,10 @@ hide_title: false
 description: Degenerate vocabulary you must know.
 ---
 
-<!--- cspell:words degen -->
-
-<!--- cspell:words LARPS -->
-
-<!--- cspell:words Degen -->
+<!---
+cspell:word degen
+cspell:word larps
+-->
 
 Degenerate vocabulary you must know
 
