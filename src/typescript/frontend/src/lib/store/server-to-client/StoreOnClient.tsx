@@ -20,7 +20,7 @@ export const StoreOnClient = ({ markets }: StoreOnClientProps) => {
   const [showDebugger, setShowDebugger] = useState(false);
 
   const [_events, setEvents] = useState(storeMarkets.get(pathname.split("/market/")?.[1] ?? ""));
-  
+
   useEffect(() => {
     setEvents(storeMarkets.get(pathname.split("/market/")?.[1]));
   }, [pathname, storeMarkets]);
