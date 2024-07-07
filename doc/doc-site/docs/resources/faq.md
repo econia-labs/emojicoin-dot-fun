@@ -2,13 +2,16 @@
 slug: /faq
 title: 💬 FAQ
 hide_title: false
-description: Nothing the emojicoin monkey says should be taken seriously.
+description: Frequently asked questions
 ---
 
 ![monkey](./monkey.png "monkey")
+
+<!---
 *Please note this is not financial advice and nothing the emojicoin monkey says
 should be taken seriously. He just likes to listen to himself talk and has
 caught the emojicoin bug.*
+-->
 
 **Q: What is the cost to launch an Emojicoin?**
 
@@ -20,7 +23,7 @@ A:  1 APT — About the cost of a bushel of bananas
 
 <!-- markdownlint-enable MD013 -->
 
-A:  45,000 APT Market Cap
+A:  45,000 APT
 
 <!-- markdownlint-disable MD013 -->
 
@@ -38,13 +41,15 @@ A:  10,000 APT
 
 A:  No, once a particular Emojicoin trading pair is launched, you cannot launch
 another. You should potentially explore launching Emojicoin combinations
-instead. Get creative, don't be lame.
+instead. Get creative!
 
 **Q: Are emojicoins the future?**
 
 A: Emojis are a universal language, transcending borders and languages. 🌍 With
-the rise of decentralized finance and the integration of emojicoins, I believe
-will see a global shift where emojicoins become the standard for transactions.
+the rise of decentralized finance and the integration of emojicoins, the world
+is poised for a paradigm shift where emojicoins become the standard unit of
+account for onchain transactions across a variety of use cases.
+
 So get ready to live, laugh, and love with emojicoins! They're not just a
 trend; they're a revolution. Embrace the future, where every transaction is a
 smile, a laugh, and a story. Emojicoins are here to stay, and they're going
