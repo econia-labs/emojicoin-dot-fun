@@ -1,6 +1,6 @@
 ---
 slug: /bridging-from-eth
-title: 🔷 Bridging From Ethereum
+title: 🔷 Bridging from Ethereum
 hide_title: false
 ---
 

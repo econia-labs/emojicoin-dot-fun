@@ -1,6 +1,6 @@
 ---
 slug: /bug-submission-form
-title: 🐞 Bug Submission Form
+title: 🐞 Bug submission form
 hide_title: false
 description: Fill out the form to submit bugs.
 ---

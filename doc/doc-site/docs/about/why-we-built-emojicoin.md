@@ -1,6 +1,6 @@
 ---
 slug: /why-we-built-emojicoin
-title: 🛠️ Why We Built emojicoin.fun
+title: 🛠️ Why we built emojicoin.fun
 hide_title: false
 description: Accessibility, Fairness, and Fun
 ---

@@ -1,6 +1,6 @@
 ---
 slug: /bridging-from-solana
-title: 🟣 Bridging From Solana
+title: 🟣 Bridging from Solana
 hide_title: false
 ---
 
