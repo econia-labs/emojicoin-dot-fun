@@ -2,15 +2,33 @@ import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
 import React, { useCallback, useMemo } from "react";
 import { useEffect } from "react";
 
-const useStaggerAnimation = (delay: number = 0) => {
+export type StaggerSpeed = 1 | 2 | 3 | 4 | 5;
+
+/**
+ * @param speed The speed of the animation. Higher is faster. 1 is the default.
+ * @param delay The delay before the animation starts. 0 is the default.
+ * @returns The scope ref to pass to the animated component's shared parent.
+ */
+const useStaggerAnimation = ({
+  speed = 1,
+  delay = 0,
+}: {
+  speed?: StaggerSpeed;
+  delay?: number;
+}) => {
   const [scope, animate] = useAnimate();
 
+  const boundedSpeed = Math.min(5 as StaggerSpeed, Math.max(1 as StaggerSpeed, speed));
   const sequence: AnimationSequence = [
-    [".item-1", { opacity: [0, 1], scale: [1, 1.05] }, { delay: stagger(0.05, { from: "first" }) }],
+    [
+      ".item-1",
+      { opacity: [0, 1], scale: [1, 1.05] },
+      { delay: stagger(0.06 - 0.01 * boundedSpeed, { from: "first" }) },
+    ],
     [
       ".item-1",
       { opacity: [1, 0], scale: [1.05, 1] },
-      { delay: stagger(0.05, { from: "first" }), at: "-0.25" },
+      { delay: stagger(0.06 - 0.01 * boundedSpeed, { from: "first" }), at: "-0.25" },
     ],
   ];
 
@@ -36,13 +54,14 @@ const useStaggerAnimation = (delay: number = 0) => {
 
 export const AnimatedStatusIndicator = ({
   numSquares = 14,
-  delay = 0,
+  delay,
+  speed,
 }: {
   numSquares?: number;
   delay?: number;
+  speed?: StaggerSpeed;
 }) => {
-  const scope = useStaggerAnimation(delay);
-
+  const scope = useStaggerAnimation({ speed, delay });
   const emptyArray = useMemo(() => Array.from({ length: numSquares }), [numSquares]);
 
   const getSquares = useCallback(

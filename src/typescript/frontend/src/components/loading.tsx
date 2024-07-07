@@ -1,8 +1,16 @@
 import React, { useEffect } from "react";
-import AnimatedStatusIndicator from "./pages/launch-emojicoin/animated-status-indicator";
+import AnimatedStatusIndicator, {
+  type StaggerSpeed,
+} from "./pages/launch-emojicoin/animated-status-indicator";
 import { getRandomEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
 
-export const Loading = ({ emojis }: { emojis?: SymbolEmojiData[] }) => {
+export const Loading = ({
+  emojis,
+  animationSpeed,
+}: {
+  emojis?: SymbolEmojiData[];
+  animationSpeed?: StaggerSpeed;
+}) => {
   const emojiCycle = emojis ?? Array.from({ length: 20 }, getRandomEmoji);
   const [{ name, emoji }, setEmoji] = React.useState(emojiCycle[0]);
 
@@ -28,7 +36,7 @@ export const Loading = ({ emojis }: { emojis?: SymbolEmojiData[] }) => {
           >
             {emoji}
           </div>
-          <AnimatedStatusIndicator />
+          <AnimatedStatusIndicator speed={animationSpeed} />
         </div>
       </div>
     </>
