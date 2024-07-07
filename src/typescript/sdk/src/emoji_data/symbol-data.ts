@@ -20,10 +20,10 @@ const hexMap = new Map<`0x${string}`, SymbolEmojiData>(values.map((v) => [v.hex,
 const emojiMap = new Map<string, SymbolEmojiData>(values.map((v) => [v.emoji, v]));
 
 export const SYMBOL_DATA = {
-  byName: (v: string) => nameMap.get(v),
+  byName: (v: string) => nameMap.get(v.toLowerCase()),
   byHex: (v: HexInput) => hexMap.get(normalizeHex(v)),
   byEmoji: (v: string) => emojiMap.get(v),
-  hasName: (v: string) => nameMap.has(v),
+  hasName: (v: string) => nameMap.has(v.toLowerCase()),
   hasHex: (v: HexInput) => hexMap.has(normalizeHex(v)),
   hasEmoji: (v: string) => emojiMap.has(v),
 };
