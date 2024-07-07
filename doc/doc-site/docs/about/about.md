@@ -2,7 +2,7 @@
 slug: /
 title: ⬛ Welcome to emojicoin.fun
 hide_title: false
-description: Amidst the ever-evolving DeFi landscape, we are thrilled to
+description: Buckle up and enjoy the ride!
 ---
 
 ![about](./about.png "about")

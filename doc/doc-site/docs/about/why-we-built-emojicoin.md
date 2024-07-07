@@ -2,7 +2,7 @@
 slug: /why-we-built-emojicoin
 title: 🛠️ Why we built emojicoin.fun
 hide_title: false
-description: Accessibility, Fairness, and Fun
+description: Accessibility, fairness, and fun
 ---
 
 <!---
@@ -13,37 +13,37 @@ cspell:word presales
 
 ![build](./build-banner.png "build")
 
-## Accessibility, Fairness, and Fun
+## Accessibility, fairness, and fun
 
-- **Engagement**: Emojis are universally recognized and loved, making our
-  platform instantly engaging and approachable. By using emojis as coin symbols,
-  we lower the barrier to entry for those who might find traditional crypto
-  trading intimidating or too complex.
+- **Engagement**: Since emojis are universally recognized and loved,
+  emojicon.fun is instantly engaging and approachable. By using emojis as coin
+  symbols, emojicoin.fun lowers the barrier to entry for those who might find
+  traditional crypto trading intimidating or too complex.
 
-- **Fairly Launched**: In the world of memecoins, oftentimes new buyers of
-  coins fall to scams or unfair token supply distributions — Resulting in an
-  immediate loss of funds. The emojicoin.fun platform enables users to launch
-  emojicoins in a fair launch style, where fairness and transparent distribution
-  are ensured without presales or team allocations.
+- **Fairly Launched**: In the world of memecoins, new participants frequently
+  fall victim to scams or unfair token supply distributions, and lose funds.
+  The emojicoin.fun platform enables users to launch emojicoins in a fair launch
+  with predefined supply amounts, where transparent distribution is ensured
+  without presales or team allocations.
 
-- **Fun**: We’re not trying to revolutionize finance with this product, we’re
-  trying to create a fun environment for speculation where the house doesn’t
-  always have the better odds.
+- **Fun**: The emojicoin.fun platform provides an enjoyable environment for
+  users to engage with the DeFi universe through a simple interface, where there
+  is no house with better odds than the user.
 
-## Community Building
+## Community building
 
-- **Social Interaction**: Emojis are inherently social, often used to express
-  emotions and ideas in digital communication. Our platform encourages a
-  community-driven atmosphere where users can bond over their emojicoins
-  and unite under one emoji banner to be the top dog.
+- **Social Interaction**: Emojis are inherently social, and are often used to
+  express emotions and ideas in digital communication. The emojicoin.fun
+  platform encourages a community-driven atmosphere where users can bond over
+  their emojicoins through a per-market chat feature based entirely on emojis.
 - **Inclusive Environment**: By leveraging the universal appeal of emojis,
-  we aim to create an inclusive trading environment that welcomes users from
-  diverse backgrounds and skill levels.
+  emojicoin.fun creates an inclusive trading environment that welcomes users
+  from all walks of life.
 
-## Showcasing the technical prowess of Aptos
+## Showcasing the Aptos tech stack
 
-- Aptos is not just fast and affordable, it’s one of the quickest and cheapest
-  decentralized networks in the world. One key reason for crafting this
-  degenerately fun environment was to showcase what happens when a fun
-  product idea leverages next-generation technology. Say goodbye to failed
-  transactions and high gas fees — And try having fun for once.
+- Aptos is not just fast and affordable, it’s one of the quickest and most
+  inexpensive decentralized networks in the world. The emojicoin.fun platform
+  leverages the powerful Aptos tech stack to showcase what can be done with
+  next-generation blockchain technology, with fun and ease. Say goodbye to
+  failed transactions and high gas fees, and say hello to joy!
