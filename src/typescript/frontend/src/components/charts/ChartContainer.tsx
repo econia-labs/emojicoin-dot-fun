@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect } from "react";
 import { useEventStore, useWebSocketClient } from "context/websockets-context";
 
-const Chart = dynamic(() => import("./PrivateChart"), { ssr: true });
+export const Chart = dynamic(() => import("./PrivateChart"), { ssr: false });
 const MemoizedChart = React.memo(Chart);
 
 export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">) => {

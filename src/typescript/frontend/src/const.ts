@@ -3,4 +3,3 @@ export const DEFAULT_TOAST_CONFIG = {
   pauseOnHover: true,
   autoClose: 7777,
 } as const;
-

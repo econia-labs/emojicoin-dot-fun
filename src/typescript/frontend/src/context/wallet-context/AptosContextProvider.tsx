@@ -1,6 +1,5 @@
 import {
   AptosApiError,
-  isPendingTransactionResponse,
   type Aptos,
   type PendingTransactionResponse,
   type UserTransactionResponse,
@@ -51,7 +50,6 @@ export type AptosContextState = {
   copyAddress: () => void;
   status: TransactionStatus;
   response: ResponseType;
-  functionName: EntryFunctionNames | null;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -67,7 +65,6 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [response, setResponse] = useState<ResponseType>(null);
-  const [functionName, setFunctionName] = useState<EntryFunctionNames | null>(null);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
@@ -95,12 +92,16 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const handleTransactionSubmission = useCallback(
     async (
       network: NetworkInfo,
-      trySubmit: () => Promise<{ aptos: Aptos; res: PendingTransactionResponse }>
+      trySubmit: () => Promise<{
+        aptos: Aptos;
+        functionName: EntryFunctionNames;
+        res: PendingTransactionResponse;
+      }>
     ) => {
       let response: PendingTransactionResponse | UserTransactionResponse | null = null;
       let error: unknown;
       try {
-        const { aptos, res } = await trySubmit();
+        const { aptos, res, functionName } = await trySubmit();
         response = res;
         setStatus("pending");
         setResponse(res);
@@ -110,7 +111,10 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           })) as UserTransactionResponse;
           setStatus("success");
           setResponse(awaitedResponse);
-          successfulTransactionToast(awaitedResponse, network);
+          // We handle the `register_market` indicators manually with the animation orchestration.
+          if (functionName !== "register_market") {
+            successfulTransactionToast(awaitedResponse, network);
+          }
           response = awaitedResponse;
         } catch (e) {
           setStatus("error");
@@ -119,9 +123,10 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           console.error(e);
           error = e;
         } finally {
-          await sleep(DEFAULT_TOAST_CONFIG.autoClose, UnitOfTime.Milliseconds);
-          setStatus("idle");
-          setResponse(null);
+          sleep(DEFAULT_TOAST_CONFIG.autoClose, UnitOfTime.Milliseconds).then(() => {
+            setStatus("idle");
+            setResponse(null);
+          });
         }
       } catch (e: unknown) {
         if (e instanceof AptosApiError) {
@@ -154,10 +159,10 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         const trySubmit = async () => {
           const builder = await builderFn();
           setStatus("prompt");
-          setFunctionName(builder.payloadBuilder.functionName as EntryFunctionNames);
           const input = builder.payloadBuilder.toInputPayload();
           return adapterSignAndSubmitTxn(input).then((res) => ({
             aptos: builder.aptos,
+            functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
             res,
           }));
         };
@@ -178,13 +183,13 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         const trySubmit = async () => {
           const builder = await builderFn();
           setStatus("prompt");
-          setFunctionName(builder.payloadBuilder.functionName);
           const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
           return submitTransaction({
             transaction: builder.rawTransactionInput,
             senderAuthenticator,
           }).then((res) => ({
             aptos: builder.aptos,
+            functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
             res,
           }));
         };
@@ -202,7 +207,6 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     signThenSubmit,
     copyAddress,
     status,
-    functionName,
     response,
   };
 
