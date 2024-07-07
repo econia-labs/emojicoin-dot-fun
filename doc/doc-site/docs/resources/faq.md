@@ -15,7 +15,7 @@ caught the emojicoin bug.*
 
 **Q: What is the cost to launch an Emojicoin?**
 
-A:  1 APT — About the cost of a bushel of bananas
+A:  1 APT
 
 <!-- markdownlint-disable MD013 -->
 
@@ -39,9 +39,8 @@ A:  10,000 APT
 
 <!-- markdownlint-enable MD013 -->
 
-A:  No, once a particular Emojicoin trading pair is launched, you cannot launch
-another. You should potentially explore launching Emojicoin combinations
-instead. Get creative!
+A:  No, once a particular emojicoin trading pair is launched, you cannot launch
+another. But emoji combinations are supportive, so get creative!
 
 **Q: Are emojicoins the future?**
 

@@ -1,6 +1,6 @@
 ---
-slug: /why-we-built-emojicoin
-title: 🛠️ Why we built emojicoin.fun
+slug: /core-values
+title: 🛠️ Core values
 hide_title: false
 description: Accessibility, fairness, and fun
 ---
@@ -42,8 +42,8 @@ cspell:word presales
 
 ## Showcasing the Aptos tech stack
 
-- Aptos is not just fast and affordable, it’s one of the quickest and most
-  inexpensive decentralized networks in the world. The emojicoin.fun platform
-  leverages the powerful Aptos tech stack to showcase what can be done with
-  next-generation blockchain technology, with fun and ease. Say goodbye to
-  failed transactions and high gas fees, and say hello to joy!
+Aptos is not just fast and affordable, it’s one of the quickest and most
+inexpensive decentralized networks in the world. The emojicoin.fun platform
+leverages the powerful Aptos tech stack to showcase what can be done with
+next-generation blockchain technology, with fun and ease. Say goodbye to failed
+transactions and high gas fees, and say hello to joy!

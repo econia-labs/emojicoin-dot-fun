@@ -7,9 +7,9 @@ description: Buckle up and enjoy the ride!
 
 ![about](./about.png "about")
 
-Amidst the ever-evolving DeFi landscape, we are thrilled to introduce a new
-platform: emojicoin.fun, where all launched and tradable coins are emojicoins.
+Say hello to the newest member of the ever-evolving DeFi landscape:
+emojicoin.fun, where all launched and tradable coins are emojicoins.
 
-Our goal is to merge the engaging, expressive nature of emojis with the dynamic
-world of DefI, creating a vibrant, fair, and user-friendly environment for
-traders and communities.
+The emojicoin.fun platoform merges the engaging, expressive nature of emojis
+with the dynamic world of DefI, enabling a vibrant, fair, and user-friendly
+environment for traders and communities.

@@ -8,7 +8,7 @@ module.exports = {
       },
       items: [
         'about/about',
-        'about/why-we-built-emojicoin',
+        'about/core-values',
         'about/how-it-works',
         'about/emojicoin-LP',
       ]
