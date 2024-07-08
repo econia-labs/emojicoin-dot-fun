@@ -174,9 +174,9 @@ const ClientLaunchEmojicoinPage = () => {
               >
                 <div className="border border-solid border-[#FFFFFFBB] rounded-md p-6">
                   <AnimatedRegisterMarketCode
-                    address={truncateAddress(account.address)}
-                    onAnimationEnd={handleFinishCoding}
+                    address={account.address as `0x${string}`}
                     emojis={emojis}
+                    animationEndCallback={handleFinishCoding}
                   />
                 </div>
               </motion.div>
