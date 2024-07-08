@@ -1,8 +1,7 @@
 ---
 slug: /how-to-trade-on-emojicoin
-title: 💻 How to Trade on Emojicoin
+title: 🔄 How to Trade on emojicoin.fun
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
 
 1. Go to emojicoin.fun

@@ -10,6 +10,16 @@
 
 
 /* You can override the default Infima variables here. */
+@font-face {
+  font-family: 'Inter-Bold';
+  src: url('/static/img/fonts/Inter-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter-Regular';
+  src: url('/static/img/fonts/Inter-Regular.woff2') format('woff2');
+}
+
 :root {
   --ifm-color-primary: #086cd9;
   --ifm-color-primary-dark: #086cd9;
@@ -18,32 +28,51 @@
   --ifm-color-primary-light: #086cd9;
   --ifm-color-primary-lighter: #086cd9;
   --ifm-color-primary-lightest: #086cd9;
+
   --ifm-code-font-size: 95%;
-  --ifm-font-family-base: "Roboto Mono", monospace;
+  --letter-spacing-medium: 0.03em;   /* 10% letter-spacing for medium font */
+  --ifm-font-family-medium: "Inter-Bold", sans-serif; /* Custom property for medium font */
+  --ifm-font-family-base: "Inter-Regular", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 
   --ifm-navbar-height: 72px;
-  --ifm-navbar-background-color: #020202;
+  --ifm-navbar-background-color: #0B0B0C;
   --ifm-navbar-padding-horizontal: 22px;
   --ifm-navbar-search-input-icon: url(/img/search-icon.svg);
-  --ifm-navbar-search-input-background-color: #020202;
+  --ifm-navbar-search-input-background-color: #0B0B0C;
 
-  --ifm-menu-color-background-active: #020202;
-  --ifm-menu-color-background-hover: #020202;
+  --ifm-menu-color-background-active: #0B0B0C;
+  --ifm-menu-color-background-hover: #0B0B0C;
 
   --ifm-h2-font-size: 48px;
-  --ifm-h2-line-height: 58px;
+  --ifm-h2-line-height: 35px;
 
+  --ifm-heading-line-height: 35px;
+
+  /*
   --ifm-heading-color: #ffffff;
-  --ifm-heading-font-family: "Jost", sans-serif;
-  --ifm-heading-font-weight: bold;
+  --ifm-heading-font-family: "Inter-Regular", sans-serif;
   --ifm-heading-line-height: 58px;
+  */
 
   --ifm-spacing-horizontal: 40px;
-  --ifm-spacing-horizontal: 40px;
-
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
-  --ifm-card-border-radius: 0px;
+  --card-background-color: #0B0B0C; /* Custom property for card background color */
+  --ifm-card-border-radius: 3px; /* Set card border radius to 3px */
+}
+
+/* Apply medium font and letter-spacing to headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--ifm-font-family-medium);
+  letter-spacing: var(--letter-spacing-medium);
+  font-weight: 500; /* Ensure medium weight is applied */
+}
+
+/* Apply regular font and letter-spacing globally */
+body {
+  font-family: var(--ifm-font-family-base);
+  letter-spacing: var(--letter-spacing-regular);
+  font-weight: 400; /* Ensure regular weight is applied */
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -59,15 +88,13 @@
 }
 
 html {
-  background: #020202;
-  background-image: url("https://global-uploads.webflow.com/62fce47e1be865a7155ff71c/633467a79910d8300a274060_bg-noise.png");
+  background: #0B0B0C;
 }
 
 .navbar {
-  border-bottom: 1px solid #565656;
+  border-bottom: 1px solid #33343D;
   display: flex;
   justify-content: center;
-  background-image: url("https://global-uploads.webflow.com/62fce47e1be865a7155ff71c/633467a79910d8300a274060_bg-noise.png");
 }
 
 .navbar__inner {
@@ -85,9 +112,9 @@ html {
 }
 
 .navbar__search-input {
-  border-radius: 0px;
-  border: 1px solid #aaaaaa;
-  color: #ffffff;
+  border-radius: 3px;
+  border: 1px solid #33343D;
+  color: #33343D;
   padding: "8px 8px 0px 36px";
   width: 252px;
   height: 36px;
@@ -95,7 +122,7 @@ html {
 
 .navbar__search-input::placeholder {
   text-transform: uppercase;
-  color: #ffffff;
+  color: #717386;
 }
 
 .menu__list {
@@ -104,7 +131,7 @@ html {
 
 .menu__link {
   border-radius: 0px;
-  color: #aaa;
+  color: #717386;
 }
 
 .menu__link:hover {
@@ -129,7 +156,7 @@ th {
 }
 
 .table-of-contents__link {
-  color: #aaa;
+  color: #33343D;
 }
 
 .table-of-contents__link--active {
@@ -141,7 +168,7 @@ th {
 }
 
 .pagination-nav__link {
-  border-radius: 0px;
+  border-radius: 3px;
   padding: 0px;
   border: none;
   transition: background-color 300ms ease, transform 300ms ease,
@@ -158,34 +185,36 @@ th {
 
 .pagination-nav__link--prev {
   text-align: left;
-  background: #161616;
-  color: #ffffff;
+  background: #CD2F8D;
+  color: #000000;
 }
 
 .pagination-nav__link--prev:hover {
-  color: #ffffff;
+  color: #000000;
 }
 
 .pagination-nav__link--next {
   text-align: right;
-  background: #ffffff;
-  color: #161616;
+  background: #2FA90F;
+  color: #000000;
 }
 
 .pagination-nav__link--next:hover {
-  color: #161616;
+  color: #0B0B0C;
 }
 
 .pagination-nav__label {
   text-transform: uppercase;
-  font-size: 14px;
-  font-weight: normal;
+  font-size: 16px;
+  font-weight: 700;
   padding: 12px 8px;
   line-height: 20px;
 }
 
 .card {
-  --ifm-color-emphasis-200: #565656;
+  border-radius: var(--ifm-card-border-radius); /* Apply card border radius */
+  background-color: var(--card-background-color);
+  --ifm-color-emphasis-200: #33343D;
 }
 
 .welcome-heading {
@@ -221,14 +250,15 @@ th {
 }
 
 .link-card {
-  background-color: #020202;
+  background-color: #0B0B0C;
+  border-radius: var(--ifm-card-border-radius); /* Apply card border radius */
   padding: 36px;
   width: 400px;
-  height: 200px;
+  height: 400px;
   cursor: pointer;
-  border: 1px solid #565656;
-  transition: all 300ms ease, transform 300ms ease, color 300ms ease,
-    -webkit-transform 300ms ease;
+  border: 1px solid #33343D;
+  transition: all 300ms ease, transform 300ms ease, color 300ms ease, -webkit-transform 300ms ease;
+  margin: 0; /* Ensure no extra margins are added */
 }
 
 .link-card:hover {
@@ -238,9 +268,9 @@ th {
 
 .link-card-title {
   display: block;
-  font-family: "Jost";
+  font-family: "Inter-Regular";
   font-style: normal;
-  font-weight: 700;
+  font-weight: 400;
   font-size: 24px;
   line-height: 32px;
   color: #ffffff;
@@ -249,10 +279,10 @@ th {
 
 .link-card-description {
   display: block;
-  font-family: "Roboto Mono";
+  font-family: "Inter-Regular";
   font-style: normal;
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
-  color: #dadada;
+  color: #717386;
 }

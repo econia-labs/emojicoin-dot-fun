@@ -1,7 +1,14 @@
-<!--
-cspell:word linecap
-cspell:word linejoin
--->
+<!--- cspell:words linecap -->
+<!--- cspell:words linejoin -->
+<!--- cspell:words dasharray -->
+
 <svg width="18" height="17" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M16.4999 15.7295L12.8749 12.1045M14.8333 7.39616C14.8333 11.0781 11.8486 14.0628 8.16667 14.0628C4.48477 14.0628 1.5 11.0781 1.5 7.39616C1.5 3.71426 4.48477 0.729492 8.16667 0.729492C11.8486 0.729492 14.8333 3.71426 14.8333 7.39616Z" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+<g clip-path="url(#clip0_15466_1219)">
+<path d="M16.4999 15.7285L12.8749 12.1035M14.8333 7.39518C14.8333 11.0771 11.8486 14.0618 8.16667 14.0618C4.48477 14.0618 1.5 11.0771 1.5 7.39518C1.5 3.71328 4.48477 0.728516 8.16667 0.728516C11.8486 0.728516 14.8333 3.71328 14.8333 7.39518Z" stroke="white" stroke-width="1.4" stroke-linecap="square" stroke-linejoin="round" stroke-dasharray="2 4"/>
+</g>
+<defs>
+<clipPath id="clip0_15466_1219">
+<rect width="18" height="17" fill="white"/>
+</clipPath>
+</defs>
 </svg>

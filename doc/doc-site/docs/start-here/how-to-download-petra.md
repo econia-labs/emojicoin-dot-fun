@@ -2,7 +2,6 @@
 slug: /how-to-download-petra
 title: 💡 How to Download Petra
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
 
 Use this guide for step by step instructions on how to download Petra wallet.

@@ -1,8 +1,7 @@
 ---
 slug: /aptos-wallet-and-cex
-title: 👛 Getting Started (Aptos Wallet + CEX)
+title: 🌐 Petra + CEX
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
 
 Use this guide if you are using an Aptos wallet and using Coinbase to onramp.

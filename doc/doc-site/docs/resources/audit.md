@@ -1,6 +1,7 @@
 ---
 slug: /audit
-title: 🍆 Audit
+title: 🧑‍💻 Audit
 hide_title: false
-description: Documentation for emojicoin dot fun
 ---
+
+Coming soon.

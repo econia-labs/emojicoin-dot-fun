@@ -31,8 +31,7 @@ export const BaseModal: React.FC<
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <DialogPanel
-              className={`w-full
-              ${className} max-w-4xl transform border bg-transparent align-middle shadow-xl`}
+              className={`${className} max-w-4xl transform border bg-transparent align-middle shadow-xl`}
             >
               {showBackButton ? (
                 <DialogTitle as="div">

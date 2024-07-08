@@ -2,7 +2,7 @@ module.exports = {
   docs: [
     {
       type: 'category',
-      label: 'About',
+      label: 'ℹ️ About',
       link: {
         type: 'generated-index'
       },
@@ -15,34 +15,22 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Start Here',
+      label: ' 🏁 Start Here',
       link: {
         type: 'generated-index'
       },
       items: [
-        {
-          type: 'category',
-          label: 'Getting Started',
-          items: [
-            'start-here/how-to-download-petra',
-            'start-here/aptos-wallet-and-moonpay',
-            'start-here/aptos-wallet-and-cex',
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Bridging',
-          items: [
-            'start-here/bridging-from-eth',
-            'start-here/bridging-from-solana',
-          ]
-        },
-        'start-here/how-to-trade-on-emojicoin',
+         'start-here/how-to-download-petra',
+          'start-here/aptos-wallet-and-moonpay',
+          'start-here/aptos-wallet-and-cex',
+          'start-here/bridging-from-eth',
+          'start-here/bridging-from-solana',
+          'start-here/how-to-trade-on-emojicoin',
       ]
     },
     {
       type: 'category',
-      label: 'Resources',
+      label: '🧠 Resources',
       link: {
         type: 'generated-index'
       },

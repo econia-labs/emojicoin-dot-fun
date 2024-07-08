@@ -31,11 +31,11 @@ export const ColoredBytesIndicator = ({ className = "" }: { className?: string }
           transition: { duration: 0.1, repeat: 0 },
         }}
         style={{ scale: 1 }}
-        className={textColorBySum(length, threshold)}
+        className={textColorBySum(length, threshold) + " !no-underline"}
       >
         {length}
       </motion.span>
-      <span className="text-white -rotate-[30deg]">{"/"}</span>
+      <span className="text-white -rotate-[30deg] select-none">{"/"}</span>
       <span className="text-white">{`${threshold}${mode === "register" ? " bytes" : ""}`}</span>
     </div>
   );

@@ -1,6 +1,6 @@
 export const slideVariants = {
   hidden: {
-    y: "100vh",
+    y: "100dvh",
     opacity: 0,
   },
   visible: {
@@ -8,7 +8,7 @@ export const slideVariants = {
     opacity: 1,
     transition: {
       duration: 0.3,
-      type: "easyInOut",
+      type: "easeInOut",
     },
   },
 };

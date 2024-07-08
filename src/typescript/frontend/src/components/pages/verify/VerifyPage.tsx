@@ -4,15 +4,14 @@ import { type AccountInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useCallback, useEffect, useState } from "react";
-import { darkColors } from "theme";
 import { createSession } from "./session";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { useScramble } from "use-scramble";
+import { motion } from "framer-motion";
 
 export const ClientVerifyPage = () => {
   const { account } = useAptos();
-  const { connected } = useWallet();
-  const [enabled, setEnabled] = useState(false);
+  const { connected, disconnect } = useWallet();
   const [verified, setVerified] = useState<boolean | null>(null);
 
   const { ref, replay } = useScramble({
@@ -25,8 +24,14 @@ export const ClientVerifyPage = () => {
     overdrive: false,
     overflow: true,
     speed: 0.6,
-    onAnimationStart: () => setEnabled(false),
-    onAnimationEnd: () => setEnabled(true),
+    playOnMount: true,
+  });
+
+  const { ref: backRef, replay: replayBack } = useScramble({
+    text: "Back",
+    overdrive: false,
+    overflow: true,
+    speed: 0.6,
   });
 
   const verify = useCallback(
@@ -45,52 +50,50 @@ export const ClientVerifyPage = () => {
     }
   }, [account, connected, verify]);
 
-  const handleReplay = useCallback(() => {
-    if (enabled) {
+  useEffect(() => {
+    setTimeout(() => {
       replay();
-    }
-  }, [enabled, replay]);
+    }, 300);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [verified]);
 
   return (
     <>
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          backgroundColor: darkColors.black,
-          zIndex: 50,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100vw",
-            height: "100vh",
-            textTransform: "uppercase",
-            color: darkColors.econiaBlue,
-            gap: "1rem",
-            fontSize: "1.5rem",
-          }}
-        >
-          <ButtonWithConnectWalletFallback>
-            <div className="flex flex-row">
-              <span className="px-2.5">{"{"}</span>
-              <a
-                ref={ref}
-                href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
-                className="uppercase"
-                onMouseOver={handleReplay}
-                {...EXTERNAL_LINK_PROPS}
-              />
-              <span className="px-2.5">{"}"}</span>
-            </div>
-          </ButtonWithConnectWalletFallback>
+      <div className="absolute top-0 left-0 w-[100dvw] h-[100dvh] bg-black z-50 overflow-hidden">
+        <div className="flex items-center justify-center w-full h-full">
+          <div className="flex flex-col justify-begin uppercase text-ec-blue gap-4 text-2xl">
+            {connected && verified === false && (
+              <motion.div
+                onMouseEnter={replayBack}
+                animate={{ x: 0, y: -60 }}
+                initial={{ x: 2000, y: -60 }}
+                className="absolute flex flex-row px-2.5 hover:cursor-pointer min-w-[12ch] top-[50%]"
+                onClick={() => {
+                  setVerified(null);
+                  disconnect();
+                }}
+                transition={{
+                  type: "just",
+                  duration: 0.3,
+                }}
+              >
+                <span>{"<<"}&nbsp;</span>
+                <span ref={backRef}>Back</span>
+              </motion.div>
+            )}
+            <ButtonWithConnectWalletFallback>
+              <div className="flex flex-row uppercase">
+                <span className="px-2.5">{"{"}</span>
+                <a
+                  ref={ref}
+                  href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
+                  onMouseEnter={replay}
+                  {...EXTERNAL_LINK_PROPS}
+                />
+                <span className="px-2.5">{"}"}</span>
+              </div>
+            </ButtonWithConnectWalletFallback>
+          </div>
         </div>
       </div>
     </>
