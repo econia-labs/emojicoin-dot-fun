@@ -1,7 +1,6 @@
 import { RegisterMarket, RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
-  AccountAddress,
   isUserTransactionResponse,
   type PendingTransactionResponse,
   type UserTransactionResponse,
