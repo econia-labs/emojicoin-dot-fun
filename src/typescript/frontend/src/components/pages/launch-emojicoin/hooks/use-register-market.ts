@@ -10,21 +10,18 @@ import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
 import useInputStore from "@store/input-store";
-import { type RegisteredMarket, SYMBOL_DATA, symbolToEmojis } from "@sdk/emoji_data";
+import { SYMBOL_DATA, symbolToEmojis } from "@sdk/emoji_data";
 import { useRouter } from "next/navigation";
-import { getEvents } from "@sdk/emojicoin_dot_fun";
 import { ROUTES } from "router/routes";
 import path from "path";
 import { revalidateTagAction } from "lib/queries/cache-utils/revalidate";
 import { TAGS } from "lib/queries/cache-utils/tags";
-import { useEventStore } from "context/websockets-context";
 
 export const useRegisterMarket = () => {
   const emojis = useInputStore((state) => state.emojis);
   const { aptos, account, submit, signThenSubmit } = useAptos();
   const clear = useInputStore((state) => state.clear);
   const router = useRouter();
-  const addRegisteredMarket = useEventStore((state) => state.addRegisteredMarket);
 
   const registerMarket = async () => {
     if (!account) {
@@ -79,7 +76,7 @@ export const useRegisterMarket = () => {
       const newPath = path.join(ROUTES.market, emojiData.symbol);
       router.push(newPath);
       router.refresh();
-      
+
       // Clear the emoji picker input.
       clear();
     } else {

@@ -3,15 +3,13 @@ import Script from "next/script";
 import { type ChartContainerProps } from "./types";
 import dynamic from "next/dynamic";
 import React, { useEffect } from "react";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useWebSocketClient } from "context/websockets-context";
 
 const Chart = dynamic(() => import("./PrivateChart"), { ssr: true });
 const MemoizedChart = React.memo(Chart);
 
 export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">) => {
   const [isScriptReady, setIsScriptReady] = React.useState(false);
-  const marketMetadataMap = useEventStore((s) => s.marketMetadataMap);
-  const allMarketSymbols = useEventStore((s) => s.symbols);
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
 
   // For now, we subscribe to any periodic state event instead of just a specific resolution.
@@ -30,8 +28,6 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
           marketID={props.marketID}
           emojis={props.emojis}
           marketAddress={props.marketAddress}
-          markets={marketMetadataMap}
-          symbols={allMarketSymbols}
           symbol={props.symbol}
           isScriptReady={isScriptReady}
         />

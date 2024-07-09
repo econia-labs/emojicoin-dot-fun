@@ -7,7 +7,6 @@ import {
   isStateEvent,
   isChatEvent,
   isLiquidityEvent,
-  isMarketRegistrationEvent,
   isPeriodicStateEvent,
 } from "@sdk/types/types";
 import { createStore } from "zustand/vanilla";
@@ -101,10 +100,9 @@ export type EventActions = {
   getSymbolMap: () => Map<SymbolString, MarketIDString>;
   getMarketIDFromSymbol: (symbol: SymbolString) => MarketIDString | undefined;
   loadEventsFromServer: (eventsIn: Array<AnyHomogenousEvent> | UniqueHomogenousEvents) => void;
-  pushEventFromClient: (event: AnyEmojicoinEvent) => void;
+  pushEventFromClient: (event: Exclude<AnyEmojicoinEvent, MarketRegistrationEvent>) => void;
   addMarketData: (d: MarketDataView) => void;
   setLatestBars: ({ marketID, latestBars }: SetLatestBarsArgs) => void;
-  addRegisteredMarket: (market: RegisteredMarket) => void;
   getRegisteredMarketMap: () => Map<MarketIDString, RegisteredMarket>;
   initializeRegisteredMarketsMap: (data: Array<RegisteredMarket>) => void;
   subscribeToResolution: ({ symbol, resolution, cb }: ResolutionSubscription) => void;
@@ -245,7 +243,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           state.guids.add(event.guid);
           const { emojiBytes, marketAddress, marketID } = event.marketMetadata;
           const emojiData = symbolBytesToEmojis(emojiBytes);
-          state.addRegisteredMarket({
+          state.registeredMarketMap.set(marketID.toString(), {
             marketID: marketID.toString(),
             symbolBytes: `0x${emojiData.emojis.map((e) => e.hex.slice(2)).join("")}`,
             marketAddress: AccountAddress.from(marketAddress).toString(),
@@ -300,7 +298,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       },
       // Note that we `unshift` here because we add the latest event to the front of the array.
       // We also update the latest bar if the incoming event is a swap or periodic state event.
-      pushEventFromClient: (event: AnyEmojicoinEvent) => {
+      pushEventFromClient: (event) => {
         if (get().guids.has(event.guid)) return;
         set((state) => {
           state.firehose.unshift(event);
@@ -318,8 +316,6 @@ export const createEventStore = (initialState: EventState = defaultState) => {
               market.chatEvents.unshift(event);
             } else if (isLiquidityEvent(event)) {
               market.liquidityEvents.unshift(event);
-            } else if (isMarketRegistrationEvent(event)) {
-              state.marketRegistrationEvents.unshift(event);
             } else {
               if (isSwapEvent(event)) {
                 const swap = event;
@@ -404,12 +400,6 @@ export const createEventStore = (initialState: EventState = defaultState) => {
               }
             }
           }
-        });
-      },
-      addRegisteredMarket: (market) => {
-        set((state) => {
-          state.registeredMarketMap.set(market.marketID, market);
-          state.symbols.set(market.symbol, market.marketID);
         });
       },
       initializeRegisteredMarketsMap: (markets) => {
