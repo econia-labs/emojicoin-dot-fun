@@ -19,7 +19,8 @@ To update the allowlist, add the desired address(es) to the allowlist file.
 Then, **restart the program**.
 
 Alternatively, you can use `pkill -USR1 allowlister3000` to send a `SIGUSR1`
-signal to the program, which will reload the file without quitting.
+signal to the program, which will reload the file without quitting. Note that
+the `add.sh` and `remove.sh` scripts do this automatically.
 
 ## Allowlist format
 
@@ -80,6 +81,16 @@ Create an allowlist file on the VM.
 Once all the addresses are added to the file, set `ALLOWLIST_FILE` to the path
 of the file.
 
+Two helper scripts are present to help you manage addresses:
+
+- `add.sh`
+- `remove.sh`
+
+Their name documents their purpose very well, and their usage is the following:
+`<SCRIPT> <ADDRESS> <FILE>`. You can also run `<SCRIPT> --help`.
+
+Note: `remove.sh` will always create a backup file.
+
 #### Step 5
 
 Start the AllowLister3K by running `./path_to_binary`.
@@ -98,8 +109,10 @@ cargo build --release --target x86_64-unknown-linux-gnu
 gcloud compute scp \
     ./target/x86_64-unknown-linux-gnu/release/allowlister3000 \
     root@allowlister3000:/
+gcloud compute scp ./add.sh root@allowlister3000:/
+gcloud compute scp ./remove.sh root@allowlister3000:/
 gcloud compute ssh root@allowlister3000
-echo "0x..." >> allowlist.txt
+./add.sh 0x... allowlist.txt
 nohup bash -c 'ALLOWLIST_FILE=./allowlist.txt /allowlister3000 &!'
 ```
 
@@ -115,8 +128,7 @@ To add a new address:
 ```sh
 gcloud config set project YOUR-PROJECT-ID
 gcloud compute ssh root@allowlister3000
-echo 0x123456 >> allowlist.txt
-pkill -USR1 allowlister3000
+./add.sh 0x123456 allowlist.txt
 ```
 
 [gcp-vm-docs]: https://cloud.google.com/compute/docs/instances/create-start-instance

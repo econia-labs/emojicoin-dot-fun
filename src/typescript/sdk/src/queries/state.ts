@@ -2,7 +2,6 @@ import "server-only";
 
 import { type Types, toGlobalStateEvent, toStateEvent, toMarketDataView } from "../types";
 import { INBOX_EVENTS_TABLE, MARKET_DATA_VIEW, ORDER_BY } from "./const";
-import { wrap } from "./utils";
 import {
   type AggregateQueryResultsArgs,
   type EventsAndErrors,
@@ -87,7 +86,7 @@ export const paginateStateEventsByMarketID = async (
       .from(INBOX_EVENTS_TABLE)
       .select("*")
       .filter("event_name", "eq", "emojicoin_dot_fun::State")
-      .eq("data->market_metadata->market_id", wrap(marketID))
+      .eq("data->market_metadata->>market_id", marketID)
       .order("transaction_version", ORDER_BY.DESC),
   });
 

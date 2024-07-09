@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
-import { useElementDimensions, useMatchBreakpoints } from "hooks";
+import { useMatchBreakpoints } from "hooks";
 
 import { TableRowDesktop, TableHeader } from "./components";
 import { Table, Th, EmptyTr, ThInner, HeaderTr, TBody } from "components";
@@ -11,15 +11,17 @@ import { StyledPoolsWrapper } from "./styled";
 import { HEADERS, MOBILE_HEADERS } from "./constants";
 
 import { getEmptyListTr } from "utils";
-import type fetchSortedMarketData from "lib/queries/sorting/market-data";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import type { OrderByStrings } from "@sdk/queries/const";
+import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
+import useElementDimensions from "@hooks/use-element-dimensions";
 
 export interface PoolsTableProps {
-  data: Awaited<ReturnType<typeof fetchSortedMarketData>>["markets"];
+  data: FetchSortedMarketDataReturn["markets"];
   sortBy: (sortBy: SortByPageQueryParams) => void;
   orderBy: (orderBy: OrderByStrings) => void;
   onSelect: (index: number) => void;
+  onEnd: () => void;
 }
 
 const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
@@ -32,6 +34,7 @@ const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
   }>({ col: "all_time_vol", direction: "desc" });
 
   const headers = isMobile ? MOBILE_HEADERS : HEADERS;
+  const tableRef = useRef<HTMLTableSectionElement>(null);
   return (
     <StyledPoolsWrapper>
       <Table>
@@ -68,9 +71,20 @@ const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
           </HeaderTr>
         </thead>
         <TBody
+          ref={tableRef}
           height={{ _: "calc(50vh)", laptopL: "calc(100vh - 353px)" }}
           maxHeight={{ _: "204px", tablet: "340px", laptopL: "unset" }}
           id="poolsTableBody"
+          onScroll={() => {
+            if (tableRef && tableRef.current) {
+              if (
+                tableRef.current.offsetHeight + tableRef.current.scrollTop >=
+                tableRef.current.scrollHeight
+              ) {
+                props.onEnd();
+              }
+            }
+          }}
         >
           {props.data.map((item, index) => (
             <TableRowDesktop

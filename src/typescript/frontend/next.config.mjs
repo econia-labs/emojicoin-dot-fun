@@ -1,4 +1,9 @@
 // @ts-check
+import analyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = analyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const DEBUG = process.env.BUILD_DEBUG === "true";
 const styledComponentsConfig = {
@@ -7,6 +12,7 @@ const styledComponentsConfig = {
   fileName: true,
   minify: false,
 };
+/** @type {import('next').NextConfig} */
 const debugConfigOptions = {
   productionBrowserSourceMaps: true,
   outputFileTracing: true,
@@ -15,6 +21,10 @@ const debugConfigOptions = {
   experimental: {
     serverMinification: false,
     serverSourceMaps: true,
+    staleTimes: {
+      dynamic: 0, // Default is normally 30s.
+      static: 30, // Default is normally 180s.
+    },
   },
   logging: {
     fetches: {
@@ -36,4 +46,4 @@ const nextConfig = {
   transpilePackages: ["@sdk"],
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

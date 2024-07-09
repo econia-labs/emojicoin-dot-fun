@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import useSWR from "swr";
-
-import { useEmojicoinPicker, useMatchBreakpoints } from "hooks";
+import { useMatchBreakpoints } from "hooks";
 
 import { FlexGap } from "@containers";
 import { Input } from "components/inputs/input";
@@ -20,41 +18,45 @@ import {
 } from "components/pages/pools/styled";
 import { isDisallowedEventKey, parseJSON } from "utils";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
-
-const fetcher = (...args: Parameters<typeof fetch>) =>
-  fetch(...args)
-    .then((res) => res.text())
-    .then((txt) => parseJSON(txt));
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 
 export const ClientPoolsPage = () => {
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number>();
-  const { data, error, isLoading } = useSWR(
-    `/pools/api?sortby=${sortBy}&orderby=${orderBy}`,
-    fetcher
-  );
+  const [page, setPage] = useState<number>(1);
+  const [markets, setMarkets] = useState<FetchSortedMarketDataReturn["markets"]>([]);
+  const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
+  const [pools, setPools] = useState<"all" | "mypools">("all");
+
+  const { account } = useAptos();
+
+  useEffect(() => {
+    const root = "/pools/api";
+    const sortByQuery = `sortby=${sortBy}`;
+    const orderByQuery = `orderby=${orderBy}`;
+    const pageQuery = `page=${page}`;
+    const accountQuery = pools === "mypools" ? `&account=${account?.address}` : "";
+    fetch(`${root}?${sortByQuery}&${orderByQuery}&${pageQuery}${accountQuery}`)
+      .then((res) => res.text())
+      .then((txt) => parseJSON(txt))
+      .then((data) => {
+        if (data.markets.length < MARKETS_PER_PAGE) {
+          setAllDataIsLoaded(true);
+        }
+        setMarkets((markets) => (page === 1 ? [...data.markets] : [...markets, ...data.markets]));
+      });
+  }, [page, orderBy, sortBy, account, pools]);
 
   const { isMobile } = useMatchBreakpoints();
-
-  // TODO: Initialize market state data here (and any other data that goes in the event store).
-
-  const { targetRef, tooltip } = useEmojicoinPicker({
-    onEmojiClick: () => {},
-    placement: "bottom",
-    width: 272,
-  });
 
   const onInputChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (isDisallowedEventKey(e)) {
       e.preventDefault();
     }
   };
-
-  if (error) return <div>Error.</div>;
-  if (isLoading) return <div>Loading...</div>;
-
-  const markets = data.markets;
 
   return (
     <StyledPoolsPage>
@@ -67,9 +69,17 @@ export const ClientPoolsPage = () => {
             alignItems="center"
             gap="13px"
           >
-            <TableHeaderSwitcher title1="Pools" title2="My pools" />
-
-            <TableHeaderSwitcher title1="Top 20" title2="All" />
+            <TableHeaderSwitcher
+              title1="Pools"
+              title2="My pools"
+              onSelect={(title) => {
+                if (title === "Pools" && pools !== "all") {
+                  setPools("all");
+                } else if (title === "My pools" && pools !== "mypools") {
+                  setPools("mypools");
+                }
+              }}
+            />
 
             {!isMobile ? (
               <>
@@ -81,9 +91,9 @@ export const ClientPoolsPage = () => {
                   label="Search pool:"
                   forId="searchPool"
                 >
-                  <Input id="searchPool" onKeyDown={onInputChange} ref={targetRef} />
+                  <Input id="searchPool" onKeyDown={onInputChange} />
                 </InputGroup>
-                {tooltip}
+                {"TODO"}
               </>
             ) : null}
           </FlexGap>
@@ -100,9 +110,9 @@ export const ClientPoolsPage = () => {
               label="Search:"
               forId="searchPool"
             >
-              <Input id="searchPool" onKeyDown={onInputChange} ref={targetRef} />
+              <Input id="searchPool" onKeyDown={onInputChange} />
             </InputGroup>
-            {tooltip}
+            {"TODO"}
           </StyledHeaderInner>
         </StyledSubHeader>
       ) : null}
@@ -113,12 +123,21 @@ export const ClientPoolsPage = () => {
             data={markets}
             sortBy={(s) => {
               setSortBy(s);
+              setPage(1);
+              setAllDataIsLoaded(false);
             }}
             orderBy={(s) => {
               setOrderBy(s);
+              setPage(1);
+              setAllDataIsLoaded(false);
             }}
             onSelect={(index) => {
               setSelectedIndex(index);
+            }}
+            onEnd={() => {
+              if (!allDataIsLoaded) {
+                setPage(page + 1);
+              }
             }}
           />
         </StyledInner>

@@ -11,11 +11,11 @@ import {
 } from "./styled";
 import SearchComponent from "./components/Search";
 import FilterOptions from "./components/FilterOptions";
-import type fetchSortedMarketData from "lib/queries/sorting/market-data";
 import { ClientGrid } from "./ClientGrid";
+import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 
 export interface EmojiTableProps {
-  data: Awaited<ReturnType<typeof fetchSortedMarketData>>["markets"];
+  data: FetchSortedMarketDataReturn["markets"];
   totalNumberOfMarkets: number;
 }
 

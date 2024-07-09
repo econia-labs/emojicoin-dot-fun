@@ -79,7 +79,7 @@ module.exports = {
         { name: "og:image:width", content: "1200" },
         { name: "og:image:height", content: "630" }
       ],
-      image: "img/social-preview.jpg",
+      image: "img/social-preview.png",
       navbar: {
         logo: {
           alt: "Header",

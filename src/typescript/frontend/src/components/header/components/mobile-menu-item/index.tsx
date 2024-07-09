@@ -10,6 +10,7 @@ import { type MobileMenuItemProps } from "./types";
 import { StyledItemWrapper } from "./styled";
 
 const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
+  withIcon,
   title,
   onClick = () => {},
   borderBottom = true,
@@ -24,9 +25,16 @@ const MobileMenuItem: React.FC<MobileMenuItemProps> = ({
 
   return (
     <StyledItemWrapper onMouseOver={replay} onClick={onClick} borderBottom={borderBottom}>
-      <Text textScale="pixelHeading3" color="black" textTransform="uppercase" ref={ref} />
-
-      <Arrow width="18px" color="black" />
+      <div className={withIcon?.className}>
+        {withIcon?.icon}
+        <Text
+          textScale={withIcon ? "pixelHeading4" : "pixelHeading3"}
+          color="black"
+          textTransform="uppercase"
+          ref={ref}
+        />
+      </div>
+      {!withIcon && <Arrow width="18px" color="black" />}
     </StyledItemWrapper>
   );
 };

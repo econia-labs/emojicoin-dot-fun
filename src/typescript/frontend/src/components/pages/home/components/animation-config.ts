@@ -30,12 +30,12 @@ export const variants = {
   },
   buy: {
     boxShadow: `0 0 14px 11px ${GREEN}AA`,
-    filter: `drop-shadow(0 0 21px ${GREEN})AA`,
+    filter: `drop-shadow(0 0 21px ${GREEN}AA)`,
     transition: transitionIn,
   },
   sell: {
     boxShadow: `0 0 14px 11px ${PINK}AA`,
-    filter: `drop-shadow(0 0 21px ${PINK})AA`,
+    filter: `drop-shadow(0 0 21px ${PINK}AA)`,
     transition: transitionIn,
   },
 };

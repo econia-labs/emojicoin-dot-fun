@@ -1,10 +1,7 @@
-import React from "react";
-
-import { useHideOverflow } from "@hooks/use-hide-overflow";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
-import { Link } from "components/link";
-import { Flex } from "@containers";
+import { EXTERNAL_LINK_PROPS, Link } from "components/link";
 import { MobileSocialLinks } from "./components/mobile-social-links";
 import { MobileMenuItem } from "../index";
 
@@ -12,42 +9,144 @@ import { type MobileMenuProps } from "./types";
 
 import { slideVariants } from "./animations";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import {
+  APTOS_CONNECT_ACCOUNT_URL,
+  isAptosConnectWallet,
+  useWallet,
+} from "@aptos-labs/wallet-adapter-react";
+import { Copy, LogOut, User } from "lucide-react";
+import { useWalletModal } from "context/wallet-context/WalletModalContext";
+import { AnimatePresence, useAnimationControls } from "framer-motion";
+import AnimatedDropdownItem from "./components/animated-dropdown-item";
+
+const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch]";
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
   setIsOpen,
   linksForCurrentPage,
-  offsetHeight,
 }) => {
-  useHideOverflow({ trigger: isOpen });
+  const { wallet, account, disconnect } = useWallet();
+  const { copyAddress } = useAptos();
+  const { openWalletModal } = useWalletModal();
+  const subMenuControls = useAnimationControls();
+  const borderControls = useAnimationControls();
+  const [subMenuOpen, setSubMenuOpen] = useState(false);
 
-  const handleCloseMobileMenu = () => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "clip";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      handleCloseSubMenu();
+    }
+    /* eslint-disable-next-line */
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!account) {
+      handleCloseSubMenu();
+    }
+    /* eslint-disable-next-line */
+  }, [account]);
+
+  const handleCloseMobileMenu = async () => {
+    await handleCloseSubMenu();
     setIsOpen(false);
   };
 
+  const handleCloseSubMenu = useCallback(async () => {
+    setSubMenuOpen(false);
+    await borderControls.start({ opacity: 0 });
+    await subMenuControls.start({ height: 0 });
+  }, [subMenuControls, borderControls]);
+
+  const subMenuOnClick = async () => {
+    if (!account) {
+      openWalletModal();
+    } else {
+      if (!subMenuOpen) {
+        setSubMenuOpen(true);
+        await borderControls.start({
+          opacity: 1,
+          transition: { delay: 0, duration: 0 },
+        });
+        await subMenuControls.start({ height: 40 });
+      } else {
+        const a = borderControls.start({ opacity: 0 });
+        const b = subMenuControls.start({ height: 0 });
+        await Promise.all([a, b]);
+        setSubMenuOpen(false);
+      }
+    }
+  };
+
   return (
-    <StyledMotion
-      initial="hidden"
-      animate={isOpen ? "visible" : "hidden"}
-      variants={slideVariants}
-      offsetHeight={offsetHeight}
-    >
-      <MobileMenuWrapper offsetHeight={offsetHeight}>
+    <StyledMotion initial="hidden" animate={isOpen ? "visible" : "hidden"} variants={slideVariants}>
+      <MobileMenuWrapper>
         <MobileMenuInner>
-          {linksForCurrentPage.map(({ title, path }) => {
+          <ButtonWithConnectWalletFallback
+            className="w-full"
+            mobile={true}
+            onClick={subMenuOnClick}
+          />
+          <AnimatePresence>
+            {subMenuOpen && (
+              <>
+                {wallet && isAptosConnectWallet(wallet) && (
+                  <a
+                    key="aptos-connect-dropdown"
+                    href={APTOS_CONNECT_ACCOUNT_URL}
+                    {...EXTERNAL_LINK_PROPS}
+                  >
+                    <AnimatedDropdownItem
+                      title="Account"
+                      icon={<User className={IconClass} />}
+                      controls={subMenuControls}
+                      borderControls={borderControls}
+                    />
+                  </a>
+                )}
+                <AnimatedDropdownItem
+                  key="copy-address-dropdown"
+                  title="Copy address"
+                  icon={<Copy className={IconClass} />}
+                  onClick={copyAddress}
+                  controls={subMenuControls}
+                  borderControls={borderControls}
+                />
+                <AnimatedDropdownItem
+                  key="disconnect-dropdown"
+                  title="Disconnect"
+                  icon={<LogOut className={IconClass} />}
+                  onClick={disconnect}
+                  controls={subMenuControls}
+                  borderControls={borderControls}
+                />
+              </>
+            )}
+          </AnimatePresence>
+          {linksForCurrentPage.map(({ title, path }, i) => {
             return (
               <Link key={title} href={path} onClick={handleCloseMobileMenu} width="100%">
-                <MobileMenuItem title={title} />
+                <MobileMenuItem title={title} borderBottom={i !== linksForCurrentPage.length - 1} />
               </Link>
             );
           })}
-
-          <ButtonWithConnectWalletFallback mobile={true} />
         </MobileMenuInner>
 
-        <Flex position="absolute" bottom="60px" justifyContent="center" width="100%">
+        <div className="flex fixed bottom-[60px] justify-center w-full">
           <MobileSocialLinks />
-        </Flex>
+        </div>
       </MobileMenuWrapper>
     </StyledMotion>
   );

@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useScramble } from "use-scramble";
 
 import { translationFunction } from "context/language-context";
 import { Flex, FlexGap } from "@containers";
 import { Text } from "components/text";
 
-import { type TableHeaderSwitcherPops } from "./types";
+import { type TableHeaderSwitcherProps } from "./types";
 
-const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2 }) => {
-  const [isActive, setIsActive] = useState(true);
+const TableHeaderSwitcher: React.FC<TableHeaderSwitcherProps> = ({ title1, title2, onSelect }) => {
+  const [selectedTitle, setSelectedTitle] = useState(title1);
   const { t } = translationFunction();
 
   const { ref: ref1, replay: replay1 } = useScramble({
@@ -25,9 +25,9 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2
     speed: 0.5,
   });
 
-  const clickHandler = () => {
-    setIsActive(!isActive);
-  };
+  useEffect(() => {
+    onSelect(selectedTitle);
+  }, [selectedTitle, onSelect]);
 
   return (
     <FlexGap gap="8px" width="fit-content">
@@ -36,8 +36,8 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2
           textScale="pixelHeading3"
           className="font-pixelar text-lg text-blue"
           textTransform="uppercase"
-          color={isActive ? "lightGray" : "darkGray"}
-          onClick={clickHandler}
+          color={selectedTitle === title1 ? "lightGray" : "darkGray"}
+          onClick={() => setSelectedTitle(title1)}
           ref={ref1}
         ></Text>
       </Flex>
@@ -47,8 +47,8 @@ const TableHeaderSwitcher: React.FC<TableHeaderSwitcherPops> = ({ title1, title2
           textScale="pixelHeading3"
           className="font-pixelar text-lg text-blue"
           textTransform="uppercase"
-          color={isActive ? "darkGray" : "lightGray"}
-          onClick={clickHandler}
+          color={selectedTitle === title2 ? "lightGray" : "darkGray"}
+          onClick={() => setSelectedTitle(title2)}
           ref={ref2}
         ></Text>
       </Flex>

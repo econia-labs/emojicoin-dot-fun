@@ -5,9 +5,11 @@ import {
   Hex,
   type UserTransactionResponse,
   MoveString,
+  isUserTransactionResponse,
+  type PendingTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
-import { type Events, converter, toGenericEvent } from "./events";
+import { type Events, converter, toGenericEvent, createEmptyEvents } from "./events";
 import { type AnyEmojicoinEvent, type AnyEmojicoinEventName, type Types } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
@@ -103,22 +105,18 @@ export function webSocketJsonToEvent<T extends AnyEmojicoinEvent>(
   return undefined;
 }
 
-export function getEvents(response: UserTransactionResponse): Events {
-  const events: Events = {
-    swapEvents: [],
-    chatEvents: [],
-    marketRegistrationEvents: [],
-    periodicStateEvents: [],
-    stateEvents: [],
-    globalStateEvents: [],
-    liquidityEvents: [],
-    events: [],
-  };
+export function getEvents(
+  response?: UserTransactionResponse | PendingTransactionResponse | null
+): Events {
+  const events = createEmptyEvents();
+  if (!response || !isUserTransactionResponse(response)) {
+    return events;
+  }
 
   response.events.forEach((event): void => {
     if (!converter.has(event.type)) {
       const res = toGenericEvent(event);
-      events.events.push(res);
+      events.genericEvents.push(res);
       return;
     }
     const conversionFunction = converter.get(event.type)!;

@@ -1,5 +1,5 @@
 import { toOrderBy } from "@sdk/queries/const";
-import fetchSortedMarketData from "lib/queries/sorting/market-data";
+import fetchSortedMarketData, { fetchMyPools } from "lib/queries/sorting/market-data";
 import type { SortByPostgrestQueryParams } from "lib/queries/sorting/types";
 import { stringifyJSON } from "utils";
 
@@ -35,11 +35,22 @@ export async function GET(request: Request) {
   if (orderBy !== "asc" && orderBy !== "desc") {
     throw "Invalid params";
   }
-  const data = await fetchSortedMarketData({
-    page,
-    inBondingCurve: false,
-    orderBy: toOrderBy(orderBy),
-    sortBy,
-  });
-  return new Response(stringifyJSON(data));
+  const account = searchParams.get("account");
+  if (account) {
+    const data = await fetchMyPools({
+      page,
+      orderBy: toOrderBy(orderBy),
+      sortBy,
+      account,
+    });
+    return new Response(stringifyJSON(data));
+  } else {
+    const data = await fetchSortedMarketData({
+      page,
+      inBondingCurve: false,
+      orderBy: toOrderBy(orderBy),
+      sortBy,
+    });
+    return new Response(stringifyJSON(data));
+  }
 }

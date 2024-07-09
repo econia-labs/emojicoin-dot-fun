@@ -3,16 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { translationFunction } from "context/language-context";
-import useTooltip from "hooks/use-tooltip";
 import { Column, Flex, FlexGap } from "@containers";
-import {
-  StyledEmoji,
-  StyledPixelHeadingText,
-  StyledDisplayFontText,
-  StyledMarketDataText,
-  StyledDoubleEmoji,
-  StyledContainer,
-} from "./styled";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
@@ -61,8 +52,10 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
     subscribe.state(marketID);
     setTimeout(() => {
       if(globeImage.current) {
+        console.log("wtf")
         let classlist = globeImage.current?.classList;
         if(!classlist.contains("hero-image-animation")) {
+          console.log("rly?")
           classlist.add("hero-image-animation")
         }
       }
@@ -87,11 +80,6 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   useEffect(() => {
     setNumMarkets(totalNumberOfMarkets);
   }, [totalNumberOfMarkets, setNumMarkets]);
-
-  const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap);
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);
@@ -123,33 +111,34 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
           />
 
           {[...new Intl.Segmenter().segment(featured?.symbol ?? "🖤")].length == 1 ?
-          <StyledEmoji>{featured?.symbol ?? "🖤"}</StyledEmoji>
+          <div id="styled-emoji">{featured?.symbol ?? "🖤"}</div>
           :
-          <StyledDoubleEmoji>{featured?.symbol}</StyledDoubleEmoji>
+          <div id="styled-double-emoji">{featured?.symbol}</div>
           }
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <StyledPixelHeadingText textScale="pixelHeading1" color="darkGray">
-            {"01"}
-          </StyledPixelHeadingText>
-          <StyledDisplayFontText ref={targetRefEmojiName} ellipsis>
+          <div className="pixel-heading-1 text-dark-gray pixel-heading-text">01</div>
+          <div
+            className="display-font-text ellipses font-forma-bold"
+            title={(featured ? emojisToName(featured.emojis) : "BLACK HEART").toUpperCase()}
+          >
             {(featured ? emojisToName(featured.emojis) : "BLACK HEART").toUpperCase()}
-          </StyledDisplayFontText>
+          </div>
 
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
+                <div className="font-forma text-dark-gray market-data-text uppercase">
                   {t("Mkt. Cap:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
+                </div>
+                <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
                     <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
-                </StyledMarketDataText>
+                </div>
               </>
             )}
           </FlexGap>
@@ -157,16 +146,18 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
-                  {t("24 hour vol:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
+                <div className="text-dark-gray uppercase">
+                  <div className="font-forma text-dark-gray market-data-text uppercase">
+                    {t("24 hour vol:")}
+                  </div>
+                </div>
+                <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
                     <div ref={dailyVolumeRef}>{toCoinDecimalString(roughDailyVolume, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
-                </StyledMarketDataText>
+                </div>
               </>
             )}
           </FlexGap>
@@ -174,21 +165,20 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <StyledMarketDataText color="darkGray" textTransform="uppercase">
+                <div className="font-forma text-dark-gray market-data-text uppercase">
                   {t("All-time vol:")}
-                </StyledMarketDataText>
-                <StyledMarketDataText>
+                </div>
+                <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
                     <div ref={allTimeVolumeRef}>{toCoinDecimalString(roughAllTimeVolume, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
-                </StyledMarketDataText>
+                </div>
               </>
             )}
           </FlexGap>
         </Column>
-        {tooltipEmojiName}
       </Flex>
     </Flex>
   );

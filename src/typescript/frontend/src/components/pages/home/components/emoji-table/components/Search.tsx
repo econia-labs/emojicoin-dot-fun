@@ -1,16 +1,9 @@
 "use client";
 
 import { InputGroup, Input } from "components/inputs";
-import { useEmojicoinPicker } from "hooks";
 import { isDisallowedEventKey } from "utils";
 
 export const SearchComponent = () => {
-  const { targetRef, tooltip } = useEmojicoinPicker({
-    onEmojiClick: () => {},
-    placement: "bottom",
-    width: 272,
-  });
-
   const onInputChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (isDisallowedEventKey(e)) {
       e.preventDefault();
@@ -32,10 +25,9 @@ export const SearchComponent = () => {
           id="search"
           autoComplete="off"
           onKeyDown={onInputChange}
-          ref={targetRef}
         />
       </InputGroup>
-      {tooltip}
+      {"TODO"}
     </>
   );
 };

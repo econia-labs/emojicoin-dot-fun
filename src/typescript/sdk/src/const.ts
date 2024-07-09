@@ -43,9 +43,13 @@ export const MARKET_REGISTRATION_FEE = 100_000_000n;
 export const DECIMALS = 8;
 
 // Emoji sequence length constraints.
-export const MAX_CHAT_MESSAGE_LENGTH = 100;
+export const MAX_NUM_CHAT_EMOJIS = 100;
 export const MAX_SYMBOL_LENGTH = 10;
 
+/**
+ * Note that a period boundary, a candlestick resolution, a period, and a candlestick time frame
+ * are all referred to interchangeably throughout this codebase.
+ */
 export enum CandlestickResolution {
   PERIOD_1M = 60000000,
   PERIOD_5M = 300000000,
@@ -56,14 +60,48 @@ export enum CandlestickResolution {
   PERIOD_1D = 86400000000,
 }
 
-export const toCandlestickResolution: Record<number, CandlestickResolution> = {
-  [CandlestickResolution.PERIOD_1M]: CandlestickResolution.PERIOD_1M,
-  [CandlestickResolution.PERIOD_5M]: CandlestickResolution.PERIOD_5M,
-  [CandlestickResolution.PERIOD_15M]: CandlestickResolution.PERIOD_15M,
-  [CandlestickResolution.PERIOD_30M]: CandlestickResolution.PERIOD_30M,
-  [CandlestickResolution.PERIOD_1H]: CandlestickResolution.PERIOD_1H,
-  [CandlestickResolution.PERIOD_4H]: CandlestickResolution.PERIOD_4H,
-  [CandlestickResolution.PERIOD_1D]: CandlestickResolution.PERIOD_1D,
+/**
+ * A helper object to convert from an untyped number to a CandlestickResolution enum value.
+ * If the number is invalid, the value returned will be undefined.
+ */
+export const toCandlestickResolution = (num: number | bigint): CandlestickResolution => {
+  if (Number(num) === CandlestickResolution.PERIOD_1M) return CandlestickResolution.PERIOD_1M;
+  if (Number(num) === CandlestickResolution.PERIOD_5M) return CandlestickResolution.PERIOD_5M;
+  if (Number(num) === CandlestickResolution.PERIOD_15M) return CandlestickResolution.PERIOD_15M;
+  if (Number(num) === CandlestickResolution.PERIOD_30M) return CandlestickResolution.PERIOD_30M;
+  if (Number(num) === CandlestickResolution.PERIOD_1H) return CandlestickResolution.PERIOD_1H;
+  if (Number(num) === CandlestickResolution.PERIOD_4H) return CandlestickResolution.PERIOD_4H;
+  if (Number(num) === CandlestickResolution.PERIOD_1D) return CandlestickResolution.PERIOD_1D;
+  throw new Error(`Invalid candlestick resolution: ${num}`);
 };
 
-export const VALID_RESOLUTIONS = new Set(Object.values(CandlestickResolution));
+export const RESOLUTIONS_ARRAY = [
+  CandlestickResolution.PERIOD_1M,
+  CandlestickResolution.PERIOD_5M,
+  CandlestickResolution.PERIOD_15M,
+  CandlestickResolution.PERIOD_30M,
+  CandlestickResolution.PERIOD_1H,
+  CandlestickResolution.PERIOD_4H,
+  CandlestickResolution.PERIOD_1D,
+];
+
+export const toResolutionKey = (resolution: CandlestickResolution) => {
+  switch (resolution) {
+    case CandlestickResolution.PERIOD_1M:
+      return "PERIOD_1M";
+    case CandlestickResolution.PERIOD_5M:
+      return "PERIOD_5M";
+    case CandlestickResolution.PERIOD_15M:
+      return "PERIOD_15M";
+    case CandlestickResolution.PERIOD_30M:
+      return "PERIOD_30M";
+    case CandlestickResolution.PERIOD_1H:
+      return "PERIOD_1H";
+    case CandlestickResolution.PERIOD_4H:
+      return "PERIOD_4H";
+    case CandlestickResolution.PERIOD_1D:
+      return "PERIOD_1D";
+    default:
+      throw new Error(`Unknown resolution: ${resolution}`);
+  }
+};

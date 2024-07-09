@@ -1,35 +1,40 @@
 import {
-  isChatEvent,
+  type AnyHomogenousEvent,
+  type AnyEmojicoinEvent,
+  type Types,
   isGlobalStateEvent,
+  isSwapEvent,
+  isStateEvent,
+  isChatEvent,
   isLiquidityEvent,
   isMarketRegistrationEvent,
   isPeriodicStateEvent,
-  isStateEvent,
-  isSwapEvent,
-  type AnyEmojicoinEvent,
-  type Types,
 } from "@sdk/types/types";
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
 import { type AnyNumberString } from "@sdk-types";
-import { CandlestickResolution, toCandlestickResolution } from "@sdk/const";
-import { type DBJsonData } from "@sdk/emojicoin_dot_fun";
-import { type AnyEmojicoinJSONEvent } from "@sdk/types/json-types";
-import { type WritableDraft } from "immer";
 import {
-  type MarketIDString,
-  type SymbolString,
-  isSwapEventFromDB,
-  deserializeEvent,
-  isGlobalStateEventFromDB,
-  isStateEventFromDB,
-  isPeriodicStateEventFromDB,
-  isChatEventFromDB,
-  isLiquidityEventFromDB,
-  isMarketRegistrationEventFromDB,
-} from "./event-utils";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
+  CandlestickResolution,
+  RESOLUTIONS_ARRAY,
+  toCandlestickResolution,
+  toResolutionKey,
+} from "@sdk/const";
+import { type WritableDraft } from "immer";
+import { type MarketIDString, type SymbolString } from "./event-utils";
+import { type RegisteredMarket, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { type HexInput } from "@aptos-labs/ts-sdk";
+import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
+import {
+  type LatestBar,
+  createNewLatestBar,
+  createNewLatestBarFromSwap,
+} from "@sdk/utils/candlestick-bars";
+import { q64ToBig } from "@sdk/utils/nominal-price";
+import {
+  toUniqueHomogenousEvents,
+  type UniqueHomogenousEvents,
+} from "@sdk/emojicoin_dot_fun/events";
+import { getPeriodStartTime } from "@sdk/utils";
 
 type SwapEvent = Types.SwapEvent;
 type ChatEvent = Types.ChatEvent;
@@ -40,47 +45,73 @@ type LiquidityEvent = Types.LiquidityEvent;
 type GlobalStateEvent = Types.GlobalStateEvent;
 type MarketDataView = Types.MarketDataView;
 
-// TODO: Pass data from server components down to client components
-// to reinitialize the store with the data from the server.
+export type CandlestickResolutionData = {
+  candlesticks: readonly PeriodicStateEvent[];
+  callback: SubscribeBarsCallback | undefined;
+  latestBar: LatestBar | undefined;
+};
 
 export type EventsWithGUIDs = {
   swapEvents: readonly SwapEvent[];
   chatEvents: readonly ChatEvent[];
   stateEvents: readonly StateEvent[];
   liquidityEvents: readonly LiquidityEvent[];
-  [CandlestickResolution.PERIOD_1M]: readonly PeriodicStateEvent[];
-  [CandlestickResolution.PERIOD_5M]: readonly PeriodicStateEvent[];
-  [CandlestickResolution.PERIOD_15M]: readonly PeriodicStateEvent[];
-  [CandlestickResolution.PERIOD_30M]: readonly PeriodicStateEvent[];
-  [CandlestickResolution.PERIOD_1H]: readonly PeriodicStateEvent[];
-  [CandlestickResolution.PERIOD_4H]: readonly PeriodicStateEvent[];
-  [CandlestickResolution.PERIOD_1D]: readonly PeriodicStateEvent[];
+  [CandlestickResolution.PERIOD_1M]: CandlestickResolutionData | undefined;
+  [CandlestickResolution.PERIOD_5M]: CandlestickResolutionData | undefined;
+  [CandlestickResolution.PERIOD_15M]: CandlestickResolutionData | undefined;
+  [CandlestickResolution.PERIOD_30M]: CandlestickResolutionData | undefined;
+  [CandlestickResolution.PERIOD_1H]: CandlestickResolutionData | undefined;
+  [CandlestickResolution.PERIOD_4H]: CandlestickResolutionData | undefined;
+  [CandlestickResolution.PERIOD_1D]: CandlestickResolutionData | undefined;
 };
 
 export type MarketStateValueType = EventsWithGUIDs & {
   marketData?: MarketDataView;
 };
 
+// NOTE: The usage of readonly here (and above) is to prevent accidental mutations.
+// The readonly attribute doesn't indicate these will never change- just that they should only
+// be mutated by zustand/immer.
 export type EventState = {
-  guids: Set<string>;
+  guids: Readonly<Set<string>>;
   firehose: readonly AnyEmojicoinEvent[];
-  markets: Map<MarketIDString, MarketStateValueType>;
-  symbolToMarketID: Map<SymbolString, MarketIDString>;
-  marketIDToSymbol: Map<MarketIDString, SymbolString>;
-  globalStateEvents: GlobalStateEvent[];
+  markets: Readonly<Map<MarketIDString, MarketStateValueType>>;
+  symbols: Readonly<Map<SymbolString, MarketIDString>>;
+  globalStateEvents: readonly GlobalStateEvent[];
   marketRegistrationEvents: readonly MarketRegistrationEvent[];
+  // This should very rarely, if ever, be mutated. This is used primarily for supplying the
+  // TradingView chart with symbol search data.
+  marketMetadataMap: Readonly<Map<MarketIDString, RegisteredMarket>>;
+};
+
+type ResolutionSubscription = {
+  symbol: string;
+  resolution: CandlestickResolution;
+  cb: SubscribeBarsCallback;
+};
+
+type SetLatestBarsArgs = {
+  marketID: MarketIDString;
+  latestBars: readonly LatestBar[];
 };
 
 export type EventActions = {
+  getGuids: () => Set<string>;
   initializeMarket: (marketID: AnyNumberString, symbolOrBytes?: HexInput) => void;
   getMarket: (marketID: AnyNumberString) => MarketStateValueType | undefined;
+  getRegisteredMarket: (marketID: AnyNumberString) => RegisteredMarket | undefined;
   getSymbols: () => Map<SymbolString, MarketIDString>;
-  getMarketIDs: () => Map<MarketIDString, SymbolString>;
   getMarketIDFromSymbol: (symbol: SymbolString) => MarketIDString | undefined;
-  getSymbolFromMarketID: (marketID: AnyNumberString | MarketIDString) => SymbolString | undefined;
-  pushEvents: (events: Array<AnyEmojicoinEvent>) => void;
-  pushEventFromWebSocket: (buffer: Buffer) => void;
+  loadEventsFromServer: (eventsIn: Array<AnyHomogenousEvent> | UniqueHomogenousEvents) => void;
+  pushEventFromClient: (event: AnyEmojicoinEvent) => void;
   addMarketData: (d: MarketDataView) => void;
+  setLatestBars: ({ marketID, latestBars }: SetLatestBarsArgs) => void;
+  addRegisteredMarket: (market: RegisteredMarket) => void;
+  initializeRegisteredMarketsMap: (data: Array<RegisteredMarket>) => void;
+  subscribeToResolution: ({ symbol, resolution, cb }: ResolutionSubscription) => void;
+  unsubscribeFromResolution: ({ symbol, resolution }: Omit<ResolutionSubscription, "cb">) => void;
+  pushGlobalStateEvent: (event: GlobalStateEvent) => void;
+  pushMarketRegistrationEvent: (event: MarketRegistrationEvent) => void;
 };
 
 export type EventStore = EventState & EventActions;
@@ -90,146 +121,332 @@ export const initializeEventStore = (): EventState => {
     guids: new Set(),
     firehose: [],
     markets: new Map(),
-    symbolToMarketID: new Map(),
-    marketIDToSymbol: new Map(),
+    symbols: new Map(),
     globalStateEvents: [],
     marketRegistrationEvents: [],
+    marketMetadataMap: new Map(),
   };
 };
 
-export const getInitialMarketState = () => ({
+const createInitialCandlestickData = (): WritableDraft<CandlestickResolutionData> => ({
+  candlesticks: [] as PeriodicStateEvent[],
+  callback: undefined,
+  latestBar: undefined,
+});
+
+export const createInitialMarketState = (): WritableDraft<MarketStateValueType> => ({
   swapEvents: [],
   liquidityEvents: [],
   stateEvents: [],
   chatEvents: [],
   marketData: undefined,
-  [CandlestickResolution.PERIOD_1M]: [],
-  [CandlestickResolution.PERIOD_5M]: [],
-  [CandlestickResolution.PERIOD_15M]: [],
-  [CandlestickResolution.PERIOD_30M]: [],
-  [CandlestickResolution.PERIOD_1H]: [],
-  [CandlestickResolution.PERIOD_4H]: [],
-  [CandlestickResolution.PERIOD_1D]: [],
+  [CandlestickResolution.PERIOD_1M]: createInitialCandlestickData(),
+  [CandlestickResolution.PERIOD_5M]: createInitialCandlestickData(),
+  [CandlestickResolution.PERIOD_15M]: createInitialCandlestickData(),
+  [CandlestickResolution.PERIOD_30M]: createInitialCandlestickData(),
+  [CandlestickResolution.PERIOD_1H]: createInitialCandlestickData(),
+  [CandlestickResolution.PERIOD_4H]: createInitialCandlestickData(),
+  [CandlestickResolution.PERIOD_1D]: createInitialCandlestickData(),
 });
 
 export const defaultState: EventState = initializeEventStore();
 
-export const initializeMarketDraft = (
+export const initializeMarketHelper = (
   state: WritableDraft<EventState>,
   marketID: AnyNumberString,
   symbolOrBytes?: HexInput
 ) => {
   const id = marketID.toString();
   if (!state.markets.has(id)) {
-    state.markets.set(id, getInitialMarketState());
+    state.markets.set(id, createInitialMarketState());
   }
   if (symbolOrBytes) {
     const symbol = symbolBytesToEmojis(symbolOrBytes).symbol;
-    state.symbolToMarketID.set(symbol, id);
-    state.marketIDToSymbol.set(id, symbol);
+    if (!state.symbols.has(symbol)) {
+      state.symbols.set(symbol, id);
+    }
   }
 };
 
-// This should REALLY use classes, I just didn't know you could use classes with
-// immer when making this.
+/**
+ * A helper function to clone the latest bar and call the callback with it. This is necessary
+ * because the TradingView SubscribeBarsCallback function (cb) will mutate the object passed to it.
+ * This for some reason causes issues with zustand, so we have this function as a workaround.
+ * @param cb the SubscribeBarsCallback to call, from the TradingView charting API
+ * @param latestBar the latest bar to clone and pass to the callback. We reduce the scope/type to
+ * only the fields that the callback needs, aka `Bar`, a subset of `LatestBar`.
+ */
+const callbackClonedLatestBarIfSubscribed = (
+  cb: SubscribeBarsCallback | undefined,
+  latestBar: WritableDraft<LatestBar>
+) => {
+  if (cb) {
+    const nonce = latestBar.marketNonce;
+    console.debug(
+      `Update latest bar for ${toResolutionKey(latestBar.period)} with mkt nonce ${nonce}`
+    );
+    cb({
+      time: latestBar.time,
+      open: latestBar.open,
+      high: latestBar.high,
+      low: latestBar.low,
+      close: latestBar.close,
+      volume: latestBar.volume,
+    });
+  }
+};
+
+// TODO Consider that we should be using classes with this- it depends how difficult it is to use
+// with immer and RSC.
 export const createEventStore = (initialState: EventState = defaultState) => {
   return createStore<EventStore>()(
     immer((set, get) => ({
       ...initialState,
       initializeMarket: (marketID, symbolOrBytes) =>
-        set((state) => initializeMarketDraft(state, marketID, symbolOrBytes)),
-      getSymbols: () => get().symbolToMarketID,
-      getMarketIDs: () => get().marketIDToSymbol,
-      getMarketIDFromSymbol: (symbol) => get().symbolToMarketID.get(symbol),
-      getSymbolFromMarketID: (marketID) => get().marketIDToSymbol.get(marketID.toString()),
+        set((state) => initializeMarketHelper(state, marketID, symbolOrBytes)),
+      getSymbols: () => get().symbols,
+      getMarketIDFromSymbol: (symbol) => get().symbols.get(symbol),
       getMarket: (marketID) => {
         return get().markets.get(marketID.toString())!;
       },
+      getGuids: () => get().guids,
       addMarketData: (data) => {
         const marketID = data.marketID.toString();
-        if (!get().markets.has(marketID)) {
-          get().initializeMarket(marketID, data.emojiBytes);
-        }
-        return set((state) => {
+        set((state) => {
+          const market = state.markets.get(marketID);
+          if (!market) {
+            initializeMarketHelper(state, marketID, data.emojiBytes);
+          }
           state.markets.get(marketID)!.marketData = data;
+        });
+      },
+      setLatestBars: ({ marketID, latestBars }) => {
+        set((state) => {
+          const market = state.markets.get(marketID.toString());
+          if (!market) {
+            initializeMarketHelper(state, marketID);
+          }
+          latestBars.forEach((bar) => {
+            const resolution = bar.period;
+            market![resolution]!.latestBar = bar;
+          });
+        });
+      },
+      pushGlobalStateEvent: (event) => {
+        set((state) => {
+          if (state.guids.has(event.guid)) return;
+          state.globalStateEvents.push(event);
+          state.guids.add(event.guid);
+        });
+      },
+      pushMarketRegistrationEvent: (event) => {
+        set((state) => {
+          if (state.guids.has(event.guid)) return;
+          state.marketRegistrationEvents.push(event);
+          state.guids.add(event.guid);
         });
       },
       // Because these often come from queries, we only do state updates in chunks with arrays.
       // Note that the events here are assumed to be sorted in descending order already, aka
       // latest first.
-      pushEvents: (events: Array<AnyEmojicoinEvent>) => {
-        if (events.length === 0) return;
+      // Also note that these events will *not* update the latest bar for the chart data.
+      loadEventsFromServer: (eventsIn) => {
+        let events: UniqueHomogenousEvents;
+        if (Array.isArray(eventsIn)) {
+          // Filter out guids and ensure there is only one marketID.
+          const res = toUniqueHomogenousEvents(eventsIn, get().guids);
+          if (!res) return;
+          events = res;
+        } else {
+          events = eventsIn;
+        }
+
         set((state) => {
-          events.forEach((event) => {
-            if (state.guids.has(event.guid)) return;
-            state.firehose.push(event);
-            state.guids.add(event.guid);
-            if (isGlobalStateEvent(event)) return;
-            const marketID = event.marketID.toString();
-            if (!state.markets.has(marketID)) initializeMarketDraft(state, marketID);
-            const market = state.markets.get(marketID)!;
-            if (isSwapEvent(event)) {
-              market.swapEvents.push(event);
-            } else if (isStateEvent(event)) {
-              market.stateEvents.push(event);
-            } else if (isChatEvent(event)) {
-              market.chatEvents.push(event);
-            } else if (isLiquidityEvent(event)) {
-              market.liquidityEvents.push(event);
-            } else if (isMarketRegistrationEvent(event)) {
-              state.marketRegistrationEvents.push(event);
-            } else if (isPeriodicStateEvent(event)) {
-              const period = Number(event.periodicStateMetadata.period);
-              const resolution = toCandlestickResolution[period];
-              if (!market[resolution]) {
-                market[resolution] = [event];
-              } else {
-                market[resolution].push(event);
-              }
-            }
-          });
+          events.guids.forEach((guid) => state.guids.add(guid));
+          state.firehose.push(
+            ...events.swapEvents,
+            ...events.stateEvents,
+            ...events.chatEvents,
+            ...events.liquidityEvents,
+            ...events.candlesticks[CandlestickResolution.PERIOD_1M],
+            ...events.candlesticks[CandlestickResolution.PERIOD_5M],
+            ...events.candlesticks[CandlestickResolution.PERIOD_15M],
+            ...events.candlesticks[CandlestickResolution.PERIOD_30M],
+            ...events.candlesticks[CandlestickResolution.PERIOD_1H],
+            ...events.candlesticks[CandlestickResolution.PERIOD_4H],
+            ...events.candlesticks[CandlestickResolution.PERIOD_1D]
+          );
+          const marketID = events.marketID.toString();
+          if (!state.markets.has(marketID)) {
+            initializeMarketHelper(state, marketID);
+          }
+          const market = state.markets.get(marketID)!;
+          market.swapEvents.push(...events.swapEvents);
+          market.stateEvents.push(...events.stateEvents);
+          market.chatEvents.push(...events.chatEvents);
+          market.liquidityEvents.push(...events.liquidityEvents);
+          for (const resolution of RESOLUTIONS_ARRAY) {
+            const periodicEvents = events.candlesticks[resolution];
+            market[resolution]!.candlesticks.push(...periodicEvents);
+          }
         });
       },
-      // We generally push WebSocket events one at a time.
       // Note that we `unshift` here because we add the latest event to the front of the array.
-      pushEventFromWebSocket: (buffer) => {
-        try {
-          const json = JSON.parse(buffer.toString()) as DBJsonData<AnyEmojicoinJSONEvent>;
-          if (!json) return;
-          const data = deserializeEvent(json, json.transaction_version);
-          if (!data) return;
-          if (get().guids.has(data.event.guid)) return;
-          set((state) => {
-            state.firehose.unshift(data.event);
-            state.guids.add(data.event.guid);
-            if (isGlobalStateEventFromDB(json)) return;
-            if (!data.marketID) throw new Error("No market ID found in event.");
-            if (!state.markets.has(data.marketID)) initializeMarketDraft(state, data.marketID);
-            const market = state.markets.get(data.marketID)!;
-            if (isSwapEventFromDB(json)) {
-              market.swapEvents.unshift(data.event as Types.SwapEvent);
-            } else if (isStateEventFromDB(json)) {
-              market.stateEvents.unshift(data.event as Types.StateEvent);
-            } else if (isChatEventFromDB(json)) {
-              market.chatEvents.unshift(data.event as Types.ChatEvent);
-            } else if (isLiquidityEventFromDB(json)) {
-              market.liquidityEvents.unshift(data.event as Types.LiquidityEvent);
-            } else if (isMarketRegistrationEventFromDB(json)) {
-              state.marketRegistrationEvents.unshift(data.event as Types.MarketRegistrationEvent);
-            } else if (isPeriodicStateEventFromDB(json)) {
-              const event = data.event as Types.PeriodicStateEvent;
-              const period = Number(event.periodicStateMetadata.period);
-              const resolution = toCandlestickResolution[period];
-              if (!market[resolution]) {
-                market[resolution] = [event];
-              } else {
-                market[resolution].unshift(event);
+      // We also update the latest bar if the incoming event is a swap or periodic state event.
+      pushEventFromClient: (event: AnyEmojicoinEvent) => {
+        if (get().guids.has(event.guid)) return;
+        set((state) => {
+          state.firehose.unshift(event);
+          state.guids.add(event.guid);
+          if (isGlobalStateEvent(event)) {
+            state.globalStateEvents.unshift(event);
+          } else {
+            if (!state.markets.has(event.marketID.toString())) {
+              initializeMarketHelper(state, event.marketID);
+            }
+            const market = state.markets.get(event.marketID.toString())!;
+            if (isStateEvent(event)) {
+              market.stateEvents.unshift(event);
+            } else if (isChatEvent(event)) {
+              market.chatEvents.unshift(event);
+            } else if (isLiquidityEvent(event)) {
+              market.liquidityEvents.unshift(event);
+            } else if (isMarketRegistrationEvent(event)) {
+              state.marketRegistrationEvents.unshift(event);
+            } else {
+              if (isSwapEvent(event)) {
+                const swap = event;
+                market.swapEvents.unshift(swap);
+                RESOLUTIONS_ARRAY.forEach((resolution) => {
+                  const data = market[resolution];
+                  if (!data) {
+                    throw new Error("No candlestick data found for resolution.");
+                  }
+
+                  const swapPeriodStartTime = getPeriodStartTime(swap, resolution);
+                  const latestBarPeriodStartTime = BigInt(data.latestBar?.time ?? -1n) * 1000n;
+                  // Create a new bar if there is no latest bar or if the swap event's period start
+                  // time is newer than the current latest bar's period start time.
+                  const shouldCreateNewBar =
+                    !data.latestBar || swapPeriodStartTime > latestBarPeriodStartTime;
+                  if (shouldCreateNewBar) {
+                    const newLatestBar = createNewLatestBarFromSwap(
+                      swap,
+                      resolution,
+                      data.latestBar?.close
+                    );
+                    data.latestBar = newLatestBar;
+                    callbackClonedLatestBarIfSubscribed(data.callback, newLatestBar);
+                  } else if (swap.marketNonce >= data.latestBar!.marketNonce) {
+                    if (!data.latestBar) {
+                      throw new Error("This will never occur- it's just to satisfy TypeScript.");
+                    }
+                    const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+                    data.latestBar.time = Number(getPeriodStartTime(swap, resolution) / 1000n);
+                    data.latestBar.close = price;
+                    data.latestBar.high = Math.max(data.latestBar.high, price);
+                    data.latestBar.low = Math.min(data.latestBar.low, price);
+                    data.latestBar.marketNonce = swap.marketNonce;
+                    data.latestBar.volume += Number(swap.baseVolume);
+                    // Note this results in `time order violation` errors if we set `has_empty_bars`
+                    // to `true` in the `LibrarySymbolInfo` configuration.
+                    callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar);
+                  }
+                });
+              } else if (isPeriodicStateEvent(event)) {
+                const resolution = toCandlestickResolution(event.periodicStateMetadata.period);
+                const data = market[resolution];
+                if (!data) {
+                  throw new Error("No candlestick data found for resolution.");
+                }
+                data.candlesticks.unshift(event);
+                const newLatestBar = createNewLatestBar(event, data.latestBar?.close);
+                // Check if the new latest bar would be newer data than the current latest bar.
+                if (
+                  (data.latestBar?.marketNonce ?? -1n) < newLatestBar.marketNonce &&
+                  (data.latestBar?.time ?? -1) <= newLatestBar.time
+                ) {
+                  data.latestBar = newLatestBar;
+                  // We need to update the latest bar for all resolutions with any existing swap
+                  // data for the new given resolution's time span/time range.
+                  // NOTE: This assumes `swapEvents` is already sorted in descending order.
+                  market.swapEvents.forEach((swap) => {
+                    const emitTime = event.periodicStateMetadata.emitTime;
+                    const swapTime = swap.time;
+                    const period = BigInt(resolution);
+                    const swapInTimeRange = emitTime <= swapTime && swapTime <= emitTime + period;
+
+                    // NOTE: When a new periodic state event is emitted, the market nonce
+                    // for the swap event is actually exactly the same as the periodic state event,
+                    // hence why we use `>=` instead of just `>`.
+                    if (swapInTimeRange && swap.marketNonce >= data.latestBar!.marketNonce) {
+                      const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+                      data.latestBar!.time = Number(getPeriodStartTime(swap, resolution) / 1000n);
+                      data.latestBar!.close = price;
+                      data.latestBar!.marketNonce = swap.marketNonce;
+                      data.latestBar!.high = Math.max(data.latestBar!.high, price);
+                      data.latestBar!.low = Math.min(data.latestBar!.low, price);
+                      data.latestBar!.volume += Number(swap.baseVolume);
+                    }
+                  });
+                  // Call the callback with the new latest bar.
+                  // Note this will result in a time order violation if we set the `has_empty_bars`
+                  // value to `true` in the `LibrarySymbolInfo` configuration.
+                  callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar!);
+                }
               }
             }
+          }
+        });
+      },
+      addRegisteredMarket: (market) => {
+        set((state) => {
+          state.marketMetadataMap.set(market.marketID, market);
+          state.symbols.set(market.symbol, market.marketID);
+        });
+      },
+      initializeRegisteredMarketsMap: (markets) => {
+        set((state) => {
+          const entries = markets.map((m) => [m.marketID, m] as const);
+          state.marketMetadataMap = new Map(entries);
+          const newMarketMetadataMap = new Map<string, RegisteredMarket>();
+          const newSymbolToMarketIDMap = new Map<string, string>();
+          markets.forEach((mkt) => {
+            const { marketID, symbol } = mkt;
+            newMarketMetadataMap.set(marketID, mkt);
+            newSymbolToMarketIDMap.set(symbol, marketID);
           });
-        } catch (e) {
-          console.error(e);
-        }
+          state.marketMetadataMap = newMarketMetadataMap;
+          state.symbols = newSymbolToMarketIDMap;
+        });
+      },
+      getRegisteredMarket: (marketID) => {
+        return get().marketMetadataMap.get(marketID.toString());
+      },
+      subscribeToResolution: ({ symbol, resolution, cb }) => {
+        const marketID = get().symbols.get(symbol);
+        if (!marketID) return;
+        const marketForCheck = get().markets.get(marketID);
+        if (!marketForCheck) return;
+        set((state) => {
+          const market = state.markets.get(marketID)!;
+          if (!market[resolution]) {
+            market[resolution] = createInitialCandlestickData();
+          }
+          const marketResolution = market[resolution]!;
+          marketResolution.callback = cb;
+        });
+      },
+      unsubscribeFromResolution: ({ symbol, resolution }) => {
+        const marketID = get().symbols.get(symbol);
+        if (!marketID) return;
+        const marketForCheck = get().markets.get(marketID);
+        if (!marketForCheck) return;
+        set((state) => {
+          const market = state.markets.get(marketID)!;
+          if (!market[resolution]) return;
+          market[resolution]!.callback = undefined;
+        });
       },
     }))
   );

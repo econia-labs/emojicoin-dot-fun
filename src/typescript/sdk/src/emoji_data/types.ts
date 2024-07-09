@@ -8,3 +8,11 @@ export type SymbolEmojiData = {
   emoji: string;
 };
 export type EmojiName = keyof AllSymbolEmojiData;
+
+export type RegisteredMarket = {
+  symbol: string;
+  emojis: SymbolEmojiData[];
+  marketID: string;
+  symbolBytes: `0x${string}`;
+  marketAddress: `0x${string}`;
+};

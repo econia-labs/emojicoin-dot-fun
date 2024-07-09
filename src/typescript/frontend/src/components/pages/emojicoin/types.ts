@@ -7,9 +7,9 @@ export interface WithVersion {
 interface DataProps extends Types.MarketDataView {
   swaps: Array<Types.SwapEvent>;
   chats: Array<Types.ChatEvent>;
-  candlesticks: Array<Types.PeriodicStateEvent>;
   emojis: Array<SymbolEmojiData>;
   symbol: string;
+  marketView: Types.MarketView;
 }
 
 export interface EmojicoinProps {

@@ -8,12 +8,16 @@ import { type NetworkInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import { createContext, type PropsWithChildren, useCallback, useContext, useMemo } from "react";
 import { toast } from "react-toastify";
 
-import { APTOS_NETWORK } from "lib/env";
 import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { getAptos } from "lib/utils/aptos-client";
-import { checkNetworkAndToast, parseAPIErrorAndToast, successfulTransactionToast } from "./toasts";
+import {
+  checkNetworkAndToast,
+  parseAPIErrorAndToast,
+  successfulTransactionToast,
+} from "components/wallet/toasts";
 import { useEventStore } from "context/websockets-context";
-import { filterNonContractEvents } from "@store/event-utils";
+import { getEvents } from "@sdk/emojicoin_dot_fun";
+import { DEFAULT_TOAST_CONFIG } from "const";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -26,6 +30,7 @@ export type AptosContextState = {
   submit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
   signThenSubmit: (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => SubmissionResponse;
   account: WalletContextState["account"];
+  copyAddress: () => void;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -38,14 +43,30 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     submitTransaction,
     signTransaction,
   } = useWallet();
-  const pushEvents = useEventStore((state) => state.pushEvents);
+  const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
-      return getAptos(network.name);
+      return getAptos();
     }
-    return getAptos(APTOS_NETWORK);
+    return getAptos();
   }, [network]);
+
+  const copyAddress = useCallback(async () => {
+    if (!account?.address) return;
+    try {
+      await navigator.clipboard.writeText(account.address);
+      toast.success("Copied address to clipboard! 📋", {
+        pauseOnFocusLoss: false,
+        autoClose: 2000,
+      });
+    } catch {
+      toast.error("Failed to copy address to clipboard. 😓", {
+        pauseOnFocusLoss: false,
+        autoClose: 2000,
+      });
+    }
+  }, [account?.address]);
 
   const handleTransactionSubmission = useCallback(
     async (
@@ -64,7 +85,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           successfulTransactionToast(awaitedResponse, network);
           response = awaitedResponse;
         } catch (e) {
-          toast.error("Transaction failed");
+          toast.error("Transaction failed", DEFAULT_TOAST_CONFIG);
           console.error(e);
           error = e;
         }
@@ -77,11 +98,20 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         error = e;
       }
       // Store any relevant events in the state event store for all components to see.
-      const events = filterNonContractEvents({ response, error });
-      pushEvents(events);
+      const events = getEvents(response);
+      const flattenedEvents = [
+        ...events.globalStateEvents,
+        ...events.marketRegistrationEvents,
+        ...events.periodicStateEvents,
+        ...events.swapEvents,
+        ...events.chatEvents,
+        ...events.stateEvents,
+        ...events.liquidityEvents,
+      ];
+      flattenedEvents.forEach(pushEventFromClient);
       return { response, error };
     },
-    [pushEvents]
+    [pushEventFromClient]
   );
 
   const submit = useCallback(
@@ -132,6 +162,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     account,
     submit,
     signThenSubmit,
+    copyAddress,
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;

@@ -39,11 +39,7 @@ export const WebSocketEventsProvider = ({
     if (!clientStore.current) {
       clientStore.current = createWebSocketClientStore();
     }
-
-    return () => {
-      console.warn("The WebSocketEventsProvider component is unmounting.");
-    };
-    /* eslint-disable react-hooks/exhaustive-deps */
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   const contextValue = {

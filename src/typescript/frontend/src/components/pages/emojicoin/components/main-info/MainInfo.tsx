@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 import { translationFunction } from "context/language-context";
-import { useTooltip } from "hooks";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
@@ -54,11 +53,6 @@ const MainInfo = (props: MainInfoProps) => {
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  const { targetRef: targetRefEmojiName, tooltip: tooltipEmojiName } = useTooltip(undefined, {
-    placement: "top",
-    isEllipsis: true,
-  });
-
   const { ref: marketCapRef } = useLabelScrambler(marketCap);
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);
   const { ref: allTimeVolumeRef } = useLabelScrambler(roughAllTimeVolume);
@@ -68,12 +62,11 @@ const MainInfo = (props: MainInfoProps) => {
       <div className={innerWrapper}>
         <div className={headerWrapper}>
           <div
-            ref={targetRefEmojiName}
+            title={emojisToName(props.data.emojis).toUpperCase()}
             className=" text-white uppercase ellipses display-4 font-forma-bold md:display-2"
           >
             {emojisToName(props.data.emojis)}
           </div>
-          {tooltipEmojiName}
 
           <div className="text-[24px] md:display-2 my-auto">{props.data.symbol}</div>
         </div>

@@ -89,32 +89,36 @@ export const isValidSymbol = (symbols: string): boolean => {
  * Parses a string passed in and maps each individual emoji to its corresponding data.
  * If none of the emojis are valid, no error is thrown, the array is just empty.
  * Note that this ignores invalid emojis.
- * @param symbol
- * @returns an array of SymbolEmojiData objects.
+ * @param symbolInput the symbol to be parsed or an array of emojis to be joined into one symbol.
+ * @returns an object containing the array of emoji data and the final concatenated symbol.
  */
-export const symbolToEmojis = (symbol: string): Array<SymbolEmojiData> => {
+export const symbolToEmojis = (symbolInput: string | string[]) => {
+  const symbol = Array.isArray(symbolInput) ? symbolInput.join("") : symbolInput;
   const emojis = getEmojisInString(symbol)
     .map((emoji) => getEmojiData(emoji))
     .filter((data) => data !== undefined);
-  return emojis as Array<SymbolEmojiData>;
+  return {
+    emojis: emojis as Array<SymbolEmojiData>,
+    symbol,
+  };
 };
 
 export const symbolBytesToEmojis = (symbol: string | Uint8Array | Uint8Array[]) => {
   if (symbol instanceof Uint8Array) {
     const symbolString = new TextDecoder().decode(symbol);
-    return { emojis: symbolToEmojis(symbolString), symbol: symbolString };
+    return symbolToEmojis(symbolString);
   }
   if (Array.isArray(symbol)) {
     const flattened = symbol.flatMap((x) => Array.from(x.values()));
     const symbolString = new TextDecoder().decode(new Uint8Array(flattened));
-    return { emojis: symbolToEmojis(symbolString), symbol: symbolString };
+    return symbolToEmojis(symbolString);
   }
   try {
     // Try to parse the string as hex.
     const hex = symbol.startsWith("0x") ? symbol.slice(2) : symbol;
     const bytes = Buffer.from(hex, "hex");
     const symbolString = new TextDecoder().decode(bytes);
-    return { emojis: symbolToEmojis(symbolString), symbol: symbolString };
+    return symbolToEmojis(symbolString);
   } catch (e) {
     const emojis = getEmojisInString(symbol);
     return {

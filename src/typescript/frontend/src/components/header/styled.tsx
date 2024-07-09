@@ -30,7 +30,7 @@ export const StyledMobileHeader = styled(motion.div)`
   top: 0;
   right: 0;
   left: 0;
-  z-index: ${({ theme }) => theme.zIndices.modal};
+  z-index: ${({ theme }) => theme.zIndices.modal + 1};
   background-color: ${({ theme }) => theme.colors.econiaBlue};
   padding: 24px;
   align-items: center;

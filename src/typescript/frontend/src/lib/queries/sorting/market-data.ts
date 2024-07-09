@@ -2,11 +2,16 @@
 import { postgrest } from "@sdk/queries/inbox-url";
 import { LIMIT, ORDER_BY, toOrderByString } from "@sdk/queries/const";
 import { type JSONTypes, toMarketDataView } from "@sdk/types";
-import { toPostgrestQueryParam, type GetSortedMarketDataQueryArgs } from "./types";
-import cached from "../cached";
+import {
+  toPostgrestQueryParam,
+  type GetSortedMarketDataQueryArgs,
+  type GetMySortedMarketDataQueryArgs,
+} from "./types";
+import cached from "../cache-utils/cached";
 import { MARKETS_PER_PAGE } from "./const";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { REVALIDATION_TIME } from "lib/server-env";
+import { TAGS } from "../cache-utils/tags";
 
 const getSortedMarketData = async ({
   limit = LIMIT,
@@ -15,6 +20,7 @@ const getSortedMarketData = async ({
   sortBy,
   inBondingCurve = null,
   exactCount,
+  searchBytes,
 }: GetSortedMarketDataQueryArgs) => {
   let query = postgrest
     .from("market_data")
@@ -22,6 +28,10 @@ const getSortedMarketData = async ({
     .range(offset, offset + limit - 1)
     .limit(limit)
     .order(toPostgrestQueryParam(sortBy), orderBy);
+
+  if (searchBytes) {
+    query = query.like("emoji_bytes", `%${searchBytes}%`);
+  }
 
   switch (inBondingCurve) {
     case true:
@@ -32,6 +42,31 @@ const getSortedMarketData = async ({
       break;
     default:
       break;
+  }
+
+  return await query.then((r) => ({
+    data: (r.data ?? []) as JSONTypes.MarketDataView[],
+    error: r.error,
+    count: r.count,
+  }));
+};
+
+const getMyPools = async ({
+  limit = LIMIT,
+  offset,
+  orderBy,
+  sortBy,
+  account,
+  searchBytes,
+}: GetMySortedMarketDataQueryArgs) => {
+  let query = postgrest
+    .rpc("mypools", { address: account })
+    .range(offset, offset + limit - 1)
+    .limit(limit)
+    .order(toPostgrestQueryParam(sortBy), orderBy);
+
+  if (searchBytes) {
+    query = query.like("emoji_bytes", `%${searchBytes}%`);
   }
 
   return await query.then((r) => ({
@@ -71,7 +106,7 @@ export const fetchFeaturedMarket = async (
       }),
     keys,
     {
-      tags: ["featured-market"],
+      tags: [TAGS.FeaturedMarket],
       revalidate: Math.max(REVALIDATION_TIME, 1),
     }
   )();
@@ -93,8 +128,7 @@ export const fetchFeaturedMarket = async (
 // AKA: page 1, 2, 3 ..., 9 are all in the same bucket, aka the page.
 // page 10, 11, 12, ... 19 are in the same bucket, aka the page.
 // To cache this correctly, we can use the page number as the key.
-const calculateOffset = (page: number) =>
-  Math.floor(((page - 1) * MARKETS_PER_PAGE) / LIMIT) * LIMIT;
+const calculateOffset = (page: number) => (page - 1) * MARKETS_PER_PAGE;
 
 // Calculate the index of an individual element based on the page number.
 // If the query is sorted in descending order, the index will be reversed,
@@ -114,11 +148,11 @@ type CachedArgs = {
 } & Omit<GetSortedMarketDataQueryArgs, "limit" | "offset">;
 
 const fetchSortedMarketData = async (args: CachedArgs) => {
-  const { page, sortBy, orderBy, inBondingCurve } = args;
+  const { page, sortBy, orderBy, inBondingCurve, exactCount, searchBytes } = args;
 
   const offset = calculateOffset(page);
 
-  const [limit, exactCount] = [LIMIT, true] as const;
+  const limit = MARKETS_PER_PAGE;
   const keys = [
     "sorted-markets",
     limit,
@@ -127,6 +161,7 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
     toOrderByString(orderBy),
     inBondingCurve,
     exactCount,
+    searchBytes,
   ].map(String);
 
   const { data, count } = await cached(
@@ -138,16 +173,15 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
         orderBy,
         inBondingCurve,
         exactCount,
+        searchBytes,
       }),
     keys,
     {
-      tags: ["sorted-markets"],
+      tags: [TAGS.SortedMarkets],
       revalidate: Math.max(REVALIDATION_TIME, 1),
     }
   )();
 
-  const start = ((page - 1) * MARKETS_PER_PAGE) % LIMIT;
-  const end = start + MARKETS_PER_PAGE;
   const indexOffset = calculateIndex({
     givenIndex: (page - 1) * MARKETS_PER_PAGE,
     orderBy,
@@ -155,7 +189,7 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
   });
 
   return {
-    markets: data.slice(start, end).map((v: JSONTypes.MarketDataView, i) => ({
+    markets: data.map((v: JSONTypes.MarketDataView, i) => ({
       ...toMarketDataView(v),
       ...symbolBytesToEmojis(v.emoji_bytes)!,
       index: indexOffset + i + 1,
@@ -163,5 +197,61 @@ const fetchSortedMarketData = async (args: CachedArgs) => {
     count: count ?? 0,
   };
 };
+
+type GetMyPoolsArgs = {
+  page: number;
+  account: string;
+} & Omit<GetSortedMarketDataQueryArgs, "limit" | "offset" | "inBondingCurve" | "exactCount">;
+
+export const fetchMyPools = async (args: GetMyPoolsArgs) => {
+  const { page, sortBy, orderBy, account, searchBytes } = args;
+
+  const offset = calculateOffset(page);
+
+  const limit = MARKETS_PER_PAGE;
+  const keys = [
+    "sorted-markets",
+    limit,
+    offset,
+    sortBy,
+    toOrderByString(orderBy),
+    account,
+    searchBytes,
+  ].map(String);
+
+  const { data, count } = await cached(
+    () =>
+      getMyPools({
+        limit,
+        offset,
+        sortBy,
+        orderBy,
+        account,
+        searchBytes,
+      }),
+    keys,
+    {
+      tags: [TAGS.SortedMarkets],
+      revalidate: Math.max(REVALIDATION_TIME, 1),
+    }
+  )();
+
+  const indexOffset = calculateIndex({
+    givenIndex: (page - 1) * MARKETS_PER_PAGE,
+    orderBy,
+    totalNumMarkets: count ?? 0,
+  });
+
+  return {
+    markets: data.map((v: JSONTypes.MarketDataView, i) => ({
+      ...toMarketDataView(v),
+      ...symbolBytesToEmojis(v.emoji_bytes)!,
+      index: indexOffset + i + 1,
+    })),
+    count: count ?? 0,
+  };
+};
+
+export type FetchSortedMarketDataReturn = Awaited<ReturnType<typeof fetchSortedMarketData>>;
 
 export default fetchSortedMarketData;

@@ -1,11 +1,11 @@
 import React, { type SVGProps } from "react";
 
-const ClosePixelated = (props: SVGProps<SVGSVGElement>) => {
+const ClosePixelated = ({ width = 15, height = 16, ...props }: SVGProps<SVGSVGElement>) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={props.width}
-      height={props.height}
+      width={width}
+      height={height}
       fill="none"
       stroke="none"
       viewBox="0 0 11 12"

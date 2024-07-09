@@ -10,10 +10,7 @@ jobs:
     - uses: 'actions/setup-node@v3'
       with:
         node-version: 20
-    - uses: 'pnpm/action-setup@v2'
-      with:
-        run_install: false
-        version: '9.1.2'
+    - uses: 'pnpm/action-setup@v4'
     - run: 'pnpm install --frozen-lockfile'
     - run: 'pnpm build'
 name: 'Verify docs site build'

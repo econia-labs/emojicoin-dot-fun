@@ -2,7 +2,6 @@ import "server-only";
 
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
 import { type JSONTypes } from "../types";
-import { wrap } from "./utils";
 import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-helper";
 import { postgrest } from "./inbox-url";
 
@@ -18,7 +17,7 @@ export const paginateChatEvents = async (
     .from(INBOX_EVENTS_TABLE)
     .select("*")
     .filter("event_name", "eq", "emojicoin_dot_fun::Chat")
-    .eq("data->market_metadata->market_id", wrap(marketID))
+    .eq("data->market_metadata->>market_id", marketID)
     .limit(Math.min(LIMIT, maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);
 
