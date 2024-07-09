@@ -11,6 +11,7 @@ import {
 } from "styles/fonts";
 import "../app/global.css";
 import FetchFromServer from "@store/server-to-client/FetchFromServer";
+import { SubscribeToMarketRegistrations } from "@store/server-to-client/SubscribeToMarketRegistrations";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <StyledComponentsRegistry>
           <Providers>
             <FetchFromServer />
+            <SubscribeToMarketRegistrations />
             {children}
           </Providers>
         </StyledComponentsRegistry>
