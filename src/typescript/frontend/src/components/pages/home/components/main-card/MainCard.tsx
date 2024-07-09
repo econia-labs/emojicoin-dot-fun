@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { translationFunction } from "context/language-context";
 import useTooltip from "hooks/use-tooltip";
@@ -10,7 +10,8 @@ import {
   StyledPixelHeadingText,
   StyledDisplayFontText,
   StyledMarketDataText,
-  StyledImage,
+  StyledDoubleEmoji,
+  StyledContainer,
 } from "./styled";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
@@ -30,6 +31,8 @@ export interface MainCardProps {
 const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   const { t } = translationFunction();
   const setNumMarkets = useMarketData((s) => s.setNumMarkets);
+
+  let globeImage = useRef<HTMLImageElement>(null);
 
   const marketID = featured?.marketID.toString() ?? "-1";
   const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
@@ -56,6 +59,14 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.state(marketID);
+    setTimeout(() => {
+      if(globeImage.current) {
+        let classlist = globeImage.current?.classList;
+        if(!classlist.contains("hero-image-animation")) {
+          classlist.add("hero-image-animation")
+        }
+      }
+    }, 500)
     return () => {
       unsubscribe.state(marketID);
     };
@@ -87,7 +98,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   const { ref: allTimeVolumeRef } = useLabelScrambler(roughAllTimeVolume);
 
   return (
-    <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1872px">
+    <Flex justifyContent="center" width="100%">
       <Flex
         alignItems="center"
         justifyContent="center"
@@ -104,14 +115,18 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
             display: "flex",
           }}
         >
-          <StyledImage
+          <img
             id="hero-image"
             src="/images/planet-home.webp"
-            aspectRatio={1.6}
             alt="Planet"
+            ref={globeImage}
           />
 
+          {[...new Intl.Segmenter().segment(featured?.symbol ?? "🖤")].length == 1 ?
           <StyledEmoji>{featured?.symbol ?? "🖤"}</StyledEmoji>
+          :
+          <StyledDoubleEmoji>{featured?.symbol}</StyledDoubleEmoji>
+          }
         </Link>
 
         <Column maxWidth="100%" ellipsis>

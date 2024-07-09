@@ -2,6 +2,37 @@ import styled from "styled-components";
 import { Text } from "components/text";
 import Image from "components/image";
 
+export const StyledDoubleEmoji = styled.div`
+  position: absolute;
+  left: 61%;
+  transform: translateX(-50%);
+  font-size: 50px;
+  line-height: unset;
+  padding-top: 8px;
+
+  @media screen and (min-width: 578px) {
+    font-size: 50px;
+    padding-top: 14px;
+  }
+
+  @media screen and (min-width: 1096px) {
+    font-size: 60px;
+    padding-top: 18px;
+  }
+
+  @media screen and (min-width: 1355px) {
+    font-size: 77px;
+  }
+
+  @media screen and (min-width: 1614px) {
+    font-size: 92px;
+  }
+
+  @media screen and (min-width: 1873px) {
+    font-size: 106px;
+  }
+`;
+
 export const StyledEmoji = styled.div`
   position: absolute;
   left: 61%;
@@ -64,6 +95,7 @@ export const StyledDisplayFontText = styled(Text)`
   font-family: ${({ theme }) => theme.fonts.formaM};
   margin-top: -12px;
   margin-bottom: 7px;
+  max-width: 50vw;
 
   @media screen and (min-width: 578px) {
     font-size: 55px;
@@ -124,26 +156,32 @@ export const StyledMarketDataText = styled(Text)`
   }
 `;
 
-export const StyledImage = styled(Image)`
-  width: 289px;
+export const StyledContainer = styled(Text)`
+  width: 578px;
+  height: 216px;
 
   @media screen and (min-width: 578px) {
-    width: 417px;
+    width: 837px;
+    height: 313px;
   }
 
   @media screen and (min-width: 1096px) {
-    width: 545px;
+    width: 1096px;
+    height: 411px;
   }
 
   @media screen and (min-width: 1355px) {
-    width: 675px;
+    width: 1355px;
+    height: 508px;
   }
 
   @media screen and (min-width: 1614px) {
-    width: 803px;
+    width: 1614px;
+    height: 606px;
   }
 
   @media screen and (min-width: 1873px) {
-    width: 932px;
+    width: 1872px;
+    height: 703px;
   }
 `;
