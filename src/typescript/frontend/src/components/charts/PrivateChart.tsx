@@ -27,7 +27,6 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import path from "path";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { type EventStore } from "@store/event-store";
 import { fetchAllCandlesticksInTimeRange } from "lib/queries/charting/candlesticks-in-time-range";
 import { useEventStore } from "context/websockets-context";
 import {
@@ -54,10 +53,7 @@ const configurationData: DatafeedConfiguration = {
 /**
  * The TradingView Chart component. This component is responsible for rendering the TradingView chart with the usage of
  * the `datafeed` API. It also handles resolving market symbols from user input with the market metadata passed down
- * from a server component/fetch in the form of the `EventStore["marketMetadataMap"]` data.
- *
- * TODO: Implement asynchronous symbol search/resolution with the `datafeed` API. This will allow users to search for
- * markets that are created after the initial page load.
+ * from a server component/fetch in the form of the `EventStore["registeredMarketMap"]` data.
  *
  * TODO: We may want to periodically refresh the candlestick data and ensure it is valid/up to date
  * with the on-chain data by polling the `market_view` endpoint. This would ensure that in the case of a dropped
@@ -69,12 +65,7 @@ const configurationData: DatafeedConfiguration = {
  * @param props
  * @returns
  */
-export const Chart = async (
-  props: ChartContainerProps & {
-    markets: EventStore["marketMetadataMap"];
-    symbols: Map<string, string>;
-  }
-) => {
+export const Chart = async (props: ChartContainerProps) => {
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -82,6 +73,8 @@ export const Chart = async (
   const subscribeToResolution = useEventStore((s) => s.subscribeToResolution);
   const unsubscribeFromResolution = useEventStore((s) => s.unsubscribeFromResolution);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
+  const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarketMap);
+  const getSymbolMap = useEventStore((s) => s.getSymbolMap);
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -89,7 +82,7 @@ export const Chart = async (
         setTimeout(() => callback(configurationData));
       },
       searchSymbols: async (userInput, _exchange, _symbolType, onResultReadyCallback) => {
-        const data = Array.from(props.markets.values());
+        const data = Array.from(getRegisteredMarketMap().values());
         // TODO: Use the new emoji picker search with this..?
         const symbols = data.reduce<SearchSymbolResultItem[]>(
           (acc, { marketID, emojis, symbol }) => {
@@ -120,10 +113,10 @@ export const Chart = async (
       resolveSymbol: async (symbolName, onSymbolResolvedCallback, onErrorCallback) => {
         // Try to look up the symbol as if it were a market ID and then as if it were the actual market symbol,
         // aka, the emoji(s) symbol string.
-        const possibleMarketID = props.symbols.get(symbolName);
+        const possibleMarketID = getSymbolMap().get(symbolName);
+        const markets = getRegisteredMarketMap();
         const metadata =
-          props.markets.get(symbolName) ??
-          (possibleMarketID ? props.markets.get(possibleMarketID) : null);
+          markets.get(symbolName) ?? (possibleMarketID ? markets.get(possibleMarketID) : null);
         if (!metadata) {
           return onErrorCallback("Symbol not found");
         }

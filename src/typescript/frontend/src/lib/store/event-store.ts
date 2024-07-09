@@ -22,7 +22,7 @@ import {
 import { type WritableDraft } from "immer";
 import { type MarketIDString, type SymbolString } from "./event-utils";
 import { type RegisteredMarket, symbolBytesToEmojis } from "@sdk/emoji_data";
-import { type HexInput } from "@aptos-labs/ts-sdk";
+import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import {
   type LatestBar,
@@ -79,9 +79,7 @@ export type EventState = {
   symbols: Readonly<Map<SymbolString, MarketIDString>>;
   globalStateEvents: readonly GlobalStateEvent[];
   marketRegistrationEvents: readonly MarketRegistrationEvent[];
-  // This should very rarely, if ever, be mutated. This is used primarily for supplying the
-  // TradingView chart with symbol search data.
-  marketMetadataMap: Readonly<Map<MarketIDString, RegisteredMarket>>;
+  registeredMarketMap: Readonly<Map<MarketIDString, RegisteredMarket>>;
 };
 
 type ResolutionSubscription = {
@@ -100,13 +98,14 @@ export type EventActions = {
   initializeMarket: (marketID: AnyNumberString, symbolOrBytes?: HexInput) => void;
   getMarket: (marketID: AnyNumberString) => MarketStateValueType | undefined;
   getRegisteredMarket: (marketID: AnyNumberString) => RegisteredMarket | undefined;
-  getSymbols: () => Map<SymbolString, MarketIDString>;
+  getSymbolMap: () => Map<SymbolString, MarketIDString>;
   getMarketIDFromSymbol: (symbol: SymbolString) => MarketIDString | undefined;
   loadEventsFromServer: (eventsIn: Array<AnyHomogenousEvent> | UniqueHomogenousEvents) => void;
   pushEventFromClient: (event: AnyEmojicoinEvent) => void;
   addMarketData: (d: MarketDataView) => void;
   setLatestBars: ({ marketID, latestBars }: SetLatestBarsArgs) => void;
   addRegisteredMarket: (market: RegisteredMarket) => void;
+  getRegisteredMarketMap: () => Map<MarketIDString, RegisteredMarket>;
   initializeRegisteredMarketsMap: (data: Array<RegisteredMarket>) => void;
   subscribeToResolution: ({ symbol, resolution, cb }: ResolutionSubscription) => void;
   unsubscribeFromResolution: ({ symbol, resolution }: Omit<ResolutionSubscription, "cb">) => void;
@@ -124,7 +123,7 @@ export const initializeEventStore = (): EventState => {
     symbols: new Map(),
     globalStateEvents: [],
     marketRegistrationEvents: [],
-    marketMetadataMap: new Map(),
+    registeredMarketMap: new Map(),
   };
 };
 
@@ -204,7 +203,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       ...initialState,
       initializeMarket: (marketID, symbolOrBytes) =>
         set((state) => initializeMarketHelper(state, marketID, symbolOrBytes)),
-      getSymbols: () => get().symbols,
+      getSymbolMap: () => get().symbols,
       getMarketIDFromSymbol: (symbol) => get().symbols.get(symbol),
       getMarket: (marketID) => {
         return get().markets.get(marketID.toString())!;
@@ -244,6 +243,14 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           if (state.guids.has(event.guid)) return;
           state.marketRegistrationEvents.push(event);
           state.guids.add(event.guid);
+          const { emojiBytes, marketAddress, marketID } = event.marketMetadata;
+          const emojiData = symbolBytesToEmojis(emojiBytes);
+          state.addRegisteredMarket({
+            marketID: marketID.toString(),
+            symbolBytes: `0x${emojiData.emojis.map((e) => e.hex.slice(2)).join("")}`,
+            marketAddress: AccountAddress.from(marketAddress).toString(),
+            ...emojiData,
+          });
         });
       },
       // Because these often come from queries, we only do state updates in chunks with arrays.
@@ -401,28 +408,29 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       },
       addRegisteredMarket: (market) => {
         set((state) => {
-          state.marketMetadataMap.set(market.marketID, market);
+          state.registeredMarketMap.set(market.marketID, market);
           state.symbols.set(market.symbol, market.marketID);
         });
       },
       initializeRegisteredMarketsMap: (markets) => {
         set((state) => {
           const entries = markets.map((m) => [m.marketID, m] as const);
-          state.marketMetadataMap = new Map(entries);
-          const newMarketMetadataMap = new Map<string, RegisteredMarket>();
+          state.registeredMarketMap = new Map(entries);
+          const newregisteredMarketMap = new Map<string, RegisteredMarket>();
           const newSymbolToMarketIDMap = new Map<string, string>();
           markets.forEach((mkt) => {
             const { marketID, symbol } = mkt;
-            newMarketMetadataMap.set(marketID, mkt);
+            newregisteredMarketMap.set(marketID, mkt);
             newSymbolToMarketIDMap.set(symbol, marketID);
           });
-          state.marketMetadataMap = newMarketMetadataMap;
+          state.registeredMarketMap = newregisteredMarketMap;
           state.symbols = newSymbolToMarketIDMap;
         });
       },
       getRegisteredMarket: (marketID) => {
-        return get().marketMetadataMap.get(marketID.toString());
+        return get().registeredMarketMap.get(marketID.toString());
       },
+      getRegisteredMarketMap: () => get().registeredMarketMap,
       subscribeToResolution: ({ symbol, resolution, cb }) => {
         const marketID = get().symbols.get(symbol);
         if (!marketID) return;

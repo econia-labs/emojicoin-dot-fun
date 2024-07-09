@@ -68,29 +68,18 @@ export const useRegisterMarket = () => {
     }
 
     if (res && isUserTransactionResponse(res)) {
-      // Parse the events from the transaction.
-      const events = getEvents(res);
-      if (events.marketRegistrationEvents.length === 1) {
-        // Add the market to the registered markets in state.
-        const event = events.marketRegistrationEvents[0];
-        const emojiData = symbolToEmojis(emojis);
-        const marketID = event.marketID.toString();
-        const market: RegisteredMarket = {
-          marketID,
-          symbolBytes: `0x${emojiData.emojis.map((e) => e.hex.slice(2)).join("")}`,
-          marketAddress: AccountAddress.from(event.marketMetadata.marketAddress).toString(),
-          ...emojiData,
-        };
-        addRegisteredMarket(market);
+      // The event is parsed and added as a registered market in `event-store.ts`,
+      // we don't need to do anything here.
+      const emojiData = symbolToEmojis(emojis);
 
-        // Revalidate the registered markets tag.
-        await revalidateTagAction(TAGS.RegisteredMarkets);
+      // Revalidate the registered markets tag.
+      await revalidateTagAction(TAGS.RegisteredMarkets);
 
-        // Redirect to the newly registered market page.
-        const newPath = path.join(ROUTES.market, emojiData.symbol);
-        router.push(newPath);
-        router.refresh();
-      }
+      // Redirect to the newly registered market page.
+      const newPath = path.join(ROUTES.market, emojiData.symbol);
+      router.push(newPath);
+      router.refresh();
+      
       // Clear the emoji picker input.
       clear();
     } else {
