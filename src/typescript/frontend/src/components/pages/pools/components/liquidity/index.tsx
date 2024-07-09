@@ -1,6 +1,7 @@
 "use client";
 
 import React, { type PropsWithChildren, useEffect, useState } from "react";
+import Image from "next/image";
 
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
@@ -27,6 +28,7 @@ import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-dat
 import { Arrows } from "components/svg";
 import { COIN_FACTORY_MODULE_NAME } from "@sdk/const";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
+import info from "../../../../../../public/images/infoicon.svg";
 
 type LiquidityProps = {
   market: FetchSortedMarketDataReturn["markets"][0] | undefined;
@@ -69,6 +71,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
   const [emojiBalance, setEmojiBalance] = useState<number>();
   const [emojiLPBalance, setEmojiLPBalance] = useState<number>();
   const [direction, setDirection] = useState<"add" | "remove">("add");
+  const [showLiquidityPrompt, setShowLiquidityPrompt] = useState<boolean>(false);
 
   const { aptos, account, submit } = useAptos();
 
@@ -243,9 +246,29 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
       <Column width="100%" maxWidth="414px" justifyContent="center">
         <Flex width="100%" justifyContent="space-between" alignItems="baseline">
-          <Text textScale="heading1" textTransform="uppercase" mb="16px">
-            {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
-          </Text>
+          <Flex position="relative" justifyContent="left" alignItems="baseline">
+            <Text textScale="heading1" textTransform="uppercase" mb="16px">
+              {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
+            </Text>
+
+            <div>
+              <Image
+                src={info}
+                alt="info"
+                className="ml-[.4em]"
+                onTouchStart={() => setShowLiquidityPrompt(!showLiquidityPrompt)}
+                onMouseEnter={() => setShowLiquidityPrompt(true)}
+                onMouseLeave={() => setShowLiquidityPrompt(false)}
+              />
+              <Prompt
+                text="Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity."
+                visible={showLiquidityPrompt}
+                close={false}
+                width={300}
+                top={false}
+              />
+            </div>
+          </Flex>
 
           <button onClick={() => setDirection(direction === "add" ? "remove" : "add")}>
             <Arrows color="econiaBlue" />
@@ -272,8 +295,6 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           mb={{ _: "17px", tablet: "37px" }}
           position="relative"
         >
-          <Prompt text="Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity." />
-
           <ButtonWithConnectWalletFallback>
             <Button
               scale="lg"
@@ -292,12 +313,12 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
                         Number(provideLiquidityResult.base_amount)
                       )
                     : false
-                  : (Number(
+                  : Number(
                       toActualCoinDecimals({
                         num: Number(lp),
                         decimals: 0,
                       })
-                    ) <= (emojiLPBalance ?? 0)))
+                    ) <= (emojiLPBalance ?? 0))
               }
               onClick={async () => {
                 if (!account) {
