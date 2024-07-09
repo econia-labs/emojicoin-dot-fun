@@ -45,6 +45,7 @@
     "react-popper": "^2.3.0",
     "react-toastify": "^9.1.3",
     "server-only": "^0.0.1",
+    "sharp": "^0.33.4",
     "socket.io-client": "^4.7.5",
     "styled-components": "^6.1.11",
     "styled-system": "^5.1.5",

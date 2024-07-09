@@ -139,11 +139,16 @@ div.display-font-text {
   margin-bottom: 7px;
   color: white;
   max-width: 50vw;
+  min-width: 500px;
 
   @media screen and (min-width: 578px) {
     font-size: 55px;
     margin-bottom: 5px;
     margin-top: -4px;
+  }
+
+  @media screen and (min-width: 768px) {
+    min-width: 400px;
   }
 
   @media screen and (min-width: 1096px) {

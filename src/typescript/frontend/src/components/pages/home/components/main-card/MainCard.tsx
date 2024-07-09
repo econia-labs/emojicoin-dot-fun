@@ -7,12 +7,14 @@ import { Column, Flex, FlexGap } from "@containers";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import "./module.css";
+import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { useEventStore, useMarketData, useWebSocketClient } from "context/websockets-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useLabelScrambler } from "../animation-config";
+import planetHome from "../../../../../../public/images/planet-home.png";
 
 export interface MainCardProps {
   featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
@@ -23,7 +25,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   const { t } = translationFunction();
   const setNumMarkets = useMarketData((s) => s.setNumMarkets);
 
-  let globeImage = useRef<HTMLImageElement>(null);
+  const globeImage = useRef<HTMLImageElement>(null);
 
   const marketID = featured?.marketID.toString() ?? "-1";
   const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
@@ -51,15 +53,13 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   useEffect(() => {
     subscribe.state(marketID);
     setTimeout(() => {
-      if(globeImage.current) {
-        console.log("wtf")
-        let classlist = globeImage.current?.classList;
-        if(!classlist.contains("hero-image-animation")) {
-          console.log("rly?")
-          classlist.add("hero-image-animation")
+      if (globeImage.current) {
+        const classlist = globeImage.current?.classList;
+        if (!classlist.contains("hero-image-animation")) {
+          classlist.add("hero-image-animation");
         }
       }
-    }, 500)
+    }, 500);
     return () => {
       unsubscribe.state(marketID);
     };
@@ -86,7 +86,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
   const { ref: allTimeVolumeRef } = useLabelScrambler(roughAllTimeVolume);
 
   return (
-    <Flex justifyContent="center" width="100%">
+    <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1872px">
       <Flex
         alignItems="center"
         justifyContent="center"
@@ -103,18 +103,19 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
             display: "flex",
           }}
         >
-          <img
+          <Image
             id="hero-image"
-            src="/images/planet-home.webp"
             alt="Planet"
+            src={planetHome}
             ref={globeImage}
+            placeholder="blur"
           />
 
-          {[...new Intl.Segmenter().segment(featured?.symbol ?? "🖤")].length == 1 ?
-          <div id="styled-emoji">{featured?.symbol ?? "🖤"}</div>
-          :
-          <div id="styled-double-emoji">{featured?.symbol}</div>
-          }
+          {[...new Intl.Segmenter().segment(featured?.symbol ?? "🖤")].length == 1 ? (
+            <div id="styled-emoji">{featured?.symbol ?? "🖤"}</div>
+          ) : (
+            <div id="styled-double-emoji">{featured?.symbol}</div>
+          )}
         </Link>
 
         <Column maxWidth="100%" ellipsis>
