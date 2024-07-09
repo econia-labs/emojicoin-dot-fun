@@ -44,7 +44,6 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     signTransaction,
   } = useWallet();
   const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
-  const pushMarketRegistrationEvent = useEventStore((state) => state.pushMarketRegistrationEvent);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
@@ -100,9 +99,9 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       // Store any relevant events in the state event store for all components to see.
       const events = getEvents(response);
-      events.marketRegistrationEvents.forEach(pushMarketRegistrationEvent);
       const flattenedEvents = [
         ...events.globalStateEvents,
+        ...events.marketRegistrationEvents,
         ...events.periodicStateEvents,
         ...events.swapEvents,
         ...events.chatEvents,
@@ -112,7 +111,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       flattenedEvents.forEach(pushEventFromClient);
       return { response, error };
     },
-    [pushEventFromClient, pushMarketRegistrationEvent]
+    [pushEventFromClient]
   );
 
   const submit = useCallback(

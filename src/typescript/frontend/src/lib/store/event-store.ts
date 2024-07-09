@@ -8,6 +8,7 @@ import {
   isChatEvent,
   isLiquidityEvent,
   isPeriodicStateEvent,
+  isMarketRegistrationEvent,
 } from "@sdk/types/types";
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
@@ -100,7 +101,7 @@ export type EventActions = {
   getSymbolMap: () => Map<SymbolString, MarketIDString>;
   getMarketIDFromSymbol: (symbol: SymbolString) => MarketIDString | undefined;
   loadEventsFromServer: (eventsIn: Array<AnyHomogenousEvent> | UniqueHomogenousEvents) => void;
-  pushEventFromClient: (event: Exclude<AnyEmojicoinEvent, MarketRegistrationEvent>) => void;
+  pushEventFromClient: (event: AnyEmojicoinEvent) => void;
   addMarketData: (d: MarketDataView) => void;
   setLatestBars: ({ marketID, latestBars }: SetLatestBarsArgs) => void;
   getRegisteredMarketMap: () => Map<MarketIDString, RegisteredMarket>;
@@ -108,7 +109,6 @@ export type EventActions = {
   subscribeToResolution: ({ symbol, resolution, cb }: ResolutionSubscription) => void;
   unsubscribeFromResolution: ({ symbol, resolution }: Omit<ResolutionSubscription, "cb">) => void;
   pushGlobalStateEvent: (event: GlobalStateEvent) => void;
-  pushMarketRegistrationEvent: (event: MarketRegistrationEvent) => void;
 };
 
 export type EventStore = EventState & EventActions;
@@ -163,6 +163,27 @@ export const initializeMarketHelper = (
       state.symbols.set(symbol, id);
     }
   }
+};
+
+export const registerMarketHelper = (
+  state: WritableDraft<EventState>,
+  event: MarketRegistrationEvent
+) => {
+  const { emojiBytes, marketAddress } = event.marketMetadata;
+  const marketID = event.marketMetadata.marketID.toString();
+  const emojiData = symbolBytesToEmojis(emojiBytes);
+  // Adding to the register market map and symbol map should really be coupled behavior, but
+  // we can't enforce that without changing the structure of the data and isn't worth the effort
+  // right now.
+  // TODO: Couple the behavior of adding a registered market to the map aka marketID => data with
+  // adding a symbol => marketID entry.
+  state.registeredMarketMap.set(marketID, {
+    marketID,
+    symbolBytes: `0x${emojiData.emojis.map((e) => e.hex.slice(2)).join("")}`,
+    marketAddress: AccountAddress.from(marketAddress).toString(),
+    ...emojiData,
+  });
+  state.symbols.set(emojiData.symbol, marketID);
 };
 
 /**
@@ -236,21 +257,6 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           state.guids.add(event.guid);
         });
       },
-      pushMarketRegistrationEvent: (event) => {
-        set((state) => {
-          if (state.guids.has(event.guid)) return;
-          state.marketRegistrationEvents.push(event);
-          state.guids.add(event.guid);
-          const { emojiBytes, marketAddress, marketID } = event.marketMetadata;
-          const emojiData = symbolBytesToEmojis(emojiBytes);
-          state.registeredMarketMap.set(marketID.toString(), {
-            marketID: marketID.toString(),
-            symbolBytes: `0x${emojiData.emojis.map((e) => e.hex.slice(2)).join("")}`,
-            marketAddress: AccountAddress.from(marketAddress).toString(),
-            ...emojiData,
-          });
-        });
-      },
       // Because these often come from queries, we only do state updates in chunks with arrays.
       // Note that the events here are assumed to be sorted in descending order already, aka
       // latest first.
@@ -305,6 +311,9 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           state.guids.add(event.guid);
           if (isGlobalStateEvent(event)) {
             state.globalStateEvents.unshift(event);
+          } else if (isMarketRegistrationEvent(event)) {
+            registerMarketHelper(state, event);
+            initializeMarketHelper(state, event.marketID, event.marketMetadata.emojiBytes);
           } else {
             if (!state.markets.has(event.marketID.toString())) {
               initializeMarketHelper(state, event.marketID);
