@@ -50,30 +50,30 @@ div#styled-double-emoji {
   position: absolute;
   left: 61%;
   transform: translateX(-50%);
-  font-size: 50px;
+  font-size: 40px;
   line-height: unset;
   padding-top: 8px;
 
   @media screen and (min-width: 578px) {
-    font-size: 50px;
+    font-size: 60px;
     padding-top: 14px;
   }
 
   @media screen and (min-width: 1096px) {
-    font-size: 60px;
+    font-size: 75px;
     padding-top: 18px;
   }
 
   @media screen and (min-width: 1355px) {
-    font-size: 77px;
+    font-size: 90px;
   }
 
   @media screen and (min-width: 1614px) {
-    font-size: 92px;
+    font-size: 110px;
   }
 
   @media screen and (min-width: 1873px) {
-    font-size: 106px;
+    font-size: 130px;
   }
 }
 
