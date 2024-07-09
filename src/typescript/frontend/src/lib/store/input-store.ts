@@ -9,6 +9,17 @@ export type InputState = {
   chatEmojiData: Map<string, SymbolEmojiData>;
   onClickOutside: (e: MouseEvent) => void;
   pickerInvisible: boolean;
+  isLoadingRegisteredMarket: boolean;
+  /**
+   * The most recently registered emojis' symbol data.
+   * This is used to retrieve the most recently registered emojis without worrying about
+   * the emojis being cleared from the input, since the `emojis` are cleared after the registration.
+   * Note that we optimistically assume the response will be successful while the transaction is
+   * pending in order to avoid re-renders during the animation orchestration. If it fails, we unset
+   * this value, but for a period of time this may technically be an invalid set of emojis if the
+   * transaction fails.
+   */
+  registeredSymbolData: Array<SymbolEmojiData>;
 };
 
 export type InputActions = {
@@ -20,6 +31,8 @@ export type InputActions = {
   setOnClickOutside: (value: (e: MouseEvent) => void) => void;
   setChatEmojiData: (value: Map<string, SymbolEmojiData>) => void;
   setPickerInvisible: (value: boolean) => void;
+  setRegisteredEmojis: (emojis: SymbolEmojiData[]) => void;
+  setIsLoadingRegisteredMarket: (value: boolean) => void;
 };
 
 export type InputStore = InputState & InputActions;
@@ -31,11 +44,14 @@ const defaultValues: InputState = {
   pickerRef: null,
   textAreaRef: null,
   chatEmojiData: new Map<string, SymbolEmojiData>(),
+  registeredSymbolData: [],
+  isLoadingRegisteredMarket: false,
   onClickOutside: (_e) => {},
 };
 
 export const useInputStore = create<InputStore>()((set, get) => ({
   ...defaultValues,
+  setRegisteredEmojis: (emojis) => set({ registeredSymbolData: emojis }),
   setPickerInvisible: (value) => set({ pickerInvisible: value }),
   setOnClickOutside: (value: (e: MouseEvent) => void) => set({ onClickOutside: value }),
   setMode: (value) => set({ mode: value }),
@@ -63,6 +79,7 @@ export const useInputStore = create<InputStore>()((set, get) => ({
     }
     return set({ emojis: [] });
   },
+  setIsLoadingRegisteredMarket: (value) => set({ isLoadingRegisteredMarket: value }),
   setPickerRef: (value: HTMLDivElement | null) => set({ pickerRef: value }),
   setTextAreaRef: (value: HTMLTextAreaElement | null) => {
     return set({ textAreaRef: value });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 
 import { Text } from "components";
 
@@ -19,6 +19,7 @@ import { type GridProps } from "../../types";
 import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
 import ChartContainer from "components/charts/ChartContainer";
 import SwapComponent from "../trade-emojicoin/SwapComponent";
+import Loading from "components/loading";
 
 const DesktopGrid = (props: GridProps) => {
   const { t } = translationFunction();
@@ -32,12 +33,14 @@ const DesktopGrid = (props: GridProps) => {
             className="bg-black z-10 border-t border-solid border-t-dark-gray"
           >
             <StyledBlockWrapper>
-              <ChartContainer
-                symbol={props.data.symbol}
-                emojis={props.data.emojis}
-                marketID={props.data.marketID.toString()}
-                marketAddress={props.data.marketAddress}
-              />
+              <Suspense fallback={<Loading numSquares={20} />}>
+                <ChartContainer
+                  symbol={props.data.symbol}
+                  emojis={props.data.emojis}
+                  marketID={props.data.marketID.toString()}
+                  marketAddress={props.data.marketAddress}
+                />
+              </Suspense>
             </StyledBlockWrapper>
           </StyledBlock>
           <StyledBlock width="43%">

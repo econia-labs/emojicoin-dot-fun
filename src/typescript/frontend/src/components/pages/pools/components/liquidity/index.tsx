@@ -215,7 +215,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           value={
             direction === "add"
               ? liquidity
-              : fmtCoin(removeLiquidityResult?.quote_amount) ?? "Loading..."
+              : (fmtCoin(removeLiquidityResult?.quote_amount) ?? "Loading...")
           }
         ></input>
       </Column>
@@ -242,8 +242,8 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           }}
           value={
             direction === "add"
-              ? fmtCoin(provideLiquidityResult?.base_amount) ?? "Loading..."
-              : fmtCoin(removeLiquidityResult?.base_amount) ?? "Loading..."
+              ? (fmtCoin(provideLiquidityResult?.base_amount) ?? "Loading...")
+              : (fmtCoin(removeLiquidityResult?.base_amount) ?? "Loading...")
           }
           type="text"
           disabled
@@ -272,7 +272,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           }}
           value={
             direction === "add"
-              ? fmtCoin(provideLiquidityResult?.lp_coin_amount) ?? "Loading..."
+              ? (fmtCoin(provideLiquidityResult?.lp_coin_amount) ?? "Loading...")
               : lp
           }
           type={direction === "add" ? "text" : "number"}
@@ -388,7 +388,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
             <AptosInputLabel />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              {market ? fmtCoin(market.cpammRealReservesQuote) ?? "Loading..." : "-"}
+              {market ? (fmtCoin(market.cpammRealReservesQuote) ?? "Loading...") : "-"}
             </Text>
           </Flex>
 
@@ -400,7 +400,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
             <EmojiInputLabel emoji={market ? market.symbol : "-"} />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              {market ? fmtCoin(market.cpammRealReservesBase) ?? "Loading..." : "-"}
+              {market ? (fmtCoin(market.cpammRealReservesBase) ?? "Loading...") : "-"}
             </Text>
           </Flex>
         </StyledAddLiquidityWrapper>

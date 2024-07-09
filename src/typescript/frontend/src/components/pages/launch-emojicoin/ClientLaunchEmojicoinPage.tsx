@@ -1,35 +1,35 @@
 "use client";
 
-import Button from "components/button";
-import { translationFunction } from "context/language-context";
-import { Column, Flex } from "@containers";
-import { useRegisterMarket } from "./hooks/use-register-market";
-import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import useInputStore from "@store/input-store";
-import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
-import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
-import { useEffect } from "react";
-import { ColoredBytesIndicator } from "components/emoji-picker/ColoredBytesIndicator";
-import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getEmojisInString } from "@sdk/emoji_data";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { revalidateTagAction } from "lib/queries/cache-utils/revalidate";
+import { TAGS } from "lib/queries/cache-utils/tags";
+import { ROUTES } from "router/routes";
+import { useRouter } from "next/navigation";
+import path from "path";
+import { sleep } from "@sdk/utils";
+import { getEvents } from "@sdk/emojicoin_dot_fun";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import MemoizedLaunchAnimation from "./memoized-launch";
 
-const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
+const LOADING_TIME = 3000;
+type Stage = "initial" | "loading" | "coding";
 
 const ClientLaunchEmojicoinPage = () => {
   const searchParams = useSearchParams();
   const emojiParams = searchParams.get("emojis");
-  const { t } = translationFunction();
-  const { emojis, setEmojis, setMode } = useInputStore((state) => ({
-    emojis: state.emojis,
-    setEmojis: state.setEmojis,
-    setMode: state.setMode,
-  }));
-  const registerMarket = useRegisterMarket();
-  const setPickerInvisible = useInputStore((state) => state.setPickerInvisible);
-  const length = sumBytes(emojis);
-  const invalid = length === 0 || length > 10;
+  const setEmojis = useInputStore((state) => state.setEmojis);
+  const setMode = useInputStore((state) => state.setMode);
+  const router = useRouter();
+  const { status, lastResponse: lastResponseFromContext } = useAptos();
+  const lastResponse = useRef(lastResponseFromContext?.response);
+  const isLoadingRegisteredMarket = useInputStore((state) => state.isLoadingRegisteredMarket);
+  const [stage, setStage] = useState<Stage>(isLoadingRegisteredMarket ? "loading" : "initial");
 
   useEffect(() => {
     if (emojiParams !== null) {
@@ -39,66 +39,76 @@ const ClientLaunchEmojicoinPage = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  // We need to store a reference to the last response in order to navigate to the market page after the market is
+  // registered. Otherwise, `lastResponse` will be stale if we try to use it directly in the `handleLoading` function.
+  useEffect(() => {
+    if (
+      lastResponseFromContext &&
+      lastResponseFromContext.response &&
+      isUserTransactionResponse(lastResponseFromContext.response)
+    ) {
+      lastResponse.current = lastResponseFromContext.response;
+    }
+  }, [lastResponseFromContext]);
+
+  const handleLoading = useCallback(async () => {
+    const response = lastResponse.current;
+    if (response && isUserTransactionResponse(response)) {
+      // NOTE: revalidateTagAction may cause a flicker in the loading animation because the server
+      // rerenders and sends the RSC components again. To avoid this we'll probably need to finish the animation
+      // orchestration with a different animation or cover it up somehow, otherwise I'm not sure how to fix it in a
+      // clean way.
+
+      // Revalidate the registered markets tag.
+      revalidateTagAction(TAGS.RegisteredMarkets);
+
+      startTransition(() => {
+        // Parse the emojis from the market registration event.
+        // We do this in case the emojis are somehow cleared before the response is received. This ensures that
+        // the emojis we're referencing are always the static ones that were used to register the market.
+        const lastResponseEvents = getEvents(response);
+        const marketRegistrationEvent = lastResponseEvents.marketRegistrationEvents[0];
+        const { marketID, emojiBytes } = marketRegistrationEvent.marketMetadata;
+        const { symbol } = symbolBytesToEmojis(emojiBytes);
+        const newPath = path.join(ROUTES.market, symbol);
+        try {
+          router.push(newPath);
+          router.refresh();
+        } catch (e) {
+          console.error("Failed to navigate to market page", e);
+          const pathWithMarketID = path.join(ROUTES.market, marketID.toString());
+          router.push(pathWithMarketID);
+          router.refresh();
+        }
+      });
+    }
+  }, [lastResponse, router]);
+
+  useEffect(() => {
+    const shouldLoad = status === "pending" || (status === "success" && stage === "initial");
+    if (!shouldLoad) return;
+
+    // Start the loading animation.
+    if (stage === "initial") {
+      setStage("loading");
+      sleep(LOADING_TIME).then(() => {
+        handleLoading();
+      });
+    }
+
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [status]);
+
   return (
-    <Column pt="85px" flexGrow="1">
+    <div className="flex flex-col grow pt-[85px]">
       <TextCarousel />
 
       <div className="flex justify-center items-center h-full px-6">
-        <Column width="100%" maxWidth="414px">
-          <Flex className="relative mb-1">
-            <Column className="relative" width="100%" flexGrow={1}>
-              <EmojiPickerWithInput
-                handleClick={registerMarket}
-                pickerButtonClassName="top-[220px] bg-black"
-                inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
-                inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
-              />
-            </Column>
-          </Flex>
-          <ColoredBytesIndicator />
-          <div className="flex">
-            <div className={labelClassName}>{t("Emojicoin Name:")}</div>
-            <div className="body-sm md:body-lg uppercase ellipses text-white font-forma ml-[0.5ch]">
-              {emojis.map((e) => SYMBOL_DATA.byEmoji(e)?.name).join(",")}
-            </div>
-          </div>
-
-          <div className="flex">
-            <div className={labelClassName}>{t("Emojicoin Symbol:")}</div>
-            <div
-              className={
-                "body-sm md:body-lg uppercase whitespace-normal text-ellipsis text-white font-forma " +
-                "ml-[0.5ch] leading-6 "
-              }
-            >
-              {emojis.join("")}
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-center m-auto pt-2">
-            <div className="pixel-heading-4 text-dark-gray uppercase">
-              {t("Cost to deploy:")} <span>1 APT</span>
-            </div>
-          </div>
-
-          <div className={"flex flex-col justify-center m-auto"}>
-            <ButtonWithConnectWalletFallback>
-              <Button
-                disabled={invalid}
-                onClick={() => {
-                  setPickerInvisible(true);
-                  registerMarket();
-                }}
-                scale="lg"
-                style={{ cursor: invalid ? "not-allowed" : "pointer" }}
-              >
-                {t("Launch Emojicoin")}
-              </Button>
-            </ButtonWithConnectWalletFallback>
-          </div>
-        </Column>
+        <div className="relative flex flex-col w-full max-w-[414px]">
+          <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} />
+        </div>
       </div>
-    </Column>
+    </div>
   );
 };
 

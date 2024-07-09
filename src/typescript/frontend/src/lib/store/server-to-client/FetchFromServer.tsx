@@ -9,7 +9,7 @@ import StoreOnClient from "./StoreOnClient";
  */
 export const FetchFromServer = async () => {
   const data = await fetchAggregateMarkets();
-  return <StoreOnClient markets={data.markets} />;
+  return <>{process.env.NODE_ENV === "development" && <StoreOnClient markets={data.markets} />}</>;
 };
 
 export default FetchFromServer;

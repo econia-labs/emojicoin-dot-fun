@@ -89,6 +89,11 @@ module.exports = {
           fontSize: "128px",
           lineHeight: "160px",
         },
+        ".pixel-display-2": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "68px",
+          lineHeight: "100px",
+        },
         ".display-1": {
           fontFamily: "var(--font-formaM)",
           fontSize: "95px",
@@ -130,6 +135,11 @@ module.exports = {
           fontFamily: "var(--font-pixelar)",
           fontSize: "32px",
           lineHeight: "40px",
+        },
+        ".pixel-heading-3b": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "24px",
+          lineHeight: "28px",
         },
         ".pixel-heading-4": {
           fontFamily: "var(--font-pixelar)",
