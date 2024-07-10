@@ -11,28 +11,30 @@ import { Arrow, StyledPrompt } from "./styled";
 
 import { type PromptProps } from "./types";
 
-const Prompt: React.FC<PromptProps> = ({ text }) => {
+const Prompt: React.FC<PromptProps> = ({ text, top, close = true }) => {
   const { t } = translationFunction();
   const [isPromptVisible, setIsPromptVisible] = useState(true);
 
   return (
-    <StyledPrompt isVisible={isPromptVisible}>
+    <StyledPrompt isVisible={isPromptVisible} top={top ?? true}>
       <Text textScale="pixelHeading4" lineHeight="20px" color="black" textTransform="uppercase">
         {t(text)}
       </Text>
 
-      <Flex height="100%" alignItems="start">
-        <CloseIcon
-          width="11px"
-          cursor="pointer"
-          mt="4px"
-          color="black"
-          onClick={() => {
-            setIsPromptVisible(false);
-          }}
-        />
-      </Flex>
-      <Arrow />
+      {close && (
+        <Flex height="100%" alignItems="start">
+          <CloseIcon
+            width="11px"
+            cursor="pointer"
+            mt="4px"
+            color="black"
+            onClick={() => {
+              setIsPromptVisible(false);
+            }}
+          />
+        </Flex>
+      )}
+      <Arrow top={top ?? true} />
     </StyledPrompt>
   );
 };
