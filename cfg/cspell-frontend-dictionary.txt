@@ -1,4 +1,5 @@
 # cspell:disable
+classlist
 toastify
 pixelar
 flexbox
@@ -13,6 +14,7 @@ expedita
 fugiat
 illo
 impedit
+infoicon
 maiores
 mypools
 numquam
@@ -39,3 +41,4 @@ idealogic
 voluptates
 webclip
 KIKI
+unfmt

@@ -1,38 +1,17 @@
 @keyframes image-pulse {
   0% {
-    filter: drop-shadow(0 0 0.01vmin rgba(205, 47, 141, 0.2)) brightness(1);
+    filter: drop-shadow(0 0 0.01vmin rgba(8, 108, 217, 0.1)) brightness(1);
   }
   50% {
-    filter: drop-shadow(0 0 0.015vmin rgba(205, 47, 141, 0.4)) brightness(1.15);
+    filter: drop-shadow(0 0 0.015vmin rgba(8, 108, 217, 0.15)) brightness(1.15);
   }
   100% {
-    filter: drop-shadow(0 0 0.01vmin rgba(205, 47, 141, 0.2)) brightness(1);
+    filter: drop-shadow(0 0 0.01vmin rgba(8, 108, 217, 0.1)) brightness(1);
   }
 }
 
-#hero-image {
+.hero-image-animation {
   animation: image-pulse 4s infinite ease-in-out;
-  width: 289px;
-
-  @media screen and (min-width: 578px) {
-    width: 417px;
-  }
-
-  @media screen and (min-width: 1096px) {
-    width: 545px;
-  }
-
-  @media screen and (min-width: 1355px) {
-    width: 675px;
-  }
-
-  @media screen and (min-width: 1614px) {
-    width: 803px;
-  }
-
-  @media screen and (min-width: 1873px) {
-    width: 932px;
-  }
 }
 
 div#styled-emoji {
@@ -64,6 +43,37 @@ div#styled-emoji {
 
   @media screen and (min-width: 1873px) {
     font-size: 166px;
+  }
+}
+
+div#styled-double-emoji {
+  position: absolute;
+  left: 61%;
+  transform: translateX(-50%);
+  font-size: 40px;
+  line-height: unset;
+  padding-top: 8px;
+
+  @media screen and (min-width: 578px) {
+    font-size: 60px;
+    padding-top: 14px;
+  }
+
+  @media screen and (min-width: 1096px) {
+    font-size: 75px;
+    padding-top: 18px;
+  }
+
+  @media screen and (min-width: 1355px) {
+    font-size: 90px;
+  }
+
+  @media screen and (min-width: 1614px) {
+    font-size: 110px;
+  }
+
+  @media screen and (min-width: 1873px) {
+    font-size: 130px;
   }
 }
 
@@ -128,11 +138,17 @@ div.display-font-text {
   margin-top: -12px;
   margin-bottom: 7px;
   color: white;
+  max-width: 50vw;
+  min-width: 500px;
 
   @media screen and (min-width: 578px) {
     font-size: 55px;
     margin-bottom: 5px;
     margin-top: -4px;
+  }
+
+  @media screen and (min-width: 768px) {
+    min-width: 400px;
   }
 
   @media screen and (min-width: 1096px) {
@@ -154,5 +170,30 @@ div.display-font-text {
   @media screen and (min-width: 1873px) {
     font-size: 124px;
     margin-bottom: 8px;
+  }
+}
+
+#hero-image {
+  filter: drop-shadow(0 0 0.01vmin rgba(8, 108, 217, 0.1)) brightness(1);
+  width: 289px;
+
+  @media screen and (min-width: 578px) {
+    width: 417px;
+  }
+
+  @media screen and (min-width: 1096px) {
+    width: 545px;
+  }
+
+  @media screen and (min-width: 1355px) {
+    width: 675px;
+  }
+
+  @media screen and (min-width: 1614px) {
+    width: 803px;
+  }
+
+  @media screen and (min-width: 1873px) {
+    width: 932px;
   }
 }
