@@ -104,8 +104,19 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
     typeTags: [emojicoin ?? ""],
   });
 
-  const enoughAssets = (apt: number, emoji: number) =>
-    aptBalance && emojiBalance && apt <= aptBalance && emoji <= emojiBalance;
+  const enoughApt =
+    direction === "add"
+      ? aptBalance !== undefined && aptBalance >= unfmtCoin(liquidity ?? 0)
+      : true;
+  const enoughEmoji =
+    direction === "add"
+      ? emojiBalance !== undefined &&
+        emojiBalance >= BigInt(provideLiquidityResult?.base_amount ?? 0)
+      : true;
+  const enoughEmojiLP =
+    direction === "remove"
+      ? emojiLPBalance !== undefined && emojiLPBalance >= unfmtCoin(lp ?? 0)
+      : true;
 
   useEffect(() => {
     if (market && account) {
@@ -163,12 +174,24 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
     setLiquidity("");
   }, [direction]);
 
+  const isActionPossible =
+    market !== undefined &&
+    (direction === "add" ? liquidity !== "" : lp !== "") &&
+    enoughApt &&
+    enoughEmoji &&
+    enoughEmojiLP;
+
   const aptInput = (
     <InnerWrapper id="apt" className="liquidity-input">
       <Column>
         <div className={grayLabel}>
           {direction === "add" ? "You deposit" : "You get"}{" "}
-          {aptBalance !== undefined && <>(balance: {fmtCoin(aptBalance)})</>}
+          {aptBalance !== undefined && (
+            <>
+              (balance: <span className={enoughApt ? "" : "text-error"}>{fmtCoin(aptBalance)}</span>
+              )
+            </>
+          )}
         </div>
         <input
           className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
@@ -196,7 +219,12 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
       <Column>
         <div className={grayLabel}>
           {direction === "add" ? "You deposit" : "You get"}{" "}
-          {emojiBalance !== undefined && <>(balance: {fmtCoin(emojiBalance)})</>}
+          {emojiBalance !== undefined && (
+            <>
+              (balance:{" "}
+              <span className={enoughEmoji ? "" : "text-error"}>{fmtCoin(emojiBalance)}</span>)
+            </>
+          )}
         </div>
         <input
           className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
@@ -221,7 +249,12 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
       <Column>
         <div className={grayLabel}>
           {direction === "remove" ? "You deposit" : "You get"}{" "}
-          {emojiLPBalance !== undefined && <>(balance: {fmtCoin(emojiLPBalance)})</>}
+          {emojiLPBalance !== undefined && (
+            <>
+              (balance:{" "}
+              <span className={enoughEmojiLP ? "" : "text-error"}>{fmtCoin(emojiLPBalance)}</span>)
+            </>
+          )}
         </div>
         <input
           className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
@@ -298,28 +331,8 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           <ButtonWithConnectWalletFallback>
             <Button
               scale="lg"
-              disabled={
-                (market ? false : true) ||
-                !(direction === "add" ? liquidity !== "" : lp !== "") ||
-                !(direction === "add"
-                  ? provideLiquidityResult
-                    ? enoughAssets(
-                        Number(
-                          toActualCoinDecimals({
-                            num: Number(liquidity),
-                            decimals: 0,
-                          })
-                        ),
-                        Number(provideLiquidityResult.base_amount)
-                      )
-                    : false
-                  : Number(
-                      toActualCoinDecimals({
-                        num: Number(lp),
-                        decimals: 0,
-                      })
-                    ) <= (emojiLPBalance ?? 0))
-              }
+              disabled={!isActionPossible}
+              style={{ cursor: isActionPossible ? "pointer" : "not-allowed" }}
               onClick={async () => {
                 if (!account) {
                   return;
