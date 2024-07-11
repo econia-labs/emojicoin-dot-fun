@@ -15,10 +15,10 @@ export const Arrow = styled.div<{ top: boolean }>`
   transform: ${({ top }) => (top ? "rotate(45deg)" : "rotate(-45deg)")};
 `;
 
-export const StyledPrompt = styled.div<{ isVisible: boolean; top: boolean }>`
+export const StyledPrompt = styled.div<{ isVisible: boolean; top: boolean; width?: number }>`
   display: ${({ isVisible }) => (isVisible ? "flex" : "none")};
   z-index: 1;
-  width: 100%;
+  width: ${({ width }) => (width ? `${width}px` : "100%")};
   position: absolute;
   justify-content: space-between;
   padding: 10px 20px;
@@ -26,4 +26,5 @@ export const StyledPrompt = styled.div<{ isVisible: boolean; top: boolean }>`
   border-radius: ${({ theme }) => theme.radii.small};
   bottom: ${({ top }) => (top ? "calc(100% + 20px)" : "unset")};
   top: ${({ top }) => (!top ? "calc(100% + 20px)" : "unset")};
+  right: ${({ width }) => (width ? `calc(-${width}px / 2 + 20px)` : "unset")};
 `;
