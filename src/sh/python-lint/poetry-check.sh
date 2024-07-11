@@ -1,5 +1,6 @@
 #!/bin/bash
-# cspell:words pyproject, toplevel
+# cspell:word pyproject
+# cspell:word toplevel
 
 original_cwd=$(pwd)
 

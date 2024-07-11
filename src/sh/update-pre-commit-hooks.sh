@@ -1,3 +1,3 @@
 #!/bin/sh
-# cspell:words autoupdate
+# cspell:word autoupdate
 pre-commit autoupdate --config cfg/pre-commit-config.yaml

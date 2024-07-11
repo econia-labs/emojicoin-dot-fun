@@ -1,22 +1,22 @@
 ---
 slug: /bridging-from-eth
-title: 🔷 Bridging From Ethereum
+title: 🔷 Bridging from Ethereum
 hide_title: false
 ---
 
-<!--- cspell:words Panora -->
+<!--- cspell:word Panora -->
 
 Use this guide if you are bridging from Ethereum to Aptos.
 
 ### Prerequisites
 
-Before we begin, you will need to have the following:
+Before we begin, you will need the following:
 
 - A wallet with USDC or ETH
 - A browser with wallet extensions installed
 - An Aptos wallet
 
-### Steps to Bridge USDC (LayerZero) into Aptos
+### Bridge USDC (LayerZero) to Aptos
 
 1. Go to [The Aptos Bridge] website
    ![eth1](./images/eth1.png "eth1")

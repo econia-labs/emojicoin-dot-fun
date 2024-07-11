@@ -1,4 +1,4 @@
-# cspell:words zsplit
+# cspell:word zsplit
 import os
 from pathlib import Path
 
