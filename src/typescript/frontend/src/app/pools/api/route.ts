@@ -35,6 +35,7 @@ export async function GET(request: Request) {
   if (orderBy !== "asc" && orderBy !== "desc") {
     throw "Invalid params";
   }
+  const searchBytes = searchParams.get("searchBytes") ?? undefined;
   const account = searchParams.get("account");
   if (account) {
     const data = await fetchMyPools({
@@ -42,6 +43,7 @@ export async function GET(request: Request) {
       orderBy: toOrderBy(orderBy),
       sortBy,
       account,
+      searchBytes,
     });
     return new Response(stringifyJSON(data));
   } else {
@@ -50,6 +52,7 @@ export async function GET(request: Request) {
       inBondingCurve: false,
       orderBy: toOrderBy(orderBy),
       sortBy,
+      searchBytes,
     });
     return new Response(stringifyJSON(data));
   }
