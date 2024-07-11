@@ -1,8 +1,8 @@
-# cspell:words pydeps
-# cspell:words pylint
-# cspell:words snok
-# cspell:words venv
-# cspell:words virtualenvs
+# cspell:word pydeps
+# cspell:word pylint
+# cspell:word snok
+# cspell:word venv
+# cspell:word virtualenvs
 ---
 env:
   POETRY_VERSION: '1.8.2'

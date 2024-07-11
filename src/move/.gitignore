@@ -1,4 +1,4 @@
-# cspell:words mvcov
+# cspell:word mvcov
 *.mvcov
 *.trace
 **/build/

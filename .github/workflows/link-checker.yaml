@@ -1,4 +1,5 @@
-# cspell:words lycheeverse, micalevisk
+# cspell:word lycheeverse
+# cspell:word micalevisk
 ---
 jobs:
   linkChecker:

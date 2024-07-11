@@ -1,5 +1,5 @@
-# cspell:words colorama
-# cspell:words unidecode
+# cspell:word colorama
+# cspell:word unidecode
 
 [tool.poetry]
 authors = ["Econia Labs <developers@econialabs.com>"]

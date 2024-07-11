@@ -1,74 +1,75 @@
 ---
 slug: /how-it-works
-title: ⚙️ How It Works
+title: ⚙️ How it works
 hide_title: false
-description: Bonding Curve Enabled Launchpad
+description: Bonding curve, state transition, and more
 ---
 
 ![gear](./gear-banner.png "gear")
 
-## Bonding Curve Enabled Launchpad
+## Bonding curve, state transition, and more
 
-When a new emojicoin launches, its pricing
-mechanics are defined as an abridged Concentrated Liquidity Automated Market
-Maker (CLAMM) with a single price range. Once the market cap of the emojicoin
-reaches 45,000 APT value, the money used to purchase the coin by traders is
-deployed to an emojicoin AMM pool.
+When a new emojicoin launches, its trading mechanics are dictated by a bonding
+curve where the price of the emojicoin is a function of circulating supply.
+Specifically, the bonding curve is implemented as a concentrated liquidity
+automated market maker (CLAMM) with a single price range.
 
-## Emojicoin or Else
+Once the market capitalization of the emojicoin reaches 45,000 APT, the APT in
+the CLAMM is burned into a constant-product automated market maker (CPAMM),
+along with emojicoin reserves set aside at the market launch. This mechanism
+ensures ample liquidity after the state transition, and a constant price
+throughout the state transition. Moreover, after the bonding curve state
+transition, anyone can provide liquidity into the CPAMM!
 
-The only coins that can be launched are emojicoins that are from the
-standardized [Unicode emoji library].
+## Emojicoin or else
 
-## Emojicoin AMM Pool
+The only coins that can be launched are emojicoins from the
+[Unicode emoji library].
 
-The emojicoin AMM follows the popular and standardized Uniswap v2 design:
+## Emojicoin CPAMM Pool
+
+The emojicoin CPAMM follows the constant-product equation popularized by Uniswap
+v2:
 
 $$
 X \cdot Y = K
 $$
 
-## Life Cycle of Emojicoin: Launchpad to Pool
+## Emojicoin lifecycle: launch to pool
 
-**Introduction**: Congratulations! You've decided to take on the daring journey
-of parenthood and give birth to a beautiful emojicoin. Econia is your favorite
-protocol on the Aptos blockchain, so you decide to name your fictional baby
-emojicoin after her.
+**Introduction**: Congratulations! You've decided to launch an emojicoin! Head
+on over to emojicoin.fun for a seamless experience, powered by the Aptos
+blockchain.
 
-Unlike birthing a human child, giving birth to your beautiful Econia emojicoin
-is painless and cheap by leveraging the Aptos blockchain. We'll now walk you
-through your emojicoin's lifecycle.
+### First steps: launch your emojicoin
 
-### First Baby Steps: Launch your emojicoin
+Launching an emojicoin costs just 1 APT! Note the following:
 
-- With just 1 APT, you can launch your emojicoin — We don't believe in screwing
-  over new parents with expensive medical bills.
+- Single emojis and emoji combinations are supposed, as long as the total number
+  of bytes is 10 or less.
+- Only one market may be launched for a given emoji combination (emojicoin
+  markets are canonical).
+- Emojis that became part of the [Unicode emoji library] after the launch of
+  emojicoin.fun are not supported.
 
-### Growing Up: Exiting the Bonding Curve
+### Growing up: exiting the bonding curve
 
-- Emojicoins are like just like humans, as they grow up and mature they want to
-  leave the house to take the world on their own.
-- The emojicoin.fun platform utilizes a bonding curve for initial price
-  discovery to take place. - The bonding curve is essentially an emojicoin's
-  home. The way your emojicoin matures is depicted by the size of its market
-  cap.
-- The market cap size required to leave the bonding curve = 45,000 APT.
-  For the emojicoin to reach a 45,000 APT market cap, it must have a net
-  buy/sell pressure of +10,000 APT.
+As users buy or sell against the bonding curve, the market capitalization of the
+emojicoin changes. Once 10,000 APT of cumulative sell pressure has pushed the
+bonding curve up to a market capitalization up to 45,000 APT, the emojicoin
+leaves the bonding curve.
 
-### Going to College: Emojicoin Liquidity Pools
+### Going to college: emojicoin liquidity pools
 
-- Once your emojicoin reaches a 45,000 APT market cap size, the coin's market
-  experiences a 'state change' — The 10,000 APT used to purchase the coin is
-  deposited into an emojicoin AMM Liquidity Pool, alongside 23% of the emojicoin
-  token supply. This 'state change' is like your emojicoin baby now going to
-  college and joining a sorority. This Liquidity Pool is locked and its LP
-  tokens to represent it are burned — it can never be removed.
-- The emojicoin in this LP is now available for users to liquidity farm, and
-  of course still be available for trading.
+Once an emojicoin's market capitalization reaches 45,000 APT, the underlying
+market undergoes a state transition: the 10,000 APT that has been deposited into
+the bonding curve is transferred into an emojicoin CPAMM liquidity pool,
+alongside roughly 23% of the remaining emojicoin token supply that has not yet
+gone into circulation. The LP coins generated from this step are then burned
+into the pool to ensure continued market liquidity. Note that this entire step
+is autonomous (handled by the protocol itself without any human intervention).
 
-We understand watching your child grow up is bittersweet, but it's a natural
-part of life and you should be proud of what you've accomplished (like breaking
-out of the bonding curve)!
+Once an emojicoin has left the bonding curve, users may earn yield on their
+emojicoins by providing liquidity to the new CPAMM liquidity pool!
 
 [unicode emoji library]: https://www.unicode.org/emoji/charts/full-emoji-list.html

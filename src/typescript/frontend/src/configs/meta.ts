@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 
 export const DEFAULT_TITLE = "emojicoin.fun";
-export const DEFAULT_DESCRIPTION = "Emojicoin degeneracy starts here";
+export const DEFAULT_DESCRIPTION = "Emojicoin joy starts here";
 export const OG_IMAGES = "/social-preview.png";
 export const OG_TYPE = "website";
 export const TWITTER_CARD = "summary";

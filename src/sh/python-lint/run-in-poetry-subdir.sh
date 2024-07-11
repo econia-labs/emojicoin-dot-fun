@@ -1,5 +1,8 @@
 #!/bin/bash
-# cspell:words realpath, autoflake, venv, toplevel
+# cspell:word autoflake
+# cspell:word realpath
+# cspell:word toplevel
+# cspell:word venv
 
 # Capture the first argument, which is the command we're wrapping for
 # the pre-commit hook.

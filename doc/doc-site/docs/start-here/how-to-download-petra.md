@@ -1,6 +1,6 @@
 ---
 slug: /how-to-download-petra
-title: 💡 How to Download Petra
+title: 💡 How to download Petra
 hide_title: false
 ---
 
