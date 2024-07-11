@@ -21,6 +21,8 @@ import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
+import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
+import useInputStore from "@store/input-store";
 
 export const ClientPoolsPage = () => {
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
@@ -30,6 +32,23 @@ export const ClientPoolsPage = () => {
   const [markets, setMarkets] = useState<FetchSortedMarketDataReturn["markets"]>([]);
   const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
   const [pools, setPools] = useState<"all" | "mypools">("all");
+  const { emojis, setMode } = useInputStore((state) => ({
+    emojis: state.emojis,
+    setMode: state.setMode,
+  }));
+  useEffect(() => {
+    setMode("pools");
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
+
+  const encodeEmoji = (emojis: string[]) => {
+    const encoder = new TextEncoder();
+    return emojis.reduce(
+      (acc: string, emoji) =>
+        `${acc}${[...encoder.encode(emoji)].map((e) => e.toString(16)).join("")}`,
+      "0x"
+    );
+  };
 
   const { account } = useAptos();
 
@@ -39,7 +58,8 @@ export const ClientPoolsPage = () => {
     const orderByQuery = `orderby=${orderBy}`;
     const pageQuery = `page=${page}`;
     const accountQuery = pools === "mypools" ? `&account=${account?.address}` : "";
-    fetch(`${root}?${sortByQuery}&${orderByQuery}&${pageQuery}${accountQuery}`)
+    const searchBytes = emojis.length > 0 ? `&searchBytes=${encodeEmoji(emojis)}` : "";
+    fetch(`${root}?${sortByQuery}&${orderByQuery}&${pageQuery}${accountQuery}${searchBytes}`)
       .then((res) => res.text())
       .then((txt) => parseJSON(txt))
       .then((data) => {
@@ -48,7 +68,7 @@ export const ClientPoolsPage = () => {
         }
         setMarkets((markets) => (page === 1 ? [...data.markets] : [...markets, ...data.markets]));
       });
-  }, [page, orderBy, sortBy, account, pools]);
+  }, [page, orderBy, sortBy, account, pools, emojis]);
 
   const { isMobile } = useMatchBreakpoints();
 
@@ -91,7 +111,11 @@ export const ClientPoolsPage = () => {
                   label="Search pool:"
                   forId="searchPool"
                 >
-                  <Input id="searchPool" onKeyDown={onInputChange} />
+                  <EmojiPickerWithInput
+                    handleClick={async () => {}}
+                    pickerButtonClassName="top-[50px] left-[-87px] bg-black"
+                    inputClassName="!w-[175px] ml-[4px]"
+                  />
                 </InputGroup>
                 {"TODO"}
               </>

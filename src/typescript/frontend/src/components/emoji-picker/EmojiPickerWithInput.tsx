@@ -24,7 +24,7 @@ const ConditionalWrapper = ({
   mode,
 }: {
   children: React.ReactNode;
-  mode: "chat" | "register";
+  mode: "chat" | "register" | "pools";
 }) => {
   return mode === "chat" ? (
     <ButtonWithConnectWalletFallback className="mt-2">{children}</ButtonWithConnectWalletFallback>
@@ -130,6 +130,15 @@ export const EmojiPickerWithInput = ({
   const closeIconClassName =
     "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer";
 
+  const close = (
+    <motion.div whileTap={{ scale: 0.85 }} className={closeIconClassName} onClick={clear}>
+      {/* className={closeIconClassName} */}
+      <ClosePixelated
+        className={`w-[15px] h-[16px] ${mode !== "pools" ? "text-white" : "text-light-gray"}`}
+      />
+    </motion.div>
+  );
+
   return (
     <Flex
       onFocus={(e) => {
@@ -151,14 +160,7 @@ export const EmojiPickerWithInput = ({
                   inputClassName
                 }
               >
-                <motion.div
-                  whileTap={{ scale: 0.85 }}
-                  className={closeIconClassName}
-                  onClick={clear}
-                >
-                  {/* className={closeIconClassName} */}
-                  <ClosePixelated className="w-[15px] h-[16px] text-white" />
-                </motion.div>
+                {mode !== "pools" && close}
                 <Textarea
                   id="emoji-picker-text-area"
                   className="relative !pt-[16px] px-[4px] scroll-auto"
@@ -172,6 +174,7 @@ export const EmojiPickerWithInput = ({
                     setTextAreaRef(textAreaRef.current); // Ensure the ref is set.
                   }}
                 />
+                {mode === "pools" && close}
                 {mode === "chat" ? (
                   <>
                     <ColoredBytesIndicator className="flex flex-row min-w-fit justify-end px-[1ch]" />

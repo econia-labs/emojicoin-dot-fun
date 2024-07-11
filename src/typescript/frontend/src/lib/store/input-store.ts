@@ -2,7 +2,7 @@ import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { create } from "zustand";
 
 export type InputState = {
-  mode: "chat" | "register";
+  mode: "chat" | "register" | "pools";
   emojis: string[];
   pickerRef: HTMLDivElement | null;
   textAreaRef: HTMLTextAreaElement | null;
@@ -16,7 +16,7 @@ export type InputActions = {
   setEmojis: (emojis: string[], selection?: { start: number; end?: number }) => void;
   setPickerRef: (value: HTMLDivElement | null) => void;
   setTextAreaRef: (value: HTMLTextAreaElement | null) => void;
-  setMode: (mode: "chat" | "register") => void;
+  setMode: (mode: "chat" | "register" | "pools") => void;
   setOnClickOutside: (value: (e: MouseEvent) => void) => void;
   setChatEmojiData: (value: Map<string, SymbolEmojiData>) => void;
   setPickerInvisible: (value: boolean) => void;
