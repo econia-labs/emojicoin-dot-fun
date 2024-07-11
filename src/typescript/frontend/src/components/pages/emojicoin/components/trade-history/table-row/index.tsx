@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type PropsWithChildren } from "react";
+import React, { useState, type PropsWithChildren } from "react";
 import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { toNominalPrice } from "@sdk/utils/nominal-price";
@@ -8,6 +8,8 @@ import { ExplorerLink } from "components/link/component";
 import { darkColors } from "theme";
 import { truncateAddress } from "@sdk/utils";
 import "./table-row.css";
+import { useThemeContext } from "context";
+import Text from "components/text";
 
 type TableRowTextItemProps = {
   className: string;
@@ -35,19 +37,66 @@ const TableRowStyles =
 const TableCellStyles = "h-[33px]";
 
 const TableRow = ({ item, showBorder }: TableRowDesktopProps) => {
+  const { theme } = useThemeContext();
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isHover, setIsHover] = useState(false);
   return (
-    <tr className={TableRowStyles} id="grid-hover">
+    <tr
+      className={TableRowStyles}
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+      style={{
+        boxShadow:
+          isHover && showBorder
+            ? "var(--ec-blue) 1px 1px inset, var(--ec-blue) -1px -1px inset"
+            : "",
+      }}
+      id="grid-hover"
+    >
       <td
-        className={
-          "absolute w-full h-full bg-transparent group-hover:inline-flex border-r-[1px] " +
-          "border-b-[1px] border-solid group-hover:border-[1px] group-hover:border-ec-blue z-[1] border-dark-gray" +
-          (showBorder ? "" : " border-b-transparent")
-        }
-      />
-      <td
-        className={`min-w-[60px] xl:min-w-[71px] xl:ml-[0.5ch] xl:mr-[-0.5ch] ${TableCellStyles}`}
+        className={`min-w-[60px] xl:min-w-[71px] xl:ml-[0.5ch] xl:mr-[-0.5ch] ${TableCellStyles} relative`}
       >
-        <div className="flex h-full">
+        <div
+          style={{
+            display: isPopupVisible ? "flex" : "none",
+            zIndex: 100,
+            width: "max-content",
+            position: "absolute",
+            justifyContent: "space-between",
+            padding: "10px 20px",
+            backgroundColor: theme.colors.econiaBlue,
+            borderRadius: theme.radii.small,
+            left: "calc(100% - 10px)",
+            bottom: "-3px",
+          }}
+          onMouseEnter={() => setIsPopupVisible(true)}
+          onMouseLeave={() => setIsPopupVisible(false)}
+        >
+          <Text textScale="pixelHeading4" lineHeight="20px" color="black">
+            {item.rankIcon === "🐡"
+              ? "n00b"
+              : item.rankIcon === "🐳"
+                ? "365 UR SO JULIA"
+                : "SKILL ISSUE"}
+          </Text>
+          <div
+            style={{
+              position: "absolute",
+              width: "20px",
+              height: "20px",
+              background: theme.colors.econiaBlue,
+              left: "-8px",
+              top: "calc(50% - 10px)",
+              border: `1px solid ${theme.colors.econiaBlue}`,
+              transform: "rotate(45deg)",
+            }}
+          />
+        </div>
+        <div
+          className="flex h-full relative"
+          onMouseEnter={() => setIsPopupVisible(true)}
+          onMouseLeave={() => setIsPopupVisible(false)}
+        >
           <span className="text-light-gray m-auto">{item.rankIcon}</span>
         </div>
       </td>
