@@ -11,12 +11,12 @@ import { Arrow, StyledPrompt } from "./styled";
 
 import { type PromptProps } from "./types";
 
-const Prompt: React.FC<PromptProps> = ({ text, top, close = true }) => {
+const Prompt: React.FC<PromptProps> = ({ text, top, close = true, width, visible = true }) => {
   const { t } = translationFunction();
   const [isPromptVisible, setIsPromptVisible] = useState(true);
 
   return (
-    <StyledPrompt isVisible={isPromptVisible} top={top ?? true}>
+    <StyledPrompt isVisible={isPromptVisible && visible} top={top ?? true} width={width}>
       <Text textScale="pixelHeading4" lineHeight="20px" color="black" textTransform="uppercase">
         {t(text)}
       </Text>
