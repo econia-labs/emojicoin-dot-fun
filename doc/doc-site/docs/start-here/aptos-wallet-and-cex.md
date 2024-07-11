@@ -1,6 +1,6 @@
 ---
 slug: /aptos-wallet-and-cex
-title: 🌐 Petra + CEX
+title: 🌐 Petra + CEX (Coinbase)
 hide_title: false
 ---
 

@@ -1,8 +1,11 @@
 ---
 slug: /bug-submission-form
-title: 🐞 Bug Submission Form
+title: 🐛➡️🦋 Bug submission form
 hide_title: false
-description: Fill out the form to submit bugs.
+description: Help catch bugs and give them the love they need
 ---
 
-Fill out the form to submit bugs: <https://form.typeform.com/to/mMylFJQo>
+Help catch unloved bugs 🐛🐛🐛 early, so they can be nurtured until they
+metamorphose into beautiful adult forms and fly away 🦋🦋🦋
+
+Submit bugs here: <https://form.typeform.com/to/mMylFJQo>

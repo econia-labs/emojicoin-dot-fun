@@ -8,24 +8,24 @@ module.exports = {
       },
       items: [
         'about/about',
-        'about/why-we-built-emojicoin',
+        'about/core-values',
         'about/how-it-works',
         'about/emojicoin-LP',
       ]
     },
     {
       type: 'category',
-      label: ' 🏁 Start Here',
+      label: ' 🏁 Start here',
       link: {
         type: 'generated-index'
       },
       items: [
-         'start-here/how-to-download-petra',
-          'start-here/aptos-wallet-and-moonpay',
-          'start-here/aptos-wallet-and-cex',
-          'start-here/bridging-from-eth',
-          'start-here/bridging-from-solana',
-          'start-here/how-to-trade-on-emojicoin',
+        'start-here/how-to-download-petra',
+        'start-here/aptos-wallet-and-moonpay',
+        'start-here/aptos-wallet-and-cex',
+        'start-here/bridging-from-eth',
+        'start-here/bridging-from-solana',
+        'start-here/how-to-trade-on-emojicoin',
       ]
     },
     {

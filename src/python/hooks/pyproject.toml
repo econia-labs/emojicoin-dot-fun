@@ -1,9 +1,9 @@
-# cspell:words autoflake
-# cspell:words colorama
-# cspell:words flake8
-# cspell:words isort
-# cspell:words mypy
-# cspell:words pyyaml
+# cspell:word autoflake
+# cspell:word colorama
+# cspell:word flake8
+# cspell:word isort
+# cspell:word mypy
+# cspell:word pyyaml
 
 [tool.poetry]
 authors = ["Econia Labs <developers@econialabs.com>"]

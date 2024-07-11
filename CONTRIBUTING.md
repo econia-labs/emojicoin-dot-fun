@@ -1,4 +1,4 @@
-<!--- cspell:words wxyz -->
+<!--- cspell:word wxyz -->
 
 # Contribution Guidelines
 

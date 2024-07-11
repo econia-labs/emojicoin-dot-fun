@@ -2,30 +2,33 @@
 slug: /glossary
 title: 🐒 Glossary
 hide_title: false
-description: Degenerate vocabulary you must know.
+description: Common terms you'll want to know
 ---
 
-<!--- cspell:words degen -->
+<!---
+cspell:word degen
+cspell:word larps
+-->
 
-<!--- cspell:words LARPS -->
+Common DeFi vocabulary
 
-<!--- cspell:words Degen -->
+**Bonding Curve**: a mechanism that determine's a token's price based on its
+circulating supply. Each emojicoin markets starts in a bonding curve
+(implemented as a CLAMM) before transitioning to a CPAMM.
 
-Degenerate vocabulary you must know
+**Concentrated Liquidity Automated Market Maker (CLAMM)**: an AMM design where
+liquidity is selectively confined to one or multiple price ranges.
 
-**Bonding Curve**: smart contracts that determine a token's price based on its
-circulating supply. In this case the first state of the emojicoin will be here
-before transitioning into the CPAMM.
+**Constant Product Automated Market Maker (CPAMM)**: the most popular AMM design
 
-**Concentrated Liquidity Automated Market Maker (CLAMM)**:More efficient AMM
-design where users have more control over price where liquidity is placed.
+- Uniswap v2 style (`xy = k`), where `x` and `y` represent the quantities of two
+  assets in a liquidity pool, and `k` is a constant.
 
-**Constant Product Automated Market Maker (CPAMM)**: The most popular AMM design
+**emojicoin**: a coin with an emoji as a symbol. Emojicoins are the only
+tradeable assets on emojicoin.fun, and are enabled by a novel hexadecimal
+encoding technique.
 
-- Uniswap v2 style.
-  Where, ‘x’ and ‘y’ represent the quantities of two assets in a liquidity pool,
-  and ‘k’ is a constant.
-
+<!---
 **Degen**: Someone who LARPS as a gambler but doesn't actually make any money.
 
 - Tim: I love NFTs and Web3.  I'm such a degen.
@@ -39,5 +42,4 @@ the rest of the market overlooks
 the market overlooks.
 
 - We degenerately bought the entire supply of three emojicoins this morning."
-
-**emojicoin**: emojicoins are emojis that are tradeable on emojicoin.fun.
+-->

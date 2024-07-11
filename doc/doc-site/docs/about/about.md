@@ -2,17 +2,14 @@
 slug: /
 title: ⬛ Welcome to emojicoin.fun
 hide_title: false
-description: In the ever-evolving landscape of defi, we are thrilled to introduce
+description: Buckle up and enjoy the ride!
 ---
-
-<!--- cspell:words defi -->
 
 ![about](./about.png "about")
 
-In the ever-evolving landscape of defi, we are
-thrilled to introduce its new platform — emojicoin.fun: where all launched
-and tradable coins are emojicoins.
+Say hello to the newest member of the ever-evolving DeFi landscape:
+emojicoin.fun, where all launched and tradable coins are emojicoins.
 
-Our goal is to merge the engaging, expressive nature of emojis with the
-dynamic world of defi, creating a vibrant, fair, and
-user-friendly environment for traders and communities.
+The emojicoin.fun platform merges the engaging, expressive nature of emojis
+with the dynamic world of DefI, enabling a vibrant, fair, and user-friendly
+environment for traders and communities.

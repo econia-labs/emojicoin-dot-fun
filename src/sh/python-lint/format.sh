@@ -1,5 +1,6 @@
 #!/bin/sh
-# cspell:words subdir, toplevel
+# cspell:word subdir
+# cspell:word toplevel
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
 DIR_ABS_PATH="$ROOT_DIR/src/sh/python-lint"

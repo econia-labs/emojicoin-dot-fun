@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# cspell:words autoflake
-# cspell:words colorama
-# cspell:words lightblack
-# cspell:words lightwhite
-# cspell:words lightyellow
+# cspell:word autoflake
+# cspell:word colorama
+# cspell:word lightblack
+# cspell:word lightwhite
+# cspell:word lightyellow
 
 import os
 import subprocess

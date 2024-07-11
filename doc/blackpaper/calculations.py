@@ -1,4 +1,4 @@
-# cspell:words texttt
+# cspell:word texttt
 from math import isclose, sqrt
 
 A = 10_000.0
