@@ -12,13 +12,18 @@ import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { useEffect } from "react";
 import { ColoredBytesIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
+import { useSearchParams } from "next/navigation";
+import { getEmojisInString } from "@sdk/emoji_data";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
 const ClientLaunchEmojicoinPage = () => {
+  const searchParams = useSearchParams();
+  const emojiParams = searchParams.get("emojis");
   const { t } = translationFunction();
-  const { emojis, setMode } = useInputStore((state) => ({
+  const { emojis, setEmojis, setMode } = useInputStore((state) => ({
     emojis: state.emojis,
+    setEmojis: state.setEmojis,
     setMode: state.setMode,
   }));
   const registerMarket = useRegisterMarket();
@@ -27,6 +32,9 @@ const ClientLaunchEmojicoinPage = () => {
   const invalid = length === 0 || length > 10;
 
   useEffect(() => {
+    if (emojiParams !== null) {
+      setEmojis(getEmojisInString(emojiParams));
+    }
     setMode("register");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);

@@ -11,6 +11,7 @@ import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
 import { useEventStore } from "context/websockets-context";
 import { useMatchBreakpoints } from "@hooks/index";
+import { useSearchParams } from "next/navigation";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -43,12 +44,22 @@ export default function SwapComponent({
   marketID,
   initNumSwaps,
 }: SwapComponentProps) {
+  const searchParams = useSearchParams();
+
+  const presetInputAmount =
+    searchParams.get("buy") !== null ? searchParams.get("buy") : searchParams.get("sell");
+  const presetInputAmountIsValid =
+    presetInputAmount !== null &&
+    presetInputAmount !== "" &&
+    !Number.isNaN(Number(presetInputAmount));
   const { isDesktop } = useMatchBreakpoints();
-  const [inputAmount, setInputAmount] = useState("1");
+  const [inputAmount, setInputAmount] = useState(
+    presetInputAmountIsValid ? presetInputAmount! : "1"
+  );
   const [outputAmount, setOutputAmount] = useState("0"); // TODO: Use calculation for initial value...?
   const [previous, setPrevious] = useState(inputAmount);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSell, setIsSell] = useState(false);
+  const [isSell, setIsSell] = useState(!(searchParams.get("sell") === null));
   const [submit, setSubmit] = useState<(() => Promise<void>) | null>(null);
 
   const numSwaps = useEventStore(

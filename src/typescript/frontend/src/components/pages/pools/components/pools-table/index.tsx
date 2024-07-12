@@ -18,6 +18,7 @@ import useElementDimensions from "@hooks/use-element-dimensions";
 
 export interface PoolsTableProps {
   data: FetchSortedMarketDataReturn["markets"];
+  index: number | undefined;
   sortBy: (sortBy: SortByPageQueryParams) => void;
   orderBy: (orderBy: OrderByStrings) => void;
   onSelect: (index: number) => void;
@@ -27,7 +28,7 @@ export interface PoolsTableProps {
 const PoolsTable: React.FC<PoolsTableProps> = (props: PoolsTableProps) => {
   const { isMobile } = useMatchBreakpoints();
   const { offsetHeight: poolsTableBodyHeight } = useElementDimensions("poolsTableBody");
-  const [selectedRow, setSelectedRow] = useState<number>();
+  const [selectedRow, setSelectedRow] = useState<number | undefined>(props.index);
   const [selectedSort, setSelectedSort] = useState<{
     col: SortByPageQueryParams;
     direction: OrderByStrings;
