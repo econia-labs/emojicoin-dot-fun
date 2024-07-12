@@ -51,7 +51,7 @@ const ClientLaunchEmojicoinPage = () => {
           <div className="flex">
             <div className={labelClassName}>{t("Emojicoin Name:")}</div>
             <div className="body-sm md:body-lg uppercase ellipses text-white font-forma ml-[0.5ch]">
-              {emojis.map((e) => SYMBOL_DATA.byEmoji(e)?.name).join(", ")}
+              {emojis.map((e) => SYMBOL_DATA.byEmoji(e)?.name).join(",")}
             </div>
           </div>
 
@@ -63,7 +63,7 @@ const ClientLaunchEmojicoinPage = () => {
                 "ml-[0.5ch] leading-6 "
               }
             >
-              {emojis.join(", ")}
+              {emojis.join("")}
             </div>
           </div>
 

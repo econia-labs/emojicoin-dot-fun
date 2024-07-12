@@ -5,7 +5,7 @@ import EmojiNotFoundPage from "./not-found";
 import fetchInitialChatData from "lib/queries/initial/chats";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
-import parseBigInt from "lib/utils/try-parse-bigint";
+import { SYMBOL_DATA } from "@sdk/emoji_data";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -35,9 +35,11 @@ interface EmojicoinPageProps {
  */
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const { market: marketSlug } = params.params;
-  const parsed = parseBigInt(marketSlug);
-  const market = parsed ? BigInt(parsed) : marketSlug;
-  const res = await fetchLatestMarketState(market);
+  const hex = decodeURIComponent(marketSlug)
+    .split(",")
+    .map(n => SYMBOL_DATA.byName(n)?.hex.slice(2))
+    .join("");
+  const res = await fetchLatestMarketState(`0x${hex}`);
 
   if (res) {
     const marketID = res.marketID.toString();
