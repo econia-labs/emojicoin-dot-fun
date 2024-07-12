@@ -23,20 +23,27 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import useInputStore from "@store/input-store";
+import { useSearchParams } from "next/navigation";
+import { getEmojisInString } from "@sdk/emoji_data";
 
 export const ClientPoolsPage = () => {
+  const searchParams = useSearchParams();
+  const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
-  const [selectedIndex, setSelectedIndex] = useState<number>();
+  const [selectedIndex, setSelectedIndex] = useState<number | undefined>(poolParam ? 0 : undefined);
   const [page, setPage] = useState<number>(1);
   const [markets, setMarkets] = useState<FetchSortedMarketDataReturn["markets"]>([]);
   const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
   const [pools, setPools] = useState<"all" | "mypools">("all");
-  const { emojis, setMode } = useInputStore((state) => ({
+  const [realEmojis, setRealEmojis] = useState(getEmojisInString(poolParam ?? ""));
+  const { emojis, setEmojis, setMode } = useInputStore((state) => ({
     emojis: state.emojis,
     setMode: state.setMode,
+    setEmojis: state.setEmojis,
   }));
   useEffect(() => {
+    setEmojis(realEmojis);
     setMode("pools");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
@@ -53,12 +60,16 @@ export const ClientPoolsPage = () => {
   const { account } = useAptos();
 
   useEffect(() => {
+    setRealEmojis(emojis);
+  }, [emojis]);
+
+  useEffect(() => {
     const root = "/pools/api";
     const sortByQuery = `sortby=${sortBy}`;
     const orderByQuery = `orderby=${orderBy}`;
     const pageQuery = `page=${page}`;
     const accountQuery = pools === "mypools" ? `&account=${account?.address}` : "";
-    const searchBytes = emojis.length > 0 ? `&searchBytes=${encodeEmoji(emojis)}` : "";
+    const searchBytes = realEmojis.length > 0 ? `&searchBytes=${encodeEmoji(realEmojis)}` : "";
     fetch(`${root}?${sortByQuery}&${orderByQuery}&${pageQuery}${accountQuery}${searchBytes}`)
       .then((res) => res.text())
       .then((txt) => parseJSON(txt))
@@ -68,7 +79,7 @@ export const ClientPoolsPage = () => {
         }
         setMarkets((markets) => (page === 1 ? [...data.markets] : [...markets, ...data.markets]));
       });
-  }, [page, orderBy, sortBy, account, pools, emojis]);
+  }, [page, orderBy, sortBy, account, pools, realEmojis]);
 
   const { isMobile } = useMatchBreakpoints();
 
@@ -144,6 +155,7 @@ export const ClientPoolsPage = () => {
       <StyledWrapper>
         <StyledInner width={{ _: "100%", laptopL: "57%" }}>
           <PoolsTable
+            index={selectedIndex}
             data={markets}
             sortBy={(s) => {
               setSortBy(s);

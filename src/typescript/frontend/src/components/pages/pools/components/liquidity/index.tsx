@@ -29,6 +29,7 @@ import { Arrows } from "components/svg";
 import { COIN_FACTORY_MODULE_NAME } from "@sdk/const";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import info from "../../../../../../public/images/infoicon.svg";
+import { useSearchParams } from "next/navigation";
 
 type LiquidityProps = {
   market: FetchSortedMarketDataReturn["markets"][0] | undefined;
@@ -81,12 +82,25 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
   const { t } = translationFunction();
   const { theme } = useThemeContext();
 
-  const [liquidity, setLiquidity] = useState<number | "">("");
-  const [lp, setLP] = useState<number | "">("");
+  const searchParams = useSearchParams();
+  const presetInputAmount =
+    searchParams.get("add") !== null ? searchParams.get("add") : searchParams.get("remove");
+  const presetInputAmountIsValid =
+    presetInputAmount !== null &&
+    presetInputAmount !== "" &&
+    !Number.isNaN(Number(presetInputAmount));
+  const [liquidity, setLiquidity] = useState<number | "">(
+    searchParams.get("add") !== null && presetInputAmountIsValid ? Number(presetInputAmount) : ""
+  );
+  const [lp, setLP] = useState<number | "">(
+    searchParams.get("remove") !== null && presetInputAmountIsValid ? Number(presetInputAmount) : ""
+  );
   const [aptBalance, setAptBalance] = useState<bigint>();
   const [emojiBalance, setEmojiBalance] = useState<bigint>();
   const [emojiLPBalance, setEmojiLPBalance] = useState<bigint>();
-  const [direction, setDirection] = useState<"add" | "remove">("add");
+  const [direction, setDirection] = useState<"add" | "remove">(
+    searchParams.get("remove") !== null ? "remove" : "add"
+  );
   const [showLiquidityPrompt, setShowLiquidityPrompt] = useState<boolean>(false);
 
   const { aptos, account, submit } = useAptos();
@@ -168,11 +182,6 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
         });
     }
   }, [market, account, aptos]);
-
-  useEffect(() => {
-    setLP("");
-    setLiquidity("");
-  }, [direction]);
 
   const isActionPossible =
     market !== undefined &&
