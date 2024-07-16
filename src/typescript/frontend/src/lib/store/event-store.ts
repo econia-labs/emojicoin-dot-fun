@@ -415,14 +415,14 @@ export const createEventStore = (initialState: EventState = defaultState) => {
         set((state) => {
           const entries = markets.map((m) => [m.marketID, m] as const);
           state.registeredMarketMap = new Map(entries);
-          const newregisteredMarketMap = new Map<string, RegisteredMarket>();
+          const newRegisteredMarketMap = new Map<string, RegisteredMarket>();
           const newSymbolToMarketIDMap = new Map<string, string>();
           markets.forEach((mkt) => {
             const { marketID, symbol } = mkt;
-            newregisteredMarketMap.set(marketID, mkt);
+            newRegisteredMarketMap.set(marketID, mkt);
             newSymbolToMarketIDMap.set(symbol, marketID);
           });
-          state.registeredMarketMap = newregisteredMarketMap;
+          state.registeredMarketMap = newRegisteredMarketMap;
           state.symbols = newSymbolToMarketIDMap;
         });
       },

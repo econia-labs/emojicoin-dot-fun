@@ -18,7 +18,7 @@ for each market registered.
 
 We update this state data with WebSocket updates and any time the current user
 registers a market. It's also fetched from the server component initially- thus
-we have a full and up to date picture of the currently registed markets.
+we have a full and up to date picture of the currently registered markets.
 
 This data facilitates searching for market data in the search bar in the Chart
 component.
@@ -237,7 +237,6 @@ to avoid duplicating events in state, we know that we won't inadvertently count
 incoming swap data twice in the latest bar. This means our volume data is
 accurate despite using data from three separate sources.
 
-[datafeed]: ./README.md#datafeed-api
 [datafeed api]: https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-API/
 [eventstore state]: ../../lib/store/event-store.ts
 [fetchallcandlesticksintimerange]: ../../lib/queries/charting/candlesticks-in-time-range.ts
