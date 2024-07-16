@@ -80,8 +80,8 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
     "paneProperties.legendProperties.showVolume": true,
   },
   studies_overrides: {
-    "volume.volume.color.0": PINK_OPACITY_HALF,
-    "volume.volume.color.1": GREEN_OPACITY_HALF,
+    "volume.volume.color.0": PINK_HEX,
+    "volume.volume.color.1": GREEN_HEX,
   },
   time_frames: [
     {
