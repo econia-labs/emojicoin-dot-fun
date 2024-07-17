@@ -1,18 +1,13 @@
-"use client";
-
 import { FlexGap } from "@containers";
 import { SingleSelect, DropdownMenu } from "components/selects";
 import { Switcher } from "components/switcher";
 import { translationFunction } from "context/language-context";
 import { StyledTHFilters } from "../styled";
 import { useMatchBreakpoints } from "hooks";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Text } from "components/text";
 import { type Option } from "components/selects/types";
-import { MarketDataSortBy, toPageQueryParam } from "lib/queries/sorting/types";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { getSortQueryPath } from "lib/queries/sorting/query-params";
+import { MarketDataSortBy } from "lib/queries/sorting/types";
 
 const titleFromValue: Record<MarketDataSortBy, string> = {
   [MarketDataSortBy.MarketCap]: "Market Cap",
@@ -24,12 +19,7 @@ const titleFromValue: Record<MarketDataSortBy, string> = {
   [MarketDataSortBy.Tvl]: "TVL",
 };
 
-type MyOption = {
-  title: string;
-  value: MarketDataSortBy;
-};
-
-const options: Array<MyOption> = [
+const options: Array<Option> = [
   { title: titleFromValue[MarketDataSortBy.MarketCap], value: MarketDataSortBy.MarketCap },
   { title: titleFromValue[MarketDataSortBy.BumpOrder], value: MarketDataSortBy.BumpOrder },
   { title: titleFromValue[MarketDataSortBy.DailyVolume], value: MarketDataSortBy.DailyVolume },
@@ -37,20 +27,13 @@ const options: Array<MyOption> = [
   // TODO: Add price..?
 ];
 
-const queryParamToOption = (value: string): MyOption => {
-  let option = options.find((o) => toPageQueryParam(o.value) === (value as MarketDataSortBy));
-  if (!option) {
-    option = options.find((o) => toPageQueryParam(o.value) === MarketDataSortBy.MarketCap)!;
-  }
-  return option;
+export type FilterOptionsComponentProps = {
+  filter: MarketDataSortBy;
+  onChange: (value: MarketDataSortBy) => void;
 };
 
-export const FilterOptionsComponent = () => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const initialOption = queryParamToOption(searchParams.get("sort") ?? "");
-  const [selectedOption, setSelectedOption] = useState<MyOption>(initialOption);
+export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
+  const selectedOption = options.find((x) => x.value === filter)!
   const [isChecked, setIsChecked] = useState(true);
   const { t } = translationFunction();
   const { isLaptopL } = useMatchBreakpoints();
@@ -58,27 +41,6 @@ export const FilterOptionsComponent = () => {
   const handler = () => {
     setIsChecked((v) => !v);
   };
-
-  const handleQueryParams = useCallback(
-    (option: Option | MyOption, routerFunction: keyof AppRouterInstance) => {
-      const newPath = getSortQueryPath({
-        value: toPageQueryParam((option as MyOption).value),
-        searchParams,
-        pathname,
-      });
-      if (routerFunction === "push") {
-        setSelectedOption(option as MyOption);
-        // TODO: Consider refactoring the dropdown Single/MultiSelect stuff entirely into a `next/Link` component.
-        // It's possible this is actually the only way to do this because I don't think `next/Link` automatically
-        // refreshes, but we can look into it.
-        router.push(newPath, { scroll: false });
-        router.refresh();
-      } else if (routerFunction === "prefetch") {
-        router.prefetch(newPath);
-      }
-    },
-    [searchParams, pathname, router]
-  );
 
   return (
     <StyledTHFilters>
@@ -90,13 +52,11 @@ export const FilterOptionsComponent = () => {
         }}
         title={selectedOption?.title}
         value={selectedOption}
-        setValue={(option: MyOption | Option) => handleQueryParams(option, "push")}
-        dropdownComponent={DropdownMenu}
-        onHover={(option: MyOption | Option) => {
-          if (option) {
-            handleQueryParams(option, "prefetch");
-          }
+        setValue={(option) => {
+          onChange(option.value as MarketDataSortBy);
         }}
+        dropdownComponent={DropdownMenu}
+        onHover={(_) => {}}
         options={options}
         dropdownWrapperProps={{ width: "250px" }}
         titleProps={{ color: "darkGray", textTransform: "uppercase" }}

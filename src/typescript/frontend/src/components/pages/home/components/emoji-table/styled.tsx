@@ -66,6 +66,7 @@ export const Header = styled.div`
   width: 100%;
   align-items: center;
   justify-content: center;
+  scroll-margin-top: 100px;
 
   ${mediaQueries}
 

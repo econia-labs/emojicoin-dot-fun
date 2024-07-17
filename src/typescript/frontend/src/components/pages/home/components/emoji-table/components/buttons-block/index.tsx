@@ -1,60 +1,31 @@
-"use client";
-
-import React, { useCallback } from "react";
+import React from "react";
 
 import { FlexGap } from "@containers";
 import { Text } from "components/text";
 
 import { Arrow } from "components/svg";
 import { StyledBtn } from "./styled";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { getPageQueryPath } from "lib/queries/sorting/query-params";
-import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { useMarketData } from "context/websockets-context";
 
-const ButtonsBlock: React.FC = () => {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const numMarkets = useMarketData((s) => s.numMarkets);
+export type ButtonsBlockProps = {
+  value: number;
+  numberOfPages: number;
+  onChange: (page: number) => void;
+};
 
-  const handleRouterAction = useCallback(
-    ({ prev, routerFunction }: { prev: boolean; routerFunction: keyof AppRouterInstance }) => {
-      const newPath = getPageQueryPath({
-        prev,
-        searchParams,
-        pathname,
-        numMarkets,
-      });
-      if (routerFunction === "push") {
-        // TODO: Consider refactoring the dropdown Single/MultiSelect stuff entirely into a `next/Link` component.
-        // It's possible this is actually the only way to do this because I don't think `next/Link` automatically
-        // refreshes, but we can look into it.
-        router.push(newPath, { scroll: false });
-        router.refresh();
-      } else if (routerFunction === "prefetch") {
-        router.prefetch(newPath);
-      }
-    },
-    [searchParams, pathname, router, numMarkets]
-  );
-
+const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
+  value,
+  numberOfPages,
+  onChange,
+}: ButtonsBlockProps) => {
   return (
     <FlexGap gap="17px" justifyContent="center" marginTop="30px">
       {/* Left */}
       <StyledBtn
-        onMouseEnter={() =>
-          handleRouterAction({
-            prev: true,
-            routerFunction: "prefetch",
-          })
-        }
-        onClick={() =>
-          handleRouterAction({
-            prev: true,
-            routerFunction: "push",
-          })
-        }
+        onClick={() => {
+          if (value > 1) {
+            onChange(value - 1);
+          }
+        }}
       >
         <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
           {"{"}
@@ -67,20 +38,27 @@ const ButtonsBlock: React.FC = () => {
         </Text>
       </StyledBtn>
 
+      <>
+        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+          {"{"}
+        </Text>
+
+        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+          {value} / {numberOfPages}
+        </Text>
+
+        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+          {"}"}
+        </Text>
+      </>
+
       {/* Right */}
       <StyledBtn
-        onMouseEnter={() =>
-          handleRouterAction({
-            prev: false,
-            routerFunction: "prefetch",
-          })
-        }
-        onClick={() =>
-          handleRouterAction({
-            prev: false,
-            routerFunction: "push",
-          })
-        }
+        onClick={() => {
+          if (value < numberOfPages) {
+            onChange(value + 1);
+          }
+        }}
       >
         <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
           {"{"}

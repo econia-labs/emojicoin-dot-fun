@@ -82,7 +82,7 @@ export const fetchFeaturedMarket = async (
   const limit = 1;
   const offset = 0;
   const exactCount = false;
-  const { sortBy, orderBy, inBondingCurve } = args;
+  const { sortBy, orderBy, inBondingCurve, searchBytes } = args;
 
   const keys = [
     "featured-market",
@@ -92,6 +92,7 @@ export const fetchFeaturedMarket = async (
     toOrderByString(orderBy),
     inBondingCurve,
     exactCount,
+    searchBytes,
   ].map(String);
 
   const res = await cached(
@@ -103,6 +104,7 @@ export const fetchFeaturedMarket = async (
         orderBy,
         inBondingCurve,
         exactCount,
+        searchBytes,
       }),
     keys,
     {

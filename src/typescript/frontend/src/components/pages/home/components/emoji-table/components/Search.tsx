@@ -1,33 +1,23 @@
-"use client";
-
-import { InputGroup, Input } from "components/inputs";
-import { isDisallowedEventKey } from "utils";
+import { InputGroup } from "components/inputs";
+import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 
 export const SearchComponent = () => {
-  const onInputChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (isDisallowedEventKey(e)) {
-      e.preventDefault();
-    }
-  };
-
   return (
     <>
       <InputGroup
-        label="Search:"
-        textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
+        textScale="pixelHeading3"
         variant="fantom"
-        forId="search"
+        width="unset"
         isShowError={false}
-        className="med-pixel-text"
+        label="Search:"
+        forId="search"
       >
-        <Input
-          className="med-pixel-text"
-          id="search"
-          autoComplete="off"
-          onKeyDown={onInputChange}
+        <EmojiPickerWithInput
+          handleClick={async () => {}}
+          pickerButtonClassName="top-[50px] left-[-87px] bg-black"
+          inputClassName="!w-[175px] ml-[4px] border-none"
         />
       </InputGroup>
-      {"TODO"}
     </>
   );
 };

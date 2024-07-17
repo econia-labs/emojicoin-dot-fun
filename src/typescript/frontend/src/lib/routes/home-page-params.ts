@@ -21,6 +21,7 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
     sort = MarketDataSortBy.MarketCap,
     order = "desc",
     bonding: inBondingCurve = null,
+    q,
   } = searchParams ?? {};
 
   const sortBy = toPostgrestQueryParam(sort);
@@ -32,5 +33,6 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
     sortBy,
     orderBy,
     inBondingCurve,
+    q,
   };
 };
