@@ -14,6 +14,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     use aptos_std::table::{Self, Table};
     use aptos_std::type_info;
     use emojicoin_dot_fun::hex_codes;
+    use emojicoin_dot_fun::emojicoin_dot_fun_rewards as rewards;
     use std::option::{Self, Option};
     use std::signer;
     use std::string::{Self, String};
@@ -658,6 +659,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 fully_diluted_value: fdv_end,
             },
         );
+
+        // Update user rewards state tracking.
+        let apt_fees_paid = ((integrator_fee_as_u128 + pool_fees_quote_as_u128) as u64);
+        rewards::increment_apt_fees_paid(swapper, apt_fees_paid)
     }
 
     /// Constructs a chat message from a sequence of emojis emitted as an event.
@@ -1586,6 +1591,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 fully_diluted_value: fdv,
             },
         );
+
+        // Update user rewards state tracking, such that the registrant of the first market is also
+        // considered eligible for rewards.
+        rewards::increment_apt_fees_paid(registrant, MARKET_REGISTRATION_FEE)
     }
 
     // Ideally this would be inline, but unfortunately that breaks the compiler.
