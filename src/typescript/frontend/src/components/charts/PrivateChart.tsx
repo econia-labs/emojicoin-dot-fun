@@ -39,6 +39,7 @@ import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { toMarketView } from "@sdk/types/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { getAptosConfig } from "lib/utils/aptos-client";
+import { symbolToEmojis } from "@sdk/emoji_data";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
@@ -74,7 +75,6 @@ export const Chart = async (props: ChartContainerProps) => {
   const unsubscribeFromResolution = useEventStore((s) => s.unsubscribeFromResolution);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
   const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarketMap);
-  const getSymbolMap = useEventStore((s) => s.getSymbolMap);
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -110,27 +110,12 @@ export const Chart = async (props: ChartContainerProps) => {
 
         onResultReadyCallback(symbols);
       },
-      resolveSymbol: async (symbolName, onSymbolResolvedCallback, onErrorCallback) => {
+      resolveSymbol: async (symbolName, onSymbolResolvedCallback, _onErrorCallback) => {
         // Try to look up the symbol as if it were a market ID and then as if it were the actual market symbol,
         // aka, the emoji(s) symbol string.
-        const possibleMarketID = getSymbolMap().get(symbolName);
-        const markets = getRegisteredMarketMap();
-        const symbolMap = getSymbolMap();
-        console.log(symbolMap);
-        console.log(symbolMap.size);
-        console.log(symbolMap.entries());
-        console.log(markets);
-        console.log(markets.size);
-        console.log(markets.entries());
-        console.log("looking for", symbolName, "or", possibleMarketID);
-        const metadata =
-          markets.get(symbolName) ?? (possibleMarketID ? markets.get(possibleMarketID) : null);
-        if (!metadata) {
-          return onErrorCallback("Symbol not found");
-        }
-        const { marketID, symbol } = metadata;
-        if (props.marketID !== marketID) {
-          const newRoute = path.join(ROUTES.market, marketID);
+        const { symbol } = symbolToEmojis(symbolName);
+        if (symbol !== props.symbol) {
+          const newRoute = path.join(ROUTES.market, symbol);
           console.debug(`[resolveSymbol]: Redirecting to ${newRoute}`);
           router.push(newRoute);
           router.refresh();

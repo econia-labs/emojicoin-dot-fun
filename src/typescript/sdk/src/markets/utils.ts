@@ -10,7 +10,7 @@ import {
   parseTypeTag,
   type TypeTag,
 } from "@aptos-labs/ts-sdk";
-import { EmojicoinDotFun, deriveEmojicoinPublisherAddress } from "../emojicoin_dot_fun";
+import { EmojicoinDotFun, REGISTRY_ADDRESS, deriveEmojicoinPublisherAddress } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
   COIN_FACTORY_MODULE_NAME,
@@ -42,10 +42,10 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
  * @returns The derived market address and TypeTags.
  */
 export function getEmojicoinMarketAddressAndTypeTags(args: {
-  registryAddress: AccountAddressInput;
+  registryAddress?: AccountAddressInput;
   symbolBytes: HexInput;
 }): Types.EmojicoinInfo {
-  const registryAddress = AccountAddress.from(args.registryAddress);
+  const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
   const symbolBytes = Hex.fromHexInput(args.symbolBytes);
   const marketAddress = deriveEmojicoinPublisherAddress({
     registryAddress,
