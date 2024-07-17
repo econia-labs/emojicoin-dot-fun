@@ -51,6 +51,7 @@ nextjs
 nohup
 octa
 oden
+offchain
 parallelizable
 permissionless
 pkill

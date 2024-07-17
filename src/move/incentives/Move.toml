@@ -6,14 +6,13 @@ git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
 
+[dev-addresses]
+coin_factory = "0xaaaa"
+emojicoin_dot_fun = "0xc0de"
+incentives = "0xbbbb"
+
 [dev-dependencies.EmojicoinDotFun]
 local = "../emojicoin_dot_fun"
-
-[dev-addresses]
-incentives = "0xbbbb"
-emojicoin_dot_fun = "0xc0de"
-coin_factory = "0xaaaa"
-
 
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
