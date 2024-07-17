@@ -14,7 +14,7 @@ module incentives::incentives {
     /// Signer is not sender.
     const E_NOT_SENDER: u64 = 1;
 
-    struct Permissions has key {
+    struct Roles has key {
         admin: address,
         sender: address
     }
@@ -26,35 +26,35 @@ module incentives::incentives {
         amount: u64
     }
 
-    public entry fun send(sender: &signer, recipient: address, amount: u64) acquires Permissions {
-        let manifest_ref = borrow_global<Permissions>(@incentives);
+    public entry fun send(sender: &signer, recipient: address, amount: u64) acquires Roles {
+        let manifest_ref = borrow_global<Roles>(@incentives);
         let sender_address = signer::address_of(sender);
         assert!(sender_address == manifest_ref.sender, E_NOT_SENDER);
         aptos_account::transfer(sender, recipient, amount);
         event::emit(Send { sender: sender_address, recipient, amount });
     }
 
-    public entry fun set_admin(admin: &signer, new_admin: address) acquires Permissions {
-        let manifest_ref_mut = borrow_global_mut<Permissions>(@incentives);
+    public entry fun set_admin(admin: &signer, new_admin: address) acquires Roles {
+        let manifest_ref_mut = borrow_global_mut<Roles>(@incentives);
         assert!(signer::address_of(admin) == manifest_ref_mut.admin, E_NOT_ADMIN);
         manifest_ref_mut.admin = new_admin;
     }
 
-    public entry fun set_sender(admin: &signer, new_sender: address) acquires Permissions {
-        let manifest_ref_mut = borrow_global_mut<Permissions>(@incentives);
+    public entry fun set_sender(admin: &signer, new_sender: address) acquires Roles {
+        let manifest_ref_mut = borrow_global_mut<Roles>(@incentives);
         assert!(signer::address_of(admin) == manifest_ref_mut.admin, E_NOT_ADMIN);
         manifest_ref_mut.sender = new_sender;
     }
 
     fun init_module(publisher: &signer) {
         let publisher_address = signer::address_of(publisher);
-        move_to(publisher, Permissions {
+        move_to(publisher, Roles {
             admin: publisher_address,
             sender: publisher_address
         });
     }
 
-    #[test] fun test_end_to_end() acquires Permissions {
+    #[test] fun test_end_to_end() acquires Roles {
         // Declare addresses, signers.
         let new_admin_address = @0xabc;
         let new_sender_address = @0xdef;
@@ -110,7 +110,7 @@ module incentives::incentives {
 
     #[test, expected_failure(
         abort_code = E_NOT_SENDER
-    )] fun test_send_not_sender() acquires Permissions {
+    )] fun test_send_not_sender() acquires Roles {
         init_module(&get_signer(@incentives));
         let impostor = @0x13245678;
         send(&get_signer(impostor), impostor, 10000000000);
@@ -118,7 +118,7 @@ module incentives::incentives {
 
     #[test, expected_failure(
         abort_code = E_NOT_ADMIN
-    )] fun test_set_admin_not_admin() acquires Permissions {
+    )] fun test_set_admin_not_admin() acquires Roles {
         init_module(&get_signer(@incentives));
         let impostor = @0x13245678;
         set_admin(&get_signer(impostor), impostor);
@@ -126,7 +126,7 @@ module incentives::incentives {
 
     #[test, expected_failure(
         abort_code = E_NOT_ADMIN
-    )] fun test_set_sender_not_admin() acquires Permissions {
+    )] fun test_set_sender_not_admin() acquires Roles {
         init_module(&get_signer(@incentives));
         let impostor = @0x13245678;
         set_sender(&get_signer(impostor), impostor);

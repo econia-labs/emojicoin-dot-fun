@@ -85,3 +85,28 @@ aptos multisig execute-with-payload \
     --multisig-address $MULTISIG \
     --profile emojicoin-testnet
 ```
+
+Publish the [`Incentives`](../incentives/README.md) package:
+
+```sh
+cd ../incentives
+aptos move build-publish-payload \
+    --json-output-file incentives.json \
+    --named-addresses incentives=$MULTISIG \
+    --profile emojicoin-testnet
+```
+
+```sh
+aptos multisig create-transaction \
+    --json-file incentives.json \
+    --multisig-address $MULTISIG \
+    --profile emojicoin-testnet \
+    --store-hash-only
+```
+
+```sh
+aptos multisig execute-with-payload \
+    --json-file incentives.json \
+    --multisig-address $MULTISIG \
+    --profile emojicoin-testnet
+```
