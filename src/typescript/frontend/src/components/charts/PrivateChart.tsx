@@ -115,6 +115,14 @@ export const Chart = async (props: ChartContainerProps) => {
         // aka, the emoji(s) symbol string.
         const possibleMarketID = getSymbolMap().get(symbolName);
         const markets = getRegisteredMarketMap();
+        const symbolMap = getSymbolMap();
+        console.log(symbolMap);
+        console.log(symbolMap.size);
+        console.log(symbolMap.entries());
+        console.log(markets);
+        console.log(markets.size);
+        console.log(markets.entries());
+        console.log("looking for", symbolName, "or", possibleMarketID);
         const metadata =
           markets.get(symbolName) ?? (possibleMarketID ? markets.get(possibleMarketID) : null);
         if (!metadata) {
