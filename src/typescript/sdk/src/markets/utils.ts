@@ -10,7 +10,11 @@ import {
   parseTypeTag,
   type TypeTag,
 } from "@aptos-labs/ts-sdk";
-import { EmojicoinDotFun, REGISTRY_ADDRESS, deriveEmojicoinPublisherAddress } from "../emojicoin_dot_fun";
+import {
+  EmojicoinDotFun,
+  REGISTRY_ADDRESS,
+  deriveEmojicoinPublisherAddress,
+} from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
   COIN_FACTORY_MODULE_NAME,
