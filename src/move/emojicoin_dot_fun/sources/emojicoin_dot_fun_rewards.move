@@ -18,8 +18,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun_rewards {
         apt_rewards_claimed: u64
     }
 
-    public entry fun claim(user: &signer)
-    acquires EmojicoinDotFunRewards, RewardsVaultSignerCapability {
+    public entry fun claim(user: &signer) acquires
+        EmojicoinDotFunRewards,
+        RewardsVaultSignerCapability
+    {
+
         let (user_address, rewards_ref_mut) = borrow_rewards_ref_mut(user);
 
         // Check that user is eligible for claim.
@@ -42,8 +45,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun_rewards {
         rewards_ref_mut.apt_rewards_claimed = claimed + claim_amount;
     }
 
-    public(friend) fun increment_apt_fees_paid(user: &signer, amount: u64)
-    acquires EmojicoinDotFunRewards {
+    public(friend) fun increment_apt_fees_paid(user: &signer, amount: u64) acquires
+        EmojicoinDotFunRewards
+    {
         let (_, rewards_ref_mut) = borrow_rewards_ref_mut(user);
         rewards_ref_mut.apt_fees_paid = rewards_ref_mut.apt_fees_paid + amount;
     }
@@ -58,9 +62,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun_rewards {
     inline fun borrow_rewards_ref_mut(user: &signer): (address, &mut EmojicoinDotFunRewards) {
         let user_address = signer::address_of(user);
         if (!exists<EmojicoinDotFunRewards>(user_address)) {
-            move_to<EmojicoinDotFunRewards>(
-                user,
-                EmojicoinDotFunRewards{ apt_fees_paid: 0, apt_rewards_claimed: 0 });
+            move_to(user, EmojicoinDotFunRewards{ apt_fees_paid: 0, apt_rewards_claimed: 0 });
         };
         let rewards_ref_mut = borrow_global_mut<EmojicoinDotFunRewards>(user_address);
         (user_address, rewards_ref_mut)
