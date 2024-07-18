@@ -29,3 +29,10 @@ export const removeTrailingSlashIfExists = (path: string) => {
   }
   return path;
 };
+
+export const emojiNamesToPath = (emojiNames: string[]) => emojiNames.map(x => x.replace(/ /g, "_")).join("+");
+
+export const pathToEmojiNames = (path: string) =>
+  decodeURIComponent(path)
+    .split("+")
+    .map(n => n.replace(/_/g, " "));

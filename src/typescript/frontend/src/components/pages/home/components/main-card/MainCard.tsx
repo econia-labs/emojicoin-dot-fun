@@ -15,6 +15,7 @@ import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useLabelScrambler } from "../animation-config";
 import planetHome from "../../../../../../public/images/planet-home.png";
+import { emojiNamesToPath } from "utils/pathname-helpers";
 
 export interface MainCardProps {
   featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
@@ -95,7 +96,7 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
         flexDirection={{ _: "column", tablet: "row" }}
       >
         <Link
-          href={featured ? `${ROUTES.market}/${featured?.marketID.toString()}` : ROUTES.home}
+          href={featured ? `${ROUTES.market}/${emojiNamesToPath(featured.emojis.map(x => x.name))}` : ROUTES.home}
           style={{
             position: "relative",
             alignItems: "center",
