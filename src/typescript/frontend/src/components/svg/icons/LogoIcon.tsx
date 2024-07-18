@@ -6,20 +6,30 @@ import { type SvgProps } from "../types";
 import { useThemeContext } from "context";
 import Text from "components/text";
 
-const Badge = ({children}) => (
-  <Text style={{
-    border: "1px solid var(--ec-blue)",
-    borderRadius: "20px",
-  }} className="!pixel-heading-4 mx-[.5rem] px-[.4rem] !text-ec-blue">
+const Badge = ({ children }) => (
+  <Text
+    style={{
+      border: "1px solid var(--ec-blue)",
+      borderRadius: "20px",
+    }}
+    className="!pixel-heading-4 mx-[.5rem] px-[.4rem] !text-ec-blue"
+  >
     {children}
   </Text>
-)
+);
 
 const VersionBadge = () => (
-  <Badge>{VERSION?.prerelease[0].toString().toUpperCase()} v{VERSION?.major}.{VERSION?.minor}.{VERSION?.patch}</Badge>
-)
+  <Badge>
+    {VERSION?.prerelease[0].toString().toUpperCase()} v{VERSION?.major}.{VERSION?.minor}.
+    {VERSION?.patch}
+  </Badge>
+);
 
-const Icon: React.FC<SvgProps & {versionBadge?: boolean}> = ({ color = "econiaBlue", versionBadge = false, ...props }) => {
+const Icon: React.FC<SvgProps & { versionBadge?: boolean }> = ({
+  color = "econiaBlue",
+  versionBadge = false,
+  ...props
+}) => {
   const { theme } = useThemeContext();
 
   return (
@@ -33,7 +43,8 @@ const Icon: React.FC<SvgProps & {versionBadge?: boolean}> = ({ color = "econiaBl
           d="M0.700012 103.4V0.599609H103.5V15.2996H30.1V44.6996H88.8V59.3996H30.1V88.7996H103.5V103.5H0.700012V103.4Z"
           fill={theme.colors[color]}
         />
-        <path d="M126.8 103.4V0.599609H156.2V15.2996H170.9V29.9996H185.6V15.2996H200.3V0.599609H229.7V103.4H200.3V44.5996H185.6V73.9996H170.9V44.5996H156.2V103.3H126.8V103.4Z"
+        <path
+          d="M126.8 103.4V0.599609H156.2V15.2996H170.9V29.9996H185.6V15.2996H200.3V0.599609H229.7V103.4H200.3V44.5996H185.6V73.9996H170.9V44.5996H156.2V103.3H126.8V103.4Z"
           fill={theme.colors[color]}
         />
         <path

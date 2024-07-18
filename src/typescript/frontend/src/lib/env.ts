@@ -1,6 +1,6 @@
 import { type Network } from "@aptos-labs/wallet-adapter-react";
-import { version } from '../../package.json';
-import {parse} from "semver";
+import { version } from "../../package.json";
+import { parse } from "semver";
 
 let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;

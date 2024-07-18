@@ -27,7 +27,10 @@ const DesktopGrid = (props: GridProps) => {
     <StyledContentWrapper>
       <StyledContentInner>
         <StyledContentColumn>
-          <StyledBlock width="57%">
+          <StyledBlock
+            width="57%"
+            className="bg-black z-10 border-t border-solid border-t-dark-gray"
+          >
             <StyledBlockWrapper>
               <ChartContainer
                 symbol={props.data.symbol}

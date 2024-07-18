@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 
 import { Flex, FlexGap } from "@containers";
 import { Text } from "components";
@@ -15,6 +15,11 @@ import ChatBox from "../chat/ChatBox";
 import { type GridProps } from "../../types";
 import SwapComponent from "../trade-emojicoin/SwapComponent";
 import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
+import ChartContainer from "components/charts/ChartContainer";
+import Loading from "components/loading";
+
+const DISPLAY_HEADER_ABOVE_CHART = false;
+const HEIGHT = DISPLAY_HEADER_ABOVE_CHART ? "min-h-[320px]" : "min-h-[365px]";
 
 const MobileGrid = (props: GridProps) => {
   const [tab, setTab] = useState(1);
@@ -22,10 +27,19 @@ const MobileGrid = (props: GridProps) => {
 
   return (
     <StyledMobileContentWrapper>
-      <StyledMobileContentBlock>
-        <StyledMobileContentHeader></StyledMobileContentHeader>
-
-        <StyledMobileContentInner></StyledMobileContentInner>
+      <StyledMobileContentBlock className="">
+        {/* Add this back in if we decide to use the custom emoji picker search bar. */}
+        {DISPLAY_HEADER_ABOVE_CHART && <StyledMobileContentHeader></StyledMobileContentHeader>}
+        <StyledMobileContentInner className={HEIGHT}>
+          <Suspense fallback={<Loading />}>
+            <ChartContainer
+              symbol={props.data.symbol}
+              emojis={props.data.emojis}
+              marketID={props.data.marketID.toString()}
+              marketAddress={props.data.marketAddress}
+            />
+          </Suspense>
+        </StyledMobileContentInner>
       </StyledMobileContentBlock>
 
       <StyledMobileContentBlock>
