@@ -112,7 +112,11 @@ const TableCard: React.FC<TableCardProps> = ({
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
 
   return (
-    <Link id="grid-emoji-card" className="group" href={`${ROUTES.market}/${emojiNamesToPath(emojis.map(x => x.name))}`}>
+    <Link
+      id="grid-emoji-card"
+      className="group"
+      href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}
+    >
       <StyledItemWrapper>
         <motion.div
           animate={controls}

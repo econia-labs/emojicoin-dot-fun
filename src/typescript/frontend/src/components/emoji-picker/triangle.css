@@ -1,4 +1,5 @@
-#picker.register, #picker.pools {
+#picker.register,
+#picker.pools {
   --pos-size: 10px;
   --neg-size: -20px;
 

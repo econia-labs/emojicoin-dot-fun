@@ -96,7 +96,11 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
         flexDirection={{ _: "column", tablet: "row" }}
       >
         <Link
-          href={featured ? `${ROUTES.market}/${emojiNamesToPath(featured.emojis.map(x => x.name))}` : ROUTES.home}
+          href={
+            featured
+              ? `${ROUTES.market}/${emojiNamesToPath(featured.emojis.map((x) => x.name))}`
+              : ROUTES.home
+          }
           style={{
             position: "relative",
             alignItems: "center",
