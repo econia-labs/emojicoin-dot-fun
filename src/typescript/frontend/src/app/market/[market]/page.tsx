@@ -37,10 +37,13 @@ interface EmojicoinPageProps {
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const { market: marketSlug } = params.params;
   const names = pathToEmojiNames(marketSlug);
+  console.log({names});
   const hex = names
     .map(n => SYMBOL_DATA.byName(n)?.hex.slice(2))
     .join("");
+  console.log({hex});
   const res = await fetchLatestMarketState(`0x${hex}`);
+  console.log({res});
 
   if (res) {
     const marketID = res.marketID.toString();
