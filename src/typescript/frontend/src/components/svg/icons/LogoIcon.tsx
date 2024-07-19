@@ -20,8 +20,7 @@ const Badge = ({ children }) => (
 
 const VersionBadge = () => (
   <Badge>
-    {VERSION?.prerelease[0].toString().toUpperCase()} v{VERSION?.major}.{VERSION?.minor}.
-    {VERSION?.patch}
+    {VERSION?.prerelease[0].toString().toUpperCase()}&nbsp;v{VERSION?.major}.{VERSION?.minor}.{VERSION?.patch}
   </Badge>
 );
 
@@ -85,7 +84,7 @@ const Icon: React.FC<SvgProps & { versionBadge?: boolean }> = ({
           fill={theme.colors[color]}
         />
       </Svg>
-      {(versionBadge || VERSION?.prerelease) && <VersionBadge />}
+      {versionBadge ? <VersionBadge /> : <></>}
     </div>
   );
 };
