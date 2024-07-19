@@ -17,7 +17,7 @@ import { ClientGrid } from "./ClientGrid";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { MarketDataSortBy } from "lib/queries/sorting/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { parseJSON } from "utils";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import useInputStore from "@store/input-store";
@@ -38,6 +38,7 @@ const getQuery = (page: number, sort: string, emojis: string[]) => {
 };
 
 const EmojiTable = (props: EmojiTableProps) => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const q = searchParams.get("q");
   let sortParam = searchParams.get("sort");
@@ -99,11 +100,7 @@ const EmojiTable = (props: EmojiTableProps) => {
     } else {
       newUrl.searchParams.delete("q");
     }
-    window.history.replaceState(
-      { ...window.history.state, as: newUrl.toString(), url: newUrl.toString() },
-      "",
-      newUrl.toString()
-    );
+    router.push(newUrl.toString(), { scroll: false });
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [sort, emojis, page]);
 
