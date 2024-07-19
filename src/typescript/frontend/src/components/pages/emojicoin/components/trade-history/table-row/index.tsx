@@ -39,22 +39,17 @@ const TableCellStyles = "h-[33px]";
 const TableRow = ({ item, showBorder }: TableRowDesktopProps) => {
   const { theme } = useThemeContext();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [isHover, setIsHover] = useState(false);
   return (
-    <tr
-      className={TableRowStyles}
-      onMouseEnter={() => setIsHover(true)}
-      onMouseLeave={() => setIsHover(false)}
-      style={{
-        boxShadow:
-          isHover && showBorder
-            ? "var(--ec-blue) 1px 1px inset, var(--ec-blue) -1px -1px inset"
-            : "",
-      }}
-      id="grid-hover"
-    >
+    <tr className={TableRowStyles} id="grid-hover">
       <td
-        className={`min-w-[60px] xl:min-w-[71px] xl:ml-[0.5ch] xl:mr-[-0.5ch] ${TableCellStyles} relative`}
+        className={
+          "absolute w-full h-full bg-transparent group-hover:inline-flex " +
+          "border-b-[1px] border-solid group-hover:border-[1px] group-hover:border-ec-blue z-[1] border-dark-gray" +
+          (showBorder ? "" : " border-b-transparent")
+        }
+      />
+      <td
+        className={`min-w-[60px] xl:min-w-[71px] xl:ml-[0.5ch] xl:mr-[-0.5ch] ${TableCellStyles}`}
       >
         <div
           style={{
