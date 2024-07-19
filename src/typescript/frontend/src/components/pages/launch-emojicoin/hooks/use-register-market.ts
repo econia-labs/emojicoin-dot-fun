@@ -1,7 +1,6 @@
 import { RegisterMarket, RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
-  AccountAddress,
   isUserTransactionResponse,
   type PendingTransactionResponse,
   type UserTransactionResponse,
@@ -10,21 +9,18 @@ import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
 import useInputStore from "@store/input-store";
-import { type RegisteredMarket, SYMBOL_DATA, symbolToEmojis } from "@sdk/emoji_data";
+import { SYMBOL_DATA, symbolToEmojis } from "@sdk/emoji_data";
 import { useRouter } from "next/navigation";
-import { getEvents } from "@sdk/emojicoin_dot_fun";
 import { ROUTES } from "router/routes";
 import path from "path";
 import { revalidateTagAction } from "lib/queries/cache-utils/revalidate";
 import { TAGS } from "lib/queries/cache-utils/tags";
-import { useEventStore } from "context/websockets-context";
 
 export const useRegisterMarket = () => {
   const emojis = useInputStore((state) => state.emojis);
   const { aptos, account, submit, signThenSubmit } = useAptos();
   const clear = useInputStore((state) => state.clear);
   const router = useRouter();
-  const addRegisteredMarket = useEventStore((state) => state.addRegisteredMarket);
 
   const registerMarket = async () => {
     if (!account) {
@@ -68,29 +64,18 @@ export const useRegisterMarket = () => {
     }
 
     if (res && isUserTransactionResponse(res)) {
-      // Parse the events from the transaction.
-      const events = getEvents(res);
-      if (events.marketRegistrationEvents.length === 1) {
-        // Add the market to the registered markets in state.
-        const event = events.marketRegistrationEvents[0];
-        const emojiData = symbolToEmojis(emojis);
-        const marketID = event.marketID.toString();
-        const market: RegisteredMarket = {
-          marketID,
-          symbolBytes: `0x${emojiData.emojis.map((e) => e.hex.slice(2)).join("")}`,
-          marketAddress: AccountAddress.from(event.marketMetadata.marketAddress).toString(),
-          ...emojiData,
-        };
-        addRegisteredMarket(market);
+      // The event is parsed and added as a registered market in `event-store.ts`,
+      // we don't need to do anything here.
+      const emojiData = symbolToEmojis(emojis);
 
-        // Revalidate the registered markets tag.
-        await revalidateTagAction(TAGS.RegisteredMarkets);
+      // Revalidate the registered markets tag.
+      await revalidateTagAction(TAGS.RegisteredMarkets);
 
-        // Redirect to the newly registered market page.
-        const newPath = path.join(ROUTES.market, emojiData.symbol);
-        router.push(newPath);
-        router.refresh();
-      }
+      // Redirect to the newly registered market page.
+      const newPath = path.join(ROUTES.market, emojiData.symbol);
+      router.push(newPath);
+      router.refresh();
+
       // Clear the emoji picker input.
       clear();
     } else {

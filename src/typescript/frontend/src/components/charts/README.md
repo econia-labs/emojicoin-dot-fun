@@ -9,16 +9,16 @@ to update the `Chart` component in real time.
 
 ## Market Symbol Resolution
 
-The `marketMetadataMap` data is static data passed from a server component to
-the chart component before it's rendered. This data contains all currently
-registered market's symbol bytes, emoji symbols, and market addresses. These are
-the uniquely identifiable values for each market registered when the server
-component initially fetches data.
+The `registeredMarketMap` data is data managed by the event store. Since changes
+to the zustand state don't cause re-renders if we retrieve it through a getter,
+we `get()` the registered market map and search all registered market symbol
+data with it. This data contains all currently registered market's symbol bytes,
+emoji symbols, and market addresses. These are the uniquely identifiable values
+for each market registered.
 
-We can supplement this data with an asynchronous fetch in the form of a React
-server action to search for and/or resolve market symbols that are created
-after the initial render of the chart component, since `searchSymbols` and
-`resolveSymbol` are both asynchronous functions inside the [datafeed].
+We update this state data with WebSocket updates and any time the current user
+registers a market. It's also fetched from the server component initially- thus
+we have a full and up to date picture of the currently registered markets.
 
 This data facilitates searching for market data in the search bar in the Chart
 component.
@@ -237,7 +237,6 @@ to avoid duplicating events in state, we know that we won't inadvertently count
 incoming swap data twice in the latest bar. This means our volume data is
 accurate despite using data from three separate sources.
 
-[datafeed]: ./README.md#datafeed-api
 [datafeed api]: https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-API/
 [eventstore state]: ../../lib/store/event-store.ts
 [fetchallcandlesticksintimerange]: ../../lib/queries/charting/candlesticks-in-time-range.ts

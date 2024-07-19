@@ -1,4 +1,6 @@
 import { type Network } from "@aptos-labs/wallet-adapter-react";
+import { version } from "../../package.json";
+import { parse } from "semver";
 
 let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;
@@ -44,10 +46,13 @@ if (vercel && local) {
   );
 }
 
+const VERSION = parse(version);
+
 export {
   APTOS_NETWORK,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
   IS_ALLOWLIST_ENABLED,
   MQTT_URL,
+  VERSION,
 };

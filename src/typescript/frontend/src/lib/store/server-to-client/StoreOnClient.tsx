@@ -18,6 +18,7 @@ export const StoreOnClient = ({ markets }: StoreOnClientProps) => {
   const subscriptions = useWebSocketClient((s) => s.subscriptions);
   const pathname = usePathname();
   const [showDebugger, setShowDebugger] = useState(false);
+  const registeredMarkets = useEventStore((s) => s.registeredMarketMap);
 
   const [events, setEvents] = useState(storeMarkets.get(pathname.split("/market/")?.[1] ?? ""));
   useEffect(() => {
@@ -35,7 +36,7 @@ export const StoreOnClient = ({ markets }: StoreOnClientProps) => {
   return process.env.NODE_ENV === "development" ? (
     <>
       <div className="fixed flex bottom-0 right-0 p-2 bg-black text-green text-xl">
-        <div className="m-auto">{markets.length} mkts</div>
+        <div className="m-auto">{registeredMarkets.size} mkts</div>
       </div>
 
       <CloseIconWithHover

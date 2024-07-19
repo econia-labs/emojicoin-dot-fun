@@ -22,7 +22,7 @@ const HEADERS = ["A better way to login.", "What is a wallet?", "Explore more of
 const DESCRIPTIONS = [
   "Aptos Connect is a web3 wallet that uses a Social Login to create accounts on the Aptos blockchain.",
   "Wallets are a secure way to send, receive, and interact with digital assets like cryptocurrencies & NFTs.",
-  "Aptos Connect lets you to take one account across any application built on Aptos. Explore the ecosystem.",
+  "Aptos Connect lets you use one account across any application built on Aptos. Explore the ecosystem.",
 ];
 
 export const AnimatedSVG = ({ animateKey, slide }: { animateKey: number; slide: number }) => {
