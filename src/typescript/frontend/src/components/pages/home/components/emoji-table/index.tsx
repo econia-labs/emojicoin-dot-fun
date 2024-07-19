@@ -116,7 +116,7 @@ const EmojiTable = (props: EmojiTableProps) => {
   }, [sort, emojis, page]);
 
   useEffect(() => {
-    setMode("pools");
+    setMode("home");
     setEmojis(symbolBytesToEmojis(q ?? "").emojis.map((e) => e.emoji));
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);

@@ -24,7 +24,7 @@ const ConditionalWrapper = ({
   mode,
 }: {
   children: React.ReactNode;
-  mode: "chat" | "register" | "pools";
+  mode: "chat" | "register" | "pools" | "home";
 }) => {
   return mode === "chat" ? (
     <ButtonWithConnectWalletFallback className="mt-2">{children}</ButtonWithConnectWalletFallback>
@@ -128,13 +128,13 @@ export const EmojiPickerWithInput = ({
   }, [emojis]);
 
   const closeIconClassName =
-    "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer";
+    `flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer ${mode === "home" ? "med-pixel-close" : ""}`;
 
   const close = (
     <motion.div whileTap={{ scale: 0.85 }} className={closeIconClassName} onClick={clear}>
       {/* className={closeIconClassName} */}
       <ClosePixelated
-        className={`w-[15px] h-[16px] ${mode !== "pools" ? "text-white" : "text-light-gray"}`}
+        className={`w-[15px] h-[16px] ${(mode !== "pools" && mode !== "home") ? "text-white" : "text-light-gray"}`}
       />
     </motion.div>
   );
@@ -160,10 +160,10 @@ export const EmojiPickerWithInput = ({
                   inputClassName
                 }
               >
-                {mode !== "pools" && close}
+                {mode !== "pools" && mode != "home" && close}
                 <Textarea
                   id="emoji-picker-text-area"
-                  className="relative !pt-[16px] px-[4px] scroll-auto"
+                  className={`relative !pt-[16px] px-[4px] scroll-auto ${mode === "home" ? "home-textarea" : ""}`}
                   ref={textAreaRef}
                   autoFocus={true}
                   onPaste={handlePaste}
@@ -174,7 +174,7 @@ export const EmojiPickerWithInput = ({
                     setTextAreaRef(textAreaRef.current); // Ensure the ref is set.
                   }}
                 />
-                {mode === "pools" && close}
+                {(mode === "pools" || mode === "home") && close}
                 {mode === "chat" ? (
                   <>
                     <ColoredBytesIndicator className="flex flex-row min-w-fit justify-end px-[1ch]" />

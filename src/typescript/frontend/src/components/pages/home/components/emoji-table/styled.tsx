@@ -14,6 +14,10 @@ export const StyledTHFilters = styled.div`
   ${base.mediaQueries.tablet} {
     width: unset;
   }
+  @media screen and (max-width: ${breakpointsArray[3]}) {
+    justify-content: center;
+    padding: 10px;
+  }
 `;
 
 export const StyledGrid = styled.div`
@@ -78,6 +82,7 @@ export const Header = styled.div`
   @media screen and (max-width: ${breakpointsArray[3]}) {
     padding-left: 0px;
     padding-right: 0px;
+    flex-direction: column;
   }
 `;
 
@@ -98,13 +103,19 @@ const WrapperCss = `
 
 export const SearchWrapper = styled.div`
   ${WrapperCss}
+  padding: 0 10px;
   justify-content: left;
-  padding-left: 20px;
   border-left: 1px solid ${darkColors.darkGray};
   margin-left: -1px;
 
   &:after {
     left: 0;
+  }
+
+  @media screen and (max-width: ${breakpointsArray[3]}) {
+    border-right: 1px solid ${darkColors.darkGray};
+    margin-right: -1px;
+    justify-content: center;
   }
 `;
 
@@ -117,5 +128,10 @@ export const FilterOptionsWrapper = styled.div`
 
   &:after {
     right: 0;
+  }
+
+  @media screen and (max-width: ${breakpointsArray[3]}) {
+    border-left: 1px solid ${darkColors.darkGray};
+    margin-left: -1px;
   }
 `;

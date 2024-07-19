@@ -33,6 +33,28 @@ export const Textarea = styled.textarea<TextareaProps>`
     border: none;
   }
 
+  &.home-textarea {
+      padding-top: 12px !important;
+  }
+
+  @media screen and (min-width: 768px) {
+    &.home-textarea {
+      padding-top: 11px !important;
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    &.home-textarea {
+      padding-top: 9px !important;
+    }
+  }
+
+  @media screen and (min-width: 1440px) {
+    &.home-textarea {
+      padding-top: 4px !important;
+    }
+  }
+
   ${typography}
   ${space}
 `;
