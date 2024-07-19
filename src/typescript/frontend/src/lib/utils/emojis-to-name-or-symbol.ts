@@ -6,5 +6,5 @@ import { type SymbolEmojiData } from "@sdk/emoji_data";
  * @returns {string}
  */
 export const emojisToName = (emojis: Array<SymbolEmojiData>): string => {
-  return emojis.map((emoji) => emoji.name).join(", ");
+  return emojis.map((emoji) => emoji.name).join(",");
 };

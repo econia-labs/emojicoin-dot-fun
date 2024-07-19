@@ -19,6 +19,7 @@ import "./module.css";
 import Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { variants, textVariants, borderVariants, useLabelScrambler } from "../animation-config";
+import { emojiNamesToPath } from "utils/pathname-helpers";
 
 const TableCard: React.FC<TableCardProps> = ({
   index,
@@ -111,7 +112,11 @@ const TableCard: React.FC<TableCardProps> = ({
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
 
   return (
-    <Link id="grid-emoji-card" className="group" href={`${ROUTES.market}/${marketID}`}>
+    <Link
+      id="grid-emoji-card"
+      className="group"
+      href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}
+    >
       <StyledItemWrapper>
         <motion.div
           animate={controls}
