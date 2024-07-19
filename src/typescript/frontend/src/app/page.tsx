@@ -16,6 +16,7 @@ export default async function Home({ searchParams }: HomePageParams) {
     orderBy,
     inBondingCurve,
     searchBytes: q,
+    exactCount: true,
   });
 
   return <HomePageComponent featured={featured} markets={sorted.markets} count={sorted.count} />;

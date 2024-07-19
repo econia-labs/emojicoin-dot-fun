@@ -5,6 +5,7 @@ import { Text } from "components/text";
 
 import { Arrow } from "components/svg";
 import { StyledBtn } from "./styled";
+import { useMatchBreakpoints } from "@hooks/index";
 
 export type ButtonsBlockProps = {
   value: number;
@@ -17,19 +18,21 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
   numberOfPages,
   onChange,
 }: ButtonsBlockProps) => {
+  const { isMobile } = useMatchBreakpoints();
+  const gap = isMobile ? "12px" : "17px";
   return (
-    <FlexGap gap="17px" justifyContent="center" marginTop="30px">
+    <FlexGap gap={gap} justifyContent="center" marginTop="30px">
       {/* First */}
       <StyledBtn onClick={() => onChange(1)}>
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"{"}
         </Text>
 
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"<<"}
         </Text>
 
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}
         </Text>
       </StyledBtn>
@@ -42,30 +45,43 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
           }
         }}
       >
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"{"}
         </Text>
 
-        <Arrow width="21px" rotate="180deg" />
+        <Arrow className="med-pixel-search" rotate="180deg" />
 
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}
         </Text>
       </StyledBtn>
 
-      <>
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+      <FlexGap
+        style={{
+          height: "fit-content",
+        }}
+        gap="12px"
+      >
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"{"}
         </Text>
 
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
-          {value} / {numberOfPages}
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
+          {value}
         </Text>
 
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
+          /
+        </Text>
+
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
+          {numberOfPages}
+        </Text>
+
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}
         </Text>
-      </>
+      </FlexGap>
 
       {/* Right */}
       <StyledBtn
@@ -75,28 +91,28 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
           }
         }}
       >
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"{"}
         </Text>
 
-        <Arrow width="21px" />
+        <Arrow className="med-pixel-search" />
 
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}
         </Text>
       </StyledBtn>
 
       {/* Last */}
       <StyledBtn onClick={() => onChange(numberOfPages)}>
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"{"}
         </Text>
 
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {">>"}
         </Text>
 
-        <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
+        <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}
         </Text>
       </StyledBtn>

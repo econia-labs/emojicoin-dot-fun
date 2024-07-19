@@ -7,6 +7,7 @@ export const StyledBtn = styled.div`
   color: ${({ theme }) => theme.colors.darkGray};
   cursor: pointer;
   gap: 12px;
+  height: fit-content;
 
   &:hover {
     ${Text} {

@@ -48,7 +48,7 @@ const EmojiTable = (props: EmojiTableProps) => {
   const [data, setData] = useState(props.data);
   const [page, setPage] = useState(Number(searchParams.get("page") ?? "1"));
   const [pages, setPages] = useState(Math.ceil(props.totalNumberOfMarkets / MARKETS_PER_PAGE));
-  const [prevEmojis, setPrevEmojis] = useState<string[]>();
+  const [prevEmojis, setPrevEmojis] = useState<string[]>([]);
   const scrollToRef = useRef<HTMLDivElement>(null);
 
   const { emojis, setEmojis, setMode } = useInputStore((state) => ({
@@ -60,7 +60,7 @@ const EmojiTable = (props: EmojiTableProps) => {
   const [prevQuery, setPrevQuery] = useState<string>(getQuery(page, sort, emojis));
 
   useEffect(() => {
-    if (prevEmojis?.toString() !== emojis.toString()) {
+    if (prevEmojis.toString() !== emojis.toString()) {
       setPrevEmojis(emojis);
       if (page !== 1) {
         setPage(1);
