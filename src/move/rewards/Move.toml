@@ -1,0 +1,18 @@
+[addresses]
+rewards = "_"
+integrator = "_"
+
+[dependencies.EmojicoinDotFun]
+local = "../emojicoin_dot_fun"
+
+[dev-addresses]
+coin_factory = "0xaaaa"
+emojicoin_dot_fun = "0xc0de"
+integrator = "0xccc"
+rewards = "0xddd"
+
+[package]
+authors = ["Econia Labs (developers@econialabs.com)"]
+name = "EmojicoinDotFunRewards"
+upgrade_policy = "immutable"
+version = "1.0.0"
