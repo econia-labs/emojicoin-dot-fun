@@ -21,29 +21,21 @@ import { useSearchParams } from "next/navigation";
 import { parseJSON } from "utils";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import useInputStore from "@store/input-store";
+import { encodeEmojis } from "@sdk/emoji_data";
 
 export interface EmojiTableProps {
   data: FetchSortedMarketDataReturn["markets"];
   totalNumberOfMarkets: number;
 }
 
-const encodeEmoji = (emojis: string[]) => {
-  const encoder = new TextEncoder();
-  return emojis.reduce(
-    (acc: string, emoji) =>
-      `${acc}${[...encoder.encode(emoji)].map((e) => e.toString(16)).join("")}`,
-    "0x"
-  );
-};
-
 const getQuery = (page: number, sort: string, emojis: string[]) => {
-    const root = "/market/api";
-    const pageQuery = page ? `page=${page}` : "";
-    const sortByQuery = sort ? `&sortby=${sort}` : "";
-    const searchBytes = emojis.length > 0 ? `&q=${encodeEmoji(emojis)}` : "";
+  const root = "/market/api";
+  const pageQuery = page ? `page=${page}` : "";
+  const sortByQuery = sort ? `&sortby=${sort}` : "";
+  const searchBytes = emojis.length > 0 ? `&q=${encodeEmojis(emojis)}` : "";
 
-    return `${root}?${pageQuery}${sortByQuery}${searchBytes}`;
-}
+  return `${root}?${pageQuery}${sortByQuery}${searchBytes}`;
+};
 
 const EmojiTable = (props: EmojiTableProps) => {
   const searchParams = useSearchParams();
@@ -68,9 +60,9 @@ const EmojiTable = (props: EmojiTableProps) => {
   const [prevQuery, setPrevQuery] = useState<string>(getQuery(page, sort, emojis));
 
   useEffect(() => {
-    if(prevEmojis?.toString() !== emojis.toString()) {
+    if (prevEmojis?.toString() !== emojis.toString()) {
       setPrevEmojis(emojis);
-      if(page !== 1) {
+      if (page !== 1) {
         setPage(1);
         return;
       }
@@ -103,7 +95,7 @@ const EmojiTable = (props: EmojiTableProps) => {
       newUrl.searchParams.delete("sort");
     }
     if (emojis.length > 0) {
-      newUrl.searchParams.set("q", encodeEmoji(emojis));
+      newUrl.searchParams.set("q", encodeEmojis(emojis));
     } else {
       newUrl.searchParams.delete("q");
     }

@@ -33,7 +33,7 @@ export type FilterOptionsComponentProps = {
 };
 
 export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
-  const selectedOption = options.find((x) => x.value === filter)!
+  const selectedOption = options.find((x) => x.value === filter)!;
   const [isChecked, setIsChecked] = useState(true);
   const { t } = translationFunction();
   const { isLaptopL } = useMatchBreakpoints();

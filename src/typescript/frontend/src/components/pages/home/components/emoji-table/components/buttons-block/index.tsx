@@ -20,9 +20,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
   return (
     <FlexGap gap="17px" justifyContent="center" marginTop="30px">
       {/* First */}
-      <StyledBtn
-        onClick={() => onChange(1)}
-      >
+      <StyledBtn onClick={() => onChange(1)}>
         <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
           {"{"}
         </Text>
@@ -89,9 +87,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
       </StyledBtn>
 
       {/* Last */}
-      <StyledBtn
-        onClick={() => onChange(numberOfPages)}
-      >
+      <StyledBtn onClick={() => onChange(numberOfPages)}>
         <Text textScale="pixelHeading2" fontSize="48px" color="darkGray">
           {"{"}
         </Text>

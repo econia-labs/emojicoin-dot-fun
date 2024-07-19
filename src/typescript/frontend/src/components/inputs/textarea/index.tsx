@@ -34,7 +34,7 @@ export const Textarea = styled.textarea<TextareaProps>`
   }
 
   &.home-textarea {
-      padding-top: 12px !important;
+    padding-top: 12px !important;
   }
 
   @media screen and (min-width: 768px) {

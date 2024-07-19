@@ -160,3 +160,13 @@ export const isValidEmojiHex = (input: HexInput) => {
     return false;
   }
 };
+
+export const encodeEmojis = (emojis: string[]) => {
+  const encoder = new TextEncoder();
+  // eslint-disable-next-line prefer-template
+  return "0x" + emojis.reduce(
+    (acc: string, emoji) =>
+      `${acc}${[...encoder.encode(emoji)].map((e) => e.toString(16)).join("")}`,
+    "",
+  );
+};

@@ -2,7 +2,7 @@ import TableCard from "../table-card/TableCard";
 import { StyledGrid } from "./styled";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 
-export const ClientGrid = ({ data }: {data: FetchSortedMarketDataReturn["markets"]}) => {
+export const ClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["markets"] }) => {
   return (
     <>
       <StyledGrid>

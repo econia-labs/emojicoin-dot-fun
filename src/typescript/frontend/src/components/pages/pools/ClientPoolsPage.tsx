@@ -24,7 +24,7 @@ import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-dat
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import useInputStore from "@store/input-store";
 import { useSearchParams } from "next/navigation";
-import { getEmojisInString } from "@sdk/emoji_data";
+import { encodeEmojis, getEmojisInString } from "@sdk/emoji_data";
 
 export const ClientPoolsPage = () => {
   const searchParams = useSearchParams();
@@ -48,15 +48,6 @@ export const ClientPoolsPage = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const encodeEmoji = (emojis: string[]) => {
-    const encoder = new TextEncoder();
-    return emojis.reduce(
-      (acc: string, emoji) =>
-        `${acc}${[...encoder.encode(emoji)].map((e) => e.toString(16)).join("")}`,
-      "0x"
-    );
-  };
-
   const { account } = useAptos();
 
   useEffect(() => {
@@ -69,7 +60,7 @@ export const ClientPoolsPage = () => {
     const orderByQuery = `orderby=${orderBy}`;
     const pageQuery = `page=${page}`;
     const accountQuery = pools === "mypools" ? `&account=${account?.address}` : "";
-    const searchBytes = realEmojis.length > 0 ? `&searchBytes=${encodeEmoji(realEmojis)}` : "";
+    const searchBytes = realEmojis.length > 0 ? `&searchBytes=${encodeEmojis(realEmojis)}` : "";
     fetch(`${root}?${sortByQuery}&${orderByQuery}&${pageQuery}${accountQuery}${searchBytes}`)
       .then((res) => res.text())
       .then((txt) => parseJSON(txt))
