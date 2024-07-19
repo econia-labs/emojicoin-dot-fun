@@ -1,6 +1,6 @@
 [addresses]
-rewards = "_"
 integrator = "_"
+rewards = "_"
 
 [dependencies.EmojicoinDotFun]
 local = "../emojicoin_dot_fun"

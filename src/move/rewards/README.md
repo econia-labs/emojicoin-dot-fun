@@ -1,3 +1,8 @@
+<!---
+cspell:word undergassing
+cspell:word permissionlessly
+-->
+
 # `EmojicoinDotFunRewards`
 
 This package provides an overloaded swap function that randomly rewards a fixed
@@ -27,12 +32,12 @@ Then inside `build/EmojicoinDotFunRewards/bytecode_modules`, open
 
 ```asm
 B4:
-	56: LdU64(0)
-	57: LdConst[6](U64: [16, 39, 0, 0, 0, 0, 0, 0])
-	58: Call randomness::u64_range(u64, u64): u64
-	59: LdConst[7](U64: [231, 3, 0, 0, 0, 0, 0, 0])
-	60: Lt
-	61: BrFalse(85)
+    56: LdU64(0)
+    57: LdConst[6](U64: [16, 39, 0, 0, 0, 0, 0, 0])
+    58: Call randomness::u64_range(u64, u64): u64
+    59: LdConst[7](U64: [231, 3, 0, 0, 0, 0, 0, 0])
+    60: Lt
+    61: BrFalse(85)
 ```
 
 Here, the `false` (losing) branch is essentially an instant return, while the
@@ -55,7 +60,7 @@ except in the extreme hypothetical edge case where:
 1. `BrFalse` for the `false` branch is set absurdly high in a gas schedule
    update, such that its execution cost vastly exceeds all other instructions in
    the winning path combined.
-2. The user is the last lottery winner, sweeping a vault that has less than the
+1. The user is the last lottery winner, sweeping a vault that has less than the
    single rewards amount inside.
 
 Yet even this can issue can be mitigated, by simply filling up the vault with
@@ -66,5 +71,4 @@ never evaluate due to this statement:
 if (vault_balance == 0) return;
 ```
 
-Then open `build/EmojicoinDotFunRewards/bytecode_modules/emojicoin_dot_fun_rewards.asm
 [undergassing docs]: https://aptos.dev/en/build/smart-contracts/randomness#undergasing-attacks-and-how-to-prevent

@@ -50,6 +50,7 @@ nazar
 nextjs
 nohup
 octa
+octas
 oden
 parallelizable
 permissionless
