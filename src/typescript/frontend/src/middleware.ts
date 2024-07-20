@@ -21,7 +21,7 @@ export default async function middleware(request: NextRequest) {
     const emojis = [...new Intl.Segmenter().segment(slug)].map((x) => x.segment);
     const chars = emojis.map((x) => SYMBOL_DATA.byEmoji(x)?.name);
     if (chars.reduce((p, c) => p && c !== undefined, true)) {
-      const name = chars.join(",");
+      const name = chars.join(";");
       return NextResponse.redirect(new URL(`/market/${name}`, request.url));
     }
   }
