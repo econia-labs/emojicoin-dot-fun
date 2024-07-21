@@ -49,7 +49,7 @@ export const ONE_SPACE = " ";
 export const emojisToPath = (emojis: string[]) => {
   const names = emojis
     .map((x) => SYMBOL_DATA.byEmoji(x)?.name)
-    .filter((x) => typeof x !== "undefined");
+    .filter((x) => typeof x !== "undefined") as string[];
   return emojiNamesToPath(names);
 };
 
