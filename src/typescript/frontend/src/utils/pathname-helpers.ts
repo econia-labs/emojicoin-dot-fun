@@ -42,7 +42,7 @@ export const EMOJI_PATH_DELIMITER = ";";
  * The delimiter for intra-segment emoji names; i.e.,
  * for changing "Happy face emoji" to "Happy_face_emoji".
  */
-export const EMOJI_PATH_INTRASEGMENT_DELIMITER = "_";
+export const EMOJI_PATH_INTRA_SEGMENT_DELIMITER = "_";
 
 export const ONE_SPACE = " ";
 
@@ -55,17 +55,17 @@ export const emojisToPath = (emojis: string[]) => {
 
 export const emojiNamesToPath = (emojiNames: string[]) =>
   emojiNames
-    .map((x) => encodeURIComponent(x.replaceAll(ONE_SPACE, EMOJI_PATH_INTRASEGMENT_DELIMITER)))
+    .map((x) => encodeURIComponent(x.replaceAll(ONE_SPACE, EMOJI_PATH_INTRA_SEGMENT_DELIMITER)))
     .join(EMOJI_PATH_DELIMITER);
 
 export const pathToEmojiNames = (path: string) =>
   decodeURIComponent(path)
     .split(EMOJI_PATH_DELIMITER)
-    .map((n) => n.replaceAll(EMOJI_PATH_INTRASEGMENT_DELIMITER, ONE_SPACE));
+    .map((n) => n.replaceAll(EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE));
 
 /**
  * Used to normalize a potential emojicoin market path by replacing emojis with their properly
- * path-ified names based on our routing conventions.
+ * normalized paths based on our routing conventions.
  * @param pathname
  * @param requestUrlString
  * @returns a normalized path we can redirect to.
