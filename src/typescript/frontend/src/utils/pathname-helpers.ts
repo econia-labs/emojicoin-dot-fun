@@ -1,6 +1,5 @@
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 import { languageList } from "configs";
-import { NextRequest, NextResponse } from "next/server";
 import { ROUTES } from "router/routes";
 
 export const removeLangParamFromPathname = (pathname: string, language?: string) => {

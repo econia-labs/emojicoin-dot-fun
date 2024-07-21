@@ -21,7 +21,7 @@ export default async function middleware(request: NextRequest) {
   if (possibleMarketPath) {
     return NextResponse.redirect(possibleMarketPath);
   }
-  
+
   const hashed = request.cookies.get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = request.cookies.get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;
 
