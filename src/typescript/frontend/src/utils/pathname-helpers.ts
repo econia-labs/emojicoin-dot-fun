@@ -66,5 +66,6 @@ export const pathToEmojiNames = (path: string) =>
 export const normalizeMarketPath = (pathname: string, requestUrlString: string) => {
   const slug = decodeURIComponent(pathname.slice(8));
   const emojis = [...new Intl.Segmenter().segment(slug)].map((x) => x.segment);
-  return new URL(`market/${emojisToPath(emojis)}`, requestUrlString);
+  const normalizedPath = emojisToPath(emojis);
+  return normalizedPath.length === 0 ? undefined : new URL(`${normalizedPath}`, requestUrlString);
 };

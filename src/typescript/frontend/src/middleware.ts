@@ -16,9 +16,14 @@ export default async function middleware(request: NextRequest) {
   ) {
     return NextResponse.next();
   }
+
+  // Parse the path if it's an emojicoin market path. If the path has emojis in it,
+  // this will resolve the emojis to their names and normalize the path with the correct delimiters.
   if (pathname.startsWith("/market/")) {
     const newPath = normalizeMarketPath(pathname, request.url);
-    return NextResponse.redirect(newPath);
+    if (newPath) {
+      return NextResponse.redirect(newPath);
+    }
   }
   const hashed = request.cookies.get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = request.cookies.get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;
