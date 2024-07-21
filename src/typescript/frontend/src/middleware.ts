@@ -1,4 +1,3 @@
-import { SYMBOL_DATA } from "@sdk/emoji_data";
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,
   COOKIE_FOR_HASHED_ADDRESS,
@@ -6,6 +5,7 @@ import {
 import { authenticate } from "components/pages/verify/verify";
 import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
+import { normalizeMarketPath } from "utils/pathname-helpers";
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
@@ -17,13 +17,8 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   if (pathname.startsWith("/market/")) {
-    const slug = decodeURIComponent(pathname.slice(8));
-    const emojis = [...new Intl.Segmenter().segment(slug)].map((x) => x.segment);
-    const chars = emojis.map((x) => SYMBOL_DATA.byEmoji(x)?.name);
-    if (chars.reduce((p, c) => p && c !== undefined, true)) {
-      const name = chars.join(";");
-      return NextResponse.redirect(new URL(`/market/${name}`, request.url));
-    }
+    const newPath = normalizeMarketPath(pathname, request.url);
+    return NextResponse.redirect(newPath);
   }
   const hashed = request.cookies.get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = request.cookies.get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;
