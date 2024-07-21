@@ -1,6 +1,7 @@
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 import { languageList } from "configs";
 import { NextRequest, NextResponse } from "next/server";
+import { ROUTES } from "router/routes";
 
 export const removeLangParamFromPathname = (pathname: string, language?: string) => {
   return pathname
@@ -63,9 +64,19 @@ export const pathToEmojiNames = (path: string) =>
     .split(EMOJI_PATH_DELIMITER)
     .map((n) => n.replaceAll(EMOJI_PATH_INTRASEGMENT_DELIMITER, ONE_SPACE));
 
-export const normalizeMarketPath = (pathname: string, requestUrlString: string) => {
-  const slug = decodeURIComponent(pathname.slice(8));
-  const emojis = [...new Intl.Segmenter().segment(slug)].map((x) => x.segment);
-  const normalizedPath = emojisToPath(emojis);
-  return normalizedPath.length === 0 ? undefined : new URL(`${normalizedPath}`, requestUrlString);
+/**
+ * Used to normalize a potential emojicoin market path by replacing emojis with their properly
+ * path-ified names based on our routing conventions.
+ * @param pathname
+ * @param requestUrlString
+ * @returns a normalized path we can redirect to.
+ */
+export const normalizePossibleMarketPath = (pathname: string, requestUrlString: string) => {
+  if (pathname.startsWith(`${ROUTES.market}/`)) {
+    const slug = decodeURIComponent(pathname.slice(8));
+    const emojis = [...new Intl.Segmenter().segment(slug)].map((x) => x.segment);
+    const normalizedPath = emojisToPath(emojis);
+    return normalizedPath.length === 0 ? undefined : new URL(`${normalizedPath}`, requestUrlString);
+  }
+  return undefined;
 };

@@ -5,7 +5,7 @@ import {
 import { authenticate } from "components/pages/verify/verify";
 import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
-import { normalizeMarketPath } from "utils/pathname-helpers";
+import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
@@ -17,14 +17,11 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Parse the path if it's an emojicoin market path. If the path has emojis in it,
-  // this will resolve the emojis to their names and normalize the path with the correct delimiters.
-  if (pathname.startsWith("/market/")) {
-    const newPath = normalizeMarketPath(pathname, request.url);
-    if (newPath) {
-      return NextResponse.redirect(newPath);
-    }
+  const possibleMarketPath = normalizePossibleMarketPath(pathname, request.url);
+  if (possibleMarketPath) {
+    return NextResponse.redirect(possibleMarketPath);
   }
+  
   const hashed = request.cookies.get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = request.cookies.get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;
 
