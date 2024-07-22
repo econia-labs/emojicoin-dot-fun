@@ -47,7 +47,10 @@ const ClientLaunchEmojicoinPage = () => {
       lastResponseFromContext.response &&
       isUserTransactionResponse(lastResponseFromContext.response)
     ) {
-      lastResponse.current = lastResponseFromContext.response;
+      const events = getEvents(lastResponseFromContext.response);
+      if (events.marketRegistrationEvents.length === 1) {
+        lastResponse.current = lastResponseFromContext.response;
+      }
     }
   }, [lastResponseFromContext]);
 
