@@ -8,7 +8,7 @@ import { type Types } from "@sdk/types/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import TableRow from "./table-row";
 import { type TableRowDesktopProps } from "./table-row/types";
-import { toSortedDedupedEvents } from "lib/utils/sort-events";
+import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
 import "./trade-history.css";
 import { parseJSON } from "utils";
 
@@ -32,13 +32,13 @@ const ThWrapper = ({ className, children }: { className: string } & PropsWithChi
 );
 
 const getCombinedSwaps = (swaps: readonly Types.SwapEvent[], marketID: bigint) => {
-  const localSwaps: Types.SwapEvent[] = parseJSON(localStorage.getItem(`swaps`) ?? "[]").filter(
-    (swap: Types.SwapEvent) => swap.marketID === marketID
+  const stateGuids = new Set(swaps.map((swap) => swap.guid));
+  const localSwaps: Types.SwapEvent[] = parseJSON(localStorage.getItem(`swaps`) ?? "[]");
+  const filteredSwaps = localSwaps.filter(
+    (swap: Types.SwapEvent) => swap.marketID === marketID && !stateGuids.has(swap.guid)
   );
-  return [
-    ...localSwaps,
-    ...swaps.filter((swap) => !localSwaps.find((localSwap) => localSwap.guid === swap.guid)),
-  ];
+  sortEvents(filteredSwaps);
+  return mergeSortedEvents(swaps, filteredSwaps);
 };
 
 const TradeHistory = (props: TradeHistoryProps) => {

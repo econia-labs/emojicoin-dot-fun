@@ -8,16 +8,18 @@ import { type EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
 
 export type AnyNumberString = number | string | bigint;
 
+export type EventName =
+  | "Swap"
+  | "Chat"
+  | "MarketRegistration"
+  | "PeriodicState"
+  | "State"
+  | "GlobalState"
+  | "Liquidity";
+
 export type WithVersionAndGUID = {
   version: number;
-  guid: `${
-    | "Swap"
-    | "Chat"
-    | "MarketRegistration"
-    | "PeriodicState"
-    | "State"
-    | "GlobalState"
-    | "Liquidity"}::${string}`;
+  guid: `${EventName}::${string}`;
 };
 
 export type WithMarketID = {
@@ -699,4 +701,28 @@ export function isLiquidityEvent(e: AnyEmojicoinEvent): e is Types.LiquidityEven
 
 export function isPeriodicStateView(e: any): e is Types.PeriodicStateView {
   return typeof e.startTime === "number" && isPeriodicStateEvent(e);
+}
+
+// NOTE: The below code structure strongly suggests we should be using classes instead of types.
+// However, we cannot use them with server components easily- hence the following code.
+export function getEmojicoinEventTime(e: AnyEmojicoinEvent): bigint {
+  if (isSwapEvent(e)) return e.time;
+  if (isChatEvent(e)) return e.emitTime;
+  if (isMarketRegistrationEvent(e)) return e.time;
+  if (isPeriodicStateEvent(e)) return e.periodicStateMetadata.emitTime;
+  if (isStateEvent(e)) return e.stateMetadata.bumpTime;
+  if (isGlobalStateEvent(e)) return e.emitTime;
+  if (isLiquidityEvent(e)) return e.time;
+  throw new Error(`Unknown event type: ${e}`);
+}
+
+export function getEventTypeName(e: AnyEmojicoinEvent): EventName {
+  if (isSwapEvent(e)) return "Swap";
+  if (isChatEvent(e)) return "Chat";
+  if (isMarketRegistrationEvent(e)) return "MarketRegistration";
+  if (isPeriodicStateEvent(e)) return "PeriodicState";
+  if (isStateEvent(e)) return "State";
+  if (isGlobalStateEvent(e)) return "GlobalState";
+  if (isLiquidityEvent(e)) return "Liquidity";
+  throw new Error(`Unknown event type: ${e}`);
 }

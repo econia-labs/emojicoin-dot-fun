@@ -16,7 +16,7 @@ import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import useInputStore from "@store/input-store";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
-import { toSortedDedupedEvents } from "lib/utils/sort-events";
+import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
 import type { Types } from "@sdk/types/types";
 import { parseJSON } from "utils";
 
@@ -48,13 +48,13 @@ const pickerClass = `
 `;
 
 const getCombinedChats = (chats: readonly Types.ChatEvent[], marketID: bigint) => {
-  const localChats: Types.ChatEvent[] = parseJSON(localStorage.getItem(`chats`) ?? "[]").filter(
-    (chat: Types.ChatEvent) => chat.marketID === marketID
+  const stateGuids = new Set(chats.map((chat) => chat.guid));
+  const localChats: Types.ChatEvent[] = parseJSON(localStorage.getItem(`chats`) ?? "[]");
+  const filteredChats = localChats.filter(
+    (chat: Types.ChatEvent) => chat.marketID === marketID && !stateGuids.has(chat.guid)
   );
-  return [
-    ...localChats,
-    ...chats.filter((chat) => !localChats.find((localChat) => localChat.guid === chat.guid)),
-  ];
+  sortEvents(filteredChats);
+  return mergeSortedEvents(chats, filteredChats);
 };
 
 const ChatBox = (props: ChatProps) => {
