@@ -2,13 +2,14 @@ import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { MarketValidityIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import AnimatedStatusIndicator from "../animated-status-indicator";
 import useInputStore from "@store/input-store";
 import { translationFunction } from "context/language-context";
 import { useRegisterMarket } from "../hooks/use-register-market";
 import { useIsMarketRegistered } from "../hooks/use-is-market-registered";
 import LaunchButtonOrGoToMarketLink from "./components/launch-or-goto";
+import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -26,6 +27,10 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
     return () => setIsLoadingRegisteredMarket(false);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
+
+  const numBytes = useMemo(() => {
+    return sumBytes(emojis);
+  }, [emojis]);
 
   return (
     <AnimatePresence initial={false} mode="wait">
@@ -49,7 +54,13 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
             </div>
           </div>
           <MarketValidityIndicator
-            className={registered || typeof registered !== "undefined" ? "opacity-[0.65]" : ""}
+            className={
+              emojis.length !== 0 &&
+              numBytes <= 10 &&
+              (registered || typeof registered === "undefined")
+                ? "opacity-[0.65]"
+                : ""
+            }
             registered={registered}
           />
           <div className="flex">
