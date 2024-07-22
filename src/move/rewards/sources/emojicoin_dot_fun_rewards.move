@@ -1,4 +1,4 @@
-module emojicoin_dot_fun::emojicoin_dot_fun_rewards {
+module rewards::emojicoin_dot_fun_rewards {
 
     use std::signer;
     use aptos_framework::account::{Self, SignerCapability};
