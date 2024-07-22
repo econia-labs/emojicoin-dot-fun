@@ -16,14 +16,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun_rewards {
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
 
     // APT amounts.
-    const OCTAS_PER_APT: u64 = 100_000_000;
-    const REWARD_AMOUNT_IN_APT: u64 = 1;
     const REWARD_AMOUNT_IN_OCTAS: u64 = 100_000_000;
-    const VOLUME_THRESHOLD_IN_APT: u64 = 10;
-    const VOLUME_THRESHOLD_IN_OCTAS: u64 = 1_000_000_000;
+    const VOLUME_THRESHOLD_IN_OCTAS: u64 = 990_000_000;
 
     // Randomness amounts.
-    const WIN_PERCENTAGE_NUMERATOR: u64 = 999;
+    const WIN_PERCENTAGE_NUMERATOR: u64 = 980;
     const WIN_PERCENTAGE_DENOMINATOR: u64 = 10_000;
 
     struct RewardsVaultSignerCapability has key {
@@ -91,11 +88,6 @@ module emojicoin_dot_fun::emojicoin_dot_fun_rewards {
         let (vault_signer, signer_capability) = account::create_resource_account(rewards, VAULT);
         move_to(rewards, RewardsVaultSignerCapability{ signer_capability });
         coin::register<AptosCoin>(&vault_signer);
-    }
-
-    #[test] fun test_apt_conversions() {
-        assert!(VOLUME_THRESHOLD_IN_APT * OCTAS_PER_APT == VOLUME_THRESHOLD_IN_OCTAS, 0);
-        assert!(REWARD_AMOUNT_IN_APT * OCTAS_PER_APT == REWARD_AMOUNT_IN_OCTAS, 0);
     }
 
     #[test] fun expected_value() {
