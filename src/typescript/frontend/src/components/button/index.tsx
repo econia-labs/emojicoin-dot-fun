@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useScramble } from "use-scramble";
+import { useScramble, type UseScrambleProps } from "use-scramble";
 
 import StyledButton from "./styled";
 import SpinnerIcon from "components/svg/icons/Spinner";
@@ -21,8 +21,9 @@ const Button = <E extends React.ElementType = "button">({
   isScramble = true,
   scale = "sm",
   variant = "outline",
+  scrambleProps = {},
   ...rest
-}: ButtonProps<E>): JSX.Element => {
+}: ButtonProps<E> & { scrambleProps?: UseScrambleProps }): JSX.Element => {
   const isDisabled = isLoading || disabled;
   const internalProps = external ? EXTERNAL_LINK_PROPS : {};
 
@@ -30,6 +31,7 @@ const Button = <E extends React.ElementType = "button">({
     text: isScramble ? `${children}` : undefined,
     overdrive: false,
     speed: 0.5,
+    ...scrambleProps,
   });
 
   return (

@@ -17,7 +17,7 @@ import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import MemoizedLaunchAnimation from "./memoized-launch";
 
-const LOADING_TIME = 3000;
+const LOADING_TIME = 2000;
 type Stage = "initial" | "loading" | "coding";
 
 const ClientLaunchEmojicoinPage = () => {

@@ -8,7 +8,7 @@ import { ROUTES } from "router/routes";
 
 export const LaunchButtonOrGoToMarketLink = ({
   onWalletButtonClick,
-  registered = false,
+  registered,
   invalid,
 }: {
   onWalletButtonClick: () => void;
@@ -18,6 +18,11 @@ export const LaunchButtonOrGoToMarketLink = ({
   const emojis = useInputStore((state) => state.emojis);
   const { t } = translationFunction();
 
+  const scrambleProps = {
+    overdrive: true,
+    overflow: true,
+  };
+
   return (
     <>
       <ButtonWithConnectWalletFallback>
@@ -26,14 +31,17 @@ export const LaunchButtonOrGoToMarketLink = ({
             className="font-pixelar text-lg uppercase text-ec-blue"
             href={path.join(ROUTES.market, emojis.join(""))}
           >
-            <Button scale="lg">{t("Go to emojicoin market")}</Button>
+            <Button scale="lg" scrambleProps={scrambleProps}>
+              {t("Go to emojicoin market")}
+            </Button>
           </Link>
         ) : (
           <Button
-            disabled={invalid}
+            disabled={invalid || typeof registered === "undefined"}
             onClick={onWalletButtonClick}
             scale="lg"
             style={{ cursor: invalid ? "not-allowed" : "pointer" }}
+            scrambleProps={scrambleProps}
           >
             {t("Launch Emojicoin")}
           </Button>
