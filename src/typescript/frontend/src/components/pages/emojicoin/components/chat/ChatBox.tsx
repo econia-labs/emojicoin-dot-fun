@@ -17,7 +17,7 @@ import useInputStore from "@store/input-store";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 import { toSortedDedupedEvents } from "lib/utils/sort-events";
-import { Types } from "@sdk/types/types";
+import type { Types } from "@sdk/types/types";
 import { parseJSON } from "utils";
 
 const convertChatMessageToEmojiAndIndices = (
