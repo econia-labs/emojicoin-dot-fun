@@ -52,11 +52,9 @@ const EmojiTable = (props: EmojiTableProps) => {
   const [prevEmojis, setPrevEmojis] = useState<string[]>([]);
   const scrollToRef = useRef<HTMLDivElement>(null);
 
-  const { emojis, setEmojis, setMode } = useInputStore((state) => ({
-    emojis: state.emojis,
-    setMode: state.setMode,
-    setEmojis: state.setEmojis,
-  }));
+  const setEmojis = useInputStore((state) => state.setEmojis);
+  const emojis = useInputStore((state) => state.emojis);
+  const setMode = useInputStore((state) => state.setMode);
 
   const [prevQuery, setPrevQuery] = useState<string>(getQuery(page, sort, emojis));
 
@@ -106,9 +104,13 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   useEffect(() => {
     setMode("home");
-    setEmojis(symbolBytesToEmojis(q ?? "").emojis.map((e) => e.emoji));
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
+
+  useEffect(() => {
+    setEmojis(symbolBytesToEmojis(q ?? "").emojis.map((e) => e.emoji));
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [q]);
 
   return (
     <OutermostContainer>
