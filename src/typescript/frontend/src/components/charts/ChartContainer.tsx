@@ -1,11 +1,12 @@
 // cspell:word datafeeds
 import Script from "next/script";
 import { type ChartContainerProps } from "./types";
-import dynamic from "next/dynamic";
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { useWebSocketClient } from "context/websockets-context";
+import Loading from "components/loading";
+import PrivateChart from "./PrivateChart";
 
-const Chart = dynamic(() => import("./PrivateChart"), { ssr: true });
+export const Chart = PrivateChart;
 const MemoizedChart = React.memo(Chart);
 
 export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">) => {
@@ -23,16 +24,15 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
 
   return (
     <>
-      {isScriptReady ? (
-        <MemoizedChart
-          marketID={props.marketID}
-          emojis={props.emojis}
-          marketAddress={props.marketAddress}
-          symbol={props.symbol}
-          isScriptReady={isScriptReady}
-        />
-      ) : (
-        <>Loading...</>
+      {isScriptReady && (
+        <Suspense fallback={<Loading emojis={props.emojis} />}>
+          <MemoizedChart
+            marketID={props.marketID}
+            emojis={props.emojis}
+            marketAddress={props.marketAddress}
+            symbol={props.symbol}
+          />
+        </Suspense>
       )}
       <Script
         src="/static/datafeeds/udf/dist/bundle.js"

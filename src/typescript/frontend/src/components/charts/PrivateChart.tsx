@@ -107,7 +107,6 @@ export const Chart = async (props: ChartContainerProps) => {
           },
           []
         );
-
         onResultReadyCallback(symbols);
       },
       resolveSymbol: async (symbolName, onSymbolResolvedCallback, _onErrorCallback) => {
@@ -272,7 +271,6 @@ export const Chart = async (props: ChartContainerProps) => {
         // For example: `🚀_#_5` for the `🚀` market for a resolution of period `5`.
         const [symbol, resolution] = subscriberUID.split("_#_");
         const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution];
-        console.debug("unsubscribeBars:", symbol, resolution);
         unsubscribeFromResolution({
           symbol,
           resolution: resolutionEnum,

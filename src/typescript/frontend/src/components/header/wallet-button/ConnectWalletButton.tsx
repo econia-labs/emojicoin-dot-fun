@@ -45,7 +45,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   }, [text]);
 
   const { ref, replay } = useScramble({
-    text,
+    text: text.startsWith("0x") ? `0x${text.slice(2).toUpperCase()}` : text.toUpperCase(),
     overdrive: false,
     speed: 0.5,
     ignore: [" "],
@@ -81,7 +81,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
               <OuterConnectText side="left" connected={connected} mobile={mobile} />
               <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>
                 <span
-                  className="uppercase whitespace-nowrap text-overflow-ellipsis overflow-hidden"
+                  className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
                   style={{ width, maxWidth: width }}
                   ref={ref}
                 />
