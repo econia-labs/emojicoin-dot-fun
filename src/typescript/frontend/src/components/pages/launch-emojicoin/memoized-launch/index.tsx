@@ -48,7 +48,10 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
               />
             </div>
           </div>
-          <MarketValidityIndicator registered={registered} />
+          <MarketValidityIndicator
+            className={registered ?? false ? "opacity-[0.65]" : ""}
+            registered={registered}
+          />
           <div className="flex">
             <div className={labelClassName}>{t("Emojicoin Name:")}</div>
             <div className="body-sm md:body-lg uppercase ellipses text-white font-forma ml-[0.5ch]">
