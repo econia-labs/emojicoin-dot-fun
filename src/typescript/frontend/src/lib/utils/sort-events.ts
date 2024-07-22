@@ -33,7 +33,7 @@ type MarketRegistration = Types.MarketRegistrationEvent;
 type GlobalState = Types.GlobalStateEvent;
 
 /**
- * This function sorts an array. It does *NOT* mutate the original array.
+ * This function sorts an array. It mutates the original array and returns nothing.
  * NOTE: It assumes that the array is homogenous.
  */
 export const sortEvents = <T extends AnyEmojicoinEvent>(

@@ -20,7 +20,7 @@ import {
   toResolutionKey,
 } from "@sdk/const";
 import { type WritableDraft } from "immer";
-import { type MarketIDString, type SymbolString } from "./event-utils";
+import { addToLocalStorage, type MarketIDString, type SymbolString } from "./event-utils";
 import { type RegisteredMarket, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
@@ -306,6 +306,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       // We also update the latest bar if the incoming event is a swap or periodic state event.
       pushEventFromClient: (event) => {
         if (get().guids.has(event.guid)) return;
+        addToLocalStorage(event);
         set((state) => {
           state.firehose.unshift(event);
           state.guids.add(event.guid);
