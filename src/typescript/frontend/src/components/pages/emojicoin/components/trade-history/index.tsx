@@ -10,6 +10,7 @@ import TableRow from "./table-row";
 import { type TableRowDesktopProps } from "./table-row/types";
 import { toSortedDedupedEvents } from "lib/utils/sort-events";
 import "./trade-history.css";
+import { parseJSON } from "utils";
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   ...getRankFromSwapEvent(Number(toCoinDecimalString(value.quoteVolume, 3))),
@@ -30,10 +31,24 @@ const ThWrapper = ({ className, children }: { className: string } & PropsWithChi
   <th className={className + " " + TableHeader}>{children}</th>
 );
 
+const getCombinedSwaps = (swaps: readonly Types.SwapEvent[], marketID: bigint) => {
+  const localSwaps: Types.SwapEvent[] = parseJSON(localStorage.getItem(`swaps`) ?? "[]").filter(
+    (swap: Types.SwapEvent) => swap.marketID === marketID
+  );
+  return [
+    ...localSwaps,
+    ...swaps.filter((swap) => !localSwaps.find((localSwap) => localSwap.guid === swap.guid)),
+  ];
+};
+
 const TradeHistory = (props: TradeHistoryProps) => {
   const marketID = props.data.marketID;
 
-  const swaps = useEventStore((s) => s.getMarket(marketID.toString())?.swapEvents ?? []);
+  const swaps = getCombinedSwaps(
+    useEventStore((s) => s.getMarket(marketID.toString())?.swapEvents ?? []),
+    BigInt(marketID)
+  );
+
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
 
   /* eslint-disable react-hooks/exhaustive-deps */

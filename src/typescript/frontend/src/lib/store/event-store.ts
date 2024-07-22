@@ -35,6 +35,7 @@ import {
   type UniqueHomogenousEvents,
 } from "@sdk/emojicoin_dot_fun/events";
 import { getPeriodStartTime } from "@sdk/utils";
+import { parseJSON, stringifyJSON } from "utils";
 
 type SwapEvent = Types.SwapEvent;
 type ChatEvent = Types.ChatEvent;
@@ -305,7 +306,19 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       // Note that we `unshift` here because we add the latest event to the front of the array.
       // We also update the latest bar if the incoming event is a swap or periodic state event.
       pushEventFromClient: (event) => {
+        const keepSwap = (swap: Types.SwapEvent) => {
+          return swap.time / 1000n > BigInt(new Date().getTime() - 60 * 1_000);
+        };
+        const cacheSwap = (swap: Types.SwapEvent) => {
+          let localSwaps: Types.SwapEvent[] = parseJSON(localStorage.getItem(`swaps`) ?? "[]");
+          localSwaps = localSwaps.filter(keepSwap);
+          localSwaps = [...localSwaps, ...(keepSwap(swap) ? [swap] : [])];
+          localStorage.setItem(`swaps`, stringifyJSON(localSwaps));
+        };
         if (get().guids.has(event.guid)) return;
+        if (event.guid.startsWith("Swap")) {
+          cacheSwap(event as Types.SwapEvent);
+        }
         set((state) => {
           state.firehose.unshift(event);
           state.guids.add(event.guid);
