@@ -7,6 +7,7 @@ export type HomePageSearchParams = {
   sort: SortByPageQueryParams;
   order: OrderByStrings;
   bonding: boolean;
+  q: string;
 };
 
 export const calculatePageNumber = ({

@@ -9,6 +9,8 @@ import {
   toSwapEvent,
   type AnyEmojicoinEvent,
   type Types,
+  getEmojicoinEventTime,
+  getEventTypeName,
 } from "@sdk/types/types";
 
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
@@ -17,6 +19,7 @@ import { type DBJsonData } from "@sdk/emojicoin_dot_fun/utils";
 import { type AnyEmojicoinJSONEvent } from "@sdk/types/json-types";
 import { MODULE_ADDRESS, RESOLUTIONS_ARRAY } from "@sdk/const";
 import { type MarketStateValueType } from "./event-store";
+import { parseJSON, stringifyJSON } from "utils";
 
 export type AddEventsType<T> = ({ data, sorted }: { data: readonly T[]; sorted?: boolean }) => void;
 
@@ -184,4 +187,18 @@ export const deserializationMap: Record<
 
 export const getLatestBars = (market: MarketStateValueType) => {
   return RESOLUTIONS_ARRAY.map((res) => ({ ...market[res]!.latestBar, period: res }));
+};
+
+export const addToLocalStorage = (event: AnyEmojicoinEvent) => {
+  const shouldKeep = (event: AnyEmojicoinEvent) => {
+    const time = getEmojicoinEventTime(event);
+    return time / 1000n > BigInt(new Date().getTime() - 60 * 1_000);
+  };
+
+  const eventName = getEventTypeName(event);
+  const localEvents: Array<AnyEmojicoinEvent> = parseJSON(localStorage.getItem(eventName) ?? "[]");
+
+  localEvents.push(event);
+  const filtered = localEvents.filter(shouldKeep);
+  localStorage.setItem(eventName, stringifyJSON(filtered));
 };

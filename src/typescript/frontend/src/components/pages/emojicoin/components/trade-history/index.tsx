@@ -8,8 +8,9 @@ import { type Types } from "@sdk/types/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import TableRow from "./table-row";
 import { type TableRowDesktopProps } from "./table-row/types";
-import { toSortedDedupedEvents } from "lib/utils/sort-events";
+import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
 import "./trade-history.css";
+import { parseJSON } from "utils";
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   ...getRankFromSwapEvent(Number(toCoinDecimalString(value.quoteVolume, 3))),
@@ -30,10 +31,24 @@ const ThWrapper = ({ className, children }: { className: string } & PropsWithChi
   <th className={className + " " + TableHeader}>{children}</th>
 );
 
+const getCombinedSwaps = (swaps: readonly Types.SwapEvent[], marketID: bigint) => {
+  const stateGuids = new Set(swaps.map((swap) => swap.guid));
+  const localSwaps: Types.SwapEvent[] = parseJSON(localStorage.getItem(`swaps`) ?? "[]");
+  const filteredSwaps = localSwaps.filter(
+    (swap: Types.SwapEvent) => swap.marketID === marketID && !stateGuids.has(swap.guid)
+  );
+  sortEvents(filteredSwaps);
+  return mergeSortedEvents(swaps, filteredSwaps);
+};
+
 const TradeHistory = (props: TradeHistoryProps) => {
   const marketID = props.data.marketID;
 
-  const swaps = useEventStore((s) => s.getMarket(marketID.toString())?.swapEvents ?? []);
+  const swaps = getCombinedSwaps(
+    useEventStore((s) => s.getMarket(marketID.toString())?.swapEvents ?? []),
+    BigInt(marketID)
+  );
+
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
 
   /* eslint-disable react-hooks/exhaustive-deps */
