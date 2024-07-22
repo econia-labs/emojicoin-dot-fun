@@ -1,34 +1,56 @@
-"use client";
+import { InputGroup } from "components/inputs";
+import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
+import Text from "components/text";
+import { EMOJI_GRID_ITEM_WIDTH } from "../../const";
+import { Flex } from "components/layout";
+import useInputStore from "@store/input-store";
+import { useEffect } from "react";
+import icon from "../../../../../../../public/images/search-icon.svg";
+import Image from "next/image";
 
-import { InputGroup, Input } from "components/inputs";
-import { isDisallowedEventKey } from "utils";
+const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
 
 export const SearchComponent = () => {
-  const onInputChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (isDisallowedEventKey(e)) {
-      e.preventDefault();
-    }
-  };
-
+  const setMode = useInputStore((state) => state.setMode);
+  useEffect(() => {
+    setMode("home");
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
   return (
-    <>
-      <InputGroup
-        label="Search:"
-        textScale={{ _: "pixelHeading4", laptopL: "pixelHeading3" }}
-        variant="fantom"
-        forId="search"
-        isShowError={false}
-        className="med-pixel-text"
+    <Flex
+      style={{
+        width: `${EMOJI_GRID_ITEM_WIDTH - 20}px`,
+        margin: 0,
+        padding: 0,
+      }}
+      alignItems="center"
+    >
+      <Text className="med-pixel-text" color="darkGray">
+        {"{"}
+      </Text>
+
+      <div
+        style={{
+          padding: "0 5px",
+          width: "100%",
+        }}
       >
-        <Input
-          className="med-pixel-text"
-          id="search"
-          autoComplete="off"
-          onKeyDown={onInputChange}
-        />
-      </InputGroup>
-      {"TODO"}
-    </>
+        <InputGroup variant="fantom" isShowError={false} forId="search" className="med-pixel-text">
+          <Flex>
+            {searchIcon}
+            <EmojiPickerWithInput
+              handleClick={async () => {}}
+              pickerButtonClassName="top-[50px] left-[-87px] bg-black"
+              inputClassName="home-picker ml-[4px] border-none"
+            />
+          </Flex>
+        </InputGroup>
+      </div>
+
+      <Text className="med-pixel-text" color="darkGray">
+        {"}"}
+      </Text>
+    </Flex>
   );
 };
 

@@ -10,7 +10,7 @@ import "./module.css";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
-import { useEventStore, useMarketData, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useWebSocketClient } from "context/websockets-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useLabelScrambler } from "../animation-config";
@@ -19,12 +19,10 @@ import { emojiNamesToPath } from "utils/pathname-helpers";
 
 export interface MainCardProps {
   featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
-  totalNumberOfMarkets: number;
 }
 
-const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
+const MainCard = ({ featured }: MainCardProps) => {
   const { t } = translationFunction();
-  const setNumMarkets = useMarketData((s) => s.setNumMarkets);
 
   const globeImage = useRef<HTMLImageElement>(null);
 
@@ -77,10 +75,6 @@ const MainCard = ({ featured, totalNumberOfMarkets }: MainCardProps) => {
     };
   }, [featured, marketID]);
   /* eslint-enable react-hooks/exhaustive-deps */
-
-  useEffect(() => {
-    setNumMarkets(totalNumberOfMarkets);
-  }, [totalNumberOfMarkets, setNumMarkets]);
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap);
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);

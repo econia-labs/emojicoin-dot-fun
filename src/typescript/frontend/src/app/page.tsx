@@ -7,10 +7,17 @@ export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: HomePageParams) {
-  const { page, sortBy, orderBy, inBondingCurve } = toHomePageParamsWithDefault(searchParams);
+  const { page, sortBy, orderBy, inBondingCurve, q } = toHomePageParamsWithDefault(searchParams);
 
-  const featured = await fetchFeaturedMarket({ sortBy, orderBy, inBondingCurve });
-  const sorted = await fetchSortedMarketData({ page, sortBy, orderBy, inBondingCurve });
+  const featured = await fetchFeaturedMarket({ sortBy, orderBy, inBondingCurve, searchBytes: q });
+  const sorted = await fetchSortedMarketData({
+    page,
+    sortBy,
+    orderBy,
+    inBondingCurve,
+    searchBytes: q,
+    exactCount: true,
+  });
 
   return <HomePageComponent featured={featured} markets={sorted.markets} count={sorted.count} />;
 }

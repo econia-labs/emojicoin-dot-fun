@@ -1,8 +1,8 @@
 import TableCard from "../table-card/TableCard";
 import { StyledGrid } from "./styled";
-import { type EmojiTableProps } from "./index";
+import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 
-export const ClientGrid = ({ data }: Omit<EmojiTableProps, "totalNumberOfMarkets">) => {
+export const ClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["markets"] }) => {
   return (
     <>
       <StyledGrid>
