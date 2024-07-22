@@ -51,9 +51,9 @@ export const MarketValidityIndicator = ({
             length > 10 ? (
               <div className="text-error">Too many bytes</div>
             ) : null
-          ) : (typeof registered === "undefined") ? 
+          ) : typeof registered === "undefined" ? (
             <AnimatedStatusIndicator numSquares={4} delay={0} />
-            : registered ? (
+          ) : registered ? (
             <div className="text-error">Already Registered</div>
           ) : (
             <div className="text-green">Ready to Register</div>
