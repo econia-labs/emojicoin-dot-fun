@@ -17,6 +17,8 @@ import useInputStore from "@store/input-store";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 import { toSortedDedupedEvents } from "lib/utils/sort-events";
+import { Types } from "@sdk/types/types";
+import { parseJSON } from "utils";
 
 const convertChatMessageToEmojiAndIndices = (
   message: string,
@@ -45,6 +47,16 @@ const pickerClass = `
   right-[50%] xl:right-full translate-x-[50%] xl:translate-x-0 mr-0
 `;
 
+const getCombinedChats = (chats: readonly Types.ChatEvent[], marketID: bigint) => {
+  const localChats: Types.ChatEvent[] = parseJSON(localStorage.getItem(`chats`) ?? "[]").filter(
+    (chat: Types.ChatEvent) => chat.marketID === marketID
+  );
+  return [
+    ...localChats,
+    ...chats.filter((chat) => !localChats.find((localChat) => localChat.guid === chat.guid)),
+  ];
+};
+
 const ChatBox = (props: ChatProps) => {
   const { theme } = useThemeContext();
   const { aptos, account, submit } = useAptos();
@@ -52,7 +64,10 @@ const ChatBox = (props: ChatProps) => {
   const clear = useInputStore((state) => state.clear);
   const setMode = useInputStore((state) => state.setMode);
   const emojis = useInputStore((state) => state.emojis);
-  const chats = useEventStore((s) => s.getMarket(marketID)?.chatEvents ?? props.data.chats);
+  const chats = getCombinedChats(
+    useEventStore((s) => s.getMarket(marketID)?.chatEvents ?? props.data.chats),
+    BigInt(props.data.marketID)
+  );
   const chatEmojiData = useInputStore((state) => state.chatEmojiData);
   const subscribe = useWebSocketClient((s) => s.subscribe);
   const unsubscribe = useWebSocketClient((s) => s.unsubscribe);

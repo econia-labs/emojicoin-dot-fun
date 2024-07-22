@@ -306,18 +306,27 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       // Note that we `unshift` here because we add the latest event to the front of the array.
       // We also update the latest bar if the incoming event is a swap or periodic state event.
       pushEventFromClient: (event) => {
-        const keepSwap = (swap: Types.SwapEvent) => {
-          return swap.time / 1000n > BigInt(new Date().getTime() - 60 * 1_000);
+        const keepEvent = (time: bigint) => {
+          return time / 1000n > BigInt(new Date().getTime() - 60 * 1_000);
         };
         const cacheSwap = (swap: Types.SwapEvent) => {
           let localSwaps: Types.SwapEvent[] = parseJSON(localStorage.getItem(`swaps`) ?? "[]");
-          localSwaps = localSwaps.filter(keepSwap);
-          localSwaps = [...localSwaps, ...(keepSwap(swap) ? [swap] : [])];
+          localSwaps = localSwaps.filter((e) => keepEvent(e.time));
+          localSwaps = [...localSwaps, ...(keepEvent(swap.time) ? [swap] : [])];
           localStorage.setItem(`swaps`, stringifyJSON(localSwaps));
+        };
+        const cacheChat = (chat: Types.ChatEvent) => {
+          let localChats: Types.ChatEvent[] = parseJSON(localStorage.getItem(`chats`) ?? "[]");
+          localChats = localChats.filter((e) => keepEvent(e.emitTime));
+          localChats = [...localChats, ...(keepEvent(chat.emitTime) ? [chat] : [])];
+          localStorage.setItem(`chats`, stringifyJSON(localChats));
         };
         if (get().guids.has(event.guid)) return;
         if (event.guid.startsWith("Swap")) {
           cacheSwap(event as Types.SwapEvent);
+        }
+        if (event.guid.startsWith("Chat")) {
+          cacheChat(event as Types.ChatEvent);
         }
         set((state) => {
           state.firehose.unshift(event);
