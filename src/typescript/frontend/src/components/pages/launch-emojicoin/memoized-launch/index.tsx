@@ -49,7 +49,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
             </div>
           </div>
           <MarketValidityIndicator
-            className={registered ?? false ? "opacity-[0.65]" : ""}
+            className={registered ?? true ? "opacity-[0.65]" : ""}
             registered={registered}
           />
           <div className="flex">
