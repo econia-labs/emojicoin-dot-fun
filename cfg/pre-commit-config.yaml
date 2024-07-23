@@ -219,4 +219,12 @@ repos:
     id: 'clippy'
   repo: 'https://github.com/doublify/pre-commit-rust'
   rev: 'v1.0'
+-
+  hooks:
+    -
+      id: cfn-lint
+      # Lint all files ending in `.cfn.yaml`.
+      files: '.*\.cfn\.yaml'
+  repo: https://github.com/aws-cloudformation/cfn-lint
+  rev: v1.8.2
 ...
