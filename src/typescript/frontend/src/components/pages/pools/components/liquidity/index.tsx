@@ -278,9 +278,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
               : lp
           }
           type={direction === "add" ? "text" : "number"}
-          onChange={(e) => {
-            setLP(e.target.value === "" ? "" : Number(e.target.value));
-          }}
+          onChange={(e) => setLP(e.target.value === "" ? "" : Number(e.target.value))}
           disabled={direction === "add"}
         ></input>
       </Column>
