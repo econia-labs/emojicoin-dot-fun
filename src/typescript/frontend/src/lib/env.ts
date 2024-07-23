@@ -1,5 +1,5 @@
 import { type Network } from "@aptos-labs/wallet-adapter-react";
-import { version } from "../../package.json";
+import packageInfo from "../../package.json";
 import { parse } from "semver";
 
 let APTOS_NETWORK: Network;
@@ -46,7 +46,7 @@ if (vercel && local) {
   );
 }
 
-const VERSION = parse(version);
+const VERSION = parse(packageInfo.version);
 
 export {
   APTOS_NETWORK,

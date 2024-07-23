@@ -10,7 +10,7 @@ import { insertEmojiTextInput, removeEmojiTextInput } from "lib/utils/handle-emo
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
-import { ColoredBytesIndicator } from "./ColoredBytesIndicator";
+import { MarketValidityIndicator } from "./ColoredBytesIndicator";
 import { variants } from "./animation-variants";
 import "./triangle.css";
 import { checkTargetAndStopDefaultPropagation } from "./utils";
@@ -176,7 +176,7 @@ export const EmojiPickerWithInput = ({
                 {(mode === "pools" || mode === "home") && close}
                 {mode === "chat" ? (
                   <>
-                    <ColoredBytesIndicator className="flex flex-row min-w-fit justify-end px-[1ch]" />
+                    <MarketValidityIndicator className="flex flex-row min-w-fit justify-end px-[1ch]" />
                     <motion.div
                       whileTap={{ scale: 0.85 }}
                       onClick={() => {
@@ -206,11 +206,13 @@ export const EmojiPickerWithInput = ({
       <motion.button
         animate={pickerInvisible ? "hidden" : focused ? "visible" : "hidden"}
         variants={variants}
+        initial={{
+          opacity: 0,
+          scale: 0,
+        }}
         style={{
-          opacity: 0, // Initially hidden.
           zIndex: focused ? 50 : -1,
           cursor: focused ? "auto" : "pointer",
-          scale: focused ? 1 : 0,
         }}
         className={`absolute z-50 ${pickerButtonClassName}`}
       >

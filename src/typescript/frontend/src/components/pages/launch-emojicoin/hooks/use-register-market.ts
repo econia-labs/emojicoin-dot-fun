@@ -9,18 +9,12 @@ import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
 import useInputStore from "@store/input-store";
-import { SYMBOL_DATA, symbolToEmojis } from "@sdk/emoji_data";
-import { useRouter } from "next/navigation";
-import { ROUTES } from "router/routes";
-import path from "path";
-import { revalidateTagAction } from "lib/queries/cache-utils/revalidate";
-import { TAGS } from "lib/queries/cache-utils/tags";
+import { SYMBOL_DATA } from "@sdk/emoji_data";
 
 export const useRegisterMarket = () => {
   const emojis = useInputStore((state) => state.emojis);
+  const setIsLoadingRegisteredMarket = useInputStore((state) => state.setIsLoadingRegisteredMarket);
   const { aptos, account, submit, signThenSubmit } = useAptos();
-  const clear = useInputStore((state) => state.clear);
-  const router = useRouter();
 
   const registerMarket = async () => {
     if (!account) {
@@ -65,21 +59,11 @@ export const useRegisterMarket = () => {
 
     if (res && isUserTransactionResponse(res)) {
       // The event is parsed and added as a registered market in `event-store.ts`,
-      // we don't need to do anything here.
-      const emojiData = symbolToEmojis(emojis);
-
-      // Revalidate the registered markets tag.
-      await revalidateTagAction(TAGS.RegisteredMarkets);
-
-      // Redirect to the newly registered market page.
-      const newPath = path.join(ROUTES.market, emojiData.symbol);
-      router.push(newPath);
-      router.refresh();
-
-      // Clear the emoji picker input.
-      clear();
+      // we don't need to do anything here other than set the loading state.
+      setIsLoadingRegisteredMarket(true);
     } else {
       console.error("Error registering market:", error);
+      setIsLoadingRegisteredMarket(false);
     }
   };
 

@@ -33,10 +33,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
     <StyledMessageContainer fromAnotherUser={fromAnotherUser}>
       <StyledMessageWrapper fromAnotherUser={fromAnotherUser}>
         <StyledMessageInner>
-          <Text textScale="bodySmall" color="black" pt="2px">
-            {message.text}
-          </Text>
-
+          <span className="pt-[1ch] p-[0.25ch] text-xl tracking-widest">{message.text}</span>
           <Arrow />
         </StyledMessageInner>
 

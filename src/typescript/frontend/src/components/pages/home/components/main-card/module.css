@@ -16,6 +16,7 @@
 
 div#styled-emoji {
   position: absolute;
+  color: white;
   left: 61%;
   transform: translateX(-50%);
   font-size: 51px;

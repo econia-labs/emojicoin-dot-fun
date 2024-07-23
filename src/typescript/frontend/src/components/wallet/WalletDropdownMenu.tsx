@@ -35,7 +35,7 @@ const WalletDropdownMenu = () => {
   }, [account, t]);
 
   const { ref, replay } = useScramble({
-    text,
+    text: text.startsWith("0x") ? `0x${text.slice(2).toUpperCase()}` : text.toUpperCase(),
     overdrive: false,
     overflow: false,
     speed: 0.6,
@@ -63,7 +63,7 @@ const WalletDropdownMenu = () => {
             <div className="flex flex-row text-ec-blue text-2xl">
               <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
               <p
-                className="uppercase whitespace-nowrap text-overflow-ellipsis overflow-hidden"
+                className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
                 style={{ width, maxWidth: width }}
                 ref={ref}
               />

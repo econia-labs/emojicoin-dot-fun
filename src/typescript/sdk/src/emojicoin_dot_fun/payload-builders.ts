@@ -25,8 +25,8 @@ import {
   postAptosFullNode,
   type AptosConfig,
   type InputGenerateTransactionOptions,
-  type InputGenerateTransactionPayloadData,
   type AccountAddressInput,
+  type InputEntryFunctionData,
 } from "@aptos-labs/ts-sdk";
 import { type WalletSignTransactionFunction } from ".";
 import { toConfig } from "../utils/aptos-utils";
@@ -162,7 +162,8 @@ export class EntryFunctionTransactionBuilder {
 /* eslint-disable-next-line import/no-unused-modules */
 export type WalletInputTransactionData = {
   sender?: AccountAddressInput;
-  data: InputGenerateTransactionPayloadData;
+  // For now we only use entry functions. Eventually we could support script functions, too.
+  data: InputEntryFunctionData;
   options?: InputGenerateTransactionOptions;
 };
 
