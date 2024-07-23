@@ -25,17 +25,17 @@ div#styled-emoji {
 
   @media screen and (min-width: 578px) {
     font-size: 74px;
-    padding-top: 14px;
+    padding-top: 14px !important;
   }
 
   @media screen and (min-width: 1096px) {
     font-size: 97px;
-    padding-top: 18px;
+    padding-top: 18px !important;
   }
 
   @media screen and (min-width: 1355px) {
     font-size: 120px;
-    padding-top: 32px;
+    padding-top: 32px !important;
   }
 
   @media screen and (min-width: 1614px) {
@@ -57,12 +57,12 @@ div#styled-double-emoji {
 
   @media screen and (min-width: 578px) {
     font-size: 60px;
-    padding-top: 14px;
+    padding-top: 14px !important;
   }
 
   @media screen and (min-width: 1096px) {
     font-size: 75px;
-    padding-top: 18px;
+    padding-top: 18px !important;
   }
 
   @media screen and (min-width: 1355px) {
