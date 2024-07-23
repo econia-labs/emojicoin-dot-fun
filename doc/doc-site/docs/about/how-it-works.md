@@ -45,8 +45,8 @@ blockchain.
 
 Launching an emojicoin costs just 1 APT! Note the following:
 
-- Single emojis and emoji combinations are supposed, as long as the total number
-  of bytes is 10 or less.
+- Single emojis and emoji combinations are supported, as long as the total
+  number of bytes is 10 or less.
 - Only one market may be launched for a given emoji combination (emojicoin
   markets are canonical).
 - Emojis that became part of the [Unicode emoji library] after the launch of
