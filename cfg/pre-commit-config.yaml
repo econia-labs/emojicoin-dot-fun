@@ -221,10 +221,10 @@ repos:
   rev: 'v1.0'
 -
   hooks:
-    -
-      id: cfn-lint
-      # Lint all files ending in `.cfn.yaml`.
-      files: '.*\.cfn\.yaml'
-  repo: https://github.com/aws-cloudformation/cfn-lint
-  rev: v1.8.2
+  -
+    # Lint all AWS CloudFormation files ending in `.cfn.yaml`.
+    files: '.*\.cfn\.yaml'
+    id: 'cfn-lint'
+  repo: 'https://github.com/aws-cloudformation/cfn-lint'
+  rev: 'v1.8.2'
 ...
