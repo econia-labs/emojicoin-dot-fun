@@ -122,7 +122,7 @@ export const RewardsAnimation = ({
           }
         }
       }}
-      className="absolute top-0 left-0 h-[100dvh] w-[100dvh] z-[101]"
+      className="absolute top-0 left-0 z-[101]"
       {...props}
     >
       {renderFirst && (
