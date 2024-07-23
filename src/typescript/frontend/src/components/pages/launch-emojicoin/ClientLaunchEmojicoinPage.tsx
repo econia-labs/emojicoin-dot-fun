@@ -67,10 +67,12 @@ const ClientLaunchEmojicoinPage = () => {
   }, [emojis]);
 
   const handleFinishCoding = () => {
-    startTransition(() => {
-      const newPath = path.join(ROUTES.market, emojis.join(""));
-      router.push(newPath);
-      clear();
+    sleep(2000).then(() => {
+      startTransition(() => {
+        const newPath = path.join(ROUTES.market, emojis.join(""));
+        router.push(newPath);
+        clear();
+      });
     });
   };
 

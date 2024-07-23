@@ -58,23 +58,23 @@ const CHARS = [
 export const ScrambledChar = ({ char, i, offset }: { char: string; i: number; offset: number }) => {
   const [displayedChar, setDisplayedChar] = useState(char);
   useEffect(() => {
-    const interval = setInterval(() => {
-      const idx = Math.floor(Math.random() * CHARS.length);
-      setDisplayedChar(CHARS.at(idx)!);
-    }, Math.random() * 10);
+    // const interval = setInterval(() => {
+    //   const idx = Math.floor(Math.random() * CHARS.length);
+    //   setDisplayedChar(CHARS.at(idx)!);
+    // }, Math.random() * 10);
 
-    const timer = setTimeout(
-      () => {
-        setDisplayedChar(char);
-        clearInterval(interval);
-      },
-      (i + offset) * 10
-    );
+    // const timer = setTimeout(
+    //   () => {
+    //     setDisplayedChar(char);
+    //     clearInterval(interval);
+    //   },
+    //   (i + offset) * 10
+    // );
 
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timer);
-    };
+    // return () => {
+    //   clearInterval(interval);
+    //   clearTimeout(timer);
+    // };
   }, []);
 
   return (
@@ -144,7 +144,7 @@ export const AnimatedRegisterMarketCode = ({
   return (
     <div
       ref={scope}
-      className="relative flex flex-col gap-1 justify-start font-mono text-white"
+      className="relative flex flex-col gap-1 justify-start font-pixelar text-white"
     >
       <>
         <div>
