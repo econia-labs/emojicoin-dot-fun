@@ -6,12 +6,13 @@ cspell:word permissionlessly
 # `EmojicoinDotFunRewards`
 
 This package provides an overloaded swap function that randomly rewards a fixed
-percentage of swaps that exceed of an arbitrary volume. Funds are autonomously
-disbursed from a resource account with an APT vault that can be topped off
-permissionlessly.
+percentage of swaps that exceed an arbitrary amount of volume. Funds are
+autonomously  disbursed from a resource account with an APT vault that can be
+topped off permissionlessly.
 
-Per the [undergassing docs], the winning path requires the most gas per the
-final logical branch:
+Per the [undergassing docs], one strategy to mitigate undergassing attacks is to
+make the most preferred path cost the most gas. Hence, here it is ensured that
+the winning path requires the most gas per the final logical branch:
 
 ```move
 let result = randomness::u64_range(0, WIN_PERCENTAGE_DENOMINATOR);

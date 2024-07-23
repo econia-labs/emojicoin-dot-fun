@@ -67,7 +67,7 @@ module rewards::emojicoin_dot_fun_rewards {
 
         // Get vault balance, returning without lottery if vault is empty.
         let vault_signer_cap_ref =
-            &borrow_global<RewardsVaultSignerCapability>(@emojicoin_dot_fun).signer_capability;
+            &borrow_global<RewardsVaultSignerCapability>(@rewards).signer_capability;
         let vault_address = account::get_signer_capability_address(vault_signer_cap_ref);
         let vault_balance = coin::balance<AptosCoin>(vault_address);
         if (vault_balance == 0) return;
