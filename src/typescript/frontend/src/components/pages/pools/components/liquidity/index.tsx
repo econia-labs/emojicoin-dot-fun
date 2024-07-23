@@ -30,6 +30,8 @@ import { COIN_FACTORY_MODULE_NAME } from "@sdk/const";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import info from "../../../../../../public/images/infoicon.svg";
 import { useSearchParams } from "next/navigation";
+import { APTOS_COIN, isUserTransactionResponse, parseTypeTag } from "@aptos-labs/ts-sdk";
+import { getNewCoinBalanceFromChanges } from "utils/parse-changes-for-balances";
 
 type LiquidityProps = {
   market: FetchSortedMarketDataReturn["markets"][0] | undefined;
@@ -276,7 +278,9 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
               : lp
           }
           type={direction === "add" ? "text" : "number"}
-          onChange={(e) => setLP(e.target.value === "" ? "" : Number(e.target.value))}
+          onChange={(e) => {
+            setLP(e.target.value === "" ? "" : Number(e.target.value));
+          }}
           disabled={direction === "add"}
         ></input>
       </Column>
@@ -354,7 +358,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
                       aptosConfig: aptos.config,
                       provider: account.address,
                       marketAddress: market!.marketAddress,
-                      quoteAmount: unfmtCoin(lp),
+                      quoteAmount: unfmtCoin(liquidity ?? 0),
                       typeTags: [emojicoin, emojicoinLP],
                     });
                 } else {
@@ -367,7 +371,33 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
                       typeTags: [emojicoin, emojicoinLP],
                     });
                 }
-                await submit(builderLambda);
+                const res = await submit(builderLambda);
+                // Parse the event changes and update the user's APT, emojicoin, and emojicoin LP balance in the UI
+                // based on the writeset changes from the transaction response.
+                if (res && res.response) {
+                  if (isUserTransactionResponse(res.response)) {
+                    const changes = res.response.changes;
+                    const userAddress = account.address;
+                    const newAptBalance = getNewCoinBalanceFromChanges({
+                      changes,
+                      userAddress,
+                      coinType: parseTypeTag(APTOS_COIN),
+                    });
+                    const newEmojiBalance = getNewCoinBalanceFromChanges({
+                      changes,
+                      userAddress,
+                      coinType: emojicoin,
+                    });
+                    const newEmojiLPBalance = getNewCoinBalanceFromChanges({
+                      changes,
+                      userAddress,
+                      coinType: emojicoinLP,
+                    });
+                    setAptBalance(newAptBalance);
+                    setEmojiBalance(newEmojiBalance);
+                    setEmojiLPBalance(newEmojiLPBalance);
+                  }
+                }
               }}
             >
               {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
