@@ -14,28 +14,31 @@
   animation: image-pulse 4s infinite ease-in-out;
 }
 
-div#styled-emoji {
+div.styled-emoji {
   position: absolute;
   color: white;
   left: 61%;
   transform: translateX(-50%);
-  font-size: 51px;
   line-height: unset;
   padding-top: 8px;
+}
+
+div.styled-single-emoji {
+  font-size: 51px;
 
   @media screen and (min-width: 578px) {
     font-size: 74px;
-    padding-top: 14px !important;
+    padding-top: 14px;
   }
 
   @media screen and (min-width: 1096px) {
     font-size: 97px;
-    padding-top: 18px !important;
+    padding-top: 18px;
   }
 
   @media screen and (min-width: 1355px) {
     font-size: 120px;
-    padding-top: 32px !important;
+    padding-top: 32px;
   }
 
   @media screen and (min-width: 1614px) {
@@ -47,22 +50,17 @@ div#styled-emoji {
   }
 }
 
-div#styled-double-emoji {
-  position: absolute;
-  left: 61%;
-  transform: translateX(-50%);
+div.styled-double-emoji {
   font-size: 40px;
-  line-height: unset;
-  padding-top: 8px;
 
   @media screen and (min-width: 578px) {
     font-size: 60px;
-    padding-top: 14px !important;
+    padding-top: 14px;
   }
 
   @media screen and (min-width: 1096px) {
     font-size: 75px;
-    padding-top: 18px !important;
+    padding-top: 18px;
   }
 
   @media screen and (min-width: 1355px) {
