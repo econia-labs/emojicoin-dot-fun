@@ -1,18 +1,35 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 
 export const VERCEL = process.env.VERCEL === "1";
-if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
-  let msg = `\n\n${"-".repeat(61)}\n\nMissing NEXT_PUBLIC_MODULE_ADDRESS environment variable\n`;
-  if (!VERCEL) {
-    msg += "Please run this project from the top-level, parent directory.\n";
+if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS || !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {
+  let missing = "";
+  let missingBoth = false;
+  if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
+    missing += "NEXT_PUBLIC_MODULE_ADDRESS";
   }
-  msg += `\n${"-".repeat(61)}\n`;
-  throw new Error(msg);
+  if (!process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {
+    if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
+      missingBoth = true;
+      missing += " and NEXT_PUBLIC_REWARDS_MODULE_ADDRESS";
+    } else {
+      missing += "NEXT_PUBLIC_REWARDS_MODULE_ADDRESS";
+    }
+  }
+  missing = missing.trimEnd();
+  const missingMessage = `Missing ${missing} environment variable${missingBoth ? "s" : ""}`;
+  let fullErrorMessage = `\n\n${"-".repeat(61)}\n\n${missingMessage}\n`;
+  if (!VERCEL) {
+    fullErrorMessage += "Please run this project from the top-level, parent directory.\n";
+  }
+  fullErrorMessage += `\n${"-".repeat(61)}\n`;
+  throw new Error(fullErrorMessage);
 }
 if (typeof window !== "undefined" && typeof process.env.INBOX_URL !== "undefined") {
   throw new Error("The `inbox` endpoint should not be exposed to any client components.");
 }
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
+export const REWARDS_MODULE_ADDRESS = (() =>
+  AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 
 export const LOCAL_INBOX_URL = process.env.INBOX_URL ?? "http://localhost:3000";
 export const ONE_APT = 1 * 10 ** 8;
@@ -20,6 +37,7 @@ export const ONE_APTN = BigInt(ONE_APT);
 export const MAX_GAS_FOR_PUBLISH = 1500000;
 export const COIN_FACTORY_MODULE_NAME = "coin_factory";
 export const EMOJICOIN_DOT_FUN_MODULE_NAME = "emojicoin_dot_fun";
+export const REWARDS_MODULE_NAME = "emojicoin_dot_fun_rewards";
 export const DEFAULT_REGISTER_MARKET_GAS_OPTIONS = {
   maxGasAmount: ONE_APT / 100,
   gasUnitPrice: 100,

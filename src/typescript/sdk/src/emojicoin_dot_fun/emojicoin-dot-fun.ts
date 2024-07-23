@@ -32,7 +32,7 @@ import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
 } from "./payload-builders";
-import { MODULE_ADDRESS } from "../const";
+import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../const";
 import type JSONTypes from "../types/json-types";
 
 export type ChatPayloadMoveArguments = {
@@ -554,6 +554,113 @@ export class Swap extends EntryFunctionPayloadBuilder {
     const { swapper: primarySigner, waitForTransactionOptions, feePayer } = args;
 
     const transactionBuilder = await Swap.builder({
+      ...args,
+      feePayer: feePayer ? feePayer.accountAddress : undefined,
+      swapper: primarySigner.accountAddress,
+    });
+    const response = await transactionBuilder.submit({
+      primarySigner,
+      feePayer,
+      options: waitForTransactionOptions,
+    });
+    return response;
+  }
+}
+
+export type SwapWithRewardsPayloadMoveArguments = {
+  marketAddress: AccountAddress;
+  inputAmount: U64;
+  isSell: Bool;
+};
+
+/**
+ *```
+ *  public entry fun swap_with_rewards<Emojicoin, EmojicoinLP>(
+ *     swapper: &signer,
+ *     market_address: address,
+ *     input_amount: u64,
+ *     is_sell: bool,
+ *  )
+ *```
+ * */
+
+export class SwapWithRewards extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = REWARDS_MODULE_ADDRESS;
+
+  public readonly moduleName = "emojicoin_dot_fun_rewards";
+
+  public readonly functionName = "swap_with_rewards";
+
+  public readonly args: SwapWithRewardsPayloadMoveArguments;
+
+  public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
+
+  public readonly primarySender: AccountAddress;
+
+  public readonly secondarySenders: [] = [];
+
+  public readonly feePayer?: AccountAddress;
+
+  private constructor(args: {
+    swapper: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
+    feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
+  }) {
+    super();
+    const { swapper, marketAddress, inputAmount, isSell, typeTags, feePayer } = args;
+    this.primarySender = AccountAddress.from(swapper);
+
+    this.args = {
+      marketAddress: AccountAddress.from(marketAddress),
+      inputAmount: new U64(inputAmount),
+      isSell: new Bool(isSell),
+    };
+    this.typeTags = typeTags.map((typeTag) =>
+      typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
+    ) as [TypeTag, TypeTag];
+    this.feePayer = feePayer !== undefined ? AccountAddress.from(feePayer) : undefined;
+  }
+
+  static async builder(args: {
+    aptosConfig: AptosConfig;
+    swapper: AccountAddressInput; // &signer
+    marketAddress: AccountAddressInput; // address
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
+    feePayer?: AccountAddressInput;
+    options?: InputGenerateTransactionOptions;
+  }): Promise<EntryFunctionTransactionBuilder> {
+    const { aptosConfig, options, feePayer } = args;
+    const payloadBuilder = new this(args);
+    const rawTransactionInput = await buildTransaction({
+      aptosConfig,
+      sender: payloadBuilder.primarySender,
+      payload: payloadBuilder.createPayload(),
+      options,
+      feePayerAddress: feePayer,
+    });
+    const aptos = new Aptos(aptosConfig);
+    return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
+  }
+
+  static async submit(args: {
+    aptosConfig: AptosConfig;
+    swapper: Account; // &signer
+    marketAddress: AccountAddressInput; // address
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
+    feePayer?: Account;
+    options?: InputGenerateTransactionOptions;
+    waitForTransactionOptions?: WaitForTransactionOptions;
+  }): Promise<UserTransactionResponse> {
+    const { swapper: primarySigner, waitForTransactionOptions, feePayer } = args;
+
+    const transactionBuilder = await SwapWithRewards.builder({
       ...args,
       feePayer: feePayer ? feePayer.accountAddress : undefined,
       swapper: primarySigner.accountAddress,
