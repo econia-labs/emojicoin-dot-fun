@@ -22,7 +22,7 @@ const renderHelper = (setter: Dispatch<SetStateAction<boolean>>) => {
 /**
  * In case we reach the end of the total number of confetti components, we cycle back, keeping track of the most recent
  * confetti index in order to stop and then re-render the next. The delay to restart on cycle is how long we wait in
- * between unrendering and then rendering the confetti component.
+ * between un-rendering and then rendering the confetti component.
  */
 const DELAY_TO_RESTART_ON_CYCLE = 100;
 const stopAndStartHelper = (nextSetter: Dispatch<SetStateAction<boolean>>) => {
