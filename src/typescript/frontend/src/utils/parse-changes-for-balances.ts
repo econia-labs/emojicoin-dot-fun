@@ -25,11 +25,13 @@ export const getNewCoinBalanceFromChanges = ({
     const resourceType = (change as WriteSetChangeWriteResource).data.type;
     if (resourceType !== `0x1::coin::CoinStore<${coinType.toString()}>`) return false;
 
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const changeData = (change as WriteSetChangeWriteResource).data.data as any;
     return typeof changeData.coin.value === "string";
   }) as WriteSetChangeWriteResource | undefined;
 
   if (coinBalanceChange) {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     return BigInt((coinBalanceChange.data.data as any).coin.value);
   }
 
