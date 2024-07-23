@@ -12,7 +12,7 @@ const Badge = ({ children }) => (
       border: "1px solid var(--ec-blue)",
       borderRadius: "20px",
     }}
-    className="!pixel-heading-4 mx-[.5rem] px-[.4rem] !text-ec-blue"
+    className="!pixel-heading-4 px-[.4rem] !text-ec-blue"
   >
     {children}
   </Text>
@@ -32,7 +32,7 @@ const Icon: React.FC<SvgProps & { versionBadge?: boolean }> = ({
   const { theme } = useThemeContext();
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center flex-wrap gap-[.5rem]">
       <Svg viewBox="0 0 1514 104" {...props} color="transparent">
         <path
           d="M830.4 15.2996V0.599609H757V15.2996H742.3V88.7996H757V103.5H830.5V88.7996H845.2V15.2996H830.4ZM762.3 18.2996H777.5V33.4996H762.3V18.2996ZM825.2 73.7996H813.3V85.6996H774.3V73.7996H762.4V46.6996H777.6V70.4996H810V46.9996H825.2V73.7996ZM825.2 33.4996H810V18.2996H825.2V33.4996Z"

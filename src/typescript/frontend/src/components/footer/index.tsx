@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
         <StyledContainer>
           <StyledSocialWrapper>
             <StyledClickItem>
-              <LogoIcon width="170px" cursor="pointer" versionBadge={true && !isMobile} />
+              <LogoIcon width="170px" cursor="pointer" versionBadge={true} />
             </StyledClickItem>
 
             <FlexGap gap="12px">
