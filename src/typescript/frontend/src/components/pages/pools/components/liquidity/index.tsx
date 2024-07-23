@@ -371,7 +371,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
                 }
                 const res = await submit(builderLambda);
                 // Parse the event changes and update the user's APT, emojicoin, and emojicoin LP balance in the UI
-                // based on the writeset changes from the transaction response.
+                // based on the write set changes from the transaction response.
                 if (res && res.response) {
                   if (isUserTransactionResponse(res.response)) {
                     const changes = res.response.changes;
