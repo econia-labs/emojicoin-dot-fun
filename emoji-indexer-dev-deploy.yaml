@@ -1,0 +1,3 @@
+template-file-path: src/indexer/indexer.cfn.yaml
+parameters: {}
+tags: {}
