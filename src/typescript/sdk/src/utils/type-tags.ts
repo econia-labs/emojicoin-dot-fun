@@ -5,7 +5,12 @@ import {
   parseTypeTag,
   type TypeTagStruct,
 } from "@aptos-labs/ts-sdk";
-import { MODULE_ADDRESS, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
+import {
+  MODULE_ADDRESS,
+  EMOJICOIN_DOT_FUN_MODULE_NAME,
+  REWARDS_MODULE_NAME,
+  REWARDS_MODULE_ADDRESS,
+} from "../const";
 
 export function toTypeTag(
   addressInput: AccountAddressInput,
@@ -24,16 +29,16 @@ export function toTypeTagString(
   return toTypeTag(addressInput, moduleName, structName).toString();
 }
 
-export const toEmojicoinStructString = (structName: string): string => {
+export const toEmojicoinStructTag = (structName: string): TypeTagStruct => {
   const res = toTypeTag(MODULE_ADDRESS, EMOJICOIN_DOT_FUN_MODULE_NAME, structName);
   if (!res.isStruct()) {
     throw new Error(`Unexpected non-struct type tag: ${res}`);
   }
-  return res.toString();
+  return res;
 };
 
-export const toEmojicoinStructTag = (structName: string): TypeTagStruct => {
-  const res = toTypeTag(MODULE_ADDRESS, EMOJICOIN_DOT_FUN_MODULE_NAME, structName);
+export const toEmojicoinRewardsStructTag = (structName: string): TypeTagStruct => {
+  const res = toTypeTag(REWARDS_MODULE_ADDRESS, REWARDS_MODULE_NAME, structName);
   if (!res.isStruct()) {
     throw new Error(`Unexpected non-struct type tag: ${res}`);
   }
@@ -49,6 +54,7 @@ export const TYPE_TAGS = {
   GlobalStateEvent: toEmojicoinStructTag("GlobalState"),
   LiquidityEvent: toEmojicoinStructTag("Liquidity"),
   Registry: toEmojicoinStructTag("Registry"),
+  LotteryWinnerEvent: toEmojicoinRewardsStructTag("EmojicoinDotFunRewardsLotteryWinner"),
 } as const;
 
 export const STRUCT_STRINGS = {
@@ -60,4 +66,5 @@ export const STRUCT_STRINGS = {
   GlobalStateEvent: TYPE_TAGS.GlobalStateEvent.toString(),
   LiquidityEvent: TYPE_TAGS.LiquidityEvent.toString(),
   Registry: TYPE_TAGS.Registry.toString(),
+  LotteryWinnerEvent: TYPE_TAGS.LotteryWinnerEvent.toString(),
 } as const;
