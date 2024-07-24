@@ -1,5 +1,5 @@
 ---
 Resources:
-  GoodbyeBucket:
+  HelloBucket:
     Type: 'AWS::S3::Bucket'
 ...
