@@ -1,6 +1,5 @@
 ---
 parameters: null
 tags:
-  build_nonce: '1'
 template-file-path: 'src/indexer/cloud-formation/indexer.cfn.yaml'
 ...
