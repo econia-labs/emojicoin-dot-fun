@@ -6,7 +6,7 @@ The indexer is deployed using [AWS CloudFormation] with a [template file] at
 `cloud-formation/indexer.cfm.yaml` and a development-specific
 [stack deployment file] at `cloud-formation/deploy-dev.yaml`.
 
-By granting the [PowerUserAccess] to the stack, deployments can be performed
+By granting [PowerUserAccess] to the stack, deployments can be performed
 programmatically using [GitSync] alone.
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
