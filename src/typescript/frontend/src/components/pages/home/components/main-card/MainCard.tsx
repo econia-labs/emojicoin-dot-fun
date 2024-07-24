@@ -111,9 +111,9 @@ const MainCard = ({ featured }: MainCardProps) => {
           />
 
           {[...new Intl.Segmenter().segment(featured?.symbol ?? "🖤")].length == 1 ? (
-            <div id="styled-emoji">{featured?.symbol ?? "🖤"}</div>
+            <div className="styled-emoji styled-single-emoji">{featured?.symbol ?? "🖤"}</div>
           ) : (
-            <div id="styled-double-emoji">{featured?.symbol}</div>
+            <div className="styled-emoji styled-double-emoji">{featured?.symbol}</div>
           )}
         </Link>
 
