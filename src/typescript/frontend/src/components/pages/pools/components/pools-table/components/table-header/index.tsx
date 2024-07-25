@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import Image from "next/image";
 import { useScramble } from "use-scramble";
 
 import { translationFunction } from "context/language-context";
@@ -10,10 +11,14 @@ import { Text } from "components/text";
 import { Arrows } from "components/svg";
 
 import { type TableHeaderProps } from "./types";
+import Prompt from "components/prompt";
+
+import info from "../../../../../../../../public/images/infoicon.svg";
 
 const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
   const { t } = translationFunction();
   const { isMobile } = useMatchBreakpoints();
+  const [showAPRInfoPrompt, setShowAPRInfoPrompt] = useState<boolean>(false);
 
   const { ref, replay } = useScramble({
     text: `${t(item.text)}`,
@@ -42,12 +47,26 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
         >
           {t(item.text)}
         </Text>
-        {item.sortBy && !isMobile ? (
-          <Flex>
-            <Arrows color="econiaBlue" />
-          </Flex>
-        ) : null}
+        {item.sortBy && !isMobile ? <Flex>{!isLast && <Arrows color="econiaBlue" />}</Flex> : null}
       </FlexGap>
+      {isLast && (
+        <div className="relative">
+          <Image
+            src={info}
+            alt="info"
+            onTouchStart={() => setShowAPRInfoPrompt(!showAPRInfoPrompt)}
+            onMouseEnter={() => setShowAPRInfoPrompt(true)}
+            onMouseLeave={() => setShowAPRInfoPrompt(false)}
+          />
+          <Prompt
+            text="On extremly volatile markets, APR and WPR are impossible to predict. When such values are under -50% or above 1000%, they are represented by 😭 and 🤯 respectively."
+            visible={showAPRInfoPrompt}
+            close={false}
+            width={300}
+            top={false}
+          />
+        </div>
+      )}
     </Flex>
   );
 };

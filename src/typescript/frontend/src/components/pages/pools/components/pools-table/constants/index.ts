@@ -19,8 +19,13 @@ export const HEADERS = [
     sortBy: "tvl",
   },
   {
-    width: "29%",
+    width: "14%",
     text: "Apr",
+    sortBy: "apr",
+  },
+  {
+    width: "15%",
+    text: "Wpr",
     sortBy: "apr",
   },
 ];
