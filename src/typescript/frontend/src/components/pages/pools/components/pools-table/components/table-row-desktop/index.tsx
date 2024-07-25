@@ -8,6 +8,30 @@ import { Text, Tr, Td } from "components";
 import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 
+const DAYS_IN_WEEK = 7;
+const DAYS_IN_YEAR = 365;
+
+const getXPR = (x: number, tvlPerLpCoinGrowth: number) => (tvlPerLpCoinGrowth ** x - 1) * 100;
+
+const LOWER_CUT_OFF = -50;
+const UPPER_CUT_OFF = 100;
+
+const formatXPR = (xpr: number, title: boolean = false) => {
+  if (xpr > UPPER_CUT_OFF) {
+    if (title) {
+      return "lfg";
+    }
+    return "🤯";
+  }
+  if (xpr < LOWER_CUT_OFF) {
+    if (title) {
+      return "cry more";
+    }
+    return "😭";
+  }
+  return `${xpr.toFixed(4)}%`;
+};
+
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
   const { isMobile } = useMatchBreakpoints();
 
@@ -71,16 +95,30 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
         </Flex>
       </Td>
 
-      <Td p="7px 12px" width={{ _: "20%", tablet: "29%" }}>
+      <Td p="7px 12px" width={{ _: "10%", tablet: "14%" }}>
         <Flex justifyContent="end">
           <Text
             textScale="bodySmall"
             color="lightGray"
             textTransform="uppercase"
             ellipsis
-            title={`${((item.tvlPerLpCoinGrowth ** 356 - 1) * 100).toFixed(4)}%`}
+            title={formatXPR(getXPR(DAYS_IN_YEAR, item.tvlPerLpCoinGrowth), true)}
           >
-            {((item.tvlPerLpCoinGrowth ** 356 - 1) * 100).toFixed(4)}%
+            {formatXPR(getXPR(DAYS_IN_YEAR, item.tvlPerLpCoinGrowth))}
+          </Text>
+        </Flex>
+      </Td>
+
+      <Td p="7px 12px" width={{ _: "10%", tablet: "15%" }}>
+        <Flex justifyContent="end">
+          <Text
+            textScale="bodySmall"
+            color="lightGray"
+            textTransform="uppercase"
+            ellipsis
+            title={formatXPR(getXPR(DAYS_IN_WEEK, item.tvlPerLpCoinGrowth), true)}
+          >
+            {formatXPR(getXPR(DAYS_IN_WEEK, item.tvlPerLpCoinGrowth))}
           </Text>
         </Flex>
       </Td>
