@@ -42,3 +42,5 @@ voluptates
 webclip
 KIKI
 unfmt
+LOCALSTORAGE
+mapstr

@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren, useEffect, useMemo } from "react";
+import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 
 import { type TradeHistoryProps } from "../../types";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -11,6 +11,7 @@ import { type TableRowDesktopProps } from "./table-row/types";
 import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
 import "./trade-history.css";
 import { parseJSON } from "utils";
+import { getANSNames } from "utils/ans";
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   ...getRankFromSwapEvent(Number(toCoinDecimalString(value.quoteVolume, 3))),
@@ -51,6 +52,8 @@ const TradeHistory = (props: TradeHistoryProps) => {
 
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
 
+  const [names, setNames] = useState(new Map());
+
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.swap(marketID, null);
@@ -65,6 +68,22 @@ const TradeHistory = (props: TradeHistoryProps) => {
     return toSortedDedupedEvents(props.data.swaps, swaps, "desc").slice(0, HARD_LIMIT);
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [props.data.swaps.length, swaps.length]);
+
+  useEffect(() => {
+    (async () => {
+      const names = await getANSNames(sortedSwaps.map((e) => e.swapper));
+      setNames(names);
+    })();
+  }, [sortedSwaps]);
+
+  const sortedSwapsWithNames = useMemo(() => {
+    const data = sortedSwaps.map((e) => ({
+      ...e,
+      swapper: names.get(e.swapper) ? names.get(e.swapper) : e.swapper,
+    }));
+    return data;
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [names]);
 
   return (
     <table className="flex flex-col table-fixed w-full">
@@ -94,7 +113,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
         </tr>
       </thead>
       <tbody className="flex flex-col overflow-auto scrollbar-track w-full h-[340px]">
-        {sortedSwaps.map((item, index) => (
+        {sortedSwapsWithNames.map((item, index) => (
           <TableRow
             key={index}
             item={toTableItem(item)}
