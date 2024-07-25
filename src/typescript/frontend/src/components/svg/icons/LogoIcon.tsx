@@ -5,21 +5,27 @@ import { VERSION } from "lib/env";
 import { type SvgProps } from "../types";
 import { useThemeContext } from "context";
 import Text from "components/text";
+import type { Colors } from "theme/types";
 
-const Badge = ({ children }) => (
-  <Text
-    style={{
-      border: "1px solid var(--ec-blue)",
-      borderRadius: "20px",
-    }}
-    className="!pixel-heading-4 px-[.4rem] !text-ec-blue"
-  >
-    {children}
-  </Text>
-);
+const Badge: React.FC<React.PropsWithChildren<{color: keyof Colors}>> = ({ children, color }) => {
+  const { theme } = useThemeContext();
 
-const VersionBadge = () => (
-  <Badge>
+  return (
+    <Text
+      style={{
+        border: `1px solid ${theme.colors[color]}`,
+        borderRadius: "20px",
+        color: theme.colors[color],
+      }}
+      className="!pixel-heading-4 px-[.4rem]"
+    >
+      {children}
+    </Text>
+  )
+};
+
+const VersionBadge: React.FC<{color: keyof Colors}> = ({color}) => (
+  <Badge color={color}>
     {VERSION?.prerelease[0].toString().toUpperCase()}&nbsp;v{VERSION?.major}.{VERSION?.minor}.{VERSION?.patch}
   </Badge>
 );
@@ -84,7 +90,7 @@ const Icon: React.FC<SvgProps & { versionBadge?: boolean }> = ({
           fill={theme.colors[color]}
         />
       </Svg>
-      {versionBadge ? <VersionBadge /> : <></>}
+      {versionBadge ? <VersionBadge color={color} /> : <></>}
     </div>
   );
 };
