@@ -1,12 +1,12 @@
 import { InputGroup } from "components/inputs";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import Text from "components/text";
-import { EMOJI_GRID_ITEM_WIDTH } from "../../const";
 import { Flex } from "components/layout";
 import useInputStore from "@store/input-store";
 import { useEffect } from "react";
 import icon from "../../../../../../../public/images/search-icon.svg";
 import Image from "next/image";
+import { StyledSearch } from "../styled";
 
 const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
 
@@ -17,14 +17,7 @@ export const SearchComponent = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
   return (
-    <Flex
-      style={{
-        width: `${EMOJI_GRID_ITEM_WIDTH - 20}px`,
-        margin: 0,
-        padding: 0,
-      }}
-      alignItems="center"
-    >
+    <StyledSearch>
       <Text className="med-pixel-text" color="darkGray">
         {"{"}
       </Text>
@@ -35,8 +28,8 @@ export const SearchComponent = () => {
           width: "100%",
         }}
       >
-        <InputGroup variant="fantom" isShowError={false} forId="search" className="med-pixel-text">
-          <Flex>
+        <InputGroup variant="fantom" isShowError={false} forId="search" className="med-pixel-text" inputWrapperStyles={{width: "100%"}}>
+          <Flex width="100%">
             {searchIcon}
             <EmojiPickerWithInput
               handleClick={async () => {}}
@@ -50,7 +43,7 @@ export const SearchComponent = () => {
       <Text className="med-pixel-text" color="darkGray">
         {"}"}
       </Text>
-    </Flex>
+    </StyledSearch>
   );
 };
 

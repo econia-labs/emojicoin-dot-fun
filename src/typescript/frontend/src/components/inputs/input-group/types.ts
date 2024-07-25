@@ -25,6 +25,7 @@ export interface InputGroupProps extends SpaceProps, LayoutProps {
   forId?: string;
   textScale?: ResponsiveValue<TextScales>;
   className?: string;
+  inputWrapperStyles?: React.CSSProperties;
 }
 
 export interface StyledInputGroupProps extends LayoutProps {

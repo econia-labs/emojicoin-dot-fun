@@ -88,23 +88,6 @@
 }
 
 .home-picker {
-  width: 212px !important;
-}
-
-@media screen and (min-width: 768px) {
-  .home-picker {
-    width: 208px !important;
-  }
-}
-
-@media screen and (min-width: 1024px) {
-  .home-picker {
-    width: 208px !important;
-  }
-}
-
-@media screen and (min-width: 1440px) {
-  .home-picker {
-    width: 200px !important;
-  }
+  position: relative !important;
+  width: 100% !important;
 }

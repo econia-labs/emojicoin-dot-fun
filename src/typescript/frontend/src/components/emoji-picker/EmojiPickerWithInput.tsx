@@ -147,6 +147,7 @@ export const EmojiPickerWithInput = ({
       }}
       className="justify-center"
       ref={inputRef}
+      style={{...(mode === "home" ? {width: "100%"} : {})}}
     >
       <ConditionalWrapper mode={mode}>
         <InputGroup isShowError={false} {...inputGroupProps}>

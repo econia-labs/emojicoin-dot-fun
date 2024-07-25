@@ -17,6 +17,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
   isShowError = true,
   variant,
   forId,
+  inputWrapperStyles,
   textScale = "heading1",
   ...props
 }) => {
@@ -43,7 +44,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
           </Text>
         )}
 
-        <InputWrapper>
+        <InputWrapper style={inputWrapperStyles}>
           {startIcon && <InputIcon scale={scale}>{startIcon}</InputIcon>}
 
           {cloneElement(children, { scale, error, touched })}
