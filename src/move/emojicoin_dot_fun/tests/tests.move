@@ -153,6 +153,7 @@
         get_publish_code_test_only as get_publish_code,
     };
     use emojicoin_dot_fun::test_acquisitions::{
+        ensure_aptos_coin_capability_store_initialized,
         mint_aptos_coin_to,
     };
     use yellow_heart_market::coin_factory::{
@@ -1556,6 +1557,7 @@
     }
 
     public fun init_package() {
+        ensure_aptos_coin_capability_store_initialized();
         timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
         init_module(&get_signer(@emojicoin_dot_fun));
     }
@@ -3134,6 +3136,7 @@
         let time = one_day_and_one_hour;
         timestamp::update_global_time_for_test(time);
         init_module(&get_signer(@emojicoin_dot_fun));
+        ensure_aptos_coin_capability_store_initialized();
 
         // Assert registry view.
         let registry_view = base_registry_view();
