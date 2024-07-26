@@ -110,6 +110,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_INVALID_EMOJI_INDEX: u64 = 14;
     /// No emoji bytes specified.
     const E_EMOJI_BYTES_EMPTY: u64 = 15;
+    /// Only market registrant may swap during the grace period.
+    const E_NOT_REGISTRANT: u64 = 16;
 
     /// Exists at package address, tracks the address of the registry object.
     struct RegistryAddress has key {
@@ -146,6 +148,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     struct LPCoinCapabilities<phantom Emojicoin, phantom EmojicoinLP> has key {
         burn: BurnCapability<EmojicoinLP>,
         mint: MintCapability<EmojicoinLP>,
+    }
+
+    #[resource_group = ObjectGroup]
+    struct RegistrantGracePeriodFlag has drop, key {
+        market_registrant: address,
+        market_registration_time: u64,
     }
 
     #[event]
@@ -396,7 +404,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
-    ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
+    ) acquires LPCoinCapabilities, Market, Registry, RegistrantGracePeriodFlag, RegistryAddress {
 
         // Mutably borrow market, check its coin types, then simulate a swap.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
@@ -414,6 +422,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             integrator_fee_rate_bps,
             market_ref_mut,
         );
+
+        // Verify registrant grace period is not violated, then remove flag.
+        if (exists<RegistrantGracePeriodFlag>(market_address)) {
+            let flag_ref = borrow_global<RegistrantGracePeriodFlag>(market_address);
+            let grace_period_over = event.time > flag_ref.market_registration_time + PERIOD_5M;
+            let swapper_is_registrant = swapper_address == flag_ref.market_registrant;
+            assert!(grace_period_over || swapper_is_registrant, E_NOT_REGISTRANT);
+            move_from<RegistrantGracePeriodFlag>(market_address);
+        };
 
         // Get TVL before swap, use it to update periodic state.
         let starts_in_bonding_curve = event.starts_in_bonding_curve;
@@ -1563,6 +1580,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             fee
         };
 
+        // Move a registrant grace period flag to the market address.
+        move_to(&market_signer, RegistrantGracePeriodFlag {
+            market_registrant: registrant_address,
+            market_registration_time: time,
+        });
+
         // Update global FDV.
         let fdv = fdv(market_ref_mut.clamm_virtual_reserves);
         let fdv_ref_mut = &mut registry_ref_mut.global_stats.fully_diluted_value;
@@ -2471,6 +2494,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         reserves: Reserves,
     ): u64 {
         cpamm_simple_swap_output_amount(input_amount, is_sell, reserves)
+    }
+
+    #[test_only] public fun disable_registrant_grace_period_check(
+        market_address: address
+    ) acquires RegistrantGracePeriodFlag {
+        move_from<RegistrantGracePeriodFlag>(market_address);
     }
 
     #[test_only] public fun exists_lp_coin_capabilities<Emojicoin, EmojicoinLP>(
