@@ -74,12 +74,6 @@ export const Th = styled.td<TdProps>`
     }
   }
 
-  &:nth-last-child(2) {
-    ${ThInner} {
-      justify-content: end;
-    }
-  }
-
   ${typography}
   ${space}
 `;
