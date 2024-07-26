@@ -3517,6 +3517,100 @@
         );
     }
 
+    // Verify registrant able to buy after period, then non-registrant can buy right after.
+    #[test] fun swap_grace_period_is_registrant_after_period() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        timestamp::update_global_time_for_test(get_PERIOD_5M() + 1);
+        mint_aptos_coin_to(USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    // Verify registrant able to buy during period, then non-registrant can buy right after.
+    #[test] fun swap_grace_period_is_registrant_during_period() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        timestamp::update_global_time_for_test(get_PERIOD_5M());
+        mint_aptos_coin_to(USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+
+    // Verify non-registrant user can buy after the grace period has lapsed, then again after that.
+    #[test] fun swap_grace_period_not_registrant_after_period() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        timestamp::update_global_time_for_test(get_PERIOD_5M() + 1);
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    // Verify non-registrant user unable to buy during the grace period.
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NOT_REGISTRANT,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun swap_grace_period_not_registrant_during_period() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        timestamp::update_global_time_for_test(get_PERIOD_5M());
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
     #[test, expected_failure(
         abort_code = 65542, // 0x1 << 16 + 6, error:invalid_argument(EINSUFFICIENT_BALANCE)
         location = aptos_framework::coin,
