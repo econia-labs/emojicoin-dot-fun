@@ -62,6 +62,7 @@
         assert_valid_coin_types_test_only as assert_valid_coin_types,
         chat,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
+        disable_registrant_grace_period_check,
         exists_lp_coin_capabilities,
         fdv_market_cap_test_only as fdv_market_cap,
         get_BASE_REAL_CEILING,
@@ -1576,6 +1577,7 @@
             EXACT_TRANSITION_INTEGRATOR,
             EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
         );
+        disable_registrant_grace_period_check(@black_cat_market);
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             market_address,
@@ -1601,6 +1603,7 @@
             SIMPLE_BUY_INTEGRATOR,
             SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
         );
+        disable_registrant_grace_period_check(@black_cat_market);
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(SIMPLE_BUY_USER),
             market_address,
@@ -2233,6 +2236,7 @@
         // Provide the exact transition user with Aptos coins, then execute exact transition.
         mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
         timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME);
+        disable_registrant_grace_period_check(@black_cat_market);
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,

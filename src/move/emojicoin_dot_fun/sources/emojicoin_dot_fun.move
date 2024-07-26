@@ -2496,6 +2496,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         cpamm_simple_swap_output_amount(input_amount, is_sell, reserves)
     }
 
+    #[test_only] public fun disable_registrant_grace_period_check(
+        market_address: address
+    ) acquires RegistrantGracePeriodFlag {
+        move_from<RegistrantGracePeriodFlag>(market_address);
+    }
+
     #[test_only] public fun exists_lp_coin_capabilities<Emojicoin, EmojicoinLP>(
         market_address: address,
     ): bool {
