@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
 
-import { Flex, Column } from "@containers";
-import { Text, Button, Prompt } from "components";
+import { Flex, Column, FlexGap } from "@containers";
+import { Text, Button } from "components";
 
 import { StyledAddLiquidityWrapper } from "./styled";
 import { ProvideLiquidity, RemoveLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
@@ -27,10 +27,10 @@ import {
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { Arrows } from "components/svg";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
-import info from "../../../../../../public/images/infoicon.svg";
 import { useSearchParams } from "next/navigation";
 import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-status-indicator";
 import { TypeTag } from "@aptos-labs/ts-sdk";
+import Info from "components/info";
 
 type LiquidityProps = {
   market: FetchSortedMarketDataReturn["markets"][0] | undefined;
@@ -99,7 +99,6 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
   const [direction, setDirection] = useState<"add" | "remove">(
     searchParams.get("remove") !== null ? "remove" : "add"
   );
-  const [showLiquidityPrompt, setShowLiquidityPrompt] = useState<boolean>(false);
 
   const loadingComponent = useMemo(() => <AnimatedStatusIndicator numSquares={4} />, []);
 
@@ -258,29 +257,24 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
       <Column width="100%" maxWidth="414px" justifyContent="center">
         <Flex width="100%" justifyContent="space-between" alignItems="baseline">
-          <Flex position="relative" justifyContent="left" alignItems="baseline">
+          <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="baseline">
             <Text textScale="heading1" textTransform="uppercase" mb="16px">
               {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
             </Text>
 
-            <div>
-              <Image
-                src={info}
-                alt="info"
-                className="ml-[.4em]"
-                onTouchStart={() => setShowLiquidityPrompt(!showLiquidityPrompt)}
-                onMouseEnter={() => setShowLiquidityPrompt(true)}
-                onMouseLeave={() => setShowLiquidityPrompt(false)}
-              />
-              <Prompt
-                text="Liquidity providers receive a 0.25% fee from all trades, proportional to their pool share. Fees are continuously reinvested in the pool and can be claimed by withdrawing liquidity."
-                visible={showLiquidityPrompt}
-                close={false}
-                width={300}
-                top={false}
-              />
-            </div>
-          </Flex>
+            <Info>
+              <Text
+                textScale="pixelHeading4"
+                lineHeight="20px"
+                color="black"
+                textTransform="uppercase"
+              >
+                Liquidity providers receive a 0.25% fee from all trades, proportional to their pool
+                share. Fees are continuously reinvested in the pool and can be claimed by
+                withdrawing liquidity.
+              </Text>
+            </Info>
+          </FlexGap>
 
           <button onClick={() => setDirection(direction === "add" ? "remove" : "add")}>
             <Arrows color="econiaBlue" />

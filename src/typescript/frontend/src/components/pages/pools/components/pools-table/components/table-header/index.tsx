@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import Image from "next/image";
+import React from "react";
 import { useScramble } from "use-scramble";
 
 import { translationFunction } from "context/language-context";
@@ -7,18 +6,14 @@ import { useMatchBreakpoints } from "hooks";
 
 import { FlexGap, Flex } from "@containers";
 import { Text } from "components/text";
-
+import Info from "components/info";
 import { Arrows } from "components/svg";
 
 import { type TableHeaderProps } from "./types";
-import Prompt from "components/prompt";
-
-import info from "../../../../../../../../public/images/infoicon.svg";
 
 const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
   const { t } = translationFunction();
   const { isMobile } = useMatchBreakpoints();
-  const [showAPRInfoPrompt, setShowAPRInfoPrompt] = useState<boolean>(false);
 
   const { ref, replay } = useScramble({
     text: `${t(item.text)}`,
@@ -37,6 +32,43 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
         onMouseEnter={replay}
         ellipsis
       >
+        {isLast && (
+          <Info>
+            <Text
+              textScale="pixelHeading4"
+              lineHeight="20px"
+              color="black"
+              textTransform="uppercase"
+            >
+              <FlexGap gap=".2rem" justifyContent="space-between">
+                <span>DPR:</span>
+                <span>Daily Percentage Return</span>
+              </FlexGap>
+            </Text>
+            <Text
+              textScale="pixelHeading4"
+              lineHeight="20px"
+              color="black"
+              textTransform="uppercase"
+            >
+              <FlexGap gap=".2rem" justifyContent="space-between">
+                <span>WPR:</span>
+                <span>Weekly Percentage Return</span>
+              </FlexGap>
+            </Text>
+            <Text
+              textScale="pixelHeading4"
+              lineHeight="20px"
+              color="black"
+              textTransform="uppercase"
+            >
+              <FlexGap gap=".2rem" justifyContent="space-between">
+                <span>APR:</span>
+                <span>Annual Percentage Return</span>
+              </FlexGap>
+            </Text>
+          </Info>
+        )}
         <Text
           textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
           textTransform="uppercase"
@@ -47,26 +79,12 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
         >
           {t(item.text)}
         </Text>
-        {item.sortBy && !isMobile ? <Flex>{!isLast && <Arrows color="econiaBlue" />}</Flex> : null}
+        {item.sortBy && !isMobile ? (
+          <Flex>
+            <Arrows color="econiaBlue" />
+          </Flex>
+        ) : null}
       </FlexGap>
-      {isLast && (
-        <div className="relative">
-          <Image
-            src={info}
-            alt="info"
-            onTouchStart={() => setShowAPRInfoPrompt(!showAPRInfoPrompt)}
-            onMouseEnter={() => setShowAPRInfoPrompt(true)}
-            onMouseLeave={() => setShowAPRInfoPrompt(false)}
-          />
-          <Prompt
-            text="On extremly volatile markets, APR and WPR are impossible to predict. When such values are under -50% or above 1000%, they are represented by 😭 and 🤯 respectively."
-            visible={showAPRInfoPrompt}
-            close={false}
-            width={300}
-            top={false}
-          />
-        </div>
-      )}
     </Flex>
   );
 };
