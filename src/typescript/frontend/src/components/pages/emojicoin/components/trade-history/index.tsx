@@ -79,7 +79,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
   const sortedSwapsWithNames = useMemo(() => {
     const data = sortedSwaps.map((e) => ({
       ...e,
-      swapper: names.get(e.swapper) ? names.get(e.swapper) : e.swapper,
+      swapper: names.get(e.swapper) ?? e.swapper,
     }));
     return data;
     /* eslint-disable react-hooks/exhaustive-deps */
