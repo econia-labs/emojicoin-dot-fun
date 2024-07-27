@@ -18,11 +18,13 @@ export const SwapButton = ({
   isSell,
   marketAddress,
   setSubmit,
+  disabled,
 }: {
   inputAmount: bigint | number | string;
   isSell: boolean;
   marketAddress: AccountAddressString;
   setSubmit: Dispatch<SetStateAction<(() => Promise<void>) | null>>;
+  disabled?: boolean;
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
@@ -66,7 +68,11 @@ export const SwapButton = ({
   return (
     <>
       <ButtonWithConnectWalletFallback>
-        <Button onClick={handleClick} scale="lg">
+        <Button
+          disabled={disabled}
+          onClick={handleClick}
+          scale="lg"
+        >
           {t("Swap")}
         </Button>
       </ButtonWithConnectWalletFallback>
