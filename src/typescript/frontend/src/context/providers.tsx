@@ -18,7 +18,6 @@ import StyledToaster from "styles/StyledToaster";
 import {
   WebSocketEventsProvider,
   MarketDataProvider,
-  CoinBalanceProvider,
 } from "./state-store-context/StateStoreContextProviders";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
@@ -64,20 +63,18 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               dappConfig={{ network: APTOS_NETWORK }}
             >
               <WalletModalContextProvider>
-                <CoinBalanceProvider>
-                  <AptosContextProvider>
-                    <GlobalStyle />
-                    <ConnectToWebSockets />
-                    <Suspense fallback={<Loader />}>
-                      <StyledToaster />
-                      <ContentWrapper>
-                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                        {children}
-                        <Footer />
-                      </ContentWrapper>
-                    </Suspense>
-                  </AptosContextProvider>
-                </CoinBalanceProvider>
+                <AptosContextProvider>
+                  <GlobalStyle />
+                  <ConnectToWebSockets />
+                  <Suspense fallback={<Loader />}>
+                    <StyledToaster />
+                    <ContentWrapper>
+                      <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                      {children}
+                      <Footer />
+                    </ContentWrapper>
+                  </Suspense>
+                </AptosContextProvider>
               </WalletModalContextProvider>
             </AptosWalletAdapterProvider>
           </MarketDataProvider>
