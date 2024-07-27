@@ -35,5 +35,5 @@ export const getNewCoinBalanceFromChanges = ({
     return BigInt((coinBalanceChange.data.data as any).coin.value);
   }
 
-  return 0n;
+  return undefined;
 };

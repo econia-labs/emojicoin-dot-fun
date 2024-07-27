@@ -12,7 +12,7 @@ import LaunchButtonOrGoToMarketLink from "./components/launch-or-goto";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import { MARKET_REGISTRATION_FEE, ONE_APT } from "@sdk/const";
+import { MARKET_REGISTRATION_FEE, ONE_APTN } from "@sdk/const";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 // This is the value that most wallets use. It's an estimate, possibly incorrect, but better for UX.
@@ -25,7 +25,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   const setPickerInvisible = useInputStore((state) => state.setPickerInvisible);
   const emojis = useInputStore((state) => state.emojis);
   const setIsLoadingRegisteredMarket = useInputStore((state) => state.setIsLoadingRegisteredMarket);
-  const { aptBalance, refetchBalanceIfStale } = useAptos();
+  const { aptBalance, refetchIfStale } = useAptos();
 
   const registerMarket = useRegisterMarket();
   const { invalid, registered } = useIsMarketRegistered();
@@ -43,7 +43,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   }, [emojis]);
 
   useEffect(() => {
-    refetchBalanceIfStale();
+    refetchIfStale("apt");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [emojis]);
 
@@ -112,7 +112,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
                       sufficientBalance ? "text-green" : "text-error brightness-[1.1] saturate-150"
                     }
                   >
-                    {Number(toCoinDecimalString(aptBalance, aptBalance / ONE_APT < 1 ? 6 : 4))}
+                    {Number(toCoinDecimalString(aptBalance, aptBalance / ONE_APTN < 1 ? 6 : 4))}
                   </span>
                   &nbsp;APT
                 </div>

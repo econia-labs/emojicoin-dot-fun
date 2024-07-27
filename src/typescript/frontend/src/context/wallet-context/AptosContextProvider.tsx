@@ -4,6 +4,7 @@ import {
   AptosApiError,
   isUserTransactionResponse,
   parseTypeTag,
+  TypeTag,
   type Aptos,
   type PendingTransactionResponse,
   type UserTransactionResponse,
@@ -11,10 +12,11 @@ import {
 import { type NetworkInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
   createContext,
+  type Dispatch,
   type PropsWithChildren,
+  type SetStateAction,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -27,8 +29,8 @@ import {
   parseAPIErrorAndToast,
   successfulTransactionToast,
 } from "components/wallet/toasts";
-import { useEventStore } from "context/websockets-context";
-import { getEvents } from "@sdk/emojicoin_dot_fun";
+import { useEventStore } from "context/state-store-context";
+import { getEvents, type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { sleep, UnitOfTime } from "@sdk/utils";
 import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
@@ -40,6 +42,7 @@ export type SubmissionResponse = Promise<{
   error: unknown;
 } | null>;
 
+export type TrackedCoinType = "apt" | "emojicoin" | "emojicoinLP";
 export type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
 export type ResponseType = Awaited<SubmissionResponse>;
 export type EntryFunctionNames =
@@ -57,11 +60,14 @@ export type AptosContextState = {
   copyAddress: () => void;
   status: TransactionStatus;
   lastResponse: ResponseType;
-  aptBalance: number;
-  isFetchingBalance: boolean;
-  forceRefetchBalance: () => void;
-  refetchBalanceIfStale: () => void;
-  setBalance: (n: number) => void;
+  setEmojicoinType: (type?: TypeTagInput) => void;
+  aptBalance: bigint;
+  emojicoinBalance: bigint;
+  emojicoinLPBalance: bigint;
+  isFetching(coinType: TrackedCoinType): boolean;
+  forceRefetch(coinType: TrackedCoinType): void;
+  refetchIfStale(coinType: TrackedCoinType): void;
+  setBalance(coinType: TrackedCoinType, n: bigint): void;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -77,6 +83,15 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [lastResponse, setLastResponse] = useState<ResponseType>(null);
+  const [emojicoinType, setEmojicoinType] = useState<string | undefined>();
+
+  const { emojicoin, emojicoinLP } = useMemo(() => {
+    if (!emojicoinType) return { emojicoin: undefined, emojicoinLP: undefined };
+    return {
+      emojicoin: emojicoinType,
+      emojicoinLP: `${emojicoinType}LP`,
+    };
+  }, [emojicoinType]);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
@@ -87,21 +102,39 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
   const {
     balance: aptBalance,
-    setBalance,
-    isFetching: isFetchingBalance,
-    forceRefetch,
-    refetchIfStale,
+    setBalance: setAptBalance,
+    isFetching: isFetchingAptBalance,
+    forceRefetch: forceRefetchAptBalance,
+    refetchIfStale: refetchAptBalanceIfStale,
   } = useWalletBalance({
     aptos,
     accountAddress: account?.address,
-    coinType: parseTypeTag(APTOS_COIN),
+    coinType: APTOS_COIN,
   });
 
-  useEffect(() => {
-    if (account?.address) {
-      forceRefetch();
-    }
-  }, [account, forceRefetch]);
+  const {
+    balance: emojicoinBalance,
+    setBalance: setEmojicoinBalance,
+    isFetching: isFetchingEmojicoinBalance,
+    forceRefetch: forceRefetchEmojicoinBalance,
+    refetchIfStale: refetchEmojicoinBalanceIfStale,
+  } = useWalletBalance({
+    aptos,
+    accountAddress: account?.address,
+    coinType: emojicoin,
+  });
+
+  const {
+    balance: emojicoinLPBalance,
+    setBalance: setEmojicoinLPBalance,
+    isFetching: isFetchingEmojicoinLPBalance,
+    forceRefetch: forceRefetchEmojicoinLPBalance,
+    refetchIfStale: refetchEmojicoinLPBalanceIfStale,
+  } = useWalletBalance({
+    aptos,
+    accountAddress: account?.address,
+    coinType: emojicoinLP,
+  });
 
   const copyAddress = useCallback(async () => {
     if (!account?.address) return;
@@ -119,23 +152,32 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     }
   }, [account?.address]);
 
-  // Any time the lastResponse changes, we will parse the write set changes to update the balance as long as
-  // the sender of the transaction is still the currently connected account.
-  useEffect(() => {
-    const response = lastResponse?.response;
-    if (response && isUserTransactionResponse(response)) {
-      const sender = AccountAddress.from(response.sender);
-      if (account && AccountAddress.from(account.address).equals(sender)) {
-        const changes = response.changes;
-        const newAptBalance = getNewCoinBalanceFromChanges({
-          changes,
-          userAddress: sender,
-          coinType: parseTypeTag(APTOS_COIN),
-        });
-        setBalance(Number(newAptBalance));
-      }
-    }
-  }, [lastResponse, aptBalance, setBalance, account]);
+  const parseChangesAndSetBalances = useCallback(
+    (response: UserTransactionResponse) => {
+      const userAddress = AccountAddress.from(response.sender);
+      // Return if the account is not connected or the sender of the transaction is not the currently connected account.
+      if (!account || !userAddress.equals(AccountAddress.from(account.address))) return;
+
+      const changes = response.changes;
+      const args = { changes, userAddress };
+      const newAptBalance = getNewCoinBalanceFromChanges({
+        ...args,
+        coinType: parseTypeTag(APTOS_COIN),
+      });
+      const newEmojicoinBalance = emojicoin
+        ? getNewCoinBalanceFromChanges({ ...args, coinType: parseTypeTag(emojicoin) })
+        : undefined;
+      const newEmojicoinLPBalance = emojicoinLP
+        ? getNewCoinBalanceFromChanges({ ...args, coinType: parseTypeTag(emojicoinLP) })
+        : undefined;
+      // Update the user's balance if the coins are present in the write set changes.
+      if (typeof newAptBalance !== "undefined") setAptBalance(newAptBalance);
+      if (typeof newEmojicoinBalance !== "undefined") setEmojicoinBalance(newEmojicoinBalance);
+      if (typeof newEmojicoinLPBalance !== "undefined")
+        setEmojicoinLPBalance(newEmojicoinLPBalance);
+    },
+    [account, emojicoin, emojicoinLP, setAptBalance, setEmojicoinBalance, setEmojicoinLPBalance]
+  );
 
   const handleTransactionSubmission = useCallback(
     async (
@@ -197,9 +239,13 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       ];
       flattenedEvents.forEach(pushEventFromClient);
 
+      if (response && isUserTransactionResponse(response)) {
+        parseChangesAndSetBalances(response);
+      }
+
       return { response, error };
     },
-    [pushEventFromClient]
+    [pushEventFromClient, parseChangesAndSetBalances]
   );
 
   const submit = useCallback(
@@ -249,6 +295,20 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     [network, handleTransactionSubmission, signTransaction, submitTransaction]
   );
 
+  const setCoinTypeHelper = (
+    set: Dispatch<SetStateAction<string | undefined>>,
+    type?: TypeTagInput
+  ) => {
+    if (!type) set(undefined);
+    else if (typeof type === "string") {
+      set(type);
+    } else if (type instanceof TypeTag) {
+      set(type.toString());
+    } else {
+      throw new Error(`Invalid type: ${type}`);
+    }
+  };
+
   const value: AptosContextState = {
     aptos,
     account,
@@ -258,10 +318,33 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     status,
     lastResponse,
     aptBalance,
-    isFetchingBalance,
-    forceRefetchBalance: forceRefetch,
-    refetchBalanceIfStale: refetchIfStale,
-    setBalance,
+    emojicoinBalance,
+    emojicoinLPBalance,
+    setEmojicoinType: (type?: TypeTagInput) => setCoinTypeHelper(setEmojicoinType, type),
+    setBalance: (coinType: TrackedCoinType, n: bigint) => {
+      if (coinType === "apt") setAptBalance(n);
+      else if (coinType === "emojicoin") setEmojicoinBalance(n);
+      else if (coinType === "emojicoinLP") setEmojicoinLPBalance(n);
+      else throw new Error(`Invalid coin type: ${coinType}`);
+    },
+    isFetching: (coinType: TrackedCoinType) => {
+      if (coinType === "apt") return isFetchingAptBalance;
+      else if (coinType === "emojicoin") return isFetchingEmojicoinBalance;
+      else if (coinType === "emojicoinLP") return isFetchingEmojicoinLPBalance;
+      else throw new Error(`Invalid coin type: ${coinType}`);
+    },
+    forceRefetch: (coinType: TrackedCoinType) => {
+      if (coinType === "apt") forceRefetchAptBalance();
+      else if (coinType === "emojicoin") forceRefetchEmojicoinBalance();
+      else if (coinType === "emojicoinLP") forceRefetchEmojicoinLPBalance();
+      else throw new Error(`Invalid coin type: ${coinType}`);
+    },
+    refetchIfStale: (coinType: TrackedCoinType) => {
+      if (coinType === "apt") refetchAptBalanceIfStale();
+      else if (coinType === "emojicoin") refetchEmojicoinBalanceIfStale();
+      else if (coinType === "emojicoinLP") refetchEmojicoinLPBalanceIfStale();
+      else throw new Error(`Invalid coin type: ${coinType}`);
+    },
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;

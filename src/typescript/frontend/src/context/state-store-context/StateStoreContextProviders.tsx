@@ -6,6 +6,7 @@ import { type StoreApi } from "zustand";
 import { type EventStore, createEventStore } from "@store/event-store";
 import { type MarketDataStore, createMarketDataStore } from "@store/market-data";
 import { type WebSocketClientStore, createWebSocketClientStore } from "@store/websocket-store";
+import { type CoinBalanceStore, createCoinBalanceStore } from "@store/coin-balance-store";
 
 /**
  *
@@ -72,4 +73,28 @@ export const MarketDataProvider = ({ children, initialState }: MarketDataProvide
     store.current = createMarketDataStore(initialState);
   }
   return <MarketDataContext.Provider value={store.current}>{children}</MarketDataContext.Provider>;
+};
+
+/**
+ *
+ * -------------------
+ * Coin Balance Context
+ * -------------------
+ *
+ */
+export const CoinBalanceContext = createContext<StoreApi<CoinBalanceStore> | null>(null);
+
+export interface CoinBalanceProviderProps {
+  children: ReactNode;
+  initialState?: CoinBalanceStore;
+}
+
+export const CoinBalanceProvider = ({ children, initialState }: CoinBalanceProviderProps) => {
+  const store = useRef<StoreApi<CoinBalanceStore>>();
+  if (!store.current) {
+    store.current = createCoinBalanceStore(initialState);
+  }
+  return (
+    <CoinBalanceContext.Provider value={store.current}>{children}</CoinBalanceContext.Provider>
+  );
 };

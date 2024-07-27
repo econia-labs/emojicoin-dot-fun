@@ -2,7 +2,7 @@
 import Script from "next/script";
 import { type ChartContainerProps } from "./types";
 import React, { Suspense, useEffect } from "react";
-import { useWebSocketClient } from "context/websockets-context";
+import { useWebSocketClient } from "context/state-store-context";
 import Loading from "components/loading";
 import PrivateChart from "./PrivateChart";
 

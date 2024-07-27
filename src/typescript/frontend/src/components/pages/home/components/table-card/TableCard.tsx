@@ -12,7 +12,7 @@ import { type TableCardProps } from "./types";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { motion, useAnimationControls } from "framer-motion";
 import { Arrow } from "components/svg";
 import "./module.css";

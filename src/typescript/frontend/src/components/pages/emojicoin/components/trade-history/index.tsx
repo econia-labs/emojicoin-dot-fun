@@ -3,7 +3,7 @@ import React, { type PropsWithChildren, useEffect, useMemo } from "react";
 import { type TradeHistoryProps } from "../../types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { getRankFromSwapEvent } from "lib/utils/get-user-rank";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { type Types } from "@sdk/types/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import TableRow from "./table-row";

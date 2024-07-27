@@ -9,9 +9,10 @@ import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
-import { useEventStore } from "context/websockets-context";
+import { useEventStore } from "context/state-store-context";
 import { useMatchBreakpoints } from "@hooks/index";
 import { useSearchParams } from "next/navigation";
+import { translationFunction } from "context/language-context";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -45,6 +46,7 @@ export default function SwapComponent({
   initNumSwaps,
 }: SwapComponentProps) {
   const searchParams = useSearchParams();
+  const { t } = translationFunction();
 
   const presetInputAmount =
     searchParams.get("buy") !== null ? searchParams.get("buy") : searchParams.get("sell");
@@ -139,14 +141,11 @@ export default function SwapComponent({
         <SimulateInputsWrapper>
           <InnerWrapper>
             <Column>
-              <div className={grayLabel}>You {isSell ? "sell" : "pay"}</div>
+              <div className={grayLabel}>{isSell ? t("You sell") : t("You pay")}</div>
               <input
                 className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
                 value={inputAmount}
-                min={0}
-                // TODO: Fix this conversion so that it doesn't break upon multiplying by DECIMALS ** 10n
-                // in the `Big` library.
-                max={Number.MAX_SAFE_INTEGER}
+                min={0} // min, max, and step don't do anything here. They're here for possible accessibility purposes.
                 step={0.01}
                 onChange={handleInput}
                 onKeyDown={handleKeyDown}

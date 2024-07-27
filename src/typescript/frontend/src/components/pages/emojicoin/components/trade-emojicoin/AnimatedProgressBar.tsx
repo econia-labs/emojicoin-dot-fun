@@ -1,6 +1,6 @@
 import { Text } from "components";
 import { type GridProps } from "components/pages/emojicoin/types";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";

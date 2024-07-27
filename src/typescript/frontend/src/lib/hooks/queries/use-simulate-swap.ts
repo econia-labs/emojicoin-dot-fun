@@ -5,6 +5,8 @@ import { type Aptos } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { withResponseError } from "./client";
+import Big from "big.js";
+import { useMemo } from "react";
 
 export const simulateSwap = async (args: {
   aptos: Aptos;
@@ -33,10 +35,17 @@ export const useSimulateSwap = (args: {
   isSell: boolean;
   numSwaps: number;
 }) => {
+
   const { marketAddress, isSell, numSwaps } = args;
   const { aptos } = useAptos();
-  const inputAmount = BigInt(args.inputAmount);
-  const invalid = inputAmount === 0n || isNaN(Number(inputAmount));
+  const { inputAmount, invalid } = useMemo(() => {
+    const bigInput = Big(args.inputAmount.toString());
+    const inputAmount = BigInt(bigInput.toString());
+    return {
+      invalid: inputAmount === 0n,
+      inputAmount,
+    };
+  }, [args.inputAmount]);
 
   const { data } = useQuery({
     queryKey: [

@@ -3,7 +3,12 @@ import { type MarketDataStore } from "@store/market-data";
 import { type WebSocketClientStore } from "@store/websocket-store";
 import { useContext } from "react";
 import { useStore } from "zustand";
-import { WebSocketEventContext, MarketDataContext } from "./WebSocketContextProvider";
+import {
+  WebSocketEventContext,
+  MarketDataContext,
+  CoinBalanceContext,
+} from "./StateStoreContextProviders";
+import { type CoinBalanceStore } from "@store/coin-balance-store";
 
 export const useEventStore = <T,>(selector: (store: EventStore) => T): T => {
   const eventStoreContext = useContext(WebSocketEventContext);
@@ -32,4 +37,14 @@ export const useMarketData = <T,>(selector: (store: MarketDataStore) => T): T =>
   }
 
   return useStore(marketDataContext, selector);
+};
+
+export const useCoinBalanceStore = <T,>(selector: (store: CoinBalanceStore) => T): T => {
+  const coinBalanceContext = useContext(CoinBalanceContext);
+
+  if (coinBalanceContext === null) {
+    throw new Error("useCoinBalanceStore must be used within a CoinBalanceProvider");
+  }
+
+  return useStore(coinBalanceContext, selector);
 };

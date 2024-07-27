@@ -1,4 +1,4 @@
-import { type AccountAddressInput, type Aptos, APTOS_COIN, parseTypeTag } from "@aptos-labs/ts-sdk";
+import { type AccountAddressInput, type Aptos } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { withResponseError } from "./client";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -25,19 +25,19 @@ import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 export const useWalletBalance = ({
   aptos,
   accountAddress,
-  coinType = parseTypeTag(APTOS_COIN),
+  coinType,
   staleTime = 10000,
   refetchInterval,
 }: {
   aptos: Aptos;
   accountAddress?: AccountAddressInput;
-  coinType: TypeTagInput;
+  coinType?: TypeTagInput;
   staleTime?: number;
   refetchInterval?: number;
 }) => {
   // We use a nonce here because invalidateQuery for some reason does not work.
   const [nonce, setNonce] = useState(0);
-  const manualBalance = useRef<number | null>(null);
+  const manualBalance = useRef<bigint | null>(null);
   const queryKey = useMemo(() => {
     return ["getAccountCoinAmount", aptos.config.network, accountAddress, coinType, nonce];
   }, [aptos.config.network, accountAddress, coinType, nonce]);
@@ -52,7 +52,7 @@ export const useWalletBalance = ({
   } = useQuery({
     queryKey,
     queryFn: () => {
-      if (!accountAddress) return 0;
+      if (!accountAddress || !coinType) return 0;
       if (manualBalance.current !== null) {
         const res = manualBalance.current;
         // Only use the manual balance once.
@@ -63,7 +63,7 @@ export const useWalletBalance = ({
         aptos.getAccountCoinAmount({
           accountAddress,
           coinType: coinType.toString() as `${string}::${string}::${string}`,
-        })
+        }).then((r) => BigInt(r))
       );
     },
     placeholderData: (previousBalance) => previousBalance ?? 0,
@@ -71,7 +71,7 @@ export const useWalletBalance = ({
     refetchInterval,
   });
 
-  const setBalance = useCallback((num: number) => {
+  const setBalance = useCallback((num: bigint) => {
     manualBalance.current = num;
     setNonce((n) => n + 1);
   }, []);
@@ -83,7 +83,7 @@ export const useWalletBalance = ({
   }, [refetch, isStale]);
 
   return {
-    balance: balance ?? 0,
+    balance: BigInt(balance ?? 0),
     isFetching,
     setBalance,
     forceRefetch: refetch,

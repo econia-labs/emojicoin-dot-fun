@@ -28,7 +28,7 @@ import { ROUTES } from "router/routes";
 import path from "path";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { fetchAllCandlesticksInTimeRange } from "lib/queries/charting/candlesticks-in-time-range";
-import { useEventStore } from "context/websockets-context";
+import { useEventStore } from "context/state-store-context";
 import {
   type LatestBar,
   marketViewToLatestBars,
