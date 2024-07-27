@@ -26,7 +26,6 @@ import {
 } from "lib/hooks/queries/use-simulate-provide-liquidity";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { Arrows } from "components/svg";
-import { COIN_FACTORY_MODULE_NAME } from "@sdk/const";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import info from "../../../../../../public/images/infoicon.svg";
 import { useSearchParams } from "next/navigation";
