@@ -60,10 +60,12 @@ export const useWalletBalance = ({
         return res;
       }
       return withResponseError(
-        aptos.getAccountCoinAmount({
-          accountAddress,
-          coinType: coinType.toString() as `${string}::${string}::${string}`,
-        }).then((r) => BigInt(r))
+        aptos
+          .getAccountCoinAmount({
+            accountAddress,
+            coinType: coinType.toString() as `${string}::${string}::${string}`,
+          })
+          .then((r) => BigInt(r))
       );
     },
     placeholderData: (previousBalance) => previousBalance ?? 0,

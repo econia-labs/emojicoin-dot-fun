@@ -35,7 +35,6 @@ export const useSimulateSwap = (args: {
   isSell: boolean;
   numSwaps: number;
 }) => {
-
   const { marketAddress, isSell, numSwaps } = args;
   const { aptos } = useAptos();
   const { inputAmount, invalid } = useMemo(() => {

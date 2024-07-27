@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import colors, { red } from "tailwindcss/colors";
+import colors from "tailwindcss/colors";
 delete colors.lightBlue;
 delete colors.warmGray;
 delete colors.lightBlue;
