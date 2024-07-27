@@ -68,11 +68,7 @@ export const SwapButton = ({
   return (
     <>
       <ButtonWithConnectWalletFallback>
-        <Button
-          disabled={disabled}
-          onClick={handleClick}
-          scale="lg"
-        >
+        <Button disabled={disabled} onClick={handleClick} scale="lg">
           {t("Swap")}
         </Button>
       </ButtonWithConnectWalletFallback>

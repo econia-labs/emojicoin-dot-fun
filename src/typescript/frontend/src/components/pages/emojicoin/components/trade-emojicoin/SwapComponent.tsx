@@ -15,6 +15,7 @@ import { useSearchParams } from "next/navigation";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { AnimatePresence, motion } from "framer-motion";
+import { toCoinTypes } from "@sdk/markets/utils";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -68,11 +69,16 @@ export default function SwapComponent({
   const [isLoading, setIsLoading] = useState(false);
   const [isSell, setIsSell] = useState(!(searchParams.get("sell") === null));
   const [submit, setSubmit] = useState<(() => Promise<void>) | null>(null);
-  const { aptBalance, emojicoinBalance, account } = useAptos();
+  const { aptBalance, emojicoinBalance, account, setEmojicoinType } = useAptos();
 
   const numSwaps = useEventStore(
     (s) => s.getMarket(marketID.toString())?.swapEvents.length ?? initNumSwaps
   );
+
+  useEffect(() => {
+    const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();
+    setEmojicoinType(emojicoinType);
+  }, [marketAddress, setEmojicoinType]);
 
   const swapResult = useSimulateSwap({
     marketAddress,
@@ -153,7 +159,7 @@ export default function SwapComponent({
     const coinBalance = isSell ? emojicoinBalance : aptBalance;
     const balance = toDisplayCoinDecimals({
       num: coinBalance,
-      decimals: APT_DISPLAY_DECIMALS,
+      decimals: !isSell ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS,
     });
     return (
       <AnimatePresence>

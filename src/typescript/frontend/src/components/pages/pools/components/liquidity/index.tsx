@@ -31,6 +31,7 @@ import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/pay
 import info from "../../../../../../public/images/infoicon.svg";
 import { useSearchParams } from "next/navigation";
 import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-status-indicator";
+import { TypeTag } from "@aptos-labs/ts-sdk";
 
 type LiquidityProps = {
   market: FetchSortedMarketDataReturn["markets"][0] | undefined;
@@ -142,10 +143,10 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
       : true;
 
   useEffect(() => {
-    if (market) {
-      setEmojicoinType(`${market.marketAddress}::${COIN_FACTORY_MODULE_NAME}::Emojicoin`);
+    if (emojicoin instanceof TypeTag) {
+      setEmojicoinType(emojicoin);
     }
-  }, [market, setEmojicoinType]);
+  }, [emojicoin, setEmojicoinType]);
 
   useEffect(() => {
     if (account) {
