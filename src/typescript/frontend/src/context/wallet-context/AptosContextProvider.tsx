@@ -97,6 +97,12 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     coinType: parseTypeTag(APTOS_COIN),
   });
 
+  useEffect(() => {
+    if (account?.address) {
+      forceRefetch();
+    }
+  }, [account, forceRefetch]);
+
   const copyAddress = useCallback(async () => {
     if (!account?.address) return;
     try {
