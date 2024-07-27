@@ -105,7 +105,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
                 </div>
               </div>
               <div className="flex flex-row justify-between">
-                <span className="mr-[2ch]">{t("Your Balance") + ": "}</span>
+                <span className="mr-[2ch]">{t("Your balance") + ": "}</span>
                 <div>
                   <span
                     className={
