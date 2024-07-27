@@ -5,19 +5,22 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 
 /**
- * __NOTE: You should prefer__ to use `aptBalance, setBalance, refetchBalance` in
- * `AptosContextProvider` instead of this hook, because it will have persistent state across the
- *  whole application.
+ * __NOTE: If you're using this for a connected user's APT balance, you should use__
+ * `aptBalance, setBalance, refetchBalance` in the `AptosContextProvider` instead of this hook,
+ * because it will have persistent state across the whole application.
  *
  * A hook to get the user's account balance for a coin type. Defaults to APT if no type is provided.
  *
  * @param aptos The aptos client
  * @param accountAddress The account address for which to get the balance
  * @param coinTypeTag The coin type for which to get the balance
- * @returns `null` is the account is undefined, `undefined` while fetching, and the user's account
- * balance for the specified coin type upon a successful fetch.
- * It also returns a `setBalance` function to manually update the balance and a `refetchBalance`
- * function to trigger a refetch with an invalidated cache.
+ * @param staleTime The time in milliseconds before the cache is considered stale
+ * @param refetchInterval The time in milliseconds to refetch the balance
+ * @returns {number} balance The balance of the account
+ * @returns {boolean} isFetching Whether the query is fetching
+ * @returns {(num: number) => void} setBalance A function to manually set the balance
+ * @returns {() => void} forceRefetch A function to force refetch the balance
+ * @returns {() => void} refetchIfStale A function to refetch the balance only if it is stale
  */
 export const useWalletBalance = ({
   aptos,

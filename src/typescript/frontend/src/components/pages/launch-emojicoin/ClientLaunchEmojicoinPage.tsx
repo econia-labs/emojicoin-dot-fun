@@ -59,7 +59,7 @@ const ClientLaunchEmojicoinPage = () => {
     if (response && isUserTransactionResponse(response)) {
       const lastResponseEvents = getEvents(response);
       if (!lastResponseEvents.marketRegistrationEvents.length) return;
-      
+
       // NOTE: revalidateTagAction may cause a flicker in the loading animation because the server
       // rerenders and sends the RSC components again. To avoid this we'll probably need to finish the animation
       // orchestration with a different animation or cover it up somehow, otherwise I'm not sure how to fix it in a

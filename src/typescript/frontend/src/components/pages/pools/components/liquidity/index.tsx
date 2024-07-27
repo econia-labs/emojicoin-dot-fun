@@ -151,14 +151,12 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           functionArguments: [account?.address],
         },
       });
-      Promise.all([emojicoinBalance, emojicoinLPBalance]).then(
-        ([emojicoin, emojicoinLP]) => {
-          if (emojicoin[0] && emojicoinLP[0]) {
-            setEmojiBalance(BigInt(emojicoin[0].toString()));
-            setEmojiLPBalance(BigInt(emojicoinLP[0].toString()));
-          }
+      Promise.all([emojicoinBalance, emojicoinLPBalance]).then(([emojicoin, emojicoinLP]) => {
+        if (emojicoin[0] && emojicoinLP[0]) {
+          setEmojiBalance(BigInt(emojicoin[0].toString()));
+          setEmojiLPBalance(BigInt(emojicoinLP[0].toString()));
         }
-      );
+      });
     } else if (account) {
       refetchBalanceIfStale();
     }
