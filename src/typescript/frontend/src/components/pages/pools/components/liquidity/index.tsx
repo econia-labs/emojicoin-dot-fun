@@ -30,7 +30,7 @@ import { COIN_FACTORY_MODULE_NAME } from "@sdk/const";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import info from "../../../../../../public/images/infoicon.svg";
 import { useSearchParams } from "next/navigation";
-import { APTOS_COIN, isUserTransactionResponse, parseTypeTag } from "@aptos-labs/ts-sdk";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { getNewCoinBalanceFromChanges } from "utils/parse-changes-for-balances";
 
 type LiquidityProps = {
@@ -41,7 +41,7 @@ const fmtCoin = (n: number | bigint | string | undefined) => {
   if (n === undefined) {
     return n;
   }
-  return new Intl.NumberFormat().format(Number(toCoinDecimalString(BigInt(n), 8)));
+  return new Intl.NumberFormat().format(Number(toCoinDecimalString(n, 8)));
 };
 
 const unfmtCoin = (n: number | bigint | string) => {
@@ -97,7 +97,6 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
   const [lp, setLP] = useState<number | "">(
     searchParams.get("remove") !== null && presetInputAmountIsValid ? Number(presetInputAmount) : ""
   );
-  const [aptBalance, setAptBalance] = useState<bigint>();
   const [emojiBalance, setEmojiBalance] = useState<bigint>();
   const [emojiLPBalance, setEmojiLPBalance] = useState<bigint>();
   const [direction, setDirection] = useState<"add" | "remove">(
@@ -105,7 +104,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
   );
   const [showLiquidityPrompt, setShowLiquidityPrompt] = useState<boolean>(false);
 
-  const { aptos, account, submit } = useAptos();
+  const { aptos, account, submit, aptBalance, refetchBalanceIfStale } = useAptos();
 
   const provideLiquidityResult = useSimulateProvideLiquidity({
     marketAddress: market?.marketAddress,
@@ -138,13 +137,6 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
     if (market && account) {
       const emojicoin = `${market.marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::Emojicoin`;
       const emojicoinLP = `${market.marketAddress.toString()}::${COIN_FACTORY_MODULE_NAME}::EmojicoinLP`;
-      const aptosBalance = aptos.view({
-        payload: {
-          function: "0x1::coin::balance",
-          typeArguments: ["0x1::aptos_coin::AptosCoin"],
-          functionArguments: [account?.address],
-        },
-      });
       const emojicoinBalance = aptos.view({
         payload: {
           function: "0x1::coin::balance",
@@ -159,30 +151,18 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           functionArguments: [account?.address],
         },
       });
-      Promise.all([aptosBalance, emojicoinBalance, emojicoinLPBalance]).then(
-        ([apt, emojicoin, emojicoinLP]) => {
-          if (apt[0] && emojicoin[0] && emojicoinLP[0]) {
+      Promise.all([emojicoinBalance, emojicoinLPBalance]).then(
+        ([emojicoin, emojicoinLP]) => {
+          if (emojicoin[0] && emojicoinLP[0]) {
             setEmojiBalance(BigInt(emojicoin[0].toString()));
-            setAptBalance(BigInt(apt[0].toString()));
             setEmojiLPBalance(BigInt(emojicoinLP[0].toString()));
           }
         }
       );
     } else if (account) {
-      aptos
-        .view({
-          payload: {
-            function: "0x1::coin::balance",
-            typeArguments: ["0x1::aptos_coin::AptosCoin"],
-            functionArguments: [account?.address],
-          },
-        })
-        .then((res) => {
-          if (res[0]) {
-            setAptBalance(BigInt(res[0].toString()));
-          }
-        });
+      refetchBalanceIfStale();
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [market, account, aptos]);
 
   const isActionPossible =
@@ -370,17 +350,13 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
                     });
                 }
                 const res = await submit(builderLambda);
-                // Parse the event changes and update the user's APT, emojicoin, and emojicoin LP balance in the UI
+                // Parse the event changes and update the user's emojicoin and emojicoin LP balance in the UI
                 // based on the write set changes from the transaction response.
+                // The user's APT balance is already parsed and updated in the AptosContextProvider.
                 if (res && res.response) {
                   if (isUserTransactionResponse(res.response)) {
                     const changes = res.response.changes;
                     const userAddress = account.address;
-                    const newAptBalance = getNewCoinBalanceFromChanges({
-                      changes,
-                      userAddress,
-                      coinType: parseTypeTag(APTOS_COIN),
-                    });
                     const newEmojiBalance = getNewCoinBalanceFromChanges({
                       changes,
                       userAddress,
@@ -391,7 +367,6 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
                       userAddress,
                       coinType: emojicoinLP,
                     });
-                    setAptBalance(newAptBalance);
                     setEmojiBalance(newEmojiBalance);
                     setEmojiLPBalance(newEmojiLPBalance);
                   }

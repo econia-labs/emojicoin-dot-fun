@@ -1,5 +1,9 @@
 import {
+  AccountAddress,
+  APTOS_COIN,
   AptosApiError,
+  isUserTransactionResponse,
+  parseTypeTag,
   type Aptos,
   type PendingTransactionResponse,
   type UserTransactionResponse,
@@ -10,6 +14,7 @@ import {
   type PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -26,6 +31,8 @@ import { useEventStore } from "context/websockets-context";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { sleep, UnitOfTime } from "@sdk/utils";
+import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
+import { getNewCoinBalanceFromChanges } from "utils/parse-changes-for-balances";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -50,6 +57,11 @@ export type AptosContextState = {
   copyAddress: () => void;
   status: TransactionStatus;
   lastResponse: ResponseType;
+  aptBalance: number;
+  isFetchingBalance: boolean;
+  forceRefetchBalance: () => void;
+  refetchBalanceIfStale: () => void;
+  setBalance: (n: number) => void;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
@@ -73,6 +85,18 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     return getAptos();
   }, [network]);
 
+  const {
+    balance: aptBalance,
+    setBalance,
+    isFetching: isFetchingBalance,
+    forceRefetch,
+    refetchIfStale,
+  } = useWalletBalance({
+    aptos,
+    accountAddress: account?.address,
+    coinType: parseTypeTag(APTOS_COIN),
+  });
+
   const copyAddress = useCallback(async () => {
     if (!account?.address) return;
     try {
@@ -88,6 +112,24 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       });
     }
   }, [account?.address]);
+
+  // Any time the lastResponse changes, we will parse the write set changes to update the balance as long as
+  // the sender of the transaction is still the currently connected account.
+  useEffect(() => {
+    const response = lastResponse?.response;
+    if (response && isUserTransactionResponse(response)) {
+      const sender = AccountAddress.from(response.sender);
+      if (account && AccountAddress.from(account.address).equals(sender)) {
+        const changes = response.changes;
+        const newAptBalance = getNewCoinBalanceFromChanges({
+          changes,
+          userAddress: sender,
+          coinType: parseTypeTag(APTOS_COIN),
+        });
+        setBalance(Number(newAptBalance));
+      }
+    }
+  }, [lastResponse, aptBalance, setBalance, account]);
 
   const handleTransactionSubmission = useCallback(
     async (
@@ -148,6 +190,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         ...events.liquidityEvents,
       ];
       flattenedEvents.forEach(pushEventFromClient);
+
       return { response, error };
     },
     [pushEventFromClient]
@@ -208,6 +251,11 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     copyAddress,
     status,
     lastResponse,
+    aptBalance,
+    isFetchingBalance,
+    forceRefetchBalance: forceRefetch,
+    refetchBalanceIfStale: refetchIfStale,
+    setBalance,
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;
