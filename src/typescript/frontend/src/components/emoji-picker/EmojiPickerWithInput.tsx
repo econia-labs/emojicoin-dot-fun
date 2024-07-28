@@ -101,13 +101,6 @@ export const EmojiPickerWithInput = ({
     }
   }, []);
 
-  // Allow for any input change, just filter the input text to only include valid emojis.
-  const onInputHandler = (e: React.FormEvent<HTMLTextAreaElement>) => {
-    if (checkTargetAndStopDefaultPropagation(e, textAreaRef.current)) {
-      insertEmojiTextInput((e.target as HTMLTextAreaElement).value);
-    }
-  };
-
   const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
     if (!target) return;
@@ -125,6 +118,9 @@ export const EmojiPickerWithInput = ({
       removeEmojiTextInput(e.key);
     } else if (isDisallowedEventKey(e)) {
       e.preventDefault();
+    } else {
+      // If the key is an emoji, insert it. This will do nothing if the key is not an emoji.
+      insertEmojiTextInput(e.key);
     }
   };
 
@@ -175,7 +171,6 @@ export const EmojiPickerWithInput = ({
                   onPaste={handlePaste}
                   onCut={handleCut}
                   onKeyDown={onKeyDownHandler}
-                  onInput={onInputHandler}
                   onClick={() => {
                     setPickerInvisible(false);
                     setTextAreaRef(textAreaRef.current); // Ensure the ref is set.
