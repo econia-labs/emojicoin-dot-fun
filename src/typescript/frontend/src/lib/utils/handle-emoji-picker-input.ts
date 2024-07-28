@@ -54,6 +54,8 @@ export const insertEmojiTextInput = (textToInsert: string | string[]) => {
   const indices = calculateEmojiIndices(newEmojis);
   const newSelectionEnd = indices[newEmojiEnd];
 
+  console.log("newEmojis" + newEmojis);
+
   setEmojis(newEmojis, {
     start: newSelectionEnd,
   });

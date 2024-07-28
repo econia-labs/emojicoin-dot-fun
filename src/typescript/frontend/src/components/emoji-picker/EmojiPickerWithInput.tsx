@@ -7,7 +7,7 @@ import ClosePixelated from "@icons/ClosePixelated";
 import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
 import { motion } from "framer-motion";
 import { insertEmojiTextInput, removeEmojiTextInput } from "lib/utils/handle-emoji-picker-input";
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { isDisallowedEventKey } from "utils";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import { MarketValidityIndicator } from "./ColoredBytesIndicator";
@@ -15,6 +15,7 @@ import { variants } from "./animation-variants";
 import "./triangle.css";
 import { checkTargetAndStopDefaultPropagation } from "./utils";
 import { getEmojisInString } from "@sdk/emoji_data";
+import { isMobile, isTablet } from "react-device-detect";
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -64,6 +65,12 @@ export const EmojiPickerWithInput = ({
     await handleClick(message);
   };
 
+  // The emoji picker button is only visible if the user is not on a mobile or tablet device. This is because
+  // mobile devices have native support for emoji keyboards and are generally much easier to use.
+  const shouldUseCustomPicker = useMemo(() => {
+    return !isMobile && !isTablet;
+  }, []);
+
   // Clear the input and set the onClickOutside event handler on mount.
   useEffect(() => {
     clear();
@@ -106,7 +113,6 @@ export const EmojiPickerWithInput = ({
     const target = e.target as HTMLTextAreaElement;
     if (!target) return;
     if (getEmojisInString(e.key).length) {
-      e.preventDefault();
       insertEmojiTextInput(e.key);
     } else if (e.key === "Enter") {
       e.preventDefault();
@@ -207,21 +213,23 @@ export const EmojiPickerWithInput = ({
           </div>
         </InputGroup>
       </ConditionalWrapper>
-      <motion.button
-        animate={pickerInvisible ? "hidden" : focused ? "visible" : "hidden"}
-        variants={variants}
-        initial={{
-          opacity: 0,
-          scale: 0,
-        }}
-        style={{
-          zIndex: focused ? 50 : -1,
-          cursor: focused ? "auto" : "pointer",
-        }}
-        className={`absolute z-50 ${pickerButtonClassName}`}
-      >
-        <EmojiPicker id="picker" className={mode} />
-      </motion.button>
+      {shouldUseCustomPicker && (
+        <motion.button
+          animate={pickerInvisible ? "hidden" : focused ? "visible" : "hidden"}
+          variants={variants}
+          initial={{
+            opacity: 0,
+            scale: 0,
+          }}
+          style={{
+            zIndex: focused ? 50 : -1,
+            cursor: focused ? "auto" : "pointer",
+          }}
+          className={`absolute z-50 ${pickerButtonClassName}`}
+        >
+          <EmojiPicker id="picker" className={mode} />
+        </motion.button>
+      )}
     </Flex>
   );
 };
