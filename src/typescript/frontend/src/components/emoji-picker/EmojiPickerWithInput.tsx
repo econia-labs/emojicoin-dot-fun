@@ -14,6 +14,7 @@ import { MarketValidityIndicator } from "./ColoredBytesIndicator";
 import { variants } from "./animation-variants";
 import "./triangle.css";
 import { checkTargetAndStopDefaultPropagation } from "./utils";
+import { getEmojisInString } from "@sdk/emoji_data";
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -104,7 +105,10 @@ export const EmojiPickerWithInput = ({
   const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
     if (!target) return;
-    if (e.key === "Enter") {
+    if (getEmojisInString(e.key).length) {
+      e.preventDefault();
+      insertEmojiTextInput(e.key);
+    } else if (e.key === "Enter") {
       e.preventDefault();
       await handleSubmission(emojis.join(""));
     } else if (e.ctrlKey || e.metaKey) {
@@ -118,9 +122,6 @@ export const EmojiPickerWithInput = ({
       removeEmojiTextInput(e.key);
     } else if (isDisallowedEventKey(e)) {
       e.preventDefault();
-    } else {
-      // If the key is an emoji, insert it. This will do nothing if the key is not an emoji.
-      insertEmojiTextInput(e.key);
     }
   };
 
