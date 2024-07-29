@@ -19,6 +19,8 @@ import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
 import type { Types } from "@sdk/types/types";
 import { parseJSON } from "utils";
+import { MAX_NUM_CHAT_EMOJIS } from "@sdk/const";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 const convertChatMessageToEmojiAndIndices = (
   message: string,
@@ -88,7 +90,7 @@ const ChatBox = (props: ChatProps) => {
   };
 
   const sendChatMessage = async () => {
-    if (!account) {
+    if (!account || emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS) {
       return;
     }
     const emojiText = emojis.join("");
@@ -106,8 +108,10 @@ const ChatBox = (props: ChatProps) => {
         emojiIndicesSequence: new Uint8Array(emojiIndicesSequence),
         typeTags: [emojicoin, emojicoinLP],
       });
-    await submit(builderLambda);
-    clear();
+    const res = await submit(builderLambda);
+    if (res && res.response && isUserTransactionResponse(res.response)) {
+      clear();
+    }
   };
 
   // TODO: Add infinite scroll to this.

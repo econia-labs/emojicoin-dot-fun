@@ -69,7 +69,6 @@ export const EmojiPickerWithInput = ({
 
   // Append the picker visibility mutation to the end of the handleClick function.
   const handleSubmission = async (message: string) => {
-    setPickerInvisible(true);
     await handleClick(message);
   };
 
@@ -116,6 +115,8 @@ export const EmojiPickerWithInput = ({
     const target = e.target as HTMLTextAreaElement;
     if (!target) return;
     if (getEmojisInString(e.key).length) {
+      e.preventDefault();
+      e.stopPropagation();
       insertEmojiTextInput(e.key);
     } else if (e.key === "Enter") {
       e.preventDefault();
@@ -196,7 +197,8 @@ export const EmojiPickerWithInput = ({
                           emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS
                             ? "not-allowed"
                             : "pointer",
-                        opacity: emojis.length === 0 || emojis.length >= 100 ? 0.2 : 1,
+                        opacity:
+                          emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS ? 0.2 : 1,
                       }}
                       ref={sendButtonRef}
                     >

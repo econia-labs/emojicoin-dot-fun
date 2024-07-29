@@ -22,7 +22,6 @@ const ESTIMATED_TOTAL_COST = Number(MARKET_REGISTRATION_FEE) + ESTIMATED_GAS_REQ
 export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   // Maybe it's this...? Maybe we need to memoize this value.
   const { t } = translationFunction();
-  const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
   const emojis = useEmojiPicker((state) => state.emojis);
   const setIsLoadingRegisteredMarket = useEmojiPicker(
     (state) => state.setIsLoadingRegisteredMarket
@@ -48,6 +47,12 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
     refetchIfStale("apt");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [emojis]);
+  
+  const handleClick = async () => {
+    if (!invalid && !registered) {
+      await registerMarket();
+    }
+  };
 
   return (
     <AnimatePresence initial={false} mode="wait">
@@ -63,7 +68,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
           <div className="flex relative mb-1">
             <div className="flex flex-col grow relative w-full">
               <EmojiPickerWithInput
-                handleClick={registerMarket}
+                handleClick={handleClick}
                 pickerButtonClassName="top-[220px] bg-black"
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
@@ -132,7 +137,6 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
               invalid={invalid || !sufficientBalance}
               registered={registered}
               onWalletButtonClick={() => {
-                setPickerInvisible(true);
                 registerMarket();
               }}
             />
