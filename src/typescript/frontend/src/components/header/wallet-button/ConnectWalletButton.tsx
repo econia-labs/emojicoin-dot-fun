@@ -7,9 +7,9 @@ import { useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
 import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
-import { isBanned } from "utils/geolocation";
 import Popup from "components/popup";
 import Text from "components/text";
+import useIsBanned from "@hooks/use-is-banned";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
@@ -27,11 +27,12 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   const { connected, account } = useWallet();
   const { openWalletModal } = useWalletModal();
   const { t } = translationFunction();
+  const isBanned = useIsBanned();
 
   const [enabled, setEnabled] = useState(false);
 
   const text = useMemo(() => {
-    if (!isBanned() && connected) {
+    if (!isBanned && connected) {
       if (account) {
         // If there's no button text provided, we just show the truncated address.
         // Keep in mind this only shows if no children are passed to the component.
@@ -63,15 +64,16 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
     }
   };
 
+
   // This component is used to display the `Connect Wallet` button and text with a scramble effect.
   // We use it in both mobile and desktop components.
   const inner =
-      !connected || !children || isBanned() ? (
+      !connected || !children || isBanned ? (
         <Button
           className={
             className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
           }
-          disabled={isBanned()}
+          disabled={isBanned}
           onClick={(e) => {
             e.preventDefault();
             onClick ? onClick() : openWalletModal();
@@ -79,7 +81,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
           }}
           onMouseOver={handleReplay}
         >
-          <div className={`flex flex-row text-${isBanned() ? "dark-gray" : "ec-blue"} text-2xl justify-between`}>
+          <div className={`flex flex-row text-${isBanned ? "dark-gray" : "ec-blue"} text-2xl justify-between`}>
             <div className="flex flex-row">
               <OuterConnectText side="left" connected={connected} mobile={mobile} />
               <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>

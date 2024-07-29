@@ -6,6 +6,7 @@ let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;
 let INTEGRATOR_FEE_RATE_BPS: number;
 let MQTT_URL: string;
+let IPINFO_TOKEN: string;
 
 const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_ALLOWLIST_ENABLED === "true";
 
@@ -24,6 +25,12 @@ if (process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS) {
   INTEGRATOR_ADDRESS = process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS;
 } else {
   throw new Error("Environment variable NEXT_PUBLIC_INTEGRATOR_ADDRESS is undefined.");
+}
+
+if (process.env.NEXT_PUBLIC_IPINFO_TOKEN) {
+  IPINFO_TOKEN = process.env.NEXT_PUBLIC_IPINFO_TOKEN;
+} else {
+  throw new Error("Environment variable NEXT_PUBLIC_IPINFO_TOKEN is undefined.");
 }
 
 if (process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS) {
@@ -52,6 +59,8 @@ export {
   APTOS_NETWORK,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
+  IPINFO_TOKEN,
+
   IS_ALLOWLIST_ENABLED,
   MQTT_URL,
   VERSION,

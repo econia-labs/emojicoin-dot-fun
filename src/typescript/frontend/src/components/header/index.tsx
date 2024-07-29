@@ -20,7 +20,7 @@ import { useSearchParams } from "next/navigation";
 import Link, { type LinkProps } from "next/link";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { GeoblockedBanner } from "components/geoblocking";
-import { isBanned } from "utils/geolocation";
+import useIsBanned from "@hooks/use-is-banned";
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
@@ -57,6 +57,8 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
       },
     };
   }, [searchParams, handleCloseMobileMenu, clear]);
+
+  const isBanned = useIsBanned();
 
   return (
     <StyledContainer ref={headerRef}>
@@ -111,7 +113,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
         </Flex>
       </Container>
       <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={linksForCurrentPage} />
-      {isBanned() && <GeoblockedBanner />}
+      {isBanned && <GeoblockedBanner />}
     </StyledContainer>
   );
 };
