@@ -193,6 +193,7 @@ export const EmojiPickerWithInput = ({
                   autoFocus={true}
                   onPaste={handlePaste}
                   onCut={handleCut}
+                  inputMode={nativePicker ? "text" : "none"}
                   onKeyDown={onKeyDownHandler}
                   onFocus={(e) => {
                     // Stop the focus from bubbling up to the `Flex` component above. We only want to focus
