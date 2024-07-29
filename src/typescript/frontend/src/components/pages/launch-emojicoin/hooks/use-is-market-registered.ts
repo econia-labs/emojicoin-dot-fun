@@ -4,7 +4,7 @@ import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import useInputStore from "@store/input-store";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useEventStore } from "context/websockets-context";
+import { useEventStore } from "context/state-store-context";
 
 const encoder = new TextEncoder();
 

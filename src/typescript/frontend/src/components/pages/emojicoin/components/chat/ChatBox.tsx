@@ -12,7 +12,7 @@ import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import useInputStore from "@store/input-store";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";

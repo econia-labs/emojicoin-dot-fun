@@ -18,7 +18,7 @@ import StyledToaster from "styles/StyledToaster";
 import {
   WebSocketEventsProvider,
   MarketDataProvider,
-} from "./websockets-context/WebSocketContextProvider";
+} from "./state-store-context/StateStoreContextProviders";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
