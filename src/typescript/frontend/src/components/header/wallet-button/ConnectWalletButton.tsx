@@ -1,6 +1,6 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Button } from "@headlessui/react";
-import { truncateAddress } from "@sdk/utils/misc";
+import { truncateAddress, truncateANSName } from "@sdk/utils/misc";
 import { translationFunction } from "context/language-context";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
 import { useMemo, useState, type PropsWithChildren } from "react";
@@ -30,6 +30,9 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   const text = useMemo(() => {
     if (connected) {
       if (account) {
+        if (account.ansName) {
+          return truncateANSName(account.ansName);
+        }
         // If there's no button text provided, we just show the truncated address.
         // Keep in mind this only shows if no children are passed to the component.
         return truncateAddress(account.address);
@@ -41,7 +44,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   }, [connected, account, t]);
 
   const width = useMemo(() => {
-    return `${text.length}ch`;
+    return `${text.length + 1}ch`;
   }, [text]);
 
   const { ref, replay } = useScramble({

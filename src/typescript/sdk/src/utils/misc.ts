@@ -171,7 +171,18 @@ export const truncateAddress = (input: HexInput, numChars: number = 4): string =
     s = input;
   }
   const res = normalizeHex(s);
-  return `${res.substring(0, numChars + 2)}...${res.substring(res.length - numChars, res.length)}`;
+  const start = res.substring(0, numChars + 2);
+  const end = res.substring(res.length - numChars, res.length);
+  return `${start}...${end}`;
+};
+
+export const truncateANSName = (input: string, numChars: number = 4): string => {
+  if (input.length > 11) {
+    const start = input.substring(0, numChars);
+    const end = input.substring(input.length - numChars, input.length);
+    return `${start}...${end}`;
+  }
+  return input;
 };
 
 export class Lazy<T> {

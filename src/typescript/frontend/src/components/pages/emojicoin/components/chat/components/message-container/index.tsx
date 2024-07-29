@@ -15,7 +15,7 @@ import { type MessageContainerProps } from "./types";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { normalizeAddress, truncateAddress } from "@sdk/utils";
+import { normalizeAddress, truncateAddress, truncateANSName } from "@sdk/utils";
 
 const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
   const { account } = useAptos();
@@ -26,7 +26,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
       return;
     }
     const normalized = normalizeAddress(account.address);
-    setFromAnotherUser(normalized !== message.sender);
+    setFromAnotherUser(normalized !== message.sender && account.ansName !== message.sender);
   }, [account, fromAnotherUser, message]);
 
   return (
@@ -44,7 +44,10 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
               href={toExplorerLink({ value: message.version, linkType: "version" })}
             >
               <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
-                {truncateAddress(message.sender)}
+                {/* Note: someone could have a name starting with "0x", is it a problem ? */}
+                {message.sender.startsWith("0x")
+                  ? truncateAddress(message.sender)
+                  : truncateANSName(message.sender)}
               </Text>
             </a>
 

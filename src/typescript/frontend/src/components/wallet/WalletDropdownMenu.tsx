@@ -12,7 +12,7 @@ import {
 import React, { useMemo, useState } from "react";
 import { User, Copy, LogOut } from "lucide-react";
 import { translationFunction } from "context/language-context";
-import { truncateAddress } from "@sdk/utils/misc";
+import { truncateAddress, truncateANSName } from "@sdk/utils/misc";
 import { useScramble } from "use-scramble";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { WalletDropdownItem } from "./WalletDropdownItem";
@@ -28,6 +28,9 @@ const WalletDropdownMenu = () => {
 
   const text = useMemo(() => {
     if (account) {
+      if (account.ansName) {
+        return truncateANSName(account.ansName);
+      }
       return truncateAddress(account.address);
     } else {
       return t("Connected");
@@ -45,7 +48,7 @@ const WalletDropdownMenu = () => {
   });
 
   const width = useMemo(() => {
-    return `${text.length}ch`;
+    return `${text.length + 1}ch`;
   }, [text]);
 
   const handleReplay = (enabled: boolean, replay: () => void) => {
