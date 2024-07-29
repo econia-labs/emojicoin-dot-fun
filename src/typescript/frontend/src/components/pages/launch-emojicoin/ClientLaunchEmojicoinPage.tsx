@@ -1,7 +1,7 @@
 "use client";
 
 import TextCarousel from "components/text-carousel/TextCarousel";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getEmojisInString } from "@sdk/emoji_data";
@@ -23,12 +23,12 @@ type Stage = "initial" | "loading" | "coding";
 const ClientLaunchEmojicoinPage = () => {
   const searchParams = useSearchParams();
   const emojiParams = searchParams.get("emojis");
-  const setEmojis = useInputStore((state) => state.setEmojis);
-  const setMode = useInputStore((state) => state.setMode);
+  const setEmojis = useEmojiPicker((state) => state.setEmojis);
+  const setMode = useEmojiPicker((state) => state.setMode);
   const router = useRouter();
   const { status, lastResponse: lastResponseFromContext } = useAptos();
   const lastResponse = useRef(lastResponseFromContext?.response);
-  const isLoadingRegisteredMarket = useInputStore((state) => state.isLoadingRegisteredMarket);
+  const isLoadingRegisteredMarket = useEmojiPicker((state) => state.isLoadingRegisteredMarket);
   const [stage, setStage] = useState<Stage>(isLoadingRegisteredMarket ? "loading" : "initial");
 
   useEffect(() => {

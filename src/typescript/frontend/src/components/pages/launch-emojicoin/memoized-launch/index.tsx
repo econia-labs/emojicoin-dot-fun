@@ -4,7 +4,7 @@ import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useMemo } from "react";
 import AnimatedStatusIndicator from "../animated-status-indicator";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
 import { useRegisterMarket } from "../hooks/use-register-market";
 import { useIsMarketRegistered } from "../hooks/use-is-market-registered";
@@ -22,9 +22,10 @@ const ESTIMATED_TOTAL_COST = Number(MARKET_REGISTRATION_FEE) + ESTIMATED_GAS_REQ
 export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   // Maybe it's this...? Maybe we need to memoize this value.
   const { t } = translationFunction();
-  const setPickerInvisible = useInputStore((state) => state.setPickerInvisible);
-  const emojis = useInputStore((state) => state.emojis);
-  const setIsLoadingRegisteredMarket = useInputStore((state) => state.setIsLoadingRegisteredMarket);
+  const emojis = useEmojiPicker((state) => state.emojis);
+  const setIsLoadingRegisteredMarket = useEmojiPicker(
+    (state) => state.setIsLoadingRegisteredMarket
+  );
   const { aptBalance, refetchIfStale } = useAptos();
 
   const registerMarket = useRegisterMarket();
@@ -47,6 +48,12 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [emojis]);
 
+  const handleClick = async () => {
+    if (!invalid && !registered) {
+      await registerMarket();
+    }
+  };
+
   return (
     <AnimatePresence initial={false} mode="wait">
       {/* Input */}
@@ -61,7 +68,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
           <div className="flex relative mb-1">
             <div className="flex flex-col grow relative w-full">
               <EmojiPickerWithInput
-                handleClick={registerMarket}
+                handleClick={handleClick}
                 pickerButtonClassName="top-[220px] bg-black"
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
@@ -130,7 +137,6 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
               invalid={invalid || !sufficientBalance}
               registered={registered}
               onWalletButtonClick={() => {
-                setPickerInvisible(true);
                 registerMarket();
               }}
             />

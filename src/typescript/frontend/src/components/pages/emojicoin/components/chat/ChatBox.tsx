@@ -13,12 +13,14 @@ import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
 import type { Types } from "@sdk/types/types";
 import { parseJSON } from "utils";
+import { MAX_NUM_CHAT_EMOJIS } from "@sdk/const";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 const convertChatMessageToEmojiAndIndices = (
   message: string,
@@ -61,16 +63,17 @@ const ChatBox = (props: ChatProps) => {
   const { theme } = useThemeContext();
   const { aptos, account, submit } = useAptos();
   const marketID = props.data.marketID.toString();
-  const clear = useInputStore((state) => state.clear);
-  const setMode = useInputStore((state) => state.setMode);
-  const emojis = useInputStore((state) => state.emojis);
+  const clear = useEmojiPicker((state) => state.clear);
+  const setMode = useEmojiPicker((state) => state.setMode);
+  const emojis = useEmojiPicker((state) => state.emojis);
   const chats = getCombinedChats(
     useEventStore((s) => s.getMarket(marketID)?.chatEvents ?? props.data.chats),
     BigInt(props.data.marketID)
   );
-  const chatEmojiData = useInputStore((state) => state.chatEmojiData);
+  const chatEmojiData = useEmojiPicker((state) => state.chatEmojiData);
   const subscribe = useWebSocketClient((s) => s.subscribe);
   const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
+  const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
 
   useEffect(() => {
     subscribe.chat(marketID);
@@ -88,9 +91,11 @@ const ChatBox = (props: ChatProps) => {
   };
 
   const sendChatMessage = async () => {
-    if (!account) {
+    if (!account || emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS) {
       return;
     }
+    // Set the picker invisible while the transaction is being processed.
+    setPickerInvisible(true);
     const emojiText = emojis.join("");
     const { emojicoin, emojicoinLP } = toCoinTypes(props.data.marketAddress);
     const { emojiBytes, emojiIndicesSequence } = convertChatMessageToEmojiAndIndices(
@@ -106,8 +111,14 @@ const ChatBox = (props: ChatProps) => {
         emojiIndicesSequence: new Uint8Array(emojiIndicesSequence),
         typeTags: [emojicoin, emojicoinLP],
       });
-    await submit(builderLambda);
-    clear();
+    const res = await submit(builderLambda);
+    if (res && res.response && isUserTransactionResponse(res.response)) {
+      // Note we only clear the input if the transaction is successful.
+      clear();
+    } else {
+      // Show the picker again in case the user wants to try again with the same input.
+      setPickerInvisible(false);
+    }
   };
 
   // TODO: Add infinite scroll to this.
