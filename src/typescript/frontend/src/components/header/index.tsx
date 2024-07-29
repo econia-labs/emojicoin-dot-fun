@@ -22,7 +22,7 @@ import { translationFunction } from "context/language-context";
 import WalletDropdownMenu from "components/wallet/WalletDropdownMenu";
 import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton";
 import { GeoblockedBanner } from "components/geoblocking";
-import { isBanned } from "utils/geolocation";
+import useIsBanned from "@hooks/use-is-banned";
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
@@ -35,6 +35,8 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const handleCloseMobileMenu = () => {
     setIsOpen(false);
   };
+
+  const isBanned = useIsBanned();
 
   return (
     <StyledContainer id="header">
@@ -89,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
         </Flex>
       </Container>
       <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={linksForCurrentPage} />
-      {isBanned() && <GeoblockedBanner />}
+      {isBanned && <GeoblockedBanner />}
     </StyledContainer>
   );
 };
