@@ -189,14 +189,26 @@ export const getLatestBars = (market: MarketStateValueType) => {
   return RESOLUTIONS_ARRAY.map((res) => ({ ...market[res]!.latestBar, period: res }));
 };
 
+const shouldKeep = (event: AnyEmojicoinEvent) => {
+  const time = getEmojicoinEventTime(event);
+  return time / 1000n > BigInt(new Date().getTime() - 60 * 1_000);
+};
+
 export const addToLocalStorage = (event: AnyEmojicoinEvent) => {
-  const shouldKeep = (event: AnyEmojicoinEvent) => {
-    const time = getEmojicoinEventTime(event);
-    return time / 1000n > BigInt(new Date().getTime() - 60 * 1_000);
-  };
 
   const eventName = getEventTypeName(event);
   const localEvents: Array<AnyEmojicoinEvent> = parseJSON(localStorage.getItem(eventName) ?? "[]");
+
+  localEvents.push(event);
+  const filtered = localEvents.filter(shouldKeep);
+  localStorage.setItem(eventName, stringifyJSON(filtered));
+};
+
+export const updateLocalStorage = (event: AnyEmojicoinEvent) => {
+  const eventName = getEventTypeName(event);
+  let localEvents: Array<AnyEmojicoinEvent> = parseJSON(localStorage.getItem(eventName) ?? "[]");
+
+  localEvents = localEvents.filter((e) => e.guid != event.guid);
 
   localEvents.push(event);
   const filtered = localEvents.filter(shouldKeep);
