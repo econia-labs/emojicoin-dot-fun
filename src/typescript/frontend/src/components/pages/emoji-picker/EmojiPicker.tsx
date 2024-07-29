@@ -73,6 +73,27 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
   }, [host, setPickerRef]);
 
   const previewSelector = host?.shadowRoot?.querySelector("div.margin-l");
+  const search = host?.shadowRoot?.querySelector("div.search input");
+
+  useEffect(() => {
+    if (!search || !host) return;
+    const inputHandler = (_e: Event) => {
+      const previewSubtitle = host.shadowRoot?.querySelector("div.preview-subtitle");
+      if (!previewSubtitle) return;
+      const text = previewSubtitle.textContent;
+      const failedSearch =
+        text && text.includes("That emoji couldn") && text.endsWith("t be found");
+      if (failedSearch) {
+        // There's a weird apostrophe character in the text, so just check startsWith and endsWith here.
+        previewSubtitle.textContent = "That emoji couldn't be found";
+      }
+    };
+    search?.addEventListener("input", inputHandler);
+
+    return () => {
+      search?.removeEventListener("input", inputHandler);
+    };
+  }, [search, host]);
 
   useEffect(() => {
     // We use query selector here because we're working with a shadow root in the DOM,
@@ -87,6 +108,7 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
           mutations.forEach((mutation, _i) => {
             mutation.addedNodes.forEach((node) => {
               const text = node.textContent;
+
               // The `text` here is the short code the library uses, aka `:smile:` or `:rolling_on_the_floor_laughing:`
               if (text?.at(0) === ":" && text?.at(-1) === ":") {
                 // No matter what we need to replace the text, so let's just reset it if we can even find it.
@@ -109,6 +131,7 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
                   const formattedBytes = `${" ".repeat(2 - bytes.length)}${bytes}`;
                   if (mode === "register" && numBytes > 10) {
                     const span = document.createElement("span");
+                    span.id = "emoji-byte-size";
                     node.textContent = "";
                     span.textContent = `${formattedBytes} bytes`;
                     span.style.setProperty("color", "red", "important");

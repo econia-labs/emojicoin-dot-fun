@@ -54,9 +54,7 @@ export const EmojiPickerWithInput = ({
   const setOnClickOutside = useEmojiPicker((s) => s.setOnClickOutside);
   const pickerInvisible = useEmojiPicker((s) => s.pickerInvisible);
   const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
-  // const nativePicker = useEmojiPicker((s) => s.nativePicker);
-  // Set the native picker to true to test some stuff on mobile really quick.
-  const nativePicker = false;
+  const nativePicker = useEmojiPicker((s) => s.nativePicker);
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
   const removeEmojiTextInput = useEmojiPicker((s) => s.removeEmojiTextInput);
   const textAreaRef = useEmojiPicker((s) => s.textAreaRef);
@@ -167,15 +165,7 @@ export const EmojiPickerWithInput = ({
   }, []);
 
   return (
-    <Flex
-      onFocus={(e) => {
-        if (e.target !== sendButtonRef.current) {
-          setPickerInvisible(false);
-        }
-      }}
-      className="justify-center"
-      ref={inputRef}
-    >
+    <Flex className="justify-center" ref={inputRef}>
       <ConditionalWrapper mode={mode}>
         <InputGroup isShowError={false} {...inputGroupProps}>
           <div className="flex-row relative items-center justify-center">
