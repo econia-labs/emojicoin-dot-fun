@@ -1,21 +1,19 @@
 import { Flex } from "@containers";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { InputGroup, Textarea } from "components/inputs";
 import { Arrow } from "components/svg";
 import ClosePixelated from "@icons/ClosePixelated";
 import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
 import { motion } from "framer-motion";
-import { insertEmojiTextInput, removeEmojiTextInput } from "lib/utils/handle-emoji-picker-input";
-import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import { MarketValidityIndicator } from "./ColoredBytesIndicator";
 import { variants } from "./animation-variants";
-import "./triangle.css";
 import { checkTargetAndStopDefaultPropagation } from "./utils";
 import { getEmojisInString } from "@sdk/emoji_data";
-import { isMobile, isTablet } from "react-device-detect";
+import "./triangle.css";
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -49,27 +47,31 @@ export const EmojiPickerWithInput = ({
   const [focused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLDivElement | null>(null);
   const sendButtonRef = useRef<HTMLDivElement | null>(null);
-  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const emojis = useInputStore((s) => s.emojis);
-  const clear = useInputStore((s) => s.clear);
-  const mode = useInputStore((s) => s.mode);
-  const setTextAreaRef = useInputStore((s) => s.setTextAreaRef);
-  const setOnClickOutside = useInputStore((s) => s.setOnClickOutside);
-  const pickerInvisible = useInputStore((s) => s.pickerInvisible);
-  const setPickerInvisible = useInputStore((s) => s.setPickerInvisible);
+  const emojis = useEmojiPicker((s) => s.emojis);
+  const clear = useEmojiPicker((s) => s.clear);
+  const mode = useEmojiPicker((s) => s.mode);
+  const setTextAreaRef = useEmojiPicker((s) => s.setTextAreaRef);
+  const setOnClickOutside = useEmojiPicker((s) => s.setOnClickOutside);
+  const pickerInvisible = useEmojiPicker((s) => s.pickerInvisible);
+  const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
+  const nativePicker = useEmojiPicker((s) => s.nativePicker);
+  const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
+  const removeEmojiTextInput = useEmojiPicker((s) => s.removeEmojiTextInput);
+  const textAreaRef = useEmojiPicker((s) => s.textAreaRef);
+
+  const onRefChange = useCallback(
+    (node: HTMLTextAreaElement | null) => {
+      setTextAreaRef(node);
+    },
+    [setTextAreaRef]
+  );
 
   // Append the picker visibility mutation to the end of the handleClick function.
   const handleSubmission = async (message: string) => {
     setPickerInvisible(true);
     await handleClick(message);
   };
-
-  // The emoji picker button is only visible if the user is not on a mobile or tablet device. This is because
-  // mobile devices have native support for emoji keyboards and are generally much easier to use.
-  const shouldUseCustomPicker = useMemo(() => {
-    return !isMobile && !isTablet;
-  }, []);
 
   // Clear the input and set the onClickOutside event handler on mount.
   useEffect(() => {
@@ -86,28 +88,29 @@ export const EmojiPickerWithInput = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  useEffect(() => {
-    if (textAreaRef.current) setTextAreaRef(textAreaRef.current);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      if (checkTargetAndStopDefaultPropagation(e, textAreaRef)) {
+        const pastedText = e.clipboardData.getData("text");
+        insertEmojiTextInput(pastedText);
+      }
+    },
+    [insertEmojiTextInput, textAreaRef]
+  );
 
-  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    if (checkTargetAndStopDefaultPropagation(e, textAreaRef.current)) {
-      const pastedText = e.clipboardData.getData("text");
-      insertEmojiTextInput(pastedText);
-    }
-  }, []);
-
-  const handleCut = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const target = checkTargetAndStopDefaultPropagation(e, textAreaRef.current);
-    if (target) {
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
-      const selected = target.value.slice(start, end);
-      navigator.clipboard.writeText(selected);
-      removeEmojiTextInput();
-    }
-  }, []);
+  const handleCut = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      const target = checkTargetAndStopDefaultPropagation(e, textAreaRef);
+      if (target) {
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+        const selected = target.value.slice(start, end);
+        navigator.clipboard.writeText(selected);
+        removeEmojiTextInput();
+      }
+    },
+    [removeEmojiTextInput, textAreaRef]
+  );
 
   const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
@@ -130,12 +133,6 @@ export const EmojiPickerWithInput = ({
       e.preventDefault();
     }
   };
-
-  useEffect(() => {
-    if (textAreaRef.current) {
-      textAreaRef.current.focus();
-    }
-  }, [emojis]);
 
   const closeIconClassName = `flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer ${mode === "home" ? "med-pixel-close" : ""}`;
 
@@ -173,14 +170,13 @@ export const EmojiPickerWithInput = ({
                 <Textarea
                   id="emoji-picker-text-area"
                   className={`relative !pt-[16px] px-[4px] scroll-auto ${mode === "home" ? "home-textarea" : ""}`}
-                  ref={textAreaRef}
+                  ref={onRefChange}
                   autoFocus={true}
                   onPaste={handlePaste}
                   onCut={handleCut}
                   onKeyDown={onKeyDownHandler}
                   onClick={() => {
                     setPickerInvisible(false);
-                    setTextAreaRef(textAreaRef.current); // Ensure the ref is set.
                   }}
                 />
                 {(mode === "pools" || mode === "home") && close}
@@ -213,7 +209,7 @@ export const EmojiPickerWithInput = ({
           </div>
         </InputGroup>
       </ConditionalWrapper>
-      {shouldUseCustomPicker && (
+      {!nativePicker && (
         <motion.button
           animate={pickerInvisible ? "hidden" : focused ? "visible" : "hidden"}
           variants={variants}

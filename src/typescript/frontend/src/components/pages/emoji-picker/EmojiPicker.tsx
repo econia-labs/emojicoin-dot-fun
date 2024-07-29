@@ -1,14 +1,13 @@
 "use client";
 
 import { type HTMLAttributes, Suspense, useEffect } from "react";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
-import { insertEmojiTextInput } from "lib/utils/handle-emoji-picker-input";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
 // TBH, we should probably just fork the library.
@@ -28,11 +27,12 @@ export const search = async (value: string): Promise<SearchResult> => {
 };
 
 export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
-  const setPickerRef = useInputStore((s) => s.setPickerRef);
-  const setChatEmojiData = useInputStore((s) => s.setChatEmojiData);
-  const mode = useInputStore((s) => s.mode);
-  const onClickOutside = useInputStore((s) => s.onClickOutside);
+  const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
+  const setChatEmojiData = useEmojiPicker((s) => s.setChatEmojiData);
+  const mode = useEmojiPicker((s) => s.mode);
+  const onClickOutside = useEmojiPicker((s) => s.onClickOutside);
   const host = document.querySelector("em-emoji-picker");
+  const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
 
   // TODO: Verify that the length of this set is the same length as the valid chat emojis array in the Move contract.
   // Load the data from the emoji picker library and then extract the valid chat emojis from it.

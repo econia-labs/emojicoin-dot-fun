@@ -1,4 +1,4 @@
-import useInputStore from "../store/input-store";
+import { type EmojiPickerStore } from "./emoji-picker-store";
 import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
 import { getEmojisInString } from "@sdk/emoji_data";
 
@@ -15,18 +15,24 @@ export const calculateEmojiIndices = (emojis: string[]) => {
 // Convert cursor position to emoji index by accumulating the total # of bytes at each position.
 // For example, if we have three emojis, respectively 2, 3, and 4 bytes long, then indices is:
 // [0, 2, 5, 9]
-export const calculateIndicesFromSelection = (emojis: string[], target: HTMLTextAreaElement) => {
+export const calculateIndicesFromSelection = (
+  emojis: string[],
+  selectionStart: number,
+  selectionEnd: number
+) => {
   const indices = calculateEmojiIndices(emojis);
   return {
     indices,
-    start: indices.findIndex((characterIndex) => characterIndex >= target.selectionStart),
-    end: indices.findIndex((characterIndex) => characterIndex >= target.selectionEnd),
+    start: indices.findIndex((characterIndex) => characterIndex >= selectionStart),
+    end: indices.findIndex((characterIndex) => characterIndex >= selectionEnd),
   };
 };
 
-export const insertEmojiTextInput = (textToInsert: string | string[]) => {
-  const state = useInputStore.getState();
-  const { mode, emojis, textAreaRef: target, setEmojis } = state;
+export const insertEmojiTextInputHelper = (
+  state: EmojiPickerStore,
+  textToInsert: string | string[]
+) => {
+  const { mode, emojis, textAreaRef: target } = state;
 
   if (!target) return;
   const parsedEmojis = Array.isArray(textToInsert) ? textToInsert : getEmojisInString(textToInsert);
@@ -34,7 +40,11 @@ export const insertEmojiTextInput = (textToInsert: string | string[]) => {
     mode === "chat" ? parsedEmojis : parsedEmojis.filter((emoji) => SYMBOL_DATA.byEmoji(emoji));
   if (filteredEmojis.length === 0) return;
 
-  const { start, end } = calculateIndicesFromSelection(emojis, target);
+  const { start, end } = calculateIndicesFromSelection(
+    emojis,
+    target.selectionStart,
+    target.selectionEnd
+  );
 
   // prettier-ignore
   const newEmojis = emojis
@@ -54,11 +64,11 @@ export const insertEmojiTextInput = (textToInsert: string | string[]) => {
   const indices = calculateEmojiIndices(newEmojis);
   const newSelectionEnd = indices[newEmojiEnd];
 
-  console.log("newEmojis" + newEmojis);
-
-  setEmojis(newEmojis, {
-    start: newSelectionEnd,
-  });
+  return {
+    textAreaRef: target,
+    emojis: newEmojis,
+    selectionStart: newSelectionEnd,
+  };
 };
 
 /**
@@ -70,16 +80,17 @@ export const insertEmojiTextInput = (textToInsert: string | string[]) => {
  *     not it's a delete or a backspace. The resulting cursor position is the selectionStart.
  *  2. If the selectionStart === selectionEnd, remove the emoji to the left if it's a backspace.
  *  3. If the selectionStart === selectionEnd, remove the emoji to the right if it's a delete.
- * @param param0
- * @returns
  */
-export const removeEmojiTextInput = (key?: string) => {
-  const state = useInputStore.getState();
-  const { emojis, textAreaRef: target, setEmojis } = state;
+export const removeEmojiTextInputHelper = (state: EmojiPickerStore, key?: string) => {
+  const { emojis, textAreaRef: target } = state;
 
   if (!target) return;
 
-  const { indices, start, end } = calculateIndicesFromSelection(emojis, target);
+  const { indices, start, end } = calculateIndicesFromSelection(
+    emojis,
+    target.selectionStart,
+    target.selectionEnd
+  );
 
   let emojiSelectionStart = start;
   let emojiSelectionEnd = end;
@@ -114,7 +125,9 @@ export const removeEmojiTextInput = (key?: string) => {
   // Remove the emojis from the selection start to the selection end.
   const newEmojis = emojis.slice(0, emojiSelectionStart).concat(emojis.slice(emojiSelectionEnd));
 
-  setEmojis(newEmojis, {
-    start: newSelectionStart,
-  });
+  return {
+    textAreaRef: target,
+    emojis: newEmojis,
+    selectionStart: newSelectionStart,
+  };
 };

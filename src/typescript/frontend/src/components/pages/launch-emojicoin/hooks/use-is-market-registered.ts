@@ -1,7 +1,7 @@
 import { MarketMetadataByEmojiBytes } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { normalizeHex } from "@sdk/utils";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEventStore } from "context/state-store-context";
@@ -9,7 +9,7 @@ import { useEventStore } from "context/state-store-context";
 const encoder = new TextEncoder();
 
 export const useIsMarketRegistered = () => {
-  const emojis = useInputStore((state) => state.emojis);
+  const emojis = useEmojiPicker((state) => state.emojis);
   const symbols = useEventStore((state) => state.symbols);
   const { aptos } = useAptos();
   const emojiBytes = normalizeHex(encoder.encode(emojis.join("")));

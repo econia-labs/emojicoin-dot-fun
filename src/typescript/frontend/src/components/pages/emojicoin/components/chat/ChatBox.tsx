@@ -13,7 +13,7 @@ import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
@@ -61,14 +61,14 @@ const ChatBox = (props: ChatProps) => {
   const { theme } = useThemeContext();
   const { aptos, account, submit } = useAptos();
   const marketID = props.data.marketID.toString();
-  const clear = useInputStore((state) => state.clear);
-  const setMode = useInputStore((state) => state.setMode);
-  const emojis = useInputStore((state) => state.emojis);
+  const clear = useEmojiPicker((state) => state.clear);
+  const setMode = useEmojiPicker((state) => state.setMode);
+  const emojis = useEmojiPicker((state) => state.emojis);
   const chats = getCombinedChats(
     useEventStore((s) => s.getMarket(marketID)?.chatEvents ?? props.data.chats),
     BigInt(props.data.marketID)
   );
-  const chatEmojiData = useInputStore((state) => state.chatEmojiData);
+  const chatEmojiData = useEmojiPicker((state) => state.chatEmojiData);
   const subscribe = useWebSocketClient((s) => s.subscribe);
   const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
 

@@ -4,7 +4,7 @@ import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useMemo } from "react";
 import AnimatedStatusIndicator from "../animated-status-indicator";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
 import { useRegisterMarket } from "../hooks/use-register-market";
 import { useIsMarketRegistered } from "../hooks/use-is-market-registered";
@@ -22,9 +22,11 @@ const ESTIMATED_TOTAL_COST = Number(MARKET_REGISTRATION_FEE) + ESTIMATED_GAS_REQ
 export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   // Maybe it's this...? Maybe we need to memoize this value.
   const { t } = translationFunction();
-  const setPickerInvisible = useInputStore((state) => state.setPickerInvisible);
-  const emojis = useInputStore((state) => state.emojis);
-  const setIsLoadingRegisteredMarket = useInputStore((state) => state.setIsLoadingRegisteredMarket);
+  const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
+  const emojis = useEmojiPicker((state) => state.emojis);
+  const setIsLoadingRegisteredMarket = useEmojiPicker(
+    (state) => state.setIsLoadingRegisteredMarket
+  );
   const { aptBalance, refetchIfStale } = useAptos();
 
   const registerMarket = useRegisterMarket();

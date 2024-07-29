@@ -3,7 +3,7 @@ import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import Text from "components/text";
 import { EMOJI_GRID_ITEM_WIDTH } from "../../const";
 import { Flex } from "components/layout";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { useEffect } from "react";
 import icon from "../../../../../../../public/images/search-icon.svg";
 import Image from "next/image";
@@ -11,7 +11,7 @@ import Image from "next/image";
 const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
 
 export const SearchComponent = () => {
-  const setMode = useInputStore((state) => state.setMode);
+  const setMode = useEmojiPicker((state) => state.setMode);
   useEffect(() => {
     setMode("home");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */

@@ -22,7 +22,7 @@ import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { useSearchParams } from "next/navigation";
 import { encodeEmojis, getEmojisInString } from "@sdk/emoji_data";
 
@@ -37,7 +37,7 @@ export const ClientPoolsPage = () => {
   const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
   const [pools, setPools] = useState<"all" | "mypools">("all");
   const [realEmojis, setRealEmojis] = useState(getEmojisInString(poolParam ?? ""));
-  const { emojis, setEmojis, setMode } = useInputStore((state) => ({
+  const { emojis, setEmojis, setMode } = useEmojiPicker((state) => ({
     emojis: state.emojis,
     setMode: state.setMode,
     setEmojis: state.setEmojis,

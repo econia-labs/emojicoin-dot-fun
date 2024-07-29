@@ -8,12 +8,14 @@ import {
 import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 
 export const useRegisterMarket = () => {
-  const emojis = useInputStore((state) => state.emojis);
-  const setIsLoadingRegisteredMarket = useInputStore((state) => state.setIsLoadingRegisteredMarket);
+  const emojis = useEmojiPicker((state) => state.emojis);
+  const setIsLoadingRegisteredMarket = useEmojiPicker(
+    (state) => state.setIsLoadingRegisteredMarket
+  );
   const { aptos, account, submit, signThenSubmit } = useAptos();
 
   const registerMarket = async () => {
