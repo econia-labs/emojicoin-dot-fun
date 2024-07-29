@@ -1,4 +1,5 @@
 "use client";
+// cspell:word couldn
 
 import { type HTMLAttributes, Suspense, useEffect } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
