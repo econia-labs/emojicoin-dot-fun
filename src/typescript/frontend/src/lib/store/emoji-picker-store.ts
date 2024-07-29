@@ -73,7 +73,7 @@ export const setInputHelper = ({
     if (selectionStart) {
       textArea.setSelectionRange(selectionStart, selectionEnd ?? selectionStart);
     }
-    if (typeof shouldFocus === "boolean" && shouldFocus) {
+    if (shouldFocus === true) {
       textArea.focus();
     }
   };
@@ -126,15 +126,12 @@ export const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
     setPickerInvisible: (value) => {
       // Explicitly needs to be a boolean to avoid eventHandlers that pass their event inadvertently
       // passing truthy values.
-      const invisible = typeof value === "boolean" && value;
+      const invisible = value === true;
       if (invisible) {
         get().textAreaRef?.blur();
       } else {
         get().textAreaRef?.focus();
       }
-      // if ((invisible && get().pickerInvisible) || (!invisible && !get().pickerInvisible)) {
-      //   return;
-      // }
       set({ pickerInvisible: value });
     },
     setOnClickOutside: (value: (e: MouseEvent) => void) => set({ onClickOutside: value }),
@@ -154,8 +151,15 @@ export const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
     },
     setIsLoadingRegisteredMarket: (value) => set({ isLoadingRegisteredMarket: value }),
     setPickerRef: (value: HTMLDivElement | null) => set({ pickerRef: value }),
-    setTextAreaRef: (value: HTMLTextAreaElement | null) => {
-      return set({ textAreaRef: value });
+    setTextAreaRef: (textAreaRef: HTMLTextAreaElement | null) => {
+      // Reload the text area with the current emojis.
+      if (textAreaRef) {
+        textAreaRef.value = get().emojis.join("");
+        if (get().pickerInvisible === false) {
+          textAreaRef.focus();
+        }
+      }
+      return set({ textAreaRef });
     },
     setChatEmojiData: (value: Map<string, SymbolEmojiData>) => set({ chatEmojiData: value }),
   }));

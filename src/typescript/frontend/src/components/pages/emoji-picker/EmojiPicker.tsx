@@ -198,7 +198,7 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
           onClickOutside={onClickOutside}
           perLine={8}
           // TODO: Use this instead of the current "not allowed" emoji we're using..?
-          // exceptEmojis={["🔥", "🚀", "🌙", "🌟", "🎉", "🎊", "🎈", "🎁", "🎆", "🎇"]}
+          exceptEmojis={["🔥", "🚀", "🌙", "🌟", "🎉", "🎊", "🎈", "🎁", "🎆", "🎇"]}
           onEmojiSelect={(v: EmojiSelectorData) => {
             const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
             insertEmojiTextInput([newEmoji]);
