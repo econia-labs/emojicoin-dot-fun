@@ -225,8 +225,10 @@ export const EmojiPickerWithInput = ({
           </div>
         </InputGroup>
       </ConditionalWrapper>
-      {/* We don't not render the picker if we're using the nativePicker because there is logic within the picker
-        we use for checking auxiliary (chat) emojis and other various things, so we still need to use it. */}
+      {/* Note that we still render the picker even if we're using the nativePicker because there is logic within the
+        picker we use for checking auxiliary (chat) emojis and other various things, so we still need to use it.
+        We could decouple this, but we'll likely be using the data loaded in the EmojiPicker at some point in the app's
+        lifecycle anyway, so it should be fine as is. */}
       <motion.button
         animate={nativePicker || pickerInvisible ? "hidden" : "visible"}
         variants={variants}
