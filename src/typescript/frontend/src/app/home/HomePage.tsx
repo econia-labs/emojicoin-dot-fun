@@ -4,6 +4,7 @@ import TextCarousel from "components/text-carousel/TextCarousel";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import type fetchSortedMarketData from "lib/queries/sorting/market-data";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import { isBanned } from "utils/geolocation";
 
 export interface HomePageProps {
   featured: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
@@ -26,7 +27,7 @@ export default async function HomePageComponent({
 }: HomePageProps) {
   return (
     <>
-      <div className="pt-[93px]">
+      <div className={isBanned() ? "pt-[141px]" : "pt-[93px]"}>
         <div className="flex-col mb-[31px]">
           <TextCarousel />
           <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
