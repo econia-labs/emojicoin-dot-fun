@@ -1,3 +1,5 @@
+import { isBanned } from "utils/geolocation";
+
 export const OuterConnectText = ({
   side,
   connected,
@@ -7,7 +9,7 @@ export const OuterConnectText = ({
   connected: boolean;
   mobile?: boolean;
 }) => {
-  if (connected) {
+  if (!isBanned() && connected) {
     if (mobile && side === "left") {
       return null;
     }
