@@ -56,7 +56,7 @@ export const EmojiPickerWithInput = ({
   const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
   // const nativePicker = useEmojiPicker((s) => s.nativePicker);
   // Set the native picker to true to test some stuff on mobile really quick.
-  const nativePicker = true;
+  const nativePicker = false;
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
   const removeEmojiTextInput = useEmojiPicker((s) => s.removeEmojiTextInput);
   const textAreaRef = useEmojiPicker((s) => s.textAreaRef);
