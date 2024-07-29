@@ -233,20 +233,20 @@ export const EmojiPickerWithInput = ({
           </div>
         </InputGroup>
       </ConditionalWrapper>
-      {!nativePicker && (
-        <motion.button
-          animate={pickerInvisible ? "hidden" : "visible"}
-          variants={variants}
-          initial={{
-            zIndex: -1,
-            opacity: 0,
-            scale: 0,
-          }}
-          className={`absolute z-50 ${pickerButtonClassName}`}
-        >
-          <EmojiPicker id="picker" className={mode} />
-        </motion.button>
-      )}
+      {/* We don't not render the picker if we're using the nativePicker because there is logic within the picker
+        we use for checking auxiliary (chat) emojis and other various things, so we still need to use it. */}
+      <motion.button
+        animate={nativePicker || pickerInvisible ? "hidden" : "visible"}
+        variants={variants}
+        initial={{
+          zIndex: -1,
+          opacity: 0,
+          scale: 0,
+        }}
+        className={`absolute z-50 ${pickerButtonClassName}`}
+      >
+        <EmojiPicker id="picker" className={mode} />
+      </motion.button>
     </Flex>
   );
 };
