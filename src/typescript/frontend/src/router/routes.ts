@@ -6,5 +6,5 @@ export const ROUTES = {
   launch: "/launch",
   pools: "/pools",
   verify: "/verify",
-  startHere: "https://docs.emojicoin.fun",
+  startHere: "https://docs.emojicoin.fun/category/--start-here",
 } as const;
