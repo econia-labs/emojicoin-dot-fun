@@ -274,6 +274,11 @@ namespace JSONTypes {
     pro_rata_base_donation_claim_amount: Uint64String;
     pro_rata_quote_donation_claim_amount: Uint64String;
   };
+
+  export type RegistrantGracePeriodFlag = {
+    market_registrant: AccountAddressString;
+    market_registration_time: Uint64String;
+  };
 }
 
 export default JSONTypes;

@@ -14,14 +14,16 @@ import {
   EmojicoinDotFun,
   REGISTRY_ADDRESS,
   deriveEmojicoinPublisherAddress,
+  getRegistryAddress,
 } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
   COIN_FACTORY_MODULE_NAME,
   DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
+  MODULE_ADDRESS,
 } from "../const";
-import { type Types, toMarketResource } from "../types/types";
+import { type Types, toMarketResource, toRegistrantGracePeriodFlag } from "../types/types";
 import type JSONTypes from "../types/json-types";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
@@ -63,6 +65,36 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
     emojicoin,
     emojicoinLP,
   };
+}
+
+/**
+ * Fetches the market grace period from the registry resource based on the market `symbol` input.
+ * @param aptos the Aptos client
+ * @param symbol the market symbol
+ * @param moduleAddress the emojicoin_dot_fun.move module address, uses environment vars if absent
+ * @param registryAddress the registry address, uses environment vars if absent
+ */
+export async function getRegistrationGracePeriodFlag(args: {
+  aptos: Aptos;
+  symbol: string;
+  moduleAddress?: AccountAddressInput;
+  registryAddress?: AccountAddressInput;
+}): Promise<Types.RegistrantGracePeriodFlag> {
+  const { aptos, symbol } = args;
+  const moduleAddress = AccountAddress.from(args.moduleAddress ?? MODULE_ADDRESS);
+  const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
+  const textEncoder = new TextEncoder();
+  const symbolBytes = textEncoder.encode(symbol);
+  const { marketAddress } = getEmojicoinMarketAddressAndTypeTags({
+    registryAddress,
+    symbolBytes,
+  });
+  const gracePeriodResource = await aptos.getAccountResource<JSONTypes.RegistrantGracePeriodFlag>({
+    accountAddress: marketAddress,
+    resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::RegistrantGracePeriodFlag`,
+  });
+
+  return toRegistrantGracePeriodFlag(gracePeriodResource);
 }
 
 export const registerMarketAndGetEmojicoinInfo = async (args: {
