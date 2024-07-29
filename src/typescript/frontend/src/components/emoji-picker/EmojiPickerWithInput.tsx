@@ -6,7 +6,7 @@ import { Arrow } from "components/svg";
 import ClosePixelated from "@icons/ClosePixelated";
 import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
 import { motion } from "framer-motion";
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import { MarketValidityIndicator } from "./ColoredBytesIndicator";
@@ -44,7 +44,6 @@ export const EmojiPickerWithInput = ({
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
 }) => {
-  const [focused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLDivElement | null>(null);
   const sendButtonRef = useRef<HTMLDivElement | null>(null);
 
@@ -80,7 +79,7 @@ export const EmojiPickerWithInput = ({
         const target = e.target as Node;
         const input = inputRef.current;
         if (!input.contains(target)) {
-          setIsFocused(false);
+          setPickerInvisible(true);
         }
       }
     });
@@ -114,6 +113,13 @@ export const EmojiPickerWithInput = ({
   const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
     if (!target) return;
+    // I use this so much while developing that I need to account for it.
+    // AKA: Allow refresh + hard refresh while the input is focused.
+    if ((e.metaKey || e.ctrlKey) && (e.key === "r" || e.key === "F5")) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.reload();
+    }
     if (getEmojisInString(e.key).length) {
       e.preventDefault();
       e.stopPropagation();
@@ -138,7 +144,14 @@ export const EmojiPickerWithInput = ({
   const closeIconClassName = `flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer ${mode === "home" ? "med-pixel-close" : ""}`;
 
   const close = (
-    <motion.div whileTap={{ scale: 0.85 }} className={closeIconClassName} onClick={clear}>
+    <motion.div
+      whileTap={{ scale: 0.85 }}
+      className={closeIconClassName}
+      onClick={() => {
+        clear();
+        setPickerInvisible(false);
+      }}
+    >
       {/* className={closeIconClassName} */}
       <ClosePixelated
         className={`w-[15px] h-[16px] ${mode !== "pools" && mode !== "home" ? "text-white" : "text-light-gray"}`}
@@ -146,11 +159,16 @@ export const EmojiPickerWithInput = ({
     </motion.div>
   );
 
+  useEffect(() => {
+    setPickerInvisible(true);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
+
   return (
     <Flex
       onFocus={(e) => {
         if (e.target !== sendButtonRef.current) {
-          setIsFocused(true);
+          setPickerInvisible(false);
         }
       }}
       className="justify-center"
@@ -176,6 +194,11 @@ export const EmojiPickerWithInput = ({
                   onPaste={handlePaste}
                   onCut={handleCut}
                   onKeyDown={onKeyDownHandler}
+                  onFocus={(e) => {
+                    // Stop the focus from bubbling up to the `Flex` component above. We only want to focus
+                    // this specific text area without triggering a focus on the `Flex` component.
+                    e.stopPropagation();
+                  }}
                   onClick={() => {
                     setPickerInvisible(false);
                   }}
@@ -188,8 +211,6 @@ export const EmojiPickerWithInput = ({
                       whileTap={{ scale: 0.85 }}
                       onClick={() => {
                         handleSubmission(emojis.join(""));
-                        setIsFocused(false);
-                        setPickerInvisible(true);
                       }}
                       className="flex relative h-full pl-[1ch] pr-[2ch] hover:cursor-pointer mb-[1px]"
                       style={{
@@ -213,15 +234,12 @@ export const EmojiPickerWithInput = ({
       </ConditionalWrapper>
       {!nativePicker && (
         <motion.button
-          animate={pickerInvisible ? "hidden" : focused ? "visible" : "hidden"}
+          animate={pickerInvisible ? "hidden" : "visible"}
           variants={variants}
           initial={{
+            zIndex: -1,
             opacity: 0,
             scale: 0,
-          }}
-          style={{
-            zIndex: focused ? 50 : -1,
-            cursor: focused ? "auto" : "pointer",
           }}
           className={`absolute z-50 ${pickerButtonClassName}`}
         >

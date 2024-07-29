@@ -73,6 +73,7 @@ const ChatBox = (props: ChatProps) => {
   const chatEmojiData = useEmojiPicker((state) => state.chatEmojiData);
   const subscribe = useWebSocketClient((s) => s.subscribe);
   const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
+  const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
 
   useEffect(() => {
     subscribe.chat(marketID);
@@ -93,6 +94,8 @@ const ChatBox = (props: ChatProps) => {
     if (!account || emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS) {
       return;
     }
+    // Set the picker invisible while the transaction is being processed.
+    setPickerInvisible(true);
     const emojiText = emojis.join("");
     const { emojicoin, emojicoinLP } = toCoinTypes(props.data.marketAddress);
     const { emojiBytes, emojiIndicesSequence } = convertChatMessageToEmojiAndIndices(
@@ -110,7 +113,11 @@ const ChatBox = (props: ChatProps) => {
       });
     const res = await submit(builderLambda);
     if (res && res.response && isUserTransactionResponse(res.response)) {
+      // Note we only clear the input if the transaction is successful.
       clear();
+    } else {
+      // Show the picker again in case the user wants to try again with the same input.
+      setPickerInvisible(false);
     }
   };
 

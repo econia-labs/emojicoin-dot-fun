@@ -60,25 +60,37 @@ export const setInputHelper = ({
   emojis,
   selectionStart,
   selectionEnd,
+  shouldFocus,
 }: {
   textAreaRef: HTMLTextAreaElement | null;
   emojis: string[];
   selectionStart?: number;
   selectionEnd?: number;
+  shouldFocus?: boolean;
 }) => {
-  if (textAreaRef) {
-    textAreaRef.value = emojis.join("");
+  const updateThings = (textArea: HTMLTextAreaElement) => {
+    textArea.value = emojis.join("");
     if (selectionStart) {
-      textAreaRef.setSelectionRange(selectionStart, selectionEnd ?? selectionStart);
+      textArea.setSelectionRange(selectionStart, selectionEnd ?? selectionStart);
     }
-    textAreaRef.focus();
+    if (typeof shouldFocus === "boolean" && shouldFocus) {
+      textArea.focus();
+    }
+  };
+
+  if (textAreaRef) {
+    updateThings(textAreaRef);
+    // Call this twice so the DOM is for sure updated. Without this, the selectionStart and
+    // selectionEnd are not updated properly.
     setTimeout(() => {
-      textAreaRef.value = emojis.join("");
-      if (selectionStart) {
-        textAreaRef.setSelectionRange(selectionStart, selectionEnd ?? selectionStart);
-      }
-      textAreaRef.focus();
+      updateThings(textAreaRef);
     }, 0);
+  }
+  if (shouldFocus) {
+    return {
+      emojis,
+      pickerInvisible: false,
+    };
   }
   return {
     emojis,
@@ -91,17 +103,40 @@ export const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
     ...initial,
     setNativePicker: (value) => set({ nativePicker: value }),
     insertEmojiTextInput: (textToInsert) => {
-      const res = insertEmojiTextInputHelper(get(), textToInsert);
-      if (!res) return;
-      return set(() => setInputHelper(res));
+      const inputs = insertEmojiTextInputHelper(get(), textToInsert);
+      if (!inputs) return;
+      return set(() =>
+        setInputHelper({
+          ...inputs,
+          shouldFocus: true,
+        })
+      );
     },
     removeEmojiTextInput: (key) => {
-      const res = removeEmojiTextInputHelper(get(), key);
-      if (!res) return;
-      return set(() => setInputHelper(res));
+      const inputs = removeEmojiTextInputHelper(get(), key);
+      if (!inputs) return;
+      return set(() =>
+        setInputHelper({
+          ...inputs,
+          shouldFocus: true,
+        })
+      );
     },
     setRegisteredEmojis: (emojis) => set({ registeredSymbolData: emojis }),
-    setPickerInvisible: (value) => set({ pickerInvisible: value }),
+    setPickerInvisible: (value) => {
+      // Explicitly needs to be a boolean to avoid eventHandlers that pass their event inadvertently
+      // passing truthy values.
+      const invisible = typeof value === "boolean" && value;
+      if (invisible) {
+        get().textAreaRef?.blur();
+      } else {
+        get().textAreaRef?.focus();
+      }
+      // if ((invisible && get().pickerInvisible) || (!invisible && !get().pickerInvisible)) {
+      //   return;
+      // }
+      set({ pickerInvisible: value });
+    },
     setOnClickOutside: (value: (e: MouseEvent) => void) => set({ onClickOutside: value }),
     setMode: (value) => set({ mode: value }),
     setEmojis: (emojis) => {
