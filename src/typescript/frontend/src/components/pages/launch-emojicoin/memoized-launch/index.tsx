@@ -47,7 +47,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
     refetchIfStale("apt");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [emojis]);
-  
+
   const handleClick = async () => {
     if (!invalid && !registered) {
       await registerMarket();
