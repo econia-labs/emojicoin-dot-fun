@@ -79,9 +79,21 @@ export const MARKET_RESOURCE_TYPE =
 
 /**
  * Fetches the market grace period from the registry resource based on the market `symbol` input.
+ *
  * @param aptos the Aptos client
  * @param symbol the market symbol
  * @param registryAddress the registry address, uses environment vars if absent
+ *
+ * @returns If the market doesn't exist, the function returns `null` for the grace period flag and grace
+ * period over.
+ *
+ * If the market exists, the function returns the grace period flag and whether the grace period is
+ * over. If the grace period flag is `null`, the grace period is over, but we also mark it as over
+ * more explicitly with the `gracePeriodOver` field.
+ *
+ * If the market exists and has a flag, we explicitly check if the grace period is over by comparing
+ * the current time with the registration time and grace period end in case there is a slight delay
+ * between the fetched indexer value and the on-chain value.
  */
 export async function getRegistrationGracePeriodFlag(args: {
   aptos: Aptos;
@@ -113,6 +125,8 @@ export async function getRegistrationGracePeriodFlag(args: {
         (r) => parseTypeTag(r.type).toString() === MARKET_RESOURCE_TYPE
       ) !== "undefined";
     if (!hasMarketResource) {
+      // If the account doesn't have a `Market` resource, the market doesn't exist and will have
+      // no flag and thus no grace period.
       return {
         marketNotFound: true,
         flag: null,
@@ -124,6 +138,7 @@ export async function getRegistrationGracePeriodFlag(args: {
     )?.data as JSONTypes.RegistrantGracePeriodFlag;
     if (gracePeriodJSONResource) {
       const gracePeriodFlag = toRegistrantGracePeriodFlag(gracePeriodJSONResource);
+      // We've found the market, got a flag, and can check if the grace period is over.
       return {
         marketNotFound: false,
         flag: gracePeriodFlag,
@@ -135,8 +150,8 @@ export async function getRegistrationGracePeriodFlag(args: {
         gracePeriodOver: isRegistrationGracePeriodOver(gracePeriodFlag),
       };
     }
-    // If the account has an emojicoin coin type resource but no grace period flag, the grace period
-    // is over.
+    // If the account has a `Market` resource but no grace period flag, we know for sure that the
+    // grace period is over.
     return {
       marketNotFound: false,
       flag: null,
