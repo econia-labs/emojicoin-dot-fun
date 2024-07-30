@@ -84,8 +84,8 @@ export const MARKET_RESOURCE_TYPE =
  * @param symbol the market symbol
  * @param registryAddress the registry address, uses environment vars if absent
  *
- * @returns If the market doesn't exist, the function returns `null` for the grace period flag and grace
- * period over.
+ * @returns If the market doesn't exist, the function returns `null` for the grace period flag and
+ * grace period over.
  *
  * If the market exists, the function returns the grace period flag and whether the grace period is
  * over. If the grace period flag is `null`, the grace period is over, but we also mark it as over
