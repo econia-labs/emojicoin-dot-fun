@@ -7,7 +7,7 @@ import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { type SymbolEmojiData } from "@sdk/emoji_data";
+import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
@@ -54,7 +54,7 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
           const bytes = new TextEncoder().encode(emoji);
           const hex = normalizeHex(bytes);
           chatEmojiData.set(emoji, {
-            name,
+            name: name as EmojiName,
             emoji,
             hex,
             bytes,

@@ -303,7 +303,13 @@ export namespace Types {
     dailyVolume: number;
     tvlPerLpCoinGrowth: number;
   };
+
+  export type RegistrantGracePeriodFlag = {
+    marketRegistrant: `0x${string}`;
+    marketRegistrationTime: bigint;
+  };
 }
+
 export const toExtendRef = (data: JSONTypes.ExtendRef): Types.ExtendRef => ({
   self: data.self,
 });
@@ -619,6 +625,11 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
   tvlPerLpCoinGrowth: Number(data.one_day_tvl_per_lp_coin_growth_q64 / 2 ** 64),
 });
 
+export const toRegistrantGracePeriodFlag = (data: JSONTypes.RegistrantGracePeriodFlag) => ({
+  marketRegistrant: normalizeAddress(data.market_registrant),
+  marketRegistrationTime: BigInt(data.market_registration_time),
+});
+
 export type AnyContractType =
   | Types.ExtendRef
   | Types.SequenceInfo
@@ -641,7 +652,8 @@ export type AnyContractType =
   | Types.PeriodicStateEvent
   | Types.StateEvent
   | Types.GlobalStateEvent
-  | Types.LiquidityEvent;
+  | Types.LiquidityEvent
+  | Types.RegistrantGracePeriodFlag;
 
 export type AnyEmojicoinEvent =
   | Types.SwapEvent

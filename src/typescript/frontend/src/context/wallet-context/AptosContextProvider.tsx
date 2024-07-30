@@ -34,7 +34,10 @@ import { getEvents, type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { sleep, UnitOfTime } from "@sdk/utils";
 import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
-import { getNewCoinBalanceFromChanges } from "utils/parse-changes-for-balances";
+import {
+  getAptBalanceFromChanges,
+  getCoinBalanceFromChanges,
+} from "@sdk/utils/parse-changes-for-balances";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -158,17 +161,12 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       // Return if the account is not connected or the sender of the transaction is not the currently connected account.
       if (!account || !userAddress.equals(AccountAddress.from(account.address))) return;
 
-      const changes = response.changes;
-      const args = { changes, userAddress };
-      const newAptBalance = getNewCoinBalanceFromChanges({
-        ...args,
-        coinType: parseTypeTag(APTOS_COIN),
-      });
+      const newAptBalance = getAptBalanceFromChanges(response, userAddress);
       const newEmojicoinBalance = emojicoin
-        ? getNewCoinBalanceFromChanges({ ...args, coinType: parseTypeTag(emojicoin) })
+        ? getCoinBalanceFromChanges({ response, userAddress, coinType: parseTypeTag(emojicoin) })
         : undefined;
       const newEmojicoinLPBalance = emojicoinLP
-        ? getNewCoinBalanceFromChanges({ ...args, coinType: parseTypeTag(emojicoinLP) })
+        ? getCoinBalanceFromChanges({ response, userAddress, coinType: parseTypeTag(emojicoinLP) })
         : undefined;
       // Update the user's balance if the coins are present in the write set changes.
       if (typeof newAptBalance !== "undefined") setAptBalance(newAptBalance);

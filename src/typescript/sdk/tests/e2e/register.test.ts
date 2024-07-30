@@ -76,7 +76,6 @@ describe("registers a market successfully", () => {
 
     const marketObjectMarketResource = await getMarketResource({
       aptos,
-      moduleAddress: publisher.accountAddress,
       objectAddress: derivedNamedObjectAddress,
     });
 

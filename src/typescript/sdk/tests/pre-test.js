@@ -16,7 +16,7 @@ module.exports = async function setup() {
     globalThis.__LOCAL_NODE__ = localNode;
     await localNode.run();
 
-    // This is not done in parallel as Inbox requires the local node to be up first
+    // This is not done in parallel as Inbox requires the local node to be up first.
     const inbox = new Inbox();
     await inbox.run();
   }
