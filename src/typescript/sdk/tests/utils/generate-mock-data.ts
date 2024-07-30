@@ -260,6 +260,8 @@ const generatePeriodicStates = async (
   }
 };
 
+export const INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP = 1n;
+
 const concatEmoji = (a: Array<HexInput>) =>
   a.map((v) => Hex.fromHexInput(v).toStringWithoutPrefix()).join("");
 
@@ -389,7 +391,7 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
         account: accounts[i],
         emojicoin: emojicoins[i],
         isSell: false,
-        inputAmount: 1n,
+        inputAmount: INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP,
       },
     });
   }

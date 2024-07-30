@@ -8,7 +8,11 @@ import {
   sleep,
 } from "../../src";
 import { getTestHelpers } from "../utils";
-import { MOCK_DATA_MARKETS_EMOJIS, generateMockData } from "../utils/generate-mock-data";
+import {
+  INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP,
+  MOCK_DATA_MARKETS_EMOJIS,
+  generateMockData,
+} from "../utils/generate-mock-data";
 import { getMarketResource } from "../../src/markets/utils";
 
 jest.setTimeout(10000000);
@@ -68,6 +72,7 @@ describe("tests a simple faucet fund account request", () => {
     expectedSum += ONE_APTN * 50000n;
     expectedSum += ONE_APTN * 200000n;
     expectedSum += ONE_APTN * 100n;
+    expectedSum += INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP;
     const sum = data.reduce((prev, curr) => prev + BigInt(curr.data.quote_volume), 0n);
     expect(sum).toBe(expectedSum);
   });
