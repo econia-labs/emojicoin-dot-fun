@@ -1,4 +1,10 @@
-import { Account, type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  AccountAddress,
+  isFeePayerSignature,
+  type TypeTag,
+  type UserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import { ONE_APT } from "../../src/const";
 import { SYMBOL_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
@@ -10,8 +16,8 @@ import {
 } from "../../src/markets/utils";
 import {
   getAptBalanceFromChanges,
-  getFeeStatement,
   getCoinBalanceFromChanges,
+  getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
 
 jest.setTimeout(90000);
@@ -73,14 +79,20 @@ describe("tests the swap functionality", () => {
     return true;
   });
 
-  // NOTE: We would ideally write a separate e2e unit test for all the storage refund scenarios,
-  // but it would require writing a custom contract that frees the resource up in the same
-  // transaction as spending APT. It is a little too much effort, and this test is sufficient.
-  it("successfully swap buys, checks APT balance accounting for storage refunds", async () => {
+  it("successfully swap buys, checks APT balance", async () => {
     const aptBalanceBefore = getAptBalanceFromChanges(
       registerMarketResponse,
       registrant.accountAddress
     )!;
+
+    const realBalance = BigInt(
+      await aptos.getAccountAPTAmount({
+        accountAddress: registrant.accountAddress,
+        minimumLedgerVersion: Number(registerMarketResponse.version),
+      })
+    );
+
+    expect(aptBalanceBefore).toBe(realBalance);
 
     const inputAmount = 3212n;
     const swapResponse = await EmojicoinDotFun.Swap.submit({
@@ -101,11 +113,16 @@ describe("tests the swap functionality", () => {
       coinType: pooEmojicoin,
     })!;
 
-    // This calculation only works because the user is not the fee payer.
-    // See `getNewCoinBalanceFromChanges` for more details.
-    const { storageFeeRefundOctas } = getFeeStatement(swapResponse);
-
-    const calculated = aptBalanceBefore - (gasUsed + inputAmount) + storageFeeRefundOctas;
+    // Manually calculate the expected balance by accounting for a possible storage refund.
+    const sig = swapResponse.signature;
+    const hasFeePayer = sig && isFeePayerSignature(sig);
+    const feePayerAddress = hasFeePayer
+      ? AccountAddress.from(sig.fee_payer_address)
+      : registrant.accountAddress;
+    const storageRefund = AccountAddress.from(feePayerAddress).equals(registrant.accountAddress)
+      ? getFeeStatement(swapResponse).storageFeeRefundOctas
+      : 0n;
+    const calculated = aptBalanceBefore - (gasUsed + inputAmount) + storageRefund;
     expect(newAptBalance).toBe(calculated);
     expect(emojicoinBalance).toBeGreaterThan(1n);
   });
