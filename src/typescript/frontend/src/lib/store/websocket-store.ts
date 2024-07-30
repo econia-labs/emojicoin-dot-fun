@@ -22,7 +22,6 @@ export type ClientActions = {
   connect: (eventStore: EventStore) => void;
   close: () => void;
   unsubscribeAll: () => void;
-  updateConnection: () => void;
   subscribe: {
     chat: (marketID: AnyNumberString | null) => void;
     swap: (marketID: AnyNumberString | null, stateTransitions: boolean | null) => void;
@@ -72,6 +71,7 @@ const unsubscribeHelper = (set: ZustandSetStore<WebSocketClientStore>, topic: st
     };
   });
 };
+
 export const createWebSocketClientStore = () => {
   return createStore<WebSocketClientStore>((set, get) => ({
     client: mqtt.connect(MQTT_URL, {
@@ -88,7 +88,6 @@ export const createWebSocketClientStore = () => {
         client.connect();
         client.on("message", (topic, buffer) => {
           try {
-            // console.log("Received a client-side message for topic:", topic);
             const json = JSON.parse(buffer.toString());
             if (!json) return;
             const data = deserializeEvent(json, json.transaction_version);
@@ -101,16 +100,9 @@ export const createWebSocketClientStore = () => {
             console.error("Error parsing message from topic:", topic, e);
           }
         });
-
-        client.on("connect", () => {
-          set({ connected: true });
-        });
-        client.on("disconnect", () => {
-          set({ disconnected: true });
-        });
-        client.on("reconnect", () => {
-          set({ reconnecting: true });
-        });
+        client.on("connect", () => set({ connected: true, disconnected: false }));
+        client.on("disconnect", () => set({ connected: false, disconnected: true }));
+        client.on("reconnect", () => set({ reconnecting: true }));
         client.on("error", (err) => {
           console.error("Error with MQTT client:", err);
         });
@@ -118,6 +110,10 @@ export const createWebSocketClientStore = () => {
     },
     close: () => {
       get().client.end();
+      set({
+        connected: false,
+        disconnected: true,
+      });
     },
     subscriptions: new Set<string>(),
     unsubscribeAll: () => {
@@ -130,12 +126,6 @@ export const createWebSocketClientStore = () => {
         };
       });
     },
-    updateConnection: () =>
-      set((state) => ({
-        connected: state.client.connected,
-        disconnected: state.client.disconnected,
-        reconnecting: state.client.reconnecting,
-      })),
     connected: false as boolean,
     disconnected: false as boolean,
     reconnecting: false as boolean,

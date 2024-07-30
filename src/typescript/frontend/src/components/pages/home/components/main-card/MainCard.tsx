@@ -6,7 +6,6 @@ import { translationFunction } from "context/language-context";
 import { Column, Flex, FlexGap } from "@containers";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
-import "./module.css";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
@@ -16,6 +15,7 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useLabelScrambler } from "../animation-config";
 import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
+import "./module.css";
 
 export interface MainCardProps {
   featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;

@@ -22,6 +22,7 @@ import { parseJSON } from "utils";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { encodeEmojis } from "@sdk/emoji_data";
+import { useEventStore } from "context/state-store-context";
 
 export interface EmojiTableProps {
   data: FetchSortedMarketDataReturn["markets"];
@@ -57,6 +58,12 @@ const EmojiTable = (props: EmojiTableProps) => {
   const setMode = useEmojiPicker((state) => state.setMode);
 
   const [prevQuery, setPrevQuery] = useState<string>(getQuery(page, sort, emojis));
+  const addMarketData = useEventStore((s) => s.addMarketData);
+
+  useEffect(() => {
+    data.map((d) => addMarketData(d));
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [data]);
 
   useEffect(() => {
     if (prevEmojis.toString() !== emojis.toString()) {
@@ -88,11 +95,7 @@ const EmojiTable = (props: EmojiTableProps) => {
     } else {
       newUrl.searchParams.delete("page");
     }
-    if (sort !== MarketDataSortBy.MarketCap) {
-      newUrl.searchParams.set("sort", sort);
-    } else {
-      newUrl.searchParams.delete("sort");
-    }
+    newUrl.searchParams.set("sort", sort);
     if (emojis.length > 0) {
       newUrl.searchParams.set("q", encodeEmojis(emojis));
     } else {
@@ -124,7 +127,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <FilterOptions filter={sort} onChange={(value) => setSort(value)} />
             </FilterOptionsWrapper>
           </Header>
-          <ClientGrid data={data} />
+          <ClientGrid data={data} sortBy={sort} page={page} numPages={pages} />
           <ButtonsBlock
             value={page}
             onChange={(page) => {
@@ -133,7 +136,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                 scrollToRef.current.scrollIntoView({ behavior: "smooth" });
               }
             }}
-            numberOfPages={pages}
+            numPages={pages}
           />
         </InnerGridContainer>
       </OuterContainer>

@@ -11,6 +11,12 @@ export enum MarketDataSortBy {
   Tvl = "tvl",
 }
 
+export type MarketDataSortByHomePage =
+  | MarketDataSortBy.MarketCap
+  | MarketDataSortBy.BumpOrder
+  | MarketDataSortBy.DailyVolume
+  | MarketDataSortBy.AllTimeVolume;
+
 export type GetSortedMarketDataQueryArgs = {
   limit?: number;
   offset: number;
@@ -86,4 +92,12 @@ export const toPostgrestQueryParam = (
   sortBy: SortByPageQueryParams | MarketDataSortBy | SortByPostgrestQueryParams
 ): SortByPostgrestQueryParams => {
   return sortByFilters[sortBy]?.forPostgrestQuery ?? sortBy;
+};
+
+export const toMarketDataSortBy = (sortBy?: string): MarketDataSortByHomePage => {
+  if (sortBy === MarketDataSortBy.MarketCap) return sortBy;
+  if (sortBy === MarketDataSortBy.BumpOrder) return sortBy;
+  if (sortBy === MarketDataSortBy.DailyVolume) return sortBy;
+  if (sortBy === MarketDataSortBy.AllTimeVolume) return sortBy;
+  return MarketDataSortBy.MarketCap;
 };

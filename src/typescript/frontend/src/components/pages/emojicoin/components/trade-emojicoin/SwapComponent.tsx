@@ -51,8 +51,8 @@ export default function SwapComponent({
   marketID,
   initNumSwaps,
 }: SwapComponentProps) {
-  const searchParams = useSearchParams();
   const { t } = translationFunction();
+  const searchParams = useSearchParams();
 
   const presetInputAmount =
     searchParams.get("buy") !== null ? searchParams.get("buy") : searchParams.get("sell");
@@ -176,11 +176,11 @@ export default function SwapComponent({
 
   return (
     <>
-      <Column className="w-full max-w-[414px] h-full justify-center">
+      <Column className="relative w-full max-w-[414px] h-full justify-center">
         <div
           className={`${isDesktop ? "heading-1" : "heading-2"} md:heading-1 text-white uppercase pb-[17px]`}
         >
-          {"Trade emojicoin"}
+          {t("Trade Emojicoin")}
         </div>
 
         <SimulateInputsWrapper>

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import styled from "styled-components";
 
 export const Arrow = styled.div`
@@ -17,7 +18,7 @@ export const StyledMessageInner = styled.div`
   margin: 0 7px 11px 7px;
 `;
 
-export const StyledMessageWrapper = styled.div<{ fromAnotherUser: boolean }>`
+export const StyledMessageWrapper = styled(motion.div)<{ fromAnotherUser: boolean }>`
   display: flex;
   flex-direction: column;
   margin-bottom: 11px;
@@ -35,7 +36,7 @@ export const StyledUserNameWrapper = styled.div`
   display: flex;
 `;
 
-export const StyledMessageContainer = styled.div<{ fromAnotherUser: boolean }>`
+export const StyledMessageContainer = styled(motion.div)<{ fromAnotherUser: boolean }>`
   display: flex;
   width: 100%;
   justify-content: ${({ fromAnotherUser }) => (fromAnotherUser ? "start" : "end")};

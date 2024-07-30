@@ -9,6 +9,8 @@ import {
   isLiquidityEvent,
   isPeriodicStateEvent,
   isMarketRegistrationEvent,
+  type WithTime,
+  toEventWithTime,
 } from "@sdk/types/types";
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
@@ -74,7 +76,10 @@ export type MarketStateValueType = EventsWithGUIDs & {
 // be mutated by zustand/immer.
 export type EventState = {
   guids: Readonly<Set<string>>;
-  firehose: readonly AnyEmojicoinEvent[];
+  firehose: readonly (AnyEmojicoinEvent & WithTime)[];
+  // We need a firehose solely for state because we don't want pages to re-render when we add
+  // anything other than state events.
+  stateFirehose: readonly (StateEvent & WithTime)[];
   markets: Readonly<Map<MarketIDString, MarketStateValueType>>;
   symbols: Readonly<Map<SymbolString, MarketIDString>>;
   globalStateEvents: readonly GlobalStateEvent[];
@@ -117,6 +122,7 @@ export const initializeEventStore = (): EventState => {
   return {
     guids: new Set(),
     firehose: [],
+    stateFirehose: [],
     markets: new Map(),
     symbols: new Map(),
     globalStateEvents: [],
@@ -214,7 +220,7 @@ const callbackClonedLatestBarIfSubscribed = (
   }
 };
 
-// TODO Consider that we should be using classes with this- it depends how difficult it is to use
+// TODO: Consider that we should be using classes with this- it depends how difficult it is to use
 // with immer and RSC.
 export const createEventStore = (initialState: EventState = defaultState) => {
   return createStore<EventStore>()(
@@ -235,7 +241,12 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           if (!market) {
             initializeMarketHelper(state, marketID, data.emojiBytes);
           }
-          state.markets.get(marketID)!.marketData = data;
+          if (
+            !state.markets.get(marketID)!.marketData ||
+            (state.markets.get(marketID)!.marketData?.bumpTime ?? 0) < data.bumpTime
+          ) {
+            state.markets.get(marketID)!.marketData = data;
+          }
         });
       },
       setLatestBars: ({ marketID, latestBars }) => {
@@ -274,7 +285,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
 
         set((state) => {
           events.guids.forEach((guid) => state.guids.add(guid));
-          state.firehose.push(
+          const eventArray = [
             ...events.swapEvents,
             ...events.stateEvents,
             ...events.chatEvents,
@@ -285,8 +296,9 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             ...events.candlesticks[CandlestickResolution.PERIOD_30M],
             ...events.candlesticks[CandlestickResolution.PERIOD_1H],
             ...events.candlesticks[CandlestickResolution.PERIOD_4H],
-            ...events.candlesticks[CandlestickResolution.PERIOD_1D]
-          );
+            ...events.candlesticks[CandlestickResolution.PERIOD_1D],
+          ];
+          state.firehose.push(...eventArray.map(toEventWithTime));
           const marketID = events.marketID.toString();
           if (!state.markets.has(marketID)) {
             initializeMarketHelper(state, marketID);
@@ -294,6 +306,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           const market = state.markets.get(marketID)!;
           market.swapEvents.push(...events.swapEvents);
           market.stateEvents.push(...events.stateEvents);
+          state.stateFirehose.push(...events.stateEvents.map(toEventWithTime));
           market.chatEvents.push(...events.chatEvents);
           market.liquidityEvents.push(...events.liquidityEvents);
           for (const resolution of RESOLUTIONS_ARRAY) {
@@ -308,7 +321,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
         if (get().guids.has(event.guid)) return;
         addToLocalStorage(event);
         set((state) => {
-          state.firehose.unshift(event);
+          state.firehose.unshift(toEventWithTime(event));
           state.guids.add(event.guid);
           if (isGlobalStateEvent(event)) {
             state.globalStateEvents.unshift(event);
@@ -322,6 +335,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             const market = state.markets.get(event.marketID.toString())!;
             if (isStateEvent(event)) {
               market.stateEvents.unshift(event);
+              state.stateFirehose.unshift(toEventWithTime(event));
             } else if (isChatEvent(event)) {
               market.chatEvents.unshift(event);
             } else if (isLiquidityEvent(event)) {

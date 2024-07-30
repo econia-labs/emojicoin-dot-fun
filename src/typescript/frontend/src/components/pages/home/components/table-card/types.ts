@@ -8,4 +8,11 @@ export type TableCardProps = {
   staticNumSwaps: string;
   staticMarketCap: string;
   staticVolume24H: string;
+  prevIndex?: number;
+};
+
+export type GridLayoutInformation = {
+  itemsPerLine: number;
+  pageOffset: number;
+  runInitialAnimation?: boolean;
 };
