@@ -38,6 +38,7 @@ export type EmojiPickerActions = {
   setIsLoadingRegisteredMarket: (value: boolean) => void;
   insertEmojiTextInput: (textToInsert: string | string[]) => void;
   removeEmojiTextInput: (key?: string) => void;
+  getEmojis: () => string[];
 };
 
 export type EmojiPickerStore = EmojiPickerState & EmojiPickerActions;
@@ -101,6 +102,7 @@ export const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
   createStore<EmojiPickerStore>()((set, get) => ({
     ...defaultValues,
     ...initial,
+    getEmojis: () => get().emojis,
     setNativePicker: (value) => set({ nativePicker: value }),
     insertEmojiTextInput: (textToInsert) => {
       const inputs = insertEmojiTextInputHelper(get(), textToInsert);

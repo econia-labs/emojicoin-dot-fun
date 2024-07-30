@@ -81,6 +81,17 @@ export const borderVariants = {
   },
 };
 
+export const onlyHoverVariant = {
+  initial: {
+    borderColor: "#00000000",
+    transition: transitionOut,
+  },
+  hover: {
+    borderColor: ECONIA_BLUE,
+    transition: transitionIn,
+  },
+};
+
 export type RangeCharCodes = {
   0: number;
   1: number;

@@ -1,9 +1,9 @@
 import fetchSortedMarketData, { fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
-import { REVALIDATION_TIME } from "lib/server-env";
+import { revalidatePath } from "next/cache";
+import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 import HomePageComponent from "./home/HomePage";
 
-export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: HomePageParams) {
@@ -15,9 +15,20 @@ export default async function Home({ searchParams }: HomePageParams) {
     sortBy,
     orderBy,
     inBondingCurve,
-    searchBytes: q,
     exactCount: true,
+    searchBytes: q,
   });
 
-  return <HomePageComponent featured={featured} markets={sorted.markets} count={sorted.count} />;
+  revalidatePath("/");
+
+  return (
+    <HomePageComponent
+      featured={featured}
+      markets={sorted.markets}
+      count={sorted.count}
+      page={page}
+      sortBy={toMarketDataSortByHomePage(sortBy)}
+      searchBytes={q === "0x" ? undefined : q}
+    />
+  );
 }

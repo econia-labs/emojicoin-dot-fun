@@ -25,19 +25,21 @@ export interface WebSocketEventsProviderProps {
   initialState?: EventStore;
 }
 
+const appClientStore = createWebSocketClientStore();
+
 export const WebSocketEventsProvider = ({
   children,
   initialState,
 }: WebSocketEventsProviderProps) => {
   const events = useRef<StoreApi<EventStore>>(createEventStore(initialState));
-  const clientStore = useRef<StoreApi<WebSocketClientStore>>(createWebSocketClientStore());
+  const clientStore = useRef<StoreApi<WebSocketClientStore>>(appClientStore);
 
   useEffect(() => {
     if (!events.current) {
       events.current = createEventStore(initialState);
     }
     if (!clientStore.current) {
-      clientStore.current = createWebSocketClientStore();
+      clientStore.current = appClientStore;
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);

@@ -22,17 +22,22 @@ export const StyledTHFilters = styled.div`
 
 export const StyledGrid = styled.div`
   display: grid;
+  position: relative;
   grid-template-columns: repeat(auto-fill, ${EMOJI_GRID_ITEM_WIDTH}px);
   justify-content: center;
   gap: 0;
   width: 100%;
 `;
 
-const PADDING = 40;
+export const GridRowBorders = styled(StyledGrid)`
+  position: absolute;
+`;
+
+export const GRID_PADDING = 40;
 
 export const OutermostContainer = styled.div`
   display: flex;
-  padding: 0 ${PADDING}px;
+  padding: 0 ${GRID_PADDING}px;
   border-top: 1px solid ${darkColors.darkGray};
 `;
 
@@ -57,9 +62,9 @@ let width = EMOJI_GRID_ITEM_WIDTH;
 let mediaQueries = "";
 while (width < MAX_WIDTH) {
   mediaQueries += `
-  @media (min-width: ${width + PADDING * 2}px) {
-    padding-left: calc((100vw - ${PADDING * 2 + width}px) / 2);
-    padding-right: calc((100vw - ${PADDING * 2 + width}px) / 2);
+  @media (min-width: ${width + GRID_PADDING * 2}px) {
+    padding-left: calc((100vw - ${GRID_PADDING * 2 + width}px) / 2);
+    padding-right: calc((100vw - ${GRID_PADDING * 2 + width}px) / 2);
   }`;
   width += EMOJI_GRID_ITEM_WIDTH;
 }
@@ -74,7 +79,7 @@ export const Header = styled.div`
 
   ${mediaQueries}
 
-  @media (min-width: ${MAX_WIDTH + PADDING * 2}px) {
+  @media (min-width: ${MAX_WIDTH + GRID_PADDING * 2}px) {
     padding-left: 0px;
     padding-right: 0px;
   }

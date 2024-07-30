@@ -1,0 +1,10 @@
+div.horizontal-grid-line::after {
+  content: "";
+  position: relative;
+  top: 243px;
+  display: block;
+  width: 200vw;
+  background-color: var(--dark-gray);
+  height: 1px;
+  transform: translateX(-50%);
+}

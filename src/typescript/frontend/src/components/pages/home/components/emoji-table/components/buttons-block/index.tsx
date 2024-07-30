@@ -9,13 +9,13 @@ import { useMatchBreakpoints } from "@hooks/index";
 
 export type ButtonsBlockProps = {
   value: number;
-  numberOfPages: number;
+  numPages: number;
   onChange: (page: number) => void;
 };
 
 const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
   value,
-  numberOfPages,
+  numPages,
   onChange,
 }: ButtonsBlockProps) => {
   const { isMobile } = useMatchBreakpoints();
@@ -75,7 +75,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
         </Text>
 
         <Text className="med-pixel-text" fontSize="48px" color="darkGray">
-          {numberOfPages}
+          {numPages}
         </Text>
 
         <Text className="med-pixel-text" fontSize="48px" color="darkGray">
@@ -86,7 +86,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
       {/* Right */}
       <StyledBtn
         onClick={() => {
-          if (value < numberOfPages) {
+          if (value < numPages) {
             onChange(value + 1);
           }
         }}
@@ -103,7 +103,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
       </StyledBtn>
 
       {/* Last */}
-      <StyledBtn onClick={() => onChange(numberOfPages)}>
+      <StyledBtn onClick={() => onChange(numPages)}>
         <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"{"}
         </Text>

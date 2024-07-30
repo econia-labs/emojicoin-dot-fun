@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { translationFunction } from "context/language-context";
 import { Column, Flex, FlexGap } from "@containers";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
-import "./module.css";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
@@ -16,12 +15,51 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useLabelScrambler } from "../animation-config";
 import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
+import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import { type HomePageProps } from "app/home/HomePage";
+import { MarketDataSortBy } from "lib/queries/sorting/types";
+import "./module.css";
 
 export interface MainCardProps {
   featured?: Awaited<ReturnType<typeof fetchFeaturedMarket>>;
+  page: HomePageProps["page"];
+  sortBy: HomePageProps["sortBy"];
+  searchBytes: HomePageProps["searchBytes"];
 }
 
-const MainCard = ({ featured }: MainCardProps) => {
+const MainCard = (props: MainCardProps) => {
+  const stateFirehose = useEventStore((s) => s.stateFirehose);
+  const getMarket = useEventStore((s) => s.getMarket);
+  const getSymbolMap = useEventStore((s) => s.getSymbolMap);
+
+  const featured = useMemo(() => {
+    const { page, sortBy, searchBytes } = props;
+    const sortByBumpOrder = page === 1 && sortBy === MarketDataSortBy.BumpOrder;
+    const latestEvent = !sortByBumpOrder ? stateFirehose.at(0) : undefined;
+    const searchOrLatestEmojis = symbolBytesToEmojis(
+      searchBytes ?? latestEvent?.marketMetadata.emojiBytes ?? ""
+    );
+    const searchOrLatestMarketID = getSymbolMap().get(searchOrLatestEmojis.symbol);
+    const latestMarketID = searchOrLatestMarketID ?? undefined;
+
+    if (latestMarketID && searchOrLatestEmojis) {
+      const dataInState = getMarket(latestMarketID);
+      const marketData = {
+        marketID: latestMarketID,
+        marketCap: 0,
+        dailyVolume: 0,
+        allTimeVolume: 0,
+        numSwaps: 0,
+        ...dataInState,
+      };
+      return {
+        ...marketData,
+        ...searchOrLatestEmojis,
+      };
+    }
+    return props.featured;
+  }, [props, stateFirehose, getMarket, getSymbolMap]);
+
   const { t } = translationFunction();
 
   const globeImage = useRef<HTMLImageElement>(null);
