@@ -194,17 +194,19 @@ export class Lazy<T> {
 export class LazyPromise<T> {
   generator: () => Promise<T>;
 
-  data: T | null = null;
+  promise: Promise<T> | null = null;
+
+  lock: boolean = false;
 
   constructor(generator: () => Promise<T>) {
     this.generator = generator;
   }
 
   async get(): Promise<T> {
-    if (this.data === null) {
-      this.data = await this.generator();
+    if(this.promise === null) {
+      this.promise = this.generator();
     }
-    return this.data;
+    return await this.promise;
   }
 }
 
