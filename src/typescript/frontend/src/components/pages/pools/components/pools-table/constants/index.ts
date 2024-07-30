@@ -14,12 +14,12 @@ export const HEADERS = [
     sortBy: "daily_vol",
   },
   {
-    width: "15%",
+    width: "20%",
     text: "Tvl",
     sortBy: "tvl",
   },
   {
-    width: "29%",
+    width: "24%",
     text: "Dpr",
     sortBy: "apr",
   },
@@ -42,7 +42,7 @@ export const MOBILE_HEADERS = [
   },
   {
     width: "20%",
-    text: "Apr",
+    text: "Dpr",
     sortBy: "apr",
   },
 ];

@@ -16,7 +16,7 @@ const DAYS_IN_YEAR = 365;
 const getXPR = (x: number, tvlPerLpCoinGrowth: number) => (tvlPerLpCoinGrowth ** x - 1) * 100;
 
 const formatXPR = (xpr: number) => {
-  return `${xpr.toFixed(4)}%`;
+  return `${xpr.toFixed(4).replace(/(\.0*|(?<=(\..*))0*)$/, '')}%`;
 };
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
@@ -68,7 +68,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
         </Td>
       )}
 
-      <Td p="7px 12px" width={{ _: "25%", tablet: "15%" }}>
+      <Td p="7px 12px" width={{ _: "25%", tablet: "20%" }}>
         <Flex>
           <Text
             textScale="bodySmall"
@@ -82,8 +82,8 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
         </Flex>
       </Td>
 
-      <Td p="7px 12px" width={{ _: "10%", tablet: "29%" }}>
-        <Flex justifyContent="end" className="relative">
+      <Td p="7px 12px" width={{ _: "20%", tablet: "24%" }}>
+        <Flex justifyContent="start" className="relative">
           <Popup
             content={[
               <Text

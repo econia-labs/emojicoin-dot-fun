@@ -70,7 +70,6 @@ export const Th = styled.td<TdProps>`
   &:nth-last-child(1) {
     ${ThInner} {
       padding-inline-end: 15px;
-      justify-content: end;
     }
   }
 
