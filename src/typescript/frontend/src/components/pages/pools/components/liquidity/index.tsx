@@ -1,7 +1,6 @@
 "use client";
 
 import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
