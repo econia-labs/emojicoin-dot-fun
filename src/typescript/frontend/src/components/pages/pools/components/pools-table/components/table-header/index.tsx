@@ -22,7 +22,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
   });
 
   return (
-    <Flex justifyContent={isLast ? "end" : undefined}>
+    <Flex>
       <FlexGap
         cursor={item.sortBy ? "pointer" : undefined}
         gap="10px"
