@@ -260,6 +260,8 @@ const generatePeriodicStates = async (
   }
 };
 
+export const INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP = 1n;
+
 const concatEmoji = (a: Array<HexInput>) =>
   a.map((v) => Hex.fromHexInput(v).toStringWithoutPrefix()).join("");
 
@@ -379,6 +381,20 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
     n += 1;
     return data;
   });
+
+  // End the grace period for each market early by having the registrant swap as small an amount
+  // as possible right after registering.
+  for (let i = 0; i < emojicoins.length; i += 1) {
+    actions.push({
+      type: "swap",
+      data: {
+        account: accounts[i],
+        emojicoin: emojicoins[i],
+        isSell: false,
+        inputAmount: INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP,
+      },
+    });
+  }
 
   // Make 100 swaps by all accounts on each market
   for (let i = 1; i <= emojicoins.length; i += 1) {
@@ -529,7 +545,6 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
 
   const marketObjectMarketResource = await getMarketResource({
     aptos,
-    moduleAddress: publisher.accountAddress,
     objectAddress: derivedNamedObjectAddress,
   });
 

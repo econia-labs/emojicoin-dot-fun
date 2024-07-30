@@ -1,14 +1,14 @@
 "use client";
+// cspell:word couldn
 
 import { type HTMLAttributes, Suspense, useEffect } from "react";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { type SymbolEmojiData } from "@sdk/emoji_data";
+import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
-import { insertEmojiTextInput } from "lib/utils/handle-emoji-picker-input";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
 // TBH, we should probably just fork the library.
@@ -28,11 +28,12 @@ export const search = async (value: string): Promise<SearchResult> => {
 };
 
 export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
-  const setPickerRef = useInputStore((s) => s.setPickerRef);
-  const setChatEmojiData = useInputStore((s) => s.setChatEmojiData);
-  const mode = useInputStore((s) => s.mode);
-  const onClickOutside = useInputStore((s) => s.onClickOutside);
+  const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
+  const setChatEmojiData = useEmojiPicker((s) => s.setChatEmojiData);
+  const mode = useEmojiPicker((s) => s.mode);
+  const onClickOutside = useEmojiPicker((s) => s.onClickOutside);
   const host = document.querySelector("em-emoji-picker");
+  const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
 
   // TODO: Verify that the length of this set is the same length as the valid chat emojis array in the Move contract.
   // Load the data from the emoji picker library and then extract the valid chat emojis from it.
@@ -53,7 +54,7 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
           const bytes = new TextEncoder().encode(emoji);
           const hex = normalizeHex(bytes);
           chatEmojiData.set(emoji, {
-            name,
+            name: name as EmojiName,
             emoji,
             hex,
             bytes,
@@ -73,6 +74,27 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
   }, [host, setPickerRef]);
 
   const previewSelector = host?.shadowRoot?.querySelector("div.margin-l");
+  const search = host?.shadowRoot?.querySelector("div.search input");
+
+  useEffect(() => {
+    if (!search || !host) return;
+    const inputHandler = (_e: Event) => {
+      const previewSubtitle = host.shadowRoot?.querySelector("div.preview-subtitle");
+      if (!previewSubtitle) return;
+      const text = previewSubtitle.textContent;
+      const failedSearch =
+        text && text.includes("That emoji couldn") && text.endsWith("t be found");
+      if (failedSearch) {
+        // There's a weird apostrophe character in the text, so just check startsWith and endsWith here.
+        previewSubtitle.textContent = "That emoji couldn't be found";
+      }
+    };
+    search?.addEventListener("input", inputHandler);
+
+    return () => {
+      search?.removeEventListener("input", inputHandler);
+    };
+  }, [search, host]);
 
   useEffect(() => {
     // We use query selector here because we're working with a shadow root in the DOM,
@@ -87,6 +109,7 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
           mutations.forEach((mutation, _i) => {
             mutation.addedNodes.forEach((node) => {
               const text = node.textContent;
+
               // The `text` here is the short code the library uses, aka `:smile:` or `:rolling_on_the_floor_laughing:`
               if (text?.at(0) === ":" && text?.at(-1) === ":") {
                 // No matter what we need to replace the text, so let's just reset it if we can even find it.
@@ -109,6 +132,7 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
                   const formattedBytes = `${" ".repeat(2 - bytes.length)}${bytes}`;
                   if (mode === "register" && numBytes > 10) {
                     const span = document.createElement("span");
+                    span.id = "emoji-byte-size";
                     node.textContent = "";
                     span.textContent = `${formattedBytes} bytes`;
                     span.style.setProperty("color", "red", "important");
@@ -197,8 +221,7 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
           // TODO: Use this function later instead of the current stuff we have, aka using `onBlur()`.
           onClickOutside={onClickOutside}
           perLine={8}
-          // TODO: Use this instead of the current "not allowed" emoji we're using..?
-          // exceptEmojis={["🔥", "🚀", "🌙", "🌟", "🎉", "🎊", "🎈", "🎁", "🎆", "🎇"]}
+          exceptEmojis={[]}
           onEmojiSelect={(v: EmojiSelectorData) => {
             const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
             insertEmojiTextInput([newEmoji]);

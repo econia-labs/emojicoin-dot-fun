@@ -3,7 +3,7 @@ import { type MarketDataStore } from "@store/market-data";
 import { type WebSocketClientStore } from "@store/websocket-store";
 import { useContext } from "react";
 import { useStore } from "zustand";
-import { WebSocketEventContext, MarketDataContext } from "./WebSocketContextProvider";
+import { WebSocketEventContext, MarketDataContext } from "./StateStoreContextProviders";
 
 export const useEventStore = <T,>(selector: (store: EventStore) => T): T => {
   const eventStoreContext = useContext(WebSocketEventContext);

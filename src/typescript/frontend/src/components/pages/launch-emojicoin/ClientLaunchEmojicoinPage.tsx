@@ -1,7 +1,7 @@
 "use client";
 
 import TextCarousel from "components/text-carousel/TextCarousel";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getEmojisInString } from "@sdk/emoji_data";
@@ -23,12 +23,12 @@ type Stage = "initial" | "loading" | "coding";
 const ClientLaunchEmojicoinPage = () => {
   const searchParams = useSearchParams();
   const emojiParams = searchParams.get("emojis");
-  const setEmojis = useInputStore((state) => state.setEmojis);
-  const setMode = useInputStore((state) => state.setMode);
+  const setEmojis = useEmojiPicker((state) => state.setEmojis);
+  const setMode = useEmojiPicker((state) => state.setMode);
   const router = useRouter();
   const { status, lastResponse: lastResponseFromContext } = useAptos();
   const lastResponse = useRef(lastResponseFromContext?.response);
-  const isLoadingRegisteredMarket = useInputStore((state) => state.isLoadingRegisteredMarket);
+  const isLoadingRegisteredMarket = useEmojiPicker((state) => state.isLoadingRegisteredMarket);
   const [stage, setStage] = useState<Stage>(isLoadingRegisteredMarket ? "loading" : "initial");
 
   useEffect(() => {
@@ -57,6 +57,9 @@ const ClientLaunchEmojicoinPage = () => {
   const handleLoading = useCallback(async () => {
     const response = lastResponse.current;
     if (response && isUserTransactionResponse(response)) {
+      const lastResponseEvents = getEvents(response);
+      if (!lastResponseEvents.marketRegistrationEvents.length) return;
+
       // NOTE: revalidateTagAction may cause a flicker in the loading animation because the server
       // rerenders and sends the RSC components again. To avoid this we'll probably need to finish the animation
       // orchestration with a different animation or cover it up somehow, otherwise I'm not sure how to fix it in a
@@ -69,7 +72,6 @@ const ClientLaunchEmojicoinPage = () => {
         // Parse the emojis from the market registration event.
         // We do this in case the emojis are somehow cleared before the response is received. This ensures that
         // the emojis we're referencing are always the static ones that were used to register the market.
-        const lastResponseEvents = getEvents(response);
         const marketRegistrationEvent = lastResponseEvents.marketRegistrationEvents[0];
         const { marketID, emojiBytes } = marketRegistrationEvent.marketMetadata;
         const { symbol } = symbolBytesToEmojis(emojiBytes);

@@ -18,7 +18,7 @@ import StyledToaster from "styles/StyledToaster";
 import {
   WebSocketEventsProvider,
   MarketDataProvider,
-} from "./websockets-context/WebSocketContextProvider";
+} from "./state-store-context/StateStoreContextProviders";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
@@ -26,6 +26,8 @@ import { WalletModalContextProvider } from "./wallet-context/WalletModalContext"
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
+import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
+import { isMobile, isTablet } from "react-device-detect";
 
 enableMapSet();
 
@@ -64,16 +66,22 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             >
               <WalletModalContextProvider>
                 <AptosContextProvider>
-                  <GlobalStyle />
-                  <ConnectToWebSockets />
-                  <Suspense fallback={<Loader />}>
-                    <StyledToaster />
-                    <ContentWrapper>
-                      <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                      {children}
-                      <Footer />
-                    </ContentWrapper>
-                  </Suspense>
+                  <EmojiPickerProvider
+                    initialState={{
+                      nativePicker: isMobile || isTablet,
+                    }}
+                  >
+                    <GlobalStyle />
+                    <ConnectToWebSockets />
+                    <Suspense fallback={<Loader />}>
+                      <StyledToaster />
+                      <ContentWrapper>
+                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                        {children}
+                        <Footer />
+                      </ContentWrapper>
+                    </Suspense>
+                  </EmojiPickerProvider>
                 </AptosContextProvider>
               </WalletModalContextProvider>
             </AptosWalletAdapterProvider>

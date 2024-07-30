@@ -1,4 +1,5 @@
-import { AccountAddress } from "@aptos-labs/ts-sdk";
+import { AccountAddress, APTOS_COIN, parseTypeTag } from "@aptos-labs/ts-sdk";
+import Big from "big.js";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS || !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {
@@ -34,6 +35,7 @@ export const REWARDS_MODULE_ADDRESS = (() =>
 export const LOCAL_INBOX_URL = process.env.INBOX_URL ?? "http://localhost:3000";
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APTN = BigInt(ONE_APT);
+export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);
 export const MAX_GAS_FOR_PUBLISH = 1500000;
 export const COIN_FACTORY_MODULE_NAME = "coin_factory";
 export const EMOJICOIN_DOT_FUN_MODULE_NAME = "emojicoin_dot_fun";
@@ -60,6 +62,10 @@ export const MARKET_REGISTRATION_FEE = 100_000_000n;
 // For APT coin and for each emojicoin.
 export const DECIMALS = 8;
 
+// The number of decimals at which exponential notation is used for positive Big.js numbers.
+export const NUM_DECIMALS_BEFORE_SCIENTIFIC_NOTATION = 1000;
+Big.PE = NUM_DECIMALS_BEFORE_SCIENTIFIC_NOTATION;
+
 // Emoji sequence length constraints.
 export const MAX_NUM_CHAT_EMOJIS = 100;
 export const MAX_SYMBOL_LENGTH = 10;
@@ -77,6 +83,11 @@ export enum CandlestickResolution {
   PERIOD_4H = 14400000000,
   PERIOD_1D = 86400000000,
 }
+
+// The default grace period time for a new market registrant to trade on a new market before
+// non-registrants can trade. Note that this period is ended early once the registrant makes a
+// single trade.
+export const GRACE_PERIOD_TIME = BigInt(CandlestickResolution.PERIOD_5M.valueOf());
 
 /**
  * A helper object to convert from an untyped number to a CandlestickResolution enum value.

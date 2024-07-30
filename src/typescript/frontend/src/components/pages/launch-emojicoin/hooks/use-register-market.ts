@@ -8,18 +8,24 @@ import {
 import { INTEGRATOR_ADDRESS } from "lib/env";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
 import { toRegistryView } from "@sdk/types";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 
 export const useRegisterMarket = () => {
-  const emojis = useInputStore((state) => state.emojis);
-  const setIsLoadingRegisteredMarket = useInputStore((state) => state.setIsLoadingRegisteredMarket);
+  const emojis = useEmojiPicker((state) => state.emojis);
+  const setIsLoadingRegisteredMarket = useEmojiPicker(
+    (state) => state.setIsLoadingRegisteredMarket
+  );
+  const clear = useEmojiPicker((state) => state.clear);
+  const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
   const { aptos, account, submit, signThenSubmit } = useAptos();
 
   const registerMarket = async () => {
     if (!account) {
       return;
     }
+    // Set the picker invisible for the duration of the registration transaction.
+    setPickerInvisible(true);
     let res: PendingTransactionResponse | UserTransactionResponse | undefined | null;
     let error: unknown;
     const builderArgs = {
@@ -58,10 +64,16 @@ export const useRegisterMarket = () => {
     }
 
     if (res && isUserTransactionResponse(res)) {
+      clear();
       // The event is parsed and added as a registered market in `event-store.ts`,
       // we don't need to do anything here other than set the loading state.
       setIsLoadingRegisteredMarket(true);
     } else {
+      // If the transaction fails or the user cancels the transaction, we unset the loading state
+      // and set the picker visible.
+      // Note that we don't clear the input here, because the user may want to alter it to make it
+      // correct and try again.
+      setPickerInvisible(false);
       console.error("Error registering market:", error);
       setIsLoadingRegisteredMarket(false);
     }

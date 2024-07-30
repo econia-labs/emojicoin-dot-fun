@@ -1,5 +1,5 @@
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { MAX_NUM_CHAT_EMOJIS, MAX_SYMBOL_LENGTH } from "components/pages/emoji-picker/const";
 import { AnimatedStatusIndicator } from "components/pages/launch-emojicoin/animated-status-indicator";
 import { motion } from "framer-motion";
@@ -16,8 +16,8 @@ export const MarketValidityIndicator = ({
   className?: string;
   registered?: boolean;
 }) => {
-  const mode = useInputStore((s) => s.mode);
-  const emojis = useInputStore((s) => s.emojis);
+  const mode = useEmojiPicker((s) => s.mode);
+  const emojis = useEmojiPicker((s) => s.emojis);
   const length = mode === "register" ? sumBytes(emojis) : emojis.length;
   const threshold = mode === "register" ? MAX_SYMBOL_LENGTH : MAX_NUM_CHAT_EMOJIS;
   const [nonce, setNonce] = useState(0);

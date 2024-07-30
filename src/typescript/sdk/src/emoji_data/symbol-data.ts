@@ -8,7 +8,7 @@ const values: SymbolEmojiData[] = Object.entries(AllSymbolEmojiJSON).map(([name,
   const bytes = encoder.encode(emoji);
   const hex = normalizeHex(bytes);
   return {
-    name,
+    name: name as keyof typeof AllSymbolEmojiJSON,
     hex,
     bytes,
     emoji,
@@ -20,6 +20,7 @@ const hexMap = new Map<`0x${string}`, SymbolEmojiData>(values.map((v) => [v.hex,
 const emojiMap = new Map<string, SymbolEmojiData>(values.map((v) => [v.emoji, v]));
 
 export const SYMBOL_DATA = {
+  byStrictName: (v: keyof typeof AllSymbolEmojiJSON) => nameMap.get(v)!,
   byName: (v: string) => nameMap.get(v),
   byHex: (v: HexInput) => hexMap.get(normalizeHex(v)),
   byEmoji: (v: string) => emojiMap.get(v),

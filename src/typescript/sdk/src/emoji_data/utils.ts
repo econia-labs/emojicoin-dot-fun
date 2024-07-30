@@ -104,6 +104,7 @@ export const symbolToEmojis = (symbolInput: string | string[]) => {
 };
 
 export const symbolBytesToEmojis = (symbol: string | Uint8Array | Uint8Array[]) => {
+  if (symbol.length === 0) return { emojis: [], symbol: "" };
   if (symbol instanceof Uint8Array) {
     const symbolString = new TextDecoder().decode(symbol);
     return symbolToEmojis(symbolString);
@@ -118,6 +119,7 @@ export const symbolBytesToEmojis = (symbol: string | Uint8Array | Uint8Array[]) 
     const hex = symbol.startsWith("0x") ? symbol.slice(2) : symbol;
     const bytes = Buffer.from(hex, "hex");
     const symbolString = new TextDecoder().decode(bytes);
+    if (!symbolString) throw new Error("Empty or not a hex string. Try parsing as an emoji now.");
     return symbolToEmojis(symbolString);
   } catch (e) {
     const emojis = getEmojisInString(symbol);

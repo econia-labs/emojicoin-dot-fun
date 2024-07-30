@@ -1,6 +1,6 @@
 "use client";
 
-import { useWebSocketClient } from "context/websockets-context";
+import { useWebSocketClient } from "context/state-store-context";
 import { useEffect } from "react";
 
 export const SubscribeToMarketRegistrations = () => {

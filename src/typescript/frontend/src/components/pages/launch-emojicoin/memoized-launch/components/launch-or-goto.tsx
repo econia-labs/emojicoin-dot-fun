@@ -1,4 +1,4 @@
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import Button from "components/button";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { translationFunction } from "context/language-context";
@@ -15,7 +15,7 @@ export const LaunchButtonOrGoToMarketLink = ({
   registered?: boolean;
   invalid: boolean;
 }) => {
-  const emojis = useInputStore((state) => state.emojis);
+  const emojis = useEmojiPicker((state) => state.emojis);
   const { t } = translationFunction();
 
   const scrambleProps = {

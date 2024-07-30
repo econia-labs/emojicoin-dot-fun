@@ -6,7 +6,7 @@ import { Box } from "@containers";
 import DesktopGrid from "./components/desktop-grid";
 import MobileGrid from "./components/mobile-grid";
 import { type EmojicoinProps } from "./types";
-import { useEventStore } from "context/websockets-context";
+import { useEventStore } from "context/state-store-context";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import MainInfo from "./components/main-info/MainInfo";
 import { toUniqueHomogenousEvents } from "@sdk/emojicoin_dot_fun/events";

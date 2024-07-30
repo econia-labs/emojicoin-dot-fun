@@ -20,7 +20,7 @@ import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { useRouter, useSearchParams } from "next/navigation";
 import { parseJSON } from "utils";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { encodeEmojis } from "@sdk/emoji_data";
 
 export interface EmojiTableProps {
@@ -52,9 +52,9 @@ const EmojiTable = (props: EmojiTableProps) => {
   const [prevEmojis, setPrevEmojis] = useState<string[]>([]);
   const scrollToRef = useRef<HTMLDivElement>(null);
 
-  const setEmojis = useInputStore((state) => state.setEmojis);
-  const emojis = useInputStore((state) => state.emojis);
-  const setMode = useInputStore((state) => state.setMode);
+  const setEmojis = useEmojiPicker((state) => state.setEmojis);
+  const emojis = useEmojiPicker((state) => state.emojis);
+  const setMode = useEmojiPicker((state) => state.setMode);
 
   const [prevQuery, setPrevQuery] = useState<string>(getQuery(page, sort, emojis));
 
