@@ -8,7 +8,7 @@ const values: SymbolEmojiData[] = Object.entries(AllSymbolEmojiJSON).map(([name,
   const bytes = encoder.encode(emoji);
   const hex = normalizeHex(bytes);
   return {
-    name,
+    name: name as keyof typeof AllSymbolEmojiJSON,
     hex,
     bytes,
     emoji,
