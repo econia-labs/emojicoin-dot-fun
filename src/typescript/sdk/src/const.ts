@@ -87,7 +87,7 @@ export enum CandlestickResolution {
 // The default grace period time for a new market registrant to trade on a new market before
 // non-registrants can trade. Note that this period is ended early once the registrant makes a
 // single trade.
-export const GRACE_PERIOD_TIME = CandlestickResolution.PERIOD_5M;
+export const GRACE_PERIOD_TIME = BigInt(CandlestickResolution.PERIOD_5M.valueOf());
 
 /**
  * A helper object to convert from an untyped number to a CandlestickResolution enum value.

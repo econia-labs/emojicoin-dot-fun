@@ -37,7 +37,6 @@ describe("tests a simple faucet fund account request", () => {
 
     const marketObjectMarketResource = await getMarketResource({
       aptos,
-      moduleAddress: publisher.accountAddress,
       objectAddress: derivedNamedObjectAddress,
     });
 

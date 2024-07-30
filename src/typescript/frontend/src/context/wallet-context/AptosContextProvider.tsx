@@ -34,7 +34,7 @@ import { getEvents, type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { sleep, UnitOfTime } from "@sdk/utils";
 import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
-import { getNewCoinBalanceFromChanges } from "utils/parse-changes-for-balances";
+import { getNewCoinBalanceFromChanges } from "@sdk/utils/parse-changes-for-balances";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{

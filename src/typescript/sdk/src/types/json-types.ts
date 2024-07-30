@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unused-modules */
-import { type Uint8 } from "@aptos-labs/ts-sdk";
+import { AccountAddress, type Uint8 } from "@aptos-labs/ts-sdk";
 import {
   type Uint64String,
   type AccountAddressString,
@@ -312,4 +312,12 @@ export function isJSONGlobalStateEvent(e: EventJSON): boolean {
 }
 export function isJSONLiquidityEvent(e: EventJSON): boolean {
   return e.type.startsWith("Liquidity");
+}
+export function isRegistrantGracePeriodFlag(e: EventJSON["data"][number]) {
+  return (
+    "market_registrant" in e &&
+    "market_registration_time" in e &&
+    AccountAddress.isValid(e.market_registrant) &&
+    !Number.isNaN(e.market_registration_time)
+  );
 }

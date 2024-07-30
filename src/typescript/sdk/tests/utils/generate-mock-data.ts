@@ -380,6 +380,20 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
     return data;
   });
 
+  // End the grace period for each market early by having the registrant swap as small an amount
+  // as possible right after registering.
+  for (let i = 0; i < emojicoins.length; i += 1) {
+    actions.push({
+      type: "swap",
+      data: {
+        account: accounts[i],
+        emojicoin: emojicoins[i],
+        isSell: false,
+        inputAmount: 1n,
+      },
+    });
+  }
+
   // Make 100 swaps by all accounts on each market
   for (let i = 1; i <= emojicoins.length; i += 1) {
     for (let j = 1n; j <= 100n; j += 1n) {
@@ -529,7 +543,6 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
 
   const marketObjectMarketResource = await getMarketResource({
     aptos,
-    moduleAddress: publisher.accountAddress,
     objectAddress: derivedNamedObjectAddress,
   });
 
