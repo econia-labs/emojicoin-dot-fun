@@ -1,3 +1,4 @@
+import { LazyPromise } from "@sdk/utils";
 import { IPINFO_TOKEN } from "lib/env";
 
 const COUNTRY_CACHING_DURATION = 1000 * 60 * 60 * 24; // One day
@@ -12,13 +13,13 @@ const isAllowedCountry = (country: string) => {
   return country !== "US" && country !== "KP" && country !== "IR";
 };
 
-export const isBanned = async () => {
+const getCountry: () => Promise<string> = async () => {
   const cache = localStorage.getItem(COUNTRY_LOCALSTORAGE_KEY);
 
   if (cache) {
     const data: LocationCache = JSON.parse(cache);
     if (data.expiry > new Date().getTime()) {
-      return !isAllowedCountry(data.country);
+      return data.country;
     }
   }
 
@@ -33,5 +34,11 @@ export const isBanned = async () => {
 
   localStorage.setItem(COUNTRY_LOCALSTORAGE_KEY, JSON.stringify(data));
 
-  return !isAllowedCountry(queryResult);
+  return queryResult;
 };
+
+const country: LazyPromise<string> = new LazyPromise(() => getCountry());
+
+export const isBanned = async () => {
+  return !isAllowedCountry(await country.get())
+}
