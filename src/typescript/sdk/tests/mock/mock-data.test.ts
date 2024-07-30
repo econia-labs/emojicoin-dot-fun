@@ -57,7 +57,7 @@ describe("tests a simple faucet fund account request", () => {
 
     const data = swaps.data!;
 
-    expect(data.length).toBe(104);
+    expect(data.length).toBe(105);
 
     let expectedSum = 0n;
     for (let i = 1n; i <= 100n; i += 1n) {
