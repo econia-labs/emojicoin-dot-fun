@@ -4,7 +4,7 @@ import { isBanned } from "utils/geolocation";
 const useIsBanned = () => {
   const [banned, setBanned] = useState(true);
 
-  isBanned().then(res => setBanned(res));
+  isBanned().then((res) => setBanned(res));
 
   return banned;
 };

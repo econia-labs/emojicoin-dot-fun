@@ -64,47 +64,56 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
     }
   };
 
-
   // This component is used to display the `Connect Wallet` button and text with a scramble effect.
   // We use it in both mobile and desktop components.
   const inner =
-      !connected || !children || isBanned ? (
-        <Button
-          className={
-            className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
-          }
-          disabled={isBanned}
-          onClick={(e) => {
-            e.preventDefault();
-            onClick ? onClick() : openWalletModal();
-            handleReplay();
-          }}
-          onMouseOver={handleReplay}
+    !connected || !children || isBanned ? (
+      <Button
+        className={
+          className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
+        }
+        disabled={isBanned}
+        onClick={(e) => {
+          e.preventDefault();
+          onClick ? onClick() : openWalletModal();
+          handleReplay();
+        }}
+        onMouseOver={handleReplay}
+      >
+        <div
+          className={`flex flex-row text-${isBanned ? "dark-gray" : "ec-blue"} text-2xl justify-between`}
         >
-          <div className={`flex flex-row text-${isBanned ? "dark-gray" : "ec-blue"} text-2xl justify-between`}>
-            <div className="flex flex-row">
-              <OuterConnectText side="left" connected={connected} mobile={mobile} />
-              <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>
-                <span
-                  className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
-                  style={{ width, maxWidth: width }}
-                  ref={ref}
-                />
-              </div>
-              <OuterConnectText side="right" connected={connected} mobile={mobile} />
+          <div className="flex flex-row">
+            <OuterConnectText side="left" connected={connected} mobile={mobile} />
+            <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>
+              <span
+                className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
+                style={{ width, maxWidth: width }}
+                ref={ref}
+              />
             </div>
-            <Arrow width={18} className="fill-black" />
+            <OuterConnectText side="right" connected={connected} mobile={mobile} />
           </div>
-        </Button>
-      ) : (
-        children
-      );
+          <Arrow width={18} className="fill-black" />
+        </div>
+      </Button>
+    ) : (
+      children
+    );
 
-  return (<>
-      <Popup content={<Text textTransform="uppercase" color="black">not available in your jurisdiction</Text>}>
-        {inner}
-      </Popup>
-  </>);
+  return isBanned ? (
+    <Popup
+      content={
+        <Text textTransform="uppercase" color="black">
+          not available in your jurisdiction
+        </Text>
+      }
+    >
+      {inner}
+    </Popup>
+  ) : (
+    inner
+  );
 };
 
 export default ButtonWithConnectWalletFallback;
