@@ -4,7 +4,7 @@
 import { MODULE_ADDRESS } from "@sdk/const";
 import { type RegisteredMarket } from "@sdk/emoji_data";
 import { CloseIconWithHover } from "components/svg";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useWebSocketClient } from "context/data-context";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 

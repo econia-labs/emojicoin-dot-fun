@@ -4,6 +4,7 @@ import { type WebSocketClientStore } from "@store/websocket-store";
 import { useContext } from "react";
 import { useStore } from "zustand";
 import { WebSocketEventContext, MarketDataContext } from "./WebSocketContextProvider";
+import type { NameStore } from "@store/name-store";
 
 export const useEventStore = <T,>(selector: (store: EventStore) => T): T => {
   const eventStoreContext = useContext(WebSocketEventContext);
@@ -13,6 +14,16 @@ export const useEventStore = <T,>(selector: (store: EventStore) => T): T => {
   }
 
   return useStore(eventStoreContext.events, selector);
+};
+
+export const useNameStore = <T,>(selector: (store: NameStore) => T): T => {
+  const nameStoreContext = useContext(WebSocketEventContext);
+
+  if (nameStoreContext === null || nameStoreContext.events === null) {
+    throw new Error("useNameStore must be used within a EventStoreProvider");
+  }
+
+  return useStore(nameStoreContext.names, selector);
 };
 
 export const useWebSocketClient = <T,>(selector: (store: WebSocketClientStore) => T): T => {

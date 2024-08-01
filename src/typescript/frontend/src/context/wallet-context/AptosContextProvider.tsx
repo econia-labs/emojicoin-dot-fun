@@ -22,7 +22,7 @@ import {
   parseAPIErrorAndToast,
   successfulTransactionToast,
 } from "components/wallet/toasts";
-import { useEventStore } from "context/websockets-context";
+import { useEventStore } from "context/data-context";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { sleep, UnitOfTime } from "@sdk/utils";

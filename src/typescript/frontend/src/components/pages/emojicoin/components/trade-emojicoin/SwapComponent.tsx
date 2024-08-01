@@ -9,7 +9,7 @@ import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
-import { useEventStore } from "context/websockets-context";
+import { useEventStore } from "context/data-context";
 import { useMatchBreakpoints } from "@hooks/index";
 import { useSearchParams } from "next/navigation";
 

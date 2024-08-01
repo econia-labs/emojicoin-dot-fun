@@ -15,18 +15,22 @@ import { type MessageContainerProps } from "./types";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { normalizeAddress, truncateAddress, truncateANSName } from "@sdk/utils";
+import { formatDisplayName } from "@sdk/utils";
+import { useNameStore } from "context/data-context";
 
 const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
   const { account } = useAptos();
   const [fromAnotherUser, setFromAnotherUser] = useState(true);
+  const nameResolver = useNameStore((s) =>
+    s.getResolverWithNames(account?.address ? [account.address] : [])
+  );
   useEffect(() => {
     if (!account) {
       setFromAnotherUser(true);
       return;
     }
-    const normalized = normalizeAddress(account.address);
-    setFromAnotherUser(normalized !== message.sender && account.ansName !== message.sender);
+    const selfName = nameResolver(account.address);
+    setFromAnotherUser(selfName !== message.sender);
   }, [account, fromAnotherUser, message]);
 
   return (
@@ -45,9 +49,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({ message }) => {
             >
               <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
                 {/* Note: someone could have a name starting with "0x", is it a problem ? */}
-                {message.sender.startsWith("0x")
-                  ? truncateAddress(message.sender)
-                  : truncateANSName(message.sender)}
+                {formatDisplayName(message.sender)}
               </Text>
             </a>
 

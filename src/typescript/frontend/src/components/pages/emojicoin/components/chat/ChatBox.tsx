@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useThemeContext } from "context";
 import { Flex, Column } from "@containers";
@@ -12,14 +12,13 @@ import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useNameStore, useWebSocketClient } from "context/data-context";
 import useInputStore from "@store/input-store";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
 import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
 import type { Types } from "@sdk/types/types";
 import { parseJSON } from "utils";
-import { getANSNames } from "utils/ans";
 
 const convertChatMessageToEmojiAndIndices = (
   message: string,
@@ -72,7 +71,6 @@ const ChatBox = (props: ChatProps) => {
   const chatEmojiData = useInputStore((state) => state.chatEmojiData);
   const subscribe = useWebSocketClient((s) => s.subscribe);
   const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
-  const [names, setNames] = useState(new Map());
 
   useEffect(() => {
     subscribe.chat(marketID);
@@ -120,21 +118,17 @@ const ChatBox = (props: ChatProps) => {
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [props.data.chats.length, chats.length]);
 
-  useEffect(() => {
-    (async () => {
-      const names = await getANSNames(sortedChats.map((chat) => chat.user));
-      setNames(names);
-    })();
-  }, [sortedChats]);
+  const addresses = sortedChats.map((chat) => chat.user);
+  const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
 
   const sortedChatsWithNames = useMemo(() => {
     const data = sortedChats.map((e) => ({
       ...e,
-      user: names.get(e.user) ? names.get(e.user) : e.user,
+      user: nameResolver(e.user),
     }));
     return data;
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [names]);
+  }, [nameResolver]);
 
   return (
     <Column className="relative" width="100%" flexGrow={1}>

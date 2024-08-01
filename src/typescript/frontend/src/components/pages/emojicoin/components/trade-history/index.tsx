@@ -1,9 +1,9 @@
-import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
+import React, { type PropsWithChildren, useEffect, useMemo } from "react";
 
 import { type TradeHistoryProps } from "../../types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { getRankFromSwapEvent } from "lib/utils/get-user-rank";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useNameStore, useWebSocketClient } from "context/data-context";
 import { type Types } from "@sdk/types/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import TableRow from "./table-row";
@@ -11,7 +11,6 @@ import { type TableRowDesktopProps } from "./table-row/types";
 import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
 import "./trade-history.css";
 import { parseJSON } from "utils";
-import { getANSNames } from "utils/ans";
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   ...getRankFromSwapEvent(Number(toCoinDecimalString(value.quoteVolume, 3))),
@@ -52,8 +51,6 @@ const TradeHistory = (props: TradeHistoryProps) => {
 
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
 
-  const [names, setNames] = useState(new Map());
-
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.swap(marketID, null);
@@ -69,21 +66,17 @@ const TradeHistory = (props: TradeHistoryProps) => {
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [props.data.swaps.length, swaps.length]);
 
-  useEffect(() => {
-    (async () => {
-      const names = await getANSNames(sortedSwaps.map((e) => e.swapper));
-      setNames(names);
-    })();
-  }, [sortedSwaps]);
+  const addresses = sortedSwaps.map((swap) => swap.swapper);
+  const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
 
   const sortedSwapsWithNames = useMemo(() => {
     const data = sortedSwaps.map((e) => ({
       ...e,
-      swapper: names.get(e.swapper) ?? e.swapper,
+      swapper: nameResolver(e.swapper),
     }));
     return data;
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [names]);
+  }, [nameResolver]);
 
   return (
     <table className="flex flex-col table-fixed w-full">

@@ -1,12 +1,13 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Button } from "@headlessui/react";
-import { truncateAddress, truncateANSName } from "@sdk/utils/misc";
+import { formatDisplayName } from "@sdk/utils/misc";
 import { translationFunction } from "context/language-context";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
 import { useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
 import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
+import { useNameStore } from "context/data-context";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
@@ -27,21 +28,20 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
 
   const [enabled, setEnabled] = useState(false);
 
+  const nameResolver = useNameStore((s) =>
+    s.getResolverWithNames(account?.address ? [account.address] : [])
+  );
+
   const text = useMemo(() => {
     if (connected) {
       if (account) {
-        if (account.ansName) {
-          return truncateANSName(account.ansName);
-        }
-        // If there's no button text provided, we just show the truncated address.
-        // Keep in mind this only shows if no children are passed to the component.
-        return truncateAddress(account.address);
+        return formatDisplayName(nameResolver(account.address));
       } else {
         return t("Connected");
       }
     }
     return t(CONNECT_WALLET);
-  }, [connected, account, t]);
+  }, [connected, account, t, nameResolver]);
 
   const width = useMemo(() => {
     return `${text.length + 1}ch`;

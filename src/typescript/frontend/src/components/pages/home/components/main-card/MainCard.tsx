@@ -10,7 +10,7 @@ import "./module.css";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
+import { useEventStore, useWebSocketClient } from "context/data-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useLabelScrambler } from "../animation-config";

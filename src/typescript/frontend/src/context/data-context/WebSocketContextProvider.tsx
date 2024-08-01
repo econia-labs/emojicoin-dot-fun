@@ -6,6 +6,7 @@ import { type StoreApi } from "zustand";
 import { type EventStore, createEventStore } from "@store/event-store";
 import { type MarketDataStore, createMarketDataStore } from "@store/market-data";
 import { type WebSocketClientStore, createWebSocketClientStore } from "@store/websocket-store";
+import { type NameStore, createNameStore } from "@store/name-store";
 
 /**
  *
@@ -17,6 +18,7 @@ import { type WebSocketClientStore, createWebSocketClientStore } from "@store/we
 
 export const WebSocketEventContext = createContext<{
   events: StoreApi<EventStore>;
+  names: StoreApi<NameStore>;
   client: StoreApi<WebSocketClientStore>;
 } | null>(null);
 
@@ -30,11 +32,15 @@ export const WebSocketEventsProvider = ({
   initialState,
 }: WebSocketEventsProviderProps) => {
   const events = useRef<StoreApi<EventStore>>(createEventStore(initialState));
+  const names = useRef<StoreApi<NameStore>>(createNameStore());
   const clientStore = useRef<StoreApi<WebSocketClientStore>>(createWebSocketClientStore());
 
   useEffect(() => {
     if (!events.current) {
       events.current = createEventStore(initialState);
+    }
+    if (!names.current) {
+      names.current = createNameStore();
     }
     if (!clientStore.current) {
       clientStore.current = createWebSocketClientStore();
@@ -44,6 +50,7 @@ export const WebSocketEventsProvider = ({
 
   const contextValue = {
     events: events.current,
+    names: names.current,
     client: clientStore.current,
   };
 
