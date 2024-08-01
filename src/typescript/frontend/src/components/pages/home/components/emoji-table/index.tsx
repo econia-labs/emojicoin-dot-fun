@@ -11,7 +11,7 @@ import {
   FilterOptionsWrapper,
   OutermostContainer,
 } from "./styled";
-import SearchComponent from "./components/Search";
+import SearchBar from "components/inputs/search-bar";
 import FilterOptions from "./components/FilterOptions";
 import { ClientGrid } from "./ClientGrid";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
@@ -54,7 +54,6 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const setEmojis = useInputStore((state) => state.setEmojis);
   const emojis = useInputStore((state) => state.emojis);
-  const setMode = useInputStore((state) => state.setMode);
 
   const [prevQuery, setPrevQuery] = useState<string>(getQuery(page, sort, emojis));
 
@@ -103,11 +102,6 @@ const EmojiTable = (props: EmojiTableProps) => {
   }, [sort, emojis, page]);
 
   useEffect(() => {
-    setMode("home");
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
-
-  useEffect(() => {
     setEmojis(symbolBytesToEmojis(q ?? "").emojis.map((e) => e.emoji));
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [q]);
@@ -118,7 +112,7 @@ const EmojiTable = (props: EmojiTableProps) => {
         <InnerGridContainer>
           <Header ref={scrollToRef}>
             <SearchWrapper>
-              <SearchComponent />
+              <SearchBar />
             </SearchWrapper>
             <FilterOptionsWrapper>
               <FilterOptions filter={sort} onChange={(value) => setSort(value)} />
