@@ -42,7 +42,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
       }
     }
     return t(CONNECT_WALLET);
-  }, [connected, account, t]);
+  }, [connected, account, t, isBanned]);
 
   const width = useMemo(() => {
     return `${text.length}ch`;
