@@ -7,6 +7,7 @@ import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
+import { prettifyHex } from "lib/utils/prettify-hex";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -22,8 +23,6 @@ type StaticParams = {
   market: string;
 };
 
-// TODO: Bring back static params or caching with invalidation by some identifier for recent events having happened.
-
 interface EmojicoinPageProps {
   params: StaticParams;
   searchParams: {};
@@ -37,8 +36,9 @@ interface EmojicoinPageProps {
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const { market: marketSlug } = params.params;
   const names = pathToEmojiNames(marketSlug);
-  const hex = names.map((n) => SYMBOL_DATA.byName(n)?.hex.slice(2)).join("");
-  const res = await fetchLatestMarketState(`0x${hex}`);
+  const bytes = names.flatMap((n) => Array.from(SYMBOL_DATA.byName(n)?.bytes ?? []));
+  const hex = prettifyHex(bytes);
+  const res = await fetchLatestMarketState(hex);
 
   if (res) {
     const marketID = res.marketID.toString();

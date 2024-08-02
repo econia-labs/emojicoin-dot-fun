@@ -3,7 +3,9 @@ import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/hom
 import { revalidatePath } from "next/cache";
 import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 import HomePageComponent from "./home/HomePage";
+import { REVALIDATION_TIME } from "lib/server-env";
 
+export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: HomePageParams) {

@@ -5,6 +5,7 @@ import React, { Suspense, useEffect } from "react";
 import { useWebSocketClient } from "context/state-store-context";
 import Loading from "components/loading";
 import PrivateChart from "./PrivateChart";
+import FetchFromServer from "@store/server-to-client/FetchFromServer";
 
 export const Chart = PrivateChart;
 const MemoizedChart = React.memo(Chart);
@@ -26,6 +27,7 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
     <>
       {isScriptReady && (
         <Suspense fallback={<Loading emojis={props.emojis} />}>
+          <FetchFromServer />
           <MemoizedChart
             marketID={props.marketID}
             emojis={props.emojis}
