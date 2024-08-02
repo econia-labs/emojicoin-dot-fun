@@ -22,7 +22,7 @@ export type GetSortedMarketDataQueryArgs = {
   offset: number;
   orderBy: ValueOf<typeof ORDER_BY>;
   sortBy: MarketDataSortBy | SortByPostgrestQueryParams;
-  inBondingCurve: boolean | null;
+  inBondingCurve?: boolean;
   exactCount?: boolean;
   searchBytes?: string;
 };

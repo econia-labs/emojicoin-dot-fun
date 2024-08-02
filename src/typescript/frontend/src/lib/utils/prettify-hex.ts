@@ -6,7 +6,7 @@
  *
  * @param hex - The hex string to prettify.
  */
-export const prettifyHex = (hex: `0x${string}` | Uint8Array) => {
+export const prettifyHex = (hex: `0x${string}` | Uint8Array | number[]) => {
   const normalized = typeof hex === "string" ? hex : Buffer.from(hex).toString("hex");
-  return `0x${normalized.replace(/0x/g, "").toUpperCase()}`;
+  return `0x${normalized.replace(/0x/g, "").toUpperCase()}` as const;
 };

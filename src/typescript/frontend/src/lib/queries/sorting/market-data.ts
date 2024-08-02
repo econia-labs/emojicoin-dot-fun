@@ -18,7 +18,7 @@ export const getSortedMarketData = async ({
   offset,
   orderBy,
   sortBy,
-  inBondingCurve = null,
+  inBondingCurve,
   exactCount,
   searchBytes,
 }: GetSortedMarketDataQueryArgs) => {

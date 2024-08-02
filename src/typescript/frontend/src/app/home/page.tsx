@@ -1,9 +1,9 @@
 import fetchSortedMarketData, { fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 import HomePageComponent from "./HomePage";
-import { revalidatePath } from "next/cache";
-import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
+import { REVALIDATION_TIME } from "lib/server-env";
 
+export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: HomePageParams) {
@@ -25,8 +25,8 @@ export default async function Home({ searchParams }: HomePageParams) {
       markets={sorted.markets}
       count={sorted.count}
       page={page}
-      sortBy={toMarketDataSortByHomePage(sortBy)}
-      searchBytes={q === "0x" ? undefined : q}
+      sortBy={sortBy}
+      searchBytes={q}
     />
   );
 }
