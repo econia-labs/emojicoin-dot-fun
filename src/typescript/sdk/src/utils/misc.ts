@@ -206,6 +206,6 @@ export class LazyPromise<T> {
     if(this.promise === null) {
       this.promise = this.generator();
     }
-    return await this.promise;
+    return this.promise;
   }
 }
