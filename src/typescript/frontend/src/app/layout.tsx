@@ -2,6 +2,7 @@ import { type Metadata, type Viewport } from "next";
 import { getDefaultMetadata } from "configs/meta";
 import Providers from "context/providers";
 import StyledComponentsRegistry from "lib/registry";
+import { SubscribeToMarketRegistrations } from "@store/server-to-client/SubscribeToMarketRegistrations";
 import "react-toastify/dist/ReactToastify.css";
 import {
   formaDJRDisplayMedium,
@@ -10,8 +11,7 @@ import {
   pixelar,
 } from "styles/fonts";
 import "../app/global.css";
-import FetchFromServer from "@store/server-to-client/FetchFromServer";
-import { SubscribeToMarketRegistrations } from "@store/server-to-client/SubscribeToMarketRegistrations";
+import DisplayMarketData from "@store/server-to-client/FetchFromServer";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={fontsClassName}>
         <StyledComponentsRegistry>
           <Providers>
-            <FetchFromServer />
+            <DisplayMarketData />
             <SubscribeToMarketRegistrations />
             {children}
           </Providers>

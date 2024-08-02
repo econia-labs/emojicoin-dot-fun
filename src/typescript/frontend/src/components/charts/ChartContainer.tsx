@@ -2,15 +2,34 @@
 import Script from "next/script";
 import { type ChartContainerProps } from "./types";
 import React, { Suspense, useEffect } from "react";
-import { useWebSocketClient } from "context/state-store-context";
+import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import Loading from "components/loading";
 import PrivateChart from "./PrivateChart";
+import fetchAggregateMarkets from "lib/queries/initial/aggregate-markets";
 
 export const Chart = PrivateChart;
 const MemoizedChart = React.memo(Chart);
 
 export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">) => {
   const [isScriptReady, setIsScriptReady] = React.useState(false);
+  const [isMarketDataReady, setIsMarketDataReady] = React.useState(false);
+
+  const initialize = useEventStore((s) => s.initializeRegisteredMarketsMap);
+
+  useEffect(() => {
+    fetchAggregateMarkets()
+      .then(({ markets }) => {
+        initialize(markets);
+        // Let state propagate so that the chart doesn't re-render before the data is fully loaded into state.
+        setTimeout(() => {
+          setIsMarketDataReady(true);
+        }, 100);
+      })
+      .catch((_error) => {
+        setIsMarketDataReady(true);
+      });
+  }, [initialize]);
+
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
 
   // For now, we subscribe to any periodic state event instead of just a specific resolution.
@@ -24,7 +43,7 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
 
   return (
     <>
-      {isScriptReady && (
+      {isScriptReady && isMarketDataReady && (
         <Suspense fallback={<Loading emojis={props.emojis} />}>
           <MemoizedChart
             marketID={props.marketID}
