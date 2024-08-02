@@ -1,8 +1,9 @@
 import { LazyPromise } from "@sdk/utils";
-import { IPINFO_TOKEN } from "lib/env";
+import { GEOBLOCKING_ENABLED } from "lib/env";
 
 const COUNTRY_CACHING_DURATION = 1000 * 60 * 60 * 24; // One day
 const COUNTRY_LOCALSTORAGE_KEY = "user-country";
+export const COUNTRY_UNKNOWN = "unknown";
 
 type LocationCache = {
   country: string;
@@ -10,7 +11,7 @@ type LocationCache = {
 };
 
 const isAllowedCountry = (country: string) => {
-  return country !== "US" && country !== "KP" && country !== "IR";
+  return country !== "US" && country !== "KP" && country !== "IR" && country !== COUNTRY_UNKNOWN;
 };
 
 const getCountry: () => Promise<string> = async () => {
@@ -23,9 +24,7 @@ const getCountry: () => Promise<string> = async () => {
     }
   }
 
-  const queryResult = await fetch(`https://ipinfo.io/json?token=${IPINFO_TOKEN}`)
-    .then((res) => res.json())
-    .then((res) => res.country);
+  const queryResult = await fetch("/geolocation").then((res) => res.text());
 
   const data: LocationCache = {
     country: queryResult,
@@ -40,5 +39,6 @@ const getCountry: () => Promise<string> = async () => {
 const country: LazyPromise<string> = new LazyPromise(() => getCountry());
 
 export const isBanned = async () => {
-  return !isAllowedCountry(await country.get())
-}
+  if (!GEOBLOCKING_ENABLED) return false;
+  return !isAllowedCountry(await country.get());
+};
