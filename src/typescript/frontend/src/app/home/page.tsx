@@ -19,8 +19,6 @@ export default async function Home({ searchParams }: HomePageParams) {
     searchBytes: q,
   });
 
-  revalidatePath("/");
-
   return (
     <HomePageComponent
       featured={featured}
