@@ -4,7 +4,6 @@ import { type EventStore } from "@store/event-store";
 import { type FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { type TableCardProps } from "../table-card/types";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { StateTrigger } from "@sdk/const";
 import { type EmojiPickerStore } from "@store/emoji-picker-store";
 
 export type PropsWithTime = Omit<TableCardProps, "index" | "itemsPerLine"> & {
@@ -14,6 +13,7 @@ export type PropsWithTime = Omit<TableCardProps, "index" | "itemsPerLine"> & {
 export type PropsWithTimeAndIndex = TableCardProps & { key: string; time: number };
 export type WithTimeIndexAndShouldAnimate = PropsWithTimeAndIndex & {
   prevIndex?: number;
+  prevKey?: string;
 };
 
 export const marketDataToProps = (data: FetchSortedMarketDataReturn["markets"]): PropsWithTime[] =>
@@ -88,76 +88,31 @@ export const deduplicateAndSortEvents = (
 export const constructOrdered = ({
   data,
   stateFirehose,
-  sortByBumpOrder,
   getMarket,
   getSearchEmojis = () => [],
 }: {
   data: FetchSortedMarketDataReturn["markets"];
   stateFirehose: EventStore["stateFirehose"];
-  sortByBumpOrder: boolean;
   getMarket: EventStore["getMarket"];
   getSearchEmojis?: EmojiPickerStore["getEmojis"];
 }) => {
-  // If the search emoji getter is passed in, we should filter events by the current search emojis.
+  // We don't need to filter because the data passed in is already filtered from the server
+  // component prop data.
   const searchEmojis = getSearchEmojis();
-  const initial = !searchEmojis.length
-    ? marketDataToProps(data).map((v, i) => ({ ...v, index: i }))
-    : marketDataToProps(data).reduce(
-        (acc, val) => {
-          // We're filtering by search emojis- so only add the event state data if the emojis
-          // in the event are in the search emojis.
-          if (searchEmojis.some((s) => val.emojis.map((v) => v.emoji).includes(s))) {
-            acc.push({
-              ...val,
-              index: acc.length + 1,
-            });
-          }
-          return acc;
-        },
-        [] as (PropsWithTime & { index: number })[]
-      );
+  const initial = marketDataToProps(data).map((v, i) => ({ ...v, index: i }));
 
   // If we're sorting by bump order, deduplicate and sort the events by bump order.
-  if (sortByBumpOrder) {
-    const bumps = stateEventsToProps(stateFirehose, getMarket);
-    // Filter only if there are search emojis.
-    const filteredBumps = !searchEmojis.length
-      ? bumps
-      : bumps.filter((bump) =>
-          searchEmojis.some((s) => bump.emojis.map((v) => v.emoji).includes(s))
-        );
-    const latest = deduplicateAndSortEvents(
-      initial,
-      filteredBumps
-    ) as WithTimeIndexAndShouldAnimate[];
-    return latest.slice(0, MARKETS_PER_PAGE);
-  }
-  // Otherwise, we can add newly registered markets to the end of `ordered`. This is
-  // a quick fix to registered markets not appearing in the grid, so eventually
-  // we'd change this logic to actually filter by volume or market cap.
-  const newRegistrationEvents = stateFirehose
-    .filter((event) => event.stateMetadata.trigger === StateTrigger.MARKET_REGISTRATION)
-    .filter(
-      (event) =>
-        // If there are no search emojis, this always returns true- otherwise, it filters.
-        searchEmojis.length === 0 ||
-        searchEmojis.some((e) =>
-          symbolBytesToEmojis(event.marketMetadata.emojiBytes)
-            .emojis.map((v) => v.emoji)
-            .includes(e)
-        )
-    );
-  // Sort *only* the registration events by time- *earliest* first.
-  newRegistrationEvents.sort((a, b) => Number(a.stateMetadata.bumpTime - b.stateMetadata.bumpTime));
-  const registers = stateEventsToProps(newRegistrationEvents, getMarket);
-  const deduplicated = deduplicateEventsByMarketID([...initial, ...registers]);
-  return deduplicated.slice(0, MARKETS_PER_PAGE);
+  const bumps = stateEventsToProps(stateFirehose, getMarket);
+  // Filter only if there are search emojis.
+  const filteredBumps = !searchEmojis.length
+    ? bumps
+    : bumps.filter((bump) => searchEmojis.some((s) => bump.emojis.map((v) => v.emoji).includes(s)));
+  const latest = deduplicateAndSortEvents(
+    initial,
+    filteredBumps
+  ) as WithTimeIndexAndShouldAnimate[];
+  return latest.slice(0, MARKETS_PER_PAGE);
 };
-
-export const filterBySearchEmojis = <T extends { emojis: Array<{ emoji: string }> }>(
-  data: T[],
-  emojis: string[]
-): T[] => data.filter((d) => emojis.some((e) => d.emojis.map((v) => v.emoji).includes(e)));
 
 export const filterStateEventsBySearchEmojis = (
   data: Types.StateEvent[],

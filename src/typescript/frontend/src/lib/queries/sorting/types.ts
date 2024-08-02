@@ -94,10 +94,24 @@ export const toPostgrestQueryParam = (
   return sortByFilters[sortBy]?.forPostgrestQuery ?? sortBy;
 };
 
-export const toMarketDataSortBy = (sortBy?: string): MarketDataSortByHomePage => {
-  if (sortBy === MarketDataSortBy.MarketCap) return sortBy;
-  if (sortBy === MarketDataSortBy.BumpOrder) return sortBy;
-  if (sortBy === MarketDataSortBy.DailyVolume) return sortBy;
-  if (sortBy === MarketDataSortBy.AllTimeVolume) return sortBy;
+export const toMarketDataSortBy = (
+  sortBy?: SortByPostgrestQueryParams | MarketDataSortBy | SortByPageQueryParams
+): MarketDataSortBy => {
+  for (const key of Object.keys(sortByFilters)) {
+    if (sortBy === sortByFilters[key]?.forPostgrestQuery) return key as MarketDataSortBy;
+    if (sortBy === sortByFilters[key]?.forPageQueryParams) return key as MarketDataSortBy;
+    if (sortBy === key) return key as MarketDataSortBy;
+  }
+  return MarketDataSortBy.MarketCap;
+};
+
+export const toMarketDataSortByHomePage = (
+  sortBy?: SortByPageQueryParams | MarketDataSortBy | SortByPostgrestQueryParams
+): MarketDataSortByHomePage => {
+  const sort = toMarketDataSortBy(sortBy);
+  if (sort === MarketDataSortBy.MarketCap) return sort;
+  if (sort === MarketDataSortBy.BumpOrder) return sort;
+  if (sort === MarketDataSortBy.DailyVolume) return sort;
+  if (sort === MarketDataSortBy.AllTimeVolume) return sort;
   return MarketDataSortBy.MarketCap;
 };

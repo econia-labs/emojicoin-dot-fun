@@ -15,4 +15,5 @@ export type GridLayoutInformation = {
   itemsPerLine: number;
   pageOffset: number;
   runInitialAnimation?: boolean;
+  animateLayout?: boolean;
 };

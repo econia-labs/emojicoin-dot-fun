@@ -40,6 +40,7 @@ const TableCard = ({
   prevIndex,
   pageOffset,
   runInitialAnimation,
+  animateLayout,
 }: TableCardProps & GridLayoutInformation) => {
   const { t } = translationFunction();
   const events = useEventStore((s) => s);
@@ -161,7 +162,7 @@ const TableCard = ({
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
-  const indexWithOffset = useMemo(() => index + pageOffset, [index, pageOffset]);
+  const indexWithOffset = index + pageOffset;
 
   const variant: keyof typeof tableCardVariants = useMemo(() => {
     if (runInitialAnimation) return "initial";
@@ -183,14 +184,14 @@ const TableCard = ({
 
   return (
     <motion.div
-      layout
-      className="grid-emoji-card group card-wrapper last:border-r last:border-solid last:border-dark-gray"
+      layout={animateLayout}
+      className="grid-emoji-card group card-wrapper"
       variants={tableCardVariants}
       animate={variant}
       custom={index}
       style={{
-        borderLeft: "1px solid var(--dark-gray)",
-        borderRight: index % itemsPerLine !== 0 ? undefined : "1px solid var(--dark-gray)",
+        borderLeft: `${(index - 1) % itemsPerLine === 0 ? 1 : 0}px solid var(--dark-gray)`,
+        borderRight: "1px solid var(--dark-gray)",
       }}
     >
       <Link href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}>
@@ -214,15 +215,15 @@ const TableCard = ({
             variants={shouldAnimate ? borderVariants : onlyHoverVariant}
           >
             <Flex justifyContent="space-between" mb="7px">
-              <motion.div className="pixel-heading-2 text-dark-gray group-hover:text-ec-blue p-[1px] transition-all">
+              <span className="pixel-heading-2 text-dark-gray group-hover:text-ec-blue p-[1px]">
                 {indexWithOffset < 10 ? `0${indexWithOffset}` : indexWithOffset}
-              </motion.div>
+              </span>
 
               <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
             </Flex>
 
             <Text textScale="pixelHeading1" textAlign="center" mb="22px">
-              <span>{variant}</span>
+              <span>{symbol}</span>
             </Text>
             <Text
               textScale="display4"
