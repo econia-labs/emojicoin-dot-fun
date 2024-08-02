@@ -11,6 +11,7 @@ import {
   pixelar,
 } from "styles/fonts";
 import "../app/global.css";
+import DisplayMarketData from "@store/server-to-client/FetchFromServer";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={fontsClassName}>
         <StyledComponentsRegistry>
           <Providers>
+            <DisplayMarketData />
             <SubscribeToMarketRegistrations />
             {children}
           </Providers>
