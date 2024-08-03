@@ -2,7 +2,7 @@ const DURATION = 0.3;
 const INSERTION_DELAY = 0.2;
 const PER_ELEMENT_DELAY = 0.02;
 
-// This isn't the longest animation ("initial") is- but for the purpose of updating the grid
+// This isn't the longest animation ("initial" is), but for the purpose of updating the grid
 // with a debounced animation effect, it is. Revisit this if we change the animation times.
 export const TOTAL_ANIMATION_TIME = DURATION;
 
