@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-
 import { translationFunction } from "context/language-context";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
-
 import { type GridLayoutInformation, type TableCardProps } from "./types";
 import Link from "next/link";
 import { ROUTES } from "router/routes";

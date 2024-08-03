@@ -11,7 +11,7 @@ export type PropsWithTime = Omit<TableCardProps, "index" | "itemsPerLine"> & {
   time: number;
 };
 export type PropsWithTimeAndIndex = TableCardProps & { key: string; time: number };
-export type WithTimeIndexAndShouldAnimate = PropsWithTimeAndIndex & {
+export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
   prevIndex?: number;
   prevKey?: string;
 };
@@ -110,7 +110,7 @@ export const constructOrdered = ({
   const latest = deduplicateAndSortEvents(
     initial,
     filteredBumps
-  ) as WithTimeIndexAndShouldAnimate[];
+  ) as WithTimeIndexAndPrev[];
   return latest.slice(0, MARKETS_PER_PAGE);
 };
 
