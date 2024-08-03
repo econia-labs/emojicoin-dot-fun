@@ -65,10 +65,7 @@ export const constructURLForHomePage = ({
  * Check all the current and next url parameters using their default fallback values to see if the URL has
  * actually changed.
  */
-export const homePageParamsHaveMeaningfullyChanged = (
-  curr: URLSearchParams,
-  next: URLSearchParams
-) => {
+export const isHomePageURLDifferent = (curr: URLSearchParams, next: URLSearchParams) => {
   if ((curr.get("page") ?? "1") !== (next.get("page") ?? "1")) {
     return true;
   }

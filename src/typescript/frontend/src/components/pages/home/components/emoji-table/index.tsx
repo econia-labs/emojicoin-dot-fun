@@ -24,7 +24,7 @@ import { encodeEmojis } from "@sdk/emoji_data";
 import { useEventStore } from "context/state-store-context";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import useEvent from "@hooks/use-event";
-import { constructURLForHomePage, homePageParamsHaveMeaningfullyChanged } from "lib/queries/sorting/query-params";
+import { constructURLForHomePage, isHomePageURLDifferent } from "lib/queries/sorting/query-params";
 
 export interface EmojiTableProps {
   data: FetchSortedMarketDataReturn["markets"];
@@ -73,7 +73,7 @@ const EmojiTable = (props: EmojiTableProps) => {
 
       // Always push the new URL to the history, but only refresh if the URL has actually changed in a meaningful way.
       router.push(newURL.toString(), { scroll: false });
-      if (homePageParamsHaveMeaningfullyChanged(curr, newURL.searchParams)) {
+      if (isHomePageURLDifferent(curr, newURL.searchParams)) {
         router.refresh();
       }
     }
