@@ -1,17 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
 import TableCard from "../table-card/TableCard";
-import { GRID_PADDING, GridRowBorders, StyledGrid } from "./styled";
+import { GridRowBorders, StyledGrid } from "./styled";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { EMOJI_GRID_ITEM_HEIGHT, EMOJI_GRID_ITEM_WIDTH } from "../const";
 import { motion } from "framer-motion";
 import { marketDataToProps } from "./utils";
-import { useWindowSize } from "react-use";
+import { useGridItemsPerLine } from "./hooks/use-grid-items-per-line";
 import "./module.css";
-
-export const MAX_ELEMENTS_PER_LINE = 7;
 
 export const ClientGrid = ({
   data,
@@ -21,11 +18,7 @@ export const ClientGrid = ({
   page: number;
 }) => {
   const ordered = marketDataToProps(data);
-  const { width } = useWindowSize();
-  const itemsPerLine = useMemo(() => {
-    const num = Math.floor((width - GRID_PADDING * 2) / EMOJI_GRID_ITEM_WIDTH);
-    return Math.min(num, MAX_ELEMENTS_PER_LINE);
-  }, [width]);
+  const itemsPerLine = useGridItemsPerLine();
 
   return (
     <>

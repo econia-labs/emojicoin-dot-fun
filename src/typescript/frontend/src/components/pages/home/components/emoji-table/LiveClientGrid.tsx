@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useInsertionEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useInsertionEffect, useRef, useState } from "react";
 import TableCard from "../table-card/TableCard";
-import { GRID_PADDING, GridRowBorders, StyledGrid } from "./styled";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
+import { GridRowBorders, StyledGrid } from "./styled";
 import { EMOJI_GRID_ITEM_HEIGHT, EMOJI_GRID_ITEM_WIDTH } from "../const";
 import { motion } from "framer-motion";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { constructOrdered, type WithTimeIndexAndPrev } from "./utils";
-import { useWindowSize } from "react-use";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import useEvent from "@hooks/use-event";
 import { TOTAL_ANIMATION_TIME } from "../table-card/animation-variants";
+import { useGridItemsPerLine } from "./hooks/use-grid-items-per-line";
+import useEvent from "@hooks/use-event";
 import "./module.css";
 
 export const ANIMATION_DEBOUNCE_TIME = TOTAL_ANIMATION_TIME;
@@ -21,6 +21,8 @@ const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
   data.map((v) => v.marketID).join(",");
 
 export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["markets"] }) => {
+  const itemsPerLine = useGridItemsPerLine();
+
   const getMarket = useEventStore((s) => s.getMarket);
   const getSearchEmojis = useEmojiPicker((s) => s.getEmojis);
   const stateFirehose = useEventStore((s) => s.stateFirehose);
@@ -51,12 +53,6 @@ export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["ma
       runInitialAnimation: true,
     }))
   );
-
-  const { width } = useWindowSize();
-  const itemsPerLine = useMemo(() => {
-    const num = Math.floor((width - GRID_PADDING * 2) / EMOJI_GRID_ITEM_WIDTH);
-    return Math.min(num, MAX_ELEMENTS_PER_LINE);
-  }, [width]);
 
   // Note that this must be a stable function that's not in any effect's dependency array, otherwise
   // it'd trigger a re-render and thus an infinite loop. We use `useEvent` for this.
