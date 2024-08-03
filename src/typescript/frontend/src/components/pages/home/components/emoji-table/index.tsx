@@ -15,19 +15,16 @@ import SearchComponent from "./components/Search";
 import FilterOptions from "./components/FilterOptions";
 import { ClientGrid } from "./ClientGrid";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
-import {
-  MarketDataSortBy,
-  toMarketDataSortByHomePage,
-  type MarketDataSortByHomePage,
-} from "lib/queries/sorting/types";
+import { MarketDataSortBy, type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { useRouter } from "next/navigation";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { encodeEmojis } from "@sdk/emoji_data";
 import { useEventStore } from "context/state-store-context";
-import { LiveClientGrid } from "./LiveClientGrid";
+import { LiveClientGrid } from "./AnimatedClientGrid";
 import useEvent from "@hooks/use-event";
+import { constructURLForHomePage, isHomePageURLDifferent } from "lib/queries/sorting/query-params";
 
 export interface EmojiTableProps {
   data: FetchSortedMarketDataReturn["markets"];
@@ -36,35 +33,6 @@ export interface EmojiTableProps {
   sortBy?: MarketDataSortByHomePage;
   searchBytes?: string;
 }
-
-const constructURL = ({
-  page,
-  sort,
-  searchBytes,
-}: {
-  page?: number;
-  sort?: MarketDataSortBy;
-  searchBytes?: string;
-}) => {
-  const newURL = new URL(location.href);
-  if (typeof page === "number" && page !== 1) {
-    newURL.searchParams.set("page", page.toString());
-  } else {
-    newURL.searchParams.delete("page");
-  }
-  if (sort) {
-    const newSort = toMarketDataSortByHomePage(sort);
-    newURL.searchParams.set("sort", newSort);
-  } else {
-    newURL.searchParams.delete("sort");
-  }
-  if (searchBytes && searchBytes !== "0x") {
-    newURL.searchParams.set("q", searchBytes);
-  } else {
-    newURL.searchParams.delete("q");
-  }
-  return newURL.toString();
-};
 
 const EmojiTable = (props: EmojiTableProps) => {
   const router = useRouter();
@@ -96,14 +64,18 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const pushURL = useEvent(
     (args?: { page?: number; sort?: MarketDataSortBy; emojis?: string[] }) => {
-      const newURL = constructURL({
+      const curr = new URLSearchParams(location.search);
+      const newURL = constructURLForHomePage({
         page: args?.page ?? page,
         sort: args?.sort ?? sort,
         searchBytes: encodeEmojis(args?.emojis ?? emojis),
       });
 
-      router.push(newURL, { scroll: false });
-      router.refresh();
+      // Always push the new URL to the history, but only refresh if the URL has actually changed in a meaningful way.
+      router.push(newURL.toString(), { scroll: false });
+      if (isHomePageURLDifferent(curr, newURL.searchParams)) {
+        router.refresh();
+      }
     }
   );
 
@@ -126,9 +98,10 @@ const EmojiTable = (props: EmojiTableProps) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const shouldShowLive = useMemo(() => {
-    return sort === MarketDataSortBy.BumpOrder && page === 1 && !searchBytes;
-  }, [sort, page, searchBytes]);
+  const shouldAnimateGrid = useMemo(
+    () => sort === MarketDataSortBy.BumpOrder && page === 1 && !searchBytes,
+    [sort, page, searchBytes]
+  );
 
   return (
     <OutermostContainer>
@@ -145,7 +118,11 @@ const EmojiTable = (props: EmojiTableProps) => {
               />
             </FilterOptionsWrapper>
           </Header>
-          {shouldShowLive ? <LiveClientGrid data={data} /> : <ClientGrid data={data} page={page} />}
+          {shouldAnimateGrid ? (
+            <LiveClientGrid data={data} />
+          ) : (
+            <ClientGrid data={data} page={page} />
+          )}
           <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} />
         </InnerGridContainer>
       </OuterContainer>

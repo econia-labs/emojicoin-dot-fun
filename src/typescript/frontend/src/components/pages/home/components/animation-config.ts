@@ -18,7 +18,13 @@ export const transitionOut = {
   delay: 0.3,
 };
 
-export const variants = {
+export type AnyNonGridTableCardVariant =
+  | TableCardGlowVariants
+  | TableCardTextVariants
+  | TableCardBorderVariants;
+export type TableCardGlowVariants = keyof typeof glowVariants;
+
+export const glowVariants = {
   initial: {
     boxShadow: "0 0 0px 0px #00000000",
     filter: "drop-shadow(0 0 0 #00000000)",
@@ -40,6 +46,8 @@ export const variants = {
   },
 };
 
+export type TableCardTextVariants = keyof typeof textVariants;
+
 export const textVariants = {
   initial: {
     color: "#FFFFFFFF",
@@ -57,6 +65,8 @@ export const textVariants = {
     transition: transitionIn,
   },
 };
+
+export type TableCardBorderVariants = keyof typeof borderVariants;
 
 export const borderVariants = {
   initial: {

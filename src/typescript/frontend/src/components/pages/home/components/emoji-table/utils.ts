@@ -11,7 +11,7 @@ export type PropsWithTime = Omit<TableCardProps, "index" | "itemsPerLine"> & {
   time: number;
 };
 export type PropsWithTimeAndIndex = TableCardProps & { key: string; time: number };
-export type WithTimeIndexAndShouldAnimate = PropsWithTimeAndIndex & {
+export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
   prevIndex?: number;
   prevKey?: string;
 };
@@ -107,10 +107,7 @@ export const constructOrdered = ({
   const filteredBumps = !searchEmojis.length
     ? bumps
     : bumps.filter((bump) => searchEmojis.some((s) => bump.emojis.map((v) => v.emoji).includes(s)));
-  const latest = deduplicateAndSortEvents(
-    initial,
-    filteredBumps
-  ) as WithTimeIndexAndShouldAnimate[];
+  const latest = deduplicateAndSortEvents(initial, filteredBumps) as WithTimeIndexAndPrev[];
   return latest.slice(0, MARKETS_PER_PAGE);
 };
 

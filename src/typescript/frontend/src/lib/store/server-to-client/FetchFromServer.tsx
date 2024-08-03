@@ -2,7 +2,7 @@
 
 import StoreOnClient from "./StoreOnClient";
 
-export const DisplayMarketData = async () => {
+export const DisplayMarketData = () => {
   return <>{process.env.NODE_ENV === "development" && <StoreOnClient />}</>;
 };
 
