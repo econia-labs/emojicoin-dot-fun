@@ -107,7 +107,7 @@ export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["ma
   // Note that I've ensured that multiple changes during both the timeout and interval delay will not cause
   // a re-render/update if the grid order hasn't changed. This means we *always* get a visual update if the grid
   // order has changed and we're not in the middle of an animation.
-  useEffect(() => {
+  useLayoutEffect(() => {
     // We always calculate the interval remainder because this is triggered every time the grid order changes, and we
     // want to check how long we need to wait since the last update to update the current ordered list visually.
     // Seconds since last animation: (Date.now() - lastAnimationUpdate.current) * 0.001
