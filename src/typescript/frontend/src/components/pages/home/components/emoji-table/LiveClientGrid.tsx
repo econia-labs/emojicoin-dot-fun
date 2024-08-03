@@ -60,7 +60,7 @@ export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["ma
     const latestGrid = toSerializedGridOrder(latestOrdered.current);
     // We only update the grid if the grid order has changed. This is what triggers the useEffect that clears
     // any timeouts and intervals and restarts them.
-    if (latestGrid === gridOrder) {
+    if (latestGrid !== gridOrder) {
       setGridOrder(latestGrid);
     }
   });

@@ -28,6 +28,7 @@ import { encodeEmojis } from "@sdk/emoji_data";
 import { useEventStore } from "context/state-store-context";
 import { LiveClientGrid } from "./LiveClientGrid";
 import useEvent from "@hooks/use-event";
+import { safeParsePage } from "lib/routes/home-page-params";
 
 export interface EmojiTableProps {
   data: FetchSortedMarketDataReturn["markets"];
@@ -47,23 +48,43 @@ const constructURL = ({
   searchBytes?: string;
 }) => {
   const newURL = new URL(location.href);
-  if (typeof page === "number" && page !== 1) {
-    newURL.searchParams.set("page", page.toString());
-  } else {
-    newURL.searchParams.delete("page");
-  }
-  if (sort) {
-    const newSort = toMarketDataSortByHomePage(sort);
-    newURL.searchParams.set("sort", newSort);
-  } else {
-    newURL.searchParams.delete("sort");
+  newURL.searchParams.delete("page");
+  newURL.searchParams.delete("sort");
+  newURL.searchParams.delete("q");
+
+  const safePage = safeParsePage((page ?? 1).toString());
+  if (safePage !== 1) {
+    newURL.searchParams.set("page", safePage.toString());
   }
   if (searchBytes && searchBytes !== "0x") {
     newURL.searchParams.set("q", searchBytes);
-  } else {
-    newURL.searchParams.delete("q");
   }
-  return newURL.toString();
+  const newSort = toMarketDataSortByHomePage(sort);
+  if (newSort !== MarketDataSortBy.MarketCap) {
+    newURL.searchParams.set("sort", newSort);
+  }
+
+  return newURL;
+};
+
+/**
+ * Check all the current and next url parameters using their default fallback values to see if the URL has
+ * actually changed.
+ */
+const paramsHaveMeaningfullyChanged = (curr: URLSearchParams, next: URLSearchParams) => {
+  if ((curr.get("page") ?? "1") !== (next.get("page") ?? "1")) {
+    return true;
+  }
+  if (
+    (curr.get("sort") ?? MarketDataSortBy.MarketCap) !==
+    (next.get("sort") ?? MarketDataSortBy.MarketCap)
+  ) {
+    return true;
+  }
+  if ((curr.get("q") ?? "0x") !== (next.get("q") ?? "0x")) {
+    return true;
+  }
+  return false;
 };
 
 const EmojiTable = (props: EmojiTableProps) => {
@@ -96,14 +117,18 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const pushURL = useEvent(
     (args?: { page?: number; sort?: MarketDataSortBy; emojis?: string[] }) => {
+      const curr = new URLSearchParams(location.search);
       const newURL = constructURL({
         page: args?.page ?? page,
         sort: args?.sort ?? sort,
         searchBytes: encodeEmojis(args?.emojis ?? emojis),
       });
 
-      router.push(newURL, { scroll: false });
-      router.refresh();
+      // Always push the new URL to the history, but only refresh if the URL has actually changed in a meaningful way.
+      router.push(newURL.toString(), { scroll: false });
+      if (paramsHaveMeaningfullyChanged(curr, newURL.searchParams)) {
+        router.refresh();
+      }
     }
   );
 
@@ -127,6 +152,8 @@ const EmojiTable = (props: EmojiTableProps) => {
   }, []);
 
   const shouldShowLive = useMemo(() => {
+    console.log(sort, page, searchBytes);
+    console.log(sort === MarketDataSortBy.BumpOrder && page === 1 && !searchBytes);
     return sort === MarketDataSortBy.BumpOrder && page === 1 && !searchBytes;
   }, [sort, page, searchBytes]);
 

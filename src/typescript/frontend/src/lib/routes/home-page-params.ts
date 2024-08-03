@@ -9,7 +9,7 @@ export interface HomePageParams {
 
 export const safeParsePage = (pageInput: string | undefined | null): number => {
   try {
-    return Math.min(parseInt(pageInput ?? "1"), 1);
+    return Math.max(parseInt(pageInput ?? "1"), 1);
   } catch (e) {
     return 1;
   }
