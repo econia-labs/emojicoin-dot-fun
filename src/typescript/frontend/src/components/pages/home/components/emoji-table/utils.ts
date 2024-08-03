@@ -107,10 +107,7 @@ export const constructOrdered = ({
   const filteredBumps = !searchEmojis.length
     ? bumps
     : bumps.filter((bump) => searchEmojis.some((s) => bump.emojis.map((v) => v.emoji).includes(s)));
-  const latest = deduplicateAndSortEvents(
-    initial,
-    filteredBumps
-  ) as WithTimeIndexAndPrev[];
+  const latest = deduplicateAndSortEvents(initial, filteredBumps) as WithTimeIndexAndPrev[];
   return latest.slice(0, MARKETS_PER_PAGE);
 };
 

@@ -11,9 +11,10 @@ import { constructOrdered, type WithTimeIndexAndPrev } from "./utils";
 import { useWindowSize } from "react-use";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import useEvent from "@hooks/use-event";
+import { TOTAL_ANIMATION_TIME } from "../table-card/animation-variants";
 import "./module.css";
 
-export const ANIMATION_DEBOUNCE_TIME = 10000;
+export const ANIMATION_DEBOUNCE_TIME = TOTAL_ANIMATION_TIME;
 export const MAX_ELEMENTS_PER_LINE = 7;
 
 const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
