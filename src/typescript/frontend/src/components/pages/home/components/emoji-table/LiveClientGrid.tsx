@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useInsertionEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TableCard from "../table-card/TableCard";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { GridRowBorders, StyledGrid } from "./styled";
@@ -68,7 +68,7 @@ export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["ma
   // Construct `latestOrdered` as a ref. Every time any incoming data changes, we update the latestOrdered ref
   // so that anywhere in the component we always see the latest ordered list.
   // We also update the grid if the order has changed.
-  useInsertionEffect(() => {
+  useLayoutEffect(() => {
     latestOrdered.current = constructOrdered({
       data,
       stateFirehose,
