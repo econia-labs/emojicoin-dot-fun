@@ -11,7 +11,6 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { motion, useAnimationControls } from "framer-motion";
 import { Arrow } from "components/svg";
-import "./module.css";
 import Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import {
@@ -19,12 +18,17 @@ import {
   onlyHoverVariant,
   textVariants,
   useLabelScrambler,
-  variants,
+  glowVariants,
 } from "../animation-config";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { type Types } from "@sdk-types";
 import { useEvent } from "@hooks/use-event";
-import { tableCardVariants } from "./animation-variants";
+import {
+  safeQueueAnimations,
+  type TableCardVariants,
+  tableCardVariants,
+} from "./animation-variants";
+import "./module.css";
 
 const TableCard = ({
   index,
@@ -51,14 +55,19 @@ const TableCard = ({
   const isMounted = useRef(true);
   const controls = useAnimationControls();
 
-  // In order to avoid calling `controls.start(...)` on unmounted components, we need to keep track of whether
-  // the component is mounted or not.
+  const stopAnimations = useEvent(() => {
+    controls.stop();
+  });
+
+  // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {
     isMounted.current = true;
 
     return () => {
       isMounted.current = false;
+      stopAnimations();
     };
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   // TODO: Most of this component's state should be managed in `event-store` more cleanly, but for now this is an
@@ -69,7 +78,7 @@ const TableCard = ({
 
   // TODO: Replace this with the `animate` state value we'll control in `settings-store.ts` or something.
   // Essentially, this will turn animations off.
-  const shouldAnimate = true;
+  const animationsOn = true;
 
   // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
   // TODO: Convert all/most usage of bigints to Big so we can have more precise bigints without having to
@@ -77,13 +86,11 @@ const TableCard = ({
   const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
   const [roughDailyVolume, setRoughDailyVolume] = useState(Big(staticVolume24H));
 
-  const animateSwaps = useEvent(
-    (args: { staticNumSwaps: string; stateEvents: readonly Types.StateEvent[] }) => {
-      const { staticNumSwaps, stateEvents } = args;
-      if (stateEvents.length === 0) return;
-      const latestEvent = stateEvents.at(0)!;
+  const animateSwaps = useEvent((swapsFromProps: string, events: readonly Types.StateEvent[]) => {
+    const latestEvent = events.at(0);
+    if (latestEvent) {
       const numSwapsInStore = Big((latestEvent?.cumulativeStats.numSwaps ?? 0).toString());
-      if (Big(numSwapsInStore).gt(staticNumSwaps)) {
+      if (Big(numSwapsInStore).gt(swapsFromProps)) {
         const marketCapInStore = latestEvent.instantaneousStats.marketCap;
         setMarketCap(Big(marketCapInStore.toString()));
       }
@@ -92,55 +99,51 @@ const TableCard = ({
       // volume. It's just a rough estimate to simulate live 24h rolling volume.
       setRoughDailyVolume((prev) => prev.plus(Big(latestEvent.lastSwap.quoteVolume.toString())));
 
-      controls.start(latestEvent.lastSwap.isSell ? "sell" : "buy").then(() => {
-        if (isMounted.current) {
-          controls.start("initial");
-        }
+      safeQueueAnimations({
+        controls,
+        variants: [latestEvent.lastSwap.isSell ? "sell" : "buy", "initial"],
+        isMounted,
+        latestEvent,
       });
-
-      return () => controls.stop();
     }
-  );
-
-  useEffect(() => {
-    animateSwaps({ staticNumSwaps, stateEvents });
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [staticNumSwaps, stateEvents]);
-
-  const animateChats = useEvent((args: { chats: readonly Types.ChatEvent[] }) => {
-    const { chats } = args;
-    if (chats.length === 0) return;
-    controls.start("chats").then(() => {
-      if (isMounted.current) {
-        controls.start("initial");
-      }
-    });
-
-    return () => controls.stop();
   });
 
   useEffect(() => {
-    animateChats({ chats });
+    animateSwaps(staticNumSwaps, stateEvents);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [staticNumSwaps, stateEvents]);
+
+  const animateChats = useEvent((events: readonly Types.ChatEvent[]) => {
+    const latestEvent = events.at(0);
+    if (latestEvent) {
+      safeQueueAnimations({
+        controls,
+        variants: ["chats", "initial"],
+        isMounted,
+        latestEvent,
+      });
+    }
+  });
+
+  useEffect(() => {
+    animateChats(chats);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [chats]);
 
-  const animateLiquidity = useEvent(
-    (args: { liquidityEvents: readonly Types.LiquidityEvent[] }) => {
-      const { liquidityEvents } = args;
-      if (liquidityEvents.length === 0) return;
-      const latestEvent = liquidityEvents.at(0)!;
-      controls.start(latestEvent.liquidityProvided ? "buy" : "sell").then(() => {
-        if (isMounted.current) {
-          controls.start("initial");
-        }
+  const animateLiquidity = useEvent((events: readonly Types.LiquidityEvent[]) => {
+    const latestEvent = events.at(0);
+    if (latestEvent) {
+      safeQueueAnimations({
+        controls,
+        variants: [latestEvent.liquidityProvided ? "buy" : "sell", "initial"],
+        isMounted,
+        latestEvent,
       });
-
-      return () => controls.stop();
     }
-  );
+  });
 
   useEffect(() => {
-    animateLiquidity({ liquidityEvents });
+    animateLiquidity(liquidityEvents);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [liquidityEvents]);
 
@@ -162,7 +165,7 @@ const TableCard = ({
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
   const indexWithOffset = index + pageOffset;
 
-  const variant: keyof typeof tableCardVariants = useMemo(() => {
+  const variant: TableCardVariants = useMemo(() => {
     if (runInitialAnimation) return "initial";
     const inPreviousGrid = typeof prevIndex !== "undefined";
     const isMovingToNewLine = inPreviousGrid && prevIndex % itemsPerLine === 0;
@@ -195,7 +198,7 @@ const TableCard = ({
       <Link href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}>
         <motion.div
           animate={controls}
-          variants={shouldAnimate ? variants : {}}
+          variants={animationsOn ? glowVariants : {}}
           style={{
             boxShadow: "0 0 0px 0px #00000000",
             filter: "drop-shadow(0 0 0px #00000000)",
@@ -210,7 +213,7 @@ const TableCard = ({
               cursor: emojis.length ? "pointer" : "unset",
             }}
             animate={controls}
-            variants={shouldAnimate ? borderVariants : onlyHoverVariant}
+            variants={animationsOn ? borderVariants : onlyHoverVariant}
           >
             <Flex justifyContent="space-between" mb="7px">
               <span className="pixel-heading-2 text-dark-gray group-hover:text-ec-blue p-[1px]">
@@ -231,7 +234,7 @@ const TableCard = ({
               ellipsis
               title={emojisToName(emojis).toUpperCase()}
             >
-              {emojisToName(emojis)}
+              {variant}
             </Text>
             <Flex>
               <Column width="50%">
@@ -248,7 +251,7 @@ const TableCard = ({
                   then fall off the screen. */}
                 <motion.div
                   animate={controls}
-                  variants={shouldAnimate ? textVariants : {}}
+                  variants={animationsOn ? textVariants : {}}
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                   ref={marketCapRef}
@@ -267,7 +270,7 @@ const TableCard = ({
                 </div>
                 <motion.div
                   animate={controls}
-                  variants={shouldAnimate ? textVariants : {}}
+                  variants={animationsOn ? textVariants : {}}
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                   ref={dailyVolumeRef}

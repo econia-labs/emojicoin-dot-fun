@@ -1,3 +1,7 @@
+import { getEmojicoinEventTime, type AnyEmojicoinEvent } from "@sdk/types/types";
+import { type AnimationControls } from "framer-motion";
+import { type AnyNonGridTableCardVariant } from "../animation-config";
+
 const DURATION = 0.3;
 const INSERTION_DELAY = 0.2;
 const PER_ELEMENT_DELAY = 0.02;
@@ -55,6 +59,47 @@ export const tableCardVariants = {
       },
     },
   }),
+};
+
+export type TableCardVariants = keyof typeof tableCardVariants;
+
+const ONE_SECOND_MS = 1000n;
+const FIVE_SECONDS_MS = 5n * ONE_SECOND_MS;
+
+/**
+ * To avoid animations being started when the component is unmounted or the event that triggers
+ * the animation was already consumed, we check if the component is mounted and if the event
+ * happened less than the animation grace period.
+ *
+ * This is to avoid the animation being triggered when the sorting filter is changed and the
+ * component is unmounted and mounted again.
+ */
+export const shouldAnimateGlow = (
+  isMounted: React.MutableRefObject<boolean>,
+  latestEvent: AnyEmojicoinEvent
+) => {
+  // Note this is in microseconds.
+  const now = BigInt(Date.now()) * 1000n;
+  return isMounted.current && now - getEmojicoinEventTime(latestEvent) <= FIVE_SECONDS_MS * 1000n;
+};
+
+export const safeQueueAnimations = async ({
+  controls,
+  variants,
+  isMounted,
+  latestEvent,
+}: {
+  controls: AnimationControls;
+  variants: [AnyNonGridTableCardVariant, AnyNonGridTableCardVariant];
+  isMounted: React.MutableRefObject<boolean>;
+  latestEvent: AnyEmojicoinEvent;
+}) => {
+  if (shouldAnimateGlow(isMounted, latestEvent)) {
+    await controls.start(variants[0]);
+    if (shouldAnimateGlow(isMounted, latestEvent)) {
+      await controls.start(variants[1]);
+    }
+  }
 };
 
 export default tableCardVariants;
