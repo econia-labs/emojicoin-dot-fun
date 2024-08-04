@@ -6,7 +6,7 @@ import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
-import { useLabelScrambler } from "components/pages/home/components/animation-config";
+import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 
 const innerWrapper = `flex flex-col md:flex-row justify-around w-full max-w-[1362px] px-[30px] lg:px-[44px] py-[17px]
 md:py-[37px] xl:py-[68px]`;

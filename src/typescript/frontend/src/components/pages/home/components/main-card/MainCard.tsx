@@ -12,7 +12,7 @@ import { ROUTES } from "router/routes";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useLabelScrambler } from "../animation-config";
+import { useLabelScrambler } from "../table-card/animation-variants/event-variants";
 import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
@@ -145,7 +145,7 @@ const MainCard = (props: MainCardProps) => {
             alt="Planet"
             src={planetHome}
             ref={globeImage}
-            placeholder="blur"
+            placeholder="empty"
           />
 
           {[...new Intl.Segmenter().segment(featured?.symbol ?? "🖤")].length == 1 ? (
@@ -156,7 +156,7 @@ const MainCard = (props: MainCardProps) => {
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <div className="pixel-heading-1 text-dark-gray pixel-heading-text">01</div>
+          <div className="pixel-heading-1 text-dark-gray pixel-heading-text">00</div>
           <div
             className="display-font-text ellipses font-forma-bold"
             title={(featured ? emojisToName(featured.emojis) : "BLACK HEART").toUpperCase()}

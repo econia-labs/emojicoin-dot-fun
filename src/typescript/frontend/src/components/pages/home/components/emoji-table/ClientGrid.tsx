@@ -1,47 +1,37 @@
 "use client";
 
 import TableCard from "../table-card/TableCard";
-import { GridRowBorders, StyledGrid } from "./styled";
+import { StyledGrid } from "./styled";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { EMOJI_GRID_ITEM_HEIGHT, EMOJI_GRID_ITEM_WIDTH } from "../const";
 import { motion } from "framer-motion";
 import { marketDataToProps } from "./utils";
-import { useGridItemsPerLine } from "./hooks/use-grid-items-per-line";
+import { useGridRowLength } from "./hooks/use-grid-items-per-line";
+import MemoizedGridRowLines from "./components/grid-row-lines";
 import "./module.css";
+import { type MarketDataSortBy } from "lib/queries/sorting/types";
 
 export const ClientGrid = ({
   data,
   page,
+  sortBy,
 }: {
   data: FetchSortedMarketDataReturn["markets"];
   page: number;
+  sortBy: MarketDataSortBy;
 }) => {
   const ordered = marketDataToProps(data);
-  const itemsPerLine = useGridItemsPerLine();
+  const rowLength = useGridRowLength();
 
   return (
     <>
       <motion.div className="relative w-full h-full">
         <StyledGrid>
-          <GridRowBorders>
-            {/* To prevent auto-scrolling to the top of the page when the elements re-order, we provide
-             a static grid of horizontal lines that are the same height as the emoji grid items. */}
-            {Array.from({ length: ordered.length }).map((_, i) => (
-              <div
-                key={`${i}-non-live-clone-for-grid-lines`}
-                className={"horizontal-grid-line"}
-                style={{
-                  width: EMOJI_GRID_ITEM_WIDTH,
-                  height: EMOJI_GRID_ITEM_HEIGHT,
-                }}
-              />
-            ))}
-          </GridRowBorders>
+          <MemoizedGridRowLines key={`${sortBy}-grid-lines`} length={ordered.length} />
           {ordered.map((v, i) => {
             return (
               <TableCard
-                key={v.key}
+                key={`${sortBy}-${v.key}`}
                 index={i + 1}
                 pageOffset={(page - 1) * MARKETS_PER_PAGE}
                 marketID={v.marketID}
@@ -50,7 +40,7 @@ export const ClientGrid = ({
                 staticNumSwaps={v.staticNumSwaps}
                 staticMarketCap={v.staticMarketCap}
                 staticVolume24H={v.staticVolume24H}
-                itemsPerLine={itemsPerLine}
+                rowLength={rowLength}
                 prevIndex={i + 1}
                 runInitialAnimation={true}
               />

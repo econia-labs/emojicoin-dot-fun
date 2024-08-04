@@ -5,12 +5,12 @@ import { GRID_PADDING } from "../styled";
 
 export const MAX_ELEMENTS_PER_LINE = 7;
 
-export const useGridItemsPerLine = () => {
+export const useGridRowLength = () => {
   const { width } = useWindowSize();
-  const itemsPerLine = useMemo(() => {
+  const rowLength = useMemo(() => {
     const num = Math.floor((width - GRID_PADDING * 2) / EMOJI_GRID_ITEM_WIDTH);
     return Math.min(num, MAX_ELEMENTS_PER_LINE);
   }, [width]);
 
-  return itemsPerLine;
+  return rowLength;
 };

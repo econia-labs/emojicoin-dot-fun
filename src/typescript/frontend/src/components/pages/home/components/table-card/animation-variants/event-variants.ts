@@ -1,21 +1,16 @@
 import { type AnyNumberString } from "@sdk-types";
 import type Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
+import { ECONIA_BLUE, GREEN, PINK } from "theme/colors";
 import { useScramble } from "use-scramble";
 
-export const ECONIA_BLUE = "#086CD9";
-export const GREEN = "#2FA90F";
-export const PINK = "#CD2F8D";
-
 export const transitionIn = {
-  ease: "linear",
-  duration: 0.03,
+  duration: 0,
 };
 
 export const transitionOut = {
-  ease: "linear",
-  duration: 2,
-  delay: 0.3,
+  ease: "easeOut",
+  duration: 1.5,
 };
 
 export type AnyNonGridTableCardVariant =
@@ -32,6 +27,7 @@ export const glowVariants = {
   },
   chats: {
     boxShadow: `0 0 14px 11px ${ECONIA_BLUE}AA`,
+    filter: `drop-shadow(0 0 21px ${ECONIA_BLUE}AA)`,
     transition: transitionIn,
   },
   buy: {
@@ -40,8 +36,8 @@ export const glowVariants = {
     transition: transitionIn,
   },
   sell: {
-    boxShadow: `0 0 14px 11px ${PINK}AA`,
-    filter: `drop-shadow(0 0 21px ${PINK}AA)`,
+    boxShadow: `0 0 14px 11px ${PINK}CC`,
+    filter: `drop-shadow(0 0 21px ${PINK}CC)`,
     transition: transitionIn,
   },
 };
@@ -70,7 +66,7 @@ export type TableCardBorderVariants = keyof typeof borderVariants;
 
 export const borderVariants = {
   initial: {
-    borderColor: "#00000000",
+    borderColor: "#000000",
     transition: transitionOut,
   },
   buy: {

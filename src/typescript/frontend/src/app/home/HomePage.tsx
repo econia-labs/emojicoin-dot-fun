@@ -29,7 +29,7 @@ export default async function HomePageComponent({
       <div className="pt-[93px]">
         <div className="flex-col mb-[31px]">
           <TextCarousel />
-          <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full">
+          <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full min-h-[60dvh] h-[60dvh] max-h-[60dvh]">
             <MainCard featured={featured} page={page} sortBy={sortBy} searchBytes={searchBytes} />
           </div>
           {children}

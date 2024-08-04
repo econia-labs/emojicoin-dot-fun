@@ -5,8 +5,6 @@ import { translationFunction } from "context/language-context";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 import { type GridLayoutInformation, type TableCardProps } from "./types";
-import Link from "next/link";
-import { ROUTES } from "router/routes";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { motion, useAnimationControls } from "framer-motion";
@@ -19,15 +17,16 @@ import {
   textVariants,
   useLabelScrambler,
   glowVariants,
-} from "../animation-config";
-import { emojiNamesToPath } from "utils/pathname-helpers";
+} from "./animation-variants/event-variants";
 import { type Types } from "@sdk-types";
 import { useEvent } from "@hooks/use-event";
 import {
+  calculateDistance,
+  determineGridAnimationVariant,
   safeQueueAnimations,
-  type TableCardVariants,
   tableCardVariants,
-} from "./animation-variants";
+} from "./animation-variants/grid-variants";
+import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import "./module.css";
 
 const TableCard = ({
@@ -38,11 +37,10 @@ const TableCard = ({
   staticNumSwaps,
   staticMarketCap,
   staticVolume24H,
-  itemsPerLine,
+  rowLength,
   prevIndex,
   pageOffset,
   runInitialAnimation,
-  animateLayout,
 }: TableCardProps & GridLayoutInformation) => {
   const { t } = translationFunction();
   const events = useEventStore((s) => s);
@@ -55,17 +53,12 @@ const TableCard = ({
   const isMounted = useRef(true);
   const controls = useAnimationControls();
 
-  const stopAnimations = useEvent(() => {
-    controls.stop();
-  });
-
   // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {
     isMounted.current = true;
 
     return () => {
       isMounted.current = false;
-      stopAnimations();
     };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
@@ -110,8 +103,12 @@ const TableCard = ({
 
   useEffect(() => {
     animateSwaps(staticNumSwaps, stateEvents);
+
+    return () => {
+      if (isMounted.current) controls.set("initial");
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [staticNumSwaps, stateEvents]);
+  }, [staticNumSwaps, stateEvents, controls]);
 
   const animateChats = useEvent((events: readonly Types.ChatEvent[]) => {
     const latestEvent = events.at(0);
@@ -127,8 +124,12 @@ const TableCard = ({
 
   useEffect(() => {
     animateChats(chats);
+
+    return () => {
+      if (isMounted.current) controls.set("initial");
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [chats]);
+  }, [chats, controls]);
 
   const animateLiquidity = useEvent((events: readonly Types.LiquidityEvent[]) => {
     const latestEvent = events.at(0);
@@ -144,8 +145,12 @@ const TableCard = ({
 
   useEffect(() => {
     animateLiquidity(liquidityEvents);
+
+    return () => {
+      if (isMounted.current) controls.set("initial");
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [liquidityEvents]);
+  }, [liquidityEvents, controls]);
 
   useEffect(() => {
     events.initializeMarket(marketID, symbol);
@@ -163,39 +168,47 @@ const TableCard = ({
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
-  const indexWithOffset = index + pageOffset;
-
-  const variant: TableCardVariants = useMemo(() => {
-    if (runInitialAnimation) return "initial";
-    const inPreviousGrid = typeof prevIndex !== "undefined";
-    const isMovingToNewLine = inPreviousGrid && prevIndex % itemsPerLine === 0;
-    const isBeingInserted = !inPreviousGrid;
-    const isMovingForwards = inPreviousGrid && prevIndex < index;
-    const isMovingBackwards = inPreviousGrid && prevIndex > index;
-    const isMoving = isMovingBackwards || isMovingForwards;
-
-    // Note that we have to check if it's moving here or it won't trigger the layout animation correctly.
-    // Set the `symbol` span to `variant` to view this in action and how it works.
-    if (isMovingToNewLine) return isMoving ? "toNewLine" : "default";
-    if (isBeingInserted) return "unshift";
-    if (isMovingBackwards) return "backwards";
-    if (isMovingForwards) return "default";
-    return "default";
-  }, [prevIndex, index, itemsPerLine, runInitialAnimation]);
+  const { variant, indexWithOffset, distance } = useMemo(() => {
+    const variant = determineGridAnimationVariant({
+      prevIndex,
+      index,
+      rowLength,
+      runInitialAnimation,
+    });
+    const indexWithOffset = index + pageOffset;
+    const distance = calculateDistance({ index, prevIndex, rowLength });
+    return {
+      variant,
+      indexWithOffset,
+      distance,
+    };
+  }, [prevIndex, index, rowLength, pageOffset, runInitialAnimation]);
 
   return (
     <motion.div
-      layout={animateLayout}
-      className="grid-emoji-card group card-wrapper"
+      layout
+      layoutId={index.toString()}
+      className="grid-emoji-card group card-wrapper border border-solid border-dark-gray box-border"
       variants={tableCardVariants}
+      initial={{ opacity: 0 }}
       animate={variant}
       custom={index}
-      style={{
-        borderLeft: `${(index - 1) % itemsPerLine === 0 ? 1 : 0}px solid var(--dark-gray)`,
-        borderRight: "1px solid var(--dark-gray)",
+      transition={{
+        type: "spring",
+        duration: 0.4,
+        // restSpeed: 10,
+        // restDelta: 3,
+        // velocity: distance * 400,
+        delay: distance * 0.001,
       }}
+      style={{
+        borderLeft: `${index % rowLength === 0 ? 1 : 0}px solid var(--dark-gray)`,
+        borderTop: "0px solid #00000000",
+        cursor: "pointer",
+      }}
+      onLayoutAnimationStart={() => {}}
     >
-      <Link href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}>
+      <LinkOrAnimationTrigger emojis={emojis} marketID={marketID}>
         <motion.div
           animate={controls}
           variants={animationsOn ? glowVariants : {}}
@@ -208,9 +221,9 @@ const TableCard = ({
             className="flex flex-col relative grid-emoji-card w-full h-full py-[10px] px-[19px] overflow-hidden"
             whileHover="hover"
             style={{
-              border: "1px solid",
+              borderWidth: 1,
+              borderStyle: "solid",
               borderColor: "#00000000",
-              cursor: emojis.length ? "pointer" : "unset",
             }}
             animate={controls}
             variants={animationsOn ? borderVariants : onlyHoverVariant}
@@ -234,7 +247,7 @@ const TableCard = ({
               ellipsis
               title={emojisToName(emojis).toUpperCase()}
             >
-              {variant}
+              {`${prevIndex ?? "♾️"} => ${index}, ${Math.floor(distance)}`}
             </Text>
             <Flex>
               <Column width="50%">
@@ -281,7 +294,7 @@ const TableCard = ({
             </Flex>
           </motion.div>
         </motion.div>
-      </Link>
+      </LinkOrAnimationTrigger>
     </motion.div>
   );
 };

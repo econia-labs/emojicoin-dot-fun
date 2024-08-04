@@ -3,25 +3,25 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TableCard from "../table-card/TableCard";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
-import { GridRowBorders, StyledGrid } from "./styled";
-import { EMOJI_GRID_ITEM_HEIGHT, EMOJI_GRID_ITEM_WIDTH } from "../const";
+import { StyledGrid } from "./styled";
 import { motion } from "framer-motion";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { constructOrdered, type WithTimeIndexAndPrev } from "./utils";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { TOTAL_ANIMATION_TIME } from "../table-card/animation-variants";
-import { useGridItemsPerLine } from "./hooks/use-grid-items-per-line";
+import { TOTAL_ANIMATION_TIME } from "../table-card/animation-variants/grid-variants";
+import { useGridRowLength } from "./hooks/use-grid-items-per-line";
+import MemoizedGridRowLines from "./components/grid-row-lines";
 import useEvent from "@hooks/use-event";
 import "./module.css";
 
-export const ANIMATION_DEBOUNCE_TIME = TOTAL_ANIMATION_TIME;
+export const ANIMATION_DEBOUNCE_TIME = TOTAL_ANIMATION_TIME * 4.2 * 1000;
 export const MAX_ELEMENTS_PER_LINE = 7;
 
 const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
   data.map((v) => v.marketID).join(",");
 
 export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["markets"] }) => {
-  const itemsPerLine = useGridItemsPerLine();
+  const rowLength = useGridRowLength();
 
   const getMarket = useEventStore((s) => s.getMarket);
   const getSearchEmojis = useEmojiPicker((s) => s.getEmojis);
@@ -145,36 +145,22 @@ export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["ma
     <>
       <motion.div className="relative w-full h-full">
         <StyledGrid>
-          <GridRowBorders>
-            {/* To prevent auto-scrolling to the top of the page when the elements re-order, we provide
-             a static grid of horizontal lines that are the same height as the emoji grid items. */}
-            {Array.from({ length: ordered.length }).map((_, i) => (
-              <div
-                key={`${i}-live-clone-for-grid-lines`}
-                className={"horizontal-grid-line"}
-                style={{
-                  width: EMOJI_GRID_ITEM_WIDTH,
-                  height: EMOJI_GRID_ITEM_HEIGHT,
-                }}
-              />
-            ))}
-          </GridRowBorders>
+          <MemoizedGridRowLines key={"live-grid-lines"} length={ordered.length} />
           {ordered.map((v) => {
             return (
               <TableCard
                 key={`live-${v.key}`}
                 index={v.index}
-                pageOffset={0}
+                pageOffset={0} // We don't paginate the live grid.
                 marketID={v.marketID}
                 symbol={v.symbol}
                 emojis={v.emojis}
                 staticNumSwaps={v.staticNumSwaps}
                 staticMarketCap={v.staticMarketCap}
                 staticVolume24H={v.staticVolume24H}
-                itemsPerLine={itemsPerLine}
+                rowLength={rowLength}
                 prevIndex={v.prevIndex}
                 runInitialAnimation={v.runInitialAnimation}
-                animateLayout={true}
               />
             );
           })}

@@ -12,8 +12,7 @@ export type TableCardProps = {
 };
 
 export type GridLayoutInformation = {
-  itemsPerLine: number;
+  rowLength: number;
   pageOffset: number;
   runInitialAnimation?: boolean;
-  animateLayout?: boolean;
 };

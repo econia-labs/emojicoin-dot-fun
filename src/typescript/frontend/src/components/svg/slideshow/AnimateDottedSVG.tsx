@@ -1,5 +1,5 @@
-import { ECONIA_BLUE } from "components/pages/home/components/animation-config";
 import { type SVGMotionProps, motion } from "framer-motion";
+import { ECONIA_BLUE } from "theme/colors";
 
 const getAnimateConfig = (delay: number) => ({
   pathLength: [0, 1],

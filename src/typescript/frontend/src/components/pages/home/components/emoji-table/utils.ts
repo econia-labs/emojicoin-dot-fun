@@ -6,7 +6,7 @@ import { type TableCardProps } from "../table-card/types";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type EmojiPickerStore } from "@store/emoji-picker-store";
 
-export type PropsWithTime = Omit<TableCardProps, "index" | "itemsPerLine"> & {
+export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   key: string;
   time: number;
 };
@@ -65,7 +65,7 @@ export const deduplicateEventsByMarketID = (
       if (!marketIDs.has(val.marketID)) {
         acc.push({
           ...val,
-          index: acc.length + 1,
+          index: acc.length,
         });
         marketIDs.add(val.marketID);
       }
@@ -99,7 +99,7 @@ export const constructOrdered = ({
   // We don't need to filter because the data passed in is already filtered from the server
   // component prop data.
   const searchEmojis = getSearchEmojis();
-  const initial = marketDataToProps(data).map((v, i) => ({ ...v, index: i }));
+  const initial = marketDataToProps(data);
 
   // If we're sorting by bump order, deduplicate and sort the events by bump order.
   const bumps = stateEventsToProps(stateFirehose, getMarket);

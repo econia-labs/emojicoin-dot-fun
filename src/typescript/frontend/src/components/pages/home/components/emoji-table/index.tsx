@@ -121,7 +121,7 @@ const EmojiTable = (props: EmojiTableProps) => {
           {shouldAnimateGrid ? (
             <LiveClientGrid data={data} />
           ) : (
-            <ClientGrid data={data} page={page} />
+            <ClientGrid data={data} page={page} sortBy={sort} />
           )}
           <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} />
         </InnerGridContainer>
