@@ -5,6 +5,17 @@ import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { normalizeAddress } from "../utils/account-address";
 import { type StateTrigger, toStateTrigger, type EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
+import {
+  type AnyEmojicoinJSONEvent,
+  isJSONChatEvent,
+  isJSONGlobalStateEvent,
+  isJSONLiquidityEvent,
+  isJSONMarketRegistrationEvent,
+  isJSONPeriodicStateEvent,
+  isJSONStateEvent,
+  isJSONSwapEvent,
+} from "./json-types";
+import { type STRUCT_STRINGS } from "../utils";
 
 export type AnyNumberString = number | string | bigint;
 
@@ -748,4 +759,24 @@ export function getEventTypeName(e: AnyEmojicoinEvent): EventName {
 
 export interface WithTime {
   time: bigint;
+}
+
+export function toAnyEmojicoinEvent(
+  type: (typeof STRUCT_STRINGS)[keyof typeof STRUCT_STRINGS],
+  data: AnyEmojicoinJSONEvent,
+  version?: number
+): AnyEmojicoinEvent {
+  const event = { type, data };
+  if (isJSONSwapEvent(event)) return toSwapEvent(data as JSONTypes.SwapEvent, version ?? -1);
+  if (isJSONChatEvent(event)) return toChatEvent(data as JSONTypes.ChatEvent, version ?? -1);
+  if (isJSONMarketRegistrationEvent(event))
+    return toMarketRegistrationEvent(data as JSONTypes.MarketRegistrationEvent, version ?? -1);
+  if (isJSONPeriodicStateEvent(event))
+    return toPeriodicStateEvent(data as JSONTypes.PeriodicStateEvent, version ?? -1);
+  if (isJSONStateEvent(event)) return toStateEvent(data as JSONTypes.StateEvent, version ?? -1);
+  if (isJSONGlobalStateEvent(event))
+    return toGlobalStateEvent(data as JSONTypes.GlobalStateEvent, version ?? -1);
+  if (isJSONLiquidityEvent(event))
+    return toLiquidityEvent(data as JSONTypes.LiquidityEvent, version ?? -1);
+  throw new Error(`Unknown event type: ${type}`);
 }

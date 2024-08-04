@@ -27,6 +27,13 @@ import {
 import { type Types, toMarketResource, toRegistrantGracePeriodFlag } from "../types/types";
 import type JSONTypes from "../types/json-types";
 import { sleep } from "../utils";
+import {
+  type DerivedEmojicoinData,
+  type EmojicoinSymbol,
+  encodeSymbols,
+  symbolBytesToEmojis,
+  type SymbolEmojiData,
+} from "../emoji_data";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
@@ -68,6 +75,25 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
     emojicoinLP,
   };
 }
+
+/**
+ * Helper function to get all emoji data based from a symbol.
+ *
+ * Note that the market metadata is implicitly derived from the hardcoded module address constant.
+ */
+export const getEmojicoinData = (symbol: EmojicoinSymbol): DerivedEmojicoinData => {
+  const symbolArray = Array.isArray(symbol)
+    ? symbol
+    : ([symbol] as Array<string> | Array<SymbolEmojiData>);
+  const symbolBytes = encodeSymbols(symbolArray);
+  const data = symbolBytesToEmojis(symbolBytes);
+  const metadata = getEmojicoinMarketAddressAndTypeTags({ symbolBytes });
+  return {
+    ...data,
+    ...metadata,
+    symbolBytes,
+  };
+};
 
 // TODO: Consolidate all resource types into one place at some point.
 export const GRACE_PERIOD_FLAG_RESOURCE_TYPE =
