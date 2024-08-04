@@ -9,7 +9,6 @@ export const transitionIn = {
 };
 
 export const transitionOut = {
-  ease: "easeOut",
   duration: 1.5,
 };
 

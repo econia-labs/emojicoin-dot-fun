@@ -27,12 +27,12 @@ export const ClientGrid = ({
     <>
       <motion.div className="relative w-full h-full">
         <StyledGrid>
-          <MemoizedGridRowLines key={`${sortBy}-grid-lines`} length={ordered.length} />
+          <MemoizedGridRowLines gridRowLinesKey={`${sortBy}-grid-lines`} length={ordered.length} />
           {ordered.map((v, i) => {
             return (
               <TableCard
                 key={`${sortBy}-${v.key}`}
-                index={i + 1}
+                index={i}
                 pageOffset={(page - 1) * MARKETS_PER_PAGE}
                 marketID={v.marketID}
                 symbol={v.symbol}
@@ -41,7 +41,7 @@ export const ClientGrid = ({
                 staticMarketCap={v.staticMarketCap}
                 staticVolume24H={v.staticVolume24H}
                 rowLength={rowLength}
-                prevIndex={i + 1}
+                prevIndex={i}
                 runInitialAnimation={true}
               />
             );

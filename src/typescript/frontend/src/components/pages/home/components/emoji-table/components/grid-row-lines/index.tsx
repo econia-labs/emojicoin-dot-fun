@@ -1,13 +1,13 @@
 import React, { useMemo } from "react";
 import { EMOJI_GRID_ITEM_WIDTH, EMOJI_GRID_ITEM_HEIGHT } from "../../../const";
+import { useGridRowLength } from "../../hooks/use-grid-items-per-line";
 import { GridRowBorders } from "../../styled";
 import { motion } from "framer-motion";
-import { useGridRowLength } from "../../hooks/use-grid-items-per-line";
 
 // To account for the new bottom borders on each grid element.
 const HEIGHT = EMOJI_GRID_ITEM_HEIGHT + 1;
 
-const GridRowLines = ({ length, key }: { length: number; key: string }) => {
+const GridRowLines = ({ length, gridRowLinesKey }: { length: number; gridRowLinesKey: string }) => {
   const rowLength = useGridRowLength();
 
   const gridItems = useMemo(
@@ -21,7 +21,7 @@ const GridRowLines = ({ length, key }: { length: number; key: string }) => {
 
   return (
     <>
-      <GridRowBorders key={key}>
+      <GridRowBorders key={gridRowLinesKey}>
         {/* To prevent auto-scrolling to the top of the page when the elements re-order, we provide
              a static grid of horizontal lines that are the same height as the emoji grid items. */}
         {gridItems.map(({ row, col }, i) => {
@@ -31,7 +31,7 @@ const GridRowLines = ({ length, key }: { length: number; key: string }) => {
                 backgroundColor: "#00000000",
               }}
               animate={{
-                backgroundColor: ["#00000000", "#33343D44", "#00000000"],
+                backgroundColor: ["#00000000", "#33343D55", "#00000000"],
                 transition: {
                   backgroundColor: {
                     duration: 2,

@@ -141,11 +141,12 @@ export const EmojiPickerWithInput = ({
     }
   };
 
-  const closeIconClassName = `flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer ${mode === "home" ? "med-pixel-close" : ""}`;
+  const closeIconClassName =
+    "flex items-center justify-center relative h-full ml-[2.5ch] pr-[1ch] hover:cursor-pointer " +
+    `${mode === "home" ? "med-pixel-close" : ""}`;
 
   const close = (
     <motion.div whileTap={{ scale: 0.85 }} className={closeIconClassName} onClick={clear}>
-      {/* className={closeIconClassName} */}
       <ClosePixelated
         className={`w-[15px] h-[16px] ${mode !== "pools" && mode !== "home" ? "text-white" : "text-light-gray"}`}
       />

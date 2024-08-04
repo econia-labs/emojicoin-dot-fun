@@ -8,13 +8,19 @@ import { motion } from "framer-motion";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { constructOrdered, type WithTimeIndexAndPrev } from "./utils";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { TOTAL_ANIMATION_TIME } from "../table-card/animation-variants/grid-variants";
+import {
+  PER_ROW_DELAY,
+  TOTAL_ANIMATION_TIME,
+} from "../table-card/animation-variants/grid-variants";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import MemoizedGridRowLines from "./components/grid-row-lines";
 import useEvent from "@hooks/use-event";
 import "./module.css";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 
-export const ANIMATION_DEBOUNCE_TIME = TOTAL_ANIMATION_TIME * 4.2 * 1000;
+// This is slightly inaccurate but a user viewing the grid on a very long screen will not see the full animation anyway.
+export const ANIMATION_DEBOUNCE_TIME =
+  TOTAL_ANIMATION_TIME * 1000 + MARKETS_PER_PAGE * PER_ROW_DELAY * 1000;
 export const MAX_ELEMENTS_PER_LINE = 7;
 
 const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
@@ -145,7 +151,7 @@ export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["ma
     <>
       <motion.div className="relative w-full h-full">
         <StyledGrid>
-          <MemoizedGridRowLines key={"live-grid-lines"} length={ordered.length} />
+          <MemoizedGridRowLines gridRowLinesKey={"live-grid-lines"} length={ordered.length} />
           {ordered.map((v) => {
             return (
               <TableCard

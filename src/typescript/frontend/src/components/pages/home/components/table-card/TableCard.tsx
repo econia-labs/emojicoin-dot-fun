@@ -7,7 +7,7 @@ import { Text } from "components/text";
 import { type GridLayoutInformation, type TableCardProps } from "./types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
-import { motion, useAnimationControls } from "framer-motion";
+import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
 import Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -21,12 +21,14 @@ import {
 import { type Types } from "@sdk-types";
 import { useEvent } from "@hooks/use-event";
 import {
-  calculateDistance,
+  calculateGridData,
   determineGridAnimationVariant,
+  LAYOUT_DURATION,
   safeQueueAnimations,
   tableCardVariants,
 } from "./animation-variants/grid-variants";
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
+import { type Colors } from "theme/types";
 import "./module.css";
 
 const TableCard = ({
@@ -41,7 +43,8 @@ const TableCard = ({
   prevIndex,
   pageOffset,
   runInitialAnimation,
-}: TableCardProps & GridLayoutInformation) => {
+  ...props
+}: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
   const events = useEventStore((s) => s);
   const chats = useEventStore((s) => s.getMarket(marketID.toString())?.chatEvents ?? []);
@@ -168,45 +171,69 @@ const TableCard = ({
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
-  const { variant, indexWithOffset, distance } = useMemo(() => {
-    const variant = determineGridAnimationVariant({
-      prevIndex,
+
+  const { coordinates, variant, distance, displayIndex, layoutDelay } = useMemo(() => {
+    const { coordinates, distance } = calculateGridData({
       index,
+      prevIndex,
+      rowLength,
+    });
+    const { variant, layoutDelay } = determineGridAnimationVariant({
+      coordinates,
       rowLength,
       runInitialAnimation,
     });
-    const indexWithOffset = index + pageOffset;
-    const distance = calculateDistance({ index, prevIndex, rowLength });
+    const displayIndex = index + pageOffset + 1;
     return {
       variant,
-      indexWithOffset,
       distance,
+      coordinates,
+      displayIndex,
+      layoutDelay,
     };
   }, [prevIndex, index, rowLength, pageOffset, runInitialAnimation]);
+
+  // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border though, which we handle in the
+  // layout animation begin/complete callbacks and in the style prop of the outermost motion.div.
+  const borderLeftWidth = useMotionValue(coordinates.curr.col === 0 ? 1 : 0);
 
   return (
     <motion.div
       layout
       layoutId={index.toString()}
-      className="grid-emoji-card group card-wrapper border border-solid border-dark-gray box-border"
+      className="grid-emoji-card group card-wrapper border border-solid border-dark-gray"
       variants={tableCardVariants}
       initial={{ opacity: 0 }}
       animate={variant}
-      custom={index}
+      custom={{ coordinates, distance, layoutDelay }}
       transition={{
         type: "spring",
-        duration: 0.4,
-        // restSpeed: 10,
-        // restDelta: 3,
-        // velocity: distance * 400,
-        delay: distance * 0.001,
+        duration: LAYOUT_DURATION,
+        delay: variant === "initial" ? 0 : layoutDelay,
       }}
       style={{
-        borderLeft: `${index % rowLength === 0 ? 1 : 0}px solid var(--dark-gray)`,
+        borderLeftWidth,
+        borderLeftColor: "var(--dark-gray)",
+        borderLeftStyle: "solid",
         borderTop: "0px solid #00000000",
         cursor: "pointer",
       }}
-      onLayoutAnimationStart={() => {}}
+      onLayoutAnimationStart={() => {
+        if (coordinates.curr.col === 0) {
+          setTimeout(() => {
+            if (isMounted.current) {
+              borderLeftWidth.set(1);
+            }
+          }, layoutDelay * 1000);
+        }
+      }}
+      onLayoutAnimationComplete={() => {
+        // We need to get rid of the temporary border after the layout animation completes.
+        if (coordinates.curr.col !== 0) {
+          borderLeftWidth.set(0);
+        }
+      }}
+      {...props}
     >
       <LinkOrAnimationTrigger emojis={emojis} marketID={marketID}>
         <motion.div
@@ -230,7 +257,7 @@ const TableCard = ({
           >
             <Flex justifyContent="space-between" mb="7px">
               <span className="pixel-heading-2 text-dark-gray group-hover:text-ec-blue p-[1px]">
-                {indexWithOffset < 10 ? `0${indexWithOffset}` : indexWithOffset}
+                {displayIndex < 10 ? `0${displayIndex}` : displayIndex}
               </span>
 
               <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
@@ -246,8 +273,15 @@ const TableCard = ({
               mb="6px"
               ellipsis
               title={emojisToName(emojis).toUpperCase()}
+              color={
+                (["green", "pink", "econiaBlue", "warning", "error"] as (keyof Colors)[])[
+                  ["unshift", "portal-backwards", "portal-forwards", "default", "initial"].indexOf(
+                    variant
+                  )!
+                ]
+              }
             >
-              {`${prevIndex ?? "♾️"} => ${index}, ${Math.floor(distance)}`}
+              {variant}
             </Text>
             <Flex>
               <Column width="50%">

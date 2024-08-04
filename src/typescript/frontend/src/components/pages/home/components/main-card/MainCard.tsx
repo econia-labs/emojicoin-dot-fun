@@ -28,42 +28,9 @@ export interface MainCardProps {
 }
 
 const MainCard = (props: MainCardProps) => {
-  const stateFirehose = useEventStore((s) => s.stateFirehose);
-  const getMarket = useEventStore((s) => s.getMarket);
-  const getSymbolMap = useEventStore((s) => s.getSymbolMap);
-
-  const featured = useMemo(() => {
-    const { page, sortBy, searchBytes } = props;
-    const sortByBumpOrder = page === 1 && sortBy === MarketDataSortBy.BumpOrder;
-    const latestEvent = !sortByBumpOrder ? stateFirehose.at(0) : undefined;
-    const searchOrLatestEmojis = symbolBytesToEmojis(
-      searchBytes ?? latestEvent?.marketMetadata.emojiBytes ?? ""
-    );
-    const searchOrLatestMarketID = getSymbolMap().get(searchOrLatestEmojis.symbol);
-    const latestMarketID = searchOrLatestMarketID ?? undefined;
-
-    if (latestMarketID && searchOrLatestEmojis) {
-      const dataInState = getMarket(latestMarketID);
-      const marketData = {
-        marketID: latestMarketID,
-        marketCap: 0,
-        dailyVolume: 0,
-        allTimeVolume: 0,
-        numSwaps: 0,
-        ...dataInState,
-      };
-      return {
-        ...marketData,
-        ...searchOrLatestEmojis,
-      };
-    }
-    return props.featured;
-  }, [props, stateFirehose, getMarket, getSymbolMap]);
-
+  const { featured } = props;
   const { t } = translationFunction();
-
   const globeImage = useRef<HTMLImageElement>(null);
-
   const marketID = featured?.marketID.toString() ?? "-1";
   const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);

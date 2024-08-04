@@ -1,18 +1,24 @@
 import { getEmojicoinEventTime, type AnyEmojicoinEvent } from "@sdk/types/types";
 import { type AnimationControls } from "framer-motion";
 import { type AnyNonGridTableCardVariant } from "./event-variants";
-import { EMOJI_GRID_ITEM_HEIGHT, EMOJI_GRID_ITEM_WIDTH } from "../../const";
 
-export const ANIMATION_DURATION = 0.3;
-const INSERTION_DELAY = 0.2;
-export const PER_ELEMENT_ANIMATION_DELAY = 0.02;
+export const ANIMATION_DURATION = 0.15;
+export const LAYOUT_DURATION = 0.2;
+export const PORTAL_ANIMATION_DURATION = 0.25;
+export const PER_ROW_DELAY = 0.02;
+export const INITIAL_GRID_ANIMATION_DELAY = 0.02;
+
+export const LONG_PORTAL_DURATION = LAYOUT_DURATION * 2;
+const INSERTION_DELAY = LAYOUT_DURATION * 0.5;
 
 // This isn't the longest animation ("initial" is), but for the purpose of updating the grid
 // with a debounced animation effect, it is. Revisit this if we change the animation times.
 export const TOTAL_ANIMATION_TIME = ANIMATION_DURATION;
 
+type GridDataAndLayoutDelay = GridData & { layoutDelay: number };
+
 export const tableCardVariants = {
-  unshift: (_idx: number) => ({
+  unshift: () => ({
     opacity: [0, 1],
     scale: [0, 1],
     transition: {
@@ -24,23 +30,34 @@ export const tableCardVariants = {
       },
     },
   }),
-  backwards: (_idx: number) => ({
-    opacity: [1, 0.5, 0.5, 0.5, 0.5, 0.5, 1],
-    scale: [1, 0.7, 0.1, 0, 0, 0, 1],
+  "portal-backwards": () => ({
+    opacity: [1, 1, 1, 1, 1, 1, 1],
+    scale: [1, 0, 0, 0, 0, 0, 1],
     transition: {
-      duration: ANIMATION_DURATION,
+      duration: LAYOUT_DURATION * 2,
       ease: "easeInOut",
+      delay: 0,
     },
   }),
-  toNewLine: (_idx: number) => ({
+  "portal-forwards": ({ layoutDelay }: GridDataAndLayoutDelay) => ({
+    opacity: [1, 1, 1, 1, 1, 1, 1],
+    scale: [1, 0, 0, 0, 0, 0, 1],
+    transition: {
+      duration: LAYOUT_DURATION * 1.1,
+      ease: "easeInOut",
+      delay: layoutDelay - 0.1,
+    },
+  }),
+  "moving-down": ({ layoutDelay }: GridDataAndLayoutDelay) => ({
     opacity: [1, 1, 1, 1, 1],
     scale: [1, 0.7, 0.1, 0, 1],
     transition: {
-      duration: ANIMATION_DURATION,
+      duration: LAYOUT_DURATION * 1.25,
       ease: "easeInOut",
+      delay: layoutDelay - 0.1,
     },
   }),
-  default: (_idx: number) => ({
+  default: () => ({
     opacity: 1,
     scale: 1,
     transition: {
@@ -55,7 +72,7 @@ export const tableCardVariants = {
     transition: {
       duration: ANIMATION_DURATION * 2,
       type: "just",
-      delay: idx * PER_ELEMENT_ANIMATION_DELAY,
+      delay: idx * INITIAL_GRID_ANIMATION_DELAY,
     },
   }),
 };
@@ -106,36 +123,98 @@ export const safeQueueAnimations = async ({
   }
 };
 
+// Set the `symbol` <span> value to `variant` to view these variants in action and how they work.
 export const determineGridAnimationVariant = ({
-  prevIndex,
-  index,
+  coordinates: { prev, curr },
   rowLength,
   runInitialAnimation,
 }: {
-  prevIndex?: number;
-  index: number;
+  coordinates: GridCoordinateHistory;
   rowLength: number;
   runInitialAnimation?: boolean;
-}): TableCardVariants => {
-  if (runInitialAnimation) return "initial";
-  const inPreviousGrid = typeof prevIndex !== "undefined";
+}): { variant: TableCardVariants; layoutDelay: number } => {
+  const defaultDelay = ((prev?.row ?? 0) + 1) * (rowLength * PER_ROW_DELAY);
+
+  if (runInitialAnimation)
+    return {
+      variant: "initial",
+      layoutDelay: defaultDelay,
+    };
+  const inPreviousGrid = typeof prev !== "undefined";
   const isBeingInserted = !inPreviousGrid;
-  const isMovingForwards = inPreviousGrid && prevIndex < index;
-  const isMovingBackwards = inPreviousGrid && prevIndex > index;
-  const isMoving = isMovingBackwards || isMovingForwards;
-  const isMovingToNewLine = inPreviousGrid && isMoving && index % rowLength === 0;
+  if (isBeingInserted) {
+    return {
+      variant: "unshift",
+      layoutDelay: defaultDelay,
+    };
+  }
 
-  // We have to check if it's moving here or it won't trigger the layout animation correctly.
-  // Set the `symbol` <span> value to `variant` to view this in action and how it works.
-  if (isMovingToNewLine) return isMoving ? "toNewLine" : "default";
-  if (isBeingInserted) return "unshift";
-  if (isMovingBackwards) return "backwards";
-  if (isMovingForwards) return "default";
+  const simpleHorizontalShift = curr.index - prev.index === 1 && curr.row === prev.row;
+  const gridIndexIncreased = curr.index > prev.index;
+  const gridIndexDecreased = curr.index < prev.index;
+  const isMovingVertically = prev.row !== curr.row;
 
-  return "default";
+  if (simpleHorizontalShift) {
+    return {
+      variant: "default",
+      layoutDelay: defaultDelay,
+    };
+  }
+
+  const portalDelay = (prev.row + 1) * (rowLength * PER_ROW_DELAY);
+
+  if (gridIndexDecreased && isMovingVertically) {
+    if (curr.col === 0 && curr.row === 0) {
+      return {
+        variant: "portal-backwards",
+        layoutDelay: PORTAL_ANIMATION_DURATION,
+      };
+    }
+    return {
+      variant: "portal-backwards",
+      layoutDelay: portalDelay,
+    };
+  }
+  if (gridIndexIncreased && isMovingVertically) {
+    return {
+      variant: "portal-forwards",
+      layoutDelay: portalDelay,
+    };
+  }
+  if (isMovingVertically) {
+    return {
+      variant: "moving-down",
+      layoutDelay: portalDelay,
+    };
+  }
+  return {
+    variant: "default",
+    layoutDelay: defaultDelay,
+  };
 };
 
-export const calculateDistance = ({
+export type GridCoordinateHistory = {
+  prev?: GridCoordinate;
+  curr: GridCoordinate;
+};
+
+export type GridCoordinate = {
+  row: number;
+  col: number;
+  index: number;
+};
+
+export type GridData = {
+  coordinates: GridCoordinateHistory;
+  distance: number;
+};
+
+const getRow = (index: number, rowLength: number) => Math.floor(index / rowLength);
+const getColumn = (index: number, rowLength: number) => index % rowLength;
+const getDistance = (a: GridCoordinate, b?: GridCoordinate) =>
+  b ? Math.sqrt((a.row - b.row) ** 2 + (a.col - b.col) ** 2) : 0;
+
+export const calculateGridData = ({
   index,
   prevIndex,
   rowLength,
@@ -143,16 +222,29 @@ export const calculateDistance = ({
   index: number;
   prevIndex?: number;
   rowLength: number;
-}) => {
-  /*                     row                         col               */
-  const curr = [index % rowLength, Math.floor(index / rowLength)];
+}): GridData => {
+  const curr: GridCoordinate = {
+    row: getRow(index, rowLength),
+    col: getColumn(index, rowLength),
+    index,
+  };
   const prev =
-    typeof prevIndex === "undefined"
-      ? [0, 0]
-      : [prevIndex % rowLength, Math.floor(prevIndex / rowLength)];
-  const deltaX = (curr[0] - prev[0]) * EMOJI_GRID_ITEM_WIDTH;
-  const deltaY = (curr[1] - prev[1]) * EMOJI_GRID_ITEM_HEIGHT;
-  return Math.sqrt(deltaX ** 2 + deltaY ** 2);
+    typeof prevIndex !== "undefined"
+      ? {
+          row: getRow(prevIndex, rowLength),
+          col: getColumn(prevIndex, rowLength),
+          index: prevIndex,
+        }
+      : undefined;
+  const distance = getDistance(curr, prev);
+
+  return {
+    coordinates: {
+      curr,
+      prev,
+    },
+    distance,
+  };
 };
 
 export default tableCardVariants;
