@@ -12,7 +12,7 @@ import { ROUTES } from "router/routes";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { type fetchFeaturedMarket } from "lib/queries/sorting/market-data";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useLabelScrambler } from "../animation-config";
+import { useLabelScrambler } from "../table-card/animation-variants/event-variants";
 import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
@@ -28,42 +28,9 @@ export interface MainCardProps {
 }
 
 const MainCard = (props: MainCardProps) => {
-  const stateFirehose = useEventStore((s) => s.stateFirehose);
-  const getMarket = useEventStore((s) => s.getMarket);
-  const getSymbolMap = useEventStore((s) => s.getSymbolMap);
-
-  const featured = useMemo(() => {
-    const { page, sortBy, searchBytes } = props;
-    const sortByBumpOrder = page === 1 && sortBy === MarketDataSortBy.BumpOrder;
-    const latestEvent = !sortByBumpOrder ? stateFirehose.at(0) : undefined;
-    const searchOrLatestEmojis = symbolBytesToEmojis(
-      searchBytes ?? latestEvent?.marketMetadata.emojiBytes ?? ""
-    );
-    const searchOrLatestMarketID = getSymbolMap().get(searchOrLatestEmojis.symbol);
-    const latestMarketID = searchOrLatestMarketID ?? undefined;
-
-    if (latestMarketID && searchOrLatestEmojis) {
-      const dataInState = getMarket(latestMarketID);
-      const marketData = {
-        marketID: latestMarketID,
-        marketCap: 0,
-        dailyVolume: 0,
-        allTimeVolume: 0,
-        numSwaps: 0,
-        ...dataInState,
-      };
-      return {
-        ...marketData,
-        ...searchOrLatestEmojis,
-      };
-    }
-    return props.featured;
-  }, [props, stateFirehose, getMarket, getSymbolMap]);
-
+  const { featured } = props;
   const { t } = translationFunction();
-
   const globeImage = useRef<HTMLImageElement>(null);
-
   const marketID = featured?.marketID.toString() ?? "-1";
   const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
   const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
@@ -145,7 +112,7 @@ const MainCard = (props: MainCardProps) => {
             alt="Planet"
             src={planetHome}
             ref={globeImage}
-            placeholder="blur"
+            placeholder="empty"
           />
 
           {[...new Intl.Segmenter().segment(featured?.symbol ?? "🖤")].length == 1 ? (
@@ -156,7 +123,7 @@ const MainCard = (props: MainCardProps) => {
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <div className="pixel-heading-1 text-dark-gray pixel-heading-text">01</div>
+          <div className="pixel-heading-1 text-dark-gray pixel-heading-text">00</div>
           <div
             className="display-font-text ellipses font-forma-bold"
             title={(featured ? emojisToName(featured.emojis) : "BLACK HEART").toUpperCase()}

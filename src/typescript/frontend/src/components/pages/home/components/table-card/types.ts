@@ -1,4 +1,5 @@
 import { type SymbolEmojiData } from "@sdk/emoji_data";
+import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 
 export type TableCardProps = {
   index: number;
@@ -12,8 +13,8 @@ export type TableCardProps = {
 };
 
 export type GridLayoutInformation = {
-  itemsPerLine: number;
+  rowLength: number;
   pageOffset: number;
+  sortBy: MarketDataSortByHomePage;
   runInitialAnimation?: boolean;
-  animateLayout?: boolean;
 };

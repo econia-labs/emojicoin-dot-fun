@@ -63,8 +63,8 @@ let mediaQueries = "";
 while (width < MAX_WIDTH) {
   mediaQueries += `
   @media (min-width: ${width + GRID_PADDING * 2}px) {
-    padding-left: calc((100vw - ${GRID_PADDING * 2 + width}px) / 2);
-    padding-right: calc((100vw - ${GRID_PADDING * 2 + width}px) / 2);
+    padding-left: calc((100vw - ${width + GRID_PADDING * 2}px) / 2);
+    padding-right: calc((100vw - ${width + GRID_PADDING * 2}px) / 2);
   }`;
   width += EMOJI_GRID_ITEM_WIDTH;
 }
@@ -111,7 +111,6 @@ export const SearchWrapper = styled.div`
   padding: 0 10px;
   justify-content: left;
   border-left: 1px solid ${darkColors.darkGray};
-  margin-left: -1px;
 
   &:after {
     left: 0;
@@ -119,7 +118,6 @@ export const SearchWrapper = styled.div`
 
   @media screen and (max-width: ${breakpointsArray[3]}) {
     border-right: 1px solid ${darkColors.darkGray};
-    margin-right: -1px;
     justify-content: center;
   }
 `;
@@ -129,7 +127,6 @@ export const FilterOptionsWrapper = styled.div`
   justify-content: right;
   padding-right: 20px;
   border-right: 1px solid ${darkColors.darkGray};
-  margin-right: -1px;
 
   &:after {
     right: 0;
@@ -137,6 +134,5 @@ export const FilterOptionsWrapper = styled.div`
 
   @media screen and (max-width: ${breakpointsArray[3]}) {
     border-left: 1px solid ${darkColors.darkGray};
-    margin-left: -1px;
   }
 `;

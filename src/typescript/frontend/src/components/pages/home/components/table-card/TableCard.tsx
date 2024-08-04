@@ -5,11 +5,9 @@ import { translationFunction } from "context/language-context";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 import { type GridLayoutInformation, type TableCardProps } from "./types";
-import Link from "next/link";
-import { ROUTES } from "router/routes";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useWebSocketClient } from "context/state-store-context";
-import { motion, useAnimationControls } from "framer-motion";
+import { useEventStore, useUserSettings, useWebSocketClient } from "context/state-store-context";
+import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
 import Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -19,15 +17,17 @@ import {
   textVariants,
   useLabelScrambler,
   glowVariants,
-} from "../animation-config";
-import { emojiNamesToPath } from "utils/pathname-helpers";
+} from "./animation-variants/event-variants";
 import { type Types } from "@sdk-types";
 import { useEvent } from "@hooks/use-event";
 import {
+  calculateGridData,
+  determineGridAnimationVariant,
+  LAYOUT_DURATION,
   safeQueueAnimations,
-  type TableCardVariants,
   tableCardVariants,
-} from "./animation-variants";
+} from "./animation-variants/grid-variants";
+import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import "./module.css";
 
 const TableCard = ({
@@ -38,12 +38,13 @@ const TableCard = ({
   staticNumSwaps,
   staticMarketCap,
   staticVolume24H,
-  itemsPerLine,
+  rowLength,
   prevIndex,
   pageOffset,
   runInitialAnimation,
-  animateLayout,
-}: TableCardProps & GridLayoutInformation) => {
+  sortBy,
+  ...props
+}: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
   const events = useEventStore((s) => s);
   const chats = useEventStore((s) => s.getMarket(marketID.toString())?.chatEvents ?? []);
@@ -55,30 +56,23 @@ const TableCard = ({
   const isMounted = useRef(true);
   const controls = useAnimationControls();
 
-  const stopAnimations = useEvent(() => {
-    controls.stop();
-  });
-
   // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {
     isMounted.current = true;
 
     return () => {
       isMounted.current = false;
-      stopAnimations();
     };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
+
+  const animationsOn = useUserSettings((s) => s.animate);
 
   // TODO: Most of this component's state should be managed in `event-store` more cleanly, but for now this is an
   // initial prototype.
   // Ideally, we don't even store most data, we just store the last state in a Zustand store and use that
   // like we're using the events now, except we'd need less data and wouldn't need to do so many comparisons between
   // the static data and the data in the store.
-
-  // TODO: Replace this with the `animate` state value we'll control in `settings-store.ts` or something.
-  // Essentially, this will turn animations off.
-  const animationsOn = true;
 
   // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
   // TODO: Convert all/most usage of bigints to Big so we can have more precise bigints without having to
@@ -110,8 +104,12 @@ const TableCard = ({
 
   useEffect(() => {
     animateSwaps(staticNumSwaps, stateEvents);
+
+    return () => {
+      if (isMounted.current) controls.set("initial");
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [staticNumSwaps, stateEvents]);
+  }, [staticNumSwaps, stateEvents, controls]);
 
   const animateChats = useEvent((events: readonly Types.ChatEvent[]) => {
     const latestEvent = events.at(0);
@@ -127,8 +125,12 @@ const TableCard = ({
 
   useEffect(() => {
     animateChats(chats);
+
+    return () => {
+      if (isMounted.current) controls.set("initial");
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [chats]);
+  }, [chats, controls]);
 
   const animateLiquidity = useEvent((events: readonly Types.LiquidityEvent[]) => {
     const latestEvent = events.at(0);
@@ -144,8 +146,12 @@ const TableCard = ({
 
   useEffect(() => {
     animateLiquidity(liquidityEvents);
+
+    return () => {
+      if (isMounted.current) controls.set("initial");
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [liquidityEvents]);
+  }, [liquidityEvents, controls]);
 
   useEffect(() => {
     events.initializeMarket(marketID, symbol);
@@ -163,39 +169,78 @@ const TableCard = ({
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
-  const indexWithOffset = index + pageOffset;
 
-  const variant: TableCardVariants = useMemo(() => {
-    if (runInitialAnimation) return "initial";
-    const inPreviousGrid = typeof prevIndex !== "undefined";
-    const isMovingToNewLine = inPreviousGrid && prevIndex % itemsPerLine === 0;
-    const isBeingInserted = !inPreviousGrid;
-    const isMovingForwards = inPreviousGrid && prevIndex < index;
-    const isMovingBackwards = inPreviousGrid && prevIndex > index;
-    const isMoving = isMovingBackwards || isMovingForwards;
+  const { coordinates, variant, distance, displayIndex, layoutDelay } = useMemo(() => {
+    const { coordinates, distance } = calculateGridData({
+      index,
+      prevIndex,
+      rowLength,
+    });
+    const { variant, layoutDelay } = determineGridAnimationVariant({
+      coordinates,
+      rowLength,
+      runInitialAnimation,
+    });
+    const displayIndex = index + pageOffset + 1;
+    return {
+      variant,
+      distance,
+      coordinates,
+      displayIndex,
+      layoutDelay,
+    };
+  }, [prevIndex, index, rowLength, pageOffset, runInitialAnimation]);
 
-    // Note that we have to check if it's moving here or it won't trigger the layout animation correctly.
-    // Set the `symbol` span to `variant` to view this in action and how it works.
-    if (isMovingToNewLine) return isMoving ? "toNewLine" : "default";
-    if (isBeingInserted) return "unshift";
-    if (isMovingBackwards) return "backwards";
-    if (isMovingForwards) return "default";
-    return "default";
-  }, [prevIndex, index, itemsPerLine, runInitialAnimation]);
+  // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border though, which we handle in the
+  // layout animation begin/complete callbacks and in the style prop of the outermost motion.div.
+  const borderLeftWidth = useMotionValue(coordinates.curr.col === 0 ? 1 : 0);
 
   return (
     <motion.div
-      layout={animateLayout}
-      className="grid-emoji-card group card-wrapper"
+      layout
+      layoutId={`${sortBy}-${marketID}`}
+      initial={
+        variant === "initial"
+          ? {
+              opacity: 0,
+            }
+          : variant === "unshift"
+            ? {
+                opacity: 0,
+                scale: 0,
+              }
+            : undefined
+      }
+      className="grid-emoji-card group card-wrapper border border-solid border-dark-gray"
       variants={tableCardVariants}
       animate={variant}
-      custom={index}
-      style={{
-        borderLeft: `${(index - 1) % itemsPerLine === 0 ? 1 : 0}px solid var(--dark-gray)`,
-        borderRight: "1px solid var(--dark-gray)",
+      custom={{ coordinates, distance, layoutDelay }}
+      transition={{
+        type: variant === "initial" ? "just" : "spring",
+        delay: variant === "initial" ? 0 : layoutDelay,
+        duration: variant === "initial" ? 0 : LAYOUT_DURATION,
       }}
+      style={{
+        borderLeftWidth,
+        borderLeftColor: "var(--dark-gray)",
+        borderLeftStyle: "solid",
+        borderTop: "0px solid #00000000",
+        cursor: "pointer",
+      }}
+      onLayoutAnimationStart={() => {
+        if (coordinates.curr.col === 0) {
+          borderLeftWidth.set(1);
+        }
+      }}
+      onLayoutAnimationComplete={() => {
+        // We need to get rid of the temporary border after the layout animation completes.
+        if (coordinates.curr.col !== 0) {
+          borderLeftWidth.set(0);
+        }
+      }}
+      {...props}
     >
-      <Link href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}>
+      <LinkOrAnimationTrigger emojis={emojis} marketID={marketID}>
         <motion.div
           animate={controls}
           variants={animationsOn ? glowVariants : {}}
@@ -208,16 +253,16 @@ const TableCard = ({
             className="flex flex-col relative grid-emoji-card w-full h-full py-[10px] px-[19px] overflow-hidden"
             whileHover="hover"
             style={{
-              border: "1px solid",
+              borderWidth: 1,
+              borderStyle: "solid",
               borderColor: "#00000000",
-              cursor: emojis.length ? "pointer" : "unset",
             }}
             animate={controls}
             variants={animationsOn ? borderVariants : onlyHoverVariant}
           >
             <Flex justifyContent="space-between" mb="7px">
               <span className="pixel-heading-2 text-dark-gray group-hover:text-ec-blue p-[1px]">
-                {indexWithOffset < 10 ? `0${indexWithOffset}` : indexWithOffset}
+                {displayIndex < 10 ? `0${displayIndex}` : displayIndex}
               </span>
 
               <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
@@ -234,7 +279,7 @@ const TableCard = ({
               ellipsis
               title={emojisToName(emojis).toUpperCase()}
             >
-              {variant}
+              {emojisToName(emojis)}
             </Text>
             <Flex>
               <Column width="50%">
@@ -281,7 +326,7 @@ const TableCard = ({
             </Flex>
           </motion.div>
         </motion.div>
-      </Link>
+      </LinkOrAnimationTrigger>
     </motion.div>
   );
 };
