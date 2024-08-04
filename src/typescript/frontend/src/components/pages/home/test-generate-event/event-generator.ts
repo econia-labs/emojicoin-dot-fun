@@ -5,8 +5,8 @@ import { getRandomEmoji, type SymbolEmojiData, type EmojicoinSymbol } from "@sdk
 import { getEmojicoinData } from "@sdk/markets/utils";
 import type JSONTypes from "@sdk/types/json-types";
 import { STRUCT_STRINGS } from "@sdk/utils";
-import Big from "big.js";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
+import Big from "big.js";
 
 /**
  * Note that this data is generated solely for animation purposes. It isn't logically consistent
