@@ -12,7 +12,8 @@ export default async function middleware(request: NextRequest) {
   if (
     pathname === "/social-preview.png" ||
     pathname === "/webclip.png" ||
-    pathname === "/icon.png"
+    pathname === "/icon.png" ||
+    pathname === "/test"
   ) {
     return NextResponse.next();
   }
