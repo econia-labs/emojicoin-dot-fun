@@ -19,7 +19,8 @@ import "./module.css";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 
-// This is slightly inaccurate but a user viewing the grid on a very long screen will not see the full animation anyway.
+// This is slightly inaccurate for long screens, but a user viewing the grid on a long screen will not see the full
+// animation anyway.
 export const ANIMATION_DEBOUNCE_TIME =
   (TOTAL_ANIMATION_TIME * 1000 + MARKETS_PER_PAGE * PER_ROW_DELAY * 1000) * 1.5;
 export const MAX_ELEMENTS_PER_LINE = 7;
@@ -27,6 +28,10 @@ export const MAX_ELEMENTS_PER_LINE = 7;
 const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
   data.map((v) => v.marketID).join(",");
 
+// TODO: Consider queueing up the changes by storing each state update in a queue and then updating the state
+// by popping off the queue. This would allow us to update the state in a more controlled manner and avoid lots of
+// simultaneous state updates and expensive re-renders.
+// For now, we probably don't need to worry about this since we're not sure how frequent the state updates will be.
 export const LiveClientGrid = ({
   data,
   sortBy,
