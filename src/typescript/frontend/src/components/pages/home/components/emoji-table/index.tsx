@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { encodeEmojis } from "@sdk/emoji_data";
-import { useEventStore } from "context/state-store-context";
+import { useEventStore, useUserSettings } from "context/state-store-context";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import useEvent from "@hooks/use-event";
 import { constructURLForHomePage, isHomePageURLDifferent } from "lib/queries/sorting/query-params";
@@ -98,9 +98,11 @@ const EmojiTable = (props: EmojiTableProps) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  const animationsOn = useUserSettings((s) => s.animate);
+
   const shouldAnimateGrid = useMemo(
-    () => sort === MarketDataSortBy.BumpOrder && page === 1 && !searchBytes,
-    [sort, page, searchBytes]
+    () => animationsOn && sort === MarketDataSortBy.BumpOrder && page === 1 && !searchBytes,
+    [sort, page, searchBytes, animationsOn]
   );
 
   return (
@@ -119,9 +121,9 @@ const EmojiTable = (props: EmojiTableProps) => {
             </FilterOptionsWrapper>
           </Header>
           {shouldAnimateGrid ? (
-            <LiveClientGrid data={data} />
+            <LiveClientGrid data={data} sortBy={sort ?? MarketDataSortBy.MarketCap} />
           ) : (
-            <ClientGrid data={data} page={page} sortBy={sort} />
+            <ClientGrid data={data} page={page} sortBy={sort ?? MarketDataSortBy.MarketCap} />
           )}
           <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} />
         </InnerGridContainer>

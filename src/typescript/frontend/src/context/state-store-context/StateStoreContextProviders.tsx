@@ -4,8 +4,8 @@ import { type ReactNode, createContext, useRef, useEffect } from "react";
 import { type StoreApi } from "zustand";
 
 import { type EventStore, createEventStore } from "@store/event-store";
-import { type MarketDataStore, createMarketDataStore } from "@store/market-data";
 import { type WebSocketClientStore, createWebSocketClientStore } from "@store/websocket-store";
+import createUserSettingsStore, { type UserSettingsStore } from "@store/user-settings-store";
 
 /**
  *
@@ -56,22 +56,24 @@ export const WebSocketEventsProvider = ({
 
 /**
  *
- * -------------------
- * Market Data Context
- * -------------------
+ * ---------------------
+ * User Settings Context
+ * ---------------------
  *
  */
-export const MarketDataContext = createContext<StoreApi<MarketDataStore> | null>(null);
+export const UserSettingsContext = createContext<StoreApi<UserSettingsStore> | null>(null);
 
-export interface MarketDataProviderProps {
+export interface UserSettingsProviderProps {
   children: ReactNode;
-  initialState?: MarketDataStore;
+  initialState?: UserSettingsStore;
 }
 
-export const MarketDataProvider = ({ children, initialState }: MarketDataProviderProps) => {
-  const store = useRef<StoreApi<MarketDataStore>>();
+export const UserSettingsProvider = ({ children, initialState }: UserSettingsProviderProps) => {
+  const store = useRef<StoreApi<UserSettingsStore>>();
   if (!store.current) {
-    store.current = createMarketDataStore(initialState);
+    store.current = createUserSettingsStore(initialState);
   }
-  return <MarketDataContext.Provider value={store.current}>{children}</MarketDataContext.Provider>;
+  return (
+    <UserSettingsContext.Provider value={store.current}>{children}</UserSettingsContext.Provider>
+  );
 };

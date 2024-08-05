@@ -2,11 +2,10 @@ import { getEmojicoinEventTime, type AnyEmojicoinEvent } from "@sdk/types/types"
 import { type AnimationControls } from "framer-motion";
 import { type AnyNonGridTableCardVariant } from "./event-variants";
 
-export const ANIMATION_DURATION = 0.15;
-export const LAYOUT_DURATION = 0.2;
-export const PORTAL_ANIMATION_DURATION = 0.25;
-export const PER_ROW_DELAY = 0.02;
-export const INITIAL_GRID_ANIMATION_DELAY = 0.02;
+export const ANIMATION_DURATION = 0.3;
+export const LAYOUT_DURATION = 0.4;
+export const PORTAL_ANIMATION_DURATION = 0.4;
+export const PER_ROW_DELAY = 0.01;
 
 export const LONG_PORTAL_DURATION = LAYOUT_DURATION * 2;
 const INSERTION_DELAY = LAYOUT_DURATION * 0.5;
@@ -18,16 +17,13 @@ export const TOTAL_ANIMATION_TIME = ANIMATION_DURATION;
 type GridDataAndLayoutDelay = GridData & { layoutDelay: number };
 
 export const tableCardVariants = {
-  unshift: () => ({
-    opacity: [0, 1],
-    scale: [0, 1],
+  unshift: ({ coordinates: { curr } }) => ({
+    scale: [0, 0.5, 1, 1, 1.5, 1.2, 1],
+    opacity: [0, 0.5, 1, 1, 1, 1, 1],
     transition: {
-      duration: ANIMATION_DURATION,
+      duration: LAYOUT_DURATION * 1,
       type: "spring",
-      scale: {
-        duration: ANIMATION_DURATION - INSERTION_DELAY,
-        delay: INSERTION_DELAY,
-      },
+      delay: INSERTION_DELAY + (curr.index * PER_ROW_DELAY) / 5,
     },
   }),
   "portal-backwards": () => ({
@@ -66,13 +62,15 @@ export const tableCardVariants = {
       delay: 0,
     },
   }),
-  initial: (idx: number) => ({
+  initial: ({ coordinates: { curr } }: GridDataAndLayoutDelay) => ({
     opacity: [0, 1],
-    scale: 1,
+    scale: [1, 1],
     transition: {
-      duration: ANIMATION_DURATION * 2,
-      type: "just",
-      delay: idx * INITIAL_GRID_ANIMATION_DELAY,
+      opacity: {
+        duration: ANIMATION_DURATION * 2,
+        type: "just",
+        delay: (curr.col * PER_ROW_DELAY + curr.row * PER_ROW_DELAY) * 7,
+      },
     },
   }),
 };

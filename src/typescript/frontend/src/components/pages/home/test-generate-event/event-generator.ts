@@ -1,7 +1,12 @@
 import { Account, AccountAddress, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { toAnyEmojicoinEvent, type Types, type AnyNumberString } from "@sdk-types";
 import { MAX_SYMBOL_LENGTH, StateTrigger } from "@sdk/const";
-import { getRandomEmoji, type SymbolEmojiData, type EmojicoinSymbol } from "@sdk/emoji_data";
+import {
+  getRandomEmoji,
+  type SymbolEmojiData,
+  type EmojicoinSymbol,
+  generateRandomSymbol,
+} from "@sdk/emoji_data";
 import { getEmojicoinData } from "@sdk/markets/utils";
 import type JSONTypes from "@sdk/types/json-types";
 import { STRUCT_STRINGS } from "@sdk/utils";
@@ -42,21 +47,6 @@ const triggerToStructString = (trigger: AnimationTriggers) => {
   if (trigger === StateTrigger.REMOVE_LIQUIDITY) return STRUCT_STRINGS.LiquidityEvent;
   if (trigger === StateTrigger.CHAT) return STRUCT_STRINGS.ChatEvent;
   throw new Error(`Invalid trigger: ${trigger}`);
-};
-
-const generateRandomSymbol = () => {
-  const emojis: SymbolEmojiData[] = [];
-  let i = 0;
-  const sumBytes = (bytes: Uint8Array[]) => bytes.reduce((acc, b) => acc + b.length, 0);
-  // Try 10 times. Guaranteed to return at least one emoji, but possibly multiple.
-  while (i < 10) {
-    const randomEmoji = getRandomEmoji();
-    if (sumBytes([...emojis.map((e) => e.bytes), randomEmoji.bytes]) < MAX_SYMBOL_LENGTH) {
-      emojis.push(randomEmoji);
-      i++;
-    }
-  }
-  return emojis;
 };
 
 export type RandomEventArgs = {

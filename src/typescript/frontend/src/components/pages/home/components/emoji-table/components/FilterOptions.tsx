@@ -4,10 +4,10 @@ import { Switcher } from "components/switcher";
 import { translationFunction } from "context/language-context";
 import { StyledTHFilters } from "../styled";
 import { useMatchBreakpoints } from "hooks";
-import { useState } from "react";
 import { Text } from "components/text";
 import { type Option } from "components/selects/types";
 import { MarketDataSortBy } from "lib/queries/sorting/types";
+import { useUserSettings } from "context/state-store-context";
 
 const titleFromValue: Record<MarketDataSortBy, string> = {
   [MarketDataSortBy.MarketCap]: "Market Cap",
@@ -34,12 +34,13 @@ export type FilterOptionsComponentProps = {
 
 export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
   const selectedOption = options.find((x) => x.value === filter)!;
-  const [isChecked, setIsChecked] = useState(true);
   const { t } = translationFunction();
   const { isLaptopL } = useMatchBreakpoints();
+  const animate = useUserSettings((s) => s.animate);
+  const toggleAnimate = useUserSettings((s) => s.toggleAnimate);
 
   const handler = () => {
-    setIsChecked((v) => !v);
+    toggleAnimate();
   };
 
   return (
@@ -73,7 +74,7 @@ export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsCompon
           {t("Animate:")}
         </Text>
 
-        <Switcher checked={isChecked} onChange={handler} scale={isLaptopL ? "md" : "sm"} />
+        <Switcher checked={animate} onChange={handler} scale={isLaptopL ? "md" : "sm"} />
       </FlexGap>
     </StyledTHFilters>
   );

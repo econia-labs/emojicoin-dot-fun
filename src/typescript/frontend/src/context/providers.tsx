@@ -17,7 +17,7 @@ import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import StyledToaster from "styles/StyledToaster";
 import {
   WebSocketEventsProvider,
-  MarketDataProvider,
+  UserSettingsProvider,
 } from "./state-store-context/StateStoreContextProviders";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
@@ -57,7 +57,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <WebSocketEventsProvider>
-          <MarketDataProvider>
+          <UserSettingsProvider>
             <AptosWalletAdapterProvider
               plugins={wallets}
               autoConnect={true}
@@ -85,7 +85,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </AptosContextProvider>
               </WalletModalContextProvider>
             </AptosWalletAdapterProvider>
-          </MarketDataProvider>
+          </UserSettingsProvider>
         </WebSocketEventsProvider>
       </QueryClientProvider>
     </ThemeProvider>

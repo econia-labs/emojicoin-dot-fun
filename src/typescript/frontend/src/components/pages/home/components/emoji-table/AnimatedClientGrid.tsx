@@ -17,16 +17,23 @@ import MemoizedGridRowLines from "./components/grid-row-lines";
 import useEvent from "@hooks/use-event";
 import "./module.css";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 
 // This is slightly inaccurate but a user viewing the grid on a very long screen will not see the full animation anyway.
 export const ANIMATION_DEBOUNCE_TIME =
-  TOTAL_ANIMATION_TIME * 1000 + MARKETS_PER_PAGE * PER_ROW_DELAY * 1000;
+  (TOTAL_ANIMATION_TIME * 1000 + MARKETS_PER_PAGE * PER_ROW_DELAY * 1000) * 1.5;
 export const MAX_ELEMENTS_PER_LINE = 7;
 
 const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
   data.map((v) => v.marketID).join(",");
 
-export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["markets"] }) => {
+export const LiveClientGrid = ({
+  data,
+  sortBy,
+}: {
+  data: FetchSortedMarketDataReturn["markets"];
+  sortBy: MarketDataSortByHomePage;
+}) => {
   const rowLength = useGridRowLength();
 
   const getMarket = useEventStore((s) => s.getMarket);
@@ -151,11 +158,14 @@ export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["ma
     <>
       <motion.div className="relative w-full h-full">
         <StyledGrid>
-          <MemoizedGridRowLines gridRowLinesKey={"live-grid-lines"} length={ordered.length} />
+          <MemoizedGridRowLines
+            gridRowLinesKey={"live-grid-lines-" + rowLength}
+            length={ordered.length}
+          />
           {ordered.map((v) => {
             return (
               <TableCard
-                key={`live-${v.key}`}
+                key={`live-${v.key}-${rowLength}`}
                 index={v.index}
                 pageOffset={0} // We don't paginate the live grid.
                 marketID={v.marketID}
@@ -166,6 +176,7 @@ export const LiveClientGrid = ({ data }: { data: FetchSortedMarketDataReturn["ma
                 staticVolume24H={v.staticVolume24H}
                 rowLength={rowLength}
                 prevIndex={v.prevIndex}
+                sortBy={sortBy}
                 runInitialAnimation={v.runInitialAnimation}
               />
             );

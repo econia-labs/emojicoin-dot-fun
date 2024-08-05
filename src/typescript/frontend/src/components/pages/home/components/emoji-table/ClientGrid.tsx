@@ -9,7 +9,7 @@ import { marketDataToProps } from "./utils";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import MemoizedGridRowLines from "./components/grid-row-lines";
 import "./module.css";
-import { type MarketDataSortBy } from "lib/queries/sorting/types";
+import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 
 export const ClientGrid = ({
   data,
@@ -18,7 +18,7 @@ export const ClientGrid = ({
 }: {
   data: FetchSortedMarketDataReturn["markets"];
   page: number;
-  sortBy: MarketDataSortBy;
+  sortBy: MarketDataSortByHomePage;
 }) => {
   const ordered = marketDataToProps(data);
   const rowLength = useGridRowLength();
@@ -43,6 +43,7 @@ export const ClientGrid = ({
                 rowLength={rowLength}
                 prevIndex={i}
                 runInitialAnimation={true}
+                sortBy={sortBy}
               />
             );
           })}

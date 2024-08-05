@@ -8,7 +8,7 @@ import { generateRandomEvent, type RandomEventArgs } from "./event-generator";
 export const useGenerateEvent = (args: RandomEventArgs & { stateOnly?: boolean }) => {
   const pushEvent = useEventStore((s) => s.pushEventFromClient);
 
-  const { triggeringEvent, stateEvent } = generateRandomEvent(args);
+  const { triggeringEvent, stateEvent } = generateRandomEvent({ ...args, emojis: undefined });
 
   return () => {
     pushEvent(stateEvent);

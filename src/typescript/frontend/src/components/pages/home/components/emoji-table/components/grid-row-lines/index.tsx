@@ -31,11 +31,11 @@ const GridRowLines = ({ length, gridRowLinesKey }: { length: number; gridRowLine
                 backgroundColor: "#00000000",
               }}
               animate={{
-                backgroundColor: ["#00000000", "#33343D55", "#00000000"],
+                backgroundColor: ["#00000000", "#33343D66", "#00000000"],
                 transition: {
                   backgroundColor: {
-                    duration: 2,
-                    delay: row * 0.06 + col * 0.06 + 0.9,
+                    duration: 1,
+                    delay: row * 0.04 + col * 0.04 + 0.2,
                   },
                 },
               }}

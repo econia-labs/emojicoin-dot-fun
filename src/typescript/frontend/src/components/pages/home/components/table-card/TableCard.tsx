@@ -6,7 +6,7 @@ import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 import { type GridLayoutInformation, type TableCardProps } from "./types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useWebSocketClient } from "context/state-store-context";
+import { useEventStore, useUserSettings, useWebSocketClient } from "context/state-store-context";
 import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
 import Big from "big.js";
@@ -28,7 +28,6 @@ import {
   tableCardVariants,
 } from "./animation-variants/grid-variants";
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
-import { type Colors } from "theme/types";
 import "./module.css";
 
 const TableCard = ({
@@ -43,6 +42,7 @@ const TableCard = ({
   prevIndex,
   pageOffset,
   runInitialAnimation,
+  sortBy,
   ...props
 }: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
@@ -66,15 +66,13 @@ const TableCard = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  const animationsOn = useUserSettings((s) => s.animate);
+
   // TODO: Most of this component's state should be managed in `event-store` more cleanly, but for now this is an
   // initial prototype.
   // Ideally, we don't even store most data, we just store the last state in a Zustand store and use that
   // like we're using the events now, except we'd need less data and wouldn't need to do so many comparisons between
   // the static data and the data in the store.
-
-  // TODO: Replace this with the `animate` state value we'll control in `settings-store.ts` or something.
-  // Essentially, this will turn animations off.
-  const animationsOn = true;
 
   // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
   // TODO: Convert all/most usage of bigints to Big so we can have more precise bigints without having to
@@ -200,16 +198,27 @@ const TableCard = ({
   return (
     <motion.div
       layout
-      layoutId={index.toString()}
+      layoutId={`${sortBy}-${marketID}`}
+      initial={
+        variant === "initial"
+          ? {
+              opacity: 0,
+            }
+          : variant === "unshift"
+            ? {
+                opacity: 0,
+                scale: 0,
+              }
+            : undefined
+      }
       className="grid-emoji-card group card-wrapper border border-solid border-dark-gray"
       variants={tableCardVariants}
-      initial={{ opacity: 0 }}
       animate={variant}
       custom={{ coordinates, distance, layoutDelay }}
       transition={{
-        type: "spring",
-        duration: LAYOUT_DURATION,
+        type: variant === "initial" ? "just" : "spring",
         delay: variant === "initial" ? 0 : layoutDelay,
+        duration: variant === "initial" ? 0 : LAYOUT_DURATION,
       }}
       style={{
         borderLeftWidth,
@@ -220,11 +229,7 @@ const TableCard = ({
       }}
       onLayoutAnimationStart={() => {
         if (coordinates.curr.col === 0) {
-          setTimeout(() => {
-            if (isMounted.current) {
-              borderLeftWidth.set(1);
-            }
-          }, layoutDelay * 1000);
+          borderLeftWidth.set(1);
         }
       }}
       onLayoutAnimationComplete={() => {
@@ -273,15 +278,8 @@ const TableCard = ({
               mb="6px"
               ellipsis
               title={emojisToName(emojis).toUpperCase()}
-              color={
-                (["green", "pink", "econiaBlue", "warning", "error"] as (keyof Colors)[])[
-                  ["unshift", "portal-backwards", "portal-forwards", "default", "initial"].indexOf(
-                    variant
-                  )!
-                ]
-              }
             >
-              {variant}
+              {emojisToName(emojis)}
             </Text>
             <Flex>
               <Column width="50%">
