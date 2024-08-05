@@ -4,20 +4,21 @@ import { type AnyNonGridTableCardVariant } from "./event-variants";
 
 export const ANIMATION_DURATION = 0.3;
 export const LAYOUT_DURATION = 0.4;
-export const PORTAL_ANIMATION_DURATION = 0.4;
+export const PORTAL_BACKWARDS_ANIMATION_DURATION = LAYOUT_DURATION * 1.5;
 export const PER_ROW_DELAY = 0.01;
 
-export const LONG_PORTAL_DURATION = LAYOUT_DURATION * 2;
+export const PORTAL_DURATION = LAYOUT_DURATION * 3;
 const INSERTION_DELAY = LAYOUT_DURATION * 0.5;
 
 // This isn't the longest animation ("initial" is), but for the purpose of updating the grid
 // with a debounced animation effect, it is. Revisit this if we change the animation times.
 export const TOTAL_ANIMATION_TIME = ANIMATION_DURATION;
 
-type GridDataAndLayoutDelay = GridData & { layoutDelay: number };
+type GridDataAndLayoutDelay = GridCoordinateHistory & { layoutDelay: number };
 
 export const tableCardVariants = {
-  unshift: ({ coordinates: { curr } }) => ({
+  // Aka push to front.
+  unshift: ({ curr }: GridDataAndLayoutDelay) => ({
     scale: [0, 0.5, 1, 1, 1.5, 1.2, 1],
     opacity: [0, 0.5, 1, 1, 1, 1, 1],
     transition: {
@@ -27,12 +28,13 @@ export const tableCardVariants = {
     },
   }),
   "portal-backwards": () => ({
-    opacity: [1, 1, 1, 1, 1, 1, 1],
-    scale: [1, 0, 0, 0, 0, 0, 1],
+    opacity: [1, 0, 0, 1],
+    scale: [1, 0, 0, 1],
     transition: {
-      duration: LAYOUT_DURATION * 2,
-      ease: "easeInOut",
+      times: [0, 0.3, 0.7, 1],
+      duration: PORTAL_BACKWARDS_ANIMATION_DURATION,
       delay: 0,
+      type: "just",
     },
   }),
   "portal-forwards": ({ layoutDelay }: GridDataAndLayoutDelay) => ({
@@ -41,16 +43,7 @@ export const tableCardVariants = {
     transition: {
       duration: LAYOUT_DURATION * 1.1,
       ease: "easeInOut",
-      delay: layoutDelay - 0.1,
-    },
-  }),
-  "moving-down": ({ layoutDelay }: GridDataAndLayoutDelay) => ({
-    opacity: [1, 1, 1, 1, 1],
-    scale: [1, 0.7, 0.1, 0, 1],
-    transition: {
-      duration: LAYOUT_DURATION * 1.25,
-      ease: "easeInOut",
-      delay: layoutDelay - 0.1,
+      delay: layoutDelay,
     },
   }),
   default: () => ({
@@ -62,7 +55,7 @@ export const tableCardVariants = {
       delay: 0,
     },
   }),
-  initial: ({ coordinates: { curr } }: GridDataAndLayoutDelay) => ({
+  initial: ({ curr }: GridDataAndLayoutDelay) => ({
     opacity: [0, 1],
     scale: [1, 1],
     transition: {
@@ -110,10 +103,9 @@ export const safeQueueAnimations = async ({
   latestEvent: AnyEmojicoinEvent;
 }) => {
   if (shouldAnimateGlow(isMounted, latestEvent)) {
-    controls.start(variants[0]).then(() => {
+    await controls.start(variants[0]).then(() => {
       // Only check if the component is still mounted after the first animation, because we
       // always want to reset it to the initial state if the first animation is triggered.
-      // console.log("should go back to initial?", shouldAnimateGlow(isMounted));
       if (shouldAnimateGlow(isMounted)) {
         controls.start(variants[1]);
       }
@@ -123,11 +115,11 @@ export const safeQueueAnimations = async ({
 
 // Set the `symbol` <span> value to `variant` to view these variants in action and how they work.
 export const determineGridAnimationVariant = ({
-  coordinates: { prev, curr },
+  prev,
+  curr,
   rowLength,
   runInitialAnimation,
-}: {
-  coordinates: GridCoordinateHistory;
+}: GridCoordinateHistory & {
   rowLength: number;
   runInitialAnimation?: boolean;
 }): { variant: TableCardVariants; layoutDelay: number } => {
@@ -162,12 +154,6 @@ export const determineGridAnimationVariant = ({
   const portalDelay = (prev.row + 1) * (rowLength * PER_ROW_DELAY);
 
   if (gridIndexDecreased && isMovingVertically) {
-    if (curr.col === 0 && curr.row === 0) {
-      return {
-        variant: "portal-backwards",
-        layoutDelay: PORTAL_ANIMATION_DURATION,
-      };
-    }
     return {
       variant: "portal-backwards",
       layoutDelay: portalDelay,
@@ -176,12 +162,6 @@ export const determineGridAnimationVariant = ({
   if (gridIndexIncreased && isMovingVertically) {
     return {
       variant: "portal-forwards",
-      layoutDelay: portalDelay,
-    };
-  }
-  if (isMovingVertically) {
-    return {
-      variant: "moving-down",
       layoutDelay: portalDelay,
     };
   }
@@ -202,15 +182,8 @@ export type GridCoordinate = {
   index: number;
 };
 
-export type GridData = {
-  coordinates: GridCoordinateHistory;
-  distance: number;
-};
-
-const getRow = (index: number, rowLength: number) => Math.floor(index / rowLength);
-const getColumn = (index: number, rowLength: number) => index % rowLength;
-const getDistance = (a: GridCoordinate, b?: GridCoordinate) =>
-  b ? Math.sqrt((a.row - b.row) ** 2 + (a.col - b.col) ** 2) : 0;
+export const getRow = (index: number, rowLength: number) => Math.floor(index / rowLength);
+export const getColumn = (index: number, rowLength: number) => index % rowLength;
 
 export const calculateGridData = ({
   index,
@@ -220,7 +193,7 @@ export const calculateGridData = ({
   index: number;
   prevIndex?: number;
   rowLength: number;
-}): GridData => {
+}): GridCoordinateHistory => {
   const curr: GridCoordinate = {
     row: getRow(index, rowLength),
     col: getColumn(index, rowLength),
@@ -234,14 +207,10 @@ export const calculateGridData = ({
           index: prevIndex,
         }
       : undefined;
-  const distance = getDistance(curr, prev);
 
   return {
-    coordinates: {
-      curr,
-      prev,
-    },
-    distance,
+    curr,
+    prev,
   };
 };
 

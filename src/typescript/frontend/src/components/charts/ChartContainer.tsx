@@ -30,14 +30,15 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
       });
   }, [initialize]);
 
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+  const subscribe = useWebSocketClient((s) => s.subscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
 
   // For now, we subscribe to any periodic state event instead of just a specific resolution.
   // There isn't a good reason to do otherwise since this is just the websocket subscription and we
   // default to 5m candles, which will have more data than any resolution except for the 1 minute chart.
   useEffect(() => {
     subscribe.periodicState(props.marketID, null);
-    return () => unsubscribe.periodicState(props.marketID, null);
+    return () => requestUnsubscribe.periodicState(props.marketID, null);
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [props.marketID]);
 

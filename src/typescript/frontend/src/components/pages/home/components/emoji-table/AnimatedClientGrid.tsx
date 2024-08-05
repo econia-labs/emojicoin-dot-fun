@@ -8,22 +8,14 @@ import { motion } from "framer-motion";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { constructOrdered, type WithTimeIndexAndPrev } from "./utils";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import {
-  PER_ROW_DELAY,
-  TOTAL_ANIMATION_TIME,
-} from "../table-card/animation-variants/grid-variants";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import MemoizedGridRowLines from "./components/grid-row-lines";
 import useEvent from "@hooks/use-event";
-import "./module.css";
-import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import "./module.css";
 
-// This is slightly inaccurate for long screens, but a user viewing the grid on a long screen will not see the full
-// animation anyway.
-export const ANIMATION_DEBOUNCE_TIME =
-  (TOTAL_ANIMATION_TIME * 1000 + MARKETS_PER_PAGE * PER_ROW_DELAY * 1000) * 1.5;
 export const MAX_ELEMENTS_PER_LINE = 7;
+export const ANIMATION_DEBOUNCE_TIME = 1111;
 
 const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
   data.map((v) => v.marketID).join(",");
@@ -45,7 +37,7 @@ export const LiveClientGrid = ({
   const getSearchEmojis = useEmojiPicker((s) => s.getEmojis);
   const stateFirehose = useEventStore((s) => s.stateFirehose);
   const subscribe = useWebSocketClient((s) => s.subscribe);
-  const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
   const latestOrdered = useRef(
     constructOrdered({
       data,
@@ -68,6 +60,8 @@ export const LiveClientGrid = ({
       getSearchEmojis,
     }).map((v) => ({
       ...v,
+      // Ensure the trigger is undefined for the first render.
+      trigger: undefined,
       runInitialAnimation: true,
     }))
   );
@@ -93,6 +87,7 @@ export const LiveClientGrid = ({
       getMarket,
       getSearchEmojis,
     });
+
     updateGridIfOrderChanged();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [data, stateFirehose, getMarket, getSearchEmojis]);
@@ -111,12 +106,15 @@ export const LiveClientGrid = ({
       const prevSymbols = new Map<number, number>(
         previousOrdered.map((v) => [v.marketID, v.index])
       );
+
       // Add the previous index to the new ordered list we'll display visually.
-      return latestOrdered.current.map((latestValue) => ({
-        ...latestValue,
-        prevIndex: prevSymbols.get(latestValue.marketID),
-        runInitialAnimation: false,
-      }));
+      return latestOrdered.current.map((latestValue) => {
+        return {
+          ...latestValue,
+          prevIndex: prevSymbols.get(latestValue.marketID),
+          runInitialAnimation: false,
+        };
+      });
     });
   });
 
@@ -155,8 +153,16 @@ export const LiveClientGrid = ({
   useEffect(() => {
     subscribe.state(null);
 
-    return () => unsubscribe.state(null);
+    return () => requestUnsubscribe.state(null);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
+
+  const initialRender = useRef(true);
+  useEffect(() => {
+    initialRender.current = false;
+    return () => {
+      initialRender.current = true;
+    };
   }, []);
 
   return (
@@ -166,6 +172,7 @@ export const LiveClientGrid = ({
           <MemoizedGridRowLines
             gridRowLinesKey={"live-grid-lines-" + rowLength}
             length={ordered.length}
+            shouldAnimate={initialRender.current}
           />
           {ordered.map((v) => {
             return (
@@ -176,7 +183,6 @@ export const LiveClientGrid = ({
                 marketID={v.marketID}
                 symbol={v.symbol}
                 emojis={v.emojis}
-                staticNumSwaps={v.staticNumSwaps}
                 staticMarketCap={v.staticMarketCap}
                 staticVolume24H={v.staticVolume24H}
                 rowLength={rowLength}

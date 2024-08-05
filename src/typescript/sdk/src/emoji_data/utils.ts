@@ -164,6 +164,7 @@ export const isValidEmojiHex = (input: HexInput) => {
 };
 
 export const encodeText = (s: string) => new TextEncoder().encode(s);
+export const encodeToHexString = (s: string) => Buffer.from(encodeText(s)).toString("hex");
 
 export const isStringArray = (arr: Array<unknown>): arr is Array<string> =>
   Array.isArray(arr) && arr.every((val) => typeof val === "string");
@@ -173,7 +174,7 @@ export const encodeSymbolData = (data: SymbolEmojiData[]) =>
 
 export const encodeEmojis = (emojis: string[] | SymbolEmojiData[]) =>
   `0x${
-    isStringArray(emojis) ? encodeText(emojis.join("")) : encodeSymbolData(emojis)
+    isStringArray(emojis) ? encodeToHexString(emojis.join("")) : encodeSymbolData(emojis)
   }` as `0x${string}`;
 
 // For ease of use, we alias `encodeEmojis` to `encodeSymbols`.

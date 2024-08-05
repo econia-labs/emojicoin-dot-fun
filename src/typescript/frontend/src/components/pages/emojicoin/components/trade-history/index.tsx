@@ -48,16 +48,17 @@ const TradeHistory = (props: TradeHistoryProps) => {
   const marketID = props.data.marketID;
 
   const swaps = getCombinedSwaps(
-    useEventStore((s) => s.getMarket(marketID.toString())?.swapEvents ?? []),
+    useEventStore((s) => s.getMarket(marketID)?.swapEvents ?? []),
     BigInt(marketID)
   );
 
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+  const subscribe = useWebSocketClient((s) => s.subscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.swap(marketID, null);
-    return () => unsubscribe.swap(marketID, null);
+    return () => requestUnsubscribe.swap(marketID, null);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 

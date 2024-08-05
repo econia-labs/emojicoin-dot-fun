@@ -1,3 +1,4 @@
+import { type StateTrigger } from "@sdk/const";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 
@@ -6,10 +7,10 @@ export type TableCardProps = {
   symbol: string;
   marketID: number;
   emojis: Array<SymbolEmojiData>;
-  staticNumSwaps: string;
   staticMarketCap: string;
   staticVolume24H: string;
   prevIndex?: number;
+  trigger?: StateTrigger;
 };
 
 export type GridLayoutInformation = {

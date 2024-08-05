@@ -8,8 +8,9 @@ import { motion } from "framer-motion";
 import { marketDataToProps } from "./utils";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import MemoizedGridRowLines from "./components/grid-row-lines";
-import "./module.css";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import { useEffect, useMemo, useRef } from "react";
+import "./module.css";
 
 export const ClientGrid = ({
   data,
@@ -20,14 +21,31 @@ export const ClientGrid = ({
   page: number;
   sortBy: MarketDataSortByHomePage;
 }) => {
-  const ordered = marketDataToProps(data);
   const rowLength = useGridRowLength();
+
+  const ordered = useMemo(() => {
+    return marketDataToProps(data);
+  }, [data]);
+
+  const initialRender = useRef(true);
+
+  useEffect(() => {
+    initialRender.current = false;
+
+    return () => {
+      initialRender.current = true;
+    };
+  }, []);
 
   return (
     <>
       <motion.div className="relative w-full h-full">
         <StyledGrid>
-          <MemoizedGridRowLines gridRowLinesKey={`${sortBy}-grid-lines`} length={ordered.length} />
+          <MemoizedGridRowLines
+            gridRowLinesKey={`${sortBy}-grid-lines`}
+            length={ordered.length}
+            shouldAnimate={initialRender.current}
+          />
           {ordered.map((v, i) => {
             return (
               <TableCard
@@ -37,7 +55,6 @@ export const ClientGrid = ({
                 marketID={v.marketID}
                 symbol={v.symbol}
                 emojis={v.emojis}
-                staticNumSwaps={v.staticNumSwaps}
                 staticMarketCap={v.staticMarketCap}
                 staticVolume24H={v.staticVolume24H}
                 rowLength={rowLength}

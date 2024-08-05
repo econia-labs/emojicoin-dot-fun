@@ -1,7 +1,16 @@
-import { type AnyNumberString } from "@sdk-types";
+import {
+  type Types,
+  type AnyNumberString,
+  isChatEvent,
+  isStateEvent,
+  isSwapEvent,
+  isLiquidityEvent,
+  isMarketRegistrationEvent,
+} from "@sdk-types";
+import { StateTrigger } from "@sdk/const";
 import type Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import { ECONIA_BLUE, GREEN, PINK } from "theme/colors";
+import { ECONIA_BLUE, GREEN, PINK, WHITE } from "theme/colors";
 import { useScramble } from "use-scramble";
 
 export const transitionIn = {
@@ -37,6 +46,11 @@ export const glowVariants = {
   sell: {
     boxShadow: `0 0 14px 11px ${PINK}CC`,
     filter: `drop-shadow(0 0 21px ${PINK}CC)`,
+    transition: transitionIn,
+  },
+  register: {
+    boxShadow: `0 0 14px 11px ${WHITE}AA`,
+    filter: `drop-shadow(0 0 21px ${WHITE}AA)`,
     transition: transitionIn,
   },
 };
@@ -84,6 +98,10 @@ export const borderVariants = {
     borderColor: ECONIA_BLUE,
     transition: transitionIn,
   },
+  register: {
+    borderColor: WHITE,
+    transition: transitionIn,
+  },
 };
 
 export const onlyHoverVariant = {
@@ -129,4 +147,31 @@ export const useLabelScrambler = (value: AnyNumberString | Big, suffix: string =
   });
 
   return scrambler;
+};
+
+export const eventToVariant = (
+  event?:
+    | Types.ChatEvent
+    | Types.StateEvent
+    | Types.SwapEvent
+    | Types.LiquidityEvent
+    | Types.MarketRegistrationEvent
+): AnyNonGridTableCardVariant => {
+  if (typeof event === "undefined") return "initial";
+  if (isStateEvent(event)) return stateEventToVariant(event);
+  if (isChatEvent(event)) return "chats";
+  if (isSwapEvent(event)) return event.isSell ? "sell" : "buy";
+  if (isLiquidityEvent(event)) return event.liquidityProvided ? "buy" : "sell";
+  if (isMarketRegistrationEvent(event)) return "register";
+  throw new Error("Unknown event type");
+};
+
+export const stateEventToVariant = (event: Types.StateEvent): AnyNonGridTableCardVariant => {
+  if (event.stateMetadata.trigger === StateTrigger.MARKET_REGISTRATION) return "register";
+  if (event.stateMetadata.trigger === StateTrigger.REMOVE_LIQUIDITY) return "sell";
+  if (event.stateMetadata.trigger === StateTrigger.PROVIDE_LIQUIDITY) return "buy";
+  if (event.stateMetadata.trigger === StateTrigger.SWAP_BUY) return "buy";
+  if (event.stateMetadata.trigger === StateTrigger.SWAP_SELL) return "sell";
+  if (event.stateMetadata.trigger === StateTrigger.CHAT) return "chats";
+  throw new Error("Unknown state event type");
 };

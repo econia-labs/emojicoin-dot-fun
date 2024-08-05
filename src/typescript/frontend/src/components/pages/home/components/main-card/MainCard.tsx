@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { translationFunction } from "context/language-context";
 import { Column, Flex, FlexGap } from "@containers";
@@ -15,9 +15,7 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useLabelScrambler } from "../table-card/animation-variants/event-variants";
 import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { type HomePageProps } from "app/home/HomePage";
-import { MarketDataSortBy } from "lib/queries/sorting/types";
 import "./module.css";
 
 export interface MainCardProps {
@@ -33,7 +31,8 @@ const MainCard = (props: MainCardProps) => {
   const globeImage = useRef<HTMLImageElement>(null);
   const marketID = featured?.marketID.toString() ?? "-1";
   const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+  const subscribe = useWebSocketClient((s) => s.subscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
 
   // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
   // See the other todo note with the same tag.
@@ -45,18 +44,16 @@ const MainCard = (props: MainCardProps) => {
 
   useEffect(() => {
     if (stateEvents.length === 0 || !featured) return;
-    const latestEvent = stateEvents.at(0)!;
-    setMarketCap(BigInt(featured.marketCap));
-
-    // TODO: Fix ASAP. This **will** become inaccurate over time.
-    setRoughDailyVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
-    setRoughAllTimeVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
+    // TODO: Refactor this to have accurate data. We increment by 1 like this just to trigger a scramble animation.
+    setMarketCap((prev) => prev + 1n);
+    setRoughDailyVolume((prev) => prev + 1n);
+    setRoughAllTimeVolume((prev) => prev + 1n);
   }, [featured, stateEvents]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.state(marketID);
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       if (globeImage.current) {
         const classlist = globeImage.current?.classList;
         if (!classlist.contains("hero-image-animation")) {
@@ -65,18 +62,20 @@ const MainCard = (props: MainCardProps) => {
       }
     }, 500);
     return () => {
-      unsubscribe.state(marketID);
+      clearTimeout(timeout);
+      requestUnsubscribe.state(marketID);
     };
   }, []);
 
   useEffect(() => {
     subscribe.state(marketID);
-    if (!featured) return;
-    setMarketCap(BigInt(featured.marketCap));
-    setRoughDailyVolume(BigInt(featured.dailyVolume));
-    setRoughAllTimeVolume(BigInt(featured.allTimeVolume));
+    if (featured) {
+      setMarketCap(BigInt(featured.marketCap));
+      setRoughDailyVolume(BigInt(featured.dailyVolume));
+      setRoughAllTimeVolume(BigInt(featured.allTimeVolume));
+    }
     return () => {
-      unsubscribe.state(marketID);
+      requestUnsubscribe.state(marketID);
     };
   }, [featured, marketID]);
   /* eslint-enable react-hooks/exhaustive-deps */

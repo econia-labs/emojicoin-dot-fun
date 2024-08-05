@@ -71,9 +71,7 @@ export default function SwapComponent({
   const [submit, setSubmit] = useState<(() => Promise<void>) | null>(null);
   const { aptBalance, emojicoinBalance, account, setEmojicoinType } = useAptos();
 
-  const numSwaps = useEventStore(
-    (s) => s.getMarket(marketID.toString())?.swapEvents.length ?? initNumSwaps
-  );
+  const numSwaps = useEventStore((s) => s.getMarket(marketID)?.swapEvents.length ?? initNumSwaps);
 
   useEffect(() => {
     const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();

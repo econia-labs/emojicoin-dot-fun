@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { translationFunction } from "context/language-context";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 import { type GridLayoutInformation, type TableCardProps } from "./types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useUserSettings, useWebSocketClient } from "context/state-store-context";
+import { useEventStore, useUserSettings } from "context/state-store-context";
 import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
 import Big from "big.js";
@@ -17,9 +23,10 @@ import {
   textVariants,
   useLabelScrambler,
   glowVariants,
+  type AnyNonGridTableCardVariant,
+  eventToVariant as toVariant,
 } from "./animation-variants/event-variants";
 import { type Types } from "@sdk-types";
-import { useEvent } from "@hooks/use-event";
 import {
   calculateGridData,
   determineGridAnimationVariant,
@@ -29,13 +36,14 @@ import {
 } from "./animation-variants/grid-variants";
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import "./module.css";
+import useEvent from "@hooks/use-event";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 
 const TableCard = ({
   index,
   marketID,
   symbol,
   emojis,
-  staticNumSwaps,
   staticMarketCap,
   staticVolume24H,
   rowLength,
@@ -46,15 +54,13 @@ const TableCard = ({
   ...props
 }: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
-  const events = useEventStore((s) => s);
-  const chats = useEventStore((s) => s.getMarket(marketID.toString())?.chatEvents ?? []);
-  const stateEvents = useEventStore((s) => s.getMarket(marketID.toString())?.stateEvents ?? []);
-  const liquidityEvents = useEventStore(
-    (s) => s.getMarket(marketID.toString())?.liquidityEvents ?? []
-  );
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
   const isMounted = useRef(true);
   const controls = useAnimationControls();
+  const animationsOn = useUserSettings((s) => s.animate);
+
+  const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
+  const [roughDailyVolume, setRoughDailyVolume] = useState(Big(staticVolume24H));
+  const animations = useEventStore((s) => s.stateEventsByMarket.get(BigInt(marketID)));
 
   // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {
@@ -63,137 +69,82 @@ const TableCard = ({
     return () => {
       isMounted.current = false;
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const animationsOn = useUserSettings((s) => s.animate);
+  // The main reason we use this here is to avoid subscription thrashing since the user
+  // can paginate many times quickly back and forth. In order to avoid this, we set up
+  // a hook that will handle the subscription and unsubscription for us based on the component
+  // mounting and unmounting.
+  useReliableSubscribe(
+    animationsOn
+      ? {
+          chat: [marketID],
+          liquidity: [marketID],
+          swap: [marketID, null],
+        }
+      : undefined
+  );
 
-  // TODO: Most of this component's state should be managed in `event-store` more cleanly, but for now this is an
-  // initial prototype.
-  // Ideally, we don't even store most data, we just store the last state in a Zustand store and use that
-  // like we're using the events now, except we'd need less data and wouldn't need to do so many comparisons between
-  // the static data and the data in the store.
-
-  // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
-  // TODO: Convert all/most usage of bigints to Big so we can have more precise bigints without having to
-  // worry about overflow with `number`.
-  const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
-  const [roughDailyVolume, setRoughDailyVolume] = useState(Big(staticVolume24H));
-
-  const animateSwaps = useEvent((swapsFromProps: string, events: readonly Types.StateEvent[]) => {
-    const latestEvent = events.at(0);
-    if (latestEvent) {
-      const numSwapsInStore = Big((latestEvent?.cumulativeStats.numSwaps ?? 0).toString());
-      if (Big(numSwapsInStore).gt(swapsFromProps)) {
-        const marketCapInStore = latestEvent.instantaneousStats.marketCap;
-        setMarketCap(Big(marketCapInStore.toString()));
-      }
-
-      // TODO: Fix ASAP. This **will** become inaccurate over time, because it doesn't evict stale data from the rolling
-      // volume. It's just a rough estimate to simulate live 24h rolling volume.
-      setRoughDailyVolume((prev) => prev.plus(Big(latestEvent.lastSwap.quoteVolume.toString())));
-
+  const startAnimation = useEvent(
+    (
+      variant: AnyNonGridTableCardVariant,
+      latestEvent:
+        | Types.SwapEvent
+        | Types.ChatEvent
+        | Types.LiquidityEvent
+        | Types.MarketRegistrationEvent
+        | Types.StateEvent
+    ) => {
       safeQueueAnimations({
         controls,
-        variants: [latestEvent.lastSwap.isSell ? "sell" : "buy", "initial"],
+        variants: [variant, "initial"],
         isMounted,
         latestEvent,
       });
     }
-  });
+  );
 
   useEffect(() => {
-    animateSwaps(staticNumSwaps, stateEvents);
-
-    return () => {
-      if (isMounted.current) controls.set("initial");
-    };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [staticNumSwaps, stateEvents, controls]);
-
-  const animateChats = useEvent((events: readonly Types.ChatEvent[]) => {
-    const latestEvent = events.at(0);
-    if (latestEvent) {
-      safeQueueAnimations({
-        controls,
-        variants: ["chats", "initial"],
-        isMounted,
-        latestEvent,
-      });
+    if (animations && animations.length) {
+      const event = animations.at(0)!;
+      const variant = toVariant(event);
+      startAnimation(variant, event);
+      // TODO: Refactor this to have accurate data. We increment by 1 like this just to trigger a scramble animation.
+      // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
+      setMarketCap((prev) => prev.plus(1));
+      setRoughDailyVolume((prev) => prev.plus(1));
     }
-  });
-
-  useEffect(() => {
-    animateChats(chats);
-
-    return () => {
-      if (isMounted.current) controls.set("initial");
-    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [chats, controls]);
-
-  const animateLiquidity = useEvent((events: readonly Types.LiquidityEvent[]) => {
-    const latestEvent = events.at(0);
-    if (latestEvent) {
-      safeQueueAnimations({
-        controls,
-        variants: [latestEvent.liquidityProvided ? "buy" : "sell", "initial"],
-        isMounted,
-        latestEvent,
-      });
-    }
-  });
-
-  useEffect(() => {
-    animateLiquidity(liquidityEvents);
-
-    return () => {
-      if (isMounted.current) controls.set("initial");
-    };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [liquidityEvents, controls]);
-
-  useEffect(() => {
-    events.initializeMarket(marketID, symbol);
-    subscribe.chat(marketID);
-    subscribe.state(marketID);
-    subscribe.liquidity(marketID);
-
-    return () => {
-      unsubscribe.chat(marketID);
-      unsubscribe.state(marketID);
-      unsubscribe.liquidity(marketID);
-    };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
+  }, [animations]);
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
 
-  const { coordinates, variant, distance, displayIndex, layoutDelay } = useMemo(() => {
-    const { coordinates, distance } = calculateGridData({
+  const { curr, prev, variant, displayIndex, layoutDelay } = useMemo(() => {
+    const { curr, prev } = calculateGridData({
       index,
       prevIndex,
       rowLength,
     });
     const { variant, layoutDelay } = determineGridAnimationVariant({
-      coordinates,
+      curr,
+      prev,
       rowLength,
       runInitialAnimation,
     });
     const displayIndex = index + pageOffset + 1;
     return {
       variant,
-      distance,
-      coordinates,
+      curr,
+      prev,
       displayIndex,
       layoutDelay,
     };
   }, [prevIndex, index, rowLength, pageOffset, runInitialAnimation]);
 
-  // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border though, which we handle in the
-  // layout animation begin/complete callbacks and in the style prop of the outermost motion.div.
-  const borderLeftWidth = useMotionValue(coordinates.curr.col === 0 ? 1 : 0);
+  // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border
+  // though, which we handle in the layout animation begin/complete callbacks and in the outermost div's style prop.
+  const borderLeftWidth = useMotionValue(curr.col === 0 ? 1 : 0);
 
   return (
     <motion.div
@@ -214,11 +165,18 @@ const TableCard = ({
       className="grid-emoji-card group card-wrapper border border-solid border-dark-gray"
       variants={tableCardVariants}
       animate={variant}
-      custom={{ coordinates, distance, layoutDelay }}
+      custom={{ curr, prev, layoutDelay }}
+      // Unfortunately, the transition for a layout animation is separate from a variant, hence why we have
+      // to fill this with conditionals.
       transition={{
-        type: variant === "initial" ? "just" : "spring",
+        type: variant === "initial" || variant === "portal-backwards" ? "just" : "spring",
         delay: variant === "initial" ? 0 : layoutDelay,
-        duration: variant === "initial" ? 0 : LAYOUT_DURATION,
+        duration:
+          variant === "initial"
+            ? 0
+            : variant === "portal-backwards"
+              ? LAYOUT_DURATION * 0.25
+              : LAYOUT_DURATION,
       }}
       style={{
         borderLeftWidth,
@@ -228,13 +186,16 @@ const TableCard = ({
         cursor: "pointer",
       }}
       onLayoutAnimationStart={() => {
-        if (coordinates.curr.col === 0) {
+        // Show a temporary left border for all elements while they are changing their layout position.
+        setTimeout(() => {
+          // Note that this is probably a fairly bad way to do this. It works for now but we could easily
+          // improve it.
           borderLeftWidth.set(1);
-        }
+        }, layoutDelay * 1000);
       }}
       onLayoutAnimationComplete={() => {
-        // We need to get rid of the temporary border after the layout animation completes.
-        if (coordinates.curr.col !== 0) {
+        // Get rid of the temporary border after the layout animation completes.
+        if (curr.col !== 0) {
           borderLeftWidth.set(0);
         }
       }}

@@ -45,7 +45,7 @@ export const generateRandomSymbol = () => {
     if (sumBytes([...emojis.map((e) => e.bytes), randomEmoji.bytes]) < MAX_SYMBOL_LENGTH) {
       emojis.push(randomEmoji);
     }
-    i++;
+    i += 1;
   }
   return emojis;
 };

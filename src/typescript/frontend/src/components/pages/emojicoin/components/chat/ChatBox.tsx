@@ -71,12 +71,12 @@ const ChatBox = (props: ChatProps) => {
   );
   const chatEmojiData = useEmojiPicker((state) => state.chatEmojiData);
   const subscribe = useWebSocketClient((s) => s.subscribe);
-  const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
   const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
 
   useEffect(() => {
     subscribe.chat(marketID);
-    return () => unsubscribe.chat(marketID);
+    return () => requestUnsubscribe.chat(marketID);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 

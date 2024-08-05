@@ -25,7 +25,7 @@ export const marketDataToProps = (data: FetchSortedMarketDataReturn["markets"]):
     emojis: market.emojis,
     staticMarketCap: market.marketCap.toString(),
     staticVolume24H: market.dailyVolume.toString(),
-    staticNumSwaps: market.numSwaps.toString(),
+    trigger: undefined,
   }));
 
 export const stateEventsToProps = (
@@ -40,7 +40,6 @@ export const stateEventsToProps = (
     const marketID = Number(e.marketID);
     const marketCap = getMarket(marketID)?.marketData?.marketCap;
     const volume24H = getMarket(marketID)?.marketData?.dailyVolume;
-    const numSwaps = getMarket(marketID)?.marketData?.numSwaps;
     const emojiData = symbolBytesToEmojis(e.marketMetadata.emojiBytes);
     const { symbol, emojis } = emojiData;
     return {
@@ -51,7 +50,7 @@ export const stateEventsToProps = (
       marketID: Number(marketID),
       staticMarketCap: (marketCap ?? 0).toString(),
       staticVolume24H: (volume24H ?? 0).toString(),
-      staticNumSwaps: (numSwaps ?? 0).toString(),
+      trigger: e.stateMetadata.trigger,
     };
   });
 };

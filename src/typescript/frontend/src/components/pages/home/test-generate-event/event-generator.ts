@@ -1,12 +1,7 @@
 import { Account, AccountAddress, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { toAnyEmojicoinEvent, type Types, type AnyNumberString } from "@sdk-types";
-import { MAX_SYMBOL_LENGTH, StateTrigger } from "@sdk/const";
-import {
-  getRandomEmoji,
-  type SymbolEmojiData,
-  type EmojicoinSymbol,
-  generateRandomSymbol,
-} from "@sdk/emoji_data";
+import { StateTrigger } from "@sdk/const";
+import { getRandomEmoji, type EmojicoinSymbol, generateRandomSymbol } from "@sdk/emoji_data";
 import { getEmojicoinData } from "@sdk/markets/utils";
 import type JSONTypes from "@sdk/types/json-types";
 import { STRUCT_STRINGS } from "@sdk/utils";
