@@ -38,7 +38,7 @@ const GridRowLines = ({
           },
         };
       }),
-    [length, rowLength]
+    [length, rowLength, shouldAnimate]
   );
 
   return (
