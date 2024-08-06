@@ -75,7 +75,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
         disabled={isBanned}
         onClick={(e) => {
           e.preventDefault();
-          onClick ? onClick() : openWalletModal();
+          (onClick ?? openWalletModal)();
           handleReplay();
         }}
         onMouseOver={handleReplay}

@@ -1,7 +1,7 @@
 import { LazyPromise } from "@sdk/utils";
 import { GEOBLOCKING_ENABLED } from "lib/env";
 
-const COUNTRY_CACHING_DURATION = 1000 * 60 * 60 * 24; // One day
+const COUNTRY_CACHING_DURATION = 1000 * 60 * 60 * 24; // One day.
 const COUNTRY_LOCALSTORAGE_KEY = "user-country";
 export const COUNTRY_UNKNOWN = "unknown";
 
