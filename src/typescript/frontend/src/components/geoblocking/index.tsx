@@ -19,18 +19,16 @@ const Item: React.FC = () => {
   );
 };
 
-export const GeoblockedBanner: React.FC = () => {
-  const items: React.ReactNode[] = [];
-  for (let i = 0; i < 4; i++) {
-    items.push(<Item key={i} />);
-  }
-  return (
-    <div className="w-full bg-pink">
-      <div className="overflow-hidden w-full flex-row">
-        <div className="flex">
-          <div className="flex gap-[16px] animate-banCarousel">{items}</div>
+export const GeoblockedBanner: React.FC = () => (
+  <div className="w-full bg-pink">
+    <div className="overflow-hidden w-full flex-row">
+      <div className="flex">
+        <div className="flex gap-[16px] animate-banCarousel">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Item key={i} />
+          ))}
         </div>
       </div>
     </div>
-  );
-};
+  </div>
+);
