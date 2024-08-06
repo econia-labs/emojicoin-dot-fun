@@ -1,4 +1,4 @@
-import { getEmojicoinEventTime, type AnyEmojicoinEvent } from "@sdk/types/types";
+import { getEmojicoinEventTime, Types, type AnyEmojicoinEvent } from "@sdk/types/types";
 import { type AnimationControls } from "framer-motion";
 import { type AnyNonGridTableCardVariant } from "./event-variants";
 
@@ -13,6 +13,13 @@ const INSERTION_DELAY = LAYOUT_DURATION * 0.5;
 // This isn't the longest animation ("initial" is), but for the purpose of updating the grid
 // with a debounced animation effect, it is. Revisit this if we change the animation times.
 export const TOTAL_ANIMATION_TIME = ANIMATION_DURATION;
+
+export type EmojicoinAnimationEvents =
+  | Types.SwapEvent
+  | Types.ChatEvent
+  | Types.LiquidityEvent
+  | Types.MarketRegistrationEvent
+  | Types.StateEvent;
 
 type GridDataAndLayoutDelay = GridCoordinateHistory & { layoutDelay: number };
 

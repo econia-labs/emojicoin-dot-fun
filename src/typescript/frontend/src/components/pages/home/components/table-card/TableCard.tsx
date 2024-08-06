@@ -30,6 +30,7 @@ import { type Types } from "@sdk-types";
 import {
   calculateGridData,
   determineGridAnimationVariant,
+  EmojicoinAnimationEvents,
   LAYOUT_DURATION,
   safeQueueAnimations,
   tableCardVariants,
@@ -86,15 +87,7 @@ const TableCard = ({
   );
 
   const startAnimation = useEvent(
-    (
-      variant: AnyNonGridTableCardVariant,
-      latestEvent:
-        | Types.SwapEvent
-        | Types.ChatEvent
-        | Types.LiquidityEvent
-        | Types.MarketRegistrationEvent
-        | Types.StateEvent
-    ) => {
+    (variant: AnyNonGridTableCardVariant, latestEvent: EmojicoinAnimationEvents) => {
       safeQueueAnimations({
         controls,
         variants: [variant, "initial"],
@@ -187,10 +180,11 @@ const TableCard = ({
       }}
       onLayoutAnimationStart={() => {
         // Show a temporary left border for all elements while they are changing their layout position.
+        // Note that this is probably a fairly bad way to do this. It works for now but we could easily improve it.
+        // The issue is that transition has a different time than the variant, and there's no way to coalesce the two
+        // easily without refactoring the entire animation orchestration. For now, we can use the setTimeout.
         setTimeout(() => {
-          // Note that this is probably a fairly bad way to do this. It works for now but we could easily
-          // improve it.
-          borderLeftWidth.set(10);
+          borderLeftWidth.set(1);
         }, layoutDelay * 1000);
       }}
       onLayoutAnimationComplete={() => {
