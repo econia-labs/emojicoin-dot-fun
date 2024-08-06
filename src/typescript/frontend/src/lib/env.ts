@@ -8,6 +8,7 @@ let INTEGRATOR_FEE_RATE_BPS: number;
 let MQTT_URL: string;
 
 const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_ALLOWLIST_ENABLED === "true";
+const GEOBLOCKING_ENABLED: boolean = process.env.NEXT_PUBLIC_GEOBLOCKING_ENABLED === "true";
 
 if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
@@ -52,6 +53,7 @@ export {
   APTOS_NETWORK,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
+  GEOBLOCKING_ENABLED,
   IS_ALLOWLIST_ENABLED,
   MQTT_URL,
   VERSION,

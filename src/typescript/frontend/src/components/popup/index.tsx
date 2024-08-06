@@ -16,9 +16,7 @@ const Popup: React.FC<
             typeof content === "bigint" ||
             typeof content === "number" ||
             typeof content === "boolean" ? (
-              <Text color="black">
-                {content}
-              </Text>
+              <Text color="black">{content}</Text>
             ) : (
               content
             )}

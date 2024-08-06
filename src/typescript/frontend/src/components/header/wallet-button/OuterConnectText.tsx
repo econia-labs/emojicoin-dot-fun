@@ -1,3 +1,5 @@
+import useIsBanned from "@hooks/use-is-banned";
+
 export const OuterConnectText = ({
   side,
   connected,
@@ -7,7 +9,8 @@ export const OuterConnectText = ({
   connected: boolean;
   mobile?: boolean;
 }) => {
-  if (connected) {
+  const isBanned = useIsBanned();
+  if (!isBanned && connected) {
     if (mobile && side === "left") {
       return null;
     }
