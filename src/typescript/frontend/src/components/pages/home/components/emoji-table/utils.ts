@@ -10,10 +10,12 @@ export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   key: string;
   time: number;
 };
-export type PropsWithTimeAndIndex = TableCardProps & { key: string; time: number };
+export type PropsWithTimeAndIndex = TableCardProps & {
+  key: string;
+  time: number;
+};
 export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
   prevIndex?: number;
-  prevKey?: string;
 };
 
 export const marketDataToProps = (data: FetchSortedMarketDataReturn["markets"]): PropsWithTime[] =>
@@ -25,7 +27,6 @@ export const marketDataToProps = (data: FetchSortedMarketDataReturn["markets"]):
     emojis: market.emojis,
     staticMarketCap: market.marketCap.toString(),
     staticVolume24H: market.dailyVolume.toString(),
-    trigger: undefined,
   }));
 
 export const stateEventsToProps = (
@@ -95,8 +96,8 @@ export const constructOrdered = ({
   getMarket: EventStore["getMarket"];
   getSearchEmojis?: EmojiPickerStore["getEmojis"];
 }) => {
-  // We don't need to filter because the data passed in is already filtered from the server
-  // component prop data.
+  // We don't need to filter the fetched data because it's already filtered and sorted by the
+  // server. We only need to filter event store state events.
   const searchEmojis = getSearchEmojis();
   const initial = marketDataToProps(data);
 
@@ -110,14 +111,5 @@ export const constructOrdered = ({
   return latest.slice(0, MARKETS_PER_PAGE);
 };
 
-export const filterStateEventsBySearchEmojis = (
-  data: Types.StateEvent[],
-  searchEmojis: string[]
-): Types.StateEvent[] =>
-  data.filter((d) =>
-    searchEmojis.some((e) =>
-      symbolBytesToEmojis(d.marketMetadata.emojiBytes)
-        .emojis.map((v) => v.emoji)
-        .includes(e)
-    )
-  );
+export const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
+  data.map((v) => v.marketID).join(",");

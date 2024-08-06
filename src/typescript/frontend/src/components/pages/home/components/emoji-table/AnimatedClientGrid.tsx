@@ -3,20 +3,16 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TableCard from "../table-card/TableCard";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
-import { useEventStore, useWebSocketClient } from "context/state-store-context";
-import { constructOrdered, type WithTimeIndexAndPrev } from "./utils";
+import { useEventStore } from "context/state-store-context";
+import { constructOrdered, toSerializedGridOrder, type WithTimeIndexAndPrev } from "./utils";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import MemoizedGridRowLines from "./components/grid-row-lines";
 import useEvent from "@hooks/use-event";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import { ANIMATION_DEBOUNCE_TIME } from "../table-card/animation-variants/grid-variants";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import "./module.css";
-
-export const MAX_ELEMENTS_PER_LINE = 7;
-export const ANIMATION_DEBOUNCE_TIME = 1111;
-
-const toSerializedGridOrder = <T extends { marketID: number }>(data: T[]) =>
-  data.map((v) => v.marketID).join(",");
 
 // TODO: Consider queueing up the changes by storing each state update in a queue and then updating the state
 // by popping off the queue. This would allow us to update the state in a more controlled manner and avoid lots of
@@ -33,8 +29,6 @@ export const LiveClientGrid = ({
   const getMarket = useEventStore((s) => s.getMarket);
   const getSearchEmojis = useEmojiPicker((s) => s.getEmojis);
   const stateFirehose = useEventStore((s) => s.stateFirehose);
-  const subscribe = useWebSocketClient((s) => s.subscribe);
-  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
   const latestOrdered = useRef(
     constructOrdered({
       data,
@@ -57,8 +51,6 @@ export const LiveClientGrid = ({
       getSearchEmojis,
     }).map((v) => ({
       ...v,
-      // Ensure the trigger is undefined for the first render.
-      trigger: undefined,
       runInitialAnimation: true,
     }))
   );
@@ -123,8 +115,8 @@ export const LiveClientGrid = ({
   useLayoutEffect(() => {
     // We always calculate the interval remainder because this is triggered every time the grid order changes, and we
     // want to check how long we need to wait since the last update to update the current ordered list visually.
-    // Seconds since last animation: (Date.now() - lastAnimationUpdate.current) * 0.001
-    // We must wait: Math.max(0, updateDelay * 0.001) seconds.
+    // If the seconds since last animation are => (Date.now() - lastAnimationUpdate.current) * 0.001 seconds, then
+    // we must wait => Math.max(0, updateDelay * 0.001) seconds.
     const intervalRemainder = ANIMATION_DEBOUNCE_TIME - (Date.now() - lastAnimationUpdate.current);
     const updateDelay = Math.max(0, intervalRemainder);
 
@@ -147,12 +139,9 @@ export const LiveClientGrid = ({
   }, [gridOrder]);
 
   // Handle subscribing/unsubscribing to/from all state events across all markets on component mount/unmount.
-  useEffect(() => {
-    subscribe.state(null);
-
-    return () => requestUnsubscribe.state(null);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
+  useReliableSubscribe({
+    state: [null],
+  });
 
   const initialRender = useRef(true);
   useEffect(() => {
@@ -183,6 +172,7 @@ export const LiveClientGrid = ({
             rowLength={rowLength}
             prevIndex={v.prevIndex}
             sortBy={sortBy}
+            animatedGrid={true}
             runInitialAnimation={v.runInitialAnimation}
           />
         );

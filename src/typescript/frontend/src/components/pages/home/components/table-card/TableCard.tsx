@@ -29,9 +29,9 @@ import {
   tableCardVariants,
 } from "./animation-variants/grid-variants";
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
-import "./module.css";
 import useEvent from "@hooks/use-event";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import "./module.css";
 
 const TableCard = ({
   index,
@@ -45,6 +45,7 @@ const TableCard = ({
   pageOffset,
   runInitialAnimation,
   sortBy,
+  animatedGrid,
   ...props
 }: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
@@ -69,8 +70,10 @@ const TableCard = ({
   // can paginate many times quickly back and forth. In order to avoid this, we set up
   // a hook that will handle the subscription and unsubscription for us based on the component
   // mounting and unmounting.
+  // The animated grid uses the global state event subscription, so we don't subscribe to individual
+  // event types by market ID if this table card component is being used in the animated grid.
   useReliableSubscribe(
-    animationsOn
+    animationsOn && !animatedGrid
       ? {
           chat: [marketID],
           liquidity: [marketID],

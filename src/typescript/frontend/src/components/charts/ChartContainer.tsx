@@ -6,6 +6,7 @@ import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import Loading from "components/loading";
 import PrivateChart from "./PrivateChart";
 import fetchAggregateMarkets from "lib/queries/initial/aggregate-markets";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 
 export const Chart = PrivateChart;
 const MemoizedChart = React.memo(Chart);
@@ -30,17 +31,12 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
       });
   }, [initialize]);
 
-  const subscribe = useWebSocketClient((s) => s.subscribe);
-  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
-
   // For now, we subscribe to any periodic state event instead of just a specific resolution.
   // There isn't a good reason to do otherwise since this is just the websocket subscription and we
   // default to 5m candles, which will have more data than any resolution except for the 1 minute chart.
-  useEffect(() => {
-    subscribe.periodicState(props.marketID, null);
-    return () => requestUnsubscribe.periodicState(props.marketID, null);
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [props.marketID]);
+  useReliableSubscribe({
+    periodicState: [props.marketID, null],
+  });
 
   return (
     <>

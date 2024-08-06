@@ -2,6 +2,9 @@ import { getEmojicoinEventTime, type Types, type AnyEmojicoinEvent } from "@sdk/
 import { type AnimationControls } from "framer-motion";
 import { type AnyNonGridTableCardVariant } from "./event-variants";
 
+export const MAX_ELEMENTS_PER_LINE = 7;
+export const ANIMATION_DEBOUNCE_TIME = 1111;
+
 export const ANIMATION_DURATION = 0.3;
 export const LAYOUT_DURATION = 0.4;
 export const PORTAL_BACKWARDS_ANIMATION_DURATION = LAYOUT_DURATION * 1.5;
@@ -24,7 +27,7 @@ export type EmojicoinAnimationEvents =
 type GridDataAndLayoutDelay = GridCoordinateHistory & { layoutDelay: number };
 
 export const tableCardVariants = {
-  // Aka push to front.
+  // Insertions to the front of the grid.
   unshift: ({ curr }: GridDataAndLayoutDelay) => ({
     scale: [0, 0.5, 1, 1, 1.5, 1.2, 1],
     opacity: [0, 0.5, 1, 1, 1, 1, 1],
@@ -34,6 +37,7 @@ export const tableCardVariants = {
       delay: INSERTION_DELAY + (curr.index * PER_ROW_DELAY) / 5,
     },
   }),
+  // Up and/or left.
   "portal-backwards": () => ({
     opacity: [1, 0, 0, 1],
     scale: [1, 0, 0, 1],
@@ -44,6 +48,7 @@ export const tableCardVariants = {
       type: "just",
     },
   }),
+  // Down and/or right.
   "portal-forwards": ({ layoutDelay }: GridDataAndLayoutDelay) => ({
     opacity: [1, 1, 1, 1, 1, 1, 1],
     scale: [1, 0, 0, 0, 0, 0, 1],
@@ -53,6 +58,7 @@ export const tableCardVariants = {
       delay: layoutDelay,
     },
   }),
+  // Shifting one grid position over on the same line.
   default: () => ({
     opacity: 1,
     scale: 1,
@@ -62,6 +68,7 @@ export const tableCardVariants = {
       delay: 0,
     },
   }),
+  // The initial animation for each grid element.
   initial: ({ curr }: GridDataAndLayoutDelay) => ({
     opacity: [0, 1],
     scale: [1, 1],
