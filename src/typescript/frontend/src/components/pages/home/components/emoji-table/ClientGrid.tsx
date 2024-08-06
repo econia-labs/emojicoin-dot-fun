@@ -1,10 +1,8 @@
 "use client";
 
 import TableCard from "../table-card/TableCard";
-import { StyledGrid } from "./styled";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { motion } from "framer-motion";
 import { marketDataToProps } from "./utils";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import MemoizedGridRowLines from "./components/grid-row-lines";

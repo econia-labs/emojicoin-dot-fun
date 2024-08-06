@@ -7,13 +7,7 @@ import { Text } from "components/text";
 import { type GridLayoutInformation, type TableCardProps } from "./types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useUserSettings } from "context/state-store-context";
-import {
-  motion,
-  type MotionProps,
-  useAnimationControls,
-  useMotionValue,
-  useMotionValueEvent,
-} from "framer-motion";
+import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
 import Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -26,11 +20,10 @@ import {
   type AnyNonGridTableCardVariant,
   eventToVariant as toVariant,
 } from "./animation-variants/event-variants";
-import { type Types } from "@sdk-types";
 import {
   calculateGridData,
   determineGridAnimationVariant,
-  EmojicoinAnimationEvents,
+  type EmojicoinAnimationEvents,
   LAYOUT_DURATION,
   safeQueueAnimations,
   tableCardVariants,

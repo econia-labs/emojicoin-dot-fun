@@ -3,8 +3,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TableCard from "../table-card/TableCard";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
-import { StyledGrid } from "./styled";
-import { motion } from "framer-motion";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { constructOrdered, type WithTimeIndexAndPrev } from "./utils";
 import { useEmojiPicker } from "context/emoji-picker-context";

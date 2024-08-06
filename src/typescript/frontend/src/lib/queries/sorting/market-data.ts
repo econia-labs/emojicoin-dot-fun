@@ -25,11 +25,9 @@ export const getSortedMarketData = async ({
   let query = postgrest
     .from("market_data")
     .select("*", exactCount ? { count: "exact" } : undefined)
-    .range(offset, offset + limit)
+    .range(offset, offset + limit - 1)
     .limit(limit)
     .order(toPostgrestQueryParam(sortBy), orderBy);
-
-  console.log(query);
 
   if (searchBytes) {
     query = query.like("emoji_bytes", `%${searchBytes}%`);

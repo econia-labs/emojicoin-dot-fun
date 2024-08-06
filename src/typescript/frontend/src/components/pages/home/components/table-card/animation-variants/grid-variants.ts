@@ -1,4 +1,4 @@
-import { getEmojicoinEventTime, Types, type AnyEmojicoinEvent } from "@sdk/types/types";
+import { getEmojicoinEventTime, type Types, type AnyEmojicoinEvent } from "@sdk/types/types";
 import { type AnimationControls } from "framer-motion";
 import { type AnyNonGridTableCardVariant } from "./event-variants";
 

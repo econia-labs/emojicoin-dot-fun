@@ -12,7 +12,7 @@ const GridRowLines = ({
 }: {
   length: number;
   gridRowLinesKey: string;
-  shouldAnimate?: boolean;
+  shouldAnimate: boolean;
 }) => {
   const rowLength = useGridRowLength();
 
@@ -21,6 +21,13 @@ const GridRowLines = ({
       Array.from({ length }).map((_, i) => {
         const row = getRow(i, rowLength);
         const col = getColumn(i, rowLength);
+        // The last element in the grid lines should not animate if it isn't the first render, because otherwise
+        // elements added to the grid will animate in with the shine animation and look odd. It's only supposed to
+        // animate a single time, but because we use keys to replace the grid with different arrays of elements to
+        // prevent layout snapping, we must add this check.
+        if (i === length - 1 && !shouldAnimate) {
+          return false;
+        }
         return {
           backgroundColor: ["#00000000", "#33343D66", "#00000000"],
           transition: {
@@ -31,7 +38,7 @@ const GridRowLines = ({
           },
         };
       }),
-    [length, rowLength, shouldAnimate]
+    [length, rowLength]
   );
 
   return (

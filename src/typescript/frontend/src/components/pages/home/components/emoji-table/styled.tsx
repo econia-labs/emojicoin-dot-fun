@@ -4,7 +4,6 @@ import styled from "styled-components";
 import base, { breakpointsArray } from "theme/base";
 import { darkColors } from "theme/colors";
 import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
-import { motion } from "framer-motion";
 
 export const StyledTHFilters = styled.div`
   display: flex;
@@ -62,15 +61,15 @@ export const InnerGridContainer = styled.div`
 // We already have these in the `module.css` file but I leave it here to show how to generate it again in case we ever
 // change the grid item width.
 let width = EMOJI_GRID_ITEM_WIDTH;
-let headerMediaQueries = "";
-let gridMediaQueries = "";
+let _headerMediaQueries = "";
+let _gridMediaQueries = "";
 while (width < MAX_WIDTH) {
-  headerMediaQueries += `
+  _headerMediaQueries += `
   @media (min-width: ${width + GRID_PADDING * 2}px) {
     padding-left: calc((100vw - ${width + GRID_PADDING * 2}px) / 2);
     padding-right: calc((100vw - ${width + GRID_PADDING * 2}px) / 2);
   }`;
-  gridMediaQueries += `
+  _gridMediaQueries += `
   @media (min-width: ${width + GRID_PADDING * 2}px) {
     max-width: ${width}px;
     min-width: ${width}px;
