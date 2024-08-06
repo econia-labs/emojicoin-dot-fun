@@ -1,19 +1,19 @@
 "use client";
 
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { translationFunction } from "context/language-context";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 import { type GridLayoutInformation, type TableCardProps } from "./types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useUserSettings } from "context/state-store-context";
-import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
+import {
+  motion,
+  type MotionProps,
+  useAnimationControls,
+  useMotionValue,
+  useMotionValueEvent,
+} from "framer-motion";
 import { Arrow } from "components/svg";
 import Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -190,7 +190,7 @@ const TableCard = ({
         setTimeout(() => {
           // Note that this is probably a fairly bad way to do this. It works for now but we could easily
           // improve it.
-          borderLeftWidth.set(1);
+          borderLeftWidth.set(10);
         }, layoutDelay * 1000);
       }}
       onLayoutAnimationComplete={() => {

@@ -4,12 +4,13 @@ import React, { useEffect, useMemo } from "react";
 
 import { ButtonsBlock } from "./components";
 import {
-  Header,
   InnerGridContainer,
   SearchWrapper,
   OuterContainer,
   FilterOptionsWrapper,
   OutermostContainer,
+  StyledGrid,
+  GRID_PADDING,
 } from "./styled";
 import SearchComponent from "./components/Search";
 import FilterOptions from "./components/FilterOptions";
@@ -25,6 +26,9 @@ import { useEventStore, useUserSettings } from "context/state-store-context";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import useEvent from "@hooks/use-event";
 import { constructURLForHomePage, isHomePageURLDifferent } from "lib/queries/sorting/query-params";
+import { useGridRowLength } from "./hooks/use-grid-items-per-line";
+import { AnimatePresence, motion } from "framer-motion";
+import { EMOJI_GRID_ITEM_WIDTH } from "../const";
 
 export interface EmojiTableProps {
   data: FetchSortedMarketDataReturn["markets"];
@@ -39,7 +43,8 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const { data, page, sort, pages, searchBytes } = useMemo(() => {
     const { data, page, sortBy: sort } = props;
-    const pages = Math.ceil(props.totalNumberOfMarkets / MARKETS_PER_PAGE);
+    const numMarkets = Math.max(props.totalNumberOfMarkets, 1);
+    const pages = Math.ceil(numMarkets / MARKETS_PER_PAGE);
     const searchBytes = props.searchBytes ?? "";
     return { data, page, sort, pages, searchBytes };
   }, [props]);
@@ -105,11 +110,23 @@ const EmojiTable = (props: EmojiTableProps) => {
     [sort, page, searchBytes, animationsOn]
   );
 
+  const rowLength = useGridRowLength();
+
   return (
     <OutermostContainer>
       <OuterContainer>
         <InnerGridContainer>
-          <Header>
+          <motion.div
+            key={rowLength}
+            id="emoji-grid-header"
+            exit={{
+              opacity: 0,
+              transition: {
+                duration: 0.5,
+                type: "just",
+              },
+            }}
+          >
             <SearchWrapper>
               <SearchComponent />
             </SearchWrapper>
@@ -119,12 +136,38 @@ const EmojiTable = (props: EmojiTableProps) => {
                 onChange={handleSortChange}
               />
             </FilterOptionsWrapper>
-          </Header>
-          {shouldAnimateGrid ? (
-            <LiveClientGrid data={data} sortBy={sort ?? MarketDataSortBy.MarketCap} />
-          ) : (
-            <ClientGrid data={data} page={page} sortBy={sort ?? MarketDataSortBy.MarketCap} />
-          )}
+          </motion.div>
+          {/* Each version of the grid must wait for the other to fully exit animate out before appearing.
+              This provides a smooth transition from grids of varying row lengths. */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              className="relative w-full h-full"
+              id="emoji-grid"
+              key={rowLength}
+              style={{
+                // We set these so the grid layout doesn't snap when the number of items per row changes.
+                // This actually seems to work better than the css media queries, although I've left them in module.css
+                // in case we want to use them for other things.
+                maxWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
+                minWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
+              }}
+              exit={{
+                opacity: 0,
+                transition: {
+                  duration: 0.35,
+                  type: "just",
+                },
+              }}
+            >
+              <StyledGrid>
+                {shouldAnimateGrid ? (
+                  <LiveClientGrid data={data} sortBy={sort ?? MarketDataSortBy.MarketCap} />
+                ) : (
+                  <ClientGrid data={data} page={page} sortBy={sort ?? MarketDataSortBy.MarketCap} />
+                )}
+              </StyledGrid>
+            </motion.div>
+          </AnimatePresence>
           <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} />
         </InnerGridContainer>
       </OuterContainer>

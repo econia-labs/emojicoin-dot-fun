@@ -19,9 +19,6 @@ const GridRowLines = ({
   const gridItems = useMemo(
     () =>
       Array.from({ length }).map((_, i) => {
-        if (!shouldAnimate) {
-          return undefined;
-        }
         const row = getRow(i, rowLength);
         const col = getColumn(i, rowLength);
         return {

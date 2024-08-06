@@ -39,33 +39,29 @@ export const ClientGrid = ({
 
   return (
     <>
-      <motion.div className="relative w-full h-full">
-        <StyledGrid>
-          <MemoizedGridRowLines
-            gridRowLinesKey={`${sortBy}-grid-lines`}
-            length={ordered.length}
-            shouldAnimate={initialRender.current}
+      <MemoizedGridRowLines
+        gridRowLinesKey={`${sortBy}-grid-lines`}
+        length={ordered.length}
+        shouldAnimate={initialRender.current}
+      />
+      {ordered.map((v, i) => {
+        return (
+          <TableCard
+            key={`${sortBy}-${v.key}`}
+            index={i}
+            pageOffset={(page - 1) * MARKETS_PER_PAGE}
+            marketID={v.marketID}
+            symbol={v.symbol}
+            emojis={v.emojis}
+            staticMarketCap={v.staticMarketCap}
+            staticVolume24H={v.staticVolume24H}
+            rowLength={rowLength}
+            prevIndex={i}
+            runInitialAnimation={true}
+            sortBy={sortBy}
           />
-          {ordered.map((v, i) => {
-            return (
-              <TableCard
-                key={`${sortBy}-${v.key}`}
-                index={i}
-                pageOffset={(page - 1) * MARKETS_PER_PAGE}
-                marketID={v.marketID}
-                symbol={v.symbol}
-                emojis={v.emojis}
-                staticMarketCap={v.staticMarketCap}
-                staticVolume24H={v.staticVolume24H}
-                rowLength={rowLength}
-                prevIndex={i}
-                runInitialAnimation={true}
-                sortBy={sortBy}
-              />
-            );
-          })}
-        </StyledGrid>
-      </motion.div>
+        );
+      })}
     </>
   );
 };

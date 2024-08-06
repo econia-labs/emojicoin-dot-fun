@@ -32,7 +32,6 @@ export const LiveClientGrid = ({
   sortBy: MarketDataSortByHomePage;
 }) => {
   const rowLength = useGridRowLength();
-
   const getMarket = useEventStore((s) => s.getMarket);
   const getSearchEmojis = useEmojiPicker((s) => s.getEmojis);
   const stateFirehose = useEventStore((s) => s.stateFirehose);
@@ -167,33 +166,29 @@ export const LiveClientGrid = ({
 
   return (
     <>
-      <motion.div className="relative w-full h-full">
-        <StyledGrid>
-          <MemoizedGridRowLines
-            gridRowLinesKey={"live-grid-lines-" + rowLength}
-            length={ordered.length}
-            shouldAnimate={initialRender.current}
+      <MemoizedGridRowLines
+        gridRowLinesKey={"live-grid-lines-" + rowLength}
+        length={ordered.length}
+        shouldAnimate={initialRender.current}
+      />
+      {ordered.map((v) => {
+        return (
+          <TableCard
+            key={`live-${v.key}`}
+            index={v.index}
+            pageOffset={0} // We don't paginate the live grid.
+            marketID={v.marketID}
+            symbol={v.symbol}
+            emojis={v.emojis}
+            staticMarketCap={v.staticMarketCap}
+            staticVolume24H={v.staticVolume24H}
+            rowLength={rowLength}
+            prevIndex={v.prevIndex}
+            sortBy={sortBy}
+            runInitialAnimation={v.runInitialAnimation}
           />
-          {ordered.map((v) => {
-            return (
-              <TableCard
-                key={`live-${v.key}-${rowLength}`}
-                index={v.index}
-                pageOffset={0} // We don't paginate the live grid.
-                marketID={v.marketID}
-                symbol={v.symbol}
-                emojis={v.emojis}
-                staticMarketCap={v.staticMarketCap}
-                staticVolume24H={v.staticVolume24H}
-                rowLength={rowLength}
-                prevIndex={v.prevIndex}
-                sortBy={sortBy}
-                runInitialAnimation={v.runInitialAnimation}
-              />
-            );
-          })}
-        </StyledGrid>
-      </motion.div>
+        );
+      })}
     </>
   );
 };

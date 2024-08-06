@@ -4,6 +4,7 @@ import styled from "styled-components";
 import base, { breakpointsArray } from "theme/base";
 import { darkColors } from "theme/colors";
 import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
+import { motion } from "framer-motion";
 
 export const StyledTHFilters = styled.div`
   display: flex;
@@ -58,38 +59,25 @@ export const InnerGridContainer = styled.div`
 
 // There's no modulo in CSS, so we have to provide the breakpoints manually per # of items per grid.
 // Max width is 1813px so we stop at 1813px.
+// We already have these in the `module.css` file but I leave it here to show how to generate it again in case we ever
+// change the grid item width.
 let width = EMOJI_GRID_ITEM_WIDTH;
-let mediaQueries = "";
+let headerMediaQueries = "";
+let gridMediaQueries = "";
 while (width < MAX_WIDTH) {
-  mediaQueries += `
+  headerMediaQueries += `
   @media (min-width: ${width + GRID_PADDING * 2}px) {
     padding-left: calc((100vw - ${width + GRID_PADDING * 2}px) / 2);
     padding-right: calc((100vw - ${width + GRID_PADDING * 2}px) / 2);
   }`;
+  gridMediaQueries += `
+  @media (min-width: ${width + GRID_PADDING * 2}px) {
+    max-width: ${width}px;
+    min-width: ${width}px;
+  }
+  `;
   width += EMOJI_GRID_ITEM_WIDTH;
 }
-
-export const Header = styled.div`
-  display: flex;
-  position: relative;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  scroll-margin-top: 100px;
-
-  ${mediaQueries}
-
-  @media (min-width: ${MAX_WIDTH + GRID_PADDING * 2}px) {
-    padding-left: 0px;
-    padding-right: 0px;
-  }
-
-  @media screen and (max-width: ${breakpointsArray[3]}) {
-    padding-left: 0px;
-    padding-right: 0px;
-    flex-direction: column;
-  }
-`;
 
 const WrapperCss = `
   display: flex;
