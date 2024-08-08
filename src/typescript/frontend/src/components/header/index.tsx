@@ -43,15 +43,12 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   // they clicked. We reset the search bytes and the page here to nothing, which will resolve to their defaults.
   // Note that we shouldn't need to call `clear` on the picker here because the refetch will clear the picker.
   const linkProps: LinkProps = useMemo(() => {
-    const sort = searchParams.get("sort");
+    const sortParam = searchParams.get("sort");
+    const query = sortParam ? { sort: sortParam } : {};
     return {
       href: {
         pathname: ROUTES.home,
-        query: sort
-          ? {
-              sort,
-            }
-          : {},
+        query,
       },
       onClick: () => {
         handleCloseMobileMenu();
