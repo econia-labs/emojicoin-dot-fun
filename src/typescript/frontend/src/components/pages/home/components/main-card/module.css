@@ -19,7 +19,6 @@ div.styled-emoji {
   color: white;
   left: 61%;
   transform: translateX(-50%);
-  line-height: unset;
   padding-top: 8px;
 }
 

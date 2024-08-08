@@ -63,6 +63,7 @@ export type AptosContextState = {
   copyAddress: () => void;
   status: TransactionStatus;
   lastResponse: ResponseType;
+  lastResponseStoredAt: number;
   setEmojicoinType: (type?: TypeTagInput) => void;
   aptBalance: bigint;
   emojicoinBalance: bigint;
@@ -86,6 +87,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [lastResponse, setLastResponse] = useState<ResponseType>(null);
+  const [lastResponseStoredAt, setLastResponseStoredAt] = useState(-1);
   const [emojicoinType, setEmojicoinType] = useState<string | undefined>();
 
   const { emojicoin, emojicoinLP } = useMemo(() => {
@@ -212,6 +214,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
             response,
             error: null,
           });
+          setLastResponseStoredAt(Date.now());
           sleep(DEFAULT_TOAST_CONFIG.autoClose, UnitOfTime.Milliseconds).then(() => {
             setStatus("idle");
           });
@@ -315,6 +318,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     copyAddress,
     status,
     lastResponse,
+    lastResponseStoredAt,
     aptBalance,
     emojicoinBalance,
     emojicoinLPBalance,

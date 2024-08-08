@@ -9,6 +9,7 @@ import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData 
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
+import { ECONIA_BLUE } from "theme/colors";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
 // TBH, we should probably just fork the library.
@@ -18,8 +19,6 @@ const data = fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15
       return data as EmojiMartData;
     })
 );
-
-export const ECONIA_BLUE = "#086CD9";
 
 export type SearchResult = Array<EmojiPickerSearchData>;
 

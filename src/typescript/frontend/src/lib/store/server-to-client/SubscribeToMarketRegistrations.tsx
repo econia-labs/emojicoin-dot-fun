@@ -5,12 +5,12 @@ import { useEffect } from "react";
 
 export const SubscribeToMarketRegistrations = () => {
   const subscribe = useWebSocketClient((s) => s.subscribe);
-  const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
 
   useEffect(() => {
     subscribe.marketRegistration(null);
 
-    return () => unsubscribe.marketRegistration(null);
+    return () => requestUnsubscribe.marketRegistration(null);
   });
 
   return <></>;

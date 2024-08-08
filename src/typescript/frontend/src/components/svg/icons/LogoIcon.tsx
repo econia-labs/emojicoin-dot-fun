@@ -7,7 +7,7 @@ import { useThemeContext } from "context";
 import Text from "components/text";
 import type { Colors } from "theme/types";
 
-const Badge: React.FC<React.PropsWithChildren<{color: keyof Colors}>> = ({ children, color }) => {
+const Badge: React.FC<React.PropsWithChildren<{ color: keyof Colors }>> = ({ children, color }) => {
   const { theme } = useThemeContext();
 
   return (
@@ -21,12 +21,13 @@ const Badge: React.FC<React.PropsWithChildren<{color: keyof Colors}>> = ({ child
     >
       {children}
     </Text>
-  )
+  );
 };
 
-const VersionBadge: React.FC<{color: keyof Colors}> = ({color}) => (
+const VersionBadge: React.FC<{ color: keyof Colors }> = ({ color }) => (
   <Badge color={color}>
-    {VERSION?.prerelease[0].toString().toUpperCase()}&nbsp;v{VERSION?.major}.{VERSION?.minor}.{VERSION?.patch}
+    {VERSION?.prerelease[0].toString().toUpperCase()}&nbsp;v{VERSION?.major}.{VERSION?.minor}.
+    {VERSION?.patch}
   </Badge>
 );
 

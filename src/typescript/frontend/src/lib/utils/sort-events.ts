@@ -34,6 +34,9 @@ type GlobalState = Types.GlobalStateEvent;
 
 /**
  * This function sorts an array. It mutates the original array and returns nothing.
+ * Note that this is for sorting events that are all for the same type of data, i.e.,
+ * all the same market or all global state events. This will not make sense for sorting
+ * events across different markets or with global and non-global state events.
  * NOTE: It assumes that the array is homogenous.
  */
 export const sortEvents = <T extends AnyEmojicoinEvent>(
@@ -110,4 +113,33 @@ export const toSortedDedupedEvents = <T extends AnyEmojicoinEvent>(
   });
   sortEvents(deduped, order);
   return deduped;
+};
+
+export const HARD_LIMIT = 500;
+
+export const memoizedSortedDedupedEvents = <T extends Types.ChatEvent | Types.SwapEvent>({
+  a,
+  b,
+  order = "desc",
+  limit = HARD_LIMIT,
+  canAnimateAsInsertion,
+}: {
+  a: readonly T[];
+  b: readonly T[];
+  order?: "asc" | "desc";
+  limit?: number;
+  canAnimateAsInsertion: boolean;
+}): Array<T & { shouldAnimateAsInsertion?: boolean }> => {
+  const res = toSortedDedupedEvents(a, b, order) as Array<
+    T & { shouldAnimateAsInsertion?: boolean }
+  >;
+  if (res.length) {
+    res[0] = {
+      ...res[0],
+      // Looks weird if we delay the first swap animation as an insertion and it's the only row, so we also check for
+      // the length of the swaps array to be greater than 1.
+      shouldAnimateAsInsertion: canAnimateAsInsertion && res.length > 1,
+    };
+  }
+  return res.slice(0, limit);
 };

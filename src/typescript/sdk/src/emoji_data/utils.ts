@@ -163,12 +163,19 @@ export const isValidEmojiHex = (input: HexInput) => {
   }
 };
 
-export const encodeEmojis = (emojis: string[]) => {
-  const encoder = new TextEncoder();
-  // eslint-disable-next-line prefer-template
-  return `0x${emojis.reduce(
-    (acc: string, emoji) =>
-      `${acc}${[...encoder.encode(emoji)].map((e) => e.toString(16)).join("")}`,
-    ""
-  )}`;
-};
+export const encodeText = (s: string) => new TextEncoder().encode(s);
+export const encodeToHexString = (s: string) => Buffer.from(encodeText(s)).toString("hex");
+
+export const isStringArray = (arr: Array<unknown>): arr is Array<string> =>
+  Array.isArray(arr) && arr.every((val) => typeof val === "string");
+
+export const encodeSymbolData = (data: SymbolEmojiData[]) =>
+  Buffer.from(data.flatMap((v) => Array.from(v.bytes))).toString("hex");
+
+export const encodeEmojis = (emojis: string[] | SymbolEmojiData[]) =>
+  `0x${
+    isStringArray(emojis) ? encodeToHexString(emojis.join("")) : encodeSymbolData(emojis)
+  }` as `0x${string}`;
+
+// For ease of use, we alias `encodeEmojis` to `encodeSymbols`.
+export const encodeSymbols = encodeEmojis;

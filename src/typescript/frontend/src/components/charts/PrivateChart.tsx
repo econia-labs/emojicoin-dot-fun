@@ -281,37 +281,35 @@ export const Chart = async (props: ChartContainerProps) => {
   );
 
   useEffect(() => {
-    if (!ref.current) {
-      return;
+    if (ref.current) {
+      tvWidget.current = new widget({
+        ...WIDGET_OPTIONS,
+        symbol: symbol as string,
+        datafeed,
+        container: ref.current,
+        timezone: (Intl.DateTimeFormat().resolvedOptions().timeZone ?? "Etc/UTC") as Timezone,
+      });
+
+      tvWidget.current.onChartReady(() => {
+        const chart = tvWidget.current!.activeChart();
+        const now = new Date();
+        const startDaysAgo = 1;
+        const endDaysAgo = 0;
+        const startMilliseconds = now.getTime() - startDaysAgo * MS_IN_ONE_DAY;
+        const endMilliseconds = now.getTime() - endDaysAgo * MS_IN_ONE_DAY;
+        const startTimestamp = Math.floor(new Date(startMilliseconds).getTime()) / 1000;
+        const endTimestamp = Math.floor(new Date(endMilliseconds).getTime()) / 1000;
+
+        chart
+          .setVisibleRange({
+            from: startTimestamp,
+            to: endTimestamp,
+          })
+          .catch((error) => {
+            console.error("Error applying visible range:", error);
+          });
+      });
     }
-
-    tvWidget.current = new widget({
-      ...WIDGET_OPTIONS,
-      symbol: symbol as string,
-      datafeed,
-      container: ref.current,
-      timezone: (Intl.DateTimeFormat().resolvedOptions().timeZone ?? "Etc/UTC") as Timezone,
-    });
-
-    tvWidget.current.onChartReady(() => {
-      const chart = tvWidget.current!.activeChart();
-      const now = new Date();
-      const startDaysAgo = 1;
-      const endDaysAgo = 0;
-      const startMilliseconds = now.getTime() - startDaysAgo * MS_IN_ONE_DAY;
-      const endMilliseconds = now.getTime() - endDaysAgo * MS_IN_ONE_DAY;
-      const startTimestamp = Math.floor(new Date(startMilliseconds).getTime()) / 1000;
-      const endTimestamp = Math.floor(new Date(endMilliseconds).getTime()) / 1000;
-
-      chart
-        .setVisibleRange({
-          from: startTimestamp,
-          to: endTimestamp,
-        })
-        .catch((error) => {
-          console.error("Error applying visible range:", error);
-        });
-    });
 
     return () => {
       if (tvWidget.current != null) {

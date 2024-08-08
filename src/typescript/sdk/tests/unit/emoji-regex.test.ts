@@ -1,5 +1,11 @@
 import { SYMBOL_DATA } from "../../src";
-import { getEmojisInString, isValidSymbol, symbolToEmojis } from "../../src/emoji_data/utils";
+import {
+  encodeEmojis,
+  encodeSymbols,
+  getEmojisInString,
+  isValidSymbol,
+  symbolToEmojis,
+} from "../../src/emoji_data/utils";
 import SymbolEmojiData from "../../src/emoji_data/symbol-emojis.json";
 
 describe("tests emojis against the emoji regex to ensure they're properly validated", () => {
@@ -80,5 +86,29 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
     emojiData.emojis.forEach((emoji) => {
       expect(names.has(emoji.name)).toBe(true);
     });
+  });
+
+  it("encodes emojis correctly", () => {
+    const symbolsForward = [
+      SYMBOL_DATA.byStrictName("ATM sign"),
+      SYMBOL_DATA.byStrictName("Aquarius"),
+      SYMBOL_DATA.byStrictName("yin yang"),
+      SYMBOL_DATA.byStrictName("Cancer"),
+      SYMBOL_DATA.byStrictName("world map"),
+      SYMBOL_DATA.byStrictName("yellow heart"),
+      SYMBOL_DATA.byStrictName("black cat"),
+    ];
+    const symbolsReverse = symbolsForward.toReversed();
+
+    // Encode forwards and backwards to ensure we don't encounter a padding error.
+    for (const symbols of [symbolsForward, symbolsReverse]) {
+      const enc1 = `0x${Buffer.from(symbols.flatMap((v) => Array.from(v.bytes))).toString("hex")}`;
+      const enc2 = `0x${symbols.flatMap((d) => [...d.bytes].map((v) => v.toString(16))).join("")}`;
+      const enc3 = encodeEmojis(symbols);
+      const enc4 = encodeSymbols(symbols);
+      expect(enc1).toEqual(enc2);
+      expect(enc1).toEqual(enc3);
+      expect(enc1).toEqual(enc4);
+    }
   });
 });

@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren, useEffect, useMemo } from "react";
+import React, { type PropsWithChildren, useEffect, useMemo, useRef } from "react";
 
 import { type TradeHistoryProps } from "../../types";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -8,9 +8,12 @@ import { type Types } from "@sdk/types/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import TableRow from "./table-row";
 import { type TableRowDesktopProps } from "./table-row/types";
-import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
-import "./trade-history.css";
+import { memoizedSortedDedupedEvents, mergeSortedEvents, sortEvents } from "lib/utils/sort-events";
 import { parseJSON } from "utils";
+import { motion } from "framer-motion";
+import "./trade-history.css";
+
+const HARD_LIMIT = 500;
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   ...getRankFromSwapEvent(Number(toCoinDecimalString(value.quoteVolume, 3))),
@@ -45,29 +48,42 @@ const TradeHistory = (props: TradeHistoryProps) => {
   const marketID = props.data.marketID;
 
   const swaps = getCombinedSwaps(
-    useEventStore((s) => s.getMarket(marketID.toString())?.swapEvents ?? []),
+    useEventStore((s) => s.getMarket(marketID)?.swapEvents ?? []),
     BigInt(marketID)
   );
 
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+  const subscribe = useWebSocketClient((s) => s.subscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.swap(marketID, null);
-    return () => unsubscribe.swap(marketID, null);
+    return () => requestUnsubscribe.swap(marketID, null);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
+  const initialLoad = useRef(true);
+  useEffect(() => {
+    initialLoad.current = false;
+  }, []);
+
   // TODO: Add infinite scroll to this.
-  // For now just don't render more than `HARD_LIMIT` swaps.
-  const sortedSwaps = useMemo(() => {
-    const HARD_LIMIT = 500;
-    return toSortedDedupedEvents(props.data.swaps, swaps, "desc").slice(0, HARD_LIMIT);
+  // For now just don't render more than `HARD_LIMIT` chats.
+  const sortedSwaps = useMemo(
+    () =>
+      memoizedSortedDedupedEvents({
+        a: props.data.swaps,
+        b: swaps,
+        order: "desc",
+        limit: HARD_LIMIT,
+        canAnimateAsInsertion: !initialLoad.current,
+      }),
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [props.data.swaps.length, swaps.length]);
+    [props.data.swaps.length, swaps.length]
+  );
 
   return (
-    <table className="flex flex-col table-fixed w-full">
+    <table className="relative flex flex-col table-fixed w-full">
       <thead className="relative w-full border-solid border-b-[1px] border-b-dark-gray">
         <tr className={"flex w-full h-[33px]" + (sortedSwaps.length < 11 ? "" : " pr-[9px] ")}>
           <ThWrapper className="flex min-w-[50px] ml-[10px] xl:ml-[21px]">
@@ -93,21 +109,43 @@ const TradeHistory = (props: TradeHistoryProps) => {
           </ThWrapper>
         </tr>
       </thead>
-      <tbody className="flex flex-col overflow-auto scrollbar-track w-full h-[340px]">
+      <motion.tbody
+        layoutScroll
+        className="flex flex-col overflow-auto scrollbar-track w-full h-[340px] overflow-x-hidden"
+      >
         {sortedSwaps.map((item, index) => (
           <TableRow
-            key={index}
+            // Note the key/index must be in reverse for the rows to animate correctly.
+            key={sortedSwaps.length - index}
+            index={sortedSwaps.length - index}
             item={toTableItem(item)}
             showBorder={index !== sortedSwaps.length - 1 || sortedSwaps.length < 11}
+            numSwapsDisplayed={sortedSwaps.length}
+            shouldAnimateAsInsertion={item.shouldAnimateAsInsertion}
           ></TableRow>
         ))}
-        {Array.from({ length: 10 - sortedSwaps.length }).map((_, index) => (
-          <tr
-            key={`EMPTY_ROW::${index}`}
-            className="flex min-h-[33px] border-b-dark-gray border-solid border-[1px]"
-          />
-        ))}
-      </tbody>
+        <tr className="absolute top-0 right-0 w-full z-[-1]">
+          {Array.from({ length: 11 }).map((_, index) => (
+            <motion.td
+              key={`EMPTY_ROW::${index}`}
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: sortedSwaps.length + 1 > index ? 0 : 1,
+                transition: {
+                  type: "just",
+                  // Pretty much just guessing here with the `- 5` on the delay.
+                  // We could coordinate it better with animation controls that are triggered as soon as the last row
+                  // from the populated trades finishes animating but this is good enough.
+                  delay: (index + sortedSwaps.length - 5) * 0.02,
+                },
+              }}
+              className="flex min-h-[33px] border-b-dark-gray border-solid border-[1px] w-full"
+            />
+          ))}
+        </tr>
+      </motion.tbody>
     </table>
   );
 };

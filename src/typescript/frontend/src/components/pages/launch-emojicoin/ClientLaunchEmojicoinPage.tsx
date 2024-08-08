@@ -11,14 +11,27 @@ import { TAGS } from "lib/queries/cache-utils/tags";
 import { ROUTES } from "router/routes";
 import { useRouter } from "next/navigation";
 import path from "path";
-import { sleep } from "@sdk/utils";
 import { getEvents } from "@sdk/emojicoin_dot_fun";
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  isUserTransactionResponse,
+  type PendingTransactionResponse,
+  type UserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import MemoizedLaunchAnimation from "./memoized-launch";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 
 const LOADING_TIME = 2000;
 type Stage = "initial" | "loading" | "coding";
+
+const lastMarketRegistration = (
+  response?: PendingTransactionResponse | UserTransactionResponse | null
+) => {
+  if (response && isUserTransactionResponse(response)) {
+    return getEvents(response).marketRegistrationEvents.at(0);
+  }
+  return undefined;
+};
 
 const ClientLaunchEmojicoinPage = () => {
   const searchParams = useSearchParams();
@@ -26,8 +39,13 @@ const ClientLaunchEmojicoinPage = () => {
   const setEmojis = useEmojiPicker((state) => state.setEmojis);
   const setMode = useEmojiPicker((state) => state.setMode);
   const router = useRouter();
-  const { status, lastResponse: lastResponseFromContext } = useAptos();
-  const lastResponse = useRef(lastResponseFromContext?.response);
+  const {
+    status,
+    lastResponse: lastResponseFromContext,
+    lastResponseStoredAt: lastResponseStoredAtFromContext,
+  } = useAptos();
+  const lastResponse = useRef(lastMarketRegistration(lastResponseFromContext?.response));
+  const lastResponseStoredAt = useRef(lastResponseStoredAtFromContext);
   const isLoadingRegisteredMarket = useEmojiPicker((state) => state.isLoadingRegisteredMarket);
   const [stage, setStage] = useState<Stage>(isLoadingRegisteredMarket ? "loading" : "initial");
 
@@ -39,27 +57,24 @@ const ClientLaunchEmojicoinPage = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  useReliableSubscribe({
+    chat: [null],
+    liquidity: [null],
+  });
+
   // We need to store a reference to the last response in order to navigate to the market page after the market is
   // registered. Otherwise, `lastResponse` will be stale if we try to use it directly in the `handleLoading` function.
   useEffect(() => {
-    if (
-      lastResponseFromContext &&
-      lastResponseFromContext.response &&
-      isUserTransactionResponse(lastResponseFromContext.response)
-    ) {
-      const events = getEvents(lastResponseFromContext.response);
-      if (events.marketRegistrationEvents.length === 1) {
-        lastResponse.current = lastResponseFromContext.response;
-      }
-    }
+    lastResponse.current = lastMarketRegistration(lastResponseFromContext?.response);
   }, [lastResponseFromContext]);
 
-  const handleLoading = useCallback(async () => {
-    const response = lastResponse.current;
-    if (response && isUserTransactionResponse(response)) {
-      const lastResponseEvents = getEvents(response);
-      if (!lastResponseEvents.marketRegistrationEvents.length) return;
+  useEffect(() => {
+    lastResponseStoredAt.current = lastResponseStoredAtFromContext;
+  }, [lastResponseStoredAtFromContext]);
 
+  const handleLoading = useCallback(async () => {
+    const marketRegistrationEvent = lastResponse.current;
+    if (marketRegistrationEvent) {
       // NOTE: revalidateTagAction may cause a flicker in the loading animation because the server
       // rerenders and sends the RSC components again. To avoid this we'll probably need to finish the animation
       // orchestration with a different animation or cover it up somehow, otherwise I'm not sure how to fix it in a
@@ -72,7 +87,6 @@ const ClientLaunchEmojicoinPage = () => {
         // Parse the emojis from the market registration event.
         // We do this in case the emojis are somehow cleared before the response is received. This ensures that
         // the emojis we're referencing are always the static ones that were used to register the market.
-        const marketRegistrationEvent = lastResponseEvents.marketRegistrationEvents[0];
         const { marketID, emojiBytes } = marketRegistrationEvent.marketMetadata;
         const { symbol } = symbolBytesToEmojis(emojiBytes);
         const newPath = path.join(ROUTES.market, symbol);
@@ -87,20 +101,44 @@ const ClientLaunchEmojicoinPage = () => {
         }
       });
     }
-  }, [lastResponse, router]);
+  }, [router]);
+
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    const shouldLoad = status === "pending" || (status === "success" && stage === "initial");
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const timeSinceLastResponseStored = Date.now() - lastResponseStoredAt.current;
+    const shouldLoad =
+      status === "pending" ||
+      (status === "success" && stage === "initial" && timeSinceLastResponseStored < 1000);
     if (!shouldLoad) return;
 
     // Start the loading animation.
+    let timeout: number;
     if (stage === "initial") {
       setStage("loading");
-      sleep(LOADING_TIME).then(() => {
-        handleLoading();
-      });
+
+      timeout = window.setTimeout(() => {
+        if (window.location.href.endsWith(ROUTES.launch)) {
+          handleLoading();
+        }
+      }, LOADING_TIME);
     }
 
+    return () => {
+      // If the user navigates away, consider the animation as having been completed and cancel the rest
+      // of the navigational animation orchestration.
+      if (!window.location.href.endsWith(ROUTES.launch)) {
+        window.clearTimeout(timeout);
+      }
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [status]);
 

@@ -1,4 +1,4 @@
-#grid-emoji-card {
+.grid-emoji-card {
   &:hover {
     filter: brightness(1.05);
     background: #00031e13;

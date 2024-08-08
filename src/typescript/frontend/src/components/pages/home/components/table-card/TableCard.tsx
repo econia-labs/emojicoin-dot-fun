@@ -1,143 +1,220 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { translationFunction } from "context/language-context";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
-
-import { StyledInnerItem, StyledItemWrapper } from "./styled";
-
-import { type TableCardProps } from "./types";
-import Link from "next/link";
-import { ROUTES } from "router/routes";
+import { type GridLayoutInformation, type TableCardProps } from "./types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useWebSocketClient } from "context/state-store-context";
-import { motion, useAnimationControls } from "framer-motion";
+import { useEventStore, useUserSettings } from "context/state-store-context";
+import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
-import "./module.css";
 import Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import { variants, textVariants, borderVariants, useLabelScrambler } from "../animation-config";
-import { emojiNamesToPath } from "utils/pathname-helpers";
+import {
+  borderVariants,
+  onlyHoverVariant,
+  textVariants,
+  useLabelScrambler,
+  glowVariants,
+  type AnyNonGridTableCardVariant,
+  eventToVariant as toVariant,
+} from "./animation-variants/event-variants";
+import {
+  calculateGridData,
+  determineGridAnimationVariant,
+  type EmojicoinAnimationEvents,
+  LAYOUT_DURATION,
+  safeQueueAnimations,
+  tableCardVariants,
+} from "./animation-variants/grid-variants";
+import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
+import useEvent from "@hooks/use-event";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import "./module.css";
 
-const TableCard: React.FC<TableCardProps> = ({
+const TableCard = ({
   index,
   marketID,
   symbol,
   emojis,
-  staticNumSwaps,
   staticMarketCap,
   staticVolume24H,
-}) => {
+  rowLength,
+  prevIndex,
+  pageOffset,
+  runInitialAnimation,
+  sortBy,
+  animatedGrid,
+  ...props
+}: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
-  const events = useEventStore((s) => s);
-  const { chats, stateEvents, liquidityEvents } = useEventStore((s) => {
-    const market = s.getMarket(marketID.toString());
-    return {
-      chats: market ? market.chatEvents : [],
-      stateEvents: market ? market.stateEvents : [],
-      liquidityEvents: market ? market.liquidityEvents : [],
-    };
-  });
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+  const isMounted = useRef(true);
   const controls = useAnimationControls();
+  const animationsOn = useUserSettings((s) => s.animate);
 
-  // TODO: Most of this component's state should be managed in `event-store` more cleanly, but for now this is an
-  // initial prototype.
-  // Ideally, we don't even store most data, we just store the last state in a Zustand store and use that
-  // like we're using the events now, except we'd need less data and wouldn't need to do so many comparisons between
-  // the static data and the data in the store.
-
-  // TODO: Replace this with the `animate` state value we'll control in `settings-store.ts` or something.
-  // Essentially, this will turn animations off.
-  const shouldAnimate = true;
-
-  // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
-  // TODO: Convert all/most usage of bigints to Big so we can have more precise bigints without having to
-  // worry about overflow with `number`.
   const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
   const [roughDailyVolume, setRoughDailyVolume] = useState(Big(staticVolume24H));
+  const animations = useEventStore((s) => s.stateEventsByMarket.get(BigInt(marketID)));
 
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    if (stateEvents.length === 0) return;
-    const latestEvent = stateEvents.at(0)!;
-    const numSwapsInStore = Big((latestEvent?.cumulativeStats.numSwaps ?? 0).toString());
-    if (Big(numSwapsInStore).gt(staticNumSwaps)) {
-      const marketCapInStore = latestEvent.instantaneousStats.marketCap;
-      setMarketCap(Big(marketCapInStore.toString()));
-    }
-
-    // TODO: Fix ASAP. This **will** become inaccurate over time, because it doesn't evict stale data from the rolling
-    // volume. It's just a rough estimate to simulate live 24h rolling volume.
-    setRoughDailyVolume((prev) => prev.plus(Big(latestEvent.lastSwap.quoteVolume.toString())));
-
-    controls
-      .start(latestEvent.lastSwap.isSell ? "sell" : "buy")
-      .then(() => controls.start("initial"));
-    return () => controls.stop();
-  }, [staticNumSwaps, stateEvents]);
-
-  useEffect(() => {
-    if (chats.length === 0) return;
-    controls.start("chats").then(() => controls.start("initial"));
-    return () => controls.stop();
-  }, [chats]);
-
-  useEffect(() => {
-    if (liquidityEvents.length === 0) return;
-    const latestEvent = liquidityEvents.at(0)!;
-    controls
-      .start(latestEvent.liquidityProvided ? "buy" : "sell")
-      .then(() => controls.start("initial"));
-    return () => controls.stop();
-  }, [liquidityEvents]);
-
-  useEffect(() => {
-    events.initializeMarket(marketID, symbol);
-    subscribe.chat(marketID);
-    subscribe.state(marketID);
-    subscribe.liquidity(marketID);
+  // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
+  useLayoutEffect(() => {
+    isMounted.current = true;
 
     return () => {
-      unsubscribe.chat(marketID);
-      unsubscribe.state(marketID);
-      unsubscribe.liquidity(marketID);
+      isMounted.current = false;
     };
   }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+
+  // The main reason we use this here is to avoid subscription thrashing since the user
+  // can paginate many times quickly back and forth. In order to avoid this, we set up
+  // a hook that will handle the subscription and unsubscription for us based on the component
+  // mounting and unmounting.
+  // The animated grid uses the global state event subscription, so we don't subscribe to individual
+  // event types by market ID if this table card component is being used in the animated grid.
+  useReliableSubscribe(
+    animationsOn && !animatedGrid
+      ? {
+          chat: [marketID],
+          liquidity: [marketID],
+          swap: [marketID, null],
+        }
+      : undefined
+  );
+
+  const startAnimation = useEvent(
+    (variant: AnyNonGridTableCardVariant, latestEvent: EmojicoinAnimationEvents) => {
+      safeQueueAnimations({
+        controls,
+        variants: [variant, "initial"],
+        isMounted,
+        latestEvent,
+      });
+    }
+  );
+
+  useEffect(() => {
+    if (animations && animations.length) {
+      const event = animations.at(0)!;
+      const variant = toVariant(event);
+      startAnimation(variant, event);
+      // TODO: Refactor this to have accurate data. We increment by 1 like this just to trigger a scramble animation.
+      // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
+      setMarketCap((prev) => prev.plus(1));
+      setRoughDailyVolume((prev) => prev.plus(1));
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [animations]);
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
 
+  const { curr, prev, variant, displayIndex, layoutDelay } = useMemo(() => {
+    const { curr, prev } = calculateGridData({
+      index,
+      prevIndex,
+      rowLength,
+    });
+    const { variant, layoutDelay } = determineGridAnimationVariant({
+      curr,
+      prev,
+      rowLength,
+      runInitialAnimation,
+    });
+    const displayIndex = index + pageOffset + 1;
+    return {
+      variant,
+      curr,
+      prev,
+      displayIndex,
+      layoutDelay,
+    };
+  }, [prevIndex, index, rowLength, pageOffset, runInitialAnimation]);
+
+  // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border
+  // though, which we handle in the layout animation begin/complete callbacks and in the outermost div's style prop.
+  const borderLeftWidth = useMotionValue(curr.col === 0 ? 1 : 0);
+
   return (
-    <Link
-      id="grid-emoji-card"
-      className="group"
-      href={`${ROUTES.market}/${emojiNamesToPath(emojis.map((x) => x.name))}`}
+    <motion.div
+      layout
+      layoutId={`${sortBy}-${marketID}`}
+      initial={
+        variant === "initial"
+          ? {
+              opacity: 0,
+            }
+          : variant === "unshift"
+            ? {
+                opacity: 0,
+                scale: 0,
+              }
+            : undefined
+      }
+      className="grid-emoji-card group card-wrapper border border-solid border-dark-gray"
+      variants={tableCardVariants}
+      animate={variant}
+      custom={{ curr, prev, layoutDelay }}
+      // Unfortunately, the transition for a layout animation is separate from a variant, hence why we have
+      // to fill this with conditionals.
+      transition={{
+        type: variant === "initial" || variant === "portal-backwards" ? "just" : "spring",
+        delay: variant === "initial" ? 0 : layoutDelay,
+        duration:
+          variant === "initial"
+            ? 0
+            : variant === "portal-backwards"
+              ? LAYOUT_DURATION * 0.25
+              : LAYOUT_DURATION,
+      }}
+      style={{
+        borderLeftWidth,
+        borderLeftColor: "var(--dark-gray)",
+        borderLeftStyle: "solid",
+        borderTop: "0px solid #00000000",
+        cursor: "pointer",
+      }}
+      onLayoutAnimationStart={() => {
+        // Show a temporary left border for all elements while they are changing their layout position.
+        // Note that this is probably a fairly bad way to do this. It works for now but we could easily improve it.
+        // The issue is that transition has a different time than the variant, and there's no way to coalesce the two
+        // easily without refactoring the entire animation orchestration. For now, we can use the setTimeout.
+        setTimeout(() => {
+          borderLeftWidth.set(1);
+        }, layoutDelay * 1000);
+      }}
+      onLayoutAnimationComplete={() => {
+        // Get rid of the temporary border after the layout animation completes.
+        if (curr.col !== 0) {
+          borderLeftWidth.set(0);
+        }
+      }}
+      {...props}
     >
-      <StyledItemWrapper>
+      <LinkOrAnimationTrigger emojis={emojis} marketID={marketID}>
         <motion.div
           animate={controls}
-          variants={shouldAnimate ? variants : {}}
+          variants={animationsOn ? glowVariants : {}}
           style={{
             boxShadow: "0 0 0px 0px #00000000",
             filter: "drop-shadow(0 0 0px #00000000)",
           }}
         >
-          <StyledInnerItem
-            id="grid-emoji-card"
-            isEmpty={emojis.length === 0}
+          <motion.div
+            className="flex flex-col relative grid-emoji-card w-full h-full py-[10px] px-[19px] overflow-hidden"
             whileHover="hover"
-            style={{ border: "1px solid", borderColor: "#00000000" }}
+            style={{
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor: "#00000000",
+            }}
             animate={controls}
-            variants={shouldAnimate ? borderVariants : {}}
+            variants={animationsOn ? borderVariants : onlyHoverVariant}
           >
             <Flex justifyContent="space-between" mb="7px">
-              <div className="pixel-heading-2 text-dark-gray group-hover:text-ec-blue p-[1px] transition-all">
-                {index < 10 ? `0${index}` : index}
-              </div>
+              <span className="pixel-heading-2 text-dark-gray group-hover:text-ec-blue p-[1px]">
+                {displayIndex < 10 ? `0${displayIndex}` : displayIndex}
+              </span>
 
               <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
             </Flex>
@@ -165,13 +242,12 @@ const TableCard: React.FC<TableCardProps> = ({
                 >
                   {t("Market Cap")}
                 </div>
-
                 {/* TODO: Have these do a "damage"-like animation, as if it's health is being chunked.
                   Like you'd see -0.03 (the diff) pop out of the total value in red and it'd shake horizontally,
                   then fall off the screen. */}
                 <motion.div
                   animate={controls}
-                  variants={shouldAnimate ? textVariants : {}}
+                  variants={animationsOn ? textVariants : {}}
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                   ref={marketCapRef}
@@ -179,7 +255,6 @@ const TableCard: React.FC<TableCardProps> = ({
                   {toCoinDecimalString(marketCap.toString(), 2) + " APT"}
                 </motion.div>
               </Column>
-
               <Column width="50%">
                 <div
                   className={
@@ -189,10 +264,9 @@ const TableCard: React.FC<TableCardProps> = ({
                 >
                   {t("24h Volume")}
                 </div>
-
                 <motion.div
                   animate={controls}
-                  variants={shouldAnimate ? textVariants : {}}
+                  variants={animationsOn ? textVariants : {}}
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                   ref={dailyVolumeRef}
@@ -201,10 +275,10 @@ const TableCard: React.FC<TableCardProps> = ({
                 </motion.div>
               </Column>
             </Flex>
-          </StyledInnerItem>
+          </motion.div>
         </motion.div>
-      </StyledItemWrapper>
-    </Link>
+      </LinkOrAnimationTrigger>
+    </motion.div>
   );
 };
 

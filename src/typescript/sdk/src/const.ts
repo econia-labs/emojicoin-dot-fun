@@ -59,6 +59,27 @@ export const QUOTE_VIRTUAL_CEILING = 1_400_000_000_000n;
 export const POOL_FEE_RATE_BPS = 25;
 export const MARKET_REGISTRATION_FEE = 100_000_000n;
 
+export enum StateTrigger {
+  PACKAGE_PUBLICATION = 0,
+  MARKET_REGISTRATION = 1,
+  SWAP_BUY = 2,
+  SWAP_SELL = 3,
+  PROVIDE_LIQUIDITY = 4,
+  REMOVE_LIQUIDITY = 5,
+  CHAT = 6,
+}
+
+export const toStateTrigger = (num: number): StateTrigger => {
+  if (num === StateTrigger.PACKAGE_PUBLICATION) return StateTrigger.PACKAGE_PUBLICATION;
+  if (num === StateTrigger.MARKET_REGISTRATION) return StateTrigger.MARKET_REGISTRATION;
+  if (num === StateTrigger.SWAP_BUY) return StateTrigger.SWAP_BUY;
+  if (num === StateTrigger.SWAP_SELL) return StateTrigger.SWAP_SELL;
+  if (num === StateTrigger.PROVIDE_LIQUIDITY) return StateTrigger.PROVIDE_LIQUIDITY;
+  if (num === StateTrigger.REMOVE_LIQUIDITY) return StateTrigger.REMOVE_LIQUIDITY;
+  if (num === StateTrigger.CHAT) return StateTrigger.CHAT;
+  throw new Error(`Invalid state trigger: ${num}`);
+};
+
 // For APT coin and for each emojicoin.
 export const DECIMALS = 8;
 

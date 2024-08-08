@@ -1,140 +1,174 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 
 import { ButtonsBlock } from "./components";
 import {
-  Header,
   InnerGridContainer,
   SearchWrapper,
   OuterContainer,
   FilterOptionsWrapper,
   OutermostContainer,
+  StyledGrid,
+  GRID_PADDING,
 } from "./styled";
 import SearchComponent from "./components/Search";
 import FilterOptions from "./components/FilterOptions";
 import { ClientGrid } from "./ClientGrid";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
-import { MarketDataSortBy } from "lib/queries/sorting/types";
+import { MarketDataSortBy, type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
-import { useRouter, useSearchParams } from "next/navigation";
-import { parseJSON } from "utils";
+import { useRouter } from "next/navigation";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { encodeEmojis } from "@sdk/emoji_data";
+import { useEventStore, useUserSettings } from "context/state-store-context";
+import { LiveClientGrid } from "./AnimatedClientGrid";
+import useEvent from "@hooks/use-event";
+import { constructURLForHomePage, isHomePageURLDifferent } from "lib/queries/sorting/query-params";
+import { useGridRowLength } from "./hooks/use-grid-items-per-line";
+import { AnimatePresence, motion } from "framer-motion";
+import { EMOJI_GRID_ITEM_WIDTH } from "../const";
 
 export interface EmojiTableProps {
   data: FetchSortedMarketDataReturn["markets"];
   totalNumberOfMarkets: number;
+  page: number;
+  sortBy?: MarketDataSortByHomePage;
+  searchBytes?: string;
 }
-
-const getQuery = (page: number, sort: string, emojis: string[]) => {
-  const root = "/market/api";
-  const pageQuery = page ? `page=${page}` : "";
-  const sortByQuery = sort ? `&sortby=${sort}` : "";
-  const searchBytes = emojis.length > 0 ? `&q=${encodeEmojis(emojis)}` : "";
-
-  return `${root}?${pageQuery}${sortByQuery}${searchBytes}`;
-};
 
 const EmojiTable = (props: EmojiTableProps) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const q = searchParams.get("q");
-  let sortParam = searchParams.get("sort");
-  if (!Object.values(MarketDataSortBy).includes((sortParam ?? "") as MarketDataSortBy)) {
-    sortParam = "market_cap";
-  }
-  const [sort, setSort] = useState<MarketDataSortBy>(sortParam as MarketDataSortBy);
-  const [data, setData] = useState(props.data);
-  const [page, setPage] = useState(Number(searchParams.get("page") ?? "1"));
-  const [pages, setPages] = useState(Math.ceil(props.totalNumberOfMarkets / MARKETS_PER_PAGE));
-  const [prevEmojis, setPrevEmojis] = useState<string[]>([]);
-  const scrollToRef = useRef<HTMLDivElement>(null);
 
-  const setEmojis = useEmojiPicker((state) => state.setEmojis);
-  const emojis = useEmojiPicker((state) => state.emojis);
-  const setMode = useEmojiPicker((state) => state.setMode);
+  const { data, page, sort, pages, searchBytes } = useMemo(() => {
+    const { data, page, sortBy: sort } = props;
+    const numMarkets = Math.max(props.totalNumberOfMarkets, 1);
+    const pages = Math.ceil(numMarkets / MARKETS_PER_PAGE);
+    const searchBytes = props.searchBytes ?? "";
+    return { data, page, sort, pages, searchBytes };
+  }, [props]);
 
-  const [prevQuery, setPrevQuery] = useState<string>(getQuery(page, sort, emojis));
+  const addMarketData = useEventStore((s) => s.addMarketData);
+  const setEmojis = useEmojiPicker((s) => s.setEmojis);
+  const emojis = useEmojiPicker((s) => s.emojis);
+  const setMode = useEmojiPicker((s) => s.setMode);
 
   useEffect(() => {
-    if (prevEmojis.toString() !== emojis.toString()) {
-      setPrevEmojis(emojis);
-      if (page !== 1) {
-        setPage(1);
-        return;
-      }
-    }
-    const query = getQuery(page, sort, emojis);
+    data.map((d) => addMarketData(d));
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [data]);
 
-    if (prevQuery === query) {
-      return;
+  useEffect(() => {
+    const decoded = symbolBytesToEmojis(searchBytes ?? "");
+    if (decoded.emojis.length > 0) {
+      setEmojis(decoded.emojis.map((e) => e.emoji));
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [searchBytes]);
 
-    fetch(query)
-      .then((res) => res.text())
-      .then((txt) => parseJSON(txt))
-      .then((data) => {
-        setData(data.markets);
-        setPages(Math.ceil(data.count / MARKETS_PER_PAGE));
+  const pushURL = useEvent(
+    (args?: { page?: number; sort?: MarketDataSortBy; emojis?: string[] }) => {
+      const curr = new URLSearchParams(location.search);
+      const newURL = constructURLForHomePage({
+        page: args?.page ?? page,
+        sort: args?.sort ?? sort,
+        searchBytes: encodeEmojis(args?.emojis ?? emojis),
       });
 
-    setPrevQuery(query);
+      // Always push the new URL to the history, but only refresh if the URL has actually changed in a meaningful way.
+      router.push(newURL.toString(), { scroll: false });
+      if (isHomePageURLDifferent(curr, newURL.searchParams)) {
+        router.refresh();
+      }
+    }
+  );
 
-    const newUrl = new URL(location.href);
-    if (page !== 1) {
-      newUrl.searchParams.set("page", page.toString());
-    } else {
-      newUrl.searchParams.delete("page");
-    }
-    if (sort !== MarketDataSortBy.MarketCap) {
-      newUrl.searchParams.set("sort", sort);
-    } else {
-      newUrl.searchParams.delete("sort");
-    }
-    if (emojis.length > 0) {
-      newUrl.searchParams.set("q", encodeEmojis(emojis));
-    } else {
-      newUrl.searchParams.delete("q");
-    }
-    router.push(newUrl.toString(), { scroll: false });
+  const handlePageChange = (page: number) => {
+    const newPage = Math.min(Math.max(1, page), pages);
+    pushURL({ page: newPage });
+  };
+
+  const handleSortChange = (newPage: MarketDataSortBy) => {
+    pushURL({ sort: newPage });
+  };
+
+  useEffect(() => {
+    pushURL();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [sort, emojis, page]);
+  }, [emojis]);
 
   useEffect(() => {
     setMode("home");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  useEffect(() => {
-    setEmojis(symbolBytesToEmojis(q ?? "").emojis.map((e) => e.emoji));
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [q]);
+  const animationsOn = useUserSettings((s) => s.animate);
+
+  const shouldAnimateGrid = useMemo(
+    () => animationsOn && sort === MarketDataSortBy.BumpOrder && page === 1 && !searchBytes,
+    [sort, page, searchBytes, animationsOn]
+  );
+
+  const rowLength = useGridRowLength();
 
   return (
     <OutermostContainer>
       <OuterContainer>
         <InnerGridContainer>
-          <Header ref={scrollToRef}>
+          <motion.div
+            key={rowLength}
+            id="emoji-grid-header"
+            exit={{
+              opacity: 0,
+              transition: {
+                duration: 0.5,
+                type: "just",
+              },
+            }}
+          >
             <SearchWrapper>
               <SearchComponent />
             </SearchWrapper>
             <FilterOptionsWrapper>
-              <FilterOptions filter={sort} onChange={(value) => setSort(value)} />
+              <FilterOptions
+                filter={sort ?? MarketDataSortBy.MarketCap}
+                onChange={handleSortChange}
+              />
             </FilterOptionsWrapper>
-          </Header>
-          <ClientGrid data={data} />
-          <ButtonsBlock
-            value={page}
-            onChange={(page) => {
-              setPage(page);
-              if (scrollToRef.current) {
-                scrollToRef.current.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-            numberOfPages={pages}
-          />
+          </motion.div>
+          {/* Each version of the grid must wait for the other to fully exit animate out before appearing.
+              This provides a smooth transition from grids of varying row lengths. */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              className="relative w-full h-full"
+              id="emoji-grid"
+              key={rowLength}
+              style={{
+                // We set these so the grid layout doesn't snap when the number of items per row changes.
+                // This actually seems to work better than the css media queries, although I've left them in module.css
+                // in case we want to use them for other things.
+                maxWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
+                minWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
+              }}
+              exit={{
+                opacity: 0,
+                transition: {
+                  duration: 0.35,
+                  type: "just",
+                },
+              }}
+            >
+              <StyledGrid>
+                {shouldAnimateGrid ? (
+                  <LiveClientGrid data={data} sortBy={sort ?? MarketDataSortBy.MarketCap} />
+                ) : (
+                  <ClientGrid data={data} page={page} sortBy={sort ?? MarketDataSortBy.MarketCap} />
+                )}
+              </StyledGrid>
+            </motion.div>
+          </AnimatePresence>
+          <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} />
         </InnerGridContainer>
       </OuterContainer>
     </OutermostContainer>

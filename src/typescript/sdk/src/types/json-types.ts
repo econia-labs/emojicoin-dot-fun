@@ -293,25 +293,25 @@ export type AnyEmojicoinJSONEvent =
   | JSONTypes.LiquidityEvent;
 
 export function isJSONSwapEvent(e: EventJSON): boolean {
-  return e.type.startsWith("Swap");
+  return e.type.endsWith("Swap");
 }
 export function isJSONChatEvent(e: EventJSON): boolean {
-  return e.type.startsWith("Chat");
+  return e.type.endsWith("Chat");
 }
 export function isJSONMarketRegistrationEvent(e: EventJSON): boolean {
-  return e.type.startsWith("MarketRegistration");
+  return e.type.endsWith("MarketRegistration");
 }
 export function isJSONPeriodicStateEvent(e: EventJSON): boolean {
-  return e.type.startsWith("PeriodicState");
+  return e.type.endsWith("PeriodicState");
 }
 export function isJSONStateEvent(e: EventJSON): boolean {
-  return e.type.startsWith("State");
+  return e.type.endsWith("State");
 }
 export function isJSONGlobalStateEvent(e: EventJSON): boolean {
-  return e.type.startsWith("GlobalState");
+  return e.type.endsWith("GlobalState");
 }
 export function isJSONLiquidityEvent(e: EventJSON): boolean {
-  return e.type.startsWith("Liquidity");
+  return e.type.endsWith("Liquidity");
 }
 export function isRegistrantGracePeriodFlag(e: EventJSON["data"][number]) {
   return (
