@@ -52,9 +52,10 @@ module.exports = {
       blue: "#64A7FF",
       green: "#2FA90F",
       pink: "#CD2F8D",
+      error: "#CD2F8D",
       "ec-blue": "#086CD9",
       warning: "#FFB119",
-      error: "#F3263E",
+      red: "#F3263E",
       transparent: "transparent",
     },
     keyframes: {

@@ -43,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
       >
         <Link href={ROUTES.home} mt="6px" onClick={handleCloseMobileMenu}>
           <StyledClickItem>
-            <LogoIcon width="170px" color="black" cursor="pointer" />
+            <LogoIcon width="170px" color="black" cursor="pointer" versionBadge={true} />
           </StyledClickItem>
         </Link>
 
@@ -56,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
         <Flex my="30px" justifyContent="space-between" alignItems="center">
           <Link marginLeft="50px" href={ROUTES.home}>
             <StyledClickItem>
-              <LogoIcon width="170px" cursor="pointer" />
+              <LogoIcon width="170px" cursor="pointer" versionBadge={true} />
             </StyledClickItem>
           </Link>
 

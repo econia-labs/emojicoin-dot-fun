@@ -1,5 +1,7 @@
 export type MessageContainerProps = {
+  index: number;
   message: MessageType;
+  shouldAnimateAsInsertion?: boolean;
 };
 
 export type MessageType = {

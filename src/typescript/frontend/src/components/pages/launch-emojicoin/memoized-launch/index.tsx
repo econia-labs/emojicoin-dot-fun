@@ -4,21 +4,29 @@ import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useMemo } from "react";
 import AnimatedStatusIndicator from "../animated-status-indicator";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
 import { useRegisterMarket } from "../hooks/use-register-market";
 import { useIsMarketRegistered } from "../hooks/use-is-market-registered";
 import LaunchButtonOrGoToMarketLink from "./components/launch-or-goto";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { toCoinDecimalString } from "lib/utils/decimals";
+import { MARKET_REGISTRATION_FEE, ONE_APTN } from "@sdk/const";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
+// This is the value that most wallets use. It's an estimate, possibly incorrect, but better for UX.
+const ESTIMATED_GAS_REQUIREMENT = 300000;
+const ESTIMATED_TOTAL_COST = Number(MARKET_REGISTRATION_FEE) + ESTIMATED_GAS_REQUIREMENT;
 
 export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   // Maybe it's this...? Maybe we need to memoize this value.
   const { t } = translationFunction();
-  const setPickerInvisible = useInputStore((state) => state.setPickerInvisible);
-  const emojis = useInputStore((state) => state.emojis);
-  const setIsLoadingRegisteredMarket = useInputStore((state) => state.setIsLoadingRegisteredMarket);
+  const emojis = useEmojiPicker((state) => state.emojis);
+  const setIsLoadingRegisteredMarket = useEmojiPicker(
+    (state) => state.setIsLoadingRegisteredMarket
+  );
+  const { aptBalance, refetchIfStale } = useAptos();
 
   const registerMarket = useRegisterMarket();
   const { invalid, registered } = useIsMarketRegistered();
@@ -28,9 +36,23 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  const sufficientBalance = useMemo(() => aptBalance >= MARKET_REGISTRATION_FEE, [aptBalance]);
+  const sufficientBalanceWithGas = useMemo(() => aptBalance >= ESTIMATED_TOTAL_COST, [aptBalance]);
+
   const numBytes = useMemo(() => {
     return sumBytes(emojis);
   }, [emojis]);
+
+  useEffect(() => {
+    refetchIfStale("apt");
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [emojis]);
+
+  const handleClick = async () => {
+    if (!invalid && !registered) {
+      await registerMarket();
+    }
+  };
 
   return (
     <AnimatePresence initial={false} mode="wait">
@@ -46,7 +68,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
           <div className="flex relative mb-1">
             <div className="flex flex-col grow relative w-full">
               <EmojiPickerWithInput
-                handleClick={registerMarket}
+                handleClick={handleClick}
                 pickerButtonClassName="top-[220px] bg-black"
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
@@ -81,23 +103,54 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
               {emojis.join(", ")}
             </div>
           </div>
-
-          <div className="flex flex-col justify-center m-auto pt-2">
-            <div className="pixel-heading-4 text-dark-gray uppercase">
-              {t("Cost to deploy:")} <span>1 APT</span>
+          <div className="flex flex-col justify-center m-auto pt-2 pixel-heading-4 uppercase">
+            <div className="flex flex-col text-dark-gray">
+              <div className="flex flex-row justify-between">
+                <span className="mr-[2ch]">{t("Cost to deploy") + ": "}</span>
+                <div>
+                  <span className="">1</span>&nbsp;APT
+                </div>
+              </div>
+              <div className="flex flex-row justify-between">
+                <span className="mr-[2ch]">{t("Your balance") + ": "}</span>
+                <div>
+                  <span
+                    className={
+                      sufficientBalance ? "text-green" : "text-error brightness-[1.1] saturate-150"
+                    }
+                  >
+                    {Number(toCoinDecimalString(aptBalance, aptBalance / ONE_APTN < 1 ? 6 : 4))}
+                  </span>
+                  &nbsp;APT
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className={"flex flex-col justify-center m-auto"}>
+          <motion.div
+            className={"flex flex-col justify-center m-auto mt-[1ch]"}
+            initial={{ opacity: 0.4 }}
+            animate={{
+              opacity: emojis.length === 0 || numBytes > 10 ? 0.4 : 1,
+            }}
+          >
             <LaunchButtonOrGoToMarketLink
-              invalid={invalid}
+              invalid={invalid || !sufficientBalance}
               registered={registered}
               onWalletButtonClick={() => {
-                setPickerInvisible(true);
                 registerMarket();
               }}
             />
-          </div>
+          </motion.div>
+
+          {!sufficientBalanceWithGas && sufficientBalance && (
+            <div className="flex flex-row pixel-heading-4 uppercase mt-[1ch]">
+              <span className="text-error absolute w-full text-center">
+                {t("Your transaction may fail due to gas costs.")}
+              </span>
+              <span className="relative opacity-0">{"placeholder"}</span>
+            </div>
+          )}
+          <div className="h-[1ch] opacity-0">{"placeholder"}</div>
         </motion.div>
       ) : (
         // Status indicator.

@@ -10,6 +10,7 @@ import { truncateAddress } from "@sdk/utils";
 import "./table-row.css";
 import { useThemeContext } from "context";
 import Text from "components/text";
+import { motion } from "framer-motion";
 
 type TableRowTextItemProps = {
   className: string;
@@ -32,15 +33,41 @@ const TableRowTextItem = ({
   </td>
 );
 
-const TableRowStyles =
-  "flex relative w-full font-forma body-sm transition-all duration-[50ms] group";
+const TableRowStyles = "flex relative w-full font-forma body-sm group";
 const TableCellStyles = "h-[33px]";
 
-const TableRow = ({ item, showBorder }: TableRowDesktopProps) => {
+const TableRow = ({
+  index,
+  item,
+  showBorder,
+  numSwapsDisplayed,
+  shouldAnimateAsInsertion,
+}: TableRowDesktopProps) => {
   const { theme } = useThemeContext();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+
   return (
-    <tr className={TableRowStyles} id="grid-hover">
+    <motion.tr
+      className={TableRowStyles}
+      layout
+      initial={{
+        opacity: 0,
+        filter: "brightness(1) saturate(1)",
+        boxShadow: "0 0 0px 0px rgba(0, 0, 0, 0)",
+      }}
+      whileHover={{
+        filter: "brightness(1.05) saturate(1.1)",
+        boxShadow: "0 0 9px 7px rgba(8, 108, 217, 0.2)",
+        transition: { duration: 0.05 },
+      }}
+      animate={{
+        opacity: 1,
+        transition: {
+          type: "just",
+          delay: shouldAnimateAsInsertion ? 0.2 : (numSwapsDisplayed - index) * 0.02,
+        },
+      }}
+    >
       <td
         className={
           "absolute w-full h-full bg-transparent group-hover:inline-flex " +
@@ -134,7 +161,7 @@ const TableRow = ({ item, showBorder }: TableRowDesktopProps) => {
           </span>
         </ExplorerLink>
       </td>
-    </tr>
+    </motion.tr>
   );
 };
 

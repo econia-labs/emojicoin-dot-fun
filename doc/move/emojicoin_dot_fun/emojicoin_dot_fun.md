@@ -9,6 +9,7 @@
 -  [Resource `Registry`](#0xc0de_emojicoin_dot_fun_Registry)
 -  [Resource `Market`](#0xc0de_emojicoin_dot_fun_Market)
 -  [Resource `LPCoinCapabilities`](#0xc0de_emojicoin_dot_fun_LPCoinCapabilities)
+-  [Resource `RegistrantGracePeriodFlag`](#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag)
 -  [Struct `GlobalState`](#0xc0de_emojicoin_dot_fun_GlobalState)
 -  [Struct `State`](#0xc0de_emojicoin_dot_fun_State)
 -  [Struct `PeriodicState`](#0xc0de_emojicoin_dot_fun_PeriodicState)
@@ -330,6 +331,37 @@ Exists at object address for a market.
 </dd>
 <dt>
 <code>mint: <a href="_MintCapability">coin::MintCapability</a>&lt;EmojicoinLP&gt;</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+<a id="0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag"></a>
+
+## Resource `RegistrantGracePeriodFlag`
+
+
+
+<pre><code>#[resource_group = <a href="_ObjectGroup">0x1::object::ObjectGroup</a>]
+<b>struct</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a> <b>has</b> drop, key
+</code></pre>
+
+
+
+##### Fields
+
+
+<dl>
+<dt>
+<code>market_registrant: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>market_registration_time: u64</code>
 </dt>
 <dd>
 
@@ -1915,6 +1947,16 @@ No quote amount given during liquidity provision/removal.
 
 
 
+<a id="0xc0de_emojicoin_dot_fun_E_NOT_REGISTRANT"></a>
+
+Only market registrant may swap during the grace period.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_NOT_REGISTRANT">E_NOT_REGISTRANT</a>: u64 = 16;
+</code></pre>
+
+
+
 <a id="0xc0de_emojicoin_dot_fun_E_NOT_SUPPORTED_CHAT_EMOJI"></a>
 
 Provided bytes do not indicate a supported chat emoji.
@@ -2285,7 +2327,7 @@ Named object seed for the registry.
     is_sell: bool,
     integrator: <b>address</b>,
     integrator_fee_rate_bps: u8,
-) <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistryAddress">RegistryAddress</a> {
+) <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistryAddress">RegistryAddress</a> {
 
     // Mutably borrow market, check its <a href="">coin</a> types, then simulate a swap.
     <b>let</b> (market_ref_mut, market_signer) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_market_ref_mut_and_signer_checked">get_market_ref_mut_and_signer_checked</a>(market_address);
@@ -2303,6 +2345,15 @@ Named object seed for the registry.
         integrator_fee_rate_bps,
         market_ref_mut,
     );
+
+    // Verify registrant grace period is not violated, then remove flag.
+    <b>if</b> (<b>exists</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a>&gt;(market_address)) {
+        <b>let</b> flag_ref = <b>borrow_global</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a>&gt;(market_address);
+        <b>let</b> grace_period_over = <a href="">event</a>.time &gt; flag_ref.market_registration_time + <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_5M">PERIOD_5M</a>;
+        <b>let</b> swapper_is_registrant = swapper_address == flag_ref.market_registrant;
+        <b>assert</b>!(grace_period_over || swapper_is_registrant, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_NOT_REGISTRANT">E_NOT_REGISTRANT</a>);
+        <b>move_from</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a>&gt;(market_address);
+    };
 
     // Get TVL before swap, <b>use</b> it <b>to</b> <b>update</b> periodic state.
     <b>let</b> starts_in_bonding_curve = <a href="">event</a>.starts_in_bonding_curve;
@@ -3986,6 +4037,12 @@ Checks if an individual emoji is supported for usage in chat only.
 
         fee
     };
+
+    // Move a registrant grace period flag <b>to</b> the market <b>address</b>.
+    <b>move_to</b>(&market_signer, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a> {
+        market_registrant: registrant_address,
+        market_registration_time: time,
+    });
 
     // Update <b>global</b> FDV.
     <b>let</b> fdv = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv">fdv</a>(market_ref_mut.clamm_virtual_reserves);

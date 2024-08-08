@@ -62,6 +62,7 @@
         assert_valid_coin_types_test_only as assert_valid_coin_types,
         chat,
         cpamm_simple_swap_output_amount_test_only as cpamm_simple_swap_output_amount,
+        disable_registrant_grace_period_check,
         exists_lp_coin_capabilities,
         fdv_market_cap_test_only as fdv_market_cap,
         get_BASE_REAL_CEILING,
@@ -153,6 +154,7 @@
         get_publish_code_test_only as get_publish_code,
     };
     use emojicoin_dot_fun::test_acquisitions::{
+        ensure_aptos_coin_capability_store_initialized,
         mint_aptos_coin_to,
     };
     use yellow_heart_market::coin_factory::{
@@ -1556,6 +1558,7 @@
     }
 
     public fun init_package() {
+        ensure_aptos_coin_capability_store_initialized();
         timestamp::set_time_has_started_for_testing(&get_signer(@aptos_framework));
         init_module(&get_signer(@emojicoin_dot_fun));
     }
@@ -1574,6 +1577,7 @@
             EXACT_TRANSITION_INTEGRATOR,
             EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
         );
+        disable_registrant_grace_period_check(@black_cat_market);
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             market_address,
@@ -1599,6 +1603,7 @@
             SIMPLE_BUY_INTEGRATOR,
             SIMPLE_BUY_INTEGRATOR_FEE_RATE_BPS,
         );
+        disable_registrant_grace_period_check(@black_cat_market);
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(SIMPLE_BUY_USER),
             market_address,
@@ -2231,6 +2236,7 @@
         // Provide the exact transition user with Aptos coins, then execute exact transition.
         mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
         timestamp::update_global_time_for_test(EXACT_TRANSITION_TIME);
+        disable_registrant_grace_period_check(@black_cat_market);
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,
@@ -3134,6 +3140,7 @@
         let time = one_day_and_one_hour;
         timestamp::update_global_time_for_test(time);
         init_module(&get_signer(@emojicoin_dot_fun));
+        ensure_aptos_coin_capability_store_initialized();
 
         // Assert registry view.
         let registry_view = base_registry_view();
@@ -3505,6 +3512,100 @@
             base_market_metadata().market_address,
             0,
             SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    // Verify registrant able to buy after period, then non-registrant can buy right after.
+    #[test] fun swap_grace_period_is_registrant_after_period() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        timestamp::update_global_time_for_test(get_PERIOD_5M() + 1);
+        mint_aptos_coin_to(USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    // Verify registrant able to buy during period, then non-registrant can buy right after.
+    #[test] fun swap_grace_period_is_registrant_during_period() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        timestamp::update_global_time_for_test(get_PERIOD_5M());
+        mint_aptos_coin_to(USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+
+    // Verify non-registrant user can buy after the grace period has lapsed, then again after that.
+    #[test] fun swap_grace_period_not_registrant_after_period() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        timestamp::update_global_time_for_test(get_PERIOD_5M() + 1);
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+        mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    // Verify non-registrant user unable to buy during the grace period.
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NOT_REGISTRANT,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun swap_grace_period_not_registrant_during_period() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        timestamp::update_global_time_for_test(get_PERIOD_5M());
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(SIMPLE_BUY_USER),
+            @black_cat_market,
+            SIMPLE_BUY_INPUT_AMOUNT,
+            SWAP_BUY,
             INTEGRATOR,
             INTEGRATOR_FEE_RATE_BPS,
         );

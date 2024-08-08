@@ -11,6 +11,14 @@
   }
 
   --ec-blue: #086cd9;
+  --lighter-gray: #9a9cb0;
+  --light-gray: #717386;
+  --dark-gray: #33343d;
+  --blue: #64a7ff;
+  --green: #2fa90f;
+  --pink: #cd2f8d;
+  --warning: #ffb119;
+  --error: #f3263e;
 }
 
 .med-pixel-text {

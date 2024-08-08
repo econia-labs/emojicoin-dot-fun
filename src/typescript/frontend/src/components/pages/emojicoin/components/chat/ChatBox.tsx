@@ -1,10 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { useThemeContext } from "context";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Flex, Column } from "@containers";
-import { Loader } from "components";
 import { MessageContainer } from "./components";
 import { type ChatProps } from "../../types";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -12,13 +9,18 @@ import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
-import { useEventStore, useWebSocketClient } from "context/websockets-context";
-import useInputStore from "@store/input-store";
+import { useEventStore, useWebSocketClient } from "context/state-store-context";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
-import { mergeSortedEvents, sortEvents, toSortedDedupedEvents } from "lib/utils/sort-events";
+import { memoizedSortedDedupedEvents, mergeSortedEvents, sortEvents } from "lib/utils/sort-events";
 import type { Types } from "@sdk/types/types";
 import { parseJSON } from "utils";
+import { MAX_NUM_CHAT_EMOJIS } from "@sdk/const";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { motion } from "framer-motion";
+
+const HARD_LIMIT = 500;
 
 const convertChatMessageToEmojiAndIndices = (
   message: string,
@@ -58,23 +60,23 @@ const getCombinedChats = (chats: readonly Types.ChatEvent[], marketID: bigint) =
 };
 
 const ChatBox = (props: ChatProps) => {
-  const { theme } = useThemeContext();
   const { aptos, account, submit } = useAptos();
   const marketID = props.data.marketID.toString();
-  const clear = useInputStore((state) => state.clear);
-  const setMode = useInputStore((state) => state.setMode);
-  const emojis = useInputStore((state) => state.emojis);
+  const clear = useEmojiPicker((state) => state.clear);
+  const setMode = useEmojiPicker((state) => state.setMode);
+  const emojis = useEmojiPicker((state) => state.emojis);
   const chats = getCombinedChats(
     useEventStore((s) => s.getMarket(marketID)?.chatEvents ?? props.data.chats),
     BigInt(props.data.marketID)
   );
-  const chatEmojiData = useInputStore((state) => state.chatEmojiData);
+  const chatEmojiData = useEmojiPicker((state) => state.chatEmojiData);
   const subscribe = useWebSocketClient((s) => s.subscribe);
-  const unsubscribe = useWebSocketClient((s) => s.unsubscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
+  const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
 
   useEffect(() => {
     subscribe.chat(marketID);
-    return () => unsubscribe.chat(marketID);
+    return () => requestUnsubscribe.chat(marketID);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
@@ -83,14 +85,12 @@ const ChatBox = (props: ChatProps) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const loadMoreMessages = () => {
-    // Paginate messages here.
-  };
-
   const sendChatMessage = async () => {
-    if (!account) {
+    if (!account || emojis.length === 0 || emojis.length > MAX_NUM_CHAT_EMOJIS) {
       return;
     }
+    // Set the picker invisible while the transaction is being processed.
+    setPickerInvisible(true);
     const emojiText = emojis.join("");
     const { emojicoin, emojicoinLP } = toCoinTypes(props.data.marketAddress);
     const { emojiBytes, emojiIndicesSequence } = convertChatMessageToEmojiAndIndices(
@@ -106,17 +106,36 @@ const ChatBox = (props: ChatProps) => {
         emojiIndicesSequence: new Uint8Array(emojiIndicesSequence),
         typeTags: [emojicoin, emojicoinLP],
       });
-    await submit(builderLambda);
-    clear();
+    const res = await submit(builderLambda);
+    if (res && res.response && isUserTransactionResponse(res.response)) {
+      // Note we only clear the input if the transaction is successful.
+      clear();
+    } else {
+      // Show the picker again in case the user wants to try again with the same input.
+      setPickerInvisible(false);
+    }
   };
+
+  const initialLoad = useRef(true);
+  useEffect(() => {
+    initialLoad.current = false;
+  }, []);
 
   // TODO: Add infinite scroll to this.
   // For now just don't render more than `HARD_LIMIT` chats.
-  const sortedChats = useMemo(() => {
-    const HARD_LIMIT = 500;
-    return toSortedDedupedEvents(props.data.chats, chats, "desc").slice(0, HARD_LIMIT);
+  const sortedChats = useMemo(
+    () =>
+      memoizedSortedDedupedEvents({
+        a: props.data.chats,
+        b: chats,
+        order: "desc",
+        limit: HARD_LIMIT,
+        canAnimateAsInsertion: !initialLoad.current,
+      }),
+
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [props.data.chats.length, chats.length]);
+    [props.data.chats.length, chats.length]
+  );
 
   return (
     <Column className="relative" width="100%" flexGrow={1}>
@@ -127,22 +146,9 @@ const ChatBox = (props: ChatProps) => {
         maxHeight="328px"
         flexDirection="column-reverse"
       >
-        <InfiniteScroll
-          next={loadMoreMessages}
-          hasMore={false}
-          dataLength={10}
-          inverse
-          loader={
-            <Flex width="100%" justifyContent="center">
-              <Loader height="44px" width="44px" />
-            </Flex>
-          }
-          style={{
-            padding: "0px 21px",
-            borderRight: `1px solid ${theme.colors.darkGray}`,
-            display: "flex",
-            flexDirection: "column-reverse",
-          }}
+        <motion.div
+          layoutScroll
+          className="flex flex-col-reverse w-full justify-center px-[21px] py-0 border-r border-solid border-r-dark-gray"
         >
           {sortedChats.map((chat, index) => {
             const message = {
@@ -152,9 +158,16 @@ const ChatBox = (props: ChatProps) => {
               senderRank: getRankFromChatEvent(chat).rankIcon,
               version: chat.version,
             };
-            return <MessageContainer message={message} key={index} />;
+            return (
+              <MessageContainer
+                message={message}
+                key={sortedChats.length - index}
+                index={sortedChats.length - index}
+                shouldAnimateAsInsertion={chat.shouldAnimateAsInsertion}
+              />
+            );
           })}
-        </InfiniteScroll>
+        </motion.div>
       </Flex>
 
       <EmojiPickerWithInput handleClick={sendChatMessage} pickerButtonClassName={pickerClass} />

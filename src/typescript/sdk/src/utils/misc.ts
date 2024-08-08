@@ -207,3 +207,7 @@ export class LazyPromise<T> {
     return this.data;
   }
 }
+
+export function sum(arr: number[]) {
+  return arr.reduce((acc, val) => acc + val, 0);
+}

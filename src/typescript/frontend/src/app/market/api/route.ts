@@ -1,39 +1,28 @@
-import { toOrderBy } from "@sdk/queries/const";
 import fetchSortedMarketData from "lib/queries/sorting/market-data";
-import type { SortByPostgrestQueryParams } from "lib/queries/sorting/types";
 import { stringifyJSON } from "utils";
+import { constructHomePageSearchParams } from "lib/queries/sorting/query-params";
+import { toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 
 export const dynamic = "force-dynamic";
 
-// Returns market data
-// Defaults to page 0, sort by market cap desc.
+// Returns market data for a given market. Note that this only
+// supports the search params for a home page request.
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const pageStr = searchParams.get("page") ?? "1";
-  let page: number;
-  try {
-    page = Number.parseInt(pageStr);
-  } catch {
-    throw "Invalid params";
-  }
-  const sortByStr = searchParams.get("sortby") ?? "market_cap";
-  let sortBy: SortByPostgrestQueryParams;
-  if (
-    sortByStr !== "market_cap" &&
-    sortByStr !== "bump" &&
-    sortByStr !== "daily_vol" &&
-    sortByStr !== "all_time_vol"
-  ) {
-    throw "Invalid params";
-  } else {
-    sortBy = sortByStr as SortByPostgrestQueryParams;
-  }
-  const searchBytes = searchParams.get("q") ?? undefined;
+  const { searchParams: urlSearchParams } = new URL(request.url);
+  const searchParams = constructHomePageSearchParams(urlSearchParams);
+  const {
+    page,
+    sortBy,
+    orderBy,
+    inBondingCurve,
+    q: searchBytes,
+  } = toHomePageParamsWithDefault(searchParams);
+
   const data = await fetchSortedMarketData({
     page,
-    inBondingCurve: null,
-    orderBy: toOrderBy("desc"),
+    orderBy,
     sortBy,
+    inBondingCurve,
     searchBytes,
     exactCount: true,
   });
