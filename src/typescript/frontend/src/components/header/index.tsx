@@ -41,7 +41,6 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
 
   // When the user clicks the home page button, they probably expect the sort to be the same as it was before
   // they clicked. We reset the search bytes and the page here to nothing, which will resolve to their defaults.
-  // Note that we shouldn't need to call `clear` on the picker here because the refetch will clear the picker.
   const linkProps: LinkProps = useMemo(() => {
     const sortParam = searchParams.get("sort");
     const query = sortParam ? { sort: sortParam } : {};
