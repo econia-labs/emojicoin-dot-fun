@@ -197,6 +197,7 @@ export namespace Types {
       poolFee: bigint;
       startsInBondingCurve: boolean;
       resultsInStateTransition: boolean;
+      balanceAsFractionOfCirculatingSupply?: number;
     };
 
   export type ChatEvent = WithMarketID &
@@ -485,6 +486,7 @@ export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.S
   startsInBondingCurve: data.starts_in_bonding_curve,
   resultsInStateTransition: data.results_in_state_transition,
   guid: `Swap::${data.market_id}::${data.market_nonce}`,
+  balanceAsFractionOfCirculatingSupply: data.balance_as_fraction_of_circulating_supply,
 });
 
 export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.ChatEvent => ({
