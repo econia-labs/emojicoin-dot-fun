@@ -45,7 +45,7 @@ export const ClientGrid = ({
       {ordered.map((v, i) => {
         return (
           <TableCard
-            key={`${sortBy}-${v.key}`}
+            key={`${sortBy}-${v.marketID}-${i}`}
             index={i}
             pageOffset={(page - 1) * MARKETS_PER_PAGE}
             marketID={v.marketID}

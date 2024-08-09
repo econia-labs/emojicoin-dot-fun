@@ -1,9 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useMatchBreakpoints } from "hooks";
-
-import Link from "components/link/component";
 import Button from "components/button";
 import { Flex, FlexGap, Container } from "@containers";
 import LogoIcon from "../svg/icons/LogoIcon";
@@ -11,37 +9,61 @@ import CloseIcon from "../svg/icons/Close";
 import MenuItem from "components/header/components/menu-item";
 import { MobileMenu } from "components/header/components/mobile-menu";
 import { StyledContainer, StyledClickItem, StyledMobileHeader, StyledCloseIcon } from "./styled";
-
 import { ROUTES } from "router/routes";
 import { NAVIGATE_LINKS } from "./constants";
 import { slideTopVariants } from "./animations";
-
 import { type HeaderProps } from "./types";
 import { translationFunction } from "context/language-context";
-
 import WalletDropdownMenu from "components/wallet/WalletDropdownMenu";
 import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton";
+import { useSearchParams } from "next/navigation";
+import Link, { type LinkProps } from "next/link";
+import { useEmojiPicker } from "context/emoji-picker-context";
 
 const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
   const { isDesktop } = useMatchBreakpoints();
   const { t } = translationFunction();
-
+  const searchParams = useSearchParams();
   const linksForCurrentPage = NAVIGATE_LINKS;
+  const clear = useEmojiPicker((s) => s.clear);
 
-  const { offsetHeight } = document.getElementById("header") ?? { offsetHeight: 0 };
+  const [offsetHeight, setOffsetHeight] = useState(0);
 
-  const handleCloseMobileMenu = () => {
+  const headerRef = useCallback((node: HTMLElement | null) => {
+    if (node) {
+      setOffsetHeight(node.offsetHeight);
+    }
+  }, []);
+
+  const handleCloseMobileMenu = useCallback(() => {
     setIsOpen(false);
-  };
+  }, [setIsOpen]);
+
+  // When the user clicks the home page button, they probably expect the sort to be the same as it was before
+  // they clicked. We reset the search bytes and the page here to nothing, which will resolve to their defaults.
+  const linkProps: LinkProps = useMemo(() => {
+    const sortParam = searchParams.get("sort");
+    const query = sortParam ? { sort: sortParam } : {};
+    return {
+      href: {
+        pathname: ROUTES.home,
+        query,
+      },
+      onClick: () => {
+        handleCloseMobileMenu();
+        clear();
+      },
+    };
+  }, [searchParams, handleCloseMobileMenu, clear]);
 
   return (
-    <StyledContainer id="header">
+    <StyledContainer ref={headerRef}>
       <StyledMobileHeader
         initial="hidden"
         animate={isOpen ? "visible" : "hidden"}
         variants={slideTopVariants(offsetHeight)}
       >
-        <Link href={ROUTES.home} mt="6px" onClick={handleCloseMobileMenu}>
+        <Link className="mt-[6px]" {...linkProps}>
           <StyledClickItem>
             <LogoIcon width="170px" color="black" cursor="pointer" versionBadge={true} />
           </StyledClickItem>
@@ -54,7 +76,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
 
       <Container>
         <Flex my="30px" justifyContent="space-between" alignItems="center">
-          <Link marginLeft="50px" href={ROUTES.home}>
+          <Link className="ml-[50px]" {...linkProps}>
             <StyledClickItem>
               <LogoIcon width="170px" cursor="pointer" versionBadge={true} />
             </StyledClickItem>

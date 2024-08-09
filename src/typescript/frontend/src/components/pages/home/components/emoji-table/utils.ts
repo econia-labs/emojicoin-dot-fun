@@ -7,11 +7,9 @@ import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type EmojiPickerStore } from "@store/emoji-picker-store";
 
 export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
-  key: string;
   time: number;
 };
 export type PropsWithTimeAndIndex = TableCardProps & {
-  key: string;
   time: number;
 };
 export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
@@ -20,7 +18,6 @@ export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
 
 export const marketDataToProps = (data: FetchSortedMarketDataReturn["markets"]): PropsWithTime[] =>
   data.map((market) => ({
-    key: market.symbol,
     time: market.bumpTime,
     symbol: market.symbol,
     marketID: market.marketID,
@@ -44,7 +41,6 @@ export const stateEventsToProps = (
     const emojiData = symbolBytesToEmojis(e.marketMetadata.emojiBytes);
     const { symbol, emojis } = emojiData;
     return {
-      key: symbol,
       time: Number(e.stateMetadata.bumpTime),
       symbol,
       emojis,
