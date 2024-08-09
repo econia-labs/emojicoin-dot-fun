@@ -3,7 +3,7 @@ import { createStore } from "zustand";
 import { insertEmojiTextInputHelper, removeEmojiTextInputHelper } from "./emoji-picker-utils";
 
 export type EmojiPickerState = {
-  mode: "chat" | "register" | "pools" | "home";
+  mode: "chat" | "register" | "search";
   emojis: string[];
   nativePicker: boolean;
   pickerRef: HTMLDivElement | null;
@@ -30,7 +30,7 @@ export type EmojiPickerActions = {
   setNativePicker: (value: boolean) => void;
   setPickerRef: (value: HTMLDivElement | null) => void;
   setTextAreaRef: (value: HTMLTextAreaElement | null) => void;
-  setMode: (mode: "chat" | "register" | "pools" | "home") => void;
+  setMode: (mode: "chat" | "register" | "search") => void;
   setOnClickOutside: (value: (e: MouseEvent) => void) => void;
   setChatEmojiData: (value: Map<string, SymbolEmojiData>) => void;
   setPickerInvisible: (value: boolean) => void;

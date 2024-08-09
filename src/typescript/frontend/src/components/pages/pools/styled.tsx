@@ -88,7 +88,7 @@ export const StyledSubHeader = styled.div`
   padding-left: 30px;
   padding-right: 30px;
   width: 100%;
-  height: 33px;
+  height: 47px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
 
   ${({ theme }) => theme.mediaQueries.tablet} {

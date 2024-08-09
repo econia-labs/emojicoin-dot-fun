@@ -17,6 +17,7 @@ cpamm
 cunha
 dango
 darkgray
+dasharray
 defi
 devnet
 diya
@@ -40,6 +41,8 @@ khanda
 kitts
 leaderboard
 leste
+linecap
+linejoin
 maarten
 marino
 mayen
