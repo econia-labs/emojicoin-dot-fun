@@ -6,7 +6,7 @@ import { useMatchBreakpoints } from "hooks";
 
 import { FlexGap, Flex } from "@containers";
 import { Text } from "components/text";
-
+import Info from "components/info";
 import { Arrows } from "components/svg";
 
 import { type TableHeaderProps } from "./types";
@@ -22,7 +22,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
   });
 
   return (
-    <Flex justifyContent={isLast ? "end" : undefined}>
+    <Flex>
       <FlexGap
         cursor={item.sortBy ? "pointer" : undefined}
         gap="10px"
@@ -32,6 +32,43 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
         onMouseEnter={replay}
         ellipsis
       >
+        {isLast && (
+          <Info>
+            <Text
+              textScale="pixelHeading4"
+              lineHeight="20px"
+              color="black"
+              textTransform="uppercase"
+            >
+              <FlexGap gap=".2rem" justifyContent="space-between">
+                <span>DPR:</span>
+                <span>Daily Percentage Return</span>
+              </FlexGap>
+            </Text>
+            <Text
+              textScale="pixelHeading4"
+              lineHeight="20px"
+              color="black"
+              textTransform="uppercase"
+            >
+              <FlexGap gap=".2rem" justifyContent="space-between">
+                <span>WPR:</span>
+                <span>Weekly Percentage Return</span>
+              </FlexGap>
+            </Text>
+            <Text
+              textScale="pixelHeading4"
+              lineHeight="20px"
+              color="black"
+              textTransform="uppercase"
+            >
+              <FlexGap gap=".2rem" justifyContent="space-between">
+                <span>APR:</span>
+                <span>Annual Percentage Return</span>
+              </FlexGap>
+            </Text>
+          </Info>
+        )}
         <Text
           textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
           textTransform="uppercase"

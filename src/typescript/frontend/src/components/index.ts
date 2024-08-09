@@ -15,4 +15,3 @@ export { StyledLink } from "./link/styled";
 export { default as Checkbox } from "./checkbox";
 export { SingleSelect, MultipleSelect } from "./selects";
 export { Table, Th, Tr, EmptyTr, Td, ThInner, HeaderTr, TBody, TrWrapper } from "./table";
-export { default as Prompt } from "./prompt";
