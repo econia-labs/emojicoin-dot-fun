@@ -12,7 +12,7 @@ import {
   StyledGrid,
   GRID_PADDING,
 } from "./styled";
-import SearchComponent from "./components/Search";
+import SearchBar from "components/inputs/search-bar";
 import FilterOptions from "./components/FilterOptions";
 import { ClientGrid } from "./ClientGrid";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
@@ -26,9 +26,9 @@ import { useEventStore, useUserSettings } from "context/state-store-context";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import useEvent from "@hooks/use-event";
 import { constructURLForHomePage, isHomePageURLDifferent } from "lib/queries/sorting/query-params";
-import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import { AnimatePresence, motion } from "framer-motion";
 import { EMOJI_GRID_ITEM_WIDTH } from "../const";
+import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 
 export interface EmojiTableProps {
   data: FetchSortedMarketDataReturn["markets"];
@@ -52,7 +52,6 @@ const EmojiTable = (props: EmojiTableProps) => {
   const addMarketData = useEventStore((s) => s.addMarketData);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
   const emojis = useEmojiPicker((s) => s.emojis);
-  const setMode = useEmojiPicker((s) => s.setMode);
 
   useEffect(() => {
     data.map((d) => addMarketData(d));
@@ -98,11 +97,6 @@ const EmojiTable = (props: EmojiTableProps) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [emojis]);
 
-  useEffect(() => {
-    setMode("home");
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
-
   const animationsOn = useUserSettings((s) => s.animate);
 
   const shouldAnimateGrid = useMemo(
@@ -128,7 +122,7 @@ const EmojiTable = (props: EmojiTableProps) => {
             }}
           >
             <SearchWrapper>
-              <SearchComponent />
+              <SearchBar />
             </SearchWrapper>
             <FilterOptionsWrapper>
               <FilterOptions

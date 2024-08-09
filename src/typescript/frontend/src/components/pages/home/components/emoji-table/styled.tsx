@@ -1,9 +1,10 @@
 "use client";
 
 import styled from "styled-components";
-import base, { breakpointsArray } from "theme/base";
+import base, { breakpointsArray, mediaQueries } from "theme/base";
 import { darkColors } from "theme/colors";
-import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH } from "../const";
+import { EMOJI_GRID_ITEM_WIDTH, MAX_WIDTH, PADDING } from "../const";
+import { Flex } from "@containers";
 
 export const StyledTHFilters = styled.div`
   display: flex;
@@ -15,8 +16,19 @@ export const StyledTHFilters = styled.div`
     width: unset;
   }
   @media screen and (max-width: ${breakpointsArray[3]}) {
-    justify-content: center;
+    justify-content: space-between;
     padding: 10px;
+  }
+`;
+
+export const StyledSearch = styled(Flex)`
+  width: ${EMOJI_GRID_ITEM_WIDTH - 20}px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+
+  @media screen and (max-width: ${breakpointsArray[3]}) {
+    width: 100%;
   }
 `;
 
@@ -39,6 +51,10 @@ export const OutermostContainer = styled.div`
   display: flex;
   padding: 0 ${GRID_PADDING}px;
   border-top: 1px solid ${darkColors.darkGray};
+
+  @media screen and (max-width: ${breakpointsArray[3]}) {
+    padding: 0;
+  }
 `;
 
 export const OuterContainer = styled.div`
@@ -78,6 +94,27 @@ while (width < MAX_WIDTH) {
   width += EMOJI_GRID_ITEM_WIDTH;
 }
 
+export const Header = styled.div`
+  display: flex;
+  position: relative;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  scroll-margin-top: 100px;
+
+  ${mediaQueries}
+
+  @media (min-width: ${MAX_WIDTH + PADDING * 2}px) {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  @media screen and (max-width: ${breakpointsArray[3]}) {
+    padding: 0 10px;
+    flex-direction: column;
+  }
+`;
+
 const WrapperCss = `
   display: flex;
   width: 100%;
@@ -104,7 +141,9 @@ export const SearchWrapper = styled.div`
   }
 
   @media screen and (max-width: ${breakpointsArray[3]}) {
-    border-right: 1px solid ${darkColors.darkGray};
+    border: none;
+    margin-left: 0;
+    margin-right: 0;
     justify-content: center;
   }
 `;
@@ -120,6 +159,9 @@ export const FilterOptionsWrapper = styled.div`
   }
 
   @media screen and (max-width: ${breakpointsArray[3]}) {
-    border-left: 1px solid ${darkColors.darkGray};
+    border: none;
+    margin-left: 0;
+    margin-right: 0;
+    padding-right: 0;
   }
 `;
