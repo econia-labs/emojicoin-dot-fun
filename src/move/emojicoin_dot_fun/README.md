@@ -16,7 +16,8 @@ aptos move publish \
     --assume-yes \
     --included-artifacts=none \
     --max-gas 2000000 \
-    --named-addresses emojicoin_dot_fun=$EMOJICOIN_DOT_FUN
+    --named-addresses emojicoin_dot_fun=$EMOJICOIN_DOT_FUN \
+    --override-size-check
 ```
 
 ## Multisig publication
@@ -63,6 +64,7 @@ aptos move build-publish-payload \
     --included-artifacts none \
     --json-output-file emojicoin_dot_fun.json \
     --named-addresses emojicoin_dot_fun=$MULTISIG \
+    --override-size-check \
     --profile emojicoin-testnet
 ```
 
