@@ -260,6 +260,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         pool_fee: u64,
         starts_in_bonding_curve: bool,
         results_in_state_transition: bool,
+        balance_as_fraction_of_circulating_supply_before_q64: u128,
+        balance_as_fraction_of_circulating_supply_after_q64: u128,
     }
 
     #[event]
@@ -440,17 +442,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         RegistrantGracePeriodFlag,
         RegistryAddress
     {
-        assert!(min_output_amount > 0, E_SWAP_MIN_OUTPUT_AMOUNT_ZERO);
 
-        // Mutably borrow market, check its coin types, then simulate a swap.
+        // Mutably borrow market, verify minimum output amount specified, then simulate a swap.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
-        ensure_coins_initialized<Emojicoin, EmojicoinLP>(
-            market_ref_mut,
-            &market_signer,
-            market_address,
-        );
+        assert!(min_output_amount > 0, E_SWAP_MIN_OUTPUT_AMOUNT_ZERO);
         let swapper_address = signer::address_of(swapper);
-        let event = simulate_swap_inner(
+        let event = simulate_swap_inner<Emojicoin, EmojicoinLP>(
             swapper_address,
             input_amount,
             is_sell,
@@ -1241,7 +1238,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     #[view]
-    public fun simulate_swap(
+    public fun simulate_swap<Emojicoin, EmojicoinLP>(
         swapper: address,
         market_address: address,
         input_amount: u64,
@@ -1251,7 +1248,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     ): Swap
     acquires Market {
         assert!(exists<Market>(market_address), E_NO_MARKET);
-        simulate_swap_inner(
+        simulate_swap_inner<Emojicoin, EmojicoinLP>(
             swapper,
             input_amount,
             is_sell,
@@ -1278,6 +1275,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         u64,
         bool,
         bool,
+        u128,
+        u128,
     ) {
         let Swap {
             market_id,
@@ -1296,6 +1295,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             pool_fee,
             starts_in_bonding_curve,
             results_in_state_transition,
+            balance_as_fraction_of_circulating_supply_before_q64,
+            balance_as_fraction_of_circulating_supply_after_q64,
         } = swap;
         (
             market_id,
@@ -1314,6 +1315,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             pool_fee,
             starts_in_bonding_curve,
             results_in_state_transition,
+            balance_as_fraction_of_circulating_supply_before_q64,
+            balance_as_fraction_of_circulating_supply_after_q64,
         )
     }
 
@@ -1683,7 +1686,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     }
 
     // Ideally this would be inline, but unfortunately that breaks the compiler.
-    fun simulate_swap_inner(
+    fun simulate_swap_inner<Emojicoin, EmojicoinLP>(
         swapper: address,
         input_amount: u64,
         is_sell: bool,
@@ -1691,7 +1694,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         integrator_fee_rate_bps: u8,
         market_ref: &Market,
     ): Swap {
+        // Sanitize inputs, ensure coin types initialized.
         assert!(input_amount > 0, E_SWAP_INPUT_ZERO);
+        ensure_coins_initialized<Emojicoin, EmojicoinLP>(
+            market_ref,
+            &object::generate_signer_for_extending(&market_ref.extend_ref),
+            market_ref.metadata.market_address,
+        );
+
+        // Set up local variables.
         let starts_in_bonding_curve = market_ref.lp_coin_supply == 0;
         let net_proceeds;
         let base_volume;
@@ -1699,6 +1710,24 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let integrator_fee;
         let pool_fee = 0;
         let results_in_state_transition = false;
+        let circulating_supply_after;
+        let balance_after;
+
+        // Determine user balance as a fraction of circulating supply before swap.
+        let (supply_minuend, reserves_ref) =
+            assign_supply_minuend_reserves_ref(market_ref, starts_in_bonding_curve);
+        let circulating_supply_before = supply_minuend - reserves_ref.base;
+        let balance_before = if (coin::is_account_registered<Emojicoin>(swapper)) {
+            coin::balance<Emojicoin>(swapper)
+        } else {
+            0
+        };
+        let balance_fraction_before_q64 = if (circulating_supply_before == 0) {
+            0
+        } else {
+            ((balance_before as u128) << SHIFT_Q64) / (circulating_supply_before as u128)
+        };
+
         if (is_sell) { // If selling, no possibility of state transition.
             let amm_quote_output;
             if (starts_in_bonding_curve) { // Selling to CLAMM only.
@@ -1719,6 +1748,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             base_volume = input_amount;
             quote_volume = amm_quote_output - pool_fee - integrator_fee;
             net_proceeds = quote_volume;
+            balance_after = balance_before - input_amount;
+            circulating_supply_after = circulating_supply_before - input_amount;
         } else { // If buying, there may be a state transition.
             integrator_fee = get_bps_fee(input_amount, integrator_fee_rate_bps);
             quote_volume = input_amount - integrator_fee;
@@ -1757,6 +1788,15 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 base_volume = cpamm_base_output - pool_fee;
             };
             net_proceeds = base_volume;
+            balance_after = balance_before + net_proceeds;
+            circulating_supply_after = circulating_supply_before + net_proceeds;
+        };
+
+        // Determine user balance as a fraction of circulating supply after swap.
+        let balance_fraction_after_q64 = if (circulating_supply_after == 0) {
+            0
+        } else {
+            ((balance_after as u128) << SHIFT_Q64) / (circulating_supply_after as u128)
         };
         Swap {
             market_id: market_ref.metadata.market_id,
@@ -1776,6 +1816,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             pool_fee,
             starts_in_bonding_curve,
             results_in_state_transition,
+            balance_as_fraction_of_circulating_supply_before_q64: balance_fraction_before_q64,
+            balance_as_fraction_of_circulating_supply_after_q64: balance_fraction_after_q64,
         }
     }
 
