@@ -35,6 +35,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const POOL_FEE_RATE_BPS: u8 = 25;
 
     /// Denominated in `AptosCoin` subunits.
+    const MARKET_REGISTRATION_DEPOSIT: u64 = 400_000_000;
     const MARKET_REGISTRATION_FEE: u64 = 100_000_000;
 
     /// Named object seed for the registry.
@@ -112,6 +113,26 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_EMOJI_BYTES_EMPTY: u64 = 15;
     /// Only market registrant may swap during the grace period.
     const E_NOT_REGISTRANT: u64 = 16;
+    /// Account is unable to pay market registration deposit.
+    const E_UNABLE_TO_PAY_MARKET_REGISTRATION_DEPOSIT: u64 = 17;
+    /// Swap minimum output amount specified as zero.
+    const E_SWAP_MIN_OUTPUT_AMOUNT_ZERO: u64 = 18;
+    /// Swap minimum output amount not met.
+    const E_SWAP_MIN_OUTPUT_NOT_MET: u64 = 19;
+    /// Provide liquidity operation minimum LP coin amount specified as zero.
+    const E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO: u64 = 20;
+    /// Provide liquidity operation minimum LP coin amount not met.
+    const E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET: u64 = 21;
+    /// Remove liquidity operation minimum quote amount speified as zero.
+    const E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO: u64 = 22;
+    /// Remove liquidity operation minimum quote amount not met.
+    const E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET: u64 = 23;
+    /// Swap results in an output amount of zero.
+    const E_SWAP_OUTPUT_AMOUNT_ZERO: u64 = 24;
+    /// Remove liquidity operation results in a base amount of zero.
+    const E_REMOVE_LIQUIDITY_BASE_AMOUNT_ZERO: u64 = 25;
+    /// Remove liquidity operation results in a quote amount of zero.
+    const E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO: u64 = 25;
 
     /// Exists at package address, tracks the address of the registry object.
     struct RegistryAddress has key {
@@ -148,6 +169,12 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     struct LPCoinCapabilities<phantom Emojicoin, phantom EmojicoinLP> has key {
         burn: BurnCapability<EmojicoinLP>,
         mint: MintCapability<EmojicoinLP>,
+    }
+
+    #[resource_group = ObjectGroup]
+    struct RegistrantDeposit has key {
+        market_registrant: address,
+        deposit: Coin<AptosCoin>
     }
 
     #[resource_group = ObjectGroup]
@@ -257,8 +284,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         quote_amount: u64,
         lp_coin_amount: u64,
         liquidity_provided: bool,
-        pro_rata_base_donation_claim_amount: u64,
-        pro_rata_quote_donation_claim_amount: u64,
+        base_donation_claim_amount: u64,
+        quote_donation_claim_amount: u64,
     }
 
     struct RegistryView has drop, store {
@@ -404,7 +431,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         is_sell: bool,
         integrator: address,
         integrator_fee_rate_bps: u8,
-    ) acquires LPCoinCapabilities, Market, Registry, RegistrantGracePeriodFlag, RegistryAddress {
+        min_output_amount: u64,
+    ) acquires
+        LPCoinCapabilities,
+        Market,
+        Registry,
+        RegistrantDeposit,
+        RegistrantGracePeriodFlag,
+        RegistryAddress
+    {
+        assert!(min_output_amount > 0, E_SWAP_MIN_OUTPUT_AMOUNT_ZERO);
 
         // Mutably borrow market, check its coin types, then simulate a swap.
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
@@ -422,6 +458,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             integrator_fee_rate_bps,
             market_ref_mut,
         );
+        assert!(event.net_proceeds >= min_output_amount, E_SWAP_MIN_OUTPUT_NOT_MET);
 
         // Verify registrant grace period is not violated, then remove flag.
         if (exists<RegistrantGracePeriodFlag>(market_address)) {
@@ -487,10 +524,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             (fdv_start, market_cap_start, fdv_end, market_cap_end) =
                 fdv_market_cap_start_end(reserves_start, reserves_end, supply_minuend);
 
-            // Update global stats.
+            // Update global total quote locked.
             aggregator_v2::try_sub(total_quote_locked_ref_mut, (quote_leaving_market as u128));
-            aggregator_v2::try_sub(market_cap_ref_mut, market_cap_start - market_cap_end);
-            aggregator_v2::try_sub(fdv_ref_mut, fdv_start - fdv_end);
 
             // Update cumulative pool fees.
             let local_cumulative_pool_fees_quote_ref_mut =
@@ -543,6 +578,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
                 (fdv_end, market_cap_end) =
                     fdv_market_cap(reserves_end, supply_minuend_end);
 
+                // Refund market registration deposit.
+                let RegistrantDeposit { market_registrant, deposit } =
+                    move_from<RegistrantDeposit>(market_address);
+                coin::deposit(market_registrant, deposit);
+
             } else { // Buy without state transition.
 
                 // Get minuend for circulating supply calculations and affected reserves.
@@ -564,10 +604,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
             };
 
-            // Update global stats.
+            // Update global total quote locked.
             aggregator_v2::try_add(total_quote_locked_ref_mut, quote_volume_as_u128);
-            aggregator_v2::try_add(market_cap_ref_mut, market_cap_end - market_cap_start);
-            aggregator_v2::try_add(fdv_ref_mut, fdv_end - fdv_start);
 
             // Update cumulative pool fees.
             let local_cumulative_pool_fees_base_ref_mut =
@@ -607,7 +645,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let global_cumulative_swaps_ref_mut = &mut global_stats_ref_mut.cumulative_swaps;
         aggregator_v2::try_add(global_cumulative_swaps_ref_mut, 1);
 
-        // Update global TVL amounts.
+        // Update global TVL, FDV, market cap amounts.
         let lp_coin_supply = market_ref_mut.lp_coin_supply;
         let tvl_end = tvl(market_ref_mut, ends_in_bonding_curve);
         let global_total_value_locked_ref_mut = &mut global_stats_ref_mut.total_value_locked;
@@ -617,6 +655,20 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         } else {
             let tvl_decrease = tvl_start - tvl_end;
             aggregator_v2::try_sub(global_total_value_locked_ref_mut, tvl_decrease);
+        };
+        if (fdv_end > fdv_start) {
+            let fdv_increase = fdv_end - fdv_start;
+            aggregator_v2::try_add(fdv_ref_mut, fdv_increase);
+        } else {
+            let fdv_decrease = fdv_start - fdv_end;
+            aggregator_v2::try_sub(fdv_ref_mut, fdv_decrease);
+        };
+        if (market_cap_end > market_cap_start) {
+            let market_cap_increase = market_cap_end - market_cap_start;
+            aggregator_v2::try_add(market_cap_ref_mut, market_cap_increase);
+        } else {
+            let market_cap_decrease = market_cap_start - market_cap_end;
+            aggregator_v2::try_sub(market_cap_ref_mut, market_cap_decrease);
         };
 
         // Update last swap info.
@@ -799,9 +851,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         provider: &signer,
         market_address: address,
         quote_amount: u64,
+        min_lp_coins_out: u64,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
 
         // Sanitize inputs, set up local variables.
+        assert!(min_lp_coins_out > 0, E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO);
         let (market_ref_mut, _) = get_market_ref_mut_and_signer_checked(market_address);
         assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
         let provider_address = signer::address_of(provider);
@@ -809,6 +863,10 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             provider_address,
             quote_amount,
             market_ref_mut,
+        );
+        assert!(
+            event.lp_coin_amount >= min_lp_coins_out,
+            E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET,
         );
         let registry_ref_mut = borrow_registry_ref_mut();
 
@@ -876,9 +934,11 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         provider: &signer,
         market_address: address,
         lp_coin_amount: u64,
+        min_quote_out: u64,
     ) acquires LPCoinCapabilities, Market, Registry, RegistryAddress {
 
         // Sanitize inputs, set up local variables.
+        assert!(min_quote_out > 0, E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO);
         let (market_ref_mut, market_signer) = get_market_ref_mut_and_signer_checked(market_address);
         assert_valid_coin_types<Emojicoin, EmojicoinLP>(market_address);
         let provider_address = signer::address_of(provider);
@@ -887,6 +947,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             lp_coin_amount,
             market_ref_mut,
         );
+        assert!(event.quote_amount >= min_quote_out, E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET);
         let registry_ref_mut = borrow_registry_ref_mut();
 
         // Get TVL before operations, use it to update periodic state.
@@ -899,8 +960,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let reserves_start = market_ref_mut.cpamm_real_reserves;
 
         // Transfer coins.
-        let base_total = event.base_amount + event.pro_rata_base_donation_claim_amount;
-        let quote_total = event.quote_amount + event.pro_rata_quote_donation_claim_amount;
+        let base_total = event.base_amount + event.base_donation_claim_amount;
+        let quote_total = event.quote_amount + event.quote_donation_claim_amount;
         coin::transfer<Emojicoin>(&market_signer, provider_address, base_total);
         coin::transfer<AptosCoin>(&market_signer, provider_address, quote_total);
 
@@ -1307,8 +1368,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             quote_amount,
             lp_coin_amount,
             liquidity_provided,
-            pro_rata_base_donation_claim_amount,
-            pro_rata_quote_donation_claim_amount,
+            base_donation_claim_amount,
+            quote_donation_claim_amount,
         } = liquidity;
         (
             market_id,
@@ -1319,8 +1380,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             quote_amount,
             lp_coin_amount,
             liquidity_provided,
-            pro_rata_base_donation_claim_amount,
-            pro_rata_quote_donation_claim_amount,
+            base_donation_claim_amount,
+            quote_donation_claim_amount,
         )
     }
 
@@ -1579,6 +1640,16 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
 
             fee
         };
+
+        // Set aside market registration deposit.
+        let can_pay_deposit =
+            coin::is_account_registered<AptosCoin>(registrant_address) &&
+            coin::balance<AptosCoin>(registrant_address) >= MARKET_REGISTRATION_DEPOSIT;
+        assert!(can_pay_deposit, E_UNABLE_TO_PAY_MARKET_REGISTRATION_DEPOSIT);
+        move_to(&market_signer, RegistrantDeposit {
+            market_registrant: registrant_address,
+            deposit: coin::withdraw<AptosCoin>(registrant, MARKET_REGISTRATION_DEPOSIT),
+        });
 
         // Move a registrant grace period flag to the market address.
         move_to(&market_signer, RegistrantGracePeriodFlag {
@@ -1879,6 +1950,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         let denominator = (input_amount as u128) + (denominator_addend as u128);
         assert!(denominator > 0, E_SWAP_DIVIDE_BY_ZERO);
         let result = numerator / denominator;
+        assert!(result > 0, E_SWAP_OUTPUT_AMOUNT_ZERO);
         (result as u64)
     }
 
@@ -2271,8 +2343,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             quote_amount,
             lp_coin_amount: (lp_coin_amount_u128 as u64),
             liquidity_provided: true,
-            pro_rata_base_donation_claim_amount: 0,
-            pro_rata_quote_donation_claim_amount: 0,
+            base_donation_claim_amount: 0,
+            quote_donation_claim_amount: 0,
         }
     }
 
@@ -2288,25 +2360,23 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
         assert!(lp_coin_amount > 0, E_LIQUIDITY_NO_LP_COINS);
 
         let reserves_ref = market_ref.cpamm_real_reserves;
-        let base_reserves_u128 = (reserves_ref.base as u128);
-        let quote_reserves_u128 = (reserves_ref.quote as u128);
+        let base_reserves = reserves_ref.base;
+        let quote_reserves = reserves_ref.quote;
+        let base_reserves_u128 = (base_reserves as u128);
+        let quote_reserves_u128 = (quote_reserves as u128);
 
         // Proportional base amount: (lp_coin_amount / lp_coin_supply) * (base_reserves).
         let base_amount = ((lp_coin_amount_u128 * base_reserves_u128 / lp_coin_supply) as u64);
+        assert!(base_amount > 0, E_REMOVE_LIQUIDITY_BASE_AMOUNT_ZERO);
 
         // Proportional quote amount: (lp_coin_amount / lp_coin_supply) * (quote_reserves).
         let quote_amount = ((lp_coin_amount_u128 * quote_reserves_u128 / lp_coin_supply) as u64);
+        assert!(quote_amount > 0, E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO);
 
-        // Check to see if base or quote donations have been sent to market coin stores.
+        // Disburse all base and quote donations.
         let market_address = market_ref.metadata.market_address;
-        let market_balance_base_u128 = (coin::balance<Emojicoin>(market_address) as u128);
-        let market_balance_quote_u128 = (coin::balance<AptosCoin>(market_address) as u128);
-        let base_donations_u128 = market_balance_base_u128 - base_reserves_u128;
-        let quote_donations_u128 = market_balance_quote_u128 - quote_reserves_u128;
-        let pro_rata_base_donation_claim_amount =
-            (((lp_coin_amount_u128 * base_donations_u128) / lp_coin_supply) as u64);
-        let pro_rata_quote_donation_claim_amount =
-            (((lp_coin_amount_u128 * quote_donations_u128) / lp_coin_supply) as u64);
+        let base_donation_claim_amount = coin::balance<Emojicoin>(market_address) - base_reserves;
+        let quote_donation_claim_amount = coin::balance<AptosCoin>(market_address) - quote_reserves;
 
         Liquidity {
             market_id: market_ref.metadata.market_id,
@@ -2317,8 +2387,8 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             quote_amount,
             lp_coin_amount,
             liquidity_provided: false,
-            pro_rata_base_donation_claim_amount,
-            pro_rata_quote_donation_claim_amount,
+            base_donation_claim_amount,
+            quote_donation_claim_amount,
         }
     }
 
@@ -2461,6 +2531,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     #[test_only] public fun get_MAX_CHAT_MESSAGE_LENGTH(): u64 { MAX_CHAT_MESSAGE_LENGTH }
     #[test_only] public fun get_MAX_SYMBOL_LENGTH(): u8 { MAX_SYMBOL_LENGTH }
     #[test_only] public fun get_MARKET_REGISTRATION_FEE(): u64 { MARKET_REGISTRATION_FEE }
+    #[test_only] public fun get_MARKET_REGISTRATION_DEPOSIT(): u64 { MARKET_REGISTRATION_DEPOSIT }
     #[test_only] public fun get_MICROSECONDS_PER_SECOND(): u64 { MICROSECONDS_PER_SECOND }
     #[test_only] public fun get_PERIOD_1M(): u64 { PERIOD_1M }
     #[test_only] public fun get_PERIOD_5M(): u64 { PERIOD_5M }
