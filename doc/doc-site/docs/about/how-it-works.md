@@ -43,7 +43,8 @@ blockchain.
 
 ### First steps: launch your emojicoin
 
-Launching an emojicoin costs just 1 APT! Note the following:
+Launching an emojicoin costs just 1 APT plus a 4 APT refundable deposit! Note
+the following:
 
 - Single emojis and emoji combinations are supported, as long as the total
   number of bytes is 10 or less.
@@ -51,17 +52,23 @@ Launching an emojicoin costs just 1 APT! Note the following:
   markets are canonical).
 - Emojis that became part of the [Unicode emoji library] after the launch of
   emojicoin.fun are not supported.
+- The 4 APT refundable deposit will be sent back to the market registrant once
+  the market exits the bonding curve.
+- After the market is registered, a 5 minute grace period begins, during which
+  only the market registrant may place the first swap. After the first swap or
+  5 minutes, whichever comes first, anyone can swap!
 
 ### Growing up: exiting the bonding curve
 
 As users buy or sell against the bonding curve, the market capitalization of the
 emojicoin changes. Once 1,000 APT of cumulative buy pressure has pushed the
 bonding curve up to a market capitalization up to 4,500 APT, the emojicoin
-leaves the bonding curve.
+leaves the bonding curve and the 4 APT deposit is automatically sent back to the
+market registrant.
 
 ### Going to college: emojicoin liquidity pools
 
-Once an emojicoin's market capitalization reaches 4,5000 APT, the underlying
+Once an emojicoin's market capitalization reaches 4,500 APT, the underlying
 market undergoes a state transition: the 1,000 APT that has been deposited into
 the bonding curve is transferred into an emojicoin CPAMM liquidity pool,
 alongside roughly 22.3% of the remaining emojicoin token supply that has not yet
