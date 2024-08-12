@@ -1,16 +1,19 @@
 #!/bin/sh
+
 TRADING_VIEW_SUBMODULE_PATH=public/static
-if [ "$TRADING_VIEW_REPO_OWNER" == "" ]; then
-	echo "Error: TRADING_VIEW_REPO_OWNER is empty. Please set it."
-	exit 1
-fi
-if [ "$GITHUB_ACCESS_TOKEN" == "" ]; then
-	echo "Error: GITHUB_ACCESS_TOKEN is empty. Please set it."
-	exit 1
-fi
 
 # Exit on any error.
 set -e
+
+test -n "$TRADING_VIEW_REPO_OWNER" || ( \
+	echo "Error: TRADING_VIEW_REPO_OWNER is empty. Please set it." && \
+	exit 1 \
+)
+
+test -n "$GITHUB_ACCESS_TOKEN" || ( \
+	echo "Error: GITHUB_ACCESS_TOKEN is empty. Please set it." && \
+	exit 1 \
+)
 
 # Set up an empty temporary work directory.
 rm -rf tmp || true
