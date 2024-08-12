@@ -23,7 +23,7 @@ A:  1 APT
 
 <!-- markdownlint-enable MD013 -->
 
-A:  45,000 APT
+A:  4,500 APT
 
 <!-- markdownlint-disable MD013 -->
 
@@ -31,7 +31,7 @@ A:  45,000 APT
 
 <!-- markdownlint-enable MD013 -->
 
-A:  10,000 APT
+A:  1,000 APT
 
 <!-- markdownlint-disable MD013 -->
 
