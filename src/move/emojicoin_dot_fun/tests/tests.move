@@ -3528,6 +3528,119 @@
         simulate_remove_liquidity<BlackCatEmojicoin>(USER, @black_cat_market, 1);
     }
 
+    #[test] fun simulate_swap_balance_before_zero_cases() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        disable_registrant_grace_period_check(@black_cat_market);
+
+        // Verify balance as fraction reported as 0 for no circulating supply.
+        let (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            balance_as_fraction_of_circulating_supply_before_q64,
+            _,
+        ) = unpack_swap(simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            USER,
+            @black_cat_market,
+            100,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        ));
+        assert!(balance_as_fraction_of_circulating_supply_before_q64 == 0, 0);
+
+        // Verify balance as fraction reported as 0 for user has none of circulating supply, and
+        // does not have coin type registered at account.
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, get_QUOTE_REAL_CEILING());
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
+            EXACT_TRANSITION_INPUT_AMOUNT,
+            SWAP_BUY,
+            EXACT_TRANSITION_INTEGRATOR,
+            EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
+            1,
+        );
+        let (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            balance_as_fraction_of_circulating_supply_before_q64,
+            _,
+        ) = unpack_swap(simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            USER,
+            @black_cat_market,
+            100,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        ));
+        assert!(balance_as_fraction_of_circulating_supply_before_q64 == 0, 0);
+
+        // Verify balance as fraction reported as 0 for user has none of circulating supply, and
+        // does have coin type registered at account.
+        aptos_account::transfer_coins<BlackCatEmojicoin>(
+            &get_signer(EXACT_TRANSITION_USER),
+            USER,
+            get_BASE_REAL_CEILING(),
+        );
+        let (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            balance_as_fraction_of_circulating_supply_before_q64,
+            _,
+        ) = unpack_swap(simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            EXACT_TRANSITION_USER,
+            @black_cat_market,
+            100,
+            SWAP_BUY,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        ));
+        assert!(balance_as_fraction_of_circulating_supply_before_q64 == 0, 0);
+    }
+
     #[test, expected_failure(
         abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
         location = emojicoin_dot_fun::emojicoin_dot_fun,
