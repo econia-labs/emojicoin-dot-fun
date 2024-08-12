@@ -8,3 +8,5 @@
 *.out
 *.pdf
 *.synctex.gz
+
+!emojicoin-dot-fun-blackpaper.pdf
