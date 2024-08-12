@@ -36,6 +36,7 @@ export interface EmojiTableProps {
   page: number;
   sortBy?: MarketDataSortByHomePage;
   searchBytes?: string;
+  geoblocked: boolean
 }
 
 const EmojiTable = (props: EmojiTableProps) => {
@@ -122,7 +123,7 @@ const EmojiTable = (props: EmojiTableProps) => {
             }}
           >
             <SearchWrapper>
-              <SearchBar />
+              <SearchBar geoblocked={props.geoblocked} />
             </SearchWrapper>
             <FilterOptionsWrapper>
               <FilterOptions

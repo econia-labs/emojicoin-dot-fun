@@ -170,7 +170,7 @@ const ChatBox = (props: ChatProps) => {
         </motion.div>
       </Flex>
 
-      <EmojiPickerWithInput handleClick={sendChatMessage} pickerButtonClassName={pickerClass} />
+      <EmojiPickerWithInput geoblocked={props.geoblocked} handleClick={sendChatMessage} pickerButtonClassName={pickerClass} />
     </Column>
   );
 };

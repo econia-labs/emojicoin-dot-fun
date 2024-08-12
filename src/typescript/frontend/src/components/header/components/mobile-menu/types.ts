@@ -4,4 +4,5 @@ export interface MobileMenuProps {
   isOpen: boolean;
   setIsOpen: (arg: boolean) => void;
   linksForCurrentPage: (typeof NAVIGATE_LINKS)[number][];
+  geoblocked: boolean;
 }

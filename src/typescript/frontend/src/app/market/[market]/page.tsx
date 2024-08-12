@@ -21,6 +21,7 @@ const SWAP_DATA_ROWS = 100;
  */
 type StaticParams = {
   market: string;
+  geoblocked: boolean;
 };
 
 interface EmojicoinPageProps {
@@ -53,6 +54,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
           marketView,
           ...res,
         }}
+        geoblocked={params.params.geoblocked}
       />
     );
   }

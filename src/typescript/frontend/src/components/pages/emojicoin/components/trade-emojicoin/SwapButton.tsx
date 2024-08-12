@@ -19,12 +19,14 @@ export const SwapButton = ({
   marketAddress,
   setSubmit,
   disabled,
+  geoblocked,
 }: {
   inputAmount: bigint | number | string;
   isSell: boolean;
   marketAddress: AccountAddressString;
   setSubmit: Dispatch<SetStateAction<(() => Promise<void>) | null>>;
   disabled?: boolean;
+  geoblocked: boolean;
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
@@ -67,7 +69,7 @@ export const SwapButton = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback>
+      <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
         <Button disabled={disabled} onClick={handleClick} scale="lg">
           {t("Swap")}
         </Button>

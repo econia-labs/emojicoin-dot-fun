@@ -26,6 +26,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
   setIsOpen,
   linksForCurrentPage,
+  geoblocked,
 }) => {
   const { wallet, account, disconnect } = useWallet();
   const { copyAddress } = useAptos();
@@ -95,6 +96,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       <MobileMenuWrapper>
         <MobileMenuInner>
           <ButtonWithConnectWalletFallback
+            geoblocked={geoblocked}
             className="w-full"
             mobile={true}
             onClick={subMenuOnClick}

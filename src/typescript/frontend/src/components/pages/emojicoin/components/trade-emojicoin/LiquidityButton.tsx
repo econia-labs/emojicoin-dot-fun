@@ -26,7 +26,7 @@ export const LiquidityButton = (props: GridProps) => {
         </StyledContentHeader>
       ) : (
         <StyledContentHeader className="!p-0">
-          <AnimatedProgressBar data={props.data} />
+          <AnimatedProgressBar geoblocked={props.geoblocked} data={props.data} />
         </StyledContentHeader>
       )}
     </>

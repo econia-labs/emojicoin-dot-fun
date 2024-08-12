@@ -1,44 +1,57 @@
-import { LazyPromise } from "@sdk/utils";
-import { GEOBLOCKING_ENABLED } from "lib/env";
+import { GEOBLOCKED, GEOBLOCKING_ENABLED, VPNAPI_IO_API_KEY } from "lib/server-env";
 
-const COUNTRY_CACHING_DURATION = 1000 * 60 * 60 * 24; // One day.
-const COUNTRY_LOCALSTORAGE_KEY = "user-country";
-export const COUNTRY_UNKNOWN = "unknown";
-
-type LocationCache = {
-  country: string;
-  expiry: number;
+export type Location = {
+    country: string,
+    region: string,
+    countryCode: string,
+    regionCode: string,
+    vpn: boolean,
 };
 
-const isAllowedCountry = (country: string) => {
-  return country !== "US" && country !== "KP" && country !== "IR" && country !== COUNTRY_UNKNOWN;
-};
-
-const getCountry: () => Promise<string> = async () => {
-  const cache = localStorage.getItem(COUNTRY_LOCALSTORAGE_KEY);
-
-  if (cache) {
-    const data: LocationCache = JSON.parse(cache);
-    if (data.expiry > new Date().getTime()) {
-      return data.country;
-    }
+const isAllowedLocation = (location: Location) => {
+  if(GEOBLOCKED.countries.includes(location.countryCode)) {
+    return false;
   }
+  const isoCode = `${location.countryCode}-${location.regionCode}`;
+  if(GEOBLOCKED.regions.includes(isoCode)) {
+    return false;
+  }
+  return true;
+};
 
-  const queryResult = await fetch("/geolocation").then((res) => res.text());
+export const isBanned = async (ip: string | undefined | null) => {
+  if (!GEOBLOCKING_ENABLED) return false;
+  if (ip === "undefined" || typeof ip === "undefined" || ip === "null" || ip === null) {
+    return true;
+  }
+  let location: Location;
+  try {
+    location = await getLocation(ip)
+  } catch (_) {
+    return true;
+  }
+  if (location.vpn) {
+    return true;
+  }
+  const res = !isAllowedLocation(location);
+  return res;
+};
 
-  const data: LocationCache = {
-    country: queryResult,
-    expiry: new Date().getTime() + COUNTRY_CACHING_DURATION,
+const ONE_DAY = 604800;
+
+const getLocation: (ip: string) => Promise<Location> = async (ip) => {
+  if (ip === "undefined" || typeof ip === "undefined") {
+    throw "IP is undefined";
+  }
+  const queryResult = await fetch(`https://vpnapi.io/api/${ip}?key=${VPNAPI_IO_API_KEY}`, {next: {revalidate: ONE_DAY}}).then((res) => res.json());
+
+  const data = {
+    country: queryResult.location.country,
+    region: queryResult.location.region,
+    countryCode: queryResult.location.country_code,
+    regionCode: queryResult.location.region_code,
+    vpn: queryResult.security.vpn,
   };
 
-  localStorage.setItem(COUNTRY_LOCALSTORAGE_KEY, JSON.stringify(data));
-
-  return queryResult;
-};
-
-const country: LazyPromise<string> = new LazyPromise(() => getCountry());
-
-export const isBanned = async () => {
-  if (!GEOBLOCKING_ENABLED) return false;
-  return !isAllowedCountry(await country.get());
-};
+  return data;
+}

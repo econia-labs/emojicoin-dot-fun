@@ -9,7 +9,7 @@ import { EXTERNAL_LINK_PROPS } from "components/link";
 import { useScramble } from "use-scramble";
 import { motion } from "framer-motion";
 
-export const ClientVerifyPage = () => {
+export const ClientVerifyPage: React.FC<{geoblocked: boolean}> = ({geoblocked}) => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [verified, setVerified] = useState<boolean | null>(null);
@@ -81,7 +81,7 @@ export const ClientVerifyPage = () => {
                 <span ref={backRef}>Back</span>
               </motion.div>
             )}
-            <ButtonWithConnectWalletFallback>
+            <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
               <div className="flex flex-row uppercase">
                 <span className="px-2.5">{"{"}</span>
                 <a

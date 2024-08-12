@@ -20,9 +20,8 @@ import { useSearchParams } from "next/navigation";
 import Link, { type LinkProps } from "next/link";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { GeoblockedBanner } from "components/geoblocking";
-import useIsBanned from "@hooks/use-is-banned";
 
-const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
+const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen, geoblocked }) => {
   const { isDesktop } = useMatchBreakpoints();
   const { t } = translationFunction();
   const searchParams = useSearchParams();
@@ -57,8 +56,6 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
       },
     };
   }, [searchParams, handleCloseMobileMenu, clear]);
-
-  const isBanned = useIsBanned();
 
   return (
     <StyledContainer ref={headerRef}>
@@ -99,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
                   </Link>
                 );
               })}
-              <ButtonWithConnectWalletFallback>
+              <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
                 <WalletDropdownMenu />
               </ButtonWithConnectWalletFallback>
             </FlexGap>
@@ -112,8 +109,8 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen }) => {
           )}
         </Flex>
       </Container>
-      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={linksForCurrentPage} />
-      {isBanned && <GeoblockedBanner />}
+      <MobileMenu geoblocked={geoblocked} isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={linksForCurrentPage} />
+      {geoblocked && <GeoblockedBanner />}
     </StyledContainer>
   );
 };

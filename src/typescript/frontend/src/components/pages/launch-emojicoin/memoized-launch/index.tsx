@@ -19,7 +19,7 @@ const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray upp
 const ESTIMATED_GAS_REQUIREMENT = 300000;
 const ESTIMATED_TOTAL_COST = Number(MARKET_REGISTRATION_FEE) + ESTIMATED_GAS_REQUIREMENT;
 
-export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
+export const MemoizedLaunchAnimation = ({ loading, geoblocked }: { loading: boolean, geoblocked: boolean }) => {
   // Maybe it's this...? Maybe we need to memoize this value.
   const { t } = translationFunction();
   const emojis = useEmojiPicker((state) => state.emojis);
@@ -68,6 +68,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
           <div className="flex relative mb-1">
             <div className="flex flex-col grow relative w-full">
               <EmojiPickerWithInput
+                geoblocked={geoblocked}
                 handleClick={handleClick}
                 pickerButtonClassName="top-[220px] bg-black"
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
@@ -134,6 +135,7 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
             }}
           >
             <LaunchButtonOrGoToMarketLink
+              geoblocked={geoblocked}
               invalid={invalid || !sufficientBalance}
               registered={registered}
               onWalletButtonClick={() => {
