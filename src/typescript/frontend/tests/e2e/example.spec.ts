@@ -1,4 +1,5 @@
 import { test, expect, Response } from '@playwright/test';
+import { REVALIDATE_TEST } from "../../src/const";
 
 const sleep = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -7,7 +8,7 @@ const sleep = (ms: number) => {
 const NEXTJS_CACHE_HEADER = "x-nextjs-cache";
 
 test('api test route', async ({ page }) => {
-  const numeicRegex = /^[0-9]+$/;
+  const numericRegex = /^[0-9]+$/;
 
   let res1: Response;
   let res1headers: {
@@ -31,12 +32,12 @@ test('api test route', async ({ page }) => {
   } while (res1headers[NEXTJS_CACHE_HEADER] === "STALE");
   const res1text = await res1.text();
 
-  expect(res1text).toMatch(numeicRegex)
+  expect(res1text).toMatch(numericRegex)
 
   // Query a second time after a second.
   //
   // This should hit cache and be the same value as before.
-  await sleep(1000);
+  await sleep(REVALIDATE_TEST / 2 * 1000);
   const res2 = await page.goto('/test');
   const res2headers = res2.headers();
   const res2text = await res2.text();
@@ -50,14 +51,14 @@ test('api test route', async ({ page }) => {
   // have the cache header set to "STALE". Despite that, because of the "serve
   // stale value while generating new one" caching policy, this value should be
   // the same as the previous one.
-  await sleep(1200);
+  await sleep(REVALIDATE_TEST / 2 * 1.2 * 1000);
 
   const res3 = await page.goto('/test');
   const res3headers = res3.headers();
   const res3text = await res3.text();
 
   expect(res3headers[NEXTJS_CACHE_HEADER]).toBe("STALE");
-  expect(res3text).toMatch(numeicRegex);
+  expect(res3text).toMatch(numericRegex);
   expect(res3text).toBe(res2text);
 
   // Query a fourth time.
@@ -73,7 +74,7 @@ test('api test route', async ({ page }) => {
   const res4text = await res4.text();
 
   expect(res4headers[NEXTJS_CACHE_HEADER]).toBe("HIT");
-  expect(res4text).toMatch(numeicRegex);
+  expect(res4text).toMatch(numericRegex);
 
   expect(BigInt(res1text)).toBeLessThan(BigInt(res4text));
 });

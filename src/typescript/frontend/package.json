@@ -99,11 +99,12 @@
     "format:check": "pnpm _format --check",
     "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",
+    "prepare": "./submodule.sh && pnpm i && pnpm exec playwright install",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
     "start": "next start --port 3001",
-    "vercel-install": "./vercel-submodule.sh && pnpm i"
+    "vercel-install": "./submodule.sh && pnpm i"
   },
   "version": "0.0.1-alpha"
 }
