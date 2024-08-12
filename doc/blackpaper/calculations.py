@@ -3,7 +3,7 @@ from math import isclose, sqrt
 
 A = 10_000.0
 R = 3.5**2
-T = 10_000.0
+T = 1_000.0
 
 F_P = 25.0
 
