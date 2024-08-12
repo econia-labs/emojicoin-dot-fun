@@ -407,6 +407,8 @@
         pool_fee: u64,
         starts_in_bonding_curve: bool,
         results_in_state_transition: bool,
+        balance_as_fraction_of_circulating_supply_before_q64: u128,
+        balance_as_fraction_of_circulating_supply_after_q64: u128,
     }
 
     struct ProvideLiquidityTestFlow has copy, drop, store {
@@ -956,6 +958,8 @@
             pool_fee,
             starts_in_bonding_curve,
             results_in_state_transition,
+            balance_as_fraction_of_circulating_supply_before_q64,
+            balance_as_fraction_of_circulating_supply_after_q64,
         ) = unpack_swap(swap);
         assert!(market_id == mock_swap.market_id, 0);
         assert!(time == mock_swap.time, 0);
@@ -973,6 +977,16 @@
         assert!(pool_fee == mock_swap.pool_fee, 0);
         assert!(starts_in_bonding_curve == mock_swap.starts_in_bonding_curve, 0);
         assert!(results_in_state_transition == mock_swap.results_in_state_transition, 0);
+        assert!(
+            balance_as_fraction_of_circulating_supply_before_q64 ==
+                mock_swap.balance_as_fraction_of_circulating_supply_before_q64,
+            0
+        );
+        assert!(
+            balance_as_fraction_of_circulating_supply_after_q64 ==
+                mock_swap.balance_as_fraction_of_circulating_supply_after_q64,
+            0
+        );
     }
 
     public fun assert_test_market_address(
@@ -1456,6 +1470,9 @@
             pool_fee: 0,
             starts_in_bonding_curve: true,
             results_in_state_transition: true,
+            balance_as_fraction_of_circulating_supply_before_q64: 0,
+            balance_as_fraction_of_circulating_supply_after_q64:
+                ((base_volume as u128) << 64) / (base_volume as u128),
         }
     }
 
@@ -1487,6 +1504,9 @@
             pool_fee: 0,
             starts_in_bonding_curve: true,
             results_in_state_transition: false,
+            balance_as_fraction_of_circulating_supply_before_q64: 0,
+            balance_as_fraction_of_circulating_supply_after_q64:
+                ((base_volume as u128) << 64) / (base_volume as u128),
         }
     }
 
@@ -1570,7 +1590,7 @@
         init_market(vector[BLACK_CAT]);
         mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
         let market_address = base_market_metadata().market_address;
-        let simulated_swap = simulate_swap(
+        let simulated_swap = simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             EXACT_TRANSITION_USER,
             market_address,
             EXACT_TRANSITION_INPUT_AMOUNT,
@@ -1597,7 +1617,7 @@
         init_market(vector[BLACK_CAT]);
         mint_aptos_coin_to(SIMPLE_BUY_USER, SIMPLE_BUY_INPUT_AMOUNT);
         let market_address = base_market_metadata().market_address;
-        let simulated_swap = simulate_swap(
+        let simulated_swap = simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             SIMPLE_BUY_USER,
             market_address,
             SIMPLE_BUY_INPUT_AMOUNT,
@@ -1698,7 +1718,7 @@
         // Update global time, simulate swap, then execute swap.
         timestamp::update_global_time_for_test(GENERAL_CASE_SWAP_TIME);
         let market_address = base_market_metadata().market_address;
-        let simulated_swap = simulate_swap(
+        let simulated_swap = simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             USER,
             market_address,
             flow.input_amount,
@@ -1746,6 +1766,26 @@
         let market_aptos_coin_balance = result.market_aptos_coin_balance;
         let market_emojicoin_balance = result.market_emojicoin_balance;
         let avg_execution_price_q64 = ((quote_volume as u128) << 64) / (base_volume as u128);
+        let balance_before = if (flow.is_sell) {
+            flow.input_amount
+        } else {
+            0
+        };
+        let balance_after = if (flow.is_sell) {
+            balance_before - flow.input_amount
+        } else {
+            balance_before + net_proceeds
+        };
+        let circulating_supply_before = if (flow.setup_is_simple_buy) {
+            base_swap_simple_buy().base_volume
+        } else {
+            base_swap_exact_transition().base_volume
+        };
+        let circulating_supply_after = if (flow.is_sell) {
+            circulating_supply_before - flow.input_amount
+        } else {
+            circulating_supply_before + base_volume
+        };
 
         // Determine if ends in bonding curve, LP coins/instantaneous stats.
         let ends_in_bonding_curve = starts_in_bonding_curve && !results_in_state_transition;
@@ -1790,6 +1830,11 @@
             pool_fee: if (flow.is_sell) pool_fee_quote else pool_fee_base,
             starts_in_bonding_curve,
             results_in_state_transition,
+            balance_as_fraction_of_circulating_supply_before_q64:
+                ((balance_before as u128) << 64) / (circulating_supply_before as u128),
+            balance_as_fraction_of_circulating_supply_after_q64:
+                if (circulating_supply_after == 0) 0 else
+                ((balance_after as u128) << 64) / (circulating_supply_after as u128),
         };
         let mock_market_view = MockMarketView {
             metadata: setup_market_view.metadata,
@@ -3576,7 +3621,7 @@
         abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
         location = emojicoin_dot_fun::emojicoin_dot_fun,
     )] fun simulate_swap_no_market() {
-        simulate_swap(
+        simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             USER,
             @0x0,
             1,
@@ -3591,7 +3636,7 @@
         location = emojicoin_dot_fun::emojicoin_dot_fun,
     )] fun simulate_swap_no_size() {
         init_package_then_simple_buy();
-        simulate_swap(
+        simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             USER,
             base_market_metadata().market_address,
             0,
@@ -3737,8 +3782,8 @@
     }
 
     #[test, expected_failure(
-        abort_code = 65542, // 0x1 << 16 + 6, error:invalid_argument(EINSUFFICIENT_BALANCE)
-        location = aptos_framework::coin,
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_SWAP_NOT_ENOUGH_BASE,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
     )] fun swap_no_base() {
         init_package_then_simple_buy();
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
@@ -3973,6 +4018,8 @@
             swap_sell_1_quote_pool_fee,
             _,
             _,
+            _,
+            _,
         ) = unpack_swap(vector::pop_back(&mut emitted_events<Swap>()));
         assert!(swap_sell_1_price_q64 > exact_transition_price, 0);
 
@@ -4006,6 +4053,8 @@
             swap_buy_1_price_q64,
             swap_buy_1_integrator_fee,
             swap_buy_1_base_pool_fee,
+            _,
+            _,
             _,
             _,
         ) = unpack_swap(vector::pop_back(&mut emitted_events<Swap>()));
@@ -4173,6 +4222,8 @@
             swap_buy_2_base_pool_fee,
             _,
             _,
+            _,
+            _,
         ) = unpack_swap(vector::pop_back(&mut emitted_events<Swap>()));
         assert!(swap_buy_2_price_q64 > swap_sell_1_price_q64, 0);
 
@@ -4242,6 +4293,8 @@
             swap_sell_2_quote_volume,
             swap_sell_2_price_q64,
             swap_sell_2_integrator_fee,
+            _,
+            _,
             _,
             _,
             _,

@@ -132,7 +132,9 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     /// Remove liquidity operation results in a base amount of zero.
     const E_REMOVE_LIQUIDITY_BASE_AMOUNT_ZERO: u64 = 25;
     /// Remove liquidity operation results in a quote amount of zero.
-    const E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO: u64 = 25;
+    const E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO: u64 = 26;
+    /// User does not have enough base for swap sell.
+    const E_SWAP_NOT_ENOUGH_BASE: u64 = 27;
 
     /// Exists at package address, tracks the address of the registry object.
     struct RegistryAddress has key {
@@ -1748,6 +1750,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
             base_volume = input_amount;
             quote_volume = amm_quote_output - pool_fee - integrator_fee;
             net_proceeds = quote_volume;
+            assert!(input_amount <= balance_before, E_SWAP_NOT_ENOUGH_BASE);
             balance_after = balance_before - input_amount;
             circulating_supply_after = circulating_supply_before - input_amount;
         } else { // If buying, there may be a state transition.
