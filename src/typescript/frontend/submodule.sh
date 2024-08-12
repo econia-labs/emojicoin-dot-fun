@@ -1,11 +1,11 @@
 #!/bin/sh
 TRADING_VIEW_SUBMODULE_PATH=public/static
 if [ "$TRADING_VIEW_REPO_OWNER" == "" ]; then
-	echo "Error: TRADING_VIEW_REPO_OWNER is empty. Set it in vercel."
+	echo "Error: TRADING_VIEW_REPO_OWNER is empty. Please set it."
 	exit 1
 fi
 if [ "$GITHUB_ACCESS_TOKEN" == "" ]; then
-	echo "Error: GITHUB_ACCESS_TOKEN is empty. Set it in vercel."
+	echo "Error: GITHUB_ACCESS_TOKEN is empty. Please set it."
 	exit 1
 fi
 
