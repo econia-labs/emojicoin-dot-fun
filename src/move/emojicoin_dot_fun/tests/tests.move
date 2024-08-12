@@ -3528,6 +3528,35 @@
         simulate_remove_liquidity<BlackCatEmojicoin>(USER, @black_cat_market, 1);
     }
 
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun simulate_swap_no_market() {
+        simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            USER,
+            @0x0,
+            1,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_SWAP_INPUT_ZERO,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun simulate_swap_no_size() {
+        init_package_then_simple_buy();
+        simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            USER,
+            base_market_metadata().market_address,
+            0,
+            SWAP_SELL,
+            INTEGRATOR,
+            INTEGRATOR_FEE_RATE_BPS,
+        );
+    }
+
     #[test] fun supported_symbol_emojis() {
         init_package();
         let various_emojis = vector<vector<u8>> [
@@ -3614,35 +3643,6 @@
                 @yellow_heart_market
             ),
             0,
-        );
-    }
-
-    #[test, expected_failure(
-        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_NO_MARKET,
-        location = emojicoin_dot_fun::emojicoin_dot_fun,
-    )] fun simulate_swap_no_market() {
-        simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            USER,
-            @0x0,
-            1,
-            SWAP_SELL,
-            INTEGRATOR,
-            INTEGRATOR_FEE_RATE_BPS,
-        );
-    }
-
-    #[test, expected_failure(
-        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_SWAP_INPUT_ZERO,
-        location = emojicoin_dot_fun::emojicoin_dot_fun,
-    )] fun simulate_swap_no_size() {
-        init_package_then_simple_buy();
-        simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            USER,
-            base_market_metadata().market_address,
-            0,
-            SWAP_SELL,
-            INTEGRATOR,
-            INTEGRATOR_FEE_RATE_BPS,
         );
     }
 
