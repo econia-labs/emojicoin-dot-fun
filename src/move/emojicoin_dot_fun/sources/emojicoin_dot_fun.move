@@ -123,7 +123,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO: u64 = 20;
     /// Provide liquidity operation minimum LP coin amount not met.
     const E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET: u64 = 21;
-    /// Remove liquidity operation minimum quote amount speified as zero.
+    /// Remove liquidity operation minimum quote amount specified as zero.
     const E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO: u64 = 22;
     /// Remove liquidity operation minimum quote amount not met.
     const E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET: u64 = 23;

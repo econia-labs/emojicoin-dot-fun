@@ -2073,7 +2073,7 @@ Remove liquidity operation minimum quote amount not met.
 
 <a id="0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO"></a>
 
-Remove liquidity operation minimum quote amount speified as zero.
+Remove liquidity operation minimum quote amount specified as zero.
 
 
 <pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO">E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO</a>: u64 = 22;
