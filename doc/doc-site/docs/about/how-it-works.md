@@ -62,9 +62,9 @@ the following:
 
 As users buy or sell against the bonding curve, the market capitalization of the
 emojicoin changes. Once 1,000 APT of cumulative buy pressure has pushed the
-bonding curve up to a market capitalization up to 4,500 APT, the emojicoin
-leaves the bonding curve and the 4 APT deposit is automatically sent back to the
-market registrant.
+bonding curve up to a market capitalization of 4,500 APT, the emojicoin leaves
+the bonding curve and the 4 APT deposit is automatically sent back to the market
+registrant.
 
 ### Going to college: emojicoin liquidity pools
 
