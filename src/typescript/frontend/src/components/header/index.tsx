@@ -109,7 +109,12 @@ const Header: React.FC<HeaderProps> = ({ isOpen, setIsOpen, geoblocked }) => {
           )}
         </Flex>
       </Container>
-      <MobileMenu geoblocked={geoblocked} isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={linksForCurrentPage} />
+      <MobileMenu
+        geoblocked={geoblocked}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        linksForCurrentPage={linksForCurrentPage}
+      />
       {geoblocked && <GeoblockedBanner />}
     </StyledContainer>
   );

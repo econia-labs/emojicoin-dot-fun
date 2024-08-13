@@ -31,7 +31,10 @@ import { isMobile, isTablet } from "react-device-detect";
 
 enableMapSet();
 
-const ThemedApp: React.FC<{ children: React.ReactNode, geoblocked: boolean }> = ({ children, geoblocked }) => {
+const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
+  children,
+  geoblocked,
+}) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
@@ -76,7 +79,11 @@ const ThemedApp: React.FC<{ children: React.ReactNode, geoblocked: boolean }> = 
                     <Suspense fallback={<Loader />}>
                       <StyledToaster />
                       <ContentWrapper>
-                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} geoblocked={geoblocked} />
+                        <Header
+                          isOpen={isMobileMenuOpen}
+                          setIsOpen={setIsOpen}
+                          geoblocked={geoblocked}
+                        />
                         {children}
                         <Footer />
                       </ContentWrapper>
@@ -92,7 +99,10 @@ const ThemedApp: React.FC<{ children: React.ReactNode, geoblocked: boolean }> = 
   );
 };
 
-const Providers: React.FC<{ children: React.ReactNode, geoblocked: boolean }> = ({ children, geoblocked }) => {
+const Providers: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
+  children,
+  geoblocked,
+}) => {
   const [p, setP] = useState(false);
 
   // Hack for now because I'm unsure how to get rid of the warning.

@@ -36,7 +36,7 @@ export interface EmojiTableProps {
   page: number;
   sortBy?: MarketDataSortByHomePage;
   searchBytes?: string;
-  geoblocked: boolean
+  geoblocked: boolean;
 }
 
 const EmojiTable = (props: EmojiTableProps) => {

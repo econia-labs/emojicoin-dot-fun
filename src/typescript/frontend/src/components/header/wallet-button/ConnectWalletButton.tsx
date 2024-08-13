@@ -84,7 +84,12 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
           className={`flex flex-row text-${geoblocked ? "dark-gray" : "ec-blue"} text-2xl justify-between`}
         >
           <div className="flex flex-row">
-            <OuterConnectText geoblocked={geoblocked} side="left" connected={connected} mobile={mobile} />
+            <OuterConnectText
+              geoblocked={geoblocked}
+              side="left"
+              connected={connected}
+              mobile={mobile}
+            />
             <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>
               <span
                 className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
@@ -92,7 +97,12 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
                 ref={ref}
               />
             </div>
-            <OuterConnectText geoblocked={geoblocked} side="right" connected={connected} mobile={mobile} />
+            <OuterConnectText
+              geoblocked={geoblocked}
+              side="right"
+              connected={connected}
+              mobile={mobile}
+            />
           </div>
           <Arrow width={18} className="fill-black" />
         </div>

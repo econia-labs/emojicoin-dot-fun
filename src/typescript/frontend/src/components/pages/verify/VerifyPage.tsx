@@ -9,7 +9,7 @@ import { EXTERNAL_LINK_PROPS } from "components/link";
 import { useScramble } from "use-scramble";
 import { motion } from "framer-motion";
 
-export const ClientVerifyPage: React.FC<{geoblocked: boolean}> = ({geoblocked}) => {
+export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [verified, setVerified] = useState<boolean | null>(null);

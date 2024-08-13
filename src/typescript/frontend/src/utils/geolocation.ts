@@ -1,19 +1,19 @@
 import { GEOBLOCKED, GEOBLOCKING_ENABLED, VPNAPI_IO_API_KEY } from "lib/server-env";
 
 export type Location = {
-    country: string,
-    region: string,
-    countryCode: string,
-    regionCode: string,
-    vpn: boolean,
+  country: string;
+  region: string;
+  countryCode: string;
+  regionCode: string;
+  vpn: boolean;
 };
 
 const isAllowedLocation = (location: Location) => {
-  if(GEOBLOCKED.countries.includes(location.countryCode)) {
+  if (GEOBLOCKED.countries.includes(location.countryCode)) {
     return false;
   }
   const isoCode = `${location.countryCode}-${location.regionCode}`;
-  if(GEOBLOCKED.regions.includes(isoCode)) {
+  if (GEOBLOCKED.regions.includes(isoCode)) {
     return false;
   }
   return true;
@@ -26,7 +26,7 @@ export const isBanned = async (ip: string | undefined | null) => {
   }
   let location: Location;
   try {
-    location = await getLocation(ip)
+    location = await getLocation(ip);
   } catch (_) {
     return true;
   }
@@ -43,7 +43,9 @@ const getLocation: (ip: string) => Promise<Location> = async (ip) => {
   if (ip === "undefined" || typeof ip === "undefined") {
     throw "IP is undefined";
   }
-  const queryResult = await fetch(`https://vpnapi.io/api/${ip}?key=${VPNAPI_IO_API_KEY}`, {next: {revalidate: ONE_DAY}}).then((res) => res.json());
+  const queryResult = await fetch(`https://vpnapi.io/api/${ip}?key=${VPNAPI_IO_API_KEY}`, {
+    next: { revalidate: ONE_DAY },
+  }).then((res) => res.json());
 
   const data = {
     country: queryResult.location.country,
@@ -54,4 +56,4 @@ const getLocation: (ip: string) => Promise<Location> = async (ip) => {
   };
 
   return data;
-}
+};

@@ -24,7 +24,7 @@ export default async function HomePageComponent({
   sortBy,
   searchBytes,
   children,
-  geoblocked
+  geoblocked,
 }: HomePageProps) {
   return (
     <>

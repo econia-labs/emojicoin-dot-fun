@@ -19,7 +19,13 @@ const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray upp
 const ESTIMATED_GAS_REQUIREMENT = 300000;
 const ESTIMATED_TOTAL_COST = Number(MARKET_REGISTRATION_FEE) + ESTIMATED_GAS_REQUIREMENT;
 
-export const MemoizedLaunchAnimation = ({ loading, geoblocked }: { loading: boolean, geoblocked: boolean }) => {
+export const MemoizedLaunchAnimation = ({
+  loading,
+  geoblocked,
+}: {
+  loading: boolean;
+  geoblocked: boolean;
+}) => {
   // Maybe it's this...? Maybe we need to memoize this value.
   const { t } = translationFunction();
   const emojis = useEmojiPicker((state) => state.emojis);

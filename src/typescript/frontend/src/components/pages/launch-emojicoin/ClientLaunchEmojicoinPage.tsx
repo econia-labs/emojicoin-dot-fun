@@ -33,7 +33,7 @@ const lastMarketRegistration = (
   return undefined;
 };
 
-const ClientLaunchEmojicoinPage: React.FC<{geoblocked: boolean}> = ({geoblocked}) => {
+const ClientLaunchEmojicoinPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const searchParams = useSearchParams();
   const emojiParams = searchParams.get("emojis");
   const setEmojis = useEmojiPicker((state) => state.setEmojis);
