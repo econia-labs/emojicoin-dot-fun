@@ -320,7 +320,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
         if (get().guids.has(event.guid) && !event.guid.startsWith("Swap")) return;
         if (
           event.guid.startsWith("Swap") &&
-          (event as Types.SwapEvent).balanceAsFractionOfCirculatingSupply
+          typeof (event as Types.SwapEvent).balanceAsFractionOfCirculatingSupply === "bigint"
         ) {
           updateLocalStorage(event);
           return;
