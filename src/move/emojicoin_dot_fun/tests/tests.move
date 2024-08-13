@@ -2730,19 +2730,29 @@
         assert!(get_PERIOD_1D() == 24 * 60 * 60 * ms_per_s, 0);
     }
 
+    #[test] fun provide_liquidity_min_lp_coins_out_met_exactly() {
+        init_package_then_exact_transition();
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, get_QUOTE_REAL_CEILING());
+        provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
+            get_QUOTE_REAL_CEILING(),
+            get_LP_TOKENS_INITIAL(),
+        );
+    }
+
     #[test, expected_failure(
         abort_code =
             emojicoin_dot_fun::emojicoin_dot_fun::E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET,
         location = emojicoin_dot_fun::emojicoin_dot_fun,
-    )] fun provide_liquidity_min_lp_coins_out_not_met() {
+    )] fun provide_liquidity_min_lp_coins_out_not_met_just_barely() {
         init_package_then_exact_transition();
-        let quote_input_amount = 10;
-        mint_aptos_coin_to(EXACT_TRANSITION_USER, quote_input_amount);
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, get_QUOTE_REAL_CEILING());
         provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,
-            quote_input_amount,
-            100_000,
+            get_QUOTE_REAL_CEILING(),
+            get_LP_TOKENS_INITIAL() + 1,
         );
     }
 
@@ -3403,24 +3413,40 @@
         assert!(market_metadata_byes == concatenated_bytes, 0);
     }
 
-    #[test, expected_failure(
-        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET,
-        location = emojicoin_dot_fun::emojicoin_dot_fun,
-    )] fun remove_liquidity_min_quote_out_not_met() {
+    #[test] fun remove_liquidity_min_quote_out_met_exactly() {
         init_package_then_exact_transition();
-        let quote_liquidity = 1_000;
-        mint_aptos_coin_to(EXACT_TRANSITION_USER, quote_liquidity);
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, get_QUOTE_REAL_CEILING());
         provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,
-            quote_liquidity,
-            1,
+            get_QUOTE_REAL_CEILING(),
+            get_LP_TOKENS_INITIAL(),
         );
         remove_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(EXACT_TRANSITION_USER),
             @black_cat_market,
-            coin::balance<BlackCatEmojicoinLP>(EXACT_TRANSITION_USER),
-            quote_liquidity + 1,
+            get_LP_TOKENS_INITIAL(),
+            get_QUOTE_REAL_CEILING(),
+        );
+    }
+
+    #[test, expected_failure(
+        abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET,
+        location = emojicoin_dot_fun::emojicoin_dot_fun,
+    )] fun remove_liquidity_min_quote_out_not_met_just_barely() {
+        init_package_then_exact_transition();
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, get_QUOTE_REAL_CEILING());
+        provide_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
+            get_QUOTE_REAL_CEILING(),
+            get_LP_TOKENS_INITIAL(),
+        );
+        remove_liquidity<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(EXACT_TRANSITION_USER),
+            @black_cat_market,
+            get_LP_TOKENS_INITIAL(),
+            get_QUOTE_REAL_CEILING() + 1,
         );
     }
 
@@ -3860,21 +3886,38 @@
         );
     }
 
+    #[test] fun swap_min_output_met_exactly() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        disable_registrant_grace_period_check(@black_cat_market);
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
+        swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(EXACT_TRANSITION_USER),
+            base_market_metadata().market_address,
+            EXACT_TRANSITION_INPUT_AMOUNT,
+            SWAP_BUY,
+            EXACT_TRANSITION_INTEGRATOR,
+            EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
+            get_BASE_REAL_CEILING(),
+        );
+    }
+
     #[test, expected_failure(
         abort_code = emojicoin_dot_fun::emojicoin_dot_fun::E_SWAP_MIN_OUTPUT_NOT_MET,
         location = emojicoin_dot_fun::emojicoin_dot_fun,
-    )] fun swap_min_output_not_met() {
-        init_package_then_simple_buy();
-        let input_amount = 1_000;
-        mint_aptos_coin_to(USER, input_amount);
+    )] fun swap_min_output_not_met_just_barely() {
+        init_package();
+        init_market(vector[BLACK_CAT]);
+        disable_registrant_grace_period_check(@black_cat_market);
+        mint_aptos_coin_to(EXACT_TRANSITION_USER, EXACT_TRANSITION_INPUT_AMOUNT);
         swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
-            &get_signer(USER),
+            &get_signer(EXACT_TRANSITION_USER),
             base_market_metadata().market_address,
-            input_amount,
+            EXACT_TRANSITION_INPUT_AMOUNT,
             SWAP_BUY,
-            INTEGRATOR,
-            INTEGRATOR_FEE_RATE_BPS,
-            100_000_000_000_000,
+            EXACT_TRANSITION_INTEGRATOR,
+            EXACT_TRANSITION_INTEGRATOR_FEE_RATE_BPS,
+            get_BASE_REAL_CEILING() + 1,
         );
     }
 
