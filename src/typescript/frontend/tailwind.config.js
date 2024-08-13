@@ -76,14 +76,14 @@ module.exports = {
       },
       banCarousel: {
         "0%": { transform: "translateX(0)" },
-        "100%": { transform: "translateX(-5008.25px)" },
+        "100%": { transform: "translateX(-4825.46px)" },
       },
     },
     animation: {
       fadeIn: "fadeIn 2s ease-in-out forwards",
       flicker: "flicker 1s infinite",
       carousel: "carousel 88.407s linear infinite",
-      banCarousel: "banCarousel 97.787s linear infinite",
+      banCarousel: "banCarousel 94.218s linear infinite",
     },
   },
   plugins: [
