@@ -18,6 +18,11 @@ jobs:
         node-version: lts/*
     - name: Install dependencies
       run: npm install -g pnpm && pnpm install
+    - name: Prepare CI env
+      run: pnpm run playwright-preps
+      env:
+        GITHUB_ACCESS_TOKEN: ${{ secrets.TRADING_VIEW_REPO_ACCESS_TOKEN }}
+        TRADING_VIEW_REPO_OWNER: ${{ secrets.TRADING_VIEW_REPO_OWNER }}
     - name: Install Playwright Browsers
       run: pnpm exec playwright install --with-deps
     - name: Run Playwright tests

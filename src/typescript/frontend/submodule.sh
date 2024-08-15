@@ -10,8 +10,8 @@ test -n "$TRADING_VIEW_REPO_OWNER" || ( \
 	exit 1 \
 )
 
-test -n "$TRADING_VIEW_REPO_ACCESS_TOKEN" || ( \
-	echo "Error: TRADING_VIEW_REPO_ACCESS_TOKEN is empty. Please set it." && \
+test -n "$GITHUB_ACCESS_TOKEN" || ( \
+	echo "Error: GITHUB_ACCESS_TOKEN is empty. Please set it." && \
 	exit 1 \
 )
 
@@ -22,7 +22,7 @@ cd tmp
 
 # Check out submodule.
 git clone \
-	https://$TRADING_VIEW_REPO_ACCESS_TOKEN@github.com/$TRADING_VIEW_REPO_OWNER/charting_library.git \
+	https://$GITHUB_ACCESS_TOKEN@github.com/$TRADING_VIEW_REPO_OWNER/charting_library.git \
 	--branch master \
 	--depth 1
 
