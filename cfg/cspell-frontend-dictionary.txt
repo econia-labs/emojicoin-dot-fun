@@ -46,3 +46,4 @@ geoblocking
 geoblocked
 ipinfo
 localstorage
+vpnapi

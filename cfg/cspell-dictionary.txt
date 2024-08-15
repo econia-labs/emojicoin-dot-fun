@@ -31,6 +31,8 @@ fullnode
 futuna
 galxe
 gcloud
+geoblock
+geoblocked
 guids
 hamsa
 headlessui
@@ -80,6 +82,7 @@ turkiye
 unsubscription
 vercel
 viewports
+vpnapi
 websockets
 xbtmatt
 zustand
