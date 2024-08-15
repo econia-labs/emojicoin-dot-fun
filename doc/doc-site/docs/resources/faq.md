@@ -23,15 +23,15 @@ A:  1 APT
 
 <!-- markdownlint-enable MD013 -->
 
-A:  45,000 APT
+A:  4,500 APT
 
 <!-- markdownlint-disable MD013 -->
 
-**Q: Assuming nobody sells their tokens, how much buy pressure is required for the Emojicoin reach a 45,000 APT market cap?**
+**Q: Assuming nobody sells their tokens, how much buy pressure is required for the Emojicoin reach a 4,500 APT market cap?**
 
 <!-- markdownlint-enable MD013 -->
 
-A:  10,000 APT
+A:  1,000 APT
 
 <!-- markdownlint-disable MD013 -->
 
