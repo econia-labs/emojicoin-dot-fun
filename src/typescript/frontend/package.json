@@ -99,7 +99,7 @@
     "format:check": "pnpm _format --check",
     "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",
-    "prepare": "./submodule.sh && pnpm i && pnpm exec playwright install",
+    "playwright-preps": "./submodule.sh && pnpm i && pnpm exec playwright install",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
