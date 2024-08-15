@@ -1,13 +1,15 @@
 module rewards::emojicoin_dot_fun_rewards {
 
-    use std::signer;
-    use aptos_framework::account::{Self, SignerCapability};
-    use aptos_framework::aptos_account;
-    use aptos_framework::aptos_coin::AptosCoin;
-    use aptos_framework::coin;
-    use aptos_framework::event;
-    use aptos_framework::randomness;
-    use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
+    use std::vector;
+
+    //use std::signer;
+    use aptos_framework::account::SignerCapability;
+    //use aptos_framework::aptos_account;
+    //use aptos_framework::aptos_coin::AptosCoin;
+    //use aptos_framework::coin;
+    //use aptos_framework::event;
+    //use aptos_framework::randomness;
+    use emojicoin_dot_fun::emojicoin_dot_fun::Swap;
 
     /// Resource account address seed for the vault.
     const VAULT: vector<u8> = b"Vault";
@@ -15,16 +17,40 @@ module rewards::emojicoin_dot_fun_rewards {
     /// Flat integrator fee.
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
 
-    // APT amounts.
-    const REWARD_AMOUNT_IN_OCTAS: u64 = 100_000_000;
-    const VOLUME_THRESHOLD_IN_OCTAS: u64 = 990_000_000;
+    /// Basis points per nominal unit.
+    const BPS_PER_UNIT: u64 = 10_000;
 
-    // Randomness amounts.
-    const WIN_PERCENTAGE_NUMERATOR: u64 = 980;
-    const WIN_PERCENTAGE_DENOMINATOR: u64 = 10_000;
+    /// Nominal volume denominated in octas, representing the expected total volume corresponding to
+    /// the disbursement of all rewards.
+    const NOMINAL_VOLUME: u64 = 500_000_000_000_000;
+    /// Nominal total reward pool amount, representing amount of rewards expected to be disbursed
+    /// once nominal volume has been traded.
+    const NOMINAL_REWARDS: u64 = 500_000_000_000;
 
-    struct RewardsVaultSignerCapability has key {
+    const SHIFT_Q64: u8 = 64;
+
+    const NOMINAL_WINNERS_PER_TIER: vector<u64> = vector[
+        5_000,
+        500,
+        50,
+        5
+    ];
+    const REWARD_AMOUNTS_PER_TIER: vector<u64> = vector[
+        100_000_000,
+        1_000_000_000,
+        10_000_000_000,
+        100_000_000_000,
+    ];
+
+    struct RewardTier has store {
+        octas_per_reward: u64,
+        rewards_remaining: u64,
+        win_probability_per_octa_of_swap_fees_paid_q64: u128,
+    }
+
+    struct Vault has key {
         signer_capability: SignerCapability,
+        reward_tiers: vector<RewardTier>,
     }
 
     #[event]
@@ -33,6 +59,46 @@ module rewards::emojicoin_dot_fun_rewards {
         reward_amount: u64,
     }
 
+    fun calculate_probabilities(): vector<RewardTier> {
+        // Check tier count.
+        let n_tiers = vector::length(&NOMINAL_WINNERS_PER_TIER);
+        assert!(vector::length(&REWARD_AMOUNTS_PER_TIER) == n_tiers, 0);
+
+        // Check number of winners, total rewards.
+        let n_winners = 0;
+        let total_rewards = 0;
+        for (i in 0..n_tiers)  {
+            n_winners = n_winners + *vector::borrow(&NOMINAL_WINNERS_PER_TIER, i);
+            total_rewards = total_rewards + *vector::borrow(&REWARD_AMOUNTS_PER_TIER, i);
+        };
+        assert!(total_rewards == NOMINAL_REWARDS, 0);
+
+        // Check expected value of rewards against nominal fees paid.
+        let nominal_fees = (
+            (
+                (NOMINAL_VOLUME as u128) * (INTEGRATOR_FEE_RATE_BPS as u128) /
+                (BPS_PER_UNIT as u128)
+            ) as u64
+        );
+        assert!(total_rewards < nominal_fees, 0);
+
+        // Construct tiers.
+        let reward_tiers = vector[];
+        for (i in 0..n_tiers) {
+            vector::push_back(&mut reward_tiers, RewardTier {
+                octas_per_reward: *vector::borrow(&REWARD_AMOUNTS_PER_TIER, i),
+                rewards_remaining: 0,
+                win_probability_per_octa_of_swap_fees_paid_q64:
+                    (
+                        ((*vector::borrow(&NOMINAL_WINNERS_PER_TIER, i) as u128) << SHIFT_Q64) /
+                        (nominal_fees as u128)
+                    )
+            });
+        };
+        reward_tiers
+    }
+
+/*
     #[randomness]
     entry fun swap_with_rewards<Emojicoin, EmojicoinLP>(
         swapper: &signer,
@@ -86,7 +152,14 @@ module rewards::emojicoin_dot_fun_rewards {
 
     fun init_module(rewards: &signer) {
         let (vault_signer, signer_capability) = account::create_resource_account(rewards, VAULT);
-        move_to(rewards, RewardsVaultSignerCapability{ signer_capability });
+        move_to(rewards, RewardsVaultSignerCapability{
+            signer_capability,
+            prize_tiers: vector[
+                PrizeTier {
+                    octas_per_prize
+                }
+            ]
+        });
         coin::register<AptosCoin>(&vault_signer);
     }
 
@@ -99,4 +172,5 @@ module rewards::emojicoin_dot_fun_rewards {
         );
     }
 
+*/
 }
