@@ -78,6 +78,7 @@ tradingview
 turkiye
 unsubscription
 vercel
+viewports
 websockets
 xbtmatt
 zustand
