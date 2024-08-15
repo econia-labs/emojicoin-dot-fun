@@ -2,14 +2,14 @@ module rewards::emojicoin_dot_fun_rewards {
 
     use std::vector;
 
-    //use std::signer;
     use aptos_framework::account::{Self, SignerCapability};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
     //use aptos_framework::event;
     //use aptos_framework::randomness;
-    use emojicoin_dot_fun::emojicoin_dot_fun::Swap;
+    use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
+    use std::signer;
 
     /// Resource account address seed for the vault.
     const VAULT: vector<u8> = b"Vault";
@@ -153,18 +153,18 @@ module rewards::emojicoin_dot_fun_rewards {
         reward_tiers
     }
 
-/*
     #[randomness]
     entry fun swap_with_rewards<Emojicoin, EmojicoinLP>(
         swapper: &signer,
         market_address: address,
         input_amount: u64,
         is_sell: bool,
-    ) acquires RewardsVaultSignerCapability {
+        min_output_amount: u64,
+    ) {
 
-        // Simulate swap to get quote volume, then execute swap.
+        // Simulate swap to get integrator fee, then execute swap.
         let swapper_address = signer::address_of(swapper);
-        let swap = emojicoin_dot_fun::simulate_swap(
+        let swap = emojicoin_dot_fun::simulate_swap<Emojicoin, EmojicoinLP>(
             swapper_address,
             market_address,
             input_amount,
@@ -172,8 +172,9 @@ module rewards::emojicoin_dot_fun_rewards {
             @integrator,
             INTEGRATOR_FEE_RATE_BPS,
         );
-        let ( _, _, _, _, _, _, _, _, _, _, quote_volume, _, _, _, _, _) =
-            emojicoin_dot_fun::unpack_swap(swap);
+        let (
+             _, _, _, _, _, _, _, _, _, _, _, _, integrator_fee_in_octas, _, _, _, _, _,
+        ) = emojicoin_dot_fun::unpack_swap(swap);
         emojicoin_dot_fun::swap<Emojicoin, EmojicoinLP>(
             swapper,
             market_address,
@@ -181,8 +182,11 @@ module rewards::emojicoin_dot_fun_rewards {
             is_sell,
             @integrator,
             INTEGRATOR_FEE_RATE_BPS,
+            min_output_amount,
         );
+    }
 
+/*
         // Return if quote volume is below threshold, otherwise proceed to lottery.
         if (quote_volume < VOLUME_THRESHOLD_IN_OCTAS) return;
 
