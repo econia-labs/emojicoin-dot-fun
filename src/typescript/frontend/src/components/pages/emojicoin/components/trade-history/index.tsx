@@ -1,7 +1,6 @@
 import React, { type PropsWithChildren, useEffect, useMemo, useRef } from "react";
 
 import { type TradeHistoryProps } from "../../types";
-import { toCoinDecimalString } from "lib/utils/decimals";
 import { getRankFromSwapEvent } from "lib/utils/get-user-rank";
 import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { type Types } from "@sdk/types/types";
@@ -16,7 +15,7 @@ import "./trade-history.css";
 const HARD_LIMIT = 500;
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
-  ...getRankFromSwapEvent(Number(toCoinDecimalString(value.quoteVolume, 3))),
+  ...getRankFromSwapEvent((value.balanceAsFractionOfCirculatingSupply ?? 0) * 100),
   apt: value.quoteVolume.toString(),
   emoji: value.baseVolume.toString(),
   date: new Date(Number(value.time / 1000n)),
