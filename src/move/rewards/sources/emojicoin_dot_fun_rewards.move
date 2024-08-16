@@ -9,6 +9,7 @@ module rewards::emojicoin_dot_fun_rewards {
     use aptos_framework::event;
     use aptos_framework::randomness;
     use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
+    use std::option;
     use std::signer;
 
     /// Resource account address seed for the vault.
@@ -195,20 +196,18 @@ module rewards::emojicoin_dot_fun_rewards {
         // Get a random number between 0 and 1, represented as a Q64.
         let random_q64 = randomness::u128_range(0, 1 << SHIFT_Q64);
 
-        // Loop over all reward tiers in reverse order to provide reconciliation rewards for the
-        // next-highest tier in the case that the highest eligible tier has no rewards remaining.
-        // Only disburse rewards after looping over all tiers, to prevent undergassing attacks.
+        // Loop over all tiers in ascending order to determine the highest tier that the user is
+        // eligible to win, then disburse rewards at end. This method has the effect that the result
+        // with the highest economic payout requires the most gas, in order to prevent undergassing.
         let tiers_ref_mut = &mut vault_ref_mut.reward_tiers;
         let n_tiers = vector::length(tiers_ref_mut);
-        let octas_reward_amount = 0;
-        let eligible_for_reconciliation = false;
+        let highest_winning_tier_index = option::none();
         for (i in 0..n_tiers) {
-            let tier_index = n_tiers - i - 1;
-            let tier_ref_mut = vector::borrow_mut(tiers_ref_mut, tier_index);
+            let tier_ref = vector::borrow(tiers_ref_mut, i);
 
             // Get reward probability threshold for current tier based on integrator fees paid.
             let probability_per_octa_q64 =
-                tier_ref_mut.reward_probability_per_octa_of_swap_fees_paid_q64;
+                tier_ref.reward_probability_per_octa_of_swap_fees_paid_q64;
             let reward_threshold_q64 = ( // Q64 multiplication requires shifting at the end.
                 (
                     ((probability_per_octa_q64 as u256) * (integrator_fee_in_octas as u256))
@@ -216,31 +215,29 @@ module rewards::emojicoin_dot_fun_rewards {
                 ) as u128
             );
 
-            // User is eligible for rewards if they are eligible for reconciliation, or if they have
-            // not yet been rewarded and their random number is below the reward threshold.
-            let eligible_for_reward = eligible_for_reconciliation ||
-                (octas_reward_amount == 0 && random_q64 < reward_threshold_q64);
-
-            // But costs less gas to win big, because then not invoking this after winning at top
-            // tier.
-            if (eligible_for_reward) {
-                if (tier_ref_mut.n_rewards_remaining == 0) {
-                    eligible_for_reconciliation = true;
-                } else {
-                    tier_ref_mut.n_rewards_remaining = tier_ref_mut.n_rewards_remaining - 1;
-                    tier_ref_mut.n_rewards_disbursed = tier_ref_mut.n_rewards_disbursed + 1;
-                    octas_reward_amount = tier_ref_mut.apt_amount_per_reward * OCTAS_PER_APT;
-                    eligible_for_reconciliation = false;
-                }
+            // Check if user is eligible for reward at current tier by checking if tier still has
+            // rewards remaining, then compare random number to probability threshold. Since the
+            // logical check short-circuits, put the randomness check second such that the result
+            // with the highest economic payout requires the most gas.
+            if (tier_ref.n_rewards_remaining > 0 && random_q64 < reward_threshold_q64) {
+                highest_winning_tier_index = option::some(i);
             }
         };
 
-        if (octas_reward_amount > 0) {
+        // Disburse rewards after checking all reward tiers. Use a "not none" instead of a "some"
+        // check such that the result with the highest economic payout requires the most gas:
+        // disbursement effectively requires an additional GOTO statement (`BrFalse`) in bytecode
+        // for the false branch.
+        if (!option::is_none(&highest_winning_tier_index)) {
+            let highest_winning_tier_index = option::destroy_some(highest_winning_tier_index);
+            let tier_ref_mut = vector::borrow_mut(tiers_ref_mut, highest_winning_tier_index);
+            tier_ref_mut.n_rewards_remaining = tier_ref_mut.n_rewards_remaining - 1;
+            tier_ref_mut.n_rewards_disbursed = tier_ref_mut.n_rewards_disbursed + 1;
+            let octas_reward_amount = tier_ref_mut.apt_amount_per_reward * OCTAS_PER_APT;
             let vault_signer = account::create_signer_with_capability(vault_signer_cap_ref);
-            aptos_account::transfer(&vault_signer, swapper_address, octas_reward_amount);
             event::emit(EmojicoindotFunRewards{ swap, octas_reward_amount });
+            aptos_account::transfer(&vault_signer, swapper_address, octas_reward_amount);
         }
-
     }
 
     #[test] fun test_reward_tiers() { reward_tiers(); }
