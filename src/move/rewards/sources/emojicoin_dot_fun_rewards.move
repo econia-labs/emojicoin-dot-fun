@@ -6,8 +6,8 @@ module rewards::emojicoin_dot_fun_rewards {
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
-    //use aptos_framework::event;
-    //use aptos_framework::randomness;
+    use aptos_framework::event;
+    use aptos_framework::randomness;
     use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
     use std::signer;
 
@@ -24,7 +24,7 @@ module rewards::emojicoin_dot_fun_rewards {
 
     /// Nominal volume denominated in APT, representing the expected total volume corresponding to
     /// the disbursement of `APT_NOMINAL_REWARDS` in rewards.
-    const APT_NOMINAL_VOLUME: u64 = 500_000;
+    const APT_NOMINAL_VOLUME: u64 = 750_000;
 
     /// Nominal total reward pool amount in APT, representing amount of rewards expected to be
     /// disbursed per `APT_NOMINAL_VOLUME`.
@@ -70,9 +70,9 @@ module rewards::emojicoin_dot_fun_rewards {
     }
 
     #[event]
-    struct EmojicoinDotFunRewards has copy, drop, store {
+    struct EmojicoindotFunRewards has copy, drop, store {
         swap: Swap,
-        reward_amount: u64,
+        octas_reward_amount: u64,
     }
 
     /// To fund 10 rewards in the first tier and 5 rewards in the second tier, pass
@@ -160,7 +160,7 @@ module rewards::emojicoin_dot_fun_rewards {
         input_amount: u64,
         is_sell: bool,
         min_output_amount: u64,
-    ) {
+    ) acquires Vault {
 
         // Simulate swap to get integrator fee, then execute swap.
         let swapper_address = signer::address_of(swapper);
@@ -184,31 +184,64 @@ module rewards::emojicoin_dot_fun_rewards {
             INTEGRATOR_FEE_RATE_BPS,
             min_output_amount,
         );
-    }
 
-/*
-        // Return if quote volume is below threshold, otherwise proceed to lottery.
-        if (quote_volume < VOLUME_THRESHOLD_IN_OCTAS) return;
-
-        // Get vault balance, returning without lottery if vault is empty.
-        let vault_signer_cap_ref =
-            &borrow_global<RewardsVaultSignerCapability>(@rewards).signer_capability;
+        // Get vault balance, returning early if empty.
+        let vault_ref_mut = borrow_global_mut<Vault>(@rewards);
+        let vault_signer_cap_ref = &vault_ref_mut.signer_capability;
         let vault_address = account::get_signer_capability_address(vault_signer_cap_ref);
         let vault_balance = coin::balance<AptosCoin>(vault_address);
         if (vault_balance == 0) return;
 
-        // Evaluate lottery.
-        let result = randomness::u64_range(0, WIN_PERCENTAGE_DENOMINATOR);
-        if (result < WIN_PERCENTAGE_NUMERATOR) {
-            let reward_amount = if (vault_balance < REWARD_AMOUNT_IN_OCTAS) vault_balance
-                else REWARD_AMOUNT_IN_OCTAS;
-            let vault_signer = account::create_signer_with_capability(vault_signer_cap_ref);
-            aptos_account::transfer(&vault_signer, swapper_address, reward_amount);
-            event::emit(EmojicoinDotFunRewardsLotteryWinner{ swap, reward_amount });
+        // Get a random number between 0 and 1, represented as a Q64.
+        let random_q64 = randomness::u128_range(0, 1 << SHIFT_Q64);
+
+        // Loop over all reward tiers in reverse order to provide reconciliation rewards for the
+        // next-highest tier in the case that the highest eligible tier has no rewards remaining.
+        // Only disburse rewards after looping over all tiers, to prevent undergassing attacks.
+        let tiers_ref_mut = &mut vault_ref_mut.reward_tiers;
+        let n_tiers = vector::length(tiers_ref_mut);
+        let octas_reward_amount = 0;
+        let eligible_for_reconciliation = false;
+        for (i in 0..n_tiers) {
+            let tier_index = n_tiers - i - 1;
+            let tier_ref_mut = vector::borrow_mut(tiers_ref_mut, tier_index);
+
+            // Get reward probability threshold for current tier based on integrator fees paid.
+            let probability_per_octa_q64 =
+                tier_ref_mut.reward_probability_per_octa_of_swap_fees_paid_q64;
+            let reward_threshold_q64 = ( // Q64 multiplication requires shifting at the end.
+                (
+                    ((probability_per_octa_q64 as u256) * (integrator_fee_in_octas as u256))
+                        >> SHIFT_Q64
+                ) as u128
+            );
+
+            // User is eligible for rewards if they are eligible for reconciliation, or if they have
+            // not yet been rewarded and their random number is below the reward threshold.
+            let eligible_for_reward = eligible_for_reconciliation ||
+                (octas_reward_amount == 0 && random_q64 < reward_threshold_q64);
+
+            // But costs less gas to win big, because then not invoking this after winning at top
+            // tier.
+            if (eligible_for_reward) {
+                if (tier_ref_mut.n_rewards_remaining == 0) {
+                    eligible_for_reconciliation = true;
+                } else {
+                    tier_ref_mut.n_rewards_remaining = tier_ref_mut.n_rewards_remaining - 1;
+                    tier_ref_mut.n_rewards_disbursed = tier_ref_mut.n_rewards_disbursed + 1;
+                    octas_reward_amount = tier_ref_mut.apt_amount_per_reward * OCTAS_PER_APT;
+                    eligible_for_reconciliation = false;
+                }
+            }
         };
 
+        if (octas_reward_amount > 0) {
+            let vault_signer = account::create_signer_with_capability(vault_signer_cap_ref);
+            aptos_account::transfer(&vault_signer, swapper_address, octas_reward_amount);
+            event::emit(EmojicoindotFunRewards{ swap, octas_reward_amount });
+        }
+
     }
-*/
 
     #[test] fun test_reward_tiers() { reward_tiers(); }
 }
