@@ -1,0 +1,60 @@
+services:
+  processor:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    build:
+      context: .
+      dockerfile: processor/rust/Dockerfile
+    environment:
+      DATABASE_URL: "postgres://bigdan:bigdan3000@postgres:5434/emojicoinz"
+      CONTRACT_ADDRESS: ${CONTRACT_ADDRESS}
+      GRPC_AUTH_TOKEN: ${GRPC_AUTH_TOKEN}
+      GRPC_DATA_SERVICE_URL: ${GRPC_DATA_SERVICE_URL}
+      STARTING_VERSION: ${STARTING_VERSION}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: econialabs/emojicoinz:processor
+    restart: unless-stopped
+    stop_signal: SIGKILL
+
+  postgres:
+    environment:
+      POSTGRES_USER: "bigdan"
+      POSTGRES_DB: "emojicoinz"
+      POSTGRES_PASSWORD: "bigdan3000"
+    image: postgres:14-bookworm
+    restart: always
+    volumes:
+      - "db:/var/lib/postgresql/data"
+      # Copy our `postgres-init` folder to the docker entrypoint folder; the postgres image will call
+      # every .sh/.sql file in this folder on container initialization.
+      - "./processor/rust/processor/postgres-init:/docker-entrypoint-initdb.d"
+    healthcheck:
+      test: pg_isready -h localhost -p 5434 -U bigdan -d emojicoinz || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+      start_interval: 5s
+    ports:
+      - "5434:5432"
+
+  postgrest:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: "postgres://bigdan:bigdan3000@postgres:5434/emojicoinz"
+      PGRST_DB_ANON_ROLE: bigdan
+      PGRST_DB_SCHEMA: api
+      PGRST_DB_MAX_ROWS: ${POSTGREST_MAX_ROWS}
+    image: postgrest/postgrest
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  db:
+    driver: local
+  

@@ -5,3 +5,7 @@
 	path = src/typescript/frontend/public/static
 	url = git@github.com:tradingview/charting_library.git
 	ignore = all
+[submodule "src/indexer/processor"]
+	path = src/indexer/processor
+	url = https://github.com/econia-labs/aptos-indexer-processors
+	branch = ECO-2073
