@@ -1,0 +1,74 @@
+services:
+  broker:
+    build:
+      context: .
+      dockerfile: broker/Dockerfile
+      args:
+        EMOJICOIN_MODULE_ADDRESS: ${CONTRACT_ADDRESS}
+    depends_on:
+      processor:
+        condition: service_started
+    environment:
+      PROCESSOR_WS_URL: "ws://processor:3008/ws"
+      RUST_LOG: info
+    image: econialabs/emojicoin-dot-fun:broker
+    ports:
+      - "3009:3009"
+    restart: unless-stopped
+
+  postgres:
+    environment:
+      POSTGRES_USER: "indexer"
+      POSTGRES_DB: "indexer"
+      POSTGRES_PASSWORD: "indexer"
+    image: postgres:14-bookworm
+    restart: always
+    volumes:
+      - "db:/var/lib/postgresql/data"
+    healthcheck:
+      test: pg_isready -h localhost -p 5432 -U indexer || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+      start_interval: 5s
+    ports:
+      - "5432:5432"
+
+  postgrest:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: "postgres://indexer:indexer@postgres:5432/indexer"
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_DB_MAX_ROWS: ${POSTGREST_MAX_ROWS}
+    image: postgrest/postgrest
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  processor:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    build:
+      context: processor/rust
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgres://indexer:indexer@postgres:5432/indexer"
+      CONTRACT_ADDRESS: ${CONTRACT_ADDRESS}
+      GRPC_AUTH_TOKEN: ${GRPC_AUTH_TOKEN}
+      GRPC_DATA_SERVICE_URL: ${GRPC_DATA_SERVICE_URL}
+      STARTING_VERSION: ${STARTING_VERSION}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: econialabs/emojicoin-dot-fun:processor
+    restart: unless-stopped
+    stop_signal: SIGKILL
+    ports:
+      - "3008:3008"
+
+volumes:
+  db:
+    driver: local

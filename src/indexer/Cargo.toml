@@ -1,10 +1,10 @@
 [workspace]
 members = [
-  "allowlister3000"
+  "broker"
 ]
 resolver = "2"
 
-exclude = ["indexer"]
+exclude = ["processor"]
 
 [workspace.package]
 authors = ["Econia Labs <developers@econialabs.com>"]
