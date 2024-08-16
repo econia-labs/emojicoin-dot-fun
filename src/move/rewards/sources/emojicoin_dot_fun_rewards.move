@@ -76,84 +76,6 @@ module rewards::emojicoin_dot_fun_rewards {
         octas_reward_amount: u64,
     }
 
-    /// To fund 10 rewards in the first tier and 5 rewards in the second tier, pass
-    /// `n_rewards_to_fund_per_tier` as `vector[10, 5, ...]`.
-    public entry fun fund_tiers(funder: &signer, n_rewards_to_fund_per_tier: vector<u64>)
-        acquires Vault
-    {
-        // Check tiers.
-        let n_tiers = vector::length(&NOMINAL_N_REWARDS_PER_TIER);
-        let tiers_ref_mut = &mut borrow_global_mut<Vault>(@rewards).reward_tiers;
-        assert!(vector::length(&n_rewards_to_fund_per_tier) == n_tiers, E_N_TIERS_MISMATCH);
-
-        // Calculate total amount to fund, updating remaining rewards for each tier.
-        let octas_to_fund = 0;
-        for (i in 0..n_tiers)  {
-            let tier_ref_mut = vector::borrow_mut(tiers_ref_mut, i);
-            let n_rewards_to_fund_this_tier = *vector::borrow(&n_rewards_to_fund_per_tier, i);
-            octas_to_fund = octas_to_fund +
-                n_rewards_to_fund_this_tier * tier_ref_mut.apt_amount_per_reward * OCTAS_PER_APT;
-            tier_ref_mut.n_rewards_remaining =
-                tier_ref_mut.n_rewards_remaining + n_rewards_to_fund_this_tier;
-        };
-
-        // Transfer rewards to vault.
-        aptos_account::transfer(funder, @rewards, octas_to_fund);
-    }
-
-    fun init_module(rewards: &signer) {
-        let (vault_signer, signer_capability) = account::create_resource_account(rewards, VAULT);
-        move_to(rewards, Vault {
-            signer_capability,
-            reward_tiers: reward_tiers(),
-        });
-        coin::register<AptosCoin>(&vault_signer);
-    }
-
-    fun reward_tiers(): vector<RewardTier> {
-        // Check tier count.
-        let n_tiers = vector::length(&NOMINAL_N_REWARDS_PER_TIER);
-        assert!(vector::length(&APT_REWARD_AMOUNTS_PER_TIER) == n_tiers, E_N_TIERS_MISMATCH);
-
-        // Check total number of rewards, and total rewards amount in APT.
-        let n_rewards_total = 0;
-        let apt_total_reward_amount = 0;
-        for (i in 0..n_tiers)  {
-            let n_rewards_this_tier = *vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i);
-            n_rewards_total = n_rewards_total + n_rewards_this_tier;
-            apt_total_reward_amount = apt_total_reward_amount +
-                *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i) * n_rewards_this_tier;
-        };
-        assert!(apt_total_reward_amount == APT_NOMINAL_REWARDS, E_REWARD_AMOUNT_MISMATCH);
-
-        // Check expected value of rewards against nominal fees paid.
-        let octas_nominal_volume = APT_NOMINAL_VOLUME * OCTAS_PER_APT;
-        let octas_nominal_fees = (
-            (
-                (octas_nominal_volume as u128) * (INTEGRATOR_FEE_RATE_BPS as u128) /
-                (BASIS_POINTS_PER_UNIT as u128)
-            ) as u64
-        );
-        let octas_total_reward_amount = apt_total_reward_amount * OCTAS_PER_APT;
-        assert!(octas_total_reward_amount <= octas_nominal_fees, E_EXPECTED_VALUE);
-
-        // Construct tiers.
-        let reward_tiers = vector[];
-        for (i in 0..n_tiers) {
-            vector::push_back(&mut reward_tiers, RewardTier {
-                apt_amount_per_reward: *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i),
-                n_rewards_disbursed: 0,
-                n_rewards_remaining: 0,
-                reward_probability_per_octa_of_swap_fees_paid_q64:
-                    (
-                        ((*vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i) as u128) << SHIFT_Q64) /
-                        (octas_nominal_fees as u128)
-                    )
-            });
-        };
-        reward_tiers
-    }
-
     #[randomness]
     entry fun swap_with_rewards<Emojicoin, EmojicoinLP>(
         swapper: &signer,
@@ -238,6 +160,84 @@ module rewards::emojicoin_dot_fun_rewards {
             event::emit(EmojicoindotFunRewards{ swap, octas_reward_amount });
             aptos_account::transfer(&vault_signer, swapper_address, octas_reward_amount);
         }
+    }
+
+    /// To fund 10 rewards in the first tier and 5 rewards in the second tier, pass
+    /// `n_rewards_to_fund_per_tier` as `vector[10, 5, ...]`.
+    public entry fun fund_tiers(funder: &signer, n_rewards_to_fund_per_tier: vector<u64>)
+        acquires Vault
+    {
+        // Check tiers.
+        let n_tiers = vector::length(&NOMINAL_N_REWARDS_PER_TIER);
+        let tiers_ref_mut = &mut borrow_global_mut<Vault>(@rewards).reward_tiers;
+        assert!(vector::length(&n_rewards_to_fund_per_tier) == n_tiers, E_N_TIERS_MISMATCH);
+
+        // Calculate total amount to fund, updating remaining rewards for each tier.
+        let octas_to_fund = 0;
+        for (i in 0..n_tiers)  {
+            let tier_ref_mut = vector::borrow_mut(tiers_ref_mut, i);
+            let n_rewards_to_fund_this_tier = *vector::borrow(&n_rewards_to_fund_per_tier, i);
+            octas_to_fund = octas_to_fund +
+                n_rewards_to_fund_this_tier * tier_ref_mut.apt_amount_per_reward * OCTAS_PER_APT;
+            tier_ref_mut.n_rewards_remaining =
+                tier_ref_mut.n_rewards_remaining + n_rewards_to_fund_this_tier;
+        };
+
+        // Transfer rewards to vault.
+        aptos_account::transfer(funder, @rewards, octas_to_fund);
+    }
+
+    fun init_module(rewards: &signer) {
+        let (vault_signer, signer_capability) = account::create_resource_account(rewards, VAULT);
+        move_to(rewards, Vault {
+            signer_capability,
+            reward_tiers: reward_tiers(),
+        });
+        coin::register<AptosCoin>(&vault_signer);
+    }
+
+    fun reward_tiers(): vector<RewardTier> {
+        // Check tier count.
+        let n_tiers = vector::length(&NOMINAL_N_REWARDS_PER_TIER);
+        assert!(vector::length(&APT_REWARD_AMOUNTS_PER_TIER) == n_tiers, E_N_TIERS_MISMATCH);
+
+        // Check total number of rewards, and total rewards amount in APT.
+        let n_rewards_total = 0;
+        let apt_total_reward_amount = 0;
+        for (i in 0..n_tiers)  {
+            let n_rewards_this_tier = *vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i);
+            n_rewards_total = n_rewards_total + n_rewards_this_tier;
+            apt_total_reward_amount = apt_total_reward_amount +
+                *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i) * n_rewards_this_tier;
+        };
+        assert!(apt_total_reward_amount == APT_NOMINAL_REWARDS, E_REWARD_AMOUNT_MISMATCH);
+
+        // Check expected value of rewards against nominal fees paid.
+        let octas_nominal_volume = APT_NOMINAL_VOLUME * OCTAS_PER_APT;
+        let octas_nominal_fees = (
+            (
+                (octas_nominal_volume as u128) * (INTEGRATOR_FEE_RATE_BPS as u128) /
+                (BASIS_POINTS_PER_UNIT as u128)
+            ) as u64
+        );
+        let octas_total_reward_amount = apt_total_reward_amount * OCTAS_PER_APT;
+        assert!(octas_total_reward_amount <= octas_nominal_fees, E_EXPECTED_VALUE);
+
+        // Construct tiers.
+        let reward_tiers = vector[];
+        for (i in 0..n_tiers) {
+            vector::push_back(&mut reward_tiers, RewardTier {
+                apt_amount_per_reward: *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i),
+                n_rewards_disbursed: 0,
+                n_rewards_remaining: 0,
+                reward_probability_per_octa_of_swap_fees_paid_q64:
+                    (
+                        ((*vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i) as u128) << SHIFT_Q64) /
+                        (octas_nominal_fees as u128)
+                    )
+            });
+        };
+        reward_tiers
     }
 
     #[test] fun test_reward_tiers() { reward_tiers(); }
