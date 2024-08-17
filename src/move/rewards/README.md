@@ -13,18 +13,28 @@ nominal volume amount. See `reward_tiers` for more.
 For ease of parameter modeling, named constants use values in `APT`, which are
 converted to octas internally.
 
-## Publish command
+## Publish commands
+
+Set variables:
 
 ```sh
-emojicoin_dot_fun=0xaaa...
-integrator=0xbbb...
-rewards=0xccc...
+EMOJICOIN_DOT_FUN=0xaaa...
+INTEGRATOR=0xbbb...
+REWARDS=0xccc...
 PROFILE=my-profile
 ```
 
+Publish:
+
 ```sh
+NAMED_ADDRESSES=$(
+    printf "%s,%s,%s" \
+        "emojicoin_dot_fun=$EMOJICOIN_DOT_FUN" \
+        "integrator=$INTEGRATOR" \
+        "rewards=$REWARDS"
+)
 aptos move publish \
     --assume-yes \
-    --named-addresses \
-        emojicoin_dot_fun=$EMOJICOIN_DOT_FUN,integrator=$INTEGRATOR,rewards=$REWARDS
+    --named-addresses $NAMED_ADDRESSES \
+    --profile $PROFILE
 ```
