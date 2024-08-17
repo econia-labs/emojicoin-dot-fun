@@ -171,8 +171,9 @@ module rewards::emojicoin_dot_fun_rewards {
         acquires Vault
     {
         // Check tiers.
+        let vault_ref_mut = borrow_global_mut<Vault>(@rewards);
         let n_tiers = vector::length(&NOMINAL_N_REWARDS_PER_TIER);
-        let tiers_ref_mut = &mut borrow_global_mut<Vault>(@rewards).reward_tiers;
+        let tiers_ref_mut = &mut vault_ref_mut.reward_tiers;
         assert!(vector::length(&n_rewards_to_fund_per_tier) == n_tiers, E_N_TIERS_MISMATCH);
 
         // Calculate total amount to fund, updating remaining rewards for each tier.
@@ -187,7 +188,9 @@ module rewards::emojicoin_dot_fun_rewards {
         };
 
         // Transfer rewards to vault.
-        aptos_account::transfer(funder, @rewards, octas_to_fund);
+        let vault_signer_cap_ref = &vault_ref_mut.signer_capability;
+        let vault_address = account::get_signer_capability_address(vault_signer_cap_ref);
+        aptos_account::transfer(funder, vault_address, octas_to_fund);
     }
 
     fun init_module(rewards: &signer) {
