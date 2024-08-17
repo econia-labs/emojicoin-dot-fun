@@ -141,7 +141,7 @@ async function main() {
             tradeInputs: {
               inputAmount: amt,
               integrator: PUBLISHER.accountAddress,
-              integratorFeeRateBps: 0,
+              integratorFeeRateBPs: 0,
             },
           });
 
@@ -311,7 +311,7 @@ const submitTradeAndRandomChatMessage = async (args: {
   tradeInputs: {
     inputAmount: bigint;
     integrator: AccountAddress;
-    integratorFeeRateBps: number;
+    integratorFeeRateBPs: number;
   };
 }) => {
   const sharedArgs = {
@@ -331,7 +331,7 @@ const submitTradeAndRandomChatMessage = async (args: {
     inputAmount: amt < 0n ? -10000n * amt : amt,
     isSell: amt < 0n,
     integrator: PUBLISHER.accountAddress,
-    integratorFeeRateBps: 0,
+    integratorFeeRateBPs: 0,
     options: {
       accountSequenceNumber: args.sequenceNumber,
       maxGasAmount: TRADER_GAS_RESERVES / 100,

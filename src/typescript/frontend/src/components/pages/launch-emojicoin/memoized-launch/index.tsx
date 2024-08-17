@@ -12,12 +12,12 @@ import LaunchButtonOrGoToMarketLink from "./components/launch-or-goto";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import { MARKET_REGISTRATION_FEE, ONE_APTN } from "@sdk/const";
+import { APT_BALANCE_REQUIRED_TO_REGISTER_MARKET, ONE_APT_BIGINT } from "@sdk/const";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 // This is the value that most wallets use. It's an estimate, possibly incorrect, but better for UX.
-const ESTIMATED_GAS_REQUIREMENT = 300000;
-const ESTIMATED_TOTAL_COST = Number(MARKET_REGISTRATION_FEE) + ESTIMATED_GAS_REQUIREMENT;
+const ESTIMATED_GAS_REQUIREMENT = 300000n;
+const ESTIMATED_TOTAL_COST = APT_BALANCE_REQUIRED_TO_REGISTER_MARKET + ESTIMATED_GAS_REQUIREMENT;
 
 export const MemoizedLaunchAnimation = ({
   loading,
@@ -42,7 +42,10 @@ export const MemoizedLaunchAnimation = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const sufficientBalance = useMemo(() => aptBalance >= MARKET_REGISTRATION_FEE, [aptBalance]);
+  const sufficientBalance = useMemo(
+    () => aptBalance >= APT_BALANCE_REQUIRED_TO_REGISTER_MARKET,
+    [aptBalance]
+  );
   const sufficientBalanceWithGas = useMemo(() => aptBalance >= ESTIMATED_TOTAL_COST, [aptBalance]);
 
   const numBytes = useMemo(() => {
@@ -126,7 +129,9 @@ export const MemoizedLaunchAnimation = ({
                       sufficientBalance ? "text-green" : "text-error brightness-[1.1] saturate-150"
                     }
                   >
-                    {Number(toCoinDecimalString(aptBalance, aptBalance / ONE_APTN < 1 ? 6 : 4))}
+                    {Number(
+                      toCoinDecimalString(aptBalance, aptBalance / ONE_APT_BIGINT < 1 ? 6 : 4)
+                    )}
                   </span>
                   &nbsp;APT
                 </div>
