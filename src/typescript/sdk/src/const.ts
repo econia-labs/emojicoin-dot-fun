@@ -57,7 +57,8 @@ export const QUOTE_VIRTUAL_FLOOR = 400_000_000_000n;
 export const BASE_VIRTUAL_CEILING = 49_000_000_000_000_000n;
 export const QUOTE_VIRTUAL_CEILING = 1_400_000_000_000n;
 export const POOL_FEE_RATE_BPS = 25;
-export const MARKET_REGISTRATION_FEE = 4n * ONE_APT_BIGINT;
+// 1 APT plus the 4 APT deposit.
+export const APT_BALANCE_REQUIRED_TO_REGISTER_MARKET = 5n * ONE_APT_BIGINT;
 
 export enum StateTrigger {
   PACKAGE_PUBLICATION = 0,

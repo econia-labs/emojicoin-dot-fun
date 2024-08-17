@@ -41,7 +41,7 @@ export async function fundAccountFast(
   aptos: Aptos,
   maybeAddress: AccountAddressInput | Account,
   // Note that this is the display amount; i.e., 1 => 10^8 input amount on-chain.
-  aptAmount: number
+  aptAmount: number | bigint
 ): Promise<void> {
   const isHexInput = typeof maybeAddress === "string" || maybeAddress instanceof Uint8Array;
   const accountAddress = AccountAddress.from(
@@ -50,9 +50,9 @@ export async function fundAccountFast(
       : maybeAddress.accountAddress
   );
   if (getAptosNetwork() === Network.LOCAL) {
-    await aptos.fundAccount({ accountAddress, amount: ONE_APT * aptAmount });
+    await aptos.fundAccount({ accountAddress, amount: Number(aptAmount) * ONE_APT });
   } else {
-    const results = Array.from({ length: aptAmount }).map(async () =>
+    const results = Array.from({ length: Number(aptAmount) }).map(async () =>
       aptos.fundAccount({ accountAddress, amount: ONE_APT })
     );
     await Promise.all(results);

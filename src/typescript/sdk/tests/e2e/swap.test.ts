@@ -5,7 +5,7 @@ import {
   type TypeTag,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { ONE_APT } from "../../src/const";
+import { APT_BALANCE_REQUIRED_TO_REGISTER_MARKET, ONE_APT, ONE_APT_BIGINT } from "../../src/const";
 import { SYMBOL_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { fundAccountFast, getTestHelpers } from "../utils";
@@ -46,10 +46,17 @@ describe("tests the swap functionality", () => {
     minOutputAmount: 1n,
     typeTags: [pooEmojicoin, pooLPCoin] as [TypeTag, TypeTag],
   };
+  const numMarketRegistrationsInThisTest = 4n;
 
   beforeAll(async () => {
     await Promise.all([
-      fundAccountFast(aptos, registrant, 21),
+      fundAccountFast(
+        aptos,
+        registrant,
+        (APT_BALANCE_REQUIRED_TO_REGISTER_MARKET * numMarketRegistrationsInThisTest) /
+          ONE_APT_BIGINT +
+          1n // To pay for the gas for other transactions.
+      ),
       fundAccountFast(aptos, nonRegistrantUser, 3),
     ]);
 
