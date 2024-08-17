@@ -52,6 +52,7 @@ export async function publishPackage(args: {
     ...["--included-artifacts", includedArtifacts],
     ...["--private-key", pkString],
     ...["--encoding", "hex"],
+    ...["--override-size-check"],
     "--assume-yes",
   ];
 
