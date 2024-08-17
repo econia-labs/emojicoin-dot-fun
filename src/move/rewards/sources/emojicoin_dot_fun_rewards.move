@@ -1,5 +1,6 @@
 // cspell:word emojicoindot
 // cspell:word funder
+// cspell:word undergassing
 module rewards::emojicoin_dot_fun_rewards {
 
     use aptos_framework::account::{Self, SignerCapability};
