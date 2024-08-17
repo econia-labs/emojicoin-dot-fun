@@ -1,7 +1,5 @@
 module rewards::emojicoin_dot_fun_rewards {
 
-    use std::vector;
-
     use aptos_framework::account::{Self, SignerCapability};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
@@ -11,6 +9,7 @@ module rewards::emojicoin_dot_fun_rewards {
     use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
     use std::option;
     use std::signer;
+    use std::vector;
 
     /// Resource account address seed for the vault.
     const VAULT: vector<u8> = b"Vault";
