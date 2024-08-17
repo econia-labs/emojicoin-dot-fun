@@ -1,4 +1,3 @@
-// cspell:word emojicoindot
 // cspell:word funder
 // cspell:word undergassing
 module rewards::emojicoin_dot_fun_rewards {
@@ -77,7 +76,7 @@ module rewards::emojicoin_dot_fun_rewards {
     }
 
     #[event]
-    struct EmojicoindotFunRewards has copy, drop, store {
+    struct EmojicoinDotFunRewards has copy, drop, store {
         swap: Swap,
         octas_reward_amount: u64,
     }
@@ -163,7 +162,7 @@ module rewards::emojicoin_dot_fun_rewards {
             tier_ref_mut.n_rewards_disbursed = tier_ref_mut.n_rewards_disbursed + 1;
             let octas_reward_amount = tier_ref_mut.apt_amount_per_reward * OCTAS_PER_APT;
             let vault_signer = account::create_signer_with_capability(vault_signer_cap_ref);
-            event::emit(EmojicoindotFunRewards{ swap, octas_reward_amount });
+            event::emit(EmojicoinDotFunRewards{ swap, octas_reward_amount });
             aptos_account::transfer(&vault_signer, swapper_address, octas_reward_amount);
         }
     }
