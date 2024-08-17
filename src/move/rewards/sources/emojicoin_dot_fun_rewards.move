@@ -37,6 +37,10 @@ module rewards::emojicoin_dot_fun_rewards {
     const E_REWARD_AMOUNT_MISMATCH: u64 = 1;
     /// Expected value of rewards exceeds nominal fees paid.
     const E_EXPECTED_VALUE: u64 = 2;
+    /// Number of nominal rewards per tier is increasing.
+    const E_N_REWARDS_INCREASING: u64 = 3;
+    /// APT reward amount per tier is decreasing.
+    const E_APT_REWARD_AMOUNTS_DECREASING: u64 = 4;
 
     /// Expected number of rewards disbursed per tier per `APT_NOMINAL_VOLUME`.
     const NOMINAL_N_REWARDS_PER_TIER: vector<u64> = vector[
@@ -201,14 +205,24 @@ module rewards::emojicoin_dot_fun_rewards {
         let n_tiers = vector::length(&NOMINAL_N_REWARDS_PER_TIER);
         assert!(vector::length(&APT_REWARD_AMOUNTS_PER_TIER) == n_tiers, E_N_TIERS_MISMATCH);
 
-        // Check total number of rewards, and total rewards amount in APT.
+        // Check number of rewards, and reward amount in APT: total, and for each tier.
         let n_rewards_total = 0;
         let apt_total_reward_amount = 0;
+        let n_rewards_per_tier_last = *vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, 0);
+        let apt_reward_amount_last_tier = *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, 0);
         for (i in 0..n_tiers)  {
             let n_rewards_this_tier = *vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i);
+            assert!(n_rewards_this_tier <= n_rewards_per_tier_last, E_N_REWARDS_INCREASING);
             n_rewards_total = n_rewards_total + n_rewards_this_tier;
+            let apt_reward_amount_this_tier = *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i);
+            assert!(
+                apt_reward_amount_this_tier >= apt_reward_amount_last_tier,
+                E_APT_REWARD_AMOUNTS_DECREASING
+            );
             apt_total_reward_amount = apt_total_reward_amount +
-                *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i) * n_rewards_this_tier;
+                apt_reward_amount_this_tier * n_rewards_this_tier;
+            n_rewards_per_tier_last = n_rewards_this_tier;
+            apt_reward_amount_last_tier = apt_reward_amount_this_tier;
         };
         assert!(apt_total_reward_amount == APT_NOMINAL_REWARDS, E_REWARD_AMOUNT_MISMATCH);
 
