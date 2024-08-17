@@ -1,7 +1,7 @@
 import {
-  Account,
+  type Account,
   AccountAddress,
-  AccountAddressInput,
+  type AccountAddressInput,
   Aptos,
   AptosConfig,
   Network,
