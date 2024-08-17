@@ -38,3 +38,18 @@ aptos move publish \
     --named-addresses $NAMED_ADDRESSES \
     --profile $PROFILE
 ```
+
+## Fund the vault
+
+```sh
+REWARDS=0xaaa...
+PROFILE=my-profile
+N_REWARDS_TO_FUND_PER_TIER="u64:[1500,500,200,50,5,1]"
+```
+
+```sh
+aptos move run \
+    --args $N_REWARDS_TO_FUND_PER_TIER \
+    --function-id $REWARDS::emojicoin_dot_fun_rewards::fund_tiers \
+    --profile $PROFILE
+```
