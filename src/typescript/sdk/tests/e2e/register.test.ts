@@ -1,14 +1,21 @@
-import { Account, AccountAddress, Hex, isUserTransactionResponse, Network } from "@aptos-labs/ts-sdk";
 import {
+  Account,
+  AccountAddress,
+  Hex,
+  isUserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
+import {
+  APT_BALANCE_REQUIRED_TO_REGISTER_MARKET,
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   ONE_APT,
+  ONE_APT_BIGINT,
   deriveEmojicoinPublisherAddress,
   getMarketResource,
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { fundAccountFast, getAptosNetwork, getTestHelpers } from "../utils";
+import { fundAccountFast, getTestHelpers } from "../utils";
 import { normalizeAddress } from "../../src/utils/account-address";
 
 jest.setTimeout(20000);
@@ -18,7 +25,8 @@ describe("registers a market successfully", () => {
   const user = Account.generate();
 
   beforeAll(async () => {
-    await fundAccountFast(aptos, user, 6);
+    const fundAmount = APT_BALANCE_REQUIRED_TO_REGISTER_MARKET / ONE_APT_BIGINT + 1n;
+    await fundAccountFast(aptos, user, fundAmount);
   });
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {

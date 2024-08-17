@@ -20,6 +20,7 @@ type ProvideLiquidityAction = {
   account: Account;
   emojicoin: Lazy<Types.EmojicoinInfo>;
   quoteAmount: Uint64;
+  minLpCoinsOut: 1n,
 };
 
 type RemoveLiquidityAction = {
@@ -522,6 +523,7 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
         account: accounts[3],
         emojicoin: emojicoins[0],
         quoteAmount: (i + (i % 2n === 0n ? 1000000n : 500000n)) * ONE_APT_BIGINT,
+        minLpCoinsOut: 1n,
       },
     });
     actions.push({

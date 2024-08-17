@@ -1,6 +1,11 @@
 import { Account } from "@aptos-labs/ts-sdk";
 import { PostgrestClient } from "@supabase/postgrest-js";
-import { LOCAL_INBOX_URL, ONE_APT } from "../../src/const";
+import {
+  APT_BALANCE_REQUIRED_TO_REGISTER_MARKET,
+  LOCAL_INBOX_URL,
+  ONE_APT,
+  ONE_APT_BIGINT,
+} from "../../src/const";
 import { getRegistryAddress, toChatEvent } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { sleep } from "../../src/utils";
@@ -16,7 +21,11 @@ describe("emits a chat message event successfully", () => {
   const user = Account.generate();
 
   beforeAll(async () => {
-    await fundAccountFast(aptos, user, 6);
+    await fundAccountFast(
+      aptos,
+      user,
+      APT_BALANCE_REQUIRED_TO_REGISTER_MARKET / ONE_APT_BIGINT + 1n
+    );
   });
 
   it("registers a black cat emojicoin and then emits complex chat emoji sequences", async () => {
