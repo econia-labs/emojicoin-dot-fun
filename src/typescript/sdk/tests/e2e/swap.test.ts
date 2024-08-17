@@ -8,7 +8,7 @@ import {
 import { ONE_APT } from "../../src/const";
 import { SYMBOL_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
+import { fundAccountFast, getTestHelpers } from "../utils";
 import {
   getEmojicoinMarketAddressAndTypeTags,
   getRegistrationGracePeriodFlag,
@@ -43,27 +43,16 @@ describe("tests the swap functionality", () => {
     emoji: emoji.hex,
     integrator: randomIntegrator.accountAddress,
     integratorFeeRateBps: 0,
+    minOutputAmount: 1n,
     typeTags: [pooEmojicoin, pooLPCoin] as [TypeTag, TypeTag],
   };
 
   beforeAll(async () => {
-    if (aptos.config.network === "local") {
-      await aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT * 10 });
-      await aptos.fundAccount({
-        accountAddress: nonRegistrantUser.accountAddress,
-        amount: ONE_APT * 10,
-      });
-    } else {
-      const fundAccounts = [
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-      ];
-      await Promise.all(fundAccounts);
-    }
+    await Promise.all([
+      fundAccountFast(aptos, registrant, 21),
+      fundAccountFast(aptos, nonRegistrantUser, 3),
+    ]);
+
     // Register a market.
     registerMarketResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
@@ -202,6 +191,7 @@ describe("tests the swap functionality", () => {
         marketAddress,
         integratorFeeRateBps: transactionArgs.integratorFeeRateBps,
         integrator: transactionArgs.integrator,
+        minOutputAmount: 1n,
         typeTags: [emojicoin, emojicoinLP],
       });
     }
@@ -267,6 +257,7 @@ describe("tests the swap functionality", () => {
       marketAddress,
       integratorFeeRateBps: transactionArgs.integratorFeeRateBps,
       integrator: transactionArgs.integrator,
+      minOutputAmount: 1n,
       typeTags: [emojicoin, emojicoinLP],
     });
     await expect(failedSwap).rejects.toThrow();

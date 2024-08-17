@@ -1,22 +1,60 @@
-import { Aptos, AptosConfig, Network, NetworkToNetworkName } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  AccountAddress,
+  AccountAddressInput,
+  Aptos,
+  AptosConfig,
+  Network,
+  NetworkToNetworkName,
+} from "@aptos-labs/ts-sdk";
+import { ONE_APT } from "../../src/const";
 
 /* eslint-disable import/no-unused-modules */
 export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
   aptos: Aptos;
   config: AptosConfig;
 } {
-  const networkRaw = process.env.NEXT_PUBLIC_APTOS_NETWORK;
-  const network = networkRaw ? NetworkToNetworkName[networkRaw] : Network.LOCAL;
-  if (!network) {
-    const r = networkRaw;
-    throw new Error(
-      `Unknown network, confirm NEXT_PUBLIC_APTOS_NETWORK environment variable is valid: ${r}`
-    );
-  }
+  const network = getAptosNetwork();
   const config = new AptosConfig({
     network,
     ...additionalConfig,
   });
   const aptos = new Aptos(config);
   return { aptos, config };
+}
+
+export function getAptosNetwork(): Network {
+  const networkRaw = process.env.NEXT_PUBLIC_APTOS_NETWORK;
+  if (!networkRaw) {
+    console.warn(
+      "NEXT_PUBLIC_APTOS_NETWORK environment variable not set, defaulting to local network"
+    );
+  }
+  return networkRaw ? NetworkToNetworkName[networkRaw] : Network.LOCAL;
+}
+
+/**
+ * A faster way to fund an account if we're on a local network.
+ * Otherwise, it will call the fundAccount method aptAmount times.
+ */
+export async function fundAccountFast(
+  aptos: Aptos,
+  maybeAddress: AccountAddressInput | Account,
+  // Note that this is the display amount; i.e., 1 => 10^8 input amount on-chain.
+  aptAmount: number
+): Promise<void> {
+  const isHexInput = typeof maybeAddress === "string" || maybeAddress instanceof Uint8Array;
+  const accountAddress = AccountAddress.from(
+    maybeAddress instanceof AccountAddress || isHexInput
+      ? maybeAddress
+      : maybeAddress.accountAddress
+  );
+  if (getAptosNetwork() === Network.LOCAL) {
+    await aptos.fundAccount({ accountAddress, amount: ONE_APT * aptAmount });
+  } else {
+    const results = Array.from({ length: aptAmount }).map(async () =>
+      aptos.fundAccount({ accountAddress, amount: ONE_APT })
+    );
+    await Promise.all(results);
+  }
 }
