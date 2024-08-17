@@ -1228,7 +1228,7 @@ export type SimulateSwapPayloadMoveArguments = {
 /**
  *```
  *  #[view]
- *  public fun simulate_swap(
+ *  public fun simulate_swap<Emojicoin, EmojicoinLP>(
  *     swapper: address,
  *     market_address: address,
  *     input_amount: u64,
@@ -1248,7 +1248,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
 
   public readonly args: SimulateSwapPayloadMoveArguments;
 
-  public readonly typeTags: [] = [];
+  public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
   constructor(args: {
     swapper: AccountAddressInput; // address
@@ -1257,9 +1257,18 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
     integratorFeeRateBps: Uint8; // u8
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
   }) {
     super();
-    const { swapper, marketAddress, inputAmount, isSell, integrator, integratorFeeRateBps } = args;
+    const {
+      swapper,
+      marketAddress,
+      inputAmount,
+      isSell,
+      integrator,
+      integratorFeeRateBps,
+      typeTags,
+    } = args;
 
     this.args = {
       swapper: AccountAddress.from(swapper),
@@ -1269,6 +1278,9 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
       integrator: AccountAddress.from(integrator),
       integratorFeeRateBps: new U8(integratorFeeRateBps),
     };
+    this.typeTags = typeTags.map((typeTag) =>
+      typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
+    ) as [TypeTag, TypeTag];
   }
 
   static async view(args: {
@@ -1279,6 +1291,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
     integratorFeeRateBps: Uint8; // u8
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     options?: LedgerVersionArg;
   }): Promise<JSONTypes.SwapEvent> {
     const [res] = await new SimulateSwap(args).view(args);
