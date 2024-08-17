@@ -34,7 +34,7 @@ export const REWARDS_MODULE_ADDRESS = (() =>
 
 export const LOCAL_INBOX_URL = process.env.INBOX_URL ?? "http://localhost:3000";
 export const ONE_APT = 1 * 10 ** 8;
-export const ONE_APTN = BigInt(ONE_APT);
+export const ONE_APT_BIGINT = BigInt(ONE_APT);
 export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);
 export const MAX_GAS_FOR_PUBLISH = 1500000;
 export const COIN_FACTORY_MODULE_NAME = "coin_factory";
@@ -57,7 +57,7 @@ export const QUOTE_VIRTUAL_FLOOR = 400_000_000_000n;
 export const BASE_VIRTUAL_CEILING = 49_000_000_000_000_000n;
 export const QUOTE_VIRTUAL_CEILING = 1_400_000_000_000n;
 export const POOL_FEE_RATE_BPS = 25;
-export const MARKET_REGISTRATION_FEE = 100_000_000n;
+export const MARKET_REGISTRATION_FEE = 4n * ONE_APT_BIGINT;
 
 export enum StateTrigger {
   PACKAGE_PUBLICATION = 0,

@@ -1,4 +1,4 @@
-import { Account, AccountAddress, Hex, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { Account, AccountAddress, Hex, isUserTransactionResponse, Network } from "@aptos-labs/ts-sdk";
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
@@ -8,7 +8,7 @@ import {
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
+import { fundAccountFast, getAptosNetwork, getTestHelpers } from "../utils";
 import { normalizeAddress } from "../../src/utils/account-address";
 
 jest.setTimeout(20000);
@@ -18,8 +18,7 @@ describe("registers a market successfully", () => {
   const user = Account.generate();
 
   beforeAll(async () => {
-    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
-    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
+    await fundAccountFast(aptos, user, 6);
   });
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
@@ -98,6 +97,7 @@ describe("registers a market successfully", () => {
     const expectedStructAbis = [
       {
         name: "Emojicoin",
+        is_event: false,
         is_native: false,
         abilities: [],
         generic_type_params: [],
@@ -105,6 +105,7 @@ describe("registers a market successfully", () => {
       },
       {
         name: "EmojicoinLP",
+        is_event: false,
         is_native: false,
         abilities: [],
         generic_type_params: [],

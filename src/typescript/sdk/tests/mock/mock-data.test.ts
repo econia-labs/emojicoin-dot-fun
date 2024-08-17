@@ -2,7 +2,7 @@ import { PostgrestClient } from "@supabase/postgrest-js";
 import {
   LOCAL_INBOX_URL,
   ONE_APT,
-  ONE_APTN,
+  ONE_APT_BIGINT,
   deriveEmojicoinPublisherAddress,
   getRegistryAddress,
   sleep,
@@ -67,11 +67,11 @@ describe("tests a simple faucet fund account request", () => {
     for (let i = 1n; i <= 100n; i += 1n) {
       expectedSum += i;
     }
-    expectedSum *= ONE_APTN * 100n;
-    expectedSum += ONE_APTN;
-    expectedSum += ONE_APTN * 50000n;
-    expectedSum += ONE_APTN * 200000n;
-    expectedSum += ONE_APTN * 100n;
+    expectedSum *= ONE_APT_BIGINT * 100n;
+    expectedSum += ONE_APT_BIGINT;
+    expectedSum += ONE_APT_BIGINT * 50000n;
+    expectedSum += ONE_APT_BIGINT * 200000n;
+    expectedSum += ONE_APT_BIGINT * 100n;
     expectedSum += INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP;
     const sum = data.reduce((prev, curr) => prev + BigInt(curr.data.quote_volume), 0n);
     expect(sum).toBe(expectedSum);
