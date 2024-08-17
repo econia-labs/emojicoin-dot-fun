@@ -322,6 +322,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                       marketAddress: market!.marketAddress,
                       quoteAmount: unfmtCoin(liquidity ?? 0),
                       typeTags: [emojicoin, emojicoinLP],
+                      minLpCoinsOut: 1n,
                     });
                 } else {
                   builderLambda = () =>
@@ -331,6 +332,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                       marketAddress: market!.marketAddress,
                       lpCoinAmount: unfmtCoin(lp),
                       typeTags: [emojicoin, emojicoinLP],
+                      minQuoteOut: 1n,
                     });
                 }
                 await submit(builderLambda);

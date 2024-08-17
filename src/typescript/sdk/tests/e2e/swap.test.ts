@@ -5,10 +5,10 @@ import {
   type TypeTag,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { ONE_APT } from "../../src/const";
+import { APT_BALANCE_REQUIRED_TO_REGISTER_MARKET, ONE_APT, ONE_APT_BIGINT } from "../../src/const";
 import { SYMBOL_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
+import { fundAccountFast, getTestHelpers } from "../utils";
 import {
   getEmojicoinMarketAddressAndTypeTags,
   getRegistrationGracePeriodFlag,
@@ -42,28 +42,24 @@ describe("tests the swap functionality", () => {
     user: registrant,
     emoji: emoji.hex,
     integrator: randomIntegrator.accountAddress,
-    integratorFeeRateBps: 0,
+    integratorFeeRateBPs: 0,
+    minOutputAmount: 1n,
     typeTags: [pooEmojicoin, pooLPCoin] as [TypeTag, TypeTag],
   };
+  const numMarketRegistrationsInThisTest = 4n;
 
   beforeAll(async () => {
-    if (aptos.config.network === "local") {
-      await aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT * 10 });
-      await aptos.fundAccount({
-        accountAddress: nonRegistrantUser.accountAddress,
-        amount: ONE_APT * 10,
-      });
-    } else {
-      const fundAccounts = [
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-      ];
-      await Promise.all(fundAccounts);
-    }
+    await Promise.all([
+      fundAccountFast(
+        aptos,
+        registrant,
+        (APT_BALANCE_REQUIRED_TO_REGISTER_MARKET * numMarketRegistrationsInThisTest) /
+          ONE_APT_BIGINT +
+          1n // To pay for the gas for other transactions.
+      ),
+      fundAccountFast(aptos, nonRegistrantUser, 3),
+    ]);
+
     // Register a market.
     registerMarketResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
@@ -200,8 +196,9 @@ describe("tests the swap functionality", () => {
         inputAmount: 10000n,
         isSell: false,
         marketAddress,
-        integratorFeeRateBps: transactionArgs.integratorFeeRateBps,
+        integratorFeeRateBPs: transactionArgs.integratorFeeRateBPs,
         integrator: transactionArgs.integrator,
+        minOutputAmount: 1n,
         typeTags: [emojicoin, emojicoinLP],
       });
     }
@@ -265,8 +262,9 @@ describe("tests the swap functionality", () => {
       inputAmount: 10000n,
       isSell: false,
       marketAddress,
-      integratorFeeRateBps: transactionArgs.integratorFeeRateBps,
+      integratorFeeRateBPs: transactionArgs.integratorFeeRateBPs,
       integrator: transactionArgs.integrator,
+      minOutputAmount: 1n,
       typeTags: [emojicoin, emojicoinLP],
     });
     await expect(failedSwap).rejects.toThrow();

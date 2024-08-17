@@ -1,7 +1,7 @@
 import React, { type PropsWithChildren, useEffect, useMemo, useRef } from "react";
 
 import { type TradeHistoryProps } from "../../types";
-import { getRankFromSwapEvent } from "lib/utils/get-user-rank";
+import { getRankFromEvent } from "lib/utils/get-user-rank";
 import { useEventStore, useNameStore, useWebSocketClient } from "context/state-store-context";
 import { type Types } from "@sdk/types/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
@@ -15,12 +15,12 @@ import "./trade-history.css";
 const HARD_LIMIT = 500;
 
 const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
-  ...getRankFromSwapEvent((value.balanceAsFractionOfCirculatingSupply ?? 0) * 100),
+  ...getRankFromEvent(value),
   apt: value.quoteVolume.toString(),
   emoji: value.baseVolume.toString(),
   date: new Date(Number(value.time / 1000n)),
   type: value.isSell ? "sell" : "buy",
-  price: value.avgExecutionPrice.toString(),
+  price: value.avgExecutionPriceQ64.toString(),
   swapper: value.swapper,
   version: value.version,
 });

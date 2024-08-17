@@ -9,7 +9,7 @@ import {
   deriveEmojicoinPublisherAddress,
 } from "../../src/emojicoin_dot_fun";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets";
-import { Lazy, ONE_APT, ONE_APTN, type Types, getMarketResource } from "../../src";
+import { Lazy, ONE_APT, ONE_APT_BIGINT, type Types, getMarketResource } from "../../src";
 
 type RegisterMarketAction = {
   emojis: Array<HexInput>;
@@ -20,12 +20,14 @@ type ProvideLiquidityAction = {
   account: Account;
   emojicoin: Lazy<Types.EmojicoinInfo>;
   quoteAmount: Uint64;
+  minLpCoinsOut: 1n,
 };
 
 type RemoveLiquidityAction = {
   account: Account;
   emojicoin: Lazy<Types.EmojicoinInfo>;
   lpCoinAmount: Uint64;
+  minQuoteOut: Uint64;
 };
 
 type SwapAction = {
@@ -33,6 +35,7 @@ type SwapAction = {
   emojicoin: Lazy<Types.EmojicoinInfo>;
   inputAmount: Uint64;
   isSell: boolean;
+  minOutputAmount: Uint64;
 };
 
 type ChatAction = {
@@ -171,14 +174,14 @@ const generatePeriodicStates = async (
 
     volumeBase = 1000n * BigInt(Math.round(Math.random() * 10));
     volumeQuote = volumeBase * ((closePrice + openPrice) / 2n);
-    const startsInBondingCurve = sum < ONE_APTN * 10_000n;
+    const startsInBondingCurve = sum < ONE_APT_BIGINT * 10_000n;
     sum += volumeBase;
     const integratorFees = volumeBase * 1000n;
 
     let poolFeesBase: bigint;
     let poolFeesQuote: bigint;
 
-    if (sum >= ONE_APTN * 10_000n) {
+    if (sum >= ONE_APT_BIGINT * 10_000n) {
       poolFeesBase = volumeBase * 1000n;
       poolFeesQuote = poolFeesBase * ((closePrice + openPrice) / 2n);
     } else {
@@ -189,7 +192,7 @@ const generatePeriodicStates = async (
     nSwaps = BigInt(Math.round(Math.random() * 10));
     nChats = BigInt(Math.round(Math.random() * 20));
 
-    const endsInBondingCurve = sum >= ONE_APTN * 10_000n;
+    const endsInBondingCurve = sum >= ONE_APT_BIGINT * 10_000n;
 
     const periodicState: PeriodicState = {
       market_metadata: marketMetadata,
@@ -304,7 +307,8 @@ async function execute(aptos: Aptos, actions: Action[]) {
         swapper: action.data.account,
         inputAmount: action.data.inputAmount,
         isSell: action.data.isSell,
-        integratorFeeRateBps: 0,
+        integratorFeeRateBPs: 0,
+        minOutputAmount: 1n,
       })
         /* eslint-disable-next-line no-console */
         .catch(console.error);
@@ -313,6 +317,7 @@ async function execute(aptos: Aptos, actions: Action[]) {
         ...defaultTxWithMarket(action.data.emojicoin),
         provider: action.data.account,
         quoteAmount: action.data.quoteAmount,
+        minLpCoinsOut: 1n,
       })
         /* eslint-disable-next-line no-console */
         .catch(console.error);
@@ -321,6 +326,7 @@ async function execute(aptos: Aptos, actions: Action[]) {
         ...defaultTxWithMarket(action.data.emojicoin),
         provider: action.data.account,
         lpCoinAmount: action.data.lpCoinAmount,
+        minQuoteOut: 1n,
       })
         /* eslint-disable-next-line no-console */
         .catch(console.error);
@@ -392,6 +398,7 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
         emojicoin: emojicoins[i],
         isSell: false,
         inputAmount: INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP,
+        minOutputAmount: 1n,
       },
     });
   }
@@ -405,7 +412,8 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
           account: accounts[Number(j) % 3],
           emojicoin: emojicoins[i - 1],
           isSell: false,
-          inputAmount: j * ONE_APTN * BigInt(10 ** (emojicoins.length - i)),
+          inputAmount: j * ONE_APT_BIGINT * BigInt(10 ** (emojicoins.length - i)),
+          minOutputAmount: 1n,
         },
       });
     }
@@ -419,7 +427,8 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
         account: accounts[0],
         emojicoin,
         isSell: false,
-        inputAmount: ONE_APTN,
+        inputAmount: ONE_APT_BIGINT,
+        minOutputAmount: 1n,
       },
     });
   }
@@ -432,7 +441,8 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
         account: accounts[0],
         emojicoin,
         isSell: true,
-        inputAmount: ONE_APTN * 3n,
+        inputAmount: ONE_APT_BIGINT * 3n,
+        minOutputAmount: 1n,
       },
     });
   }
@@ -445,6 +455,7 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
       emojicoin: emojicoins[0],
       isSell: true,
       inputAmount: 14000000000000000n,
+      minOutputAmount: 1n,
     },
   });
   actions.push({
@@ -454,6 +465,7 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
       emojicoin: emojicoins[0],
       isSell: true,
       inputAmount: 14000000000000000n,
+      minOutputAmount: 1n,
     },
   });
   actions.push({
@@ -463,6 +475,7 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
       emojicoin: emojicoins[0],
       isSell: true,
       inputAmount: 14000000000000000n,
+      minOutputAmount: 1n,
     },
   });
 
@@ -473,7 +486,8 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
       account: accounts[3],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTN * 50000n,
+      inputAmount: ONE_APT_BIGINT * 50000n,
+      minOutputAmount: 1n,
     },
   });
 
@@ -484,7 +498,8 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
       account: accounts[4],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTN * 200000n,
+      inputAmount: ONE_APT_BIGINT * 200000n,
+      minOutputAmount: 1n,
     },
   });
 
@@ -495,7 +510,8 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
       account: accounts[5],
       emojicoin: emojicoins[0],
       isSell: false,
-      inputAmount: ONE_APTN * 100n,
+      inputAmount: ONE_APT_BIGINT * 100n,
+      minOutputAmount: 1n,
     },
   });
 
@@ -506,7 +522,8 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
       data: {
         account: accounts[3],
         emojicoin: emojicoins[0],
-        quoteAmount: (i + (i % 2n === 0n ? 1000000n : 500000n)) * ONE_APTN,
+        quoteAmount: (i + (i % 2n === 0n ? 1000000n : 500000n)) * ONE_APT_BIGINT,
+        minLpCoinsOut: 1n,
       },
     });
     actions.push({
@@ -514,7 +531,8 @@ export const generateMockData = async (aptos: Aptos, publisher: Account) => {
       data: {
         account: accounts[3],
         emojicoin: emojicoins[0],
-        lpCoinAmount: (i + (i % 2n === 0n ? 50n : 100n)) * ONE_APTN,
+        lpCoinAmount: (i + (i % 2n === 0n ? 50n : 100n)) * ONE_APT_BIGINT,
+        minQuoteOut: 1n,
       },
     });
   }
