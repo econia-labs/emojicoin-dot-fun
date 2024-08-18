@@ -26,9 +26,15 @@ export type AggregateQueryResultsArgs = {
 export type PostgrestJSONResponse<T> = {
   data: T;
   transaction_version: number;
+  event_name?: string;
+  balance_as_fraction_of_circulating_supply?: number;
 };
 
-type CustomQueryResponseType<T> = T & { transaction_version: number };
+type CustomQueryResponseType<T> = T & {
+  transaction_version: number;
+  event_name?: string;
+  balance_as_fraction_of_circulating_supply?: number;
+};
 
 export type InnerPostgrestResponse<T> = Array<
   PostgrestJSONResponse<T> | CustomQueryResponseType<T>
@@ -75,7 +81,19 @@ export const aggregateQueryResults = async <T>(
     // TODO: Clean this up later. JSON queries have two nested data fields, while custom
     // queries/views only have one (because of the postgrest API response).
     aggregated.push(
-      ...events.map((e) => ({ ...(hasJSONData(e) ? e.data : e), version: e.transaction_version }))
+      ...events.map((e) => {
+        if (e.event_name === "emojicoin_dot_fun::Swap") {
+          return {
+            ...(hasJSONData(e) ? e.data : e),
+            version: e.transaction_version,
+            balance_as_fraction_of_circulating_supply: e.balance_as_fraction_of_circulating_supply,
+          };
+        }
+        return {
+          ...(hasJSONData(e) ? e.data : e),
+          version: e.transaction_version,
+        };
+      })
     );
     shouldContinue = events.length === LIMIT;
     errors.push(error);

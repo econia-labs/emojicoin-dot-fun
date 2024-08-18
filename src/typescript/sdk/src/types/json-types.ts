@@ -197,6 +197,7 @@ namespace JSONTypes {
     pool_fee: Uint64String;
     starts_in_bonding_curve: boolean;
     results_in_state_transition: boolean;
+    balance_as_fraction_of_circulating_supply?: number;
   };
 
   export type ChatEvent = {
