@@ -12,7 +12,7 @@ import {
 } from "styles/fonts";
 import "../app/global.css";
 import DisplayDebugData from "@store/server-to-client/FetchFromServer";
-import { isBanned } from "utils/geolocation";
+import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 
 export const metadata: Metadata = getDefaultMetadata();
@@ -24,7 +24,7 @@ const fonts = [pixelar, formaDJRMicro, formaDJRDisplayMedium, formaDJRDisplayReg
 const fontsClassName = fonts.map((font) => font.variable).join(" ");
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const geoblocked = await isBanned(headers().get("x-real-ip"));
+  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
   return (
     <html>
       <body className={fontsClassName}>

@@ -4,7 +4,7 @@ import HomePageComponent from "./HomePage";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { MarketDataSortBy } from "lib/queries/sorting/types";
 import { ORDER_BY } from "@sdk/queries/const";
-import { isBanned } from "utils/geolocation";
+import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 
 export const revalidate = REVALIDATION_TIME;
@@ -18,7 +18,7 @@ export default async function Home({ searchParams }: HomePageParams) {
     orderBy: ORDER_BY.DESC,
   });
 
-  const geoblocked = await isBanned(headers().get("x-real-ip"));
+  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 
   const sorted = await fetchSortedMarketData({
     page,

@@ -8,18 +8,18 @@ export type Location = {
   vpn: boolean;
 };
 
-const isAllowedLocation = (location: Location) => {
+const isDisallowedLocation = (location: Location) => {
   if (GEOBLOCKED.countries.includes(location.countryCode)) {
-    return false;
+    return true;
   }
   const isoCode = `${location.countryCode}-${location.regionCode}`;
   if (GEOBLOCKED.regions.includes(isoCode)) {
-    return false;
+    return true;
   }
-  return true;
+  return false;
 };
 
-export const isBanned = async (ip: string | undefined | null) => {
+export const isUserGeoblocked = async (ip: string | undefined | null) => {
   if (!GEOBLOCKING_ENABLED) return false;
   if (ip === "undefined" || typeof ip === "undefined" || ip === "null" || ip === null) {
     return true;
@@ -33,8 +33,7 @@ export const isBanned = async (ip: string | undefined | null) => {
   if (location.vpn) {
     return true;
   }
-  const res = !isAllowedLocation(location);
-  return res;
+  return isDisallowedLocation(location);
 };
 
 const ONE_DAY = 604800;
