@@ -6,8 +6,6 @@ jobs:
         working-directory: 'src/typescript/frontend'
     runs-on: 'ubuntu-latest'
     steps:
-    - name: 'Copy env file'
-      run: 'cp ../.env.ci .'
     - uses: 'actions/checkout@v4'
     - uses: 'actions/setup-node@v4'
       with:
@@ -21,9 +19,11 @@ jobs:
       run: 'pnpm run playwright-preps'
     - name: 'Install Playwright Browsers'
       run: 'pnpm exec playwright install --with-deps'
+    - name: 'Copy env file'
+      run: 'cp ../.env.ci .env'
     - env:
         INBOX_URL: '${{ secrets.INBOX_URL }}'
-        NEXT_PUBLIC_MQTT_URL: '${{ secrets.MQTT_URL }}'
+        NEXT_PUBLIC_MQTT_URL: '${{ secrets.NEXT_PUBLIC_MQTT_URL }}'
       name: 'Run Playwright tests'
       run: 'pnpm exec playwright test'
     - if: 'always()'
