@@ -68,7 +68,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
               dappConfig={{ network: APTOS_NETWORK }}
             >
               <WalletModalContextProvider>
-                <AptosContextProvider>
+                <AptosContextProvider geoblocked={geoblocked}>
                   <EmojiPickerProvider
                     initialState={{
                       nativePicker: isMobile || isTablet,
