@@ -76,7 +76,10 @@ export type AptosContextState = {
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
-export function AptosContextProvider({ children, geoblocked }: PropsWithChildren<{geoblocked: boolean}>) {
+export function AptosContextProvider({
+  children,
+  geoblocked,
+}: PropsWithChildren<{ geoblocked: boolean }>) {
   const {
     signAndSubmitTransaction: adapterSignAndSubmitTxn,
     account,
@@ -268,7 +271,7 @@ export function AptosContextProvider({ children, geoblocked }: PropsWithChildren
       }
       return null;
     },
-    [network, handleTransactionSubmission, adapterSignAndSubmitTxn]
+    [network, handleTransactionSubmission, adapterSignAndSubmitTxn, geoblocked]
   );
 
   // To manually enforce explicit gas options, we can use this transaction submission flow.
@@ -295,7 +298,7 @@ export function AptosContextProvider({ children, geoblocked }: PropsWithChildren
       }
       return null;
     },
-    [network, handleTransactionSubmission, signTransaction, submitTransaction]
+    [network, handleTransactionSubmission, signTransaction, submitTransaction, geoblocked]
   );
 
   const setCoinTypeHelper = (
