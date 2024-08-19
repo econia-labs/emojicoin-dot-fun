@@ -1,11 +1,7 @@
 /* eslint-disable no-console */
 import { Account, AccountAddress, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
-import { VERCEL } from "../../src/const";
 
 export const getPublisherPKForTest = async () => {
-  if (VERCEL) {
-    throw new Error("This function should not be called in a Vercel deployment.");
-  }
   // If the publisher private key is not set by now, throw an error.
   if (!process.env.PUBLISHER_PK) {
     console.warn("Missing PUBLISHER_PK environment variable for test, using the default value.");

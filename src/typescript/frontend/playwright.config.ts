@@ -1,11 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import path from 'path';
 
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// import dotenv from 'dotenv';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, process.env.CI ? '.env.ci' : '.env') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -34,18 +35,30 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'stack up',
+      testMatch: /global\.setup\.ts/,
+      teardown: 'stack down'
+    },
+    {
+      name: 'stack down',
+      testMatch: /global\.teardown\.ts/,
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['stack up']
     },
 
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      dependencies: ['stack up']
     },
 
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      dependencies: ['stack up']
     },
 
     /* Test against mobile viewports. */
@@ -70,10 +83,10 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'pnpm run build && pnpm run start',
-    url: 'http://127.0.0.1:3001/',
-    reuseExistingServer: false,
-    timeout: 120 * 1000,
-  },
+  //webServer: {
+  //  command: 'pnpm run build && pnpm run start',
+  //  url: 'http://127.0.0.1:3001/',
+  //  reuseExistingServer: false,
+  //  timeout: 120 * 1000,
+  //},
 });

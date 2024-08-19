@@ -1,21 +1,17 @@
-import { type ChildProcessWithoutNullStreams, spawn } from "child_process";
-import kill from "tree-kill";
-import { sleep } from "../../src/utils";
+import { exec, spawn } from "child_process";
+import { sleep } from "@econia-labs/emojicoin-common";
 
-export class LocalNode {
-  readonly MAXIMUM_WAIT_TIME_SEC = 75;
+export class Frontend {
+  readonly MAXIMUM_WAIT_TIME_SEC = 180;
 
-  readonly READINESS_ENDPOINT = "http://127.0.0.1:8070/";
-
-  process: ChildProcessWithoutNullStreams | null = null;
+  readonly READINESS_ENDPOINT = "http://127.0.0.1:3001/";
 
   /**
    * Kills all the descendent processes of the node
    * process, including the node process itself.
    */
   stop() {
-    if (!this.process?.pid) return;
-    kill(this.process.pid);
+    exec('pkill -f "pnpm run start"')
   }
 
   /**
@@ -27,6 +23,7 @@ export class LocalNode {
   async run() {
     const nodeIsUp = await this.checkIfProcessIsUp();
     if (nodeIsUp) {
+      console.log("already up lol")
       return;
     }
     this.start();
@@ -36,21 +33,14 @@ export class LocalNode {
   /**
    * Starts the local testnet by running the aptos node run-local-testnet command.
    */
-  start() {
-    const cliCommand = "npx";
+  async start() {
+    const cliCommand = "bash";
     const cliArgs = [
-      "@aptos-labs/aptos-cli",
-      "node",
-      "run-local-testnet",
-      "--force-restart",
-      "--assume-yes",
-      "--with-indexer-api",
-      "--bind-to",
-      "0.0.0.0",
+      "-c",
+      "pnpm run build && pnpm run start",
     ];
 
-    const childProcess = spawn(cliCommand, cliArgs);
-    this.process = childProcess;
+    const childProcess = spawn(cliCommand, cliArgs, { detached: true });
 
     childProcess.stderr?.on("data", (data: any) => {
       const str = data.toString();

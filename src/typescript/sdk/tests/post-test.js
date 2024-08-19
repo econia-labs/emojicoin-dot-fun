@@ -1,4 +1,4 @@
-let inbox = require("./utils/inbox.ts");
+let { Inbox } = require("@econia-labs/emojicoin-test-utils");
 
 module.exports = async function () {
   // Check if the current local node process is
@@ -10,7 +10,7 @@ module.exports = async function () {
     // of the node process, including the node process itself
     aptosNode.stop();
 
-    await inbox.Inbox.stop();
-    await inbox.Inbox.clearState();
+    await Inbox.stop();
+    await Inbox.clearState();
   }
 };

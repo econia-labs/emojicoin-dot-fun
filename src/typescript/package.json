@@ -33,7 +33,9 @@
   },
   "version": "0.0.0",
   "workspaces": [
+    "common",
     "sdk",
-    "frontend"
+    "frontend",
+    "test-utils"
   ]
 }

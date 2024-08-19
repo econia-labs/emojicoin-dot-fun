@@ -8,8 +8,8 @@ import {
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
 import { normalizeAddress } from "../../src/utils/account-address";
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(20000);
 

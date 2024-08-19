@@ -4,7 +4,7 @@ import {
   MoveVector,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { ONE_APT } from "../../src";
+import { ONE_APT } from "@econia-labs/emojicoin-common";
 
 // Instead of calling the faucet for each account, we fund one twice and have it distribute them
 // evenly among the rest with the `batch_transfer` function.

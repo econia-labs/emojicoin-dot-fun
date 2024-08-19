@@ -1,6 +1,6 @@
 import { AccountAddress, Hex, type HexInput } from "@aptos-labs/ts-sdk";
 import * as EmojicoinDotFun from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getTestHelpers } from "../utils";
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(15000);
 

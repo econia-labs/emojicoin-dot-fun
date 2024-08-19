@@ -4,9 +4,9 @@ import { LOCAL_INBOX_URL, ONE_APT } from "../../src/const";
 import { getRegistryAddress, toChatEvent } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { sleep } from "../../src/utils";
-import { getTestHelpers } from "../utils";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { STRUCT_STRINGS } from "../../src/utils/type-tags";
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(20000);
 

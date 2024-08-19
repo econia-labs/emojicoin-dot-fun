@@ -4,9 +4,9 @@ import {
   type WriteSetChangeWriteResource,
   type WriteSetChangeWriteTableItem,
 } from "@aptos-labs/ts-sdk";
-import { getTestHelpers } from "../utils";
 import { STRUCT_STRINGS, SYMBOL_DATA, normalizeHex } from "../../src";
 import EmojiJSONData from "../../src/emoji_data/symbol-emojis.json";
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(10000);
 

@@ -8,7 +8,7 @@ const {
   getPublisherPKForTest,
   PK_PATH,
   PUBLISH_RES_PATH,
-} = require("./utils");
+} = require("@econia-labs/emojicoin-test-utils");
 
 module.exports = async function setup() {
   if (process.env.START_LOCAL_NODE_FOR_TEST === "true") {

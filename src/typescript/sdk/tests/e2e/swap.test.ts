@@ -8,7 +8,6 @@ import {
 import { ONE_APT } from "../../src/const";
 import { SYMBOL_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
 import {
   getEmojicoinMarketAddressAndTypeTags,
   getRegistrationGracePeriodFlag,
@@ -19,6 +18,7 @@ import {
   getCoinBalanceFromChanges,
   getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(90000);
 

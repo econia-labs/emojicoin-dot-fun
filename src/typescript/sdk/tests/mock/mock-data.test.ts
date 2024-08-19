@@ -7,13 +7,13 @@ import {
   getRegistryAddress,
   sleep,
 } from "../../src";
-import { getTestHelpers } from "../utils";
 import {
   INPUT_AMOUNT_FOR_END_GRACE_PERIOD_SWAP,
   MOCK_DATA_MARKETS_EMOJIS,
   generateMockData,
 } from "../utils/generate-mock-data";
 import { getMarketResource } from "../../src/markets/utils";
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(10000000);
 

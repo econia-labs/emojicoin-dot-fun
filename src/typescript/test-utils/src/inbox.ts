@@ -1,5 +1,6 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "child_process";
-import { sleep } from "../../src/utils";
+import { sleep } from "@econia-labs/emojicoin-common";
+import findGitRoot from "find-git-root";
 
 export class Inbox {
   // This is enough to start Inbox, but not to build it. It is recommended
@@ -65,12 +66,15 @@ export class Inbox {
    */
   start() {
     const cliCommand = "docker";
+    const gitRoot = findGitRoot(process.cwd());
     const cliArgs = [
       "compose",
       "-p",
       "emojicoin-inbox-test",
       "-f",
-      "../../inbox/compose.yaml",
+      `${gitRoot}/../src/inbox/compose.yaml`,
+      "--env-file",
+      `${gitRoot}/../src/typescript/frontend/.inbox.env.ci`,
       "up",
       "-d",
     ];

@@ -1,5 +1,7 @@
 ---
 packages:
+- 'common'
 - 'sdk'
 - 'frontend'
+- 'test-utils'
 ...
