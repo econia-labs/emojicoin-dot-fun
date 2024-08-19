@@ -8,6 +8,8 @@ import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 import { prettifyHex } from "lib/utils/prettify-hex";
+import { isUserGeoblocked } from "utils/geolocation";
+import { headers } from "next/headers";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -21,7 +23,6 @@ const SWAP_DATA_ROWS = 100;
  */
 type StaticParams = {
   market: string;
-  geoblocked: boolean;
 };
 
 interface EmojicoinPageProps {
@@ -41,6 +42,8 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const hex = prettifyHex(bytes);
   const res = await fetchLatestMarketState(hex);
 
+  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
+
   if (res) {
     const marketID = res.marketID.toString();
     const chatData = await fetchInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
@@ -54,7 +57,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
           marketView,
           ...res,
         }}
-        geoblocked={params.params.geoblocked}
+        geoblocked={geoblocked}
       />
     );
   }
