@@ -33,6 +33,7 @@ test('api test route', async ({ page }) => {
   const res1text = await res1.text();
 
   expect(res1text).toMatch(numericRegex)
+  expect(res1headers[NEXTJS_CACHE_HEADER]).toMatch("HIT")
 
   // Query a second time after a second.
   //
