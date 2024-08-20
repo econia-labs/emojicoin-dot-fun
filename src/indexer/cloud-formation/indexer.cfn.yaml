@@ -1,7 +1,9 @@
 ---
 Mappings:
+  # Use one map entry for constants to prevent them from being overloaded,
+  # which would be possible if they were parameters.
   Constants:
-    Default:
+    Defaults:
       VpcCidrBlock: '10.0.0.0/16'
 Resources:
   # Virtual private cloud for internal networking.
@@ -9,9 +11,10 @@ Resources:
     Properties:
       CidrBlock: !FindInMap
       - 'Constants'
-      - 'Default'
+      - 'Defaults'
       - 'VpcCidrBlock'
       EnableDnsHostnames: true
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
+Transform: 'AWS::LanguageExtensions'
 ...
