@@ -29,6 +29,9 @@ Outputs:
     Description: 'The database cluster reader connection endpoint.'
     Value: !GetAtt 'DbCluster.ReadEndpoint.Address'
 Parameters:
+  BastionHostAmiId:
+    Default: 'ami-030cb86c12b18e236'
+    Type: 'AWS::EC2::Image::Id'
   DbMaxCapacity:
     Default: 4
     Type: 'Number'
@@ -36,6 +39,22 @@ Parameters:
     Default: 0.5
     Type: 'Number'
 Resources:
+  # Minimal VM in the private network for accessing the database.
+  BastionHost:
+    Properties:
+      ImageId: !Ref 'BastionHostAmiId'
+      InstanceType: 't4g.nano'
+      NetworkInterfaces:
+      - DeviceIndex: 0
+        GroupSet:
+        - !Ref 'DbUserSecurityGroup'
+        SubnetId: !Ref 'SubnetA'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y postgresql16
+    Type: 'AWS::EC2::Instance'
   # Database cluster.
   DbCluster:
     Metadata:
