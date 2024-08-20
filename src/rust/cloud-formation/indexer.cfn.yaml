@@ -16,7 +16,16 @@ Mappings:
       AvailabilityZone: 2
       CidrBlock: '10.0.3.0/24'
 Resources:
-  # A subnet for each of the availability zones that the database spans.
+  # Database subnet group.
+  DbSubnetGroup:
+    Properties:
+      DBSubnetGroupDescription: !Ref 'AWS::StackName'
+      SubnetIds:
+      - !Ref 'SubnetA'
+      - !Ref 'SubnetB'
+      - !Ref 'SubnetC'
+    Type: 'AWS::RDS::DBSubnetGroup'
+  # A private subnet for each of the database availability zones.
   Fn::ForEach::Subnet:
   - 'Identifier'
   - - 'A'
