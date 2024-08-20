@@ -18,6 +18,9 @@ Mappings:
     C:
       AvailabilityZone: 2
       CidrBlock: '10.0.3.0/24'
+    Public:
+      AvailabilityZone: 0
+      CidrBlock: '10.0.0.0/24'
 Outputs:
   BastionHostId:
     Description: 'The instance ID of the bastion host.'
@@ -42,7 +45,7 @@ Parameters:
     Default: 0.5
     Type: 'Number'
 Resources:
-  # Minimal VM in the private network for accessing the database.
+  # Minimal VM for accessing the database.
   BastionHost:
     Properties:
       ImageId: !Ref 'BastionHostAmiId'
@@ -52,7 +55,7 @@ Resources:
         GroupSet:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
-        SubnetId: !Ref 'SubnetA'
+        SubnetId: !Ref 'PublicSubnet'
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -149,6 +152,20 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # An outbound internet traffic route association for each subnet.
+  Fn::ForEach::PrivateRouteTableAssociation:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateRouteTableAssociation${Identifier}:
+      Properties:
+        RouteTableId: !Ref 'PrivateRouteTable'
+        SubnetId: !Ref
+          Fn::Sub:
+          - 'Subnet${Identifier}'
+          - Identifier: !Ref 'Identifier'
+      Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A private subnet for each of the database availability zones.
   Fn::ForEach::Subnet:
   - 'Identifier'
@@ -170,6 +187,72 @@ Resources:
         MapPublicIpOnLaunch: false
         VpcId: !Ref 'Vpc'
       Type: 'AWS::EC2::Subnet'
+  # Internet gateway for the virtual private cloud.
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+  # Attachment of internet gateway to the virtual private cloud.
+  InternetGatewayAttachment:
+    Properties:
+      InternetGatewayId: !Ref 'InternetGateway'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+  # Network address translation gateway for the virtual private cloud.
+  NatGateway:
+    Properties:
+      AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
+      SubnetId: !Ref 'PublicSubnet'
+    Type: 'AWS::EC2::NatGateway'
+  # Elastic IP address for the network address translation gateway.
+  NatGatewayEip:
+    Properties:
+      Domain: 'vpc'
+    Type: 'AWS::EC2::EIP'
+  # Route table for private subnets in the virtual private cloud.
+  PrivateRouteTable:
+    Properties:
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::RouteTable'
+  # Route route for the public subnet in the virtual private cloud.
+  PublicRouteTable:
+    Properties:
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::RouteTable'
+  # Association between public route table and public subnet.
+  PublicRouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      SubnetId: !Ref 'PublicSubnet'
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Public subnet for the virtual private cloud, for internet access.
+  PublicSubnet:
+    Properties:
+      AvailabilityZone: !Select
+      - !FindInMap
+        - 'Subnets'
+        - 'Public'
+        - 'AvailabilityZone'
+      - Fn::GetAZs: !Ref 'AWS::Region'
+      CidrBlock: !FindInMap
+      - 'Subnets'
+      - 'Public'
+      - 'CidrBlock'
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::Subnet'
+  # Route to the internet for the public subnet.
+  RouteToInternet:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+      RouteTableId: !Ref 'PublicRouteTable'
+    Type: 'AWS::EC2::Route'
+  # Route to the network address translation gateway for private subnets.
+  RouteToNatGateway:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref 'NatGateway'
+      RouteTableId: !Ref 'PrivateRouteTable'
+    Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
     Properties:
