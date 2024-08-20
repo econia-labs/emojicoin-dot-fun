@@ -1,4 +1,7 @@
-<!--- cspell:word eice -->
+<!---
+cspell:word ec2instanceconnectcli
+cspell:word eice
+-->
 
 # Rust source
 
@@ -33,6 +36,12 @@ programmatically using [GitSync] alone.
 
 #### Connect to bastion host
 
+Install the [AWS EC2 Instance Connect CLI]:
+
+```sh
+pip install ec2instanceconnectcli
+```
+
 Set your stack name, for example `emojicoin-dot-fun-indexer-dev`:
 
 ```sh
@@ -58,6 +67,7 @@ aws ec2-instance-connect ssh \
 ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
+[aws ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
