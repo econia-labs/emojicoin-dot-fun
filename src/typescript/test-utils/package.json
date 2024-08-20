@@ -2,16 +2,14 @@
   "dependencies": {
     "@aptos-labs/ts-sdk": "1.22.2",
     "@econia-labs/emojicoin-common": "workspace:*",
-    "find-git-root": "^1.0.4",
-    "ps-list": "^8.1.1"
+    "find-git-root": "^1.0.4"
   },
-  "description": "TypeScript SDK for Econia's Emojicoin Dot Fun",
+  "description": "Test utilities Econia's Emojicoin Dot Fun",
   "devDependencies": {
     "@aptos-labs/aptos-cli": "^0.1.9",
     "@types/node": "^20.14.9",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
-    "dotenv-cli": "^7.4.2",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
@@ -19,7 +17,6 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-unused-imports": "^3.2.0",
     "prettier": "^3.3.2",
-    "tree-kill": "^1.2.2",
     "ts-node": "^10.9.2",
     "typescript": "5.3.3"
   },
@@ -42,14 +39,10 @@
     "build:clean": "pnpm run clean && pnpm i && tsc",
     "build:debug": "pnpm run build:clean",
     "check": "tsc --noEmit",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
-    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",
-    "lint:fix": "pnpm lint --fix",
-    "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
-    "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
-    "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml"
+    "lint": "eslint 'src/**/*.ts' -c .eslintrc.js",
+    "lint:fix": "pnpm lint --fix"
   },
   "typings": "dist/src/index.d.ts",
   "version": "0.0.1"

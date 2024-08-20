@@ -1,5 +1,4 @@
-import { exec, spawn } from "child_process";
-import kill from "tree-kill";
+import { spawn } from "child_process";
 import { sleep } from "@econia-labs/emojicoin-common";
 
 export class LocalNode {
@@ -11,8 +10,31 @@ export class LocalNode {
    * Kills all the descendent processes of the node
    * process, including the node process itself.
    */
-  async stop() {
-    exec("pkill -SIGINT aptos")
+  static stop(): Promise<null> {
+    const cliCommand = "pkill";
+    const cliArgs = ["-SIGINT", "aptos"];
+
+    const childProcess = spawn(cliCommand, cliArgs);
+
+    childProcess.stderr?.on("data", (data: any) => {
+      const str = data.toString();
+      // eslint-disable-next-line no-console
+      console.log(str);
+    });
+
+    childProcess.stdout?.on("data", (data: any) => {
+      const str = data.toString();
+      // eslint-disable-next-line no-console
+      console.log(str);
+    });
+
+    const p: Promise<null> = new Promise((r) => {
+      childProcess.on("close", () => {
+        r(null);
+      });
+    });
+
+    return p;
   }
 
   /**
@@ -26,14 +48,14 @@ export class LocalNode {
     if (nodeIsUp) {
       return;
     }
-    this.start();
+    LocalNode.start();
     await this.waitUntilProcessIsUp();
   }
 
   /**
    * Starts the local testnet by running the aptos node run-local-testnet command.
    */
-  start() {
+  static start() {
     const cliCommand = "npx";
     const cliArgs = [
       "@aptos-labs/aptos-cli",

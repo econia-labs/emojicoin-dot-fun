@@ -1,14 +1,14 @@
-import { test, expect, Response } from '@playwright/test';
+import { test, expect, type Response } from "@playwright/test";
 import { REVALIDATE_TEST } from "../../src/const";
 import { NEXTJS_CACHE_HEADER } from "../util";
-import { sleep } from '@econia-labs/emojicoin-common';
+import { sleep } from "@econia-labs/emojicoin-common";
 
-test('api test route', async ({ page }) => {
+test("api test route", async ({ page }) => {
   const numericRegex = /^[0-9]+$/;
 
   let res1: Response;
   let res1headers: {
-    [key: string]: string
+    [key: string]: string;
   };
 
   // Query a first time.
@@ -23,19 +23,19 @@ test('api test route', async ({ page }) => {
   // the second one should get the new result).
   do {
     await sleep(100);
-    res1 = (await page.goto('/test'))!;
+    res1 = (await page.goto("/test"))!;
     res1headers = res1.headers();
   } while (res1headers[NEXTJS_CACHE_HEADER] === "STALE");
   const res1text = await res1.text();
 
-  expect(res1text).toMatch(numericRegex)
-  expect(res1headers[NEXTJS_CACHE_HEADER]).toMatch("HIT")
+  expect(res1text).toMatch(numericRegex);
+  expect(res1headers[NEXTJS_CACHE_HEADER]).toMatch("HIT");
 
   // Query a second time after a second.
   //
   // This should hit cache and be the same value as before.
-  await sleep(REVALIDATE_TEST / 2 * 1000);
-  const res2 = (await page.goto('/test'))!;
+  await sleep((REVALIDATE_TEST / 2) * 1000);
+  const res2 = (await page.goto("/test"))!;
   const res2headers = res2.headers();
   const res2text = await res2.text();
 
@@ -48,9 +48,9 @@ test('api test route', async ({ page }) => {
   // have the cache header set to "STALE". Despite that, because of the "serve
   // stale value while generating new one" caching policy, this value should be
   // the same as the previous one.
-  await sleep(REVALIDATE_TEST / 2 * 1.2 * 1000);
+  await sleep((REVALIDATE_TEST / 2) * 1.2 * 1000);
 
-  const res3 = (await page.goto('/test'))!;
+  const res3 = (await page.goto("/test"))!;
   const res3headers = res3.headers();
   const res3text = await res3.text();
 
@@ -66,7 +66,7 @@ test('api test route', async ({ page }) => {
   //
   // We also give 200ms to finish generating the new value.
   await sleep(200);
-  const res4 = (await page.goto('/test'))!;
+  const res4 = (await page.goto("/test"))!;
   const res4headers = res4.headers();
   const res4text = await res4.text();
 

@@ -9,9 +9,13 @@ import {
   Ed25519PrivateKey,
 } from "@aptos-labs/ts-sdk";
 import path from "path";
+import {
+  MAX_GAS_FOR_PUBLISH,
+  ONE_APT,
+  EMOJICOIN_DOT_FUN_MODULE_NAME,
+} from "@econia-labs/emojicoin-common";
 import { type PublishPackageResult, type ResultJSON } from "./types";
 import { getAptosClient } from "./aptos-client";
-import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "@econia-labs/emojicoin-common";
 import { getGitRoot } from "./helpers";
 
 export async function publishPackage(args: {

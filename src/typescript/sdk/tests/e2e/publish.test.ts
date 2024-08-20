@@ -1,5 +1,5 @@
 import { AccountAddress, Network, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME, ONE_APT } from "../../src";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, ONE_APT } from "@econia-labs/emojicoin-common";
 import { getModuleExists, getTestHelpers, publishPackage } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(60000);

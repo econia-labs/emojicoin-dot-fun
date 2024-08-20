@@ -4,7 +4,7 @@ module.exports = {
     es2021: true,
     node: true,
   },
-  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js", "mock-data.ts"],
+  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js"],
   extends: ["airbnb-base", "airbnb-typescript/base", "prettier"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -52,7 +52,7 @@ module.exports = {
       {
         missingExports: true,
         unusedExports: true,
-        ignoreExports: ["tests/**/*", "**/index.ts", "src/types/server-only.d.ts"],
+        ignoreExports: ["tests/**/*", "**/index.ts"],
       },
     ],
     "@typescript-eslint/consistent-type-imports": [

@@ -1,15 +1,13 @@
 import { Account, AccountAddress, Hex, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   ONE_APT,
-  deriveEmojicoinPublisherAddress,
-  getMarketResource,
-  getRegistryAddress,
-} from "../../src";
+} from "@econia-labs/emojicoin-common";
+import { deriveEmojicoinPublisherAddress, getMarketResource, getRegistryAddress } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { normalizeAddress } from "../../src/utils/account-address";
-import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(20000);
 

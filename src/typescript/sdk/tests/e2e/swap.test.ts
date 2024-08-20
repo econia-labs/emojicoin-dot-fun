@@ -5,7 +5,8 @@ import {
   type TypeTag,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { ONE_APT } from "../../src/const";
+import { ONE_APT } from "@econia-labs/emojicoin-common";
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 import { SYMBOL_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import {
@@ -18,7 +19,6 @@ import {
   getCoinBalanceFromChanges,
   getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
-import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(90000);
 

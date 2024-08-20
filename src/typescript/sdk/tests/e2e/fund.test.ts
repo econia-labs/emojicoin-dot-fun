@@ -1,5 +1,5 @@
 import { Account, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { ONE_APT } from "../../src";
+import { ONE_APT } from "@econia-labs/emojicoin-common";
 import { getAptosClient } from "@econia-labs/emojicoin-test-utils";
 
 jest.setTimeout(10000);

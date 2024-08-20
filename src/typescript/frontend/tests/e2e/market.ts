@@ -1,28 +1,28 @@
-import { test, expect, Response } from '@playwright/test';
+import { test, expect, type Response } from "@playwright/test";
 import { NEXTJS_CACHE_HEADER, REVALIDATION_TIME } from "../util";
 import { ONE_APT, sleep } from "@econia-labs/emojicoin-common";
-import { getTestHelpers } from '@econia-labs/emojicoin-test-utils';
-import { Account } from '@aptos-labs/ts-sdk';
-import { EmojicoinDotFun, getRegistryAddress } from '@sdk/emojicoin_dot_fun';
-import { getEmojicoinMarketAddressAndTypeTags } from '@sdk/index';
+import { getTestHelpers } from "@econia-labs/emojicoin-test-utils";
+import { Account } from "@aptos-labs/ts-sdk";
+import { EmojicoinDotFun, getRegistryAddress } from "@sdk/emojicoin_dot_fun";
+import { getEmojicoinMarketAddressAndTypeTags } from "@sdk/index";
 
 /**
-  * In this test, we're going to test the caching of the /market/api endpoint.
-  *
-  * To do this, we're going to:
-  *
-  * 1. sort by bump, which will give us the latest markets that have been bumped.
-  * 2. bump the second market from the response.
-  * 3. wait for the changes to propagate.
-  * 4. query the data again, and see the changes.
-  */
-test('test market api route', async ({ page }) => {
+ * In this test, we're going to test the caching of the /market/api endpoint.
+ *
+ * To do this, we're going to:
+ *
+ * 1. sort by bump, which will give us the latest markets that have been bumped.
+ * 2. bump the second market from the response.
+ * 3. wait for the changes to propagate.
+ * 4. query the data again, and see the changes.
+ */
+test("test market api route", async ({ page }) => {
   const { aptos, publisher } = getTestHelpers();
   const randomIntegrator = Account.generate();
   const user = Account.generate();
   await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
   await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
-  const endpoint = '/market/api?sortby=bump';
+  const endpoint = "/market/api?sortby=bump";
 
   const chatEmojis = [
     ["f09fa791e2808df09f9a80", "🧑‍🚀"], // Astronaut.
@@ -64,7 +64,7 @@ test('test market api route', async ({ page }) => {
 
   let res1: Response;
   let res1headers: {
-    [key: string]: string
+    [key: string]: string;
   };
 
   // Query fresh data a first time.
@@ -78,8 +78,8 @@ test('test market api route', async ({ page }) => {
   const firstMarket = res1data.markets[0];
   const secondMarket = res1data.markets[1];
 
-  expect(firstMarket["marketID"]).not.toBe(secondMarket["marketID"])
-  expect(firstMarket["bumpTime"]).toBeGreaterThanOrEqual(secondMarket["bumpTime"])
+  expect(firstMarket["marketID"]).not.toBe(secondMarket["marketID"]);
+  expect(firstMarket["bumpTime"]).toBeGreaterThanOrEqual(secondMarket["bumpTime"]);
 
   // TODO: call contract and bump secondMarket
   // Get the registry address.
@@ -126,5 +126,5 @@ test('test market api route', async ({ page }) => {
   expect(res3headers[NEXTJS_CACHE_HEADER]).toBe("HIT");
   expect(newFirstMarket["marketID"]).toBe(secondMarket["marketID"]);
   expect(newSecondMarket["marketID"]).toBe(firstMarket["marketID"]);
-  expect(newFirstMarket["bumpTime"]).toBeGreaterThanOrEqual(newSecondMarket["bumpTime"])
+  expect(newFirstMarket["bumpTime"]).toBeGreaterThanOrEqual(newSecondMarket["bumpTime"]);
 });

@@ -141,7 +141,8 @@ export const EmojiPickerWithInput = ({
     }
   };
 
-  const closeIconClassName = `flex items-center justify-center relative h-full ${mode !== "search" && "ml-[2.5ch] pr-[1ch]"} hover:cursor-pointer ` +
+  const closeIconClassName =
+    `flex items-center justify-center relative h-full ${mode !== "search" && "ml-[2.5ch] pr-[1ch]"} hover:cursor-pointer ` +
     `${mode === "search" ? "med-pixel-close" : ""}`;
 
   const close = (
@@ -160,8 +161,9 @@ export const EmojiPickerWithInput = ({
   return (
     <Flex
       style={{ ...(mode === "search" ? { width: "100%" } : {}) }}
-      className="justify-center" ref={inputRef}
-      >
+      className="justify-center"
+      ref={inputRef}
+    >
       <ConditionalWrapper mode={mode}>
         <InputGroup isShowError={false} {...inputGroupProps}>
           <div className="flex-row relative items-center justify-center">

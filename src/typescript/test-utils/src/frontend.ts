@@ -1,4 +1,4 @@
-import { exec, spawn } from "child_process";
+import { spawn } from "child_process";
 import { sleep } from "@econia-labs/emojicoin-common";
 
 export class Frontend {
@@ -10,8 +10,31 @@ export class Frontend {
    * Kills all the descendent processes of the node
    * process, including the node process itself.
    */
-  stop() {
-    exec('pkill -f "pnpm run start"')
+  static stop() {
+    const cliCommand = "pkill";
+    const cliArgs = ["-SIGINT", "pnpm run start"];
+
+    const childProcess = spawn(cliCommand, cliArgs);
+
+    childProcess.stderr?.on("data", (data: any) => {
+      const str = data.toString();
+      // eslint-disable-next-line no-console
+      console.log(str);
+    });
+
+    childProcess.stdout?.on("data", (data: any) => {
+      const str = data.toString();
+      // eslint-disable-next-line no-console
+      console.log(str);
+    });
+
+    const p: Promise<null> = new Promise((r) => {
+      childProcess.on("close", () => {
+        r(null);
+      });
+    });
+
+    return p;
   }
 
   /**
@@ -23,22 +46,18 @@ export class Frontend {
   async run() {
     const nodeIsUp = await this.checkIfProcessIsUp();
     if (nodeIsUp) {
-      console.log("already up lol")
       return;
     }
-    this.start();
+    Frontend.start();
     await this.waitUntilProcessIsUp();
   }
 
   /**
    * Starts the local testnet by running the aptos node run-local-testnet command.
    */
-  async start() {
+  static async start() {
     const cliCommand = "bash";
-    const cliArgs = [
-      "-c",
-      "pnpm run build && pnpm run start",
-    ];
+    const cliArgs = ["-c", "pnpm run build && pnpm run start"];
 
     const childProcess = spawn(cliCommand, cliArgs, { detached: true });
 

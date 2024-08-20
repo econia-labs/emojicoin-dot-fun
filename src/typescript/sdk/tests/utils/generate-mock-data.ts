@@ -2,6 +2,7 @@
 import { Account, type HexInput, type Aptos, type Uint64, Hex } from "@aptos-labs/ts-sdk";
 import type { Sql } from "postgres";
 import postgres from "postgres";
+import { Lazy, ONE_APT, ONE_APTN } from "@econia-labs/emojicoin-common";
 import {
   EmojicoinDotFun,
   type TypeTagInput,
@@ -9,7 +10,7 @@ import {
   deriveEmojicoinPublisherAddress,
 } from "../../src/emojicoin_dot_fun";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets";
-import { Lazy, ONE_APT, ONE_APTN, type Types, getMarketResource } from "../../src";
+import { type Types, getMarketResource } from "../../src";
 
 type RegisterMarketAction = {
   emojis: Array<HexInput>;

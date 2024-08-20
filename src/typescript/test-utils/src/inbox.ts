@@ -69,6 +69,7 @@ export class Inbox {
     const gitRoot = findGitRoot(process.cwd());
     const cliArgs = [
       "compose",
+      "--progress=plain",
       "-p",
       "emojicoin-inbox-test",
       "-f",

@@ -1,7 +1,8 @@
 {
   "dependencies": {
-    "@econia-labs/emojicoin-test-utils": "workspace:*",
     "@aptos-labs/ts-sdk": "1.22.2",
+    "@econia-labs/emojicoin-common": "workspace:*",
+    "@econia-labs/emojicoin-test-utils": "workspace:*",
     "@keyvhq/core": "^2.1.1",
     "@noble/hashes": "^1.4.0",
     "@supabase/postgrest-js": "^1.15.7",

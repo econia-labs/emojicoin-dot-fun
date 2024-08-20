@@ -31,6 +31,7 @@ fullnode
 futuna
 galxe
 gcloud
+geoblocking
 guids
 hamsa
 headlessui
@@ -49,6 +50,7 @@ mayen
 melilla
 merperson
 moai
+mosquitto
 mqtt
 mybuilder
 nazar

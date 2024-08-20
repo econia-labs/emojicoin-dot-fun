@@ -16,7 +16,7 @@ const DAYS_IN_YEAR = 365;
 const getXPR = (x: number, tvlPerLpCoinGrowth: number) => (tvlPerLpCoinGrowth ** x - 1) * 100;
 
 const formatXPR = (xpr: number) => {
-  return `${xpr.toFixed(4).replace(/(\.0*|(?<=(\..*))0*)$/, '')}%`;
+  return `${xpr.toFixed(4).replace(/(\.0*|(?<=(\..*))0*)$/, "")}%`;
 };
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {

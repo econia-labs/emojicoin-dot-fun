@@ -16,10 +16,12 @@ export const LiquidityButton = (props: GridProps) => {
       {!isInBondingCurve(props.data) ? (
         <StyledContentHeader>
           <Flex width="100%" justifyContent="center">
-            <Link href={{
-              pathname: ROUTES.pools,
-              query: { pool: props.data.emojis.map(e => e.emoji).join("") },
-            }}>
+            <Link
+              href={{
+                pathname: ROUTES.pools,
+                query: { pool: props.data.emojis.map((e) => e.emoji).join("") },
+              }}
+            >
               <Button scale="lg">{t("Provide liquidity")}</Button>
             </Link>
           </Flex>
