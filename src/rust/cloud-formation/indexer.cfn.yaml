@@ -18,6 +18,16 @@ Mappings:
     C:
       AvailabilityZone: 2
       CidrBlock: '10.0.3.0/24'
+Outputs:
+  DbClusterEndpoint:
+    Description: 'The database cluster connection endpoint.'
+    Value: !GetAtt 'DbCluster.Endpoint.Address'
+  DbClusterEndpointPort:
+    Description: 'The database cluster endpoint connection port.'
+    Value: !GetAtt 'DbCluster.Endpoint.Port'
+  DbClusterReaderEndpoint:
+    Description: 'The database cluster reader connection endpoint.'
+    Value: !GetAtt 'DbCluster.Endpoint.Address'
 Parameters:
   DbMaxCapacity:
     Default: 4
