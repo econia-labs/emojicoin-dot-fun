@@ -1,6 +1,6 @@
 "use server";
 
-import { UnitOfTime, getTime } from "@sdk/utils/misc";
+import { UnitOfTime, getTime } from "@econia-labs/emojicoin-common";
 import { cache } from "react";
 
 /**

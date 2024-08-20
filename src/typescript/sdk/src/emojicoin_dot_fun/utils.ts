@@ -8,7 +8,8 @@ import {
   isUserTransactionResponse,
   type PendingTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME } from "@econia-labs/emojicoin-common";
+import { MODULE_ADDRESS } from "../const";
 import { type Events, converter, toGenericEvent, createEmptyEvents } from "./events";
 import { type AnyEmojicoinEvent, type AnyEmojicoinEventName, type Types } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";

@@ -1,5 +1,5 @@
 import { type AtLeastOne } from "../../../sdk/src/utils/utility-types";
-import { QUOTE_REAL_CEILING, QUOTE_VIRTUAL_FLOOR } from "@sdk/const";
+import { QUOTE_REAL_CEILING, QUOTE_VIRTUAL_FLOOR } from "@econia-labs/emojicoin-common";
 import Big from "big.js";
 
 /**

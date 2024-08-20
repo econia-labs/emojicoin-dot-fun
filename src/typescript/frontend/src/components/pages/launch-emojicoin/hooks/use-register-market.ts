@@ -6,7 +6,7 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { INTEGRATOR_ADDRESS } from "lib/env";
-import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
+import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@econia-labs/emojicoin-common";
 import { toRegistryView } from "@sdk/types";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { SYMBOL_DATA } from "@sdk/emoji_data";

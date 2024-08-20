@@ -6,9 +6,11 @@ import {
   type TypeTagStruct,
 } from "@aptos-labs/ts-sdk";
 import {
-  MODULE_ADDRESS,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   REWARDS_MODULE_NAME,
+} from "@econia-labs/emojicoin-common";
+import {
+  MODULE_ADDRESS,
   REWARDS_MODULE_ADDRESS,
 } from "../const";
 

@@ -1,4 +1,4 @@
-import { AccountAddress } from "@aptos-labs/ts-sdk";
+import { APTOS_COIN, AccountAddress, parseTypeTag } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 
 export const VERCEL = process.env.VERCEL === "1";
@@ -31,6 +31,8 @@ if (typeof window !== "undefined" && typeof process.env.INBOX_URL !== "undefined
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
+
+export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);
 
 export const LOCAL_INBOX_URL = process.env.INBOX_URL ?? "http://localhost:3000";
 

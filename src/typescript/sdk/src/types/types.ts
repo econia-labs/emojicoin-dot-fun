@@ -1,10 +1,11 @@
 import { hexToBytes } from "@noble/hashes/utils";
 import { type AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
+import { type EMOJICOIN_DOT_FUN_MODULE_NAME } from "@econia-labs/emojicoin-common";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { normalizeAddress } from "../utils/account-address";
-import { type StateTrigger, toStateTrigger, type EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
+import { type StateTrigger, toStateTrigger } from "../const";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,

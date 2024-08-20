@@ -1,6 +1,6 @@
 // cspell:word emojicoindotfun
 
-import { UNIT_OF_TIME_MULTIPLIERS, UnitOfTime } from "@sdk/utils/misc";
+import { UNIT_OF_TIME_MULTIPLIERS, UnitOfTime } from "@econia-labs/emojicoin-common";
 
 export const COOKIE_FOR_HASHED_ADDRESS = "emojicoindotfun-account-hashed-address";
 export const COOKIE_FOR_ACCOUNT_ADDRESS = "emojicoindotfun-account-address";

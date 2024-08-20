@@ -12,7 +12,7 @@ import LaunchButtonOrGoToMarketLink from "./components/launch-or-goto";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import { MARKET_REGISTRATION_FEE, ONE_APTN } from "@sdk/const";
+import { MARKET_REGISTRATION_FEE, ONE_APTN } from "@econia-labs/emojicoin-common";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 // This is the value that most wallets use. It's an estimate, possibly incorrect, but better for UX.

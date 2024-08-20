@@ -28,8 +28,7 @@
     "strict": true,
     "target": "esnext",
     "types": [
-      "node",
-      "jest"
+      "node"
     ]
   },
   "exclude": [

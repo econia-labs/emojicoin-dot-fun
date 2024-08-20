@@ -32,7 +32,7 @@ import {
 import { useEventStore } from "context/state-store-context";
 import { getEvents, type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
-import { sleep, UnitOfTime } from "@sdk/utils";
+import { sleep, UnitOfTime } from "@econia-labs/emojicoin-common";
 import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
 import {
   getAptBalanceFromChanges,

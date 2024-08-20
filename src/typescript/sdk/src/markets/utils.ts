@@ -12,21 +12,23 @@ import {
   type TypeTag,
 } from "@aptos-labs/ts-sdk";
 import {
+  sleep,
+  COIN_FACTORY_MODULE_NAME,
+  DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+  EMOJICOIN_DOT_FUN_MODULE_NAME,
+} from "@econia-labs/emojicoin-common";
+import {
   EmojicoinDotFun,
   REGISTRY_ADDRESS,
   deriveEmojicoinPublisherAddress,
 } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
-  COIN_FACTORY_MODULE_NAME,
-  DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
-  EMOJICOIN_DOT_FUN_MODULE_NAME,
   GRACE_PERIOD_TIME,
   MODULE_ADDRESS,
 } from "../const";
 import { type Types, toMarketResource, toRegistrantGracePeriodFlag } from "../types/types";
 import type JSONTypes from "../types/json-types";
-import { sleep } from "../utils";
 import {
   type DerivedEmojicoinData,
   type EmojicoinSymbol,
