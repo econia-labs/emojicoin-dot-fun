@@ -55,7 +55,9 @@ export class LocalNode {
    * Starts the local testnet by running the aptos node run-local-testnet command.
    */
   static start() {
-    const cliCommand = "npx @aptos-labs/aptos-cli node run-local-testnet --force-restart --assume-yes --with-indexer-api --bind-to 0.0.0.0 > /dev/null 2>&1";
+    const cliCommand = "npx @aptos-labs/aptos-cli node run-local-testnet " +
+      "--force-restart --assume-yes --with-indexer-api --bind-to 0.0.0.0 >" +
+      "/dev/null 2>&1";
 
     const childProcess = exec(cliCommand);
 
