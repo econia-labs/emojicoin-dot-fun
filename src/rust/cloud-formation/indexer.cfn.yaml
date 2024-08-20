@@ -47,6 +47,7 @@ Resources:
       NetworkInterfaces:
       - DeviceIndex: 0
         GroupSet:
+        - !Ref 'BastionHostConnectionEndpointSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
         SubnetId: !Ref 'SubnetA'
       UserData:
@@ -55,6 +56,25 @@ Resources:
           yum update -y
           yum install -y postgresql16
     Type: 'AWS::EC2::Instance'
+  # Connection endpoint allowing access to the bastion host.
+  BastionHostConnectionEndpoint:
+    Properties:
+      PreserveClientIp: true
+      SecurityGroupIds:
+      - !Ref 'BastionHostConnectionEndpointSecurityGroup'
+      SubnetId: !Ref 'SubnetA'
+    Type: 'AWS::EC2::InstanceConnectEndpoint'
+  # Security group for bastion host connection endpoint.
+  BastionHostConnectionEndpointSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - CidrIp: '0.0.0.0/0'
+        FromPort: 443
+        IpProtocol: 'tcp'
+        ToPort: 443
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Database cluster.
   DbCluster:
     Metadata:
