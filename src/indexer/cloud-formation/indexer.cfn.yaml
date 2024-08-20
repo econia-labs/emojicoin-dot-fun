@@ -1,0 +1,14 @@
+---
+Mappings:
+  Constants:
+    VpcCidrBlock: '10.0.0.0/16'
+  # Virtual private cloud for internal networking.
+  Vpc:
+    Properties:
+      CidrBlock: !FindInMap
+      - Constants
+      - VpcCidrBlock
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+    Type: 'AWS::EC2::VPC'
+...
