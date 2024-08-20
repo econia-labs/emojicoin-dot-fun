@@ -1,9 +1,12 @@
 ---
 Mappings:
-  # Use one map entry for constants to prevent them from being overloaded,
-  # which would be possible if they were parameters.
   Constants:
-    Defaults:
+    # These compromised credentials are not a security risk because access to
+    # the database is restricted to security groups in the VPC.
+    DatabaseCredentials:
+      MasterPassword: 'postgres'
+      MasterUsername: 'postgres'
+    Networking:
       VpcCidrBlock: '10.0.0.0/16'
   Subnets:
     A:
@@ -15,7 +18,40 @@ Mappings:
     C:
       AvailabilityZone: 2
       CidrBlock: '10.0.3.0/24'
+Parameters:
+  DbMaxCapacity:
+    Default: 4
+    Type: 'Number'
+  DbMinCapacity:
+    Default: 0.5
+    Type: 'Number'
 Resources:
+  # Database cluster.
+  DbCluster:
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+          - 'W2501'
+    Properties:
+      DBSubnetGroupName: !Ref 'DbSubnetGroup'
+      Engine: 'aurora-postgresql'
+      EngineMode: 'provisioned'
+      EngineVersion: '16.2'
+      MasterUserPassword: !FindInMap
+      - 'Constants'
+      - 'DatabaseCredentials'
+      - 'MasterPassword'
+      MasterUsername: !FindInMap
+      - 'Constants'
+      - 'DatabaseCredentials'
+      - 'MasterUsername'
+      ServerlessV2ScalingConfiguration:
+        MaxCapacity: !Ref 'DbMaxCapacity'
+        MinCapacity: !Ref 'DbMinCapacity'
+      VpcSecurityGroupIds:
+      - !Ref 'DbSecurityGroup'
+    Type: 'AWS::RDS::DBCluster'
   # Security group for the database itself.
   DbSecurityGroup:
     Properties:
@@ -73,7 +109,7 @@ Resources:
     Properties:
       CidrBlock: !FindInMap
       - 'Constants'
-      - 'Defaults'
+      - 'Networking'
       - 'VpcCidrBlock'
       EnableDnsHostnames: true
       EnableDnsSupport: true
