@@ -15,7 +15,6 @@ setup("start stack", async () => {
   setup.slow();
 
   const localNode = new LocalNode();
-  globalThis.__LOCAL_NODE__ = localNode;
   await localNode.run();
 
   // This is not done in parallel as Inbox requires the local node to be up first.
@@ -23,7 +22,6 @@ setup("start stack", async () => {
   await inbox.run();
 
   const frontend = new Frontend();
-  globalThis.__FRONTEND__ = frontend;
   await frontend.run();
 
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });

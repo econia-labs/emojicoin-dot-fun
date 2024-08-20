@@ -12,11 +12,11 @@
     ]
   },
   "dependencies": {
+    "@aptos-labs/aptos-cli": "^0.1.9",
     "@aptos-labs/ts-sdk": "1.22.2",
     "@aptos-labs/wallet-adapter-react": "3.4.3",
     "@econia-labs/emojicoin-common": "workspace:*",
     "@econia-labs/emojicoin-sdk": "workspace:*",
-    "@econia-labs/emojicoin-test-utils": "workspace:*",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@emotion/is-prop-valid": "^1.2.2",
@@ -66,6 +66,7 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@econia-labs/emojicoin-test-utils": "workspace:*",
     "@playwright/test": "^1.45.3",
     "@types/big.js": "^6.2.2",
     "@types/lodash": "^4.17.6",
