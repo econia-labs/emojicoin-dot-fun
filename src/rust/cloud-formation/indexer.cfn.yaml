@@ -19,7 +19,7 @@ Mappings:
       AvailabilityZone: 2
       CidrBlock: '10.0.3.0/24'
 Outputs:
-  BastionHostInstanceId:
+  BastionHostId:
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
   DbClusterEndpoint:
