@@ -27,7 +27,7 @@ Outputs:
     Value: !GetAtt 'DbCluster.Endpoint.Port'
   DbClusterReaderEndpoint:
     Description: 'The database cluster reader connection endpoint.'
-    Value: !GetAtt 'DbCluster.Endpoint.Address'
+    Value: !GetAtt 'DbCluster.ReadEndpoint.Address'
 Parameters:
   DbMaxCapacity:
     Default: 4
