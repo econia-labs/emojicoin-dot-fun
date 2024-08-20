@@ -62,6 +62,7 @@ Resources:
   # circular dependencies with security group for users of the database.
   DbSecurityGroupIngress:
     Properties:
+      GroupId: !Ref 'DbSecurityGroup'
       IpProtocol: -1
       SourceSecurityGroupId: !Ref 'DbUserSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
