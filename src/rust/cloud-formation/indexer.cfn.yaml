@@ -5,7 +5,38 @@ Mappings:
   Constants:
     Defaults:
       VpcCidrBlock: '10.0.0.0/16'
+  Subnets:
+    A:
+      AvailabilityZone: 0
+      CidrBlock: '10.0.1.0/24'
+    B:
+      AvailabilityZone: 1
+      CidrBlock: '10.0.2.0/24'
+    C:
+      AvailabilityZone: 2
+      CidrBlock: '10.0.3.0/24'
 Resources:
+  # A subnet for each of the availability zones that the database spans.
+  Fn::ForEach::Subnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - Subnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'Subnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'Subnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: false
+        VpcId: !Ref 'Vpc'
+      Type: 'AWS::EC2::Subnet'
   # Virtual private cloud for internal networking.
   Vpc:
     Properties:
