@@ -395,9 +395,6 @@ importers:
       find-git-root:
         specifier: ^1.0.4
         version: 1.0.4
-      ps-list:
-        specifier: ^8.1.1
-        version: 8.1.1
     devDependencies:
       '@aptos-labs/aptos-cli':
         specifier: ^0.1.9
@@ -411,9 +408,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^6.21.0
         version: 6.21.0(eslint@8.57.0)(typescript@5.3.3)
-      dotenv-cli:
-        specifier: ^7.4.2
-        version: 7.4.2
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -435,9 +429,6 @@ importers:
       prettier:
         specifier: ^3.3.2
         version: 3.3.2
-      tree-kill:
-        specifier: ^1.2.2
-        version: 1.2.2
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.14.10)(typescript@5.3.3)
