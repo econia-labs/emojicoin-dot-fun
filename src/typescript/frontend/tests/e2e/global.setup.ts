@@ -12,7 +12,7 @@ import fs from "fs";
 import path from "path";
 
 setup("start stack", async () => {
-  setup.slow();
+  setup.setTimeout(240000);
 
   const localNode = new LocalNode();
   await localNode.run();

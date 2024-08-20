@@ -1,8 +1,8 @@
-import { spawn } from "child_process";
+import { exec } from "child_process";
 import { sleep } from "@econia-labs/emojicoin-common";
 
 export class LocalNode {
-  readonly MAXIMUM_WAIT_TIME_SEC = 75;
+  readonly MAXIMUM_WAIT_TIME_SEC = 120;
 
   readonly READINESS_ENDPOINT = "http://127.0.0.1:8070/";
 
@@ -11,10 +11,9 @@ export class LocalNode {
    * process, including the node process itself.
    */
   static stop(): Promise<null> {
-    const cliCommand = "pkill";
-    const cliArgs = ["-SIGINT", "aptos"];
+    const cliCommand = "pkill -SIGINT aptos";
 
-    const childProcess = spawn(cliCommand, cliArgs);
+    const childProcess = exec(cliCommand);
 
     childProcess.stderr?.on("data", (data: any) => {
       const str = data.toString();
@@ -56,19 +55,9 @@ export class LocalNode {
    * Starts the local testnet by running the aptos node run-local-testnet command.
    */
   static start() {
-    const cliCommand = "npx";
-    const cliArgs = [
-      "@aptos-labs/aptos-cli",
-      "node",
-      "run-local-testnet",
-      "--force-restart",
-      "--assume-yes",
-      "--with-indexer-api",
-      "--bind-to",
-      "0.0.0.0",
-    ];
+    const cliCommand = "npx @aptos-labs/aptos-cli node run-local-testnet --force-restart --assume-yes --with-indexer-api --bind-to 0.0.0.0 > /dev/null 2>&1";
 
-    const childProcess = spawn(cliCommand, cliArgs, { detached: true });
+    const childProcess = exec(cliCommand);
 
     childProcess.stderr?.on("data", (data: any) => {
       const str = data.toString();

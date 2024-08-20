@@ -7,6 +7,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
+    - run: 'git submodule update --init --recursive ../../inbox'
     - uses: 'actions/setup-node@v4'
       with:
         node-version: 'lts/*'
@@ -25,7 +26,7 @@ jobs:
         INBOX_URL: '${{ secrets.INBOX_URL }}'
         NEXT_PUBLIC_MQTT_URL: '${{ secrets.NEXT_PUBLIC_MQTT_URL }}'
       name: 'Run Playwright tests'
-      run: 'pnpm exec playwright test'
+      run: 'pnpm run e2e-chromium'
     - if: 'always()'
       uses: 'actions/upload-artifact@v4'
       with:

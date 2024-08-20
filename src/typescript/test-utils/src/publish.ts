@@ -57,6 +57,7 @@ export async function publishPackage(args: {
     ...["--private-key", pkString],
     ...["--encoding", "hex"],
     "--assume-yes",
+    "--override-size-check",
   ];
 
   const command = shellArgs.join(" ");
