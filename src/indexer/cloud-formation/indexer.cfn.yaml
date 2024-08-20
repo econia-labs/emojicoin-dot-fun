@@ -16,6 +16,19 @@ Mappings:
       AvailabilityZone: 2
       CidrBlock: '10.0.3.0/24'
 Resources:
+  # Security group for the database itself.
+  DbSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the database's security group, separated to eliminate
+  # circular dependencies with security group for users of the database.
+  DbSecurityGroupIngress:
+    Properties:
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'DbUserSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
   # Database subnet group.
   DbSubnetGroup:
     Properties:
@@ -25,6 +38,15 @@ Resources:
       - !Ref 'SubnetB'
       - !Ref 'SubnetC'
     Type: 'AWS::RDS::DBSubnetGroup'
+  # Security group for users of the database.
+  DbUserSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'DbSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # A private subnet for each of the database availability zones.
   Fn::ForEach::Subnet:
   - 'Identifier'
