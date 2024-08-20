@@ -1,0 +1,7 @@
+# Contains a minimal template, used to test stack teardown by pointing the
+# stack deployment file to this template.
+---
+Resources:
+  NullBucket:
+    Type: 'AWS::S3::Bucket'
+...
