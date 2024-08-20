@@ -1,3 +1,5 @@
+<!--- cspell:word eice -->
+
 # `emojicoin-dot-fun` indexer
 
 ## AWS CloudFormation
@@ -9,7 +11,34 @@ The indexer is deployed using [AWS CloudFormation] with a [template file] at
 By granting [PowerUserAccess] to the stack, deployments can be performed
 programmatically using [GitSync] alone.
 
+## Connect to bastion host
+
+Set your stack name, for example `emojicoin-dot-fun-indexer-dev`:
+
+```sh
+STACK_NAME=emojicoin-dot-fun-indexer-dev
+```
+
+Get the bastion host instance ID from the CloudFormation stack:
+
+```sh
+INSTANCE_ID=$(aws cloudformation describe-stacks \
+    --output text \
+    --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
+    --stack-name $STACK_NAME
+)
+echo $INSTANCE_ID
+```
+
+Connect to the instance via [EC2 Instance Connect Endpoint]:
+
+```sh
+aws ec2-instance-connect ssh \
+    --instance-id $INSTANCE_ID --connection-type eice
+```
+
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
+[ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
 [stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html
