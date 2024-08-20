@@ -20,7 +20,7 @@ jobs:
     - name: 'Install Playwright Browsers'
       run: 'pnpm exec playwright install --with-deps'
     - name: 'Copy env file'
-      run: 'cp ../.env.ci .env'
+      run: 'cp ../.env.test .env'
     - env:
         INBOX_URL: '${{ secrets.INBOX_URL }}'
         NEXT_PUBLIC_MQTT_URL: '${{ secrets.NEXT_PUBLIC_MQTT_URL }}'
@@ -35,9 +35,7 @@ jobs:
     timeout-minutes: 60
 name: 'Playwright Tests'
 "on":
-  pull_request:
-    branches:
-    - 'main'
+  pull_request: null
   push:
     branches:
     - 'main'
