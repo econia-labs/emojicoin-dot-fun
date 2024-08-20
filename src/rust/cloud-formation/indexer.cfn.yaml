@@ -28,9 +28,6 @@ Outputs:
   DbClusterEndpoint:
     Description: 'The database cluster connection endpoint.'
     Value: !GetAtt 'DbCluster.Endpoint.Address'
-  DbClusterEndpointPort:
-    Description: 'The database cluster endpoint connection port.'
-    Value: !GetAtt 'DbCluster.Endpoint.Port'
   DbClusterReaderEndpoint:
     Description: 'The database cluster reader connection endpoint.'
     Value: !GetAtt 'DbCluster.ReadEndpoint.Address'
@@ -38,6 +35,9 @@ Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
     Type: 'AWS::EC2::Image::Id'
+  DatabasePort:
+    Default: 5432
+    Type: 'Number'
   DbMaxCapacity:
     Default: 4
     Type: 'Number'
@@ -114,6 +114,7 @@ Resources:
       - 'Constants'
       - 'DatabaseCredentials'
       - 'MasterUsername'
+      Port: !Ref 'DatabasePort'
       ServerlessV2ScalingConfiguration:
         MaxCapacity: !Ref 'DbMaxCapacity'
         MinCapacity: !Ref 'DbMinCapacity'
