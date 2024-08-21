@@ -6,12 +6,13 @@ Conditions:
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
-    # the database is restricted to security groups in the VPC. Using the name
-    # of the database as the master username ensures it is initialized.
-    DatabaseCredentials:
+    # the database is restricted to security groups in the VPC.
+    DatabaseConfig:
+      DatabaseName: 'emojicoin'
       MasterPassword: 'emojicoin'
       MasterUsername: 'emojicoin'
     Networking:
+      DatabasePort: 5432
       ProcessorPort: 3008
       VpcCidrBlock: '10.0.0.0/16'
   Subnets:
@@ -166,18 +167,25 @@ Resources:
           - 'W2501'
     Properties:
       DBSubnetGroupName: !Ref 'DbSubnetGroup'
+      DatabaseName: !FindInMap
+      - 'Constants'
+      - 'DatabaseConfig'
+      - 'DatabaseName'
       Engine: 'aurora-postgresql'
       EngineMode: 'provisioned'
       EngineVersion: '16.2'
       MasterUserPassword: !FindInMap
       - 'Constants'
-      - 'DatabaseCredentials'
+      - 'DatabaseConfig'
       - 'MasterPassword'
       MasterUsername: !FindInMap
       - 'Constants'
-      - 'DatabaseCredentials'
+      - 'DatabaseConfig'
       - 'MasterUsername'
-      Port: 5432
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DatabasePort'
       ServerlessV2ScalingConfiguration:
         MaxCapacity: !Ref 'DbMaxCapacity'
         MinCapacity: !Ref 'DbMinCapacity'
@@ -294,19 +302,19 @@ Resources:
           - - 'postgres://'
             - !FindInMap
               - 'Constants'
-              - 'DatabaseCredentials'
+              - 'DatabaseConfig'
               - 'MasterUsername'
             - ':'
             - !FindInMap
               - 'Constants'
-              - 'DatabaseCredentials'
+              - 'DatabaseConfig'
               - 'MasterPassword'
             - '@'
             - !GetAtt 'DbCluster.Endpoint.Address'
             - '/'
             - !FindInMap
               - 'Constants'
-              - 'DatabaseCredentials'
+              - 'DatabaseConfig'
               - 'MasterUsername'
         - Name: 'GRPC_DATA_SERVICE_URL'
           Value: !Ref 'GrpcDataServiceUrl'
