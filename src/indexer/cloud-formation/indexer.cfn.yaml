@@ -46,24 +46,24 @@ Parameters:
     Type: 'Number'
 Resources:
   # Minimal VM for accessing the database.
-  BastionHost:
-    Properties:
-      ImageId: !Ref 'BastionHostAmiId'
-      InstanceType: 't4g.nano'
-      NetworkInterfaces:
-      - DeviceIndex: 0
-        GroupSet:
-        - !Ref 'BastionHostSecurityGroup'
-        - !Ref 'DbUserSecurityGroup'
-        SubnetId: !Ref 'PublicSubnet'
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          yum update -y
-          amazon-linux-extras enable postgresql14
-          yum clean metadata
-          yum install -y postgresql
-    Type: 'AWS::EC2::Instance'
+  # BastionHost:
+  #   Properties:
+  #     ImageId: !Ref 'BastionHostAmiId'
+  #     InstanceType: 't4g.nano'
+  #     NetworkInterfaces:
+  #     - DeviceIndex: 0
+  #       GroupSet:
+  #       - !Ref 'BastionHostSecurityGroup'
+  #       - !Ref 'DbUserSecurityGroup'
+  #       SubnetId: !Ref 'PublicSubnet'
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash
+  #         yum update -y
+  #         amazon-linux-extras enable postgresql14
+  #         yum clean metadata
+  #         yum install -y postgresql
+  #   Type: 'AWS::EC2::Instance'
   # Connection endpoint allowing access to the bastion host.
   BastionHostConnectionEndpoint:
     Properties:
