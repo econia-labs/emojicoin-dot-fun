@@ -8,8 +8,8 @@ Mappings:
     # These compromised credentials are not a security risk because access to
     # the database is restricted to security groups in the VPC.
     DatabaseCredentials:
-      MasterPassword: 'indexer'
-      MasterUsername: 'indexer'
+      MasterPassword: 'emojicoin'
+      MasterUsername: 'emojicoin'
     Networking:
       VpcCidrBlock: '10.0.0.0/16'
   Subnets:
