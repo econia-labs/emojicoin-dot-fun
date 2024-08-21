@@ -1,4 +1,8 @@
 ---
+Conditions:
+  ProvisionBastionHost: !Equals
+  - !Ref 'ProvisionBastionHost'
+  - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
@@ -23,6 +27,7 @@ Mappings:
       CidrBlock: '10.0.0.0/24'
 Outputs:
   BastionHostId:
+    Condition: 'ProvisionBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
   DbClusterEndpoint:
@@ -44,26 +49,30 @@ Parameters:
   DbMinCapacity:
     Default: 0.5
     Type: 'Number'
+  ProvisionBastionHost:
+    Default: 'true'
+    Type: 'String'
 Resources:
   # Minimal VM for accessing the database.
-  # BastionHost:
-  #   Properties:
-  #     ImageId: !Ref 'BastionHostAmiId'
-  #     InstanceType: 't4g.nano'
-  #     NetworkInterfaces:
-  #     - DeviceIndex: 0
-  #       GroupSet:
-  #       - !Ref 'BastionHostSecurityGroup'
-  #       - !Ref 'DbUserSecurityGroup'
-  #       SubnetId: !Ref 'PublicSubnet'
-  #     UserData:
-  #       Fn::Base64: !Sub |
-  #         #!/bin/bash
-  #         yum update -y
-  #         amazon-linux-extras enable postgresql14
-  #         yum clean metadata
-  #         yum install -y postgresql
-  #   Type: 'AWS::EC2::Instance'
+  BastionHost:
+    Condition: 'ProvisionBastionHost'
+    Properties:
+      ImageId: !Ref 'BastionHostAmiId'
+      InstanceType: 't4g.nano'
+      NetworkInterfaces:
+      - DeviceIndex: 0
+        GroupSet:
+        - !Ref 'BastionHostSecurityGroup'
+        - !Ref 'DbUserSecurityGroup'
+        SubnetId: !Ref 'PublicSubnet'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          amazon-linux-extras enable postgresql14
+          yum clean metadata
+          yum install -y postgresql
+    Type: 'AWS::EC2::Instance'
   # Connection endpoint allowing access to the bastion host.
   BastionHostConnectionEndpoint:
     Properties:
