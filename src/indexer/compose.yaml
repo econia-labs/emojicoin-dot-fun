@@ -60,6 +60,7 @@ services:
       GRPC_AUTH_TOKEN: ${GRPC_AUTH_TOKEN}
       GRPC_DATA_SERVICE_URL: ${GRPC_DATA_SERVICE_URL}
       STARTING_VERSION: ${STARTING_VERSION}
+      EMOJICOIN_MODULE_ADDRESS: ${CONTRACT_ADDRESS}
     depends_on:
       postgres:
         condition: service_healthy
