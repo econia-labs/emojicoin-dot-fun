@@ -6,11 +6,13 @@ Conditions:
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
-    # the database is restricted to security groups in the VPC.
+    # the database is restricted to security groups in the VPC. Using the name
+    # of the database as the master username ensures it is initialized.
     DatabaseCredentials:
       MasterPassword: 'emojicoin'
       MasterUsername: 'emojicoin'
     Networking:
+      ProcessorPort: 3008
       VpcCidrBlock: '10.0.0.0/16'
   Subnets:
     A:
@@ -40,18 +42,23 @@ Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
     Type: 'AWS::EC2::Image::Id'
-  DatabasePort:
-    Default: 5432
-    Type: 'Number'
   DbMaxCapacity:
     Default: 4
     Type: 'Number'
   DbMinCapacity:
     Default: 0.5
     Type: 'Number'
+  EmojicoinModuleAddress:
+    Type: 'String'
+  GrpcDataServiceUrl:
+    Type: 'String'
+  ProcessorImageVersion:
+    Type: 'String'
   ProvisionBastionHost:
     Default: 'false'
     Type: 'String'
+  StartingTransactionVersion:
+    Type: 'Number'
 Resources:
   # Minimal VM for accessing the database.
   BastionHost:
@@ -170,7 +177,7 @@ Resources:
       - 'Constants'
       - 'DatabaseCredentials'
       - 'MasterUsername'
-      Port: !Ref 'DatabasePort'
+      Port: 5432
       ServerlessV2ScalingConfiguration:
         MaxCapacity: !Ref 'DbMaxCapacity'
         MinCapacity: !Ref 'DbMinCapacity'
@@ -276,6 +283,65 @@ Resources:
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
+  # Task definition for processor.
+  ProcessorTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+      - Environment:
+        - Name: 'DATABASE_URL'
+          Value: !Join
+          - ''
+          - - 'postgres://'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseCredentials'
+              - 'MasterUsername'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseCredentials'
+              - 'MasterPassword'
+            - '@'
+            - !GetAtt 'DbCluster.Endpoint.Address'
+            - '/'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseCredentials'
+              - 'MasterUsername'
+        - Name: 'GRPC_DATA_SERVICE_URL'
+          Value: !Ref 'GrpcDataServiceUrl'
+        - Name: 'STARTING_VERSION'
+          Value: !Ref 'StartingTransactionVersion'
+        - Name: 'EMOJICOIN_MODULE_ADDRESS'
+          Value: !Ref 'EmojicoinModuleAddress'
+        Image: !Sub 'econialabs/emojicoin-processor:${ProcessorImageVersion}'
+        LogConfiguration:
+          LogDriver: 'awslogs'
+          Options:
+            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: 'ecs'
+        Name: 'processor'
+        PortMappings:
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ProcessorPort'
+        Secrets:
+        - Name: 'GRPC_AUTH_TOKEN'
+          ValueFrom: !Sub
+          - 'arn:aws:secretsmanager:${Region}:${Account}:secret:${SecretName}'
+          - Account: !Ref 'AWS::AccountId'
+            Region: !Ref 'AWS::Region'
+            SecretName: 'GRPC_AUTH_TOKEN'
+      Cpu: '256'
+      ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
+      Family: 'AllowlistTask'
+      Memory: '512'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities:
+      - 'FARGATE'
+    Type: 'AWS::ECS::TaskDefinition'
   # Route route for the public subnet in the virtual private cloud.
   PublicRouteTable:
     Properties:
