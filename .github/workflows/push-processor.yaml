@@ -10,7 +10,7 @@ jobs:
         images: 'econialabs/emojicoin-processor'
         tags: |
           type=ref,event=branch
-          type=match,pattern=indexer-v(.*),group=1
+          type=semver,pattern={{version}}
     - uses: 'docker/setup-qemu-action@v3'
     - uses: 'docker/setup-buildx-action@v3'
     - uses: 'docker/login-action@v3'
@@ -33,5 +33,5 @@ name: 'Build processor Docker image and push to Docker Hub'
     branches:
     - 'unstable'
     tags:
-    - 'indexer-v*'
+    - 'v*'
 ...
