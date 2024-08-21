@@ -50,7 +50,7 @@ Parameters:
     Default: 0.5
     Type: 'Number'
   ProvisionBastionHost:
-    Default: 'true'
+    Default: 'false'
     Type: 'String'
 Resources:
   # Minimal VM for accessing the database.
