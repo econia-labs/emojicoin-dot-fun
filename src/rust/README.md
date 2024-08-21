@@ -89,7 +89,7 @@ DB_CLUSTER_ENDPOINT=
 Start `psql`:
 
 ```sh
-psql postgres://indexer:indexer@$DB_CLUSTER_ENDPOINT
+psql postgres://emojicoin:emojicoin@$DB_CLUSTER_ENDPOINT
 ```
 
 Run a simple statement:
