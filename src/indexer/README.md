@@ -39,6 +39,17 @@ INSTANCE_ID=$(aws cloudformation describe-stacks \
 echo $INSTANCE_ID
 ```
 
+Get the database cluster endpoint:
+
+```sh
+DB_CLUSTER_ENDPOINT=$(aws cloudformation describe-stacks \
+    --output text \
+    --query 'Stacks[0].Outputs[?OutputKey==`DbClusterEndpoint`].OutputValue' \
+    --stack-name $STACK_NAME
+)
+echo $DB_CLUSTER_ENDPOINT
+```
+
 Connect to the instance via [EC2 Instance Connect Endpoint]:
 
 ```sh
