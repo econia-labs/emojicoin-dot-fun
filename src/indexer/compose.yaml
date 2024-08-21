@@ -3,15 +3,13 @@ services:
     build:
       context: .
       dockerfile: broker/Dockerfile
-      args:
-        EMOJICOIN_MODULE_ADDRESS: ${CONTRACT_ADDRESS}
     depends_on:
       processor:
         condition: service_started
     environment:
       PROCESSOR_WS_URL: "ws://processor:3008/ws"
       RUST_LOG: info
-    image: econialabs/emojicoin-dot-fun:broker
+    image: econialabs/emojicoin-broker
     ports:
       - "3009:3009"
     restart: unless-stopped
@@ -64,7 +62,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    image: econialabs/emojicoin-dot-fun:processor
+    image: econialabs/emojicoin-processor
     restart: unless-stopped
     stop_signal: SIGKILL
     ports:
