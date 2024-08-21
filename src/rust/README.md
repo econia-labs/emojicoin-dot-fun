@@ -89,13 +89,13 @@ DB_CLUSTER_ENDPOINT=
 Start `psql`:
 
 ```sh
-psql postgres://emojicoin:emojicoin@$DB_CLUSTER_ENDPOINT
+psql postgres://emojicoin:emojicoin@$DB_CLUSTER_ENDPOINT/emojicoin
 ```
 
-Run a simple statement:
+List the databases:
 
 ```sh
-SELECT NOW();
+\list
 ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
