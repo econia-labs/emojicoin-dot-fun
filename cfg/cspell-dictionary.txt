@@ -49,6 +49,7 @@ mayen
 melilla
 merperson
 moai
+mqtt
 mybuilder
 nazar
 nextjs
@@ -78,6 +79,7 @@ tradingview
 turkiye
 unsubscription
 vercel
+viewports
 websockets
 xbtmatt
 zustand
