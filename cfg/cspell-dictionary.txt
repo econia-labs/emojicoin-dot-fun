@@ -75,6 +75,7 @@ postg
 postgrest
 precommit
 presale
+psql
 rica
 rustup
 serde
