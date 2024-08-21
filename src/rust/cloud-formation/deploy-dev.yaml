@@ -2,5 +2,5 @@
 parameters:
   ProvisionBastionHost: 'false'
 tags: null
-template-file-path: 'src/indexer/cloud-formation/null-template.cfn.yaml'
+template-file-path: 'src/indexer/cloud-formation/indexer.cfn.yaml'
 ...
