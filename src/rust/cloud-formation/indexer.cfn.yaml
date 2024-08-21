@@ -126,7 +126,7 @@ Resources:
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
-      Engine: 'aurora-mysql'
+      Engine: 'aurora-postgresql'
     Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
