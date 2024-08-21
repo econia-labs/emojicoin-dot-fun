@@ -36,6 +36,9 @@ programmatically using [GitSync] alone.
 
 #### Connect to database through bastion host
 
+Verify the `ProvisionBastionHost` [stack parameter][stack deployment file] is
+set to `true`.
+
 Install the [AWS EC2 Instance Connect CLI]:
 
 ```sh
