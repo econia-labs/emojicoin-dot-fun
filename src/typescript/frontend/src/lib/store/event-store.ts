@@ -19,7 +19,6 @@ import { CandlestickResolution, RESOLUTIONS_ARRAY, toCandlestickResolution } fro
 import { type WritableDraft } from "immer";
 import {
   addToLocalStorage,
-  updateLocalStorage,
   type MarketIDString,
   type SymbolString,
 } from "./event-utils";
@@ -318,15 +317,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       // We also update the latest bar if the incoming event is a swap or periodic state event.
       pushEventFromClient: (event) => {
         if (get().guids.has(event.guid) && !event.guid.startsWith("Swap")) return;
-        if (
-          event.guid.startsWith("Swap") &&
-          typeof (event as Types.SwapEvent).balanceAsFractionOfCirculatingSupply === "bigint"
-        ) {
-          updateLocalStorage(event);
-          return;
-        } else {
-          addToLocalStorage(event);
-        }
+        addToLocalStorage(event);
         set((state) => {
           state.firehose.unshift(toEventWithTime(event));
           state.guids.add(event.guid);

@@ -139,8 +139,8 @@ const generateLiquidityJSON = ({
   lp_coin_amount: "1212122424",
   market_id: marketID.toString(),
   market_nonce: marketNonce.toString(),
-  pro_rata_base_donation_claim_amount: "0",
-  pro_rata_quote_donation_claim_amount: "0",
+  base_donation_claim_amount: "0",
+  quote_donation_claim_amount: "0",
   provider: "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
   quote_amount: "1200000000",
   time: time.toString(),
@@ -258,6 +258,8 @@ const generateSwapJSON = ({
     starts_in_bonding_curve: startsInBondingCurve,
     swapper: AccountAddress.from(swapper).toString(),
     time: time.toString(),
+    balance_as_fraction_of_circulating_supply_before_q64: "0",
+    balance_as_fraction_of_circulating_supply_after_q64: "0",
   };
 };
 
