@@ -121,6 +121,13 @@ Resources:
       VpcSecurityGroupIds:
       - !Ref 'DbSecurityGroup'
     Type: 'AWS::RDS::DBCluster'
+  # Database instance.
+  DbInstance:
+    Properties:
+      DBClusterIdentifier: !Ref 'DbCluster'
+      DBInstanceClass: 'db.serverless'
+      Engine: 'aurora-mysql'
+    Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
     Properties:
