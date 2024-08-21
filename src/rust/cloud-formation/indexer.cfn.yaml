@@ -109,6 +109,47 @@ Resources:
       SourceSecurityGroupId:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
+  # Cluster for running ECS containers.
+  ContainerCluster:
+    Type: 'AWS::ECS::Cluster'
+  # Log group for ECS task logging.
+  ContainerLogGroup:
+    Properties:
+      LogGroupName: !Sub '/ecs/${AWS::StackName}'
+      RetentionInDays: 14
+    Type: 'AWS::Logs::LogGroup'
+  # Role with assorted permissions required to run containers.
+  ContainerRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: 'sts:AssumeRole'
+          Effect: 'Allow'
+          Principal:
+            Service: 'ecs-tasks.amazonaws.com'
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - 'ecr:GetDownloadUrlForLayer'
+            - 'ecr:BatchGetImage'
+            - 'ecr:BatchCheckLayerAvailability'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            Effect: 'Allow'
+            Resource: '*'
+        PolicyName: !Sub 'ContainerRolePolicy-${AWS::StackName}'
+    Type: 'AWS::IAM::Role'
+  # Security group for ECS containers.
+  ContainerSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      # Allow all outbound traffic, to other resources and to Docker Hub.
+      SecurityGroupEgress:
+      - CidrIp: '0.0.0.0/0'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Database cluster.
   DbCluster:
     Metadata:
