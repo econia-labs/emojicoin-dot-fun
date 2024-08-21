@@ -1,6 +1,11 @@
 ---
 parameters:
+  EmojicoinModuleAddress: |
+    0xbabe8f471b7f4744502b1397530bafe80e3731b358c0dfeba26b38b2603bd00d
+  GrpcDataServiceUrl: 'https://grpc.testnet.aptoslabs.com:443'
+  ProcessorImageVersion: '0.1.0'
   ProvisionBastionHost: 'true'
+  StartingTransactionVersionNumber: '1226900000'
 tags: null
 template-file-path: 'src/indexer/cloud-formation/indexer.cfn.yaml'
 ...
