@@ -197,7 +197,8 @@ export namespace Types {
       poolFee: bigint;
       startsInBondingCurve: boolean;
       resultsInStateTransition: boolean;
-      balanceAsFractionOfCirculatingSupply?: number;
+      balanceAsFractionOfCirculatingSupplyBeforeQ64: bigint;
+      balanceAsFractionOfCirculatingSupplyAfterQ64: bigint;
     };
 
   export type ChatEvent = WithMarketID &
@@ -485,8 +486,13 @@ export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.S
   poolFee: BigInt(data.pool_fee),
   startsInBondingCurve: data.starts_in_bonding_curve,
   resultsInStateTransition: data.results_in_state_transition,
+  balanceAsFractionOfCirculatingSupplyBeforeQ64: BigInt(
+    data.balance_as_fraction_of_circulating_supply_before_q64
+  ),
+  balanceAsFractionOfCirculatingSupplyAfterQ64: BigInt(
+    data.balance_as_fraction_of_circulating_supply_after_q64
+  ),
   guid: `Swap::${data.market_id}::${data.market_nonce}`,
-  balanceAsFractionOfCirculatingSupply: data.balance_as_fraction_of_circulating_supply,
 });
 
 export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.ChatEvent => ({
@@ -598,8 +604,8 @@ export const toLiquidityEvent = (
   quoteAmount: BigInt(data.quote_amount),
   lpCoinAmount: BigInt(data.lp_coin_amount),
   liquidityProvided: data.liquidity_provided,
-  proRataBaseDonationClaimAmount: BigInt(data.pro_rata_base_donation_claim_amount),
-  proRataQuoteDonationClaimAmount: BigInt(data.pro_rata_quote_donation_claim_amount),
+  proRataBaseDonationClaimAmount: BigInt(data.base_donation_claim_amount),
+  proRataQuoteDonationClaimAmount: BigInt(data.quote_donation_claim_amount),
   guid: `Liquidity::${data.market_id}::${data.market_nonce}`,
 });
 

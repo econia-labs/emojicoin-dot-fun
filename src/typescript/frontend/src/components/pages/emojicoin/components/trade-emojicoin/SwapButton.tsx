@@ -45,6 +45,7 @@ export const SwapButton = ({
         inputAmount: BigInt(inputAmount),
         isSell,
         typeTags: [emojicoin, emojicoinLP],
+        minOutputAmount: 1n,
       });
     const res = await submit(builderLambda);
     if (res && res.response && isUserTransactionResponse(res.response)) {
