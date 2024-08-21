@@ -34,7 +34,7 @@ The indexer is deployed using [AWS CloudFormation] with a [template file] at
 By granting [PowerUserAccess] to the stack, deployments can be performed
 programmatically using [GitSync] alone.
 
-#### Connect to bastion host
+#### Connect to database through bastion host
 
 Install the [AWS EC2 Instance Connect CLI]:
 
@@ -75,6 +75,18 @@ Connect to the instance via [EC2 Instance Connect Endpoint]:
 ```sh
 aws ec2-instance-connect ssh \
     --instance-id $INSTANCE_ID --connection-type eice
+```
+
+Start `psql`:
+
+```sh
+psql postgres://postgres:postgres@$DB_CLUSTER_ENDPOINT
+```
+
+Run a simple statement:
+
+```sh
+SELECT NOW();
 ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
