@@ -31,7 +31,7 @@ name: 'Build broker Docker image and push to Docker Hub'
 'on':
   push:
     branches:
-      - 'unstable'
+    - 'unstable'
     tags:
-      - 'indexer-v*'
+    - 'indexer-v*'
 ...

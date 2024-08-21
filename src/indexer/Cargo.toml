@@ -1,10 +1,9 @@
 [workspace]
+exclude = ["processor"]
 members = [
   "broker"
 ]
 resolver = "2"
-
-exclude = ["processor"]
 
 [workspace.package]
 authors = ["Econia Labs <developers@econialabs.com>"]

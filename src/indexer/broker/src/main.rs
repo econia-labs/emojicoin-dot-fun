@@ -14,7 +14,10 @@ async fn main() -> Result<(), ()> {
     let (tx, _) = broadcast::channel(2048);
     let tx2 = tx.clone();
 
-    let processor_connection = tokio::spawn(processor_connection::processor_connection(processor_url, tx2));
+    let processor_connection = tokio::spawn(processor_connection::processor_connection(
+        processor_url,
+        tx2,
+    ));
 
     let sse_server = tokio::spawn(server::server(tx));
 

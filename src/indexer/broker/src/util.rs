@@ -13,8 +13,8 @@ pub fn get_market_id(event: &EmojicoinEvent) -> Result<u64, String> {
             } else {
                 Err("Got negative market ID".to_string())
             }
-        },
-        _ => Err("Got event which does not have a market ID".to_string())
+        }
+        _ => Err("Got event which does not have a market ID".to_string()),
     }
 }
 

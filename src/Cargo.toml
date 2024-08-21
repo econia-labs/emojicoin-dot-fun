@@ -1,10 +1,9 @@
 [workspace]
+exclude = ["indexer"]
 members = [
   "allowlister3000"
 ]
 resolver = "2"
-
-exclude = ["indexer"]
 
 [workspace.package]
 authors = ["Econia Labs <developers@econialabs.com>"]

@@ -6,10 +6,10 @@ use tokio::sync::broadcast::Sender;
 
 use crate::util::shutdown_signal;
 
-#[cfg(feature = "ws")]
-mod ws;
 #[cfg(feature = "sse")]
 mod sse;
+#[cfg(feature = "ws")]
+mod ws;
 
 struct AppState {
     #[allow(dead_code)]
@@ -28,8 +28,7 @@ fn prepare_app(app: Router<Arc<AppState>>) -> Router<Arc<AppState>> {
 
 #[cfg(all(feature = "ws", feature = "sse"))]
 fn prepare_app(app: Router<Arc<AppState>>) -> Router<Arc<AppState>> {
-    app
-        .route("/ws", get(ws::handler))
+    app.route("/ws", get(ws::handler))
         .route("/sse", get(sse::handler))
 }
 
@@ -47,7 +46,9 @@ pub async fn server(tx: Sender<EmojicoinEvent>) -> Result<(), std::io::Error> {
     let app = app.with_state(Arc::new(app_state));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3009").await.unwrap();
-    axum::serve(listener, app).with_graceful_shutdown(async {
-        let _ = shutdown_signal().await;
-    }).await
+    axum::serve(listener, app)
+        .with_graceful_shutdown(async {
+            let _ = shutdown_signal().await;
+        })
+        .await
 }

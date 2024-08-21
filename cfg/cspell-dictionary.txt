@@ -2,6 +2,7 @@ aland
 allowlister
 aptn
 aptos
+aptoslabs
 barthelemy
 bento
 blackpaper
@@ -21,7 +22,9 @@ dasharray
 defi
 devnet
 diya
+dockerhub
 econia
+econialabs
 emojicoin
 emojicoins
 eswatini
@@ -34,13 +37,19 @@ gcloud
 guids
 hamsa
 headlessui
+healthcheck
 immer
+isready
 ivoire
 keycap
 khanda
 kitts
 leaderboard
 leste
+libclang
+libdw
+libpq
+libudev
 linecap
 linejoin
 maarten
@@ -49,6 +58,7 @@ mayen
 melilla
 merperson
 moai
+mosquitto
 mybuilder
 nazar
 nextjs
@@ -58,6 +68,7 @@ octas
 oden
 parallelizable
 permissionless
+pgrst
 pkill
 postg
 postgrest
@@ -65,6 +76,7 @@ precommit
 presale
 rica
 rustup
+serde
 sint
 solana
 struct
@@ -75,6 +87,7 @@ supervillain
 tanabata
 tokelau
 tradingview
+tungstenite
 turkiye
 unsubscription
 vercel

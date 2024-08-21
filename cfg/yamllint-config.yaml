@@ -16,7 +16,7 @@ rules:
   document-start:
     level: 'error'
   empty-lines:
-    max: 0
+    max: 1
     max-end: 1
     max-start: 0
   empty-values: 'enable'
@@ -29,7 +29,7 @@ rules:
     check-multi-line-strings: true
     indent-sequences: false
     spaces: 2
-  key-ordering: 'enable'
+  key-ordering: 'disable'
   octal-values: 'enable'
   quoted-strings:
     quote-type: 'single'

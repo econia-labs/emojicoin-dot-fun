@@ -1,6 +1,12 @@
 use std::{convert::Infallible, sync::Arc};
 
-use axum::{extract::State, response::{sse::{Event, KeepAlive}, Sse}};
+use axum::{
+    extract::State,
+    response::{
+        sse::{Event, KeepAlive},
+        Sse,
+    },
+};
 use axum_extra::extract::Query;
 use futures_util::{Stream, StreamExt};
 use tokio::sync::broadcast::error::RecvError;

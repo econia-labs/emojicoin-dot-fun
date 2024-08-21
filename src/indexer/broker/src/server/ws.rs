@@ -1,6 +1,12 @@
 use std::sync::Arc;
 
-use axum::{extract::{ws::{Message, WebSocket}, State, WebSocketUpgrade}, response::Response};
+use axum::{
+    extract::{
+        ws::{Message, WebSocket},
+        State, WebSocketUpgrade,
+    },
+    response::Response,
+};
 use futures_util::{SinkExt, StreamExt};
 use tokio::sync::{broadcast::error::RecvError, RwLock};
 
@@ -8,10 +14,7 @@ use crate::{types::Subscription, util::is_match};
 
 use super::AppState;
 
-pub async fn handler(
-    ws: WebSocketUpgrade,
-    State(state): State<Arc<AppState>>,
-) -> Response {
+pub async fn handler(ws: WebSocketUpgrade, State(state): State<Arc<AppState>>) -> Response {
     ws.on_upgrade(|socket| handle_websocket(socket, state))
 }
 
