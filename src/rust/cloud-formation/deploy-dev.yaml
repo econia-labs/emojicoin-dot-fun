@@ -5,6 +5,7 @@ parameters:
   GrpcDataServiceUrl: 'https://grpc.testnet.aptoslabs.com:443'
   ProcessorImageVersion: '0.1.0'
   ProvisionBastionHost: 'true'
+  ProvisionProcessor: 'false'
   StartingTransactionVersionNumber: '1226900000'
 tags: null
 template-file-path: 'src/indexer/cloud-formation/indexer.cfn.yaml'

@@ -3,6 +3,9 @@ Conditions:
   ProvisionBastionHost: !Equals
   - !Ref 'ProvisionBastionHost'
   - 'true'
+  ProvisionProcessor: !Equals
+  - !Ref 'ProvisionProcessor'
+  - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
@@ -58,7 +61,10 @@ Parameters:
   ProvisionBastionHost:
     Default: 'false'
     Type: 'String'
-  StartingTransactionVersion:
+  ProvisionProcessor:
+    Default: 'true'
+    Type: 'String'
+  StartingTransactionVersionNumber:
     Type: 'Number'
 Resources:
   # Minimal VM for accessing the database.
@@ -291,8 +297,26 @@ Resources:
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
+  # Service for running the processor.
+  ProcessorRunner:
+    Condition: 'ProvisionProcessor'
+    Properties:
+      Cluster: !Ref 'ContainerCluster'
+      LaunchType: 'FARGATE'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: 'ENABLED'
+          SecurityGroups:
+          - !Ref 'ContainerSecurityGroup'
+          - !Ref 'DbUserSecurityGroup'
+          Subnets:
+          - !Ref 'SubnetA'
+          - !Ref 'SubnetB'
+          - !Ref 'SubnetC'
+      TaskDefinition: !Ref 'ProcessorTask'
+    Type: 'AWS::ECS::Service'
   # Task definition for processor.
-  ProcessorTaskDefinition:
+  ProcessorTask:
     Properties:
       ContainerDefinitions:
       - Environment:
@@ -319,7 +343,7 @@ Resources:
         - Name: 'GRPC_DATA_SERVICE_URL'
           Value: !Ref 'GrpcDataServiceUrl'
         - Name: 'STARTING_VERSION'
-          Value: !Ref 'StartingTransactionVersion'
+          Value: !Ref 'StartingTransactionVersionNumber'
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
           Value: !Ref 'EmojicoinModuleAddress'
         Image: !Sub 'econialabs/emojicoin-processor:${ProcessorImageVersion}'
