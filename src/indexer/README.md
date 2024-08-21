@@ -57,6 +57,12 @@ aws ec2-instance-connect ssh \
     --instance-id $INSTANCE_ID --connection-type eice
 ```
 
+Set the database cluster endpoint inside the VM:
+
+```sh
+DB_CLUSTER_ENDPOINT=
+```
+
 Start `psql`:
 
 ```sh
