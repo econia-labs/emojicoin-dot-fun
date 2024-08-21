@@ -1,4 +1,4 @@
-use processor::emojicoin_dot_fun::EmojicoinEventType;
+use processor::emojicoin_dot_fun::EmojicoinDbEventType;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString};
 
@@ -18,5 +18,5 @@ pub struct Subscription {
     #[serde(default)]
     pub markets: Vec<u64>,
     #[serde(default)]
-    pub event_types: Vec<EmojicoinEventType>,
+    pub event_types: Vec<EmojicoinDbEventType>,
 }

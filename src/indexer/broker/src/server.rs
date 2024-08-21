@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{routing::get, Router};
-use processor::emojicoin_dot_fun::EmojicoinEvent;
+use processor::emojicoin_dot_fun::EmojicoinDbEvent;
 use tokio::sync::broadcast::Sender;
 
 use crate::util::shutdown_signal;
@@ -13,7 +13,7 @@ mod ws;
 
 struct AppState {
     #[allow(dead_code)]
-    tx: Sender<EmojicoinEvent>,
+    tx: Sender<EmojicoinDbEvent>,
 }
 
 #[cfg(all(feature = "sse", not(feature = "ws")))]
@@ -39,7 +39,7 @@ fn prepare_app(app: Router<Arc<AppState>>) -> Router<Arc<AppState>> {
 
 async fn health() {}
 
-pub async fn server(tx: Sender<EmojicoinEvent>) -> Result<(), std::io::Error> {
+pub async fn server(tx: Sender<EmojicoinDbEvent>) -> Result<(), std::io::Error> {
     let app_state = AppState { tx };
 
     let app = prepare_app(Router::new().route("/", get(health)));

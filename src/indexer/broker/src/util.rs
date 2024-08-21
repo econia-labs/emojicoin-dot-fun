@@ -1,31 +1,35 @@
-use processor::emojicoin_dot_fun::{EmojicoinEvent, EmojicoinEventType};
+use processor::emojicoin_dot_fun::{EmojicoinDbEvent, EmojicoinDbEventType};
 use tokio::signal;
 
 use crate::types::Subscription;
 
-/// Get the market ID of a EmojicoinEvent of a given EventType
-pub fn get_market_id(event: &EmojicoinEvent) -> Result<u64, String> {
-    match event {
-        EmojicoinEvent::EventWithMarket(e) => {
-            let market_id = e.get_market_id().try_into();
-            if let Ok(market_id) = market_id {
-                Ok(market_id)
-            } else {
-                Err("Got negative market ID".to_string())
-            }
-        }
-        _ => Err("Got event which does not have a market ID".to_string()),
+/// Get the market ID of a EmojicoinDbEvent of a given EventType
+pub fn get_market_id(event: &EmojicoinDbEvent) -> Result<u64, String> {
+    let market_id: Result<u64, _> = match event {
+        EmojicoinDbEvent::Swap(s) => s.market_id,
+        EmojicoinDbEvent::Chat(c) => c.market_id,
+        EmojicoinDbEvent::MarketRegistration(mr) => mr.market_id,
+        EmojicoinDbEvent::PeriodicState(ps) => ps.market_id,
+        EmojicoinDbEvent::MarketLatestState(mls) => mls.market_id,
+        EmojicoinDbEvent::Liquidity(l) => l.market_id,
+        _ => return Err("Got event which does not have a market ID".to_string()),
+    }
+    .try_into();
+    if let Ok(market_id) = market_id {
+        Ok(market_id)
+    } else {
+        Err("Got negative market ID".to_string())
     }
 }
 
 /// Returns true if the given subscription should receive the given event.
-pub fn is_match(subscription: &Subscription, event: &EmojicoinEvent) -> bool {
+pub fn is_match(subscription: &Subscription, event: &EmojicoinDbEvent) -> bool {
     // If all fields of a subscription are empty, all events should be sent there.
     if subscription.markets.is_empty() && subscription.event_types.is_empty() {
         return true;
     }
 
-    let event_type: EmojicoinEventType = event.into();
+    let event_type: EmojicoinDbEventType = event.into();
 
     if !subscription.event_types.is_empty() && !subscription.event_types.contains(&event_type) {
         return false;
@@ -33,7 +37,7 @@ pub fn is_match(subscription: &Subscription, event: &EmojicoinEvent) -> bool {
     if subscription.markets.is_empty() {
         return true;
     }
-    if event_type == EmojicoinEventType::GlobalState {
+    if event_type == EmojicoinDbEventType::GlobalState {
         return true;
     }
 

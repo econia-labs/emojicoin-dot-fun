@@ -1,9 +1,9 @@
 use futures_util::StreamExt;
-use processor::emojicoin_dot_fun::EmojicoinEvent;
+use processor::emojicoin_dot_fun::EmojicoinDbEvent;
 use tokio::sync::broadcast::Sender;
 use tokio_tungstenite::connect_async;
 
-pub async fn processor_connection(processor_url: String, tx: Sender<EmojicoinEvent>) {
+pub async fn processor_connection(processor_url: String, tx: Sender<EmojicoinDbEvent>) {
     let mut connection = connect_async(processor_url).await.unwrap();
     while let Some(msg) = connection.0.next().await {
         if msg.is_err() {
@@ -17,7 +17,7 @@ pub async fn processor_connection(processor_url: String, tx: Sender<EmojicoinEve
             continue;
         }
         let msg = msg.unwrap();
-        let res: Result<EmojicoinEvent, _> = serde_json::de::from_str(msg);
+        let res: Result<EmojicoinDbEvent, _> = serde_json::de::from_str(msg);
         if res.is_err() {
             log::error!(
                 "Could not parse message: error: {}, message: {}",
