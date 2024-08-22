@@ -313,6 +313,12 @@ Resources:
     Condition: 'ProvisionProcessor'
     Properties:
       Cluster: !Ref 'ContainerCluster'
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+        MaximumPercent: 100
+      DesiredCount: 1
       LaunchType: 'FARGATE'
       NetworkConfiguration:
         AwsvpcConfiguration:
