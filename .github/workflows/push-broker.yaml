@@ -9,7 +9,7 @@ jobs:
       with:
         images: 'econialabs/emojicoin-broker'
         tags: |
-          type=ref,event=branch
+          type=edge,branch=main
           type=semver,pattern={{version}}
     - uses: 'docker/setup-qemu-action@v3'
     - uses: 'docker/setup-buildx-action@v3'
@@ -19,6 +19,8 @@ jobs:
         username: '${{ secrets.DOCKERHUB_USERNAME }}'
     - uses: 'docker/build-push-action@v6'
       with:
+        build-args:
+        - FEATURES: 'ws'
         cache-from: 'type=gha'
         cache-to: 'type=gha,mode=max'
         context: 'src/rust'
@@ -31,7 +33,7 @@ name: 'Build broker Docker image and push to Docker Hub'
 'on':
   push:
     branches:
-    - 'unstable'
+    - 'main'
     tags:
     - 'v*'
 ...

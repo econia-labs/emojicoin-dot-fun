@@ -5,6 +5,8 @@ services:
     build:
       context: '.'
       dockerfile: 'broker/Dockerfile'
+      args:
+        FEATURES: 'ws'
     depends_on:
       processor:
         condition: 'service_started'

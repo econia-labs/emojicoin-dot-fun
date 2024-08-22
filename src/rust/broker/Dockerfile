@@ -11,6 +11,7 @@ RUN cargo chef prepare --bin broker
 
 # Cache build dependencies, compile binary.
 FROM base AS builder
+ARG FEATURES
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libudev-dev \
     build-essential \
@@ -22,9 +23,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=planner app/recipe.json recipe.json
-RUN cargo chef cook --bin broker --package broker --release
+RUN ls -la
+COPY processor processor
+RUN cargo chef cook --bin broker --package broker --release --features $FEATURES
 COPY . .
-RUN cargo build --bin broker --package broker --release
+RUN cargo build --bin broker --package broker --release --features $FEATURES
 
 # Install runtime dependencies, copy over binary.
 FROM debian:bookworm-slim AS runtime
