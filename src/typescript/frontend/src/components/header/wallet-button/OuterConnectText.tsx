@@ -2,12 +2,14 @@ export const OuterConnectText = ({
   side,
   connected,
   mobile,
+  geoblocked,
 }: {
   side: "left" | "right";
   connected: boolean;
   mobile?: boolean;
+  geoblocked: boolean;
 }) => {
-  if (connected) {
+  if (!geoblocked && connected) {
     if (mobile && side === "left") {
       return null;
     }

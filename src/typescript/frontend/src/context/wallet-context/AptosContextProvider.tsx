@@ -76,7 +76,10 @@ export type AptosContextState = {
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
-export function AptosContextProvider({ children }: PropsWithChildren) {
+export function AptosContextProvider({
+  children,
+  geoblocked,
+}: PropsWithChildren<{ geoblocked: boolean }>) {
   const {
     signAndSubmitTransaction: adapterSignAndSubmitTxn,
     account,
@@ -251,6 +254,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
   const submit = useCallback(
     async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
+      if (geoblocked) return null;
       if (checkNetworkAndToast(network, true)) {
         const trySubmit = async () => {
           const builder = await builderFn();
@@ -267,7 +271,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       return null;
     },
-    [network, handleTransactionSubmission, adapterSignAndSubmitTxn]
+    [network, handleTransactionSubmission, adapterSignAndSubmitTxn, geoblocked]
   );
 
   // To manually enforce explicit gas options, we can use this transaction submission flow.
@@ -275,6 +279,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   // unnecessary to support that and I'm not gonna write the code for it.
   const signThenSubmit = useCallback(
     async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
+      if (geoblocked) return null;
       if (checkNetworkAndToast(network, true)) {
         const trySubmit = async () => {
           const builder = await builderFn();
@@ -293,7 +298,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       return null;
     },
-    [network, handleTransactionSubmission, signTransaction, submitTransaction]
+    [network, handleTransactionSubmission, signTransaction, submitTransaction, geoblocked]
   );
 
   const setCoinTypeHelper = (

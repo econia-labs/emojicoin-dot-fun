@@ -50,6 +50,7 @@ export default function SwapComponent({
   marketAddress,
   marketID,
   initNumSwaps,
+  geoblocked,
 }: SwapComponentProps) {
   const { t } = translationFunction();
   const searchParams = useSearchParams();
@@ -242,6 +243,7 @@ export default function SwapComponent({
             // Disable the button if and only if the balance has been fetched and isn't sufficient *and*
             // the user is connected.
             disabled={!sufficientBalance && !isLoading && !!account}
+            geoblocked={geoblocked}
           />
         </Row>
       </Column>

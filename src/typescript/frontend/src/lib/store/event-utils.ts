@@ -197,7 +197,6 @@ const shouldKeep = (event: AnyEmojicoinEvent) => {
 };
 
 export const addToLocalStorage = (event: AnyEmojicoinEvent) => {
-
   const eventName = getEventTypeName(event);
   const localEvents: Array<AnyEmojicoinEvent> = parseJSON(localStorage.getItem(eventName) ?? "[]");
 

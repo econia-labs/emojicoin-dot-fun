@@ -33,6 +33,7 @@ import Info from "components/info";
 
 type LiquidityProps = {
   market: FetchSortedMarketDataReturn["markets"][0] | undefined;
+  geoblocked: boolean;
 };
 
 const fmtCoin = (n: number | bigint | string | undefined) => {
@@ -78,7 +79,7 @@ const inputAndOutputStyles = `
   border-transparent !p-0 text-white
 `;
 
-const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
+const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
   const { t } = translationFunction();
   const { theme } = useThemeContext();
 
@@ -300,7 +301,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market }) => {
           mb={{ _: "17px", tablet: "37px" }}
           position="relative"
         >
-          <ButtonWithConnectWalletFallback>
+          <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
             <Button
               scale="lg"
               disabled={!isActionPossible}
