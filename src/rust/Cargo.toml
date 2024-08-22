@@ -1,7 +1,8 @@
 [workspace]
 exclude = ["processor"]
 members = [
-  "broker"
+  "broker",
+  "allowlister3000"
 ]
 resolver = "2"
 

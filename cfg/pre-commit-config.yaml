@@ -202,19 +202,22 @@ repos:
   -
     args:
     - '--manifest-path'
-    - 'src/Cargo.toml'
+    - 'src/rust/Cargo.toml'
+    - '-p'
+    - 'allowlister3000'
+    - 'broker'
     - '--'
     id: 'fmt'
   -
     args:
     - '--manifest-path'
-    - 'src/Cargo.toml'
+    - 'src/rust/Cargo.toml'
     - '--'
     id: 'cargo-check'
   -
     args:
     - '--manifest-path'
-    - 'src/Cargo.toml'
+    - 'src/rust/Cargo.toml'
     - '--'
     id: 'clippy'
   repo: 'https://github.com/doublify/pre-commit-rust'

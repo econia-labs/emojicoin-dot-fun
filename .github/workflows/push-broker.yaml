@@ -21,8 +21,8 @@ jobs:
       with:
         cache-from: 'type=gha'
         cache-to: 'type=gha,mode=max'
-        context: 'src/indexer'
-        file: 'src/indexer/broker/Dockerfile'
+        context: 'src/rust'
+        file: 'src/rust/broker/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
         platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS }}'
         push: 'true'
