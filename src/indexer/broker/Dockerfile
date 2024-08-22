@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /app/target/release/broker /app/broker
+COPY --from=builder /app/target/release/broker /app
 
 # This helps the container stop faster.
 STOPSIGNAL SIGKILL
