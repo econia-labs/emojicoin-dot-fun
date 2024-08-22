@@ -45,51 +45,29 @@ Install the [AWS EC2 Instance Connect CLI]:
 pip install ec2instanceconnectcli
 ```
 
-Set your stack name, for example `emojicoin-dot-fun-indexer-dev`:
+Connect to the bastion host using your stack name, for example
+`emojicoin-dot-fun-indexer-dev`:
 
 ```sh
 STACK_NAME=emojicoin-dot-fun-indexer-dev
-```
-
-Get the bastion host instance ID from the CloudFormation stack:
-
-```sh
 INSTANCE_ID=$(aws cloudformation describe-stacks \
     --output text \
     --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
     --stack-name $STACK_NAME
 )
-echo $INSTANCE_ID
-```
-
-Get the database cluster endpoint:
-
-```sh
-DB_CLUSTER_ENDPOINT=$(aws cloudformation describe-stacks \
-    --output text \
-    --query 'Stacks[0].Outputs[?OutputKey==`DbClusterEndpoint`].OutputValue' \
-    --stack-name $STACK_NAME
-)
-echo $DB_CLUSTER_ENDPOINT
-```
-
-Connect to the instance via [EC2 Instance Connect Endpoint]:
-
-```sh
-aws ec2-instance-connect ssh \
+if [ -n "$(echo -e "${INSTANCE_ID}" | tr -d '[:space:]')" ]; then
+  echo "Connecting to instance ${INSTANCE_ID}"
+  aws ec2-instance-connect ssh \
     --instance-id $INSTANCE_ID --connection-type eice
-```
-
-Set the database cluster endpoint inside the VM:
-
-```sh
-DB_CLUSTER_ENDPOINT=
+else
+  echo 'Error: instance ID not found or is empty.' >&2
+fi
 ```
 
 Start `psql`:
 
 ```sh
-psql postgres://emojicoin:emojicoin@$DB_CLUSTER_ENDPOINT/emojicoin
+psql $DB_URL
 ```
 
 List the databases:
