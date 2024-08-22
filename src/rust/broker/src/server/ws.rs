@@ -63,7 +63,7 @@ async fn handle_websocket(socket: WebSocket, state: Arc<AppState>) {
             if let Ok(item) = r {
                 let s = sub.read().await;
                 for s in s.iter() {
-                    if is_match(&s, &item) {
+                    if is_match(s, &item) {
                         let item_str = serde_json::to_string(&item).unwrap();
                         if let Err(e) = ws_tx.write().await.send(Message::Text(item_str)).await {
                             log::warn!("Could not send event to user: {}.", e);
