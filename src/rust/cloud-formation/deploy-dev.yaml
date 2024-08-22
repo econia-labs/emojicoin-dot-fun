@@ -4,7 +4,7 @@ parameters:
     0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111
   GrpcDataServiceUrl: 'https://grpc.testnet.aptoslabs.com:443'
   ProcessorImageVersion: '0.2.0'
-  ProvisionBastionHost: 'true'
+  ProvisionBastionHost: 'false'
   ProvisionProcessor: 'true'
   StartingTransactionVersionNumber: '5722000000'
 tags: null
