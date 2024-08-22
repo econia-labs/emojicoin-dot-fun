@@ -317,6 +317,7 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Task definition for processor.
   ProcessorTask:
+    DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
       - Environment:
@@ -371,7 +372,7 @@ Resources:
             SecretName: 'GRPC_AUTH_TOKEN'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
-      Family: 'AllowlistTask'
+      Family: !Ref 'AWS::StackName'
       Memory: '512'
       NetworkMode: 'awsvpc'
       RequiresCompatibilities:
