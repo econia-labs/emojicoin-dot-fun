@@ -59,7 +59,6 @@ services:
       dockerfile: 'Dockerfile'
     environment:
       DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
-      CONTRACT_ADDRESS: '${CONTRACT_ADDRESS}'
       GRPC_AUTH_TOKEN: '${GRPC_AUTH_TOKEN}'
       GRPC_DATA_SERVICE_URL: '${GRPC_DATA_SERVICE_URL}'
       MINIMUM_STARTING_VERSION: '${MINIMUM_STARTING_VERSION}'
