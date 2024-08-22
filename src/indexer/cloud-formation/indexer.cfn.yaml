@@ -158,7 +158,13 @@ Resources:
           - Action:
             - 'secretsmanager:GetSecretValue'
             Effect: 'Allow'
-            Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:GRPC_AUTH_TOKEN-*'
+            Resource: !Join
+            - ''
+            - - 'arn:aws:secretsmanager:'
+              - !Ref 'AWS::Region'
+              - ':'
+              - !Ref 'AWS::AccountId'
+              - ':secret:GRPC_AUTH_TOKEN-*'
         PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
