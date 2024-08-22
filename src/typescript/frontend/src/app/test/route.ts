@@ -6,6 +6,6 @@ export const revalidate = REVALIDATE_TEST;
 
 export async function GET() {
   const aptos = getAptos();
-  const version = await aptos.getLedgerInfo().then(res => res.ledger_version);
+  const version = await aptos.getLedgerInfo().then((res) => res.ledger_version);
   return new NextResponse(version.toString());
 }

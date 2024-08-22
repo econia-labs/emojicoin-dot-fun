@@ -203,7 +203,7 @@ export class LazyPromise<T> {
   }
 
   async get(): Promise<T> {
-    if(this.promise === null) {
+    if (this.promise === null) {
       this.promise = this.generator();
     }
     return this.promise;
