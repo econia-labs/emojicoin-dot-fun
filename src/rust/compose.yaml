@@ -21,15 +21,15 @@ services:
 
   postgres:
     environment:
-      POSTGRES_USER: 'indexer'
-      POSTGRES_DB: 'indexer'
-      POSTGRES_PASSWORD: 'indexer'
+      POSTGRES_USER: 'emojicoin'
+      POSTGRES_DB: 'emojicoin'
+      POSTGRES_PASSWORD: 'emojicoin'
     image: 'postgres:14-bookworm'
     restart: 'always'
     volumes:
     - 'db:/var/lib/postgresql/data'
     healthcheck:
-      test: 'pg_isready -h localhost -p 5432 -U indexer || exit 1'
+      test: 'pg_isready -h localhost -p 5432 -U emojicoin || exit 1'
       interval: '5s'
       timeout: '3s'
       retries: '3'
@@ -43,7 +43,7 @@ services:
       postgres:
         condition: 'service_healthy'
     environment:
-      PGRST_DB_URI: 'postgres://indexer:indexer@postgres:5432/indexer'
+      PGRST_DB_URI: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
       PGRST_DB_ANON_ROLE: 'web_anon'
       PGRST_DB_MAX_ROWS: '${POSTGREST_MAX_ROWS}'
     image: 'postgrest/postgrest'
@@ -58,7 +58,7 @@ services:
       context: 'processor/rust'
       dockerfile: 'Dockerfile'
     environment:
-      DATABASE_URL: 'postgres://indexer:indexer@postgres:5432/indexer'
+      DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
       CONTRACT_ADDRESS: '${CONTRACT_ADDRESS}'
       GRPC_AUTH_TOKEN: '${GRPC_AUTH_TOKEN}'
       GRPC_DATA_SERVICE_URL: '${GRPC_DATA_SERVICE_URL}'
