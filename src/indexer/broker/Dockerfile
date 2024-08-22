@@ -1,12 +1,17 @@
-ARG APP_DIR=/app
-ARG RUST_ROOT=.
-ARG BIN_PATH=$APP_DIR/target/release/broker
+ARG BUILDER_VERSION=1.0.0
 
-FROM rust:slim-bookworm AS builder
-ARG APP_DIR
-ARG RUST_ROOT
-COPY $RUST_ROOT $APP_DIR
-WORKDIR $APP_DIR
+# Configure base image with buildtime dependencies.
+FROM econialabs/rust-builder:$BUILDER_VERSION AS base
+WORKDIR /app
+
+# Prepare build recipe.
+FROM base AS planner
+COPY . .
+RUN cargo chef prepare --bin broker
+
+# Cache build dependencies, compile binary.
+FROM base AS builder
+COPY --from=planner app/recipe.json recipe.json
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libudev-dev \
     build-essential \
@@ -17,20 +22,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lld \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
-RUN cargo build --all-features --release -p broker
+COPY . .
+RUN cargo chef cook --bin broker --package broker --release
 
-FROM debian:bookworm-slim
-ARG APP_DIR
-ARG BIN_PATH
-
+# Install runtime dependencies, copy over binary.
+FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/target/release/broker /app/broker
 
-COPY --from=builder $BIN_PATH $APP_DIR/
-
-# This helps the container stop faster
+# This helps the container stop faster.
 STOPSIGNAL SIGKILL
 
-ENTRYPOINT /app/broker
+ENTRYPOINT ["/app/broker"]
