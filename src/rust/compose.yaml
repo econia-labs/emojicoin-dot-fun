@@ -16,7 +16,7 @@ services:
       RUST_LOG: 'info'
     image: 'econialabs/emojicoin-broker'
     ports:
-    - '3009:3009'
+    - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
     restart: 'unless-stopped'
 
   postgres:
@@ -72,7 +72,7 @@ services:
     restart: 'unless-stopped'
     stop_signal: 'SIGKILL'
     ports:
-    - '3008:3008'
+    - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
 
 volumes:
   db:
