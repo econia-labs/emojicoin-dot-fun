@@ -7,4 +7,4 @@
 	ignore = all
 [submodule "src/indexer/processor"]
 	path = src/indexer/processor
-	url = git@github.com:econia-labs/aptos-indexer-processors.git
+	url = https://github.com/econia-labs/aptos-indexer-processors.git
