@@ -361,6 +361,14 @@ Resources:
           Value: !Ref 'StartingTransactionVersionNumber'
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
           Value: !Ref 'EmojicoinModuleAddress'
+        # HealthCheck:
+        #   Command:
+        #   - 'CMD-SHELL'
+        #   - 'curl -f http://localhost:8084/metrics || exit 1'
+        #   Interval: 10
+        #   Retries: 3
+        #   StartPeriod: 10
+        #   Timeout: 5
         Image: !Join
         - ''
         - - 'econialabs/emojicoin-dot-fun-indexer-processor:'
