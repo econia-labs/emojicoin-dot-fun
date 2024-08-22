@@ -5,6 +5,8 @@ mod server;
 mod types;
 mod util;
 
+const CHANNEL_BUFFER_SIZE: usize = 2048;
+
 #[tokio::main]
 async fn main() -> Result<(), ()> {
     env_logger::init();
@@ -16,7 +18,7 @@ async fn main() -> Result<(), ()> {
         .parse()
         .expect("Environment variable PORT is not a valid port.");
 
-    let (tx, _) = broadcast::channel(2048);
+    let (tx, _) = broadcast::channel(CHANNEL_BUFFER_SIZE);
     let tx2 = tx.clone();
 
     let processor_connection = tokio::spawn(processor_connection::processor_connection(

@@ -25,7 +25,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=planner app/recipe.json recipe.json
 RUN ls -la
 COPY processor processor
-RUN cargo chef cook --bin broker --package broker --release --features $FEATURES
+RUN cargo chef cook \
+    --bin broker \
+    --features $FEATURES \
+    --package broker \
+    --release
 COPY . .
 RUN cargo build --bin broker --package broker --release --features $FEATURES
 

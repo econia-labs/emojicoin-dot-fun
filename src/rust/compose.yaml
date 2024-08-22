@@ -14,9 +14,9 @@ services:
       PROCESSOR_WS_URL: 'ws://processor:${PROCESSOR_WS_PORT}/ws'
       PORT: '${BROKER_PORT}'
       RUST_LOG: 'info'
-    image: 'econialabs/emojicoin-broker'
+    image: 'econialabs/emojicoin-dot-fun-indexer-broker'
     ports:
-    - '3009:3009'
+    - '${BROKER_PORT}:${BROKER_PORT}'
     restart: 'unless-stopped'
 
   postgres:
@@ -59,20 +59,19 @@ services:
       dockerfile: 'Dockerfile'
     environment:
       DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
-      CONTRACT_ADDRESS: '${CONTRACT_ADDRESS}'
       GRPC_AUTH_TOKEN: '${GRPC_AUTH_TOKEN}'
       GRPC_DATA_SERVICE_URL: '${GRPC_DATA_SERVICE_URL}'
       MINIMUM_STARTING_VERSION: '${MINIMUM_STARTING_VERSION}'
-      EMOJICOIN_MODULE_ADDRESS: '${CONTRACT_ADDRESS}'
+      EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
       WS_PORT: '${PROCESSOR_WS_PORT}'
     depends_on:
       postgres:
         condition: 'service_healthy'
-    image: 'econialabs/emojicoin-processor'
+    image: 'econialabs/emojicoin-dot-fun-indexer-processor'
     restart: 'unless-stopped'
     stop_signal: 'SIGKILL'
     ports:
-    - '3008:3008'
+    - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
 
 volumes:
   db:
