@@ -9,7 +9,12 @@ mod util;
 async fn main() -> Result<(), ()> {
     env_logger::init();
 
-    let processor_url = std::env::var("PROCESSOR_WS_URL").unwrap();
+    let processor_url = std::env::var("PROCESSOR_WS_URL")
+        .expect("Enviroment variable PROCESSOR_WS_URL is not set.");
+    let port: u16 = std::env::var("PORT")
+        .expect("Enviroment variable PORT is not set.")
+        .parse()
+        .expect("Enviroment variable PORT is not a valid port.");
 
     let (tx, _) = broadcast::channel(2048);
     let tx2 = tx.clone();
@@ -19,7 +24,7 @@ async fn main() -> Result<(), ()> {
         tx2,
     ));
 
-    let sse_server = tokio::spawn(server::server(tx));
+    let sse_server = tokio::spawn(server::server(tx, port));
 
     tokio::select! {
         _ = processor_connection => {
