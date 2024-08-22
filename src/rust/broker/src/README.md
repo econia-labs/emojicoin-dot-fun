@@ -30,7 +30,7 @@ payload over multiple lines through `websocat`, it will error out and parse
 the JSON payload incorrectly.
 ### All markets, all event types
 
-```json
+```json5
 // All of the below are equivalent.
 // Remember, with `websocat`, your message should be exactly one line.
 // This is four different ways to subscribe to all markets and event types.
