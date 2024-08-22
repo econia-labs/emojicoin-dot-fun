@@ -24,7 +24,7 @@ jobs:
         context: 'src/rust/processor/rust'
         file: 'src/rust/processor/rust/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
-        platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS }}'
+        platforms: 'linux/amd64'
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
 name: 'Build processor Docker image and push to Docker Hub'
