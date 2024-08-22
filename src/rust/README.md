@@ -13,17 +13,17 @@ programmatically using [GitSync] alone.
 
 1. Copy `example.env` to `.env`, which is ignored by `git`:
 
-    ```sh
-    cp example.env .env
-    ```
+   ```sh
+   cp example.env .env
+   ```
 
 1. Provide a `GRPC_AUTH_TOKEN` in your `.env` as described in `example.env`.
-
+1. Modify other values as needed.
 1. Start the indexer:
 
-    ```sh
-    docker compose up
-    ```
+   ```sh
+   docker compose up
+   ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
