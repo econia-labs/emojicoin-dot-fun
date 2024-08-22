@@ -16,7 +16,7 @@ services:
       RUST_LOG: 'info'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
     ports:
-    - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
+    - '${BROKER_PORT}:${BROKER_PORT}'
     restart: 'unless-stopped'
 
   postgres:
