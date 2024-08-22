@@ -7,10 +7,13 @@ import { useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
 import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
+import Popup from "components/popup";
+import Text from "components/text";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
   onClick?: () => void;
+  geoblocked: boolean;
 }
 
 const CONNECT_WALLET = "Connect Wallet";
@@ -20,6 +23,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   children,
   className,
   onClick,
+  geoblocked,
 }) => {
   const { connected, account } = useWallet();
   const { openWalletModal } = useWalletModal();
@@ -28,7 +32,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   const [enabled, setEnabled] = useState(false);
 
   const text = useMemo(() => {
-    if (connected) {
+    if (!geoblocked && connected) {
       if (account) {
         // If there's no button text provided, we just show the truncated address.
         // Keep in mind this only shows if no children are passed to the component.
@@ -38,7 +42,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
       }
     }
     return t(CONNECT_WALLET);
-  }, [connected, account, t]);
+  }, [connected, account, t, geoblocked]);
 
   const width = useMemo(() => {
     return `${text.length}ch`;
@@ -62,39 +66,63 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
 
   // This component is used to display the `Connect Wallet` button and text with a scramble effect.
   // We use it in both mobile and desktop components.
-  return (
-    <>
-      {!connected || !children ? (
-        <Button
-          className={
-            className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
-          }
-          onClick={(e) => {
-            e.preventDefault();
-            onClick ? onClick() : openWalletModal();
-            handleReplay();
-          }}
-          onMouseOver={handleReplay}
+  const inner =
+    !connected || !children || geoblocked ? (
+      <Button
+        className={
+          className + (mobile ? " px-[9px] border-dashed border-b border-b-dark-gray" : "")
+        }
+        disabled={geoblocked}
+        onClick={(e) => {
+          e.preventDefault();
+          (onClick ?? openWalletModal)();
+          handleReplay();
+        }}
+        onMouseOver={handleReplay}
+      >
+        <div
+          className={`flex flex-row text-${geoblocked ? "dark-gray" : "ec-blue"} text-2xl justify-between`}
         >
-          <div className="flex flex-row text-ec-blue text-2xl justify-between">
-            <div className="flex flex-row">
-              <OuterConnectText side="left" connected={connected} mobile={mobile} />
-              <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>
-                <span
-                  className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
-                  style={{ width, maxWidth: width }}
-                  ref={ref}
-                />
-              </div>
-              <OuterConnectText side="right" connected={connected} mobile={mobile} />
+          <div className="flex flex-row">
+            <OuterConnectText
+              geoblocked={geoblocked}
+              side="left"
+              connected={connected}
+              mobile={mobile}
+            />
+            <div className={!mobile ? "" : "text-black text-[32px] leading-[40px]"}>
+              <span
+                className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
+                style={{ width, maxWidth: width }}
+                ref={ref}
+              />
             </div>
-            <Arrow width={18} className="fill-black" />
+            <OuterConnectText
+              geoblocked={geoblocked}
+              side="right"
+              connected={connected}
+              mobile={mobile}
+            />
           </div>
-        </Button>
-      ) : (
-        children
-      )}
-    </>
+          <Arrow width={18} className="fill-black" />
+        </div>
+      </Button>
+    ) : (
+      children
+    );
+
+  return geoblocked ? (
+    <Popup
+      content={
+        <Text textTransform="uppercase" color="black">
+          not available in your jurisdiction
+        </Text>
+      }
+    >
+      {inner}
+    </Popup>
+  ) : (
+    inner
   );
 };
 

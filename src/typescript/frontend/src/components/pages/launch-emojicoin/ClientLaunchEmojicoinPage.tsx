@@ -33,7 +33,7 @@ const lastMarketRegistration = (
   return undefined;
 };
 
-const ClientLaunchEmojicoinPage = () => {
+const ClientLaunchEmojicoinPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const searchParams = useSearchParams();
   const emojiParams = searchParams.get("emojis");
   const setEmojis = useEmojiPicker((state) => state.setEmojis);
@@ -148,7 +148,7 @@ const ClientLaunchEmojicoinPage = () => {
 
       <div className="flex justify-center items-center h-full px-6">
         <div className="relative flex flex-col w-full max-w-[414px]">
-          <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} />
+          <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} geoblocked={geoblocked} />
         </div>
       </div>
     </div>

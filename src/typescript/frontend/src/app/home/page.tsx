@@ -4,6 +4,8 @@ import HomePageComponent from "./HomePage";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { MarketDataSortBy } from "lib/queries/sorting/types";
 import { ORDER_BY } from "@sdk/queries/const";
+import { isUserGeoblocked } from "utils/geolocation";
+import { headers } from "next/headers";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -15,6 +17,8 @@ export default async function Home({ searchParams }: HomePageParams) {
     sortBy: MarketDataSortBy.DailyVolume,
     orderBy: ORDER_BY.DESC,
   });
+
+  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 
   const sorted = await fetchSortedMarketData({
     page,
@@ -33,6 +37,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       page={page}
       sortBy={sortBy}
       searchBytes={q}
+      geoblocked={geoblocked}
     />
   );
 }

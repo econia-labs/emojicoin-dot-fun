@@ -24,7 +24,7 @@ import { useSearchParams } from "next/navigation";
 import { encodeEmojis, getEmojisInString } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
 
-export const ClientPoolsPage = () => {
+export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
@@ -81,7 +81,7 @@ export const ClientPoolsPage = () => {
             alignItems="center"
             gap="13px"
           >
-            {!isMobile ? <SearchBar /> : null}
+            {!isMobile ? <SearchBar geoblocked={geoblocked} /> : null}
 
             <TableHeaderSwitcher
               title1="Pools"
@@ -100,7 +100,7 @@ export const ClientPoolsPage = () => {
       {isMobile ? (
         <StyledSubHeader>
           <StyledHeaderInner>
-            <SearchBar />
+            <SearchBar geoblocked={geoblocked} />
           </StyledHeaderInner>
         </StyledSubHeader>
       ) : null}
@@ -132,7 +132,10 @@ export const ClientPoolsPage = () => {
         </StyledInner>
 
         <StyledInner flexGrow={1} width={{ _: "100%", laptopL: "43%" }}>
-          <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
+          <Liquidity
+            geoblocked={geoblocked}
+            market={selectedIndex !== undefined ? markets[selectedIndex] : undefined}
+          />
         </StyledInner>
       </StyledWrapper>
     </StyledPoolsPage>

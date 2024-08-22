@@ -13,7 +13,8 @@ export default async function middleware(request: NextRequest) {
     pathname === "/social-preview.png" ||
     pathname === "/webclip.png" ||
     pathname === "/icon.png" ||
-    pathname === "/test"
+    pathname === "/test" ||
+    pathname === "/geolocation"
   ) {
     return NextResponse.next();
   }
