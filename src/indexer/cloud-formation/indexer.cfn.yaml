@@ -318,7 +318,6 @@ Resources:
           Enable: true
           Rollback: true
         MaximumPercent: 100
-        MinimumPercent: 0
       DesiredCount: 1
       LaunchType: 'FARGATE'
       NetworkConfiguration:
