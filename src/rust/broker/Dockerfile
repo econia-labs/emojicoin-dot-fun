@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libclang-dev \
     libdw-dev \
-    libpq-dev \
     libssl-dev \
     lld \
     pkg-config \
@@ -33,7 +32,6 @@ RUN cargo build --bin broker --package broker --release --features $FEATURES
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
-    libpq-dev \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir app
 COPY --from=builder /app/target/release/broker /app
