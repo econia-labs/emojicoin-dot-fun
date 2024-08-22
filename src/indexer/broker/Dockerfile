@@ -22,8 +22,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lld \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
-COPY . .
 RUN cargo chef cook --bin broker --package broker --release
+COPY . .
+RUN cargo build --bin broker --package broker --release
 
 # Install runtime dependencies, copy over binary.
 FROM debian:bookworm-slim AS runtime
