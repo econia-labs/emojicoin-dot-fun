@@ -18,7 +18,9 @@ programmatically using [GitSync] alone.
    ```
 
 1. Provide a `GRPC_AUTH_TOKEN` in your `.env` as described in `example.env`.
+
 1. Modify other values as needed.
+
 1. Start the indexer:
 
    ```sh
