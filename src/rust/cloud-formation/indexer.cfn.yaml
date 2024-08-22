@@ -80,12 +80,29 @@ Resources:
         - !Ref 'DbUserSecurityGroup'
         SubnetId: !Ref 'SubnetA'
       UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          yum update -y
-          amazon-linux-extras enable postgresql14
-          yum clean metadata
-          yum install -y postgresql
+        # Install PostgreSQL client, set connection string variable.
+        Fn::Base64: !Sub
+        - |
+            #!/bin/bash
+            yum update -y
+            amazon-linux-extras enable postgresql14
+            yum clean metadata
+            yum install -y postgresql
+            echo 'export DB_URL="postgres://${MasterUsername}:\
+            ${MasterPassword}@${DbCluster.Endpoint.Address}/${DatabaseName}"' \
+            >> /etc/profile
+        - DatabaseName: !FindInMap
+          - 'Constants'
+          - 'DatabaseConfig'
+          - 'DatabaseName'
+          MasterPassword: !FindInMap
+          - 'Constants'
+          - 'DatabaseConfig'
+          - 'MasterPassword'
+          MasterUsername: !FindInMap
+          - 'Constants'
+          - 'DatabaseConfig'
+          - 'MasterUsername'
     Type: 'AWS::EC2::Instance'
   # Connection endpoint allowing access to the bastion host.
   BastionHostConnectionEndpoint:
