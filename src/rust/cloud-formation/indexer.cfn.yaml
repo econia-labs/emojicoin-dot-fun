@@ -372,7 +372,7 @@ Resources:
           - 'CMD-SHELL'
           - 'curl -f http://localhost:8084/metrics || exit 1'
           Interval: 10
-          Retries: 2
+          Retries: 3
           StartPeriod: 10
           Timeout: 2
         Image: !Join
