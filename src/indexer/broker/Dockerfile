@@ -11,7 +11,6 @@ RUN cargo chef prepare --bin broker
 
 # Cache build dependencies, compile binary.
 FROM base AS builder
-COPY --from=planner app/recipe.json recipe.json
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libudev-dev \
     build-essential \
@@ -22,6 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lld \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
+COPY --from=planner app/recipe.json recipe.json
 RUN cargo chef cook --bin broker --package broker --release
 COPY . .
 RUN cargo build --bin broker --package broker --release
