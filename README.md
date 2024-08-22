@@ -18,6 +18,10 @@ To set up a simple release cycle for the code in this repository, you can
 target the `production` branch as the main deployment branch and use
 all other branches as preview/development builds.
 
+The process is as simple as merging feature branches to `main` first to trigger
+CI/CD checks, and then once it's merged into `main`, merging or [cherry-picking]
+a subset of the new features into the `production` branch.
+
 You can set in Vercel project settings the production branch. By default, this
 is `main`, however you can use the `production` branch to separate staging
 environments from the release (aka production) environment.
@@ -108,6 +112,7 @@ If you do have access to the `charting_library` repository:
 git submodule update --init --recursive
 ```
 
+[cherry-picking]: https://git-scm.com/docs/git-cherry-pick
 [pre-commit repo]: https://github.com/pre-commit/pre-commit
 [pre-commit shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit
 [uploading environment variables with vercel's ui]: https://github.com/user-attachments/assets/d613725d-82ed-4a4e-a467-a89b2cf57d91
