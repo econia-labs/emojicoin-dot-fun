@@ -1,0 +1,79 @@
+# yamllint disable rule:empty-lines rule:key-ordering
+---
+services:
+  broker:
+    build:
+      context: '.'
+      dockerfile: 'broker/Dockerfile'
+      args:
+        FEATURES: 'ws'
+    depends_on:
+      processor:
+        condition: 'service_started'
+    environment:
+      PROCESSOR_WS_URL: 'ws://processor:${PROCESSOR_WS_PORT}/ws'
+      PORT: '${BROKER_PORT}'
+      RUST_LOG: 'info'
+    image: 'econialabs/emojicoin-dot-fun-indexer-broker'
+    ports:
+    - '${BROKER_PORT}:${BROKER_PORT}'
+    restart: 'unless-stopped'
+
+  postgres:
+    environment:
+      POSTGRES_USER: 'emojicoin'
+      POSTGRES_DB: 'emojicoin'
+      POSTGRES_PASSWORD: 'emojicoin'
+    image: 'postgres:14-bookworm'
+    restart: 'always'
+    volumes:
+    - 'db:/var/lib/postgresql/data'
+    healthcheck:
+      test: 'pg_isready -h localhost -p 5432 -U emojicoin || exit 1'
+      interval: '5s'
+      timeout: '3s'
+      retries: '3'
+      start_period: '15s'
+      start_interval: '5s'
+    ports:
+    - '5432:5432'
+
+  postgrest:
+    depends_on:
+      postgres:
+        condition: 'service_healthy'
+    environment:
+      PGRST_DB_URI: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
+      PGRST_DB_ANON_ROLE: 'web_anon'
+      PGRST_DB_MAX_ROWS: '${POSTGREST_MAX_ROWS}'
+    image: 'postgrest/postgrest'
+    ports:
+    - '3000:3000'
+    restart: 'unless-stopped'
+
+  processor:
+    extra_hosts:
+    - 'host.docker.internal:host-gateway'
+    build:
+      context: 'processor/rust'
+      dockerfile: 'Dockerfile'
+    environment:
+      DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
+      GRPC_AUTH_TOKEN: '${GRPC_AUTH_TOKEN}'
+      GRPC_DATA_SERVICE_URL: '${GRPC_DATA_SERVICE_URL}'
+      MINIMUM_STARTING_VERSION: '${MINIMUM_STARTING_VERSION}'
+      EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
+      WS_PORT: '${PROCESSOR_WS_PORT}'
+    depends_on:
+      postgres:
+        condition: 'service_healthy'
+    image: 'econialabs/emojicoin-dot-fun-indexer-processor'
+    restart: 'unless-stopped'
+    stop_signal: 'SIGKILL'
+    ports:
+    - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
+
+volumes:
+  db:
+    driver: 'local'
+...

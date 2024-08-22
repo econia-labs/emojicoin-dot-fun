@@ -104,6 +104,7 @@ run the command below to clone the appropriate submodules:
 
 ```shell
 git submodule update --init --recursive src/inbox
+git submodule update --init --recursive src/rust/processor
 ```
 
 If you do have access to the `charting_library` repository:

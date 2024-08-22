@@ -66,7 +66,7 @@ async fn handle_signals(mut signals: Signals, allowlist_set: Arc<RwLock<HashSet<
 #[tokio::main]
 async fn main() {
     let set = Arc::new(RwLock::new(read_allowlist()));
-    let signals = Signals::new(&[SIGUSR1]).unwrap();
+    let signals = Signals::new([SIGUSR1]).unwrap();
     let handle = signals.handle();
     let signals_task = tokio::spawn(handle_signals(signals, set.clone()));
     let cors = CorsLayer::new()
