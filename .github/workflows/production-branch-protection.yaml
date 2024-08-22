@@ -1,15 +1,24 @@
+# yamllint disable rule:empty-lines rule:key-ordering
+---
 name: 'Production Branch Protection'
 
-on:
+"on":
   pull_request:
+    types:
+    - 'opened'
+    - 'reopened'
+    - 'synchronize'
+    - 'edited'
 
 jobs:
   production-branch-protection:
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-latest'
     steps:
-      - name: "Check if the PR is targeting the production branch"
-        id: check_branch
-        if: github.base_ref == 'production' && github.head_ref != 'main'
-        run: |
-          echo "ERROR: You can only merge to the production branch from `main`."
-          exit 1
+    - name: 'Check if the PR is targeting the production branch'
+      id: 'check_branch'
+      if: |
+        github.base_ref == 'production' && github.head_ref != 'main'
+      run: |
+        echo ERROR: You can only merge to the production branch from main.
+        exit 1
+...
