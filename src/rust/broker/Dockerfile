@@ -34,7 +34,8 @@ FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir app
 COPY --from=builder /app/target/release/broker /app
 
 # This helps the container stop faster.
