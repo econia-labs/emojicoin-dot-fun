@@ -10,11 +10,11 @@ async fn main() -> Result<(), ()> {
     env_logger::init();
 
     let processor_url = std::env::var("PROCESSOR_WS_URL")
-        .expect("Enviroment variable PROCESSOR_WS_URL is not set.");
+        .expect("Environment variable PROCESSOR_WS_URL is not set.");
     let port: u16 = std::env::var("PORT")
-        .expect("Enviroment variable PORT is not set.")
+        .expect("Environment variable PORT is not set.")
         .parse()
-        .expect("Enviroment variable PORT is not a valid port.");
+        .expect("Environment variable PORT is not a valid port.");
 
     let (tx, _) = broadcast::channel(2048);
     let tx2 = tx.clone();
