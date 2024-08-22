@@ -31,5 +31,5 @@ name: 'Build processor Docker image and push to Docker Hub'
 'on':
   push:
     tags:
-    - 'v*'
+    - 'processor-v*'
 ...
