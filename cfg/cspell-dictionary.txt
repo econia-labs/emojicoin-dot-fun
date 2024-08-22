@@ -59,6 +59,7 @@ melilla
 merperson
 moai
 mosquitto
+mqtt
 mybuilder
 nazar
 nextjs
@@ -91,6 +92,7 @@ tungstenite
 turkiye
 unsubscription
 vercel
+viewports
 websockets
 xbtmatt
 zustand
