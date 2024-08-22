@@ -1,6 +1,8 @@
-# `emojicoin-dot-fun` indexer
+# Rust source
 
-## AWS CloudFormation
+## `emojicoin-dot-fun` indexer
+
+### AWS CloudFormation
 
 The indexer is deployed using [AWS CloudFormation] with a [template file] at
 `cloud-formation/indexer.cfm.yaml` and a development-specific
@@ -9,7 +11,7 @@ The indexer is deployed using [AWS CloudFormation] with a [template file] at
 By granting [PowerUserAccess] to the stack, deployments can be performed
 programmatically using [GitSync] alone.
 
-## Running Docker compose locally
+### Running Docker compose locally
 
 1. Copy `example.env` to `.env`, which is ignored by `git`:
 
