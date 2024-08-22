@@ -70,18 +70,19 @@ the following environment variables to the `Preview` and `Deployment`
 environments.
 
 ```shell
-# If you wanted to change or add `NEXT_PUBLIC_APTOS_NETWORK` and
-# `NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS`, for example, you would change them
-# locally in an `.env` file, save that file, then upload it with Vercel's
-# "Import .env" button shown below.
+# If you wanted to change a couple values, you'd create an .env file,
+# then upload that to Vercel.
+# For example, if your file consisted of the following two lines, when you
+# upload the file with "Import .env", it will look like the image below.
 NEXT_PUBLIC_APTOS_NETWORK="testnet"
 NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS="100"
 ```
 
 ![Uploading environment variables with Vercel's UI]
 
-**You should specify the `Environments` to apply the environment variables to.
-In most cases you should alter `Production` environment variables manually.**
+**Note the `Environments` checkboxes. You *must* specify which `Environments`
+to apply the environment variables to. In most cases you should alter
+`Production` environment variables manually.**
 
 Once you make any changes, either with the CLI or through Vercel's UI, you must
 pull the environment variables again to see the new, updated values in your
