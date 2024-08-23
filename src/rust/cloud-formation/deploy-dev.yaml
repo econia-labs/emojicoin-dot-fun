@@ -6,7 +6,7 @@ parameters:
   MinimumStartingVersion: '5675600000'
   ProcessorImageVersion: '0.3.0'
   ProvisionBastionHost: 'false'
-  ProvisionProcessor: 'true'
+  ProvisionProcessor: 'false'
 tags: null
 template-file-path: 'src/indexer/cloud-formation/indexer.cfn.yaml'
 ...
