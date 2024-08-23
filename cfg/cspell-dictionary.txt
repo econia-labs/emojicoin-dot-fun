@@ -98,6 +98,7 @@ unsubscription
 vercel
 viewports
 vpnapi
+websocat
 websockets
 xbtmatt
 zustand
