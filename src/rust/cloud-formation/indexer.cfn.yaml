@@ -97,21 +97,42 @@ Resources:
             wget ${WebsocatReleaseUrlBase}/${WebsocatVersion}/${WebsocatBuild}
             chmod +x ${WebsocatBuild}
             mv ${WebsocatBuild} /usr/local/bin/websocat
-            echo 'export DB_URL="postgres://${MasterUsername}:\
-            ${MasterPassword}@${DbCluster.Endpoint.Address}/${DatabaseName}"' \
-            >> /etc/profile
-        - DatabaseName: !FindInMap
-          - 'Constants'
-          - 'DatabaseConfig'
-          - 'DatabaseName'
-          MasterPassword: !FindInMap
-          - 'Constants'
-          - 'DatabaseConfig'
-          - 'MasterPassword'
-          MasterUsername: !FindInMap
-          - 'Constants'
-          - 'DatabaseConfig'
-          - 'MasterUsername'
+            echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
+            echo '${ProcessorWsUrlExport}' >> /etc/profile
+        - DatabaseUrl: !Join
+          - ''
+          - - 'postgres://'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterPassword'
+            - '@'
+            - !GetAtt 'DbCluster.Endpoint.Address'
+            - '/'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'DatabaseName'
+          ProcessorWsUrlExport: !If
+          - 'ProvisionProcessor'
+          - !Join
+            - ''
+            - - 'export PROCESSOR_WS_URL="ws://'
+              - !GetAtt 'ProcessorRunner.Name'
+              - '.'
+              - !Ref 'AWS::StackName'
+              - '.internal:'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'ProcessorWebsocketPort'
+              - '"'
+          - '# PROCESSOR_WS_URL not set (processor not provisioned)'
           WebsocatBuild: !FindInMap
           - 'Constants'
           - 'Websocat'
@@ -373,6 +394,7 @@ Resources:
         MaximumPercent: 100
         MinimumHealthyPercent: 0
       DesiredCount: 1
+      EnableECSManagedTags: true
       LaunchType: 'FARGATE'
       NetworkConfiguration:
         AwsvpcConfiguration:
@@ -385,6 +407,8 @@ Resources:
           - !Ref 'SubnetA'
           - !Ref 'SubnetB'
           - !Ref 'SubnetC'
+      PropagateTags: 'SERVICE'
+      ServiceName: !Sub '${AWS::StackName}-processor'
       TaskDefinition: !Ref 'ProcessorTask'
     Type: 'AWS::ECS::Service'
   # Task definition for processor.
