@@ -15,9 +15,9 @@ Mappings:
       MasterPassword: 'emojicoin'
       MasterUsername: 'emojicoin'
     Networking:
+      BrokerPort: 3009
       DatabasePort: 5432
-      ProcessorPort: 3008
-      ProcessorWebsocketPort: 3009
+      ProcessorWebsocketPort: 3008
       VpcCidrBlock: '10.0.0.0/16'
     Websocat:
       Build: 'websocat.aarch64-unknown-linux-musl'
@@ -51,6 +51,8 @@ Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
     Type: 'AWS::EC2::Image::Id'
+  BrokerImageVersion:
+    Type: 'String'
   DbMaxCapacity:
     Default: 4
     Type: 'Number'
@@ -182,6 +184,74 @@ Resources:
       SourceSecurityGroupId:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
+  # Task definition for the broker.
+  BrokerTask:
+    Condition: 'ProvisionProcessor'
+    DependsOn: 'ContainerLogGroup'
+    Properties:
+      ContainerDefinitions:
+      - Environment:
+        - Name: 'PROCESSOR_WS_URL'
+          Value: !Join
+          - ''
+          - - 'ws://'
+            - !GetAtt 'ProcessorServiceDiscovery.Name'
+            - '.'
+            - !Ref 'AWS::StackName'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'Networking'
+              - 'ProcessorWebsocketPort'
+            - '/ws"'
+        - Name: 'PORT'
+          Value: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'BrokerPort'
+        - Name: 'RUST_LOG'
+          Value: 'info'
+        HealthCheck:
+          Command:
+          - 'CMD-SHELL'
+          - !Sub
+            - 'curl -f http://localhost:${PORT}/ || exit 1'
+            - PORT: !FindInMap
+              - 'Constants'
+              - 'Networking'
+              - 'BrokerPort'
+          Interval: 10
+          Retries: 3
+          StartPeriod: 10
+          Timeout: 2
+        Image: !Join
+        - ''
+        - - 'econialabs/emojicoin-dot-fun-indexer-broker:'
+          - !Ref 'BrokerImageVersion'
+        LogConfiguration:
+          LogDriver: 'awslogs'
+          Options:
+            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: 'ecs'
+        Name: !Sub '${AWS::StackName}-processor'
+        PortMappings:
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'BrokerPort'
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'BrokerPort'
+      Cpu: '256'
+      ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
+      Family: !Ref 'AWS::StackName'
+      Memory: '512'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities:
+      - 'FARGATE'
+    Type: 'AWS::ECS::TaskDefinition'
   # Cluster for running ECS containers.
   ContainerCluster:
     Type: 'AWS::ECS::Cluster'
@@ -487,16 +557,8 @@ Resources:
             awslogs-group: !Sub '/ecs/${AWS::StackName}'
             awslogs-region: !Ref 'AWS::Region'
             awslogs-stream-prefix: 'ecs'
-        Name: 'processor'
+        Name: !Sub '${AWS::StackName}-processor'
         PortMappings:
-        - ContainerPort: !FindInMap
-          - 'Constants'
-          - 'Networking'
-          - 'ProcessorPort'
-          HostPort: !FindInMap
-          - 'Constants'
-          - 'Networking'
-          - 'ProcessorPort'
         - ContainerPort: !FindInMap
           - 'Constants'
           - 'Networking'
