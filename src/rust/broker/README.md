@@ -1,8 +1,8 @@
-<!-- markdownlint-disable-file MD024 -->
-
-<!-- cspell:word websocat -->
-
-<!-- cspell:word netcat -->
+<!--
+cspell:word netcat
+cspell:word websocat
+markdownlint-disable-file MD024
+-->
 
 # Using the WebSockets broker server
 
