@@ -416,7 +416,7 @@ Resources:
           - !Ref 'SubnetB'
           - !Ref 'SubnetC'
       ServiceRegistries:
-      - RegistryArn: !Ref 'ProcessorServiceDiscovery'
+      - RegistryArn: !GetAtt 'ProcessorServiceDiscovery.Arn'
       TaskDefinition: !Ref 'ProcessorTask'
     Type: 'AWS::ECS::Service'
   # Service discovery for the processor.
