@@ -493,6 +493,10 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'ProcessorPort'
+        - HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ProcessorWebsocketPort'
         Secrets:
         - Name: 'GRPC_AUTH_TOKEN'
           ValueFrom: !Sub
