@@ -85,6 +85,7 @@ Resources:
         GroupSet:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
+        - !Ref 'BrokerWsClientSecurityGroup'
         - !Ref 'ProcessorWsClientSecurityGroup'
         SubnetId: !Ref 'SubnetA'
       UserData:
@@ -184,6 +185,19 @@ Resources:
       SourceSecurityGroupId:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
+  # Security group for the broker's WebSocket server.
+  BrokerPublisherSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the broker's WebSocket server security group.
+  BrokerPublisherSecurityGroupIngress:
+    Properties:
+      GroupId: !Ref 'BrokerPublisherSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'BrokerWsClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
   # Service for running the broker.
   BrokerRunner:
     Condition: 'ProvisionProcessor'
@@ -201,8 +215,9 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
+          - !Ref 'BrokerPublisherSecurityGroup'
           - !Ref 'ContainerSecurityGroup'
-          - !Ref 'DbUserSecurityGroup'
+          - !Ref 'ProcessorWsClientSecurityGroup'
           Subnets:
           - !Ref 'SubnetA'
           - !Ref 'SubnetB'
@@ -277,6 +292,15 @@ Resources:
       RequiresCompatibilities:
       - 'FARGATE'
     Type: 'AWS::ECS::TaskDefinition'
+  # Security group for clients of the broker's WebSocket server.
+  BrokerWsClientSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'BrokerPublisherSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Cluster for running ECS containers.
   ContainerCluster:
     Type: 'AWS::ECS::Cluster'
