@@ -1,6 +1,5 @@
 <!--
 cspell:word netcat
-cspell:word websocat
 markdownlint-disable-file MD024
 -->
 

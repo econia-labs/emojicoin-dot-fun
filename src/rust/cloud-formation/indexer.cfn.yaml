@@ -19,6 +19,10 @@ Mappings:
       ProcessorPort: 3008
       ProcessorWebsocketPort: 3009
       VpcCidrBlock: '10.0.0.0/16'
+    Websocat:
+      Build: 'websocat.aarch64-unknown-linux-musl'
+      ReleaseUrlBase: 'https://github.com/vi/websocat/releases/download'
+      Version: 'v1.13.0'
   Subnets:
     A:
       AvailabilityZone: 0
@@ -68,7 +72,7 @@ Parameters:
     Default: 'true'
     Type: 'String'
 Resources:
-  # Minimal VM for accessing the database.
+  # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'ProvisionBastionHost'
     Properties:
@@ -81,7 +85,7 @@ Resources:
         - !Ref 'DbUserSecurityGroup'
         SubnetId: !Ref 'SubnetA'
       UserData:
-        # Install PostgreSQL client, set connection string variable.
+        # Install PostgreSQL client & websocat, set connection string variable.
         Fn::Base64: !Sub
         - |
             #!/bin/bash
@@ -89,6 +93,9 @@ Resources:
             amazon-linux-extras enable postgresql14
             yum clean metadata
             yum install -y postgresql
+            wget ${WebsocatReleaseUrlBase}/${WebsocatVersion}/${WebsocatBuild}
+            chmod +x ${WebsocatBuild}
+            mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="postgres://${MasterUsername}:\
             ${MasterPassword}@${DbCluster.Endpoint.Address}/${DatabaseName}"' \
             >> /etc/profile
@@ -104,6 +111,18 @@ Resources:
           - 'Constants'
           - 'DatabaseConfig'
           - 'MasterUsername'
+          WebsocatBuild: !FindInMap
+          - 'Constants'
+          - 'Websocat'
+          - 'Build'
+          WebsocatReleaseUrlBase: !FindInMap
+          - 'Constants'
+          - 'Websocat'
+          - 'ReleaseUrlBase'
+          WebsocatVersion: !FindInMap
+          - 'Constants'
+          - 'Websocat'
+          - 'Version'
     Type: 'AWS::EC2::Instance'
   # Connection endpoint allowing access to the bastion host.
   BastionHostConnectionEndpoint:
