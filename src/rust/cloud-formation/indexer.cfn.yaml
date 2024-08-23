@@ -3,6 +3,13 @@ Conditions:
   ProvisionBastionHost: !Equals
   - !Ref 'ProvisionBastionHost'
   - 'true'
+  ProvisionBroker: !And
+  - !Equals
+    - !Ref 'ProvisionProcessor'
+    - 'true'
+  - !Equals
+    - !Ref 'ProvisionBroker'
+    - 'true'
   ProvisionProcessor: !Equals
   - !Ref 'ProvisionProcessor'
   - 'true'
@@ -68,10 +75,10 @@ Parameters:
   ProcessorImageVersion:
     Type: 'String'
   ProvisionBastionHost:
-    Default: 'false'
+    Type: 'String'
+  ProvisionBroker:
     Type: 'String'
   ProvisionProcessor:
-    Default: 'true'
     Type: 'String'
 Resources:
   # Minimal VM for monitoring internal processes.
@@ -200,14 +207,14 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Service for running the broker.
   BrokerRunner:
-    Condition: 'ProvisionProcessor'
+    Condition: 'ProvisionBroker'
     DependsOn: 'ProcessorRunner'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
-        DeploymentCircuitBreaker:
-          Enable: true
-          Rollback: true
+        # DeploymentCircuitBreaker:
+        #   Enable: true
+        #   Rollback: true
         MaximumPercent: 500
         MinimumHealthyPercent: 0
       DesiredCount: 1
@@ -251,19 +258,19 @@ Resources:
           - 'BrokerPort'
         - Name: 'RUST_LOG'
           Value: 'info'
-        HealthCheck:
-          Command:
-          - 'CMD-SHELL'
-          - !Sub
-            - 'curl -f http://localhost:${PORT}/ || exit 1'
-            - PORT: !FindInMap
-              - 'Constants'
-              - 'Networking'
-              - 'BrokerPort'
-          Interval: 10
-          Retries: 3
-          StartPeriod: 10
-          Timeout: 2
+        # HealthCheck:
+        #   Command:
+        #   - 'CMD-SHELL'
+        #   - !Sub
+        #     - 'curl -f http://localhost:${PORT}/ || exit 1'
+        #     - PORT: !FindInMap
+        #       - 'Constants'
+        #       - 'Networking'
+        #       - 'BrokerPort'
+        #   Interval: 10
+        #   Retries: 3
+        #   StartPeriod: 10
+        #   Timeout: 2
         Image: !Join
         - ''
         - - 'econialabs/emojicoin-dot-fun-indexer-broker:'
