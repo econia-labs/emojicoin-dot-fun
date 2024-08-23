@@ -274,7 +274,7 @@ Resources:
             awslogs-group: !Sub '/ecs/${AWS::StackName}'
             awslogs-region: !Ref 'AWS::Region'
             awslogs-stream-prefix: 'ecs'
-        Name: !Sub '${AWS::StackName}-processor'
+        Name: !Sub '${AWS::StackName}-broker'
         PortMappings:
         - ContainerPort: !FindInMap
           - 'Constants'
