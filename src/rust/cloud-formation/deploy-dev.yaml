@@ -8,5 +8,5 @@ parameters:
   ProvisionBastionHost: 'false'
   ProvisionProcessor: 'false'
 tags: null
-template-file-path: 'src/indexer/cloud-formation/indexer.cfn.yaml'
+template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
 ...
