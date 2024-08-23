@@ -20,8 +20,9 @@ const nameMap = new Map<string, SymbolEmojiData>(values.map((v) => [v.name, v]))
 const hexMap = new Map<`0x${string}`, SymbolEmojiData>(values.map((v) => [v.hex, v]));
 const emojiMap = new Map<string, SymbolEmojiData>(values.map((v) => [v.emoji, v]));
 
+export type AnyEmojiName = keyof typeof AllSymbolEmojiJSON;
 export const SYMBOL_DATA = {
-  byStrictName: (v: keyof typeof AllSymbolEmojiJSON) => nameMap.get(v)!,
+  byStrictName: (v: AnyEmojiName) => nameMap.get(v)!,
   byName: (v: string) => nameMap.get(v),
   byHex: (v: HexInput) => hexMap.get(normalizeHex(v)),
   byEmoji: (v: string) => emojiMap.get(v),
