@@ -132,7 +132,6 @@ Resources:
                 - 'Networking'
                 - 'ProcessorWebsocketPort'
               - '/ws"'
-              - '"'
           - '# PROCESSOR_WS_URL not set (processor not provisioned)'
           WebsocatBuild: !FindInMap
           - 'Constants'
