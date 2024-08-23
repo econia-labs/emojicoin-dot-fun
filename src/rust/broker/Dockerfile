@@ -38,11 +38,15 @@ FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir app
 COPY --from=builder /app/target/release/broker /app
 
 # This helps the container stop faster.
 STOPSIGNAL SIGKILL
+
+HEALTHCHECK --interval=2m --timeout=5s --start-period=10s --start-interval=2s --retries=1 \
+  CMD curl -f http://localhost:$PORT/ || exit 1
 
 ENTRYPOINT ["/app/broker"]
