@@ -5,7 +5,7 @@ parameters:
   GrpcDataServiceUrl: 'https://grpc.testnet.aptoslabs.com:443'
   MinimumStartingVersion: '5675600000'
   ProcessorImageVersion: '0.3.0'
-  ProvisionBastionHost: 'true'
+  ProvisionBastionHost: 'false'
   ProvisionProcessor: 'true'
 tags: null
 template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
