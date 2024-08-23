@@ -493,7 +493,15 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'ProcessorPort'
-        - HostPort: !FindInMap
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ProcessorPort'
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ProcessorWebsocketPort'
+          HostPort: !FindInMap
           - 'Constants'
           - 'Networking'
           - 'ProcessorWebsocketPort'
