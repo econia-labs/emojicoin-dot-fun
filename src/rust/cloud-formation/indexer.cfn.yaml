@@ -83,6 +83,7 @@ Resources:
         GroupSet:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
+        - !Ref 'ProcessorWsClientSecurityGroup'
         SubnetId: !Ref 'SubnetA'
       UserData:
         # Install PostgreSQL client & websocat, set connection string variable.
@@ -347,6 +348,19 @@ Resources:
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
+  # Security group for the processor's WebSocket server.
+  ProcessorPublisherSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the processor's WebSocket server security group.
+  ProcessorPublisherSecurityGroupIngress:
+    Properties:
+      GroupId: !Ref 'ProcessorPublisherSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'ProcessorWsClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
   # Service for running the processor.
   ProcessorRunner:
     Condition: 'ProvisionProcessor'
@@ -366,6 +380,7 @@ Resources:
           SecurityGroups:
           - !Ref 'ContainerSecurityGroup'
           - !Ref 'DbUserSecurityGroup'
+          - !Ref 'ProcessorPublisherSecurityGroup'
           Subnets:
           - !Ref 'SubnetA'
           - !Ref 'SubnetB'
@@ -448,6 +463,15 @@ Resources:
       RequiresCompatibilities:
       - 'FARGATE'
     Type: 'AWS::ECS::TaskDefinition'
+  # Security group for clients of the processor's WebSocket server.
+  ProcessorWsClientSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'ProcessorPublisherSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Route route for the public subnet in the virtual private cloud.
   PublicRouteTable:
     Properties:
