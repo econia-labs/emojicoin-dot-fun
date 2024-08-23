@@ -374,7 +374,7 @@ Resources:
     Condition: 'ProvisionProcessor'
     Properties:
       Description: !Ref 'AWS::StackName'
-      Name: !Sub 'AWS::StackName'
+      Name: !Ref 'AWS::StackName'
       Vpc: !Ref 'Vpc'
     Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
