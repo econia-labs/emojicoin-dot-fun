@@ -126,11 +126,12 @@ Resources:
               - !GetAtt 'ProcessorRunner.Name'
               - '.'
               - !Ref 'AWS::StackName'
-              - '.internal:'
+              - ':'
               - !FindInMap
                 - 'Constants'
                 - 'Networking'
                 - 'ProcessorWebsocketPort'
+              - '/ws"'
               - '"'
           - '# PROCESSOR_WS_URL not set (processor not provisioned)'
           WebsocatBuild: !FindInMap
@@ -369,6 +370,13 @@ Resources:
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
+  # Private DNS namespace for internal service discovery.
+  PrivateServiceDiscoveryNamespace:
+    Properties:
+      Description: !Ref 'AWS::StackName'
+      Name: !Ref 'AWS::StackName'
+      Vpc: !Ref 'Vpc'
+    Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
   ProcessorPublisherSecurityGroup:
     Properties:
@@ -408,9 +416,24 @@ Resources:
           - !Ref 'SubnetB'
           - !Ref 'SubnetC'
       PropagateTags: 'SERVICE'
-      ServiceName: !Sub '${AWS::StackName}-processor'
+      ServiceName: !GetAtt 'ProcessorServiceDiscovery.Name'
+      ServiceRegistries:
+      - RegistryArn: !Ref 'ProcessorServiceDiscovery'
       TaskDefinition: !Ref 'ProcessorTask'
     Type: 'AWS::ECS::Service'
+  # Service discovery for the processor.
+  ProcessorServiceDiscovery:
+    Properties:
+      DnsConfig:
+        DnsRecords:
+        - TTL: 10
+          Type: 'A'
+        RoutingPolicy: 'MULTIVALUE'
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: !Sub '${AWS::StackName}-processor'
+      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+    Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for processor.
   ProcessorTask:
     DependsOn: 'ContainerLogGroup'

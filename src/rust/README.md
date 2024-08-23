@@ -76,6 +76,12 @@ List the databases:
 \list
 ```
 
+AFter exiting `psql`, to inspect processor WebSocket events:
+
+```sh
+websocat $PROCESSOR_WS_URL
+```
+
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [aws ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
