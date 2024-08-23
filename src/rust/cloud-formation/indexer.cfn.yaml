@@ -187,6 +187,7 @@ Resources:
   # Service for running the broker.
   BrokerRunner:
     Condition: 'ProvisionProcessor'
+    DependsOn: 'ProcessorRunner'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
