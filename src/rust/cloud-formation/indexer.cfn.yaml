@@ -184,6 +184,30 @@ Resources:
       SourceSecurityGroupId:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
+  # Service for running the broker.
+  BrokerRunner:
+    Condition: 'ProvisionProcessor'
+    Properties:
+      Cluster: !Ref 'ContainerCluster'
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+        MaximumPercent: 500
+        MinimumHealthyPercent: 0
+      DesiredCount: 1
+      LaunchType: 'FARGATE'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+          - !Ref 'ContainerSecurityGroup'
+          - !Ref 'DbUserSecurityGroup'
+          Subnets:
+          - !Ref 'SubnetA'
+          - !Ref 'SubnetB'
+          - !Ref 'SubnetC'
+      TaskDefinition: !Ref 'BrokerTask'
+    Type: 'AWS::ECS::Service'
   # Task definition for the broker.
   BrokerTask:
     Condition: 'ProvisionProcessor'
@@ -475,7 +499,6 @@ Resources:
       LaunchType: 'FARGATE'
       NetworkConfiguration:
         AwsvpcConfiguration:
-          AssignPublicIp: 'ENABLED'
           SecurityGroups:
           - !Ref 'ContainerSecurityGroup'
           - !Ref 'DbUserSecurityGroup'
