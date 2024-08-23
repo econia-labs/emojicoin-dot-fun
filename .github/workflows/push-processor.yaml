@@ -27,7 +27,7 @@ jobs:
         platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS }}'
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
-    timeout-minutes: 360 # Maximum allowed timeout.
+    timeout-minutes: 360
 name: 'Build processor Docker image and push to Docker Hub'
 'on':
   push:
