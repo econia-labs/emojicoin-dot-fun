@@ -228,6 +228,11 @@ Resources:
       - !Ref 'PublicSubnetC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+  BrokerAlbCert:
+    Type: 'AWS::CertificateManager::Certificate'
+    Properties:
+      DomainName: 'emojic-Broke-dHE1hWgxaUDt-1959025115.us-east-2.elb.amazonaws.com'
+      ValidationMethod: 'DNS'
   # Certificate for the broker's application load balancer.
   # BrokerAlbCert:
   #   Properties:
