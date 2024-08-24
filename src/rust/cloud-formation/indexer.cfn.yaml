@@ -298,7 +298,7 @@ Resources:
             - !Ref 'AWS::Region'
             - ':'
             - !Ref 'AWS::AccountId'
-            - ':secret:DOCKER_AUTH_CONFIG-*'
+            - ':secret:DOCKER_AUTH_CONFIG-R0MZXU'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -648,7 +648,7 @@ Resources:
             - !Ref 'AWS::Region'
             - ':'
             - !Ref 'AWS::AccountId'
-            - ':secret:DOCKER_AUTH_CONFIG-*'
+            - ':secret:DOCKER_AUTH_CONFIG-R0MZXU'
         Secrets:
         - Name: 'GRPC_AUTH_TOKEN'
           ValueFrom: !Sub
