@@ -287,7 +287,7 @@ Resources:
         - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
         - ':SecretString:hosted-zone-id}}'
       Name: !Sub
-      - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}.'
+      - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
       - PublicUrlThirdLevelSubdomain: !FindInMap
         - 'Constants'
         - 'Networking'
