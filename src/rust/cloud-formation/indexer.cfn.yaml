@@ -556,11 +556,11 @@ Resources:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::VPCGatewayAttachment'
   # Network address translation gateway for the virtual private cloud.
-  # NatGateway:
-  #   Properties:
-  #     AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
-  #     SubnetId: !Ref 'PublicSubnetA'
-  #   Type: 'AWS::EC2::NatGateway'
+  NatGateway:
+    Properties:
+      AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
+      SubnetId: !Ref 'PublicSubnetA'
+    Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for the network address translation gateway.
   NatGatewayEip:
     Properties:
@@ -755,12 +755,12 @@ Resources:
       RouteTableId: !Ref 'NatGatewayRouteTable'
     Type: 'AWS::EC2::Route'
   # Route to the network address translation gateway for private subnets.
-  # RouteToNatGateway:
-  #   Properties:
-  #     DestinationCidrBlock: '0.0.0.0/0'
-  #     NatGatewayId: !Ref 'NatGateway'
-  #     RouteTableId: !Ref 'PrivateRouteTable'
-  #   Type: 'AWS::EC2::Route'
+  RouteToNatGateway:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref 'NatGateway'
+      RouteTableId: !Ref 'PrivateRouteTable'
+    Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
     Properties:
