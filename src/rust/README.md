@@ -45,11 +45,10 @@ Install the [AWS EC2 Instance Connect CLI]:
 pip install ec2instanceconnectcli
 ```
 
-Connect to the bastion host using your stack name, for example
-`emojicoin-dot-fun-indexer-dev`:
+Connect to the bastion host using your stack name, for example `emoji-dev`:
 
 ```sh
-STACK_NAME=emojicoin-dot-fun-indexer-dev
+STACK_NAME=emoji-dev
 INSTANCE_ID=$(aws cloudformation describe-stacks \
     --output text \
     --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
