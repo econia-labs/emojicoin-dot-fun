@@ -229,23 +229,23 @@ Resources:
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
   # Certificate for the broker's application load balancer.
-  BrokerAlbCert:
-    Properties:
-      DomainName: !Sub '${BrokerAlb.DNSName}'
-      ValidationMethod: 'DNS'
-    Type: 'AWS::CertificateManager::Certificate'
+  # BrokerAlbCert:
+  #   Properties:
+  #     DomainName: !Sub '${BrokerAlb.DNSName}'
+  #     ValidationMethod: 'DNS'
+  #   Type: 'AWS::CertificateManager::Certificate'
   # Listener for broker application load balancer.
-  BrokerAlbListener:
-    Properties:
-      Certificates:
-      - CertificateArn: !Ref 'BrokerAlbCert'
-      DefaultActions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
-      LoadBalancerArn: !Ref 'BrokerAlb'
-      Port: 443
-      Protocol: 'HTTPS'
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # BrokerAlbListener:
+  #   Properties:
+  #     Certificates:
+  #     - CertificateArn: !Ref 'BrokerAlbCert'
+  #     DefaultActions:
+  #     - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+  #       Type: 'forward'
+  #     LoadBalancerArn: !Ref 'BrokerAlb'
+  #     Port: 443
+  #     Protocol: 'HTTPS'
+  #   Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Security group for broker's application load balancer.
   BrokerAlbSecurityGroup:
     Properties:
