@@ -72,7 +72,7 @@ Outputs:
       - ''
       - - '{{resolve:secretsmanager:'
         - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-        - ':SecretString:DOMAIN}}'
+        - ':SecretString:domain}}'
 Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
@@ -254,7 +254,7 @@ Resources:
         - ''
         - - '{{resolve:secretsmanager:'
           - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-          - ':SecretString:DOMAIN}}'
+          - ':SecretString:domain}}'
       DomainValidationOptions:
       - DomainName: !Sub
         - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
@@ -266,39 +266,39 @@ Resources:
           - ''
           - - '{{resolve:secretsmanager:'
             - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-            - ':SecretString:DOMAIN}}'
+            - ':SecretString:domain}}'
         HostedZoneId: !Join
         - ''
         - - '{{resolve:secretsmanager:'
           - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-          - ':SecretString:HOSTED_ZONE_ID}}'
+          - ':SecretString:hosted_zone_id}}'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
-  BrokerAlbDnsRecord:
-    DependsOn: 'BrokerAlbCertificate'
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt 'BrokerAlb.DNSName'
-        HostedZoneId: !GetAtt 'BrokerAlb.CanonicalHostedZoneID'
-      HostedZoneId: !Join
-      - ''
-      - - '{{resolve:secretsmanager:'
-        - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-        - ':SecretString:HOSTED_ZONE_ID}}'
-      Name: !Sub
-      - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
-      - PublicUrlThirdLevelSubdomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'PublicUrlThirdLevelSubdomain'
-        RootDomain: !Join
-        - ''
-        - - '{{resolve:secretsmanager:'
-          - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-          - ':SecretString:DOMAIN}}'
-      Type: 'A'
-  Type: 'AWS::Route53::RecordSet'
+  # BrokerAlbDnsRecord:
+  #   DependsOn: 'BrokerAlbCertificate'
+  #   Properties:
+  #     AliasTarget:
+  #       DNSName: !GetAtt 'BrokerAlb.DNSName'
+  #       HostedZoneId: !GetAtt 'BrokerAlb.CanonicalHostedZoneID'
+  #     HostedZoneId: !Join
+  #     - ''
+  #     - - '{{resolve:secretsmanager:'
+  #       - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+  #       - ':SecretString:HOSTED_ZONE_ID}}'
+  #     Name: !Sub
+  #     - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
+  #     - PublicUrlThirdLevelSubdomain: !FindInMap
+  #       - 'Constants'
+  #       - 'Networking'
+  #       - 'PublicUrlThirdLevelSubdomain'
+  #       RootDomain: !Join
+  #       - ''
+  #       - - '{{resolve:secretsmanager:'
+  #         - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+  #         - ':SecretString:DOMAIN}}'
+  #     Type: 'A'
+  # Type: 'AWS::Route53::RecordSet'
   # Listener for the broker's application load balancer.
   BrokerAlbListener:
     Properties:
