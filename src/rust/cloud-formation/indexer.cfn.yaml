@@ -228,29 +228,6 @@ Resources:
       - !Ref 'PublicSubnetC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  BrokerAlbCert:
-    Type: 'AWS::CertificateManager::Certificate'
-    Properties:
-      DomainName: 'emojic-Broke-dHE1hWgxaUDt-1959025115.us-east-2.elb.amazonaws.com'
-      ValidationMethod: 'DNS'
-  # Certificate for the broker's application load balancer.
-  # BrokerAlbCert:
-  #   Properties:
-  #     DomainName: !Sub '${BrokerAlb.DNSName}'
-  #     ValidationMethod: 'DNS'
-  #   Type: 'AWS::CertificateManager::Certificate'
-  # Listener for broker application load balancer.
-  # BrokerAlbListener:
-  #   Properties:
-  #     Certificates:
-  #     - CertificateArn: !Ref 'BrokerAlbCert'
-  #     DefaultActions:
-  #     - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-  #       Type: 'forward'
-  #     LoadBalancerArn: !Ref 'BrokerAlb'
-  #     Port: 443
-  #     Protocol: 'HTTPS'
-  #   Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Security group for broker's application load balancer.
   BrokerAlbSecurityGroup:
     Properties:
