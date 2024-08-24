@@ -212,9 +212,9 @@ Resources:
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
-        # DeploymentCircuitBreaker:
-        #   Enable: true
-        #   Rollback: true
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
         MaximumPercent: 500
         MinimumHealthyPercent: 0
       DesiredCount: 1
@@ -258,19 +258,19 @@ Resources:
           - 'BrokerPort'
         - Name: 'RUST_LOG'
           Value: 'info'
-        # HealthCheck:
-        #   Command:
-        #   - 'CMD-SHELL'
-        #   - !Sub
-        #     - 'curl -f http://localhost:${PORT}/ || exit 1'
-        #     - PORT: !FindInMap
-        #       - 'Constants'
-        #       - 'Networking'
-        #       - 'BrokerPort'
-        #   Interval: 10
-        #   Retries: 3
-        #   StartPeriod: 10
-        #   Timeout: 2
+        HealthCheck:
+          Command:
+          - 'CMD-SHELL'
+          - !Sub
+            - 'curl -f http://localhost:${PORT}/ || exit 1'
+            - PORT: !FindInMap
+              - 'Constants'
+              - 'Networking'
+              - 'BrokerPort'
+          Interval: 10
+          Retries: 3
+          StartPeriod: 10
+          Timeout: 2
         Image: !Join
         - ''
         - - 'econialabs/emojicoin-dot-fun-indexer-broker:'
