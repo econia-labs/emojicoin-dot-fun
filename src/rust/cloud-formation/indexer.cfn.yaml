@@ -281,7 +281,9 @@ Resources:
       AliasTarget:
         DNSName: !GetAtt 'BrokerAlb.DNSName'
         HostedZoneId: !GetAtt 'BrokerAlb.CanonicalHostedZoneID'
-      HostedZoneId: !Sub '{{resolve:secretsmanager:EMOJICOIN_INDEXER_ROOT_DOMAIN:SecretString:hosted-zone-id}}'
+      HostedZoneId: !Sub
+      - '{{resolve:secretsmanager:${SecretName}:SecretString:hosted-zone-id}}'
+      - SecretName: 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
       Name: !Sub
       - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
       - PublicUrlThirdLevelSubdomain: !FindInMap
