@@ -4,12 +4,13 @@ Conditions:
   - !Ref 'ProvisionBastionHost'
   - 'true'
   ProvisionBroker: !And
-  - !Equals
-    - !Ref 'ProvisionProcessor'
-    - 'true'
+  - !Condition 'ProvisionProcessor'
   - !Equals
     - !Ref 'ProvisionBroker'
     - 'true'
+  ProvisionBrokerServiceDiscovery: !And
+  - !Condition 'ProvisionBastionHost'
+  - !Condition 'ProvisionBroker'
   ProvisionProcessor: !Equals
   - !Ref 'ProvisionProcessor'
   - 'true'
@@ -109,7 +110,23 @@ Resources:
             mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
-        - DatabaseUrl: !Join
+            echo '${BrokerWsUrlExport}' >> /etc/profile
+        - BrokerWsUrlExport: !If
+          - 'ProvisionBroker'
+          - !Join
+            - ''
+            - - 'export BROKER_WS_URL="ws://'
+              - !GetAtt 'BrokerServiceDiscovery.Name'
+              - '.'
+              - !Ref 'AWS::StackName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'BrokerPort'
+              - '/ws"'
+          - '# BROKER_WS_URL not set (broker not provisioned)'
+          DatabaseUrl: !Join
           - ''
           - - 'postgres://'
             - !FindInMap
@@ -229,8 +246,27 @@ Resources:
           - !Ref 'SubnetA'
           - !Ref 'SubnetB'
           - !Ref 'SubnetC'
+      ServiceRegistries:
+      - RegistryArn: !If
+        - 'ProvisionBrokerServiceDiscovery'
+        - !GetAtt 'BrokerServiceDiscovery.Arn'
+        - !Ref 'AWS::NoValue'
       TaskDefinition: !Ref 'BrokerTask'
     Type: 'AWS::ECS::Service'
+  # Service discovery for the broker.
+  BrokerServiceDiscovery:
+    Condition: 'ProvisionBrokerServiceDiscovery'
+    Properties:
+      DnsConfig:
+        DnsRecords:
+        - TTL: 10
+          Type: 'A'
+        RoutingPolicy: 'MULTIVALUE'
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: !Sub '${AWS::StackName}-broker'
+      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+    Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for the broker.
   BrokerTask:
     Condition: 'ProvisionProcessor'
