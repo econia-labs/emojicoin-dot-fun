@@ -250,7 +250,7 @@ Resources:
               - 'Constants'
               - 'Networking'
               - 'ProcessorWebsocketPort'
-            - '/ws"'
+            - '/ws'
         - Name: 'PORT'
           Value: !FindInMap
           - 'Constants'
