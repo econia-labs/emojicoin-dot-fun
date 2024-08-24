@@ -260,9 +260,11 @@ Resources:
           Value: 'info'
         HealthCheck:
           Command:
-          - 'CMD-SHELL'
+          - 'CMD'
+          - 'curl'
+          - '--fail'
           - !Sub
-            - 'curl -f http://localhost:${PORT}/ || exit 1'
+            - 'http://localhost:${PORT}/'
             - PORT: !FindInMap
               - 'Constants'
               - 'Networking'
@@ -615,8 +617,10 @@ Resources:
           - 'ProcessorWebsocketPort'
         HealthCheck:
           Command:
-          - 'CMD-SHELL'
-          - 'curl -f http://localhost:8084/metrics || exit 1'
+          - 'CMD'
+          - 'curl'
+          - '--fail'
+          - 'http://localhost:8084/metrics'
           Interval: 10
           Retries: 3
           StartPeriod: 10
