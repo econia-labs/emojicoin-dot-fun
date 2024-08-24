@@ -76,17 +76,19 @@ List the databases:
 \list
 ```
 
-After exiting `psql`, to inspect processor WebSocket events:
+After exiting `psql`, to view WebSocket events published by the processor:
 
 ```sh
 websocat $PROCESSOR_WS_URL
 ```
 
-You can also inspect events from the broker service:
+To connect to the broker:
 
 ```sh
 websocat $BROKER_WS_URL
 ```
+
+To subscribe to all events:
 
 ```sh
 {}
