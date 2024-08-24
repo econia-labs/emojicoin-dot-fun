@@ -2,6 +2,7 @@
 
 aptos node run-local-testnet \
   --assume-yes \
+  --with-indexer-api \
   --force-restart
 
 # Run forever.

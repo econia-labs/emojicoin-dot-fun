@@ -44,11 +44,14 @@ RUN apt-get update && apt-get install -y \
 ENV PATH=/usr/local/bin:$PATH
 
 ARG EMOJICOIN_DOT_FUN_ROOT=src/move/emojicoin_dot_fun
+ARG REWARDS_ROOT=src/move/rewards
 
 WORKDIR /app
 
 COPY $EMOJICOIN_DOT_FUN_ROOT/Move.toml emojicoin_dot_fun/
 COPY $EMOJICOIN_DOT_FUN_ROOT/sources/* emojicoin_dot_fun/sources/
+COPY $REWARDS_ROOT/Move.toml rewards/
+COPY $REWARDS_ROOT/sources/* rewards/sources/
 COPY src/docker/aptos-node/run-fullnode.sh .
 COPY src/docker/aptos-node/initialize-contract.sh .
 RUN chmod +x run-fullnode.sh

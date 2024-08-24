@@ -17,6 +17,15 @@ services:
       retries: 5
       start_period: 30s
     command: ["bash", "/app/run-fullnode.sh"]
+    # In order to start the node with the indexer API; i.e., run
+    # `aptos node run-local-testnet --with-indexer-api`, we must
+    # mount the Docker socket to the container.
+    # This effectively allows the container to start a new container.
+    # Note that this is not Docker-in-Docker, but rather
+    # Docker-outside-Docker, where the container acts as the host in
+    # terms of orchestrating other containers.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
   move:
     extra_hosts:
@@ -25,8 +34,9 @@ services:
       context: ../../
       dockerfile: src/docker/aptos-node/Dockerfile
     environment:
-      PUBLISHER_PK: '${PUBLISHER_PK}'
-      EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
+      PUBLISHER_PK: "${PUBLISHER_PK}"
+      BIG_MONEY_GUY_PK: "${BIG_MONEY_GUY_PK}"
+      EMOJICOIN_MODULE_ADDRESS: "${EMOJICOIN_MODULE_ADDRESS}"
     depends_on:
       aptos-node:
         condition: service_healthy
