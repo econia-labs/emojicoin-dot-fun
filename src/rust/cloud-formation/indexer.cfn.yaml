@@ -62,7 +62,17 @@ Outputs:
     Value: !GetAtt 'DbCluster.ReadEndpoint.Address'
   WebSocketUrl:
     Description: 'WebSocket URL'
-    Value: !Sub 'wss://${BrokerAlb.DNSName}'
+    Value: !Sub
+    - 'wss://ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
+    - PublicUrlThirdLevelSubdomain: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PublicUrlThirdLevelSubdomain'
+      RootDomain: !Join
+      - ''
+      - - '{{resolve:secretsmanager:'
+        - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+        - ':SecretString:domain}}'
 Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
@@ -271,6 +281,18 @@ Resources:
           - ':SecretString:domain}}'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
+  # Listener for the broker's application load balancer.
+  BrokerAlbListener:
+    Properties:
+      Certificates:
+      - CertificateArn: !Ref 'BrokerAlbCertificate'
+      DefaultActions:
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'BrokerAlb'
+      Port: 443
+      Protocol: 'HTTPS'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Security group for broker's application load balancer.
   BrokerAlbSecurityGroup:
     Properties:
