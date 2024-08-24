@@ -535,8 +535,8 @@ Resources:
   # Service for running the processor.
   ProcessorRunner:
     Condition: 'ProvisionProcessor'
-    # Without instance, the cluster endpoint is defined but not active, so the
-    # service will not be able to connect to the database.
+    # Without instance, the cluster endpoint is defined but not available, so
+    # the service will not be able to connect to the database.
     DependsOn: 'DbInstance'
     Properties:
       Cluster: !Ref 'ContainerCluster'
