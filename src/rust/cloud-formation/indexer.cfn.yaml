@@ -297,7 +297,7 @@ Resources:
         - - '{{resolve:secretsmanager:'
           - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
           - ':SecretString:domain}}'
-      Type: 'A'
+      Type: 'AAAA'
     Type: 'AWS::Route53::RecordSet'
   # Listener for the broker's application load balancer.
   BrokerAlbListener:
