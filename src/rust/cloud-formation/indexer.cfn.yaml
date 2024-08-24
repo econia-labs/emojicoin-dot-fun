@@ -101,7 +101,7 @@ Resources:
         - !Ref 'ProcessorWsClientSecurityGroup'
         SubnetId: !Ref 'SubnetA'
       UserData:
-        # Install PostgreSQL client & websocat, set connection string variable.
+        # Install PostgreSQL client & websocat, set connection strings.
         Fn::Base64: !Sub
         - |
             #!/bin/bash
