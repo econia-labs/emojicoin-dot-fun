@@ -86,6 +86,9 @@ You can also inspect events from the broker service:
 
 ```sh
 websocat $BROKER_WS_URL
+```
+
+```sh
 {}
 ```
 
