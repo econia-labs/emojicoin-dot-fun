@@ -255,6 +255,23 @@ Resources:
         - - '{{resolve:secretsmanager:'
           - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
           - ':SecretString:domain}}'
+      DomainValidationOptions:
+      - DomainName: !Sub
+        - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
+        - PublicUrlThirdLevelSubdomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PublicUrlThirdLevelSubdomain'
+          RootDomain: !Join
+          - ''
+          - - '{{resolve:secretsmanager:'
+            - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+            - ':SecretString:domain}}'
+        HostedZoneId: !Join
+        - ''
+        - - '{{resolve:secretsmanager:'
+          - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+          - ':SecretString:hosted-zone-id}}'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
