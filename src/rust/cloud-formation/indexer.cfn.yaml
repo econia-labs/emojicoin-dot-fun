@@ -228,20 +228,20 @@ Resources:
       - !Ref 'PublicSubnetC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  # SSL certificate for broker application load balancer.
-  BrokerAlbCert:
-    Properties:
-      DomainName: !Sub '${BrokerAlb.DNSName}'
-      DomainValidationOptions:
-      - DomainName: !Sub '${BrokerAlb.DNSName}'
-        HostedZoneId: !GetAtt 'BrokerAlb.CanonicalHostedZoneID'
-      ValidationMethod: 'DNS'
-    Type: 'AWS::CertificateManager::Certificate'
   # Listener for broker application load balancer.
   BrokerAlbListener:
     Properties:
       Certificates:
-      - CertificateArn: !Ref 'BrokerAlbCert'
+      - CertificateArn: !Join
+        - ':'
+        - - !Sub 'arn:${AWS::Partition}'
+          - 'acm'
+          - !Ref 'AWS::Region'
+          - !Ref 'AWS::AccountId'
+          - !Join
+            - '/'
+            - - 'certificate'
+              - 'default-load-balancer-certificate'
       DefaultActions:
       - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
         Type: 'forward'
