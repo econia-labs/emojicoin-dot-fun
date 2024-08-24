@@ -247,6 +247,30 @@ Resources:
           - ':SecretString:domain}}'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
+  # DNS record for the broker's application load balancer.
+  BrokerAlbDnsRecord:
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt 'BrokerAlb.DNSName'
+        HostedZoneId: !GetAtt 'BrokerAlb.CanonicalHostedZoneID'
+      HostedZoneId: !Join
+      - ''
+      - - '{{resolve:secretsmanager:'
+        - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+        - ':SecretString:hosted-zone-id}}'
+      Name: !Sub
+      - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
+      - PublicUrlThirdLevelSubdomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'PublicUrlThirdLevelSubdomain'
+        RootDomain: !Join
+        - ''
+        - - '{{resolve:secretsmanager:'
+          - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+          - ':SecretString:domain}}'
+      Type: 'A'
+    Type: 'AWS::Route53::RecordSet'
   # Security group for broker's application load balancer.
   BrokerAlbSecurityGroup:
     Properties:
