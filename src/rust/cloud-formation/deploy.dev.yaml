@@ -1,0 +1,14 @@
+template-file-path: src/rust/cloud-formation/deploy-dev.yaml
+parameters:
+  DbMaxCapacity: '4'
+  EmojicoinModuleAddress: '0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111'
+  ProvisionBroker: 'false'
+  DbMinCapacity: '0.5'
+  ProvisionBastionHost: 'false'
+  BastionHostAmiId: ami-030cb86c12b18e236
+  MinimumStartingVersion: '5675600000'
+  ProvisionProcessor: 'false'
+  GrpcDataServiceUrl: https://grpc.testnet.aptoslabs.com:443
+  BrokerImageVersion: 0.3.0
+  ProcessorImageVersion: 0.4.0
+tags: {}
