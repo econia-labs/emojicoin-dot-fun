@@ -297,11 +297,6 @@ Resources:
         - - '{{resolve:secretsmanager:'
           - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
           - ':SecretString:domain}}'
-      HostedZoneId: !Join
-      - ''
-      - - '{{resolve:secretsmanager:'
-        - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-        - ':SecretString:hosted_zone_id}}'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
   # Listener for the broker's application load balancer.
