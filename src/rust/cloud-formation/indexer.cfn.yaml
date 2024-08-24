@@ -342,7 +342,9 @@ Resources:
   # Service for running the broker.
   BrokerRunner:
     Condition: 'ProvisionBroker'
-    DependsOn: 'ProcessorRunner'
+    DependsOn:
+    - 'BrokerAlbListener'
+    - 'ProcessorRunner'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
