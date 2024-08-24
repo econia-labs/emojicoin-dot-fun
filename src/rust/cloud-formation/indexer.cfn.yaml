@@ -276,15 +276,14 @@ Resources:
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
   BrokerAlbDnsRecord:
+    DependsOn: 'BrokerAlbCertificate'
     Properties:
       AliasTarget:
         DNSName: !GetAtt 'BrokerAlb.DNSName'
         HostedZoneId: !GetAtt 'BrokerAlb.CanonicalHostedZoneID'
-      HostedZoneId: !Join
-      - ''
-      - - '{{resolve:secretsmanager:'
-        - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-        - ':SecretString:hosted-zone-id}}'
+      HostedZoneName: !Sub
+      - '{{resolve:secretsmanager:${SECRET_NAME}:SecretString:domain}}'
+      - SECRET_NAME: 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
       Name: !Sub
       - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
       - PublicUrlThirdLevelSubdomain: !FindInMap
