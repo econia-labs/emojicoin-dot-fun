@@ -291,6 +291,14 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
+        RepositoryCredentials:
+          CredentialsParameter: !Join
+          - ''
+          - - 'arn:aws:secretsmanager:'
+            - !Ref 'AWS::Region'
+            - ':'
+            - !Ref 'AWS::AccountId'
+            - ':secret:DOCKER_AUTH_CONFIG-*'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -343,13 +351,21 @@ Resources:
           - Action:
             - 'secretsmanager:GetSecretValue'
             Effect: 'Allow'
-            Resource: !Join
-            - ''
-            - - 'arn:aws:secretsmanager:'
-              - !Ref 'AWS::Region'
-              - ':'
-              - !Ref 'AWS::AccountId'
-              - ':secret:GRPC_AUTH_TOKEN-*'
+            Resource:
+            - !Join
+              - ''
+              - - 'arn:aws:secretsmanager:'
+                - !Ref 'AWS::Region'
+                - ':'
+                - !Ref 'AWS::AccountId'
+                - ':secret:GRPC_AUTH_TOKEN-*'
+            - !Join
+              - ''
+              - - 'arn:aws:secretsmanager:'
+                - !Ref 'AWS::Region'
+                - ':'
+                - !Ref 'AWS::AccountId'
+                - ':secret:DOCKER_AUTH_CONFIG-*'
         PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
@@ -622,6 +638,14 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'ProcessorWebsocketPort'
+        RepositoryCredentials:
+          CredentialsParameter: !Join
+          - ''
+          - - 'arn:aws:secretsmanager:'
+            - !Ref 'AWS::Region'
+            - ':'
+            - !Ref 'AWS::AccountId'
+            - ':secret:DOCKER_AUTH_CONFIG-*'
         Secrets:
         - Name: 'GRPC_AUTH_TOKEN'
           ValueFrom: !Sub
