@@ -305,9 +305,9 @@ Resources:
               - 'Constants'
               - 'Networking'
               - 'BrokerPort'
-          Interval: 10
-          Retries: 3
-          StartPeriod: 10
+          Interval: 2
+          Retries: 2
+          StartPeriod: 2
           Timeout: 2
         Image: !Join
         - ''
@@ -657,9 +657,9 @@ Resources:
           - 'curl'
           - '--fail'
           - 'http://localhost:8084/metrics'
-          Interval: 10
-          Retries: 3
-          StartPeriod: 10
+          Interval: 2
+          Retries: 2
+          StartPeriod: 2
           Timeout: 2
         Image: !Join
         - ''
