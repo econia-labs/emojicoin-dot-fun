@@ -259,6 +259,7 @@ Resources:
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
   BrokerAlbDnsRecord:
+    DependsOn: 'BrokerAlbCertificate'
     Properties:
       AliasTarget:
         DNSName: !GetAtt 'BrokerAlb.DNSName'
