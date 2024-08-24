@@ -1,31 +1,36 @@
 services:
+  aptos-node:
+    network_mode: host
+    build:
+      context: ../../
+      dockerfile: src/docker/aptos-node/Dockerfile
+    ports:
+      - "50051:50051"
+      - "8070:8070"
+      - "8090:8090"
+      - "8080:8080"
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8070/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: ["bash", "/app/run-fullnode.sh"]
+
   move:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     build:
       context: ../../
-      dockerfile: src/docker/move/Dockerfile
+      dockerfile: src/docker/aptos-node/Dockerfile
     environment:
       PUBLISHER_PK: '${PUBLISHER_PK}'
       EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
     depends_on:
-      aptos:
+      aptos-node:
         condition: service_healthy
-
-  aptos:
-    image: aptoslabs/tools:nightly
-    network_mode: host
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/testnet:/testnet
-    command: aptos node run-local-testnet --with-indexer-api --with-faucet --force-restart --assume-yes --bind-to 0.0.0.0
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8070/"]
-      interval: 2m
-      timeout: 5s
-      retries: 1
-      start_period: 60s
-      start_interval: 5s
+    command: ["bash", "/app/initialize-contract.sh"]
 
   processor:
     depends_on:
