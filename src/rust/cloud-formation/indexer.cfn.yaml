@@ -28,6 +28,16 @@ Mappings:
       Build: 'websocat.aarch64-unknown-linux-musl'
       ReleaseUrlBase: 'https://github.com/vi/websocat/releases/download'
       Version: 'v1.13.0'
+  PublicSubnets:
+    A:
+      AvailabilityZone: 0
+      CidrBlock: '10.0.4.0/24'
+    B:
+      AvailabilityZone: 1
+      CidrBlock: '10.0.5.0/24'
+    C:
+      AvailabilityZone: 2
+      CidrBlock: '10.0.6.0/24'
   Subnets:
     A:
       AvailabilityZone: 0
@@ -38,9 +48,6 @@ Mappings:
     C:
       AvailabilityZone: 2
       CidrBlock: '10.0.3.0/24'
-    Public:
-      AvailabilityZone: 0
-      CidrBlock: '10.0.0.0/24'
 Outputs:
   BastionHostId:
     Condition: 'ProvisionBastionHost'
@@ -497,6 +504,27 @@ Resources:
           - 'Subnet${Identifier}'
           - Identifier: !Ref 'Identifier'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # A public subnet for each availability zone.
+  Fn::ForEach::PublicSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PublicSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PublicSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PublicSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: true
+        VpcId: !Ref 'Vpc'
+      Type: 'AWS::EC2::Subnet'
   # A private subnet for each of the database availability zones.
   Fn::ForEach::Subnet:
   - 'Identifier'
@@ -531,13 +559,25 @@ Resources:
   NatGateway:
     Properties:
       AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
-      SubnetId: !Ref 'PublicSubnet'
+      SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for the network address translation gateway.
   NatGatewayEip:
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
+  # Route table for the network address translation gateway.
+  NatGatewayRouteTable:
+    Properties:
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::RouteTable'
+  # Association between route table and subnet for network address translation
+  # gateway.
+  NatGatewayRouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref 'NatGatewayRouteTable'
+      SubnetId: !Ref 'PublicSubnetA'
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # Route table for private subnets in the virtual private cloud.
   PrivateRouteTable:
     Properties:
@@ -707,39 +747,12 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Route route for the public subnet in the virtual private cloud.
-  PublicRouteTable:
-    Properties:
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::EC2::RouteTable'
-  # Association between public route table and public subnet.
-  PublicRouteTableAssociation:
-    Properties:
-      RouteTableId: !Ref 'PublicRouteTable'
-      SubnetId: !Ref 'PublicSubnet'
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-  # Public subnet for the virtual private cloud, for internet access.
-  PublicSubnet:
-    Properties:
-      AvailabilityZone: !Select
-      - !FindInMap
-        - 'Subnets'
-        - 'Public'
-        - 'AvailabilityZone'
-      - Fn::GetAZs: !Ref 'AWS::Region'
-      CidrBlock: !FindInMap
-      - 'Subnets'
-      - 'Public'
-      - 'CidrBlock'
-      MapPublicIpOnLaunch: true
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::EC2::Subnet'
-  # Route to the internet for the public subnet.
+  # Route to the internet for network address translation gateway.
   RouteToInternet:
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
       GatewayId: !Ref 'InternetGateway'
-      RouteTableId: !Ref 'PublicRouteTable'
+      RouteTableId: !Ref 'NatGatewayRouteTable'
     Type: 'AWS::EC2::Route'
   # Route to the network address translation gateway for private subnets.
   RouteToNatGateway:
