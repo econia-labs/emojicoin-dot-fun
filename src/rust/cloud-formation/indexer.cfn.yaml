@@ -246,11 +246,10 @@ Resources:
           - !Ref 'SubnetA'
           - !Ref 'SubnetB'
           - !Ref 'SubnetC'
-      ServiceRegistries:
-      - RegistryArn: !If
-        - 'ProvisionBrokerServiceDiscovery'
-        - !GetAtt 'BrokerServiceDiscovery.Arn'
-        - !Ref 'AWS::NoValue'
+      ServiceRegistries: !If
+      - 'ProvisionBrokerServiceDiscovery'
+      - - RegistryArn: !GetAtt 'BrokerServiceDiscovery.Arn'
+      - !Ref 'AWS::NoValue'
       TaskDefinition: !Ref 'BrokerTask'
     Type: 'AWS::ECS::Service'
   # Service discovery for the broker.
