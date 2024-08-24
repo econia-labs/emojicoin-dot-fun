@@ -82,10 +82,11 @@ After exiting `psql`, to inspect processor WebSocket events:
 websocat $PROCESSOR_WS_URL
 ```
 
-You can also inspect events from the broker:
+You can also inspect events from the broker service:
 
 ```sh
-websocat $BROKER_WS_URL {}
+websocat $BROKER_WS_URL
+{}
 ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
