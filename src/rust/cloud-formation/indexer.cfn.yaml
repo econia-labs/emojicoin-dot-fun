@@ -59,6 +59,9 @@ Outputs:
   DbClusterReaderEndpoint:
     Description: 'The database cluster reader connection endpoint.'
     Value: !GetAtt 'DbCluster.ReadEndpoint.Address'
+  WebSocketUrl:
+    Description: 'WebSocket URL'
+    Value: !Sub 'wss://${BrokerAlb.DNSName}'
 Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
@@ -234,6 +237,18 @@ Resources:
         HostedZoneId: !GetAtt 'BrokerAlb.CanonicalHostedZoneID'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
+  # Listener for broker application load balancer.
+  BrokerAlbListener:
+    Properties:
+      Certificates:
+      - CertificateArn: !Ref 'BrokerAlbCert'
+      DefaultActions:
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'BrokerAlb'
+      Port: 443
+      Protocol: 'HTTPS'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Security group for broker's application load balancer.
   BrokerAlbSecurityGroup:
     Properties:
@@ -245,6 +260,27 @@ Resources:
         ToPort: 443
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Target group for the broker's application load balancer.
+  BrokerAlbTargetGroup:
+    Properties:
+      HealthCheckPath: '/'
+      Name: !Ref 'AWS::StackName'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      Protocol: 'HTTP'
+      ProtocolVersion: 'HTTP1'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'true'
+      - Key: 'stickiness.type'
+        Value: 'lb_cookie'
+      TargetType: 'ip'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
     Properties:
@@ -272,6 +308,13 @@ Resources:
         MinimumHealthyPercent: 0
       DesiredCount: 1
       LaunchType: 'FARGATE'
+      LoadBalancers:
+      - ContainerName: !Sub '${AWS::StackName}-broker'
+        ContainerPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'BrokerPort'
+        TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
