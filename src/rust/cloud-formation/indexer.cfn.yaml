@@ -287,7 +287,7 @@ Resources:
         - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
         - ':SecretString:hosted_zone_id}}'
       Name: !Sub
-      - '_639f080a31664b78b954aeae2f932cbd.ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
+      - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}.'
       - PublicUrlThirdLevelSubdomain: !FindInMap
         - 'Constants'
         - 'Networking'
@@ -297,6 +297,11 @@ Resources:
         - - '{{resolve:secretsmanager:'
           - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
           - ':SecretString:domain}}'
+      HostedZoneId: !Join
+      - ''
+      - - '{{resolve:secretsmanager:'
+        - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+        - ':SecretString:hosted_zone_id}}'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
   # Listener for the broker's application load balancer.
