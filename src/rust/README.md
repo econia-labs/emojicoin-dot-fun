@@ -76,10 +76,16 @@ List the databases:
 \list
 ```
 
-AFter exiting `psql`, to inspect processor WebSocket events:
+After exiting `psql`, to inspect processor WebSocket events:
 
 ```sh
 websocat $PROCESSOR_WS_URL
+```
+
+You can also inspect events from the broker:
+
+```sh
+websocat $BROKER_WS_URL {}
 ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
