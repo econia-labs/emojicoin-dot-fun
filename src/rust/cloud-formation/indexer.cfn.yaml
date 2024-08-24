@@ -23,6 +23,7 @@ Mappings:
       BrokerPort: 3009
       DatabasePort: 5432
       ProcessorWebsocketPort: 3008
+      PublicUrlThirdLevelSubdomain: 'data'
       VpcCidrBlock: '10.0.0.0/16'
     Websocat:
       Build: 'websocat.aarch64-unknown-linux-musl'
@@ -75,6 +76,8 @@ Parameters:
     Default: 0.5
     Type: 'Number'
   EmojicoinModuleAddress:
+    Type: 'String'
+  Environment:
     Type: 'String'
   GrpcDataServiceUrl:
     Type: 'String'
@@ -228,6 +231,22 @@ Resources:
       - !Ref 'PublicSubnetC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+  # DNS certificate for the broker's application load balancer.
+  BrokerAlbCertificate:
+    Properties:
+      DomainName: !Sub
+      - 'ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
+      - PublicUrlThirdLevelSubdomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'PublicUrlThirdLevelSubdomain'
+        RootDomain: !Join
+        - ''
+        - - '{{resolve:secretsmanager:'
+          - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
+          - ':SecretString:domain}}'
+      ValidationMethod: 'DNS'
+    Type: 'AWS::CertificateManager::Certificate'
   # Security group for broker's application load balancer.
   BrokerAlbSecurityGroup:
     Properties:
