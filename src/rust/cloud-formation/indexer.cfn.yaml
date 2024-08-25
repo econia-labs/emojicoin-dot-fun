@@ -331,12 +331,17 @@ Resources:
   # Target group for the broker's application load balancer.
   BrokerAlbTargetGroup:
     Properties:
+      HealthCheckIntervalSeconds: 5
       HealthCheckPath: '/'
-      Name: !Ref 'AWS::StackName'
-      Port: !FindInMap
+      HealthCheckPort: !FindInMap
       - 'Constants'
       - 'Networking'
       - 'BrokerPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-broker'
+      Port: 443
       Protocol: 'HTTP'
       ProtocolVersion: 'HTTP1'
       TargetGroupAttributes:
@@ -347,6 +352,7 @@ Resources:
       - Key: 'stickiness.type'
         Value: 'lb_cookie'
       TargetType: 'ip'
+      UnhealthyThresholdCount: 2
       VpcId: !Ref 'Vpc'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
@@ -377,13 +383,13 @@ Resources:
         MinimumHealthyPercent: 0
       DesiredCount: 1
       LaunchType: 'FARGATE'
-      # LoadBalancers:
-      # - ContainerName: !Sub '${AWS::StackName}-broker'
-      #   ContainerPort: !FindInMap
-      #   - 'Constants'
-      #   - 'Networking'
-      #   - 'BrokerPort'
-      #   TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+      LoadBalancers:
+      - ContainerName: !Sub '${AWS::StackName}-broker'
+        ContainerPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'BrokerPort'
+        TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
