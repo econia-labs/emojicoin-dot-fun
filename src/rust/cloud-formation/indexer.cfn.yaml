@@ -31,6 +31,8 @@ Mappings:
       BrokerPort: 3009
       DatabasePort: 5432
       ProcessorWebsocketPort: 3008
+      UrlHostedZoneId: '{{resolve:ssm:/Emojicoin/IndexerUrl/HostedZoneId}}'
+      UrlRootDomain: '{{resolve:ssm:/Emojicoin/IndexerUrl/RootDomain}}'
       UrlThirdLevelSubdomain: 'data'
       VpcCidrBlock: '10.0.0.0/16'
     Websocat:
@@ -94,12 +96,6 @@ Parameters:
     Type: 'String'
   ProvisionProcessor:
     Type: 'String'
-  UrlHostedZoneId:
-    Default: '{{resolve:ssm:/Emojicoin/IndexerUrl/HostedZoneId}}'
-    Type: 'String'
-  UrlRootDomain:
-    Default: '{{resolve:ssm:/Emojicoin/IndexerUrl/RootDomain}}'
-    Type: 'String'
 Resources:
   # Public application load balancer.
   Alb:
@@ -120,19 +116,29 @@ Resources:
     Properties:
       DomainName: !Sub
       - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
-      - UrlThirdLevelSubdomain: !FindInMap
+      - UrlRootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'UrlRootDomain'
+        UrlThirdLevelSubdomain: !FindInMap
         - 'Constants'
         - 'Networking'
         - 'UrlThirdLevelSubdomain'
       DomainValidationOptions:
       - DomainName: !Sub
         - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
-        - UrlRootDomain: !Ref 'UrlRootDomain'
+        - UrlRootDomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'UrlRootDomain'
           UrlThirdLevelSubdomain: !FindInMap
           - 'Constants'
           - 'Networking'
           - 'UrlThirdLevelSubdomain'
-        HostedZoneId: !Ref 'UrlHostedZoneId'
+        HostedZoneId: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'UrlHostedZoneId'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
@@ -142,10 +148,16 @@ Resources:
       AliasTarget:
         DNSName: !GetAtt 'Alb.DNSName'
         HostedZoneId: !GetAtt 'Alb.CanonicalHostedZoneID'
-      HostedZoneId: !Ref 'UrlHostedZoneId'
+      HostedZoneId: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'UrlHostedZoneId'
       Name: !Sub
       - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
-      - UrlRootDomain: !Ref 'UrlRootDomain'
+      - UrlRootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'UrlRootDomain'
         UrlThirdLevelSubdomain: !FindInMap
         - 'Constants'
         - 'Networking'
