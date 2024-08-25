@@ -340,7 +340,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-broker'
+      Name: !Sub '${AWS::StackName}-btg'
       Port: 443
       Protocol: 'HTTP'
       ProtocolVersion: 'HTTP1'
@@ -922,4 +922,4 @@ Resources:
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
 Transform: 'AWS::LanguageExtensions'
-...
+...# GetAttr ????
