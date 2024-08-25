@@ -4,7 +4,8 @@
 # deployer of a smart contract on Aptos is the address that's used for the
 # contract address.
 # Thus we can use the publisher's profile name as the contract's named address,
-# since the CLI resolves named addresses to a profile if one exists with the same name.
+# since the CLI resolves named addresses to a profile if one exists with the
+# same name.
 export PUBLISHER="publisher"
 export BIG_MONEY_GUY="big_money_guy"
 
@@ -46,7 +47,8 @@ aptos move publish \
 aptos move publish \
   --assume-yes \
   --included-artifacts none \
-  --named-addresses rewards=$PUBLISHER,integrator=$PUBLISHER,emojicoin_dot_fun=$PUBLISHER \
+  --named-addresses \
+    rewards=$PUBLISHER,integrator=$PUBLISHER,emojicoin_dot_fun=$PUBLISHER \
   --override-size-check \
   --max-gas 200000 \
   --package-dir /app/rewards \

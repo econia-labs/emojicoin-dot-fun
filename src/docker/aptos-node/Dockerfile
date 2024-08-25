@@ -10,7 +10,7 @@ ARG FULLNODE_BINARY
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
-RUN git clone https://github.com/aptos-labs/aptos-core.git --branch $GIT_TAG --depth 1
+RUN git clone $GIT_REPO --branch $GIT_TAG --depth 1
 RUN apt-get update && apt-get install -y \
     libudev-dev \
     build-essential \
@@ -23,12 +23,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# `cargo update ...` is necessary to avoid an error while compiling:
-# error[E0282]: type annotations needed for `Box<_>`
-#   --> /usr/local/cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.31/src/format_description/parse/mod.rs:83:9
+# Resolve outdated lockfile from upstream tag.
 RUN cargo update --manifest-path /aptos-core/Cargo.toml
 
-RUN RUSTFLAGS="--cfg tokio_unstable" cargo build --manifest-path /aptos-core/Cargo.toml --bin aptos --profile cli
+RUN RUSTFLAGS="--cfg tokio_unstable" cargo build \
+    --bin aptos \
+    --manifest-path /aptos-core/Cargo.toml \
+    --profile cli
 
 RUN strip -s $FULLNODE_BINARY
 
