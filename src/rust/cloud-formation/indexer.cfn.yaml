@@ -68,7 +68,7 @@ Outputs:
   DnsName:
     Condition: 'ProvisionAlbDnsRecord'
     Value: !Sub
-    - 'https://${Environment}.${Subdomain}.${RootDomain}'
+    - '${Environment}.${Subdomain}.${RootDomain}'
     - RootDomain: !FindInMap
       - 'Constants'
       - 'Networking'
