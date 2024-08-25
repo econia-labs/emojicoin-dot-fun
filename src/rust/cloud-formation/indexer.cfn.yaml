@@ -37,6 +37,7 @@ Mappings:
         '{{resolve:ssm:/Emojicoin/IndexerDnsName/HostedZoneId}}'
       DnsNameRootDomain: '{{resolve:ssm:/Emojicoin/IndexerDnsName/RootDomain}}'
       DnsNameSubdomain: 'data'
+      PostgrestHealthCheckPort: 3001
       PostgrestPort: 3000
       ProcessorWebsocketPort: 3008
       VpcCidrBlock: '10.0.0.0/16'
@@ -739,6 +740,20 @@ Resources:
       RouteTableId: !Ref 'NatGatewayRouteTable'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Service discovery for PostgREST.
+  PostgrestServiceDiscovery:
+    Condition: 'ProvisionPostgrest'
+    Properties:
+      DnsConfig:
+        DnsRecords:
+        - TTL: 10
+          Type: 'A'
+        RoutingPolicy: 'MULTIVALUE'
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: !Sub '${AWS::StackName}-postgrest'
+      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+    Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for PostgREST.
   PostgrestTask:
     Condition: 'ProvisionPostgrest'
@@ -746,6 +761,11 @@ Resources:
     Properties:
       ContainerDefinitions:
       - Environment:
+        - Name: 'PGRST_ADMIN_SERVER_PORT'
+          Value: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestHealthCheckPort'
         - Name: 'PGRST_DB_URI'
           Value: !Join
           - ''
@@ -770,6 +790,15 @@ Resources:
           Value: 'web_anon'
         - Name: 'PGRST_DB_MAX_ROWS'
           Value: !Ref 'PostgrestMaxRows'
+        HealthCheck:
+          Command:
+          - 'CMD-SHELL'
+          # Verify that the postgrest process is running.
+          - 'ps aux | grep ''[p]ostgrest'' > /dev/null || exit 1'
+          Interval: 5
+          Retries: 1
+          StartPeriod: 0
+          Timeout: 2
         Image: 'postgrest/postgrest:latest'
         LogConfiguration:
           LogDriver: 'awslogs'
@@ -787,6 +816,14 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'PostgrestPort'
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestHealthCheckPort'
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestHealthCheckPort'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -802,7 +839,6 @@ Resources:
     Type: 'AWS::EC2::RouteTable'
   # Private DNS namespace for internal service discovery.
   PrivateServiceDiscoveryNamespace:
-    Condition: 'ProvisionProcessor'
     Properties:
       Description: !Ref 'AWS::StackName'
       Name: !Ref 'AWS::StackName'
