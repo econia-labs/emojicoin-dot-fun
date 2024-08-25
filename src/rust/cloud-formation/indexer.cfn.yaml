@@ -329,26 +329,26 @@ Resources:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Target group for the broker's application load balancer.
-  # BrokerAlbTargetGroup:
-  #   Properties:
-  #     HealthCheckPath: '/'
-  #     Name: !Ref 'AWS::StackName'
-  #     Port: !FindInMap
-  #     - 'Constants'
-  #     - 'Networking'
-  #     - 'BrokerPort'
-  #     Protocol: 'HTTP'
-  #     ProtocolVersion: 'HTTP1'
-  #     TargetGroupAttributes:
-  #     - Key: 'deregistration_delay.timeout_seconds'
-  #       Value: '30'
-  #     - Key: 'stickiness.enabled'
-  #       Value: 'true'
-  #     - Key: 'stickiness.type'
-  #       Value: 'lb_cookie'
-  #     TargetType: 'ip'
-  #     VpcId: !Ref 'Vpc'
-  #   Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  BrokerAlbTargetGroup:
+    Properties:
+      HealthCheckPath: '/'
+      Name: !Ref 'AWS::StackName'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      Protocol: 'HTTP'
+      ProtocolVersion: 'HTTP1'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'true'
+      - Key: 'stickiness.type'
+        Value: 'lb_cookie'
+      TargetType: 'ip'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
     Properties:
