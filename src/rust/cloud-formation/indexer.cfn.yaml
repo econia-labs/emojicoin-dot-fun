@@ -1,8 +1,13 @@
 ---
 Conditions:
-  ProvisionAlbDnsRecord: !Equals
-  - !Ref 'ProvisionAlbDnsRecord'
+  ProvisionAlb: !Equals
+  - !Ref 'ProvisionAlb'
   - 'true'
+  ProvisionAlbDnsRecord: !And
+  - !Condition 'ProvisionAlb'
+  - !Equals
+    - !Ref 'ProvisionAlbDnsRecord'
+    - 'true'
   ProvisionBastionHost: !Equals
   - !Ref 'ProvisionBastionHost'
   - 'true'
@@ -79,6 +84,8 @@ Parameters:
     Type: 'Number'
   ProcessorImageVersion:
     Type: 'String'
+  ProvisionAlb:
+    Type: 'String'
   ProvisionAlbDnsRecord:
     Type: 'String'
   ProvisionBastionHost:
@@ -90,6 +97,7 @@ Parameters:
 Resources:
   # Public application load balancer.
   Alb:
+    Condition: 'ProvisionAlb'
     Properties:
       Scheme: 'internet-facing'
       SecurityGroups:
@@ -102,6 +110,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
   # DNS certificate for the application load balancer.
   AlbCertificate:
+    Condition: 'ProvisionAlb'
     Properties:
       DomainName: !Sub
       - '${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
@@ -287,6 +296,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Application load balancer listener for broker traffic.
   BrokerAlbListener:
+    Condition: 'ProvisionAlb'
     Properties:
       Certificates:
       - CertificateArn: !Ref 'AlbCertificate'
@@ -346,7 +356,6 @@ Resources:
   BrokerRunner:
     Condition: 'ProvisionBroker'
     DependsOn:
-    - 'BrokerAlbListener'
     - 'ProcessorRunner'
     Properties:
       Cluster: !Ref 'ContainerCluster'
