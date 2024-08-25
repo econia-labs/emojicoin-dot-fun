@@ -117,6 +117,7 @@ Resources:
       Scheme: 'internet-facing'
       SecurityGroups:
       - !Ref 'BrokerAlbSecurityGroup'
+      - !Ref 'BrokerWsClientSecurityGroup'
       Subnets:
       - !Ref 'PublicSubnetA'
       - !Ref 'PublicSubnetB'
