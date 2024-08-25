@@ -30,10 +30,11 @@ Mappings:
     Networking:
       BrokerPort: 3009
       DatabasePort: 5432
+      DnsNameHostedZoneId:
+        '{{resolve:ssm:/Emojicoin/IndexerDnsName/HostedZoneId}}'
+      DnsNameRootDomain: '{{resolve:ssm:/Emojicoin/IndexerDnsName/RootDomain}}'
+      DnsNameSubdomain: 'data'
       ProcessorWebsocketPort: 3008
-      UrlHostedZoneId: '{{resolve:ssm:/Emojicoin/IndexerUrl/HostedZoneId}}'
-      UrlRootDomain: '{{resolve:ssm:/Emojicoin/IndexerUrl/RootDomain}}'
-      UrlThirdLevelSubdomain: 'data'
       VpcCidrBlock: '10.0.0.0/16'
     Websocat:
       Build: 'websocat.aarch64-unknown-linux-musl'
@@ -64,18 +65,18 @@ Outputs:
     Condition: 'ProvisionBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
-  Url:
+  DnsName:
     Condition: 'ProvisionAlbDnsRecord'
     Value: !Sub
-    - 'https://${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
-    - UrlRootDomain: !FindInMap
+    - 'https://${Environment}.${Subdomain}.${RootDomain}'
+    - RootDomain: !FindInMap
       - 'Constants'
       - 'Networking'
-      - 'UrlRootDomain'
-      UrlThirdLevelSubdomain: !FindInMap
+      - 'DnsNameRootDomain'
+      Subdomain: !FindInMap
       - 'Constants'
       - 'Networking'
-      - 'UrlThirdLevelSubdomain'
+      - 'DnsNameSubdomain'
 Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
@@ -127,30 +128,30 @@ Resources:
     Condition: 'ProvisionAlb'
     Properties:
       DomainName: !Sub
-      - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
-      - UrlRootDomain: !FindInMap
+      - '${Environment}.${Subdomain}.${RootDomain}'
+      - RootDomain: !FindInMap
         - 'Constants'
         - 'Networking'
-        - 'UrlRootDomain'
-        UrlThirdLevelSubdomain: !FindInMap
+        - 'DnsNameRootDomain'
+        Subdomain: !FindInMap
         - 'Constants'
         - 'Networking'
-        - 'UrlThirdLevelSubdomain'
+        - 'DnsNameSubdomain'
       DomainValidationOptions:
       - DomainName: !Sub
-        - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
-        - UrlRootDomain: !FindInMap
+        - '${Environment}.${Subdomain}.${RootDomain}'
+        - RootDomain: !FindInMap
           - 'Constants'
           - 'Networking'
-          - 'UrlRootDomain'
-          UrlThirdLevelSubdomain: !FindInMap
+          - 'DnsNameRootDomain'
+          Subdomain: !FindInMap
           - 'Constants'
           - 'Networking'
-          - 'UrlThirdLevelSubdomain'
+          - 'DnsNameSubdomain'
         HostedZoneId: !FindInMap
         - 'Constants'
         - 'Networking'
-        - 'UrlHostedZoneId'
+        - 'DnsNameHostedZoneId'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
@@ -163,17 +164,17 @@ Resources:
       HostedZoneId: !FindInMap
       - 'Constants'
       - 'Networking'
-      - 'UrlHostedZoneId'
+      - 'DnsNameHostedZoneId'
       Name: !Sub
-      - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
-      - UrlRootDomain: !FindInMap
+      - '${Environment}.${Subdomain}.${RootDomain}'
+      - RootDomain: !FindInMap
         - 'Constants'
         - 'Networking'
-        - 'UrlRootDomain'
-        UrlThirdLevelSubdomain: !FindInMap
+        - 'DnsNameRootDomain'
+        Subdomain: !FindInMap
         - 'Constants'
         - 'Networking'
-        - 'UrlThirdLevelSubdomain'
+        - 'DnsNameSubdomain'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
   # Minimal VM for monitoring internal processes.
