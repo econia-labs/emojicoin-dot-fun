@@ -9,8 +9,8 @@ parameters:
   ProcessorImageVersion: '0.4.0'
   ProvisionAlb: 'true'
   ProvisionAlbDnsRecord: 'true'
-  ProvisionBastionHost: 'true'
-  ProvisionBroker: 'true'
+  ProvisionBastionHost: 'false'
+  ProvisionBroker: 'false'
   ProvisionProcessor: 'true'
 tags: null
 template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
