@@ -106,6 +106,13 @@ DNS_NAME=$(aws cloudformation describe-stacks \
     --query 'Stacks[0].Outputs[?OutputKey==`DnsName`].OutputValue' \
     --stack-name $STACK_NAME
 )
+echo $DNS_NAME
+```
+
+Wait until the DNS name has resolved:
+
+```sh
+host $DNS_NAME
 ```
 
 Connect to the WebSocket endpoint:
