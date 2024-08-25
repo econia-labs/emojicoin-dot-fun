@@ -54,25 +54,6 @@ Outputs:
     Condition: 'ProvisionBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
-  DbClusterEndpoint:
-    Description: 'The database cluster connection endpoint.'
-    Value: !GetAtt 'DbCluster.Endpoint.Address'
-  DbClusterReaderEndpoint:
-    Description: 'The database cluster reader connection endpoint.'
-    Value: !GetAtt 'DbCluster.ReadEndpoint.Address'
-  WebSocketUrl:
-    Description: 'WebSocket URL'
-    Value: !Sub
-    - 'wss://ws.${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
-    - PublicUrlThirdLevelSubdomain: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PublicUrlThirdLevelSubdomain'
-      RootDomain: !Join
-      - ''
-      - - '{{resolve:secretsmanager:'
-        - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-        - ':SecretString:domain}}'
 Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
