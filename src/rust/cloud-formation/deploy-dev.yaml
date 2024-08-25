@@ -8,7 +8,7 @@ parameters:
   MinimumStartingVersion: '5675600000'
   ProcessorImageVersion: '0.4.0'
   ProvisionAlb: 'true'
-  ProvisionAlbDnsRecord: 'false'
+  ProvisionAlbDnsRecord: 'true'
   ProvisionBastionHost: 'false'
   ProvisionBroker: 'false'
   ProvisionProcessor: 'true'
