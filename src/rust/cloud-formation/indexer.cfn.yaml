@@ -200,6 +200,7 @@ Resources:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
         - !Ref 'BrokerWsClientSecurityGroup'
+        - !Ref 'PostgrestClientSecurityGroup'
         - !Ref 'ProcessorWsClientSecurityGroup'
         SubnetId: !Ref 'SubnetA'
       UserData:
