@@ -215,8 +215,9 @@ Resources:
             chmod +x ${WebsocatBuild}
             mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
-            echo '${ProcessorWsUrlExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
+            echo '${PostgrestUrlExport}' >> /etc/profile
+            echo '${ProcessorWsUrlExport}' >> /etc/profile
         - BrokerWsUrlExport: !If
           - 'ProvisionBroker'
           - !Join
@@ -251,6 +252,21 @@ Resources:
               - 'Constants'
               - 'DatabaseConfig'
               - 'DatabaseName'
+          PostgrestUrlExport: !If
+          - 'ProvisionPostgrest'
+          - !Join
+            - ''
+            - - 'export POSTGREST_URL="http://'
+              - !GetAtt 'PostgrestServiceDiscovery.Name'
+              - '.'
+              - !Ref 'AWS::StackName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'PostgrestPort'
+              - '"'
+          - '# POSTGREST_URL not set (PostgREST not provisioned)'
           ProcessorWsUrlExport: !If
           - 'ProvisionProcessor'
           - !Join
@@ -740,6 +756,57 @@ Resources:
       RouteTableId: !Ref 'NatGatewayRouteTable'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Security group for PostgREST clients.
+  PostgrestClientSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'PostgrestServerSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Service for running PostgREST.
+  PostgrestRunner:
+    Condition: 'ProvisionPostgrest'
+    # Without instance, the cluster endpoint is defined but not available, so
+    # the service will not be able to connect to the database.
+    DependsOn: 'DbInstance'
+    Properties:
+      Cluster: !Ref 'ContainerCluster'
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+        MaximumPercent: 500
+        MinimumHealthyPercent: 0
+      DesiredCount: 1
+      LaunchType: 'FARGATE'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+          - !Ref 'PostgrestServerSecurityGroup'
+          - !Ref 'ContainerSecurityGroup'
+          Subnets:
+          - !Ref 'SubnetA'
+          - !Ref 'SubnetB'
+          - !Ref 'SubnetC'
+      ServiceRegistries:
+      - RegistryArn: !GetAtt 'PostgrestServiceDiscovery.Arn'
+      TaskDefinition: !Ref 'PostgrestTask'
+    Type: 'AWS::ECS::Service'
+  # Security group for the PostgREST server.
+  PostgrestServerSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the PostgREST server security group.
+  PostgrestServerSecurityGroupIngress:
+    Properties:
+      GroupId: !Ref 'PostgrestServerSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'PostgrestClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
   # Service discovery for PostgREST.
   PostgrestServiceDiscovery:
     Condition: 'ProvisionPostgrest'

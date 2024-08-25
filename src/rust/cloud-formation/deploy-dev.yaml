@@ -9,7 +9,7 @@ parameters:
   ProcessorImageVersion: '0.4.0'
   ProvisionAlb: 'true'
   ProvisionAlbDnsRecord: 'true'
-  ProvisionBastionHost: 'true'
+  ProvisionBastionHost: 'false'
   ProvisionBroker: 'true'
   ProvisionPostgrest: 'false'
   ProvisionProcessor: 'true'
