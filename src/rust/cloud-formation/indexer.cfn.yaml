@@ -64,6 +64,18 @@ Outputs:
     Condition: 'ProvisionBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
+  Url:
+    Condition: 'ProvisionAlbDnsRecord'
+    Value: !Sub
+    - 'https://${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
+    - UrlRootDomain: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'UrlRootDomain'
+      UrlThirdLevelSubdomain: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'UrlThirdLevelSubdomain'
 Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
