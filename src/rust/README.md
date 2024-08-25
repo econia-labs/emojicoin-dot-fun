@@ -34,10 +34,11 @@ The indexer is deployed using [AWS CloudFormation] with a [template file] at
 By granting [PowerUserAccess] to the stack, deployments can be performed
 programmatically using [GitSync] alone.
 
-#### Connect to database through bastion host
+#### Connect to services through bastion host
 
 Verify the `ProvisionBastionHost` [stack parameter][stack deployment file] is
-set to `true`.
+set to `true`, along with any other applicable parameters related to resource
+provisioning.
 
 Install the [AWS EC2 Instance Connect CLI]:
 
@@ -82,13 +83,38 @@ After exiting `psql`, to view WebSocket events published by the processor:
 websocat $PROCESSOR_WS_URL
 ```
 
-To connect to the broker:
+Connect to the broker:
 
 ```sh
 websocat $BROKER_WS_URL
 ```
 
-To subscribe to all events:
+Subscribe to all events:
+
+```sh
+{}
+```
+
+#### Query public endpoints
+
+If all of the bastion host tests work, you should be able to query the public
+endpoint. Get the indexer DNS name:
+
+```sh
+DNS_NAME=$(aws cloudformation describe-stacks \
+    --output text \
+    --query 'Stacks[0].Outputs[?OutputKey==`DnsName`].OutputValue' \
+    --stack-name $STACK_NAME
+)
+```
+
+Connect to the WebSocket endpoint:
+
+```sh
+websocat wss://$DNS_NAME/ws
+```
+
+Subscribe to all events:
 
 ```sh
 {}
