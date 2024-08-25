@@ -31,7 +31,7 @@ Mappings:
       BrokerPort: 3009
       DatabasePort: 5432
       ProcessorWebsocketPort: 3008
-      PublicUrlThirdLevelSubdomain: 'data'
+      UrlThirdLevelSubdomain: 'data'
       VpcCidrBlock: '10.0.0.0/16'
     Websocat:
       Build: 'websocat.aarch64-unknown-linux-musl'
@@ -94,6 +94,12 @@ Parameters:
     Type: 'String'
   ProvisionProcessor:
     Type: 'String'
+  UrlHostedZoneId:
+    Default: '{{resolve:ssm:/Emojicoin/IndexerUrl/HostedZoneId}}'
+    Type: 'String'
+  UrlRootDomain:
+    Default: '{{resolve:ssm:/Emojicoin/IndexerUrl/RootDomain}}'
+    Type: 'String'
 Resources:
   # Public application load balancer.
   Alb:
@@ -113,33 +119,20 @@ Resources:
     Condition: 'ProvisionAlb'
     Properties:
       DomainName: !Sub
-      - '${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
-      - PublicUrlThirdLevelSubdomain: !FindInMap
+      - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
+      - UrlThirdLevelSubdomain: !FindInMap
         - 'Constants'
         - 'Networking'
-        - 'PublicUrlThirdLevelSubdomain'
-        RootDomain: !Join
-        - ''
-        - - '{{resolve:secretsmanager:'
-          - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-          - ':SecretString:domain}}'
+        - 'UrlThirdLevelSubdomain'
       DomainValidationOptions:
       - DomainName: !Sub
-        - '${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
-        - PublicUrlThirdLevelSubdomain: !FindInMap
+        - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
+        - UrlRootDomain: !Ref 'UrlRootDomain'
+          UrlThirdLevelSubdomain: !FindInMap
           - 'Constants'
           - 'Networking'
-          - 'PublicUrlThirdLevelSubdomain'
-          RootDomain: !Join
-          - ''
-          - - '{{resolve:secretsmanager:'
-            - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-            - ':SecretString:domain}}'
-        HostedZoneId: !Join
-        - ''
-        - - '{{resolve:secretsmanager:'
-          - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-          - ':SecretString:hosted_zone_id}}'
+          - 'UrlThirdLevelSubdomain'
+        HostedZoneId: !Ref 'UrlHostedZoneId'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
@@ -149,22 +142,14 @@ Resources:
       AliasTarget:
         DNSName: !GetAtt 'Alb.DNSName'
         HostedZoneId: !GetAtt 'Alb.CanonicalHostedZoneID'
-      HostedZoneId: !Join
-      - ''
-      - - '{{resolve:secretsmanager:'
-        - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-        - ':SecretString:hosted_zone_id}}'
+      HostedZoneId: !Ref 'UrlHostedZoneId'
       Name: !Sub
-      - '${Environment}.${PublicUrlThirdLevelSubdomain}.${RootDomain}'
-      - PublicUrlThirdLevelSubdomain: !FindInMap
+      - '${Environment}.${UrlThirdLevelSubdomain}.${UrlRootDomain}'
+      - UrlRootDomain: !Ref 'UrlRootDomain'
+        UrlThirdLevelSubdomain: !FindInMap
         - 'Constants'
         - 'Networking'
-        - 'PublicUrlThirdLevelSubdomain'
-        RootDomain: !Join
-        - ''
-        - - '{{resolve:secretsmanager:'
-          - 'EMOJICOIN_INDEXER_ROOT_DOMAIN'
-          - ':SecretString:domain}}'
+        - 'UrlThirdLevelSubdomain'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
   # Minimal VM for monitoring internal processes.
@@ -295,18 +280,18 @@ Resources:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Application load balancer listener for broker traffic.
-  BrokerAlbListener:
-    Condition: 'ProvisionAlb'
-    Properties:
-      Certificates:
-      - CertificateArn: !Ref 'AlbCertificate'
-      DefaultActions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
-      LoadBalancerArn: !Ref 'Alb'
-      Port: 443
-      Protocol: 'HTTPS'
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # BrokerAlbListener:
+  #   Condition: 'ProvisionAlb'
+  #   Properties:
+  #     Certificates:
+  #     - CertificateArn: !Ref 'AlbCertificate'
+  #     DefaultActions:
+  #     - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+  #       Type: 'forward'
+  #     LoadBalancerArn: !Ref 'Alb'
+  #     Port: 443
+  #     Protocol: 'HTTPS'
+  #   Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Security group for the application load balancer, broker traffic.
   BrokerAlbSecurityGroup:
     Properties:
