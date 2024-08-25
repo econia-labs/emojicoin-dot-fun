@@ -340,6 +340,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
+      # Group name must be <= 32 characters.
       Name: !Sub '${AWS::StackName}-ga'
       Port: 443
       Protocol: 'HTTP'
@@ -922,4 +923,4 @@ Resources:
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
 Transform: 'AWS::LanguageExtensions'
-...# GetAttr ????
+...
