@@ -10,7 +10,7 @@ parameters:
   ProvisionAlb: 'true'
   ProvisionAlbDnsRecord: 'true'
   ProvisionBastionHost: 'false'
-  ProvisionBroker: 'false'
+  ProvisionBroker: 'true'
   ProvisionProcessor: 'true'
 tags: null
 template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
