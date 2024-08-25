@@ -340,7 +340,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-btg'
+      Name: !Sub '${AWS::StackName}-ga'
       Port: 443
       Protocol: 'HTTP'
       ProtocolVersion: 'HTTP1'
