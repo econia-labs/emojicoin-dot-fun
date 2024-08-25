@@ -16,6 +16,9 @@ Conditions:
   - !Equals
     - !Ref 'ProvisionBroker'
     - 'true'
+  ProvisionPostgrest: !Equals
+  - !Ref 'ProvisionPostgrest'
+  - 'true'
   ProvisionProcessor: !Equals
   - !Ref 'ProvisionProcessor'
   - 'true'
@@ -34,6 +37,7 @@ Mappings:
         '{{resolve:ssm:/Emojicoin/IndexerDnsName/HostedZoneId}}'
       DnsNameRootDomain: '{{resolve:ssm:/Emojicoin/IndexerDnsName/RootDomain}}'
       DnsNameSubdomain: 'data'
+      PostgrestPort: 3000
       ProcessorWebsocketPort: 3008
       VpcCidrBlock: '10.0.0.0/16'
     Websocat:
@@ -97,6 +101,9 @@ Parameters:
     Type: 'String'
   MinimumStartingVersion:
     Type: 'Number'
+  PostgrestMaxRows:
+    Default: 500
+    Type: 'Number'
   ProcessorImageVersion:
     Type: 'String'
   ProvisionAlb:
@@ -106,6 +113,8 @@ Parameters:
   ProvisionBastionHost:
     Type: 'String'
   ProvisionBroker:
+    Type: 'String'
+  ProvisionPostgrest:
     Type: 'String'
   ProvisionProcessor:
     Type: 'String'
@@ -235,7 +244,7 @@ Resources:
               - 'DatabaseConfig'
               - 'MasterPassword'
             - '@'
-            - !GetAtt 'DbCluster.Endpoint.Address'
+            - !GetAtt 'DbCluster.ReadEndpoint.Address'
             - '/'
             - !FindInMap
               - 'Constants'
@@ -730,6 +739,62 @@ Resources:
       RouteTableId: !Ref 'NatGatewayRouteTable'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Task definition for PostgREST.
+  PostgrestTask:
+    Condition: 'ProvisionPostgrest'
+    DependsOn: 'ContainerLogGroup'
+    Properties:
+      ContainerDefinitions:
+      - Environment:
+        - Name: 'PGRST_DB_URI'
+          Value: !Join
+          - ''
+          - - 'postgres://'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterPassword'
+            - '@'
+            - !GetAtt 'DbCluster.ReadEndpoint.Address'
+            - '/'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+        - Name: 'PGRST_DB_ANON_ROLE'
+          Value: 'web_anon'
+        - Name: 'PGRST_DB_MAX_ROWS'
+          Value: !Ref 'PostgrestMaxRows'
+        Image: 'postgrest/postgrest:latest'
+        LogConfiguration:
+          LogDriver: 'awslogs'
+          Options:
+            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: 'ecs'
+        Name: !Sub '${AWS::StackName}-postgrest'
+        PortMappings:
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+      Cpu: '256'
+      ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
+      Family: !Ref 'AWS::StackName'
+      Memory: '512'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities:
+      - 'FARGATE'
+    Type: 'AWS::ECS::TaskDefinition'
   # Route table for private subnets in the virtual private cloud.
   PrivateRouteTable:
     Properties:

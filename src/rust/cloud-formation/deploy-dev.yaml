@@ -1,17 +1,18 @@
 ---
 parameters:
-  BrokerImageVersion: 'latest'
+  BrokerImageVersion: '0.3.0'
   EmojicoinModuleAddress: |
     0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111
   Environment: 'dev'
   GrpcDataServiceUrl: 'https://grpc.testnet.aptoslabs.com:443'
   MinimumStartingVersion: '5675600000'
-  ProcessorImageVersion: 'latest'
+  ProcessorImageVersion: '0.4.0'
   ProvisionAlb: 'true'
   ProvisionAlbDnsRecord: 'true'
   ProvisionBastionHost: 'true'
   ProvisionBroker: 'true'
   ProvisionProcessor: 'true'
+  ProvisionPostgrest: 'false'
 tags: null
 template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
 ...
