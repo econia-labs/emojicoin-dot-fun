@@ -95,6 +95,12 @@ Subscribe to all events:
 {}
 ```
 
+Query PostgREST:
+
+```sh
+curl $POSTGREST_URL
+```
+
 #### Query public endpoints
 
 If all of the bastion host tests work, you should be able to query the public

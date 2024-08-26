@@ -356,7 +356,7 @@ Resources:
         ToPort: 443
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Target group for the broker's application load balancer.
+  # Target group for application load balancer traffic to the broker.
   BrokerAlbTargetGroup:
     Properties:
       HealthCheckIntervalSeconds: 5
@@ -757,6 +757,34 @@ Resources:
       RouteTableId: !Ref 'NatGatewayRouteTable'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Target group for application load balancer traffic to PostgREST.
+  PostgrestAlbTargetGroup:
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/ready'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestHealthCheckPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      # Group name must be <= 32 characters.
+      Name: !Sub '${AWS::StackName}-gb'
+      Port: 80
+      Protocol: 'HTTP'
+      ProtocolVersion: 'HTTP1'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'true'
+      - Key: 'stickiness.type'
+        Value: 'lb_cookie'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for PostgREST clients.
   PostgrestClientSecurityGroup:
     Properties:
