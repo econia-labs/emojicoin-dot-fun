@@ -1,0 +1,5 @@
+---
+Resources:
+  GoodbyeBucket:
+    Type: 'AWS::S3::Bucket'
+...

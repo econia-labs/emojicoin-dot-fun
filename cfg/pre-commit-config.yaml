@@ -203,6 +203,9 @@ repos:
     args:
     - '--manifest-path'
     - 'src/rust/Cargo.toml'
+    - '-p'
+    - 'allowlister3000'
+    - 'broker'
     - '--'
     id: 'fmt'
   -
@@ -219,4 +222,12 @@ repos:
     id: 'clippy'
   repo: 'https://github.com/doublify/pre-commit-rust'
   rev: 'v1.0'
+-
+  hooks:
+  -
+    # Lint all AWS CloudFormation files ending in `.cfn.yaml`.
+    files: '.*\.cfn\.yaml'
+    id: 'cfn-lint'
+  repo: 'https://github.com/aws-cloudformation/cfn-lint'
+  rev: 'v1.8.2'
 ...

@@ -1,6 +1,6 @@
 import { Text } from "components";
 import { type GridProps } from "components/pages/emojicoin/types";
-import { useEventStore, useWebSocketClient } from "context/data-context";
+import { useEventStore, useWebSocketClient } from "context/state-store-context";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";
@@ -67,12 +67,13 @@ export const AnimatedProgressBar = (props: GridProps) => {
     /* eslint-disable-next-line */
   }, [data, marketData, stateEvents]);
 
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+  const subscribe = useWebSocketClient((s) => s.subscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.state(marketID);
-    return () => unsubscribe.state(marketID);
+    return () => requestUnsubscribe.state(marketID);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 

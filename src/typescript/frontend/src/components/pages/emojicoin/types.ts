@@ -14,6 +14,7 @@ interface DataProps extends Types.MarketDataView {
 
 export interface EmojicoinProps {
   data: DataProps;
+  geoblocked: boolean;
 }
 
 export interface MainInfoProps {
@@ -22,16 +23,19 @@ export interface MainInfoProps {
 
 export interface GridProps {
   data: DataProps;
+  geoblocked: boolean;
 }
 
 export interface ChatProps {
   data: Omit<DataProps, "swaps">;
+  geoblocked: boolean;
 }
 export interface SwapComponentProps {
   emojicoin: string;
   marketAddress: string;
   marketID: string;
   initNumSwaps: number;
+  geoblocked: boolean;
 }
 export interface TradeHistoryProps {
   data: Omit<DataProps, "chats">;

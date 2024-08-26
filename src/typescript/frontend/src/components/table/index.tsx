@@ -8,7 +8,6 @@ import {
   type TypographyProps,
 } from "styled-system";
 import { Flex } from "@containers";
-import { Text } from "components/text";
 
 interface TdProps extends TypographyProps, SpaceProps, LayoutProps {}
 
@@ -53,7 +52,7 @@ export const ThInner = styled(Flex)`
   padding: 7px;
 `;
 
-export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdProps>`
+export const Th = styled.td<TdProps>`
   color: ${({ theme }) => theme.colors.econiaBlue};
   position: sticky;
   top: 0;
@@ -70,8 +69,7 @@ export const Th = styled(Text).attrs({ as: "th", textScale: "bodyLarge" })<TdPro
 
   &:nth-last-child(1) {
     ${ThInner} {
-      padding-inline-end: 34px;
-      justify-content: end;
+      padding-inline-end: 15px;
     }
   }
 

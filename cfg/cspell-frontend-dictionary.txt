@@ -44,3 +44,8 @@ KIKI
 unfmt
 LOCALSTORAGE
 mapstr
+geoblocking
+geoblocked
+ipinfo
+localstorage
+vpnapi

@@ -107,7 +107,7 @@ gcloud compute instances create allowlister3000 \
 gcloud compute firewall-rules create allow3k --allow tcp:3000
 cargo build --release --target x86_64-unknown-linux-gnu
 gcloud compute scp \
-    ./target/x86_64-unknown-linux-gnu/release/allowlister3000 \
+    ../target/x86_64-unknown-linux-gnu/release/allowlister3000 \
     root@allowlister3000:/
 gcloud compute scp ./add.sh root@allowlister3000:/
 gcloud compute scp ./remove.sh root@allowlister3000:/

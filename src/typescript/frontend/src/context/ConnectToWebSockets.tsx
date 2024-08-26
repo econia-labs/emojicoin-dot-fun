@@ -2,7 +2,7 @@
 // I'll put this here for now, although I think it can be in the WebHooks context provider.
 
 import { useEffect, useRef } from "react";
-import { useEventStore, useWebSocketClient } from "./data-context";
+import { useEventStore, useWebSocketClient } from "./state-store-context/hooks";
 import { motion } from "framer-motion";
 import { hexToRgba } from "utils/hex-to-rgba";
 

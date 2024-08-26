@@ -9,6 +9,8 @@
 -  [Resource `Registry`](#0xc0de_emojicoin_dot_fun_Registry)
 -  [Resource `Market`](#0xc0de_emojicoin_dot_fun_Market)
 -  [Resource `LPCoinCapabilities`](#0xc0de_emojicoin_dot_fun_LPCoinCapabilities)
+-  [Resource `RegistrantDeposit`](#0xc0de_emojicoin_dot_fun_RegistrantDeposit)
+-  [Resource `RegistrantGracePeriodFlag`](#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag)
 -  [Struct `GlobalState`](#0xc0de_emojicoin_dot_fun_GlobalState)
 -  [Struct `State`](#0xc0de_emojicoin_dot_fun_State)
 -  [Struct `PeriodicState`](#0xc0de_emojicoin_dot_fun_PeriodicState)
@@ -330,6 +332,68 @@ Exists at object address for a market.
 </dd>
 <dt>
 <code>mint: <a href="_MintCapability">coin::MintCapability</a>&lt;EmojicoinLP&gt;</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+<a id="0xc0de_emojicoin_dot_fun_RegistrantDeposit"></a>
+
+## Resource `RegistrantDeposit`
+
+
+
+<pre><code>#[resource_group = <a href="_ObjectGroup">0x1::object::ObjectGroup</a>]
+<b>struct</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantDeposit">RegistrantDeposit</a> <b>has</b> key
+</code></pre>
+
+
+
+##### Fields
+
+
+<dl>
+<dt>
+<code>market_registrant: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>deposit: <a href="_Coin">coin::Coin</a>&lt;<a href="_AptosCoin">aptos_coin::AptosCoin</a>&gt;</code>
+</dt>
+<dd>
+
+</dd>
+</dl>
+
+
+<a id="0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag"></a>
+
+## Resource `RegistrantGracePeriodFlag`
+
+
+
+<pre><code>#[resource_group = <a href="_ObjectGroup">0x1::object::ObjectGroup</a>]
+<b>struct</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a> <b>has</b> drop, key
+</code></pre>
+
+
+
+##### Fields
+
+
+<dl>
+<dt>
+<code>market_registrant: <b>address</b></code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>market_registration_time: u64</code>
 </dt>
 <dd>
 
@@ -768,6 +832,18 @@ Emitted for a market when a specific period lapses.
 <dd>
 
 </dd>
+<dt>
+<code>balance_as_fraction_of_circulating_supply_before_q64: u128</code>
+</dt>
+<dd>
+
+</dd>
+<dt>
+<code>balance_as_fraction_of_circulating_supply_after_q64: u128</code>
+</dt>
+<dd>
+
+</dd>
 </dl>
 
 
@@ -903,13 +979,13 @@ Emitted for a market when a specific period lapses.
 
 </dd>
 <dt>
-<code>pro_rata_base_donation_claim_amount: u64</code>
+<code>base_donation_claim_amount: u64</code>
 </dt>
 <dd>
 
 </dd>
 <dt>
-<code>pro_rata_quote_donation_claim_amount: u64</code>
+<code>quote_donation_claim_amount: u64</code>
 </dt>
 <dd>
 
@@ -1703,7 +1779,7 @@ Emitted for a market when a specific period lapses.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_REAL_CEILING">BASE_REAL_CEILING</a>: u64 = 35000000000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_REAL_CEILING">BASE_REAL_CEILING</a>: u64 = 3500000000000000;
 </code></pre>
 
 
@@ -1721,7 +1797,7 @@ Emitted for a market when a specific period lapses.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_CEILING">BASE_VIRTUAL_CEILING</a>: u64 = 49000000000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_CEILING">BASE_VIRTUAL_CEILING</a>: u64 = 4900000000000000;
 </code></pre>
 
 
@@ -1730,7 +1806,7 @@ Emitted for a market when a specific period lapses.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_FLOOR">BASE_VIRTUAL_FLOOR</a>: u64 = 14000000000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_BASE_VIRTUAL_FLOOR">BASE_VIRTUAL_FLOOR</a>: u64 = 1400000000000000;
 </code></pre>
 
 
@@ -1802,7 +1878,7 @@ Emitted for a market when a specific period lapses.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_REMAINDER">EMOJICOIN_REMAINDER</a>: u64 = 10000000000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_REMAINDER">EMOJICOIN_REMAINDER</a>: u64 = 1000000000000000;
 </code></pre>
 
 
@@ -1820,7 +1896,7 @@ Emitted for a market when a specific period lapses.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_SUPPLY">EMOJICOIN_SUPPLY</a>: u64 = 45000000000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_EMOJICOIN_SUPPLY">EMOJICOIN_SUPPLY</a>: u64 = 4500000000000000;
 </code></pre>
 
 
@@ -1915,6 +1991,16 @@ No quote amount given during liquidity provision/removal.
 
 
 
+<a id="0xc0de_emojicoin_dot_fun_E_NOT_REGISTRANT"></a>
+
+Only market registrant may swap during the grace period.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_NOT_REGISTRANT">E_NOT_REGISTRANT</a>: u64 = 16;
+</code></pre>
+
+
+
 <a id="0xc0de_emojicoin_dot_fun_E_NOT_SUPPORTED_CHAT_EMOJI"></a>
 
 Provided bytes do not indicate a supported chat emoji.
@@ -1941,6 +2027,66 @@ No market exists at the given address.
 
 
 <pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_NO_MARKET">E_NO_MARKET</a>: u64 = 2;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET"></a>
+
+Provide liquidity operation minimum LP coin amount not met.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET">E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET</a>: u64 = 21;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO"></a>
+
+Provide liquidity operation minimum LP coin amount specified as zero.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO">E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO</a>: u64 = 20;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_BASE_AMOUNT_ZERO"></a>
+
+Remove liquidity operation results in a base amount of zero.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_BASE_AMOUNT_ZERO">E_REMOVE_LIQUIDITY_BASE_AMOUNT_ZERO</a>: u64 = 25;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET"></a>
+
+Remove liquidity operation minimum quote amount not met.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET">E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET</a>: u64 = 23;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO"></a>
+
+Remove liquidity operation minimum quote amount specified as zero.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO">E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO</a>: u64 = 22;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO"></a>
+
+Remove liquidity operation results in a quote amount of zero.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO">E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO</a>: u64 = 26;
 </code></pre>
 
 
@@ -1975,6 +2121,56 @@ No input amount provided for swap.
 
 
 
+<a id="0xc0de_emojicoin_dot_fun_E_SWAP_MIN_OUTPUT_AMOUNT_ZERO"></a>
+
+Swap minimum output amount specified as zero.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_MIN_OUTPUT_AMOUNT_ZERO">E_SWAP_MIN_OUTPUT_AMOUNT_ZERO</a>: u64 = 18;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_SWAP_MIN_OUTPUT_NOT_MET"></a>
+
+Swap minimum output amount not met.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_MIN_OUTPUT_NOT_MET">E_SWAP_MIN_OUTPUT_NOT_MET</a>: u64 = 19;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_SWAP_NOT_ENOUGH_BASE"></a>
+
+User does not have enough base for swap sell.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_NOT_ENOUGH_BASE">E_SWAP_NOT_ENOUGH_BASE</a>: u64 = 27;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_SWAP_OUTPUT_AMOUNT_ZERO"></a>
+
+Swap results in an output amount of zero.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_OUTPUT_AMOUNT_ZERO">E_SWAP_OUTPUT_AMOUNT_ZERO</a>: u64 = 24;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_E_UNABLE_TO_PAY_MARKET_REGISTRATION_DEPOSIT"></a>
+
+Account is unable to pay market registration deposit.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_UNABLE_TO_PAY_MARKET_REGISTRATION_DEPOSIT">E_UNABLE_TO_PAY_MARKET_REGISTRATION_DEPOSIT</a>: u64 = 17;
+</code></pre>
+
+
+
 <a id="0xc0de_emojicoin_dot_fun_E_UNABLE_TO_PAY_MARKET_REGISTRATION_FEE"></a>
 
 Account is unable to pay market registration fee.
@@ -1998,7 +2194,7 @@ Account is unable to pay market registration fee.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LP_TOKENS_INITIAL">LP_TOKENS_INITIAL</a>: u64 = 100000000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LP_TOKENS_INITIAL">LP_TOKENS_INITIAL</a>: u64 = 10000000000000;
 </code></pre>
 
 
@@ -2007,14 +2203,23 @@ Account is unable to pay market registration fee.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MARKET_CAP">MARKET_CAP</a>: u64 = 4500000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MARKET_CAP">MARKET_CAP</a>: u64 = 450000000000;
+</code></pre>
+
+
+
+<a id="0xc0de_emojicoin_dot_fun_MARKET_REGISTRATION_DEPOSIT"></a>
+
+Denominated in <code>AptosCoin</code> subunits.
+
+
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MARKET_REGISTRATION_DEPOSIT">MARKET_REGISTRATION_DEPOSIT</a>: u64 = 400000000;
 </code></pre>
 
 
 
 <a id="0xc0de_emojicoin_dot_fun_MARKET_REGISTRATION_FEE"></a>
 
-Denominated in <code>AptosCoin</code> subunits.
 
 
 <pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MARKET_REGISTRATION_FEE">MARKET_REGISTRATION_FEE</a>: u64 = 100000000;
@@ -2116,7 +2321,7 @@ Denominated in <code>AptosCoin</code> subunits.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_REAL_CEILING">QUOTE_REAL_CEILING</a>: u64 = 1000000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_REAL_CEILING">QUOTE_REAL_CEILING</a>: u64 = 100000000000;
 </code></pre>
 
 
@@ -2134,7 +2339,7 @@ Denominated in <code>AptosCoin</code> subunits.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_CEILING">QUOTE_VIRTUAL_CEILING</a>: u64 = 1400000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_CEILING">QUOTE_VIRTUAL_CEILING</a>: u64 = 140000000000;
 </code></pre>
 
 
@@ -2143,7 +2348,7 @@ Denominated in <code>AptosCoin</code> subunits.
 
 
 
-<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_FLOOR">QUOTE_VIRTUAL_FLOOR</a>: u64 = 400000000000;
+<pre><code><b>const</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_QUOTE_VIRTUAL_FLOOR">QUOTE_VIRTUAL_FLOOR</a>: u64 = 40000000000;
 </code></pre>
 
 
@@ -2270,7 +2475,7 @@ Named object seed for the registry.
 
 
 
-<pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_swap">swap</a>&lt;Emojicoin, EmojicoinLP&gt;(swapper: &<a href="">signer</a>, market_address: <b>address</b>, input_amount: u64, is_sell: bool, integrator: <b>address</b>, integrator_fee_rate_bps: u8)
+<pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_swap">swap</a>&lt;Emojicoin, EmojicoinLP&gt;(swapper: &<a href="">signer</a>, market_address: <b>address</b>, input_amount: u64, is_sell: bool, integrator: <b>address</b>, integrator_fee_rate_bps: u8, min_output_amount: u64)
 </code></pre>
 
 
@@ -2285,17 +2490,21 @@ Named object seed for the registry.
     is_sell: bool,
     integrator: <b>address</b>,
     integrator_fee_rate_bps: u8,
-) <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistryAddress">RegistryAddress</a> {
+    min_output_amount: u64,
+) <b>acquires</b>
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>,
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>,
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantDeposit">RegistrantDeposit</a>,
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a>,
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistryAddress">RegistryAddress</a>
+{
 
-    // Mutably borrow market, check its <a href="">coin</a> types, then simulate a swap.
+    // Mutably borrow market, verify minimum output amount specified, then simulate a swap.
     <b>let</b> (market_ref_mut, market_signer) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_market_ref_mut_and_signer_checked">get_market_ref_mut_and_signer_checked</a>(market_address);
-    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_ensure_coins_initialized">ensure_coins_initialized</a>&lt;Emojicoin, EmojicoinLP&gt;(
-        market_ref_mut,
-        &market_signer,
-        market_address,
-    );
+    <b>assert</b>!(min_output_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_MIN_OUTPUT_AMOUNT_ZERO">E_SWAP_MIN_OUTPUT_AMOUNT_ZERO</a>);
     <b>let</b> swapper_address = <a href="_address_of">signer::address_of</a>(swapper);
-    <b>let</b> <a href="">event</a> = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>(
+    <b>let</b> <a href="">event</a> = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>&lt;Emojicoin, EmojicoinLP&gt;(
         swapper_address,
         input_amount,
         is_sell,
@@ -2303,6 +2512,16 @@ Named object seed for the registry.
         integrator_fee_rate_bps,
         market_ref_mut,
     );
+    <b>assert</b>!(<a href="">event</a>.net_proceeds &gt;= min_output_amount, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_MIN_OUTPUT_NOT_MET">E_SWAP_MIN_OUTPUT_NOT_MET</a>);
+
+    // Verify registrant grace period is not violated, then remove flag.
+    <b>if</b> (<b>exists</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a>&gt;(market_address)) {
+        <b>let</b> flag_ref = <b>borrow_global</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a>&gt;(market_address);
+        <b>let</b> grace_period_over = <a href="">event</a>.time &gt; flag_ref.market_registration_time + <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_PERIOD_5M">PERIOD_5M</a>;
+        <b>let</b> swapper_is_registrant = swapper_address == flag_ref.market_registrant;
+        <b>assert</b>!(grace_period_over || swapper_is_registrant, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_NOT_REGISTRANT">E_NOT_REGISTRANT</a>);
+        <b>move_from</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a>&gt;(market_address);
+    };
 
     // Get TVL before swap, <b>use</b> it <b>to</b> <b>update</b> periodic state.
     <b>let</b> starts_in_bonding_curve = <a href="">event</a>.starts_in_bonding_curve;
@@ -2359,10 +2578,8 @@ Named object seed for the registry.
         (fdv_start, market_cap_start, fdv_end, market_cap_end) =
             <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap_start_end">fdv_market_cap_start_end</a>(reserves_start, reserves_end, supply_minuend);
 
-        // Update <b>global</b> stats.
+        // Update <b>global</b> total quote locked.
         <a href="_try_sub">aggregator_v2::try_sub</a>(total_quote_locked_ref_mut, (quote_leaving_market <b>as</b> u128));
-        <a href="_try_sub">aggregator_v2::try_sub</a>(market_cap_ref_mut, market_cap_start - market_cap_end);
-        <a href="_try_sub">aggregator_v2::try_sub</a>(fdv_ref_mut, fdv_start - fdv_end);
 
         // Update cumulative pool fees.
         <b>let</b> local_cumulative_pool_fees_quote_ref_mut =
@@ -2415,6 +2632,11 @@ Named object seed for the registry.
             (fdv_end, market_cap_end) =
                 <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv_market_cap">fdv_market_cap</a>(reserves_end, supply_minuend_end);
 
+            // Refund market registration deposit.
+            <b>let</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantDeposit">RegistrantDeposit</a> { market_registrant, deposit } =
+                <b>move_from</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantDeposit">RegistrantDeposit</a>&gt;(market_address);
+            <a href="_deposit">coin::deposit</a>(market_registrant, deposit);
+
         } <b>else</b> { // Buy without state transition.
 
             // Get minuend for circulating supply calculations and affected reserves.
@@ -2436,10 +2658,8 @@ Named object seed for the registry.
 
         };
 
-        // Update <b>global</b> stats.
+        // Update <b>global</b> total quote locked.
         <a href="_try_add">aggregator_v2::try_add</a>(total_quote_locked_ref_mut, quote_volume_as_u128);
-        <a href="_try_add">aggregator_v2::try_add</a>(market_cap_ref_mut, market_cap_end - market_cap_start);
-        <a href="_try_add">aggregator_v2::try_add</a>(fdv_ref_mut, fdv_end - fdv_start);
 
         // Update cumulative pool fees.
         <b>let</b> local_cumulative_pool_fees_base_ref_mut =
@@ -2479,7 +2699,7 @@ Named object seed for the registry.
     <b>let</b> global_cumulative_swaps_ref_mut = &<b>mut</b> global_stats_ref_mut.cumulative_swaps;
     <a href="_try_add">aggregator_v2::try_add</a>(global_cumulative_swaps_ref_mut, 1);
 
-    // Update <b>global</b> TVL amounts.
+    // Update <b>global</b> TVL, FDV, market cap amounts.
     <b>let</b> lp_coin_supply = market_ref_mut.lp_coin_supply;
     <b>let</b> tvl_end = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_tvl">tvl</a>(market_ref_mut, ends_in_bonding_curve);
     <b>let</b> global_total_value_locked_ref_mut = &<b>mut</b> global_stats_ref_mut.total_value_locked;
@@ -2489,6 +2709,20 @@ Named object seed for the registry.
     } <b>else</b> {
         <b>let</b> tvl_decrease = tvl_start - tvl_end;
         <a href="_try_sub">aggregator_v2::try_sub</a>(global_total_value_locked_ref_mut, tvl_decrease);
+    };
+    <b>if</b> (fdv_end &gt; fdv_start) {
+        <b>let</b> fdv_increase = fdv_end - fdv_start;
+        <a href="_try_add">aggregator_v2::try_add</a>(fdv_ref_mut, fdv_increase);
+    } <b>else</b> {
+        <b>let</b> fdv_decrease = fdv_start - fdv_end;
+        <a href="_try_sub">aggregator_v2::try_sub</a>(fdv_ref_mut, fdv_decrease);
+    };
+    <b>if</b> (market_cap_end &gt; market_cap_start) {
+        <b>let</b> market_cap_increase = market_cap_end - market_cap_start;
+        <a href="_try_add">aggregator_v2::try_add</a>(market_cap_ref_mut, market_cap_increase);
+    } <b>else</b> {
+        <b>let</b> market_cap_decrease = market_cap_start - market_cap_end;
+        <a href="_try_sub">aggregator_v2::try_sub</a>(market_cap_ref_mut, market_cap_decrease);
     };
 
     // Update last swap info.
@@ -2701,7 +2935,7 @@ produces the message <code>[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992
 
 
 
-<pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_provide_liquidity">provide_liquidity</a>&lt;Emojicoin, EmojicoinLP&gt;(provider: &<a href="">signer</a>, market_address: <b>address</b>, quote_amount: u64)
+<pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_provide_liquidity">provide_liquidity</a>&lt;Emojicoin, EmojicoinLP&gt;(provider: &<a href="">signer</a>, market_address: <b>address</b>, quote_amount: u64, min_lp_coins_out: u64)
 </code></pre>
 
 
@@ -2713,9 +2947,11 @@ produces the message <code>[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992
     provider: &<a href="">signer</a>,
     market_address: <b>address</b>,
     quote_amount: u64,
+    min_lp_coins_out: u64,
 ) <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistryAddress">RegistryAddress</a> {
 
     // Sanitize inputs, set up <b>local</b> variables.
+    <b>assert</b>!(min_lp_coins_out &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO">E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_ZERO</a>);
     <b>let</b> (market_ref_mut, _) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_market_ref_mut_and_signer_checked">get_market_ref_mut_and_signer_checked</a>(market_address);
     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_assert_valid_coin_types">assert_valid_coin_types</a>&lt;Emojicoin, EmojicoinLP&gt;(market_address);
     <b>let</b> provider_address = <a href="_address_of">signer::address_of</a>(provider);
@@ -2723,6 +2959,10 @@ produces the message <code>[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992
         provider_address,
         quote_amount,
         market_ref_mut,
+    );
+    <b>assert</b>!(
+        <a href="">event</a>.lp_coin_amount &gt;= min_lp_coins_out,
+        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET">E_PROVIDE_LIQUIDITY_MIN_LP_COINS_OUT_NOT_MET</a>,
     );
     <b>let</b> registry_ref_mut = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_borrow_registry_ref_mut">borrow_registry_ref_mut</a>();
 
@@ -2795,7 +3035,7 @@ produces the message <code>[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992
 
 
 
-<pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_remove_liquidity">remove_liquidity</a>&lt;Emojicoin, EmojicoinLP&gt;(provider: &<a href="">signer</a>, market_address: <b>address</b>, lp_coin_amount: u64)
+<pre><code><b>public</b> entry <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_remove_liquidity">remove_liquidity</a>&lt;Emojicoin, EmojicoinLP&gt;(provider: &<a href="">signer</a>, market_address: <b>address</b>, lp_coin_amount: u64, min_quote_out: u64)
 </code></pre>
 
 
@@ -2807,9 +3047,11 @@ produces the message <code>[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992
     provider: &<a href="">signer</a>,
     market_address: <b>address</b>,
     lp_coin_amount: u64,
+    min_quote_out: u64,
 ) <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_LPCoinCapabilities">LPCoinCapabilities</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Registry">Registry</a>, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistryAddress">RegistryAddress</a> {
 
     // Sanitize inputs, set up <b>local</b> variables.
+    <b>assert</b>!(min_quote_out &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO">E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_ZERO</a>);
     <b>let</b> (market_ref_mut, market_signer) = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_market_ref_mut_and_signer_checked">get_market_ref_mut_and_signer_checked</a>(market_address);
     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_assert_valid_coin_types">assert_valid_coin_types</a>&lt;Emojicoin, EmojicoinLP&gt;(market_address);
     <b>let</b> provider_address = <a href="_address_of">signer::address_of</a>(provider);
@@ -2818,6 +3060,7 @@ produces the message <code>[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992
         lp_coin_amount,
         market_ref_mut,
     );
+    <b>assert</b>!(<a href="">event</a>.quote_amount &gt;= min_quote_out, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET">E_REMOVE_LIQUIDITY_MIN_QUOTE_OUT_NOT_MET</a>);
     <b>let</b> registry_ref_mut = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_borrow_registry_ref_mut">borrow_registry_ref_mut</a>();
 
     // Get TVL before operations, <b>use</b> it <b>to</b> <b>update</b> periodic state.
@@ -2830,8 +3073,8 @@ produces the message <code>[x"e29a93", x"e29992", x"e28fb0", x"e28fb0", x"e29992
     <b>let</b> reserves_start = market_ref_mut.cpamm_real_reserves;
 
     // Transfer coins.
-    <b>let</b> base_total = <a href="">event</a>.base_amount + <a href="">event</a>.pro_rata_base_donation_claim_amount;
-    <b>let</b> quote_total = <a href="">event</a>.quote_amount + <a href="">event</a>.pro_rata_quote_donation_claim_amount;
+    <b>let</b> base_total = <a href="">event</a>.base_amount + <a href="">event</a>.base_donation_claim_amount;
+    <b>let</b> quote_total = <a href="">event</a>.quote_amount + <a href="">event</a>.quote_donation_claim_amount;
     <a href="_transfer">coin::transfer</a>&lt;Emojicoin&gt;(&market_signer, provider_address, base_total);
     <a href="_transfer">coin::transfer</a>&lt;AptosCoin&gt;(&market_signer, provider_address, quote_total);
 
@@ -3341,7 +3584,7 @@ Checks if an individual emoji is supported for usage in chat only.
 
 
 <pre><code>#[view]
-<b>public</b> <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap">simulate_swap</a>(swapper: <b>address</b>, market_address: <b>address</b>, input_amount: u64, is_sell: bool, integrator: <b>address</b>, integrator_fee_rate_bps: u8): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">emojicoin_dot_fun::Swap</a>
+<b>public</b> <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap">simulate_swap</a>&lt;Emojicoin, EmojicoinLP&gt;(swapper: <b>address</b>, market_address: <b>address</b>, input_amount: u64, is_sell: bool, integrator: <b>address</b>, integrator_fee_rate_bps: u8): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">emojicoin_dot_fun::Swap</a>
 </code></pre>
 
 
@@ -3349,7 +3592,7 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap">simulate_swap</a>(
+<pre><code><b>public</b> <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap">simulate_swap</a>&lt;Emojicoin, EmojicoinLP&gt;(
     swapper: <b>address</b>,
     market_address: <b>address</b>,
     input_amount: u64,
@@ -3359,7 +3602,7 @@ Checks if an individual emoji is supported for usage in chat only.
 ): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">Swap</a>
 <b>acquires</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a> {
     <b>assert</b>!(<b>exists</b>&lt;<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>&gt;(market_address), <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_NO_MARKET">E_NO_MARKET</a>);
-    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>(
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>&lt;Emojicoin, EmojicoinLP&gt;(
         swapper,
         input_amount,
         is_sell,
@@ -3378,7 +3621,7 @@ Checks if an individual emoji is supported for usage in chat only.
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_unpack_swap">unpack_swap</a>(swap: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">emojicoin_dot_fun::Swap</a>): (u64, u64, u64, <b>address</b>, u64, bool, <b>address</b>, u8, u64, u64, u64, u128, u64, u64, bool, bool)
+<pre><code><b>public</b> <b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_unpack_swap">unpack_swap</a>(swap: <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">emojicoin_dot_fun::Swap</a>): (u64, u64, u64, <b>address</b>, u64, bool, <b>address</b>, u8, u64, u64, u64, u128, u64, u64, bool, bool, u128, u128)
 </code></pre>
 
 
@@ -3403,6 +3646,8 @@ Checks if an individual emoji is supported for usage in chat only.
     u64,
     bool,
     bool,
+    u128,
+    u128,
 ) {
     <b>let</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">Swap</a> {
         market_id,
@@ -3421,6 +3666,8 @@ Checks if an individual emoji is supported for usage in chat only.
         pool_fee,
         starts_in_bonding_curve,
         results_in_state_transition,
+        balance_as_fraction_of_circulating_supply_before_q64,
+        balance_as_fraction_of_circulating_supply_after_q64,
     } = swap;
     (
         market_id,
@@ -3439,6 +3686,8 @@ Checks if an individual emoji is supported for usage in chat only.
         pool_fee,
         starts_in_bonding_curve,
         results_in_state_transition,
+        balance_as_fraction_of_circulating_supply_before_q64,
+        balance_as_fraction_of_circulating_supply_after_q64,
     )
 }
 </code></pre>
@@ -3544,8 +3793,8 @@ Checks if an individual emoji is supported for usage in chat only.
         quote_amount,
         lp_coin_amount,
         liquidity_provided,
-        pro_rata_base_donation_claim_amount,
-        pro_rata_quote_donation_claim_amount,
+        base_donation_claim_amount,
+        quote_donation_claim_amount,
     } = liquidity;
     (
         market_id,
@@ -3556,8 +3805,8 @@ Checks if an individual emoji is supported for usage in chat only.
         quote_amount,
         lp_coin_amount,
         liquidity_provided,
-        pro_rata_base_donation_claim_amount,
-        pro_rata_quote_donation_claim_amount,
+        base_donation_claim_amount,
+        quote_donation_claim_amount,
     )
 }
 </code></pre>
@@ -3987,6 +4236,22 @@ Checks if an individual emoji is supported for usage in chat only.
         fee
     };
 
+    // Set aside market registration deposit.
+    <b>let</b> can_pay_deposit =
+        <a href="_is_account_registered">coin::is_account_registered</a>&lt;AptosCoin&gt;(registrant_address) &&
+        <a href="_balance">coin::balance</a>&lt;AptosCoin&gt;(registrant_address) &gt;= <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MARKET_REGISTRATION_DEPOSIT">MARKET_REGISTRATION_DEPOSIT</a>;
+    <b>assert</b>!(can_pay_deposit, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_UNABLE_TO_PAY_MARKET_REGISTRATION_DEPOSIT">E_UNABLE_TO_PAY_MARKET_REGISTRATION_DEPOSIT</a>);
+    <b>move_to</b>(&market_signer, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantDeposit">RegistrantDeposit</a> {
+        market_registrant: registrant_address,
+        deposit: <a href="_withdraw">coin::withdraw</a>&lt;AptosCoin&gt;(registrant, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_MARKET_REGISTRATION_DEPOSIT">MARKET_REGISTRATION_DEPOSIT</a>),
+    });
+
+    // Move a registrant grace period flag <b>to</b> the market <b>address</b>.
+    <b>move_to</b>(&market_signer, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_RegistrantGracePeriodFlag">RegistrantGracePeriodFlag</a> {
+        market_registrant: registrant_address,
+        market_registration_time: time,
+    });
+
     // Update <b>global</b> FDV.
     <b>let</b> fdv = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_fdv">fdv</a>(market_ref_mut.clamm_virtual_reserves);
     <b>let</b> fdv_ref_mut = &<b>mut</b> registry_ref_mut.global_stats.fully_diluted_value;
@@ -4021,7 +4286,7 @@ Checks if an individual emoji is supported for usage in chat only.
 
 
 
-<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>(swapper: <b>address</b>, input_amount: u64, is_sell: bool, integrator: <b>address</b>, integrator_fee_rate_bps: u8, market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">emojicoin_dot_fun::Market</a>): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">emojicoin_dot_fun::Swap</a>
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>&lt;Emojicoin, EmojicoinLP&gt;(swapper: <b>address</b>, input_amount: u64, is_sell: bool, integrator: <b>address</b>, integrator_fee_rate_bps: u8, market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">emojicoin_dot_fun::Market</a>): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">emojicoin_dot_fun::Swap</a>
 </code></pre>
 
 
@@ -4029,7 +4294,7 @@ Checks if an individual emoji is supported for usage in chat only.
 ##### Implementation
 
 
-<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>(
+<pre><code><b>fun</b> <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_simulate_swap_inner">simulate_swap_inner</a>&lt;Emojicoin, EmojicoinLP&gt;(
     swapper: <b>address</b>,
     input_amount: u64,
     is_sell: bool,
@@ -4037,7 +4302,15 @@ Checks if an individual emoji is supported for usage in chat only.
     integrator_fee_rate_bps: u8,
     market_ref: &<a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Market">Market</a>,
 ): <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">Swap</a> {
+    // Sanitize inputs, ensure <a href="">coin</a> types initialized.
     <b>assert</b>!(input_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_INPUT_ZERO">E_SWAP_INPUT_ZERO</a>);
+    <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_ensure_coins_initialized">ensure_coins_initialized</a>&lt;Emojicoin, EmojicoinLP&gt;(
+        market_ref,
+        &<a href="_generate_signer_for_extending">object::generate_signer_for_extending</a>(&market_ref.extend_ref),
+        market_ref.metadata.market_address,
+    );
+
+    // Set up <b>local</b> variables.
     <b>let</b> starts_in_bonding_curve = market_ref.lp_coin_supply == 0;
     <b>let</b> net_proceeds;
     <b>let</b> base_volume;
@@ -4045,6 +4318,24 @@ Checks if an individual emoji is supported for usage in chat only.
     <b>let</b> integrator_fee;
     <b>let</b> pool_fee = 0;
     <b>let</b> results_in_state_transition = <b>false</b>;
+    <b>let</b> circulating_supply_after;
+    <b>let</b> balance_after;
+
+    // Determine user balance <b>as</b> a fraction of circulating supply before swap.
+    <b>let</b> (supply_minuend, reserves_ref) =
+        <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_assign_supply_minuend_reserves_ref">assign_supply_minuend_reserves_ref</a>(market_ref, starts_in_bonding_curve);
+    <b>let</b> circulating_supply_before = supply_minuend - reserves_ref.base;
+    <b>let</b> balance_before = <b>if</b> (<a href="_is_account_registered">coin::is_account_registered</a>&lt;Emojicoin&gt;(swapper)) {
+        <a href="_balance">coin::balance</a>&lt;Emojicoin&gt;(swapper)
+    } <b>else</b> {
+        0
+    };
+    <b>let</b> balance_fraction_before_q64 = <b>if</b> (circulating_supply_before == 0) {
+        0
+    } <b>else</b> {
+        ((balance_before <b>as</b> u128) &lt;&lt; <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SHIFT_Q64">SHIFT_Q64</a>) / (circulating_supply_before <b>as</b> u128)
+    };
+
     <b>if</b> (is_sell) { // If selling, no possibility of state transition.
         <b>let</b> amm_quote_output;
         <b>if</b> (starts_in_bonding_curve) { // Selling <b>to</b> CLAMM only.
@@ -4065,6 +4356,9 @@ Checks if an individual emoji is supported for usage in chat only.
         base_volume = input_amount;
         quote_volume = amm_quote_output - pool_fee - integrator_fee;
         net_proceeds = quote_volume;
+        <b>assert</b>!(input_amount &lt;= balance_before, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_NOT_ENOUGH_BASE">E_SWAP_NOT_ENOUGH_BASE</a>);
+        balance_after = balance_before - input_amount;
+        circulating_supply_after = circulating_supply_before - input_amount;
     } <b>else</b> { // If buying, there may be a state transition.
         integrator_fee = <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_get_bps_fee">get_bps_fee</a>(input_amount, integrator_fee_rate_bps);
         quote_volume = input_amount - integrator_fee;
@@ -4103,6 +4397,15 @@ Checks if an individual emoji is supported for usage in chat only.
             base_volume = cpamm_base_output - pool_fee;
         };
         net_proceeds = base_volume;
+        balance_after = balance_before + net_proceeds;
+        circulating_supply_after = circulating_supply_before + net_proceeds;
+    };
+
+    // Determine user balance <b>as</b> a fraction of circulating supply after swap.
+    <b>let</b> balance_fraction_after_q64 = <b>if</b> (circulating_supply_after == 0) {
+        0
+    } <b>else</b> {
+        ((balance_after <b>as</b> u128) &lt;&lt; <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_SHIFT_Q64">SHIFT_Q64</a>) / (circulating_supply_after <b>as</b> u128)
     };
     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Swap">Swap</a> {
         market_id: market_ref.metadata.market_id,
@@ -4122,6 +4425,8 @@ Checks if an individual emoji is supported for usage in chat only.
         pool_fee,
         starts_in_bonding_curve,
         results_in_state_transition,
+        balance_as_fraction_of_circulating_supply_before_q64: balance_fraction_before_q64,
+        balance_as_fraction_of_circulating_supply_after_q64: balance_fraction_after_q64,
     }
 }
 </code></pre>
@@ -4448,6 +4753,7 @@ Checks if an individual emoji is supported for usage in chat only.
     <b>let</b> denominator = (input_amount <b>as</b> u128) + (denominator_addend <b>as</b> u128);
     <b>assert</b>!(denominator &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_DIVIDE_BY_ZERO">E_SWAP_DIVIDE_BY_ZERO</a>);
     <b>let</b> result = numerator / denominator;
+    <b>assert</b>!(result &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_SWAP_OUTPUT_AMOUNT_ZERO">E_SWAP_OUTPUT_AMOUNT_ZERO</a>);
     (result <b>as</b> u64)
 }
 </code></pre>
@@ -5180,8 +5486,8 @@ true if the supplemental chat emojis were added, false otherwise.
         quote_amount,
         lp_coin_amount: (lp_coin_amount_u128 <b>as</b> u64),
         liquidity_provided: <b>true</b>,
-        pro_rata_base_donation_claim_amount: 0,
-        pro_rata_quote_donation_claim_amount: 0,
+        base_donation_claim_amount: 0,
+        quote_donation_claim_amount: 0,
     }
 }
 </code></pre>
@@ -5214,25 +5520,23 @@ true if the supplemental chat emojis were added, false otherwise.
     <b>assert</b>!(lp_coin_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_LIQUIDITY_NO_LP_COINS">E_LIQUIDITY_NO_LP_COINS</a>);
 
     <b>let</b> reserves_ref = market_ref.cpamm_real_reserves;
-    <b>let</b> base_reserves_u128 = (reserves_ref.base <b>as</b> u128);
-    <b>let</b> quote_reserves_u128 = (reserves_ref.quote <b>as</b> u128);
+    <b>let</b> base_reserves = reserves_ref.base;
+    <b>let</b> quote_reserves = reserves_ref.quote;
+    <b>let</b> base_reserves_u128 = (base_reserves <b>as</b> u128);
+    <b>let</b> quote_reserves_u128 = (quote_reserves <b>as</b> u128);
 
     // Proportional base amount: (lp_coin_amount / lp_coin_supply) * (base_reserves).
     <b>let</b> base_amount = ((lp_coin_amount_u128 * base_reserves_u128 / lp_coin_supply) <b>as</b> u64);
+    <b>assert</b>!(base_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_BASE_AMOUNT_ZERO">E_REMOVE_LIQUIDITY_BASE_AMOUNT_ZERO</a>);
 
     // Proportional quote amount: (lp_coin_amount / lp_coin_supply) * (quote_reserves).
     <b>let</b> quote_amount = ((lp_coin_amount_u128 * quote_reserves_u128 / lp_coin_supply) <b>as</b> u64);
+    <b>assert</b>!(quote_amount &gt; 0, <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO">E_REMOVE_LIQUIDITY_QUOTE_AMOUNT_ZERO</a>);
 
-    // Check <b>to</b> see <b>if</b> base or quote donations have been sent <b>to</b> market <a href="">coin</a> stores.
+    // Disburse all base and quote donations.
     <b>let</b> market_address = market_ref.metadata.market_address;
-    <b>let</b> market_balance_base_u128 = (<a href="_balance">coin::balance</a>&lt;Emojicoin&gt;(market_address) <b>as</b> u128);
-    <b>let</b> market_balance_quote_u128 = (<a href="_balance">coin::balance</a>&lt;AptosCoin&gt;(market_address) <b>as</b> u128);
-    <b>let</b> base_donations_u128 = market_balance_base_u128 - base_reserves_u128;
-    <b>let</b> quote_donations_u128 = market_balance_quote_u128 - quote_reserves_u128;
-    <b>let</b> pro_rata_base_donation_claim_amount =
-        (((lp_coin_amount_u128 * base_donations_u128) / lp_coin_supply) <b>as</b> u64);
-    <b>let</b> pro_rata_quote_donation_claim_amount =
-        (((lp_coin_amount_u128 * quote_donations_u128) / lp_coin_supply) <b>as</b> u64);
+    <b>let</b> base_donation_claim_amount = <a href="_balance">coin::balance</a>&lt;Emojicoin&gt;(market_address) - base_reserves;
+    <b>let</b> quote_donation_claim_amount = <a href="_balance">coin::balance</a>&lt;AptosCoin&gt;(market_address) - quote_reserves;
 
     <a href="emojicoin_dot_fun.md#0xc0de_emojicoin_dot_fun_Liquidity">Liquidity</a> {
         market_id: market_ref.metadata.market_id,
@@ -5243,8 +5547,8 @@ true if the supplemental chat emojis were added, false otherwise.
         quote_amount,
         lp_coin_amount,
         liquidity_provided: <b>false</b>,
-        pro_rata_base_donation_claim_amount,
-        pro_rata_quote_donation_claim_amount,
+        base_donation_claim_amount,
+        quote_donation_claim_amount,
     }
 }
 </code></pre>

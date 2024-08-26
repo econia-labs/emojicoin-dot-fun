@@ -1,97 +1,82 @@
 import { type OrderByStrings } from "@sdk/queries/const";
-import { toPageQueryParam, type SortByPageQueryParams } from "./types";
-import { MARKETS_PER_PAGE } from "./const";
+import { MarketDataSortBy, toMarketDataSortByHomePage, type SortByPageQueryParams } from "./types";
+import { safeParsePage } from "lib/routes/home-page-params";
 
 export type HomePageSearchParams = {
-  page: string;
-  sort: SortByPageQueryParams;
-  order: OrderByStrings;
-  bonding: boolean;
-  q: string;
+  page: string | undefined;
+  sort: SortByPageQueryParams | undefined;
+  order: OrderByStrings | undefined;
+  bonding: boolean | undefined;
+  q: string | undefined;
 };
 
-export const calculatePageNumber = ({
-  page,
-  numMarkets,
-  prev,
-}: {
-  page?: string | null;
-  numMarkets: number;
-  prev: boolean;
-}) => {
-  const currentPage = Number(page ?? 1);
-  const newPage = prev ? currentPage - 1 : currentPage + 1;
-  const lastPage = Math.ceil(numMarkets / MARKETS_PER_PAGE);
-
-  if (newPage === 0 && prev) {
-    return lastPage;
-  } else if (newPage > lastPage) {
-    return 1;
-  }
-  return newPage;
+export const DefaultHomePageSearchParams: HomePageSearchParams = {
+  page: "1",
+  sort: "market_cap",
+  order: "desc",
+  bonding: undefined,
+  q: undefined,
 };
 
-export const getSortQueryPath = ({
-  value,
-  searchParams,
-  pathname,
-}: {
-  value: Parameters<typeof toPageQueryParam>[number];
-  searchParams: URLSearchParams;
-  pathname: string;
-}) => {
-  const params = new URLSearchParams(searchParams.toString());
-  const newValue = toPageQueryParam(value);
-  params.set("sort" as keyof HomePageSearchParams, newValue);
-  return `${pathname}?${params.toString()}`;
-};
+export const AllHomePageSearchParams = Object.keys(DefaultHomePageSearchParams) as Array<
+  keyof HomePageSearchParams
+>;
 
-export const getPageQueryPath = ({
-  prev,
-  searchParams,
-  pathname,
-  numMarkets,
-}: {
-  prev: boolean;
-  searchParams: URLSearchParams;
-  pathname: string;
-  numMarkets: number;
-}) => {
-  const page = calculatePageNumber({
-    page: searchParams.get("page"),
-    numMarkets,
-    prev,
+export const constructHomePageSearchParams = (searchParams: URLSearchParams) => {
+  const res = {} as HomePageSearchParams;
+  AllHomePageSearchParams.forEach((key) => {
+    const value = searchParams.get(key);
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    res[key] = value ?? (DefaultHomePageSearchParams[key] as any);
   });
-
-  const params = new URLSearchParams(searchParams.toString());
-  params.set("page" as keyof HomePageSearchParams, page.toString());
-  return `${pathname}?${params.toString()}`;
+  return res;
 };
 
-export const getOrderQueryPath = ({
-  value,
-  searchParams,
-  pathname,
+export const constructURLForHomePage = ({
+  page,
+  sort,
+  searchBytes,
 }: {
-  value: OrderByStrings;
-  searchParams: URLSearchParams;
-  pathname: string;
+  page?: number;
+  sort?: MarketDataSortBy;
+  searchBytes?: string;
 }) => {
-  const params = new URLSearchParams(searchParams.toString());
-  params.set("order" as keyof HomePageSearchParams, value);
-  return `${pathname}?${params.toString()}`;
+  const newURL = new URL(location.href);
+  newURL.searchParams.delete("page");
+  newURL.searchParams.delete("sort");
+  newURL.searchParams.delete("q");
+
+  const safePage = safeParsePage((page ?? 1).toString());
+  if (safePage !== 1) {
+    newURL.searchParams.set("page", safePage.toString());
+  }
+  if (searchBytes && searchBytes !== "0x") {
+    newURL.searchParams.set("q", searchBytes);
+  }
+  const newSort = toMarketDataSortByHomePage(sort);
+  if (newSort !== MarketDataSortBy.MarketCap) {
+    newURL.searchParams.set("sort", newSort);
+  }
+
+  return newURL;
 };
 
-export const getBondingQueryPath = ({
-  value,
-  searchParams,
-  pathname,
-}: {
-  value: boolean;
-  searchParams: URLSearchParams;
-  pathname: string;
-}) => {
-  const params = new URLSearchParams(searchParams.toString());
-  params.set("bonding" as keyof HomePageSearchParams, value.toString());
-  return `${pathname}?${params.toString()}`;
+/**
+ * Check all the current and next url parameters using their default fallback values to see if the URL has
+ * actually changed.
+ */
+export const isHomePageURLDifferent = (curr: URLSearchParams, next: URLSearchParams) => {
+  if ((curr.get("page") ?? "1") !== (next.get("page") ?? "1")) {
+    return true;
+  }
+  if (
+    (curr.get("sort") ?? MarketDataSortBy.MarketCap) !==
+    (next.get("sort") ?? MarketDataSortBy.MarketCap)
+  ) {
+    return true;
+  }
+  if ((curr.get("q") ?? "0x") !== (next.get("q") ?? "0x")) {
+    return true;
+  }
+  return false;
 };

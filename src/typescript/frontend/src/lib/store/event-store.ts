@@ -9,18 +9,20 @@ import {
   isLiquidityEvent,
   isPeriodicStateEvent,
   isMarketRegistrationEvent,
+  type WithTime,
+  toEventWithTime,
 } from "@sdk/types/types";
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
 import { type AnyNumberString } from "@sdk-types";
-import {
-  CandlestickResolution,
-  RESOLUTIONS_ARRAY,
-  toCandlestickResolution,
-  toResolutionKey,
-} from "@sdk/const";
+import { CandlestickResolution, RESOLUTIONS_ARRAY, toCandlestickResolution } from "@sdk/const";
 import { type WritableDraft } from "immer";
-import { addToLocalStorage, type MarketIDString, type SymbolString } from "./event-utils";
+import {
+  addToLocalStorage,
+  updateLocalStorage,
+  type MarketIDString,
+  type SymbolString,
+} from "./event-utils";
 import { type RegisteredMarket, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
@@ -74,7 +76,11 @@ export type MarketStateValueType = EventsWithGUIDs & {
 // be mutated by zustand/immer.
 export type EventState = {
   guids: Readonly<Set<string>>;
-  firehose: readonly AnyEmojicoinEvent[];
+  firehose: readonly (AnyEmojicoinEvent & WithTime)[];
+  // We need a firehose exclusively for state events, because we don't want components to re-render
+  // when anything else is added. Note that these values will be consumed by the animated grid.
+  stateFirehose: readonly (StateEvent & WithTime)[];
+  stateEventsByMarket: Readonly<Map<bigint, Array<StateEvent & WithTime>>>;
   markets: Readonly<Map<MarketIDString, MarketStateValueType>>;
   symbols: Readonly<Map<SymbolString, MarketIDString>>;
   globalStateEvents: readonly GlobalStateEvent[];
@@ -109,6 +115,7 @@ export type EventActions = {
   subscribeToResolution: ({ symbol, resolution, cb }: ResolutionSubscription) => void;
   unsubscribeFromResolution: ({ symbol, resolution }: Omit<ResolutionSubscription, "cb">) => void;
   pushGlobalStateEvent: (event: GlobalStateEvent) => void;
+  getMarketRegistrationEvents: () => readonly MarketRegistrationEvent[];
 };
 
 export type EventStore = EventState & EventActions;
@@ -117,6 +124,8 @@ export const initializeEventStore = (): EventState => {
   return {
     guids: new Set(),
     firehose: [],
+    stateFirehose: [],
+    stateEventsByMarket: new Map(),
     markets: new Map(),
     symbols: new Map(),
     globalStateEvents: [],
@@ -199,10 +208,6 @@ const callbackClonedLatestBarIfSubscribed = (
   latestBar: WritableDraft<LatestBar>
 ) => {
   if (cb) {
-    const nonce = latestBar.marketNonce;
-    console.debug(
-      `Update latest bar for ${toResolutionKey(latestBar.period)} with mkt nonce ${nonce}`
-    );
     cb({
       time: latestBar.time,
       open: latestBar.open,
@@ -214,7 +219,7 @@ const callbackClonedLatestBarIfSubscribed = (
   }
 };
 
-// TODO Consider that we should be using classes with this- it depends how difficult it is to use
+// TODO: Consider that we should be using classes with this- it depends how difficult it is to use
 // with immer and RSC.
 export const createEventStore = (initialState: EventState = defaultState) => {
   return createStore<EventStore>()(
@@ -235,7 +240,12 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           if (!market) {
             initializeMarketHelper(state, marketID, data.emojiBytes);
           }
-          state.markets.get(marketID)!.marketData = data;
+          if (
+            !state.markets.get(marketID)!.marketData ||
+            (state.markets.get(marketID)!.marketData?.bumpTime ?? 0) < data.bumpTime
+          ) {
+            state.markets.get(marketID)!.marketData = data;
+          }
         });
       },
       setLatestBars: ({ marketID, latestBars }) => {
@@ -274,7 +284,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
 
         set((state) => {
           events.guids.forEach((guid) => state.guids.add(guid));
-          state.firehose.push(
+          const eventArray = [
             ...events.swapEvents,
             ...events.stateEvents,
             ...events.chatEvents,
@@ -285,8 +295,9 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             ...events.candlesticks[CandlestickResolution.PERIOD_30M],
             ...events.candlesticks[CandlestickResolution.PERIOD_1H],
             ...events.candlesticks[CandlestickResolution.PERIOD_4H],
-            ...events.candlesticks[CandlestickResolution.PERIOD_1D]
-          );
+            ...events.candlesticks[CandlestickResolution.PERIOD_1D],
+          ];
+          state.firehose.push(...eventArray.map(toEventWithTime));
           const marketID = events.marketID.toString();
           if (!state.markets.has(marketID)) {
             initializeMarketHelper(state, marketID);
@@ -294,6 +305,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           const market = state.markets.get(marketID)!;
           market.swapEvents.push(...events.swapEvents);
           market.stateEvents.push(...events.stateEvents);
+          state.stateFirehose.push(...events.stateEvents.map(toEventWithTime));
           market.chatEvents.push(...events.chatEvents);
           market.liquidityEvents.push(...events.liquidityEvents);
           for (const resolution of RESOLUTIONS_ARRAY) {
@@ -305,14 +317,23 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       // Note that we `unshift` here because we add the latest event to the front of the array.
       // We also update the latest bar if the incoming event is a swap or periodic state event.
       pushEventFromClient: (event) => {
-        if (get().guids.has(event.guid)) return;
-        addToLocalStorage(event);
+        if (get().guids.has(event.guid) && !event.guid.startsWith("Swap")) return;
+        if (
+          event.guid.startsWith("Swap") &&
+          typeof (event as Types.SwapEvent).balanceAsFractionOfCirculatingSupply === "bigint"
+        ) {
+          updateLocalStorage(event);
+          return;
+        } else {
+          addToLocalStorage(event);
+        }
         set((state) => {
-          state.firehose.unshift(event);
+          state.firehose.unshift(toEventWithTime(event));
           state.guids.add(event.guid);
           if (isGlobalStateEvent(event)) {
             state.globalStateEvents.unshift(event);
           } else if (isMarketRegistrationEvent(event)) {
+            state.marketRegistrationEvents.unshift(event);
             registerMarketHelper(state, event);
             initializeMarketHelper(state, event.marketID, event.marketMetadata.emojiBytes);
           } else {
@@ -322,6 +343,15 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             const market = state.markets.get(event.marketID.toString())!;
             if (isStateEvent(event)) {
               market.stateEvents.unshift(event);
+              const withTime = toEventWithTime(event);
+              state.stateFirehose.unshift(withTime);
+              // Note that we only add events to the animation firehose if it comes from a single
+              // event source, i.e., the WebSocket client or a user submitting a transaction.
+              if (!state.stateEventsByMarket.has(event.marketID)) {
+                state.stateEventsByMarket.set(event.marketID, [withTime]);
+              } else {
+                state.stateEventsByMarket.get(event.marketID)!.unshift(withTime);
+              }
             } else if (isChatEvent(event)) {
               market.chatEvents.unshift(event);
             } else if (isLiquidityEvent(event)) {
@@ -412,6 +442,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           }
         });
       },
+      getMarketRegistrationEvents: () => get().marketRegistrationEvents,
       initializeRegisteredMarketsMap: (markets) => {
         set((state) => {
           const entries = markets.map((m) => [m.marketID, m] as const);

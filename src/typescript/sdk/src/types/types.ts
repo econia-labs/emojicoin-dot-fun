@@ -4,7 +4,18 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { normalizeAddress } from "../utils/account-address";
-import { type EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
+import { type StateTrigger, toStateTrigger, type EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
+import {
+  type AnyEmojicoinJSONEvent,
+  isJSONChatEvent,
+  isJSONGlobalStateEvent,
+  isJSONLiquidityEvent,
+  isJSONMarketRegistrationEvent,
+  isJSONPeriodicStateEvent,
+  isJSONStateEvent,
+  isJSONSwapEvent,
+} from "./json-types";
+import { type STRUCT_STRINGS } from "../utils";
 
 export type AnyNumberString = number | string | bigint;
 
@@ -133,13 +144,13 @@ export namespace Types {
     period: bigint;
     emitTime: bigint;
     emitMarketNonce: bigint;
-    trigger: number;
+    trigger: StateTrigger;
   };
 
   export type StateMetadata = {
     marketNonce: bigint;
     bumpTime: bigint;
-    trigger: number;
+    trigger: StateTrigger;
   };
 
   export type CumulativeStats = {
@@ -186,6 +197,7 @@ export namespace Types {
       poolFee: bigint;
       startsInBondingCurve: boolean;
       resultsInStateTransition: boolean;
+      balanceAsFractionOfCirculatingSupply?: number;
     };
 
   export type ChatEvent = WithMarketID &
@@ -244,7 +256,7 @@ export namespace Types {
   export type GlobalStateEvent = WithVersionAndGUID & {
     emitTime: bigint;
     registryNonce: bigint;
-    trigger: number;
+    trigger: StateTrigger;
     cumulativeQuoteVolume: bigint;
     totalQuoteLocked: bigint;
     totalValueLocked: bigint;
@@ -303,7 +315,13 @@ export namespace Types {
     dailyVolume: number;
     tvlPerLpCoinGrowth: number;
   };
+
+  export type RegistrantGracePeriodFlag = {
+    marketRegistrant: `0x${string}`;
+    marketRegistrationTime: bigint;
+  };
 }
+
 export const toExtendRef = (data: JSONTypes.ExtendRef): Types.ExtendRef => ({
   self: data.self,
 });
@@ -440,13 +458,13 @@ export const toPeriodicStateMetadata = (
   period: BigInt(data.period),
   emitTime: BigInt(data.emit_time),
   emitMarketNonce: BigInt(data.emit_market_nonce),
-  trigger: Number(data.trigger),
+  trigger: toStateTrigger(data.trigger),
 });
 
 export const toStateMetadata = (data: JSONTypes.StateMetadata): Types.StateMetadata => ({
   marketNonce: BigInt(data.market_nonce),
   bumpTime: BigInt(data.bump_time),
-  trigger: Number(data.trigger),
+  trigger: toStateTrigger(data.trigger),
 });
 
 export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.SwapEvent => ({
@@ -468,6 +486,7 @@ export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.S
   startsInBondingCurve: data.starts_in_bonding_curve,
   resultsInStateTransition: data.results_in_state_transition,
   guid: `Swap::${data.market_id}::${data.market_nonce}`,
+  balanceAsFractionOfCirculatingSupply: data.balance_as_fraction_of_circulating_supply,
 });
 
 export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.ChatEvent => ({
@@ -543,7 +562,7 @@ export const toStateEvent = (data: JSONTypes.StateEvent, version: number): Types
   cumulativeStats: toCumulativeStats(data.cumulative_stats),
   instantaneousStats: toInstantaneousStats(data.instantaneous_stats),
   lastSwap: toLastSwap(data.last_swap),
-  guid: `State::${data.market_metadata.market_id}::${data.last_swap.nonce}`,
+  guid: `State::${data.market_metadata.market_id}::${data.state_metadata.market_nonce}`,
   marketID: BigInt(data.market_metadata.market_id),
 });
 
@@ -554,7 +573,7 @@ export const toGlobalStateEvent = (
   version,
   emitTime: BigInt(data.emit_time),
   registryNonce: fromAggregatorSnapshot(data.registry_nonce, strToBigInt),
-  trigger: data.trigger,
+  trigger: toStateTrigger(data.trigger),
   cumulativeQuoteVolume: fromAggregatorSnapshot(data.cumulative_quote_volume, strToBigInt),
   totalQuoteLocked: fromAggregatorSnapshot(data.total_quote_locked, strToBigInt),
   totalValueLocked: fromAggregatorSnapshot(data.total_value_locked, strToBigInt),
@@ -619,6 +638,11 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
   tvlPerLpCoinGrowth: Number(data.one_day_tvl_per_lp_coin_growth_q64 / 2 ** 64),
 });
 
+export const toRegistrantGracePeriodFlag = (data: JSONTypes.RegistrantGracePeriodFlag) => ({
+  marketRegistrant: normalizeAddress(data.market_registrant),
+  marketRegistrationTime: BigInt(data.market_registration_time),
+});
+
 export type AnyContractType =
   | Types.ExtendRef
   | Types.SequenceInfo
@@ -641,7 +665,8 @@ export type AnyContractType =
   | Types.PeriodicStateEvent
   | Types.StateEvent
   | Types.GlobalStateEvent
-  | Types.LiquidityEvent;
+  | Types.LiquidityEvent
+  | Types.RegistrantGracePeriodFlag;
 
 export type AnyEmojicoinEvent =
   | Types.SwapEvent
@@ -716,6 +741,13 @@ export function getEmojicoinEventTime(e: AnyEmojicoinEvent): bigint {
   throw new Error(`Unknown event type: ${e}`);
 }
 
+export function toEventWithTime<T extends AnyEmojicoinEvent>(e: T): T & WithTime {
+  return {
+    ...e,
+    time: getEmojicoinEventTime(e),
+  };
+}
+
 export function getEventTypeName(e: AnyEmojicoinEvent): EventName {
   if (isSwapEvent(e)) return "Swap";
   if (isChatEvent(e)) return "Chat";
@@ -725,4 +757,28 @@ export function getEventTypeName(e: AnyEmojicoinEvent): EventName {
   if (isGlobalStateEvent(e)) return "GlobalState";
   if (isLiquidityEvent(e)) return "Liquidity";
   throw new Error(`Unknown event type: ${e}`);
+}
+
+export interface WithTime {
+  time: bigint;
+}
+
+export function toAnyEmojicoinEvent(
+  type: (typeof STRUCT_STRINGS)[keyof typeof STRUCT_STRINGS],
+  data: AnyEmojicoinJSONEvent,
+  version?: number
+): AnyEmojicoinEvent {
+  const event = { type, data };
+  if (isJSONSwapEvent(event)) return toSwapEvent(data as JSONTypes.SwapEvent, version ?? -1);
+  if (isJSONChatEvent(event)) return toChatEvent(data as JSONTypes.ChatEvent, version ?? -1);
+  if (isJSONMarketRegistrationEvent(event))
+    return toMarketRegistrationEvent(data as JSONTypes.MarketRegistrationEvent, version ?? -1);
+  if (isJSONPeriodicStateEvent(event))
+    return toPeriodicStateEvent(data as JSONTypes.PeriodicStateEvent, version ?? -1);
+  if (isJSONStateEvent(event)) return toStateEvent(data as JSONTypes.StateEvent, version ?? -1);
+  if (isJSONGlobalStateEvent(event))
+    return toGlobalStateEvent(data as JSONTypes.GlobalStateEvent, version ?? -1);
+  if (isJSONLiquidityEvent(event))
+    return toLiquidityEvent(data as JSONTypes.LiquidityEvent, version ?? -1);
+  throw new Error(`Unknown event type: ${type}`);
 }

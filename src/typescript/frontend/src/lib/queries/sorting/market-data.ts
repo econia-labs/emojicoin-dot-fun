@@ -13,12 +13,12 @@ import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { TAGS } from "../cache-utils/tags";
 
-const getSortedMarketData = async ({
+export const getSortedMarketData = async ({
   limit = LIMIT,
   offset,
   orderBy,
   sortBy,
-  inBondingCurve = null,
+  inBondingCurve,
   exactCount,
   searchBytes,
 }: GetSortedMarketDataQueryArgs) => {

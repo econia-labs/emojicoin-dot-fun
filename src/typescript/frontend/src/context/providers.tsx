@@ -17,8 +17,8 @@ import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import StyledToaster from "styles/StyledToaster";
 import {
   WebSocketEventsProvider,
-  MarketDataProvider,
-} from "./data-context/WebSocketContextProvider";
+  UserSettingsProvider,
+} from "./state-store-context/StateStoreContextProviders";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
@@ -26,10 +26,15 @@ import { WalletModalContextProvider } from "./wallet-context/WalletModalContext"
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
+import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
+import { isMobile, isTablet } from "react-device-detect";
 
 enableMapSet();
 
-const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
+  children,
+  geoblocked,
+}) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
@@ -55,7 +60,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <WebSocketEventsProvider>
-          <MarketDataProvider>
+          <UserSettingsProvider>
             <AptosWalletAdapterProvider
               plugins={wallets}
               autoConnect={true}
@@ -63,28 +68,41 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               dappConfig={{ network: APTOS_NETWORK }}
             >
               <WalletModalContextProvider>
-                <AptosContextProvider>
-                  <GlobalStyle />
-                  <ConnectToWebSockets />
-                  <Suspense fallback={<Loader />}>
-                    <StyledToaster />
-                    <ContentWrapper>
-                      <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
-                      {children}
-                      <Footer />
-                    </ContentWrapper>
-                  </Suspense>
+                <AptosContextProvider geoblocked={geoblocked}>
+                  <EmojiPickerProvider
+                    initialState={{
+                      nativePicker: isMobile || isTablet,
+                    }}
+                  >
+                    <GlobalStyle />
+                    <ConnectToWebSockets />
+                    <Suspense fallback={<Loader />}>
+                      <StyledToaster />
+                      <ContentWrapper>
+                        <Header
+                          isOpen={isMobileMenuOpen}
+                          setIsOpen={setIsOpen}
+                          geoblocked={geoblocked}
+                        />
+                        {children}
+                        <Footer />
+                      </ContentWrapper>
+                    </Suspense>
+                  </EmojiPickerProvider>
                 </AptosContextProvider>
               </WalletModalContextProvider>
             </AptosWalletAdapterProvider>
-          </MarketDataProvider>
+          </UserSettingsProvider>
         </WebSocketEventsProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );
 };
 
-const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Providers: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
+  children,
+  geoblocked,
+}) => {
   const [p, setP] = useState(false);
 
   // Hack for now because I'm unsure how to get rid of the warning.
@@ -96,7 +114,7 @@ const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     p && (
       <ThemeContextProvider>
-        <ThemedApp>{children}</ThemedApp>
+        <ThemedApp geoblocked={geoblocked}>{children}</ThemedApp>
       </ThemeContextProvider>
     )
   );

@@ -5,22 +5,28 @@ import { VERSION } from "lib/env";
 import { type SvgProps } from "../types";
 import { useThemeContext } from "context";
 import Text from "components/text";
+import type { Colors } from "theme/types";
 
-const Badge = ({ children }) => (
-  <Text
-    style={{
-      border: "1px solid var(--ec-blue)",
-      borderRadius: "20px",
-    }}
-    className="!pixel-heading-4 mx-[.5rem] px-[.4rem] !text-ec-blue"
-  >
-    {children}
-  </Text>
-);
+const Badge: React.FC<React.PropsWithChildren<{ color: keyof Colors }>> = ({ children, color }) => {
+  const { theme } = useThemeContext();
 
-const VersionBadge = () => (
-  <Badge>
-    {VERSION?.prerelease[0].toString().toUpperCase()} v{VERSION?.major}.{VERSION?.minor}.
+  return (
+    <Text
+      style={{
+        border: `1px solid ${theme.colors[color]}`,
+        borderRadius: "8px",
+        color: theme.colors[color],
+      }}
+      className="!pixel-heading-4 px-[.4rem] text-[15px]"
+    >
+      {children}
+    </Text>
+  );
+};
+
+const VersionBadge: React.FC<{ color: keyof Colors }> = ({ color }) => (
+  <Badge color={color}>
+    {VERSION?.prerelease[0].toString().toUpperCase()}&nbsp;v{VERSION?.major}.{VERSION?.minor}.
     {VERSION?.patch}
   </Badge>
 );
@@ -33,7 +39,7 @@ const Icon: React.FC<SvgProps & { versionBadge?: boolean }> = ({
   const { theme } = useThemeContext();
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center flex-wrap gap-[.7rem]">
       <Svg viewBox="0 0 1514 104" {...props} color="transparent">
         <path
           d="M830.4 15.2996V0.599609H757V15.2996H742.3V88.7996H757V103.5H830.5V88.7996H845.2V15.2996H830.4ZM762.3 18.2996H777.5V33.4996H762.3V18.2996ZM825.2 73.7996H813.3V85.6996H774.3V73.7996H762.4V46.6996H777.6V70.4996H810V46.9996H825.2V73.7996ZM825.2 33.4996H810V18.2996H825.2V33.4996Z"
@@ -85,7 +91,7 @@ const Icon: React.FC<SvgProps & { versionBadge?: boolean }> = ({
           fill={theme.colors[color]}
         />
       </Svg>
-      {(versionBadge || VERSION?.prerelease) && <VersionBadge />}
+      {versionBadge ? <VersionBadge color={color} /> : <></>}
     </div>
   );
 };

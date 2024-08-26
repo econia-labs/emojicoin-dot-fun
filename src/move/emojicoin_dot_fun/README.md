@@ -11,12 +11,32 @@ needs to have at least 2 APT to be able to publish, even if it only costs 1 APT.
 
 ## Signer-signer publication
 
+Set variables:
+
+```sh
+EMOJICOIN_DOT_FUN=0xaaa...
+PROFILE=my-profile...
+```
+
+Fund with faucet as applicable:
+
+```sh
+# Run this command twice.
+aptos account fund-with-faucet \
+    --account $EMOJICOIN_DOT_FUN \
+    --profile $PROFILE
+```
+
+Publish the package:
+
 ```sh
 aptos move publish \
     --assume-yes \
     --included-artifacts=none \
     --max-gas 2000000 \
-    --named-addresses emojicoin_dot_fun=$EMOJICOIN_DOT_FUN
+    --named-addresses emojicoin_dot_fun=$EMOJICOIN_DOT_FUN \
+    --profile $PROFILE \
+    --override-size-check
 ```
 
 ## Multisig publication
@@ -63,6 +83,7 @@ aptos move build-publish-payload \
     --included-artifacts none \
     --json-output-file emojicoin_dot_fun.json \
     --named-addresses emojicoin_dot_fun=$MULTISIG \
+    --override-size-check \
     --profile emojicoin-testnet
 ```
 

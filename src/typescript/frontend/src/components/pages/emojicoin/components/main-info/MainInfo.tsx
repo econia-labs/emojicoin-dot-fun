@@ -5,8 +5,8 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useWebSocketClient } from "context/data-context";
-import { useLabelScrambler } from "components/pages/home/components/animation-config";
+import { useEventStore, useWebSocketClient } from "context/state-store-context";
+import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 
 const innerWrapper = `flex flex-col md:flex-row justify-around w-full max-w-[1362px] px-[30px] lg:px-[44px] py-[17px]
 md:py-[37px] xl:py-[68px]`;
@@ -20,7 +20,8 @@ const MainInfo = (props: MainInfoProps) => {
 
   const marketID = props.data.marketID.toString();
   const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
-  const { subscribe, unsubscribe } = useWebSocketClient((s) => s);
+  const subscribe = useWebSocketClient((s) => s.subscribe);
+  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
 
   // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
   // Add to this in state. You can keep track of this yourself, technically.
@@ -33,23 +34,16 @@ const MainInfo = (props: MainInfoProps) => {
 
   useEffect(() => {
     if (stateEvents.length === 0) return;
-    const latestEvent = stateEvents.at(0)!;
-    const numSwapsInStore = latestEvent?.cumulativeStats.numSwaps ?? 0;
-    if (numSwapsInStore > props.data.numSwaps) {
-      const marketCapInStore = latestEvent.instantaneousStats.marketCap;
-      setMarketCap(marketCapInStore);
-    }
-
-    // TODO: Fix ASAP. This **will** become inaccurate over time, because it doesn't evict stale data from the rolling
-    // volume. It's just a rough estimate to simulate live 24h rolling volume.
-    setRoughDailyVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
-    setRoughAllTimeVolume((prev) => prev + latestEvent.lastSwap.quoteVolume);
-  }, [props.data, stateEvents]);
+    // TODO: Refactor this to have accurate data. We increment by 1 like this just to trigger a scramble animation.
+    setMarketCap((prev) => prev + 1n);
+    setRoughDailyVolume((prev) => prev + 1n);
+    setRoughAllTimeVolume((prev) => prev + 1n);
+  }, [stateEvents]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     subscribe.state(marketID);
-    return () => unsubscribe.state(marketID);
+    return () => requestUnsubscribe.state(marketID);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 

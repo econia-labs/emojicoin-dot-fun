@@ -1,5 +1,10 @@
 import {
+  AccountAddress,
+  APTOS_COIN,
   AptosApiError,
+  isUserTransactionResponse,
+  parseTypeTag,
+  TypeTag,
   type Aptos,
   type PendingTransactionResponse,
   type UserTransactionResponse,
@@ -7,7 +12,9 @@ import {
 import { type NetworkInfo, useWallet } from "@aptos-labs/wallet-adapter-react";
 import {
   createContext,
+  type Dispatch,
   type PropsWithChildren,
+  type SetStateAction,
   useCallback,
   useContext,
   useMemo,
@@ -22,10 +29,15 @@ import {
   parseAPIErrorAndToast,
   successfulTransactionToast,
 } from "components/wallet/toasts";
-import { useEventStore } from "context/data-context";
-import { getEvents } from "@sdk/emojicoin_dot_fun";
+import { useEventStore } from "context/state-store-context";
+import { getEvents, type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { sleep, UnitOfTime } from "@sdk/utils";
+import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
+import {
+  getAptBalanceFromChanges,
+  getCoinBalanceFromChanges,
+} from "@sdk/utils/parse-changes-for-balances";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -33,6 +45,7 @@ export type SubmissionResponse = Promise<{
   error: unknown;
 } | null>;
 
+export type TrackedCoinType = "apt" | "emojicoin" | "emojicoinLP";
 export type TransactionStatus = "idle" | "prompt" | "pending" | "success" | "error";
 export type ResponseType = Awaited<SubmissionResponse>;
 export type EntryFunctionNames =
@@ -50,11 +63,23 @@ export type AptosContextState = {
   copyAddress: () => void;
   status: TransactionStatus;
   lastResponse: ResponseType;
+  lastResponseStoredAt: number;
+  setEmojicoinType: (type?: TypeTagInput) => void;
+  aptBalance: bigint;
+  emojicoinBalance: bigint;
+  emojicoinLPBalance: bigint;
+  isFetching(coinType: TrackedCoinType): boolean;
+  forceRefetch(coinType: TrackedCoinType): void;
+  refetchIfStale(coinType: TrackedCoinType): void;
+  setBalance(coinType: TrackedCoinType, n: bigint): void;
 };
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
-export function AptosContextProvider({ children }: PropsWithChildren) {
+export function AptosContextProvider({
+  children,
+  geoblocked,
+}: PropsWithChildren<{ geoblocked: boolean }>) {
   const {
     signAndSubmitTransaction: adapterSignAndSubmitTxn,
     account,
@@ -65,6 +90,16 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const pushEventFromClient = useEventStore((state) => state.pushEventFromClient);
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [lastResponse, setLastResponse] = useState<ResponseType>(null);
+  const [lastResponseStoredAt, setLastResponseStoredAt] = useState(-1);
+  const [emojicoinType, setEmojicoinType] = useState<string | undefined>();
+
+  const { emojicoin, emojicoinLP } = useMemo(() => {
+    if (!emojicoinType) return { emojicoin: undefined, emojicoinLP: undefined };
+    return {
+      emojicoin: emojicoinType,
+      emojicoinLP: `${emojicoinType}LP`,
+    };
+  }, [emojicoinType]);
 
   const aptos = useMemo(() => {
     if (checkNetworkAndToast(network)) {
@@ -72,6 +107,42 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     }
     return getAptos();
   }, [network]);
+
+  const {
+    balance: aptBalance,
+    setBalance: setAptBalance,
+    isFetching: isFetchingAptBalance,
+    forceRefetch: forceRefetchAptBalance,
+    refetchIfStale: refetchAptBalanceIfStale,
+  } = useWalletBalance({
+    aptos,
+    accountAddress: account?.address,
+    coinType: APTOS_COIN,
+  });
+
+  const {
+    balance: emojicoinBalance,
+    setBalance: setEmojicoinBalance,
+    isFetching: isFetchingEmojicoinBalance,
+    forceRefetch: forceRefetchEmojicoinBalance,
+    refetchIfStale: refetchEmojicoinBalanceIfStale,
+  } = useWalletBalance({
+    aptos,
+    accountAddress: account?.address,
+    coinType: emojicoin,
+  });
+
+  const {
+    balance: emojicoinLPBalance,
+    setBalance: setEmojicoinLPBalance,
+    isFetching: isFetchingEmojicoinLPBalance,
+    forceRefetch: forceRefetchEmojicoinLPBalance,
+    refetchIfStale: refetchEmojicoinLPBalanceIfStale,
+  } = useWalletBalance({
+    aptos,
+    accountAddress: account?.address,
+    coinType: emojicoinLP,
+  });
 
   const copyAddress = useCallback(async () => {
     if (!account?.address) return;
@@ -88,6 +159,28 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       });
     }
   }, [account?.address]);
+
+  const parseChangesAndSetBalances = useCallback(
+    (response: UserTransactionResponse) => {
+      const userAddress = AccountAddress.from(response.sender);
+      // Return if the account is not connected or the sender of the transaction is not the currently connected account.
+      if (!account || !userAddress.equals(AccountAddress.from(account.address))) return;
+
+      const newAptBalance = getAptBalanceFromChanges(response, userAddress);
+      const newEmojicoinBalance = emojicoin
+        ? getCoinBalanceFromChanges({ response, userAddress, coinType: parseTypeTag(emojicoin) })
+        : undefined;
+      const newEmojicoinLPBalance = emojicoinLP
+        ? getCoinBalanceFromChanges({ response, userAddress, coinType: parseTypeTag(emojicoinLP) })
+        : undefined;
+      // Update the user's balance if the coins are present in the write set changes.
+      if (typeof newAptBalance !== "undefined") setAptBalance(newAptBalance);
+      if (typeof newEmojicoinBalance !== "undefined") setEmojicoinBalance(newEmojicoinBalance);
+      if (typeof newEmojicoinLPBalance !== "undefined")
+        setEmojicoinLPBalance(newEmojicoinLPBalance);
+    },
+    [account, emojicoin, emojicoinLP, setAptBalance, setEmojicoinBalance, setEmojicoinLPBalance]
+  );
 
   const handleTransactionSubmission = useCallback(
     async (
@@ -124,6 +217,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
             response,
             error: null,
           });
+          setLastResponseStoredAt(Date.now());
           sleep(DEFAULT_TOAST_CONFIG.autoClose, UnitOfTime.Milliseconds).then(() => {
             setStatus("idle");
           });
@@ -148,13 +242,19 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         ...events.liquidityEvents,
       ];
       flattenedEvents.forEach(pushEventFromClient);
+
+      if (response && isUserTransactionResponse(response)) {
+        parseChangesAndSetBalances(response);
+      }
+
       return { response, error };
     },
-    [pushEventFromClient]
+    [pushEventFromClient, parseChangesAndSetBalances]
   );
 
   const submit = useCallback(
     async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
+      if (geoblocked) return null;
       if (checkNetworkAndToast(network, true)) {
         const trySubmit = async () => {
           const builder = await builderFn();
@@ -171,7 +271,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       return null;
     },
-    [network, handleTransactionSubmission, adapterSignAndSubmitTxn]
+    [network, handleTransactionSubmission, adapterSignAndSubmitTxn, geoblocked]
   );
 
   // To manually enforce explicit gas options, we can use this transaction submission flow.
@@ -179,6 +279,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   // unnecessary to support that and I'm not gonna write the code for it.
   const signThenSubmit = useCallback(
     async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
+      if (geoblocked) return null;
       if (checkNetworkAndToast(network, true)) {
         const trySubmit = async () => {
           const builder = await builderFn();
@@ -197,8 +298,22 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       return null;
     },
-    [network, handleTransactionSubmission, signTransaction, submitTransaction]
+    [network, handleTransactionSubmission, signTransaction, submitTransaction, geoblocked]
   );
+
+  const setCoinTypeHelper = (
+    set: Dispatch<SetStateAction<string | undefined>>,
+    type?: TypeTagInput
+  ) => {
+    if (!type) set(undefined);
+    else if (typeof type === "string") {
+      set(type);
+    } else if (type instanceof TypeTag) {
+      set(type.toString());
+    } else {
+      throw new Error(`Invalid type: ${type}`);
+    }
+  };
 
   const value: AptosContextState = {
     aptos,
@@ -208,6 +323,35 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     copyAddress,
     status,
     lastResponse,
+    lastResponseStoredAt,
+    aptBalance,
+    emojicoinBalance,
+    emojicoinLPBalance,
+    setEmojicoinType: (type?: TypeTagInput) => setCoinTypeHelper(setEmojicoinType, type),
+    setBalance: (coinType: TrackedCoinType, n: bigint) => {
+      if (coinType === "apt") setAptBalance(n);
+      else if (coinType === "emojicoin") setEmojicoinBalance(n);
+      else if (coinType === "emojicoinLP") setEmojicoinLPBalance(n);
+      else throw new Error(`Invalid coin type: ${coinType}`);
+    },
+    isFetching: (coinType: TrackedCoinType) => {
+      if (coinType === "apt") return isFetchingAptBalance;
+      else if (coinType === "emojicoin") return isFetchingEmojicoinBalance;
+      else if (coinType === "emojicoinLP") return isFetchingEmojicoinLPBalance;
+      else throw new Error(`Invalid coin type: ${coinType}`);
+    },
+    forceRefetch: (coinType: TrackedCoinType) => {
+      if (coinType === "apt") forceRefetchAptBalance();
+      else if (coinType === "emojicoin") forceRefetchEmojicoinBalance();
+      else if (coinType === "emojicoinLP") forceRefetchEmojicoinLPBalance();
+      else throw new Error(`Invalid coin type: ${coinType}`);
+    },
+    refetchIfStale: (coinType: TrackedCoinType) => {
+      if (coinType === "apt") refetchAptBalanceIfStale();
+      else if (coinType === "emojicoin") refetchEmojicoinBalanceIfStale();
+      else if (coinType === "emojicoinLP") refetchEmojicoinLPBalanceIfStale();
+      else throw new Error(`Invalid coin type: ${coinType}`);
+    },
   };
 
   return <AptosContext.Provider value={value}>{children}</AptosContext.Provider>;

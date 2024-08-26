@@ -15,7 +15,12 @@ export type WalletDropdownItemProps = {
   icon: ReactElement;
 } & PropsWithChildren;
 
-export const WalletDropdownItem = ({ onSelect, scrambleText, icon }: WalletDropdownItemProps) => {
+export const WalletDropdownItem = ({
+  onSelect,
+  scrambleText,
+  icon,
+  children,
+}: WalletDropdownItemProps) => {
   const [enabled, setEnabled] = useState(true);
   const { ref, replay } = useScramble({
     text: scrambleText,
@@ -36,6 +41,7 @@ export const WalletDropdownItem = ({ onSelect, scrambleText, icon }: WalletDropd
       <motion.div whileTap={{ scale: 0.95 }} className="flex flex-row gap-2 items-center p-2">
         {icon}
         <span ref={ref}>{scrambleText}</span>
+        {children}
       </motion.div>
     </DropdownItem>
   );

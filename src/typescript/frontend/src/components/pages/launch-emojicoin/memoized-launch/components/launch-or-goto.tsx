@@ -1,4 +1,4 @@
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import Button from "components/button";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { translationFunction } from "context/language-context";
@@ -10,12 +10,14 @@ export const LaunchButtonOrGoToMarketLink = ({
   onWalletButtonClick,
   registered,
   invalid,
+  geoblocked,
 }: {
   onWalletButtonClick: () => void;
   registered?: boolean;
   invalid: boolean;
+  geoblocked: boolean;
 }) => {
-  const emojis = useInputStore((state) => state.emojis);
+  const emojis = useEmojiPicker((state) => state.emojis);
   const { t } = translationFunction();
 
   const scrambleProps = {
@@ -25,7 +27,7 @@ export const LaunchButtonOrGoToMarketLink = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback>
+      <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
         {registered ? (
           <Link
             className="font-pixelar text-lg uppercase text-ec-blue"

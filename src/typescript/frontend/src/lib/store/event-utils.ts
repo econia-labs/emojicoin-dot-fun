@@ -20,6 +20,7 @@ import { type AnyEmojicoinJSONEvent } from "@sdk/types/json-types";
 import { MODULE_ADDRESS, RESOLUTIONS_ARRAY } from "@sdk/const";
 import { type MarketStateValueType } from "./event-store";
 import { parseJSON, stringifyJSON } from "utils";
+import { LOCALSTORAGE_EXPIRY_TIME_MS } from "const";
 
 export type AddEventsType<T> = ({ data, sorted }: { data: readonly T[]; sorted?: boolean }) => void;
 
@@ -189,14 +190,26 @@ export const getLatestBars = (market: MarketStateValueType) => {
   return RESOLUTIONS_ARRAY.map((res) => ({ ...market[res]!.latestBar, period: res }));
 };
 
-export const addToLocalStorage = (event: AnyEmojicoinEvent) => {
-  const shouldKeep = (event: AnyEmojicoinEvent) => {
-    const time = getEmojicoinEventTime(event);
-    return time / 1000n > BigInt(new Date().getTime() - 60 * 1_000);
-  };
+const shouldKeep = (event: AnyEmojicoinEvent) => {
+  const eventTimeMs = Number(getEmojicoinEventTime(event) / 1000n);
+  const now = new Date().getTime();
+  return eventTimeMs > now - LOCALSTORAGE_EXPIRY_TIME_MS;
+};
 
+export const addToLocalStorage = (event: AnyEmojicoinEvent) => {
   const eventName = getEventTypeName(event);
   const localEvents: Array<AnyEmojicoinEvent> = parseJSON(localStorage.getItem(eventName) ?? "[]");
+
+  localEvents.push(event);
+  const filtered = localEvents.filter(shouldKeep);
+  localStorage.setItem(eventName, stringifyJSON(filtered));
+};
+
+export const updateLocalStorage = (event: AnyEmojicoinEvent) => {
+  const eventName = getEventTypeName(event);
+  let localEvents: Array<AnyEmojicoinEvent> = parseJSON(localStorage.getItem(eventName) ?? "[]");
+
+  localEvents = localEvents.filter((e) => e.guid != event.guid);
 
   localEvents.push(event);
   const filtered = localEvents.filter(shouldKeep);

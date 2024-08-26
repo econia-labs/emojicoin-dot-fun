@@ -5,8 +5,6 @@ import React, { useEffect, useState } from "react";
 import { useMatchBreakpoints } from "hooks";
 
 import { FlexGap } from "@containers";
-import { Input } from "components/inputs/input";
-import { InputGroup } from "components/inputs/input-group";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
 import {
   StyledWrapper,
@@ -16,17 +14,17 @@ import {
   StyledInner,
   StyledSubHeader,
 } from "components/pages/pools/styled";
-import { isDisallowedEventKey, parseJSON } from "utils";
+import { parseJSON } from "utils";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
-import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
-import useInputStore from "@store/input-store";
+import { useEmojiPicker } from "context/emoji-picker-context";
 import { useSearchParams } from "next/navigation";
 import { encodeEmojis, getEmojisInString } from "@sdk/emoji_data";
+import SearchBar from "components/inputs/search-bar";
 
-export const ClientPoolsPage = () => {
+export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
@@ -37,14 +35,12 @@ export const ClientPoolsPage = () => {
   const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
   const [pools, setPools] = useState<"all" | "mypools">("all");
   const [realEmojis, setRealEmojis] = useState(getEmojisInString(poolParam ?? ""));
-  const { emojis, setEmojis, setMode } = useInputStore((state) => ({
+  const { emojis, setEmojis } = useEmojiPicker((state) => ({
     emojis: state.emojis,
-    setMode: state.setMode,
     setEmojis: state.setEmojis,
   }));
   useEffect(() => {
     setEmojis(realEmojis);
-    setMode("pools");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
@@ -74,12 +70,6 @@ export const ClientPoolsPage = () => {
 
   const { isMobile } = useMatchBreakpoints();
 
-  const onInputChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (isDisallowedEventKey(e)) {
-      e.preventDefault();
-    }
-  };
-
   return (
     <StyledPoolsPage>
       <StyledHeader>
@@ -91,6 +81,8 @@ export const ClientPoolsPage = () => {
             alignItems="center"
             gap="13px"
           >
+            {!isMobile ? <SearchBar geoblocked={geoblocked} /> : null}
+
             <TableHeaderSwitcher
               title1="Pools"
               title2="My pools"
@@ -102,43 +94,13 @@ export const ClientPoolsPage = () => {
                 }
               }}
             />
-
-            {!isMobile ? (
-              <>
-                <InputGroup
-                  textScale="pixelHeading3"
-                  variant="fantom"
-                  width="unset"
-                  isShowError={false}
-                  label="Search pool:"
-                  forId="searchPool"
-                >
-                  <EmojiPickerWithInput
-                    handleClick={async () => {}}
-                    pickerButtonClassName="top-[50px] left-[-87px] bg-black"
-                    inputClassName="!w-[175px] ml-[4px]"
-                  />
-                </InputGroup>
-                {"TODO"}
-              </>
-            ) : null}
           </FlexGap>
         </StyledHeaderInner>
       </StyledHeader>
       {isMobile ? (
         <StyledSubHeader>
           <StyledHeaderInner>
-            <InputGroup
-              textScale="pixelHeading4"
-              variant="fantom"
-              width="unset"
-              isShowError={false}
-              label="Search:"
-              forId="searchPool"
-            >
-              <Input id="searchPool" onKeyDown={onInputChange} />
-            </InputGroup>
-            {"TODO"}
+            <SearchBar geoblocked={geoblocked} />
           </StyledHeaderInner>
         </StyledSubHeader>
       ) : null}
@@ -170,7 +132,10 @@ export const ClientPoolsPage = () => {
         </StyledInner>
 
         <StyledInner flexGrow={1} width={{ _: "100%", laptopL: "43%" }}>
-          <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
+          <Liquidity
+            geoblocked={geoblocked}
+            market={selectedIndex !== undefined ? markets[selectedIndex] : undefined}
+          />
         </StyledInner>
       </StyledWrapper>
     </StyledPoolsPage>

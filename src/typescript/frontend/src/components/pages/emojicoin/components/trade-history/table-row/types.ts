@@ -11,4 +11,7 @@ export type TableRowDesktopProps = {
     swapper: string;
   };
   showBorder: boolean;
+  index: number;
+  numSwapsDisplayed: number;
+  shouldAnimateAsInsertion?: boolean;
 };

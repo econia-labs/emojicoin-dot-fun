@@ -1,6 +1,6 @@
 import { toOrderBy } from "@sdk/queries/const";
 import { type HomePageSearchParams } from "lib/queries/sorting/query-params";
-import { MarketDataSortBy, toPostgrestQueryParam } from "lib/queries/sorting/types";
+import { toMarketDataSortByHomePage } from "lib/queries/sorting/types";
 
 export interface HomePageParams {
   params?: {};
@@ -9,7 +9,7 @@ export interface HomePageParams {
 
 export const safeParsePage = (pageInput: string | undefined | null): number => {
   try {
-    return parseInt(pageInput ?? "1");
+    return Math.max(parseInt(pageInput ?? "1"), 1);
   } catch (e) {
     return 1;
   }
@@ -18,15 +18,17 @@ export const safeParsePage = (pageInput: string | undefined | null): number => {
 export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams | undefined) => {
   const {
     page: pageInput,
-    sort = MarketDataSortBy.MarketCap,
+    sort,
     order = "desc",
-    bonding: inBondingCurve = null,
-    q,
+    bonding: inBondingCurve,
+    q: searchBytes,
   } = searchParams ?? {};
 
-  const sortBy = toPostgrestQueryParam(sort);
+  // Ensure the filter is a home-page-only filter.
+  const sortBy = toMarketDataSortByHomePage(sort);
   const page = safeParsePage(pageInput);
   const orderBy = toOrderBy(order);
+  const q = searchBytes === "0x" ? undefined : searchBytes;
 
   return {
     page,

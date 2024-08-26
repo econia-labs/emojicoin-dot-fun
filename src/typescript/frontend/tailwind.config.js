@@ -52,9 +52,10 @@ module.exports = {
       blue: "#64A7FF",
       green: "#2FA90F",
       pink: "#CD2F8D",
+      error: "#CD2F8D",
       "ec-blue": "#086CD9",
       warning: "#FFB119",
-      error: "#F3263E",
+      red: "#F3263E",
       transparent: "transparent",
     },
     keyframes: {
@@ -73,11 +74,16 @@ module.exports = {
         "0%": { transform: "translateX(0)" },
         "100%": { transform: "translateX(-4527.83px)" },
       },
+      banCarousel: {
+        "0%": { transform: "translateX(0)" },
+        "100%": { transform: "translateX(-4825.46px)" },
+      },
     },
     animation: {
       fadeIn: "fadeIn 2s ease-in-out forwards",
       flicker: "flicker 1s infinite",
       carousel: "carousel 88.407s linear infinite",
+      banCarousel: "banCarousel 94.218s linear infinite",
     },
   },
   plugins: [

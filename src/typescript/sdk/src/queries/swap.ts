@@ -1,7 +1,7 @@
 import "server-only";
 
 import { type Types, type JSONTypes, toSwapEvent } from "../types";
-import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY } from "./const";
+import { INBOX_EVENTS_TABLE, INBOX_SWAPS, LIMIT, ORDER_BY } from "./const";
 import {
   type AggregateQueryResultsArgs,
   type EventsAndErrors,
@@ -18,7 +18,7 @@ export const paginateSwapEvents = async (
   const { swapper, marketID } = args;
 
   let query = postgrest
-    .from(INBOX_EVENTS_TABLE)
+    .from(INBOX_SWAPS)
     .select("*")
     .filter("event_name", "eq", "emojicoin_dot_fun::Swap")
     .order("transaction_version", ORDER_BY.DESC);

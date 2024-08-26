@@ -1,5 +1,8 @@
 [workspace]
+# Exclude the processor, which is a workspace in a submodule.
+exclude = ["processor"]
 members = [
+  "broker",
   "allowlister3000"
 ]
 resolver = "2"

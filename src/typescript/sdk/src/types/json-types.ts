@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unused-modules */
-import { type Uint8 } from "@aptos-labs/ts-sdk";
+import { AccountAddress, type Uint8 } from "@aptos-labs/ts-sdk";
 import {
   type Uint64String,
   type AccountAddressString,
@@ -197,6 +197,7 @@ namespace JSONTypes {
     pool_fee: Uint64String;
     starts_in_bonding_curve: boolean;
     results_in_state_transition: boolean;
+    balance_as_fraction_of_circulating_supply?: number;
   };
 
   export type ChatEvent = {
@@ -274,6 +275,11 @@ namespace JSONTypes {
     pro_rata_base_donation_claim_amount: Uint64String;
     pro_rata_quote_donation_claim_amount: Uint64String;
   };
+
+  export type RegistrantGracePeriodFlag = {
+    market_registrant: AccountAddressString;
+    market_registration_time: Uint64String;
+  };
 }
 
 export default JSONTypes;
@@ -288,23 +294,31 @@ export type AnyEmojicoinJSONEvent =
   | JSONTypes.LiquidityEvent;
 
 export function isJSONSwapEvent(e: EventJSON): boolean {
-  return e.type.startsWith("Swap");
+  return e.type.endsWith("Swap");
 }
 export function isJSONChatEvent(e: EventJSON): boolean {
-  return e.type.startsWith("Chat");
+  return e.type.endsWith("Chat");
 }
 export function isJSONMarketRegistrationEvent(e: EventJSON): boolean {
-  return e.type.startsWith("MarketRegistration");
+  return e.type.endsWith("MarketRegistration");
 }
 export function isJSONPeriodicStateEvent(e: EventJSON): boolean {
-  return e.type.startsWith("PeriodicState");
+  return e.type.endsWith("PeriodicState");
 }
 export function isJSONStateEvent(e: EventJSON): boolean {
-  return e.type.startsWith("State");
+  return e.type.endsWith("State");
 }
 export function isJSONGlobalStateEvent(e: EventJSON): boolean {
-  return e.type.startsWith("GlobalState");
+  return e.type.endsWith("GlobalState");
 }
 export function isJSONLiquidityEvent(e: EventJSON): boolean {
-  return e.type.startsWith("Liquidity");
+  return e.type.endsWith("Liquidity");
+}
+export function isRegistrantGracePeriodFlag(e: EventJSON["data"][number]) {
+  return (
+    "market_registrant" in e &&
+    "market_registration_time" in e &&
+    AccountAddress.isValid(e.market_registrant) &&
+    !Number.isNaN(e.market_registration_time)
+  );
 }

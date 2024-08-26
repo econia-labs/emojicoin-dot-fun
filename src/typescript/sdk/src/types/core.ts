@@ -44,3 +44,27 @@ export type GUID = {
   creation_number: bigint;
   account_address: AccountAddressString;
 };
+
+export type JSONFeeStatement = {
+  total_charge_gas_units: string;
+  execution_gas_units: string;
+  io_gas_units: string;
+  storage_fee_octas: string;
+  storage_fee_refund_octas: string;
+};
+
+export type FeeStatement = {
+  totalChargeGasUnits: bigint;
+  executionGasUnits: bigint;
+  ioGasUnits: bigint;
+  storageFeeOctas: bigint;
+  storageFeeRefundOctas: bigint;
+};
+
+export const toFeeStatement = (json: JSONFeeStatement): FeeStatement => ({
+  totalChargeGasUnits: BigInt(json.total_charge_gas_units),
+  executionGasUnits: BigInt(json.execution_gas_units),
+  ioGasUnits: BigInt(json.io_gas_units),
+  storageFeeOctas: BigInt(json.storage_fee_octas),
+  storageFeeRefundOctas: BigInt(json.storage_fee_refund_octas),
+});

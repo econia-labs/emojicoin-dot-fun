@@ -44,7 +44,7 @@ const DesktopGrid = (props: GridProps) => {
             </StyledBlockWrapper>
           </StyledBlock>
           <StyledBlock width="43%">
-            <LiquidityButton data={props.data} />
+            <LiquidityButton geoblocked={props.geoblocked} data={props.data} />
 
             <StyledBlockWrapper>
               <SwapComponent
@@ -52,6 +52,7 @@ const DesktopGrid = (props: GridProps) => {
                 marketAddress={props.data.marketAddress}
                 marketID={props.data.marketID.toString()}
                 initNumSwaps={props.data.numSwaps}
+                geoblocked={props.geoblocked}
               />
             </StyledBlockWrapper>
           </StyledBlock>
@@ -78,7 +79,7 @@ const DesktopGrid = (props: GridProps) => {
             </StyledContentHeader>
 
             <StyledBlockWrapper>
-              <ChatBox data={props.data} />
+              <ChatBox geoblocked={props.geoblocked} data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
         </StyledContentColumn>
