@@ -791,16 +791,16 @@ Resources:
       RouteTableId: !Ref 'NatGatewayRouteTable'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
-  # NatGatewayRouteTableAssociationMockForSubnetB:
-  #   Properties:
-  #     RouteTableId: !Ref 'NatGatewayRouteTable'
-  #     SubnetId: !Ref 'PublicSubnetB'
-  #   Type: 'AWS::EC2::SubnetRouteTableAssociation'
-  # NatGatewayRouteTableAssociationMockForSubnetC:
-  #   Properties:
-  #     RouteTableId: !Ref 'NatGatewayRouteTable'
-  #     SubnetId: !Ref 'PublicSubnetC'
-  #   Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  NatGatewayRouteTableAssociationMockForSubnetB:
+    Properties:
+      RouteTableId: !Ref 'NatGatewayRouteTable'
+      SubnetId: !Ref 'PublicSubnetB'
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  NatGatewayRouteTableAssociationMockForSubnetC:
+    Properties:
+      RouteTableId: !Ref 'NatGatewayRouteTable'
+      SubnetId: !Ref 'PublicSubnetC'
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'ProvisionAlb'
