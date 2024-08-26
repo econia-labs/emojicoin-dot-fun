@@ -47,7 +47,7 @@ export const createNewLatestBarFromSwap = (
 ): LatestBar => {
   // Set the new bar's open, high, low, and close to the close price of the event triggering
   // the creation of the new bar.
-  const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+  const price = q64ToBig(swap.avgExecutionPriceQ64).toNumber();
   const periodStartTime = getPeriodStartTime(swap, resolution);
 
   return {

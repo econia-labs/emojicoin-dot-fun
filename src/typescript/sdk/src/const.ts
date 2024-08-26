@@ -1,5 +1,6 @@
 import { AccountAddress, APTOS_COIN, parseTypeTag } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
+import { type ValueOf } from "./utils/utility-types";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS || !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {
@@ -61,7 +62,58 @@ export const POOL_FEE_RATE_BPS = 25;
 // 1 APT plus the 4 APT deposit.
 export const APT_BALANCE_REQUIRED_TO_REGISTER_MARKET = 5n * ONE_APT_BIGINT;
 
-export enum StateTrigger {
+/// As defined in the database, aka the enum string.
+export enum Period {
+  Period1M = "period_1m",
+  Period5M = "period_5m",
+  Period15M = "period_15m",
+  Period30M = "period_30m",
+  Period1H = "period_1h",
+  Period4H = "period_4h",
+  Period1D = "period_1d",
+}
+
+/// As defined in the database, aka the enum string.
+export enum Trigger {
+  PackagePublication = "package_publication",
+  MarketRegistration = "market_registration",
+  SwapBuy = "swap_buy",
+  SwapSell = "swap_sell",
+  ProvideLiquidity = "provide_liquidity",
+  RemoveLiquidity = "remove_liquidity",
+  Chat = "chat",
+}
+
+export const toPeriod = (s: string) =>
+  ({
+    period_1m: Period.Period1M,
+    period_5m: Period.Period5M,
+    period_15m: Period.Period15M,
+    period_30m: Period.Period30M,
+    period_1h: Period.Period1H,
+    period_4h: Period.Period4H,
+    period_1d: Period.Period1D,
+  })[s as ValueOf<typeof Period>] ??
+  (() => {
+    throw new Error(`Unknown period: ${s}`);
+  })();
+
+export const toTrigger = (s: string) =>
+  ({
+    package_publication: Trigger.PackagePublication,
+    market_registration: Trigger.MarketRegistration,
+    swap_buy: Trigger.SwapBuy,
+    swap_sell: Trigger.SwapSell,
+    provide_liquidity: Trigger.ProvideLiquidity,
+    remove_liquidity: Trigger.RemoveLiquidity,
+    chat: Trigger.Chat,
+  })[s as ValueOf<typeof Trigger>] ??
+  (() => {
+    throw new Error(`Unknown trigger: ${s}`);
+  })();
+
+/// As defined in the contract, not in the database; i.e., numbers, not enum strings.
+enum StateTriggerFromContract {
   PACKAGE_PUBLICATION = 0,
   MARKET_REGISTRATION = 1,
   SWAP_BUY = 2,
@@ -70,28 +122,6 @@ export enum StateTrigger {
   REMOVE_LIQUIDITY = 5,
   CHAT = 6,
 }
-
-export const toStateTrigger = (num: number): StateTrigger => {
-  if (num === StateTrigger.PACKAGE_PUBLICATION) return StateTrigger.PACKAGE_PUBLICATION;
-  if (num === StateTrigger.MARKET_REGISTRATION) return StateTrigger.MARKET_REGISTRATION;
-  if (num === StateTrigger.SWAP_BUY) return StateTrigger.SWAP_BUY;
-  if (num === StateTrigger.SWAP_SELL) return StateTrigger.SWAP_SELL;
-  if (num === StateTrigger.PROVIDE_LIQUIDITY) return StateTrigger.PROVIDE_LIQUIDITY;
-  if (num === StateTrigger.REMOVE_LIQUIDITY) return StateTrigger.REMOVE_LIQUIDITY;
-  if (num === StateTrigger.CHAT) return StateTrigger.CHAT;
-  throw new Error(`Invalid state trigger: ${num}`);
-};
-
-// For APT coin and for each emojicoin.
-export const DECIMALS = 8;
-
-// The number of decimals at which exponential notation is used for positive Big.js numbers.
-export const NUM_DECIMALS_BEFORE_SCIENTIFIC_NOTATION = 1000;
-Big.PE = NUM_DECIMALS_BEFORE_SCIENTIFIC_NOTATION;
-
-// Emoji sequence length constraints.
-export const MAX_NUM_CHAT_EMOJIS = 100;
-export const MAX_SYMBOL_LENGTH = 10;
 
 /**
  * Note that a period boundary, a candlestick resolution, a period, and a candlestick time frame
@@ -106,6 +136,39 @@ export enum CandlestickResolution {
   PERIOD_4H = 14400000000,
   PERIOD_1D = 86400000000,
 }
+
+export const toTriggerFromContract = (num: number): Trigger => {
+  if (num === StateTriggerFromContract.PACKAGE_PUBLICATION) return Trigger.PackagePublication;
+  if (num === StateTriggerFromContract.MARKET_REGISTRATION) return Trigger.MarketRegistration;
+  if (num === StateTriggerFromContract.SWAP_BUY) return Trigger.SwapBuy;
+  if (num === StateTriggerFromContract.SWAP_SELL) return Trigger.SwapSell;
+  if (num === StateTriggerFromContract.PROVIDE_LIQUIDITY) return Trigger.ProvideLiquidity;
+  if (num === StateTriggerFromContract.REMOVE_LIQUIDITY) return Trigger.RemoveLiquidity;
+  if (num === StateTriggerFromContract.CHAT) return Trigger.Chat;
+  throw new Error(`Invalid state trigger: ${num}`);
+};
+
+export const toPeriodFromContract = (num: bigint): Period => {
+  if (num === BigInt(CandlestickResolution.PERIOD_1M)) return Period.Period1M;
+  if (num === BigInt(CandlestickResolution.PERIOD_5M)) return Period.Period5M;
+  if (num === BigInt(CandlestickResolution.PERIOD_15M)) return Period.Period15M;
+  if (num === BigInt(CandlestickResolution.PERIOD_30M)) return Period.Period30M;
+  if (num === BigInt(CandlestickResolution.PERIOD_1H)) return Period.Period1H;
+  if (num === BigInt(CandlestickResolution.PERIOD_4H)) return Period.Period4H;
+  if (num === BigInt(CandlestickResolution.PERIOD_1D)) return Period.Period1D;
+  throw new Error(`Invalid period: ${num}`);
+};
+
+// For APT coin and for each emojicoin.
+export const DECIMALS = 8;
+
+// The number of decimals at which exponential notation is used for positive Big.js numbers.
+export const NUM_DECIMALS_BEFORE_SCIENTIFIC_NOTATION = 1000;
+Big.PE = NUM_DECIMALS_BEFORE_SCIENTIFIC_NOTATION;
+
+// Emoji sequence length constraints.
+export const MAX_NUM_CHAT_EMOJIS = 100;
+export const MAX_SYMBOL_LENGTH = 10;
 
 // The default grace period time for a new market registrant to trade on a new market before
 // non-registrants can trade. Note that this period is ended early once the registrant makes a

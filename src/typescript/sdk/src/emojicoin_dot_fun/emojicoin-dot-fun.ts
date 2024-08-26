@@ -456,7 +456,7 @@ export type SwapPayloadMoveArguments = {
   inputAmount: U64;
   isSell: Bool;
   integrator: AccountAddress;
-  integratorFeeRateBps: U8;
+  integratorFeeRateBPs: U8;
   minOutputAmount: U64;
 };
 
@@ -497,7 +497,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
     minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
@@ -509,7 +509,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
       inputAmount,
       isSell,
       integrator,
-      integratorFeeRateBps,
+      integratorFeeRateBPs,
       minOutputAmount,
       typeTags,
       feePayer,
@@ -521,7 +521,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
       inputAmount: new U64(inputAmount),
       isSell: new Bool(isSell),
       integrator: AccountAddress.from(integrator),
-      integratorFeeRateBps: new U8(integratorFeeRateBps),
+      integratorFeeRateBPs: new U8(integratorFeeRateBPs),
       minOutputAmount: new U64(minOutputAmount),
     };
     this.typeTags = typeTags.map((typeTag) =>
@@ -537,7 +537,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
     minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
@@ -563,7 +563,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
     minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
@@ -1222,7 +1222,7 @@ export type SimulateSwapPayloadMoveArguments = {
   inputAmount: U64;
   isSell: Bool;
   integrator: AccountAddress;
-  integratorFeeRateBps: U8;
+  integratorFeeRateBPs: U8;
 };
 
 /**
@@ -1256,7 +1256,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
   }) {
     super();
@@ -1266,7 +1266,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
       inputAmount,
       isSell,
       integrator,
-      integratorFeeRateBps,
+      integratorFeeRateBPs,
       typeTags,
     } = args;
 
@@ -1276,7 +1276,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
       inputAmount: new U64(inputAmount),
       isSell: new Bool(isSell),
       integrator: AccountAddress.from(integrator),
-      integratorFeeRateBps: new U8(integratorFeeRateBps),
+      integratorFeeRateBPs: new U8(integratorFeeRateBPs),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -1290,7 +1290,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     options?: LedgerVersionArg;
   }): Promise<JSONTypes.SwapEvent> {

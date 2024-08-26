@@ -2,7 +2,6 @@ import { type HexInput } from "@aptos-labs/ts-sdk";
 import { normalizeHex } from "../utils/hex";
 import AllSymbolEmojiJSON from "./symbol-emojis.json";
 import { type SymbolEmojiData } from "./types";
-import { MAX_SYMBOL_LENGTH } from "../const";
 
 const encoder = new TextEncoder();
 const values: SymbolEmojiData[] = Object.entries(AllSymbolEmojiJSON).map(([name, emoji]) => {
@@ -34,19 +33,4 @@ export const SYMBOL_DATA = {
 export const getRandomEmoji = (): SymbolEmojiData => {
   const randomIndex = Math.floor(values.length * Math.random());
   return values[randomIndex];
-};
-
-export const generateRandomSymbol = () => {
-  const emojis: SymbolEmojiData[] = [];
-  let i = 0;
-  const sumBytes = (bytes: Uint8Array[]) => bytes.reduce((acc, b) => acc + b.length, 0);
-  // Try 10 times. Guaranteed to return at least one emoji, but possibly multiple.
-  while (i < 10) {
-    const randomEmoji = getRandomEmoji();
-    if (sumBytes([...emojis.map((e) => e.bytes), randomEmoji.bytes]) < MAX_SYMBOL_LENGTH) {
-      emojis.push(randomEmoji);
-    }
-    i += 1;
-  }
-  return emojis;
 };

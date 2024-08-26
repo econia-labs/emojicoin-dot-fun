@@ -307,7 +307,7 @@ async function execute(aptos: Aptos, actions: Action[]) {
         swapper: action.data.account,
         inputAmount: action.data.inputAmount,
         isSell: action.data.isSell,
-        integratorFeeRateBps: 0,
+        integratorFeeRateBPs: 0,
         minOutputAmount: 1n,
       })
         /* eslint-disable-next-line no-console */

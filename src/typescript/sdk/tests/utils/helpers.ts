@@ -1,13 +1,16 @@
-import { Account, AccountAddress, Ed25519PrivateKey, Hex, TypeTag } from "@aptos-labs/ts-sdk";
+import { Account, Ed25519PrivateKey, Hex, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import fs from "fs";
 import path from "path";
 import findGitRoot from "find-git-root";
-import { fundAccountFast, getAptosClient } from "./aptos-client";
+import { getAptosClient } from "./aptos-client";
 import { type TestHelpers } from "./types";
-import { AnyEmojiName, SYMBOL_DATA } from "../../src/emoji_data/symbol-data";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { ONE_APT, symbolBytesToEmojis } from "../../src";
+import { generateRandomSymbol, type JSONTypes, ONE_APT } from "../../src";
+
+// The exact amount of APT to trigger a transition out of the bonding curve. Note that the
+// fee integrator rate BPs must be set to 0 for this to work.
+export const EXACT_TRANSITION_INPUT_AMOUNT = 100_000_000_000n;
 
 export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/sdk/tests");
 export const PK_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", ".pk"));
@@ -53,45 +56,57 @@ export function getGitRoot(): string {
 }
 
 export async function registerMarketTestHelper({
-  emojiNames,
   registrant = Account.generate(),
   integrator = Account.generate(),
+  sequenceNumber,
 }: {
-  emojiNames: Array<AnyEmojiName>;
   registrant?: Account;
   additionalAccountsToFund?: Array<Account>;
   integrator?: Account;
+  sequenceNumber?: bigint;
 }) {
   const { aptos } = getTestHelpers();
-  const emojis = emojiNames.map((name) => SYMBOL_DATA.byStrictName(name));
-  const symbolBytes = new Uint8Array(emojis.flatMap((e) => Array.from(e.bytes)));
-  const { marketAddress, emojicoin, emojicoinLP } = getEmojicoinMarketAddressAndTypeTags({
-    symbolBytes,
-  });
 
-  const funds = fundAccountFast(aptos, registrant, ONE_APT * 100000);
-
-  const register = EmojicoinDotFun.RegisterMarket.submit({
-    aptosConfig: aptos.config,
-    registrant,
-    emojis: emojis.map((e) => e.hex),
-    integrator: integrator.accountAddress,
-    options: {
-      maxGasAmount: ONE_APT / 100,
-      gasUnitPrice: 100,
+  let symbol = generateRandomSymbol();
+  let registered = true as boolean | JSONTypes.MarketMetadata | undefined;
+  while (registered) {
+    /* eslint-disable-next-line no-await-in-loop */
+    registered = await EmojicoinDotFun.MarketMetadataByEmojiBytes.view({
+      aptos,
+      emojiBytes: symbol.symbolData.bytes,
+    }).then((r) => r.vec.at(0));
+    if (!registered) {
+      break;
     }
+    symbol = generateRandomSymbol();
+  }
+
+  const { marketAddress, emojicoin, emojicoinLP } = getEmojicoinMarketAddressAndTypeTags({
+    symbolBytes: symbol.symbolData.bytes,
   });
 
-  const [_, registerResponse] = await Promise.all([funds, register]);
+  let registerResponse: UserTransactionResponse | undefined;
+  if (!registered) {
+    registerResponse = await EmojicoinDotFun.RegisterMarket.submit({
+      aptosConfig: aptos.config,
+      registrant,
+      emojis: symbol.emojis.map((e) => e.hex),
+      integrator: integrator.accountAddress,
+      options: {
+        maxGasAmount: ONE_APT / 100,
+        gasUnitPrice: 100,
+        accountSequenceNumber: sequenceNumber,
+      },
+    });
+  }
 
   return {
-    aptos,
     registerResponse,
     marketAddress,
     emojicoin,
     emojicoinLP,
     registrant,
     integrator,
-    ...symbolBytesToEmojis(symbolBytes),
+    ...symbol,
   };
 }

@@ -1,3 +1,4 @@
+import { Trigger } from "../../src";
 import { type Types } from "../../src/types/types";
 
 export const SAMPLE_SWAP_EVENT: Types.SwapEvent = {
@@ -12,13 +13,15 @@ export const SAMPLE_SWAP_EVENT: Types.SwapEvent = {
   netProceeds: 0n,
   baseVolume: 0n,
   quoteVolume: 0n,
-  avgExecutionPrice: 0n,
+  avgExecutionPriceQ64: 0n,
   integratorFee: 0n,
   poolFee: 0n,
   startsInBondingCurve: false,
   resultsInStateTransition: false,
   guid: `Swap::${1n.toString()}::${10n.toString()}`,
   version: 0,
+  balanceAsFractionOfCirculatingSupplyBeforeQ64: 0n,
+  balanceAsFractionOfCirculatingSupplyAfterQ64: 0n,
 };
 
 export const SAMPLE_STATE_EVENT: Types.StateEvent = {
@@ -29,9 +32,9 @@ export const SAMPLE_STATE_EVENT: Types.StateEvent = {
     emojiBytes: new Uint8Array([0x00, 0x01]),
   },
   stateMetadata: {
-    marketNonce: 0n,
+    marketNonce: 1n,
     bumpTime: 123n,
-    trigger: 3,
+    trigger: Trigger.MarketRegistration,
   },
   clammVirtualReserves: {
     base: 0n,
@@ -59,7 +62,7 @@ export const SAMPLE_STATE_EVENT: Types.StateEvent = {
   },
   lastSwap: {
     isSell: false,
-    avgExecutionPrice: 0n,
+    avgExecutionPriceQ64: 0n,
     baseVolume: 0n,
     quoteVolume: 0n,
     nonce: 11n,
