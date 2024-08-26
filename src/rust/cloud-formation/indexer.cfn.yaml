@@ -24,6 +24,9 @@ Conditions:
   ProvisionProcessor: !Equals
   - !Ref 'ProvisionProcessor'
   - 'true'
+  ProvisionRouteTables: !Equals
+  - !Ref 'ProvisionRouteTables'
+  - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
@@ -120,6 +123,8 @@ Parameters:
   ProvisionPostgrest:
     Type: 'String'
   ProvisionProcessor:
+    Type: 'String'
+  ProvisionRouteTables:
     Type: 'String'
 Resources:
   # Public application load balancer.
@@ -710,6 +715,7 @@ Resources:
     - 'B'
     - 'C'
   - PrivateRouteTableAssociation${Identifier}:
+      Condition: 'ProvisionRouteTables'
       Properties:
         RouteTableId: !Ref 'PrivateRouteTable'
         SubnetId: !Ref
@@ -724,6 +730,7 @@ Resources:
     - 'B'
     - 'C'
   - PublicRouteTableAssociation${Identifier}:
+      Condition: 'ProvisionRouteTables'
       Properties:
         RouteTableId: !Ref 'PublicRouteTable'
         SubnetId: !Ref
@@ -979,11 +986,13 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Route table for private subnets in the virtual private cloud.
   PrivateRouteTable:
+    Condition: 'ProvisionRouteTables'
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
   # Route from private subnets through network address translation gateway.
   PrivateRouteThroughNatGateway:
+    Condition: 'ProvisionRouteTables'
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
       NatGatewayId: !Ref 'NatGateway'
@@ -991,6 +1000,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Route from private subnets to the rest of the virtual private cloud.
   PrivateRouteToVpc:
+    Condition: 'ProvisionRouteTables'
     Properties:
       DestinationCidrBlock: !FindInMap
       - 'Constants'
@@ -1163,11 +1173,13 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Route table for public subnets in the virtual private cloud.
   PublicRouteTable:
+    Condition: 'ProvisionRouteTables'
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
   # Route from public subnets through the internet gateway.
   PublicRouteToInternet:
+    Condition: 'ProvisionRouteTables'
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
       GatewayId: !Ref 'InternetGateway'
@@ -1175,6 +1187,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Route from public subnets to the rest of the virtual private cloud.
   PublicRouteToVpc:
+    Condition: 'ProvisionRouteTables'
     Properties:
       DestinationCidrBlock: !FindInMap
       - 'Constants'
