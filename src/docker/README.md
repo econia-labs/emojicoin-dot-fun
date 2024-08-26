@@ -1,4 +1,3 @@
-
 # Running the emojicoin dot fun indexer with Docker
 
 Ensure you've successfully pulled all submodule repositories required to
