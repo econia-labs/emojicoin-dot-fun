@@ -7,7 +7,7 @@ parameters:
   GrpcDataServiceUrl: 'https://grpc.testnet.aptoslabs.com:443'
   MinimumStartingVersion: '5675600000'
   ProcessorImageVersion: '0.4.0'
-  ProvisionAlb: 'false'
+  ProvisionAlb: 'true'
   ProvisionAlbDnsRecord: 'true'
   ProvisionBastionHost: 'true'
   ProvisionBroker: 'true'
