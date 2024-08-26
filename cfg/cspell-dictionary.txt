@@ -38,6 +38,7 @@ gcloud
 geoblock
 geoblocked
 guids
+hadolint
 hamsa
 headlessui
 healthcheck
@@ -80,6 +81,7 @@ precommit
 presale
 psql
 rica
+rustflags
 rustup
 serde
 sint

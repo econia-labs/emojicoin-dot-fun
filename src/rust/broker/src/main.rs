@@ -1,3 +1,4 @@
+use log::{error, info};
 use tokio::sync::broadcast;
 
 mod processor_connection;
@@ -30,15 +31,15 @@ async fn main() -> Result<(), ()> {
 
     tokio::select! {
         _ = processor_connection => {
-            log::error!("Connection to processor error.");
+            error!("Processor connection thread terminated.");
             return Err(());
         }
         result = sse_server => {
             if let Err(e) = result {
-                log::error!("Broker server error: {e}.");
+                error!("Broker server error: {e}.");
                 return Err(());
             } else {
-                log::info!("Gracefully shutting down.")
+                info!("Gracefully shutting down.")
             }
         }
     };
