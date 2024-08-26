@@ -33,58 +33,44 @@ type PostgresTimestamp = string;
 
 /**
  * Converts a PostgreSQL timestamp string to microseconds since the Unix epoch.
+ * 
+ * NOTE: This function assumes that the input timestamp is in UTC, but without the "Z" suffix.
+ * If that changes, this function will break. This is intentional.
  *
- * @param {PostgresTimestamp} timestamp - A PostgreSQL timestamp: "YYYY-MM-DDTHH:mm:ss.SSSSSS"
- * @returns {bigint} The number of microseconds since the Unix epoch: January 1, 1970, 00:00:00 UTC.
- *   The fractional seconds part can have 1 to 6 digits.
- * @throws {Error} If the timestamp string dose not contain a valid microseconds part.
+ * This function takes a PostgreSQL timestamp string and converts it to the number of
+ * microseconds elapsed since the Unix epoch (January 1, 1970, 00:00:00 UTC). It handles
+ * timestamps with varying precision in the fractional seconds part, from 1 to 6 digits.
+ *
+ * @param {PostgresTimestamp} timestamp - A PostgreSQL timestamp string in the format "YYYY-MM-DDTHH:mm:ss.SSSSSS".
+ * @returns {bigint} The number of microseconds since the Unix epoch.
  *
  * @example
  * const timestamp1 = "2024-08-24T19:23:01.940306";
  * console.log(postgresTimestampToMicroseconds(timestamp1).toString()); // 1724598581940306
  *
+ * @example
  * const timestamp2 = "2024-08-24T19:23:01.94";
  * console.log(postgresTimestampToMicroseconds(timestamp2).toString()); // 1724598581940000
  *
- * @remarks
- * - This function assumes that the input timestamp is in UTC. If the timestamp is in a different
- *   timezone, it should be converted to UTC before passing it to this function.
- * - The function uses JavaScript's built-in Date object to parse the main part of the timestamp,
- *   which provides millisecond precision. It then extracts the fractional seconds part using a
- *   regular expression and combines both to achieve microsecond precision.
- * - If the fractional seconds part has fewer than 6 digits, it's padded with zeros to microsecond
- *   precision.
- */
+ * @note
+ * - The function can handle timestamps with or without fractional seconds.
+ * - If fractional seconds are provided, they can have 1 to 6 digits of precision.
+ * - If fewer than 6 digits are provided for fractional seconds, the function pads the value with
+ *   zeros to ensure microsecond precision.
+ * - The function uses the BigInt type to ensure precision when dealing with microsecond timestamps.
+ * @typedef {string} PostgresTimestamp A string in the format "YYYY-MM-DDTHH:mm:ss.SSSSSS"
+*/
 export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp): bigint => {
-  const timestampToSecondPrecision = timestamp.split(".")[0];
+  const spl = timestamp.split(".");
+  const microseconds = spl.length == 1 ? 0n : BigInt(spl[1].padEnd(6, "0"));
 
-  let restOfTimestamp = timestamp.split(".")[1] ?? "";
-  if (!restOfTimestamp) {
-    const numCharsAfterSecondColon = timestamp.split(":", 3)[2].length;
-    if (
-      !(
-        numCharsAfterSecondColon === 2 ||
-        (numCharsAfterSecondColon === 3 && timestamp.endsWith("Z"))
-      )
-    ) {
-      throw new Error("Invalid PostgreSQL timestamp: missing fractional seconds.");
-    }
-  }
-  if (restOfTimestamp && restOfTimestamp.endsWith("Z")) {
-    // Remove the "Z" at the end before parsing the microseconds.
-    restOfTimestamp = restOfTimestamp.slice(0, -1);
-  }
-  restOfTimestamp.padEnd(6, "0");
-
-  const milliseconds = new Date(`${timestampToSecondPrecision}Z`).getTime();
-  const microseconds = BigInt(restOfTimestamp);
-  console.log(milliseconds, microseconds);
-  return BigInt(milliseconds) * 1000n + microseconds;
+  // Get the date to the nearest second.
+  const dateToNearestSecond = new Date(spl[0]);
+  // Convert it to milliseconds.
+  const inMilliseconds = dateToNearestSecond.getTime();
+  // Convert it to microseconds; add the microseconds portion from the original timestamp.
+  return BigInt(inMilliseconds * 1000) + microseconds;
 };
-
-console.log(postgresTimestampToMicroseconds("2024-08-24T19:23:01.000000").toString());
-console.log(postgresTimestampToMicroseconds("2024-08-24T19:23:01.0").toString());
-console.log(postgresTimestampToMicroseconds("2024-08-24T19:23:01").toString());
 
 /**
  * Converts a PostgreSQL timestamp string to a JavaScript Date object.
@@ -101,11 +87,6 @@ console.log(postgresTimestampToMicroseconds("2024-08-24T19:23:01").toString());
  * Uses postgresTimestampToMicroseconds for parsing, then converts microseconds
  * to milliseconds to create the Date object. This approach preserves the full
  * precision of the PostgreSQL timestamp up to JavaScript Date's millisecond limit.
- *
- * NOTE: We can't use `new Date(timestamp)` directly because it incorrectly parses the timestamp by
- * ignoring the milliseconds and using the microseconds as milliseconds.
- * This method parses the full timestamp to microseconds, then converts to milliseconds, ensuring
- * we preserve the PostgreSQL timestamp's precision up to JavaScript's millisecond limit.
  */
 export const postgresTimestampToDate = (timestamp: PostgresTimestamp): Date => {
   const microseconds = postgresTimestampToMicroseconds(timestamp);
