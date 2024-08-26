@@ -75,7 +75,7 @@ services:
 
   frontend:
     build:
-      context: ../..
+      context: '../..'
       dockerfile: src/docker/frontend/Dockerfile
       args:
         INBOX_URL: http://postgrest:3000
