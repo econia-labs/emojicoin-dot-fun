@@ -389,7 +389,10 @@ Resources:
       HealthyThresholdCount: 2
       # Group name must be <= 32 characters.
       Name: !Sub '${AWS::StackName}-ga'
-      Port: 443
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
       Protocol: 'HTTP'
       ProtocolVersion: 'HTTP1'
       TargetGroupAttributes:
@@ -801,7 +804,10 @@ Resources:
       HealthyThresholdCount: 2
       # Group name must be <= 32 characters.
       Name: !Sub '${AWS::StackName}-gb'
-      Port: 443
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
       Protocol: 'HTTP'
       ProtocolVersion: 'HTTP1'
       TargetGroupAttributes:
