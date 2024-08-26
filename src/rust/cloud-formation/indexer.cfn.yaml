@@ -422,7 +422,7 @@ Resources:
           - 'Networking'
           - 'BrokerPort'
           TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-      - null
+      - !Ref 'AWS::NoValue'
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
@@ -832,7 +832,7 @@ Resources:
           - 'Networking'
           - 'PostgrestPort'
           TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
-      - null
+      - !Ref 'AWS::NoValue'
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
