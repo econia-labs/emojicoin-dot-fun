@@ -1003,15 +1003,15 @@ Resources:
       RouteTableId: !Ref 'PrivateRouteTable'
     Type: 'AWS::EC2::Route'
   # Route from private subnets to the rest of the virtual private cloud.
-  PrivateRouteToVpc:
-    Condition: 'ProvisionRouteTables'
-    Properties:
-      DestinationCidrBlock: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'VpcCidrBlock'
-      RouteTableId: !Ref 'PrivateRouteTable'
-    Type: 'AWS::EC2::Route'
+  # PrivateRouteToVpc:
+  #   Condition: 'ProvisionRouteTables'
+  #   Properties:
+  #     DestinationCidrBlock: !FindInMap
+  #     - 'Constants'
+  #     - 'Networking'
+  #     - 'VpcCidrBlock'
+  #     RouteTableId: !Ref 'PrivateRouteTable'
+  #   Type: 'AWS::EC2::Route'
   # Private DNS namespace for internal service discovery.
   PrivateServiceDiscoveryNamespace:
     Properties:
@@ -1190,15 +1190,15 @@ Resources:
       RouteTableId: !Ref 'PublicRouteTable'
     Type: 'AWS::EC2::Route'
   # Route from public subnets to the rest of the virtual private cloud.
-  PublicRouteToVpc:
-    Condition: 'ProvisionRouteTables'
-    Properties:
-      DestinationCidrBlock: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'VpcCidrBlock'
-      RouteTableId: !Ref 'PublicRouteTable'
-    Type: 'AWS::EC2::Route'
+  # PublicRouteToVpc:
+  #   Condition: 'ProvisionRouteTables'
+  #   Properties:
+  #     DestinationCidrBlock: !FindInMap
+  #     - 'Constants'
+  #     - 'Networking'
+  #     - 'VpcCidrBlock'
+  #     RouteTableId: !Ref 'PublicRouteTable'
+  #   Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
     Properties:
