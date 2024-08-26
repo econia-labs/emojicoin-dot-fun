@@ -823,7 +823,7 @@ Resources:
       DesiredCount: 1
       LaunchType: 'FARGATE'
       LoadBalancers:
-      - ContainerName: !Sub '${AWS::StackName}-broker'
+      - ContainerName: !Sub '${AWS::StackName}-postgrest'
         ContainerPort: !FindInMap
         - 'Constants'
         - 'Networking'

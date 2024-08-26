@@ -11,7 +11,7 @@ parameters:
   ProvisionAlbDnsRecord: 'true'
   ProvisionBastionHost: 'true'
   ProvisionBroker: 'true'
-  ProvisionPostgrest: 'false'
+  ProvisionPostgrest: 'true'
   ProvisionProcessor: 'true'
 tags: null
 template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
