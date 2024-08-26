@@ -703,7 +703,7 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # An outbound internet traffic route association for each subnet.
+  # Association for private route table with each private subnet.
   Fn::ForEach::PrivateRouteTableAssociation:
   - 'Identifier'
   - - 'A'
@@ -715,6 +715,20 @@ Resources:
         SubnetId: !Ref
           Fn::Sub:
           - 'Subnet${Identifier}'
+          - Identifier: !Ref 'Identifier'
+      Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Association for public route table with each public subnet.
+  Fn::ForEach::PublicRouteTableAssociation:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PublicRouteTableAssociation${Identifier}:
+      Properties:
+        RouteTableId: !Ref 'PublicRouteTable'
+        SubnetId: !Ref
+          Fn::Sub:
+          - 'PublicSubnet${Identifier}'
           - Identifier: !Ref 'Identifier'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A public subnet for each availability zone.
@@ -779,28 +793,6 @@ Resources:
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
-  # Route table for the network address translation gateway.
-  NatGatewayRouteTable:
-    Properties:
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::EC2::RouteTable'
-  # Association between route table and subnet for network address translation
-  # gateway.
-  NatGatewayRouteTableAssociation:
-    Properties:
-      RouteTableId: !Ref 'NatGatewayRouteTable'
-      SubnetId: !Ref 'PublicSubnetA'
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-  NatGatewayRouteTableAssociationMockForSubnetB:
-    Properties:
-      RouteTableId: !Ref 'NatGatewayRouteTable'
-      SubnetId: !Ref 'PublicSubnetB'
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-  NatGatewayRouteTableAssociationMockForSubnetC:
-    Properties:
-      RouteTableId: !Ref 'NatGatewayRouteTable'
-      SubnetId: !Ref 'PublicSubnetC'
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'ProvisionAlb'
@@ -990,6 +982,22 @@ Resources:
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
+  # Route from private subnets through network address translation gateway.
+  PrivateRouteThroughNatGateway:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref 'NatGateway'
+      RouteTableId: !Ref 'PrivateRouteTable'
+    Type: 'AWS::EC2::Route'
+  # Route from private subnets to the rest of the virtual private cloud.
+  PrivateRouteToVpc:
+    Properties:
+      DestinationCidrBlock: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'VpcCidrBlock'
+      RouteTableId: !Ref 'PrivateRouteTable'
+    Type: 'AWS::EC2::Route'
   # Private DNS namespace for internal service discovery.
   PrivateServiceDiscoveryNamespace:
     Properties:
@@ -1153,19 +1161,26 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Route to the internet for network address translation gateway.
-  RouteToInternet:
+  # Route table for public subnets in the virtual private cloud.
+  PublicRouteTable:
+    Properties:
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::RouteTable'
+  # Route from public subnets through the internet gateway.
+  PublicRouteToInternet:
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
       GatewayId: !Ref 'InternetGateway'
-      RouteTableId: !Ref 'NatGatewayRouteTable'
+      RouteTableId: !Ref 'PublicRouteTable'
     Type: 'AWS::EC2::Route'
-  # Route to the network address translation gateway for private subnets.
-  RouteToNatGateway:
+  # Route from public subnets to the rest of the virtual private cloud.
+  PublicRouteToVpc:
     Properties:
-      DestinationCidrBlock: '0.0.0.0/0'
-      NatGatewayId: !Ref 'NatGateway'
-      RouteTableId: !Ref 'PrivateRouteTable'
+      DestinationCidrBlock: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'VpcCidrBlock'
+      RouteTableId: !Ref 'PublicRouteTable'
     Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
