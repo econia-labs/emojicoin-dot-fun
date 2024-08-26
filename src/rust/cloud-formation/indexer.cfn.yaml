@@ -823,13 +823,13 @@ Resources:
         MinimumHealthyPercent: 0
       DesiredCount: 1
       LaunchType: 'FARGATE'
-      # LoadBalancers:
-      # - ContainerName: !Sub '${AWS::StackName}-postgrest'
-      #   ContainerPort: !FindInMap
-      #   - 'Constants'
-      #   - 'Networking'
-      #   - 'PostgrestPort'
-      #   TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+      LoadBalancers:
+      - ContainerName: !Sub '${AWS::StackName}-postgrest'
+        ContainerPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'PostgrestPort'
+        TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
