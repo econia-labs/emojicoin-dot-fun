@@ -362,6 +362,7 @@ Resources:
   # Target group for application load balancer traffic to the broker.
   BrokerAlbTargetGroup:
     Condition: 'ProvisionAlb'
+    DependsOn: 'Alb'
     Properties:
       HealthCheckIntervalSeconds: 5
       HealthCheckPath: '/'
@@ -776,6 +777,7 @@ Resources:
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'ProvisionAlb'
+    DependsOn: 'Alb'
     Properties:
       HealthCheckIntervalSeconds: 5
       HealthCheckPath: '/ready'
