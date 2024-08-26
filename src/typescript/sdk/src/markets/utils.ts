@@ -10,7 +10,10 @@ import {
   type MoveStructId,
   parseTypeTag,
   type TypeTag,
+  type UserTransactionResponse,
+  type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
+import Big from "big.js";
 import {
   EmojicoinDotFun,
   REGISTRY_ADDRESS,
@@ -23,6 +26,8 @@ import {
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   GRACE_PERIOD_TIME,
   MODULE_ADDRESS,
+  Period,
+  toPeriodFromContract,
 } from "../const";
 import { type Types, toMarketResource, toRegistrantGracePeriodFlag } from "../types/types";
 import type JSONTypes from "../types/json-types";
@@ -245,4 +250,52 @@ export async function getMarketResource(args: {
   });
 
   return toMarketResource(marketResource);
+}
+
+export function getMarketResourceFromWriteSet(
+  response: UserTransactionResponse,
+  marketAddress: AccountAddressInput
+) {
+  const { changes } = response;
+  let marketResource: JSONTypes.MarketResource | undefined;
+  const exists = changes.find((anyChange) => {
+    if (anyChange.type !== "write_resource") return false;
+    const change = anyChange as WriteSetChangeWriteResource;
+
+    const { address } = change as WriteSetChangeWriteResource;
+    if (!AccountAddress.from(marketAddress).equals(AccountAddress.from(address))) return false;
+
+    const resourceType = (change as WriteSetChangeWriteResource).data.type;
+    const typeTag = parseTypeTag(resourceType).toString();
+    if (typeTag !== MARKET_RESOURCE_TYPE) return false;
+
+    marketResource = change.data.data as JSONTypes.MarketResource;
+    return true;
+  });
+
+  if (exists && marketResource) {
+    return toMarketResource(marketResource);
+  }
+
+  return undefined;
+}
+
+export function calculateTvlGrowth(periodicStateTracker1D: Types.PeriodicStateTracker) {
+  if (toPeriodFromContract(periodicStateTracker1D.period) !== Period.Period1D) {
+    throw new Error("Expected a 1-day Periodic State Tracker to calculate TVL growth.");
+  }
+
+  const { coinRatioStart: start, coinRatioEnd: end } = periodicStateTracker1D;
+
+  const a = Big(start.tvl.toString());
+  const b = Big(start.lpCoins.toString());
+  const c = Big(end.tvl.toString());
+  const d = Big(end.lpCoins.toString());
+
+  if (a.eq(0) || b.eq(0)) {
+    return 0n;
+  }
+
+  // (b * c) / (a * d)
+  return BigInt(b.mul(c).div(a.mul(d)).toString());
 }

@@ -1,8 +1,8 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
 import emojiRegex from "emoji-regex";
 import { normalizeHex } from "../utils/hex";
-import { SYMBOL_DATA } from "./symbol-data";
-import { type SymbolEmojiData, type EmojiName } from "./types";
+import { getRandomEmoji, SYMBOL_DATA } from "./symbol-data";
+import { type SymbolEmojiData, type EmojiName, type SymbolData } from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
 export const getEmojisInString = (symbols: string): Array<string> => {
@@ -139,7 +139,7 @@ export const symbolBytesToEmojis = (symbol: string | Uint8Array | Uint8Array[]) 
  * @param delimiter
  * @returns a string of the emoji names joined by the delimiter.
  */
-export const joinEmojis = (emojis: Array<SymbolEmojiData>, delimiter: string = ", "): string =>
+export const joinEmojiNames = (emojis: Array<SymbolEmojiData>, delimiter: string = ", "): string =>
   emojis.map((e) => e.name).join(delimiter);
 
 /**
@@ -179,3 +179,39 @@ export const encodeEmojis = (emojis: string[] | SymbolEmojiData[]) =>
 
 // For ease of use, we alias `encodeEmojis` to `encodeSymbols`.
 export const encodeSymbols = encodeEmojis;
+
+/**
+ * A helper/wrapper function for `symbolBytesToEmojis` that returns all emoji and symbol data.
+ * @param symbolInput
+ * @returns an object containing the array of emoji data and the final concatenated symbol data.
+ */
+export const toMarketEmojiData = (symbolInput: string | Uint8Array | Uint8Array[]) => {
+  const { emojis, symbol } = symbolBytesToEmojis(symbolInput);
+  const symbolData: SymbolData = {
+    symbol,
+    name: joinEmojiNames(emojis),
+    hex: encodeEmojis(emojis),
+    bytes: new Uint8Array(emojis.flatMap((v) => Array.from(v.bytes))),
+  };
+  return {
+    emojis,
+    symbolData,
+  };
+};
+
+export const generateRandomSymbol = () => {
+  const emojis: SymbolEmojiData[] = [];
+  let i = 0;
+  const sumBytes = (bytes: Uint8Array[]) => bytes.reduce((acc, b) => acc + b.length, 0);
+  // Try 10 times. Guaranteed to return at least one emoji, but possibly multiple.
+  while (i < 10) {
+    const randomEmoji = getRandomEmoji();
+    if (sumBytes([...emojis.map((e) => e.bytes), randomEmoji.bytes]) < MAX_SYMBOL_LENGTH) {
+      emojis.push(randomEmoji);
+    }
+    i += 1;
+  }
+
+  const symbolBytes = new Uint8Array(emojis.flatMap((e) => Array.from(e.bytes)));
+  return toMarketEmojiData(symbolBytes);
+};
