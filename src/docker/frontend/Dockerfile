@@ -1,12 +1,13 @@
-FROM alpine:3.20
+FROM debian:bookworm-slim
 
 RUN apk add nodejs curl \
-    && wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.shrc" SHELL="$(which sh)" sh - \
+    && wget -qO- https://get.pnpm.io/install.sh | \
+       ENV="$HOME/.shrc" SHELL="$(which sh)" sh - \
     && mv /root/.local/share/pnpm/pnpm /usr/bin/
 
 COPY . .
 
-WORKDIR src/typescript/frontend
+WORKDIR /src/typescript/frontend
 
 RUN pnpm i
 
@@ -33,7 +34,12 @@ ENV REVALIDATION_TIME=$REVALIDATION_TIME
 
 RUN pnpm run build
 
-HEALTHCHECK --interval=2m --timeout=1s --start-period=20s --start-interval=1s --retries=1 \
-  CMD curl -f http://localhost:3001/ || exit 1
+HEALTHCHECK \
+    --interval=2m \
+    --timeout=1s \
+    --start-period=20s \
+    --start-interval=1s \
+    --retries=1 \
+    CMD curl -f http://localhost:3001/ || exit 1
 
 CMD pnpm run start -H 0.0.0.0
