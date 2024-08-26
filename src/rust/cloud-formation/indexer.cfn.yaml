@@ -240,8 +240,14 @@ Resources:
     - 'BrokerAlbTargetGroup'
     - 'PostgrestAlbTargetGroup'
     Properties:
-      Timeout: 120
+      Count: 1
+      Handle: !Ref 'AlbTargetGroupWaitHandle'
+      Timeout: '120'
     Type: 'AWS::CloudFormation::WaitCondition'
+  # Handle for application load balancer target group wait condition.
+  AlbTargetGroupWaitHandle:
+    Condition: 'ProvisionAlb'
+    Type: 'AWS::CloudFormation::WaitConditionHandle'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'ProvisionBastionHost'
