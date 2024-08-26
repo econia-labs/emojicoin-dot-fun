@@ -10,6 +10,8 @@ ARG GIT_REPO
 ARG GIT_TAG
 ARG FULLNODE_BINARY
 
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
+
 RUN git clone $GIT_REPO --branch $GIT_TAG --depth 1
 RUN apt-get update && apt-get install -y \
     libudev-dev \
