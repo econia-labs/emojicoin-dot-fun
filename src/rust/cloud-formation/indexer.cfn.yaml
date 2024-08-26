@@ -858,15 +858,6 @@ Resources:
           Value: 'web_anon'
         - Name: 'PGRST_DB_MAX_ROWS'
           Value: !Ref 'PostgrestMaxRows'
-        HealthCheck:
-          Command:
-          - 'CMD-SHELL'
-          # Verify that the postgrest process is running.
-          - 'ps aux | grep ''[p]ostgrest'' > /dev/null || exit 1'
-          Interval: 5
-          Retries: 1
-          StartPeriod: 0
-          Timeout: 2
         Image: 'postgrest/postgrest:latest'
         LogConfiguration:
           LogDriver: 'awslogs'
