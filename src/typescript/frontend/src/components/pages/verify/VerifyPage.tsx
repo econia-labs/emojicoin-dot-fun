@@ -8,6 +8,11 @@ import { createSession } from "./session";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { useScramble } from "use-scramble";
 import { motion } from "framer-motion";
+import { Flex } from "@containers";
+import Link from "next/link";
+import { Text } from "components/text";
+import { LINKS } from "lib/env";
+import { ROUTES } from "router/routes";
 
 export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const { account } = useAptos();
@@ -59,42 +64,58 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
 
   return (
     <>
-      <div className="absolute top-0 left-0 w-[100dvw] h-[100dvh] bg-black z-50 overflow-hidden">
-        <div className="flex items-center justify-center w-full h-full">
-          <div className="flex flex-col justify-begin uppercase text-ec-blue gap-4 text-2xl">
-            {connected && verified === false && (
-              <motion.div
-                onMouseEnter={replayBack}
-                animate={{ x: 0, y: -60 }}
-                initial={{ x: 2000, y: -60 }}
-                className="absolute flex flex-row px-2.5 hover:cursor-pointer min-w-[12ch] top-[50%]"
-                onClick={() => {
-                  setVerified(null);
-                  disconnect();
-                }}
-                transition={{
-                  type: "just",
-                  duration: 0.3,
-                }}
-              >
-                <span>{"<<"}&nbsp;</span>
-                <span ref={backRef}>Back</span>
-              </motion.div>
-            )}
-            <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
-              <div className="flex flex-row uppercase">
-                <span className="px-2.5">{"{"}</span>
-                <a
-                  ref={ref}
-                  href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
-                  onMouseEnter={replay}
-                  {...EXTERNAL_LINK_PROPS}
-                />
-                <span className="px-2.5">{"}"}</span>
-              </div>
-            </ButtonWithConnectWalletFallback>
+      <div className="absolute top-0 left-0 w-[100dvw] h-[100dvh] bg-black z-50 overflow-hidden grid"
+        style={{
+          gridTemplateRows: "19fr 1fr"
+        }}>
+          <div className="flex items-center justify-center w-full h-full">
+            <div className="flex flex-col justify-begin uppercase text-ec-blue gap-4 text-2xl">
+              {connected && verified === false && (
+                <motion.div
+                  onMouseEnter={replayBack}
+                  animate={{ x: 0, y: -60 }}
+                  initial={{ x: 2000, y: -60 }}
+                  className="absolute flex flex-row px-2.5 hover:cursor-pointer min-w-[12ch] top-[50%]"
+                  onClick={() => {
+                    setVerified(null);
+                    disconnect();
+                  }}
+                  transition={{
+                    type: "just",
+                    duration: 0.3,
+                  }}
+                >
+                  <span>{"<<"}&nbsp;</span>
+                  <span ref={backRef}>Back</span>
+                </motion.div>
+              )}
+              <ButtonWithConnectWalletFallback geoblocked={geoblocked} arrow={false}>
+                <div className="flex flex-row uppercase">
+                  <span className="px-2.5">{"{"}</span>
+                  <a
+                    ref={ref}
+                    href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
+                    onMouseEnter={replay}
+                    {...EXTERNAL_LINK_PROPS}
+                  />
+                  <span className="px-2.5">{"}"}</span>
+                </div>
+              </ButtonWithConnectWalletFallback>
+            </div>
           </div>
-        </div>
+          <Flex justifyContent="center" className="w-[100dvw]">
+            <Link href={LINKS?.tos ?? ROUTES.notFound}>
+              <Text
+                textScale="display6"
+                $fontWeight="bold"
+                fontSize={{ _: "8px", tablet: "15px" }}
+                textTransform="uppercase"
+                py={{ _: "16px", tablet: "24px" }}
+              >
+                TERMS OF USE
+              </Text>
+            </Link>
+          </Flex>
       </div>
     </>
   );
