@@ -126,6 +126,9 @@ Resources:
   Alb:
     Condition: 'ProvisionAlb'
     Properties:
+      LoadBalancerAttributes:
+      - Key: 'load_balancing.cross_zone.enabled'
+        Value: 'true'
       Scheme: 'internet-facing'
       SecurityGroups:
       - !Ref 'AlbSecurityGroup'
