@@ -9,6 +9,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use futures_util::{Stream, StreamExt};
+use log::{error, info, trace, warn};
 use tokio::sync::broadcast::error::RecvError;
 
 use crate::{types::Subscription, util::is_match};
@@ -32,21 +33,25 @@ pub async fn handler(
     Query(subscription): Query<Subscription>,
     State(state): State<Arc<AppState>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    log::info!("New SSE connection ({subscription:?}).");
+    info!("New SSE connection ({subscription:?}).");
+
     let mut rx = state.tx.subscribe();
     let stream = async_stream::stream! {
         loop {
             let mut r = rx.recv().await;
             while matches!(r, Err(RecvError::Lagged(_))) {
-                log::warn!("Messages dropped due to lag.");
+                warn!("Messages dropped due to lag.");
                 r = rx.recv().await;
             }
             if let Ok(item) = r {
                 if is_match(&subscription, &item) {
+                    trace!("Event is a match.");
                     yield item;
+                } else {
+                    trace!("Event is not a match");
                 }
             } else {
-                log::error!("Got error: {}.", r.unwrap_err());
+                error!("Got unexpected error: {}.", r.unwrap_err());
             }
         }
     };
