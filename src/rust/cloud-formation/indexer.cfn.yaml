@@ -128,6 +128,7 @@ Resources:
       SecurityGroups:
       - !Ref 'BrokerAlbSecurityGroup'
       - !Ref 'BrokerWsClientSecurityGroup'
+      - !Ref 'PostgrestClientSecurityGroup'
       Subnets:
       - !Ref 'PublicSubnetA'
       - !Ref 'PublicSubnetB'
@@ -757,6 +758,17 @@ Resources:
       RouteTableId: !Ref 'NatGatewayRouteTable'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Application load balancer listener for PostgREST traffic.
+  PostgrestAlbListener:
+    Condition: 'ProvisionAlb'
+    Properties:
+      DefaultActions:
+      - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Alb'
+      Port: 80
+      Protocol: 'HTTP'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Properties:
@@ -810,6 +822,13 @@ Resources:
         MinimumHealthyPercent: 0
       DesiredCount: 1
       LaunchType: 'FARGATE'
+      LoadBalancers:
+      - ContainerName: !Sub '${AWS::StackName}-broker'
+        ContainerPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'PostgrestPort'
+        TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
