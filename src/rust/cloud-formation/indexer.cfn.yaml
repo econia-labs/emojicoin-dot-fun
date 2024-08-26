@@ -388,7 +388,7 @@ Resources:
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
       # Group name must be <= 32 characters.
-      Name: !Sub '${AWS::StackName}-ga'
+      Name: !Sub '${AWS::StackName}-a'
       Port: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -803,7 +803,7 @@ Resources:
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
       # Group name must be <= 32 characters.
-      Name: !Sub '${AWS::StackName}-gb'
+      Name: !Sub '${AWS::StackName}-b'
       Port: !FindInMap
       - 'Constants'
       - 'Networking'
