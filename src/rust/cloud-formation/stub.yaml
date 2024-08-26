@@ -1,0 +1,36 @@
+# Minimal template used to test stack teardown.
+---
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+      - 'W2001'
+Parameters:
+  BrokerImageVersion:
+    Type: 'String'
+  EmojicoinModuleAddress:
+    Type: 'String'
+  Environment:
+    Type: 'String'
+  GrpcDataServiceUrl:
+    Type: 'String'
+  MinimumStartingVersion:
+    Type: 'String'
+  ProcessorImageVersion:
+    Type: 'String'
+  ProvisionAlb:
+    Type: 'String'
+  ProvisionAlbDnsRecord:
+    Type: 'String'
+  ProvisionBastionHost:
+    Type: 'String'
+  ProvisionBroker:
+    Type: 'String'
+  ProvisionPostgrest:
+    Type: 'String'
+  ProvisionProcessor:
+    Type: 'String'
+Resources:
+  NullBucket:
+    Type: 'AWS::S3::Bucket'
+...
