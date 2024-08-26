@@ -229,6 +229,19 @@ Resources:
         ToPort: 443
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Wait condition for additional delay after the application load balancer is
+  # provisioned and target groups are ready, to prevent the case where an ECS
+  # service that relies on a target group fails to create because it reports
+  # that its load balancer target group is not associated with a load balancer.
+  AlbTargetGroupWaitCondition:
+    Condition: 'ProvisionAlb'
+    DependsOn:
+    - 'Alb'
+    - 'BrokerAlbTargetGroup'
+    - 'PostgrestAlbTargetGroup'
+    Properties:
+      Timeout: 120
+    Type: 'AWS::CloudFormation::WaitCondition'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'ProvisionBastionHost'
@@ -420,6 +433,12 @@ Resources:
   BrokerRunner:
     Condition: 'ProvisionBroker'
     DependsOn: 'ProcessorRunner'
+    # Proxy for a conditional dependency on the target group wait condition.
+    Metadata:
+      ConditionalDependencyProxy: !If
+      - 'ProvisionAlb'
+      - !Ref 'AlbTargetGroupWaitCondition'
+      - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
@@ -821,6 +840,12 @@ Resources:
     Condition: 'ProvisionPostgrest'
     # Wait for processor to ensure that migrations have been run.
     DependsOn: 'ProcessorRunner'
+    # Proxy for a conditional dependency on the target group wait condition.
+    Metadata:
+      ConditionalDependencyProxy: !If
+      - 'ProvisionAlb'
+      - !Ref 'AlbTargetGroupWaitCondition'
+      - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
