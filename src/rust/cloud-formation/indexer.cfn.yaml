@@ -361,6 +361,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Target group for application load balancer traffic to the broker.
   BrokerAlbTargetGroup:
+    Condition: 'ProvisionAlb'
     Properties:
       HealthCheckIntervalSeconds: 5
       HealthCheckPath: '/'
@@ -774,6 +775,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
+    Condition: 'ProvisionAlb'
     Properties:
       HealthCheckIntervalSeconds: 5
       HealthCheckPath: '/ready'
