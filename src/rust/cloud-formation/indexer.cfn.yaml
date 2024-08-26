@@ -403,8 +403,7 @@ Resources:
   # Service for running the broker.
   BrokerRunner:
     Condition: 'ProvisionBroker'
-    DependsOn:
-    - 'ProcessorRunner'
+    DependsOn: 'ProcessorRunner'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
@@ -415,13 +414,15 @@ Resources:
         MinimumHealthyPercent: 0
       DesiredCount: 1
       LaunchType: 'FARGATE'
-      LoadBalancers:
-      - ContainerName: !Sub '${AWS::StackName}-broker'
-        ContainerPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'BrokerPort'
-        TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+      LoadBalancers: !If
+      - 'ProvisionAlb'
+      - - ContainerName: !Sub '${AWS::StackName}-broker'
+          ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'BrokerPort'
+          TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+      - null
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
@@ -823,13 +824,15 @@ Resources:
         MinimumHealthyPercent: 0
       DesiredCount: 1
       LaunchType: 'FARGATE'
-      LoadBalancers:
-      - ContainerName: !Sub '${AWS::StackName}-postgrest'
-        ContainerPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'PostgrestPort'
-        TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+      LoadBalancers: !If
+      - 'ProvisionAlb'
+      - - ContainerName: !Sub '${AWS::StackName}-postgrest'
+          ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+          TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+      - null
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
