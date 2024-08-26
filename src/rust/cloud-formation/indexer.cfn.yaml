@@ -721,6 +721,8 @@ Resources:
           Fn::Sub:
           - 'Subnet${Identifier}'
           - Identifier: !Ref 'Identifier'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
       Condition: 'ProvisionRouteTables'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # Association for public route table with each public subnet.
@@ -736,6 +738,8 @@ Resources:
           Fn::Sub:
           - 'PublicSubnet${Identifier}'
           - Identifier: !Ref 'Identifier'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
       Condition: 'ProvisionRouteTables'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A public subnet for each availability zone.
