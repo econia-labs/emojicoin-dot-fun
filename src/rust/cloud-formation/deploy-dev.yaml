@@ -13,7 +13,7 @@ parameters:
   ProvisionBroker: 'true'
   ProvisionPostgrest: 'true'
   ProvisionProcessor: 'true'
-  ProvisionRouteTables: 'false'
+  ProvisionRouteTables: 'true'
 tags: null
 template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
 ...
