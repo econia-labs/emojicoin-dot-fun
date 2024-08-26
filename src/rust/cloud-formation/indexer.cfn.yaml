@@ -16,9 +16,11 @@ Conditions:
   - !Equals
     - !Ref 'ProvisionBroker'
     - 'true'
-  ProvisionPostgrest: !Equals
-  - !Ref 'ProvisionPostgrest'
-  - 'true'
+  ProvisionPostgrest: !And
+  - !Condition 'ProvisionProcessor'
+  - !Equals
+    - !Ref 'ProvisionPostgrest'
+    - 'true'
   ProvisionProcessor: !Equals
   - !Ref 'ProvisionProcessor'
   - 'true'
@@ -334,18 +336,18 @@ Resources:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Application load balancer listener for broker traffic.
-  BrokerAlbListener:
-    Condition: 'ProvisionAlb'
-    Properties:
-      Certificates:
-      - CertificateArn: !Ref 'AlbCertificate'
-      DefaultActions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
-      LoadBalancerArn: !Ref 'Alb'
-      Port: 443
-      Protocol: 'HTTPS'
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # BrokerAlbListener:
+  #   Condition: 'ProvisionAlb'
+  #   Properties:
+  #     Certificates:
+  #     - CertificateArn: !Ref 'AlbCertificate'
+  #     DefaultActions:
+  #     - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+  #       Type: 'forward'
+  #     LoadBalancerArn: !Ref 'Alb'
+  #     Port: 443
+  #     Protocol: 'HTTPS'
+  #   Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Security group for the application load balancer, broker traffic.
   BrokerAlbSecurityGroup:
     Properties:
@@ -358,33 +360,33 @@ Resources:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Target group for application load balancer traffic to the broker.
-  BrokerAlbTargetGroup:
-    Properties:
-      HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/'
-      HealthCheckPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'BrokerPort'
-      HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 2
-      HealthyThresholdCount: 2
-      # Group name must be <= 32 characters.
-      Name: !Sub '${AWS::StackName}-ga'
-      Port: 443
-      Protocol: 'HTTP'
-      ProtocolVersion: 'HTTP1'
-      TargetGroupAttributes:
-      - Key: 'deregistration_delay.timeout_seconds'
-        Value: '30'
-      - Key: 'stickiness.enabled'
-        Value: 'true'
-      - Key: 'stickiness.type'
-        Value: 'lb_cookie'
-      TargetType: 'ip'
-      UnhealthyThresholdCount: 2
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  # BrokerAlbTargetGroup:
+  #   Properties:
+  #     HealthCheckIntervalSeconds: 5
+  #     HealthCheckPath: '/'
+  #     HealthCheckPort: !FindInMap
+  #     - 'Constants'
+  #     - 'Networking'
+  #     - 'BrokerPort'
+  #     HealthCheckProtocol: 'HTTP'
+  #     HealthCheckTimeoutSeconds: 2
+  #     HealthyThresholdCount: 2
+  #     # Group name must be <= 32 characters.
+  #     Name: !Sub '${AWS::StackName}-ga'
+  #     Port: 443
+  #     Protocol: 'HTTP'
+  #     ProtocolVersion: 'HTTP1'
+  #     TargetGroupAttributes:
+  #     - Key: 'deregistration_delay.timeout_seconds'
+  #       Value: '30'
+  #     - Key: 'stickiness.enabled'
+  #       Value: 'true'
+  #     - Key: 'stickiness.type'
+  #       Value: 'lb_cookie'
+  #     TargetType: 'ip'
+  #     UnhealthyThresholdCount: 2
+  #     VpcId: !Ref 'Vpc'
+  #   Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
     Properties:
@@ -413,13 +415,13 @@ Resources:
         MinimumHealthyPercent: 0
       DesiredCount: 1
       LaunchType: 'FARGATE'
-      LoadBalancers:
-      - ContainerName: !Sub '${AWS::StackName}-broker'
-        ContainerPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'BrokerPort'
-        TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+      # LoadBalancers:
+      # - ContainerName: !Sub '${AWS::StackName}-broker'
+      #   ContainerPort: !FindInMap
+      #   - 'Constants'
+      #   - 'Networking'
+      #   - 'BrokerPort'
+      #   TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
@@ -809,9 +811,8 @@ Resources:
   # Service for running PostgREST.
   PostgrestRunner:
     Condition: 'ProvisionPostgrest'
-    # Without instance, the cluster endpoint is defined but not available, so
-    # the service will not be able to connect to the database.
-    DependsOn: 'DbInstance'
+    # Wait for processor to ensure that migrations have been run.
+    DependsOn: 'ProcessorRunner'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
@@ -832,6 +833,7 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
+          - !Ref 'DbUserSecurityGroup'
           - !Ref 'PostgrestServerSecurityGroup'
           - !Ref 'ContainerSecurityGroup'
           Subnets:
