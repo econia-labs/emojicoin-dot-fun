@@ -240,9 +240,9 @@ Resources:
     - 'BrokerAlbTargetGroup'
     - 'PostgrestAlbTargetGroup'
     Properties:
-      Count: 1
+      Count: 0
       Handle: !Ref 'AlbTargetGroupWaitHandle'
-      Timeout: '120'
+      Timeout: '60'
     Type: 'AWS::CloudFormation::WaitCondition'
   # Handle for application load balancer target group wait condition.
   AlbTargetGroupWaitHandle:
