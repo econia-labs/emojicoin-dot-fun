@@ -128,9 +128,8 @@ Resources:
     Properties:
       Scheme: 'internet-facing'
       SecurityGroups:
-      - !Ref 'BrokerAlbSecurityGroup'
+      - !Ref 'AlbSecurityGroup'
       - !Ref 'BrokerWsClientSecurityGroup'
-      - !Ref 'PostgrestAlbSecurityGroup'
       - !Ref 'PostgrestClientSecurityGroup'
       Subnets:
       - !Ref 'PublicSubnetA'
@@ -192,6 +191,44 @@ Resources:
         - 'DnsNameSubdomain'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
+  # Application load balancer listener.
+  AlbListener:
+    Condition: 'ProvisionAlb'
+    Properties:
+      Certificates:
+      - CertificateArn: !Ref 'AlbCertificate'
+      DefaultActions:
+      - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Alb'
+      Port: 443
+      Protocol: 'HTTPS'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # Application load balancer listener rule for broker traffic.
+  AlbListenerRuleBrokerTarget:
+    Condition: 'ProvisionAlb'
+    Properties:
+      Actions:
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+        Type: 'forward'
+      Conditions:
+      - Field: 'path-pattern'
+        Values:
+        - '/ws'
+      ListenerArn: !Ref 'AlbListener'
+      Priority: 1
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+  # Security group for the application load balancer.
+  AlbSecurityGroup:
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupIngress:
+      - CidrIp: '0.0.0.0/0'
+        FromPort: 443
+        IpProtocol: 'tcp'
+        ToPort: 443
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'ProvisionBastionHost'
@@ -336,30 +373,6 @@ Resources:
       SourceSecurityGroupId:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
-  # Application load balancer listener for broker traffic.
-  BrokerAlbListener:
-    Condition: 'ProvisionAlb'
-    Properties:
-      Certificates:
-      - CertificateArn: !Ref 'AlbCertificate'
-      DefaultActions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
-      LoadBalancerArn: !Ref 'Alb'
-      Port: 443
-      Protocol: 'HTTPS'
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
-  # Security group for the application load balancer, broker traffic.
-  BrokerAlbSecurityGroup:
-    Properties:
-      GroupDescription: !Ref 'AWS::StackName'
-      SecurityGroupIngress:
-      - CidrIp: '0.0.0.0/0'
-        FromPort: 443
-        IpProtocol: 'tcp'
-        ToPort: 443
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::EC2::SecurityGroup'
   # Target group for application load balancer traffic to the broker.
   BrokerAlbTargetGroup:
     Condition: 'ProvisionAlb'
@@ -764,28 +777,6 @@ Resources:
       RouteTableId: !Ref 'NatGatewayRouteTable'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
-  # Application load balancer listener for PostgREST traffic.
-  PostgrestAlbListener:
-    Condition: 'ProvisionAlb'
-    Properties:
-      DefaultActions:
-      - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
-        Type: 'forward'
-      LoadBalancerArn: !Ref 'Alb'
-      Port: 80
-      Protocol: 'HTTP'
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
-  # Security group for the application load balancer, PostgREST traffic.
-  PostgrestAlbSecurityGroup:
-    Properties:
-      GroupDescription: !Ref 'AWS::StackName'
-      SecurityGroupIngress:
-      - CidrIp: '0.0.0.0/0'
-        FromPort: 80
-        IpProtocol: 'tcp'
-        ToPort: 80
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::EC2::SecurityGroup'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'ProvisionAlb'
@@ -802,7 +793,7 @@ Resources:
       HealthyThresholdCount: 2
       # Group name must be <= 32 characters.
       Name: !Sub '${AWS::StackName}-gb'
-      Port: 80
+      Port: 443
       Protocol: 'HTTP'
       ProtocolVersion: 'HTTP1'
       TargetGroupAttributes:

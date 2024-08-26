@@ -136,7 +136,7 @@ Subscribe to all events:
 Check PostgREST:
 
 ```sh
-curl http://$DNS_NAME
+curl https://$DNS_NAME/
 ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
