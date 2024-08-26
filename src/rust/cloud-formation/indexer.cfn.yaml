@@ -827,7 +827,8 @@ Resources:
   # Service for running PostgREST.
   PostgrestRunner:
     Condition: 'ProvisionPostgrest'
-    # Wait for processor to ensure that migrations have been run.
+    # Wait for processor to ensure that migrations have been run, so that the
+    # schema will be available and load balancer health checks will pass.
     DependsOn: 'ProcessorRunner'
     # Proxy for a conditional dependency on the application load balancer
     # listener, which associates the PostgREST target group with the balancer.
