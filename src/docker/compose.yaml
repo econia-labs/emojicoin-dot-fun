@@ -3,13 +3,13 @@
 services:
   broker:
     build:
-      context: '.'
+      context: '../rust'
       dockerfile: 'broker/Dockerfile'
       args:
         FEATURES: 'ws'
     depends_on:
       processor:
-        condition: 'service_started'
+        condition: 'service_healthy'
     environment:
       PROCESSOR_WS_URL: 'ws://processor:${PROCESSOR_WS_PORT}/ws'
       PORT: '${BROKER_PORT}'
@@ -30,11 +30,11 @@ services:
     - 'db:/var/lib/postgresql/data'
     healthcheck:
       test: 'pg_isready -h localhost -p 5432 -U emojicoin || exit 1'
-      interval: '5s'
-      timeout: '3s'
-      retries: '3'
+      interval: '60s'
+      timeout: '1s'
+      retries: '1'
       start_period: '15s'
-      start_interval: '5s'
+      start_interval: '1s'
     ports:
     - '5432:5432'
 
@@ -55,7 +55,7 @@ services:
     extra_hosts:
     - 'host.docker.internal:host-gateway'
     build:
-      context: 'processor/rust'
+      context: '../rust/processor/rust'
       dockerfile: 'Dockerfile'
     environment:
       DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
@@ -72,6 +72,44 @@ services:
     stop_signal: 'SIGKILL'
     ports:
     - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
+
+  frontend:
+    build:
+      context: '../..'
+      dockerfile: 'src/docker/frontend/Dockerfile'
+      args:
+        INBOX_URL: 'http://postgrest:3000'
+        HASH_SEED: '${HASH_SEED}'
+        NEXT_PUBLIC_APTOS_NETWORK: '${APTOS_NETWORK}'
+        NEXT_PUBLIC_INTEGRATOR_ADDRESS: '${EMOJICOIN_INTEGRATOR_ADDRESS}'
+        NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: '${FEE_RATE_BPS}'
+        NEXT_PUBLIC_IS_ALLOWLIST_ENABLED: 'false'
+        NEXT_PUBLIC_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
+        NEXT_PUBLIC_MQTT_URL: 'ws://broker:${BROKER_PORT}'
+        NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: >-
+          ${EMOJICOIN_REWARDS_MODULE_ADDRESS}
+        REVALIDATION_TIME: '${REVALIDATION_TIME}'
+    image: 'econialabs/emojicoin-dot-fun:frontend'
+    environment:
+      INBOX_URL: 'http://postgrest:3000'
+      HASH_SEED: '${HASH_SEED}'
+      NEXT_PUBLIC_APTOS_NETWORK: '${APTOS_NETWORK}'
+      NEXT_PUBLIC_INTEGRATOR_ADDRESS: '${EMOJICOIN_INTEGRATOR_ADDRESS}'
+      NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: '${FEE_RATE_BPS}'
+      NEXT_PUBLIC_IS_ALLOWLIST_ENABLED: 'false'
+      NEXT_PUBLIC_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
+      NEXT_PUBLIC_MQTT_URL: 'ws://broker:${BROKER_PORT}'
+      NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: '${EMOJICOIN_REWARDS_MODULE_ADDRESS}'
+      REVALIDATION_TIME: '${REVALIDATION_TIME}'
+    ports:
+    - '3001:3001'
+    depends_on:
+      postgrest:
+        condition: 'service_started'
+      broker:
+        condition: 'service_healthy'
+
+    restart: 'unless-stopped'
 
 volumes:
   db:
