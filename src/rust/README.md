@@ -98,7 +98,7 @@ Subscribe to all events:
 Query PostgREST:
 
 ```sh
-curl $POSTGREST_URL
+curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
 ```
 
 #### Query public endpoints
