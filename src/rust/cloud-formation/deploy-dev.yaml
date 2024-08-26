@@ -14,5 +14,5 @@ parameters:
   ProvisionPostgrest: 'true'
   ProvisionProcessor: 'true'
 tags: null
-template-file-path: 'src/rust/cloud-formation/stub.cfn.yaml'
+template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
 ...
