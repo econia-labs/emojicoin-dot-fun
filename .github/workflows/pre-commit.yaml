@@ -59,5 +59,6 @@ name: 'pre-commit'
   push:
     branches:
     - 'main'
+    - 'production'
   workflow_dispatch: null
 ...

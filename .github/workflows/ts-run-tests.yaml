@@ -1,10 +1,9 @@
 ---
 env:
   NEXT_PUBLIC_MODULE_ADDRESS: |-
-    4bab58978ec1b1bef032eeb285ad47a6a9b997d646c19b598c35f46b26ff9ece
+    0xf000000d12c21b4170c7165010a4373b9ebc47bb9be9f0e48091645308a14136
   PUBLISHER_PK: |-
-    29479e9e5fe47ba9a8af509dd6da1f907510bcf8917bfb19b7079d8c63c0b720
-  START_LOCAL_NODE_FOR_TEST: 'true'
+    0xb2e21f041ace3b049de2ef720ba6d1e1e9601c72d0d79efcbf6c476437174f10
   TS_DIR: 'src/typescript'
 jobs:
   ts-run-tests:
@@ -14,12 +13,13 @@ jobs:
       with:
         submodules: 'false'
     - run: |
-        git submodule update --init --recursive src/inbox
-        cp src/inbox/example.env src/inbox/.env && \
-        docker buildx create \
-        --name=mybuilder \
-        --use \
-        --driver=docker-container
+        git submodule update --init --recursive src/rust
+        cp src/docker/example.local.env src/docker/.env && \
+        bash src/sh/emojicoin/test-runner.sh \
+          --reset \
+          --pull \
+          --build \
+          --start
       shell: 'bash'
     - uses: './.github/actions/ts-run-tests'
 name: 'Run the TypeScript E2E and unit tests with a local testnet'
@@ -28,5 +28,6 @@ name: 'Run the TypeScript E2E and unit tests with a local testnet'
   push:
     branches:
     - 'main'
+    - 'production'
   workflow_dispatch: null
 ...

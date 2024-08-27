@@ -26,24 +26,18 @@ export class Inbox {
     const childProcess = spawn(cliCommand, cliArgs);
 
     childProcess.stderr?.on("data", (data: any) => {
-      const str = data.toString();
-      // eslint-disable-next-line no-console
-      console.log(str);
+      console.warn(data.toString());
     });
 
     childProcess.stdout?.on("data", (data: any) => {
-      const str = data.toString();
-      // eslint-disable-next-line no-console
-      console.log(str);
+      console.debug(data.toString());
     });
 
-    const p: Promise<null> = new Promise((r) => {
+    return new Promise((resolve) => {
       childProcess.on("close", () => {
-        r(null);
+        resolve(null);
       });
     });
-
-    return p;
   }
 
   /**

@@ -1,5 +1,6 @@
+import "server-only";
+
 import {
-  AccountAddress,
   type EntryFunctionPayloadResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
@@ -49,15 +50,16 @@ type Indexer = {
 };
 
 const checkTuplesAndPrint = (args: [string, any, any][]) => {
-  let equal = true;
-  for (const [path, row, response] of args) {
-    const equalRow = row === response;
-    if (!equalRow) {
-      equal = false;
-      console.log(path, row, response);
-    }
-  }
-  return equal;
+  const [rows, responses] = args.reduce(
+    (acc, [path, row, response]) => {
+      acc[0].push(`${path}: ${row.toString()}`);
+      acc[1].push(`${path}: ${response.toString()}`);
+      return acc;
+    },
+    [[], []] as [any[], any[]]
+  );
+
+  expect(rows).toEqual(responses);
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -78,11 +80,7 @@ export const compareTransactionMetadata = <T extends Indexer["TransactionMetadat
       row.transaction.entryFunction,
       (response.payload as EntryFunctionPayloadResponse).function,
     ],
-    [
-      "row.transaction.sender",
-      row.transaction.sender,
-      AccountAddress.from(response.sender).toString(),
-    ],
+    ["row.transaction.sender", row.transaction.sender, response.sender],
     ["row.transaction.version", row.transaction.version, BigInt(response.version)],
     ["row.transaction.time", row.transaction.time, BigInt(response.timestamp)],
   ]);
@@ -375,10 +373,8 @@ const globalStateRow = (row: GlobalStateEventModel, response: UserTransactionRes
   const events = getEvents(response);
   const globalStateEvent = events.globalStateEvents[0];
 
-  const equal =
-    compareTransactionMetadata(row, response) && compareGlobalStateEvent(row, globalStateEvent);
-
-  return equal;
+  compareTransactionMetadata(row, response);
+  compareGlobalStateEvent(row, globalStateEvent);
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -394,14 +390,11 @@ const periodicStateRow = (row: PeriodicStateEventModel, response: UserTransactio
   const periodicStateEvent = events.periodicStateEvents[0];
   const stateEvent = events.stateEvents[0];
 
-  const equal =
-    compareTransactionMetadata(row, response) &&
-    compareMarketAndStateMetadata(row, stateEvent) &&
-    compareLastSwap(row, stateEvent) &&
-    comparePeriodicStateEvent(row, periodicStateEvent) &&
-    comparePeriodicStateMetadata(row, periodicStateEvent);
-
-  return equal;
+  compareTransactionMetadata(row, response);
+  compareMarketAndStateMetadata(row, stateEvent);
+  compareLastSwap(row, stateEvent);
+  comparePeriodicStateEvent(row, periodicStateEvent);
+  comparePeriodicStateMetadata(row, periodicStateEvent);
 };
 
 const marketRegistrationRow = <T extends MarketRegistrationEventModel>(
@@ -412,12 +405,9 @@ const marketRegistrationRow = <T extends MarketRegistrationEventModel>(
   const registerEvent = events.marketRegistrationEvents[0];
   const stateEvent = events.stateEvents[0];
 
-  const equal =
-    compareTransactionMetadata(row, response) &&
-    compareMarketAndStateMetadata(row, stateEvent) &&
-    compareMarketRegistrationEvent(row, registerEvent);
-
-  return equal;
+  compareTransactionMetadata(row, response);
+  compareMarketAndStateMetadata(row, stateEvent);
+  compareMarketRegistrationEvent(row, registerEvent);
 };
 
 const swapRow = (row: SwapEventModel, response: UserTransactionResponse) => {
@@ -425,13 +415,10 @@ const swapRow = (row: SwapEventModel, response: UserTransactionResponse) => {
   const swapEvent = events.swapEvents[0];
   const stateEvent = events.stateEvents[0];
 
-  const equal =
-    compareTransactionMetadata(row, response) &&
-    compareMarketAndStateMetadata(row, stateEvent) &&
-    compareStateEvents(row, stateEvent) &&
-    compareSwapEvents(row, swapEvent);
-
-  return equal;
+  compareTransactionMetadata(row, response);
+  compareMarketAndStateMetadata(row, stateEvent);
+  compareStateEvents(row, stateEvent);
+  compareSwapEvents(row, swapEvent);
 };
 
 const chatRow = (row: ChatEventModel, response: UserTransactionResponse) => {
@@ -439,12 +426,9 @@ const chatRow = (row: ChatEventModel, response: UserTransactionResponse) => {
   const chatEvent = events.chatEvents[0];
   const stateEvent = events.stateEvents[0];
 
-  const equal =
-    compareTransactionMetadata(row, response) &&
-    compareMarketAndStateMetadata(row, stateEvent) &&
-    compareChatEvents(row, chatEvent);
-
-  return equal;
+  compareTransactionMetadata(row, response);
+  compareMarketAndStateMetadata(row, stateEvent);
+  compareChatEvents(row, chatEvent);
 };
 
 const liquidityRow = (row: LiquidityEventModel, response: UserTransactionResponse) => {
@@ -452,12 +436,9 @@ const liquidityRow = (row: LiquidityEventModel, response: UserTransactionRespons
   const liquidityEvent = events.liquidityEvents[0];
   const stateEvent = events.stateEvents[0];
 
-  const equal =
-    compareTransactionMetadata(row, response) &&
-    compareMarketAndStateMetadata(row, stateEvent) &&
-    compareLiquidityEvents(row, liquidityEvent);
-
-  return equal;
+  compareTransactionMetadata(row, response);
+  compareMarketAndStateMetadata(row, stateEvent);
+  compareLiquidityEvents(row, liquidityEvent);
 };
 
 const marketLatestStateRow = (
@@ -489,15 +470,13 @@ const marketLatestStateRow = (
     throw new Error("There should be a 1D periodic state tracker in the Market resource.");
   }
 
-  const equal =
-    compareMarketAndStateMetadata(row, stateEvent) &&
-    compareStateEvents(row, stateEvent) &&
-    compareTransactionMetadata(row, response) &&
-    row.dailyTvlPerLPCoinGrowthQ64 === calculateTvlGrowth(periodicStateTracker1D) &&
-    row.inBondingCurve === (stateEvent.lpCoinSupply === BigInt(0)) &&
-    row.volumeIn1MStateTracker === volumeInStateTrackerFromWriteSet;
+  compareMarketAndStateMetadata(row, stateEvent);
+  compareTransactionMetadata(row, response);
+  compareStateEvents(row, stateEvent);
 
-  return equal;
+  expect(row.dailyTvlPerLPCoinGrowthQ64).toEqual(calculateTvlGrowth(periodicStateTracker1D));
+  expect(row.inBondingCurve).toEqual(stateEvent.lpCoinSupply === BigInt(0));
+  expect(row.volumeIn1MStateTracker).toEqual(volumeInStateTrackerFromWriteSet);
 };
 
 const RowEqualityChecks = {

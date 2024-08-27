@@ -34,7 +34,7 @@ export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 
 export const LOCAL_INBOX_URL = process.env.INBOX_URL ?? "http://localhost:3000";
-export const LOCAL_INDEXER_URL = process.env.INBOX_URL ?? "http://localhost:3000";
+export const LOCAL_INDEXER_URL = process.env.INDEXER_URL ?? "http://localhost:3000";
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
 export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);

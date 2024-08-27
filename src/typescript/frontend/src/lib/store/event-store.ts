@@ -17,11 +17,7 @@ import { immer } from "zustand/middleware/immer";
 import { type AnyNumberString } from "@sdk-types";
 import { CandlestickResolution, RESOLUTIONS_ARRAY, toCandlestickResolution } from "@sdk/const";
 import { type WritableDraft } from "immer";
-import {
-  addToLocalStorage,
-  type MarketIDString,
-  type SymbolString,
-} from "./event-utils";
+import { addToLocalStorage, type MarketIDString, type SymbolString } from "./event-utils";
 import { type RegisteredMarket, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";

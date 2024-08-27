@@ -1,14 +1,7 @@
 import { Account } from "@aptos-labs/ts-sdk";
-import { PostgrestClient } from "@supabase/postgrest-js";
-import {
-  APT_BALANCE_REQUIRED_TO_REGISTER_MARKET,
-  LOCAL_INBOX_URL,
-  ONE_APT,
-  ONE_APT_BIGINT,
-} from "../../src/const";
+import { APT_BALANCE_REQUIRED_TO_REGISTER_MARKET, ONE_APT, ONE_APT_BIGINT } from "../../src/const";
 import { getRegistryAddress, toChatEvent } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { sleep } from "../../src/utils";
 import { fundAccountFast, getTestHelpers } from "../utils";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { STRUCT_STRINGS } from "../../src/utils/type-tags";
@@ -120,12 +113,5 @@ describe("emits a chat message event successfully", () => {
     expect(secondChatEventJSON).toBeDefined();
     const secondChatEvent = toChatEvent(secondChatEventJSON, Number(chatResponse.version));
     expect(secondChatEvent.message).toEqual(indices.map((i) => chatEmojis[i][1]).join(""));
-
-    const postgrest = new PostgrestClient(LOCAL_INBOX_URL);
-
-    // Wait to make sure events were processed and saved by Inbox.
-    await sleep(1000);
-    const res = await postgrest.from("inbox_events").select("type");
-    expect(res.data?.length).toBeGreaterThan(0);
   });
 });

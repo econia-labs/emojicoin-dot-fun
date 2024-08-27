@@ -12,6 +12,9 @@ import { generateRandomSymbol, type JSONTypes, ONE_APT } from "../../src";
 // fee integrator rate BPs must be set to 0 for this to work.
 export const EXACT_TRANSITION_INPUT_AMOUNT = 100_000_000_000n;
 
+export const PUBLISH_PACKAGES_FOR_TEST = process.env.PUBLISH_PACKAGES_FOR_TEST === "true";
+export const RESET_CONTAINERS_ON_START = process.env.RESET_CONTAINERS_ON_START === "true";
+export const REMOVE_CONTAINERS_ON_EXIT = process.env.REMOVE_CONTAINERS_ON_EXIT === "true";
 export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/sdk/tests");
 export const PK_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", ".pk"));
 export const PUBLISH_RES_PATH = path.resolve(
@@ -58,12 +61,10 @@ export function getGitRoot(): string {
 export async function registerMarketTestHelper({
   registrant = Account.generate(),
   integrator = Account.generate(),
-  sequenceNumber,
 }: {
   registrant?: Account;
   additionalAccountsToFund?: Array<Account>;
   integrator?: Account;
-  sequenceNumber?: bigint;
 }) {
   const { aptos } = getTestHelpers();
 
@@ -85,7 +86,9 @@ export async function registerMarketTestHelper({
     symbolBytes: symbol.symbolData.bytes,
   });
 
-  let registerResponse: UserTransactionResponse | undefined;
+  // Default the `success` field to true, because we don't want to throw an error if the
+  // market is already registered, we just want to make sure it exists.
+  let registerResponse: UserTransactionResponse | { success: boolean } = { success: true };
   if (!registered) {
     registerResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
@@ -95,7 +98,6 @@ export async function registerMarketTestHelper({
       options: {
         maxGasAmount: ONE_APT / 100,
         gasUnitPrice: 100,
-        accountSequenceNumber: sequenceNumber,
       },
     });
   }

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { type Period } from "../../const";

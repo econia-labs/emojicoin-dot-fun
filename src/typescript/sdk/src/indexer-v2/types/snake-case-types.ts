@@ -1,3 +1,5 @@
+// cspell:word DDTHH
+
 import {
   type AccountAddressString,
   type HexString,
@@ -33,7 +35,7 @@ type PostgresTimestamp = string;
 
 /**
  * Converts a PostgreSQL timestamp string to microseconds since the Unix epoch.
- * 
+ *
  * NOTE: This function assumes that the input timestamp is in UTC, but without the "Z" suffix.
  * If that changes, this function will break. This is intentional.
  *
@@ -41,7 +43,8 @@ type PostgresTimestamp = string;
  * microseconds elapsed since the Unix epoch (January 1, 1970, 00:00:00 UTC). It handles
  * timestamps with varying precision in the fractional seconds part, from 1 to 6 digits.
  *
- * @param {PostgresTimestamp} timestamp - A PostgreSQL timestamp string in the format "YYYY-MM-DDTHH:mm:ss.SSSSSS".
+ * @param {PostgresTimestamp} timestamp - A PostgreSQL timestamp string in ISO-8601 format, with up
+ * to 6 digits of microsecond precision. Specifically: "YYYY-MM-DDTHH:mm:ss.SSSSSS"
  * @returns {bigint} The number of microseconds since the Unix epoch.
  *
  * @example
@@ -59,13 +62,13 @@ type PostgresTimestamp = string;
  *   zeros to ensure microsecond precision.
  * - The function uses the BigInt type to ensure precision when dealing with microsecond timestamps.
  * @typedef {string} PostgresTimestamp A string in the format "YYYY-MM-DDTHH:mm:ss.SSSSSS"
-*/
+ */
 export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp): bigint => {
   const spl = timestamp.split(".");
-  const microseconds = spl.length == 1 ? 0n : BigInt(spl[1].padEnd(6, "0"));
+  const microseconds = spl.length === 1 ? 0n : BigInt(spl[1].padEnd(6, "0"));
 
-  // Get the date to the nearest second.
-  const dateToNearestSecond = new Date(spl[0]);
+  // Get the date to the nearest second. Ensure JavaScript parses it as a UTC date.
+  const dateToNearestSecond = new Date(`${spl[0]}Z`);
   // Convert it to milliseconds.
   const inMilliseconds = dateToNearestSecond.getTime();
   // Convert it to microseconds; add the microseconds portion from the original timestamp.
@@ -219,19 +222,6 @@ type GlobalStateEventData = {
   cumulative_chat_messages: Uint64String;
 };
 
-export type DatabaseDataTypes2 =
-  | TransactionMetadata
-  | MarketAndStateMetadata
-  | LastSwapData
-  | PeriodicStateMetadata
-  | PeriodicStateEventData
-  | MarketRegistrationEventData
-  | SwapEventData
-  | LiquidityEventData
-  | ChatEventData
-  | StateEventData
-  | GlobalStateEventData;
-
 export type DatabaseDataTypes = {
   TransactionMetadata: TransactionMetadata;
   MarketAndStateMetadata: MarketAndStateMetadata;
@@ -293,18 +283,6 @@ export type DatabaseSnakeCaseModels = {
     volume: Uint128String;
     start_time: PostgresTimestamp;
   };
-};
-export type DatabaseSchemaTypes = {
-  global_state_events: Array<DatabaseSnakeCaseModels["GlobalStateEventModel"]>;
-  periodic_state_events: Array<DatabaseSnakeCaseModels["PeriodicStateEventModel"]>;
-  market_registration_events: Array<DatabaseSnakeCaseModels["MarketRegistrationEventModel"]>;
-  swap_events: Array<DatabaseSnakeCaseModels["SwapEventModel"]>;
-  chat_events: Array<DatabaseSnakeCaseModels["ChatEventModel"]>;
-  liquidity_events: Array<DatabaseSnakeCaseModels["LiquidityEventModel"]>;
-  market_latest_state_event: Array<DatabaseSnakeCaseModels["MarketLatestStateEventModel"]>;
-  user_liquidity_pools: Array<DatabaseSnakeCaseModels["UserLiquidityPoolsModel"]>;
-  market_daily_volume: Array<DatabaseSnakeCaseModels["MarketDailyVolumeModel"]>;
-  market_1m_periods_in_last_day: Array<DatabaseSnakeCaseModels["Market1MPeriodsInLastDay"]>;
 };
 
 // Technically some of these are views, but may as well be tables in the context of the indexer.

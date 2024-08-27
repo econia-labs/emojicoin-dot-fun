@@ -13,5 +13,6 @@ name: 'Run the TypeScript linter'
   push:
     branches:
     - 'main'
+    - 'production'
   workflow_dispatch: null
 ...
