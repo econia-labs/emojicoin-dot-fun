@@ -1290,52 +1290,89 @@ Resources:
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
 Rules:
-  #  ProvisionAlb:
-  #    Assertions:
-  #    - Assert: !Or
-  #      - Fn::Not: !Condition 'ProvisionAlb'
-  #      - !And
-  #        - !Condition 'ProvisionStack'
-  #        - !Condition 'ProvisionVpc'
-  #  ProvisionAlbDnsRecord:
-  #    Assertions:
-  #    - Assert: !Or
-  #      - Fn::Not: !Condition 'ProvisionAlbDnsRecord'
-  #      - !And
-  #        - !Condition 'ProvisionAlb'
-  #        - !Condition 'ProvisionStack'
-  #        - !Condition 'ProvisionVpc'
-  #  ProvisionBastionHost:
-  #    Assertions:
-  #    - Assert: !Or
-  #      - Fn::Not: !Condition 'ProvisionBastionHost'
-  #      - !And
-  #        - !Condition 'ProvisionDb'
-  #        - !Condition 'ProvisionStack'
-  #        - !Condition 'ProvisionVpc'
-  #  ProvisionBroker:
-  #    Assertions:
-  #    - Assert: !Or
-  #      - Fn::Not: !Condition 'ProvisionBroker'
-  #      - !And
-  #        - !Condition 'ProvisionDb'
-  #        - !Condition 'ProvisionProcessor'
-  #        - !Condition 'ProvisionStack'
-  #        - !Condition 'ProvisionVpc'
-  #  ProvisionDb:
-  #    Assertions:
-  #    - Assert: !Or
-  #      - Fn::Not: !Condition 'ProvisionDb'
-  #      - !And
-  #        - !Condition 'ProvisionStack'
-  #        - !Condition 'ProvisionVpc'
+  ProvisionAlb:
+    Assertions:
+    - Assert: !Or
+      - !Equals
+        - !Ref 'ProvisionAlb'
+        - 'false'
+      - !And
+        - !Equals
+          - !Ref 'ProvisionStack'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionVpc'
+          - 'true'
+  ProvisionAlbDnsRecord:
+    Assertions:
+    - Assert: !Or
+      - !Equals
+        - !Ref 'ProvisionAlbDnsRecord'
+        - 'false'
+      - !And
+        - !Equals
+          - !Ref 'ProvisionAlb'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionStack'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionVpc'
+          - 'true'
+  ProvisionBastionHost:
+    Assertions:
+    - Assert: !Or
+      - !Equals
+        - !Ref 'ProvisionBastionHost'
+        - 'false'
+      - !And
+        - !Equals
+          - !Ref 'ProvisionDb'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionStack'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionVpc'
+          - 'true'
+  ProvisionBroker:
+    Assertions:
+    - Assert: !Or
+      - !Equals
+        - !Ref 'ProvisionBroker'
+        - 'false'
+      - !And
+        - !Equals
+          - !Ref 'ProvisionDb'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionProcessor'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionStack'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionVpc'
+          - 'true'
+  ProvisionDb:
+    Assertions:
+    - Assert: !Or
+      - !Equals
+        - !Ref 'ProvisionDb'
+        - 'false'
+      - !And
+        - !Equals
+          - !Ref 'ProvisionStack'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionVpc'
+          - 'true'
   ProvisionPostgrest:
     Assertions:
     - Assert: !Or
       - !Equals
         - !Ref 'ProvisionPostgrest'
         - 'false'
-      - !And
       - !And
         - !Equals
           - !Ref 'ProvisionDb'
