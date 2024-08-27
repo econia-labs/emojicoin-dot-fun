@@ -140,24 +140,54 @@ Parameters:
   ProcessorImageVersion:
     Type: 'String'
   ProvisionAlb:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionAlbDnsRecord:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionBastionHost:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionBroker:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionDb:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionPostgrest:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionProcessor:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionRouteTables:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionStack:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
   ProvisionVpc:
+    AllowedValues:
+    - 'false'
+    - 'true'
     Type: 'String'
 Resources:
   # Public application load balancer.
@@ -1259,5 +1289,11 @@ Resources:
       EnableDnsHostnames: true
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
+Rules:
+  ProvisionVpc:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionVpc'
+      - !Condition 'ProvisionStack'
 Transform: 'AWS::LanguageExtensions'
 ...
