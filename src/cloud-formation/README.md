@@ -103,7 +103,9 @@ expected behavior might not occur: for example if `ProvisionStack` is `false`,
 then even if `ProvisionVpc` is `true` there still won't be any virtual private
 network resources because `ProvisionVpc` depends on `ProvisionStack`. To
 minimize such situations the template also contains a [rules] section for build
-time parameter assertion, but pending
+time parameter assertion, but pending the resolution of [`cfn-lint` issue #3630]
+the associated conditions should be considered the source of truth for
+static analysis-based determination of stack outcomes.
 
 ## Connect to services through bastion host
 
@@ -230,3 +232,4 @@ curl "https://$DNS_NAME/processor_status?select=last_success_version"
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
 [rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
+[`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630

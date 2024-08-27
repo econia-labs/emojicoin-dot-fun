@@ -50,9 +50,11 @@ Conditions:
   ProvisionStack: !Equals
   - !Ref 'ProvisionStack'
   - 'true'
-  ProvisionVpc: !Equals
-  - !Ref 'ProvisionVpc'
-  - 'true'
+  ProvisionVpc: !And
+  - !Condition 'ProvisionStack'
+  - !Equals
+    - !Ref 'ProvisionVpc'
+    - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
