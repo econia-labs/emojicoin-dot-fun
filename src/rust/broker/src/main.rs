@@ -30,11 +30,13 @@ async fn main() -> Result<(), ()> {
 
     tokio::select! {
         _ = processor_connection => {
-            log::error!("Connection to processor error.")
+            log::error!("Connection to processor error.");
+            return Err(());
         }
         result = sse_server => {
             if let Err(e) = result {
-                log::error!("Broker server error: {e}.")
+                log::error!("Broker server error: {e}.");
+                return Err(());
             } else {
                 log::info!("Gracefully shutting down.")
             }
