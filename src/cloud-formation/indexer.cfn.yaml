@@ -5,33 +5,56 @@
 # cspell:word multivalue
 ---
 Conditions:
-  ProvisionAlb: !Equals
-  - !Ref 'ProvisionAlb'
-  - 'true'
+  ProvisionAlb: !And
+  - !Condition 'ProvisionVpc'
+  - !Equals
+    - !Ref 'ProvisionAlb'
+    - 'true'
   ProvisionAlbDnsRecord: !And
   - !Condition 'ProvisionAlb'
   - !Equals
     - !Ref 'ProvisionAlbDnsRecord'
     - 'true'
-  ProvisionBastionHost: !Equals
-  - !Ref 'ProvisionBastionHost'
-  - 'true'
+  ProvisionBastionHost: !And
+  - !Condition 'ProvisionDb'
+  - !Equals
+    - !Ref 'ProvisionBastionHost'
+    - 'true'
   ProvisionBroker: !And
   - !Condition 'ProvisionProcessor'
   - !Equals
     - !Ref 'ProvisionBroker'
     - 'true'
+  ProvisionDb: !And
+  - !Condition 'ProvisionVpc'
+  - !Equals
+    - !Ref 'ProvisionDb'
+    - 'true'
   ProvisionPostgrest: !And
+  - !Condition 'ProvisionDb'
   - !Condition 'ProvisionProcessor'
+  - !Condition 'ProvisionVpc'
   - !Equals
     - !Ref 'ProvisionPostgrest'
     - 'true'
-  ProvisionProcessor: !Equals
-  - !Ref 'ProvisionProcessor'
+  ProvisionProcessor: !And
+  - !Condition 'ProvisionDb'
+  - !Equals
+    - !Ref 'ProvisionProcessor'
+    - 'true'
+  ProvisionRouteTables: !And
+  - !Condition 'ProvisionVpc'
+  - !Equals
+    - !Ref 'ProvisionRouteTables'
+    - 'true'
+  ProvisionStack: !Equals
+  - !Ref 'ProvisionStack'
   - 'true'
-  ProvisionRouteTables: !Equals
-  - !Ref 'ProvisionRouteTables'
-  - 'true'
+  ProvisionVpc: !And
+  - !Condition 'ProvisionStack'
+  - !Equals
+    - !Ref 'ProvisionVpc'
+    - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
@@ -55,6 +78,16 @@ Mappings:
       Build: 'websocat.aarch64-unknown-linux-musl'
       ReleaseUrlBase: 'https://github.com/vi/websocat/releases/download'
       Version: 'v1.13.0'
+  PrivateSubnets:
+    A:
+      AvailabilityZone: 0
+      CidrBlock: '10.0.1.0/24'
+    B:
+      AvailabilityZone: 1
+      CidrBlock: '10.0.2.0/24'
+    C:
+      AvailabilityZone: 2
+      CidrBlock: '10.0.3.0/24'
   PublicSubnets:
     A:
       AvailabilityZone: 0
@@ -65,16 +98,6 @@ Mappings:
     C:
       AvailabilityZone: 2
       CidrBlock: '10.0.6.0/24'
-  Subnets:
-    A:
-      AvailabilityZone: 0
-      CidrBlock: '10.0.1.0/24'
-    B:
-      AvailabilityZone: 1
-      CidrBlock: '10.0.2.0/24'
-    C:
-      AvailabilityZone: 2
-      CidrBlock: '10.0.3.0/24'
 Outputs:
   BastionHostId:
     Condition: 'ProvisionBastionHost'
@@ -104,14 +127,13 @@ Parameters:
   DbMinCapacity:
     Default: 0.5
     Type: 'Number'
-  EmojicoinModuleAddress:
-    Type: 'String'
   Environment:
     Type: 'String'
-  GrpcDataServiceUrl:
+  Network:
+    AllowedValues:
+    - 'Mainnet'
+    - 'Testnet'
     Type: 'String'
-  MinimumStartingVersion:
-    Type: 'Number'
   PostgrestMaxRows:
     Default: 500
     Type: 'Number'
@@ -125,11 +147,17 @@ Parameters:
     Type: 'String'
   ProvisionBroker:
     Type: 'String'
+  ProvisionDb:
+    Type: 'String'
   ProvisionPostgrest:
     Type: 'String'
   ProvisionProcessor:
     Type: 'String'
   ProvisionRouteTables:
+    Type: 'String'
+  ProvisionStack:
+    Type: 'String'
+  ProvisionVpc:
     Type: 'String'
 Resources:
   # Public application load balancer.
@@ -233,6 +261,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupIngress:
@@ -256,7 +285,7 @@ Resources:
         - !Ref 'BrokerWsClientSecurityGroup'
         - !Ref 'PostgrestClientSecurityGroup'
         - !Ref 'ProcessorWsClientSecurityGroup'
-        SubnetId: !Ref 'SubnetA'
+        SubnetId: !Ref 'PrivateSubnetA'
       UserData:
         # Install PostgreSQL client & websocat, set connection strings.
         Fn::Base64: !Sub
@@ -357,7 +386,7 @@ Resources:
       PreserveClientIp: true
       SecurityGroupIds:
       - !Ref 'BastionHostConnectionEndpointSecurityGroup'
-      SubnetId: !Ref 'SubnetA'
+      SubnetId: !Ref 'PrivateSubnetA'
     Type: 'AWS::EC2::InstanceConnectEndpoint'
   # Security group for bastion host connection endpoint.
   BastionHostConnectionEndpointSecurityGroup:
@@ -400,8 +429,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
-      # Group name must be <= 32 characters.
-      Name: !Sub '${AWS::StackName}-a'
+      Name: !Sub '${AWS::StackName}-broker'
       Port: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -421,12 +449,14 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the broker's WebSocket server security group.
   BrokerPublisherSecurityGroupIngress:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupId: !Ref 'BrokerPublisherSecurityGroup'
       IpProtocol: -1
@@ -470,9 +500,9 @@ Resources:
           - !Ref 'ContainerSecurityGroup'
           - !Ref 'ProcessorWsClientSecurityGroup'
           Subnets:
-          - !Ref 'SubnetA'
-          - !Ref 'SubnetB'
-          - !Ref 'SubnetC'
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'BrokerServiceDiscovery.Arn'
       TaskDefinition: !Ref 'BrokerTask'
@@ -571,6 +601,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the broker's WebSocket server.
   BrokerWsClientSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -580,15 +611,18 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Cluster for running ECS containers.
   ContainerCluster:
+    Condition: 'ProvisionStack'
     Type: 'AWS::ECS::Cluster'
   # Log group for ECS task logging.
   ContainerLogGroup:
+    Condition: 'ProvisionStack'
     Properties:
       LogGroupName: !Sub '/ecs/${AWS::StackName}'
       RetentionInDays: 14
     Type: 'AWS::Logs::LogGroup'
   # Role with assorted permissions required to run containers.
   ContainerRole:
+    Condition: 'ProvisionStack'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -632,6 +666,7 @@ Resources:
     Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
   ContainerSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       # Allow all outbound traffic, to other resources and to Docker Hub.
@@ -642,6 +677,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Database cluster.
   DbCluster:
+    Condition: 'ProvisionDb'
     Metadata:
       cfn-lint:
         config:
@@ -676,6 +712,7 @@ Resources:
     Type: 'AWS::RDS::DBCluster'
   # Database instance.
   DbInstance:
+    Condition: 'ProvisionDb'
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
@@ -683,6 +720,7 @@ Resources:
     Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
@@ -690,6 +728,7 @@ Resources:
   # Ingress policy for the database's security group, separated to eliminate
   # circular dependencies with security group for users of the database.
   DbSecurityGroupIngress:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupId: !Ref 'DbSecurityGroup'
       IpProtocol: -1
@@ -697,15 +736,17 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Database subnet group.
   DbSubnetGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       DBSubnetGroupDescription: !Ref 'AWS::StackName'
       SubnetIds:
-      - !Ref 'SubnetA'
-      - !Ref 'SubnetB'
-      - !Ref 'SubnetC'
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
     Type: 'AWS::RDS::DBSubnetGroup'
   # Security group for users of the database.
   DbUserSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -724,12 +765,36 @@ Resources:
         RouteTableId: !Ref 'PrivateRouteTable'
         SubnetId: !Ref
           Fn::Sub:
-          - 'Subnet${Identifier}'
+          - 'PrivateSubnet${Identifier}'
           - Identifier: !Ref 'Identifier'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
       Condition: 'ProvisionRouteTables'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # A private subnet for each of the database availability zones.
+  Fn::ForEach::PrivateSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PrivateSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PrivateSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: false
+        VpcId: !Ref 'Vpc'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: 'ProvisionVpc'
+      Type: 'AWS::EC2::Subnet'
   # Association for public route table with each public subnet.
   Fn::ForEach::PublicRouteTableAssociation:
   - 'Identifier'
@@ -767,45 +832,31 @@ Resources:
         - 'CidrBlock'
         MapPublicIpOnLaunch: true
         VpcId: !Ref 'Vpc'
-      Type: 'AWS::EC2::Subnet'
-  # A private subnet for each of the database availability zones.
-  Fn::ForEach::Subnet:
-  - 'Identifier'
-  - - 'A'
-    - 'B'
-    - 'C'
-  - Subnet${Identifier}:
-      Properties:
-        AvailabilityZone: !Select
-        - !FindInMap
-          - 'Subnets'
-          - Ref: 'Identifier'
-          - 'AvailabilityZone'
-        - Fn::GetAZs: !Ref 'AWS::Region'
-        CidrBlock: !FindInMap
-        - 'Subnets'
-        - Ref: 'Identifier'
-        - 'CidrBlock'
-        MapPublicIpOnLaunch: false
-        VpcId: !Ref 'Vpc'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: 'ProvisionVpc'
       Type: 'AWS::EC2::Subnet'
   # Internet gateway for the virtual private cloud.
   InternetGateway:
+    Condition: 'ProvisionStack'
     Type: 'AWS::EC2::InternetGateway'
   # Attachment of internet gateway to the virtual private cloud.
   InternetGatewayAttachment:
+    Condition: 'ProvisionVpc'
     Properties:
       InternetGatewayId: !Ref 'InternetGateway'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::VPCGatewayAttachment'
   # Network address translation gateway for the virtual private cloud.
   NatGateway:
+    Condition: 'ProvisionVpc'
     Properties:
       AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for the network address translation gateway.
   NatGatewayEip:
+    Condition: 'ProvisionStack'
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
@@ -823,8 +874,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
-      # Group name must be <= 32 characters.
-      Name: !Sub '${AWS::StackName}-b'
+      Name: !Sub '${AWS::StackName}-postgrest'
       Port: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -844,6 +894,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for PostgREST clients.
   PostgrestClientSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -890,21 +941,23 @@ Resources:
           - !Ref 'PostgrestServerSecurityGroup'
           - !Ref 'ContainerSecurityGroup'
           Subnets:
-          - !Ref 'SubnetA'
-          - !Ref 'SubnetB'
-          - !Ref 'SubnetC'
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'PostgrestServiceDiscovery.Arn'
       TaskDefinition: !Ref 'PostgrestTask'
     Type: 'AWS::ECS::Service'
   # Security group for the PostgREST server.
   PostgrestServerSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the PostgREST server security group.
   PostgrestServerSecurityGroupIngress:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupId: !Ref 'PostgrestServerSecurityGroup'
       IpProtocol: -1
@@ -1009,6 +1062,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Private DNS namespace for internal service discovery.
   PrivateServiceDiscoveryNamespace:
+    Condition: 'ProvisionVpc'
     Properties:
       Description: !Ref 'AWS::StackName'
       Name: !Ref 'AWS::StackName'
@@ -1016,12 +1070,14 @@ Resources:
     Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
   ProcessorPublisherSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the processor's WebSocket server security group.
   ProcessorPublisherSecurityGroupIngress:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupId: !Ref 'ProcessorPublisherSecurityGroup'
       IpProtocol: -1
@@ -1050,9 +1106,9 @@ Resources:
           - !Ref 'DbUserSecurityGroup'
           - !Ref 'ProcessorPublisherSecurityGroup'
           Subnets:
-          - !Ref 'SubnetA'
-          - !Ref 'SubnetB'
-          - !Ref 'SubnetC'
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'ProcessorServiceDiscovery.Arn'
       TaskDefinition: !Ref 'ProcessorTask'
@@ -1073,6 +1129,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for processor.
   ProcessorTask:
+    Condition: 'ProvisionProcessor'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
@@ -1098,11 +1155,17 @@ Resources:
               - 'DatabaseConfig'
               - 'MasterUsername'
         - Name: 'GRPC_DATA_SERVICE_URL'
-          Value: !Ref 'GrpcDataServiceUrl'
+          Value: !Sub
+          - '{{resolve:ssm:/GrpcDataServiceUrl/${Network}}}'
+          - Network: !Ref 'Network'
         - Name: 'MINIMUM_STARTING_VERSION'
-          Value: !Ref 'MinimumStartingVersion'
+          Value: !Sub
+          - '{{resolve:ssm:/Emojicoin/MinimumStartingVersion/${Network}}}'
+          - Network: !Ref 'Network'
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
-          Value: !Ref 'EmojicoinModuleAddress'
+          Value: !Sub
+          - '{{resolve:ssm:/Emojicoin/ModuleAddress/${Network}}}'
+          - Network: !Ref 'Network'
         - Name: 'WS_PORT'
           Value: !FindInMap
           - 'Constants'
@@ -1163,6 +1226,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the processor's WebSocket server.
   ProcessorWsClientSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -1186,6 +1250,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
+    Condition: 'ProvisionVpc'
     Properties:
       CidrBlock: !FindInMap
       - 'Constants'

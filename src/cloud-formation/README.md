@@ -9,14 +9,103 @@ The indexer can be deployed on [AWS CloudFormation] using the [template file] at
 `indexer.cfn.yaml` and a development-specific [stack deployment file] at
 `deploy-*.yaml`.
 
-By granting [PowerUserAccess] to the stack, deployments can be performed
-programmatically using [GitSync] alone.
+## Configuration
+
+Deployments can be performed programmatically using [GitSync] alone, through the
+the use of a custom [IAM role] (for example `CloudFormationPowerUser`) that has
+access to the [stack]. This custom role will require [PowerUserAccess] with the
+following [inline policy]:
+
+<!-- markdownlint-disable MD033 -->
+
+<details>
+<summary>Inline policy</summary>
+
+<!-- markdownlint-enable MD033 -->
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:TagRole",
+        "iam:PassRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:AddRoleToInstanceProfile"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "ecr:BatchCheckLayerAvailability",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+
+Assuming you have [made AWS Route 53 the DNS service for a domain you own],
+you'll need to set the following [AWS Systems Manager parameters]:
+
+- `/Emojicoin/IndexerDnsName/HostedZoneId` (for your domain)
+- `/Emojicoin/IndexerDnsName/RootDomain` (for your domain)
+- `/Emojicoin/MinimumStartingVersion/<NETWORK>`
+- `/Emojicoin/ModuleAddress/<NETWORK>`
+- `/GrpcDataServiceUrl/<NETWORK>`
+
+For `<NETWORK>` you can substitute `Mainnet` or `Testnet`, corresponding to the
+`Network` template parameter. You'll also need the following secrets:
+
+- `GRPC_AUTH_TOKEN` (plaintext)
+
+- `DOCKER_AUTH_CONFIG` with format:
+
+  ```json
+  {
+    "username": "<YOUR_USERNAME>",
+    "password": "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
+  }
+  ```
+
+## Template parameters
+
+`indexer.cfn.yaml` contains assorted [parameters] of the form `Provision*` that
+can be used to selectively provision and de-provision [resources]. For a concise
+list of such parameters, see the [stack deployment file]. See the template
+[conditions] section for associated dependencies.
+
+Note that even if a parameter is passed as `true`, the resources that directly
+depend on it will not be created unless the condition's dependencies are also
+met. All resources are eventually conditional on `ProvisionStack`, which can be
+used to toggle provisioning and de-provisioning of all resources in the stack.
 
 ## Connect to services through bastion host
 
-Verify the `ProvisionBastionHost` [stack parameter][stack deployment file] is
-set to `true`, along with any other applicable parameters related to resource
-provisioning.
+Before you try connecting to the bastion host, verify that the
+`ProvisionBastionHost` [condition][conditions] evaluates to `true`. Note too
+that if you have been provisioning and de-provisioning other resources, you
+might want to de-provision then provision the bastion host before running the
+below commands, in order to refresh the bastion host [user data] that stores the
+URLs of other resources in the stack.
 
 Install the [AWS EC2 Instance Connect CLI]:
 
@@ -114,13 +203,22 @@ Subscribe to all events:
 Check PostgREST:
 
 ```sh
-curl https://$DNS_NAME/
+curl "https://$DNS_NAME/processor_status?select=last_success_version"
 ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [aws ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
+[aws systems manager parameters]: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
+[conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
+[iam role]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
+[inline policy]: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#inline-policies
+[made aws route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
+[parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
+[resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+[stack]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html
 [stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
+[user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
