@@ -15,5 +15,5 @@ parameters:
   ProvisionProcessor: 'true'
   ProvisionRouteTables: 'true'
 tags: null
-template-file-path: 'src/rust/cloud-formation/indexer.cfn.yaml'
+template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
 ...
