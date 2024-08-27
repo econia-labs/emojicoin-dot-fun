@@ -1,3 +1,8 @@
+# cspell:word aarch
+# cspell:word awslogs
+# cspell:word awsvpc
+# cspell:word fargate
+# cspell:word multivalue
 ---
 Conditions:
   ProvisionAlb: !Equals
