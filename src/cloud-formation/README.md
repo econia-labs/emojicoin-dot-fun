@@ -7,7 +7,8 @@ cspell:word eice
 
 The indexer can be automatically deployed on [AWS CloudFormation] with [GitSync]
 using the [template file] at `indexer.cfn.yaml` and a development-specific
-[stack deployment file] at `deploy-*.yaml`.
+[stack deployment file] at `deploy-*.yaml`. Once a [stack] is configured
+accordingly, `git` updates will result in automatic updates.
 
 ## Setup
 
@@ -89,7 +90,7 @@ using the [template file] at `indexer.cfn.yaml` and a development-specific
 
    </details>
 
-1. Create the [stack].
+1. [Create the stack with GitSync].
 
 ## Template parameters
 
@@ -223,6 +224,7 @@ curl "https://$DNS_NAME/processor_status?select=last_success_version"
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+[create the stack with gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-walkthrough.html
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
