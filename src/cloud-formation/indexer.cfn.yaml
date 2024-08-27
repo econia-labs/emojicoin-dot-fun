@@ -5,55 +5,55 @@
 # cspell:word multivalue
 ---
 Conditions:
-  ProvisionAlb: !And
-  - !Condition 'ProvisionVpc'
+  TryProvisionAlb: !And
+  - !Condition 'TryProvisionVpc'
   - !Equals
-    - !Ref 'ProvisionAlb'
+    - !Ref 'TryProvisionAlb'
     - 'true'
-  ProvisionAlbDnsRecord: !And
-  - !Condition 'ProvisionAlb'
+  TryProvisionAlbDnsRecord: !And
+  - !Condition 'TryProvisionAlb'
   - !Equals
-    - !Ref 'ProvisionAlbDnsRecord'
+    - !Ref 'TryProvisionAlbDnsRecord'
     - 'true'
-  ProvisionBastionHost: !And
-  - !Condition 'ProvisionDb'
+  TryProvisionBastionHost: !And
+  - !Condition 'TryProvisionDb'
   - !Equals
-    - !Ref 'ProvisionBastionHost'
+    - !Ref 'TryProvisionBastionHost'
     - 'true'
-  ProvisionBroker: !And
-  - !Condition 'ProvisionProcessor'
+  TryProvisionBroker: !And
+  - !Condition 'TryProvisionProcessor'
   - !Equals
-    - !Ref 'ProvisionBroker'
+    - !Ref 'TryProvisionBroker'
     - 'true'
-  ProvisionDb: !And
-  - !Condition 'ProvisionVpc'
+  TryProvisionDb: !And
+  - !Condition 'TryProvisionVpc'
   - !Equals
-    - !Ref 'ProvisionDb'
+    - !Ref 'TryProvisionDb'
     - 'true'
-  ProvisionPostgrest: !And
-  - !Condition 'ProvisionDb'
-  - !Condition 'ProvisionProcessor'
-  - !Condition 'ProvisionVpc'
+  TryProvisionPostgrest: !And
+  - !Condition 'TryProvisionDb'
+  - !Condition 'TryProvisionProcessor'
+  - !Condition 'TryProvisionVpc'
   - !Equals
-    - !Ref 'ProvisionPostgrest'
+    - !Ref 'TryProvisionPostgrest'
     - 'true'
-  ProvisionProcessor: !And
-  - !Condition 'ProvisionDb'
+  TryProvisionProcessor: !And
+  - !Condition 'TryProvisionDb'
   - !Equals
-    - !Ref 'ProvisionProcessor'
+    - !Ref 'TryProvisionProcessor'
     - 'true'
-  ProvisionRouteTables: !And
-  - !Condition 'ProvisionVpc'
+  TryProvisionRouteTables: !And
+  - !Condition 'TryProvisionVpc'
   - !Equals
-    - !Ref 'ProvisionRouteTables'
+    - !Ref 'TryProvisionRouteTables'
     - 'true'
-  ProvisionStack: !Equals
-  - !Ref 'ProvisionStack'
+  TryProvisionStack: !Equals
+  - !Ref 'TryProvisionStack'
   - 'true'
-  ProvisionVpc: !And
-  - !Condition 'ProvisionStack'
+  TryProvisionVpc: !And
+  - !Condition 'TryProvisionStack'
   - !Equals
-    - !Ref 'ProvisionVpc'
+    - !Ref 'TryProvisionVpc'
     - 'true'
 Mappings:
   Constants:
@@ -100,11 +100,11 @@ Mappings:
       CidrBlock: '10.0.6.0/24'
 Outputs:
   BastionHostId:
-    Condition: 'ProvisionBastionHost'
+    Condition: 'TryProvisionBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
   DnsName:
-    Condition: 'ProvisionAlbDnsRecord'
+    Condition: 'TryProvisionAlbDnsRecord'
     Value: !Sub
     - '${Environment}.${Subdomain}.${RootDomain}'
     - RootDomain: !FindInMap
@@ -139,52 +139,52 @@ Parameters:
     Type: 'Number'
   ProcessorImageVersion:
     Type: 'String'
-  ProvisionAlb:
+  TryProvisionAlb:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionAlbDnsRecord:
+  TryProvisionAlbDnsRecord:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionBastionHost:
+  TryProvisionBastionHost:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionBroker:
+  TryProvisionBroker:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionDb:
+  TryProvisionDb:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionPostgrest:
+  TryProvisionPostgrest:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionProcessor:
+  TryProvisionProcessor:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionRouteTables:
+  TryProvisionRouteTables:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionStack:
+  TryProvisionStack:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
-  ProvisionVpc:
+  TryProvisionVpc:
     AllowedValues:
     - 'false'
     - 'true'
@@ -192,7 +192,7 @@ Parameters:
 Resources:
   # Public application load balancer.
   Alb:
-    Condition: 'ProvisionAlb'
+    Condition: 'TryProvisionAlb'
     Properties:
       LoadBalancerAttributes:
       - Key: 'load_balancing.cross_zone.enabled'
@@ -210,7 +210,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
   # DNS certificate for the application load balancer.
   AlbCertificate:
-    Condition: 'ProvisionAlb'
+    Condition: 'TryProvisionAlb'
     Properties:
       DomainName: !Sub
       - '${Environment}.${Subdomain}.${RootDomain}'
@@ -241,7 +241,7 @@ Resources:
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
   AlbDnsRecord:
-    Condition: 'ProvisionAlbDnsRecord'
+    Condition: 'TryProvisionAlbDnsRecord'
     Properties:
       AliasTarget:
         DNSName: !GetAtt 'Alb.DNSName'
@@ -264,7 +264,7 @@ Resources:
     Type: 'AWS::Route53::RecordSet'
   # Application load balancer listener.
   AlbListener:
-    Condition: 'ProvisionAlb'
+    Condition: 'TryProvisionAlb'
     Properties:
       Certificates:
       - CertificateArn: !Ref 'AlbCertificate'
@@ -277,7 +277,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Application load balancer listener rule for broker traffic.
   AlbListenerRuleBrokerTarget:
-    Condition: 'ProvisionAlb'
+    Condition: 'TryProvisionAlb'
     Properties:
       Actions:
       - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
@@ -291,7 +291,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupIngress:
@@ -303,7 +303,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Minimal VM for monitoring internal processes.
   BastionHost:
-    Condition: 'ProvisionBastionHost'
+    Condition: 'TryProvisionBastionHost'
     Properties:
       ImageId: !Ref 'BastionHostAmiId'
       InstanceType: 't4g.nano'
@@ -333,7 +333,7 @@ Resources:
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
         - BrokerWsUrlExport: !If
-          - 'ProvisionBroker'
+          - 'TryProvisionBroker'
           - !Join
             - ''
             - - 'export BROKER_WS_URL="ws://'
@@ -367,7 +367,7 @@ Resources:
               - 'DatabaseConfig'
               - 'DatabaseName'
           PostgrestUrlExport: !If
-          - 'ProvisionPostgrest'
+          - 'TryProvisionPostgrest'
           - !Join
             - ''
             - - 'export POSTGREST_URL="http://'
@@ -382,7 +382,7 @@ Resources:
               - '"'
           - '# POSTGREST_URL not set (PostgREST not provisioned)'
           ProcessorWsUrlExport: !If
-          - 'ProvisionProcessor'
+          - 'TryProvisionProcessor'
           - !Join
             - ''
             - - 'export PROCESSOR_WS_URL="ws://'
@@ -411,7 +411,7 @@ Resources:
     Type: 'AWS::EC2::Instance'
   # Connection endpoint allowing access to the bastion host.
   BastionHostConnectionEndpoint:
-    Condition: 'ProvisionBastionHost'
+    Condition: 'TryProvisionBastionHost'
     Properties:
       PreserveClientIp: true
       SecurityGroupIds:
@@ -420,7 +420,7 @@ Resources:
     Type: 'AWS::EC2::InstanceConnectEndpoint'
   # Security group for bastion host connection endpoint.
   BastionHostConnectionEndpointSecurityGroup:
-    Condition: 'ProvisionBastionHost'
+    Condition: 'TryProvisionBastionHost'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -430,7 +430,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Security group for the bastion host.
   BastionHostSecurityGroup:
-    Condition: 'ProvisionBastionHost'
+    Condition: 'TryProvisionBastionHost'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
@@ -438,7 +438,7 @@ Resources:
   # Ingress policy for the bastion host security group, separated to eliminate
   # circular dependencies with the security group for the connection endpoint.
   BastionHostSecurityGroupIngress:
-    Condition: 'ProvisionBastionHost'
+    Condition: 'TryProvisionBastionHost'
     Properties:
       GroupId: !Ref 'BastionHostSecurityGroup'
       IpProtocol: -1
@@ -447,7 +447,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Target group for application load balancer traffic to the broker.
   BrokerAlbTargetGroup:
-    Condition: 'ProvisionAlb'
+    Condition: 'TryProvisionAlb'
     DependsOn: 'Alb'
     Properties:
       HealthCheckIntervalSeconds: 5
@@ -479,14 +479,14 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the broker's WebSocket server security group.
   BrokerPublisherSecurityGroupIngress:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupId: !Ref 'BrokerPublisherSecurityGroup'
       IpProtocol: -1
@@ -494,14 +494,14 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Service for running the broker.
   BrokerRunner:
-    Condition: 'ProvisionBroker'
+    Condition: 'TryProvisionBroker'
     DependsOn: 'ProcessorRunner'
     # Proxy for a conditional dependency on the application load balancer
     # listener rule for the broker, which associates the broker target group
     # with the application load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
-      - 'ProvisionAlb'
+      - 'TryProvisionAlb'
       - !Ref 'AlbListenerRuleBrokerTarget'
       - ''
     Properties:
@@ -515,7 +515,7 @@ Resources:
       DesiredCount: 1
       LaunchType: 'FARGATE'
       LoadBalancers: !If
-      - 'ProvisionAlb'
+      - 'TryProvisionAlb'
       - - ContainerName: !Sub '${AWS::StackName}-broker'
           ContainerPort: !FindInMap
           - 'Constants'
@@ -539,7 +539,7 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Service discovery for the broker.
   BrokerServiceDiscovery:
-    Condition: 'ProvisionBroker'
+    Condition: 'TryProvisionBroker'
     Properties:
       DnsConfig:
         DnsRecords:
@@ -553,7 +553,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for the broker.
   BrokerTask:
-    Condition: 'ProvisionProcessor'
+    Condition: 'TryProvisionProcessor'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
@@ -631,7 +631,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the broker's WebSocket server.
   BrokerWsClientSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -641,18 +641,18 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Cluster for running ECS containers.
   ContainerCluster:
-    Condition: 'ProvisionStack'
+    Condition: 'TryProvisionStack'
     Type: 'AWS::ECS::Cluster'
   # Log group for ECS task logging.
   ContainerLogGroup:
-    Condition: 'ProvisionStack'
+    Condition: 'TryProvisionStack'
     Properties:
       LogGroupName: !Sub '/ecs/${AWS::StackName}'
       RetentionInDays: 14
     Type: 'AWS::Logs::LogGroup'
   # Role with assorted permissions required to run containers.
   ContainerRole:
-    Condition: 'ProvisionStack'
+    Condition: 'TryProvisionStack'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -696,7 +696,7 @@ Resources:
     Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
   ContainerSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       # Allow all outbound traffic, to other resources and to Docker Hub.
@@ -707,7 +707,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Database cluster.
   DbCluster:
-    Condition: 'ProvisionDb'
+    Condition: 'TryProvisionDb'
     Metadata:
       cfn-lint:
         config:
@@ -742,7 +742,7 @@ Resources:
     Type: 'AWS::RDS::DBCluster'
   # Database instance.
   DbInstance:
-    Condition: 'ProvisionDb'
+    Condition: 'TryProvisionDb'
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
@@ -750,7 +750,7 @@ Resources:
     Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
@@ -758,7 +758,7 @@ Resources:
   # Ingress policy for the database's security group, separated to eliminate
   # circular dependencies with security group for users of the database.
   DbSecurityGroupIngress:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupId: !Ref 'DbSecurityGroup'
       IpProtocol: -1
@@ -766,7 +766,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Database subnet group.
   DbSubnetGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       DBSubnetGroupDescription: !Ref 'AWS::StackName'
       SubnetIds:
@@ -776,7 +776,7 @@ Resources:
     Type: 'AWS::RDS::DBSubnetGroup'
   # Security group for users of the database.
   DbUserSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -799,7 +799,7 @@ Resources:
           - Identifier: !Ref 'Identifier'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
-      Condition: 'ProvisionRouteTables'
+      Condition: 'TryProvisionRouteTables'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A private subnet for each of the database availability zones.
   Fn::ForEach::PrivateSubnet:
@@ -823,7 +823,7 @@ Resources:
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
-      Condition: 'ProvisionVpc'
+      Condition: 'TryProvisionVpc'
       Type: 'AWS::EC2::Subnet'
   # Association for public route table with each public subnet.
   Fn::ForEach::PublicRouteTableAssociation:
@@ -840,7 +840,7 @@ Resources:
           - Identifier: !Ref 'Identifier'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
-      Condition: 'ProvisionRouteTables'
+      Condition: 'TryProvisionRouteTables'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A public subnet for each availability zone.
   Fn::ForEach::PublicSubnet:
@@ -864,35 +864,35 @@ Resources:
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
-      Condition: 'ProvisionVpc'
+      Condition: 'TryProvisionVpc'
       Type: 'AWS::EC2::Subnet'
   # Internet gateway for the virtual private cloud.
   InternetGateway:
-    Condition: 'ProvisionStack'
+    Condition: 'TryProvisionStack'
     Type: 'AWS::EC2::InternetGateway'
   # Attachment of internet gateway to the virtual private cloud.
   InternetGatewayAttachment:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       InternetGatewayId: !Ref 'InternetGateway'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::VPCGatewayAttachment'
   # Network address translation gateway for the virtual private cloud.
   NatGateway:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for the network address translation gateway.
   NatGatewayEip:
-    Condition: 'ProvisionStack'
+    Condition: 'TryProvisionStack'
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
-    Condition: 'ProvisionAlb'
+    Condition: 'TryProvisionAlb'
     DependsOn: 'Alb'
     Properties:
       HealthCheckIntervalSeconds: 5
@@ -924,7 +924,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for PostgREST clients.
   PostgrestClientSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -934,7 +934,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Service for running PostgREST.
   PostgrestRunner:
-    Condition: 'ProvisionPostgrest'
+    Condition: 'TryProvisionPostgrest'
     # Wait for processor to ensure that migrations have been run, so that the
     # schema will be available and load balancer health checks will pass.
     DependsOn: 'ProcessorRunner'
@@ -942,7 +942,7 @@ Resources:
     # listener, which associates the PostgREST target group with the balancer.
     Metadata:
       ConditionalDependencyProxy: !If
-      - 'ProvisionAlb'
+      - 'TryProvisionAlb'
       - !Ref 'AlbListener'
       - ''
     Properties:
@@ -956,7 +956,7 @@ Resources:
       DesiredCount: 1
       LaunchType: 'FARGATE'
       LoadBalancers: !If
-      - 'ProvisionAlb'
+      - 'TryProvisionAlb'
       - - ContainerName: !Sub '${AWS::StackName}-postgrest'
           ContainerPort: !FindInMap
           - 'Constants'
@@ -980,14 +980,14 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Security group for the PostgREST server.
   PostgrestServerSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the PostgREST server security group.
   PostgrestServerSecurityGroupIngress:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupId: !Ref 'PostgrestServerSecurityGroup'
       IpProtocol: -1
@@ -995,7 +995,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Service discovery for PostgREST.
   PostgrestServiceDiscovery:
-    Condition: 'ProvisionPostgrest'
+    Condition: 'TryProvisionPostgrest'
     Properties:
       DnsConfig:
         DnsRecords:
@@ -1009,7 +1009,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for PostgREST.
   PostgrestTask:
-    Condition: 'ProvisionPostgrest'
+    Condition: 'TryProvisionPostgrest'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
@@ -1078,13 +1078,13 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Route table for private subnets in the virtual private cloud.
   PrivateRouteTable:
-    Condition: 'ProvisionRouteTables'
+    Condition: 'TryProvisionRouteTables'
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
   # Route from private subnets through network address translation gateway.
   PrivateRouteThroughNatGateway:
-    Condition: 'ProvisionRouteTables'
+    Condition: 'TryProvisionRouteTables'
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
       NatGatewayId: !Ref 'NatGateway'
@@ -1092,7 +1092,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Private DNS namespace for internal service discovery.
   PrivateServiceDiscoveryNamespace:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       Description: !Ref 'AWS::StackName'
       Name: !Ref 'AWS::StackName'
@@ -1100,14 +1100,14 @@ Resources:
     Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
   ProcessorPublisherSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the processor's WebSocket server security group.
   ProcessorPublisherSecurityGroupIngress:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupId: !Ref 'ProcessorPublisherSecurityGroup'
       IpProtocol: -1
@@ -1115,7 +1115,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Service for running the processor.
   ProcessorRunner:
-    Condition: 'ProvisionProcessor'
+    Condition: 'TryProvisionProcessor'
     # Without instance, the cluster endpoint is defined but not available, so
     # the service will not be able to connect to the database.
     DependsOn: 'DbInstance'
@@ -1145,7 +1145,7 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Service discovery for the processor.
   ProcessorServiceDiscovery:
-    Condition: 'ProvisionProcessor'
+    Condition: 'TryProvisionProcessor'
     Properties:
       DnsConfig:
         DnsRecords:
@@ -1159,7 +1159,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for processor.
   ProcessorTask:
-    Condition: 'ProvisionProcessor'
+    Condition: 'TryProvisionProcessor'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
@@ -1256,7 +1256,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the processor's WebSocket server.
   ProcessorWsClientSecurityGroup:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -1266,13 +1266,13 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Route table for public subnets in the virtual private cloud.
   PublicRouteTable:
-    Condition: 'ProvisionRouteTables'
+    Condition: 'TryProvisionRouteTables'
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
   # Route from public subnets through the internet gateway.
   PublicRouteToInternet:
-    Condition: 'ProvisionRouteTables'
+    Condition: 'TryProvisionRouteTables'
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
       GatewayId: !Ref 'InternetGateway'
@@ -1280,7 +1280,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
-    Condition: 'ProvisionVpc'
+    Condition: 'TryProvisionVpc'
     Properties:
       CidrBlock: !FindInMap
       - 'Constants'
@@ -1289,140 +1289,5 @@ Resources:
       EnableDnsHostnames: true
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
-Rules:
-  ProvisionAlb:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionAlb'
-        - 'false'
-      - !And
-        - !Equals
-          - !Ref 'ProvisionStack'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionVpc'
-          - 'true'
-  ProvisionAlbDnsRecord:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionAlbDnsRecord'
-        - 'false'
-      - !And
-        - !Equals
-          - !Ref 'ProvisionAlb'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionStack'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionVpc'
-          - 'true'
-  ProvisionBastionHost:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionBastionHost'
-        - 'false'
-      - !And
-        - !Equals
-          - !Ref 'ProvisionDb'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionStack'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionVpc'
-          - 'true'
-  ProvisionBroker:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionBroker'
-        - 'false'
-      - !And
-        - !Equals
-          - !Ref 'ProvisionDb'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionProcessor'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionStack'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionVpc'
-          - 'true'
-  ProvisionDb:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionDb'
-        - 'false'
-      - !And
-        - !Equals
-          - !Ref 'ProvisionStack'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionVpc'
-          - 'true'
-  ProvisionPostgrest:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionPostgrest'
-        - 'false'
-      - !And
-        - !Equals
-          - !Ref 'ProvisionDb'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionProcessor'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionStack'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionVpc'
-          - 'true'
-  ProvisionProcessor:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionProcessor'
-        - 'false'
-      - !And
-        - !Equals
-          - !Ref 'ProvisionDb'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionStack'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionVpc'
-          - 'true'
-  ProvisionRouteTables:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionRouteTables'
-        - 'false'
-      - !And
-        - !Equals
-          - !Ref 'ProvisionStack'
-          - 'true'
-        - !Equals
-          - !Ref 'ProvisionVpc'
-          - 'true'
-  ProvisionVpc:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'ProvisionVpc'
-        - 'false'
-      - !Equals
-        - !Ref 'ProvisionStack'
-        - 'true'
 Transform: 'AWS::LanguageExtensions'
 ...
