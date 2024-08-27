@@ -22,19 +22,19 @@ async fn main() -> Result<(), ()> {
     let (tx, _) = broadcast::channel(CHANNEL_BUFFER_SIZE);
     let tx2 = tx.clone();
 
-    let processor_connection = tokio::spawn(processor_connection::processor_connection(
+    let processor_connection = tokio::spawn(processor_connection::start(
         processor_url,
         tx2,
     ));
 
-    let sse_server = tokio::spawn(server::server(tx, port));
+    let mut sse_server = tokio::spawn(server::server(tx, port));
 
     tokio::select! {
         _ = processor_connection => {
             error!("Processor connection thread terminated.");
             return Err(());
         }
-        result = sse_server => {
+        result = &mut sse_server => {
             if let Err(e) = result {
                 error!("Broker server error: {e}.");
                 return Err(());
