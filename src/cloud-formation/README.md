@@ -98,6 +98,13 @@ depend on it will not be created unless the condition's dependencies are also
 met. All resources are eventually conditional on `ProvisionStack`, which can be
 used to toggle provisioning and de-provisioning of all resources in the stack.
 
+In practice this means that even if a parameter evaluates to `true`, the
+expected behavior might not occur: for example if `ProvisionStack` is `false`,
+then even if `ProvisionVpc` is `true` there still won't be any virtual private
+network resources because `ProvisionVpc` depends on `ProvisionStack`. To
+minimize such situations the template also contains a [rules] section for build
+time parameter assertion, but pending
+
 ## Connect to services through bastion host
 
 Before you try connecting to the bastion host, verify that the
@@ -222,3 +229,4 @@ curl "https://$DNS_NAME/processor_status?select=last_success_version"
 [stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
+[rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html

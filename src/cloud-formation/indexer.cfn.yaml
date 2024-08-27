@@ -1290,6 +1290,69 @@ Resources:
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
 Rules:
+  ProvisionAlb:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionAlb'
+      - !And
+        - !Condition 'ProvisionStack'
+        - !Condition 'ProvisionVpc'
+  ProvisionAlbDnsRecord:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionAlbDnsRecord'
+      - !And
+        - !Condition 'ProvisionAlb'
+        - !Condition 'ProvisionStack'
+        - !Condition 'ProvisionVpc'
+  ProvisionBastionHost:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionBastionHost'
+      - !And
+        - !Condition 'ProvisionDb'
+        - !Condition 'ProvisionStack'
+        - !Condition 'ProvisionVpc'
+  ProvisionBroker:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionBroker'
+      - !And
+        - !Condition 'ProvisionDb'
+        - !Condition 'ProvisionProcessor'
+        - !Condition 'ProvisionStack'
+        - !Condition 'ProvisionVpc'
+  ProvisionDb:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionDb'
+      - !And
+        - !Condition 'ProvisionStack'
+        - !Condition 'ProvisionVpc'
+  ProvisionPostgrest:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionPostgrest'
+      - !And
+        - !Condition 'ProvisionDb'
+        - !Condition 'ProvisionProcessor'
+        - !Condition 'ProvisionStack'
+        - !Condition 'ProvisionVpc'
+  ProvisionProcessor:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionProcessor'
+      - !And
+        - !Condition 'ProvisionDb'
+        - !Condition 'ProvisionStack'
+        - !Condition 'ProvisionVpc'
+  ProvisionRouteTables:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionRouteTables'
+      - !And
+        - !Condition 'ProvisionStack'
+        - !Condition 'ProvisionVpc'
   ProvisionVpc:
     Assertions:
     - Assert: !Or
