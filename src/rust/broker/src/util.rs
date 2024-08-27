@@ -13,7 +13,11 @@ pub fn get_market_id(event: &EmojicoinDbEvent) -> Result<u64, String> {
         EmojicoinDbEvent::PeriodicState(ps) => ps.market_id,
         EmojicoinDbEvent::MarketLatestState(mls) => mls.market_id,
         EmojicoinDbEvent::Liquidity(l) => l.market_id,
-        _ => return Err("Trying to get market ID from event which does not have a market ID".to_string()),
+        _ => {
+            return Err(
+                "Trying to get market ID from event which does not have a market ID".to_string(),
+            )
+        }
     }
     .try_into();
     if let Ok(market_id) = market_id {
