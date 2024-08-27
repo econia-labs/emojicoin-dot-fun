@@ -5,86 +5,91 @@ cspell:word eice
 
 # Indexer on CloudFormation
 
-The indexer can be deployed on [AWS CloudFormation] using the [template file] at
-`indexer.cfn.yaml` and a development-specific [stack deployment file] at
-`deploy-*.yaml`.
+The indexer can be automatically deployed on [AWS CloudFormation] with [GitSync]
+using the [template file] at `indexer.cfn.yaml` and a development-specific
+[stack deployment file] at `deploy-*.yaml`.
 
-## Configuration
+## Setup
 
-Deployments can be performed programmatically using [GitSync] alone, through the
-the use of a custom [IAM role] (for example `CloudFormationPowerUser`) that has
-access to the [stack]. This custom role will require [PowerUserAccess] with the
-following [inline policy]:
+1. [Make Route 53 the DNS service for a domain you own].
 
-<!-- markdownlint-disable MD033 -->
+1. Set the following [Systems Manager parameters] (note `<Mainnet|Testnet>`
+   should be substituted with either `Mainnet` or `Testnet`, depending on the
+   network you want to index. You can create a parameter for each network if you
+   want to run multiple deployments):
 
-<details>
-<summary>Inline policy</summary>
+   1. `/Emojicoin/IndexerDnsName/HostedZoneId` (for your domain)
+   1. `/Emojicoin/IndexerDnsName/RootDomain` (for your domain)
+   1. `/Emojicoin/MinimumStartingVersion/<Mainnet|Testnet>`
+   1. `/Emojicoin/ModuleAddress/<Mainnet|Testnet>`
+   1. `/GrpcDataServiceUrl/<Mainnet|Testnet>`
 
-<!-- markdownlint-enable MD033 -->
+1. Create the following [Secrets Manager secrets]:
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iam:CreateRole",
-        "iam:TagRole",
-        "iam:PassRole",
-        "iam:PutRolePolicy",
-        "iam:DeleteRolePolicy",
-        "iam:DeleteRole",
-        "iam:GetRole",
-        "iam:AttachRolePolicy",
-        "iam:DetachRolePolicy",
-        "iam:RemoveRoleFromInstanceProfile",
-        "iam:CreateInstanceProfile",
-        "iam:DeleteInstanceProfile",
-        "iam:AddRoleToInstanceProfile"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage",
-        "ecr:BatchCheckLayerAvailability",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-```
+   1. `GRPC_AUTH_TOKEN` (plaintext).
+   1. `DOCKER_AUTH_CONFIG` (key/value pair below).
 
-</details>
+   ```json
+   {
+       "username": "<YOUR_USERNAME>",
+       "password": "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
+   }
+   ```
 
-Assuming you have [made AWS Route 53 the DNS service for a domain you own],
-you'll need to set the following [AWS Systems Manager parameters]:
+1. Configure a [GitSync IAM role], for example `CloudFormationGitHubSync`.
 
-- `/Emojicoin/IndexerDnsName/HostedZoneId` (for your domain)
-- `/Emojicoin/IndexerDnsName/RootDomain` (for your domain)
-- `/Emojicoin/MinimumStartingVersion/<NETWORK>`
-- `/Emojicoin/ModuleAddress/<NETWORK>`
-- `/GrpcDataServiceUrl/<NETWORK>`
+1. Configure a [CloudFormation service role], for example
+   `CloudFormationPowerUser`, that has [PowerUserAccess] and the following
+   [inline policy] particular to the indexer:
 
-For `<NETWORK>` you can substitute `Mainnet` or `Testnet`, corresponding to the
-`Network` template parameter. You'll also need the following secrets:
+   <!-- markdownlint-disable MD033 -->
 
-- `GRPC_AUTH_TOKEN` (plaintext)
+   <details>
+    <summary>Inline policy</summary>
 
-- `DOCKER_AUTH_CONFIG` with format:
+   <!-- markdownlint-enable MD033 -->
 
-  ```json
-  {
-    "username": "<YOUR_USERNAME>",
-    "password": "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
-  }
-  ```
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Action": [
+           "iam:CreateRole",
+           "iam:TagRole",
+           "iam:PassRole",
+           "iam:PutRolePolicy",
+           "iam:DeleteRolePolicy",
+           "iam:DeleteRole",
+           "iam:GetRole",
+           "iam:AttachRolePolicy",
+           "iam:DetachRolePolicy",
+           "iam:RemoveRoleFromInstanceProfile",
+           "iam:CreateInstanceProfile",
+           "iam:DeleteInstanceProfile",
+           "iam:AddRoleToInstanceProfile"
+         ],
+         "Resource": "*"
+       },
+       {
+         "Effect": "Allow",
+         "Action": [
+           "ecr:GetDownloadUrlForLayer",
+           "ecr:BatchGetImage",
+           "ecr:BatchCheckLayerAvailability",
+           "logs:CreateLogStream",
+           "logs:PutLogEvents"
+         ],
+         "Resource": "*"
+       }
+     ]
+   }
+   ```
+
+   </details>
+
+1. Create the [stack].
 
 ## Template parameters
 
@@ -116,7 +121,7 @@ might want to de-provision then provision the bastion host before running the
 below commands, in order to refresh the bastion host [user data] that stores the
 URLs of other resources in the stack.
 
-Install the [AWS EC2 Instance Connect CLI]:
+Install the [EC2 Instance Connect CLI]:
 
 ```sh
 pip install ec2instanceconnectcli
@@ -216,20 +221,22 @@ curl "https://$DNS_NAME/processor_status?select=last_success_version"
 ```
 
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
-[aws ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
-[aws systems manager parameters]: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
+[cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+[ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
-[iam role]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
+[gitsync iam role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-prereq.html#git-sync-prereq-iam
 [inline policy]: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#inline-policies
-[made aws route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
+[make route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
 [resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+[rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
+[secrets manager secrets]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html
 [stack]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html
-[stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html
+[stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html#git-sync-concepts-terms-depoyment-file
+[systems manager parameters]: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
-[rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
 [`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630
