@@ -1,0 +1,22 @@
+---
+Conditions:
+  ProvisionStack: !Equals
+  - !Ref 'ProvisionStack'
+  - 'true'
+  ProvisionVpc: !And
+  - !Condition 'ProvisionStack'
+  - !Equals
+    - !Ref 'ProvisionVpc'
+    - 'true'
+Resources:
+  Vpc:
+    Condition: 'ProvisionVpc'
+    Properties:
+      CidrBlock: '0.0.0.0/16'
+    Type: 'AWS::EC2::VPC'
+Rules:
+  ProvisionVpc:
+    Assertions:
+    - Assert: !Or
+      - Fn::Not: !Condition 'ProvisionVpc'
+      - !Condition 'ProvisionStack'
