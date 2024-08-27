@@ -423,8 +423,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
-      # Group name must be <= 32 characters.
-      Name: !Sub '${AWS::StackName}-a'
+      Name: !Sub '${AWS::StackName}-broker'
       Port: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -860,8 +859,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
-      # Group name must be <= 32 characters.
-      Name: !Sub '${AWS::StackName}-b'
+      Name: !Sub '${AWS::StackName}-postgrest'
       Port: !FindInMap
       - 'Constants'
       - 'Networking'
