@@ -1329,23 +1329,42 @@ Rules:
   #      - !And
   #        - !Condition 'ProvisionStack'
   #        - !Condition 'ProvisionVpc'
-  #  ProvisionPostgrest:
-  #    Assertions:
-  #    - Assert: !Or
-  #      - Fn::Not: !Condition 'ProvisionPostgrest'
-  #      - !And
-  #        - !Condition 'ProvisionDb'
-  #        - !Condition 'ProvisionProcessor'
-  #        - !Condition 'ProvisionStack'
-  #        - !Condition 'ProvisionVpc'
-  #  ProvisionProcessor:
-  #    Assertions:
-  #    - Assert: !Or
-  #      - Fn::Not: !Condition 'ProvisionProcessor'
-  #      - !And
-  #        - !Condition 'ProvisionDb'
-  #        - !Condition 'ProvisionStack'
-  #        - !Condition 'ProvisionVpc'
+  ProvisionPostgrest:
+    Assertions:
+    - Assert: !Or
+      - !Equals
+        - !Ref 'ProvisionPostgrest'
+        - 'false'
+      - !And
+      - !And
+        - !Equals
+          - !Ref 'ProvisionDb'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionProcessor'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionStack'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionVpc'
+          - 'true'
+  ProvisionProcessor:
+    Assertions:
+    - Assert: !Or
+      - !Equals
+        - !Ref 'ProvisionProcessor'
+        - 'false'
+      - !And
+        - !Equals
+          - !Ref 'ProvisionDb'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionStack'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionVpc'
+          - 'true'
   ProvisionRouteTables:
     Assertions:
     - Assert: !Or
