@@ -6,7 +6,7 @@ cspell:word eice
 # Indexer on CloudFormation
 
 The indexer can be deployed on [AWS CloudFormation] using the [template file] at
-`indexer.cfm.yaml` and a development-specific [stack deployment file] at
+`indexer.cfn.yaml` and a development-specific [stack deployment file] at
 `deploy-*.yaml`.
 
 By granting [PowerUserAccess] to the stack, deployments can be performed
