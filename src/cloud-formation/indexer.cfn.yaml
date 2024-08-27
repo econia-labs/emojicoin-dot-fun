@@ -13,22 +13,30 @@ Conditions:
   - !Equals
     - !Ref 'ProvisionAlbDnsRecord'
     - 'true'
-  ProvisionBastionHost: !Equals
-  - !Ref 'ProvisionBastionHost'
-  - 'true'
+  ProvisionBastionHost: !And
+  - !Condition 'ProvisionDb'
+  - !Equals
+    - !Ref 'ProvisionBastionHost'
+    - 'true'
   ProvisionBroker: !And
   - !Condition 'ProvisionProcessor'
   - !Equals
     - !Ref 'ProvisionBroker'
     - 'true'
+  ProvisionDb: !Equals
+  - !Ref 'ProvisionDb'
+  - 'true'
   ProvisionPostgrest: !And
+  - !Condition 'ProvisionDb'
   - !Condition 'ProvisionProcessor'
   - !Equals
     - !Ref 'ProvisionPostgrest'
     - 'true'
-  ProvisionProcessor: !Equals
-  - !Ref 'ProvisionProcessor'
-  - 'true'
+  ProvisionProcessor: !And
+  - !Condition 'ProvisionDb'
+  - !Equals
+    - !Ref 'ProvisionProcessor'
+    - 'true'
   ProvisionRouteTables: !Equals
   - !Ref 'ProvisionRouteTables'
   - 'true'
@@ -124,6 +132,8 @@ Parameters:
   ProvisionBastionHost:
     Type: 'String'
   ProvisionBroker:
+    Type: 'String'
+  ProvisionDb:
     Type: 'String'
   ProvisionPostgrest:
     Type: 'String'
@@ -642,6 +652,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Database cluster.
   DbCluster:
+    Condition: 'ProvisionDb'
     Metadata:
       cfn-lint:
         config:
@@ -676,6 +687,7 @@ Resources:
     Type: 'AWS::RDS::DBCluster'
   # Database instance.
   DbInstance:
+    Condition: 'ProvisionDb'
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
@@ -1073,6 +1085,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for processor.
   ProcessorTask:
+    Condition: 'ProvisionProcessor'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
