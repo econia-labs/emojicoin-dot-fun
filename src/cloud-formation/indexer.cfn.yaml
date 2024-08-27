@@ -1293,15 +1293,14 @@ Rules:
   ProvisionAlb:
     Assertions:
     - Assert: !Or
-      - !Not: !Condition 'ProvisionAlb'
+      - Fn::Not: !Condition 'ProvisionAlb'
       - !And
         - !Condition 'ProvisionStack'
         - !Condition 'ProvisionVpc'
   ProvisionAlbDnsRecord:
     Assertions:
     - Assert: !Or
-      - !Not:
-        - !Condition 'ProvisionAlbDnsRecord'
+      - Fn::Not: !Condition 'ProvisionAlbDnsRecord'
       - !And
         - !Condition 'ProvisionAlb'
         - !Condition 'ProvisionStack'
@@ -1309,8 +1308,7 @@ Rules:
   ProvisionBastionHost:
     Assertions:
     - Assert: !Or
-      - !Not:
-        - !Condition 'ProvisionBastionHost'
+      - Fn::Not: !Condition 'ProvisionBastionHost'
       - !And
         - !Condition 'ProvisionDb'
         - !Condition 'ProvisionStack'
@@ -1318,8 +1316,7 @@ Rules:
   ProvisionBroker:
     Assertions:
     - Assert: !Or
-      - !Not:
-        - !Condition 'ProvisionBroker'
+      - Fn::Not: !Condition 'ProvisionBroker'
       - !And
         - !Condition 'ProvisionDb'
         - !Condition 'ProvisionProcessor'
@@ -1328,16 +1325,14 @@ Rules:
   ProvisionDb:
     Assertions:
     - Assert: !Or
-      - !Not
-        - !Condition 'ProvisionDb'
+      - Fn::Not: !Condition 'ProvisionDb'
       - !And
         - !Condition 'ProvisionStack'
         - !Condition 'ProvisionVpc'
   ProvisionPostgrest:
     Assertions:
     - Assert: !Or
-      - !Not:
-        - !Condition 'ProvisionPostgrest'
+      - Fn::Not: !Condition 'ProvisionPostgrest'
       - !And
         - !Condition 'ProvisionDb'
         - !Condition 'ProvisionProcessor'
@@ -1346,8 +1341,7 @@ Rules:
   ProvisionProcessor:
     Assertions:
     - Assert: !Or
-      - !Not:
-        - !Condition 'ProvisionProcessor'
+      - Fn::Not: !Condition 'ProvisionProcessor'
       - !And
         - !Condition 'ProvisionDb'
         - !Condition 'ProvisionStack'
@@ -1355,16 +1349,14 @@ Rules:
   ProvisionRouteTables:
     Assertions:
     - Assert: !Or
-      - !Not:
-        - !Condition 'ProvisionRouteTables'
+      - Fn::Not: !Condition 'ProvisionRouteTables'
       - !And
         - !Condition 'ProvisionStack'
         - !Condition 'ProvisionVpc'
   ProvisionVpc:
     Assertions:
     - Assert: !Or
-      - !Not:
-        - !Condition 'ProvisionVpc'
+      - Fn::Not: !Condition 'ProvisionVpc'
       - !Condition 'ProvisionStack'
 Transform: 'AWS::LanguageExtensions'
 ...
