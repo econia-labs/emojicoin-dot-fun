@@ -130,7 +130,8 @@ issues in practice:
 The indexer database uses [Aurora PostgreSQL] on a
 [Multi-AZ Aurora Serverless v2 cluster] with a
 [primary (writer) instance][aurora clusters] and a fallback
-[replica (reader) instance][aurora clusters] in separate
+[replica (reader) instance][aurora clusters] in
+[dynamically-assigned][auto-selection of aurora az], separate
 [Availability Zones][aurora availability zones] to ensure
 [high availability][high availability for aurora] with
 [fault tolerant replica promotion] and [autoscaling][aurora autoscaling].
@@ -247,6 +248,7 @@ curl "https://$DNS_NAME/processor_status?select=last_success_version"
 [aurora availability zones]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.RegionsAndAvailabilityZones.html
 [aurora clusters]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html
 [aurora postgresql]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraPostgreSQL.html
+[auto-selection of aurora az]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-availabilityzone
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
