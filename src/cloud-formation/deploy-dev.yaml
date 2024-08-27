@@ -12,7 +12,7 @@ parameters:
   ProvisionPostgrest: 'true'
   ProvisionProcessor: 'true'
   ProvisionRouteTables: 'true'
-  ProvisionStack: 'true'
+  ProvisionStack: 'false'
   ProvisionVpc: 'true'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
