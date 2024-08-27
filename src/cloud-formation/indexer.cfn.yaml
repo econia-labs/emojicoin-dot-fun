@@ -1293,8 +1293,7 @@ Rules:
   ProvisionAlb:
     Assertions:
     - Assert: !Or
-      - Fn::Not:
-        - !Condition 'ProvisionAlb'
+      - Fn::Not: !Condition 'ProvisionAlb'
       - !And
         - !Condition 'ProvisionStack'
         - !Condition 'ProvisionVpc'
