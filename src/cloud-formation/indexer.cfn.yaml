@@ -78,6 +78,16 @@ Mappings:
       Build: 'websocat.aarch64-unknown-linux-musl'
       ReleaseUrlBase: 'https://github.com/vi/websocat/releases/download'
       Version: 'v1.13.0'
+  PrivateSubnets:
+    A:
+      AvailabilityZone: 0
+      CidrBlock: '10.0.1.0/24'
+    B:
+      AvailabilityZone: 1
+      CidrBlock: '10.0.2.0/24'
+    C:
+      AvailabilityZone: 2
+      CidrBlock: '10.0.3.0/24'
   PublicSubnets:
     A:
       AvailabilityZone: 0
@@ -88,16 +98,6 @@ Mappings:
     C:
       AvailabilityZone: 2
       CidrBlock: '10.0.6.0/24'
-  Subnets:
-    A:
-      AvailabilityZone: 0
-      CidrBlock: '10.0.1.0/24'
-    B:
-      AvailabilityZone: 1
-      CidrBlock: '10.0.2.0/24'
-    C:
-      AvailabilityZone: 2
-      CidrBlock: '10.0.3.0/24'
 Outputs:
   BastionHostId:
     Condition: 'ProvisionBastionHost'
@@ -286,7 +286,7 @@ Resources:
         - !Ref 'BrokerWsClientSecurityGroup'
         - !Ref 'PostgrestClientSecurityGroup'
         - !Ref 'ProcessorWsClientSecurityGroup'
-        SubnetId: !Ref 'SubnetA'
+        SubnetId: !Ref 'PrivateSubnetA'
       UserData:
         # Install PostgreSQL client & websocat, set connection strings.
         Fn::Base64: !Sub
@@ -387,7 +387,7 @@ Resources:
       PreserveClientIp: true
       SecurityGroupIds:
       - !Ref 'BastionHostConnectionEndpointSecurityGroup'
-      SubnetId: !Ref 'SubnetA'
+      SubnetId: !Ref 'PrivateSubnetA'
     Type: 'AWS::EC2::InstanceConnectEndpoint'
   # Security group for bastion host connection endpoint.
   BastionHostConnectionEndpointSecurityGroup:
@@ -501,9 +501,9 @@ Resources:
           - !Ref 'ContainerSecurityGroup'
           - !Ref 'ProcessorWsClientSecurityGroup'
           Subnets:
-          - !Ref 'SubnetA'
-          - !Ref 'SubnetB'
-          - !Ref 'SubnetC'
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'BrokerServiceDiscovery.Arn'
       TaskDefinition: !Ref 'BrokerTask'
@@ -741,9 +741,9 @@ Resources:
     Properties:
       DBSubnetGroupDescription: !Ref 'AWS::StackName'
       SubnetIds:
-      - !Ref 'SubnetA'
-      - !Ref 'SubnetB'
-      - !Ref 'SubnetC'
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
     Type: 'AWS::RDS::DBSubnetGroup'
   # Security group for users of the database.
   DbUserSecurityGroup:
@@ -766,12 +766,36 @@ Resources:
         RouteTableId: !Ref 'PrivateRouteTable'
         SubnetId: !Ref
           Fn::Sub:
-          - 'Subnet${Identifier}'
+          - 'PrivateSubnet${Identifier}'
           - Identifier: !Ref 'Identifier'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
       Condition: 'ProvisionRouteTables'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # A private subnet for each of the database availability zones.
+  Fn::ForEach::PrivateSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PrivateSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PrivateSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: false
+        VpcId: !Ref 'Vpc'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: 'ProvisionVpc'
+      Type: 'AWS::EC2::Subnet'
   # Association for public route table with each public subnet.
   Fn::ForEach::PublicRouteTableAssociation:
   - 'Identifier'
@@ -808,30 +832,6 @@ Resources:
         - Ref: 'Identifier'
         - 'CidrBlock'
         MapPublicIpOnLaunch: true
-        VpcId: !Ref 'Vpc'
-      # ForEach transforms require that condition is second key or later.
-      # yamllint disable-line rule:key-ordering
-      Condition: 'ProvisionVpc'
-      Type: 'AWS::EC2::Subnet'
-  # A private subnet for each of the database availability zones.
-  Fn::ForEach::Subnet:
-  - 'Identifier'
-  - - 'A'
-    - 'B'
-    - 'C'
-  - Subnet${Identifier}:
-      Properties:
-        AvailabilityZone: !Select
-        - !FindInMap
-          - 'Subnets'
-          - Ref: 'Identifier'
-          - 'AvailabilityZone'
-        - Fn::GetAZs: !Ref 'AWS::Region'
-        CidrBlock: !FindInMap
-        - 'Subnets'
-        - Ref: 'Identifier'
-        - 'CidrBlock'
-        MapPublicIpOnLaunch: false
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
@@ -942,9 +942,9 @@ Resources:
           - !Ref 'PostgrestServerSecurityGroup'
           - !Ref 'ContainerSecurityGroup'
           Subnets:
-          - !Ref 'SubnetA'
-          - !Ref 'SubnetB'
-          - !Ref 'SubnetC'
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'PostgrestServiceDiscovery.Arn'
       TaskDefinition: !Ref 'PostgrestTask'
@@ -1107,9 +1107,9 @@ Resources:
           - !Ref 'DbUserSecurityGroup'
           - !Ref 'ProcessorPublisherSecurityGroup'
           Subnets:
-          - !Ref 'SubnetA'
-          - !Ref 'SubnetB'
-          - !Ref 'SubnetC'
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'ProcessorServiceDiscovery.Arn'
       TaskDefinition: !Ref 'ProcessorTask'
