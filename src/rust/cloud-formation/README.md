@@ -3,38 +3,16 @@ cspell:word ec2instanceconnectcli
 cspell:word eice
 -->
 
-# Rust source
+# Indexer on CloudFormation
 
-## `emojicoin-dot-fun` indexer
-
-### Running Docker compose locally
-
-1. Copy `example.env` to `.env`, which is ignored by `git`:
-
-   ```sh
-   cp example.env .env
-   ```
-
-1. Provide a `GRPC_AUTH_TOKEN` in your `.env` as described in `example.env`.
-
-1. Modify other values as needed.
-
-1. Start the indexer:
-
-   ```sh
-   docker compose up
-   ```
-
-### AWS CloudFormation
-
-The indexer is deployed using [AWS CloudFormation] with a [template file] at
-`cloud-formation/indexer.cfm.yaml` and a development-specific
-[stack deployment file] at `cloud-formation/deploy-dev.yaml`.
+The indexer can be deployed on [AWS CloudFormation] using the [template file] at
+`indexer.cfm.yaml` and a development-specific [stack deployment file] at
+`deploy-*.yaml`.
 
 By granting [PowerUserAccess] to the stack, deployments can be performed
 programmatically using [GitSync] alone.
 
-#### Connect to services through bastion host
+## Connect to services through bastion host
 
 Verify the `ProvisionBastionHost` [stack parameter][stack deployment file] is
 set to `true`, along with any other applicable parameters related to resource
@@ -101,7 +79,7 @@ Query PostgREST:
 curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
 ```
 
-#### Query public endpoints
+## Query public endpoints
 
 If all of the bastion host tests work, you should be able to query the public
 endpoint. Get the indexer DNS name:
