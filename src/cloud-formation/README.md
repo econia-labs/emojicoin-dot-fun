@@ -113,7 +113,7 @@ Install the [AWS EC2 Instance Connect CLI]:
 pip install ec2instanceconnectcli
 ```
 
-connect to the bastion host over the [EC2 Instance Connect Endpoint] using your
+Connect to the bastion host over the [EC2 Instance Connect Endpoint] using your
 stack name, for example `emoji-dev`:
 
 ```sh
