@@ -1,11 +1,12 @@
 use std::sync::Arc;
 
-use axum::{routing::get, Router};
+use axum::{extract::State, routing::get, Json, Router};
 use log::{debug, info, warn};
 use processor::emojicoin_dot_fun::EmojicoinDbEvent;
-use tokio::sync::broadcast::Sender;
+use serde_json::Value;
+use tokio::sync::{broadcast::Sender, RwLock};
 
-use crate::util::shutdown_signal;
+use crate::{util::shutdown_signal, BrokerHealth, HealthStatus};
 
 #[cfg(feature = "sse")]
 mod sse;
@@ -15,6 +16,7 @@ mod ws;
 struct AppState {
     #[allow(dead_code)]
     tx: Sender<EmojicoinDbEvent>,
+    broker_health: Arc<RwLock<BrokerHealth>>,
 }
 
 #[cfg(all(feature = "sse", not(feature = "ws")))]
@@ -38,12 +40,14 @@ fn prepare_app(app: Router<Arc<AppState>>) -> Router<Arc<AppState>> {
     app
 }
 
-async fn health() {
-    debug!("Health check: healthy");
+async fn health(State(state): State<Arc<AppState>>) -> Json<Value> {
+    let broker_health = state.broker_health.read().await;
+    debug!("Health check: {broker_health:?}");
+    return Json(serde_json::to_value(broker_health.clone()).unwrap());
 }
 
-pub async fn server(tx: Sender<EmojicoinDbEvent>, port: u16) -> Result<(), std::io::Error> {
-    let app_state = AppState { tx };
+pub async fn server(tx: Sender<EmojicoinDbEvent>, port: u16, broker_health: Arc<RwLock<BrokerHealth>>) -> Result<(), std::io::Error> {
+    let app_state = AppState { tx, broker_health: broker_health.clone() };
 
     let app = prepare_app(Router::new().route("/", get(health)));
     let app = app.with_state(Arc::new(app_state));
@@ -64,6 +68,8 @@ pub async fn server(tx: Sender<EmojicoinDbEvent>, port: u16) -> Result<(), std::
     if cfg!(all(not(feature = "ws"), not(feature = "sse"))) {
         warn!("Starting web server with no endpoints.");
     }
+
+    broker_health.write().await.server = HealthStatus::Ok;
 
     axum::serve(listener, app)
         .with_graceful_shutdown(async {

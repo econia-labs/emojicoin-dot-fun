@@ -1,10 +1,12 @@
-use std::time::{Duration, SystemTime};
+use std::{sync::Arc, time::{Duration, SystemTime}};
 
 use futures_util::StreamExt;
 use log::{error, info, log_enabled, warn, Level};
 use processor::emojicoin_dot_fun::EmojicoinDbEvent;
-use tokio::sync::broadcast::Sender;
+use tokio::sync::{broadcast::Sender, RwLock};
 use tokio_tungstenite::connect_async;
+
+use crate::{BrokerHealth, HealthStatus};
 
 /// Number of retries before giving up and exiting.
 const CONNECTION_RETRIES: u64 = 10;
@@ -28,7 +30,7 @@ enum ConnectionError {
     ConnectionLost,
 }
 
-pub async fn start(processor_url: String, tx: Sender<EmojicoinDbEvent>) {
+pub async fn start(processor_url: String, tx: Sender<EmojicoinDbEvent>, broker_health: Arc<RwLock<BrokerHealth>>) {
     // Number of retries since last successful connection.
     let mut retries = 0;
 
@@ -38,7 +40,7 @@ pub async fn start(processor_url: String, tx: Sender<EmojicoinDbEvent>) {
     loop {
         // Timestamp of the start of the connection.
         let start_timestamp = SystemTime::now();
-        let res = processor_connection(processor_url.clone(), tx.clone()).await;
+        let res = processor_connection(processor_url.clone(), tx.clone(), broker_health.clone()).await;
         let connection_duration = SystemTime::elapsed(&start_timestamp).unwrap();
 
         // In the broker connected to the processor and the connection duration was longer than the
@@ -70,29 +72,38 @@ pub async fn start(processor_url: String, tx: Sender<EmojicoinDbEvent>) {
     }
 }
 
-async fn processor_connection(processor_url: String, tx: Sender<EmojicoinDbEvent>) -> Result<(), ConnectionError> {
+async fn processor_connection(processor_url: String, tx: Sender<EmojicoinDbEvent>, broker_health: Arc<RwLock<BrokerHealth>>) -> Result<(), ConnectionError> {
     let connection = connect_async(processor_url).await;
     let mut connection = if let Ok(connection) = connection {
         connection
     } else {
+        broker_health.write().await.processor_connection = HealthStatus::Dead;
         error!("Could not connect to the processor.");
         return Err(ConnectionError::ConnectionImpossible);
     };
+    broker_health.write().await.processor_connection = HealthStatus::Ok;
     info!("Connected to the processor.");
+    let mut is_sick = false;
     while let Some(msg) = connection.0.next().await {
         if msg.is_err() {
+            broker_health.write().await.processor_connection = HealthStatus::Sick;
+            is_sick = true;
             error!("Got an error instead of a message: {}", msg.unwrap_err());
             continue;
         }
         let msg = msg.unwrap();
         let msg = msg.to_text();
         if msg.is_err() {
+            broker_health.write().await.processor_connection = HealthStatus::Sick;
+            is_sick = true;
             error!("Could not convert message to text: {}", msg.unwrap_err());
             continue;
         }
         let msg = msg.unwrap();
         let res: Result<EmojicoinDbEvent, _> = serde_json::de::from_str(msg);
         if res.is_err() {
+            broker_health.write().await.processor_connection = HealthStatus::Sick;
+            is_sick = true;
             error!(
                 "Could not parse message: error: {}, message: {}",
                 res.unwrap_err(),
@@ -101,6 +112,9 @@ async fn processor_connection(processor_url: String, tx: Sender<EmojicoinDbEvent
             continue;
         }
         let msg = res.unwrap();
+        if is_sick {
+            broker_health.write().await.processor_connection = HealthStatus::Ok;
+        }
         if log_enabled!(Level::Debug) {
             info!("Got message from processor: {msg:?}.");
         } else {
@@ -109,5 +123,6 @@ async fn processor_connection(processor_url: String, tx: Sender<EmojicoinDbEvent
         let _ = tx.send(msg);
     }
     info!("Connection to the processor terminated.");
+    broker_health.write().await.processor_connection = HealthStatus::Dead;
     Err(ConnectionError::ConnectionLost)
 }
