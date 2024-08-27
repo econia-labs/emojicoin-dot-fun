@@ -32,7 +32,7 @@ export const getRankFromEvent = (
     const q64 = event.balanceAsFractionOfCirculatingSupply;
     return q64ToBig(q64).toNumber();
   })();
-  
+
   const percentage = fraction * 100;
 
   if (percentage < 5) {

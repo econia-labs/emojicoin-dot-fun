@@ -1,9 +1,9 @@
 // eslint-disable no-await-in-loop
 
 import { spawn } from "child_process";
+import path from "path";
 import { sleep } from "../../src/utils";
 import { getGitRoot } from "./helpers";
-import path from "path";
 
 const CONTAINERS_AND_HEALTHCHECK_ENDPOINTS = {
   "local-testnet": "http://localhost:8070/",
@@ -11,7 +11,7 @@ const CONTAINERS_AND_HEALTHCHECK_ENDPOINTS = {
   // Note that we start the broker regardless, we just don't wait for it unless
   // it's specified to be run in the constructor.
   "processor-and-broker": `http://localhost:${process.env.BROKER_PORT}/`,
-  "processor-and-broker-and-frontend": `http://localhost:3001/`,
+  "processor-and-broker-and-frontend": "http://localhost:3001/",
 };
 
 const TEST_RUNNER_PATH = path.join(getGitRoot(), "src/sh/emojicoin/test-runner.sh");
@@ -69,7 +69,6 @@ export class DockerDirector {
   async run() {
     this.start();
     await this.waitUntilProcessIsUp();
-    return;
   }
 
   /**
@@ -91,7 +90,6 @@ export class DockerDirector {
     });
 
     childProcess.stdout?.on("data", (data: any) => {
-      const s: string = "";
       console.debug(data.toString().trim());
     });
   }
@@ -115,11 +113,13 @@ export class DockerDirector {
     let operational = await this.checkIfProcessIsUp();
     let secondsElapsed = 0;
 
+    /* eslint-disable no-await-in-loop */
     while (!operational && secondsElapsed < this.MAXIMUM_WAIT_TIME_SEC) {
       await sleep(1000);
       secondsElapsed += 1;
       operational = await this.checkIfProcessIsUp();
     }
+    /* eslint-enable no-await-in-loop */
 
     // If we are here it means something blocked the process start-up.
     // Consider checking if another process is running on a conflicting port.

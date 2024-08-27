@@ -7,7 +7,7 @@ DOCKER_DIR_ABS_PATH="$ROOT_DIR/src/docker"
 if [ -z "$PUBLISHER_PK" ]; then
 	echo "PUBLISHER_PK is not set. Trying to find one in $DOCKER_DIR_ABS_PATH/.env"
 	echo "Note that this will override BIG_MONEY_GUY_PK if it exists."
-	
+
 	if [ -f "$DOCKER_DIR_ABS_PATH/.env" ]; then
 		source "$DOCKER_DIR_ABS_PATH/.env"
 	else
@@ -37,7 +37,7 @@ aptos init --profile $PUBLISHER \
 	--private-key $PUBLISHER_PK \
 	--encoding hex \
 	--assume-yes \
-    --network local
+	--network local
 
 aptos init --profile $BIG_MONEY_GUY \
 	--private-key $BIG_MONEY_GUY_PK \

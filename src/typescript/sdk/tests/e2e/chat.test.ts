@@ -1,9 +1,5 @@
 import { Account } from "@aptos-labs/ts-sdk";
-import {
-  APT_BALANCE_REQUIRED_TO_REGISTER_MARKET,
-  ONE_APT,
-  ONE_APT_BIGINT,
-} from "../../src/const";
+import { APT_BALANCE_REQUIRED_TO_REGISTER_MARKET, ONE_APT, ONE_APT_BIGINT } from "../../src/const";
 import { getRegistryAddress, toChatEvent } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { fundAccountFast, getTestHelpers } from "../utils";

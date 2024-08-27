@@ -11,12 +11,7 @@ import {
 import path from "path";
 import { type PublishPackageResult, type ResultJSON } from "./types";
 import { getAptosClient } from "./aptos-client";
-import {
-  MAX_GAS_FOR_PUBLISH,
-  ONE_APT,
-  EMOJICOIN_DOT_FUN_MODULE_NAME,
-  REWARDS_MODULE_NAME,
-} from "../../src";
+import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
 import { getGitRoot } from "./helpers";
 
 export async function publishPackage(args: {
@@ -151,7 +146,7 @@ export async function publishPackagesForTest(pk: string): Promise<PublishPackage
       integrator: publisher.accountAddress,
     },
     network: Network.LOCAL,
-    packageDirRelativeToRoot: `src/move/rewards`,
+    packageDirRelativeToRoot: "src/move/rewards",
   });
 
   return mainPackageRes;

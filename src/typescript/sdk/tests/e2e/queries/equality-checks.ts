@@ -52,8 +52,8 @@ type Indexer = {
 const checkTuplesAndPrint = (args: [string, any, any][]) => {
   const [rows, responses] = args.reduce(
     (acc, [path, row, response]) => {
-      acc[0].push(path + ": " + row.toString());
-      acc[1].push(path + ": " + response.toString());
+      acc[0].push(`${path}: ${row.toString()}`);
+      acc[1].push(`${path}: ${response.toString()}`);
       return acc;
     },
     [[], []] as [any[], any[]]

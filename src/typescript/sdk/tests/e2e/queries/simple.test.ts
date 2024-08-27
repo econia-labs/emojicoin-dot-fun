@@ -20,7 +20,6 @@ import RowEqualityChecks from "./equality-checks";
 import { withQueryConfig } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/snake-case-types";
 import { postgrest } from "../../../src/indexer-v2/queries/base";
-import { toMarketLatestStateEventModel } from "../../../src/indexer-v2/types";
 
 const NUM_TESTS = 4;
 
@@ -36,8 +35,8 @@ describe("queries swap_events and returns accurate swap row data", () => {
     // Fund the account with 100 APT.
     await fundAccountFast(aptos, registrant, ONE_APT * 100);
 
-    /* eslint-disable-next-line no-await-in-loop */
-    for (let i = 0; i < NUM_TESTS; i++) {
+    for (let i = 0; i < NUM_TESTS; i += 1) {
+      /* eslint-disable-next-line no-await-in-loop */
       markets.push(await registerMarketTestHelper({ registrant }));
     }
 

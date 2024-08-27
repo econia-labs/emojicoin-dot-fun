@@ -1,5 +1,7 @@
 #!/bin/bash
 # cspell:word toplevel
+# cspell:word localnode
+# cspell:word buildable
 
 # ------------------------------------------------------------------------------
 #                            Setup for absolute paths
@@ -26,17 +28,17 @@ trap cleanup EXIT
 # ------------------------------------------------------------------------------
 
 show_help() {
-    echo "Usage: $0 [OPTION]"
-    echo "Control the Docker Compose environment with a local testnet."
-    echo
-    echo "Options:"
-    echo "  -r, --reset       Reset all containers and volumes, including the local testnet."
-    echo "  -s, --start       Start the Docker environment with the local testnet."
-    echo "  --no-frontend     Do not start the frontend container."
-    echo
-    echo "  -h, --help        Display this help message"
-    echo
-    echo "You can specify both options to reset and then start the environment."
+	echo "Usage: $0 [OPTION]"
+	echo "Control the Docker Compose environment with a local testnet."
+	echo
+	echo "Options:"
+	echo "  -r, --reset       Reset all containers and volumes, including the local testnet."
+	echo "  -s, --start       Start the Docker environment with the local testnet."
+	echo "  --no-frontend     Do not start the frontend container."
+	echo
+	echo "  -h, --help        Display this help message"
+	echo
+	echo "You can specify both options to reset and then start the environment."
 }
 
 # ------------------------------------------------------------------------------
@@ -55,25 +57,32 @@ localnode_compose="localnode.yaml"
 frontend_compose="frontend.yaml"
 
 # Parse command line arguments
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --reset) reset=true ;;
-        -r) reset=true ;;
-        --start) start=true ;;
-        -s) start=true ;;
-        --no-frontend) include_frontend=false ;;
-        -h|--help) show_help; exit 0 ;;
-        *) echo "Unknown parameter passed: $1"; show_help; exit 1 ;;
-    esac
-    shift
+while [[ $# -gt 0 ]]; do
+	case $1 in
+	--reset) reset=true ;;
+	-r) reset=true ;;
+	--start) start=true ;;
+	-s) start=true ;;
+	--no-frontend) include_frontend=false ;;
+	-h | --help)
+		show_help
+		exit 0
+		;;
+	*)
+		echo "Unknown parameter passed: $1"
+		show_help
+		exit 1
+		;;
+	esac
+	shift
 done
 
 compose_args=""
 
 if [ "$include_frontend" = true ]; then
-    compose_args="-f $base_compose -f $localnode_compose -f $frontend_compose"
+	compose_args="-f $base_compose -f $localnode_compose -f $frontend_compose"
 else
-    compose_args="-f $base_compose -f $localnode_compose"
+	compose_args="-f $base_compose -f $localnode_compose"
 fi
 
 # ------------------------------------------------------------------------------
@@ -81,32 +90,32 @@ fi
 # ------------------------------------------------------------------------------
 
 reset_container_resources() {
-    # Remove the frontend container regardless of whether or not it was started;
-    # otherwise, there will be a dangling/orphaned container.
-    all_compose_files="-f $base_compose -f $localnode_compose -f $frontend_compose"
+	# Remove the frontend container regardless of whether or not it was started;
+	# otherwise, there will be a dangling/orphaned container.
+	all_compose_files="-f $base_compose -f $localnode_compose -f $frontend_compose"
 
-    echo "Resetting the remaining containers and volumes..."
-    docker compose $all_compose_files down --volumes
+	echo "Resetting the remaining containers and volumes..."
+	docker compose $all_compose_files down --volumes
 
-    echo "Resetting local testnet containers and volumes..."
-    docker stop $localnode $graphql
-    docker rm -f $localnode $graphql --volumes 2>/dev/null
+	echo "Resetting local testnet containers and volumes..."
+	docker stop $localnode $graphql
+	docker rm -f $localnode $graphql --volumes 2>/dev/null
 }
 
 build_and_start() {
-    echo "Starting local testnet..."
-    docker compose $compose_args up --build -d --force-recreate
+	echo "Starting local testnet..."
+	docker compose $compose_args up --build -d --force-recreate
 }
 
 pull_images() {
-    echo "Pulling Docker images..."
-    if ! docker compose $compose_args pull --policy missing 2>/dev/null; then
-        echo "Failed to pull Docker images. Some may need to be built."
-        echo "Pulling non-buildable images..."
-        docker compose $compose_args pull --ignore-buildable --policy missing
-    else
-        echo "All images pulled successfully."
-    fi
+	echo "Pulling Docker images..."
+	if ! docker compose $compose_args pull --policy missing 2>/dev/null; then
+		echo "Failed to pull Docker images. Some may need to be built."
+		echo "Pulling non-buildable images..."
+		docker compose $compose_args pull --ignore-buildable --policy missing
+	else
+		echo "All images pulled successfully."
+	fi
 }
 
 # ------------------------------------------------------------------------------
@@ -114,11 +123,11 @@ pull_images() {
 # ------------------------------------------------------------------------------
 
 if [ "$reset" = true ]; then
-    reset_container_resources
+	reset_container_resources
 fi
 
 pull_images
 
 if [ "$start" = true ]; then
-    build_and_start
+	build_and_start
 fi

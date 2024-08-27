@@ -1,4 +1,4 @@
-# yamllint disable rule:empty-lines rule:key-ordering
+# yamllint disable rule:empty-lines rule:key-ordering rule:brackets
 ---
 services:
   broker:
@@ -16,12 +16,12 @@ services:
       RUST_LOG: 'info'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${BROKER_PORT}/"]
-      interval: 2m
-      timeout: 5s
+      test: ['CMD', 'curl', '-f', 'http://localhost:${BROKER_PORT}/']
+      interval: '2m'
+      timeout: '5s'
       retries: 2
-      start_period: 10s
-      start_interval: 2s
+      start_period: '10s'
+      start_interval: '2s'
     ports:
     - '${BROKER_PORT}:${BROKER_PORT}'
     restart: 'unless-stopped'
@@ -77,11 +77,11 @@ services:
     image: 'econialabs/emojicoin-dot-fun-indexer-processor'
     restart: 'unless-stopped'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/metrics/"]
-      interval: 30s
-      timeout: 10s
+      test: ['CMD', 'curl', '-f', 'http://localhost:8084/metrics/']
+      interval: '30s'
+      timeout: '10s'
       retries: 5
-      start_period: 15s
+      start_period: '15s'
     stop_signal: 'SIGKILL'
     ports:
     - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'

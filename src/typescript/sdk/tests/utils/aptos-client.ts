@@ -51,10 +51,9 @@ export async function fundAccountFast(
   );
   if (getAptosNetwork() === Network.LOCAL) {
     return [await aptos.fundAccount({ accountAddress, amount: Number(aptAmount) * ONE_APT })];
-  } else {
-    const results = Array.from({ length: Number(aptAmount) }).map(async () =>
-      aptos.fundAccount({ accountAddress, amount: ONE_APT })
-    );
-    return await Promise.all(results);
   }
+  const results = Array.from({ length: Number(aptAmount) }).map(async () =>
+    aptos.fundAccount({ accountAddress, amount: ONE_APT })
+  );
+  return Promise.all(results);
 }

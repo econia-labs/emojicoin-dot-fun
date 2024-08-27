@@ -7,7 +7,7 @@ import { type AnyNumberString } from "../../types/types";
 import { type TableName } from "../types/snake-case-types";
 import { type Flatten } from "../../types";
 
-export type EnumLiteralType<T extends TableName> = T extends TableName ? `${T}` : never;
+type EnumLiteralType<T extends TableName> = T extends TableName ? `${T}` : never;
 
 type QueryFunction<
   Row extends Record<string, unknown>,

@@ -1,6 +1,10 @@
 import { SimulateSwap } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
-import { type AnyNumber, type AccountAddressString, type TypeTagInput } from "@sdk/emojicoin_dot_fun";
+import {
+  type AnyNumber,
+  type AccountAddressString,
+  type TypeTagInput,
+} from "@sdk/emojicoin_dot_fun";
 import { type TypeTag, type Aptos } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
