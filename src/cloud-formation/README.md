@@ -72,19 +72,17 @@ you'll need to set the following [AWS Systems Manager parameters]:
 - `/Emojicoin/ModuleAddress/<NETWORK>`
 - `/GrpcDataServiceUrl/<NETWORK>`
 
-where `<NETWORK>` is either `Mainnet` or `Testnet`, corresponding to the
-`Network` template parameter.
+For `<NETWORK>` you can substitute `Mainnet` or `Testnet`, corresponding to the
+`Network` template parameter. You'll also need the following secrets:
 
-Lastly, you'll need the following secrets:
-
-- `GRPC_AUTH_TOKEN`, in plaintext
+- `GRPC_AUTH_TOKEN` (plaintext)
 
 - `DOCKER_AUTH_CONFIG` with format:
 
   ```json
   {
-    "username" : "<YOUR_USERNAME>",
-    "password" : "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
+    "username": "<YOUR_USERNAME>",
+    "password": "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
   }
   ```
 
