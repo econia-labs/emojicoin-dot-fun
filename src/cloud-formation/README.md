@@ -94,32 +94,41 @@ accordingly, `git` updates will result in automatic updates.
 
 ## Template parameters
 
-`indexer.cfn.yaml` contains assorted [parameters] of the form `Provision*` that
-can be used to selectively provision and de-provision [resources]. For a concise
-list of such parameters, see the [stack deployment file]. See the template
+`indexer.cfn.yaml` contains assorted [parameters] of the form `TryProvision*`
+that can be used to selectively provision and de-provision [resources]. For a
+concise list of such parameters, see a [stack deployment file]. See the template
 [conditions] section for associated dependencies.
 
 Note that even if a parameter is passed as `true`, the resources that directly
 depend on it will not be created unless the condition's dependencies are also
-met. All resources are eventually conditional on `ProvisionStack`, which can be
-used to toggle provisioning and de-provisioning of all resources in the stack.
+met. All resources are eventually conditional on `TryProvisionStack`, which can
+be used to toggle provisioning and de-provisioning of all resources.
 
-In practice this means that even if a parameter evaluates to `true`, the
-expected behavior might not occur: for example if `ProvisionStack` is `false`,
-then even if `ProvisionVpc` is `true` there still won't be any virtual private
-network resources because `ProvisionVpc` depends on `ProvisionStack`.
+In practice this means that even if a `TryProvision*` parameter is passed as
+`true`, the corresponding resource(s) might not be created. For example if
+`TryProvisionStack` is `false`, then even if `TryProvisionVpc` is `true`,
+virtual private network resources won't be created because `TryProvisionVpc`
+is conditional on `TryProvisionStack`.
 
-To minimize such situations the template also contains a [rules] section for
-build time parameter assertion, but pending the resolution of
-[`cfn-lint` issue #3630] the associated conditions should be considered the
-source of truth for static analysis-based determination of stack outcomes. Note
-that if an assertion fails, the update will silently halt before mutating any
-resources.
+In theory [rules] could be used to enforce parametric dependencies, thus
+generating an error in the case that `ProvisionVpc` is passed `true` but
+`ProvisionStack` is passed `false`, however rules have several prohibitive
+issues in practice:
+
+1. [`cfn-lint` issue #3630].
+
+1. If a rule assertion fails, rather than reporting an assertion error, the
+   [GitSync status dashboard] instead simply halts the update with
+   [GitSync event] type `CHANGESET_CREATION_FAILED` and following event message,
+   misleadingly reporting that no changes are present when in fact the update
+   failure was a result of failed rule assertions:
+
+   > Changeset creation failed. The reason was No updates are to be performed..
 
 ## Connect to services through bastion host
 
 Before you try connecting to the bastion host, verify that the
-`ProvisionBastionHost` [condition][conditions] evaluates to `true`. Note too
+`TryProvisionBastionHost` [condition][conditions] evaluates to `true`. Note too
 that if you have been provisioning and de-provisioning other resources, you
 might want to de-provision then provision the bastion host before running the
 below commands, in order to refresh the bastion host [user data] that stores the
@@ -231,7 +240,9 @@ curl "https://$DNS_NAME/processor_status?select=last_success_version"
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
+[gitsync event]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-status.html#git-sync-status-sync-events
 [gitsync iam role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-prereq.html#git-sync-prereq-iam
+[gitsync status dashboard]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-status.html
 [inline policy]: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#inline-policies
 [make route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
