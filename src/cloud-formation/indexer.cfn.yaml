@@ -740,8 +740,16 @@ Resources:
       VpcSecurityGroupIds:
       - !Ref 'DbSecurityGroup'
     Type: 'AWS::RDS::DBCluster'
-  # Database instance.
-  DbInstance:
+  # Primary (writer) database instance.
+  DbInstancePrimary:
+    Condition: 'TryProvisionDb'
+    Properties:
+      DBClusterIdentifier: !Ref 'DbCluster'
+      DBInstanceClass: 'db.serverless'
+      Engine: 'aurora-postgresql'
+    Type: 'AWS::RDS::DBInstance'
+  # Replica (reader) database instance.
+  DbInstanceReplica:
     Condition: 'TryProvisionDb'
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
@@ -1116,9 +1124,11 @@ Resources:
   # Service for running the processor.
   ProcessorRunner:
     Condition: 'TryProvisionProcessor'
-    # Without instance, the cluster endpoint is defined but not available, so
-    # the service will not be able to connect to the database.
-    DependsOn: 'DbInstance'
+    # Pending instance creation, the cluster endpoint is defined but not
+    # available, so the service will not be able to connect to the database.
+    DependsOn:
+    - 'DbInstancePrimary'
+    - 'DbInstanceReplica'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
