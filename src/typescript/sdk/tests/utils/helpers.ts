@@ -86,7 +86,9 @@ export async function registerMarketTestHelper({
     symbolBytes: symbol.symbolData.bytes,
   });
 
-  let registerResponse: UserTransactionResponse | undefined;
+  // Default the `success` field to true, because we don't want to throw an error if the
+  // market is already registered, we just want to make sure it exists.
+  let registerResponse: UserTransactionResponse | { success: boolean } = { success: true };
   if (!registered) {
     registerResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,

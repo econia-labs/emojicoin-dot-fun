@@ -1,7 +1,6 @@
 import "server-only";
 
 import {
-  AccountAddress,
   type EntryFunctionPayloadResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
@@ -62,8 +61,6 @@ const checkTuplesAndPrint = (args: [string, any, any][]) => {
 
   expect(rows).toEqual(responses);
 };
-
-const normalize = (s: string) => AccountAddress.from(s).toString();
 
 // -------------------------------------------------------------------------------------------------
 //

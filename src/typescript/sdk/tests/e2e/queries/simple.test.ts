@@ -25,7 +25,10 @@ import { toMarketLatestStateEventModel } from "../../../src/indexer-v2/types";
 const NUM_TESTS = 4;
 
 describe("queries swap_events and returns accurate swap row data", () => {
-  const registrant = Account.generate();
+  let registrant = Account.generate();
+  while (registrant.accountAddress.toString().at(0) !== "0") {
+    registrant = Account.generate();
+  }
   const { aptos } = getAptosClient();
   const markets = new Array<Awaited<ReturnType<typeof registerMarketTestHelper>>>();
 
@@ -40,7 +43,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
 
     // Check that all the markets were registered successfully.
     const res = markets.reduce(
-      (acc, { registerResponse }) => (acc && registerResponse ? registerResponse.success : true),
+      (acc, { registerResponse }) => acc && registerResponse.success,
       true
     );
     return res;
@@ -179,27 +182,6 @@ describe("queries swap_events and returns accurate swap row data", () => {
       ({ market_id }) => ({ marketID: BigInt(market_id) }),
       TableName.MarketLatestStateEvent
     )({ marketID });
-
-    console.warn(
-      postgrest
-            .from(TableName.MarketLatestStateEvent)
-            .select("*")
-            .eq("in_bonding_curve", false)
-            .eq("market_id", marketID),
-    )
-
-    console.warn(
-      await withQueryConfig(
-        () =>
-          postgrest
-            .from(TableName.MarketLatestStateEvent)
-            .select("*")
-            .eq("in_bonding_curve", false)
-            .eq("market_id", marketID),
-        (latest) => toMarketLatestStateEventModel(latest),
-        TableName.MarketLatestStateEvent
-      )({ marketID })
-    );
 
     const foundInMarketsWithPools = marketsWithPools.find((m) => m.marketID === marketID);
 

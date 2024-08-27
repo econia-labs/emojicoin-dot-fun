@@ -62,7 +62,6 @@ export async function publishPackage(args: {
   ];
 
   const command = shellArgs.join(" ");
-  console.debug(`\n${command}\n`);
   const outputBytes = execSync(command);
   const commandOutput = Buffer.from(outputBytes).toString();
   const resultObject = extractJsonFromText(command, commandOutput);
@@ -144,7 +143,6 @@ export async function publishPackagesForTest(pk: string): Promise<PublishPackage
   });
 
   // Also publish the rewards module.
-  const rewards = REWARDS_MODULE_NAME;
   await publishPackage({
     pk: publisher.privateKey,
     namedAddresses: {
