@@ -12,8 +12,8 @@ parameters:
   ProvisionPostgrest: 'false'
   ProvisionProcessor: 'false'
   ProvisionRouteTables: 'false'
-  ProvisionStack: 'false'
-  ProvisionVpc: 'false'
+  ProvisionStack: 'true'
+  ProvisionVpc: 'true'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
 ...
