@@ -102,11 +102,20 @@ export class DockerDirector {
    * @returns Promise<boolean>
    */
   async waitUntilProcessIsUp(): Promise<boolean> {
+    // If we don't wait in between `start` and the readiness check, the readiness check
+    // actually succeeds, despite being torn down nearly immediately after. This results
+    // in an error in the test because it mistakenly thinks the processor is ready.
+    // We need to wait at least a small amount of time up front if we're tearing down and
+    // restarting the containers. Since the containers will never be started immediately,
+    // we wait a larger amount of time than may be necessary to avoid an error.
+    if (this.resetContainersOnStart) {
+      await sleep(5000);
+    }
+
     let operational = await this.checkIfProcessIsUp();
     let secondsElapsed = 0;
 
     while (!operational && secondsElapsed < this.MAXIMUM_WAIT_TIME_SEC) {
-      const timeLeft = this.MAXIMUM_WAIT_TIME_SEC - secondsElapsed;
       await sleep(1000);
       secondsElapsed += 1;
       operational = await this.checkIfProcessIsUp();

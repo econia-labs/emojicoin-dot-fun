@@ -61,12 +61,10 @@ export function getGitRoot(): string {
 export async function registerMarketTestHelper({
   registrant = Account.generate(),
   integrator = Account.generate(),
-  sequenceNumber,
 }: {
   registrant?: Account;
   additionalAccountsToFund?: Array<Account>;
   integrator?: Account;
-  sequenceNumber?: bigint;
 }) {
   const { aptos } = getTestHelpers();
 
@@ -98,7 +96,6 @@ export async function registerMarketTestHelper({
       options: {
         maxGasAmount: ONE_APT / 100,
         gasUnitPrice: 100,
-        accountSequenceNumber: sequenceNumber,
       },
     });
   }

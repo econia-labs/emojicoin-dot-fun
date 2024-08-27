@@ -64,8 +64,8 @@ export const postgresTimestampToMicroseconds = (timestamp: PostgresTimestamp): b
   const spl = timestamp.split(".");
   const microseconds = spl.length == 1 ? 0n : BigInt(spl[1].padEnd(6, "0"));
 
-  // Get the date to the nearest second.
-  const dateToNearestSecond = new Date(spl[0]);
+  // Get the date to the nearest second. Ensure JavaScript parses it as a UTC date.
+  const dateToNearestSecond = new Date(spl[0] + "Z");
   // Convert it to milliseconds.
   const inMilliseconds = dateToNearestSecond.getTime();
   // Convert it to microseconds; add the microseconds portion from the original timestamp.

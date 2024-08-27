@@ -1,3 +1,5 @@
+import "server-only";
+
 import { TableName } from "../types/snake-case-types";
 import {
   toChatEventModel,

@@ -81,16 +81,16 @@ fi
 # ------------------------------------------------------------------------------
 
 reset_container_resources() {
-    echo "Resetting local testnet containers and volumes..."
-    docker stop $localnode $graphql
-    docker rm -f $localnode $graphql --volumes 2>/dev/null
-
     # Remove the frontend container regardless of whether or not it was started;
     # otherwise, there will be a dangling/orphaned container.
     all_compose_files="-f $base_compose -f $localnode_compose -f $frontend_compose"
 
     echo "Resetting the remaining containers and volumes..."
     docker compose $all_compose_files down --volumes
+
+    echo "Resetting local testnet containers and volumes..."
+    docker stop $localnode $graphql
+    docker rm -f $localnode $graphql --volumes 2>/dev/null
 }
 
 build_and_start() {

@@ -6,6 +6,11 @@ module.exports = {
   },
   workerThreads: true,
   testEnvironment: "node",
+  testEnvironmentOptions: {
+    // If we don't add this, all the jest tests that run/import server-only code will fail to
+    // import it and thus fail.
+    customExportConditions: ["react-server", "node", "node-addons"],
+  },
   coveragePathIgnorePatterns: [
     "src/cli/local-node.ts",
     "src/helpers/misc.ts",
@@ -24,5 +29,5 @@ module.exports = {
   },
   maxWorkers: 4,
   globalSetup: process.env.NO_TEST_SETUP !== "true" ? "./tests/pre-test.js" : null,
-  globalTeardown: process.env.NO_TEST_SETUP !== "true" ?  "./tests/post-test.js" : null,
+  globalTeardown: process.env.NO_TEST_SETUP !== "true" ? "./tests/post-test.js" : null,
 };

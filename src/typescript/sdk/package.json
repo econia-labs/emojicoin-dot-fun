@@ -54,7 +54,7 @@
     "build:debug": "pnpm run build:clean",
     "check": "tsc --noEmit",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "e2e-test": "dotenv -e ../.env.ci -- pnpm jest tests/e2e",
+    "e2e-test": "dotenv -e ../.env.ci -- pnpm jest tests/e2e --conditions=react-server",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
     "generate-data": "dotenv -e ../.env.local -e ../.env -e ../.env.ci -- pnpm tsx src/utils/mock-data.ts",
@@ -65,6 +65,7 @@
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
     "test": "dotenv -e ../.env.ci -e ../../docker/.env -- pnpm jest",
+    "test-no-remove": "pnpm dotenv -e ../.env.ci -e ../../docker/.env -v REMOVE_CONTAINERS_ON_EXIT=false -- pnpm jest",
     "unit-test": "dotenv -v NO_TEST_SETUP=true -e ../.env.ci -- pnpm jest tests/unit"
   },
   "typings": "dist/src/index.d.ts",
