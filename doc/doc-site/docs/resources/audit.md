@@ -4,7 +4,7 @@ title: 🧑‍💻 Audit
 hide_title: false
 ---
 
-The emojicoin dot fun  Move package is audited:
+The emojicoin dot fun Move package is audited:
 
 - [PDF Report]
 - Corresponding `git` tag [`move-v1.0.0-audited`]
