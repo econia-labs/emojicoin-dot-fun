@@ -107,11 +107,14 @@ used to toggle provisioning and de-provisioning of all resources in the stack.
 In practice this means that even if a parameter evaluates to `true`, the
 expected behavior might not occur: for example if `ProvisionStack` is `false`,
 then even if `ProvisionVpc` is `true` there still won't be any virtual private
-network resources because `ProvisionVpc` depends on `ProvisionStack`. To
-minimize such situations the template also contains a [rules] section for build
-time parameter assertion, but pending the resolution of [`cfn-lint` issue #3630]
-the associated conditions should be considered the source of truth for
-static analysis-based determination of stack outcomes.
+network resources because `ProvisionVpc` depends on `ProvisionStack`.
+
+To minimize such situations the template also contains a [rules] section for
+build time parameter assertion, but pending the resolution of
+[`cfn-lint` issue #3630] the associated conditions should be considered the
+source of truth for static analysis-based determination of stack outcomes. Note
+that if an assertion fails, the update will silently halt before mutating any
+resources.
 
 ## Connect to services through bastion host
 
