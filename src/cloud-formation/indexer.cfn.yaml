@@ -47,9 +47,14 @@ Conditions:
   - !Equals
     - !Ref 'ProvisionRouteTables'
     - 'true'
-  ProvisionVpc: !Equals
-  - !Ref 'ProvisionVpc'
+  ProvisionStack: !Equals
+  - !Ref 'ProvisionStack'
   - 'true'
+  ProvisionVpc: !And
+  - !Condition 'ProvisionStack'
+  - !Equals
+    - !Ref 'ProvisionVpc'
+    - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
@@ -150,6 +155,8 @@ Parameters:
   ProvisionProcessor:
     Type: 'String'
   ProvisionRouteTables:
+    Type: 'String'
+  ProvisionStack:
     Type: 'String'
   ProvisionVpc:
     Type: 'String'
@@ -605,15 +612,18 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Cluster for running ECS containers.
   ContainerCluster:
+    Condition: 'ProvisionStack'
     Type: 'AWS::ECS::Cluster'
   # Log group for ECS task logging.
   ContainerLogGroup:
+    Condition: 'ProvisionStack'
     Properties:
       LogGroupName: !Sub '/ecs/${AWS::StackName}'
       RetentionInDays: 14
     Type: 'AWS::Logs::LogGroup'
   # Role with assorted permissions required to run containers.
   ContainerRole:
+    Condition: 'ProvisionStack'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -829,6 +839,7 @@ Resources:
       Type: 'AWS::EC2::Subnet'
   # Internet gateway for the virtual private cloud.
   InternetGateway:
+    Condition: 'ProvisionStack'
     Type: 'AWS::EC2::InternetGateway'
   # Attachment of internet gateway to the virtual private cloud.
   InternetGatewayAttachment:
@@ -846,6 +857,7 @@ Resources:
     Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for the network address translation gateway.
   NatGatewayEip:
+    Condition: 'ProvisionStack'
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
