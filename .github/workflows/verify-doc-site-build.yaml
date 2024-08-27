@@ -18,6 +18,7 @@ name: 'Verify docs site build'
   pull_request:
     branches:
     - 'main'
+    - 'production'
     paths:
     - 'doc/doc-site/**'
     - '.github/workflows/verify-doc-site-build.yaml'

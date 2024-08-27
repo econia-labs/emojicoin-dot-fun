@@ -10,6 +10,6 @@ export async function GET() {
     const version = await aptos.getLedgerInfo().then((res) => res.ledger_version);
     return new NextResponse(version.toString());
   } catch {
-    return new NextResponse("", {status: 500});
+    return new NextResponse("", { status: 500 });
   }
 }

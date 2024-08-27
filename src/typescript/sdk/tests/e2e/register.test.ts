@@ -1,9 +1,4 @@
-import {
-  Account,
-  AccountAddress,
-  Hex,
-  isUserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
+import { Account, AccountAddress, Hex, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   APT_BALANCE_REQUIRED_TO_REGISTER_MARKET,
   COIN_FACTORY_MODULE_NAME,
