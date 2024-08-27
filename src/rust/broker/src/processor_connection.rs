@@ -1,4 +1,7 @@
-use std::{sync::Arc, time::{Duration, SystemTime}};
+use std::{
+    sync::Arc,
+    time::{Duration, SystemTime},
+};
 
 use futures_util::StreamExt;
 use log::{error, info, log_enabled, warn, Level};
@@ -30,7 +33,11 @@ enum ConnectionError {
     ConnectionLost,
 }
 
-pub async fn start(processor_url: String, tx: Sender<EmojicoinDbEvent>, broker_health: Arc<RwLock<BrokerHealth>>) {
+pub async fn start(
+    processor_url: String,
+    tx: Sender<EmojicoinDbEvent>,
+    broker_health: Arc<RwLock<BrokerHealth>>,
+) {
     // Number of retries since last successful connection.
     let mut retries = 0;
 
@@ -40,12 +47,14 @@ pub async fn start(processor_url: String, tx: Sender<EmojicoinDbEvent>, broker_h
     loop {
         // Timestamp of the start of the connection.
         let start_timestamp = SystemTime::now();
-        let res = processor_connection(processor_url.clone(), tx.clone(), broker_health.clone()).await;
+        let res =
+            processor_connection(processor_url.clone(), tx.clone(), broker_health.clone()).await;
         let connection_duration = SystemTime::elapsed(&start_timestamp).unwrap();
 
         // In the broker connected to the processor and the connection duration was longer than the
         // retry treshold, it is considered successful.
-        let connection_successful = matches!(res, Err(ConnectionError::ConnectionLost)) && connection_duration > RETRY_TRESHOLD;
+        let connection_successful = matches!(res, Err(ConnectionError::ConnectionLost))
+            && connection_duration > RETRY_TRESHOLD;
 
         if connection_successful {
             retries = 0;
@@ -58,21 +67,29 @@ pub async fn start(processor_url: String, tx: Sender<EmojicoinDbEvent>, broker_h
 
         first_time = false;
 
-        if retries == 0 { // If this is the first retry, try and reconnect instantly.
+        if retries == 0 {
+            // If this is the first retry, try and reconnect instantly.
             warn!("Trying to reconnect to the processor. (retries left: {CONNECTION_RETRIES}).");
             tokio::time::sleep(INSTANT_RECONNECTION_TIMEOUT).await;
         } else if retries < CONNECTION_RETRIES {
-            warn!("Waiting {DELAYED_RECONNECTION_TIMEOUT:?} then retrying (retries left: {}).", CONNECTION_RETRIES - retries);
+            warn!(
+                "Waiting {DELAYED_RECONNECTION_TIMEOUT:?} then retrying (retries left: {}).",
+                CONNECTION_RETRIES - retries
+            );
             tokio::time::sleep(DELAYED_RECONNECTION_TIMEOUT).await;
         } else {
             error!("No retries left.");
-            break
+            break;
         }
         retries = retries + 1;
     }
 }
 
-async fn processor_connection(processor_url: String, tx: Sender<EmojicoinDbEvent>, broker_health: Arc<RwLock<BrokerHealth>>) -> Result<(), ConnectionError> {
+async fn processor_connection(
+    processor_url: String,
+    tx: Sender<EmojicoinDbEvent>,
+    broker_health: Arc<RwLock<BrokerHealth>>,
+) -> Result<(), ConnectionError> {
     let connection = connect_async(processor_url).await;
     let mut connection = if let Ok(connection) = connection {
         connection

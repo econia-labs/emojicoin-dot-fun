@@ -46,8 +46,15 @@ async fn health(State(state): State<Arc<AppState>>) -> Json<Value> {
     return Json(serde_json::to_value(broker_health.clone()).unwrap());
 }
 
-pub async fn server(tx: Sender<EmojicoinDbEvent>, port: u16, broker_health: Arc<RwLock<BrokerHealth>>) -> Result<(), std::io::Error> {
-    let app_state = AppState { tx, broker_health: broker_health.clone() };
+pub async fn server(
+    tx: Sender<EmojicoinDbEvent>,
+    port: u16,
+    broker_health: Arc<RwLock<BrokerHealth>>,
+) -> Result<(), std::io::Error> {
+    let app_state = AppState {
+        tx,
+        broker_health: broker_health.clone(),
+    };
 
     let app = prepare_app(Router::new().route("/", get(health)));
     let app = app.with_state(Arc::new(app_state));
