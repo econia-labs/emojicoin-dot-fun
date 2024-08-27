@@ -1356,8 +1356,11 @@ Rules:
   ProvisionVpc:
     Assertions:
     - Assert: !Or
-      - !Not
-        - !Condition 'ProvisionVpc'
-      - !Condition 'ProvisionStack'
+      - !Equals
+        - 'ProvisionVpc'
+        - 'false'
+      - !Equals:
+        - 'ProvisionStack'
+        - 'true'
 Transform: 'AWS::LanguageExtensions'
 ...
