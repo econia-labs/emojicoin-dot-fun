@@ -5,9 +5,11 @@
 # cspell:word multivalue
 ---
 Conditions:
-  ProvisionAlb: !Equals
-  - !Ref 'ProvisionAlb'
-  - 'true'
+  ProvisionAlb: !And
+  - !Condition 'ProvisionVpc'
+  - !Equals
+    - !Ref 'ProvisionAlb'
+    - 'true'
   ProvisionAlbDnsRecord: !And
   - !Condition 'ProvisionAlb'
   - !Equals
@@ -23,12 +25,15 @@ Conditions:
   - !Equals
     - !Ref 'ProvisionBroker'
     - 'true'
-  ProvisionDb: !Equals
-  - !Ref 'ProvisionDb'
-  - 'true'
+  ProvisionDb: !And
+  - !Condition 'ProvisionVpc'
+  - !Equals
+    - !Ref 'ProvisionDb'
+    - 'true'
   ProvisionPostgrest: !And
   - !Condition 'ProvisionDb'
   - !Condition 'ProvisionProcessor'
+  - !Condition 'ProvisionVpc'
   - !Equals
     - !Ref 'ProvisionPostgrest'
     - 'true'
@@ -37,8 +42,13 @@ Conditions:
   - !Equals
     - !Ref 'ProvisionProcessor'
     - 'true'
-  ProvisionRouteTables: !Equals
-  - !Ref 'ProvisionRouteTables'
+  ProvisionRouteTables: !And
+  - !Condition 'ProvisionVpc'
+  - !Equals
+    - !Ref 'ProvisionRouteTables'
+    - 'true'
+  ProvisionVpc: !Equals
+  - !Ref 'ProvisionVpc'
   - 'true'
 Mappings:
   Constants:
@@ -140,6 +150,8 @@ Parameters:
   ProvisionProcessor:
     Type: 'String'
   ProvisionRouteTables:
+    Type: 'String'
+  ProvisionVpc:
     Type: 'String'
 Resources:
   # Public application load balancer.
@@ -243,6 +255,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupIngress:
@@ -431,12 +444,14 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the broker's WebSocket server security group.
   BrokerPublisherSecurityGroupIngress:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupId: !Ref 'BrokerPublisherSecurityGroup'
       IpProtocol: -1
@@ -581,6 +596,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the broker's WebSocket server.
   BrokerWsClientSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -642,6 +658,7 @@ Resources:
     Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
   ContainerSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       # Allow all outbound traffic, to other resources and to Docker Hub.
@@ -695,6 +712,7 @@ Resources:
     Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
@@ -702,6 +720,7 @@ Resources:
   # Ingress policy for the database's security group, separated to eliminate
   # circular dependencies with security group for users of the database.
   DbSecurityGroupIngress:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupId: !Ref 'DbSecurityGroup'
       IpProtocol: -1
@@ -709,6 +728,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Database subnet group.
   DbSubnetGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       DBSubnetGroupDescription: !Ref 'AWS::StackName'
       SubnetIds:
@@ -718,6 +738,7 @@ Resources:
     Type: 'AWS::RDS::DBSubnetGroup'
   # Security group for users of the database.
   DbUserSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -766,6 +787,7 @@ Resources:
     - 'B'
     - 'C'
   - PublicSubnet${Identifier}:
+      Condition: 'ProvisionVpc'
       Properties:
         AvailabilityZone: !Select
         - !FindInMap
@@ -787,6 +809,7 @@ Resources:
     - 'B'
     - 'C'
   - Subnet${Identifier}:
+      Condition: 'ProvisionVpc'
       Properties:
         AvailabilityZone: !Select
         - !FindInMap
@@ -806,12 +829,14 @@ Resources:
     Type: 'AWS::EC2::InternetGateway'
   # Attachment of internet gateway to the virtual private cloud.
   InternetGatewayAttachment:
+    Condition: 'ProvisionVpc'
     Properties:
       InternetGatewayId: !Ref 'InternetGateway'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::VPCGatewayAttachment'
   # Network address translation gateway for the virtual private cloud.
   NatGateway:
+    Condition: 'ProvisionVpc'
     Properties:
       AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
       SubnetId: !Ref 'PublicSubnetA'
@@ -856,6 +881,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for PostgREST clients.
   PostgrestClientSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -911,12 +937,14 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Security group for the PostgREST server.
   PostgrestServerSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the PostgREST server security group.
   PostgrestServerSecurityGroupIngress:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupId: !Ref 'PostgrestServerSecurityGroup'
       IpProtocol: -1
@@ -1021,6 +1049,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Private DNS namespace for internal service discovery.
   PrivateServiceDiscoveryNamespace:
+    Condition: 'ProvisionVpc'
     Properties:
       Description: !Ref 'AWS::StackName'
       Name: !Ref 'AWS::StackName'
@@ -1028,12 +1057,14 @@ Resources:
     Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
   ProcessorPublisherSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the processor's WebSocket server security group.
   ProcessorPublisherSecurityGroupIngress:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupId: !Ref 'ProcessorPublisherSecurityGroup'
       IpProtocol: -1
@@ -1176,6 +1207,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the processor's WebSocket server.
   ProcessorWsClientSecurityGroup:
+    Condition: 'ProvisionVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -1199,6 +1231,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
+    Condition: 'ProvisionVpc'
     Properties:
       CidrBlock: !FindInMap
       - 'Constants'
