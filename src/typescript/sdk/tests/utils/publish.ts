@@ -11,13 +11,18 @@ import {
 import path from "path";
 import { type PublishPackageResult, type ResultJSON } from "./types";
 import { getAptosClient } from "./aptos-client";
-import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
+import {
+  MAX_GAS_FOR_PUBLISH,
+  ONE_APT,
+  EMOJICOIN_DOT_FUN_MODULE_NAME,
+  REWARDS_MODULE_NAME,
+} from "../../src";
 import { getGitRoot } from "./helpers";
 
 export async function publishPackage(args: {
   pk: PrivateKey;
   network: Network;
-  includedArtifacts: string | undefined;
+  includedArtifacts?: string;
   namedAddresses: Record<string, AccountAddressInput>;
   packageDirRelativeToRoot: string;
 }): Promise<PublishPackageResult> {
@@ -106,7 +111,7 @@ function extractJsonFromText(originalCommand: string, text: string): ResultJSON 
   return null;
 }
 
-export async function publishForTest(pk: string): Promise<PublishPackageResult> {
+export async function publishPackagesForTest(pk: string): Promise<PublishPackageResult> {
   const { aptos } = getAptosClient();
   const publisher = Account.fromPrivateKey({
     privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
@@ -127,17 +132,31 @@ export async function publishForTest(pk: string): Promise<PublishPackageResult> 
     await aptos.fundAccount({ accountAddress: publisher.accountAddress, amount: ONE_APT * 1000 });
   }
 
-  const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
-  const packageName = moduleName;
-  return publishPackage({
+  const emojicoinDotFun = EMOJICOIN_DOT_FUN_MODULE_NAME;
+  const mainPackageRes = await publishPackage({
     pk: publisher.privateKey,
     includedArtifacts: "none",
     namedAddresses: {
-      [packageName]: publisher.accountAddress,
+      [emojicoinDotFun]: publisher.accountAddress,
     },
     network: Network.LOCAL,
-    packageDirRelativeToRoot: `src/move/${packageName}`,
+    packageDirRelativeToRoot: `src/move/${emojicoinDotFun}`,
   });
+
+  // Also publish the rewards module.
+  const rewards = REWARDS_MODULE_NAME;
+  await publishPackage({
+    pk: publisher.privateKey,
+    namedAddresses: {
+      [emojicoinDotFun]: publisher.accountAddress,
+      rewards: publisher.accountAddress,
+      integrator: publisher.accountAddress,
+    },
+    network: Network.LOCAL,
+    packageDirRelativeToRoot: `src/move/rewards`,
+  });
+
+  return mainPackageRes;
 }
 
 export async function getModuleExists(

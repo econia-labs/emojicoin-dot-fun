@@ -1,33 +1,40 @@
-const { Account, Hex, Ed25519PrivateKey } = require("@aptos-labs/ts-sdk");
 const fs = require("fs");
 const path = require("path");
 const {
-  Inbox,
-  LocalNode,
-  publishForTest,
+  publishPackagesForTest,
   getPublisherPKForTest,
   PK_PATH,
   PUBLISH_RES_PATH,
+  RESET_CONTAINERS_ON_START,
+  PUBLISH_PACKAGES_FOR_TEST,
 } = require("./utils");
+const DockerDirector = require("./utils/docker-director.ts").default;
 
 module.exports = async function setup() {
-  if (process.env.START_LOCAL_NODE_FOR_TEST === "true") {
-    const localNode = new LocalNode();
-    globalThis.__LOCAL_NODE__ = localNode;
-    await localNode.run();
+  console.log();
+  console.log("Setting up test environment...");
 
-    // This is not done in parallel as Inbox requires the local node to be up first.
-    const inbox = new Inbox();
-    await inbox.run();
-  }
+  // --------------------------------------------------------------------------------------
+  //                              Start the docker containers.
+  // --------------------------------------------------------------------------------------
+  const director = new DockerDirector(
+    "processor-and-broker",
+    RESET_CONTAINERS_ON_START,
+    PUBLISH_PACKAGES_FOR_TEST,
+  );
+  await director.run();
+
+  // Note that the docker container start-up script publishes the package on-chain.
+  // --------------------------------------------------------------------------------------
+  //                         Find the publish transaction on-chain.
+  // --------------------------------------------------------------------------------------
+  const pk = getPublisherPKForTest();
+
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
   fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });
 
-  const pk = await getPublisherPKForTest();
-  if (!pk) {
-    throw new Error("Please provide a private key for testing");
-  };
   fs.writeFileSync(PK_PATH, pk);
-  const publishResult = JSON.stringify(await publishForTest(pk), null, 2);
-  fs.writeFileSync(PUBLISH_RES_PATH, publishResult);
+  const publishResult = await publishPackagesForTest(pk);
+  const json = JSON.stringify(publishResult, null, 2);
+  fs.writeFileSync(PUBLISH_RES_PATH, json);
 };

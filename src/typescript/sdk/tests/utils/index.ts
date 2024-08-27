@@ -6,3 +6,4 @@ export * from "./local-node";
 export * from "./publish";
 export * from "./types";
 export * from "./load-priv-key";
+export * from "./get-publish-txn-from-indexer";
