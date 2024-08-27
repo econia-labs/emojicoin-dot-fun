@@ -1346,13 +1346,19 @@ Rules:
   #        - !Condition 'ProvisionDb'
   #        - !Condition 'ProvisionStack'
   #        - !Condition 'ProvisionVpc'
-  #  ProvisionRouteTables:
-  #    Assertions:
-  #    - Assert: !Or
-  #      - Fn::Not: !Condition 'ProvisionRouteTables'
-  #      - !And
-  #        - !Condition 'ProvisionStack'
-  #        - !Condition 'ProvisionVpc'
+  ProvisionRouteTables:
+    Assertions:
+    - Assert: !Or
+      - !Equals
+        - !Ref 'ProvisionRouteTables'
+        - 'false'
+      - !And
+        - !Equals
+          - !Ref 'ProvisionStack'
+          - 'true'
+        - !Equals
+          - !Ref 'ProvisionVpc'
+          - 'true'
   ProvisionVpc:
     Assertions:
     - Assert: !Or
