@@ -21,6 +21,9 @@ if [ -z "$BIG_MONEY_GUY_PK" ]; then
 	exit 1
 fi
 
+GIT_ROOT_DIR=$(git rev-parse --show-toplevel)
+move_directory=$GIT_ROOT_DIR/src/move
+
 # In simple cases like ours (where there is no account abstraction), the
 # deployer of a smart contract on Aptos is the address that's used for the
 # contract address.
@@ -34,7 +37,7 @@ aptos init --profile $PUBLISHER \
 	--private-key $PUBLISHER_PK \
 	--encoding hex \
 	--assume-yes \
-	--network local
+    --network local
 
 aptos init --profile $BIG_MONEY_GUY \
 	--private-key $BIG_MONEY_GUY_PK \
@@ -45,7 +48,6 @@ aptos init --profile $BIG_MONEY_GUY \
 # Fund with 1,000,000 APT.
 aptos account fund-with-faucet \
 	--profile $PUBLISHER \
-	--network local
 	--amount 100000000000000
 
 # Fund with 10,000,000 APT.
@@ -58,9 +60,8 @@ aptos move publish \
 	--included-artifacts none \
 	--named-addresses emojicoin_dot_fun=$PUBLISHER \
 	--override-size-check \
-	--max-gas 2000000 \
-	--package-dir /app/emojicoin_dot_fun \
-	--skip-fetch-latest-git-deps \
+	--max-gas 1500000 \
+	--package-dir $move_directory/emojicoin_dot_fun \
 	--profile $PUBLISHER
 
 aptos move publish \
@@ -70,6 +71,5 @@ aptos move publish \
 	rewards=$PUBLISHER,integrator=$PUBLISHER,emojicoin_dot_fun=$PUBLISHER \
 	--override-size-check \
 	--max-gas 200000 \
-	--package-dir /app/rewards \
-	--skip-fetch-latest-git-deps \
+	--package-dir $move_directory/rewards \
 	--profile $PUBLISHER
