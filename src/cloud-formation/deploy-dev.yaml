@@ -1,11 +1,8 @@
 ---
 parameters:
   BrokerImageVersion: '0.3.0'
-  EmojicoinModuleAddress: |
-    0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111
   Environment: 'eco-2136'
-  GrpcDataServiceUrl: 'https://grpc.testnet.aptoslabs.com:443'
-  MinimumStartingVersion: '5675600000'
+  Network: 'Testnet'
   ProcessorImageVersion: '0.4.0'
   ProvisionAlb: 'true'
   ProvisionAlbDnsRecord: 'true'
@@ -15,7 +12,7 @@ parameters:
   ProvisionPostgrest: 'true'
   ProvisionProcessor: 'true'
   ProvisionRouteTables: 'true'
-  ProvisionStack: 'false'
+  ProvisionStack: 'true'
   ProvisionVpc: 'true'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'

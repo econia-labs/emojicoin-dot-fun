@@ -127,14 +127,13 @@ Parameters:
   DbMinCapacity:
     Default: 0.5
     Type: 'Number'
-  EmojicoinModuleAddress:
-    Type: 'String'
   Environment:
     Type: 'String'
-  GrpcDataServiceUrl:
+  Network:
+    AllowedValues:
+    - 'Mainnet'
+    - 'Testnet'
     Type: 'String'
-  MinimumStartingVersion:
-    Type: 'Number'
   PostgrestMaxRows:
     Default: 500
     Type: 'Number'
@@ -1156,11 +1155,17 @@ Resources:
               - 'DatabaseConfig'
               - 'MasterUsername'
         - Name: 'GRPC_DATA_SERVICE_URL'
-          Value: !Ref 'GrpcDataServiceUrl'
+          Value: !Sub
+          - '{{resolve:ssm:/GrpcDataServiceUrl/${Network}}}'
+          - Network: !Ref 'Network'
         - Name: 'MINIMUM_STARTING_VERSION'
-          Value: !Ref 'MinimumStartingVersion'
+          Value: !Sub
+          - '{{resolve:ssm:/Emojicoin/MinimumStartingVersion/${Network}}}'
+          - Network: !Ref 'Network'
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
-          Value: !Ref 'EmojicoinModuleAddress'
+          Value: !Sub
+          - '{{resolve:ssm:/Emojicoin/ModuleAddress/${Network}}}'
+          - Network: !Ref 'Network'
         - Name: 'WS_PORT'
           Value: !FindInMap
           - 'Constants'
