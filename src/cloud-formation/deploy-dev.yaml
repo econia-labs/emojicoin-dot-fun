@@ -3,7 +3,7 @@ parameters:
   BrokerImageVersion: '0.3.0'
   EmojicoinModuleAddress: |
     0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111
-  Environment: 'dev'
+  Environment: 'eco-2136'
   GrpcDataServiceUrl: 'https://grpc.testnet.aptoslabs.com:443'
   MinimumStartingVersion: '5675600000'
   ProcessorImageVersion: '0.4.0'
