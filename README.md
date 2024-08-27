@@ -10,6 +10,11 @@
 
 *Sponsored by a grant from the Aptos Foundation*
 
+The emojicoin dot fun Move package is audited:
+
+- [PDF Report]
+- Corresponding `git` tag [`move-v1.0.0-audited`]
+
 <!-- markdownlint-enable MD036 -->
 
 ## Setting up the environment variables for various release stages
@@ -114,7 +119,9 @@ git submodule update --init --recursive
 ```
 
 [cherry-picking]: https://git-scm.com/docs/git-cherry-pick
+[pdf report]: https://econia-labs.notion.site/emojicoin-dot-fun-audit-8806ffea2b594c8e846ce3d32e5630b9
 [pre-commit repo]: https://github.com/pre-commit/pre-commit
 [pre-commit shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit
 [uploading environment variables with vercel's ui]: https://github.com/user-attachments/assets/d613725d-82ed-4a4e-a467-a89b2cf57d91
 [vercel cli]: https://vercel.com/docs/cli
+[`move-v1.0.0-audited`]: https://github.com/econia-labs/emojicoin-dot-fun/releases/tag/move-v1.0.0-audited
