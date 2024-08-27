@@ -78,6 +78,7 @@ postg
 postgrest
 precommit
 presale
+psql
 rica
 rustup
 serde
@@ -97,6 +98,7 @@ unsubscription
 vercel
 viewports
 vpnapi
+websocat
 websockets
 xbtmatt
 zustand

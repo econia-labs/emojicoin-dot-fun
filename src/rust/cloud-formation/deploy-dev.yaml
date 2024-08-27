@@ -1,5 +1,0 @@
----
-parameters: null
-tags: null
-template-file-path: 'src/indexer/cloud-formation/indexer.cfn.yaml'
-...
