@@ -102,9 +102,10 @@ used to toggle provisioning and de-provisioning of all resources in the stack.
 
 Before you try connecting to the bastion host, verify that the
 `ProvisionBastionHost` [condition][conditions] evaluates to `true`. Note too
-that if you have been provisioning and de-provisioning other resources that you
-might to de-provision then provision the bastion host in order to refresh its
-[user data], which stores the URL of other resources in the stack.
+that if you have been provisioning and de-provisioning other resources, you
+might want to de-provision then provision the bastion host before running the
+below commands, in order to refresh the bastion host [user data] that stores the
+URLs of other resources in the stack.
 
 Install the [AWS EC2 Instance Connect CLI]:
 
