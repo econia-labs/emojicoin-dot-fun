@@ -694,8 +694,8 @@ Resources:
     Condition: 'TryProvisionStack'
     DependsOn: 'ContainerImageCache'
     Properties:
-      EcrRepositoryPrefix: 'docker-hub'
-      UpstreamRegistry: 'docker-hub'
+      EcrRepositoryPrefix: 'dockerhub'
+      UpstreamRegistryUrl: 'registry-1.docker.io'
     Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
   ContainerLogGroup:
