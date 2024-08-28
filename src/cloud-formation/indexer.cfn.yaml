@@ -682,14 +682,12 @@ Resources:
     Properties:
       ImageScanningConfiguration:
         ScanOnPush: true
-      RepositoryName: !Sub '${AWS::StackName}-docker-hub'
     Type: 'AWS::ECR::Repository'
   ContainerImageCache2forTest:
     Condition: 'TryProvisionStack'
     Properties:
       ImageScanningConfiguration:
         ScanOnPush: true
-      RepositoryName: !Sub '${AWS::StackName}-docker-hub-2'
     Type: 'AWS::ECR::Repository'
   # Pull-through cache rule for Docker images from Docker Hub.
   ContainerImageCacheRule:

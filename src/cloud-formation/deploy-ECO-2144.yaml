@@ -13,7 +13,7 @@ parameters:
   TryProvisionProcessor: 'false'
   TryProvisionRouteTables: 'false'
   TryProvisionStack: 'true'
-  TryProvisionVpc: 'true'
+  TryProvisionVpc: 'false'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
 ...
