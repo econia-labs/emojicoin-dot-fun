@@ -3,6 +3,7 @@ allowlister
 aptn
 aptos
 aptoslabs
+autoscale
 barthelemy
 bento
 blackpaper
@@ -14,6 +15,7 @@ caicos
 clamm
 clipperton
 clippy
+cooldown
 counterparties
 cpamm
 cunha
