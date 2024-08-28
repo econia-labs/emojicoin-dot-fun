@@ -29,7 +29,7 @@ export const getRankFromEvent = (
       const q64 = event.balanceAsFractionOfCirculatingSupplyAfterQ64;
       return q64ToBig(q64).toNumber();
     }
-    const q64 = event.balanceAsFractionOfCirculatingSupply;
+    const q64 = event.balanceAsFractionOfCirculatingSupplyQ64;
     return q64ToBig(q64).toNumber();
   })();
 

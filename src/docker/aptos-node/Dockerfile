@@ -89,11 +89,15 @@ ENV PUBLISH_TYPE=${PUBLISH_TYPE} \
 
 ENV PATH=/usr/local/bin:$PATH
 ARG FULLNODE_BINARY
-COPY --from=aptos-cli $FULLNODE_BINARY /usr/local/bin
 
+COPY --from=aptos-cli $FULLNODE_BINARY /usr/local/bin
 COPY src/docker/aptos-node/json/batch-fund.json json/
 
+COPY src/docker/aptos-node/healthcheck.sh .
 COPY src/docker/aptos-node/run-fullnode.sh .
+
+RUN chmod +x healthcheck.sh
 RUN chmod +x run-fullnode.sh
+
 
 STOPSIGNAL SIGKILL

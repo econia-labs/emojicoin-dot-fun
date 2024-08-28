@@ -25,7 +25,7 @@ export const simulateSwap = async (args: {
       ...args,
       swapper: "0x0",
       integrator: INTEGRATOR_ADDRESS,
-      integratorFeeRateBps: INTEGRATOR_FEE_RATE_BPS,
+      integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
     })
   );
 };

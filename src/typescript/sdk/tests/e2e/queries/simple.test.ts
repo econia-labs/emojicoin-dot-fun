@@ -1,6 +1,5 @@
-import { Account } from "@aptos-labs/ts-sdk";
 import { generateRandomSymbol, getEvents, ONE_APT } from "../../../src";
-import { EXACT_TRANSITION_INPUT_AMOUNT, registerMarketTestHelper } from "../../utils/helpers";
+import { EXACT_TRANSITION_INPUT_AMOUNT, registerRandomMarket } from "../../utils/helpers";
 import {
   Chat,
   ProvideLiquidity,
@@ -15,30 +14,38 @@ import {
   fetchSwaps,
   fetchUserLiquidityPools,
 } from "../../../src/indexer-v2/queries";
-import { fundAccountFast, getAptosClient } from "../../utils";
+import { getAptosClient } from "../../utils";
 import RowEqualityChecks from "./equality-checks";
 import { withQueryConfig } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/snake-case-types";
 import { postgrest } from "../../../src/indexer-v2/queries/base";
-
-const NUM_TESTS = 4;
+import { getFundedAccount } from "../../utils/test-accounts";
 
 describe("queries swap_events and returns accurate swap row data", () => {
-  let registrant = Account.generate();
-  while (registrant.accountAddress.toString().at(0) !== "0") {
-    registrant = Account.generate();
-  }
+  const registrant = getFundedAccount(
+    "0x00739effd4b9979ff5c51f57d37248911786d4039afd4e31270e2e37661f4007"
+  );
+  const user = getFundedAccount(
+    "0x008e3dfa7bc7dd3ae0eb59919a1cd5f70155bd0b4d26bf146742bdba2d44b008"
+  );
+  const swapper = getFundedAccount(
+    "0x0097ca77b3896cc62f0e390c268727f175d5835773da19011c2d3942240d2009"
+  );
+  const provider = getFundedAccount(
+    "0x0105ede7d798728422d2c9c9a07306a4a1df01dd2784623a386926b76a3e0010"
+  );
+
   const { aptos } = getAptosClient();
-  const markets = new Array<Awaited<ReturnType<typeof registerMarketTestHelper>>>();
+  const markets = new Array<Awaited<ReturnType<typeof registerRandomMarket>>>();
 
   beforeAll(async () => {
-    // Fund the account with 100 APT.
-    await fundAccountFast(aptos, registrant, ONE_APT * 100);
-
-    for (let i = 0; i < NUM_TESTS; i += 1) {
-      /* eslint-disable-next-line no-await-in-loop */
-      markets.push(await registerMarketTestHelper({ registrant }));
-    }
+    const results = await Promise.all([
+      registerRandomMarket({ registrant }),
+      registerRandomMarket({ registrant: user }),
+      registerRandomMarket({ registrant: swapper }),
+      registerRandomMarket({ registrant: provider }),
+    ]);
+    markets.push(...results);
 
     // Check that all the markets were registered successfully.
     const res = markets.reduce(
@@ -77,7 +84,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const { marketAddress, emojicoin, emojicoinLP } = market;
     const res = await SwapWithRewards.submit({
       aptosConfig: aptos.config,
-      swapper: registrant,
+      swapper,
       marketAddress,
       inputAmount: 90n,
       isSell: false,
@@ -103,7 +110,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const { marketAddress, emojicoin, emojicoinLP, emojis } = market;
     const res = await Chat.submit({
       aptosConfig: aptos.config,
-      user: registrant,
+      user,
       marketAddress,
       emojiBytes: emojis.map((e) => e.hex),
       emojiIndicesSequence: new Uint8Array(Array.from({ length: emojis.length }, (_, i) => i)),
@@ -129,7 +136,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const { marketAddress, emojicoin, emojicoinLP } = market;
     const res = await Swap.submit({
       aptosConfig: aptos.config,
-      swapper: registrant,
+      swapper: provider,
       marketAddress,
       inputAmount: EXACT_TRANSITION_INPUT_AMOUNT,
       isSell: false,
@@ -149,7 +156,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
 
     const liquidityRes = await ProvideLiquidity.submit({
       aptosConfig: aptos.config,
-      provider: registrant,
+      provider,
       marketAddress,
       quoteAmount: ONE_APT,
       minLpCoinsOut: 1n,

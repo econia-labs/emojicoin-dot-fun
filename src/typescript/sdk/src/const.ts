@@ -113,14 +113,14 @@ export const toTrigger = (s: string) =>
   })();
 
 /// As defined in the contract, not in the database; i.e., numbers, not enum strings.
-enum StateTriggerFromContract {
-  PACKAGE_PUBLICATION = 0,
-  MARKET_REGISTRATION = 1,
-  SWAP_BUY = 2,
-  SWAP_SELL = 3,
-  PROVIDE_LIQUIDITY = 4,
-  REMOVE_LIQUIDITY = 5,
-  CHAT = 6,
+export enum TriggerFromContract {
+  PackagePublication = 0,
+  MarketRegistration = 1,
+  SwapBuy = 2,
+  SwapSell = 3,
+  ProvideLiquidity = 4,
+  RemoveLiquidity = 5,
+  Chat = 6,
 }
 
 /**
@@ -137,14 +137,25 @@ export enum CandlestickResolution {
   PERIOD_1D = 86400000000,
 }
 
-export const toTriggerFromContract = (num: number): Trigger => {
-  if (num === StateTriggerFromContract.PACKAGE_PUBLICATION) return Trigger.PackagePublication;
-  if (num === StateTriggerFromContract.MARKET_REGISTRATION) return Trigger.MarketRegistration;
-  if (num === StateTriggerFromContract.SWAP_BUY) return Trigger.SwapBuy;
-  if (num === StateTriggerFromContract.SWAP_SELL) return Trigger.SwapSell;
-  if (num === StateTriggerFromContract.PROVIDE_LIQUIDITY) return Trigger.ProvideLiquidity;
-  if (num === StateTriggerFromContract.REMOVE_LIQUIDITY) return Trigger.RemoveLiquidity;
-  if (num === StateTriggerFromContract.CHAT) return Trigger.Chat;
+export const fromContractEnumToRawTrigger = (trigger: Trigger): number => {
+  if (trigger === Trigger.PackagePublication) return TriggerFromContract.PackagePublication;
+  if (trigger === Trigger.MarketRegistration) return TriggerFromContract.MarketRegistration;
+  if (trigger === Trigger.SwapBuy) return TriggerFromContract.SwapBuy;
+  if (trigger === Trigger.SwapSell) return TriggerFromContract.SwapSell;
+  if (trigger === Trigger.ProvideLiquidity) return TriggerFromContract.ProvideLiquidity;
+  if (trigger === Trigger.RemoveLiquidity) return TriggerFromContract.RemoveLiquidity;
+  if (trigger === Trigger.Chat) return TriggerFromContract.Chat;
+  throw new Error(`Invalid state trigger: ${trigger}`);
+};
+
+export const fromRawTriggerToContractEnum = (num: number): Trigger => {
+  if (num === TriggerFromContract.PackagePublication) return Trigger.PackagePublication;
+  if (num === TriggerFromContract.MarketRegistration) return Trigger.MarketRegistration;
+  if (num === TriggerFromContract.SwapBuy) return Trigger.SwapBuy;
+  if (num === TriggerFromContract.SwapSell) return Trigger.SwapSell;
+  if (num === TriggerFromContract.ProvideLiquidity) return Trigger.ProvideLiquidity;
+  if (num === TriggerFromContract.RemoveLiquidity) return Trigger.RemoveLiquidity;
+  if (num === TriggerFromContract.Chat) return Trigger.Chat;
   throw new Error(`Invalid state trigger: ${num}`);
 };
 

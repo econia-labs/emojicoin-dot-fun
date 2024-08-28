@@ -4,7 +4,11 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { normalizeAddress } from "../utils/account-address";
-import { type Trigger, type EMOJICOIN_DOT_FUN_MODULE_NAME, toTriggerFromContract } from "../const";
+import {
+  type Trigger,
+  type EMOJICOIN_DOT_FUN_MODULE_NAME,
+  fromRawTriggerToContractEnum,
+} from "../const";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,
@@ -310,7 +314,7 @@ export namespace Types {
     cpammRealReservesBase: number;
     cpammRealReservesQuote: number;
     lpCoinSupply: number;
-    avgExecutionPrice: number;
+    avgExecutionPriceQ64: number;
     emojiBytes: `0x${string}`;
     allTimeVolume: number;
     dailyVolume: number;
@@ -459,13 +463,13 @@ export const toPeriodicStateMetadata = (
   period: BigInt(data.period),
   emitTime: BigInt(data.emit_time),
   emitMarketNonce: BigInt(data.emit_market_nonce),
-  trigger: toTriggerFromContract(data.trigger),
+  trigger: fromRawTriggerToContractEnum(data.trigger),
 });
 
 export const toStateMetadata = (data: JSONTypes.StateMetadata): Types.StateMetadata => ({
   marketNonce: BigInt(data.market_nonce),
   bumpTime: BigInt(data.bump_time),
-  trigger: toTriggerFromContract(data.trigger),
+  trigger: fromRawTriggerToContractEnum(data.trigger),
 });
 
 export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.SwapEvent => ({
@@ -581,7 +585,7 @@ export const toGlobalStateEvent = (
   version,
   emitTime: BigInt(data.emit_time),
   registryNonce: fromAggregatorSnapshot(data.registry_nonce, strToBigInt),
-  trigger: toTriggerFromContract(data.trigger),
+  trigger: fromRawTriggerToContractEnum(data.trigger),
   cumulativeQuoteVolume: fromAggregatorSnapshot(data.cumulative_quote_volume, strToBigInt),
   totalQuoteLocked: fromAggregatorSnapshot(data.total_quote_locked, strToBigInt),
   totalValueLocked: fromAggregatorSnapshot(data.total_value_locked, strToBigInt),
@@ -639,7 +643,7 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
   cpammRealReservesBase: Number(data.cpamm_real_reserves_base),
   cpammRealReservesQuote: Number(data.cpamm_real_reserves_quote),
   lpCoinSupply: Number(data.lp_coin_supply),
-  avgExecutionPrice: Number(data.last_swap_avg_execution_price_q64),
+  avgExecutionPriceQ64: Number(data.last_swap_avg_execution_price_q64),
   allTimeVolume: Number(data.all_time_volume),
   dailyVolume: Number(data.daily_volume),
   emojiBytes: data.emoji_bytes,
