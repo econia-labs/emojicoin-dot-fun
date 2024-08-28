@@ -69,9 +69,9 @@ Mappings:
       BrokerPort: 3009
       DatabasePort: 5432
       DnsNameHostedZoneId:
-        '{{resolve:ssm://emojicoin/indexer-dns-name/hosted-zone-id}}'
+        '{{resolve:ssm:/emojicoin/indexer-dns-name/hosted-zone-id}}'
       DnsNameRootDomain:
-        '{{resolve:ssm://emojicoin/indexer-dns-name/root-domain}}'
+        '{{resolve:ssm:/emojicoin/indexer-dns-name/root-domain}}'
       DnsNameSubdomain: 'data'
       PostgrestHealthCheckPort: 3001
       PostgrestPort: 3000
