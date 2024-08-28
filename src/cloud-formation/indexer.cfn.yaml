@@ -653,7 +653,7 @@ Resources:
             - !Ref 'AWS::Region'
             - ':'
             - !Ref 'AWS::AccountId'
-            - ':secret:DOCKER_AUTH_CONFIG'
+            - ':secret:Emojicoin/DockerHubCredentials'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -679,6 +679,11 @@ Resources:
   # Pull-through cache rule for Docker images from Docker Hub.
   ContainerImageCacheRule:
     Condition: 'TryProvisionStack'
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+          - 'W1032'
     Properties:
       CredentialArn: !Join
       - ''
@@ -686,7 +691,7 @@ Resources:
         - !Ref 'AWS::Region'
         - ':'
         - !Ref 'AWS::AccountId'
-        - ':secret:ecr-pullthroughcache/docker-hub-credentials'
+        - ':secret:Emojicoin/DockerHubCredentials'
       EcrRepositoryPrefix: 'docker-hub'
       UpstreamRegistryUrl: 'registry-1.docker.io'
     Type: 'AWS::ECR::PullThroughCacheRule'
@@ -732,14 +737,14 @@ Resources:
                 - !Ref 'AWS::Region'
                 - ':'
                 - !Ref 'AWS::AccountId'
-                - ':secret:GRPC_AUTH_TOKEN-*'
+                - ':secret:Emojicoin/GrpcAuthToken-*'
             - !Join
               - ''
               - - 'arn:aws:secretsmanager:'
                 - !Ref 'AWS::Region'
                 - ':'
                 - !Ref 'AWS::AccountId'
-                - ':secret:DOCKER_AUTH_CONFIG-*'
+                - ':secret:Emojicoin/DockerHubCredentials-*'
         PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
   # Role for container service auto scaling.
@@ -1182,6 +1187,14 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'PostgrestHealthCheckPort'
+        RepositoryCredentials:
+          CredentialsParameter: !Join
+          - ''
+          - - 'arn:aws:secretsmanager:'
+            - !Ref 'AWS::Region'
+            - ':'
+            - !Ref 'AWS::AccountId'
+            - ':secret:Emojicoin/DockerHubCredentials'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -1302,7 +1315,7 @@ Resources:
               - 'MasterUsername'
         - Name: 'GRPC_DATA_SERVICE_URL'
           Value: !Sub
-          - '{{resolve:ssm:/GrpcDataServiceUrl/${Network}}}'
+          - '{{resolve:ssm:/Emojicoin/GrpcDataServiceUrl/${Network}}}'
           - Network: !Ref 'Network'
         - Name: 'MINIMUM_STARTING_VERSION'
           Value: !Sub
@@ -1358,14 +1371,14 @@ Resources:
             - !Ref 'AWS::Region'
             - ':'
             - !Ref 'AWS::AccountId'
-            - ':secret:DOCKER_AUTH_CONFIG'
+            - ':secret:Emojicoin/DockerHubCredentials'
         Secrets:
         - Name: 'GRPC_AUTH_TOKEN'
           ValueFrom: !Sub
           - 'arn:aws:secretsmanager:${Region}:${Account}:secret:${Secret}'
           - Account: !Ref 'AWS::AccountId'
             Region: !Ref 'AWS::Region'
-            Secret: 'GRPC_AUTH_TOKEN'
+            Secret: 'Emojicoin/GrpcAuthToken'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'

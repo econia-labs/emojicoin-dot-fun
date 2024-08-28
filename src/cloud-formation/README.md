@@ -19,23 +19,24 @@ accordingly, `git` updates will result in automatic updates.
    network you want to index. You can create a parameter for each network if you
    want to run multiple deployments):
 
+   1. `/Emojicoin/GrpcDataServiceUrl/<Mainnet|Testnet>`
    1. `/Emojicoin/IndexerDnsName/HostedZoneId` (for your domain)
    1. `/Emojicoin/IndexerDnsName/RootDomain` (for your domain)
    1. `/Emojicoin/MinimumStartingVersion/<Mainnet|Testnet>`
    1. `/Emojicoin/ModuleAddress/<Mainnet|Testnet>`
-   1. `/GrpcDataServiceUrl/<Mainnet|Testnet>`
 
 1. Create the following [Secrets Manager secrets]:
 
-   1. `GRPC_AUTH_TOKEN` (plaintext).
-   1. `DOCKER_AUTH_CONFIG` (key/value pair below).
+   1. `Emojicoin/DockerHubCredentials` (key/value pair below).
 
-   ```json
-   {
-       "username": "<YOUR_USERNAME>",
-       "password": "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
-   }
-   ```
+        ```json
+        {
+            "username": "<YOUR_USERNAME>",
+            "password": "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
+        }
+        ```
+
+   1. `Emojicoin/GrpcAuthToken` (plaintext).
 
 1. Configure a [GitSync IAM role], for example `CloudFormationGitHubSync`.
 
