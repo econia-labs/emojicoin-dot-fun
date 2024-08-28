@@ -12,7 +12,8 @@ accordingly, `git` updates will result in automatic updates.
 
 ## Setup
 
-1. [Make Route 53 the DNS service for a domain you own].
+1. [Make Route 53 the DNS service for a domain you own], which will
+   automatically be configured with a subdomain for each deployment environment.
 
 1. Set the following [Systems Manager parameters] (note `<Mainnet|Testnet>`
    should be substituted with either `Mainnet` or `Testnet`, depending on the
@@ -29,12 +30,12 @@ accordingly, `git` updates will result in automatic updates.
 
    1. `Emojicoin/DockerHubCredentials` (key/value pair below).
 
-        ```json
-        {
-            "username": "<YOUR_USERNAME>",
-            "password": "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
-        }
-        ```
+      ```json
+      {
+          "username": "<YOUR_USERNAME>",
+          "password": "<YOUR_DOCKER_HUB_PERSONAL_ACCESS_TOKEN>"
+      }
+      ```
 
    1. `Emojicoin/GrpcAuthToken` (plaintext).
 
