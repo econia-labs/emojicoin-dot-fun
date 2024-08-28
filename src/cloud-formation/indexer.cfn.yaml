@@ -669,6 +669,13 @@ Resources:
   ContainerCluster:
     Condition: 'TryProvisionStack'
     Type: 'AWS::ECS::Cluster'
+  # Pull-through cache for Docker images to reduce Docker hub queries.
+  ContainerImageCache:
+    Condition: 'TryProvisionStack'
+    Properties:
+      EcrRepositoryPrefix: 'dockerhub'
+      UpstreamRegistry: 'docker-hub'
+    Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
   ContainerLogGroup:
     Condition: 'TryProvisionStack'
@@ -1300,7 +1307,11 @@ Resources:
           Timeout: 2
         Image: !Join
         - ''
-        - - 'econialabs/emojicoin-dot-fun-indexer-processor:'
+        - - !Ref 'AWS::AccountId'
+          - '.dkr.ecr.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/dockerhub/'
+          - 'econialabs/emojicoin-dot-fun-indexer-processor:'
           - !Ref 'ProcessorImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
