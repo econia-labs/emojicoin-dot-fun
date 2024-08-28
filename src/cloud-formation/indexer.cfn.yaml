@@ -630,8 +630,12 @@ Resources:
         - - !Ref 'AWS::AccountId'
           - '.dkr.ecr.'
           - !Ref 'AWS::Region'
-          - '.amazonaws.com/dockerhub/'
-          - 'econialabs/emojicoin-dot-fun-indexer-broker:'
+          - '.amazonaws.com/'
+          - !FindInMap
+            - 'Constants'
+            - 'ImageCache'
+            - 'RepositoryPrefix'
+          - '/econialabs/emojicoin-dot-fun-indexer-broker:'
           - !Ref 'BrokerImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
@@ -1146,8 +1150,12 @@ Resources:
         - - !Ref 'AWS::AccountId'
           - '.dkr.ecr.'
           - !Ref 'AWS::Region'
-          - '.amazonaws.com/dockerhub/'
-          - 'postgrest/postgrest:'
+          - '.amazonaws.com/'
+          - !FindInMap
+            - 'Constants'
+            - 'ImageCache'
+            - 'RepositoryPrefix'
+          - '/postgrest/postgrest:'
           - !Ref 'PostgrestImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
@@ -1323,8 +1331,12 @@ Resources:
         - - !Ref 'AWS::AccountId'
           - '.dkr.ecr.'
           - !Ref 'AWS::Region'
-          - '.amazonaws.com/dockerhub/'
-          - 'econialabs/emojicoin-dot-fun-indexer-processor:'
+          - '.amazonaws.com/'
+          - !FindInMap
+            - 'Constants'
+            - 'ImageCache'
+            - 'RepositoryPrefix'
+          - '/econialabs/emojicoin-dot-fun-indexer-processor:'
           - !Ref 'ProcessorImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
