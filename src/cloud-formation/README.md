@@ -178,7 +178,7 @@ issues in practice:
 
    </td><td>
 
-   A [CloudFormation service role] with [PowerUserAccess] and the below
+   A [CloudFormation service role] with [PowerUserAccess] plus the below
    [inline policy] particular to the indexer.
 
    </td></tr></table><details><summary>Policy</summary>
@@ -190,12 +190,6 @@ issues in practice:
        {
          "Effect": "Allow",
          "Action": [
-           "ecr:BatchCheckLayerAvailability",
-           "ecr:BatchGetImage",
-           "ecr:CreatePullThroughCacheRule",
-           "ecr:DeletePullThroughCacheRule",
-           "ecr:DescribePullThroughCacheRules",
-           "ecr:GetDownloadUrlForLayer",
            "iam:AddRoleToInstanceProfile",
            "iam:AttachRolePolicy",
            "iam:CreateInstanceProfile",
@@ -209,8 +203,6 @@ issues in practice:
            "iam:PutRolePolicy",
            "iam:RemoveRoleFromInstanceProfile",
            "iam:TagRole",
-           "logs:CreateLogStream",
-           "logs:PutLogEvents"
          ],
          "Resource": "*"
        }
