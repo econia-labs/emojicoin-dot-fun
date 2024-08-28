@@ -1045,7 +1045,12 @@ Resources:
               - 'DatabaseConfig'
               - 'MasterPassword'
             - '@'
-            - !GetAtt 'DbCluster.ReadEndpoint.Address'
+            # While the PostgREST endpoint is configured to support read-only
+            # operations, the PostgREST listener errors out when connected to
+            # a read replica because it relies on `LISTEN` and `NOTIFY`
+            # commands, which do not work on read replicas. Hence it is
+            # connected to the writer endpoint.
+            - !GetAtt 'DbCluster.Endpoint.Address'
             - '/'
             - !FindInMap
               - 'Constants'
