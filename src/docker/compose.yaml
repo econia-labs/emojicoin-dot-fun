@@ -13,7 +13,7 @@ services:
     environment:
       PROCESSOR_WS_URL: 'ws://processor:${PROCESSOR_WS_PORT}/ws'
       PORT: '${BROKER_PORT}'
-      RUST_LOG: 'info'
+      RUST_LOG: 'info,broker=trace'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
     ports:
     - '${BROKER_PORT}:${BROKER_PORT}'
