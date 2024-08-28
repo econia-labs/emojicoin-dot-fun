@@ -477,6 +477,35 @@ Resources:
       UnhealthyThresholdCount: 2
       VpcId: !Ref 'Vpc'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  # Scaling policy for broker service.
+  BrokerAutoScalingPolicy:
+    Condition: 'TryProvisionBroker'
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-broker'
+      PolicyType: 'TargetTrackingScaling'
+      ScalingTargetId: !Ref 'BrokerAutoScalingTarget'
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
+        ScaleInCooldown: 300
+        ScaleOutCooldown: 60
+        TargetValue: 70
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+  # Scalable target for broker service.
+  BrokerAutoScalingTarget:
+    Condition: 'TryProvisionBroker'
+    Properties:
+      MaxCapacity: 5
+      MinCapacity: 1
+      ResourceId: !Join
+      - '/'
+      - - 'service'
+        - !Ref 'ContainerCluster'
+        - !GetAtt 'BrokerRunner.Name'
+      RoleARN: !GetAtt 'ContainerScalingRole.Arn'
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: 'ecs'
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
     Condition: 'TryProvisionVpc'
@@ -510,9 +539,6 @@ Resources:
         DeploymentCircuitBreaker:
           Enable: true
           Rollback: true
-        MaximumPercent: 500
-        MinimumHealthyPercent: 0
-      DesiredCount: 1
       LaunchType: 'FARGATE'
       LoadBalancers: !If
       - 'TryProvisionAlb'
@@ -946,6 +972,35 @@ Resources:
       UnhealthyThresholdCount: 2
       VpcId: !Ref 'Vpc'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  # Scaling policy for PostgREST service.
+  PostgrestAutoScalingPolicy:
+    Condition: 'TryProvisionPostgrest'
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-postgrest'
+      PolicyType: 'TargetTrackingScaling'
+      ScalingTargetId: !Ref 'PostgrestAutoScalingTarget'
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        TargetValue: 70
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+  # Scalable target for PostgREST service.
+  PostgrestAutoScalingTarget:
+    Condition: 'TryProvisionPostgrest'
+    Properties:
+      MaxCapacity: 5
+      MinCapacity: 1
+      ResourceId: !Join
+      - '/'
+      - - 'service'
+        - !Ref 'ContainerCluster'
+        - !GetAtt 'PostgrestRunner.Name'
+      RoleARN: !GetAtt 'ContainerScalingRole.Arn'
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: 'ecs'
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Security group for PostgREST clients.
   PostgrestClientSecurityGroup:
     Condition: 'TryProvisionVpc'
@@ -979,9 +1034,6 @@ Resources:
         DeploymentCircuitBreaker:
           Enable: true
           Rollback: true
-        MaximumPercent: 500
-        MinimumHealthyPercent: 0
-      DesiredCount: 1
       LaunchType: 'FARGATE'
       LoadBalancers: !If
       - 'TryProvisionAlb'
