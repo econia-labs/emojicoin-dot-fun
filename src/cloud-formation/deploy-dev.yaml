@@ -1,0 +1,19 @@
+---
+parameters:
+  BrokerImageVersion: '0.3.0'
+  Environment: 'dev'
+  Network: 'Testnet'
+  ProcessorImageVersion: '0.4.0'
+  TryProvisionAlb: 'true'
+  TryProvisionAlbDnsRecord: 'true'
+  TryProvisionBastionHost: 'true'
+  TryProvisionBroker: 'true'
+  TryProvisionDb: 'true'
+  TryProvisionPostgrest: 'true'
+  TryProvisionProcessor: 'true'
+  TryProvisionRouteTables: 'true'
+  TryProvisionStack: 'true'
+  TryProvisionVpc: 'true'
+tags: null
+template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
+...
