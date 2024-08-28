@@ -134,6 +134,9 @@ Parameters:
     - 'Mainnet'
     - 'Testnet'
     Type: 'String'
+  PostgrestImageVersion:
+    Default: 'v12.2.3'
+    Type: 'String'
   PostgrestMaxRows:
     Default: 500
     Type: 'Number'
@@ -621,7 +624,11 @@ Resources:
           Timeout: 2
         Image: !Join
         - ''
-        - - 'econialabs/emojicoin-dot-fun-indexer-broker:'
+        - - !Ref 'AWS::AccountId'
+          - '.dkr.ecr.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/dockerhub/'
+          - 'econialabs/emojicoin-dot-fun-indexer-broker:'
           - !Ref 'BrokerImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
@@ -1136,7 +1143,14 @@ Resources:
           Value: 'web_anon'
         - Name: 'PGRST_DB_MAX_ROWS'
           Value: !Ref 'PostgrestMaxRows'
-        Image: 'postgrest/postgrest:latest'
+        Image: !Join
+        - ''
+        - - !Ref 'AWS::AccountId'
+          - '.dkr.ecr.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/dockerhub/'
+          - 'postgrest/postgrest:'
+          - !Ref 'PostgrestImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
           Options:
