@@ -7,14 +7,14 @@
 #                            Setup for absolute paths
 # ------------------------------------------------------------------------------
 # Resolve the docker directory to its absolute path to avoid issues.
-ROOT_DIR=$(git rev-parse --show-toplevel)
-DOCKER_ABSOLUTE_DIR="$ROOT_DIR/src/docker"
-EMOJICOIN_SCRIPTS_ABSOLUTE_DIR="$ROOT_DIR/src/sh/emojicoin"
-
-cd "$DOCKER_ABSOLUTE_DIR" || exit 1
+root_dir=$(git rev-parse --show-toplevel)
+docker_dir="$root_dir/src/docker"
+move_dir="$root_dir/src/move"
 
 # Store the original working directory to return to upon exit.
 original_cwd=$(pwd)
+
+cd "$docker_dir" || exit 1
 
 function cleanup() {
 	cd "$original_cwd" || exit 1
@@ -36,11 +36,15 @@ show_help() {
 	echo "  -b, --build       Build Docker images for the environment."
 	echo "  -r, --reset       Reset all containers and volumes, including the local testnet."
 	echo "  -s, --start       Start the Docker environment with the local testnet."
+	echo "  -j, --json        Publish the smart contracts with JSON publish payload files."
+	echo "  -c, --compile     Publish the smart contracts by compiling at container build time."
+	echo "  --no-cache  	  Do not use cache when building the Docker images."
 	echo "  --no-frontend     Do not start the frontend container."
 	echo
 	echo "  -h, --help        Display this help message"
 	echo
 	echo "You can specify both options to reset and then start the environment."
+	echo "You must specify either the JSON or compile option to publish the smart contracts."
 }
 
 # ------------------------------------------------------------------------------
@@ -53,12 +57,15 @@ include_frontend=true
 pull=false
 build=false
 show_help=false
+publish_json=false
+publish_compile=false
+no_cache=false
 localnode="local-testnet-postgres"
 graphql="local-testnet-indexer-api"
 
-base_compose="base.yaml"
-localnode_compose="localnode.yaml"
-frontend_compose="frontend.yaml"
+base_compose="compose.yaml"
+localnode_compose="compose.localnode.yaml"
+frontend_compose="compose.frontend.yaml"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -72,6 +79,11 @@ while [[ $# -gt 0 ]]; do
 	-p) pull=true ;;
 	--build) build=true ;;
 	-b) build=true ;;
+	--json) publish_json=true ;;
+	-j) publish_json=true ;;
+	--compile) publish_compile=true ;;
+	-c) publish_compile=true ;;
+	--no-cache) no_cache=true ;;
 	-h | --help)
 		show_help
 		exit 0
@@ -112,7 +124,11 @@ reset_container_resources() {
 
 build_containers() {
 	echo "Building Docker images..."
-	docker compose $compose_args build
+	if [ "$no_cache" = true ]; then
+		docker compose $compose_args build --no-cache
+	else
+		docker compose $compose_args build
+	fi
 }
 
 start_containers() {
@@ -134,6 +150,56 @@ pull_images() {
 # ------------------------------------------------------------------------------
 #                                Run the script
 # ------------------------------------------------------------------------------
+
+if [ "$publish_json" = true ]; then
+	export PUBLISH_TYPE="json"
+elif [ "$publish_compile" = true ]; then
+	export PUBLISH_TYPE="compile"
+else
+	echo "Must specify either JSON or compile option."
+	show_help
+	exit 1
+fi
+
+if [ "$publish_json" = true ] && [ "$publish_compile" = true ]; then
+	echo "Cannot specify both JSON and compile options."
+	show_help
+	exit 1
+fi
+
+source $docker_dir/.env
+
+# The publish type ("json" or "compile") are specified as environment variables
+# to be used in the Dockerfile. We set them here before building the containers.
+if [ "$PUBLISH_TYPE" = "json" ]; then
+	echo "Publish type is set to JSON. Build the JSON payloads now and the container will use them to publish."
+	# Ensure we're in the correct directory to run the Aptos CLI commands.
+	cd $docker_dir || exit 1
+
+	addr=$EMOJICOIN_MODULE_ADDRESS
+
+	aptos move build-publish-payload \
+	  --assume-yes \
+	  --private-key $PUBLISHER_PK \
+	  --encoding hex \
+	  --named-addresses emojicoin_dot_fun=$addr \
+	  --override-size-check \
+	  --included-artifacts none \
+	  --package-dir $move_dir/emojicoin_dot_fun/ \
+	  --json-output-file $docker_dir/aptos-node/json/publish-emojicoin_dot_fun.json &
+
+	aptos move build-publish-payload \
+	  --assume-yes \
+	  --private-key $PUBLISHER_PK \
+	  --encoding hex \
+	  --named-addresses rewards=$addr,integrator=$addr,emojicoin_dot_fun=$addr \
+	  --override-size-check \
+	  --included-artifacts none \
+	  --package-dir $move_dir/rewards/ \
+	  --json-output-file $docker_dir/aptos-node/json/publish-rewards.json
+else
+	echo "Publish type is set to compile- the container will build the contracts at run time."
+fi
 
 if [ "$reset" = true ]; then
 	reset_container_resources

@@ -28,6 +28,6 @@ module.exports = {
     },
   },
   maxWorkers: 4,
-  globalSetup: process.env.NO_TEST_SETUP !== "true" ? "./tests/pre-test.js" : null,
-  globalTeardown: process.env.NO_TEST_SETUP !== "true" ? "./tests/post-test.js" : null,
+  globalSetup: process.env.NO_TEST_SETUP !== "true" ? "./tests/pre-test.ts" : null,
+  globalTeardown: process.env.NO_TEST_SETUP !== "true" ? "./tests/post-test.ts" : null,
 };

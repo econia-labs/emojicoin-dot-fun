@@ -1,4 +1,4 @@
-# yamllint disable rule:empty-lines rule:key-ordering
+# yamllint disable rule:empty-lines rule:key-ordering rule:brackets
 ---
 services:
   broker:
@@ -15,6 +15,13 @@ services:
       PORT: '${BROKER_PORT}'
       RUST_LOG: 'info'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:${BROKER_PORT}/']
+      interval: '2m'
+      timeout: '5s'
+      retries: 2
+      start_period: '10s'
+      start_interval: '2s'
     ports:
     - '${BROKER_PORT}:${BROKER_PORT}'
     restart: 'unless-stopped'
@@ -69,47 +76,15 @@ services:
         condition: 'service_healthy'
     image: 'econialabs/emojicoin-dot-fun-indexer-processor'
     restart: 'unless-stopped'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8084/metrics/']
+      interval: '30s'
+      timeout: '10s'
+      retries: 5
+      start_period: '15s'
     stop_signal: 'SIGKILL'
     ports:
     - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
-
-  frontend:
-    build:
-      context: '../..'
-      dockerfile: 'src/docker/frontend/Dockerfile'
-      args:
-        INBOX_URL: 'http://postgrest:3000'
-        HASH_SEED: '${HASH_SEED}'
-        NEXT_PUBLIC_APTOS_NETWORK: '${APTOS_NETWORK}'
-        NEXT_PUBLIC_INTEGRATOR_ADDRESS: '${EMOJICOIN_INTEGRATOR_ADDRESS}'
-        NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: '${FEE_RATE_BPS}'
-        NEXT_PUBLIC_IS_ALLOWLIST_ENABLED: 'false'
-        NEXT_PUBLIC_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
-        NEXT_PUBLIC_MQTT_URL: 'ws://broker:${BROKER_PORT}'
-        NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: >-
-          ${EMOJICOIN_REWARDS_MODULE_ADDRESS}
-        REVALIDATION_TIME: '${REVALIDATION_TIME}'
-    image: 'econialabs/emojicoin-dot-fun:frontend'
-    environment:
-      INBOX_URL: 'http://postgrest:3000'
-      HASH_SEED: '${HASH_SEED}'
-      NEXT_PUBLIC_APTOS_NETWORK: '${APTOS_NETWORK}'
-      NEXT_PUBLIC_INTEGRATOR_ADDRESS: '${EMOJICOIN_INTEGRATOR_ADDRESS}'
-      NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: '${FEE_RATE_BPS}'
-      NEXT_PUBLIC_IS_ALLOWLIST_ENABLED: 'false'
-      NEXT_PUBLIC_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
-      NEXT_PUBLIC_MQTT_URL: 'ws://broker:${BROKER_PORT}'
-      NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: '${EMOJICOIN_REWARDS_MODULE_ADDRESS}'
-      REVALIDATION_TIME: '${REVALIDATION_TIME}'
-    ports:
-    - '3001:3001'
-    depends_on:
-      postgrest:
-        condition: 'service_started'
-      broker:
-        condition: 'service_healthy'
-
-    restart: 'unless-stopped'
 
 volumes:
   db:

@@ -1,16 +1,15 @@
-const fs = require("fs");
-const path = require("path");
-const {
+import fs from "fs";
+import path from "path";
+import {
   publishPackagesForTest,
   getPublisherPKForTest,
   PK_PATH,
   PUBLISH_RES_PATH,
   RESET_CONTAINERS_ON_START,
-  PUBLISH_PACKAGES_FOR_TEST,
-} = require("./utils");
-const DockerDirector = require("./utils/docker-director.ts").default;
+} from "./utils";
+import DockerDirector from "./utils/docker-director";
 
-module.exports = async function setup() {
+export default async function setup() {
   console.log();
   console.log("Setting up test environment...");
 
@@ -38,4 +37,4 @@ module.exports = async function setup() {
   const publishResult = await publishPackagesForTest(pk);
   const json = JSON.stringify(publishResult, null, 2);
   fs.writeFileSync(PUBLISH_RES_PATH, json);
-};
+}

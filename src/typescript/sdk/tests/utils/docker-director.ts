@@ -15,9 +15,9 @@ const CONTAINERS_AND_HEALTHCHECK_ENDPOINTS = {
 };
 
 const TEST_RUNNER_PATH = path.join(getGitRoot(), "src/sh/emojicoin/test-runner.sh");
-
+const MAXIMUM_WAIT_TIME_SEC = 120;
 export class DockerDirector {
-  readonly MAXIMUM_WAIT_TIME_SEC = 120;
+  public waitTimeSeconds: number;
 
   public container: keyof typeof CONTAINERS_AND_HEALTHCHECK_ENDPOINTS;
 
@@ -41,6 +41,11 @@ export class DockerDirector {
     this.resetContainersOnStart = resetContainersOnStart;
     this.pullImages = pullImages;
     this.buildImages = buildImages;
+    if (this.buildImages) {
+      this.waitTimeSeconds = MAXIMUM_WAIT_TIME_SEC + 1200;
+    } else {
+      this.waitTimeSeconds = MAXIMUM_WAIT_TIME_SEC;
+    }
   }
 
   /**
@@ -112,12 +117,14 @@ export class DockerDirector {
    */
   async waitUntilProcessIsUp(): Promise<boolean> {
     // If we don't wait in between `start` and the readiness check, the readiness check
-    // actually succeeds, despite being torn down nearly immediately after. This results
-    // in an error in the test because it mistakenly thinks the processor is ready.
+    // actually can unintentionally succeed if the containers existed from a previous run, because
+    // the containers and volumes haven't been fully removed yet.
+    // Then they are removed almost immediately after, resulting in an error where the containers/
+    // resources aren't found or the connection socket is closed unexpectedly.
     // We need to wait at least a small amount of time up front if we're tearing down and
     // restarting the containers. Since the containers will never be started immediately,
     // we wait a larger amount of time than may be necessary to avoid an error.
-    if (this.resetContainersOnStart) {
+    if (this.resetContainersOnStart || this.buildImages) {
       await sleep(5000);
     }
 
@@ -125,7 +132,7 @@ export class DockerDirector {
     let secondsElapsed = 0;
 
     /* eslint-disable no-await-in-loop */
-    while (!operational && secondsElapsed < this.MAXIMUM_WAIT_TIME_SEC) {
+    while (!operational && secondsElapsed < this.waitTimeSeconds) {
       await sleep(1000);
       secondsElapsed += 1;
       operational = await this.checkIfProcessIsUp();
