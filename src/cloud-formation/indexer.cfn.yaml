@@ -688,7 +688,7 @@ Resources:
         - !Ref 'AWS::AccountId'
         - ':secret:ecr-pullthroughcache/docker-hub-credentials'
       EcrRepositoryPrefix: 'docker-hub'
-      UpstreamRegistry: 'docker-hub'
+      UpstreamRegistryUrl: 'registry-1.docker.io'
     Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
   ContainerLogGroup:
