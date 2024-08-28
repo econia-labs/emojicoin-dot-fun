@@ -982,7 +982,7 @@ Resources:
       TargetTrackingScalingPolicyConfiguration:
         PredefinedMetricSpecification:
           PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
-        ScaleInCooldown: 60
+        ScaleInCooldown: 300
         ScaleOutCooldown: 60
         TargetValue: 70
     Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
