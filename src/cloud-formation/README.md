@@ -57,28 +57,25 @@ accordingly, `git` updates will result in automatic updates.
        {
          "Effect": "Allow",
          "Action": [
+           "ecr:BatchCheckLayerAvailability",
+           "ecr:BatchGetImage",
+           "ecr:CreatePullThroughCacheRule",
+           "ecr:DeletePullThroughCacheRule",
+           "ecr:DescribePullThroughCacheRules",
+           "ecr:GetDownloadUrlForLayer",
+           "iam:AddRoleToInstanceProfile",
+           "iam:AttachRolePolicy",
+           "iam:CreateInstanceProfile",
            "iam:CreateRole",
-           "iam:TagRole",
+           "iam:DeleteInstanceProfile",
+           "iam:DeleteRole",
+           "iam:DeleteRolePolicy",
+           "iam:DetachRolePolicy",
+           "iam:GetRole",
            "iam:PassRole",
            "iam:PutRolePolicy",
-           "iam:DeleteRolePolicy",
-           "iam:DeleteRole",
-           "iam:GetRole",
-           "iam:AttachRolePolicy",
-           "iam:DetachRolePolicy",
            "iam:RemoveRoleFromInstanceProfile",
-           "iam:CreateInstanceProfile",
-           "iam:DeleteInstanceProfile",
-           "iam:AddRoleToInstanceProfile"
-         ],
-         "Resource": "*"
-       },
-       {
-         "Effect": "Allow",
-         "Action": [
-           "ecr:GetDownloadUrlForLayer",
-           "ecr:BatchGetImage",
-           "ecr:BatchCheckLayerAvailability",
+           "iam:TagRole",
            "logs:CreateLogStream",
            "logs:PutLogEvents"
          ],
