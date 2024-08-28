@@ -8,14 +8,14 @@ import {
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
+import { getPublishHelpers } from "../utils";
 import { normalizeAddress } from "../../src/utils/account-address";
 import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(20000);
 
 describe("registers a market successfully", () => {
-  const { aptos, publisher, publishPackageResult } = getTestHelpers();
+  const { aptos, publisher, publishPackageResult } = getPublishHelpers();
   const user = getFundedAccount(
     "0x000276e7908d952b7639672a07da760969c7791315fdde140c00228427fe6000"
   );

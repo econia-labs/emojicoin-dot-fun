@@ -2,7 +2,7 @@ import { Ed25519Account } from "@aptos-labs/ts-sdk";
 import { ONE_APT } from "../../src/const";
 import { getRegistryAddress, toChatEvent } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
+import { getPublishHelpers } from "../utils";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { STRUCT_STRINGS } from "../../src/utils/type-tags";
 import { getFundedAccount } from "../utils/test-accounts";
@@ -10,7 +10,7 @@ import { getFundedAccount } from "../utils/test-accounts";
 jest.setTimeout(20000);
 
 describe("emits a chat message event successfully", () => {
-  const { aptos, publisher } = getTestHelpers();
+  const { aptos, publisher } = getPublishHelpers();
   const randomIntegrator = Ed25519Account.generate();
   const user = getFundedAccount(
     "0x006423e9a2e9574b2ec3898a78ab52a0678346a463a75cd414f4db51de36a006"

@@ -1,11 +1,13 @@
 import "server-only";
 
 import { type PostgrestSingleResponse, type PostgrestFilterBuilder } from "@supabase/postgrest-js";
-import { postgrest } from "./base";
+import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { ORDER_BY } from "../../queries/const";
 import { type AnyNumberString } from "../../types/types";
 import { type TableName } from "../types/snake-case-types";
 import { type Flatten } from "../../types";
+import { toAddress } from "../../utils";
+import { postgrest } from "./client";
 
 type EnumLiteralType<T extends TableName> = T extends TableName ? `${T}` : never;
 
@@ -39,7 +41,7 @@ const getLatestProcessedVersion = async (tableOrView: TableName) =>
     .limit(1)
     .maybeSingle()
     .then((r) => {
-      const rowWithVersion = extractRow(r);
+      const rowWithVersion = extractRow(r) as { transaction_version: string } | null;
       if (rowWithVersion === null) {
         // We don't throw an error here because it's possible that the table is empty.
         return 0n;
@@ -126,3 +128,18 @@ export function withQueryConfig<
 
   return paginatedQuery;
 }
+
+/**
+ * Normalizes an address for use in a query.
+ *
+ * Currently, it removes all leading zeroes from the address.
+ *
+ * @param address either the account object, an account address, or a string.
+ * @returns the address without any leading zeroes, still prefixed with "0x".
+ *
+ */
+export const normalizeAddressForQuery = <T extends Account>(address: T | AccountAddressInput) =>
+  // prettier-ignore
+  toAddress(address)
+    .toString()
+    .replace(/^0x0+/, "0x");

@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if curl -s -f -o /dev/null http://localhost:8070/; then
+	if pgrep -f "aptos" > /dev/null; then
+		echo "The local testnet is currently running in a non-Docker environment."
+		exit 1
+	fi
+	echo "Please ensure that the local testnet is down before starting the fullnode."
+fi
+
 # ------------------------------------------------------------------------------
 #                               Start the local testnet
 # ------------------------------------------------------------------------------
@@ -11,16 +19,14 @@ aptos node run-local-testnet \
 seconds=2
 
 check_endpoint() {
-    if (curl -s -f -o /dev/null http://localhost:8070/); then
-        return 0
-    else
-        return 1
-    fi
+    curl -s -f -o /dev/null http://localhost:8070/
 }
 
 # Wait for the local testnet to be up.
-while ! check_endpoint; do
-	sleep $seconds
+while ! check_endpoint
+do
+    echo "Waiting for the local testnet to be up..."
+    sleep "$seconds"
 done
 
 # ------------------------------------------------------------------------------

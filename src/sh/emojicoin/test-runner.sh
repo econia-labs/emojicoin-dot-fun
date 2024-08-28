@@ -23,6 +23,12 @@ function cleanup() {
 # Ensure cleanup function is called on exit.
 trap cleanup EXIT
 
+LIGHT_PURPLE='\033[1;35m'
+NO_COLOR='\033[0m'
+
+HEADER_BEGIN="$LIGHT_PURPLE--------------------"
+HEADER_END="--------------------$NO_COLOR"
+
 # ------------------------------------------------------------------------------
 #                                  Display Help
 # ------------------------------------------------------------------------------
@@ -34,7 +40,7 @@ show_help() {
 	echo "Options:"
 	echo "  -p, --pull        Pull Docker images for the environment."
 	echo "  -b, --build       Build Docker images for the environment."
-	echo "  -r, --reset       Reset all containers and volumes, including the local testnet."
+	echo "  -r, --remove      Remove all related containers and volumes, including the local testnet."
 	echo "  -s, --start       Start the Docker environment with the local testnet."
 	echo "  -j, --json        Publish the smart contracts with JSON publish payload files."
 	echo "  -c, --compile     Publish the smart contracts by compiling at container build time."
@@ -43,7 +49,7 @@ show_help() {
 	echo
 	echo "  -h, --help        Display this help message"
 	echo
-	echo "You can specify both options to reset and then start the environment."
+	echo "Specifying both options will remove all container resources and then start the environment."
 	echo "You must specify either the JSON or compile option to publish the smart contracts."
 }
 
@@ -51,7 +57,7 @@ show_help() {
 #                          Parse command line arguments
 # ------------------------------------------------------------------------------
 
-reset=false
+remove=false
 start=false
 include_frontend=true
 pull=false
@@ -70,8 +76,8 @@ frontend_compose="compose.frontend.yaml"
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
 	case $1 in
-	--reset) reset=true ;;
-	-r) reset=true ;;
+	--remove) remove=true ;;
+	-r) remove=true ;;
 	--start) start=true ;;
 	-s) start=true ;;
 	--no-frontend) include_frontend=false ;;
@@ -109,34 +115,37 @@ fi
 #                             Main script functions
 # ------------------------------------------------------------------------------
 
-reset_container_resources() {
-	# Remove the frontend container regardless of whether or not it was started;
-	# otherwise, there will be a dangling/orphaned container.
-	all_compose_files="-f $base_compose -f $localnode_compose -f $frontend_compose"
+remove_container_resources() {
+	echo -e "$HEADER_BEGIN---------- Removing resources ----------$HEADER_END"
+	echo "Removing the remaining containers and volumes..."
+	docker compose $compose_args down --volumes
 
-	echo "Resetting the remaining containers and volumes..."
-	docker compose $all_compose_files down --volumes
-
-	echo "Resetting local testnet containers and volumes..."
+	echo "Removing local testnet containers and volumes..."
 	docker stop $localnode $graphql
 	docker rm -f $localnode $graphql --volumes 2>/dev/null
+	echo -e "$LIGHT_PURPLE----$NO_COLOR"
 }
 
 build_containers() {
+	echo -e "$HEADER_BEGIN----------- Building images ------------$HEADER_END"
 	echo "Building Docker images..."
 	if [ "$no_cache" = true ]; then
 		docker compose $compose_args build --no-cache
 	else
 		docker compose $compose_args build
 	fi
+	echo -e "$LIGHT_PURPLE----$NO_COLOR"
 }
 
 start_containers() {
+	echo -e "$HEADER_BEGIN-------- Starting containers -----------$HEADER_END"
 	echo "Starting local testnet..."
 	docker compose $compose_args up -d --force-recreate
+	echo -e "$LIGHT_PURPLE----$NO_COLOR"
 }
 
 pull_images() {
+	echo -e "$HEADER_BEGIN----------- Pulling images -------------$HEADER_END"
 	echo "Pulling Docker images..."
 	if ! docker compose $compose_args pull --policy missing 2>/dev/null; then
 		echo "Failed to pull Docker images. Some may need to be built."
@@ -145,6 +154,7 @@ pull_images() {
 	else
 		echo "All images pulled successfully."
 	fi
+	echo -e "$LIGHT_PURPLE----$NO_COLOR"
 }
 
 # ------------------------------------------------------------------------------
@@ -156,9 +166,11 @@ if [ "$publish_json" = true ]; then
 elif [ "$publish_compile" = true ]; then
 	export PUBLISH_TYPE="compile"
 else
-	echo "Must specify either JSON or compile option."
-	show_help
-	exit 1
+	if [ "$build" = true ] || [ "$start" = true ]; then
+		echo "Must specify either JSON or compile option."
+		show_help
+		exit 1
+	fi
 fi
 
 if [ "$publish_json" = true ] && [ "$publish_compile" = true ]; then
@@ -172,9 +184,8 @@ source $docker_dir/.env
 # The publish type ("json" or "compile") are specified as environment variables
 # to be used in the Dockerfile. We set them here before building the containers.
 if [ "$PUBLISH_TYPE" = "json" ]; then
-	echo "Publish type is set to JSON. Build the JSON payloads now and the container will use them to publish."
-	# Ensure we're in the correct directory to run the Aptos CLI commands.
-	cd $docker_dir || exit 1
+	echo
+	echo "Publish type is set to JSON. Building the JSON publish payloads on the host machine."
 
 	addr=$EMOJICOIN_MODULE_ADDRESS
 
@@ -186,7 +197,7 @@ if [ "$PUBLISH_TYPE" = "json" ]; then
 		--override-size-check \
 		--included-artifacts none \
 		--package-dir $move_dir/emojicoin_dot_fun/ \
-		--json-output-file $docker_dir/aptos-node/json/publish-emojicoin_dot_fun.json &
+		--json-output-file aptos-node/json/publish-emojicoin_dot_fun.json &
 
 	aptos move build-publish-payload \
 		--assume-yes \
@@ -196,13 +207,11 @@ if [ "$PUBLISH_TYPE" = "json" ]; then
 		--override-size-check \
 		--included-artifacts none \
 		--package-dir $move_dir/rewards/ \
-		--json-output-file $docker_dir/aptos-node/json/publish-rewards.json
-else
-	echo "Publish type is set to compile- the container will build the contracts at run time."
+		--json-output-file aptos-node/json/publish-rewards.json
 fi
 
-if [ "$reset" = true ]; then
-	reset_container_resources
+if [ "$remove" = true ]; then
+	remove_container_resources
 fi
 
 if [ "$pull" = true ]; then

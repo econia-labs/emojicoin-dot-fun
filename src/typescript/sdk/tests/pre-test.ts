@@ -10,20 +10,23 @@ import { DockerDirector } from "./utils/docker-director";
 import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
 
 export default async function preTest() {
-  // --------------------------------------------------------------------------------------
-  //                             Start the docker containers.
-  // --------------------------------------------------------------------------------------
-  const director = new DockerDirector({
-    container: "processor-and-broker",
-    resetContainersOnStart: RESET_CONTAINERS_ON_START,
+  const globalThisAny = globalThis as any;
+  /* eslint-disable-next-line */
+  globalThisAny.__GLOBAL_DIRECTOR__ = new DockerDirector({
+    container: "docker-broker-1",
+    removeContainersOnStart: RESET_CONTAINERS_ON_START,
     pullImages: true,
     buildImages: true,
     // `json` is better if you're frequently changing the code, `compile` is better if you
     // don't mind an initial long wait time. Sometimes there are issues with cloning from git
     // and `json` is better in those cases.
-    publishType: "compile",
+    publishType: "json",
   });
-  await director.run();
+  // --------------------------------------------------------------------------------------
+  //                             Start the docker containers.
+  // --------------------------------------------------------------------------------------
+  /* eslint-disable-next-line */
+  await globalThisAny.__GLOBAL_DIRECTOR__.run();
 
   // Note that the docker container start-up script publishes the package on-chain.
   // --------------------------------------------------------------------------------------

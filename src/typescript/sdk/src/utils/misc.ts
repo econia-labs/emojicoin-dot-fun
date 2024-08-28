@@ -231,6 +231,17 @@ export class LazyPromise<T> {
   }
 }
 
-export function sum(arr: number[]) {
-  return arr.reduce((acc, val) => acc + val, 0);
+export function sum<T extends number | bigint>(array: T[]): T {
+  if (typeof array[0] === "bigint") {
+    return (array as bigint[]).reduce((acc, val) => acc + val, 0n) as T;
+  }
+  return (array as number[]).reduce((acc, val) => acc + val, 0) as T;
+}
+
+export function sumByKey<T, K extends keyof T>(array: T[], key: K): number | bigint {
+  const arr = array.map((x) => x[key]);
+  if (typeof arr[0] === "bigint") {
+    return sum(arr as Array<bigint>);
+  }
+  return sum(arr as Array<number>);
 }

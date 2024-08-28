@@ -1,29 +1,52 @@
 // eslint-disable no-await-in-loop
 
-import { spawn } from "child_process";
+import { exec, spawn } from "child_process";
 import path from "path";
+import { promisify } from "node:util";
 import { sleep } from "../../src/utils";
 import { getGitRoot } from "./helpers";
 
-const CONTAINERS_AND_HEALTHCHECK_ENDPOINTS = {
-  "local-testnet": "http://localhost:8070/",
-  processor: "http://localhost:8084/metrics/",
-  // Note that we start the broker regardless, we just don't wait for it unless
-  // it's specified to be run in the constructor.
-  "processor-and-broker": `http://localhost:${process.env.BROKER_PORT}/`,
-  "processor-and-broker-and-frontend": "http://localhost:3001/",
-};
+const execPromise = promisify(exec);
+
+type ContainerName =
+  | "local-testnet-indexer-api"
+  | "local-testnet-postgres"
+  | "docker-aptos-node-1"
+  | "docker-broker-1"
+  | "docker-frontend-1"
+  | "docker-processor-1"
+  | "docker-postgres-1"
+  | "docker-postgrest-1";
+
+interface ContainerStatus {
+  isRunning: boolean;
+  isHealthy: boolean;
+}
+
+async function getDockerContainerStatus(name: ContainerName): Promise<ContainerStatus> {
+  try {
+    const { stdout } = await execPromise(
+      `docker inspect -f '{{.State.Running}},{{.State.Health.Status}}' ${name}`
+    );
+    const [running, health] = stdout.trim().split(",");
+    return {
+      isRunning: running === "true",
+      isHealthy: health === "healthy",
+    };
+  } catch (error) {
+    // If the container doesn't exist or there's another error, we return false for both.
+    return { isRunning: false, isHealthy: false };
+  }
+}
 
 const TEST_RUNNER_PATH = path.join(getGitRoot(), "src/sh/emojicoin/test-runner.sh");
 const MAXIMUM_WAIT_TIME_SEC = 120;
 export class DockerDirector {
   public waitTimeSeconds: number;
 
-  public container: keyof typeof CONTAINERS_AND_HEALTHCHECK_ENDPOINTS;
+  public container: ContainerName;
 
-  public healthCheckEndpoint: string;
-
-  public resetContainersOnStart: boolean;
+  public removeContainersOnStart: boolean;
 
   public pullImages: boolean;
 
@@ -32,16 +55,15 @@ export class DockerDirector {
   public publishType: "json" | "compile";
 
   constructor(args: {
-    container: keyof typeof CONTAINERS_AND_HEALTHCHECK_ENDPOINTS;
-    resetContainersOnStart: boolean;
+    container: ContainerName;
+    removeContainersOnStart: boolean;
     pullImages: boolean;
     buildImages: boolean;
     publishType?: "json" | "compile";
   }) {
-    const { container, resetContainersOnStart, pullImages, buildImages } = args;
+    const { container, removeContainersOnStart, pullImages, buildImages } = args;
     this.container = container;
-    this.healthCheckEndpoint = CONTAINERS_AND_HEALTHCHECK_ENDPOINTS[container];
-    this.resetContainersOnStart = resetContainersOnStart;
+    this.removeContainersOnStart = removeContainersOnStart;
     this.pullImages = pullImages;
     this.buildImages = buildImages;
     if (this.buildImages) {
@@ -55,24 +77,8 @@ export class DockerDirector {
   /**
    * Removes all related processes.
    */
-  static remove(): Promise<null> {
-    const command = "bash";
-    const args = [TEST_RUNNER_PATH, "--reset"];
-    const childProcess = spawn(command, args);
-
-    childProcess.stderr?.on("data", (data: any) => {
-      console.warn(data.toString().trim());
-    });
-
-    childProcess.stdout?.on("data", (data: any) => {
-      console.debug(data.toString().trim());
-    });
-
-    return new Promise((resolve) => {
-      childProcess.on("close", () => {
-        resolve(null);
-      });
-    });
+  static remove() {
+    return execPromise(`bash ${TEST_RUNNER_PATH} --remove`);
   }
 
   /**
@@ -85,22 +91,28 @@ export class DockerDirector {
    * If any of the processes are already up, this returns and does not start any new processes.
    */
   async run() {
-    this.start();
+    await this.start();
     await this.waitUntilProcessIsUp();
   }
 
   /**
    * Starts the local testnet by running the aptos node run-local-testnet command.
    */
-  start() {
+  async start() {
+    if (this.removeContainersOnStart) {
+      console.debug();
+      const { stdout, stderr } = await DockerDirector.remove();
+      console.debug(stdout);
+      console.debug(stderr);
+    }
+
     const command = "bash";
     const args = [
       TEST_RUNNER_PATH,
       "--start",
       this.pullImages ? "--pull" : "",
       this.buildImages ? "--build" : "",
-      this.resetContainersOnStart ? "--reset" : "",
-      this.container === "processor-and-broker-and-frontend" ? "" : "--no-frontend",
+      this.container === "docker-frontend-1" ? "" : "--no-frontend",
       this.publishType === "json" ? "--json" : "--compile",
     ].filter((arg) => arg !== "");
 
@@ -116,59 +128,27 @@ export class DockerDirector {
   }
 
   /**
-   * Waits for all processes to be up.
+   * Waits for the specific docker container to be up.
    *
    * @returns Promise<boolean>
    */
   async waitUntilProcessIsUp(): Promise<boolean> {
-    // If we don't wait in between `start` and the readiness check, the readiness check
-    // actually can unintentionally succeed if the containers existed from a previous run, because
-    // the containers and volumes haven't been fully removed yet.
-    // Then they are removed almost immediately after, resulting in an error where the containers/
-    // resources aren't found or the connection socket is closed unexpectedly.
-    // We need to wait at least a small amount of time up front if we're tearing down and
-    // restarting the containers. Since the containers will never be started immediately,
-    // we wait a larger amount of time than may be necessary to avoid an error.
-    if (this.resetContainersOnStart || this.buildImages) {
-      await sleep(5000);
-    }
-
-    let operational = await this.checkIfProcessIsUp();
     let secondsElapsed = 0;
+    let status: ContainerStatus = await getDockerContainerStatus(this.container);
 
-    /* eslint-disable no-await-in-loop */
-    while (!operational && secondsElapsed < this.waitTimeSeconds) {
+    while (!status.isHealthy && !status.isRunning) {
+      /* eslint-disable no-await-in-loop */
       await sleep(1000);
-      secondsElapsed += 1;
-      operational = await this.checkIfProcessIsUp();
-    }
-    /* eslint-enable no-await-in-loop */
 
-    // If we are here it means something blocked the process start-up.
-    // Consider checking if another process is running on a conflicting port.
-    if (!operational) {
-      throw new Error("Process failed to start");
-    }
+      /* eslint-disable no-await-in-loop */
+      status = await getDockerContainerStatus(this.container);
 
-    return true;
-  }
-
-  /**
-   * Checks if the endpoint indicates readiness.
-   *
-   * @returns Promise<boolean>
-   */
-  async checkIfProcessIsUp(): Promise<boolean> {
-    try {
-      // Query readiness endpoint.
-      const data = await fetch(this.healthCheckEndpoint);
-      if (data.status === 200) {
-        return true;
+      if (secondsElapsed >= this.waitTimeSeconds) {
+        throw new Error("Container is not running or healthy after maximum wait time.");
       }
-      console.error(`Failed to check readiness at ${this.healthCheckEndpoint}`);
-      return false;
-    } catch (err: any) {
-      return false;
+
+      secondsElapsed += 1;
     }
+    return status.isHealthy && status.isRunning;
   }
 }

@@ -9,17 +9,20 @@ import fs from "fs";
 import path from "path";
 import findGitRoot from "find-git-root";
 import { getAptosClient } from "./aptos-client";
-import { type TestHelpers } from "./types";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
-import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
+import { EmojicoinDotFun, getEvents } from "../../src/emojicoin_dot_fun";
 import {
   type EmojiName,
   generateRandomSymbol,
   type JSONTypes,
+  type MarketEmojiData,
   ONE_APT,
   SYMBOL_DATA,
   toMarketEmojiData,
+  type Types,
 } from "../../src";
+import { type Events } from "../../src/emojicoin_dot_fun/events";
+import { type PublishHelpers } from "./types";
 
 // The exact amount of APT to trigger a transition out of the bonding curve. Note that the
 // fee integrator rate BPs must be set to 0 for this to work.
@@ -43,7 +46,7 @@ export const PUBLISH_RES_PATH = path.resolve(
  *
  * @returns TestHelpers
  */
-export function getTestHelpers(): TestHelpers {
+export function getPublishHelpers(): PublishHelpers {
   const { aptos } = getAptosClient();
 
   const pk = fs.readFileSync(PK_PATH).toString();
@@ -70,12 +73,20 @@ export function getGitRoot(): string {
   return path.dirname(gitRoot);
 }
 
-export async function registerMarketFromNames(args: {
+type RegisterMarketHelper = Types.EmojicoinInfo &
+  MarketEmojiData & {
+    registrant: Account;
+    integrator: Account;
+    registerResponse: UserTransactionResponse | undefined;
+    events: Events;
+  };
+
+async function registerMarketFromNames(args: {
   registrant: Account;
   emojiNames: Array<EmojiName>;
   integrator?: Account;
-}) {
-  const { aptos } = getTestHelpers();
+}): Promise<RegisterMarketHelper & { registerResponse: UserTransactionResponse }> {
+  const { aptos } = getPublishHelpers();
   const { registrant, emojiNames, integrator = registrant } = args;
   const symbolBytes = new Uint8Array(
     emojiNames.flatMap((e) => Array.from(SYMBOL_DATA.byStrictName(e).bytes))
@@ -93,24 +104,27 @@ export async function registerMarketFromNames(args: {
     },
   });
 
+  expect(response.success).toBe(true);
+
   return {
     ...getEmojicoinMarketAddressAndTypeTags({ symbolBytes }),
     registrant,
     integrator,
-    registerResponse: response as UserTransactionResponse | { success: boolean },
+    registerResponse: response,
     ...symbol,
+    events: getEvents(response),
   };
 }
 
-export async function registerRandomMarket({
+async function registerRandomMarket({
   registrant = Ed25519Account.generate(),
   integrator = Ed25519Account.generate(),
 }: {
   registrant?: Account;
   additionalAccountsToFund?: Array<Account>;
   integrator?: Account;
-}) {
-  const { aptos } = getTestHelpers();
+}): Promise<RegisterMarketHelper> {
+  const { aptos } = getPublishHelpers();
 
   let symbol = generateRandomSymbol();
   let registered = true as boolean | JSONTypes.MarketMetadata | undefined;
@@ -132,7 +146,7 @@ export async function registerRandomMarket({
 
   // Default the `success` field to true, because we don't want to throw an error if the
   // market is already registered, we just want to make sure it exists.
-  let registerResponse: UserTransactionResponse | { success: boolean } = { success: true };
+  let registerResponse: UserTransactionResponse | undefined;
   if (!registered) {
     registerResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
@@ -144,6 +158,8 @@ export async function registerRandomMarket({
         gasUnitPrice: 100,
       },
     });
+
+    expect(registerResponse.success).toBe(true);
   }
 
   return {
@@ -154,5 +170,14 @@ export async function registerRandomMarket({
     registrant,
     integrator,
     ...symbol,
+    events: getEvents(registerResponse),
   };
 }
+
+// So as not to pollute the global scope, we export the test helpers as a single object.
+const TestHelpers = {
+  registerMarketFromNames,
+  registerRandomMarket,
+};
+
+export default TestHelpers;

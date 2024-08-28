@@ -7,7 +7,7 @@ import {
 import { ONE_APT } from "../../src/const";
 import { SYMBOL_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
+import { getPublishHelpers } from "../utils";
 import {
   getEmojicoinMarketAddressAndTypeTags,
   getRegistrationGracePeriodFlag,
@@ -23,7 +23,7 @@ import { getFundedAccount } from "../utils/test-accounts";
 jest.setTimeout(90000);
 
 describe("tests the swap functionality", () => {
-  const { aptos } = getTestHelpers();
+  const { aptos } = getPublishHelpers();
   const randomIntegrator = getFundedAccount(
     "0x00153cf56239ab6d0a71f50a7b31cc94e7ff56ef7dd0acb0c038bf13457de001"
   );

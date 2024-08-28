@@ -180,12 +180,19 @@ export const encodeEmojis = (emojis: string[] | SymbolEmojiData[]) =>
 // For ease of use, we alias `encodeEmojis` to `encodeSymbols`.
 export const encodeSymbols = encodeEmojis;
 
+export type MarketEmojiData = {
+  emojis: SymbolEmojiData[];
+  symbolData: SymbolData;
+};
+
 /**
  * A helper/wrapper function for `symbolBytesToEmojis` that returns all emoji and symbol data.
  * @param symbolInput
  * @returns an object containing the array of emoji data and the final concatenated symbol data.
  */
-export const toMarketEmojiData = (symbolInput: string | Uint8Array | Uint8Array[]) => {
+export const toMarketEmojiData = (
+  symbolInput: string | Uint8Array | Uint8Array[]
+): MarketEmojiData => {
   const { emojis, symbol } = symbolBytesToEmojis(symbolInput);
   const symbolData: SymbolData = {
     symbol,
@@ -203,8 +210,9 @@ export const generateRandomSymbol = () => {
   const emojis: SymbolEmojiData[] = [];
   let i = 0;
   const sumBytes = (bytes: Uint8Array[]) => bytes.reduce((acc, b) => acc + b.length, 0);
-  // Try 10 times. Guaranteed to return at least one emoji, but possibly multiple.
-  while (i < 10) {
+  // Try 1000 times to add another emoji to the symbol.
+  // Thus, it is guaranteed to return at least one emoji, but there may be multiple in the symbol.
+  while (i < 1000) {
     const randomEmoji = getRandomEmoji();
     if (sumBytes([...emojis.map((e) => e.bytes), randomEmoji.bytes]) < MAX_SYMBOL_LENGTH) {
       emojis.push(randomEmoji);
