@@ -10,7 +10,7 @@ parameters:
   TryProvisionBroker: 'false'
   TryProvisionDb: 'true'
   TryProvisionPostgrest: 'false'
-  TryProvisionProcessor: 'true'
+  TryProvisionProcessor: 'false'
   TryProvisionRouteTables: 'false'
   TryProvisionStack: 'true'
   TryProvisionVpc: 'true'

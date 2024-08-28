@@ -679,14 +679,25 @@ Resources:
   # Repository for caching Docker images from Docker Hub.
   ContainerImageCache:
     Condition: 'TryProvisionStack'
+    Properties:
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      RepositoryName: !Sub '${AWS::StackName}-docker-hub'
+    Type: 'AWS::ECR::Repository'
+  ContainerImageCache2forTest:
+    Condition: 'TryProvisionStack'
+    Properties:
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      RepositoryName: !Sub '${AWS::StackName}-docker-hub-2'
     Type: 'AWS::ECR::Repository'
   # Pull-through cache rule for Docker images from Docker Hub.
   ContainerImageCacheRule:
     Condition: 'TryProvisionStack'
     DependsOn: 'ContainerImageCache'
     Properties:
-      EcrRepositoryPrefix: 'dockerhub'
-      UpstreamRegistry: 'docker-hub'
+      EcrRepositoryPrefix: 'docker-hub'
+      UpstreamRegistryUrl: 'docker-hub'
     Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
   ContainerLogGroup:
