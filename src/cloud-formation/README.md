@@ -15,20 +15,27 @@ accordingly, `git` updates will result in automatic updates.
 1. [Make Route 53 the DNS service for a domain you own], which will
    automatically be configured with a subdomain for each deployment environment.
 
-1. Set the following [Systems Manager parameters] (note `<Mainnet|Testnet>`
-   should be substituted with either `Mainnet` or `Testnet`, depending on the
-   network you want to index. You can create a parameter for each network if you
-   want to run multiple deployments):
+1. Set the following [Systems Manager parameters], substituting either `mainnet`
+   or `testnet` for `<mainnet|testnet>` depending on the network you want to
+   index (create a parameter for each network if you want to run deployments for
+   both networks):
 
-   1. `/Emojicoin/GrpcDataServiceUrl/<Mainnet|Testnet>`
-   1. `/Emojicoin/IndexerDnsName/HostedZoneId` (for your domain)
-   1. `/Emojicoin/IndexerDnsName/RootDomain` (for your domain)
-   1. `/Emojicoin/MinimumStartingVersion/<Mainnet|Testnet>`
-   1. `/Emojicoin/ModuleAddress/<Mainnet|Testnet>`
+   1. `/emojicoin/grpc-data-service-url/<mainnet|testnet>`: A
+      [transaction stream service endpoint], for example the
+      [Aptos Labs gRPC endpoint].
+   1. `/emojicoin/indexer-dns-name/hosted-zone-id`: The [hosted zone ID] for
+      your domain.
+   1. `/emojicoin/indexer-dns-name/root-domain`: The root domain you own.
+   1. `/emojicoin/minimum-starting-version/<mainnet|testnet>`: A transaction
+      version number prior to the version in which the target Move package was
+      published.
+   1. `/emojicoin/package-address/<mainnet|testnet>`: The address of the Move
+      package you want to index.
 
 1. Create the following [Secrets Manager secrets]:
 
-   1. `Emojicoin/DockerHubCredentials` (key/value pair below).
+   1. `ecr-pullthroughcache/emojicoin/docker-hub-credentials`, corresponding to
+      the [required secret name format for image pull-through cache rules]:
 
       ```json
       {
@@ -37,7 +44,9 @@ accordingly, `git` updates will result in automatic updates.
       }
       ```
 
-   1. `Emojicoin/GrpcAuthToken` (plaintext).
+   1. `emojicoin/grpc-auth-token`: A plaintext API key for the
+      [transaction stream service endpoint] you are connecting to, for example
+      an [Aptos Labs transaction stream service API key].
 
 1. Configure a [GitSync IAM role], for example `CloudFormationGitHubSync`.
 
@@ -89,7 +98,57 @@ accordingly, `git` updates will result in automatic updates.
 
    </details>
 
+1. Generate a [stack deployment file] (see `deploy-*.yml`) with appropriate
+   [template parameters](#template-parameters).
+
 1. [Create the stack with GitSync].
+
+## Query public endpoints
+
+Once you have [deployed a stack](#setup), you should be able to query the public
+endpoint for your deployment environment:
+
+1. Set your stack name:
+
+   ```sh
+   STACK_NAME=<STACK_NAME>
+   echo $STACK_NAME
+   ```
+
+1. Get the DNS name specified in the [template outputs section]:
+
+   ```sh
+   DNS_NAME=$(aws cloudformation describe-stacks \
+       --output text \
+       --query 'Stacks[0].Outputs[?OutputKey==`DnsName`].OutputValue' \
+       --stack-name $STACK_NAME
+   )
+   echo $DNS_NAME
+   ```
+
+1. Wait until the DNS name has resolved:
+
+   ```sh
+   host $DNS_NAME
+   ```
+
+1. Connect to the WebSocket endpoint:
+
+   ```sh
+   websocat wss://$DNS_NAME/ws
+   ```
+
+1. Subscribe to all events:
+
+   ```sh
+   {}
+   ```
+
+1. Check PostgREST:
+
+   ```sh
+   curl "https://$DNS_NAME/processor_status?select=last_success_version"
+   ```
 
 ## Template parameters
 
@@ -205,44 +264,8 @@ Query PostgREST:
 curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
 ```
 
-## Query public endpoints
-
-If all of the bastion host tests work, you should be able to query the public
-endpoint. Get the indexer DNS name:
-
-```sh
-DNS_NAME=$(aws cloudformation describe-stacks \
-    --output text \
-    --query 'Stacks[0].Outputs[?OutputKey==`DnsName`].OutputValue' \
-    --stack-name $STACK_NAME
-)
-echo $DNS_NAME
-```
-
-Wait until the DNS name has resolved:
-
-```sh
-host $DNS_NAME
-```
-
-Connect to the WebSocket endpoint:
-
-```sh
-websocat wss://$DNS_NAME/ws
-```
-
-Subscribe to all events:
-
-```sh
-{}
-```
-
-Check PostgREST:
-
-```sh
-curl "https://$DNS_NAME/processor_status?select=last_success_version"
-```
-
+[aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
+[aptos labs transaction stream service api key]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#authorization-via-api-key
 [aurora autoscaling]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html#aurora-serverless-v2.how-it-works.scaling
 [aurora availability zones]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.RegionsAndAvailabilityZones.html
 [aurora clusters]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html
@@ -260,11 +283,13 @@ curl "https://$DNS_NAME/processor_status?select=last_success_version"
 [gitsync iam role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-prereq.html#git-sync-prereq-iam
 [gitsync status dashboard]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-status.html
 [high availability for aurora]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.AuroraHighAvailability.html
+[hosted zone id]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/ListInfoOnHostedZone.html
 [inline policy]: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#inline-policies
 [make route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
 [multi-az aurora serverless v2 cluster]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html#aurora-serverless.ha
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
+[required secret name format for image pull-through cache rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecr-pullthroughcacherule.html#cfn-ecr-pullthroughcacherule-credentialarn
 [resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 [rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
 [secrets manager secrets]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html
@@ -272,5 +297,7 @@ curl "https://$DNS_NAME/processor_status?select=last_success_version"
 [stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html#git-sync-concepts-terms-depoyment-file
 [systems manager parameters]: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
+[template outputs section]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+[transaction stream service endpoint]: https://aptos.dev/en/build/indexer/txn-stream
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
 [`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630

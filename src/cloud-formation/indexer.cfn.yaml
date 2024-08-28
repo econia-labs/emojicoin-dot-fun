@@ -131,8 +131,8 @@ Parameters:
     Type: 'String'
   Network:
     AllowedValues:
-    - 'Mainnet'
-    - 'Testnet'
+    - 'mainnet'
+    - 'testnet'
     Type: 'String'
   PostgrestImageVersion:
     Default: 'v12.2.3'
