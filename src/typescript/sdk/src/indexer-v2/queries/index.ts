@@ -21,12 +21,13 @@ import {
   selectMarketDailyVolume,
   selectUniqueMarkets,
   selectLiquidityEvents,
+  selectAllMarketsDailyVolume,
 } from "./base";
 
 // -------------------------------------------------------------------------------------------------
 //
 //
-//                                        Curried queries
+//                           Curried queries (only for queries with indexes)
 //
 //
 // -------------------------------------------------------------------------------------------------
@@ -64,17 +65,23 @@ const fetchUserLiquidityPools = withQueryConfig(
 const fetchMarket1MPeriodsInLastDay = withQueryConfig(
   selectMarket1MPeriodsInLastDay,
   (r) => ({
-    marketID: r.market_id,
-    startTime: r.start_time,
-    volume: r.volume,
+    startTime: BigInt(r.start_time),
+    volume: BigInt(r.volume),
   }),
   TableName.Market1MPeriodsInLastDay
 );
 const fetchMarketDailyVolume = withQueryConfig(
   selectMarketDailyVolume,
   (r) => ({
-    marketID: r.market_id,
-    dailyVolume: r.daily_volume,
+    dailyVolume: BigInt(r.daily_volume),
+  }),
+  TableName.MarketDailyVolume
+);
+const fetchAllMarketsDailyVolume = withQueryConfig(
+  selectAllMarketsDailyVolume,
+  (r) => ({
+    marketID: BigInt(r.market_id),
+    dailyVolume: BigInt(r.daily_volume),
   }),
   TableName.MarketDailyVolume
 );
@@ -95,4 +102,5 @@ export {
   fetchUserLiquidityPools,
   fetchMarket1MPeriodsInLastDay,
   fetchMarketDailyVolume,
+  fetchAllMarketsDailyVolume,
 };

@@ -7,13 +7,13 @@ services:
       context: '../../'
       dockerfile: 'src/docker/aptos-node/Dockerfile'
       args:
-      - 'PUBLISH_TYPE'
-      - 'PUBLISHER_PK'
-      - 'BIG_MONEY_GUY_PK'
+        PUBLISH_TYPE: '${PUBLISH_TYPE:-"compile"}'
+        PUBLISHER_PK: '${PUBLISHER_PK}'
+        BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
     environment:
-    - 'PUBLISHER_PK'
-    - 'BIG_MONEY_GUY_PK'
-    - 'EMOJICOIN_MODULE_ADDRESS'
+      PUBLISHER_PK: '${PUBLISHER_PK}'
+      BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
+      EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
     ports:
     - '50051:50051'
     - '8070:8070'

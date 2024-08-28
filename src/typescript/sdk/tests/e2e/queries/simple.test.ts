@@ -1,12 +1,6 @@
-import { generateRandomSymbol, getEvents, ONE_APT } from "../../../src";
-import { EXACT_TRANSITION_INPUT_AMOUNT, registerRandomMarket } from "../../utils/helpers";
-import {
-  Chat,
-  ProvideLiquidity,
-  RegisterMarket,
-  Swap,
-  SwapWithRewards,
-} from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { type EmojiName, getEvents, ONE_APT } from "../../../src";
+import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
+import { Chat, ProvideLiquidity, Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import {
   fetchChats,
   fetchLiquidityEvents,
@@ -18,77 +12,58 @@ import { getAptosClient } from "../../utils";
 import RowEqualityChecks from "./equality-checks";
 import { withQueryConfig } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/snake-case-types";
-import { postgrest } from "../../../src/indexer-v2/queries/base";
 import { getFundedAccount } from "../../utils/test-accounts";
+import { postgrest } from "../../../src/indexer-v2/queries/client";
 
 describe("queries swap_events and returns accurate swap row data", () => {
-  const registrant = getFundedAccount(
-    "0x00739effd4b9979ff5c51f57d37248911786d4039afd4e31270e2e37661f4007"
-  );
-  const user = getFundedAccount(
-    "0x008e3dfa7bc7dd3ae0eb59919a1cd5f70155bd0b4d26bf146742bdba2d44b008"
-  );
-  const swapper = getFundedAccount(
-    "0x0097ca77b3896cc62f0e390c268727f175d5835773da19011c2d3942240d2009"
-  );
-  const provider = getFundedAccount(
-    "0x0105ede7d798728422d2c9c9a07306a4a1df01dd2784623a386926b76a3e0010"
-  );
-
   const { aptos } = getAptosClient();
-  const markets = new Array<Awaited<ReturnType<typeof registerRandomMarket>>>();
-
-  beforeAll(async () => {
-    const results = await Promise.all([
-      registerRandomMarket({ registrant }),
-      registerRandomMarket({ registrant: user }),
-      registerRandomMarket({ registrant: swapper }),
-      registerRandomMarket({ registrant: provider }),
-    ]);
-    markets.push(...results);
-
-    // Check that all the markets were registered successfully.
-    const res = markets.reduce(
-      (acc, { registerResponse }) => acc && registerResponse.success,
-      true
-    );
-    return res;
-  });
+  const accounts = [
+    "0x00739effd4b9979ff5c51f57d37248911786d4039afd4e31270e2e37661f4007" as const,
+    "0x008e3dfa7bc7dd3ae0eb59919a1cd5f70155bd0b4d26bf146742bdba2d44b008" as const,
+    "0x0097ca77b3896cc62f0e390c268727f175d5835773da19011c2d3942240d2009" as const,
+    "0x0105ede7d798728422d2c9c9a07306a4a1df01dd2784623a386926b76a3e0010" as const,
+  ];
+  const registrant = getFundedAccount(accounts[0]);
+  const user = getFundedAccount(accounts[1]);
+  const swapper = getFundedAccount(accounts[2]);
+  const provider = getFundedAccount(accounts[3]);
+  const marketEmojiNames: EmojiName[][] = [
+    ["scroll"],
+    ["selfie"],
+    ["Japanese \"discount\" button"],
+    ["adhesive bandage"],
+  ];
 
   it("performs a simple registerMarket fetch accurately", async () => {
-    const emojis = generateRandomSymbol().emojis.map((e) => e.hex);
-    const res = await RegisterMarket.submit({
-      aptosConfig: aptos.config,
+    const { registerResponse: response } = await TestHelpers.registerMarketFromNames({
       registrant,
-      emojis,
-      integrator: registrant.accountAddress,
+      emojiNames: marketEmojiNames[0],
     });
-
-    const events = getEvents(res);
+    const events = getEvents(response);
     const { marketID } = events.marketRegistrationEvents[0];
-
     const marketLatestStateRes = await fetchMarketLatestStateEvents({
       marketID,
-      minimumVersion: res.version,
+      minimumVersion: response.version,
     });
     const marketLatestStateRow = marketLatestStateRes[0];
 
-    RowEqualityChecks.marketLatestStateRow(marketLatestStateRow, res);
+    RowEqualityChecks.marketLatestStateRow(marketLatestStateRow, response);
   });
 
   it("performs a simple swap fetch accurately", async () => {
-    const market = markets.pop();
-    if (!market) {
-      throw new Error("There should be enough markets for each test to pop off.");
-    }
-    const { marketAddress, emojicoin, emojicoinLP } = market;
-    const res = await SwapWithRewards.submit({
+    const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromNames({
+      registrant,
+      emojiNames: marketEmojiNames[1],
+    });
+    const res = await Swap.submit({
       aptosConfig: aptos.config,
       swapper,
       marketAddress,
       inputAmount: 90n,
       isSell: false,
       typeTags: [emojicoin, emojicoinLP],
+      integrator: registrant.accountAddress,
+      integratorFeeRateBPs: 0,
       minOutputAmount: 1n,
     });
 
@@ -102,12 +77,12 @@ describe("queries swap_events and returns accurate swap row data", () => {
   });
 
   it("performs a simple chat fetch accurately", async () => {
-    const market = markets.pop();
-    if (!market) {
-      throw new Error("There should be enough markets for each test to pop off.");
-    }
+    const { marketAddress, emojicoin, emojicoinLP, emojis } =
+      await TestHelpers.registerMarketFromNames({
+        registrant,
+        emojiNames: marketEmojiNames[2],
+      });
 
-    const { marketAddress, emojicoin, emojicoinLP, emojis } = market;
     const res = await Chat.submit({
       aptosConfig: aptos.config,
       user,
@@ -127,13 +102,11 @@ describe("queries swap_events and returns accurate swap row data", () => {
   });
 
   it("performs a simple liquidity fetch accurately", async () => {
-    const market = markets.pop();
-    if (!market) {
-      throw new Error("There should be enough markets for each test to pop off.");
-    }
+    const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromNames({
+      registrant,
+      emojiNames: marketEmojiNames[3],
+    });
 
-    // We need to trigger a state transition. Buy exactly the right amount.
-    const { marketAddress, emojicoin, emojicoinLP } = market;
     const res = await Swap.submit({
       aptosConfig: aptos.config,
       swapper: provider,
@@ -185,7 +158,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
           .select("market_id")
           .eq("in_bonding_curve", false)
           .eq("market_id", marketID),
-      ({ market_id }) => ({ marketID: BigInt(market_id) }),
+      ({ market_id }) => ({ marketID: BigInt(market_id as string) }),
       TableName.MarketLatestStateEvent
     )({ marketID });
 
