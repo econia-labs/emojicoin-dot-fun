@@ -676,9 +676,14 @@ Resources:
   ContainerCluster:
     Condition: 'TryProvisionStack'
     Type: 'AWS::ECS::Cluster'
-  # Pull-through cache for Docker images to reduce Docker hub queries.
+  # Repository for caching Docker images from Docker Hub.
   ContainerImageCache:
     Condition: 'TryProvisionStack'
+    Type: 'AWS::ECR::Repository'
+  # Pull-through cache rule for Docker images from Docker Hub.
+  ContainerImageCacheRule:
+    Condition: 'TryProvisionStack'
+    DependsOn: 'ContainerImageCache'
     Properties:
       EcrRepositoryPrefix: 'dockerhub'
       UpstreamRegistry: 'docker-hub'
