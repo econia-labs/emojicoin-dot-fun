@@ -8,11 +8,11 @@ parameters:
   TryProvisionAlbDnsRecord: 'false'
   TryProvisionBastionHost: 'false'
   TryProvisionBroker: 'false'
-  TryProvisionDb: 'true'
+  TryProvisionDb: 'false'
   TryProvisionPostgrest: 'false'
   TryProvisionProcessor: 'false'
   TryProvisionRouteTables: 'false'
-  TryProvisionStack: 'true'
+  TryProvisionStack: 'false'
   TryProvisionVpc: 'false'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
