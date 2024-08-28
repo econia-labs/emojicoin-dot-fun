@@ -63,12 +63,15 @@ Mappings:
       DatabaseName: 'emojicoin'
       MasterPassword: 'emojicoin'
       MasterUsername: 'emojicoin'
+    ImageCache:
+      RepositoryPrefix: 'docker-hub'
     Networking:
       BrokerPort: 3009
       DatabasePort: 5432
       DnsNameHostedZoneId:
-        '{{resolve:ssm:/Emojicoin/IndexerDnsName/HostedZoneId}}'
-      DnsNameRootDomain: '{{resolve:ssm:/Emojicoin/IndexerDnsName/RootDomain}}'
+        '{{resolve:ssm://emojicoin/indexer-dns-name/hosted-zone-id}}'
+      DnsNameRootDomain:
+        '{{resolve:ssm://emojicoin/indexer-dns-name/root-domain}}'
       DnsNameSubdomain: 'data'
       PostgrestHealthCheckPort: 3001
       PostgrestPort: 3000
@@ -646,14 +649,6 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
-        RepositoryCredentials:
-          CredentialsParameter: !Join
-          - ''
-          - - 'arn:aws:secretsmanager:'
-            - !Ref 'AWS::Region'
-            - ':'
-            - !Ref 'AWS::AccountId'
-            - ':secret:Emojicoin/DockerHubCredentials'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -679,11 +674,6 @@ Resources:
   # Pull-through cache rule for Docker images from Docker Hub.
   ContainerImageCacheRule:
     Condition: 'TryProvisionStack'
-    Metadata:
-      cfn-lint:
-        config:
-          ignore_checks:
-          - 'W1032'
     Properties:
       CredentialArn: !Join
       - ''
@@ -691,8 +681,11 @@ Resources:
         - !Ref 'AWS::Region'
         - ':'
         - !Ref 'AWS::AccountId'
-        - ':secret:Emojicoin/DockerHubCredentials'
-      EcrRepositoryPrefix: 'docker-hub'
+        - ':secret:ecr-pullthroughcache/emojicoin/docker-hub'
+      EcrRepositoryPrefix: !FindInMap
+      - 'Constants'
+      - 'ImageCache'
+      - 'RepositoryPrefix'
       UpstreamRegistryUrl: 'registry-1.docker.io'
     Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
@@ -737,14 +730,7 @@ Resources:
                 - !Ref 'AWS::Region'
                 - ':'
                 - !Ref 'AWS::AccountId'
-                - ':secret:Emojicoin/GrpcAuthToken-*'
-            - !Join
-              - ''
-              - - 'arn:aws:secretsmanager:'
-                - !Ref 'AWS::Region'
-                - ':'
-                - !Ref 'AWS::AccountId'
-                - ':secret:Emojicoin/DockerHubCredentials-*'
+                - ':secret:emojicoin/grpc-auth-token-*'
         PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
   # Role for container service auto scaling.
@@ -1187,14 +1173,6 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'PostgrestHealthCheckPort'
-        RepositoryCredentials:
-          CredentialsParameter: !Join
-          - ''
-          - - 'arn:aws:secretsmanager:'
-            - !Ref 'AWS::Region'
-            - ':'
-            - !Ref 'AWS::AccountId'
-            - ':secret:Emojicoin/DockerHubCredentials'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -1315,15 +1293,15 @@ Resources:
               - 'MasterUsername'
         - Name: 'GRPC_DATA_SERVICE_URL'
           Value: !Sub
-          - '{{resolve:ssm:/Emojicoin/GrpcDataServiceUrl/${Network}}}'
+          - '{{resolve:ssm:/emojicoin/grpc-data-service-url/${Network}}}'
           - Network: !Ref 'Network'
         - Name: 'MINIMUM_STARTING_VERSION'
           Value: !Sub
-          - '{{resolve:ssm:/Emojicoin/MinimumStartingVersion/${Network}}}'
+          - '{{resolve:ssm:/emojicoin/minimum-starting-version/${Network}}}'
           - Network: !Ref 'Network'
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
           Value: !Sub
-          - '{{resolve:ssm:/Emojicoin/ModuleAddress/${Network}}}'
+          - '{{resolve:ssm:/emojicoin/package-address/${Network}}}'
           - Network: !Ref 'Network'
         - Name: 'WS_PORT'
           Value: !FindInMap
@@ -1364,21 +1342,13 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'ProcessorWebsocketPort'
-        RepositoryCredentials:
-          CredentialsParameter: !Join
-          - ''
-          - - 'arn:aws:secretsmanager:'
-            - !Ref 'AWS::Region'
-            - ':'
-            - !Ref 'AWS::AccountId'
-            - ':secret:Emojicoin/DockerHubCredentials'
         Secrets:
         - Name: 'GRPC_AUTH_TOKEN'
           ValueFrom: !Sub
           - 'arn:aws:secretsmanager:${Region}:${Account}:secret:${Secret}'
           - Account: !Ref 'AWS::AccountId'
             Region: !Ref 'AWS::Region'
-            Secret: 'Emojicoin/GrpcAuthToken'
+            Secret: 'emojicoin/grpc-auth-token'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
