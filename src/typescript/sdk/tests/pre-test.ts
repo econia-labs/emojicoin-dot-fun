@@ -1,40 +1,41 @@
 import fs from "fs";
 import path from "path";
 import {
-  publishPackagesForTest,
   getPublisherPKForTest,
   PK_PATH,
   PUBLISH_RES_PATH,
   RESET_CONTAINERS_ON_START,
 } from "./utils";
-import DockerDirector from "./utils/docker-director";
+import { DockerDirector } from "./utils/docker-director";
+import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
 
-export default async function setup() {
-  console.log();
-  console.log("Setting up test environment...");
-
+export default async function preTest() {
   // --------------------------------------------------------------------------------------
-  //                              Start the docker containers.
+  //                             Start the docker containers.
   // --------------------------------------------------------------------------------------
   const director = new DockerDirector({
     container: "processor-and-broker",
     resetContainersOnStart: RESET_CONTAINERS_ON_START,
     pullImages: true,
     buildImages: true,
+    // `json` is better if you're frequently changing the code, `compile` is better if you
+    // don't mind an initial long wait time. Sometimes there are issues with cloning from git
+    // and `json` is better in those cases.
+    publishType: "compile",
   });
   await director.run();
 
   // Note that the docker container start-up script publishes the package on-chain.
   // --------------------------------------------------------------------------------------
-  //                         Find the publish transaction on-chain.
+  //                        Find the publish transaction on-chain.
   // --------------------------------------------------------------------------------------
   const pk = getPublisherPKForTest();
+  const publishTransaction = await getPublishTransactionFromIndexer(pk);
 
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
   fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });
-
   fs.writeFileSync(PK_PATH, pk);
-  const publishResult = await publishPackagesForTest(pk);
-  const json = JSON.stringify(publishResult, null, 2);
+
+  const json = JSON.stringify(publishTransaction, null, 2);
   fs.writeFileSync(PUBLISH_RES_PATH, json);
 }

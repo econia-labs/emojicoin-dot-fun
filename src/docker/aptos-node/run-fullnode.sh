@@ -11,21 +11,17 @@ aptos node run-local-testnet \
 seconds=2
 
 check_endpoint() {
-    status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8070/)
-    if [ "$status_code" -eq 200 ]; then
-		echo "Local testnet is up."
+    if (curl -s -f -o /dev/null http://localhost:8070/); then
         return 0
     else
-		echo "Local testnet is not up yet: [$status_code]. Sleeping $seconds seconds..."
         return 1
     fi
 }
 
 # Wait for the local testnet to be up.
 while ! check_endpoint; do
-    sleep $seconds
+	sleep $seconds
 done
-
 
 # ------------------------------------------------------------------------------
 #                              Publish the contracts
@@ -55,12 +51,12 @@ aptos init --profile $BIG_MONEY_GUY \
 # Fund with 1,000,000 APT.
 aptos account fund-with-faucet \
 	--profile $PUBLISHER \
-	--amount 100000000000000
+	--amount 100000000000000000
 
 # Fund with 10,000,000 APT.
 aptos account fund-with-faucet \
 	--profile $BIG_MONEY_GUY \
-	--amount 100000000000000
+	--amount 100000000000000000
 
 if [ $PUBLISH_TYPE = "json" ]; then
 	aptos move run \
@@ -100,9 +96,9 @@ fi
 # ------------------------------------------------------------------------------
 # Fund ten addresses and inadvertently create accounts for them on-chain.
 aptos move run \
-  --assume-yes \
-  --profile $BIG_MONEY_GUY \
-  --json-file /app/json/batch-fund.json
+	--assume-yes \
+	--profile $BIG_MONEY_GUY \
+	--json-file /app/json/batch-fund.json
 
 # Run forever- the local testnet needs to be up indefinitely.
 tail -f /dev/null

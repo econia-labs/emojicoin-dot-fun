@@ -29,11 +29,14 @@ export class DockerDirector {
 
   public buildImages: boolean;
 
+  public publishType: "json" | "compile";
+
   constructor(args: {
     container: keyof typeof CONTAINERS_AND_HEALTHCHECK_ENDPOINTS;
     resetContainersOnStart: boolean;
     pullImages: boolean;
     buildImages: boolean;
+    publishType?: "json" | "compile";
   }) {
     const { container, resetContainersOnStart, pullImages, buildImages } = args;
     this.container = container;
@@ -46,6 +49,7 @@ export class DockerDirector {
     } else {
       this.waitTimeSeconds = MAXIMUM_WAIT_TIME_SEC;
     }
+    this.publishType = args.publishType || "compile";
   }
 
   /**
@@ -97,6 +101,7 @@ export class DockerDirector {
       this.buildImages ? "--build" : "",
       this.resetContainersOnStart ? "--reset" : "",
       this.container === "processor-and-broker-and-frontend" ? "" : "--no-frontend",
+      this.publishType === "json" ? "--json" : "--compile",
     ].filter((arg) => arg !== "");
 
     const childProcess = spawn(command, args);
@@ -167,5 +172,3 @@ export class DockerDirector {
     }
   }
 }
-
-export default DockerDirector;

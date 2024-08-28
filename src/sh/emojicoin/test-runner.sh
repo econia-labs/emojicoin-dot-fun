@@ -38,7 +38,7 @@ show_help() {
 	echo "  -s, --start       Start the Docker environment with the local testnet."
 	echo "  -j, --json        Publish the smart contracts with JSON publish payload files."
 	echo "  -c, --compile     Publish the smart contracts by compiling at container build time."
-	echo "  --no-cache  	  Do not use cache when building the Docker images."
+	echo "  --no-cache        Do not use cache when building the Docker images."
 	echo "  --no-frontend     Do not start the frontend container."
 	echo
 	echo "  -h, --help        Display this help message"
@@ -179,24 +179,24 @@ if [ "$PUBLISH_TYPE" = "json" ]; then
 	addr=$EMOJICOIN_MODULE_ADDRESS
 
 	aptos move build-publish-payload \
-	  --assume-yes \
-	  --private-key $PUBLISHER_PK \
-	  --encoding hex \
-	  --named-addresses emojicoin_dot_fun=$addr \
-	  --override-size-check \
-	  --included-artifacts none \
-	  --package-dir $move_dir/emojicoin_dot_fun/ \
-	  --json-output-file $docker_dir/aptos-node/json/publish-emojicoin_dot_fun.json &
+		--assume-yes \
+		--private-key $PUBLISHER_PK \
+		--encoding hex \
+		--named-addresses emojicoin_dot_fun=$addr \
+		--override-size-check \
+		--included-artifacts none \
+		--package-dir $move_dir/emojicoin_dot_fun/ \
+		--json-output-file $docker_dir/aptos-node/json/publish-emojicoin_dot_fun.json &
 
 	aptos move build-publish-payload \
-	  --assume-yes \
-	  --private-key $PUBLISHER_PK \
-	  --encoding hex \
-	  --named-addresses rewards=$addr,integrator=$addr,emojicoin_dot_fun=$addr \
-	  --override-size-check \
-	  --included-artifacts none \
-	  --package-dir $move_dir/rewards/ \
-	  --json-output-file $docker_dir/aptos-node/json/publish-rewards.json
+		--assume-yes \
+		--private-key $PUBLISHER_PK \
+		--encoding hex \
+		--named-addresses rewards=$addr,integrator=$addr,emojicoin_dot_fun=$addr \
+		--override-size-check \
+		--included-artifacts none \
+		--package-dir $move_dir/rewards/ \
+		--json-output-file $docker_dir/aptos-node/json/publish-rewards.json
 else
 	echo "Publish type is set to compile- the container will build the contracts at run time."
 fi

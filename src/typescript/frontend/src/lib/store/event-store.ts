@@ -371,7 +371,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                     if (!data.latestBar) {
                       throw new Error("This will never occur- it's just to satisfy TypeScript.");
                     }
-                    const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+                    const price = q64ToBig(swap.avgExecutionPriceQ64).toNumber();
                     data.latestBar.time = Number(getPeriodStartTime(swap, resolution) / 1000n);
                     data.latestBar.close = price;
                     data.latestBar.high = Math.max(data.latestBar.high, price);
@@ -410,7 +410,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                     // for the swap event is actually exactly the same as the periodic state event,
                     // hence why we use `>=` instead of just `>`.
                     if (swapInTimeRange && swap.marketNonce >= data.latestBar!.marketNonce) {
-                      const price = q64ToBig(swap.avgExecutionPrice).toNumber();
+                      const price = q64ToBig(swap.avgExecutionPriceQ64).toNumber();
                       data.latestBar!.time = Number(getPeriodStartTime(swap, resolution) / 1000n);
                       data.latestBar!.close = price;
                       data.latestBar!.marketNonce = swap.marketNonce;

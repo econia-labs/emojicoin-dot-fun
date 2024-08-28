@@ -1,4 +1,10 @@
-import { Account, Ed25519PrivateKey, Hex, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  Ed25519Account,
+  Ed25519PrivateKey,
+  Hex,
+  type UserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import fs from "fs";
 import path from "path";
 import findGitRoot from "find-git-root";
@@ -6,7 +12,14 @@ import { getAptosClient } from "./aptos-client";
 import { type TestHelpers } from "./types";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { generateRandomSymbol, type JSONTypes, ONE_APT } from "../../src";
+import {
+  type EmojiName,
+  generateRandomSymbol,
+  type JSONTypes,
+  ONE_APT,
+  SYMBOL_DATA,
+  toMarketEmojiData,
+} from "../../src";
 
 // The exact amount of APT to trigger a transition out of the bonding curve. Note that the
 // fee integrator rate BPs must be set to 0 for this to work.
@@ -57,9 +70,41 @@ export function getGitRoot(): string {
   return path.dirname(gitRoot);
 }
 
-export async function registerMarketTestHelper({
-  registrant = Account.generate(),
-  integrator = Account.generate(),
+export async function registerMarketFromNames(args: {
+  registrant: Account;
+  emojiNames: Array<EmojiName>;
+  integrator?: Account;
+}) {
+  const { aptos } = getTestHelpers();
+  const { registrant, emojiNames, integrator = registrant } = args;
+  const symbolBytes = new Uint8Array(
+    emojiNames.flatMap((e) => Array.from(SYMBOL_DATA.byStrictName(e).bytes))
+  );
+  const symbol = toMarketEmojiData(symbolBytes);
+
+  const response = await EmojicoinDotFun.RegisterMarket.submit({
+    aptosConfig: aptos.config,
+    registrant: args.registrant,
+    emojis: symbol.emojis.map((e) => e.hex),
+    integrator: integrator.accountAddress,
+    options: {
+      maxGasAmount: ONE_APT / 100,
+      gasUnitPrice: 100,
+    },
+  });
+
+  return {
+    ...getEmojicoinMarketAddressAndTypeTags({ symbolBytes }),
+    registrant,
+    integrator,
+    registerResponse: response as UserTransactionResponse | { success: boolean },
+    ...symbol,
+  };
+}
+
+export async function registerRandomMarket({
+  registrant = Ed25519Account.generate(),
+  integrator = Ed25519Account.generate(),
 }: {
   registrant?: Account;
   additionalAccountsToFund?: Array<Account>;
