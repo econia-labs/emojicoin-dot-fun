@@ -29,21 +29,21 @@ The indexer database uses [Aurora PostgreSQL] on a
 
 ## Template parameters
 
-`indexer.cfn.yaml` contains assorted [parameters] of the form `TryProvision*`
+`indexer.cfn.yaml` contains assorted [parameters] of the form `MaybeProvision*`
 that can be used to selectively provision and de-provision [resources]. For a
 concise list of such parameters, see a [stack deployment file]. See the template
 [conditions] section for associated dependencies.
 
 Note that even if a parameter is passed as `true`, the resources that directly
 depend on it will not be created unless the condition's dependencies are also
-met. All resources are eventually conditional on `TryProvisionStack`, which can
-be used to toggle provisioning and de-provisioning of all resources.
+met. All resources are eventually conditional on `MaybeProvisionStack`, which
+can be used to toggle provisioning and de-provisioning of all resources.
 
-In practice this means that even if a `TryProvision*` parameter is passed as
+In practice this means that even if a `MaybeProvision*` parameter is passed as
 `true`, the corresponding resource(s) might not be created. For example if
-`TryProvisionStack` is `false`, then even if `TryProvisionVpc` is `true`,
-virtual private network resources won't be created because `TryProvisionVpc`
-is conditional on `TryProvisionStack`.
+`MaybeProvisionStack` is `false`, then even if `MaybeProvisionVpc` is `true`,
+virtual private network resources won't be created because `MaybeProvisionVpc`
+is conditional on `MaybeProvisionStack`.
 
 In theory [rules] could be used to enforce parametric dependencies, thus
 generating an error in the case that `ProvisionVpc` is passed `true` but
@@ -276,8 +276,8 @@ deployment environment:
 ## Connect to services through bastion host
 
 Before you try connecting to the bastion host, verify that the
-`TryProvisionBastionHost` [condition][conditions] evaluates to `true`. Note too
-that if you have been provisioning and de-provisioning other resources, you
+`MaybeProvisionBastionHost` [condition][conditions] evaluates to `true`. Note
+too that if you have been provisioning and de-provisioning other resources, you
 might want to de-provision then provision the bastion host before running the
 below commands, in order to refresh the bastion host [user data] that stores the
 URLs of other resources in the stack.
