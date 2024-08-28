@@ -943,9 +943,13 @@ Resources:
   # Service for running PostgREST.
   PostgrestRunner:
     Condition: 'TryProvisionPostgrest'
+    DependsOn:
+    # Wait for both database instances to ensure cluster is fully available.
+    - 'DbInstancePrimary'
+    - 'DbInstanceReplica'
     # Wait for processor to ensure that migrations have been run, so that the
     # schema will be available and load balancer health checks will pass.
-    DependsOn: 'ProcessorRunner'
+    - 'ProcessorRunner'
     # Proxy for a conditional dependency on the application load balancer
     # listener, which associates the PostgREST target group with the balancer.
     Metadata:
