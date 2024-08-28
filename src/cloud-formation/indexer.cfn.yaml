@@ -697,10 +697,10 @@ Resources:
       - PolicyDocument:
           Statement:
           - Action:
-            - 'ecr:GetDownloadUrlForLayer'
-            - 'ecr:BatchGetImage'
             - 'ecr:BatchCheckLayerAvailability'
+            - 'ecr:BatchGetImage'
             - 'ecr:GetAuthorizationToken'
+            - 'ecr:GetDownloadUrlForLayer'
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Effect: 'Allow'
