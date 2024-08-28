@@ -694,6 +694,22 @@ Resources:
                 - ':secret:DOCKER_AUTH_CONFIG-*'
         PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
+  # Role for container service auto scaling.
+  ContainerScalingRole:
+    Condition: 'TryProvisionStack'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: 'sts:AssumeRole'
+          Effect: 'Allow'
+          Principal:
+            Service: 'application-autoscaling.amazonaws.com'
+      ManagedPolicyArns:
+      - !Join
+        - ''
+        - - 'arn:aws:iam::aws:policy/service-role/'
+          - 'AmazonEC2ContainerServiceAutoscaleRole'
+    Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
   ContainerSecurityGroup:
     Condition: 'TryProvisionVpc'

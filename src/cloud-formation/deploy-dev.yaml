@@ -1,7 +1,7 @@
 ---
 parameters:
   BrokerImageVersion: '0.3.0'
-  Environment: 'dev'
+  Environment: 'eco-2140'
   Network: 'Testnet'
   ProcessorImageVersion: '0.4.0'
   TryProvisionAlb: 'true'
