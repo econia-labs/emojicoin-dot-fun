@@ -39,6 +39,7 @@ Conditions:
     - 'true'
   MaybeProvisionProcessor: !And
   - !Condition 'MaybeProvisionDb'
+  - !Condition 'MaybeProvisionRouteTables'
   - !Equals
     - !Ref 'MaybeProvisionProcessor'
     - 'true'
