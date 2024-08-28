@@ -8,7 +8,7 @@ parameters:
   MaybeProvisionBroker: 'true'
   MaybeProvisionDb: 'true'
   MaybeProvisionPostgrest: 'true'
-  MaybeProvisionProcessor: 'true'
+  MaybeProvisionProcessor: 'false'
   MaybeProvisionRouteTables: 'true'
   MaybeProvisionStack: 'true'
   MaybeProvisionVpc: 'true'
