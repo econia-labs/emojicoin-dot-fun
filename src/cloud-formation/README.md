@@ -10,6 +10,10 @@ using the [template file] at `indexer.cfn.yaml` and a development-specific
 [stack deployment file] at `deploy-*.yaml`. Once a [stack] is configured
 accordingly, `git` updates will result in automatic updates.
 
+The indexer provides a public endpoint for both REST queries and WebSocket
+events at an environment and owned root domain of your choosing, of format
+`<ENVIRONMENT.data.<YOUR_ROOT_DOMAIN>`, for example `dev.data.foo.bar`.
+
 ## Setup
 
 1. [Make Route 53 the DNS service for a domain you own], which will
