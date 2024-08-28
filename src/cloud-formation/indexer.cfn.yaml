@@ -694,6 +694,13 @@ Resources:
     Condition: 'TryProvisionStack'
     DependsOn: 'ContainerImageCache'
     Properties:
+      CredentialArn: !Join
+      - ''
+      - - 'arn:aws:secretsmanager:'
+        - !Ref 'AWS::Region'
+        - ':'
+        - !Ref 'AWS::AccountId'
+        - ':secret:ecr-pullthroughcache/docker-hub-credentials'
       EcrRepositoryPrefix: 'dockerhub'
       UpstreamRegistryUrl: 'registry-1.docker.io'
     Type: 'AWS::ECR::PullThroughCacheRule'
