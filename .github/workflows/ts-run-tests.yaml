@@ -19,7 +19,8 @@ jobs:
           --reset \
           --pull \
           --build \
-          --start
+          --start \
+          --no-frontend
       shell: 'bash'
     - uses: './.github/actions/ts-run-tests'
 name: 'Run the TypeScript E2E and unit tests with a local testnet'

@@ -24,11 +24,8 @@ fi
 GIT_ROOT_DIR=$(git rev-parse --show-toplevel)
 move_directory=$GIT_ROOT_DIR/src/move
 
-# In simple cases like ours (where there is no account abstraction), the
-# deployer of a smart contract on Aptos is the address that's used for the
-# contract address.
-# Thus we can use the publisher's profile name as the contract's named address,
-# since the CLI resolves named addresses to a profile if one exists with the
+# We can use the publisher's profile name as the contract's named address,
+# since the Aptos CLI resolves named addresses to a profile if one exists with the
 # same name.
 export PUBLISHER="EMOJICOIN_DOT_FUN_TEST_publisher"
 export BIG_MONEY_GUY="EMOJICOIN_DOT_FUN_TEST_big_money_guy"
