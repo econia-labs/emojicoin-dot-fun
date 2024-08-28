@@ -10,7 +10,6 @@ export { default as Arrow } from "./icons/Arrow";
 export { default as CheckIcon } from "./icons/Check";
 export { default as InfoIcon } from "./icons/Info";
 export { default as Arrows } from "./icons/Arrows";
-export { default as EconiaLabsLogoIcon } from "./icons/EconiaLabsLogoIcon";
 export { default as GitHubOutlineIcon } from "./icons/GitHubOutlineIcon";
 export { default as TwitterOutlineIcon } from "./icons/TwitterOutlineIcon";
 
