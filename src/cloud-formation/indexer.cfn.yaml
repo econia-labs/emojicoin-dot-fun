@@ -695,7 +695,7 @@ Resources:
     DependsOn: 'ContainerImageCache'
     Properties:
       EcrRepositoryPrefix: 'docker-hub'
-      UpstreamRegistryUrl: 'docker-hub'
+      UpstreamRegistry: 'docker-hub'
     Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
   ContainerLogGroup:
