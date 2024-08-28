@@ -676,23 +676,9 @@ Resources:
   ContainerCluster:
     Condition: 'TryProvisionStack'
     Type: 'AWS::ECS::Cluster'
-  # Repository for caching Docker images from Docker Hub.
-  ContainerImageCache:
-    Condition: 'TryProvisionStack'
-    Properties:
-      ImageScanningConfiguration:
-        ScanOnPush: true
-    Type: 'AWS::ECR::Repository'
-  ContainerImageCache2forTest:
-    Condition: 'TryProvisionStack'
-    Properties:
-      ImageScanningConfiguration:
-        ScanOnPush: true
-    Type: 'AWS::ECR::Repository'
   # Pull-through cache rule for Docker images from Docker Hub.
   ContainerImageCacheRule:
     Condition: 'TryProvisionStack'
-    DependsOn: 'ContainerImageCache'
     Properties:
       CredentialArn: !Join
       - ''
@@ -701,8 +687,8 @@ Resources:
         - ':'
         - !Ref 'AWS::AccountId'
         - ':secret:ecr-pullthroughcache/docker-hub-credentials'
-      EcrRepositoryPrefix: 'dockerhub'
-      UpstreamRegistryUrl: 'registry-1.docker.io'
+      EcrRepositoryPrefix: 'docker-hub'
+      UpstreamRegistry: 'docker-hub'
     Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
   ContainerLogGroup:
