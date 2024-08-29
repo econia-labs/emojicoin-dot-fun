@@ -3,7 +3,7 @@ import Big from "big.js";
 import { type Types } from "../types";
 import { getPeriodStartTime } from "./misc";
 import { q64ToBig } from "./nominal-price";
-import { type CandlestickResolution } from "../const";
+import { type ContractPeriod } from "../const";
 
 export type Bar = {
   time: number;
@@ -15,7 +15,7 @@ export type Bar = {
 };
 
 export type LatestBar = Bar & {
-  period: CandlestickResolution;
+  period: ContractPeriod;
   marketNonce: bigint;
 };
 
@@ -42,7 +42,7 @@ export const toBars = <T extends Types.PeriodicStateEvent | Types.PeriodicStateV
 
 export const createNewLatestBarFromSwap = (
   swap: Types.SwapEvent,
-  resolution: CandlestickResolution,
+  resolution: ContractPeriod,
   previousClose?: number
 ): LatestBar => {
   // Set the new bar's open, high, low, and close to the close price of the event triggering

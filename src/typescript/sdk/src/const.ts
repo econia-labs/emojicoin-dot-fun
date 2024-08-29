@@ -127,7 +127,7 @@ export enum TriggerFromContract {
  * Note that a period boundary, a candlestick resolution, a period, and a candlestick time frame
  * are all referred to interchangeably throughout this codebase.
  */
-export enum CandlestickResolution {
+export enum ContractPeriod {
   PERIOD_1M = 60000000,
   PERIOD_5M = 300000000,
   PERIOD_15M = 900000000,
@@ -136,6 +136,17 @@ export enum CandlestickResolution {
   PERIOD_4H = 14400000000,
   PERIOD_1D = 86400000000,
 }
+
+export const periodEnumToContractPeriod = (period: Period): ContractPeriod => {
+  if (period === Period.Period1M) return ContractPeriod.PERIOD_1M;
+  if (period === Period.Period5M) return ContractPeriod.PERIOD_5M;
+  if (period === Period.Period15M) return ContractPeriod.PERIOD_15M;
+  if (period === Period.Period30M) return ContractPeriod.PERIOD_30M;
+  if (period === Period.Period1H) return ContractPeriod.PERIOD_1H;
+  if (period === Period.Period4H) return ContractPeriod.PERIOD_4H;
+  if (period === Period.Period1D) return ContractPeriod.PERIOD_1D;
+  throw new Error(`Invalid period: ${period}`);
+};
 
 export const fromContractEnumToRawTrigger = (trigger: Trigger): number => {
   if (trigger === Trigger.PackagePublication) return TriggerFromContract.PackagePublication;
@@ -160,13 +171,13 @@ export const fromRawTriggerToContractEnum = (num: number): Trigger => {
 };
 
 export const toPeriodFromContract = (num: bigint): Period => {
-  if (num === BigInt(CandlestickResolution.PERIOD_1M)) return Period.Period1M;
-  if (num === BigInt(CandlestickResolution.PERIOD_5M)) return Period.Period5M;
-  if (num === BigInt(CandlestickResolution.PERIOD_15M)) return Period.Period15M;
-  if (num === BigInt(CandlestickResolution.PERIOD_30M)) return Period.Period30M;
-  if (num === BigInt(CandlestickResolution.PERIOD_1H)) return Period.Period1H;
-  if (num === BigInt(CandlestickResolution.PERIOD_4H)) return Period.Period4H;
-  if (num === BigInt(CandlestickResolution.PERIOD_1D)) return Period.Period1D;
+  if (num === BigInt(ContractPeriod.PERIOD_1M)) return Period.Period1M;
+  if (num === BigInt(ContractPeriod.PERIOD_5M)) return Period.Period5M;
+  if (num === BigInt(ContractPeriod.PERIOD_15M)) return Period.Period15M;
+  if (num === BigInt(ContractPeriod.PERIOD_30M)) return Period.Period30M;
+  if (num === BigInt(ContractPeriod.PERIOD_1H)) return Period.Period1H;
+  if (num === BigInt(ContractPeriod.PERIOD_4H)) return Period.Period4H;
+  if (num === BigInt(ContractPeriod.PERIOD_1D)) return Period.Period1D;
   throw new Error(`Invalid period: ${num}`);
 };
 
@@ -184,48 +195,48 @@ export const MAX_SYMBOL_LENGTH = 10;
 // The default grace period time for a new market registrant to trade on a new market before
 // non-registrants can trade. Note that this period is ended early once the registrant makes a
 // single trade.
-export const GRACE_PERIOD_TIME = BigInt(CandlestickResolution.PERIOD_5M.valueOf());
+export const GRACE_PERIOD_TIME = BigInt(ContractPeriod.PERIOD_5M.valueOf());
 
 /**
  * A helper object to convert from an untyped number to a CandlestickResolution enum value.
  * If the number is invalid, the value returned will be undefined.
  */
-export const toCandlestickResolution = (num: number | bigint): CandlestickResolution => {
-  if (Number(num) === CandlestickResolution.PERIOD_1M) return CandlestickResolution.PERIOD_1M;
-  if (Number(num) === CandlestickResolution.PERIOD_5M) return CandlestickResolution.PERIOD_5M;
-  if (Number(num) === CandlestickResolution.PERIOD_15M) return CandlestickResolution.PERIOD_15M;
-  if (Number(num) === CandlestickResolution.PERIOD_30M) return CandlestickResolution.PERIOD_30M;
-  if (Number(num) === CandlestickResolution.PERIOD_1H) return CandlestickResolution.PERIOD_1H;
-  if (Number(num) === CandlestickResolution.PERIOD_4H) return CandlestickResolution.PERIOD_4H;
-  if (Number(num) === CandlestickResolution.PERIOD_1D) return CandlestickResolution.PERIOD_1D;
+export const toCandlestickResolution = (num: number | bigint): ContractPeriod => {
+  if (Number(num) === ContractPeriod.PERIOD_1M) return ContractPeriod.PERIOD_1M;
+  if (Number(num) === ContractPeriod.PERIOD_5M) return ContractPeriod.PERIOD_5M;
+  if (Number(num) === ContractPeriod.PERIOD_15M) return ContractPeriod.PERIOD_15M;
+  if (Number(num) === ContractPeriod.PERIOD_30M) return ContractPeriod.PERIOD_30M;
+  if (Number(num) === ContractPeriod.PERIOD_1H) return ContractPeriod.PERIOD_1H;
+  if (Number(num) === ContractPeriod.PERIOD_4H) return ContractPeriod.PERIOD_4H;
+  if (Number(num) === ContractPeriod.PERIOD_1D) return ContractPeriod.PERIOD_1D;
   throw new Error(`Invalid candlestick resolution: ${num}`);
 };
 
 export const RESOLUTIONS_ARRAY = [
-  CandlestickResolution.PERIOD_1M,
-  CandlestickResolution.PERIOD_5M,
-  CandlestickResolution.PERIOD_15M,
-  CandlestickResolution.PERIOD_30M,
-  CandlestickResolution.PERIOD_1H,
-  CandlestickResolution.PERIOD_4H,
-  CandlestickResolution.PERIOD_1D,
+  ContractPeriod.PERIOD_1M,
+  ContractPeriod.PERIOD_5M,
+  ContractPeriod.PERIOD_15M,
+  ContractPeriod.PERIOD_30M,
+  ContractPeriod.PERIOD_1H,
+  ContractPeriod.PERIOD_4H,
+  ContractPeriod.PERIOD_1D,
 ];
 
-export const toResolutionKey = (resolution: CandlestickResolution) => {
+export const toResolutionKey = (resolution: ContractPeriod) => {
   switch (resolution) {
-    case CandlestickResolution.PERIOD_1M:
+    case ContractPeriod.PERIOD_1M:
       return "PERIOD_1M";
-    case CandlestickResolution.PERIOD_5M:
+    case ContractPeriod.PERIOD_5M:
       return "PERIOD_5M";
-    case CandlestickResolution.PERIOD_15M:
+    case ContractPeriod.PERIOD_15M:
       return "PERIOD_15M";
-    case CandlestickResolution.PERIOD_30M:
+    case ContractPeriod.PERIOD_30M:
       return "PERIOD_30M";
-    case CandlestickResolution.PERIOD_1H:
+    case ContractPeriod.PERIOD_1H:
       return "PERIOD_1H";
-    case CandlestickResolution.PERIOD_4H:
+    case ContractPeriod.PERIOD_4H:
       return "PERIOD_4H";
-    case CandlestickResolution.PERIOD_1D:
+    case ContractPeriod.PERIOD_1D:
       return "PERIOD_1D";
     default:
       throw new Error(`Unknown resolution: ${resolution}`);

@@ -16,9 +16,7 @@ jobs:
         git submodule update --init --recursive src/rust
         cp src/docker/example.local.env src/docker/.env && \
         bash src/sh/emojicoin/test-runner.sh \
-        --reset \
-        --pull \
-        --build \
+        --remove \
         --start \
         --no-frontend \
         --compile

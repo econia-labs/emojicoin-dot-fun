@@ -16,8 +16,7 @@ export const fetchAllSwapsBySwapper = withQueryConfig(
       .select("*")
       .eq("swapper", normalizeAddressForQuery(swapper))
       .order("market_nonce", ORDER_BY.DESC),
-  toSwapEventModel,
-  TableName.SwapEvents
+  toSwapEventModel
 );
 
 /* eslint-disable-next-line import/no-unused-modules */
@@ -28,8 +27,7 @@ export const fetchAllChatsByUser = withQueryConfig(
       .select("*")
       .eq("user", normalizeAddressForQuery(user))
       .order("market_nonce", ORDER_BY.DESC),
-  toChatEventModel,
-  TableName.ChatEvents
+  toChatEventModel
 );
 
 /* eslint-disable-next-line import/no-unused-modules */
@@ -41,6 +39,5 @@ export const fetchAllChatsByUserAndMarket = withQueryConfig(
       .eq("user", normalizeAddressForQuery(user))
       .eq("market_id", marketID)
       .order("market_nonce", ORDER_BY.DESC),
-  toChatEventModel,
-  TableName.ChatEvents
+  toChatEventModel
 );

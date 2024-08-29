@@ -38,13 +38,11 @@ show_help() {
 	echo "Control the Docker Compose environment with a local testnet."
 	echo
 	echo "Options:"
-	echo "  -p, --pull        Pull Docker images for the environment."
-	echo "  -b, --build       Build Docker images for the environment."
 	echo "  -r, --remove      Remove all related containers and volumes, including the local testnet."
 	echo "  -s, --start       Start the Docker environment with the local testnet."
 	echo "  -j, --json        Publish the smart contracts with JSON publish payload files."
 	echo "  -c, --compile     Publish the smart contracts by compiling at container build time."
-	echo "  --no-cache        Do not use cache when building the Docker images."
+	echo "  --no-compile      Do not build the smart contract publish payloads if they already exist."
 	echo "  --no-frontend     Do not start the frontend container."
 	echo
 	echo "  -h, --help        Display this help message"
@@ -60,12 +58,11 @@ show_help() {
 remove=false
 start=false
 include_frontend=true
-pull=false
-build=false
 show_help=false
 publish_json=false
 publish_compile=false
 no_cache=false
+no_compile=false
 localnode="local-testnet-postgres"
 graphql="local-testnet-indexer-api"
 
@@ -81,15 +78,11 @@ while [[ $# -gt 0 ]]; do
 	--start) start=true ;;
 	-s) start=true ;;
 	--no-frontend) include_frontend=false ;;
-	--pull) pull=true ;;
-	-p) pull=true ;;
-	--build) build=true ;;
-	-b) build=true ;;
 	--json) publish_json=true ;;
 	-j) publish_json=true ;;
 	--compile) publish_compile=true ;;
 	-c) publish_compile=true ;;
-	--no-cache) no_cache=true ;;
+	--no-compile) no_compile=true ;;
 	-h | --help)
 		show_help
 		exit 0
@@ -116,45 +109,19 @@ fi
 # ------------------------------------------------------------------------------
 
 remove_container_resources() {
-	echo -e "$HEADER_BEGIN---------- Removing resources ----------$HEADER_END"
+	echo -e "$HEADER_BEGIN----- Removing container resources -----$HEADER_END"
 	echo "Removing the remaining containers and volumes..."
 	docker compose $compose_args down --volumes
 
 	echo "Removing local testnet containers and volumes..."
 	docker stop $localnode $graphql
 	docker rm -f $localnode $graphql --volumes 2>/dev/null
-	echo -e "$LIGHT_PURPLE----$NO_COLOR"
-}
-
-build_containers() {
-	echo -e "$HEADER_BEGIN----------- Building images ------------$HEADER_END"
-	echo "Building Docker images..."
-	if [ "$no_cache" = true ]; then
-		docker compose $compose_args build --no-cache
-	else
-		docker compose $compose_args build
-	fi
-	echo -e "$LIGHT_PURPLE----$NO_COLOR"
 }
 
 start_containers() {
 	echo -e "$HEADER_BEGIN-------- Starting containers -----------$HEADER_END"
 	echo "Starting local testnet..."
 	docker compose $compose_args up -d --force-recreate
-	echo -e "$LIGHT_PURPLE----$NO_COLOR"
-}
-
-pull_images() {
-	echo -e "$HEADER_BEGIN----------- Pulling images -------------$HEADER_END"
-	echo "Pulling Docker images..."
-	if ! docker compose $compose_args pull --policy missing 2>/dev/null; then
-		echo "Failed to pull Docker images. Some may need to be built."
-		echo "Pulling non-buildable images..."
-		docker compose $compose_args pull --ignore-buildable --policy missing
-	else
-		echo "All images pulled successfully."
-	fi
-	echo -e "$LIGHT_PURPLE----$NO_COLOR"
 }
 
 # ------------------------------------------------------------------------------
@@ -185,41 +152,47 @@ source $docker_dir/.env
 # to be used in the Dockerfile. We set them here before building the containers.
 if [ "$PUBLISH_TYPE" = "json" ]; then
 	echo
-	echo "Publish type is set to JSON. Building the JSON publish payloads on the host machine."
 
-	addr=$EMOJICOIN_MODULE_ADDRESS
+	skip_compilation=false
+	if [ "$no_compile" = true ]; then
+		if [ ! aptos-node/json/publish-rewards.json ] || [ ! aptos-node/json/publish-emojicoin_dot_fun.json ]; then
+			echo "JSON publish payloads not found."
+			echo "Ignoring $(--no-compile) and building the JSON publish payloads on the host machine."
+		else
+			echo "JSON publish payloads found. Skipping compilation."
+			skip_compilation=true
+		fi
+	else
+		echo "Publish type is set to JSON. Building the JSON publish payloads on the host machine."
+	fi
 
-	aptos move build-publish-payload \
-		--assume-yes \
-		--private-key $PUBLISHER_PK \
-		--encoding hex \
-		--named-addresses emojicoin_dot_fun=$addr \
-		--override-size-check \
-		--included-artifacts none \
-		--package-dir $move_dir/emojicoin_dot_fun/ \
-		--json-output-file aptos-node/json/publish-emojicoin_dot_fun.json &
+	if [ "$skip_compilation" = false ]; then
+		addr=$EMOJICOIN_MODULE_ADDRESS
 
-	aptos move build-publish-payload \
-		--assume-yes \
-		--private-key $PUBLISHER_PK \
-		--encoding hex \
-		--named-addresses rewards=$addr,integrator=$addr,emojicoin_dot_fun=$addr \
-		--override-size-check \
-		--included-artifacts none \
-		--package-dir $move_dir/rewards/ \
-		--json-output-file aptos-node/json/publish-rewards.json
+		aptos move build-publish-payload \
+			--assume-yes \
+			--private-key $PUBLISHER_PK \
+			--encoding hex \
+			--named-addresses emojicoin_dot_fun=$addr \
+			--override-size-check \
+			--included-artifacts none \
+			--package-dir $move_dir/emojicoin_dot_fun/ \
+			--json-output-file aptos-node/json/publish-emojicoin_dot_fun.json &
+
+		aptos move build-publish-payload \
+			--assume-yes \
+			--private-key $PUBLISHER_PK \
+			--encoding hex \
+			--named-addresses rewards=$addr,integrator=$addr,emojicoin_dot_fun=$addr \
+			--override-size-check \
+			--included-artifacts none \
+			--package-dir $move_dir/rewards/ \
+			--json-output-file aptos-node/json/publish-rewards.json
+	fi
 fi
 
 if [ "$remove" = true ]; then
 	remove_container_resources
-fi
-
-if [ "$pull" = true ]; then
-	pull_images
-fi
-
-if [ "$build" = true ]; then
-	build_containers
 fi
 
 if [ "$start" = true ]; then

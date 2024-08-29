@@ -28,6 +28,7 @@ import { type PublishHelpers } from "./types";
 // fee integrator rate BPs must be set to 0 for this to work.
 export const EXACT_TRANSITION_INPUT_AMOUNT = 100_000_000_000n;
 
+export const SKIP_JSON_COMPILATION = process.env.SKIP_JSON_COMPILATION === "true";
 export const RESET_CONTAINERS_ON_START = process.env.RESET_CONTAINERS_ON_START === "true";
 export const REMOVE_CONTAINERS_ON_EXIT = process.env.REMOVE_CONTAINERS_ON_EXIT === "true";
 export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/sdk/tests");

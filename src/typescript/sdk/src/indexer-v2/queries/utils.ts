@@ -2,9 +2,8 @@ import "server-only";
 
 import { type PostgrestSingleResponse, type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
-import { ORDER_BY } from "../../queries/const";
 import { type AnyNumberString } from "../../types/types";
-import { type TableName } from "../types/snake-case-types";
+import { TableName } from "../types/snake-case-types";
 import { type Flatten } from "../../types";
 import { toAddress } from "../../utils";
 import { postgrest } from "./client";
@@ -33,39 +32,31 @@ const POLLING_TIMEOUT = 5000;
 const extractRow = <T>(res: PostgrestSingleResponse<T>) => res.data;
 const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? ([] as T[]);
 
-const getLatestProcessedVersion = async (tableOrView: TableName) =>
+const getLatestProcessedVersion = async () =>
   postgrest
-    .from(tableOrView)
-    .select("transaction_version")
-    .order("transaction_version", ORDER_BY.DESC)
-    .limit(1)
+    .from(TableName.ProcessorStatus)
+    .select("last_success_version")
     .maybeSingle()
     .then((r) => {
-      const rowWithVersion = extractRow(r) as { transaction_version: string } | null;
-      if (rowWithVersion === null) {
-        // We don't throw an error here because it's possible that the table is empty.
-        return 0n;
+      const rowWithVersion = extractRow(r);
+      if (!rowWithVersion) {
+        throw new Error("No processor status row found.");
       }
-      return BigInt(rowWithVersion.transaction_version);
+      return BigInt(rowWithVersion.last_success_version);
     });
 
 /**
  * Wait for the processed version of a table or view to be at least the given version.
  */
-const waitForProcessedVersion = async (args: {
-  minimumVersion: AnyNumberString;
-  tableName: TableName;
-}) =>
+const waitForProcessedVersion = async (minimumVersion: AnyNumberString) =>
   new Promise<void>((resolve, reject) => {
-    const minimumVersion = BigInt(args.minimumVersion);
-    const { tableName } = args;
     let i = 0;
     const maxTries = Math.floor(POLLING_TIMEOUT / POLLING_INTERVAL);
 
     const check = async () => {
       try {
-        const latestVersion = await getLatestProcessedVersion(tableName);
-        if (latestVersion >= minimumVersion) {
+        const latestVersion = await getLatestProcessedVersion();
+        if (latestVersion >= BigInt(minimumVersion)) {
           resolve();
         } else if (i > maxTries) {
           reject(new Error("Timeout waiting for processed version."));
@@ -99,8 +90,7 @@ export function withQueryConfig<
   OutputType,
 >(
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
-  convert: (rows: Row) => OutputType,
-  tableName: Relationships
+  convert: (rows: Row) => OutputType
 ): (args: WithConfig<QueryArgs>) => Promise<OutputType[]> {
   const paginatedQuery = async (args: WithConfig<QueryArgs>) => {
     const { limit, offset, minimumVersion, ...queryArgs } = args;
@@ -115,10 +105,7 @@ export function withQueryConfig<
     }
 
     if (minimumVersion) {
-      await waitForProcessedVersion({
-        minimumVersion,
-        tableName,
-      });
+      await waitForProcessedVersion(minimumVersion);
     }
 
     const res = await query;
@@ -141,5 +128,5 @@ export function withQueryConfig<
 export const normalizeAddressForQuery = <T extends Account>(address: T | AccountAddressInput) =>
   // prettier-ignore
   toAddress(address)
-    .toString()
-    .replace(/^0x0+/, "0x");
+    .toString();
+// .replace(/^0x0+/, "0x");

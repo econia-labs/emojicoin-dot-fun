@@ -1,4 +1,4 @@
-import { CandlestickResolution, getPeriodStartTime } from "../../src";
+import { ContractPeriod, getPeriodStartTime } from "../../src";
 import { SAMPLE_STATE_EVENT, SAMPLE_SWAP_EVENT } from "../utils/sample-data";
 
 const swap = SAMPLE_SWAP_EVENT;
@@ -8,16 +8,16 @@ const epochInMicroseconds = BigInt(epoch.getTime() * 1000);
 
 const microsecondFactor = 10n ** 6n;
 
-const { PERIOD_1M } = CandlestickResolution;
-const { PERIOD_5M } = CandlestickResolution;
-const { PERIOD_15M } = CandlestickResolution;
-const { PERIOD_30M } = CandlestickResolution;
-const { PERIOD_1H } = CandlestickResolution;
-const { PERIOD_4H } = CandlestickResolution;
-const { PERIOD_1D } = CandlestickResolution;
+const { PERIOD_1M } = ContractPeriod;
+const { PERIOD_5M } = ContractPeriod;
+const { PERIOD_15M } = ContractPeriod;
+const { PERIOD_30M } = ContractPeriod;
+const { PERIOD_1H } = ContractPeriod;
+const { PERIOD_4H } = ContractPeriod;
+const { PERIOD_1D } = ContractPeriod;
 
 describe("tests period boundaries", () => {
-  it("calculates the first period boundary ever correctly for a swap event", () => {
+  it("calculates the first period boundary ever for a swap event", () => {
     swap.time = epochInMicroseconds;
     expect(getPeriodStartTime(swap, PERIOD_1D) === 0n * BigInt(PERIOD_1D)).toEqual(true);
     expect(getPeriodStartTime(swap, PERIOD_4H) === 0n * BigInt(PERIOD_4H)).toEqual(true);
@@ -28,7 +28,7 @@ describe("tests period boundaries", () => {
     expect(getPeriodStartTime(swap, PERIOD_1M) === 0n * BigInt(PERIOD_1M)).toEqual(true);
   });
 
-  it("calculates the first period boundary ever correctly for a state event", () => {
+  it("calculates the first period boundary ever for a state event", () => {
     state.lastSwap.time = epochInMicroseconds;
     expect(getPeriodStartTime(state, PERIOD_1D) === 0n * BigInt(PERIOD_1D)).toEqual(true);
     expect(getPeriodStartTime(state, PERIOD_4H) === 0n * BigInt(PERIOD_4H)).toEqual(true);
@@ -39,7 +39,7 @@ describe("tests period boundaries", () => {
     expect(getPeriodStartTime(state, PERIOD_1M) === 0n * BigInt(PERIOD_1M)).toEqual(true);
   });
 
-  it("calculates various period boundaries correctly for a swap event", () => {
+  it("calculates various period boundaries for a swap event", () => {
     swap.time = epochInMicroseconds;
     // Exactly at the period boundary.
     swap.time += 60n * microsecondFactor;
@@ -81,7 +81,7 @@ describe("tests period boundaries", () => {
     expect(getPeriodStartTime(swap, PERIOD_30M) === 0n * BigInt(PERIOD_30M)).toEqual(true);
   });
 
-  it("calculates various period boundaries correctly for a state event", () => {
+  it("calculates various period boundaries for a state event", () => {
     state.lastSwap.time = epochInMicroseconds;
     // Exactly at the period boundary.
     state.lastSwap.time += 60n * microsecondFactor;

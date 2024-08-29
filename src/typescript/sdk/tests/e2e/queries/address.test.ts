@@ -6,8 +6,8 @@ import RowEqualityChecks from "./equality-checks";
 import { getFundedAccount } from "../../utils/test-accounts";
 import TestHelpers from "../../utils/helpers";
 
-describe("address normalization tests", () => {
-  it("normalizes a user's address correctly", async () => {
+describe("address standardization tests", () => {
+  it("standardizes a user's address", async () => {
     const user = getFundedAccount(
       "0x005c0f73b58fcdb08a644f72f454253af5f0965b347469c2af3e01b987139005"
     );

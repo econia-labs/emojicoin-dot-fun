@@ -11,9 +11,9 @@ response=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8080/v1/acco
 
 # Check if the response is 200.
 if [ "$response" -eq 200 ]; then
-    echo "Healthcheck passed: Account endpoint returned 200"
-    exit 0
+	echo "Healthcheck passed: Account endpoint returned 200"
+	exit 0
 else
-    echo "Healthcheck failed: Account endpoint returned $response"
-    exit 1
+	echo "Healthcheck failed: Account endpoint returned $response"
+	exit 1
 fi

@@ -6,13 +6,13 @@ import {
 import {
   bigintMax,
   getEvents,
-  getMarketResourceFromWriteSet,
+  getPeriodBoundary,
+  getPeriodBoundaryAsDate,
   ONE_APT,
   Period,
   sleep,
   sum,
   sumByKey,
-  toPeriodFromContract,
 } from "../../../src";
 import { Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import {
@@ -25,8 +25,16 @@ import { type Events } from "../../../src/emojicoin_dot_fun/events";
 import { fetchAllSwapsBySwapper } from "../../../src/indexer-v2/queries/non-indexed";
 import { getTxnBatchHighestVersion } from "../../utils/get-txn-batch-highest-version";
 import TestHelpers from "../../utils/helpers";
+import {
+  getOneMinutePeriodicStateEvents,
+  getPeriodExpiryDate,
+  getTrackerFromWriteSet,
+} from "./helpers";
 
-jest.setTimeout(30000);
+// We need a long timeout because the test must wait for the 1-minute period to expire.
+jest.setTimeout(75000);
+
+const TEN_SECONDS = 10 * 1000;
 
 describe("queries swap_events and returns accurate swap row data", () => {
   const { aptos } = getAptosClient();
@@ -44,6 +52,21 @@ describe("queries swap_events and returns accurate swap row data", () => {
   });
 
   it("sums a market's daily volume over multiple 1-minute periods with 3 swaps", async () => {
+    // This test needs very specific conditions in order to verify accuracy in a reasonable amount
+    // of time. The easiest way to set it up correctly is by aligning the start time of the test
+    // with around half a minute before the end of the current 1-minute period. This way, we can
+    // ensure that the first swap is in the same period as the second swap, and the third swap
+    // creates a new period. This is the only way to ensure that the daily volume is accurately
+    // calculated across multiple periods.
+    const currentPeriodBoundary = getPeriodBoundaryAsDate(Date.now() * 1000, Period.Period1M);
+    const timeUntilNextPeriod = currentPeriodBoundary.getTime() - Date.now();
+    if (timeUntilNextPeriod < TEN_SECONDS) {
+      await sleep(timeUntilNextPeriod);
+      // There might be some drift between the current time in the js runtime and in the Aptos VM.
+      // We'll sleep for a little bit longer to ensure that the period has expired.
+      await sleep(2000);
+    }
+
     const swapper = fundedAccounts.pop()!;
     const { marketAddress, emojicoin, emojicoinLP, integrator } =
       await TestHelpers.registerMarketFromNames({
@@ -72,77 +95,81 @@ describe("queries swap_events and returns accurate swap row data", () => {
 
     const first = await swapCall(inputAmounts[0]);
     const firstQuoteVolume = getEvents(first).swapEvents[0].quoteVolume;
-    const { marketID } = getEvents(first).marketRegistrationEvents[0];
+    const firstEvents = getEvents(first);
+    const { marketID } = firstEvents.swapEvents[0];
 
-    const marketResource = getMarketResourceFromWriteSet(first, marketAddress)!;
-    expect(marketResource).toBeDefined();
-    const oneMinuteStateTracker = marketResource.periodicStateTrackers.find(
-      (tracker) => toPeriodFromContract(tracker.period) === Period.Period1M
-    )!;
-    expect(oneMinuteStateTracker).toBeDefined();
-    expect(oneMinuteStateTracker.volumeQuote).toEqual(firstQuoteVolume);
+    // There should be no periodic state events emitted for the first swap.
+    expect(firstEvents.periodicStateEvents.length).toEqual(0);
 
+    const firstTracker = getTrackerFromWriteSet(first, marketAddress, Period.Period1M)!;
+    expect(firstTracker).toBeDefined();
+    expect(firstTracker.volumeQuote).toEqual(firstQuoteVolume);
+    expect(firstTracker.startTime).toEqual(getPeriodBoundary(first.timestamp, Period.Period1M));
+
+    await fetchMarketDailyVolume({ marketID, minimumVersion: first.version }).then((r) => {
+      expect(r[0].dailyVolume).toEqual(firstQuoteVolume);
+    });
     let periods = await fetchMarket1MPeriodsInLastDay({ marketID });
-    expect(periods.length).toEqual(1);
-    expect(periods[0].volume).toEqual(firstQuoteVolume);
-
-    // Get the periodic state tracker's period expiry time by converting the start time to
-    // milliseconds and adding 1 minute.
-    // Convert from microseconds to milliseconds, then round up to the nearest millisecond.
-    const millisecondsCeiling = Math.ceil(Number(oneMinuteStateTracker.startTime / 1000n));
-    const periodExpiry = new Date(millisecondsCeiling + 60 * 1000);
-
-    // Our test relies upon this tracker having at least 30 seconds left.
-    expect(periodExpiry.getTime() - Date.now()).toBeGreaterThan(30 * 1000);
+    // The first period ever isn't tracked until the *end* of the period- so even with one swap,
+    // we won't see a period until this periodic state tracker ends.
+    expect(periods.length).toEqual(0);
+    const periodExpiry = getPeriodExpiryDate(firstTracker, Period.Period1M);
+    expect(periodExpiry.getTime() - Date.now()).toBeGreaterThan(TEN_SECONDS / 2);
 
     // Now call a second swap to ensure that it's slotted in with the first swap in the same
     // 1-minute period.
-    const second = await swapCall(inputAmounts[1]);
-    const secondQuoteVolume = getEvents(second).swapEvents[0].quoteVolume;
-    const secondMarketResource = getMarketResourceFromWriteSet(second, marketAddress)!;
-    expect(secondMarketResource).toBeDefined();
-    const second1MTracker = secondMarketResource.periodicStateTrackers.find(
-      (tracker) => toPeriodFromContract(tracker.period) === Period.Period1M
-    )!;
-    expect(second1MTracker).toBeDefined();
-    expect(second1MTracker.startTime).toEqual(oneMinuteStateTracker.startTime);
-    expect(second1MTracker.volumeQuote).toEqual(firstQuoteVolume + secondQuoteVolume);
 
+    expect(getOneMinutePeriodicStateEvents(first).length).toEqual(0);
+    const second = await swapCall(inputAmounts[1]);
+    const secondEvents = getEvents(second);
+    const secondQuoteVolume = secondEvents.swapEvents[0].quoteVolume;
+    const secondTracker = getTrackerFromWriteSet(second, marketAddress, Period.Period1M)!;
+    expect(secondTracker).toBeDefined();
+    expect(secondTracker.startTime).toEqual(firstTracker.startTime);
+    expect(secondTracker.volumeQuote).toEqual(firstQuoteVolume + secondQuoteVolume);
+
+    // There should be no periodic state events emitted for the second swap.
+    expect(getOneMinutePeriodicStateEvents(second).length).toEqual(0);
+
+    await fetchMarketDailyVolume({ marketID, minimumVersion: second.version }).then((r) => {
+      expect(r[0].dailyVolume).toEqual(firstQuoteVolume + secondQuoteVolume);
+    });
     periods = await fetchMarket1MPeriodsInLastDay({ marketID });
-    expect(periods.length).toEqual(1);
-    expect(periods[0].volume).toEqual(firstQuoteVolume + secondQuoteVolume);
+    expect(periods.length).toEqual(0);
 
     // Sleep until the period expiry time.
     await sleep(periodExpiry.getTime() - Date.now());
+    // There might be some drift between the current time in the js runtime and in the Aptos VM.
+    // We'll sleep for a little bit longer to ensure that the period has expired.
+    await sleep(2000);
 
     // Now perform another swap and ensure that the daily volume has been accurately updated.
     const third = await swapCall(inputAmounts[2]);
     const thirdSwapTimestamp = BigInt(third.timestamp);
-    const thirdMarketResource = getMarketResourceFromWriteSet(third, marketAddress)!;
-    expect(thirdMarketResource).toBeDefined();
-    const third1MTracker = thirdMarketResource.periodicStateTrackers.find(
-      (tracker) => toPeriodFromContract(tracker.period) === Period.Period1M
-    )!;
-    expect(third1MTracker).toBeDefined();
-    // Expect that the start time of the current state tracker is the transaction timestamp
-    // of the third swap; i.e., the tracker started because of the third swap.
-    expect(third1MTracker.startTime).toEqual(thirdSwapTimestamp);
-    const thirdQuoteVolume = getEvents(third).swapEvents[0].quoteVolume;
-    expect(third1MTracker.volumeQuote).toEqual(thirdQuoteVolume);
+    const thirdTracker = getTrackerFromWriteSet(third, marketAddress, Period.Period1M)!;
+    expect(thirdTracker).toBeDefined();
+    expect(thirdTracker.startTime).toEqual(getPeriodBoundary(thirdSwapTimestamp, Period.Period1M));
+    const thirdEvents = getEvents(third);
+    const thirdQuoteVolume = thirdEvents.swapEvents[0].quoteVolume;
+    expect(thirdTracker.volumeQuote).toEqual(thirdQuoteVolume);
 
-    const dailyVolumeQueryResult = (await fetchMarketDailyVolume({ marketID })).at(0)!;
-    expect(dailyVolumeQueryResult).toBeDefined();
+    // *Now* we should see periodic state events being emitted.
+    expect(getOneMinutePeriodicStateEvents(third).length).toEqual(1);
 
-    const totalVolume = firstQuoteVolume + thirdQuoteVolume;
-    expect(dailyVolumeQueryResult.dailyVolume).toEqual(totalVolume);
+    // Make sure the indexer processor saw the new periodic state event.
+    periods = await fetchMarket1MPeriodsInLastDay({ marketID, minimumVersion: third.version });
+    expect(periods.length).toEqual(1);
 
-    periods = await fetchMarket1MPeriodsInLastDay({ marketID });
-    expect(periods.length).toEqual(2);
-    const volume = sumByKey(periods, "volume");
-    expect(volume).toEqual(firstQuoteVolume + secondQuoteVolume + thirdQuoteVolume);
+    // Ensure that the total daily volume is accurate.
+    const only1MPeriodsVolume = sumByKey(periods, "volume");
+    expect(only1MPeriodsVolume).toEqual(firstQuoteVolume + secondQuoteVolume);
+
+    await fetchMarketDailyVolume({ marketID }).then((r) => {
+      expect(r[0].dailyVolume).toEqual(firstQuoteVolume + secondQuoteVolume + thirdQuoteVolume);
+    });
   });
 
-  it("correctly sums the volume by user and market daily volume", async () => {
+  it("sums the volume by user and market daily volume", async () => {
     const swappersAndVolumes = [
       [fundedAccounts.pop()!, 100n] as const,
       [fundedAccounts.pop()!, 200n] as const,
@@ -182,7 +209,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     // Now have each swapper make a swap, excluding the first swap for the first swapper.
     let highestVersion = 0n;
     for (let i = 0; i < swapsPerAccount; i += 1) {
-      const txns = new Array<Promise<UserTransactionResponse>>();
+      const transactions = new Array<Promise<UserTransactionResponse>>();
       swappersAndVolumes.forEach(([swapper, amount], ii) => {
         if (
           i === 0 &&
@@ -193,10 +220,10 @@ describe("queries swap_events and returns accurate swap row data", () => {
         }
         const addr = swapper.accountAddress;
         volume.set(addr, (volume.get(addr) ?? 0n) + amount);
-        txns.push(swapCall(swapper, amount));
+        transactions.push(swapCall(swapper, amount));
       });
       /* eslint-disable-next-line no-await-in-loop */
-      const responses = await Promise.all(txns);
+      const responses = await Promise.all(transactions);
       highestVersion = bigintMax(getTxnBatchHighestVersion(responses), highestVersion);
       results.push(...responses.map(getEvents));
     }

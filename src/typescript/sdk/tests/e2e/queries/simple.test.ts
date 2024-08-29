@@ -159,7 +159,6 @@ describe("queries swap_events and returns accurate swap row data", () => {
           .eq("in_bonding_curve", false)
           .eq("market_id", marketID),
       ({ market_id }) => ({ marketID: BigInt(market_id as string) }),
-      TableName.MarketLatestStateEvent
     )({ marketID });
 
     const foundInMarketsWithPools = marketsWithPools.find((m) => m.marketID === marketID);

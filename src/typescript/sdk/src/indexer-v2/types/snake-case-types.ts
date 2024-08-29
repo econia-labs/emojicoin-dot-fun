@@ -297,4 +297,5 @@ export enum TableName {
   UserLiquidityPools = "user_liquidity_pools",
   MarketDailyVolume = "market_daily_volume",
   Market1MPeriodsInLastDay = "market_1m_periods_in_last_day",
+  ProcessorStatus = "processor_status",
 }

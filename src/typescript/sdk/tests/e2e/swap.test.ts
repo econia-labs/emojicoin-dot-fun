@@ -263,7 +263,7 @@ describe("tests the swap functionality", () => {
     await expect(failedSwap).rejects.toThrow();
   });
 
-  it("correctly sees the grace period hasn't ended", async () => {
+  it("sees the grace period hasn't ended", async () => {
     const newEmoji = SYMBOL_DATA.byStrictName("yawning face");
     const newMarketRegisterResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
