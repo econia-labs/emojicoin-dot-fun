@@ -3,7 +3,7 @@ import { immer } from "zustand/middleware/immer";
 import { APTOS_NETWORK } from "lib/env";
 import type { WritableDraft } from "immer";
 
-export type ANSValue = { name: string | null; isNull: boolean; expiry: number };
+export type ANSValue = { name: string | null; expiry: number };
 export type ANSMap = Map<string, ANSValue>;
 export type ANSPromiseMap = Map<string, Promise<void>>;
 
@@ -138,7 +138,6 @@ const getNameMap = (set: Set, get: Get, addresses: string[]): ANSMap => {
         const x = fetchANSName(address)
           .then((res) => ({
             name: res,
-            isNull: res === null,
             expiry: new Date().getTime() + ANS_CACHE_TIME,
           }))
           .then((res) => {
