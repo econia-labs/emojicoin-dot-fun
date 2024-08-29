@@ -42,36 +42,29 @@ async function getDockerContainerStatus(name: ContainerName): Promise<ContainerS
 const TEST_RUNNER_PATH = path.join(getGitRoot(), "src/sh/emojicoin/test-runner.sh");
 const MAXIMUM_WAIT_TIME_SEC = 120;
 export class DockerDirector {
-  public waitTimeSeconds: number;
-
   public container: ContainerName;
 
   public removeContainersOnStart: boolean;
 
-  public pullImages: boolean;
-
-  public buildImages: boolean;
-
   public publishType: "json" | "compile";
+
+  public skipJSONCompilation: boolean;
 
   constructor(args: {
     container: ContainerName;
     removeContainersOnStart: boolean;
-    pullImages: boolean;
-    buildImages: boolean;
+    skipJSONCompilation?: boolean;
     publishType?: "json" | "compile";
   }) {
-    const { container, removeContainersOnStart, pullImages, buildImages } = args;
+    const { container, removeContainersOnStart, publishType, skipJSONCompilation } = args;
     this.container = container;
     this.removeContainersOnStart = removeContainersOnStart;
-    this.pullImages = pullImages;
-    this.buildImages = buildImages;
-    if (this.buildImages) {
-      this.waitTimeSeconds = MAXIMUM_WAIT_TIME_SEC + 1200;
-    } else {
-      this.waitTimeSeconds = MAXIMUM_WAIT_TIME_SEC;
+    this.publishType = publishType || "compile";
+
+    if (skipJSONCompilation && publishType !== "json") {
+      throw new Error("You can only skip compilation if if publishType is set to `--json`");
     }
-    this.publishType = args.publishType || "compile";
+    this.skipJSONCompilation = skipJSONCompilation || false;
   }
 
   /**
@@ -110,10 +103,9 @@ export class DockerDirector {
     const args = [
       TEST_RUNNER_PATH,
       "--start",
-      this.pullImages ? "--pull" : "",
-      this.buildImages ? "--build" : "",
       this.container === "docker-frontend-1" ? "" : "--no-frontend",
       this.publishType === "json" ? "--json" : "--compile",
+      this.skipJSONCompilation ? "--no-compile" : "",
     ].filter((arg) => arg !== "");
 
     const childProcess = spawn(command, args);
@@ -143,7 +135,7 @@ export class DockerDirector {
       /* eslint-disable no-await-in-loop */
       status = await getDockerContainerStatus(this.container);
 
-      if (secondsElapsed >= this.waitTimeSeconds) {
+      if (secondsElapsed >= MAXIMUM_WAIT_TIME_SEC) {
         throw new Error("Container is not running or healthy after maximum wait time.");
       }
 

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unused-modules */ // Still this bug where it thinks this doesn't export.
-import { CandlestickResolution } from "../../const";
+import { ContractPeriod } from "../../const";
 import { type Types } from "../../types";
 
 /**
@@ -11,16 +11,16 @@ import { type Types } from "../../types";
  * const oneHourCandlesticks = candlesticks[CandlestickResolution.PERIOD_1H];
  * const oneMinuteCandlesticks = candlesticks[CandlestickResolution.PERIOD_1M];
  */
-export type GroupedPeriodicStateEvents = Record<CandlestickResolution, Types.PeriodicStateEvent[]>;
+export type GroupedPeriodicStateEvents = Record<ContractPeriod, Types.PeriodicStateEvent[]>;
 
 export const createEmptyGroupedCandlesticks = (): GroupedPeriodicStateEvents => ({
-  [CandlestickResolution.PERIOD_1M]: [],
-  [CandlestickResolution.PERIOD_5M]: [],
-  [CandlestickResolution.PERIOD_15M]: [],
-  [CandlestickResolution.PERIOD_30M]: [],
-  [CandlestickResolution.PERIOD_1H]: [],
-  [CandlestickResolution.PERIOD_4H]: [],
-  [CandlestickResolution.PERIOD_1D]: [],
+  [ContractPeriod.PERIOD_1M]: [],
+  [ContractPeriod.PERIOD_5M]: [],
+  [ContractPeriod.PERIOD_15M]: [],
+  [ContractPeriod.PERIOD_30M]: [],
+  [ContractPeriod.PERIOD_1H]: [],
+  [ContractPeriod.PERIOD_4H]: [],
+  [ContractPeriod.PERIOD_1D]: [],
 });
 
 // TODO: Put this in the event store...?
@@ -31,7 +31,7 @@ export const toGroupedCandlesticks = (candlesticks: Types.PeriodicStateEvent[]) 
   const grouped = createEmptyGroupedCandlesticks();
 
   for (const candlestick of candlesticks) {
-    const periodInEvent = Number(candlestick.periodicStateMetadata.period) as CandlestickResolution;
+    const periodInEvent = Number(candlestick.periodicStateMetadata.period) as ContractPeriod;
     grouped[periodInEvent].push(candlestick);
   }
 
@@ -42,5 +42,5 @@ export const isGroupedCandlesticks = (
   candlesticks: any
 ): candlesticks is GroupedPeriodicStateEvents =>
   Object.keys(candlesticks).every((key) =>
-    Object.values(CandlestickResolution).includes(key as any)
+    Object.values(ContractPeriod).includes(key as any)
   );

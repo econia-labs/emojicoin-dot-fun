@@ -1,8 +1,14 @@
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import { type CandlestickResolution, toCandlestickResolution } from "../const";
+import {
+  type ContractPeriod,
+  type Period,
+  periodEnumToContractPeriod,
+  toCandlestickResolution,
+} from "../const";
 import { normalizeHex } from "./hex";
 import {
+  type AnyNumberString,
   type Types,
   isAnyEmojiCoinEvent,
   isPeriodicStateEvent,
@@ -104,7 +110,7 @@ export function getTime(unitOfTime: UnitOfTime) {
  */
 export function getPeriodStartTime(
   event: Types.SwapEvent | Types.StateEvent | Types.PeriodicStateEvent | Types.PeriodicStateView,
-  periodIn: CandlestickResolution | bigint | number
+  periodIn: ContractPeriod | bigint | number
 ) {
   // All CandlestickPeriods are in microseconds.
   let time: bigint;
@@ -128,7 +134,7 @@ export function getPeriodStartTime(
     throw new Error("Invalid event type.");
   }
 
-  let period: CandlestickResolution;
+  let period: ContractPeriod;
   if (typeof periodIn === "bigint" || typeof periodIn === "number") {
     const tryPeriod = toCandlestickResolution(periodIn);
     if (!tryPeriod) {
@@ -143,7 +149,13 @@ export function getPeriodStartTime(
   return boundary;
 }
 
-export function getPeriodStartTimeFromTime(microseconds: bigint, period: CandlestickResolution) {
+/**
+ * Calculate the start of a period based on a given input time and period.
+ * @param microseconds the time in microseconds.
+ * @param period the period to calculate the start of.
+ * @returns the start of the period in microseconds.
+ */
+export function getPeriodStartTimeFromTime(microseconds: AnyNumberString, period: ContractPeriod) {
   const time = BigInt(microseconds);
   // prettier-ignore
   const res = Big(time.toString())
@@ -151,6 +163,18 @@ export function getPeriodStartTimeFromTime(microseconds: bigint, period: Candles
     .round(0, Big.roundDown)
     .mul(period);
   return BigInt(res.toString());
+}
+
+export function getPeriodBoundary(microseconds: AnyNumberString, period: Period): bigint {
+  const contractPeriod = periodEnumToContractPeriod(period);
+  return getPeriodStartTimeFromTime(microseconds, contractPeriod);
+}
+
+export const dateFromMicroseconds = (microseconds: bigint) =>
+  new Date(Number(microseconds / 1000n));
+
+export function getPeriodBoundaryAsDate(microseconds: AnyNumberString, period: Period): Date {
+  return dateFromMicroseconds(getPeriodBoundary(microseconds, period));
 }
 
 export const ADDRESS_FULL_CHAR_LENGTH = 64;
@@ -238,10 +262,10 @@ export function sum<T extends number | bigint>(array: T[]): T {
   return (array as number[]).reduce((acc, val) => acc + val, 0) as T;
 }
 
-export function sumByKey<T, K extends keyof T>(array: T[], key: K): number | bigint {
+export function sumByKey<T, K extends keyof T>(array: T[], key: K): T[K] {
   const arr = array.map((x) => x[key]);
   if (typeof arr[0] === "bigint") {
-    return sum(arr as Array<bigint>);
+    return sum(arr as Array<bigint>) as T[K];
   }
-  return sum(arr as Array<number>);
+  return sum(arr as Array<number>) as T[K];
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { type CandlestickResolution } from "../const";
+import { type ContractPeriod } from "../const";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY, PERIODIC_STATE_VIEW } from "./const";
 import { type Types, toPeriodicStateView, type JSONTypes } from "../types";
 import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-helper";
@@ -9,7 +9,7 @@ import { type ValueOf } from "../utils/utility-types";
 
 export type SharedCandlestickQueryArgs = {
   marketID: bigint | number | string;
-  resolution: CandlestickResolution;
+  resolution: ContractPeriod;
   limit?: number;
 };
 
@@ -62,7 +62,7 @@ export const fetchCandlesticks = async ({
 
 export const paginateCandlesticks = async (
   args: Omit<SharedCandlestickQueryArgs, "resolution"> &
-    Omit<AggregateQueryResultsArgs, "query"> & { resolution?: CandlestickResolution }
+    Omit<AggregateQueryResultsArgs, "query"> & { resolution?: ContractPeriod }
 ) => {
   const { marketID, resolution } = args;
   let query = postgrest

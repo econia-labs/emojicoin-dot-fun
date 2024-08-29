@@ -1,7 +1,8 @@
 #!/bin/bash
+# cspell:word pgrep
 
 if curl -s -f -o /dev/null http://localhost:8070/; then
-	if pgrep -f "aptos" > /dev/null; then
+	if pgrep -f "aptos" >/dev/null; then
 		echo "The local testnet is currently running in a non-Docker environment."
 		exit 1
 	fi
@@ -19,14 +20,13 @@ aptos node run-local-testnet \
 seconds=2
 
 check_endpoint() {
-    curl -s -f -o /dev/null http://localhost:8070/
+	curl -s -f -o /dev/null http://localhost:8070/
 }
 
 # Wait for the local testnet to be up.
-while ! check_endpoint
-do
-    echo "Waiting for the local testnet to be up..."
-    sleep "$seconds"
+while ! check_endpoint; do
+	echo "Waiting for the local testnet to be up..."
+	sleep "$seconds"
 done
 
 # ------------------------------------------------------------------------------

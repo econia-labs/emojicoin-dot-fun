@@ -5,6 +5,7 @@ import {
   PK_PATH,
   PUBLISH_RES_PATH,
   RESET_CONTAINERS_ON_START,
+  SKIP_JSON_COMPILATION,
 } from "./utils";
 import { DockerDirector } from "./utils/docker-director";
 import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
@@ -15,12 +16,11 @@ export default async function preTest() {
   globalThisAny.__GLOBAL_DIRECTOR__ = new DockerDirector({
     container: "docker-broker-1",
     removeContainersOnStart: RESET_CONTAINERS_ON_START,
-    pullImages: true,
-    buildImages: true,
     // `json` is better if you're frequently changing the code, `compile` is better if you
     // don't mind an initial long wait time. Sometimes there are issues with cloning from git
     // and `json` is better in those cases.
     publishType: "json",
+    skipJSONCompilation: SKIP_JSON_COMPILATION,
   });
   // --------------------------------------------------------------------------------------
   //                             Start the docker containers.
