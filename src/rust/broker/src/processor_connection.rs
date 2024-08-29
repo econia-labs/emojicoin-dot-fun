@@ -64,7 +64,7 @@ pub async fn start(
             retries = 0;
         }
 
-        // If this is the first connection and it was unsuccsessful, do not try to retry.
+        // If this is the first connection and it was unsuccessful, do not try to retry.
         if first_time && !connection_successful {
             break;
         }
