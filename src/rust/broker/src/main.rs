@@ -19,18 +19,6 @@ pub enum HealthStatus {
     Dead,
 }
 
-impl Default for HealthStatus {
-    fn default() -> Self {
-        Self::Starting
-    }
-}
-
-#[derive(Default, Debug, Serialize, Deserialize, Clone)]
-pub struct BrokerHealth {
-    processor_connection: HealthStatus,
-    server: HealthStatus,
-}
-
 #[tokio::main]
 async fn main() -> Result<(), ()> {
     env_logger::init();
@@ -45,15 +33,15 @@ async fn main() -> Result<(), ()> {
     let (tx, _) = broadcast::channel(CHANNEL_BUFFER_SIZE);
     let tx2 = tx.clone();
 
-    let broker_health = Arc::new(RwLock::new(BrokerHealth::default()));
+    let processor_connection_health = Arc::new(RwLock::new(HealthStatus::Starting));
 
     let processor_connection = tokio::spawn(processor_connection::start(
         processor_url,
         tx2,
-        broker_health.clone(),
+        processor_connection_health.clone(),
     ));
 
-    let mut sse_server = tokio::spawn(server::server(tx, port, broker_health));
+    let mut sse_server = tokio::spawn(server::server(tx, port, processor_connection_health));
 
     tokio::select! {
         _ = processor_connection => {
