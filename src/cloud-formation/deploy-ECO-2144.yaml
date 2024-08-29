@@ -7,7 +7,7 @@ parameters:
   MaybeProvisionBastionHost: 'false'
   MaybeProvisionBroker: 'true'
   MaybeProvisionDb: 'true'
-  MaybeProvisionPostgrest: 'false'
+  MaybeProvisionPostgrest: 'true'
   MaybeProvisionProcessor: 'true'
   MaybeProvisionRouteTables: 'true'
   MaybeProvisionStack: 'true'
