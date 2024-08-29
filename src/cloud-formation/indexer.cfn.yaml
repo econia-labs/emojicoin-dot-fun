@@ -718,12 +718,14 @@ Resources:
       - PolicyDocument:
           Statement:
           - Action:
-            - 'ecr:GetAuthorizationToken'
             - 'ecr:BatchCheckLayerAvailability'
-            - 'ecr:InitiateLayerUpload'
-            - 'ecr:UploadLayerPart'
+            - 'ecr:BatchGetImage'
             - 'ecr:CompleteLayerUpload'
+            - 'ecr:GetAuthorizationToken'
+            - 'ecr:GetDownloadUrlForLayer'
+            - 'ecr:InitiateLayerUpload'
             - 'ecr:PutImage'
+            - 'ecr:UploadLayerPart'
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Effect: 'Allow'
