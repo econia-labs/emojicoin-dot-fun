@@ -710,19 +710,14 @@ Resources:
           Effect: 'Allow'
           Principal:
             Service: 'ecs-tasks.amazonaws.com'
+        - Action: 'sts:AssumeRole'
+          Effect: 'Allow'
+          Principal:
+            Service: 'pullthroughcache.ecr.amazonaws.com'
       Policies:
       - PolicyDocument:
           Statement:
           - Action:
-            - 'ecr:BatchCheckLayerAvailability'
-            - 'ecr:BatchGetImage'
-            - 'ecr:GetAuthorizationToken'
-            - 'ecr:GetDownloadUrlForLayer'
-            - 'ecr:CreateRepository'
-            - 'ecr:InitiateLayerUpload'
-            - 'ecr:UploadLayerPart'
-            - 'ecr:CompleteLayerUpload'
-            - 'ecr:PutImage'
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Effect: 'Allow'
