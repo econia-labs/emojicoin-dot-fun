@@ -158,18 +158,17 @@ describe("queries swap_events and returns accurate swap row data", () => {
           .select("market_id")
           .eq("in_bonding_curve", false)
           .eq("market_id", marketID),
-      ({ market_id }) => ({ marketID: BigInt(market_id as string) }),
+      ({ market_id }) => ({ marketID: BigInt(market_id as string) })
     )({ marketID });
 
     const foundInMarketsWithPools = marketsWithPools.find((m) => m.marketID === marketID);
 
     const userPoolQueryRes = await fetchUserLiquidityPools({
-      provider: registrant.accountAddress,
+      provider,
       minimumVersion: res.version,
     });
 
     const foundInUserPools = userPoolQueryRes.find((row) => row.marketID === marketID);
-
     const row = liquidityEventsQueryRes[0];
 
     RowEqualityChecks.liquidityRow(row, liquidityRes);

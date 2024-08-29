@@ -23,6 +23,7 @@ function cleanup() {
 # Ensure cleanup function is called on exit.
 trap cleanup EXIT
 
+WARNING_COLOR='\033[38;5;202m'
 LIGHT_PURPLE='\033[1;35m'
 NO_COLOR='\033[0m'
 
@@ -42,7 +43,6 @@ show_help() {
 	echo "  -s, --start       Start the Docker environment with the local testnet."
 	echo "  -j, --json        Publish the smart contracts with JSON publish payload files."
 	echo "  -c, --compile     Publish the smart contracts by compiling at container build time."
-	echo "  --no-compile      Do not build the smart contract publish payloads if they already exist."
 	echo "  --no-frontend     Do not start the frontend container."
 	echo
 	echo "  -h, --help        Display this help message"
@@ -62,7 +62,6 @@ show_help=false
 publish_json=false
 publish_compile=false
 no_cache=false
-no_compile=false
 localnode="local-testnet-postgres"
 graphql="local-testnet-indexer-api"
 
@@ -82,7 +81,6 @@ while [[ $# -gt 0 ]]; do
 	-j) publish_json=true ;;
 	--compile) publish_compile=true ;;
 	-c) publish_compile=true ;;
-	--no-compile) no_compile=true ;;
 	-h | --help)
 		show_help
 		exit 0
@@ -154,16 +152,14 @@ if [ "$PUBLISH_TYPE" = "json" ]; then
 	echo
 
 	skip_compilation=false
-	if [ "$no_compile" = true ]; then
-		if [ ! aptos-node/json/publish-rewards.json ] || [ ! aptos-node/json/publish-emojicoin_dot_fun.json ]; then
-			echo "JSON publish payloads not found."
-			echo "Ignoring $(--no-compile) and building the JSON publish payloads on the host machine."
-		else
-			echo "JSON publish payloads found. Skipping compilation."
-			skip_compilation=true
-		fi
+	if [ ! aptos-node/json/publish-rewards.json ] || [ ! aptos-node/json/publish-emojicoin_dot_fun.json ]; then
+		echo "JSON publish payloads not found. Building the JSON publish payloads on the host machine."
 	else
-		echo "Publish type is set to JSON. Building the JSON publish payloads on the host machine."
+		echo "JSON publish payloads found- skipping compilation and copying the existing JSON publish payloads."
+		json_dir_path="$docker_dir/aptos-node/json"
+		msg="WARNING: If you have made changes to the Move modules, remove the existing ones at"
+		echo -e "$WARNING_COLOR$msg $json_dir_path.$NO_COLOR"
+		skip_compilation=true
 	fi
 
 	if [ "$skip_compilation" = false ]; then

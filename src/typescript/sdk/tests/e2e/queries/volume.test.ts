@@ -34,7 +34,8 @@ import {
 // We need a long timeout because the test must wait for the 1-minute period to expire.
 jest.setTimeout(75000);
 
-const TEN_SECONDS = 10 * 1000;
+const TWENTY_SECONDS = 20 * 1000;
+const FIVE_SECONDS = 5 * 1000;
 
 describe("queries swap_events and returns accurate swap row data", () => {
   const { aptos } = getAptosClient();
@@ -60,7 +61,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     // calculated across multiple periods.
     const currentPeriodBoundary = getPeriodBoundaryAsDate(Date.now() * 1000, Period.Period1M);
     const timeUntilNextPeriod = currentPeriodBoundary.getTime() - Date.now();
-    if (timeUntilNextPeriod < TEN_SECONDS) {
+    if (timeUntilNextPeriod < TWENTY_SECONDS) {
       await sleep(timeUntilNextPeriod);
       // There might be some drift between the current time in the js runtime and in the Aptos VM.
       // We'll sleep for a little bit longer to ensure that the period has expired.
@@ -114,7 +115,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     // we won't see a period until this periodic state tracker ends.
     expect(periods.length).toEqual(0);
     const periodExpiry = getPeriodExpiryDate(firstTracker, Period.Period1M);
-    expect(periodExpiry.getTime() - Date.now()).toBeGreaterThan(TEN_SECONDS / 2);
+    expect(periodExpiry.getTime() - Date.now()).toBeGreaterThan(FIVE_SECONDS);
 
     // Now call a second swap to ensure that it's slotted in with the first swap in the same
     // 1-minute period.

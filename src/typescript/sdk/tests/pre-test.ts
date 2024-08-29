@@ -5,7 +5,6 @@ import {
   PK_PATH,
   PUBLISH_RES_PATH,
   RESET_CONTAINERS_ON_START,
-  SKIP_JSON_COMPILATION,
 } from "./utils";
 import { DockerDirector } from "./utils/docker-director";
 import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
@@ -20,7 +19,6 @@ export default async function preTest() {
     // don't mind an initial long wait time. Sometimes there are issues with cloning from git
     // and `json` is better in those cases.
     publishType: "json",
-    skipJSONCompilation: SKIP_JSON_COMPILATION,
   });
   // --------------------------------------------------------------------------------------
   //                             Start the docker containers.

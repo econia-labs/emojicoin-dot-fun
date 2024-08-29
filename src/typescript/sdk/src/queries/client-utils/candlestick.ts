@@ -41,6 +41,4 @@ export const toGroupedCandlesticks = (candlesticks: Types.PeriodicStateEvent[]) 
 export const isGroupedCandlesticks = (
   candlesticks: any
 ): candlesticks is GroupedPeriodicStateEvents =>
-  Object.keys(candlesticks).every((key) =>
-    Object.values(ContractPeriod).includes(key as any)
-  );
+  Object.keys(candlesticks).every((key) => Object.values(ContractPeriod).includes(key as any));
