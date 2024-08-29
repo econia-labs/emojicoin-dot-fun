@@ -1,10 +1,11 @@
 import TwitterOutlineIcon from "components/svg/icons/TwitterOutlineIcon";
-import { LINKS } from "configs";
+import { LINKS } from "lib/env";
 import DiscordOutlineIcon from "@icons/DiscordOutlineIcon";
 import TelegramOutlineIcon from "@icons/TelegramOutlineIcon";
+import { ROUTES } from "router/routes";
 
 export const SOCIAL_ICONS = [
-  { icon: DiscordOutlineIcon, href: LINKS.discord },
-  { icon: TelegramOutlineIcon, href: LINKS.telegram },
-  { icon: TwitterOutlineIcon, href: LINKS.x },
+  { icon: DiscordOutlineIcon, href: LINKS?.discord ?? ROUTES.notFound },
+  { icon: TelegramOutlineIcon, href: LINKS?.telegram ?? ROUTES.notFound },
+  { icon: TwitterOutlineIcon, href: LINKS?.x ?? ROUTES.notFound },
 ];

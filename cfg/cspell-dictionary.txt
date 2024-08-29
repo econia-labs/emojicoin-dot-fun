@@ -3,6 +3,7 @@ allowlister
 aptn
 aptos
 aptoslabs
+autoscale
 barthelemy
 bento
 blackpaper
@@ -14,6 +15,7 @@ caicos
 clamm
 clipperton
 clippy
+cooldown
 counterparties
 cpamm
 cunha
@@ -78,6 +80,7 @@ postg
 postgrest
 precommit
 presale
+psql
 rica
 rustup
 serde
@@ -97,6 +100,7 @@ unsubscription
 vercel
 viewports
 vpnapi
+websocat
 websockets
 xbtmatt
 zustand

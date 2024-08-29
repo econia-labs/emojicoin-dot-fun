@@ -229,5 +229,5 @@ repos:
     files: '.*\.cfn\.yaml'
     id: 'cfn-lint'
   repo: 'https://github.com/aws-cloudformation/cfn-lint'
-  rev: 'v1.8.2'
+  rev: 'v1.11.0'
 ...

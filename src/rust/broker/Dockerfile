@@ -36,6 +36,7 @@ RUN cargo build --bin broker --package broker --release --features $FEATURES
 # Install runtime dependencies, copy over binary.
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     libssl-dev \
     libpq-dev \
     curl \

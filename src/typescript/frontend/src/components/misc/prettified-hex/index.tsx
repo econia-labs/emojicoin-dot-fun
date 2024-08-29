@@ -15,7 +15,7 @@ export const PrettyHex = ({
     text: prettifyHex(hex),
     overdrive: false,
     overflow: true,
-    speed: typeof scramble === "undefined" ? 0 : scrambleProps.speed ?? 0.6,
+    speed: typeof scramble === "undefined" ? 0 : (scrambleProps.speed ?? 0.6),
     playOnMount: true,
     ...scrambleProps,
   });

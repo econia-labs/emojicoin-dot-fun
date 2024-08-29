@@ -1,0 +1,1380 @@
+# cspell:word aarch
+# cspell:word awslogs
+# cspell:word awsvpc
+# cspell:word fargate
+# cspell:word multivalue
+---
+Conditions:
+  TryProvisionAlb: !And
+  - !Condition 'TryProvisionVpc'
+  - !Equals
+    - !Ref 'TryProvisionAlb'
+    - 'true'
+  TryProvisionAlbDnsRecord: !And
+  - !Condition 'TryProvisionAlb'
+  - !Equals
+    - !Ref 'TryProvisionAlbDnsRecord'
+    - 'true'
+  TryProvisionBastionHost: !And
+  - !Condition 'TryProvisionDb'
+  - !Equals
+    - !Ref 'TryProvisionBastionHost'
+    - 'true'
+  TryProvisionBroker: !And
+  - !Condition 'TryProvisionProcessor'
+  - !Equals
+    - !Ref 'TryProvisionBroker'
+    - 'true'
+  TryProvisionDb: !And
+  - !Condition 'TryProvisionVpc'
+  - !Equals
+    - !Ref 'TryProvisionDb'
+    - 'true'
+  TryProvisionPostgrest: !And
+  - !Condition 'TryProvisionDb'
+  - !Condition 'TryProvisionProcessor'
+  - !Condition 'TryProvisionVpc'
+  - !Equals
+    - !Ref 'TryProvisionPostgrest'
+    - 'true'
+  TryProvisionProcessor: !And
+  - !Condition 'TryProvisionDb'
+  - !Equals
+    - !Ref 'TryProvisionProcessor'
+    - 'true'
+  TryProvisionRouteTables: !And
+  - !Condition 'TryProvisionVpc'
+  - !Equals
+    - !Ref 'TryProvisionRouteTables'
+    - 'true'
+  TryProvisionStack: !Equals
+  - !Ref 'TryProvisionStack'
+  - 'true'
+  TryProvisionVpc: !And
+  - !Condition 'TryProvisionStack'
+  - !Equals
+    - !Ref 'TryProvisionVpc'
+    - 'true'
+Mappings:
+  Constants:
+    # These compromised credentials are not a security risk because access to
+    # the database is restricted to security groups in the VPC.
+    DatabaseConfig:
+      DatabaseName: 'emojicoin'
+      MasterPassword: 'emojicoin'
+      MasterUsername: 'emojicoin'
+    Networking:
+      BrokerPort: 3009
+      DatabasePort: 5432
+      DnsNameHostedZoneId:
+        '{{resolve:ssm:/Emojicoin/IndexerDnsName/HostedZoneId}}'
+      DnsNameRootDomain: '{{resolve:ssm:/Emojicoin/IndexerDnsName/RootDomain}}'
+      DnsNameSubdomain: 'data'
+      PostgrestHealthCheckPort: 3001
+      PostgrestPort: 3000
+      ProcessorWebsocketPort: 3008
+      VpcCidrBlock: '10.0.0.0/16'
+    Websocat:
+      Build: 'websocat.aarch64-unknown-linux-musl'
+      ReleaseUrlBase: 'https://github.com/vi/websocat/releases/download'
+      Version: 'v1.13.0'
+  PrivateSubnets:
+    A:
+      AvailabilityZone: 0
+      CidrBlock: '10.0.1.0/24'
+    B:
+      AvailabilityZone: 1
+      CidrBlock: '10.0.2.0/24'
+    C:
+      AvailabilityZone: 2
+      CidrBlock: '10.0.3.0/24'
+  PublicSubnets:
+    A:
+      AvailabilityZone: 0
+      CidrBlock: '10.0.4.0/24'
+    B:
+      AvailabilityZone: 1
+      CidrBlock: '10.0.5.0/24'
+    C:
+      AvailabilityZone: 2
+      CidrBlock: '10.0.6.0/24'
+Outputs:
+  BastionHostId:
+    Condition: 'TryProvisionBastionHost'
+    Description: 'The instance ID of the bastion host.'
+    Value: !Ref 'BastionHost'
+  DnsName:
+    Condition: 'TryProvisionAlbDnsRecord'
+    Value: !Sub
+    - '${Environment}.${Subdomain}.${RootDomain}'
+    - RootDomain: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DnsNameRootDomain'
+      Subdomain: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DnsNameSubdomain'
+Parameters:
+  BastionHostAmiId:
+    Default: 'ami-030cb86c12b18e236'
+    Type: 'AWS::EC2::Image::Id'
+  BrokerImageVersion:
+    Type: 'String'
+  DbMaxCapacity:
+    Default: 4
+    Type: 'Number'
+  DbMinCapacity:
+    Default: 0.5
+    Type: 'Number'
+  Environment:
+    Type: 'String'
+  Network:
+    AllowedValues:
+    - 'Mainnet'
+    - 'Testnet'
+    Type: 'String'
+  PostgrestMaxRows:
+    Default: 500
+    Type: 'Number'
+  ProcessorImageVersion:
+    Type: 'String'
+  TryProvisionAlb:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionAlbDnsRecord:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionBastionHost:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionBroker:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionDb:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionPostgrest:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionProcessor:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionRouteTables:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionStack:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  TryProvisionVpc:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+Resources:
+  # Public application load balancer.
+  Alb:
+    Condition: 'TryProvisionAlb'
+    Properties:
+      LoadBalancerAttributes:
+      - Key: 'load_balancing.cross_zone.enabled'
+        Value: 'true'
+      Scheme: 'internet-facing'
+      SecurityGroups:
+      - !Ref 'AlbSecurityGroup'
+      - !Ref 'BrokerWsClientSecurityGroup'
+      - !Ref 'PostgrestClientSecurityGroup'
+      Subnets:
+      - !Ref 'PublicSubnetA'
+      - !Ref 'PublicSubnetB'
+      - !Ref 'PublicSubnetC'
+      Type: 'application'
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+  # DNS certificate for the application load balancer.
+  AlbCertificate:
+    Condition: 'TryProvisionAlb'
+    Properties:
+      DomainName: !Sub
+      - '${Environment}.${Subdomain}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+        Subdomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameSubdomain'
+      DomainValidationOptions:
+      - DomainName: !Sub
+        - '${Environment}.${Subdomain}.${RootDomain}'
+        - RootDomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'DnsNameRootDomain'
+          Subdomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'DnsNameSubdomain'
+        HostedZoneId: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameHostedZoneId'
+      ValidationMethod: 'DNS'
+    Type: 'AWS::CertificateManager::Certificate'
+  # DNS record for the broker's application load balancer.
+  AlbDnsRecord:
+    Condition: 'TryProvisionAlbDnsRecord'
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt 'Alb.DNSName'
+        HostedZoneId: !GetAtt 'Alb.CanonicalHostedZoneID'
+      HostedZoneId: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DnsNameHostedZoneId'
+      Name: !Sub
+      - '${Environment}.${Subdomain}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+        Subdomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameSubdomain'
+      Type: 'A'
+    Type: 'AWS::Route53::RecordSet'
+  # Application load balancer listener.
+  AlbListener:
+    Condition: 'TryProvisionAlb'
+    Properties:
+      Certificates:
+      - CertificateArn: !Ref 'AlbCertificate'
+      DefaultActions:
+      - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Alb'
+      Port: 443
+      Protocol: 'HTTPS'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # Application load balancer listener rule for broker traffic.
+  AlbListenerRuleBrokerTarget:
+    Condition: 'TryProvisionAlb'
+    Properties:
+      Actions:
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+        Type: 'forward'
+      Conditions:
+      - Field: 'path-pattern'
+        Values:
+        - '/ws'
+      ListenerArn: !Ref 'AlbListener'
+      Priority: 1
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+  # Security group for the application load balancer.
+  AlbSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupIngress:
+      - CidrIp: '0.0.0.0/0'
+        FromPort: 443
+        IpProtocol: 'tcp'
+        ToPort: 443
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Minimal VM for monitoring internal processes.
+  BastionHost:
+    Condition: 'TryProvisionBastionHost'
+    Properties:
+      ImageId: !Ref 'BastionHostAmiId'
+      InstanceType: 't4g.nano'
+      NetworkInterfaces:
+      - DeviceIndex: 0
+        GroupSet:
+        - !Ref 'BastionHostSecurityGroup'
+        - !Ref 'DbUserSecurityGroup'
+        - !Ref 'BrokerWsClientSecurityGroup'
+        - !Ref 'PostgrestClientSecurityGroup'
+        - !Ref 'ProcessorWsClientSecurityGroup'
+        SubnetId: !Ref 'PrivateSubnetA'
+      UserData:
+        # Install PostgreSQL client & websocat, set connection strings.
+        Fn::Base64: !Sub
+        - |
+            #!/bin/bash
+            yum update -y
+            amazon-linux-extras enable postgresql14
+            yum clean metadata
+            yum install -y postgresql
+            wget ${WebsocatReleaseUrlBase}/${WebsocatVersion}/${WebsocatBuild}
+            chmod +x ${WebsocatBuild}
+            mv ${WebsocatBuild} /usr/local/bin/websocat
+            echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
+            echo '${BrokerWsUrlExport}' >> /etc/profile
+            echo '${PostgrestUrlExport}' >> /etc/profile
+            echo '${ProcessorWsUrlExport}' >> /etc/profile
+        - BrokerWsUrlExport: !If
+          - 'TryProvisionBroker'
+          - !Join
+            - ''
+            - - 'export BROKER_WS_URL="ws://'
+              - !GetAtt 'BrokerServiceDiscovery.Name'
+              - '.'
+              - !Ref 'AWS::StackName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'BrokerPort'
+              - '/ws"'
+          - '# BROKER_WS_URL not set (broker not provisioned)'
+          DatabaseUrl: !Join
+          - ''
+          - - 'postgres://'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterPassword'
+            - '@'
+            - !GetAtt 'DbCluster.ReadEndpoint.Address'
+            - '/'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'DatabaseName'
+          PostgrestUrlExport: !If
+          - 'TryProvisionPostgrest'
+          - !Join
+            - ''
+            - - 'export POSTGREST_URL="http://'
+              - !GetAtt 'PostgrestServiceDiscovery.Name'
+              - '.'
+              - !Ref 'AWS::StackName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'PostgrestPort'
+              - '"'
+          - '# POSTGREST_URL not set (PostgREST not provisioned)'
+          ProcessorWsUrlExport: !If
+          - 'TryProvisionProcessor'
+          - !Join
+            - ''
+            - - 'export PROCESSOR_WS_URL="ws://'
+              - !GetAtt 'ProcessorServiceDiscovery.Name'
+              - '.'
+              - !Ref 'AWS::StackName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'ProcessorWebsocketPort'
+              - '/ws"'
+          - '# PROCESSOR_WS_URL not set (processor not provisioned)'
+          WebsocatBuild: !FindInMap
+          - 'Constants'
+          - 'Websocat'
+          - 'Build'
+          WebsocatReleaseUrlBase: !FindInMap
+          - 'Constants'
+          - 'Websocat'
+          - 'ReleaseUrlBase'
+          WebsocatVersion: !FindInMap
+          - 'Constants'
+          - 'Websocat'
+          - 'Version'
+    Type: 'AWS::EC2::Instance'
+  # Connection endpoint allowing access to the bastion host.
+  BastionHostConnectionEndpoint:
+    Condition: 'TryProvisionBastionHost'
+    Properties:
+      PreserveClientIp: true
+      SecurityGroupIds:
+      - !Ref 'BastionHostConnectionEndpointSecurityGroup'
+      SubnetId: !Ref 'PrivateSubnetA'
+    Type: 'AWS::EC2::InstanceConnectEndpoint'
+  # Security group for bastion host connection endpoint.
+  BastionHostConnectionEndpointSecurityGroup:
+    Condition: 'TryProvisionBastionHost'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'BastionHostSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Security group for the bastion host.
+  BastionHostSecurityGroup:
+    Condition: 'TryProvisionBastionHost'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the bastion host security group, separated to eliminate
+  # circular dependencies with the security group for the connection endpoint.
+  BastionHostSecurityGroupIngress:
+    Condition: 'TryProvisionBastionHost'
+    Properties:
+      GroupId: !Ref 'BastionHostSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId:
+        !Ref 'BastionHostConnectionEndpointSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Target group for application load balancer traffic to the broker.
+  BrokerAlbTargetGroup:
+    Condition: 'TryProvisionAlb'
+    DependsOn: 'Alb'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-broker'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      Protocol: 'HTTP'
+      ProtocolVersion: 'HTTP1'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'true'
+      - Key: 'stickiness.type'
+        Value: 'lb_cookie'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  # Scaling policy for broker service.
+  BrokerAutoScalingPolicy:
+    Condition: 'TryProvisionBroker'
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-broker'
+      PolicyType: 'TargetTrackingScaling'
+      ScalingTargetId: !Ref 'BrokerAutoScalingTarget'
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
+        ScaleInCooldown: 300
+        ScaleOutCooldown: 60
+        TargetValue: 70
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+  # Scalable target for broker service.
+  BrokerAutoScalingTarget:
+    Condition: 'TryProvisionBroker'
+    Properties:
+      MaxCapacity: 5
+      MinCapacity: 1
+      ResourceId: !Join
+      - '/'
+      - - 'service'
+        - !Ref 'ContainerCluster'
+        - !GetAtt 'BrokerRunner.Name'
+      RoleARN: !GetAtt 'ContainerScalingRole.Arn'
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: 'ecs'
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+  # Security group for the broker's WebSocket server.
+  BrokerPublisherSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the broker's WebSocket server security group.
+  BrokerPublisherSecurityGroupIngress:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupId: !Ref 'BrokerPublisherSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'BrokerWsClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Service for running the broker.
+  BrokerRunner:
+    Condition: 'TryProvisionBroker'
+    DependsOn: 'ProcessorRunner'
+    # Proxy for a conditional dependency on the application load balancer
+    # listener rule for the broker, which associates the broker target group
+    # with the application load balancer.
+    Metadata:
+      ConditionalDependencyProxy: !If
+      - 'TryProvisionAlb'
+      - !Ref 'AlbListenerRuleBrokerTarget'
+      - ''
+    Properties:
+      Cluster: !Ref 'ContainerCluster'
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+      LaunchType: 'FARGATE'
+      LoadBalancers: !If
+      - 'TryProvisionAlb'
+      - - ContainerName: !Sub '${AWS::StackName}-broker'
+          ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'BrokerPort'
+          TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+      - !Ref 'AWS::NoValue'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+          - !Ref 'BrokerPublisherSecurityGroup'
+          - !Ref 'ContainerSecurityGroup'
+          - !Ref 'ProcessorWsClientSecurityGroup'
+          Subnets:
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
+      ServiceRegistries:
+      - RegistryArn: !GetAtt 'BrokerServiceDiscovery.Arn'
+      TaskDefinition: !Ref 'BrokerTask'
+    Type: 'AWS::ECS::Service'
+  # Service discovery for the broker.
+  BrokerServiceDiscovery:
+    Condition: 'TryProvisionBroker'
+    Properties:
+      DnsConfig:
+        DnsRecords:
+        - TTL: 10
+          Type: 'A'
+        RoutingPolicy: 'MULTIVALUE'
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: !Sub '${AWS::StackName}-broker'
+      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+    Type: 'AWS::ServiceDiscovery::Service'
+  # Task definition for the broker.
+  BrokerTask:
+    Condition: 'TryProvisionProcessor'
+    DependsOn: 'ContainerLogGroup'
+    Properties:
+      ContainerDefinitions:
+      - Environment:
+        - Name: 'PROCESSOR_WS_URL'
+          Value: !Join
+          - ''
+          - - 'ws://'
+            - !GetAtt 'ProcessorServiceDiscovery.Name'
+            - '.'
+            - !Ref 'AWS::StackName'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'Networking'
+              - 'ProcessorWebsocketPort'
+            - '/ws'
+        - Name: 'PORT'
+          Value: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'BrokerPort'
+        - Name: 'RUST_LOG'
+          Value: 'info'
+        HealthCheck:
+          Command:
+          - 'CMD'
+          - 'curl'
+          - '--fail'
+          - !Sub
+            - 'http://localhost:${PORT}/'
+            - PORT: !FindInMap
+              - 'Constants'
+              - 'Networking'
+              - 'BrokerPort'
+          Interval: 5
+          Retries: 1
+          StartPeriod: 0
+          Timeout: 2
+        Image: !Join
+        - ''
+        - - 'econialabs/emojicoin-dot-fun-indexer-broker:'
+          - !Ref 'BrokerImageVersion'
+        LogConfiguration:
+          LogDriver: 'awslogs'
+          Options:
+            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: 'ecs'
+        Name: !Sub '${AWS::StackName}-broker'
+        PortMappings:
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'BrokerPort'
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'BrokerPort'
+        RepositoryCredentials:
+          CredentialsParameter: !Join
+          - ''
+          - - 'arn:aws:secretsmanager:'
+            - !Ref 'AWS::Region'
+            - ':'
+            - !Ref 'AWS::AccountId'
+            - ':secret:DOCKER_AUTH_CONFIG'
+      Cpu: '256'
+      ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
+      Family: !Ref 'AWS::StackName'
+      Memory: '512'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities:
+      - 'FARGATE'
+    Type: 'AWS::ECS::TaskDefinition'
+  # Security group for clients of the broker's WebSocket server.
+  BrokerWsClientSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'BrokerPublisherSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Cluster for running ECS containers.
+  ContainerCluster:
+    Condition: 'TryProvisionStack'
+    Type: 'AWS::ECS::Cluster'
+  # Log group for ECS task logging.
+  ContainerLogGroup:
+    Condition: 'TryProvisionStack'
+    Properties:
+      LogGroupName: !Sub '/ecs/${AWS::StackName}'
+      RetentionInDays: 14
+    Type: 'AWS::Logs::LogGroup'
+  # Role with assorted permissions required to run containers.
+  ContainerRole:
+    Condition: 'TryProvisionStack'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: 'sts:AssumeRole'
+          Effect: 'Allow'
+          Principal:
+            Service: 'ecs-tasks.amazonaws.com'
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - 'ecr:GetDownloadUrlForLayer'
+            - 'ecr:BatchGetImage'
+            - 'ecr:BatchCheckLayerAvailability'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            Effect: 'Allow'
+            Resource: '*'
+        PolicyName: !Sub 'ContainerRolePolicy-${AWS::StackName}'
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - 'secretsmanager:GetSecretValue'
+            Effect: 'Allow'
+            Resource:
+            - !Join
+              - ''
+              - - 'arn:aws:secretsmanager:'
+                - !Ref 'AWS::Region'
+                - ':'
+                - !Ref 'AWS::AccountId'
+                - ':secret:GRPC_AUTH_TOKEN-*'
+            - !Join
+              - ''
+              - - 'arn:aws:secretsmanager:'
+                - !Ref 'AWS::Region'
+                - ':'
+                - !Ref 'AWS::AccountId'
+                - ':secret:DOCKER_AUTH_CONFIG-*'
+        PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
+    Type: 'AWS::IAM::Role'
+  # Role for container service auto scaling.
+  ContainerScalingRole:
+    Condition: 'TryProvisionStack'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: 'sts:AssumeRole'
+          Effect: 'Allow'
+          Principal:
+            Service: 'application-autoscaling.amazonaws.com'
+      ManagedPolicyArns:
+      - !Join
+        - ''
+        - - 'arn:aws:iam::aws:policy/service-role/'
+          - 'AmazonEC2ContainerServiceAutoscaleRole'
+    Type: 'AWS::IAM::Role'
+  # Security group for ECS containers.
+  ContainerSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      # Allow all outbound traffic, to other resources and to Docker Hub.
+      SecurityGroupEgress:
+      - CidrIp: '0.0.0.0/0'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Database cluster.
+  DbCluster:
+    Condition: 'TryProvisionDb'
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+          - 'W2501'
+    Properties:
+      DBSubnetGroupName: !Ref 'DbSubnetGroup'
+      DatabaseName: !FindInMap
+      - 'Constants'
+      - 'DatabaseConfig'
+      - 'DatabaseName'
+      Engine: 'aurora-postgresql'
+      EngineMode: 'provisioned'
+      EngineVersion: '16.2'
+      MasterUserPassword: !FindInMap
+      - 'Constants'
+      - 'DatabaseConfig'
+      - 'MasterPassword'
+      MasterUsername: !FindInMap
+      - 'Constants'
+      - 'DatabaseConfig'
+      - 'MasterUsername'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DatabasePort'
+      ServerlessV2ScalingConfiguration:
+        MaxCapacity: !Ref 'DbMaxCapacity'
+        MinCapacity: !Ref 'DbMinCapacity'
+      VpcSecurityGroupIds:
+      - !Ref 'DbSecurityGroup'
+    Type: 'AWS::RDS::DBCluster'
+  # Primary (writer) database instance.
+  DbInstancePrimary:
+    Condition: 'TryProvisionDb'
+    Properties:
+      DBClusterIdentifier: !Ref 'DbCluster'
+      DBInstanceClass: 'db.serverless'
+      Engine: 'aurora-postgresql'
+    Type: 'AWS::RDS::DBInstance'
+  # Replica (reader) database instance.
+  DbInstanceReplica:
+    Condition: 'TryProvisionDb'
+    Properties:
+      DBClusterIdentifier: !Ref 'DbCluster'
+      DBInstanceClass: 'db.serverless'
+      Engine: 'aurora-postgresql'
+    Type: 'AWS::RDS::DBInstance'
+  # Security group for the database itself.
+  DbSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the database's security group, separated to eliminate
+  # circular dependencies with security group for users of the database.
+  DbSecurityGroupIngress:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupId: !Ref 'DbSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'DbUserSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Database subnet group.
+  DbSubnetGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      DBSubnetGroupDescription: !Ref 'AWS::StackName'
+      SubnetIds:
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
+    Type: 'AWS::RDS::DBSubnetGroup'
+  # Security group for users of the database.
+  DbUserSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'DbSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Association for private route table with each private subnet.
+  Fn::ForEach::PrivateRouteTableAssociation:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateRouteTableAssociation${Identifier}:
+      Properties:
+        RouteTableId: !Ref 'PrivateRouteTable'
+        SubnetId: !Ref
+          Fn::Sub:
+          - 'PrivateSubnet${Identifier}'
+          - Identifier: !Ref 'Identifier'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: 'TryProvisionRouteTables'
+      Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # A private subnet for each of the database availability zones.
+  Fn::ForEach::PrivateSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PrivateSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PrivateSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: false
+        VpcId: !Ref 'Vpc'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: 'TryProvisionVpc'
+      Type: 'AWS::EC2::Subnet'
+  # Association for public route table with each public subnet.
+  Fn::ForEach::PublicRouteTableAssociation:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PublicRouteTableAssociation${Identifier}:
+      Properties:
+        RouteTableId: !Ref 'PublicRouteTable'
+        SubnetId: !Ref
+          Fn::Sub:
+          - 'PublicSubnet${Identifier}'
+          - Identifier: !Ref 'Identifier'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: 'TryProvisionRouteTables'
+      Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # A public subnet for each availability zone.
+  Fn::ForEach::PublicSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PublicSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PublicSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PublicSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: true
+        VpcId: !Ref 'Vpc'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: 'TryProvisionVpc'
+      Type: 'AWS::EC2::Subnet'
+  # Internet gateway for the virtual private cloud.
+  InternetGateway:
+    Condition: 'TryProvisionStack'
+    Type: 'AWS::EC2::InternetGateway'
+  # Attachment of internet gateway to the virtual private cloud.
+  InternetGatewayAttachment:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      InternetGatewayId: !Ref 'InternetGateway'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+  # Network address translation gateway for the virtual private cloud.
+  NatGateway:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
+      SubnetId: !Ref 'PublicSubnetA'
+    Type: 'AWS::EC2::NatGateway'
+  # Elastic IP address for the network address translation gateway.
+  NatGatewayEip:
+    Condition: 'TryProvisionStack'
+    Properties:
+      Domain: 'vpc'
+    Type: 'AWS::EC2::EIP'
+  # Target group for application load balancer traffic to PostgREST.
+  PostgrestAlbTargetGroup:
+    Condition: 'TryProvisionAlb'
+    DependsOn: 'Alb'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/ready'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestHealthCheckPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-postgrest'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+      Protocol: 'HTTP'
+      ProtocolVersion: 'HTTP1'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'false'
+      - Key: 'load_balancing.algorithm.type'
+        Value: 'round_robin'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  # Scaling policy for PostgREST service.
+  PostgrestAutoScalingPolicy:
+    Condition: 'TryProvisionPostgrest'
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-postgrest'
+      PolicyType: 'TargetTrackingScaling'
+      ScalingTargetId: !Ref 'PostgrestAutoScalingTarget'
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
+        ScaleInCooldown: 300
+        ScaleOutCooldown: 60
+        TargetValue: 70
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+  # Scalable target for PostgREST service.
+  PostgrestAutoScalingTarget:
+    Condition: 'TryProvisionPostgrest'
+    Properties:
+      MaxCapacity: 5
+      MinCapacity: 1
+      ResourceId: !Join
+      - '/'
+      - - 'service'
+        - !Ref 'ContainerCluster'
+        - !GetAtt 'PostgrestRunner.Name'
+      RoleARN: !GetAtt 'ContainerScalingRole.Arn'
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: 'ecs'
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+  # Security group for PostgREST clients.
+  PostgrestClientSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'PostgrestServerSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Service for running PostgREST.
+  PostgrestRunner:
+    Condition: 'TryProvisionPostgrest'
+    DependsOn:
+    # Wait for both database instances to ensure cluster is fully available.
+    - 'DbInstancePrimary'
+    - 'DbInstanceReplica'
+    # Wait for processor to ensure that migrations have been run, so that the
+    # schema will be available and load balancer health checks will pass.
+    - 'ProcessorRunner'
+    # Proxy for a conditional dependency on the application load balancer
+    # listener, which associates the PostgREST target group with the balancer.
+    Metadata:
+      ConditionalDependencyProxy: !If
+      - 'TryProvisionAlb'
+      - !Ref 'AlbListener'
+      - ''
+    Properties:
+      Cluster: !Ref 'ContainerCluster'
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+      LaunchType: 'FARGATE'
+      LoadBalancers: !If
+      - 'TryProvisionAlb'
+      - - ContainerName: !Sub '${AWS::StackName}-postgrest'
+          ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+          TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+      - !Ref 'AWS::NoValue'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+          - !Ref 'DbUserSecurityGroup'
+          - !Ref 'PostgrestServerSecurityGroup'
+          - !Ref 'ContainerSecurityGroup'
+          Subnets:
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
+      ServiceRegistries:
+      - RegistryArn: !GetAtt 'PostgrestServiceDiscovery.Arn'
+      TaskDefinition: !Ref 'PostgrestTask'
+    Type: 'AWS::ECS::Service'
+  # Security group for the PostgREST server.
+  PostgrestServerSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the PostgREST server security group.
+  PostgrestServerSecurityGroupIngress:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupId: !Ref 'PostgrestServerSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'PostgrestClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Service discovery for PostgREST.
+  PostgrestServiceDiscovery:
+    Condition: 'TryProvisionPostgrest'
+    Properties:
+      DnsConfig:
+        DnsRecords:
+        - TTL: 10
+          Type: 'A'
+        RoutingPolicy: 'MULTIVALUE'
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: !Sub '${AWS::StackName}-postgrest'
+      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+    Type: 'AWS::ServiceDiscovery::Service'
+  # Task definition for PostgREST.
+  PostgrestTask:
+    Condition: 'TryProvisionPostgrest'
+    DependsOn: 'ContainerLogGroup'
+    Properties:
+      ContainerDefinitions:
+      - Environment:
+        - Name: 'PGRST_ADMIN_SERVER_PORT'
+          Value: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestHealthCheckPort'
+        - Name: 'PGRST_DB_URI'
+          Value: !Join
+          - ''
+          - - 'postgres://'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterPassword'
+            - '@'
+            # While the PostgREST endpoint is configured to support read-only
+            # operations, the PostgREST listener errors out when connected to
+            # a read replica because it relies on `LISTEN` and `NOTIFY`
+            # commands, which do not work on read replicas. Hence it is
+            # connected to the writer endpoint.
+            - !GetAtt 'DbCluster.Endpoint.Address'
+            - '/'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+        - Name: 'PGRST_DB_ANON_ROLE'
+          Value: 'web_anon'
+        - Name: 'PGRST_DB_MAX_ROWS'
+          Value: !Ref 'PostgrestMaxRows'
+        Image: 'postgrest/postgrest:latest'
+        LogConfiguration:
+          LogDriver: 'awslogs'
+          Options:
+            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: 'ecs'
+        Name: !Sub '${AWS::StackName}-postgrest'
+        PortMappings:
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestHealthCheckPort'
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestHealthCheckPort'
+      Cpu: '256'
+      ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
+      Family: !Ref 'AWS::StackName'
+      Memory: '512'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities:
+      - 'FARGATE'
+    Type: 'AWS::ECS::TaskDefinition'
+  # Route table for private subnets in the virtual private cloud.
+  PrivateRouteTable:
+    Condition: 'TryProvisionRouteTables'
+    Properties:
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::RouteTable'
+  # Route from private subnets through network address translation gateway.
+  PrivateRouteThroughNatGateway:
+    Condition: 'TryProvisionRouteTables'
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref 'NatGateway'
+      RouteTableId: !Ref 'PrivateRouteTable'
+    Type: 'AWS::EC2::Route'
+  # Private DNS namespace for internal service discovery.
+  PrivateServiceDiscoveryNamespace:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      Description: !Ref 'AWS::StackName'
+      Name: !Ref 'AWS::StackName'
+      Vpc: !Ref 'Vpc'
+    Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
+  # Security group for the processor's WebSocket server.
+  ProcessorPublisherSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the processor's WebSocket server security group.
+  ProcessorPublisherSecurityGroupIngress:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupId: !Ref 'ProcessorPublisherSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'ProcessorWsClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Service for running the processor.
+  ProcessorRunner:
+    Condition: 'TryProvisionProcessor'
+    # Pending instance creation, the cluster endpoint is defined but not
+    # available, so the service will not be able to connect to the database.
+    DependsOn:
+    - 'DbInstancePrimary'
+    - 'DbInstanceReplica'
+    Properties:
+      Cluster: !Ref 'ContainerCluster'
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+        MaximumPercent: 100
+        MinimumHealthyPercent: 0
+      DesiredCount: 1
+      LaunchType: 'FARGATE'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+          - !Ref 'ContainerSecurityGroup'
+          - !Ref 'DbUserSecurityGroup'
+          - !Ref 'ProcessorPublisherSecurityGroup'
+          Subnets:
+          - !Ref 'PrivateSubnetA'
+          - !Ref 'PrivateSubnetB'
+          - !Ref 'PrivateSubnetC'
+      ServiceRegistries:
+      - RegistryArn: !GetAtt 'ProcessorServiceDiscovery.Arn'
+      TaskDefinition: !Ref 'ProcessorTask'
+    Type: 'AWS::ECS::Service'
+  # Service discovery for the processor.
+  ProcessorServiceDiscovery:
+    Condition: 'TryProvisionProcessor'
+    Properties:
+      DnsConfig:
+        DnsRecords:
+        - TTL: 10
+          Type: 'A'
+        RoutingPolicy: 'MULTIVALUE'
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: !Sub '${AWS::StackName}-processor'
+      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+    Type: 'AWS::ServiceDiscovery::Service'
+  # Task definition for processor.
+  ProcessorTask:
+    Condition: 'TryProvisionProcessor'
+    DependsOn: 'ContainerLogGroup'
+    Properties:
+      ContainerDefinitions:
+      - Environment:
+        - Name: 'DATABASE_URL'
+          Value: !Join
+          - ''
+          - - 'postgres://'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+            - ':'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterPassword'
+            - '@'
+            - !GetAtt 'DbCluster.Endpoint.Address'
+            - '/'
+            - !FindInMap
+              - 'Constants'
+              - 'DatabaseConfig'
+              - 'MasterUsername'
+        - Name: 'GRPC_DATA_SERVICE_URL'
+          Value: !Sub
+          - '{{resolve:ssm:/GrpcDataServiceUrl/${Network}}}'
+          - Network: !Ref 'Network'
+        - Name: 'MINIMUM_STARTING_VERSION'
+          Value: !Sub
+          - '{{resolve:ssm:/Emojicoin/MinimumStartingVersion/${Network}}}'
+          - Network: !Ref 'Network'
+        - Name: 'EMOJICOIN_MODULE_ADDRESS'
+          Value: !Sub
+          - '{{resolve:ssm:/Emojicoin/ModuleAddress/${Network}}}'
+          - Network: !Ref 'Network'
+        - Name: 'WS_PORT'
+          Value: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ProcessorWebsocketPort'
+        HealthCheck:
+          Command:
+          - 'CMD'
+          - 'curl'
+          - '--fail'
+          - 'http://localhost:8084/metrics'
+          Interval: 5
+          Retries: 1
+          StartPeriod: 0
+          Timeout: 2
+        Image: !Join
+        - ''
+        - - 'econialabs/emojicoin-dot-fun-indexer-processor:'
+          - !Ref 'ProcessorImageVersion'
+        LogConfiguration:
+          LogDriver: 'awslogs'
+          Options:
+            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: 'ecs'
+        Name: !Sub '${AWS::StackName}-processor'
+        PortMappings:
+        - ContainerPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ProcessorWebsocketPort'
+          HostPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'ProcessorWebsocketPort'
+        RepositoryCredentials:
+          CredentialsParameter: !Join
+          - ''
+          - - 'arn:aws:secretsmanager:'
+            - !Ref 'AWS::Region'
+            - ':'
+            - !Ref 'AWS::AccountId'
+            - ':secret:DOCKER_AUTH_CONFIG'
+        Secrets:
+        - Name: 'GRPC_AUTH_TOKEN'
+          ValueFrom: !Sub
+          - 'arn:aws:secretsmanager:${Region}:${Account}:secret:${Secret}'
+          - Account: !Ref 'AWS::AccountId'
+            Region: !Ref 'AWS::Region'
+            Secret: 'GRPC_AUTH_TOKEN'
+      Cpu: '256'
+      ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
+      Family: !Ref 'AWS::StackName'
+      Memory: '512'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities:
+      - 'FARGATE'
+    Type: 'AWS::ECS::TaskDefinition'
+  # Security group for clients of the processor's WebSocket server.
+  ProcessorWsClientSecurityGroup:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'ProcessorPublisherSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Route table for public subnets in the virtual private cloud.
+  PublicRouteTable:
+    Condition: 'TryProvisionRouteTables'
+    Properties:
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::RouteTable'
+  # Route from public subnets through the internet gateway.
+  PublicRouteToInternet:
+    Condition: 'TryProvisionRouteTables'
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+      RouteTableId: !Ref 'PublicRouteTable'
+    Type: 'AWS::EC2::Route'
+  # Virtual private cloud for internal networking.
+  Vpc:
+    Condition: 'TryProvisionVpc'
+    Properties:
+      CidrBlock: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'VpcCidrBlock'
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+    Type: 'AWS::EC2::VPC'
+Transform: 'AWS::LanguageExtensions'
+...

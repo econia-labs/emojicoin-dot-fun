@@ -15,6 +15,7 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
   mobile?: boolean;
   onClick?: () => void;
   geoblocked: boolean;
+  arrow?: boolean;
 }
 
 const CONNECT_WALLET = "Connect Wallet";
@@ -25,6 +26,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   className,
   onClick,
   geoblocked,
+  arrow = true,
 }) => {
   const { connected, account } = useWallet();
   const { openWalletModal } = useWalletModal();
@@ -107,7 +109,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
               mobile={mobile}
             />
           </div>
-          <Arrow width={18} className="fill-black" />
+          {arrow && <Arrow width={18} className="fill-black" />}
         </div>
       </Button>
     ) : (
