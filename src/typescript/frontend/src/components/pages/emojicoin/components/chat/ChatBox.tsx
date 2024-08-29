@@ -9,7 +9,7 @@ import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
-import { useEventStore, useWebSocketClient } from "context/state-store-context";
+import { useEventStore, useNameStore, useWebSocketClient } from "context/state-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromChatEvent } from "lib/utils/get-user-rank";
@@ -137,6 +137,18 @@ const ChatBox = (props: ChatProps) => {
     [props.data.chats.length, chats.length]
   );
 
+  const addresses = sortedChats.map((chat) => chat.user);
+  const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
+
+  const sortedChatsWithNames = useMemo(() => {
+    const data = sortedChats.map((e) => ({
+      ...e,
+      user: nameResolver(e.user),
+    }));
+    return data;
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [nameResolver]);
+
   return (
     <Column className="relative" width="100%" flexGrow={1}>
       <Flex
@@ -150,7 +162,7 @@ const ChatBox = (props: ChatProps) => {
           layoutScroll
           className="flex flex-col-reverse w-full justify-center px-[21px] py-0 border-r border-solid border-r-dark-gray"
         >
-          {sortedChats.map((chat, index) => {
+          {sortedChatsWithNames.map((chat, index) => {
             const message = {
               // TODO: Resolve address to Aptos name, store in state.
               sender: chat.user,

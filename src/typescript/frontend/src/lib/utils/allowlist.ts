@@ -41,7 +41,7 @@ export async function isAllowListed(address: string): Promise<boolean> {
       }),
     })
       .then((r) => r.json())
-      .then((data) => data.data.campaign.whitelistInfo.usedCount === 1);
+      .then((data) => data.data.campaign && data.data.campaign.whitelistInfo.usedCount === 1);
     if (condition) {
       return true;
     }

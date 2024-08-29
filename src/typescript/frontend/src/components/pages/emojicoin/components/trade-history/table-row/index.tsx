@@ -6,7 +6,7 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import { toNominalPrice } from "@sdk/utils/nominal-price";
 import { ExplorerLink } from "components/link/component";
 import { darkColors } from "theme";
-import { truncateAddress } from "@sdk/utils";
+import { formatDisplayName } from "@sdk/utils";
 import "./table-row.css";
 import Text from "components/text";
 import Popup from "components/popup";
@@ -101,7 +101,7 @@ const TableRow = ({ item, showBorder }: TableRowDesktopProps) => {
                 " my-auto ml-auto mr-[20px]"
               }
             >
-              {"0x" + truncateAddress(item.swapper).substring(2).toUpperCase()}
+              {formatDisplayName(item.swapper)}
             </span>
           </ExplorerLink>
         </td>
