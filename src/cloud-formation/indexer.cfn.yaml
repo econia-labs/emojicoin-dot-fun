@@ -678,7 +678,7 @@ Resources:
     Type: 'AWS::ECS::Cluster'
   # Pull-through cache rule for Docker images from Docker Hub.
   ContainerImageCacheRule:
-    Condition: 'MaybeProvisionStack'
+    Condition: 'MaybeProvisionProcessor'
     Properties:
       CredentialArn: !Join
       - ''
@@ -1254,6 +1254,8 @@ Resources:
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
+    # Wait for the pull-through cache rule so the image can be pulled.
+    - 'ContainerImageCacheRule'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
