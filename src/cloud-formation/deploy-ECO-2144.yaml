@@ -5,7 +5,7 @@ parameters:
   MaybeProvisionAlb: 'false'
   MaybeProvisionAlbDnsRecord: 'false'
   MaybeProvisionBastionHost: 'false'
-  MaybeProvisionBroker: 'false'
+  MaybeProvisionBroker: 'true'
   MaybeProvisionDb: 'true'
   MaybeProvisionPostgrest: 'false'
   MaybeProvisionProcessor: 'true'

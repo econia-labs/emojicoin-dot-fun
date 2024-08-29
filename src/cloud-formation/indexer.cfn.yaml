@@ -718,6 +718,7 @@ Resources:
             - 'ecr:BatchGetImage'
             - 'ecr:GetAuthorizationToken'
             - 'ecr:GetDownloadUrlForLayer'
+            - 'ecr:CreateRepository'
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Effect: 'Allow'
