@@ -5,7 +5,7 @@ import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
 import { TableName } from "../types/snake-case-types";
 import { type Flatten } from "../../types";
-import { toAddress } from "../../utils";
+import { toAccountAddress } from "../../utils";
 import { postgrest } from "./client";
 
 type EnumLiteralType<T extends TableName> = T extends TableName ? `${T}` : never;
@@ -117,16 +117,15 @@ export function withQueryConfig<
 }
 
 /**
- * Normalizes an address for use in a query.
- *
- * Currently, it removes all leading zeroes from the address.
+ * Strip leading zeroes from an address.
  *
  * @param address either the account object, an account address, or a string.
  * @returns the address without any leading zeroes, still prefixed with "0x".
  *
  */
-export const normalizeAddressForQuery = <T extends Account>(address: T | AccountAddressInput) =>
+/* eslint-disable-next-line import/no-unused-modules */
+export const stripLeadingZeroes = <T extends Account>(address: T | AccountAddressInput) =>
   // prettier-ignore
-  toAddress(address)
-    .toString();
-// .replace(/^0x0+/, "0x");
+  toAccountAddress(address)
+    .toString()
+    .replace(/^0x0+/, "0x");

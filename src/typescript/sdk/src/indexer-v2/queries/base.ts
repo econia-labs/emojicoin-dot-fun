@@ -5,7 +5,6 @@ import { type Period } from "../../const";
 import { ORDER_BY } from "../../queries";
 import { type AnyNumberString } from "../../types";
 import { TableName } from "../types/snake-case-types";
-import { normalizeAddressForQuery } from "./utils";
 import { postgrest } from "./client";
 
 const selectSwapsByMarketID = ({ marketID }: { marketID: AnyNumberString }) =>
@@ -58,7 +57,7 @@ const selectUserLiquidityPools = ({ provider }: { provider: AccountAddressInput 
   postgrest
     .from(TableName.UserLiquidityPools)
     .select("*")
-    .eq("provider", normalizeAddressForQuery(provider))
+    .eq("provider", provider)
     .order("market_nonce", ORDER_BY.DESC);
 
 const selectMarket1MPeriodsInLastDay = ({ marketID }: { marketID: AnyNumberString }) =>

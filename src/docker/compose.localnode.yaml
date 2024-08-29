@@ -7,7 +7,7 @@ services:
       context: '../../'
       dockerfile: 'src/docker/aptos-node/Dockerfile'
       args:
-        PUBLISH_TYPE: '${PUBLISH_TYPE:-"compile"}'
+        PUBLISH_TYPE: '${PUBLISH_TYPE:-compile}'
         PUBLISHER_PK: '${PUBLISHER_PK}'
         BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
     environment:

@@ -6,12 +6,12 @@ import {
   type AccountAddressInput,
 } from "@aptos-labs/ts-sdk";
 
-export const normalizeAddress = (address: AccountAddressInput) =>
+export const standardizeAddress = (address: AccountAddressInput) =>
   AccountAddress.from(address).toString();
 
 type AnyAccount = Ed25519Account | SingleKeyAccount | SingleKeyAccount | Account;
 
-export const toAddress = (input: AnyAccount | AccountAddressInput) =>
+export const toAccountAddress = (input: AnyAccount | AccountAddressInput) =>
   AccountAddress.from(
     input instanceof Ed25519Account ||
       input instanceof SingleKeyAccount ||
@@ -20,3 +20,6 @@ export const toAddress = (input: AnyAccount | AccountAddressInput) =>
       ? input.accountAddress
       : input
   );
+
+export const toAccountAddressString = (input: AnyAccount | AccountAddressInput) =>
+  toAccountAddress(input).toString();

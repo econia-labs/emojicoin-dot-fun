@@ -9,7 +9,7 @@ import {
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { getPublishHelpers } from "../utils";
-import { normalizeAddress } from "../../src/utils/account-address";
+import { standardizeAddress } from "../../src/utils/account-address";
 import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(20000);
@@ -84,8 +84,8 @@ describe("registers a market successfully", () => {
     expect(marketID).toBeGreaterThanOrEqual(1n);
     expect(Hex.fromHexInput(emojiBytes).toString()).toEqual(`0x${emojis.join("")}`);
     expect(emojiBytes).toEqual(Hex.fromHexString(emojis.join("")).toUint8Array());
-    expect(normalizeAddress(extendRef.self)).toEqual(normalizeAddress(derivedNamedObjectAddress));
-    expect(normalizeAddress(extendRef.self)).toEqual(normalizeAddress(marketAddress));
+    expect(extendRef.self).toEqual(standardizeAddress(derivedNamedObjectAddress));
+    expect(extendRef.self).toEqual(standardizeAddress(marketAddress));
     expect(lpCoinSupply).toEqual(0n);
 
     const marketObjectResources = await aptos.getAccountModule({
