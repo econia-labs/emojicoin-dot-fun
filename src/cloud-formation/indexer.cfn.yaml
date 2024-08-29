@@ -702,7 +702,7 @@ Resources:
     Type: 'AWS::Logs::LogGroup'
   # Role with assorted permissions required to run containers.
   ContainerRole:
-    Condition: 'MaybeProvisionStack'
+    Condition: 'MaybeProvisionProcessor'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
