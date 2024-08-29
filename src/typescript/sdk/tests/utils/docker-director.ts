@@ -51,23 +51,15 @@ export class DockerDirector {
 
   public publishType: "json" | "compile";
 
-  public skipJSONCompilation: boolean;
-
   constructor(args: {
     container: ContainerName;
     removeContainersOnStart: boolean;
-    skipJSONCompilation?: boolean;
     publishType?: "json" | "compile";
   }) {
-    const { container, removeContainersOnStart, publishType, skipJSONCompilation } = args;
+    const { container, removeContainersOnStart, publishType } = args;
     this.container = container;
     this.removeContainersOnStart = removeContainersOnStart;
     this.publishType = publishType || "compile";
-
-    if (skipJSONCompilation && publishType !== "json") {
-      throw new Error("You can only skip compilation if if publishType is set to `--json`");
-    }
-    this.skipJSONCompilation = skipJSONCompilation || false;
   }
 
   /**
@@ -108,7 +100,6 @@ export class DockerDirector {
       "--start",
       this.container === "docker-frontend-1" ? "" : "--no-frontend",
       this.publishType === "json" ? "--json" : "--compile",
-      this.skipJSONCompilation ? "--no-compile" : "",
     ].filter((arg) => arg !== "");
 
     const childProcess = spawn(command, args);

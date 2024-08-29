@@ -210,14 +210,14 @@ export const truncateANSName = (input: string, numChars: number = 4): string => 
 };
 
 /**
-  * Takes an address or a name and formats it accordingly.
-  */
+ * Takes an address or a name and formats it accordingly.
+ */
 export const formatDisplayName = (input: string) => {
   if (AccountAddress.isValid({ input, strict: false }).valid) {
     return `0x${truncateAddress(input).substring(2).toUpperCase()}`;
   }
   return truncateANSName(input);
-}
+};
 
 export class Lazy<T> {
   generator: () => T;

@@ -22,6 +22,21 @@ jobs:
         --compile
       shell: 'bash'
     - uses: './.github/actions/ts-run-tests'
+
+    # Add a tmate debugging session if the previous step fails.
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      if: failure()
+      with:
+        limit-access-to-actor: true
+
+    # Add a manual trigger for a tmate session.
+    - name: Setup tmate session (manual trigger)
+      uses: mxschmitt/action-tmate@v3
+      if: github.event_name == 'workflow_dispatch'
+      with:
+        limit-access-to-actor: true
+
 name: 'Run the TypeScript E2E and unit tests with a local testnet'
 'on':
   pull_request: null

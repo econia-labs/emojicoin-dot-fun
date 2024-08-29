@@ -1,11 +1,12 @@
 import "server-only";
 
-import { type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import { type Account } from "@aptos-labs/ts-sdk";
 import { type Period } from "../../const";
 import { ORDER_BY } from "../../queries";
 import { type AnyNumberString } from "../../types";
 import { TableName } from "../types/snake-case-types";
 import { postgrest } from "./client";
+import { toAccountAddressString } from "../../utils";
 
 const selectSwapsByMarketID = ({ marketID }: { marketID: AnyNumberString }) =>
   postgrest
@@ -53,11 +54,11 @@ const selectMarketsPostBondingCurve = () =>
 const selectUniqueMarkets = () =>
   postgrest.from(TableName.MarketLatestStateEvent).select("market_id");
 
-const selectUserLiquidityPools = ({ provider }: { provider: AccountAddressInput }) =>
+const selectUserLiquidityPools = ({ provider }: { provider: Account }) =>
   postgrest
     .from(TableName.UserLiquidityPools)
     .select("*")
-    .eq("provider", provider)
+    .eq("provider", toAccountAddressString(provider))
     .order("market_nonce", ORDER_BY.DESC);
 
 const selectMarket1MPeriodsInLastDay = ({ marketID }: { marketID: AnyNumberString }) =>

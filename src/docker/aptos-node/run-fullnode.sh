@@ -39,16 +39,16 @@ export PUBLISHER="publisher"
 export BIG_MONEY_GUY="big_money_guy"
 
 aptos init --profile $PUBLISHER \
-	--rest-url http://host.docker.internal:8080/v1 \
-	--faucet-url http://host.docker.internal:8081 \
+	--rest-url http://localhost:8080/v1 \
+	--faucet-url http://localhost:8081 \
 	--private-key $PUBLISHER_PK \
 	--encoding hex \
 	--assume-yes \
 	--network custom
 
 aptos init --profile $BIG_MONEY_GUY \
-	--rest-url http://host.docker.internal:8080/v1 \
-	--faucet-url http://host.docker.internal:8081 \
+	--rest-url http://localhost:8080/v1 \
+	--faucet-url http://localhost:8081 \
 	--private-key $BIG_MONEY_GUY_PK \
 	--encoding hex \
 	--assume-yes \
