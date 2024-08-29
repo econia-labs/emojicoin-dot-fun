@@ -1230,11 +1230,17 @@ Resources:
   # Service for running the processor.
   ProcessorRunner:
     Condition: 'MaybeProvisionProcessor'
+    DependsOn:
     # Pending instance creation, the cluster endpoint is defined but not
     # available, so the service will not be able to connect to the database.
-    DependsOn:
     - 'DbInstancePrimary'
     - 'DbInstanceReplica'
+    # Wait until there is an outbound route to get the image from the
+    # pullthrough cache.
+    - 'PrivateRouteTableAssociationA'
+    - 'PrivateRouteTableAssociationB'
+    - 'PrivateRouteTableAssociationC'
+    - 'PrivateRouteThroughNatGateway'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
