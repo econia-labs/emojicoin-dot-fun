@@ -12,11 +12,12 @@ import {
 import React, { useMemo, useState } from "react";
 import { User, Copy, LogOut } from "lucide-react";
 import { translationFunction } from "context/language-context";
-import { truncateAddress } from "@sdk/utils/misc";
+import { formatDisplayName } from "@sdk/utils/misc";
 import { useScramble } from "use-scramble";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { WalletDropdownItem } from "./WalletDropdownItem";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { useNameStore } from "context/state-store-context";
 
 const WIDTH = "24ch";
 
@@ -26,13 +27,17 @@ const WalletDropdownMenu = () => {
   const { copyAddress } = useAptos();
   const [enabled, setEnabled] = useState(true);
 
+  const nameResolver = useNameStore((s) =>
+    s.getResolverWithNames(account?.address ? [account.address] : [])
+  );
+
   const text = useMemo(() => {
     if (account) {
-      return truncateAddress(account.address);
+      return formatDisplayName(nameResolver(account.address));
     } else {
       return t("Connected");
     }
-  }, [account, t]);
+  }, [account, t, nameResolver]);
 
   const { ref, replay } = useScramble({
     text: text.startsWith("0x") ? `0x${text.slice(2).toUpperCase()}` : text.toUpperCase(),
@@ -45,7 +50,7 @@ const WalletDropdownMenu = () => {
   });
 
   const width = useMemo(() => {
-    return `${text.length}ch`;
+    return `${text.length + 1}ch`;
   }, [text]);
 
   const handleReplay = (enabled: boolean, replay: () => void) => {

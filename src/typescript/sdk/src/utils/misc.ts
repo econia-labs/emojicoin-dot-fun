@@ -1,4 +1,4 @@
-import { type HexInput } from "@aptos-labs/ts-sdk";
+import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import { type CandlestickResolution, toCandlestickResolution } from "../const";
 import { normalizeHex } from "./hex";
@@ -171,8 +171,29 @@ export const truncateAddress = (input: HexInput, numChars: number = 4): string =
     s = input;
   }
   const res = normalizeHex(s);
-  return `${res.substring(0, numChars + 2)}...${res.substring(res.length - numChars, res.length)}`;
+  const start = res.substring(0, numChars + 2);
+  const end = res.substring(res.length - numChars, res.length);
+  return `${start}...${end}`;
 };
+
+export const truncateANSName = (input: string, numChars: number = 4): string => {
+  if (input.length > 11) {
+    const start = input.substring(0, numChars);
+    const end = input.substring(input.length - numChars, input.length);
+    return `${start}...${end}`;
+  }
+  return input;
+};
+
+/**
+  * Takes an address or a name and formats it accordingly.
+  */
+export const formatDisplayName = (input: string) => {
+  if (AccountAddress.isValid({ input, strict: false }).valid) {
+    return `0x${truncateAddress(input).substring(2).toUpperCase()}`;
+  }
+  return truncateANSName(input);
+}
 
 export class Lazy<T> {
   generator: () => T;

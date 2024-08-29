@@ -42,6 +42,7 @@ voluptates
 webclip
 KIKI
 unfmt
+LOCALSTORAGE
 geoblocking
 geoblocked
 ipinfo
