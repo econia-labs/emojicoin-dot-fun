@@ -27,10 +27,6 @@ export const getDefaultMetadata = (): Metadata => {
     alternates: {
       canonical: "/",
     },
-    authors: {
-      name: "Econia Labs",
-      url: "https://econialabs.com",
-    },
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
     keywords: "aptos, tokens, emoji, emojicoins",
