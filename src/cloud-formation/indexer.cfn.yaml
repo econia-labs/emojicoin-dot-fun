@@ -720,6 +720,8 @@ Resources:
           - Action:
             - 'ecr:BatchCheckLayerAvailability'
             - 'ecr:BatchGetImage'
+            - 'ecr:BatchImportUpstreamImage'
+            - 'ecr:CreateRepository'
             - 'ecr:CompleteLayerUpload'
             - 'ecr:DescribeImages'
             - 'ecr:DescribeRepositories'
