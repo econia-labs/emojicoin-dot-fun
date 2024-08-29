@@ -2,7 +2,7 @@ import React, { type PropsWithChildren, useEffect, useMemo, useRef } from "react
 
 import { type TradeHistoryProps } from "../../types";
 import { getRankFromSwapEvent } from "lib/utils/get-user-rank";
-import { useEventStore, useWebSocketClient } from "context/state-store-context";
+import { useEventStore, useNameStore, useWebSocketClient } from "context/state-store-context";
 import { type Types } from "@sdk/types/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import TableRow from "./table-row";
@@ -81,6 +81,18 @@ const TradeHistory = (props: TradeHistoryProps) => {
     [props.data.swaps.length, swaps.length]
   );
 
+  const addresses = sortedSwaps.map((swap) => swap.swapper);
+  const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
+
+  const sortedSwapsWithNames = useMemo(() => {
+    const data = sortedSwaps.map((e) => ({
+      ...e,
+      swapper: nameResolver(e.swapper),
+    }));
+    return data;
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [nameResolver]);
+
   return (
     <table className="relative flex flex-col table-fixed w-full">
       <thead className="relative w-full border-solid border-b-[1px] border-b-dark-gray">
@@ -112,7 +124,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
         layoutScroll
         className="flex flex-col overflow-auto scrollbar-track w-full h-[340px] overflow-x-hidden"
       >
-        {sortedSwaps.map((item, index) => (
+        {sortedSwapsWithNames.map((item, index) => (
           <TableRow
             // Note the key/index must be in reverse for the rows to animate correctly.
             key={sortedSwaps.length - index}
