@@ -25,10 +25,13 @@ interface ContainerStatus {
 
 async function getDockerContainerStatus(name: ContainerName): Promise<ContainerStatus> {
   try {
-    const { stdout } = await execPromise(
+    const { stdout, stderr } = await execPromise(
       `docker inspect -f '{{.State.Running}},{{.State.Health.Status}}' ${name}`
     );
     const [running, health] = stdout.trim().split(",");
+    console.log(`Container ${name} is running: ${running}, is healthy: ${health}`);
+    console.log(stdout);
+    console.error(stderr);
     return {
       isRunning: running === "true",
       isHealthy: health === "healthy",

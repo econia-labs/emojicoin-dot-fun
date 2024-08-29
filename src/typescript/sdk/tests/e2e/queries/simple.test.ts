@@ -52,7 +52,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
 
   it("performs a simple swap fetch accurately", async () => {
     const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromNames({
-      registrant,
+      registrant: swapper,
       emojiNames: marketEmojiNames[1],
     });
     const res = await Swap.submit({
@@ -79,7 +79,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
   it("performs a simple chat fetch accurately", async () => {
     const { marketAddress, emojicoin, emojicoinLP, emojis } =
       await TestHelpers.registerMarketFromNames({
-        registrant,
+        registrant: user,
         emojiNames: marketEmojiNames[2],
       });
 
@@ -103,7 +103,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
 
   it("performs a simple liquidity fetch accurately", async () => {
     const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromNames({
-      registrant,
+      registrant: provider,
       emojiNames: marketEmojiNames[3],
     });
 

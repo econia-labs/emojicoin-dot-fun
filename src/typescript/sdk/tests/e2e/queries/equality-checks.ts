@@ -29,6 +29,7 @@ import {
   calculateTvlGrowth,
   getEvents,
   getMarketResourceFromWriteSet,
+  standardizeAddress,
   Period,
   toPeriodFromContract,
   type Types,
@@ -80,7 +81,7 @@ export const compareTransactionMetadata = <T extends Indexer["TransactionMetadat
       row.transaction.entryFunction,
       (response.payload as EntryFunctionPayloadResponse).function,
     ],
-    ["row.transaction.sender", row.transaction.sender, response.sender],
+    ["row.transaction.sender", row.transaction.sender, standardizeAddress(response.sender)],
     ["row.transaction.version", row.transaction.version, BigInt(response.version)],
     ["row.transaction.time", row.transaction.time, BigInt(response.timestamp)],
   ]);

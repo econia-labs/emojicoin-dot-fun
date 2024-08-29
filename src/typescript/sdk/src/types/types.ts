@@ -3,7 +3,7 @@ import { type AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
-import { normalizeAddress } from "../utils/account-address";
+import { standardizeAddress } from "../utils/account-address";
 import {
   type Trigger,
   type EMOJICOIN_DOT_FUN_MODULE_NAME,
@@ -328,7 +328,7 @@ export namespace Types {
 }
 
 export const toExtendRef = (data: JSONTypes.ExtendRef): Types.ExtendRef => ({
-  self: data.self,
+  self: standardizeAddress(data.self),
 });
 
 export const toSequenceInfo = (data: JSONTypes.SequenceInfo): Types.SequenceInfo => ({
@@ -369,13 +369,13 @@ export const toPeriodicStateTracker = (
 });
 
 export const toRegistryAddress = (data: JSONTypes.RegistryAddress): Types.RegistryAddress => ({
-  registryAddress: normalizeAddress(data.registry_address),
+  registryAddress: standardizeAddress(data.registry_address),
 });
 
 const strToBigInt = (data: string): bigint => BigInt(data);
 
 export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView => ({
-  registryAddress: normalizeAddress(data.registry_address),
+  registryAddress: standardizeAddress(data.registry_address),
   nonce: fromAggregatorSnapshot(data.nonce, strToBigInt),
   lastBumpTime: BigInt(data.last_bump_time),
   numMarkets: BigInt(data.n_markets),
@@ -391,7 +391,7 @@ export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView
 
 export const toMarketMetadata = (data: JSONTypes.MarketMetadata): Types.MarketMetadata => ({
   marketID: BigInt(data.market_id),
-  marketAddress: normalizeAddress(data.market_address),
+  marketAddress: standardizeAddress(data.market_address),
   emojiBytes: hexToBytes(
     data.emoji_bytes.startsWith("0x") ? data.emoji_bytes.slice(2) : data.emoji_bytes
   ),
@@ -477,10 +477,10 @@ export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.S
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
-  swapper: data.swapper,
+  swapper: standardizeAddress(data.swapper),
   inputAmount: BigInt(data.input_amount),
   isSell: data.is_sell,
-  integrator: data.integrator,
+  integrator: standardizeAddress(data.integrator),
   integratorFeeRateBPs: Number(data.integrator_fee_rate_bps),
   netProceeds: BigInt(data.net_proceeds),
   baseVolume: BigInt(data.base_volume),
@@ -504,7 +504,7 @@ export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.C
   marketMetadata: toMarketMetadata(data.market_metadata),
   emitTime: BigInt(data.emit_time),
   emitMarketNonce: BigInt(data.emit_market_nonce),
-  user: normalizeAddress(data.user),
+  user: standardizeAddress(data.user),
   message: data.message,
   userEmojicoinBalance: BigInt(data.user_emojicoin_balance),
   circulatingSupply: BigInt(data.circulating_supply),
@@ -522,8 +522,8 @@ export const toMarketRegistrationEvent = (
   version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   time: BigInt(data.time),
-  registrant: normalizeAddress(data.registrant),
-  integrator: normalizeAddress(data.integrator),
+  registrant: standardizeAddress(data.registrant),
+  integrator: standardizeAddress(data.integrator),
   integratorFee: BigInt(data.integrator_fee),
   guid: `MarketRegistration::${data.market_metadata.market_id}`,
   marketID: BigInt(data.market_metadata.market_id),
@@ -605,7 +605,7 @@ export const toLiquidityEvent = (
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
-  provider: data.provider,
+  provider: standardizeAddress(data.provider),
   baseAmount: BigInt(data.base_amount),
   quoteAmount: BigInt(data.quote_amount),
   lpCoinAmount: BigInt(data.lp_coin_amount),
@@ -632,7 +632,7 @@ export const toPeriodicStateView = (
 
 export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDataView => ({
   marketID: Number(data.market_id),
-  marketAddress: normalizeAddress(data.market_address),
+  marketAddress: standardizeAddress(data.market_address),
   marketCap: Number(data.market_cap),
   bumpTime: Number(data.bump_time),
   version: Number(data.transaction_version),
@@ -651,7 +651,7 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
 });
 
 export const toRegistrantGracePeriodFlag = (data: JSONTypes.RegistrantGracePeriodFlag) => ({
-  marketRegistrant: normalizeAddress(data.market_registrant),
+  marketRegistrant: standardizeAddress(data.market_registrant),
   marketRegistrationTime: BigInt(data.market_registration_time),
 });
 
