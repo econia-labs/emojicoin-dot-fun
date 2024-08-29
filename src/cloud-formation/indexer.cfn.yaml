@@ -718,6 +718,12 @@ Resources:
       - PolicyDocument:
           Statement:
           - Action:
+            - 'ecr:GetAuthorizationToken'
+            - 'ecr:BatchCheckLayerAvailability'
+            - 'ecr:InitiateLayerUpload'
+            - 'ecr:UploadLayerPart'
+            - 'ecr:CompleteLayerUpload'
+            - 'ecr:PutImage'
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Effect: 'Allow'
@@ -736,6 +742,13 @@ Resources:
                 - ':'
                 - !Ref 'AWS::AccountId'
                 - ':secret:emojicoin/grpc-auth-token-*'
+            - !Join
+              - ''
+              - - 'arn:aws:secretsmanager:'
+                - !Ref 'AWS::Region'
+                - ':'
+                - !Ref 'AWS::AccountId'
+                - ':secret:ecr-pullthroughcache/emojicoin/docker-hub-*'
         PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
   # Role for container service auto scaling.
