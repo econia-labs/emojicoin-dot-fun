@@ -767,18 +767,19 @@ Resources:
             - 'ecr:PutImage'
             - 'ecr:UploadLayerPart'
             Effect: 'Allow'
-            Resource: !Join
-            - ''
-            - - 'arn:aws:ecr:'
-              - !Ref 'AWS::Region'
-              - ':'
-              - !Ref 'AWS::AccountId'
-              - ':repository:'
-              - !FindInMap
-                - 'Constants'
-                - 'ImageCache'
-                - 'RepositoryPrefix'
-              - '/*'
+            Resource: '*'
+            # !Join
+            # - ''
+            # - - 'arn:aws:ecr:'
+            #   - !Ref 'AWS::Region'
+            #   - ':'
+            #   - !Ref 'AWS::AccountId'
+            #   - ':repository:'
+            #   - !FindInMap
+            #     - 'Constants'
+            #     - 'ImageCache'
+            #     - 'RepositoryPrefix'
+            #   - '/*'
           - Action:
             - 'ecr:GetAuthorizationToken'
             Effect: 'Allow'
