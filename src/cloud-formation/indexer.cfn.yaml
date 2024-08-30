@@ -767,10 +767,11 @@ Resources:
             Effect: 'Allow'
             Resource: !Join
             - ''
-            - - !Ref 'AWS::AccountId'
-              - '.dkr.ecr.'
+            - - 'arn:aws:ecr:'
               - !Ref 'AWS::Region'
-              - '.amazonaws.com/'
+              - ':'
+              - !Ref 'AWS::AccountId'
+              - ':repository:'
               - !FindInMap
                 - 'Constants'
                 - 'ImageCache'
