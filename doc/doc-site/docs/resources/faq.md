@@ -15,7 +15,8 @@ caught the emojicoin bug.*
 
 **Q: What is the cost to launch an Emojicoin?**
 
-A:  1 APT
+A: 1 APT, plus a 4 APT deposit that is automatically refunded after the market
+exits the bonding curve
 
 <!-- markdownlint-disable MD013 -->
 
@@ -23,7 +24,7 @@ A:  1 APT
 
 <!-- markdownlint-enable MD013 -->
 
-A:  4,500 APT
+A: 4,500 APT
 
 <!-- markdownlint-disable MD013 -->
 
@@ -31,7 +32,7 @@ A:  4,500 APT
 
 <!-- markdownlint-enable MD013 -->
 
-A:  1,000 APT
+A: 1,000 APT
 
 <!-- markdownlint-disable MD013 -->
 
@@ -39,7 +40,7 @@ A:  1,000 APT
 
 <!-- markdownlint-enable MD013 -->
 
-A:  No, once a particular emojicoin trading pair is launched, you cannot launch
+A: No, once a particular emojicoin trading pair is launched, you cannot launch
 another. But emoji combinations are supportive, so get creative!
 
 **Q: Are emojicoins the future?**

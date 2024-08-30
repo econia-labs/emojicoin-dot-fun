@@ -15,7 +15,8 @@ import { type MessageContainerProps } from "./types";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { normalizeAddress, truncateAddress } from "@sdk/utils";
+import { formatDisplayName } from "@sdk/utils";
+import { useNameStore } from "context/state-store-context";
 import { motion } from "framer-motion";
 
 const MessageContainer: React.FC<MessageContainerProps> = ({
@@ -25,14 +26,17 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
 }) => {
   const { account } = useAptos();
   const [fromAnotherUser, setFromAnotherUser] = useState(true);
+  const nameResolver = useNameStore((s) =>
+    s.getResolverWithNames(account?.address ? [account.address] : [])
+  );
   useEffect(() => {
     if (!account) {
       setFromAnotherUser(true);
       return;
     }
-    const normalized = normalizeAddress(account.address);
-    setFromAnotherUser(normalized !== message.sender);
-  }, [account, fromAnotherUser, message]);
+    const selfName = nameResolver(account.address);
+    setFromAnotherUser(selfName !== message.sender);
+  }, [account, fromAnotherUser, message, nameResolver]);
 
   return (
     <motion.div
@@ -62,7 +66,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
                 href={toExplorerLink({ value: message.version, linkType: "version" })}
               >
                 <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
-                  {truncateAddress(message.sender)}
+                  {formatDisplayName(message.sender)}
                 </Text>
               </a>
 

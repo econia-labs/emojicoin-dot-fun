@@ -18,8 +18,8 @@
       "type": "image/png"
     }
   ],
-  "name": "Econia labs",
-  "short_name": "Econia labs",
-  "start_url": ".",
+  "name": "emojicoin.fun",
+  "short_name": "Emojicoin",
+  "start_url": "../",
   "theme_color": "#000000"
 }
