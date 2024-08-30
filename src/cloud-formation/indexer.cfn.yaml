@@ -70,7 +70,7 @@ Mappings:
       MasterPassword: 'emojicoin'
       MasterUsername: 'emojicoin'
     ImageCache:
-      RepositoryPrefix: 'docker-hub'
+      RepositoryPrefix: 'emojicoin'
     Logging:
       Prefix: 'emojicoin'
     Networking:
