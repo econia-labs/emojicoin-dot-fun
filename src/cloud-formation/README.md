@@ -188,14 +188,14 @@ several prohibitive issues in practice:
            "iam:GetRole",
            "iam:PutRolePolicy",
            "iam:RemoveRoleFromInstanceProfile",
-           "iam:TagRole",
+           "iam:TagRole"
          ],
          "Resource": "*"
        },
        {
          "Effect": "Allow",
          "Action": [
-           "iam:PassRole",
+           "iam:PassRole"
          ],
          "Resource": "arn:aws:iam::*:role/EmojicoinContainerRole*"
        }
@@ -357,7 +357,8 @@ It also includes the [AmazonEC2ContainerServiceAutoscaleRole], which is required
 for [application autoscaling IAM access].
 
 For ease of accessing the various services required to deploy the indexer,
-[`CloudFormationPowerUser`](#setup) is more permissive, though notably
+[`CloudFormationPowerUser`](#setup) is more permissive, though notably it
+restricts [role passing] to the `ContainerRole`.
 
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
@@ -394,6 +395,7 @@ For ease of accessing the various services required to deploy the indexer,
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
 [resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+[role passing]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_passrole.html
 [rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
 [secrets manager secrets]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html
 [stack]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html
