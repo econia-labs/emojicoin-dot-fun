@@ -19,7 +19,7 @@ services:
       test: ['CMD', 'curl', '-f', 'http://localhost:${BROKER_PORT}/']
       interval: '2m'
       timeout: '5s'
-      retries: '1'
+      retries: '2'
       start_period: '10s'
       start_interval: '2s'
     ports:
