@@ -3,57 +3,64 @@
 # cspell:word awsvpc
 # cspell:word fargate
 # cspell:word multivalue
+# cspell:word pullthroughcache
 ---
 Conditions:
-  TryProvisionAlb: !And
-  - !Condition 'TryProvisionVpc'
+  MaybeDeployAlb: !And
+  - !Condition 'MaybeDeployVpc'
   - !Equals
-    - !Ref 'TryProvisionAlb'
+    - !Ref 'MaybeDeployAlb'
     - 'true'
-  TryProvisionAlbDnsRecord: !And
-  - !Condition 'TryProvisionAlb'
+  MaybeDeployAlbDnsRecord: !And
+  - !Condition 'MaybeDeployAlb'
   - !Equals
-    - !Ref 'TryProvisionAlbDnsRecord'
+    - !Ref 'MaybeDeployAlbDnsRecord'
     - 'true'
-  TryProvisionBastionHost: !And
-  - !Condition 'TryProvisionDb'
+  MaybeDeployBastionHost: !And
+  - !Condition 'MaybeDeployDb'
   - !Equals
-    - !Ref 'TryProvisionBastionHost'
+    - !Ref 'MaybeDeployBastionHost'
     - 'true'
-  TryProvisionBroker: !And
-  - !Condition 'TryProvisionProcessor'
+  MaybeDeployBroker: !And
+  - !Condition 'MaybeDeployContainers'
+  - !Condition 'MaybeDeployProcessor'
   - !Equals
-    - !Ref 'TryProvisionBroker'
+    - !Ref 'MaybeDeployBroker'
     - 'true'
-  TryProvisionDb: !And
-  - !Condition 'TryProvisionVpc'
+  MaybeDeployContainers: !And
+  - !Condition 'MaybeDeployDb'
+  - !Condition 'MaybeDeployRouteTables'
   - !Equals
-    - !Ref 'TryProvisionDb'
+    - !Ref 'MaybeDeployContainers'
     - 'true'
-  TryProvisionPostgrest: !And
-  - !Condition 'TryProvisionDb'
-  - !Condition 'TryProvisionProcessor'
-  - !Condition 'TryProvisionVpc'
+  MaybeDeployDb: !And
+  - !Condition 'MaybeDeployVpc'
   - !Equals
-    - !Ref 'TryProvisionPostgrest'
+    - !Ref 'MaybeDeployDb'
     - 'true'
-  TryProvisionProcessor: !And
-  - !Condition 'TryProvisionDb'
+  MaybeDeployPostgrest: !And
+  - !Condition 'MaybeDeployContainers'
+  - !Condition 'MaybeDeployProcessor'
   - !Equals
-    - !Ref 'TryProvisionProcessor'
+    - !Ref 'MaybeDeployPostgrest'
     - 'true'
-  TryProvisionRouteTables: !And
-  - !Condition 'TryProvisionVpc'
+  MaybeDeployProcessor: !And
+  - !Condition 'MaybeDeployContainers'
   - !Equals
-    - !Ref 'TryProvisionRouteTables'
+    - !Ref 'MaybeDeployProcessor'
     - 'true'
-  TryProvisionStack: !Equals
-  - !Ref 'TryProvisionStack'
+  MaybeDeployRouteTables: !And
+  - !Condition 'MaybeDeployVpc'
+  - !Equals
+    - !Ref 'MaybeDeployRouteTables'
+    - 'true'
+  MaybeDeployStack: !Equals
+  - !Ref 'MaybeDeployStack'
   - 'true'
-  TryProvisionVpc: !And
-  - !Condition 'TryProvisionStack'
+  MaybeDeployVpc: !And
+  - !Condition 'MaybeDeployStack'
   - !Equals
-    - !Ref 'TryProvisionVpc'
+    - !Ref 'MaybeDeployVpc'
     - 'true'
 Mappings:
   Constants:
@@ -63,12 +70,17 @@ Mappings:
       DatabaseName: 'emojicoin'
       MasterPassword: 'emojicoin'
       MasterUsername: 'emojicoin'
+    ImageCache:
+      RepositoryPrefix: 'emojicoin'
+    Logging:
+      Prefix: 'emojicoin'
     Networking:
       BrokerPort: 3009
       DatabasePort: 5432
       DnsNameHostedZoneId:
-        '{{resolve:ssm:/Emojicoin/IndexerDnsName/HostedZoneId}}'
-      DnsNameRootDomain: '{{resolve:ssm:/Emojicoin/IndexerDnsName/RootDomain}}'
+        '{{resolve:ssm:/emojicoin/indexer-dns-name/hosted-zone-id}}'
+      DnsNameRootDomain:
+        '{{resolve:ssm:/emojicoin/indexer-dns-name/root-domain}}'
       DnsNameSubdomain: 'data'
       PostgrestHealthCheckPort: 3001
       PostgrestPort: 3000
@@ -100,11 +112,11 @@ Mappings:
       CidrBlock: '10.0.6.0/24'
 Outputs:
   BastionHostId:
-    Condition: 'TryProvisionBastionHost'
+    Condition: 'MaybeDeployBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
   DnsName:
-    Condition: 'TryProvisionAlbDnsRecord'
+    Condition: 'MaybeDeployAlbDnsRecord'
     Value: !Sub
     - '${Environment}.${Subdomain}.${RootDomain}'
     - RootDomain: !FindInMap
@@ -129,70 +141,78 @@ Parameters:
     Type: 'Number'
   Environment:
     Type: 'String'
+  MaybeDeployAlb:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployAlbDnsRecord:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployBastionHost:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployBroker:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployContainers:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployDb:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployPostgrest:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployProcessor:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployRouteTables:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployStack:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployVpc:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
   Network:
     AllowedValues:
-    - 'Mainnet'
-    - 'Testnet'
+    - 'mainnet'
+    - 'testnet'
+    Type: 'String'
+  PostgrestImageVersion:
+    Default: 'v12.2.3'
     Type: 'String'
   PostgrestMaxRows:
     Default: 500
     Type: 'Number'
   ProcessorImageVersion:
     Type: 'String'
-  TryProvisionAlb:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionAlbDnsRecord:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionBastionHost:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionBroker:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionDb:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionPostgrest:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionProcessor:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionRouteTables:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionStack:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  TryProvisionVpc:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
 Resources:
   # Public application load balancer.
   Alb:
-    Condition: 'TryProvisionAlb'
+    Condition: 'MaybeDeployAlb'
     Properties:
       LoadBalancerAttributes:
       - Key: 'load_balancing.cross_zone.enabled'
@@ -200,8 +220,14 @@ Resources:
       Scheme: 'internet-facing'
       SecurityGroups:
       - !Ref 'AlbSecurityGroup'
-      - !Ref 'BrokerWsClientSecurityGroup'
-      - !Ref 'PostgrestClientSecurityGroup'
+      - !If
+        - 'MaybeDeployBroker'
+        - !Ref 'BrokerWsClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
+      - !If
+        - 'MaybeDeployPostgrest'
+        - !Ref 'PostgrestClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
       Subnets:
       - !Ref 'PublicSubnetA'
       - !Ref 'PublicSubnetB'
@@ -210,7 +236,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
   # DNS certificate for the application load balancer.
   AlbCertificate:
-    Condition: 'TryProvisionAlb'
+    Condition: 'MaybeDeployAlb'
     Properties:
       DomainName: !Sub
       - '${Environment}.${Subdomain}.${RootDomain}'
@@ -241,7 +267,7 @@ Resources:
     Type: 'AWS::CertificateManager::Certificate'
   # DNS record for the broker's application load balancer.
   AlbDnsRecord:
-    Condition: 'TryProvisionAlbDnsRecord'
+    Condition: 'MaybeDeployAlbDnsRecord'
     Properties:
       AliasTarget:
         DNSName: !GetAtt 'Alb.DNSName'
@@ -264,7 +290,7 @@ Resources:
     Type: 'AWS::Route53::RecordSet'
   # Application load balancer listener.
   AlbListener:
-    Condition: 'TryProvisionAlb'
+    Condition: 'MaybeDeployAlb'
     Properties:
       Certificates:
       - CertificateArn: !Ref 'AlbCertificate'
@@ -277,7 +303,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Application load balancer listener rule for broker traffic.
   AlbListenerRuleBrokerTarget:
-    Condition: 'TryProvisionAlb'
+    Condition: 'MaybeDeployAlb'
     Properties:
       Actions:
       - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
@@ -291,7 +317,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployAlb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupIngress:
@@ -303,7 +329,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Minimal VM for monitoring internal processes.
   BastionHost:
-    Condition: 'TryProvisionBastionHost'
+    Condition: 'MaybeDeployBastionHost'
     Properties:
       ImageId: !Ref 'BastionHostAmiId'
       InstanceType: 't4g.nano'
@@ -312,9 +338,18 @@ Resources:
         GroupSet:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
-        - !Ref 'BrokerWsClientSecurityGroup'
-        - !Ref 'PostgrestClientSecurityGroup'
-        - !Ref 'ProcessorWsClientSecurityGroup'
+        - !If
+          - 'MaybeDeployBroker'
+          - !Ref 'BrokerWsClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
+        - !If
+          - 'MaybeDeployPostgrest'
+          - !Ref 'PostgrestClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
+        - !If
+          - 'MaybeDeployProcessor'
+          - !Ref 'ProcessorWsClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
         SubnetId: !Ref 'PrivateSubnetA'
       UserData:
         # Install PostgreSQL client & websocat, set connection strings.
@@ -333,7 +368,7 @@ Resources:
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
         - BrokerWsUrlExport: !If
-          - 'TryProvisionBroker'
+          - 'MaybeDeployBroker'
           - !Join
             - ''
             - - 'export BROKER_WS_URL="ws://'
@@ -367,7 +402,7 @@ Resources:
               - 'DatabaseConfig'
               - 'DatabaseName'
           PostgrestUrlExport: !If
-          - 'TryProvisionPostgrest'
+          - 'MaybeDeployPostgrest'
           - !Join
             - ''
             - - 'export POSTGREST_URL="http://'
@@ -382,7 +417,7 @@ Resources:
               - '"'
           - '# POSTGREST_URL not set (PostgREST not provisioned)'
           ProcessorWsUrlExport: !If
-          - 'TryProvisionProcessor'
+          - 'MaybeDeployProcessor'
           - !Join
             - ''
             - - 'export PROCESSOR_WS_URL="ws://'
@@ -411,7 +446,7 @@ Resources:
     Type: 'AWS::EC2::Instance'
   # Connection endpoint allowing access to the bastion host.
   BastionHostConnectionEndpoint:
-    Condition: 'TryProvisionBastionHost'
+    Condition: 'MaybeDeployBastionHost'
     Properties:
       PreserveClientIp: true
       SecurityGroupIds:
@@ -420,7 +455,7 @@ Resources:
     Type: 'AWS::EC2::InstanceConnectEndpoint'
   # Security group for bastion host connection endpoint.
   BastionHostConnectionEndpointSecurityGroup:
-    Condition: 'TryProvisionBastionHost'
+    Condition: 'MaybeDeployBastionHost'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -430,7 +465,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Security group for the bastion host.
   BastionHostSecurityGroup:
-    Condition: 'TryProvisionBastionHost'
+    Condition: 'MaybeDeployBastionHost'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
@@ -438,7 +473,7 @@ Resources:
   # Ingress policy for the bastion host security group, separated to eliminate
   # circular dependencies with the security group for the connection endpoint.
   BastionHostSecurityGroupIngress:
-    Condition: 'TryProvisionBastionHost'
+    Condition: 'MaybeDeployBastionHost'
     Properties:
       GroupId: !Ref 'BastionHostSecurityGroup'
       IpProtocol: -1
@@ -447,7 +482,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Target group for application load balancer traffic to the broker.
   BrokerAlbTargetGroup:
-    Condition: 'TryProvisionAlb'
+    Condition: 'MaybeDeployAlb'
     DependsOn: 'Alb'
     Properties:
       HealthCheckIntervalSeconds: 5
@@ -479,7 +514,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Scaling policy for broker service.
   BrokerAutoScalingPolicy:
-    Condition: 'TryProvisionBroker'
+    Condition: 'MaybeDeployBroker'
     Properties:
       PolicyName: !Sub '${AWS::StackName}-broker'
       PolicyType: 'TargetTrackingScaling'
@@ -493,7 +528,7 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
   # Scalable target for broker service.
   BrokerAutoScalingTarget:
-    Condition: 'TryProvisionBroker'
+    Condition: 'MaybeDeployBroker'
     Properties:
       MaxCapacity: 5
       MinCapacity: 1
@@ -502,20 +537,20 @@ Resources:
       - - 'service'
         - !Ref 'ContainerCluster'
         - !GetAtt 'BrokerRunner.Name'
-      RoleARN: !GetAtt 'ContainerScalingRole.Arn'
+      RoleARN: !GetAtt 'ContainerRole.Arn'
       ScalableDimension: 'ecs:service:DesiredCount'
       ServiceNamespace: 'ecs'
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployBroker'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the broker's WebSocket server security group.
   BrokerPublisherSecurityGroupIngress:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployBroker'
     Properties:
       GroupId: !Ref 'BrokerPublisherSecurityGroup'
       IpProtocol: -1
@@ -523,14 +558,22 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Service for running the broker.
   BrokerRunner:
-    Condition: 'TryProvisionBroker'
-    DependsOn: 'ProcessorRunner'
+    Condition: 'MaybeDeployBroker'
+    DependsOn:
+    # Wait until processor server is online.
+    - 'ProcessorRunner'
+    # Wait until there is an outbound route to get the image from the
+    # pull through cache.
+    - 'PrivateRouteTableAssociationA'
+    - 'PrivateRouteTableAssociationB'
+    - 'PrivateRouteTableAssociationC'
+    - 'PrivateRouteThroughNatGateway'
     # Proxy for a conditional dependency on the application load balancer
     # listener rule for the broker, which associates the broker target group
     # with the application load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
-      - 'TryProvisionAlb'
+      - 'MaybeDeployAlb'
       - !Ref 'AlbListenerRuleBrokerTarget'
       - ''
     Properties:
@@ -541,7 +584,7 @@ Resources:
           Rollback: true
       LaunchType: 'FARGATE'
       LoadBalancers: !If
-      - 'TryProvisionAlb'
+      - 'MaybeDeployAlb'
       - - ContainerName: !Sub '${AWS::StackName}-broker'
           ContainerPort: !FindInMap
           - 'Constants'
@@ -565,7 +608,7 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Service discovery for the broker.
   BrokerServiceDiscovery:
-    Condition: 'TryProvisionBroker'
+    Condition: 'MaybeDeployBroker'
     Properties:
       DnsConfig:
         DnsRecords:
@@ -579,7 +622,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for the broker.
   BrokerTask:
-    Condition: 'TryProvisionProcessor'
+    Condition: 'MaybeDeployBroker'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
@@ -621,14 +664,33 @@ Resources:
           Timeout: 2
         Image: !Join
         - ''
-        - - 'econialabs/emojicoin-dot-fun-indexer-broker:'
+        - - !Ref 'AWS::AccountId'
+          - '.dkr.ecr.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/'
+          - !FindInMap
+            - 'Constants'
+            - 'ImageCache'
+            - 'RepositoryPrefix'
+          - '/econialabs/emojicoin-dot-fun-indexer-broker:'
           - !Ref 'BrokerImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
           Options:
-            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-group: !Join
+            - ''
+            - - '/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: 'ecs'
+            awslogs-stream-prefix: !FindInMap
+            - 'Constants'
+            - 'Logging'
+            - 'Prefix'
         Name: !Sub '${AWS::StackName}-broker'
         PortMappings:
         - ContainerPort: !FindInMap
@@ -639,14 +701,6 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
-        RepositoryCredentials:
-          CredentialsParameter: !Join
-          - ''
-          - - 'arn:aws:secretsmanager:'
-            - !Ref 'AWS::Region'
-            - ':'
-            - !Ref 'AWS::AccountId'
-            - ':secret:DOCKER_AUTH_CONFIG'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -657,7 +711,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the broker's WebSocket server.
   BrokerWsClientSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployBroker'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -667,39 +721,96 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Cluster for running ECS containers.
   ContainerCluster:
-    Condition: 'TryProvisionStack'
+    Condition: 'MaybeDeployContainers'
     Type: 'AWS::ECS::Cluster'
   # Log group for ECS task logging.
   ContainerLogGroup:
-    Condition: 'TryProvisionStack'
+    Condition: 'MaybeDeployContainers'
     Properties:
-      LogGroupName: !Sub '/ecs/${AWS::StackName}'
-      RetentionInDays: 14
+      LogGroupName: !Join
+      - ''
+      - - '/'
+        - !FindInMap
+          - 'Constants'
+          - 'Logging'
+          - 'Prefix'
+        - '/'
+        - !Ref 'AWS::StackName'
+      RetentionInDays: 7
     Type: 'AWS::Logs::LogGroup'
   # Role with assorted permissions required to run containers.
   ContainerRole:
-    Condition: 'TryProvisionStack'
+    Condition: 'MaybeDeployContainers'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
         - Action: 'sts:AssumeRole'
           Effect: 'Allow'
           Principal:
+            Service: 'application-autoscaling.amazonaws.com'
+        - Action: 'sts:AssumeRole'
+          Effect: 'Allow'
+          Principal:
             Service: 'ecs-tasks.amazonaws.com'
+      ManagedPolicyArns:
+      - !Join
+        - ''
+        - - 'arn:aws:iam::aws:policy/service-role/'
+          - 'AmazonEC2ContainerServiceAutoscaleRole'
       Policies:
       - PolicyDocument:
           Statement:
+          # Pull through cache permissions.
           - Action:
-            - 'ecr:GetDownloadUrlForLayer'
-            - 'ecr:BatchGetImage'
             - 'ecr:BatchCheckLayerAvailability'
+            - 'ecr:BatchGetImage'
+            - 'ecr:BatchImportUpstreamImage'
+            - 'ecr:CompleteLayerUpload'
+            - 'ecr:CreateRepository'
+            - 'ecr:DescribeImages'
+            - 'ecr:DescribeRepositories'
+            - 'ecr:GetAuthorizationToken'
+            - 'ecr:GetDownloadUrlForLayer'
+            - 'ecr:InitiateLayerUpload'
+            - 'ecr:PutImage'
+            - 'ecr:UploadLayerPart'
+            Effect: 'Allow'
+            Resource: !Join
+            - ''
+            - - 'arn:aws:ecr:'
+              - !Ref 'AWS::Region'
+              - ':'
+              - !Ref 'AWS::AccountId'
+              - ':repository/'
+              - !FindInMap
+                - 'Constants'
+                - 'ImageCache'
+                - 'RepositoryPrefix'
+              - '/*'
+          - Action:
+            - 'ecr:GetAuthorizationToken'
+            Effect: 'Allow'
+            Resource: '*'
+          # Container logging permissions.
+          - Action:
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Effect: 'Allow'
-            Resource: '*'
-        PolicyName: !Sub 'ContainerRolePolicy-${AWS::StackName}'
-      - PolicyDocument:
-          Statement:
+            Resource: !Join
+            - ''
+            - - 'arn:aws:logs:'
+              - !Ref 'AWS::Region'
+              - ':'
+              - !Ref 'AWS::AccountId'
+              - ':log-group:/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
+              - ':*'
+          # Secret access permissions.
           - Action:
             - 'secretsmanager:GetSecretValue'
             Effect: 'Allow'
@@ -710,35 +821,20 @@ Resources:
                 - !Ref 'AWS::Region'
                 - ':'
                 - !Ref 'AWS::AccountId'
-                - ':secret:GRPC_AUTH_TOKEN-*'
+                - ':secret:emojicoin/grpc-auth-token-*'
             - !Join
               - ''
               - - 'arn:aws:secretsmanager:'
                 - !Ref 'AWS::Region'
                 - ':'
                 - !Ref 'AWS::AccountId'
-                - ':secret:DOCKER_AUTH_CONFIG-*'
-        PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
-    Type: 'AWS::IAM::Role'
-  # Role for container service auto scaling.
-  ContainerScalingRole:
-    Condition: 'TryProvisionStack'
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action: 'sts:AssumeRole'
-          Effect: 'Allow'
-          Principal:
-            Service: 'application-autoscaling.amazonaws.com'
-      ManagedPolicyArns:
-      - !Join
-        - ''
-        - - 'arn:aws:iam::aws:policy/service-role/'
-          - 'AmazonEC2ContainerServiceAutoscaleRole'
+                - ':secret:ecr-pullthroughcache/emojicoin/docker-hub-*'
+        PolicyName: !Sub 'EmojicoinContainerRolePolicy-${AWS::StackName}'
+      RoleName: !Sub 'EmojicoinContainerRole-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
   ContainerSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployContainers'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       # Allow all outbound traffic, to other resources and to Docker Hub.
@@ -749,7 +845,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Database cluster.
   DbCluster:
-    Condition: 'TryProvisionDb'
+    Condition: 'MaybeDeployDb'
     Metadata:
       cfn-lint:
         config:
@@ -784,7 +880,7 @@ Resources:
     Type: 'AWS::RDS::DBCluster'
   # Primary (writer) database instance.
   DbInstancePrimary:
-    Condition: 'TryProvisionDb'
+    Condition: 'MaybeDeployDb'
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
@@ -792,7 +888,7 @@ Resources:
     Type: 'AWS::RDS::DBInstance'
   # Replica (reader) database instance.
   DbInstanceReplica:
-    Condition: 'TryProvisionDb'
+    Condition: 'MaybeDeployDb'
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
@@ -800,7 +896,7 @@ Resources:
     Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployDb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
@@ -808,7 +904,7 @@ Resources:
   # Ingress policy for the database's security group, separated to eliminate
   # circular dependencies with security group for users of the database.
   DbSecurityGroupIngress:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployDb'
     Properties:
       GroupId: !Ref 'DbSecurityGroup'
       IpProtocol: -1
@@ -816,7 +912,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Database subnet group.
   DbSubnetGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployDb'
     Properties:
       DBSubnetGroupDescription: !Ref 'AWS::StackName'
       SubnetIds:
@@ -826,7 +922,7 @@ Resources:
     Type: 'AWS::RDS::DBSubnetGroup'
   # Security group for users of the database.
   DbUserSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployDb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -849,7 +945,7 @@ Resources:
           - Identifier: !Ref 'Identifier'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
-      Condition: 'TryProvisionRouteTables'
+      Condition: 'MaybeDeployRouteTables'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A private subnet for each of the database availability zones.
   Fn::ForEach::PrivateSubnet:
@@ -873,7 +969,7 @@ Resources:
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
-      Condition: 'TryProvisionVpc'
+      Condition: 'MaybeDeployVpc'
       Type: 'AWS::EC2::Subnet'
   # Association for public route table with each public subnet.
   Fn::ForEach::PublicRouteTableAssociation:
@@ -890,7 +986,7 @@ Resources:
           - Identifier: !Ref 'Identifier'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
-      Condition: 'TryProvisionRouteTables'
+      Condition: 'MaybeDeployRouteTables'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A public subnet for each availability zone.
   Fn::ForEach::PublicSubnet:
@@ -914,35 +1010,35 @@ Resources:
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
-      Condition: 'TryProvisionVpc'
+      Condition: 'MaybeDeployVpc'
       Type: 'AWS::EC2::Subnet'
   # Internet gateway for the virtual private cloud.
   InternetGateway:
-    Condition: 'TryProvisionStack'
+    Condition: 'MaybeDeployVpc'
     Type: 'AWS::EC2::InternetGateway'
   # Attachment of internet gateway to the virtual private cloud.
   InternetGatewayAttachment:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployVpc'
     Properties:
       InternetGatewayId: !Ref 'InternetGateway'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::VPCGatewayAttachment'
   # Network address translation gateway for the virtual private cloud.
   NatGateway:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployVpc'
     Properties:
       AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
       SubnetId: !Ref 'PublicSubnetA'
     Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for the network address translation gateway.
   NatGatewayEip:
-    Condition: 'TryProvisionStack'
+    Condition: 'MaybeDeployVpc'
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
-    Condition: 'TryProvisionAlb'
+    Condition: 'MaybeDeployAlb'
     DependsOn: 'Alb'
     Properties:
       HealthCheckIntervalSeconds: 5
@@ -974,7 +1070,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Scaling policy for PostgREST service.
   PostgrestAutoScalingPolicy:
-    Condition: 'TryProvisionPostgrest'
+    Condition: 'MaybeDeployPostgrest'
     Properties:
       PolicyName: !Sub '${AWS::StackName}-postgrest'
       PolicyType: 'TargetTrackingScaling'
@@ -988,7 +1084,7 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
   # Scalable target for PostgREST service.
   PostgrestAutoScalingTarget:
-    Condition: 'TryProvisionPostgrest'
+    Condition: 'MaybeDeployPostgrest'
     Properties:
       MaxCapacity: 5
       MinCapacity: 1
@@ -997,13 +1093,13 @@ Resources:
       - - 'service'
         - !Ref 'ContainerCluster'
         - !GetAtt 'PostgrestRunner.Name'
-      RoleARN: !GetAtt 'ContainerScalingRole.Arn'
+      RoleARN: !GetAtt 'ContainerRole.Arn'
       ScalableDimension: 'ecs:service:DesiredCount'
       ServiceNamespace: 'ecs'
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Security group for PostgREST clients.
   PostgrestClientSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployPostgrest'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -1013,7 +1109,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Service for running PostgREST.
   PostgrestRunner:
-    Condition: 'TryProvisionPostgrest'
+    Condition: 'MaybeDeployPostgrest'
     DependsOn:
     # Wait for both database instances to ensure cluster is fully available.
     - 'DbInstancePrimary'
@@ -1021,11 +1117,17 @@ Resources:
     # Wait for processor to ensure that migrations have been run, so that the
     # schema will be available and load balancer health checks will pass.
     - 'ProcessorRunner'
+    # Wait until there is an outbound route to get the image from the
+    # pull through cache.
+    - 'PrivateRouteTableAssociationA'
+    - 'PrivateRouteTableAssociationB'
+    - 'PrivateRouteTableAssociationC'
+    - 'PrivateRouteThroughNatGateway'
     # Proxy for a conditional dependency on the application load balancer
     # listener, which associates the PostgREST target group with the balancer.
     Metadata:
       ConditionalDependencyProxy: !If
-      - 'TryProvisionAlb'
+      - 'MaybeDeployAlb'
       - !Ref 'AlbListener'
       - ''
     Properties:
@@ -1036,7 +1138,7 @@ Resources:
           Rollback: true
       LaunchType: 'FARGATE'
       LoadBalancers: !If
-      - 'TryProvisionAlb'
+      - 'MaybeDeployAlb'
       - - ContainerName: !Sub '${AWS::StackName}-postgrest'
           ContainerPort: !FindInMap
           - 'Constants'
@@ -1060,14 +1162,14 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Security group for the PostgREST server.
   PostgrestServerSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployPostgrest'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the PostgREST server security group.
   PostgrestServerSecurityGroupIngress:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployPostgrest'
     Properties:
       GroupId: !Ref 'PostgrestServerSecurityGroup'
       IpProtocol: -1
@@ -1075,7 +1177,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Service discovery for PostgREST.
   PostgrestServiceDiscovery:
-    Condition: 'TryProvisionPostgrest'
+    Condition: 'MaybeDeployPostgrest'
     Properties:
       DnsConfig:
         DnsRecords:
@@ -1089,7 +1191,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for PostgREST.
   PostgrestTask:
-    Condition: 'TryProvisionPostgrest'
+    Condition: 'MaybeDeployPostgrest'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
@@ -1128,13 +1230,35 @@ Resources:
           Value: 'web_anon'
         - Name: 'PGRST_DB_MAX_ROWS'
           Value: !Ref 'PostgrestMaxRows'
-        Image: 'postgrest/postgrest:latest'
+        Image: !Join
+        - ''
+        - - !Ref 'AWS::AccountId'
+          - '.dkr.ecr.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/'
+          - !FindInMap
+            - 'Constants'
+            - 'ImageCache'
+            - 'RepositoryPrefix'
+          - '/postgrest/postgrest:'
+          - !Ref 'PostgrestImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
           Options:
-            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-group: !Join
+            - ''
+            - - '/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: 'ecs'
+            awslogs-stream-prefix: !FindInMap
+            - 'Constants'
+            - 'Logging'
+            - 'Prefix'
         Name: !Sub '${AWS::StackName}-postgrest'
         PortMappings:
         - ContainerPort: !FindInMap
@@ -1163,13 +1287,13 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Route table for private subnets in the virtual private cloud.
   PrivateRouteTable:
-    Condition: 'TryProvisionRouteTables'
+    Condition: 'MaybeDeployRouteTables'
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
   # Route from private subnets through network address translation gateway.
   PrivateRouteThroughNatGateway:
-    Condition: 'TryProvisionRouteTables'
+    Condition: 'MaybeDeployRouteTables'
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
       NatGatewayId: !Ref 'NatGateway'
@@ -1177,7 +1301,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Private DNS namespace for internal service discovery.
   PrivateServiceDiscoveryNamespace:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployVpc'
     Properties:
       Description: !Ref 'AWS::StackName'
       Name: !Ref 'AWS::StackName'
@@ -1185,14 +1309,14 @@ Resources:
     Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
   ProcessorPublisherSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployVpc'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the processor's WebSocket server security group.
   ProcessorPublisherSecurityGroupIngress:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployProcessor'
     Properties:
       GroupId: !Ref 'ProcessorPublisherSecurityGroup'
       IpProtocol: -1
@@ -1200,12 +1324,18 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Service for running the processor.
   ProcessorRunner:
-    Condition: 'TryProvisionProcessor'
+    Condition: 'MaybeDeployProcessor'
+    DependsOn:
     # Pending instance creation, the cluster endpoint is defined but not
     # available, so the service will not be able to connect to the database.
-    DependsOn:
     - 'DbInstancePrimary'
     - 'DbInstanceReplica'
+    # Wait until there is an outbound route to get the image from the
+    # pull through cache.
+    - 'PrivateRouteTableAssociationA'
+    - 'PrivateRouteTableAssociationB'
+    - 'PrivateRouteTableAssociationC'
+    - 'PrivateRouteThroughNatGateway'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
@@ -1232,7 +1362,7 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Service discovery for the processor.
   ProcessorServiceDiscovery:
-    Condition: 'TryProvisionProcessor'
+    Condition: 'MaybeDeployProcessor'
     Properties:
       DnsConfig:
         DnsRecords:
@@ -1246,7 +1376,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for processor.
   ProcessorTask:
-    Condition: 'TryProvisionProcessor'
+    Condition: 'MaybeDeployProcessor'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
@@ -1273,15 +1403,15 @@ Resources:
               - 'MasterUsername'
         - Name: 'GRPC_DATA_SERVICE_URL'
           Value: !Sub
-          - '{{resolve:ssm:/GrpcDataServiceUrl/${Network}}}'
+          - '{{resolve:ssm:/emojicoin/grpc-data-service-url/${Network}}}'
           - Network: !Ref 'Network'
         - Name: 'MINIMUM_STARTING_VERSION'
           Value: !Sub
-          - '{{resolve:ssm:/Emojicoin/MinimumStartingVersion/${Network}}}'
+          - '{{resolve:ssm:/emojicoin/minimum-starting-version/${Network}}}'
           - Network: !Ref 'Network'
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
           Value: !Sub
-          - '{{resolve:ssm:/Emojicoin/ModuleAddress/${Network}}}'
+          - '{{resolve:ssm:/emojicoin/package-address/${Network}}}'
           - Network: !Ref 'Network'
         - Name: 'WS_PORT'
           Value: !FindInMap
@@ -1300,14 +1430,33 @@ Resources:
           Timeout: 2
         Image: !Join
         - ''
-        - - 'econialabs/emojicoin-dot-fun-indexer-processor:'
+        - - !Ref 'AWS::AccountId'
+          - '.dkr.ecr.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/'
+          - !FindInMap
+            - 'Constants'
+            - 'ImageCache'
+            - 'RepositoryPrefix'
+          - '/econialabs/emojicoin-dot-fun-indexer-processor:'
           - !Ref 'ProcessorImageVersion'
         LogConfiguration:
           LogDriver: 'awslogs'
           Options:
-            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-group: !Join
+            - ''
+            - - '/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: 'ecs'
+            awslogs-stream-prefix: !FindInMap
+            - 'Constants'
+            - 'Logging'
+            - 'Prefix'
         Name: !Sub '${AWS::StackName}-processor'
         PortMappings:
         - ContainerPort: !FindInMap
@@ -1318,21 +1467,13 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'ProcessorWebsocketPort'
-        RepositoryCredentials:
-          CredentialsParameter: !Join
-          - ''
-          - - 'arn:aws:secretsmanager:'
-            - !Ref 'AWS::Region'
-            - ':'
-            - !Ref 'AWS::AccountId'
-            - ':secret:DOCKER_AUTH_CONFIG'
         Secrets:
         - Name: 'GRPC_AUTH_TOKEN'
           ValueFrom: !Sub
           - 'arn:aws:secretsmanager:${Region}:${Account}:secret:${Secret}'
           - Account: !Ref 'AWS::AccountId'
             Region: !Ref 'AWS::Region'
-            Secret: 'GRPC_AUTH_TOKEN'
+            Secret: 'emojicoin/grpc-auth-token'
       Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
@@ -1343,7 +1484,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the processor's WebSocket server.
   ProcessorWsClientSecurityGroup:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployProcessor'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -1353,13 +1494,13 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Route table for public subnets in the virtual private cloud.
   PublicRouteTable:
-    Condition: 'TryProvisionRouteTables'
+    Condition: 'MaybeDeployRouteTables'
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
   # Route from public subnets through the internet gateway.
   PublicRouteToInternet:
-    Condition: 'TryProvisionRouteTables'
+    Condition: 'MaybeDeployRouteTables'
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
       GatewayId: !Ref 'InternetGateway'
@@ -1367,7 +1508,7 @@ Resources:
     Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
-    Condition: 'TryProvisionVpc'
+    Condition: 'MaybeDeployVpc'
     Properties:
       CidrBlock: !FindInMap
       - 'Constants'
