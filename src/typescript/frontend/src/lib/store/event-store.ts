@@ -384,8 +384,8 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                   }
                 });
               } else if (isPeriodicStateEvent(event)) {
-                const periodDuration = toPeriodDuration(event.periodicStateMetadata.period);
-                const data = market[periodDuration];
+                const period = toPeriodDuration(event.periodicStateMetadata.period);
+                const data = market[period];
                 if (!data) {
                   throw new Error("No candlestick data found for that period duration.");
                 }
@@ -403,15 +403,15 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                   market.swapEvents.forEach((swap) => {
                     const emitTime = event.periodicStateMetadata.emitTime;
                     const swapTime = swap.time;
-                    const period = BigInt(periodDuration);
-                    const swapInTimeRange = emitTime <= swapTime && swapTime <= emitTime + period;
+                    const swapInTimeRange =
+                      emitTime <= swapTime && swapTime <= emitTime + BigInt(period);
 
                     // NOTE: When a new periodic state event is emitted, the market nonce
                     // for the swap event is actually exactly the same as the periodic state event,
                     // hence why we use `>=` instead of just `>`.
                     if (swapInTimeRange && swap.marketNonce >= data.latestBar!.marketNonce) {
                       const price = q64ToBig(swap.avgExecutionPriceQ64).toNumber();
-                      data.latestBar!.time = Number(getPeriodStartTime(swap, periodDuration) / 1000n);
+                      data.latestBar!.time = Number(getPeriodStartTime(swap, period) / 1000n);
                       data.latestBar!.close = price;
                       data.latestBar!.marketNonce = swap.marketNonce;
                       data.latestBar!.high = Math.max(data.latestBar!.high, price);
