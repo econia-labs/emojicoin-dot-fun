@@ -709,7 +709,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Cluster for running ECS containers.
   ContainerCluster:
-    Condition: 'MaybeProvisionStack'
+    Condition: 'MaybeProvisionContainers'
     Type: 'AWS::ECS::Cluster'
   # Pull-through cache rule for Docker images from Docker Hub.
   ContainerImageCacheRule:
