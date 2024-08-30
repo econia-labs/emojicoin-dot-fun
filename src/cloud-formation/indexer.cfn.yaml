@@ -21,9 +21,16 @@ Conditions:
     - !Ref 'MaybeProvisionBastionHost'
     - 'true'
   MaybeProvisionBroker: !And
+  - !Condition 'MaybeProvisionContainers'
   - !Condition 'MaybeProvisionProcessor'
   - !Equals
     - !Ref 'MaybeProvisionBroker'
+    - 'true'
+  MaybeProvisionContainers: !And
+  - !Condition 'MaybeProvisionDb'
+  - !Condition 'MaybeProvisionRouteTables'
+  - !Equals
+    - !Ref 'MaybeProvisionContainers'
     - 'true'
   MaybeProvisionDb: !And
   - !Condition 'MaybeProvisionVpc'
@@ -31,15 +38,13 @@ Conditions:
     - !Ref 'MaybeProvisionDb'
     - 'true'
   MaybeProvisionPostgrest: !And
-  - !Condition 'MaybeProvisionDb'
+  - !Condition 'MaybeProvisionContainers'
   - !Condition 'MaybeProvisionProcessor'
-  - !Condition 'MaybeProvisionVpc'
   - !Equals
     - !Ref 'MaybeProvisionPostgrest'
     - 'true'
   MaybeProvisionProcessor: !And
-  - !Condition 'MaybeProvisionDb'
-  - !Condition 'MaybeProvisionRouteTables'
+  - !Condition 'MaybeProvisionContainers'
   - !Equals
     - !Ref 'MaybeProvisionProcessor'
     - 'true'
@@ -153,6 +158,11 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
+  MaybeProvisionContainers:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
   MaybeProvisionDb:
     AllowedValues:
     - 'false'
@@ -207,8 +217,14 @@ Resources:
       Scheme: 'internet-facing'
       SecurityGroups:
       - !Ref 'AlbSecurityGroup'
-      - !Ref 'BrokerWsClientSecurityGroup'
-      - !Ref 'PostgrestClientSecurityGroup'
+      - !If
+        - 'MaybeProvisionBroker'
+        - !Ref 'BrokerWsClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
+      - !If
+        - 'MaybeProvisionPostgrest'
+        - !Ref 'PostgrestClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
       Subnets:
       - !Ref 'PublicSubnetA'
       - !Ref 'PublicSubnetB'
@@ -298,7 +314,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionAlb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupIngress:
@@ -319,9 +335,18 @@ Resources:
         GroupSet:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
-        - !Ref 'BrokerWsClientSecurityGroup'
-        - !Ref 'PostgrestClientSecurityGroup'
-        - !Ref 'ProcessorWsClientSecurityGroup'
+        - !If
+          - 'MaybeProvisionBroker'
+          - !Ref 'BrokerWsClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
+        - !If
+          - 'MaybeProvisionPostgrest'
+          - !Ref 'PostgrestClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
+        - !If
+          - 'MaybeProvisionProcessor'
+          - !Ref 'ProcessorWsClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
         SubnetId: !Ref 'PrivateSubnetA'
       UserData:
         # Install PostgreSQL client & websocat, set connection strings.
@@ -515,14 +540,14 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionBroker'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the broker's WebSocket server security group.
   BrokerPublisherSecurityGroupIngress:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionBroker'
     Properties:
       GroupId: !Ref 'BrokerPublisherSecurityGroup'
       IpProtocol: -1
@@ -531,7 +556,17 @@ Resources:
   # Service for running the broker.
   BrokerRunner:
     Condition: 'MaybeProvisionBroker'
-    DependsOn: 'ProcessorRunner'
+    DependsOn:
+    # Wait until processor server is online.
+    - 'ProcessorRunner'
+    # Wait until there is an outbound route to get the image from the
+    # pullthrough cache.
+    - 'PrivateRouteTableAssociationA'
+    - 'PrivateRouteTableAssociationB'
+    - 'PrivateRouteTableAssociationC'
+    - 'PrivateRouteThroughNatGateway'
+    # Wait for the pull-through cache rule so the image can be pulled.
+    - 'ContainerImageCacheRule'
     # Proxy for a conditional dependency on the application load balancer
     # listener rule for the broker, which associates the broker target group
     # with the application load balancer.
@@ -586,7 +621,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for the broker.
   BrokerTask:
-    Condition: 'MaybeProvisionProcessor'
+    Condition: 'MaybeProvisionBroker'
     DependsOn: 'ContainerLogGroup'
     Properties:
       ContainerDefinitions:
@@ -664,7 +699,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the broker's WebSocket server.
   BrokerWsClientSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionBroker'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -678,7 +713,7 @@ Resources:
     Type: 'AWS::ECS::Cluster'
   # Pull-through cache rule for Docker images from Docker Hub.
   ContainerImageCacheRule:
-    Condition: 'MaybeProvisionProcessor'
+    Condition: 'MaybeProvisionContainers'
     Properties:
       CredentialArn: !Join
       - ''
@@ -695,14 +730,14 @@ Resources:
     Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
   ContainerLogGroup:
-    Condition: 'MaybeProvisionStack'
+    Condition: 'MaybeProvisionContainers'
     Properties:
       LogGroupName: !Sub '/ecs/${AWS::StackName}'
       RetentionInDays: 14
     Type: 'AWS::Logs::LogGroup'
   # Role with assorted permissions required to run containers.
   ContainerRole:
-    Condition: 'MaybeProvisionProcessor'
+    Condition: 'MaybeProvisionContainers'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -761,7 +796,7 @@ Resources:
     Type: 'AWS::IAM::Role'
   # Role for container service auto scaling.
   ContainerScalingRole:
-    Condition: 'MaybeProvisionStack'
+    Condition: 'MaybeProvisionContainers'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -777,7 +812,7 @@ Resources:
     Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
   ContainerSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionContainers'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       # Allow all outbound traffic, to other resources and to Docker Hub.
@@ -839,7 +874,7 @@ Resources:
     Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionDb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
@@ -847,7 +882,7 @@ Resources:
   # Ingress policy for the database's security group, separated to eliminate
   # circular dependencies with security group for users of the database.
   DbSecurityGroupIngress:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionDb'
     Properties:
       GroupId: !Ref 'DbSecurityGroup'
       IpProtocol: -1
@@ -855,7 +890,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Database subnet group.
   DbSubnetGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionDb'
     Properties:
       DBSubnetGroupDescription: !Ref 'AWS::StackName'
       SubnetIds:
@@ -865,7 +900,7 @@ Resources:
     Type: 'AWS::RDS::DBSubnetGroup'
   # Security group for users of the database.
   DbUserSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionDb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -957,7 +992,7 @@ Resources:
       Type: 'AWS::EC2::Subnet'
   # Internet gateway for the virtual private cloud.
   InternetGateway:
-    Condition: 'MaybeProvisionStack'
+    Condition: 'MaybeProvisionVpc'
     Type: 'AWS::EC2::InternetGateway'
   # Attachment of internet gateway to the virtual private cloud.
   InternetGatewayAttachment:
@@ -975,7 +1010,7 @@ Resources:
     Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for the network address translation gateway.
   NatGatewayEip:
-    Condition: 'MaybeProvisionStack'
+    Condition: 'MaybeProvisionVpc'
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
@@ -1042,7 +1077,7 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Security group for PostgREST clients.
   PostgrestClientSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionPostgrest'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
@@ -1060,6 +1095,14 @@ Resources:
     # Wait for processor to ensure that migrations have been run, so that the
     # schema will be available and load balancer health checks will pass.
     - 'ProcessorRunner'
+    # Wait until there is an outbound route to get the image from the
+    # pullthrough cache.
+    - 'PrivateRouteTableAssociationA'
+    - 'PrivateRouteTableAssociationB'
+    - 'PrivateRouteTableAssociationC'
+    - 'PrivateRouteThroughNatGateway'
+    # Wait for the pull-through cache rule so the image can be pulled.
+    - 'ContainerImageCacheRule'
     # Proxy for a conditional dependency on the application load balancer
     # listener, which associates the PostgREST target group with the balancer.
     Metadata:
@@ -1099,14 +1142,14 @@ Resources:
     Type: 'AWS::ECS::Service'
   # Security group for the PostgREST server.
   PostgrestServerSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionPostgrest'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the PostgREST server security group.
   PostgrestServerSecurityGroupIngress:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionPostgrest'
     Properties:
       GroupId: !Ref 'PostgrestServerSecurityGroup'
       IpProtocol: -1
@@ -1242,7 +1285,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the processor's WebSocket server security group.
   ProcessorPublisherSecurityGroupIngress:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionProcessor'
     Properties:
       GroupId: !Ref 'ProcessorPublisherSecurityGroup'
       IpProtocol: -1
@@ -1401,7 +1444,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Security group for clients of the processor's WebSocket server.
   ProcessorWsClientSecurityGroup:
-    Condition: 'MaybeProvisionVpc'
+    Condition: 'MaybeProvisionProcessor'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       SecurityGroupEgress:
