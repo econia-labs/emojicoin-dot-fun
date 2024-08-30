@@ -10,22 +10,9 @@ using the [template file] at `indexer.cfn.yaml` and a development-specific
 [stack deployment file] at `deploy-*.yaml`. Once a [stack] is configured
 accordingly, `git` updates will result in automatic updates.
 
-## Endpoints
-
 The indexer provides a public endpoint for both REST queries and WebSocket
 events at a custom subdomain under a root domain you provide, of format
 `<ENVIRONMENT.data.<YOUR_ROOT_DOMAIN>`, for example `dev.data.foo.bar`.
-
-## Database architecture
-
-The indexer database uses [Aurora PostgreSQL] on a
-[Multi-AZ Aurora Serverless v2 cluster] with a
-[primary (writer) instance][aurora clusters] and a fallback
-[replica (reader) instance][aurora clusters] in
-[dynamically-assigned][auto-selection of aurora az], separate
-[Availability Zones][aurora availability zones] to ensure
-[high availability][high availability for aurora] with
-[fault tolerant replica promotion] and [autoscaling][aurora autoscaling].
 
 ## Template parameters
 
@@ -218,7 +205,9 @@ issues in practice:
 
 1. [Create the stack with GitSync].
 
-## Query public endpoints
+## Querying endpoints
+
+### Public endpoints
 
 Once you have [deployed a stack](#setup), query the public endpoint for your
 deployment environment:
@@ -265,7 +254,7 @@ deployment environment:
    curl "https://$DNS_NAME/processor_status?select=last_success_version"
    ```
 
-## Connect to services through bastion host
+### Bastion host connections
 
 Before you try connecting to the bastion host, verify that the
 `MaybeProvisionBastionHost` [condition][conditions] evaluates to `true`. Note
@@ -334,6 +323,19 @@ Query PostgREST:
 ```sh
 curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
 ```
+
+## Architecture notes
+
+### Database
+
+The indexer database uses [Aurora PostgreSQL] on a
+[Multi-AZ Aurora Serverless v2 cluster] with a
+[primary (writer) instance][aurora clusters] and a fallback
+[replica (reader) instance][aurora clusters] in
+[dynamically-assigned][auto-selection of aurora az], separate
+[Availability Zones][aurora availability zones] to ensure
+[high availability][high availability for aurora] with
+[fault tolerant replica promotion] and [autoscaling][aurora autoscaling].
 
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
 [aptos labs transaction stream service api key]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#authorization-via-api-key
