@@ -197,7 +197,7 @@ several prohibitive issues in practice:
          "Action": [
            "iam:PassRole",
          ],
-         "Resource": "arn:aws:sts::*:role/*EmojicoinContainerRole*"
+         "Resource": "arn:aws:iam::*:role/EmojicoinContainerRole*"
        }
      ]
    }
