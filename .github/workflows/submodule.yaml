@@ -1,0 +1,17 @@
+---
+jobs:
+  pre-commit:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v3'
+    - run: 'git submodule update --init --recursive src/rust/processor'
+    - run: 'cd src/rust/processor && git switch emojicoin-dot-fun && git pull && cd -'
+    - run: 'test "$(git status --short | wc -l)" -eq 0'
+name: 'Ensure correct version of processor submodule'
+'on':
+  pull_request: null
+  push:
+    branches:
+    - 'main'
+  workflow_dispatch: null
+...
