@@ -138,7 +138,7 @@ ensure_publish_payloads_exist() {
 		echo "Move JSON publish payloads not found- recompiling the Move modules on the host machine."
 		should_compile=true
 	else
-		if git diff --quiet origin/main..HEAD -- src/move/; then
+		if git diff --quiet origin/main -- src/move/; then
 			msg="$INFO The Move modules have not been changed- using the existing JSON publish payloads."
 			echo -e "$msg"
 		else
