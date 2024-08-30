@@ -20,8 +20,9 @@ events at a custom subdomain under a root domain you provide, of format
 
 `indexer.cfn.yaml` contains assorted [parameters] of the form `MaybeDeploy*`
 that can be used to selectively provision and de-provision [resources]. For a
-concise list of such parameters, see a [stack deployment file]. See the template
-[conditions] section for associated dependencies.
+concise list of such parameters, see a [stack deployment file] at
+`deploy-*.yaml`. See the template [conditions] section for associated
+dependencies.
 
 Note that even if a parameter is passed as `true`, the resources that directly
 depend on it will not be created unless the condition's dependencies are also
