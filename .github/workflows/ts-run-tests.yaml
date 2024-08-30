@@ -21,6 +21,7 @@ jobs:
         destination_directory: '/usr/local/bin'
     - name: 'Build the docker test harness'
       run: |
+        git fetch --depth 1 origin main
         git submodule update --init --recursive src/rust
         cp src/docker/example.local.env src/docker/.env && \
         bash src/sh/emojicoin/docker-test-harness.sh \
