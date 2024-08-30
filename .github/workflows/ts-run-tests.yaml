@@ -30,13 +30,14 @@ jobs:
       shell: 'bash'
     - uses: './.github/actions/ts-run-tests'
 
-    # Only run the tmate session if the workflow was triggered manually.
-    - name: 'Setup tmate session (manual trigger)'
+    # Add a tmate debugging session if the previous step fails and
+    # the workflow was triggered manually.
+    - name: 'Setup tmate session'
       uses: 'mxschmitt/action-tmate@v3'
       # yamllint disable-line rule:quoted-strings
-      if: github.event_name == 'workflow_dispatch'
+      if: failure() && github.event_name == 'workflow_dispatch'
+      # The tmate session is only available to whoever triggered the workflow.
       with:
-        # The tmate session is only available to whoever triggered the workflow.
         limit-access-to-actor: true
 
 name: 'Run the TypeScript E2E and unit tests with a local testnet'
