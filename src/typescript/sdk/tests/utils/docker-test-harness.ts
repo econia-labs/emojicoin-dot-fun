@@ -25,7 +25,7 @@ interface ContainerStatus {
 
 async function getDockerContainerStatus(name: ContainerName): Promise<ContainerStatus> {
   try {
-    const { stdout, stderr } = await execPromise(
+    const { stdout } = await execPromise(
       `docker inspect -f '{{.State.Running}},{{.State.Health.Status}}' ${name}`
     );
     const [running, health] = stdout.trim().split(",");
@@ -46,10 +46,7 @@ export class DockerTestHarness {
 
   public removeContainersOnStart: boolean;
 
-  constructor(args: {
-    container: ContainerName;
-    removeContainersOnStart: boolean;
-  }) {
+  constructor(args: { container: ContainerName; removeContainersOnStart: boolean }) {
     const { container, removeContainersOnStart } = args;
     this.container = container;
     this.removeContainersOnStart = removeContainersOnStart;

@@ -1,3 +1,6 @@
+# yamllint disable rule:empty-lines rule:key-ordering
+# cspell:word mxschmitt
+
 ---
 env:
   NEXT_PUBLIC_MODULE_ADDRESS: |-
@@ -15,7 +18,7 @@ jobs:
       uses: './.github/actions/get-latest-aptos-cli'
       with:
         destination_directory: '/usr/local/bin'
-    
+
   ts-run-tests:
     runs-on: 'ubuntu-latest'
     steps:
@@ -34,11 +37,12 @@ jobs:
     - uses: './.github/actions/ts-run-tests'
 
     # Only run the tmate session if the workflow was triggered manually.
-    - name: Setup tmate session (manual trigger)
-      uses: mxschmitt/action-tmate@v3
+    - name: 'Setup tmate session (manual trigger)'
+      uses: 'mxschmitt/action-tmate@v3'
+      # yamllint disable-line rule:quoted-strings
       if: github.event_name == 'workflow_dispatch'
       with:
-        # The tmate session is only accessible to whoever triggered the workflow.
+        # The tmate session is only available to whoever triggered the workflow.
         limit-access-to-actor: true
 
 name: 'Run the TypeScript E2E and unit tests with a local testnet'
