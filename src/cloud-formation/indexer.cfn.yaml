@@ -760,6 +760,7 @@ Resources:
             - 'ecr:CreateRepository'
             - 'ecr:DescribeImages'
             - 'ecr:DescribeRepositories'
+            - 'ecr:GetAuthorizationToken'
             - 'ecr:GetDownloadUrlForLayer'
             - 'ecr:InitiateLayerUpload'
             - 'ecr:PutImage'
