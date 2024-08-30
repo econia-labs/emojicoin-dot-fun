@@ -6,7 +6,7 @@ parameters:
   MaybeDeployAlbDnsRecord: 'false'
   MaybeDeployBastionHost: 'false'
   MaybeDeployBroker: 'false'
-  MaybeDeployContainers: 'false'
+  MaybeDeployContainers: 'true'
   MaybeDeployDb: 'true'
   MaybeDeployPostgrest: 'false'
   MaybeDeployProcessor: 'false'
