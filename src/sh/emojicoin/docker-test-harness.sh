@@ -1,7 +1,6 @@
 #!/bin/bash
 # cspell:word toplevel
 # cspell:word localnode
-# cspell:word buildable
 
 # ------------------------------------------------------------------------------
 #                            Setup for absolute paths
@@ -23,11 +22,15 @@ function cleanup() {
 # Ensure cleanup function is called on exit.
 trap cleanup EXIT
 
+INFO_COLOR='\033[1;37m'
 WARNING_COLOR='\033[38;5;202m'
-LIGHT_PURPLE='\033[1;35m'
+HEADER_COLOR='\033[1;35m'
 NO_COLOR='\033[0m'
 
-HEADER_BEGIN="$LIGHT_PURPLE--------------------"
+INFO="$INFO_COLOR[INFO]$NO_COLOR:"
+WARNING="$WARNING_COLOR[WARNING]$NO_COLOR:"
+
+HEADER_BEGIN="$HEADER_COLOR--------------------"
 HEADER_END="--------------------$NO_COLOR"
 
 # ------------------------------------------------------------------------------
@@ -41,14 +44,11 @@ show_help() {
 	echo "Options:"
 	echo "  -r, --remove      Remove all related containers and volumes, including the local testnet."
 	echo "  -s, --start       Start the Docker environment with the local testnet."
-	echo "  -j, --json        Publish the smart contracts with JSON publish payload files."
-	echo "  -c, --compile     Publish the smart contracts by compiling at container build time."
 	echo "  --no-frontend     Do not start the frontend container."
 	echo
 	echo "  -h, --help        Display this help message"
 	echo
 	echo "Specifying both options will remove all container resources and then start the environment."
-	echo "You must specify either the JSON or compile option to publish the smart contracts."
 }
 
 # ------------------------------------------------------------------------------
@@ -59,9 +59,7 @@ remove=false
 start=false
 include_frontend=true
 show_help=false
-publish_json=false
-publish_compile=false
-no_cache=false
+
 localnode="local-testnet-postgres"
 graphql="local-testnet-indexer-api"
 
@@ -77,10 +75,6 @@ while [[ $# -gt 0 ]]; do
 	--start) start=true ;;
 	-s) start=true ;;
 	--no-frontend) include_frontend=false ;;
-	--json) publish_json=true ;;
-	-j) publish_json=true ;;
-	--compile) publish_compile=true ;;
-	-c) publish_compile=true ;;
 	-h | --help)
 		show_help
 		exit 0
@@ -123,70 +117,55 @@ start_containers() {
 }
 
 # ------------------------------------------------------------------------------
-#                                Run the script
+#                 Determine if Move modules need to be compiled
 # ------------------------------------------------------------------------------
-
-if [ "$publish_json" = true ]; then
-	export PUBLISH_TYPE="json"
-elif [ "$publish_compile" = true ]; then
-	export PUBLISH_TYPE="compile"
-else
-	if [ "$build" = true ] || [ "$start" = true ]; then
-		echo "Must specify either JSON or compile option."
-		show_help
-		exit 1
-	fi
-fi
-
-if [ "$publish_json" = true ] && [ "$publish_compile" = true ]; then
-	echo "Cannot specify both JSON and compile options."
-	show_help
-	exit 1
-fi
-
 source $docker_dir/.env
 
-# The publish type ("json" or "compile") are specified as environment variables
-# to be used in the Dockerfile. We set them here before building the containers.
-if [ "$PUBLISH_TYPE" = "json" ]; then
-	echo
-
-	skip_compilation=false
-	if [ ! aptos-node/json/publish-rewards.json ] || [ ! aptos-node/json/publish-emojicoin_dot_fun.json ]; then
-		echo "JSON publish payloads not found. Building the JSON publish payloads on the host machine."
+# Compile the Move contracts in the form of JSON publish payloads, with the output directory
+# in a place where the Docker publisher container looks so that they can be used to publish
+# the Move modules on the local testnet without having to compile them in the container.
+# This action should always be run in CI, but locally it can only be skipped if the Move
+# modules have not been changed since the last time they were compiled, based on the git diff.
+should_compile=false
+if [ ! -d "$move_dir/emojicoin_dot_fun/target" ] || [ ! -d "$move_dir/rewards/target" ]; then
+	echo "Move JSON publish payloads not found- recompiling the Move modules on the host machine."
+	should_compile=true
+else
+	if git diff --quiet origin/main..HEAD -- src/move/; then
+		msg="$INFO The Move modules have not been changed- using the existing JSON publish payloads."
+		echo -e "$msg"
 	else
-		echo "JSON publish payloads found- skipping compilation and copying the existing JSON publish payloads."
-		json_dir_path="$docker_dir/aptos-node/json"
-		msg="WARNING: If you have made changes to the Move modules, remove the existing ones at"
-		echo -e "$WARNING_COLOR$msg $json_dir_path.$NO_COLOR"
-		skip_compilation=true
-	fi
-
-	if [ "$skip_compilation" = false ]; then
-		addr=$EMOJICOIN_MODULE_ADDRESS
-
-		aptos move build-publish-payload \
-			--assume-yes \
-			--private-key $PUBLISHER_PK \
-			--encoding hex \
-			--named-addresses emojicoin_dot_fun=$addr \
-			--override-size-check \
-			--included-artifacts none \
-			--package-dir $move_dir/emojicoin_dot_fun/ \
-			--json-output-file aptos-node/json/publish-emojicoin_dot_fun.json &
-
-		aptos move build-publish-payload \
-			--assume-yes \
-			--private-key $PUBLISHER_PK \
-			--encoding hex \
-			--named-addresses rewards=$addr,integrator=$addr,emojicoin_dot_fun=$addr \
-			--override-size-check \
-			--included-artifacts none \
-			--package-dir $move_dir/rewards/ \
-			--json-output-file aptos-node/json/publish-rewards.json
+		msg="$WARNING Files in the Move directory have been changed- recompiling the Move modules."
+		echo -e "$WARNING_COLOR$msg$NO_COLOR"
+		should_compile=true
 	fi
 fi
 
+if [ "$should_compile" = true ]; then
+	aptos move build-publish-payload \
+		--assume-yes \
+		--private-key $PUBLISHER_PK \
+		--encoding hex \
+		--named-addresses emojicoin_dot_fun=$addr \
+		--override-size-check \
+		--included-artifacts none \
+		--package-dir $move_dir/emojicoin_dot_fun/ \
+		--json-output-file aptos-node/json/publish-emojicoin_dot_fun.json &
+
+	aptos move build-publish-payload \
+		--assume-yes \
+		--private-key $PUBLISHER_PK \
+		--encoding hex \
+		--named-addresses rewards=$addr,integrator=$addr,emojicoin_dot_fun=$addr \
+		--override-size-check \
+		--included-artifacts none \
+		--package-dir $move_dir/rewards/ \
+		--json-output-file aptos-node/json/publish-rewards.json
+fi
+
+# ------------------------------------------------------------------------------
+#                Remove and/or start the test harness containers
+# ------------------------------------------------------------------------------
 if [ "$remove" = true ]; then
 	remove_container_resources
 fi

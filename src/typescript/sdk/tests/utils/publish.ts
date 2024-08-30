@@ -32,6 +32,11 @@ export async function publishPackage(args: {
     aptosExecutableAvailable = false;
   }
 
+  const npxCommand = "npx @aptos-labs/aptos-cli";
+  if (aptosExecutableAvailable) {
+    console.debug(`Found aptos executable. Using that instead of ${npxCommand}`);
+  }
+
   const packageDir = path.join(getGitRoot(), packageDirRelative);
 
   const entries = Object.entries(namedAddresses);
@@ -42,7 +47,7 @@ export async function publishPackage(args: {
   const pkString = new Hex(pk.toUint8Array()).toStringWithoutPrefix();
 
   const shellArgs = [
-    aptosExecutableAvailable ? "npx @aptos-labs/aptos-cli" : "aptos",
+    aptosExecutableAvailable ? npxCommand : "aptos",
     "move",
     "publish",
     ...["--named-addresses", namedAddressesString],

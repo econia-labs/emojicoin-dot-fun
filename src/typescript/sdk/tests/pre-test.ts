@@ -6,19 +6,15 @@ import {
   PUBLISH_RES_PATH,
   RESET_CONTAINERS_ON_START,
 } from "./utils";
-import { DockerDirector } from "./utils/docker-director";
+import { DockerTestHarness } from "./utils/docker-test-harness";
 import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
 
 export default async function preTest() {
   const globalThisAny = globalThis as any;
   /* eslint-disable-next-line */
-  globalThisAny.__GLOBAL_DIRECTOR__ = new DockerDirector({
+  globalThisAny.__GLOBAL_DIRECTOR__ = new DockerTestHarness({
     container: "docker-broker-1",
     removeContainersOnStart: RESET_CONTAINERS_ON_START,
-    // `json` is better if you're frequently changing the code, `compile` is better if you
-    // don't mind an initial long wait time. Sometimes there are issues with cloning from git
-    // and `json` is better in those cases.
-    publishType: "json",
   });
   // --------------------------------------------------------------------------------------
   //                             Start the docker containers.

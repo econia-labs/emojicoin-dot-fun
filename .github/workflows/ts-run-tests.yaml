@@ -6,6 +6,14 @@ env:
     0xb2e21f041ace3b049de2ef720ba6d1e1e9601c72d0d79efcbf6c476437174f10
   TS_DIR: 'src/typescript'
 jobs:
+  get-latest-aptos-cli:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - name: 'Install the latest Aptos CLI'
+      uses: './.github/actions/get-latest-aptos-cli'
+      with:
+        destination_directory: '/usr/local/bin'
+    
   ts-run-tests:
     runs-on: 'ubuntu-latest'
     steps:
@@ -23,18 +31,12 @@ jobs:
       shell: 'bash'
     - uses: './.github/actions/ts-run-tests'
 
-    # Add a tmate debugging session if the previous step fails.
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      if: failure()
-      with:
-        limit-access-to-actor: true
-
-    # Add a manual trigger for a tmate session.
+    # Only run the tmate session if the workflow was triggered manually.
     - name: Setup tmate session (manual trigger)
       uses: mxschmitt/action-tmate@v3
       if: github.event_name == 'workflow_dispatch'
       with:
+        # The tmate session is only accessible to whoever triggered the workflow.
         limit-access-to-actor: true
 
 name: 'Run the TypeScript E2E and unit tests with a local testnet'
