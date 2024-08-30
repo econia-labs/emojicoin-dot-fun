@@ -536,7 +536,7 @@ Resources:
       - - 'service'
         - !Ref 'ContainerCluster'
         - !GetAtt 'BrokerRunner.Name'
-      RoleARN: !GetAtt 'ContainerScalingRole.Arn'
+      RoleARN: !GetAtt 'ContainerRole.Arn'
       ScalableDimension: 'ecs:service:DesiredCount'
       ServiceNamespace: 'ecs'
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
@@ -765,7 +765,16 @@ Resources:
         - Action: 'sts:AssumeRole'
           Effect: 'Allow'
           Principal:
+            Service: 'application-autoscaling.amazonaws.com'
+        - Action: 'sts:AssumeRole'
+          Effect: 'Allow'
+          Principal:
             Service: 'ecs-tasks.amazonaws.com'
+      ManagedPolicyArns:
+      - !Join
+        - ''
+        - - 'arn:aws:iam::aws:policy/service-role/'
+          - 'AmazonEC2ContainerServiceAutoscaleRole'
       Policies:
       - PolicyDocument:
           Statement:
@@ -840,22 +849,6 @@ Resources:
                 - ':secret:ecr-pullthroughcache/emojicoin/docker-hub-*'
         PolicyName: !Sub 'EmojicoinContainerRolePolicy-${AWS::StackName}'
       RoleName: !Sub 'EmojicoinContainerRole-${AWS::StackName}'
-    Type: 'AWS::IAM::Role'
-  # Role for container service auto scaling.
-  ContainerScalingRole:
-    Condition: 'MaybeDeployContainers'
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action: 'sts:AssumeRole'
-          Effect: 'Allow'
-          Principal:
-            Service: 'application-autoscaling.amazonaws.com'
-      ManagedPolicyArns:
-      - !Join
-        - ''
-        - - 'arn:aws:iam::aws:policy/service-role/'
-          - 'AmazonEC2ContainerServiceAutoscaleRole'
     Type: 'AWS::IAM::Role'
   # Security group for ECS containers.
   ContainerSecurityGroup:
@@ -1118,7 +1111,7 @@ Resources:
       - - 'service'
         - !Ref 'ContainerCluster'
         - !GetAtt 'PostgrestRunner.Name'
-      RoleARN: !GetAtt 'ContainerScalingRole.Arn'
+      RoleARN: !GetAtt 'ContainerRole.Arn'
       ScalableDimension: 'ecs:service:DesiredCount'
       ServiceNamespace: 'ecs'
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'

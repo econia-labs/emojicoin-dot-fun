@@ -186,12 +186,18 @@ several prohibitive issues in practice:
            "iam:DeleteRolePolicy",
            "iam:DetachRolePolicy",
            "iam:GetRole",
-           "iam:PassRole",
            "iam:PutRolePolicy",
            "iam:RemoveRoleFromInstanceProfile",
            "iam:TagRole",
          ],
          "Resource": "*"
+       },
+       {
+         "Effect": "Allow",
+         "Action": [
+           "iam:PassRole",
+         ],
+         "Resource": "arn:aws:sts::*:role/*EmojicoinContainerRole*"
        }
      ]
    }
@@ -347,10 +353,14 @@ The `ContainerRole` [ECS task execution IAM role] provides
 [wildcard resource][iam policy resource element] for
 [`ecr::GetAuthorizationToken`] only, since it does not
 [specify an action for an individual resource][iam policy resource element].
+It also includes the [AmazonEC2ContainerServiceAutoscaleRole], which is required
+for [application autoscaling IAM access].
 
 For ease of accessing the various services required to deploy the indexer,
 [`CloudFormationPowerUser`](#setup) is more permissive, though notably
 
+[amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
+[application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
 [aptos labs transaction stream service api key]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#authorization-via-api-key
 [aurora autoscaling]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html#aurora-serverless-v2.how-it-works.scaling
@@ -374,6 +384,7 @@ For ease of accessing the various services required to deploy the indexer,
 [gitsync status dashboard]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-status.html
 [high availability for aurora]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.AuroraHighAvailability.html
 [hosted zone id]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/ListInfoOnHostedZone.html
+[iam policy resource element]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html
 [iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
 [inline policy]: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#inline-policies
 [least-privilege permissions]: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege
@@ -394,5 +405,4 @@ For ease of accessing the various services required to deploy the indexer,
 [transaction stream service endpoint]: https://aptos.dev/en/build/indexer/txn-stream
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
 [`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630
-[iam policy resource element]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html
-[`ecr::GetAuthorizationToken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
+[`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
