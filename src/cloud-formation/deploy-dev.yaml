@@ -9,7 +9,7 @@ parameters:
   MaybeProvisionContainers: 'true'
   MaybeProvisionDb: 'true'
   MaybeProvisionPostgrest: 'false'
-  MaybeProvisionProcessor: 'true'
+  MaybeProvisionProcessor: 'false'
   MaybeProvisionRouteTables: 'true'
   MaybeProvisionStack: 'true'
   MaybeProvisionVpc: 'true'
