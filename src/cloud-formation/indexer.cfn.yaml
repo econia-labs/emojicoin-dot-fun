@@ -741,17 +741,18 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
+        # - Action: 'sts:AssumeRole'
+        #   Effect: 'Allow'
+        #   Principal:
+        #     Service: 'pullthroughcache.ecr.amazonaws.com'
         - Action: 'sts:AssumeRole'
           Effect: 'Allow'
           Principal:
             Service: 'ecs-tasks.amazonaws.com'
-        - Action: 'sts:AssumeRole'
-          Effect: 'Allow'
-          Principal:
-            Service: 'pullthroughcache.ecr.amazonaws.com'
       Policies:
       - PolicyDocument:
           Statement:
+          # Pull through cache permissions.
           - Action:
             - 'ecr:BatchCheckLayerAvailability'
             - 'ecr:BatchGetImage'
@@ -778,31 +779,17 @@ Resources:
                 - 'ImageCache'
                 - 'RepositoryPrefix'
               - '/*'
-        PolicyName: !Sub 'ContainerRolePullThroughPolicy-${AWS::StackName}'
-      - PolicyDocument:
-          Statement:
           - Action:
-            # - 'ecr:BatchCheckLayerAvailability'
-            # - 'ecr:BatchGetImage'
-            # - 'ecr:BatchImportUpstreamImage'
-            # - 'ecr:CreateRepository'
-            # - 'ecr:CompleteLayerUpload'
-            # - 'ecr:DescribeImages'
-            # - 'ecr:DescribeRepositories'
-            # - 'ecr:GetAuthorizationToken'
-            # - 'ecr:GetDownloadUrlForLayer'
-            # - 'ecr:GetRepositoryPolicy'
-            # - 'ecr:InitiateLayerUpload'
-            # - 'ecr:ListImages'
-            # - 'ecr:PutImage'
-            # - 'ecr:UploadLayerPart'
+            - 'ecr:GetAuthorizationToken'
+            Effect: 'Allow'
+            Resource: '*'
+          # Container logging permissions.
+          - Action:
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Effect: 'Allow'
             Resource: '*'
-        PolicyName: !Sub 'ContainerRolePolicy-${AWS::StackName}'
-      - PolicyDocument:
-          Statement:
+          # Secret access permissions.
           - Action:
             - 'secretsmanager:GetSecretValue'
             Effect: 'Allow'
@@ -821,7 +808,7 @@ Resources:
                 - ':'
                 - !Ref 'AWS::AccountId'
                 - ':secret:ecr-pullthroughcache/emojicoin/docker-hub-*'
-        PolicyName: !Sub 'ContainerRoleSecretsPolicy-${AWS::StackName}'
+        PolicyName: !Sub 'ContainerRolePolicy-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
   # Role for container service auto scaling.
   ContainerScalingRole:
