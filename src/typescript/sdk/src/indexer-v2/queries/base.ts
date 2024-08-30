@@ -22,7 +22,7 @@ const selectChatsByMarketID = ({ marketID }: { marketID: AnyNumberString }) =>
     .eq("market_id", marketID)
     .order("market_nonce", ORDER_BY.DESC);
 
-const selectPeriodicEventsByResolution = ({
+const selectPeriodicEventsByPeriod = ({
   marketID,
   period,
   startTime,
@@ -100,7 +100,7 @@ const selectLiquidityEvents = ({
 export {
   selectSwapsByMarketID,
   selectChatsByMarketID,
-  selectPeriodicEventsByResolution,
+  selectPeriodicEventsByPeriod,
   selectMarketLatestStateEvents,
   selectMarketsPostBondingCurve,
   selectUniqueMarkets,

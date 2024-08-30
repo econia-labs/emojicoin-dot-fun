@@ -31,9 +31,9 @@ export const ChartContainer = (props: Omit<ChartContainerProps, "isScriptReady">
       });
   }, [initialize]);
 
-  // For now, we subscribe to any periodic state event instead of just a specific resolution.
+  // For now, we subscribe to any periodic state event instead of just a specific period duration type.
   // There isn't a good reason to do otherwise since this is just the websocket subscription and we
-  // default to 5m candles, which will have more data than any resolution except for the 1 minute chart.
+  // default to 5m candles, which will have more data than any period duration type except for the 1 minute chart.
   useReliableSubscribe({
     periodicState: [props.marketID, null],
   });

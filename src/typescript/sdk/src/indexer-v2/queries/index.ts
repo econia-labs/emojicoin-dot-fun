@@ -12,7 +12,7 @@ import { withQueryConfig } from "./utils";
 import {
   selectSwapsByMarketID,
   selectChatsByMarketID,
-  selectPeriodicEventsByResolution,
+  selectPeriodicEventsByPeriod,
   selectMarketLatestStateEvents,
   selectMarketsPostBondingCurve,
   selectUserLiquidityPools,
@@ -34,7 +34,7 @@ import { postgresTimestampToMicroseconds } from "../types/snake-case-types";
 const fetchSwaps = withQueryConfig(selectSwapsByMarketID, toSwapEventModel);
 const fetchChats = withQueryConfig(selectChatsByMarketID, toChatEventModel);
 const fetchPeriodicEvents = withQueryConfig(
-  selectPeriodicEventsByResolution,
+  selectPeriodicEventsByPeriod,
   toPeriodicStateEventModel
 );
 const fetchMarketLatestStateEvents = withQueryConfig(

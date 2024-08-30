@@ -1,10 +1,10 @@
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import {
-  type ContractPeriod,
+  type PeriodDuration,
   type Period,
-  periodEnumToContractPeriod,
-  toCandlestickResolution,
+  periodEnumToPeriodDuration,
+  toPeriodDuration,
 } from "../const";
 import { normalizeHex } from "./hex";
 import {
@@ -90,27 +90,27 @@ export function getTime(unitOfTime: UnitOfTime) {
  * ```
  * // A swap event that occurred at exactly 1 minute after the epoch event.
  * const swap = { ...someSwapEvent, time: 1n * 60n * 1000n * 1000n };
- * const periodStart = getPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * const periodStart = getPeriodStartTime(swap, PeriodDuration.PERIOD_1M);
  * // `periodStart` is equal to 1 minute in microseconds, i.e., 60 * 1000 * 1000.
  *
  * // If the time is one microsecond before...
  * swap.time -= 1n;
- * const periodStart = getPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * const periodStart = getPeriodStartTime(swap, PeriodDuration.PERIOD_1M);
  * // `periodStart` is equal to 0 minutes in microseconds.
  *
  * // One minute later...
  * swap.time += 60n * 1000n * 1000n;
- * const periodStart = getPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * const periodStart = getPeriodStartTime(swap, PeriodDuration.PERIOD_1M);
  * // `periodStart` is equal to 1 minute in microseconds.
  *
  * swap.time += 1n;
- * const periodStart = getPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * const periodStart = getPeriodStartTime(swap, PeriodDuration.PERIOD_1M);
  * // `periodStart` is equal to 2 minutes in microseconds.
  * ```
  */
 export function getPeriodStartTime(
   event: Types.SwapEvent | Types.StateEvent | Types.PeriodicStateEvent | Types.PeriodicStateView,
-  periodIn: ContractPeriod | bigint | number
+  periodIn: PeriodDuration | bigint | number
 ) {
   // All CandlestickPeriods are in microseconds.
   let time: bigint;
@@ -134,9 +134,9 @@ export function getPeriodStartTime(
     throw new Error("Invalid event type.");
   }
 
-  let period: ContractPeriod;
+  let period: PeriodDuration;
   if (typeof periodIn === "bigint" || typeof periodIn === "number") {
-    const tryPeriod = toCandlestickResolution(periodIn);
+    const tryPeriod = toPeriodDuration(periodIn);
     if (!tryPeriod) {
       throw new Error("Invalid period passed in to period boundary calculation.");
     }
@@ -155,7 +155,7 @@ export function getPeriodStartTime(
  * @param period the period to calculate the start of.
  * @returns the start of the period in microseconds.
  */
-export function getPeriodStartTimeFromTime(microseconds: AnyNumberString, period: ContractPeriod) {
+export function getPeriodStartTimeFromTime(microseconds: AnyNumberString, period: PeriodDuration) {
   const time = BigInt(microseconds);
   // prettier-ignore
   const res = Big(time.toString())
@@ -166,8 +166,8 @@ export function getPeriodStartTimeFromTime(microseconds: AnyNumberString, period
 }
 
 export function getPeriodBoundary(microseconds: AnyNumberString, period: Period): bigint {
-  const contractPeriod = periodEnumToContractPeriod(period);
-  return getPeriodStartTimeFromTime(microseconds, contractPeriod);
+  const periodDuration = periodEnumToPeriodDuration(period);
+  return getPeriodStartTimeFromTime(microseconds, periodDuration);
 }
 
 export const dateFromMicroseconds = (microseconds: bigint) =>

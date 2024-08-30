@@ -1,26 +1,26 @@
 /* eslint-disable import/no-unused-modules */ // Still this bug where it thinks this doesn't export.
-import { ContractPeriod } from "../../const";
+import { PeriodDuration } from "../../const";
 import { type Types } from "../../types";
 
 /**
- * Tip: Use the CandlestickResolution enum to access the keys of an object of this type.
+ * Tip: Use the PeriodDuration enum to access the keys of an object of this type.
  *
  * @example
  * const candlesticks = await getInitialCandlesticks(marketID);
- * const oneDayCandlesticks = candlesticks[CandlestickResolution.PERIOD_1D];
- * const oneHourCandlesticks = candlesticks[CandlestickResolution.PERIOD_1H];
- * const oneMinuteCandlesticks = candlesticks[CandlestickResolution.PERIOD_1M];
+ * const oneDayCandlesticks = candlesticks[PeriodDuration.PERIOD_1D];
+ * const oneHourCandlesticks = candlesticks[PeriodDuration.PERIOD_1H];
+ * const oneMinuteCandlesticks = candlesticks[PeriodDuration.PERIOD_1M];
  */
-export type GroupedPeriodicStateEvents = Record<ContractPeriod, Types.PeriodicStateEvent[]>;
+export type GroupedPeriodicStateEvents = Record<PeriodDuration, Types.PeriodicStateEvent[]>;
 
 export const createEmptyGroupedCandlesticks = (): GroupedPeriodicStateEvents => ({
-  [ContractPeriod.PERIOD_1M]: [],
-  [ContractPeriod.PERIOD_5M]: [],
-  [ContractPeriod.PERIOD_15M]: [],
-  [ContractPeriod.PERIOD_30M]: [],
-  [ContractPeriod.PERIOD_1H]: [],
-  [ContractPeriod.PERIOD_4H]: [],
-  [ContractPeriod.PERIOD_1D]: [],
+  [PeriodDuration.PERIOD_1M]: [],
+  [PeriodDuration.PERIOD_5M]: [],
+  [PeriodDuration.PERIOD_15M]: [],
+  [PeriodDuration.PERIOD_30M]: [],
+  [PeriodDuration.PERIOD_1H]: [],
+  [PeriodDuration.PERIOD_4H]: [],
+  [PeriodDuration.PERIOD_1D]: [],
 });
 
 // TODO: Put this in the event store...?
@@ -31,7 +31,7 @@ export const toGroupedCandlesticks = (candlesticks: Types.PeriodicStateEvent[]) 
   const grouped = createEmptyGroupedCandlesticks();
 
   for (const candlestick of candlesticks) {
-    const periodInEvent = Number(candlestick.periodicStateMetadata.period) as ContractPeriod;
+    const periodInEvent = Number(candlestick.periodicStateMetadata.period) as PeriodDuration;
     grouped[periodInEvent].push(candlestick);
   }
 
@@ -41,4 +41,4 @@ export const toGroupedCandlesticks = (candlesticks: Types.PeriodicStateEvent[]) 
 export const isGroupedCandlesticks = (
   candlesticks: any
 ): candlesticks is GroupedPeriodicStateEvents =>
-  Object.keys(candlesticks).every((key) => Object.values(ContractPeriod).includes(key as any));
+  Object.keys(candlesticks).every((key) => Object.values(PeriodDuration).includes(key as any));
