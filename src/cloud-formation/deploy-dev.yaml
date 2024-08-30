@@ -1,18 +1,18 @@
 ---
 parameters:
   BrokerImageVersion: '0.3.0'
-  Environment: 'dev'
+  Environment: 'ECO-2144'
   MaybeProvisionAlb: 'false'
   MaybeProvisionAlbDnsRecord: 'false'
   MaybeProvisionBastionHost: 'false'
   MaybeProvisionBroker: 'false'
   MaybeProvisionContainers: 'true'
-  MaybeProvisionDb: 'false'
+  MaybeProvisionDb: 'true'
   MaybeProvisionPostgrest: 'false'
   MaybeProvisionProcessor: 'false'
-  MaybeProvisionRouteTables: 'false'
-  MaybeProvisionStack: 'false'
-  MaybeProvisionVpc: 'false'
+  MaybeProvisionRouteTables: 'true'
+  MaybeProvisionStack: 'true'
+  MaybeProvisionVpc: 'true'
   Network: 'testnet'
   ProcessorImageVersion: '0.4.0'
 tags: null
