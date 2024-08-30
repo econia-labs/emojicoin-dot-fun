@@ -1,6 +1,11 @@
 #!/bin/bash
 # cspell:word toplevel
 
+# A complete bash script to publish the Move contracts.
+# This is primarily used as a helper script to quickly
+# publish the contracts. This is not intended to be used
+# in a Docker container.
+
 ROOT_DIR=$(git rev-parse --show-toplevel)
 DOCKER_DIR_ABS_PATH="$ROOT_DIR/src/docker"
 
