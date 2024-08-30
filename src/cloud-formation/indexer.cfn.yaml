@@ -745,8 +745,16 @@ Resources:
   ContainerLogGroup:
     Condition: 'MaybeProvisionContainers'
     Properties:
-      LogGroupName: !Sub '/ecs/${AWS::StackName}'
-      RetentionInDays: 14
+      LogGroupName: !Join
+      - ''
+      - - '/'
+        - !FindInMap
+          - 'Constants'
+          - 'Logging'
+          - 'Prefix'
+        - '/'
+        - !Ref 'AWS::StackName'
+      RetentionInDays: 7
     Type: 'AWS::Logs::LogGroup'
   # Role with assorted permissions required to run containers.
   ContainerRole:
@@ -830,7 +838,8 @@ Resources:
                 - ':'
                 - !Ref 'AWS::AccountId'
                 - ':secret:ecr-pullthroughcache/emojicoin/docker-hub-*'
-        PolicyName: !Sub 'ContainerRolePolicy-${AWS::StackName}'
+        PolicyName: !Sub 'EmojicoinContainerRolePolicy-${AWS::StackName}'
+      RoleName: !Sub 'EmojicoinContainerRole-${AWS::StackName}'
     Type: 'AWS::IAM::Role'
   # Role for container service auto scaling.
   ContainerScalingRole:
