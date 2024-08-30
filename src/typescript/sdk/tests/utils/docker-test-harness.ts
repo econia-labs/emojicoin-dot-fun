@@ -29,9 +29,6 @@ async function getDockerContainerStatus(name: ContainerName): Promise<ContainerS
       `docker inspect -f '{{.State.Running}},{{.State.Health.Status}}' ${name}`
     );
     const [running, health] = stdout.trim().split(",");
-    console.log(`Container ${name} is running: ${running}, is healthy: ${health}`);
-    console.log(stdout);
-    console.error(stderr);
     return {
       isRunning: running === "true",
       isHealthy: health === "healthy",
@@ -42,31 +39,27 @@ async function getDockerContainerStatus(name: ContainerName): Promise<ContainerS
   }
 }
 
-const TEST_RUNNER_PATH = path.join(getGitRoot(), "src/sh/emojicoin/test-runner.sh");
+const TEST_HARNESS_PATH = path.join(getGitRoot(), "src/sh/emojicoin/docker-test-harness.sh");
 const MAXIMUM_WAIT_TIME_SEC = 120;
-export class DockerDirector {
+export class DockerTestHarness {
   public container: ContainerName;
 
   public removeContainersOnStart: boolean;
 
-  public publishType: "json" | "compile";
-
   constructor(args: {
     container: ContainerName;
     removeContainersOnStart: boolean;
-    publishType?: "json" | "compile";
   }) {
-    const { container, removeContainersOnStart, publishType } = args;
+    const { container, removeContainersOnStart } = args;
     this.container = container;
     this.removeContainersOnStart = removeContainersOnStart;
-    this.publishType = publishType || "compile";
   }
 
   /**
    * Removes all related processes.
    */
   static remove() {
-    return execPromise(`bash ${TEST_RUNNER_PATH} --remove`);
+    return execPromise(`bash ${TEST_HARNESS_PATH} --remove`);
   }
 
   /**
@@ -89,17 +82,16 @@ export class DockerDirector {
   async start() {
     if (this.removeContainersOnStart) {
       console.debug();
-      const { stdout, stderr } = await DockerDirector.remove();
+      const { stdout, stderr } = await DockerTestHarness.remove();
       console.debug(stdout);
       console.debug(stderr);
     }
 
     const command = "bash";
     const args = [
-      TEST_RUNNER_PATH,
+      TEST_HARNESS_PATH,
       "--start",
       this.container === "docker-frontend-1" ? "" : "--no-frontend",
-      this.publishType === "json" ? "--json" : "--compile",
     ].filter((arg) => arg !== "");
 
     const childProcess = spawn(command, args);
