@@ -1,10 +1,12 @@
 FROM node:20.12.2
 
+SHELL ["/bin/bash", "-o", "pipefail"]
+
 RUN curl -fsSL https://get.pnpm.io/install.sh | \
     ENV="$HOME/.bashrc" SHELL="$(which bash)" bash - \
     && mv /root/.local/share/pnpm/pnpm /usr/local/bin/
 
-COPY . .
+COPY . /
 
 WORKDIR /src/typescript/frontend
 
@@ -29,15 +31,6 @@ ENV INBOX_URL=$INBOX_URL \
     NEXT_PUBLIC_REWARDS_MODULE_ADDRESS=$NEXT_PUBLIC_REWARDS_MODULE_ADDRESS \
     REVALIDATION_TIME=$REVALIDATION_TIME
 
-RUN pnpm install
-RUN pnpm run build
+RUN pnpm install && pnpm run build
 
-HEALTHCHECK \
-    --interval=2m \
-    --timeout=1s \
-    --start-period=20s \
-    --start-interval=1s \
-    --retries=1 \
-    CMD curl -f http://localhost:3001/ || exit 1
-
-CMD pnpm run start -H 0.0.0.0
+CMD ["pnpm", "run", "start", "-H", "0.0.0.0"]
