@@ -117,51 +117,60 @@ start_containers() {
 }
 
 # ------------------------------------------------------------------------------
-#                 Determine if Move modules need to be compiled
+#                       Ensure the publish payloads exist
 # ------------------------------------------------------------------------------
-source $docker_dir/.env
+ensure_publish_payloads_exist() {
+	source $docker_dir/.env
 
-# Compile the Move contracts in the form of JSON publish payloads, with the output directory
-# in a place where the Docker publisher container looks so that they can be used to publish
-# the Move modules on the local testnet without having to compile them in the container.
-# This action should always be run in CI, but locally it can only be skipped if the Move
-# modules have not been changed since the last time they were compiled, based on the git diff.
-should_compile=false
-if [ ! -d "$move_dir/emojicoin_dot_fun/target" ] || [ ! -d "$move_dir/rewards/target" ]; then
-	echo "Move JSON publish payloads not found- recompiling the Move modules on the host machine."
-	should_compile=true
-else
-	if git diff --quiet origin/main..HEAD -- src/move/; then
-		msg="$INFO The Move modules have not been changed- using the existing JSON publish payloads."
-		echo -e "$msg"
-	else
-		msg="$WARNING Files in the Move directory have been changed- recompiling the Move modules."
-		echo -e "$WARNING_COLOR$msg$NO_COLOR"
+	# Compile the Move contracts in the form of JSON publish payloads, with the output directory
+	# in a place where the Docker publisher container looks so that they can be used to publish
+	# the Move modules on the local testnet without having to compile them in the container.
+	# This action will always be run in CI because the files won't exist on the GitHub runner since
+	# we have a `.gitignore` set up to ignore the JSON files.
+	# But locally it will only be skipped if the Move modules directory has not been changed, according
+	# to the git diff.
+	should_compile=false
+	json_output_dir="$docker_dir/aptos-node/json"
+	emojicoin_json_path="$json_output_dir/publish-emojicoin_dot_fun.json"
+	rewards_json_path="$json_output_dir/publish-rewards.json"
+
+	if [ ! "$emojicoin_json_path" ] || [ ! "$rewards_json_path" ]; then
+		echo "Move JSON publish payloads not found- recompiling the Move modules on the host machine."
 		should_compile=true
+	else
+		if git diff --quiet origin/main..HEAD -- src/move/; then
+			msg="$INFO The Move modules have not been changed- using the existing JSON publish payloads."
+			echo -e "$msg"
+		else
+			msg="$WARNING Files in the Move directory have been changed- recompiling the Move modules."
+			echo -e "$WARNING_COLOR$msg$NO_COLOR"
+			should_compile=true
+		fi
 	fi
-fi
 
-if [ "$should_compile" = true ]; then
-	aptos move build-publish-payload \
-		--assume-yes \
-		--private-key $PUBLISHER_PK \
-		--encoding hex \
-		--named-addresses emojicoin_dot_fun=$addr \
-		--override-size-check \
-		--included-artifacts none \
-		--package-dir $move_dir/emojicoin_dot_fun/ \
-		--json-output-file aptos-node/json/publish-emojicoin_dot_fun.json &
+	if [ "$should_compile" = true ]; then
+		address="$EMOJICOIN_MODULE_ADDRESS"
+		aptos move build-publish-payload \
+			--assume-yes \
+			--private-key $PUBLISHER_PK \
+			--encoding hex \
+			--named-addresses emojicoin_dot_fun=$address \
+			--override-size-check \
+			--included-artifacts none \
+			--package-dir $move_dir/emojicoin_dot_fun/ \
+			--json-output-file $emojicoin_json_path &
 
-	aptos move build-publish-payload \
-		--assume-yes \
-		--private-key $PUBLISHER_PK \
-		--encoding hex \
-		--named-addresses rewards=$addr,integrator=$addr,emojicoin_dot_fun=$addr \
-		--override-size-check \
-		--included-artifacts none \
-		--package-dir $move_dir/rewards/ \
-		--json-output-file aptos-node/json/publish-rewards.json
-fi
+		aptos move build-publish-payload \
+			--assume-yes \
+			--private-key $PUBLISHER_PK \
+			--encoding hex \
+			--named-addresses rewards=$address,integrator=$address,emojicoin_dot_fun=$address \
+			--override-size-check \
+			--included-artifacts none \
+			--package-dir $move_dir/rewards/ \
+			--json-output-file $rewards_json_path
+	fi
+}
 
 # ------------------------------------------------------------------------------
 #                Remove and/or start the test harness containers
@@ -171,5 +180,6 @@ if [ "$remove" = true ]; then
 fi
 
 if [ "$start" = true ]; then
+	ensure_publish_payloads_exist
 	start_containers
 fi
