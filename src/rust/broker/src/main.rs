@@ -1,4 +1,8 @@
-use tokio::sync::broadcast;
+use std::sync::Arc;
+
+use log::{error, info};
+use serde::{Deserialize, Serialize};
+use tokio::sync::{broadcast, RwLock};
 
 mod processor_connection;
 mod server;
@@ -6,6 +10,14 @@ mod types;
 mod util;
 
 const CHANNEL_BUFFER_SIZE: usize = 2048;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum HealthStatus {
+    Starting,
+    Ok,
+    Sick,
+    Dead,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), ()> {
@@ -21,24 +33,27 @@ async fn main() -> Result<(), ()> {
     let (tx, _) = broadcast::channel(CHANNEL_BUFFER_SIZE);
     let tx2 = tx.clone();
 
-    let processor_connection = tokio::spawn(processor_connection::processor_connection(
+    let processor_connection_health = Arc::new(RwLock::new(HealthStatus::Starting));
+
+    let processor_connection = tokio::spawn(processor_connection::start(
         processor_url,
         tx2,
+        processor_connection_health.clone(),
     ));
 
-    let sse_server = tokio::spawn(server::server(tx, port));
+    let mut sse_server = tokio::spawn(server::server(tx, port, processor_connection_health));
 
     tokio::select! {
         _ = processor_connection => {
-            log::error!("Connection to processor error.");
+            error!("Processor connection thread terminated.");
             return Err(());
         }
-        result = sse_server => {
+        result = &mut sse_server => {
             if let Err(e) = result {
-                log::error!("Broker server error: {e}.");
+                error!("Broker server error: {e}.");
                 return Err(());
             } else {
-                log::info!("Gracefully shutting down.")
+                info!("Gracefully shutting down.")
             }
         }
     };

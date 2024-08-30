@@ -8,6 +8,7 @@ use axum::{
     response::Response,
 };
 use futures_util::{SinkExt, StreamExt};
+use log::{debug, error, info, warn};
 use tokio::sync::{broadcast::error::RecvError, RwLock};
 
 use crate::{types::Subscription, util::is_match};
@@ -19,7 +20,7 @@ pub async fn handler(ws: WebSocketUpgrade, State(state): State<Arc<AppState>>) -
 }
 
 async fn handle_websocket(socket: WebSocket, state: Arc<AppState>) {
-    log::info!("New websocket connection.");
+    info!("New websocket connection.");
 
     let (ws_tx, mut ws_rx) = socket.split();
 
@@ -34,22 +35,21 @@ async fn handle_websocket(socket: WebSocket, state: Arc<AppState>) {
     let r = async move {
         while let Some(Ok(msg)) = ws_rx.next().await {
             if let Ok(msg) = msg.to_text() {
-                log::info!("Got message ({}).", msg);
                 let new_sub: Result<Subscription, _> = serde_json::from_str(msg);
                 if let Ok(new_sub) = new_sub {
-                    log::info!("Subscription updated ({new_sub:?}).");
+                    debug!("Subscription updated ({new_sub:?}).");
                     *sub2.write().await = Some(new_sub);
                 } else {
-                    log::warn!("Got invalid JSON format from client, closing.");
+                    warn!("Got invalid JSON format from client, closing connection.");
                     break;
                 }
             } else {
-                log::warn!("Message sent by client is not text, closing.");
+                warn!("Message sent by client is not text, closing connection.");
                 break;
             }
         }
         let _ = ws_tx2.write().await.close().await;
-        log::warn!("Connection ended, closing.");
+        warn!("Connection ended.");
     };
 
     let t = async move {
@@ -57,24 +57,24 @@ async fn handle_websocket(socket: WebSocket, state: Arc<AppState>) {
         loop {
             let mut r = rx.recv().await;
             while matches!(r, Err(RecvError::Lagged(_))) {
-                log::warn!("Messages dropped due to lag.");
+                warn!("Messages dropped due to lag.");
                 r = rx.recv().await;
             }
             if let Ok(item) = r {
                 let s = sub.read().await;
-                for s in s.iter() {
+                if let Some(s) = &*s {
                     if is_match(s, &item) {
                         let item_str = serde_json::to_string(&item).unwrap();
                         if let Err(e) = ws_tx.write().await.send(Message::Text(item_str)).await {
-                            log::warn!("Could not send event to user: {}.", e);
+                            warn!("Could not send event to user: {}, closing connection.", e);
                             break;
                         } else {
-                            log::info!("Sent message.")
+                            debug!("Sent message.")
                         }
                     }
                 }
             } else {
-                log::error!("Got error: {}.", r.unwrap_err());
+                error!("Got unexpected error: {}.", r.unwrap_err());
                 break;
             }
         }
@@ -82,13 +82,9 @@ async fn handle_websocket(socket: WebSocket, state: Arc<AppState>) {
     };
 
     tokio::select! {
-        _ = t => {
-            log::warn!("Connection broken (t).")
-        }
-        _ = r => {
-            log::warn!("Connection broken (r).")
-        }
+        _ = t => {}
+        _ = r => {}
     };
 
-    log::info!("Websocket connection closed.");
+    info!("Websocket connection closed.");
 }

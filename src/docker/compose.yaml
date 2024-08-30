@@ -13,8 +13,15 @@ services:
     environment:
       PROCESSOR_WS_URL: 'ws://processor:${PROCESSOR_WS_PORT}/ws'
       PORT: '${BROKER_PORT}'
-      RUST_LOG: 'info'
+      RUST_LOG: 'info,broker=trace'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
+    healthcheck:
+      test: 'curl -f http://localhost:${BROKER_PORT}/ || exit 1'
+      interval: '2m'
+      timeout: '5s'
+      retries: '1'
+      start_period: '10s'
+      start_interval: '2s'
     ports:
     - '${BROKER_PORT}:${BROKER_PORT}'
     restart: 'unless-stopped'
@@ -68,6 +75,13 @@ services:
       postgres:
         condition: 'service_healthy'
     image: 'econialabs/emojicoin-dot-fun-indexer-processor'
+    healthcheck:
+      test: 'curl -f http://localhost:${PROCESSOR_WS_PORT}/ || exit 1'
+      interval: '2m'
+      timeout: '5s'
+      retries: '1'
+      start_period: '15s'
+      start_interval: '2s'
     restart: 'unless-stopped'
     stop_signal: 'SIGKILL'
     ports:
@@ -101,6 +115,13 @@ services:
       NEXT_PUBLIC_MQTT_URL: 'ws://broker:${BROKER_PORT}'
       NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: '${EMOJICOIN_REWARDS_MODULE_ADDRESS}'
       REVALIDATION_TIME: '${REVALIDATION_TIME}'
+    healthcheck:
+      test: 'curl -f http://localhost:3001/ || exit 1'
+      interval: '2m'
+      timeout: '1s'
+      retries: '1'
+      start_period: '20s'
+      start_interval: '1s'
     ports:
     - '3001:3001'
     depends_on:

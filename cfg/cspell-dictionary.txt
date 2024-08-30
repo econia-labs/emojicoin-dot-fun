@@ -40,6 +40,7 @@ gcloud
 geoblock
 geoblocked
 guids
+hadolint
 hamsa
 headlessui
 healthcheck
@@ -75,6 +76,7 @@ oden
 parallelizable
 permissionless
 pgrst
+pipefail
 pkill
 postg
 postgrest
@@ -82,6 +84,7 @@ precommit
 presale
 psql
 rica
+rustflags
 rustup
 serde
 sint

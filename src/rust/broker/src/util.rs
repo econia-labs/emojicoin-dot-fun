@@ -1,9 +1,11 @@
+use log::error;
 use processor::emojicoin_dot_fun::{EmojicoinDbEvent, EmojicoinDbEventType};
 use tokio::signal;
 
 use crate::types::Subscription;
 
 /// Get the market ID of a EmojicoinDbEvent of a given EventType
+#[allow(dead_code)]
 pub fn get_market_id(event: &EmojicoinDbEvent) -> Result<u64, String> {
     let market_id: Result<u64, _> = match event {
         EmojicoinDbEvent::Swap(s) => s.market_id,
@@ -12,7 +14,11 @@ pub fn get_market_id(event: &EmojicoinDbEvent) -> Result<u64, String> {
         EmojicoinDbEvent::PeriodicState(ps) => ps.market_id,
         EmojicoinDbEvent::MarketLatestState(mls) => mls.market_id,
         EmojicoinDbEvent::Liquidity(l) => l.market_id,
-        _ => return Err("Got event which does not have a market ID".to_string()),
+        _ => {
+            return Err(
+                "Trying to get market ID from event which does not have a market ID".to_string(),
+            )
+        }
     }
     .try_into();
     if let Ok(market_id) = market_id {
@@ -23,6 +29,7 @@ pub fn get_market_id(event: &EmojicoinDbEvent) -> Result<u64, String> {
 }
 
 /// Returns true if the given subscription should receive the given event.
+#[allow(dead_code)]
 pub fn is_match(subscription: &Subscription, event: &EmojicoinDbEvent) -> bool {
     // If all fields of a subscription are empty, all events should be sent there.
     if subscription.markets.is_empty() && subscription.event_types.is_empty() {
@@ -44,7 +51,7 @@ pub fn is_match(subscription: &Subscription, event: &EmojicoinDbEvent) -> bool {
     match get_market_id(event) {
         Ok(market_id) => subscription.markets.contains(&market_id),
         Err(msg) => {
-            log::error!("{msg}");
+            error!("{msg}");
             false
         }
     }
