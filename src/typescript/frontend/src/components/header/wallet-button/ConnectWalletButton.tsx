@@ -1,12 +1,13 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Button } from "@headlessui/react";
-import { truncateAddress } from "@sdk/utils/misc";
+import { formatDisplayName } from "@sdk/utils/misc";
 import { translationFunction } from "context/language-context";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
 import { useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
 import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
+import { useNameStore } from "context/state-store-context";
 import Popup from "components/popup";
 import Text from "components/text";
 
@@ -14,6 +15,7 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
   mobile?: boolean;
   onClick?: () => void;
   geoblocked: boolean;
+  arrow?: boolean;
 }
 
 const CONNECT_WALLET = "Connect Wallet";
@@ -24,6 +26,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   className,
   onClick,
   geoblocked,
+  arrow = true,
 }) => {
   const { connected, account } = useWallet();
   const { openWalletModal } = useWalletModal();
@@ -31,21 +34,23 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
 
   const [enabled, setEnabled] = useState(false);
 
+  const nameResolver = useNameStore((s) =>
+    s.getResolverWithNames(account?.address ? [account.address] : [])
+  );
+
   const text = useMemo(() => {
     if (!geoblocked && connected) {
       if (account) {
-        // If there's no button text provided, we just show the truncated address.
-        // Keep in mind this only shows if no children are passed to the component.
-        return truncateAddress(account.address);
+        return formatDisplayName(nameResolver(account.address));
       } else {
         return t("Connected");
       }
     }
     return t(CONNECT_WALLET);
-  }, [connected, account, t, geoblocked]);
+  }, [connected, account, t, nameResolver, geoblocked]);
 
   const width = useMemo(() => {
-    return `${text.length}ch`;
+    return `${text.length + 1}ch`;
   }, [text]);
 
   const { ref, replay } = useScramble({
@@ -104,7 +109,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
               mobile={mobile}
             />
           </div>
-          <Arrow width={18} className="fill-black" />
+          {arrow && <Arrow width={18} className="fill-black" />}
         </div>
       </Button>
     ) : (

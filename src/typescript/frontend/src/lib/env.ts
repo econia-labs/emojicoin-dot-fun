@@ -2,10 +2,23 @@ import { type Network } from "@aptos-labs/wallet-adapter-react";
 import packageInfo from "../../package.json";
 import { parse } from "semver";
 
+export type Links = {
+  x: string;
+  github: string;
+  discord: string;
+  telegram: string;
+  tos: string;
+};
+
 let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: string;
 let INTEGRATOR_FEE_RATE_BPS: number;
 let MQTT_URL: string;
+
+export const LINKS: Links | undefined =
+  typeof process.env.NEXT_PUBLIC_LINKS === "string" && process.env.NEXT_PUBLIC_LINKS !== ""
+    ? JSON.parse(process.env.NEXT_PUBLIC_LINKS)
+    : undefined;
 
 const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_ALLOWLIST_ENABLED === "true";
 

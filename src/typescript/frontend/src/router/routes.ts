@@ -7,4 +7,5 @@ export const ROUTES = {
   pools: "/pools",
   verify: "/verify",
   startHere: "https://docs.emojicoin.fun/category/--start-here",
+  notFound: "/not-found",
 } as const;
