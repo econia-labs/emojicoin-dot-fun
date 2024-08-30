@@ -9,23 +9,18 @@ env:
     0xb2e21f041ace3b049de2ef720ba6d1e1e9601c72d0d79efcbf6c476437174f10
   TS_DIR: 'src/typescript'
 jobs:
-  get-latest-aptos-cli:
-    runs-on: 'ubuntu-latest'
-    steps:
-    - name: 'Checkout the repository'
-      uses: 'actions/checkout@v4'
-    - name: 'Install the latest Aptos CLI'
-      uses: './.github/actions/get-latest-aptos-cli'
-      with:
-        destination_directory: '/usr/local/bin'
-
   ts-run-tests:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
       with:
         submodules: 'false'
-    - run: |
+    - name: 'Install the latest Aptos CLI'
+      uses: './.github/actions/get-latest-aptos-cli'
+      with:
+        destination_directory: '/usr/local/bin'
+    - name: 'Build the docker test harness'
+      run: |
         git submodule update --init --recursive src/rust
         cp src/docker/example.local.env src/docker/.env && \
         bash src/sh/emojicoin/docker-test-harness.sh \
