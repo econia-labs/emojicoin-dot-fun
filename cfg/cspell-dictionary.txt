@@ -76,6 +76,7 @@ oden
 parallelizable
 permissionless
 pgrst
+pipefail
 pkill
 postg
 postgrest
