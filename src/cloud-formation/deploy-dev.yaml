@@ -9,7 +9,7 @@ parameters:
   MaybeDeployContainers: 'true'
   MaybeDeployDb: 'true'
   MaybeDeployPostgrest: 'false'
-  MaybeDeployProcessor: 'false'
+  MaybeDeployProcessor: 'true'
   MaybeDeployRouteTables: 'true'
   MaybeDeployStack: 'true'
   MaybeDeployVpc: 'true'
