@@ -324,7 +324,7 @@ Query PostgREST:
 curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
 ```
 
-## Architecture notes
+## Design notes
 
 ### Database
 
@@ -343,7 +343,13 @@ The `ContainerRole` [ECS task execution IAM role] provides
 [least-privilege permissions] required for
 [using an ECR pull through cache][ecr pull through cache permissions],
 [container logging][container logging permissions], and accessing
-[deployment secrets](#setup).
+[deployment secrets](#setup), with a
+[wildcard resource][iam policy resource element] for
+[`ecr::GetAuthorizationToken`] only, since it does not
+[specify an action for an individual resource][iam policy resource element].
+
+For ease of accessing the various services required to deploy the indexer,
+[`CloudFormationPowerUser`](#setup) is more permissive, though notably
 
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
 [aptos labs transaction stream service api key]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#authorization-via-api-key
@@ -388,3 +394,5 @@ The `ContainerRole` [ECS task execution IAM role] provides
 [transaction stream service endpoint]: https://aptos.dev/en/build/indexer/txn-stream
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
 [`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630
+[iam policy resource element]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_resource.html
+[`ecr::GetAuthorizationToken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
