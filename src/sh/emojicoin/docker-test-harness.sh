@@ -143,7 +143,7 @@ ensure_publish_payloads_exist() {
 			echo -e "$msg"
 		else
 			msg="$WARNING Files in the Move directory have been changed- recompiling the Move modules."
-			echo -e "$WARNING_COLOR$msg$NO_COLOR"
+			echo -e "$msg"
 			should_compile=true
 		fi
 	fi
