@@ -17,30 +17,30 @@ ARG FULLNODE_BINARY
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
-RUN git clone $GIT_REPO --branch $GIT_TAG --depth 1
-RUN apt-get update && apt-get install -y \
-    libudev-dev \
-    build-essential \
-    libclang-dev \
-    libpq-dev \
-    libssl-dev \
-    libdw-dev \
-    pkg-config \
-    lld \
-    curl \
+RUN git clone $GIT_REPO --branch $GIT_TAG --depth 1 \
+    && apt-get update && apt-get install --no-install-recommends -y \
+        libudev-dev=252.26-1~deb12u2 \
+        build-essential=12.9 \
+        libclang-dev=1:14.0-55.7~deb12u1 \
+        libpq-dev=15.8-0+deb12u1 \
+        libssl-dev=3.0.13-1~deb12u1 \
+        libdw-dev=0.188-2.1 \
+        pkg-config=1.8.1-1 \
+        lld=1:14.0-55.7~deb12u1 \
+        curl=7.88.1-10+deb12u6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Resolve outdated lockfile from upstream tag.
 RUN cargo update --manifest-path /aptos-core/Cargo.toml
-
+# Build the fullnode binary.
 RUN RUSTFLAGS="--cfg tokio_unstable" cargo build \
     --bin aptos \
     --manifest-path /aptos-core/Cargo.toml \
     --profile cli
-
+# Strip the binary to reduce its size.
 RUN strip -s $FULLNODE_BINARY
 
-FROM ubuntu AS base
+FROM ubuntu:noble AS base
 WORKDIR /app
 
 # If we publish with json, we don't need to compile the Move contracts or

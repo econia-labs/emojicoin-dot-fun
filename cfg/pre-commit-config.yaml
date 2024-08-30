@@ -219,6 +219,30 @@ repos:
     - '--manifest-path'
     - 'src/rust/Cargo.toml'
     - '--'
+    - '--deny'
+    - 'clippy::all'
+    id: 'clippy'
+  repo: 'https://github.com/doublify/pre-commit-rust'
+  rev: 'v1.0'
+-
+  hooks:
+  -
+    args:
+    - '--manifest-path'
+    - 'src/rust/processor/rust/processor/Cargo.toml'
+    - '--config'
+    - 'build.rustflags=["--cfg", "tokio_unstable"]'
+    - '--'
+    id: 'cargo-check'
+  -
+    args:
+    - '--manifest-path'
+    - 'src/rust/processor/rust/processor/Cargo.toml'
+    - '--config'
+    - 'build.rustflags=["--cfg", "tokio_unstable"]'
+    - '--'
+    - '--deny'
+    - 'clippy::all'
     id: 'clippy'
   repo: 'https://github.com/doublify/pre-commit-rust'
   rev: 'v1.0'
@@ -230,4 +254,10 @@ repos:
     id: 'cfn-lint'
   repo: 'https://github.com/aws-cloudformation/cfn-lint'
   rev: 'v1.11.0'
+-
+  hooks:
+  -
+    id: 'hadolint-docker'
+  repo: 'https://github.com/hadolint/hadolint'
+  rev: 'v2.12.0'
 ...

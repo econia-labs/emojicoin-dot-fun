@@ -13,13 +13,13 @@ services:
     environment:
       PROCESSOR_WS_URL: 'ws://processor:${PROCESSOR_WS_PORT}/ws'
       PORT: '${BROKER_PORT}'
-      RUST_LOG: 'info'
+      RUST_LOG: 'info,broker=trace'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:${BROKER_PORT}/']
       interval: '2m'
       timeout: '5s'
-      retries: 2
+      retries: '1'
       start_period: '10s'
       start_interval: '2s'
     ports:
@@ -75,16 +75,17 @@ services:
       postgres:
         condition: 'service_healthy'
     image: 'econialabs/emojicoin-dot-fun-indexer-processor'
-    restart: 'unless-stopped'
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8084/metrics/']
-      interval: '30s'
-      timeout: '10s'
-      retries: 5
+      test: ['CMD', 'curl', '-f', 'http://localhost:${PROCESSOR_WS_PORT}/']
+      interval: '2m'
+      timeout: '5s'
+      retries: '1'
       start_period: '15s'
-    stop_signal: 'SIGKILL'
+      start_interval: '2s'
     ports:
     - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
+    restart: 'unless-stopped'
+    stop_signal: 'SIGKILL'
 
 volumes:
   db:
