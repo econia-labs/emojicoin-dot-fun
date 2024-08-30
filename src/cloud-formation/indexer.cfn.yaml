@@ -71,6 +71,8 @@ Mappings:
       MasterUsername: 'emojicoin'
     ImageCache:
       RepositoryPrefix: 'docker-hub'
+    Logging:
+      Prefix: 'emojicoin'
     Networking:
       BrokerPort: 3009
       DatabasePort: 5432
@@ -676,9 +678,20 @@ Resources:
         LogConfiguration:
           LogDriver: 'awslogs'
           Options:
-            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-group: !Join
+            - ''
+            - - '/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: 'ecs'
+            awslogs-stream-prefix: !FindInMap
+            - 'Constants'
+            - 'Logging'
+            - 'Prefix'
         Name: !Sub '${AWS::StackName}-broker'
         PortMappings:
         - ContainerPort: !FindInMap
@@ -741,10 +754,6 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-        # - Action: 'sts:AssumeRole'
-        #   Effect: 'Allow'
-        #   Principal:
-        #     Service: 'pullthroughcache.ecr.amazonaws.com'
         - Action: 'sts:AssumeRole'
           Effect: 'Allow'
           Principal:
@@ -788,7 +797,20 @@ Resources:
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Effect: 'Allow'
-            Resource: '*'
+            Resource: !Join
+            - ''
+            - - 'arn:aws:logs:'
+              - !Ref 'AWS::Region'
+              - ':'
+              - !Ref 'AWS::AccountId'
+              - ':log-group:/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
+              - ':*'
           # Secret access permissions.
           - Action:
             - 'secretsmanager:GetSecretValue'
@@ -1241,9 +1263,20 @@ Resources:
         LogConfiguration:
           LogDriver: 'awslogs'
           Options:
-            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-group: !Join
+            - ''
+            - - '/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: 'ecs'
+            awslogs-stream-prefix: !FindInMap
+            - 'Constants'
+            - 'Logging'
+            - 'Prefix'
         Name: !Sub '${AWS::StackName}-postgrest'
         PortMappings:
         - ContainerPort: !FindInMap
@@ -1430,9 +1463,20 @@ Resources:
         LogConfiguration:
           LogDriver: 'awslogs'
           Options:
-            awslogs-group: !Sub '/ecs/${AWS::StackName}'
+            awslogs-group: !Join
+            - ''
+            - - '/'
+              - !FindInMap
+                - 'Constants'
+                - 'Logging'
+                - 'Prefix'
+              - '/'
+              - !Ref 'AWS::StackName'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: 'ecs'
+            awslogs-stream-prefix: !FindInMap
+            - 'Constants'
+            - 'Logging'
+            - 'Prefix'
         Name: !Sub '${AWS::StackName}-processor'
         PortMappings:
         - ContainerPort: !FindInMap
