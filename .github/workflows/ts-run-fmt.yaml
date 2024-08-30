@@ -5,7 +5,7 @@ jobs:
   ts-run-fmt:
     runs-on: 'ubuntu-latest'
     steps:
-    - uses: 'actions/checkout@v3'
+    - uses: 'actions/checkout@v4'
     - uses: './.github/actions/ts-run-fmt'
 name: 'Run the TypeScript formatter'
 'on':
