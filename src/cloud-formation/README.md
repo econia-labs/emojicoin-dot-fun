@@ -1,6 +1,8 @@
 <!---
+cspell:word getauthorizationtoken
 cspell:word ec2instanceconnectcli
 cspell:word eice
+cspell:word pullthroughcache
 -->
 
 # Indexer on CloudFormation
@@ -84,6 +86,10 @@ several prohibitive issues in practice:
    [Aptos Labs transaction stream service API key].
 
    </td></tr></table>
+
+1. Follow the `For Docker Hub` section of the
+   [ECR pull through cache rule creation docs] using the secret
+   `ecr-pullthroughcache/emojicoin/docker-hub` and prefix `emojicoin`.
 
    <!-- markdownlint-enable MD033 -->
 
@@ -377,6 +383,7 @@ restricts [role passing] to the `ContainerRole`.
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [ecr pull through cache permissions]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-iam.html
+[ecr pull through cache rule creation docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-rule.html
 [ecs task execution iam role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html
 [fault tolerant replica promotion]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.AuroraHighAvailability.html#Aurora.Managing.FaultTolerance
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
