@@ -31,8 +31,7 @@ jobs:
         bash src/sh/emojicoin/test-runner.sh \
         --remove \
         --start \
-        --no-frontend \
-        --compile
+        --no-frontend
       shell: 'bash'
     - uses: './.github/actions/ts-run-tests'
 

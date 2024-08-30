@@ -64,38 +64,19 @@ aptos account fund-with-faucet \
 	--profile $BIG_MONEY_GUY \
 	--amount 100000000000000000
 
-if [ $PUBLISH_TYPE = "json" ]; then
-	aptos move run \
-		--json-file /app/json/publish-emojicoin_dot_fun.json \
-		--assume-yes \
-		--max-gas 2000000 \
-		--profile $PUBLISHER
+# Publish with the JSON publish payloads that were built on the host machine
+# and copied to the container.
+aptos move run \
+	--json-file /app/json/publish-emojicoin_dot_fun.json \
+	--assume-yes \
+	--max-gas 2000000 \
+	--profile $PUBLISHER
 
-	aptos move run \
-		--json-file /app/json/publish-rewards.json \
-		--assume-yes \
-		--max-gas 2000000 \
-		--profile $PUBLISHER
-else
-	aptos move publish \
-		--assume-yes \
-		--included-artifacts none \
-		--named-addresses emojicoin_dot_fun=$PUBLISHER \
-		--override-size-check \
-		--max-gas 2000000 \
-		--package-dir /app/emojicoin_dot_fun \
-		--profile $PUBLISHER
-
-	aptos move publish \
-		--assume-yes \
-		--included-artifacts none \
-		--named-addresses \
-		rewards=$PUBLISHER,integrator=$PUBLISHER,emojicoin_dot_fun=$PUBLISHER \
-		--override-size-check \
-		--max-gas 200000 \
-		--package-dir /app/rewards \
-		--profile $PUBLISHER
-fi
+aptos move run \
+	--json-file /app/json/publish-rewards.json \
+	--assume-yes \
+	--max-gas 2000000 \
+	--profile $PUBLISHER
 
 # ------------------------------------------------------------------------------
 #                              Fund the test accounts
