@@ -1528,26 +1528,7 @@ Resources:
       GatewayId: !Ref 'InternetGateway'
       RouteTableId: !Ref 'PublicRouteTable'
     Type: 'AWS::EC2::Route'
-  PullThroughCacheRule1:
-    Metadata:
-      Stack: 'a'
-    Properties:
-      CredentialArn: !Join
-      - ''
-      - - 'arn:aws:secretsmanager:'
-        - !Ref 'AWS::Region'
-        - ':'
-        - !Ref 'AWS::AccountId'
-        - ':secret:ecr-pullthroughcache/emojicoin/docker-hub'
-      EcrRepositoryPrefix: !FindInMap
-      - 'Constants'
-      - 'ImageCache'
-      - 'RepositoryPrefix'
-      UpstreamRegistryUrl: 'registry-1.docker.io'
-    Type: 'AWS::ECR::PullThroughCacheRule'
-  PullThroughCacheRule2:
-    Metadata:
-      Stack: 'b'
+  PullThroughCacheRule:
     Properties:
       CredentialArn: !Join
       - ''
