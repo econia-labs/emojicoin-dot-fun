@@ -562,13 +562,11 @@ Resources:
     # Wait until processor server is online.
     - 'ProcessorRunner'
     # Wait until there is an outbound route to get the image from the
-    # pullthrough cache.
+    # pull through cache.
     - 'PrivateRouteTableAssociationA'
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
-    # Wait for the pull-through cache rule so the image can be pulled.
-    - 'ContainerImageCacheRule'
     # Proxy for a conditional dependency on the application load balancer
     # listener rule for the broker, which associates the broker target group
     # with the application load balancer.
@@ -724,23 +722,6 @@ Resources:
   ContainerCluster:
     Condition: 'MaybeDeployContainers'
     Type: 'AWS::ECS::Cluster'
-  # Pull-through cache rule for Docker images from Docker Hub.
-  ContainerImageCacheRule:
-    Condition: 'MaybeDeployContainers'
-    Properties:
-      CredentialArn: !Join
-      - ''
-      - - 'arn:aws:secretsmanager:'
-        - !Ref 'AWS::Region'
-        - ':'
-        - !Ref 'AWS::AccountId'
-        - ':secret:ecr-pullthroughcache/emojicoin/docker-hub'
-      EcrRepositoryPrefix: !FindInMap
-      - 'Constants'
-      - 'ImageCache'
-      - 'RepositoryPrefix'
-      UpstreamRegistryUrl: 'registry-1.docker.io'
-    Type: 'AWS::ECR::PullThroughCacheRule'
   # Log group for ECS task logging.
   ContainerLogGroup:
     Condition: 'MaybeDeployContainers'
@@ -1136,13 +1117,11 @@ Resources:
     # schema will be available and load balancer health checks will pass.
     - 'ProcessorRunner'
     # Wait until there is an outbound route to get the image from the
-    # pullthrough cache.
+    # pull through cache.
     - 'PrivateRouteTableAssociationA'
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
-    # Wait for the pull-through cache rule so the image can be pulled.
-    - 'ContainerImageCacheRule'
     # Proxy for a conditional dependency on the application load balancer
     # listener, which associates the PostgREST target group with the balancer.
     Metadata:
@@ -1351,13 +1330,11 @@ Resources:
     - 'DbInstancePrimary'
     - 'DbInstanceReplica'
     # Wait until there is an outbound route to get the image from the
-    # pullthrough cache.
+    # pull through cache.
     - 'PrivateRouteTableAssociationA'
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
-    # Wait for the pull-through cache rule so the image can be pulled.
-    - 'ContainerImageCacheRule'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
@@ -1528,21 +1505,6 @@ Resources:
       GatewayId: !Ref 'InternetGateway'
       RouteTableId: !Ref 'PublicRouteTable'
     Type: 'AWS::EC2::Route'
-  PullThroughCacheRule:
-    Properties:
-      CredentialArn: !Join
-      - ''
-      - - 'arn:aws:secretsmanager:'
-        - !Ref 'AWS::Region'
-        - ':'
-        - !Ref 'AWS::AccountId'
-        - ':secret:ecr-pullthroughcache/emojicoin/docker-hub'
-      EcrRepositoryPrefix: !FindInMap
-      - 'Constants'
-      - 'ImageCache'
-      - 'RepositoryPrefix'
-      UpstreamRegistryUrl: 'registry-1.docker.io'
-    Type: 'AWS::ECR::PullThroughCacheRule'
   # Virtual private cloud for internal networking.
   Vpc:
     Condition: 'MaybeDeployVpc'
