@@ -1,4 +1,4 @@
-import { ContractPeriod, getPeriodStartTime } from "../../src";
+import { PeriodDuration, getPeriodStartTime } from "../../src";
 import { SAMPLE_STATE_EVENT, SAMPLE_SWAP_EVENT } from "../utils/sample-data";
 
 const swap = SAMPLE_SWAP_EVENT;
@@ -8,13 +8,13 @@ const epochInMicroseconds = BigInt(epoch.getTime() * 1000);
 
 const microsecondFactor = 10n ** 6n;
 
-const { PERIOD_1M } = ContractPeriod;
-const { PERIOD_5M } = ContractPeriod;
-const { PERIOD_15M } = ContractPeriod;
-const { PERIOD_30M } = ContractPeriod;
-const { PERIOD_1H } = ContractPeriod;
-const { PERIOD_4H } = ContractPeriod;
-const { PERIOD_1D } = ContractPeriod;
+const { PERIOD_1M } = PeriodDuration;
+const { PERIOD_5M } = PeriodDuration;
+const { PERIOD_15M } = PeriodDuration;
+const { PERIOD_30M } = PeriodDuration;
+const { PERIOD_1H } = PeriodDuration;
+const { PERIOD_4H } = PeriodDuration;
+const { PERIOD_1D } = PeriodDuration;
 
 describe("tests period boundaries", () => {
   it("calculates the first period boundary ever for a swap event", () => {

@@ -3,7 +3,7 @@ import Big from "big.js";
 import { type Types } from "../types";
 import { getPeriodStartTime } from "./misc";
 import { q64ToBig } from "./nominal-price";
-import { type ContractPeriod } from "../const";
+import { type PeriodDuration } from "../const";
 
 export type Bar = {
   time: number;
@@ -15,7 +15,7 @@ export type Bar = {
 };
 
 export type LatestBar = Bar & {
-  period: ContractPeriod;
+  period: PeriodDuration;
   marketNonce: bigint;
 };
 
@@ -42,13 +42,13 @@ export const toBars = <T extends Types.PeriodicStateEvent | Types.PeriodicStateV
 
 export const createNewLatestBarFromSwap = (
   swap: Types.SwapEvent,
-  resolution: ContractPeriod,
+  period: PeriodDuration,
   previousClose?: number
 ): LatestBar => {
   // Set the new bar's open, high, low, and close to the close price of the event triggering
   // the creation of the new bar.
   const price = q64ToBig(swap.avgExecutionPriceQ64).toNumber();
-  const periodStartTime = getPeriodStartTime(swap, resolution);
+  const periodStartTime = getPeriodStartTime(swap, period);
 
   return {
     time: Number(periodStartTime / 1000n),
@@ -57,7 +57,7 @@ export const createNewLatestBarFromSwap = (
     low: price,
     close: price,
     volume: Number(swap.baseVolume),
-    period: resolution,
+    period,
     marketNonce: swap.marketNonce,
   };
 };
