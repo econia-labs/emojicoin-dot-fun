@@ -340,11 +340,11 @@ fi
 1. Check broker and PostgREST access through the ALB:
 
    ```sh
-   websocat $ALB_WS_URL
+   websocat ws://$ALB_DNS_NAME/ws
    ```
 
    ```sh
-   curl $ALB_REST_URL/market_latest_state_event?select=market_id && echo
+   curl http://$ALB_DNS_NAME/market_latest_state_event?select=market_id && echo
    ```
 
 ## Design notes
