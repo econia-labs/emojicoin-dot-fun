@@ -572,7 +572,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-broker'
+      Name: !Sub '${AWS::StackName}-broker-alb'
       Port: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -619,6 +619,37 @@ Resources:
       ScalableDimension: 'ecs:service:DesiredCount'
       ServiceNamespace: 'ecs'
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+  # Target group for network load balancer traffic to the broker.
+  BrokerNlbTargetGroup:
+    Condition: 'MaybeDeployNlb'
+    DependsOn: 'Nlb'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-broker'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      Protocol: 'TCP'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'true'
+      - Key: 'stickiness.type'
+        Value: 'lb_cookie'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
     Condition: 'MaybeDeployBroker'
@@ -662,13 +693,13 @@ Resources:
           Rollback: true
       LaunchType: 'FARGATE'
       LoadBalancers: !If
-      - 'MaybeDeployAlb'
+      - 'MaybeDeployNlb'
       - - ContainerName: !Sub '${AWS::StackName}-broker'
           ContainerPort: !FindInMap
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
-          TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+          TargetGroupArn: !Ref 'BrokerNlbTargetGroup'
       - !Ref 'AWS::NoValue'
       NetworkConfiguration:
         AwsvpcConfiguration:
@@ -1125,6 +1156,10 @@ Resources:
       SecurityGroups:
       # - !Ref 'AlbClientSecurityGroup'
       - !If
+        - 'MaybeDeployBroker'
+        - !Ref 'BrokerWsClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
+      - !If
         - 'MaybeDeployPostgrest'
         - !Ref 'PostgrestClientSecurityGroup'
         - !Ref 'AWS::NoValue'
@@ -1157,21 +1192,40 @@ Resources:
       Port: 80
       Protocol: 'TCP'
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # Network load balancer listener rule for broker traffic.
+  NlbListenerRuleBrokerTarget:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      Actions:
+      - TargetGroupArn: !Ref 'BrokerNlbTargetGroup'
+        Type: 'forward'
+      Conditions:
+      - Field: 'path-pattern'
+        Values:
+        - '/ws'
+      ListenerArn: !Ref 'NlbListener'
+      Priority: 1
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the network load balancer.
   NlbSecurityGroup:
     Condition: 'MaybeDeployNlb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupIngress:
+      - CidrIp: '0.0.0.0/0'
+        FromPort: 80
+        IpProtocol: 'tcp'
+        ToPort: 80
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the network load balancer security group.
-  NlbSecurityGroupIngress:
-    Condition: 'MaybeDeployNlb'
-    Properties:
-      GroupId: !Ref 'NlbSecurityGroup'
-      IpProtocol: -1
-      SourceSecurityGroupId: !Ref 'NlbClientSecurityGroup'
-    Type: 'AWS::EC2::SecurityGroupIngress'
+  # NlbSecurityGroupIngress:
+  #   Condition: 'MaybeDeployNlb'
+  #   Properties:
+  #     GroupId: !Ref 'NlbSecurityGroup'
+  #     IpProtocol: -1
+  #     SourceSecurityGroupId: !Ref 'NlbClientSecurityGroup'
+  #   Type: 'AWS::EC2::SecurityGroupIngress'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'MaybeDeployAlb'
@@ -1305,13 +1359,13 @@ Resources:
           Rollback: true
       LaunchType: 'FARGATE'
       LoadBalancers: !If
-      - 'MaybeDeployAlb'
+      - 'MaybeDeployNlb'
       - - ContainerName: !Sub '${AWS::StackName}-postgrest'
           ContainerPort: !FindInMap
           - 'Constants'
           - 'Networking'
           - 'PostgrestPort'
-          TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+          TargetGroupArn: !Ref 'PostgrestNlbTargetGroup'
       - !Ref 'AWS::NoValue'
       NetworkConfiguration:
         AwsvpcConfiguration:
