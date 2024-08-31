@@ -39,7 +39,7 @@ Conditions:
     - !Ref 'MaybeDeployDb'
     - 'true'
   MaybeDeployNlb: !And
-  - !Condition 'MaybeDeployAlb'
+  - !Condition 'MaybeDeployVpc'
   - !Equals
     - !Ref 'MaybeDeployNlb'
     - 'true'
@@ -295,16 +295,16 @@ Resources:
       SourceSecurityGroupId: !Ref 'AlbClientSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Application load balancer as the target of the network load balancer.
-  AlbTargetGroup:
-    Condition: 'MaybeDeployNlb'
-    Properties:
-      Port: 80
-      Protocol: 'TCP'
-      TargetType: 'alb'
-      Targets:
-      - Id: !Ref 'Alb'
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+  # AlbTargetGroup:
+  #   Condition: 'MaybeDeployNlb'
+  #   Properties:
+  #     Port: 80
+  #     Protocol: 'TCP'
+  #     TargetType: 'alb'
+  #     Targets:
+  #     - Id: !Ref 'Alb'
+  #     VpcId: !Ref 'Vpc'
+  #   Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # DNS certificate for the API.
   ApiCertificate:
     Condition: 'MaybeDeployApiDnsRecord'
@@ -1123,7 +1123,11 @@ Resources:
         Value: 'true'
       Scheme: 'internal'
       SecurityGroups:
-      - !Ref 'AlbClientSecurityGroup'
+      # - !Ref 'AlbClientSecurityGroup'
+      - !If
+        - 'MaybeDeployPostgrest'
+        - !Ref 'PostgrestClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
       Subnets:
       - !Ref 'PrivateSubnetA'
       - !Ref 'PrivateSubnetB'
@@ -1145,7 +1149,9 @@ Resources:
     Condition: 'MaybeDeployNlb'
     Properties:
       DefaultActions:
-      - TargetGroupArn: !Ref 'AlbTargetGroup'
+      # - TargetGroupArn: !Ref 'AlbTargetGroup'
+      #   Type: 'forward'
+      - TargetGroupArn: !Ref 'PostgrestNlbTargetGroup'
         Type: 'forward'
       LoadBalancerArn: !Ref 'Nlb'
       Port: 80
@@ -1180,7 +1186,7 @@ Resources:
       HealthCheckProtocol: 'HTTP'
       HealthCheckTimeoutSeconds: 2
       HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-postgrest'
+      Name: !Sub '${AWS::StackName}-postgrest-alb'
       Port: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -1237,6 +1243,37 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Target group for network load balancer traffic to PostgREST.
+  PostgrestNlbTargetGroup:
+    Condition: 'MaybeDeployNlb'
+    DependsOn: 'Nlb'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/ready'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestHealthCheckPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-postgrest'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+      Protocol: 'TCP'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'false'
+      - Key: 'load_balancing.algorithm.type'
+        Value: 'round_robin'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Service for running PostgREST.
   PostgrestRunner:
     Condition: 'MaybeDeployPostgrest'
