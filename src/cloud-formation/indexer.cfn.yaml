@@ -677,13 +677,13 @@ Resources:
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
-    # Proxy for a conditional dependency on the application load balancer
-    # listener rule for the broker, which associates the broker target group
-    # with the application load balancer.
+    # Proxy for a conditional dependency on the network load balancer listener
+    # rule for the broker, which associates the broker target group with the
+    # network load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
-      - 'MaybeDeployAlb'
-      - !Ref 'AlbListenerRuleBrokerTarget'
+      - 'MaybeDeployNlb'
+      - !Ref 'NlbListenerRuleBrokerTarget'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
@@ -1344,12 +1344,13 @@ Resources:
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
-    # Proxy for a conditional dependency on the application load balancer
-    # listener, which associates the PostgREST target group with the balancer.
+    # Proxy for a conditional dependency on the network load balancer listener,
+    # which associates the PostgREST target group with the network load
+    # balancer.
     Metadata:
       ConditionalDependencyProxy: !If
-      - 'MaybeDeployAlb'
-      - !Ref 'AlbListener'
+      - 'MaybeDeployNlb'
+      - !Ref 'NlbListener'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
