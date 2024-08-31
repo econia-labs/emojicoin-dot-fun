@@ -332,7 +332,7 @@ Resources:
         - 'DnsNameSubdomain'
       EndpointConfiguration:
         Types:
-        - 'EDGE'
+        - 'REGIONAL'
       SecurityPolicy: 'TLS_1_2'
     Type: 'AWS::ApiGateway::DomainName'
   # DNS record for the API.
