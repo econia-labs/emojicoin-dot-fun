@@ -43,6 +43,11 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployNlb'
     - 'true'
+  MaybeDeployNlbVpcLink: !And
+  - !Condition 'MaybeDeployNlb'
+  - !Equals
+    - !Ref 'MaybeDeployNlbVpcLink'
+    - 'true'
   MaybeDeployPostgrest: !And
   - !Condition 'MaybeDeployContainers'
   - !Condition 'MaybeDeployProcessor'
@@ -177,6 +182,11 @@ Parameters:
     - 'true'
     Type: 'String'
   MaybeDeployNlb:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployNlbVpcLink:
     AllowedValues:
     - 'false'
     - 'true'
@@ -1220,6 +1230,14 @@ Resources:
       - 'Networking'
       - 'PostgrestPort'
     Type: 'AWS::EC2::SecurityGroupIngress'
+  # Connection to network load balancer.
+  NlbVpcLink:
+    Condition: 'MaybeDeployNlbVpcLink'
+    Properties:
+      Name: !Ref 'AWS::StackName'
+      TargetArns:
+      - !Ref 'Nlb'
+    Type: 'AWS::ApiGateway::VpcLink'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'MaybeDeployAlb'
