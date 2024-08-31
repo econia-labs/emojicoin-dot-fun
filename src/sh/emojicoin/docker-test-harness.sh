@@ -134,7 +134,7 @@ ensure_publish_payloads_exist() {
 	emojicoin_json_path="$json_output_dir/publish-emojicoin_dot_fun.json"
 	rewards_json_path="$json_output_dir/publish-rewards.json"
 
-	if [ ! "$emojicoin_json_path" ] || [ ! "$rewards_json_path" ]; then
+	if [ ! -f "$emojicoin_json_path" ] || [ ! -f "$rewards_json_path" ]; then
 		echo "Move JSON publish payloads not found- recompiling the Move modules on the host machine."
 		should_compile=true
 	else
