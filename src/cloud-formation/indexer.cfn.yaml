@@ -619,6 +619,20 @@ Resources:
       ScalableDimension: 'ecs:service:DesiredCount'
       ServiceNamespace: 'ecs'
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+  # Listener for network load balancer traffic to broker.
+  BrokerNlbListener:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      DefaultActions:
+      - TargetGroupArn: !Ref 'PostgrestNlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Nlb'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      Protocol: 'TCP'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Target group for network load balancer traffic to the broker.
   BrokerNlbTargetGroup:
     Condition: 'MaybeDeployNlb'
@@ -676,12 +690,12 @@ Resources:
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
     # Proxy for a conditional dependency on the network load balancer listener
-    # rule for the broker, which associates the broker target group with the
-    # network load balancer.
+    # for the broker, which associates the broker target group with the network
+    # load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
       - 'MaybeDeployNlb'
-      - !Ref 'NlbListenerRuleBrokerTarget'
+      - !Ref 'BrokerNlbListener'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
@@ -1177,33 +1191,6 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Network load balancer listener.
-  NlbListener:
-    Condition: 'MaybeDeployNlb'
-    Properties:
-      DefaultActions:
-      # - TargetGroupArn: !Ref 'AlbTargetGroup'
-      #   Type: 'forward'
-      - TargetGroupArn: !Ref 'PostgrestNlbTargetGroup'
-        Type: 'forward'
-      LoadBalancerArn: !Ref 'Nlb'
-      Port: 80
-      Protocol: 'TCP'
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
-  # Network load balancer listener rule for broker traffic.
-  NlbListenerRuleBrokerTarget:
-    Condition: 'MaybeDeployNlb'
-    Properties:
-      Actions:
-      - TargetGroupArn: !Ref 'BrokerNlbTargetGroup'
-        Type: 'forward'
-      Conditions:
-      - Field: 'path-pattern'
-        Values:
-        - '/ws'
-      ListenerArn: !Ref 'NlbListener'
-      Priority: 1
-    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the network load balancer.
   NlbSecurityGroup:
     Condition: 'MaybeDeployNlb'
@@ -1295,6 +1282,20 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Listener for network load balancer traffic to PostgREST.
+  PostgrestNlbListener:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      DefaultActions:
+      - TargetGroupArn: !Ref 'PostgrestNlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Nlb'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+      Protocol: 'TCP'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Target group for network load balancer traffic to PostgREST.
   PostgrestNlbTargetGroup:
     Condition: 'MaybeDeployNlb'
@@ -1340,13 +1341,13 @@ Resources:
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
-    # Proxy for a conditional dependency on the network load balancer listener,
-    # which associates the PostgREST target group with the network load
-    # balancer.
+    # Proxy for a conditional dependency on the network load balancer listener
+    # for PostgREST, which associates the PostgREST target group with the
+    # network load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
       - 'MaybeDeployNlb'
-      - !Ref 'NlbListener'
+      - !Ref 'PostgrestNlbListener'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
