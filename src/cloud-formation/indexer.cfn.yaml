@@ -11,10 +11,11 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployAlb'
     - 'true'
-  MaybeDeployAlbDnsRecord: !And
-  - !Condition 'MaybeDeployAlb'
+  MaybeDeployApiDnsRecord: !And
+  - !Condition 'MaybeDeployApiDnsRecord'
+  - !Condition 'MaybeDeployStack'
   - !Equals
-    - !Ref 'MaybeDeployAlbDnsRecord'
+    - !Ref 'MaybeDeployApiDnsRecord'
     - 'true'
   MaybeDeployBastionHost: !And
   - !Condition 'MaybeDeployDb'
@@ -116,7 +117,7 @@ Outputs:
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
   DnsName:
-    Condition: 'MaybeDeployAlbDnsRecord'
+    Condition: 'MaybeDeployApiDnsRecord'
     Value: !Sub
     - '${Environment}.${Subdomain}.${RootDomain}'
     - RootDomain: !FindInMap
@@ -146,7 +147,7 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
-  MaybeDeployAlbDnsRecord:
+  MaybeDeployApiDnsRecord:
     AllowedValues:
     - 'false'
     - 'true'
@@ -210,14 +211,14 @@ Parameters:
   ProcessorImageVersion:
     Type: 'String'
 Resources:
-  # Public application load balancer.
+  # Private application load balancer.
   Alb:
     Condition: 'MaybeDeployAlb'
     Properties:
       LoadBalancerAttributes:
       - Key: 'load_balancing.cross_zone.enabled'
         Value: 'true'
-      Scheme: 'internet-facing'
+      Scheme: 'internal'
       SecurityGroups:
       - !Ref 'AlbSecurityGroup'
       - !If
@@ -229,14 +230,14 @@ Resources:
         - !Ref 'PostgrestClientSecurityGroup'
         - !Ref 'AWS::NoValue'
       Subnets:
-      - !Ref 'PublicSubnetA'
-      - !Ref 'PublicSubnetB'
-      - !Ref 'PublicSubnetC'
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  # DNS certificate for the application load balancer.
-  AlbCertificate:
-    Condition: 'MaybeDeployAlb'
+  # DNS certificate for the API.
+  ApiCertificate:
+    Condition: 'MaybeDeployApiDnsRecord'
     Properties:
       DomainName: !Sub
       - '${Environment}.${Subdomain}.${RootDomain}'
@@ -265,9 +266,9 @@ Resources:
         - 'DnsNameHostedZoneId'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
-  # DNS record for the broker's application load balancer.
-  AlbDnsRecord:
-    Condition: 'MaybeDeployAlbDnsRecord'
+  # DNS record for the API.
+  ApiDnsRecord:
+    Condition: 'MaybeDeployApiDnsRecord'
     Properties:
       AliasTarget:
         DNSName: !GetAtt 'Alb.DNSName'
@@ -288,18 +289,26 @@ Resources:
         - 'DnsNameSubdomain'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
+  # Security group for clients of the application load balancer.
+  AlbClientSecurityGroup:
+    Condition: 'MaybeDeployAlb'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'AlbSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Application load balancer listener.
   AlbListener:
     Condition: 'MaybeDeployAlb'
     Properties:
-      Certificates:
-      - CertificateArn: !Ref 'AlbCertificate'
       DefaultActions:
       - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
         Type: 'forward'
       LoadBalancerArn: !Ref 'Alb'
-      Port: 443
-      Protocol: 'HTTPS'
+      Port: 80
+      Protocol: 'HTTP'
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Application load balancer listener rule for broker traffic.
   AlbListenerRuleBrokerTarget:
@@ -320,13 +329,36 @@ Resources:
     Condition: 'MaybeDeployAlb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
-      SecurityGroupIngress:
-      - CidrIp: '0.0.0.0/0'
-        FromPort: 443
-        IpProtocol: 'tcp'
-        ToPort: 443
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the application load balancer security group.
+  AlbSecurityGroupIngress:
+    Condition: 'MaybeDeployAlb'
+    Properties:
+      GroupId: !Ref 'AlbSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'AlbClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Custom domain for the API.
+  ApiCustomDomain:
+    Condition: 'MaybeDeployApiDnsRecord'
+    Properties:
+      DomainName: !Sub
+      - '${Environment}.${Subdomain}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+        Subdomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameSubdomain'
+      CertificateArn: !Ref 'ApiCertificate'
+      EndpointConfiguration:
+        Types:
+        - 'EDGE'
+      SecurityPolicy: 'TLS_1_2'
+    Type: 'AWS::ApiGateway::DomainName'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'MaybeDeployBastionHost'
