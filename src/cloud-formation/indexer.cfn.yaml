@@ -413,7 +413,7 @@ Resources:
             echo '${BrokerWsUrlExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
-        - AlbDnsName: !If
+        - AlbDnsNameExport: !If
           - 'MaybeDeployAlb'
           - !Join
             - ''
