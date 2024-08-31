@@ -413,7 +413,7 @@ Resources:
                 - 'PostgrestPort'
               - '"'
           - '# ALB_REST_URL not set (ALB not provisioned)'
-          AlbtWsUrlExport: !If
+          AlbWsUrlExport: !If
           - 'MaybeDeployAlb'
           - !Join
             - ''
