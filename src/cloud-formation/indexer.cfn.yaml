@@ -398,10 +398,10 @@ Resources:
           - 'MaybeDeployBroker'
           - !Ref 'BrokerWsClientSecurityGroup'
           - !Ref 'AWS::NoValue'
-        - !If
-          - 'MaybeDeployNlb'
-          - !Ref 'NlbClientSecurityGroup'
-          - !Ref 'AWS::NoValue'
+        # - !If
+        #   - 'MaybeDeployNlb'
+        #   - !Ref 'NlbClientSecurityGroup'
+        #   - !Ref 'AWS::NoValue'
         - !If
           - 'MaybeDeployPostgrest'
           - !Ref 'PostgrestClientSecurityGroup'
@@ -426,7 +426,6 @@ Resources:
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
             echo '${AlbDnsNameExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
-            echo '${NlbDnsNameExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
         - AlbDnsNameExport: !If
@@ -471,14 +470,15 @@ Resources:
               - 'Constants'
               - 'DatabaseConfig'
               - 'DatabaseName'
-          NlbDnsNameExport: !If
-          - 'MaybeDeployNlb'
-          - !Join
-            - ''
-            - - 'export NLB_DNS_NAME="'
-              - !GetAtt 'Nlb.DNSName'
-              - '"'
-          - '# NLB_DNS_NAME not set (NLB not provisioned)'
+          # echo '${NlbDnsNameExport}' >> /etc/profile
+          # NlbDnsNameExport: !If
+          # - 'MaybeDeployNlb'
+          # - !Join
+          #   - ''
+          #   - - 'export NLB_DNS_NAME="'
+          #     - !GetAtt 'Nlb.DNSName'
+          #     - '"'
+          # - '# NLB_DNS_NAME not set (NLB not provisioned)'
           PostgrestUrlExport: !If
           - 'MaybeDeployPostgrest'
           - !Join
@@ -624,7 +624,7 @@ Resources:
     Condition: 'MaybeDeployNlb'
     Properties:
       DefaultActions:
-      - TargetGroupArn: !Ref 'PostgrestNlbTargetGroup'
+      - TargetGroupArn: !Ref 'BrokerNlbTargetGroup'
         Type: 'forward'
       LoadBalancerArn: !Ref 'Nlb'
       Port: !FindInMap
@@ -1181,36 +1181,43 @@ Resources:
       - !Ref 'PrivateSubnetC'
       Type: 'network'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  # Security group for clients of the network load balancer.
-  NlbClientSecurityGroup:
-    Condition: 'MaybeDeployNlb'
-    Properties:
-      GroupDescription: !Ref 'AWS::StackName'
-      SecurityGroupEgress:
-      - DestinationSecurityGroupId: !Ref 'NlbSecurityGroup'
-        IpProtocol: -1
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::EC2::SecurityGroup'
   # Security group for the network load balancer.
   NlbSecurityGroup:
     Condition: 'MaybeDeployNlb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
-      SecurityGroupIngress:
-      - CidrIp: '0.0.0.0/0'
-        FromPort: 80
-        IpProtocol: 'tcp'
-        ToPort: 80
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Ingress policy for the network load balancer security group.
-  # NlbSecurityGroupIngress:
-  #   Condition: 'MaybeDeployNlb'
-  #   Properties:
-  #     GroupId: !Ref 'NlbSecurityGroup'
-  #     IpProtocol: -1
-  #     SourceSecurityGroupId: !Ref 'NlbClientSecurityGroup'
-  #   Type: 'AWS::EC2::SecurityGroupIngress'
+  # Network load balancer security group ingress policy for broker traffic.
+  NlbSecurityGroupIngressBroker:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+    - CidrIp: '0.0.0.0/0'
+      FromPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      GroupId: !Ref 'NlbSecurityGroup'
+      ToPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Network load balancer security group ingress policy for PostgREST traffic.
+  NlbSecurityGroupIngressPostgrest:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+    - CidrIp: '0.0.0.0/0'
+      FromPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+      GroupId: !Ref 'NlbSecurityGroup'
+      ToPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+    Type: 'AWS::EC2::SecurityGroupIngress'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'MaybeDeployAlb'
