@@ -38,6 +38,11 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployDb'
     - 'true'
+  MaybeDeployNlb: !And
+  - !Condition 'MaybeDeployAlb'
+  - !Equals
+    - !Ref 'MaybeDeployNlb'
+    - 'true'
   MaybeDeployPostgrest: !And
   - !Condition 'MaybeDeployContainers'
   - !Condition 'MaybeDeployProcessor'
@@ -167,6 +172,11 @@ Parameters:
     - 'true'
     Type: 'String'
   MaybeDeployDb:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployNlb:
     AllowedValues:
     - 'false'
     - 'true'
@@ -369,6 +379,10 @@ Resources:
         GroupSet:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
+        - !If
+          - 'MaybeDeployAlb'
+          - !Ref 'AlbClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
         - !If
           - 'MaybeDeployBroker'
           - !Ref 'BrokerWsClientSecurityGroup'
