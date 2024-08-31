@@ -418,6 +418,40 @@ Resources:
         - 'REGIONAL'
       Name: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGateway::RestApi'
+  # Rest API endpoint method for the API.
+  ApiRestEndpointMethod:
+    Condition: 'MaybeDeployApiRestEndpoint'
+    Properties:
+      AuthorizationType: 'NONE'
+      HttpMethod: 'ANY'
+      Integration:
+        ConnectionId: !Ref 'NlbVpcLink'
+        ConnectionType: 'VPC_LINK'
+        IntegrationHttpMethod: 'ANY'
+        PassthroughBehavior: 'WHEN_NO_MATCH'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        Type: 'HTTP_PROXY'
+        Uri: !Sub
+        - 'http://${NlbDnsName}:${PostgrestPort}/{proxy}'
+        - NlbDnsName: !GetAtt 'Nlb.DNSName'
+          PostgrestPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+      RequestParameters:
+        method.request.path.proxy: true
+      ResourceId: !Ref 'ApiRestEndpointProxyResource'
+      RestApiId: !Ref 'ApiRestEndpoint'
+    Type: 'AWS::ApiGateway::Method'
+  # Proxy resource for the REST API endpoint.
+  ApiRestEndpointProxyResource:
+    Condition: 'MaybeDeployApiRestEndpoint'
+    Properties:
+      ParentId: !GetAtt 'ApiRestEndpoint.RootResourceId'
+      PathPart: '{proxy+}'
+      RestApiId: !Ref 'ApiRestEndpoint'
+    Type: 'AWS::ApiGateway::Resource'
   # WebSocket API endpoint for the API.
   ApiWsEndpoint:
     Condition: 'MaybeDeployApiWsEndpoint'
