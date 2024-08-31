@@ -642,8 +642,6 @@ Resources:
         Value: '30'
       - Key: 'stickiness.enabled'
         Value: 'true'
-      - Key: 'stickiness.type'
-        Value: 'lb_cookie'
       TargetType: 'ip'
       UnhealthyThresholdCount: 2
       VpcId: !Ref 'Vpc'
