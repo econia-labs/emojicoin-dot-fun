@@ -12,7 +12,6 @@ Conditions:
     - !Ref 'MaybeDeployAlb'
     - 'true'
   MaybeDeployApiDnsRecord: !And
-  - !Condition 'MaybeDeployApiDnsRecord'
   - !Condition 'MaybeDeployStack'
   - !Equals
     - !Ref 'MaybeDeployApiDnsRecord'
@@ -235,60 +234,6 @@ Resources:
       - !Ref 'PrivateSubnetC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  # DNS certificate for the API.
-  ApiCertificate:
-    Condition: 'MaybeDeployApiDnsRecord'
-    Properties:
-      DomainName: !Sub
-      - '${Environment}.${Subdomain}.${RootDomain}'
-      - RootDomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameRootDomain'
-        Subdomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameSubdomain'
-      DomainValidationOptions:
-      - DomainName: !Sub
-        - '${Environment}.${Subdomain}.${RootDomain}'
-        - RootDomain: !FindInMap
-          - 'Constants'
-          - 'Networking'
-          - 'DnsNameRootDomain'
-          Subdomain: !FindInMap
-          - 'Constants'
-          - 'Networking'
-          - 'DnsNameSubdomain'
-        HostedZoneId: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameHostedZoneId'
-      ValidationMethod: 'DNS'
-    Type: 'AWS::CertificateManager::Certificate'
-  # DNS record for the API.
-  ApiDnsRecord:
-    Condition: 'MaybeDeployApiDnsRecord'
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt 'Alb.DNSName'
-        HostedZoneId: !GetAtt 'Alb.CanonicalHostedZoneID'
-      HostedZoneId: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'DnsNameHostedZoneId'
-      Name: !Sub
-      - '${Environment}.${Subdomain}.${RootDomain}'
-      - RootDomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameRootDomain'
-        Subdomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameSubdomain'
-      Type: 'A'
-    Type: 'AWS::Route53::RecordSet'
   # Security group for clients of the application load balancer.
   AlbClientSecurityGroup:
     Condition: 'MaybeDeployAlb'
@@ -339,8 +284,8 @@ Resources:
       IpProtocol: -1
       SourceSecurityGroupId: !Ref 'AlbClientSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
-  # Custom domain for the API.
-  ApiCustomDomain:
+  # DNS certificate for the API.
+  ApiCertificate:
     Condition: 'MaybeDeployApiDnsRecord'
     Properties:
       DomainName: !Sub
@@ -353,12 +298,66 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'DnsNameSubdomain'
+      DomainValidationOptions:
+      - DomainName: !Sub
+        - '${Environment}.${Subdomain}.${RootDomain}'
+        - RootDomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'DnsNameRootDomain'
+          Subdomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'DnsNameSubdomain'
+        HostedZoneId: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameHostedZoneId'
+      ValidationMethod: 'DNS'
+    Type: 'AWS::CertificateManager::Certificate'
+  # Custom domain for the API.
+  ApiCustomDomain:
+    Condition: 'MaybeDeployApiDnsRecord'
+    Properties:
       CertificateArn: !Ref 'ApiCertificate'
+      DomainName: !Sub
+      - '${Environment}.${Subdomain}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+        Subdomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameSubdomain'
       EndpointConfiguration:
         Types:
         - 'EDGE'
       SecurityPolicy: 'TLS_1_2'
     Type: 'AWS::ApiGateway::DomainName'
+  # DNS record for the API.
+  ApiDnsRecord:
+    Condition: 'MaybeDeployApiDnsRecord'
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt 'ApiCustomDomain.DistributionDomainName'
+        HostedZoneId: !GetAtt 'ApiCustomDomain.DistributionHostedZoneId'
+      HostedZoneId: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DnsNameHostedZoneId'
+      Name: !Sub
+      - '${Environment}.${Subdomain}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+        Subdomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameSubdomain'
+      Type: 'A'
+    Type: 'AWS::Route53::RecordSet'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'MaybeDeployBastionHost'
