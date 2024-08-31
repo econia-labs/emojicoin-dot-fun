@@ -340,8 +340,8 @@ Resources:
     Condition: 'MaybeDeployApiDnsRecord'
     Properties:
       AliasTarget:
-        DNSName: !GetAtt 'ApiCustomDomain.DistributionDomainName'
-        HostedZoneId: !GetAtt 'ApiCustomDomain.DistributionHostedZoneId'
+        DNSName: !GetAtt 'ApiCustomDomain.RegionalDomainName'
+        HostedZoneId: !GetAtt 'ApiCustomDomain.RegionalHostedZoneId'
       HostedZoneId: !FindInMap
       - 'Constants'
       - 'Networking'
