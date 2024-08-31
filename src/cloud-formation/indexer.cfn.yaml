@@ -399,6 +399,10 @@ Resources:
           - !Ref 'BrokerWsClientSecurityGroup'
           - !Ref 'AWS::NoValue'
         - !If
+          - 'MaybeDeployNlb'
+          - !Ref 'NlbClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
+        - !If
           - 'MaybeDeployPostgrest'
           - !Ref 'PostgrestClientSecurityGroup'
           - !Ref 'AWS::NoValue'
@@ -422,6 +426,7 @@ Resources:
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
             echo '${AlbDnsNameExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
+            echo '${NlbDnsNameExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
         - AlbDnsNameExport: !If
@@ -466,6 +471,14 @@ Resources:
               - 'Constants'
               - 'DatabaseConfig'
               - 'DatabaseName'
+          NlbDnsNameExport: !If
+          - 'MaybeDeployNlb'
+          - !Join
+            - ''
+            - - 'export NLB_DNS_NAME="'
+              - !GetAtt 'Nlb.DNSName'
+              - '"'
+          - '# NLB_DNS_NAME not set (NLB not provisioned)'
           PostgrestUrlExport: !If
           - 'MaybeDeployPostgrest'
           - !Join
@@ -1127,6 +1140,17 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Network load balancer listener.
+  NlbListener:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      DefaultActions:
+      - TargetGroupArn: !Ref 'AlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Nlb'
+      Port: 80
+      Protocol: 'TCP'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
   # Security group for the network load balancer.
   NlbSecurityGroup:
     Condition: 'MaybeDeployNlb'
