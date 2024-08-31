@@ -16,6 +16,16 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployApiDnsRecord'
     - 'true'
+  MaybeDeployApiRestEndpoint: !And
+  - !Condition 'MaybeDeployNlbVpcLink'
+  - !Equals
+    - !Ref 'MaybeDeployApiRestEndpoint'
+    - 'true'
+  MaybeDeployApiWsEndpoint: !And
+  - !Condition 'MaybeDeployNlbVpcLink'
+  - !Equals
+    - !Ref 'MaybeDeployApiWsEndpoint'
+    - 'true'
   MaybeDeployBastionHost: !And
   - !Condition 'MaybeDeployDb'
   - !Equals
@@ -157,6 +167,16 @@ Parameters:
     - 'true'
     Type: 'String'
   MaybeDeployApiDnsRecord:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployApiRestEndpoint:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployApiWsEndpoint:
     AllowedValues:
     - 'false'
     - 'true'
@@ -389,6 +409,23 @@ Resources:
         - 'DnsNameSubdomain'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
+  # REST API endpoint for the API.
+  ApiRestEndpoint:
+    Condition: 'MaybeDeployApiRestEndpoint'
+    Properties:
+      EndpointConfiguration:
+        Types:
+        - 'REGIONAL'
+      Name: !Ref 'AWS::StackName'
+    Type: 'AWS::ApiGateway::RestApi'
+  # WebSocket API endpoint for the API.
+  ApiWsEndpoint:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      Name: !Ref 'AWS::StackName'
+      ProtocolType: 'WEBSOCKET'
+      RouteSelectionExpression: '$request.body.action'
+    Type: 'AWS::ApiGatewayV2::Api'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'MaybeDeployBastionHost'
