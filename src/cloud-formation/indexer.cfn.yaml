@@ -319,7 +319,6 @@ Resources:
   ApiCustomDomain:
     Condition: 'MaybeDeployApiDnsRecord'
     Properties:
-      CertificateArn: !Ref 'ApiCertificate'
       DomainName: !Sub
       - '${Environment}.${Subdomain}.${RootDomain}'
       - RootDomain: !FindInMap
@@ -333,6 +332,7 @@ Resources:
       EndpointConfiguration:
         Types:
         - 'REGIONAL'
+      RegionalCertificateArn: !Ref 'ApiCertificate'
       SecurityPolicy: 'TLS_1_2'
     Type: 'AWS::ApiGateway::DomainName'
   # DNS record for the API.
