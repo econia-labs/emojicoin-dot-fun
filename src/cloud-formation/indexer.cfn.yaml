@@ -294,6 +294,17 @@ Resources:
       IpProtocol: -1
       SourceSecurityGroupId: !Ref 'AlbClientSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
+  # Application load balancer as the target of the network load balancer.
+  AlbTargetGroup:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      Port: 80
+      Protocol: 'TCP'
+      TargetType: 'alb'
+      Targets:
+      - Id: !Ref 'Alb'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # DNS certificate for the API.
   ApiCertificate:
     Condition: 'MaybeDeployApiDnsRecord'
