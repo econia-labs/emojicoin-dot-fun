@@ -347,6 +347,16 @@ fi
    curl http://$ALB_DNS_NAME/market_latest_state_event?select=market_id && echo
    ```
 
+1. Check broker and PostgREST access through the NLB:
+
+   ```sh
+   websocat ws://$NLB_DNS_NAME/ws
+   ```
+
+   ```sh
+   curl http://$NLB_DNS_NAME/market_latest_state_event?select=market_id && echo
+   ```
+
 ## Design notes
 
 ### Database
