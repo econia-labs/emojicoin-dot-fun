@@ -404,20 +404,7 @@ Resources:
           - 'MaybeDeployAlb'
           - !Join
             - ''
-            - - 'export ALB_REST_URL="ws://'
-              - !GetAtt 'Alb.DNSName'
-              - ':'
-              - !FindInMap
-                - 'Constants'
-                - 'Networking'
-                - 'BrokerPort'
-              - '/ws"'
-          - '# ALB_REST_URL not set (ALB not provisioned)'
-          AlbWsUrlExport: !If
-          - 'MaybeDeployAlb'
-          - !Join
-            - ''
-            - - 'export ALB_WS_URL="http://'
+            - - 'export ALB_REST_URL="http://'
               - !GetAtt 'Alb.DNSName'
               - ':'
               - !FindInMap
@@ -425,6 +412,19 @@ Resources:
                 - 'Networking'
                 - 'PostgrestPort'
               - '"'
+          - '# ALB_REST_URL not set (ALB not provisioned)'
+          AlbtWsUrlExport: !If
+          - 'MaybeDeployAlb'
+          - !Join
+            - ''
+            - - 'export ALB_WS_URL="ws://'
+              - !GetAtt 'Alb.DNSName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'BrokerPort'
+              - '/ws"'
           - '# ALB_WS_URL not set (ALB not provisioned)'
           BrokerWsUrlExport: !If
           - 'MaybeDeployBroker'

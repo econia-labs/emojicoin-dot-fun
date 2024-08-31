@@ -301,41 +301,51 @@ else
 fi
 ```
 
-Start `psql`:
+1. Start `psql`:
 
-```sh
-psql $DB_URL
-```
+   ```sh
+   psql $DB_URL
+   ```
 
-List the databases:
+1. List the databases:
 
-```sh
-\list
-```
+   ```sh
+   \list
+   ```
 
-After exiting `psql`, to view WebSocket events published by the processor:
+1. After exiting `psql`, to view WebSocket events published by the processor:
 
-```sh
-websocat $PROCESSOR_WS_URL
-```
+   ```sh
+   websocat $PROCESSOR_WS_URL
+   ```
 
-Connect to the broker:
+1. Connect to the broker:
 
-```sh
-websocat $BROKER_WS_URL
-```
+   ```sh
+   websocat $BROKER_WS_URL
+   ```
 
-Subscribe to all events:
+1. Subscribe to all events:
 
-```sh
-{}
-```
+   ```sh
+   {}
+   ```
 
-Query PostgREST:
+1. Query PostgREST:
 
-```sh
-curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
-```
+   ```sh
+   curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
+   ```
+
+1. Check broker and PostgREST access through the ALB:
+
+   ```sh
+   websocat $ALB_WS_URL
+   ```
+
+   ```sh
+   curl $ALB_REST_URL/market_latest_state_event?select=market_id && echo
+   ```
 
 ## Design notes
 
