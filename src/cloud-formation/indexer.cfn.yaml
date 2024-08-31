@@ -584,8 +584,6 @@ Resources:
         Value: '30'
       - Key: 'stickiness.enabled'
         Value: 'true'
-      - Key: 'stickiness.type'
-        Value: 'lb_cookie'
       TargetType: 'ip'
       UnhealthyThresholdCount: 2
       VpcId: !Ref 'Vpc'
@@ -1322,8 +1320,6 @@ Resources:
         Value: '30'
       - Key: 'stickiness.enabled'
         Value: 'false'
-      - Key: 'load_balancing.algorithm.type'
-        Value: 'round_robin'
       TargetType: 'ip'
       UnhealthyThresholdCount: 2
       VpcId: !Ref 'Vpc'
