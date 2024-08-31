@@ -1109,6 +1109,31 @@ Resources:
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
+  # Security group for clients of the network load balancer.
+  NlbClientSecurityGroup:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'NlbSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Security group for the network load balancer.
+  NlbSecurityGroup:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Ingress policy for the network load balancer security group.
+  NlbSecurityGroupIngress:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      GroupId: !Ref 'NlbSecurityGroup'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'NlbClientSecurityGroup'
+    Type: 'AWS::EC2::SecurityGroupIngress'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'MaybeDeployAlb'
