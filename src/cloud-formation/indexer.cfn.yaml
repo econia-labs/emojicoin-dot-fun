@@ -409,37 +409,18 @@ Resources:
             chmod +x ${WebsocatBuild}
             mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
-            echo '${AlbRestUrlExport}' >> /etc/profile
-            echo '${AlbWsUrlExport}' >> /etc/profile
+            echo '${AlbDnsNameExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
-        - AlbRestUrlExport: !If
+        - AlbDnsName: !If
           - 'MaybeDeployAlb'
           - !Join
             - ''
-            - - 'export ALB_REST_URL="http://'
+            - - 'export ALB_DNS_NAME="'
               - !GetAtt 'Alb.DNSName'
-              - ':'
-              - !FindInMap
-                - 'Constants'
-                - 'Networking'
-                - 'PostgrestPort'
               - '"'
-          - '# ALB_REST_URL not set (ALB not provisioned)'
-          AlbWsUrlExport: !If
-          - 'MaybeDeployAlb'
-          - !Join
-            - ''
-            - - 'export ALB_WS_URL="ws://'
-              - !GetAtt 'Alb.DNSName'
-              - ':'
-              - !FindInMap
-                - 'Constants'
-                - 'Networking'
-                - 'BrokerPort'
-              - '/ws"'
-          - '# ALB_WS_URL not set (ALB not provisioned)'
+          - '# ALB_DNS_NAME not set (ALB not provisioned)'
           BrokerWsUrlExport: !If
           - 'MaybeDeployBroker'
           - !Join
@@ -1109,6 +1090,22 @@ Resources:
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
+  # Private network load balancer.
+  Nlb:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      LoadBalancerAttributes:
+      - Key: 'load_balancing.cross_zone.enabled'
+        Value: 'true'
+      Scheme: 'internal'
+      SecurityGroups:
+      - !Ref 'AlbClientSecurityGroup'
+      Subnets:
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
+      Type: 'network'
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
   # Security group for clients of the network load balancer.
   NlbClientSecurityGroup:
     Condition: 'MaybeDeployNlb'
