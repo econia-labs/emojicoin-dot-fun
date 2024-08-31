@@ -395,10 +395,38 @@ Resources:
             chmod +x ${WebsocatBuild}
             mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
+            echo '${AlbRestUrlExport}' >> /etc/profile
+            echo '${AlbWsUrlExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
-        - BrokerWsUrlExport: !If
+        - AlbRestUrlExport: !If
+          - 'MaybeDeployAlb'
+          - !Join
+            - ''
+            - - 'export ALB_REST_URL="ws://'
+              - !GetAtt 'Alb.DNSName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'BrokerPort'
+              - '/ws"'
+          - '# ALB_REST_URL not set (ALB not provisioned)'
+          AlbWsUrlExport: !If
+          - 'MaybeDeployAlb'
+          - !Join
+            - ''
+            - - 'export ALB_WS_URL="http://'
+              - !GetAtt 'Alb.DNSName'
+              - ':'
+              - !FindInMap
+                - 'Constants'
+                - 'Networking'
+                - 'PostgrestPort'
+              - '"'
+          - '# ALB_WS_URL not set (ALB not provisioned)'
+          BrokerWsUrlExport: !If
           - 'MaybeDeployBroker'
           - !Join
             - ''
