@@ -511,7 +511,7 @@ Resources:
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
       AuthorizationType: 'NONE'
-      RouteKey: '$connect'
+      RouteKey: '$default'
       Target: !Join
       - '/'
       - - 'integrations'
