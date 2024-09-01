@@ -503,7 +503,6 @@ Resources:
     Properties:
       Name: !Ref 'AWS::StackName'
       ProtocolType: 'WEBSOCKET'
-      RouteSelectionExpression: '$request.body.action'
     Type: 'AWS::ApiGatewayV2::Api'
   # WebSocket API route for the connection event.
   ApiWsEndpointConnectRoute:
@@ -546,19 +545,6 @@ Resources:
       IntegrationUri: !Ref 'BrokerNlbListener'
       PayloadFormatVersion: '1.0'
     Type: 'AWS::ApiGatewayV2::Integration'
-  # Open access policy for WebSocket API endpoint.
-  ApiWsEndpointPolicy:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      Policy:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal: '*'
-          Action: 'execute-api:*'
-          Resource: !Sub 'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiWsEndpoint}/*'
-    Type: 'AWS::ApiGatewayV2::ApiPolicy'
   # Stage for the WebSocket API endpoint.
   ApiWsEndpointStage:
     Condition: 'MaybeDeployApiWsEndpoint'
