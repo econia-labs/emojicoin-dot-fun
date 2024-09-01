@@ -382,8 +382,6 @@ Resources:
       ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
-      # HTTP_PROXY without request parameters results in a 400 failed handshake
-      # with warning that connection header does not include upgrade.
       IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Sub
       - 'http://${Nlb.DNSName}:${BrokerPort}'
@@ -391,10 +389,6 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
-      PassthroughBehavior: 'WHEN_NO_MATCH'
-      # RequestParameters:
-      #   # integration.request.header.Upgrade: '''websocket'''
-      #   integration.request.header.Connection: '$request.header.Connection'
     Type: 'AWS::ApiGatewayV2::Integration'
   # WebSocket API route for the connection event.
   ApiWsEndpointConnectRoute:
