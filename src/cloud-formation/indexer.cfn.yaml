@@ -326,26 +326,12 @@ Resources:
       Certificates:
       - CertificateArn: !Ref 'AlbCertificate'
       DefaultActions:
-      - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
         Type: 'forward'
       LoadBalancerArn: !Ref 'Alb'
       Port: 443
       Protocol: 'HTTPS'
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
-  # Application load balancer listener rule for broker traffic.
-  AlbListenerRuleBrokerTarget:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      Actions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
-      Conditions:
-      - Field: 'path-pattern'
-        Values:
-        - '/ws'
-      ListenerArn: !Ref 'AlbListener'
-      Priority: 1
-    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
     Condition: 'MaybeDeployAlb'
@@ -613,12 +599,12 @@ Resources:
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
     # Proxy for a conditional dependency on the application load balancer
-    # listener rule for the broker, which associates the broker target group
-    # with the application load balancer.
+    # listener, which associates the broker target group with the application
+    # load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
       - 'MaybeDeployAlb'
-      - !Ref 'AlbListenerRuleBrokerTarget'
+      - !Ref 'AlbListener'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
@@ -1146,38 +1132,6 @@ Resources:
       TargetArns:
       - !Ref 'Nlb'
     Type: 'AWS::ApiGateway::VpcLink'
-  # Target group for application load balancer traffic to PostgREST.
-  PostgrestAlbTargetGroup:
-    Condition: 'MaybeDeployAlb'
-    DependsOn: 'Alb'
-    Properties:
-      HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/ready'
-      HealthCheckPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestHealthCheckPort'
-      HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 2
-      HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-postgrest'
-      Port: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestPort'
-      Protocol: 'HTTP'
-      ProtocolVersion: 'HTTP1'
-      TargetGroupAttributes:
-      - Key: 'deregistration_delay.timeout_seconds'
-        Value: '30'
-      - Key: 'stickiness.enabled'
-        Value: 'false'
-      - Key: 'load_balancing.algorithm.type'
-        Value: 'round_robin'
-      TargetType: 'ip'
-      UnhealthyThresholdCount: 2
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Scaling policy for PostgREST service.
   PostgrestAutoScalingPolicy:
     Condition: 'MaybeDeployPostgrest'
