@@ -1627,12 +1627,13 @@ Resources:
   RestApiDeployment:
     Condition: 'MaybeDeployRestApi'
     DependsOn:
-    - 'RestApiMethod'
+    - 'RestApiMethodGeneral'
+    - 'RestApiMethodRoot'
     Properties:
       RestApiId: !Ref 'RestApi'
     Type: 'AWS::ApiGateway::Deployment'
-  # Rest API endpoint method.
-  RestApiMethod:
+  # Rest API endpoint general method.
+  RestApiMethodGeneral:
     Condition: 'MaybeDeployRestApi'
     Properties:
       AuthorizationType: 'NONE'
@@ -1654,6 +1655,31 @@ Resources:
       RequestParameters:
         method.request.path.proxy: true
       ResourceId: !Ref 'RestApiProxyResource'
+      RestApiId: !Ref 'RestApi'
+    Type: 'AWS::ApiGateway::Method'
+  # Rest API endpoint root method.
+  RestApiMethodRoot:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      AuthorizationType: 'NONE'
+      HttpMethod: 'GET'
+      Integration:
+        ConnectionId: !Ref 'NlbVpcLink'
+        ConnectionType: 'VPC_LINK'
+        IntegrationHttpMethod: 'GET'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        Type: 'HTTP_PROXY'
+        Uri: !Sub
+        - 'http://${NlbDnsName}:${PostgrestPort}/'
+        - NlbDnsName: !GetAtt 'Nlb.DNSName'
+          PostgrestPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+      RequestParameters:
+        method.request.path.proxy: true
+      ResourceId: !GetAtt 'RestApi.RootResourceId'
       RestApiId: !Ref 'RestApi'
     Type: 'AWS::ApiGateway::Method'
   # Proxy resource for the REST API endpoint.
