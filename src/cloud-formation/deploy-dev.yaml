@@ -6,7 +6,7 @@ parameters:
   MaybeDeployApiDnsRecord: 'false'
   MaybeDeployApiRestEndpoint: 'true'
   MaybeDeployApiWsEndpoint: 'true'
-  MaybeDeployBastionHost: 'true'
+  MaybeDeployBastionHost: 'false'
   MaybeDeployBroker: 'true'
   MaybeDeployContainers: 'true'
   MaybeDeployDb: 'true'
