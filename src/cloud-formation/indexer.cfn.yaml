@@ -437,17 +437,11 @@ Resources:
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
       ApiId: !Ref 'ApiRestEndpoint'
-      ConnectionId: !Ref 'PostgrestNlbListener'
+      ConnectionId: !Ref 'NlbVpcLink'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Sub
-      - 'http://${NlbDnsName}:${PostgrestPort}/{proxy}'
-      - NlbDnsName: !GetAtt 'Nlb.DNSName'
-        PostgrestPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'PostgrestPort'
+      IntegrationUri: !Ref 'PostgrestNlbListener'
       PayloadFormatVersion: '1.0'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Rest API endpoint method for the API.
