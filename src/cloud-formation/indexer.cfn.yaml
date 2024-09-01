@@ -582,6 +582,9 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
+      RequestParameters:
+        integration.request.header.Connection: 'Upgrade'
+        integration.request.header.Upgrade: 'websocket'
     # RequestParameters:
     #   'integration.request.header.Host': '$default'
     #   'integration.request.header.Sec-WebSocket-Key':
