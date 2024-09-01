@@ -573,10 +573,18 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
-      PassthroughBehavior: 'WHEN_NO_MATCH'
-      # RequestParameters:
-      #   'integration.request.header.Connection': "'Upgrade'"
-      #   'integration.request.header.Upgrade': "'WebSocket'"
+    # RequestParameters:
+    #   'integration.request.header.Host': '$default'
+    #   'integration.request.header.Sec-WebSocket-Key':
+    #     'context.wsContext.key'
+    #   'integration.request.header.Sec-WebSocket-Protocol':
+    #     'context.wsContext.protocol'
+    #   'integration.request.header.Sec-WebSocket-Version':
+    #     'context.wsContext.version'
+    #   'integration.request.header.X-Api-Gateway-Context': '$default'
+    #   'integration.request.header.X-Api-Gateway-Event': '$default'
+    #   'integration.request.header.X-Forwarded-For':
+    #     'context.identity.sourceIp'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Account config for logging the WebSocket API endpoint.
   ApiWsEndpointLogAccountConfig:
@@ -618,8 +626,6 @@ Resources:
         Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "routeKey":"$context.routeKey", "status":"$context.status", "connectionId": "$context.connectionId", "error": "$context.error.messageString", "integrationError": "$context.integrationErrorMessage", "integrationStatus": "$context.integration.status", "integrationLatency": "$context.integration.latency", "responseLatency": "$context.responseLatency" }'
       ApiId: !Ref 'ApiWsEndpoint'
       AutoDeploy: true
-      DefaultRouteSettings:
-        DetailedMetricsEnabled: true
       StageName: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGatewayV2::Stage'
   # Minimal VM for monitoring internal processes.
