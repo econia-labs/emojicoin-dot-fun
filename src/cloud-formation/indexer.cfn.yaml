@@ -1382,6 +1382,19 @@ Resources:
     Condition: 'MaybeDeployNlb'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
+      # Allow all incoming broker traffic over v1 VPC link required for
+      # WebSocket API.
+      SecurityGroupIngress:
+      - CidrIp: '0.0.0.0/0'
+        FromPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'BrokerPort'
+        IpProtocol: 'tcp'
+        ToPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'BrokerPort'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
   # Network load balancer security group ingress policy.
