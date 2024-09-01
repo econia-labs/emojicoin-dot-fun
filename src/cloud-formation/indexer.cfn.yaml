@@ -423,12 +423,11 @@ Resources:
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
       AuthorizationType: 'NONE'
-      HttpMethod: 'ANY'
+      HttpMethod: 'GET'
       Integration:
         ConnectionId: !Ref 'NlbVpcLink'
         ConnectionType: 'VPC_LINK'
-        IntegrationHttpMethod: 'ANY'
-        PassthroughBehavior: 'WHEN_NO_MATCH'
+        IntegrationHttpMethod: 'GET'
         RequestParameters:
           integration.request.path.proxy: 'method.request.path.proxy'
         Type: 'HTTP_PROXY'
