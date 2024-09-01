@@ -495,7 +495,7 @@ Resources:
     Properties:
       ApiId: !Ref 'ApiRestEndpoint'
       AutoDeploy: true
-      StageName: '$default'
+      StageName: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGatewayV2::Stage'
   # WebSocket API endpoint for the API.
   ApiWsEndpoint:
@@ -511,7 +511,7 @@ Resources:
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
       AuthorizationType: 'NONE'
-      RouteKey: '$default'
+      RouteKey: '$connect'
       Target: !Join
       - '/'
       - - 'integrations'
