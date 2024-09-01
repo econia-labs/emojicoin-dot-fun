@@ -3,7 +3,7 @@ parameters:
   BrokerImageVersion: '0.5.0'
   Environment: 'ECO-2152'
   MaybeDeployAlb: 'false'
-  MaybeDeployApiDnsRecord: 'true'
+  MaybeDeployApiDnsRecord: 'false'
   MaybeDeployApiRestEndpoint: 'true'
   MaybeDeployApiWsEndpoint: 'true'
   MaybeDeployBastionHost: 'true'
