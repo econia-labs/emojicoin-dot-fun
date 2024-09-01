@@ -570,10 +570,21 @@ Resources:
       IntegrationUri: !Ref 'BrokerNlbListener'
       PayloadFormatVersion: '1.0'
     Type: 'AWS::ApiGatewayV2::Integration'
+  # Logging for the WebSocket API endpoint.
+  ApiWsEndpointLogGroup:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      LogGroupName: !Sub '/aws/apigateway/${ApiWsEndpoint}'
+      RetentionInDays: 7
+    Type: 'AWS::Logs::LogGroup'
   # Stage for the WebSocket API endpoint.
   ApiWsEndpointStage:
     Condition: 'MaybeDeployApiWsEndpoint'
     Properties:
+      AccessLogSettings:
+        DestinationArn: !GetAtt 'ApiWsEndpointLogGroup.Arn'
+        # yamllint disable-line rule:line-length
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "resourcePath":"$context.resourcePath", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
       ApiId: !Ref 'ApiWsEndpoint'
       AutoDeploy: true
       StageName: !Ref 'AWS::StackName'
@@ -1398,7 +1409,8 @@ Resources:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Network load balancer security group ingress policy for broker traffic.
+  # Network load balancer security group ingress policy for broker traffic from
+  # VPC link and broker containers.
   NlbSecurityGroupIngressBroker:
     Condition: 'MaybeDeployNlbVpcLinks'
     Properties:
