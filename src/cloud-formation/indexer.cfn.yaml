@@ -384,7 +384,7 @@ Resources:
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP'
       IntegrationUri: !Sub
-      - 'ws://${Nlb.DNSName}:${BrokerPort}'
+      - 'http://${Nlb.DNSName}:${BrokerPort}'
       - BrokerPort: !FindInMap
         - 'Constants'
         - 'Networking'
