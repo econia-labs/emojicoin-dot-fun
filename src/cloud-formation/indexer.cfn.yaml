@@ -652,10 +652,10 @@ Resources:
           - 'MaybeDeployBroker'
           - !Ref 'BrokerWsClientSecurityGroup'
           - !Ref 'AWS::NoValue'
-        # - !If
-        #   - 'MaybeDeployNlb'
-        #   - !Ref 'NlbClientSecurityGroup'
-        #   - !Ref 'AWS::NoValue'
+        - !If
+          - 'MaybeDeployNlb'
+          - !Ref 'NlbClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
         - !If
           - 'MaybeDeployPostgrest'
           - !Ref 'PostgrestClientSecurityGroup'
@@ -679,6 +679,7 @@ Resources:
             mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
             echo '${AlbDnsNameExport}' >> /etc/profile
+            echo '${NlbDnsNameExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
@@ -724,15 +725,14 @@ Resources:
               - 'Constants'
               - 'DatabaseConfig'
               - 'DatabaseName'
-          # echo '${NlbDnsNameExport}' >> /etc/profile
-          # NlbDnsNameExport: !If
-          # - 'MaybeDeployNlb'
-          # - !Join
-          #   - ''
-          #   - - 'export NLB_DNS_NAME="'
-          #     - !GetAtt 'Nlb.DNSName'
-          #     - '"'
-          # - '# NLB_DNS_NAME not set (NLB not provisioned)'
+          NlbDnsNameExport: !If
+          - 'MaybeDeployNlb'
+          - !Join
+            - ''
+            - - 'export NLB_DNS_NAME="'
+              - !GetAtt 'Nlb.DNSName'
+              - '"'
+          - '# NLB_DNS_NAME not set (NLB not provisioned)'
           PostgrestUrlExport: !If
           - 'MaybeDeployPostgrest'
           - !Join
