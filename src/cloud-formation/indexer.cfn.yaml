@@ -392,7 +392,7 @@ Resources:
       RequestParameters:
         # integration.request.header.Upgrade: '''websocket'''
         integration.request.header.Connection:
-          '$context.request.header.Connection'
+          'method.request.header.Connection'
     Type: 'AWS::ApiGatewayV2::Integration'
   # WebSocket API route for the connection event.
   ApiWsEndpointConnectRoute:
