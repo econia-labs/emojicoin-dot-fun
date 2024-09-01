@@ -563,7 +563,7 @@ Resources:
     Condition: 'MaybeDeployApiWsEndpoint'
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
-      ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
+      ConnectionId: !Ref 'NlbVpcLinkRestEndpoint'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
