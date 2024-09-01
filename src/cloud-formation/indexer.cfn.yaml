@@ -18,12 +18,12 @@ Conditions:
     - !Ref 'MaybeDeployApiDnsRecord'
     - 'true'
   MaybeDeployApiRestEndpoint: !And
-  - !Condition 'MaybeDeployNlbVpcLink'
+  - !Condition 'MaybeDeployNlbVpcLinks'
   - !Equals
     - !Ref 'MaybeDeployApiRestEndpoint'
     - 'true'
   MaybeDeployApiWsEndpoint: !And
-  - !Condition 'MaybeDeployNlbVpcLink'
+  - !Condition 'MaybeDeployNlbVpcLinks'
   - !Equals
     - !Ref 'MaybeDeployApiWsEndpoint'
     - 'true'
@@ -54,10 +54,10 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployNlb'
     - 'true'
-  MaybeDeployNlbVpcLink: !And
+  MaybeDeployNlbVpcLinks: !And
   - !Condition 'MaybeDeployNlb'
   - !Equals
-    - !Ref 'MaybeDeployNlbVpcLink'
+    - !Ref 'MaybeDeployNlbVpcLinks'
     - 'true'
   MaybeDeployPostgrest: !And
   - !Condition 'MaybeDeployContainers'
@@ -207,7 +207,7 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
-  MaybeDeployNlbVpcLink:
+  MaybeDeployNlbVpcLinks:
     AllowedValues:
     - 'false'
     - 'true'
@@ -437,7 +437,7 @@ Resources:
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
       ApiId: !Ref 'ApiRestEndpoint'
-      ConnectionId: !Ref 'NlbVpcLink'
+      ConnectionId: !Ref 'NlbVpcLinkRestEndpoint'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
@@ -538,17 +538,11 @@ Resources:
     Condition: 'MaybeDeployApiWsEndpoint'
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
-      ConnectionId: !Ref 'BrokerNlbListener'
+      ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Sub
-      - 'http://${NlbDnsName}:${BrokerPort}/ws'
-      - BrokerPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'BrokerPort'
-        NlbDnsName: !GetAtt 'Nlb.DNSName'
+      IntegrationUri: !Ref 'BrokerNlbListener'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Stage for the WebSocket API endpoint.
   ApiWsEndpointStage:
@@ -1361,6 +1355,16 @@ Resources:
       - !Ref 'PrivateSubnetC'
       Type: 'network'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+  # Security group for clients of the network load balancer.
+  NlbClientSecurityGroup:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'NlbSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Security group for the network load balancer.
   NlbSecurityGroup:
     Condition: 'MaybeDeployNlb'
@@ -1370,7 +1374,7 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
   # Network load balancer security group ingress policy for broker traffic.
   NlbSecurityGroupIngressBroker:
-    Condition: 'MaybeDeployNlbVpcLink'
+    Condition: 'MaybeDeployNlbVpcLinks'
     Properties:
       CidrIp: '0.0.0.0/0'
       FromPort: !FindInMap
@@ -1386,23 +1390,27 @@ Resources:
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Network load balancer security group ingress policy for PostgREST traffic.
   NlbSecurityGroupIngressPostgrest:
-    Condition: 'MaybeDeployNlbVpcLink'
+    Condition: 'MaybeDeployNlbVpcLinks'
     Properties:
-      CidrIp: '0.0.0.0/0'
-      FromPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestPort'
       GroupId: !Ref 'NlbSecurityGroup'
-      IpProtocol: 'tcp'
-      ToPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestPort'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'NlbClientSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
-  # Connection to network load balancer for API.
-  NlbVpcLink:
-    Condition: 'MaybeDeployNlbVpcLink'
+  # Connection to network load balancer for API REST endpoint.
+  NlbVpcLinkRestEndpoint:
+    Condition: 'MaybeDeployNlbVpcLinks'
+    Properties:
+      Name: !Ref 'AWS::StackName'
+      SecurityGroupIds:
+      - !Ref 'NlbClientSecurityGroup'
+      SubnetIds:
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
+    Type: 'AWS::ApiGatewayV2::VpcLink'
+  # Connection to network load balancer for API WebSocket endpoint.
+  NlbVpcLinkWsEndpoint:
+    Condition: 'MaybeDeployNlbVpcLinks'
     Properties:
       Name: !Ref 'AWS::StackName'
       TargetArns:
