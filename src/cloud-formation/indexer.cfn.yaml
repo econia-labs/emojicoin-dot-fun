@@ -575,9 +575,8 @@ Resources:
         - 'Networking'
         - 'BrokerPort'
       RequestParameters:
-        integration.request.header.Connection:
-          'method.request.header.Connection'
-        integration.request.header.Upgrade: 'method.request.header.Upgrade'
+        integration.request.header.Connection: '''Upgrade'''
+        integration.request.header.Upgrade: '''websocket'''
     Type: 'AWS::ApiGatewayV2::Integration'
   # Account config for logging the WebSocket API endpoint.
   ApiWsEndpointLogAccountConfig:
