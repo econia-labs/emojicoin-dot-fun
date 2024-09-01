@@ -59,11 +59,12 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployProcessor'
     - 'true'
-  # MaybeDeployRestApi: !And
-  # - !Condition 'MaybeDeployNlbVpcLink'
-  # - !Equals
-  #   - !Ref 'MaybeDeployRestApi'
-  #   - 'true'
+  MaybeDeployRestApi: !And
+  - !Condition 'MaybeDeployNlbVpcLink'
+  - !Condition 'MaybeDeployPostgrest'
+  - !Equals
+    - !Ref 'MaybeDeployRestApi'
+    - 'true'
   MaybeDeployRouteTables: !And
   - !Condition 'MaybeDeployVpc'
   - !Equals
@@ -1659,6 +1660,64 @@ Resources:
       GatewayId: !Ref 'InternetGateway'
       RouteTableId: !Ref 'PublicRouteTable'
     Type: 'AWS::EC2::Route'
+  # REST API endpoint.
+  RestApi:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      EndpointConfiguration:
+        Types:
+        - 'REGIONAL'
+      Name: !Ref 'AWS::StackName'
+    Type: 'AWS::ApiGateway::RestApi'
+  # Deployment for the REST API endpoint.
+  RestApiDeployment:
+    Condition: 'MaybeDeployRestApi'
+    DependsOn:
+    - 'RestApiMethod'
+    Properties:
+      RestApiId: !Ref 'RestApi'
+    Type: 'AWS::ApiGateway::Deployment'
+  # Rest API endpoint method.
+  RestApiMethod:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      AuthorizationType: 'NONE'
+      HttpMethod: 'GET'
+      Integration:
+        ConnectionId: !Ref 'NlbVpcLink'
+        ConnectionType: 'VPC_LINK'
+        IntegrationHttpMethod: 'GET'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        Type: 'HTTP_PROXY'
+        Uri: !Sub
+        - 'http://${NlbDnsName}:${PostgrestPort}/{proxy}'
+        - NlbDnsName: !GetAtt 'Nlb.DNSName'
+          PostgrestPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+      RequestParameters:
+        method.request.path.proxy: true
+      ResourceId: !Ref 'RestApiProxyResource'
+      RestApiId: !Ref 'RestApi'
+    Type: 'AWS::ApiGateway::Method'
+  # Proxy resource for the REST API endpoint.
+  RestApiProxyResource:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      ParentId: !GetAtt 'RestApi.RootResourceId'
+      PathPart: '{proxy+}'
+      RestApiId: !Ref 'RestApi'
+    Type: 'AWS::ApiGateway::Resource'
+  # Stage for the REST API endpoint.
+  RestApiStage:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      DeploymentId: !Ref 'RestApiDeployment'
+      RestApiId: !Ref 'RestApi'
+      StageName: !Ref 'AWS::StackName'
+    Type: 'AWS::ApiGateway::Stage'
   # Virtual private cloud for internal networking.
   Vpc:
     Condition: 'MaybeDeployVpc'
