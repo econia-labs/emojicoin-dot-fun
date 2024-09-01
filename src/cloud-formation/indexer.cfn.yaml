@@ -648,7 +648,7 @@ Resources:
                 - 'Constants'
                 - 'Networking'
                 - 'BrokerPort'
-              - '/ws"'
+              - '"'
           - '# BROKER_WS_URL not set (broker not provisioned)'
           DatabaseUrl: !Join
           - ''
@@ -838,7 +838,7 @@ Resources:
     DependsOn: 'Nlb'
     Properties:
       HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/'
+      HealthCheckPath: '/health'
       HealthCheckPort: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -973,7 +973,7 @@ Resources:
           - 'curl'
           - '--fail'
           - !Sub
-            - 'http://localhost:${PORT}/'
+            - 'http://localhost:${PORT}/live'
             - PORT: !FindInMap
               - 'Constants'
               - 'Networking'
