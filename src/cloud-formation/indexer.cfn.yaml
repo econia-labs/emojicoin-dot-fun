@@ -551,7 +551,7 @@ Resources:
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
       AutoDeploy: true
-      StageName: !Ref 'AWS::StackName'
+      StageName: '$default'
     Type: 'AWS::ApiGatewayV2::Stage'
   # Minimal VM for monitoring internal processes.
   BastionHost:
