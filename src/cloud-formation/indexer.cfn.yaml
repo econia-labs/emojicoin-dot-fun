@@ -465,6 +465,7 @@ Resources:
     Properties:
       DeploymentId: !Ref 'ApiRestEndpointDeployment'
       RestApiId: !Ref 'ApiRestEndpoint'
+      Name: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGateway::Stage'
   # WebSocket API endpoint for the API.
   ApiWsEndpoint:
@@ -517,6 +518,7 @@ Resources:
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
       DeploymentId: !Ref 'ApiWsEndpointDeployment'
+      Name: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGatewayV2::Stage'
   # Minimal VM for monitoring internal processes.
   BastionHost:
