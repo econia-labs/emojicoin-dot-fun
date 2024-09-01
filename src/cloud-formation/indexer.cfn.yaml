@@ -6,11 +6,6 @@
 # cspell:word pullthroughcache
 ---
 Conditions:
-  MaybeDeployAlb: !And
-  - !Condition 'MaybeDeployVpc'
-  - !Equals
-    - !Ref 'MaybeDeployAlb'
-    - 'true'
   MaybeDeployApiDnsRecord: !And
   - !Condition 'MaybeDeployApiRestEndpoint'
   - !Condition 'MaybeDeployApiWsEndpoint'
@@ -251,91 +246,6 @@ Parameters:
   ProcessorImageVersion:
     Type: 'String'
 Resources:
-  # Private application load balancer.
-  Alb:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      LoadBalancerAttributes:
-      - Key: 'load_balancing.cross_zone.enabled'
-        Value: 'true'
-      Scheme: 'internal'
-      SecurityGroups:
-      - !Ref 'AlbSecurityGroup'
-      - !If
-        - 'MaybeDeployBroker'
-        - !Ref 'BrokerWsClientSecurityGroup'
-        - !Ref 'AWS::NoValue'
-      - !If
-        - 'MaybeDeployPostgrest'
-        - !Ref 'PostgrestClientSecurityGroup'
-        - !Ref 'AWS::NoValue'
-      Subnets:
-      - !Ref 'PrivateSubnetA'
-      - !Ref 'PrivateSubnetB'
-      - !Ref 'PrivateSubnetC'
-      Type: 'application'
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  # Security group for clients of the application load balancer.
-  AlbClientSecurityGroup:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      GroupDescription: !Ref 'AWS::StackName'
-      SecurityGroupEgress:
-      - DestinationSecurityGroupId: !Ref 'AlbSecurityGroup'
-        IpProtocol: -1
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::EC2::SecurityGroup'
-  # Application load balancer listener.
-  AlbListener:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      DefaultActions:
-      - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
-        Type: 'forward'
-      LoadBalancerArn: !Ref 'Alb'
-      Port: 80
-      Protocol: 'HTTP'
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
-  # Application load balancer listener rule for broker traffic.
-  AlbListenerRuleBrokerTarget:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      Actions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
-      Conditions:
-      - Field: 'path-pattern'
-        Values:
-        - '/ws'
-      ListenerArn: !Ref 'AlbListener'
-      Priority: 1
-    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
-  # Security group for the application load balancer.
-  AlbSecurityGroup:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      GroupDescription: !Ref 'AWS::StackName'
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::EC2::SecurityGroup'
-  # Ingress policy for the application load balancer security group.
-  AlbSecurityGroupIngress:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      GroupId: !Ref 'AlbSecurityGroup'
-      IpProtocol: -1
-      SourceSecurityGroupId: !Ref 'AlbClientSecurityGroup'
-    Type: 'AWS::EC2::SecurityGroupIngress'
-  # Application load balancer as the target of the network load balancer.
-  # AlbTargetGroup:
-  #   Condition: 'MaybeDeployNlb'
-  #   Properties:
-  #     Port: 80
-  #     Protocol: 'TCP'
-  #     TargetType: 'alb'
-  #     Targets:
-  #     - Id: !Ref 'Alb'
-  #     VpcId: !Ref 'Vpc'
-  #   Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # DNS certificate for the API.
   ApiCertificate:
     Condition: 'MaybeDeployApiDnsRecord'
@@ -520,8 +430,6 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
-      # RequestParameters:
-      #   integration.request.header.Connection: '''Upgrade'''
     Type: 'AWS::ApiGatewayV2::Integration'
   # WebSocket API route for the connection event.
   ApiWsEndpointConnectRoute:
@@ -645,10 +553,6 @@ Resources:
         - !Ref 'BastionHostSecurityGroup'
         - !Ref 'DbUserSecurityGroup'
         - !If
-          - 'MaybeDeployAlb'
-          - !Ref 'AlbClientSecurityGroup'
-          - !Ref 'AWS::NoValue'
-        - !If
           - 'MaybeDeployBroker'
           - !Ref 'BrokerWsClientSecurityGroup'
           - !Ref 'AWS::NoValue'
@@ -678,20 +582,11 @@ Resources:
             chmod +x ${WebsocatBuild}
             mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
-            echo '${AlbDnsNameExport}' >> /etc/profile
             echo '${NlbDnsNameExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
-        - AlbDnsNameExport: !If
-          - 'MaybeDeployAlb'
-          - !Join
-            - ''
-            - - 'export ALB_DNS_NAME="'
-              - !GetAtt 'Alb.DNSName'
-              - '"'
-          - '# ALB_DNS_NAME not set (ALB not provisioned)'
-          BrokerWsUrlExport: !If
+        - BrokerWsUrlExport: !If
           - 'MaybeDeployBroker'
           - !Join
             - ''
@@ -812,38 +707,6 @@ Resources:
       SourceSecurityGroupId:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
-  # Target group for application load balancer traffic to the broker.
-  BrokerAlbTargetGroup:
-    Condition: 'MaybeDeployAlb'
-    DependsOn: 'Alb'
-    Properties:
-      HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/'
-      HealthCheckPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'BrokerPort'
-      HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 2
-      HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-broker-alb'
-      Port: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'BrokerPort'
-      Protocol: 'HTTP'
-      ProtocolVersion: 'HTTP1'
-      TargetGroupAttributes:
-      - Key: 'deregistration_delay.timeout_seconds'
-        Value: '30'
-      - Key: 'stickiness.enabled'
-        Value: 'true'
-      - Key: 'stickiness.type'
-        Value: 'lb_cookie'
-      TargetType: 'ip'
-      UnhealthyThresholdCount: 2
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Scaling policy for broker service.
   BrokerAutoScalingPolicy:
     Condition: 'MaybeDeployBroker'
@@ -1498,38 +1361,6 @@ Resources:
       TargetArns:
       - !Ref 'Nlb'
     Type: 'AWS::ApiGateway::VpcLink'
-  # Target group for application load balancer traffic to PostgREST.
-  PostgrestAlbTargetGroup:
-    Condition: 'MaybeDeployAlb'
-    DependsOn: 'Alb'
-    Properties:
-      HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/ready'
-      HealthCheckPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestHealthCheckPort'
-      HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 2
-      HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-postgrest-alb'
-      Port: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestPort'
-      Protocol: 'HTTP'
-      ProtocolVersion: 'HTTP1'
-      TargetGroupAttributes:
-      - Key: 'deregistration_delay.timeout_seconds'
-        Value: '30'
-      - Key: 'stickiness.enabled'
-        Value: 'false'
-      - Key: 'load_balancing.algorithm.type'
-        Value: 'round_robin'
-      TargetType: 'ip'
-      UnhealthyThresholdCount: 2
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Scaling policy for PostgREST service.
   PostgrestAutoScalingPolicy:
     Condition: 'MaybeDeployPostgrest'
