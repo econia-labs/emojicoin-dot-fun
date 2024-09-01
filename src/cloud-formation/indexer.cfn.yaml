@@ -437,7 +437,7 @@ Resources:
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
       ApiId: !Ref 'ApiRestEndpoint'
-      ConnectionId: !Ref 'NlbVpcLink'
+      ConnectionId: !Ref 'PostgrestNlbListener'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
@@ -544,7 +544,7 @@ Resources:
     Condition: 'MaybeDeployApiWsEndpoint'
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
-      ConnectionId: !Ref 'NlbVpcLink'
+      ConnectionId: !Ref 'BrokerNlbListener'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
