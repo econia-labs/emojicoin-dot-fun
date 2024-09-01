@@ -441,13 +441,7 @@ Resources:
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Sub
-      - '${PostgrestNlbListener}/${PostgrestPort}'
-      - PostgrestNlbListener: !Ref 'PostgrestNlbListener'
-        PostgrestPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'PostgrestPort'
+      IntegrationUri: !Ref 'PostgrestNlbListener'
       PayloadFormatVersion: '1.0'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Rest API endpoint method for the API.
