@@ -517,6 +517,18 @@ Resources:
       - - 'integrations'
         - !Ref 'ApiWsEndpointIntegration'
     Type: 'AWS::ApiGatewayV2::Route'
+  # WebSocket API route for the default route.
+  ApiWsEndpointDefaultRoute:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      ApiId: !Ref 'ApiWsEndpoint'
+      AuthorizationType: 'NONE'
+      RouteKey: '$default'
+      Target: !Join
+      - '/'
+      - - 'integrations'
+        - !Ref 'ApiWsEndpointIntegration'
+    Type: 'AWS::ApiGatewayV2::Route'
   # Deployment for the WebSocket API endpoint.
   # ApiWsEndpointDeployment:
   #   Condition: 'MaybeDeployApiWsEndpoint'
