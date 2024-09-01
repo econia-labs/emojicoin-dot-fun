@@ -443,8 +443,6 @@ Resources:
       IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Ref 'PostgrestNlbListener'
       PayloadFormatVersion: '1.0'
-      RequestParameters:
-        integration.request.path.proxy: 'method.request.path.proxy'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Rest API endpoint method for the API.
   # ApiRestEndpointMethod:
@@ -497,7 +495,7 @@ Resources:
     Properties:
       ApiId: !Ref 'ApiRestEndpoint'
       AutoDeploy: true
-      StageName: !Ref 'AWS::StackName'
+      StageName: '$default'
     Type: 'AWS::ApiGatewayV2::Stage'
   # WebSocket API endpoint for the API.
   ApiWsEndpoint:
