@@ -574,6 +574,19 @@ Resources:
         - 'Networking'
         - 'BrokerPort'
       PassthroughBehavior: 'WHEN_NO_MATCH'
+      RequestParameters:
+        integration.request.header.Connection: '''Upgrade'''
+        integration.request.header.Host:
+          'method.request.header.Host'
+        integration.request.header.Sec-WebSocket-Key:
+          'method.request.header.Sec-WebSocket-Key'
+        integration.request.header.Sec-WebSocket-Protocol:
+          'method.request.header.Sec-WebSocket-Protocol'
+        integration.request.header.Sec-WebSocket-Version:
+          'method.request.header.Sec-WebSocket-Version'
+        integration.request.header.Upgrade: '''WebSocket'''
+      RequestTemplates:
+        '$default': '{"action": "$context.routeKey"}'
     # RequestParameters:
     #   'integration.request.header.Host': '$default'
     #   'integration.request.header.Sec-WebSocket-Key':
