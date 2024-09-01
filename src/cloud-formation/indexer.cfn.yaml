@@ -541,9 +541,10 @@ Resources:
       ApiId: !Ref 'ApiWsEndpoint'
       ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
       ConnectionType: 'VPC_LINK'
-      IntegrationMethod: 'GET'
+      IntegrationMethod: 'POST'
       IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Ref 'BrokerNlbListener'
+      PaloadFormatVersion: '1.0'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Stage for the WebSocket API endpoint.
   ApiWsEndpointStage:
