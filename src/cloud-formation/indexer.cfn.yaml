@@ -577,8 +577,6 @@ Resources:
       RequestParameters:
         'integration.request.header.Connection': "'Upgrade'"
         'integration.request.header.Upgrade': "'WebSocket'"
-      RequestTemplates:
-        '$default': '{"action":"$context.routeKey"}'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Account config for logging the WebSocket API endpoint.
   ApiWsEndpointLogAccountConfig:
