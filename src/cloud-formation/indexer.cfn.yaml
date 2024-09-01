@@ -506,44 +506,44 @@ Resources:
       RouteSelectionExpression: '$request.body.action'
     Type: 'AWS::ApiGatewayV2::Api'
   # WebSocket API endpoint connect integration for the API.
-  ApiWsEndpointConnectIntegration:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
-      ConnectionType: 'VPC_LINK'
-      IntegrationMethod: 'GET'
-      IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Sub
-      - 'http://${Nlb.DNSName}:${BrokerPort}'
-      - BrokerPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'BrokerPort'
-    # RequestParameters:
-    #   integration.request.header.Connection: '''Upgrade'''
-    #   integration.request.header.Upgrade: '''websocket'''
-    Type: 'AWS::ApiGatewayV2::Integration'
+  # ApiWsEndpointConnectIntegration:
+  #   Condition: 'MaybeDeployApiWsEndpoint'
+  #   Properties:
+  #     ApiId: !Ref 'ApiWsEndpoint'
+  #     ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
+  #     ConnectionType: 'VPC_LINK'
+  #     IntegrationMethod: 'GET'
+  #     IntegrationType: 'HTTP_PROXY'
+  #     IntegrationUri: !Sub
+  #     - 'http://${Nlb.DNSName}:${BrokerPort}'
+  #     - BrokerPort: !FindInMap
+  #       - 'Constants'
+  #       - 'Networking'
+  #       - 'BrokerPort'
+  #   RequestParameters:
+  #     integration.request.header.Connection: '''Upgrade'''
+  #     integration.request.header.Upgrade: '''websocket'''
+  #   Type: 'AWS::ApiGatewayV2::Integration'
   # WebSocket API route for the connection event.
-  ApiWsEndpointConnectRoute:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      AuthorizationType: 'NONE'
-      RouteKey: '$connect'
-      Target: !Join
-      - '/'
-      - - 'integrations'
-        - !Ref 'ApiWsEndpointConnectIntegration'
-    Type: 'AWS::ApiGatewayV2::Route'
+  # ApiWsEndpointConnectRoute:
+  #   Condition: 'MaybeDeployApiWsEndpoint'
+  #   Properties:
+  #     ApiId: !Ref 'ApiWsEndpoint'
+  #     AuthorizationType: 'NONE'
+  #     RouteKey: '$connect'
+  #     Target: !Join
+  #     - '/'
+  #     - - 'integrations'
+  #       - !Ref 'ApiWsEndpointConnectIntegration'
+  #   Type: 'AWS::ApiGatewayV2::Route'
   # Connect route response for the WebSocket API endpoint.
-  ApiWsEndpointConnectRouteResponse:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      RouteId: !Ref 'ApiWsEndpointConnectRoute'
-      RouteResponseKey: '$default'
-    Type: 'AWS::ApiGatewayV2::RouteResponse'
+  # ApiWsEndpointConnectRouteResponse:
+  #   Condition: 'MaybeDeployApiWsEndpoint'
+  #   Properties:
+  #     ApiId: !Ref 'ApiWsEndpoint'
+  #     RouteId: !Ref 'ApiWsEndpointConnectRoute'
+  #     RouteResponseKey: '$default'
+  #   Type: 'AWS::ApiGatewayV2::RouteResponse'
   # WebSocket API endpoint default integration for the API.
   ApiWsEndpointDefaultIntegration:
     Condition: 'MaybeDeployApiWsEndpoint'
