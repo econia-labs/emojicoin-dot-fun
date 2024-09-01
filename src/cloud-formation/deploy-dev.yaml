@@ -11,7 +11,7 @@ parameters:
   MaybeDeployContainers: 'true'
   MaybeDeployDb: 'true'
   MaybeDeployNlb: 'true'
-  MaybeDeployNlbVpcLink: 'false'
+  MaybeDeployNlbVpcLinks: 'true'
   MaybeDeployPostgrest: 'true'
   MaybeDeployProcessor: 'true'
   MaybeDeployRouteTables: 'true'

@@ -18,12 +18,12 @@ Conditions:
     - !Ref 'MaybeDeployApiDnsRecord'
     - 'true'
   MaybeDeployApiRestEndpoint: !And
-  - !Condition 'MaybeDeployNlbVpcLink'
+  - !Condition 'MaybeDeployNlbVpcLinks'
   - !Equals
     - !Ref 'MaybeDeployApiRestEndpoint'
     - 'true'
   MaybeDeployApiWsEndpoint: !And
-  - !Condition 'MaybeDeployNlbVpcLink'
+  - !Condition 'MaybeDeployNlbVpcLinks'
   - !Equals
     - !Ref 'MaybeDeployApiWsEndpoint'
     - 'true'
@@ -54,10 +54,10 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployNlb'
     - 'true'
-  MaybeDeployNlbVpcLink: !And
+  MaybeDeployNlbVpcLinks: !And
   - !Condition 'MaybeDeployNlb'
   - !Equals
-    - !Ref 'MaybeDeployNlbVpcLink'
+    - !Ref 'MaybeDeployNlbVpcLinks'
     - 'true'
   MaybeDeployPostgrest: !And
   - !Condition 'MaybeDeployContainers'
@@ -207,7 +207,7 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
-  MaybeDeployNlbVpcLink:
+  MaybeDeployNlbVpcLinks:
     AllowedValues:
     - 'false'
     - 'true'
@@ -437,7 +437,7 @@ Resources:
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
       ApiId: !Ref 'ApiRestEndpoint'
-      ConnectionId: !Ref 'NlbVpcLink'
+      ConnectionId: !Ref 'NlbVpcLinkRestApi'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
@@ -544,7 +544,7 @@ Resources:
     Condition: 'MaybeDeployApiWsEndpoint'
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
-      ConnectionId: !Ref 'NlbVpcLink'
+      ConnectionId: !Ref 'NlbVpcLinkWsApi'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
@@ -1392,9 +1392,9 @@ Resources:
       IpProtocol: -1
       SourceSecurityGroupId: !Ref 'NlbClientSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
-  # Connection to network load balancer.
-  NlbVpcLink:
-    Condition: 'MaybeDeployNlbVpcLink'
+  # Connection to network load balancer for REST API.
+  NlbVpcLinkRestApi:
+    Condition: 'MaybeDeployNlbVpcLinks'
     Properties:
       Name: !Ref 'AWS::StackName'
       SecurityGroupIds:
@@ -1404,6 +1404,14 @@ Resources:
       - !Ref 'PrivateSubnetB'
       - !Ref 'PrivateSubnetC'
     Type: 'AWS::ApiGatewayV2::VpcLink'
+  # Connection to network load balancer for WebSocket API.
+  NlbVpcLinkWsApi:
+    Condition: 'MaybeDeployNlbVpcLinks'
+    Properties:
+      Name: !Ref 'AWS::StackName'
+      TargetArns:
+      - !Ref 'Nlb'
+    Type: 'AWS::ApiGateway::VpcLink'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'MaybeDeployAlb'
