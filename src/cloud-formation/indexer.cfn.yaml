@@ -389,6 +389,10 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
+      RequestParameters:
+        # integration.request.header.Upgrade: '''websocket'''
+        integration.request.header.Connection:
+          '$context.request.header.Connection'
     Type: 'AWS::ApiGatewayV2::Integration'
   # WebSocket API route for the connection event.
   ApiWsEndpointConnectRoute:
@@ -425,9 +429,6 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
-    # RequestParameters:
-    #   integration.request.header.Connection: '''Upgrade'''
-    #   integration.request.header.Upgrade: '''websocket'''
     Type: 'AWS::ApiGatewayV2::Integration'
   # WebSocket API route for default messages.
   ApiWsEndpointDefaultRoute:
