@@ -512,11 +512,20 @@ Resources:
       ApiId: !Ref 'ApiWsEndpoint'
       AuthorizationType: 'NONE'
       RouteKey: '$connect'
+      RouteResponseSelectionExpression: '$default'
       Target: !Join
       - '/'
       - - 'integrations'
         - !Ref 'ApiWsEndpointIntegration'
     Type: 'AWS::ApiGatewayV2::Route'
+  # Connect route response for the WebSocket API endpoint.
+  ApiWsEndpointConnectRouteResponse:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      ApiId: !Ref 'ApiWsEndpoint'
+      RouteId: !Ref 'ApiWsEndpointConnectRoute'
+      RouteResponseKey: '$default'
+    Type: 'AWS::ApiGatewayV2::RouteResponse'
   # WebSocket API route for default messages.
   ApiWsEndpointDefaultRoute:
     Condition: 'MaybeDeployApiWsEndpoint'
