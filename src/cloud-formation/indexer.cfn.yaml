@@ -517,13 +517,25 @@ Resources:
       - - 'integrations'
         - !Ref 'ApiWsEndpointIntegration'
     Type: 'AWS::ApiGatewayV2::Route'
-  # WebSocket API route for the default route.
+  # WebSocket API route for default messages.
   ApiWsEndpointDefaultRoute:
     Condition: 'MaybeDeployApiWsEndpoint'
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
       AuthorizationType: 'NONE'
       RouteKey: '$default'
+      Target: !Join
+      - '/'
+      - - 'integrations'
+        - !Ref 'ApiWsEndpointIntegration'
+    Type: 'AWS::ApiGatewayV2::Route'
+  # WebSocket API route for the disconnect event.
+  ApiWsEndpointDisconnectRoute:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      ApiId: !Ref 'ApiWsEndpoint'
+      AuthorizationType: 'NONE'
+      RouteKey: '$disconnect'
       Target: !Join
       - '/'
       - - 'integrations'
