@@ -514,13 +514,12 @@ Resources:
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Ref 'BrokerNlbListener'
-      # IntegrationUri: !Sub
-      # - 'http://${Nlb.DNSName}:${PostgrestPort}'
-      # - PostgrestPort: !FindInMap
-      #   - 'Constants'
-      #   - 'Networking'
-      #   - 'PostgrestPort'
+      IntegrationUri: !Sub
+      - 'http://${Nlb.DNSName}:${BrokerPort}'
+      - BrokerPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'BrokerPort'
       # RequestParameters:
       #   integration.request.header.Connection:
       #     'context.request.header.Connection'
