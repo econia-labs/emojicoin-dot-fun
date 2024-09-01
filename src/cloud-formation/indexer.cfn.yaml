@@ -382,7 +382,7 @@ Resources:
       ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
-      IntegrationType: 'HTTP'
+      IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Sub
       - 'http://${Nlb.DNSName}:${BrokerPort}'
       - BrokerPort: !FindInMap
