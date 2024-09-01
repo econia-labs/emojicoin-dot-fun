@@ -384,16 +384,17 @@ Resources:
       IntegrationMethod: 'GET'
       # HTTP_PROXY without request parameters results in a 400 failed handshake
       # with warning that connection header does not include upgrade.
-      IntegrationType: 'HTTP'
+      IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Sub
       - 'http://${Nlb.DNSName}:${BrokerPort}'
       - BrokerPort: !FindInMap
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
-      RequestParameters:
-        # integration.request.header.Upgrade: '''websocket'''
-        integration.request.header.Connection: '$request.header.Connection'
+      PassThroughBehavior: 'WHEN_NO_MATCH'
+      # RequestParameters:
+      #   # integration.request.header.Upgrade: '''websocket'''
+      #   integration.request.header.Connection: '$request.header.Connection'
     Type: 'AWS::ApiGatewayV2::Integration'
   # WebSocket API route for the connection event.
   ApiWsEndpointConnectRoute:
