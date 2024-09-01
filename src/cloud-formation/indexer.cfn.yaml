@@ -503,7 +503,7 @@ Resources:
     Properties:
       Name: !Ref 'AWS::StackName'
       ProtocolType: 'WEBSOCKET'
-      RouteSelectionExpression: '$request.method'
+      RouteSelectionExpression: '$request.body.action'
     Type: 'AWS::ApiGatewayV2::Api'
   # WebSocket API route for the connection event.
   ApiWsEndpointConnectRoute:
