@@ -567,7 +567,12 @@ Resources:
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Ref 'BrokerNlbListener'
+      IntegrationUri: !Sub
+      - 'http://${Nlb.DNSName}:${BrokerPort}'
+      - BrokerPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'BrokerPort'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Account config for logging the WebSocket API endpoint.
   ApiWsEndpointLogAccountConfig:
