@@ -6,21 +6,15 @@
 # cspell:word pullthroughcache
 ---
 Conditions:
-  MaybeDeployApiDnsRecord: !And
-  - !Condition 'MaybeDeployApiRestEndpoint'
-  - !Condition 'MaybeDeployApiWsEndpoint'
+  MaybeDeployAlb: !And
+  - !Condition 'MaybeDeployVpc'
   - !Equals
-    - !Ref 'MaybeDeployApiDnsRecord'
+    - !Ref 'MaybeDeployAlb'
     - 'true'
-  MaybeDeployApiRestEndpoint: !And
-  - !Condition 'MaybeDeployNlbVpcLinks'
+  MaybeDeployAlbDnsRecord: !And
+  - !Condition 'MaybeDeployAlb'
   - !Equals
-    - !Ref 'MaybeDeployApiRestEndpoint'
-    - 'true'
-  MaybeDeployApiWsEndpoint: !And
-  - !Condition 'MaybeDeployNlbVpcLinks'
-  - !Equals
-    - !Ref 'MaybeDeployApiWsEndpoint'
+    - !Ref 'MaybeDeployAlbDnsRecord'
     - 'true'
   MaybeDeployBastionHost: !And
   - !Condition 'MaybeDeployDb'
@@ -49,10 +43,10 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployNlb'
     - 'true'
-  MaybeDeployNlbVpcLinks: !And
+  MaybeDeployNlbVpcLink: !And
   - !Condition 'MaybeDeployNlb'
   - !Equals
-    - !Ref 'MaybeDeployNlbVpcLinks'
+    - !Ref 'MaybeDeployNlbVpcLink'
     - 'true'
   MaybeDeployPostgrest: !And
   - !Condition 'MaybeDeployContainers'
@@ -65,6 +59,11 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployProcessor'
     - 'true'
+  # MaybeDeployRestApi: !And
+  # - !Condition 'MaybeDeployNlbVpcLink'
+  # - !Equals
+  #   - !Ref 'MaybeDeployRestApi'
+  #   - 'true'
   MaybeDeployRouteTables: !And
   - !Condition 'MaybeDeployVpc'
   - !Equals
@@ -132,7 +131,7 @@ Outputs:
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
   DnsName:
-    Condition: 'MaybeDeployApiDnsRecord'
+    Condition: 'MaybeDeployAlbDnsRecord'
     Value: !Sub
     - '${Environment}.${Subdomain}.${RootDomain}'
     - RootDomain: !FindInMap
@@ -162,17 +161,7 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
-  MaybeDeployApiDnsRecord:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  MaybeDeployApiRestEndpoint:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  MaybeDeployApiWsEndpoint:
+  MaybeDeployAlbDnsRecord:
     AllowedValues:
     - 'false'
     - 'true'
@@ -202,7 +191,7 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
-  MaybeDeployNlbVpcLinks:
+  MaybeDeployNlbVpcLink:
     AllowedValues:
     - 'false'
     - 'true'
@@ -213,6 +202,11 @@ Parameters:
     - 'true'
     Type: 'String'
   MaybeDeployProcessor:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployRestApi:
     AllowedValues:
     - 'false'
     - 'true'
@@ -246,9 +240,33 @@ Parameters:
   ProcessorImageVersion:
     Type: 'String'
 Resources:
-  # DNS certificate for the API.
-  ApiCertificate:
-    Condition: 'MaybeDeployApiDnsRecord'
+  # Public application load balancer.
+  Alb:
+    Condition: 'MaybeDeployAlb'
+    Properties:
+      LoadBalancerAttributes:
+      - Key: 'load_balancing.cross_zone.enabled'
+        Value: 'true'
+      Scheme: 'internet-facing'
+      SecurityGroups:
+      - !Ref 'AlbSecurityGroup'
+      - !If
+        - 'MaybeDeployBroker'
+        - !Ref 'BrokerWsClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
+      - !If
+        - 'MaybeDeployPostgrest'
+        - !Ref 'PostgrestClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
+      Subnets:
+      - !Ref 'PublicSubnetA'
+      - !Ref 'PublicSubnetB'
+      - !Ref 'PublicSubnetC'
+      Type: 'application'
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+  # DNS certificate for the application load balancer.
+  AlbCertificate:
+    Condition: 'MaybeDeployAlb'
     Properties:
       DomainName: !Sub
       - '${Environment}.${Subdomain}.${RootDomain}'
@@ -277,32 +295,13 @@ Resources:
         - 'DnsNameHostedZoneId'
       ValidationMethod: 'DNS'
     Type: 'AWS::CertificateManager::Certificate'
-  # Custom domain for the API.
-  ApiCustomDomain:
-    Condition: 'MaybeDeployApiDnsRecord'
-    Properties:
-      DomainName: !Sub
-      - '${Environment}.${Subdomain}.${RootDomain}'
-      - RootDomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameRootDomain'
-        Subdomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameSubdomain'
-      DomainNameConfigurations:
-      - CertificateArn: !Ref 'ApiCertificate'
-        EndpointType: 'REGIONAL'
-        SecurityPolicy: 'TLS_1_2'
-    Type: 'AWS::ApiGatewayV2::DomainName'
-  # DNS record for the API.
-  ApiDnsRecord:
-    Condition: 'MaybeDeployApiDnsRecord'
+  # DNS record for the broker's application load balancer.
+  AlbDnsRecord:
+    Condition: 'MaybeDeployAlbDnsRecord'
     Properties:
       AliasTarget:
-        DNSName: !GetAtt 'ApiCustomDomain.RegionalDomainName'
-        HostedZoneId: !GetAtt 'ApiCustomDomain.RegionalHostedZoneId'
+        DNSName: !GetAtt 'Alb.DNSName'
+        HostedZoneId: !GetAtt 'Alb.CanonicalHostedZoneID'
       HostedZoneId: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -319,184 +318,45 @@ Resources:
         - 'DnsNameSubdomain'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
-  # REST API endpoint for the API.
-  ApiRestEndpoint:
-    Condition: 'MaybeDeployApiRestEndpoint'
+  # Application load balancer listener.
+  AlbListener:
+    Condition: 'MaybeDeployAlb'
     Properties:
-      Name: !Ref 'AWS::StackName'
-      ProtocolType: 'HTTP'
-    Type: 'AWS::ApiGatewayV2::Api'
-  # REST endpoint domain mapping for the API.
-  ApiRestEndpointDomainMapping:
-    Condition: 'MaybeDeployApiDnsRecord'
+      Certificates:
+      - CertificateArn: !Ref 'AlbCertificate'
+      DefaultActions:
+      - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Alb'
+      Port: 443
+      Protocol: 'HTTPS'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # Application load balancer listener rule for broker traffic.
+  AlbListenerRuleBrokerTarget:
+    Condition: 'MaybeDeployAlb'
     Properties:
-      ApiId: !Ref 'ApiRestEndpoint'
-      DomainName: !Ref 'ApiCustomDomain'
-      Stage: !Ref 'ApiRestEndpointStage'
-    Type: 'AWS::ApiGatewayV2::ApiMapping'
-  # Integration for the REST API endpoint.
-  ApiRestEndpointIntegration:
-    Condition: 'MaybeDeployApiRestEndpoint'
+      Actions:
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+        Type: 'forward'
+      Conditions:
+      - Field: 'path-pattern'
+        Values:
+        - '/ws'
+      ListenerArn: !Ref 'AlbListener'
+      Priority: 1
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+  # Security group for the application load balancer.
+  AlbSecurityGroup:
+    Condition: 'MaybeDeployAlb'
     Properties:
-      ApiId: !Ref 'ApiRestEndpoint'
-      ConnectionId: !Ref 'NlbVpcLinkRestEndpoint'
-      ConnectionType: 'VPC_LINK'
-      IntegrationMethod: 'GET'
-      IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Ref 'PostgrestNlbListener'
-      PayloadFormatVersion: '1.0'
-    Type: 'AWS::ApiGatewayV2::Integration'
-  # Rest API endpoint integration for the API.
-  ApiRestEndpointRoute:
-    Condition: 'MaybeDeployApiRestEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiRestEndpoint'
-      AuthorizationType: 'NONE'
-      RouteKey: 'GET /{proxy+}'
-      Target: !Join
-      - '/'
-      - - 'integrations'
-        - !Ref 'ApiRestEndpointIntegration'
-    Type: 'AWS::ApiGatewayV2::Route'
-  # Stage for the REST API endpoint.
-  ApiRestEndpointStage:
-    Condition: 'MaybeDeployApiRestEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiRestEndpoint'
-      AutoDeploy: true
-      StageName: '$default'
-    Type: 'AWS::ApiGatewayV2::Stage'
-  # WebSocket API endpoint for the API.
-  ApiWsEndpoint:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      Name: !Ref 'AWS::StackName'
-      ProtocolType: 'WEBSOCKET'
-      RouteSelectionExpression: '$request.body.action'
-    Type: 'AWS::ApiGatewayV2::Api'
-  # WebSocket API endpoint connect integration for the API.
-  ApiWsEndpointConnectIntegration:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
-      ConnectionType: 'VPC_LINK'
-      IntegrationMethod: 'GET'
-      IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Sub
-      - 'http://${Nlb.DNSName}:${BrokerPort}'
-      - BrokerPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'BrokerPort'
-    Type: 'AWS::ApiGatewayV2::Integration'
-  # WebSocket API route for the connection event.
-  ApiWsEndpointConnectRoute:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      AuthorizationType: 'NONE'
-      RouteKey: '$connect'
-      Target: !Join
-      - '/'
-      - - 'integrations'
-        - !Ref 'ApiWsEndpointConnectIntegration'
-    Type: 'AWS::ApiGatewayV2::Route'
-  # Connect route response for the WebSocket API endpoint.
-  ApiWsEndpointConnectRouteResponse:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      RouteId: !Ref 'ApiWsEndpointConnectRoute'
-      RouteResponseKey: '$default'
-    Type: 'AWS::ApiGatewayV2::RouteResponse'
-  # WebSocket API endpoint default integration for the API.
-  ApiWsEndpointDefaultIntegration:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
-      ConnectionType: 'VPC_LINK'
-      IntegrationMethod: 'POST'
-      IntegrationType: 'HTTP_PROXY'
-      IntegrationUri: !Sub
-      - 'http://${Nlb.DNSName}:${BrokerPort}'
-      - BrokerPort: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'BrokerPort'
-    Type: 'AWS::ApiGatewayV2::Integration'
-  # WebSocket API route for default messages.
-  ApiWsEndpointDefaultRoute:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      AuthorizationType: 'NONE'
-      RouteKey: '$default'
-      Target: !Join
-      - '/'
-      - - 'integrations'
-        - !Ref 'ApiWsEndpointDefaultIntegration'
-    Type: 'AWS::ApiGatewayV2::Route'
-  # Default route response for the WebSocket API endpoint.
-  ApiWsEndpointDefaultRouteResponse:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      RouteId: !Ref 'ApiWsEndpointDefaultRoute'
-      RouteResponseKey: '$default'
-    Type: 'AWS::ApiGatewayV2::RouteResponse'
-  # WebSocket endpoint domain mapping for the API.
-  ApiWsEndpointDomainMapping:
-    Condition: 'MaybeDeployApiDnsRecord'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-      ApiMappingKey: 'ws'
-      DomainName: !Ref 'ApiCustomDomain'
-      Stage: !Ref 'ApiWsEndpointStage'
-    Type: 'AWS::ApiGatewayV2::ApiMapping'
-  # Account config for logging the WebSocket API endpoint.
-  ApiWsEndpointLogAccountConfig:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      CloudWatchRoleArn: !GetAtt 'ApiWsEndpointLogRole.Arn'
-    Type: 'AWS::ApiGateway::Account'
-  # Logging for the WebSocket API endpoint.
-  ApiWsEndpointLogGroup:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      LogGroupName: !Sub '/aws/apigateway/${ApiWsEndpoint}'
-      RetentionInDays: 7
-    Type: 'AWS::Logs::LogGroup'
-  # Role for the WebSocket API endpoint to push logs to CloudWatch.
-  ApiWsEndpointLogRole:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action: 'sts:AssumeRole'
-          Effect: 'Allow'
-          Principal:
-            Service: 'apigateway.amazonaws.com'
-        Version: '2012-10-17'
-      ManagedPolicyArns:
-      # yamllint disable-line rule:line-length
-      - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'
-      RoleName: !Sub 'ApiGatewayCloudWatchRole-${AWS::StackName}'
-    Type: 'AWS::IAM::Role'
-  # Stage for the WebSocket API endpoint.
-  ApiWsEndpointStage:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    DependsOn: 'ApiWsEndpointLogAccountConfig'
-    Properties:
-      AccessLogSettings:
-        DestinationArn: !GetAtt 'ApiWsEndpointLogGroup.Arn'
-        # yamllint disable-line rule:line-length
-        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "routeKey":"$context.routeKey", "status":"$context.status", "connectionId": "$context.connectionId", "error": "$context.error.messageString", "integrationError": "$context.integrationErrorMessage", "integrationStatus": "$context.integration.status", "integrationLatency": "$context.integration.latency", "responseLatency": "$context.responseLatency" }'
-      ApiId: !Ref 'ApiWsEndpoint'
-      AutoDeploy: true
-      StageName: !Ref 'AWS::StackName'
-    Type: 'AWS::ApiGatewayV2::Stage'
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupIngress:
+      - CidrIp: '0.0.0.0/0'
+        FromPort: 443
+        IpProtocol: 'tcp'
+        ToPort: 443
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'MaybeDeployBastionHost'
@@ -663,6 +523,38 @@ Resources:
       SourceSecurityGroupId:
         !Ref 'BastionHostConnectionEndpointSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
+  # Target group for application load balancer traffic to the broker.
+  BrokerAlbTargetGroup:
+    Condition: 'MaybeDeployAlb'
+    DependsOn: 'Alb'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/ready'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-broker'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'BrokerPort'
+      Protocol: 'HTTP'
+      ProtocolVersion: 'HTTP1'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'true'
+      - Key: 'stickiness.type'
+        Value: 'lb_cookie'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Scaling policy for broker service.
   BrokerAutoScalingPolicy:
     Condition: 'MaybeDeployBroker'
@@ -692,49 +584,6 @@ Resources:
       ScalableDimension: 'ecs:service:DesiredCount'
       ServiceNamespace: 'ecs'
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-  # Listener for network load balancer traffic to broker.
-  BrokerNlbListener:
-    Condition: 'MaybeDeployNlb'
-    Properties:
-      DefaultActions:
-      - TargetGroupArn: !Ref 'BrokerNlbTargetGroup'
-        Type: 'forward'
-      LoadBalancerArn: !Ref 'Nlb'
-      Port: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'BrokerPort'
-      Protocol: 'TCP'
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
-  # Target group for network load balancer traffic to the broker.
-  BrokerNlbTargetGroup:
-    Condition: 'MaybeDeployNlb'
-    DependsOn: 'Nlb'
-    Properties:
-      HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/health'
-      HealthCheckPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'BrokerPort'
-      HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 2
-      HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-broker'
-      Port: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'BrokerPort'
-      Protocol: 'TCP'
-      TargetGroupAttributes:
-      - Key: 'deregistration_delay.timeout_seconds'
-        Value: '30'
-      - Key: 'stickiness.enabled'
-        Value: 'true'
-      TargetType: 'ip'
-      UnhealthyThresholdCount: 2
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
     Condition: 'MaybeDeployBroker'
@@ -762,13 +611,13 @@ Resources:
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
-    # Proxy for a conditional dependency on the network load balancer listener
-    # for the broker, which associates the broker target group with the network
-    # load balancer.
+    # Proxy for a conditional dependency on the application load balancer
+    # listener rule for the broker, which associates the broker target group
+    # with the application load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
-      - 'MaybeDeployNlb'
-      - !Ref 'BrokerNlbListener'
+      - 'MaybeDeployAlb'
+      - !Ref 'AlbListenerRuleBrokerTarget'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
@@ -778,13 +627,13 @@ Resources:
           Rollback: true
       LaunchType: 'FARGATE'
       LoadBalancers: !If
-      - 'MaybeDeployNlb'
+      - 'MaybeDeployAlb'
       - - ContainerName: !Sub '${AWS::StackName}-broker'
           ContainerPort: !FindInMap
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
-          TargetGroupArn: !Ref 'BrokerNlbTargetGroup'
+          TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
       - !Ref 'AWS::NoValue'
       NetworkConfiguration:
         AwsvpcConfiguration:
@@ -1239,7 +1088,6 @@ Resources:
         Value: 'true'
       Scheme: 'internal'
       SecurityGroups:
-      # - !Ref 'AlbClientSecurityGroup'
       - !Ref 'NlbSecurityGroup'
       - !If
         - 'MaybeDeployBroker'
@@ -1255,7 +1103,7 @@ Resources:
       - !Ref 'PrivateSubnetC'
       Type: 'network'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  # Security group for clients of the network load balancer.
+  # Security group for direct clients of the network load balancer.
   NlbClientSecurityGroup:
     Condition: 'MaybeDeployNlb'
     Properties:
@@ -1272,51 +1120,63 @@ Resources:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Network load balancer security group ingress policy for broker traffic from
-  # VPC link and broker containers.
-  NlbSecurityGroupIngressBroker:
-    Condition: 'MaybeDeployNlbVpcLinks'
+  # Network load balancer security group ingress policy for PostgREST traffic
+  # over VPC link.
+  NlbSecurityGroupIngressPostgrest:
+    Condition: 'MaybeDeployNlbVpcLink'
     Properties:
       CidrIp: '0.0.0.0/0'
       FromPort: !FindInMap
       - 'Constants'
       - 'Networking'
-      - 'BrokerPort'
+      - 'PostgrestPort'
       GroupId: !Ref 'NlbSecurityGroup'
       IpProtocol: 'tcp'
       ToPort: !FindInMap
       - 'Constants'
       - 'Networking'
-      - 'BrokerPort'
+      - 'PostgrestPort'
     Type: 'AWS::EC2::SecurityGroupIngress'
-  # Network load balancer security group ingress policy for PostgREST traffic.
-  NlbSecurityGroupIngressPostgrest:
-    Condition: 'MaybeDeployNlbVpcLinks'
-    Properties:
-      GroupId: !Ref 'NlbSecurityGroup'
-      IpProtocol: -1
-      SourceSecurityGroupId: !Ref 'NlbClientSecurityGroup'
-    Type: 'AWS::EC2::SecurityGroupIngress'
-  # Connection to network load balancer for API REST endpoint.
-  NlbVpcLinkRestEndpoint:
-    Condition: 'MaybeDeployNlbVpcLinks'
-    Properties:
-      Name: !Ref 'AWS::StackName'
-      SecurityGroupIds:
-      - !Ref 'NlbClientSecurityGroup'
-      SubnetIds:
-      - !Ref 'PrivateSubnetA'
-      - !Ref 'PrivateSubnetB'
-      - !Ref 'PrivateSubnetC'
-    Type: 'AWS::ApiGatewayV2::VpcLink'
-  # Connection to network load balancer for API WebSocket endpoint.
-  NlbVpcLinkWsEndpoint:
-    Condition: 'MaybeDeployNlbVpcLinks'
+  # Connection to network load balancer through VPC link.
+  NlbVpcLink:
+    Condition: 'MaybeDeployNlbVpcLink'
     Properties:
       Name: !Ref 'AWS::StackName'
       TargetArns:
       - !Ref 'Nlb'
     Type: 'AWS::ApiGateway::VpcLink'
+  # Target group for application load balancer traffic to PostgREST.
+  PostgrestAlbTargetGroup:
+    Condition: 'MaybeDeployAlb'
+    DependsOn: 'Alb'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/ready'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestHealthCheckPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-postgrest'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+      Protocol: 'HTTP'
+      ProtocolVersion: 'HTTP1'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'false'
+      - Key: 'load_balancing.algorithm.type'
+        Value: 'round_robin'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Scaling policy for PostgREST service.
   PostgrestAutoScalingPolicy:
     Condition: 'MaybeDeployPostgrest'
