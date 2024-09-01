@@ -286,7 +286,7 @@ Connect to the bastion host over the [EC2 Instance Connect Endpoint] using your
 stack name, for example `emoji-dev`:
 
 ```sh
-STACK_NAME=emoji-dev
+STACK_NAME=emoji-ECO-2152
 INSTANCE_ID=$(aws cloudformation describe-stacks \
     --output text \
     --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
@@ -337,24 +337,18 @@ fi
    curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
    ```
 
-1. Check broker and PostgREST access through the ALB:
-
-   ```sh
-   websocat ws://$ALB_DNS_NAME/ws
-   ```
-
-   ```sh
-   curl http://$ALB_DNS_NAME/market_latest_state_event?select=market_id && echo
-   ```
-
 1. Check broker and PostgREST access through the NLB:
 
    ```sh
-   websocat ws://$NLB_DNS_NAME/ws
+   websocat ws://$NLB_DNS_NAME:3009
    ```
 
    ```sh
-   curl http://$NLB_DNS_NAME/market_latest_state_event?select=market_id && echo
+   {}
+   ```
+
+   ```sh
+   curl http://$NLB_DNS_NAME:3000/market_latest_state_event?select=market_id
    ```
 
 ## Design notes
