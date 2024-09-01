@@ -402,7 +402,7 @@ Resources:
                 - 'Constants'
                 - 'Networking'
                 - 'BrokerPort'
-              - '"'
+              - '/ws"'
           - '# BROKER_WS_URL not set (broker not provisioned)'
           DatabaseUrl: !Join
           - ''
@@ -683,7 +683,7 @@ Resources:
           - 'curl'
           - '--fail'
           - !Sub
-            - 'http://localhost:${PORT}/live'
+            - 'http://localhost:${PORT}/'
             - PORT: !FindInMap
               - 'Constants'
               - 'Networking'
