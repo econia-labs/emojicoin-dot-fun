@@ -541,7 +541,7 @@ Resources:
       ApiId: !Ref 'ApiWsEndpoint'
       ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
       ConnectionType: 'VPC_LINK'
-      IntegrationMethod: 'POST'
+      IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Ref 'BrokerNlbListener'
       PayloadFormatVersion: '1.0'
