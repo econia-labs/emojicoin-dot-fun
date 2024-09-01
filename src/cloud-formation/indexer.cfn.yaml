@@ -391,7 +391,7 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
-      PassThroughBehavior: 'WHEN_NO_MATCH'
+      PassthroughBehavior: 'WHEN_NO_MATCH'
       # RequestParameters:
       #   # integration.request.header.Upgrade: '''websocket'''
       #   integration.request.header.Connection: '$request.header.Connection'
