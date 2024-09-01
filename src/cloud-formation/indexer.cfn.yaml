@@ -459,6 +459,33 @@ Resources:
       ProtocolType: 'WEBSOCKET'
       RouteSelectionExpression: '$request.body.action'
     Type: 'AWS::ApiGatewayV2::Api'
+  # WebSocket API route for the connection event.
+  ApiWsEndpointConnectRoute:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      ApiId: !Ref 'ApiWsEndpoint'
+      RouteKey: '$connect'
+      Target: !Join
+      - '/'
+      - - 'integrations'
+        - !Ref 'ApiWsEndpointIntegration'
+    Type: 'AWS::ApiGatewayV2::Route'
+  # WebSocket API endpoint integration for the API.
+  ApiWsEndpointIntegration:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      ApiId: !Ref 'ApiWsEndpoint'
+      ConnectionId: !Ref 'NlbVpcLink'
+      ConnectionType: 'VPC_LINK'
+      IntegrationType: 'HTTP_PROXY'
+      IntegrationUri: !Sub
+      - 'http://${NlbDnsName}:${BrokerPort}/ws'
+      - BrokerPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'BrokerPort'
+        NlbDnsName: !GetAtt 'Nlb.DNSName'
+    Type: 'AWS::ApiGatewayV2::Integration'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'MaybeDeployBastionHost'
