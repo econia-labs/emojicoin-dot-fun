@@ -382,7 +382,9 @@ Resources:
       ConnectionId: !Ref 'NlbVpcLinkWsEndpoint'
       ConnectionType: 'VPC_LINK'
       IntegrationMethod: 'GET'
-      IntegrationType: 'HTTP_PROXY'
+      # HTTP proxy without request parameters results in a 400 failed handshake
+      # with warning that connection header does not include upgrade.
+      IntegrationType: 'HTTP'
       IntegrationUri: !Sub
       - 'http://${Nlb.DNSName}:${BrokerPort}'
       - BrokerPort: !FindInMap
