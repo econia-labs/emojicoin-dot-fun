@@ -574,7 +574,7 @@ Resources:
         - 'Networking'
         - 'BrokerPort'
       RequestParameters:
-        'integration.request.header.Host': '$default'
+        # 'integration.request.header.Host': '$default'
         'integration.request.header.Sec-WebSocket-Key': 'context.wsContext.key'
         'integration.request.header.Sec-WebSocket-Protocol':
           'context.wsContext.protocol'
