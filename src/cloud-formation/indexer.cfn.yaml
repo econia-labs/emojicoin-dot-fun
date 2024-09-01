@@ -418,6 +418,14 @@ Resources:
         - 'REGIONAL'
       Name: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGateway::RestApi'
+  # Deployment for the REST API endpoint.
+  ApiRestEndpointDeployment:
+    Condition: 'MaybeDeployApiRestEndpoint'
+    DependsOn:
+    - 'ApiRestEndpointMethod'
+    Properties:
+      RestApiId: !Ref 'ApiRestEndpoint'
+    Type: 'AWS::ApiGateway::Deployment'
   # Rest API endpoint method for the API.
   ApiRestEndpointMethod:
     Condition: 'MaybeDeployApiRestEndpoint'
@@ -451,6 +459,13 @@ Resources:
       PathPart: '{proxy+}'
       RestApiId: !Ref 'ApiRestEndpoint'
     Type: 'AWS::ApiGateway::Resource'
+  # Stage for the REST API endpoint.
+  ApiRestEndpointStage:
+    Condition: 'MaybeDeployApiRestEndpoint'
+    Properties:
+      DeploymentId: !Ref 'ApiRestEndpointDeployment'
+      RestApiId: !Ref 'ApiRestEndpoint'
+    Type: 'AWS::ApiGateway::Stage'
   # WebSocket API endpoint for the API.
   ApiWsEndpoint:
     Condition: 'MaybeDeployApiWsEndpoint'
@@ -471,6 +486,14 @@ Resources:
       - - 'integrations'
         - !Ref 'ApiWsEndpointIntegration'
     Type: 'AWS::ApiGatewayV2::Route'
+  # Deployment for the WebSocket API endpoint.
+  ApiWsEndpointDeployment:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    DependsOn:
+    - 'ApiWsEndpointConnectRoute'
+    Properties:
+      ApiId: !Ref 'ApiWsEndpoint'
+    Type: 'AWS::ApiGatewayV2::Deployment'
   # WebSocket API endpoint integration for the API.
   ApiWsEndpointIntegration:
     Condition: 'MaybeDeployApiWsEndpoint'
@@ -488,6 +511,13 @@ Resources:
         - 'BrokerPort'
         NlbDnsName: !GetAtt 'Nlb.DNSName'
     Type: 'AWS::ApiGatewayV2::Integration'
+  # Stage for the WebSocket API endpoint.
+  ApiWsEndpointStage:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      ApiId: !Ref 'ApiWsEndpoint'
+      DeploymentId: !Ref 'ApiWsEndpointDeployment'
+    Type: 'AWS::ApiGatewayV2::Stage'
   # Minimal VM for monitoring internal processes.
   BastionHost:
     Condition: 'MaybeDeployBastionHost'
