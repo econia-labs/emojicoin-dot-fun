@@ -4,7 +4,7 @@ parameters:
   Environment: 'ECO-2152'
   MaybeDeployAlb: 'false'
   MaybeDeployApiDnsRecord: 'false'
-  MaybeDeployApiRestEndpoint: 'false'
+  MaybeDeployApiRestEndpoint: 'true'
   MaybeDeployApiWsEndpoint: 'false'
   MaybeDeployBastionHost: 'false'
   MaybeDeployBroker: 'true'
