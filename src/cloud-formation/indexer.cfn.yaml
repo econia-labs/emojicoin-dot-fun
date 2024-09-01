@@ -607,7 +607,20 @@ Resources:
       AccessLogSettings:
         DestinationArn: !GetAtt 'ApiWsEndpointLogGroup.Arn'
         # yamllint disable-line rule:line-length
-        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "resourcePath":"$context.resourcePath", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+        Format: >-
+          { "requestId":"$context.requestId",
+            "ip": "$context.identity.sourceIp",
+            "requestTime":"$context.requestTime",
+            "httpMethod":"$context.httpMethod",
+            "routeKey":"$context.routeKey",
+            "status":"$context.status",
+            "connectionId": "$context.connectionId",
+            "error": "$context.error.messageString",
+            "integrationError": "$context.integrationErrorMessage",
+            "integrationStatus": "$context.integration.status",
+            "integrationLatency": "$context.integration.latency",
+            "responseLatency": "$context.responseLatency"
+          }
       ApiId: !Ref 'ApiWsEndpoint'
       AutoDeploy: true
       StageName: !Ref 'AWS::StackName'
