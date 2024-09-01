@@ -1247,6 +1247,7 @@ Resources:
       Scheme: 'internal'
       SecurityGroups:
       # - !Ref 'AlbClientSecurityGroup'
+      - !Ref 'NlbSecurityGroup'
       - !If
         - 'MaybeDeployBroker'
         - !Ref 'BrokerWsClientSecurityGroup'
