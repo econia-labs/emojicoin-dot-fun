@@ -568,11 +568,11 @@ Resources:
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Sub
-      - 'http://${Nlb.DNSName}:${BrokerPort}'
-      - BrokerPort: !FindInMap
+      - 'http://${Nlb.DNSName}:${PostgrestPort}'
+      - PostgrestPort: !FindInMap
         - 'Constants'
         - 'Networking'
-        - 'BrokerPort'
+        - 'PostgrestPort'
     # RequestParameters:
     #   'integration.request.header.Host': '$default'
     #   'integration.request.header.Sec-WebSocket-Key':
