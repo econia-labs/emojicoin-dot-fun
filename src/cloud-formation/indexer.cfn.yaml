@@ -568,7 +568,6 @@ Resources:
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Ref 'BrokerNlbListener'
-      PayloadFormatVersion: '1.0'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Account config for logging the WebSocket API endpoint.
   ApiWsEndpointLogAccountConfig:
