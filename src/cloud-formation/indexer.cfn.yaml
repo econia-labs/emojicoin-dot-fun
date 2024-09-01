@@ -550,14 +550,6 @@ Resources:
       - - 'integrations'
         - !Ref 'ApiWsEndpointIntegration'
     Type: 'AWS::ApiGatewayV2::Route'
-  # Deployment for the WebSocket API endpoint.
-  # ApiWsEndpointDeployment:
-  #   Condition: 'MaybeDeployApiWsEndpoint'
-  #   DependsOn:
-  #   - 'ApiWsEndpointConnectRoute'
-  #   Properties:
-  #     ApiId: !Ref 'ApiWsEndpoint'
-  #   Type: 'AWS::ApiGatewayV2::Deployment'
   # WebSocket endpoint domain mapping for the API.
   ApiWsEndpointDomainMapping:
     Condition: 'MaybeDeployApiDnsRecord'
@@ -583,20 +575,9 @@ Resources:
         - 'Networking'
         - 'BrokerPort'
       RequestParameters:
-        integration.request.header.Connection: "'Upgrade'"
-        integration.request.header.Upgrade: "'websocket'"
-    # RequestParameters:
-    #   'integration.request.header.Host': '$default'
-    #   'integration.request.header.Sec-WebSocket-Key':
-    #     'context.wsContext.key'
-    #   'integration.request.header.Sec-WebSocket-Protocol':
-    #     'context.wsContext.protocol'
-    #   'integration.request.header.Sec-WebSocket-Version':
-    #     'context.wsContext.version'
-    #   'integration.request.header.X-Api-Gateway-Context': '$default'
-    #   'integration.request.header.X-Api-Gateway-Event': '$default'
-    #   'integration.request.header.X-Forwarded-For':
-    #     'context.identity.sourceIp'
+        integration.request.header.Connection:
+          'method.request.header.Connection'
+        integration.request.header.Upgrade: 'method.request.header.Upgrade'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Account config for logging the WebSocket API endpoint.
   ApiWsEndpointLogAccountConfig:
