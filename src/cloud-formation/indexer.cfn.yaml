@@ -570,6 +570,12 @@ Resources:
       IntegrationUri: !Ref 'BrokerNlbListener'
       PayloadFormatVersion: '1.0'
     Type: 'AWS::ApiGatewayV2::Integration'
+  # Account config for logging the WebSocket API endpoint.
+  ApiWsEndpointLogAccountConfig:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      CloudWatchRoleArn: !GetAtt 'ApiWsEndpointLogRole.Arn'
+    Type: 'AWS::ApiGateway::Account'
   # Logging for the WebSocket API endpoint.
   ApiWsEndpointLogGroup:
     Condition: 'MaybeDeployApiWsEndpoint'
@@ -577,9 +583,26 @@ Resources:
       LogGroupName: !Sub '/aws/apigateway/${ApiWsEndpoint}'
       RetentionInDays: 7
     Type: 'AWS::Logs::LogGroup'
+  # Role for the WebSocket API endpoint to push logs to CloudWatch.
+  ApiWsEndpointLogRole:
+    Condition: 'MaybeDeployApiWsEndpoint'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: 'sts:AssumeRole'
+          Effect: 'Allow'
+          Principal:
+            Service: 'apigateway.amazonaws.com'
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      # yamllint disable-line rule:line-length
+      - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+      RoleName: !Sub 'ApiGatewayCloudWatchRole-${AWS::StackName}'
+    Type: 'AWS::IAM::Role'
   # Stage for the WebSocket API endpoint.
   ApiWsEndpointStage:
     Condition: 'MaybeDeployApiWsEndpoint'
+    DependsOn: 'ApiWsEndpointLogAccountConfig'
     Properties:
       AccessLogSettings:
         DestinationArn: !GetAtt 'ApiWsEndpointLogGroup.Arn'
