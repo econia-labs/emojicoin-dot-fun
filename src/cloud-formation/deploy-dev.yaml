@@ -12,7 +12,7 @@ parameters:
   MaybeDeployNlbVpcLink: 'true'
   MaybeDeployPostgrest: 'true'
   MaybeDeployProcessor: 'true'
-  MaybeDeployRestApi: 'true'
+  MaybeDeployRestApi: 'false'
   MaybeDeployRouteTables: 'true'
   MaybeDeployStack: 'true'
   MaybeDeployVpc: 'true'
