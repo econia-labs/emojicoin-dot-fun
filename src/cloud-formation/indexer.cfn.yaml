@@ -479,10 +479,10 @@ Resources:
   #   Type: 'AWS::ApiGateway::Resource'
   # Rest API endpoint integration for the API.
   ApiRestEndpointRoute:
-    AuthorizationType: 'NONE'
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
       ApiId: !Ref 'ApiRestEndpoint'
+      AuthorizationType: 'NONE'
       RouteKey: 'GET /{proxy+}'
       Target: !Join
       - '/'
