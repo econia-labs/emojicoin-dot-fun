@@ -12,7 +12,8 @@ Conditions:
     - !Ref 'MaybeDeployAlb'
     - 'true'
   MaybeDeployApiDnsRecord: !And
-  - !Condition 'MaybeDeployStack'
+  - !Condition 'MaybeDeployApiRestEndpoint'
+  - !Condition 'MaybeDeployApiWsEndpoint'
   - !Equals
     - !Ref 'MaybeDeployApiDnsRecord'
     - 'true'
@@ -426,6 +427,14 @@ Resources:
     Properties:
       RestApiId: !Ref 'ApiRestEndpoint'
     Type: 'AWS::ApiGateway::Deployment'
+  # REST endpoint domain mapping for the API.
+  ApiRestEndpointDomainMapping:
+    Condition: 'MaybeDeployApiDnsRecord'
+    Properties:
+      DomainName: !Ref 'ApiCustomDomain'
+      RestApiId: !Ref 'ApiRestEndpoint'
+      Stage: !Ref 'ApiRestEndpointStage'
+    Type: 'AWS::ApiGateway::BasePathMapping'
   # Rest API endpoint method for the API.
   ApiRestEndpointMethod:
     Condition: 'MaybeDeployApiRestEndpoint'
@@ -495,6 +504,15 @@ Resources:
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
     Type: 'AWS::ApiGatewayV2::Deployment'
+  # WebSocket endpoint domain mapping for the API.
+  ApiWsEndpointDomainMapping:
+    Condition: 'MaybeDeployApiDnsRecord'
+    Properties:
+      BasePath: 'ws'
+      DomainName: !Ref 'ApiCustomDomain'
+      RestApiId: !Ref 'ApiWsEndpoint'
+      Stage: !Ref 'ApiWsEndpointStage'
+    Type: 'AWS::ApiGateway::BasePathMapping'
   # WebSocket API endpoint integration for the API.
   ApiWsEndpointIntegration:
     Condition: 'MaybeDeployApiWsEndpoint'
