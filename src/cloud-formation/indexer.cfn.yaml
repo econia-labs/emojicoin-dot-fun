@@ -7,6 +7,7 @@
 ---
 Conditions:
   MaybeDeployAlb: !And
+  - !Condition 'MaybeDeployRestApi'
   - !Condition 'MaybeDeployVpc'
   - !Equals
     - !Ref 'MaybeDeployAlb'
@@ -255,10 +256,6 @@ Resources:
         - 'MaybeDeployBroker'
         - !Ref 'BrokerWsClientSecurityGroup'
         - !Ref 'AWS::NoValue'
-      - !If
-        - 'MaybeDeployPostgrest'
-        - !Ref 'PostgrestClientSecurityGroup'
-        - !Ref 'AWS::NoValue'
       Subnets:
       - !Ref 'PublicSubnetA'
       - !Ref 'PublicSubnetB'
@@ -326,12 +323,32 @@ Resources:
       Certificates:
       - CertificateArn: !Ref 'AlbCertificate'
       DefaultActions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
+      - RedirectConfig:
+          Host: !Sub '${RestApi}.execute-api.${AWS::Region}.amazonaws.com'
+          Path: !Sub '/${RestApiStage}/#{path}'
+          Port: '443'
+          Protocol: 'HTTPS'
+          Query: '#{query}'
+          StatusCode: 'HTTP_301'
+        Type: 'redirect'
       LoadBalancerArn: !Ref 'Alb'
       Port: 443
       Protocol: 'HTTPS'
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # Application load balancer listener rule for WebSocket traffic.
+  AlbListenerWebsocketRule:
+    Condition: 'MaybeDeployAlb'
+    Properties:
+      Actions:
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
+        Type: 'forward'
+      Conditions:
+      - Field: 'path-pattern'
+        Values:
+        - '/ws'
+      ListenerArn: !Ref 'AlbListener'
+      Priority: 1
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
     Condition: 'MaybeDeployAlb'
@@ -599,12 +616,12 @@ Resources:
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
     # Proxy for a conditional dependency on the application load balancer
-    # listener, which associates the broker target group with the application
-    # load balancer.
+    # listener WebSocket rule, which associates the broker target group with
+    # the application load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
       - 'MaybeDeployAlb'
-      - !Ref 'AlbListener'
+      - !Ref 'AlbListenerWebsocketRule'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
