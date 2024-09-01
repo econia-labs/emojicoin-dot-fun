@@ -515,13 +515,13 @@ Resources:
       IntegrationMethod: 'GET'
       IntegrationType: 'HTTP'
       IntegrationUri: !Sub
-      - 'http://${Nlb.DNSName}:${BrokerPort}'
+      - 'ws://${Nlb.DNSName}:${BrokerPort}'
       - BrokerPort: !FindInMap
         - 'Constants'
         - 'Networking'
         - 'BrokerPort'
-      RequestParameters:
-        integration.request.header.Connection: '''Upgrade'''
+      # RequestParameters:
+      #   integration.request.header.Connection: '''Upgrade'''
     Type: 'AWS::ApiGatewayV2::Integration'
   # WebSocket API route for the connection event.
   ApiWsEndpointConnectRoute:
