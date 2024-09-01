@@ -381,12 +381,11 @@ Resources:
         - 'Constants'
         - 'Networking'
         - 'DnsNameSubdomain'
-      EndpointConfiguration:
-        Types:
-        - 'REGIONAL'
-      RegionalCertificateArn: !Ref 'ApiCertificate'
-      SecurityPolicy: 'TLS_1_2'
-    Type: 'AWS::ApiGateway::DomainName'
+      DomainNameConfigurations:
+      - CertificateArn: !Ref 'ApiCertificate'
+        EndpointType: 'REGIONAL'
+        SecurityPolicy: 'TLS_1_2'
+    Type: 'AWS::ApiGatewayV2::DomainName'
   # DNS record for the API.
   ApiDnsRecord:
     Condition: 'MaybeDeployApiDnsRecord'
@@ -414,68 +413,95 @@ Resources:
   ApiRestEndpoint:
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
-      EndpointConfiguration:
-        Types:
-        - 'REGIONAL'
       Name: !Ref 'AWS::StackName'
-    Type: 'AWS::ApiGateway::RestApi'
+      ProtocolType: 'HTTP'
+    Type: 'AWS::ApiGatewayV2::Api'
   # Deployment for the REST API endpoint.
-  ApiRestEndpointDeployment:
-    Condition: 'MaybeDeployApiRestEndpoint'
-    DependsOn:
-    - 'ApiRestEndpointMethod'
-    Properties:
-      RestApiId: !Ref 'ApiRestEndpoint'
-    Type: 'AWS::ApiGateway::Deployment'
+  # ApiRestEndpointDeployment:
+  #   Condition: 'MaybeDeployApiRestEndpoint'
+  #   DependsOn:
+  #   - 'ApiRestEndpointMethod'
+  #   Properties:
+  #     RestApiId: !Ref 'ApiRestEndpoint'
+  #   Type: 'AWS::ApiGateway::Deployment'
   # REST endpoint domain mapping for the API.
   ApiRestEndpointDomainMapping:
     Condition: 'MaybeDeployApiDnsRecord'
     Properties:
+      ApiId: !Ref 'ApiRestEndpoint'
       DomainName: !Ref 'ApiCustomDomain'
-      RestApiId: !Ref 'ApiRestEndpoint'
       Stage: !Ref 'ApiRestEndpointStage'
-    Type: 'AWS::ApiGateway::BasePathMapping'
+    Type: 'AWS::ApiGatewayV2::ApiMapping'
+  # Integration for the REST API endpoint.
+  ApiRestEndpointIntegration:
+    Condition: 'MaybeDeployApiRestEndpoint'
+    Properties:
+      ApiId: !Ref 'ApiRestEndpoint'
+      ConnectionId: !Ref 'NlbVpcLink'
+      ConnectionType: 'VPC_LINK'
+      IntegrationMethod: 'GET'
+      IntegrationType: 'HTTP_PROXY'
+      IntegrationUri: !Sub
+      - 'http://${NlbDnsName}:${PostgrestPort}/{proxy}'
+      - NlbDnsName: !GetAtt 'Nlb.DNSName'
+        PostgrestPort: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'PostgrestPort'
+      PayloadFormatVersion: '1.0'
+    Type: 'AWS::ApiGatewayV2::Integration'
   # Rest API endpoint method for the API.
-  ApiRestEndpointMethod:
-    Condition: 'MaybeDeployApiRestEndpoint'
-    Properties:
-      AuthorizationType: 'NONE'
-      HttpMethod: 'GET'
-      Integration:
-        ConnectionId: !Ref 'NlbVpcLink'
-        ConnectionType: 'VPC_LINK'
-        IntegrationHttpMethod: 'GET'
-        RequestParameters:
-          integration.request.path.proxy: 'method.request.path.proxy'
-        Type: 'HTTP_PROXY'
-        Uri: !Sub
-        - 'http://${NlbDnsName}:${PostgrestPort}/{proxy}'
-        - NlbDnsName: !GetAtt 'Nlb.DNSName'
-          PostgrestPort: !FindInMap
-          - 'Constants'
-          - 'Networking'
-          - 'PostgrestPort'
-      RequestParameters:
-        method.request.path.proxy: true
-      ResourceId: !Ref 'ApiRestEndpointProxyResource'
-      RestApiId: !Ref 'ApiRestEndpoint'
-    Type: 'AWS::ApiGateway::Method'
+  # ApiRestEndpointMethod:
+  #   Condition: 'MaybeDeployApiRestEndpoint'
+  #   Properties:
+  #     AuthorizationType: 'NONE'
+  #     HttpMethod: 'GET'
+  #     Integration:
+  #       ConnectionId: !Ref 'NlbVpcLink'
+  #       ConnectionType: 'VPC_LINK'
+  #       IntegrationHttpMethod: 'GET'
+  #       RequestParameters:
+  #         integration.request.path.proxy: 'method.request.path.proxy'
+  #       Type: 'HTTP_PROXY'
+  #       Uri: !Sub
+  #       - 'http://${NlbDnsName}:${PostgrestPort}/{proxy}'
+  #       - NlbDnsName: !GetAtt 'Nlb.DNSName'
+  #         PostgrestPort: !FindInMap
+  #         - 'Constants'
+  #         - 'Networking'
+  #         - 'PostgrestPort'
+  #     RequestParameters:
+  #       method.request.path.proxy: true
+  #     ResourceId: !Ref 'ApiRestEndpointProxyResource'
+  #     RestApiId: !Ref 'ApiRestEndpoint'
+  #   Type: 'AWS::ApiGateway::Method'
   # Proxy resource for the REST API endpoint.
-  ApiRestEndpointProxyResource:
+  # ApiRestEndpointProxyResource:
+  #   Condition: 'MaybeDeployApiRestEndpoint'
+  #   Properties:
+  #     ParentId: !GetAtt 'ApiRestEndpoint.RootResourceId'
+  #     PathPart: '{proxy+}'
+  #     RestApiId: !Ref 'ApiRestEndpoint'
+  #   Type: 'AWS::ApiGateway::Resource'
+  # Rest API endpoint integration for the API.
+  ApiRestEndpointRoute:
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
-      ParentId: !GetAtt 'ApiRestEndpoint.RootResourceId'
-      PathPart: '{proxy+}'
-      RestApiId: !Ref 'ApiRestEndpoint'
-    Type: 'AWS::ApiGateway::Resource'
+      ApiId: !Ref 'ApiRestEndpoint'
+      RouteKey: 'GET /{proxy+}'
+      Target: !Join
+      - '/'
+      - - 'integrations'
+        - !Ref 'ApiRestEndpointIntegration'
+    Type: 'AWS::ApiGatewayV2::Route'
   # Stage for the REST API endpoint.
   ApiRestEndpointStage:
     Condition: 'MaybeDeployApiRestEndpoint'
     Properties:
-      DeploymentId: !Ref 'ApiRestEndpointDeployment'
-      RestApiId: !Ref 'ApiRestEndpoint'
+      ApiId: !Ref 'ApiRestEndpoint'
+      AutoDeploy: true
       StageName: !Ref 'AWS::StackName'
-    Type: 'AWS::ApiGateway::Stage'
+    Type: 'AWS::ApiGatewayV2::Stage'
   # WebSocket API endpoint for the API.
   ApiWsEndpoint:
     Condition: 'MaybeDeployApiWsEndpoint'
@@ -497,22 +523,22 @@ Resources:
         - !Ref 'ApiWsEndpointIntegration'
     Type: 'AWS::ApiGatewayV2::Route'
   # Deployment for the WebSocket API endpoint.
-  ApiWsEndpointDeployment:
-    Condition: 'MaybeDeployApiWsEndpoint'
-    DependsOn:
-    - 'ApiWsEndpointConnectRoute'
-    Properties:
-      ApiId: !Ref 'ApiWsEndpoint'
-    Type: 'AWS::ApiGatewayV2::Deployment'
+  # ApiWsEndpointDeployment:
+  #   Condition: 'MaybeDeployApiWsEndpoint'
+  #   DependsOn:
+  #   - 'ApiWsEndpointConnectRoute'
+  #   Properties:
+  #     ApiId: !Ref 'ApiWsEndpoint'
+  #   Type: 'AWS::ApiGatewayV2::Deployment'
   # WebSocket endpoint domain mapping for the API.
   ApiWsEndpointDomainMapping:
     Condition: 'MaybeDeployApiDnsRecord'
     Properties:
-      BasePath: 'ws'
+      ApiId: !Ref 'ApiWsEndpoint'
+      ApiMappingKey: 'ws'
       DomainName: !Ref 'ApiCustomDomain'
-      RestApiId: !Ref 'ApiWsEndpoint'
       Stage: !Ref 'ApiWsEndpointStage'
-    Type: 'AWS::ApiGateway::BasePathMapping'
+    Type: 'AWS::ApiGatewayV2::ApiMapping'
   # WebSocket API endpoint integration for the API.
   ApiWsEndpointIntegration:
     Condition: 'MaybeDeployApiWsEndpoint'
@@ -535,7 +561,7 @@ Resources:
     Condition: 'MaybeDeployApiWsEndpoint'
     Properties:
       ApiId: !Ref 'ApiWsEndpoint'
-      DeploymentId: !Ref 'ApiWsEndpointDeployment'
+      AutoDeploy: true
       StageName: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGatewayV2::Stage'
   # Minimal VM for monitoring internal processes.
@@ -1341,6 +1367,16 @@ Resources:
       - !Ref 'PrivateSubnetC'
       Type: 'network'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+  # Security group for clients of the network load balancer.
+  NlbClientSecurityGroup:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'NlbSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
   # Security group for the network load balancer.
   NlbSecurityGroup:
     Condition: 'MaybeDeployNlb'
@@ -1348,46 +1384,26 @@ Resources:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Network load balancer security group ingress policy for broker traffic.
-  NlbSecurityGroupIngressBroker:
+  # Network load balancer security group ingress policy.
+  NlbSecurityGroupIngress:
     Condition: 'MaybeDeployNlb'
     Properties:
-      CidrIp: '0.0.0.0/0'
-      FromPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'BrokerPort'
       GroupId: !Ref 'NlbSecurityGroup'
-      IpProtocol: 'tcp'
-      ToPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'BrokerPort'
-    Type: 'AWS::EC2::SecurityGroupIngress'
-  # Network load balancer security group ingress policy for PostgREST traffic.
-  NlbSecurityGroupIngressPostgrest:
-    Condition: 'MaybeDeployNlb'
-    Properties:
-      CidrIp: '0.0.0.0/0'
-      FromPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestPort'
-      GroupId: !Ref 'NlbSecurityGroup'
-      IpProtocol: 'tcp'
-      ToPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestPort'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'NlbClientSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
   # Connection to network load balancer.
   NlbVpcLink:
     Condition: 'MaybeDeployNlbVpcLink'
     Properties:
       Name: !Ref 'AWS::StackName'
-      TargetArns:
-      - !Ref 'Nlb'
-    Type: 'AWS::ApiGateway::VpcLink'
+      SecurityGroupIds:
+      - !Ref 'NlbClientSecurityGroup'
+      SubnetIds:
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
+    Type: 'AWS::ApiGatewayV2::VpcLink'
   # Target group for application load balancer traffic to PostgREST.
   PostgrestAlbTargetGroup:
     Condition: 'MaybeDeployAlb'
