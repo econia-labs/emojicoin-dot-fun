@@ -1383,6 +1383,7 @@ Resources:
       - 'Constants'
       - 'Networking'
       - 'BrokerPort'
+      GroupId: !Ref 'NlbSecurityGroup'
       IpProtocol: 'tcp'
       ToPort: !FindInMap
       - 'Constants'
@@ -1398,6 +1399,7 @@ Resources:
       - 'Constants'
       - 'Networking'
       - 'PostgrestPort'
+      GroupId: !Ref 'NlbSecurityGroup'
       IpProtocol: 'tcp'
       ToPort: !FindInMap
       - 'Constants'
