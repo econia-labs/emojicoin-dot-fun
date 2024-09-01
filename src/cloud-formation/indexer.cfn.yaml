@@ -443,6 +443,8 @@ Resources:
       IntegrationType: 'HTTP_PROXY'
       IntegrationUri: !Ref 'PostgrestNlbListener'
       PayloadFormatVersion: '1.0'
+      RequestParameters:
+        integration.request.path.proxy: 'method.request.path.proxy'
     Type: 'AWS::ApiGatewayV2::Integration'
   # Rest API endpoint method for the API.
   # ApiRestEndpointMethod:
