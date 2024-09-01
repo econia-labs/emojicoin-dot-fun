@@ -516,7 +516,7 @@ Resources:
     DependsOn: 'Alb'
     Properties:
       HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/ready'
+      HealthCheckPath: '/health'
       HealthCheckPort: !FindInMap
       - 'Constants'
       - 'Networking'
