@@ -32,6 +32,9 @@ jobs:
         username: '${{ secrets.DOCKERHUB_USERNAME }}'
     - uses: 'docker/build-push-action@v6'
       with:
+        build-args: |
+          PUBLISHER_PK=${{ env.PUBLISHER_PK }}
+          BIG_MONEY_GUY_PK=${{ env.BIG_MONEY_GUY_PK }}
         cache-from: 'type=gha'
         cache-to: 'type=gha,mode=max'
         context: '.'
