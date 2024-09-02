@@ -26,13 +26,13 @@ services:
       timeout: '3s'
       retries: 10
       start_period: '60s'
-    In order to start the node with the indexer API; i.e., run
-    `aptos node run-local-testnet --with-indexer-api`, the Docker socket must
-    be mounted to the container. This mount enables the container to start a
-    new container. Note that this is *not* 'Docker-in-Docker', but rather
-    'Docker-outside-Docker'. That is, the container can act as the host in
-    terms of creating and orchestrating other containers but still appears as
-    a sibling to the existing containers and any new containers it creates.
+    # In order to start the node with the indexer API; i.e., run
+    # `aptos node run-local-testnet --with-indexer-api`, the Docker socket must
+    # be mounted to the container. This mount enables the container to start a
+    # new container. Note that this is *not* 'Docker-in-Docker', but rather
+    # 'Docker-outside-Docker'. That is, the container can act as the host in
+    # terms of creating and orchestrating other containers but still appears as
+    # a sibling to the existing containers and any new containers it creates.
     volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
 ...
