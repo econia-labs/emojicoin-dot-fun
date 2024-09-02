@@ -662,8 +662,8 @@ Resources:
           - 'curl'
           - '--fail'
           - !Sub
-            - 'http://localhost:${PORT}/live'
-            - PORT: !FindInMap
+            - 'http://localhost:${Port}/live'
+            - Port: !FindInMap
               - 'Constants'
               - 'Networking'
               - 'BrokerPort'
@@ -1510,7 +1510,12 @@ Resources:
           - 'CMD'
           - 'curl'
           - '--fail'
-          - 'http://localhost:8084/metrics'
+          - !Sub
+            - 'http://localhost:${Port}/'
+            - Port: !FindInMap
+              - 'Constants'
+              - 'Networking'
+              - 'ProcessorWebsocketPort'
           Interval: 5
           Retries: 1
           StartPeriod: 0

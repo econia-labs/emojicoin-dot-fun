@@ -17,7 +17,7 @@ parameters:
   MaybeDeployStack: 'true'
   MaybeDeployVpc: 'true'
   Network: 'testnet'
-  ProcessorImageVersion: '0.4.0'
+  ProcessorImageVersion: '0.5.0'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
 ...
