@@ -36,4 +36,5 @@ STOPSIGNAL SIGKILL
 
 # Leave it open to the user to run the node with various options.
 # Keep in mind that the `--force-restart` option will remove the
-# testnet data directory and reinitialize the state.
+# testnet data directory and reinitialize the state from genesis.
+ENTRYPOINT [ "aptos", "node", "run-localnet", "--with-indexer-api" ]
