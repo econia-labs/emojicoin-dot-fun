@@ -187,7 +187,6 @@ export async function getRegistrationGracePeriodFlag(args: {
     console.error(
       `Failed to fetch account resources for market address: ${marketAddress}. Error: ${e}`
     );
-    await sleep(20000);
     return {
       marketNotFound: true,
       flag: null,
