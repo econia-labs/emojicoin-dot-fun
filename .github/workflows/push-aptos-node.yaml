@@ -43,6 +43,7 @@ jobs:
     timeout-minutes: 360
 name: 'Build aptos-node Docker image and push to Docker Hub'
 'on':
+  workflow_dispatch: {}
   push:
     tags:
     - 'aptos-node-v*'
