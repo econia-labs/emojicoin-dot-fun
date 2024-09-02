@@ -12,9 +12,13 @@ using the [template file] at `indexer.cfn.yaml` and a development-specific
 [stack deployment file] at `deploy-*.yaml`. Once a [stack] is configured
 accordingly, `git` updates will result in automatic updates.
 
-The indexer provides a public endpoint for both REST queries and WebSocket
-events at a custom subdomain under a root domain you provide, of format
-`<ENVIRONMENT.data.<YOUR_ROOT_DOMAIN>`, for example `dev.data.foo.bar`.
+The indexer provides a public REST endpoint and a public WebSocket endpoint
+under a root domain you provide, for an environment name of your choosing:
+
+| Endpoint  | URI                                         |
+| --------- | ------------------------------------------- |
+| REST      | `https://<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>`  |
+| WebSocket | `wss://ws.<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>` |
 
 ## Template parameters
 
