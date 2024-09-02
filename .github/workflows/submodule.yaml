@@ -5,8 +5,10 @@ jobs:
     steps:
     - uses: 'actions/checkout@v3'
     - run: 'git submodule update --init --recursive src/rust/processor'
-    - run: 'cd src/rust/processor && git switch emojicoin-dot-fun && git pull && cd -'
-    - run: 'test "$(git status --short | wc -l)" -eq 0'
+    - run: 'cd src/rust/processor && git fetch'
+      working-directory: 'src/rust/processor'
+    - run: 'test "$(git rev-parse emojicoin-dot-fun)" = "$(git rev-parse origin/emojicoin-dot-fun)"'
+      working-directory: 'src/rust/processor'
 name: 'Ensure correct version of processor submodule'
 'on':
   pull_request: null
