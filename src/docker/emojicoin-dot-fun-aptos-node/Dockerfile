@@ -23,9 +23,7 @@ COPY $base_path/json/publish-rewards.json json/
 COPY $base_path/json/test-accounts.json json/
 COPY $base_path/sh/initialize-state.sh sh/
 
-RUN chmod +x sh/initialize-state.sh
-
-RUN ["bash", "sh/initialize-state.sh"]
+RUN chmod +x sh/initialize-state.sh && sh/initialize-state.sh
 
 FROM state-generator
 

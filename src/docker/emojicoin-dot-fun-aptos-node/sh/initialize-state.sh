@@ -1,4 +1,6 @@
 #!/bin/bash
+# cspell:word localnet
+# cspell:word argjson
 
 # Environment variables.
 publisher_pk=$PUBLISHER_PK
@@ -93,14 +95,14 @@ num_accounts=$(jq 'keys | length' $accounts_json_path)
 amount_per_account=$((fund_amount / num_accounts))
 
 for i in {1..2}; do
-    start_index=$(( (i-1) * 500 ))
-    end_index=$(( i * 500 ))
-    
-    jq -r --arg amount "$amount_per_account" \
-	    --argjson start "$start_index" \
-	    --argjson end "$end_index" \
-	'
-    keys | 
+	start_index=$(((i - 1) * 500))
+	end_index=$((i * 500))
+
+	jq -r --arg amount "$amount_per_account" \
+		--argjson start "$start_index" \
+		--argjson end "$end_index" \
+		'
+    keys |
     .[$start:$end] |
     {
       "args": [
@@ -117,7 +119,7 @@ for i in {1..2}; do
       "type_args": []
     }
     ' \
-	$accounts_json_path > "${batch_fund_path_prefix}-${i}.json"
+		$accounts_json_path >"${batch_fund_path_prefix}-${i}.json"
 done
 
 gas_unit_price=100
@@ -128,9 +130,9 @@ max_gas=$(((extra_for_gas / gas_unit_price) / 2))
 for i in {1..2}; do
 	batch_fund_output_path="${batch_fund_path_prefix}-${i}.json"
 	aptos move run \
-	    --assume-yes \
-	    --profile $BIG_MONEY_GUY \
-	    --json-file $batch_fund_output_path \
+		--assume-yes \
+		--profile $BIG_MONEY_GUY \
+		--json-file $batch_fund_output_path \
 		--max-gas $max_gas \
 		--gas-unit-price $gas_unit_price
 done

@@ -1,3 +1,4 @@
+# cspell:word localnet
 ---
 env:
   DOCKER_IMAGE_PLATFORM: 'linux/amd64'
