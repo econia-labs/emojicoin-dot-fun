@@ -7,7 +7,6 @@
 ---
 Conditions:
   MaybeDeployAlb: !And
-  - !Condition 'MaybeDeployRestApi'
   - !Condition 'MaybeDeployVpc'
   - !Equals
     - !Ref 'MaybeDeployAlb'
@@ -323,26 +322,12 @@ Resources:
       Certificates:
       - CertificateArn: !Ref 'AlbCertificate'
       DefaultActions:
-      - TargetGroupArn: !Ref 'RestApiTargetGroup'
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
         Type: 'forward'
       LoadBalancerArn: !Ref 'Alb'
       Port: 443
       Protocol: 'HTTPS'
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
-  # Application load balancer listener rule for WebSocket traffic.
-  AlbListenerWebsocketRule:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      Actions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
-      Conditions:
-      - Field: 'path-pattern'
-        Values:
-        - '/ws'
-      ListenerArn: !Ref 'AlbListener'
-      Priority: 1
-    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
     Condition: 'MaybeDeployAlb'
@@ -610,12 +595,12 @@ Resources:
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
     # Proxy for a conditional dependency on the application load balancer
-    # listener WebSocket rule, which associates the broker target group with
-    # the application load balancer.
+    # listener, which associates the broker target group with the application
+    # load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
       - 'MaybeDeployAlb'
-      - !Ref 'AlbListenerWebsocketRule'
+      - !Ref 'AlbListener'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
@@ -1709,26 +1694,6 @@ Resources:
       RestApiId: !Ref 'RestApi'
       StageName: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGateway::Stage'
-  # Target group for the REST API endpoint.
-  RestApiTargetGroup:
-    Condition: 'MaybeDeployRestApi'
-    Properties:
-      HealthCheckPath: '/processor_status?select=last_success_version'
-      HealthCheckProtocol: 'HTTPS'
-      Port: 443
-      Protocol: 'HTTPS'
-      TargetType: 'ip'
-      Targets:
-      - Id: !Join
-        - ''
-        - - !Ref 'RestApi'
-          - '.execute-api.'
-          - !Ref 'AWS::Region'
-          - '.amazonaws.com/'
-          - !Ref 'RestApiStage'
-        Port: 443
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Virtual private cloud for internal networking.
   Vpc:
     Condition: 'MaybeDeployVpc'
