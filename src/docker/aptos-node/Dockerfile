@@ -1,46 +1,41 @@
-# cspell:word RUSTFLAGS
+FROM xbtmatt/aptos-cli AS aptos-cli
 
-ARG GIT_REPO=https://github.com/aptos-labs/aptos-core.git
-ARG GIT_TAG=aptos-cli-v4.0.0
-
-ARG FULLNODE_BINARY=/aptos-core/target/cli/aptos
-
-FROM rust:1-bookworm AS aptos-cli
-
-ARG GIT_REPO
-ARG GIT_TAG
-ARG FULLNODE_BINARY
-
-ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
-
-RUN git clone $GIT_REPO --branch $GIT_TAG --depth 1 \
-    && apt-get update && apt-get install --no-install-recommends -y \
-        libudev-dev=252.26-1~deb12u2 \
-        build-essential=12.9 \
-        libclang-dev=1:14.0-55.7~deb12u1 \
-        libpq-dev=15.8-0+deb12u1 \
-        libssl-dev=3.0.13-1~deb12u1 \
-        libdw-dev=0.188-2.1 \
-        pkg-config=1.8.1-1 \
-        lld=1:14.0-55.7~deb12u1 \
-        curl=7.88.1-10+deb12u6 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Resolve outdated lockfile from upstream tag, build the binary,
-# and strip it to reduce its size.
-RUN cargo update --manifest-path /aptos-core/Cargo.toml && \
-    RUSTFLAGS="--cfg tokio_unstable" cargo build \
-    --bin aptos \
-    --manifest-path /aptos-core/Cargo.toml \
-    --profile cli && \
-    strip -s $FULLNODE_BINARY
-
-FROM ubuntu:noble
-WORKDIR /app
-
+FROM ubuntu:noble AS state-generator
 # Copy the executable to `/usr/local/bin` and add it to the PATH.
 ENV PATH=/usr/local/bin:$PATH
-ARG FULLNODE_BINARY
-COPY --from=aptos-cli $FULLNODE_BINARY /usr/local/bin
+COPY --from=aptos-cli /usr/local/bin/aptos /usr/local/bin
+
+ARG PUBLISHER_PK \
+    BIG_MONEY_GUY_PK
+ENV PUBLISHER_PK=${PUBLISHER_PK} \
+    BIG_MONEY_GUY_PK=${BIG_MONEY_GUY_PK}
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    curl=8.5* \
+    jq=1.7* \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG base_path=src/docker/aptos-node
+COPY $base_path/json/publish-emojicoin_dot_fun.json json/
+COPY $base_path/json/publish-rewards.json json/
+COPY $base_path/json/test-accounts.json json/
+COPY $base_path/sh/initialize-state.sh sh/
+
+RUN chmod +x sh/initialize-state.sh
+
+RUN ["bash", "sh/initialize-state.sh"]
+
+FROM state-generator
+
+# Copy the data from the state-generator to the final image.
+# This includes the on-chain testnet data and the CLI profiles.
+COPY --from=state-generator /app/.aptos/testnet /app/.aptos/testnet
+COPY --from=state-generator /app/.aptos/config.yaml /app/.aptos/config.yaml
 
 STOPSIGNAL SIGKILL
+
+# Leave it open to the user to run the node with various options.
+# Keep in mind that the `--force-restart` option will remove the
+# testnet data directory and reinitialize the state.
