@@ -254,4 +254,10 @@ repos:
     id: 'cfn-lint'
   repo: 'https://github.com/aws-cloudformation/cfn-lint'
   rev: 'v1.11.0'
+-
+  hooks:
+  -
+    id: 'hadolint-docker'
+  repo: 'https://github.com/hadolint/hadolint'
+  rev: 'v2.12.0'
 ...

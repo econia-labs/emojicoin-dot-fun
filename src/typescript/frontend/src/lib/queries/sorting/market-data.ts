@@ -76,35 +76,18 @@ const getMyPools = async ({
   }));
 };
 
-export const fetchFeaturedMarket = async (
-  args: Omit<GetSortedMarketDataQueryArgs, "limit" | "offset">
-) => {
-  const limit = 1;
-  const offset = 0;
-  const exactCount = false;
-  const { sortBy, orderBy, inBondingCurve, searchBytes } = args;
-
+export const fetchFeaturedMarket = async () => {
   const keys = [
     "featured-market",
-    limit,
-    offset,
-    sortBy,
-    toOrderByString(orderBy),
-    inBondingCurve,
-    exactCount,
-    searchBytes,
   ].map(String);
 
   const res = await cached(
     () =>
       getSortedMarketData({
-        limit,
-        offset,
-        sortBy,
-        orderBy,
-        inBondingCurve,
-        exactCount,
-        searchBytes,
+        limit: 1,
+        offset: 0,
+        orderBy: { ascending: false },
+        sortBy: "daily_volume",
       }),
     keys,
     {
