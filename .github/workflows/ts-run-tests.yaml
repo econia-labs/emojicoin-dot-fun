@@ -10,17 +10,13 @@ jobs:
   ts-run-tests:
     runs-on: 'ubuntu-latest'
     steps:
-    - uses: 'actions/checkout@v3'
+    - uses: 'actions/checkout@v4'
       with:
         submodules: 'false'
-    - run: |
-        git submodule update --init --recursive src/inbox
-        cp src/inbox/example.env src/inbox/.env && \
-        docker buildx create \
-        --name=mybuilder \
-        --use \
-        --driver=docker-container
-      shell: 'bash'
+    - name: 'Install the latest Aptos CLI'
+      uses: './.github/actions/get-latest-aptos-cli'
+      with:
+        destination_directory: '/usr/local/bin'
     - uses: './.github/actions/ts-run-tests'
 name: 'Run the TypeScript E2E and unit tests with a local testnet'
 'on':

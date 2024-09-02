@@ -4,11 +4,17 @@ root_dir=$(git rev-parse --show-toplevel)
 docker_dir="$root_dir/src/docker"
 move_dir="$root_dir/src/move"
 
-json_output_dir="$docker_dir/aptos-node/json"
+json_output_dir="$docker_dir/emojicoin-dot-fun-aptos-node/json"
 emojicoin_json_path="$json_output_dir/publish-emojicoin_dot_fun.json"
 rewards_json_path="$json_output_dir/publish-rewards.json"
 
+if [ ! -f $docker_dir/.env ]; then
+    echo "No .env file found, copying example.local.env to .env"
+    cp $docker_dir/example.local.env $docker_dir/.env
+fi
 source $docker_dir/.env
+
+git fetch --depth 1 origin main
 
 address="$EMOJICOIN_MODULE_ADDRESS"
 aptos move build-publish-payload \
