@@ -10,7 +10,7 @@ jobs:
       run: |
         docker run --rm --network host \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        econialabs/aptos-cli:4.1.0 \
+        econialabs/aptos-cli:4.0.0 \
         uname -a && \
         ls -la /app && \
         ls -la /app/usr/local/bin && \
