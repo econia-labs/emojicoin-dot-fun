@@ -26,7 +26,6 @@ import {
 } from "../const";
 import { type Types, toMarketResource, toRegistrantGracePeriodFlag } from "../types/types";
 import type JSONTypes from "../types/json-types";
-import { sleep } from "../utils";
 import {
   type DerivedEmojicoinData,
   type EmojicoinSymbol,
