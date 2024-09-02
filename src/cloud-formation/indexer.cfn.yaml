@@ -97,7 +97,6 @@ Mappings:
         '{{resolve:ssm:/emojicoin/indexer-dns-name/hosted-zone-id}}'
       DnsNameRootDomain:
         '{{resolve:ssm:/emojicoin/indexer-dns-name/root-domain}}'
-      DnsNameSubdomain: 'data'
       PostgrestHealthCheckPort: 3001
       PostgrestPort: 3000
       ProcessorWebsocketPort: 3008
@@ -131,18 +130,14 @@ Outputs:
     Condition: 'MaybeDeployBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
-  DnsName:
+  WsEndpoint:
     Condition: 'MaybeDeployAlbDnsRecord'
     Value: !Sub
-    - '${Environment}.${Subdomain}.${RootDomain}'
+    - 'wss://ws.${Environment}.${RootDomain}'
     - RootDomain: !FindInMap
       - 'Constants'
       - 'Networking'
       - 'DnsNameRootDomain'
-      Subdomain: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'DnsNameSubdomain'
 Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
@@ -266,26 +261,18 @@ Resources:
     Condition: 'MaybeDeployAlb'
     Properties:
       DomainName: !Sub
-      - '${Environment}.${Subdomain}.${RootDomain}'
+      - 'ws.${Environment}.${RootDomain}'
       - RootDomain: !FindInMap
         - 'Constants'
         - 'Networking'
         - 'DnsNameRootDomain'
-        Subdomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameSubdomain'
       DomainValidationOptions:
       - DomainName: !Sub
-        - '${Environment}.${Subdomain}.${RootDomain}'
+        - 'ws.${Environment}.${RootDomain}'
         - RootDomain: !FindInMap
           - 'Constants'
           - 'Networking'
           - 'DnsNameRootDomain'
-          Subdomain: !FindInMap
-          - 'Constants'
-          - 'Networking'
-          - 'DnsNameSubdomain'
         HostedZoneId: !FindInMap
         - 'Constants'
         - 'Networking'
@@ -304,15 +291,11 @@ Resources:
       - 'Networking'
       - 'DnsNameHostedZoneId'
       Name: !Sub
-      - '${Environment}.${Subdomain}.${RootDomain}'
+      - 'ws.${Environment}.${RootDomain}'
       - RootDomain: !FindInMap
         - 'Constants'
         - 'Networking'
         - 'DnsNameRootDomain'
-        Subdomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameSubdomain'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
   # Application load balancer listener.
