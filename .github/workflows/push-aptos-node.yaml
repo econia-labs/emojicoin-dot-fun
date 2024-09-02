@@ -9,9 +9,9 @@ jobs:
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
-        images: 'econialabs/emojicoin-dot-fun-aptos-node'
+        images: 'econialabs/emojicoin-aptos-node'
         tags: |
-          type=match,pattern=aptos-node-v(.*),group=1
+          type=match,pattern=emojicoin-aptos-node-v(.*),group=1
     - uses: 'docker/setup-qemu-action@v3'
     - uses: 'docker/setup-buildx-action@v3'
     - uses: 'docker/login-action@v3'
@@ -23,7 +23,7 @@ jobs:
         cache-from: 'type=gha'
         cache-to: 'type=gha,mode=max'
         context: '.'
-        file: 'src/docker/aptos-node/Dockerfile'
+        file: 'src/docker/emojicoin-aptos-node/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
         # The emojicoin-node image can only be built for the platform on which
         # the build is running. This is because the build process requires
@@ -34,10 +34,10 @@ jobs:
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
     timeout-minutes: 360
-name: 'Build aptos-node Docker image and push to Docker Hub'
+name: |
+  Build the emojicoin Aptos node Docker image and push to Docker Hub
 'on':
-  workflow_dispatch: {}
   push:
     tags:
-    - 'aptos-node-v*'
+    - 'emojicoin-aptos-node-v*'
 ...

@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     jq=1.7* \
     && rm -rf /var/lib/apt/lists/*
 
-ARG base_path=src/docker/aptos-node
+ARG base_path=src/docker/emojicoin-aptos-node
 COPY $base_path/json/publish-emojicoin_dot_fun.json json/
 COPY $base_path/json/publish-rewards.json json/
 COPY $base_path/json/test-accounts.json json/

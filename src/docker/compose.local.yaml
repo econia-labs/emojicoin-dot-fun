@@ -1,11 +1,11 @@
 # yamllint disable rule:empty-lines rule:key-ordering rule:brackets
 ---
 services:
-  aptos-node:
+  emojicoin-aptos-node:
     network_mode: 'host'
     build:
       context: '../../'
-      dockerfile: 'src/docker/aptos-node/Dockerfile'
+      dockerfile: 'src/docker/emojicoin-aptos-node/Dockerfile'
       args:
         PUBLISHER_PK: '${PUBLISHER_PK}'
         BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
