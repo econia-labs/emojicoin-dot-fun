@@ -12,6 +12,9 @@ jobs:
         -v /var/run/docker.sock:/var/run/docker.sock \
         econialabs/aptos-cli:4.1.0 \
         uname -a && \
+        ls -la /app && \
+        ls -la /app/usr/local/bin && \
+        ls -la /usr/local/bin && \
         /bin/bash -c "/usr/local/bin/aptos --version && \
         /usr/local/bin/aptos node run-localnet --with-indexer-api"
     - id: 'metadata'
