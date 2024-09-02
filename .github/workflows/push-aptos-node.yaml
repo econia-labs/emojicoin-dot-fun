@@ -8,11 +8,11 @@ jobs:
     - uses: 'actions/checkout@v4'
     - id: 'aptos-node'
       run: |
-        docker run --rm --network host
-        -v /var/run/docker.sock:/var/run/docker.sock
-        econialabs/aptos-cli:4.1.0
-        uname -a &&
-        /bin/bash -c "/usr/local/bin/aptos --version &&
+        docker run --rm --network host \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        econialabs/aptos-cli:4.1.0 \
+        uname -a && \
+        /bin/bash -c "/usr/local/bin/aptos --version && \
         /usr/local/bin/aptos node run-localnet --with-indexer-api"
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
