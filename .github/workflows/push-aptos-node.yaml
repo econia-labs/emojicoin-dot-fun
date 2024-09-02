@@ -1,10 +1,18 @@
 ---
+env:
+  DOCKER_IMAGE_PLATFORM: 'linux/amd64'
 jobs:
   build-push:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
-    - run: 'git submodule update --init --recursive src/rust/processor'
+    - id: 'aptos-node'
+      run: |
+        docker run --rm -it \
+        econialabs/aptos-cli:4.1.0 \
+        uname -a && \
+        /bin/bash -c "aptos --version && \
+        aptos node run-localnet"
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
@@ -24,7 +32,12 @@ jobs:
         context: '.'
         file: 'src/docker/aptos-node/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
-        platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS }}'
+        # The emojicoin-node image can only be built for the platform on which
+        # the build is running. This is because the build process requires
+        # running `aptos node run-localnet`, which spawns a new container. This
+        # new container must be able to run the `aptos` binary, which is only
+        # available for the platform on which the build is running.
+        platforms: '${{ env.DOCKER_IMAGE_PLATFORM }}'
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
     timeout-minutes: 360

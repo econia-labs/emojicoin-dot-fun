@@ -1,4 +1,4 @@
-FROM xbtmatt/aptos-cli AS aptos-cli
+FROM econialabs/aptos-cli:4.1.0 AS aptos-cli
 
 FROM ubuntu:noble AS state-generator
 # Copy the executable to `/usr/local/bin` and add it to the PATH.
