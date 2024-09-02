@@ -5,9 +5,9 @@ jobs:
     steps:
     - uses: 'actions/checkout@v3'
     - run: 'git submodule update --init --recursive src/rust/processor'
-    - run: 'cd src/rust/processor && git fetch'
+    - run: 'git fetch'
       working-directory: 'src/rust/processor'
-    - run: 'test "$(git rev-parse emojicoin-dot-fun)" = "$(git rev-parse origin/emojicoin-dot-fun)"'
+    - run: 'test "$(git rev-parse HEAD)" = "$(git rev-parse origin/emojicoin-dot-fun)"'
       working-directory: 'src/rust/processor'
 name: 'Ensure correct version of processor submodule'
 'on':
