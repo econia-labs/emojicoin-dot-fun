@@ -1,6 +1,10 @@
 ---
 env:
   DOCKER_IMAGE_PLATFORM: 'linux/amd64'
+  PUBLISHER_PK: >-
+    0xeaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e
+  BIG_MONEY_GUY_PK: >-
+    0xa5e11183d0c23b8c49b40dd71bba7fa0992aed9b89c42934a1bb8f6e4ccc4ec4
 jobs:
   build-push:
     runs-on: 'ubuntu-latest'
@@ -13,7 +17,7 @@ jobs:
       with:
         destination_directory: '/usr/local/bin'
     - name: 'Create the Move JSON publish payloads'
-      run: 'source src/docker/emojicoin-aptos-node/sh/create-publish-payloads.sh'
+      run: 'bash src/docker/emojicoin-aptos-node/sh/create-publish-payloads.sh'
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
