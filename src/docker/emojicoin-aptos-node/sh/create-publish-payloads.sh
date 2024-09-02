@@ -10,6 +10,8 @@ rewards_json_path="$json_output_dir/publish-rewards.json"
 
 source $docker_dir/.env
 
+git fetch --depth 1 origin main
+
 address="$EMOJICOIN_MODULE_ADDRESS"
 aptos move build-publish-payload \
     --assume-yes \

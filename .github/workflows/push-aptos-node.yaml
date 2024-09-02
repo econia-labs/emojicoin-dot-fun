@@ -6,6 +6,14 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
+      with:
+        submodules: 'false'
+    - name: 'Install the latest Aptos CLI'
+      uses: './.github/actions/get-latest-aptos-cli'
+      with:
+        destination_directory: '/usr/local/bin'
+    - name: 'Create the Move JSON publish payloads'
+      run: 'bash src/docker/emojicoin-aptos-node/sh/create-publish-payloads.sh'
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
