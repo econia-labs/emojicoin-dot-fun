@@ -8,6 +8,10 @@ json_output_dir="$docker_dir/emojicoin-aptos-node/json"
 emojicoin_json_path="$json_output_dir/publish-emojicoin_dot_fun.json"
 rewards_json_path="$json_output_dir/publish-rewards.json"
 
+if [ ! -f $docker_dir/.env ]; then
+    echo "No .env file found, copying example.local.env to .env"
+    cp $docker_dir/example.local.env $docker_dir/.env
+fi
 source $docker_dir/.env
 
 git fetch --depth 1 origin main
