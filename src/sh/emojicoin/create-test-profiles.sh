@@ -8,7 +8,7 @@ root_dir=$(git rev-parse --show-toplevel)
 docker_dir="$root_dir/src/docker"
 sh_dir="$root_dir/src/sh"
 
-source $sh_dir/setup-terminal-colors.sh
+source $sh_dir/utils/colors.sh
 
 if [ ! -f "$docker_dir/.env" ]; then
 	log_info

@@ -13,7 +13,7 @@ this_dir="$sh_dir/emojicoin"
 publisher="emojicoin_test_publisher"
 big_money_guy="emojicoin_test_big_money_guy"
 
-source $sh_dir/setup-terminal-colors.sh
+source $sh_dir/utils/colors.sh
 log_header "Funding test accounts"
 
 # ------------------------------------------------------------------------------

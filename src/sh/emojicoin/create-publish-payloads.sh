@@ -10,7 +10,7 @@ move_dir="$root_dir/src/move"
 sh_dir="$root_dir/src/sh"
 this_dir="$sh_dir/emojicoin"
 
-source $sh_dir/setup-terminal-colors.sh
+source $sh_dir/utils/colors.sh
 
 if [ ! -f "$docker_dir/.env" ]; then
 	log_info \

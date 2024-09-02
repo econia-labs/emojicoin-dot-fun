@@ -2,7 +2,7 @@
 
 # All functions in this file are intended to be
 # sourced by other scripts, for example:
-#   source src/sh/setup-terminal-colors.sh
+#   source src/sh/utils/colors.sh
 #   log_info "This is an info message"
 #   log_warning "This is a warning message"
 
@@ -16,9 +16,9 @@ style() {
 # Color definitions
 BOLD_TEXT=$(style "1m")
 HIGHLIGHT_COLOR=$(style "38;5;221m")
-INFO_COLOR=$(style "38;5;182m")
+INFO_COLOR=$(style "38;5;117m")
 ERROR_COLOR=$(style "38;5;009m")
-WARNING_COLOR=$(style "38;5;220m")
+WARNING_COLOR=$(style "38;5;172m")
 HEADER_COLOR=$(style "1;32m")
 GRAY_TEXT=$(style "0;37m")
 NO_STYLES=$(style "0m")
@@ -32,15 +32,15 @@ if [ -n "$NO_COLOR" ]; then
 fi
 
 log_info() {
-	echo -e "${BOLD_TEXT}${INFO_COLOR}[INFO]${NO_STYLES}: $1${NO_STYLES}"
+	echo -e "${BOLD_TEXT}${INFO_COLOR}[INFO]${NO_STYLES} $1${NO_STYLES}"
 }
 
 log_warning() {
-	echo -e "${BOLD_TEXT}${WARNING_COLOR}[WARNING]${NO_STYLES}: $1${NO_STYLES}"
+	echo -e "${BOLD_TEXT}${WARNING_COLOR}[WARNING]${NO_STYLES} $1${NO_STYLES}"
 }
 
 log_error() {
-	echo -e "${BOLD_TEXT}${ERROR_COLOR}[ERROR]${NO_STYLES}: $1${NO_STYLES}"
+	echo -e "${BOLD_TEXT}${ERROR_COLOR}[ERROR]${NO_STYLES} $1${NO_STYLES}"
 }
 
 # Note this won't work if you nest it inside another function that styles text.

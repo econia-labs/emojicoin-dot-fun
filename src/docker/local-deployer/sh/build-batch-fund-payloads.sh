@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /app/sh/colors.sh
+
 distribution_amount=10000000000000000
 
 accounts_json_path="/app/json/test-accounts.json"
@@ -11,9 +13,16 @@ num_accounts=$(jq 'keys | length' $accounts_json_path)
 # Calculate amount per key (integer division)
 amount_per_account=$((distribution_amount / num_accounts))
 
-for i in {1..2}; do
-	start_index=$(((i - 1) * 500))
-	end_index=$((i * 500))
+log_info "Distributing $distribution_amount to $num_accounts accounts"
+
+for i in {1..3}; do
+	start_index=$(((i - 1) * 333))
+  
+  if [ $i != 3 ]; then
+	  end_index=$((i * 333))
+  else
+    end_index=$num_accounts
+  fi
 
 	jq -r --arg amount "$amount_per_account" \
 		--argjson start "$start_index" \
