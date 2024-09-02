@@ -323,14 +323,8 @@ Resources:
       Certificates:
       - CertificateArn: !Ref 'AlbCertificate'
       DefaultActions:
-      - RedirectConfig:
-          Host: !Sub '${RestApi}.execute-api.${AWS::Region}.amazonaws.com'
-          Path: !Sub '/${RestApiStage}/#{path}'
-          Port: '443'
-          Protocol: 'HTTPS'
-          Query: '#{query}'
-          StatusCode: 'HTTP_301'
-        Type: 'redirect'
+      - TargetGroupArn: !Ref 'RestApiTargetGroup'
+        Type: 'forward'
       LoadBalancerArn: !Ref 'Alb'
       Port: 443
       Protocol: 'HTTPS'
@@ -1715,6 +1709,26 @@ Resources:
       RestApiId: !Ref 'RestApi'
       StageName: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGateway::Stage'
+  # Target group for the REST API endpoint.
+  RestApiTargetGroup:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      HealthCheckPath: '/processor_status?select=last_success_version'
+      HealthCheckProtocol: 'HTTPS'
+      Port: 443
+      Protocol: 'HTTPS'
+      TargetType: 'ip'
+      Targets:
+      - Id: !Join
+        - ''
+        - - !Ref 'RestApi'
+          - '.execute-api.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/'
+          - !Ref 'RestApiStage'
+        Port: 443
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Virtual private cloud for internal networking.
   Vpc:
     Condition: 'MaybeDeployVpc'
