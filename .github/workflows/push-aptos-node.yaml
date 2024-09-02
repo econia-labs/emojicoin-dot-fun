@@ -21,7 +21,7 @@ jobs:
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
-        images: 'econialabs/emojicoin-aptos-node'
+        images: 'xbtmatt/emojicoin-aptos-node'
         tags: |
           type=match,pattern=emojicoin-aptos-node-v(.*),group=1
     - uses: 'docker/setup-qemu-action@v3'
