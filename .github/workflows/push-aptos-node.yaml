@@ -11,8 +11,8 @@ jobs:
         docker run --rm \
         econialabs/aptos-cli:4.1.0 \
         uname -a && \
-        /bin/bash -c "aptos --version && \
-        aptos node run-localnet"
+        /bin/bash -c "/usr/local/bin/aptos --version && \
+        /usr/local/bin/aptos node run-localnet"
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
