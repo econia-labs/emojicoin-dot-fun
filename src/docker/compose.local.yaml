@@ -9,6 +9,10 @@ services:
       args:
         PUBLISHER_PK: '${PUBLISHER_PK}'
         BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
+      # platforms:
+        # - linux/amd64
+        # - linux/arm64
+    # image: xbtmatt/emojicoin-dot-fun:0.0.1
     environment:
       PUBLISHER_PK: '${PUBLISHER_PK}'
       BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'

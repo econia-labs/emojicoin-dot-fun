@@ -10,7 +10,7 @@ big_money_guy_pk=$BIG_MONEY_GUY_PK
 # The `test-dir` path specified is the default path, but it's here to be
 # explicit. This will be copied over to the new image with state pre-loaded
 # at the end of the multi-stage build process.
-aptos node run-local-testnet \
+aptos node run-localnet \
 	--test-dir /app/.aptos/testnet \
 	--assume-yes \
 	--force-restart &
