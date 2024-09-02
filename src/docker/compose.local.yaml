@@ -6,46 +6,33 @@ services:
     build:
       context: '../../'
       dockerfile: 'src/docker/aptos-node/Dockerfile'
+      args:
+        PUBLISHER_PK: '${PUBLISHER_PK}'
+        BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
+    environment:
+      PUBLISHER_PK: '${PUBLISHER_PK}'
+      BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
     ports:
     - '50051:50051'
     - '8070:8070'
     - '8090:8090'
     - '8080:8080'
     - '8081:8081'
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8070/']
-      interval: '30s'
-      timeout: '10s'
-      retries: 5
-      start_period: '30s'
-    command: ['bash', '/app/run-fullnode.sh']
+    # healthcheck:
+    #   test: ['CMD', '/app/healthcheck.sh']
+    #   # Short interval because this is solely for testing.
+    #   # No point in waiting around forever.
+    #   interval: '1s'
+    #   timeout: '3s'
+    #   retries: 10
+    #   start_period: '60s'
     # In order to start the node with the indexer API; i.e., run
     # `aptos node run-local-testnet --with-indexer-api`, the Docker socket must
     # be mounted to the container. This mount enables the container to start a
-    # new container. Note that this is *not* "Docker-in-Docker", but rather
-    # "Docker-outside-Docker". That is, the container can act as the host in
+    # new container. Note that this is *not* 'Docker-in-Docker', but rather
+    # 'Docker-outside-Docker'. That is, the container can act as the host in
     # terms of creating and orchestrating other containers but still appears as
     # a sibling to the existing containers and any new containers it creates.
     volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
-
-  move:
-    extra_hosts:
-    - 'host.docker.internal:host-gateway'
-    build:
-      context: '../../'
-      dockerfile: 'src/docker/aptos-node/Dockerfile'
-    environment:
-      PUBLISHER_PK: '${PUBLISHER_PK}'
-      BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
-      EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
-    depends_on:
-      aptos-node:
-        condition: 'service_healthy'
-    command: ['bash', '/app/initialize-contract.sh']
-
-  processor:
-    depends_on:
-      move:
-        condition: 'service_completed_successfully'
 ...
