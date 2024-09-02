@@ -65,6 +65,11 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployRestApi'
     - 'true'
+  MaybeDeployRestApiDnsRecord: !And
+  - !Condition 'MaybeDeployRestApi'
+  - !Equals
+    - !Ref 'MaybeDeployRestApiDnsRecord'
+    - 'true'
   MaybeDeployRouteTables: !And
   - !Condition 'MaybeDeployVpc'
   - !Equals
@@ -130,6 +135,14 @@ Outputs:
     Condition: 'MaybeDeployBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
+  RestEndpoint:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Value: !Sub
+    - 'https://${Environment}.${RootDomain}'
+    - RootDomain: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DnsNameRootDomain'
   WsEndpoint:
     Condition: 'MaybeDeployAlbDnsRecord'
     Value: !Sub
@@ -207,6 +220,11 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
+  MaybeDeployRestApiDnsRecord:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
   MaybeDeployRouteTables:
     AllowedValues:
     - 'false'
@@ -256,7 +274,7 @@ Resources:
       - !Ref 'PublicSubnetC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  # DNS certificate for the application load balancer.
+  # DNS certificate for the broker's application load balancer.
   AlbCertificate:
     Condition: 'MaybeDeployAlb'
     Properties:
@@ -1607,6 +1625,29 @@ Resources:
         - 'REGIONAL'
       Name: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGateway::RestApi'
+  # DNS certificate for the REST API endpoint.
+  RestApiCertificate:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Properties:
+      DomainName: !Sub
+      - '${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      DomainValidationOptions:
+      - DomainName: !Sub
+        - '${Environment}.${RootDomain}'
+        - RootDomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'DnsNameRootDomain'
+        HostedZoneId: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameHostedZoneId'
+      ValidationMethod: 'DNS'
+    Type: 'AWS::CertificateManager::Certificate'
   # Deployment for the REST API endpoint.
   RestApiDeployment:
     Condition: 'MaybeDeployRestApi'
@@ -1616,6 +1657,50 @@ Resources:
     Properties:
       RestApiId: !Ref 'RestApi'
     Type: 'AWS::ApiGateway::Deployment'
+  # DNS record for the REST API.
+  RestApiDnsRecord:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt 'RestApiDomainName.RegionalDomainName'
+        HostedZoneId: !GetAtt 'RestApiDomainName.RegionalHostedZoneId'
+      HostedZoneId: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DnsNameHostedZoneId'
+      Name: !Sub
+      - '${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      Type: 'A'
+    Type: 'AWS::Route53::RecordSet'
+  # Domain mapping for the REST API endpoint.
+  RestApiDomainMapping:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Properties:
+      DomainName: !Ref 'RestApiDomainName'
+      RestApiId: !Ref 'RestApi'
+      Stage: !Ref 'RestApiStage'
+    Type: 'AWS::ApiGateway::BasePathMapping'
+  # Custom domain name for the REST API endpoint.
+  RestApiDomainName:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Properties:
+      CertificateArn: !Ref 'RestApiCertificate'
+      DomainName: !Sub
+      - '${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      EndpointConfiguration:
+        Types:
+        - 'REGIONAL'
+      RegionalCertificateArn: !Ref 'RestApiCertificate'
+      SecurityPolicy: 'TLS_1_2'
+    Type: 'AWS::ApiGateway::DomainName'
   # Rest API endpoint general method.
   RestApiMethodGeneral:
     Condition: 'MaybeDeployRestApi'
