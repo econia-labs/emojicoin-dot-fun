@@ -4,7 +4,7 @@ parameters:
   Environment: 'ECO-2152'
   MaybeDeployAlb: 'true'
   MaybeDeployAlbDnsRecord: 'true'
-  MaybeDeployBastionHost: 'false'
+  MaybeDeployBastionHost: 'true'
   MaybeDeployBroker: 'true'
   MaybeDeployContainers: 'true'
   MaybeDeployDb: 'true'
