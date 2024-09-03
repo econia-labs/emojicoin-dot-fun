@@ -232,7 +232,7 @@ deployment environment:
 1. Set your stack name:
 
    ```sh
-   STACK_NAME=emoji-ECO-2152
+   STACK_NAME=<STACK_NAME>
    echo $STACK_NAME
    ```
 
@@ -297,7 +297,7 @@ URLs of other resources in the stack.
    your stack name, for example `emoji-dev`:
 
    ```sh
-   STACK_NAME=emoji-ECO-2152
+   STACK_NAME=emoji-dev
    INSTANCE_ID=$(aws cloudformation describe-stacks \
        --output text \
        --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
