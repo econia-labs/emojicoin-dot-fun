@@ -1,7 +1,7 @@
 ---
 parameters:
   BrokerImageVersion: '0.7.0'
-  Environment: 'ECO-2152'
+  Environment: 'dev'
   MaybeDeployAlb: 'true'
   MaybeDeployAlbDnsRecord: 'true'
   MaybeDeployBastionHost: 'true'
