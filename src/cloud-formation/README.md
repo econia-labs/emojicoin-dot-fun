@@ -232,7 +232,7 @@ deployment environment:
 1. Set your stack name:
 
    ```sh
-   STACK_NAME=<STACK_NAME>
+   STACK_NAME=emoji-ECO-2152
    echo $STACK_NAME
    ```
 
@@ -256,14 +256,14 @@ deployment environment:
 1. Wait until the DNS names have resolved:
 
    ```sh
-   host $REST_ENDPOINT
-   host $WS_ENDPOINT
+   host $(echo $REST_ENDPOINT | sed 's|^.*//||')
+   host $(echo $WS_ENDPOINT | sed 's|^.*//||')
    ```
 
 1. Query the REST endpoint:
 
    ```sh
-   curl $REST_ENDPOINT/processor_status?select=last_success_version
+   curl "$REST_ENDPOINT/processor_status?select=last_success_version"
    ```
 
 1. Connect to the WebSocket endpoint:
@@ -297,7 +297,7 @@ URLs of other resources in the stack.
    your stack name, for example `emoji-dev`:
 
    ```sh
-   STACK_NAME=emoji-dev
+   STACK_NAME=emoji-ECO-2152
    INSTANCE_ID=$(aws cloudformation describe-stacks \
        --output text \
        --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
@@ -330,6 +330,12 @@ URLs of other resources in the stack.
    websocat $PROCESSOR_WS_URL
    ```
 
+1. Subscribe to all events:
+
+   ```sh
+   {}
+   ```
+
 1. Connect to the broker:
 
    ```sh
@@ -345,13 +351,14 @@ URLs of other resources in the stack.
 1. Query PostgREST:
 
    ```sh
-   curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
+   curl $POSTGREST_URL/processor_status?select=last_success_version && echo
    ```
 
 1. Check PostgREST through the NLB:
 
    ```sh
-   curl http://$NLB_DNS_NAME:3000/market_latest_state_event?select=market_id
+   curl http://$NLB_DNS_NAME:3000/processor_status?select=last_success_version \
+       && echo
    ```
 
 ## Design notes
