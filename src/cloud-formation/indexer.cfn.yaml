@@ -1772,8 +1772,8 @@ Resources:
         CachingEnabled: true
         HttpMethod: '*'
         ResourcePath: '/*'
-        ThrottlingBurstLimit: 500
-        ThrottlingRateLimit: 2500
+        ThrottlingBurstLimit: 1000
+        ThrottlingRateLimit: 500
       # Use a long cache time and restrictive throttling on the schema at the
       # root, which is large and not required for normal operations.
       - CacheDataEncrypted: false
@@ -1781,7 +1781,7 @@ Resources:
         CachingEnabled: true
         HttpMethod: 'GET'
         ResourcePath: '/'
-        ThrottlingBurstLimit: 50
+        ThrottlingBurstLimit: 100
         ThrottlingRateLimit: 50
       RestApiId: !Ref 'RestApi'
       StageName: !Ref 'AWS::StackName'
