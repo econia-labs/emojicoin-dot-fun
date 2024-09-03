@@ -83,6 +83,13 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployVpc'
     - 'true'
+  MaybeDeployWaf: !And
+  - !Condition 'MaybeDeployAlb'
+  - !Condition 'MaybeDeployStack'
+  - !Condition 'MaybeDeployRestApi'
+  - !Equals
+    - !Ref 'MaybeDeployWaf'
+    - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
@@ -236,6 +243,11 @@ Parameters:
     - 'true'
     Type: 'String'
   MaybeDeployVpc:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployWaf:
     AllowedValues:
     - 'false'
     - 'true'
@@ -1797,5 +1809,147 @@ Resources:
       EnableDnsHostnames: true
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
+  # Web application firewall.
+  Waf:
+    Condition: 'MaybeDeployWaf'
+    Properties:
+      # Allow all all traffic by default unless blocked per below rules.
+      DefaultAction:
+        Allow: null
+      Name: !Ref 'AWS::StackName'
+      Rules:
+      # Use AWS common rule set.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
+        OverrideAction:
+          None: null
+        Priority: 1
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: !Sub 'AWSManagedRulesCommonRuleSet'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
+          SampledRequestsEnabled: true
+      # Block VPNs and otherwise obfuscated IP addresses.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
+        OverrideAction:
+          None: null
+        Priority: 2
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesAnonymousIPList'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
+          SampledRequestsEnabled: true
+      # Block known IP threats.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
+        OverrideAction:
+          None: null
+        Priority: 3
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesAmazonIpReputationList'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub
+            '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
+          SampledRequestsEnabled: true
+      # Block bot activity.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesBotControlRuleSet'
+        OverrideAction:
+          None: null
+        Priority: 4
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesBotControlRuleSet'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesBotControlRuleSet'
+          SampledRequestsEnabled: true
+      # Rate limit by IP for the REST API.
+      - Action:
+          Block: null
+        Name: !Sub '${AWS::StackName}-RestApiRateLimit'
+        Priority: 5
+        Statement:
+          RateBasedStatement:
+            AggregateKeyType: 'IP'
+            Limit: 200
+            ScopeDownStatement:
+              ByteMatchStatement:
+                FieldToMatch:
+                  SingleHeader:
+                    Name: 'host'
+                PositionalConstraint: 'CONTAINS'
+                SearchString: !Sub
+                - '${Environment}.${RootDomain}'
+                - RootDomain: !FindInMap
+                  - 'Constants'
+                  - 'Networking'
+                  - 'DnsNameRootDomain'
+                TextTransformations:
+                - Priority: 0
+                  Type: 'LOWERCASE'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-RestApiRateLimit'
+          SampledRequestsEnabled: true
+      # Limit WebSocket messages by IP via rate limit.
+      - Action:
+          Block: null
+        Name: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
+        Priority: 6
+        Statement:
+          RateBasedStatement:
+            AggregateKeyType: 'IP'
+            Limit: 100
+            ScopeDownStatement:
+              ByteMatchStatement:
+                FieldToMatch:
+                  SingleHeader:
+                    Name: 'host'
+                PositionalConstraint: 'CONTAINS'
+                SearchString: !Sub
+                - 'ws.${Environment}.${RootDomain}'
+                - RootDomain: !FindInMap
+                  - 'Constants'
+                  - 'Networking'
+                  - 'DnsNameRootDomain'
+                TextTransformations:
+                - Priority: 0
+                  Type: 'LOWERCASE'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
+          SampledRequestsEnabled: true
+      Scope: 'REGIONAL'
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: !Ref 'AWS::StackName'
+        SampledRequestsEnabled: true
+    Type: 'AWS::WAFv2::WebACL'
+  # Web application firewall for the broker application load balancer.
+  WafAlb:
+    Condition: 'MaybeDeployWaf'
+    Properties:
+      ResourceArn: !Ref 'Alb'
+      WebACLArn: !GetAtt 'Waf.Arn'
+    Type: 'AWS::WAFv2::WebACLAssociation'
+  # Web application firewall for the REST API.
+  WafRestApi:
+    Condition: 'MaybeDeployWaf'
+    Properties:
+      ResourceArn: !Sub
+      - 'arn:aws:apigateway:${Region}::/restapis/${ApiId}/stages/${StageName}'
+      - ApiId: !Ref 'RestApi'
+        Region: !Ref 'AWS::Region'
+        StageName: !Ref 'RestApiStage'
+      WebACLArn: !GetAtt 'Waf.Arn'
+    Type: 'AWS::WAFv2::WebACLAssociation'
 Transform: 'AWS::LanguageExtensions'
 ...
