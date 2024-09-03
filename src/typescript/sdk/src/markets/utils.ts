@@ -26,7 +26,6 @@ import {
 } from "../const";
 import { type Types, toMarketResource, toRegistrantGracePeriodFlag } from "../types/types";
 import type JSONTypes from "../types/json-types";
-import { sleep } from "../utils";
 import {
   type DerivedEmojicoinData,
   type EmojicoinSymbol,
@@ -187,7 +186,6 @@ export async function getRegistrationGracePeriodFlag(args: {
     console.error(
       `Failed to fetch account resources for market address: ${marketAddress}. Error: ${e}`
     );
-    await sleep(20000);
     return {
       marketNotFound: true,
       flag: null,
