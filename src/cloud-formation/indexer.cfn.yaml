@@ -1688,7 +1688,6 @@ Resources:
   RestApiDomainName:
     Condition: 'MaybeDeployRestApiDnsRecord'
     Properties:
-      CertificateArn: !Ref 'RestApiCertificate'
       DomainName: !Sub
       - '${Environment}.${RootDomain}'
       - RootDomain: !FindInMap
