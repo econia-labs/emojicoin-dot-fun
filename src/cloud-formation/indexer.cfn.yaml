@@ -1779,7 +1779,7 @@ Resources:
       - CacheDataEncrypted: false
         CacheTtlInSeconds: 3600
         CachingEnabled: true
-        HttpMethod: '*'
+        HttpMethod: 'GET'
         ResourcePath: '/'
         ThrottlingBurstLimit: 50
         ThrottlingRateLimit: 50
