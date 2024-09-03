@@ -15,7 +15,7 @@ parameters:
   MaybeDeployRestApi: 'true'
   MaybeDeployRestApiDnsRecord: 'true'
   MaybeDeployRouteTables: 'true'
-  MaybeDeployStack: 'true'
+  MaybeDeployStack: 'false'
   MaybeDeployVpc: 'true'
   Network: 'testnet'
   ProcessorImageVersion: '0.5.0'
