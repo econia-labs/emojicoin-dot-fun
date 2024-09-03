@@ -236,39 +236,46 @@ deployment environment:
    echo $STACK_NAME
    ```
 
-1. Get the DNS name specified in the [template outputs section]:
+1. Get the endpoints specified in the [template outputs section]:
 
    ```sh
-   DNS_NAME=$(aws cloudformation describe-stacks \
+   REST_ENDPOINT=$(aws cloudformation describe-stacks \
        --output text \
-       --query 'Stacks[0].Outputs[?OutputKey==`DnsName`].OutputValue' \
+       --query 'Stacks[0].Outputs[?OutputKey==`RestEndpoint`].OutputValue' \
        --stack-name $STACK_NAME
    )
-   echo $DNS_NAME
+   WS_ENDPOINT=$(aws cloudformation describe-stacks \
+       --output text \
+       --query 'Stacks[0].Outputs[?OutputKey==`WsEndpoint`].OutputValue' \
+       --stack-name $STACK_NAME
+   )
+   echo $REST_ENDPOINT
+   echo $WS_ENDPOINT
    ```
 
-1. Wait until the DNS name has resolved:
+1. Wait until the DNS names have resolved:
 
    ```sh
-   host $DNS_NAME
+   host $REST_ENDPOINT
+   host $WS_ENDPOINT
+   ```
+
+1. Query the REST endpoint:
+
+   ```sh
+   curl $REST_ENDPOINT/processor_status?select=last_success_version
    ```
 
 1. Connect to the WebSocket endpoint:
 
    ```sh
-   websocat wss://$DNS_NAME/ws
+   websocat $WS_ENDPOINT
    ```
 
 1. Subscribe to all events:
 
    ```sh
    {}
-   ```
-
-1. Check PostgREST:
-
-   ```sh
-   curl "https://$DNS_NAME/processor_status?select=last_success_version"
    ```
 
 ### Bastion host connections
@@ -280,30 +287,30 @@ might want to de-provision then provision the bastion host before running the
 below commands, in order to refresh the bastion host [user data] that stores the
 URLs of other resources in the stack.
 
-Install the [EC2 Instance Connect CLI]:
+1. Install the [EC2 Instance Connect CLI]:
 
-```sh
-pip install ec2instanceconnectcli
-```
+   ```sh
+   pip install ec2instanceconnectcli
+   ```
 
-Connect to the bastion host over the [EC2 Instance Connect Endpoint] using your
-stack name, for example `emoji-dev`:
+1. Connect to the bastion host over the [EC2 Instance Connect Endpoint] using
+   your stack name, for example `emoji-dev`:
 
-```sh
-STACK_NAME=emoji-ECO-2152
-INSTANCE_ID=$(aws cloudformation describe-stacks \
-    --output text \
-    --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
-    --stack-name $STACK_NAME
-)
-if [ -n "$(echo -e "${INSTANCE_ID}" | tr -d '[:space:]')" ]; then
-  echo "Connecting to instance ${INSTANCE_ID}"
-  aws ec2-instance-connect ssh \
-    --instance-id $INSTANCE_ID --connection-type eice
-else
-  echo 'Error: instance ID not found or is empty.' >&2
-fi
-```
+   ```sh
+   STACK_NAME=emoji-dev
+   INSTANCE_ID=$(aws cloudformation describe-stacks \
+       --output text \
+       --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
+       --stack-name $STACK_NAME
+   )
+   if [ -n "$(echo -e "${INSTANCE_ID}" | tr -d '[:space:]')" ]; then
+   echo "Connecting to instance ${INSTANCE_ID}"
+   aws ec2-instance-connect ssh \
+       --instance-id $INSTANCE_ID --connection-type eice
+   else
+   echo 'Error: instance ID not found or is empty.' >&2
+   fi
+   ```
 
 1. Start `psql`:
 
@@ -341,15 +348,7 @@ fi
    curl $POSTGREST_URL/market_latest_state_event?select=market_id && echo
    ```
 
-1. Check broker and PostgREST access through the NLB:
-
-   ```sh
-   websocat ws://$NLB_DNS_NAME:3009
-   ```
-
-   ```sh
-   {}
-   ```
+1. Check PostgREST through the NLB:
 
    ```sh
    curl http://$NLB_DNS_NAME:3000/market_latest_state_event?select=market_id
