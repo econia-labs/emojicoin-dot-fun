@@ -1874,64 +1874,64 @@ Resources:
           CloudWatchMetricsEnabled: true
           MetricName: !Sub '${AWS::StackName}-AWSManagedRulesBotControlRuleSet'
           SampledRequestsEnabled: true
-      # Rate limit by IP for the REST API.
-      - Action:
-          # CloudFormation prohibits both null and empty values.
-          Block: {} # yamllint disable-line rule:braces
-        Name: !Sub '${AWS::StackName}-RestApiRateLimit'
-        Priority: 5
-        Statement:
-          RateBasedStatement:
-            AggregateKeyType: 'IP'
-            Limit: 200
-            ScopeDownStatement:
-              ByteMatchStatement:
-                FieldToMatch:
-                  SingleHeader:
-                    Name: 'host'
-                PositionalConstraint: 'CONTAINS'
-                SearchString: !Sub
-                - '${Environment}.${RootDomain}'
-                - RootDomain: !FindInMap
-                  - 'Constants'
-                  - 'Networking'
-                  - 'DnsNameRootDomain'
-                TextTransformations:
-                - Priority: 0
-                  Type: 'LOWERCASE'
-        VisibilityConfig:
-          CloudWatchMetricsEnabled: true
-          MetricName: !Sub '${AWS::StackName}-RestApiRateLimit'
-          SampledRequestsEnabled: true
-      # Limit WebSocket messages by IP via rate limit.
-      - Action:
-          # CloudFormation prohibits both null and empty values.
-          Block: {} # yamllint disable-line rule:braces
-        Name: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
-        Priority: 6
-        Statement:
-          RateBasedStatement:
-            AggregateKeyType: 'IP'
-            Limit: 100
-            ScopeDownStatement:
-              ByteMatchStatement:
-                FieldToMatch:
-                  SingleHeader:
-                    Name: 'host'
-                PositionalConstraint: 'CONTAINS'
-                SearchString: !Sub
-                - 'ws.${Environment}.${RootDomain}'
-                - RootDomain: !FindInMap
-                  - 'Constants'
-                  - 'Networking'
-                  - 'DnsNameRootDomain'
-                TextTransformations:
-                - Priority: 0
-                  Type: 'LOWERCASE'
-        VisibilityConfig:
-          CloudWatchMetricsEnabled: true
-          MetricName: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
-          SampledRequestsEnabled: true
+      # # Rate limit by IP for the REST API.
+      # - Action:
+      #     # CloudFormation prohibits both null and empty values.
+      #     Block: {} # yamllint disable-line rule:braces
+      #   Name: !Sub '${AWS::StackName}-RestApiRateLimit'
+      #   Priority: 5
+      #   Statement:
+      #     RateBasedStatement:
+      #       AggregateKeyType: 'IP'
+      #       Limit: 200
+      #       ScopeDownStatement:
+      #         ByteMatchStatement:
+      #           FieldToMatch:
+      #             SingleHeader:
+      #               Name: 'host'
+      #           PositionalConstraint: 'CONTAINS'
+      #           SearchString: !Sub
+      #           - '${Environment}.${RootDomain}'
+      #           - RootDomain: !FindInMap
+      #             - 'Constants'
+      #             - 'Networking'
+      #             - 'DnsNameRootDomain'
+      #           TextTransformations:
+      #           - Priority: 0
+      #             Type: 'LOWERCASE'
+      #   VisibilityConfig:
+      #     CloudWatchMetricsEnabled: true
+      #     MetricName: !Sub '${AWS::StackName}-RestApiRateLimit'
+      #     SampledRequestsEnabled: true
+      # # Limit WebSocket messages by IP via rate limit.
+      # - Action:
+      #     # CloudFormation prohibits both null and empty values.
+      #     Block: {} # yamllint disable-line rule:braces
+      #   Name: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
+      #   Priority: 6
+      #   Statement:
+      #     RateBasedStatement:
+      #       AggregateKeyType: 'IP'
+      #       Limit: 100
+      #       ScopeDownStatement:
+      #         ByteMatchStatement:
+      #           FieldToMatch:
+      #             SingleHeader:
+      #               Name: 'host'
+      #           PositionalConstraint: 'CONTAINS'
+      #           SearchString: !Sub
+      #           - 'ws.${Environment}.${RootDomain}'
+      #           - RootDomain: !FindInMap
+      #             - 'Constants'
+      #             - 'Networking'
+      #             - 'DnsNameRootDomain'
+      #           TextTransformations:
+      #           - Priority: 0
+      #             Type: 'LOWERCASE'
+      #   VisibilityConfig:
+      #     CloudWatchMetricsEnabled: true
+      #     MetricName: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
+      #     SampledRequestsEnabled: true
       Scope: 'REGIONAL'
       VisibilityConfig:
         CloudWatchMetricsEnabled: true
