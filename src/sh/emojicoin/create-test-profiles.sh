@@ -1,4 +1,5 @@
 #!/bin/bash
+# cspell:word toplevel
 
 # ------------------------------------------------------------------------------
 #                            		  Setup
@@ -20,7 +21,7 @@ source $docker_dir/.env
 all_profiles=$(aptos config show-profiles)
 check_profile() {
 	local profile="$1"
-	echo $all_profiles | grep $profile > /dev/null
+	echo $all_profiles | grep $profile >/dev/null
 }
 
 publisher="emojicoin_test_publisher"
@@ -34,10 +35,10 @@ initialize_and_fund() {
 		--private-key "$private_key" \
 		--encoding hex \
 		--network local \
-		--assume-yes && \
-	aptos account fund-with-faucet \
-		--profile "$profile" \
-		--amount 100000000000000000
+		--assume-yes &&
+		aptos account fund-with-faucet \
+			--profile "$profile" \
+			--amount 100000000000000000
 }
 
 maybe_initialize_and_fund() {

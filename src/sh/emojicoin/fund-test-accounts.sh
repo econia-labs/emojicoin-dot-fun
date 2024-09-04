@@ -1,4 +1,6 @@
 #!/bin/bash
+# cspell:word toplevel
+# cspell:word argjson
 
 # ------------------------------------------------------------------------------
 #                            		  Setup
@@ -33,9 +35,9 @@ aptos account fund-with-faucet \
 #                       Fund the other 1,000 test accounts
 # ------------------------------------------------------------------------------
 
-if ! command -v jq &> /dev/null; then
-	log_error "`jq` is not installed. This script requires `jq` to run."
-	log_error "Please install `jq` and try again."
+if ! command -v jq &>/dev/null; then
+	log_error "$(jq) is not installed. This script requires $(jq) to run."
+	log_error "Please install $(jq) and try again."
 	exit 1
 fi
 
@@ -54,7 +56,7 @@ batch_fund() {
 	amount_per_account=$((fund_amount / num_accounts))
 	batches=$((num_accounts / accounts_per_batch))
 
-	for ((i=1; i<=batches; i++)); do
+	for ((i = 1; i <= batches; i++)); do
 		start_index=$(((i - 1) * accounts_per_batch))
 		end_index=$((i * accounts_per_batch))
 
@@ -79,14 +81,14 @@ batch_fund() {
 		"type_args": []
 		}
 		' \
-			$accounts_json_path > "${batch_fund_path_prefix}-${i}.json"
+			$accounts_json_path >"${batch_fund_path_prefix}-${i}.json"
 	done
 
 	gas_unit_price=100
 	max_gas=$(((extra_for_gas / gas_unit_price) / batches))
 	# Fund the test accounts and inadvertently create them on-chain.
 	# Loop to avoid transaction execution limits.
-	for ((i=1; i<=batches; i++)); do
+	for ((i = 1; i <= batches; i++)); do
 		batch_fund_output_path="${batch_fund_path_prefix}-${i}.json"
 		aptos move run \
 			--assume-yes \
