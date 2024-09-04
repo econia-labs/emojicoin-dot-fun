@@ -1,17 +1,9 @@
 # yamllint disable rule:empty-lines rule:key-ordering rule:brackets
 ---
 services:
-  emojicoin-dot-fun-aptos-node:
+  aptos-node:
     network_mode: 'host'
-    build:
-      context: '../../'
-      dockerfile: 'src/docker/emojicoin-dot-fun-aptos-node/Dockerfile'
-      args:
-        PUBLISHER_PK: '${PUBLISHER_PK}'
-        BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
-    environment:
-      PUBLISHER_PK: '${PUBLISHER_PK}'
-      BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
+    image: econialabs/aptos-cli:4.1.0
     ports:
     - '50051:50051'
     - '8070:8070'
@@ -19,15 +11,13 @@ services:
     - '8080:8080'
     - '8081:8081'
     healthcheck:
-      test: ['CMD', '/app/healthcheck.sh']
-      # Short interval because this is solely for testing.
-      # No point in waiting around forever.
-      interval: '1s'
-      timeout: '3s'
+      test: ['CMD', 'curl', 'http://localhost:8070/']
+      interval: '5s'
+      timeout: '5s'
       retries: 10
       start_period: '60s'
     # In order to start the node with the indexer API; i.e., run
-    # `aptos node run-local-testnet --with-indexer-api`, the Docker socket must
+    # `aptos node run-localnet --with-indexer-api`, the Docker socket must
     # be mounted to the container. This mount enables the container to start a
     # new container. Note that this is *not* 'Docker-in-Docker', but rather
     # 'Docker-outside-Docker'. That is, the container can act as the host in
@@ -35,4 +25,5 @@ services:
     # a sibling to the existing containers and any new containers it creates.
     volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
+    entrypoint: ['aptos', 'node', 'run-localnet', '--with-indexer-api', '--force-restart', '--bind-to', '0.0.0.0']
 ...
