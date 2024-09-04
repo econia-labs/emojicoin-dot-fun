@@ -25,12 +25,12 @@ fn prepare_app(app: Router<Arc<AppState>>) -> Router<Arc<AppState>> {
 
 #[cfg(all(feature = "ws", not(feature = "sse")))]
 fn prepare_app(app: Router<Arc<AppState>>) -> Router<Arc<AppState>> {
-    app.route("/ws", get(ws::handler))
+    app.route("/", get(ws::handler))
 }
 
 #[cfg(all(feature = "ws", feature = "sse"))]
 fn prepare_app(app: Router<Arc<AppState>>) -> Router<Arc<AppState>> {
-    app.route("/ws", get(ws::handler))
+    app.route("/", get(ws::handler))
         .route("/sse", get(sse::handler))
 }
 
@@ -39,7 +39,7 @@ fn prepare_app(app: Router<Arc<AppState>>) -> Router<Arc<AppState>> {
     app
 }
 
-async fn root() {}
+async fn live() {}
 
 async fn health(State(state): State<Arc<AppState>>) -> StatusCode {
     match *state.processor_connection_health.read().await {
@@ -60,7 +60,7 @@ pub async fn server(
 
     let app = prepare_app(
         Router::new()
-            .route("/", get(root))
+            .route("/live", get(live))
             .route("/health", get(health)),
     );
     let app = app.with_state(Arc::new(app_state));
