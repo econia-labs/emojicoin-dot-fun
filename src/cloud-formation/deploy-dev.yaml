@@ -17,7 +17,7 @@ parameters:
   MaybeDeployRouteTables: 'true'
   MaybeDeployStack: 'true'
   MaybeDeployVpc: 'true'
-  MaybeDeployWaf: 'true'
+  MaybeDeployWaf: 'false'
   Network: 'testnet'
   ProcessorImageVersion: '0.5.0'
 tags: null
