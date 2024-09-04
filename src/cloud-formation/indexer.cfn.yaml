@@ -1007,8 +1007,7 @@ Resources:
         MapPublicIpOnLaunch: false
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
-      # yamllint disable-line rule:key-ordering
-      Condition: 'MaybeDeployVpc'
+      Condition: 'MaybeDeployVpc' # yamllint disable-line rule:key-ordering
       Type: 'AWS::EC2::Subnet'
   # Association for public route table with each public subnet.
   Fn::ForEach::PublicRouteTableAssociation:
@@ -1048,8 +1047,7 @@ Resources:
         MapPublicIpOnLaunch: true
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
-      # yamllint disable-line rule:key-ordering
-      Condition: 'MaybeDeployVpc'
+      Condition: 'MaybeDeployVpc' # yamllint disable-line rule:key-ordering
       Type: 'AWS::EC2::Subnet'
   # Internet gateway for the virtual private cloud.
   InternetGateway:
@@ -1816,16 +1814,14 @@ Resources:
       # Allow all all traffic by default unless blocked per below rules.
       DefaultAction:
         # CloudFormation prohibits both null and empty values.
-        # yamllint disable-line rule:braces
-        Allow: {}
+        Allow: {} # yamllint disable-line rule:braces
       Name: !Ref 'AWS::StackName'
       Rules:
       # Use AWS common rule set.
       - Name: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
         OverrideAction:
           # CloudFormation prohibits both null and empty values.
-          # yamllint disable-line rule:braces
-          None: {}
+          None: {} # yamllint disable-line rule:braces
         Priority: 1
         Statement:
           ManagedRuleGroupStatement:
@@ -1835,107 +1831,107 @@ Resources:
           CloudWatchMetricsEnabled: true
           MetricName: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
           SampledRequestsEnabled: true
-      # # Block VPNs and otherwise obfuscated IP addresses.
-      # - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
-      #   OverrideAction:
-      #     # yamllint disable-line rule:braces
-      #     None: {}
-      #   Priority: 2
-      #   Statement:
-      #     ManagedRuleGroupStatement:
-      #       Name: 'AWSManagedRulesAnonymousIPList'
-      #       VendorName: 'AWS'
-      #   VisibilityConfig:
-      #     CloudWatchMetricsEnabled: true
-      #     MetricName: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
-      #     SampledRequestsEnabled: true
-      # # Block known IP threats.
-      # - Name: !Sub '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
-      #   OverrideAction:
-      #     # yamllint disable-line rule:braces
-      #     None: {}
-      #   Priority: 3
-      #   Statement:
-      #     ManagedRuleGroupStatement:
-      #       Name: 'AWSManagedRulesAmazonIpReputationList'
-      #       VendorName: 'AWS'
-      #   VisibilityConfig:
-      #     CloudWatchMetricsEnabled: true
-      #     MetricName: !Sub
-      #       '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
-      #     SampledRequestsEnabled: true
-      # # Block bot activity.
-      # - Name: !Sub '${AWS::StackName}-AWSManagedRulesBotControlRuleSet'
-      #   OverrideAction:
-      #     # yamllint disable-line rule:braces
-      #     None: {}
-      #   Priority: 4
-      #   Statement:
-      #     ManagedRuleGroupStatement:
-      #       Name: 'AWSManagedRulesBotControlRuleSet'
-      #       VendorName: 'AWS'
-      #   VisibilityConfig:
-      #     CloudWatchMetricsEnabled: true
-      #     MetricName: !Sub '${AWS::StackName}-AWSManagedRulesBotControlRuleSet'
-      #     SampledRequestsEnabled: true
-      # # Rate limit by IP for the REST API.
-      # - Action:
-      #     # yamllint disable-line rule:braces
-      #     Block: {}
-      #   Name: !Sub '${AWS::StackName}-RestApiRateLimit'
-      #   Priority: 5
-      #   Statement:
-      #     RateBasedStatement:
-      #       AggregateKeyType: 'IP'
-      #       Limit: 200
-      #       ScopeDownStatement:
-      #         ByteMatchStatement:
-      #           FieldToMatch:
-      #             SingleHeader:
-      #               Name: 'host'
-      #           PositionalConstraint: 'CONTAINS'
-      #           SearchString: !Sub
-      #           - '${Environment}.${RootDomain}'
-      #           - RootDomain: !FindInMap
-      #             - 'Constants'
-      #             - 'Networking'
-      #             - 'DnsNameRootDomain'
-      #           TextTransformations:
-      #           - Priority: 0
-      #             Type: 'LOWERCASE'
-      #   VisibilityConfig:
-      #     CloudWatchMetricsEnabled: true
-      #     MetricName: !Sub '${AWS::StackName}-RestApiRateLimit'
-      #     SampledRequestsEnabled: true
-      # # Limit WebSocket messages by IP via rate limit.
-      # - Action:
-      #     # yamllint disable-line rule:braces
-      #     Block: {}
-      #   Name: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
-      #   Priority: 6
-      #   Statement:
-      #     RateBasedStatement:
-      #       AggregateKeyType: 'IP'
-      #       Limit: 100
-      #       ScopeDownStatement:
-      #         ByteMatchStatement:
-      #           FieldToMatch:
-      #             SingleHeader:
-      #               Name: 'host'
-      #           PositionalConstraint: 'CONTAINS'
-      #           SearchString: !Sub
-      #           - 'ws.${Environment}.${RootDomain}'
-      #           - RootDomain: !FindInMap
-      #             - 'Constants'
-      #             - 'Networking'
-      #             - 'DnsNameRootDomain'
-      #           TextTransformations:
-      #           - Priority: 0
-      #             Type: 'LOWERCASE'
-      #   VisibilityConfig:
-      #     CloudWatchMetricsEnabled: true
-      #     MetricName: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
-      #     SampledRequestsEnabled: true
+      # Block VPNs and otherwise obfuscated IP addresses.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
+        OverrideAction:
+          # CloudFormation prohibits both null and empty values.
+          None: {} # yamllint disable-line rule:braces
+        Priority: 2
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesAnonymousIPList'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
+          SampledRequestsEnabled: true
+      # Block known IP threats.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
+        OverrideAction:
+          # CloudFormation prohibits both null and empty values.
+          None: {} # yamllint disable-line rule:braces
+        Priority: 3
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesAmazonIpReputationList'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub
+            '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
+          SampledRequestsEnabled: true
+      # Block bot activity.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesBotControlRuleSet'
+        OverrideAction:
+          # CloudFormation prohibits both null and empty values.
+          None: {} # yamllint disable-line rule:braces
+        Priority: 4
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesBotControlRuleSet'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesBotControlRuleSet'
+          SampledRequestsEnabled: true
+      # Rate limit by IP for the REST API.
+      - Action:
+          # CloudFormation prohibits both null and empty values.
+          Block: {} # yamllint disable-line rule:braces
+        Name: !Sub '${AWS::StackName}-RestApiRateLimit'
+        Priority: 5
+        Statement:
+          RateBasedStatement:
+            AggregateKeyType: 'IP'
+            Limit: 200
+            ScopeDownStatement:
+              ByteMatchStatement:
+                FieldToMatch:
+                  SingleHeader:
+                    Name: 'host'
+                PositionalConstraint: 'CONTAINS'
+                SearchString: !Sub
+                - '${Environment}.${RootDomain}'
+                - RootDomain: !FindInMap
+                  - 'Constants'
+                  - 'Networking'
+                  - 'DnsNameRootDomain'
+                TextTransformations:
+                - Priority: 0
+                  Type: 'LOWERCASE'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-RestApiRateLimit'
+          SampledRequestsEnabled: true
+      # Limit WebSocket messages by IP via rate limit.
+      - Action:
+          # CloudFormation prohibits both null and empty values.
+          Block: {} # yamllint disable-line rule:braces
+        Name: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
+        Priority: 6
+        Statement:
+          RateBasedStatement:
+            AggregateKeyType: 'IP'
+            Limit: 100
+            ScopeDownStatement:
+              ByteMatchStatement:
+                FieldToMatch:
+                  SingleHeader:
+                    Name: 'host'
+                PositionalConstraint: 'CONTAINS'
+                SearchString: !Sub
+                - 'ws.${Environment}.${RootDomain}'
+                - RootDomain: !FindInMap
+                  - 'Constants'
+                  - 'Networking'
+                  - 'DnsNameRootDomain'
+                TextTransformations:
+                - Priority: 0
+                  Type: 'LOWERCASE'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
+          SampledRequestsEnabled: true
       Scope: 'REGIONAL'
       VisibilityConfig:
         CloudWatchMetricsEnabled: true
