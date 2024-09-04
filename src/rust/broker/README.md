@@ -22,7 +22,7 @@ Connect to the server with `websocat`:
 
 ```shell
 # Where `3009` here is the `BROKER_PORT` in `compose.yaml`.
-websocat -t 'ws://127.0.0.1:3009/ws'
+websocat -t 'ws://127.0.0.1:3009'
 ```
 
 This will bring you into a shell where everything you send is sent directly
