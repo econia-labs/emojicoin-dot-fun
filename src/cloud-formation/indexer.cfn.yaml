@@ -1820,20 +1820,21 @@ Resources:
         Allow: {}
       Name: !Ref 'AWS::StackName'
       Rules:
-      # # Use AWS common rule set.
-      # - Name: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
-      #   OverrideAction:
-      #     # yamllint disable-line rule:braces
-      #     None: {}
-      #   Priority: 1
-      #   Statement:
-      #     ManagedRuleGroupStatement:
-      #       Name: !Sub 'AWSManagedRulesCommonRuleSet'
-      #       VendorName: 'AWS'
-      #   VisibilityConfig:
-      #     CloudWatchMetricsEnabled: true
-      #     MetricName: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
-      #     SampledRequestsEnabled: true
+      # Use AWS common rule set.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
+        OverrideAction:
+          # CloudFormation prohibits both null and empty values.
+          # yamllint disable-line rule:braces
+          None: {}
+        Priority: 1
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesCommonRuleSet'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
+          SampledRequestsEnabled: true
       # # Block VPNs and otherwise obfuscated IP addresses.
       # - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
       #   OverrideAction:
