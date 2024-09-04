@@ -52,6 +52,6 @@ maybe_initialize_and_fund() {
 if ! check_profile "$publisher" || ! check_profile "$big_money_guy"; then
 	log_header "Creating test profiles"
 
-	maybe_initialize_and_fund "$publisher" "$PUBLISHER_PK"
-	maybe_initialize_and_fund "$big_money_guy" "$BIG_MONEY_GUY_PK"
+	maybe_initialize_and_fund "$publisher" "$PUBLISHER_PRIVATE_KEY"
+	maybe_initialize_and_fund "$big_money_guy" "$BIG_MONEY_GUY_PRIVATE_KEY"
 fi
