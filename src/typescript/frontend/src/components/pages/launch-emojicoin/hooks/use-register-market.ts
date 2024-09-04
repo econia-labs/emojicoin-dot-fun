@@ -1,15 +1,17 @@
-import { RegisterMarket, RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { RegisterMarket } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
+  Ed25519PublicKey,
   isUserTransactionResponse,
   type PendingTransactionResponse,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { INTEGRATOR_ADDRESS } from "lib/env";
-import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS } from "@sdk/const";
-import { toRegistryView } from "@sdk/types";
+import { MARKET_REGISTRATION_FEE, ONE_APT } from "@sdk/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
+import { useQuery } from "@tanstack/react-query";
 
 export const useRegisterMarket = () => {
   const emojis = useEmojiPicker((state) => state.emojis);
@@ -18,7 +20,30 @@ export const useRegisterMarket = () => {
   );
   const clear = useEmojiPicker((state) => state.clear);
   const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
-  const { aptos, account, submit, signThenSubmit } = useAptos();
+  const { aptos, account, signThenSubmit } = useAptos();
+
+  const { data: numMarkets } = useNumMarkets();
+
+  const { data: gas } = useQuery({
+    queryKey: ["register-market-cost", numMarkets, account?.address],
+    queryFn: async () => {
+      const publicKey = new Ed25519PublicKey(
+        typeof account!.publicKey === "string" ? account!.publicKey : account!.publicKey[0]
+      );
+      const r = await RegisterMarket.getGasCost({
+        aptosConfig: aptos.config,
+        registrant: account!.address,
+        registrantPubKey: publicKey,
+        emojis:
+          numMarkets === 0
+            ? [SYMBOL_DATA.byName("Virgo")!.bytes]
+            : emojis.map((e) => SYMBOL_DATA.byEmoji(e)!.bytes),
+      });
+      return r;
+    },
+    staleTime: 1000,
+    enabled: numMarkets !== undefined && account !== null,
+  });
 
   const registerMarket = async () => {
     if (!account) {
@@ -34,34 +59,26 @@ export const useRegisterMarket = () => {
       emojis: emojis.map((e) => SYMBOL_DATA.byEmoji(e)!.bytes),
       integrator: INTEGRATOR_ADDRESS,
     };
-    try {
-      const builderLambda = () => RegisterMarket.builder(builderArgs);
-      await submit(builderLambda).then((r) => {
-        res = r?.response ?? null;
-        error = r?.error;
-      });
-    } catch (e) {
-      // TODO: Check if this works.
-      // If the market registration fails, it's possibly because it's the first market and the gas limit
-      // needs to be set very high. We'll check if the registry has 0 markets, and then try to manually
-      // set the gas limits and submit again.
-      const registryView = await RegistryView.view({
-        aptos,
-      }).then((r) => toRegistryView(r));
-
-      const builderLambda = () =>
-        RegisterMarket.builder({
-          ...builderArgs,
-          options: DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
-        });
-
-      if (registryView.numMarkets === 0n) {
-        await signThenSubmit(builderLambda).then((r) => {
-          res = r?.response ?? null;
-          error = r?.error;
-        });
-      }
+    let amount: number, unitPrice: number;
+    if (gas) {
+      amount = gas.amount;
+      unitPrice = gas.unitPrice;
+    } else {
+      amount = ONE_APT / 100;
+      unitPrice = 100;
     }
+    const builderLambda = () =>
+      RegisterMarket.builder({
+        ...builderArgs,
+        options: {
+          maxGasAmount: Math.round(amount * 1.2),
+          gasUnitPrice: unitPrice,
+        },
+      });
+    await signThenSubmit(builderLambda).then((r) => {
+      res = r?.response ?? null;
+      error = r?.error;
+    });
 
     if (res && isUserTransactionResponse(res)) {
       clear();
@@ -79,5 +96,19 @@ export const useRegisterMarket = () => {
     }
   };
 
-  return registerMarket;
+  // By default, just consider that this is the price, since in 99.99% of cases, this will be the most accurate estimate.
+  let cost: number = Number(MARKET_REGISTRATION_FEE);
+
+  if (gas !== undefined) {
+    if (numMarkets === 0) {
+      cost = gas.unitPrice * gas.amount;
+    } else {
+      cost += gas.unitPrice * gas.amount;
+    }
+  }
+
+  return {
+    registerMarket,
+    cost,
+  };
 };

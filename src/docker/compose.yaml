@@ -16,7 +16,7 @@ services:
       RUST_LOG: 'info,broker=trace'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
     healthcheck:
-      test: 'curl -f http://localhost:${BROKER_PORT}/ || exit 1'
+      test: 'curl -f http://localhost:${BROKER_PORT}/live || exit 1'
       interval: '2m'
       timeout: '5s'
       retries: '1'
@@ -99,7 +99,7 @@ services:
         NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: '${FEE_RATE_BPS}'
         NEXT_PUBLIC_IS_ALLOWLIST_ENABLED: 'false'
         NEXT_PUBLIC_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
-        NEXT_PUBLIC_MQTT_URL: 'ws://broker:${BROKER_PORT}'
+        NEXT_PUBLIC_MQTT_URL: 'ws://localhost:${BROKER_PORT}'
         NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: >-
           ${EMOJICOIN_REWARDS_MODULE_ADDRESS}
         REVALIDATION_TIME: '${REVALIDATION_TIME}'
@@ -112,7 +112,7 @@ services:
       NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: '${FEE_RATE_BPS}'
       NEXT_PUBLIC_IS_ALLOWLIST_ENABLED: 'false'
       NEXT_PUBLIC_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
-      NEXT_PUBLIC_MQTT_URL: 'ws://broker:${BROKER_PORT}'
+      NEXT_PUBLIC_MQTT_URL: 'ws://localhost:${BROKER_PORT}'
       NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: '${EMOJICOIN_REWARDS_MODULE_ADDRESS}'
       REVALIDATION_TIME: '${REVALIDATION_TIME}'
     healthcheck:

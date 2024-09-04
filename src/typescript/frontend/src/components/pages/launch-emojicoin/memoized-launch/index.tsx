@@ -12,12 +12,10 @@ import LaunchButtonOrGoToMarketLink from "./components/launch-or-goto";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import { MARKET_REGISTRATION_FEE, ONE_APTN } from "@sdk/const";
+import { MARKET_REGISTRATION_DEPOSIT, ONE_APTN } from "@sdk/const";
+import Info from "components/info";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
-// This is the value that most wallets use. It's an estimate, possibly incorrect, but better for UX.
-const ESTIMATED_GAS_REQUIREMENT = 300000;
-const ESTIMATED_TOTAL_COST = Number(MARKET_REGISTRATION_FEE) + ESTIMATED_GAS_REQUIREMENT;
 
 export const MemoizedLaunchAnimation = ({
   loading,
@@ -34,7 +32,7 @@ export const MemoizedLaunchAnimation = ({
   );
   const { aptBalance, refetchIfStale } = useAptos();
 
-  const registerMarket = useRegisterMarket();
+  const { registerMarket, cost } = useRegisterMarket();
   const { invalid, registered } = useIsMarketRegistered();
 
   useEffect(() => {
@@ -42,9 +40,18 @@ export const MemoizedLaunchAnimation = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
-  const sufficientBalance = useMemo(() => aptBalance >= MARKET_REGISTRATION_FEE, [aptBalance]);
-  const sufficientBalanceWithGas = useMemo(() => aptBalance >= ESTIMATED_TOTAL_COST, [aptBalance]);
+  const totalCost = useMemo(
+    () => (cost ? cost + Number(MARKET_REGISTRATION_DEPOSIT) : undefined),
+    [cost]
+  );
 
+  const sufficientBalance = useMemo(
+    () => (totalCost ? aptBalance >= totalCost : undefined),
+    [aptBalance, totalCost]
+  );
+
+  const displayCost = toCoinDecimalString(cost, 2);
+  const displayDeposit = toCoinDecimalString(MARKET_REGISTRATION_DEPOSIT, 2);
   const numBytes = useMemo(() => {
     return sumBytes(emojis);
   }, [emojis]);
@@ -113,9 +120,21 @@ export const MemoizedLaunchAnimation = ({
           <div className="flex flex-col justify-center m-auto pt-2 pixel-heading-4 uppercase">
             <div className="flex flex-col text-dark-gray">
               <div className="flex flex-row justify-between">
-                <span className="mr-[2ch]">{t("Cost to deploy") + ": "}</span>
+                <div className="flex flex-row items-center justify-left mr-[2ch]">
+                  <span>{t("Cost to deploy")}</span>
+                  <div className="mx-[5px]">
+                    <Info className="uppercase">{`
+                      The cost to deploy a market is ${displayCost} APT. You
+                      will also make a ${displayDeposit} APT deposit that will
+                      automatically be refunded when your market exits the
+                      bonding curve.
+                    `}</Info>
+                  </div>
+                  :
+                </div>
                 <div>
-                  <span className="">1</span>&nbsp;APT
+                  <span className="">{displayCost}</span>&nbsp;APT (+{" "}
+                  <span className="">{displayDeposit}</span>&nbsp;APT)
                 </div>
               </div>
               <div className="flex flex-row justify-between">
@@ -130,6 +149,20 @@ export const MemoizedLaunchAnimation = ({
                   </span>
                   &nbsp;APT
                 </div>
+              </div>
+              <div className="flex flex-row justify-between">
+                <div className="flex flex-row items-center justify-left mr-[2ch]">
+                  <span>{t("Grace period")}</span>
+                  <div className="mx-[5px]">
+                    <Info className="uppercase">
+                      After a market is launched, there will be a grace period during which only the
+                      account that launched the market can trade. The grace period ends after 5
+                      minutes or after the first trade, whichever comes first.
+                    </Info>
+                  </div>
+                  :
+                </div>
+                <div>5 minutes</div>
               </div>
             </div>
           </div>
@@ -150,14 +183,6 @@ export const MemoizedLaunchAnimation = ({
             />
           </motion.div>
 
-          {!sufficientBalanceWithGas && sufficientBalance && (
-            <div className="flex flex-row pixel-heading-4 uppercase mt-[1ch]">
-              <span className="text-error absolute w-full text-center">
-                {t("Your transaction may fail due to gas costs.")}
-              </span>
-              <span className="relative opacity-0">{"placeholder"}</span>
-            </div>
-          )}
           <div className="h-[1ch] opacity-0">{"placeholder"}</div>
         </motion.div>
       ) : (

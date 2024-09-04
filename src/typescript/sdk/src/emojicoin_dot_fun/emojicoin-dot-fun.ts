@@ -18,6 +18,7 @@ import {
   type WaitForTransactionOptions,
   type UserTransactionResponse,
   type LedgerVersionArg,
+  type PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -290,6 +291,33 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
       integrator: AccountAddress.from(integrator),
     };
     this.feePayer = feePayer !== undefined ? AccountAddress.from(feePayer) : undefined;
+  }
+
+  static async getGasCost(args: {
+    aptosConfig: AptosConfig;
+    registrant: AccountAddressInput; // &signer
+    registrantPubKey: PublicKey;
+    emojis: Array<HexInput>; // vector<vector<u8>>
+  }): Promise<{amount: number, unitPrice: number}> {
+    const { aptosConfig } = args;
+    const payloadBuilder = new this({...args, integrator: "0x0000000000000000000000000000000000000000000000000000000000000001"});
+    const aptos = new Aptos(aptosConfig);
+    const transaction = await aptos.transaction.build.simple({
+      sender: payloadBuilder.primarySender,
+      data: {
+        function: `${payloadBuilder.moduleAddress}::${payloadBuilder.moduleName}::${payloadBuilder.functionName}`,
+        functionArguments: payloadBuilder.argsToArray(),
+      },
+    });
+    const [userTransactionResponse] = await aptos.transaction.simulate.simple({
+        signerPublicKey: args.registrantPubKey,
+        transaction,
+        options: {
+          estimateGasUnitPrice: true,
+          estimateMaxGasAmount: true,
+      }
+    });
+    return {amount: Number(userTransactionResponse.gas_used), unitPrice: Number(userTransactionResponse.gas_unit_price)};
   }
 
   static async builder(args: {
