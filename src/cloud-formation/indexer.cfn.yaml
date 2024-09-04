@@ -1831,20 +1831,20 @@ Resources:
           CloudWatchMetricsEnabled: true
           MetricName: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
           SampledRequestsEnabled: true
-      # Block VPNs and otherwise obfuscated IP addresses.
-      - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
-        OverrideAction:
-          # CloudFormation prohibits both null and empty values.
-          None: {} # yamllint disable-line rule:braces
-        Priority: 2
-        Statement:
-          ManagedRuleGroupStatement:
-            Name: 'AWSManagedRulesAnonymousIPList'
-            VendorName: 'AWS'
-        VisibilityConfig:
-          CloudWatchMetricsEnabled: true
-          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
-          SampledRequestsEnabled: true
+      # # Block VPNs and otherwise obfuscated IP addresses.
+      # - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
+      #   OverrideAction:
+      #     # CloudFormation prohibits both null and empty values.
+      #     None: {} # yamllint disable-line rule:braces
+      #   Priority: 2
+      #   Statement:
+      #     ManagedRuleGroupStatement:
+      #       Name: 'AWSManagedRulesAnonymousIPList'
+      #       VendorName: 'AWS'
+      #   VisibilityConfig:
+      #     CloudWatchMetricsEnabled: true
+      #     MetricName: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
+      #     SampledRequestsEnabled: true
       # # Block known IP threats.
       # - Name: !Sub '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
       #   OverrideAction:
