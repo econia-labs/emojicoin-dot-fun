@@ -1,4 +1,5 @@
 #!/bin/bash
+# cspell:word toplevel
 
 # ------------------------------------------------------------------------------
 #                            Setup for absolute paths
@@ -32,8 +33,8 @@ profile="emojicoin_test_publisher"
 		--override-size-check \
 		--included-artifacts none \
 		--package-dir $rewards_dir \
-		--json-output-file $output_prefix-rewards.json && \
-	log_info "Created publish payload at ${HIGHLIGHT_COLOR}$output_prefix-rewards.json"
+		--json-output-file $output_prefix-rewards.json &&
+		log_info "Created publish payload at ${HIGHLIGHT_COLOR}$output_prefix-rewards.json"
 } &
 pid_publish_1=$!
 
@@ -45,8 +46,8 @@ pid_publish_1=$!
 		--override-size-check \
 		--included-artifacts none \
 		--package-dir $emojicoin_dir \
-		--json-output-file $output_prefix-emojicoin_dot_fun.json && \
-	log_info "Created publish payload at ${HIGHLIGHT_COLOR}$output_prefix-emojicoin_dot_fun.json"
+		--json-output-file $output_prefix-emojicoin_dot_fun.json &&
+		log_info "Created publish payload at ${HIGHLIGHT_COLOR}$output_prefix-emojicoin_dot_fun.json"
 } &
 pid_publish_2=$!
 

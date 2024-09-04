@@ -1,9 +1,10 @@
 # yamllint disable rule:empty-lines rule:key-ordering rule:brackets
+# cspell:word localnet
 ---
 services:
   aptos-node:
     network_mode: 'host'
-    image: econialabs/aptos-cli:4.1.0
+    image: 'econialabs/aptos-cli:4.1.0'
     ports:
     - '50051:50051'
     - '8070:8070'
@@ -25,5 +26,13 @@ services:
     # a sibling to the existing containers and any new containers it creates.
     volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
-    entrypoint: ['aptos', 'node', 'run-localnet', '--with-indexer-api', '--force-restart', '--bind-to', '0.0.0.0']
+    entrypoint: [
+      'aptos',
+      'node',
+      'run-localnet',
+      '--with-indexer-api',
+      '--force-restart',
+      '--bind-to',
+      '0.0.0.0'
+    ]
 ...
