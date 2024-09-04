@@ -394,7 +394,9 @@ restricts [role passing] to the `ContainerRole`.
 ### Endpoint hardening
 
 The `Waf` [resource][resources] specifies a [Web Application Firewall] to
-protect REST and WebSocket endpoints, using custom and [managed rules].
+protect REST and WebSocket endpoints, using custom and [managed rules]. The
+`EnableWafRules` [template parameter](#template-parameters) can be used to
+toggle [rule actions] between `Block` and `Count`.
 
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
@@ -434,6 +436,7 @@ protect REST and WebSocket endpoints, using custom and [managed rules].
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
 [resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 [role passing]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_passrole.html
+[rule actions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-ruleaction.html
 [rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
 [secrets manager secrets]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html
 [stack]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html

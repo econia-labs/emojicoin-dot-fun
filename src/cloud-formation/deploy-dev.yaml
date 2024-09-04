@@ -1,6 +1,7 @@
 ---
 parameters:
   BrokerImageVersion: '0.7.0'
+  EnableWafRules: 'true'
   Environment: 'ECO-2164'
   MaybeDeployAlb: 'true'
   MaybeDeployAlbDnsRecord: 'true'
