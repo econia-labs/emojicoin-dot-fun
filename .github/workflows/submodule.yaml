@@ -7,7 +7,7 @@ jobs:
     - run: 'git submodule update --init --recursive src/rust/processor'
     - run: 'git fetch'
       working-directory: 'src/rust/processor'
-    - run: 'test "$(git rev-parse HEAD)" = "$(git rev-parse origin/emojicoin-dot-fun)"'
+    - run: 'git diff --quiet origin/emojicoin-dot-fun'
       working-directory: 'src/rust/processor'
 name: 'Ensure correct version of processor submodule'
 'on':
