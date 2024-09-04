@@ -232,7 +232,7 @@ deployment environment:
 1. Set your stack name:
 
    ```sh
-   STACK_NAME=<STACK_NAME>
+   STACK_NAME=emoji-ECO-2164
    echo $STACK_NAME
    ```
 
