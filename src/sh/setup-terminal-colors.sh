@@ -43,6 +43,13 @@ log_error() {
 	echo -e "${BOLD_TEXT}${ERROR_COLOR}[ERROR]${NO_STYLES}: $1${NO_STYLES}"
 }
 
+# Note this won't work if you nest it inside another function that styles text.
+# To use it in a `log_info`, you'd have to do this:
+#  log_info "Here's something cool: $(highlight_text 'this is highlighted.')"
+highlight_text() {
+	echo -e "${HIGHLIGHT_COLOR}$1${NO_STYLES}"
+}
+
 # Function to print header begin with padding.
 log_header_begin() {
 	local text="$1"

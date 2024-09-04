@@ -13,7 +13,8 @@ this_dir="$sh_dir/emojicoin"
 source $sh_dir/setup-terminal-colors.sh
 
 if [ ! -f "$docker_dir/.env" ]; then
-	log_info "$docker_dir/.env does not exist. Copying example.local.env to .env"
+	log_info \
+		"$docker_dir/.env does not exist. Copying example.local.env to .env"
 	cp $docker_dir/example.local.env $docker_dir/.env
 fi
 
@@ -25,20 +26,25 @@ output_prefix="$this_dir/json/publish"
 
 profile="emojicoin_test_publisher"
 
+log_info "Here's something cool: $(highlight_text 'this is highlighted.')"
+
 {
+	output_path="$output_prefix-rewards.json"
 	aptos move build-publish-payload \
 		--assume-yes \
 		--profile $profile \
-		--named-addresses rewards=$profile,integrator=$profile,emojicoin_dot_fun=$profile \
+		--named-addresses \
+			rewards=$profile,integrator=$profile,emojicoin_dot_fun=$profile \
 		--override-size-check \
 		--included-artifacts none \
 		--package-dir $rewards_dir \
-		--json-output-file $output_prefix-rewards.json &&
-		log_info "Created publish payload at ${HIGHLIGHT_COLOR}$output_prefix-rewards.json"
+		--json-output-file $output_path
+	log_info "Created publish payload at $(highlight_text $output_path)"
 } &
 pid_publish_1=$!
 
 {
+	output_path="$output_prefix-emojicoin_dot_fun.json"
 	aptos move build-publish-payload \
 		--assume-yes \
 		--profile $profile \
@@ -46,8 +52,8 @@ pid_publish_1=$!
 		--override-size-check \
 		--included-artifacts none \
 		--package-dir $emojicoin_dir \
-		--json-output-file $output_prefix-emojicoin_dot_fun.json &&
-		log_info "Created publish payload at ${HIGHLIGHT_COLOR}$output_prefix-emojicoin_dot_fun.json"
+		--json-output-file $output_path
+	log_info "Created publish payload at $(highlight_text $output_path)"
 } &
 pid_publish_2=$!
 
