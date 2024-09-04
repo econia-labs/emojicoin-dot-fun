@@ -398,6 +398,8 @@ protect REST and WebSocket endpoints, using custom and [managed rules]. The
 `EnableWafRules` [template parameter](#template-parameters) can be used to
 toggle [rule actions] between `Block` and `Count`.
 
+See the [Web ACL traffic overview dashboards] to monitor rules.
+
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
@@ -447,6 +449,7 @@ toggle [rule actions] between `Block` and `Count`.
 [the upstream repository credentials docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-secret.html
 [transaction stream service endpoint]: https://aptos.dev/en/build/indexer/txn-stream
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
+[web acl traffic overview dashboards]: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-dashboards.html
 [web application firewall]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
 [`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630
 [`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
