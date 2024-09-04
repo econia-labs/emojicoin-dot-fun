@@ -1821,7 +1821,7 @@ Resources:
       - Name: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
         OverrideAction:
           # CloudFormation prohibits both null and empty values.
-          Count: {} # yamllint disable-line rule:braces
+          None: {} # yamllint disable-line rule:braces
         Priority: 1
         Statement:
           ManagedRuleGroupStatement:
@@ -1835,7 +1835,7 @@ Resources:
       - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
         OverrideAction:
           # CloudFormation prohibits both null and empty values.
-          Count: {} # yamllint disable-line rule:braces
+          None: {} # yamllint disable-line rule:braces
         Priority: 2
         Statement:
           ManagedRuleGroupStatement:
@@ -1849,7 +1849,7 @@ Resources:
       - Name: !Sub '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
         OverrideAction:
           # CloudFormation prohibits both null and empty values.
-          Count: {} # yamllint disable-line rule:braces
+          None: {} # yamllint disable-line rule:braces
         Priority: 3
         Statement:
           ManagedRuleGroupStatement:
@@ -1864,7 +1864,7 @@ Resources:
       - Name: !Sub '${AWS::StackName}-AWSManagedRulesBotControlRuleSet'
         OverrideAction:
           # CloudFormation prohibits both null and empty values.
-          Count: {} # yamllint disable-line rule:braces
+          None: {} # yamllint disable-line rule:braces
         Priority: 4
         Statement:
           ManagedRuleGroupStatement:
@@ -1877,7 +1877,7 @@ Resources:
       # Rate limit by IP for the REST API.
       - Action:
           # CloudFormation prohibits both null and empty values.
-          Count: {} # yamllint disable-line rule:braces
+          Block: {} # yamllint disable-line rule:braces
         Name: !Sub '${AWS::StackName}-RestApiRateLimit'
         Priority: 5
         Statement:
@@ -1906,7 +1906,7 @@ Resources:
       # Limit WebSocket messages by IP via rate limit.
       - Action:
           # CloudFormation prohibits both null and empty values.
-          Count: {} # yamllint disable-line rule:braces
+          Block: {} # yamllint disable-line rule:braces
         Name: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
         Priority: 6
         Statement:
