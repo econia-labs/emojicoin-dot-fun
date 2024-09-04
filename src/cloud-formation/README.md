@@ -394,9 +394,7 @@ restricts [role passing] to the `ContainerRole`.
 ### Endpoint hardening
 
 The `Waf` [resource][resources] specifies a [Web Application Firewall] to
-protect REST and WebSocket endpoints. It relies on assorted [managed rules] that
-may trigger false alarms during testing so that, for example, you may have to
-query the REST endpoint from a browser instead of using `curl`.
+protect REST and WebSocket endpoints, using custom and [managed rules].
 
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
