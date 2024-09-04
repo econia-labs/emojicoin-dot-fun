@@ -1815,8 +1815,9 @@ Resources:
     Properties:
       # Allow all all traffic by default unless blocked per below rules.
       DefaultAction:
-        # yamllint disable-line rule:empty-values
-        Allow:
+        # CloudFormation prohibits both null and empty values.
+        # yamllint disable-line rule:braces
+        Allow: {}
       Name: !Ref 'AWS::StackName'
       Rules:
       # # Use AWS common rule set.
