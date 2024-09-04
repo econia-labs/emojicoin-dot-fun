@@ -16,7 +16,7 @@ services:
       RUST_LOG: 'info,broker=trace'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
     healthcheck:
-      test: 'curl -f http://localhost:${BROKER_PORT}/ || exit 1'
+      test: 'curl -f http://localhost:${BROKER_PORT}/live || exit 1'
       interval: '2m'
       timeout: '5s'
       retries: '1'

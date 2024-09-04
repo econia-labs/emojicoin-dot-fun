@@ -5,7 +5,7 @@ const {
   Inbox,
   LocalNode,
   publishForTest,
-  getPublisherPKForTest,
+  getTestPublisherPrivateKey,
   PK_PATH,
   PUBLISH_RES_PATH,
 } = require("./utils");
@@ -23,7 +23,7 @@ module.exports = async function setup() {
   fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
   fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });
 
-  const pk = await getPublisherPKForTest();
+  const pk = await getTestPublisherPrivateKey();
   if (!pk) {
     throw new Error("Please provide a private key for testing");
   };
