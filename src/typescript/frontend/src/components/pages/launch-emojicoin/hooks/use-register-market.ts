@@ -7,7 +7,11 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { INTEGRATOR_ADDRESS } from "lib/env";
-import { MARKET_REGISTRATION_FEE, ONE_APT } from "@sdk/const";
+import {
+  MARKET_REGISTRATION_FEE,
+  MARKET_REGISTRATION_GAS_ESTIMATION_FIRST,
+  MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST,
+} from "@sdk/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
@@ -24,8 +28,10 @@ export const useRegisterMarket = () => {
 
   const { data: numMarkets } = useNumMarkets();
 
-  const { data: gas } = useQuery({
-    queryKey: ["register-market-cost", numMarkets, account?.address],
+  const emojiBytes = emojis.map((e) => SYMBOL_DATA.byEmoji(e)!.bytes);
+
+  const { data: gasResult } = useQuery({
+    queryKey: ["register-market-cost", numMarkets, account?.address, emojiBytes],
     queryFn: async () => {
       const publicKey = new Ed25519PublicKey(
         typeof account!.publicKey === "string" ? account!.publicKey : account!.publicKey[0]
@@ -34,16 +40,29 @@ export const useRegisterMarket = () => {
         aptosConfig: aptos.config,
         registrant: account!.address,
         registrantPubKey: publicKey,
-        emojis:
-          numMarkets === 0
-            ? [SYMBOL_DATA.byName("Virgo")!.bytes]
-            : emojis.map((e) => SYMBOL_DATA.byEmoji(e)!.bytes),
+        emojis: numMarkets === 0 ? [SYMBOL_DATA.byName("Virgo")!.bytes] : emojiBytes,
       });
       return r;
     },
     staleTime: 1000,
-    enabled: numMarkets !== undefined && account !== null,
+    enabled:
+      numMarkets !== undefined && account !== null && (numMarkets === 0 || emojis.length > 0),
   });
+
+  let amount: number, unitPrice: number;
+
+  if (gasResult && !gasResult.error) {
+    amount = gasResult.data.amount;
+    unitPrice = gasResult.data.unitPrice;
+  } else {
+    // If numMarkets is undefined (request not completed yet), we are ok with displaying the bigger number.
+    // And in most cases (every time except for the first market), it will actually be the correct one.
+    amount =
+      numMarkets === 0
+        ? MARKET_REGISTRATION_GAS_ESTIMATION_FIRST / 100
+        : MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST / 100;
+    unitPrice = 100;
+  }
 
   const registerMarket = async () => {
     if (!account) {
@@ -56,17 +75,9 @@ export const useRegisterMarket = () => {
     const builderArgs = {
       aptosConfig: aptos.config,
       registrant: account.address,
-      emojis: emojis.map((e) => SYMBOL_DATA.byEmoji(e)!.bytes),
+      emojis: emojiBytes,
       integrator: INTEGRATOR_ADDRESS,
     };
-    let amount: number, unitPrice: number;
-    if (gas) {
-      amount = gas.amount;
-      unitPrice = gas.unitPrice;
-    } else {
-      amount = ONE_APT / 100;
-      unitPrice = 100;
-    }
     const builderLambda = () =>
       RegisterMarket.builder({
         ...builderArgs,
@@ -99,12 +110,12 @@ export const useRegisterMarket = () => {
   // By default, just consider that this is the price, since in 99.99% of cases, this will be the most accurate estimate.
   let cost: number = Number(MARKET_REGISTRATION_FEE);
 
-  if (gas !== undefined) {
-    if (numMarkets === 0) {
-      cost = gas.unitPrice * gas.amount;
-    } else {
-      cost += gas.unitPrice * gas.amount;
-    }
+  // If numMarkets is undefined (request not completed yet), we are ok with choosing the second option.
+  // And in most cases (every time except for the first market), it will actually be the correct one.
+  if (numMarkets === 0) {
+    cost = amount * unitPrice;
+  } else {
+    cost += amount * unitPrice;
   }
 
   return {

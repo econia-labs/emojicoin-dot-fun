@@ -298,9 +298,12 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
     registrant: AccountAddressInput; // &signer
     registrantPubKey: PublicKey;
     emojis: Array<HexInput>; // vector<vector<u8>>
-  }): Promise<{amount: number, unitPrice: number}> {
+  }): Promise<{ data: { amount: number; unitPrice: number }; error: boolean }> {
     const { aptosConfig } = args;
-    const payloadBuilder = new this({...args, integrator: "0x0000000000000000000000000000000000000000000000000000000000000001"});
+    const payloadBuilder = new this({
+      ...args,
+      integrator: "0x0000000000000000000000000000000000000000000000000000000000000001",
+    });
     const aptos = new Aptos(aptosConfig);
     const transaction = await aptos.transaction.build.simple({
       sender: payloadBuilder.primarySender,
@@ -310,14 +313,20 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
       },
     });
     const [userTransactionResponse] = await aptos.transaction.simulate.simple({
-        signerPublicKey: args.registrantPubKey,
-        transaction,
-        options: {
-          estimateGasUnitPrice: true,
-          estimateMaxGasAmount: true,
-      }
+      signerPublicKey: args.registrantPubKey,
+      transaction,
+      options: {
+        estimateGasUnitPrice: true,
+        estimateMaxGasAmount: true,
+      },
     });
-    return {amount: Number(userTransactionResponse.gas_used), unitPrice: Number(userTransactionResponse.gas_unit_price)};
+    return {
+      data: {
+        amount: Number(userTransactionResponse.gas_used),
+        unitPrice: Number(userTransactionResponse.gas_unit_price),
+      },
+      error: !userTransactionResponse.success,
+    };
   }
 
   static async builder(args: {
