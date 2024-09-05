@@ -12,6 +12,8 @@ import { useAnimationControls } from "framer-motion";
 import { RewardsAnimation } from "./RewardsAnimation";
 import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
+import { useGracePeriod } from "lib/hooks/queries/use-grace-period";
+import Popup from "components/popup";
 
 export const SwapButton = ({
   inputAmount,
@@ -20,6 +22,7 @@ export const SwapButton = ({
   setSubmit,
   disabled,
   geoblocked,
+  symbol,
 }: {
   inputAmount: bigint | number | string;
   isSell: boolean;
@@ -27,10 +30,18 @@ export const SwapButton = ({
   setSubmit: Dispatch<SetStateAction<(() => Promise<void>) | null>>;
   disabled?: boolean;
   geoblocked: boolean;
+  symbol: string;
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
   const controls = useAnimationControls();
+  const { isLoading, data } = useGracePeriod(symbol);
+
+  const isInGracePeriod = isLoading ? false : !data!.gracePeriodOver;
+  // If data not loaded yet, use user address as registrant address in order to not prevent the user from trying to trade.
+  const registrantAddress = data?.flag?.marketRegistrant ?? account?.address;
+
+  const canTrade = !isInGracePeriod || registrantAddress === account?.address;
 
   const handleClick = useCallback(async () => {
     if (!account) {
@@ -80,10 +91,20 @@ export const SwapButton = ({
   return (
     <>
       <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
-        <Button disabled={disabled} onClick={handleClick} scale="lg">
-          {t("Swap")}
-        </Button>
-        <RewardsAnimation controls={controls} />
+        {canTrade ? (
+          <>
+            <Button disabled={disabled} onClick={handleClick} scale="lg">
+              {t("Swap")}
+            </Button>
+            <RewardsAnimation controls={controls} />
+          </>
+        ) : (
+          <Popup content="This market is in its grace period. During the grace period of a market, only the market creator can trade. The grace period ends 5 minutes after the market registration, of atfter the first trade, whichever comes first.">
+            <Button disabled={true} onClick={handleClick} scale="lg">
+              {t("Swap")}
+            </Button>
+          </Popup>
+        )}
       </ButtonWithConnectWalletFallback>
     </>
   );
