@@ -5,6 +5,7 @@ services:
   aptos-node:
     network_mode: 'host'
     image: 'econialabs/aptos-cli:4.1.0'
+    profiles: ["test-harness"]
     ports:
     - '50051:50051'
     - '8070:8070'
@@ -35,7 +36,27 @@ services:
       '--bind-to',
       '0.0.0.0'
     ]
+  local-deployer:
+    extra_hosts:
+    - 'host.docker.internal:host-gateway'
+    build:
+      context: ../../
+      dockerfile: 'src/docker/local-deployer/Dockerfile'
+      args:
+        PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
+        EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
+    env_file:
+    - path: './example.local.env'
+      required: true
+    - path: './.env'
+      required: false
+    image: 'econialabs/emojicoin-dot-fun-local-deployer:latest'
+    profiles: ["test-harness"]
+    depends_on:
+      aptos-node:
+        condition: 'service_healthy'
   processor:
+    profiles: ["test-harness"]
     depends_on:
       aptos-node:
         condition: 'service_healthy'
