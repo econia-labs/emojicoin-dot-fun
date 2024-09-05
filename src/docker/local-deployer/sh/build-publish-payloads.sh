@@ -11,18 +11,21 @@ address=$EMOJICOIN_MODULE_ADDRESS
 
 aptos move build-publish-payload \
 	--assume-yes \
-	--named-addresses \
-        rewards=$address,integrator=$address,emojicoin_dot_fun=$address \
-	--override-size-check \
-	--included-artifacts none \
-	--package-dir $move_dir/rewards/ \
-	--json-output-file $json_dir/rewards.json
-
-aptos move build-publish-payload \
-	--assume-yes \
 	--named-addresses emojicoin_dot_fun=$address \
 	--override-size-check \
 	--included-artifacts none \
 	--package-dir $move_dir/emojicoin_dot_fun/ \
 	--json-output-file $json_dir/emojicoin_dot_fun.json \
+
+# Note the extra `--skip-fetch-latest-git-deps` flag because the previous
+# command already fetches the latest git dependencies and the `rewards` module's
+# dependencies are a subset of the dependencies for `emojicoin_dot_fun`.
+aptos move build-publish-payload \
+	--assume-yes \
+	--named-addresses \
+        rewards=$address,integrator=$address,emojicoin_dot_fun=$address \
+	--override-size-check \
+	--included-artifacts none \
+	--package-dir $move_dir/rewards/ \
+	--json-output-file $json_dir/rewards.json \
 	--skip-fetch-latest-git-deps
