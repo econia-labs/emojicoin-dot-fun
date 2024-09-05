@@ -6,13 +6,13 @@
 # ------------------------------------------------------------------------------
 root_dir=$(git rev-parse --show-toplevel)
 docker_dir="$root_dir/src/docker"
-move_dir="$root_dir/src/move"
 sh_dir="$root_dir/src/sh"
 
 source $sh_dir/setup-terminal-colors.sh
 
 if [ ! -f "$docker_dir/.env" ]; then
-	log_info "$docker_dir/.env does not exist. Copying example.local.env to .env"
+	log_info
+		"$docker_dir/.env does not exist. Copying example.local.env to .env"
 	cp $docker_dir/example.local.env $docker_dir/.env
 fi
 
@@ -35,10 +35,10 @@ initialize_and_fund() {
 		--private-key "$private_key" \
 		--encoding hex \
 		--network local \
-		--assume-yes &&
-		aptos account fund-with-faucet \
-			--profile "$profile" \
-			--amount 100000000000000000
+		--assume-yes \
+	&& aptos account fund-with-faucet \
+		--profile "$profile" \
+		--amount 100000000000000000
 }
 
 maybe_initialize_and_fund() {

@@ -26,8 +26,6 @@ output_prefix="$this_dir/json/publish"
 
 profile="emojicoin_test_publisher"
 
-log_info "Here's something cool: $(highlight_text 'this is highlighted.')"
-
 {
 	output_path="$output_prefix-rewards.json"
 	aptos move build-publish-payload \
