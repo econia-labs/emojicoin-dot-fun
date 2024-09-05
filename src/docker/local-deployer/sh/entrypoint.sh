@@ -9,14 +9,8 @@ publisher_private_key=$PUBLISHER_PRIVATE_KEY
 # ------------------------------------------------------------------------------
 #                              Publish the contracts
 # ------------------------------------------------------------------------------
-# We can use the publisher's profile name as the contract's named address,
-# since the CLI resolves named addresses to a profile if one exists with the
-# same name.
-publisher="publisher"
 
-# The amount we'll fund the publisher with.
 fund_amount=20000000000000000
-distribution_amount=10000000000000000
 extra_for_gas=200000000
 gas_unit_price=100
 
