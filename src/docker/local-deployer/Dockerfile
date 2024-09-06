@@ -27,6 +27,6 @@ COPY src/sh/utils/colors.sh sh/colors.sh
 RUN chmod +x sh/*.sh                    \
     && sh/init-profile.sh               \
     && sh/build-batch-fund-payloads.sh  \
-    && sh/build-publish-payloads.sh     \
+    && sh/build-publish-payloads.sh
 
 ENTRYPOINT [ "bash", "sh/entrypoint.sh" ]
