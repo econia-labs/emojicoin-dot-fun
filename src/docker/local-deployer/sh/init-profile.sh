@@ -3,8 +3,8 @@
 set -e
 
 if [ -z "$PUBLISHER_PRIVATE_KEY" ]; then
-    echo "PUBLISHER_PRIVATE_KEY is not set. Exiting."
-    exit 1
+	echo "PUBLISHER_PRIVATE_KEY is not set. Exiting."
+	exit 1
 fi
 
 source /app/sh/cli-profile.sh
@@ -12,8 +12,8 @@ source /app/sh/colors.sh
 
 current_key=$(get_publisher_private_key)
 if [ "$current_key" == "$PUBLISHER_PRIVATE_KEY" ]; then
-    echo "Profile publisher already exists. Skipping profile initialization."
-    exit 0
+	echo "Profile publisher already exists. Skipping profile initialization."
+	exit 0
 fi
 
 # This script initializes a profile on the `testnet` network and then updates
@@ -30,22 +30,22 @@ fi
 profile="publisher"
 
 result_json=$(aptos init \
-    --assume-yes \
-    --profile $profile \
-    --private-key $PUBLISHER_PRIVATE_KEY \
-    --encoding hex \
-    --network testnet 2>/dev/null)
+	--assume-yes \
+	--profile $profile \
+	--private-key $PUBLISHER_PRIVATE_KEY \
+	--encoding hex \
+	--network testnet 2>/dev/null)
 
 result=$(echo $result_json | jq -r '.Error')
 
 if [ -n "$result" ]; then
-    # As long as the private key is correct, we have what we need.
-    current_key=$(get_publisher_private_key)
-    if [ "$current_key" != "$PUBLISHER_PRIVATE_KEY" ]; then
-        log_error "Failed to initialize profile \"$profile\""
-        log_error $(echo $result | jq -r '.Error')
-        exit 1
-    fi
+	# As long as the private key is correct, we have what we need.
+	current_key=$(get_publisher_private_key)
+	if [ "$current_key" != "$PUBLISHER_PRIVATE_KEY" ]; then
+		log_error "Failed to initialize profile \"$profile\""
+		log_error $(echo $result | jq -r '.Error')
+		exit 1
+	fi
 fi
 
 log_info "Profile successfully created."

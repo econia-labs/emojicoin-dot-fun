@@ -15,7 +15,7 @@ aptos move build-publish-payload \
 	--override-size-check \
 	--included-artifacts none \
 	--package-dir $move_dir/emojicoin_dot_fun/ \
-	--json-output-file $json_dir/emojicoin_dot_fun.json \
+	--json-output-file $json_dir/emojicoin_dot_fun.json
 
 # Note the extra `--skip-fetch-latest-git-deps` flag because the previous
 # command already fetches the latest git dependencies and the `rewards` module's
@@ -23,7 +23,7 @@ aptos move build-publish-payload \
 aptos move build-publish-payload \
 	--assume-yes \
 	--named-addresses \
-        rewards=$profile,integrator=$profile,emojicoin_dot_fun=$profile \
+	rewards=$profile,integrator=$profile,emojicoin_dot_fun=$profile \
 	--override-size-check \
 	--included-artifacts none \
 	--package-dir $move_dir/rewards/ \

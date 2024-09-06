@@ -32,7 +32,7 @@ profile="emojicoin_test_publisher"
 		--assume-yes \
 		--profile $profile \
 		--named-addresses \
-			rewards=$profile,integrator=$profile,emojicoin_dot_fun=$profile \
+		rewards=$profile,integrator=$profile,emojicoin_dot_fun=$profile \
 		--override-size-check \
 		--included-artifacts none \
 		--package-dir $rewards_dir \

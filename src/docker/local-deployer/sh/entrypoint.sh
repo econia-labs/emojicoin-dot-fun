@@ -16,7 +16,7 @@ profile="publisher"
 profile_private_key=$(get_publisher_private_key)
 if [ "$profile_private_key" != "$PUBLISHER_PRIVATE_KEY" ]; then
 	log_warning \
-		"The private key for \"publisher\" does not match PUBLISHER_PRIVATE_KEY"
+		'The private key for "publisher" does not match PUBLISHER_PRIVATE_KEY'
 	log_warning "PUBLISHER_PRIVATE_KEY: $PUBLISHER_PRIVATE_KEY"
 	log_warning "\"publisher\" profile: $profile_private_key"
 	msg="Rebuild the image to skip re-initializing the CLI profile and"
