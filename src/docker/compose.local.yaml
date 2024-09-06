@@ -5,26 +5,18 @@ services:
   aptos-node:
     network_mode: 'host'
     image: 'econialabs/aptos-cli:4.1.0'
-    profiles: ["test-harness"]
-    ports:
-    - '50051:50051'
-    - '8070:8070'
-    - '8090:8090'
-    - '8080:8080'
-    - '8081:8081'
+    profiles: ['localnet']
     healthcheck:
       test: [ 'bash', 'sh/healthcheck.sh' ]
       interval: '5s'
       timeout: '5s'
       retries: 10
       start_period: '60s'
-    # In order to start the node with the indexer API; i.e., run
-    # `aptos node run-localnet --with-indexer-api`, the Docker socket must
-    # be mounted to the container. This mount enables the container to start a
-    # new container. Note that this is *not* 'Docker-in-Docker', but rather
-    # 'Docker-outside-Docker'. That is, the container can act as the host in
-    # terms of creating and orchestrating other containers but still appears as
-    # a sibling to the existing containers and any new containers it creates.
+    # Mount the Docker socket so that this container can start new containers.
+    # Note that the containers created are not `children` but `siblings` of the
+    # creating container.
+    # See "The socket solution" below:
+    # https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/
     volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
     entrypoint: [
@@ -40,19 +32,19 @@ services:
     extra_hosts:
     - 'host.docker.internal:host-gateway'
     build:
-      context: ../../
+      context: '../../'
       dockerfile: 'src/docker/local-deployer/Dockerfile'
       args:
-        PUBLISHER_PRIVATE_KEY: ${PUBLISHER_PRIVATE_KEY}
+        PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
     environment:
-      PUBLISHER_PRIVATE_KEY: ${PUBLISHER_PRIVATE_KEY}
+      PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
     image: 'econialabs/emojicoin-dot-fun-local-deployer:latest'
-    profiles: ["test-harness"]
+    profiles: ['localnet']
     depends_on:
       aptos-node:
         condition: 'service_healthy'
   processor:
-    profiles: ["test-harness"]
+    profiles: ['localnet']
     depends_on:
       aptos-node:
         condition: 'service_healthy'
