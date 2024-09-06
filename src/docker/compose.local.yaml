@@ -13,7 +13,7 @@ services:
     - '8080:8080'
     - '8081:8081'
     healthcheck:
-      test: ['CMD', 'curl', 'http://localhost:8070/']
+      test: [ 'bash', 'sh/healthcheck.sh' ]
       interval: '5s'
       timeout: '5s'
       retries: 10
@@ -43,13 +43,9 @@ services:
       context: ../../
       dockerfile: 'src/docker/local-deployer/Dockerfile'
       args:
-        PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
-        EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
-    env_file:
-    - path: './example.local.env'
-      required: true
-    - path: './.env'
-      required: false
+        PUBLISHER_PRIVATE_KEY: ${PUBLISHER_PRIVATE_KEY}
+    environment:
+      PUBLISHER_PRIVATE_KEY: ${PUBLISHER_PRIVATE_KEY}
     image: 'econialabs/emojicoin-dot-fun-local-deployer:latest'
     profiles: ["test-harness"]
     depends_on:
