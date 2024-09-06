@@ -9,6 +9,7 @@ import MemoizedGridRowLines from "./components/grid-row-lines";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { useEffect, useMemo, useRef } from "react";
 import "./module.css";
+import { useEmojiPicker } from "context/emoji-picker-context";
 
 export const ClientGrid = ({
   data,
@@ -20,10 +21,11 @@ export const ClientGrid = ({
   sortBy: MarketDataSortByHomePage;
 }) => {
   const rowLength = useGridRowLength();
+  const searchEmojis = useEmojiPicker((s) => s.emojis);
 
   const ordered = useMemo(() => {
-    return marketDataToProps(data);
-  }, [data]);
+    return marketDataToProps(data, searchEmojis);
+  }, [data, searchEmojis]);
 
   const initialRender = useRef(true);
 
@@ -45,7 +47,7 @@ export const ClientGrid = ({
       {ordered.map((v, i) => {
         return (
           <TableCard
-            key={`${sortBy}-${v.marketID}-${i}`}
+            key={`live-${v.marketID}${v.searchEmojisKey}`}
             index={i}
             pageOffset={(page - 1) * MARKETS_PER_PAGE}
             marketID={v.marketID}
