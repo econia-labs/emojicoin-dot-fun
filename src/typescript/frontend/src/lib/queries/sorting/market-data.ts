@@ -77,9 +77,7 @@ const getMyPools = async ({
 };
 
 export const fetchFeaturedMarket = async () => {
-  const keys = [
-    "featured-market",
-  ].map(String);
+  const keys = ["featured-market"].map(String);
 
   const res = await cached(
     () =>
