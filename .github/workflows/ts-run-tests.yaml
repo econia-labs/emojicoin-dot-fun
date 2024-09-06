@@ -14,7 +14,8 @@ jobs:
       with:
         submodules: 'false'
     - name: 'Install the latest Aptos CLI'
-      uses: 'aptos-labs/aptos-core/.github/actions/get-latest-cli@8792eef'
+      # yamllint disable-line rule:line-length
+      uses: 'aptos-labs/aptos-core/.github/actions/get-latest-cli@8792eefecd537c33fb879984635a0762838e2329'
       with:
         destination_directory: '/usr/local/bin'
     - uses: './.github/actions/ts-run-tests'
