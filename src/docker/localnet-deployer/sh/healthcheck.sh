@@ -15,4 +15,5 @@
 # `curl` the readiness endpoint and check if the `not_ready` array is empty.
 # Pipe the output from `jq` to `grep` to check if the length is 0.
 
-curl -s http://localhost:8070/ | jq '.not_ready | length' | grep -q 0
+curl -s http://localhost:8070/ | jq -e '.not_ready | length == 0'
+

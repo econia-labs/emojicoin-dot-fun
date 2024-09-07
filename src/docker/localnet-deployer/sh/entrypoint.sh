@@ -58,8 +58,8 @@ aptos move run \
 #                              Fund the test accounts
 # ------------------------------------------------------------------------------
 # Fund test accounts with the batch fund payloads generated in the build step.
-num_batches=$(ls $batch_fund_path_prefix-*.json | wc -l)
 batch_fund_path_prefix="/app/json/batch-fund"
+num_batches=$(ls $batch_fund_path_prefix-*.json | wc -l)
 max_gas=$(((extra_for_gas / gas_unit_price) / num_batches))
 
 # Fund the test accounts and inadvertently create them on-chain.

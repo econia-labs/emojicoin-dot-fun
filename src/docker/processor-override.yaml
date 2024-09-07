@@ -1,0 +1,33 @@
+---
+services:
+  processor:
+    extra_hosts:
+    - 'host.docker.internal:host-gateway'
+    build:
+      context: '../rust/processor/rust'
+      dockerfile: 'Dockerfile'
+    environment:
+      DATABASE_URL: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
+      GRPC_AUTH_TOKEN: '${GRPC_AUTH_TOKEN}'
+      GRPC_DATA_SERVICE_URL: '${GRPC_DATA_SERVICE_URL}'
+      MINIMUM_STARTING_VERSION: '${MINIMUM_STARTING_VERSION}'
+      EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
+      WS_PORT: '${PROCESSOR_WS_PORT}'
+    depends_on:
+      postgres:
+        condition: 'service_healthy'
+      localnet-node:
+        condition: 'service_healthy'
+    # image: 'econialabs/emojicoin-dot-fun-indexer-processor'
+    healthcheck:
+      test: 'curl -f http://localhost:${PROCESSOR_WS_PORT}/ || exit 1'
+      interval: '2m'
+      timeout: '5s'
+      retries: '1'
+      start_period: '15s'
+      start_interval: '2s'
+    restart: 'unless-stopped'
+    stop_signal: 'SIGKILL'
+    ports:
+    - '${PROCESSOR_WS_PORT}:${PROCESSOR_WS_PORT}'
+...
