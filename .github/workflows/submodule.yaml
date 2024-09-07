@@ -1,6 +1,6 @@
 ---
 jobs:
-  pre-commit:
+  verify-submodule:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v3'
