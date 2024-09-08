@@ -18,14 +18,9 @@ msg="Building the payload for"
 msg="$msg distributing $distribution_amount to $num_accounts accounts"
 log_info "$msg"
 
-for i in {1..3}; do
-	start_index=$(((i - 1) * 333))
-
-	if [ $i != 3 ]; then
-		end_index=$((i * 333))
-	else
-		end_index=$num_accounts
-	fi
+for i in {1..2}; do
+	start_index=$(((i - 1) * 500))
+	end_index=$((i * 500))
 
 	jq -r --arg amount "$amount_per_account" \
 		--argjson start "$start_index" \

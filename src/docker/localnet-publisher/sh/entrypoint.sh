@@ -83,4 +83,4 @@ if [ -n "$FORCE_RESTART" ] || ! already_published; then
 	fund_test_accounts
 fi
 
-log_info "Smart is published and test accounts are funded!"
+log_info "Smart contract is published and test accounts are funded!"

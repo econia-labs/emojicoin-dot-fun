@@ -56,7 +56,7 @@ services:
     environment:
       FORCE_RESTART: '${FORCE_RESTART:-}'
       PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
-    image: 'xbtmatt/emojicoin-dot-fun-aptos-node:latest'
+    image: 'econialabs/emojicoin-dot-fun-localnet-publisher:latest'
     depends_on:
       localnet:
         condition: 'service_healthy'
