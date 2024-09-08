@@ -1,9 +1,8 @@
+# cspell:word localnet
 ---
 env:
   PUBLISHER_PRIVATE_KEY: >-
     0xeaa964d1353b075ac63b0c5a0c1e92aa93355be1402f6077581e37e2a846105e
-  EMOJICOIN_MODULE_ADDRESS: >-
-    0xf000d910b99722d201c6cf88eb7d1112b43475b9765b118f289b5d65d919000d
 jobs:
   build-push:
     runs-on: 'ubuntu-latest'
@@ -12,9 +11,9 @@ jobs:
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
-        images: 'econialabs/emojicoin-dot-fun-aptos-node'
+        images: 'econialabs/emojicoin-dot-fun-localnet-deployer'
         tags: |
-          type=match,pattern=emojicoin-dot-fun-aptos-node-v(.*),group=1
+          type=match,pattern=emojicoin-dot-fun-localnet-deployer-v(.*),group=1
     - uses: 'docker/setup-qemu-action@v3'
     - uses: 'docker/setup-buildx-action@v3'
     - uses: 'docker/login-action@v3'
@@ -25,25 +24,19 @@ jobs:
       with:
         build-args: |
           PUBLISHER_PRIVATE_KEY=${{ env.PUBLISHER_PRIVATE_KEY }}
-          EMOJICOIN_MODULE_ADDRESS=${{ env.EMOJICOIN_MODULE_ADDRESS }}
         cache-from: 'type=gha'
         cache-to: 'type=gha,mode=max'
         context: '.'
-        file: 'src/docker/aptos-node/Dockerfile'
+        file: 'src/docker/localnet-deployer/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
-        # The emojicoin-node image can only be built for the platform on which
-        # the build is running. This is because the build process requires
-        # running `aptos node run-localnet`, which spawns a new container. This
-        # new container must be able to run the `aptos` binary, which is only
-        # available for the platform on which the build is running.
         platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS }}'
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
     timeout-minutes: 360
-name: 'Build the aptos-node Docker image and push to Dockerhub'
+name: 'Build the localnet-deployer Docker image and push to Dockerhub'
 'on':
-  workflow_dispatch: {}
   push:
     tags:
-    - 'emojicoin-dot-fun-aptos-node*'
+    - 'emojicoin-dot-fun-localnet-deployer*'
+  workflow_dispatch: null
 ...
