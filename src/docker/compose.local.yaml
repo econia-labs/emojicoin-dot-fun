@@ -11,7 +11,7 @@ include:
 # This setup allows us to only have to specify only one compose file.
 - path:
   - 'compose.yaml'
-  - 'localnet-publisher/processor-override.yaml'
+  - 'deployer/processor-override.yaml'
 name: 'emojicoin-dot-fun'
 services:
   localnet:
@@ -41,19 +41,19 @@ services:
         aptos node run-localnet --with-indexer-api --bind-to 0.0.0.0 $$arg
       "
     # yamllint enable rule:indentation
-  localnet-publisher:
+  deployer:
     extra_hosts:
     - 'host.docker.internal:host-gateway'
     build:
       context: '../../'
-      dockerfile: 'src/docker/localnet-publisher/Dockerfile'
+      dockerfile: 'src/docker/deployer/Dockerfile'
       args:
         PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
     environment:
       FORCE_RESTART: '${FORCE_RESTART:-}'
       PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
-    image: 'econialabs/emojicoin-dot-fun-localnet-publisher:latest'
-    container_name: 'localnet-publisher'
+    image: 'econialabs/emojicoin-dot-fun-deployer:latest'
+    container_name: 'deployer'
     depends_on:
       localnet:
         condition: 'service_healthy'

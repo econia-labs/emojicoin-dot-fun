@@ -31,7 +31,7 @@ docker compose -f compose.local.yaml up
 The `compose.local.yaml` file `include`s the `compose.yaml` file and
 overwrites some settings like the order of dependencies for the services.
 
-See `localnet-publisher/processor-override.yaml` and note the order of the
+See `deployer/processor-override.yaml` and note the order of the
 `include:` items in `compose.local.yaml`
 
 ## Running the frontend container
