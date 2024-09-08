@@ -39,7 +39,6 @@ export const isInBondingCurve = (
   if (cpammRealReservesBase && cpammRealReservesQuote) {
     return cpammRealReservesBase > 0n && cpammRealReservesQuote > 0n;
   }
-  // The compiler should stop you from using input data that could ever get here.
   throw new Error("One of the reserves must be defined.");
 };
 

@@ -25,5 +25,6 @@ name: 'Run the TypeScript E2E and unit tests with a local testnet'
   push:
     branches:
     - 'main'
+    - 'production'
   workflow_dispatch: null
 ...
