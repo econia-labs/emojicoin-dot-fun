@@ -36,7 +36,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
     }
     const selfName = nameResolver(account.address);
     setFromAnotherUser(selfName !== message.sender);
-  }, [account, fromAnotherUser, message, nameResolver]);
+  }, [account, message]);
 
   return (
     <motion.div

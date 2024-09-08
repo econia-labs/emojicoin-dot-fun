@@ -10,6 +10,7 @@ import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 import { ECONIA_BLUE } from "theme/colors";
+import Close from "@icons/Close";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
 // TBH, we should probably just fork the library.
@@ -26,11 +27,14 @@ export const search = async (value: string): Promise<SearchResult> => {
   return await SearchIndex.search(value);
 };
 
-export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
+export default function EmojiPicker(
+  props: HTMLAttributes<HTMLDivElement> & { drag: (e: any) => void }
+) {
   const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
   const setChatEmojiData = useEmojiPicker((s) => s.setChatEmojiData);
   const mode = useEmojiPicker((s) => s.mode);
   const onClickOutside = useEmojiPicker((s) => s.onClickOutside);
+  const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
   const host = document.querySelector("em-emoji-picker");
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
 
@@ -215,15 +219,40 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div {...props}>
+      <div
+        {...props}
+        className="relative bg-black"
+      >
+        <div
+          className="absolute z-20 right-0 top-0"
+          style={{
+            borderRight: "15px solid var(--ec-blue)",
+            borderTop: "15px solid var(--ec-blue)",
+            borderBottom: "15px solid transparent",
+            borderLeft: "15px solid transparent",
+            touchAction: "none",
+          }}
+          onPointerDown={props.drag}
+        ></div>
         <Picker
           // TODO: Use this function later instead of the current stuff we have, aka using `onBlur()`.
-          onClickOutside={onClickOutside}
           perLine={8}
           exceptEmojis={[]}
           onEmojiSelect={(v: EmojiSelectorData) => {
             const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
             insertEmojiTextInput([newEmoji]);
+          }}
+        />
+        <Close
+          className="absolute z-20"
+          style={{
+            bottom: "8px",
+            right: "8px",
+          }}
+          color="econiaBlue"
+          height="14px"
+          onClick={() => {
+            setPickerInvisible(true);
           }}
         />
       </div>
