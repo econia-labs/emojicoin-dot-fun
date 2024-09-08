@@ -17,7 +17,7 @@ import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import type JSONTypes from "@sdk/types/json-types";
 import { type DBJsonData } from "@sdk/emojicoin_dot_fun/utils";
 import { type AnyEmojicoinJSONEvent } from "@sdk/types/json-types";
-import { MODULE_ADDRESS, RESOLUTIONS_ARRAY } from "@sdk/const";
+import { MODULE_ADDRESS, PERIOD_DURATIONS } from "@sdk/const";
 import { type MarketStateValueType } from "./event-store";
 import { parseJSON, stringifyJSON } from "utils";
 import { LOCALSTORAGE_EXPIRY_TIME_MS } from "const";
@@ -187,7 +187,7 @@ export const deserializationMap: Record<
 };
 
 export const getLatestBars = (market: MarketStateValueType) => {
-  return RESOLUTIONS_ARRAY.map((res) => ({ ...market[res]!.latestBar, period: res }));
+  return PERIOD_DURATIONS.map((res) => ({ ...market[res]!.latestBar, period: res }));
 };
 
 const shouldKeep = (event: AnyEmojicoinEvent) => {

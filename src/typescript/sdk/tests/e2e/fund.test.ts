@@ -1,4 +1,4 @@
-import { Account, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { Ed25519Account, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { ONE_APT } from "../../src";
 import { getAptosClient } from "../utils";
 
@@ -6,7 +6,7 @@ jest.setTimeout(10000);
 
 describe("tests a simple faucet fund account request", () => {
   const { aptos } = getAptosClient();
-  const account = Account.generate();
+  const account = Ed25519Account.generate();
 
   beforeAll(async () => {
     await aptos.fundAccount({ accountAddress: account.accountAddress, amount: ONE_APT });

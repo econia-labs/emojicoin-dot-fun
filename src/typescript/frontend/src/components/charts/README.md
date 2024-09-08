@@ -48,6 +48,9 @@ most often refers to the `start time` of the `period`, although it can mean
 either side of a period boundary, i.e., the start _or_ the end time for a
 candlestick period.
 
+The `PeriodDuration` enum indicates the actual time of the period in
+microseconds, as specified in the Move smart contract.
+
 ## Datafeed API
 
 The [datafeed API] provides two ways of populating data on the chart.
@@ -119,12 +122,13 @@ store them in state and visually update the latest bar data with the
 This function is created by the datafeed API specifically for each combination
 of a market and a candlestick time frame. We store this function in our
 [EventStore state] in the `EventStore` market ID map, which also has a
-corresponding `resolution` field containing an object that holds the callback
+corresponding `period` field containing an object that holds the callback
 function.
 
 For example, if our `EventStore` encounters a swap event for the market with a
-market ID of `3`, we iterate over all resolutions and check if we should update
-the latest bar and/or invoke the datafeed API callback function.
+market ID of `3`, we iterate over all resolutions (aka period duration types
+and check if we should update the latest bar and/or invoke the datafeed API
+callback function.
 
 Something like this:
 
@@ -136,19 +140,19 @@ set((state) => {
   // ...
 
   // For all periods/resolutions, i.e., 1m, 5m, 15m, 30m, 1h, 4h, 1d.
-  for (const resolution of RESOLUTIONS_ARRAY) {
+  for (const period of PERIOD_DURATIONS) {
     const marketID = event.marketID.toString();
     const market = state.markets.get(marketID);
-    const resolutionData = market[resolution];
-    if (resolutionData) {
+    const periodData = market[period];
+    if (periodData) {
       // Process the data, possibly update or create a new latest bar...
       // ...
 
       // In essence, we eventually do this:
-      if (resolutionData.latestBar && resolutionData.callback) {
+      if (periodData.latestBar && periodData.callback) {
         // Thus, our callback is only invoked if we are currently subscribed
-        // to that specific market ID + resolution combination.
-        resolutionData.callback(resolutionData.latestBar);
+        // to that specific market ID + period combination.
+        periodData.callback(periodData.latestBar);
       }
     }
   }

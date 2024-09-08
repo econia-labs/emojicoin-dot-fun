@@ -4,14 +4,14 @@ import {
   type WriteSetChangeWriteResource,
   type WriteSetChangeWriteTableItem,
 } from "@aptos-labs/ts-sdk";
-import { getTestHelpers } from "../utils";
+import { getPublishHelpers } from "../utils";
 import { STRUCT_STRINGS, SYMBOL_DATA, normalizeHex } from "../../src";
 import EmojiJSONData from "../../src/emoji_data/symbol-emojis.json";
 
 jest.setTimeout(10000);
 
 describe("verification of typescript emoji JSON data", () => {
-  const { aptos, publishPackageResult } = getTestHelpers();
+  const { aptos, publishPackageResult } = getPublishHelpers();
 
   it("checks the on-chain changes in the publish txn to verify the JSON data", async () => {
     const publishResult = publishPackageResult;

@@ -3,8 +3,12 @@ import { type AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 import type JSONTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
-import { normalizeAddress } from "../utils/account-address";
-import { type StateTrigger, toStateTrigger, type EMOJICOIN_DOT_FUN_MODULE_NAME } from "../const";
+import { standardizeAddress } from "../utils/account-address";
+import {
+  type Trigger,
+  type EMOJICOIN_DOT_FUN_MODULE_NAME,
+  fromRawTriggerToContractEnum,
+} from "../const";
 import {
   type AnyEmojicoinJSONEvent,
   isJSONChatEvent,
@@ -144,13 +148,13 @@ export namespace Types {
     period: bigint;
     emitTime: bigint;
     emitMarketNonce: bigint;
-    trigger: StateTrigger;
+    trigger: Trigger;
   };
 
   export type StateMetadata = {
     marketNonce: bigint;
     bumpTime: bigint;
-    trigger: StateTrigger;
+    trigger: Trigger;
   };
 
   export type CumulativeStats = {
@@ -172,7 +176,7 @@ export namespace Types {
 
   export type LastSwap = {
     isSell: boolean;
-    avgExecutionPrice: bigint;
+    avgExecutionPriceQ64: bigint;
     baseVolume: bigint;
     quoteVolume: bigint;
     nonce: bigint;
@@ -192,12 +196,13 @@ export namespace Types {
       netProceeds: bigint;
       baseVolume: bigint;
       quoteVolume: bigint;
-      avgExecutionPrice: bigint;
+      avgExecutionPriceQ64: bigint;
       integratorFee: bigint;
       poolFee: bigint;
       startsInBondingCurve: boolean;
       resultsInStateTransition: boolean;
-      balanceAsFractionOfCirculatingSupply?: number;
+      balanceAsFractionOfCirculatingSupplyBeforeQ64: bigint;
+      balanceAsFractionOfCirculatingSupplyAfterQ64: bigint;
     };
 
   export type ChatEvent = WithMarketID &
@@ -209,7 +214,7 @@ export namespace Types {
       message: string;
       userEmojicoinBalance: bigint;
       circulatingSupply: bigint;
-      balanceAsFractionOfCirculatingSupply: bigint;
+      balanceAsFractionOfCirculatingSupplyQ64: bigint;
     };
 
   export type MarketRegistrationEvent = WithMarketID &
@@ -238,7 +243,7 @@ export namespace Types {
       numChatMessages: bigint;
       startsInBondingCurve: boolean;
       endsInBondingCurve: boolean;
-      tvlPerLPCoinGrowth: bigint;
+      tvlPerLPCoinGrowthQ64: bigint;
     };
 
   export type StateEvent = WithMarketID &
@@ -256,7 +261,7 @@ export namespace Types {
   export type GlobalStateEvent = WithVersionAndGUID & {
     emitTime: bigint;
     registryNonce: bigint;
-    trigger: StateTrigger;
+    trigger: Trigger;
     cumulativeQuoteVolume: bigint;
     totalQuoteLocked: bigint;
     totalValueLocked: bigint;
@@ -277,8 +282,8 @@ export namespace Types {
       quoteAmount: bigint;
       lpCoinAmount: bigint;
       liquidityProvided: boolean;
-      proRataBaseDonationClaimAmount: bigint;
-      proRataQuoteDonationClaimAmount: bigint;
+      baseDonationClaimAmount: bigint;
+      quoteDonationClaimAmount: bigint;
     };
 
   // One row in the `inbox_latest_state` table.
@@ -309,7 +314,7 @@ export namespace Types {
     cpammRealReservesBase: number;
     cpammRealReservesQuote: number;
     lpCoinSupply: number;
-    avgExecutionPrice: number;
+    avgExecutionPriceQ64: number;
     emojiBytes: `0x${string}`;
     allTimeVolume: number;
     dailyVolume: number;
@@ -323,7 +328,7 @@ export namespace Types {
 }
 
 export const toExtendRef = (data: JSONTypes.ExtendRef): Types.ExtendRef => ({
-  self: data.self,
+  self: standardizeAddress(data.self),
 });
 
 export const toSequenceInfo = (data: JSONTypes.SequenceInfo): Types.SequenceInfo => ({
@@ -364,13 +369,13 @@ export const toPeriodicStateTracker = (
 });
 
 export const toRegistryAddress = (data: JSONTypes.RegistryAddress): Types.RegistryAddress => ({
-  registryAddress: normalizeAddress(data.registry_address),
+  registryAddress: standardizeAddress(data.registry_address),
 });
 
 const strToBigInt = (data: string): bigint => BigInt(data);
 
 export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView => ({
-  registryAddress: normalizeAddress(data.registry_address),
+  registryAddress: standardizeAddress(data.registry_address),
   nonce: fromAggregatorSnapshot(data.nonce, strToBigInt),
   lastBumpTime: BigInt(data.last_bump_time),
   numMarkets: BigInt(data.n_markets),
@@ -386,7 +391,7 @@ export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView
 
 export const toMarketMetadata = (data: JSONTypes.MarketMetadata): Types.MarketMetadata => ({
   marketID: BigInt(data.market_id),
-  marketAddress: normalizeAddress(data.market_address),
+  marketAddress: standardizeAddress(data.market_address),
   emojiBytes: hexToBytes(
     data.emoji_bytes.startsWith("0x") ? data.emoji_bytes.slice(2) : data.emoji_bytes
   ),
@@ -413,7 +418,7 @@ export const toInstantaneousStats = (
 
 export const toLastSwap = (data: JSONTypes.LastSwap): Types.LastSwap => ({
   isSell: data.is_sell,
-  avgExecutionPrice: BigInt(data.avg_execution_price_q64),
+  avgExecutionPriceQ64: BigInt(data.avg_execution_price_q64),
   baseVolume: BigInt(data.base_volume),
   quoteVolume: BigInt(data.quote_volume),
   nonce: BigInt(data.nonce),
@@ -458,13 +463,13 @@ export const toPeriodicStateMetadata = (
   period: BigInt(data.period),
   emitTime: BigInt(data.emit_time),
   emitMarketNonce: BigInt(data.emit_market_nonce),
-  trigger: toStateTrigger(data.trigger),
+  trigger: fromRawTriggerToContractEnum(data.trigger),
 });
 
 export const toStateMetadata = (data: JSONTypes.StateMetadata): Types.StateMetadata => ({
   marketNonce: BigInt(data.market_nonce),
   bumpTime: BigInt(data.bump_time),
-  trigger: toStateTrigger(data.trigger),
+  trigger: fromRawTriggerToContractEnum(data.trigger),
 });
 
 export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.SwapEvent => ({
@@ -472,21 +477,26 @@ export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.S
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
-  swapper: data.swapper,
+  swapper: standardizeAddress(data.swapper),
   inputAmount: BigInt(data.input_amount),
   isSell: data.is_sell,
-  integrator: data.integrator,
+  integrator: standardizeAddress(data.integrator),
   integratorFeeRateBPs: Number(data.integrator_fee_rate_bps),
   netProceeds: BigInt(data.net_proceeds),
   baseVolume: BigInt(data.base_volume),
   quoteVolume: BigInt(data.quote_volume),
-  avgExecutionPrice: BigInt(data.avg_execution_price_q64),
+  avgExecutionPriceQ64: BigInt(data.avg_execution_price_q64),
   integratorFee: BigInt(data.integrator_fee),
   poolFee: BigInt(data.pool_fee),
   startsInBondingCurve: data.starts_in_bonding_curve,
   resultsInStateTransition: data.results_in_state_transition,
+  balanceAsFractionOfCirculatingSupplyBeforeQ64: BigInt(
+    data.balance_as_fraction_of_circulating_supply_before_q64
+  ),
+  balanceAsFractionOfCirculatingSupplyAfterQ64: BigInt(
+    data.balance_as_fraction_of_circulating_supply_after_q64
+  ),
   guid: `Swap::${data.market_id}::${data.market_nonce}`,
-  balanceAsFractionOfCirculatingSupply: data.balance_as_fraction_of_circulating_supply,
 });
 
 export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.ChatEvent => ({
@@ -494,11 +504,13 @@ export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.C
   marketMetadata: toMarketMetadata(data.market_metadata),
   emitTime: BigInt(data.emit_time),
   emitMarketNonce: BigInt(data.emit_market_nonce),
-  user: normalizeAddress(data.user),
+  user: standardizeAddress(data.user),
   message: data.message,
   userEmojicoinBalance: BigInt(data.user_emojicoin_balance),
   circulatingSupply: BigInt(data.circulating_supply),
-  balanceAsFractionOfCirculatingSupply: BigInt(data.balance_as_fraction_of_circulating_supply_q64),
+  balanceAsFractionOfCirculatingSupplyQ64: BigInt(
+    data.balance_as_fraction_of_circulating_supply_q64
+  ),
   guid: `Chat::${data.market_metadata.market_id}::${data.emit_market_nonce}`,
   marketID: BigInt(data.market_metadata.market_id),
 });
@@ -510,8 +522,8 @@ export const toMarketRegistrationEvent = (
   version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   time: BigInt(data.time),
-  registrant: normalizeAddress(data.registrant),
-  integrator: normalizeAddress(data.integrator),
+  registrant: standardizeAddress(data.registrant),
+  integrator: standardizeAddress(data.integrator),
   integratorFee: BigInt(data.integrator_fee),
   guid: `MarketRegistration::${data.market_metadata.market_id}`,
   marketID: BigInt(data.market_metadata.market_id),
@@ -545,7 +557,7 @@ export const toPeriodicStateEvent = (
   numChatMessages: BigInt(data.n_chat_messages),
   startsInBondingCurve: data.starts_in_bonding_curve,
   endsInBondingCurve: data.ends_in_bonding_curve,
-  tvlPerLPCoinGrowth: BigInt(data.tvl_per_lp_coin_growth_q64),
+  tvlPerLPCoinGrowthQ64: BigInt(data.tvl_per_lp_coin_growth_q64),
   guid: (`PeriodicState::${data.market_metadata.market_id}::` +
     `${data.periodic_state_metadata.period}::` +
     `${data.periodic_state_metadata.emit_market_nonce}`) as `PeriodicState::${string}`,
@@ -573,7 +585,7 @@ export const toGlobalStateEvent = (
   version,
   emitTime: BigInt(data.emit_time),
   registryNonce: fromAggregatorSnapshot(data.registry_nonce, strToBigInt),
-  trigger: toStateTrigger(data.trigger),
+  trigger: fromRawTriggerToContractEnum(data.trigger),
   cumulativeQuoteVolume: fromAggregatorSnapshot(data.cumulative_quote_volume, strToBigInt),
   totalQuoteLocked: fromAggregatorSnapshot(data.total_quote_locked, strToBigInt),
   totalValueLocked: fromAggregatorSnapshot(data.total_value_locked, strToBigInt),
@@ -593,13 +605,13 @@ export const toLiquidityEvent = (
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
   marketNonce: BigInt(data.market_nonce),
-  provider: data.provider,
+  provider: standardizeAddress(data.provider),
   baseAmount: BigInt(data.base_amount),
   quoteAmount: BigInt(data.quote_amount),
   lpCoinAmount: BigInt(data.lp_coin_amount),
   liquidityProvided: data.liquidity_provided,
-  proRataBaseDonationClaimAmount: BigInt(data.pro_rata_base_donation_claim_amount),
-  proRataQuoteDonationClaimAmount: BigInt(data.pro_rata_quote_donation_claim_amount),
+  baseDonationClaimAmount: BigInt(data.base_donation_claim_amount),
+  quoteDonationClaimAmount: BigInt(data.quote_donation_claim_amount),
   guid: `Liquidity::${data.market_id}::${data.market_nonce}`,
 });
 
@@ -620,7 +632,7 @@ export const toPeriodicStateView = (
 
 export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDataView => ({
   marketID: Number(data.market_id),
-  marketAddress: normalizeAddress(data.market_address),
+  marketAddress: standardizeAddress(data.market_address),
   marketCap: Number(data.market_cap),
   bumpTime: Number(data.bump_time),
   version: Number(data.transaction_version),
@@ -631,7 +643,7 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
   cpammRealReservesBase: Number(data.cpamm_real_reserves_base),
   cpammRealReservesQuote: Number(data.cpamm_real_reserves_quote),
   lpCoinSupply: Number(data.lp_coin_supply),
-  avgExecutionPrice: Number(data.last_swap_avg_execution_price_q64),
+  avgExecutionPriceQ64: Number(data.last_swap_avg_execution_price_q64),
   allTimeVolume: Number(data.all_time_volume),
   dailyVolume: Number(data.daily_volume),
   emojiBytes: data.emoji_bytes,
@@ -639,7 +651,7 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
 });
 
 export const toRegistrantGracePeriodFlag = (data: JSONTypes.RegistrantGracePeriodFlag) => ({
-  marketRegistrant: normalizeAddress(data.market_registrant),
+  marketRegistrant: standardizeAddress(data.market_registrant),
   marketRegistrationTime: BigInt(data.market_registration_time),
 });
 

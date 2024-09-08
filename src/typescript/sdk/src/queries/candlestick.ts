@@ -1,6 +1,6 @@
 "use server";
 
-import { type CandlestickResolution } from "../const";
+import { type PeriodDuration } from "../const";
 import { INBOX_EVENTS_TABLE, LIMIT, ORDER_BY, PERIODIC_STATE_VIEW } from "./const";
 import { type Types, toPeriodicStateView, type JSONTypes } from "../types";
 import { type AggregateQueryResultsArgs, aggregateQueryResults } from "./query-helper";
@@ -9,7 +9,7 @@ import { type ValueOf } from "../utils/utility-types";
 
 export type SharedCandlestickQueryArgs = {
   marketID: bigint | number | string;
-  resolution: CandlestickResolution;
+  period: PeriodDuration;
   limit?: number;
 };
 
@@ -22,7 +22,7 @@ export type CandlestickByTimeRangeQueryArgs = SharedCandlestickQueryArgs & {
 
 export const fetchCandlesticks = async ({
   marketID,
-  resolution,
+  period,
   start,
   end,
   offset = 0,
@@ -37,7 +37,7 @@ export const fetchCandlesticks = async ({
     .from(PERIODIC_STATE_VIEW)
     .select("*")
     .eq("market_id", Number(marketID))
-    .eq("period", resolution)
+    .eq("period", period)
     .gte("start_time", startMicroseconds)
     .range(offset, offset + limit - 1)
     .order("start_time", orderBy)
@@ -61,10 +61,10 @@ export const fetchCandlesticks = async ({
 };
 
 export const paginateCandlesticks = async (
-  args: Omit<SharedCandlestickQueryArgs, "resolution"> &
-    Omit<AggregateQueryResultsArgs, "query"> & { resolution?: CandlestickResolution }
+  args: Omit<SharedCandlestickQueryArgs, "period"> &
+    Omit<AggregateQueryResultsArgs, "query"> & { period?: PeriodDuration }
 ) => {
-  const { marketID, resolution } = args;
+  const { marketID, period } = args;
   let query = postgrest
     .from(INBOX_EVENTS_TABLE)
     .select("*")
@@ -72,7 +72,7 @@ export const paginateCandlesticks = async (
     .eq("data->market_metadata->>market_id", marketID)
     .limit(Math.min(LIMIT, args.maxTotalRows ?? Infinity))
     .order("transaction_version", ORDER_BY.DESC);
-  query = resolution ? query.eq("data->periodic_state_metadata->>period", resolution) : query;
+  query = period ? query.eq("data->periodic_state_metadata->>period", period) : query;
 
   const { data, errors } = await aggregateQueryResults<JSONTypes.PeriodicStateEvent>({
     query,

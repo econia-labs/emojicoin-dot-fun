@@ -1,8 +1,14 @@
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import { type CandlestickResolution, toCandlestickResolution } from "../const";
+import {
+  type PeriodDuration,
+  type Period,
+  periodEnumToPeriodDuration,
+  toPeriodDuration,
+} from "../const";
 import { normalizeHex } from "./hex";
 import {
+  type AnyNumberString,
   type Types,
   isAnyEmojiCoinEvent,
   isPeriodicStateEvent,
@@ -84,27 +90,27 @@ export function getTime(unitOfTime: UnitOfTime) {
  * ```
  * // A swap event that occurred at exactly 1 minute after the epoch event.
  * const swap = { ...someSwapEvent, time: 1n * 60n * 1000n * 1000n };
- * const periodStart = getPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * const periodStart = getPeriodStartTime(swap, PeriodDuration.PERIOD_1M);
  * // `periodStart` is equal to 1 minute in microseconds, i.e., 60 * 1000 * 1000.
  *
  * // If the time is one microsecond before...
  * swap.time -= 1n;
- * const periodStart = getPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * const periodStart = getPeriodStartTime(swap, PeriodDuration.PERIOD_1M);
  * // `periodStart` is equal to 0 minutes in microseconds.
  *
  * // One minute later...
  * swap.time += 60n * 1000n * 1000n;
- * const periodStart = getPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * const periodStart = getPeriodStartTime(swap, PeriodDuration.PERIOD_1M);
  * // `periodStart` is equal to 1 minute in microseconds.
  *
  * swap.time += 1n;
- * const periodStart = getPeriodStartTime(swap, CandlestickResolution.PERIOD_1M);
+ * const periodStart = getPeriodStartTime(swap, PeriodDuration.PERIOD_1M);
  * // `periodStart` is equal to 2 minutes in microseconds.
  * ```
  */
 export function getPeriodStartTime(
   event: Types.SwapEvent | Types.StateEvent | Types.PeriodicStateEvent | Types.PeriodicStateView,
-  periodIn: CandlestickResolution | bigint | number
+  periodIn: PeriodDuration | bigint | number
 ) {
   // All CandlestickPeriods are in microseconds.
   let time: bigint;
@@ -128,9 +134,9 @@ export function getPeriodStartTime(
     throw new Error("Invalid event type.");
   }
 
-  let period: CandlestickResolution;
+  let period: PeriodDuration;
   if (typeof periodIn === "bigint" || typeof periodIn === "number") {
-    const tryPeriod = toCandlestickResolution(periodIn);
+    const tryPeriod = toPeriodDuration(periodIn);
     if (!tryPeriod) {
       throw new Error("Invalid period passed in to period boundary calculation.");
     }
@@ -143,7 +149,13 @@ export function getPeriodStartTime(
   return boundary;
 }
 
-export function getPeriodStartTimeFromTime(microseconds: bigint, period: CandlestickResolution) {
+/**
+ * Calculate the start of a period based on a given input time and period.
+ * @param microseconds the time in microseconds.
+ * @param period the period to calculate the start of.
+ * @returns the start of the period in microseconds.
+ */
+export function getPeriodStartTimeFromTime(microseconds: AnyNumberString, period: PeriodDuration) {
   const time = BigInt(microseconds);
   // prettier-ignore
   const res = Big(time.toString())
@@ -151,6 +163,18 @@ export function getPeriodStartTimeFromTime(microseconds: bigint, period: Candles
     .round(0, Big.roundDown)
     .mul(period);
   return BigInt(res.toString());
+}
+
+export function getPeriodBoundary(microseconds: AnyNumberString, period: Period): bigint {
+  const periodDuration = periodEnumToPeriodDuration(period);
+  return getPeriodStartTimeFromTime(microseconds, periodDuration);
+}
+
+export const dateFromMicroseconds = (microseconds: bigint) =>
+  new Date(Number(microseconds / 1000n));
+
+export function getPeriodBoundaryAsDate(microseconds: AnyNumberString, period: Period): Date {
+  return dateFromMicroseconds(getPeriodBoundary(microseconds, period));
 }
 
 export const ADDRESS_FULL_CHAR_LENGTH = 64;
@@ -231,6 +255,17 @@ export class LazyPromise<T> {
   }
 }
 
-export function sum(arr: number[]) {
-  return arr.reduce((acc, val) => acc + val, 0);
+export function sum<T extends number | bigint>(array: T[]): T {
+  if (typeof array[0] === "bigint") {
+    return (array as bigint[]).reduce((acc, val) => acc + val, 0n) as T;
+  }
+  return (array as number[]).reduce((acc, val) => acc + val, 0) as T;
+}
+
+export function sumByKey<T, K extends keyof T>(array: T[], key: K): T[K] {
+  const arr = array.map((x) => x[key]);
+  if (typeof arr[0] === "bigint") {
+    return sum(arr as Array<bigint>) as T[K];
+  }
+  return sum(arr as Array<number>) as T[K];
 }
