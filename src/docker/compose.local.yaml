@@ -17,7 +17,7 @@ services:
   localnet:
     network_mode: 'host'
     image: 'econialabs/aptos-cli:4.1.0'
-    container_name: 'emojicoin-dot-fun-localnet'
+    container_name: 'localnet'
     environment:
       FORCE_RESTART: '${FORCE_RESTART:-}'
     healthcheck:
@@ -53,7 +53,7 @@ services:
       FORCE_RESTART: '${FORCE_RESTART:-}'
       PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
     image: 'econialabs/emojicoin-dot-fun-localnet-publisher:latest'
-    container_name: 'emojicoin-dot-fun-localnet-publisher'
+    container_name: 'localnet-publisher'
     depends_on:
       localnet:
         condition: 'service_healthy'
