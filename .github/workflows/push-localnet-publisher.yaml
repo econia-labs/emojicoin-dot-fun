@@ -11,9 +11,9 @@ jobs:
     - id: 'metadata'
       uses: 'docker/metadata-action@v5'
       with:
-        images: 'econialabs/emojicoin-dot-fun-localnet-deployer'
+        images: 'econialabs/emojicoin-dot-fun-localnet-publisher'
         tags: |
-          type=match,pattern=emojicoin-dot-fun-localnet-deployer-v(.*),group=1
+          type=match,pattern=emojicoin-dot-fun-localnet-publisher-v(.*),group=1
     - uses: 'docker/setup-qemu-action@v3'
     - uses: 'docker/setup-buildx-action@v3'
     - uses: 'docker/login-action@v3'
@@ -27,16 +27,16 @@ jobs:
         cache-from: 'type=gha'
         cache-to: 'type=gha,mode=max'
         context: '.'
-        file: 'src/docker/localnet-deployer/Dockerfile'
+        file: 'src/docker/localnet-publisher/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
         platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS }}'
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
     timeout-minutes: 360
-name: 'Build the localnet-deployer Docker image and push to Dockerhub'
+name: 'Build the localnet-publisher Docker image and push to Dockerhub'
 'on':
   push:
     tags:
-    - 'emojicoin-dot-fun-localnet-deployer*'
+    - 'emojicoin-dot-fun-localnet-publisher*'
   workflow_dispatch: null
 ...
