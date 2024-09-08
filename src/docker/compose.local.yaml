@@ -18,12 +18,6 @@ services:
     image: 'econialabs/aptos-cli:4.1.0'
     environment:
       FORCE_RESTART: '${FORCE_RESTART:-}'
-    ports:
-    - '50051:50051'
-    - '8070:8070'
-    - '8090:8090'
-    - '8080:8080'
-    - '8081:8081'
     healthcheck:
       test:
       - 'CMD'
