@@ -1,16 +1,23 @@
-# yamllint disable rule:empty-lines rule:key-ordering rule:brackets
+# yamllint disable rule:empty-lines rule:key-ordering
+# cspell:word localnet
 
 # Services in this file are EXCLUSIVELY for running a local testnet.
+# Note the presence of any value in the environment variable
+# `FORCE_RESTART` will force the local testnet to restart. This will
+# *NOT* remove or reset the emojicoin indexer processor volumes. To
+# do this, run the helper script in `src/docker/utils/helper.sh`.
 ---
 include:
-  # This setup allows us to only have to specify only one compose file.
-  - path:
-    - 'compose.yaml'
-    - 'processor-override.yaml'
+# This setup allows us to only have to specify only one compose file.
+- path:
+  - 'compose.yaml'
+  - 'localnet-publisher/processor-override.yaml'
 services:
-  localnet-node:
+  localnet:
     network_mode: 'host'
     image: 'econialabs/aptos-cli:4.1.0'
+    environment:
+      FORCE_RESTART: '${FORCE_RESTART:-}'
     ports:
     - '50051:50051'
     - '8070:8070'
@@ -18,34 +25,39 @@ services:
     - '8080:8080'
     - '8081:8081'
     healthcheck:
-      test: [ 'CMD', 'sh/healthcheck.sh' ]
+      test:
+      - 'CMD'
+      - 'sh/healthcheck.sh'
       interval: '5s'
       timeout: '5s'
       retries: 10
       start_period: '60s'
     volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
-    entrypoint: [
-      'aptos',
-      'node',
-      'run-localnet',
-      '--with-indexer-api',
-      '--force-restart',
-      '--bind-to',
-      '0.0.0.0'
-    ]
-  localnet-deployer:
+    # yamllint disable rule:indentation
+    entrypoint: >
+      sh -c
+      "
+        arg=''
+        if [ -n $$FORCE_RESTART ]; then
+          arg='--force-restart'
+        fi
+        aptos node run-localnet --with-indexer-api --bind-to 0.0.0.0 $$arg
+      "
+    # yamllint enable rule:indentation
+  localnet-publisher:
     extra_hosts:
     - 'host.docker.internal:host-gateway'
     build:
       context: '../../'
-      dockerfile: 'src/docker/localnet-deployer/Dockerfile'
+      dockerfile: 'src/docker/localnet-publisher/Dockerfile'
       args:
         PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
     environment:
+      FORCE_RESTART: '${FORCE_RESTART:-}'
       PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
     image: 'xbtmatt/emojicoin-dot-fun-aptos-node:latest'
     depends_on:
-      localnet-node:
+      localnet:
         condition: 'service_healthy'
 ...

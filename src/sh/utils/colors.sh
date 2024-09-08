@@ -16,11 +16,13 @@ style() {
 # Color definitions
 BOLD_TEXT=$(style "1m")
 HIGHLIGHT_COLOR=$(style "38;5;221m")
-INFO_COLOR=$(style "38;5;117m")
+INFO_COLOR=$(style "38;5;115m")
 ERROR_COLOR=$(style "38;5;009m")
 WARNING_COLOR=$(style "38;5;172m")
 HEADER_COLOR=$(style "1;32m")
+DEBUG_COLOR=$(style "38;5;019m")
 GRAY_TEXT=$(style "0;37m")
+FADED_GRAY_TEXT=$(style "38;5;238m")
 NO_STYLES=$(style "0m")
 
 # When the NO_COLOR env variable is set, it means the user prefers not to see
@@ -32,22 +34,26 @@ if [ -n "$NO_COLOR" ]; then
 fi
 
 log_info() {
-	echo -e "${BOLD_TEXT}${INFO_COLOR}[INFO]${NO_STYLES} $1${NO_STYLES}"
+	echo -e "${BOLD_TEXT}${INFO_COLOR}[INFO]${GRAY_TEXT} $*${NO_STYLES}"
 }
 
 log_warning() {
-	echo -e "${BOLD_TEXT}${WARNING_COLOR}[WARNING]${NO_STYLES} $1${NO_STYLES}"
+	echo -e "${BOLD_TEXT}${WARNING_COLOR}[WARNING]${NO_STYLES} $*${NO_STYLES}"
 }
 
 log_error() {
-	echo -e "${BOLD_TEXT}${ERROR_COLOR}[ERROR]${NO_STYLES} $1${NO_STYLES}"
+	echo -e "${BOLD_TEXT}${ERROR_COLOR}[ERROR]${NO_STYLES} $*${NO_STYLES}"
+}
+
+log_debug() {
+	echo -e "${BOLD_TEXT}${DEBUG_COLOR}[DEBUG]${FADED_GRAY_TEXT} $*${NO_STYLES}"
 }
 
 # Note this won't work if you nest it inside another function that styles text.
 # To use it in a `log_info`, you'd have to do this:
 #  log_info "Here's something cool: $(highlight_text 'this is highlighted.')"
 highlight_text() {
-	echo -e "${HIGHLIGHT_COLOR}$1${NO_STYLES}"
+	echo -e "${HIGHLIGHT_COLOR}$*${NO_STYLES}"
 }
 
 # Function to print header begin with padding.
