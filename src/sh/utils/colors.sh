@@ -56,6 +56,14 @@ highlight_text() {
 	echo -e "${HIGHLIGHT_COLOR}$*${NO_STYLES}"
 }
 
+dim_text() {
+	echo -e "${GRAY_TEXT}$*${NO_STYLES}"
+}
+
+very_dim_text() {
+	echo -e "${GRAY_TEXT}$*${NO_STYLES}"
+}
+
 # Function to print header begin with padding.
 log_header_begin() {
 	local text="$1"

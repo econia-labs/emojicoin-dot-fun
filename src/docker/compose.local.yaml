@@ -2,45 +2,34 @@
 # cspell:word localnet
 
 # Services in this file are EXCLUSIVELY for running a local testnet.
-# Note the presence of any value in the environment variable
-# `FORCE_RESTART` will force the local testnet to restart. This will
-# *NOT* remove or reset the emojicoin indexer processor volumes. To
-# do this, run the helper script in `src/docker/utils/helper.sh`.
 ---
 include:
 # This setup allows us to only have to specify only one compose file.
 - path:
   - 'compose.yaml'
-  - 'deployer/processor-override.yaml'
+  - 'processor.overrides.yaml'
 name: 'emojicoin-dot-fun'
 services:
   localnet:
     network_mode: 'host'
-    image: 'econialabs/aptos-cli:4.1.0'
     container_name: 'localnet'
-    environment:
-      FORCE_RESTART: '${FORCE_RESTART:-}'
+    build:
+      context: '../../'
+      dockerfile: 'src/docker/localnet/Dockerfile'
     healthcheck:
       test:
       - 'CMD'
       - 'sh/healthcheck.sh'
       interval: '5s'
       timeout: '5s'
-      retries: 10
-      start_period: '60s'
+      retries: 5
+      start_period: '30s'
+    entrypoint:
+      - /bin/bash
+      - /app/sh/run-localnet.sh
     volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
-    # yamllint disable rule:indentation
-    entrypoint: >
-      sh -c
-      "
-        arg=''
-        if [ -n $$FORCE_RESTART ]; then
-          arg='--force-restart'
-        fi
-        aptos node run-localnet --with-indexer-api --bind-to 0.0.0.0 $$arg
-      "
-    # yamllint enable rule:indentation
+    - './localnet/.aptos/testnet:/app/.aptos/testnet'
   deployer:
     extra_hosts:
     - 'host.docker.internal:host-gateway'
@@ -50,7 +39,6 @@ services:
       args:
         PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
     environment:
-      FORCE_RESTART: '${FORCE_RESTART:-}'
       PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
     image: 'econialabs/emojicoin-dot-fun-deployer:latest'
     container_name: 'deployer'
