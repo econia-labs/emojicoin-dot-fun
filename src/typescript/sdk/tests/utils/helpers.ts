@@ -6,7 +6,9 @@ import { getAptosClient } from "./aptos-client";
 import { type TestHelpers } from "./types";
 
 export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/sdk/tests");
-export const PK_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", ".pk"));
+export const PUBLISHER_PRIVATE_KEY_PATH = path.resolve(
+  path.join(TS_UNIT_TEST_DIR, ".tmp", ".publisher_private_key")
+);
 export const PUBLISH_RES_PATH = path.resolve(
   path.join(TS_UNIT_TEST_DIR, ".tmp", ".publish_result")
 );
@@ -24,9 +26,9 @@ export const PUBLISH_RES_PATH = path.resolve(
 export function getTestHelpers(): TestHelpers {
   const { aptos } = getAptosClient();
 
-  const pk = fs.readFileSync(PK_PATH).toString();
+  const privateKeyString = fs.readFileSync(PUBLISHER_PRIVATE_KEY_PATH).toString();
   const publisher = Account.fromPrivateKey({
-    privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
+    privateKey: new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array()),
   });
   const publishPackageResult = JSON.parse(fs.readFileSync(PUBLISH_RES_PATH).toString());
 
