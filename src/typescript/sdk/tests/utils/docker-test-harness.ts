@@ -1,4 +1,5 @@
 // eslint-disable no-await-in-loop
+// cspell:word localnet
 
 import { exec, spawn } from "child_process";
 import path from "path";
@@ -11,12 +12,13 @@ const execPromise = promisify(exec);
 type ContainerName =
   | "local-testnet-indexer-api"
   | "local-testnet-postgres"
-  | "docker-aptos-node-1"
-  | "docker-broker-1"
-  | "docker-frontend-1"
-  | "docker-processor-1"
-  | "docker-postgres-1"
-  | "docker-postgrest-1";
+  | "broker"
+  | "deployer"
+  | "frontend"
+  | "localnet"
+  | "processor"
+  | "postgres"
+  | "postgrest";
 
 interface ContainerStatus {
   isRunning: boolean;
@@ -52,6 +54,10 @@ export class DockerTestHarness {
     this.removeContainersOnStart = removeContainersOnStart;
   }
 
+  static down() {
+    return execPromise(`bash ${TEST_HARNESS_PATH} --remove --local`);
+  }
+
   /**
    * Removes all related processes.
    */
@@ -60,15 +66,14 @@ export class DockerTestHarness {
   }
 
   /**
-   * Runs a local testnet, processor/publisher, broker, and possibly frontend app.
+   * Calls the Docker helper script to start the containers.
    *
-   * Waits for all processes to be up. Note that the frontend app is optional.
+   * Waits for the `deployer` container to be up and running + healthy.
    *
-   * The order is `local testnet => processor/publisher => broker => frontend app`.
-   *
-   * If any of the processes are already up, this returns and does not start any new processes.
+   * If the processes are already up, this returns and does not start any new processes.
    */
   async run() {
+    await DockerTestHarness.remove();
     await this.start();
     await this.waitUntilProcessIsUp();
   }
