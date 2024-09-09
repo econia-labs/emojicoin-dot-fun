@@ -7,7 +7,8 @@
 # issues can arise on Windows when binding to 0.0.0.0.
 # See: https://github.com/aptos-labs/aptos-core/commit/d8eef35
 
-aptos node run-localnet \
+# Reasoning behind using `exec`: https://stackoverflow.com/a/68578067/2142219
+exec aptos node run-localnet \
 	--assume-yes \
 	--with-indexer-api \
 	--bind-to 0.0.0.0

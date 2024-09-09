@@ -79,9 +79,8 @@ fund_test_accounts() {
 	done
 }
 
-# Run the initialization steps if the contract doesn't exist or if the user
-# forces a restart.
-if [ -n "$FORCE_RESTART" ] || ! already_published; then
+# Run the initialization steps if the contract doesn't exist.
+if ! already_published; then
 	log_info "Funding the publisher and publishing the contract."
 	fund_and_publish
 	fund_test_accounts

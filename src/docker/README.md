@@ -65,4 +65,22 @@ cd src/docker/utils
 ./prune.sh --reset-localnet
 ```
 
+### Why not just pass `--force-restart`?
+
+The CLI simply uses a directory for all localnet test data. By default it's
+located at `~/.aptos/testnet`. Since it's not a mounted volume, it is ephemeral
+and will be removed on each container restart. This is very unintuitive behavior
+that results in corrupt indexer data each time you restart the `localnet`
+container unless you explicitly prune the database volumes.
+
+To fix this, the data directory in the container is created as a bind-mount to
+the host's `localnet/.aptos` folder, making the data persist between container
+restarts.
+
+However, if you try to force restart the node in its entrypoint command with
+`--force-restart`, you'll get a `Device or resource busy` error. Since
+there's no reason we need to run `--force-restart` at runtime, the best way to
+handle a restart is by removing the localnet test data directory prior to each
+run as well as pruning all the related volumes, which is what [prune.sh] does.
+
 [prune.sh]: ./utils/prune.sh
