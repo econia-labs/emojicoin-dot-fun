@@ -250,8 +250,10 @@ export const EmojiPickerWithInput = ({
           <motion.button
             dragControls={ctrls}
             drag={true}
+            dragTransition={{power: 0.05, timeConstant: 100}}
             dragListener={false}
             dragConstraints={useRef(document.body)}
+            whileDrag={{scale: 1.1}}
             animate={nativePicker || pickerInvisible ? "hidden" : "visible"}
             variants={variants}
             initial={{

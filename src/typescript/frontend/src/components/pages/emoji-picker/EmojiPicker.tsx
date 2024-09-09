@@ -10,7 +10,7 @@ import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 import { ECONIA_BLUE } from "theme/colors";
-import Close from "@icons/Close";
+import Minimize from "@icons/Minimize";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
 // TBH, we should probably just fork the library.
@@ -243,18 +243,19 @@ export default function EmojiPicker(
             insertEmojiTextInput([newEmoji]);
           }}
         />
-        <Close
+        <div
           className="absolute z-20"
           style={{
-            bottom: "8px",
+            bottom: "6px",
             right: "8px",
           }}
-          color="econiaBlue"
-          height="14px"
           onClick={() => {
             setPickerInvisible(true);
-          }}
-        />
+          }}>
+          <Minimize
+            color="econiaBlue"
+          />
+        </div>
       </div>
     </Suspense>
   );
