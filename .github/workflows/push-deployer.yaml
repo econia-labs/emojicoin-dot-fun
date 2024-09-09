@@ -1,4 +1,7 @@
 # cspell:word localnet
+# Pushes the latest localnet deployer image to Dockerhub. This image handles
+# the initialization of the emojicoin contract and test accounts for local
+# feature/e2e tests and e2e tests in CI.
 ---
 env:
   PUBLISHER_PRIVATE_KEY: >-
@@ -38,5 +41,4 @@ name: 'Build the deployer Docker image and push to Dockerhub'
   push:
     tags:
     - 'emojicoin-dot-fun-deployer*'
-  workflow_dispatch: null
 ...
