@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 import {
-  getPublisherPKForTest,
-  PK_PATH,
+  getTestPublisherPrivateKey,
+  PUBLISHER_PRIVATE_KEY_PATH,
   PUBLISH_RES_PATH,
 } from "./utils";
 import { DockerTestHarness } from "./utils/docker-test-harness";
@@ -19,12 +19,12 @@ export default async function preTest() {
   // --------------------------------------------------------------------------------------
   //                        Find the publish transaction on-chain.
   // --------------------------------------------------------------------------------------
-  const pk = getPublisherPKForTest();
-  const publishTransaction = await getPublishTransactionFromIndexer(pk);
+  const privateKeyString = getTestPublisherPrivateKey();
+  const publishTransaction = await getPublishTransactionFromIndexer(privateKeyString);
 
-  fs.mkdirSync(path.dirname(PK_PATH), { recursive: true });
+  fs.mkdirSync(path.dirname(PUBLISHER_PRIVATE_KEY_PATH), { recursive: true });
   fs.mkdirSync(path.dirname(PUBLISH_RES_PATH), { recursive: true });
-  fs.writeFileSync(PK_PATH, pk);
+  fs.writeFileSync(PUBLISHER_PRIVATE_KEY_PATH, privateKeyString);
 
   const json = JSON.stringify(publishTransaction, null, 2);
   fs.writeFileSync(PUBLISH_RES_PATH, json);

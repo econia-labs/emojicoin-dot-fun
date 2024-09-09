@@ -2,7 +2,7 @@
 import { Account, AccountAddress, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
 import { VERCEL } from "../../src/const";
 
-export const getTestPublisherPrivateKey = async () => {
+export const getTestPublisherPrivateKey = () => {
   if (VERCEL) {
     throw new Error("This function should not be called in a Vercel deployment.");
   }
