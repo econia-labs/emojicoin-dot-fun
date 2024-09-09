@@ -56,12 +56,16 @@ highlight_text() {
 	echo -e "${HIGHLIGHT_COLOR}$*${NO_STYLES}"
 }
 
+debug_text() {
+	echo -e "${DEBUG_COLOR}$*${NO_STYLES}"
+}
+
 dim_text() {
 	echo -e "${GRAY_TEXT}$*${NO_STYLES}"
 }
 
 very_dim_text() {
-	echo -e "${GRAY_TEXT}$*${NO_STYLES}"
+	echo -e "${FADED_GRAY_TEXT}$*${NO_STYLES}"
 }
 
 # Function to print header begin with padding.

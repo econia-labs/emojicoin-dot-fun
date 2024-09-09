@@ -19,13 +19,13 @@ set -e
 
 # `-e` flag tells `jq` to exit with a status code matching the boolean
 # expression. If the expression is true, the status code is 0, otherwise 1.
-curl -s http://localhost:8070/ | jq -e '.not_ready | length == 0' > /dev/null
+curl -s http://localhost:8070/ | jq -e '.not_ready | length == 0' >/dev/null
 
 if [[ $? -eq 0 ]]; then
-  echo "All CLI services are ready."
+	echo "All CLI services are ready."
 else
-  echo "Not all CLI indexer processors are ready."
-  exit 1
+	echo "Not all CLI indexer processors are ready."
+	exit 1
 fi
 
 # Check if the indexer data is in sync with the current local testnet.

@@ -1,4 +1,8 @@
+# cspell:word localnet
+
 FROM econialabs/aptos-cli:4.1.0
+
+WORKDIR /app
 
 ARG FORCE_RESTART
 ENV FORCE_RESTART=$FORCE_RESTART
