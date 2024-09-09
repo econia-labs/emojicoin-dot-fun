@@ -15,7 +15,11 @@ gas_unit_price=100
 # Generally, this will be the profile created at the image build time.
 # If it doesn't match, ensure the CLI recreates the profile with the new key.
 profile_private_key=$(get_publisher_private_key)
-if [ "$profile_private_key" != "$PUBLISHER_PRIVATE_KEY" ]; then
+# Checks for address equality, with 0x and without it.
+address_eq() {
+	[ "$1" == "$2" ] || [ "0x$1" == "$2" ] || [ "$1" == "0x$2" ]
+}
+if ! address_eq "$profile_private_key" "$PUBLISHER_PRIVATE_KEY"; then
 	log_warning \
 		'The private key for "publisher" does not match PUBLISHER_PRIVATE_KEY'
 	log_warning "PUBLISHER_PRIVATE_KEY: $PUBLISHER_PRIVATE_KEY"
