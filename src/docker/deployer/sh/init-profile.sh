@@ -26,9 +26,9 @@ fi
 # This could always be run with a local testnet started prior to building the
 # image if necessary. It's just easier to avoid that if possible.
 
-# See the note above for why we use `testnet` here.
 profile="publisher"
 
+# See the note above for why we use `testnet` below.
 result_json=$(aptos init \
 	--assume-yes \
 	--profile $profile \
@@ -39,7 +39,8 @@ result_json=$(aptos init \
 result=$(echo $result_json | jq -r '.Error')
 
 if [ -n "$result" ]; then
-	# As long as the private key is correct, we have what we need.
+	# Only throw an error if the profile wasn't initialized with the
+	# correct private key, since that's all we care about.
 	current_key=$(get_publisher_private_key)
 	if [ "$current_key" != "$PUBLISHER_PRIVATE_KEY" ]; then
 		log_error "Failed to initialize profile \"$profile\""
