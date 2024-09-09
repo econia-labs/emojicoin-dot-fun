@@ -4,23 +4,16 @@ import {
   getPublisherPKForTest,
   PK_PATH,
   PUBLISH_RES_PATH,
-  RESET_CONTAINERS_ON_START,
 } from "./utils";
 import { DockerTestHarness } from "./utils/docker-test-harness";
 import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
 
 export default async function preTest() {
-  const globalThisAny = globalThis as any;
-  /* eslint-disable-next-line */
-  globalThisAny.__GLOBAL_DIRECTOR__ = new DockerTestHarness({
-    container: "docker-broker-1",
-    removeContainersOnStart: RESET_CONTAINERS_ON_START,
-  });
+  const testHarness = new DockerTestHarness({ includeFrontend: false });
   // --------------------------------------------------------------------------------------
   //                             Start the docker containers.
   // --------------------------------------------------------------------------------------
-  /* eslint-disable-next-line */
-  await globalThisAny.__GLOBAL_DIRECTOR__.run();
+  await testHarness.run();
 
   // Note that the docker container start-up script publishes the package on-chain.
   // --------------------------------------------------------------------------------------

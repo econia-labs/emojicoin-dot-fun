@@ -20,6 +20,9 @@ type ContainerName =
   | "postgres"
   | "postgrest";
 
+const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
+const PRUNE_SCRIPT = path.join(getGitRoot(), "src/docker/utils", "prune.sh");
+
 interface ContainerStatus {
   isRunning: boolean;
   isHealthy: boolean;
@@ -41,59 +44,44 @@ async function getDockerContainerStatus(name: ContainerName): Promise<ContainerS
   }
 }
 
-const TEST_HARNESS_PATH = path.join(getGitRoot(), "src/sh/emojicoin/docker-test-harness.sh");
 const MAXIMUM_WAIT_TIME_SEC = 120;
 export class DockerTestHarness {
-  public container: ContainerName;
+  public includeFrontend: boolean;
 
-  public removeContainersOnStart: boolean;
-
-  constructor(args: { container: ContainerName; removeContainersOnStart: boolean }) {
-    const { container, removeContainersOnStart } = args;
-    this.container = container;
-    this.removeContainersOnStart = removeContainersOnStart;
-  }
-
-  static down() {
-    return execPromise(`bash ${TEST_HARNESS_PATH} --remove --local`);
+  constructor({ includeFrontend }: { includeFrontend: boolean }) {
+    this.includeFrontend = includeFrontend;
   }
 
   /**
    * Removes all related processes.
    */
   static remove() {
-    return execPromise(`bash ${TEST_HARNESS_PATH} --remove`);
+    return execPromise(`bash ${PRUNE_SCRIPT} --reset-localnet --yes`);
   }
 
   /**
    * Calls the Docker helper script to start the containers.
-   *
-   * Waits for the `deployer` container to be up and running + healthy.
-   *
-   * If the processes are already up, this returns and does not start any new processes.
    */
   async run() {
     await DockerTestHarness.remove();
     await this.start();
-    await this.waitUntilProcessIsUp();
+    await this.waitForContainer();
   }
 
   /**
-   * Starts the local testnet by running the aptos node run-local-testnet command.
+   * Starts a completely new Docker environment for the test harness.
    */
   async start() {
-    if (this.removeContainersOnStart) {
-      console.debug();
-      const { stdout, stderr } = await DockerTestHarness.remove();
-      console.debug(stdout);
-      console.debug(stderr);
-    }
+    // Ensure that we have a fresh Docker environment before starting the test harness.
+    await DockerTestHarness.remove();
 
-    const command = "bash";
+    const command = "docker";
     const args = [
-      TEST_HARNESS_PATH,
-      "--start",
-      this.container === "docker-frontend-1" ? "" : "--no-frontend",
+      "compose",
+      "-f",
+      LOCAL_COMPOSE_PATH,
+      "up",
+      this.includeFrontend ? "--profile frontend" : "",
     ].filter((arg) => arg !== "");
 
     const childProcess = spawn(command, args);
@@ -112,16 +100,19 @@ export class DockerTestHarness {
    *
    * @returns Promise<boolean>
    */
-  async waitUntilProcessIsUp(): Promise<boolean> {
+  async waitForContainer(): Promise<boolean> {
     let secondsElapsed = 0;
-    let status: ContainerStatus = await getDockerContainerStatus(this.container);
+    // The broker will be the last container up, unless we're running the frontend.
+    // In that case, the frontend will be last.
+    const container: ContainerName = this.includeFrontend ? "frontend" : "broker";
+    let status: ContainerStatus = await getDockerContainerStatus(container);
 
     while (!status.isHealthy && !status.isRunning) {
       /* eslint-disable no-await-in-loop */
       await sleep(1000);
 
       /* eslint-disable no-await-in-loop */
-      status = await getDockerContainerStatus(this.container);
+      status = await getDockerContainerStatus(container);
 
       if (secondsElapsed >= MAXIMUM_WAIT_TIME_SEC) {
         throw new Error("Container is not running or healthy after maximum wait time.");
