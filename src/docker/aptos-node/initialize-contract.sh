@@ -12,7 +12,7 @@ export BIG_MONEY_GUY="big_money_guy"
 aptos init --profile $PUBLISHER \
 	--rest-url http://host.docker.internal:8080/v1 \
 	--faucet-url http://host.docker.internal:8081 \
-	--private-key $PUBLISHER_PK \
+	--private-key $PUBLISHER_PRIVATE_KEY \
 	--encoding hex \
 	--assume-yes \
 	--network custom
@@ -20,7 +20,7 @@ aptos init --profile $PUBLISHER \
 aptos init --profile $BIG_MONEY_GUY \
 	--rest-url http://host.docker.internal:8080/v1 \
 	--faucet-url http://host.docker.internal:8081 \
-	--private-key $BIG_MONEY_GUY_PK \
+	--private-key $BIG_MONEY_GUY_PRIVATE_KEY \
 	--encoding hex \
 	--assume-yes \
 	--network custom

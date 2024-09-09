@@ -36,8 +36,8 @@ services:
       context: '../../'
       dockerfile: 'src/docker/aptos-node/Dockerfile'
     environment:
-      PUBLISHER_PK: '${PUBLISHER_PK}'
-      BIG_MONEY_GUY_PK: '${BIG_MONEY_GUY_PK}'
+      PUBLISHER_PRIVATE_KEY: '${PUBLISHER_PRIVATE_KEY}'
+      BIG_MONEY_GUY_PRIVATE_KEY: '${BIG_MONEY_GUY_PRIVATE_KEY}'
       EMOJICOIN_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
     depends_on:
       aptos-node:
