@@ -38,6 +38,16 @@ Conditions:
   - !Equals
     - !Ref 'MaybeDeployDb'
     - 'true'
+  MaybeDeployNlb: !And
+  - !Condition 'MaybeDeployVpc'
+  - !Equals
+    - !Ref 'MaybeDeployNlb'
+    - 'true'
+  MaybeDeployNlbVpcLink: !And
+  - !Condition 'MaybeDeployNlb'
+  - !Equals
+    - !Ref 'MaybeDeployNlbVpcLink'
+    - 'true'
   MaybeDeployPostgrest: !And
   - !Condition 'MaybeDeployContainers'
   - !Condition 'MaybeDeployProcessor'
@@ -48,6 +58,17 @@ Conditions:
   - !Condition 'MaybeDeployContainers'
   - !Equals
     - !Ref 'MaybeDeployProcessor'
+    - 'true'
+  MaybeDeployRestApi: !And
+  - !Condition 'MaybeDeployNlbVpcLink'
+  - !Condition 'MaybeDeployPostgrest'
+  - !Equals
+    - !Ref 'MaybeDeployRestApi'
+    - 'true'
+  MaybeDeployRestApiDnsRecord: !And
+  - !Condition 'MaybeDeployRestApi'
+  - !Equals
+    - !Ref 'MaybeDeployRestApiDnsRecord'
     - 'true'
   MaybeDeployRouteTables: !And
   - !Condition 'MaybeDeployVpc'
@@ -81,7 +102,6 @@ Mappings:
         '{{resolve:ssm:/emojicoin/indexer-dns-name/hosted-zone-id}}'
       DnsNameRootDomain:
         '{{resolve:ssm:/emojicoin/indexer-dns-name/root-domain}}'
-      DnsNameSubdomain: 'data'
       PostgrestHealthCheckPort: 3001
       PostgrestPort: 3000
       ProcessorWebsocketPort: 3008
@@ -115,18 +135,22 @@ Outputs:
     Condition: 'MaybeDeployBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
-  DnsName:
-    Condition: 'MaybeDeployAlbDnsRecord'
+  RestEndpoint:
+    Condition: 'MaybeDeployRestApiDnsRecord'
     Value: !Sub
-    - '${Environment}.${Subdomain}.${RootDomain}'
+    - 'https://${Environment}.${RootDomain}'
     - RootDomain: !FindInMap
       - 'Constants'
       - 'Networking'
       - 'DnsNameRootDomain'
-      Subdomain: !FindInMap
+  WsEndpoint:
+    Condition: 'MaybeDeployAlbDnsRecord'
+    Value: !Sub
+    - 'wss://ws.${Environment}.${RootDomain}'
+    - RootDomain: !FindInMap
       - 'Constants'
       - 'Networking'
-      - 'DnsNameSubdomain'
+      - 'DnsNameRootDomain'
 Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
@@ -171,12 +195,32 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
+  MaybeDeployNlb:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployNlbVpcLink:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
   MaybeDeployPostgrest:
     AllowedValues:
     - 'false'
     - 'true'
     Type: 'String'
   MaybeDeployProcessor:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployRestApi:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployRestApiDnsRecord:
     AllowedValues:
     - 'false'
     - 'true'
@@ -224,41 +268,29 @@ Resources:
         - 'MaybeDeployBroker'
         - !Ref 'BrokerWsClientSecurityGroup'
         - !Ref 'AWS::NoValue'
-      - !If
-        - 'MaybeDeployPostgrest'
-        - !Ref 'PostgrestClientSecurityGroup'
-        - !Ref 'AWS::NoValue'
       Subnets:
       - !Ref 'PublicSubnetA'
       - !Ref 'PublicSubnetB'
       - !Ref 'PublicSubnetC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-  # DNS certificate for the application load balancer.
+  # DNS certificate for the broker's application load balancer.
   AlbCertificate:
     Condition: 'MaybeDeployAlb'
     Properties:
       DomainName: !Sub
-      - '${Environment}.${Subdomain}.${RootDomain}'
+      - 'ws.${Environment}.${RootDomain}'
       - RootDomain: !FindInMap
         - 'Constants'
         - 'Networking'
         - 'DnsNameRootDomain'
-        Subdomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameSubdomain'
       DomainValidationOptions:
       - DomainName: !Sub
-        - '${Environment}.${Subdomain}.${RootDomain}'
+        - 'ws.${Environment}.${RootDomain}'
         - RootDomain: !FindInMap
           - 'Constants'
           - 'Networking'
           - 'DnsNameRootDomain'
-          Subdomain: !FindInMap
-          - 'Constants'
-          - 'Networking'
-          - 'DnsNameSubdomain'
         HostedZoneId: !FindInMap
         - 'Constants'
         - 'Networking'
@@ -277,15 +309,11 @@ Resources:
       - 'Networking'
       - 'DnsNameHostedZoneId'
       Name: !Sub
-      - '${Environment}.${Subdomain}.${RootDomain}'
+      - 'ws.${Environment}.${RootDomain}'
       - RootDomain: !FindInMap
         - 'Constants'
         - 'Networking'
         - 'DnsNameRootDomain'
-        Subdomain: !FindInMap
-        - 'Constants'
-        - 'Networking'
-        - 'DnsNameSubdomain'
       Type: 'A'
     Type: 'AWS::Route53::RecordSet'
   # Application load balancer listener.
@@ -295,26 +323,12 @@ Resources:
       Certificates:
       - CertificateArn: !Ref 'AlbCertificate'
       DefaultActions:
-      - TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
         Type: 'forward'
       LoadBalancerArn: !Ref 'Alb'
       Port: 443
       Protocol: 'HTTPS'
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
-  # Application load balancer listener rule for broker traffic.
-  AlbListenerRuleBrokerTarget:
-    Condition: 'MaybeDeployAlb'
-    Properties:
-      Actions:
-      - TargetGroupArn: !Ref 'BrokerAlbTargetGroup'
-        Type: 'forward'
-      Conditions:
-      - Field: 'path-pattern'
-        Values:
-        - '/ws'
-      ListenerArn: !Ref 'AlbListener'
-      Priority: 1
-    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
   # Security group for the application load balancer.
   AlbSecurityGroup:
     Condition: 'MaybeDeployAlb'
@@ -343,6 +357,10 @@ Resources:
           - !Ref 'BrokerWsClientSecurityGroup'
           - !Ref 'AWS::NoValue'
         - !If
+          - 'MaybeDeployNlb'
+          - !Ref 'NlbClientSecurityGroup'
+          - !Ref 'AWS::NoValue'
+        - !If
           - 'MaybeDeployPostgrest'
           - !Ref 'PostgrestClientSecurityGroup'
           - !Ref 'AWS::NoValue'
@@ -364,6 +382,7 @@ Resources:
             chmod +x ${WebsocatBuild}
             mv ${WebsocatBuild} /usr/local/bin/websocat
             echo 'export DB_URL="${DatabaseUrl}"' >> /etc/profile
+            echo '${NlbDnsNameExport}' >> /etc/profile
             echo '${BrokerWsUrlExport}' >> /etc/profile
             echo '${PostgrestUrlExport}' >> /etc/profile
             echo '${ProcessorWsUrlExport}' >> /etc/profile
@@ -380,7 +399,7 @@ Resources:
                 - 'Constants'
                 - 'Networking'
                 - 'BrokerPort'
-              - '/ws"'
+              - '"'
           - '# BROKER_WS_URL not set (broker not provisioned)'
           DatabaseUrl: !Join
           - ''
@@ -401,6 +420,14 @@ Resources:
               - 'Constants'
               - 'DatabaseConfig'
               - 'DatabaseName'
+          NlbDnsNameExport: !If
+          - 'MaybeDeployNlb'
+          - !Join
+            - ''
+            - - 'export NLB_DNS_NAME="'
+              - !GetAtt 'Nlb.DNSName'
+              - '"'
+          - '# NLB_DNS_NAME not set (NLB not provisioned)'
           PostgrestUrlExport: !If
           - 'MaybeDeployPostgrest'
           - !Join
@@ -486,7 +513,7 @@ Resources:
     DependsOn: 'Alb'
     Properties:
       HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/'
+      HealthCheckPath: '/health'
       HealthCheckPort: !FindInMap
       - 'Constants'
       - 'Networking'
@@ -569,12 +596,12 @@ Resources:
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
     # Proxy for a conditional dependency on the application load balancer
-    # listener rule for the broker, which associates the broker target group
-    # with the application load balancer.
+    # listener, which associates the broker target group with the application
+    # load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
       - 'MaybeDeployAlb'
-      - !Ref 'AlbListenerRuleBrokerTarget'
+      - !Ref 'AlbListener'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
@@ -653,8 +680,8 @@ Resources:
           - 'curl'
           - '--fail'
           - !Sub
-            - 'http://localhost:${PORT}/'
-            - PORT: !FindInMap
+            - 'http://localhost:${Port}/live'
+            - Port: !FindInMap
               - 'Constants'
               - 'Networking'
               - 'BrokerPort'
@@ -1036,38 +1063,72 @@ Resources:
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
-  # Target group for application load balancer traffic to PostgREST.
-  PostgrestAlbTargetGroup:
-    Condition: 'MaybeDeployAlb'
-    DependsOn: 'Alb'
+  # Private network load balancer.
+  Nlb:
+    Condition: 'MaybeDeployNlb'
     Properties:
-      HealthCheckIntervalSeconds: 5
-      HealthCheckPath: '/ready'
-      HealthCheckPort: !FindInMap
-      - 'Constants'
-      - 'Networking'
-      - 'PostgrestHealthCheckPort'
-      HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 2
-      HealthyThresholdCount: 2
-      Name: !Sub '${AWS::StackName}-postgrest'
-      Port: !FindInMap
+      LoadBalancerAttributes:
+      - Key: 'load_balancing.cross_zone.enabled'
+        Value: 'true'
+      Scheme: 'internal'
+      SecurityGroups:
+      - !Ref 'NlbSecurityGroup'
+      - !If
+        - 'MaybeDeployBroker'
+        - !Ref 'BrokerWsClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
+      - !If
+        - 'MaybeDeployPostgrest'
+        - !Ref 'PostgrestClientSecurityGroup'
+        - !Ref 'AWS::NoValue'
+      Subnets:
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
+      Type: 'network'
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+  # Security group for direct clients of the network load balancer.
+  NlbClientSecurityGroup:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupEgress:
+      - DestinationSecurityGroupId: !Ref 'NlbSecurityGroup'
+        IpProtocol: -1
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Security group for the network load balancer.
+  NlbSecurityGroup:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      GroupDescription: !Ref 'AWS::StackName'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::SecurityGroup'
+  # Network load balancer security group ingress policy for PostgREST traffic
+  # over VPC link.
+  NlbSecurityGroupIngressPostgrest:
+    Condition: 'MaybeDeployNlbVpcLink'
+    Properties:
+      CidrIp: '0.0.0.0/0'
+      FromPort: !FindInMap
       - 'Constants'
       - 'Networking'
       - 'PostgrestPort'
-      Protocol: 'HTTP'
-      ProtocolVersion: 'HTTP1'
-      TargetGroupAttributes:
-      - Key: 'deregistration_delay.timeout_seconds'
-        Value: '30'
-      - Key: 'stickiness.enabled'
-        Value: 'false'
-      - Key: 'load_balancing.algorithm.type'
-        Value: 'round_robin'
-      TargetType: 'ip'
-      UnhealthyThresholdCount: 2
-      VpcId: !Ref 'Vpc'
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+      GroupId: !Ref 'NlbSecurityGroup'
+      IpProtocol: 'tcp'
+      ToPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  # Connection to network load balancer through VPC link.
+  NlbVpcLink:
+    Condition: 'MaybeDeployNlbVpcLink'
+    Properties:
+      Name: !Ref 'AWS::StackName'
+      TargetArns:
+      - !Ref 'Nlb'
+    Type: 'AWS::ApiGateway::VpcLink'
   # Scaling policy for PostgREST service.
   PostgrestAutoScalingPolicy:
     Condition: 'MaybeDeployPostgrest'
@@ -1107,6 +1168,49 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Listener for network load balancer traffic to PostgREST.
+  PostgrestNlbListener:
+    Condition: 'MaybeDeployNlb'
+    Properties:
+      DefaultActions:
+      - TargetGroupArn: !Ref 'PostgrestNlbTargetGroup'
+        Type: 'forward'
+      LoadBalancerArn: !Ref 'Nlb'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+      Protocol: 'TCP'
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+  # Target group for network load balancer traffic to PostgREST.
+  PostgrestNlbTargetGroup:
+    Condition: 'MaybeDeployNlb'
+    DependsOn: 'Nlb'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: '/ready'
+      HealthCheckPort: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestHealthCheckPort'
+      HealthCheckProtocol: 'HTTP'
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${AWS::StackName}-postgrest'
+      Port: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'PostgrestPort'
+      Protocol: 'TCP'
+      TargetGroupAttributes:
+      - Key: 'deregistration_delay.timeout_seconds'
+        Value: '30'
+      - Key: 'stickiness.enabled'
+        Value: 'false'
+      TargetType: 'ip'
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Service for running PostgREST.
   PostgrestRunner:
     Condition: 'MaybeDeployPostgrest'
@@ -1123,12 +1227,13 @@ Resources:
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
     - 'PrivateRouteThroughNatGateway'
-    # Proxy for a conditional dependency on the application load balancer
-    # listener, which associates the PostgREST target group with the balancer.
+    # Proxy for a conditional dependency on the network load balancer listener
+    # for PostgREST, which associates the PostgREST target group with the
+    # network load balancer.
     Metadata:
       ConditionalDependencyProxy: !If
-      - 'MaybeDeployAlb'
-      - !Ref 'AlbListener'
+      - 'MaybeDeployNlb'
+      - !Ref 'PostgrestNlbListener'
       - ''
     Properties:
       Cluster: !Ref 'ContainerCluster'
@@ -1138,13 +1243,13 @@ Resources:
           Rollback: true
       LaunchType: 'FARGATE'
       LoadBalancers: !If
-      - 'MaybeDeployAlb'
+      - 'MaybeDeployNlb'
       - - ContainerName: !Sub '${AWS::StackName}-postgrest'
           ContainerPort: !FindInMap
           - 'Constants'
           - 'Networking'
           - 'PostgrestPort'
-          TargetGroupArn: !Ref 'PostgrestAlbTargetGroup'
+          TargetGroupArn: !Ref 'PostgrestNlbTargetGroup'
       - !Ref 'AWS::NoValue'
       NetworkConfiguration:
         AwsvpcConfiguration:
@@ -1423,7 +1528,12 @@ Resources:
           - 'CMD'
           - 'curl'
           - '--fail'
-          - 'http://localhost:8084/metrics'
+          - !Sub
+            - 'http://localhost:${Port}/'
+            - Port: !FindInMap
+              - 'Constants'
+              - 'Networking'
+              - 'ProcessorWebsocketPort'
           Interval: 5
           Retries: 1
           StartPeriod: 0
@@ -1506,6 +1616,156 @@ Resources:
       GatewayId: !Ref 'InternetGateway'
       RouteTableId: !Ref 'PublicRouteTable'
     Type: 'AWS::EC2::Route'
+  # REST API endpoint.
+  RestApi:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      EndpointConfiguration:
+        Types:
+        - 'REGIONAL'
+      Name: !Ref 'AWS::StackName'
+    Type: 'AWS::ApiGateway::RestApi'
+  # DNS certificate for the REST API endpoint.
+  RestApiCertificate:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Properties:
+      DomainName: !Sub
+      - '${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      DomainValidationOptions:
+      - DomainName: !Sub
+        - '${Environment}.${RootDomain}'
+        - RootDomain: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'DnsNameRootDomain'
+        HostedZoneId: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameHostedZoneId'
+      ValidationMethod: 'DNS'
+    Type: 'AWS::CertificateManager::Certificate'
+  # Deployment for the REST API endpoint.
+  RestApiDeployment:
+    Condition: 'MaybeDeployRestApi'
+    DependsOn:
+    - 'RestApiMethodGeneral'
+    - 'RestApiMethodRoot'
+    Properties:
+      RestApiId: !Ref 'RestApi'
+    Type: 'AWS::ApiGateway::Deployment'
+  # DNS record for the REST API.
+  RestApiDnsRecord:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt 'RestApiDomainName.RegionalDomainName'
+        HostedZoneId: !GetAtt 'RestApiDomainName.RegionalHostedZoneId'
+      HostedZoneId: !FindInMap
+      - 'Constants'
+      - 'Networking'
+      - 'DnsNameHostedZoneId'
+      Name: !Sub
+      - '${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      Type: 'A'
+    Type: 'AWS::Route53::RecordSet'
+  # Domain mapping for the REST API endpoint.
+  RestApiDomainMapping:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Properties:
+      DomainName: !Ref 'RestApiDomainName'
+      RestApiId: !Ref 'RestApi'
+      Stage: !Ref 'RestApiStage'
+    Type: 'AWS::ApiGateway::BasePathMapping'
+  # Custom domain name for the REST API endpoint.
+  RestApiDomainName:
+    Condition: 'MaybeDeployRestApiDnsRecord'
+    Properties:
+      DomainName: !Sub
+      - '${Environment}.${RootDomain}'
+      - RootDomain: !FindInMap
+        - 'Constants'
+        - 'Networking'
+        - 'DnsNameRootDomain'
+      EndpointConfiguration:
+        Types:
+        - 'REGIONAL'
+      RegionalCertificateArn: !Ref 'RestApiCertificate'
+      SecurityPolicy: 'TLS_1_2'
+    Type: 'AWS::ApiGateway::DomainName'
+  # Rest API endpoint general method.
+  RestApiMethodGeneral:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      AuthorizationType: 'NONE'
+      HttpMethod: 'GET'
+      Integration:
+        ConnectionId: !Ref 'NlbVpcLink'
+        ConnectionType: 'VPC_LINK'
+        IntegrationHttpMethod: 'GET'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        Type: 'HTTP_PROXY'
+        Uri: !Sub
+        - 'http://${NlbDnsName}:${PostgrestPort}/{proxy}'
+        - NlbDnsName: !GetAtt 'Nlb.DNSName'
+          PostgrestPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+      RequestParameters:
+        method.request.path.proxy: true
+      ResourceId: !Ref 'RestApiProxyResource'
+      RestApiId: !Ref 'RestApi'
+    Type: 'AWS::ApiGateway::Method'
+  # Rest API endpoint root method.
+  RestApiMethodRoot:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      AuthorizationType: 'NONE'
+      HttpMethod: 'GET'
+      Integration:
+        ConnectionId: !Ref 'NlbVpcLink'
+        ConnectionType: 'VPC_LINK'
+        IntegrationHttpMethod: 'GET'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        Type: 'HTTP_PROXY'
+        Uri: !Sub
+        - 'http://${NlbDnsName}:${PostgrestPort}/'
+        - NlbDnsName: !GetAtt 'Nlb.DNSName'
+          PostgrestPort: !FindInMap
+          - 'Constants'
+          - 'Networking'
+          - 'PostgrestPort'
+      RequestParameters:
+        method.request.path.proxy: true
+      ResourceId: !GetAtt 'RestApi.RootResourceId'
+      RestApiId: !Ref 'RestApi'
+    Type: 'AWS::ApiGateway::Method'
+  # Proxy resource for the REST API endpoint.
+  RestApiProxyResource:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      ParentId: !GetAtt 'RestApi.RootResourceId'
+      PathPart: '{proxy+}'
+      RestApiId: !Ref 'RestApi'
+    Type: 'AWS::ApiGateway::Resource'
+  # Stage for the REST API endpoint.
+  RestApiStage:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      DeploymentId: !Ref 'RestApiDeployment'
+      RestApiId: !Ref 'RestApi'
+      StageName: !Ref 'AWS::StackName'
+    Type: 'AWS::ApiGateway::Stage'
   # Virtual private cloud for internal networking.
   Vpc:
     Condition: 'MaybeDeployVpc'

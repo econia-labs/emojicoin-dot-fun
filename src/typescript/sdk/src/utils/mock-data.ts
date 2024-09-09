@@ -60,7 +60,7 @@ const { aptos, publisher } = getTestHelpers();
 
 // const PUBLISHER = publisher;
 const PUBLISHER = Account.fromPrivateKey({
-  privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PK!),
+  privateKey: new Ed25519PrivateKey(process.env.PUBLISHER_PRIVATE_KEY!),
 });
 
 if (!(NUM_TRADERS % CHUNK_SIZE === 0)) {

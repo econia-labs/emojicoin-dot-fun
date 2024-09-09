@@ -17,7 +17,7 @@ describe("tests publishing modules to a local network", () => {
     const moduleName = "main";
     const packageName = "template";
     const publishResult = await publishPackage({
-      pk: publisher.privateKey,
+      privateKey: publisher.privateKey,
       includedArtifacts: "none",
       namedAddresses: {
         [packageName]: publisher.accountAddress,
