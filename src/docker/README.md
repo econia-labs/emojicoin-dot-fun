@@ -61,8 +61,8 @@ cd src/docker/utils
 # To skip the prompt, run any of these:
 ./prune.sh -y
 ./prune.sh --yes
-./prune.sh -f
-./prune.sh --force-restart
+./prune.sh -r
+./prune.sh --reset-localnet
 ```
 
 [prune.sh]: ./utils/prune.sh
