@@ -2,6 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
     "INBOX_URL",
+    "INDEXER_URL",
     "REVALIDATION_TIME",
     "ALLOWLISTER3K_URL",
     "NEXT_PUBLIC_IS_ALLOWLIST_ENABLED",
@@ -14,8 +15,7 @@
     "NEXT_PUBLIC_REWARDS_MODULE_ADDRESS",
     "NEXT_PUBLIC_APTOS_NETWORK",
     "NEXT_PUBLIC_MQTT_URL",
-    "BROKER_PORT",
-    "REMOVE_CONTAINERS_ON_EXIT"
+    "BROKER_PORT"
   ],
   "tasks": {
     "build": {
@@ -58,6 +58,9 @@
       "outputs": []
     },
     "test": {
+      "outputs": []
+    },
+    "test:verbose": {
       "outputs": []
     }
   }

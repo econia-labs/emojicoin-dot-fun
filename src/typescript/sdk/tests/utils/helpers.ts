@@ -28,7 +28,6 @@ import { type PublishHelpers } from "./types";
 // fee integrator rate BPs must be set to 0 for this to work.
 export const EXACT_TRANSITION_INPUT_AMOUNT = 100_000_000_000n;
 
-export const REMOVE_CONTAINERS_ON_EXIT = process.env.REMOVE_CONTAINERS_ON_EXIT === "true";
 export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/sdk/tests");
 export const PUBLISHER_PRIVATE_KEY_PATH = path.resolve(
   path.join(TS_UNIT_TEST_DIR, ".tmp", ".publisher_private_key")
@@ -36,6 +35,7 @@ export const PUBLISHER_PRIVATE_KEY_PATH = path.resolve(
 export const PUBLISH_RES_PATH = path.resolve(
   path.join(TS_UNIT_TEST_DIR, ".tmp", ".publish_result")
 );
+export const TEST_LOGS_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", "logs"));
 
 /**
  * Facilitates the usage of a constant Aptos Account and client for testing the publishing

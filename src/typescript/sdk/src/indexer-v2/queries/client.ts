@@ -1,6 +1,6 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import JSON_BIGINT from "../json-bigint";
-import { type TableName } from "../types/snake-case-types";
+import { TableName } from "../types/snake-case-types";
 
 /**
  * Fetch with BigInt support. This is necessary because the JSON returned by the indexer
