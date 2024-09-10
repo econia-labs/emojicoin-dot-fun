@@ -8,6 +8,17 @@ fund_amount=20000000000000000
 extra_for_gas=200000000
 gas_unit_price=100
 
+check_faucet_and_rest_API() {
+	faucet_url="http://host.docker.internal:8081"
+	rest_url="http://host.docker.internal:8080/v1"
+	curl -s "$faucet_url" >/dev/null && curl -s "$rest_url" >/dev/null
+}
+
+# We only need to wait for the REST API, not the full indexer API.
+while ! check_faucet_and_rest_API; do
+	sleep 0.1
+done
+
 # ------------------------------------------------------------------------------
 #               Re-initialize the CLI publisher profile if necessary
 # ------------------------------------------------------------------------------

@@ -44,5 +44,5 @@ services:
     container_name: 'deployer'
     depends_on:
       localnet:
-        condition: 'service_healthy'
+        condition: 'service_started'
 ...
