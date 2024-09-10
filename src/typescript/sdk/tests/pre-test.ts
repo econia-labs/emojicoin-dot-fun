@@ -1,8 +1,4 @@
-import {
-  getTestPublisherPrivateKey,
-  PUBLISHER_PRIVATE_KEY_PATH,
-  PUBLISH_RES_PATH,
-} from "./utils";
+import { getTestPublisherPrivateKey, PUBLISHER_PRIVATE_KEY_PATH, PUBLISH_RES_PATH } from "./utils";
 import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
 import { ensureWriteFileSync } from "./utils/ensure-write-file-sync";
@@ -12,7 +8,13 @@ export default async function preTest() {
   // Print an empty line to separate `Determining test suites to run...` from the logs.
   console.debug();
   // @ts-ignore
-  globalThis.__DOCKER_LOGS_FILTER__ = ["broker"] as Array<ContainerName>;
+  globalThis.__DOCKER_LOGS_FILTER__ = [
+    // Only show more meaningful logs by default. Note these only print if running in verbose mode.
+    "broker",
+    "processor",
+    "frontend",
+    "postgres",
+  ] as Array<ContainerName>;
   const testHarness = new DockerTestHarness({ includeFrontend: false });
   // --------------------------------------------------------------------------------------
   //                             Start the docker containers.
@@ -20,7 +22,6 @@ export default async function preTest() {
   await testHarness.run();
   // @ts-ignore
   globalThis.__TEST_HARNESS__ = testHarness;
-
 
   // Note that the docker container start-up script publishes the package on-chain.
   // --------------------------------------------------------------------------------------

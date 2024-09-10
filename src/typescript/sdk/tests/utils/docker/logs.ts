@@ -103,6 +103,7 @@ const printLogs = (log: string | Buffer) => {
   if (containerName) {
     res = colorLogs(res);
   }
+  // Must be debug (at least not console.log(...)) or else `jest` won't print it.
   console.debug(res);
 };
 
