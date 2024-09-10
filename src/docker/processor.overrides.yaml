@@ -1,0 +1,8 @@
+# cspell:word localnet
+---
+services:
+  processor:
+    depends_on:
+      localnet:
+        condition: 'service_healthy'
+...

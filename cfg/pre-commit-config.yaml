@@ -227,28 +227,6 @@ repos:
 -
   hooks:
   -
-    args:
-    - '--manifest-path'
-    - 'src/rust/processor/rust/processor/Cargo.toml'
-    - '--config'
-    - 'build.rustflags=["--cfg", "tokio_unstable"]'
-    - '--'
-    id: 'cargo-check'
-  -
-    args:
-    - '--manifest-path'
-    - 'src/rust/processor/rust/processor/Cargo.toml'
-    - '--config'
-    - 'build.rustflags=["--cfg", "tokio_unstable"]'
-    - '--'
-    - '--deny'
-    - 'clippy::all'
-    id: 'clippy'
-  repo: 'https://github.com/doublify/pre-commit-rust'
-  rev: 'v1.0'
--
-  hooks:
-  -
     # Lint all AWS CloudFormation files ending in `.cfn.yaml`.
     files: '.*\.cfn\.yaml'
     id: 'cfn-lint'

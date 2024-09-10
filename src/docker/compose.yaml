@@ -1,5 +1,6 @@
 # yamllint disable rule:empty-lines rule:key-ordering
 ---
+name: 'emojicoin-dot-fun'
 services:
   broker:
     build:
@@ -15,6 +16,7 @@ services:
       PORT: '${BROKER_PORT}'
       RUST_LOG: 'info,broker=trace'
     image: 'econialabs/emojicoin-dot-fun-indexer-broker'
+    container_name: 'broker'
     healthcheck:
       test: 'curl -f http://localhost:${BROKER_PORT}/live || exit 1'
       interval: '2m'
@@ -32,6 +34,7 @@ services:
       POSTGRES_DB: 'emojicoin'
       POSTGRES_PASSWORD: 'emojicoin'
     image: 'postgres:14-bookworm'
+    container_name: 'postgres'
     restart: 'always'
     volumes:
     - 'db:/var/lib/postgresql/data'
@@ -54,6 +57,7 @@ services:
       PGRST_DB_ANON_ROLE: 'web_anon'
       PGRST_DB_MAX_ROWS: '${POSTGREST_MAX_ROWS}'
     image: 'postgrest/postgrest'
+    container_name: 'postgrest'
     ports:
     - '3000:3000'
     restart: 'unless-stopped'
@@ -75,6 +79,7 @@ services:
       postgres:
         condition: 'service_healthy'
     image: 'econialabs/emojicoin-dot-fun-indexer-processor'
+    container_name: 'processor'
     healthcheck:
       test: 'curl -f http://localhost:${PROCESSOR_WS_PORT}/ || exit 1'
       interval: '2m'
@@ -104,6 +109,9 @@ services:
           ${EMOJICOIN_REWARDS_MODULE_ADDRESS}
         REVALIDATION_TIME: '${REVALIDATION_TIME}'
     image: 'econialabs/emojicoin-dot-fun:frontend'
+    container_name: 'frontend'
+    profiles:
+    - 'frontend'
     environment:
       INBOX_URL: 'http://postgrest:3000'
       HASH_SEED: '${HASH_SEED}'
