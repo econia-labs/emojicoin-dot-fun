@@ -10,7 +10,7 @@ import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 import { ECONIA_BLUE } from "theme/colors";
-import Minimize from "@icons/Minimize";
+import RoundButton from "@icons/Minimize";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
 // TBH, we should probably just fork the library.
@@ -183,8 +183,6 @@ export default function EmojiPicker(
           font-weight: 500 !important;
           background: var(--black) !important;
           color: ${ECONIA_BLUE} !important;
-          border: 1px solid ${ECONIA_BLUE} !important;
-          box-shadow: -1px 1px 7px 5px ${ECONIA_BLUE}33 !important;
         }
 
         div.flex div.search input {
@@ -221,19 +219,20 @@ export default function EmojiPicker(
     <Suspense fallback={<div>Loading...</div>}>
       <div
         {...props}
-        className="relative bg-black"
+        className="relative bg-black rounded-xl shadow-econia"
       >
         <div
-          className="absolute z-20 right-0 top-0"
+          className="right-0 relative h-[29px] w-[100%] bg-ec-blue z-5"
           style={{
-            borderRight: "15px solid var(--ec-blue)",
-            borderTop: "15px solid var(--ec-blue)",
-            borderBottom: "15px solid transparent",
-            borderLeft: "15px solid transparent",
             touchAction: "none",
+            borderTopLeftRadius: "8px",
+            borderTopRightRadius: "8px",
           }}
           onPointerDown={props.drag}
-        ></div>
+        >
+        </div>
+
+        <div className="relative z-10 bg-black rounded-xl border-ec-blue border-solid border-[1px] border-t-0" style={{marginTop: "-10px"}}>
         <Picker
           // TODO: Use this function later instead of the current stuff we have, aka using `onBlur()`.
           perLine={8}
@@ -243,19 +242,14 @@ export default function EmojiPicker(
             insertEmojiTextInput([newEmoji]);
           }}
         />
-        <div
-          className="absolute z-20"
-          style={{
-            bottom: "6px",
-            right: "8px",
-          }}
+        </div>
+
+        <RoundButton
+          className="absolute top-[4px] left-[5px] z-20 bg-red"
           onClick={() => {
             setPickerInvisible(true);
-          }}>
-          <Minimize
-            color="econiaBlue"
-          />
-        </div>
+          }}
+        />
       </div>
     </Suspense>
   );

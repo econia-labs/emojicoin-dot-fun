@@ -1,12 +1,11 @@
 import React from "react";
-import { Text } from "components/text";
-import { type TextProps } from "components/text/types";
 
-const Minimize: React.FC<TextProps> = (props) => {
+const Minimize: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({className, ...props}) => {
   return (
-    <Text textScale="pixelHeading3" {...props}>
-      _
-    </Text>
+    <div {...props} className={`rounded-full bg-amber-500 w-[12px] h-[12px] ${className}`} style={{
+      boxShadow: "rgba(0, 0, 0, 0.42) 0px 0px 2px 1px inset",
+    }}>
+    </div>
   );
 };
 
