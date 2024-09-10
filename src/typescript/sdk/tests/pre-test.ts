@@ -1,8 +1,9 @@
+/* eslint-disable no-underscore-dangle */
 import { getTestPublisherPrivateKey, PUBLISHER_PRIVATE_KEY_PATH, PUBLISH_RES_PATH } from "./utils";
 import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
 import { ensureWriteFileSync } from "./utils/ensure-write-file-sync";
-import { ContainerName } from "./utils/docker/logs";
+import { type ContainerName } from "./utils/docker/logs";
 
 export default async function preTest() {
   // Print an empty line to separate `Determining test suites to run...` from the logs.

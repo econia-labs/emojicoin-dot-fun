@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 // cspell:word kolorist
 // cspell:word localnet
 
@@ -43,8 +44,9 @@ const containerNames: ContainerName[] = [
 
 // Fisher-Yates shuffle algorithm.
 function shuffleArray<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
+  for (let i = array.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
+    // eslint-disable-next-line no-param-reassign
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
@@ -56,8 +58,6 @@ containerNames.forEach((containerName, index) => {
   const [r, g, b] = shuffledColors[index % shuffledColors.length];
   coloredNames.set(containerName, colorText(r, g, b)(containerName));
 });
-
-const colorLogs = (text: string) => text.split("\n").map(colorContainerName).join("\n");
 
 const shouldPrint = (containerName: ContainerName) => {
   // @ts-ignore
@@ -101,10 +101,10 @@ const printLogs = (log: string | Buffer) => {
   }
   let res = log.toString();
   if (containerName) {
-    res = colorLogs(res);
+    res = res.split("\n").map(colorContainerName).join("\n");
   }
   // Must be debug (at least not console.log(...)) or else `jest` won't print it.
   console.debug(res);
 };
 
-export { printLogs, colorLogs };
+export { printLogs };

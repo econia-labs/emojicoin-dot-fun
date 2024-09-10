@@ -1,15 +1,15 @@
 // eslint-disable no-await-in-loop
 // cspell:word localnet
 
-import { ChildProcessWithoutNullStreams } from "child_process";
+import { type ChildProcessWithoutNullStreams } from "child_process";
 import path from "path";
 import { sleep } from "../../../src/utils";
 import { getGitRoot } from "../helpers";
-import { ContainerName } from "./logs";
+import { type ContainerName } from "./logs";
 import {
   getContainerState,
   isRunningAndHealthy,
-  ContainerState,
+  type ContainerState,
   execPromise,
   spawnWrapper,
 } from "./utils";
@@ -93,7 +93,7 @@ export class DockerTestHarness {
    */
   async run() {
     await this.start();
-    const promises = [this.waitForPrimaryService(), this.waitForDeployer()];
+    const promises = [this.waitForPrimaryService(), DockerTestHarness.waitForDeployer()];
     await Promise.all(promises);
   }
 
@@ -145,7 +145,7 @@ export class DockerTestHarness {
   /**
    * Waits for the deployer to be up.
    */
-  async waitForDeployer(): Promise<boolean> {
+  static async waitForDeployer(): Promise<boolean> {
     const waitStartTime = new Date();
     let secondsElapsed = 0;
     const localnetName: ContainerName = "localnet";

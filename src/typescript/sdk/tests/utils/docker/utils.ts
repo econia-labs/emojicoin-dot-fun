@@ -1,6 +1,11 @@
-import { ContainerName, printLogs } from "./logs";
-import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from "child_process";
+import {
+  type ChildProcessWithoutNullStreams,
+  exec,
+  type ExecException,
+  spawn,
+} from "child_process";
 import { promisify } from "node:util";
+import { type ContainerName, printLogs } from "./logs";
 
 export interface ContainerStatus {
   isRunning: boolean;
@@ -36,24 +41,6 @@ export type ContainerState = Omit<ContainerStateJSON, "StartedAt" | "FinishedAt"
   FinishedAt: Date;
 };
 
-export async function getContainerState(name: ContainerName): Promise<ContainerState | undefined> {
-  try {
-    const { stdout } = await execPromise(`docker inspect --format '{{json .State}}' ${name}`, true);
-    const state: ContainerStateJSON = JSON.parse(stdout.trim());
-    const res = {
-      ...state,
-      StartedAt: new Date(state.StartedAt),
-      FinishedAt: new Date(state.FinishedAt),
-    };
-    if (!res.Health.Log) {
-      res.Health.Log = [];
-    }
-    return res;
-  } catch (e) {
-    return undefined;
-  }
-}
-
 export const isRunningAndHealthy = (state?: ContainerState) =>
   state !== undefined && state.Running && state.Health.Status === "healthy";
 
@@ -87,6 +74,24 @@ export const execPromise = async (cmd: string, quiet: boolean = false) => {
       throw error;
     });
 };
+
+export async function getContainerState(name: ContainerName): Promise<ContainerState | undefined> {
+  try {
+    const { stdout } = await execPromise(`docker inspect --format '{{json .State}}' ${name}`, true);
+    const state: ContainerStateJSON = JSON.parse(stdout.trim());
+    const res = {
+      ...state,
+      StartedAt: new Date(state.StartedAt),
+      FinishedAt: new Date(state.FinishedAt),
+    };
+    if (!res.Health.Log) {
+      res.Health.Log = [];
+    }
+    return res;
+  } catch (e) {
+    return undefined;
+  }
+}
 
 export const spawnWrapper = (
   command: string,

@@ -1,4 +1,5 @@
-import { DockerTestHarness } from "./utils/docker/docker-test-harness";
+/* eslint-disable no-underscore-dangle */
+import { type DockerTestHarness } from "./utils/docker/docker-test-harness";
 
 export default async function postTest() {
   // @ts-ignore
