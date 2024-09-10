@@ -65,8 +65,8 @@
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
-    "test": "dotenv -e ../.env.ci -e ../../docker/.env -- pnpm jest",
-    "test:verbose": "dotenv -e ../.env.ci -e ../../docker/.env -v VERBOSE=true -- pnpm jest",
+    "test": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -- pnpm jest",
+    "test:verbose": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -v VERBOSE=true -- pnpm jest",
     "unit-test": "dotenv -e ../.env.ci -v NO_TEST_SETUP=true -- pnpm jest tests/unit"
   },
   "typings": "dist/src/index.d.ts",

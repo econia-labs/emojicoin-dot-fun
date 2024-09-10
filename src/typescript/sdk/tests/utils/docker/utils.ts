@@ -75,7 +75,7 @@ export const execPromise = async (cmd: string, quiet: boolean = false) => {
   const res = promisify(exec);
   return res(cmd)
     .then((result) => {
-      if (process.env.VERBOSE && !quiet) {
+      if (!quiet) {
         logger(null, result.stdout, result.stderr);
       }
       return result;
@@ -94,7 +94,7 @@ export const spawnWrapper = (
   quiet: boolean = false
 ): ChildProcessWithoutNullStreams => {
   const childProcess = spawn(command, args);
-  if (process.env.VERBOSE && !quiet) {
+  if (!quiet) {
     childProcess.stdout.on("data", (data) => {
       printLogs(data.toString().trim());
     });
