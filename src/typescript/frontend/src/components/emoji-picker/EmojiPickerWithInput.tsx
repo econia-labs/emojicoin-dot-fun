@@ -6,7 +6,7 @@ import { Arrow } from "components/svg";
 import ClosePixelated from "@icons/ClosePixelated";
 import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
 import { motion, useDragControls } from "framer-motion";
-import React, { useRef, useEffect, useCallback, RefObject, useState } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
 import { MarketValidityIndicator } from "./ColoredBytesIndicator";

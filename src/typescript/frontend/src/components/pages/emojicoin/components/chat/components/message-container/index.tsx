@@ -36,6 +36,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
     }
     const selfName = nameResolver(account.address);
     setFromAnotherUser(selfName !== message.sender);
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [account, message]);
 
   return (

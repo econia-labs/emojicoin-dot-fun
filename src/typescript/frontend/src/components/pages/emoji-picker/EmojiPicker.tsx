@@ -1,7 +1,7 @@
 "use client";
 // cspell:word couldn
 
-import { type HTMLAttributes, Suspense, useEffect } from "react";
+import { type HTMLAttributes, Suspense, useEffect, type PointerEventHandler } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
@@ -28,12 +28,11 @@ export const search = async (value: string): Promise<SearchResult> => {
 };
 
 export default function EmojiPicker(
-  props: HTMLAttributes<HTMLDivElement> & { drag: (e: any) => void }
+  props: HTMLAttributes<HTMLDivElement> & { drag: PointerEventHandler<HTMLDivElement> }
 ) {
   const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
   const setChatEmojiData = useEmojiPicker((s) => s.setChatEmojiData);
   const mode = useEmojiPicker((s) => s.mode);
-  const onClickOutside = useEmojiPicker((s) => s.onClickOutside);
   const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
   const host = document.querySelector("em-emoji-picker");
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
@@ -234,7 +233,6 @@ export default function EmojiPicker(
 
         <div className="relative z-10 bg-black rounded-xl border-ec-blue border-solid border-[1px] border-t-0" style={{marginTop: "-10px"}}>
         <Picker
-          // TODO: Use this function later instead of the current stuff we have, aka using `onBlur()`.
           perLine={8}
           exceptEmojis={[]}
           onEmojiSelect={(v: EmojiSelectorData) => {
