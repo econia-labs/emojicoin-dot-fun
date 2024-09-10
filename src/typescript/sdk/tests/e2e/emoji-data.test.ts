@@ -1,5 +1,6 @@
 // cspell:word writeset
 import {
+  AccountAddress,
   type UserTransactionResponse,
   type WriteSetChangeWriteResource,
   type WriteSetChangeWriteTableItem,
@@ -34,10 +35,15 @@ describe("verification of typescript emoji JSON data", () => {
     });
 
     expect(registryWrite).toBeDefined();
+    // Get the table handle in the writeset.
     const writeset = registryWrite as WriteSetChangeWriteResource;
     const data = writeset.data.data as any;
-    const tableHandle = data.coin_symbol_emojis.handle;
+    // Believe it or not, the REST API strips leading zeroes from a table handle when it's in the
+    // `handle` field, but not when i's in the `key` field of a table item. 💀
+    // So we need to normalize it.
+    const tableHandle = AccountAddress.from(data.coin_symbol_emojis.handle);
 
+    // Then filter all writeset changes for emojis being added to the coin_symbol_emojis table.
     const emojisInChangeSet = changes.filter((change) => {
       const changeType = change.type;
       if (changeType !== "write_table_item") {
@@ -45,7 +51,7 @@ describe("verification of typescript emoji JSON data", () => {
       }
       const ch = change as WriteSetChangeWriteTableItem;
       return (
-        ch.handle === tableHandle &&
+        AccountAddress.from(ch.handle).equals(tableHandle) &&
         ch.data?.key_type === "vector<u8>" &&
         ch.data?.value === 0 &&
         ch.data?.value_type === "u8"

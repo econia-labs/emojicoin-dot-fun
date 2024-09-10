@@ -3,16 +3,24 @@ import {
   PUBLISHER_PRIVATE_KEY_PATH,
   PUBLISH_RES_PATH,
 } from "./utils";
-import { DockerTestHarness } from "./utils/docker-test-harness";
+import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 import { getPublishTransactionFromIndexer } from "./utils/get-publish-txn-from-indexer";
 import { ensureWriteFileSync } from "./utils/ensure-write-file-sync";
+import { ContainerName } from "./utils/docker/logs";
 
 export default async function preTest() {
+  // Print an empty line to separate `Determining test suites to run...` from the logs.
+  console.debug();
+  // @ts-ignore
+  globalThis.__DOCKER_LOGS_FILTER__ = ["broker"] as Array<ContainerName>;
   const testHarness = new DockerTestHarness({ includeFrontend: false });
   // --------------------------------------------------------------------------------------
   //                             Start the docker containers.
   // --------------------------------------------------------------------------------------
   await testHarness.run();
+  // @ts-ignore
+  globalThis.__TEST_HARNESS__ = testHarness;
+
 
   // Note that the docker container start-up script publishes the package on-chain.
   // --------------------------------------------------------------------------------------
