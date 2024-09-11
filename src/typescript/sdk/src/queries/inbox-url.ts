@@ -3,7 +3,7 @@ import "server-only";
 import { PostgrestClient } from "@supabase/postgrest-js";
 
 if (!process.env.INBOX_URL) {
-  console.warn("Remove this file upon submission of this PR.");
+  throw new Error("The `inbox` endpoint is not defined for server actions.");
 }
 
 const authorizationHeaders = process.env.INBOX_JWT_TOKEN
