@@ -11,6 +11,7 @@ import { memoizedSortedDedupedEvents, mergeSortedEvents, sortEvents } from "lib/
 import { parseJSON } from "utils";
 import { motion } from "framer-motion";
 import "./trade-history.css";
+import { q64ToBig } from "@sdk/utils/nominal-price";
 
 const HARD_LIMIT = 500;
 
@@ -20,7 +21,7 @@ const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
   emoji: value.baseVolume.toString(),
   date: new Date(Number(value.time / 1000n)),
   type: value.isSell ? "sell" : "buy",
-  price: value.avgExecutionPriceQ64.toString(),
+  price: q64ToBig(value.avgExecutionPriceQ64).toString(),
   swapper: value.swapper,
   version: value.version,
 });
