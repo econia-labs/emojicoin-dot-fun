@@ -2,9 +2,9 @@ FROM node:20.12.2
 
 SHELL ["/bin/bash", "-o", "pipefail"]
 
-RUN curl -fsSL https://get.pnpm.io/install.sh | \
-    ENV="$HOME/.bashrc" SHELL="$(which bash)" bash - \
-    && mv /root/.local/share/pnpm/pnpm /usr/local/bin/
+RUN ["bash", "-c", "curl -fsSL https://get.pnpm.io/install.sh | ENV=$HOME/.bashrc SHELL=$(which bash) bash -"]
+
+RUN ["mv", "/root/.local/share/pnpm/pnpm", "/usr/local/bin"]
 
 COPY . /
 
@@ -31,6 +31,6 @@ ENV INBOX_URL=$INBOX_URL \
     NEXT_PUBLIC_REWARDS_MODULE_ADDRESS=$NEXT_PUBLIC_REWARDS_MODULE_ADDRESS \
     REVALIDATION_TIME=$REVALIDATION_TIME
 
-RUN pnpm install && pnpm run build
+RUN ["bash", "-c", "pnpm install && pnpm run build"]
 
 CMD ["pnpm", "run", "start", "-H", "0.0.0.0"]
