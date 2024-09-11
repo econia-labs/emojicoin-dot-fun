@@ -61,7 +61,6 @@ export const SearchBar: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => 
               {searchIcon}
               <EmojiPickerWithInput
                 handleClick={async () => {}}
-                pickerButtonClassName="top-[50px] bg-black"
                 inputClassName="search-picker border-none"
                 geoblocked={geoblocked}
               />

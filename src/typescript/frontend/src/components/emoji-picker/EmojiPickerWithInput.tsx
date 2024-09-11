@@ -5,7 +5,7 @@ import { InputGroup, Textarea } from "components/inputs";
 import { Arrow } from "components/svg";
 import ClosePixelated from "@icons/ClosePixelated";
 import EmojiPicker from "components/pages/emoji-picker/EmojiPicker";
-import { motion } from "framer-motion";
+import { motion, useDragControls } from "framer-motion";
 import React, { useRef, useEffect, useCallback } from "react";
 import { isDisallowedEventKey } from "utils";
 import { MAX_NUM_CHAT_EMOJIS } from "components/pages/emoji-picker/const";
@@ -14,6 +14,7 @@ import { variants } from "./animation-variants";
 import { checkTargetAndStopDefaultPropagation } from "./utils";
 import { getEmojisInString } from "@sdk/emoji_data";
 import "./triangle.css";
+import { createPortal } from "react-dom";
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -45,7 +46,7 @@ export const EmojiPickerWithInput = ({
   geoblocked,
 }: {
   handleClick: (message: string) => Promise<void>;
-  pickerButtonClassName: string;
+  pickerButtonClassName?: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
   geoblocked: boolean;
@@ -64,6 +65,10 @@ export const EmojiPickerWithInput = ({
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
   const removeEmojiTextInput = useEmojiPicker((s) => s.removeEmojiTextInput);
   const textAreaRef = useEmojiPicker((s) => s.textAreaRef);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const ctrls = useDragControls();
 
   const onRefChange = useCallback(
     (node: HTMLTextAreaElement | null) => {
@@ -233,18 +238,44 @@ export const EmojiPickerWithInput = ({
         picker we use for checking auxiliary (chat) emojis and other various things, so we still need to use it.
         We could decouple this, but we'll likely be using the data loaded in the EmojiPicker at some point in the app's
         lifecycle anyway, so it should be fine as is. */}
-      <motion.button
-        animate={nativePicker || pickerInvisible ? "hidden" : "visible"}
-        variants={variants}
-        initial={{
-          zIndex: -1,
-          opacity: 0,
-          scale: 0,
-        }}
-        className={`absolute z-50 ${pickerButtonClassName}`}
-      >
-        <EmojiPicker id="picker" className={mode} />
-      </motion.button>
+      {createPortal(
+        <div
+          className="fixed bg-transparent right-0"
+          style={{
+            zIndex: 100,
+            ...(mode === "chat" ? { top: 0 } : { bottom: 0 }),
+          }}
+          ref={containerRef}
+        >
+          <motion.button
+            dragControls={ctrls}
+            drag={true}
+            dragTransition={{power: 0.05, timeConstant: 100}}
+            dragListener={false}
+            dragConstraints={useRef(document.body)}
+            whileDrag={{scale: 1.03}}
+            animate={nativePicker || pickerInvisible ? "hidden" : "visible"}
+            variants={variants}
+            initial={{
+              zIndex: -1,
+              opacity: 0,
+              scale: 0,
+            }}
+            className={`absolute ${pickerButtonClassName}`}
+            style={{
+              right: 20,
+              ...(mode === "chat" ? { top: 20 } : { bottom: 20 }),
+            }}
+          >
+            <EmojiPicker
+              id="picker"
+              className={mode}
+              drag={(e) => ctrls.start(e, { snapToCursor: false })}
+            />
+          </motion.button>
+        </div>,
+        document.body
+      )}
     </Flex>
   );
 };
