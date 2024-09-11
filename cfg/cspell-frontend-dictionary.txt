@@ -48,3 +48,4 @@ geoblocked
 ipinfo
 localstorage
 vpnapi
+ctrls

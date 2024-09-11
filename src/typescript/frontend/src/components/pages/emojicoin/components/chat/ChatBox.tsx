@@ -44,11 +44,6 @@ const convertChatMessageToEmojiAndIndices = (
   return { emojiBytes: bytesArray, emojiIndicesSequence: sequence };
 };
 
-const pickerClass = `
-  absolute bottom-[55px] mb-[5px] xl:mb-0 xl:bottom-[-3.6%] bg-black
-  right-[50%] xl:right-full translate-x-[50%] xl:translate-x-0 mr-0
-`;
-
 const getCombinedChats = (chats: readonly Types.ChatEvent[], marketID: bigint) => {
   const stateGuids = new Set(chats.map((chat) => chat.guid));
   const localChats: Types.ChatEvent[] = parseJSON(localStorage.getItem(`chats`) ?? "[]");
@@ -182,11 +177,7 @@ const ChatBox = (props: ChatProps) => {
         </motion.div>
       </Flex>
 
-      <EmojiPickerWithInput
-        geoblocked={props.geoblocked}
-        handleClick={sendChatMessage}
-        pickerButtonClassName={pickerClass}
-      />
+      <EmojiPickerWithInput geoblocked={props.geoblocked} handleClick={sendChatMessage} />
     </Column>
   );
 };

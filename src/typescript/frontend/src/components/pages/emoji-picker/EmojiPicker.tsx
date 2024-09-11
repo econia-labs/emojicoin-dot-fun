@@ -1,7 +1,7 @@
 "use client";
 // cspell:word couldn
 
-import { type HTMLAttributes, Suspense, useEffect } from "react";
+import { type HTMLAttributes, Suspense, useEffect, type PointerEventHandler } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
@@ -10,6 +10,7 @@ import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 import { ECONIA_BLUE } from "theme/colors";
+import RoundButton from "@icons/Minimize";
 
 // This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
 // TBH, we should probably just fork the library.
@@ -26,11 +27,13 @@ export const search = async (value: string): Promise<SearchResult> => {
   return await SearchIndex.search(value);
 };
 
-export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
+export default function EmojiPicker(
+  props: HTMLAttributes<HTMLDivElement> & { drag: PointerEventHandler<HTMLDivElement> }
+) {
   const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
   const setChatEmojiData = useEmojiPicker((s) => s.setChatEmojiData);
   const mode = useEmojiPicker((s) => s.mode);
-  const onClickOutside = useEmojiPicker((s) => s.onClickOutside);
+  const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
   const host = document.querySelector("em-emoji-picker");
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
 
@@ -179,8 +182,6 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
           font-weight: 500 !important;
           background: var(--black) !important;
           color: ${ECONIA_BLUE} !important;
-          border: 1px solid ${ECONIA_BLUE} !important;
-          box-shadow: -1px 1px 7px 5px ${ECONIA_BLUE}33 !important;
         }
 
         div.flex div.search input {
@@ -215,15 +216,36 @@ export default function EmojiPicker(props: HTMLAttributes<HTMLDivElement>) {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div {...props}>
+      <div
+        {...props}
+        className="relative bg-black rounded-xl shadow-econia"
+      >
+        <div
+          className="right-0 relative h-[29px] w-[100%] bg-ec-blue z-5"
+          style={{
+            touchAction: "none",
+            borderTopLeftRadius: "8px",
+            borderTopRightRadius: "8px",
+          }}
+          onPointerDown={props.drag}
+        >
+        </div>
+
+        <div className="relative z-10 bg-black rounded-xl border-ec-blue border-solid border-[1px] border-t-0" style={{marginTop: "-10px"}}>
         <Picker
-          // TODO: Use this function later instead of the current stuff we have, aka using `onBlur()`.
-          onClickOutside={onClickOutside}
           perLine={8}
           exceptEmojis={[]}
           onEmojiSelect={(v: EmojiSelectorData) => {
             const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
             insertEmojiTextInput([newEmoji]);
+          }}
+        />
+        </div>
+
+        <RoundButton
+          className="absolute top-[4px] left-[5px] z-20 bg-red"
+          onClick={() => {
+            setPickerInvisible(true);
           }}
         />
       </div>

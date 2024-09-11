@@ -36,7 +36,8 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
     }
     const selfName = nameResolver(account.address);
     setFromAnotherUser(selfName !== message.sender);
-  }, [account, fromAnotherUser, message, nameResolver]);
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [account, message]);
 
   return (
     <motion.div
