@@ -302,7 +302,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
     const { aptosConfig } = args;
     const payloadBuilder = new this({
       ...args,
-      integrator: "0x0000000000000000000000000000000000000000000000000000000000000001",
+      integrator: AccountAddress.ONE,
     });
     const aptos = new Aptos(aptosConfig);
     const transaction = await aptos.transaction.build.simple({
