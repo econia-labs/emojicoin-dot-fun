@@ -20,8 +20,8 @@ import { Flex, FlexGap } from "@containers";
 import Popup from "components/popup";
 import { Text } from "components/text";
 
-const SmallButton = ({ emoji, descripition, onClick }: { emoji: string, descripition: string, onClick?: MouseEventHandler<HTMLDivElement> }) => {
-  return <Popup content={<Text textScale="pixelHeading4" textTransform="uppercase" color="black">{descripition}</Text>}>
+const SmallButton = ({ emoji, description, onClick }: { emoji: string, description: string, onClick?: MouseEventHandler<HTMLDivElement> }) => {
+  return <Popup content={<Text textScale="pixelHeading4" textTransform="uppercase" color="black">{description}</Text>}>
     <div className="px-[.7rem] py-[.2rem] border-[1px] border-solid rounded-full border-dark-gray h-[1.5rem] cursor-pointer hover:bg-neutral-800" onClick={onClick}>
       <div className="mt-[.11rem]">
         {emoji}
@@ -201,11 +201,11 @@ export default function SwapComponent({
           </div>
           <FlexGap flexDirection="row" gap="5px">
             {isSell ?
-              <SmallButton emoji="🤮" descripition="Sell all" onClick={() => setInputAmount(String(emojicoinBalance))} />
+              <SmallButton emoji="🤮" description="Sell all" onClick={() => setInputAmount(String(emojicoinBalance))} />
               :
               <>
-                <SmallButton emoji="🌓" descripition="Buy half" onClick={() => setInputAmount(String(availableAptBalance / 2n))} />
-                <SmallButton emoji="🌕" descripition="Buy all" onClick={() => setInputAmount(String(availableAptBalance))} />
+                <SmallButton emoji="🌓" description="Buy half" onClick={() => setInputAmount(String(availableAptBalance / 2n))} />
+                <SmallButton emoji="🌕" description="Buy all" onClick={() => setInputAmount(String(availableAptBalance))} />
               </>
             }
           </FlexGap>
