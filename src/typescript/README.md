@@ -10,15 +10,15 @@ scripts run the `dotenv-cli` package as a wrapper, like so:
 
 ```shell
 # In sdk/package.json:
-"test": "dotenv -e ../.env.test -- pnpm jest",
+"test": "dotenv -e ../.env.ci -- pnpm jest",
 
 # I run this command
 pnpm run test
 
-# Which loads the env variables in `../.env.test` and runs `jest`
+# Which loads the env variables in `../.env.ci` and runs `jest`
 ```
 
-Where `../.env.test` is the environment file located in the `typescript` parent
+Where `../.env.ci` is the environment file located in the `typescript` parent
 directory.
 
 To avoid having to define environment variables in multiple places, we've

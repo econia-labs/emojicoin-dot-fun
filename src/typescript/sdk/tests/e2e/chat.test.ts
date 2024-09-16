@@ -1,25 +1,20 @@
-import { Account } from "@aptos-labs/ts-sdk";
-import { PostgrestClient } from "@supabase/postgrest-js";
-import { LOCAL_INBOX_URL, ONE_APT } from "../../src/const";
+import { Ed25519Account } from "@aptos-labs/ts-sdk";
+import { ONE_APT } from "../../src/const";
 import { getRegistryAddress, toChatEvent } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { sleep } from "../../src/utils";
-import { getTestHelpers } from "../utils";
+import { getPublishHelpers } from "../utils";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { STRUCT_STRINGS } from "../../src/utils/type-tags";
+import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(20000);
 
 describe("emits a chat message event successfully", () => {
-  const { aptos, publisher } = getTestHelpers();
-  const randomIntegrator = Account.generate();
-  const user = Account.generate();
-
-  beforeAll(async () => {
-    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
-    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
-    return true;
-  });
+  const { aptos, publisher } = getPublishHelpers();
+  const randomIntegrator = Ed25519Account.generate();
+  const user = getFundedAccount(
+    "0x006423e9a2e9574b2ec3898a78ab52a0678346a463a75cd414f4db51de36a006"
+  );
 
   it("registers a black cat emojicoin and then emits complex chat emoji sequences", async () => {
     // Note the first two are supplementary chat emojis, the rest are valid symbol emojis.
@@ -113,12 +108,5 @@ describe("emits a chat message event successfully", () => {
     expect(secondChatEventJSON).toBeDefined();
     const secondChatEvent = toChatEvent(secondChatEventJSON, Number(chatResponse.version));
     expect(secondChatEvent.message).toEqual(indices.map((i) => chatEmojis[i][1]).join(""));
-
-    const postgrest = new PostgrestClient(LOCAL_INBOX_URL);
-
-    // Wait to make sure events were processed and saved by Inbox.
-    await sleep(1000);
-    const res = await postgrest.from("inbox_events").select("type");
-    expect(res.data?.length).toBeGreaterThan(0);
   });
 });

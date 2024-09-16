@@ -6,7 +6,7 @@ jobs:
         working-directory: 'doc/doc-site'
     runs-on: 'ubuntu-latest'
     steps:
-    - uses: 'actions/checkout@v3'
+    - uses: 'actions/checkout@v4'
     - uses: 'actions/setup-node@v3'
       with:
         node-version: 20
@@ -18,6 +18,7 @@ name: 'Verify docs site build'
   pull_request:
     branches:
     - 'main'
+    - 'production'
     paths:
     - 'doc/doc-site/**'
     - '.github/workflows/verify-doc-site-build.yaml'
