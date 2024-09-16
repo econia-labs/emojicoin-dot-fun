@@ -1,7 +1,7 @@
 "use client";
 
 import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
-import { type PropsWithChildren, useEffect, useState, useCallback, useMemo, MouseEventHandler } from "react";
+import { type PropsWithChildren, useEffect, useState, useCallback, useMemo, type MouseEventHandler } from "react";
 import FlipInputsArrow from "./FlipInputsArrow";
 import { Column, Row } from "components/layout/components/FlexContainers";
 import { SwapButton } from "./SwapButton";
