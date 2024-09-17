@@ -151,9 +151,6 @@ Outputs:
     Condition: 'MaybeDeployBastionHost'
     Description: 'The instance ID of the bastion host.'
     Value: !Ref 'BastionHost'
-  RestApiKey:
-    Condition: 'MaybeDeployRestApi'
-    Value: !Ref 'RestApiKey'
   RestEndpoint:
     Condition: 'MaybeDeployRestApiDnsRecord'
     Value: !Sub

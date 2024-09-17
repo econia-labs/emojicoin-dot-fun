@@ -236,13 +236,26 @@ deployment environment:
    echo $STACK_NAME
    ```
 
+1. Get the REST API key ID:
+
+   ```sh
+   API_KEY_ID=$(aws cloudformation describe-stack-resources \
+       --logical-resource-id RestApiKey \
+       --output text \
+       --query 'StackResources[0].PhysicalResourceId' \
+       --stack-name $STACK_NAME \
+   )
+   echo $API_KEY_ID
+   ```
+
 1. Get the REST API key:
 
    ```sh
-   API_KEY=$(aws cloudformation describe-stacks \
+   API_KEY=$(aws apigateway get-api-key \
+       --api-key $API_KEY_ID \
+       --include-value \
        --output text \
-       --query 'Stacks[0].Outputs[?OutputKey==`RestApiKey`].OutputValue' \
-       --stack-name $STACK_NAME \
+       --query 'value'
    )
    echo $API_KEY
    ```
