@@ -6,8 +6,14 @@
 # cspell:word pullthroughcache
 ---
 Conditions:
-  EnableWafRules: !Equals
-  - !Ref 'EnableWafRules'
+  EnableWafRulesGeneral: !Equals
+  - !Ref 'EnableWafRulesGeneral'
+  - 'true'
+  EnableWafRulesRestApi: !Equals
+  - !Ref 'EnableWafRulesRestApi'
+  - 'true'
+  EnableWafRulesWebSocket: !Equals
+  - !Ref 'EnableWafRulesWebSocket'
   - 'true'
   MaybeDeployAlb: !And
   - !Condition 'MaybeDeployVpc'
@@ -173,7 +179,17 @@ Parameters:
   DbMinCapacity:
     Default: 0.5
     Type: 'Number'
-  EnableWafRules:
+  EnableWafRulesGeneral:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  EnableWafRulesRestApi:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  EnableWafRulesWebSocket:
     AllowedValues:
     - 'false'
     - 'true'
@@ -1828,7 +1844,7 @@ Resources:
       # Use AWS common rule set.
       - Name: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
         OverrideAction: !If
-        - 'EnableWafRules'
+        - 'EnableWafRulesGeneral'
         - None: {} # yamllint disable-line rule:braces
         - Count: {} # yamllint disable-line rule:braces
         Priority: 1
@@ -1843,7 +1859,7 @@ Resources:
       # Block VPNs and otherwise obfuscated IP addresses.
       - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
         OverrideAction: !If
-        - 'EnableWafRules'
+        - 'EnableWafRulesGeneral'
         - None: {} # yamllint disable-line rule:braces
         - Count: {} # yamllint disable-line rule:braces
         Priority: 2
@@ -1858,7 +1874,7 @@ Resources:
       # Block known IP threats.
       - Name: !Sub '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
         OverrideAction: !If
-        - 'EnableWafRules'
+        - 'EnableWafRulesGeneral'
         - None: {} # yamllint disable-line rule:braces
         - Count: {} # yamllint disable-line rule:braces
         Priority: 3
@@ -1873,7 +1889,7 @@ Resources:
           SampledRequestsEnabled: true
       # Rate limit by IP for the REST API.
       - Action: !If
-        - 'EnableWafRules'
+        - 'EnableWafRulesRestApi'
         - Block: {} # yamllint disable-line rule:braces
         - Count: {} # yamllint disable-line rule:braces
         Name: !Sub '${AWS::StackName}-RestApiRateLimit'
@@ -1903,7 +1919,7 @@ Resources:
           SampledRequestsEnabled: true
       # Limit WebSocket messages by IP via rate limit.
       - Action: !If
-        - 'EnableWafRules'
+        - 'EnableWafRulesWebSocket'
         - Block: {} # yamllint disable-line rule:braces
         - Count: {} # yamllint disable-line rule:braces
         Name: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
