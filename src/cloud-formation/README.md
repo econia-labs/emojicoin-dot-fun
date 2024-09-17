@@ -236,6 +236,17 @@ deployment environment:
    echo $STACK_NAME
    ```
 
+1. Get the REST API key:
+
+   ```sh
+   API_KEY=$(aws cloudformation describe-stacks \
+       --output text \
+       --query 'Stacks[0].Outputs[?OutputKey==`RestApiKey`].OutputValue' \
+       --stack-name $STACK_NAME \
+   )
+   echo $API_KEY
+   ```
+
 1. Get the endpoints specified in the [template outputs section]:
 
    ```sh
@@ -263,7 +274,8 @@ deployment environment:
 1. Query the REST endpoint:
 
    ```sh
-   curl "$REST_ENDPOINT/processor_status?select=last_success_version"
+   curl -H "x-api-key: $API_KEY" \
+       "$REST_ENDPOINT/processor_status?select=last_success_version"
    ```
 
 1. Connect to the WebSocket endpoint:
