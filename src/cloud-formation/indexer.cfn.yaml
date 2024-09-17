@@ -1687,6 +1687,7 @@ Resources:
   RestApiDeployment:
     Condition: 'MaybeDeployRestApi'
     DependsOn:
+    - 'RestApiKey'
     - 'RestApiMethodGeneral'
     - 'RestApiMethodRoot'
     Properties:
@@ -1738,7 +1739,6 @@ Resources:
   # API key for the REST API endpoint.
   RestApiKey:
     Condition: 'MaybeDeployRestApi'
-    DependsOn: 'RestApiStage'
     Properties:
       Enabled: true
       StageKeys:
@@ -1808,6 +1808,7 @@ Resources:
   # Stage for the REST API endpoint.
   RestApiStage:
     Condition: 'MaybeDeployRestApi'
+    DependsOn: 'RestApiKey'
     Properties:
       CacheClusterEnabled: 'true'
       CacheClusterSize: '0.5'
