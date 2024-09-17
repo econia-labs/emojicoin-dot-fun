@@ -1654,6 +1654,7 @@ Resources:
   RestApi:
     Condition: 'MaybeDeployRestApi'
     Properties:
+      ApiKeySourceType: 'HEADER'
       EndpointConfiguration:
         Types:
         - 'REGIONAL'
@@ -1734,10 +1735,21 @@ Resources:
       RegionalCertificateArn: !Ref 'RestApiCertificate'
       SecurityPolicy: 'TLS_1_2'
     Type: 'AWS::ApiGateway::DomainName'
+  # API key for the REST API endpoint.
+  RestApiKey:
+    Condition: 'MaybeDeployRestApi'
+    DependsOn: 'RestApiStage'
+    Properties:
+      Enabled: true
+      StageKeys:
+      - RestApiId: !Ref 'RestApi'
+        StageName: !Ref 'AWS::StackName'
+    Type: 'AWS::ApiGateway::ApiKey'
   # Rest API endpoint general method.
   RestApiMethodGeneral:
     Condition: 'MaybeDeployRestApi'
     Properties:
+      ApiKeyRequired: true
       AuthorizationType: 'NONE'
       HttpMethod: 'GET'
       Integration:
@@ -1763,6 +1775,7 @@ Resources:
   RestApiMethodRoot:
     Condition: 'MaybeDeployRestApi'
     Properties:
+      ApiKeyRequired: true
       AuthorizationType: 'NONE'
       HttpMethod: 'GET'
       Integration:
