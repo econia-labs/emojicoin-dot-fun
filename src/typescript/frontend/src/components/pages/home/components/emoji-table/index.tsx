@@ -137,49 +137,52 @@ const EmojiTable = (props: EmojiTableProps) => {
           </motion.div>
           {/* Each version of the grid must wait for the other to fully exit animate out before appearing.
               This provides a smooth transition from grids of varying row lengths. */}
-          {
-            data.length > 0 ?
-              <>
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    className="relative w-full h-full"
-                    id="emoji-grid"
-                    key={rowLength}
-                    style={{
-                      // We set these so the grid layout doesn't snap when the number of items per row changes.
-                      // This actually seems to work better than the css media queries, although I've left them in module.css
-                      // in case we want to use them for other things.
-                      maxWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
-                      minWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
-                    }}
-                    exit={{
-                      opacity: 0,
-                      transition: {
-                        duration: 0.35,
-                        type: "just",
-                      },
-                    }}
-                  >
-                    <StyledGrid>
-                      {shouldAnimateGrid ? (
-                        <LiveClientGrid data={data} sortBy={sort ?? MarketDataSortBy.MarketCap} />
-                      ) : (
-                        <ClientGrid data={data} page={page} sortBy={sort ?? MarketDataSortBy.MarketCap} />
-                      )}
-                    </StyledGrid>
-                  </motion.div>
-                </AnimatePresence>
-                <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} />
-              </>
-              :
-              <div className="py-10">
-                <Link href={`${ROUTES.launch}?emojis=${emojis.join("")}`}>
+          {data.length > 0 ? (
+            <>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  className="relative w-full h-full"
+                  id="emoji-grid"
+                  key={rowLength}
+                  style={{
+                    // We set these so the grid layout doesn't snap when the number of items per row changes.
+                    // This actually seems to work better than the css media queries, although I've left them in module.css
+                    // in case we want to use them for other things.
+                    maxWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
+                    minWidth: rowLength * EMOJI_GRID_ITEM_WIDTH + GRID_PADDING * 2,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    transition: {
+                      duration: 0.35,
+                      type: "just",
+                    },
+                  }}
+                >
+                  <StyledGrid>
+                    {shouldAnimateGrid ? (
+                      <LiveClientGrid data={data} sortBy={sort ?? MarketDataSortBy.MarketCap} />
+                    ) : (
+                      <ClientGrid
+                        data={data}
+                        page={page}
+                        sortBy={sort ?? MarketDataSortBy.MarketCap}
+                      />
+                    )}
+                  </StyledGrid>
+                </motion.div>
+              </AnimatePresence>
+              <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} />
+            </>
+          ) : (
+            <div className="py-10">
+              <Link href={`${ROUTES.launch}?emojis=${emojis.join("")}`}>
                 <Text textScale="pixelHeading3" color="econiaBlue">
                   Click here to launch {emojis.join("")} !
                 </Text>
-                </Link>
-              </div>
-          }
+              </Link>
+            </div>
+          )}
         </InnerGridContainer>
       </OuterContainer>
     </OutermostContainer>

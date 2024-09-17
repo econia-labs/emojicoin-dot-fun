@@ -32,8 +32,7 @@ module.exports = {
       boxShadow: {
         pretty:
           "-0.5px 0.5px 0.3px rgba(0,0,0,0.04), -1.1px 1.1px 0.7px rgba(0,0,0,0.055), -1.8px 1.8px 1.2px rgba(0,0,0,0.064), -2.7px 2.7px 1.8px rgba(0,0,0,0.071), -3.9px 3.9px 2.6px rgba(0,0,0,0.077), -5.5px 5.5px 3.7px rgba(0,0,0,0.083), -7.8px 7.8px 5.3px rgba(0,0,0,0.089)",
-        econia:
-          `-1px 1px 7px 5px rgba(8, 108, 217, .12) !important`
+        econia: `-1px 1px 7px 5px rgba(8, 108, 217, .12) !important`,
       },
       dropShadow: {
         text: "0 1px 2px #000000dd",

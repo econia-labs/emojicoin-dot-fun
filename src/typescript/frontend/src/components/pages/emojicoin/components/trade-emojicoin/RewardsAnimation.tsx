@@ -54,6 +54,7 @@ const CustomConfetti = ({
       gravity={0.15}
       tweenDuration={TWEEN_DURATION}
       recycle={false}
+      colors={["#086CD9", "#CD2F8D", "#2FA90F"]}
       onConfettiComplete={() => {
         if (lastIdx.current !== secondaryIndex) {
           // Note that we're basically just ensuring that we don't accidentally cancel a "restarted" animation due to
