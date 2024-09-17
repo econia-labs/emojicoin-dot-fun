@@ -1687,7 +1687,6 @@ Resources:
   RestApiDeployment:
     Condition: 'MaybeDeployRestApi'
     DependsOn:
-    - 'RestApiKey'
     - 'RestApiMethodGeneral'
     - 'RestApiMethodRoot'
     Properties:
@@ -1743,7 +1742,7 @@ Resources:
       Enabled: true
       StageKeys:
       - RestApiId: !Ref 'RestApi'
-        StageName: !Ref 'AWS::StackName'
+        StageName: !Ref 'RestApiStage'
     Type: 'AWS::ApiGateway::ApiKey'
   # Rest API endpoint general method.
   RestApiMethodGeneral:
@@ -1808,7 +1807,6 @@ Resources:
   # Stage for the REST API endpoint.
   RestApiStage:
     Condition: 'MaybeDeployRestApi'
-    DependsOn: 'RestApiKey'
     Properties:
       CacheClusterEnabled: 'true'
       CacheClusterSize: '0.5'
