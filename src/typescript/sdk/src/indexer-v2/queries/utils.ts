@@ -30,9 +30,9 @@ const POLLING_INTERVAL = 100;
 const POLLING_TIMEOUT = 5000;
 
 const extractRow = <T>(res: PostgrestSingleResponse<T>) => res.data;
-const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? ([] as T[]);
+export const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? ([] as T[]);
 
-const getLatestProcessedVersion = async () =>
+const getEmojicoinTableLatestProcessedVersion = async () =>
   postgrest
     .from(TableName.ProcessorStatus)
     .select("last_success_version")
@@ -48,14 +48,14 @@ const getLatestProcessedVersion = async () =>
 /**
  * Wait for the processed version of a table or view to be at least the given version.
  */
-const waitForProcessedVersion = async (minimumVersion: AnyNumberString) =>
+export const waitForEmojicoinIndexer = async (minimumVersion: AnyNumberString) =>
   new Promise<void>((resolve, reject) => {
     let i = 0;
     const maxTries = Math.floor(POLLING_TIMEOUT / POLLING_INTERVAL);
 
     const check = async () => {
       try {
-        const latestVersion = await getLatestProcessedVersion();
+        const latestVersion = await getEmojicoinTableLatestProcessedVersion();
         if (latestVersion >= BigInt(minimumVersion)) {
           resolve();
         } else if (i > maxTries) {
@@ -105,7 +105,7 @@ export function withQueryConfig<
     }
 
     if (minimumVersion) {
-      await waitForProcessedVersion(minimumVersion);
+      await waitForEmojicoinIndexer(minimumVersion);
     }
 
     const res = await query;

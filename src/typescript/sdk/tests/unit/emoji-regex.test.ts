@@ -1,3 +1,4 @@
+import fs from "fs";
 import { SYMBOL_DATA } from "../../src";
 import {
   encodeEmojis,
@@ -7,6 +8,8 @@ import {
   symbolToEmojis,
 } from "../../src/emoji_data/utils";
 import SymbolEmojiData from "../../src/emoji_data/symbol-emojis.json";
+import { getGitRoot } from "../utils";
+import path from "path";
 
 describe("tests emojis against the emoji regex to ensure they're properly validated", () => {
   it("tests a few single emojis", () => {
@@ -110,5 +113,22 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
       expect(enc1).toEqual(enc3);
       expect(enc1).toEqual(enc4);
     }
+  });
+
+  it("ensures the Rust processor has the same emoji data as the TypeScript SDK", () => {
+    const gitRoot = getGitRoot();
+    const tsPath = path.join(gitRoot, "src/typescript/sdk/src/emoji_data/symbol-emojis.json");
+    const rustPath = path.join(
+      gitRoot,
+      "src/rust/processor",
+      "rust/processor",
+      "src/db/common/models/emojicoin_models",
+      "parsers/emojis/symbol-emojis.json"
+    );
+    const tsData = fs.readFileSync(tsPath);
+    const rustData = fs.readFileSync(rustPath);
+    const tsJSON = JSON.parse(tsData.toString());
+    const rustJSON = JSON.parse(rustData.toString());
+    expect(JSON.stringify(tsJSON) === JSON.stringify(rustJSON));
   });
 });

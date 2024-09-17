@@ -6,6 +6,8 @@ import RowEqualityChecks from "./equality-checks";
 import { getFundedAccount } from "../../utils/test-accounts";
 import TestHelpers from "../../utils/helpers";
 
+jest.setTimeout(20000);
+
 describe("address standardization tests", () => {
   it("standardizes a user's address", async () => {
     const user = getFundedAccount(

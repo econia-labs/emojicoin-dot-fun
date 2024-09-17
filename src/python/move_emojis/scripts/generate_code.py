@@ -2,20 +2,48 @@
 # to Move-friendly constants.
 
 import json
+import os
 import pathlib
 from typing import Any
 
 import utils.data_parser as data_parser
 from data_types.type_defs import EmojiData, QualifiedEmojiData
+from utils.git_root import get_git_root
 
 BASE_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-test.txt"
 ZWJ_EMOJIS_URL = "https://unicode.org/Public/emoji/15.1/emoji-zwj-sequences.txt"
-SYMBOL_EMOJI_MOVE_CONSTS_FILE = "data/move-consts-symbol-emojis.txt"
-CHAT_EMOJI_MOVE_CONSTS_FILE = "data/move-consts-chat-emojis.txt"
-BASE_EMOJIS_FILE = "data/base-emojis.json"
-ZWJ_EMOJIS_FILE = "data/zwj-emojis.json"
-SYMBOL_EMOJIS_FILE = "data/symbol-emojis.json"
-CHAT_EMOJIS_FILE = "data/chat-emojis.json"
+SYMBOL_EMOJI_MOVE_CONSTS_PATH = os.path.join("data", "move-consts-symbol-emojis.txt")
+CHAT_EMOJI_MOVE_CONSTS_PATH = os.path.join("data", "move-consts-chat-emojis.txt")
+GIT_ROOT = get_git_root(os.getcwd())
+BASE_EMOJIS_PATH = os.path.join("data", "base-emojis.json")
+ZWJ_EMOJIS_PATH = os.path.join("data", "zwj-emojis.json")
+SYMBOL_EMOJIS_ALL_DATA_PATH = os.path.join("data", "symbol-emojis-all-data.json")
+CHAT_EMOJIS_PATH = os.path.join("data", "chat-emojis.json")
+TYPESCRIPT_JSON_PATH = os.path.join(
+    GIT_ROOT,
+    "src",
+    "typescript",
+    "sdk",
+    "src",
+    "emoji_data",
+    "symbol-emojis.json",
+)
+RUST_JSON_PATH = os.path.join(
+    GIT_ROOT,
+    "src",
+    "rust",
+    "processor",
+    "rust",
+    "processor",
+    "src",
+    "db",
+    "common",
+    "models",
+    "emojicoin_models",
+    "parsers",
+    "emojis",
+    "symbol-emojis.json",
+)
 TAB = " " * 4
 
 
@@ -64,7 +92,21 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
     )
 
 
-def ensure_write_to_file(data: str | dict[str, Any], fp_str: str, indent: int = 3):
+# Use the name as the key still but only keep the encoded UTF-8 emoji field as
+# each entry's value, then sort by the key.
+def as_name_to_emoji_dict(symbol_emojis: dict[str, EmojiData]) -> dict[str, str]:
+    new_data = {k: v["emoji"] for k, v in symbol_emojis.items()}
+    sorted_data = sorted(new_data.items(), key=lambda x: x[0])
+    return dict(sorted_data)
+
+
+# Simply return the emojis as a list.
+def as_emojis_array(symbol_emojis: dict[str, EmojiData]) -> list[str]:
+    data = as_name_to_emoji_dict(symbol_emojis)
+    return list(data.values())
+
+
+def ensure_write_to_file(data: str | dict[str, Any] | list[str], fp_str: str):
     fp = pathlib.Path(fp_str)
     pathlib.Path(fp.parent).mkdir(exist_ok=True)
 
@@ -72,24 +114,24 @@ def ensure_write_to_file(data: str | dict[str, Any], fp_str: str, indent: int = 
         if isinstance(data, str):
             _ = outfile.write(data)
         else:
-            json.dump(data, outfile, indent=indent)
+            json.dump(data, outfile, indent=2)
 
 
 if __name__ == "__main__":
     base_emoji_dict: dict[str, QualifiedEmojiData]
     zwj_emoji_dict: dict[str, EmojiData]
 
-    if pathlib.Path(BASE_EMOJIS_FILE).exists():
-        base_emoji_dict = json.load(open(BASE_EMOJIS_FILE, "r"))
+    if pathlib.Path(BASE_EMOJIS_PATH).exists():
+        base_emoji_dict = json.load(open(BASE_EMOJIS_PATH, "r"))
     else:
         base_emoji_dict = data_parser.get_base_emojis(BASE_EMOJIS_URL)
-        ensure_write_to_file(base_emoji_dict, BASE_EMOJIS_FILE)
+        ensure_write_to_file(base_emoji_dict, BASE_EMOJIS_PATH)
 
-    if pathlib.Path(ZWJ_EMOJIS_FILE).exists():
-        zwj_emoji_dict = json.load(open(ZWJ_EMOJIS_FILE, "r"))
+    if pathlib.Path(ZWJ_EMOJIS_PATH).exists():
+        zwj_emoji_dict = json.load(open(ZWJ_EMOJIS_PATH, "r"))
     else:
         zwj_emoji_dict = data_parser.get_zwj_emojis(ZWJ_EMOJIS_URL)
-        ensure_write_to_file(zwj_emoji_dict, ZWJ_EMOJIS_FILE)
+        ensure_write_to_file(zwj_emoji_dict, ZWJ_EMOJIS_PATH)
 
     symbol_emojis, extended_emojis = data_parser.get_viable_emojis(
         base_emoji_dict, zwj_emoji_dict
@@ -99,11 +141,18 @@ if __name__ == "__main__":
     # some of the larger extended emojis.
     data_parser.remove_large_extended_emojis(extended_emojis)
 
-    ensure_write_to_file(symbol_emojis, SYMBOL_EMOJIS_FILE)
-    ensure_write_to_file(extended_emojis, CHAT_EMOJIS_FILE)
+    ensure_write_to_file(symbol_emojis, SYMBOL_EMOJIS_ALL_DATA_PATH)
+    typescript_data = as_name_to_emoji_dict(symbol_emojis)
+    ensure_write_to_file(typescript_data, TYPESCRIPT_JSON_PATH)
+    # The rust processor uses the `symbol-emojis.json` data at build time, so if the
+    # path for the directory exists, output the data there as well.
+    if pathlib.Path(RUST_JSON_PATH).parent.exists():
+        rust_data = as_emojis_array(symbol_emojis)
+        ensure_write_to_file(rust_data, RUST_JSON_PATH)
 
+    ensure_write_to_file(extended_emojis, CHAT_EMOJIS_PATH)
     generated_code = generate_move_code(symbol_emojis)
-    ensure_write_to_file(generated_code, SYMBOL_EMOJI_MOVE_CONSTS_FILE)
+    ensure_write_to_file(generated_code, SYMBOL_EMOJI_MOVE_CONSTS_PATH)
 
     extended_generated_code = generate_move_code(extended_emojis)
-    ensure_write_to_file(extended_generated_code, CHAT_EMOJI_MOVE_CONSTS_FILE)
+    ensure_write_to_file(extended_generated_code, CHAT_EMOJI_MOVE_CONSTS_PATH)

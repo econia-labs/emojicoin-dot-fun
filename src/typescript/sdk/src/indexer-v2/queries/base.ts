@@ -39,11 +39,12 @@ const selectPeriodicEventsByPeriod = ({
     .gte("start_time", startTime)
     .order("start_time", ORDER_BY.ASC);
 
-const selectMarketLatestStateEvents = ({ marketID }: { marketID?: AnyNumberString }) =>
-  (typeof marketID === "undefined"
-    ? postgrest.from(TableName.MarketLatestStateEvent).select("*")
-    : postgrest.from(TableName.MarketLatestStateEvent).select("*").eq("market_id", marketID)
-  ).order("market_nonce", ORDER_BY.DESC);
+const selectLatestStateEventForMarket = ({ marketID }: { marketID: AnyNumberString }) =>
+  postgrest
+    .from(TableName.MarketLatestStateEvent)
+    .select("*")
+    .eq("market_id", marketID)
+    .order("bump_time", ORDER_BY.DESC);
 
 const selectMarketsPostBondingCurve = () =>
   postgrest
@@ -64,7 +65,7 @@ const selectUserLiquidityPools = ({ provider }: { provider: Account }) =>
 const selectMarket1MPeriodsInLastDay = ({ marketID }: { marketID: AnyNumberString }) =>
   postgrest
     .from(TableName.Market1MPeriodsInLastDay)
-    .select("start_time, volume")
+    .select("*")
     .eq("market_id", marketID);
 
 // prettier-ignore
@@ -73,12 +74,6 @@ const selectMarketDailyVolume = ({ marketID }: { marketID: AnyNumberString }) =>
     .from(TableName.MarketDailyVolume)
     .select("daily_volume")
     .eq("market_id", marketID);
-
-// prettier-ignore
-const selectAllMarketsDailyVolume = () =>
-  postgrest
-    .from(TableName.MarketDailyVolume)
-    .select("daily_volume");
 
 /**
  * NOTE: This query is not optimized, it's merely used for testing purposes to check the validity
@@ -101,12 +96,10 @@ export {
   selectSwapsByMarketID,
   selectChatsByMarketID,
   selectPeriodicEventsByPeriod,
-  selectMarketLatestStateEvents,
-  selectMarketsPostBondingCurve,
+  selectLatestStateEventForMarket,
   selectUniqueMarkets,
   selectUserLiquidityPools,
   selectMarket1MPeriodsInLastDay,
   selectMarketDailyVolume,
-  selectAllMarketsDailyVolume,
   selectLiquidityEvents,
 };

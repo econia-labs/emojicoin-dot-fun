@@ -223,3 +223,6 @@ export const generateRandomSymbol = () => {
   const symbolBytes = new Uint8Array(emojis.flatMap((e) => Array.from(e.bytes)));
   return toMarketEmojiData(symbolBytes);
 };
+
+export const namesToEmojis = (...names: EmojiName[]) =>
+  names.map((name) => SYMBOL_DATA.byStrictName(name).emoji);

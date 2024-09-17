@@ -48,6 +48,7 @@ const checkIfCorruptedData = (state?: ContainerState) => {
     latest.ExitCode !== 0 &&
     latest.Output.includes("The localnet indexer has stale data")
   ) {
+    console.dir(latest, { depth: null });
     throw new Error("Localnet indexer has stale data.");
   }
 };

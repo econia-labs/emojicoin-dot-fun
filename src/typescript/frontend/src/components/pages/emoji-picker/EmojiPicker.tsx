@@ -37,9 +37,9 @@ export default function EmojiPicker(
   const host = document.querySelector("em-emoji-picker");
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
 
-  // TODO: Verify that the length of this set is the same length as the valid chat emojis array in the Move contract.
   // Load the data from the emoji picker library and then extract the valid chat emojis from it.
-  // This way we don't have to construct our own `chat-emojis.json` file.
+  // This is why it's not necessary to build/import a `chat-emojis.json` set, even though there is `symbol-emojis.json`.
+  // NOTE: We don't verify that the length of this set is equal to the number of valid chat emojis in the Move contract.
   useEffect(() => {
     data.then((d) => {
       const chatEmojiData = new Map<string, SymbolEmojiData>();

@@ -107,6 +107,7 @@ type TransactionMetadata = {
 type MarketAndStateMetadata = {
   market_id: Uint64String;
   symbol_bytes: HexString;
+  symbol_emojis: string[];
   bump_time: PostgresTimestamp;
   market_nonce: Uint64String;
   trigger: TriggerType;
@@ -236,7 +237,7 @@ export type DatabaseDataTypes = {
   GlobalStateEventData: GlobalStateEventData;
 };
 
-export type DatabaseSnakeCaseModels = {
+export type DatabaseRow = {
   GlobalStateEventModel: Flatten<TransactionMetadata & GlobalStateEventData>;
   PeriodicStateEventModel: Flatten<
     TransactionMetadata &
@@ -275,13 +276,17 @@ export type DatabaseSnakeCaseModels = {
     market_id: Uint64String;
     daily_volume: Uint128String;
   };
-  Market1MPeriodsInLastDay: {
+  Market1MPeriodsInLastDayModel: {
     market_id: Uint64String;
     transaction_version: Uint64String;
     inserted_at: PostgresTimestamp;
     nonce: Uint64String;
     volume: Uint128String;
     start_time: PostgresTimestamp;
+  };
+  MarketStateModel: DatabaseRow["MarketLatestStateEventModel"] & { daily_volume: Uint128String };
+  ProcessorStatusModel: {
+    last_processed_timestamp: PostgresTimestamp;
   };
 };
 
@@ -297,5 +302,21 @@ export enum TableName {
   UserLiquidityPools = "user_liquidity_pools",
   MarketDailyVolume = "market_daily_volume",
   Market1MPeriodsInLastDay = "market_1m_periods_in_last_day",
+  MarketState = "market_state",
   ProcessorStatus = "processor_status",
 }
+
+export type DatabaseTables = {
+  [TableName.GlobalStateEvents]: DatabaseRow["GlobalStateEventModel"];
+  [TableName.PeriodicStateEvents]: DatabaseRow["PeriodicStateEventModel"];
+  [TableName.MarketRegistrationEvents]: DatabaseRow["MarketRegistrationEventModel"];
+  [TableName.SwapEvents]: DatabaseRow["SwapEventModel"];
+  [TableName.ChatEvents]: DatabaseRow["ChatEventModel"];
+  [TableName.LiquidityEvents]: DatabaseRow["LiquidityEventModel"];
+  [TableName.MarketLatestStateEvent]: DatabaseRow["MarketLatestStateEventModel"];
+  [TableName.UserLiquidityPools]: DatabaseRow["UserLiquidityPoolsModel"];
+  [TableName.MarketDailyVolume]: DatabaseRow["MarketDailyVolumeModel"];
+  [TableName.Market1MPeriodsInLastDay]: DatabaseRow["Market1MPeriodsInLastDayModel"];
+  [TableName.MarketState]: DatabaseRow["MarketStateModel"];
+  [TableName.ProcessorStatus]: DatabaseRow["ProcessorStatusModel"];
+};

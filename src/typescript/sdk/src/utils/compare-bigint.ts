@@ -11,8 +11,8 @@ export const compareBigInt = (a: AnyNumberString, b: AnyNumberString): 0 | -1 | 
   return 0;
 };
 
-export const bigintMax = (a: AnyNumberString, b: AnyNumberString) =>
-  BigInt(compareBigInt(a, b) === 1 ? a : b);
+export const bigintMax = (...args: AnyNumberString[]) =>
+  args.map(BigInt).reduce((max, cur) => (compareBigInt(cur, max) === 1 ? cur : max));
 
-export const bigintMin = (a: AnyNumberString, b: AnyNumberString) =>
-  BigInt(compareBigInt(a, b) === -1 ? a : b);
+export const bigintMin = (...args: AnyNumberString[]) =>
+  args.map(BigInt).reduce((min, cur) => (compareBigInt(cur, min) === -1 ? cur : min));

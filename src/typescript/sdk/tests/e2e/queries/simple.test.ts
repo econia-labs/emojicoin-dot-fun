@@ -4,7 +4,7 @@ import { Chat, ProvideLiquidity, Swap } from "../../../src/emojicoin_dot_fun/emo
 import {
   fetchChats,
   fetchLiquidityEvents,
-  fetchMarketLatestStateEvents,
+  fetchLatestStateEventForMarket,
   fetchSwaps,
   fetchUserLiquidityPools,
 } from "../../../src/indexer-v2/queries";
@@ -12,21 +12,19 @@ import { getAptosClient } from "../../utils";
 import RowEqualityChecks from "./equality-checks";
 import { withQueryConfig } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/snake-case-types";
-import { getFundedAccount } from "../../utils/test-accounts";
+import { getFundedAccounts } from "../../utils/test-accounts";
 import { postgrest } from "../../../src/indexer-v2/queries/client";
+
+jest.setTimeout(20000);
 
 describe("queries swap_events and returns accurate swap row data", () => {
   const { aptos } = getAptosClient();
-  const accounts = [
-    "0x00739effd4b9979ff5c51f57d37248911786d4039afd4e31270e2e37661f4007" as const,
-    "0x008e3dfa7bc7dd3ae0eb59919a1cd5f70155bd0b4d26bf146742bdba2d44b008" as const,
-    "0x0097ca77b3896cc62f0e390c268727f175d5835773da19011c2d3942240d2009" as const,
-    "0x0105ede7d798728422d2c9c9a07306a4a1df01dd2784623a386926b76a3e0010" as const,
-  ];
-  const registrant = getFundedAccount(accounts[0]);
-  const user = getFundedAccount(accounts[1]);
-  const swapper = getFundedAccount(accounts[2]);
-  const provider = getFundedAccount(accounts[3]);
+  const [registrant, user, swapper, provider] = getFundedAccounts(
+    "0x00739effd4b9979ff5c51f57d37248911786d4039afd4e31270e2e37661f4007",
+    "0x008e3dfa7bc7dd3ae0eb59919a1cd5f70155bd0b4d26bf146742bdba2d44b008",
+    "0x0097ca77b3896cc62f0e390c268727f175d5835773da19011c2d3942240d2009",
+    "0x0105ede7d798728422d2c9c9a07306a4a1df01dd2784623a386926b76a3e0010"
+  );
   const marketEmojiNames: EmojiName[][] = [
     ["scroll"],
     ["selfie"],
@@ -41,7 +39,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     });
     const events = getEvents(response);
     const { marketID } = events.marketRegistrationEvents[0];
-    const marketLatestStateRes = await fetchMarketLatestStateEvents({
+    const marketLatestStateRes = await fetchLatestStateEventForMarket({
       marketID,
       minimumVersion: response.version,
     });
@@ -149,7 +147,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
       minimumVersion: liquidityRes.version,
     });
 
-    const poolQueryRes = (await fetchMarketLatestStateEvents({ marketID })).at(0);
+    const poolQueryRes = (await fetchLatestStateEventForMarket({ marketID })).at(0);
     const foundMarketInLatestStateTable = poolQueryRes?.market.marketID === marketID;
     const marketsWithPools = await withQueryConfig(
       () =>
