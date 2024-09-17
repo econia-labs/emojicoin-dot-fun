@@ -1832,6 +1832,22 @@ Resources:
       RestApiId: !Ref 'RestApi'
       StageName: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGateway::Stage'
+  # REST API usage plan.
+  RestApiUsagePlan:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      ApiStages:
+      - ApiId: !Ref 'RestApi'
+        Stage: !Ref 'RestApiStage'
+    Type: 'AWS::ApiGateway::UsagePlan'
+  # Association of API key with usage plan.
+  RestApiUsagePlanKeyAssociation:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      KeyId: !Ref 'RestApiKey'
+      KeyType: 'API_KEY'
+      UsagePlanId: !Ref 'RestApiUsagePlan'
+    Type: 'AWS::ApiGateway::UsagePlanKey'
   # Virtual private cloud for internal networking.
   Vpc:
     Condition: 'MaybeDeployVpc'
