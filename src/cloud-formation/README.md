@@ -15,10 +15,10 @@ accordingly, `git` updates will result in automatic updates.
 The indexer provides a public REST endpoint and a public WebSocket endpoint
 under a root domain you provide, for an environment name of your choosing:
 
-| Endpoint  | URI                                         |
-| --------- | ------------------------------------------- |
-| REST      | `https://<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>`  |
-| WebSocket | `wss://ws.<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>` |
+| Endpoint  | URI                                         | Hardening   |
+| --------- | ------------------------------------------- | ----------- |
+| REST      | `https://<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>`  | API key     |
+| WebSocket | `wss://ws.<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>` | Forthcoming |
 
 ## Template parameters
 
