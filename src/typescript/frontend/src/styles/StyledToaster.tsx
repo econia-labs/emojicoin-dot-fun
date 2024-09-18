@@ -5,7 +5,7 @@ export const StyledToaster = () => {
   return (
     <ToastContainer
       style={{ width: "500px" }}
-      toastStyle={{ background: "black", border: "1px solid #33343D", borderRadius: "0" }}
+      toastStyle={{ background: "black", border: "1px solid #33343D" }}
       position="bottom-left"
       autoClose={7100}
       closeOnClick

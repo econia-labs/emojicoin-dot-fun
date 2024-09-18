@@ -52,6 +52,7 @@ export const SwapButton = ({
         (e) => e.type === STRUCT_STRINGS.LotteryWinnerEvent
       );
       if (rewardsEvent) {
+        controls.start("celebration");
         toast.dark(
           <>
             <RewardsAnimation controls={controls} />
@@ -59,14 +60,11 @@ export const SwapButton = ({
           </>,
           {
             pauseOnFocusLoss: false,
-            autoClose: 7000,
+            autoClose: 15000,
             position: "top-center",
             closeOnClick: false,
           }
         );
-        setTimeout(() => {
-          controls.start("celebration");
-        }, 200);
       }
     }
   }, [account, aptos.config, inputAmount, isSell, marketAddress, submit, controls]);
@@ -81,6 +79,7 @@ export const SwapButton = ({
         <Button disabled={disabled} onClick={handleClick} scale="lg">
           {t("Swap")}
         </Button>
+      <RewardsAnimation controls={controls} />
       </ButtonWithConnectWalletFallback>
     </>
   );
