@@ -201,11 +201,15 @@ export default function SwapComponent({
           </div>
           <FlexGap flexDirection="row" gap="5px">
             {isSell ?
-              <SmallButton emoji="🤮" description="Sell all" onClick={() => setInputAmount(String(emojicoinBalance))} />
+              <>
+                <SmallButton emoji="🤢" description="Sell 50%" onClick={() => setInputAmount(String(emojicoinBalance / 2n))} />
+                <SmallButton emoji="🤮" description="Sell 100%" onClick={() => setInputAmount(String(emojicoinBalance))} />
+              </>
               :
               <>
-                <SmallButton emoji="🌓" description="Buy half" onClick={() => setInputAmount(String(availableAptBalance / 2n))} />
-                <SmallButton emoji="🌕" description="Buy all" onClick={() => setInputAmount(String(availableAptBalance))} />
+                <SmallButton emoji="🌒" description="Buy 25%" onClick={() => setInputAmount(String(availableAptBalance / 4n))} />
+                <SmallButton emoji="🌓" description="Buy 50%" onClick={() => setInputAmount(String(availableAptBalance / 2n))} />
+                <SmallButton emoji="🌕" description="Buy 100%" onClick={() => setInputAmount(String(availableAptBalance))} />
               </>
             }
           </FlexGap>
