@@ -4,6 +4,7 @@
 # cspell:word fargate
 # cspell:word multivalue
 # cspell:word pullthroughcache
+# cspell:word restapis
 ---
 Conditions:
   EnableWafRulesGeneral: !Equals
