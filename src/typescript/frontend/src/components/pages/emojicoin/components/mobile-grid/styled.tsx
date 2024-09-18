@@ -6,6 +6,18 @@ export const StyledMobileContentWrapper = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.darkGray};
   margin-left: 30px;
   margin-right: 30px;
+  position: relative;
+
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: -1px;
+    width: 1200vw;
+    background-color: ${({ theme }) => theme.colors.darkGray};
+    height: 1px;
+    transform: translateX(-20%);
+  }
 `;
 
 export const StyledMobileContentInner = styled.div`
