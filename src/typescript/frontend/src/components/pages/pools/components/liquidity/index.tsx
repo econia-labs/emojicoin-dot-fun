@@ -188,9 +188,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           type={direction === "add" ? "number" : "text"}
           disabled={direction === "remove"}
           value={
-            direction === "add"
-              ? liquidity
-              : (fmtCoin(removeLiquidityResult?.quote_amount) ?? "...")
+            direction === "add" ? liquidity : fmtCoin(removeLiquidityResult?.quote_amount) ?? "..."
           }
         ></input>
       </Column>
@@ -216,8 +214,8 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           }}
           value={
             direction === "add"
-              ? (fmtCoin(provideLiquidityResult?.base_amount) ?? "...")
-              : (fmtCoin(removeLiquidityResult?.base_amount) ?? "...")
+              ? fmtCoin(provideLiquidityResult?.base_amount) ?? "..."
+              : fmtCoin(removeLiquidityResult?.base_amount) ?? "..."
           }
           type="text"
           disabled
@@ -244,7 +242,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
             color: direction === "add" ? theme.colors.lightGray + "99" : "white",
           }}
           value={
-            direction === "add" ? (fmtCoin(provideLiquidityResult?.lp_coin_amount) ?? "...") : lp
+            direction === "add" ? fmtCoin(provideLiquidityResult?.lp_coin_amount) ?? "..." : lp
           }
           type={direction === "add" ? "text" : "number"}
           onChange={(e) => setLP(e.target.value === "" ? "" : Number(e.target.value))}
@@ -322,6 +320,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                       marketAddress: market!.marketAddress,
                       quoteAmount: unfmtCoin(liquidity ?? 0),
                       typeTags: [emojicoin, emojicoinLP],
+                      minLpCoinsOut: 1n,
                     });
                 } else {
                   builderLambda = () =>
@@ -331,6 +330,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                       marketAddress: market!.marketAddress,
                       lpCoinAmount: unfmtCoin(lp),
                       typeTags: [emojicoin, emojicoinLP],
+                      minQuoteOut: 1n,
                     });
                 }
                 await submit(builderLambda);
@@ -354,7 +354,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
             <AptosInputLabel />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              {market ? (fmtCoin(market.cpammRealReservesQuote) ?? loadingComponent) : "-"}
+              {market ? fmtCoin(market.cpammRealReservesQuote) ?? loadingComponent : "-"}
             </Text>
           </Flex>
 
@@ -366,7 +366,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
             <EmojiInputLabel emoji={market ? market.symbol : "-"} />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              {market ? (fmtCoin(market.cpammRealReservesBase) ?? loadingComponent) : "-"}
+              {market ? fmtCoin(market.cpammRealReservesBase) ?? loadingComponent : "-"}
             </Text>
           </Flex>
         </StyledAddLiquidityWrapper>

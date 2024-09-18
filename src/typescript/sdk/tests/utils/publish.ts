@@ -15,13 +15,18 @@ import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../
 import { getGitRoot } from "./helpers";
 
 export async function publishPackage(args: {
-  pk: PrivateKey;
+  privateKey: PrivateKey;
   network: Network;
   includedArtifacts: string | undefined;
   namedAddresses: Record<string, AccountAddressInput>;
   packageDirRelativeToRoot: string;
 }): Promise<PublishPackageResult> {
-  const { pk, network, namedAddresses, packageDirRelativeToRoot: packageDirRelative } = args;
+  const {
+    privateKey,
+    network,
+    namedAddresses,
+    packageDirRelativeToRoot: packageDirRelative,
+  } = args;
   const includedArtifacts = args.includedArtifacts || "none";
 
   let aptosExecutableAvailable = true;
@@ -39,7 +44,7 @@ export async function publishPackage(args: {
     .map(([name, address]) => `${name}=${address.toString()}`)
     .join(",");
 
-  const pkString = new Hex(pk.toUint8Array()).toStringWithoutPrefix();
+  const privateKeyString = new Hex(privateKey.toUint8Array()).toStringWithoutPrefix();
 
   const shellArgs = [
     aptosExecutableAvailable ? "npx @aptos-labs/aptos-cli" : "aptos",
@@ -50,14 +55,13 @@ export async function publishPackage(args: {
     ...["--url", NetworkToNodeAPI[network]],
     ...["--package-dir", packageDir],
     ...["--included-artifacts", includedArtifacts],
-    ...["--private-key", pkString],
+    ...["--private-key", privateKeyString],
     ...["--encoding", "hex"],
     "--assume-yes",
     "--override-size-check",
   ];
 
   const command = shellArgs.join(" ");
-  console.debug(`\n${command}\n`);
   const outputBytes = execSync(command);
   const commandOutput = Buffer.from(outputBytes).toString();
   const resultObject = extractJsonFromText(command, commandOutput);
@@ -106,10 +110,10 @@ function extractJsonFromText(originalCommand: string, text: string): ResultJSON 
   return null;
 }
 
-export async function publishForTest(pk: string): Promise<PublishPackageResult> {
+export async function publishForTest(privateKeyString: string): Promise<PublishPackageResult> {
   const { aptos } = getAptosClient();
   const publisher = Account.fromPrivateKey({
-    privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
+    privateKey: new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array()),
   });
 
   let publisherBalance = await aptos.account
@@ -130,7 +134,7 @@ export async function publishForTest(pk: string): Promise<PublishPackageResult> 
   const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
   const packageName = moduleName;
   return publishPackage({
-    pk: publisher.privateKey,
+    privateKey: publisher.privateKey,
     includedArtifacts: "none",
     namedAddresses: {
       [packageName]: publisher.accountAddress,

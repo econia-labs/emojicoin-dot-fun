@@ -38,7 +38,9 @@ name: 'Playwright Tests'
   pull_request:
     branches:
     - 'main'
+    - 'production'
   push:
     branches:
     - 'main'
+    - 'production'
 ...

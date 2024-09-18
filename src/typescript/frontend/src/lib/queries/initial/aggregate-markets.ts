@@ -14,7 +14,7 @@ export const fetchNumMarkets = async () => {
   return await cached(
     async () => {
       const { count, error } = await postgrest
-        .from("market_data")
+        .from("inbox_latest_state")
         .select("*", { count: "exact", head: true });
       if (error || count === null) {
         throw new Error("Failed to fetch the number of markets.");

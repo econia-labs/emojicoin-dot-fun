@@ -8,15 +8,22 @@ import { type EmojiPickerStore } from "@store/emoji-picker-store";
 
 export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   time: number;
+  searchEmojisKey: string;
 };
 export type PropsWithTimeAndIndex = TableCardProps & {
   time: number;
+  searchEmojisKey: string;
 };
 export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
   prevIndex?: number;
 };
 
-export const marketDataToProps = (data: FetchSortedMarketDataReturn["markets"]): PropsWithTime[] =>
+const toSearchEmojisKey = (searchEmojis: string[]) => `{${searchEmojis.join("")}}`;
+
+export const marketDataToProps = (
+  data: FetchSortedMarketDataReturn["markets"],
+  searchEmojis: string[]
+): PropsWithTime[] =>
   data.map((market) => ({
     time: market.bumpTime,
     symbol: market.symbol,
@@ -24,11 +31,13 @@ export const marketDataToProps = (data: FetchSortedMarketDataReturn["markets"]):
     emojis: market.emojis,
     staticMarketCap: market.marketCap.toString(),
     staticVolume24H: market.dailyVolume.toString(),
+    searchEmojisKey: toSearchEmojisKey(searchEmojis),
   }));
 
 export const stateEventsToProps = (
   firehose: EventStore["firehose"],
-  getMarket: EventStore["getMarket"]
+  getMarket: EventStore["getMarket"],
+  searchEmojis: string[]
 ): PropsWithTime[] => {
   // State events are emitted with every single event related to bump order.
   // We can strictly only use state events to get the information we need to construct the bump
@@ -48,6 +57,7 @@ export const stateEventsToProps = (
       staticMarketCap: (marketCap ?? 0).toString(),
       staticVolume24H: (volume24H ?? 0).toString(),
       trigger: e.stateMetadata.trigger,
+      searchEmojisKey: toSearchEmojisKey(searchEmojis),
     };
   });
 };
@@ -95,10 +105,10 @@ export const constructOrdered = ({
   // We don't need to filter the fetched data because it's already filtered and sorted by the
   // server. We only need to filter event store state events.
   const searchEmojis = getSearchEmojis();
-  const initial = marketDataToProps(data);
+  const initial = marketDataToProps(data, searchEmojis);
 
   // If we're sorting by bump order, deduplicate and sort the events by bump order.
-  const bumps = stateEventsToProps(stateFirehose, getMarket);
+  const bumps = stateEventsToProps(stateFirehose, getMarket, searchEmojis);
   // Filter only if there are search emojis.
   const filteredBumps = !searchEmojis.length
     ? bumps

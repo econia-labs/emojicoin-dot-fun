@@ -21,7 +21,7 @@ import {
 } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { type AnyEmojicoinJSONEvent } from "../types/json-types";
-import { type CandlestickResolution } from "../const";
+import { type PeriodDuration } from "../const";
 import {
   type GroupedPeriodicStateEvents,
   createEmptyGroupedCandlesticks,
@@ -125,7 +125,7 @@ export const toUniqueHomogenousEvents = (
         } else if (isLiquidityEvent(event)) {
           events.liquidityEvents.push(event);
         } else if (isPeriodicStateEvent(event)) {
-          const periodInEvent = Number(event.periodicStateMetadata.period) as CandlestickResolution;
+          const periodInEvent = Number(event.periodicStateMetadata.period) as PeriodDuration;
           events.candlesticks[periodInEvent].push(event);
         }
       }

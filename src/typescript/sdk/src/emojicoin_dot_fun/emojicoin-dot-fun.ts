@@ -18,6 +18,7 @@ import {
   type WaitForTransactionOptions,
   type UserTransactionResponse,
   type LedgerVersionArg,
+  type PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -145,6 +146,7 @@ export class Chat extends EntryFunctionPayloadBuilder {
 export type ProvideLiquidityPayloadMoveArguments = {
   marketAddress: AccountAddress;
   quoteAmount: U64;
+  minLpCoinsOut: U64;
 };
 
 /**
@@ -153,6 +155,7 @@ export type ProvideLiquidityPayloadMoveArguments = {
  *     provider: &signer,
  *     market_address: address,
  *     quote_amount: u64,
+ *     min_lp_coins_out: u64,
  *  )
  *```
  * */
@@ -178,16 +181,18 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
     provider: AccountAddressInput; // &signer
     marketAddress: AccountAddressInput; // address
     quoteAmount: Uint64; // u64
+    minLpCoinsOut: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
     super();
-    const { provider, marketAddress, quoteAmount, typeTags, feePayer } = args;
+    const { provider, marketAddress, quoteAmount, typeTags, feePayer, minLpCoinsOut } = args;
     this.primarySender = AccountAddress.from(provider);
 
     this.args = {
       marketAddress: AccountAddress.from(marketAddress),
       quoteAmount: new U64(quoteAmount),
+      minLpCoinsOut: new U64(minLpCoinsOut),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -200,6 +205,7 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
     provider: AccountAddressInput; // &signer
     marketAddress: AccountAddressInput; // address
     quoteAmount: Uint64; // u64
+    minLpCoinsOut: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
@@ -222,6 +228,7 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
     provider: Account; // &signer
     marketAddress: AccountAddressInput; // address
     quoteAmount: Uint64; // u64
+    minLpCoinsOut: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
@@ -292,6 +299,42 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
     this.feePayer = feePayer !== undefined ? AccountAddress.from(feePayer) : undefined;
   }
 
+  static async getGasCost(args: {
+    aptosConfig: AptosConfig;
+    registrant: AccountAddressInput; // &signer
+    registrantPubKey: PublicKey;
+    emojis: Array<HexInput>; // vector<vector<u8>>
+  }): Promise<{ data: { amount: number; unitPrice: number }; error: boolean }> {
+    const { aptosConfig } = args;
+    const payloadBuilder = new this({
+      ...args,
+      integrator: AccountAddress.ONE,
+    });
+    const aptos = new Aptos(aptosConfig);
+    const transaction = await aptos.transaction.build.simple({
+      sender: payloadBuilder.primarySender,
+      data: {
+        function: `${payloadBuilder.moduleAddress}::${payloadBuilder.moduleName}::${payloadBuilder.functionName}`,
+        functionArguments: payloadBuilder.argsToArray(),
+      },
+    });
+    const [userTransactionResponse] = await aptos.transaction.simulate.simple({
+      signerPublicKey: args.registrantPubKey,
+      transaction,
+      options: {
+        estimateGasUnitPrice: true,
+        estimateMaxGasAmount: true,
+      },
+    });
+    return {
+      data: {
+        amount: Number(userTransactionResponse.gas_used),
+        unitPrice: Number(userTransactionResponse.gas_unit_price),
+      },
+      error: !userTransactionResponse.success,
+    };
+  }
+
   static async builder(args: {
     aptosConfig: AptosConfig;
     registrant: AccountAddressInput; // &signer
@@ -341,6 +384,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
 export type RemoveLiquidityPayloadMoveArguments = {
   marketAddress: AccountAddress;
   lpCoinAmount: U64;
+  minQuoteOut: U64;
 };
 
 /**
@@ -349,6 +393,7 @@ export type RemoveLiquidityPayloadMoveArguments = {
  *     provider: &signer,
  *     market_address: address,
  *     lp_coin_amount: u64,
+ *     min_quote_out: u64,
  *  )
  *```
  * */
@@ -374,16 +419,18 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
     provider: AccountAddressInput; // &signer
     marketAddress: AccountAddressInput; // address
     lpCoinAmount: Uint64; // u64
+    minQuoteOut: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
     super();
-    const { provider, marketAddress, lpCoinAmount, typeTags, feePayer } = args;
+    const { provider, marketAddress, lpCoinAmount, typeTags, feePayer, minQuoteOut } = args;
     this.primarySender = AccountAddress.from(provider);
 
     this.args = {
       marketAddress: AccountAddress.from(marketAddress),
       lpCoinAmount: new U64(lpCoinAmount),
+      minQuoteOut: new U64(minQuoteOut),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -396,6 +443,7 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
     provider: AccountAddressInput; // &signer
     marketAddress: AccountAddressInput; // address
     lpCoinAmount: Uint64; // u64
+    minQuoteOut: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
@@ -418,6 +466,7 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
     provider: Account; // &signer
     marketAddress: AccountAddressInput; // address
     lpCoinAmount: Uint64; // u64
+    minQuoteOut: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
@@ -444,7 +493,8 @@ export type SwapPayloadMoveArguments = {
   inputAmount: U64;
   isSell: Bool;
   integrator: AccountAddress;
-  integratorFeeRateBps: U8;
+  integratorFeeRateBPs: U8;
+  minOutputAmount: U64;
 };
 
 /**
@@ -456,6 +506,7 @@ export type SwapPayloadMoveArguments = {
  *     is_sell: bool,
  *     integrator: address,
  *     integrator_fee_rate_bps: u8,
+ *     min_output_amount: u64,
  *  )
  *```
  * */
@@ -483,7 +534,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
+    minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
@@ -494,7 +546,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
       inputAmount,
       isSell,
       integrator,
-      integratorFeeRateBps,
+      integratorFeeRateBPs,
+      minOutputAmount,
       typeTags,
       feePayer,
     } = args;
@@ -505,7 +558,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
       inputAmount: new U64(inputAmount),
       isSell: new Bool(isSell),
       integrator: AccountAddress.from(integrator),
-      integratorFeeRateBps: new U8(integratorFeeRateBps),
+      integratorFeeRateBPs: new U8(integratorFeeRateBPs),
+      minOutputAmount: new U64(minOutputAmount),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -520,7 +574,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
+    minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
@@ -545,7 +600,8 @@ export class Swap extends EntryFunctionPayloadBuilder {
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
+    minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
@@ -571,6 +627,7 @@ export type SwapWithRewardsPayloadMoveArguments = {
   marketAddress: AccountAddress;
   inputAmount: U64;
   isSell: Bool;
+  minOutputAmount: U64;
 };
 
 /**
@@ -580,6 +637,7 @@ export type SwapWithRewardsPayloadMoveArguments = {
  *     market_address: address,
  *     input_amount: u64,
  *     is_sell: bool,
+ *     min_output_amount: u64,
  *  )
  *```
  * */
@@ -606,17 +664,20 @@ export class SwapWithRewards extends EntryFunctionPayloadBuilder {
     marketAddress: AccountAddressInput; // address
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
+    minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
   }) {
     super();
-    const { swapper, marketAddress, inputAmount, isSell, typeTags, feePayer } = args;
+    const { swapper, marketAddress, inputAmount, isSell, minOutputAmount, typeTags, feePayer } =
+      args;
     this.primarySender = AccountAddress.from(swapper);
 
     this.args = {
       marketAddress: AccountAddress.from(marketAddress),
       inputAmount: new U64(inputAmount),
       isSell: new Bool(isSell),
+      minOutputAmount: new U64(minOutputAmount),
     };
     this.typeTags = typeTags.map((typeTag) =>
       typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
@@ -630,6 +691,7 @@ export class SwapWithRewards extends EntryFunctionPayloadBuilder {
     marketAddress: AccountAddressInput; // address
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
+    minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
     feePayer?: AccountAddressInput;
     options?: InputGenerateTransactionOptions;
@@ -653,6 +715,7 @@ export class SwapWithRewards extends EntryFunctionPayloadBuilder {
     marketAddress: AccountAddressInput; // address
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
+    minOutputAmount: Uint64; // u64
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     feePayer?: Account;
     options?: InputGenerateTransactionOptions;
@@ -1196,13 +1259,13 @@ export type SimulateSwapPayloadMoveArguments = {
   inputAmount: U64;
   isSell: Bool;
   integrator: AccountAddress;
-  integratorFeeRateBps: U8;
+  integratorFeeRateBPs: U8;
 };
 
 /**
  *```
  *  #[view]
- *  public fun simulate_swap(
+ *  public fun simulate_swap<Emojicoin, EmojicoinLP>(
  *     swapper: address,
  *     market_address: address,
  *     input_amount: u64,
@@ -1222,7 +1285,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
 
   public readonly args: SimulateSwapPayloadMoveArguments;
 
-  public readonly typeTags: [] = [];
+  public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
 
   constructor(args: {
     swapper: AccountAddressInput; // address
@@ -1230,10 +1293,19 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
   }) {
     super();
-    const { swapper, marketAddress, inputAmount, isSell, integrator, integratorFeeRateBps } = args;
+    const {
+      swapper,
+      marketAddress,
+      inputAmount,
+      isSell,
+      integrator,
+      integratorFeeRateBPs,
+      typeTags,
+    } = args;
 
     this.args = {
       swapper: AccountAddress.from(swapper),
@@ -1241,8 +1313,11 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
       inputAmount: new U64(inputAmount),
       isSell: new Bool(isSell),
       integrator: AccountAddress.from(integrator),
-      integratorFeeRateBps: new U8(integratorFeeRateBps),
+      integratorFeeRateBPs: new U8(integratorFeeRateBPs),
     };
+    this.typeTags = typeTags.map((typeTag) =>
+      typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
+    ) as [TypeTag, TypeTag];
   }
 
   static async view(args: {
@@ -1252,7 +1327,8 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
     inputAmount: Uint64; // u64
     isSell: boolean; // bool
     integrator: AccountAddressInput; // address
-    integratorFeeRateBps: Uint8; // u8
+    integratorFeeRateBPs: Uint8; // u8
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     options?: LedgerVersionArg;
   }): Promise<JSONTypes.SwapEvent> {
     const [res] = await new SimulateSwap(args).view(args);

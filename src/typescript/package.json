@@ -29,7 +29,8 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
     "start": "dotenv -e .env.local -e .env -- turbo run start",
-    "test": "dotenv -e .env.test -- turbo run test"
+    "test": "dotenv -e .env.ci -e ../docker/example.local.env -e ../docker/.env -- turbo run test",
+    "test:verbose": "dotenv -e .env.ci -e ../docker/example.local.env -e ../docker/.env -v VERBOSE=true -- turbo run test:verbose"
   },
   "version": "0.0.0",
   "workspaces": [

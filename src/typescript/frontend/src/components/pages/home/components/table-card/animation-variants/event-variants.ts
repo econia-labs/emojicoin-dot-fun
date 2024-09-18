@@ -7,7 +7,7 @@ import {
   isLiquidityEvent,
   isMarketRegistrationEvent,
 } from "@sdk-types";
-import { StateTrigger } from "@sdk/const";
+import { Trigger } from "@sdk/const";
 import type Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { ECONIA_BLUE, GREEN, PINK, WHITE } from "theme/colors";
@@ -167,11 +167,11 @@ export const eventToVariant = (
 };
 
 export const stateEventToVariant = (event: Types.StateEvent): AnyNonGridTableCardVariant => {
-  if (event.stateMetadata.trigger === StateTrigger.MARKET_REGISTRATION) return "register";
-  if (event.stateMetadata.trigger === StateTrigger.REMOVE_LIQUIDITY) return "sell";
-  if (event.stateMetadata.trigger === StateTrigger.PROVIDE_LIQUIDITY) return "buy";
-  if (event.stateMetadata.trigger === StateTrigger.SWAP_BUY) return "buy";
-  if (event.stateMetadata.trigger === StateTrigger.SWAP_SELL) return "sell";
-  if (event.stateMetadata.trigger === StateTrigger.CHAT) return "chats";
+  if (event.stateMetadata.trigger === Trigger.MarketRegistration) return "register";
+  if (event.stateMetadata.trigger === Trigger.RemoveLiquidity) return "sell";
+  if (event.stateMetadata.trigger === Trigger.ProvideLiquidity) return "buy";
+  if (event.stateMetadata.trigger === Trigger.SwapBuy) return "buy";
+  if (event.stateMetadata.trigger === Trigger.SwapSell) return "sell";
+  if (event.stateMetadata.trigger === Trigger.Chat) return "chats";
   throw new Error("Unknown state event type");
 };

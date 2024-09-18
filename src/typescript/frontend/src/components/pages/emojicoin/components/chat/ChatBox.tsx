@@ -12,7 +12,7 @@ import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { useEventStore, useNameStore, useWebSocketClient } from "context/state-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
-import { getRankFromChatEvent } from "lib/utils/get-user-rank";
+import { getRankFromEvent } from "lib/utils/get-user-rank";
 import { memoizedSortedDedupedEvents, mergeSortedEvents, sortEvents } from "lib/utils/sort-events";
 import type { Types } from "@sdk/types/types";
 import { parseJSON } from "utils";
@@ -43,11 +43,6 @@ const convertChatMessageToEmojiAndIndices = (
   }
   return { emojiBytes: bytesArray, emojiIndicesSequence: sequence };
 };
-
-const pickerClass = `
-  absolute bottom-[55px] mb-[5px] xl:mb-0 xl:bottom-[-3.6%] bg-black
-  right-[50%] xl:right-full translate-x-[50%] xl:translate-x-0 mr-0
-`;
 
 const getCombinedChats = (chats: readonly Types.ChatEvent[], marketID: bigint) => {
   const stateGuids = new Set(chats.map((chat) => chat.guid));
@@ -167,7 +162,7 @@ const ChatBox = (props: ChatProps) => {
               // TODO: Resolve address to Aptos name, store in state.
               sender: chat.user,
               text: chat.message,
-              senderRank: getRankFromChatEvent(chat).rankIcon,
+              senderRank: getRankFromEvent(chat).rankIcon,
               version: chat.version,
             };
             return (
@@ -182,11 +177,7 @@ const ChatBox = (props: ChatProps) => {
         </motion.div>
       </Flex>
 
-      <EmojiPickerWithInput
-        geoblocked={props.geoblocked}
-        handleClick={sendChatMessage}
-        pickerButtonClassName={pickerClass}
-      />
+      <EmojiPickerWithInput geoblocked={props.geoblocked} handleClick={sendChatMessage} />
     </Column>
   );
 };
