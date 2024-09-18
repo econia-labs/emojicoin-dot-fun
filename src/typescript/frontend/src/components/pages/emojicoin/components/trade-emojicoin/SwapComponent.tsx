@@ -1,7 +1,14 @@
 "use client";
 
 import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
-import { type PropsWithChildren, useEffect, useState, useCallback, useMemo, type MouseEventHandler } from "react";
+import {
+  type PropsWithChildren,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  type MouseEventHandler,
+} from "react";
 import FlipInputsArrow from "./FlipInputsArrow";
 import { Column, Row } from "components/layout/components/FlexContainers";
 import { SwapButton } from "./SwapButton";
@@ -20,15 +27,32 @@ import { Flex, FlexGap } from "@containers";
 import Popup from "components/popup";
 import { Text } from "components/text";
 
-const SmallButton = ({ emoji, description, onClick }: { emoji: string, description: string, onClick?: MouseEventHandler<HTMLDivElement> }) => {
-  return <Popup content={<Text textScale="pixelHeading4" textTransform="uppercase" color="black">{description}</Text>}>
-    <div className="px-[.7rem] py-[.2rem] border-[1px] border-solid rounded-full border-dark-gray h-[1.5rem] cursor-pointer hover:bg-neutral-800" onClick={onClick}>
-      <div className="mt-[.11rem]">
-        {emoji}
+const SmallButton = ({
+  emoji,
+  description,
+  onClick,
+}: {
+  emoji: string;
+  description: string;
+  onClick?: MouseEventHandler<HTMLDivElement>;
+}) => {
+  return (
+    <Popup
+      content={
+        <Text textScale="pixelHeading4" textTransform="uppercase" color="black">
+          {description}
+        </Text>
+      }
+    >
+      <div
+        className="px-[.7rem] py-[.2rem] border-[1px] border-solid rounded-full border-dark-gray h-[1.5rem] cursor-pointer hover:bg-neutral-800"
+        onClick={onClick}
+      >
+        <div className="mt-[.11rem]">{emoji}</div>
       </div>
-    </div>
-  </Popup>
-}
+    </Popup>
+  );
+};
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -85,7 +109,10 @@ export default function SwapComponent({
   const [isSell, setIsSell] = useState(!(searchParams.get("sell") === null));
   const [submit, setSubmit] = useState<(() => Promise<void>) | null>(null);
   const { aptBalance, emojicoinBalance, account, setEmojicoinType } = useAptos();
-  const availableAptBalance = useMemo(() => aptBalance - SWAP_GAS_COST > 0 ? aptBalance - SWAP_GAS_COST : 0n, [aptBalance]);
+  const availableAptBalance = useMemo(
+    () => (aptBalance - SWAP_GAS_COST > 0 ? aptBalance - SWAP_GAS_COST : 0n),
+    [aptBalance]
+  );
 
   const numSwaps = useEventStore(
     (s) => s.getMarket(marketEmojis)?.swapEvents.length ?? initNumSwaps
@@ -137,7 +164,10 @@ export default function SwapComponent({
       return "0";
     }
     // We use the APT display decimal amount here to avoid early truncation.
-    return toDisplayCoinDecimals({ num: value, decimals: type === "apt" ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS }).toString();
+    return toDisplayCoinDecimals({
+      num: value,
+      decimals: type === "apt" ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS,
+    }).toString();
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,18 +230,38 @@ export default function SwapComponent({
             {t("Trade Emojicoin")}
           </div>
           <FlexGap flexDirection="row" gap="5px">
-            {isSell ?
+            {isSell ? (
               <>
-                <SmallButton emoji="🤢" description="Sell 50%" onClick={() => setInputAmount(String(emojicoinBalance / 2n))} />
-                <SmallButton emoji="🤮" description="Sell 100%" onClick={() => setInputAmount(String(emojicoinBalance))} />
+                <SmallButton
+                  emoji="🤢"
+                  description="Sell 50%"
+                  onClick={() => setInputAmount(String(emojicoinBalance / 2n))}
+                />
+                <SmallButton
+                  emoji="🤮"
+                  description="Sell 100%"
+                  onClick={() => setInputAmount(String(emojicoinBalance))}
+                />
               </>
-              :
+            ) : (
               <>
-                <SmallButton emoji="🌒" description="Buy 25%" onClick={() => setInputAmount(String(availableAptBalance / 4n))} />
-                <SmallButton emoji="🌓" description="Buy 50%" onClick={() => setInputAmount(String(availableAptBalance / 2n))} />
-                <SmallButton emoji="🌕" description="Buy 100%" onClick={() => setInputAmount(String(availableAptBalance))} />
+                <SmallButton
+                  emoji="🌒"
+                  description="Buy 25%"
+                  onClick={() => setInputAmount(String(availableAptBalance / 4n))}
+                />
+                <SmallButton
+                  emoji="🌓"
+                  description="Buy 50%"
+                  onClick={() => setInputAmount(String(availableAptBalance / 2n))}
+                />
+                <SmallButton
+                  emoji="🌕"
+                  description="Buy 100%"
+                  onClick={() => setInputAmount(String(availableAptBalance))}
+                />
               </>
-            }
+            )}
           </FlexGap>
         </Flex>
 
@@ -236,7 +286,7 @@ export default function SwapComponent({
 
           <FlipInputsArrow
             onClick={() => {
-              setInputAmount(toActualCoinDecimals({num: outputAmount}));
+              setInputAmount(toActualCoinDecimals({ num: outputAmount }));
               setIsSell((v) => !v);
             }}
           />
