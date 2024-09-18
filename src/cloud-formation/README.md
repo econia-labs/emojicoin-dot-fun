@@ -232,7 +232,7 @@ deployment environment:
 1. Set your stack name:
 
    ```sh
-   STACK_NAME=emoji-ECO-2164
+   STACK_NAME=<STACK_NAME>
    echo $STACK_NAME
    ```
 
@@ -420,7 +420,7 @@ restricts [role passing] to the `ContainerRole`.
 
 The `Waf` [resource][resources] specifies a [Web Application Firewall] to
 protect REST and WebSocket endpoints, using custom and [managed rules]. The
-`EnableWafRules` [template parameter](#template-parameters) can be used to
+`EnableWafRules*` [template parameters](#template-parameters) can be used to
 toggle [rule actions] between `Block` and `Count`.
 
 See the [Web ACL traffic overview dashboards] to monitor rules.
