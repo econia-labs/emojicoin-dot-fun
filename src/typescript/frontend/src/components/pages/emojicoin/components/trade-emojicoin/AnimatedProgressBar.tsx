@@ -118,7 +118,7 @@ export const AnimatedProgressBar = (props: GridProps) => {
                 padding: ".7em",
               }
         }
-        className="relative flex my-auto mx-[2ch] opacity-[0.9]"
+        className="relative flex my-auto px-[21px] opacity-[0.9]"
         animate={flickerControls}
       >
         <Text
