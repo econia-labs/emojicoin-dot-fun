@@ -92,7 +92,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
               </motion.div>
             )}
             <ButtonWithConnectWalletFallback geoblocked={geoblocked} arrow={false}>
-              <div className="flex flex-row uppercase">
+              <div className="flex flex-row uppercase mt-[8ch]">
                 <span className="px-2.5">{"{"}</span>
                 <span
                   ref={ref}
