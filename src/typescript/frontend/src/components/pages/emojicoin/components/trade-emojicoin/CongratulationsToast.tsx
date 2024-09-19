@@ -1,9 +1,17 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { ExplorerLink } from "components/link/component";
 import { APTOS_NETWORK } from "lib/env";
+import { toDisplayCoinDecimals } from "lib/utils/decimals";
 
-export const CongratulationsToast = ({ transactionHash }: { transactionHash: string }) => {
+export const CongratulationsToast = ({
+  transactionHash,
+  amount,
+}: {
+  transactionHash: string;
+  amount: number | bigint | string;
+}) => {
   const { network } = useWallet();
+  const amountString = toDisplayCoinDecimals({ num: amount, decimals: 2 });
   return (
     <div className="flex flex-col text-center">
       <span className="text-7xl p-[20px]">🎉</span>
@@ -12,7 +20,7 @@ export const CongratulationsToast = ({ transactionHash }: { transactionHash: str
           Congratulations!
         </span>
         <span className="font-forma text-2xl uppercase text-ec-blue">
-          {"You won 1 APT!"}
+          <span>{`You won ${amountString} APT.`}</span>
         </span>
         <div className="w-[100%] flex flex-row justify-center mb-[15px]">
           <span className="text-dark-gray text-l uppercase">
