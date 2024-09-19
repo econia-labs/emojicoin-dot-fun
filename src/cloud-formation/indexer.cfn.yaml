@@ -4,8 +4,18 @@
 # cspell:word fargate
 # cspell:word multivalue
 # cspell:word pullthroughcache
+# cspell:word restapis
 ---
 Conditions:
+  EnableWafRulesGeneral: !Equals
+  - !Ref 'EnableWafRulesGeneral'
+  - 'true'
+  EnableWafRulesRestApi: !Equals
+  - !Ref 'EnableWafRulesRestApi'
+  - 'true'
+  EnableWafRulesWebSocket: !Equals
+  - !Ref 'EnableWafRulesWebSocket'
+  - 'true'
   MaybeDeployAlb: !And
   - !Condition 'MaybeDeployVpc'
   - !Equals
@@ -82,6 +92,13 @@ Conditions:
   - !Condition 'MaybeDeployStack'
   - !Equals
     - !Ref 'MaybeDeployVpc'
+    - 'true'
+  MaybeDeployWaf: !And
+  - !Condition 'MaybeDeployAlb'
+  - !Condition 'MaybeDeployStack'
+  - !Condition 'MaybeDeployRestApi'
+  - !Equals
+    - !Ref 'MaybeDeployWaf'
     - 'true'
 Mappings:
   Constants:
@@ -163,6 +180,21 @@ Parameters:
   DbMinCapacity:
     Default: 0.5
     Type: 'Number'
+  EnableWafRulesGeneral:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  EnableWafRulesRestApi:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  EnableWafRulesWebSocket:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
   Environment:
     Type: 'String'
   MaybeDeployAlb:
@@ -236,6 +268,11 @@ Parameters:
     - 'true'
     Type: 'String'
   MaybeDeployVpc:
+    AllowedValues:
+    - 'false'
+    - 'true'
+    Type: 'String'
+  MaybeDeployWaf:
     AllowedValues:
     - 'false'
     - 'true'
@@ -995,8 +1032,7 @@ Resources:
         MapPublicIpOnLaunch: false
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
-      # yamllint disable-line rule:key-ordering
-      Condition: 'MaybeDeployVpc'
+      Condition: 'MaybeDeployVpc' # yamllint disable-line rule:key-ordering
       Type: 'AWS::EC2::Subnet'
   # Association for public route table with each public subnet.
   Fn::ForEach::PublicRouteTableAssociation:
@@ -1036,8 +1072,7 @@ Resources:
         MapPublicIpOnLaunch: true
         VpcId: !Ref 'Vpc'
       # ForEach transforms require that condition is second key or later.
-      # yamllint disable-line rule:key-ordering
-      Condition: 'MaybeDeployVpc'
+      Condition: 'MaybeDeployVpc' # yamllint disable-line rule:key-ordering
       Type: 'AWS::EC2::Subnet'
   # Internet gateway for the virtual private cloud.
   InternetGateway:
@@ -1620,6 +1655,7 @@ Resources:
   RestApi:
     Condition: 'MaybeDeployRestApi'
     Properties:
+      ApiKeySourceType: 'HEADER'
       EndpointConfiguration:
         Types:
         - 'REGIONAL'
@@ -1700,10 +1736,20 @@ Resources:
       RegionalCertificateArn: !Ref 'RestApiCertificate'
       SecurityPolicy: 'TLS_1_2'
     Type: 'AWS::ApiGateway::DomainName'
+  # API key for the REST API endpoint.
+  RestApiKey:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      Enabled: true
+      StageKeys:
+      - RestApiId: !Ref 'RestApi'
+        StageName: !Ref 'RestApiStage'
+    Type: 'AWS::ApiGateway::ApiKey'
   # Rest API endpoint general method.
   RestApiMethodGeneral:
     Condition: 'MaybeDeployRestApi'
     Properties:
+      ApiKeyRequired: true
       AuthorizationType: 'NONE'
       HttpMethod: 'GET'
       Integration:
@@ -1729,6 +1775,7 @@ Resources:
   RestApiMethodRoot:
     Condition: 'MaybeDeployRestApi'
     Properties:
+      ApiKeyRequired: true
       AuthorizationType: 'NONE'
       HttpMethod: 'GET'
       Integration:
@@ -1762,10 +1809,46 @@ Resources:
   RestApiStage:
     Condition: 'MaybeDeployRestApi'
     Properties:
+      CacheClusterEnabled: 'true'
+      CacheClusterSize: '0.5'
       DeploymentId: !Ref 'RestApiDeployment'
+      MethodSettings:
+      # Cache general data for one second, with permissive throttling.
+      - CacheDataEncrypted: false
+        CacheTtlInSeconds: 1
+        CachingEnabled: true
+        HttpMethod: '*'
+        ResourcePath: '/*'
+        ThrottlingBurstLimit: 1000
+        ThrottlingRateLimit: 500
+      # Use a long cache time and restrictive throttling on the schema at the
+      # root, which is large and not required for normal operations.
+      - CacheDataEncrypted: false
+        CacheTtlInSeconds: 3600
+        CachingEnabled: true
+        HttpMethod: 'GET'
+        ResourcePath: '/'
+        ThrottlingBurstLimit: 100
+        ThrottlingRateLimit: 50
       RestApiId: !Ref 'RestApi'
       StageName: !Ref 'AWS::StackName'
     Type: 'AWS::ApiGateway::Stage'
+  # REST API usage plan.
+  RestApiUsagePlan:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      ApiStages:
+      - ApiId: !Ref 'RestApi'
+        Stage: !Ref 'RestApiStage'
+    Type: 'AWS::ApiGateway::UsagePlan'
+  # Association of API key with usage plan.
+  RestApiUsagePlanKeyAssociation:
+    Condition: 'MaybeDeployRestApi'
+    Properties:
+      KeyId: !Ref 'RestApiKey'
+      KeyType: 'API_KEY'
+      UsagePlanId: !Ref 'RestApiUsagePlan'
+    Type: 'AWS::ApiGateway::UsagePlanKey'
   # Virtual private cloud for internal networking.
   Vpc:
     Condition: 'MaybeDeployVpc'
@@ -1777,5 +1860,145 @@ Resources:
       EnableDnsHostnames: true
       EnableDnsSupport: true
     Type: 'AWS::EC2::VPC'
+  # Web application firewall.
+  Waf:
+    Condition: 'MaybeDeployWaf'
+    Properties:
+      # Allow all all traffic by default unless blocked per below rules.
+      DefaultAction:
+        # CloudFormation prohibits both null and empty values.
+        Allow: {} # yamllint disable-line rule:braces
+      Name: !Ref 'AWS::StackName'
+      Rules:
+      # Use AWS common rule set.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
+        OverrideAction: !If
+        - 'EnableWafRulesGeneral'
+        - None: {} # yamllint disable-line rule:braces
+        - Count: {} # yamllint disable-line rule:braces
+        Priority: 1
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesCommonRuleSet'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesCommonRuleSet'
+          SampledRequestsEnabled: true
+      # Block VPNs and otherwise obfuscated IP addresses.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
+        OverrideAction: !If
+        - 'EnableWafRulesGeneral'
+        - None: {} # yamllint disable-line rule:braces
+        - Count: {} # yamllint disable-line rule:braces
+        Priority: 2
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesAnonymousIpList'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-AWSManagedRulesAnonymousIpList'
+          SampledRequestsEnabled: true
+      # Block known IP threats.
+      - Name: !Sub '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
+        OverrideAction: !If
+        - 'EnableWafRulesGeneral'
+        - None: {} # yamllint disable-line rule:braces
+        - Count: {} # yamllint disable-line rule:braces
+        Priority: 3
+        Statement:
+          ManagedRuleGroupStatement:
+            Name: 'AWSManagedRulesAmazonIpReputationList'
+            VendorName: 'AWS'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub
+            '${AWS::StackName}-AWSManagedRulesAmazonIpReputationList'
+          SampledRequestsEnabled: true
+      # Rate limit by IP for the REST API.
+      - Action: !If
+        - 'EnableWafRulesRestApi'
+        - Block: {} # yamllint disable-line rule:braces
+        - Count: {} # yamllint disable-line rule:braces
+        Name: !Sub '${AWS::StackName}-RestApiRateLimit'
+        Priority: 4
+        Statement:
+          RateBasedStatement:
+            AggregateKeyType: 'IP'
+            Limit: 200
+            ScopeDownStatement:
+              ByteMatchStatement:
+                FieldToMatch:
+                  SingleHeader:
+                    Name: 'host'
+                PositionalConstraint: 'CONTAINS'
+                SearchString: !Sub
+                - '${Environment}.${RootDomain}'
+                - RootDomain: !FindInMap
+                  - 'Constants'
+                  - 'Networking'
+                  - 'DnsNameRootDomain'
+                TextTransformations:
+                - Priority: 0
+                  Type: 'LOWERCASE'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-RestApiRateLimit'
+          SampledRequestsEnabled: true
+      # Limit WebSocket messages by IP via rate limit.
+      - Action: !If
+        - 'EnableWafRulesWebSocket'
+        - Block: {} # yamllint disable-line rule:braces
+        - Count: {} # yamllint disable-line rule:braces
+        Name: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
+        Priority: 5
+        Statement:
+          RateBasedStatement:
+            AggregateKeyType: 'IP'
+            Limit: 100
+            ScopeDownStatement:
+              ByteMatchStatement:
+                FieldToMatch:
+                  SingleHeader:
+                    Name: 'host'
+                PositionalConstraint: 'CONTAINS'
+                SearchString: !Sub
+                - 'ws.${Environment}.${RootDomain}'
+                - RootDomain: !FindInMap
+                  - 'Constants'
+                  - 'Networking'
+                  - 'DnsNameRootDomain'
+                TextTransformations:
+                - Priority: 0
+                  Type: 'LOWERCASE'
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub '${AWS::StackName}-WebSocketMessageRateLimit'
+          SampledRequestsEnabled: true
+      Scope: 'REGIONAL'
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: !Ref 'AWS::StackName'
+        SampledRequestsEnabled: true
+    Type: 'AWS::WAFv2::WebACL'
+  # Web application firewall for the broker application load balancer.
+  WafAlb:
+    Condition: 'MaybeDeployWaf'
+    Properties:
+      ResourceArn: !Ref 'Alb'
+      WebACLArn: !GetAtt 'Waf.Arn'
+    Type: 'AWS::WAFv2::WebACLAssociation'
+  # Web application firewall for the REST API.
+  WafRestApi:
+    Condition: 'MaybeDeployWaf'
+    Properties:
+      ResourceArn: !Sub
+      - 'arn:aws:apigateway:${Region}::/restapis/${ApiId}/stages/${StageName}'
+      - ApiId: !Ref 'RestApi'
+        Region: !Ref 'AWS::Region'
+        StageName: !Ref 'RestApiStage'
+      WebACLArn: !GetAtt 'Waf.Arn'
+    Type: 'AWS::WAFv2::WebACLAssociation'
 Transform: 'AWS::LanguageExtensions'
 ...
