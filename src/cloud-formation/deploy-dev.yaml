@@ -4,7 +4,7 @@ parameters:
   EnableWafRulesGeneral: 'true'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'ECO-2164'
+  Environment: 'dev'
   MaybeDeployAlb: 'true'
   MaybeDeployAlbDnsRecord: 'true'
   MaybeDeployBastionHost: 'true'
