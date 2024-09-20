@@ -8,6 +8,8 @@ env:
   TS_DIR: 'src/typescript'
 jobs:
   ts-run-tests:
+    permissions:
+      contents: 'write'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'

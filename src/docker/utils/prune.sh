@@ -132,12 +132,7 @@ docker rm -f $api 2>/dev/null
 docker volume rm -f $postgres-data
 
 if [ -n "$reset_localnet" ]; then
-	# Remove the localnet data if we're not running in an action workflow.
-	# There are issues with the file permissions in when running in CI, but the
-	# containers in are ephemeral so we don't need to remove them anyway.
-	if [ "$GITHUB_ACTIONS" != "true" ]; then
-		rm -rf $docker_dir/localnet/.aptos/*
-	fi
+	rm -rf $docker_dir/localnet/.aptos/*
 	docker compose -f compose.local.yaml down --volumes
 else
 	docker compose -f compose.local.yaml down
