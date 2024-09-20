@@ -8,7 +8,7 @@ import {
   type ResolutionString,
   type ThemeName,
 } from "@static/charting_library";
-import { CandlestickResolution } from "@econia-labs/emojicoin-sdk";
+import { PeriodDuration } from "@econia-labs/emojicoin-sdk";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";
 
@@ -19,26 +19,16 @@ export const GREEN = hexToRgba(GREEN_HEX);
 export const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
 export const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
-export const PERIOD_TO_CANDLESTICK_RESOLUTION: { [key: string]: CandlestickResolution } = {
-  "1D": CandlestickResolution.PERIOD_1D,
-  "30": CandlestickResolution.PERIOD_30M,
-  "60": CandlestickResolution.PERIOD_1H,
-  "15": CandlestickResolution.PERIOD_15M,
-  "240": CandlestickResolution.PERIOD_4H,
-  "5": CandlestickResolution.PERIOD_5M,
-  "1": CandlestickResolution.PERIOD_1M,
+export const ResolutionStringsToPeriodDuration: { [key: string]: PeriodDuration } = {
+  "1D": PeriodDuration.PERIOD_1D,
+  "30": PeriodDuration.PERIOD_30M,
+  "60": PeriodDuration.PERIOD_1H,
+  "15": PeriodDuration.PERIOD_15M,
+  "240": PeriodDuration.PERIOD_4H,
+  "5": PeriodDuration.PERIOD_5M,
+  "1": PeriodDuration.PERIOD_1M,
 };
 
-export const DAY_BY_RESOLUTION: { [key: string]: ResolutionString } = {
-  "1D": "86400" as ResolutionString,
-  "30": "1800" as ResolutionString,
-  "60": "3600" as ResolutionString,
-  "15": "900" as ResolutionString,
-  "240": "14400" as ResolutionString,
-  "720": "43200" as ResolutionString,
-  "5": "300" as ResolutionString,
-  "1": "60" as ResolutionString,
-};
 export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 
 export const EXCHANGE_NAME = "emojicoin.fun";
@@ -86,40 +76,37 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
   time_frames: [
     {
       text: "1D",
-      resolution: "1",
+      resolution: "1" as ResolutionString,
     },
     {
       text: "5D",
-      resolution: "5",
+      resolution: "5" as ResolutionString,
     },
     {
       text: "1M",
-      resolution: "30",
+      resolution: "30" as ResolutionString,
     },
     {
       text: "3M",
-      resolution: "60",
+      resolution: "60" as ResolutionString,
     },
     {
       text: "6M",
-      resolution: "120",
+      resolution: "120" as ResolutionString,
     },
     {
       text: "1y",
-      resolution: "D",
+      resolution: "D" as ResolutionString,
     },
     {
       text: "5y",
-      resolution: "W",
+      resolution: "W" as ResolutionString,
     },
     {
       text: "1000y",
-      resolution: "1",
+      resolution: "1" as ResolutionString,
       description: "All",
       title: "All",
     },
-  ].map((v) => ({
-    ...v,
-    resolution: v.resolution as ResolutionString,
-  })),
+  ],
 };

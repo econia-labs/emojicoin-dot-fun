@@ -1,7 +1,7 @@
 "use server";
 
 import { type Types } from "@sdk-types";
-import { type CandlestickResolution } from "@sdk/const";
+import { type PeriodDuration } from "@sdk/const";
 import { fetchCandlesticks } from "@sdk/queries/candlestick";
 import { LIMIT, ORDER_BY } from "@sdk/queries/const";
 
@@ -14,7 +14,7 @@ import { LIMIT, ORDER_BY } from "@sdk/queries/const";
  * @param marketID The market ID to fetch data for.
  * @param start The start time of the range to fetch data from.
  * @param end The end time of the range to fetch data from.
- * @param resolution The resolution of the candlesticks to fetch.
+ * @param period The period of the candlesticks to fetch.
  * @param limit Optional limit to the number of elements to fetch per request. Defaults to `LIMIT`.
  * @param fetchDelay Optional delay in milliseconds between each fetch request.
  * @returns an Array<Types.PeriodicStateEvent>.
@@ -23,11 +23,11 @@ export async function fetchAllCandlesticksInTimeRange(args: {
   marketID: string;
   start: Date;
   end: Date;
-  resolution: CandlestickResolution;
+  period: PeriodDuration;
   limit?: number;
   fetchDelay?: number;
 }): Promise<Types.PeriodicStateView[]> {
-  const { marketID, start, end, resolution, limit = LIMIT, fetchDelay = 0 } = args;
+  const { marketID, start, end, period, limit = LIMIT, fetchDelay = 0 } = args;
   const aggregate: Types.PeriodicStateView[] = [];
   let keepFetching = true;
 
@@ -44,7 +44,7 @@ export async function fetchAllCandlesticksInTimeRange(args: {
     try {
       const data = await fetchCandlesticks({
         marketID,
-        resolution,
+        period,
         start,
         end,
         offset,

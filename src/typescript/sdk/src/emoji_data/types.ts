@@ -11,6 +11,13 @@ export type SymbolEmojiData = {
   emoji: string;
 };
 
+export type SymbolData = {
+  name: string;
+  hex: `0x${string}`;
+  bytes: Uint8Array;
+  symbol: string;
+};
+
 export type RegisteredMarket = {
   symbol: string;
   emojis: SymbolEmojiData[];

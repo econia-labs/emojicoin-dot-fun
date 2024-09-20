@@ -63,7 +63,7 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
     expect(emojis).toEqual(["🟥", "🟧", "🟩", "🟦", "🟪", "🟫"]);
   });
 
-  it("maps the emojis to their corresponding data correctly", () => {
+  it("maps the emojis to their corresponding data", () => {
     const names = new Set(Object.keys(SymbolEmojiData));
     const emojis = ["🎅", "🎅🏽", "🎅🏼", "🎅🏿", "🌎", "🇧🇷", "⭐"].map((v) => SYMBOL_DATA.byEmoji(v)!);
     emojis.forEach((emoji) => {
@@ -72,7 +72,7 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
     });
   });
 
-  it("maps the emojis to their corresponding data correctly, ignoring non-emoji characters", () => {
+  it("maps the emojis to their corresponding data, ignoring non-emoji characters", () => {
     const emojiString = "hey 🎅 I'm 🎅🏽 having 🎅🏼 fun 🎅🏿 what 🌎 about 🇧🇷 you? ⭐";
     const extractedEmojis = getEmojisInString(emojiString);
     expect(extractedEmojis).toEqual(["🎅", "🎅🏽", "🎅🏼", "🎅🏿", "🌎", "🇧🇷", "⭐"]);
@@ -88,7 +88,7 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
     });
   });
 
-  it("encodes emojis correctly", () => {
+  it("encodes emojis", () => {
     const symbolsForward = [
       SYMBOL_DATA.byStrictName("ATM sign"),
       SYMBOL_DATA.byStrictName("Aquarius"),

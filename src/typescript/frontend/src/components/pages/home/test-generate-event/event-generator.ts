@@ -1,6 +1,11 @@
-import { Account, AccountAddress, type AccountAddressInput } from "@aptos-labs/ts-sdk";
+import {
+  Ed25519Account,
+  AccountAddress,
+  type AccountAddressInput,
+  type Uint8,
+} from "@aptos-labs/ts-sdk";
 import { toAnyEmojicoinEvent, type Types, type AnyNumberString } from "@sdk-types";
-import { StateTrigger } from "@sdk/const";
+import { fromContractEnumToRawTrigger, Trigger } from "@sdk/const";
 import { getRandomEmoji, type EmojicoinSymbol, generateRandomSymbol } from "@sdk/emoji_data";
 import { getEmojicoinData } from "@sdk/markets/utils";
 import type JSONTypes from "@sdk/types/json-types";
@@ -15,32 +20,32 @@ import Big from "big.js";
  */
 
 type AnimationTriggers =
-  | StateTrigger.MARKET_REGISTRATION
-  | StateTrigger.SWAP_BUY
-  | StateTrigger.SWAP_SELL
-  | StateTrigger.PROVIDE_LIQUIDITY
-  | StateTrigger.REMOVE_LIQUIDITY
-  | StateTrigger.CHAT;
+  | Trigger.MarketRegistration
+  | Trigger.SwapBuy
+  | Trigger.SwapSell
+  | Trigger.ProvideLiquidity
+  | Trigger.RemoveLiquidity
+  | Trigger.Chat;
 
 const getRandomAnimationTrigger = () => {
   const triggers = [
-    StateTrigger.MARKET_REGISTRATION,
-    StateTrigger.SWAP_BUY,
-    StateTrigger.SWAP_SELL,
-    StateTrigger.PROVIDE_LIQUIDITY,
-    StateTrigger.REMOVE_LIQUIDITY,
-    StateTrigger.CHAT,
+    Trigger.MarketRegistration,
+    Trigger.SwapBuy,
+    Trigger.SwapSell,
+    Trigger.ProvideLiquidity,
+    Trigger.RemoveLiquidity,
+    Trigger.Chat,
   ] as const;
   return triggers[Math.floor(Math.random() * triggers.length)];
 };
 
 const triggerToStructString = (trigger: AnimationTriggers) => {
-  if (trigger === StateTrigger.MARKET_REGISTRATION) return STRUCT_STRINGS.MarketRegistrationEvent;
-  if (trigger === StateTrigger.SWAP_BUY) return STRUCT_STRINGS.SwapEvent;
-  if (trigger === StateTrigger.SWAP_SELL) return STRUCT_STRINGS.SwapEvent;
-  if (trigger === StateTrigger.PROVIDE_LIQUIDITY) return STRUCT_STRINGS.LiquidityEvent;
-  if (trigger === StateTrigger.REMOVE_LIQUIDITY) return STRUCT_STRINGS.LiquidityEvent;
-  if (trigger === StateTrigger.CHAT) return STRUCT_STRINGS.ChatEvent;
+  if (trigger === Trigger.MarketRegistration) return STRUCT_STRINGS.MarketRegistrationEvent;
+  if (trigger === Trigger.SwapBuy) return STRUCT_STRINGS.SwapEvent;
+  if (trigger === Trigger.SwapSell) return STRUCT_STRINGS.SwapEvent;
+  if (trigger === Trigger.ProvideLiquidity) return STRUCT_STRINGS.LiquidityEvent;
+  if (trigger === Trigger.RemoveLiquidity) return STRUCT_STRINGS.LiquidityEvent;
+  if (trigger === Trigger.Chat) return STRUCT_STRINGS.ChatEvent;
   throw new Error(`Invalid trigger: ${trigger}`);
 };
 
@@ -60,7 +65,7 @@ export const generateRandomEvent = ({
   version,
   time = Date.now() * 1000,
   marketNonce = nonce++,
-  emojis = generateRandomSymbol(),
+  emojis = generateRandomSymbol().emojis,
   trigger = getRandomAnimationTrigger(),
 }: RandomEventArgs) => {
   const args = {
@@ -72,24 +77,24 @@ export const generateRandomEvent = ({
   const eventType = triggerToStructString(trigger);
   const jsonEvent = (() => {
     switch (trigger) {
-      case StateTrigger.MARKET_REGISTRATION:
+      case Trigger.MarketRegistration:
         return generateMarketRegistrationJSON(args);
-      case StateTrigger.SWAP_BUY:
+      case Trigger.SwapBuy:
         return generateSwapJSON({ ...args, isSell: false });
-      case StateTrigger.SWAP_SELL:
+      case Trigger.SwapSell:
         return generateSwapJSON({ ...args, isSell: true });
-      case StateTrigger.PROVIDE_LIQUIDITY:
+      case Trigger.ProvideLiquidity:
         return generateLiquidityJSON({ ...args, liquidityProvided: true });
-      case StateTrigger.REMOVE_LIQUIDITY:
+      case Trigger.RemoveLiquidity:
         return generateLiquidityJSON({ ...args, liquidityProvided: false });
-      case StateTrigger.CHAT:
+      case Trigger.Chat:
         return generateChatJSON(args);
       default:
         throw new Error(`Invalid trigger: ${trigger}`);
     }
   })();
   const specificEvent = toAnyEmojicoinEvent(eventType, jsonEvent, Number(version));
-  const stateJSON = generateStateJSON({ ...args, trigger });
+  const stateJSON = generateStateJSON({ ...args, trigger: fromContractEnumToRawTrigger(trigger) });
   const stateEvent = toAnyEmojicoinEvent(STRUCT_STRINGS.StateEvent, stateJSON, Number(version));
 
   return {
@@ -102,7 +107,7 @@ const generateMarketRegistrationJSON = ({
   marketID,
   emojis,
   time,
-  registrant = AccountAddress.from(Account.generate().accountAddress),
+  registrant = AccountAddress.from(Ed25519Account.generate().accountAddress),
 }: {
   marketID: AnyNumberString;
   emojis: EmojicoinSymbol;
@@ -139,8 +144,8 @@ const generateLiquidityJSON = ({
   lp_coin_amount: "1212122424",
   market_id: marketID.toString(),
   market_nonce: marketNonce.toString(),
-  pro_rata_base_donation_claim_amount: "0",
-  pro_rata_quote_donation_claim_amount: "0",
+  base_donation_claim_amount: "0",
+  quote_donation_claim_amount: "0",
   provider: "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
   quote_amount: "1200000000",
   time: time.toString(),
@@ -158,7 +163,7 @@ const generateStateJSON = ({
 }: {
   marketID: AnyNumberString;
   marketNonce: AnyNumberString;
-  trigger: StateTrigger;
+  trigger: Uint8;
   emojis: EmojicoinSymbol;
   time?: AnyNumberString;
   lastSwapNonce?: AnyNumberString;
@@ -218,7 +223,7 @@ const generateSwapJSON = ({
   marketNonce,
   inputAmount = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(),
   time = Date.now() * 1000,
-  swapper = AccountAddress.from(Account.generate().accountAddress),
+  swapper = AccountAddress.from(Ed25519Account.generate().accountAddress),
   resultsInStateTransition = false,
   startsInBondingCurve = true,
 }: {
@@ -258,6 +263,8 @@ const generateSwapJSON = ({
     starts_in_bonding_curve: startsInBondingCurve,
     swapper: AccountAddress.from(swapper).toString(),
     time: time.toString(),
+    balance_as_fraction_of_circulating_supply_before_q64: "0",
+    balance_as_fraction_of_circulating_supply_after_q64: "0",
   };
 };
 
@@ -266,7 +273,7 @@ const generateChatJSON = ({
   time = Date.now() * 1000,
   marketNonce,
   emojis,
-  user = AccountAddress.from(Account.generate().accountAddress),
+  user = AccountAddress.from(Ed25519Account.generate().accountAddress),
 }: {
   marketID: AnyNumberString;
   marketNonce: AnyNumberString;
