@@ -216,10 +216,7 @@ export default function EmojiPicker(
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div
-        {...props}
-        className="relative bg-black rounded-xl shadow-econia"
-      >
+      <div {...props} className="relative bg-black rounded-xl shadow-econia">
         <div
           className="right-0 relative h-[29px] w-[100%] bg-ec-blue z-5"
           style={{
@@ -228,18 +225,20 @@ export default function EmojiPicker(
             borderTopRightRadius: "8px",
           }}
           onPointerDown={props.drag}
-        >
-        </div>
+        ></div>
 
-        <div className="relative z-10 bg-black rounded-xl border-ec-blue border-solid border-[1px] border-t-0" style={{marginTop: "-10px"}}>
-        <Picker
-          perLine={8}
-          exceptEmojis={[]}
-          onEmojiSelect={(v: EmojiSelectorData) => {
-            const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
-            insertEmojiTextInput([newEmoji]);
-          }}
-        />
+        <div
+          className="relative z-10 bg-black rounded-xl border-ec-blue border-solid border-[1px] border-t-0"
+          style={{ marginTop: "-10px" }}
+        >
+          <Picker
+            perLine={8}
+            exceptEmojis={[]}
+            onEmojiSelect={(v: EmojiSelectorData) => {
+              const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
+              insertEmojiTextInput([newEmoji]);
+            }}
+          />
         </div>
 
         <RoundButton
