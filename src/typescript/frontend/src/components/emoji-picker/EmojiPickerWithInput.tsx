@@ -191,7 +191,7 @@ export const EmojiPickerWithInput = ({
                   id="emoji-picker-text-area"
                   className={`relative !pt-[16px] px-[4px] scroll-auto ${mode === "search" ? "home-textarea" : ""}`}
                   ref={onRefChange}
-                  autoFocus={true}
+                  autoFocus={false}
                   onPaste={handlePaste}
                   onCut={handleCut}
                   inputMode={nativePicker ? "text" : "none"}
