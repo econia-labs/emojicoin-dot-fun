@@ -151,7 +151,7 @@ const TableCard = ({
               }
             : undefined
       }
-      className="grid-emoji-card group card-wrapper border-[1px] border-solid border-dark-gray testinglol"
+      className="grid-emoji-card group card-wrapper border-[1px] border-solid border-dark-gray"
       variants={tableCardVariants}
       animate={variant}
       custom={{ curr, prev, layoutDelay }}
