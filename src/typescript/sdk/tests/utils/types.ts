@@ -28,7 +28,7 @@ export type PublishPackageResult = {
   vm_status: string;
 };
 
-export type TestHelpers = {
+export type PublishHelpers = {
   aptos: Aptos;
   publisher: Ed25519Account;
   publishPackageResult: PublishPackageResult;

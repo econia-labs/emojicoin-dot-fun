@@ -2,17 +2,13 @@
 import { Account, AccountAddress, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
 import { VERCEL } from "../../src/const";
 
-export const getTestPublisherPrivateKey = async () => {
+export const getTestPublisherPrivateKey = () => {
   if (VERCEL) {
     throw new Error("This function should not be called in a Vercel deployment.");
   }
   // If the publisher private key is not set by now, throw an error.
   if (!process.env.PUBLISHER_PRIVATE_KEY) {
-    console.warn(
-      "Missing PUBLISHER_PRIVATE_KEY environment variable for test, using the default value."
-    );
-    process.env.PUBLISHER_PRIVATE_KEY =
-      "29479e9e5fe47ba9a8af509dd6da1f907510bcf8917bfb19b7079d8c63c0b720";
+    throw new Error("PUBLISHER_PRIVATE_KEY is not set.");
   }
 
   const derivedAccount = Account.fromPrivateKey({

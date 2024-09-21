@@ -12,7 +12,7 @@ import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { useEventStore, useNameStore, useWebSocketClient } from "context/state-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
-import { getRankFromChatEvent } from "lib/utils/get-user-rank";
+import { getRankFromEvent } from "lib/utils/get-user-rank";
 import { memoizedSortedDedupedEvents, mergeSortedEvents, sortEvents } from "lib/utils/sort-events";
 import type { Types } from "@sdk/types/types";
 import { parseJSON } from "utils";
@@ -162,7 +162,7 @@ const ChatBox = (props: ChatProps) => {
               // TODO: Resolve address to Aptos name, store in state.
               sender: chat.user,
               text: chat.message,
-              senderRank: getRankFromChatEvent(chat).rankIcon,
+              senderRank: getRankFromEvent(chat).rankIcon,
               version: chat.version,
             };
             return (

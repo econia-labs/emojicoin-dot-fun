@@ -45,6 +45,7 @@ export const SwapButton = ({
         inputAmount: BigInt(inputAmount),
         isSell,
         typeTags: [emojicoin, emojicoinLP],
+        minOutputAmount: 1n,
       });
     const res = await submit(builderLambda);
     if (res && res.response && isUserTransactionResponse(res.response)) {
@@ -53,12 +54,18 @@ export const SwapButton = ({
       );
       if (rewardsEvent) {
         controls.start("celebration");
-        toast.success(<CongratulationsToast transactionHash={res.response.hash} />, {
-          pauseOnFocusLoss: false,
-          autoClose: 7000,
-          position: "top-center",
-          closeOnClick: false,
-        });
+        toast.dark(
+          <>
+            <RewardsAnimation controls={controls} />
+            <CongratulationsToast transactionHash={res.response.hash} />
+          </>,
+          {
+            pauseOnFocusLoss: false,
+            autoClose: 15000,
+            position: "top-center",
+            closeOnClick: false,
+          }
+        );
       }
     }
   }, [account, aptos.config, inputAmount, isSell, marketAddress, submit, controls]);
@@ -73,8 +80,8 @@ export const SwapButton = ({
         <Button disabled={disabled} onClick={handleClick} scale="lg">
           {t("Swap")}
         </Button>
-      </ButtonWithConnectWalletFallback>
       <RewardsAnimation controls={controls} />
+      </ButtonWithConnectWalletFallback>
     </>
   );
 };

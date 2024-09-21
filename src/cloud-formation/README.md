@@ -15,10 +15,10 @@ accordingly, `git` updates will result in automatic updates.
 The indexer provides a public REST endpoint and a public WebSocket endpoint
 under a root domain you provide, for an environment name of your choosing:
 
-| Endpoint  | URI                                         |
-| --------- | ------------------------------------------- |
-| REST      | `https://<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>`  |
-| WebSocket | `wss://ws.<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>` |
+| Endpoint  | URI                                         | Hardening   |
+| --------- | ------------------------------------------- | ----------- |
+| REST      | `https://<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>`  | API key     |
+| WebSocket | `wss://ws.<ENVIRONMENT>.<YOUR_ROOT_DOMAIN>` | Forthcoming |
 
 ## Template parameters
 
@@ -236,6 +236,30 @@ deployment environment:
    echo $STACK_NAME
    ```
 
+1. Get the REST API key ID:
+
+   ```sh
+   API_KEY_ID=$(aws cloudformation describe-stack-resources \
+       --logical-resource-id RestApiKey \
+       --output text \
+       --query 'StackResources[0].PhysicalResourceId' \
+       --stack-name $STACK_NAME \
+   )
+   echo $API_KEY_ID
+   ```
+
+1. Get the REST API key:
+
+   ```sh
+   API_KEY=$(aws apigateway get-api-key \
+       --api-key $API_KEY_ID \
+       --include-value \
+       --output text \
+       --query 'value'
+   )
+   echo $API_KEY
+   ```
+
 1. Get the endpoints specified in the [template outputs section]:
 
    ```sh
@@ -263,7 +287,8 @@ deployment environment:
 1. Query the REST endpoint:
 
    ```sh
-   curl "$REST_ENDPOINT/processor_status?select=last_success_version"
+   curl -H "x-api-key: $API_KEY" \
+       "$REST_ENDPOINT/processor_status?select=last_success_version"
    ```
 
 1. Connect to the WebSocket endpoint:
@@ -391,6 +416,15 @@ For ease of accessing the various services required to deploy the indexer,
 [`CloudFormationPowerUser`](#setup) is more permissive, though notably it
 restricts [role passing] to the `ContainerRole`.
 
+### Endpoint hardening
+
+The `Waf` [resource][resources] specifies a [Web Application Firewall] to
+protect REST and WebSocket endpoints, using custom and [managed rules]. The
+`EnableWafRules*` [template parameters](#template-parameters) can be used to
+toggle [rule actions] between `Block` and `Count`.
+
+See the [Web ACL traffic overview dashboards] to monitor rules.
+
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
@@ -422,12 +456,14 @@ restricts [role passing] to the `ContainerRole`.
 [inline policy]: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#inline-policies
 [least-privilege permissions]: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege
 [make route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
+[managed rules]: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
 [multi-az aurora serverless v2 cluster]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html#aurora-serverless.ha
 [parameter naming constraints]: https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-su-create.html
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
 [resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 [role passing]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_passrole.html
+[rule actions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-ruleaction.html
 [rules]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
 [secrets manager secrets]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html
 [stack]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html
@@ -438,5 +474,7 @@ restricts [role passing] to the `ContainerRole`.
 [the upstream repository credentials docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-secret.html
 [transaction stream service endpoint]: https://aptos.dev/en/build/indexer/txn-stream
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
+[web acl traffic overview dashboards]: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-dashboards.html
+[web application firewall]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
 [`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630
 [`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html

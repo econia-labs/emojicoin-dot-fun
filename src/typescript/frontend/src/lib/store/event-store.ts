@@ -15,14 +15,9 @@ import {
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
 import { type AnyNumberString } from "@sdk-types";
-import { CandlestickResolution, RESOLUTIONS_ARRAY, toCandlestickResolution } from "@sdk/const";
+import { PeriodDuration, PERIOD_DURATIONS, toPeriodDuration } from "@sdk/const";
 import { type WritableDraft } from "immer";
-import {
-  addToLocalStorage,
-  updateLocalStorage,
-  type MarketIDString,
-  type SymbolString,
-} from "./event-utils";
+import { addToLocalStorage, type MarketIDString, type SymbolString } from "./event-utils";
 import { type RegisteredMarket, symbolBytesToEmojis } from "@sdk/emoji_data";
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
@@ -47,7 +42,7 @@ type LiquidityEvent = Types.LiquidityEvent;
 type GlobalStateEvent = Types.GlobalStateEvent;
 type MarketDataView = Types.MarketDataView;
 
-export type CandlestickResolutionData = {
+export type CandlestickData = {
   candlesticks: readonly PeriodicStateEvent[];
   callback: SubscribeBarsCallback | undefined;
   latestBar: LatestBar | undefined;
@@ -58,13 +53,13 @@ export type EventsWithGUIDs = {
   chatEvents: readonly ChatEvent[];
   stateEvents: readonly StateEvent[];
   liquidityEvents: readonly LiquidityEvent[];
-  [CandlestickResolution.PERIOD_1M]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_5M]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_15M]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_30M]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_1H]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_4H]: CandlestickResolutionData | undefined;
-  [CandlestickResolution.PERIOD_1D]: CandlestickResolutionData | undefined;
+  [PeriodDuration.PERIOD_1M]: CandlestickData | undefined;
+  [PeriodDuration.PERIOD_5M]: CandlestickData | undefined;
+  [PeriodDuration.PERIOD_15M]: CandlestickData | undefined;
+  [PeriodDuration.PERIOD_30M]: CandlestickData | undefined;
+  [PeriodDuration.PERIOD_1H]: CandlestickData | undefined;
+  [PeriodDuration.PERIOD_4H]: CandlestickData | undefined;
+  [PeriodDuration.PERIOD_1D]: CandlestickData | undefined;
 };
 
 export type MarketStateValueType = EventsWithGUIDs & {
@@ -88,9 +83,9 @@ export type EventState = {
   registeredMarketMap: Readonly<Map<MarketIDString, RegisteredMarket>>;
 };
 
-type ResolutionSubscription = {
+type PeriodSubscription = {
   symbol: string;
-  resolution: CandlestickResolution;
+  period: PeriodDuration;
   cb: SubscribeBarsCallback;
 };
 
@@ -112,8 +107,8 @@ export type EventActions = {
   setLatestBars: ({ marketID, latestBars }: SetLatestBarsArgs) => void;
   getRegisteredMarketMap: () => Map<MarketIDString, RegisteredMarket>;
   initializeRegisteredMarketsMap: (data: Array<RegisteredMarket>) => void;
-  subscribeToResolution: ({ symbol, resolution, cb }: ResolutionSubscription) => void;
-  unsubscribeFromResolution: ({ symbol, resolution }: Omit<ResolutionSubscription, "cb">) => void;
+  subscribeToPeriod: ({ symbol, period, cb }: PeriodSubscription) => void;
+  unsubscribeFromPeriod: ({ symbol, period }: Omit<PeriodSubscription, "cb">) => void;
   pushGlobalStateEvent: (event: GlobalStateEvent) => void;
   getMarketRegistrationEvents: () => readonly MarketRegistrationEvent[];
 };
@@ -134,7 +129,7 @@ export const initializeEventStore = (): EventState => {
   };
 };
 
-const createInitialCandlestickData = (): WritableDraft<CandlestickResolutionData> => ({
+const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
   candlesticks: [] as PeriodicStateEvent[],
   callback: undefined,
   latestBar: undefined,
@@ -146,13 +141,13 @@ export const createInitialMarketState = (): WritableDraft<MarketStateValueType> 
   stateEvents: [],
   chatEvents: [],
   marketData: undefined,
-  [CandlestickResolution.PERIOD_1M]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_5M]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_15M]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_30M]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_1H]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_4H]: createInitialCandlestickData(),
-  [CandlestickResolution.PERIOD_1D]: createInitialCandlestickData(),
+  [PeriodDuration.PERIOD_1M]: createInitialCandlestickData(),
+  [PeriodDuration.PERIOD_5M]: createInitialCandlestickData(),
+  [PeriodDuration.PERIOD_15M]: createInitialCandlestickData(),
+  [PeriodDuration.PERIOD_30M]: createInitialCandlestickData(),
+  [PeriodDuration.PERIOD_1H]: createInitialCandlestickData(),
+  [PeriodDuration.PERIOD_4H]: createInitialCandlestickData(),
+  [PeriodDuration.PERIOD_1D]: createInitialCandlestickData(),
 });
 
 export const defaultState: EventState = initializeEventStore();
@@ -255,8 +250,8 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             initializeMarketHelper(state, marketID);
           }
           latestBars.forEach((bar) => {
-            const resolution = bar.period;
-            market![resolution]!.latestBar = bar;
+            const period = bar.period;
+            market![period]!.latestBar = bar;
           });
         });
       },
@@ -289,13 +284,13 @@ export const createEventStore = (initialState: EventState = defaultState) => {
             ...events.stateEvents,
             ...events.chatEvents,
             ...events.liquidityEvents,
-            ...events.candlesticks[CandlestickResolution.PERIOD_1M],
-            ...events.candlesticks[CandlestickResolution.PERIOD_5M],
-            ...events.candlesticks[CandlestickResolution.PERIOD_15M],
-            ...events.candlesticks[CandlestickResolution.PERIOD_30M],
-            ...events.candlesticks[CandlestickResolution.PERIOD_1H],
-            ...events.candlesticks[CandlestickResolution.PERIOD_4H],
-            ...events.candlesticks[CandlestickResolution.PERIOD_1D],
+            ...events.candlesticks[PeriodDuration.PERIOD_1M],
+            ...events.candlesticks[PeriodDuration.PERIOD_5M],
+            ...events.candlesticks[PeriodDuration.PERIOD_15M],
+            ...events.candlesticks[PeriodDuration.PERIOD_30M],
+            ...events.candlesticks[PeriodDuration.PERIOD_1H],
+            ...events.candlesticks[PeriodDuration.PERIOD_4H],
+            ...events.candlesticks[PeriodDuration.PERIOD_1D],
           ];
           state.firehose.push(...eventArray.map(toEventWithTime));
           const marketID = events.marketID.toString();
@@ -308,9 +303,9 @@ export const createEventStore = (initialState: EventState = defaultState) => {
           state.stateFirehose.push(...events.stateEvents.map(toEventWithTime));
           market.chatEvents.push(...events.chatEvents);
           market.liquidityEvents.push(...events.liquidityEvents);
-          for (const resolution of RESOLUTIONS_ARRAY) {
-            const periodicEvents = events.candlesticks[resolution];
-            market[resolution]!.candlesticks.push(...periodicEvents);
+          for (const period of PERIOD_DURATIONS) {
+            const periodicEvents = events.candlesticks[period];
+            market[period]!.candlesticks.push(...periodicEvents);
           }
         });
       },
@@ -318,15 +313,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
       // We also update the latest bar if the incoming event is a swap or periodic state event.
       pushEventFromClient: (event) => {
         if (get().guids.has(event.guid) && !event.guid.startsWith("Swap")) return;
-        if (
-          event.guid.startsWith("Swap") &&
-          typeof (event as Types.SwapEvent).balanceAsFractionOfCirculatingSupply === "bigint"
-        ) {
-          updateLocalStorage(event);
-          return;
-        } else {
-          addToLocalStorage(event);
-        }
+        addToLocalStorage(event);
         set((state) => {
           state.firehose.unshift(toEventWithTime(event));
           state.guids.add(event.guid);
@@ -360,13 +347,13 @@ export const createEventStore = (initialState: EventState = defaultState) => {
               if (isSwapEvent(event)) {
                 const swap = event;
                 market.swapEvents.unshift(swap);
-                RESOLUTIONS_ARRAY.forEach((resolution) => {
-                  const data = market[resolution];
+                PERIOD_DURATIONS.forEach((period) => {
+                  const data = market[period];
                   if (!data) {
-                    throw new Error("No candlestick data found for resolution.");
+                    throw new Error("No candlestick data found for period.");
                   }
 
-                  const swapPeriodStartTime = getPeriodStartTime(swap, resolution);
+                  const swapPeriodStartTime = getPeriodStartTime(swap, period);
                   const latestBarPeriodStartTime = BigInt(data.latestBar?.time ?? -1n) * 1000n;
                   // Create a new bar if there is no latest bar or if the swap event's period start
                   // time is newer than the current latest bar's period start time.
@@ -375,7 +362,7 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                   if (shouldCreateNewBar) {
                     const newLatestBar = createNewLatestBarFromSwap(
                       swap,
-                      resolution,
+                      period,
                       data.latestBar?.close
                     );
                     data.latestBar = newLatestBar;
@@ -384,8 +371,8 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                     if (!data.latestBar) {
                       throw new Error("This will never occur- it's just to satisfy TypeScript.");
                     }
-                    const price = q64ToBig(swap.avgExecutionPrice).toNumber();
-                    data.latestBar.time = Number(getPeriodStartTime(swap, resolution) / 1000n);
+                    const price = q64ToBig(swap.avgExecutionPriceQ64).toNumber();
+                    data.latestBar.time = Number(getPeriodStartTime(swap, period) / 1000n);
                     data.latestBar.close = price;
                     data.latestBar.high = Math.max(data.latestBar.high, price);
                     data.latestBar.low = Math.min(data.latestBar.low, price);
@@ -397,10 +384,10 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                   }
                 });
               } else if (isPeriodicStateEvent(event)) {
-                const resolution = toCandlestickResolution(event.periodicStateMetadata.period);
-                const data = market[resolution];
+                const period = toPeriodDuration(event.periodicStateMetadata.period);
+                const data = market[period];
                 if (!data) {
-                  throw new Error("No candlestick data found for resolution.");
+                  throw new Error("No candlestick data found for that period duration.");
                 }
                 data.candlesticks.unshift(event);
                 const newLatestBar = createNewLatestBar(event, data.latestBar?.close);
@@ -410,21 +397,21 @@ export const createEventStore = (initialState: EventState = defaultState) => {
                   (data.latestBar?.time ?? -1) <= newLatestBar.time
                 ) {
                   data.latestBar = newLatestBar;
-                  // We need to update the latest bar for all resolutions with any existing swap
-                  // data for the new given resolution's time span/time range.
+                  // We need to update the latest bar for all periods with any existing swap
+                  // data for the new given period's time span/time range.
                   // NOTE: This assumes `swapEvents` is already sorted in descending order.
                   market.swapEvents.forEach((swap) => {
                     const emitTime = event.periodicStateMetadata.emitTime;
                     const swapTime = swap.time;
-                    const period = BigInt(resolution);
-                    const swapInTimeRange = emitTime <= swapTime && swapTime <= emitTime + period;
+                    const swapInTimeRange =
+                      emitTime <= swapTime && swapTime <= emitTime + BigInt(period);
 
                     // NOTE: When a new periodic state event is emitted, the market nonce
                     // for the swap event is actually exactly the same as the periodic state event,
                     // hence why we use `>=` instead of just `>`.
                     if (swapInTimeRange && swap.marketNonce >= data.latestBar!.marketNonce) {
-                      const price = q64ToBig(swap.avgExecutionPrice).toNumber();
-                      data.latestBar!.time = Number(getPeriodStartTime(swap, resolution) / 1000n);
+                      const price = q64ToBig(swap.avgExecutionPriceQ64).toNumber();
+                      data.latestBar!.time = Number(getPeriodStartTime(swap, period) / 1000n);
                       data.latestBar!.close = price;
                       data.latestBar!.marketNonce = swap.marketNonce;
                       data.latestBar!.high = Math.max(data.latestBar!.high, price);
@@ -462,29 +449,28 @@ export const createEventStore = (initialState: EventState = defaultState) => {
         return get().registeredMarketMap.get(marketID.toString());
       },
       getRegisteredMarketMap: () => get().registeredMarketMap,
-      subscribeToResolution: ({ symbol, resolution, cb }) => {
+      subscribeToPeriod: ({ symbol, period, cb }) => {
         const marketID = get().symbols.get(symbol);
         if (!marketID) return;
         const marketForCheck = get().markets.get(marketID);
         if (!marketForCheck) return;
         set((state) => {
           const market = state.markets.get(marketID)!;
-          if (!market[resolution]) {
-            market[resolution] = createInitialCandlestickData();
+          if (!market[period]) {
+            market[period] = createInitialCandlestickData();
           }
-          const marketResolution = market[resolution]!;
-          marketResolution.callback = cb;
+          market[period]!.callback = cb;
         });
       },
-      unsubscribeFromResolution: ({ symbol, resolution }) => {
+      unsubscribeFromPeriod: ({ symbol, period }) => {
         const marketID = get().symbols.get(symbol);
         if (!marketID) return;
         const marketForCheck = get().markets.get(marketID);
         if (!marketForCheck) return;
         set((state) => {
           const market = state.markets.get(marketID)!;
-          if (!market[resolution]) return;
-          market[resolution]!.callback = undefined;
+          if (!market[period]) return;
+          market[period]!.callback = undefined;
         });
       },
     }))

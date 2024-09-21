@@ -197,7 +197,8 @@ namespace JSONTypes {
     pool_fee: Uint64String;
     starts_in_bonding_curve: boolean;
     results_in_state_transition: boolean;
-    balance_as_fraction_of_circulating_supply?: number;
+    balance_as_fraction_of_circulating_supply_before_q64: Uint128String;
+    balance_as_fraction_of_circulating_supply_after_q64: Uint128String;
   };
 
   export type ChatEvent = {
@@ -272,8 +273,8 @@ namespace JSONTypes {
     quote_amount: Uint64String;
     lp_coin_amount: Uint64String;
     liquidity_provided: boolean;
-    pro_rata_base_donation_claim_amount: Uint64String;
-    pro_rata_quote_donation_claim_amount: Uint64String;
+    base_donation_claim_amount: Uint64String;
+    quote_donation_claim_amount: Uint64String;
   };
 
   export type RegistrantGracePeriodFlag = {

@@ -5,14 +5,14 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { type NetworkInfo } from "@aptos-labs/wallet-adapter-react";
-import { CandlestickResolution } from "@sdk/const";
+import { PeriodDuration } from "@sdk/const";
 import { getPeriodStartTimeFromTime, truncateAddress } from "@sdk/utils/misc";
 import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
 import { ExplorerLink } from "components/link/component";
 import { DEFAULT_TOAST_CONFIG } from "const";
 
-const debouncedToastKey = (s: string, debouncePeriod: CandlestickResolution) => {
+const debouncedToastKey = (s: string, debouncePeriod: PeriodDuration) => {
   const periodBoundary = getPeriodStartTimeFromTime(
     BigInt(new Date().getTime() * 1000),
     debouncePeriod
@@ -28,7 +28,7 @@ export const checkNetworkAndToast = (
     if (!notifyIfDisconnected) {
       toast.info("Please connect your wallet.", {
         ...DEFAULT_TOAST_CONFIG,
-        toastId: debouncedToastKey("connect-wallet", CandlestickResolution.PERIOD_1M),
+        toastId: debouncedToastKey("connect-wallet", PeriodDuration.PERIOD_1M),
       });
     }
     return false;
@@ -69,7 +69,7 @@ export const checkNetworkAndToast = (
     );
     toast.warning(message, {
       ...DEFAULT_TOAST_CONFIG,
-      toastId: debouncedToastKey("network-warning", CandlestickResolution.PERIOD_1M),
+      toastId: debouncedToastKey("network-warning", PeriodDuration.PERIOD_1M),
     });
   }
   return true;
@@ -91,7 +91,7 @@ export const parseAPIErrorAndToast = (network: NetworkInfo, error: AptosApiError
       );
       toast.error(message, {
         ...DEFAULT_TOAST_CONFIG,
-        toastId: debouncedToastKey("account-not-found", CandlestickResolution.PERIOD_1M),
+        toastId: debouncedToastKey("account-not-found", PeriodDuration.PERIOD_1M),
       });
     }
   }
@@ -120,7 +120,7 @@ export const successfulTransactionToast = (
   );
   toast.success(message, {
     ...DEFAULT_TOAST_CONFIG,
-    toastId: debouncedToastKey("transaction-success", CandlestickResolution.PERIOD_1M),
+    toastId: debouncedToastKey("transaction-success", PeriodDuration.PERIOD_1M),
     className: "cursor-text",
     closeOnClick: false,
   });
