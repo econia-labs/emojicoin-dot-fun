@@ -1,4 +1,4 @@
-import { isSwapEvent, type Types } from "@sdk-types";
+import { type ChatEventModel, type SwapEventModel } from "@sdk/indexer-v2/types";
 import { q64ToBig } from "@sdk/utils/nominal-price";
 
 export enum RankIcon {
@@ -18,19 +18,24 @@ export enum RankName {
  * @param event the chat or swap event
  * @returns the rank icon and name
  */
-export const getRankFromEvent = (
-  event: Types.SwapEvent | Types.ChatEvent
+export const getRankFromEvent = <
+  T extends
+    | Pick<SwapEventModel["swap"], "balanceAsFractionOfCirculatingSupplyAfterQ64">
+    | Pick<ChatEventModel["chat"], "balanceAsFractionOfCirculatingSupplyQ64">,
+>(
+  event: T
 ): {
   rankIcon: RankIcon;
   rankName: RankName;
 } => {
   const fraction = (() => {
-    if (isSwapEvent(event)) {
+    if ("balanceAsFractionOfCirculatingSupplyAfterQ64" in event) {
       const q64 = event.balanceAsFractionOfCirculatingSupplyAfterQ64;
       return q64ToBig(q64).toNumber();
+    } else {
+      const q64 = event.balanceAsFractionOfCirculatingSupplyQ64;
+      return q64ToBig(q64).toNumber();
     }
-    const q64 = event.balanceAsFractionOfCirculatingSupplyQ64;
-    return q64ToBig(q64).toNumber();
   })();
 
   const percentage = fraction * 100;

@@ -11,40 +11,27 @@ import {
 } from "../../../src";
 import TestHelpers from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
-import {
-  fetchMarketsByAllTimeVolume,
-  fetchMarketsByBumpTime,
-  fetchMarketsByDailyVolume,
-  fetchMarketsByMarketCap,
-} from "../../../src/indexer-v2/queries/app/home-page";
-import { waitForEmojicoinIndexer, withQueryConfig } from "../../../src/indexer-v2/queries/utils";
+import { waitForEmojicoinIndexer, queryHelper } from "../../../src/indexer-v2/queries/utils";
 import { Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../utils";
 import { postgrest } from "../../../src/indexer-v2/queries/client";
 import { TableName } from "../../../src/indexer-v2/types/snake-case-types";
 import { LIMIT } from "../../../src/queries";
 import { type MarketStateModel, toMarketState } from "../../../src/indexer-v2/types";
+import { fetchMarkets } from "../../../src/indexer-v2/queries/app/home";
+import { SortMarketsBy } from "../../../src/indexer-v2/types/common";
 
 jest.setTimeout(20000);
 
 describe("sorting queries for the sort filters on the home page", () => {
   const { aptos } = getAptosClient();
-  const registrants = getFundedAccounts(
-    "0x0230e55ee70f31e44e30e7d08bd184ebdf887289170566295b1767a4b9989023",
-    "0x0240d2bd361b9819326efec610e680da1fe29c7511c6716f255ab84d7f5e2024",
-    "0x025607a6b68b124d0e3692f3bdb9b2a7e50ffc528e3671fa1bff354c2f417025",
-    "0x0263fa88299ea8833e0d63d86985354b745672cc048a2a98a078aaf50c7cf026",
-    "0x027a138e13934a65add83e2dccd9eab62ba79803cc99bab280d3c16751ff3027",
-    "0x028032894d4418be5e1524bb4faa6530a8a5b76e70043976ab12905472f35028",
-    "0x029e359a15a2145b9816ccc1913922dca356035cc80a39b1d418139a0ddfe029",
-    "0x030bd91be82080eb3c6860eb0a04778795fd93436ea37097dd6000fb4b46a030"
-  );
+  const registrants = getFundedAccounts("023", "024", "025", "026", "027", "028", "029", "030");
 
   let latestTransactionVersion: number;
 
-  // In order for these tests to work, *ANY* of the following emojis must *NOT* be used in any other
-  // tests as part of a market symbol, because then the query for searching by emoji will return
-  // multiple results that were not intended.
+  // In order for these tests to work, *NONE* of the following emojis can be used in any other tests
+  // as part of a market symbol, because then the query for searching by emoji will return multiple
+  // results that were not intended.
   const marketEmojiNames: EmojiName[][] = [
     ["vampire"],
     ["vampire", "drop of blood"],
@@ -109,7 +96,7 @@ describe("sorting queries for the sort filters on the home page", () => {
     mapFunction: (arr: MarketStateModel) => [bigint, bigint]
   ) => {
     const allMarketsQuery = () => postgrest.from(TableName.MarketState).select("*");
-    const manualQueryResults = await withQueryConfig(allMarketsQuery, toMarketState)({});
+    const manualQueryResults = await queryHelper(allMarketsQuery, toMarketState)({});
     expect(manualQueryResults.length).toBeLessThanOrEqual(LIMIT);
 
     const latestMarketID = bigintMax(...queryResults.map((res) => res.market.marketID));
@@ -130,8 +117,8 @@ describe("sorting queries for the sort filters on the home page", () => {
       // value and if so, skip comparing the market IDs at each index until we find a different
       // value. Then, compare the set of market IDs for both.
       if (expectedMarketID !== marketID) {
-        const expectedMarketIDs = new Set<bigint>();
-        const resultsMarketIDs = new Set<bigint>();
+        const expectedMarketIDs = new Set<bigint>([expectedMarketID]);
+        const resultsMarketIDs = new Set<bigint>([marketID]);
         while (i < results.length) {
           expectedMarketIDs.add(expected[i][0]);
           resultsMarketIDs.add(results[i][0]);
@@ -141,6 +128,9 @@ describe("sorting queries for the sort filters on the home page", () => {
             break;
           }
         }
+        const expectedString = Array.from(expectedMarketIDs).toSorted().join(",");
+        const resultsString = Array.from(resultsMarketIDs).toSorted().join(",");
+        expect(expectedString).toEqual(resultsString);
         expect(expectedMarketIDs).toEqual(resultsMarketIDs);
       }
 
@@ -149,18 +139,18 @@ describe("sorting queries for the sort filters on the home page", () => {
   };
 
   it("fetches markets by bump order", async () => {
-    const marketsByBumpTime = await fetchMarketsByBumpTime({ page: 1 });
+    const byBumpOrder = await fetchMarkets({ page: 1, sortBy: SortMarketsBy.BumpOrder });
     await checkOrder(
-      marketsByBumpTime,
+      byBumpOrder,
       ({ market: a }, { market: b }) => compareBigInt(b.time, a.time),
       ({ market }) => [market.marketID, market.time]
     );
   });
 
   it("fetches markets by market cap", async () => {
-    const marketsByMarketCap = await fetchMarketsByMarketCap({ page: 1 });
+    const byMarketCap = await fetchMarkets({ page: 1, sortBy: SortMarketsBy.MarketCap });
     await checkOrder(
-      marketsByMarketCap,
+      byMarketCap,
       ({ state: a }, { state: b }) =>
         compareBigInt(b.instantaneousStats.marketCap, a.instantaneousStats.marketCap),
       ({ market, state }) => [market.marketID, state.instantaneousStats.marketCap]
@@ -168,9 +158,9 @@ describe("sorting queries for the sort filters on the home page", () => {
   });
 
   it("fetches markets by all time volume", async () => {
-    const marketsByAllTimeVolume = await fetchMarketsByAllTimeVolume({ page: 1 });
+    const byAllTimeVolume = await fetchMarkets({ page: 1, sortBy: SortMarketsBy.AllTimeVolume });
     await checkOrder(
-      marketsByAllTimeVolume,
+      byAllTimeVolume,
       ({ state: a }, { state: b }) =>
         compareBigInt(b.cumulativeStats.quoteVolume, a.cumulativeStats.quoteVolume),
       ({ market, state }) => [market.marketID, state.cumulativeStats.quoteVolume]
@@ -178,9 +168,9 @@ describe("sorting queries for the sort filters on the home page", () => {
   });
 
   it("fetches markets by daily volume", async () => {
-    const marketsByDailyVolume = await fetchMarketsByDailyVolume({ page: 1 });
+    const byDailyVolume = await fetchMarkets({ page: 1, sortBy: SortMarketsBy.DailyVolume });
     await checkOrder(
-      marketsByDailyVolume,
+      byDailyVolume,
       ({ dailyVolume: a }, { dailyVolume: b }) => compareBigInt(b, a),
       ({ market, dailyVolume }) => [market.marketID, dailyVolume]
     );

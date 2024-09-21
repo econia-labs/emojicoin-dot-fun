@@ -2,28 +2,28 @@ import React, { type PropsWithChildren, useEffect, useMemo, useRef } from "react
 
 import { type TradeHistoryProps } from "../../types";
 import { getRankFromEvent } from "lib/utils/get-user-rank";
-import { useEventStore, useNameStore, useWebSocketClient } from "context/state-store-context";
-import { type Types } from "@sdk/types/types";
-import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import { useEventStore, useNameStore } from "context/event-store-context";
 import TableRow from "./table-row";
 import { type TableRowDesktopProps } from "./table-row/types";
-import { memoizedSortedDedupedEvents, mergeSortedEvents, sortEvents } from "lib/utils/sort-events";
-import { parseJSON } from "utils";
+import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
 import { motion } from "framer-motion";
+import { type SwapEventModel } from "@sdk/indexer-v2/types";
+import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import "./trade-history.css";
-import { q64ToBig } from "@sdk/utils/nominal-price";
 
 const HARD_LIMIT = 500;
 
-const toTableItem = (value: Types.SwapEvent): TableRowDesktopProps["item"] => ({
-  ...getRankFromEvent(value),
-  apt: value.quoteVolume.toString(),
-  emoji: value.baseVolume.toString(),
-  date: new Date(Number(value.time / 1000n)),
-  type: value.isSell ? "sell" : "buy",
-  price: q64ToBig(value.avgExecutionPriceQ64).toString(),
-  swapper: value.swapper,
-  version: value.version,
+const toTableItem = (
+  swap: SwapEventModel["swap"] & { time: bigint; version: number }
+): TableRowDesktopProps["item"] => ({
+  ...getRankFromEvent(swap),
+  apt: swap.quoteVolume.toString(),
+  emoji: swap.baseVolume.toString(),
+  date: new Date(Number(swap.time / 1000n)),
+  type: swap.isSell ? "sell" : "buy",
+  priceQ64: swap.avgExecutionPriceQ64.toString(),
+  swapper: swap.swapper,
+  version: swap.version,
 });
 
 const TableHeader =
@@ -34,33 +34,8 @@ const ThWrapper = ({ className, children }: { className: string } & PropsWithChi
   <th className={className + " " + TableHeader}>{children}</th>
 );
 
-const getCombinedSwaps = (swaps: readonly Types.SwapEvent[], marketID: bigint) => {
-  const stateGuids = new Set(swaps.map((swap) => swap.guid));
-  const localSwaps: Types.SwapEvent[] = parseJSON(localStorage.getItem(`swaps`) ?? "[]");
-  const filteredSwaps = localSwaps.filter(
-    (swap: Types.SwapEvent) => swap.marketID === marketID && !stateGuids.has(swap.guid)
-  );
-  sortEvents(filteredSwaps);
-  return mergeSortedEvents(swaps, filteredSwaps);
-};
-
 const TradeHistory = (props: TradeHistoryProps) => {
-  const marketID = props.data.marketID;
-
-  const swaps = getCombinedSwaps(
-    useEventStore((s) => s.getMarket(marketID)?.swapEvents ?? []),
-    BigInt(marketID)
-  );
-
-  const subscribe = useWebSocketClient((s) => s.subscribe);
-  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
-
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    subscribe.swap(marketID, null);
-    return () => requestUnsubscribe.swap(marketID, null);
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  const swaps = useEventStore((s) => s.getMarket(props.data.symbolEmojis)?.swapEvents ?? []);
 
   const initialLoad = useRef(true);
   useEffect(() => {
@@ -82,13 +57,16 @@ const TradeHistory = (props: TradeHistoryProps) => {
     [props.data.swaps.length, swaps.length]
   );
 
-  const addresses = sortedSwaps.map((swap) => swap.swapper);
+  const addresses = sortedSwaps.map(({ swap }) => swap.swapper);
   const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
 
   const sortedSwapsWithNames = useMemo(() => {
-    const data = sortedSwaps.map((e) => ({
-      ...e,
-      swapper: nameResolver(e.swapper),
+    const data = sortedSwaps.map(({ swap, shouldAnimateAsInsertion, transaction }) => ({
+      ...swap,
+      swapper: nameResolver(swap.swapper) as AccountAddressString,
+      shouldAnimateAsInsertion,
+      time: transaction.time,
+      version: Number(transaction.version),
     }));
     return data;
     /* eslint-disable react-hooks/exhaustive-deps */
@@ -106,9 +84,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
             <span className="flex my-auto">APT</span>
           </ThWrapper>
           <ThWrapper className="flex w-[22%] md:w-[18%]">
-            <span className="flex my-auto">
-              {symbolBytesToEmojis(props.data.emojiBytes).symbol}
-            </span>
+            <span className="flex my-auto">{props.data.symbol}</span>
           </ThWrapper>
           <ThWrapper className="hidden md:flex md:w-[24%]">
             <span className="flex my-auto">Time</span>

@@ -1,6 +1,9 @@
+import "server-only";
+
 import { PostgrestClient } from "@supabase/postgrest-js";
-import JSON_BIGINT from "../json-bigint";
+import { stringifyParsedBigInts } from "../json-bigint";
 import { type TableName } from "../types/snake-case-types";
+import { EMOJICOIN_INDEXER_URL } from "../../server-env";
 
 /**
  * Fetch with BigInt support. This is necessary because the JSON returned by the indexer
@@ -17,10 +20,7 @@ const fetchPatch: typeof fetch = async (input, init) => {
   }
 
   const text = await response.text();
-  const parsedWithBigInts = JSON_BIGINT.parse(text);
-  const json = JSON.stringify(parsedWithBigInts, (_, value) =>
-    typeof value === "bigint" ? value.toString() : value
-  );
+  const json = stringifyParsedBigInts(text);
 
   if (process.env.FETCH_DEBUG === "true") {
     /* eslint-disable-next-line no-console */
@@ -41,4 +41,20 @@ class CustomClient extends PostgrestClient {
   from = (table: TableName) => super.from(table);
 }
 
-export const postgrest = new CustomClient(process.env.INDEXER_URL!, { fetch: fetchPatch });
+export const postgrest = new CustomClient(EMOJICOIN_INDEXER_URL, {
+  fetch: fetchPatch,
+});
+
+/**
+ * Converts an input array of any type to a proper query param for the `postgrest` client.
+ *
+ * @param s an array of values
+ * @returns the properly formatted string input for the query input param
+ * @example
+ * ```typescript
+ * const myArray = ["1", "2", "3"];
+ * const res = toQueryArray(myArray);
+ * // res === "{1,2,3}"
+ * ```
+ */
+export const toQueryArray = <T>(s: T[]) => `{${s.join(",")}}`;

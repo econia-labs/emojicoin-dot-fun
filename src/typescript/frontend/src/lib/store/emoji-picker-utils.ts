@@ -47,7 +47,7 @@ export const insertEmojiTextInputHelper = (
   );
 
   // prettier-ignore
-  const newEmojis = emojis
+  const newEmojis = (emojis as Array<string>)
     .slice(0, start)
     .concat(filteredEmojis)
     .concat(emojis.slice(end));

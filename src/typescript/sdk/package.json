@@ -10,6 +10,7 @@
     "emoji-regex": "^10.3.0",
     "find-git-root": "^1.0.4",
     "json-bigint": "^1.0.0",
+    "mqtt": "^5.7.3",
     "postgres": "^3.4.4",
     "server-only": "^0.0.1"
   },
@@ -33,7 +34,7 @@
     "tree-kill": "^1.2.2",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
-    "typescript": "5.3.3"
+    "typescript": "5.6.2"
   },
   "engines": {
     "node": ">=v20.12.2"
@@ -51,9 +52,8 @@
   "scripts": {
     "_format": "prettier 'src/**/*.ts' 'tests/**/*.ts' '.eslintrc.js'",
     "build": "tsc",
-    "build:clean": "pnpm run clean && pnpm i && tsc",
-    "build:debug": "pnpm run build:clean",
-    "check": "tsc --noEmit",
+    "build:debug": "BUILD_DEBUG=true pnpm run build",
+    "check": "dotenv -e ../.env.example -e ../.env.local -e ../../docker/example.local.env -e ../../docker/.env -- tsc --noEmit",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "e2e-test": "dotenv -e ../.env.ci -- pnpm jest tests/e2e --conditions=react-server",
     "format": "pnpm _format --write",
@@ -68,7 +68,8 @@
     "test": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -- pnpm jest",
     "test:debug": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -v FETCH_DEBUG=true -- pnpm jest",
     "test:verbose": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -v VERBOSE=true -- pnpm jest",
-    "unit-test": "dotenv -e ../.env.ci -v NO_TEST_SETUP=true -- pnpm jest tests/unit"
+    "unit-test": "dotenv -e ../.env.ci -v NO_TEST_SETUP=true -- pnpm jest tests/unit",
+    "wss": "dotenv -e ../../docker/.env -e ../.env.local -- tsx tests/connection.ts"
   },
   "typings": "dist/src/index.d.ts",
   "version": "0.0.1"

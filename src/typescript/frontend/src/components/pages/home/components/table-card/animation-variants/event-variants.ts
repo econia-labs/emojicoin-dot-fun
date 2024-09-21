@@ -1,13 +1,17 @@
-import {
-  type Types,
-  type AnyNumberString,
-  isChatEvent,
-  isStateEvent,
-  isSwapEvent,
-  isLiquidityEvent,
-  isMarketRegistrationEvent,
-} from "@sdk-types";
+import { type AnyNumberString } from "@sdk-types";
 import { Trigger } from "@sdk/const";
+import {
+  type ChatEventModel,
+  isChatEventModel,
+  isLiquidityEventModel,
+  isMarketLatestStateEventModel,
+  isMarketRegistrationEventModel,
+  isSwapEventModel,
+  type LiquidityEventModel,
+  type MarketLatestStateEventModel,
+  type MarketRegistrationEventModel,
+  type SwapEventModel,
+} from "@sdk/indexer-v2/types";
 import type Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { ECONIA_BLUE, GREEN, PINK, WHITE } from "theme/colors";
@@ -151,27 +155,29 @@ export const useLabelScrambler = (value: AnyNumberString | Big, suffix: string =
 
 export const eventToVariant = (
   event?:
-    | Types.ChatEvent
-    | Types.StateEvent
-    | Types.SwapEvent
-    | Types.LiquidityEvent
-    | Types.MarketRegistrationEvent
+    | ChatEventModel
+    | MarketLatestStateEventModel
+    | SwapEventModel
+    | LiquidityEventModel
+    | MarketRegistrationEventModel
 ): AnyNonGridTableCardVariant => {
   if (typeof event === "undefined") return "initial";
-  if (isStateEvent(event)) return stateEventToVariant(event);
-  if (isChatEvent(event)) return "chats";
-  if (isSwapEvent(event)) return event.isSell ? "sell" : "buy";
-  if (isLiquidityEvent(event)) return event.liquidityProvided ? "buy" : "sell";
-  if (isMarketRegistrationEvent(event)) return "register";
+  if (isMarketLatestStateEventModel(event)) return stateEventToVariant(event);
+  if (isChatEventModel(event)) return "chats";
+  if (isSwapEventModel(event)) return event.swap.isSell ? "sell" : "buy";
+  if (isLiquidityEventModel(event)) return event.liquidity.liquidityProvided ? "buy" : "sell";
+  if (isMarketRegistrationEventModel(event)) return "register";
   throw new Error("Unknown event type");
 };
 
-export const stateEventToVariant = (event: Types.StateEvent): AnyNonGridTableCardVariant => {
-  if (event.stateMetadata.trigger === Trigger.MarketRegistration) return "register";
-  if (event.stateMetadata.trigger === Trigger.RemoveLiquidity) return "sell";
-  if (event.stateMetadata.trigger === Trigger.ProvideLiquidity) return "buy";
-  if (event.stateMetadata.trigger === Trigger.SwapBuy) return "buy";
-  if (event.stateMetadata.trigger === Trigger.SwapSell) return "sell";
-  if (event.stateMetadata.trigger === Trigger.Chat) return "chats";
+export const stateEventToVariant = (
+  event: MarketLatestStateEventModel
+): AnyNonGridTableCardVariant => {
+  if (event.market.trigger === Trigger.MarketRegistration) return "register";
+  if (event.market.trigger === Trigger.RemoveLiquidity) return "sell";
+  if (event.market.trigger === Trigger.ProvideLiquidity) return "buy";
+  if (event.market.trigger === Trigger.SwapBuy) return "buy";
+  if (event.market.trigger === Trigger.SwapSell) return "sell";
+  if (event.market.trigger === Trigger.Chat) return "chats";
   throw new Error("Unknown state event type");
 };

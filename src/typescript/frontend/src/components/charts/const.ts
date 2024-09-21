@@ -8,25 +8,33 @@ import {
   type ResolutionString,
   type ThemeName,
 } from "@static/charting_library";
-import { PeriodDuration } from "@econia-labs/emojicoin-sdk";
+import { Period } from "@econia-labs/emojicoin-sdk";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";
 
-export const TV_CHARTING_LIBRARY_RESOLUTIONS = ["1", "5", "15", "30", "60", "4H", "1D"];
+export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
+  "1",
+  "5",
+  "15",
+  "30",
+  "60",
+  "4H",
+  "1D",
+] as ResolutionString[];
 
 export const PINK = hexToRgba(PINK_HEX);
 export const GREEN = hexToRgba(GREEN_HEX);
 export const PINK_OPACITY_HALF = hexToRgba(`${PINK_HEX}80`);
 export const GREEN_OPACITY_HALF = hexToRgba(`${GREEN_HEX}80`);
 
-export const ResolutionStringsToPeriodDuration: { [key: string]: PeriodDuration } = {
-  "1D": PeriodDuration.PERIOD_1D,
-  "30": PeriodDuration.PERIOD_30M,
-  "60": PeriodDuration.PERIOD_1H,
-  "15": PeriodDuration.PERIOD_15M,
-  "240": PeriodDuration.PERIOD_4H,
-  "5": PeriodDuration.PERIOD_5M,
-  "1": PeriodDuration.PERIOD_1M,
+export const ResolutionStringToPeriod: { [key: string]: Period } = {
+  "1": Period.Period1M,
+  "5": Period.Period5M,
+  "15": Period.Period15M,
+  "30": Period.Period30M,
+  "60": Period.Period1H,
+  "240": Period.Period4H,
+  "1D": Period.Period1D,
 };
 
 export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;

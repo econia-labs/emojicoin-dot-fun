@@ -1,6 +1,7 @@
 import { type Network } from "@aptos-labs/wallet-adapter-react";
 import packageInfo from "../../package.json";
 import { parse } from "semver";
+import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 
 export type Links = {
   x: string;
@@ -11,9 +12,9 @@ export type Links = {
 };
 
 let APTOS_NETWORK: Network;
-let INTEGRATOR_ADDRESS: string;
+let INTEGRATOR_ADDRESS: AccountAddressString;
 let INTEGRATOR_FEE_RATE_BPS: number;
-let MQTT_URL: string;
+let BROKER_URL: string;
 
 export const LINKS: Links | undefined =
   typeof process.env.NEXT_PUBLIC_LINKS === "string" && process.env.NEXT_PUBLIC_LINKS !== ""
@@ -34,7 +35,7 @@ if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
 }
 
 if (process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS) {
-  INTEGRATOR_ADDRESS = process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS;
+  INTEGRATOR_ADDRESS = process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS as AccountAddressString;
 } else {
   throw new Error("Environment variable NEXT_PUBLIC_INTEGRATOR_ADDRESS is undefined.");
 }
@@ -45,10 +46,10 @@ if (process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS) {
   throw new Error("Environment variable NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS is undefined.");
 }
 
-if (process.env.NEXT_PUBLIC_MQTT_URL) {
-  MQTT_URL = process.env.NEXT_PUBLIC_MQTT_URL;
+if (process.env.NEXT_PUBLIC_BROKER_URL) {
+  BROKER_URL = process.env.NEXT_PUBLIC_BROKER_URL;
 } else {
-  throw new Error("Environment variable NEXT_PUBLIC_MQTT_URL is undefined.");
+  throw new Error("Environment variable NEXT_PUBLIC_BROKER_URL is undefined.");
 }
 
 const vercel = process.env.VERCEL === "1";
@@ -66,6 +67,6 @@ export {
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
   IS_ALLOWLIST_ENABLED,
-  MQTT_URL,
+  BROKER_URL,
   VERSION,
 };

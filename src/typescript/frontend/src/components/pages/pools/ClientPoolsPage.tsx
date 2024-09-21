@@ -21,7 +21,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useSearchParams } from "next/navigation";
-import { encodeEmojis, getEmojisInString } from "@sdk/emoji_data";
+import { encodeEmojis, getEmojisInString, type MarketSymbolEmojis } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
 
 export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
@@ -47,7 +47,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked 
   const { account } = useAptos();
 
   useEffect(() => {
-    setRealEmojis(emojis);
+    setRealEmojis(emojis as MarketSymbolEmojis);
   }, [emojis]);
 
   useEffect(() => {

@@ -4,13 +4,14 @@ import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useEventStore } from "context/state-store-context";
+import { useEventStore } from "context/event-store-context";
+import { type MarketSymbolEmojis, SYMBOL_DATA } from "@sdk/emoji_data";
 
 const encoder = new TextEncoder();
 
 export const useIsMarketRegistered = () => {
   const emojis = useEmojiPicker((state) => state.emojis);
-  const symbols = useEventStore((state) => state.symbols);
+  const getMarket = useEventStore((state) => state.getMarket);
   const { aptos } = useAptos();
   const emojiBytes = normalizeHex(encoder.encode(emojis.join("")));
 
@@ -19,7 +20,14 @@ export const useIsMarketRegistered = () => {
     queryFn: async () => {
       const length = sumBytes(emojis);
       const invalidLength = length === 0 || length > 10;
-      const inSymbolMap = symbols.has(emojis.join(""));
+      // If not all of the emojis are in the symbol data map, then it can't have been registered.
+      if (!emojis.some((e) => SYMBOL_DATA.byEmoji(e))) {
+        return {
+          invalid: true,
+          registered: false,
+        };
+      }
+      const inSymbolMap = getMarket(emojis as MarketSymbolEmojis);
 
       // Early return for invalid length or if the symbol is already in the map.
       // This avoids an unnecessary fetch request.

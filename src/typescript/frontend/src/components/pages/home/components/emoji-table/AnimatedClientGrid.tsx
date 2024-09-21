@@ -2,15 +2,14 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TableCard from "../table-card/TableCard";
-import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
-import { useEventStore } from "context/state-store-context";
+import { useEventStore } from "context/event-store-context";
 import { constructOrdered, toSerializedGridOrder, type WithTimeIndexAndPrev } from "./utils";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import useEvent from "@hooks/use-event";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { ANIMATION_DEBOUNCE_TIME } from "../table-card/animation-variants/grid-variants";
-import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import { type HomePageProps } from "app/home/HomePage";
 import "./module.css";
 
 // TODO: Consider queueing up the changes by storing each state update in a queue and then updating the state
@@ -18,10 +17,10 @@ import "./module.css";
 // simultaneous state updates and expensive re-renders.
 // For now, we probably don't need to worry about this since we're not sure how frequent the state updates will be.
 export const LiveClientGrid = ({
-  data,
+  markets,
   sortBy,
 }: {
-  data: FetchSortedMarketDataReturn["markets"];
+  markets: HomePageProps["markets"];
   sortBy: MarketDataSortByHomePage;
 }) => {
   const rowLength = useGridRowLength();
@@ -30,7 +29,7 @@ export const LiveClientGrid = ({
   const stateFirehose = useEventStore((s) => s.stateFirehose);
   const latestOrdered = useRef(
     constructOrdered({
-      data,
+      markets,
       stateFirehose,
       getMarket,
       getSearchEmojis,
@@ -44,7 +43,7 @@ export const LiveClientGrid = ({
     Array<WithTimeIndexAndPrev & { runInitialAnimation?: boolean }>
   >(
     constructOrdered({
-      data,
+      markets,
       stateFirehose,
       getMarket,
       getSearchEmojis,
@@ -70,7 +69,7 @@ export const LiveClientGrid = ({
   // We also update the grid if the order has changed.
   useLayoutEffect(() => {
     latestOrdered.current = constructOrdered({
-      data,
+      markets,
       stateFirehose,
       getMarket,
       getSearchEmojis,
@@ -78,7 +77,7 @@ export const LiveClientGrid = ({
 
     updateGridIfOrderChanged();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [data, stateFirehose, getMarket, getSearchEmojis]);
+  }, [markets, stateFirehose, getMarket, getSearchEmojis]);
 
   const lastAnimationUpdate = useRef<number>(Date.now());
 
@@ -137,11 +136,6 @@ export const LiveClientGrid = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [gridOrder]);
 
-  // Handle subscribing/unsubscribing to/from all state events across all markets on component mount/unmount.
-  useReliableSubscribe({
-    state: [null],
-  });
-
   const initialRender = useRef(true);
   useEffect(() => {
     initialRender.current = false;
@@ -166,7 +160,6 @@ export const LiveClientGrid = ({
             rowLength={rowLength}
             prevIndex={v.prevIndex}
             sortBy={sortBy}
-            animatedGrid={true}
             runInitialAnimation={v.runInitialAnimation}
           />
         );

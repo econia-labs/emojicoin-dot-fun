@@ -7,7 +7,7 @@ import {
   type TransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { getEvents, Trigger } from "../../src";
-import { getAptosClient } from "./aptos-client";
+import { getAptosClient } from "../../src/utils/aptos-client";
 import { type PublishPackageResult } from "./types";
 
 export const getPublishTransactionFromIndexer = async (

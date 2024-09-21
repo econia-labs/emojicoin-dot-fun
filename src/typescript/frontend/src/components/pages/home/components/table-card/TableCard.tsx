@@ -6,7 +6,7 @@ import { Column, Flex } from "@containers";
 import { Text } from "components/text";
 import { type GridLayoutInformation, type TableCardProps } from "./types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useUserSettings } from "context/state-store-context";
+import { useEventStore, useUserSettings } from "context/event-store-context";
 import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
 import Big from "big.js";
@@ -30,7 +30,6 @@ import {
 } from "./animation-variants/grid-variants";
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import useEvent from "@hooks/use-event";
-import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import "./module.css";
 
 const TableCard = ({
@@ -45,7 +44,6 @@ const TableCard = ({
   pageOffset,
   runInitialAnimation,
   sortBy,
-  animatedGrid,
   ...props
 }: TableCardProps & GridLayoutInformation & MotionProps) => {
   const { t } = translationFunction();
@@ -55,7 +53,9 @@ const TableCard = ({
 
   const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
   const [roughDailyVolume, setRoughDailyVolume] = useState(Big(staticVolume24H));
-  const animations = useEventStore((s) => s.stateEventsByMarket.get(BigInt(marketID)));
+  const animations = useEventStore(
+    (s) => s.getMarket(emojis.map((e) => e.emoji))?.stateEvents ?? []
+  );
 
   // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {
@@ -65,22 +65,6 @@ const TableCard = ({
       isMounted.current = false;
     };
   }, []);
-
-  // The main reason we use this here is to avoid subscription thrashing since the user
-  // can paginate many times quickly back and forth. In order to avoid this, we set up
-  // a hook that will handle the subscription and unsubscription for us based on the component
-  // mounting and unmounting.
-  // The animated grid uses the global state event subscription, so we don't subscribe to individual
-  // event types by market ID if this table card component is being used in the animated grid.
-  useReliableSubscribe(
-    animationsOn && !animatedGrid
-      ? {
-          chat: [marketID],
-          liquidity: [marketID],
-          swap: [marketID, null],
-        }
-      : undefined
-  );
 
   const startAnimation = useEvent(
     (variant: AnyNonGridTableCardVariant, latestEvent: EmojicoinAnimationEvents) => {

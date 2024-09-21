@@ -5,7 +5,7 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { useEventStore, useWebSocketClient } from "context/state-store-context";
+import { useEventStore } from "context/event-store-context";
 import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 
 const innerWrapper = `flex flex-col md:flex-row justify-around w-full max-w-[1362px] px-[30px] lg:px-[44px] py-[17px]
@@ -18,19 +18,20 @@ const statsTextClasses = "display-6 md:display-4 uppercase ellipses font-forma";
 const MainInfo = (props: MainInfoProps) => {
   const { t } = translationFunction();
 
-  const marketID = props.data.marketID.toString();
-  const stateEvents = useEventStore((s) => s.getMarket(marketID)?.stateEvents ?? []);
-  const subscribe = useWebSocketClient((s) => s.subscribe);
-  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
+  const marketEmojis = props.data.symbolEmojis;
+  const stateEvents = useEventStore((s) => s.getMarket(marketEmojis)?.stateEvents ?? []);
 
+  const { state, dailyVolume } = props.data.state;
   // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
   // Add to this in state. You can keep track of this yourself, technically.
   // It would require some reconciliation between the data from server and data in store, but it would drastically
   // reduce the amount of calls we'd have to make while keeping the data very up to date and accurate.
   // Right now we add the volume from any incoming events, which is basically a rough estimate and may be inaccurate.
-  const [marketCap, setMarketCap] = useState(BigInt(props.data.marketCap));
-  const [roughDailyVolume, setRoughDailyVolume] = useState(BigInt(props.data.dailyVolume));
-  const [roughAllTimeVolume, setRoughAllTimeVolume] = useState(BigInt(props.data.allTimeVolume));
+  const [marketCap, setMarketCap] = useState(BigInt(state.instantaneousStats.marketCap));
+  const [roughDailyVolume, setRoughDailyVolume] = useState(BigInt(dailyVolume));
+  const [roughAllTimeVolume, setRoughAllTimeVolume] = useState(
+    BigInt(state.cumulativeStats.quoteVolume)
+  );
 
   useEffect(() => {
     if (stateEvents.length === 0) return;
@@ -39,13 +40,6 @@ const MainInfo = (props: MainInfoProps) => {
     setRoughDailyVolume((prev) => prev + 1n);
     setRoughAllTimeVolume((prev) => prev + 1n);
   }, [stateEvents]);
-
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    subscribe.state(marketID);
-    return () => requestUnsubscribe.state(marketID);
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap);
   const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume);
@@ -62,7 +56,9 @@ const MainInfo = (props: MainInfoProps) => {
             {emojisToName(props.data.emojis)}
           </div>
 
-          <div className="text-[24px] md:display-2 my-auto text-white">{props.data.symbol}</div>
+          <div className="text-[24px] md:display-2 my-auto text-white">
+            {props.data.symbolData.symbol}
+          </div>
         </div>
 
         <div className={statsWrapper}>

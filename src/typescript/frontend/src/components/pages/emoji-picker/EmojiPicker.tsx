@@ -7,7 +7,7 @@ import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
+import { type ChatEmojiData, type EmojiName } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 import { ECONIA_BLUE } from "theme/colors";
 import RoundButton from "@icons/Minimize";
@@ -42,7 +42,7 @@ export default function EmojiPicker(
   // NOTE: We don't verify that the length of this set is equal to the number of valid chat emojis in the Move contract.
   useEffect(() => {
     data.then((d) => {
-      const chatEmojiData = new Map<string, SymbolEmojiData>();
+      const chatEmojiData = new Map<string, ChatEmojiData>();
 
       Object.keys(d.emojis).forEach((key) => {
         const skinVariants = d.emojis[key].skins.map((skin) => skin.unified);

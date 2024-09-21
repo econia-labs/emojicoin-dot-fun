@@ -5,7 +5,7 @@ import { HASH_SEED } from "lib/server-env";
 
 export const hashAddress = async (address: string) => {
   const buffer = Buffer.from(`${address}::${HASH_SEED}`, "utf-8");
-  const hash = sha3_256(buffer);
+  const hash = sha3_256(new Uint8Array(buffer));
   return normalizeHex(hash);
 };
 

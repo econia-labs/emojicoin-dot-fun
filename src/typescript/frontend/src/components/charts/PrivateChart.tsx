@@ -4,9 +4,9 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import {
-  ResolutionStringsToPeriodDuration,
   EXCHANGE_NAME,
   MS_IN_ONE_DAY,
+  ResolutionStringToPeriod,
   TV_CHARTING_LIBRARY_RESOLUTIONS,
   WIDGET_OPTIONS,
 } from "./const";
@@ -16,7 +16,6 @@ import {
   type IBasicDataFeed,
   type IChartingLibraryWidget,
   type LibrarySymbolInfo,
-  type ResolutionString,
   type SearchSymbolResultItem,
   type Timezone,
   widget,
@@ -27,22 +26,24 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
 import path from "path";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
-import { fetchAllCandlesticksInTimeRange } from "lib/queries/charting/candlesticks-in-time-range";
-import { useEventStore } from "context/state-store-context";
-import {
-  type LatestBar,
-  marketViewToLatestBars,
-  periodicStateTrackerToLatestBar,
-  toBar,
-} from "@sdk/utils/candlestick-bars";
-import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import { toMarketView } from "@sdk/types/types";
+import { useEventStore } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { getAptosConfig } from "lib/utils/aptos-client";
-import { symbolToEmojis } from "@sdk/emoji_data";
+import { getEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
+import { type MarketMetadataModel } from "@sdk/indexer-v2/types";
+import { getMarketResource } from "@sdk/markets";
+import { Aptos } from "@aptos-labs/ts-sdk";
+import { periodEnumToRawDuration, Trigger } from "@sdk/const";
+import { fetchAllCandlesticksInTimeRange } from "@/queries/candlesticks";
+import {
+  type LatestBar,
+  marketToLatestBars,
+  periodicStateTrackerToLatestBar,
+  toBar,
+} from "@/store/event/candlestick-bars";
 
 const configurationData: DatafeedConfiguration = {
-  supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS as ResolutionString[],
+  supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
   symbols_types: [
     {
       name: "crypto",
@@ -54,7 +55,7 @@ const configurationData: DatafeedConfiguration = {
 /**
  * The TradingView Chart component. This component is responsible for rendering the TradingView chart with the usage of
  * the `datafeed` API. It also handles resolving market symbols from user input with the market metadata passed down
- * from a server component/fetch in the form of the `EventStore["registeredMarketMap"]` data.
+ * from a server component/fetch in the form of the `EventStore["markets"]` registered market map data.
  *
  * TODO: We may want to periodically refresh the candlestick data and ensure it is valid/up to date
  * with the on-chain data by polling the `market_view` endpoint. This would ensure that in the case of a dropped
@@ -74,7 +75,7 @@ export const Chart = async (props: ChartContainerProps) => {
   const subscribeToPeriod = useEventStore((s) => s.subscribeToPeriod);
   const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
-  const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarketMap);
+  const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarkets);
 
   const datafeed: IBasicDataFeed = useMemo(
     () => ({
@@ -84,29 +85,29 @@ export const Chart = async (props: ChartContainerProps) => {
       searchSymbols: async (userInput, _exchange, _symbolType, onResultReadyCallback) => {
         const data = Array.from(getRegisteredMarketMap().values());
         // TODO: Use the new emoji picker search with this..?
-        const symbols = data.reduce<SearchSymbolResultItem[]>(
-          (acc, { marketID, emojis, symbol }) => {
-            const symbolForSearch = {
-              description: `Market #${marketID}: ${symbol}`,
-              exchange: EXCHANGE_NAME,
-              full_name: `${EXCHANGE_NAME}:${emojisToName(emojis)}`,
-              symbol,
-              ticker: symbol,
-              type: "crypto",
-            };
-            if (
-              symbolForSearch.full_name.includes(userInput) ||
-              symbolForSearch.symbol.includes(userInput) ||
-              symbolForSearch.ticker.includes(userInput) ||
-              marketID.includes(userInput) ||
-              userInput.includes(marketID)
-            ) {
-              acc.push(symbolForSearch);
-            }
-            return acc;
-          },
-          []
-        );
+        const symbols = data.reduce<SearchSymbolResultItem[]>((acc, { marketMetadata }) => {
+          const marketID = marketMetadata.marketID.toString();
+          const symbol = marketMetadata.symbolData.symbol;
+          const { emojis } = marketMetadata;
+          const symbolForSearch = {
+            description: `Market #${marketID}: ${symbol}`,
+            exchange: EXCHANGE_NAME,
+            full_name: `${EXCHANGE_NAME}:${emojisToName(emojis)}`,
+            symbol,
+            ticker: symbol,
+            type: "crypto",
+          };
+          if (
+            symbolForSearch.full_name.includes(userInput) ||
+            symbolForSearch.symbol.includes(userInput) ||
+            symbolForSearch.ticker.includes(userInput) ||
+            marketID.includes(userInput) ||
+            userInput.includes(marketID)
+          ) {
+            acc.push(symbolForSearch);
+          }
+          return acc;
+        }, []);
         onResultReadyCallback(symbols);
       },
       resolveSymbol: async (symbolName, onSymbolResolvedCallback, _onErrorCallback) => {
@@ -147,7 +148,8 @@ export const Chart = async (props: ChartContainerProps) => {
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
         const { from, to } = periodParams;
         try {
-          const period = ResolutionStringsToPeriodDuration[resolution.toString()];
+          const period = ResolutionStringToPeriod[resolution.toString()];
+          const periodDuration = periodEnumToRawDuration(period);
           const start = new Date(from * 1000);
           const end = new Date(to * 1000);
           // TODO: Consider that if our data is internally consistent and we run into performance/scalability issues
@@ -166,30 +168,38 @@ export const Chart = async (props: ChartContainerProps) => {
           // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
           let latestBar: LatestBar | undefined;
           if (isFetchForMostRecentBars) {
-            // Fetch the current candlestick data from the Aptos fullnode in a view function. This fetch call should
-            // *never* be cached.
+            // Fetch the current candlestick data from the Aptos fullnode. This fetch call should *never* be cached.
             // Also, we specifically call this client-side because the server will get rate-limited if we call the
             // fullnode from the server for each client.
-            const res = await MarketView.view({
-              aptos: getAptosConfig(),
+            const marketResource = await getMarketResource({
+              aptos: new Aptos(getAptosConfig()),
               marketAddress: props.marketAddress,
             });
-            const marketView = toMarketView(res);
 
             // Convert the market view data to `latestBar[]` and set the latest bars in our EventStore to those values.
-            const latestBars = marketViewToLatestBars(marketView);
-            setLatestBars({ marketID: props.marketID, latestBars });
+            const latestBars = marketToLatestBars(marketResource);
+            const marketEmojiData = toMarketEmojiData(marketResource.metadata.emojiBytes);
+            const marketMetadata: MarketMetadataModel = {
+              marketID: marketResource.metadata.marketID,
+              time: 0n,
+              marketNonce: marketResource.sequenceInfo.nonce,
+              trigger: Trigger.PackagePublication, // Make up some bunk trigger, since it should be clear it's made up.
+              symbolEmojis: marketEmojiData.emojis.map((e) => e.emoji),
+              marketAddress: marketResource.metadata.marketAddress,
+              ...marketEmojiData,
+            };
+            setLatestBars({ marketMetadata, latestBars });
 
             // Get the period-specific state tracker for the current resolution/period type and set the latest bar on
             // the chart- *not* just in state- to the latest bar from that tracker.
-            const tracker = marketView.periodicStateTrackers.find(
+            const tracker = marketResource.periodicStateTrackers.find(
               // These are most likely indexed in order, but in case they aren't, we use `find` here.
-              (v) => Number(v.period) === period
+              (p) => Number(p.period) === periodDuration
             );
             if (!tracker) {
               throw new Error("This should never happen.");
             }
-            const nonce = marketView.sequenceInfo.nonce;
+            const nonce = marketResource.sequenceInfo.nonce;
             latestBar = periodicStateTrackerToLatestBar(tracker, nonce);
           }
           // Filter the data so that all resulting bars are within the specified time range.
@@ -222,7 +232,7 @@ export const Chart = async (props: ChartContainerProps) => {
               // If this is the most recent bar fetch and there is literally zero trading activity thus far,
               // we should create a single empty bar to get rid of the `No chart data` ghost error from showing.
               const time = BigInt(new Date().getTime()) * 1000n;
-              const timeAsPeriod = getPeriodStartTimeFromTime(time, period) / 1000n;
+              const timeAsPeriod = getPeriodStartTimeFromTime(time, periodDuration) / 1000n;
               bars.push({
                 time: Number(timeAsPeriod),
                 open: 0,
@@ -259,9 +269,11 @@ export const Chart = async (props: ChartContainerProps) => {
         if (!symbolInfo.ticker) {
           throw new Error(`No ticker for symbol: ${symbolInfo}`);
         }
-        const period = ResolutionStringsToPeriodDuration[resolution.toString()];
+        const period = ResolutionStringToPeriod[resolution.toString()];
+        const marketEmojis = getEmojisInString(symbolInfo.ticker);
+        console.debug("Subscribing to emojis:", marketEmojis);
         subscribeToPeriod({
-          symbol: symbolInfo.ticker,
+          marketEmojis,
           period,
           cb: onRealtimeCallback,
         });
@@ -270,9 +282,10 @@ export const Chart = async (props: ChartContainerProps) => {
         // subscriberUIDs come in the form of `${emoji}_#_$<period as string>`
         // For example: `🚀_#_5` for the `🚀` market for a resolution of period `5`.
         const [symbol, resolution] = subscriberUID.split("_#_");
-        const period = ResolutionStringsToPeriodDuration[resolution];
+        const period = ResolutionStringToPeriod[resolution];
+        const marketEmojis = getEmojisInString(symbol);
         unsubscribeFromPeriod({
-          symbol,
+          marketEmojis,
           period,
         });
       },

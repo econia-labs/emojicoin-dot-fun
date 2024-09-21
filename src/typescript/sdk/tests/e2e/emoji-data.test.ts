@@ -63,7 +63,7 @@ describe("verification of typescript emoji JSON data", () => {
     // From our TS JSON file.
     const jsonEntries = Object.entries(EmojiJSONData);
     const encoder = new TextEncoder();
-    const emojisInJSON = jsonEntries.map(([_name, value]) => normalizeHex(encoder.encode(value)));
+    const emojisInJSON = jsonEntries.map(([symbol, _name]) => normalizeHex(encoder.encode(symbol)));
 
     // From the Move changesets.
     const moveTableChangeKeys = emojisInChangeSet.map((ch) => (ch as any).data.key);

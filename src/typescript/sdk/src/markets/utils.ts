@@ -7,7 +7,6 @@ import {
   Hex,
   type HexInput,
   type InputGenerateTransactionOptions,
-  type MoveStructId,
   parseTypeTag,
   type TypeTag,
   type UserTransactionResponse,
@@ -23,13 +22,16 @@ import { toConfig } from "../utils/aptos-utils";
 import {
   COIN_FACTORY_MODULE_NAME,
   DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
-  EMOJICOIN_DOT_FUN_MODULE_NAME,
   GRACE_PERIOD_TIME,
-  MODULE_ADDRESS,
   Period,
-  toPeriodFromContract,
+  rawPeriodToEnum,
 } from "../const";
-import { type Types, toMarketResource, toRegistrantGracePeriodFlag } from "../types/types";
+import {
+  type Types,
+  toMarketResource,
+  toRegistrantGracePeriodFlag,
+  toRegistryResource,
+} from "../types/types";
 import type JSONTypes from "../types/json-types";
 import {
   type DerivedEmojicoinData,
@@ -38,6 +40,7 @@ import {
   symbolBytesToEmojis,
   type SymbolEmojiData,
 } from "../emoji_data";
+import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
@@ -66,9 +69,10 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
 }): Types.EmojicoinInfo {
   const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
   const symbolBytes = Hex.fromHexInput(args.symbolBytes);
+  const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array());
   const marketAddress = deriveEmojicoinPublisherAddress({
     registryAddress,
-    emojis: [symbolBytes.toStringWithoutPrefix()],
+    emojis: emojis.emojis.map((e) => e.hex),
   });
 
   const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
@@ -98,14 +102,6 @@ export const getEmojicoinData = (symbol: EmojicoinSymbol): DerivedEmojicoinData 
     symbolBytes,
   };
 };
-
-// TODO: Consolidate all resource types into one place at some point.
-export const GRACE_PERIOD_FLAG_RESOURCE_TYPE =
-  (`${MODULE_ADDRESS}::${EMOJICOIN_DOT_FUN_MODULE_NAME}` +
-    "::RegistrantGracePeriodFlag") as MoveStructId;
-
-export const MARKET_RESOURCE_TYPE =
-  `${MODULE_ADDRESS}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Market` as MoveStructId;
 
 /**
  * Fetches the market grace period from the registry resource based on the market `symbol` input.
@@ -152,7 +148,7 @@ export async function getRegistrationGracePeriodFlag(args: {
     });
     const hasMarketResource =
       typeof accountResources.find(
-        (r) => parseTypeTag(r.type).toString() === MARKET_RESOURCE_TYPE
+        (r) => parseTypeTag(r.type).toString() === STRUCT_STRINGS.Market
       ) !== "undefined";
     if (!hasMarketResource) {
       // If the account doesn't have a `Market` resource, the market doesn't exist and will have
@@ -164,7 +160,7 @@ export async function getRegistrationGracePeriodFlag(args: {
       };
     }
     gracePeriodJSONResource = accountResources.find(
-      (r) => parseTypeTag(r.type).toString() === GRACE_PERIOD_FLAG_RESOURCE_TYPE
+      (r) => parseTypeTag(r.type).toString() === STRUCT_STRINGS.RegistrantGracePeriodFlag
     )?.data as JSONTypes.RegistrantGracePeriodFlag;
     if (gracePeriodJSONResource) {
       const gracePeriodFlag = toRegistrantGracePeriodFlag(gracePeriodJSONResource);
@@ -238,13 +234,13 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
 
 export async function getMarketResource(args: {
   aptos: Aptos;
-  objectAddress: AccountAddressInput;
+  marketAddress: AccountAddressInput;
 }): Promise<Types.MarketResource> {
   const { aptos } = args;
-  const objectAddress = AccountAddress.from(args.objectAddress);
+  const marketAddress = AccountAddress.from(args.marketAddress);
   const marketResource = await aptos.getAccountResource<JSONTypes.MarketResource>({
-    accountAddress: objectAddress,
-    resourceType: MARKET_RESOURCE_TYPE,
+    accountAddress: marketAddress,
+    resourceType: STRUCT_STRINGS.Market,
   });
 
   return toMarketResource(marketResource);
@@ -254,32 +250,56 @@ export function getMarketResourceFromWriteSet(
   response: UserTransactionResponse,
   marketAddress: AccountAddressInput
 ) {
+  return getResourceFromWriteSet({
+    response,
+    resourceTypeTag: TYPE_TAGS.Market,
+    writeResourceAddress: marketAddress,
+    convert: toMarketResource,
+  });
+}
+
+export function getRegistryResourceFromWriteSet(response: UserTransactionResponse) {
+  return getResourceFromWriteSet({
+    response,
+    resourceTypeTag: TYPE_TAGS.Registry,
+    writeResourceAddress: REGISTRY_ADDRESS,
+    convert: toRegistryResource,
+  });
+}
+
+export function getResourceFromWriteSet<T, U>(args: {
+  response: UserTransactionResponse;
+  resourceTypeTag: TypeTag;
+  writeResourceAddress: AccountAddressInput;
+  convert: (data: T) => U;
+}): U | undefined {
+  const { writeResourceAddress, resourceTypeTag, response, convert } = args;
   const { changes } = response;
-  let marketResource: JSONTypes.MarketResource | undefined;
-  const exists = changes.find((anyChange) => {
-    if (anyChange.type !== "write_resource") return false;
-    const change = anyChange as WriteSetChangeWriteResource;
+  const changedAddress = AccountAddress.from(writeResourceAddress);
+  let resource: T | undefined;
+  changes.find((someChange) => {
+    if (someChange.type !== "write_resource") return false;
+    const change = someChange as WriteSetChangeWriteResource;
 
     const { address } = change as WriteSetChangeWriteResource;
-    if (!AccountAddress.from(marketAddress).equals(AccountAddress.from(address))) return false;
+    if (!changedAddress.equals(AccountAddress.from(address))) return false;
 
     const resourceType = (change as WriteSetChangeWriteResource).data.type;
     const typeTag = parseTypeTag(resourceType).toString();
-    if (typeTag !== MARKET_RESOURCE_TYPE) return false;
+    if (typeTag !== resourceTypeTag.toString()) return false;
 
-    marketResource = change.data.data as JSONTypes.MarketResource;
+    resource = change.data.data as T;
     return true;
   });
 
-  if (exists && marketResource) {
-    return toMarketResource(marketResource);
+  if (typeof resource !== "undefined") {
+    return convert(resource);
   }
-
   return undefined;
 }
 
 export function calculateTvlGrowth(periodicStateTracker1D: Types.PeriodicStateTracker) {
-  if (toPeriodFromContract(periodicStateTracker1D.period) !== Period.Period1D) {
+  if (rawPeriodToEnum(periodicStateTracker1D.period) !== Period.Period1D) {
     throw new Error("Expected a 1-day Periodic State Tracker to calculate TVL growth.");
   }
 

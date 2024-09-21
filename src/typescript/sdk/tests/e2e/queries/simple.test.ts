@@ -2,29 +2,23 @@ import { type EmojiName, getEvents, ONE_APT } from "../../../src";
 import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
 import { Chat, ProvideLiquidity, Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import {
-  fetchChats,
-  fetchLiquidityEvents,
-  fetchLatestStateEventForMarket,
-  fetchSwaps,
+  fetchChatEvents,
+  fetchSwapEvents,
   fetchUserLiquidityPools,
 } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
 import RowEqualityChecks from "./equality-checks";
-import { withQueryConfig } from "../../../src/indexer-v2/queries/utils";
+import { queryHelper } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/snake-case-types";
 import { getFundedAccounts } from "../../utils/test-accounts";
 import { postgrest } from "../../../src/indexer-v2/queries/client";
+import { fetchLatestStateEventForMarket, fetchLiquidityEvents } from ".";
 
 jest.setTimeout(20000);
 
 describe("queries swap_events and returns accurate swap row data", () => {
   const { aptos } = getAptosClient();
-  const [registrant, user, swapper, provider] = getFundedAccounts(
-    "0x00739effd4b9979ff5c51f57d37248911786d4039afd4e31270e2e37661f4007",
-    "0x008e3dfa7bc7dd3ae0eb59919a1cd5f70155bd0b4d26bf146742bdba2d44b008",
-    "0x0097ca77b3896cc62f0e390c268727f175d5835773da19011c2d3942240d2009",
-    "0x0105ede7d798728422d2c9c9a07306a4a1df01dd2784623a386926b76a3e0010"
-  );
+  const [registrant, user, swapper, provider] = getFundedAccounts("007", "008", "009", "010");
   const marketEmojiNames: EmojiName[][] = [
     ["scroll"],
     ["selfie"],
@@ -68,7 +62,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const events = getEvents(res);
     const { marketID } = events.swapEvents[0];
 
-    const queryRes = await fetchSwaps({ marketID, minimumVersion: res.version, limit: 1 });
+    const queryRes = await fetchSwapEvents({ marketID, minimumVersion: res.version, limit: 1 });
     const row = queryRes[0];
 
     RowEqualityChecks.swapRow(row, res);
@@ -93,7 +87,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const events = getEvents(res);
     const { marketID } = events.chatEvents[0];
 
-    const queryRes = await fetchChats({ marketID, minimumVersion: res.version, limit: 1 });
+    const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, limit: 1 });
     const row = queryRes[0];
 
     RowEqualityChecks.chatRow(row, res);
@@ -149,7 +143,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
 
     const poolQueryRes = (await fetchLatestStateEventForMarket({ marketID })).at(0);
     const foundMarketInLatestStateTable = poolQueryRes?.market.marketID === marketID;
-    const marketsWithPools = await withQueryConfig(
+    const marketsWithPools = await queryHelper(
       () =>
         postgrest
           .from(TableName.MarketLatestStateEvent)
@@ -166,7 +160,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
       minimumVersion: res.version,
     });
 
-    const foundInUserPools = userPoolQueryRes.find((row) => row.marketID === marketID);
+    const foundInUserPools = userPoolQueryRes.find((row) => row.market.marketID === marketID);
     const row = liquidityEventsQueryRes[0];
 
     RowEqualityChecks.liquidityRow(row, liquidityRes);

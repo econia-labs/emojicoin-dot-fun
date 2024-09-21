@@ -48,6 +48,27 @@ namespace JSONTypes {
     self: AccountAddressString;
   };
 
+  export type TableHandle = {
+    handle: AccountAddressString;
+  };
+
+  export type SmartTable = {
+    buckets: {
+      inner: TableHandle;
+      length: string;
+    };
+    level: string;
+    num_buckets: string;
+    size: string;
+    split_load_threshold: number;
+    target_bucket_size: string;
+  };
+
+  export type ParallelizableSequenceInfo = {
+    nonce: AggregatorSnapshot<Uint64String>;
+    last_bump_time: Uint64String;
+  };
+
   export type SequenceInfo = {
     nonce: Uint64String;
     last_bump_time: Uint64String;
@@ -130,6 +151,26 @@ namespace JSONTypes {
     cumulative_stats: CumulativeStats;
     last_swap: LastSwap;
     periodic_state_trackers: Array<PeriodicStateTracker>;
+  };
+
+  export type RegistryResource = {
+    coin_symbol_emojis: TableHandle;
+    extend_ref: ExtendRef;
+    global_stats: {
+      cumulative_quote_volume: AggregatorSnapshot<Uint128String>;
+      total_quote_locked: AggregatorSnapshot<Uint128String>;
+      total_value_locked: AggregatorSnapshot<Uint128String>;
+      market_cap: AggregatorSnapshot<Uint128String>;
+      fully_diluted_value: AggregatorSnapshot<Uint128String>;
+      cumulative_integrator_fees: AggregatorSnapshot<Uint128String>;
+      cumulative_swaps: AggregatorSnapshot<Uint64String>;
+      cumulative_chat_messages: AggregatorSnapshot<Uint64String>;
+    };
+    markets_by_emoji_bytes: SmartTable;
+    markets_by_market_id: SmartTable;
+    registry_address: AccountAddressString;
+    sequence_info: ParallelizableSequenceInfo;
+    supplemental_chat_emojis: TableHandle;
   };
 
   export type MarketMetadata = {

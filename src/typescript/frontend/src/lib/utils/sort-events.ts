@@ -1,14 +1,13 @@
+import { type AnyEmojicoinEvent } from "@sdk-types";
 import {
-  type AnyEmojicoinEvent,
-  isChatEvent,
-  isGlobalStateEvent,
-  isLiquidityEvent,
-  isMarketRegistrationEvent,
-  isPeriodicStateEvent,
-  isStateEvent,
-  isSwapEvent,
-  type Types,
-} from "@sdk-types";
+  type AnyEventModel,
+  type ChatEventModel,
+  type GlobalStateEventModel,
+  isGlobalStateEventModel,
+  isMarketRegistrationEventModel,
+  type MarketRegistrationEventModel,
+  type SwapEventModel,
+} from "@sdk/indexer-v2/types";
 
 export const sortByValue = <T extends bigint | number>(
   nonceA: T,
@@ -24,14 +23,6 @@ export const sortByValue = <T extends bigint | number>(
   return order === "desc" ? -1 : 1;
 };
 
-type Chat = Types.ChatEvent;
-type Swap = Types.SwapEvent;
-type Liquidity = Types.LiquidityEvent;
-type State = Types.StateEvent;
-type PeriodicState = Types.PeriodicStateEvent;
-type MarketRegistration = Types.MarketRegistrationEvent;
-type GlobalState = Types.GlobalStateEvent;
-
 /**
  * This function sorts an array. It mutates the original array and returns nothing.
  * Note that this is for sorting events that are all for the same type of data, i.e.,
@@ -39,35 +30,23 @@ type GlobalState = Types.GlobalStateEvent;
  * events across different markets or with global and non-global state events.
  * NOTE: It assumes that the array is homogenous.
  */
-export const sortEvents = <T extends AnyEmojicoinEvent>(
-  arr: T[],
-  order: "asc" | "desc" = "desc"
-) => {
+export const sortEvents = <T extends AnyEventModel>(arr: T[], order: "asc" | "desc" = "desc") => {
   if (arr.length <= 1) {
     return;
   } else {
-    if (isChatEvent(arr[0])) {
-      (arr as Chat[]).sort((a, b) => sortByValue(a.emitMarketNonce, b.emitMarketNonce, order));
-    } else if (isSwapEvent(arr[0])) {
-      (arr as Swap[]).sort((a, b) => sortByValue(a.marketNonce, b.marketNonce, order));
-    } else if (isLiquidityEvent(arr[0])) {
-      (arr as Liquidity[]).sort((a, b) => sortByValue(a.marketNonce, b.marketNonce, order));
-    } else if (isStateEvent(arr[0])) {
-      (arr as State[]).sort((a, b) => sortByValue(a.lastSwap.nonce, b.lastSwap.nonce, order));
-    } else if (isPeriodicStateEvent(arr[0])) {
-      (arr as PeriodicState[]).sort((a, b) =>
-        sortByValue(
-          a.periodicStateMetadata.emitMarketNonce,
-          b.periodicStateMetadata.emitMarketNonce,
-          order
-        )
+    const first = arr[0];
+    if (isGlobalStateEventModel(first)) {
+      (arr as GlobalStateEventModel[]).sort(({ globalState: a }, { globalState: b }) =>
+        sortByValue(a.registryNonce, b.registryNonce, order)
       );
-    } else if (isMarketRegistrationEvent(arr[0])) {
-      (arr as MarketRegistration[]).sort((a, b) => sortByValue(a.marketID, b.marketID, order));
-    } else if (isGlobalStateEvent(arr[0])) {
-      (arr as GlobalState[]).sort((a, b) => sortByValue(a.registryNonce, b.registryNonce, order));
+    } else if (isMarketRegistrationEventModel(first)) {
+      (arr as MarketRegistrationEventModel[]).sort(({ market: a }, { market: b }) =>
+        sortByValue(a.marketID, b.marketID)
+      );
     } else {
-      throw new Error("Invalid array type.");
+      (
+        arr as Array<Exclude<AnyEventModel, GlobalStateEventModel | MarketRegistrationEventModel>>
+      ).sort(({ market: a }, { market: b }) => sortByValue(a.marketNonce, b.marketNonce, order));
     }
   }
 };
@@ -100,9 +79,9 @@ export const mergeSortedEvents = <T extends AnyEmojicoinEvent>(
   return merged;
 };
 
-export const toSortedDedupedEvents = <T extends AnyEmojicoinEvent>(
-  a: readonly T[],
-  b: readonly T[],
+export const toSortedDedupedEvents = <T extends readonly AnyEventModel[]>(
+  a: T,
+  b: T,
   order: "asc" | "desc" = "desc"
 ) => {
   const recorded = new Set<string>();
@@ -117,21 +96,23 @@ export const toSortedDedupedEvents = <T extends AnyEmojicoinEvent>(
 
 export const HARD_LIMIT = 500;
 
-export const memoizedSortedDedupedEvents = <T extends Types.ChatEvent | Types.SwapEvent>({
+export const memoizedSortedDedupedEvents = <
+  T extends readonly ChatEventModel[] | readonly SwapEventModel[],
+>({
   a,
   b,
   order = "desc",
   limit = HARD_LIMIT,
   canAnimateAsInsertion,
 }: {
-  a: readonly T[];
-  b: readonly T[];
+  a: T;
+  b: T;
   order?: "asc" | "desc";
   limit?: number;
   canAnimateAsInsertion: boolean;
-}): Array<T & { shouldAnimateAsInsertion?: boolean }> => {
+}): Array<T[number] & { shouldAnimateAsInsertion?: boolean }> => {
   const res = toSortedDedupedEvents(a, b, order) as Array<
-    T & { shouldAnimateAsInsertion?: boolean }
+    T[number] & { shouldAnimateAsInsertion?: boolean }
   >;
   if (res.length) {
     res[0] = {

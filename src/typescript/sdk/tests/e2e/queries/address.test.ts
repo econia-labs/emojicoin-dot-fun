@@ -1,6 +1,6 @@
 import { getEvents } from "../../../src";
 import { Chat } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { fetchChats } from "../../../src/indexer-v2/queries";
+import { fetchChatEvents } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
 import RowEqualityChecks from "./equality-checks";
 import { getFundedAccount } from "../../utils/test-accounts";
@@ -10,9 +10,7 @@ jest.setTimeout(20000);
 
 describe("address standardization tests", () => {
   it("standardizes a user's address", async () => {
-    const user = getFundedAccount(
-      "0x005c0f73b58fcdb08a644f72f454253af5f0965b347469c2af3e01b987139005"
-    );
+    const user = getFundedAccount("005");
     const { aptos } = getAptosClient();
 
     const { marketAddress, emojicoin, emojicoinLP, emojis } =
@@ -30,7 +28,7 @@ describe("address standardization tests", () => {
     const events = getEvents(res);
     const { marketID } = events.chatEvents[0];
 
-    const queryRes = await fetchChats({ marketID, minimumVersion: res.version, limit: 1 });
+    const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, limit: 1 });
     const row = queryRes[0];
 
     RowEqualityChecks.chatRow(row, res);

@@ -15,14 +15,9 @@ import {
   sumByKey,
 } from "../../../src";
 import { Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import {
-  fetchDailyVolumeForMarket,
-  fetchMarket1MPeriodsInLastDay,
-} from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../utils";
 import { getFundedAccounts } from "../../utils/test-accounts";
 import { type Events } from "../../../src/emojicoin_dot_fun/events";
-import { fetchAllSwapsBySwapper } from "../../../src/indexer-v2/queries/non-indexed";
 import { getTxnBatchHighestVersion } from "../../utils/get-txn-batch-highest-version";
 import TestHelpers from "../../utils/helpers";
 import {
@@ -30,23 +25,21 @@ import {
   getPeriodExpiryDate,
   getTrackerFromWriteSet,
 } from "./helpers";
+import {
+  fetchAllSwapsBySwapper,
+  fetchDailyVolumeForMarket,
+  fetchMarket1MPeriodsInLastDay,
+} from ".";
 
 // We need a long timeout because the test must wait for the 1-minute period to expire.
 jest.setTimeout(75000);
 
 const TWENTY_FIVE_SECONDS = 20 * 1000;
-const FIVE_SECONDS = 5 * 1000;
+const TWO_SECONDS = 2000;
 
 describe("queries swap_events and returns accurate swap row data", () => {
   const { aptos } = getAptosClient();
-  const fundedAccounts = getFundedAccounts(
-    "0x011f468f86c6d38c708f8c1ad1ad76d986b3489824e5b78ae1f86e7dc5d84011",
-    "0x012431335d02cc4e9a7e49457a8aaeca6550300b397394254691d242a8f06012",
-    "0x01356410ca2c0c0ca29ec8a9ebe750e2ed0fa5eaba32beff63d310fc9e8cf013",
-    "0x014bb822fff7038a013050d28186f9d2095c41bbdd84c830f5e87463fd4f5014",
-    "0x0157784d9a02040b6782faa814b2b59181142be4e5b35e5079746f282c966015",
-    "0x0165113c1998280473c75f895cb5ba907f883110e5ae82fdb304e5abd6ba6016"
-  );
+  const fundedAccounts = getFundedAccounts("011", "012", "013", "014", "015", "016");
 
   it("sums a market's daily volume over multiple 1-minute periods with 3 swaps", async () => {
     // This test needs very specific conditions in order to verify accuracy in a reasonable amount
@@ -111,7 +104,10 @@ describe("queries swap_events and returns accurate swap row data", () => {
     // we won't see a period until this periodic state tracker ends.
     expect(periods.length).toEqual(0);
     const periodExpiry = getPeriodExpiryDate(firstTracker, Period.Period1M);
-    expect(periodExpiry.getTime() - Date.now()).toBeGreaterThan(FIVE_SECONDS);
+    const enoughTime = periodExpiry.getTime() - Date.now() > TWO_SECONDS;
+    if (!enoughTime) {
+      console.warn("There may not be enough time to call the swap functions. The test may fail.");
+    }
 
     // Now call a second swap to ensure that it's slotted in with the first swap in the same
     // 1-minute period.

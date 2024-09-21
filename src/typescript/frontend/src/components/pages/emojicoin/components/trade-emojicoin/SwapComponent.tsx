@@ -9,7 +9,7 @@ import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
-import { useEventStore } from "context/state-store-context";
+import { useEventStore } from "context/event-store-context";
 import { useMatchBreakpoints } from "@hooks/index";
 import { useSearchParams } from "next/navigation";
 import { translationFunction } from "context/language-context";
@@ -48,7 +48,7 @@ const EMOJICOIN_DISPLAY_DECIMALS = 1;
 export default function SwapComponent({
   emojicoin,
   marketAddress,
-  marketID,
+  marketEmojis,
   initNumSwaps,
   geoblocked,
 }: SwapComponentProps) {
@@ -72,7 +72,9 @@ export default function SwapComponent({
   const [submit, setSubmit] = useState<(() => Promise<void>) | null>(null);
   const { aptBalance, emojicoinBalance, account, setEmojicoinType } = useAptos();
 
-  const numSwaps = useEventStore((s) => s.getMarket(marketID)?.swapEvents.length ?? initNumSwaps);
+  const numSwaps = useEventStore(
+    (s) => s.getMarket(marketEmojis)?.swapEvents.length ?? initNumSwaps
+  );
 
   useEffect(() => {
     const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();

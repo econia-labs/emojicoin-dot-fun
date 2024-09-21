@@ -16,25 +16,7 @@ import { createNamedObjectAddress } from "../utils/aptos-utils";
 import type JSONTypes from "../types/json-types";
 import { type AnyEmojicoinJSONEvent } from "../types/json-types";
 import { type AccountAddressString } from "./types";
-
-/**
- * Derives the object address from the given emoji hex codes vector<u8> seed and
- * the given object creator.
- */
-export function deriveEmojicoinPublisherAddress(args: {
-  registryAddress: AccountAddress;
-  emojis: Array<string>;
-}): AccountAddress {
-  const { emojis, registryAddress } = args;
-  const hexStringBytes = emojis
-    .map((emoji) => Hex.fromHexString(emoji).toStringWithoutPrefix())
-    .join("");
-  const seed = Hex.fromHexString(hexStringBytes).toUint8Array();
-  return createNamedObjectAddress({
-    creator: registryAddress,
-    seed,
-  });
-}
+import { encodeEmojis, SYMBOL_DATA, type SymbolEmoji } from "../emoji_data";
 
 // Note that the conversion to string bytes below doesn't work if the length of the string is > 255.
 const registryNameBytes = new MoveString("Registry").bcsToBytes().slice(1);
@@ -43,6 +25,32 @@ export const REGISTRY_ADDRESS = createNamedObjectAddress({
   creator: MODULE_ADDRESS,
   seed: registryNameBytes,
 });
+
+/**
+ * Derives the object address from the given emoji hex codes vector<u8> seed and
+ * the given object creator.
+ */
+export function deriveEmojicoinPublisherAddress(args: {
+  registryAddress?: AccountAddress;
+  emojis: Array<SymbolEmoji | `0x${string}`>;
+}): AccountAddress {
+  const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
+  const { emojis } = args;
+  if (emojis.every(SYMBOL_DATA.hasEmoji)) {
+    return createNamedObjectAddress({
+      creator: registryAddress,
+      seed: encodeEmojis(emojis),
+    });
+  }
+  const hexStringBytes = emojis
+    .map((emoji) => Hex.fromHexString(emoji.replace(/^0x/, "")).toStringWithoutPrefix())
+    .join("");
+  const seed = Hex.fromHexString(hexStringBytes).toUint8Array();
+  return createNamedObjectAddress({
+    creator: registryAddress,
+    seed,
+  });
+}
 
 /**
  * Consider simply using the `REGISTRY_ADDRESS` derived constant value instead of this function, as

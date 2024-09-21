@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /* eslint-disable max-classes-per-file */
 import {
   AccountAddress,
@@ -19,6 +18,7 @@ import {
   type UserTransactionResponse,
   type LedgerVersionArg,
   type PublicKey,
+  SimpleTransaction,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -306,18 +306,13 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
     emojis: Array<HexInput>; // vector<vector<u8>>
   }): Promise<{ data: { amount: number; unitPrice: number }; error: boolean }> {
     const { aptosConfig } = args;
-    const payloadBuilder = new this({
+
+    const aptos = new Aptos(aptosConfig);
+    const rawTransaction = await this.builder({
       ...args,
       integrator: AccountAddress.ONE,
-    });
-    const aptos = new Aptos(aptosConfig);
-    const transaction = await aptos.transaction.build.simple({
-      sender: payloadBuilder.primarySender,
-      data: {
-        function: `${payloadBuilder.moduleAddress}::${payloadBuilder.moduleName}::${payloadBuilder.functionName}`,
-        functionArguments: payloadBuilder.argsToArray(),
-      },
-    });
+    }).then((res) => res.rawTransactionInput.rawTransaction);
+    const transaction = new SimpleTransaction(rawTransaction);
     const [userTransactionResponse] = await aptos.transaction.simulate.simple({
       signerPublicKey: args.registrantPubKey,
       transaction,

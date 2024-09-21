@@ -1,4 +1,4 @@
-import { useEventStore } from "context/state-store-context";
+import { useEventStore } from "context/event-store-context";
 import { generateRandomEvent, type RandomEventArgs } from "./event-generator";
 
 /**
@@ -11,9 +11,9 @@ export const useGenerateEvent = (args: RandomEventArgs & { stateOnly?: boolean }
   const { triggeringEvent, stateEvent } = generateRandomEvent({ ...args, emojis: undefined });
 
   return () => {
-    pushEvent(stateEvent);
+    pushEvent(triggeringEvent);
     if (!args.stateOnly) {
-      pushEvent(triggeringEvent);
+      pushEvent(stateEvent);
     }
   };
 };

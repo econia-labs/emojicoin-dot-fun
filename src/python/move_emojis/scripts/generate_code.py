@@ -92,18 +92,18 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
     )
 
 
-# Use the name as the key still but only keep the encoded UTF-8 emoji field as
-# each entry's value, then sort by the key.
-def as_name_to_emoji_dict(symbol_emojis: dict[str, EmojiData]) -> dict[str, str]:
+# Sort by emoji name first, then flip the key to be the encoded UTF-8 emoji and set the
+# value as its name.
+def as_emoji_to_name_dict(symbol_emojis: dict[str, EmojiData]) -> dict[str, str]:
     new_data = {k: v["emoji"] for k, v in symbol_emojis.items()}
     sorted_data = sorted(new_data.items(), key=lambda x: x[0])
-    return dict(sorted_data)
+    return {v: k for k, v in sorted_data}
 
 
 # Simply return the emojis as a list.
 def as_emojis_array(symbol_emojis: dict[str, EmojiData]) -> list[str]:
-    data = as_name_to_emoji_dict(symbol_emojis)
-    return list(data.values())
+    data = as_emoji_to_name_dict(symbol_emojis)
+    return list(data.keys())
 
 
 def ensure_write_to_file(data: str | dict[str, Any] | list[str], fp_str: str):
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     data_parser.remove_large_extended_emojis(extended_emojis)
 
     ensure_write_to_file(symbol_emojis, SYMBOL_EMOJIS_ALL_DATA_PATH)
-    typescript_data = as_name_to_emoji_dict(symbol_emojis)
+    typescript_data = as_emoji_to_name_dict(symbol_emojis)
     ensure_write_to_file(typescript_data, TYPESCRIPT_JSON_PATH)
     # The rust processor uses the `symbol-emojis.json` data at build time, so if the
     # path for the directory exists, output the data there as well.

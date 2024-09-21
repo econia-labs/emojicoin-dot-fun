@@ -1,7 +1,11 @@
 import { hexToBytes } from "@noble/hashes/utils";
-import { type AccountAddressString, type HexString } from "../../emojicoin_dot_fun";
 import {
-  type Flatten,
+  deriveEmojicoinPublisherAddress,
+  type AccountAddressString,
+  type HexString,
+} from "../../emojicoin_dot_fun";
+import {
+  type AnyNumberString,
   toCumulativeStats,
   toInstantaneousStats,
   toLastSwap,
@@ -16,10 +20,15 @@ import {
   postgresTimestampToDate,
   TableName,
 } from "./snake-case-types";
-import { toMarketEmojiData } from "../../emoji_data";
+import {
+  type MarketEmojiData,
+  type MarketSymbolEmojis,
+  type SymbolEmoji,
+  toMarketEmojiData,
+} from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 
-type TransactionMetadata = {
+export type TransactionMetadata = {
   version: bigint;
   sender: AccountAddressString;
   entryFunction?: string | null;
@@ -39,36 +48,43 @@ const toTransactionMetadata = (
   // Note that we lose microsecond precision on the two `Date` fields; they're intended to be used
   // for bookkeeping and debug logs.
   timestamp: postgresTimestampToDate(data.transaction_timestamp),
-  insertedAt: postgresTimestampToDate(data.inserted_at),
+  insertedAt: data.inserted_at ? postgresTimestampToDate(data.inserted_at) : new Date(0),
 });
 
-/// `SymbolBytes` come in as a hex string in the format "\\xabcd" where "abcd" is the hex string.
-const deserializePostgresHexString = (symbolBytes: HexString) =>
-  hexToBytes(symbolBytes.replace(/\\x/g, ""));
+/// If received from postgres, symbol bytes come in as a hex string in the format "\\xabcd" where
+/// "abcd" is the hex string.
+/// If received from the broker, the symbolBytes will be deserialized as an array of values.
+const deserializeSymbolBytes = (symbolBytes: HexString | Array<AnyNumberString>) =>
+  Array.isArray(symbolBytes)
+    ? new Uint8Array(symbolBytes.map(Number))
+    : hexToBytes(symbolBytes.replace(/\\x/g, ""));
 
-type MarketAndStateMetadata = {
+export type MarketMetadataModel = {
   marketID: bigint;
-  symbolBytes: Uint8Array;
-  symbolEmojis: string[];
-  bumpTime: Date;
+  time: bigint;
   marketNonce: bigint;
   trigger: Trigger;
-};
+  symbolEmojis: Array<SymbolEmoji>;
+  marketAddress: AccountAddressString;
+} & MarketEmojiData;
 
 // To make things simpler, convert bumpTime and emitTime to `time`, and add the symbol data
 // to the metadata.
-const toMetadata = (
+const toMarketMetadataModel = (
   data:
     | DatabaseDataTypes["MarketAndStateMetadata"]
     | WithEmitTime<DatabaseDataTypes["MarketAndStateMetadata"]>
-) => {
-  const symbolBytes = deserializePostgresHexString(data.symbol_bytes);
+): MarketMetadataModel => {
+  const symbolBytes = deserializeSymbolBytes(data.symbol_bytes);
+  const marketAddress = deriveEmojicoinPublisherAddress({ emojis: data.symbol_emojis }).toString();
 
   return {
     marketID: BigInt(data.market_id),
     time: postgresTimestampToMicroseconds("bump_time" in data ? data.bump_time : data.emit_time),
     marketNonce: BigInt(data.market_nonce),
     trigger: toTrigger(data.trigger),
+    symbolEmojis: data.symbol_emojis,
+    marketAddress,
     ...toMarketEmojiData(symbolBytes),
   };
 };
@@ -139,7 +155,7 @@ type PeriodicStateEventData = {
   numChatMessages: bigint;
   startsInBondingCurve: boolean;
   endsInBondingCurve: boolean;
-  tvlPerLpCoinGrowthQ64: bigint;
+  tvlPerLPCoinGrowthQ64: bigint;
 };
 
 const toPeriodicStateEventData = (
@@ -158,7 +174,7 @@ const toPeriodicStateEventData = (
   numChatMessages: BigInt(data.n_chat_messages),
   startsInBondingCurve: data.starts_in_bonding_curve,
   endsInBondingCurve: data.ends_in_bonding_curve,
-  tvlPerLpCoinGrowthQ64: BigInt(data.tvl_per_lp_coin_growth_q64),
+  tvlPerLPCoinGrowthQ64: BigInt(data.tvl_per_lp_coin_growth_q64),
 });
 
 type MarketRegistrationEventData = {
@@ -255,7 +271,7 @@ const toChatEventData = (data: DatabaseDataTypes["ChatEventData"]): ChatEventDat
   ),
 });
 
-type StateEventData = {
+export type StateEventData = {
   clammVirtualReserves: Types.Reserves;
   cpammRealReserves: Types.Reserves;
   lpCoinSupply: bigint;
@@ -289,58 +305,6 @@ const toStateEventData = (data: DatabaseDataTypes["StateEventData"]): StateEvent
     fully_diluted_value: data.instantaneous_stats_fully_diluted_value,
   }),
 });
-
-export type DenormalizedDatabaseModels = {
-  GlobalStateEventModel: Flatten<TransactionMetadata & GlobalStateEventData>;
-  PeriodicStateEventModel: Flatten<
-    TransactionMetadata &
-      MarketAndStateMetadata &
-      Types.LastSwap &
-      PeriodicStateMetadata &
-      PeriodicStateEventData
-  >;
-  MarketRegistrationEventModel: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & MarketRegistrationEventData
-  >;
-  SwapEventModel: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & Types.LastSwap & SwapEventData & StateEventData
-  >;
-  ChatEventModel: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & ChatEventData & StateEventData
-  >;
-  LiquidityEventModel: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & LiquidityEventData & StateEventData
-  >;
-  MarketLatestStateEventModel: Flatten<
-    TransactionMetadata &
-      MarketAndStateMetadata &
-      StateEventData & {
-        dailyTvlPerLPCoinGrowthQ64: bigint;
-        inBondingCurve: boolean;
-        volumeIn1MStateTracker: bigint;
-      }
-  >;
-  UserLiquidityPoolsModel: Flatten<
-    {
-      transactionVersion: bigint;
-      time: bigint;
-      transactionTimestamp: Date;
-      insertedAt: Date;
-    } & Omit<MarketAndStateMetadata, "emitTime"> & { bumpTime: Date } & LiquidityEventData
-  >;
-  MarketDailyVolumeModel: Flatten<{
-    marketID: bigint;
-    dailyVolume: bigint;
-  }>;
-  Market1MPeriodsInLastDay: Flatten<{
-    marketID: bigint;
-    transactionVersion: bigint;
-    insertedAt: Date;
-    nonce: bigint;
-    volume: bigint;
-    startTime: bigint;
-  }>;
-};
 
 export type GlobalStateEventModel = ReturnType<typeof toGlobalStateEventModel>;
 export type PeriodicStateEventModel = ReturnType<typeof toPeriodicStateEventModel>;
@@ -378,8 +342,14 @@ const curryToNamedType =
     ({ [name]: to(data) }) as { [P in K]: U };
 
 export const withTransactionMetadata = curryToNamedType(toTransactionMetadata, "transaction");
-export const withMarketAndStateMetadataAndBumpTime = curryToNamedType(toMetadata, "market");
-export const withMarketAndStateMetadataAndEmitTime = curryToNamedType(toMetadata, "market");
+export const withMarketAndStateMetadataAndBumpTime = curryToNamedType(
+  toMarketMetadataModel,
+  "market"
+);
+export const withMarketAndStateMetadataAndEmitTime = curryToNamedType(
+  toMarketMetadataModel,
+  "market"
+);
 export const withLastSwap = curryToNamedType(toLastSwapFromDatabase, "lastSwap");
 export const withGlobalStateEventData = curryToNamedType(toGlobalStateEventData, "globalState");
 export const withPeriodicStateMetadata = curryToNamedType(
@@ -398,92 +368,192 @@ export const withSwapEventData = curryToNamedType(toSwapEventData, "swap");
 export const withChatEventData = curryToNamedType(toChatEventData, "chat");
 export const withLiquidityEventData = curryToNamedType(toLiquidityEventData, "liquidity");
 export const withStateEventData = curryToNamedType(toStateEventData, "state");
+export const withLastSwapData = curryToNamedType(toLastSwapFromDatabase, "lastSwap");
 
-export const toGlobalStateEventModel = (data: DatabaseRow["GlobalStateEventModel"]) => ({
+const EVENT_NAMES = {
+  GlobalState: "GlobalState",
+  PeriodicState: "PeriodicState",
+  MarketRegistration: "MarketRegistration",
+  Swap: "Swap",
+  Chat: "Chat",
+  Liquidity: "Liquidity",
+  State: "State",
+} as const;
+
+export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
+
+const formatEmojis = <
+  T extends { symbol_emojis: MarketSymbolEmojis } | { symbolEmojis: MarketSymbolEmojis },
+>(
+  data: T
+) => {
+  if ("symbol_emojis" in data) {
+    return `${data.symbol_emojis.join("")}` as const;
+  }
+  return `${data.symbolEmojis.join("")}` as const;
+};
+
+const getMarketNonce = <T extends { market_nonce: string } | { marketNonce: bigint }>(data: T) => {
+  if ("market_nonce" in data) {
+    return data.market_nonce;
+  }
+  return data.marketNonce;
+};
+
+export const GuidGetters = {
+  globalStateEvent: (data: DatabaseRow["global_state_events"] | GlobalStateEventData) => {
+    const eventName = EVENT_NAMES.GlobalState;
+    const registryNonce = "registry_nonce" in data ? data.registry_nonce : data.registryNonce;
+    return {
+      eventName,
+      guid: `${eventName}::${registryNonce}` as const,
+    };
+  },
+  periodicStateEvent: (
+    data: DatabaseRow["periodic_state_events"] | (MarketMetadataModel & { period: Period })
+  ) => {
+    const eventName = EVENT_NAMES.PeriodicState;
+    const periodAndMarketNonce = `${toPeriod(data.period)}::${getMarketNonce(data)}` as const;
+    return {
+      eventName,
+      guid: `${formatEmojis(data)}::${eventName}::${periodAndMarketNonce}` as const,
+    };
+  },
+  marketRegistrationEvent: (
+    data: DatabaseRow["market_registration_events"] | MarketMetadataModel
+  ) => ({
+    eventName: EVENT_NAMES.MarketRegistration,
+    guid: `${formatEmojis(data)}::${EVENT_NAMES.MarketRegistration}` as const,
+  }),
+  swapEvent: (data: DatabaseRow["swap_events"] | MarketMetadataModel) => ({
+    eventName: EVENT_NAMES.Swap,
+    guid: `${formatEmojis(data)}::${EVENT_NAMES.Swap}::${getMarketNonce(data)}` as const,
+  }),
+  chatEvent: (data: DatabaseRow["chat_events"] | MarketMetadataModel) => ({
+    eventName: EVENT_NAMES.Chat,
+    guid: `${formatEmojis(data)}::${EVENT_NAMES.Chat}::${getMarketNonce(data)}` as const,
+  }),
+  liquidityEvent: (data: DatabaseRow["liquidity_events"] | MarketMetadataModel) => ({
+    eventName: EVENT_NAMES.Liquidity,
+    guid: `${formatEmojis(data)}::${EVENT_NAMES.Liquidity}::${getMarketNonce(data)}` as const,
+  }),
+  marketLatestStateEvent: <
+    T extends DatabaseRow["market_latest_state_event"] | MarketMetadataModel,
+  >(
+    data: T
+  ) => ({
+    eventName: EVENT_NAMES.State,
+    guid: `${formatEmojis(data)}::${EVENT_NAMES.State}::${getMarketNonce(data)}` as const,
+  }),
+};
+
+export const toGlobalStateEventModel = (data: DatabaseRow["global_state_events"]) => ({
   ...withTransactionMetadata(data),
   ...withGlobalStateEventData(data),
+  ...GuidGetters.globalStateEvent(data),
 });
 
-export const toPeriodicStateEventModel = (data: DatabaseRow["PeriodicStateEventModel"]) => ({
+export const toPeriodicStateEventModel = (data: DatabaseRow["periodic_state_events"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndEmitTime(data),
   ...withLastSwap(data),
   ...withPeriodicStateMetadata(data),
   ...withPeriodicStateEventData(data),
+  ...withLastSwapData(data),
+  ...GuidGetters.periodicStateEvent(data),
 });
 
 export const toMarketRegistrationEventModel = (
-  data: DatabaseRow["MarketRegistrationEventModel"]
+  data: DatabaseRow["market_registration_events"]
 ) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withMarketRegistrationEventData(data),
+  ...GuidGetters.marketRegistrationEvent(data),
 });
 
-export const toSwapEventModel = (data: DatabaseRow["SwapEventModel"]) => ({
+export const toSwapEventModel = (data: DatabaseRow["swap_events"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withSwapEventData(data),
   ...withStateEventData(data),
+  ...GuidGetters.swapEvent(data),
 });
 
-export const toChatEventModel = (data: DatabaseRow["ChatEventModel"]) => ({
+export const toChatEventModel = (data: DatabaseRow["chat_events"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withChatEventData(data),
   ...withStateEventData(data),
+  ...withLastSwapData(data),
+  ...GuidGetters.chatEvent(data),
 });
 
-export const toLiquidityEventModel = (data: DatabaseRow["LiquidityEventModel"]) => ({
+export const toLiquidityEventModel = (data: DatabaseRow["liquidity_events"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withLiquidityEventData(data),
   ...withStateEventData(data),
+  ...withLastSwapData(data),
+  ...GuidGetters.liquidityEvent(data),
 });
 
-export const toMarketLatestStateEventModel = (
-  data: DatabaseRow["MarketLatestStateEventModel"]
-) => ({
+export const toMarketLatestStateEventModel = (data: DatabaseRow["market_latest_state_event"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withStateEventData(data),
+  ...withLastSwapData(data),
   dailyTvlPerLPCoinGrowthQ64: BigInt(data.daily_tvl_per_lp_coin_growth_q64),
   inBondingCurve: data.in_bonding_curve,
   volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
+  ...GuidGetters.marketLatestStateEvent(data),
 });
 
-export const toMarketState = (data: DatabaseRow["MarketStateModel"]) => ({
+export const toMarketState = (data: DatabaseRow["market_state"]) => ({
   ...toMarketLatestStateEventModel(data),
   dailyVolume: BigInt(data.daily_volume),
 });
 
-export const toUserLiquidityPoolsModel = (data: DatabaseRow["UserLiquidityPoolsModel"]) => ({
-  transactionVersion: BigInt(data.transaction_version),
-  transactionTimestamp: data.transaction_timestamp,
-  insertedAt: data.inserted_at,
-  marketID: BigInt(data.market_id),
-  symbolBytes: deserializePostgresHexString(data.symbol_bytes),
-  emitTime: data.emit_time,
-  marketNonce: BigInt(data.market_nonce),
-  trigger: toTrigger(data.trigger),
-  ...withLiquidityEventData(data),
+export const toTransactionMetadataForUserLiquidityPools = (
+  transaction: TransactionMetadata
+): Omit<TransactionMetadata, "sender" | "entryFunction"> => ({
+  time: transaction.time,
+  version: transaction.version,
+  timestamp: transaction.timestamp,
+  insertedAt: transaction.insertedAt,
 });
 
-export const toMarketDailyVolumeModel = (data: DatabaseRow["MarketDailyVolumeModel"]) => ({
+export const toUserLiquidityPoolsModel = (data: DatabaseRow["user_liquidity_pools"]) => {
+  const { transaction: withExtraFields } = withTransactionMetadata({
+    ...data,
+    sender: "0x",
+    entry_function: "",
+  });
+
+  const transaction = toTransactionMetadataForUserLiquidityPools(withExtraFields);
+
+  return {
+    transaction,
+    ...withMarketAndStateMetadataAndEmitTime(data),
+    ...withLiquidityEventData(data),
+  };
+};
+
+export const toMarketDailyVolumeModel = (data: DatabaseRow["market_daily_volume"]) => ({
   marketID: BigInt(data.market_id),
   dailyVolume: BigInt(data.daily_volume),
 });
 
-export const toMarket1MPeriodsInLastDay = (data: DatabaseRow["Market1MPeriodsInLastDayModel"]) => ({
+export const toMarket1MPeriodsInLastDay = (data: DatabaseRow["market_1m_periods_in_last_day"]) => ({
   marketID: BigInt(data.market_id),
   transactionVersion: BigInt(data.transaction_version),
-  insertedAt: data.inserted_at,
+  insertedAt: data.inserted_at ? postgresTimestampToDate(data.inserted_at) : new Date(0),
   nonce: BigInt(data.nonce),
   volume: BigInt(data.volume),
   startTime: data.start_time,
 });
 
-export const toProcessorStatus = (data: DatabaseRow["ProcessorStatusModel"]) => ({
+export const toProcessorStatus = (data: DatabaseRow["processor_status"]) => ({
   lastProcessedTimestamp: data.last_processed_timestamp,
 });
 
@@ -501,3 +571,85 @@ export const TableConverter = {
   [TableName.MarketState]: toMarketState,
   [TableName.ProcessorStatus]: toProcessorStatus,
 };
+
+export type TableModels = {
+  [TableName.GlobalStateEvents]: Awaited<ReturnType<typeof toGlobalStateEventModel>>;
+  [TableName.PeriodicStateEvents]: Awaited<ReturnType<typeof toPeriodicStateEventModel>>;
+  [TableName.MarketRegistrationEvents]: Awaited<ReturnType<typeof toMarketRegistrationEventModel>>;
+  [TableName.SwapEvents]: Awaited<ReturnType<typeof toSwapEventModel>>;
+  [TableName.ChatEvents]: Awaited<ReturnType<typeof toChatEventModel>>;
+  [TableName.LiquidityEvents]: Awaited<ReturnType<typeof toLiquidityEventModel>>;
+  [TableName.MarketLatestStateEvent]: Awaited<ReturnType<typeof toMarketLatestStateEventModel>>;
+  [TableName.UserLiquidityPools]: Awaited<ReturnType<typeof toUserLiquidityPoolsModel>>;
+  [TableName.MarketDailyVolume]: Awaited<ReturnType<typeof toMarketDailyVolumeModel>>;
+  [TableName.Market1MPeriodsInLastDay]: Awaited<ReturnType<typeof toMarket1MPeriodsInLastDay>>;
+  [TableName.MarketState]: Awaited<ReturnType<typeof toMarketState>>;
+  [TableName.ProcessorStatus]: Awaited<ReturnType<typeof toProcessorStatus>>;
+};
+
+export type AnyEventTable =
+  | TableName.SwapEvents
+  | TableName.ChatEvents
+  | TableName.MarketRegistrationEvents
+  | TableName.PeriodicStateEvents
+  | TableName.MarketLatestStateEvent
+  | TableName.LiquidityEvents
+  | TableName.GlobalStateEvents;
+
+export type AnyEventModel =
+  | TableModels[TableName.SwapEvents]
+  | TableModels[TableName.ChatEvents]
+  | TableModels[TableName.MarketRegistrationEvents]
+  | TableModels[TableName.PeriodicStateEvents]
+  | TableModels[TableName.MarketLatestStateEvent]
+  | TableModels[TableName.LiquidityEvents]
+  | TableModels[TableName.GlobalStateEvents];
+
+export type EventModelWithMarket =
+  | TableModels[TableName.SwapEvents]
+  | TableModels[TableName.ChatEvents]
+  | TableModels[TableName.MarketRegistrationEvents]
+  | TableModels[TableName.PeriodicStateEvents]
+  | TableModels[TableName.MarketLatestStateEvent]
+  | TableModels[TableName.LiquidityEvents];
+
+const extractEventType = (guid: string) => {
+  const match = guid.match(/^.*::(\w+)::/u);
+  return match ? match[1] : null;
+};
+
+const eventTypeMatches = (
+  guid: ReturnType<(typeof GuidGetters)[keyof typeof GuidGetters]>["guid"],
+  eventType: EventName
+) => extractEventType(guid) === eventType;
+
+export const isSwapEventModel = (data: AnyEventModel): data is TableModels[TableName.SwapEvents] =>
+  eventTypeMatches(data.guid, "Swap");
+export const isChatEventModel = (data: AnyEventModel): data is TableModels[TableName.ChatEvents] =>
+  eventTypeMatches(data.guid, "Chat");
+export const isMarketRegistrationEventModel = (
+  data: AnyEventModel
+): data is TableModels[TableName.MarketRegistrationEvents] =>
+  eventTypeMatches(data.guid, "MarketRegistration");
+export const isPeriodicStateEventModel = (
+  data: AnyEventModel
+): data is TableModels[TableName.PeriodicStateEvents] =>
+  eventTypeMatches(data.guid, "PeriodicState");
+export const isMarketLatestStateEventModel = (
+  data: AnyEventModel
+): data is TableModels[TableName.MarketLatestStateEvent] => eventTypeMatches(data.guid, "State");
+export const isMarketStateModel = (
+  data: AnyEventModel
+): data is TableModels[TableName.MarketState] =>
+  isMarketLatestStateEventModel(data) && "dailyVolume" in data;
+export const isLiquidityEventModel = (
+  data: AnyEventModel
+): data is TableModels[TableName.LiquidityEvents] => eventTypeMatches(data.guid, "Liquidity");
+export const isGlobalStateEventModel = (
+  data: AnyEventModel
+): data is TableModels[TableName.GlobalStateEvents] => eventTypeMatches(data.guid, "GlobalState");
+
+export const isEventModelWithMarket = (data: AnyEventModel): data is EventModelWithMarket =>
+  !isGlobalStateEventModel(data);
+
+// 🩹::Swap::7

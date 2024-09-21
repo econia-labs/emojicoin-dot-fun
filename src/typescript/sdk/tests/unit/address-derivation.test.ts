@@ -9,11 +9,10 @@ describe("it derives emojicoin addresses", () => {
     const expectedObjectAddress = AccountAddress.from(
       "0x2250d03d164dc3b341d927f65858d8fa8f12ee83aaab4d16dff7308e437bfcbf"
     );
-    const emojis = ["f09fa693", "f09fa79f"];
 
     const derivedNamedObjectFromRawEmojis = deriveEmojicoinPublisherAddress({
       registryAddress,
-      emojis,
+      emojis: ["0xf09fa693", "0xf09fa79f"],
     });
 
     expect(derivedNamedObjectFromRawEmojis.toStringLong()).toEqual(

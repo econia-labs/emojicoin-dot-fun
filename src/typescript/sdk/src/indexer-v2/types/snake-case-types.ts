@@ -1,5 +1,6 @@
 // cspell:word DDTHH
 
+import { type SymbolEmoji } from "../../emoji_data";
 import {
   type AccountAddressString,
   type HexString,
@@ -8,7 +9,7 @@ import {
 } from "../../emojicoin_dot_fun/types";
 import { type Flatten } from "../../types";
 
-type PeriodType =
+type PeriodTypeFromDatabase =
   | "period_1m"
   | "period_5m"
   | "period_15m"
@@ -17,7 +18,16 @@ type PeriodType =
   | "period_4h"
   | "period_1d";
 
-type TriggerType =
+type PeriodTypeFromBroker =
+  | "OneMinute"
+  | "FiveMinutes"
+  | "FifteenMinutes"
+  | "ThirtyMinutes"
+  | "OneHour"
+  | "FourHours"
+  | "OneDay";
+
+type TriggerTypeFromDatabase =
   | "package_publication"
   | "market_registration"
   | "swap_buy"
@@ -25,6 +35,15 @@ type TriggerType =
   | "provide_liquidity"
   | "remove_liquidity"
   | "chat";
+
+type TriggerTypeFromBroker =
+  | "PackagePublication"
+  | "MarketRegistration"
+  | "SwapBuy"
+  | "SwapSell"
+  | "ProvideLiquidity"
+  | "RemoveLiquidity"
+  | "Chat";
 
 /**
  * This type is used to make it explicit that although the string is in a date format,
@@ -96,21 +115,22 @@ export const postgresTimestampToDate = (timestamp: PostgresTimestamp): Date => {
   return new Date(Number(microseconds / 1000n));
 };
 
+// `inserted_at` is omitted if the data comes from the broker.
 type TransactionMetadata = {
   transaction_version: Uint64String;
   sender: AccountAddressString;
   entry_function?: string | null;
   transaction_timestamp: PostgresTimestamp;
-  inserted_at: PostgresTimestamp;
+  inserted_at?: PostgresTimestamp;
 };
 
 type MarketAndStateMetadata = {
   market_id: Uint64String;
   symbol_bytes: HexString;
-  symbol_emojis: string[];
+  symbol_emojis: SymbolEmoji[];
   bump_time: PostgresTimestamp;
   market_nonce: Uint64String;
-  trigger: TriggerType;
+  trigger: TriggerTypeFromDatabase | TriggerTypeFromBroker;
 };
 
 export type WithEmitTime<T> = {
@@ -127,7 +147,7 @@ type LastSwapData = {
 };
 
 type PeriodicStateMetadata = {
-  period: PeriodType;
+  period: PeriodTypeFromDatabase | PeriodTypeFromBroker;
   start_time: PostgresTimestamp;
 };
 
@@ -207,12 +227,12 @@ type StateEventData = {
   instantaneous_stats_total_value_locked: Uint128String;
   instantaneous_stats_market_cap: Uint128String;
   instantaneous_stats_fully_diluted_value: Uint128String;
-};
+} & LastSwapData;
 
 type GlobalStateEventData = {
   emit_time: PostgresTimestamp;
   registry_nonce: Uint64String;
-  trigger: TriggerType;
+  trigger: TriggerTypeFromDatabase | TriggerTypeFromBroker;
   cumulative_quote_volume: Uint128String;
   total_quote_locked: Uint128String;
   total_value_locked: Uint128String;
@@ -237,58 +257,14 @@ export type DatabaseDataTypes = {
   GlobalStateEventData: GlobalStateEventData;
 };
 
-export type DatabaseRow = {
-  GlobalStateEventModel: Flatten<TransactionMetadata & GlobalStateEventData>;
-  PeriodicStateEventModel: Flatten<
-    TransactionMetadata &
-      WithEmitTime<MarketAndStateMetadata> &
-      LastSwapData &
-      PeriodicStateMetadata &
-      PeriodicStateEventData
-  >;
-  MarketRegistrationEventModel: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & MarketRegistrationEventData
-  >;
-  SwapEventModel: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & LastSwapData & SwapEventData & StateEventData
-  >;
-  ChatEventModel: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & ChatEventData & StateEventData
-  >;
-  LiquidityEventModel: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & LiquidityEventData & StateEventData
-  >;
-  MarketLatestStateEventModel: Flatten<
-    TransactionMetadata &
-      MarketAndStateMetadata &
-      StateEventData & {
-        daily_tvl_per_lp_coin_growth_q64: Uint128String;
-        in_bonding_curve: boolean;
-        volume_in_1m_state_tracker: Uint128String;
-      }
-  >;
-  UserLiquidityPoolsModel: Flatten<
-    Omit<TransactionMetadata, "sender" | "entry_function"> &
-      WithEmitTime<MarketAndStateMetadata> &
-      LiquidityEventData
-  >;
-  MarketDailyVolumeModel: {
-    market_id: Uint64String;
-    daily_volume: Uint128String;
-  };
-  Market1MPeriodsInLastDayModel: {
-    market_id: Uint64String;
-    transaction_version: Uint64String;
-    inserted_at: PostgresTimestamp;
-    nonce: Uint64String;
-    volume: Uint128String;
-    start_time: PostgresTimestamp;
-  };
-  MarketStateModel: DatabaseRow["MarketLatestStateEventModel"] & { daily_volume: Uint128String };
-  ProcessorStatusModel: {
-    last_processed_timestamp: PostgresTimestamp;
-  };
-};
+export type AnyEventDatabaseRow =
+  | DatabaseRow["global_state_events"]
+  | DatabaseRow["periodic_state_events"]
+  | DatabaseRow["market_registration_events"]
+  | DatabaseRow["swap_events"]
+  | DatabaseRow["chat_events"]
+  | DatabaseRow["liquidity_events"]
+  | DatabaseRow["market_latest_state_event"];
 
 // Technically some of these are views, but may as well be tables in the context of the indexer.
 export enum TableName {
@@ -306,17 +282,57 @@ export enum TableName {
   ProcessorStatus = "processor_status",
 }
 
-export type DatabaseTables = {
-  [TableName.GlobalStateEvents]: DatabaseRow["GlobalStateEventModel"];
-  [TableName.PeriodicStateEvents]: DatabaseRow["PeriodicStateEventModel"];
-  [TableName.MarketRegistrationEvents]: DatabaseRow["MarketRegistrationEventModel"];
-  [TableName.SwapEvents]: DatabaseRow["SwapEventModel"];
-  [TableName.ChatEvents]: DatabaseRow["ChatEventModel"];
-  [TableName.LiquidityEvents]: DatabaseRow["LiquidityEventModel"];
-  [TableName.MarketLatestStateEvent]: DatabaseRow["MarketLatestStateEventModel"];
-  [TableName.UserLiquidityPools]: DatabaseRow["UserLiquidityPoolsModel"];
-  [TableName.MarketDailyVolume]: DatabaseRow["MarketDailyVolumeModel"];
-  [TableName.Market1MPeriodsInLastDay]: DatabaseRow["Market1MPeriodsInLastDayModel"];
-  [TableName.MarketState]: DatabaseRow["MarketStateModel"];
-  [TableName.ProcessorStatus]: DatabaseRow["ProcessorStatusModel"];
+export type DatabaseRow = {
+  [TableName.GlobalStateEvents]: Flatten<TransactionMetadata & GlobalStateEventData>;
+  [TableName.PeriodicStateEvents]: Flatten<
+    TransactionMetadata &
+      WithEmitTime<MarketAndStateMetadata> &
+      LastSwapData &
+      PeriodicStateMetadata &
+      PeriodicStateEventData
+  >;
+  [TableName.MarketRegistrationEvents]: Flatten<
+    TransactionMetadata & MarketAndStateMetadata & MarketRegistrationEventData
+  >;
+  [TableName.SwapEvents]: Flatten<
+    TransactionMetadata & MarketAndStateMetadata & SwapEventData & StateEventData
+  >;
+  [TableName.LiquidityEvents]: Flatten<
+    TransactionMetadata & MarketAndStateMetadata & LiquidityEventData & StateEventData
+  >;
+  [TableName.ChatEvents]: Flatten<
+    TransactionMetadata & MarketAndStateMetadata & ChatEventData & StateEventData
+  >;
+  [TableName.MarketLatestStateEvent]: Flatten<
+    TransactionMetadata &
+      MarketAndStateMetadata &
+      StateEventData & {
+        daily_tvl_per_lp_coin_growth_q64: Uint128String;
+        in_bonding_curve: boolean;
+        volume_in_1m_state_tracker: Uint128String;
+      }
+  >;
+  [TableName.UserLiquidityPools]: Flatten<
+    Omit<TransactionMetadata, "sender" | "entry_function"> &
+      WithEmitTime<MarketAndStateMetadata> &
+      LiquidityEventData
+  >;
+  [TableName.MarketDailyVolume]: {
+    market_id: Uint64String;
+    daily_volume: Uint128String;
+  };
+  [TableName.Market1MPeriodsInLastDay]: {
+    market_id: Uint64String;
+    transaction_version: Uint64String;
+    inserted_at?: PostgresTimestamp; // Omitted if the data is transmitted from the broker.
+    nonce: Uint64String;
+    volume: Uint128String;
+    start_time: PostgresTimestamp;
+  };
+  [TableName.MarketState]: DatabaseRow["market_latest_state_event"] & {
+    daily_volume: Uint128String;
+  };
+  [TableName.ProcessorStatus]: {
+    last_processed_timestamp: PostgresTimestamp;
+  };
 };

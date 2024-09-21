@@ -15,6 +15,5 @@ export type GridLayoutInformation = {
   rowLength: number;
   pageOffset: number;
   sortBy: MarketDataSortByHomePage;
-  animatedGrid?: boolean;
   runInitialAnimation?: boolean;
 };
