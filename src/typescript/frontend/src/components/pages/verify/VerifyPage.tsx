@@ -24,7 +24,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
       verified === true
         ? "Access Granted"
         : verified === false
-          ? "Access Denied - Join Here"
+          ? "Access Denied"
           : "Verifying...",
     overdrive: false,
     overflow: true,
@@ -92,13 +92,11 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
               </motion.div>
             )}
             <ButtonWithConnectWalletFallback geoblocked={geoblocked} arrow={false}>
-              <div className="flex flex-row uppercase">
+              <div className="flex flex-row uppercase mt-[8ch]">
                 <span className="px-2.5">{"{"}</span>
-                <a
+                <span
                   ref={ref}
-                  href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
                   onMouseEnter={replay}
-                  {...EXTERNAL_LINK_PROPS}
                 />
                 <span className="px-2.5">{"}"}</span>
               </div>

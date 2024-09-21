@@ -1,7 +1,7 @@
 import { getTime, sleep, UNIT_OF_TIME_MULTIPLIERS, UnitOfTime } from "../../src";
 
 describe("sleep utility function with units of time", () => {
-  it("converts units of time to milliseconds correctly", () => {
+  it("converts units of time to milliseconds", () => {
     expect(UNIT_OF_TIME_MULTIPLIERS[UnitOfTime.Microseconds]).toEqual(0.001);
     expect(UNIT_OF_TIME_MULTIPLIERS[UnitOfTime.Milliseconds]).toEqual(1);
     expect(UNIT_OF_TIME_MULTIPLIERS[UnitOfTime.Seconds]).toBeCloseTo(1000, 1);
@@ -42,7 +42,7 @@ describe("sleep utility function with units of time", () => {
     });
   });
 
-  it("convert the time correctly with microsecond granularity", () => {
+  it("converts the time with microsecond granularity", () => {
     const nowInDays = Date.now() / (1000 * 60 * 60 * 24);
     const res = getTime(UnitOfTime.Days);
     // If the difference is greater than 1 microsecond, then the test is invalid.

@@ -3,6 +3,7 @@ import { useWindowSize } from "react-use";
 import Confetti from "react-confetti";
 import { type Dispatch, type MutableRefObject, type SetStateAction, useRef, useState } from "react";
 import { sleep } from "@sdk/utils";
+import { createPortal } from "react-dom";
 
 /**
  * The tween duration for the confetti animation is very inaccurate- a few stray confetti fall after 1/3 of the way
@@ -54,6 +55,7 @@ const CustomConfetti = ({
       gravity={0.15}
       tweenDuration={TWEEN_DURATION}
       recycle={false}
+      colors={["#086CD9", "#CD2F8D", "#2FA90F"]}
       onConfettiComplete={() => {
         if (lastIdx.current !== secondaryIndex) {
           // Note that we're basically just ensuring that we don't accidentally cancel a "restarted" animation due to
@@ -86,7 +88,7 @@ export const RewardsAnimation = ({
   const [renderThird, setRenderThird] = useState(false);
   const lastIdx = useRef(0);
 
-  return (
+  return createPortal(
     <motion.div
       initial={{
         display: "none",
@@ -134,6 +136,7 @@ export const RewardsAnimation = ({
       {renderThird && (
         <CustomConfetti lastIdx={lastIdx} secondaryIndex={6} setter={setRenderThird} />
       )}
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 };

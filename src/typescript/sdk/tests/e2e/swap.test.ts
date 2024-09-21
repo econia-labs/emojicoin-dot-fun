@@ -1,5 +1,4 @@
 import {
-  Account,
   AccountAddress,
   isFeePayerSignature,
   type TypeTag,
@@ -8,7 +7,7 @@ import {
 import { ONE_APT } from "../../src/const";
 import { SYMBOL_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
+import { getPublishHelpers } from "../utils";
 import {
   getEmojicoinMarketAddressAndTypeTags,
   getRegistrationGracePeriodFlag,
@@ -19,14 +18,21 @@ import {
   getCoinBalanceFromChanges,
   getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
+import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(90000);
 
 describe("tests the swap functionality", () => {
-  const { aptos } = getTestHelpers();
-  const randomIntegrator = Account.generate();
-  const registrant = Account.generate();
-  const nonRegistrantUser = Account.generate();
+  const { aptos } = getPublishHelpers();
+  const randomIntegrator = getFundedAccount(
+    "0x00153cf56239ab6d0a71f50a7b31cc94e7ff56ef7dd0acb0c038bf13457de001"
+  );
+  const registrant = getFundedAccount(
+    "0x002ea773209c18e7be4acc1ac68de1ad1ea16df0070ce60858283792719ed002"
+  );
+  const nonRegistrantUser = getFundedAccount(
+    "0x003177667df1e91bd7fdc9e279574576e174f6c8bfcfdde7c26a18c9637ec003"
+  );
   const emoji = SYMBOL_DATA.byStrictName("pile of poo");
   const {
     marketAddress: pooMarketAddress,
@@ -42,29 +48,12 @@ describe("tests the swap functionality", () => {
     user: registrant,
     emoji: emoji.hex,
     integrator: randomIntegrator.accountAddress,
-    integratorFeeRateBps: 0,
+    integratorFeeRateBPs: 0,
+    minOutputAmount: 1n,
     typeTags: [pooEmojicoin, pooLPCoin] as [TypeTag, TypeTag],
   };
 
   beforeAll(async () => {
-    if (aptos.config.network === "local") {
-      await aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT * 10 });
-      await aptos.fundAccount({
-        accountAddress: nonRegistrantUser.accountAddress,
-        amount: ONE_APT * 10,
-      });
-    } else {
-      const fundAccounts = [
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: registrant.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-        aptos.fundAccount({ accountAddress: nonRegistrantUser.accountAddress, amount: ONE_APT }),
-      ];
-      await Promise.all(fundAccounts);
-    }
-    // Register a market.
     registerMarketResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
       registrant,
@@ -200,8 +189,9 @@ describe("tests the swap functionality", () => {
         inputAmount: 10000n,
         isSell: false,
         marketAddress,
-        integratorFeeRateBps: transactionArgs.integratorFeeRateBps,
+        integratorFeeRateBPs: transactionArgs.integratorFeeRateBPs,
         integrator: transactionArgs.integrator,
+        minOutputAmount: 1n,
         typeTags: [emojicoin, emojicoinLP],
       });
     }
@@ -265,14 +255,15 @@ describe("tests the swap functionality", () => {
       inputAmount: 10000n,
       isSell: false,
       marketAddress,
-      integratorFeeRateBps: transactionArgs.integratorFeeRateBps,
+      integratorFeeRateBPs: transactionArgs.integratorFeeRateBPs,
       integrator: transactionArgs.integrator,
+      minOutputAmount: 1n,
       typeTags: [emojicoin, emojicoinLP],
     });
     await expect(failedSwap).rejects.toThrow();
   });
 
-  it("correctly sees the grace period hasn't ended", async () => {
+  it("sees the grace period hasn't ended", async () => {
     const newEmoji = SYMBOL_DATA.byStrictName("yawning face");
     const newMarketRegisterResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,

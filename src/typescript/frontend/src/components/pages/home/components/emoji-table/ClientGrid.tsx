@@ -5,7 +5,6 @@ import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-dat
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { marketDataToProps } from "./utils";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
-import MemoizedGridRowLines from "./components/grid-row-lines";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { useEffect, useMemo, useRef } from "react";
 import "./module.css";
@@ -39,11 +38,6 @@ export const ClientGrid = ({
 
   return (
     <>
-      <MemoizedGridRowLines
-        gridRowLinesKey={`${sortBy}-grid-lines`}
-        length={ordered.length}
-        shouldAnimate={initialRender.current}
-      />
       {ordered.map((v, i) => {
         return (
           <TableCard

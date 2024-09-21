@@ -1,4 +1,4 @@
-import { Account, AccountAddress, Hex, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { Ed25519Account, AccountAddress, Hex, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
@@ -8,19 +8,17 @@ import {
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getTestHelpers } from "../utils";
-import { normalizeAddress } from "../../src/utils/account-address";
+import { getPublishHelpers } from "../utils";
+import { standardizeAddress } from "../../src/utils/account-address";
+import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(20000);
 
 describe("registers a market successfully", () => {
-  const { aptos, publisher, publishPackageResult } = getTestHelpers();
-  const user = Account.generate();
-
-  beforeAll(async () => {
-    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
-    await aptos.fundAccount({ accountAddress: user.accountAddress, amount: ONE_APT });
-  });
+  const { aptos, publisher, publishPackageResult } = getPublishHelpers();
+  const user = getFundedAccount(
+    "0x000276e7908d952b7639672a07da760969c7791315fdde140c00228427fe6000"
+  );
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
     const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
@@ -41,7 +39,7 @@ describe("registers a market successfully", () => {
     });
     expect(accountResources.abi).toBeDefined();
 
-    const randomIntegrator = Account.generate();
+    const randomIntegrator = Ed25519Account.generate();
 
     const emojis = ["f09fa693", "f09fa79f"];
 
@@ -86,8 +84,8 @@ describe("registers a market successfully", () => {
     expect(marketID).toBeGreaterThanOrEqual(1n);
     expect(Hex.fromHexInput(emojiBytes).toString()).toEqual(`0x${emojis.join("")}`);
     expect(emojiBytes).toEqual(Hex.fromHexString(emojis.join("")).toUint8Array());
-    expect(normalizeAddress(extendRef.self)).toEqual(normalizeAddress(derivedNamedObjectAddress));
-    expect(normalizeAddress(extendRef.self)).toEqual(normalizeAddress(marketAddress));
+    expect(extendRef.self).toEqual(standardizeAddress(derivedNamedObjectAddress));
+    expect(extendRef.self).toEqual(standardizeAddress(marketAddress));
     expect(lpCoinSupply).toEqual(0n);
 
     const marketObjectResources = await aptos.getAccountModule({
@@ -98,6 +96,7 @@ describe("registers a market successfully", () => {
     const expectedStructAbis = [
       {
         name: "Emojicoin",
+        is_event: false,
         is_native: false,
         abilities: [],
         generic_type_params: [],
@@ -105,6 +104,7 @@ describe("registers a market successfully", () => {
       },
       {
         name: "EmojicoinLP",
+        is_event: false,
         is_native: false,
         abilities: [],
         generic_type_params: [],

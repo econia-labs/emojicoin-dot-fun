@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import {
-  PERIOD_TO_CANDLESTICK_RESOLUTION,
+  ResolutionStringsToPeriodDuration,
   EXCHANGE_NAME,
   MS_IN_ONE_DAY,
   TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -71,8 +71,8 @@ export const Chart = async (props: ChartContainerProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const symbol = props.symbol;
-  const subscribeToResolution = useEventStore((s) => s.subscribeToResolution);
-  const unsubscribeFromResolution = useEventStore((s) => s.unsubscribeFromResolution);
+  const subscribeToPeriod = useEventStore((s) => s.subscribeToPeriod);
+  const unsubscribeFromPeriod = useEventStore((s) => s.unsubscribeFromPeriod);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
   const getRegisteredMarketMap = useEventStore((s) => s.getRegisteredMarketMap);
 
@@ -147,7 +147,7 @@ export const Chart = async (props: ChartContainerProps) => {
       getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
         const { from, to } = periodParams;
         try {
-          const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
+          const period = ResolutionStringsToPeriodDuration[resolution.toString()];
           const start = new Date(from * 1000);
           const end = new Date(to * 1000);
           // TODO: Consider that if our data is internally consistent and we run into performance/scalability issues
@@ -157,7 +157,7 @@ export const Chart = async (props: ChartContainerProps) => {
             marketID: props.marketID,
             start,
             end,
-            resolution: resolutionEnum,
+            period,
           });
 
           const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
@@ -180,11 +180,11 @@ export const Chart = async (props: ChartContainerProps) => {
             const latestBars = marketViewToLatestBars(marketView);
             setLatestBars({ marketID: props.marketID, latestBars });
 
-            // Get the period-specific state tracker for the current resolution and set the latest bar on the chart
-            // (*not* just in state) to the latest bar from that tracker.
+            // Get the period-specific state tracker for the current resolution/period type and set the latest bar on
+            // the chart- *not* just in state- to the latest bar from that tracker.
             const tracker = marketView.periodicStateTrackers.find(
               // These are most likely indexed in order, but in case they aren't, we use `find` here.
-              (v) => Number(v.period) === resolutionEnum
+              (v) => Number(v.period) === period
             );
             if (!tracker) {
               throw new Error("This should never happen.");
@@ -222,7 +222,7 @@ export const Chart = async (props: ChartContainerProps) => {
               // If this is the most recent bar fetch and there is literally zero trading activity thus far,
               // we should create a single empty bar to get rid of the `No chart data` ghost error from showing.
               const time = BigInt(new Date().getTime()) * 1000n;
-              const timeAsPeriod = getPeriodStartTimeFromTime(time, resolutionEnum) / 1000n;
+              const timeAsPeriod = getPeriodStartTimeFromTime(time, period) / 1000n;
               bars.push({
                 time: Number(timeAsPeriod),
                 open: 0,
@@ -259,10 +259,10 @@ export const Chart = async (props: ChartContainerProps) => {
         if (!symbolInfo.ticker) {
           throw new Error(`No ticker for symbol: ${symbolInfo}`);
         }
-        const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution.toString()];
-        subscribeToResolution({
+        const period = ResolutionStringsToPeriodDuration[resolution.toString()];
+        subscribeToPeriod({
           symbol: symbolInfo.ticker,
-          resolution: resolutionEnum,
+          period,
           cb: onRealtimeCallback,
         });
       },
@@ -270,10 +270,10 @@ export const Chart = async (props: ChartContainerProps) => {
         // subscriberUIDs come in the form of `${emoji}_#_$<period as string>`
         // For example: `🚀_#_5` for the `🚀` market for a resolution of period `5`.
         const [symbol, resolution] = subscriberUID.split("_#_");
-        const resolutionEnum = PERIOD_TO_CANDLESTICK_RESOLUTION[resolution];
-        unsubscribeFromResolution({
+        const period = ResolutionStringsToPeriodDuration[resolution];
+        unsubscribeFromPeriod({
           symbol,
-          resolution: resolutionEnum,
+          period,
         });
       },
     }),

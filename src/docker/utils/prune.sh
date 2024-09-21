@@ -121,7 +121,6 @@ trap cleanup EXIT
 ################################################################################
 
 cd $docker_dir
-docker compose -f compose.local.yaml down --volumes
 
 postgres="local-testnet-postgres"
 api="local-testnet-indexer-api"
@@ -133,5 +132,7 @@ docker rm -f $api 2>/dev/null
 docker volume rm -f $postgres-data
 
 if [ -n "$reset_localnet" ]; then
-	rm -rf $docker_dir/localnet/.aptos/*
+	docker compose -f compose.local.yaml down --volumes
+else
+	docker compose -f compose.local.yaml down
 fi

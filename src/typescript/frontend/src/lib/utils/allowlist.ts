@@ -19,6 +19,15 @@ export async function isAllowListed(address: string): Promise<boolean> {
     address = `0x${address}`;
   }
 
+  if (ALLOWLISTER3K_URL !== undefined) {
+    const condition = await fetch(`${ALLOWLISTER3K_URL}/${address}`)
+      .then((r) => r.text())
+      .then((data) => data === "true");
+    if (condition) {
+      return true;
+    }
+  }
+
   if (GALXE_CAMPAIGN_ID !== undefined) {
     const condition = await fetch(GALXE_URL, {
       method: "POST",
@@ -42,15 +51,6 @@ export async function isAllowListed(address: string): Promise<boolean> {
     })
       .then((r) => r.json())
       .then((data) => data.data.campaign && data.data.campaign.whitelistInfo.usedCount === 1);
-    if (condition) {
-      return true;
-    }
-  }
-
-  if (ALLOWLISTER3K_URL !== undefined) {
-    const condition = await fetch(`${ALLOWLISTER3K_URL}/${address}`)
-      .then((r) => r.text())
-      .then((data) => data === "true");
     if (condition) {
       return true;
     }

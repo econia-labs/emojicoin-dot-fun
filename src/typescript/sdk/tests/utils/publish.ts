@@ -62,7 +62,6 @@ export async function publishPackage(args: {
   ];
 
   const command = shellArgs.join(" ");
-  console.debug(`\n${command}\n`);
   const outputBytes = execSync(command);
   const commandOutput = Buffer.from(outputBytes).toString();
   const resultObject = extractJsonFromText(command, commandOutput);
