@@ -125,7 +125,7 @@ export default function SwapComponent({
 
   const swapResult = useSimulateSwap({
     marketAddress,
-    inputAmount,
+    inputAmount: inputAmount === "" ? "0" : inputAmount,
     isSell,
     numSwaps,
   });
@@ -156,7 +156,7 @@ export default function SwapComponent({
     setOutputAmount(swapResultDisplay);
     setIsLoading(false);
     replay();
-  }, [swapResult, replay]);
+  }, [swapResult, replay, isSell]);
 
   const toDisplayNumber = (value: bigint | number | string, type: "apt" | "emoji" = "apt") => {
     const badString = typeof value === "string" && (value === "" || isNaN(parseInt(value)));
@@ -274,7 +274,11 @@ export default function SwapComponent({
               </div>
               <input
                 className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-                value={Number(toDisplayNumber(inputAmount, isSell ? "emoji" : "apt"))}
+                value={
+                  inputAmount === ""
+                    ? ""
+                    : Number(toDisplayNumber(inputAmount, isSell ? "emoji" : "apt"))
+                }
                 step={0.01}
                 onChange={handleInput}
                 onKeyDown={handleKeyDown}
