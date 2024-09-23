@@ -44,12 +44,14 @@ export const EmojiPickerWithInput = ({
   inputGroupProps,
   inputClassName = "",
   geoblocked,
+  filterEmojis,
 }: {
   handleClick: (message: string) => Promise<void>;
   pickerButtonClassName?: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
   geoblocked: boolean;
+  filterEmojis?: (e: any) => boolean;
 }) => {
   const inputRef = useRef<HTMLDivElement | null>(null);
   const sendButtonRef = useRef<HTMLDivElement | null>(null);
@@ -271,6 +273,7 @@ export const EmojiPickerWithInput = ({
               id="picker"
               className={mode}
               drag={(e) => ctrls.start(e, { snapToCursor: false })}
+              filterEmojis={filterEmojis}
             />
           </motion.button>
         </div>,

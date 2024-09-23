@@ -14,6 +14,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { MARKET_REGISTRATION_DEPOSIT, ONE_APT_BIGINT } from "@sdk/const";
 import Info from "components/info";
+import { filterBigEmojis } from "components/pages/emoji-picker/EmojiPicker";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -85,6 +86,7 @@ export const MemoizedLaunchAnimation = ({
                 handleClick={handleClick}
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
+                filterEmojis={filterBigEmojis}
               />
             </div>
           </div>
