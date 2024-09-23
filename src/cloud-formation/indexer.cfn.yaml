@@ -16,90 +16,54 @@ Conditions:
   EnableWafRulesWebSocket: !Equals
   - !Ref 'EnableWafRulesWebSocket'
   - 'true'
-  MaybeDeployAlb: !And
-  - !Condition 'MaybeDeployVpc'
-  - !Equals
-    - !Ref 'MaybeDeployAlb'
-    - 'true'
-  MaybeDeployAlbDnsRecord: !And
-  - !Condition 'MaybeDeployAlb'
-  - !Equals
-    - !Ref 'MaybeDeployAlbDnsRecord'
-    - 'true'
-  MaybeDeployBastionHost: !And
-  - !Condition 'MaybeDeployDb'
-  - !Equals
-    - !Ref 'MaybeDeployBastionHost'
-    - 'true'
-  MaybeDeployBroker: !And
-  - !Condition 'MaybeDeployContainers'
-  - !Condition 'MaybeDeployProcessor'
-  - !Equals
-    - !Ref 'MaybeDeployBroker'
-    - 'true'
-  MaybeDeployContainers: !And
-  - !Condition 'MaybeDeployDb'
-  - !Condition 'MaybeDeployRouteTables'
-  - !Equals
-    - !Ref 'MaybeDeployContainers'
-    - 'true'
-  MaybeDeployDb: !And
-  - !Condition 'MaybeDeployVpc'
-  - !Equals
-    - !Ref 'MaybeDeployDb'
-    - 'true'
-  MaybeDeployNlb: !And
-  - !Condition 'MaybeDeployVpc'
-  - !Equals
-    - !Ref 'MaybeDeployNlb'
-    - 'true'
-  MaybeDeployNlbVpcLink: !And
-  - !Condition 'MaybeDeployNlb'
-  - !Equals
-    - !Ref 'MaybeDeployNlbVpcLink'
-    - 'true'
-  MaybeDeployPostgrest: !And
-  - !Condition 'MaybeDeployContainers'
-  - !Condition 'MaybeDeployProcessor'
-  - !Equals
-    - !Ref 'MaybeDeployPostgrest'
-    - 'true'
-  MaybeDeployProcessor: !And
-  - !Condition 'MaybeDeployContainers'
-  - !Equals
-    - !Ref 'MaybeDeployProcessor'
-    - 'true'
-  MaybeDeployRestApi: !And
-  - !Condition 'MaybeDeployNlbVpcLink'
-  - !Condition 'MaybeDeployPostgrest'
-  - !Equals
-    - !Ref 'MaybeDeployRestApi'
-    - 'true'
-  MaybeDeployRestApiDnsRecord: !And
-  - !Condition 'MaybeDeployRestApi'
-  - !Equals
-    - !Ref 'MaybeDeployRestApiDnsRecord'
-    - 'true'
-  MaybeDeployRouteTables: !And
-  - !Condition 'MaybeDeployVpc'
-  - !Equals
-    - !Ref 'MaybeDeployRouteTables'
-    - 'true'
+  MaybeDeployAlb: !Equals
+  - !Ref 'MaybeDeployAlb'
+  - 'true'
+  MaybeDeployAlbDnsRecord: !Equals
+  - !Ref 'MaybeDeployAlbDnsRecord'
+  - 'true'
+  MaybeDeployBastionHost: !Equals
+  - !Ref 'MaybeDeployBastionHost'
+  - 'true'
+  MaybeDeployBroker: !Equals
+  - !Ref 'MaybeDeployBroker'
+  - 'true'
+  MaybeDeployContainers: !Equals
+  - !Ref 'MaybeDeployContainers'
+  - 'true'
+  MaybeDeployDb: !Equals
+  - !Ref 'MaybeDeployDb'
+  - 'true'
+  MaybeDeployNlb: !Equals
+  - !Ref 'MaybeDeployNlb'
+  - 'true'
+  MaybeDeployNlbVpcLink: !Equals
+  - !Ref 'MaybeDeployNlbVpcLink'
+  - 'true'
+  MaybeDeployPostgrest: !Equals
+  - !Ref 'MaybeDeployPostgrest'
+  - 'true'
+  MaybeDeployProcessor: !Equals
+  - !Ref 'MaybeDeployProcessor'
+  - 'true'
+  MaybeDeployRestApi: !Equals
+  - !Ref 'MaybeDeployRestApi'
+  - 'true'
+  MaybeDeployRestApiDnsRecord: !Equals
+  - !Ref 'MaybeDeployRestApiDnsRecord'
+  - 'true'
+  MaybeDeployRouteTables: !Equals
+  - !Ref 'MaybeDeployRouteTables'
+  - 'true'
   MaybeDeployStack: !Equals
   - !Ref 'MaybeDeployStack'
   - 'true'
-  MaybeDeployVpc: !And
-  - !Condition 'MaybeDeployStack'
-  - !Equals
-    - !Ref 'MaybeDeployVpc'
-    - 'true'
-  MaybeDeployWaf: !And
-  - !Condition 'MaybeDeployAlb'
-  - !Condition 'MaybeDeployStack'
-  - !Condition 'MaybeDeployRestApi'
-  - !Equals
-    - !Ref 'MaybeDeployWaf'
-    - 'true'
+  MaybeDeployVpc: !Equals
+  - !Ref 'MaybeDeployVpc'
+  - 'true'
+  MaybeDeployWaf: !Equals
+  - !Ref 'MaybeDeployWaf'
+  - 'true'
 Mappings:
   Constants:
     # These compromised credentials are not a security risk because access to
@@ -147,6 +111,11 @@ Mappings:
     C:
       AvailabilityZone: 2
       CidrBlock: '10.0.6.0/24'
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+      - 'W8001'
 Outputs:
   BastionHostId:
     Condition: 'MaybeDeployBastionHost'
@@ -2000,5 +1969,106 @@ Resources:
         StageName: !Ref 'RestApiStage'
       WebACLArn: !GetAtt 'Waf.Arn'
     Type: 'AWS::WAFv2::WebACLAssociation'
+Rules:
+  DeployAlb:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployVpc'
+      - Fn::Not:
+        - !Condition 'MaybeDeployAlb'
+  DeployAlbDnsRecord:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployAlb'
+      - Fn::Not:
+        - !Condition 'MaybeDeployAlbDnsRecord'
+  DeployBastionHost:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployDb'
+      - Fn::Not:
+        - !Condition 'MaybeDeployBastionHost'
+  DeployBroker:
+    Assertions:
+    - Assert: !Or
+      - Fn::And:
+        - !Condition 'MaybeDeployContainers'
+        - !Condition 'MaybeDeployProcessor'
+      - Fn::Not:
+        - !Condition 'MaybeDeployBroker'
+  DeployContainers:
+    Assertions:
+    - Assert: !Or
+      - Fn::And:
+        - !Condition 'MaybeDeployDb'
+        - !Condition 'MaybeDeployRouteTables'
+      - Fn::Not:
+        - !Condition 'MaybeDeployContainers'
+  DeployDb:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployVpc'
+      - Fn::Not:
+        - !Condition 'MaybeDeployDb'
+  DeployNlb:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployVpc'
+      - Fn::Not:
+        - !Condition 'MaybeDeployNlb'
+  DeployNlbVpcLink:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployNlb'
+      - Fn::Not:
+        - !Condition 'MaybeDeployNlbVpcLink'
+  DeployPostgrest:
+    Assertions:
+    - Assert: !Or
+      - Fn::And:
+        - !Condition 'MaybeDeployContainers'
+        - !Condition 'MaybeDeployProcessor'
+      - Fn::Not:
+        - !Condition 'MaybeDeployPostgrest'
+  DeployProcessor:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployContainers'
+      - Fn::Not:
+        - !Condition 'MaybeDeployProcessor'
+  DeployRestApi:
+    Assertions:
+    - Assert: !Or
+      - Fn::And:
+        - !Condition 'MaybeDeployNlbVpcLink'
+        - !Condition 'MaybeDeployPostgrest'
+      - Fn::Not:
+        - !Condition 'MaybeDeployRestApi'
+  DeployRestApiDnsRecord:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployRestApi'
+      - Fn::Not:
+        - !Condition 'MaybeDeployRestApiDnsRecord'
+  DeployRouteTables:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployVpc'
+      - Fn::Not:
+        - !Condition 'MaybeDeployRouteTables'
+  DeployVpc:
+    Assertions:
+    - Assert: !Or
+      - !Condition 'MaybeDeployStack'
+      - Fn::Not:
+        - !Condition 'MaybeDeployVpc'
+  DeployWaf:
+    Assertions:
+    - Assert: !Or
+      - Fn::And:
+        - !Condition 'MaybeDeployAlb'
+        - !Condition 'MaybeDeployRestApi'
+      - Fn::Not:
+        - !Condition 'MaybeDeployWaf'
 Transform: 'AWS::LanguageExtensions'
 ...
