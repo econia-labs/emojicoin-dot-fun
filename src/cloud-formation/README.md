@@ -22,37 +22,18 @@ under a root domain you provide, for an environment name of your choosing:
 
 ## Template parameters
 
-`indexer.cfn.yaml` contains assorted [parameters] of the form `MaybeDeploy*`
-that can be used to selectively provision and de-provision [resources]. For a
-concise list of such parameters, see a [stack deployment file] at
-`deploy-*.yaml`. See the template [conditions] section for associated
-dependencies.
+`indexer.cfn.yaml` contains assorted [parameters] of the form `Deploy*` that can
+be used to [conditionally][conditions] provision and de-provision [resources].
+For a concise list of such parameters, see a [stack deployment file] at
+`deploy-*.yaml`. See the template [rules] section for associated dependencies.
 
-Note that even if a parameter is passed as `true`, the resources that directly
-depend on it will not be created unless the condition's dependencies are also
-met. All resources are eventually conditional on `MaybeDeployStack`, which can
-be used to toggle provisioning and de-provisioning of all resources.
+Note that if a rule assertion fails, rather than reporting an assertion error,
+the [GitSync status dashboard] instead simply halts the update with
+[GitSync event] type `CHANGESET_CREATION_FAILED` and following event message,
+misleadingly reporting that no changes are present when in fact the update
+failure was a result of failed rule assertions:
 
-In practice this means that even if a `MaybeDeploy*` parameter is passed as
-`true`, the corresponding resource(s) might not be created. For example if
-`MaybeDeployStack` is `false`, then even if `MaybeDeployVpc` is `true`,
-virtual private network resources won't be created because `MaybeDeployVpc`
-is conditional on `MaybeDeployStack`.
-
-In theory [rules] could be used to enforce parametric dependencies, thus
-generating an error in the case that a hypothetical `DeployVpc` is passed
-`true` but a hypothetical `DeployStack` is passed `false`, however rules have
-several prohibitive issues in practice:
-
-1. [`cfn-lint` issue #3630].
-
-1. If a rule assertion fails, rather than reporting an assertion error, the
-   [GitSync status dashboard] instead simply halts the update with
-   [GitSync event] type `CHANGESET_CREATION_FAILED` and following event message,
-   misleadingly reporting that no changes are present when in fact the update
-   failure was a result of failed rule assertions:
-
-   > Changeset creation failed. The reason was No updates are to be performed..
+> Changeset creation failed. The reason was No updates are to be performed..
 
 ## Setup
 
@@ -306,7 +287,7 @@ deployment environment:
 ### Bastion host connections
 
 Before you try connecting to the bastion host, verify that the
-`MaybeDeployBastionHost` [condition][conditions] evaluates to `true`. Note
+`DeployBastionHost` [condition][conditions] evaluates to `true`. Note
 too that if you have been provisioning and de-provisioning other resources, you
 might want to de-provision then provision the bastion host before running the
 below commands, in order to refresh the bastion host [user data] that stores the

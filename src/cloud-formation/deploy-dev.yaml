@@ -14,7 +14,7 @@ parameters:
   DeployRestApi: 'true'
   DeployRestApiDnsRecord: 'true'
   DeployRouteTables: 'true'
-  DeployStack: 'true'
+  DeployStack: 'false'
   DeployVpc: 'true'
   DeployWaf: 'true'
   EnableWafRulesGeneral: 'true'
