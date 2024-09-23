@@ -26,6 +26,7 @@ import { toCoinTypes } from "@sdk/markets/utils";
 import { Flex, FlexGap } from "@containers";
 import Popup from "components/popup";
 import { Text } from "components/text";
+import PlusMinus from "./PlusMinus";
 
 const SmallButton = ({
   emoji,
@@ -53,6 +54,11 @@ const SmallButton = ({
     </Popup>
   );
 };
+
+enum Mode {
+  Simple,
+  Advanced,
+}
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -103,6 +109,7 @@ export default function SwapComponent({
   const [inputAmount, setInputAmount] = useState(
     toActualCoinDecimals({ num: presetInputAmountIsValid ? presetInputAmount! : "1" })
   );
+  const [minOutAmount, setMinOutAmount] = useState("0");
   const [outputAmount, setOutputAmount] = useState("0");
   const [previous, setPrevious] = useState(inputAmount);
   const [isLoading, setIsLoading] = useState(false);
@@ -117,6 +124,8 @@ export default function SwapComponent({
   const numSwaps = useEventStore(
     (s) => s.getMarket(marketEmojis)?.swapEvents.length ?? initNumSwaps
   );
+
+  const [mode, setMode] = useState<Mode>(Mode.Simple);
 
   useEffect(() => {
     const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();
@@ -181,6 +190,17 @@ export default function SwapComponent({
     setInputAmount(toActualCoinDecimals({ num: e.target.value }));
   };
 
+  const handleMinOutInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value === "") {
+      setMinOutAmount("");
+    }
+    if (isNaN(parseFloat(e.target.value))) {
+      e.stopPropagation();
+      return;
+    }
+    setMinOutAmount(e.target.value);
+  };
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && submit) {
@@ -219,6 +239,28 @@ export default function SwapComponent({
       </AnimatePresence>
     );
   }, [t, account, isSell, aptBalance, emojicoinBalance, sufficientBalance]);
+
+  const updateMinOutAmount = () => {
+    setMinOutAmount(
+      Number(isLoading ? previous : outputAmount).toFixed(
+        isSell ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS
+      )
+    );
+  };
+
+  useEffect(() => {
+    updateMinOutAmount();
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [outputAmount]);
+
+  const toggleMode = () => {
+    if (mode === Mode.Advanced) {
+      setMode(Mode.Simple);
+    } else {
+      setMode(Mode.Advanced);
+      updateMinOutAmount();
+    }
+  };
 
   return (
     <>
@@ -266,54 +308,82 @@ export default function SwapComponent({
         </Flex>
 
         <SimulateInputsWrapper>
-          <InnerWrapper>
-            <Column>
-              <div className={grayLabel}>
-                {isSell ? t("You sell") : t("You pay")}
-                {balanceLabel}
-              </div>
-              <input
-                className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-                value={
-                  inputAmount === ""
-                    ? ""
-                    : Number(toDisplayNumber(inputAmount, isSell ? "emoji" : "apt"))
-                }
-                step={0.01}
-                onChange={handleInput}
-                onKeyDown={handleKeyDown}
-                type="number"
-              ></input>
-            </Column>
-            {isSell ? <EmojiInputLabel emoji={emojicoin} /> : <AptosInputLabel />}
-          </InnerWrapper>
-
-          <FlipInputsArrow
-            onClick={() => {
-              setInputAmount(toActualCoinDecimals({ num: outputAmount }));
-              setIsSell((v) => !v);
-            }}
-          />
-
-          <InnerWrapper>
-            <Column>
-              <div className={grayLabel}>{t("You receive")}</div>
-              <div className="h-[22px] w-full">
-                <div
-                  onClick={() => setIsSell((v) => !v)}
-                  className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
-                  style={{ opacity: isLoading ? 0.6 : 1 }}
-                >
-                  {/* Scrambled swap result output below. */}
-                  <div ref={ref}></div>
+          <SimulateInputsWrapper>
+            <InnerWrapper>
+              <Column>
+                <div className={grayLabel}>
+                  {isSell ? t("You sell") : t("You pay")}
+                  {balanceLabel}
                 </div>
-              </div>
-            </Column>
-            {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
-          </InnerWrapper>
+                <input
+                  className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
+                  value={inputAmount}
+                  min={0} // min, max, and step don't do anything here. They're here for possible accessibility purposes.
+                  step={0.01}
+                  onChange={handleInput}
+                  onKeyDown={handleKeyDown}
+                  type="number"
+                ></input>
+              </Column>
+              {isSell ? <EmojiInputLabel emoji={emojicoin} /> : <AptosInputLabel />}
+            </InnerWrapper>
+
+            <FlipInputsArrow
+              onClick={() => {
+                const outputAmountNumber = Number(outputAmount);
+                // Keep in mind that we're switching the sell type, so we do the opposite of what you'd expect to see.
+                const switchingToSell = !isSell;
+                if (switchingToSell) {
+                  setInputAmount(outputAmountNumber.toFixed(EMOJICOIN_DISPLAY_DECIMALS));
+                } else {
+                  setInputAmount(outputAmountNumber.toFixed(APT_DISPLAY_DECIMALS));
+                }
+                setIsSell((v) => !v);
+              }}
+            />
+
+            <InnerWrapper>
+              <Column>
+                <div className={grayLabel}>{t("You receive")}</div>
+                <div className="h-[22px] w-full">
+                  <div
+                    onClick={() => setIsSell((v) => !v)}
+                    className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
+                    style={{ opacity: isLoading ? 0.6 : 1 }}
+                  >
+                    {/* Scrambled swap result output below. */}
+                    <div ref={ref}></div>
+                  </div>
+                </div>
+              </Column>
+              {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
+            </InnerWrapper>
+          </SimulateInputsWrapper>
+
+          {mode === Mode.Advanced && (
+            <InnerWrapper>
+              <Column>
+                <div className={grayLabel}>{t("Minimum output amount")}</div>
+                <input
+                  className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
+                  value={minOutAmount}
+                  min={0} // min, max, and step don't do anything here. They're here for possible accessibility purposes.
+                  step={0.01}
+                  onChange={handleMinOutInput}
+                  onKeyDown={handleKeyDown}
+                  type="number"
+                ></input>
+              </Column>
+              {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
+            </InnerWrapper>
+          )}
+
+          <PlusMinus
+            onClick={toggleMode}
+          />
         </SimulateInputsWrapper>
 
-        <Row className="justify-center mt-[14px]">
+        <Row className={`justify-center ${mode === Mode.Simple ? "mt-[32px]" : "mt-[14px]"}`}>
           <SwapButton
             inputAmount={inputAmount}
             marketAddress={marketAddress}

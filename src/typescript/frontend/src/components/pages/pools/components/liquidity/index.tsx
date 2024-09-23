@@ -4,7 +4,7 @@ import React, { type PropsWithChildren, useEffect, useMemo, useState } from "rea
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
 import { Flex, Column, FlexGap } from "@containers";
-import { Text, Button } from "components";
+import { Text, Button, Switcher } from "components";
 import { StyledAddLiquidityWrapper } from "./styled";
 import { ProvideLiquidity, RemoveLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -28,6 +28,12 @@ import { TypeTag } from "@aptos-labs/ts-sdk";
 import Info from "components/info";
 import { type AnyNumberString } from "@sdk/types/types";
 import { type PoolsData } from "../../ClientPoolsPage";
+import Popup from "components/popup";
+
+enum Mode {
+  Simple,
+  Advanced,
+}
 
 type LiquidityProps = {
   market: PoolsData | undefined;
@@ -97,6 +103,9 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
   const [direction, setDirection] = useState<"add" | "remove">(
     searchParams.get("remove") !== null ? "remove" : "add"
   );
+
+  const [mode, setMode] = useState<Mode>(Mode.Simple);
+  const [minOut, setMinOut] = useState("");
 
   const loadingComponent = useMemo(() => <AnimatedStatusIndicator numSquares={4} />, []);
 
@@ -251,10 +260,53 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
     </InnerWrapper>
   );
 
+  const minOutInput = (
+    <InnerWrapper id="apt" className="liquidity-input">
+      <Column>
+        <div className={grayLabel}>{t("Minimum output amount")}</div>
+        <input
+          className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
+          onChange={(e) => setMinOut(e.target.value === "" ? "" : e.target.value)}
+          min={0}
+          step={0.01}
+          type="number"
+          value={minOut}
+        ></input>
+      </Column>
+      {direction === "add" ? (
+        <EmojiInputLabel emoji={market ? `${market.symbol} LP` : "- LP"} />
+      ) : (
+        <AptosInputLabel />
+      )}
+    </InnerWrapper>
+  );
+
+  const updateMinOut = () => {
+    if (direction === "add") {
+      setMinOut(toCoinDecimalString(provideLiquidityResult?.lp_coin_amount ?? "0", 2));
+    } else {
+      setMinOut(toCoinDecimalString(removeLiquidityResult?.base_amount ?? "0", 2));
+    }
+  };
+
+  const toggleMode = () => {
+    if (mode === Mode.Simple) {
+      setMode(Mode.Advanced);
+      updateMinOut();
+    } else {
+      setMode(Mode.Simple);
+    }
+  };
+
+  useEffect(() => {
+    updateMinOut();
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [direction, provideLiquidityResult, removeLiquidityResult]);
+
   return (
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
       <Column width="100%" maxWidth="414px" justifyContent="center">
-        <Flex width="100%" justifyContent="space-between" alignItems="baseline">
+        <Flex width="100%" justifyContent="space-between" alignItems="flex-start">
           <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="baseline">
             <Text textScale="heading1" textTransform="uppercase" mb="16px">
               {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
@@ -274,9 +326,27 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
             </Info>
           </FlexGap>
 
-          <button onClick={() => setDirection(direction === "add" ? "remove" : "add")}>
-            <Arrows color="econiaBlue" />
-          </button>
+          <div className="flex flex-row gap-2">
+            <Popup
+              content={
+                <Text
+                  textScale="pixelHeading4"
+                  lineHeight="20px"
+                  color="black"
+                  textTransform="uppercase"
+                >
+                  Toggle advanced mode
+                </Text>
+              }
+            >
+              <div>
+                <Switcher checked={mode === Mode.Advanced} onChange={toggleMode} />
+              </div>
+            </Popup>
+            <button onClick={() => setDirection(direction === "add" ? "remove" : "add")}>
+              <Arrows color="econiaBlue" />
+            </button>
+          </div>
         </Flex>
 
         {direction === "add" ? (
@@ -284,12 +354,14 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
             {aptInput}
             {emojiInput}
             {emojiLPInput}
+            {mode === Mode.Advanced && minOutInput}
           </StyledAddLiquidityWrapper>
         ) : (
           <StyledAddLiquidityWrapper>
             {emojiLPInput}
             {aptInput}
             {emojiInput}
+            {mode === Mode.Advanced && minOutInput}
           </StyledAddLiquidityWrapper>
         )}
 
