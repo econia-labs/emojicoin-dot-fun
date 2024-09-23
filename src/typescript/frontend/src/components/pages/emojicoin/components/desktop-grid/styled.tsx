@@ -12,6 +12,7 @@ export const StyledContentInner = styled.div`
   flex-direction: column;
   width: 100%;
   max-width: 1362px;
+  margin: 0 2vw;
 `;
 
 export const StyledContentColumn = styled(Flex)`
