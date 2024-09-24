@@ -373,6 +373,10 @@ The indexer database uses [Aurora PostgreSQL] on a
 [high availability][high availability for aurora] with
 [fault tolerant replica promotion] and [autoscaling][aurora autoscaling].
 
+### NAT gateway redundancy
+
+The indexer uses [a NAT gateway in each availability zone] for high resilience.
+
 ### Permissions
 
 The `ContainerRole` [ECS task execution IAM role] provides
@@ -399,6 +403,7 @@ toggle [rule actions] between `Block` and `Count`.
 
 See the [Web ACL traffic overview dashboards] to monitor rules.
 
+[a nat gateway in each availability zone]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
