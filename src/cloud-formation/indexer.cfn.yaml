@@ -994,9 +994,7 @@ Resources:
       Properties:
         RouteTableId: !Ref 'PrivateRouteTable'
         SubnetId: !Ref
-          Fn::Sub:
-          - 'PrivateSubnet${Identifier}'
-          - Identifier: !Ref 'Identifier'
+          Fn::Sub: 'PrivateSubnet${Identifier}'
       # ForEach transforms require that condition is second key or later.
       Condition: 'DeployRouteTables' # yamllint disable-line rule:key-ordering
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
@@ -1033,9 +1031,7 @@ Resources:
       Properties:
         RouteTableId: !Ref 'PublicRouteTable'
         SubnetId: !Ref
-          Fn::Sub:
-          - 'PublicSubnet${Identifier}'
-          - Identifier: !Ref 'Identifier'
+          Fn::Sub: 'PublicSubnet${Identifier}'
       # ForEach transforms require that condition is second key or later.
       Condition: 'DeployRouteTables' # yamllint disable-line rule:key-ordering
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
@@ -1557,16 +1553,13 @@ Resources:
               - 'MasterUsername'
         - Name: 'GRPC_DATA_SERVICE_URL'
           Value: !Sub
-          - '{{resolve:ssm:/emojicoin/grpc-data-service-url/${Network}}}'
-          - Network: !Ref 'Network'
+            '{{resolve:ssm:/emojicoin/grpc-data-service-url/${Network}}}'
         - Name: 'MINIMUM_STARTING_VERSION'
           Value: !Sub
-          - '{{resolve:ssm:/emojicoin/minimum-starting-version/${Network}}}'
-          - Network: !Ref 'Network'
+            '{{resolve:ssm:/emojicoin/minimum-starting-version/${Network}}}'
         - Name: 'EMOJICOIN_MODULE_ADDRESS'
           Value: !Sub
-          - '{{resolve:ssm:/emojicoin/package-address/${Network}}}'
-          - Network: !Ref 'Network'
+            '{{resolve:ssm:/emojicoin/package-address/${Network}}}'
         - Name: 'WS_PORT'
           Value: !FindInMap
           - 'Constants'
