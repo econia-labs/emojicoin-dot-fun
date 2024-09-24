@@ -554,6 +554,7 @@ Resources:
           MetricName: 'CPUUtilization'
           Namespace: 'AWS/ECS'
           Statistic: 'Average'
+          Unit: 'Percent'
         ScaleInCooldown: 300
         ScaleOutCooldown: 60
         TargetValue: 70
@@ -1220,6 +1221,7 @@ Resources:
           MetricName: 'CPUUtilization'
           Namespace: 'AWS/ECS'
           Statistic: 'Average'
+          Unit: 'Percent'
         ScaleInCooldown: 300
         ScaleOutCooldown: 60
         TargetValue: 70
