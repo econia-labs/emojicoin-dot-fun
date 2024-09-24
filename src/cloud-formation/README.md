@@ -27,14 +27,6 @@ be used to [conditionally][conditions] provision and de-provision [resources].
 For a concise list of such parameters, see a [stack deployment file] at
 `deploy-*.yaml`. See the template [rules] section for associated dependencies.
 
-Note that if a rule assertion fails, rather than reporting an assertion error,
-the [GitSync status dashboard] instead simply halts the update with
-[GitSync event] type `CHANGESET_CREATION_FAILED` and following event message,
-misleadingly reporting that no changes are present when in fact the update
-failure was a result of failed rule assertions:
-
-> Changeset creation failed. The reason was No updates are to be performed..
-
 ## Setup
 
 1. [Make Route 53 the DNS service for a domain you own], which will
@@ -201,7 +193,8 @@ failure was a result of failed rule assertions:
 1. Create a [stack deployment file] (see `deploy-*.yml`) with appropriate
    [template parameters](#template-parameters).
 
-1. [Create the stack with GitSync].
+1. [Create the stack with GitSync], then monitor [GitSync events][gitsync event]
+   in the [GitSync status dashboard].
 
 ## Querying endpoints
 
@@ -457,5 +450,4 @@ See the [Web ACL traffic overview dashboards] to monitor rules.
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
 [web acl traffic overview dashboards]: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-dashboards.html
 [web application firewall]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
-[`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630
 [`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
