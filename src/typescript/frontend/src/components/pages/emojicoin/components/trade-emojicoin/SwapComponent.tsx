@@ -27,6 +27,7 @@ import { Flex, FlexGap } from "@containers";
 import Popup from "components/popup";
 import { Text } from "components/text";
 import PlusMinus from "./PlusMinus";
+import { PixelPopup } from "components/popup";
 
 const SmallButton = ({
   emoji,
@@ -109,7 +110,8 @@ export default function SwapComponent({
   const [inputAmount, setInputAmount] = useState(
     toActualCoinDecimals({ num: presetInputAmountIsValid ? presetInputAmount! : "1" })
   );
-  const [minOutAmount, setMinOutAmount] = useState("0");
+  const [minOutAmount, setMinOutAmount] = useState("99");
+  const [minOutPercentage, setMinOutPercentage] = useState(true);
   const [outputAmount, setOutputAmount] = useState("0");
   const [previous, setPrevious] = useState(inputAmount);
   const [isLoading, setIsLoading] = useState(false);
@@ -241,17 +243,19 @@ export default function SwapComponent({
   }, [t, account, isSell, aptBalance, emojicoinBalance, sufficientBalance]);
 
   const updateMinOutAmount = () => {
-    setMinOutAmount(
-      Number(isLoading ? previous : outputAmount).toFixed(
-        isSell ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS
-      )
-    );
+    if (!minOutPercentage) {
+      setMinOutAmount(
+        (Number(isLoading ? previous : outputAmount) * 0.99).toFixed(
+          isSell ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS
+        )
+      );
+    }
   };
 
   useEffect(() => {
     updateMinOutAmount();
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [outputAmount]);
+  }, [outputAmount, minOutPercentage]);
 
   const toggleMode = () => {
     if (mode === Mode.Advanced) {
@@ -317,7 +321,11 @@ export default function SwapComponent({
                 </div>
                 <input
                   className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-                  value={inputAmount}
+                  value={
+                    inputAmount === ""
+                      ? ""
+                      : Number(toDisplayNumber(inputAmount, isSell ? "emoji" : "apt"))
+                  }
                   min={0} // min, max, and step don't do anything here. They're here for possible accessibility purposes.
                   step={0.01}
                   onChange={handleInput}
@@ -330,14 +338,7 @@ export default function SwapComponent({
 
             <FlipInputsArrow
               onClick={() => {
-                const outputAmountNumber = Number(outputAmount);
-                // Keep in mind that we're switching the sell type, so we do the opposite of what you'd expect to see.
-                const switchingToSell = !isSell;
-                if (switchingToSell) {
-                  setInputAmount(outputAmountNumber.toFixed(EMOJICOIN_DISPLAY_DECIMALS));
-                } else {
-                  setInputAmount(outputAmountNumber.toFixed(APT_DISPLAY_DECIMALS));
-                }
+                setInputAmount(toActualCoinDecimals({ num: outputAmount }));
                 setIsSell((v) => !v);
               }}
             />
@@ -374,7 +375,35 @@ export default function SwapComponent({
                   type="number"
                 ></input>
               </Column>
-              {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
+              <div className="flex flex-row items-center">
+                <PixelPopup content="Represent the minimum output amount in percentage of the received amount">
+                  <div
+                    className={`font-pixelar text-4xl p-2 cursor-pointer ${minOutPercentage ? "text-white" : "text-dark-gray"}`}
+                    onClick={() => {
+                      let newMinOut = Number(outputAmount);
+                      if (minOutPercentage) {
+                        newMinOut = (newMinOut * Number(minOutAmount)) / 100;
+                        if (Number.isNaN(newMinOut)) {
+                          setMinOutAmount("99");
+                        } else {
+                          setMinOutAmount(newMinOut.toFixed(2));
+                        }
+                      } else {
+                        newMinOut = (Number(minOutAmount) / newMinOut) * 100;
+                        if (Number.isNaN(newMinOut)) {
+                          setMinOutAmount("0");
+                        } else {
+                          setMinOutAmount(newMinOut.toFixed(2));
+                        }
+                      }
+                      setMinOutPercentage(!minOutPercentage);
+                    }}
+                  >
+                    %
+                  </div>
+                </PixelPopup>
+                {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
+              </div>
             </InnerWrapper>
           )}
 

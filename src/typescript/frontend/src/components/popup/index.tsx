@@ -28,4 +28,23 @@ const Popup: React.FC<
   );
 };
 
+export const PixelPopup: React.FC<
+  React.PropsWithChildren<{ content: string; className?: string }>
+> = ({ content, ...props }) => (
+  <Popup
+    content={
+      <Text
+        textScale="pixelHeading4"
+        lineHeight="20px"
+        color="black"
+        textTransform="uppercase"
+        className="max-w-[300px]"
+      >
+        {content}
+      </Text>
+    }
+    {...props}
+  />
+);
+
 export default Popup;

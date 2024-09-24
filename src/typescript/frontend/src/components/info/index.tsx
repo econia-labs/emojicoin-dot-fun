@@ -2,14 +2,14 @@ import React from "react";
 import Image from "next/image";
 
 import info from "../../../public/images/infoicon.svg";
-import Popup from "components/popup";
+import { PixelPopup } from "components/popup";
 
 const Info: React.FC<
-  React.PropsWithChildren<{ popupClassName?: string; imageClassName?: string }>
+  { popupClassName?: string; imageClassName?: string, children: string }
 > = ({ imageClassName, children, popupClassName }) => (
-  <Popup className={`max-w-[300px] ${popupClassName}`} content={children}>
+  <PixelPopup className={`max-w-[300px] ${popupClassName}`} content={children}>
     <Image src={info} alt="info" className={imageClassName} />
-  </Popup>
+  </PixelPopup>
 );
 
 export default Info;

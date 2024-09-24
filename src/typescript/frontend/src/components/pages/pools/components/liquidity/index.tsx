@@ -28,7 +28,7 @@ import { TypeTag } from "@aptos-labs/ts-sdk";
 import Info from "components/info";
 import { type AnyNumberString } from "@sdk/types/types";
 import { type PoolsData } from "../../ClientPoolsPage";
-import Popup from "components/popup";
+import { PixelPopup } from "components/popup";
 
 enum Mode {
   Simple,
@@ -105,7 +105,8 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
   );
 
   const [mode, setMode] = useState<Mode>(Mode.Simple);
-  const [minOut, setMinOut] = useState("");
+  const [minOut, setMinOut] = useState("99");
+  const [minOutPercentage, setMinOutPercentage] = useState(true);
 
   const loadingComponent = useMemo(() => <AnimatedStatusIndicator numSquares={4} />, []);
 
@@ -273,19 +274,55 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           value={minOut}
         ></input>
       </Column>
-      {direction === "add" ? (
-        <EmojiInputLabel emoji={market ? `${market.symbol} LP` : "- LP"} />
-      ) : (
-        <AptosInputLabel />
-      )}
+      <div className="flex flex-row items-center">
+        <PixelPopup content="Represent the minimum output amount in percentage of the received amount">
+          <div
+            className={`font-pixelar text-4xl p-2 cursor-pointer ${minOutPercentage ? "text-white" : "text-dark-gray"}`}
+            onClick={() => {
+              let newMinOutStr =
+                direction === "add"
+                  ? provideLiquidityResult?.lp_coin_amount
+                  : removeLiquidityResult?.base_amount;
+              let newMinOut = Number(toCoinDecimalString(newMinOutStr ?? "0", 2));
+              if (minOutPercentage) {
+                newMinOut = (newMinOut * Number(minOut)) / 100;
+                if (Number.isNaN(newMinOut)) {
+                  setMinOut("99");
+                } else {
+                  setMinOut(newMinOut.toFixed(2));
+                }
+              } else {
+                newMinOut = (Number(minOut) / newMinOut) * 100;
+                if (Number.isNaN(newMinOut)) {
+                  setMinOut("0");
+                } else {
+                  setMinOut(newMinOut.toFixed(2));
+                }
+              }
+              setMinOutPercentage(!minOutPercentage);
+            }}
+          >
+            %
+          </div>
+        </PixelPopup>
+        {direction === "add" ? (
+          <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol} LP` : "- LP"} />
+        ) : (
+          <AptosInputLabel />
+        )}
+      </div>
     </InnerWrapper>
   );
 
   const updateMinOut = () => {
-    if (direction === "add") {
-      setMinOut(toCoinDecimalString(provideLiquidityResult?.lp_coin_amount ?? "0", 2));
-    } else {
-      setMinOut(toCoinDecimalString(removeLiquidityResult?.base_amount ?? "0", 2));
+    if (!minOutPercentage) {
+      let newMinOut: number;
+      if (direction === "add") {
+        newMinOut = Number(provideLiquidityResult?.lp_coin_amount ?? "0") * 0.99;
+      } else {
+        newMinOut = Number(removeLiquidityResult?.base_amount ?? "0") * 0.99;
+      }
+      setMinOut(toCoinDecimalString(newMinOut, 2));
     }
   };
 
@@ -313,36 +350,18 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
             </Text>
 
             <Info>
-              <Text
-                textScale="pixelHeading4"
-                lineHeight="20px"
-                color="black"
-                textTransform="uppercase"
-              >
-                Liquidity providers receive a 0.25% fee from all trades, proportional to their pool
-                share. Fees are continuously reinvested in the pool and can be claimed by
-                withdrawing liquidity.
-              </Text>
+              Liquidity providers receive a 0.25% fee from all trades, proportional to their pool
+              share. Fees are continuously reinvested in the pool and can be claimed by withdrawing
+              liquidity.
             </Info>
           </FlexGap>
 
           <div className="flex flex-row gap-2">
-            <Popup
-              content={
-                <Text
-                  textScale="pixelHeading4"
-                  lineHeight="20px"
-                  color="black"
-                  textTransform="uppercase"
-                >
-                  Toggle advanced mode
-                </Text>
-              }
-            >
+            <PixelPopup content="Toggle advanced mode">
               <div>
                 <Switcher checked={mode === Mode.Advanced} onChange={toggleMode} />
               </div>
-            </Popup>
+            </PixelPopup>
             <button onClick={() => setDirection(direction === "add" ? "remove" : "add")}>
               <Arrows color="econiaBlue" />
             </button>
