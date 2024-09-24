@@ -108,12 +108,6 @@ Mappings:
     C:
       AvailabilityZone: 2
       CidrBlock: '10.0.6.0/24'
-Metadata:
-  cfn-lint:
-    config:
-      ignore_checks:
-      - 'E3005'
-      - 'W1001'
 Outputs:
   BastionHostId:
     Condition: 'DeployBastionHost'
