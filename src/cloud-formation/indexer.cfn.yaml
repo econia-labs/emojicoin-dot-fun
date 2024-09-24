@@ -592,7 +592,8 @@ Resources:
     - 'PrivateRouteTableAssociationA'
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
-    - 'PrivateRouteThroughNatGateway'
+    - 'PrivateRouteThroughNatGatewayFallback'
+    - 'PrivateRouteThroughNatGatewayPrimary'
     # Proxy for a conditional dependency on the application load balancer
     # listener, which associates the broker target group with the application
     # load balancer.
@@ -1046,19 +1047,33 @@ Resources:
       InternetGatewayId: !Ref 'InternetGateway'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::VPCGatewayAttachment'
-  # Network address translation gateway for the virtual private cloud.
-  NatGateway:
-    Condition: 'DeployVpc'
-    Properties:
-      AllocationId: !GetAtt 'NatGatewayEip.AllocationId'
-      SubnetId: !Ref 'PublicSubnetA'
-    Type: 'AWS::EC2::NatGateway'
-  # Elastic IP address for the network address translation gateway.
-  NatGatewayEip:
+  # Elastic IP address for the fallback network address translation gateway.
+  NatGatewayEipFallback:
     Condition: 'DeployVpc'
     Properties:
       Domain: 'vpc'
     Type: 'AWS::EC2::EIP'
+  # Elastic IP address for the primary network address translation gateway.
+  NatGatewayEipPrimary:
+    Condition: 'DeployVpc'
+    Properties:
+      Domain: 'vpc'
+    Type: 'AWS::EC2::EIP'
+  # Fallback network address translation gateway for the virtual private cloud.
+  NatGatewayFallback:
+    Condition: 'DeployVpc'
+    DependsOn: 'NatGatewayPrimary'
+    Properties:
+      AllocationId: !GetAtt 'NatGatewayEipFallback.AllocationId'
+      SubnetId: !Ref 'PublicSubnetB'
+    Type: 'AWS::EC2::NatGateway'
+  # Primary network address translation gateway for the virtual private cloud.
+  NatGatewayPrimary:
+    Condition: 'DeployVpc'
+    Properties:
+      AllocationId: !GetAtt 'NatGatewayEipPrimary.AllocationId'
+      SubnetId: !Ref 'PublicSubnetA'
+    Type: 'AWS::EC2::NatGateway'
   # Private network load balancer.
   Nlb:
     Condition: 'DeployNlb'
@@ -1222,7 +1237,8 @@ Resources:
     - 'PrivateRouteTableAssociationA'
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
-    - 'PrivateRouteThroughNatGateway'
+    - 'PrivateRouteThroughNatGatewayFallback'
+    - 'PrivateRouteThroughNatGatewayPrimary'
     # Proxy for a conditional dependency on the network load balancer listener
     # for PostgREST, which associates the PostgREST target group with the
     # network load balancer.
@@ -1392,12 +1408,22 @@ Resources:
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
-  # Route from private subnets through network address translation gateway.
-  PrivateRouteThroughNatGateway:
+  # Private subnet route through fallback network address translation gateway.
+  PrivateRouteThroughNatGatewayFallback:
+    Condition: 'DeployRouteTables'
+    # Create after creating the primary route.
+    DependsOn: 'PrivateRouteThroughNatGatewayPrimary'
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref 'NatGatewayFallback'
+      RouteTableId: !Ref 'PrivateRouteTable'
+    Type: 'AWS::EC2::Route'
+  # Private subnet route through primary network address translation gateway.
+  PrivateRouteThroughNatGatewayPrimary:
     Condition: 'DeployRouteTables'
     Properties:
       DestinationCidrBlock: '0.0.0.0/0'
-      NatGatewayId: !Ref 'NatGateway'
+      NatGatewayId: !Ref 'NatGatewayPrimary'
       RouteTableId: !Ref 'PrivateRouteTable'
     Type: 'AWS::EC2::Route'
   # Private DNS namespace for internal service discovery.
@@ -1436,7 +1462,8 @@ Resources:
     - 'PrivateRouteTableAssociationA'
     - 'PrivateRouteTableAssociationB'
     - 'PrivateRouteTableAssociationC'
-    - 'PrivateRouteThroughNatGateway'
+    - 'PrivateRouteThroughNatGatewayFallback'
+    - 'PrivateRouteThroughNatGatewayPrimary'
     Properties:
       Cluster: !Ref 'ContainerCluster'
       DeploymentConfiguration:
