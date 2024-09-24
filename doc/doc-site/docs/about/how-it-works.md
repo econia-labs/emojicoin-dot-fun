@@ -21,6 +21,11 @@ ensures ample liquidity after the state transition, and a constant price
 throughout the state transition. Moreover, after the bonding curve state
 transition, anyone can provide liquidity into the CPAMM!
 
+## Blackpaper
+
+For a more in-depth overview of the emojicoin dot fun mechanism design, see
+the [emojicoin dot fun blackpaper]!
+
 ## Emojicoin or else
 
 The only coins that can be launched are emojicoins from the
@@ -79,4 +84,5 @@ is autonomous (handled by the protocol itself without any human intervention).
 Once an emojicoin has left the bonding curve, users may earn yield on their
 emojicoins by providing liquidity to the new CPAMM liquidity pool!
 
+[emojicoin dot fun blackpaper]: https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf
 [unicode emoji library]: https://www.unicode.org/emoji/charts/full-emoji-list.html
