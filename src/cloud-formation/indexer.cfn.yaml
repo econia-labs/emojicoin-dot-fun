@@ -957,6 +957,35 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Overload for default low CPU usage alarm on autoscaled containers,
+  # designed to effectively disable the alarm since containers have low CPU
+  # utilization at idle even on the smallest instance possible.
+  Fn::ForEach::LowCpuAlarmOverload:
+  - 'Identifier'
+  - - 'Broker'
+    - 'Postgrest'
+  - LowCpuAlarmOverload${Identifier}:
+      Properties:
+        ActionsEnabled: 'false'
+        AlarmName: !Sub '${AWS::StackName}-${Identifier}-low-cpu-overload'
+        ComparisonOperator: 'LessThanThreshold'
+        Dimensions:
+        - Name: 'ClusterName'
+          Value: !Ref 'ContainerCluster'
+        - Name: 'ServiceName'
+          Value: !GetAtt
+          - !Sub '${Identifier}Runner'
+          - 'Name'
+        EvaluationPeriods: 3
+        MetricName: 'CPUUtilization'
+        Namespace: 'AWS/ECS/ManagedScaling'
+        Period: 10
+        Statistic: 'Maximum'
+        Threshold: 1
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: !Sub 'Deploy${Identifier}'
+      Type: 'AWS::CloudWatch::Alarm'
   # Network address translation gateway for each public subnet.
   Fn::ForEach::NatGateway:
   - 'Identifier'
