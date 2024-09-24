@@ -956,6 +956,34 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Network address translation gateway for each public subnet.
+  Fn::ForEach::NatGateway:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - NatGateway${Identifier}:
+      Properties:
+        AllocationId: !GetAtt
+        - !Sub 'NatGatewayEip${Identifier}'
+        - 'AllocationId'
+        SubnetId: !Ref
+          Fn::Sub: 'PublicSubnet${Identifier}'
+      # ForEach transforms require that condition is second key or later.
+      Condition: 'DeployVpc' # yamllint disable-line rule:key-ordering
+      Type: 'AWS::EC2::NatGateway'
+  # Elastic IP address for each network address translation gateway.
+  Fn::ForEach::NatGatewayEip:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - NatGatewayEip${Identifier}:
+      Properties:
+        Domain: 'vpc'
+      # ForEach transforms require that condition is second key or later.
+      Condition: 'DeployVpc' # yamllint disable-line rule:key-ordering
+      Type: 'AWS::EC2::EIP'
   # Association for private route table with each private subnet.
   Fn::ForEach::PrivateRouteTableAssociation:
   - 'Identifier'
@@ -970,8 +998,7 @@ Resources:
           - 'PrivateSubnet${Identifier}'
           - Identifier: !Ref 'Identifier'
       # ForEach transforms require that condition is second key or later.
-      # yamllint disable-line rule:key-ordering
-      Condition: 'DeployRouteTables'
+      Condition: 'DeployRouteTables' # yamllint disable-line rule:key-ordering
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A private subnet for each of the database availability zones.
   Fn::ForEach::PrivateSubnet:
@@ -1010,8 +1037,7 @@ Resources:
           - 'PublicSubnet${Identifier}'
           - Identifier: !Ref 'Identifier'
       # ForEach transforms require that condition is second key or later.
-      # yamllint disable-line rule:key-ordering
-      Condition: 'DeployRouteTables'
+      Condition: 'DeployRouteTables' # yamllint disable-line rule:key-ordering
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
   # A public subnet for each availability zone.
   Fn::ForEach::PublicSubnet:
