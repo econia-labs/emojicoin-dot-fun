@@ -957,9 +957,10 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Overload for default low CPU usage alarm on autoscaled containers,
-  # designed to effectively disable the alarm since containers have low CPU
-  # utilization at idle even on the smallest instance possible.
+  # Overload for default low CPU usage alarm on autoscaled containers, which
+  # replicates the default alarm values but disables actions. Designed to
+  # effectively disable the alarm since containers have low CPU utilization at
+  # idle even on the smallest instance possible.
   Fn::ForEach::LowCpuAlarmOverload:
   - 'Identifier'
   - - 'Broker'
@@ -976,12 +977,13 @@ Resources:
           Value: !GetAtt
           - !Sub '${Identifier}Runner'
           - 'Name'
-        EvaluationPeriods: 3
+        EvaluationPeriods: 15
         MetricName: 'CPUUtilization'
-        Namespace: 'AWS/ECS/ManagedScaling'
-        Period: 10
-        Statistic: 'Maximum'
-        Threshold: 1
+        Namespace: 'AWS/ECS'
+        Period: 60
+        Statistic: 'Average'
+        Threshold: 63.0
+        Unit: 'Percent'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
       Condition: !Sub 'Deploy${Identifier}'
