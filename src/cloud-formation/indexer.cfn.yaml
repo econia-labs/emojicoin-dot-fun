@@ -2105,7 +2105,7 @@ Rules:
     Assertions:
     - Assert: !Or
       - !Equals
-        - 'DeployStack'
+        - !Ref 'DeployStack'
         - 'true'
       - !Equals
         - !Ref 'DeployVpc'
