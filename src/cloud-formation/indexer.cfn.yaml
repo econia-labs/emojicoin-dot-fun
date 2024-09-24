@@ -553,6 +553,7 @@ Resources:
             Value: !Ref 'BrokerRunner'
           MetricName: 'CPUUtilization'
           Namespace: 'AWS/ECS'
+          Statistic: 'Average'
         ScaleInCooldown: 300
         ScaleOutCooldown: 60
         TargetValue: 70
@@ -1218,6 +1219,7 @@ Resources:
             Value: !Ref 'PostgrestRunner'
           MetricName: 'CPUUtilization'
           Namespace: 'AWS/ECS'
+          Statistic: 'Average'
         ScaleInCooldown: 300
         ScaleOutCooldown: 60
         TargetValue: 70
