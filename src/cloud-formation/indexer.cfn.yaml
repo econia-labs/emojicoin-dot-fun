@@ -1973,102 +1973,157 @@ Rules:
   DeployAlb:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployVpc'
-      - Fn::Not:
-        - !Condition 'DeployAlb'
+      - !Equals
+        - !Ref 'DeployVpc'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployAlb'
+        - 'false'
   DeployAlbDnsRecord:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployAlb'
-      - Fn::Not:
-        - !Condition 'DeployAlbDnsRecord'
+      - !Equals
+        - !Ref 'DeployAlb'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployAlbDnsRecord'
+        - 'false'
   DeployBastionHost:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployDb'
-      - Fn::Not:
-        - !Condition 'DeployBastionHost'
+      - !Equals
+        - !Ref 'DeployDb'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployBastionHost'
+        - 'false'
   DeployBroker:
     Assertions:
     - Assert: !Or
-      - Fn::And:
-        - !Condition 'DeployContainers'
-        - !Condition 'DeployProcessor'
-      - Fn::Not:
-        - !Condition 'DeployBroker'
+      - !And
+        - !Equals
+          - !Ref 'DeployContainers'
+          - 'true'
+        - !Equals
+          - !Ref 'DeployProcessor'
+          - 'true'
+      - !Equals
+        - !Ref 'DeployBroker'
+        - 'false'
   DeployContainers:
     Assertions:
     - Assert: !Or
-      - Fn::And:
-        - !Condition 'DeployDb'
-        - !Condition 'DeployRouteTables'
-      - Fn::Not:
-        - !Condition 'DeployContainers'
+      - !And
+        - !Equals
+          - !Ref 'DeployDb'
+          - 'true'
+        - !Equals
+          - !Ref 'DeployRouteTables'
+          - 'true'
+      - !Equals
+        - !Ref 'DeployContainers'
+        - 'false'
   DeployDb:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployVpc'
-      - Fn::Not:
-        - !Condition 'DeployDb'
+      - !Equals
+        - !Ref 'DeployVpc'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployDb'
+        - 'false'
   DeployNlb:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployVpc'
-      - Fn::Not:
-        - !Condition 'DeployNlb'
+      - !Equals
+        - !Ref 'DeployVpc'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployNlb'
+        - 'false'
   DeployNlbVpcLink:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployNlb'
-      - Fn::Not:
-        - !Condition 'DeployNlbVpcLink'
+      - !Equals
+        - !Ref 'DeployNlb'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployNlbVpcLink'
+        - 'false'
   DeployPostgrest:
     Assertions:
     - Assert: !Or
-      - Fn::And:
-        - !Condition 'DeployContainers'
-        - !Condition 'DeployProcessor'
-      - Fn::Not:
-        - !Condition 'DeployPostgrest'
+      - !And
+        - !Equals
+          - !Ref 'DeployContainers'
+          - 'true'
+        - !Equals
+          - !Ref 'DeployProcessor'
+          - 'true'
+      - !Equals
+        - !Ref 'DeployPostgrest'
+        - 'false'
   DeployProcessor:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployContainers'
-      - Fn::Not:
-        - !Condition 'DeployProcessor'
+      - !Equals
+          - !Ref 'DeployContainers'
+          - 'true'
+      - !Equals
+        - !Ref 'DeployProcessor'
+        - 'false'
   DeployRestApi:
     Assertions:
     - Assert: !Or
-      - Fn::And:
-        - !Condition 'DeployNlbVpcLink'
-        - !Condition 'DeployPostgrest'
-      - Fn::Not:
-        - !Condition 'DeployRestApi'
+      - !And
+        - !Equals
+          - !Ref 'DeployNlbVpcLink'
+          - 'true'
+        - !Equals
+          - !Ref 'DeployPostgrest'
+          - 'true'
+      - !Equals
+        - !Ref 'DeployRestApi'
+        - 'false'
   DeployRestApiDnsRecord:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployRestApi'
-      - Fn::Not:
-        - !Condition 'DeployRestApiDnsRecord'
+      - !Equals
+        - !Ref 'DeployRestApi'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployRestApiDnsRecord'
+        - 'false'
   DeployRouteTables:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployVpc'
-      - Fn::Not:
-        - !Condition 'DeployRouteTables'
+      - !Equals
+        - !Ref 'DeployVpc'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployRouteTables'
+        - 'false'
   DeployVpc:
     Assertions:
     - Assert: !Or
-      - !Condition 'DeployStack'
-      - Fn::Not:
-        - !Condition 'DeployVpc'
+      - !Equals
+        - 'DeployStack'
+        - 'true'
+      - !Equals
+        - !Ref 'DeployVpc'
+        - 'false'
   DeployWaf:
     Assertions:
     - Assert: !Or
-      - Fn::And:
-        - !Condition 'DeployAlb'
-        - !Condition 'DeployRestApi'
-      - Fn::Not:
-        - !Condition 'DeployWaf'
+      - !And
+        - !Equals
+          - !Ref 'DeployAlb'
+          - 'true'
+        - !Equals
+          - !Ref 'DeployRestApi'
+          - 'true'
+      - !Equals
+        - !Ref 'DeployWaf'
+        - 'false'
 Transform: 'AWS::LanguageExtensions'
 ...
