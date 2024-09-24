@@ -545,8 +545,14 @@ Resources:
       PolicyType: 'TargetTrackingScaling'
       ScalingTargetId: !Ref 'BrokerAutoScalingTarget'
       TargetTrackingScalingPolicyConfiguration:
-        PredefinedMetricSpecification:
-          PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
+        CustomizedMetricSpecification:
+          Dimensions:
+          - Name: 'ClusterName'
+            Value: !Ref 'ContainerCluster'
+          - Name: 'ServiceName'
+            Value: !Ref 'BrokerRunner'
+          MetricName: 'CPUUtilization'
+          Namespace: 'AWS/ECS'
         ScaleInCooldown: 300
         ScaleOutCooldown: 60
         TargetValue: 70
@@ -1204,8 +1210,14 @@ Resources:
       PolicyType: 'TargetTrackingScaling'
       ScalingTargetId: !Ref 'PostgrestAutoScalingTarget'
       TargetTrackingScalingPolicyConfiguration:
-        PredefinedMetricSpecification:
-          PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
+        CustomizedMetricSpecification:
+          Dimensions:
+          - Name: 'ClusterName'
+            Value: !Ref 'ContainerCluster'
+          - Name: 'ServiceName'
+            Value: !Ref 'PostgrestRunner'
+          MetricName: 'CPUUtilization'
+          Namespace: 'AWS/ECS'
         ScaleInCooldown: 300
         ScaleOutCooldown: 60
         TargetValue: 70
