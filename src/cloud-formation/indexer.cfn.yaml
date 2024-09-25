@@ -955,7 +955,7 @@ Resources:
   - 'Identifier'
   - - 'Broker'
     - 'Postgrest'
-  - AutoScalingPolicy${Identifier}:
+  - AutoScalingPolicyScaleOut${Identifier}:
       Properties:
         PolicyName: !Sub '${AWS::StackName}-${Identifier}-scale-out'
         PolicyType: 'TargetTrackingScaling'
