@@ -59,7 +59,7 @@ export const StyledHeaderInner = styled.div`
   width: 100%;
   border-left: 1px solid ${({ theme }) => theme.colors.darkGray};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGray};
-  padding: 0 21px;
+  padding: 0 10px;
 `;
 
 export const StyledInner = styled(Flex)`
