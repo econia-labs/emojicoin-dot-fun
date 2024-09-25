@@ -928,21 +928,45 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
-  # Autoscaling policy for broker and for PostgREST.
-  Fn::ForEach::AutoScalingPolicy:
+  # Autoscaling policy for scaling in broker and PostgREST.
+  Fn::ForEach::AutoScalingPolicyScaleIn:
+  - 'Identifier'
+  - - 'Broker'
+    - 'Postgrest'
+  - AutoScalingPolicyScaleIn${Identifier}:
+      Properties:
+        PolicyName: !Sub '${AWS::StackName}-${Identifier}-scale-in'
+        PolicyType: 'TargetTrackingScaling'
+        ScalingTargetId: !Ref
+          Fn::Sub: 'AutoScalingTarget${Identifier}'
+        StepScalingPolicyConfiguration:
+          AdjustmentType: 'ChangeInCapacity'
+          Cooldown: 300
+          MetricAggregationType: 'Average'
+          StepAdjustments:
+          - MetricIntervalUpperBound: 0
+            ScalingAdjustment: -1
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: !Sub 'Deploy${Identifier}'
+      Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+  # Autoscaling policy for scaling out broker and PostgREST.
+  Fn::ForEach::AutoScalingPolicyScaleOut:
   - 'Identifier'
   - - 'Broker'
     - 'Postgrest'
   - AutoScalingPolicy${Identifier}:
       Properties:
-        PolicyName: !Sub '${AWS::StackName}-${Identifier}'
+        PolicyName: !Sub '${AWS::StackName}-${Identifier}-scale-out'
         PolicyType: 'TargetTrackingScaling'
         ScalingTargetId: !Ref
           Fn::Sub: 'AutoScalingTarget${Identifier}'
+        # Use a default policy but disable automatic scale-in to prevent the
+        # triggering of scale-in alarms when only one instance is running.
         TargetTrackingScalingPolicyConfiguration:
+          DisableScaleIn: 'true'
           PredefinedMetricSpecification:
             PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
-          ScaleInCooldown: 300
           ScaleOutCooldown: 60
           TargetValue: 70
       # ForEach transforms require that condition is second key or later.
@@ -980,7 +1004,10 @@ Resources:
   - AutoScalingTriggerScaleDown${Identifier}:
       Properties:
         ActionsEnabled: 'true'
-        AlarmName: !Sub '${AWS::StackName}-${Identifier}-scale-down'
+        AlarmActions:
+        - !Ref
+          Fn::Sub: 'AutoScalingPolicyScaleIn${Identifier}'
+        AlarmName: !Sub '${AWS::StackName}-${Identifier}-scale-in'
         ComparisonOperator: 'LessThanThreshold'
         DatapointsToAlarm: 15
         EvaluationPeriods: 15
@@ -1024,36 +1051,6 @@ Resources:
           ReturnData: true
         Threshold: 60.0
         TreatMissingData: 'notBreaching'
-      # ForEach transforms require that condition is second key or later.
-      # yamllint disable-line rule:key-ordering
-      Condition: !Sub 'Deploy${Identifier}'
-      Type: 'AWS::CloudWatch::Alarm'
-  # Scale up trigger for broker and PostgREST.
-  Fn::ForEach::AutoScalingTriggerScaleUp:
-  - 'Identifier'
-  - - 'Broker'
-    - 'Postgrest'
-  - AutoScalingTriggerScaleUp${Identifier}:
-      Properties:
-        ActionsEnabled: 'true'
-        AlarmName: !Sub '${AWS::StackName}-${Identifier}-scale-up'
-        ComparisonOperator: 'GreaterThanThreshold'
-        DatapointsToAlarm: 3
-        Dimensions:
-        - Name: 'ClusterName'
-          Value: !Ref 'ContainerCluster'
-        - Name: 'ServiceName'
-          Value: !GetAtt
-          - !Sub '${Identifier}Runner'
-          - 'Name'
-        EvaluationPeriods: 3
-        MetricName: 'CPUUtilization'
-        Namespace: 'AWS/ECS'
-        Period: 10
-        Statistic: 'Average'
-        Threshold: 70.0
-        TreatMissingData: 'notBreaching'
-        Unit: 'Percent'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
       Condition: !Sub 'Deploy${Identifier}'
