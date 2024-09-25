@@ -1,10 +1,10 @@
 ---
 parameters:
   BrokerImageVersion: '0.7.0'
-  DeployAlb: 'true'
-  DeployAlbDnsRecord: 'true'
+  DeployAlb: 'false'
+  DeployAlbDnsRecord: 'false'
   DeployBastionHost: 'true'
-  DeployBroker: 'true'
+  DeployBroker: 'false'
   DeployContainers: 'true'
   DeployDb: 'true'
   DeployNlb: 'true'
