@@ -981,19 +981,73 @@ Resources:
       # yamllint disable-line rule:key-ordering
       Condition: !Sub 'Deploy${Identifier}'
       Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-  # Overload for default low CPU usage alarm on autoscaled containers, which
-  # replicates the default alarm values but disables actions. Designed to
-  # effectively disable the alarm since containers have low CPU utilization at
-  # idle even on the smallest instance possible.
-  Fn::ForEach::LowCpuAlarmOverload:
+  # Scale down trigger for broker and PostgREST.
+  Fn::ForEach::AutoScalingTriggerScaleDown:
   - 'Identifier'
   - - 'Broker'
     - 'Postgrest'
-  - LowCpuAlarmOverload${Identifier}:
+  - AutoScalingTriggerScaleDown${Identifier}:
       Properties:
-        ActionsEnabled: 'false'
-        AlarmName: !Sub '${AWS::StackName}-${Identifier}-low-cpu-overload'
+        ActionsEnabled: 'true'
+        AlarmName: !Sub '${AWS::StackName}-${Identifier}-scale-down'
         ComparisonOperator: 'LessThanThreshold'
+        DatapointsToAlarm: 15
+        EvaluationPeriods: 15
+        Metrics:
+        - Id: 'cpuUtilization'
+          MetricStat:
+            Metric:
+              Dimensions:
+              - Name: 'ClusterName'
+                Value: !Ref 'ContainerCluster'
+              - Name: 'ServiceName'
+                Value: !GetAtt
+                - !Sub '${Identifier}Runner'
+                - 'Name'
+              MetricName: 'CPUUtilization'
+              Namespace: 'AWS/ECS'
+            Period: 60
+            Stat: 'Average'
+            Unit: 'Percent'
+          ReturnData: 'false'
+        - Id: 'runningTaskCount'
+          MetricStat:
+            Metric:
+              Dimensions:
+              - Name: 'ClusterName'
+                Value: !Ref 'ContainerCluster'
+              - Name: 'ServiceName'
+                Value: !GetAtt
+                - !Sub '${Identifier}Runner'
+                - 'Name'
+              MetricName: 'RunningTaskCount'
+              Namespace: 'ECS/ContainerInsights'
+            Period: 60
+            Stat: 'Minimum'
+          ReturnData: false
+        # If only one instance is running, return 100% utilization so that
+        # scaledown alarm isn't triggered.
+        - Expression: 'IF(runningTaskCount > 1, cpuUtilization, 100)'
+          Id: 'expression'
+          Label: 'CPU Utilization when more than one task is running'
+          ReturnData: true
+        Threshold: 60.0
+        TreatMissingData: 'notBreaching'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: !Sub 'Deploy${Identifier}'
+      Type: 'AWS::CloudWatch::Alarm'
+  # Scale up trigger for broker and PostgREST.
+  Fn::ForEach::AutoScalingTriggerScaleUp:
+  - 'Identifier'
+  - - 'Broker'
+    - 'Postgrest'
+  - AutoScalingTriggerScaleUp${Identifier}:
+      Properties:
+        ActionsEnabled: 'true'
+        AlarmName: !Sub '${AWS::StackName}-${Identifier}-scale-up'
+        ComparisonOperator: 'GreaterThanThreshold'
+        DatapointsToAlarm: 3
         Dimensions:
         - Name: 'ClusterName'
           Value: !Ref 'ContainerCluster'
@@ -1001,12 +1055,13 @@ Resources:
           Value: !GetAtt
           - !Sub '${Identifier}Runner'
           - 'Name'
-        EvaluationPeriods: 15
+        EvaluationPeriods: 3
         MetricName: 'CPUUtilization'
         Namespace: 'AWS/ECS'
-        Period: 60
+        Period: 10
         Statistic: 'Average'
-        Threshold: 63.0
+        Threshold: 70.0
+        TreatMissingData: 'notBreaching'
         Unit: 'Percent'
       # ForEach transforms require that condition is second key or later.
       # yamllint disable-line rule:key-ordering
