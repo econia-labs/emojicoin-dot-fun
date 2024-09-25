@@ -16,7 +16,7 @@ parameters:
   DeployRouteTables: 'true'
   DeployStack: 'true'
   DeployVpc: 'true'
-  DeployWaf: 'true'
+  DeployWaf: 'false'
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
