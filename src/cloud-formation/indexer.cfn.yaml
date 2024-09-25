@@ -537,43 +537,6 @@ Resources:
       UnhealthyThresholdCount: 2
       VpcId: !Ref 'Vpc'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
-  # Scaling policy for broker service.
-  BrokerAutoScalingPolicy:
-    Condition: 'DeployBroker'
-    Properties:
-      PolicyName: !Sub '${AWS::StackName}-broker'
-      PolicyType: 'TargetTrackingScaling'
-      ScalingTargetId: !Ref 'BrokerAutoScalingTarget'
-      TargetTrackingScalingPolicyConfiguration:
-        CustomizedMetricSpecification:
-          Dimensions:
-          - Name: 'ClusterName'
-            Value: !Ref 'ContainerCluster'
-          - Name: 'ServiceName'
-            Value: !Ref 'BrokerRunner'
-          MetricName: 'CPUUtilization'
-          Namespace: 'AWS/ECS'
-          Statistic: 'Average'
-          Unit: 'Percent'
-        ScaleInCooldown: 300
-        ScaleOutCooldown: 60
-        TargetValue: 70
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-  # Scalable target for broker service.
-  BrokerAutoScalingTarget:
-    Condition: 'DeployBroker'
-    Properties:
-      MaxCapacity: 5
-      MinCapacity: 1
-      ResourceId: !Join
-      - '/'
-      - - 'service'
-        - !Ref 'ContainerCluster'
-        - !GetAtt 'BrokerRunner.Name'
-      RoleARN: !GetAtt 'ContainerRole.Arn'
-      ScalableDimension: 'ecs:service:DesiredCount'
-      ServiceNamespace: 'ecs'
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
     Condition: 'DeployBroker'
@@ -965,6 +928,59 @@ Resources:
         IpProtocol: -1
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::SecurityGroup'
+  # Autoscaling policy for broker and for PostgREST.
+  Fn::ForEach::AutoScalingPolicy:
+  - 'Identifier'
+  - - 'Broker'
+    - 'Postgrest'
+  - AutoScalingPolicy${Identifier}:
+      Properties:
+        PolicyName: !Sub '${AWS::StackName}-${Identifier}'
+        PolicyType: 'TargetTrackingScaling'
+        ScalingTargetId: !Ref
+          Fn::Sub: 'AutoScalingTarget${Identifier}'
+        TargetTrackingScalingPolicyConfiguration:
+          CustomizedMetricSpecification:
+            Dimensions:
+            - Name: 'ClusterName'
+              Value: !Ref 'ContainerCluster'
+            - Name: 'ServiceName'
+              Value: !Ref
+                Fn::Sub: '${Identifier}Runner'
+            MetricName: 'CPUUtilization'
+            Namespace: 'AWS/ECS'
+            Statistic: 'Average'
+            Unit: 'Percent'
+          ScaleInCooldown: 300
+          ScaleOutCooldown: 60
+          TargetValue: 70
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: !Sub 'Deploy${Identifier}'
+      Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+  # Autoscaling target for broker and for PostgREST.
+  Fn::ForEach::AutoScalingTarget:
+  - 'Identifier'
+  - - 'Broker'
+    - 'Postgrest'
+  - AutoScalingTarget${Identifier}:
+      Properties:
+        MaxCapacity: 5
+        MinCapacity: 1
+        ResourceId: !Join
+        - '/'
+        - - 'service'
+          - !Ref 'ContainerCluster'
+          - !GetAtt
+            - !Sub '${Identifier}Runner'
+            - 'Name'
+        RoleARN: !GetAtt 'ContainerRole.Arn'
+        ScalableDimension: 'ecs:service:DesiredCount'
+        ServiceNamespace: 'ecs'
+      # ForEach transforms require that condition is second key or later.
+      # yamllint disable-line rule:key-ordering
+      Condition: !Sub 'Deploy${Identifier}'
+      Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Overload for default low CPU usage alarm on autoscaled containers, which
   # replicates the default alarm values but disables actions. Designed to
   # effectively disable the alarm since containers have low CPU utilization at
@@ -1204,43 +1220,6 @@ Resources:
       TargetArns:
       - !Ref 'Nlb'
     Type: 'AWS::ApiGateway::VpcLink'
-  # Scaling policy for PostgREST service.
-  PostgrestAutoScalingPolicy:
-    Condition: 'DeployPostgrest'
-    Properties:
-      PolicyName: !Sub '${AWS::StackName}-postgrest'
-      PolicyType: 'TargetTrackingScaling'
-      ScalingTargetId: !Ref 'PostgrestAutoScalingTarget'
-      TargetTrackingScalingPolicyConfiguration:
-        CustomizedMetricSpecification:
-          Dimensions:
-          - Name: 'ClusterName'
-            Value: !Ref 'ContainerCluster'
-          - Name: 'ServiceName'
-            Value: !Ref 'PostgrestRunner'
-          MetricName: 'CPUUtilization'
-          Namespace: 'AWS/ECS'
-          Statistic: 'Average'
-          Unit: 'Percent'
-        ScaleInCooldown: 300
-        ScaleOutCooldown: 60
-        TargetValue: 70
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-  # Scalable target for PostgREST service.
-  PostgrestAutoScalingTarget:
-    Condition: 'DeployPostgrest'
-    Properties:
-      MaxCapacity: 5
-      MinCapacity: 1
-      ResourceId: !Join
-      - '/'
-      - - 'service'
-        - !Ref 'ContainerCluster'
-        - !GetAtt 'PostgrestRunner.Name'
-      RoleARN: !GetAtt 'ContainerRole.Arn'
-      ScalableDimension: 'ecs:service:DesiredCount'
-      ServiceNamespace: 'ecs'
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Security group for PostgREST clients.
   PostgrestClientSecurityGroup:
     Condition: 'DeployPostgrest'
