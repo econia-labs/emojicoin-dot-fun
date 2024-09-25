@@ -292,11 +292,16 @@ URLs of other resources in the stack.
    pip install ec2instanceconnectcli
    ```
 
-1. Connect to the bastion host over the [EC2 Instance Connect Endpoint] using
-   your stack name, for example `emoji-dev`:
+1. Set your stack name:
 
    ```sh
-   STACK_NAME=emoji-dev
+   STACK_NAME=<STACK_NAME>
+   echo $STACK_NAME
+   ```
+
+1. Connect to the bastion host over the [EC2 Instance Connect Endpoint]:
+
+   ```sh
    INSTANCE_ID=$(aws cloudformation describe-stacks \
        --output text \
        --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
