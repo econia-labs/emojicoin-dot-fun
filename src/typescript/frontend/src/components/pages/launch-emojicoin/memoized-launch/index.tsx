@@ -119,17 +119,16 @@ export const MemoizedLaunchAnimation = ({
           <div className="flex flex-col justify-center m-auto pt-2 pixel-heading-4 uppercase">
             <div className="flex flex-col text-dark-gray">
               <div className="flex flex-row justify-between">
-                <div className="flex flex-row items-center justify-left mr-[2ch]">
-                  <span>{t("Cost to deploy")}</span>
-                  <div className="mx-[5px]">
-                    <Info className="uppercase">{`
+                <div className="flex flex-row items-center justify-left mr-[2ch] relative">
+                  <div className="absolute left-[-20px]">
+                    <Info popupClassName="uppercase" imageClassName="w-[14px]">{`
                       The cost to deploy a market is ${displayCost} APT. You
                       will also make a ${displayDeposit} APT deposit that will
                       automatically be refunded when your market exits the
                       bonding curve.
                     `}</Info>
                   </div>
-                  :
+                  <span>{t("Cost to deploy")}</span>:
                 </div>
                 <div>
                   <span className="">{displayCost}</span>&nbsp;APT (+{" "}
@@ -152,16 +151,15 @@ export const MemoizedLaunchAnimation = ({
                 </div>
               </div>
               <div className="flex flex-row justify-between">
-                <div className="flex flex-row items-center justify-left mr-[2ch]">
-                  <span>{t("Grace period")}</span>
-                  <div className="mx-[5px]">
-                    <Info className="uppercase">
+                <div className="flex flex-row items-center justify-left mr-[2ch] relative">
+                  <div className="absolute left-[-20px]">
+                    <Info popupClassName="uppercase" imageClassName="w-[14px]">
                       After a market is launched, there will be a grace period during which only the
                       account that launched the market can trade. The grace period ends after 5
                       minutes or after the first trade, whichever comes first.
                     </Info>
                   </div>
-                  :
+                  <span>{t("Grace period")}</span>:
                 </div>
                 <div>5 minutes</div>
               </div>
