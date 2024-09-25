@@ -17,7 +17,7 @@ parameters:
   DeployStack: 'true'
   DeployVpc: 'true'
   DeployWaf: 'true'
-  EnableWafRulesGeneral: 'true'
+  EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
   Environment: 'ECO-2188'
