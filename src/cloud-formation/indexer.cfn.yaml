@@ -936,7 +936,7 @@ Resources:
   - AutoScalingPolicyScaleIn${Identifier}:
       Properties:
         PolicyName: !Sub '${AWS::StackName}-${Identifier}-scale-in'
-        PolicyType: 'TargetTrackingScaling'
+        PolicyType: 'StepScaling'
         ScalingTargetId: !Ref
           Fn::Sub: 'AutoScalingTarget${Identifier}'
         StepScalingPolicyConfiguration:
