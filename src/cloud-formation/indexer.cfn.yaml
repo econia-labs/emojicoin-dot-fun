@@ -940,17 +940,8 @@ Resources:
         ScalingTargetId: !Ref
           Fn::Sub: 'AutoScalingTarget${Identifier}'
         TargetTrackingScalingPolicyConfiguration:
-          CustomizedMetricSpecification:
-            Dimensions:
-            - Name: 'ClusterName'
-              Value: !Ref 'ContainerCluster'
-            - Name: 'ServiceName'
-              Value: !Ref
-                Fn::Sub: '${Identifier}Runner'
-            MetricName: 'CPUUtilization'
-            Namespace: 'AWS/ECS'
-            Statistic: 'Average'
-            Unit: 'Percent'
+          PredefinedMetricSpecification:
+            PredefinedMetricType: 'ECSServiceAverageCPUUtilization'
           ScaleInCooldown: 300
           ScaleOutCooldown: 60
           TargetValue: 70
