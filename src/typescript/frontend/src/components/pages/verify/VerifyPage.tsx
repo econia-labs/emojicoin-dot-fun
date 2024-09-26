@@ -5,7 +5,6 @@ import ButtonWithConnectWalletFallback from "components/header/wallet-button/Con
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useCallback, useEffect, useState } from "react";
 import { createSession } from "./session";
-import { EXTERNAL_LINK_PROPS } from "components/link";
 import { useScramble } from "use-scramble";
 import { motion } from "framer-motion";
 import { Flex } from "@containers";
