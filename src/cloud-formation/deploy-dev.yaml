@@ -1,8 +1,8 @@
 ---
 parameters:
   BrokerImageVersion: '0.7.0'
-  DeployAlb: 'false'
-  DeployAlbDnsRecord: 'false'
+  DeployAlb: 'true'
+  DeployAlbDnsRecord: 'true'
   DeployBastionHost: 'true'
   DeployBroker: 'true'
   DeployContainers: 'true'
@@ -11,8 +11,8 @@ parameters:
   DeployNlbVpcLink: 'true'
   DeployPostgrest: 'true'
   DeployProcessor: 'true'
-  DeployRestApi: 'false'
-  DeployRestApiDnsRecord: 'false'
+  DeployRestApi: 'true'
+  DeployRestApiDnsRecord: 'true'
   DeployRouteTables: 'true'
   DeployStack: 'true'
   DeployVpc: 'true'
