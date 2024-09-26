@@ -175,7 +175,8 @@ export const MemoizedLaunchAnimation = ({
           >
             <LaunchButtonOrGoToMarketLink
               geoblocked={geoblocked}
-              invalid={invalid || !sufficientBalance}
+              invalid={invalid}
+              insufficientBalance={!sufficientBalance}
               registered={registered}
               onWalletButtonClick={() => {
                 registerMarket();

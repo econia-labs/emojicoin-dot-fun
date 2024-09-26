@@ -36,13 +36,18 @@ export const useRegisterMarket = () => {
       const publicKey = new Ed25519PublicKey(
         typeof account!.publicKey === "string" ? account!.publicKey : account!.publicKey[0]
       );
-      const r = await RegisterMarket.getGasCost({
-        aptosConfig: aptos.config,
-        registrant: account!.address,
-        registrantPubKey: publicKey,
-        emojis: numMarkets === 0 ? [SYMBOL_DATA.byName("Virgo")!.bytes] : emojiBytes,
-      });
-      return r;
+      try {
+        const r = await RegisterMarket.getGasCost({
+          aptosConfig: aptos.config,
+          registrant: account!.address,
+          registrantPubKey: publicKey,
+          emojis: numMarkets === 0 ? [SYMBOL_DATA.byName("Virgo")!.bytes] : emojiBytes,
+        });
+        return r;
+      } catch (e) {
+        console.error(e);
+        return undefined;
+      }
     },
     staleTime: 1000,
     enabled:
