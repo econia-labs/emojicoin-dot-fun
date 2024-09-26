@@ -2,6 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
     "EMOJICOIN_INDEXER_URL",
+    "EMOJICOIN_INDEXER_API_KEY",
     "REVALIDATION_TIME",
     "ALLOWLISTER3K_URL",
     "NEXT_PUBLIC_IS_ALLOWLIST_ENABLED",
