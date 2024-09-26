@@ -54,12 +54,18 @@ export const SwapButton = ({
       );
       if (rewardsEvent) {
         controls.start("celebration");
-        toast.success(<CongratulationsToast transactionHash={res.response.hash} />, {
-          pauseOnFocusLoss: false,
-          autoClose: 7000,
-          position: "top-center",
-          closeOnClick: false,
-        });
+        toast.dark(
+          <>
+            <RewardsAnimation controls={controls} />
+            <CongratulationsToast transactionHash={res.response.hash} />
+          </>,
+          {
+            pauseOnFocusLoss: false,
+            autoClose: 15000,
+            position: "top-center",
+            closeOnClick: false,
+          }
+        );
       }
     }
   }, [account, aptos.config, inputAmount, isSell, marketAddress, submit, controls]);
@@ -74,8 +80,8 @@ export const SwapButton = ({
         <Button disabled={disabled} onClick={handleClick} scale="lg">
           {t("Swap")}
         </Button>
-      </ButtonWithConnectWalletFallback>
       <RewardsAnimation controls={controls} />
+      </ButtonWithConnectWalletFallback>
     </>
   );
 };

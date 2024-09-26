@@ -7,7 +7,6 @@ import { useEventStore } from "context/state-store-context";
 import { constructOrdered, toSerializedGridOrder, type WithTimeIndexAndPrev } from "./utils";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
-import MemoizedGridRowLines from "./components/grid-row-lines";
 import useEvent from "@hooks/use-event";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { ANIMATION_DEBOUNCE_TIME } from "../table-card/animation-variants/grid-variants";
@@ -153,11 +152,6 @@ export const LiveClientGrid = ({
 
   return (
     <>
-      <MemoizedGridRowLines
-        gridRowLinesKey={"live-grid-lines-" + rowLength}
-        length={ordered.length}
-        shouldAnimate={initialRender.current}
-      />
       {ordered.map((v) => {
         return (
           <TableCard

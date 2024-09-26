@@ -105,7 +105,7 @@ export const AnimatedProgressBar = (props: GridProps) => {
   }, [progress, progressBarControls, flickerControls]);
 
   return (
-    <motion.div className="relative flex w-full rounded-sm h-[100%] !p-0">
+    <motion.div className="flex w-full rounded-sm h-[100%] !p-0">
       <motion.div
         style={
           isDesktop
@@ -118,7 +118,7 @@ export const AnimatedProgressBar = (props: GridProps) => {
                 padding: ".7em",
               }
         }
-        className="relative flex my-auto mx-[2ch] opacity-[0.9]"
+        className="relative flex my-auto px-[21px] opacity-[0.9]"
         animate={flickerControls}
       >
         <Text

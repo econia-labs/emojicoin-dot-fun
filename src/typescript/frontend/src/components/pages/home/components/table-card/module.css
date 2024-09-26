@@ -1,7 +1,20 @@
 .grid-emoji-card {
+  position: relative;
   &:hover {
     filter: brightness(1.05);
     background: #00031e13;
     box-shadow: 0 0 14px 11px rgba(8, 108, 217, 0.1);
   }
+}
+
+.grid-emoji-card:after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  display: block;
+  width: 200vw;
+  background-color: var(--dark-gray);
+  height: 1px;
+  transform: translateX(-50%);
+
 }

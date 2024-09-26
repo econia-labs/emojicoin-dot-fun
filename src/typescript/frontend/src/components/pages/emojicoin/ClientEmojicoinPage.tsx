@@ -13,7 +13,7 @@ import { toUniqueHomogenousEvents } from "@sdk/emojicoin_dot_fun/events";
 import { marketViewToLatestBars } from "@sdk/utils/candlestick-bars";
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
-  const { isLaptopL } = useMatchBreakpoints();
+  const { isTablet, isMobile } = useMatchBreakpoints();
   const addMarketData = useEventStore((s) => s.addMarketData);
   const initializeMarket = useEventStore((s) => s.initializeMarket);
   const loadEvents = useEventStore((s) => s.loadEventsFromServer);
@@ -43,10 +43,10 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
     <Box pt="85px">
       <TextCarousel />
       <MainInfo data={props.data} />
-      {isLaptopL ? (
-        <DesktopGrid geoblocked={props.geoblocked} data={props.data} />
-      ) : (
+      {isTablet || isMobile ? (
         <MobileGrid geoblocked={props.geoblocked} data={props.data} />
+      ) : (
+        <DesktopGrid geoblocked={props.geoblocked} data={props.data} />
       )}
     </Box>
   );
