@@ -997,11 +997,11 @@ Resources:
       Condition: !Sub 'Deploy${Identifier}'
       Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
   # Scale down trigger for broker and PostgREST.
-  Fn::ForEach::AutoScalingTriggerScaleDown:
+  Fn::ForEach::AutoScalingTriggerScaleIn:
   - 'Identifier'
   - - 'Broker'
     - 'Postgrest'
-  - AutoScalingTriggerScaleDown${Identifier}:
+  - AutoScalingTriggerScaleIn${Identifier}:
       Properties:
         ActionsEnabled: 'true'
         AlarmActions:
@@ -1044,7 +1044,7 @@ Resources:
             Stat: 'Minimum'
           ReturnData: false
         # If only one instance is running, return 100% utilization so that
-        # scaledown alarm isn't triggered.
+        # scale in alarm isn't triggered.
         - Expression: 'IF(runningTaskCount > 1, cpuUtilization, 100)'
           Id: 'expression'
           Label: 'CPU Utilization when more than one task is running'
