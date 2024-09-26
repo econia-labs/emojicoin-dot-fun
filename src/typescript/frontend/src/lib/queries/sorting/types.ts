@@ -10,7 +10,7 @@ export type MarketDataSortByHomePage =
 
 export type GetSortedMarketDataQueryArgs = {
   limit?: number;
-  offset: number;
+  page: number;
   orderBy: ValueOf<typeof ORDER_BY>;
   sortBy: SortMarketsBy | SortByPostgrestQueryParams;
   inBondingCurve?: boolean;

@@ -5,8 +5,8 @@ import {
   type AnyEventModel,
   type TableModels,
 } from "@sdk/indexer-v2/types";
-import { type LatestBar } from "@sdk/utils/candlestick-bars";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
+import { type LatestBar } from "./candlestick-bars";
 
 // Aliased to avoid repeating the type names over and over.
 type Swap = TableModels["swap_events"];

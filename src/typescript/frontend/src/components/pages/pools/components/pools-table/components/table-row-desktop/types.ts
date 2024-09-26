@@ -1,8 +1,7 @@
-import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
+import { type MarketStateModel } from "@sdk/indexer-v2/types";
 
 export type TableRowDesktopProps = {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  item: FetchSortedMarketDataReturn["markets"][0];
+  item: MarketStateModel;
   selected?: boolean;
   onClick?: React.MouseEventHandler<HTMLTableRowElement> | undefined;
 };

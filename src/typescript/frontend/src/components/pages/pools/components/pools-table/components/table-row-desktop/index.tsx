@@ -9,14 +9,16 @@ import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 
 import Popup from "components/popup";
+import { Big } from "big.js";
 
-const DAYS_IN_WEEK = 7;
-const DAYS_IN_YEAR = 365;
+const DAYS_IN_WEEK = 7n;
+const DAYS_IN_YEAR = 365n;
 
-const getXPR = (x: number, tvlPerLpCoinGrowth: number) => (tvlPerLpCoinGrowth ** x - 1) * 100;
+const getXPR = (x: bigint, tvlPerLpCoinGrowth: bigint) => (tvlPerLpCoinGrowth ** x - 1n) * 100n;
 
-const formatXPR = (xpr: number) => {
-  return `${xpr.toFixed(4).replace(/(\.0*|(?<=(\..*))0*)$/, "")}%`;
+const formatXPR = (xprIn: bigint) => {
+  const xpr = new Big(xprIn.toString()).toFixed(4);
+  return `${xpr.replace(/(\.0*|(?<=(\..*))0*)$/, "")}%`;
 };
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
@@ -31,9 +33,9 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             color="lightGray"
             textTransform="uppercase"
             ellipsis
-            title={item.symbol.toUpperCase()}
+            title={item.market.symbolData.symbol.toUpperCase()}
           >
-            {item.symbol}
+            {item.market.symbolData.symbol}
           </Text>
         </Flex>
       </Td>
@@ -45,9 +47,9 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             color="lightGray"
             textTransform="uppercase"
             ellipsis
-            title={`${toCoinDecimalString(item.allTimeVolume, 2)} APT`}
+            title={`${toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT`}
           >
-            {toCoinDecimalString(item.allTimeVolume, 2)} APT
+            {toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT
           </Text>
         </Flex>
       </Td>
@@ -75,9 +77,9 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             color="lightGray"
             textTransform="uppercase"
             ellipsis
-            title={`${toCoinDecimalString(item.cpammRealReservesQuote * 2, 2)} APT`}
+            title={`${toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT`}
           >
-            {toCoinDecimalString(item.cpammRealReservesQuote * 2, 2)} APT
+            {toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT
           </Text>
         </Flex>
       </Td>
@@ -95,7 +97,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               >
                 <FlexGap gap=".2rem" justifyContent="space-between">
                   <span>DPR:</span>
-                  <span>{formatXPR(getXPR(1, item.tvlPerLpCoinGrowth))}</span>
+                  <span>{formatXPR(getXPR(1n, item.dailyTvlPerLPCoinGrowthQ64))}</span>
                 </FlexGap>
               </Text>,
               <Text
@@ -107,7 +109,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               >
                 <FlexGap gap=".2rem" justifyContent="space-between">
                   <span>WPR:</span>
-                  <span>{formatXPR(getXPR(DAYS_IN_WEEK, item.tvlPerLpCoinGrowth))}</span>
+                  <span>{formatXPR(getXPR(DAYS_IN_WEEK, item.dailyTvlPerLPCoinGrowthQ64))}</span>
                 </FlexGap>
               </Text>,
               <Text
@@ -119,13 +121,13 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               >
                 <FlexGap gap=".2rem" justifyContent="space-between">
                   <span>APR:</span>
-                  <span>{formatXPR(getXPR(DAYS_IN_YEAR, item.tvlPerLpCoinGrowth))}</span>
+                  <span>{formatXPR(getXPR(DAYS_IN_YEAR, item.dailyTvlPerLPCoinGrowthQ64))}</span>
                 </FlexGap>
               </Text>,
             ]}
           >
             <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
-              {formatXPR(getXPR(1, item.tvlPerLpCoinGrowth))}
+              {formatXPR(getXPR(1n, item.dailyTvlPerLPCoinGrowthQ64))}
             </Text>
           </Popup>
         </Flex>

@@ -1,4 +1,5 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { type AnyNumberString } from "@sdk/types/types";
 import { ExplorerLink } from "components/link/component";
 import { APTOS_NETWORK } from "lib/env";
 import { toDisplayCoinDecimals } from "lib/utils/decimals";
@@ -8,7 +9,7 @@ export const CongratulationsToast = ({
   amount,
 }: {
   transactionHash: string;
-  amount: number | bigint | string;
+  amount: AnyNumberString;
 }) => {
   const { network } = useWallet();
   const amountString = toDisplayCoinDecimals({ num: amount, decimals: 2 });

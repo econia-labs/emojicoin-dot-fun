@@ -1,4 +1,4 @@
-import "server-only";
+"use server";
 
 import { Period } from "../../../const";
 import { LIMIT } from "../../../queries/const";
@@ -10,8 +10,6 @@ import { fetchPeriodicEventsSince } from "./market";
  * Since this function's data will be used for frontend charting, it's
  * written with non-blocking pseudo-recursive setTimeout calls to avoid
  * blocking the main javascript execution thread.
- *
- *
  *
  * @param marketID The market ID to fetch data for.
  * @param start The start time of the range to fetch data from.

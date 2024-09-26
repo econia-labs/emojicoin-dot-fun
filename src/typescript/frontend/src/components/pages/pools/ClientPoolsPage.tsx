@@ -18,11 +18,11 @@ import { parseJSON } from "utils";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useSearchParams } from "next/navigation";
 import { encodeEmojis, getEmojisInString, type MarketSymbolEmojis } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
+import { type MarketStateModel } from "@sdk/indexer-v2/types";
 
 export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const searchParams = useSearchParams();
@@ -31,7 +31,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked 
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(poolParam ? 0 : undefined);
   const [page, setPage] = useState<number>(1);
-  const [markets, setMarkets] = useState<FetchSortedMarketDataReturn["markets"]>([]);
+  const [markets, setMarkets] = useState<MarketStateModel[]>([]);
   const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
   const [pools, setPools] = useState<"all" | "mypools">("all");
   const [realEmojis, setRealEmojis] = useState(getEmojisInString(poolParam ?? ""));

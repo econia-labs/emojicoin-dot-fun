@@ -1,13 +1,10 @@
 "use client";
 
 import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
-
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
-
 import { Flex, Column, FlexGap } from "@containers";
 import { Text, Button } from "components";
-
 import { StyledAddLiquidityWrapper } from "./styled";
 import { ProvideLiquidity, RemoveLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -23,27 +20,28 @@ import {
   useSimulateProvideLiquidity,
   useSimulateRemoveLiquidity,
 } from "lib/hooks/queries/use-simulate-provide-liquidity";
-import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import { Arrows } from "components/svg";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { useSearchParams } from "next/navigation";
 import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-status-indicator";
 import { TypeTag } from "@aptos-labs/ts-sdk";
 import Info from "components/info";
+import { type AnyNumberString } from "@sdk/types/types";
+import { type MarketStateModel } from "@sdk/indexer-v2/types";
 
 type LiquidityProps = {
-  market: FetchSortedMarketDataReturn["markets"][0] | undefined;
+  market: MarketStateModel | undefined;
   geoblocked: boolean;
 };
 
-const fmtCoin = (n: number | bigint | string | undefined) => {
+const fmtCoin = (n: AnyNumberString | undefined) => {
   if (n === undefined) {
     return n;
   }
   return new Intl.NumberFormat().format(Number(toCoinDecimalString(n, 8)));
 };
 
-const unfmtCoin = (n: number | bigint | string) => {
+const unfmtCoin = (n: AnyNumberString) => {
   return BigInt(
     toActualCoinDecimals({
       num: typeof n === "bigint" ? n : Number(n),
@@ -114,14 +112,14 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
   } = useAptos();
 
   const provideLiquidityResult = useSimulateProvideLiquidity({
-    marketAddress: market?.marketAddress,
+    marketAddress: market?.market.marketAddress,
     quoteAmount: unfmtCoin(liquidity ?? 0),
   });
 
-  const { emojicoin } = market ? toCoinTypes(market?.marketAddress) : { emojicoin: "" };
+  const { emojicoin } = market ? toCoinTypes(market?.market.marketAddress) : { emojicoin: "" };
 
   const removeLiquidityResult = useSimulateRemoveLiquidity({
-    marketAddress: market?.marketAddress,
+    marketAddress: market?.market.marketAddress,
     lpCoinAmount: unfmtCoin(lp ?? 0),
     typeTags: [emojicoin ?? ""],
   });
@@ -221,7 +219,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           disabled
         ></input>
       </Column>
-      <EmojiInputLabel emoji={market ? market.symbol : "-"} />
+      <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
     </InnerWrapper>
   );
 
@@ -249,7 +247,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           disabled={direction === "add"}
         ></input>
       </Column>
-      <EmojiInputLabel emoji={market ? `${market.symbol} LP` : "- LP"} />
+      <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol} LP` : "- LP"} />
     </InnerWrapper>
   );
 
@@ -310,14 +308,14 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                 if (!account) {
                   return;
                 }
-                const { emojicoin, emojicoinLP } = toCoinTypes(market!.marketAddress);
+                const { emojicoin, emojicoinLP } = toCoinTypes(market!.market.marketAddress);
                 let builderLambda: () => Promise<EntryFunctionTransactionBuilder>;
                 if (direction === "add") {
                   builderLambda = () =>
                     ProvideLiquidity.builder({
                       aptosConfig: aptos.config,
                       provider: account.address,
-                      marketAddress: market!.marketAddress,
+                      marketAddress: market!.market.marketAddress,
                       quoteAmount: unfmtCoin(liquidity ?? 0),
                       typeTags: [emojicoin, emojicoinLP],
                       minLpCoinsOut: 1n,
@@ -327,7 +325,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                     RemoveLiquidity.builder({
                       aptosConfig: aptos.config,
                       provider: account.address,
-                      marketAddress: market!.marketAddress,
+                      marketAddress: market!.market.marketAddress,
                       lpCoinAmount: unfmtCoin(lp),
                       typeTags: [emojicoin, emojicoinLP],
                       minQuoteOut: 1n,
@@ -354,7 +352,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
             <AptosInputLabel />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              {market ? fmtCoin(market.cpammRealReservesQuote) ?? loadingComponent : "-"}
+              {market ? fmtCoin(market.state.cpammRealReserves.quote) ?? loadingComponent : "-"}
             </Text>
           </Flex>
 
@@ -363,10 +361,10 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <EmojiInputLabel emoji={market ? market.symbol : "-"} />
+            <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              {market ? fmtCoin(market.cpammRealReservesBase) ?? loadingComponent : "-"}
+              {market ? fmtCoin(market.state.cpammRealReserves.base) ?? loadingComponent : "-"}
             </Text>
           </Flex>
         </StyledAddLiquidityWrapper>
