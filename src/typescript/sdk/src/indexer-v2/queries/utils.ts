@@ -25,7 +25,7 @@ type QueryFunction<
 type WithConfig<T> = T & { minimumVersion?: AnyNumberString };
 
 // This is primarily used for testing purposes, otherwise this interval might be too short.
-const POLLING_INTERVAL = 250;
+const POLLING_INTERVAL = 500;
 const POLLING_TIMEOUT = 5000;
 
 const extractRow = <T>(res: PostgrestSingleResponse<T>) => res.data;
