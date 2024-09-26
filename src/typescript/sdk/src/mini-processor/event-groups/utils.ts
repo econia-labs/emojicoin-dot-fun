@@ -1,9 +1,10 @@
+import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { rawPeriodToEnum } from "../../const";
 import {
   GuidGetters,
   type MarketMetadataModel,
   type StateEventData,
-  type TableModels,
+  type DatabaseModels,
   toTransactionMetadataForUserLiquidityPools,
   type TransactionMetadata,
 } from "../../indexer-v2/types";
@@ -17,8 +18,9 @@ import {
 } from "../../types";
 import { type ProcessorModelsFromResponse, type UserLiquidityPoolsMap } from ".";
 import { type AccountAddressString } from "../../emojicoin_dot_fun";
+import { getLPCoinBalanceFromWriteSet } from "../parse-write-set";
 
-const toChatEventData = (event: Types.ChatEvent): TableModels["chat_events"]["chat"] => ({
+const toChatEventData = (event: Types.ChatEvent): DatabaseModels["chat_events"]["chat"] => ({
   user: event.user,
   message: event.message,
   userEmojicoinBalance: event.userEmojicoinBalance,
@@ -28,13 +30,13 @@ const toChatEventData = (event: Types.ChatEvent): TableModels["chat_events"]["ch
 
 const toMarketRegistrationEventData = (
   event: Types.MarketRegistrationEvent
-): TableModels["market_registration_events"]["marketRegistration"] => ({
+): DatabaseModels["market_registration_events"]["marketRegistration"] => ({
   registrant: event.registrant,
   integrator: event.integrator,
   integratorFee: event.integratorFee,
 });
 
-const toSwapEventData = (event: Types.SwapEvent): TableModels["swap_events"]["swap"] => ({
+const toSwapEventData = (event: Types.SwapEvent): DatabaseModels["swap_events"]["swap"] => ({
   swapper: event.swapper,
   integrator: event.integrator,
   integratorFee: event.integratorFee,
@@ -55,7 +57,7 @@ const toSwapEventData = (event: Types.SwapEvent): TableModels["swap_events"]["sw
 
 const toLiquidityEventData = (
   event: Types.LiquidityEvent
-): TableModels["liquidity_events"]["liquidity"] => ({
+): DatabaseModels["liquidity_events"]["liquidity"] => ({
   provider: event.provider,
   baseAmount: event.baseAmount,
   quoteAmount: event.quoteAmount,
@@ -72,8 +74,9 @@ export const addModelsForBumpEvent = (args: {
   state: StateEventData;
   lastSwap: Types.LastSwap;
   event: BumpEvent;
+  response?: UserTransactionResponse; // If we're parsing the WriteSet.
 }) => {
-  const { rows, transaction, market, state, lastSwap, event } = args;
+  const { rows, transaction, market, state, lastSwap, event, response } = args;
   if (isChatEvent(event)) {
     rows.chatEvents.push({
       transaction,
@@ -92,7 +95,7 @@ export const addModelsForBumpEvent = (args: {
     });
   } else if (isLiquidityEvent(event)) {
     const liquidity = toLiquidityEventData(event);
-    const liquidityEventModel: TableModels["liquidity_events"] = {
+    const liquidityEventModel: DatabaseModels["liquidity_events"] = {
       transaction,
       market,
       state,
@@ -105,10 +108,17 @@ export const addModelsForBumpEvent = (args: {
 
     const key = [event.provider, event.marketID] as [AccountAddressString, bigint];
     const currPool = rows.userPools.get(key);
-    const newPool: TableModels["user_liquidity_pools"] = {
+    const newPool: DatabaseModels["user_liquidity_pools"] = {
       transaction: toTransactionMetadataForUserLiquidityPools(transaction),
       liquidity,
       market,
+      lpCoinBalance: response
+        ? getLPCoinBalanceFromWriteSet({
+            response,
+            symbolBytes: market.symbolData.bytes,
+            userAddress: liquidity.provider,
+          })
+        : 0n,
     };
 
     if (!currPool || currPool.market.marketNonce < newPool.market.marketNonce) {
@@ -132,7 +142,7 @@ export const toPeriodicStateEventData = (args: {
   market: MarketMetadataModel;
   stateEvent: Types.StateEvent;
   periodicStateEvent: Types.PeriodicStateEvent;
-}): TableModels["periodic_state_events"] => {
+}): DatabaseModels["periodic_state_events"] => {
   const { transaction, market, stateEvent, periodicStateEvent: event } = args;
   const period = rawPeriodToEnum(event.periodicStateMetadata.period);
   return {

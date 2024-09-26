@@ -1,7 +1,7 @@
 import { type SymbolString } from "@/store/event/types";
 import { type MarketSymbolEmojis } from "@sdk/emoji_data";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import { type MarketMetadataModel, type TableModels } from "@sdk/indexer-v2/types";
+import { type MarketMetadataModel, type DatabaseModels } from "@sdk/indexer-v2/types";
 import { type Types } from "@sdk/types";
 
 export interface WithVersion {
@@ -9,9 +9,9 @@ export interface WithVersion {
 }
 type DataProps = MarketMetadataModel & {
   symbol: SymbolString;
-  swaps: Array<TableModels["swap_events"]>;
-  chats: Array<TableModels["chat_events"]>;
-  state: TableModels["market_state"];
+  swaps: Array<DatabaseModels["swap_events"]>;
+  chats: Array<DatabaseModels["chat_events"]>;
+  state: DatabaseModels["market_state"];
   marketView: Types.MarketView;
 };
 

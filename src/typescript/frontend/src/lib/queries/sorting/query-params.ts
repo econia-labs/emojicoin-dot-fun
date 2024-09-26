@@ -1,6 +1,6 @@
 import { type OrderByStrings } from "@sdk/queries/const";
 import { toMarketDataSortByHomePage, type SortByPageQueryParams } from "./types";
-import { safeParsePage } from "lib/routes/home-page-params";
+import { safeParsePageWithDefault } from "lib/routes/home-page-params";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 
 export type HomePageSearchParams = {
@@ -47,7 +47,7 @@ export const constructURLForHomePage = ({
   newURL.searchParams.delete("sort");
   newURL.searchParams.delete("q");
 
-  const safePage = safeParsePage((page ?? 1).toString());
+  const safePage = safeParsePageWithDefault((page ?? 1).toString());
   if (safePage !== 1) {
     newURL.searchParams.set("page", safePage.toString());
   }

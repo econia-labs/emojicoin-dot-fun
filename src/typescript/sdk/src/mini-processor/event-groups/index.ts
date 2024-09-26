@@ -9,7 +9,7 @@ import {
   GuidGetters,
   type MarketMetadataModel,
   type StateEventData,
-  type TableModels,
+  type DatabaseModels,
   type TransactionMetadata,
 } from "../../indexer-v2/types";
 import {
@@ -25,25 +25,25 @@ import { addModelsForBumpEvent, toPeriodicStateEventData } from "./utils";
 import { type Events } from "../../emojicoin_dot_fun/events";
 
 export type BumpEventModel =
-  | TableModels["chat_events"]
-  | TableModels["market_registration_events"]
-  | TableModels["swap_events"]
-  | TableModels["liquidity_events"];
+  | DatabaseModels["chat_events"]
+  | DatabaseModels["market_registration_events"]
+  | DatabaseModels["swap_events"]
+  | DatabaseModels["liquidity_events"];
 
 export type ProcessorModelsFromResponse = {
   transaction: TxnInfo;
-  chatEvents: Array<TableModels["chat_events"]>;
-  liquidityEvents: Array<TableModels["liquidity_events"]>;
-  marketRegistrationEvents: Array<TableModels["market_registration_events"]>;
-  periodicStateEvents: Array<TableModels["periodic_state_events"]>;
-  swapEvents: Array<TableModels["swap_events"]>;
-  userPools: Array<TableModels["user_liquidity_pools"]>;
-  marketLatestStateEvents: Array<TableModels["market_latest_state_event"]>;
+  chatEvents: Array<DatabaseModels["chat_events"]>;
+  liquidityEvents: Array<DatabaseModels["liquidity_events"]>;
+  marketRegistrationEvents: Array<DatabaseModels["market_registration_events"]>;
+  periodicStateEvents: Array<DatabaseModels["periodic_state_events"]>;
+  swapEvents: Array<DatabaseModels["swap_events"]>;
+  userPools: Array<DatabaseModels["user_liquidity_pools"]>;
+  marketLatestStateEvents: Array<DatabaseModels["market_latest_state_event"]>;
 };
 
 export type UserLiquidityPoolsMap = Map<
   [AccountAddressString, bigint],
-  TableModels["user_liquidity_pools"]
+  DatabaseModels["user_liquidity_pools"]
 >;
 
 /**
@@ -93,13 +93,13 @@ export function getEventsAsProcessorModels(
   // All the rows that the processor would insert into the database for this transaction.
   const rows = {
     transaction: txnInfo,
-    chatEvents: new Array<TableModels["chat_events"]>(),
-    liquidityEvents: new Array<TableModels["liquidity_events"]>(),
-    marketRegistrationEvents: new Array<TableModels["market_registration_events"]>(),
-    periodicStateEvents: new Array<TableModels["periodic_state_events"]>(),
-    swapEvents: new Array<TableModels["swap_events"]>(),
+    chatEvents: new Array<DatabaseModels["chat_events"]>(),
+    liquidityEvents: new Array<DatabaseModels["liquidity_events"]>(),
+    marketRegistrationEvents: new Array<DatabaseModels["market_registration_events"]>(),
+    periodicStateEvents: new Array<DatabaseModels["periodic_state_events"]>(),
+    swapEvents: new Array<DatabaseModels["swap_events"]>(),
     userPools,
-    marketLatestStateEvents: Array<TableModels["market_latest_state_event"]>(),
+    marketLatestStateEvents: Array<DatabaseModels["market_latest_state_event"]>(),
   };
 
   for (const builder of builders.values()) {
@@ -142,6 +142,7 @@ export function getEventsAsProcessorModels(
       state,
       lastSwap,
       event: bumpEvent,
+      response,
     });
 
     // Create fake data if we're generating an event- otherwise, use the transaction response
@@ -159,7 +160,7 @@ export function getEventsAsProcessorModels(
     // Convert the eventGroup data to the processor's `latest market state event` model.
     // Note we skip the check for the latest market resource, since we're only processing
     // a single transaction at a time instead of a batch of them (like the processor does).
-    const marketLatestStateEvent: TableModels["market_latest_state_event"] = {
+    const marketLatestStateEvent: DatabaseModels["market_latest_state_event"] = {
       transaction,
       market,
       state,

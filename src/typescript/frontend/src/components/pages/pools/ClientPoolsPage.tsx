@@ -22,7 +22,9 @@ import { useEmojiPicker } from "context/emoji-picker-context";
 import { useSearchParams } from "next/navigation";
 import { encodeEmojis, getEmojisInString, type MarketSymbolEmojis } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
-import { type MarketStateModel } from "@sdk/indexer-v2/types";
+import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
+
+export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
 export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const searchParams = useSearchParams();
@@ -31,7 +33,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked 
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(poolParam ? 0 : undefined);
   const [page, setPage] = useState<number>(1);
-  const [markets, setMarkets] = useState<MarketStateModel[]>([]);
+  const [markets, setMarkets] = useState<PoolsData[]>([]);
   const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
   const [pools, setPools] = useState<"all" | "mypools">("all");
   const [realEmojis, setRealEmojis] = useState(getEmojisInString(poolParam ?? ""));
@@ -51,20 +53,27 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked 
   }, [emojis]);
 
   useEffect(() => {
-    const root = "/pools/api";
-    const sortByQuery = `sortby=${sortBy}`;
-    const orderByQuery = `orderby=${orderBy}`;
-    const pageQuery = `page=${page}`;
-    const accountQuery = pools === "mypools" ? `&account=${account?.address}` : "";
-    const searchBytes = realEmojis.length > 0 ? `&searchBytes=${encodeEmojis(realEmojis)}` : "";
-    fetch(`${root}?${sortByQuery}&${orderByQuery}&${pageQuery}${accountQuery}${searchBytes}`)
+    const poolsAPI = "/pools/api";
+    const params = new URLSearchParams({
+      sortby: sortBy,
+      orderby: orderBy,
+      page: page.toString(),
+    });
+    if (pools === "mypools" && account?.address) {
+      params.set("account", account.address);
+    }
+    if (realEmojis.length) {
+      params.set("searchBytes", encodeEmojis(realEmojis));
+    }
+    const url = `${poolsAPI}?${params.toString()}`;
+    fetch(url)
       .then((res) => res.text())
-      .then((txt) => parseJSON(txt))
+      .then((txt) => parseJSON(txt) as PoolsData[])
       .then((data) => {
-        if (data.markets.length < MARKETS_PER_PAGE) {
+        if (data.length < MARKETS_PER_PAGE) {
           setAllDataIsLoaded(true);
         }
-        setMarkets((markets) => (page === 1 ? [...data.markets] : [...markets, ...data.markets]));
+        setMarkets((markets) => (page === 1 ? [...data] : [...markets, ...data]));
       });
   }, [page, orderBy, sortBy, account, pools, realEmojis]);
 

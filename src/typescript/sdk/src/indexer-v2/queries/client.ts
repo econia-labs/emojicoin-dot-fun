@@ -2,7 +2,7 @@ import "server-only";
 
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { stringifyParsedBigInts } from "../json-bigint";
-import { type TableName } from "../types/snake-case-types";
+import { type TableName } from "../types/json-types";
 import { EMOJICOIN_INDEXER_URL } from "../../server-env";
 
 /**

@@ -1,6 +1,6 @@
 import { parseJSONWithBigInts } from "../indexer-v2/json-bigint";
 import { type AnyEventModel } from "../indexer-v2/types";
-import { type AnyEventDatabaseRow } from "../indexer-v2/types/snake-case-types";
+import { type AnyEventDatabaseRow } from "../indexer-v2/types/json-types";
 import { type AnyNumberString } from "../types";
 import { ensureArray } from "../utils/misc";
 import { type BrokerEvent, type BrokerMessage, brokerMessageConverter } from "./types";

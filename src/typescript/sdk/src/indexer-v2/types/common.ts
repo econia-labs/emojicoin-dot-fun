@@ -1,4 +1,4 @@
-import { Period } from "../../const";
+import { type Period } from "../../const";
 import { type OrderBy } from "../../queries/const";
 
 export enum SortMarketsBy {
@@ -11,15 +11,16 @@ export enum SortMarketsBy {
   Tvl = "tvl",
 }
 
-export type DefaultQueryArgs = {
+export type MarketStateQueryArgs = {
   sortBy?: SortMarketsBy;
   page?: number;
   limit?: number;
   orderBy?: OrderBy;
   searchEmojis?: string[];
+  inBondingCurve?: boolean;
 };
 
 export type PeriodicStateEventQueryArgs = {
   offset: number;
   period: Period;
-} & Omit<DefaultQueryArgs, "page" | "searchEmojis" | "sortBy" | "orderBy">;
+} & Omit<MarketStateQueryArgs, "page" | "searchEmojis" | "sortBy" | "orderBy">;

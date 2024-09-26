@@ -9,7 +9,7 @@ import {
   toMarketLatestStateEventModel,
   toSwapEventModel,
 } from "../types";
-import { TableName } from "../types/snake-case-types";
+import { TableName } from "../types/json-types";
 import { postgrest } from "./client";
 import { queryHelper } from "./utils";
 

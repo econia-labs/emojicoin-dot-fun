@@ -1,11 +1,11 @@
 import {
-  type TableModels,
+  type DatabaseModels,
   type AnyEventModel,
   type MarketLatestStateEventModel,
   type MarketRegistrationEventModel,
   type GlobalStateEventModel,
 } from "@sdk/indexer-v2/types";
-import { type TableName } from "@sdk/indexer-v2/types/snake-case-types";
+import { type TableName } from "@sdk/indexer-v2/types/json-types";
 import { LOCALSTORAGE_EXPIRY_TIME_MS } from "const";
 import { parseJSON, stringifyJSON } from "utils";
 import { type MarketEventStore, type EventState, type SymbolString } from "./types";
@@ -27,13 +27,13 @@ export const addToLocalStorage = <T extends AnyEventModel>(event: T) => {
 };
 
 type EventArraysByModelType = {
-  Swap: Array<TableModels[TableName.SwapEvents]>;
-  Chat: Array<TableModels[TableName.ChatEvents]>;
-  MarketRegistration: Array<TableModels[TableName.MarketRegistrationEvents]>;
-  PeriodicState: Array<TableModels[TableName.PeriodicStateEvents]>;
-  State: Array<TableModels[TableName.MarketLatestStateEvent]>;
-  GlobalState: Array<TableModels[TableName.GlobalStateEvents]>;
-  Liquidity: Array<TableModels[TableName.LiquidityEvents]>;
+  Swap: Array<DatabaseModels[TableName.SwapEvents]>;
+  Chat: Array<DatabaseModels[TableName.ChatEvents]>;
+  MarketRegistration: Array<DatabaseModels[TableName.MarketRegistrationEvents]>;
+  PeriodicState: Array<DatabaseModels[TableName.PeriodicStateEvents]>;
+  State: Array<DatabaseModels[TableName.MarketLatestStateEvent]>;
+  GlobalState: Array<DatabaseModels[TableName.GlobalStateEvents]>;
+  Liquidity: Array<DatabaseModels[TableName.LiquidityEvents]>;
 };
 
 const emptyEventArraysByModelType: () => EventArraysByModelType = () => ({
@@ -47,11 +47,11 @@ const emptyEventArraysByModelType: () => EventArraysByModelType = () => ({
 });
 
 type MarketEventTypes =
-  | TableModels["swap_events"]
-  | TableModels["chat_events"]
+  | DatabaseModels["swap_events"]
+  | DatabaseModels["chat_events"]
   | MarketLatestStateEventModel
-  | TableModels["liquidity_events"]
-  | TableModels["periodic_state_events"];
+  | DatabaseModels["liquidity_events"]
+  | DatabaseModels["periodic_state_events"];
 
 export const initialStateFromLocalStorage = (): EventState => {
   // Purge stale events then load up the remaining ones.

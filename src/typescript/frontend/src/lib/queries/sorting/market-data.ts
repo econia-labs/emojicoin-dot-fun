@@ -37,7 +37,6 @@
 //   }));
 // };
 
-
 // type GetMyPoolsArgs = {
 //   page: number;
 //   account: string;

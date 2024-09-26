@@ -1,8 +1,8 @@
 "use server";
 
-import { Period } from "../../../const";
+import { type Period } from "../../../const";
 import { LIMIT } from "../../../queries/const";
-import { PeriodicStateEventModel } from "../../types";
+import { type PeriodicStateEventModel } from "../../types";
 import { fetchPeriodicEventsSince } from "./market";
 
 /**
@@ -19,6 +19,7 @@ import { fetchPeriodicEventsSince } from "./market";
  * @param fetchDelay Optional delay in milliseconds between each fetch request.
  * @returns an Array<PeriodicStateEventModel>.
  */
+/* eslint-disable-next-line import/no-unused-modules */
 export async function fetchAllCandlesticksInTimeRange(args: {
   marketID: string;
   start: Date;
@@ -31,10 +32,12 @@ export async function fetchAllCandlesticksInTimeRange(args: {
   const aggregate: PeriodicStateEventModel[] = [];
   let keepFetching = true;
 
+  /* eslint-disable consistent-return */
   const fetchData = async (
     resolve: (value: PeriodicStateEventModel[] | PromiseLike<PeriodicStateEventModel[]>) => void,
     reject: (reason?: string | Error) => void
   ) => {
+    /* eslint-enable consistent-return */
     if (!keepFetching) {
       return resolve(aggregate);
     }
@@ -46,8 +49,9 @@ export async function fetchAllCandlesticksInTimeRange(args: {
         offset: aggregate.length,
         limit,
       });
-      keepFetching = data.length === limit;
-      aggregate.push(...data);
+      const filtered = data.filter((d) => d.transaction.timestamp.getTime() <= end.getTime());
+      keepFetching = filtered.length === limit;
+      aggregate.push(...filtered);
 
       setTimeout(() => fetchData(resolve, reject), fetchDelay);
     } catch (err) {

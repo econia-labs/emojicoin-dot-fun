@@ -3,20 +3,20 @@ import { type MarketSymbolEmojis } from "@sdk/emoji_data";
 import {
   type MarketMetadataModel,
   type AnyEventModel,
-  type TableModels,
+  type DatabaseModels,
 } from "@sdk/indexer-v2/types";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type LatestBar } from "./candlestick-bars";
 
 // Aliased to avoid repeating the type names over and over.
-type Swap = TableModels["swap_events"];
-type Chat = TableModels["chat_events"];
-type MarketRegistration = TableModels["market_registration_events"];
-type PeriodicState = TableModels["periodic_state_events"];
-type MarketLatestStateEvent = TableModels["market_latest_state_event"];
-type Liquidity = TableModels["liquidity_events"];
-type GlobalState = TableModels["global_state_events"];
-type MarketLatestState = TableModels["market_state"];
+type Swap = DatabaseModels["swap_events"];
+type Chat = DatabaseModels["chat_events"];
+type MarketRegistration = DatabaseModels["market_registration_events"];
+type PeriodicState = DatabaseModels["periodic_state_events"];
+type MarketLatestStateEvent = DatabaseModels["market_latest_state_event"];
+type Liquidity = DatabaseModels["liquidity_events"];
+type GlobalState = DatabaseModels["global_state_events"];
+type MarketLatestState = DatabaseModels["market_state"];
 
 export type SymbolString = string;
 
@@ -64,7 +64,7 @@ export type SetLatestBarsArgs = {
 export type EventActions = {
   getMarket: (m: MarketSymbolEmojis) => undefined | Readonly<MarketEventStore>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
-  loadMarketStateFromServer: (states: Array<TableModels["market_state"]>) => void;
+  loadMarketStateFromServer: (states: Array<DatabaseModels["market_state"]>) => void;
   loadEventsFromServer: (events: Array<AnyEventModel>) => void;
   pushEventFromClient: (event: AnyEventModel) => void;
   setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => void;

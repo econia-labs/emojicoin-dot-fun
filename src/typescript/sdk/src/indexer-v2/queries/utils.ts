@@ -7,10 +7,10 @@ import {
 } from "@supabase/postgrest-js";
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
-import { type DatabaseRow, TableName } from "../types/snake-case-types";
+import { type DatabaseType, TableName } from "../types/json-types";
 import { toAccountAddress } from "../../utils";
 import { postgrest } from "./client";
-import { type TableModels } from "../types";
+import { type DatabaseModels } from "../types";
 
 type EnumLiteralType<T extends TableName> = T extends TableName ? `${T}` : never;
 
@@ -112,8 +112,8 @@ export function queryHelper<
 
 export function queryHelperSingle<
   T extends TableName,
-  Row extends DatabaseRow[T],
-  Model extends TableModels[T],
+  Row extends DatabaseType[T],
+  Model extends DatabaseModels[T],
   QueryArgs extends Record<string, any> | undefined,
 >(queryFn: (args: QueryArgs) => PostgrestBuilder<Row>, convert: (row: Row) => Model) {
   const query = async (args: WithConfig<QueryArgs>) => {

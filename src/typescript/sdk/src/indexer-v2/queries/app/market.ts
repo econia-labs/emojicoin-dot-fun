@@ -1,10 +1,9 @@
 import "server-only";
 
 import { type PostgrestBuilder } from "@supabase/postgrest-js";
-import { type Period } from "../../../const";
-import { LIMIT, ORDER_BY, OrderBy } from "../../../queries";
+import { LIMIT, ORDER_BY } from "../../../queries";
 import { type AnyNumberString } from "../../../types";
-import { type DatabaseRow, TableName } from "../../types/snake-case-types";
+import { type DatabaseType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
 import {
@@ -13,14 +12,14 @@ import {
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
-import { PeriodicStateEventQueryArgs, type DefaultQueryArgs } from "../../types/common";
+import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
 import { type MarketSymbolEmojis } from "../../../emoji_data";
 
 const selectSwapsByMarketID = ({
   marketID,
   page = 1,
   limit = LIMIT,
-}: { marketID: AnyNumberString } & DefaultQueryArgs) =>
+}: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.SwapEvents)
     .select("*")
@@ -33,7 +32,7 @@ const selectChatsByMarketID = ({
   marketID,
   page = 1,
   limit = LIMIT,
-}: { marketID: AnyNumberString } & DefaultQueryArgs) =>
+}: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.ChatEvents)
     .select("*")
@@ -71,7 +70,7 @@ const selectMarketState = ({ marketEmojis }: { marketEmojis: MarketSymbolEmojis 
     .select("*")
     .eq("symbol_emojis", toQueryArray(marketEmojis))
     .limit(1)
-    .single() as PostgrestBuilder<DatabaseRow["market_state"]>;
+    .single() as PostgrestBuilder<DatabaseType["market_state"]>;
 
 export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);

@@ -1,7 +1,7 @@
 import { AccountAddress, APTOS_COIN, parseTypeTag } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import { type ValueOf } from "./utils/utility-types";
-import { type DatabaseDataTypes } from "./indexer-v2/types/snake-case-types";
+import { type DatabaseDataTypes } from "./indexer-v2/types/json-types";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS || !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {

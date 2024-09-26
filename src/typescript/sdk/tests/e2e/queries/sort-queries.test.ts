@@ -15,7 +15,7 @@ import { waitForEmojicoinIndexer, queryHelper } from "../../../src/indexer-v2/qu
 import { Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../utils";
 import { postgrest } from "../../../src/indexer-v2/queries/client";
-import { TableName } from "../../../src/indexer-v2/types/snake-case-types";
+import { TableName } from "../../../src/indexer-v2/types/json-types";
 import { LIMIT } from "../../../src/queries";
 import { type MarketStateModel, toMarketState } from "../../../src/indexer-v2/types";
 import { fetchMarkets } from "../../../src/indexer-v2/queries/app/home";

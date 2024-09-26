@@ -1,7 +1,7 @@
-import { type MarketStateModel } from "@sdk/indexer-v2/types";
+import { type PoolsData } from "components/pages/pools/ClientPoolsPage";
 
 export type TableRowDesktopProps = {
-  item: MarketStateModel;
+  item: PoolsData;
   selected?: boolean;
   onClick?: React.MouseEventHandler<HTMLTableRowElement> | undefined;
 };

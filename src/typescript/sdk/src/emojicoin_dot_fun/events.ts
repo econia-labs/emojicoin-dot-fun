@@ -10,23 +10,9 @@ import {
   toPeriodicStateEvent,
   toStateEvent,
   toSwapEvent,
-  isChatEvent,
-  isGlobalStateEvent,
-  isLiquidityEvent,
-  isMarketRegistrationEvent,
-  isPeriodicStateEvent,
-  isStateEvent,
-  isSwapEvent,
-  type AnyHomogenousEvent,
 } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { type AnyEmojicoinJSONEvent } from "../types/json-types";
-import { type PeriodDuration } from "../const";
-import {
-  type GroupedPeriodicStateEvents,
-  createEmptyGroupedCandlesticks,
-  isGroupedCandlesticks,
-} from "../queries/client-utils/candlestick";
 
 export type Events = {
   swapEvents: Types.SwapEvent[];

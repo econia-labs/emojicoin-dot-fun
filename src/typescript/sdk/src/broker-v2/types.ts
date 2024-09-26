@@ -1,5 +1,5 @@
-import { type AnyEventModel, TableConverter } from "../indexer-v2/types";
-import { type AnyEventDatabaseRow, TableName } from "../indexer-v2/types/snake-case-types";
+import { type AnyEventModel, DatabaseTypeConverter } from "../indexer-v2/types";
+import { type AnyEventDatabaseRow, TableName } from "../indexer-v2/types/json-types";
 
 export type BrokerEvent =
   | "Chat"
@@ -11,13 +11,13 @@ export type BrokerEvent =
   | "MarketRegistration";
 
 export const brokerMessageConverter: Record<BrokerEvent, (data: any) => AnyEventModel> = {
-  Chat: (d) => TableConverter[TableName.ChatEvents](d),
-  Swap: (d) => TableConverter[TableName.SwapEvents](d),
-  Liquidity: (d) => TableConverter[TableName.LiquidityEvents](d),
-  MarketLatestState: (d) => TableConverter[TableName.MarketLatestStateEvent](d),
-  GlobalState: (d) => TableConverter[TableName.GlobalStateEvents](d),
-  PeriodicState: (d) => TableConverter[TableName.PeriodicStateEvents](d),
-  MarketRegistration: (d) => TableConverter[TableName.MarketRegistrationEvents](d),
+  Chat: (d) => DatabaseTypeConverter[TableName.ChatEvents](d),
+  Swap: (d) => DatabaseTypeConverter[TableName.SwapEvents](d),
+  Liquidity: (d) => DatabaseTypeConverter[TableName.LiquidityEvents](d),
+  MarketLatestState: (d) => DatabaseTypeConverter[TableName.MarketLatestStateEvent](d),
+  GlobalState: (d) => DatabaseTypeConverter[TableName.GlobalStateEvents](d),
+  PeriodicState: (d) => DatabaseTypeConverter[TableName.PeriodicStateEvents](d),
+  MarketRegistration: (d) => DatabaseTypeConverter[TableName.MarketRegistrationEvents](d),
 };
 
 /**

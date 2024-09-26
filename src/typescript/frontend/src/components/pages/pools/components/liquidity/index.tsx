@@ -27,10 +27,10 @@ import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-
 import { TypeTag } from "@aptos-labs/ts-sdk";
 import Info from "components/info";
 import { type AnyNumberString } from "@sdk/types/types";
-import { type MarketStateModel } from "@sdk/indexer-v2/types";
+import { type PoolsData } from "../../ClientPoolsPage";
 
 type LiquidityProps = {
-  market: MarketStateModel | undefined;
+  market: PoolsData | undefined;
   geoblocked: boolean;
 };
 

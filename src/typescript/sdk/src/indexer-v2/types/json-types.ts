@@ -258,13 +258,13 @@ export type DatabaseDataTypes = {
 };
 
 export type AnyEventDatabaseRow =
-  | DatabaseRow["global_state_events"]
-  | DatabaseRow["periodic_state_events"]
-  | DatabaseRow["market_registration_events"]
-  | DatabaseRow["swap_events"]
-  | DatabaseRow["chat_events"]
-  | DatabaseRow["liquidity_events"]
-  | DatabaseRow["market_latest_state_event"];
+  | DatabaseType["global_state_events"]
+  | DatabaseType["periodic_state_events"]
+  | DatabaseType["market_registration_events"]
+  | DatabaseType["swap_events"]
+  | DatabaseType["chat_events"]
+  | DatabaseType["liquidity_events"]
+  | DatabaseType["market_latest_state_event"];
 
 // Technically some of these are views, but may as well be tables in the context of the indexer.
 export enum TableName {
@@ -282,7 +282,22 @@ export enum TableName {
   ProcessorStatus = "processor_status",
 }
 
-export type DatabaseRow = {
+export enum DatabaseRPC {
+  UserPools = "user_pools",
+}
+
+// Fields that only exist after being processed by a processor.
+export type ProcessedFields = {
+  daily_tvl_per_lp_coin_growth_q64: Uint128String;
+  in_bonding_curve: boolean;
+  volume_in_1m_state_tracker: Uint128String;
+};
+
+type UserLPCoinBalance = {
+  lp_coin_balance: Uint64String;
+};
+
+export type DatabaseType = {
   [TableName.GlobalStateEvents]: Flatten<TransactionMetadata & GlobalStateEventData>;
   [TableName.PeriodicStateEvents]: Flatten<
     TransactionMetadata &
@@ -304,18 +319,13 @@ export type DatabaseRow = {
     TransactionMetadata & MarketAndStateMetadata & ChatEventData & StateEventData
   >;
   [TableName.MarketLatestStateEvent]: Flatten<
-    TransactionMetadata &
-      MarketAndStateMetadata &
-      StateEventData & {
-        daily_tvl_per_lp_coin_growth_q64: Uint128String;
-        in_bonding_curve: boolean;
-        volume_in_1m_state_tracker: Uint128String;
-      }
+    TransactionMetadata & MarketAndStateMetadata & StateEventData & ProcessedFields
   >;
   [TableName.UserLiquidityPools]: Flatten<
     Omit<TransactionMetadata, "sender" | "entry_function"> &
       WithEmitTime<MarketAndStateMetadata> &
-      LiquidityEventData
+      LiquidityEventData &
+      UserLPCoinBalance
   >;
   [TableName.MarketDailyVolume]: {
     market_id: Uint64String;
@@ -329,10 +339,17 @@ export type DatabaseRow = {
     volume: Uint128String;
     start_time: PostgresTimestamp;
   };
-  [TableName.MarketState]: DatabaseRow["market_latest_state_event"] & {
+  [TableName.MarketState]: DatabaseType["market_latest_state_event"] & {
     daily_volume: Uint128String;
   };
   [TableName.ProcessorStatus]: {
     last_processed_timestamp: PostgresTimestamp;
   };
+  [DatabaseRPC.UserPools]: Flatten<
+    TransactionMetadata &
+      MarketAndStateMetadata &
+      StateEventData &
+      ProcessedFields &
+      UserLPCoinBalance
+  >;
 };

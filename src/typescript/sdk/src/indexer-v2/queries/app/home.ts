@@ -1,35 +1,15 @@
 import "server-only";
 
 import { LIMIT, ORDER_BY } from "../../../queries/const";
-import { SortMarketsBy, type DefaultQueryArgs } from "../../types/common";
-import { type DatabaseRow, TableName } from "../../types/snake-case-types";
+import { SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
+import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { getLatestProcessedVersionByTable, queryHelper } from "../utils";
-import { TableConverter } from "../../types";
+import { DatabaseTypeConverter } from "../../types";
 import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
 import { toRegistryView } from "../../../types";
-
-const sortByToColumnName = (sortBy: SortMarketsBy): keyof DatabaseRow["market_state"] => {
-  switch (sortBy) {
-    case SortMarketsBy.AllTimeVolume:
-      return "cumulative_stats_quote_volume";
-    case SortMarketsBy.BumpOrder:
-      return "bump_time";
-    case SortMarketsBy.MarketCap:
-      return "instantaneous_stats_market_cap";
-    case SortMarketsBy.DailyVolume:
-      return "daily_volume";
-    case SortMarketsBy.Price:
-      return "last_swap_avg_execution_price_q64";
-    case SortMarketsBy.Apr:
-      return "daily_tvl_per_lp_coin_growth_q64";
-    case SortMarketsBy.Tvl:
-      return "instantaneous_stats_total_value_locked";
-    default:
-      throw new Error(`Got invalid "sortBy" argument: ${sortBy}`);
-  }
-};
+import { sortByWithFallback } from "../query-params";
 
 const selectMarketStates = ({
   page = 1,
@@ -37,22 +17,33 @@ const selectMarketStates = ({
   orderBy = ORDER_BY.DESC,
   searchEmojis,
   sortBy = SortMarketsBy.MarketCap,
-}: DefaultQueryArgs) => {
+  inBondingCurve,
+}: MarketStateQueryArgs) => {
   let query = postgrest
     .from(TableName.MarketState)
     .select("*")
-    .order(sortByToColumnName(sortBy), orderBy)
-    .range((page - 1) * limit, page * limit - 1)
+    .order(sortByWithFallback(sortBy), orderBy)
     .limit(limit);
+
+  if (page !== 1) {
+    query = query.range((page - 1) * limit, page * limit - 1);
+  }
 
   if (searchEmojis && searchEmojis.length) {
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
   }
 
+  if (typeof inBondingCurve === "boolean") {
+    query = query.eq("in_bonding_curve", inBondingCurve);
+  }
+
   return query;
 };
 
-export const fetchMarkets = queryHelper(selectMarketStates, TableConverter[TableName.MarketState]);
+export const fetchMarkets = queryHelper(
+  selectMarketStates,
+  DatabaseTypeConverter[TableName.MarketState]
+);
 
 // The featured market is simply the current highest daily volume market.
 export const fetchFeaturedMarket = async () =>

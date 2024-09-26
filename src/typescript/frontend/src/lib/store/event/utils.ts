@@ -6,13 +6,13 @@ import {
   type MarketMetadataModel,
   type PeriodicStateEventModel,
   type SwapEventModel,
-  type TableModels,
+  type DatabaseModels,
 } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from "./candlestick-bars";
 import { q64ToBig } from "@sdk/utils/nominal-price";
 
-type PeriodicState = TableModels["periodic_state_events"];
+type PeriodicState = DatabaseModels["periodic_state_events"];
 
 export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
   candlesticks: [] as PeriodicState[],

@@ -62,9 +62,11 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               color="lightGray"
               textTransform="uppercase"
               ellipsis
-              title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
+              // title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
+              title={"<TODO>"}
             >
-              {toCoinDecimalString(item.dailyVolume, 2)} APT
+              {/* {toCoinDecimalString(item.dailyVolume, 2)} APT */}
+              {"<TODO>"}
             </Text>
           </Flex>
         </Td>

@@ -14,10 +14,10 @@ import { getEmptyListTr } from "utils";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import type { OrderByStrings } from "@sdk/queries/const";
 import useElementDimensions from "@hooks/use-element-dimensions";
-import { type MarketStateModel } from "@sdk/indexer-v2/types";
+import { type PoolsData } from "../../ClientPoolsPage";
 
 export interface PoolsTableProps {
-  data: MarketStateModel[];
+  data: PoolsData[];
   index: number | undefined;
   sortBy: (sortBy: SortByPageQueryParams) => void;
   orderBy: (orderBy: OrderByStrings) => void;

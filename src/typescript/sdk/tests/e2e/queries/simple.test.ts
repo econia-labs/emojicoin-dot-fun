@@ -9,7 +9,7 @@ import {
 import { getAptosClient } from "../../utils";
 import RowEqualityChecks from "./equality-checks";
 import { queryHelper } from "../../../src/indexer-v2/queries/utils";
-import { TableName } from "../../../src/indexer-v2/types/snake-case-types";
+import { TableName } from "../../../src/indexer-v2/types/json-types";
 import { getFundedAccounts } from "../../utils/test-accounts";
 import { postgrest } from "../../../src/indexer-v2/queries/client";
 import { fetchLatestStateEventForMarket, fetchLiquidityEvents } from ".";
