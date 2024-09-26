@@ -4,7 +4,7 @@ parameters:
   DeployAlb: 'false'
   DeployAlbDnsRecord: 'false'
   DeployBastionHost: 'true'
-  DeployBroker: 'true'
+  DeployBroker: 'false'
   DeployContainers: 'true'
   DeployDb: 'true'
   DeployNlb: 'true'
