@@ -26,9 +26,9 @@ import {
   getTrackerFromWriteSet,
 } from "./helpers";
 import {
-  fetchAllSwapsBySwapper,
   fetchDailyVolumeForMarket,
   fetchMarket1MPeriodsInLastDay,
+  fetchSwapEventsBySwapper,
 } from ".";
 
 // We need a long timeout because the test must wait for the 1-minute period to expire.
@@ -224,9 +224,15 @@ describe("queries swap_events and returns accurate swap row data", () => {
 
     // Check volume by user.
     const swapsQueries = swappersAndVolumes.map(async ([swapper]) => {
-      const userSwaps = await fetchAllSwapsBySwapper({ swapper, minimumVersion: highestVersion });
-      const swapperVolume = sum(userSwaps.map(({ swap }) => swap.quoteVolume));
-      return [swapper, userSwaps.length, swapperVolume] as const;
+      const swaps = await fetchSwapEventsBySwapper({
+        swapper,
+        minimumVersion: highestVersion,
+      });
+      const swapperVolume = sumByKey(
+        swaps.map(({ swap }) => swap),
+        "quoteVolume"
+      );
+      return [swapper, swaps.length, swapperVolume] as const;
     });
 
     await Promise.all(swapsQueries).then((queryResults) =>

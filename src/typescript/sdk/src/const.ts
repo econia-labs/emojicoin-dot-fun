@@ -1,7 +1,7 @@
 import { AccountAddress, APTOS_COIN, parseTypeTag } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import { type ValueOf } from "./utils/utility-types";
-import { type DatabaseDataTypes } from "./indexer-v2/types/json-types";
+import { type DatabaseStructType } from "./indexer-v2/types/json-types";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS || !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {
@@ -83,7 +83,7 @@ export enum Trigger {
   Chat = "chat",
 }
 
-export const toPeriod = (s: DatabaseDataTypes["PeriodicStateMetadata"]["period"]) =>
+export const toPeriod = (s: DatabaseStructType["PeriodicStateMetadata"]["period"]) =>
   ({
     // From the database.
     period_1m: Period.Period1M,
@@ -106,7 +106,7 @@ export const toPeriod = (s: DatabaseDataTypes["PeriodicStateMetadata"]["period"]
     throw new Error(`Unknown period: ${s}`);
   })();
 
-export const toTrigger = (s: DatabaseDataTypes["GlobalStateEventData"]["trigger"]) =>
+export const toTrigger = (s: DatabaseStructType["GlobalStateEventData"]["trigger"]) =>
   ({
     // From the database.
     package_publication: Trigger.PackagePublication,

@@ -1,6 +1,5 @@
 import { hexToBytes } from "@noble/hashes/utils";
 import {
-  deriveEmojicoinPublisherAddress,
   type Uint64String,
   type AccountAddressString,
   type HexString,
@@ -15,13 +14,13 @@ import {
 } from "../../types";
 import {
   type WithEmitTime,
-  type DatabaseDataTypes,
-  type DatabaseType,
+  type DatabaseStructType,
+  type DatabaseJsonType,
   postgresTimestampToMicroseconds,
   postgresTimestampToDate,
   TableName,
   type ProcessedFields,
-  DatabaseRPC,
+  DatabaseRpc,
 } from "./json-types";
 import {
   type MarketEmojiData,
@@ -30,6 +29,7 @@ import {
   toMarketEmojiData,
 } from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
+import { toAccountAddressString } from "../../utils";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -41,7 +41,7 @@ export type TransactionMetadata = {
 };
 
 const toTransactionMetadata = (
-  data: DatabaseDataTypes["TransactionMetadata"]
+  data: DatabaseStructType["TransactionMetadata"]
 ): TransactionMetadata => ({
   version: BigInt(data.transaction_version),
   sender: data.sender,
@@ -75,11 +75,10 @@ export type MarketMetadataModel = {
 // to the metadata.
 const toMarketMetadataModel = (
   data:
-    | DatabaseDataTypes["MarketAndStateMetadata"]
-    | WithEmitTime<DatabaseDataTypes["MarketAndStateMetadata"]>
+    | DatabaseStructType["MarketAndStateMetadata"]
+    | WithEmitTime<DatabaseStructType["MarketAndStateMetadata"]>
 ): MarketMetadataModel => {
   const symbolBytes = deserializeSymbolBytes(data.symbol_bytes);
-  const marketAddress = deriveEmojicoinPublisherAddress({ emojis: data.symbol_emojis }).toString();
 
   return {
     marketID: BigInt(data.market_id),
@@ -87,12 +86,12 @@ const toMarketMetadataModel = (
     marketNonce: BigInt(data.market_nonce),
     trigger: toTrigger(data.trigger),
     symbolEmojis: data.symbol_emojis,
-    marketAddress,
+    marketAddress: toAccountAddressString(data.market_address),
     ...toMarketEmojiData(symbolBytes),
   };
 };
 
-const toLastSwapFromDatabase = (data: DatabaseDataTypes["LastSwapData"]): Types.LastSwap =>
+const toLastSwapFromDatabase = (data: DatabaseStructType["LastSwapData"]): Types.LastSwap =>
   toLastSwap({
     is_sell: data.last_swap_is_sell,
     avg_execution_price_q64: data.last_swap_avg_execution_price_q64,
@@ -117,7 +116,7 @@ type GlobalStateEventData = {
 };
 
 const toGlobalStateEventData = (
-  data: DatabaseDataTypes["GlobalStateEventData"]
+  data: DatabaseStructType["GlobalStateEventData"]
 ): GlobalStateEventData => ({
   emitTime: postgresTimestampToMicroseconds(data.emit_time),
   registryNonce: BigInt(data.registry_nonce),
@@ -138,7 +137,7 @@ type PeriodicStateMetadata = {
 };
 
 const toPeriodicStateMetadata = (
-  data: DatabaseDataTypes["PeriodicStateMetadata"]
+  data: DatabaseStructType["PeriodicStateMetadata"]
 ): PeriodicStateMetadata => ({
   period: toPeriod(data.period),
   startTime: postgresTimestampToMicroseconds(data.start_time),
@@ -162,7 +161,7 @@ type PeriodicStateEventData = {
 };
 
 const toPeriodicStateEventData = (
-  data: DatabaseDataTypes["PeriodicStateEventData"]
+  data: DatabaseStructType["PeriodicStateEventData"]
 ): PeriodicStateEventData => ({
   openPriceQ64: BigInt(data.open_price_q64),
   highPriceQ64: BigInt(data.high_price_q64),
@@ -187,7 +186,7 @@ type MarketRegistrationEventData = {
 };
 
 const toMarketRegistrationEventData = (
-  data: DatabaseDataTypes["MarketRegistrationEventData"]
+  data: DatabaseStructType["MarketRegistrationEventData"]
 ): MarketRegistrationEventData => ({
   registrant: data.registrant,
   integrator: data.integrator,
@@ -212,7 +211,7 @@ type SwapEventData = {
   balanceAsFractionOfCirculatingSupplyAfterQ64: bigint;
 };
 
-const toSwapEventData = (data: DatabaseDataTypes["SwapEventData"]): SwapEventData => ({
+const toSwapEventData = (data: DatabaseStructType["SwapEventData"]): SwapEventData => ({
   swapper: data.swapper,
   integrator: data.integrator,
   integratorFee: BigInt(data.integrator_fee),
@@ -245,7 +244,7 @@ type LiquidityEventData = {
 };
 
 const toLiquidityEventData = (
-  data: DatabaseDataTypes["LiquidityEventData"]
+  data: DatabaseStructType["LiquidityEventData"]
 ): LiquidityEventData => ({
   provider: data.provider,
   baseAmount: BigInt(data.base_amount),
@@ -264,7 +263,7 @@ type ChatEventData = {
   balanceAsFractionOfCirculatingSupplyQ64: bigint;
 };
 
-const toChatEventData = (data: DatabaseDataTypes["ChatEventData"]): ChatEventData => ({
+const toChatEventData = (data: DatabaseStructType["ChatEventData"]): ChatEventData => ({
   user: data.user,
   message: data.message,
   userEmojicoinBalance: BigInt(data.user_emojicoin_balance),
@@ -282,7 +281,7 @@ export type StateEventData = {
   instantaneousStats: Types.InstantaneousStats;
 };
 
-const toStateEventData = (data: DatabaseDataTypes["StateEventData"]): StateEventData => ({
+const toStateEventData = (data: DatabaseStructType["StateEventData"]): StateEventData => ({
   clammVirtualReserves: toReserves({
     base: data.clamm_virtual_reserves_base,
     quote: data.clamm_virtual_reserves_quote,
@@ -405,7 +404,7 @@ const getMarketNonce = <T extends { market_nonce: string } | { marketNonce: bigi
 };
 
 export const GuidGetters = {
-  globalStateEvent: (data: DatabaseType["global_state_events"] | GlobalStateEventData) => {
+  globalStateEvent: (data: DatabaseJsonType["global_state_events"] | GlobalStateEventData) => {
     const eventName = EVENT_NAMES.GlobalState;
     const registryNonce = "registry_nonce" in data ? data.registry_nonce : data.registryNonce;
     return {
@@ -414,7 +413,7 @@ export const GuidGetters = {
     };
   },
   periodicStateEvent: (
-    data: DatabaseType["periodic_state_events"] | (MarketMetadataModel & { period: Period })
+    data: DatabaseJsonType["periodic_state_events"] | (MarketMetadataModel & { period: Period })
   ) => {
     const eventName = EVENT_NAMES.PeriodicState;
     const periodAndMarketNonce = `${toPeriod(data.period)}::${getMarketNonce(data)}` as const;
@@ -424,25 +423,25 @@ export const GuidGetters = {
     };
   },
   marketRegistrationEvent: (
-    data: DatabaseType["market_registration_events"] | MarketMetadataModel
+    data: DatabaseJsonType["market_registration_events"] | MarketMetadataModel
   ) => ({
     eventName: EVENT_NAMES.MarketRegistration,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.MarketRegistration}` as const,
   }),
-  swapEvent: (data: DatabaseType["swap_events"] | MarketMetadataModel) => ({
+  swapEvent: (data: DatabaseJsonType["swap_events"] | MarketMetadataModel) => ({
     eventName: EVENT_NAMES.Swap,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.Swap}::${getMarketNonce(data)}` as const,
   }),
-  chatEvent: (data: DatabaseType["chat_events"] | MarketMetadataModel) => ({
+  chatEvent: (data: DatabaseJsonType["chat_events"] | MarketMetadataModel) => ({
     eventName: EVENT_NAMES.Chat,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.Chat}::${getMarketNonce(data)}` as const,
   }),
-  liquidityEvent: (data: DatabaseType["liquidity_events"] | MarketMetadataModel) => ({
+  liquidityEvent: (data: DatabaseJsonType["liquidity_events"] | MarketMetadataModel) => ({
     eventName: EVENT_NAMES.Liquidity,
     guid: `${formatEmojis(data)}::${EVENT_NAMES.Liquidity}::${getMarketNonce(data)}` as const,
   }),
   marketLatestStateEvent: <
-    T extends DatabaseType["market_latest_state_event"] | MarketMetadataModel,
+    T extends DatabaseJsonType["market_latest_state_event"] | MarketMetadataModel,
   >(
     data: T
   ) => ({
@@ -451,13 +450,13 @@ export const GuidGetters = {
   }),
 };
 
-export const toGlobalStateEventModel = (data: DatabaseType["global_state_events"]) => ({
+export const toGlobalStateEventModel = (data: DatabaseJsonType["global_state_events"]) => ({
   ...withTransactionMetadata(data),
   ...withGlobalStateEventData(data),
   ...GuidGetters.globalStateEvent(data),
 });
 
-export const toPeriodicStateEventModel = (data: DatabaseType["periodic_state_events"]) => ({
+export const toPeriodicStateEventModel = (data: DatabaseJsonType["periodic_state_events"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndEmitTime(data),
   ...withLastSwap(data),
@@ -468,7 +467,7 @@ export const toPeriodicStateEventModel = (data: DatabaseType["periodic_state_eve
 });
 
 export const toMarketRegistrationEventModel = (
-  data: DatabaseType["market_registration_events"]
+  data: DatabaseJsonType["market_registration_events"]
 ) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
@@ -476,7 +475,7 @@ export const toMarketRegistrationEventModel = (
   ...GuidGetters.marketRegistrationEvent(data),
 });
 
-export const toSwapEventModel = (data: DatabaseType["swap_events"]) => ({
+export const toSwapEventModel = (data: DatabaseJsonType["swap_events"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withSwapEventData(data),
@@ -484,7 +483,7 @@ export const toSwapEventModel = (data: DatabaseType["swap_events"]) => ({
   ...GuidGetters.swapEvent(data),
 });
 
-export const toChatEventModel = (data: DatabaseType["chat_events"]) => ({
+export const toChatEventModel = (data: DatabaseJsonType["chat_events"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withChatEventData(data),
@@ -493,7 +492,7 @@ export const toChatEventModel = (data: DatabaseType["chat_events"]) => ({
   ...GuidGetters.chatEvent(data),
 });
 
-export const toLiquidityEventModel = (data: DatabaseType["liquidity_events"]) => ({
+export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withLiquidityEventData(data),
@@ -508,7 +507,9 @@ export const toProcessedData = (data: ProcessedFields) => ({
   volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
 });
 
-export const toMarketLatestStateEventModel = (data: DatabaseType["market_latest_state_event"]) => ({
+export const toMarketLatestStateEventModel = (
+  data: DatabaseJsonType["market_latest_state_event"]
+) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withStateEventData(data),
@@ -517,7 +518,7 @@ export const toMarketLatestStateEventModel = (data: DatabaseType["market_latest_
   ...GuidGetters.marketLatestStateEvent(data),
 });
 
-export const toMarketState = (data: DatabaseType["market_state"]) => ({
+export const toMarketState = (data: DatabaseJsonType["market_state"]) => ({
   ...toMarketLatestStateEventModel(data),
   dailyVolume: BigInt(data.daily_volume),
 });
@@ -535,7 +536,7 @@ export const withLPCoinBalance = <T extends { lp_coin_balance: Uint64String }>(d
   lpCoinBalance: BigInt(data.lp_coin_balance),
 });
 
-export const toUserLiquidityPoolsModel = (data: DatabaseType["user_liquidity_pools"]) => {
+export const toUserLiquidityPoolsModel = (data: DatabaseJsonType["user_liquidity_pools"]) => {
   const { transaction: withExtraFields } = withTransactionMetadata({
     ...data,
     sender: "0x",
@@ -552,13 +553,13 @@ export const toUserLiquidityPoolsModel = (data: DatabaseType["user_liquidity_poo
   };
 };
 
-export const toMarketDailyVolumeModel = (data: DatabaseType["market_daily_volume"]) => ({
+export const toMarketDailyVolumeModel = (data: DatabaseJsonType["market_daily_volume"]) => ({
   marketID: BigInt(data.market_id),
   dailyVolume: BigInt(data.daily_volume),
 });
 
 export const toMarket1MPeriodsInLastDay = (
-  data: DatabaseType["market_1m_periods_in_last_day"]
+  data: DatabaseJsonType["market_1m_periods_in_last_day"]
 ) => ({
   marketID: BigInt(data.market_id),
   transactionVersion: BigInt(data.transaction_version),
@@ -568,11 +569,11 @@ export const toMarket1MPeriodsInLastDay = (
   startTime: data.start_time,
 });
 
-export const toProcessorStatus = (data: DatabaseType["processor_status"]) => ({
+export const toProcessorStatus = (data: DatabaseJsonType["processor_status"]) => ({
   lastProcessedTimestamp: data.last_processed_timestamp,
 });
 
-export const toUserPoolsRPCResponse = (data: DatabaseType["user_pools"]) => ({
+export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => ({
   ...withTransactionMetadata(data),
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withStateEventData(data),
@@ -593,7 +594,7 @@ export const DatabaseTypeConverter = {
   [TableName.Market1MPeriodsInLastDay]: toMarket1MPeriodsInLastDay,
   [TableName.MarketState]: toMarketState,
   [TableName.ProcessorStatus]: toProcessorStatus,
-  [DatabaseRPC.UserPools]: toUserPoolsRPCResponse,
+  [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
 };
 
 export type DatabaseModels = {
@@ -609,7 +610,7 @@ export type DatabaseModels = {
   [TableName.Market1MPeriodsInLastDay]: Market1MPeriodsInLastDayModel;
   [TableName.MarketState]: MarketStateModel;
   [TableName.ProcessorStatus]: ProcessorStatusModel;
-  [DatabaseRPC.UserPools]: UserPoolsRPCModel;
+  [DatabaseRpc.UserPools]: UserPoolsRPCModel;
 };
 
 export type AnyEventTable =

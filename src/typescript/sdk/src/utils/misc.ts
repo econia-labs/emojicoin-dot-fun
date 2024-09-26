@@ -277,7 +277,3 @@ export function ensureArray<T>(value: T | T[]): T[] {
   if (Array.isArray(value)) return value;
   return [value];
 }
-
-export function union<T>(s1: Set<T>, s2: Set<T>): Set<T> {
-  return s1.union(s2);
-}

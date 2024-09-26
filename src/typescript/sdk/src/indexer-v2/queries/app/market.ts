@@ -3,7 +3,7 @@ import "server-only";
 import { type PostgrestBuilder } from "@supabase/postgrest-js";
 import { LIMIT, ORDER_BY } from "../../../queries";
 import { type AnyNumberString } from "../../../types";
-import { type DatabaseType, TableName } from "../../types/json-types";
+import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
 import {
@@ -63,14 +63,13 @@ const selectPeriodicEventsSince = ({
     .range(offset, offset + limit - 1)
     .limit(limit);
 
-// prettier-ignore
-const selectMarketState = ({ marketEmojis }: { marketEmojis: MarketSymbolEmojis }) =>
+const selectMarketState = ({ searchEmojis }: { searchEmojis: MarketSymbolEmojis }) =>
   postgrest
     .from(TableName.MarketState)
     .select("*")
-    .eq("symbol_emojis", toQueryArray(marketEmojis))
+    .eq("symbol_emojis", toQueryArray(searchEmojis))
     .limit(1)
-    .single() as PostgrestBuilder<DatabaseType["market_state"]>;
+    .single() as PostgrestBuilder<DatabaseJsonType["market_state"]>;
 
 export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);

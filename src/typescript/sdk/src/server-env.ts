@@ -11,3 +11,6 @@ if (typeof process.env.EMOJICOIN_INDEXER_URL === "undefined") {
   }
 }
 export const { EMOJICOIN_INDEXER_URL } = process.env;
+
+export const FETCH_DEBUG = process.env.FETCH_DEBUG === "true" ?? false;
+export const FETCH_DEBUG_VERBOSE = process.env.FETCH_DEBUG_VERBOSE === "true" ?? false;

@@ -41,7 +41,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     }
     return res;
   });
-  const state = await fetchMarketState({ marketEmojis: emojis });
+  const state = await fetchMarketState({ searchEmojis: emojis });
 
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 

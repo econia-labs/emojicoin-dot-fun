@@ -1,1 +1,1 @@
-export * from "../../../src/indexer-v2/queries/for-test";
+export * from "../../../src/indexer-v2/queries/test";

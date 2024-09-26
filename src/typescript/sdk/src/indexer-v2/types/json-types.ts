@@ -131,6 +131,7 @@ type MarketAndStateMetadata = {
   bump_time: PostgresTimestamp;
   market_nonce: Uint64String;
   trigger: TriggerTypeFromDatabase | TriggerTypeFromBroker;
+  market_address: AccountAddressString;
 };
 
 export type WithEmitTime<T> = {
@@ -243,7 +244,7 @@ type GlobalStateEventData = {
   cumulative_chat_messages: Uint64String;
 };
 
-export type DatabaseDataTypes = {
+export type DatabaseStructType = {
   TransactionMetadata: TransactionMetadata;
   MarketAndStateMetadata: MarketAndStateMetadata;
   LastSwapData: LastSwapData;
@@ -258,13 +259,13 @@ export type DatabaseDataTypes = {
 };
 
 export type AnyEventDatabaseRow =
-  | DatabaseType["global_state_events"]
-  | DatabaseType["periodic_state_events"]
-  | DatabaseType["market_registration_events"]
-  | DatabaseType["swap_events"]
-  | DatabaseType["chat_events"]
-  | DatabaseType["liquidity_events"]
-  | DatabaseType["market_latest_state_event"];
+  | DatabaseJsonType["global_state_events"]
+  | DatabaseJsonType["periodic_state_events"]
+  | DatabaseJsonType["market_registration_events"]
+  | DatabaseJsonType["swap_events"]
+  | DatabaseJsonType["chat_events"]
+  | DatabaseJsonType["liquidity_events"]
+  | DatabaseJsonType["market_latest_state_event"];
 
 // Technically some of these are views, but may as well be tables in the context of the indexer.
 export enum TableName {
@@ -282,7 +283,7 @@ export enum TableName {
   ProcessorStatus = "processor_status",
 }
 
-export enum DatabaseRPC {
+export enum DatabaseRpc {
   UserPools = "user_pools",
 }
 
@@ -297,7 +298,7 @@ type UserLPCoinBalance = {
   lp_coin_balance: Uint64String;
 };
 
-export type DatabaseType = {
+export type DatabaseJsonType = {
   [TableName.GlobalStateEvents]: Flatten<TransactionMetadata & GlobalStateEventData>;
   [TableName.PeriodicStateEvents]: Flatten<
     TransactionMetadata &
@@ -339,13 +340,13 @@ export type DatabaseType = {
     volume: Uint128String;
     start_time: PostgresTimestamp;
   };
-  [TableName.MarketState]: DatabaseType["market_latest_state_event"] & {
+  [TableName.MarketState]: DatabaseJsonType["market_latest_state_event"] & {
     daily_volume: Uint128String;
   };
   [TableName.ProcessorStatus]: {
     last_processed_timestamp: PostgresTimestamp;
   };
-  [DatabaseRPC.UserPools]: Flatten<
+  [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
       StateEventData &

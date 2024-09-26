@@ -1,8 +1,8 @@
 import {
-  Account,
+  type Account,
   AccountAddress,
-  Ed25519Account,
-  SingleKeyAccount,
+  type Ed25519Account,
+  type SingleKeyAccount,
   type AccountAddressInput,
 } from "@aptos-labs/ts-sdk";
 
@@ -13,12 +13,7 @@ type AnyAccount = Ed25519Account | SingleKeyAccount | SingleKeyAccount | Account
 
 export const toAccountAddress = (input: AnyAccount | AccountAddressInput) =>
   AccountAddress.from(
-    input instanceof Ed25519Account ||
-      input instanceof SingleKeyAccount ||
-      input instanceof SingleKeyAccount ||
-      input instanceof Account
-      ? input.accountAddress
-      : input
+    typeof input === "object" && "accountAddress" in input ? input.accountAddress : input
   );
 
 export const toAccountAddressString = (input: AnyAccount | AccountAddressInput) =>

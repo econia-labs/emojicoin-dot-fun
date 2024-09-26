@@ -1,8 +1,8 @@
 import { SortMarketsBy } from "../types/common";
-import { type DatabaseType } from "../types/json-types";
+import { type DatabaseJsonType } from "../types/json-types";
 
 /* eslint-disable-next-line import/no-unused-modules */
-export const sortByToColumn = (sortBy: SortMarketsBy): keyof DatabaseType["market_state"] => {
+export const sortByToColumn = (sortBy: SortMarketsBy): keyof DatabaseJsonType["market_state"] => {
   switch (sortBy) {
     case SortMarketsBy.AllTimeVolume:
       return "cumulative_stats_quote_volume";
@@ -23,7 +23,9 @@ export const sortByToColumn = (sortBy: SortMarketsBy): keyof DatabaseType["marke
   }
 };
 
-export const sortByWithFallback = (input?: string | null): keyof DatabaseType["market_state"] => {
+export const sortByWithFallback = (
+  input?: string | null
+): keyof DatabaseJsonType["market_state"] => {
   const sortBy = input ?? SortMarketsBy.MarketCap;
   try {
     return sortByToColumn(sortBy as SortMarketsBy);

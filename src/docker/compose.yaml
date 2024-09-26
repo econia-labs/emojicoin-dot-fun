@@ -50,7 +50,7 @@ services:
 
   postgrest:
     depends_on:
-      postgres:
+      processor:
         condition: 'service_healthy'
     environment:
       PGRST_DB_URI: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'

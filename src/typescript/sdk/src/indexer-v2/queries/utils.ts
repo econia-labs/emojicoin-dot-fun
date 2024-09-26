@@ -4,10 +4,11 @@ import {
   type PostgrestSingleResponse,
   type PostgrestFilterBuilder,
   type PostgrestBuilder,
+  type PostgrestTransformBuilder,
 } from "@supabase/postgrest-js";
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
-import { type DatabaseType, TableName } from "../types/json-types";
+import { type DatabaseJsonType, TableName } from "../types/json-types";
 import { toAccountAddress } from "../../utils";
 import { postgrest } from "./client";
 import { type DatabaseModels } from "../types";
@@ -20,7 +21,11 @@ type QueryFunction<
   RelationName,
   Relationships extends EnumLiteralType<TableName>,
   QueryArgs extends Record<string, any> | undefined,
-> = (args: QueryArgs) => PostgrestFilterBuilder<any, Row, Result, RelationName, Relationships>;
+> = (
+  args: QueryArgs
+) =>
+  | PostgrestFilterBuilder<any, Row, Result, RelationName, Relationships>
+  | PostgrestTransformBuilder<any, Row, Result, RelationName, Relationships>;
 
 type WithConfig<T> = T & { minimumVersion?: AnyNumberString };
 
@@ -112,7 +117,7 @@ export function queryHelper<
 
 export function queryHelperSingle<
   T extends TableName,
-  Row extends DatabaseType[T],
+  Row extends DatabaseJsonType[T],
   Model extends DatabaseModels[T],
   QueryArgs extends Record<string, any> | undefined,
 >(queryFn: (args: QueryArgs) => PostgrestBuilder<Row>, convert: (row: Row) => Model) {

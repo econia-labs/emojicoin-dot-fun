@@ -57,7 +57,10 @@ export const SwapButton = ({
         toast.dark(
           <>
             <RewardsAnimation controls={controls} />
-            <CongratulationsToast transactionHash={res.response.hash} amount={rewardsEvent.data.octas_reward_amount} />
+            <CongratulationsToast
+              transactionHash={res.response.hash}
+              amount={rewardsEvent.data.octas_reward_amount}
+            />
           </>,
           {
             pauseOnFocusLoss: false,
@@ -80,7 +83,7 @@ export const SwapButton = ({
         <Button disabled={disabled} onClick={handleClick} scale="lg">
           {t("Swap")}
         </Button>
-      <RewardsAnimation controls={controls} />
+        <RewardsAnimation controls={controls} />
       </ButtonWithConnectWalletFallback>
     </>
   );

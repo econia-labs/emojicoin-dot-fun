@@ -5,8 +5,8 @@ import { getFundedAccount } from "../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 import { SwapWithRewards } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../utils";
-import { type TableModels } from "../../../src/indexer-v2/types";
 import { fetchMarketState } from "../../../src/indexer-v2/queries";
+import { type MarketStateModel } from "../../../src/indexer-v2/types";
 
 jest.setTimeout(20000);
 
@@ -24,7 +24,7 @@ describe("queries a market by market state", () => {
     const { version } = registerResponse;
     await waitForEmojicoinIndexer(version);
     const res = (await fetchMarketState({
-      marketEmojis: emojis,
+      searchEmojis: emojis,
     }))!;
     expect(res).not.toBeNull();
     expect(res).toBeDefined();
@@ -44,13 +44,13 @@ describe("queries a market by market state", () => {
     const stateFromMiniProcessor = miniProcessorResult.marketLatestStateEvents.at(0)!;
     expect(stateFromMiniProcessor).toBeDefined();
     await waitForEmojicoinIndexer(swapResponse.version);
-    const stateFromIndexerProcessor = (await fetchMarketState({ marketEmojis: emojis }))!;
+    const stateFromIndexerProcessor = (await fetchMarketState({ searchEmojis: emojis }))!;
 
     // Copy over the daily volume because we can't get that field from the mini processor.
-    (stateFromMiniProcessor as TableModels["market_state"]).dailyVolume =
+    (stateFromMiniProcessor as MarketStateModel).dailyVolume =
       stateFromIndexerProcessor.dailyVolume;
     // Copy over the `insertedAt` field because it's inserted at insertion time in postgres.
-    (stateFromMiniProcessor as TableModels["market_state"]).transaction.insertedAt =
+    (stateFromMiniProcessor as MarketStateModel).transaction.insertedAt =
       stateFromIndexerProcessor.transaction.insertedAt;
 
     const replacer = (_: string, v: any) => (typeof v === "bigint" ? v.toString() : v);
