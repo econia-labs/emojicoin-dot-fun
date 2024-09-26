@@ -280,11 +280,11 @@ deployment environment:
 ### Bastion host connections
 
 Before you try connecting to the bastion host, verify that the
-`DeployBastionHost` [condition][conditions] evaluates to `true`. Note
-too that if you have been provisioning and de-provisioning other resources, you
-might want to de-provision then provision the bastion host before running the
-below commands, in order to refresh the bastion host [user data] that stores the
-URLs of other resources in the stack.
+`DeployBastionHost` [condition][conditions] evaluates to `true`. Note too that
+if you have been provisioning and de-provisioning other resources, you might
+want to de-provision then provision the bastion host before running the below
+commands, in order to refresh the bastion host [user data] that stores the URLs
+of other resources in the stack.
 
 1. Install the [EC2 Instance Connect CLI]:
 
