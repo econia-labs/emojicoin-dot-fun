@@ -408,6 +408,18 @@ toggle [rule actions] between `Block` and `Count`.
 
 See the [Web ACL traffic overview dashboards] to monitor rules.
 
+### Container scaling
+
+[Container autoscaling] for both REST and WebSocket endpoints relies on a
+mixture of [target tracking] for scaling out and [step scaling] for scaling in.
+
+Scaling in uses a custom [step scale CloudWatch alarm] that only fires when more
+than one instance is active, to prevent alarms from triggering when only one
+instance is live and at idle.
+
+This design ensures that at least one server container is always live for both
+REST and WebSocket endpoints.
+
 [a nat gateway in each availability zone]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
@@ -421,6 +433,7 @@ See the [Web ACL traffic overview dashboards] to monitor rules.
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+[container autoscaling]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [container logging permissions]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html#ec2-considerations
 [create the stack with gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-walkthrough.html
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
@@ -452,7 +465,10 @@ See the [Web ACL traffic overview dashboards] to monitor rules.
 [secrets manager secrets]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html
 [stack]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html
 [stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html#git-sync-concepts-terms-depoyment-file
+[step scale cloudwatch alarm]: https://docs.aws.amazon.com/autoscaling/application/userguide/step-scaling-policy-overview.html#step-scaling-how-it-works
+[step scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-step-scaling-policies.html
 [systems manager parameters]: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
+[target tracking]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
 [template outputs section]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
 [the upstream repository credentials docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-secret.html
