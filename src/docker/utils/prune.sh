@@ -132,9 +132,11 @@ docker rm -f $api 2>/dev/null
 docker volume rm -f $postgres-data
 
 if [ -n "$reset_localnet" ]; then
-	ls -alrth $docker_dir/localnet
-	ps -eaf | grep -i runner
-	rm -rf $docker_dir/localnet/.aptos/*
+	if [ -n "$CI" ]; then
+		sudo rm -rf $docker_dir/localnet/.aptos || true
+	else
+		rm -rf $docker_dir/localnet/.aptos || true
+	fi
 	docker compose -f compose.local.yaml down --volumes
 else
 	docker compose -f compose.local.yaml down
