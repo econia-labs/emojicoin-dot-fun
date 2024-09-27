@@ -1,9 +1,8 @@
 import "server-only";
 
-import { type PostgrestBuilder } from "@supabase/postgrest-js";
 import { LIMIT, ORDER_BY } from "../../../queries";
 import { type AnyNumberString } from "../../../types";
-import { type DatabaseJsonType, TableName } from "../../types/json-types";
+import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
 import {
@@ -18,28 +17,26 @@ import { type MarketSymbolEmojis } from "../../../emoji_data";
 const selectSwapsByMarketID = ({
   marketID,
   page = 1,
-  limit = LIMIT,
+  pageSize = LIMIT,
 }: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.SwapEvents)
     .select("*")
     .eq("market_id", marketID)
     .order("market_nonce", ORDER_BY.DESC)
-    .range((page - 1) * limit, page * limit - 1)
-    .limit(limit);
+    .range((page - 1) * pageSize, page * pageSize - 1);
 
 const selectChatsByMarketID = ({
   marketID,
   page = 1,
-  limit = LIMIT,
+  pageSize = LIMIT,
 }: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.ChatEvents)
     .select("*")
     .eq("market_id", marketID)
     .order("market_nonce", ORDER_BY.DESC)
-    .range((page - 1) * limit, page * limit - 1)
-    .limit(limit);
+    .range((page - 1) * pageSize, page * pageSize - 1);
 
 // This query uses `offset` instead of `page` because the periodic state events query requires
 // more granular pagination due to the requirements of the private TradingView charting library.
@@ -49,10 +46,7 @@ const selectPeriodicEventsSince = ({
   start,
   offset,
   limit = LIMIT,
-}: {
-  marketID: AnyNumberString;
-  start: Date;
-} & PeriodicStateEventQueryArgs) =>
+}: PeriodicStateEventQueryArgs) =>
   postgrest
     .from(TableName.PeriodicStateEvents)
     .select("*")
@@ -60,8 +54,7 @@ const selectPeriodicEventsSince = ({
     .eq("period", period)
     .gte("start_time", start.toISOString())
     .order("start_time", ORDER_BY.ASC)
-    .range(offset, offset + limit - 1)
-    .limit(limit);
+    .range(offset, offset + limit - 1);
 
 const selectMarketState = ({ searchEmojis }: { searchEmojis: MarketSymbolEmojis }) =>
   postgrest
@@ -69,7 +62,7 @@ const selectMarketState = ({ searchEmojis }: { searchEmojis: MarketSymbolEmojis 
     .select("*")
     .eq("symbol_emojis", toQueryArray(searchEmojis))
     .limit(1)
-    .single() as PostgrestBuilder<DatabaseJsonType["market_state"]>;
+    .single();
 
 export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);

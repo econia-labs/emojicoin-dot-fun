@@ -49,26 +49,24 @@ const selectLatestStateEventForMarket = ({ marketID }: { marketID: AnyNumberStri
 const selectSwapsBySwapper = ({
   swapper,
   page = 1,
-  limit = LIMIT,
+  pageSize = LIMIT,
 }: { swapper: Account | AccountAddressInput } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.SwapEvents)
     .select("*")
     .eq("swapper", toAccountAddressString(swapper))
-    .range((page - 1) * limit, page * limit - 1)
-    .limit(limit);
+    .range((page - 1) * pageSize, page * pageSize - 1);
 
 const selectChatsByUser = ({
   user,
   page = 1,
-  limit = LIMIT,
+  pageSize = LIMIT,
 }: { user: Account | AccountAddressInput } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.ChatEvents)
     .select("*")
     .eq("user", toAccountAddressString(user))
-    .range((page - 1) * limit, page * limit - 1)
-    .limit(limit);
+    .range((page - 1) * pageSize, page * pageSize - 1);
 
 export const fetchLiquidityEvents = queryHelper(selectLiquidityEvents, toLiquidityEventModel);
 export const fetchDailyVolumeForMarket = queryHelper(selectMarketDailyVolume, (r) => ({

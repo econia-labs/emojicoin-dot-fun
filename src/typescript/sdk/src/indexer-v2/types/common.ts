@@ -1,5 +1,6 @@
 import { type Period } from "../../const";
 import { type OrderBy } from "../../queries/const";
+import { AnyNumberString } from "../../types";
 
 export enum SortMarketsBy {
   MarketCap = "market_cap",
@@ -14,13 +15,16 @@ export enum SortMarketsBy {
 export type MarketStateQueryArgs = {
   sortBy?: SortMarketsBy;
   page?: number;
-  limit?: number;
+  pageSize?: number;
   orderBy?: OrderBy;
   searchEmojis?: string[];
   inBondingCurve?: boolean;
 };
 
 export type PeriodicStateEventQueryArgs = {
+  marketID: AnyNumberString;
+  start: Date;
   offset: number;
   period: Period;
-} & Omit<MarketStateQueryArgs, "page" | "searchEmojis" | "sortBy" | "orderBy">;
+  limit?: number;
+} & Omit<MarketStateQueryArgs, "page" | "pageSize" | "searchEmojis" | "sortBy" | "orderBy">;

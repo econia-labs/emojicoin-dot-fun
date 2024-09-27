@@ -12,7 +12,7 @@ import { type DatabaseRpc, type DatabaseJsonType } from "../../types/json-types"
 const callUserPools = ({
   provider,
   page = 1,
-  limit = LIMIT,
+  pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
   sortBy = SortMarketsBy.MarketCap,
 }: { provider: Account | AccountAddressInput } & MarketStateQueryArgs) => {
@@ -20,10 +20,10 @@ const callUserPools = ({
     .rpc("user_pools", { provider: toAccountAddressString(provider) })
     .select("*")
     .order(sortByWithFallback(sortBy), orderBy)
-    .limit(limit);
+    .limit(pageSize);
 
   if (page !== 1) {
-    query = query.range((page - 1) * limit, page * limit - 1);
+    query = query.range((page - 1) * pageSize, page * pageSize - 1);
   }
 
   return query as PostgrestTransformBuilder<

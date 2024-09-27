@@ -28,7 +28,7 @@ describe("address standardization tests", () => {
     const events = getEvents(res);
     const { marketID } = events.chatEvents[0];
 
-    const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, limit: 1 });
+    const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
     RowEqualityChecks.chatRow(row, res);

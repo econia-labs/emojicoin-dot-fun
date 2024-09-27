@@ -5,6 +5,7 @@ import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 import { fetchFeaturedMarket, fetchMarkets, fetchNumRegisteredMarkets } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default async function Home({ searchParams }: HomePageParams) {
     sortBy,
     orderBy,
     searchEmojis,
+    pageSize: MARKETS_PER_PAGE,
   });
 
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));

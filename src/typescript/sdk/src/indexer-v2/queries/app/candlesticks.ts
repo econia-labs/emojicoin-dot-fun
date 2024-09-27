@@ -47,7 +47,7 @@ export async function fetchAllCandlesticksInTimeRange(args: {
         period,
         start,
         offset: aggregate.length,
-        limit,
+        pageSize,
       });
       const filtered = data.filter((d) => d.transaction.timestamp.getTime() <= end.getTime());
       keepFetching = filtered.length === limit;

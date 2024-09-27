@@ -62,7 +62,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const events = getEvents(res);
     const { marketID } = events.swapEvents[0];
 
-    const queryRes = await fetchSwapEvents({ marketID, minimumVersion: res.version, limit: 1 });
+    const queryRes = await fetchSwapEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
     RowEqualityChecks.swapRow(row, res);
@@ -87,7 +87,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const events = getEvents(res);
     const { marketID } = events.chatEvents[0];
 
-    const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, limit: 1 });
+    const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
     RowEqualityChecks.chatRow(row, res);

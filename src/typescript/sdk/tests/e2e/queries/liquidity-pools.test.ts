@@ -98,7 +98,7 @@ describe("queries for liquidity pools", () => {
     await waitForEmojicoinIndexer(version);
     const res = await fetchMarkets({
       inBondingCurve: false,
-      limit: LIMIT,
+      pageSize: LIMIT,
     });
 
     // If the result is not less than `LIMIT`, this test needs to be updated to paginate results.

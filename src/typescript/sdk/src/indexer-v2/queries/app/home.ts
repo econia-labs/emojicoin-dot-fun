@@ -13,7 +13,7 @@ import { sortByWithFallback } from "../query-params";
 
 const selectMarketStates = ({
   page = 1,
-  limit = LIMIT,
+  pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
   searchEmojis,
   sortBy = SortMarketsBy.MarketCap,
@@ -23,11 +23,7 @@ const selectMarketStates = ({
     .from(TableName.MarketState)
     .select("*")
     .order(sortByWithFallback(sortBy), orderBy)
-    .limit(limit);
-
-  if (page !== 1) {
-    query = query.range((page - 1) * limit, page * limit - 1);
-  }
+    .range((page - 1) * pageSize, page * pageSize - 1);
 
   if (searchEmojis && searchEmojis.length) {
     query = query.contains("symbol_emojis", toQueryArray(searchEmojis));
@@ -47,7 +43,7 @@ export const fetchMarkets = queryHelper(
 
 // The featured market is simply the current highest daily volume market.
 export const fetchFeaturedMarket = async () =>
-  fetchMarkets({ page: 1, limit: 1, sortBy: SortMarketsBy.DailyVolume }).then((markets) =>
+  fetchMarkets({ page: 1, pageSize: 1, sortBy: SortMarketsBy.DailyVolume }).then((markets) =>
     markets.at(0)
   );
 
