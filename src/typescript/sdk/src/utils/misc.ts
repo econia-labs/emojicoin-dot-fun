@@ -277,3 +277,10 @@ export function ensureArray<T>(value: T | T[]): T[] {
   if (Array.isArray(value)) return value;
   return [value];
 }
+
+export function zip<T>(a: T[], b: T[]): Array<[T, T]> {
+  if (a.length !== b.length) {
+    throw new Error("Arrays must have equal length.");
+  }
+  return Array.from({ length: a.length }).map((_, i) => [a[i], b[i]]);
+}
