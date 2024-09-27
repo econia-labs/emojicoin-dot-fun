@@ -35,20 +35,21 @@ export const sortWithUnsortedSubsets = (
 // unsorted results set.
 //
 // That is, say we have { 1n: 100, 2n: 200, 3n: 200 } in the table, where `1n` is a marketID
-// and `100` is the query'es relevant value (the second field in the `mapFunction`).
-// In our first sorted query results (the one passed in), the resulting mapped array might be:
+// and `100` is the query's relevant value (the second field in the `mapFunction`).
+// In our first sorted query results (the one passed in), the resulting mapped array from postgres
+// could be:
 // [ [marketID, value, index], ... ]
 // [ [1n, 100, 1], [2n, 200, 2], [3n, 300, 3] ]
 // OR
 // [ [1n, 100, 1], [3n, 200, 2], [2n, 200, 3] ]
-// Note that the market ID 3n appears before 2n, since they have the same result.
 //
 // Thus in order to compare the query results with subsets of unsorted market IDs (the ones
 // with equal `value` fields), we will bin each result according to its `value` field, then
 // get the lowest index in the bin. Then we compare that to the manually sorted result.
 // In the case above, this would be:
 // { 100: [ Set(1n), 1], 200: [ Set(2n, 3n), 2] }
-// Then when comparing each query's results in this structure, we can know what (if any)
+// Then when comparing each query's results in this structure, we can know what (if any) of the
+// unique row values are in a different order, while not failing on rows that have equal values.
 export const checkSubsetsEqual = (results: SortableResults[], expected: SortableResults[]) => {
   expect(results.length).toEqual(expected.length);
   const binnedResults = sortWithUnsortedSubsets(results);
