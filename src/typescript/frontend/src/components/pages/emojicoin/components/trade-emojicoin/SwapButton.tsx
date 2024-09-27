@@ -57,7 +57,7 @@ export const SwapButton = ({
         toast.dark(
           <>
             <RewardsAnimation controls={controls} />
-            <CongratulationsToast transactionHash={res.response.hash} />
+            <CongratulationsToast transactionHash={res.response.hash} amount={rewardsEvent.data.octas_reward_amount} />
           </>,
           {
             pauseOnFocusLoss: false,
