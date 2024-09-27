@@ -98,7 +98,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
     searchParams.get("remove") !== null ? "remove" : "add"
   );
 
-  const loadingComponent = useMemo(() => <AnimatedStatusIndicator numSquares={4} />, []);
+  const loadingComponent = useMemo(() => <AnimatedStatusIndicator numHearts={4} />, []);
 
   const {
     aptos,
