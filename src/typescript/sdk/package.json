@@ -67,7 +67,7 @@
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
     "test": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -- pnpm jest",
     "test:debug": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -v FETCH_DEBUG=true -- pnpm jest",
-    "test:verbose": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -v VERBOSE=true -- pnpm jest",
+    "test:verbose": "dotenv -e ../.env.ci -e ../../docker/example.local.env -e ../../docker/.env -v VERBOSE_TEST_LOGS=true -- pnpm jest",
     "unit-test": "dotenv -e ../.env.ci -v NO_TEST_SETUP=true -- pnpm jest tests/unit",
     "wss": "dotenv -e ../../docker/.env -e ../.env.local -- tsx tests/connection.ts"
   },

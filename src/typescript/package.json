@@ -33,7 +33,7 @@
     "restart": "pnpm run down && pnpm run up",
     "start": "dotenv -e .env.local -e .env -- turbo run start",
     "test": "dotenv -e .env.ci -e ../docker/example.local.env -e ../docker/.env -- turbo run test",
-    "test:verbose": "dotenv -e .env.ci -e ../docker/example.local.env -e ../docker/.env -v VERBOSE=true -- turbo run test:verbose",
+    "test:verbose": "dotenv -e .env.ci -e ../docker/example.local.env -e ../docker/.env -v VERBOSE_TEST_LOGS=true -- turbo run test:verbose",
     "up": "docker compose -f ../docker/compose.local.yaml up -d"
   },
   "version": "0.0.0",
