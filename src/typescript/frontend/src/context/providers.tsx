@@ -16,9 +16,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AptosContextProvider } from "./wallet-context/AptosContextProvider";
 import StyledToaster from "styles/StyledToaster";
 import {
-  WebSocketEventsProvider,
+  EventStoreProvider,
   UserSettingsProvider,
-} from "./state-store-context/StateStoreContextProviders";
+} from "./event-store-context/StateStoreContextProviders";
 import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
@@ -59,7 +59,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <WebSocketEventsProvider>
+        <EventStoreProvider>
           <UserSettingsProvider>
             <AptosWalletAdapterProvider
               plugins={wallets}
@@ -93,7 +93,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
               </WalletModalContextProvider>
             </AptosWalletAdapterProvider>
           </UserSettingsProvider>
-        </WebSocketEventsProvider>
+        </EventStoreProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

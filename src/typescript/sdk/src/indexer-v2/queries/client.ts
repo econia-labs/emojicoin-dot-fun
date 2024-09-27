@@ -1,13 +1,17 @@
+import "server-only";
+
 import { PostgrestClient } from "@supabase/postgrest-js";
-import JSON_BIGINT from "../json-bigint";
-import { type TableName } from "../types/snake-case-types";
+import { stringifyParsedBigInts } from "../json-bigint";
+import { type TableName } from "../types/json-types";
+import { EMOJICOIN_INDEXER_URL, FETCH_DEBUG, FETCH_DEBUG_VERBOSE } from "../../server-env";
 
 /**
  * Fetch with BigInt support. This is necessary because the JSON returned by the indexer
  * contains BigInts, which are not supported by the default fetch implementation.
  *
- * If you set the environment variable `FETCH_DEBUG=true`, it will log every response and URL to the
- * console.
+ * To log all query URLs to the terminal, set the environment variable `FETCH_DEBUG=true`.
+ * Set `FETCH_DEBUG_VERBOSE=true` to see all query URLs *and* responses.
+ * Queries for the the latest success version from the `processor_status` table are not logged.
  */
 const fetchPatch: typeof fetch = async (input, init) => {
   const response = await fetch(input, init);
@@ -17,20 +21,19 @@ const fetchPatch: typeof fetch = async (input, init) => {
   }
 
   const text = await response.text();
-  const parsedWithBigInts = JSON_BIGINT.parse(text);
-  const json = JSON.stringify(parsedWithBigInts, (_, value) =>
-    typeof value === "bigint" ? value.toString() : value
-  );
+  const json = stringifyParsedBigInts(text);
 
-  if (process.env.FETCH_DEBUG === "true") {
-    /* eslint-disable-next-line no-console */
-    console.dir(
-      {
-        RESPONSE: json,
-        URL: response.url,
-      },
-      { depth: null }
+  if (FETCH_DEBUG || FETCH_DEBUG_VERBOSE) {
+    const isWaitForEmojicoinIndexerQuery = response.url.endsWith(
+      "processor_status?select=last_success_version"
     );
+    if (!isWaitForEmojicoinIndexerQuery) {
+      console.debug(response.url);
+      if (FETCH_DEBUG_VERBOSE) {
+        const stringified = JSON.stringify(json, null, 2);
+        console.debug(stringified);
+      }
+    }
   }
 
   return new Response(json, response);
@@ -41,4 +44,20 @@ class CustomClient extends PostgrestClient {
   from = (table: TableName) => super.from(table);
 }
 
-export const postgrest = new CustomClient(process.env.INDEXER_URL!, { fetch: fetchPatch });
+export const postgrest = new CustomClient(EMOJICOIN_INDEXER_URL, {
+  fetch: fetchPatch,
+});
+
+/**
+ * Converts an input array of any type to a proper query param for the `postgrest` client.
+ *
+ * @param s an array of values
+ * @returns the properly formatted string input for the query input param
+ * @example
+ * ```typescript
+ * const myArray = ["1", "2", "3"];
+ * const res = toQueryArray(myArray);
+ * // res === "{1,2,3}"
+ * ```
+ */
+export const toQueryArray = <T>(s: T[]) => `{${s.join(",")}}`;

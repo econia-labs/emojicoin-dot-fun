@@ -1,8 +1,7 @@
-import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
+import { type PoolsData } from "components/pages/pools/ClientPoolsPage";
 
 export type TableRowDesktopProps = {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  item: FetchSortedMarketDataReturn["markets"][0];
+  item: PoolsData;
   selected?: boolean;
   onClick?: React.MouseEventHandler<HTMLTableRowElement> | undefined;
 };

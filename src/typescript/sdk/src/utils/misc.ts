@@ -3,7 +3,7 @@ import Big from "big.js";
 import {
   type PeriodDuration,
   type Period,
-  periodEnumToPeriodDuration,
+  periodEnumToRawDuration,
   toPeriodDuration,
 } from "../const";
 import { normalizeHex } from "./hex";
@@ -155,19 +155,22 @@ export function getPeriodStartTime(
  * @param period the period to calculate the start of.
  * @returns the start of the period in microseconds.
  */
-export function getPeriodStartTimeFromTime(microseconds: AnyNumberString, period: PeriodDuration) {
+export function getPeriodStartTimeFromTime(
+  microseconds: AnyNumberString,
+  period: PeriodDuration | Period
+) {
+  const periodDuration = typeof period !== "number" ? periodEnumToRawDuration(period) : period;
   const time = BigInt(microseconds);
   // prettier-ignore
   const res = Big(time.toString())
-    .div(period)
+    .div(periodDuration)
     .round(0, Big.roundDown)
-    .mul(period);
+    .mul(periodDuration);
   return BigInt(res.toString());
 }
 
 export function getPeriodBoundary(microseconds: AnyNumberString, period: Period): bigint {
-  const periodDuration = periodEnumToPeriodDuration(period);
-  return getPeriodStartTimeFromTime(microseconds, periodDuration);
+  return getPeriodStartTimeFromTime(microseconds, period);
 }
 
 export const dateFromMicroseconds = (microseconds: bigint) =>
@@ -268,4 +271,16 @@ export function sumByKey<T, K extends keyof T>(array: T[], key: K): T[K] {
     return sum(arr as Array<bigint>) as T[K];
   }
   return sum(arr as Array<number>) as T[K];
+}
+
+export function ensureArray<T>(value: T | T[]): T[] {
+  if (Array.isArray(value)) return value;
+  return [value];
+}
+
+export function zip<T>(a: T[], b: T[]): Array<[T, T]> {
+  if (a.length !== b.length) {
+    throw new Error("Arrays must have equal length.");
+  }
+  return Array.from({ length: a.length }).map((_, i) => [a[i], b[i]]);
 }

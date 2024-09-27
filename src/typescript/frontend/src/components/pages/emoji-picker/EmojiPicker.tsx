@@ -7,7 +7,7 @@ import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { type EmojiName, type SymbolEmojiData } from "@sdk/emoji_data";
+import { type ChatEmojiData, type EmojiName } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 import { ECONIA_BLUE } from "theme/colors";
 import RoundButton from "@icons/Minimize";
@@ -37,12 +37,12 @@ export default function EmojiPicker(
   const host = document.querySelector("em-emoji-picker");
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
 
-  // TODO: Verify that the length of this set is the same length as the valid chat emojis array in the Move contract.
   // Load the data from the emoji picker library and then extract the valid chat emojis from it.
-  // This way we don't have to construct our own `chat-emojis.json` file.
+  // This is why it's not necessary to build/import a `chat-emojis.json` set, even though there is `symbol-emojis.json`.
+  // NOTE: We don't verify that the length of this set is equal to the number of valid chat emojis in the Move contract.
   useEffect(() => {
     data.then((d) => {
-      const chatEmojiData = new Map<string, SymbolEmojiData>();
+      const chatEmojiData = new Map<string, ChatEmojiData>();
 
       Object.keys(d.emojis).forEach((key) => {
         const skinVariants = d.emojis[key].skins.map((skin) => skin.unified);

@@ -29,8 +29,8 @@ import {
   parseAPIErrorAndToast,
   successfulTransactionToast,
 } from "components/wallet/toasts";
-import { useEventStore } from "context/state-store-context";
-import { getEvents, type TypeTagInput } from "@sdk/emojicoin_dot_fun";
+import { useEventStore } from "context/event-store-context";
+import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
 import { sleep, UnitOfTime } from "@sdk/utils";
 import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
@@ -38,6 +38,7 @@ import {
   getAptBalanceFromChanges,
   getCoinBalanceFromChanges,
 } from "@sdk/utils/parse-changes-for-balances";
+import { getEventsAsProcessorModelsFromResponse } from "@sdk/mini-processor";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -231,19 +232,17 @@ export function AptosContextProvider({
         error = e;
       }
       // Store any relevant events in the state event store for all components to see.
-      const events = getEvents(response);
-      const flattenedEvents = [
-        ...events.globalStateEvents,
-        ...events.marketRegistrationEvents,
-        ...events.periodicStateEvents,
-        ...events.swapEvents,
-        ...events.chatEvents,
-        ...events.stateEvents,
-        ...events.liquidityEvents,
-      ];
-      flattenedEvents.forEach(pushEventFromClient);
-
       if (response && isUserTransactionResponse(response)) {
+        const models = getEventsAsProcessorModelsFromResponse(response);
+        const flattenedEvents = [
+          ...models.marketRegistrationEvents,
+          ...models.periodicStateEvents,
+          ...models.swapEvents,
+          ...models.chatEvents,
+          ...models.liquidityEvents,
+          ...models.marketLatestStateEvents,
+        ];
+        flattenedEvents.forEach(pushEventFromClient);
         parseChangesAndSetBalances(response);
       }
 

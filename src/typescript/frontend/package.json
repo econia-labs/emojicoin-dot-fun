@@ -39,7 +39,6 @@
     "immer": "^10.1.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.400.0",
-    "mqtt": "^5.7.3",
     "next": "^14.2.4",
     "petra-plugin-wallet-adapter": "^0.4.5",
     "react": "^18.3.1",
@@ -77,7 +76,7 @@
     "postcss": "^8.4.39",
     "prettier": "^3.3.2",
     "tailwindcss": "^3.4.4",
-    "typescript": "5.3.3"
+    "typescript": "5.6.2"
   },
   "engines": {
     "node": ">=v20.12.2"
@@ -88,7 +87,7 @@
   "scripts": {
     "_format": "prettier './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
     "build": "next build",
-    "build:debug": "BUILD_DEBUG=true && pnpm clean && pnpm i && next build --no-lint --no-mangling --debug",
+    "build:debug": "BUILD_DEBUG=true next build --no-lint --no-mangling --debug",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbo --port 3001",
     "e2e": "playwright test",

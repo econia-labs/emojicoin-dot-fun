@@ -92,8 +92,8 @@ const MobileGrid = (props: GridProps) => {
                   geoblocked={props.geoblocked}
                   emojicoin={props.data.symbol}
                   marketAddress={props.data.marketAddress}
-                  marketID={props.data.marketID.toString()}
-                  initNumSwaps={props.data.numSwaps}
+                  marketEmojis={props.data.symbolEmojis}
+                  initNumSwaps={props.data.swaps.length}
                 />
               </Flex>
             </StyledMobileContentInner>

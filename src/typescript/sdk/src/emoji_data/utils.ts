@@ -2,13 +2,13 @@ import { type HexInput } from "@aptos-labs/ts-sdk";
 import emojiRegex from "emoji-regex";
 import { normalizeHex } from "../utils/hex";
 import { getRandomEmoji, SYMBOL_DATA } from "./symbol-data";
-import { type SymbolEmojiData, type EmojiName, type SymbolData } from "./types";
+import { type SymbolEmojiData, type EmojiName, type SymbolData, type SymbolEmoji } from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
-export const getEmojisInString = (symbols: string): Array<string> => {
+export const getEmojisInString = (symbols: string): Array<SymbolEmoji> => {
   const regex = emojiRegex();
   const matches = symbols.matchAll(regex);
-  return Array.from(matches).map((match) => match[0]);
+  return Array.from(matches).map((match) => match[0]) as Array<SymbolEmoji>;
 };
 
 /**
@@ -67,14 +67,14 @@ export const isValidEmoji = (emoji: string): boolean => SYMBOL_DATA.hasEmoji(emo
  * isValidSymbol('🟥🟥🟥🟥🟥'); // false (too long)
  * ```
  */
-export const isValidSymbol = (symbols: string): boolean => {
-  const numBytes = new TextEncoder().encode(symbols).length;
+export const isValidMarketSymbol = (symbol: string): boolean => {
+  const numBytes = new TextEncoder().encode(symbol).length;
   if (numBytes > MAX_SYMBOL_LENGTH || numBytes === 0) {
     return false;
   }
-  const emojis = getEmojisInString(symbols);
+  const emojis = getEmojisInString(symbol);
   const reconstructed = Array.from(emojis).join("");
-  if (reconstructed !== symbols) {
+  if (reconstructed !== symbol) {
     return false;
   }
   for (const emoji of emojis) {
@@ -139,7 +139,7 @@ export const symbolBytesToEmojis = (symbol: string | Uint8Array | Uint8Array[]) 
  * @param delimiter
  * @returns a string of the emoji names joined by the delimiter.
  */
-export const joinEmojiNames = (emojis: Array<SymbolEmojiData>, delimiter: string = ", "): string =>
+export const joinEmojiNames = (emojis: Array<SymbolEmojiData>, delimiter: string = ","): string =>
   emojis.map((e) => e.name).join(delimiter);
 
 /**
@@ -180,6 +180,11 @@ export const encodeEmojis = (emojis: string[] | SymbolEmojiData[]) =>
 // For ease of use, we alias `encodeEmojis` to `encodeSymbols`.
 export const encodeSymbols = encodeEmojis;
 
+/**
+ * A helper/wrapper function for `symbolBytesToEmojis` that returns all emoji and symbol data.
+ * Note that `emojis` is the data for each individual emoji, while `symbolData` is the final
+ * concatenated symbol data.
+ */
 export type MarketEmojiData = {
   emojis: SymbolEmojiData[];
   symbolData: SymbolData;
@@ -223,3 +228,6 @@ export const generateRandomSymbol = () => {
   const symbolBytes = new Uint8Array(emojis.flatMap((e) => Array.from(e.bytes)));
   return toMarketEmojiData(symbolBytes);
 };
+
+export const namesToEmojis = (...names: EmojiName[]) =>
+  names.map((name) => SYMBOL_DATA.byStrictName(name).emoji);

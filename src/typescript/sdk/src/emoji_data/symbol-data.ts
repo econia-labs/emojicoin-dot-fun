@@ -1,17 +1,22 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
 import { normalizeHex } from "../utils/hex";
 import AllSymbolEmojiJSON from "./symbol-emojis.json";
-import { type SymbolEmojiData } from "./types";
+import {
+  type EmojiName,
+  type MarketSymbolEmojis,
+  type SymbolEmoji,
+  type SymbolEmojiData,
+} from "./types";
 
 const encoder = new TextEncoder();
-const values: SymbolEmojiData[] = Object.entries(AllSymbolEmojiJSON).map(([name, emoji]) => {
+const values: SymbolEmojiData[] = Object.entries(AllSymbolEmojiJSON).map(([emoji, name]) => {
   const bytes = encoder.encode(emoji);
   const hex = normalizeHex(bytes);
   return {
-    name: name as keyof typeof AllSymbolEmojiJSON,
+    name,
     hex,
     bytes,
-    emoji,
+    emoji: emoji as SymbolEmoji,
   };
 });
 
@@ -19,11 +24,11 @@ const nameMap = new Map<string, SymbolEmojiData>(values.map((v) => [v.name, v]))
 const hexMap = new Map<`0x${string}`, SymbolEmojiData>(values.map((v) => [v.hex, v]));
 const emojiMap = new Map<string, SymbolEmojiData>(values.map((v) => [v.emoji, v]));
 
-export type AnyEmojiName = keyof typeof AllSymbolEmojiJSON;
 export const SYMBOL_DATA = {
-  byStrictName: (v: AnyEmojiName) => nameMap.get(v)!,
+  byStrictName: (v: EmojiName) => nameMap.get(v)!,
   byName: (v: string) => nameMap.get(v),
   byHex: (v: HexInput) => hexMap.get(normalizeHex(v)),
+  byEmojiStrict: (v: SymbolEmoji) => emojiMap.get(v)!,
   byEmoji: (v: string) => emojiMap.get(v),
   hasName: (v: string) => nameMap.has(v),
   hasHex: (v: HexInput) => hexMap.has(normalizeHex(v)),
@@ -34,3 +39,8 @@ export const getRandomEmoji = (): SymbolEmojiData => {
   const randomIndex = Math.floor(values.length * Math.random());
   return values[randomIndex];
 };
+
+/**
+ * This function is used so often, it should be aliased for brevity.
+ */
+export const joinEmojis = (symbol: MarketSymbolEmojis) => symbol.join("");

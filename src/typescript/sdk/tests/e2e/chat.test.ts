@@ -12,9 +12,7 @@ jest.setTimeout(20000);
 describe("emits a chat message event successfully", () => {
   const { aptos, publisher } = getPublishHelpers();
   const randomIntegrator = Ed25519Account.generate();
-  const user = getFundedAccount(
-    "0x006423e9a2e9574b2ec3898a78ab52a0678346a463a75cd414f4db51de36a006"
-  );
+  const user = getFundedAccount("006");
 
   it("registers a black cat emojicoin and then emits complex chat emoji sequences", async () => {
     // Note the first two are supplementary chat emojis, the rest are valid symbol emojis.

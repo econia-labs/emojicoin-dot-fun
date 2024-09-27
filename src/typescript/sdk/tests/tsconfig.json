@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "../src/utils/aptos-client.ts"
   ]
 }

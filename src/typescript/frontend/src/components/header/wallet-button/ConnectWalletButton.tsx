@@ -7,7 +7,7 @@ import { useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
 import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
-import { useNameStore } from "context/state-store-context";
+import { useNameStore } from "context/event-store-context";
 import Popup from "components/popup";
 import Text from "components/text";
 

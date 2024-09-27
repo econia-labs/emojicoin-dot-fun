@@ -8,13 +8,13 @@ import { type ContainerName } from "./utils/docker/logs";
 export default async function preTest() {
   // Print an empty line to separate `Determining test suites to run...` from the logs.
   console.debug();
-  const logsFilter: Array<ContainerName> = [];
+  const noLogs: Array<ContainerName> = [];
   // Only show more meaningful test logs by default.
-  if (!process.env.VERBOSE) {
-    logsFilter.push(...(["broker", "processor", "frontend", "postgres"] as Array<ContainerName>));
+  if (!process.env.VERBOSE_TEST_LOGS) {
+    noLogs.push(...(["broker", "processor", "frontend", "postgres"] as Array<ContainerName>));
   }
   // @ts-ignore
-  globalThis.__DOCKER_LOGS_FILTER__ = logsFilter;
+  globalThis.__DOCKER_LOGS_FILTER__ = noLogs;
   const testHarness = new DockerTestHarness({ includeFrontend: false });
   // --------------------------------------------------------------------------------------
   //                             Start the docker containers.

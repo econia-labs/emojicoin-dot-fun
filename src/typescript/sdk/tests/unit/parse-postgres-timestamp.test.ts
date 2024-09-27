@@ -1,4 +1,4 @@
-import { postgresTimestampToMicroseconds } from "../../src/indexer-v2/types/snake-case-types";
+import { postgresTimestampToMicroseconds } from "../../src/indexer-v2/types/json-types";
 
 describe("parses a postgres timestamp and ensures microsecond precision", () => {
   it("properly parses postgres timestamps to microseconds", () => {

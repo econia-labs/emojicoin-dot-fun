@@ -1,16 +1,19 @@
-import { type SymbolEmojiData } from "@sdk/emoji_data";
+import { type SymbolString } from "@/store/event/types";
+import { type MarketSymbolEmojis } from "@sdk/emoji_data";
+import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import { type MarketMetadataModel, type DatabaseModels } from "@sdk/indexer-v2/types";
 import { type Types } from "@sdk/types";
 
 export interface WithVersion {
   version: number;
 }
-interface DataProps extends Types.MarketDataView {
-  swaps: Array<Types.SwapEvent>;
-  chats: Array<Types.ChatEvent>;
-  emojis: Array<SymbolEmojiData>;
-  symbol: string;
+type DataProps = MarketMetadataModel & {
+  symbol: SymbolString;
+  swaps: Array<DatabaseModels["swap_events"]>;
+  chats: Array<DatabaseModels["chat_events"]>;
+  state: DatabaseModels["market_state"];
   marketView: Types.MarketView;
-}
+};
 
 export interface EmojicoinProps {
   data: DataProps;
@@ -32,8 +35,8 @@ export interface ChatProps {
 }
 export interface SwapComponentProps {
   emojicoin: string;
-  marketAddress: string;
-  marketID: string;
+  marketAddress: AccountAddressString;
+  marketEmojis: MarketSymbolEmojis;
   initNumSwaps: number;
   geoblocked: boolean;
 }

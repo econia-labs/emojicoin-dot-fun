@@ -35,10 +35,10 @@ const DesktopGrid = (props: GridProps) => {
             <StyledBlockWrapper>
               <Suspense fallback={<Loading numSquares={20} />}>
                 <ChartContainer
-                  symbol={props.data.symbol}
+                  symbol={props.data.symbolData.symbol}
                   emojis={props.data.emojis}
                   marketID={props.data.marketID.toString()}
-                  marketAddress={props.data.marketAddress}
+                  marketAddress={props.data.marketView.metadata.marketAddress}
                 />
               </Suspense>
             </StyledBlockWrapper>
@@ -48,10 +48,10 @@ const DesktopGrid = (props: GridProps) => {
 
             <StyledBlockWrapper>
               <SwapComponent
-                emojicoin={props.data.symbol}
-                marketAddress={props.data.marketAddress}
-                marketID={props.data.marketID.toString()}
-                initNumSwaps={props.data.numSwaps}
+                emojicoin={props.data.symbolData.symbol}
+                marketAddress={props.data.marketView.metadata.marketAddress}
+                marketEmojis={props.data.symbolEmojis}
+                initNumSwaps={props.data.swaps.length}
                 geoblocked={props.geoblocked}
               />
             </StyledBlockWrapper>

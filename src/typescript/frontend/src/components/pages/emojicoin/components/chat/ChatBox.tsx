@@ -8,14 +8,12 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import emojiRegex from "emoji-regex";
-import { type SymbolEmojiData } from "@sdk/emoji_data";
-import { useEventStore, useNameStore, useWebSocketClient } from "context/state-store-context";
+import { type ChatEmojiData } from "@sdk/emoji_data";
+import { useEventStore, useNameStore } from "context/event-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromEvent } from "lib/utils/get-user-rank";
-import { memoizedSortedDedupedEvents, mergeSortedEvents, sortEvents } from "lib/utils/sort-events";
-import type { Types } from "@sdk/types/types";
-import { parseJSON } from "utils";
+import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
 import { MAX_NUM_CHAT_EMOJIS } from "@sdk/const";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { motion } from "framer-motion";
@@ -24,7 +22,7 @@ const HARD_LIMIT = 500;
 
 const convertChatMessageToEmojiAndIndices = (
   message: string,
-  mapping: Map<string, SymbolEmojiData>
+  mapping: Map<string, ChatEmojiData>
 ) => {
   const emojiArr = message.match(emojiRegex()) ?? [];
   const indices: Record<string, number> = {};
@@ -44,36 +42,14 @@ const convertChatMessageToEmojiAndIndices = (
   return { emojiBytes: bytesArray, emojiIndicesSequence: sequence };
 };
 
-const getCombinedChats = (chats: readonly Types.ChatEvent[], marketID: bigint) => {
-  const stateGuids = new Set(chats.map((chat) => chat.guid));
-  const localChats: Types.ChatEvent[] = parseJSON(localStorage.getItem(`chats`) ?? "[]");
-  const filteredChats = localChats.filter(
-    (chat: Types.ChatEvent) => chat.marketID === marketID && !stateGuids.has(chat.guid)
-  );
-  sortEvents(filteredChats);
-  return mergeSortedEvents(chats, filteredChats);
-};
-
 const ChatBox = (props: ChatProps) => {
   const { aptos, account, submit } = useAptos();
-  const marketID = props.data.marketID.toString();
   const clear = useEmojiPicker((state) => state.clear);
   const setMode = useEmojiPicker((state) => state.setMode);
   const emojis = useEmojiPicker((state) => state.emojis);
-  const chats = getCombinedChats(
-    useEventStore((s) => s.getMarket(marketID)?.chatEvents ?? props.data.chats),
-    BigInt(props.data.marketID)
-  );
+  const chats = useEventStore((s) => s.getMarket(props.data.symbolEmojis)?.chatEvents ?? []);
   const chatEmojiData = useEmojiPicker((state) => state.chatEmojiData);
-  const subscribe = useWebSocketClient((s) => s.subscribe);
-  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
   const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
-
-  useEffect(() => {
-    subscribe.chat(marketID);
-    return () => requestUnsubscribe.chat(marketID);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
 
   useEffect(() => {
     setMode("chat");
@@ -87,7 +63,8 @@ const ChatBox = (props: ChatProps) => {
     // Set the picker invisible while the transaction is being processed.
     setPickerInvisible(true);
     const emojiText = emojis.join("");
-    const { emojicoin, emojicoinLP } = toCoinTypes(props.data.marketAddress);
+    const { marketAddress } = props.data.marketView.metadata;
+    const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
     const { emojiBytes, emojiIndicesSequence } = convertChatMessageToEmojiAndIndices(
       emojiText,
       chatEmojiData
@@ -96,7 +73,7 @@ const ChatBox = (props: ChatProps) => {
       Chat.builder({
         aptosConfig: aptos.config,
         user: account.address,
-        marketAddress: props.data.marketAddress,
+        marketAddress,
         emojiBytes,
         emojiIndicesSequence: new Uint8Array(emojiIndicesSequence),
         typeTags: [emojicoin, emojicoinLP],
@@ -132,13 +109,15 @@ const ChatBox = (props: ChatProps) => {
     [props.data.chats.length, chats.length]
   );
 
-  const addresses = sortedChats.map((chat) => chat.user);
+  const addresses = sortedChats.map(({ chat }) => chat.user);
   const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
 
   const sortedChatsWithNames = useMemo(() => {
-    const data = sortedChats.map((e) => ({
-      ...e,
-      user: nameResolver(e.user),
+    const data = sortedChats.map(({ transaction, chat, shouldAnimateAsInsertion }) => ({
+      ...chat,
+      user: nameResolver(chat.user),
+      version: Number(transaction.version),
+      shouldAnimateAsInsertion,
     }));
     return data;
     /* eslint-disable react-hooks/exhaustive-deps */

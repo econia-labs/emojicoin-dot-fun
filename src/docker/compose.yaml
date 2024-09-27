@@ -50,7 +50,7 @@ services:
 
   postgrest:
     depends_on:
-      postgres:
+      processor:
         condition: 'service_healthy'
     environment:
       PGRST_DB_URI: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
@@ -97,7 +97,6 @@ services:
       context: '../..'
       dockerfile: 'src/docker/frontend/Dockerfile'
       args:
-        INBOX_URL: 'http://postgrest:3000'
         HASH_SEED: '${HASH_SEED}'
         NEXT_PUBLIC_APTOS_NETWORK: '${APTOS_NETWORK}'
         NEXT_PUBLIC_INTEGRATOR_ADDRESS: '${EMOJICOIN_INTEGRATOR_ADDRESS}'
@@ -113,7 +112,6 @@ services:
     profiles:
     - 'frontend'
     environment:
-      INBOX_URL: 'http://postgrest:3000'
       HASH_SEED: '${HASH_SEED}'
       NEXT_PUBLIC_APTOS_NETWORK: '${APTOS_NETWORK}'
       NEXT_PUBLIC_INTEGRATOR_ADDRESS: '${EMOJICOIN_INTEGRATOR_ADDRESS}'

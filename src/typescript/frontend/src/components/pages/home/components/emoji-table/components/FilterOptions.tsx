@@ -6,30 +6,30 @@ import { StyledTHFilters } from "../styled";
 import { useMatchBreakpoints } from "hooks";
 import { Text } from "components/text";
 import { type Option } from "components/selects/types";
-import { MarketDataSortBy } from "lib/queries/sorting/types";
-import { useUserSettings } from "context/state-store-context";
+import { useUserSettings } from "context/event-store-context";
+import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 
-const titleFromValue: Record<MarketDataSortBy, string> = {
-  [MarketDataSortBy.MarketCap]: "Market Cap",
-  [MarketDataSortBy.BumpOrder]: "Bump Order",
-  [MarketDataSortBy.DailyVolume]: "24h Volume",
-  [MarketDataSortBy.AllTimeVolume]: "Alltime Vol",
-  [MarketDataSortBy.Price]: "Price",
-  [MarketDataSortBy.Apr]: "APR",
-  [MarketDataSortBy.Tvl]: "TVL",
+const titleFromValue: Record<SortMarketsBy, string> = {
+  [SortMarketsBy.MarketCap]: "Market Cap",
+  [SortMarketsBy.BumpOrder]: "Bump Order",
+  [SortMarketsBy.DailyVolume]: "24h Volume",
+  [SortMarketsBy.AllTimeVolume]: "Alltime Vol",
+  [SortMarketsBy.Price]: "Price",
+  [SortMarketsBy.Apr]: "APR",
+  [SortMarketsBy.Tvl]: "TVL",
 };
 
 const options: Array<Option> = [
-  { title: titleFromValue[MarketDataSortBy.MarketCap], value: MarketDataSortBy.MarketCap },
-  { title: titleFromValue[MarketDataSortBy.BumpOrder], value: MarketDataSortBy.BumpOrder },
-  { title: titleFromValue[MarketDataSortBy.DailyVolume], value: MarketDataSortBy.DailyVolume },
-  { title: titleFromValue[MarketDataSortBy.AllTimeVolume], value: MarketDataSortBy.AllTimeVolume },
+  { title: titleFromValue[SortMarketsBy.MarketCap], value: SortMarketsBy.MarketCap },
+  { title: titleFromValue[SortMarketsBy.BumpOrder], value: SortMarketsBy.BumpOrder },
+  { title: titleFromValue[SortMarketsBy.DailyVolume], value: SortMarketsBy.DailyVolume },
+  { title: titleFromValue[SortMarketsBy.AllTimeVolume], value: SortMarketsBy.AllTimeVolume },
   // TODO: Add price..?
 ];
 
 export type FilterOptionsComponentProps = {
-  filter: MarketDataSortBy;
-  onChange: (value: MarketDataSortBy) => void;
+  filter: SortMarketsBy;
+  onChange: (value: SortMarketsBy) => void;
 };
 
 export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsComponentProps) => {
@@ -54,7 +54,7 @@ export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsCompon
         title={selectedOption?.title}
         value={selectedOption}
         setValue={(option) => {
-          onChange(option.value as MarketDataSortBy);
+          onChange(option.value as SortMarketsBy);
         }}
         dropdownComponent={DropdownMenu}
         onHover={(_) => {}}

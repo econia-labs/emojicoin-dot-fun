@@ -1,3 +1,16 @@
 {
-  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a"
+  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a",
+  "scripts": {
+    "dev": "pnpm --prefix src/typescript run dev",
+    "down": "pnpm --prefix src/typescript run down",
+    "format": "pnpm --prefix src/typescript run format",
+    "lint": "pnpm --prefix src/typescript run lint",
+    "lint:fix": "pnpm --prefix src/typescript run lint:fix",
+    "prune": "pnpm --prefix src/typescript run prune",
+    "restart": "pnpm --prefix src/typescript run restart",
+    "start": "pnpm --prefix src/typescript run start",
+    "test": "pnpm --prefix src/typescript run test",
+    "test:verbose": "pnpm --prefix src/typescript run test:verbose",
+    "up": "pnpm --prefix src/typescript run up"
+  }
 }

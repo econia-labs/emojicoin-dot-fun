@@ -1,20 +1,16 @@
-import { fetchLatestMarketState } from "lib/queries/initial/state";
-import fetchInitialSwapData from "lib/queries/initial/swaps";
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import EmojiNotFoundPage from "./not-found";
-import fetchInitialChatData from "lib/queries/initial/chats";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
-import { prettifyHex } from "lib/utils/prettify-hex";
 import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
+import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
+import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
-const CHAT_DATA_ROWS = 100;
-const SWAP_DATA_ROWS = 100;
 
 /**
  * Our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
@@ -38,24 +34,32 @@ interface EmojicoinPageProps {
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const { market: marketSlug } = params.params;
   const names = pathToEmojiNames(marketSlug);
-  const bytes = names.flatMap((n) => Array.from(SYMBOL_DATA.byName(n)?.bytes ?? []));
-  const hex = prettifyHex(bytes);
-  const res = await fetchLatestMarketState(hex);
+  const emojis = names.map((n) => {
+    const res = SYMBOL_DATA.byName(n)?.emoji;
+    if (!res) {
+      throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+    }
+    return res;
+  });
+  const state = await fetchMarketState({ searchEmojis: emojis });
 
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 
-  if (res) {
-    const marketID = res.marketID.toString();
-    const chatData = await fetchInitialChatData({ marketID, maxTotalRows: CHAT_DATA_ROWS });
-    const marketView = await fetchContractMarketView(res.marketAddress);
-    const swapData = await fetchInitialSwapData({ marketID, maxTotalRows: SWAP_DATA_ROWS });
+  if (state) {
+    const { marketID } = state.market;
+    const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
+    const chats = await fetchChatEvents({ marketID });
+    const swaps = await fetchSwapEvents({ marketID });
+    const marketView = await fetchContractMarketView(marketAddress.toString());
     return (
       <ClientEmojicoinPage
         data={{
-          swaps: swapData,
-          chats: chatData,
+          symbol: state.market.symbolData.symbol,
+          swaps,
+          chats,
+          state,
           marketView,
-          ...res,
+          ...state.market,
         }}
         geoblocked={geoblocked}
       />

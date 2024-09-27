@@ -16,7 +16,7 @@ import { EXTERNAL_LINK_PROPS } from "components/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { formatDisplayName } from "@sdk/utils";
-import { useNameStore } from "context/state-store-context";
+import { useNameStore } from "context/event-store-context";
 import { motion } from "framer-motion";
 
 const MessageContainer: React.FC<MessageContainerProps> = ({
