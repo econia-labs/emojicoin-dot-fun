@@ -1,7 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
-    "INBOX_URL",
     "EMOJICOIN_INDEXER_URL",
     "REVALIDATION_TIME",
     "ALLOWLISTER3K_URL",

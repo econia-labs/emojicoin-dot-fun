@@ -52,14 +52,6 @@ if (process.env.NEXT_PUBLIC_BROKER_URL) {
   throw new Error("Environment variable NEXT_PUBLIC_BROKER_URL is undefined.");
 }
 
-const vercel = process.env.VERCEL === "1";
-const local = process.env.INBOX_URL === "http://localhost:3000";
-if (vercel && local) {
-  throw new Error(
-    "Should not be using `localhost` as the `inbox` endpoint during Vercel deployment."
-  );
-}
-
 const VERSION = parse(packageInfo.version);
 
 export {
