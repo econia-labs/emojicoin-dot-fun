@@ -6,6 +6,7 @@ import {
   getEvents,
   ONE_APT,
   sleep,
+  SYMBOL_DATA,
   UnitOfTime,
 } from "../../../../src";
 import TestHelpers from "../../../utils/helpers";
@@ -20,6 +21,7 @@ import { type MarketStateModel, toMarketState } from "../../../../src/indexer-v2
 import { fetchMarkets } from "../../../../src/indexer-v2/queries/app/home";
 import { SortMarketsBy } from "../../../../src/indexer-v2/types/common";
 import {
+  checkOrder,
   checkSubsetsEqual,
   sortBigIntPairsReversed,
   sortWithUnsortedSubsets,
@@ -47,6 +49,7 @@ describe("sorting queries for the sort filters on the home page", () => {
     ["vampire: medium-dark skin tone"],
     ["vampire: medium-light skin tone"],
   ];
+  const baseVampireEmoji = SYMBOL_DATA.byStrictName("vampire").emoji;
 
   beforeAll(async () => {
     const registerAndSwap = new Array<
@@ -91,41 +94,12 @@ describe("sorting queries for the sort filters on the home page", () => {
     return true;
   });
 
-  // Market IDs are in ascending order of registration time, so to filter out markets registered
-  // after a query is run, we can just get the latest market ID from that query's results.
-  // Then we filter out markets with a market ID greater than that and sort the values in order to
-  // compare the expected results with the actual query results.
-  const checkOrder = async (
-    queryResults: MarketStateModel[],
-    sort: (a: MarketStateModel, b: MarketStateModel) => 0 | -1 | 1,
-    mapFunction: (
-      value: MarketStateModel,
-      index: number
-    ) => { marketID: bigint; value: bigint; index: number }
-  ) => {
-    // If the query results are longer than `LIMIT`, these queries need to be paginated.
-    expect(queryResults.length).toBeLessThan(LIMIT);
-    const results = queryResults.map(mapFunction);
-
-    // Filter the unsorted query by the market IDs that are in the `queryResults`.
-    const marketIDsInQueryResult = queryResults.map(({ market }) => market.marketID);
-    // prettier-ignore
-    const unsortedQuery = () =>
-      postgrest
-        .from(TableName.MarketState)
-        .select("*")
-        .in("market_id", marketIDsInQueryResult);
-
-    // Manually sort the `unsortedQuery` results by the `sort` function passed in.
-    const expected = (await queryHelper(unsortedQuery, toMarketState)({}))
-      .toSorted(sort)
-      .map(mapFunction);
-
-    checkSubsetsEqual(results, expected);
-  };
-
   it("fetches markets by bump order", async () => {
-    const byBumpOrder = await fetchMarkets({ page: 1, sortBy: SortMarketsBy.BumpOrder });
+    const byBumpOrder = await fetchMarkets({
+      page: 1,
+      sortBy: SortMarketsBy.BumpOrder,
+      searchEmojis: [baseVampireEmoji],
+    });
     await checkOrder(
       byBumpOrder,
       ({ market: a }, { market: b }) => compareBigInt(b.time, a.time),
@@ -134,7 +108,11 @@ describe("sorting queries for the sort filters on the home page", () => {
   });
 
   it("fetches markets by market cap", async () => {
-    const byMarketCap = await fetchMarkets({ page: 1, sortBy: SortMarketsBy.MarketCap });
+    const byMarketCap = await fetchMarkets({
+      page: 1,
+      sortBy: SortMarketsBy.MarketCap,
+      searchEmojis: [baseVampireEmoji], // Only include symbols with a `vampire` emoji in them.
+    });
     await checkOrder(
       byMarketCap,
       ({ state: a }, { state: b }) =>
@@ -148,7 +126,11 @@ describe("sorting queries for the sort filters on the home page", () => {
   });
 
   it("fetches markets by all time volume", async () => {
-    const byAllTimeVolume = await fetchMarkets({ page: 1, sortBy: SortMarketsBy.AllTimeVolume });
+    const byAllTimeVolume = await fetchMarkets({
+      page: 1,
+      sortBy: SortMarketsBy.AllTimeVolume,
+      searchEmojis: [baseVampireEmoji],
+    });
     await checkOrder(
       byAllTimeVolume,
       ({ state: a }, { state: b }) =>
@@ -162,7 +144,11 @@ describe("sorting queries for the sort filters on the home page", () => {
   });
 
   it("fetches markets by daily volume", async () => {
-    const byDailyVolume = await fetchMarkets({ page: 1, sortBy: SortMarketsBy.DailyVolume });
+    const byDailyVolume = await fetchMarkets({
+      page: 1,
+      sortBy: SortMarketsBy.DailyVolume,
+      searchEmojis: [baseVampireEmoji],
+    });
     await checkOrder(
       byDailyVolume,
       ({ dailyVolume: a }, { dailyVolume: b }) => compareBigInt(b, a),
