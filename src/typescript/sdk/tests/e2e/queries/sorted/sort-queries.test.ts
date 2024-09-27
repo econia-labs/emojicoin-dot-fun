@@ -11,13 +11,9 @@ import {
 } from "../../../../src";
 import TestHelpers from "../../../utils/helpers";
 import { getFundedAccounts } from "../../../utils/test-accounts";
-import { waitForEmojicoinIndexer, queryHelper } from "../../../../src/indexer-v2/queries/utils";
+import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { Swap } from "../../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils";
-import { postgrest } from "../../../../src/indexer-v2/queries/client";
-import { TableName } from "../../../../src/indexer-v2/types/json-types";
-import { LIMIT } from "../../../../src/queries";
-import { type MarketStateModel, toMarketState } from "../../../../src/indexer-v2/types";
 import { fetchMarkets } from "../../../../src/indexer-v2/queries/app/home";
 import { SortMarketsBy } from "../../../../src/indexer-v2/types/common";
 import {

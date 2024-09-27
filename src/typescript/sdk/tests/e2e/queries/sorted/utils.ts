@@ -1,6 +1,6 @@
 import { compareBigInt, sortBigIntArrays } from "../../../../src";
 import { postgrest, queryHelper } from "../../../../src/indexer-v2/queries";
-import { MarketStateModel, toMarketState } from "../../../../src/indexer-v2/types";
+import { type MarketStateModel, toMarketState } from "../../../../src/indexer-v2/types";
 import { TableName } from "../../../../src/indexer-v2/types/json-types";
 import { LIMIT } from "../../../../src/queries";
 
@@ -26,39 +26,6 @@ export const sortWithUnsortedSubsets = (
   }
 
   return valueMap;
-};
-
-// Market IDs are in ascending order of registration time, so to filter out markets registered
-// after a query is run, we can just get the latest market ID from that query's results.
-// Then we filter out markets with a market ID greater than that and sort the values in order to
-// compare the expected results with the actual query results.
-export const checkOrder = async (
-  queryResults: MarketStateModel[],
-  sort: (a: MarketStateModel, b: MarketStateModel) => 0 | -1 | 1,
-  mapFunction: (
-    value: MarketStateModel,
-    index: number
-  ) => { marketID: bigint; value: bigint; index: number }
-) => {
-  // If the query results are longer than `LIMIT`, these queries need to be paginated.
-  expect(queryResults.length).toBeLessThan(LIMIT);
-  const results = queryResults.map(mapFunction);
-
-  // Filter the unsorted query by the market IDs that are in the `queryResults`.
-  const marketIDsInQueryResult = queryResults.map(({ market }) => market.marketID);
-  // prettier-ignore
-  const unsortedQuery = () =>
-      postgrest
-        .from(TableName.MarketState)
-        .select("*")
-        .in("market_id", marketIDsInQueryResult);
-
-  // Manually sort the `unsortedQuery` results by the `sort` function passed in.
-  const expected = (await queryHelper(unsortedQuery, toMarketState)({}))
-    .toSorted(sort)
-    .map(mapFunction);
-
-  checkSubsetsEqual(results, expected);
 };
 
 // Postgres doesn't deterministically sort when columns are equal. In order to compare the
@@ -88,12 +55,6 @@ export const checkSubsetsEqual = (results: SortableResults[], expected: Sortable
   const binnedExpected = sortWithUnsortedSubsets(expected);
   const sortedResultKeys = Array.from(binnedResults.keys()).toSorted(compareBigInt);
   const sortedExpectedKeys = Array.from(binnedExpected.keys()).toSorted(compareBigInt);
-  if (sortedResultKeys.join(",") !== sortedExpectedKeys.join(",")) {
-    console.log(binnedResults);
-    console.log(binnedExpected);
-    console.log(sortedResultKeys);
-    console.log(sortedExpectedKeys);
-  }
   expect(binnedResults.size).toEqual(binnedExpected.size);
   expect(sortedResultKeys).toEqual(sortedExpectedKeys);
 
@@ -106,6 +67,35 @@ export const checkSubsetsEqual = (results: SortableResults[], expected: Sortable
     expect(marketIDsExpected).toEqual(marketIDsResult);
     expect(lowestIndexExpected).toEqual(lowestIndexResult);
   }
+};
+
+export const checkOrder = async (
+  queryResults: MarketStateModel[],
+  sort: (a: MarketStateModel, b: MarketStateModel) => 0 | -1 | 1,
+  mapFunction: (
+    value: MarketStateModel,
+    index: number
+  ) => { marketID: bigint; value: bigint; index: number }
+) => {
+  // If the query results are longer than `LIMIT`, these queries need to be paginated.
+  expect(queryResults.length).toBeLessThan(LIMIT);
+  const results = queryResults.map(mapFunction);
+
+  // Filter the unsorted query by the market IDs that are in the `queryResults`.
+  const marketIDsInQueryResult = queryResults.map(({ market }) => market.marketID);
+  // prettier-ignore
+  const unsortedQuery = () =>
+      postgrest
+        .from(TableName.MarketState)
+        .select("*")
+        .in("market_id", marketIDsInQueryResult);
+
+  // Manually sort the `unsortedQuery` results by the `sort` function passed in.
+  const expected = (await queryHelper(unsortedQuery, toMarketState)({}))
+    .toSorted(sort)
+    .map(mapFunction);
+
+  checkSubsetsEqual(results, expected);
 };
 
 export const toSortableResults = (pair: [bigint, bigint], index: number) => {
