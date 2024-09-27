@@ -102,6 +102,12 @@ export const compareMarketAndStateMetadata = <
     ["row.market.marketNonce", row.market.marketNonce, event.stateMetadata.marketNonce],
     ["row.market.trigger", row.market.trigger, event.stateMetadata.trigger],
     ["row.market.time", row.market.time, event.stateMetadata.bumpTime],
+    ["row.market.marketAddress", row.market.marketAddress, event.marketMetadata.marketAddress],
+    [
+      "row.market.symbol",
+      row.market.symbolEmojis.join(""),
+      new TextDecoder().decode(event.marketMetadata.emojiBytes),
+    ],
   ]);
 
 export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
