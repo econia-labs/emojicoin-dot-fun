@@ -4,7 +4,7 @@ import {
   type Account,
 } from "@aptos-labs/ts-sdk";
 import {
-  bigintMax,
+  maxBigInt,
   getEvents,
   getPeriodBoundary,
   getPeriodBoundaryAsDate,
@@ -217,7 +217,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
       });
       /* eslint-disable-next-line no-await-in-loop */
       const responses = await Promise.all(transactions);
-      highestVersion = bigintMax(getTxnBatchHighestVersion(responses), highestVersion);
+      highestVersion = maxBigInt(getTxnBatchHighestVersion(responses), highestVersion);
       results.push(...responses.map(getEvents));
     }
     const { marketID } = events.marketRegistrationEvents[0];

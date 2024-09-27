@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 
 import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { bigintMax, type MarketSymbolEmojis } from "../../../src";
+import { maxBigInt, type MarketSymbolEmojis } from "../../../src";
 import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
 
@@ -62,7 +62,7 @@ describe("queries for liquidity pools", () => {
       responses.push(res);
     }
 
-    const highestVersion = bigintMax(...responses.map(({ version }) => version));
+    const highestVersion = maxBigInt(...responses.map(({ version }) => version));
     await waitForEmojicoinIndexer(highestVersion);
 
     const res = await fetchUserLiquidityPools({ provider: provider.accountAddress });

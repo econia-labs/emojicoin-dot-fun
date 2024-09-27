@@ -1,6 +1,6 @@
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
-  bigintMax,
+  maxBigInt,
   compareBigInt,
   type EmojiName,
   getEmojicoinMarketAddressAndTypeTags,
@@ -99,7 +99,7 @@ describe("sorting queries for the sort filters on the home page", () => {
     const manualQueryResults = await queryHelper(allMarketsQuery, toMarketState)({});
     expect(manualQueryResults.length).toBeLessThanOrEqual(LIMIT);
 
-    const latestMarketID = bigintMax(...queryResults.map((res) => res.market.marketID));
+    const latestMarketID = maxBigInt(...queryResults.map((res) => res.market.marketID));
     const expected = manualQueryResults
       .filter(({ market }) => market.marketID <= latestMarketID)
       .toSorted(sort)
