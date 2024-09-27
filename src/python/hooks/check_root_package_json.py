@@ -29,14 +29,6 @@ def main(fix_version=False):
 
     pm_str = f"{Fore.LIGHTBLUE_EX}packageManager{Fore.RESET}"
 
-    # Ensure the `package.json` file isn't being used for any other fields.
-    if len(root_package_json) != 1:
-        print(
-            f"{Fore.RED} {root_package_json_path} ",
-            f"should contain a single field: {pm_str}.",
-        )
-        sys.exit(1)
-
     rp_json_path = str(root_package_json_path)
     fp_json_path = str(frontend_package_json_path)
     formatted_root = Fore.LIGHTBLACK_EX + rp_json_path.lstrip(relative_root)
