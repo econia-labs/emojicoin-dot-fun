@@ -13,10 +13,19 @@ export const variants = {
 export const scales = {
   SMALL: "sm",
   LARGE: "lg",
+  VERY_LARGE: "xl",
 } as const;
 
 export type Scale = (typeof scales)[keyof typeof scales];
 export type Variant = (typeof variants)[keyof typeof variants];
+
+export const scaleToPx = (scale: Scale) => {
+  switch (scale) {
+    case "sm": return "20px";
+    case "lg": return "24px";
+    case "xl": return "30px";
+  }
+}
 
 export interface BaseButtonProps
   extends LayoutProps,

@@ -313,7 +313,7 @@ export default function SwapComponent({
           </InnerWrapper>
         </SimulateInputsWrapper>
 
-        <Row className="justify-center mt-[14px]">
+        <Row className="justify-center mt-[24px]">
           <SwapButton
             inputAmount={inputAmount}
             marketAddress={marketAddress}

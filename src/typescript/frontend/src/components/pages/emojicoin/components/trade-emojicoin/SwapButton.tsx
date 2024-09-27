@@ -79,8 +79,8 @@ export const SwapButton = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
-        <Button disabled={disabled} onClick={handleClick} scale="lg">
+      <ButtonWithConnectWalletFallback geoblocked={geoblocked} scale="xl">
+        <Button disabled={disabled} onClick={handleClick} scale="xl">
           {t("Swap")}
         </Button>
         <RewardsAnimation controls={controls} />

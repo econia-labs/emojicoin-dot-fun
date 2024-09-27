@@ -8,7 +8,7 @@ import SpinnerIcon from "components/svg/icons/Spinner";
 import { Text } from "components/text";
 import { FlexGap } from "@containers";
 
-import { type ButtonProps } from "./types";
+import { scaleToPx, type ButtonProps } from "./types";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 
 const Button = <E extends React.ElementType = "button">({
@@ -63,7 +63,7 @@ const Button = <E extends React.ElementType = "button">({
                 textScale="pixelHeading4"
                 color={isDisabled ? "darkGray" : "econiaBlue"}
                 textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
+                fontSize={scaleToPx(scale)}
               >
                 {"{ "}
               </Text>
@@ -71,14 +71,14 @@ const Button = <E extends React.ElementType = "button">({
                 textScale="pixelHeading4"
                 color={isDisabled ? "darkGray" : "econiaBlue"}
                 textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
+                fontSize={scaleToPx(scale)}
                 ref={isScramble ? ref : undefined}
               />
               <Text
                 textScale="pixelHeading4"
                 color={isDisabled ? "darkGray" : "econiaBlue"}
                 textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
+                fontSize={scaleToPx(scale)}
               >
                 {" }"}
               </Text>

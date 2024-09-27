@@ -27,7 +27,7 @@ export const LaunchButtonOrGoToMarketLink = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
+      <ButtonWithConnectWalletFallback geoblocked={geoblocked} scale="xl">
         {registered ? (
           <Link
             className="font-pixelar text-lg uppercase text-ec-blue"
@@ -41,7 +41,7 @@ export const LaunchButtonOrGoToMarketLink = ({
           <Button
             disabled={invalid || typeof registered === "undefined"}
             onClick={onWalletButtonClick}
-            scale="lg"
+            scale="xl"
             style={{ cursor: invalid ? "not-allowed" : "pointer" }}
             scrambleProps={scrambleProps}
           >

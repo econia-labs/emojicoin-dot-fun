@@ -10,12 +10,14 @@ import Arrow from "@icons/Arrow";
 import { useNameStore } from "context/event-store-context";
 import Popup from "components/popup";
 import Text from "components/text";
+import { type Scale, scaleToPx } from "components/button/types";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
   onClick?: () => void;
   geoblocked: boolean;
   arrow?: boolean;
+  scale?: Scale;
 }
 
 const CONNECT_WALLET = "Connect Wallet";
@@ -27,6 +29,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   onClick,
   geoblocked,
   arrow = true,
+  scale = "lg",
 }) => {
   const { connected, account } = useWallet();
   const { openWalletModal } = useWalletModal();
@@ -86,7 +89,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
         onMouseOver={handleReplay}
       >
         <div
-          className={`flex flex-row text-${geoblocked ? "dark-gray" : "ec-blue"} text-2xl justify-between`}
+          className={`flex flex-row text-${geoblocked ? "dark-gray" : "ec-blue"} justify-between`} style={{fontSize: scaleToPx(scale)}}
         >
           <div className="flex flex-row">
             <OuterConnectText

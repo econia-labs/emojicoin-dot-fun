@@ -299,9 +299,9 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           mb={{ _: "17px", tablet: "37px" }}
           position="relative"
         >
-          <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
+          <ButtonWithConnectWalletFallback geoblocked={geoblocked} scale="xl">
             <Button
-              scale="lg"
+              scale="xl"
               disabled={!isActionPossible}
               style={{ cursor: isActionPossible ? "pointer" : "not-allowed" }}
               onClick={async () => {
