@@ -39,6 +39,7 @@ describe("registers a market successfully", () => {
 
     const randomIntegrator = Ed25519Account.generate();
 
+    // As actual emojis: ["🦓", "🧟"];
     const emojis = ["0xf09fa693" as const, "0xf09fa79f" as const];
 
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({

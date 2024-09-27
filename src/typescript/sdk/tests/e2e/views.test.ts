@@ -42,7 +42,9 @@ describe("view functions", () => {
   });
 
   it("tests verified symbol emoji bytes", async () => {
-    const emojis = ["f09fa693", "f09fa79f"];
+    // As actual emojis: ["🦓", "🧟"];
+    const emojis: HexInput[] = ["f09fa693", "f09fa79f"];
+
     const response = await EmojicoinDotFun.VerifiedSymbolEmojiBytes.view({
       aptos,
       emojis,
