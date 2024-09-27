@@ -139,7 +139,13 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           </AnimatePresence>
           {linksForCurrentPage.map(({ title, path }, i) => {
             return (
-              <Link key={title} href={path} onClick={handleCloseMobileMenu} width="100%">
+              <Link
+                key={title}
+                href={path}
+                target={path.startsWith("https://") ? "_blank" : undefined}
+                onClick={handleCloseMobileMenu}
+                width="100%"
+              >
                 <MobileMenuItem title={title} borderBottom={i !== linksForCurrentPage.length - 1} />
               </Link>
             );
