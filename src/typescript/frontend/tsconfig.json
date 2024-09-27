@@ -5,6 +5,7 @@
     "baseUrl": "src/",
     "downlevelIteration": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "isolatedModules": true,
@@ -21,6 +22,15 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "paths": {
+      "@/broker/*": [
+        "../../sdk/src/broker-v2/*"
+      ],
+      "@/queries/*": [
+        "../../sdk/src/indexer-v2/queries/app/*"
+      ],
+      "@/store/*": [
+        "lib/store/*"
+      ],
       "@containers": [
         "components/layout/components/index.ts"
       ],
@@ -38,9 +48,6 @@
       ],
       "@static/*": [
         "../public/static/*"
-      ],
-      "@store/*": [
-        "lib/store/*"
       ]
     },
     "plugins": [

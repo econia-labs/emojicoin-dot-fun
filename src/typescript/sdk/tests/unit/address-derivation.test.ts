@@ -1,5 +1,5 @@
 import { AccountAddress } from "@aptos-labs/ts-sdk";
-import { deriveEmojicoinPublisherAddress } from "../../src";
+import { deriveEmojicoinPublisherAddress, type SymbolEmoji } from "../../src";
 
 describe("it derives emojicoin addresses", () => {
   it("derives the named object address from hex string emojis", async () => {
@@ -9,7 +9,8 @@ describe("it derives emojicoin addresses", () => {
     const expectedObjectAddress = AccountAddress.from(
       "0x2250d03d164dc3b341d927f65858d8fa8f12ee83aaab4d16dff7308e437bfcbf"
     );
-    const emojis = ["f09fa693", "f09fa79f"];
+
+    const emojis: Array<SymbolEmoji> = ["🦓", "🧟"];
 
     const derivedNamedObjectFromRawEmojis = deriveEmojicoinPublisherAddress({
       registryAddress,

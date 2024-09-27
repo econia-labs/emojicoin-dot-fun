@@ -91,7 +91,7 @@ const TableRow = ({ item, showBorder }: TableRowDesktopProps) => {
           className={`w-[22%] md:w-[18%] ${TableCellStyles} md:ml-[3ch] xl:ml-[0.5ch] xl:mr-[-0.5ch]`}
           color={item.type === "sell" ? darkColors.pink : darkColors.green}
         >
-          {toNominalPrice(item.price).toFixed(9)}
+          {toNominalPrice(item.priceQ64).toFixed(9)}
         </TableRowTextItem>
         <td className={`group/explorer w-[22%] md:w-[18%] border-r-[1px] z-[2] ${TableCellStyles}`}>
           <ExplorerLink className="flex w-full h-full" value={item.version} type="txn">

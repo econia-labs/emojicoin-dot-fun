@@ -16,9 +16,7 @@ jest.setTimeout(20000);
 
 describe("registers a market successfully", () => {
   const { aptos, publisher, publishPackageResult } = getPublishHelpers();
-  const user = getFundedAccount(
-    "0x000276e7908d952b7639672a07da760969c7791315fdde140c00228427fe6000"
-  );
+  const user = getFundedAccount("000");
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
     const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
@@ -41,7 +39,8 @@ describe("registers a market successfully", () => {
 
     const randomIntegrator = Ed25519Account.generate();
 
-    const emojis = ["f09fa693", "f09fa79f"];
+    // As actual emojis: ["🦓", "🧟"];
+    const emojis = ["0xf09fa693" as const, "0xf09fa79f" as const];
 
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
@@ -74,7 +73,7 @@ describe("registers a market successfully", () => {
 
     const marketObjectMarketResource = await getMarketResource({
       aptos,
-      objectAddress: derivedNamedObjectAddress,
+      marketAddress: derivedNamedObjectAddress,
     });
 
     const { marketID, marketAddress, emojiBytes } = marketObjectMarketResource.metadata;
@@ -82,8 +81,9 @@ describe("registers a market successfully", () => {
     const { lpCoinSupply, extendRef } = marketObjectMarketResource;
 
     expect(marketID).toBeGreaterThanOrEqual(1n);
-    expect(Hex.fromHexInput(emojiBytes).toString()).toEqual(`0x${emojis.join("")}`);
-    expect(emojiBytes).toEqual(Hex.fromHexString(emojis.join("")).toUint8Array());
+    const fullHex = `0x${emojis.map((e) => e.replace(/^0x/, "")).join("")}` as const;
+    expect(Hex.fromHexInput(emojiBytes).toString()).toEqual(fullHex);
+    expect(emojiBytes).toEqual(Hex.fromHexString(fullHex).toUint8Array());
     expect(extendRef.self).toEqual(standardizeAddress(derivedNamedObjectAddress));
     expect(extendRef.self).toEqual(standardizeAddress(marketAddress));
     expect(lpCoinSupply).toEqual(0n);

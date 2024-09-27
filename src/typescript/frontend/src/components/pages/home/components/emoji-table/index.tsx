@@ -15,14 +15,12 @@ import {
 import SearchBar from "components/inputs/search-bar";
 import FilterOptions from "./components/FilterOptions";
 import { ClientGrid } from "./ClientGrid";
-import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
-import { MarketDataSortBy, type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { useRouter } from "next/navigation";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { encodeEmojis } from "@sdk/emoji_data";
-import { useEventStore, useUserSettings } from "context/state-store-context";
+import { useEventStore, useUserSettings } from "context/event-store-context";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import useEvent from "@hooks/use-event";
 import { constructURLForHomePage, isHomePageURLDifferent } from "lib/queries/sorting/query-params";
@@ -32,35 +30,39 @@ import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import { Text } from "components/text";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
+import { type HomePageProps } from "app/home/HomePage";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { type BrokerEvent } from "@/broker/types";
 
-export interface EmojiTableProps {
-  data: FetchSortedMarketDataReturn["markets"];
-  totalNumberOfMarkets: number;
-  page: number;
-  sortBy?: MarketDataSortByHomePage;
-  searchBytes?: string;
-  geoblocked: boolean;
-}
+export interface EmojiTableProps extends Omit<HomePageProps, "featured" | "children"> {}
+
+const baseGridSubscriptions: Array<BrokerEvent> = [
+  "Chat",
+  "Liquidity",
+  "MarketRegistration",
+  "Swap",
+];
 
 const EmojiTable = (props: EmojiTableProps) => {
   const router = useRouter();
 
-  const { data, page, sort, pages, searchBytes } = useMemo(() => {
-    const { data, page, sortBy: sort } = props;
-    const numMarkets = Math.max(props.totalNumberOfMarkets, 1);
+  const { markets, page, sort, pages, searchBytes } = useMemo(() => {
+    const { markets, page, sortBy: sort } = props;
+    const numMarkets = Math.max(props.numRegisteredMarkets, 1);
     const pages = Math.ceil(numMarkets / MARKETS_PER_PAGE);
     const searchBytes = props.searchBytes ?? "";
-    return { data, page, sort, pages, searchBytes };
+    return { markets, page, sort, pages, searchBytes };
   }, [props]);
 
-  const addMarketData = useEventStore((s) => s.addMarketData);
+  const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
   const setEmojis = useEmojiPicker((s) => s.setEmojis);
   const emojis = useEmojiPicker((s) => s.emojis);
 
   useEffect(() => {
-    data.map((d) => addMarketData(d));
+    loadMarketStateFromServer(markets);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [data]);
+  }, [markets]);
 
   useEffect(() => {
     const decoded = symbolBytesToEmojis(searchBytes ?? "");
@@ -70,29 +72,27 @@ const EmojiTable = (props: EmojiTableProps) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [searchBytes]);
 
-  const pushURL = useEvent(
-    (args?: { page?: number; sort?: MarketDataSortBy; emojis?: string[] }) => {
-      const curr = new URLSearchParams(location.search);
-      const newURL = constructURLForHomePage({
-        page: args?.page ?? page,
-        sort: args?.sort ?? sort,
-        searchBytes: encodeEmojis(args?.emojis ?? emojis),
-      });
+  const pushURL = useEvent((args?: { page?: number; sort?: SortMarketsBy; emojis?: string[] }) => {
+    const curr = new URLSearchParams(location.search);
+    const newURL = constructURLForHomePage({
+      page: args?.page ?? page,
+      sort: args?.sort ?? sort,
+      searchBytes: encodeEmojis(args?.emojis ?? emojis),
+    });
 
-      // Always push the new URL to the history, but only refresh if the URL has actually changed in a meaningful way.
-      router.push(newURL.toString(), { scroll: false });
-      if (isHomePageURLDifferent(curr, newURL.searchParams)) {
-        router.refresh();
-      }
+    // Always push the new URL to the history, but only refresh if the URL has actually changed in a meaningful way.
+    router.push(newURL.toString(), { scroll: false });
+    if (isHomePageURLDifferent(curr, newURL.searchParams)) {
+      router.refresh();
     }
-  );
+  });
 
   const handlePageChange = (page: number) => {
     const newPage = Math.min(Math.max(1, page), pages);
     pushURL({ page: newPage });
   };
 
-  const handleSortChange = (newPage: MarketDataSortBy) => {
+  const handleSortChange = (newPage: SortMarketsBy) => {
     pushURL({ sort: newPage });
   };
 
@@ -104,11 +104,17 @@ const EmojiTable = (props: EmojiTableProps) => {
   const animationsOn = useUserSettings((s) => s.animate);
 
   const shouldAnimateGrid = useMemo(
-    () => animationsOn && sort === MarketDataSortBy.BumpOrder && page === 1 && !searchBytes,
+    () => animationsOn && sort === SortMarketsBy.BumpOrder && page === 1 && !searchBytes,
     [sort, page, searchBytes, animationsOn]
   );
 
   const rowLength = useGridRowLength();
+
+  useReliableSubscribe({
+    eventTypes: shouldAnimateGrid
+      ? ["MarketLatestState", ...baseGridSubscriptions]
+      : baseGridSubscriptions,
+  });
 
   return (
     <OutermostContainer>
@@ -129,15 +135,12 @@ const EmojiTable = (props: EmojiTableProps) => {
               <SearchBar geoblocked={props.geoblocked} />
             </SearchWrapper>
             <FilterOptionsWrapper>
-              <FilterOptions
-                filter={sort ?? MarketDataSortBy.MarketCap}
-                onChange={handleSortChange}
-              />
+              <FilterOptions filter={sort ?? SortMarketsBy.MarketCap} onChange={handleSortChange} />
             </FilterOptionsWrapper>
           </motion.div>
           {/* Each version of the grid must wait for the other to fully exit animate out before appearing.
               This provides a smooth transition from grids of varying row lengths. */}
-          {data.length > 0 ? (
+          {markets.length > 0 ? (
             <>
               <AnimatePresence mode="wait">
                 <motion.div
@@ -161,12 +164,12 @@ const EmojiTable = (props: EmojiTableProps) => {
                 >
                   <StyledGrid>
                     {shouldAnimateGrid ? (
-                      <LiveClientGrid data={data} sortBy={sort ?? MarketDataSortBy.MarketCap} />
+                      <LiveClientGrid markets={markets} sortBy={sort ?? SortMarketsBy.MarketCap} />
                     ) : (
                       <ClientGrid
-                        data={data}
+                        markets={markets}
                         page={page}
-                        sortBy={sort ?? MarketDataSortBy.MarketCap}
+                        sortBy={sort ?? SortMarketsBy.MarketCap}
                       />
                     )}
                   </StyledGrid>
@@ -177,7 +180,7 @@ const EmojiTable = (props: EmojiTableProps) => {
           ) : (
             <div className="py-10">
               <Link href={`${ROUTES.launch}?emojis=${emojis.join("")}`}>
-                <Text textScale="pixelHeading3" color="econiaBlue">
+                <Text textScale="pixelHeading3" color="econiaBlue" className="uppercase">
                   Click here to launch {emojis.join("")} !
                 </Text>
               </Link>

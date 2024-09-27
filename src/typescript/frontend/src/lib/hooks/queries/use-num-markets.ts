@@ -1,7 +1,7 @@
 import { RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useQuery } from "@tanstack/react-query";
 import { getAptos } from "lib/utils/aptos-client";
-import { useEventStore } from "context/state-store-context";
+import { useEventStore } from "context/event-store-context";
 
 async function getNumMarkets(): Promise<number> {
   const aptos = getAptos();
@@ -9,7 +9,7 @@ async function getNumMarkets(): Promise<number> {
 }
 
 export const useNumMarkets = () => {
-  const numMarkets = useEventStore((s) => s.symbols.size);
+  const numMarkets = useEventStore((s) => s.markets.size);
   const res = useQuery({
     queryKey: ["num-markets", numMarkets],
     queryFn: () => {

@@ -1,5 +1,3 @@
-import "server-only";
-
 import {
   type EntryFunctionPayloadResponse,
   type UserTransactionResponse,
@@ -29,9 +27,9 @@ import {
   calculateTvlGrowth,
   getEvents,
   getMarketResourceFromWriteSet,
-  standardizeAddress,
   Period,
-  toPeriodFromContract,
+  rawPeriodToEnum,
+  standardizeAddress,
   type Types,
 } from "../../../src";
 
@@ -104,6 +102,12 @@ export const compareMarketAndStateMetadata = <
     ["row.market.marketNonce", row.market.marketNonce, event.stateMetadata.marketNonce],
     ["row.market.trigger", row.market.trigger, event.stateMetadata.trigger],
     ["row.market.time", row.market.time, event.stateMetadata.bumpTime],
+    ["row.market.marketAddress", row.market.marketAddress, event.marketMetadata.marketAddress],
+    [
+      "row.market.symbol",
+      row.market.symbolEmojis.join(""),
+      new TextDecoder().decode(event.marketMetadata.emojiBytes),
+    ],
   ]);
 
 export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
@@ -265,7 +269,7 @@ const comparePeriodicStateMetadata = <T extends Indexer["PeriodicStateMetadata"]
     [
       "row.periodicMetadata.period",
       row.periodicMetadata.period,
-      toPeriodFromContract(event.periodicStateMetadata.period),
+      rawPeriodToEnum(event.periodicStateMetadata.period),
     ],
     [
       "row.periodicMetadata.startTime",
@@ -302,7 +306,7 @@ const comparePeriodicStateEvent = <T extends Indexer["PeriodicStateEventData"]>(
     ],
     [
       "row.periodicState.tvlPerLpCoinGrowthQ64",
-      row.periodicState.tvlPerLpCoinGrowthQ64,
+      row.periodicState.tvlPerLPCoinGrowthQ64,
       event.tvlPerLPCoinGrowthQ64,
     ],
   ]);
@@ -429,6 +433,7 @@ const chatRow = (row: ChatEventModel, response: UserTransactionResponse) => {
 
   compareTransactionMetadata(row, response);
   compareMarketAndStateMetadata(row, stateEvent);
+  compareLastSwap(row, stateEvent);
   compareChatEvents(row, chatEvent);
 };
 
@@ -439,6 +444,7 @@ const liquidityRow = (row: LiquidityEventModel, response: UserTransactionRespons
 
   compareTransactionMetadata(row, response);
   compareMarketAndStateMetadata(row, stateEvent);
+  compareLastSwap(row, stateEvent);
   compareLiquidityEvents(row, liquidityEvent);
 };
 
@@ -448,7 +454,6 @@ const marketLatestStateRow = (
 ) => {
   const events = getEvents(response);
   const stateEvent = events.stateEvents[0];
-
   const { marketAddress } = stateEvent.marketMetadata;
   const marketResource = getMarketResourceFromWriteSet(response, marketAddress);
   if (!marketResource) {
@@ -456,20 +461,15 @@ const marketLatestStateRow = (
   }
 
   const volumeInStateTrackerFromWriteSet = marketResource.periodicStateTrackers.find(
-    (p) => toPeriodFromContract(p.period) === Period.Period1M
-  )?.volumeQuote;
+    (p) => rawPeriodToEnum(p.period) === Period.Period1M
+  )!.volumeQuote;
 
   const periodicStateTracker1D = marketResource.periodicStateTrackers.find(
-    (p) => toPeriodFromContract(p.period) === Period.Period1D
-  );
+    (p) => rawPeriodToEnum(p.period) === Period.Period1D
+  )!;
 
-  if (volumeInStateTrackerFromWriteSet === undefined) {
-    throw new Error("There should be a 1M periodic state tracker in the Market resource.");
-  }
-
-  if (!periodicStateTracker1D) {
-    throw new Error("There should be a 1D periodic state tracker in the Market resource.");
-  }
+  expect(volumeInStateTrackerFromWriteSet).toBeDefined();
+  expect(periodicStateTracker1D).toBeDefined();
 
   compareMarketAndStateMetadata(row, stateEvent);
   compareTransactionMetadata(row, response);

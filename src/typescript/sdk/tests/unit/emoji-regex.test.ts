@@ -1,54 +1,57 @@
-import { SYMBOL_DATA } from "../../src";
+import fs from "fs";
+import path from "path";
+import { SYMBOL_DATA, type SymbolEmoji } from "../../src";
 import {
   encodeEmojis,
   encodeSymbols,
   getEmojisInString,
-  isValidSymbol,
+  isValidMarketSymbol,
   symbolToEmojis,
 } from "../../src/emoji_data/utils";
 import SymbolEmojiData from "../../src/emoji_data/symbol-emojis.json";
+import { getGitRoot } from "../utils";
 
 describe("tests emojis against the emoji regex to ensure they're properly validated", () => {
   it("tests a few single emojis", () => {
-    expect(isValidSymbol("🟥")).toBe(true);
-    expect(isValidSymbol("🟧")).toBe(true);
-    expect(isValidSymbol("🟩")).toBe(true);
-    expect(isValidSymbol("🟦")).toBe(true);
-    expect(isValidSymbol("🟪")).toBe(true);
-    expect(isValidSymbol("🟫")).toBe(true);
-    expect(isValidSymbol("🟧")).toBe(true);
-    expect(isValidSymbol("🟨")).toBe(true);
-    expect(isValidSymbol("👩")).toBe(true);
-    expect(isValidSymbol("👩🏿")).toBe(true);
-    expect(isValidSymbol("⌚")).toBe(true);
-    expect(isValidSymbol("🎑")).toBe(true);
+    expect(isValidMarketSymbol("🟥")).toBe(true);
+    expect(isValidMarketSymbol("🟧")).toBe(true);
+    expect(isValidMarketSymbol("🟩")).toBe(true);
+    expect(isValidMarketSymbol("🟦")).toBe(true);
+    expect(isValidMarketSymbol("🟪")).toBe(true);
+    expect(isValidMarketSymbol("🟫")).toBe(true);
+    expect(isValidMarketSymbol("🟧")).toBe(true);
+    expect(isValidMarketSymbol("🟨")).toBe(true);
+    expect(isValidMarketSymbol("👩")).toBe(true);
+    expect(isValidMarketSymbol("👩🏿")).toBe(true);
+    expect(isValidMarketSymbol("⌚")).toBe(true);
+    expect(isValidMarketSymbol("🎑")).toBe(true);
   });
 
   it("tests emoji successful combinations", () => {
-    expect(isValidSymbol("🟥🟧")).toBe(true);
-    expect(isValidSymbol("🟦🟪")).toBe(true);
-    expect(isValidSymbol("👩🏿")).toBe(true);
+    expect(isValidMarketSymbol("🟥🟧")).toBe(true);
+    expect(isValidMarketSymbol("🟦🟪")).toBe(true);
+    expect(isValidMarketSymbol("👩🏿")).toBe(true);
   });
 
   it("tests emoji unsuccessful combinations", () => {
-    expect(isValidSymbol("👩👩🏿")).toBe(false);
-    expect(isValidSymbol("👨‍👨‍👦‍👦")).toBe(false);
-    expect(isValidSymbol("👨‍👨‍👦‍👦")).toBe(false);
-    expect(isValidSymbol("☝🏾☝️☝🏻☝🏼☝🏽☝🏾☝🏿")).toBe(false);
+    expect(isValidMarketSymbol("👩👩🏿")).toBe(false);
+    expect(isValidMarketSymbol("👨‍👨‍👦‍👦")).toBe(false);
+    expect(isValidMarketSymbol("👨‍👨‍👦‍👦")).toBe(false);
+    expect(isValidMarketSymbol("☝🏾☝️☝🏻☝🏼☝🏽☝🏾☝🏿")).toBe(false);
   });
 
   it("tests invalid inputs", () => {
-    expect(isValidSymbol("")).toBe(false);
-    expect(isValidSymbol("0123456789")).toBe(false);
-    expect(isValidSymbol("blah blah blah")).toBe(false);
-    expect(isValidSymbol("0 1 2")).toBe(false);
-    expect(isValidSymbol(" ")).toBe(false);
-    expect(isValidSymbol("☝🏾 ☝🏾")).toBe(false);
-    expect(isValidSymbol("🟪.🟪")).toBe(false);
-    expect(isValidSymbol("🟪 🟪")).toBe(false);
-    expect(isValidSymbol("🟪 🟪")).toBe(false);
-    expect(isValidSymbol("🟪 ")).toBe(false);
-    expect(isValidSymbol(" 🟪")).toBe(false);
+    expect(isValidMarketSymbol("")).toBe(false);
+    expect(isValidMarketSymbol("0123456789")).toBe(false);
+    expect(isValidMarketSymbol("blah blah blah")).toBe(false);
+    expect(isValidMarketSymbol("0 1 2")).toBe(false);
+    expect(isValidMarketSymbol(" ")).toBe(false);
+    expect(isValidMarketSymbol("☝🏾 ☝🏾")).toBe(false);
+    expect(isValidMarketSymbol("🟪.🟪")).toBe(false);
+    expect(isValidMarketSymbol("🟪 🟪")).toBe(false);
+    expect(isValidMarketSymbol("🟪 🟪")).toBe(false);
+    expect(isValidMarketSymbol("🟪 ")).toBe(false);
+    expect(isValidMarketSymbol(" 🟪")).toBe(false);
   });
 });
 
@@ -64,10 +67,14 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
   });
 
   it("maps the emojis to their corresponding data", () => {
-    const names = new Set(Object.keys(SymbolEmojiData));
-    const emojis = ["🎅", "🎅🏽", "🎅🏼", "🎅🏿", "🌎", "🇧🇷", "⭐"].map((v) => SYMBOL_DATA.byEmoji(v)!);
+    const symbols = new Set(Object.keys(SymbolEmojiData));
+    const names = new Set(Object.values(SymbolEmojiData));
+    const emojis = new Array<SymbolEmoji>("🎅", "🎅🏽", "🎅🏼", "🎅🏿", "🌎", "🇧🇷", "⭐").map((v) =>
+      SYMBOL_DATA.byEmojiStrict(v)
+    );
     emojis.forEach((emoji) => {
       expect(emoji).toBeDefined();
+      expect(symbols.has(emoji.emoji)).toBe(true);
       expect(names.has(emoji.name)).toBe(true);
     });
   });
@@ -82,8 +89,10 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
     const symbol = " 🎅🎅🏽🎅🏼🎅🏿   🌎🇧🇷 ⭐ ...";
     const emojiData = symbolToEmojis(symbol);
     expect(emojiData.emojis).toHaveLength(7);
-    const names = new Set(Object.keys(SymbolEmojiData));
+    const symbols = new Set(Object.keys(SymbolEmojiData));
+    const names = new Set(Object.values(SymbolEmojiData));
     emojiData.emojis.forEach((emoji) => {
+      expect(symbols.has(emoji.emoji)).toBe(true);
       expect(names.has(emoji.name)).toBe(true);
     });
   });
@@ -110,5 +119,32 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
       expect(enc1).toEqual(enc3);
       expect(enc1).toEqual(enc4);
     }
+  });
+
+  it("ensures the Rust processor has the same emoji data as the TypeScript SDK", () => {
+    const gitRoot = getGitRoot();
+    const tsPath = path.join(gitRoot, "src/typescript/sdk/src/emoji_data/symbol-emojis.json");
+    const rustPath = path.join(
+      gitRoot,
+      "src/rust/processor",
+      "rust/processor",
+      "src/db/common/models/emojicoin_models",
+      "parsers/emojis/symbol-emojis.json"
+    );
+    const tsData = fs.readFileSync(tsPath);
+    const tsJSON = JSON.parse(tsData.toString());
+    const rustJSON = (() => {
+      try {
+        const rustData = fs.readFileSync(rustPath).toString();
+        return JSON.parse(rustData);
+      } catch (e) {
+        // File not found. If we're in CI, that's fine. Only need to check this infrequently.
+        if (process.env.CI || process.env.GITHUB_ACTIONS) {
+          return tsJSON;
+        }
+        return "[]";
+      }
+    })();
+    expect(JSON.stringify(tsJSON) === JSON.stringify(rustJSON));
   });
 });

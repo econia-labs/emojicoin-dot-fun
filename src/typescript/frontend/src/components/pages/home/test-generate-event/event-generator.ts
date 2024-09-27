@@ -4,14 +4,21 @@ import {
   type AccountAddressInput,
   type Uint8,
 } from "@aptos-labs/ts-sdk";
-import { toAnyEmojicoinEvent, type Types, type AnyNumberString } from "@sdk-types";
-import { fromContractEnumToRawTrigger, Trigger } from "@sdk/const";
+import {
+  toEmojicoinEvent,
+  type Types,
+  type AnyNumberString,
+  type AnyEmojicoinEvent,
+} from "@sdk-types";
+import { triggerEnumToRawTrigger, Trigger } from "@sdk/const";
 import { getRandomEmoji, type EmojicoinSymbol, generateRandomSymbol } from "@sdk/emoji_data";
 import { getEmojicoinData } from "@sdk/markets/utils";
 import type JSONTypes from "@sdk/types/json-types";
 import { STRUCT_STRINGS } from "@sdk/utils";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import Big from "big.js";
+import { getEventsAsProcessorModels } from "@sdk/mini-processor";
+import { createEmptyEvents, type Events } from "@sdk/emojicoin_dot_fun/events";
 
 /**
  * Note that this data is generated solely for animation purposes. It isn't logically consistent
@@ -75,32 +82,82 @@ export const generateRandomEvent = ({
     emojis,
   };
   const eventType = triggerToStructString(trigger);
-  const jsonEvent = (() => {
+  const events: Events = createEmptyEvents();
+  const t = eventType;
+  const v = Number(version);
+  let ev: AnyEmojicoinEvent;
+  switch (trigger) {
+    case Trigger.MarketRegistration:
+      ev = toEmojicoinEvent(t, generateMarketRegistrationJSON(args), v);
+      events.marketRegistrationEvents.push(ev as Types.MarketRegistrationEvent);
+      break;
+    case Trigger.SwapBuy:
+      ev = toEmojicoinEvent(t, generateSwapJSON({ ...args, isSell: false }), v);
+      events.swapEvents.push(ev as Types.SwapEvent);
+      break;
+    case Trigger.SwapSell:
+      ev = toEmojicoinEvent(t, generateSwapJSON({ ...args, isSell: true }), v);
+      events.swapEvents.push(ev as Types.SwapEvent);
+      break;
+    case Trigger.ProvideLiquidity:
+      ev = toEmojicoinEvent(t, generateLiquidityJSON({ ...args, liquidityProvided: true }), v);
+      events.liquidityEvents.push(ev as Types.LiquidityEvent);
+      break;
+    case Trigger.RemoveLiquidity:
+      ev = toEmojicoinEvent(t, generateLiquidityJSON({ ...args, liquidityProvided: false }), v);
+      events.liquidityEvents.push(ev as Types.LiquidityEvent);
+      break;
+    case Trigger.Chat:
+      ev = toEmojicoinEvent(t, generateChatJSON(args), v);
+      events.chatEvents.push(ev as Types.ChatEvent);
+      break;
+    default:
+      throw new Error(`Invalid trigger: ${trigger}`);
+  }
+  const stateJSON = generateStateJSON({ ...args, trigger: triggerEnumToRawTrigger(trigger) });
+  const stateEvent = toEmojicoinEvent(
+    STRUCT_STRINGS.StateEvent,
+    stateJSON,
+    Number(version)
+  ) as Types.StateEvent;
+  events.stateEvents.push(stateEvent);
+
+  const models = getEventsAsProcessorModels(events, {
+    sender: "0x0123",
+    entryFunction: "0x1234::some_contract::function",
+    version: BigInt(version ?? 7777777),
+    time: 0n,
+  });
+
+  const triggeringEvent = (() => {
     switch (trigger) {
       case Trigger.MarketRegistration:
-        return generateMarketRegistrationJSON(args);
+        return models.marketRegistrationEvents.pop();
       case Trigger.SwapBuy:
-        return generateSwapJSON({ ...args, isSell: false });
+        return models.swapEvents.pop();
       case Trigger.SwapSell:
-        return generateSwapJSON({ ...args, isSell: true });
+        return models.swapEvents.pop();
       case Trigger.ProvideLiquidity:
-        return generateLiquidityJSON({ ...args, liquidityProvided: true });
+        return models.liquidityEvents.pop();
       case Trigger.RemoveLiquidity:
-        return generateLiquidityJSON({ ...args, liquidityProvided: false });
+        return models.liquidityEvents.pop();
       case Trigger.Chat:
-        return generateChatJSON(args);
+        return models.chatEvents.pop();
       default:
         throw new Error(`Invalid trigger: ${trigger}`);
     }
   })();
-  const specificEvent = toAnyEmojicoinEvent(eventType, jsonEvent, Number(version));
-  const stateJSON = generateStateJSON({ ...args, trigger: fromContractEnumToRawTrigger(trigger) });
-  const stateEvent = toAnyEmojicoinEvent(STRUCT_STRINGS.StateEvent, stateJSON, Number(version));
+
+  const stateEventModel = models.marketLatestStateEvents.pop();
+
+  if (!triggeringEvent || !stateEventModel) {
+    throw new Error("Something went wrong and the events were parsed incorrectly.");
+  }
 
   return {
-    triggeringEvent: specificEvent,
-    stateEvent: stateEvent as Types.StateEvent,
-  } as const;
+    triggeringEvent,
+    stateEvent: stateEventModel,
+  };
 };
 
 const generateMarketRegistrationJSON = ({

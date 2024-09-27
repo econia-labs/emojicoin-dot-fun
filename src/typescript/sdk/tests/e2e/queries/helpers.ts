@@ -5,8 +5,8 @@ import {
   getEvents,
   getMarketResourceFromWriteSet,
   Period,
-  periodEnumToPeriodDuration,
-  toPeriodFromContract,
+  periodEnumToRawDuration,
+  rawPeriodToEnum,
   type Types,
 } from "../../../src";
 
@@ -16,9 +16,7 @@ export const getTrackerFromWriteSet = <T extends Period>(
   period: T
 ) => {
   const market = getMarketResourceFromWriteSet(res, marketAddress);
-  const tracker = market?.periodicStateTrackers.find(
-    (t) => toPeriodFromContract(t.period) === period
-  );
+  const tracker = market?.periodicStateTrackers.find((t) => rawPeriodToEnum(t.period) === period);
   return tracker;
 };
 
@@ -36,12 +34,12 @@ export const getPeriodExpiryDate = <T extends Period>(
 ): Date => {
   // Convert from micro to milliseconds. This value is never fractional, per the smart contract.
   const millisecondStartTime = Number(tracker.startTime / 1000n);
-  const periodDuration = periodEnumToPeriodDuration(period);
+  const periodDuration = periodEnumToRawDuration(period);
   const periodDurationMilliseconds = periodDuration.valueOf() / 1000;
   return new Date(millisecondStartTime + periodDurationMilliseconds);
 };
 
 export const getOneMinutePeriodicStateEvents = (res: UserTransactionResponse) =>
   getEvents(res).periodicStateEvents.filter(
-    (e) => toPeriodFromContract(e.periodicStateMetadata.period) === Period.Period1M
+    (e) => rawPeriodToEnum(e.periodicStateMetadata.period) === Period.Period1M
   );

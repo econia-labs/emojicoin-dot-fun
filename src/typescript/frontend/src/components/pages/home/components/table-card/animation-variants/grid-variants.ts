@@ -1,6 +1,13 @@
-import { getEmojicoinEventTime, type Types, type AnyEmojicoinEvent } from "@sdk/types/types";
 import { type AnimationControls } from "framer-motion";
 import { type AnyNonGridTableCardVariant } from "./event-variants";
+import {
+  type AnyEventModel,
+  type ChatEventModel,
+  type LiquidityEventModel,
+  type MarketLatestStateEventModel,
+  type MarketRegistrationEventModel,
+  type SwapEventModel,
+} from "@sdk/indexer-v2/types";
 
 export const MAX_ELEMENTS_PER_LINE = 7;
 export const ANIMATION_DEBOUNCE_TIME = 1111;
@@ -18,11 +25,11 @@ const INSERTION_DELAY = LAYOUT_DURATION * 0.5;
 export const TOTAL_ANIMATION_TIME = ANIMATION_DURATION;
 
 export type EmojicoinAnimationEvents =
-  | Types.SwapEvent
-  | Types.ChatEvent
-  | Types.LiquidityEvent
-  | Types.MarketRegistrationEvent
-  | Types.StateEvent;
+  | SwapEventModel
+  | ChatEventModel
+  | LiquidityEventModel
+  | MarketRegistrationEventModel
+  | MarketLatestStateEventModel;
 
 type GridDataAndLayoutDelay = GridCoordinateHistory & { layoutDelay: number };
 
@@ -97,11 +104,11 @@ const FIVE_SECONDS_MS = 5n * ONE_SECOND_MS;
  */
 export const shouldAnimateGlow = (
   isMounted: React.MutableRefObject<boolean>,
-  latestEvent?: AnyEmojicoinEvent
+  latestEvent?: AnyEventModel
 ) => {
   // Note this is in microseconds.
   const now = BigInt(Date.now()) * 1000n;
-  const eventTime = latestEvent ? getEmojicoinEventTime(latestEvent) : now;
+  const eventTime = latestEvent ? latestEvent.transaction.time : now;
   return isMounted.current && now - eventTime <= FIVE_SECONDS_MS * 1000n;
 };
 
@@ -114,7 +121,7 @@ export const safeQueueAnimations = async ({
   controls: AnimationControls;
   variants: [AnyNonGridTableCardVariant, AnyNonGridTableCardVariant];
   isMounted: React.MutableRefObject<boolean>;
-  latestEvent: AnyEmojicoinEvent;
+  latestEvent: AnyEventModel;
 }) => {
   if (shouldAnimateGlow(isMounted, latestEvent)) {
     await controls.start(variants[0]).then(() => {

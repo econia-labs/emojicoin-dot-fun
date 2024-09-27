@@ -8,7 +8,7 @@ import {
 import fs from "fs";
 import path from "path";
 import findGitRoot from "find-git-root";
-import { getAptosClient } from "./aptos-client";
+import { getAptosClient } from "../../src/utils/aptos-client";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { EmojicoinDotFun, getEvents } from "../../src/emojicoin_dot_fun";
 import {
@@ -18,6 +18,7 @@ import {
   type MarketEmojiData,
   ONE_APT,
   SYMBOL_DATA,
+  type SymbolEmoji,
   toMarketEmojiData,
   type Types,
 } from "../../src";
@@ -82,16 +83,40 @@ type RegisterMarketHelper = Types.EmojicoinInfo &
     events: Events;
   };
 
+const bytesFromNameOrEmoji = (nameOrEmoji: EmojiName | SymbolEmoji) => {
+  if (SYMBOL_DATA.hasName(nameOrEmoji)) {
+    return Array.from(SYMBOL_DATA.byName(nameOrEmoji)!.bytes);
+  }
+  if (SYMBOL_DATA.hasEmoji(nameOrEmoji)) {
+    return Array.from(SYMBOL_DATA.byEmoji(nameOrEmoji)!.bytes);
+  }
+  throw new Error(`Invalid name or emoji passed: ${nameOrEmoji}`);
+};
+
+async function registerMarketFromEmojis(args: {
+  registrant: Account;
+  emojis: Array<SymbolEmoji>;
+  integrator?: Account;
+}) {
+  return registerMarketFromEmojisOrNames({ ...args, inputs: args.emojis });
+}
+
 async function registerMarketFromNames(args: {
   registrant: Account;
   emojiNames: Array<EmojiName>;
   integrator?: Account;
+}) {
+  return registerMarketFromEmojisOrNames({ ...args, inputs: args.emojiNames });
+}
+
+async function registerMarketFromEmojisOrNames(args: {
+  registrant: Account;
+  inputs: Array<EmojiName>;
+  integrator?: Account;
 }): Promise<RegisterMarketHelper & { registerResponse: UserTransactionResponse }> {
   const { aptos } = getPublishHelpers();
-  const { registrant, emojiNames, integrator = registrant } = args;
-  const symbolBytes = new Uint8Array(
-    emojiNames.flatMap((e) => Array.from(SYMBOL_DATA.byStrictName(e).bytes))
-  );
+  const { registrant, inputs, integrator = registrant } = args;
+  const symbolBytes = new Uint8Array(inputs.flatMap(bytesFromNameOrEmoji));
   const symbol = toMarketEmojiData(symbolBytes);
 
   const response = await EmojicoinDotFun.RegisterMarket.submit({
@@ -178,6 +203,7 @@ async function registerRandomMarket({
 // So as not to pollute the global scope, we export the test helpers as a single object.
 const TestHelpers = {
   registerMarketFromNames,
+  registerMarketFromEmojis,
   registerRandomMarket,
 };
 

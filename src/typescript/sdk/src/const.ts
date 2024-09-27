@@ -1,6 +1,7 @@
 import { AccountAddress, APTOS_COIN, parseTypeTag } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import { type ValueOf } from "./utils/utility-types";
+import { type DatabaseStructType } from "./indexer-v2/types/json-types";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS || !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {
@@ -26,15 +27,11 @@ if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS || !process.env.NEXT_PUBLIC_REWARDS_
   fullErrorMessage += `\n${"-".repeat(61)}\n`;
   throw new Error(fullErrorMessage);
 }
-if (typeof window !== "undefined" && typeof process.env.INBOX_URL !== "undefined") {
-  throw new Error("The `inbox` endpoint should not be exposed to any client components.");
-}
+
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 
-export const LOCAL_INBOX_URL = process.env.INBOX_URL ?? "http://localhost:3000";
-export const LOCAL_INDEXER_URL = process.env.INDEXER_URL ?? "http://localhost:3000";
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
 export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);
@@ -86,8 +83,9 @@ export enum Trigger {
   Chat = "chat",
 }
 
-export const toPeriod = (s: string) =>
+export const toPeriod = (s: DatabaseStructType["PeriodicStateMetadata"]["period"]) =>
   ({
+    // From the database.
     period_1m: Period.Period1M,
     period_5m: Period.Period5M,
     period_15m: Period.Period15M,
@@ -95,13 +93,22 @@ export const toPeriod = (s: string) =>
     period_1h: Period.Period1H,
     period_4h: Period.Period4H,
     period_1d: Period.Period1D,
+    // From the broker.
+    OneMinute: Period.Period1M,
+    FiveMinutes: Period.Period5M,
+    FifteenMinutes: Period.Period15M,
+    ThirtyMinutes: Period.Period30M,
+    OneHour: Period.Period1H,
+    FourHours: Period.Period4H,
+    OneDay: Period.Period1D,
   })[s as ValueOf<typeof Period>] ??
   (() => {
     throw new Error(`Unknown period: ${s}`);
   })();
 
-export const toTrigger = (s: string) =>
+export const toTrigger = (s: DatabaseStructType["GlobalStateEventData"]["trigger"]) =>
   ({
+    // From the database.
     package_publication: Trigger.PackagePublication,
     market_registration: Trigger.MarketRegistration,
     swap_buy: Trigger.SwapBuy,
@@ -109,6 +116,14 @@ export const toTrigger = (s: string) =>
     provide_liquidity: Trigger.ProvideLiquidity,
     remove_liquidity: Trigger.RemoveLiquidity,
     chat: Trigger.Chat,
+    // From the broker.
+    PackagePublication: Trigger.PackagePublication,
+    MarketRegistration: Trigger.MarketRegistration,
+    SwapBuy: Trigger.SwapBuy,
+    SwapSell: Trigger.SwapSell,
+    ProvideLiquidity: Trigger.ProvideLiquidity,
+    RemoveLiquidity: Trigger.RemoveLiquidity,
+    Chat: Trigger.Chat,
   })[s as ValueOf<typeof Trigger>] ??
   (() => {
     throw new Error(`Unknown trigger: ${s}`);
@@ -139,7 +154,7 @@ export enum PeriodDuration {
   PERIOD_1D = 86400000000,
 }
 
-export const periodEnumToPeriodDuration = (period: Period): PeriodDuration => {
+export const periodEnumToRawDuration = (period: Period): PeriodDuration => {
   if (period === Period.Period1M) return PeriodDuration.PERIOD_1M;
   if (period === Period.Period5M) return PeriodDuration.PERIOD_5M;
   if (period === Period.Period15M) return PeriodDuration.PERIOD_15M;
@@ -150,7 +165,7 @@ export const periodEnumToPeriodDuration = (period: Period): PeriodDuration => {
   throw new Error(`Invalid period: ${period}`);
 };
 
-export const fromContractEnumToRawTrigger = (trigger: Trigger): number => {
+export const triggerEnumToRawTrigger = (trigger: Trigger): number => {
   if (trigger === Trigger.PackagePublication) return TriggerFromContract.PackagePublication;
   if (trigger === Trigger.MarketRegistration) return TriggerFromContract.MarketRegistration;
   if (trigger === Trigger.SwapBuy) return TriggerFromContract.SwapBuy;
@@ -161,7 +176,7 @@ export const fromContractEnumToRawTrigger = (trigger: Trigger): number => {
   throw new Error(`Invalid state trigger: ${trigger}`);
 };
 
-export const fromRawTriggerToContractEnum = (num: number): Trigger => {
+export const rawTriggerToEnum = (num: number): Trigger => {
   if (num === TriggerFromContract.PackagePublication) return Trigger.PackagePublication;
   if (num === TriggerFromContract.MarketRegistration) return Trigger.MarketRegistration;
   if (num === TriggerFromContract.SwapBuy) return Trigger.SwapBuy;
@@ -172,7 +187,7 @@ export const fromRawTriggerToContractEnum = (num: number): Trigger => {
   throw new Error(`Invalid state trigger: ${num}`);
 };
 
-export const toPeriodFromContract = (num: bigint): Period => {
+export const rawPeriodToEnum = (num: bigint): Period => {
   if (num === BigInt(PeriodDuration.PERIOD_1M)) return Period.Period1M;
   if (num === BigInt(PeriodDuration.PERIOD_5M)) return Period.Period5M;
   if (num === BigInt(PeriodDuration.PERIOD_15M)) return Period.Period15M;
@@ -214,33 +229,12 @@ export const toPeriodDuration = (num: number | bigint): PeriodDuration => {
   throw new Error(`Invalid candlestick period duration: ${num}`);
 };
 
-export const PERIOD_DURATIONS = [
-  PeriodDuration.PERIOD_1M,
-  PeriodDuration.PERIOD_5M,
-  PeriodDuration.PERIOD_15M,
-  PeriodDuration.PERIOD_30M,
-  PeriodDuration.PERIOD_1H,
-  PeriodDuration.PERIOD_4H,
-  PeriodDuration.PERIOD_1D,
+export const PERIODS = [
+  Period.Period1M,
+  Period.Period5M,
+  Period.Period15M,
+  Period.Period30M,
+  Period.Period1H,
+  Period.Period4H,
+  Period.Period1D,
 ];
-
-export const toPeriodDurationKey = (period: PeriodDuration) => {
-  switch (period) {
-    case PeriodDuration.PERIOD_1M:
-      return "PERIOD_1M";
-    case PeriodDuration.PERIOD_5M:
-      return "PERIOD_5M";
-    case PeriodDuration.PERIOD_15M:
-      return "PERIOD_15M";
-    case PeriodDuration.PERIOD_30M:
-      return "PERIOD_30M";
-    case PeriodDuration.PERIOD_1H:
-      return "PERIOD_1H";
-    case PeriodDuration.PERIOD_4H:
-      return "PERIOD_4H";
-    case PeriodDuration.PERIOD_1D:
-      return "PERIOD_1D";
-    default:
-      throw new Error(`Unknown period: ${period}`);
-  }
-};

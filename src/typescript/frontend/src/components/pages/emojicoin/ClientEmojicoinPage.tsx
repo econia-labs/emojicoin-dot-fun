@@ -6,38 +6,34 @@ import { Box } from "@containers";
 import DesktopGrid from "./components/desktop-grid";
 import MobileGrid from "./components/mobile-grid";
 import { type EmojicoinProps } from "./types";
-import { useEventStore } from "context/state-store-context";
+import { useEventStore } from "context/event-store-context";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import MainInfo from "./components/main-info/MainInfo";
-import { toUniqueHomogenousEvents } from "@sdk/emojicoin_dot_fun/events";
-import { marketViewToLatestBars } from "@sdk/utils/candlestick-bars";
+import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
+import { type BrokerEvent } from "@/broker/types";
+import { marketToLatestBars } from "@/store/event/candlestick-bars";
+
+const EVENT_TYPES: Array<BrokerEvent> = ["Chat", "PeriodicState", "Swap"];
 
 const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const { isTablet, isMobile } = useMatchBreakpoints();
-  const addMarketData = useEventStore((s) => s.addMarketData);
-  const initializeMarket = useEventStore((s) => s.initializeMarket);
-  const loadEvents = useEventStore((s) => s.loadEventsFromServer);
+  const loadMarketStateFromServer = useEventStore((s) => s.loadMarketStateFromServer);
+  const loadEventsFromServer = useEventStore((s) => s.loadEventsFromServer);
   const setLatestBars = useEventStore((s) => s.setLatestBars);
-  const getGuids = useEventStore((s) => s.getGuids);
 
   useEffect(() => {
     if (props.data) {
-      const marketID = props.data.marketID.toString();
-      initializeMarket(marketID);
-      const events = toUniqueHomogenousEvents(
-        [...props.data.swaps, ...props.data.chats],
-        getGuids()
-      );
-      if (events) {
-        loadEvents(events);
-      }
-      addMarketData(props.data);
-      const latestBars = marketViewToLatestBars(props.data.marketView);
-      setLatestBars({ marketID, latestBars });
+      const { chats, swaps, state, marketView } = props.data;
+      loadMarketStateFromServer([state]);
+      loadEventsFromServer([...chats, ...swaps]);
+      const latestBars = marketToLatestBars(marketView);
+      setLatestBars({ marketMetadata: state.market, latestBars });
     }
 
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [props?.data]);
+
+  useReliableSubscribe({ eventTypes: EVENT_TYPES });
 
   return (
     <Box pt="85px">

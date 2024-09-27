@@ -7,7 +7,7 @@ export interface HomePageParams {
   searchParams?: HomePageSearchParams;
 }
 
-export const safeParsePage = (pageInput: string | undefined | null): number => {
+export const safeParsePageWithDefault = (pageInput: string | undefined | null): number => {
   try {
     return Math.max(parseInt(pageInput ?? "1"), 1);
   } catch (e) {
@@ -26,9 +26,9 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
 
   // Ensure the filter is a home-page-only filter.
   const sortBy = toMarketDataSortByHomePage(sort);
-  const page = safeParsePage(pageInput);
+  const page = safeParsePageWithDefault(pageInput);
   const orderBy = toOrderBy(order);
-  const q = searchBytes === "0x" ? undefined : searchBytes;
+  const q = handleEmptySearchBytes(searchBytes);
 
   return {
     page,
@@ -37,4 +37,10 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
     inBondingCurve,
     q,
   };
+};
+
+// Converts a bare `0x` and a `null` input to undefined. If it's already undefined, it remains so.
+// Otherwise, return the value.
+export const handleEmptySearchBytes = (searchBytes?: string | null) => {
+  return searchBytes === "0x" ? undefined : searchBytes ?? undefined;
 };

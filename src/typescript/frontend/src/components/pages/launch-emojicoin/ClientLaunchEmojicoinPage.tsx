@@ -19,7 +19,6 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import MemoizedLaunchAnimation from "./memoized-launch";
-import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 
 const LOADING_TIME = 2000;
 type Stage = "initial" | "loading" | "coding";
@@ -56,11 +55,6 @@ const ClientLaunchEmojicoinPage: React.FC<{ geoblocked: boolean }> = ({ geoblock
     setMode("register");
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
-
-  useReliableSubscribe({
-    chat: [null],
-    liquidity: [null],
-  });
 
   // We need to store a reference to the last response in order to navigate to the market page after the market is
   // registered. Otherwise, `lastResponse` will be stale if we try to use it directly in the `handleLoading` function.

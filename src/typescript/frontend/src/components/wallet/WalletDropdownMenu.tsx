@@ -17,7 +17,7 @@ import { useScramble } from "use-scramble";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { WalletDropdownItem } from "./WalletDropdownItem";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useNameStore } from "context/state-store-context";
+import { useNameStore } from "context/event-store-context";
 
 const WIDTH = "24ch";
 

@@ -5,7 +5,7 @@ export type TableRowDesktopProps = {
     apt: string;
     emoji: string;
     type: string;
-    price: string;
+    priceQ64: string;
     date: Date;
     version: number;
     swapper: string;

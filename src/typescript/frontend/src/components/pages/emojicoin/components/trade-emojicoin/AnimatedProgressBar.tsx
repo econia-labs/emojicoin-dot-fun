@@ -1,81 +1,40 @@
 import { Text } from "components";
 import { type GridProps } from "components/pages/emojicoin/types";
-import { useEventStore, useWebSocketClient } from "context/state-store-context";
+import { useEventStore } from "context/event-store-context";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getBondingCurveProgress } from "utils/bonding-curve";
-import { type Types } from "@sdk/types/types";
-import { compareBigInt } from "@sdk/utils/compare-bigint";
 import { darkColors } from "theme/colors";
 import { useMatchBreakpoints } from "@hooks/index";
-
-const getLatestReserves = (args: {
-  propsData: Types.MarketDataView;
-  storeMarketData?: Types.MarketDataView;
-  storeStateEvents: readonly Types.StateEvent[];
-}) => {
-  const { propsData, storeMarketData, storeStateEvents } = args;
-  const latestStoreState = storeStateEvents[0];
-  const reserves: Array<[[number, number], bigint]> = [
-    [
-      [propsData.clammVirtualReservesBase, propsData.clammVirtualReservesQuote],
-      BigInt(propsData.numSwaps),
-    ],
-  ];
-  if (storeMarketData) {
-    reserves.push([
-      [storeMarketData.clammVirtualReservesBase, storeMarketData.clammVirtualReservesQuote],
-      BigInt(storeMarketData.numSwaps),
-    ]);
-  }
-  if (latestStoreState) {
-    reserves.push([
-      [
-        Number(latestStoreState.clammVirtualReserves.base),
-        Number(latestStoreState.clammVirtualReserves.quote),
-      ],
-      BigInt(latestStoreState.cumulativeStats.numSwaps),
-    ]);
-  }
-  reserves.sort((a, b) => compareBigInt(a[1], b[1])).reverse();
-  return reserves[0][0];
-};
 
 export const AnimatedProgressBar = (props: GridProps) => {
   const { isDesktop } = useMatchBreakpoints();
   const data = props.data;
-  const marketID = data.marketID.toString();
-  const { marketData, stateEvents } = useEventStore((s) => ({
-    marketData: s.getMarket(marketID)?.marketData,
-    stateEvents: s.getMarket(marketID)?.stateEvents ?? [],
-  }));
+  const { state, transaction } = data.state;
+  const stateEvents = useEventStore((s) => s.markets.get(props.data.symbol)?.stateEvents ?? []);
 
   // Set the initial progress with data passed in from props, aka server component data.
-  const [progress, setProgress] = useState(getBondingCurveProgress(data.clammVirtualReservesQuote));
+  const [progress, setProgress] = useState(
+    getBondingCurveProgress(state.clammVirtualReserves.quote)
+  );
 
   // Then track the latest progress from the store.
   useEffect(() => {
-    if (marketData && stateEvents) {
-      const clammVirtualReserves = getLatestReserves({
-        propsData: data,
-        storeMarketData: marketData,
-        storeStateEvents: stateEvents ?? [],
-      });
-      const percentage = getBondingCurveProgress(clammVirtualReserves[1]);
-      setProgress(percentage);
-    }
-    /* eslint-disable-next-line */
-  }, [data, marketData, stateEvents]);
-
-  const subscribe = useWebSocketClient((s) => s.subscribe);
-  const requestUnsubscribe = useWebSocketClient((s) => s.requestUnsubscribe);
-
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    subscribe.state(marketID);
-    return () => requestUnsubscribe.state(marketID);
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+    const quoteReserves = (() => {
+      const propsReserves = state.clammVirtualReserves.quote;
+      const stateEvent = stateEvents.at(0);
+      if (!stateEvent) {
+        return propsReserves;
+      }
+      const propsTime = transaction.time;
+      if (propsTime > stateEvent.transaction.time) {
+        return propsReserves;
+      }
+      return stateEvent.state.clammVirtualReserves.quote;
+    })();
+    const percentage = getBondingCurveProgress(quoteReserves);
+    setProgress(percentage);
+  }, [state.clammVirtualReserves.quote, transaction.time, stateEvents]);
 
   const progressBarControls = useAnimation();
   const flickerControls = useAnimation();

@@ -12,6 +12,7 @@ import Link from "next/link";
 import { Text } from "components/text";
 import { LINKS } from "lib/env";
 import { ROUTES } from "router/routes";
+import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 
 export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const { account } = useAptos();
@@ -20,11 +21,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
 
   const { ref, replay } = useScramble({
     text:
-      verified === true
-        ? "Access Granted"
-        : verified === false
-          ? "Access Denied"
-          : "Verifying...",
+      verified === true ? "Access Granted" : verified === false ? "Access Denied" : "Verifying...",
     overdrive: false,
     overflow: true,
     speed: 0.6,
@@ -40,7 +37,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
 
   const verify = useCallback(
     async (account: AccountInfo) => {
-      const res = await createSession(account.address);
+      const res = await createSession(account.address as AccountAddressString);
       setVerified(res);
       replay();
     },
@@ -93,10 +90,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
             <ButtonWithConnectWalletFallback geoblocked={geoblocked} arrow={false}>
               <div className="flex flex-row uppercase mt-[8ch]">
                 <span className="px-2.5">{"{"}</span>
-                <span
-                  ref={ref}
-                  onMouseEnter={replay}
-                />
+                <span ref={ref} onMouseEnter={replay} />
                 <span className="px-2.5">{"}"}</span>
               </div>
             </ButtonWithConnectWalletFallback>

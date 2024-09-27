@@ -1,12 +1,10 @@
 import Big from "big.js";
 import { DECIMALS } from "@sdk/const";
+import { type AnyNumberString } from "@sdk-types";
 
 // Converts a number to its representation in coin decimals.
 // Both APT and emojicoins use a fixed number of decimals: 8.
-export const toCoinDecimalString = (
-  num: number | bigint | string,
-  displayDecimals?: number
-): string => {
+export const toCoinDecimalString = (num: AnyNumberString, displayDecimals?: number): string => {
   return toDisplayCoinDecimals({
     num,
     decimals: displayDecimals,
@@ -27,7 +25,7 @@ const toActualCoinDecimals = ({
   round,
   decimals,
 }: {
-  num: number | bigint | string;
+  num: AnyNumberString;
   round?: number;
   decimals?: number;
 }): string => {
@@ -58,7 +56,7 @@ const toDisplayCoinDecimals = ({
   round,
   decimals,
 }: {
-  num: number | bigint | string;
+  num: AnyNumberString;
   round?: number;
   decimals?: number;
 }): string => {

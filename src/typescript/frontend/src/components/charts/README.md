@@ -9,12 +9,13 @@ to update the `Chart` component in real time.
 
 ## Market Symbol Resolution
 
-The `registeredMarketMap` data is data managed by the event store. Since changes
-to the zustand state don't cause re-renders if we retrieve it through a getter,
-we `get()` the registered market map and search all registered market symbol
-data with it. This data contains all currently registered market's symbol bytes,
-emoji symbols, and market addresses. These are the uniquely identifiable values
-for each market registered.
+The registered market map `EventStore["markets"]` data is a `Map` managed by the
+event store. Since changes to the zustand state don't cause re-renders, we can
+retrieve it through a getter function and `get()` the registered market map and
+search all registered market symbol data with it without invoking a re-render.
+This data contains all currently registered market's symbol bytes, emoji
+symbols, and market addresses. These are the uniquely identifiable values for
+each market registered.
 
 We update this state data with WebSocket updates and any time the current user
 registers a market. It's also fetched from the server component initially- thus
@@ -242,8 +243,8 @@ incoming swap data twice in the latest bar. This means our volume data is
 accurate despite using data from three separate sources.
 
 [datafeed api]: https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-API/
-[eventstore state]: ../../lib/store/event-store.ts
-[fetchallcandlesticksintimerange]: ../../lib/queries/charting/candlesticks-in-time-range.ts
+[eventstore state]: ../../lib/store/event/event-store.ts
+[fetchallcandlesticksintimerange]: ../../../../sdk/src/indexer-v2/queries/app/candlesticks.ts
 [getbars]: https://www.tradingview.com/charting-library-docs/latest/connecting_data/Datafeed-API/#getbars
 [ohlcv candlestick]: https://en.wikipedia.org/wiki/Candlestick_chart
 [subscribebars]: https://www.tradingview.com/charting-library-docs/latest/api/interfaces/Charting_Library.IDatafeedChartApi#subscribebars

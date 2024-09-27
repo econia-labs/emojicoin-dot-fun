@@ -13,11 +13,11 @@ import { HEADERS, MOBILE_HEADERS } from "./constants";
 import { getEmptyListTr } from "utils";
 import type { SortByPageQueryParams } from "lib/queries/sorting/types";
 import type { OrderByStrings } from "@sdk/queries/const";
-import type { FetchSortedMarketDataReturn } from "lib/queries/sorting/market-data";
 import useElementDimensions from "@hooks/use-element-dimensions";
+import { type PoolsData } from "../../ClientPoolsPage";
 
 export interface PoolsTableProps {
-  data: FetchSortedMarketDataReturn["markets"];
+  data: PoolsData[];
   index: number | undefined;
   sortBy: (sortBy: SortByPageQueryParams) => void;
   orderBy: (orderBy: OrderByStrings) => void;

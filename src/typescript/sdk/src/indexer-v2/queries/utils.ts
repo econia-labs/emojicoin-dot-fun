@@ -1,12 +1,17 @@
 import "server-only";
 
-import { type PostgrestSingleResponse, type PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import {
+  type PostgrestSingleResponse,
+  type PostgrestFilterBuilder,
+  type PostgrestBuilder,
+  type PostgrestTransformBuilder,
+} from "@supabase/postgrest-js";
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
-import { TableName } from "../types/snake-case-types";
-import { type Flatten } from "../../types";
+import { type DatabaseJsonType, TableName } from "../types/json-types";
 import { toAccountAddress } from "../../utils";
 import { postgrest } from "./client";
+import { type DatabaseModels } from "../types";
 
 type EnumLiteralType<T extends TableName> = T extends TableName ? `${T}` : never;
 
@@ -16,23 +21,25 @@ type QueryFunction<
   RelationName,
   Relationships extends EnumLiteralType<TableName>,
   QueryArgs extends Record<string, any> | undefined,
-> = (args: QueryArgs) => PostgrestFilterBuilder<any, Row, Result, RelationName, Relationships>;
+> = (
+  args: QueryArgs
+) =>
+  | PostgrestFilterBuilder<any, Row, Result, RelationName, Relationships>
+  | PostgrestTransformBuilder<any, Row, Result, RelationName, Relationships>;
 
-interface PaginationArgs {
-  limit?: number;
-  offset?: number;
-}
-
-type WithConfig<T> = T & Flatten<PaginationArgs & { minimumVersion?: AnyNumberString }>;
+type WithConfig<T> = T & { minimumVersion?: AnyNumberString };
 
 // This is primarily used for testing purposes, otherwise this interval might be too short.
-const POLLING_INTERVAL = 100;
+const POLLING_INTERVAL = 500;
 const POLLING_TIMEOUT = 5000;
 
 const extractRow = <T>(res: PostgrestSingleResponse<T>) => res.data;
 const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? ([] as T[]);
 
-const getLatestProcessedVersion = async () =>
+// NOTE: If we ever add another processor type to the indexer processor stack, this will need to be
+// updated, because it is assumed here that there is a single row returned. Multiple processors
+// would mean there would be multiple rows.
+export const getLatestProcessedVersionByTable = async () =>
   postgrest
     .from(TableName.ProcessorStatus)
     .select("last_success_version")
@@ -40,6 +47,7 @@ const getLatestProcessedVersion = async () =>
     .then((r) => {
       const rowWithVersion = extractRow(r);
       if (!rowWithVersion) {
+        console.error(r);
         throw new Error("No processor status row found.");
       }
       return BigInt(rowWithVersion.last_success_version);
@@ -48,14 +56,14 @@ const getLatestProcessedVersion = async () =>
 /**
  * Wait for the processed version of a table or view to be at least the given version.
  */
-const waitForProcessedVersion = async (minimumVersion: AnyNumberString) =>
+export const waitForEmojicoinIndexer = async (minimumVersion: AnyNumberString) =>
   new Promise<void>((resolve, reject) => {
     let i = 0;
     const maxTries = Math.floor(POLLING_TIMEOUT / POLLING_INTERVAL);
 
     const check = async () => {
       try {
-        const latestVersion = await getLatestProcessedVersion();
+        const latestVersion = await getLatestProcessedVersionByTable();
         if (latestVersion >= BigInt(minimumVersion)) {
           resolve();
         } else if (i > maxTries) {
@@ -74,14 +82,13 @@ const waitForProcessedVersion = async (minimumVersion: AnyNumberString) =>
 
 /**
  *
- * @param queryFn Takes in a query function and returns a curried version of it that accepts
- * pagination arguments and returns the extracted data
+ * @param queryFn Takes in a query function that's used to be called after waiting for the indexer
+ * to reach a certain version. Then it extracts the row data and returns it.
  * @param convert A function that converts the raw row data into the desired output, usually
  * by converting it into a camelCased representation of the database row.
- * @returns queryFn(args: QueryArgs & PaginationArgs) => Promise<OutputType[]>
- * where OutputType is the result of convert<Row>(row: Row).
+ * @returns A curried function that applies the logic to the new query function.
  */
-export function withQueryConfig<
+export function queryHelper<
   Row extends Record<string, unknown>,
   Result extends Row[],
   RelationName,
@@ -92,28 +99,42 @@ export function withQueryConfig<
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
   convert: (rows: Row) => OutputType
 ): (args: WithConfig<QueryArgs>) => Promise<OutputType[]> {
-  const paginatedQuery = async (args: WithConfig<QueryArgs>) => {
-    const { limit, offset, minimumVersion, ...queryArgs } = args;
-    let query = queryFn(queryArgs as QueryArgs);
-
-    if (typeof limit === "number") {
-      query = query.limit(limit);
-    }
-
-    if (typeof offset === "number" && typeof limit === "number") {
-      query = query.range(offset, offset + limit - 1);
-    }
+  const query = async (args: WithConfig<QueryArgs>) => {
+    const { minimumVersion, ...queryArgs } = args;
+    const innerQuery = queryFn(queryArgs as QueryArgs);
 
     if (minimumVersion) {
-      await waitForProcessedVersion(minimumVersion);
+      await waitForEmojicoinIndexer(minimumVersion);
     }
 
-    const res = await query;
+    const res = await innerQuery;
     const rows = extractRows<Row>(res);
     return rows.map((row) => convert(row));
   };
 
-  return paginatedQuery;
+  return query;
+}
+
+export function queryHelperSingle<
+  T extends TableName,
+  Row extends DatabaseJsonType[T],
+  Model extends DatabaseModels[T],
+  QueryArgs extends Record<string, any> | undefined,
+>(queryFn: (args: QueryArgs) => PostgrestBuilder<Row>, convert: (row: Row) => Model) {
+  const query = async (args: WithConfig<QueryArgs>) => {
+    const { minimumVersion, ...queryArgs } = args;
+    const innerQuery = queryFn(queryArgs as QueryArgs);
+
+    if (minimumVersion) {
+      await waitForEmojicoinIndexer(minimumVersion);
+    }
+
+    const res = await innerQuery;
+    const row = extractRow<Row>(res);
+    return row ? convert(row) : null;
+  };
+
+  return query;
 }
 
 /**

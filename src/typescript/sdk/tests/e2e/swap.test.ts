@@ -24,15 +24,9 @@ jest.setTimeout(90000);
 
 describe("tests the swap functionality", () => {
   const { aptos } = getPublishHelpers();
-  const randomIntegrator = getFundedAccount(
-    "0x00153cf56239ab6d0a71f50a7b31cc94e7ff56ef7dd0acb0c038bf13457de001"
-  );
-  const registrant = getFundedAccount(
-    "0x002ea773209c18e7be4acc1ac68de1ad1ea16df0070ce60858283792719ed002"
-  );
-  const nonRegistrantUser = getFundedAccount(
-    "0x003177667df1e91bd7fdc9e279574576e174f6c8bfcfdde7c26a18c9637ec003"
-  );
+  const randomIntegrator = getFundedAccount("001");
+  const registrant = getFundedAccount("002");
+  const nonRegistrantUser = getFundedAccount("003");
   const emoji = SYMBOL_DATA.byStrictName("pile of poo");
   const {
     marketAddress: pooMarketAddress,

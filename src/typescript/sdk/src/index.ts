@@ -4,3 +4,4 @@ export * from "./emojicoin_dot_fun";
 export * from "./markets";
 export * from "./types";
 export * from "./utils";
+export * from "./mini-processor";

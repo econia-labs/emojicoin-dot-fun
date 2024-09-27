@@ -20,6 +20,7 @@ export type EventJSON = {
 };
 
 export type AggregatorSnapshot<T> = {
+  max_value: string; // This value is included but we don't use or care about it.
   value: T;
 };
 

@@ -13,7 +13,7 @@ export const LiquidityButton = (props: GridProps) => {
 
   return (
     <>
-      {!isInBondingCurve(props.data) ? (
+      {!isInBondingCurve(props.data.state.state) ? (
         <StyledContentHeader>
           <Flex width="100%" justifyContent="center">
             <Link

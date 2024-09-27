@@ -1,6 +1,7 @@
 import { type OrderByStrings } from "@sdk/queries/const";
-import { MarketDataSortBy, toMarketDataSortByHomePage, type SortByPageQueryParams } from "./types";
-import { safeParsePage } from "lib/routes/home-page-params";
+import { toMarketDataSortByHomePage, type SortByPageQueryParams } from "./types";
+import { safeParsePageWithDefault } from "lib/routes/home-page-params";
+import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 
 export type HomePageSearchParams = {
   page: string | undefined;
@@ -38,7 +39,7 @@ export const constructURLForHomePage = ({
   searchBytes,
 }: {
   page?: number;
-  sort?: MarketDataSortBy;
+  sort?: SortMarketsBy;
   searchBytes?: string;
 }) => {
   const newURL = new URL(location.href);
@@ -46,7 +47,7 @@ export const constructURLForHomePage = ({
   newURL.searchParams.delete("sort");
   newURL.searchParams.delete("q");
 
-  const safePage = safeParsePage((page ?? 1).toString());
+  const safePage = safeParsePageWithDefault((page ?? 1).toString());
   if (safePage !== 1) {
     newURL.searchParams.set("page", safePage.toString());
   }
@@ -54,7 +55,7 @@ export const constructURLForHomePage = ({
     newURL.searchParams.set("q", searchBytes);
   }
   const newSort = toMarketDataSortByHomePage(sort);
-  if (newSort !== MarketDataSortBy.MarketCap) {
+  if (newSort !== SortMarketsBy.MarketCap) {
     newURL.searchParams.set("sort", newSort);
   }
 
@@ -70,8 +71,7 @@ export const isHomePageURLDifferent = (curr: URLSearchParams, next: URLSearchPar
     return true;
   }
   if (
-    (curr.get("sort") ?? MarketDataSortBy.MarketCap) !==
-    (next.get("sort") ?? MarketDataSortBy.MarketCap)
+    (curr.get("sort") ?? SortMarketsBy.MarketCap) !== (next.get("sort") ?? SortMarketsBy.MarketCap)
   ) {
     return true;
   }
