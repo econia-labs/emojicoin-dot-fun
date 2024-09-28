@@ -42,7 +42,7 @@ const fetchPatch: typeof fetch = async (input, init) => {
 /**
  * Converts an input array of any type to a proper query param for the `postgrest` client.
  *
- * @param s an array of values
+ * @params an array of values
  * @returns the properly formatted string input for the query input param
  * @example
  * ```typescript

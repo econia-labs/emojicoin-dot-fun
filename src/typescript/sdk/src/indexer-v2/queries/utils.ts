@@ -39,11 +39,12 @@ const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? (
 // NOTE: If we ever add another processor type to the indexer processor stack, this will need to be
 // updated, because it is assumed here that there is a single row returned. Multiple processors
 // would mean there would be multiple rows.
-export const getLatestProcessedVersionByTable = async () =>
+export const getLatestProcessedEmojicoinVersion = async () =>
   postgrest
     .from(TableName.ProcessorStatus)
     .select("last_success_version")
-    .maybeSingle()
+    .limit(1)
+    .single()
     .then((r) => {
       const rowWithVersion = extractRow(r);
       if (!rowWithVersion) {
@@ -63,7 +64,7 @@ export const waitForEmojicoinIndexer = async (minimumVersion: AnyNumberString) =
 
     const check = async () => {
       try {
-        const latestVersion = await getLatestProcessedVersionByTable();
+        const latestVersion = await getLatestProcessedEmojicoinVersion();
         if (latestVersion >= BigInt(minimumVersion)) {
           resolve();
         } else if (i > maxTries) {

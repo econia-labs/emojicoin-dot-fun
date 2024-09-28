@@ -15,7 +15,9 @@
     "NEXT_PUBLIC_REWARDS_MODULE_ADDRESS",
     "NEXT_PUBLIC_APTOS_NETWORK",
     "NEXT_PUBLIC_BROKER_URL",
-    "BROKER_PORT"
+    "BROKER_PORT",
+    "FETCH_DEBUG",
+    "VERBOSE_TEST_LOGS"
   ],
   "tasks": {
     "build": {

@@ -4,7 +4,7 @@ import { LIMIT, ORDER_BY } from "../../../queries/const";
 import { SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
-import { getLatestProcessedVersionByTable, queryHelper } from "../utils";
+import { getLatestProcessedEmojicoinVersion, queryHelper } from "../utils";
 import { DatabaseTypeConverter } from "../../types";
 import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
@@ -56,7 +56,13 @@ export const fetchFeaturedMarket = async () =>
  */
 export const fetchNumRegisteredMarkets = async () => {
   const { aptos } = getAptosClient();
-  const latestVersion = await getLatestProcessedVersionByTable();
+  let latestVersion: bigint;
+  try {
+    latestVersion = await getLatestProcessedEmojicoinVersion();
+  } catch (e) {
+    console.error("Couldn't get the latest processed version.");
+    return 0;
+  }
   try {
     const numRegisteredMarkets = await RegistryView.view({
       aptos,
