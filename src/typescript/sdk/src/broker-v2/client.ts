@@ -60,6 +60,7 @@ export const getSingletonClient = (args: WebSocketClientArgs) => {
   return singletonClient;
 };
 
+/* eslint-disable-next-line import/no-unused-modules */
 export class WebSocketClient {
   public readonly client: WebSocket;
 
