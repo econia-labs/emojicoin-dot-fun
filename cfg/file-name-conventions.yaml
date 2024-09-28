@@ -20,7 +20,6 @@ ignore_directories:
 - 'src/typescript/frontend/public/locales'
 ignore_files:
 - '.env'
-- '.env.example'
 - '.eslintignore'
 - '.eslintrc.js'
 - '.flake8'
@@ -29,6 +28,7 @@ ignore_files:
 - '.prettierignore'
 - '.prettierrc.cjs'
 - '.prettierrc.js'
+- 'example.env'
 - 'pyproject.toml'
 - 'Cargo.lock'
 ...
