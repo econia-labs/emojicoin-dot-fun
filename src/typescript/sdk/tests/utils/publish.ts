@@ -9,10 +9,23 @@ import {
   Ed25519PrivateKey,
 } from "@aptos-labs/ts-sdk";
 import path from "path";
-import { type PublishPackageResult, type ResultJSON } from "./types";
 import { getAptosClient } from "../../src/utils/aptos-client";
 import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
 import { getGitRoot } from "./helpers";
+
+type ResultJSON = {
+  Result: {
+    transaction_hash: string;
+    gas_used: number;
+    gas_unit_price: number;
+    sender: string;
+    sequence_number: number;
+    success: boolean;
+    timestamp_us: number;
+    version: number;
+    vm_status: string;
+  };
+};
 
 export async function publishPackage(args: {
   privateKey: PrivateKey;
@@ -20,7 +33,7 @@ export async function publishPackage(args: {
   includedArtifacts: string | undefined;
   namedAddresses: Record<string, AccountAddressInput>;
   packageDirRelativeToRoot: string;
-}): Promise<PublishPackageResult> {
+}): Promise<ResultJSON["Result"]> {
   const {
     privateKey,
     network,
@@ -110,7 +123,7 @@ function extractJsonFromText(originalCommand: string, text: string): ResultJSON 
   return null;
 }
 
-export async function publishForTest(privateKeyString: string): Promise<PublishPackageResult> {
+export async function publishForTest(privateKeyString: string) {
   const { aptos } = getAptosClient();
   const publisher = Account.fromPrivateKey({
     privateKey: new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array()),

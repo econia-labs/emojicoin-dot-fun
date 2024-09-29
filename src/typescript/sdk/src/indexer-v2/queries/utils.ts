@@ -51,6 +51,9 @@ export const getLatestProcessedEmojicoinVersion = async () =>
         console.error(r);
         throw new Error("No processor status row found.");
       }
+      if (!("last_success_version" in rowWithVersion)) {
+        console.warn("Couldn't find `last_success_version` in the response data.", r);
+      }
       return BigInt(rowWithVersion.last_success_version);
     });
 /**

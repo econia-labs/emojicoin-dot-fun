@@ -47,7 +47,7 @@ export const fetchFeaturedMarket = async () =>
     page: 1,
     pageSize: 1,
     sortBy: SortMarketsBy.DailyVolume,
-  }).then((markets) => markets ?? [].at(0));
+  }).then((markets) => (markets ?? []).at(0));
 
 /**
  * Retrieves the number of markets by querying the view function in the registry contract on-chain.

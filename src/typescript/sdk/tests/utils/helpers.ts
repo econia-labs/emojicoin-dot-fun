@@ -5,7 +5,6 @@ import {
   Hex,
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import fs from "fs";
 import path from "path";
 import findGitRoot from "find-git-root";
 import { getAptosClient } from "../../src/utils/aptos-client";
@@ -23,20 +22,19 @@ import {
   type Types,
 } from "../../src";
 import { type Events } from "../../src/emojicoin_dot_fun/events";
-import { type PublishHelpers } from "./types";
 
 // The exact amount of APT to trigger a transition out of the bonding curve. Note that the
 // fee integrator rate BPs must be set to 0 for this to work.
 export const EXACT_TRANSITION_INPUT_AMOUNT = 100_000_000_000n;
 
-export const TS_UNIT_TEST_DIR = path.join(getGitRoot(), "src/typescript/sdk/tests");
-export const PUBLISHER_PRIVATE_KEY_PATH = path.resolve(
-  path.join(TS_UNIT_TEST_DIR, ".tmp", ".publisher_private_key")
-);
-export const PUBLISH_RES_PATH = path.resolve(
-  path.join(TS_UNIT_TEST_DIR, ".tmp", ".publish_result")
-);
-export const TEST_LOGS_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", "logs"));
+export const getPublisherPrivateKey = () => {
+  if (!process.env.PUBLISHER_PRIVATE_KEY) {
+    throw new Error("process.env.PUBLISHER_PRIVATE_KEY must be set.");
+  }
+  const privateKeyString = process.env.PUBLISHER_PRIVATE_KEY;
+  const privateKey = new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array());
+  return privateKey;
+};
 
 /**
  * Facilitates the usage of a constant Aptos Account and client for testing the publishing
@@ -48,19 +46,19 @@ export const TEST_LOGS_PATH = path.resolve(path.join(TS_UNIT_TEST_DIR, ".tmp", "
  *
  * @returns TestHelpers
  */
-export function getPublishHelpers(): PublishHelpers {
+export function getPublishHelpers() {
   const { aptos } = getAptosClient();
 
-  const privateKeyString = fs.readFileSync(PUBLISHER_PRIVATE_KEY_PATH).toString();
-  const publisher = Account.fromPrivateKey({
-    privateKey: new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array()),
-  });
-  const publishPackageResult = JSON.parse(fs.readFileSync(PUBLISH_RES_PATH).toString());
+  const privateKeyString = process.env.PUBLISHER_PRIVATE_KEY;
+  if (!privateKeyString) {
+    throw new Error("process.env.PUBLISHER_PRIVATE_KEY must be set.");
+  }
+  const privateKey = getPublisherPrivateKey();
+  const publisher = Account.fromPrivateKey({ privateKey });
 
   return {
     aptos,
     publisher,
-    publishPackageResult,
   };
 }
 

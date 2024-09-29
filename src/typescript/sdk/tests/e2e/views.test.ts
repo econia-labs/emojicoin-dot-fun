@@ -1,26 +1,13 @@
-import { AccountAddress, Hex, type HexInput } from "@aptos-labs/ts-sdk";
+import { Hex, type HexInput } from "@aptos-labs/ts-sdk";
 import * as EmojicoinDotFun from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getPublishHelpers } from "../utils";
 
 jest.setTimeout(15000);
 
 describe("view functions", () => {
-  const { aptos, publisher, publishPackageResult } = getPublishHelpers();
+  const { aptos } = getPublishHelpers();
 
   it("tests several different emojis that are and aren't supported", async () => {
-    const publishResult = publishPackageResult;
-
-    expect(AccountAddress.from(publishResult.sender).toStringLong()).toEqual(
-      publisher.accountAddress.toStringLong()
-    );
-    expect(publishResult.success).toEqual(true);
-
-    const transactionHash = publishResult.transaction_hash;
-    await aptos.waitForTransaction({ transactionHash });
-    expect(publisher.accountAddress.toStringLong()).toEqual(
-      publisher.accountAddress.toStringLong()
-    );
-
     const testIsSupported = async (hex: HexInput, expected: boolean) => {
       const supported = await EmojicoinDotFun.IsASupportedSymbolEmoji.view({
         aptos,
