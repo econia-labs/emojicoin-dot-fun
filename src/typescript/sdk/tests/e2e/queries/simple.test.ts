@@ -53,10 +53,10 @@ describe("queries swap_events and returns accurate swap row data", () => {
       marketAddress,
       inputAmount: 90n,
       isSell: false,
-      typeTags: [emojicoin, emojicoinLP],
       integrator: registrant.accountAddress,
       integratorFeeRateBPs: 0,
       minOutputAmount: 1n,
+      typeTags: [emojicoin, emojicoinLP],
     });
 
     const events = getEvents(res);

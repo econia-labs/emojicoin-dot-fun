@@ -2,11 +2,16 @@ if (typeof process.env.EMOJICOIN_INDEXER_URL === "undefined") {
   throw new Error("The indexer processor url must be defined.");
 } else {
   try {
-    const res = new URL(process.env.EMOJICOIN_INDEXER_URL);
+    const urlString = process.env.EMOJICOIN_INDEXER_URL;
+    const res = new URL(urlString);
+    if (urlString.endsWith("/")) {
+      throw new Error("Do not end the EMOJICOIN_INDEXER_URL with a trailing slash.");
+    }
     if (typeof res.toString() !== "string") {
       throw new Error(`Invalid URL: ${process.env.EMOJICOIN_INDEXER_URL}`);
     }
   } catch (e) {
+    console.error(e);
     throw new Error(`Invalid URL: ${process.env.EMOJICOIN_INDEXER_URL}`);
   }
 }
