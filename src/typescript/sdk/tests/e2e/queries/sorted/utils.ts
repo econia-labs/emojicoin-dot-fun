@@ -86,7 +86,7 @@ export const checkOrder = async (
   const marketIDsInQueryResult = queryResults.map(({ market }) => market.marketID);
   // prettier-ignore
   const unsortedQuery = () =>
-      postgrest
+     postgrest
         .from(TableName.MarketState)
         .select("*")
         .in("market_id", marketIDsInQueryResult);

@@ -53,7 +53,6 @@ export const getLatestProcessedEmojicoinVersion = async () =>
       }
       return BigInt(rowWithVersion.last_success_version);
     });
-
 /**
  * Wait for the processed version of a table or view to be at least the given version.
  */
@@ -108,9 +107,14 @@ export function queryHelper<
       await waitForEmojicoinIndexer(minimumVersion);
     }
 
-    const res = await innerQuery;
-    const rows = extractRows<Row>(res);
-    return rows.map((row) => convert(row));
+    try {
+      const res = await innerQuery;
+      const rows = extractRows<Row>(res);
+      return rows.map(convert);
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
   };
 
   return query;

@@ -65,9 +65,9 @@
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
-    "test": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -- pnpm jest",
-    "test:debug": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -v FETCH_DEBUG=true -- pnpm jest",
-    "test:verbose": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -v VERBOSE_TEST_LOGS=true -- pnpm jest",
+    "test": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -- pnpm jest --conditions=react-server",
+    "test:debug": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -v FETCH_DEBUG=true -- pnpm jest --conditions=react-server",
+    "test:verbose": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -v VERBOSE_TEST_LOGS=true -- pnpm jest --conditions=react-server",
     "unit-test": "dotenv -e ../env.ci -v NO_TEST_SETUP=true -- pnpm jest tests/unit"
   },
   "typings": "dist/src/index.d.ts",

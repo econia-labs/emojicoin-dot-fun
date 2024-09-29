@@ -43,9 +43,11 @@ export const fetchMarkets = queryHelper(
 
 // The featured market is simply the current highest daily volume market.
 export const fetchFeaturedMarket = async () =>
-  fetchMarkets({ page: 1, pageSize: 1, sortBy: SortMarketsBy.DailyVolume }).then((markets) =>
-    markets.at(0)
-  );
+  fetchMarkets({
+    page: 1,
+    pageSize: 1,
+    sortBy: SortMarketsBy.DailyVolume,
+  }).then((markets) => markets ?? [].at(0));
 
 /**
  * Retrieves the number of markets by querying the view function in the registry contract on-chain.
@@ -76,12 +78,9 @@ export const fetchNumRegisteredMarkets = async () => {
     // and we should just find the count ourselves. Since this is a costly operation, this should
     // primarily be a fallback to avoid defaulting to "0" in the UI. In practice, we should never
     // get rate-limited, since we'll cache the query results and add a proper revalidation time.
-    return (
-      postgrest
-        .from(TableName.MarketState)
-        // `count: "exact", head: true` retrieves the count of all rows in the table, but no rows.
-        .select("", { count: "exact", head: true })
-        .then((r) => r.count ?? 0)
-    );
+    return postgrest
+      .from(TableName.MarketState)
+      .select("", { count: "exact", head: true })
+      .then((r) => r.count ?? 0);
   }
 };
