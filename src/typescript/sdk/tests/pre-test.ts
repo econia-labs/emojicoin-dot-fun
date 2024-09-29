@@ -3,8 +3,9 @@ import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 import { type ContainerName } from "./utils/docker/logs";
 
 export default async function preTest() {
-  const startDockerServices = process.env.APTOS_NETWORK !== "local";
-  if (!process.env.NO_TEST_SETUP && startDockerServices) {
+  const startDockerServices = process.env.APTOS_NETWORK === "local";
+  const setupTest = !process.env.NO_TEST_SETUP;
+  if (setupTest && startDockerServices) {
     // Print an empty line to separate `Determining test suites to run...` from the logs.
     console.debug();
     const noLogs: Array<ContainerName> = [];
