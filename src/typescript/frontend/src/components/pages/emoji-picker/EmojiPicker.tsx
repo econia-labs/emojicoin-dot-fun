@@ -27,8 +27,15 @@ export const search = async (value: string): Promise<SearchResult> => {
   return await SearchIndex.search(value);
 };
 
+const nBytes = (e: string) => new TextEncoder().encode(e).length;
+
+export const filterBigEmojis = (e: EmojiMartData["emojis"][string]) =>
+  nBytes(e.skins[0].native) <= 10;
+
 export default function EmojiPicker(
-  props: HTMLAttributes<HTMLDivElement> & { drag: PointerEventHandler<HTMLDivElement> }
+  props: HTMLAttributes<HTMLDivElement> & { drag: PointerEventHandler<HTMLDivElement> } & {
+    filterEmojis?: (e: EmojiMartData["emojis"][string]) => boolean;
+  }
 ) {
   const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
   const setChatEmojiData = useEmojiPicker((s) => s.setChatEmojiData);
@@ -84,10 +91,10 @@ export default function EmojiPicker(
       const previewSubtitle = host.shadowRoot?.querySelector("div.preview-subtitle");
       if (!previewSubtitle) return;
       const text = previewSubtitle.textContent;
+      // There's a weird apostrophe character in the text, so just check startsWith and endsWith here.
       const failedSearch =
-        text && text.includes("That emoji couldn") && text.endsWith("t be found");
+        text && text.startsWith("That emoji couldn") && text.endsWith("t be found");
       if (failedSearch) {
-        // There's a weird apostrophe character in the text, so just check startsWith and endsWith here.
         previewSubtitle.textContent = "That emoji couldn't be found";
       }
     };
@@ -129,27 +136,9 @@ export default function EmojiPicker(
 
                 const emoji = emojiNode?.textContent;
                 if (emoji) {
-                  const numBytes = new TextEncoder().encode(emoji).length;
-                  const bytes = numBytes.toString();
+                  const bytes = nBytes(emoji).toString();
                   const formattedBytes = `${" ".repeat(2 - bytes.length)}${bytes}`;
-                  if (mode === "register" && numBytes > 10) {
-                    const span = document.createElement("span");
-                    span.id = "emoji-byte-size";
-                    node.textContent = "";
-                    span.textContent = `${formattedBytes} bytes`;
-                    span.style.setProperty("color", "red", "important");
-                    node.appendChild(span);
-
-                    const notAllowed = document.createElement("span");
-                    notAllowed.textContent = "🚫";
-                    notAllowed.style.setProperty("position", "absolute", "important");
-                    notAllowed.style.setProperty("left", "6px", "important");
-                    notAllowed.style.setProperty("top", "3px", "important");
-                    notAllowed.style.setProperty("font-size", "3rem", "important");
-                    node.appendChild(notAllowed);
-                  } else {
-                    node.textContent = `${formattedBytes} bytes`;
-                  }
+                  node.textContent = `${formattedBytes} bytes`;
                 }
               }
             });
@@ -237,6 +226,7 @@ export default function EmojiPicker(
             theme="dark"
             perLine={8}
             exceptEmojis={[]}
+            filterEmojis={props.filterEmojis}
             onEmojiSelect={(v: EmojiSelectorData) => {
               const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
               insertEmojiTextInput([newEmoji]);
