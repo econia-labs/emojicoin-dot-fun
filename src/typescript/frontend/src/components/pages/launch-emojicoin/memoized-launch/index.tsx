@@ -151,7 +151,7 @@ export const MemoizedLaunchAnimation = ({
               </div>
               <div className="flex flex-row justify-between">
                 <div className="flex flex-row items-center justify-left mr-[2ch]">
-                <span>{t("Grace period")}</span>
+                  <span>{t("Grace period")}</span>
                   <div className="mx-[5px]">
                     <Info popupClassName={""} imageClassName={"w-[13px] mt-[1px]"}>
                       After a market is launched, there will be a grace period during which only the
