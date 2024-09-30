@@ -67,7 +67,9 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
                   {formatDisplayName(message.sender)}
                 </span>
               </a>
-              <span className="pixel-heading-4 text-light-gray uppercase">{message.senderRank}</span>
+              <span className="pixel-heading-4 text-light-gray uppercase">
+                {message.senderRank}
+              </span>
             </FlexGap>
           </StyledUserNameWrapper>
         </StyledMessageWrapper>

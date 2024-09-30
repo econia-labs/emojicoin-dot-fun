@@ -31,7 +31,9 @@ const ChatInputBox = ({
       <ButtonWithConnectWalletFallback geoblocked={geoblocked} className="mt-[6px]">
         {children}
       </ButtonWithConnectWalletFallback>
-      {!connected && <div className="flex justify-center absolute w-full opacity-20 z-[-1]">{children}</div>}
+      {!connected && (
+        <div className="flex justify-center absolute w-full opacity-20 z-[-1]">{children}</div>
+      )}
     </>
   );
 };
