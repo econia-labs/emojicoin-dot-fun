@@ -119,17 +119,15 @@ export const MemoizedLaunchAnimation = ({
           <div className="flex flex-col justify-center m-auto pt-2 pixel-heading-4 uppercase">
             <div className="flex flex-col text-dark-gray">
               <div className="flex flex-row justify-between">
-                <div className="flex flex-row items-center justify-left mr-[2ch]">
+                <div className="flex flex-row items-center justify-left mr-[4ch]">
                   <span>{t("Cost to deploy")}</span>
                   <div className="mx-[5px]">
-                    <Info className="uppercase">{`
-                      The cost to deploy a market is ${displayCost} APT. You
-                      will also make a ${displayDeposit} APT deposit that will
-                      automatically be refunded when your market exits the
-                      bonding curve.
+                    <Info imageClassName={"w-[13px] mt-[1px]"}>{`
+                      The cost to deploy a market is ${displayCost} APT plus
+                      a ${displayDeposit} APT deposit that will automatically
+                      be refunded when the market exits the bonding curve.
                     `}</Info>
                   </div>
-                  :
                 </div>
                 <div>
                   <span className="">{displayCost}</span>&nbsp;APT (+{" "}
@@ -137,7 +135,7 @@ export const MemoizedLaunchAnimation = ({
                 </div>
               </div>
               <div className="flex flex-row justify-between">
-                <span className="mr-[2ch]">{t("Your balance") + ": "}</span>
+                <span className="mr-[2ch]">{t("Your balance")}</span>
                 <div>
                   <span
                     className={
@@ -152,16 +150,15 @@ export const MemoizedLaunchAnimation = ({
                 </div>
               </div>
               <div className="flex flex-row justify-between">
-                <div className="flex flex-row items-center justify-left mr-[2ch]">
+                <div className="flex flex-row items-center justify-left mr-[4ch]">
                   <span>{t("Grace period")}</span>
                   <div className="mx-[5px]">
-                    <Info className="uppercase">
+                    <Info imageClassName={"w-[13px] mt-[1px]"}>
                       After a market is launched, there will be a grace period during which only the
                       account that launched the market can trade. The grace period ends after 5
                       minutes or after the first trade, whichever comes first.
                     </Info>
                   </div>
-                  :
                 </div>
                 <div>5 minutes</div>
               </div>
