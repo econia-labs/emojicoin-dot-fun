@@ -42,8 +42,8 @@ export const REVALIDATION_TIME: number = Number(process.env.REVALIDATION_TIME);
 export const HASH_SEED: string = process.env.HASH_SEED;
 export const VPNAPI_IO_API_KEY: string = process.env.VPNAPI_IO_API_KEY!;
 
-if (APTOS_NETWORK !== Network.LOCAL && EMOJICOIN_INDEXER_URL.includes("localhost")) {
+if (APTOS_NETWORK === Network.LOCAL && !EMOJICOIN_INDEXER_URL.includes("localhost")) {
   throw new Error(
-    `APTOS_NETWORK is ${APTOS_NETWORK} but the indexer processor url is ${EMOJICOIN_INDEXER_URL}`
+    `APTOS_NETWORK is ${APTOS_NETWORK} but the indexer processor url is set to ${EMOJICOIN_INDEXER_URL}`
   );
 }
