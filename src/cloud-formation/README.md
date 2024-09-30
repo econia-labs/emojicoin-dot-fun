@@ -22,37 +22,10 @@ under a root domain you provide, for an environment name of your choosing:
 
 ## Template parameters
 
-`indexer.cfn.yaml` contains assorted [parameters] of the form `MaybeDeploy*`
-that can be used to selectively provision and de-provision [resources]. For a
-concise list of such parameters, see a [stack deployment file] at
-`deploy-*.yaml`. See the template [conditions] section for associated
-dependencies.
-
-Note that even if a parameter is passed as `true`, the resources that directly
-depend on it will not be created unless the condition's dependencies are also
-met. All resources are eventually conditional on `MaybeDeployStack`, which can
-be used to toggle provisioning and de-provisioning of all resources.
-
-In practice this means that even if a `MaybeDeploy*` parameter is passed as
-`true`, the corresponding resource(s) might not be created. For example if
-`MaybeDeployStack` is `false`, then even if `MaybeDeployVpc` is `true`,
-virtual private network resources won't be created because `MaybeDeployVpc`
-is conditional on `MaybeDeployStack`.
-
-In theory [rules] could be used to enforce parametric dependencies, thus
-generating an error in the case that a hypothetical `DeployVpc` is passed
-`true` but a hypothetical `DeployStack` is passed `false`, however rules have
-several prohibitive issues in practice:
-
-1. [`cfn-lint` issue #3630].
-
-1. If a rule assertion fails, rather than reporting an assertion error, the
-   [GitSync status dashboard] instead simply halts the update with
-   [GitSync event] type `CHANGESET_CREATION_FAILED` and following event message,
-   misleadingly reporting that no changes are present when in fact the update
-   failure was a result of failed rule assertions:
-
-   > Changeset creation failed. The reason was No updates are to be performed..
+`indexer.cfn.yaml` contains assorted [parameters] of the form `Deploy*` that can
+be used to [conditionally][conditions] provision and de-provision [resources].
+For a concise list of such parameters, see a [stack deployment file] at
+`deploy-*.yaml`. See the template [rules] section for associated dependencies.
 
 ## Setup
 
@@ -220,7 +193,8 @@ several prohibitive issues in practice:
 1. Create a [stack deployment file] (see `deploy-*.yml`) with appropriate
    [template parameters](#template-parameters).
 
-1. [Create the stack with GitSync].
+1. [Create the stack with GitSync], then monitor [GitSync events][gitsync event]
+   in the [GitSync status dashboard].
 
 ## Querying endpoints
 
@@ -306,11 +280,11 @@ deployment environment:
 ### Bastion host connections
 
 Before you try connecting to the bastion host, verify that the
-`MaybeDeployBastionHost` [condition][conditions] evaluates to `true`. Note
-too that if you have been provisioning and de-provisioning other resources, you
-might want to de-provision then provision the bastion host before running the
-below commands, in order to refresh the bastion host [user data] that stores the
-URLs of other resources in the stack.
+`DeployBastionHost` [condition][conditions] evaluates to `true`. Note too that
+if you have been provisioning and de-provisioning other resources, you might
+want to de-provision then provision the bastion host before running the below
+commands, in order to refresh the bastion host [user data] that stores the URLs
+of other resources in the stack.
 
 1. Install the [EC2 Instance Connect CLI]:
 
@@ -318,11 +292,16 @@ URLs of other resources in the stack.
    pip install ec2instanceconnectcli
    ```
 
-1. Connect to the bastion host over the [EC2 Instance Connect Endpoint] using
-   your stack name, for example `emoji-dev`:
+1. Set your stack name:
 
    ```sh
-   STACK_NAME=emoji-dev
+   STACK_NAME=<STACK_NAME>
+   echo $STACK_NAME
+   ```
+
+1. Connect to the bastion host over the [EC2 Instance Connect Endpoint]:
+
+   ```sh
    INSTANCE_ID=$(aws cloudformation describe-stacks \
        --output text \
        --query 'Stacks[0].Outputs[?OutputKey==`BastionHostId`].OutputValue' \
@@ -399,6 +378,10 @@ The indexer database uses [Aurora PostgreSQL] on a
 [high availability][high availability for aurora] with
 [fault tolerant replica promotion] and [autoscaling][aurora autoscaling].
 
+### NAT gateway redundancy
+
+The indexer uses [a NAT gateway in each availability zone] for high resilience.
+
 ### Permissions
 
 The `ContainerRole` [ECS task execution IAM role] provides
@@ -425,6 +408,19 @@ toggle [rule actions] between `Block` and `Count`.
 
 See the [Web ACL traffic overview dashboards] to monitor rules.
 
+### Container scaling
+
+[Container autoscaling] for both REST and WebSocket endpoints relies on a
+mixture of [target tracking] for scaling out and [step scaling] for scaling in.
+
+Scaling in uses a custom [step scale CloudWatch alarm] that only fires when more
+than one instance is active, to prevent alarms from triggering when only one
+instance is live and at idle.
+
+This design ensures that at least one server container is always live for both
+REST and WebSocket endpoints.
+
+[a nat gateway in each availability zone]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
@@ -437,6 +433,7 @@ See the [Web ACL traffic overview dashboards] to monitor rules.
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+[container autoscaling]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [container logging permissions]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html#ec2-considerations
 [create the stack with gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-walkthrough.html
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
@@ -468,7 +465,10 @@ See the [Web ACL traffic overview dashboards] to monitor rules.
 [secrets manager secrets]: https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html
 [stack]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html
 [stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html#git-sync-concepts-terms-depoyment-file
+[step scale cloudwatch alarm]: https://docs.aws.amazon.com/autoscaling/application/userguide/step-scaling-policy-overview.html#step-scaling-how-it-works
+[step scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-step-scaling-policies.html
 [systems manager parameters]: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
+[target tracking]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
 [template outputs section]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
 [the upstream repository credentials docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-secret.html
@@ -476,5 +476,4 @@ See the [Web ACL traffic overview dashboards] to monitor rules.
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
 [web acl traffic overview dashboards]: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-dashboards.html
 [web application firewall]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
-[`cfn-lint` issue #3630]: https://github.com/aws-cloudformation/cfn-lint/issues/3630
 [`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
