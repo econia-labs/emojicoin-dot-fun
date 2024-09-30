@@ -64,7 +64,7 @@ const localIndexer =
 
 const authHeaders =
   !localIndexer && process.env.EMOJICOIN_INDEXER_API_KEY
-    ? { "x-api-key": `${process.env.EMOJICOIN_INDEXER_API_KEY}`, Accept: "application-json" }
+    ? { "x-api-key": `${process.env.EMOJICOIN_INDEXER_API_KEY}`, Accept: "application/json" }
     : undefined;
 
 export const postgrest = new CustomClient(EMOJICOIN_INDEXER_URL, {
