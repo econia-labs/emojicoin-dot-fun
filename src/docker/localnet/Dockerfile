@@ -2,7 +2,8 @@
 
 FROM econialabs/aptos-cli:4.1.0
 
-RUN apt-get update && apt-get install --no-install-recommends -y bc
+RUN apt-get update && apt-get install --no-install-recommends -y bc=1.07* \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

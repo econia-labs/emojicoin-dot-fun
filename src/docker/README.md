@@ -31,7 +31,7 @@ correct. In your Docker Desktop settings, you must have enabled:
 
 If you're using WSL 2, you must also enable both of these settings:
 
-- Use the WSL 2 based engine ... -> Add the *.docker.internal names ...
+- Use the WSL 2 based engine ... -> Add the \*.docker.internal names ...
 
 Now your container can run the localnet on the host network:
 
