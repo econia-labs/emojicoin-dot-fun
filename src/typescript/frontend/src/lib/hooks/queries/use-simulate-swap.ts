@@ -15,6 +15,7 @@ import { toCoinTypes } from "@sdk/markets/utils";
 
 export const simulateSwap = async (args: {
   aptos: Aptos;
+  swapper: AccountAddressString;
   marketAddress: AccountAddressString;
   inputAmount: AnyNumber;
   isSell: boolean;
@@ -23,7 +24,6 @@ export const simulateSwap = async (args: {
   return withResponseError(
     SimulateSwap.view({
       ...args,
-      swapper: "0x0",
       integrator: INTEGRATOR_ADDRESS,
       integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
     })
@@ -43,16 +43,17 @@ export const useSimulateSwap = (args: {
 }) => {
   const { marketAddress, isSell, numSwaps } = args;
   const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-  const { aptos } = useAptos();
+  const { aptos, account } = useAptos();
   const typeTags = [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
-  const { inputAmount, invalid } = useMemo(() => {
+  const { inputAmount, invalid, swapper } = useMemo(() => {
     const bigInput = Big(args.inputAmount.toString());
     const inputAmount = BigInt(bigInput.toString());
     return {
       invalid: inputAmount === 0n,
       inputAmount,
+      swapper: account?.address ? (account.address as `0x${string}`) : undefined,
     };
-  }, [args.inputAmount]);
+  }, [args.inputAmount, account?.address]);
 
   const { data } = useQuery({
     queryKey: [
@@ -64,14 +65,15 @@ export const useSimulateSwap = (args: {
       numSwaps,
       emojicoin.toString(),
       emojicoinLP.toString(),
+      swapper ?? "",
     ],
     queryFn: () =>
-      invalid
+      invalid || typeof swapper === "undefined"
         ? {
             quote_volume: "0",
             base_volume: "0",
           }
-        : simulateSwap({ aptos, ...args, inputAmount, typeTags }),
+        : simulateSwap({ aptos, ...args, swapper, inputAmount, typeTags }),
     staleTime: Infinity,
   });
 
