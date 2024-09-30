@@ -150,7 +150,7 @@ export const MemoizedLaunchAnimation = ({
                 </div>
               </div>
               <div className="flex flex-row justify-between">
-                <div className="flex flex-row items-center justify-left mr-[2ch]">
+                <div className="flex flex-row items-center justify-left mr-[4ch]">
                   <span>{t("Grace period")}</span>
                   <div className="mx-[5px]">
                     <Info popupClassName={""} imageClassName={"w-[13px] mt-[1px]"}>
