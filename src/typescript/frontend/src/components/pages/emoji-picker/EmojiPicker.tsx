@@ -29,10 +29,13 @@ export const search = async (value: string): Promise<SearchResult> => {
 
 const nBytes = (e: string) => new TextEncoder().encode(e).length;
 
-export const filterBigEmojis = (e: any) => nBytes(e.skins[0].native) <= 10;
+export const filterBigEmojis = (e: EmojiMartData["emojis"][string]) =>
+  nBytes(e.skins[0].native) <= 10;
 
 export default function EmojiPicker(
-  props: HTMLAttributes<HTMLDivElement> & { drag: PointerEventHandler<HTMLDivElement> } & {filterEmojis?: (e: any) => boolean}
+  props: HTMLAttributes<HTMLDivElement> & { drag: PointerEventHandler<HTMLDivElement> } & {
+    filterEmojis?: (e: EmojiMartData["emojis"][string]) => boolean;
+  }
 ) {
   const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
   const setChatEmojiData = useEmojiPicker((s) => s.setChatEmojiData);

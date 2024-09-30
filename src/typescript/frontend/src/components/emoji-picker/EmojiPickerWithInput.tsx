@@ -15,6 +15,7 @@ import { checkTargetAndStopDefaultPropagation } from "./utils";
 import { getEmojisInString } from "@sdk/emoji_data";
 import "./triangle.css";
 import { createPortal } from "react-dom";
+import { type EmojiMartData } from "components/pages/emoji-picker/types";
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -51,7 +52,7 @@ export const EmojiPickerWithInput = ({
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
   geoblocked: boolean;
-  filterEmojis?: (e: any) => boolean;
+  filterEmojis?: (e: EmojiMartData["emojis"][string]) => boolean;
 }) => {
   const inputRef = useRef<HTMLDivElement | null>(null);
   const sendButtonRef = useRef<HTMLDivElement | null>(null);
