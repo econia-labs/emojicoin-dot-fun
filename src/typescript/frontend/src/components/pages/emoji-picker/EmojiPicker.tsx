@@ -214,9 +214,11 @@ export default function EmojiPicker(
     }
   }, []);
 
+  const { drag, ...propsRest } = props;
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div {...props} className="relative bg-black rounded-xl shadow-econia">
+      <div {...propsRest} className="relative bg-black rounded-xl shadow-econia">
         <div
           className="right-0 relative h-[29px] w-[100%] bg-ec-blue z-5"
           style={{
@@ -224,7 +226,7 @@ export default function EmojiPicker(
             borderTopLeftRadius: "8px",
             borderTopRightRadius: "8px",
           }}
-          onPointerDown={props.drag}
+          onPointerDown={drag}
         ></div>
 
         <div
@@ -232,6 +234,7 @@ export default function EmojiPicker(
           style={{ marginTop: "-10px" }}
         >
           <Picker
+            theme="dark"
             perLine={8}
             exceptEmojis={[]}
             onEmojiSelect={(v: EmojiSelectorData) => {

@@ -10,31 +10,31 @@ scripts run the `dotenv-cli` package as a wrapper, like so:
 
 ```shell
 # In sdk/package.json:
-"test": "dotenv -e ../.env.ci -- pnpm jest",
+"test": "dotenv -e ../ci.env -- pnpm jest",
 
 # I run this command
 pnpm run test
 
-# Which loads the env variables in `../.env.ci` and runs `jest`
+# Which loads the env variables in `../ci.env` and runs `jest`
 ```
 
-Where `../.env.ci` is the environment file located in the `typescript` parent
+Where `../ci.env` is the environment file located in the `typescript` parent
 directory.
 
 To avoid having to define environment variables in multiple places, we've
 intentionally omitted environment variables from the `frontend` directory to
 enforce that the project be built and run in a certain order.
 
-## Copy the `.env.example` file to an `.env` or `.env.local` file
+## Copy the `example.env` file to an `.env` or `.env.local` file
 
 Most commands load `.env.local` first then `.env`, so copy the environment
 example file to your own file.
 
 ```shell
 # With the highest precedence.
-cp .env.example .env.local
+cp example.env .env.local
 # or just `.env.`, which will be superseded by `.env.local` in loading order
-cp .env.example .env
+cp example.env .env
 ```
 
 ## Run the `frontend` application
@@ -84,7 +84,7 @@ On Vercel project settings:
       `pnpm run vercel-install`
    1. `Root Directory`: `src/typescript/frontend`
 1. Environment variables:
-   1. All variables under `.env.example`.
+   1. All variables under `example.env`.
    1. `GITHUB_ACCESS_TOKEN`: the token you generated above.
    1. `TRADING_VIEW_REPO_OWNER`: your GitHub username.
 

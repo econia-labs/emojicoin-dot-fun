@@ -39,19 +39,10 @@ const fetchPatch: typeof fetch = async (input, init) => {
   return new Response(json, response);
 };
 
-// Custom client that enforces a proper table name when calling `from`.
-class CustomClient extends PostgrestClient {
-  from = (table: TableName) => super.from(table);
-}
-
-export const postgrest = new CustomClient(EMOJICOIN_INDEXER_URL, {
-  fetch: fetchPatch,
-});
-
 /**
  * Converts an input array of any type to a proper query param for the `postgrest` client.
  *
- * @param s an array of values
+ * @params an array of values
  * @returns the properly formatted string input for the query input param
  * @example
  * ```typescript
@@ -61,3 +52,22 @@ export const postgrest = new CustomClient(EMOJICOIN_INDEXER_URL, {
  * ```
  */
 export const toQueryArray = <T>(s: T[]) => `{${s.join(",")}}`;
+
+// Custom client that enforces a proper table name when calling `from`.
+class CustomClient extends PostgrestClient {
+  from = (table: TableName) => super.from(table);
+}
+
+const localIndexer =
+  EMOJICOIN_INDEXER_URL.includes("localhost") ||
+  EMOJICOIN_INDEXER_URL.includes("host.docker.internal");
+
+const authHeaders =
+  !localIndexer && process.env.EMOJICOIN_INDEXER_API_KEY
+    ? { "x-api-key": `${process.env.EMOJICOIN_INDEXER_API_KEY}`, Accept: "application/json" }
+    : undefined;
+
+export const postgrest = new CustomClient(EMOJICOIN_INDEXER_URL, {
+  fetch: fetchPatch,
+  headers: authHeaders,
+});

@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       sortBy,
       provider,
       searchEmojis,
-      limit: MARKETS_PER_PAGE,
+      pageSize: MARKETS_PER_PAGE,
     });
     return new Response(stringifyJSON(data));
   } else {
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
       orderBy: toOrderBy(orderBy),
       sortBy,
       searchEmojis,
-      limit: MARKETS_PER_PAGE,
+      pageSize: MARKETS_PER_PAGE,
     });
     return new Response(stringifyJSON(data));
   }

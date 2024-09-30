@@ -29,12 +29,16 @@ const selectLiquidityEvents = ({
     .eq("market_id", marketID)
     .eq("market_nonce", marketNonce);
 
+// prettier-ignore
 const selectMarket1MPeriodsInLastDay = ({ marketID }: { marketID: AnyNumberString }) =>
-  postgrest.from(TableName.Market1MPeriodsInLastDay).select("*").eq("market_id", marketID);
+ postgrest
+  .from(TableName.Market1MPeriodsInLastDay)
+  .select("*")
+  .eq("market_id", marketID);
 
 // prettier-ignore
 const selectMarketDailyVolume = ({ marketID }: { marketID: AnyNumberString }) =>
-  postgrest
+ postgrest
     .from(TableName.MarketDailyVolume)
     .select("daily_volume")
     .eq("market_id", marketID);

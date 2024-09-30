@@ -28,7 +28,7 @@ export const Border = styled(Flex)`
   height: 33px;
   margin: 6px 0;
   padding: 0 0.5rem;
-  border: 2px solid ${DARK_GRAY};
+  border: 1px solid ${DARK_GRAY};
   border-radius: 2rem;
   @media screen and (max-width: ${breakpointsArray[3]}) {
     width: 100%;

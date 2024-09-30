@@ -8,15 +8,15 @@ import {
 import { getPublishHelpers } from "../utils";
 import { STRUCT_STRINGS, SYMBOL_DATA, normalizeHex } from "../../src";
 import EmojiJSONData from "../../src/emoji_data/symbol-emojis.json";
+import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
 
 jest.setTimeout(10000);
 
 describe("verification of typescript emoji JSON data", () => {
-  const { aptos, publishPackageResult } = getPublishHelpers();
+  const { aptos } = getPublishHelpers();
 
   it("checks the on-chain changes in the publish txn to verify the JSON data", async () => {
-    const publishResult = publishPackageResult;
-    const transactionHash = publishResult.transaction_hash;
+    const { transaction_hash: transactionHash } = await getPublishTransactionFromIndexer();
     const res = (await aptos.waitForTransaction({ transactionHash })) as UserTransactionResponse;
     const { changes } = res;
 

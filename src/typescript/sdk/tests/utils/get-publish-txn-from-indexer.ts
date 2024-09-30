@@ -1,21 +1,17 @@
 import {
   Account,
   AccountAddress,
-  Ed25519PrivateKey,
-  Hex,
   isUserTransactionResponse,
   type TransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { getEvents, Trigger } from "../../src";
 import { getAptosClient } from "../../src/utils/aptos-client";
-import { type PublishPackageResult } from "./types";
+import { getPublisherPrivateKey } from "./helpers";
 
-export const getPublishTransactionFromIndexer = async (
-  pk: string
-): Promise<PublishPackageResult> => {
+export const getPublishTransactionFromIndexer = async () => {
   const { aptos } = getAptosClient();
   const publisher = Account.fromPrivateKey({
-    privateKey: new Ed25519PrivateKey(Hex.fromHexString(pk).toUint8Array()),
+    privateKey: getPublisherPrivateKey(),
   });
 
   const transactions = await aptos.getAccountTransactions({

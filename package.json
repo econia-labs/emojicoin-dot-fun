@@ -10,6 +10,7 @@
     "restart": "pnpm --prefix src/typescript run restart",
     "start": "pnpm --prefix src/typescript run start",
     "test": "pnpm --prefix src/typescript run test",
+    "test:debug": "pnpm --prefix src/typescript run test:debug",
     "test:verbose": "pnpm --prefix src/typescript run test:verbose",
     "up": "pnpm --prefix src/typescript run up"
   }

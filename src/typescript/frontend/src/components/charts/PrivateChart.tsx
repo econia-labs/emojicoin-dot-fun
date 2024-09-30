@@ -271,7 +271,6 @@ export const Chart = async (props: ChartContainerProps) => {
         }
         const period = ResolutionStringToPeriod[resolution.toString()];
         const marketEmojis = getEmojisInString(symbolInfo.ticker);
-        console.debug("Subscribing to emojis:", marketEmojis);
         subscribeToPeriod({
           marketEmojis,
           period,

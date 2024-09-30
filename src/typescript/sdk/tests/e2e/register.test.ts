@@ -1,4 +1,4 @@
-import { Ed25519Account, AccountAddress, Hex, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { Ed25519Account, Hex } from "@aptos-labs/ts-sdk";
 import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
@@ -15,22 +15,11 @@ import { getFundedAccount } from "../utils/test-accounts";
 jest.setTimeout(20000);
 
 describe("registers a market successfully", () => {
-  const { aptos, publisher, publishPackageResult } = getPublishHelpers();
+  const { aptos, publisher } = getPublishHelpers();
   const user = getFundedAccount("000");
 
   it("publishes the emojicoin_dot_fun package and queries the expected resources", async () => {
     const moduleName = EMOJICOIN_DOT_FUN_MODULE_NAME;
-    const publishResult = publishPackageResult;
-
-    expect(AccountAddress.from(publishResult.sender).toStringLong()).toEqual(
-      publisher.accountAddress.toStringLong()
-    );
-    expect(publishResult.success).toEqual(true);
-
-    const transactionHash = publishResult.transaction_hash;
-    const response = await aptos.waitForTransaction({ transactionHash });
-    expect(isUserTransactionResponse(response)).toBe(true);
-
     const accountResources = await aptos.getAccountModule({
       accountAddress: publisher.accountAddress,
       moduleName,

@@ -32,8 +32,9 @@
     "prune": "../docker/utils/prune.sh --reset-localnet --yes",
     "restart": "pnpm run down && pnpm run up",
     "start": "dotenv -e .env.local -e .env -- turbo run start",
-    "test": "dotenv -e .env.ci -e ../docker/example.local.env -e ../docker/.env -- turbo run test --force",
-    "test:verbose": "dotenv -e .env.ci -e ../docker/example.local.env -e ../docker/.env -v VERBOSE_TEST_LOGS=true -- turbo run test:verbose --force",
+    "test": "pnpm run load-env -- dotenv -e ci.env -e ../docker/example.local.env -e ../docker/.env -- turbo run test --no-cache --force",
+    "test:debug": "dotenv -v FETCH_DEBUG=true -- pnpm run test",
+    "test:verbose": "pnpm run load-env -- dotenv -e ci.env -e ../docker/example.local.env -e ../docker/.env -v VERBOSE_TEST_LOGS=true -- turbo run test:verbose --force",
     "up": "docker compose -f ../docker/compose.local.yaml up -d"
   },
   "version": "0.0.0",

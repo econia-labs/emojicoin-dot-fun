@@ -266,9 +266,6 @@ importers:
         specifier: ^0.0.1
         version: 0.0.1
     devDependencies:
-      '@aptos-labs/aptos-cli':
-        specifier: ^0.1.9
-        version: 0.1.9
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.12
