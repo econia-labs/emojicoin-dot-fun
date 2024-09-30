@@ -226,7 +226,7 @@ export default function EmojiPicker(
             borderTopLeftRadius: "8px",
             borderTopRightRadius: "8px",
           }}
-          onPointerDown={props.drag}
+          onPointerDown={drag}
         ></div>
 
         <div
