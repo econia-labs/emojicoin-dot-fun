@@ -22,7 +22,7 @@ parameters:
   EnableWafRulesWebSocket: 'false'
   Environment: 'ECO-2188'
   Network: 'testnet'
-  ProcessorImageVersion: '0.5.9'
+  ProcessorImageVersion: '0.6.0'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
 ...
