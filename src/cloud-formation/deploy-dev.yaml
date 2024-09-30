@@ -20,7 +20,7 @@ parameters:
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'ECO-2188'
+  Environment: 'dev'
   Network: 'testnet'
   ProcessorImageVersion: '0.6.0'
 tags: null
