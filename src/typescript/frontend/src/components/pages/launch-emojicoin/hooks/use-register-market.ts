@@ -33,13 +33,16 @@ export const useRegisterMarket = () => {
   const { data: gasResult } = useQuery({
     queryKey: ["register-market-cost", numMarkets, account?.address, emojiBytes],
     queryFn: async () => {
+      if (account === null) {
+        return undefined;
+      }
       const publicKey = new Ed25519PublicKey(
-        typeof account!.publicKey === "string" ? account!.publicKey : account!.publicKey[0]
+        typeof account!.publicKey === "string" ? account.publicKey : account.publicKey[0]
       );
       try {
         const r = await RegisterMarket.getGasCost({
           aptosConfig: aptos.config,
-          registrant: account!.address,
+          registrant: account.address,
           registrantPubKey: publicKey,
           emojis: numMarkets === 0 ? [SYMBOL_DATA.byName("Virgo")!.bytes] : emojiBytes,
         });

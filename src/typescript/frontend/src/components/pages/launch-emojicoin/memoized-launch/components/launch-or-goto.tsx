@@ -10,13 +10,11 @@ export const LaunchButtonOrGoToMarketLink = ({
   onWalletButtonClick,
   registered,
   invalid,
-  insufficientBalance,
   geoblocked,
 }: {
   onWalletButtonClick: () => void;
   registered?: boolean;
   invalid: boolean;
-  insufficientBalance: boolean;
   geoblocked: boolean;
 }) => {
   const emojis = useEmojiPicker((state) => state.emojis);
@@ -41,19 +39,13 @@ export const LaunchButtonOrGoToMarketLink = ({
           </Link>
         ) : (
           <Button
-            disabled={insufficientBalance || invalid || typeof registered === "undefined"}
+            disabled={invalid || typeof registered === "undefined"}
             onClick={onWalletButtonClick}
             scale="lg"
             style={{ cursor: invalid ? "not-allowed" : "pointer" }}
             scrambleProps={scrambleProps}
           >
-            {t(
-              insufficientBalance
-                ? "Insufficient balance"
-                : invalid
-                  ? "Invalid input"
-                  : "Launch Emojicoin"
-            )}
+            {t(invalid ? "Invalid input" : "Launch Emojicoin")}
           </Button>
         )}
       </ButtonWithConnectWalletFallback>
