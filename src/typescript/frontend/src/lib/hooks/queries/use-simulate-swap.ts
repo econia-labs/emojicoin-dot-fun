@@ -51,7 +51,7 @@ export const useSimulateSwap = (args: {
     return {
       invalid: inputAmount === 0n,
       inputAmount,
-      swapper: account ? (account.address as `0x${string}`) : undefined,
+      swapper: account?.address ? (account.address as `0x${string}`) : undefined,
     };
   }, [args.inputAmount, account?.address]);
 
