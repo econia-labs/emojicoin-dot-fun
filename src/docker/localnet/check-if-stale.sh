@@ -47,7 +47,7 @@ function check_if_stale() {
 	rest_api_endpoint="http://localhost:8080/v1/transactions/by_version/1"
 	proposer2=$(curl -s "$rest_api_endpoint" | jq -r '.proposer')
 
-	if [[ -z "$proposer1" || -z "$proposer2" ]]; then
+	if [[ -z $proposer1 || -z $proposer2 ]]; then
 		echo "ERROR: Failed to fetch the proposer from both endpoints."
 		exit 1
 	fi
