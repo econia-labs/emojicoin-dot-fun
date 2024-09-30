@@ -132,11 +132,12 @@ docker rm -f $api 2>/dev/null
 docker volume rm -f $postgres-data
 
 if [ -n "$reset_localnet" ]; then
-	if [ -n "$CI" ]; then
-		sudo rm -rf $docker_dir/localnet/.aptos || true
-	else
-		rm -rf $docker_dir/localnet/.aptos || true
-	fi
+	# In order to avoid having to run `sudo rm -rf src/docker/localnet/.aptos`,
+	# we can bind-mount a volume one directory above `localnet/.aptos`, aka
+	# `localnet`, effectively giving the ephemeral container ownership of
+	# everything in that directory. Then we delete the localnet data, aka
+	# `.aptos`, from within the ephemeral container.
+	docker run --rm -v "$docker_dir/localnet:/pwd" busybox rm -rf /pwd/.aptos
 	docker compose -f compose.local.yaml down --volumes
 else
 	docker compose -f compose.local.yaml down

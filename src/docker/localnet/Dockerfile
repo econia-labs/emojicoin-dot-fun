@@ -2,6 +2,8 @@
 
 FROM econialabs/aptos-cli:4.1.0
 
+RUN apt-get update && apt-get install --no-install-recommends -y bc
+
 WORKDIR /app
 
 COPY src/docker/localnet/*.sh sh/
