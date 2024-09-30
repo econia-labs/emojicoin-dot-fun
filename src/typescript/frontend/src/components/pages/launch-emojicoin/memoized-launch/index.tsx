@@ -122,7 +122,7 @@ export const MemoizedLaunchAnimation = ({
                 <div className="flex flex-row items-center justify-left mr-[4ch]">
                   <span>{t("Cost to deploy")}</span>
                   <div className="mx-[5px]">
-                    <Info popupClassName={""} imageClassName={"w-[13px] mt-[1px]"}>{`
+                    <Info imageClassName={"w-[13px] mt-[1px]"}>{`
                       The cost to deploy a market is ${displayCost} APT plus
                       a ${displayDeposit} APT deposit that will automatically
                       be refunded when the market exits the bonding curve.
@@ -153,7 +153,7 @@ export const MemoizedLaunchAnimation = ({
                 <div className="flex flex-row items-center justify-left mr-[4ch]">
                   <span>{t("Grace period")}</span>
                   <div className="mx-[5px]">
-                    <Info popupClassName={""} imageClassName={"w-[13px] mt-[1px]"}>
+                    <Info imageClassName={"w-[13px] mt-[1px]"}>
                       After a market is launched, there will be a grace period during which only the
                       account that launched the market can trade. The grace period ends after 5
                       minutes or after the first trade, whichever comes first.
