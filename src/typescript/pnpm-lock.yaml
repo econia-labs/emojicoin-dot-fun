@@ -43,11 +43,11 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@emoji-mart/data':
-        specifier: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz
-        version: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz
+        specifier: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz
+        version: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz
       '@emoji-mart/react':
-        specifier: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz
-        version: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz(emoji-mart@https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart/emoji-mart-v5.6.0.tgz)(react@18.3.1)
+        specifier: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz
+        version: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz(emoji-mart@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz)(react@18.3.1)
       '@emotion/is-prop-valid':
         specifier: ^1.2.2
         version: 1.2.2
@@ -97,8 +97,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       emoji-mart:
-        specifier: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart/emoji-mart-v5.6.0.tgz
-        version: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart/emoji-mart-v5.6.0.tgz
+        specifier: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz
+        version: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz
       emoji-regex:
         specifier: ^10.3.0
         version: 10.3.0
@@ -594,12 +594,12 @@ packages:
   '@emnapi/runtime@1.2.0':
     resolution: {integrity: sha512-bV21/9LQmcQeCPEg3BDFtvwL6cwiTMksYNWQQ4KOxCZikEGalWtenoZ0wCiukJINlGCIi2KXx01g4FoH/LxpzQ==}
 
-  '@emoji-mart/data@https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz':
-    resolution: {tarball: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz}
+  '@emoji-mart/data@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz':
+    resolution: {tarball: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz}
     version: 1.2.1
 
-  '@emoji-mart/react@https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz':
-    resolution: {tarball: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz}
+  '@emoji-mart/react@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz':
+    resolution: {tarball: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz}
     version: 1.1.1
     peerDependencies:
       emoji-mart: ^5.2
@@ -2382,8 +2382,8 @@ packages:
     resolution: {integrity: sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==}
     engines: {node: '>=12'}
 
-  emoji-mart@https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart/emoji-mart-v5.6.0.tgz:
-    resolution: {tarball: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart/emoji-mart-v5.6.0.tgz}
+  emoji-mart@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz:
+    resolution: {tarball: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz}
     version: 5.6.0
 
   emoji-regex@10.3.0:
@@ -4990,11 +4990,11 @@ snapshots:
       tslib: 2.6.3
     optional: true
 
-  '@emoji-mart/data@https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz': {}
+  '@emoji-mart/data@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz': {}
 
-  '@emoji-mart/react@https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz(emoji-mart@https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart/emoji-mart-v5.6.0.tgz)(react@18.3.1)':
+  '@emoji-mart/react@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz(emoji-mart@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz)(react@18.3.1)':
     dependencies:
-      emoji-mart: https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart/emoji-mart-v5.6.0.tgz
+      emoji-mart: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz
       react: 18.3.1
 
   '@emotion/is-prop-valid@1.2.2':
@@ -6886,7 +6886,7 @@ snapshots:
 
   emittery@0.13.1: {}
 
-  emoji-mart@https://github.com/CRBl69/emoji-mart/raw/tarballs/packages/emoji-mart/emoji-mart-v5.6.0.tgz: {}
+  emoji-mart@https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz: {}
 
   emoji-regex@10.3.0: {}
 

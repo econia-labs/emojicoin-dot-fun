@@ -88,10 +88,10 @@ export default function EmojiPicker(
       const previewSubtitle = host.shadowRoot?.querySelector("div.preview-subtitle");
       if (!previewSubtitle) return;
       const text = previewSubtitle.textContent;
+      // There's a weird apostrophe character in the text, so just check startsWith and endsWith here.
       const failedSearch =
-        text && text.includes("That emoji couldn") && text.endsWith("t be found");
+        text && text.startsWith("That emoji couldn") && text.endsWith("t be found");
       if (failedSearch) {
-        // There's a weird apostrophe character in the text, so just check startsWith and endsWith here.
         previewSubtitle.textContent = "That emoji couldn't be found";
       }
     };
