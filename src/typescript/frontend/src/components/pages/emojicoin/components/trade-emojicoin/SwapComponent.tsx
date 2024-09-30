@@ -110,7 +110,7 @@ export default function SwapComponent({
   const [inputAmount, setInputAmount] = useState(
     toActualCoinDecimals({ num: presetInputAmountIsValid ? presetInputAmount! : "1" })
   );
-  const [minOutAmount, setMinOutAmount] = useState("99");
+  const [minOut, setMinOutAmount] = useState("99");
   const [minOutPercentage, setMinOutPercentage] = useState(true);
   const [outputAmount, setOutputAmount] = useState("0");
   const [previous, setPrevious] = useState(inputAmount);
@@ -266,6 +266,11 @@ export default function SwapComponent({
     }
   };
 
+  const minOutValue = toActualCoinDecimals({
+    num: minOutPercentage ? (Number(minOut) / 100) * Number(outputAmount) : minOut,
+    decimals: 0,
+  });
+
   return (
     <>
       <Column className="relative w-full max-w-[414px] h-full justify-center">
@@ -367,7 +372,7 @@ export default function SwapComponent({
                 <div className={grayLabel}>{t("Minimum output amount")}</div>
                 <input
                   className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-                  value={minOutAmount}
+                  value={minOut}
                   min={0} // min, max, and step don't do anything here. They're here for possible accessibility purposes.
                   step={0.01}
                   onChange={handleMinOutInput}
@@ -382,14 +387,14 @@ export default function SwapComponent({
                     onClick={() => {
                       let newMinOut = Number(outputAmount);
                       if (minOutPercentage) {
-                        newMinOut = (newMinOut * Number(minOutAmount)) / 100;
+                        newMinOut = (newMinOut * Number(minOut)) / 100;
                         if (Number.isNaN(newMinOut)) {
                           setMinOutAmount("99");
                         } else {
                           setMinOutAmount(newMinOut.toFixed(2));
                         }
                       } else {
-                        newMinOut = (Number(minOutAmount) / newMinOut) * 100;
+                        newMinOut = (Number(minOut) / newMinOut) * 100;
                         if (Number.isNaN(newMinOut)) {
                           setMinOutAmount("0");
                         } else {
@@ -407,9 +412,7 @@ export default function SwapComponent({
             </InnerWrapper>
           )}
 
-          <PlusMinus
-            onClick={toggleMode}
-          />
+          <PlusMinus onClick={toggleMode} />
         </SimulateInputsWrapper>
 
         <Row className={`justify-center ${mode === Mode.Simple ? "mt-[32px]" : "mt-[14px]"}`}>
@@ -423,6 +426,7 @@ export default function SwapComponent({
             disabled={!sufficientBalance && !isLoading && !!account}
             geoblocked={geoblocked}
             symbol={emojicoin}
+            minOutputAmount={minOutValue}
           />
         </Row>
       </Column>

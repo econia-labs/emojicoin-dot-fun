@@ -401,6 +401,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                 }
                 const { emojicoin, emojicoinLP } = toCoinTypes(market!.market.marketAddress);
                 let builderLambda: () => Promise<EntryFunctionTransactionBuilder>;
+                const minOutValue = unfmtCoin(minOutPercentage ? Number(minOut) / 100 * Number(liquidity) : minOut);
                 if (direction === "add") {
                   builderLambda = () =>
                     ProvideLiquidity.builder({
@@ -409,7 +410,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                       marketAddress: market!.market.marketAddress,
                       quoteAmount: unfmtCoin(liquidity ?? 0),
                       typeTags: [emojicoin, emojicoinLP],
-                      minLpCoinsOut: 1n,
+                      minLpCoinsOut: minOutValue,
                     });
                 } else {
                   builderLambda = () =>
@@ -419,7 +420,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                       marketAddress: market!.market.marketAddress,
                       lpCoinAmount: unfmtCoin(lp),
                       typeTags: [emojicoin, emojicoinLP],
-                      minQuoteOut: 1n,
+                      minQuoteOut: minOutValue,
                     });
                 }
                 await submit(builderLambda);
