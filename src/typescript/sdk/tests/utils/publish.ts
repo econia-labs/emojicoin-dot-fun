@@ -42,12 +42,10 @@ export async function publishPackage(args: {
   } = args;
   const includedArtifacts = args.includedArtifacts || "none";
 
-  let aptosExecutableAvailable = true;
-  // Avoid using npx if aptos is installed globally already.
   try {
     execSync("aptos --version");
   } catch (e) {
-    aptosExecutableAvailable = false;
+    throw new Error("Please install the `aptos` executable before running these tests.");
   }
 
   const packageDir = path.join(getGitRoot(), packageDirRelative);
@@ -60,7 +58,7 @@ export async function publishPackage(args: {
   const privateKeyString = new Hex(privateKey.toUint8Array()).toStringWithoutPrefix();
 
   const shellArgs = [
-    aptosExecutableAvailable ? "npx @aptos-labs/aptos-cli" : "aptos",
+    "aptos",
     "move",
     "publish",
     ...["--named-addresses", namedAddressesString],
@@ -115,11 +113,9 @@ function extractJsonFromText(originalCommand: string, text: string): ResultJSON 
     }
   }
 
-  /* eslint-disable no-console */
-  console.error(`Command: ${originalCommand}`);
-  console.error("Result:");
-  console.error(text);
-  /* eslint-enable no-console */
+  console.debug(`Command: ${originalCommand}`);
+  console.debug("Result:");
+  console.debug(text);
   return null;
 }
 
