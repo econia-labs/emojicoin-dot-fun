@@ -10,37 +10,24 @@ import { ROUTES } from "router/routes";
 import { useGracePeriod } from "lib/hooks/queries/use-grace-period";
 import { Text } from "components/text";
 import { useEffect, useState } from "react";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const timeLeft = (seconds: number) => {
   const remainder = seconds % 60;
   const minutes = Math.floor(seconds / 60);
-  if (remainder === 0 && minutes === 1) {
-    return `${minutes} minute left`;
-  }
   if (remainder === 0) {
-    return `${minutes} minutes left`;
-  }
-  if (minutes === 0 && remainder === 1) {
-    return `${remainder} second left`;
+    return `${minutes} min`;
   }
   if (minutes === 0) {
-    return `${remainder} seconds left`;
+    return `${remainder} s`;
   }
-  if (remainder === 1 && minutes == 1) {
-    return `${minutes} minute and ${remainder} second left`;
-  }
-  if (minutes === 1) {
-    return `${minutes} minute and ${remainder} seconds left`;
-  }
-  if (remainder === 1) {
-    return `${minutes} minutes and ${remainder} second left`;
-  }
-  return `${minutes} minutes and ${remainder} seconds left`;
+  return `${minutes} min and ${remainder} s`;
 };
 
 const getNow = () => Math.floor(new Date().getTime() / 1000);
 
 export const LiquidityButton = (props: GridProps) => {
+  const { isDesktop } = useMatchBreakpoints();
   const { t } = translationFunction();
   const [now, setNow] = useState(getNow());
   const { isLoading, data } = useGracePeriod(props.data.symbol);
@@ -52,7 +39,7 @@ export const LiquidityButton = (props: GridProps) => {
   useEffect(() => {
     const id = setInterval(() => {
       setNow(getNow());
-    }, 1000);
+    }, 200);
     return () => clearInterval(id);
   });
 
@@ -77,8 +64,12 @@ export const LiquidityButton = (props: GridProps) => {
         </StyledContentHeader>
       ) : (
         <StyledContentHeader>
-          <Flex width="100%" justifyContent="center">
-            <Text>Grace period ({timeLeft(now - registrationTime)} left)</Text>
+          <Flex width="100%" justifyContent="left">
+            <Text
+              textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
+              color="lightGray"
+              textTransform="uppercase"
+            >Grace period ({timeLeft(60 * 5 - (now - registrationTime))} left)</Text>
           </Flex>
         </StyledContentHeader>
       )}
