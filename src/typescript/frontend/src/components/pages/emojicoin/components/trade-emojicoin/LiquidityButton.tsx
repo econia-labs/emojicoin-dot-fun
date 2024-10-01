@@ -11,8 +11,10 @@ import { useGracePeriod } from "lib/hooks/queries/use-grace-period";
 import { Text } from "components/text";
 import { useEffect, useState } from "react";
 import { useMatchBreakpoints } from "@hooks/index";
+import { useQueryClient } from "@tanstack/react-query";
 
 const timeLeft = (seconds: number) => {
+  if (seconds <= 0) return "0 s";
   const remainder = seconds % 60;
   const minutes = Math.floor(seconds / 60);
   if (remainder === 0) {
@@ -30,15 +32,19 @@ export const LiquidityButton = (props: GridProps) => {
   const { isDesktop } = useMatchBreakpoints();
   const { t } = translationFunction();
   const [now, setNow] = useState(getNow());
+  const queryClient = useQueryClient();
   const { isLoading, data } = useGracePeriod(props.data.symbol);
-  data;
 
   const isInGracePeriod = isLoading ? false : !data!.gracePeriodOver;
   const registrationTime = Number((data?.flag?.marketRegistrationTime ?? 0n) / 1000000n);
 
   useEffect(() => {
     const id = setInterval(() => {
-      setNow(getNow());
+      const n = getNow();
+      setNow(n);
+      if (60 * 5 - (n - registrationTime) < 0) {
+        queryClient.invalidateQueries({queryKey: ["grace-period", props.data.symbol]});
+      }
     }, 200);
     return () => clearInterval(id);
   });

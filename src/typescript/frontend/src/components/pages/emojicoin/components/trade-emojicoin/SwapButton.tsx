@@ -99,10 +99,12 @@ export const SwapButton = ({
             <RewardsAnimation controls={controls} />
           </>
         ) : (
-          <Popup content="This market is in its grace period. During the grace period of a market, only the market creator can trade. The grace period ends 5 minutes after the market registration, of atfter the first trade, whichever comes first.">
-            <Button disabled={true} onClick={handleClick} scale="lg">
-              {t("Swap")}
-            </Button>
+          <Popup className="max-w-[300px]" content="This market is in its grace period. During the grace period of a market, only the market creator can trade. The grace period ends 5 minutes after the market registration, of atfter the first trade, whichever comes first.">
+            <div>
+              <Button disabled={true} onClick={handleClick} scale="lg">
+                {t("Swap")}
+              </Button>
+            </div>
           </Popup>
         )}
       </ButtonWithConnectWalletFallback>
