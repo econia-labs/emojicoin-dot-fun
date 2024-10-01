@@ -45,7 +45,7 @@ export const LaunchButtonOrGoToMarketLink = ({
             style={{ cursor: invalid ? "not-allowed" : "pointer" }}
             scrambleProps={scrambleProps}
           >
-            {t("Launch Emojicoin")}
+            {t(invalid ? "Invalid input" : "Launch Emojicoin")}
           </Button>
         )}
       </ButtonWithConnectWalletFallback>

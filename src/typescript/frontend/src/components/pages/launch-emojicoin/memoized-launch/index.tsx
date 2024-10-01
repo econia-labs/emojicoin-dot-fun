@@ -137,7 +137,13 @@ export const MemoizedLaunchAnimation = ({
                 </div>
               </div>
               <div className="flex flex-row justify-between">
-                <span className="mr-[2ch]">{t("Your balance")}</span>
+                <div className="flex flex-row">
+                  <span>{t("Your balance")}</span>
+                  <div className={"flex flex-row absolute mt-[2px]"}>
+                    <span className="opacity-0 select-none">{t("Your balance")}</span>
+                    <div className="ml-[3px] text-[12px]">{sufficientBalance ? "✅" : "❌"}</div>
+                  </div>
+                </div>
                 <div>
                   <span
                     className={
@@ -175,7 +181,7 @@ export const MemoizedLaunchAnimation = ({
           >
             <LaunchButtonOrGoToMarketLink
               geoblocked={geoblocked}
-              invalid={invalid || !sufficientBalance}
+              invalid={invalid}
               registered={registered}
               onWalletButtonClick={() => {
                 registerMarket();

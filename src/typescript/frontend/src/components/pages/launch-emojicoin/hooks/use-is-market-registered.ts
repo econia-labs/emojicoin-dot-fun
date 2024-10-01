@@ -21,7 +21,7 @@ export const useIsMarketRegistered = () => {
       const length = sumBytes(emojis);
       const invalidLength = length === 0 || length > 10;
       // If not all of the emojis are in the symbol data map, then it can't have been registered.
-      if (!emojis.some((e) => SYMBOL_DATA.byEmoji(e))) {
+      if (!emojis.every(SYMBOL_DATA.byEmoji)) {
         return {
           invalid: true,
           registered: false,
