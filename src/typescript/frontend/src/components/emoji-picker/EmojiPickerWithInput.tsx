@@ -16,6 +16,27 @@ import { getEmojisInString } from "@sdk/emoji_data";
 import "./triangle.css";
 import { createPortal } from "react-dom";
 import { type EmojiMartData } from "components/pages/emoji-picker/types";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+
+const ChatInputBox = ({
+  children,
+  geoblocked,
+}: {
+  children: React.ReactNode;
+  geoblocked: boolean;
+}) => {
+  const { connected } = useWallet();
+  return (
+    <>
+      <ButtonWithConnectWalletFallback geoblocked={geoblocked} className="mt-[6px]">
+        {children}
+      </ButtonWithConnectWalletFallback>
+      {!connected && (
+        <div className="flex justify-center absolute w-full opacity-20 z-[-1]">{children}</div>
+      )}
+    </>
+  );
+};
 
 /**
  * The wrapper for the input box, depending on whether or not we're using this as a chat input
@@ -31,9 +52,7 @@ const ConditionalWrapper = ({
   geoblocked: boolean;
 }) => {
   return mode === "chat" ? (
-    <ButtonWithConnectWalletFallback geoblocked={geoblocked} className="mt-2">
-      {children}
-    </ButtonWithConnectWalletFallback>
+    <ChatInputBox geoblocked={geoblocked}>{children}</ChatInputBox>
   ) : (
     <>{children}</>
   );

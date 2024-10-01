@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 import { FlexGap } from "@containers";
-import { Text } from "components/text";
-
 import {
   Arrow,
   StyledMessageContainer,
@@ -10,7 +8,6 @@ import {
   StyledMessageWrapper,
   StyledUserNameWrapper,
 } from "./styled";
-
 import { type MessageContainerProps } from "./types";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
@@ -66,14 +63,13 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
                 {...EXTERNAL_LINK_PROPS}
                 href={toExplorerLink({ value: message.version, linkType: "version" })}
               >
-                <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
+                <span className="pixel-heading-4 text-light-gray uppercase hover:underline">
                   {formatDisplayName(message.sender)}
-                </Text>
+                </span>
               </a>
-
-              <Text textScale="pixelHeading4" color="lightGray" textTransform="uppercase">
+              <span className="pixel-heading-4 text-light-gray uppercase">
                 {message.senderRank}
-              </Text>
+              </span>
             </FlexGap>
           </StyledUserNameWrapper>
         </StyledMessageWrapper>
