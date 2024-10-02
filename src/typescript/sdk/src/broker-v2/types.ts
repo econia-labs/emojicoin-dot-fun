@@ -1,5 +1,9 @@
 import { type AnyEventModel, DatabaseTypeConverter } from "../indexer-v2/types";
-import { type AnyEventDatabaseRow, TableName } from "../indexer-v2/types/json-types";
+import {
+  type AnyEventDatabaseRow,
+  type DatabaseJsonType,
+  TableName,
+} from "../indexer-v2/types/json-types";
 
 export type BrokerEvent =
   | "Chat"
@@ -10,14 +14,29 @@ export type BrokerEvent =
   | "PeriodicState"
   | "MarketRegistration";
 
-export const brokerMessageConverter: Record<BrokerEvent, (data: any) => AnyEventModel> = {
-  Chat: (d) => DatabaseTypeConverter[TableName.ChatEvents](d),
-  Swap: (d) => DatabaseTypeConverter[TableName.SwapEvents](d),
-  Liquidity: (d) => DatabaseTypeConverter[TableName.LiquidityEvents](d),
-  MarketLatestState: (d) => DatabaseTypeConverter[TableName.MarketLatestStateEvent](d),
-  GlobalState: (d) => DatabaseTypeConverter[TableName.GlobalStateEvents](d),
-  PeriodicState: (d) => DatabaseTypeConverter[TableName.PeriodicStateEvents](d),
-  MarketRegistration: (d) => DatabaseTypeConverter[TableName.MarketRegistrationEvents](d),
+const Chat = TableName.ChatEvents;
+const Swap = TableName.SwapEvents;
+const Liquidity = TableName.LiquidityEvents;
+const MarketLatestState = TableName.MarketLatestStateEvent;
+const GlobalState = TableName.GlobalStateEvents;
+const PeriodicState = TableName.PeriodicStateEvents;
+const MarketRegistration = TableName.MarketRegistrationEvents;
+type ChatType = DatabaseJsonType[typeof Chat];
+type SwapType = DatabaseJsonType[typeof Swap];
+type LiquidityType = DatabaseJsonType[typeof Liquidity];
+type MarketLatestStateType = DatabaseJsonType[typeof MarketLatestState];
+type GlobalStateType = DatabaseJsonType[typeof GlobalState];
+type PeriodicStateType = DatabaseJsonType[typeof PeriodicState];
+type MarketRegistrationType = DatabaseJsonType[typeof MarketRegistration];
+
+export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => AnyEventModel> = {
+  Chat: (d) => DatabaseTypeConverter[Chat](d as ChatType),
+  Swap: (d) => DatabaseTypeConverter[Swap](d as SwapType),
+  Liquidity: (d) => DatabaseTypeConverter[Liquidity](d as LiquidityType),
+  MarketLatestState: (d) => DatabaseTypeConverter[MarketLatestState](d as MarketLatestStateType),
+  GlobalState: (d) => DatabaseTypeConverter[GlobalState](d as GlobalStateType),
+  PeriodicState: (d) => DatabaseTypeConverter[PeriodicState](d as PeriodicStateType),
+  MarketRegistration: (d) => DatabaseTypeConverter[MarketRegistration](d as MarketRegistrationType),
 };
 
 /**

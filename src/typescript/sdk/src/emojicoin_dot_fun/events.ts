@@ -58,7 +58,7 @@ export type AptosEvent = {
   guid?: GUID;
   sequence_number?: bigint;
   type: string;
-  data: any;
+  data: unknown;
 };
 
 const getPossibleGUIDAndSequenceNumber = (

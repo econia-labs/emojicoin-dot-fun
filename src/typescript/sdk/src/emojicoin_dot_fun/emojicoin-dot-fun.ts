@@ -1077,7 +1077,7 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
 
   public readonly functionName = "registry_address";
 
-  public readonly args: {};
+  public readonly args: Record<string, never>;
 
   public readonly typeTags: [] = [];
 
@@ -1110,7 +1110,7 @@ export class RegistryView extends ViewFunctionPayloadBuilder<[JSONTypes.Registry
 
   public readonly functionName = "registry_view";
 
-  public readonly args: {};
+  public readonly args: Record<string, never>;
 
   public readonly typeTags: [] = [];
 

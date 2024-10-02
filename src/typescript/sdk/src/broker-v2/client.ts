@@ -19,10 +19,10 @@ export type WebSocketSubscriptions = {
   eventTypes: Set<BrokerEvent>;
 };
 
-const SendToBroker = (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) => {
+const SendToBroker = (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) => {
   const originalMethod = descriptor.value;
   /* eslint-disable-next-line func-names, no-param-reassign */
-  descriptor.value = function (...args: any[]) {
+  descriptor.value = function (...args: unknown[]) {
     const result = originalMethod.apply(this, args);
     (this as WebSocketClient).sendToBroker();
     return result;
@@ -30,7 +30,7 @@ const SendToBroker = (_target: any, _propertyKey: string, descriptor: PropertyDe
   return descriptor;
 };
 
-const convertWebSocketMessageToBrokerEvent = (e: MessageEvent<any>) => {
+const convertWebSocketMessageToBrokerEvent = <T extends string>(e: MessageEvent<T>) => {
   const response: BrokerMessage = parseJSONWithBigInts(e.data);
   const [brokerEvent, message] = Object.entries(response)[0] as [BrokerEvent, AnyEventDatabaseRow];
   const event = brokerMessageConverter[brokerEvent](message);
@@ -88,7 +88,7 @@ export class WebSocketClient {
   }
 
   public setOnMessage(onMessage: WebSocketClientEventListeners["onMessage"]) {
-    this.client.onmessage = (e: MessageEvent<any>) => {
+    this.client.onmessage = (e: MessageEvent<string>) => {
       const event = convertWebSocketMessageToBrokerEvent(e);
       onMessage(event);
     };
