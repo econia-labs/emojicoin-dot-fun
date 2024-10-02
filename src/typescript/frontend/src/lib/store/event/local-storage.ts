@@ -12,7 +12,7 @@ import { type MarketEventStore, type EventState, type SymbolString } from "./typ
 import { createInitialMarketState } from "./utils";
 import { type DeepWritable } from "@sdk/utils/utility-types";
 
-const shouldKeepItem = (event: AnyEventModel) => {
+const shouldKeepItem = <T extends AnyEventModel>(event: T) => {
   const eventTime = Number(event.transaction.timestamp);
   const now = new Date().getTime();
   return eventTime > now - LOCALSTORAGE_EXPIRY_TIME_MS;
@@ -21,8 +21,11 @@ const shouldKeepItem = (event: AnyEventModel) => {
 export const addToLocalStorage = <T extends AnyEventModel>(event: T) => {
   const { eventName } = event;
   const events = localStorage.getItem(eventName) ?? "[]";
-  const filtered: Array<T> = parseJSON(events).filter(shouldKeepItem);
-  filtered.push(event);
+  const filtered: T[] = parseJSON<T[]>(events).filter(shouldKeepItem);
+  const guids = new Set(filtered.map((e) => e.guid));
+  if (!guids.has(event.guid)) {
+    filtered.push(event);
+  }
   localStorage.setItem(eventName, stringifyJSON(filtered));
 };
 
@@ -137,14 +140,26 @@ export const initialStateFromLocalStorage = (): EventState => {
  */
 export const getEventsFromLocalStorage = () => {
   const res = emptyEventArraysByModelType();
+  const guids = new Set<string>();
 
   // Filter the events in local storage, then return them.
   Object.entries(res).forEach((entry) => {
     const eventName = entry[0] as keyof EventArraysByModelType;
-    const events = entry[1] as EventArraysByModelType[typeof eventName];
     const existing = localStorage.getItem(eventName) ?? "[]";
-    const filtered = parseJSON(existing).filter(shouldKeepItem);
-    events.push(...filtered);
+    const filtered =
+      parseJSON<EventArraysByModelType[typeof eventName]>(existing).filter(shouldKeepItem);
+    const reduced = filtered.reduce(
+      (acc, curr) => {
+        if (!guids.has(curr.guid)) {
+          acc.push(curr);
+          guids.add(curr.guid);
+        }
+        return acc;
+      },
+      [] as typeof filtered
+    );
+    const events = entry[1] as typeof filtered;
+    events.push(...reduced);
     localStorage.setItem(eventName, stringifyJSON(filtered));
   });
 

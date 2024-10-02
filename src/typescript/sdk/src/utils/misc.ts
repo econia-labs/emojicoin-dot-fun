@@ -1,5 +1,6 @@
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
+import assert from "assert";
 import {
   type PeriodDuration,
   type Period,
@@ -284,3 +285,49 @@ export function zip<T>(a: T[], b: T[]): Array<[T, T]> {
   }
   return Array.from({ length: a.length }).map((_, i) => [a[i], b[i]]);
 }
+
+/**
+ * Extracts elements from an array based on a type predicate and a type guard filter function.
+ *
+ * This function mutates the original array, removing elements that match
+ * the filter and returning them in a new array. It effectively splits
+ * the input array into two based on the filter condition, returning the second array.
+ *
+ * @param arr - The input array to filter and extract from.
+ * @param filter - A type predicate function to determine which elements to extract.
+ * @returns A new array containing all elements that passed the filter, in their original order.
+ *
+ * @example
+ * const numbers = [1, 2, 3, 4, 5, 6];
+ * const isEven = (n: number): n is number => n % 2 === 0;
+ * const evenNumbers = extractFilter(numbers, isEven);
+ * console.log(evenNumbers); // [2, 4, 6]
+ * console.log(numbers); // [1, 3, 5]
+ */
+/* eslint-disable-next-line import/no-unused-modules */
+export const extractFilter = <T, U extends T>(
+  arr: Array<T>,
+  filter: (v: T) => v is U
+): Array<U> => {
+  const res1 = new Array<T>();
+  const res2 = new Array<U>();
+  while (arr.length) {
+    const val = arr.pop()!;
+    if (filter(val)) {
+      res2.push(val);
+    } else {
+      res1.push(val);
+    }
+  }
+  while (res1.length) {
+    const val = res1.pop()!;
+    arr.push(val);
+  }
+  return res2.reverse();
+};
+
+export const DEBUG_ASSERT = (fn: () => boolean) => {
+  if (process.env.NODE_ENV === "development") {
+    assert(fn());
+  }
+};

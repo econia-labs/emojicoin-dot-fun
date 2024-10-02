@@ -44,20 +44,11 @@ type WebSocketClientEventListeners = {
   onError?: (e: Event) => void;
 };
 
-type WebSocketClientArgs = {
+/* eslint-disable-next-line import/no-unused-modules */
+export type WebSocketClientArgs = {
   url: string | URL;
   listeners: WebSocketClientEventListeners;
   permanentlySubscribeToMarketRegistrations: boolean;
-};
-
-let singletonClient: WebSocketClient;
-
-/* eslint-disable-next-line import/no-unused-modules */
-export const getSingletonClient = (args: WebSocketClientArgs) => {
-  if (!singletonClient) {
-    singletonClient = new WebSocketClient(args);
-  }
-  return singletonClient;
 };
 
 /* eslint-disable-next-line import/no-unused-modules */

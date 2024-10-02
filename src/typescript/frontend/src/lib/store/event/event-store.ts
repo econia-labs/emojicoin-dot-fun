@@ -1,7 +1,7 @@
 import {
   type AnyEventModel,
+  type EventModelWithMarket,
   isChatEventModel,
-  isEventModelWithMarket,
   isGlobalStateEventModel,
   isLiquidityEventModel,
   isMarketLatestStateEventModel,
@@ -17,13 +17,16 @@ import {
   handleLatestBarForPeriodicStateEvent,
   handleLatestBarForSwapEvent,
   pushPeriodicStateEvents,
+  toMappedMarketEvents,
 } from "./utils";
 import { addToLocalStorage, initialStateFromLocalStorage } from "./local-storage";
 import { periodEnumToRawDuration } from "@sdk/const";
 import { joinEmojis } from "@sdk/emoji_data";
+import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
+import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
 
 export const createEventStore = () => {
-  return createStore<EventStore>()(
+  return createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
       ...initialStateFromLocalStorage(),
       getMarket: (m) => get().markets.get(joinEmojis(m)),
@@ -31,47 +34,50 @@ export const createEventStore = () => {
         return get().markets;
       },
       loadMarketStateFromServer: (states) => {
-        const guids = get().guids;
         const filtered = states.filter((e) => {
           const marketEmojis = e.market.symbolEmojis;
           const symbol = joinEmojis(marketEmojis);
           const market = get().markets.get(symbol);
           // Filter by daily volume being undefined *or* the guid not already existing in `guids`.
-          return !market || typeof market.dailyVolume === "undefined" || !guids.has(symbol);
+          return !market || typeof market.dailyVolume === "undefined" || !get().guids.has(symbol);
         });
-        filtered.forEach(addToLocalStorage);
         set((state) => {
-          state.guids = state.guids.union(new Set(...filtered.map((e) => e.guid)));
+          filtered.map(({ guid }) => state.guids.add(guid));
           state.stateFirehose.push(...filtered);
-          filtered.forEach(({ market: marketMetadata }) => {
-            const symbol = marketMetadata.symbolData.symbol;
-            ensureMarketInStore(state, marketMetadata);
-            const market = state.markets.get(symbol)!;
-            market.stateEvents.push(...filtered);
+          const map = toMappedMarketEvents(filtered);
+          Array.from(map.entries()).forEach(([marketSymbol, marketEvents]) => {
+            ensureMarketInStore(state, marketEvents[0].market);
+            const market = state.markets.get(marketSymbol)!;
+            marketEvents.forEach((event) => market.stateEvents.push(event));
           });
         });
+        filtered.forEach(addToLocalStorage);
       },
       loadEventsFromServer: (eventsIn: Array<AnyEventModel>) => {
         const guids = get().guids;
         const events = eventsIn.filter((e) => !guids.has(e.guid));
         if (!events.length) return;
-        events.forEach(addToLocalStorage);
+        // Note the behavior of `extractFilter` below:
+        // It drains and returns the input array of the type filtered on in the filter function.
+        // The input array thus gets smaller each time `extractFilter` finds any matching events.
         set((state) => {
-          state.guids = state.guids.union(new Set(...events.map((e) => e.guid)));
+          events.map(({ guid }) => state.guids.add(guid));
           state.stateFirehose.push(...events.filter(isMarketLatestStateEventModel));
-          state.globalStateEvents.push(...events.filter(isGlobalStateEventModel));
-          state.marketRegistrations.push(...events.filter(isMarketRegistrationEventModel));
-          const uniqueMarkets = new Set([...events.filter(isEventModelWithMarket)]);
-          uniqueMarkets.forEach(({ market: marketMetadata }) => {
-            const symbol = marketMetadata.symbolData.symbol;
-            ensureMarketInStore(state, marketMetadata);
-            const market = state.markets.get(symbol)!;
-            market.swapEvents.push(...events.filter(isSwapEventModel));
-            market.chatEvents.push(...events.filter(isChatEventModel));
-            market.liquidityEvents.push(...events.filter(isLiquidityEventModel));
-            market.stateEvents.push(...events.filter(isMarketLatestStateEventModel));
-            pushPeriodicStateEvents(market, events.filter(isPeriodicStateEventModel));
+          state.globalStateEvents.push(...extractFilter(events, isGlobalStateEventModel));
+          state.marketRegistrations.push(...extractFilter(events, isMarketRegistrationEventModel));
+          DEBUG_ASSERT(() => !events.some(isGlobalStateEventModel));
+          const map = toMappedMarketEvents(events as Array<EventModelWithMarket>);
+          Array.from(map.entries()).forEach(([marketSymbol, marketEvents]) => {
+            ensureMarketInStore(state, marketEvents[0].market);
+            const market = state.markets.get(marketSymbol)!;
+            market.swapEvents.push(...extractFilter(marketEvents, isSwapEventModel));
+            market.chatEvents.push(...extractFilter(marketEvents, isChatEventModel));
+            market.liquidityEvents.push(...extractFilter(marketEvents, isLiquidityEventModel));
+            market.stateEvents.push(...extractFilter(marketEvents, isMarketLatestStateEventModel));
+            pushPeriodicStateEvents(market, extractFilter(marketEvents, isPeriodicStateEventModel));
+            DEBUG_ASSERT(() => marketEvents.length === 0);
           });
+          events.forEach(addToLocalStorage);
         });
       },
       pushEventFromClient: (event: AnyEventModel) => {
@@ -131,6 +137,7 @@ export const createEventStore = () => {
           market[period].callback = undefined;
         });
       },
+      ...createWebSocketClientStore(set, get),
     }))
   );
 };

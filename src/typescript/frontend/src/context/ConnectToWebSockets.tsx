@@ -1,12 +1,10 @@
-import { useWebSocketClient } from "./event-store-context/hooks";
+import { useEventStore } from "./event-store-context/hooks";
 import { motion } from "framer-motion";
 import { hexToRgba } from "utils/hex-to-rgba";
 
 export const ConnectToWebSockets = () => {
-  const { connected, received } = useWebSocketClient((s) => ({
-    connected: s.connected,
-    received: s.received,
-  }));
+  const connected = useEventStore((s) => s.connected);
+  const received = useEventStore((s) => s.received);
 
   return (
     <>

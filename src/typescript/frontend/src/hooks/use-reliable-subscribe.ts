@@ -1,5 +1,5 @@
 import { type BrokerEvent } from "@/broker/types";
-import { useWebSocketClient } from "context/event-store-context";
+import { useEventStore } from "context/event-store-context/hooks";
 import { useEffect } from "react";
 
 export type ReliableSubscribeArgs = {
@@ -13,8 +13,8 @@ export type ReliableSubscribeArgs = {
  */
 export const useReliableSubscribe = (args: ReliableSubscribeArgs) => {
   const { eventTypes } = args;
-  const subscribeEvents = useWebSocketClient((s) => s.subscribeEvents);
-  const unsubscribeEvents = useWebSocketClient((s) => s.unsubscribeEvents);
+  const subscribeEvents = useEventStore((s) => s.subscribeEvents);
+  const unsubscribeEvents = useEventStore((s) => s.unsubscribeEvents);
 
   useEffect(() => {
     // Don't subscribe right away, to let other components unmounting time to unsubscribe, that way
