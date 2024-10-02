@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { REVALIDATE_TEST } from "../../src/const";
+
+const REVALIDATE_TEST = 1;
 
 const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));

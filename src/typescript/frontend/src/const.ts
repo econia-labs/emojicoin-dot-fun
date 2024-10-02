@@ -5,4 +5,3 @@ export const DEFAULT_TOAST_CONFIG = {
 } as const;
 
 export const LOCALSTORAGE_EXPIRY_TIME_MS = 60 * 1000;
-export const REVALIDATE_TEST = 2;
