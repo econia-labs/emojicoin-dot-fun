@@ -11,7 +11,7 @@ describe("fetches the number of registered markets based on the latest processed
   const { aptos } = getAptosClient();
   const registrants = getFundedAccounts("031", "032", "033", "034", "035", "036");
 
-  let versionsAndNumMarkets: { version: BigInt; numMarkets: BigInt }[];
+  let versionsAndNumMarkets: { version: bigint; numMarkets: bigint }[];
 
   const marketEmojiNames: EmojiName[][] = [
     ["supervillain"],

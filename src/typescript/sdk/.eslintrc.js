@@ -2,10 +2,15 @@ module.exports = {
   env: {
     browser: true,
     es2021: true,
+    jest: true,
     node: true,
   },
   ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js"],
-  extends: ["airbnb-base", "airbnb-typescript/base", "prettier"],
+  extends: [
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     tsconfigRootDir: __dirname,
@@ -15,6 +20,7 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "unused-imports", "import"],
   rules: {
+    "@typescript-eslint/no-explicit-any": "warn",
     "no-console": [
       "warn",
       {
@@ -22,6 +28,12 @@ module.exports = {
       },
     ],
     quotes: ["error", "double"],
+    "@typescript-eslint/lines-between-class-members": [
+      "error",
+      "always",
+      { exceptAfterSingleLine: true },
+    ],
+    "@typescript-eslint/no-throw-literal": "error",
     "max-len": ["error", 100],
     "import/extensions": "off",
     "import/no-commonjs": ["error", { allowRequire: false, allowPrimitiveModules: false }],
@@ -37,7 +49,6 @@ module.exports = {
     "max-classes-per-file": ["error", 10],
     "import/prefer-default-export": "off",
     "object-curly-newline": "off",
-    // Replacing airbnb rule with following, to re-enable "ForOfStatement"
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error", { functions: false, classes: false }],

@@ -1,7 +1,7 @@
 module.exports = {
   env: {
     browser: true,
-    es2021: true,
+    es2024: true,
     jest: true,
     node: true,
   },
@@ -22,8 +22,9 @@ module.exports = {
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 13,
+    ecmaVersion: "latest",
     sourceType: "module",
+    project: ["tsconfig.json"],
   },
   plugins: ["@typescript-eslint", "import"],
   rules: {
@@ -33,6 +34,12 @@ module.exports = {
         ignoreExternal: true,
       },
     ],
+    "@typescript-eslint/lines-between-class-members": [
+      "error",
+      "always",
+      { "exceptAfterSingleLine": true }
+    ],
+    "@typescript-eslint/no-throw-literal": "error",
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/ban-types": [
       "error",
