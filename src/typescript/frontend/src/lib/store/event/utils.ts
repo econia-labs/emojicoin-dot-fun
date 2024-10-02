@@ -7,6 +7,7 @@ import {
   type PeriodicStateEventModel,
   type SwapEventModel,
   type DatabaseModels,
+  type EventModelWithMarket,
 } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from "./candlestick-bars";
@@ -153,4 +154,11 @@ export const callbackClonedLatestBarIfSubscribed = (
       volume: latestBar.volume,
     });
   }
+};
+
+export const toMappedMarketEvents = <T extends EventModelWithMarket>(events: Array<T>) => {
+  const uniques = new Set(events.map(({ market }) => market.symbolData.symbol));
+  const map = new Map(Array.from(uniques).map((symbol) => [symbol, [] as Array<T>]));
+  events.forEach((event) => map.get(event.market.symbolData.symbol)!.push(event));
+  return map;
 };

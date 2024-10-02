@@ -64,6 +64,9 @@
     },
     "test:verbose": {
       "outputs": []
+    },
+    "unit-test": {
+      "outputs": []
     }
   }
 }

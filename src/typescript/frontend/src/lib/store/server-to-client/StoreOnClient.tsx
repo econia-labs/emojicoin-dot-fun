@@ -4,7 +4,7 @@ import { useWallet, type WalletName } from "@aptos-labs/wallet-adapter-react";
 
 import { ONE_APT } from "@sdk/const";
 import { CloseIconWithHover } from "components/svg";
-import { useEventStore, useWebSocketClient } from "context/event-store-context";
+import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ export const StoreOnClient = () => {
   const { account, connect, connected, wallet } = useWallet();
   const { aptos, forceRefetch } = useAptos();
   const storeMarkets = useEventStore((s) => s.markets);
-  const subscriptions = useWebSocketClient((s) => s.subscriptions);
+  const subscriptions = useEventStore((s) => s.subscriptions);
   const pathname = usePathname();
   const [showDebugger, setShowDebugger] = useState(false);
   const registeredMarkets = useEventStore((s) => s.markets);

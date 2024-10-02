@@ -7,6 +7,8 @@ import {
 } from "@sdk/indexer-v2/types";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type LatestBar } from "./candlestick-bars";
+import { type WritableDraft } from "immer";
+import { type ClientState, type ClientActions } from "../websocket/store";
 
 // Aliased to avoid repeating the type names over and over.
 type Swap = DatabaseModels["swap_events"];
@@ -73,3 +75,15 @@ export type EventActions = {
 };
 
 export type EventStore = EventState & EventActions;
+
+export type EventAndClientStore = EventState & EventActions & ClientState & ClientActions;
+
+export type ImmerSetEventAndClientStore = (
+  nextStateOrUpdater:
+    | EventAndClientStore
+    | Partial<EventAndClientStore>
+    | ((state: WritableDraft<EventAndClientStore>) => void),
+  shouldReplace?: boolean | undefined
+) => void;
+
+export type ImmerGetEventAndClientStore = () => EventAndClientStore;

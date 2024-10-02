@@ -22,16 +22,14 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
   const setLatestBars = useEventStore((s) => s.setLatestBars);
 
   useEffect(() => {
-    if (props.data) {
-      const { chats, swaps, state, marketView } = props.data;
-      loadMarketStateFromServer([state]);
-      loadEventsFromServer([...chats, ...swaps]);
-      const latestBars = marketToLatestBars(marketView);
-      setLatestBars({ marketMetadata: state.market, latestBars });
-    }
+    const { chats, swaps, state, marketView } = props.data;
+    loadMarketStateFromServer([state]);
+    loadEventsFromServer([...chats, ...swaps]);
+    const latestBars = marketToLatestBars(marketView);
+    setLatestBars({ marketMetadata: state.market, latestBars });
 
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [props?.data]);
+  }, [props.data]);
 
   useReliableSubscribe({ eventTypes: EVENT_TYPES });
 

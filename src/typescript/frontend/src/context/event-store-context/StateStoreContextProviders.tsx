@@ -6,7 +6,7 @@ import { type NameStore, createNameStore } from "@/store/name-store";
 import createUserSettingsStore, { type UserSettingsStore } from "@/store/user-settings-store";
 import { createEventStore } from "@/store/event/event-store";
 import { type EventStore } from "@/store/event/types";
-import { createWebSocketClientStore, type WebSocketClientStore } from "@/store/websocket/store";
+import { type WebSocketClientStore } from "@/store/websocket/store";
 
 /**
  *
@@ -17,27 +17,28 @@ import { createWebSocketClientStore, type WebSocketClientStore } from "@/store/w
  */
 
 export const EventStoreContext = createContext<{
-  events: StoreApi<EventStore>;
+  events: StoreApi<EventStore & WebSocketClientStore>;
   names: StoreApi<NameStore>;
-  client: StoreApi<WebSocketClientStore>;
 } | null>(null);
 
 export interface EventStoreProviderProps {
   children: ReactNode;
 }
 
-const createStores = () => {
-  const events = createEventStore();
-  return {
-    events,
-    names: createNameStore(),
-    client: createWebSocketClientStore(events),
-  };
-};
-
 export const EventStoreProvider = ({ children }: EventStoreProviderProps) => {
-  const stores = useRef(createStores());
-  return <EventStoreContext.Provider value={stores.current}>{children}</EventStoreContext.Provider>;
+  const eventStore = useRef(createEventStore());
+  const nameStore = useRef(createNameStore());
+
+  return (
+    <EventStoreContext.Provider
+      value={{
+        events: eventStore.current,
+        names: nameStore.current,
+      }}
+    >
+      {children}
+    </EventStoreContext.Provider>
+  );
 };
 
 /**

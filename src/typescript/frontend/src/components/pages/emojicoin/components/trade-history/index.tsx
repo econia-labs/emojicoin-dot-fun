@@ -35,8 +35,7 @@ const ThWrapper = ({ className, children }: { className: string } & PropsWithChi
 );
 
 const TradeHistory = (props: TradeHistoryProps) => {
-  const swaps = useEventStore((s) => s.getMarket(props.data.symbolEmojis)?.swapEvents ?? []);
-
+  const swaps = useEventStore((s) => s.markets.get(props.data.symbol)?.swapEvents ?? []);
   const initialLoad = useRef(true);
   useEffect(() => {
     initialLoad.current = false;

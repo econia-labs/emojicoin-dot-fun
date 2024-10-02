@@ -27,6 +27,7 @@ export const LiveClientGrid = ({
   const getMarket = useEventStore((s) => s.getMarket);
   const getSearchEmojis = useEmojiPicker((s) => s.getEmojis);
   const stateFirehose = useEventStore((s) => s.stateFirehose);
+
   const latestOrdered = useRef(
     constructOrdered({
       markets,
