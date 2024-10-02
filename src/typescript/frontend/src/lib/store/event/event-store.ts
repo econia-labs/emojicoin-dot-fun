@@ -41,7 +41,6 @@ export const createEventStore = () => {
           // Filter by daily volume being undefined *or* the guid not already existing in `guids`.
           return !market || typeof market.dailyVolume === "undefined" || !get().guids.has(symbol);
         });
-        filtered.forEach(addToLocalStorage);
         set((state) => {
           filtered.map(({ guid }) => state.guids.add(guid));
           state.stateFirehose.push(...filtered);
@@ -52,6 +51,7 @@ export const createEventStore = () => {
             marketEvents.forEach((event) => market.stateEvents.push(event));
           });
         });
+        filtered.forEach(addToLocalStorage);
       },
       loadEventsFromServer: (eventsIn: Array<AnyEventModel>) => {
         const guids = get().guids;
