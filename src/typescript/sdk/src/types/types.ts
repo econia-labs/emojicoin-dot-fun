@@ -1,7 +1,7 @@
 import { hexToBytes } from "@noble/hashes/utils";
 import { type AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
-import type JSONTypes from "./json-types";
+import type JsonTypes from "./json-types";
 import { fromAggregatorSnapshot } from "./core";
 import { standardizeAddress } from "../utils/account-address";
 import { type Trigger, type EMOJICOIN_DOT_FUN_MODULE_NAME, rawTriggerToEnum } from "../const";
@@ -362,34 +362,34 @@ export namespace Types {
   };
 }
 
-export const toExtendRef = (data: JSONTypes.ExtendRef): Types.ExtendRef => ({
+export const toExtendRef = (data: JsonTypes["ExtendRef"]): Types.ExtendRef => ({
   self: standardizeAddress(data.self),
 });
 
-export const toSequenceInfo = (data: JSONTypes.SequenceInfo): Types.SequenceInfo => ({
+export const toSequenceInfo = (data: JsonTypes["SequenceInfo"]): Types.SequenceInfo => ({
   nonce: BigInt(data.nonce),
   lastBumpTime: BigInt(data.last_bump_time),
 });
 
 export const toParallelizableSequenceInfo = (
-  data: JSONTypes.ParallelizableSequenceInfo
+  data: JsonTypes["ParallelizableSequenceInfo"]
 ): Types.ParallelizableSequenceInfo => ({
   nonce: fromAggregatorSnapshot(data.nonce, strToBigInt),
   lastBumpTime: BigInt(data.last_bump_time),
 });
 
-export const toTVLtoLPCoinRatio = (data: JSONTypes.TVLtoLPCoinRatio): Types.TVLtoLPCoinRatio => ({
+export const toTVLtoLPCoinRatio = (data: JsonTypes["TVLtoLPCoinRatio"]): Types.TVLtoLPCoinRatio => ({
   tvl: BigInt(data.tvl),
   lpCoins: BigInt(data.lp_coins),
 });
 
-export const toReserves = (data: JSONTypes.Reserves): Types.Reserves => ({
+export const toReserves = (data: JsonTypes["Reserves"]): Types.Reserves => ({
   base: BigInt(data.base),
   quote: BigInt(data.quote),
 });
 
 export const toPeriodicStateTracker = (
-  data: JSONTypes.PeriodicStateTracker
+  data: JsonTypes["PeriodicStateTracker"]
 ): Types.PeriodicStateTracker => ({
   startTime: BigInt(data.start_time),
   period: BigInt(data.period),
@@ -410,11 +410,11 @@ export const toPeriodicStateTracker = (
   coinRatioEnd: toTVLtoLPCoinRatio(data.tvl_to_lp_coin_ratio_end),
 });
 
-export const toRegistryAddress = (data: JSONTypes.RegistryAddress): Types.RegistryAddress => ({
+export const toRegistryAddress = (data: JsonTypes["RegistryAddress"]): Types.RegistryAddress => ({
   registryAddress: standardizeAddress(data.registry_address),
 });
 
-export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView => ({
+export const toRegistryView = (data: JsonTypes["RegistryView"]): Types.RegistryView => ({
   registryAddress: standardizeAddress(data.registry_address),
   nonce: fromAggregatorSnapshot(data.nonce, strToBigInt),
   lastBumpTime: BigInt(data.last_bump_time),
@@ -429,7 +429,7 @@ export const toRegistryView = (data: JSONTypes.RegistryView): Types.RegistryView
   cumulativeChatMessages: fromAggregatorSnapshot(data.cumulative_chat_messages, strToBigInt),
 });
 
-export const toMarketMetadata = (data: JSONTypes.MarketMetadata): Types.MarketMetadata => ({
+export const toMarketMetadata = (data: JsonTypes["MarketMetadata"]): Types.MarketMetadata => ({
   marketID: BigInt(data.market_id),
   marketAddress: standardizeAddress(data.market_address),
   emojiBytes: hexToBytes(
@@ -437,7 +437,7 @@ export const toMarketMetadata = (data: JSONTypes.MarketMetadata): Types.MarketMe
   ),
 });
 
-export const toCumulativeStats = (data: JSONTypes.CumulativeStats): Types.CumulativeStats => ({
+export const toCumulativeStats = (data: JsonTypes["CumulativeStats"]): Types.CumulativeStats => ({
   baseVolume: BigInt(data.base_volume),
   quoteVolume: BigInt(data.quote_volume),
   integratorFees: BigInt(data.integrator_fees),
@@ -448,7 +448,7 @@ export const toCumulativeStats = (data: JSONTypes.CumulativeStats): Types.Cumula
 });
 
 export const toInstantaneousStats = (
-  data: JSONTypes.InstantaneousStats
+  data: JsonTypes["InstantaneousStats"]
 ): Types.InstantaneousStats => ({
   totalQuoteLocked: BigInt(data.total_quote_locked),
   totalValueLocked: BigInt(data.total_value_locked),
@@ -456,7 +456,7 @@ export const toInstantaneousStats = (
   fullyDilutedValue: BigInt(data.fully_diluted_value),
 });
 
-export const toLastSwap = (data: JSONTypes.LastSwap): Types.LastSwap => ({
+export const toLastSwap = (data: JsonTypes["LastSwap"]): Types.LastSwap => ({
   isSell: data.is_sell,
   avgExecutionPriceQ64: BigInt(data.avg_execution_price_q64),
   baseVolume: BigInt(data.base_volume),
@@ -465,7 +465,7 @@ export const toLastSwap = (data: JSONTypes.LastSwap): Types.LastSwap => ({
   time: BigInt(data.time),
 });
 
-export const toMarketView = (data: JSONTypes.MarketView): Types.MarketView => ({
+export const toMarketView = (data: JsonTypes["MarketView"]): Types.MarketView => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
 
@@ -484,7 +484,7 @@ export const toMarketView = (data: JSONTypes.MarketView): Types.MarketView => ({
   emojicoinLPBalance: BigInt(data.emojicoin_lp_balance),
 });
 
-export const toMarketResource = (data: JSONTypes.MarketResource): Types.MarketResource => ({
+export const toMarketResource = (data: JsonTypes["MarketResource"]): Types.MarketResource => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
   extendRef: toExtendRef(data.extend_ref),
@@ -496,7 +496,7 @@ export const toMarketResource = (data: JSONTypes.MarketResource): Types.MarketRe
   periodicStateTrackers: data.periodic_state_trackers.map((v) => toPeriodicStateTracker(v)),
 });
 
-export const toSmartTable = (data: JSONTypes.SmartTable): Types.SmartTable => ({
+export const toSmartTable = (data: JsonTypes["SmartTable"]): Types.SmartTable => ({
   buckets: {
     inner: {
       handle: standardizeAddress(data.buckets.inner.handle),
@@ -510,7 +510,7 @@ export const toSmartTable = (data: JSONTypes.SmartTable): Types.SmartTable => ({
   targetBucketSize: Number(data.target_bucket_size),
 });
 
-export const toRegistryResource = (data: JSONTypes.RegistryResource): Types.RegistryResource => ({
+export const toRegistryResource = (data: JsonTypes["RegistryResource"]): Types.RegistryResource => ({
   coinSymbolEmojis: standardizeAddress(data.coin_symbol_emojis.handle),
   extendRef: toExtendRef(data.extend_ref),
   globalStats: {
@@ -540,7 +540,7 @@ export const toRegistryResource = (data: JSONTypes.RegistryResource): Types.Regi
 });
 
 export const toPeriodicStateMetadata = (
-  data: JSONTypes.PeriodicStateMetadata
+  data: JsonTypes["PeriodicStateMetadata"]
 ): Types.PeriodicStateMetadata => ({
   startTime: BigInt(data.start_time),
   period: BigInt(data.period),
@@ -549,13 +549,13 @@ export const toPeriodicStateMetadata = (
   trigger: rawTriggerToEnum(data.trigger),
 });
 
-export const toStateMetadata = (data: JSONTypes.StateMetadata): Types.StateMetadata => ({
+export const toStateMetadata = (data: JsonTypes["StateMetadata"]): Types.StateMetadata => ({
   marketNonce: BigInt(data.market_nonce),
   bumpTime: BigInt(data.bump_time),
   trigger: rawTriggerToEnum(data.trigger),
 });
 
-export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.SwapEvent => ({
+export const toSwapEvent = (data: JsonTypes["SwapEvent"], version: number): Types.SwapEvent => ({
   version,
   marketID: BigInt(data.market_id),
   time: BigInt(data.time),
@@ -582,7 +582,7 @@ export const toSwapEvent = (data: JSONTypes.SwapEvent, version: number): Types.S
   guid: `Swap::${data.market_id}::${data.market_nonce}`,
 });
 
-export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.ChatEvent => ({
+export const toChatEvent = (data: JsonTypes["ChatEvent"], version: number): Types.ChatEvent => ({
   version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   emitTime: BigInt(data.emit_time),
@@ -599,7 +599,7 @@ export const toChatEvent = (data: JSONTypes.ChatEvent, version: number): Types.C
 });
 
 export const toMarketRegistrationEvent = (
-  data: JSONTypes.MarketRegistrationEvent,
+  data: JsonTypes["MarketRegistrationEvent"],
   version: number
 ): Types.MarketRegistrationEvent => ({
   version,
@@ -621,7 +621,7 @@ export const periodicViewToStateEvent = (
 });
 
 export const toPeriodicStateEvent = (
-  data: JSONTypes.PeriodicStateEvent,
+  data: JsonTypes["PeriodicStateEvent"],
   version: number
 ): Types.PeriodicStateEvent => ({
   version,
@@ -647,7 +647,7 @@ export const toPeriodicStateEvent = (
     `${data.periodic_state_metadata.emit_market_nonce}`) as `PeriodicState::${string}`,
 });
 
-export const toStateEvent = (data: JSONTypes.StateEvent, version: number): Types.StateEvent => ({
+export const toStateEvent = (data: JsonTypes["StateEvent"], version: number): Types.StateEvent => ({
   version,
   marketMetadata: toMarketMetadata(data.market_metadata),
   stateMetadata: toStateMetadata(data.state_metadata),
@@ -662,7 +662,7 @@ export const toStateEvent = (data: JSONTypes.StateEvent, version: number): Types
 });
 
 export const toGlobalStateEvent = (
-  data: JSONTypes.GlobalStateEvent,
+  data: JsonTypes["GlobalStateEvent"],
   version: number
 ): Types.GlobalStateEvent => ({
   version,
@@ -681,7 +681,7 @@ export const toGlobalStateEvent = (
 });
 
 export const toLiquidityEvent = (
-  data: JSONTypes.LiquidityEvent,
+  data: JsonTypes["LiquidityEvent"],
   version: number
 ): Types.LiquidityEvent => ({
   version,
@@ -698,13 +698,13 @@ export const toLiquidityEvent = (
   guid: `Liquidity::${data.market_id}::${data.market_nonce}`,
 });
 
-export const toInboxLatestState = (data: JSONTypes.InboxLatestState): Types.InboxLatestState => ({
+export const toInboxLatestState = (data: JsonTypes["InboxLatestState"]): Types.InboxLatestState => ({
   ...toStateEvent(data, data.transaction_version),
   version: data.transaction_version,
 });
 
 export const toPeriodicStateView = (
-  data: JSONTypes.PeriodicStateView
+  data: JsonTypes["PeriodicStateView"]
 ): Types.PeriodicStateView => ({
   ...toPeriodicStateEvent(data.data, -1),
   marketID: data.market_id,
@@ -713,7 +713,7 @@ export const toPeriodicStateView = (
   version: -1,
 });
 
-export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDataView => ({
+export const toMarketDataView = (data: JsonTypes["MarketDataView"]): Types.MarketDataView => ({
   marketID: Number(data.market_id),
   marketAddress: standardizeAddress(data.market_address),
   marketCap: Number(data.market_cap),
@@ -733,7 +733,7 @@ export const toMarketDataView = (data: JSONTypes.MarketDataView): Types.MarketDa
   tvlPerLpCoinGrowth: Number(data.one_day_tvl_per_lp_coin_growth_q64 / 2 ** 64),
 });
 
-export const toRegistrantGracePeriodFlag = (data: JSONTypes.RegistrantGracePeriodFlag) => ({
+export const toRegistrantGracePeriodFlag = (data: JsonTypes["RegistrantGracePeriodFlag"]) => ({
   marketRegistrant: standardizeAddress(data.market_registrant),
   marketRegistrationTime: BigInt(data.market_registration_time),
 });
@@ -864,16 +864,16 @@ export function toEmojicoinEvent(
   version?: number
 ): AnyEmojicoinEvent {
   const event = { type, data };
-  if (isJSONSwapEvent(event)) return toSwapEvent(data as JSONTypes.SwapEvent, version ?? -1);
-  if (isJSONChatEvent(event)) return toChatEvent(data as JSONTypes.ChatEvent, version ?? -1);
+  if (isJSONSwapEvent(event)) return toSwapEvent(data as JsonTypes["SwapEvent"], version ?? -1);
+  if (isJSONChatEvent(event)) return toChatEvent(data as JsonTypes["ChatEvent"], version ?? -1);
   if (isJSONMarketRegistrationEvent(event))
-    return toMarketRegistrationEvent(data as JSONTypes.MarketRegistrationEvent, version ?? -1);
+    return toMarketRegistrationEvent(data as JsonTypes["MarketRegistrationEvent"], version ?? -1);
   if (isJSONPeriodicStateEvent(event))
-    return toPeriodicStateEvent(data as JSONTypes.PeriodicStateEvent, version ?? -1);
-  if (isJSONStateEvent(event)) return toStateEvent(data as JSONTypes.StateEvent, version ?? -1);
+    return toPeriodicStateEvent(data as JsonTypes["PeriodicStateEvent"], version ?? -1);
+  if (isJSONStateEvent(event)) return toStateEvent(data as JsonTypes["StateEvent"], version ?? -1);
   if (isJSONGlobalStateEvent(event))
-    return toGlobalStateEvent(data as JSONTypes.GlobalStateEvent, version ?? -1);
+    return toGlobalStateEvent(data as JsonTypes["GlobalStateEvent"], version ?? -1);
   if (isJSONLiquidityEvent(event))
-    return toLiquidityEvent(data as JSONTypes.LiquidityEvent, version ?? -1);
+    return toLiquidityEvent(data as JsonTypes["LiquidityEvent"], version ?? -1);
   throw new Error(`Unknown event type: ${type}`);
 }

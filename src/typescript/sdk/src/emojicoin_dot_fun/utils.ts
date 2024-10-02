@@ -13,7 +13,7 @@ import { type Events, converter, toGenericEvent, createEmptyEvents } from "./eve
 import { type AnyEmojicoinEvent, type AnyEmojicoinEventName, type Types } from "../types";
 import { TYPE_TAGS } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
-import type JSONTypes from "../types/json-types";
+import type JsonTypes from "../types/json-types";
 import { type AnyEmojicoinJSONEvent } from "../types/json-types";
 import { type AccountAddressString } from "./types";
 import { encodeEmojis, SYMBOL_DATA, type SymbolEmoji } from "../emoji_data";
@@ -65,7 +65,7 @@ export async function getRegistryAddress(args: {
 }): Promise<AccountAddress> {
   const { aptos } = args;
   const moduleAddress = AccountAddress.from(args.moduleAddress);
-  const registryAddressResource = await aptos.getAccountResource<JSONTypes.RegistryAddress>({
+  const registryAddressResource = await aptos.getAccountResource<JsonTypes["RegistryAddress"]>({
     accountAddress: moduleAddress,
     resourceType: `${moduleAddress.toString()}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::RegistryAddress`,
   });

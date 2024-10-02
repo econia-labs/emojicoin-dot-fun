@@ -32,7 +32,7 @@ import {
   toRegistrantGracePeriodFlag,
   toRegistryResource,
 } from "../types/types";
-import type JSONTypes from "../types/json-types";
+import type JsonTypes from "../types/json-types";
 import {
   type DerivedEmojicoinData,
   type EmojicoinSymbol,
@@ -141,7 +141,7 @@ export async function getRegistrationGracePeriodFlag(args: {
     registryAddress,
     symbolBytes,
   });
-  let gracePeriodJSONResource: JSONTypes.RegistrantGracePeriodFlag | undefined;
+  let gracePeriodJSONResource: JsonTypes["RegistrantGracePeriodFlag"] | undefined;
   try {
     const accountResources = await aptos.getAccountResources({
       accountAddress: marketAddress,
@@ -161,7 +161,7 @@ export async function getRegistrationGracePeriodFlag(args: {
     }
     gracePeriodJSONResource = accountResources.find(
       (r) => parseTypeTag(r.type).toString() === STRUCT_STRINGS.RegistrantGracePeriodFlag
-    )?.data as JSONTypes.RegistrantGracePeriodFlag;
+    )?.data as JsonTypes["RegistrantGracePeriodFlag"];
     if (gracePeriodJSONResource) {
       const gracePeriodFlag = toRegistrantGracePeriodFlag(gracePeriodJSONResource);
       // We've found the market, got a flag, and can check if the grace period is over.
@@ -238,7 +238,7 @@ export async function getMarketResource(args: {
 }): Promise<Types.MarketResource> {
   const { aptos } = args;
   const marketAddress = AccountAddress.from(args.marketAddress);
-  const marketResource = await aptos.getAccountResource<JSONTypes.MarketResource>({
+  const marketResource = await aptos.getAccountResource<JsonTypes["MarketResource"]>({
     accountAddress: marketAddress,
     resourceType: STRUCT_STRINGS.Market,
   });

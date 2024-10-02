@@ -8,23 +8,23 @@ import {
 } from "../emojicoin_dot_fun/types";
 import { type EventJSON, type AggregatorSnapshot } from "./core";
 
-namespace JSONTypes {
+type JsonTypes = {
   // One row in the `inbox_latest_state` table.
-  export type InboxLatestState = StateEvent & {
+  InboxLatestState: JsonTypes["StateEvent"] & {
     transaction_version: number;
     marketID: number;
   };
 
   // Query return type for `inbox_periodic_state` view.
-  export type PeriodicStateView = {
+  PeriodicStateView: {
     market_id: number;
     period: number;
     start_time: number;
-    data: Omit<PeriodicStateEvent, "marketID" | "version">;
+    data: Omit<JsonTypes["PeriodicStateEvent"], "marketID" | "version">;
   };
 
   // Query return type for `market_data` view.
-  export type MarketDataView = {
+  MarketDataView: {
     market_id: number;
     market_address: `0x${string}`;
     market_cap: number;
@@ -44,17 +44,17 @@ namespace JSONTypes {
     one_day_tvl_per_lp_coin_growth_q64: number;
   };
 
-  export type ExtendRef = {
+  ExtendRef: {
     self: AccountAddressString;
   };
 
-  export type TableHandle = {
+  TableHandle: {
     handle: AccountAddressString;
   };
 
-  export type SmartTable = {
+  SmartTable: {
     buckets: {
-      inner: TableHandle;
+      inner: JsonTypes["TableHandle"];
       length: string;
     };
     level: string;
@@ -64,22 +64,22 @@ namespace JSONTypes {
     target_bucket_size: string;
   };
 
-  export type ParallelizableSequenceInfo = {
+  ParallelizableSequenceInfo: {
     nonce: AggregatorSnapshot<Uint64String>;
     last_bump_time: Uint64String;
   };
 
-  export type SequenceInfo = {
+  SequenceInfo: {
     nonce: Uint64String;
     last_bump_time: Uint64String;
   };
 
-  export type TVLtoLPCoinRatio = {
+  TVLtoLPCoinRatio: {
     tvl: Uint128String;
     lp_coins: Uint128String;
   };
 
-  export type PeriodicStateTracker = {
+  PeriodicStateTracker: {
     start_time: Uint64String;
     period: Uint64String;
     open_price_q64: Uint128String;
@@ -95,15 +95,15 @@ namespace JSONTypes {
     n_chat_messages: Uint64String;
     starts_in_bonding_curve: boolean;
     ends_in_bonding_curve: boolean;
-    tvl_to_lp_coin_ratio_start: TVLtoLPCoinRatio;
-    tvl_to_lp_coin_ratio_end: TVLtoLPCoinRatio;
+    tvl_to_lp_coin_ratio_start: JsonTypes["TVLtoLPCoinRatio"];
+    tvl_to_lp_coin_ratio_end: JsonTypes["TVLtoLPCoinRatio"];
   };
 
-  export type RegistryAddress = {
+  RegistryAddress: {
     registry_address: AccountAddressString;
   };
 
-  export type RegistryView = {
+  RegistryView: {
     registry_address: AccountAddressString;
     nonce: AggregatorSnapshot<Uint64String>;
     last_bump_time: Uint64String;
@@ -119,9 +119,9 @@ namespace JSONTypes {
   };
 
   // The result of the contract's `market_view` view function. NOT the database view.
-  export type MarketView = {
-    metadata: MarketMetadata;
-    sequence_info: SequenceInfo;
+  MarketView: {
+    metadata: JsonTypes["MarketMetadata"];
+    sequence_info: JsonTypes["SequenceInfo"];
     clamm_virtual_reserves: {
       base: Uint64String;
       quote: Uint64String;
@@ -132,30 +132,30 @@ namespace JSONTypes {
     };
     lp_coin_supply: Uint128String;
     in_bonding_curve: boolean;
-    cumulative_stats: CumulativeStats;
-    instantaneous_stats: InstantaneousStats;
-    last_swap: LastSwap;
-    periodic_state_trackers: PeriodicStateTracker[];
+    cumulative_stats: JsonTypes["CumulativeStats"];
+    instantaneous_stats: JsonTypes["InstantaneousStats"];
+    last_swap: JsonTypes["LastSwap"];
+    periodic_state_trackers: JsonTypes["PeriodicStateTracker"][];
     aptos_coin_balance: Uint64String;
     emojicoin_balance: Uint64String;
     emojicoin_lp_balance: Uint64String;
   };
 
-  export type MarketResource = {
-    metadata: MarketMetadata;
-    sequence_info: SequenceInfo;
-    extend_ref: ExtendRef;
-    clamm_virtual_reserves: Reserves;
-    cpamm_real_reserves: Reserves;
+  MarketResource: {
+    metadata: JsonTypes["MarketMetadata"];
+    sequence_info: JsonTypes["SequenceInfo"];
+    extend_ref: JsonTypes["ExtendRef"];
+    clamm_virtual_reserves: JsonTypes["Reserves"];
+    cpamm_real_reserves: JsonTypes["Reserves"];
     lp_coin_supply: Uint128String;
-    cumulative_stats: CumulativeStats;
-    last_swap: LastSwap;
-    periodic_state_trackers: Array<PeriodicStateTracker>;
+    cumulative_stats: JsonTypes["CumulativeStats"];
+    last_swap: JsonTypes["LastSwap"];
+    periodic_state_trackers: Array<JsonTypes["PeriodicStateTracker"]>;
   };
 
-  export type RegistryResource = {
-    coin_symbol_emojis: TableHandle;
-    extend_ref: ExtendRef;
+  RegistryResource: {
+    coin_symbol_emojis: JsonTypes["TableHandle"];
+    extend_ref: JsonTypes["ExtendRef"];
     global_stats: {
       cumulative_quote_volume: AggregatorSnapshot<Uint128String>;
       total_quote_locked: AggregatorSnapshot<Uint128String>;
@@ -166,25 +166,25 @@ namespace JSONTypes {
       cumulative_swaps: AggregatorSnapshot<Uint64String>;
       cumulative_chat_messages: AggregatorSnapshot<Uint64String>;
     };
-    markets_by_emoji_bytes: SmartTable;
-    markets_by_market_id: SmartTable;
+    markets_by_emoji_bytes: JsonTypes["SmartTable"];
+    markets_by_market_id: JsonTypes["SmartTable"];
     registry_address: AccountAddressString;
-    sequence_info: ParallelizableSequenceInfo;
-    supplemental_chat_emojis: TableHandle;
+    sequence_info: JsonTypes["ParallelizableSequenceInfo"];
+    supplemental_chat_emojis: JsonTypes["TableHandle"];
   };
 
-  export type MarketMetadata = {
+  MarketMetadata: {
     market_id: Uint64String;
     market_address: AccountAddressString;
     emoji_bytes: HexString;
   };
 
-  export type Reserves = {
+  Reserves: {
     base: Uint64String;
     quote: Uint64String;
   };
 
-  export type PeriodicStateMetadata = {
+  PeriodicStateMetadata: {
     start_time: Uint64String;
     period: Uint64String;
     emit_time: Uint64String;
@@ -192,12 +192,12 @@ namespace JSONTypes {
     trigger: Uint8;
   };
 
-  export type StateMetadata = {
+  StateMetadata: {
     market_nonce: Uint64String;
     bump_time: Uint64String;
     trigger: Uint8;
   };
-  export type CumulativeStats = {
+  CumulativeStats: {
     base_volume: Uint128String;
     quote_volume: Uint128String;
     integrator_fees: Uint128String;
@@ -206,13 +206,13 @@ namespace JSONTypes {
     n_swaps: Uint64String;
     n_chat_messages: Uint64String;
   };
-  export type InstantaneousStats = {
+  InstantaneousStats: {
     total_quote_locked: Uint64String;
     total_value_locked: Uint128String;
     market_cap: Uint128String;
     fully_diluted_value: Uint128String;
   };
-  export type LastSwap = {
+  LastSwap: {
     is_sell: boolean;
     avg_execution_price_q64: Uint128String;
     base_volume: Uint64String;
@@ -221,7 +221,7 @@ namespace JSONTypes {
     time: Uint64String;
   };
 
-  export type SwapEvent = {
+  SwapEvent: {
     market_id: Uint64String;
     time: Uint64String;
     market_nonce: Uint64String;
@@ -242,8 +242,8 @@ namespace JSONTypes {
     balance_as_fraction_of_circulating_supply_after_q64: Uint128String;
   };
 
-  export type ChatEvent = {
-    market_metadata: MarketMetadata;
+  ChatEvent: {
+    market_metadata: JsonTypes["MarketMetadata"];
     emit_time: Uint64String;
     emit_market_nonce: Uint64String;
     user: AccountAddressString;
@@ -253,17 +253,17 @@ namespace JSONTypes {
     balance_as_fraction_of_circulating_supply_q64: Uint128String;
   };
 
-  export type MarketRegistrationEvent = {
-    market_metadata: MarketMetadata;
+  MarketRegistrationEvent: {
+    market_metadata: JsonTypes["MarketMetadata"];
     time: Uint64String;
     registrant: AccountAddressString;
     integrator: AccountAddressString;
     integrator_fee: Uint64String;
   };
 
-  export type PeriodicStateEvent = {
-    market_metadata: MarketMetadata;
-    periodic_state_metadata: PeriodicStateMetadata;
+  PeriodicStateEvent: {
+    market_metadata: JsonTypes["MarketMetadata"];
+    periodic_state_metadata: JsonTypes["PeriodicStateMetadata"];
     open_price_q64: Uint128String;
     high_price_q64: Uint128String;
     low_price_q64: Uint128String;
@@ -280,18 +280,18 @@ namespace JSONTypes {
     tvl_per_lp_coin_growth_q64: Uint128String;
   };
 
-  export type StateEvent = {
-    market_metadata: MarketMetadata;
-    state_metadata: StateMetadata;
-    clamm_virtual_reserves: Reserves;
-    cpamm_real_reserves: Reserves;
+  StateEvent: {
+    market_metadata: JsonTypes["MarketMetadata"];
+    state_metadata: JsonTypes["StateMetadata"];
+    clamm_virtual_reserves: JsonTypes["Reserves"];
+    cpamm_real_reserves: JsonTypes["Reserves"];
     lp_coin_supply: Uint128String;
-    cumulative_stats: CumulativeStats;
-    instantaneous_stats: InstantaneousStats;
-    last_swap: LastSwap;
+    cumulative_stats: JsonTypes["CumulativeStats"];
+    instantaneous_stats: JsonTypes["InstantaneousStats"];
+    last_swap: JsonTypes["LastSwap"];
   };
 
-  export type GlobalStateEvent = {
+  GlobalStateEvent: {
     emit_time: Uint64String;
     registry_nonce: AggregatorSnapshot<Uint64String>;
     trigger: Uint8;
@@ -305,7 +305,7 @@ namespace JSONTypes {
     cumulative_chat_messages: AggregatorSnapshot<Uint64String>;
   };
 
-  export type LiquidityEvent = {
+  LiquidityEvent: {
     market_id: Uint64String;
     time: Uint64String;
     market_nonce: Uint64String;
@@ -318,22 +318,22 @@ namespace JSONTypes {
     quote_donation_claim_amount: Uint64String;
   };
 
-  export type RegistrantGracePeriodFlag = {
+  RegistrantGracePeriodFlag: {
     market_registrant: AccountAddressString;
     market_registration_time: Uint64String;
   };
 }
 
-export default JSONTypes;
+export default JsonTypes;
 
 export type AnyEmojicoinJSONEvent =
-  | JSONTypes.SwapEvent
-  | JSONTypes.ChatEvent
-  | JSONTypes.MarketRegistrationEvent
-  | JSONTypes.PeriodicStateEvent
-  | JSONTypes.StateEvent
-  | JSONTypes.GlobalStateEvent
-  | JSONTypes.LiquidityEvent;
+  | JsonTypes["SwapEvent"]
+  | JsonTypes["ChatEvent"]
+  | JsonTypes["MarketRegistrationEvent"]
+  | JsonTypes["PeriodicStateEvent"]
+  | JsonTypes["StateEvent"]
+  | JsonTypes["GlobalStateEvent"]
+  | JsonTypes["LiquidityEvent"];
 
 export function isJSONSwapEvent(e: EventJSON): boolean {
   return e.type.endsWith("Swap");

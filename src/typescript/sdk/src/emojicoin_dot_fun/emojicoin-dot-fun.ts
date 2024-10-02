@@ -34,7 +34,7 @@ import {
   EntryFunctionTransactionBuilder,
 } from "./payload-builders";
 import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../const";
-import type JSONTypes from "../types/json-types";
+import type JsonTypes from "../types/json-types";
 
 export type ChatPayloadMoveArguments = {
   marketAddress: AccountAddress;
@@ -881,7 +881,7 @@ export type MarketMetadataByEmojiBytesPayloadMoveArguments = {
  * */
 
 export class MarketMetadataByEmojiBytes extends ViewFunctionPayloadBuilder<
-  [Option<JSONTypes.MarketMetadata>]
+  [Option<JsonTypes["MarketMetadata"]>]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
 
@@ -908,7 +908,7 @@ export class MarketMetadataByEmojiBytes extends ViewFunctionPayloadBuilder<
     aptos: Aptos | AptosConfig;
     emojiBytes: HexInput; // vector<u8>
     options?: LedgerVersionArg;
-  }): Promise<Option<JSONTypes.MarketMetadata>> {
+  }): Promise<Option<JsonTypes["MarketMetadata"]>> {
     const [res] = await new MarketMetadataByEmojiBytes(args).view(args);
     return res;
   }
@@ -928,7 +928,7 @@ export type MarketMetadataByMarketAddressPayloadMoveArguments = {
  * */
 
 export class MarketMetadataByMarketAddress extends ViewFunctionPayloadBuilder<
-  [Option<JSONTypes.MarketMetadata>]
+  [Option<JsonTypes["MarketMetadata"]>]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
 
@@ -955,7 +955,7 @@ export class MarketMetadataByMarketAddress extends ViewFunctionPayloadBuilder<
     aptos: Aptos | AptosConfig;
     marketAddress: AccountAddressInput; // address
     options?: LedgerVersionArg;
-  }): Promise<Option<JSONTypes.MarketMetadata>> {
+  }): Promise<Option<JsonTypes["MarketMetadata"]>> {
     const [res] = await new MarketMetadataByMarketAddress(args).view(args);
     return res;
   }
@@ -975,7 +975,7 @@ export type MarketMetadataByMarketIDPayloadMoveArguments = {
  * */
 
 export class MarketMetadataByMarketID extends ViewFunctionPayloadBuilder<
-  [Option<JSONTypes.MarketMetadata>]
+  [Option<JsonTypes["MarketMetadata"]>]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
 
@@ -1002,7 +1002,7 @@ export class MarketMetadataByMarketID extends ViewFunctionPayloadBuilder<
     aptos: Aptos | AptosConfig;
     marketID: Uint64; // u64
     options?: LedgerVersionArg;
-  }): Promise<Option<JSONTypes.MarketMetadata>> {
+  }): Promise<Option<JsonTypes["MarketMetadata"]>> {
     const [res] = await new MarketMetadataByMarketID(args).view(args);
     return res;
   }
@@ -1021,7 +1021,7 @@ export type MarketViewPayloadMoveArguments = {
  *```
  * */
 
-export class MarketView extends ViewFunctionPayloadBuilder<[JSONTypes.MarketView]> {
+export class MarketView extends ViewFunctionPayloadBuilder<[JsonTypes["MarketView"]]> {
   public readonly moduleAddress = MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
@@ -1051,7 +1051,7 @@ export class MarketView extends ViewFunctionPayloadBuilder<[JSONTypes.MarketView
     aptos: Aptos | AptosConfig;
     marketAddress: AccountAddressInput; // address
     options?: LedgerVersionArg;
-  }): Promise<JSONTypes.MarketView> {
+  }): Promise<JsonTypes["MarketView"]> {
     const marketAddress = AccountAddress.from(args.marketAddress);
     const emojicoin = parseTypeTag(`${marketAddress.toString()}::coin_factory::Emojicoin`);
     const emojicoinLP = parseTypeTag(`${marketAddress.toString()}::coin_factory::EmojicoinLP`);
@@ -1103,7 +1103,7 @@ export class RegistryAddress extends ViewFunctionPayloadBuilder<[AccountAddressS
  *```
  * */
 
-export class RegistryView extends ViewFunctionPayloadBuilder<[JSONTypes.RegistryView]> {
+export class RegistryView extends ViewFunctionPayloadBuilder<[JsonTypes["RegistryView"]]> {
   public readonly moduleAddress = MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
@@ -1123,7 +1123,7 @@ export class RegistryView extends ViewFunctionPayloadBuilder<[JSONTypes.Registry
   static async view(args: {
     aptos: Aptos | AptosConfig;
     options?: LedgerVersionArg;
-  }): Promise<JSONTypes.RegistryView> {
+  }): Promise<JsonTypes["RegistryView"]> {
     const [res] = await new RegistryView().view(args);
     return res;
   }
@@ -1147,7 +1147,7 @@ export type SimulateProvideLiquidityPayloadMoveArguments = {
  * */
 
 export class SimulateProvideLiquidity extends ViewFunctionPayloadBuilder<
-  [JSONTypes.LiquidityEvent]
+  [JsonTypes["LiquidityEvent"]]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
 
@@ -1180,7 +1180,7 @@ export class SimulateProvideLiquidity extends ViewFunctionPayloadBuilder<
     marketAddress: AccountAddressInput; // address
     quoteAmount: Uint64; // u64
     options?: LedgerVersionArg;
-  }): Promise<JSONTypes.LiquidityEvent> {
+  }): Promise<JsonTypes["LiquidityEvent"]> {
     const [res] = await new SimulateProvideLiquidity(args).view(args);
     return res;
   }
@@ -1204,7 +1204,7 @@ export type SimulateRemoveLiquidityPayloadMoveArguments = {
  * */
 
 export class SimulateRemoveLiquidity extends ViewFunctionPayloadBuilder<
-  [JSONTypes.LiquidityEvent]
+  [JsonTypes["LiquidityEvent"]]
 > {
   public readonly moduleAddress = MODULE_ADDRESS;
 
@@ -1242,7 +1242,7 @@ export class SimulateRemoveLiquidity extends ViewFunctionPayloadBuilder<
     lpCoinAmount: Uint64; // u64
     typeTags: [TypeTagInput]; // [Emojicoin]
     options?: LedgerVersionArg;
-  }): Promise<JSONTypes.LiquidityEvent> {
+  }): Promise<JsonTypes["LiquidityEvent"]> {
     const [res] = await new SimulateRemoveLiquidity(args).view(args);
     return res;
   }
@@ -1271,7 +1271,7 @@ export type SimulateSwapPayloadMoveArguments = {
  *```
  * */
 
-export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEvent]> {
+export class SimulateSwap extends ViewFunctionPayloadBuilder<[JsonTypes["SwapEvent"]]> {
   public readonly moduleAddress = MODULE_ADDRESS;
 
   public readonly moduleName = "emojicoin_dot_fun";
@@ -1325,7 +1325,7 @@ export class SimulateSwap extends ViewFunctionPayloadBuilder<[JSONTypes.SwapEven
     integratorFeeRateBPs: Uint8; // u8
     typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
     options?: LedgerVersionArg;
-  }): Promise<JSONTypes.SwapEvent> {
+  }): Promise<JsonTypes["SwapEvent"]> {
     const [res] = await new SimulateSwap(args).view(args);
     return res;
   }

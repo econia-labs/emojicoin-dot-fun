@@ -13,7 +13,7 @@ import { EmojicoinDotFun, getEvents } from "../../src/emojicoin_dot_fun";
 import {
   type EmojiName,
   generateRandomSymbol,
-  type JSONTypes,
+  type JsonTypes,
   type MarketEmojiData,
   ONE_APT,
   SYMBOL_DATA,
@@ -151,7 +151,7 @@ async function registerRandomMarket({
   const { aptos } = getPublishHelpers();
 
   let symbol = generateRandomSymbol();
-  let registered = true as boolean | JSONTypes.MarketMetadata | undefined;
+  let registered = true as boolean | JsonTypes["MarketMetadata"] | undefined;
   while (registered) {
     /* eslint-disable-next-line no-await-in-loop */
     registered = await EmojicoinDotFun.MarketMetadataByEmojiBytes.view({
