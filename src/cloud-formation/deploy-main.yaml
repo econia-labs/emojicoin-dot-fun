@@ -20,9 +20,9 @@ parameters:
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'dev'
+  Environment: 'main'
   Network: 'testnet'
-  ProcessorImageVersion: '0.6.0'
+  ProcessorImageVersion: '0.7.0'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
 ...
