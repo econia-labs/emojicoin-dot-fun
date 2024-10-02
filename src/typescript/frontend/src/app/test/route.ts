@@ -1,8 +1,7 @@
-import { REVALIDATE_TEST } from "const";
 import { getAptos } from "lib/utils/aptos-client";
 import { NextResponse } from "next/server";
 
-export const revalidate = REVALIDATE_TEST;
+export const revalidate = 1;
 
 export async function GET() {
   const aptos = getAptos();
