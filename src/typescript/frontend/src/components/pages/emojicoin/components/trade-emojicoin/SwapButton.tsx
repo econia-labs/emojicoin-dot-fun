@@ -50,7 +50,7 @@ export const SwapButton = ({
     const res = await submit(builderLambda);
     if (res && res.response && isUserTransactionResponse(res.response)) {
       const rewardsEvent = res.response.events.find(
-        (e) => e.type === STRUCT_STRINGS.LotteryWinnerEvent
+        (e) => e.type === STRUCT_STRINGS.EmojicoinDotFunRewards
       );
       if (rewardsEvent) {
         controls.start("celebration");

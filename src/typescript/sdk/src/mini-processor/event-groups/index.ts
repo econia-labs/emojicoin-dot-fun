@@ -65,12 +65,12 @@ export function getEventsAsProcessorModels(
   const builders = new Map<string, EventGroupBuilder>();
 
   const marketEvents: EventWithMarket[] = [
-    ...events.ChatEvent,
-    ...events.LiquidityEvent,
-    ...events.MarketRegistrationEvent,
-    ...events.PeriodicStateEvent,
-    ...events.StateEvent,
-    ...events.SwapEvent,
+    ...events.chatEvents,
+    ...events.liquidityEvents,
+    ...events.marketRegistrationEvents,
+    ...events.periodicStateEvents,
+    ...events.stateEvents,
+    ...events.swapEvents,
   ];
 
   for (const event of marketEvents) {

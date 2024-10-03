@@ -1,6 +1,5 @@
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import assert from "assert";
 import {
   type PeriodDuration,
   type Period,
@@ -320,6 +319,8 @@ export const extractFilter = <T, U extends T>(
 
 export const DEBUG_ASSERT = (fn: () => boolean) => {
   if (process.env.NODE_ENV === "development") {
-    assert(fn());
+    if (!fn()) {
+      throw new Error("Debug assertion failed.");
+    }
   }
 };
