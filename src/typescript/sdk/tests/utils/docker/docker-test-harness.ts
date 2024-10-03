@@ -55,7 +55,9 @@ const checkIfCorruptedData = (state?: ContainerState) => {
 const MAXIMUM_WAIT_TIME_SEC = 120;
 function checkMaxWaitTime(container: ContainerName, secondsElapsed: number) {
   if (secondsElapsed >= MAXIMUM_WAIT_TIME_SEC) {
-    throw new Error(`\`${container}\` is not running or healthy after maximum wait time.`);
+    throw new Error(
+      `\`${container}\` is not running or healthy after ${MAXIMUM_WAIT_TIME_SEC} seconds.`
+    );
   }
 }
 

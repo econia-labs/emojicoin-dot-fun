@@ -47,6 +47,12 @@ export const getPublisherPrivateKey = () => {
  * @returns TestHelpers
  */
 export function getPublishHelpers() {
+  if (process.env.NEXT_PUBLIC_APTOS_NETWORK !== "local") {
+    throw new Error(
+      "This function should only be called within the context of a local network environment."
+    );
+  }
+
   const { aptos } = getAptosClient();
 
   const privateKeyString = process.env.PUBLISHER_PRIVATE_KEY;
