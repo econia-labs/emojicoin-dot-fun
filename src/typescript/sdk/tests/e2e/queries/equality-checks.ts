@@ -90,7 +90,7 @@ export const compareMarketAndStateMetadata = <
     | Indexer["MarketAndStateMetadataAndEmitTime"],
 >(
   row: T,
-  event: Types.StateEvent
+  event: Types["StateEvent"]
 ) =>
   checkTuplesAndPrint([
     [
@@ -112,7 +112,7 @@ export const compareMarketAndStateMetadata = <
 
 export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
   row: T,
-  event: Types.SwapEvent
+  event: Types["SwapEvent"]
 ) =>
   checkTuplesAndPrint([
     ["row.swap.swapper", row.swap.swapper, event.swapper],
@@ -146,7 +146,7 @@ export const compareSwapEvents = <T extends Indexer["SwapEventData"]>(
 
 export const compareStateEvents = <T extends Indexer["StateEventData"]>(
   row: T,
-  event: Types.StateEvent
+  event: Types["StateEvent"]
 ) =>
   checkTuplesAndPrint([
     [
@@ -229,7 +229,7 @@ export const compareStateEvents = <T extends Indexer["StateEventData"]>(
 
 const compareGlobalStateEvent = <T extends Indexer["GlobalStateEventData"]>(
   row: T,
-  event: Types.GlobalStateEvent
+  event: Types["GlobalStateEvent"]
 ) =>
   checkTuplesAndPrint([
     ["row.globalState.emitTime", row.globalState.emitTime, event.emitTime],
@@ -263,7 +263,7 @@ const compareGlobalStateEvent = <T extends Indexer["GlobalStateEventData"]>(
 
 const comparePeriodicStateMetadata = <T extends Indexer["PeriodicStateMetadata"]>(
   row: T,
-  event: Types.PeriodicStateEvent
+  event: Types["PeriodicStateEvent"]
 ) =>
   checkTuplesAndPrint([
     [
@@ -280,7 +280,7 @@ const comparePeriodicStateMetadata = <T extends Indexer["PeriodicStateMetadata"]
 
 const comparePeriodicStateEvent = <T extends Indexer["PeriodicStateEventData"]>(
   row: T,
-  event: Types.PeriodicStateEvent
+  event: Types["PeriodicStateEvent"]
 ) =>
   checkTuplesAndPrint([
     ["row.periodicState.openPriceQ64", row.periodicState.openPriceQ64, event.openPriceQ64],
@@ -311,7 +311,7 @@ const comparePeriodicStateEvent = <T extends Indexer["PeriodicStateEventData"]>(
     ],
   ]);
 
-const compareLastSwap = <T extends Indexer["LastSwap"]>(row: T, event: Types.StateEvent) =>
+const compareLastSwap = <T extends Indexer["LastSwap"]>(row: T, event: Types["StateEvent"]) =>
   checkTuplesAndPrint([
     ["row.lastSwap.isSell", row.lastSwap.isSell, event.lastSwap.isSell],
     [
@@ -327,7 +327,7 @@ const compareLastSwap = <T extends Indexer["LastSwap"]>(row: T, event: Types.Sta
 
 const compareMarketRegistrationEvent = <T extends Indexer["MarketRegistrationEventData"]>(
   row: T,
-  event: Types.MarketRegistrationEvent
+  event: Types["MarketRegistrationEvent"]
 ) =>
   checkTuplesAndPrint([
     ["row.marketRegistration.registrant", row.marketRegistration.registrant, event.registrant],
@@ -339,7 +339,7 @@ const compareMarketRegistrationEvent = <T extends Indexer["MarketRegistrationEve
     ],
   ]);
 
-const compareChatEvents = <T extends Indexer["ChatEventData"]>(row: T, event: Types.ChatEvent) =>
+const compareChatEvents = <T extends Indexer["ChatEventData"]>(row: T, event: Types["ChatEvent"]) =>
   checkTuplesAndPrint([
     ["row.chat.user", row.chat.user, event.user],
     ["row.chat.message", row.chat.message, event.message],
@@ -354,7 +354,7 @@ const compareChatEvents = <T extends Indexer["ChatEventData"]>(row: T, event: Ty
 
 const compareLiquidityEvents = <T extends Indexer["LiquidityEventData"]>(
   row: T,
-  event: Types.LiquidityEvent
+  event: Types["LiquidityEvent"]
 ) =>
   checkTuplesAndPrint([
     ["row.liquidity.provider", row.liquidity.provider, event.provider],

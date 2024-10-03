@@ -1,7 +1,7 @@
 import { Trigger } from "../../src";
 import { type Types } from "../../src/types/types";
 
-export const SAMPLE_SWAP_EVENT: Types.SwapEvent = {
+export const SAMPLE_SWAP_EVENT: Types["SwapEvent"] = {
   marketID: 1n,
   time: 0n,
   marketNonce: 0n,
@@ -24,7 +24,7 @@ export const SAMPLE_SWAP_EVENT: Types.SwapEvent = {
   balanceAsFractionOfCirculatingSupplyBeforeQ64: 0n,
 };
 
-export const SAMPLE_STATE_EVENT: Types.StateEvent = {
+export const SAMPLE_STATE_EVENT: Types["StateEvent"] = {
   marketID: 1n,
   marketMetadata: {
     marketAddress: "0x0",

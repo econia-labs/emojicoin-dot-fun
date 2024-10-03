@@ -73,7 +73,7 @@ export function getGitRoot(): string {
   return path.dirname(gitRoot);
 }
 
-type RegisterMarketHelper = Types.EmojicoinInfo &
+type RegisterMarketHelper = Types["EmojicoinInfo"] &
   MarketEmojiData & {
     registrant: Account;
     integrator: Account;

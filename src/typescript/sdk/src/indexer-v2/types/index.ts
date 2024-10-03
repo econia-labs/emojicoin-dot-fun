@@ -91,7 +91,7 @@ const toMarketMetadataModel = (
   };
 };
 
-const toLastSwapFromDatabase = (data: DatabaseStructType["LastSwapData"]): Types.LastSwap =>
+const toLastSwapFromDatabase = (data: DatabaseStructType["LastSwapData"]): Types["LastSwap"] =>
   toLastSwap({
     is_sell: data.last_swap_is_sell,
     avg_execution_price_q64: data.last_swap_avg_execution_price_q64,
@@ -274,11 +274,11 @@ const toChatEventData = (data: DatabaseStructType["ChatEventData"]): ChatEventDa
 });
 
 export type StateEventData = {
-  clammVirtualReserves: Types.Reserves;
-  cpammRealReserves: Types.Reserves;
+  clammVirtualReserves: Types["Reserves"];
+  cpammRealReserves: Types["Reserves"];
   lpCoinSupply: bigint;
-  cumulativeStats: Types.CumulativeStats;
-  instantaneousStats: Types.InstantaneousStats;
+  cumulativeStats: Types["CumulativeStats"];
+  instantaneousStats: Types["InstantaneousStats"];
 };
 
 const toStateEventData = (data: DatabaseStructType["StateEventData"]): StateEventData => ({

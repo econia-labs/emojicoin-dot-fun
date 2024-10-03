@@ -27,7 +27,7 @@ const lastMarketRegistration = (
   response?: PendingTransactionResponse | UserTransactionResponse | null
 ) => {
   if (response && isUserTransactionResponse(response)) {
-    return getEvents(response).marketRegistrationEvents.at(0);
+    return getEvents(response).MarketRegistrationEvent.at(0);
   }
   return undefined;
 };

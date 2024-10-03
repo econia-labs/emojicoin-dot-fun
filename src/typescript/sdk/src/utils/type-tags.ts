@@ -1,8 +1,8 @@
 import {
   type AccountAddressInput,
-  type TypeTag,
   AccountAddress,
   parseTypeTag,
+  type TypeTag,
   type TypeTagStruct,
 } from "@aptos-labs/ts-sdk";
 import {
@@ -11,6 +11,7 @@ import {
   REWARDS_MODULE_NAME,
   REWARDS_MODULE_ADDRESS,
 } from "../const";
+import { type TypeTagInput } from "../emojicoin_dot_fun";
 
 export function toTypeTag(
   addressInput: AccountAddressInput,
@@ -45,7 +46,22 @@ export const toEmojicoinRewardsStructTag = (structName: string): TypeTagStruct =
   return res;
 };
 
-export const TYPE_TAGS = {
+export type EmojicoinStructName =
+  | "SwapEvent"
+  | "ChatEvent"
+  | "MarketRegistrationEvent"
+  | "PeriodicStateEvent"
+  | "StateEvent"
+  | "GlobalStateEvent"
+  | "LiquidityEvent"
+  | "Market"
+  | "Registry"
+  | "RegistrantGracePeriodFlag"
+  | "EmojicoinDotFunRewards";
+
+type StructTagString = `0x${string}::${string}::${string}`;
+
+export const TYPE_TAGS: { [K in EmojicoinStructName]: TypeTag } = {
   SwapEvent: toEmojicoinStructTag("Swap"),
   ChatEvent: toEmojicoinStructTag("Chat"),
   MarketRegistrationEvent: toEmojicoinStructTag("MarketRegistration"),
@@ -56,19 +72,36 @@ export const TYPE_TAGS = {
   Market: toEmojicoinStructTag("Market"),
   Registry: toEmojicoinStructTag("Registry"),
   RegistrantGracePeriodFlag: toEmojicoinStructTag("RegistrantGracePeriodFlag"),
-  LotteryWinnerEvent: toEmojicoinRewardsStructTag("EmojicoinDotFunRewardsLotteryWinner"),
-} as const;
+  EmojicoinDotFunRewards: toEmojicoinRewardsStructTag("EmojicoinDotFunRewards"),
+};
 
-export const STRUCT_STRINGS = {
-  SwapEvent: TYPE_TAGS.SwapEvent.toString(),
-  ChatEvent: TYPE_TAGS.ChatEvent.toString(),
-  MarketRegistrationEvent: TYPE_TAGS.MarketRegistrationEvent.toString(),
-  PeriodicStateEvent: TYPE_TAGS.PeriodicStateEvent.toString(),
-  StateEvent: TYPE_TAGS.StateEvent.toString(),
-  GlobalStateEvent: TYPE_TAGS.GlobalStateEvent.toString(),
-  LiquidityEvent: TYPE_TAGS.LiquidityEvent.toString(),
-  Market: TYPE_TAGS.Market.toString(),
-  Registry: TYPE_TAGS.Registry.toString(),
-  RegistrantGracePeriodFlag: TYPE_TAGS.RegistrantGracePeriodFlag.toString(),
-  LotteryWinnerEvent: TYPE_TAGS.LotteryWinnerEvent.toString(),
-} as const;
+export const STRUCT_STRINGS: { [K in EmojicoinStructName]: StructTagString } = {
+  SwapEvent: TYPE_TAGS.SwapEvent.toString() as StructTagString,
+  ChatEvent: TYPE_TAGS.ChatEvent.toString() as StructTagString,
+  MarketRegistrationEvent: TYPE_TAGS.MarketRegistrationEvent.toString() as StructTagString,
+  PeriodicStateEvent: TYPE_TAGS.PeriodicStateEvent.toString() as StructTagString,
+  StateEvent: TYPE_TAGS.StateEvent.toString() as StructTagString,
+  GlobalStateEvent: TYPE_TAGS.GlobalStateEvent.toString() as StructTagString,
+  LiquidityEvent: TYPE_TAGS.LiquidityEvent.toString() as StructTagString,
+  Market: TYPE_TAGS.Market.toString() as StructTagString,
+  Registry: TYPE_TAGS.Registry.toString() as StructTagString,
+  RegistrantGracePeriodFlag: TYPE_TAGS.RegistrantGracePeriodFlag.toString() as StructTagString,
+  EmojicoinDotFunRewards: TYPE_TAGS.EmojicoinDotFunRewards.toString() as StructTagString,
+};
+
+const STRUCT_STRINGS_REVERSED: { [key: string]: EmojicoinStructName | undefined } = {
+  [TYPE_TAGS.SwapEvent.toString()]: "SwapEvent",
+  [TYPE_TAGS.ChatEvent.toString()]: "ChatEvent",
+  [TYPE_TAGS.MarketRegistrationEvent.toString()]: "MarketRegistrationEvent",
+  [TYPE_TAGS.PeriodicStateEvent.toString()]: "PeriodicStateEvent",
+  [TYPE_TAGS.StateEvent.toString()]: "StateEvent",
+  [TYPE_TAGS.GlobalStateEvent.toString()]: "GlobalStateEvent",
+  [TYPE_TAGS.LiquidityEvent.toString()]: "LiquidityEvent",
+  [TYPE_TAGS.Market.toString()]: "Market",
+  [TYPE_TAGS.Registry.toString()]: "Registry",
+  [TYPE_TAGS.RegistrantGracePeriodFlag.toString()]: "RegistrantGracePeriodFlag",
+  [TYPE_TAGS.EmojicoinDotFunRewards.toString()]: "EmojicoinDotFunRewards",
+};
+
+export const typeTagInputToStructName = (t: TypeTagInput): EmojicoinStructName | undefined =>
+  STRUCT_STRINGS_REVERSED[t.toString()];

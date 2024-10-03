@@ -11,7 +11,7 @@ import { type Types } from "../../types";
  * const oneHourCandlesticks = candlesticks[PeriodDuration.PERIOD_1H];
  * const oneMinuteCandlesticks = candlesticks[PeriodDuration.PERIOD_1M];
  */
-export type GroupedPeriodicStateEvents = Record<PeriodDuration, Types.PeriodicStateEvent[]>;
+export type GroupedPeriodicStateEvents = Record<PeriodDuration, Types["PeriodicStateEvent"][]>;
 
 export const createEmptyGroupedCandlesticks = (): GroupedPeriodicStateEvents => ({
   [PeriodDuration.PERIOD_1M]: [],
@@ -27,7 +27,7 @@ export const createEmptyGroupedCandlesticks = (): GroupedPeriodicStateEvents => 
 /**
  * @see {@link GroupedPeriodicStateEvents}
  */
-export const toGroupedCandlesticks = (candlesticks: Types.PeriodicStateEvent[]) => {
+export const toGroupedCandlesticks = (candlesticks: Types["PeriodicStateEvent"][]) => {
   const grouped = createEmptyGroupedCandlesticks();
 
   for (const candlestick of candlesticks) {

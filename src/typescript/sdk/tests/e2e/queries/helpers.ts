@@ -29,7 +29,7 @@ export const getTrackerFromWriteSet = <T extends Period>(
  * @returns The period expiry time as a Date object.
  */
 export const getPeriodExpiryDate = <T extends Period>(
-  tracker: Types.PeriodicStateTracker,
+  tracker: Types["PeriodicStateTracker"],
   period: T
 ): Date => {
   // Convert from micro to milliseconds. This value is never fractional, per the smart contract.

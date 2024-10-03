@@ -110,7 +110,7 @@ export function getTime(unitOfTime: UnitOfTime) {
  * ```
  */
 export function getPeriodStartTime(
-  event: Types.SwapEvent | Types.StateEvent | Types.PeriodicStateEvent | Types.PeriodicStateView,
+  event: Types["SwapEvent"] | Types["StateEvent"] | Types["PeriodicStateEvent"] | Types["PeriodicStateView"],
   periodIn: PeriodDuration | bigint | number
 ) {
   // All CandlestickPeriods are in microseconds.

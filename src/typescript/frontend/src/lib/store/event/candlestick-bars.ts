@@ -20,7 +20,7 @@ export type LatestBar = Bar & {
 };
 
 export const periodicStateTrackerToLatestBar = (
-  tracker: Types.PeriodicStateTracker,
+  tracker: Types["PeriodicStateTracker"],
   marketNonce: bigint
 ): LatestBar => {
   const { startTime } = tracker;
@@ -38,8 +38,8 @@ export const periodicStateTrackerToLatestBar = (
 
 export const marketToLatestBars = <
   T extends {
-    periodicStateTrackers: Types.MarketView["periodicStateTrackers"];
-    sequenceInfo: Types.MarketView["sequenceInfo"];
+    periodicStateTrackers: Types["MarketView"]["periodicStateTrackers"];
+    sequenceInfo: Types["MarketView"]["sequenceInfo"];
   },
 >(
   market: T

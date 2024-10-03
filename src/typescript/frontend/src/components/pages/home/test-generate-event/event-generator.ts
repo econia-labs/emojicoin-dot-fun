@@ -89,27 +89,27 @@ export const generateRandomEvent = ({
   switch (trigger) {
     case Trigger.MarketRegistration:
       ev = toEmojicoinEvent(t, generateMarketRegistrationJSON(args), v);
-      events.marketRegistrationEvents.push(ev as Types.MarketRegistrationEvent);
+      events.MarketRegistrationEvents.push(ev as Types["MarketRegistrationEvent"]);
       break;
     case Trigger.SwapBuy:
       ev = toEmojicoinEvent(t, generateSwapJSON({ ...args, isSell: false }), v);
-      events.swapEvents.push(ev as Types.SwapEvent);
+      events.SwapEvents.push(ev as Types["SwapEvent"]);
       break;
     case Trigger.SwapSell:
       ev = toEmojicoinEvent(t, generateSwapJSON({ ...args, isSell: true }), v);
-      events.swapEvents.push(ev as Types.SwapEvent);
+      events.SwapEvents.push(ev as Types["SwapEvent"]);
       break;
     case Trigger.ProvideLiquidity:
       ev = toEmojicoinEvent(t, generateLiquidityJSON({ ...args, liquidityProvided: true }), v);
-      events.liquidityEvents.push(ev as Types.LiquidityEvent);
+      events.LiquidityEvents.push(ev as Types["LiquidityEvent"]);
       break;
     case Trigger.RemoveLiquidity:
       ev = toEmojicoinEvent(t, generateLiquidityJSON({ ...args, liquidityProvided: false }), v);
-      events.liquidityEvents.push(ev as Types.LiquidityEvent);
+      events.LiquidityEvents.push(ev as Types["LiquidityEvent"]);
       break;
     case Trigger.Chat:
       ev = toEmojicoinEvent(t, generateChatJSON(args), v);
-      events.chatEvents.push(ev as Types.ChatEvent);
+      events.ChatEvents.push(ev as Types["ChatEvent"]);
       break;
     default:
       throw new Error(`Invalid trigger: ${trigger}`);
@@ -119,8 +119,8 @@ export const generateRandomEvent = ({
     STRUCT_STRINGS.StateEvent,
     stateJSON,
     Number(version)
-  ) as Types.StateEvent;
-  events.stateEvents.push(stateEvent);
+  ) as Types["StateEvent"];
+  events.StateEvents.push(stateEvent);
 
   const models = getEventsAsProcessorModels(events, {
     sender: "0x0123",

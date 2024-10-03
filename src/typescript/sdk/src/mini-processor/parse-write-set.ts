@@ -14,7 +14,7 @@ import { getCoinBalanceFromChanges } from "../utils/parse-changes-for-balances";
 
 export const getMiscLatestStateEventFieldsFromWriteSet = (response: UserTransactionResponse) => {
   const events = getEvents(response);
-  const stateEvent = events.stateEvents[0];
+  const stateEvent = events.StateEvent[0];
 
   const { marketAddress } = stateEvent.marketMetadata;
   const marketResource = getMarketResourceFromWriteSet(response, marketAddress);

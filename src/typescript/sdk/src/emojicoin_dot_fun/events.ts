@@ -1,8 +1,8 @@
 /* eslint-disable import/no-unused-modules */
 import { type GUID, type EventJSON } from "../types/core";
 import {
+  type JsonTypes,
   type Types,
-  type AnyEmojicoinEvent,
   toChatEvent,
   toGlobalStateEvent,
   toLiquidityEvent,
@@ -10,49 +10,54 @@ import {
   toPeriodicStateEvent,
   toStateEvent,
   toSwapEvent,
+  toMarketResource,
+  toRegistryResource,
+  toRegistrantGracePeriodFlag,
+  toEmojicoinDotFunRewards,
 } from "../types";
-import { TYPE_TAGS } from "../utils/type-tags";
-import { type AnyEmojicoinJSONEvent } from "../types/json-types";
+import { type EmojicoinStructName } from "../utils/type-tags";
 
-export type Events = {
-  swapEvents: Types.SwapEvent[];
-  chatEvents: Types.ChatEvent[];
-  marketRegistrationEvents: Types.MarketRegistrationEvent[];
-  periodicStateEvents: Types.PeriodicStateEvent[];
-  stateEvents: Types.StateEvent[];
-  globalStateEvents: Types.GlobalStateEvent[];
-  liquidityEvents: Types.LiquidityEvent[];
-  genericEvents: AptosEvent[];
-};
+export type FullEventNames =
+  | "ChatEvent"
+  | "SwapEvent"
+  | "MarketRegistrationEvent"
+  | "PeriodicStateEvent"
+  | "StateEvent"
+  | "GlobalStateEvent"
+  | "LiquidityEvent";
+
+type PluralEventNames = `${FullEventNames}s`;
+type RemovePlurality<T extends string> = T extends `${infer R}s` ? R : T;
+
+export type Events = { [K in PluralEventNames]: Types[RemovePlurality<K>][] };
 
 export const createEmptyEvents = (): Events => ({
-  swapEvents: [],
-  chatEvents: [],
-  marketRegistrationEvents: [],
-  periodicStateEvents: [],
-  stateEvents: [],
-  globalStateEvents: [],
-  liquidityEvents: [],
-  genericEvents: [],
+  SwapEvents: [],
+  ChatEvents: [],
+  MarketRegistrationEvents: [],
+  PeriodicStateEvents: [],
+  StateEvents: [],
+  GlobalStateEvents: [],
+  LiquidityEvents: [],
 });
 
-export const converter: Map<
-  string,
-  (data: AnyEmojicoinJSONEvent, version: number) => AnyEmojicoinEvent
-> = new Map();
-[
-  [TYPE_TAGS.SwapEvent, toSwapEvent] as const,
-  [TYPE_TAGS.ChatEvent, toChatEvent] as const,
-  [TYPE_TAGS.MarketRegistrationEvent, toMarketRegistrationEvent] as const,
-  [TYPE_TAGS.PeriodicStateEvent, toPeriodicStateEvent] as const,
-  [TYPE_TAGS.StateEvent, toStateEvent] as const,
-  [TYPE_TAGS.GlobalStateEvent, toGlobalStateEvent] as const,
-  [TYPE_TAGS.LiquidityEvent, toLiquidityEvent] as const,
-].forEach(([tag, fn]) => {
-  converter.set(tag.toString(), (data: AnyEmojicoinJSONEvent, version: number) =>
-    fn(data as any, version)
-  );
-});
+type Converter = {
+  [K in EmojicoinStructName]: (data: JsonTypes[K], version: number | string) => Types[K];
+};
+
+export const converter: Converter = {
+  ["SwapEvent"]: toSwapEvent,
+  ["ChatEvent"]: toChatEvent,
+  ["MarketRegistrationEvent"]: toMarketRegistrationEvent,
+  ["PeriodicStateEvent"]: toPeriodicStateEvent,
+  ["StateEvent"]: toStateEvent,
+  ["GlobalStateEvent"]: toGlobalStateEvent,
+  ["LiquidityEvent"]: toLiquidityEvent,
+  ["Market"]: toMarketResource,
+  ["Registry"]: toRegistryResource,
+  ["RegistrantGracePeriodFlag"]: toRegistrantGracePeriodFlag,
+  ["EmojicoinDotFunRewards"]: toEmojicoinDotFunRewards,
+};
 
 export type AptosEvent = {
   guid?: GUID;
@@ -88,7 +93,7 @@ const getPossibleGUIDAndSequenceNumber = (
   return res;
 };
 
-export const toGenericEvent = (event: EventJSON): AptosEvent => ({
+const _toGenericEvent = (event: EventJSON): AptosEvent => ({
   ...getPossibleGUIDAndSequenceNumber(event),
   type: event.type,
   data: event.data,

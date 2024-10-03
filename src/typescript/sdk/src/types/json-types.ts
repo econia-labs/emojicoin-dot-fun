@@ -9,41 +9,6 @@ import {
 import { type EventJSON, type AggregatorSnapshot } from "./core";
 
 type JsonTypes = {
-  // One row in the `inbox_latest_state` table.
-  InboxLatestState: JsonTypes["StateEvent"] & {
-    transaction_version: number;
-    marketID: number;
-  };
-
-  // Query return type for `inbox_periodic_state` view.
-  PeriodicStateView: {
-    market_id: number;
-    period: number;
-    start_time: number;
-    data: Omit<JsonTypes["PeriodicStateEvent"], "marketID" | "version">;
-  };
-
-  // Query return type for `market_data` view.
-  MarketDataView: {
-    market_id: number;
-    market_address: `0x${string}`;
-    market_cap: number;
-    bump_time: number;
-    transaction_version: number;
-    n_swaps: number;
-    n_chat_messages: number;
-    clamm_virtual_reserves_base: Uint64String;
-    clamm_virtual_reserves_quote: Uint64String;
-    cpamm_real_reserves_base: Uint64String;
-    cpamm_real_reserves_quote: Uint64String;
-    lp_coin_supply: number;
-    last_swap_avg_execution_price_q64: number;
-    emoji_bytes: `0x${string}`;
-    all_time_volume: number;
-    daily_volume: number;
-    one_day_tvl_per_lp_coin_growth_q64: number;
-  };
-
   ExtendRef: {
     self: AccountAddressString;
   };
@@ -141,7 +106,7 @@ type JsonTypes = {
     emojicoin_lp_balance: Uint64String;
   };
 
-  MarketResource: {
+  Market: {
     metadata: JsonTypes["MarketMetadata"];
     sequence_info: JsonTypes["SequenceInfo"];
     extend_ref: JsonTypes["ExtendRef"];
@@ -153,7 +118,7 @@ type JsonTypes = {
     periodic_state_trackers: Array<JsonTypes["PeriodicStateTracker"]>;
   };
 
-  RegistryResource: {
+  Registry: {
     coin_symbol_emojis: JsonTypes["TableHandle"];
     extend_ref: JsonTypes["ExtendRef"];
     global_stats: {
@@ -322,6 +287,11 @@ type JsonTypes = {
     market_registrant: AccountAddressString;
     market_registration_time: Uint64String;
   };
+
+  EmojicoinDotFunRewards: {
+    swap: JsonTypes["SwapEvent"];
+    octas_reward_amount: Uint64String;
+  }
 }
 
 export default JsonTypes;
