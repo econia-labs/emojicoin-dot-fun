@@ -41,18 +41,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
 
   const isMobileMenuOpen = isOpen && !isDesktop;
 
-  const wallets = useMemo(
-    () => [
-      new PontemWallet(),
-      new RiseWallet(),
-      new MartianWallet(),
-      // new AptosConnectWalletPlugin({ network: APTOS_NETWORK }),
-    ],
-    []
-  );
-  // TODO: Make fetch queries here and pass the data to the event store..?
-  // It's possible we can also pass a promise down from the server components
-  // to the clients and then add those to the store as they stream in.
+  const wallets = useMemo(() => [new PontemWallet(), new RiseWallet(), new MartianWallet()], []);
 
   const queryClient = new QueryClient();
 
@@ -63,8 +52,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
           <UserSettingsProvider>
             <AptosWalletAdapterProvider
               plugins={wallets}
-              autoConnect={true}
-              optInWallets={["Petra"]}
+              autoConnect={false}
               dappConfig={{ network: APTOS_NETWORK }}
             >
               <WalletModalContextProvider>

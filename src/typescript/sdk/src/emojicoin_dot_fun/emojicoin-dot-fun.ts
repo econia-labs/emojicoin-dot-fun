@@ -17,8 +17,8 @@ import {
   type WaitForTransactionOptions,
   type UserTransactionResponse,
   type LedgerVersionArg,
-  type PublicKey,
   SimpleTransaction,
+  Ed25519PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -302,7 +302,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   static async getGasCost(args: {
     aptosConfig: AptosConfig;
     registrant: AccountAddressInput; // &signer
-    registrantPubKey: PublicKey;
+    registrantPubKey: Ed25519PublicKey;
     emojis: Array<HexInput>; // vector<vector<u8>>
   }): Promise<{ data: { amount: number; unitPrice: number }; error: boolean }> {
     const { aptosConfig } = args;

@@ -7,8 +7,10 @@ if (typeof process.env.REVALIDATION_TIME === "undefined") {
   if (process.env.NODE) throw new Error("Environment variable REVALIDATION_TIME is undefined.");
 }
 
-if (typeof process.env.HASH_SEED === "undefined") {
-  throw new Error("Environment variable HASH_SEED is undefined.");
+// We don't export `HASH_SEED` here since it would pollute the Edge Runtime namespace with
+// incompatible node.js functions. Instead, just verify that it is valid.
+if (!process.env.HASH_SEED || process.env.HASH_SEED.length < 8) {
+  throw new Error("Environment variable HASH_SEED must be set and at least 8 characters.");
 }
 
 if (
@@ -39,7 +41,6 @@ if (GEOBLOCKING_ENABLED) {
 export const ALLOWLISTER3K_URL: string | undefined = process.env.ALLOWLISTER3K_URL;
 export const GALXE_CAMPAIGN_ID: string | undefined = process.env.GALXE_CAMPAIGN_ID;
 export const REVALIDATION_TIME: number = Number(process.env.REVALIDATION_TIME);
-export const HASH_SEED: string = process.env.HASH_SEED;
 export const VPNAPI_IO_API_KEY: string = process.env.VPNAPI_IO_API_KEY!;
 
 if (APTOS_NETWORK === Network.LOCAL && !EMOJICOIN_INDEXER_URL.includes("localhost")) {
