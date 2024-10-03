@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@aptos-labs/ts-sdk": "1.22.2",
     "@types/node": "^20.14.9"
   },
   "devDependencies": {

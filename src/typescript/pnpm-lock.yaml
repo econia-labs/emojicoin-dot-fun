@@ -11,9 +11,6 @@ importers:
 
   .:
     dependencies:
-      '@aptos-labs/ts-sdk':
-        specifier: 1.22.2
-        version: 1.22.2
       '@types/node':
         specifier: ^20.14.9
         version: 20.14.10
@@ -351,10 +348,6 @@ packages:
       '@aptos-labs/wallet-standard': ^0.1.0
       aptos: ^1.20.0
 
-  '@aptos-labs/aptos-cli@0.1.9':
-    resolution: {integrity: sha512-76uPNZ6JrpruN9H8bEU37GVhAHwdhmvp7ZXpMTFnlFOJnBYt0LHCxR3x+HCk4WZ1CRrPQ57lmO+5A58PiGuweA==}
-    hasBin: true
-
   '@aptos-labs/aptos-cli@0.2.0':
     resolution: {integrity: sha512-6kljJFRsTLXCvgkNhBoOLhVyo7rmih+8+XAtdeciIXkZYwzwVS3TFPLMqBUO2HcY6gYtQQRmTG52R5ihyi/bXA==}
     hasBin: true
@@ -366,10 +359,6 @@ packages:
   '@aptos-labs/aptos-client@0.1.1':
     resolution: {integrity: sha512-kJsoy4fAPTOhzVr7Vwq8s/AUg6BQiJDa7WOqRzev4zsuIS3+JCuIZ6vUd7UBsjnxtmguJJulMRs9qWCzVBt2XA==}
     engines: {node: '>=15.10.0'}
-
-  '@aptos-labs/ts-sdk@1.22.2':
-    resolution: {integrity: sha512-EUGFT6Emyrc8xqBxZB7fO6Xha98+Q3WWJNw56IOVbiMYaga5w7Dzj8rTYYHxvxyBfEbnNQHn4QcQfaciU2N4qA==}
-    engines: {node: '>=11.0.0'}
 
   '@aptos-labs/ts-sdk@1.27.1':
     resolution: {integrity: sha512-QS4BlivXQy/uJgXcNOfXNjv8l+MSd+qQ256mY/Jc6iaWbfn69nRYh6chjSyLot4fHA49QxlZlWh1mJLlfNdtow==}
@@ -4796,8 +4785,6 @@ snapshots:
       aptos: 1.21.0
       uuid: 9.0.1
 
-  '@aptos-labs/aptos-cli@0.1.9': {}
-
   '@aptos-labs/aptos-cli@0.2.0': {}
 
   '@aptos-labs/aptos-client@0.1.0':
@@ -4811,22 +4798,6 @@ snapshots:
     dependencies:
       axios: 1.7.4
       got: 11.8.6
-    transitivePeerDependencies:
-      - debug
-
-  '@aptos-labs/ts-sdk@1.22.2':
-    dependencies:
-      '@aptos-labs/aptos-cli': 0.1.9
-      '@aptos-labs/aptos-client': 0.1.0
-      '@noble/curves': 1.4.0
-      '@noble/hashes': 1.4.0
-      '@scure/bip32': 1.4.0
-      '@scure/bip39': 1.3.0
-      eventemitter3: 5.0.1
-      form-data: 4.0.0
-      js-base64: 3.7.7
-      jwt-decode: 4.0.0
-      poseidon-lite: 0.2.0
     transitivePeerDependencies:
       - debug
 
