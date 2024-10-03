@@ -26,6 +26,17 @@ describe("queries swap_events and returns accurate swap row data", () => {
     ["adhesive bandage"],
   ];
 
+  it("verifies a valid response for fetching the processor status", async () => {
+    expect(process.env.EMOJICOIN_INDEXER_URL).toBeDefined();
+    const url = new URL("processor_status", process.env.EMOJICOIN_INDEXER_URL!);
+    url.searchParams.set("select", "last_success_version");
+    url.searchParams.set("limit", "1");
+    const res = await fetch(url);
+    const json: [{ last_success_version: number }] = await res.json();
+    expect(json).toBeDefined();
+    expect(typeof json[0].last_success_version).toBe("number");
+  });
+
   it("performs a simple registerMarket fetch accurately", async () => {
     const { registerResponse: response } = await TestHelpers.registerMarketFromNames({
       registrant,

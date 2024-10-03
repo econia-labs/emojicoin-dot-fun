@@ -29,7 +29,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { toConfig } from "../utils/aptos-utils";
 import serializeArgsToJSON from "./serialize-args-to-json";
-import { StructTagString } from "../utils/type-tags";
+import { type StructTagString } from "../utils/type-tags";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;
