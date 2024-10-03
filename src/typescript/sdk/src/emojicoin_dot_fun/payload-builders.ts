@@ -29,6 +29,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { toConfig } from "../utils/aptos-utils";
 import serializeArgsToJSON from "./serialize-args-to-json";
+import { StructTagString } from "../utils/type-tags";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;
@@ -206,9 +207,7 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
   toPayload(): InputViewFunctionData {
     return {
       function: `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`,
-      typeArguments: this.typeTags.map(
-        (type) => type.toString() as `0x${string}::${string}::${string}`
-      ),
+      typeArguments: this.typeTags.map((type) => type.toString() as StructTagString),
       functionArguments: this.argsToArray(),
     };
   }

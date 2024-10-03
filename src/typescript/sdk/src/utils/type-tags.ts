@@ -59,7 +59,7 @@ export type EmojicoinStructName =
   | "RegistrantGracePeriodFlag"
   | "EmojicoinDotFunRewards";
 
-type StructTagString = `0x${string}::${string}::${string}`;
+export type StructTagString = `0x${string}::${string}::${string}`;
 
 export const TYPE_TAGS: { [K in EmojicoinStructName]: TypeTag } = {
   SwapEvent: toEmojicoinStructTag("Swap"),
@@ -89,19 +89,11 @@ export const STRUCT_STRINGS: { [K in EmojicoinStructName]: StructTagString } = {
   EmojicoinDotFunRewards: TYPE_TAGS.EmojicoinDotFunRewards.toString() as StructTagString,
 };
 
-const STRUCT_STRINGS_REVERSED: { [key: string]: EmojicoinStructName | undefined } = {
-  [TYPE_TAGS.SwapEvent.toString()]: "SwapEvent",
-  [TYPE_TAGS.ChatEvent.toString()]: "ChatEvent",
-  [TYPE_TAGS.MarketRegistrationEvent.toString()]: "MarketRegistrationEvent",
-  [TYPE_TAGS.PeriodicStateEvent.toString()]: "PeriodicStateEvent",
-  [TYPE_TAGS.StateEvent.toString()]: "StateEvent",
-  [TYPE_TAGS.GlobalStateEvent.toString()]: "GlobalStateEvent",
-  [TYPE_TAGS.LiquidityEvent.toString()]: "LiquidityEvent",
-  [TYPE_TAGS.Market.toString()]: "Market",
-  [TYPE_TAGS.Registry.toString()]: "Registry",
-  [TYPE_TAGS.RegistrantGracePeriodFlag.toString()]: "RegistrantGracePeriodFlag",
-  [TYPE_TAGS.EmojicoinDotFunRewards.toString()]: "EmojicoinDotFunRewards",
-};
+const structStringToName = new Map(
+  Array.from(new Map(Object.entries(STRUCT_STRINGS)).entries()).map(([key, value]) => {
+    return [value, key as EmojicoinStructName] as const;
+  })
+);
 
-export const typeTagInputToStructName = (t: TypeTagInput): EmojicoinStructName | undefined =>
-  STRUCT_STRINGS_REVERSED[t.toString()];
+export const typeTagInputToStructName = (typeTag: TypeTagInput): EmojicoinStructName | undefined =>
+  structStringToName.get(typeTag.toString() as StructTagString);
