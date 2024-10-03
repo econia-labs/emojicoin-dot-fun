@@ -13,8 +13,8 @@ import {
   type Events,
   converter,
   createEmptyEvents,
-  type FullEventNames,
   toCamelCaseEventName,
+  isAnEmojicoinStructName,
 } from "./events";
 import { typeTagInputToStructName } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
@@ -75,9 +75,6 @@ export async function getRegistryAddress(args: {
   return AccountAddress.from(registryAddressResource.registry_address);
 }
 
-const eventNames: Set<string> = new Set(Object.keys(createEmptyEvents()));
-const isSomeEmojicoinStructNames = (s: string): s is FullEventNames => eventNames.has(s);
-
 export function getEvents(
   response?: UserTransactionResponse | PendingTransactionResponse | null
 ): Events {
@@ -88,7 +85,7 @@ export function getEvents(
 
   response.events.forEach((event): void => {
     const structName = typeTagInputToStructName(event.type);
-    if (!structName || !isSomeEmojicoinStructNames(structName)) {
+    if (!structName || !isAnEmojicoinStructName(structName)) {
       return;
     }
     const data = converter[structName](event.data, response.version);

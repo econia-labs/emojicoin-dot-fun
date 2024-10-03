@@ -601,10 +601,10 @@ export const toChatEvent = (
   guid: `Chat::${data.market_metadata.market_id}::${data.emit_market_nonce}`,
 });
 
-export const toMarketRegistrationEvent = <T extends "MarketRegistrationEvent">(
-  data: JsonTypes[T],
+export const toMarketRegistrationEvent = (
+  data: JsonTypes["MarketRegistrationEvent"],
   version: number | string
-): Types[T] => ({
+): Types["MarketRegistrationEvent"] => ({
   version: Number(version),
   marketMetadata: toMarketMetadata(data.market_metadata),
   time: BigInt(data.time),
@@ -675,7 +675,7 @@ export const toGlobalStateEvent = (
   cumulativeIntegratorFees: fromAggregatorSnapshot(data.cumulative_integrator_fees, strToBigInt),
   cumulativeSwaps: fromAggregatorSnapshot(data.cumulative_swaps, strToBigInt),
   cumulativeChatMessages: fromAggregatorSnapshot(data.cumulative_chat_messages, strToBigInt),
-  guid: `GlobalState::${data.registry_nonce}`,
+  guid: `GlobalState::${data.registry_nonce.value}`,
 });
 
 export const toLiquidityEvent = (

@@ -12,6 +12,7 @@
     "test": "pnpm --prefix src/typescript run test",
     "test:debug": "pnpm --prefix src/typescript run test:debug",
     "test:verbose": "pnpm --prefix src/typescript run test:verbose",
+    "unit-test": "pnpm --prefix src/typescript run unit-test",
     "up": "pnpm --prefix src/typescript run up"
   }
 }

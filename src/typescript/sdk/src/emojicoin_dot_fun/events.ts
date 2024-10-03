@@ -17,23 +17,29 @@ import {
 } from "../types";
 import { type EmojicoinStructName } from "../utils/type-tags";
 
-export type FullEventNames =
-  | "ChatEvent"
-  | "SwapEvent"
-  | "MarketRegistrationEvent"
-  | "PeriodicStateEvent"
-  | "StateEvent"
-  | "GlobalStateEvent"
-  | "LiquidityEvent";
+export type FullEventName = keyof typeof fullEventNames;
+
+const fullEventNames = {
+  ChatEvent: null,
+  SwapEvent: null,
+  MarketRegistrationEvent: null,
+  PeriodicStateEvent: null,
+  StateEvent: null,
+  GlobalStateEvent: null,
+  LiquidityEvent: null,
+};
+
+const eventNamesSet = new Set(Object.keys(fullEventNames));
+export const isAnEmojicoinStructName = (s: string): s is FullEventName => eventNamesSet.has(s);
 
 type RemovePlurality<T extends string> = T extends `${infer R}s` ? R : T;
 type PascalToCamelCase<S extends string> = S extends `${infer F}${infer R}`
   ? `${Lowercase<F>}${R}`
   : S;
-type CamelCaseEventNames = `${PascalToCamelCase<FullEventNames>}s`;
+type CamelCaseEventNames = `${PascalToCamelCase<FullEventName>}s`;
 type Capitalize<S extends string> = S extends `${infer F}${infer R}` ? `${Uppercase<F>}${R}` : S;
 
-export const toCamelCaseEventName = <T extends FullEventNames>(s: T): PascalToCamelCase<T> => {
+export const toCamelCaseEventName = <T extends FullEventName>(s: T): PascalToCamelCase<T> => {
   return `${s.charAt(0).toLowerCase()}${s.slice(1)}` as PascalToCamelCase<T>;
 };
 
@@ -54,17 +60,17 @@ type Converter = {
 };
 
 export const converter: Converter = {
-  ["SwapEvent"]: toSwapEvent,
-  ["ChatEvent"]: toChatEvent,
-  ["MarketRegistrationEvent"]: toMarketRegistrationEvent,
-  ["PeriodicStateEvent"]: toPeriodicStateEvent,
-  ["StateEvent"]: toStateEvent,
-  ["GlobalStateEvent"]: toGlobalStateEvent,
-  ["LiquidityEvent"]: toLiquidityEvent,
-  ["Market"]: toMarketResource,
-  ["Registry"]: toRegistryResource,
-  ["RegistrantGracePeriodFlag"]: toRegistrantGracePeriodFlag,
-  ["EmojicoinDotFunRewards"]: toEmojicoinDotFunRewards,
+  SwapEvent: toSwapEvent,
+  ChatEvent: toChatEvent,
+  MarketRegistrationEvent: toMarketRegistrationEvent,
+  PeriodicStateEvent: toPeriodicStateEvent,
+  StateEvent: toStateEvent,
+  GlobalStateEvent: toGlobalStateEvent,
+  LiquidityEvent: toLiquidityEvent,
+  Market: toMarketResource,
+  Registry: toRegistryResource,
+  RegistrantGracePeriodFlag: toRegistrantGracePeriodFlag,
+  EmojicoinDotFunRewards: toEmojicoinDotFunRewards,
 };
 
 export type AptosEvent = {
