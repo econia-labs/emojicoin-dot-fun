@@ -16,7 +16,7 @@ export type EventJSON = {
   guid?: EventGuid;
   sequence_number?: string;
   type: string;
-  data: any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
+  data: any /* eslint-disable-line @typescript-eslint/no-explicit-any */;
 };
 
 export type AggregatorSnapshot<T> = {
