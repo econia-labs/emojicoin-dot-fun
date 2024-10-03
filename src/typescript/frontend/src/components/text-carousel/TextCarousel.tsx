@@ -12,8 +12,9 @@ const Item = ({ children }: { children: React.ReactNode }) => {
 const TextCarousel = () => {
   const messages = ["Universal ownership", "Universal blockchain", "Universal language"];
 
-  const items = messages
-    .map((message, index) => <Item key={`first::${message}::${index}`}>{message}</Item>);
+  const items = messages.map((message, index) => (
+    <Item key={`first::${message}::${index}`}>{message}</Item>
+  ));
 
   return (
     <div className="w-full">

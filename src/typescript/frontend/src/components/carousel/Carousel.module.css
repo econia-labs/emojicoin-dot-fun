@@ -1,11 +1,11 @@
 .hoverPause:hover {
-    animation-play-state: paused !important;
+  animation-play-state: paused !important;
 }
 @keyframes carousel {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-66.6%);
-    }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-66.6%);
+  }
 }

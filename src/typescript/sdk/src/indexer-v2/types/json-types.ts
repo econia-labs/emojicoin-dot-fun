@@ -359,10 +359,9 @@ export type DatabaseJsonType = {
       UserLPCoinBalance & { daily_volume: Uint128String }
   >;
   [DatabaseRpc.PriceFeed]: Flatten<
-    Omit<MarketAndStateMetadata, "bump_time" | "market_nonce" | "trigger"> &
-    {
-      open_price_q64: number,
-      close_price_q64: number,
+    Omit<MarketAndStateMetadata, "bump_time" | "market_nonce" | "trigger"> & {
+      open_price_q64: number;
+      close_price_q64: number;
     }
   >;
 };

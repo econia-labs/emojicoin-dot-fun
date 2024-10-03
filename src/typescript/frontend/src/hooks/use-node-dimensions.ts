@@ -1,11 +1,11 @@
-import { useState, useEffect, type RefObject } from 'react';
+import { useState, useEffect, type RefObject } from "react";
 
 function getNodeDimensions(ref: RefObject<HTMLElement>) {
   if (ref.current) {
     const { width, height } = ref.current.getBoundingClientRect();
     return {
       width,
-      height
+      height,
     };
   }
   return {
@@ -24,7 +24,7 @@ export default function useNodeDimensions(ref: RefObject<HTMLElement>) {
 
     const element = ref?.current;
 
-    if(!element) return;
+    if (!element) return;
 
     const observer = new ResizeObserver(handleResize);
 
@@ -32,7 +32,7 @@ export default function useNodeDimensions(ref: RefObject<HTMLElement>) {
 
     return () => {
       observer.disconnect();
-    }
+    };
   }, [ref]);
 
   return windowDimensions;

@@ -595,7 +595,7 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   dailyVolume: BigInt(data.daily_volume),
 });
 
-const unq64 = (n: number) => (n / (2 ** 64));
+const unq64 = (n: number) => n / 2 ** 64;
 
 export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => ({
   marketID: data.market_id,

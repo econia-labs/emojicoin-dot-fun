@@ -15,10 +15,10 @@ export const GeoblockedBanner: React.FC = () => (
           textAlign="center"
           fontWeight="600"
         >
-          You are accessing our products and services from a restricted jurisdiction. We do not allow
-          access from certain jurisdictions including locations subject to sanctions restrictions and
-          other jurisdictions where our services are ineligible for use. For more information, see our
-          Terms of Use.
+          You are accessing our products and services from a restricted jurisdiction. We do not
+          allow access from certain jurisdictions including locations subject to sanctions
+          restrictions and other jurisdictions where our services are ineligible for use. For more
+          information, see our Terms of Use.
         </Text>
       </div>
     </Carousel>
