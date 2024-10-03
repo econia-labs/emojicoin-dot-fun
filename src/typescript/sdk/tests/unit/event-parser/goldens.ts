@@ -1,5 +1,5 @@
 // cspell:word goldens
-import { rawTriggerToEnum, toAccountAddressString, toTrigger, Types } from "../../../src";
+import { rawTriggerToEnum, toAccountAddressString, type Types } from "../../../src";
 
 const Swap: Types["SwapEvent"] = {
   marketID: 26n,

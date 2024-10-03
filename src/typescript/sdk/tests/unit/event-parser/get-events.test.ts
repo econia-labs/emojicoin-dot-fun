@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // cspell:word goldens
 import {
   getEvents,
-  JsonTypes,
+  type JsonTypes,
   toChatEvent,
   toGlobalStateEvent,
   toLiquidityEvent,
@@ -16,16 +17,16 @@ import {
   isAnEmojicoinStructName,
   toCamelCaseEventName,
 } from "../../../src/emojicoin_dot_fun/events";
-import { EventName } from "../../../src/indexer-v2/types";
+import { type EventName } from "../../../src/indexer-v2/types";
 import Data from "./event-data.json";
 // Note that this isn't an actual valid transaction, it's just structured like one for parsing.
 import Transaction from "./transaction.json";
 import goldens from "./goldens";
 import {
-  EntryFunctionPayloadResponse,
-  TransactionEd25519Signature,
-  TransactionResponseType,
-  UserTransactionResponse,
+  type EntryFunctionPayloadResponse,
+  type TransactionEd25519Signature,
+  type TransactionResponseType,
+  type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 
 type EventData = {
