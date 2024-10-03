@@ -595,6 +595,18 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   dailyVolume: BigInt(data.daily_volume),
 });
 
+const unq64 = (n: number) => (n / Math.pow(2,64));
+
+export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => ({
+  marketID: data.market_id,
+  symbolBytes: data.symbol_bytes,
+  symbolEmojis: data.symbol_emojis,
+  marketAddress: data.market_address,
+  openPrice: unq64(data.open_price_q64),
+  closePrice: unq64(data.close_price_q64),
+  deltaPercentage: (1 - unq64(data.close_price_q64) / unq64(data.open_price_q64)) * 100,
+});
+
 export const DatabaseTypeConverter = {
   [TableName.GlobalStateEvents]: toGlobalStateEventModel,
   [TableName.PeriodicStateEvents]: toPeriodicStateEventModel,
@@ -609,6 +621,7 @@ export const DatabaseTypeConverter = {
   [TableName.MarketState]: toMarketStateModel,
   [TableName.ProcessorStatus]: toProcessorStatus,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
+  [DatabaseRpc.PriceFeed]: toPriceFeedRPCResponse,
 };
 
 export type DatabaseModels = {

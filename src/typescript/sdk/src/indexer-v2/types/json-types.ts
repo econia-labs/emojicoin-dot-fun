@@ -286,6 +286,7 @@ export enum TableName {
 
 export enum DatabaseRpc {
   UserPools = "user_pools",
+  PriceFeed = "price_feed",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -356,6 +357,13 @@ export type DatabaseJsonType = {
       StateEventData &
       ProcessedFields &
       UserLPCoinBalance & { daily_volume: Uint128String }
+  >;
+  [DatabaseRpc.PriceFeed]: Flatten<
+    Omit<MarketAndStateMetadata, "bump_time" | "market_nonce" | "trigger"> &
+    {
+      open_price_q64: number,
+      close_price_q64: number,
+    }
   >;
 };
 
