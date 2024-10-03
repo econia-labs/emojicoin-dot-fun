@@ -18,7 +18,7 @@ import {
   type UserTransactionResponse,
   type LedgerVersionArg,
   SimpleTransaction,
-  Ed25519PublicKey,
+  type Ed25519PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
