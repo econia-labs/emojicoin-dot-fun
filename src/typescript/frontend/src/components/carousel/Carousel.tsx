@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import useNodeDimensions from '@hooks/use-node-dimensions';
 
 // This might seem like it is useless, but removing this line of code breaks the carousel functionality.
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 const Test = () => (<div className="animate-carousel"></div>)
 
 export const Carousel = ({ children, gap = 0 }: React.PropsWithChildren<{gap?: number}>) => {
@@ -14,8 +15,6 @@ export const Carousel = ({ children, gap = 0 }: React.PropsWithChildren<{gap?: n
   const [len, setLen] = useState(3);
   const { width: carouselWidth } = useNodeDimensions(carouselRef);
   const { width: windowWidth } = useWindowDimensions();
-
-  console.log(carouselWidth, windowWidth);
 
   useEffect(() => {
     if(carouselWidth > 0 && (carouselWidth < windowWidth * 3)) {
@@ -25,6 +24,7 @@ export const Carousel = ({ children, gap = 0 }: React.PropsWithChildren<{gap?: n
     if(carouselWidth == 0) {
       setLen(3);
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [carouselWidth, windowWidth])
 
   return <div className="w-full">

@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchPriceFeed } from "@/queries/home";
+import type { fetchPriceFeed } from "@/queries/home";
 import Link from "next/link";
 import Carousel from 'components/carousel';
 

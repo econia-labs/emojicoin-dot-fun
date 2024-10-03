@@ -1,4 +1,4 @@
-import { useState, useEffect, RefObject } from 'react';
+import { useState, useEffect, type RefObject } from 'react';
 
 function getNodeDimensions(ref: RefObject<HTMLElement>) {
   if (ref.current) {
