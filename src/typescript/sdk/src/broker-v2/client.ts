@@ -122,9 +122,9 @@ export class WebSocketClient {
   @SendToBroker
   public subscribeEvents(input: BrokerEvent | BrokerEvent[]) {
     const newTypes = new Set(ensureArray(input));
-    newTypes["forEach"]((e) => this.subscriptions.eventTypes["add"](e));
+    newTypes.forEach((e) => this.subscriptions.eventTypes.add(e));
     if (this.permanentlySubscribeToMarketRegistrations) {
-      this.subscriptions.eventTypes["add"]("MarketRegistration");
+      this.subscriptions.eventTypes.add("MarketRegistration");
     }
   }
 
@@ -138,9 +138,9 @@ export class WebSocketClient {
   public unsubscribeEvents(input: BrokerEvent | BrokerEvent[]) {
     const newTypes = new Set(ensureArray(input));
     if (this.permanentlySubscribeToMarketRegistrations) {
-      newTypes["delete"]("MarketRegistration");
+      newTypes.delete("MarketRegistration");
     }
-    newTypes["forEach"]((e) => this.subscriptions.eventTypes["delete"](e));
+    newTypes.forEach((e) => this.subscriptions.eventTypes.delete(e));
   }
 
   public sendToBroker() {
