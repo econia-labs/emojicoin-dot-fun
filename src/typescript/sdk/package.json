@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@aptos-labs/ts-sdk": "1.22.2",
+    "@aptos-labs/ts-sdk": "1.27.1",
     "@keyvhq/core": "^2.1.1",
     "@noble/hashes": "^1.4.0",
     "@supabase/postgrest-js": "^1.15.7",
