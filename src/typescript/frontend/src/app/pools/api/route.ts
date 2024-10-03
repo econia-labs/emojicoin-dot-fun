@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
   if (orderBy !== "asc" && orderBy !== "desc") {
-    throw "Invalid params";
+    throw new Error("Invalid params");
   }
 
   // The liquidity `provider`, aka the account to search for in the user liquidity pools.

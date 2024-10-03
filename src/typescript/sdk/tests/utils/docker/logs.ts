@@ -60,7 +60,7 @@ containerNames.forEach((containerName, index) => {
 });
 
 const shouldPrint = (containerName: ContainerName) => {
-  // @ts-ignore
+  // @ts-expect-error Using `globalThis` as any.
   const filterLogsFrom = globalThis.__DOCKER_LOGS_FILTER__ as Array<ContainerName>;
   return !filterLogsFrom.includes(containerName);
 };

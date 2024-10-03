@@ -11,9 +11,7 @@ import { normalizeHex } from "./hex";
 import {
   type AnyNumberString,
   type Types,
-  isAnyEmojiCoinEvent,
   isPeriodicStateEvent,
-  isPeriodicStateView,
   isStateEvent,
   isSwapEvent,
 } from "../types";
@@ -110,29 +108,23 @@ export function getTime(unitOfTime: UnitOfTime) {
  * ```
  */
 export function getPeriodStartTime(
-  event: Types["SwapEvent"] | Types["StateEvent"] | Types["PeriodicStateEvent"] | Types["PeriodicStateView"],
+  event: Types["SwapEvent"] | Types["StateEvent"] | Types["PeriodicStateEvent"],
   periodIn: PeriodDuration | bigint | number
 ) {
   // All CandlestickPeriods are in microseconds.
   let time: bigint;
-  if (isAnyEmojiCoinEvent(event)) {
-    if (isSwapEvent(event)) {
-      time = event.time;
-    } else if (isStateEvent(event)) {
-      time = event.lastSwap.time;
-    } else if (isPeriodicStateEvent(event)) {
-      // Since periodic state events are only emitted once a period threshold
-      // has been exceeded, the period boundary's emit time is completely irrelevant to
-      // the event's time. The `start_time` is the actual period start for the event.
-      time = event.periodicStateMetadata.startTime;
-      return time;
-    } else {
-      throw new Error("Invalid event type, not a swap, state, or periodic state event.");
-    }
-  } else if (isPeriodicStateView(event)) {
-    time = BigInt(event.startTime);
+  if (isSwapEvent(event)) {
+    time = event.time;
+  } else if (isStateEvent(event)) {
+    time = event.lastSwap.time;
+  } else if (isPeriodicStateEvent(event)) {
+    // Since periodic state events are only emitted once a period threshold
+    // has been exceeded, the period boundary's emit time is completely irrelevant to
+    // the event's time. The `start_time` is the actual period start for the event.
+    time = event.periodicStateMetadata.startTime;
+    return time;
   } else {
-    throw new Error("Invalid event type.");
+    throw new Error("Invalid event type, not a swap, state, or periodic state event.");
   }
 
   let period: PeriodDuration;

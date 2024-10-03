@@ -26,19 +26,27 @@ export type FullEventNames =
   | "GlobalStateEvent"
   | "LiquidityEvent";
 
-type PluralEventNames = `${FullEventNames}s`;
 type RemovePlurality<T extends string> = T extends `${infer R}s` ? R : T;
+type PascalToCamelCase<S extends string> = S extends `${infer F}${infer R}`
+  ? `${Lowercase<F>}${R}`
+  : S;
+type CamelCaseEventNames = `${PascalToCamelCase<FullEventNames>}s`;
+type Capitalize<S extends string> = S extends `${infer F}${infer R}` ? `${Uppercase<F>}${R}` : S;
 
-export type Events = { [K in PluralEventNames]: Types[RemovePlurality<K>][] };
+export const toCamelCaseEventName = <T extends FullEventNames>(s: T): PascalToCamelCase<T> => {
+  return `${s.charAt(0).toLowerCase()}${s.slice(1)}` as PascalToCamelCase<T>;
+};
+
+export type Events = { [K in CamelCaseEventNames]: Types[Capitalize<RemovePlurality<K>>][] };
 
 export const createEmptyEvents = (): Events => ({
-  SwapEvents: [],
-  ChatEvents: [],
-  MarketRegistrationEvents: [],
-  PeriodicStateEvents: [],
-  StateEvents: [],
-  GlobalStateEvents: [],
-  LiquidityEvents: [],
+  swapEvents: [],
+  chatEvents: [],
+  marketRegistrationEvents: [],
+  periodicStateEvents: [],
+  stateEvents: [],
+  globalStateEvents: [],
+  liquidityEvents: [],
 });
 
 type Converter = {

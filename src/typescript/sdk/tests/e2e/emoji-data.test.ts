@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // cspell:word writeset
 import {
   AccountAddress,
@@ -65,7 +66,6 @@ describe("verification of typescript emoji JSON data", () => {
     const encoder = new TextEncoder();
     const emojisInJSON = jsonEntries.map(([symbol, _name]) => normalizeHex(encoder.encode(symbol)));
 
-    // From the Move changesets.
     const moveTableChangeKeys = emojisInChangeSet.map((ch) => (ch as any).data.key);
     const moveEmojiHexStringsAsSet = new Set(moveTableChangeKeys);
 

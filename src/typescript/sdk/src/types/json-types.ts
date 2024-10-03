@@ -8,6 +8,15 @@ import {
 } from "../emojicoin_dot_fun/types";
 import { type EventJSON, type AggregatorSnapshot } from "./core";
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue }
+  | bigint;
+
 type JsonTypes = {
   ExtendRef: {
     self: AccountAddressString;
@@ -291,8 +300,8 @@ type JsonTypes = {
   EmojicoinDotFunRewards: {
     swap: JsonTypes["SwapEvent"];
     octas_reward_amount: Uint64String;
-  }
-}
+  };
+};
 
 export default JsonTypes;
 

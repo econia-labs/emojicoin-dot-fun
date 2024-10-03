@@ -32,6 +32,7 @@ import {
   standardizeAddress,
   type Types,
 } from "../../../src";
+import { type JsonValue } from "../../../src/types/json-types";
 
 type Indexer = {
   TransactionMetadata: ReturnType<typeof withTransactionMetadata>;
@@ -48,14 +49,14 @@ type Indexer = {
   StateEventData: ReturnType<typeof withStateEventData>;
 };
 
-const checkTuplesAndPrint = (args: [string, any, any][]) => {
+const checkTuplesAndPrint = (args: [string, JsonValue | undefined, JsonValue | undefined][]) => {
   const [rows, responses] = args.reduce(
     (acc, [path, row, response]) => {
-      acc[0].push(`${path}: ${row.toString()}`);
-      acc[1].push(`${path}: ${response.toString()}`);
+      acc[0].push(`${path}: ${row?.toString()}`);
+      acc[1].push(`${path}: ${response?.toString()}`);
       return acc;
     },
-    [[], []] as [any[], any[]]
+    [[], []] as [JsonValue[], JsonValue[]]
   );
 
   expect(rows).toEqual(responses);

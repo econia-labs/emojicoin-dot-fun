@@ -1,5 +1,4 @@
 import { type AccountAddressInput, type Account } from "@aptos-labs/ts-sdk";
-import { type PostgrestTransformBuilder } from "@supabase/postgrest-js";
 import { LIMIT, ORDER_BY } from "../../../queries";
 import { toAccountAddressString } from "../../../utils";
 import { toUserPoolsRPCResponse } from "../../types";
@@ -7,7 +6,6 @@ import { postgrest } from "../client";
 import { queryHelper } from "../utils";
 import { sortByWithFallback } from "../query-params";
 import { type MarketStateQueryArgs, SortMarketsBy } from "../../types/common";
-import { type DatabaseRpc, type DatabaseJsonType } from "../../types/json-types";
 
 const callUserPools = ({
   provider,
@@ -26,13 +24,7 @@ const callUserPools = ({
     query = query.range((page - 1) * pageSize, page * pageSize - 1);
   }
 
-  return query as PostgrestTransformBuilder<
-    any,
-    any,
-    Array<DatabaseJsonType["user_pools"]>,
-    DatabaseRpc.UserPools,
-    DatabaseRpc.UserPools
-  >;
+  return query;
 };
 
 export const fetchUserLiquidityPools = queryHelper(callUserPools, toUserPoolsRPCResponse);

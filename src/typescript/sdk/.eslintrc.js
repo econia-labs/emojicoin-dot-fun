@@ -17,6 +17,7 @@ module.exports = {
     project: ["tsconfig.json", "tests/tsconfig.json"],
     ecmaVersion: "latest",
     sourceType: "module",
+    warnOnUnsupportedTypeScriptVersion: false,
   },
   plugins: ["@typescript-eslint", "unused-imports", "import"],
   rules: {

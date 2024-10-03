@@ -31,7 +31,7 @@ const SendToBroker = (_target: unknown, _propertyKey: string, descriptor: Proper
 };
 
 const convertWebSocketMessageToBrokerEvent = <T extends string>(e: MessageEvent<T>) => {
-  const response: BrokerMessage = parseJSONWithBigInts(e.data);
+  const response = parseJSONWithBigInts<BrokerMessage>(e.data);
   const [brokerEvent, message] = Object.entries(response)[0] as [BrokerEvent, AnyEventDatabaseRow];
   const event = brokerMessageConverter[brokerEvent](message);
   return event;

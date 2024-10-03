@@ -321,20 +321,6 @@ export type Types = {
       quoteDonationClaimAmount: bigint;
     };
 
-  // One row in the `inbox_latest_state` table.
-  InboxLatestState: Types["StateEvent"] & {
-    version: number | string;
-    marketID: bigint;
-  };
-
-  // Query return type for `inbox_periodic_state` view.
-  PeriodicStateView: Omit<Types["PeriodicStateEvent"], "marketID" | "version"> & {
-    marketID: number;
-    period: number;
-    startTime: number;
-    version: -1;
-  };
-
   // Query return type for `market_data` view.
   MarketDataView: {
     marketID: number;
@@ -629,14 +615,6 @@ export const toMarketRegistrationEvent = <T extends "MarketRegistrationEvent">(
   guid: `MarketRegistration::${data.market_metadata.market_id}`,
 });
 
-export const periodicViewToStateEvent = (
-  data: Types["PeriodicStateView"]
-): Types["PeriodicStateEvent"] => ({
-  ...data,
-  version: -1,
-  marketID: BigInt(data.marketID),
-});
-
 export const toPeriodicStateEvent = (
   data: JsonTypes["PeriodicStateEvent"],
   version: number | string
@@ -785,9 +763,6 @@ export type AnyEmojicoinEventName =
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::GlobalState`
   | `${typeof EMOJICOIN_DOT_FUN_MODULE_NAME}::Liquidity`;
 
-export function isAnyEmojiCoinEvent(e: any): e is AnyEmojicoinEvent {
-  return typeof e?.guid === "string" && e.guid.includes("::");
-}
 export function isSwapEvent(e: AnyEmojicoinEvent): e is Types["SwapEvent"] {
   return e.guid.startsWith("Swap");
 }
@@ -810,10 +785,6 @@ export function isGlobalStateEvent(e: AnyEmojicoinEvent): e is Types["GlobalStat
 }
 export function isLiquidityEvent(e: AnyEmojicoinEvent): e is Types["LiquidityEvent"] {
   return e.guid.startsWith("Liquidity");
-}
-
-export function isPeriodicStateView(e: any): e is Types["PeriodicStateView"] {
-  return typeof e.startTime === "number" && isPeriodicStateEvent(e);
 }
 
 // NOTE: The below code structure strongly suggests we should be using classes instead of types.

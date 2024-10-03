@@ -17,14 +17,26 @@ module.exports = {
     JSX: true,
     React: true,
   },
+  ignorePatterns: [
+    "dist/**",
+    "node_modules/**",
+    ".eslintrc.js",
+    "config-overrides.js",
+    "playwright.config.ts",
+    "postcss.config.js",
+    "tailwind.config.js",
+    "example.spec.ts",
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
+    tsconfigRootDir: __dirname,
     ecmaFeatures: {
       jsx: true,
     },
     ecmaVersion: "latest",
     sourceType: "module",
     project: ["tsconfig.json"],
+    warnOnUnsupportedTypeScriptVersion: false,
   },
   plugins: ["@typescript-eslint", "import"],
   rules: {
@@ -37,7 +49,7 @@ module.exports = {
     "@typescript-eslint/lines-between-class-members": [
       "error",
       "always",
-      { "exceptAfterSingleLine": true }
+      { exceptAfterSingleLine: true },
     ],
     "@typescript-eslint/no-throw-literal": "error",
     "@typescript-eslint/no-explicit-any": "warn",

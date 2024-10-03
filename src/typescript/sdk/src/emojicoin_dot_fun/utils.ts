@@ -9,7 +9,13 @@ import {
   type PendingTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "../const";
-import { type Events, converter, createEmptyEvents, type FullEventNames } from "./events";
+import {
+  type Events,
+  converter,
+  createEmptyEvents,
+  type FullEventNames,
+  toCamelCaseEventName,
+} from "./events";
 import { typeTagInputToStructName } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
 import type JsonTypes from "../types/json-types";
@@ -86,10 +92,11 @@ export function getEvents(
       return;
     }
     const data = converter[structName](event.data, response.version);
+    const camelCasedAndPlural = `${toCamelCaseEventName(structName)}s` as const;
     // TypeScript can't infer or narrow the type. It's too difficult to figure out how to get it to
     // do it properly so we must use `as any` here, although we know for sure its type is correct.
-    /* eslint-disable-next-line no-explicit-any */
-    events[`${structName}s`].push(data as any);
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    events[camelCasedAndPlural].push(data as any);
   });
   return events;
 }

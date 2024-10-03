@@ -7,6 +7,7 @@ import { SwapWithRewards } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fu
 import { getAptosClient } from "../../utils";
 import { fetchMarketState } from "../../../src/indexer-v2/queries";
 import { type MarketStateModel } from "../../../src/indexer-v2/types";
+import { type JsonValue } from "../../../src/types/json-types";
 
 jest.setTimeout(20000);
 
@@ -53,7 +54,7 @@ describe("queries a market by market state", () => {
     (stateFromMiniProcessor as MarketStateModel).transaction.insertedAt =
       stateFromIndexerProcessor.transaction.insertedAt;
 
-    const replacer = (_: string, v: any) => (typeof v === "bigint" ? v.toString() : v);
+    const replacer = (_: string, v: JsonValue) => (typeof v === "bigint" ? v.toString() : v);
     const res1 = JSON.stringify(stateFromMiniProcessor, replacer);
     const res2 = JSON.stringify(stateFromIndexerProcessor, replacer);
     expect(res1).toEqual(res2);
