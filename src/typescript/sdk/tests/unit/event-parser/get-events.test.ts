@@ -43,7 +43,7 @@ const response: UserTransactionResponse = {
 
 const TRANSACTION_VERSION = 123987;
 
-describe.only("tests for parsing event data", () => {
+describe("tests for parsing event data", () => {
   it("parses global state event data", () => {
     const name: EventName = "GlobalState";
     const data = eventData[name];
@@ -100,7 +100,7 @@ describe.only("tests for parsing event data", () => {
     expect(manual).toEqual(fromConverter);
     expect(manual).toEqual(goldens[name]);
   });
-  it.only("parses events and slots them into the proper array", () => {
+  it("parses events and slots them into the proper array", () => {
     const events = getEvents(response);
 
     response.events.forEach((event) => {
