@@ -6,11 +6,8 @@ import {
   type ImmerGetEventAndClientStore,
   type ImmerSetEventAndClientStore,
 } from "@/store/event/types";
-import {
-  WebSocketClient,
-  type WebSocketClientArgs,
-  type WebSocketSubscriptions,
-} from "@/broker/client";
+import { WebSocketClient, type WebSocketClientArgs } from "@/broker/client";
+import { type WebSocketSubscriptions } from "@/broker/types";
 import { type BrokerEvent } from "@/broker/types";
 import { immerable } from "immer";
 

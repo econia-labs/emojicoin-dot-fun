@@ -36,7 +36,7 @@ import type JsonTypes from "../types/json-types";
 import {
   type DerivedEmojicoinData,
   type EmojicoinSymbol,
-  encodeEmojisToSymbol,
+  encodeEmojis,
   symbolBytesToEmojis,
   type SymbolEmojiData,
 } from "../emoji_data";
@@ -93,7 +93,7 @@ export const getEmojicoinData = (symbol: EmojicoinSymbol): DerivedEmojicoinData 
   const symbolArray = Array.isArray(symbol)
     ? symbol
     : ([symbol] as Array<string> | Array<SymbolEmojiData>);
-  const symbolBytes = encodeEmojisToSymbol(symbolArray);
+  const symbolBytes = encodeEmojis(symbolArray);
   const data = symbolBytesToEmojis(symbolBytes);
   const metadata = getEmojicoinMarketAddressAndTypeTags({ symbolBytes });
   return {

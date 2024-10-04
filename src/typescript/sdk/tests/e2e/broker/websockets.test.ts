@@ -1,6 +1,6 @@
 import {
   compareBigInt,
-  encodeEmojisToSymbol,
+  encodeEmojis,
   enumerate,
   getEmojicoinMarketAddressAndTypeTags,
   getEvents,
@@ -65,7 +65,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
   const marketData: MarketEmojiData[] = (
     [["🍌"], ["🍟"], ["🍺"], ["🍦"], ["🍌", "🍟"], ["🍉", "🍉"]] as MarketSymbolEmojis[]
   )
-    .map(encodeEmojisToSymbol)
+    .map(encodeEmojis)
     .map(toMarketEmojiData);
 
   const marketMetadata = marketData.map((mkt) =>
@@ -311,7 +311,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     const market_1 = marketsRegistered[MARKET_INDEX];
     const market_2 = await RegisterMarket.submit({
       ...senderArgs[MARKET_INDEX],
-      emojis: toMarketEmojiData(encodeEmojisToSymbol(["⚓"])).emojis.map((emoji) => emoji.bytes),
+      emojis: toMarketEmojiData(encodeEmojis(["⚓"])).emojis.map((emoji) => emoji.bytes),
     }).then((res) => getEvents(res).marketRegistrationEvents.pop()!);
     expect(market_1).toBeDefined();
     expect(market_2).toBeDefined();
@@ -394,7 +394,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     const market_1 = marketsRegistered[MARKET_INDEX];
     const registerResponse = await RegisterMarket.submit({
       ...senderArgs[MARKET_INDEX],
-      emojis: toMarketEmojiData(encodeEmojisToSymbol(["⚓⚓"])).emojis.map((emoji) => emoji.bytes),
+      emojis: toMarketEmojiData(encodeEmojis(["⚓⚓"])).emojis.map((emoji) => emoji.bytes),
     });
     const registerEvents = getEvents(registerResponse);
     const [market_2, registrationStateEventForMarket_2] = [

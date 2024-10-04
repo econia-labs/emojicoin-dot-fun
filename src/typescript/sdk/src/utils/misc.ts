@@ -270,7 +270,7 @@ export function ensureArray<T>(value: T | T[]): T[] {
   return [value];
 }
 
-export function zip<U, T>(a: U[], b: T[]): Array<[U, T]> {
+export function zip<A, B>(a: A[], b: B[]): Array<[A, B]> {
   if (a.length !== b.length) {
     throw new Error("Arrays must have equal length.");
   }
