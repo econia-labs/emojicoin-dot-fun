@@ -22,6 +22,7 @@
     "clean": "turbo run clean --no-cache --force && rm -rf .turbo && rm -rf sdk/.turbo && rm -rf frontend/.turbo && rm -rf frontend/.next",
     "dev": "pnpm load-env -- turbo run dev --no-cache --force --parallel --continue",
     "down": "pnpm run prune",
+    "e2e:testnet": "turbo run e2e:testnet",
     "format": "turbo run format -- --write",
     "format:check": "turbo run format -- --check",
     "full-clean": "pnpm run clean && rm -rf node_modules && rm -rf sdk/node_modules && rm -rf frontend/node_modules",
