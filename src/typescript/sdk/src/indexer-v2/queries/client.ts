@@ -62,10 +62,10 @@ const localIndexer =
   EMOJICOIN_INDEXER_URL.includes("localhost") ||
   EMOJICOIN_INDEXER_URL.includes("host.docker.internal");
 
-const authHeaders =
+const authHeaders: Record<string,string> =
   !localIndexer && process.env.EMOJICOIN_INDEXER_API_KEY
     ? { "x-api-key": `${process.env.EMOJICOIN_INDEXER_API_KEY}`, Accept: "application/json" }
-    : undefined;
+    : { Accept: "application/json" };
 
 export const postgrest = new CustomClient(EMOJICOIN_INDEXER_URL, {
   fetch: fetchPatch,

@@ -1,7 +1,7 @@
 import parse from "json-bigint";
 
 const JSON_BIGINT = parse({
-  alwaysParseAsBig: true,
+  alwaysParseAsBig: false,
   useNativeBigInt: true,
   protoAction: "ignore",
   constructorAction: "ignore",

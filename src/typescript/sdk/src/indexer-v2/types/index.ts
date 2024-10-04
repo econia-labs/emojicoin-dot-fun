@@ -502,7 +502,7 @@ export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]
 });
 
 export const toProcessedData = (data: ProcessedFields) => ({
-  dailyTvlPerLPCoinGrowthQ64: BigInt(data.daily_tvl_per_lp_coin_growth_q64),
+  dailyTvlPerLPCoinGrowth: data.daily_tvl_per_lp_coin_growth,
   inBondingCurve: data.in_bonding_curve,
   volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
 });
@@ -579,6 +579,7 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   ...withStateEventData(data),
   ...toProcessedData(data),
   ...withLPCoinBalance(data),
+  dailyVolume: BigInt(data.daily_volume),
 });
 
 export const DatabaseTypeConverter = {

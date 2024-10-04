@@ -2,6 +2,7 @@
 
 import { type SymbolEmoji } from "../../emoji_data";
 import {
+    UnsizedDecimalString,
   type AccountAddressString,
   type HexString,
   type Uint128String,
@@ -289,7 +290,7 @@ export enum DatabaseRpc {
 
 // Fields that only exist after being processed by a processor.
 export type ProcessedFields = {
-  daily_tvl_per_lp_coin_growth_q64: Uint128String;
+  daily_tvl_per_lp_coin_growth: UnsizedDecimalString;
   in_bonding_curve: boolean;
   volume_in_1m_state_tracker: Uint128String;
 };
@@ -351,6 +352,6 @@ export type DatabaseJsonType = {
       MarketAndStateMetadata &
       StateEventData &
       ProcessedFields &
-      UserLPCoinBalance
+      UserLPCoinBalance & { daily_volume: Uint128String }
   >;
 };

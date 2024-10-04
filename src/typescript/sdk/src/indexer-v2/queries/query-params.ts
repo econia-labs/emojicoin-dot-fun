@@ -15,7 +15,7 @@ export const sortByToColumn = (sortBy: SortMarketsBy): keyof DatabaseJsonType["m
     case SortMarketsBy.Price:
       return "last_swap_avg_execution_price_q64";
     case SortMarketsBy.Apr:
-      return "daily_tvl_per_lp_coin_growth_q64";
+      return "daily_tvl_per_lp_coin_growth";
     case SortMarketsBy.Tvl:
       return "instantaneous_stats_total_value_locked";
     default:

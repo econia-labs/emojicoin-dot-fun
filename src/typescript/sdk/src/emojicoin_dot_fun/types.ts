@@ -41,6 +41,7 @@ export type MoveObject = AccountAddress;
 export type Uint64String = string;
 export type Uint128String = string;
 export type Uint256String = string;
+export type UnsizedDecimalString = string;
 export type AccountAddressString = `0x${string}`;
 export type ObjectAddressStruct = {
   inner: string;
