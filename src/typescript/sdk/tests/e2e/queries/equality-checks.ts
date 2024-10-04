@@ -473,7 +473,7 @@ const MarketLatestState = (row: MarketLatestStateEventModel, response: UserTrans
   compareTransactionMetadata(row, response);
   compareStateEvents(row, stateEvent);
 
-  expect(row.dailyTvlPerLPCoinGrowthQ64).toEqual(calculateTvlGrowth(periodicStateTracker1D));
+  expect(row.dailyTvlPerLPCoinGrowth).toEqual(calculateTvlGrowth(periodicStateTracker1D));
   expect(row.inBondingCurve).toEqual(stateEvent.lpCoinSupply === BigInt(0));
   expect(row.volumeIn1MStateTracker).toEqual(volumeInStateTrackerFromWriteSet);
 };
