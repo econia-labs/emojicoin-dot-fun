@@ -3,21 +3,13 @@ import { type AnyEventModel } from "../indexer-v2/types";
 import { type AnyEventDatabaseRow } from "../indexer-v2/types/json-types";
 import { type AnyNumberString } from "../types";
 import { ensureArray } from "../utils/misc";
-import { type BrokerEvent, type BrokerMessage, brokerMessageConverter } from "./types";
-
-/**
- * The message the client sends to the broker to subscribe or unsubscribe.
- */
-type SubscriptionMessage = {
-  markets: number[];
-  event_types: BrokerEvent[];
-};
-
-/* eslint-disable-next-line import/no-unused-modules */
-export type WebSocketSubscriptions = {
-  marketIDs: Set<AnyNumberString>;
-  eventTypes: Set<BrokerEvent>;
-};
+import {
+  type BrokerEvent,
+  type BrokerMessage,
+  brokerMessageConverter,
+  type SubscriptionMessage,
+  type WebSocketSubscriptions,
+} from "./types";
 
 const SendToBroker = (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) => {
   const originalMethod = descriptor.value;
@@ -30,7 +22,7 @@ const SendToBroker = (_target: unknown, _propertyKey: string, descriptor: Proper
   return descriptor;
 };
 
-const convertWebSocketMessageToBrokerEvent = <T extends string>(e: MessageEvent<T>) => {
+export const convertWebSocketMessageToBrokerEvent = <T extends string>(e: MessageEvent<T>) => {
   const response = parseJSONWithBigInts<BrokerMessage>(e.data);
   const [brokerEvent, message] = Object.entries(response)[0] as [BrokerEvent, AnyEventDatabaseRow];
   const event = brokerMessageConverter[brokerEvent](message);

@@ -41,6 +41,9 @@
     "dev": {
       "cache": false
     },
+    "e2e:testnet": {
+      "outputs": []
+    },
     "format": {
       "outputs": []
     },
@@ -62,7 +65,10 @@
     "test": {
       "outputs": []
     },
-    "test:verbose": {
+    "test:parallel": {
+      "outputs": []
+    },
+    "test:sequential": {
       "outputs": []
     },
     "unit-test": {

@@ -1,8 +1,12 @@
 /* eslint-disable no-underscore-dangle */
+import WebSocket from "ws";
 import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 import { type ContainerName } from "./utils/docker/logs";
 
 export default async function preTest() {
+  // @ts-expect-error Using `globalThis` as any for a polyfill for `WebSocket` in node.js.
+  globalThis.WebSocket = WebSocket;
+
   const startDockerServices = process.env.APTOS_NETWORK === "local";
   const setupTest = !process.env.NO_TEST_SETUP;
   if (setupTest && startDockerServices) {

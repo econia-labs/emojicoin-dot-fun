@@ -31,6 +31,6 @@ describe("address standardization tests", () => {
     const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
-    RowEqualityChecks.chatRow(row, res);
+    RowEqualityChecks.Chat(row, res);
   });
 });

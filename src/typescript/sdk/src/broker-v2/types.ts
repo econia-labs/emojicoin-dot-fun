@@ -4,6 +4,7 @@ import {
   type DatabaseJsonType,
   TableName,
 } from "../indexer-v2/types/json-types";
+import { type AnyNumberString } from "../types/types";
 
 export type BrokerEvent =
   | "Chat"
@@ -50,4 +51,18 @@ export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => AnyE
  */
 export type BrokerMessage = {
   [K in BrokerEvent]: AnyEventDatabaseRow;
+};
+
+/**
+ * The message the client sends to the broker to subscribe or unsubscribe.
+ */
+export type SubscriptionMessage = {
+  markets: number[];
+  event_types: BrokerEvent[];
+};
+
+/* eslint-disable-next-line import/no-unused-modules */
+export type WebSocketSubscriptions = {
+  marketIDs: Set<AnyNumberString>;
+  eventTypes: Set<BrokerEvent>;
 };

@@ -3,7 +3,7 @@
 
 import { type ChildProcessWithoutNullStreams } from "child_process";
 import path from "path";
-import { sleep } from "../../../src/utils";
+import { waitFor } from "../../../src/utils";
 import { getGitRoot } from "../helpers";
 import { type ContainerName } from "./logs";
 import {
@@ -13,6 +13,8 @@ import {
   execPromise,
   spawnWrapper,
 } from "./utils";
+import { EMOJICOIN_INDEXER_URL } from "../../../src/server-env";
+import { TableName } from "../../../src/indexer-v2/types/json-types";
 
 const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
 const PRUNE_SCRIPT = path.join(getGitRoot(), "src/docker/utils", "prune.sh");
@@ -24,7 +26,7 @@ async function isPrimaryContainerReady(name: ContainerName): Promise<boolean> {
   return isRunningAndHealthy(state);
 }
 
-const checkIfCorruptedData = (state?: ContainerState) => {
+const isDataNotCorrupted = (state?: ContainerState): boolean | undefined => {
   // If the container isn't up yet, it can't be considered corrupted.
   if (!state || !state.Health.Log) {
     return;
@@ -50,16 +52,10 @@ const checkIfCorruptedData = (state?: ContainerState) => {
   ) {
     throw new Error("Localnet indexer has stale data.");
   }
+  return true;
 };
 
-const MAXIMUM_WAIT_TIME_SEC = 120;
-function checkMaxWaitTime(container: ContainerName, secondsElapsed: number) {
-  if (secondsElapsed >= MAXIMUM_WAIT_TIME_SEC) {
-    throw new Error(
-      `\`${container}\` is not running or healthy after ${MAXIMUM_WAIT_TIME_SEC} seconds.`
-    );
-  }
-}
+const MAX_WAIT_TIME_SECONDS = 120;
 
 export class DockerTestHarness {
   public includeFrontend: boolean;
@@ -95,7 +91,11 @@ export class DockerTestHarness {
    */
   async run() {
     await this.start();
-    const promises = [this.waitForPrimaryService(), DockerTestHarness.waitForDeployer()];
+    const promises = [
+      this.waitForPrimaryService(),
+      DockerTestHarness.waitForDeployer(),
+      DockerTestHarness.waitForMigrationsToComplete(),
+    ];
     await Promise.all(promises);
   }
 
@@ -120,51 +120,35 @@ export class DockerTestHarness {
   }
 
   /**
-   * Waits for the specific docker container to be up.
+   * Waits for the @see DockerTestHarness instance's docker container to be up.
    *
    * @returns Promise<boolean>
    */
   async waitForPrimaryService(): Promise<boolean> {
-    let secondsElapsed = 0;
     // The broker will be the last container up, unless we're running the frontend.
     // In that case, the frontend will be last.
     const container: ContainerName = this.includeFrontend ? "frontend" : "broker";
-    let ready: boolean = await isPrimaryContainerReady(container);
-
-    while (!ready) {
-      /* eslint-disable no-await-in-loop */
-      await sleep(PING_STATE_INTERVAL);
-
-      /* eslint-disable no-await-in-loop */
-      ready = await isPrimaryContainerReady(container);
-
-      checkMaxWaitTime(container, secondsElapsed);
-      secondsElapsed += PING_STATE_INTERVAL / 1000;
-    }
+    const ready = await waitFor({
+      condition: async () => await isPrimaryContainerReady(container),
+      interval: PING_STATE_INTERVAL,
+      maxWaitTime: MAX_WAIT_TIME_SECONDS * 1000,
+      errorMessage: `\`${container}\` is not healthy after ${MAX_WAIT_TIME_SECONDS} seconds.`,
+    });
     return ready;
   }
 
-  /**
-   * Waits for the deployer to be up.
-   */
   static async waitForDeployer(): Promise<boolean> {
     const waitStartTime = new Date();
-    let secondsElapsed = 0;
-    const localnetName: ContainerName = "localnet";
-    let localnet = await getContainerState(localnetName);
-    while (!isRunningAndHealthy(localnet)) {
-      checkIfCorruptedData(localnet);
 
-      /* eslint-disable no-await-in-loop */
-      await sleep(PING_STATE_INTERVAL);
+    const isLocalnetReady = async () => {
+      const state = await getContainerState("localnet");
+      const notCorrupted = isDataNotCorrupted(state);
+      const healthy = isRunningAndHealthy(state);
+      return healthy && notCorrupted === true;
+    };
 
-      /* eslint-disable no-await-in-loop */
-      localnet = await getContainerState(localnetName);
-      checkMaxWaitTime(localnetName, secondsElapsed);
-      secondsElapsed += PING_STATE_INTERVAL / 1000;
-    }
-
-    const ready = (state?: ContainerState) => {
+    const isDeployerReady = async () => {
+      const state = await getContainerState("deployer");
       if (!state) {
         return false;
       }
@@ -179,18 +163,53 @@ export class DockerTestHarness {
       return wasStartedRecently && exitCode === 0 && error === "" && finished;
     };
 
-    // Then wait for the deployer to be up.
-    const name: ContainerName = "deployer";
-    let deployer = await getContainerState(name);
-    while (!ready(deployer)) {
-      /* eslint-disable no-await-in-loop */
-      await sleep(PING_STATE_INTERVAL);
+    const localnetReady = await waitFor({
+      condition: isLocalnetReady,
+      interval: PING_STATE_INTERVAL,
+      maxWaitTime: MAX_WAIT_TIME_SECONDS * 1000,
+      errorMessage: `localnet is not healthy after ${MAX_WAIT_TIME_SECONDS} seconds.`,
+    });
 
-      /* eslint-disable no-await-in-loop */
-      deployer = await getContainerState(name);
-      checkMaxWaitTime(name, secondsElapsed);
-      secondsElapsed += PING_STATE_INTERVAL / 1000;
-    }
-    return true;
+    const deployerReady = await waitFor({
+      condition: isDeployerReady,
+      interval: PING_STATE_INTERVAL,
+      maxWaitTime: MAX_WAIT_TIME_SECONDS * 1000,
+      errorMessage: `deployer is not healthy after ${MAX_WAIT_TIME_SECONDS} seconds.`,
+    });
+
+    return localnetReady && deployerReady;
+  }
+
+  static async waitForMigrationsToComplete(): Promise<boolean> {
+    // Because `pre-test.ts` imports this file, and we have `server-only` for queries, we must
+    // write the query here to avoid getting an error. `--react-conditions=server-only` does not
+    // fix the issue, because it seems that `pre-test.ts` does not run with those conditions.
+    const getLatestVersion = async () => {
+      const url = new URL(TableName.ProcessorStatus, EMOJICOIN_INDEXER_URL);
+      url.searchParams.set("select", "last_success_version");
+      url.searchParams.set("limit", "1");
+      return await fetch(url)
+        .then((res) => res.json())
+        .then((data: [{ last_success_version: string }]) => data)
+        .then((data) => data.pop()?.last_success_version)
+        .then((version) => (version ? BigInt(version) : undefined));
+    };
+
+    const migrationsComplete = async () => {
+      try {
+        // Migrations are complete when the indexer has a row with last processed version == `0`.
+        const latestVersion = await getLatestVersion();
+        return typeof latestVersion === "bigint" && latestVersion >= 0n;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    return await waitFor({
+      condition: migrationsComplete,
+      interval: PING_STATE_INTERVAL,
+      maxWaitTime: MAX_WAIT_TIME_SECONDS * 1000,
+      errorMessage: `Processor didn't finish migrations after ${MAX_WAIT_TIME_SECONDS} seconds.`,
+    });
   }
 }
