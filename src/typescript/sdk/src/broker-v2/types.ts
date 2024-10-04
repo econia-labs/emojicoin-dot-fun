@@ -1,11 +1,15 @@
-import { type AnyEventModel, DatabaseTypeConverter } from "../indexer-v2/types";
+import {
+  type AnyEventModel,
+  DatabaseTypeConverter,
+} from "../indexer-v2/types";
 import {
   type AnyEventDatabaseRow,
   type DatabaseJsonType,
   TableName,
 } from "../indexer-v2/types/json-types";
+import { type AnyNumberString } from "../types/types";
 
-export type BrokerEvent =
+export type EventModelName =
   | "Chat"
   | "Swap"
   | "Liquidity"
@@ -29,7 +33,7 @@ type GlobalStateType = DatabaseJsonType[typeof GlobalState];
 type PeriodicStateType = DatabaseJsonType[typeof PeriodicState];
 type MarketRegistrationType = DatabaseJsonType[typeof MarketRegistration];
 
-export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => AnyEventModel> = {
+export const brokerMessageConverter: Record<EventModelName, (data: unknown) => AnyEventModel> = {
   Chat: (d) => DatabaseTypeConverter[Chat](d as ChatType),
   Swap: (d) => DatabaseTypeConverter[Swap](d as SwapType),
   Liquidity: (d) => DatabaseTypeConverter[Liquidity](d as LiquidityType),
@@ -49,5 +53,19 @@ export const brokerMessageConverter: Record<BrokerEvent, (data: unknown) => AnyE
  * corresponding `TableConverter` functions after parsing the initial JSON message.
  */
 export type BrokerMessage = {
-  [K in BrokerEvent]: AnyEventDatabaseRow;
+  [K in EventModelName]: AnyEventDatabaseRow;
+};
+
+/**
+ * The message the client sends to the broker to subscribe or unsubscribe.
+ */
+export type SubscriptionMessage = {
+  markets: number[];
+  event_types: EventModelName[];
+};
+
+/* eslint-disable-next-line import/no-unused-modules */
+export type WebSocketSubscriptions = {
+  marketIDs: Set<AnyNumberString>;
+  eventTypes: Set<EventModelName>;
 };

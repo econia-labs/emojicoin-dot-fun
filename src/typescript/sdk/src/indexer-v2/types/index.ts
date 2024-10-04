@@ -409,7 +409,7 @@ export const GuidGetters = {
     const registryNonce = "registry_nonce" in data ? data.registry_nonce : data.registryNonce;
     return {
       eventName,
-      guid: `${eventName}::${registryNonce}` as const,
+      guid: `${eventName}::${registryNonce}::` as const,
     };
   },
   periodicStateEvent: (
@@ -426,7 +426,7 @@ export const GuidGetters = {
     data: DatabaseJsonType["market_registration_events"] | MarketMetadataModel
   ) => ({
     eventName: EVENT_NAMES.MarketRegistration,
-    guid: `${formatEmojis(data)}::${EVENT_NAMES.MarketRegistration}` as const,
+    guid: `${formatEmojis(data)}::${EVENT_NAMES.MarketRegistration}::` as const,
   }),
   swapEvent: (data: DatabaseJsonType["swap_events"] | MarketMetadataModel) => ({
     eventName: EVENT_NAMES.Swap,

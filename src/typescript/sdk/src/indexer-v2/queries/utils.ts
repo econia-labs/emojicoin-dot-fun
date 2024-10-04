@@ -60,10 +60,13 @@ export const getLatestProcessedEmojicoinVersion = async () =>
 /**
  * Wait for the processed version of a table or view to be at least the given version.
  */
-export const waitForEmojicoinIndexer = async (minimumVersion: AnyNumberString) =>
+export const waitForEmojicoinIndexer = async (
+  minimumVersion: AnyNumberString,
+  maxWaitTimeMs?: number
+) =>
   new Promise<void>((resolve, reject) => {
     let i = 0;
-    const maxTries = Math.floor(POLLING_TIMEOUT / POLLING_INTERVAL);
+    const maxTries = Math.floor((maxWaitTimeMs ?? POLLING_TIMEOUT) / POLLING_INTERVAL);
 
     const check = async () => {
       try {

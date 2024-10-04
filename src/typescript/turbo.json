@@ -62,7 +62,10 @@
     "test": {
       "outputs": []
     },
-    "test:verbose": {
+    "test:parallel": {
+      "outputs": []
+    },
+    "test:sequential": {
       "outputs": []
     },
     "unit-test": {
