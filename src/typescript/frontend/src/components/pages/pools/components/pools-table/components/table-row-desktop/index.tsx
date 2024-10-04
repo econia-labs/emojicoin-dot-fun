@@ -15,7 +15,8 @@ import { UnsizedDecimalString } from "@sdk/emojicoin_dot_fun";
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;
 
-const getXPR = (x: number, tvlPerLpCoinGrowth: UnsizedDecimalString) => (new Big(tvlPerLpCoinGrowth).pow(x).sub(new Big(1))).mul(new Big(100));
+const getXPR = (x: number, tvlPerLpCoinGrowth: UnsizedDecimalString) =>
+  new Big(tvlPerLpCoinGrowth).pow(x).sub(new Big(1)).mul(new Big(100));
 
 const formatXPR = (xprIn: Big) => {
   const xpr = xprIn.toFixed(4);

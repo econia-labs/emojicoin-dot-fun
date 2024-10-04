@@ -62,7 +62,7 @@ const localIndexer =
   EMOJICOIN_INDEXER_URL.includes("localhost") ||
   EMOJICOIN_INDEXER_URL.includes("host.docker.internal");
 
-const authHeaders: Record<string,string> =
+const authHeaders: Record<string, string> =
   !localIndexer && process.env.EMOJICOIN_INDEXER_API_KEY
     ? { "x-api-key": `${process.env.EMOJICOIN_INDEXER_API_KEY}`, Accept: "application/json" }
     : { Accept: "application/json" };

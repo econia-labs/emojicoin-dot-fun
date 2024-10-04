@@ -1,12 +1,12 @@
 // cspell:word DDTHH
 
 import { type SymbolEmoji } from "../../emoji_data";
-import {
-    UnsizedDecimalString,
-  type AccountAddressString,
-  type HexString,
-  type Uint128String,
-  type Uint64String,
+import type {
+  UnsizedDecimalString,
+  AccountAddressString,
+  HexString,
+  Uint128String,
+  Uint64String,
 } from "../../emojicoin_dot_fun/types";
 import { type Flatten } from "../../types";
 
