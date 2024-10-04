@@ -12,6 +12,7 @@ import {
   SYMBOL_DATA,
   toMarketEmojiData,
   type Types,
+  waitFor,
   zip,
 } from "../../../src";
 import {
@@ -34,9 +35,17 @@ import { AccountAddress, type TypeTag } from "@aptos-labs/ts-sdk";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries";
 import { convertWebSocketMessageToBrokerEvent } from "../../../src/broker-v2/client";
 
-import { waitFor, connectNewClient, compareParsedData, subscribe } from "./utils";
+import { connectNewClient, compareParsedData, subscribe } from "./utils";
 
 jest.setTimeout(20000);
+
+const customWaitFor = async (condition: () => boolean) =>
+  waitFor({
+    condition,
+    interval: 10,
+    maxWaitTime: 5000,
+    errorMessage: `Maximum wait time exceeded for test: ${expect.getState().currentTestName}.`,
+  });
 
 describe("tests to ensure that websocket event subscriptions work as expected", () => {
   const registrants = getFundedAccounts("040", "041", "042", "043", "044", "045");
@@ -132,7 +141,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
       typeTags: [emojicoin, emojicoinLP],
     });
 
-    await waitFor(() => messageEvents.length === 1);
+    await customWaitFor(() => messageEvents.length === 1);
     const messageEvent = messageEvents.pop()!;
     expect(messageEvent).toBeDefined();
     const event = convertWebSocketMessageToBrokerEvent(messageEvent);
@@ -157,7 +166,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
       typeTags: [emojicoin, emojicoinLP],
     });
 
-    await waitFor(() => messageEvents.length === 1);
+    await customWaitFor(() => messageEvents.length === 1);
     compareParsedData({
       messageEvent: messageEvents.pop(),
       brokerMessage: brokerMessages.pop(),
@@ -182,7 +191,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
       typeTags: [emojicoin, emojicoinLP],
     });
 
-    await waitFor(() => messageEvents.length === 1);
+    await customWaitFor(() => messageEvents.length === 1);
     compareParsedData({
       messageEvent: messageEvents.pop(),
       brokerMessage: brokerMessages.pop(),
@@ -219,7 +228,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
       minLpCoinsOut: 1n,
     });
 
-    await waitFor(() => messageEvents.length === 2);
+    await customWaitFor(() => messageEvents.length === 2);
     // Since they're pushed at the same time, we only have to find the index of one, then we know
     // all the arrays should have the same index for the corresponding message event type.
     const swapIndex = events.findIndex(
@@ -280,7 +289,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     // Wait for all responses to be processed by the indexer.
     await waitForEmojicoinIndexer(highestVersion);
     // Then wait for the broker to send at least two messages (it should be two chats).
-    await waitFor(() => messageEvents.length >= 2);
+    await customWaitFor(() => messageEvents.length >= 2);
     expect(messageEvents.length === 2);
     expect(brokerMessages.length === 2);
     expect(events.length === 2);
@@ -369,7 +378,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     // Wait for all responses to be processed by the indexer.
     await waitForEmojicoinIndexer(highestVersion);
     // Then wait for the broker to send at least two messages (it should be two chats).
-    await waitFor(() => messageEvents.length >= 2);
+    await customWaitFor(() => messageEvents.length >= 2);
     expect(messageEvents.length === 2);
     expect(brokerMessages.length === 2);
     expect(events.length === 2);
@@ -485,7 +494,7 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
     await waitForEmojicoinIndexer(highestVersion);
     // Wait for the broker to send all 10 messages:
     // 1 registration, 2 swaps, 2 chats, and 5 state event models.
-    await waitFor(() => messageEvents.length === 10);
+    await customWaitFor(() => messageEvents.length === 10);
     expect(messageEvents.length === 10);
     expect(brokerMessages.length === 10);
     expect(events.length === 10);

@@ -24,10 +24,6 @@ export default async function Home({ searchParams }: HomePageParams) {
     pageSize: MARKETS_PER_PAGE,
   });
 
-  console.log(numRegisteredMarkets);
-  console.log(featured);
-  console.log(markets);
-
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 
   return (

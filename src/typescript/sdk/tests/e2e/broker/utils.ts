@@ -1,4 +1,4 @@
-import { type AnyNumberString, sleep } from "../../../src";
+import { type AnyNumberString, waitFor } from "../../../src";
 import {
   type BrokerEvent,
   type BrokerMessage,
@@ -21,17 +21,6 @@ import RowEqualityChecks from "../queries/equality-checks";
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 
 const MAX_WAIT_TIME = 5000;
-export const waitFor = async (condition: () => boolean) => {
-  let elapsed = 0;
-  while (!condition() && elapsed < MAX_WAIT_TIME) {
-    await sleep(10);
-    elapsed += 10;
-  }
-  if (condition()) {
-    return true;
-  }
-  throw new Error("Waited for too long.");
-};
 
 const BROKER_URL = process.env.NEXT_PUBLIC_BROKER_URL!;
 export const connectNewClient = async () => {
@@ -56,7 +45,12 @@ export const connectNewClient = async () => {
   };
 
   // Wait for the connection to be established.
-  await waitFor(() => client.readyState === client.OPEN);
+  await waitFor({
+    condition: () => client.readyState === client.OPEN,
+    interval: 10,
+    maxWaitTime: MAX_WAIT_TIME,
+    errorMessage: "Client `readyState` is not `OPEN` after maximum wait time.",
+  });
   expect(client.readyState).toEqual(client.OPEN);
 
   return {

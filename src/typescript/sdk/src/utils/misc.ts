@@ -331,3 +331,50 @@ export const DEBUG_ASSERT = (fn: () => boolean) => {
     }
   }
 };
+
+/**
+ * Waits for a condition to be true, with a specified interval and maximum wait time.
+ *
+ * @param {() => boolean} args.condition - A function that returns true when the condition is met.
+ * @param {number} args.interval - The time in milliseconds between each check of the condition.
+ * @param {number} args.maxWaitTime - The maximum time in milliseconds to wait for the condition.
+ * @param {boolean} [args.throwError=true] - Whether to throw an error if the condition is not met
+ * within the max wait time.
+ * @param {string} [args.errorMessage] - Custom error message if the wait time is exceeded. Defaults
+ * to a generic message.
+ *
+ * @returns {Promise<boolean>} Returns the condition on the last check.
+ * @throws {Error} Throws an error if the time elapsed is too large and `throwError` is true.
+ *
+ * @example
+ * await waitFor({
+ *   condition: () => someAsyncOperation(),
+ *   interval: 1000,
+ *   maxWaitTime: 10000,
+ *   throwError: false
+ * });
+ */
+export const waitFor = async (args: {
+  condition: (() => boolean) | (() => Promise<boolean>);
+  interval: number;
+  maxWaitTime: number;
+  throwError?: boolean;
+  errorMessage?: string;
+}) => {
+  const {
+    condition,
+    interval,
+    maxWaitTime,
+    throwError = true,
+    errorMessage = `Wait time exceeded ${maxWaitTime / 1000} seconds.`,
+  } = args;
+
+  let elapsed = 0;
+  while (!(await condition()) && elapsed < maxWaitTime) {
+    await sleep(interval);
+    elapsed += interval;
+  }
+  if (await condition()) return true;
+  if (throwError) throw new Error(errorMessage);
+  return false;
+};
