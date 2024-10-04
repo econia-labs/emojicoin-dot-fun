@@ -19,8 +19,9 @@ module.exports = {
     sourceType: "module",
     warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "unused-imports", "import"],
+  plugins: ["@typescript-eslint", "unused-imports", "import", "prettier"],
   rules: {
+    "prettier/prettier": ["error"],
     "@typescript-eslint/no-explicit-any": "warn",
     "no-console": [
       "warn",
@@ -28,14 +29,12 @@ module.exports = {
         allow: ["warn", "error", "debug", "clear", "trace"],
       },
     ],
-    quotes: ["error", "double"],
     "@typescript-eslint/lines-between-class-members": [
       "error",
       "always",
       { exceptAfterSingleLine: true },
     ],
     "@typescript-eslint/no-throw-literal": "error",
-    "max-len": ["error", 100],
     "import/extensions": "off",
     "import/no-commonjs": ["error", { allowRequire: false, allowPrimitiveModules: false }],
     "import/no-extraneous-dependencies": [

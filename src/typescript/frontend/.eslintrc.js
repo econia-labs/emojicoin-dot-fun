@@ -38,8 +38,9 @@ module.exports = {
     project: ["tsconfig.json"],
     warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "import"],
+  plugins: ["@typescript-eslint", "import", "prettier"],
   rules: {
+    "prettier/prettier": ["error"],
     "import/no-cycle": [
       "error",
       {
