@@ -1,7 +1,4 @@
-import {
-  type AnyEventModel,
-  DatabaseTypeConverter,
-} from "../indexer-v2/types";
+import { type AnyEventModel, DatabaseTypeConverter } from "../indexer-v2/types";
 import {
   type AnyEventDatabaseRow,
   type DatabaseJsonType,
