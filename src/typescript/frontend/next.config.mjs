@@ -44,6 +44,11 @@ const nextConfig = {
   },
   ...(DEBUG ? debugConfigOptions : {}),
   transpilePackages: ["@sdk"],
+  redirects: async () => ([{
+    source: '/',
+    destination: '/home',
+    permanent: true,
+  }]),
 };
 
 export default withBundleAnalyzer(nextConfig);
