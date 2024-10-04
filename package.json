@@ -3,6 +3,7 @@
   "scripts": {
     "dev": "pnpm --prefix src/typescript run dev",
     "down": "pnpm --prefix src/typescript run down",
+    "e2e:testnet": "pnpm --prefix src/typescript run e2e:testnet",
     "format": "pnpm --prefix src/typescript run format",
     "lint": "pnpm --prefix src/typescript run lint",
     "lint:fix": "pnpm --prefix src/typescript run lint:fix",
@@ -12,6 +13,7 @@
     "test": "pnpm --prefix src/typescript run test",
     "test:debug": "pnpm --prefix src/typescript run test:debug",
     "test:verbose": "pnpm --prefix src/typescript run test:verbose",
+    "unit-test": "pnpm --prefix src/typescript run unit-test",
     "up": "pnpm --prefix src/typescript run up"
   }
 }

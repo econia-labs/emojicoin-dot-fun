@@ -13,7 +13,7 @@ import {
 import { triggerEnumToRawTrigger, Trigger } from "@sdk/const";
 import { getRandomEmoji, type EmojicoinSymbol, generateRandomSymbol } from "@sdk/emoji_data";
 import { getEmojicoinData } from "@sdk/markets/utils";
-import type JSONTypes from "@sdk/types/json-types";
+import type JsonTypes from "@sdk/types/json-types";
 import { STRUCT_STRINGS } from "@sdk/utils";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import Big from "big.js";
@@ -89,27 +89,27 @@ export const generateRandomEvent = ({
   switch (trigger) {
     case Trigger.MarketRegistration:
       ev = toEmojicoinEvent(t, generateMarketRegistrationJSON(args), v);
-      events.marketRegistrationEvents.push(ev as Types.MarketRegistrationEvent);
+      events.marketRegistrationEvents.push(ev as Types["MarketRegistrationEvent"]);
       break;
     case Trigger.SwapBuy:
       ev = toEmojicoinEvent(t, generateSwapJSON({ ...args, isSell: false }), v);
-      events.swapEvents.push(ev as Types.SwapEvent);
+      events.swapEvents.push(ev as Types["SwapEvent"]);
       break;
     case Trigger.SwapSell:
       ev = toEmojicoinEvent(t, generateSwapJSON({ ...args, isSell: true }), v);
-      events.swapEvents.push(ev as Types.SwapEvent);
+      events.swapEvents.push(ev as Types["SwapEvent"]);
       break;
     case Trigger.ProvideLiquidity:
       ev = toEmojicoinEvent(t, generateLiquidityJSON({ ...args, liquidityProvided: true }), v);
-      events.liquidityEvents.push(ev as Types.LiquidityEvent);
+      events.liquidityEvents.push(ev as Types["LiquidityEvent"]);
       break;
     case Trigger.RemoveLiquidity:
       ev = toEmojicoinEvent(t, generateLiquidityJSON({ ...args, liquidityProvided: false }), v);
-      events.liquidityEvents.push(ev as Types.LiquidityEvent);
+      events.liquidityEvents.push(ev as Types["LiquidityEvent"]);
       break;
     case Trigger.Chat:
       ev = toEmojicoinEvent(t, generateChatJSON(args), v);
-      events.chatEvents.push(ev as Types.ChatEvent);
+      events.chatEvents.push(ev as Types["ChatEvent"]);
       break;
     default:
       throw new Error(`Invalid trigger: ${trigger}`);
@@ -119,7 +119,7 @@ export const generateRandomEvent = ({
     STRUCT_STRINGS.StateEvent,
     stateJSON,
     Number(version)
-  ) as Types.StateEvent;
+  ) as Types["StateEvent"];
   events.stateEvents.push(stateEvent);
 
   const models = getEventsAsProcessorModels(events, {
@@ -170,7 +170,7 @@ const generateMarketRegistrationJSON = ({
   emojis: EmojicoinSymbol;
   time: AnyNumberString;
   registrant?: AccountAddressInput;
-}): JSONTypes.MarketRegistrationEvent => {
+}): JsonTypes["MarketRegistrationEvent"] => {
   const { marketAddress, symbolBytes } = getEmojicoinData(emojis);
   return {
     integrator: INTEGRATOR_ADDRESS,
@@ -195,7 +195,7 @@ const generateLiquidityJSON = ({
   marketNonce: AnyNumberString;
   time?: AnyNumberString;
   liquidityProvided: boolean;
-}): JSONTypes.LiquidityEvent => ({
+}): JsonTypes["LiquidityEvent"] => ({
   base_amount: "1524336998",
   liquidity_provided: liquidityProvided,
   lp_coin_amount: "1212122424",
@@ -226,7 +226,7 @@ const generateStateJSON = ({
   lastSwapNonce?: AnyNumberString;
   lastSwapTime?: AnyNumberString;
   isSell?: boolean;
-}): JSONTypes.StateEvent => {
+}): JsonTypes["StateEvent"] => {
   const { marketAddress, symbolBytes } = getEmojicoinData(emojis);
   return {
     clamm_virtual_reserves: {
@@ -292,7 +292,7 @@ const generateSwapJSON = ({
   resultsInStateTransition?: boolean;
   startsInBondingCurve?: boolean;
   swapper?: AccountAddressInput;
-}): JSONTypes.SwapEvent => {
+}): JsonTypes["SwapEvent"] => {
   return {
     // The ratios here are based on a random swap in the contract generated on-chain.
     avg_execution_price_q64: Big(153481808316888)
@@ -337,7 +337,7 @@ const generateChatJSON = ({
   user?: AccountAddressInput;
   emojis: EmojicoinSymbol;
   time?: AnyNumberString;
-}): JSONTypes.ChatEvent => {
+}): JsonTypes["ChatEvent"] => {
   const { marketAddress, symbolBytes } = getEmojicoinData(emojis);
   return {
     balance_as_fraction_of_circulating_supply_q64: "0",

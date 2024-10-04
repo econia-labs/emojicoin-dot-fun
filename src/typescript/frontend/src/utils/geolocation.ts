@@ -40,7 +40,7 @@ const ONE_DAY = 604800;
 
 const getLocation: (ip: string) => Promise<Location> = async (ip) => {
   if (ip === "undefined" || typeof ip === "undefined") {
-    throw "IP is undefined";
+    throw new Error("IP is undefined");
   }
   const queryResult = await fetch(`https://vpnapi.io/api/${ip}?key=${VPNAPI_IO_API_KEY}`, {
     next: { revalidate: ONE_DAY },

@@ -32,11 +32,11 @@ import {
   toRegistrantGracePeriodFlag,
   toRegistryResource,
 } from "../types/types";
-import type JSONTypes from "../types/json-types";
+import type JsonTypes from "../types/json-types";
 import {
   type DerivedEmojicoinData,
   type EmojicoinSymbol,
-  encodeSymbols,
+  encodeEmojis,
   symbolBytesToEmojis,
   type SymbolEmojiData,
 } from "../emoji_data";
@@ -66,7 +66,7 @@ export function toCoinTypes(inputAddress: AccountAddressInput): {
 export function getEmojicoinMarketAddressAndTypeTags(args: {
   registryAddress?: AccountAddressInput;
   symbolBytes: HexInput;
-}): Types.EmojicoinInfo {
+}): Types["EmojicoinInfo"] {
   const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
   const symbolBytes = Hex.fromHexInput(args.symbolBytes);
   const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array());
@@ -93,7 +93,7 @@ export const getEmojicoinData = (symbol: EmojicoinSymbol): DerivedEmojicoinData 
   const symbolArray = Array.isArray(symbol)
     ? symbol
     : ([symbol] as Array<string> | Array<SymbolEmojiData>);
-  const symbolBytes = encodeSymbols(symbolArray);
+  const symbolBytes = encodeEmojis(symbolArray);
   const data = symbolBytesToEmojis(symbolBytes);
   const metadata = getEmojicoinMarketAddressAndTypeTags({ symbolBytes });
   return {
@@ -129,7 +129,7 @@ export async function getRegistrationGracePeriodFlag(args: {
   | { marketNotFound: true; flag: null; gracePeriodOver: null }
   | {
       marketNotFound: false;
-      flag: Types.RegistrantGracePeriodFlag | null;
+      flag: Types["RegistrantGracePeriodFlag"] | null;
       gracePeriodOver: boolean;
     }
 > {
@@ -141,7 +141,7 @@ export async function getRegistrationGracePeriodFlag(args: {
     registryAddress,
     symbolBytes,
   });
-  let gracePeriodJSONResource: JSONTypes.RegistrantGracePeriodFlag | undefined;
+  let gracePeriodJSONResource: JsonTypes["RegistrantGracePeriodFlag"] | undefined;
   try {
     const accountResources = await aptos.getAccountResources({
       accountAddress: marketAddress,
@@ -161,7 +161,7 @@ export async function getRegistrationGracePeriodFlag(args: {
     }
     gracePeriodJSONResource = accountResources.find(
       (r) => parseTypeTag(r.type).toString() === STRUCT_STRINGS.RegistrantGracePeriodFlag
-    )?.data as JSONTypes.RegistrantGracePeriodFlag;
+    )?.data as JsonTypes["RegistrantGracePeriodFlag"];
     if (gracePeriodJSONResource) {
       const gracePeriodFlag = toRegistrantGracePeriodFlag(gracePeriodJSONResource);
       // We've found the market, got a flag, and can check if the grace period is over.
@@ -195,7 +195,7 @@ export async function getRegistrationGracePeriodFlag(args: {
   }
 }
 
-export function isRegistrationGracePeriodOver(flag: Types.RegistrantGracePeriodFlag): boolean {
+export function isRegistrationGracePeriodOver(flag: Types["RegistrantGracePeriodFlag"]): boolean {
   const now = BigInt(new Date().getTime()) * 1000n;
   return now - GRACE_PERIOD_TIME > flag.marketRegistrationTime;
 }
@@ -207,7 +207,7 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
   sender: Account;
   integrator: AccountAddressInput;
   options?: InputGenerateTransactionOptions;
-}): Promise<Types.EmojicoinInfo> => {
+}): Promise<Types["EmojicoinInfo"]> => {
   const { aptos, emojis, sender, integrator } = args;
   const aptosConfig = toConfig(aptos);
   const options = args.options || DEFAULT_REGISTER_MARKET_GAS_OPTIONS;
@@ -235,10 +235,10 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
 export async function getMarketResource(args: {
   aptos: Aptos;
   marketAddress: AccountAddressInput;
-}): Promise<Types.MarketResource> {
+}): Promise<Types["Market"]> {
   const { aptos } = args;
   const marketAddress = AccountAddress.from(args.marketAddress);
-  const marketResource = await aptos.getAccountResource<JSONTypes.MarketResource>({
+  const marketResource = await aptos.getAccountResource<JsonTypes["Market"]>({
     accountAddress: marketAddress,
     resourceType: STRUCT_STRINGS.Market,
   });
@@ -298,7 +298,7 @@ export function getResourceFromWriteSet<T, U>(args: {
   return undefined;
 }
 
-export function calculateTvlGrowth(periodicStateTracker1D: Types.PeriodicStateTracker) {
+export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateTracker"]) {
   if (rawPeriodToEnum(periodicStateTracker1D.period) !== Period.Period1D) {
     throw new Error("Expected a 1-day Periodic State Tracker to calculate TVL growth.");
   }

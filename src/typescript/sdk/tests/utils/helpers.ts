@@ -13,7 +13,7 @@ import { EmojicoinDotFun, getEvents } from "../../src/emojicoin_dot_fun";
 import {
   type EmojiName,
   generateRandomSymbol,
-  type JSONTypes,
+  type JsonTypes,
   type MarketEmojiData,
   ONE_APT,
   SYMBOL_DATA,
@@ -47,6 +47,12 @@ export const getPublisherPrivateKey = () => {
  * @returns TestHelpers
  */
 export function getPublishHelpers() {
+  if (process.env.NEXT_PUBLIC_APTOS_NETWORK !== "local") {
+    throw new Error(
+      "This function should only be called within the context of a local network environment."
+    );
+  }
+
   const { aptos } = getAptosClient();
 
   const privateKeyString = process.env.PUBLISHER_PRIVATE_KEY;
@@ -73,7 +79,7 @@ export function getGitRoot(): string {
   return path.dirname(gitRoot);
 }
 
-type RegisterMarketHelper = Types.EmojicoinInfo &
+type RegisterMarketHelper = Types["EmojicoinInfo"] &
   MarketEmojiData & {
     registrant: Account;
     integrator: Account;
@@ -151,7 +157,7 @@ async function registerRandomMarket({
   const { aptos } = getPublishHelpers();
 
   let symbol = generateRandomSymbol();
-  let registered = true as boolean | JSONTypes.MarketMetadata | undefined;
+  let registered = true as boolean | JsonTypes["MarketMetadata"] | undefined;
   while (registered) {
     /* eslint-disable-next-line no-await-in-loop */
     registered = await EmojicoinDotFun.MarketMetadataByEmojiBytes.view({

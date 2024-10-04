@@ -24,5 +24,5 @@ export const stringifyParsedBigInts = (msg: string) =>
 /**
  * Casts a stringified, safely-parsed bigint JSON response into the generic type T.
  */
-export const parseJSONWithBigInts = <T extends any>(msg: string): T =>
+export const parseJSONWithBigInts = <T>(msg: string): T =>
   JSON.parse(stringifyParsedBigInts(msg)) as T;

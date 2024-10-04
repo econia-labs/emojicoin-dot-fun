@@ -33,8 +33,7 @@
     ]
   },
   "exclude": [
-    "node_modules",
-    "src/utils/mock-data.ts"
+    "node_modules"
   ],
   "include": [
     "src"

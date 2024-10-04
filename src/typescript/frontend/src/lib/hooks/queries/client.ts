@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-throw-literal */
 export enum ResponseErrorType {
   NOT_FOUND = "Not found",
   UNHANDLED = "Unhandled",

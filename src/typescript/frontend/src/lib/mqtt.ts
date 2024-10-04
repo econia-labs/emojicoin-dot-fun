@@ -69,6 +69,7 @@ export class TopicBuilder {
       resultsInStateTransition !== null ? `${resultsInStateTransition}` : "+"
     );
   }
+
   /**
    * Build an MQTT topic for MarketRegistration events.
    *

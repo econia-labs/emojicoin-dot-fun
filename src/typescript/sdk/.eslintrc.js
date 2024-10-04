@@ -2,27 +2,39 @@ module.exports = {
   env: {
     browser: true,
     es2021: true,
+    jest: true,
     node: true,
   },
   ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js"],
-  extends: ["airbnb-base", "airbnb-typescript/base", "prettier"],
+  extends: [
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ["tsconfig.json", "tests/tsconfig.json"],
     ecmaVersion: "latest",
     sourceType: "module",
+    warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "unused-imports", "import"],
+  plugins: ["@typescript-eslint", "unused-imports", "import", "prettier"],
   rules: {
+    "prettier/prettier": ["error"],
+    "@typescript-eslint/no-explicit-any": "warn",
     "no-console": [
       "warn",
       {
         allow: ["warn", "error", "debug", "clear", "trace"],
       },
     ],
-    quotes: ["error", "double"],
-    "max-len": ["error", 100],
+    "@typescript-eslint/lines-between-class-members": [
+      "error",
+      "always",
+      { exceptAfterSingleLine: true },
+    ],
+    "@typescript-eslint/no-throw-literal": "error",
     "import/extensions": "off",
     "import/no-commonjs": ["error", { allowRequire: false, allowPrimitiveModules: false }],
     "import/no-extraneous-dependencies": [
@@ -37,14 +49,17 @@ module.exports = {
     "max-classes-per-file": ["error", 10],
     "import/prefer-default-export": "off",
     "object-curly-newline": "off",
-    // Replacing airbnb rule with following, to re-enable "ForOfStatement"
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error", { functions: false, classes: false }],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
-      { argsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_" },
+      {
+        argsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+      },
     ],
     "unused-imports/no-unused-imports": "error",
     "import/no-unused-modules": [

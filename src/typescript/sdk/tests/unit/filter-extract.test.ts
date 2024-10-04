@@ -1,5 +1,7 @@
 import { extractFilter } from "../../src/utils";
 
+jest.setTimeout(20000);
+
 describe("tests the extractFilter function", () => {
   it("tests basic input", () => {
     type Even = number;

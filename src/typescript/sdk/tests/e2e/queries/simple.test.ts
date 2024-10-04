@@ -22,9 +22,20 @@ describe("queries swap_events and returns accurate swap row data", () => {
   const marketEmojiNames: EmojiName[][] = [
     ["scroll"],
     ["selfie"],
-    ["Japanese \"discount\" button"],
+    ['Japanese "discount" button'],
     ["adhesive bandage"],
   ];
+
+  it("verifies a valid response for fetching the processor status", async () => {
+    expect(process.env.EMOJICOIN_INDEXER_URL).toBeDefined();
+    const url = new URL("processor_status", process.env.EMOJICOIN_INDEXER_URL!);
+    url.searchParams.set("select", "last_success_version");
+    url.searchParams.set("limit", "1");
+    const res = await fetch(url);
+    const json: [{ last_success_version: number }] = await res.json();
+    expect(json).toBeDefined();
+    expect(typeof json[0].last_success_version).toBe("number");
+  });
 
   it("performs a simple registerMarket fetch accurately", async () => {
     const { registerResponse: response } = await TestHelpers.registerMarketFromNames({
@@ -39,7 +50,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     });
     const marketLatestStateRow = marketLatestStateRes[0];
 
-    RowEqualityChecks.marketLatestStateRow(marketLatestStateRow, response);
+    RowEqualityChecks.MarketLatestState(marketLatestStateRow, response);
   });
 
   it("performs a simple swap fetch accurately", async () => {
@@ -65,7 +76,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const queryRes = await fetchSwapEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
-    RowEqualityChecks.swapRow(row, res);
+    RowEqualityChecks.Swap(row, res);
   });
 
   it("performs a simple chat fetch accurately", async () => {
@@ -90,7 +101,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const queryRes = await fetchChatEvents({ marketID, minimumVersion: res.version, pageSize: 1 });
     const row = queryRes[0];
 
-    RowEqualityChecks.chatRow(row, res);
+    RowEqualityChecks.Chat(row, res);
   });
 
   it("performs a simple liquidity fetch accurately", async () => {
@@ -163,7 +174,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const foundInUserPools = userPoolQueryRes.find((row) => row.market.marketID === marketID);
     const row = liquidityEventsQueryRes[0];
 
-    RowEqualityChecks.liquidityRow(row, liquidityRes);
+    RowEqualityChecks.Liquidity(row, liquidityRes);
     expect(foundMarketInLatestStateTable).toBe(true);
     expect(foundInMarketsWithPools).toBeTruthy();
     expect(foundInUserPools).toBeTruthy();

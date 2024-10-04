@@ -1,6 +1,5 @@
 import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import assert from "assert";
 import {
   type PeriodDuration,
   type Period,
@@ -11,9 +10,7 @@ import { normalizeHex } from "./hex";
 import {
   type AnyNumberString,
   type Types,
-  isAnyEmojiCoinEvent,
   isPeriodicStateEvent,
-  isPeriodicStateView,
   isStateEvent,
   isSwapEvent,
 } from "../types";
@@ -110,29 +107,23 @@ export function getTime(unitOfTime: UnitOfTime) {
  * ```
  */
 export function getPeriodStartTime(
-  event: Types.SwapEvent | Types.StateEvent | Types.PeriodicStateEvent | Types.PeriodicStateView,
+  event: Types["SwapEvent"] | Types["StateEvent"] | Types["PeriodicStateEvent"],
   periodIn: PeriodDuration | bigint | number
 ) {
   // All CandlestickPeriods are in microseconds.
   let time: bigint;
-  if (isAnyEmojiCoinEvent(event)) {
-    if (isSwapEvent(event)) {
-      time = event.time;
-    } else if (isStateEvent(event)) {
-      time = event.lastSwap.time;
-    } else if (isPeriodicStateEvent(event)) {
-      // Since periodic state events are only emitted once a period threshold
-      // has been exceeded, the period boundary's emit time is completely irrelevant to
-      // the event's time. The `start_time` is the actual period start for the event.
-      time = event.periodicStateMetadata.startTime;
-      return time;
-    } else {
-      throw new Error("Invalid event type, not a swap, state, or periodic state event.");
-    }
-  } else if (isPeriodicStateView(event)) {
-    time = BigInt(event.startTime);
+  if (isSwapEvent(event)) {
+    time = event.time;
+  } else if (isStateEvent(event)) {
+    time = event.lastSwap.time;
+  } else if (isPeriodicStateEvent(event)) {
+    // Since periodic state events are only emitted once a period threshold
+    // has been exceeded, the period boundary's emit time is completely irrelevant to
+    // the event's time. The `start_time` is the actual period start for the event.
+    time = event.periodicStateMetadata.startTime;
+    return time;
   } else {
-    throw new Error("Invalid event type.");
+    throw new Error("Invalid event type, not a swap, state, or periodic state event.");
   }
 
   let period: PeriodDuration;
@@ -279,11 +270,18 @@ export function ensureArray<T>(value: T | T[]): T[] {
   return [value];
 }
 
-export function zip<T>(a: T[], b: T[]): Array<[T, T]> {
+export function zip<A, B>(a: A[], b: B[]): Array<[A, B]> {
   if (a.length !== b.length) {
     throw new Error("Arrays must have equal length.");
   }
   return Array.from({ length: a.length }).map((_, i) => [a[i], b[i]]);
+}
+
+export function enumerate<T>(arr: T[]): Array<[T, number]> {
+  return zip(
+    arr,
+    arr.map((_, i) => i)
+  );
 }
 
 /**
@@ -328,6 +326,55 @@ export const extractFilter = <T, U extends T>(
 
 export const DEBUG_ASSERT = (fn: () => boolean) => {
   if (process.env.NODE_ENV === "development") {
-    assert(fn());
+    if (!fn()) {
+      throw new Error("Debug assertion failed.");
+    }
   }
+};
+
+/**
+ * Waits for a condition to be true, with a specified interval and maximum wait time.
+ *
+ * @param {() => boolean} args.condition - A function that returns true when the condition is met.
+ * @param {number} args.interval - The time in milliseconds between each check of the condition.
+ * @param {number} args.maxWaitTime - The maximum time in milliseconds to wait for the condition.
+ * @param {boolean} [args.throwError=true] - Whether to throw an error if the condition is not met
+ * within the max wait time.
+ * @param {string} [args.errorMessage] - Custom error message if the wait time is exceeded. Defaults
+ * to a generic message.
+ *
+ * @returns {Promise<boolean>} Returns the condition on the last check.
+ * @throws {Error} Throws an error if the time elapsed is too large and `throwError` is true.
+ *
+ * @example
+ * await waitFor({
+ *   condition: () => someAsyncOperation(),
+ *   interval: 1000,
+ *   maxWaitTime: 10000,
+ *   throwError: false
+ * });
+ */
+export const waitFor = async (args: {
+  condition: (() => boolean) | (() => Promise<boolean>);
+  interval: number;
+  maxWaitTime: number;
+  throwError?: boolean;
+  errorMessage?: string;
+}) => {
+  const {
+    condition,
+    interval,
+    maxWaitTime,
+    throwError = true,
+    errorMessage = `Wait time exceeded ${maxWaitTime / 1000} seconds.`,
+  } = args;
+
+  let elapsed = 0;
+  while (!(await condition()) && elapsed < maxWaitTime) {
+    await sleep(interval);
+    elapsed += interval;
+  }
+  if (await condition()) return true;
+  if (throwError) throw new Error(errorMessage);
+  return false;
 };

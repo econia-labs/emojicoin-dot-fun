@@ -19,12 +19,12 @@ export type TxnInfo = {
 };
 
 export type BumpEvent =
-  | Types.ChatEvent
-  | Types.MarketRegistrationEvent
-  | Types.LiquidityEvent
-  | Types.SwapEvent;
+  | Types["ChatEvent"]
+  | Types["MarketRegistrationEvent"]
+  | Types["LiquidityEvent"]
+  | Types["SwapEvent"];
 
-export type EventWithMarket = BumpEvent | Types.StateEvent | Types.PeriodicStateEvent;
+export type EventWithMarket = BumpEvent | Types["StateEvent"] | Types["PeriodicStateEvent"];
 
 /// When a market is first registered, the market_nonce field emitted is always 1.
 const INITIAL_MARKET_NONCE = 1n;
@@ -57,8 +57,8 @@ type EventGroup = {
   marketID: bigint;
   marketNonce: bigint;
   bumpEvent: BumpEvent;
-  stateEvent: Types.StateEvent;
-  periodicStateEvents: Types.PeriodicStateEvent[];
+  stateEvent: Types["StateEvent"];
+  periodicStateEvents: Types["PeriodicStateEvent"][];
   txnInfo: TxnInfo;
 };
 
@@ -69,9 +69,9 @@ export class EventGroupBuilder {
 
   public bumpEvent?: BumpEvent;
 
-  public stateEvent?: Types.StateEvent;
+  public stateEvent?: Types["StateEvent"];
 
-  public periodicStateEvents: Types.PeriodicStateEvent[];
+  public periodicStateEvents: Types["PeriodicStateEvent"][];
 
   public txnInfo: TxnInfo;
 
@@ -121,14 +121,14 @@ export class EventGroupBuilder {
     this.bumpEvent = event;
   }
 
-  addState(event: Types.StateEvent) {
+  addState(event: Types["StateEvent"]) {
     if (this.stateEvent) {
       throw new Error("EventGroups can only have one StateEvent.");
     }
     this.stateEvent = event;
   }
 
-  addPeriodicState(event: Types.PeriodicStateEvent) {
+  addPeriodicState(event: Types["PeriodicStateEvent"]) {
     if (this.periodicStateEvents.length >= 7) {
       throw new Error("EventGroups can't have more than 7 PeriodicStateEvents.");
     }

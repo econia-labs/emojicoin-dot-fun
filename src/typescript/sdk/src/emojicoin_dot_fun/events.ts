@@ -1,8 +1,8 @@
 /* eslint-disable import/no-unused-modules */
 import { type GUID, type EventJSON } from "../types/core";
 import {
+  type JsonTypes,
   type Types,
-  type AnyEmojicoinEvent,
   toChatEvent,
   toGlobalStateEvent,
   toLiquidityEvent,
@@ -10,20 +10,40 @@ import {
   toPeriodicStateEvent,
   toStateEvent,
   toSwapEvent,
+  toMarketResource,
+  toRegistryResource,
+  toRegistrantGracePeriodFlag,
+  toEmojicoinDotFunRewards,
 } from "../types";
-import { TYPE_TAGS } from "../utils/type-tags";
-import { type AnyEmojicoinJSONEvent } from "../types/json-types";
+import { type EmojicoinStructName } from "../utils/type-tags";
 
-export type Events = {
-  swapEvents: Types.SwapEvent[];
-  chatEvents: Types.ChatEvent[];
-  marketRegistrationEvents: Types.MarketRegistrationEvent[];
-  periodicStateEvents: Types.PeriodicStateEvent[];
-  stateEvents: Types.StateEvent[];
-  globalStateEvents: Types.GlobalStateEvent[];
-  liquidityEvents: Types.LiquidityEvent[];
-  genericEvents: AptosEvent[];
+export type FullEventName = keyof typeof fullEventNames;
+
+const fullEventNames = {
+  ChatEvent: null,
+  SwapEvent: null,
+  MarketRegistrationEvent: null,
+  PeriodicStateEvent: null,
+  StateEvent: null,
+  GlobalStateEvent: null,
+  LiquidityEvent: null,
 };
+
+const eventNamesSet = new Set(Object.keys(fullEventNames));
+export const isAnEmojicoinStructName = (s: string): s is FullEventName => eventNamesSet.has(s);
+
+type RemovePlurality<T extends string> = T extends `${infer R}s` ? R : T;
+type PascalToCamelCase<S extends string> = S extends `${infer F}${infer R}`
+  ? `${Lowercase<F>}${R}`
+  : S;
+type CamelCaseEventNames = `${PascalToCamelCase<FullEventName>}s`;
+type Capitalize<S extends string> = S extends `${infer F}${infer R}` ? `${Uppercase<F>}${R}` : S;
+
+export const toCamelCaseEventName = <T extends FullEventName>(s: T): PascalToCamelCase<T> => {
+  return `${s.charAt(0).toLowerCase()}${s.slice(1)}` as PascalToCamelCase<T>;
+};
+
+export type Events = { [K in CamelCaseEventNames]: Types[Capitalize<RemovePlurality<K>>][] };
 
 export const createEmptyEvents = (): Events => ({
   swapEvents: [],
@@ -33,32 +53,31 @@ export const createEmptyEvents = (): Events => ({
   stateEvents: [],
   globalStateEvents: [],
   liquidityEvents: [],
-  genericEvents: [],
 });
 
-export const converter: Map<
-  string,
-  (data: AnyEmojicoinJSONEvent, version: number) => AnyEmojicoinEvent
-> = new Map();
-[
-  [TYPE_TAGS.SwapEvent, toSwapEvent] as const,
-  [TYPE_TAGS.ChatEvent, toChatEvent] as const,
-  [TYPE_TAGS.MarketRegistrationEvent, toMarketRegistrationEvent] as const,
-  [TYPE_TAGS.PeriodicStateEvent, toPeriodicStateEvent] as const,
-  [TYPE_TAGS.StateEvent, toStateEvent] as const,
-  [TYPE_TAGS.GlobalStateEvent, toGlobalStateEvent] as const,
-  [TYPE_TAGS.LiquidityEvent, toLiquidityEvent] as const,
-].forEach(([tag, fn]) => {
-  converter.set(tag.toString(), (data: AnyEmojicoinJSONEvent, version: number) =>
-    fn(data as any, version)
-  );
-});
+type Converter = {
+  [K in EmojicoinStructName]: (data: JsonTypes[K], version: number | string) => Types[K];
+};
+
+export const converter: Converter = {
+  SwapEvent: toSwapEvent,
+  ChatEvent: toChatEvent,
+  MarketRegistrationEvent: toMarketRegistrationEvent,
+  PeriodicStateEvent: toPeriodicStateEvent,
+  StateEvent: toStateEvent,
+  GlobalStateEvent: toGlobalStateEvent,
+  LiquidityEvent: toLiquidityEvent,
+  Market: toMarketResource,
+  Registry: toRegistryResource,
+  RegistrantGracePeriodFlag: toRegistrantGracePeriodFlag,
+  EmojicoinDotFunRewards: toEmojicoinDotFunRewards,
+};
 
 export type AptosEvent = {
   guid?: GUID;
   sequence_number?: bigint;
   type: string;
-  data: any;
+  data: unknown;
 };
 
 const getPossibleGUIDAndSequenceNumber = (
@@ -88,7 +107,7 @@ const getPossibleGUIDAndSequenceNumber = (
   return res;
 };
 
-export const toGenericEvent = (event: EventJSON): AptosEvent => ({
+const _toGenericEvent = (event: EventJSON): AptosEvent => ({
   ...getPossibleGUIDAndSequenceNumber(event),
   type: event.type,
   data: event.data,

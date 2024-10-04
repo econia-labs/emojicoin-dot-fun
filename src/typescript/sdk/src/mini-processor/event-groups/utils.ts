@@ -20,7 +20,7 @@ import { type ProcessorModelsFromResponse, type UserLiquidityPoolsMap } from "."
 import { type AccountAddressString } from "../../emojicoin_dot_fun";
 import { getLPCoinBalanceFromWriteSet } from "../parse-write-set";
 
-const toChatEventData = (event: Types.ChatEvent): DatabaseModels["chat_events"]["chat"] => ({
+const toChatEventData = (event: Types["ChatEvent"]): DatabaseModels["chat_events"]["chat"] => ({
   user: event.user,
   message: event.message,
   userEmojicoinBalance: event.userEmojicoinBalance,
@@ -29,14 +29,14 @@ const toChatEventData = (event: Types.ChatEvent): DatabaseModels["chat_events"][
 });
 
 const toMarketRegistrationEventData = (
-  event: Types.MarketRegistrationEvent
+  event: Types["MarketRegistrationEvent"]
 ): DatabaseModels["market_registration_events"]["marketRegistration"] => ({
   registrant: event.registrant,
   integrator: event.integrator,
   integratorFee: event.integratorFee,
 });
 
-const toSwapEventData = (event: Types.SwapEvent): DatabaseModels["swap_events"]["swap"] => ({
+const toSwapEventData = (event: Types["SwapEvent"]): DatabaseModels["swap_events"]["swap"] => ({
   swapper: event.swapper,
   integrator: event.integrator,
   integratorFee: event.integratorFee,
@@ -56,7 +56,7 @@ const toSwapEventData = (event: Types.SwapEvent): DatabaseModels["swap_events"][
 });
 
 const toLiquidityEventData = (
-  event: Types.LiquidityEvent
+  event: Types["LiquidityEvent"]
 ): DatabaseModels["liquidity_events"]["liquidity"] => ({
   provider: event.provider,
   baseAmount: event.baseAmount,
@@ -72,7 +72,7 @@ export const addModelsForBumpEvent = (args: {
   transaction: TransactionMetadata;
   market: MarketMetadataModel;
   state: StateEventData;
-  lastSwap: Types.LastSwap;
+  lastSwap: Types["LastSwap"];
   event: BumpEvent;
   response?: UserTransactionResponse; // If we're parsing the WriteSet.
 }) => {
@@ -140,8 +140,8 @@ export const addModelsForBumpEvent = (args: {
 export const toPeriodicStateEventData = (args: {
   transaction: TransactionMetadata;
   market: MarketMetadataModel;
-  stateEvent: Types.StateEvent;
-  periodicStateEvent: Types.PeriodicStateEvent;
+  stateEvent: Types["StateEvent"];
+  periodicStateEvent: Types["PeriodicStateEvent"];
 }): DatabaseModels["periodic_state_events"] => {
   const { transaction, market, stateEvent, periodicStateEvent: event } = args;
   const period = rawPeriodToEnum(event.periodicStateMetadata.period);

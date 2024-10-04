@@ -1,7 +1,7 @@
 module.exports = {
   env: {
     browser: true,
-    es2021: true,
+    es2024: true,
     jest: true,
     node: true,
   },
@@ -17,22 +17,42 @@ module.exports = {
     JSX: true,
     React: true,
   },
+  ignorePatterns: [
+    "dist/**",
+    "node_modules/**",
+    ".eslintrc.js",
+    "config-overrides.js",
+    "playwright.config.ts",
+    "postcss.config.js",
+    "tailwind.config.js",
+    "example.spec.ts",
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
+    tsconfigRootDir: __dirname,
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 13,
+    ecmaVersion: "latest",
     sourceType: "module",
+    project: ["tsconfig.json"],
+    warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "import"],
+  plugins: ["@typescript-eslint", "import", "prettier"],
   rules: {
+    "prettier/prettier": ["error"],
     "import/no-cycle": [
       "error",
       {
         ignoreExternal: true,
       },
     ],
+    "@typescript-eslint/lines-between-class-members": [
+      "error",
+      "always",
+      { exceptAfterSingleLine: true },
+    ],
+    "@typescript-eslint/no-throw-literal": "error",
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/ban-types": [
       "error",

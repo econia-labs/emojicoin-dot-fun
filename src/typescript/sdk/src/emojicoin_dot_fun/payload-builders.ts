@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import {
   type Aptos,
-  Account,
+  type Account,
   type AccountAddress,
   EntryFunction,
   type EntryFunctionArgumentTypes,
@@ -14,7 +14,6 @@ import {
   type WaitForTransactionOptions,
   Serializable,
   Serializer,
-  type EntryFunctionPayloadResponse,
   type AnyRawTransaction,
   AccountAuthenticator,
   type InputViewFunctionData,
@@ -28,9 +27,9 @@ import {
   type AccountAddressInput,
   type InputEntryFunctionData,
 } from "@aptos-labs/ts-sdk";
-import { type WalletSignTransactionFunction } from ".";
 import { toConfig } from "../utils/aptos-utils";
 import serializeArgsToJSON from "./serialize-args-to-json";
+import { type StructTagString } from "../utils/type-tags";
 
 export class EntryFunctionTransactionBuilder {
   public readonly payloadBuilder: EntryFunctionPayloadBuilder;
@@ -56,29 +55,22 @@ export class EntryFunctionTransactionBuilder {
    * @param asFeePayer whether or not the signer is the fee payer.
    * @returns a Promise<AccountAuthenticator>
    */
-  async sign(
-    signer: Account | WalletSignTransactionFunction,
-    asFeePayer?: boolean
-  ): Promise<AccountAuthenticator> {
-    /* eslint-disable-next-line no-prototype-builtins */
-    if (signer.hasOwnProperty("privateKey") || signer instanceof Account) {
-      const signingFunction = asFeePayer
-        ? this.aptos.transaction.signAsFeePayer
-        : this.aptos.transaction.sign;
-      const accountAuthenticator = signingFunction({
-        signer: signer as Account,
-        transaction: this.rawTransactionInput,
-      });
-      return Promise.resolve(accountAuthenticator);
-    }
-    return signer(this.rawTransactionInput, asFeePayer);
+  async sign(signer: Account, asFeePayer?: boolean): Promise<AccountAuthenticator> {
+    const signingFunction = asFeePayer
+      ? this.aptos.transaction.signAsFeePayer
+      : this.aptos.transaction.sign;
+    const accountAuthenticator = signingFunction({
+      signer: signer as Account,
+      transaction: this.rawTransactionInput,
+    });
+    return Promise.resolve(accountAuthenticator);
   }
 
   // To be used by a static `submit` where the user enters named signer arguments.
   async submit(args: {
-    primarySigner: Account | WalletSignTransactionFunction | AccountAuthenticator;
-    secondarySigners?: Array<Account | WalletSignTransactionFunction | AccountAuthenticator>;
-    feePayer?: Account | WalletSignTransactionFunction | AccountAuthenticator;
+    primarySigner: Account | AccountAuthenticator;
+    secondarySigners?: Array<Account | AccountAuthenticator>;
+    feePayer?: Account | AccountAuthenticator;
     options?: WaitForTransactionOptions;
   }): Promise<UserTransactionResponse> {
     const { primarySigner, secondarySigners, feePayer, options } = args;
@@ -123,40 +115,6 @@ export class EntryFunctionTransactionBuilder {
 
     return userTransactionResponse;
   }
-
-  /**
-   * Helper function to print out relevant transaction info with an easy way to filter out fields.
-   *
-   * These are intended to be chained declaratively. For example:
-   *    const response = await builder.submit(...).responseInfo(["hash", "success"]);
-   *
-   * @param response The transaction response for a user submitted transaction.
-   * @param optionsArray An array of keys to print out from the transaction response.
-   * @returns the transaction info as an object.
-   */
-  /* eslint-disable-next-line class-methods-use-this */ // This is intended to be chained.
-  responseInfo(
-    response: UserTransactionResponse,
-    optionsArray?: Array<keyof UserTransactionResponse>
-  ) {
-    const payload = response.payload as EntryFunctionPayloadResponse;
-
-    const keysToPrint: Record<string, any> = {};
-    for (const key of optionsArray ?? []) {
-      keysToPrint[key] = response[key as keyof typeof response];
-    }
-
-    return {
-      function: payload.function,
-      arguments: payload.arguments,
-      type_arguments: payload.type_arguments,
-      hash: response.hash,
-      version: response.version,
-      sender: response.sender,
-      success: response.success,
-      ...keysToPrint,
-    };
-  }
 }
 
 /* eslint-disable-next-line import/no-unused-modules */
@@ -174,7 +132,7 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
 
   public abstract readonly functionName: string;
 
-  public abstract readonly args: any;
+  public abstract readonly args: Record<string, EntryFunctionArgumentTypes>;
 
   public abstract readonly typeTags: Array<TypeTag>;
 
@@ -242,16 +200,14 @@ export abstract class ViewFunctionPayloadBuilder<T extends Array<MoveValue>> {
 
   public abstract readonly functionName: string;
 
-  public abstract readonly args: any;
+  public abstract readonly args: Record<string, EntryFunctionArgumentTypes>;
 
   public abstract readonly typeTags: Array<TypeTag>;
 
   toPayload(): InputViewFunctionData {
     return {
       function: `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`,
-      typeArguments: this.typeTags.map(
-        (type) => type.toString() as `0x${string}::${string}::${string}`
-      ),
+      typeArguments: this.typeTags.map((type) => type.toString() as StructTagString),
       functionArguments: this.argsToArray(),
     };
   }

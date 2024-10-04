@@ -9,18 +9,18 @@ import { type AccountAddressString } from "../emojicoin_dot_fun/types";
 // they've been zeroed out in the Aptos VM in order to parallelize event
 // emission.
 // Note that the `guid` here is NOT the same as the `guid` in the contract event types in
-// `types.ts`. The `guid` here is a deprecated Move resource emitted in the v1 event data,
+// `Types["ts"]`. The `guid` here is a deprecated Move resource emitted in the v1 event data,
 // where as the `guid` in our contract event types is a unique identifier for the event type
 // we use to avoid storing duplicate events in state.
 export type EventJSON = {
   guid?: EventGuid;
   sequence_number?: string;
   type: string;
-  data: any;
+  data: any /* eslint-disable-line @typescript-eslint/no-explicit-any */;
 };
 
 export type AggregatorSnapshot<T> = {
-  max_value: string; // This value is included but we don't use or care about it.
+  max_value?: string; // This field is included in view function responses but not in txn JSON data.
   value: T;
 };
 
@@ -38,7 +38,7 @@ export type AggregatorSnapshot<T> = {
  */
 export const fromAggregatorSnapshot: <T1, T2>(
   data: AggregatorSnapshot<T1>,
-  fn: (d: any) => T2
+  fn: (d: any) => T2 /* eslint-disable-line @typescript-eslint/no-explicit-any */
 ) => T2 = (data, fn) => fn(data.value);
 
 export type GUID = {

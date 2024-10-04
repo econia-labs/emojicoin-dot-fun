@@ -1,0 +1,162 @@
+{
+  "Chat": {
+    "balance_as_fraction_of_circulating_supply_q64": "18446744073709551616",
+    "circulating_supply": "90233622131978",
+    "emit_market_nonce": "31",
+    "emit_time": "1727840694100792",
+    "market_metadata": {
+      "emoji_bytes": "0xf09f9880",
+      "market_address": "0x3482d7ec914c86e9e898d40bf88a5d31afb3fb43ce73b3d58f0b888c70f7356f",
+      "market_id": "26"
+    },
+    "message": "\ud83e\udd72",
+    "user": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+    "user_emojicoin_balance": "90233622131978"
+  },
+  "GlobalState": {
+    "cumulative_chat_messages": {
+      "value": "16891"
+    },
+    "cumulative_integrator_fees": {
+      "value": "249444000000"
+    },
+    "cumulative_quote_volume": {
+      "value": "200576291031"
+    },
+    "cumulative_swaps": {
+      "value": "14209"
+    },
+    "emit_time": "1723350357240102",
+    "fully_diluted_value": {
+      "value": "912838434139348"
+    },
+    "market_cap": {
+      "value": "213923864245"
+    },
+    "registry_nonce": {
+      "value": "33586"
+    },
+    "total_quote_locked": {
+      "value": "165704422193"
+    },
+    "total_value_locked": {
+      "value": "5075928984264"
+    },
+    "trigger": 1
+  },
+  "Liquidity": {
+    "base_amount": "1639206334780",
+    "base_donation_claim_amount": "0",
+    "liquidity_provided": true,
+    "lp_coin_amount": "4272180527",
+    "market_id": "328",
+    "market_nonce": "40278",
+    "provider": "0x000006d68589500aa64d92f4f0e14d2f9d8075d003b8adf1e90ae6037f100000",
+    "quote_amount": "100000000",
+    "quote_donation_claim_amount": "0",
+    "time": "1723246374791035"
+  },
+  "MarketRegistration": {
+    "integrator": "d00db145c047cd3619ecba69e45b4ad77f43737d309d8113d6c1c35f7a8dd00d",
+    "integrator_fee": "100000000",
+    "market_metadata": {
+      "emoji_bytes": "0xf09f988df09f989c",
+      "market_address": "0xd3cbef2c5d489228ae5304f39d94bd794847b5c0e9d7968ab0391999926d3679",
+      "market_id": "2304"
+    },
+    "registrant": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+    "time": "1723253654764692"
+  },
+  "PeriodicState": {
+    "close_price_q64": "1128118906863219",
+    "ends_in_bonding_curve": false,
+    "high_price_q64": "1128118906863219",
+    "integrator_fees": "1000000",
+    "low_price_q64": "1128118906863219",
+    "market_metadata": {
+      "emoji_bytes": "0xf09f9fa5",
+      "market_address": "0x175394d0883e28262c4c40cb8228e47a36e6a813d5117805c3c26a5c",
+      "market_id": "328"
+    },
+    "n_chat_messages": "0",
+    "n_swaps": "1",
+    "open_price_q64": "1128118906863219",
+    "periodic_state_metadata": {
+      "emit_market_nonce": "40278",
+      "emit_time": "1723246374791035",
+      "period": "60000000",
+      "start_time": "1722900360000000",
+      "trigger": 4
+    },
+    "pool_fees_base": "4057206788",
+    "pool_fees_quote": "0",
+    "starts_in_bonding_curve": false,
+    "tvl_per_lp_coin_growth_q64": "18447524036544063189",
+    "volume_base": "1618825508718",
+    "volume_quote": "99000000"
+  },
+  "State": {
+    "clamm_virtual_reserves": {
+      "base": "4572066261370141",
+      "quote": "42869020000"
+    },
+    "cpamm_real_reserves": {
+      "base": "0",
+      "quote": "0"
+    },
+    "cumulative_stats": {
+      "base_volume": "327933738629859",
+      "integrator_fees": "128980000",
+      "n_chat_messages": "1",
+      "n_swaps": "90",
+      "pool_fees_base": "0",
+      "pool_fees_quote": "0",
+      "quote_volume": "2869020000"
+    },
+    "instantaneous_stats": {
+      "fully_diluted_value": "42193305821",
+      "market_cap": "3074801894",
+      "total_quote_locked": "2869020000",
+      "total_value_locked": "41987523927"
+    },
+    "last_swap": {
+      "avg_execution_price_q64": "172562593773750",
+      "base_volume": "10582986864996",
+      "is_sell": false,
+      "nonce": "92",
+      "quote_volume": "99000000",
+      "time": "1727851314936821"
+    },
+    "lp_coin_supply": "0",
+    "market_metadata": {
+      "emoji_bytes": "0xf09f9880",
+      "market_address": "0x3482d7ec914c86e9e898d40bf88a5d31afb3fb43ce73b3d58f0b888c70f7356f",
+      "market_id": "26"
+    },
+    "state_metadata": {
+      "bump_time": "1727851314936821",
+      "market_nonce": "92",
+      "trigger": 2
+    }
+  },
+  "Swap": {
+    "avg_execution_price_q64": "172562593773750",
+    "balance_as_fraction_of_circulating_supply_after_q64": "18446744073709551616",
+    "balance_as_fraction_of_circulating_supply_before_q64": "18446744073709551616",
+    "base_volume": "10582986864996",
+    "input_amount": "100000000",
+    "integrator": "0x33332c9ea4c220e0572b7f83f397164f8171e1c9f681136bb8ab78efa6c43333",
+    "integrator_fee": "1000000",
+    "integrator_fee_rate_bps": 100,
+    "is_sell": false,
+    "market_id": "26",
+    "market_nonce": "92",
+    "net_proceeds": "10582986864996",
+    "pool_fee": "0",
+    "quote_volume": "99000000",
+    "results_in_state_transition": false,
+    "starts_in_bonding_curve": true,
+    "swapper": "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+    "time": "1727851314936821"
+  }
+}
