@@ -10,7 +10,7 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 
 import Popup from "components/popup";
 import { Big } from "big.js";
-import { UnsizedDecimalString } from "@sdk/emojicoin_dot_fun";
+import type { UnsizedDecimalString } from "@sdk/emojicoin_dot_fun";
 
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;
