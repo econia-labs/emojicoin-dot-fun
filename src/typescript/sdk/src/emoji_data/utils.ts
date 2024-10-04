@@ -177,8 +177,7 @@ export const encodeEmojis = (emojis: string[] | SymbolEmojiData[]) =>
     isStringArray(emojis) ? encodeToHexString(emojis.join("")) : encodeSymbolData(emojis)
   }` as `0x${string}`;
 
-// For ease of use, we alias `encodeEmojis` to `encodeSymbols`.
-export const encodeSymbols = encodeEmojis;
+export const encodeEmojisToSymbol = encodeEmojis;
 
 /**
  * A helper/wrapper function for `symbolBytesToEmojis` that returns all emoji and symbol data.

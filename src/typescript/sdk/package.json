@@ -56,17 +56,17 @@
     "e2e-test": "dotenv -e ../env.ci -- pnpm jest tests/e2e --conditions=react-server",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
-    "generate-data": "dotenv -e ../.env.local -e ../.env -e ../env.ci -- pnpm tsx src/utils/mock-data.ts",
     "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",
     "lint:fix": "pnpm lint --fix",
-    "mock-test": "dotenv -e ../.env.local -e ../.env -e ../env.ci -- pnpm jest tests/mock",
+    "load-env": "dotenv -e ../.env.local -e ../.env -e ../.env.example -e ../../docker/example.local.env -e ../../docker/.env",
+    "load-test-env": "pnpm run load-env -- dotenv -e ../ci.env",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
-    "test": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -- pnpm jest --conditions=react-server",
-    "test:debug": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -v FETCH_DEBUG=true -- pnpm jest --conditions=react-server",
-    "test:verbose": "dotenv -e ../env.ci -e ../../docker/example.local.env -e ../../docker/.env -v VERBOSE_TEST_LOGS=true -- pnpm jest --conditions=react-server",
-    "unit-test": "dotenv -e ../env.ci -v NO_TEST_SETUP=true -- pnpm jest tests/unit"
+    "test": "pnpm load-test-env -- pnpm run test:parallel && pnpm run test:sequential",
+    "test:parallel": "pnpm load-test-env -- pnpm jest --conditions=react-server --testPathIgnorePatterns=tests/e2e/broker",
+    "test:sequential": "pnpm load-test-env -- pnpm jest --conditions=react-server --runInBand tests/e2e/broker",
+    "unit-test": "pnpm load-test-env -v NO_TEST_SETUP=true -- pnpm jest tests/unit"
   },
   "typings": "dist/src/index.d.ts",
   "version": "0.0.1"

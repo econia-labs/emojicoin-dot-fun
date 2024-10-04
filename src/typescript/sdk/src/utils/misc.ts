@@ -270,11 +270,18 @@ export function ensureArray<T>(value: T | T[]): T[] {
   return [value];
 }
 
-export function zip<T>(a: T[], b: T[]): Array<[T, T]> {
+export function zip<U, T>(a: U[], b: T[]): Array<[U, T]> {
   if (a.length !== b.length) {
     throw new Error("Arrays must have equal length.");
   }
   return Array.from({ length: a.length }).map((_, i) => [a[i], b[i]]);
+}
+
+export function enumerate<T>(arr: T[]): Array<[T, number]> {
+  return zip(
+    arr,
+    arr.map((_, i) => i)
+  );
 }
 
 /**

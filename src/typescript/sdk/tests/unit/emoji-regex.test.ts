@@ -3,7 +3,7 @@ import path from "path";
 import { SYMBOL_DATA, type SymbolEmoji } from "../../src";
 import {
   encodeEmojis,
-  encodeSymbols,
+  encodeEmojisToSymbol,
   getEmojisInString,
   isValidMarketSymbol,
   symbolToEmojis,
@@ -114,7 +114,7 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
       const enc1 = `0x${Buffer.from(symbols.flatMap((v) => Array.from(v.bytes))).toString("hex")}`;
       const enc2 = `0x${symbols.flatMap((d) => [...d.bytes].map((v) => v.toString(16))).join("")}`;
       const enc3 = encodeEmojis(symbols);
-      const enc4 = encodeSymbols(symbols);
+      const enc4 = encodeEmojisToSymbol(symbols);
       expect(enc1).toEqual(enc2);
       expect(enc1).toEqual(enc3);
       expect(enc1).toEqual(enc4);
