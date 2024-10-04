@@ -1,6 +1,5 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import EmojiNotFoundPage from "./not-found";
-import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
@@ -10,8 +9,8 @@ import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/ma
 import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
 import { type Metadata } from "next";
 
-export const revalidate = REVALIDATION_TIME;
-export const dynamic = "force-dynamic";
+export const revalidate = 1;
+export const fetchCache = "default-cache";
 
 /**
  * Our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.

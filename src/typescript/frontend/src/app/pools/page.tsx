@@ -1,5 +1,4 @@
 import ClientPoolsPage from "components/pages/pools/ClientPoolsPage";
-import { REVALIDATION_TIME } from "lib/server-env";
 import { headers } from "next/headers";
 import { isUserGeoblocked } from "utils/geolocation";
 import { getPoolData } from "./api/getPoolDataQuery";
@@ -8,8 +7,8 @@ import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { type Metadata } from "next";
 import { emoji } from "utils";
 
-export const revalidate = REVALIDATION_TIME;
-export const dynamic = "force-dynamic";
+export const revalidate = 1;
+export const fetchCache = "default-cache";
 
 export const metadata: Metadata = {
   title: "pools",
