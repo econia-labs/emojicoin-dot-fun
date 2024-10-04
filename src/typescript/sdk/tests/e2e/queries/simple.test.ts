@@ -22,7 +22,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
   const marketEmojiNames: EmojiName[][] = [
     ["scroll"],
     ["selfie"],
-    ['Japanese "discount" button'],
+    ["Japanese \"discount\" button"],
     ["adhesive bandage"],
   ];
 
