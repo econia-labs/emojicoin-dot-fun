@@ -13,7 +13,7 @@
       "cumulative_stats_pool_fees_base": 1239425264986,
       "cumulative_stats_pool_fees_quote": 0,
       "cumulative_stats_quote_volume": 198321507000,
-      "daily_tvl_per_lp_coin_growth": 1.001499814363967876933091555675361179387333896289378370590041427871042284306953206420708127389,
+      "daily_tvl_per_lp_coin_growth": 1.001499814363967876933091555675361179387333896289378370590041427871042284306953206420708127389545305,
       "daily_volume": 0,
       "entry_function": "0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::provide_liquidity",
       "in_bonding_curve": false,

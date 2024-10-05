@@ -1,3 +1,4 @@
+// cspell:word
 import path from "path";
 import fs from "fs";
 import { parseJSONWithBigInts } from "../../../src/indexer-v2/json-bigint";

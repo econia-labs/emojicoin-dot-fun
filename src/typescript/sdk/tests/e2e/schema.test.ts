@@ -61,4 +61,17 @@ describe("verifies the schema is what's expected", () => {
     expect(bigints).toEqual(bigintColumns);
     expect(integers).toEqual(integerColumns);
   });
+
+  it("ensures that the schema has been updated post migrations", async () => {
+    // We know that the `daily_tvl_per_lp_coin_growth` column has `_64` at the end of it
+    // before migrations are run. Check the schema and the column name and verify the schema cache
+    // has been reloaded.
+    const response = await fetch(EMOJICOIN_INDEXER_URL);
+    const json: DatabaseSchema = await response.json();
+    const { definitions } = json;
+    const marketStateProperties = definitions["market_state"]["properties"];
+    const marketStateColumnNames = new Set(Object.keys(marketStateProperties));
+    expect(marketStateColumnNames.has("daily_tvl_per_lp_coin_growth")).toBe(true);
+    expect(marketStateColumnNames.has("daily_tvl_per_lp_coin_growth_q64")).toBe(false);
+  });
 });
