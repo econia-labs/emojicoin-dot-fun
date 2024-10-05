@@ -502,11 +502,20 @@ export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]
   ...GuidGetters.liquidityEvent(data),
 });
 
-export const toProcessedData = (data: ProcessedFields) => ({
-  dailyTvlPerLPCoinGrowth: Big(data.daily_tvl_per_lp_coin_growth).toString(),
-  inBondingCurve: data.in_bonding_curve,
-  volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
-});
+// Default to 0% DPR. This is to mitigate crashing the entire frontend here if the value of
+// `daily_tvl_per_lp_coin_growth` here is `undefined` or "".
+// NOTE: Remove the union type and extra check once the new schema is deployed.
+export const toProcessedData = (
+  data: ProcessedFields & { daily_tvl_per_lp_coin_growth_q64?: string }
+) => {
+  const dailyGrowthWithDefault =
+    data.daily_tvl_per_lp_coin_growth ?? data.daily_tvl_per_lp_coin_growth_q64 ?? 1;
+  return {
+    dailyTvlPerLPCoinGrowth: Big(dailyGrowthWithDefault).toString(),
+    inBondingCurve: data.in_bonding_curve,
+    volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
+  };
+};
 
 export const toMarketLatestStateEventModel = (
   data: DatabaseJsonType["market_latest_state_event"]
