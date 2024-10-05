@@ -25,7 +25,7 @@ jobs:
         context: 'src/rust'
         file: 'src/rust/broker/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
-        platforms: 'linux/amd64'
+        platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS}}'
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
     timeout-minutes: 360
