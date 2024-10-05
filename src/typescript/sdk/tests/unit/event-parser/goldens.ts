@@ -1,5 +1,14 @@
 // cspell:word goldens
-import { rawTriggerToEnum, toAccountAddressString, type Types } from "../../../src";
+import {
+  encodeToHexString,
+  rawTriggerToEnum,
+  toAccountAddressString,
+  toMarketEmojiData,
+  toTrigger,
+  type Types,
+} from "../../../src";
+import { type DatabaseModels } from "../../../src/indexer-v2/types";
+import { type TableName } from "../../../src/indexer-v2/types/json-types";
 
 const Swap: Types["SwapEvent"] = {
   marketID: 26n,
@@ -188,5 +197,135 @@ const Chat: Types["ChatEvent"] = {
   guid: `Chat::${26}::${31}`,
 };
 
-const goldens = { Swap, State, PeriodicState, Liquidity, MarketRegistration, GlobalState, Chat };
+const BondingCurveStates: {
+  preBondingCurve: DatabaseModels[TableName.MarketState][];
+  postBondingCurve: DatabaseModels[TableName.MarketState][];
+} = {
+  preBondingCurve: [
+    {
+      transaction: {
+        version: 6084169932n,
+        sender: "0xbad225596d685895aa64d92f4f0e14d2f9d8075d3b8adf1e90ae6037f1fcbabe",
+        entryFunction:
+          `0x22227920701e36651a6649be2067cd7eebf3fabb94717ff3b256e3ada58b2222::emojicoin_dot_fun_rew
+          ards::swap_with_rewards`.replaceAll(/\s/g, ""),
+        time: 1728034178690850n,
+        timestamp: new Date("2024-10-04T09:29:38.69085Z"),
+        insertedAt: new Date("2024-10-04T09:29:14.65541Z"),
+      },
+      market: {
+        marketID: 65n,
+        time: 1728034178690850n,
+        marketNonce: 2n,
+        trigger: toTrigger("swap_buy"),
+        symbolEmojis: ["😉", "🙃"],
+        marketAddress: "0xa8f7c8ced47426d7c3762d0b5a9840487cde820b7a5a4a4751ecaf32f790fa82",
+        ...toMarketEmojiData(encodeToHexString("😉🙃")),
+      },
+      state: {
+        clammVirtualReserves: { base: 4887902441457393n, quote: 40099000000n },
+        cpammRealReserves: { base: 0n, quote: 0n },
+        lpCoinSupply: 0n,
+        cumulativeStats: {
+          baseVolume: 12097558542607n,
+          quoteVolume: 99000000n,
+          integratorFees: 101000000n,
+          poolFeesBase: 0n,
+          poolFeesQuote: 0n,
+          numSwaps: 1n,
+          numChatMessages: 0n,
+        },
+        instantaneousStats: {
+          totalQuoteLocked: 99000000n,
+          totalValueLocked: 36916510610n,
+          marketCap: 99245024n,
+          fullyDilutedValue: 36916755635n,
+        },
+      },
+      lastSwap: {
+        isSell: false,
+        avgExecutionPriceQ64: 150958365430955n,
+        baseVolume: 12097558542607n,
+        quoteVolume: 99000000n,
+        nonce: 2n,
+        time: 1728034178690850n,
+      },
+      dailyTvlPerLPCoinGrowth: "0",
+      inBondingCurve: true,
+      volumeIn1MStateTracker: 99000000n,
+      dailyVolume: 99000000n,
+      eventName: "State",
+      guid: "😉🙃::State::2",
+    },
+  ],
+  postBondingCurve: [
+    {
+      transaction: {
+        version: 6080639845n,
+        sender: "0xc9b6bbf05e807d8935676c95ef00d694365ba5ff15b31cea6fc057cf6f9b6aa7",
+        entryFunction:
+          `0x11113ddc70ea051ffd8a7cde7b96818326aabf56fdfd47807f7700e2b46e1111::emojicoin_dot_fun::
+          provide_liquidity`.replaceAll(/\s/g, ""),
+        time: 1727970932080509n,
+        timestamp: new Date("2024-10-03T15:55:32.080509Z"),
+        insertedAt: new Date("2024-10-03T01:09:52.037678Z"),
+      },
+      market: {
+        marketID: 1n,
+        time: 1727970932080509n,
+        marketNonce: 47668n,
+        trigger: toTrigger("provide_liquidity"),
+        symbolEmojis: ["💻", "⚡"],
+        marketAddress: "0x43dcf02dcc0f3759d00486052585bf1694acf85c7e3e7c4b4770c5216d58eb67",
+        ...toMarketEmojiData(encodeToHexString("💻⚡")),
+      },
+      state: {
+        clammVirtualReserves: { base: 0n, quote: 0n },
+        cpammRealReserves: { base: 505979066626452n, quote: 198521507000n },
+        lpCoinSupply: 10010084634945n,
+        cumulativeStats: {
+          baseVolume: 3994530680729664n,
+          quoteVolume: 198321507000n,
+          integratorFees: 2003200000n,
+          poolFeesBase: 1239425264986n,
+          poolFeesQuote: 0n,
+          numSwaps: 47073n,
+          numChatMessages: 593n,
+        },
+        instantaneousStats: {
+          totalQuoteLocked: 198521507000n,
+          totalValueLocked: 397043014000n,
+          marketCap: 1567059008921n,
+          fullyDilutedValue: 1765580515921n,
+        },
+      },
+      lastSwap: {
+        isSell: false,
+        avgExecutionPriceQ64: 7244903199401139n,
+        baseVolume: 756212034737n,
+        quoteVolume: 297000000n,
+        nonce: 47667n,
+        time: 1727970908649388n,
+      },
+      dailyTvlPerLPCoinGrowth: `1.001499814363967876933091555675361179387333896289378370590041427871
+      042284306953206420708127389545305`.replaceAll(/\s/g, ""),
+      inBondingCurve: false,
+      volumeIn1MStateTracker: 297000000n,
+      dailyVolume: 0n,
+      eventName: "State",
+      guid: "💻⚡::State::47668",
+    },
+  ],
+};
+
+const goldens = {
+  Swap,
+  State,
+  PeriodicState,
+  Liquidity,
+  MarketRegistration,
+  GlobalState,
+  Chat,
+  BondingCurveStates,
+};
 export default goldens;

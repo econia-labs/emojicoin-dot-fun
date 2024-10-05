@@ -117,6 +117,10 @@ export function queryHelper<
     try {
       const res = await innerQuery;
       const rows = extractRows<Row>(res);
+      if (res.error) {
+        console.error("[Failed row conversion]:\n");
+        throw new Error(JSON.stringify(res));
+      }
       return rows.map(convert);
     } catch (e) {
       console.error(e);

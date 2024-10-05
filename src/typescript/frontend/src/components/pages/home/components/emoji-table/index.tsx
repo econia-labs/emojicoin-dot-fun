@@ -116,6 +116,10 @@ const EmojiTable = (props: EmojiTableProps) => {
       : baseGridSubscriptions,
   });
 
+  useEffect(() => {
+    console.log(markets);
+  }, [markets]);
+
   return (
     <OutermostContainer>
       <OuterContainer>

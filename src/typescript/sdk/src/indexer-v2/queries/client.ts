@@ -1,7 +1,7 @@
 import "server-only";
 
 import { PostgrestClient } from "@supabase/postgrest-js";
-import { stringifyParsedBigInts } from "../json-bigint";
+import { parseJSONWithBigInts, stringifyJSONWithBigInts } from "../json-bigint";
 import { type TableName } from "../types/json-types";
 import { EMOJICOIN_INDEXER_URL, FETCH_DEBUG, FETCH_DEBUG_VERBOSE } from "../../server-env";
 
@@ -16,12 +16,13 @@ import { EMOJICOIN_INDEXER_URL, FETCH_DEBUG, FETCH_DEBUG_VERBOSE } from "../../s
 const fetchPatch: typeof fetch = async (input, init) => {
   const response = await fetch(input, init);
   const contentType = response.headers.get("content-type");
-  if (!contentType?.includes("application/json")) {
+  if (!contentType?.match(/^application\/.*json;/)) {
     return response;
   }
 
   const text = await response.text();
-  const json = stringifyParsedBigInts(text);
+  const json = parseJSONWithBigInts(text);
+  const stringified = stringifyJSONWithBigInts(json);
 
   if (FETCH_DEBUG || FETCH_DEBUG_VERBOSE) {
     const isWaitForEmojicoinIndexerQuery = response.url.endsWith(
@@ -30,13 +31,13 @@ const fetchPatch: typeof fetch = async (input, init) => {
     if (!isWaitForEmojicoinIndexerQuery) {
       console.debug(response.url);
       if (FETCH_DEBUG_VERBOSE) {
-        const stringified = JSON.stringify(json, null, 2);
-        console.debug(stringified);
+        /* eslint-disable-next-line no-console */
+        console.dir(json, { depth: null });
       }
     }
   }
 
-  return new Response(json, response);
+  return new Response(stringified, response);
 };
 
 /**

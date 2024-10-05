@@ -1,6 +1,6 @@
 import { compareBigInt, sortBigIntArrays } from "../../../../src";
 import { postgrest, queryHelper } from "../../../../src/indexer-v2/queries";
-import { type MarketStateModel, toMarketState } from "../../../../src/indexer-v2/types";
+import { type MarketStateModel, toMarketStateModel } from "../../../../src/indexer-v2/types";
 import { TableName } from "../../../../src/indexer-v2/types/json-types";
 import { LIMIT } from "../../../../src/queries";
 
@@ -92,7 +92,7 @@ export const checkOrder = async (
         .in("market_id", marketIDsInQueryResult);
 
   // Manually sort the `unsortedQuery` results by the `sort` function passed in.
-  const expected = (await queryHelper(unsortedQuery, toMarketState)({}))
+  const expected = (await queryHelper(unsortedQuery, toMarketStateModel)({}))
     .toSorted(sort)
     .map(mapFunction);
 

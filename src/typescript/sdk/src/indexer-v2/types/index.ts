@@ -30,6 +30,7 @@ import {
 } from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
+import Big from "big.js";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -318,7 +319,7 @@ export type MarketLatestStateEventModel = ReturnType<typeof toMarketLatestStateE
 export type UserLiquidityPoolsModel = ReturnType<typeof toUserLiquidityPoolsModel>;
 export type MarketDailyVolumeModel = ReturnType<typeof toMarketDailyVolumeModel>;
 export type Market1MPeriodsInLastDayModel = ReturnType<typeof toMarket1MPeriodsInLastDay>;
-export type MarketStateModel = ReturnType<typeof toMarketState>;
+export type MarketStateModel = ReturnType<typeof toMarketStateModel>;
 export type ProcessorStatusModel = ReturnType<typeof toProcessorStatus>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 
@@ -502,7 +503,7 @@ export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]
 });
 
 export const toProcessedData = (data: ProcessedFields) => ({
-  dailyTvlPerLPCoinGrowth: data.daily_tvl_per_lp_coin_growth,
+  dailyTvlPerLPCoinGrowth: Big(data.daily_tvl_per_lp_coin_growth).toString(),
   inBondingCurve: data.in_bonding_curve,
   volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
 });
@@ -518,7 +519,7 @@ export const toMarketLatestStateEventModel = (
   ...GuidGetters.marketLatestStateEvent(data),
 });
 
-export const toMarketState = (data: DatabaseJsonType["market_state"]) => ({
+export const toMarketStateModel = (data: DatabaseJsonType["market_state"]) => ({
   ...toMarketLatestStateEventModel(data),
   dailyVolume: BigInt(data.daily_volume),
 });
@@ -570,7 +571,10 @@ export const toMarket1MPeriodsInLastDay = (
 });
 
 export const toProcessorStatus = (data: DatabaseJsonType["processor_status"]) => ({
-  lastProcessedTimestamp: data.last_processed_timestamp,
+  processor: data.processor,
+  lastSuccessVersion: data.last_success_version,
+  lastUpdated: postgresTimestampToDate(data.last_updated),
+  lastTransactionTimestamp: postgresTimestampToDate(data.last_transaction_timestamp),
 });
 
 export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => ({
@@ -593,7 +597,7 @@ export const DatabaseTypeConverter = {
   [TableName.UserLiquidityPools]: toUserLiquidityPoolsModel,
   [TableName.MarketDailyVolume]: toMarketDailyVolumeModel,
   [TableName.Market1MPeriodsInLastDay]: toMarket1MPeriodsInLastDay,
-  [TableName.MarketState]: toMarketState,
+  [TableName.MarketState]: toMarketStateModel,
   [TableName.ProcessorStatus]: toProcessorStatus,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
 };

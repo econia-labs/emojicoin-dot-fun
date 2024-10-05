@@ -25,7 +25,6 @@ export default async function Home({ searchParams }: HomePageParams) {
   });
 
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
-
   return (
     <HomePageComponent
       featured={featured}

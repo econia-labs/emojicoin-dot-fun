@@ -1,28 +1,42 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Big from "big.js";
 import parse from "json-bigint";
+import { bigintColumns, floatColumns, integerColumns } from "./types/postgres-numeric-types";
+import { type AnyColumnName } from "./types/json-types";
 
 const JSON_BIGINT = parse({
   alwaysParseAsBig: false,
   useNativeBigInt: true,
+  storeAsString: true,
   protoAction: "ignore",
   constructorAction: "ignore",
 });
 
-/**
- * Parses a JSON string that uses bigints- i.e., numbers too large for a normal number, but not used
- * as strings. Without this parsing method, the parsed value loses precision.
- *
- * With this method, we re-stringify the message and convert all bigint values to strings.
- *
- * If we have `alwaysParseAsBig` in the config options set to `true`, then all numbers are converted
- * to bigints and thus all numeric values are converted to strings in the re-stringified output.
- */
-export const stringifyParsedBigInts = (msg: string) =>
-  JSON.stringify(JSON_BIGINT.parse(msg), (_, value) =>
-    typeof value === "bigint" ? value.toString() : value
-  );
+const parseFloat = (v: any) => Big(v).toString();
+const parseBigInt = (v: any) => BigInt(v);
+const parseInteger = (v: any) => Number(v);
+const parseDefault = (v: any) => v;
+const floatConversions = [...Array.from(floatColumns).map((c) => [c, parseFloat] as const)];
+const bigintConversions = [...Array.from(bigintColumns).map((c) => [c, parseBigInt] as const)];
+const integerConversions = [...Array.from(integerColumns).map((c) => [c, parseInteger] as const)];
+
+const converter = new Map<AnyColumnName, (value: any) => any>([
+  ...floatConversions,
+  ...bigintConversions,
+  ...integerConversions,
+]);
 
 /**
- * Casts a stringified, safely-parsed bigint JSON response into the generic type T.
+ * Parses a JSON string that uses bigints- i.e., numbers too large for a normal number, but not used
+ * as strings. Without this parsing method, the parsed value loses precision or results in an error.
+ *
+ * Eventually, this could be more fully fleshed out to utilize more precise deserialization.
  */
-export const parseJSONWithBigInts = <T>(msg: string): T =>
-  JSON.parse(stringifyParsedBigInts(msg)) as T;
+export const parseJSONWithBigInts = <T>(msg: string): T => {
+  return JSON_BIGINT.parse(msg, (key, value) => {
+    const fn = converter.get(key as AnyColumnName) ?? parseDefault;
+    return fn(value);
+  });
+};
+
+export const stringifyJSONWithBigInts = (msg: any): string => JSON_BIGINT.stringify(msg);

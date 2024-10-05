@@ -19,9 +19,9 @@ import {
   toCamelCaseEventName,
 } from "../../../src/emojicoin_dot_fun/events";
 import { type EventName } from "../../../src/indexer-v2/types";
-import Data from "./event-data.json";
+import Data from "./json/event-data.json";
 // Note that this isn't an actual valid transaction, it's just structured like one for parsing.
-import Transaction from "./transaction.json";
+import Transaction from "./json/transaction.json";
 import goldens from "./goldens";
 import {
   type EntryFunctionPayloadResponse,
