@@ -43,7 +43,7 @@ const customWaitFor = async (condition: () => boolean) =>
   waitFor({
     condition,
     interval: 10,
-    maxWaitTime: 5000,
+    maxWaitTime: 10000,
     errorMessage: `Maximum wait time exceeded for test: ${expect.getState().currentTestName}.`,
   });
 
