@@ -1,4 +1,4 @@
-import { AccountAddress, type HexInput } from "@aptos-labs/ts-sdk";
+import { AccountAddress, InputGenerateTransactionOptions, type HexInput } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import {
   type PeriodDuration,
@@ -378,3 +378,16 @@ export const waitFor = async (args: {
   if (throwError) throw new Error(errorMessage);
   return false;
 };
+
+/**
+ * Converts an index `i` to specified sequence number options used for transaction submission.
+ * @param i
+ * @see InputGenerateTransactionOptions
+ */
+export const toSequenceNumberOptions = (
+  i: number
+): { options: InputGenerateTransactionOptions } => ({
+  options: {
+    accountSequenceNumber: i,
+  },
+});
