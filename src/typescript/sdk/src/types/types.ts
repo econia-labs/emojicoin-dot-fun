@@ -16,6 +16,7 @@ import {
   isJSONSwapEvent,
 } from "./json-types";
 import { type STRUCT_STRINGS } from "../utils";
+import { Flatten } from ".";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);
@@ -218,7 +219,7 @@ export type Types = {
     time: bigint;
   };
 
-  SwapEvent: WithMarketID &
+  SwapEvent: Flatten<WithMarketID &
     WithVersionAndGUID & {
       marketID: bigint;
       time: bigint;
@@ -238,9 +239,9 @@ export type Types = {
       resultsInStateTransition: boolean;
       balanceAsFractionOfCirculatingSupplyBeforeQ64: bigint;
       balanceAsFractionOfCirculatingSupplyAfterQ64: bigint;
-    };
+    }>;
 
-  ChatEvent: WithMarketID &
+  ChatEvent: Flatten<WithMarketID &
     WithVersionAndGUID & {
       marketMetadata: Types["MarketMetadata"];
       emitTime: bigint;
@@ -250,18 +251,18 @@ export type Types = {
       userEmojicoinBalance: bigint;
       circulatingSupply: bigint;
       balanceAsFractionOfCirculatingSupplyQ64: bigint;
-    };
+    }>;
 
-  MarketRegistrationEvent: WithMarketID &
+  MarketRegistrationEvent: Flatten<WithMarketID &
     WithVersionAndGUID & {
       marketMetadata: Types["MarketMetadata"];
       time: bigint;
       registrant: AccountAddressString;
       integrator: AccountAddressString;
       integratorFee: bigint;
-    };
+    }>;
 
-  PeriodicStateEvent: WithMarketID &
+  PeriodicStateEvent: Flatten<WithMarketID &
     WithVersionAndGUID & {
       marketMetadata: Types["MarketMetadata"];
       periodicStateMetadata: Types["PeriodicStateMetadata"];
@@ -279,9 +280,9 @@ export type Types = {
       startsInBondingCurve: boolean;
       endsInBondingCurve: boolean;
       tvlPerLPCoinGrowthQ64: bigint;
-    };
+    }>;
 
-  StateEvent: WithMarketID &
+  StateEvent: Flatten<WithMarketID &
     WithVersionAndGUID & {
       marketMetadata: Types["MarketMetadata"];
       stateMetadata: Types["StateMetadata"];
@@ -291,9 +292,9 @@ export type Types = {
       cumulativeStats: Types["CumulativeStats"];
       instantaneousStats: Types["InstantaneousStats"];
       lastSwap: Types["LastSwap"];
-    };
+    }>;
 
-  GlobalStateEvent: WithVersionAndGUID & {
+  GlobalStateEvent: Flatten<WithVersionAndGUID & {
     emitTime: bigint;
     registryNonce: bigint;
     trigger: Trigger;
@@ -305,9 +306,9 @@ export type Types = {
     cumulativeIntegratorFees: bigint;
     cumulativeSwaps: bigint;
     cumulativeChatMessages: bigint;
-  };
+  }>;
 
-  LiquidityEvent: WithMarketID &
+  LiquidityEvent: Flatten<WithMarketID &
     WithVersionAndGUID & {
       marketID: bigint;
       time: bigint;
@@ -319,7 +320,7 @@ export type Types = {
       liquidityProvided: boolean;
       baseDonationClaimAmount: bigint;
       quoteDonationClaimAmount: bigint;
-    };
+    }>;
 
   // Query return type for `market_data` view.
   MarketDataView: {
@@ -787,8 +788,8 @@ export function isLiquidityEvent(e: AnyEmojicoinEvent): e is Types["LiquidityEve
   return e.guid.startsWith("Liquidity");
 }
 
-// NOTE: The below code structure strongly suggests we should be using classes instead of types.
-// However, we cannot use them with server components easily- hence the following code.
+// Unfortunately, we can't use classes with server components or `immer` easily, so we have to write
+// helper functions like these.
 export function getEmojicoinEventTime(e: AnyEmojicoinEvent): bigint {
   if (isSwapEvent(e)) return e.time;
   if (isChatEvent(e)) return e.emitTime;
