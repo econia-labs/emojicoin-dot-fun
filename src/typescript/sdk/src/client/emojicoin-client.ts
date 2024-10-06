@@ -10,8 +10,6 @@ import {
   TypeTag,
   Uint64,
 } from "@aptos-labs/ts-sdk";
-import { INTEGRATOR_ADDRESS } from "../const";
-import { getRandomEmoji } from "../emoji_data/symbol-data";
 import { MarketSymbolEmojis, SymbolEmoji } from "../emoji_data/types";
 import { getEvents } from "../emojicoin_dot_fun";
 import {
@@ -26,6 +24,8 @@ import { Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
 import { getAptosClient } from "../utils/aptos-client";
+import { getEmojisInString } from "../emoji_data";
+import { Types } from "../types";
 
 type Options = {
   feePayer?: Account;
@@ -33,56 +33,35 @@ type Options = {
   waitForTransactionOptions?: WaitForTransactionOptions;
 };
 
-export const DEFAULT_INPUT_AMOUNT = 100n;
-export const DEFAULT_MIN_OUTPUT_AMOUNT = 1n;
-export const DEFAULT_INTEGRATOR = INTEGRATOR_ADDRESS;
-export const DEFAULT_INTEGRATOR_FEE_RATE_BPS = 0;
-
-type SubmitArgs<
-  T extends
-    | typeof Chat
-    | typeof ProvideLiquidity
-    | typeof RemoveLiquidity
-    | typeof RegisterMarket
-    | typeof Swap
-    | typeof SwapWithRewards,
-> = Partial<
-  Omit<Parameters<T["submit"]>["0"], "swapper" | "provider" | "user" | "registrant" | "emojis">
->;
-
 type TransactionResult = {
   response: UserTransactionResponse;
   events: Events;
   models: EventsModels;
 };
 
-type DefaultArgs = {
+type AnyEmoji = string;
+
+type ExtraSwapArgs = {
+  isSell: boolean;
+  inputAmount: Uint64;
+  minOutputAmount: Uint64;
   integrator: AccountAddressInput;
-  swap: {
-    inputAmount: Uint64;
-    minOutputAmount: Uint64;
-    integratorFeeRateBPs: number;
-  };
-  liquidity: {
-    quoteAmount: Uint64;
-    minLpCoinsOut: Uint64;
-    lpCoinAmount: Uint64;
-    minQuoteOut: Uint64;
-  };
+  integratorFeeRateBPs: number;
 };
 
-type PartialDefaults = {
-  integrator?: AccountAddressInput;
-  swap?: Partial<DefaultArgs["swap"]>;
-  liquidity?: Partial<DefaultArgs["liquidity"]>;
+const expect = <T>(v: T | undefined): T => {
+  if (typeof v === "undefined") {
+    throw new Error("Expected to receive a non-undefined value.");
+  }
+  return v;
 };
 
 export class EmojicoinClient {
   public aptos: Aptos;
 
   public liquidity = {
-    provide: this.provideLiquidityWithExpect,
-    remove: this.removeLiquidityWithExpect,
+    provide: this.provideLiquidity,
+    remove: this.removeLiquidity,
   };
 
   public utils = {
@@ -92,139 +71,229 @@ export class EmojicoinClient {
     getEmojicoinData: this.getEmojicoinData,
   };
 
-  private defaults: DefaultArgs;
+  public rewards = {
+    buy: this.buyWithRewards,
+    sell: this.sellWithRewards,
+  };
 
-  constructor(args?: { aptos?: Aptos; customDefaults?: PartialDefaults }) {
-    const { aptos = getAptosClient().aptos, customDefaults } = args ?? {};
-    this.aptos = aptos;
-    this.defaults = initializeDefaults(customDefaults);
+  constructor(args?: { aptos?: Aptos }) {
+    this.aptos = args?.aptos ?? getAptosClient().aptos;
   }
 
-  @CheckDefaultsInProd
   async register(
     registrant: Account,
     emojis: MarketSymbolEmojis,
-    extraArgs?: {
-      args: {
-        integrator: AccountAddressInput;
-      };
-      options?: Options;
-    }
+    args: {
+      integrator: AccountAddressInput;
+    },
+    options?: Options
   ) {
-    const { args = {}, options } = extraArgs ?? {};
-    return this.registerMarket({ registrant, emojis, args, options }).then((res) => ({
+    const response = await RegisterMarket.submit({
+      aptosConfig: this.aptos.config,
+      registrant,
+      emojis: this.emojisToHexStrings(emojis),
+      integrator: args.integrator,
+      ...options,
+    });
+    const res = this.getEmojicoinData(response);
+    return {
       ...res,
       registration: {
         event: expect(res.events.marketRegistrationEvents.at(0)),
         model: expect(res.models.marketRegistrationEvents.at(0)),
       },
-    }));
+    };
   }
 
-  @CheckDefaultsInProd
+  async chat(
+    user: Account,
+    emojis: SymbolEmoji[],
+    args: {
+      chatEmojis: AnyEmoji[];
+      emojiIndicesSequence: number[];
+    },
+    options?: Options
+  ) {
+    const chatEmojis = getEmojisInString(args.chatEmojis.join("")) as SymbolEmoji[];
+    const emojiBytes = this.emojisToHexStrings(chatEmojis);
+    const emojiIndicesSequence = new Uint8Array(args.emojiIndicesSequence);
+
+    const response = await Chat.submit({
+      aptosConfig: this.aptos.config,
+      user,
+      emojiBytes,
+      emojiIndicesSequence,
+      ...options,
+      ...this.getEmojicoinInfo(emojis),
+    });
+    const res = this.getEmojicoinData(response);
+    return {
+      ...res,
+      chat: {
+        event: expect(res.events.chatEvents.at(0)),
+        model: expect(res.models.chatEvents.at(0)),
+      },
+    };
+  }
+
   async buy(
     swapper: Account,
-    emojis: MarketSymbolEmojis,
-    extraArgs?: {
-      args: {
-        inputAmount: Uint64;
-        minOutputAmount: Uint64;
-        integrator: AccountAddressInput;
-        integratorFeeRateBPs: number;
-      };
-      options?: Options;
-    }
+    emojis: SymbolEmoji[],
+    args: {
+      inputAmount: Uint64;
+      minOutputAmount: Uint64;
+      integrator: AccountAddressInput;
+      integratorFeeRateBPs: number;
+    },
+    options?: Options
   ) {
-    const { args = {}, options } = extraArgs ?? {};
-    return this.swap({
-      swapper,
-      emojis,
-      args: {
-        ...args,
-        isSell: false,
-      },
-      options,
-    }).then((res) => ({
-      ...res,
-      swap: {
-        event: expect(res.events.swapEvents.at(0)),
-        model: expect(res.models.swapEvents.at(0)),
-      },
-    }));
+    return await this.swap(swapper, emojis, { ...args, isSell: false }, options);
   }
 
-  @CheckDefaultsInProd
   async sell(
     swapper: Account,
-    emojis: MarketSymbolEmojis,
-    extraArgs?: {
-      args: {
-        inputAmount: Uint64;
-        minOutputAmount: Uint64;
-        integrator: AccountAddressInput;
-        integratorFeeRateBPs: number;
-      };
-      options?: Options;
-    }
+    emojis: SymbolEmoji[],
+    args: {
+      inputAmount: Uint64;
+      minOutputAmount: Uint64;
+      integrator: AccountAddressInput;
+      integratorFeeRateBPs: number;
+    },
+    options?: Options
   ) {
-    const { args = {}, options } = extraArgs ?? {};
-    return this.swap({
+    return await this.swap(swapper, emojis, { ...args, isSell: true }, options);
+  }
+
+  private async swap(
+    swapper: Account,
+    emojis: SymbolEmoji[],
+    args: ExtraSwapArgs,
+    options?: Options
+  ) {
+    const response = await Swap.submit({
+      aptosConfig: this.aptos.config,
       swapper,
-      emojis,
-      args: {
-        ...args,
-        isSell: true,
-      },
-      options,
-    }).then((res) => ({
+      ...args,
+      ...options,
+      ...this.getEmojicoinInfo(emojis),
+    });
+    const res = this.getEmojicoinData(response);
+    return {
       ...res,
       swap: {
         event: expect(res.events.swapEvents.at(0)),
         model: expect(res.models.swapEvents.at(0)),
       },
-    }));
+    };
   }
 
-  @CheckDefaultsInProd
-  private async provideLiquidityWithExpect(
-    provider: Account,
-    emojis: MarketSymbolEmojis,
-    extraArgs?: {
-      args: {
-        quoteAmount: Uint64;
-        minLpCoinsOut: Uint64;
-      };
-      options?: Options;
-    }
+  private async buyWithRewards(
+    swapper: Account,
+    emojis: SymbolEmoji[],
+    args: {
+      inputAmount: Uint64;
+      minOutputAmount: Uint64;
+    },
+    options?: Options
   ) {
-    const { args = {}, options } = extraArgs ?? {};
-    return this.provideLiquidity({ provider, emojis, args, options }).then((res) => ({
-      ...res,
-      liquidity: {
-        event: expect(res.events.liquidityEvents.at(0)),
-        model: expect(res.models.liquidityEvents.at(0)),
-      },
-    }));
+    return await this.swapWithRewards(swapper, emojis, { ...args, isSell: false }, options);
   }
 
-  @CheckDefaultsInProd
-  private async removeLiquidityWithExpect(    provider: Account,
-    emojis: MarketSymbolEmojis,
-    extraArgs?: {
-      args: {
-        lpCoinAmount: Uint64;
-        minQuoteOut: Uint64;
-      };
-      options?: Options;
-    }) {
-      const { args = {}, options } = (extraArgs ?? {});
-    return this.removeLiquidity({ provider, emojis, args, options }).then((res) => ({
+  private async sellWithRewards(
+    swapper: Account,
+    emojis: SymbolEmoji[],
+    args: {
+      inputAmount: Uint64;
+      minOutputAmount: Uint64;
+    },
+    options?: Options
+  ) {
+    return await this.swapWithRewards(swapper, emojis, { ...args, isSell: true }, options);
+  }
+
+  private async swapWithRewards(
+    swapper: Account,
+    emojis: SymbolEmoji[],
+    args: Omit<ExtraSwapArgs, "integrator" | "integratorFeeRateBPs">,
+    options?: Options
+  ) {
+    const response = await SwapWithRewards.submit({
+      aptosConfig: this.aptos.config,
+      swapper,
+      ...args,
+      ...options,
+      ...this.getEmojicoinInfo(emojis),
+    });
+    const res = this.getEmojicoinData(response);
+    return {
+      ...res,
+      swap: {
+        event: expect(res.events.swapEvents.at(0)),
+        model: expect(res.models.swapEvents.at(0)),
+      },
+    };
+  }
+
+  private async provideLiquidity({
+    provider,
+    emojis,
+    args,
+    options = {},
+  }: {
+    provider: Account;
+    emojis: SymbolEmoji[];
+    args: {
+      quoteAmount: Uint64;
+      minLpCoinsOut: Uint64;
+    };
+    options?: Options;
+  }) {
+    const response = await ProvideLiquidity.submit({
+      aptosConfig: this.aptos.config,
+      provider,
+      ...args,
+      ...options,
+      ...this.getEmojicoinInfo(emojis),
+    });
+    const res = this.getEmojicoinData(response);
+    return {
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0)),
         model: expect(res.models.liquidityEvents.at(0)),
       },
-    }));
+    };
+  }
+
+  private async removeLiquidity({
+    provider,
+    emojis,
+    args,
+    options = {},
+  }: {
+    provider: Account;
+    emojis: SymbolEmoji[];
+    args: {
+      lpCoinAmount: Uint64;
+      minQuoteOut: Uint64;
+    };
+    options?: Options;
+  }) {
+    const response = await RemoveLiquidity.submit({
+      aptosConfig: this.aptos.config,
+      provider,
+      ...args,
+      ...options,
+      ...this.getEmojicoinInfo(emojis),
+    });
+    const res = this.getEmojicoinData(response);
+    return {
+      ...res,
+      liquidity: {
+        event: expect(res.events.liquidityEvents.at(0)),
+        model: expect(res.models.liquidityEvents.at(0)),
+      },
+    };
   }
 
   private emojisToHexStrings(emojis: SymbolEmoji[]): HexInput[] {
@@ -258,228 +327,4 @@ export class EmojicoinClient {
       models,
     };
   }
-
-  private async registerMarket({
-    registrant,
-    emojis,
-    args,
-    options = {},
-  }: {
-    registrant: Account;
-    emojis: SymbolEmoji[];
-    args: SubmitArgs<typeof RegisterMarket>;
-    options?: Options;
-  }): Promise<TransactionResult> {
-    const response = await RegisterMarket.submit({
-      aptosConfig: this.aptos.config,
-      registrant,
-      emojis: this.emojisToHexStrings(emojis),
-      integrator: safeDefault(args.integrator, this.defaults.integrator),
-      ...options,
-    });
-    return this.getEmojicoinData(response);
-  }
-
-  private async swap({
-    swapper,
-    emojis,
-    args,
-    options = {},
-  }: {
-    swapper: Account;
-    emojis: SymbolEmoji[];
-    args: SubmitArgs<typeof Swap>;
-    options?: Options;
-  }): Promise<TransactionResult> {
-    const defaults = this.defaults.swap;
-    const {
-      inputAmount = safeDefault(args.inputAmount, defaults.inputAmount),
-      minOutputAmount = safeDefault(args.minOutputAmount, defaults.minOutputAmount),
-      integratorFeeRateBPs = safeDefault(args.integratorFeeRateBPs, defaults.integratorFeeRateBPs),
-      integrator = safeDefault(args.integrator, this.defaults.integrator),
-      isSell = safeDefault(args.isSell, false),
-    } = args;
-
-    const response = await Swap.submit({
-      aptosConfig: this.aptos.config,
-      swapper,
-      isSell,
-      inputAmount,
-      minOutputAmount,
-      integrator,
-      integratorFeeRateBPs,
-      ...options,
-      ...this.getEmojicoinInfo(emojis),
-    });
-    return this.getEmojicoinData(response);
-  }
-
-  private async provideLiquidity({
-    provider,
-    emojis,
-    args,
-    options = {},
-  }: {
-    provider: Account;
-    emojis: SymbolEmoji[];
-    args: SubmitArgs<typeof ProvideLiquidity>;
-    options?: Options;
-  }): Promise<TransactionResult> {
-    const {
-      quoteAmount = safeDefault(args.quoteAmount, this.defaults.liquidity.quoteAmount),
-      minLpCoinsOut = safeDefault(args.minLpCoinsOut, this.defaults.liquidity.minLpCoinsOut),
-    } = args;
-    const response = await ProvideLiquidity.submit({
-      aptosConfig: this.aptos.config,
-      provider,
-      quoteAmount,
-      minLpCoinsOut,
-      ...options,
-      ...this.getEmojicoinInfo(emojis),
-    });
-    return this.getEmojicoinData(response);
-  }
-
-  private async removeLiquidity({
-    provider,
-    emojis,
-    args,
-    options = {},
-  }: {
-    provider: Account;
-    emojis: SymbolEmoji[];
-    args: SubmitArgs<typeof RemoveLiquidity>;
-    options?: Options;
-  }): Promise<TransactionResult> {
-    const {
-      lpCoinAmount = safeDefault(args.lpCoinAmount, this.defaults.liquidity.lpCoinAmount),
-      minQuoteOut = safeDefault(args.minQuoteOut, this.defaults.liquidity.minQuoteOut),
-    } = args;
-    const response = await RemoveLiquidity.submit({
-      aptosConfig: this.aptos.config,
-      provider,
-      lpCoinAmount,
-      minQuoteOut,
-      ...options,
-      ...this.getEmojicoinInfo(emojis),
-    });
-    return this.getEmojicoinData(response);
-  }
-
-  private async chat({
-    user,
-    emojis,
-    args,
-    options = {},
-  }: {
-    user: Account;
-    emojis: SymbolEmoji[];
-    args: SubmitArgs<typeof Chat>;
-    options: Options;
-  }): Promise<TransactionResult> {
-    // Generate random chat emojis if they're not provided. Throw an error if we're in production.
-    const [emojiBytes, emojiIndicesSequence] = (() => {
-      const { emojiBytes, emojiIndicesSequence } = args;
-      if (typeof emojiBytes === "undefined" || typeof emojiIndicesSequence === "undefined") {
-        if (process.env.NODE_ENV !== "development") {
-          throw new Error(`emojiBytes and emojiIndicesSequence can't be undefined in production.`);
-        }
-        const length = Math.random() * 9 + 1;
-        const randomEmojis = Array.from({ length }).map(() => getRandomEmoji().bytes);
-        const randomSequence = new Uint8Array(Array.from({ length }).map((_, i) => i));
-
-        return [randomEmojis, randomSequence];
-      } else {
-        return [emojiBytes, emojiIndicesSequence];
-      }
-    })();
-
-    const response = await Chat.submit({
-      aptosConfig: this.aptos.config,
-      user,
-      emojiBytes,
-      emojiIndicesSequence,
-      ...options,
-      ...this.getEmojicoinInfo(emojis),
-    });
-    return this.getEmojicoinData(response);
-  }
 }
-
-const expect = <T>(v: T | undefined): T => {
-  if (typeof v === "undefined") {
-    throw new Error("Expected to receive event data.");
-  }
-  return v;
-};
-
-const CheckDefaultsInProd = (
-  _target: unknown,
-  _propertyKey: string,
-  descriptor: PropertyDescriptor
-) => {
-  const originalMethod = descriptor.value;
-  /* eslint-disable-next-line func-names, no-param-reassign */
-  descriptor.value = function (...args: unknown[]) {
-    const extraArgs = args[2] as object | undefined;
-    ensureDevelopmentEnvironment(extraArgs);
-    const result = originalMethod.apply(this, args);
-    return result;
-  };
-  return descriptor;
-};
-
-const ensureDevelopmentEnvironment = (extraArgs: object | undefined) => {
-  if (
-    (typeof extraArgs === "undefined" ||
-      Object.keys(extraArgs).length === 0 ||
-      !("args" in extraArgs) ||
-      typeof extraArgs["args"] === "undefined" ||
-      Object.keys(extraArgs["args"] ?? {}).length === 0) &&
-    process.env.NODE_ENV !== "development"
-  ) {
-    throw new Error(`Arguments can't be undefined in a non-development environment.`);
-  }
-};
-
-const safeDefault = <T>(v: T | undefined, defaultValue: T): T => {
-  if (typeof v === "undefined" && process.env.NODE_ENV !== "development") {
-    throw new Error(`This argument can't be undefined in a non-development environment.`);
-  }
-  return v ?? defaultValue;
-};
-
-const initializeDefaults = (customDefaults?: PartialDefaults): DefaultArgs => {
-  const defaults: DefaultArgs = {
-    integrator: DEFAULT_INTEGRATOR,
-    swap: {
-      inputAmount: DEFAULT_INPUT_AMOUNT,
-      minOutputAmount: DEFAULT_MIN_OUTPUT_AMOUNT,
-      integratorFeeRateBPs: DEFAULT_INTEGRATOR_FEE_RATE_BPS,
-    },
-    liquidity: {
-      quoteAmount: DEFAULT_INPUT_AMOUNT,
-      minLpCoinsOut: DEFAULT_MIN_OUTPUT_AMOUNT,
-      lpCoinAmount: DEFAULT_INPUT_AMOUNT,
-      minQuoteOut: DEFAULT_MIN_OUTPUT_AMOUNT,
-    },
-  };
-  if (customDefaults) {
-    if (process.env.NODE_ENV !== "development") {
-      throw new Error(`You can't use default arguments in a non-development environment.`);
-    }
-    return {
-      integrator: customDefaults.integrator ?? defaults.integrator,
-      swap: {
-        ...defaults.swap,
-        ...customDefaults.swap,
-      },
-      liquidity: {
-        ...defaults.liquidity,
-        ...customDefaults.liquidity,
-      },
-    };
-  } else {
-    return defaults;
-  }
-};
