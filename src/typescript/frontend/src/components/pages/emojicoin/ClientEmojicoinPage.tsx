@@ -12,7 +12,6 @@ import MainInfo from "./components/main-info/MainInfo";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { type BrokerEvent } from "@/broker/types";
 import { marketToLatestBars } from "@/store/event/candlestick-bars";
-import { useQueryClient } from "@tanstack/react-query";
 
 const EVENT_TYPES: BrokerEvent[] = ["Chat", "PeriodicState", "Swap"];
 
@@ -33,12 +32,6 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
   }, [props.data]);
 
   useReliableSubscribe({ eventTypes: EVENT_TYPES });
-
-  const queryClient = useQueryClient();
-  const swaps = useEventStore((s) => s.getMarket(props.data.symbolEmojis)?.swapEvents ?? []);
-  useEffect(() => {
-    queryClient.invalidateQueries({queryKey: ["grace-period", props.data.symbol]});
-  }, [swaps]);
 
   return (
     <Box pt="85px">

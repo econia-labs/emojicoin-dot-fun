@@ -12,8 +12,13 @@ import { useAnimationControls } from "framer-motion";
 import { RewardsAnimation } from "./RewardsAnimation";
 import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
-import { useGracePeriod } from "lib/hooks/queries/use-grace-period";
+import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
+
+const GRACE_PERIOD_MESSAGE =
+  "This market is in its grace period. During the grace period of a market, only the market " +
+  "creator can trade. The grace period ends 5 minutes after the market registration or after the first " +
+  "trade, whichever comes first.";
 
 export const SwapButton = ({
   inputAmount,
@@ -35,13 +40,7 @@ export const SwapButton = ({
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
   const controls = useAnimationControls();
-  const { isLoading, data } = useGracePeriod(symbol);
-
-  const isInGracePeriod = isLoading ? false : !data!.gracePeriodOver;
-  // If data not loaded yet, use user address as registrant address in order to not prevent the user from trying to trade.
-  const registrantAddress = data?.flag?.marketRegistrant ?? account?.address;
-
-  const canTrade = !isInGracePeriod || registrantAddress === account?.address;
+  const { canTrade } = useCanTradeMarket(symbol);
 
   const handleClick = useCallback(async () => {
     if (!account) {
@@ -99,7 +98,7 @@ export const SwapButton = ({
             <RewardsAnimation controls={controls} />
           </>
         ) : (
-          <Popup className="max-w-[300px]" content="This market is in its grace period. During the grace period of a market, only the market creator can trade. The grace period ends 5 minutes after the market registration, of after the first trade, whichever comes first.">
+          <Popup className="max-w-[300px]" content={t(GRACE_PERIOD_MESSAGE)}>
             <div>
               <Button disabled={true} onClick={handleClick} scale="lg">
                 {t("Swap")}
