@@ -1,58 +1,52 @@
-import { getEventsAsProcessorModelsFromResponse, type MarketSymbolEmojis } from "../../../src";
-import TestHelpers from "../../utils/helpers";
+import {
+  INTEGRATOR_ADDRESS,
+  type MarketSymbolEmojis,
+} from "../../../src";
 import { getFundedAccount } from "../../utils/test-accounts";
 
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
-import { SwapWithRewards } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getAptosClient } from "../../utils";
 import { fetchMarketState } from "../../../src/indexer-v2/queries";
 import { type MarketStateModel } from "../../../src/indexer-v2/types";
 import { type JsonValue } from "../../../src/types/json-types";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 
 jest.setTimeout(20000);
 
 describe("queries a market by market state", () => {
-  const { aptos } = getAptosClient();
   const registrant = getFundedAccount("037");
+  const emojicoin = new EmojicoinClient();
 
   it("fetches the market state for a market based on an emoji symbols array", async () => {
     const emojis: MarketSymbolEmojis = ["🧐", "🧐"];
-    const { registerResponse, marketAddress, emojicoin, emojicoinLP } =
-      await TestHelpers.registerMarketFromEmojis({
-        registrant,
-        emojis,
-      });
-    const { version } = registerResponse;
-    await waitForEmojicoinIndexer(version);
-    const res = (await fetchMarketState({
-      searchEmojis: emojis,
-    }))!;
+    const res = await emojicoin
+      .register(registrant, emojis, { integrator: INTEGRATOR_ADDRESS })
+      .then(({ response }) => waitForEmojicoinIndexer(response.version))
+      .then(() => fetchMarketState({ searchEmojis: emojis }));
     expect(res).not.toBeNull();
     expect(res).toBeDefined();
-    expect(res.dailyVolume).toEqual(0n);
+    expect(res!.dailyVolume).toEqual(0n);
 
-    const inputAmount = 1234n;
-    const swapResponse = await SwapWithRewards.submit({
-      aptosConfig: aptos.config,
-      swapper: registrant,
-      inputAmount,
-      marketAddress,
-      isSell: false,
-      minOutputAmount: 1n,
-      typeTags: [emojicoin, emojicoinLP],
-    });
-    const miniProcessorResult = getEventsAsProcessorModelsFromResponse(swapResponse);
-    const stateFromMiniProcessor = miniProcessorResult.marketLatestStateEvents.at(0)!;
-    expect(stateFromMiniProcessor).toBeDefined();
-    await waitForEmojicoinIndexer(swapResponse.version);
-    const stateFromIndexerProcessor = (await fetchMarketState({ searchEmojis: emojis }))!;
+    const results = await emojicoin.rewards
+      .buy(registrant, emojis, { inputAmount: 1234n, minOutputAmount: 1n })
+      .then((res) =>
+        waitForEmojicoinIndexer(res.response.version).then(() =>
+          fetchMarketState({ searchEmojis: emojis }).then((stateFromIndexerProcessor) => ({
+            stateFromMiniProcessor: res.models.marketLatestStateEvents.at(0),
+            stateFromIndexerProcessor,
+          }))
+        )
+      );
+
+    const { stateFromMiniProcessor, stateFromIndexerProcessor } = results;
+    expect(stateFromMiniProcessor).not.toBeNull();
+    expect(stateFromIndexerProcessor).not.toBeNull();
 
     // Copy over the daily volume because we can't get that field from the mini processor.
     (stateFromMiniProcessor as MarketStateModel).dailyVolume =
-      stateFromIndexerProcessor.dailyVolume;
+      stateFromIndexerProcessor!.dailyVolume;
     // Copy over the `insertedAt` field because it's inserted at insertion time in postgres.
     (stateFromMiniProcessor as MarketStateModel).transaction.insertedAt =
-      stateFromIndexerProcessor.transaction.insertedAt;
+      stateFromIndexerProcessor!.transaction.insertedAt;
 
     const replacer = (_: string, v: JsonValue) => (typeof v === "bigint" ? v.toString() : v);
     const res1 = JSON.stringify(stateFromMiniProcessor, replacer);

@@ -82,20 +82,20 @@ export class EmojicoinClient {
   public aptos: Aptos;
 
   public liquidity = {
-    provide: this.provideLiquidity,
-    remove: this.removeLiquidity,
+    provide: this.provideLiquidity.bind(this),
+    remove: this.removeLiquidity.bind(this),
   };
 
   public utils = {
-    emojisToHexStrings: this.emojisToHexStrings,
-    emojisToHexSymbol: this.emojisToHexSymbol,
-    getEmojicoinInfo: this.getEmojicoinInfo,
-    getEmojicoinData: this.getEmojicoinData,
+    emojisToHexStrings: this.emojisToHexStrings.bind(this),
+    emojisToHexSymbol: this.emojisToHexSymbol.bind(this),
+    getEmojicoinInfo: this.getEmojicoinInfo.bind(this),
+    getEmojicoinData: this.getEmojicoinData.bind(this),
   };
 
   public rewards = {
-    buy: this.buyWithRewards,
-    sell: this.sellWithRewards,
+    buy: this.buyWithRewards.bind(this),
+    sell: this.sellWithRewards.bind(this),
   };
 
   constructor(args?: { aptos?: Aptos }) {
@@ -256,20 +256,15 @@ export class EmojicoinClient {
     };
   }
 
-  private async provideLiquidity({
-    provider,
-    emojis,
-    args,
-    options = {},
-  }: {
-    provider: Account;
-    emojis: SymbolEmoji[];
+  private async provideLiquidity(
+    provider: Account,
+    emojis: SymbolEmoji[],
     args: {
       quoteAmount: Uint64;
       minLpCoinsOut: Uint64;
-    };
-    options?: Options;
-  }) {
+    },
+    options?: Options
+  ) {
     const response = await ProvideLiquidity.submit({
       aptosConfig: this.aptos.config,
       provider,
@@ -287,20 +282,15 @@ export class EmojicoinClient {
     };
   }
 
-  private async removeLiquidity({
-    provider,
-    emojis,
-    args,
-    options = {},
-  }: {
-    provider: Account;
-    emojis: SymbolEmoji[];
+  private async removeLiquidity(
+    provider: Account,
+    emojis: SymbolEmoji[],
     args: {
       lpCoinAmount: Uint64;
       minQuoteOut: Uint64;
-    };
-    options?: Options;
-  }) {
+    },
+    options?: Options
+  ) {
     const response = await RemoveLiquidity.submit({
       aptosConfig: this.aptos.config,
       provider,

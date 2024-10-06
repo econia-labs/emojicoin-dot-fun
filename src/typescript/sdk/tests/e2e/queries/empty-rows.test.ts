@@ -20,6 +20,9 @@ describe("ensures no errors are thrown when empty rows are returned from queries
 
     for (const response of [res, state, chats, swaps]) {
       if (Array.isArray(response)) {
+        if (response.length !== 0) {
+          console.warn(response);
+        }
         expect(response).toBeDefined();
         expect(response.length).toEqual(0);
       } else {
