@@ -2,13 +2,13 @@ import { type HexInput } from "@aptos-labs/ts-sdk";
 import emojiRegex from "emoji-regex";
 import { normalizeHex } from "../utils/hex";
 import { getRandomEmoji, SYMBOL_DATA } from "./symbol-data";
-import { type SymbolEmojiData, type EmojiName, type SymbolData, type SymbolEmoji } from "./types";
+import { type SymbolEmojiData, type EmojiName, type SymbolData } from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
-export const getEmojisInString = (symbols: string): Array<SymbolEmoji> => {
+export const getEmojisInString = (symbols: string): Array<string> => {
   const regex = emojiRegex();
   const matches = symbols.matchAll(regex);
-  return Array.from(matches).map((match) => match[0]) as Array<SymbolEmoji>;
+  return Array.from(matches).map((match) => match[0]) as Array<string>;
 };
 
 /**
@@ -228,3 +228,9 @@ export const generateRandomSymbol = () => {
 
 export const namesToEmojis = (...names: EmojiName[]) =>
   names.map((name) => SYMBOL_DATA.byStrictName(name).emoji);
+
+export const getRandomChatArgs = () => {
+  const emojiBytes = Array.from({ length }).map(() => getRandomEmoji().bytes);
+  const emojiIndicesSequence = new Uint8Array(Array.from({ length }).map((_, i) => i));
+  return { emojiBytes, emojiIndicesSequence };
+};
