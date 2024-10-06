@@ -33,6 +33,7 @@ import {
   type Types,
 } from "../../../src";
 import { type JsonValue } from "../../../src/types/json-types";
+import { EmojicoinClient } from "../helpers";
 
 type Indexer = {
   TransactionMetadata: ReturnType<typeof withTransactionMetadata>;

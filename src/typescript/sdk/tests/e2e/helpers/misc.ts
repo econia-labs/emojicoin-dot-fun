@@ -1,5 +1,3 @@
-// There are so many helper functions necessary for the new query e2e tests that it needs
-// its own independent file.
 import { type AccountAddressInput, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   getEvents,
