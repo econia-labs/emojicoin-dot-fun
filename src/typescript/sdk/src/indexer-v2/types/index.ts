@@ -502,11 +502,11 @@ export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]
   ...GuidGetters.liquidityEvent(data),
 });
 
+// Note that daily TVL defaults to `0` since that's the initial value in the database.
 export const toProcessedData = (
   data: ProcessedFields & { daily_tvl_per_lp_coin_growth_q64?: string }
 ) => ({
-  // Default to 0% DPR by defaulting to `1`, since that results in `0%` in DPR calculations.
-  dailyTvlPerLPCoinGrowth: Big(data.daily_tvl_per_lp_coin_growth ?? 1).toString(),
+  dailyTvlPerLPCoinGrowth: Big(data.daily_tvl_per_lp_coin_growth ?? 0).toString(),
   inBondingCurve: data.in_bonding_curve,
   volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
 });

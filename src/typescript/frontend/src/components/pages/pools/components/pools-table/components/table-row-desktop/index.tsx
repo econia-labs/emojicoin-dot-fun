@@ -1,13 +1,10 @@
+// cspell:word unsized
 import React from "react";
-
 import { useMatchBreakpoints } from "hooks";
-
 import { Flex, FlexGap } from "@containers";
 import { Text, Tr, Td } from "components";
-
 import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
-
 import Popup from "components/popup";
 import { Big } from "big.js";
 import type { UnsizedDecimalString } from "@sdk/emojicoin_dot_fun";
@@ -16,7 +13,10 @@ const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;
 
 const getXPR = (x: number, tvlPerLpCoinGrowth: UnsizedDecimalString) =>
-  new Big(tvlPerLpCoinGrowth).pow(x).sub(new Big(1)).mul(new Big(100));
+  (Big(tvlPerLpCoinGrowth).gte(Big(1)) ? Big(tvlPerLpCoinGrowth) : Big(1))
+    .pow(x)
+    .sub(Big(1))
+    .mul(Big(100));
 
 const formatXPR = (xprIn: Big) => {
   const xpr = xprIn.toFixed(4);
