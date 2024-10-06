@@ -38,11 +38,11 @@ export const getMiscLatestStateEventFieldsFromWriteSet = (response: UserTransact
     throw new Error("There should be a 1D periodic state tracker in the Market resource.");
   }
 
-  const dailyTvlPerLPCoinGrowthQ64 = calculateTvlGrowth(periodicStateTracker1D);
+  const dailyTvlPerLPCoinGrowth = calculateTvlGrowth(periodicStateTracker1D);
   const inBondingCurve = stateEvent.lpCoinSupply === BigInt(0);
 
   return {
-    dailyTvlPerLPCoinGrowthQ64,
+    dailyTvlPerLPCoinGrowth,
     inBondingCurve,
     volumeIn1MStateTracker,
   };

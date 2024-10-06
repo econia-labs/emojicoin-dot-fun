@@ -6,7 +6,9 @@ import { handleEmptySearchBytes, safeParsePageWithDefault } from "lib/routes/hom
 import { stringifyJSON } from "utils";
 import { fetchUserLiquidityPools } from "@sdk/indexer-v2/queries/app/pools";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { REVALIDATION_TIME } from "lib/server-env";
 
+export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {

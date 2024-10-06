@@ -10,14 +10,16 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 
 import Popup from "components/popup";
 import { Big } from "big.js";
+import type { UnsizedDecimalString } from "@sdk/emojicoin_dot_fun";
 
-const DAYS_IN_WEEK = 7n;
-const DAYS_IN_YEAR = 365n;
+const DAYS_IN_WEEK = 7;
+const DAYS_IN_YEAR = 365;
 
-const getXPR = (x: bigint, tvlPerLpCoinGrowth: bigint) => (tvlPerLpCoinGrowth ** x - 1n) * 100n;
+const getXPR = (x: number, tvlPerLpCoinGrowth: UnsizedDecimalString) =>
+  new Big(tvlPerLpCoinGrowth).pow(x).sub(new Big(1)).mul(new Big(100));
 
-const formatXPR = (xprIn: bigint) => {
-  const xpr = new Big(xprIn.toString()).toFixed(4);
+const formatXPR = (xprIn: Big) => {
+  const xpr = xprIn.toFixed(4);
   return `${xpr.replace(/(\.0*|(?<=(\..*))0*)$/, "")}%`;
 };
 
@@ -62,11 +64,9 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               color="lightGray"
               textTransform="uppercase"
               ellipsis
-              // title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
-              title={"<TODO>"}
+              title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
             >
-              {/* {toCoinDecimalString(item.dailyVolume, 2)} APT */}
-              {"<TODO>"}
+              {toCoinDecimalString(item.dailyVolume, 2)} APT
             </Text>
           </Flex>
         </Td>
@@ -99,7 +99,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               >
                 <FlexGap gap=".2rem" justifyContent="space-between">
                   <span>DPR:</span>
-                  <span>{formatXPR(getXPR(1n, item.dailyTvlPerLPCoinGrowthQ64))}</span>
+                  <span>{formatXPR(getXPR(1, item.dailyTvlPerLPCoinGrowth))}</span>
                 </FlexGap>
               </Text>,
               <Text
@@ -111,7 +111,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               >
                 <FlexGap gap=".2rem" justifyContent="space-between">
                   <span>WPR:</span>
-                  <span>{formatXPR(getXPR(DAYS_IN_WEEK, item.dailyTvlPerLPCoinGrowthQ64))}</span>
+                  <span>{formatXPR(getXPR(DAYS_IN_WEEK, item.dailyTvlPerLPCoinGrowth))}</span>
                 </FlexGap>
               </Text>,
               <Text
@@ -123,13 +123,13 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               >
                 <FlexGap gap=".2rem" justifyContent="space-between">
                   <span>APR:</span>
-                  <span>{formatXPR(getXPR(DAYS_IN_YEAR, item.dailyTvlPerLPCoinGrowthQ64))}</span>
+                  <span>{formatXPR(getXPR(DAYS_IN_YEAR, item.dailyTvlPerLPCoinGrowth))}</span>
                 </FlexGap>
               </Text>,
             ]}
           >
             <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
-              {formatXPR(getXPR(1n, item.dailyTvlPerLPCoinGrowthQ64))}
+              {formatXPR(getXPR(1, item.dailyTvlPerLPCoinGrowth))}
             </Text>
           </Popup>
         </Flex>

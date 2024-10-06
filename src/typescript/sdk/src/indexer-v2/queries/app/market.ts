@@ -7,7 +7,7 @@ import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
 import {
   toChatEventModel,
-  toMarketState,
+  toMarketStateModel,
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
@@ -70,4 +70,4 @@ export const fetchPeriodicEventsSince = queryHelper(
   selectPeriodicEventsSince,
   toPeriodicStateEventModel
 );
-export const fetchMarketState = queryHelperSingle(selectMarketState, toMarketState);
+export const fetchMarketState = queryHelperSingle(selectMarketState, toMarketStateModel);

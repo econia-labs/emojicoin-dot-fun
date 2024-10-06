@@ -30,6 +30,7 @@ import {
 } from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
+import Big from "big.js";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -318,7 +319,7 @@ export type MarketLatestStateEventModel = ReturnType<typeof toMarketLatestStateE
 export type UserLiquidityPoolsModel = ReturnType<typeof toUserLiquidityPoolsModel>;
 export type MarketDailyVolumeModel = ReturnType<typeof toMarketDailyVolumeModel>;
 export type Market1MPeriodsInLastDayModel = ReturnType<typeof toMarket1MPeriodsInLastDay>;
-export type MarketStateModel = ReturnType<typeof toMarketState>;
+export type MarketStateModel = ReturnType<typeof toMarketStateModel>;
 export type ProcessorStatusModel = ReturnType<typeof toProcessorStatus>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 
@@ -501,11 +502,20 @@ export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]
   ...GuidGetters.liquidityEvent(data),
 });
 
-export const toProcessedData = (data: ProcessedFields) => ({
-  dailyTvlPerLPCoinGrowthQ64: BigInt(data.daily_tvl_per_lp_coin_growth_q64),
-  inBondingCurve: data.in_bonding_curve,
-  volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
-});
+// Default to 0% DPR. This is to mitigate crashing the entire frontend here if the value of
+// `daily_tvl_per_lp_coin_growth` here is `undefined` or "".
+// NOTE: Remove the union type and extra check once the new schema is deployed.
+export const toProcessedData = (
+  data: ProcessedFields & { daily_tvl_per_lp_coin_growth_q64?: string }
+) => {
+  const dailyGrowthWithDefault =
+    data.daily_tvl_per_lp_coin_growth ?? data.daily_tvl_per_lp_coin_growth_q64 ?? 1;
+  return {
+    dailyTvlPerLPCoinGrowth: Big(dailyGrowthWithDefault).toString(),
+    inBondingCurve: data.in_bonding_curve,
+    volumeIn1MStateTracker: BigInt(data.volume_in_1m_state_tracker),
+  };
+};
 
 export const toMarketLatestStateEventModel = (
   data: DatabaseJsonType["market_latest_state_event"]
@@ -518,7 +528,7 @@ export const toMarketLatestStateEventModel = (
   ...GuidGetters.marketLatestStateEvent(data),
 });
 
-export const toMarketState = (data: DatabaseJsonType["market_state"]) => ({
+export const toMarketStateModel = (data: DatabaseJsonType["market_state"]) => ({
   ...toMarketLatestStateEventModel(data),
   dailyVolume: BigInt(data.daily_volume),
 });
@@ -570,7 +580,10 @@ export const toMarket1MPeriodsInLastDay = (
 });
 
 export const toProcessorStatus = (data: DatabaseJsonType["processor_status"]) => ({
-  lastProcessedTimestamp: data.last_processed_timestamp,
+  processor: data.processor,
+  lastSuccessVersion: data.last_success_version,
+  lastUpdated: postgresTimestampToDate(data.last_updated),
+  lastTransactionTimestamp: postgresTimestampToDate(data.last_transaction_timestamp),
 });
 
 export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => ({
@@ -579,6 +592,7 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   ...withStateEventData(data),
   ...toProcessedData(data),
   ...withLPCoinBalance(data),
+  dailyVolume: BigInt(data.daily_volume),
 });
 
 export const DatabaseTypeConverter = {
@@ -592,7 +606,7 @@ export const DatabaseTypeConverter = {
   [TableName.UserLiquidityPools]: toUserLiquidityPoolsModel,
   [TableName.MarketDailyVolume]: toMarketDailyVolumeModel,
   [TableName.Market1MPeriodsInLastDay]: toMarket1MPeriodsInLastDay,
-  [TableName.MarketState]: toMarketState,
+  [TableName.MarketState]: toMarketStateModel,
   [TableName.ProcessorStatus]: toProcessorStatus,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
 };

@@ -126,8 +126,10 @@ repos:
     args:
     - '--autofix'
     exclude: |
-      (?x)
-      ^src/typescript/frontend/public/locales/.*\.json$
+      (?x)^(
+      src/typescript/frontend/public/locales/.*\.json|
+      src/typescript/sdk/tests/unit/event-parser/json/.*\.json
+      )$
     id: 'pretty-format-json'
   - id: 'trailing-whitespace'
   repo: 'https://github.com/pre-commit/pre-commit-hooks'

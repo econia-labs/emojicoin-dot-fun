@@ -152,7 +152,7 @@ export function getEventsAsProcessorModels(
           ...getMiscLatestStateEventFieldsFromWriteSet(response),
         }
       : {
-          dailyTvlPerLPCoinGrowthQ64: 0n,
+          dailyTvlPerLPCoinGrowth: "0",
           inBondingCurve: true,
           volumeIn1MStateTracker: 0n,
         };

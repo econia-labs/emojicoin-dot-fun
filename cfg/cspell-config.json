@@ -18,7 +18,9 @@
     "/project-words.txt",
     "**/package.json",
     "**/pnpm-lock.yaml",
-    "../src/typescript/sdk/src/emoji_data/symbol-emojis.json"
+    "../src/typescript/sdk/src/emoji_data/symbol-emojis.json",
+    "../src/typescript/sdk/tests/unit/event-parser/json/bonding-curve-states.json",
+    "../src/typescript/sdk/tests/unit/event-parser/event-models.test.ts"
   ],
   "overrides": [
     {

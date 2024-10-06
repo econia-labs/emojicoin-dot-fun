@@ -17,6 +17,7 @@
     "NEXT_PUBLIC_BROKER_URL",
     "BROKER_PORT",
     "FETCH_DEBUG",
+    "FETCH_DEBUG_VERBOSE",
     "VERBOSE_TEST_LOGS"
   ],
   "tasks": {

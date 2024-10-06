@@ -13,7 +13,7 @@ describe("ensures no errors are thrown when empty rows are returned from queries
     const searchEmojis: SymbolEmoji[] = ["⛔", "⛔", "⛔"];
     const res = await fetchMarkets({ searchEmojis });
     /* eslint-disable-next-line no-bitwise */
-    const veryBigInt = 1n << 64n;
+    const veryBigInt = (1n << 63n) - 1n;
     const state = await fetchMarketState({ searchEmojis });
     const chats = await fetchChatEvents({ marketID: veryBigInt });
     const swaps = await fetchSwapEvents({ marketID: veryBigInt });

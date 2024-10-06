@@ -14,8 +14,10 @@ const callUserPools = ({
   orderBy = ORDER_BY.DESC,
   sortBy = SortMarketsBy.MarketCap,
 }: { provider: Account | AccountAddressInput } & MarketStateQueryArgs) => {
+  // Since this is a read-only function call, prefer to call this as a `GET` request. It makes API
+  // gateway authorization simpler and cleaner.
   let query = postgrest
-    .rpc("user_pools", { provider: toAccountAddressString(provider) })
+    .rpc("user_pools", { provider: toAccountAddressString(provider) }, { get: true })
     .select("*")
     .order(sortByWithFallback(sortBy), orderBy)
     .limit(pageSize);

@@ -1,6 +1,6 @@
 "use server";
 import { sha3_256 } from "@noble/hashes/sha3";
-import { normalizeHex } from "@sdk/utils";
+import { normalizeHex } from "@sdk/utils/hex";
 
 export const hashAddress = async (address: string) => {
   // Ensure the HASH_SEED is valid, since we don't import it.

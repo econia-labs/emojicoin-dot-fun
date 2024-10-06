@@ -1,11 +1,12 @@
 // cspell:word DDTHH
 
 import { type SymbolEmoji } from "../../emoji_data";
-import {
-  type AccountAddressString,
-  type HexString,
-  type Uint128String,
-  type Uint64String,
+import type {
+  UnsizedDecimalString,
+  AccountAddressString,
+  HexString,
+  Uint128String,
+  Uint64String,
 } from "../../emojicoin_dot_fun/types";
 import { type Flatten } from "../../types";
 
@@ -289,7 +290,7 @@ export enum DatabaseRpc {
 
 // Fields that only exist after being processed by a processor.
 export type ProcessedFields = {
-  daily_tvl_per_lp_coin_growth_q64: Uint128String;
+  daily_tvl_per_lp_coin_growth: UnsizedDecimalString;
   in_bonding_curve: boolean;
   volume_in_1m_state_tracker: Uint128String;
 };
@@ -344,13 +345,32 @@ export type DatabaseJsonType = {
     daily_volume: Uint128String;
   };
   [TableName.ProcessorStatus]: {
-    last_processed_timestamp: PostgresTimestamp;
+    processor: string;
+    last_success_version: number;
+    last_updated: PostgresTimestamp;
+    last_transaction_timestamp: PostgresTimestamp;
   };
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
       StateEventData &
       ProcessedFields &
-      UserLPCoinBalance
+      UserLPCoinBalance & { daily_volume: Uint128String }
   >;
 };
+
+type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
+  DatabaseJsonType[TableName.PeriodicStateEvents] &
+  DatabaseJsonType[TableName.MarketRegistrationEvents] &
+  DatabaseJsonType[TableName.SwapEvents] &
+  DatabaseJsonType[TableName.LiquidityEvents] &
+  DatabaseJsonType[TableName.ChatEvents] &
+  DatabaseJsonType[TableName.MarketLatestStateEvent] &
+  DatabaseJsonType[TableName.UserLiquidityPools] &
+  DatabaseJsonType[TableName.MarketDailyVolume] &
+  DatabaseJsonType[TableName.Market1MPeriodsInLastDay] &
+  DatabaseJsonType[TableName.MarketState] &
+  DatabaseJsonType[TableName.ProcessorStatus] &
+  DatabaseJsonType[DatabaseRpc.UserPools];
+
+export type AnyColumnName = keyof Columns;

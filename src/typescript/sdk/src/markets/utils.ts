@@ -311,9 +311,9 @@ export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateT
   const d = Big(end.lpCoins.toString());
 
   if (a.eq(0) || b.eq(0)) {
-    return 0n;
+    return "0";
   }
 
   // (b * c) / (a * d)
-  return BigInt(b.mul(c).div(a.mul(d)).toString());
+  return b.mul(c).div(a.mul(d)).toString();
 }
