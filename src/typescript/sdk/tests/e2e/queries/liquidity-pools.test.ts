@@ -1,23 +1,40 @@
 /* eslint-disable no-await-in-loop */
 
-import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { maxBigInt, type MarketSymbolEmojis } from "../../../src";
-import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
+import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  INTEGRATOR_ADDRESS,
+  maxBigInt,
+  toSequenceNumberOptions,
+  type MarketSymbolEmojis,
+} from "../../../src";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";
-
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
-import { ProvideLiquidity, Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getAptosClient } from "../../utils";
 import { fetchMarkets, fetchUserLiquidityPools } from "../../../src/indexer-v2/queries";
 import { LIMIT } from "../../../src/queries";
+import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 
 jest.setTimeout(20000);
 
 describe("queries for liquidity pools", () => {
-  const { config: aptosConfig } = getAptosClient();
   const registrants = getFundedAccounts("038", "039");
-  const inputAmount = EXACT_TRANSITION_INPUT_AMOUNT;
-  const integrator = registrants[0].accountAddress;
+  const emojicoin = new EmojicoinClient();
+
+  const REGISTRATION_ARGS = {
+    integrator: INTEGRATOR_ADDRESS,
+  };
+
+  const SWAP_ARGS = {
+    inputAmount: EXACT_TRANSITION_INPUT_AMOUNT,
+    minOutputAmount: 1n,
+    integrator: INTEGRATOR_ADDRESS,
+    integratorFeeRateBPs: 0,
+  };
+
+  const LIQUIDITY_ARGS = {
+    quoteAmount: 1000n,
+    minLpCoinsOut: 1n,
+  };
 
   it("queries a user's liquidity pools with the rpc function call", async () => {
     const registrant = registrants[0];
@@ -27,40 +44,21 @@ describe("queries for liquidity pools", () => {
       Array.from([e])
     );
 
-    const markets: Awaited<ReturnType<typeof TestHelpers.registerMarketFromEmojis>>[] = [];
-    for (const emojis of symbols) {
-      markets.push(
-        await TestHelpers.registerMarketFromEmojis({
-          registrant,
-          emojis,
-        })
-      );
-    }
-
-    const responses: UserTransactionResponse[] = [];
-    for (const { marketAddress, emojicoin, emojicoinLP } of markets) {
-      const typeTags = [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
-      await Swap.submit({
-        aptosConfig,
-        swapper,
-        inputAmount,
-        marketAddress,
-        isSell: false,
-        minOutputAmount: 1n,
-        integrator,
-        integratorFeeRateBPs: 0,
-        typeTags,
-      });
-      const res = await ProvideLiquidity.submit({
-        aptosConfig,
-        provider,
-        marketAddress,
-        quoteAmount: 1000n,
-        minLpCoinsOut: 1n,
-        typeTags,
-      });
-      responses.push(res);
-    }
+    const responses: UserTransactionResponse[] = await Promise.all(
+      symbols.map((symbol, i) =>
+        emojicoin
+          .register(registrant, symbol, REGISTRATION_ARGS, toSequenceNumberOptions(i * 3))
+          .then(() =>
+            emojicoin
+              .buy(swapper, symbol, SWAP_ARGS)
+              .then(() =>
+                emojicoin.liquidity
+                  .provide(provider, symbol, LIQUIDITY_ARGS)
+                  .then(({ response }) => response)
+              )
+          )
+      )
+    );
 
     const highestVersion = maxBigInt(...responses.map(({ version }) => version));
     await waitForEmojicoinIndexer(highestVersion);
@@ -79,28 +77,15 @@ describe("queries for liquidity pools", () => {
     const registrant = registrants[1];
     const swapper = registrant;
     const emojis: MarketSymbolEmojis = ["🌊"];
-    const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromEmojis({
-      registrant,
-      emojis,
-    });
-    const { version } = await Swap.submit({
-      aptosConfig,
-      swapper,
-      inputAmount,
-      marketAddress,
-      isSell: false,
-      minOutputAmount: 1n,
-      integrator,
-      integratorFeeRateBPs: 0,
-      typeTags: [emojicoin, emojicoinLP],
-    });
-
-    await waitForEmojicoinIndexer(version);
-    const res = await fetchMarkets({
-      inBondingCurve: false,
-      pageSize: LIMIT,
-    });
-
+    await emojicoin.register(registrant, emojis, REGISTRATION_ARGS);
+    const res = await emojicoin.buy(swapper, emojis, SWAP_ARGS).then(({ response }) =>
+      waitForEmojicoinIndexer(response.version).then(() =>
+        fetchMarkets({
+          inBondingCurve: false,
+          pageSize: LIMIT,
+        })
+      )
+    );
     // If the result is not less than `LIMIT`, this test needs to be updated to paginate results.
     expect(res.length).toBeLessThan(LIMIT);
 
