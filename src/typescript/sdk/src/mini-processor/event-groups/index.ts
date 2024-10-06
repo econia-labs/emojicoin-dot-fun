@@ -30,7 +30,7 @@ export type BumpEventModel =
   | DatabaseModels["swap_events"]
   | DatabaseModels["liquidity_events"];
 
-export type ProcessorModelsFromResponse = {
+export type EventsModels = {
   transaction: TxnInfo;
   chatEvents: Array<DatabaseModels["chat_events"]>;
   liquidityEvents: Array<DatabaseModels["liquidity_events"]>;
@@ -61,7 +61,7 @@ export function getEventsAsProcessorModels(
   events: Events,
   txnInfo: TxnInfo,
   response?: UserTransactionResponse
-): ProcessorModelsFromResponse {
+): EventsModels {
   const builders = new Map<string, EventGroupBuilder>();
 
   const marketEvents: EventWithMarket[] = [
@@ -189,8 +189,10 @@ export function getEventsAsProcessorModels(
   };
 }
 
-export const getEventsAsProcessorModelsFromResponse = (response: UserTransactionResponse) => {
-  const events = getEvents(response);
+export const getEventsAsProcessorModelsFromResponse = (
+  response: UserTransactionResponse,
+  events?: Events
+) => {
   const txnInfo = getTxnInfo(response);
-  return getEventsAsProcessorModels(events, txnInfo, response);
+  return getEventsAsProcessorModels(events ?? getEvents(response), txnInfo, response);
 };

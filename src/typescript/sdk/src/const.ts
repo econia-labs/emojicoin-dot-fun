@@ -4,34 +4,31 @@ import { type ValueOf } from "./utils/utility-types";
 import { type DatabaseStructType } from "./indexer-v2/types/json-types";
 
 export const VERCEL = process.env.VERCEL === "1";
-if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS || !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {
-  let missing = "";
-  let missingBoth = false;
-  if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
-    missing += "NEXT_PUBLIC_MODULE_ADDRESS";
-  }
-  if (!process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS) {
-    if (!process.env.NEXT_PUBLIC_MODULE_ADDRESS) {
-      missingBoth = true;
-      missing += " and NEXT_PUBLIC_REWARDS_MODULE_ADDRESS";
-    } else {
-      missing += "NEXT_PUBLIC_REWARDS_MODULE_ADDRESS";
-    }
-  }
-  missing = missing.trimEnd();
-  const missingMessage = `Missing ${missing} environment variable${missingBoth ? "s" : ""}`;
-  let fullErrorMessage = `\n\n${"-".repeat(61)}\n\n${missingMessage}\n`;
-  if (!VERCEL) {
-    fullErrorMessage += "Please run this project from the top-level, parent directory.\n";
-  }
-  fullErrorMessage += `\n${"-".repeat(61)}\n`;
-  throw new Error(fullErrorMessage);
+if (
+  !process.env.NEXT_PUBLIC_MODULE_ADDRESS ||
+  !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS ||
+  !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS
+) {
+  const missing = [
+    ["NEXT_PUBLIC_MODULE_ADDRESS", process.env.NEXT_PUBLIC_MODULE_ADDRESS],
+    ["NEXT_PUBLIC_REWARDS_MODULE_ADDRESS", process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS],
+    ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
+  ].filter(([_, value]) => !value);
+  missing.forEach(([key, _]) => {
+    console.error(`Missing environment variables ${key}`);
+  });
+  throw new Error(
+    VERCEL
+      ? `Please set the missing environment variables. ${missing.map(([key, _]) => key).join(", ")}`
+      : "Please run this project from the top-level, parent directory.\n"
+  );
 }
 
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
-
+export const INTEGRATOR_ADDRESS = (() =>
+  AccountAddress.from(process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS))();
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
 export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);

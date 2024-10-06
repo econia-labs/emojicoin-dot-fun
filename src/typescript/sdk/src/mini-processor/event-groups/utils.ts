@@ -16,7 +16,7 @@ import {
   isSwapEvent,
   type Types,
 } from "../../types";
-import { type ProcessorModelsFromResponse, type UserLiquidityPoolsMap } from ".";
+import { type EventsModels, type UserLiquidityPoolsMap } from ".";
 import { type AccountAddressString } from "../../emojicoin_dot_fun";
 import { getLPCoinBalanceFromWriteSet } from "../parse-write-set";
 
@@ -68,7 +68,7 @@ const toLiquidityEventData = (
 });
 
 export const addModelsForBumpEvent = (args: {
-  rows: Omit<ProcessorModelsFromResponse, "userPools"> & { userPools: UserLiquidityPoolsMap };
+  rows: Omit<EventsModels, "userPools"> & { userPools: UserLiquidityPoolsMap };
   transaction: TransactionMetadata;
   market: MarketMetadataModel;
   state: StateEventData;
