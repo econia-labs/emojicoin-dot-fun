@@ -12,7 +12,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { INTEGRATOR_ADDRESS } from "../const";
 import { getRandomEmoji } from "../emoji_data/symbol-data";
-import { SymbolEmoji } from "../emoji_data/types";
+import { MarketSymbolEmojis, SymbolEmoji } from "../emoji_data/types";
 import { getEvents } from "../emojicoin_dot_fun";
 import {
   Chat,
@@ -100,8 +100,19 @@ export class EmojicoinClient {
     this.defaults = initializeDefaults(customDefaults);
   }
 
-  async register(args: Parameters<typeof this.registerMarket>["0"]) {
-    return this.registerMarket(args).then((res) => ({
+  @CheckDefaultsInProd
+  async register(
+    registrant: Account,
+    emojis: MarketSymbolEmojis,
+    extraArgs?: {
+      args: {
+        integrator: AccountAddressInput;
+      };
+      options?: Options;
+    }
+  ) {
+    const { args = {}, options } = extraArgs ?? {};
+    return this.registerMarket({ registrant, emojis, args, options }).then((res) => ({
       ...res,
       registration: {
         event: expect(res.events.marketRegistrationEvents.at(0)),
@@ -110,12 +121,29 @@ export class EmojicoinClient {
     }));
   }
 
-  async buy(submitArgs: Parameters<typeof this.swap>["0"]) {
-    return this.swap({
-      ...submitArgs,
+  @CheckDefaultsInProd
+  async buy(
+    swapper: Account,
+    emojis: MarketSymbolEmojis,
+    extraArgs?: {
       args: {
+        inputAmount: Uint64;
+        minOutputAmount: Uint64;
+        integrator: AccountAddressInput;
+        integratorFeeRateBPs: number;
+      };
+      options?: Options;
+    }
+  ) {
+    const { args = {}, options } = extraArgs ?? {};
+    return this.swap({
+      swapper,
+      emojis,
+      args: {
+        ...args,
         isSell: false,
       },
+      options,
     }).then((res) => ({
       ...res,
       swap: {
@@ -125,12 +153,29 @@ export class EmojicoinClient {
     }));
   }
 
-  async sell(submitArgs: Parameters<typeof this.swap>["0"]) {
-    return this.swap({
-      ...submitArgs,
+  @CheckDefaultsInProd
+  async sell(
+    swapper: Account,
+    emojis: MarketSymbolEmojis,
+    extraArgs?: {
       args: {
+        inputAmount: Uint64;
+        minOutputAmount: Uint64;
+        integrator: AccountAddressInput;
+        integratorFeeRateBPs: number;
+      };
+      options?: Options;
+    }
+  ) {
+    const { args = {}, options } = extraArgs ?? {};
+    return this.swap({
+      swapper,
+      emojis,
+      args: {
+        ...args,
         isSell: true,
       },
+      options,
     }).then((res) => ({
       ...res,
       swap: {
@@ -140,8 +185,20 @@ export class EmojicoinClient {
     }));
   }
 
-  private async provideLiquidityWithExpect(args: Parameters<typeof this.provideLiquidity>["0"]) {
-    return this.provideLiquidity(args).then((res) => ({
+  @CheckDefaultsInProd
+  private async provideLiquidityWithExpect(
+    provider: Account,
+    emojis: MarketSymbolEmojis,
+    extraArgs?: {
+      args: {
+        quoteAmount: Uint64;
+        minLpCoinsOut: Uint64;
+      };
+      options?: Options;
+    }
+  ) {
+    const { args = {}, options } = extraArgs ?? {};
+    return this.provideLiquidity({ provider, emojis, args, options }).then((res) => ({
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0)),
@@ -150,8 +207,18 @@ export class EmojicoinClient {
     }));
   }
 
-  private async removeLiquidityWithExpect(args: Parameters<typeof this.removeLiquidity>["0"]) {
-    return this.removeLiquidity(args).then((res) => ({
+  @CheckDefaultsInProd
+  private async removeLiquidityWithExpect(    provider: Account,
+    emojis: MarketSymbolEmojis,
+    extraArgs?: {
+      args: {
+        lpCoinAmount: Uint64;
+        minQuoteOut: Uint64;
+      };
+      options?: Options;
+    }) {
+      const { args = {}, options } = (extraArgs ?? {});
+    return this.removeLiquidity({ provider, emojis, args, options }).then((res) => ({
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0)),
@@ -256,7 +323,7 @@ export class EmojicoinClient {
     provider: Account;
     emojis: SymbolEmoji[];
     args: SubmitArgs<typeof ProvideLiquidity>;
-    options: Options;
+    options?: Options;
   }): Promise<TransactionResult> {
     const {
       quoteAmount = safeDefault(args.quoteAmount, this.defaults.liquidity.quoteAmount),
@@ -282,7 +349,7 @@ export class EmojicoinClient {
     provider: Account;
     emojis: SymbolEmoji[];
     args: SubmitArgs<typeof RemoveLiquidity>;
-    options: Options;
+    options?: Options;
   }): Promise<TransactionResult> {
     const {
       lpCoinAmount = safeDefault(args.lpCoinAmount, this.defaults.liquidity.lpCoinAmount),
@@ -344,6 +411,35 @@ const expect = <T>(v: T | undefined): T => {
     throw new Error("Expected to receive event data.");
   }
   return v;
+};
+
+const CheckDefaultsInProd = (
+  _target: unknown,
+  _propertyKey: string,
+  descriptor: PropertyDescriptor
+) => {
+  const originalMethod = descriptor.value;
+  /* eslint-disable-next-line func-names, no-param-reassign */
+  descriptor.value = function (...args: unknown[]) {
+    const extraArgs = args[2] as object | undefined;
+    ensureDevelopmentEnvironment(extraArgs);
+    const result = originalMethod.apply(this, args);
+    return result;
+  };
+  return descriptor;
+};
+
+const ensureDevelopmentEnvironment = (extraArgs: object | undefined) => {
+  if (
+    (typeof extraArgs === "undefined" ||
+      Object.keys(extraArgs).length === 0 ||
+      !("args" in extraArgs) ||
+      typeof extraArgs["args"] === "undefined" ||
+      Object.keys(extraArgs["args"] ?? {}).length === 0) &&
+    process.env.NODE_ENV !== "development"
+  ) {
+    throw new Error(`Arguments can't be undefined in a non-development environment.`);
+  }
 };
 
 const safeDefault = <T>(v: T | undefined, defaultValue: T): T => {
