@@ -7,9 +7,14 @@ import { isInBondingCurve } from "utils/bonding-curve";
 import { AnimatedProgressBar } from "./AnimatedProgressBar";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
+import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
+import { Text } from "components/text";
+import { useMatchBreakpoints } from "@hooks/index";
 
 export const LiquidityButton = (props: GridProps) => {
+  const { isDesktop } = useMatchBreakpoints();
   const { t } = translationFunction();
+  const { canTrade, displayTimeLeft } = useCanTradeMarket(props.data.symbol);
 
   return (
     <>
@@ -26,9 +31,21 @@ export const LiquidityButton = (props: GridProps) => {
             </Link>
           </Flex>
         </StyledContentHeader>
-      ) : (
+      ) : canTrade ? (
         <StyledContentHeader className="!p-0">
           <AnimatedProgressBar geoblocked={props.geoblocked} data={props.data} />
+        </StyledContentHeader>
+      ) : (
+        <StyledContentHeader>
+          <Flex width="100%" justifyContent="left">
+            <Text
+              textScale={isDesktop ? "pixelHeading3" : "pixelHeading4"}
+              color="lightGray"
+              textTransform="uppercase"
+            >
+              Grace period ends in {displayTimeLeft}
+            </Text>
+          </Flex>
         </StyledContentHeader>
       )}
     </>

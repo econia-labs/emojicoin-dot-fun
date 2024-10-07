@@ -323,6 +323,7 @@ export default function SwapComponent({
             // the user is connected.
             disabled={!sufficientBalance && !isLoading && !!account}
             geoblocked={geoblocked}
+            symbol={emojicoin}
           />
         </Row>
       </Column>
