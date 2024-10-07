@@ -31,6 +31,8 @@ import { isMobile, isTablet } from "react-device-detect";
 
 enableMapSet();
 
+const queryClient = new QueryClient();
+
 const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
   children,
   geoblocked,
@@ -42,8 +44,6 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
   const isMobileMenuOpen = isOpen && !isDesktop;
 
   const wallets = useMemo(() => [new PontemWallet(), new RiseWallet(), new MartianWallet()], []);
-
-  const queryClient = new QueryClient();
 
   return (
     <ThemeProvider theme={theme}>

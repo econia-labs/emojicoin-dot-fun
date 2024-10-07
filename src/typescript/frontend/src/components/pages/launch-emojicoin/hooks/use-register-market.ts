@@ -16,6 +16,17 @@ import { useEmojiPicker } from "context/emoji-picker-context";
 import { SYMBOL_DATA } from "@sdk/emoji_data";
 import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
+import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
+
+const tryEd25519PublicKey = (account: AccountInfo) => {
+  try {
+    return new Ed25519PublicKey(
+      typeof account.publicKey === "string" ? account.publicKey : account.publicKey[0]
+    );
+  } catch (_) {
+    return undefined;
+  }
+};
 
 export const useRegisterMarket = () => {
   const emojis = useEmojiPicker((state) => state.emojis);
@@ -36,9 +47,16 @@ export const useRegisterMarket = () => {
       if (account === null) {
         return undefined;
       }
-      const publicKey = new Ed25519PublicKey(
-        typeof account!.publicKey === "string" ? account.publicKey : account.publicKey[0]
-      );
+      const publicKey = tryEd25519PublicKey(account);
+      if (!publicKey) {
+        return {
+          error: true,
+          data: {
+            amount: 0,
+            unitPrice: 0,
+          },
+        };
+      }
       try {
         const r = await RegisterMarket.getGasCost({
           aptosConfig: aptos.config,

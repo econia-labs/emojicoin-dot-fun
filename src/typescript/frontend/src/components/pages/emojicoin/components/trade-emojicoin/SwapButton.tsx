@@ -12,6 +12,13 @@ import { useAnimationControls } from "framer-motion";
 import { RewardsAnimation } from "./RewardsAnimation";
 import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
+import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
+import Popup from "components/popup";
+
+const GRACE_PERIOD_MESSAGE =
+  "This market is in its grace period. During the grace period of a market, only the market " +
+  "creator can trade. The grace period ends 5 minutes after the market registration or after the first " +
+  "trade, whichever comes first.";
 
 export const SwapButton = ({
   inputAmount,
@@ -20,6 +27,7 @@ export const SwapButton = ({
   setSubmit,
   disabled,
   geoblocked,
+  symbol,
 }: {
   inputAmount: bigint | number | string;
   isSell: boolean;
@@ -27,10 +35,12 @@ export const SwapButton = ({
   setSubmit: Dispatch<SetStateAction<(() => Promise<void>) | null>>;
   disabled?: boolean;
   geoblocked: boolean;
+  symbol: string;
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
   const controls = useAnimationControls();
+  const { canTrade } = useCanTradeMarket(symbol);
 
   const handleClick = useCallback(async () => {
     if (!account) {
@@ -80,10 +90,22 @@ export const SwapButton = ({
   return (
     <>
       <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
-        <Button disabled={disabled} onClick={handleClick} scale="lg">
-          {t("Swap")}
-        </Button>
-        <RewardsAnimation controls={controls} />
+        {canTrade ? (
+          <>
+            <Button disabled={disabled} onClick={handleClick} scale="lg">
+              {t("Swap")}
+            </Button>
+            <RewardsAnimation controls={controls} />
+          </>
+        ) : (
+          <Popup className="max-w-[300px]" content={t(GRACE_PERIOD_MESSAGE)}>
+            <div>
+              <Button disabled={true} onClick={handleClick} scale="lg">
+                {t("Swap")}
+              </Button>
+            </div>
+          </Popup>
+        )}
       </ButtonWithConnectWalletFallback>
     </>
   );

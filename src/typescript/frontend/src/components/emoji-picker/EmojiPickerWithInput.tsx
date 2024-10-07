@@ -85,6 +85,7 @@ export const EmojiPickerWithInput = ({
   const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
   const nativePicker = useEmojiPicker((s) => s.nativePicker);
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
+  const setEmojis = useEmojiPicker((s) => s.setEmojis);
   const removeEmojiTextInput = useEmojiPicker((s) => s.removeEmojiTextInput);
   const textAreaRef = useEmojiPicker((s) => s.textAreaRef);
 
@@ -143,7 +144,7 @@ export const EmojiPickerWithInput = ({
     [removeEmojiTextInput, textAreaRef]
   );
 
-  const onKeyDownHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const onKeyUpHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
     if (!target) return;
     // I use this so much while developing that I need to account for it.
@@ -153,10 +154,10 @@ export const EmojiPickerWithInput = ({
       e.stopPropagation();
       window.location.reload();
     }
-    if (getEmojisInString(e.key).length) {
+    if (getEmojisInString(e.currentTarget.value).length) {
       e.preventDefault();
       e.stopPropagation();
-      insertEmojiTextInput(e.key);
+      setEmojis(getEmojisInString(e.currentTarget.value));
     } else if (e.key === "Enter") {
       e.preventDefault();
       await handleSubmission(emojis.join(""));
@@ -217,7 +218,7 @@ export const EmojiPickerWithInput = ({
                   onPaste={handlePaste}
                   onCut={handleCut}
                   inputMode={nativePicker ? "text" : "none"}
-                  onKeyDown={onKeyDownHandler}
+                  onKeyUp={onKeyUpHandler}
                   onFocus={(e) => {
                     // Stop the focus from bubbling up to the `Flex` component above. We only want to focus
                     // this specific text area without triggering a focus on the `Flex` component.
