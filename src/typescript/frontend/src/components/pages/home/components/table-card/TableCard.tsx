@@ -17,7 +17,6 @@ import {
   textVariants,
   useLabelScrambler,
   glowVariants,
-  type AnyNonGridTableCardVariant,
   eventToVariant as toVariant,
 } from "./animation-variants/event-variants";
 import {
@@ -31,6 +30,7 @@ import {
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import useEvent from "@hooks/use-event";
 import "./module.css";
+import { isMarketStateModel } from "@sdk/indexer-v2/types";
 
 const TableCard = ({
   index,
@@ -52,7 +52,7 @@ const TableCard = ({
   const animationsOn = useUserSettings((s) => s.animate);
 
   const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
-  const [roughDailyVolume, setRoughDailyVolume] = useState(Big(staticVolume24H));
+  const [dailyVolume, setDailyVolume] = useState(Big(staticVolume24H));
   const animations = useEventStore(
     (s) => s.getMarket(emojis.map((e) => e.emoji))?.stateEvents ?? []
   );
@@ -66,32 +66,44 @@ const TableCard = ({
     };
   }, []);
 
-  const startAnimation = useEvent(
-    (variant: AnyNonGridTableCardVariant, latestEvent: EmojicoinAnimationEvents) => {
-      safeQueueAnimations({
-        controls,
-        variants: [variant, "initial"],
-        isMounted,
-        latestEvent,
-      });
-    }
-  );
+  const startAnimation = useEvent((latestEvent: EmojicoinAnimationEvents) => {
+    safeQueueAnimations({
+      controls,
+      variants: [toVariant(latestEvent), "initial"],
+      isMounted,
+      latestEvent,
+    });
+  });
 
   useEffect(() => {
     if (animations && animations.length) {
       const event = animations.at(0)!;
-      const variant = toVariant(event);
-      startAnimation(variant, event);
-      // TODO: Refactor this to have accurate data. We increment by 1 like this just to trigger a scramble animation.
-      // TODO: [ROUGH_VOLUME_TAG_FOR_CTRL_F]
-      setMarketCap((prev) => prev.plus(1));
-      setRoughDailyVolume((prev) => prev.plus(1));
+      const [nowMs, eventMs] = [new Date().getTime(), event.transaction.timestamp.getTime()];
+      setMarketCap(Big(event.state.instantaneousStats.marketCap.toString()));
+      if (isMarketStateModel(event)) {
+        setDailyVolume(Big(event.dailyVolume.toString()));
+      }
+
+      let timeout: number;
+      // Animate the event immediately if it occurred while the user is actively viewing this page.
+      if (nowMs - eventMs < 200) {
+        startAnimation(event);
+        // Otherwise, allow for some latency when receiving events, but ensure the animation queue is triggered
+        // once controls are set by passing a `setTimeout` with a timeout value of zero.
+        // Without this, the table card is stuck in its "glow" variant until another event for its market occurs.
+      } else if (nowMs - eventMs < 5000) {
+        timeout = window.setTimeout(() => {
+          startAnimation(event);
+        }, 0);
+      }
+
+      return () => window.clearTimeout(timeout);
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [animations]);
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
-  const { ref: dailyVolumeRef } = useLabelScrambler(roughDailyVolume, " APT");
+  const { ref: dailyVolumeRef } = useLabelScrambler(dailyVolume, " APT");
 
   const { curr, prev, variant, displayIndex, layoutDelay } = useMemo(() => {
     const { curr, prev } = calculateGridData({
@@ -255,7 +267,7 @@ const TableCard = ({
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                   ref={dailyVolumeRef}
                 >
-                  {toCoinDecimalString(roughDailyVolume.toString(), 2) + " APT"}
+                  {toCoinDecimalString(dailyVolume.toString(), 2) + " APT"}
                 </motion.div>
               </Column>
             </Flex>
