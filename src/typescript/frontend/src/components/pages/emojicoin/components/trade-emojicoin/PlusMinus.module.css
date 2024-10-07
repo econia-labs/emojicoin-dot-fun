@@ -21,7 +21,6 @@
     height: 2px;
 }
 
-/* and a bonus!!! minus :-) */
 .circle.minus:before{
     content: '';
     position: absolute;
