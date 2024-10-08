@@ -1,44 +1,12 @@
-import { fetchMarkets } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { getValidSortByForPoolsPage } from "@sdk/indexer-v2/queries/query-params";
-import { toOrderBy } from "@sdk/queries/const";
 import { handleEmptySearchBytes, safeParsePageWithDefault } from "lib/routes/home-page-params";
 import { stringifyJSON } from "utils";
-import { fetchUserLiquidityPools } from "@sdk/indexer-v2/queries/app/pools";
-import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { REVALIDATION_TIME } from "lib/server-env";
-import type { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { getPoolData } from "./getPoolDataQuery";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
-
-export async function getPoolData(
-  page: number,
-  sortBy: SortMarketsBy,
-  orderBy: "asc" | "desc",
-  searchEmojis?: string[],
-  provider?: string
-) {
-  if (provider) {
-    return fetchUserLiquidityPools({
-      page,
-      orderBy: toOrderBy(orderBy),
-      sortBy,
-      provider,
-      searchEmojis,
-      pageSize: MARKETS_PER_PAGE,
-    });
-  } else {
-    return fetchMarkets({
-      page,
-      inBondingCurve: false,
-      orderBy: toOrderBy(orderBy),
-      sortBy,
-      searchEmojis,
-      pageSize: MARKETS_PER_PAGE,
-    });
-  }
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

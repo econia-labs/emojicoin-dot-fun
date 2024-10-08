@@ -2,7 +2,7 @@ import ClientPoolsPage from "components/pages/pools/ClientPoolsPage";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { headers } from "next/headers";
 import { isUserGeoblocked } from "utils/geolocation";
-import { getPoolData } from "./api/route";
+import { getPoolData } from "./api/getPoolDataQuery";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 
