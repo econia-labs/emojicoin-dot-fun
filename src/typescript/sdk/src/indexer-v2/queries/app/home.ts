@@ -85,7 +85,7 @@ export const fetchNumRegisteredMarkets = async () => {
   }
 };
 
-const selectPriceFeed = () => postgrest.rpc(DatabaseRpc.PriceFeed);
+const selectPriceFeed = () => postgrest.rpc(DatabaseRpc.PriceFeed, undefined, { get: true });
 
 export const fetchPriceFeed = queryHelper(
   selectPriceFeed,
