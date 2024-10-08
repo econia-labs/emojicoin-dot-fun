@@ -56,6 +56,16 @@ type MarketEventTypes =
   | DatabaseModels["liquidity_events"]
   | DatabaseModels["periodic_state_events"];
 
+export const initialStatePatch = (): EventState => {
+  return {
+    guids: new Set<string>(),
+    stateFirehose: [],
+    marketRegistrations: [],
+    markets: new Map(),
+    globalStateEvents: [],
+  };
+};
+
 export const initialStateFromLocalStorage = (): EventState => {
   // Purge stale events then load up the remaining ones.
   const events = getEventsFromLocalStorage();
