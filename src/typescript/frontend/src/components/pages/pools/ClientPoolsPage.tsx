@@ -26,7 +26,10 @@ import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/t
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
-export const ClientPoolsPage: React.FC<{ geoblocked: boolean, initialData: PoolsData[] }> = ({ geoblocked, initialData }) => {
+export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: PoolsData[] }> = ({
+  geoblocked,
+  initialData,
+}) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");

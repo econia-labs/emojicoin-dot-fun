@@ -7,12 +7,18 @@ import { stringifyJSON } from "utils";
 import { fetchUserLiquidityPools } from "@sdk/indexer-v2/queries/app/pools";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { REVALIDATION_TIME } from "lib/server-env";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import type { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
 
-export async function getPoolData(page: number, sortBy: SortMarketsBy, orderBy: "asc" | "desc", searchEmojis?: string[], provider?: string) {
+export async function getPoolData(
+  page: number,
+  sortBy: SortMarketsBy,
+  orderBy: "asc" | "desc",
+  searchEmojis?: string[],
+  provider?: string
+) {
   if (provider) {
     return fetchUserLiquidityPools({
       page,

@@ -100,7 +100,8 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
                 >
                   The market is too recent. Cannot predict APR yet.
                 </Text>
-              }>
+              }
+            >
               <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
                 {SYMBOL_DATA.byName("hourglass not done")!.emoji}
               </Text>
