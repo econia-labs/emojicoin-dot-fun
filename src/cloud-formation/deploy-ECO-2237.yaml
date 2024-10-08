@@ -1,6 +1,6 @@
 ---
 parameters:
-  BrokerImageVersion: '0.9.0'
+  BrokerImageVersion: '0.9.1'
   DeployAlb: 'true'
   DeployAlbDnsRecord: 'true'
   DeployBastionHost: 'true'
@@ -22,7 +22,7 @@ parameters:
   EnableWafRulesWebSocket: 'false'
   Environment: 'ECO-2237'
   Network: 'testnet'
-  ProcessorImageVersion: '0.8.0'
+  ProcessorImageVersion: '0.8.1'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
 ...
