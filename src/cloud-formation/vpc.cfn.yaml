@@ -29,6 +29,9 @@ Mappings:
       # Public subnet in third availability zone.
       AvailabilityZone: 2
       CidrBlock: '10.0.192.0/19'
+Outputs:
+  VpcId:
+    Value: !Ref 'Vpc'
 Resources:
   # Virtual private cloud for internal networking.
   Vpc:
