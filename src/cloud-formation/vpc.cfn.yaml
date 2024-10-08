@@ -31,8 +31,146 @@ Mappings:
       CidrBlock: '10.0.192.0/19'
 Outputs:
   VpcId:
+    Export:
+      Name: !Sub '${AWS::StackName}-VpcId'
     Value: !Ref 'Vpc'
 Resources:
+  # Network address translation gateway for each public subnet.
+  Fn::ForEach::NatGateway:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - NatGateway${Identifier}:
+      Properties:
+        AllocationId: !GetAtt
+        - !Sub 'NatGatewayEip${Identifier}'
+        - 'AllocationId'
+        SubnetId: !Ref
+          Fn::Sub: 'PublicSubnet${Identifier}'
+      Type: 'AWS::EC2::NatGateway'
+  # Elastic IP address for each network address translation gateway.
+  Fn::ForEach::NatGatewayEip:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - NatGatewayEip${Identifier}:
+      Properties:
+        Domain: 'vpc'
+      Type: 'AWS::EC2::EIP'
+  # Route table for each private subnet.
+  Fn::ForEach::PrivateRouteTable:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateRouteTable${Identifier}:
+      Properties:
+        VpcId: !Ref 'Vpc'
+      Type: 'AWS::EC2::RouteTable'
+  # Association for each private route table within each private subnet.
+  Fn::ForEach::PrivateRouteTableAssociation:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateRouteTableAssociation${Identifier}:
+      Properties:
+        RouteTableId: !Ref
+          Fn::Sub: 'PrivateRouteTable${Identifier}'
+        SubnetId: !Ref
+          Fn::Sub: 'PrivateSubnet${Identifier}'
+      Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Route through network address translation gateway for each private subnet.
+  Fn::ForEach::PrivateRouteThroughNatGateway:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateRouteThroughNatGateway${Identifier}:
+      Properties:
+        DestinationCidrBlock: '0.0.0.0/0'
+        NatGatewayId: !Ref
+          Fn::Sub: 'NatGateway${Identifier}'
+        RouteTableId: !Ref
+          Fn::Sub: 'PrivateRouteTable${Identifier}'
+      Type: 'AWS::EC2::Route'
+  # A private subnet for each availability zone.
+  Fn::ForEach::PrivateSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PrivateSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PrivateSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: false
+        VpcId: !Ref 'Vpc'
+      Type: 'AWS::EC2::Subnet'
+  # Association for public route table with each public subnet.
+  Fn::ForEach::PublicRouteTableAssociation:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PublicRouteTableAssociation${Identifier}:
+      Properties:
+        RouteTableId: !Ref 'PublicRouteTable'
+        SubnetId: !Ref
+          Fn::Sub: 'PublicSubnet${Identifier}'
+      Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # A public subnet for each availability zone.
+  Fn::ForEach::PublicSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PublicSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PublicSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PublicSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: true
+        VpcId: !Ref 'Vpc'
+      Type: 'AWS::EC2::Subnet'
+  # Internet gateway for the virtual private cloud.
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+  # Attachment of internet gateway to the virtual private cloud.
+  InternetGatewayAttachment:
+    Properties:
+      InternetGatewayId: !Ref 'InternetGateway'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+  # Route table for public subnets in the virtual private cloud.
+  PublicRouteTable:
+    Properties:
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::RouteTable'
+  # Route from public subnets through the internet gateway.
+  PublicRouteToInternet:
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+      RouteTableId: !Ref 'PublicRouteTable'
+    Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
     Properties:
