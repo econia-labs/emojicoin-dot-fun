@@ -78,7 +78,7 @@ import React, { useMemo } from "react";
 //
 //export default React.memo(AnimatedStatusIndicator);
 
-export const AnimatedStatusIndicator = ({ numHearts = 14 }: { numHearts?: number }) => {
+export const AnimatedStatusIndicator = ({ numHearts = 14, className }: { numHearts?: number, className?: string }) => {
   const emojis = useMemo(() => Array.from({ length: numHearts }), [numHearts]).map(() =>
     getRandomEmoji()
   );
@@ -86,7 +86,7 @@ export const AnimatedStatusIndicator = ({ numHearts = 14 }: { numHearts?: number
 
   return (
     <motion.div
-      className="pixel-heading-4 relative select-none mt-[100px]"
+      className={className ?? "" + " pixel-heading-4 relative select-none mt-[100px]"}
       initial={{
         transform: "rotate(0deg)",
       }}
