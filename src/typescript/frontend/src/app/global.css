@@ -10,10 +10,6 @@
     line-height: 1.4rem;
   }
 
-  .Toastify__progress-bar {
-    height: 20px;
-  }
-
   --toastify-color-progress-dark: #2fa90f !important;
 
   --ec-blue: #086cd9;

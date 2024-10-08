@@ -76,29 +76,35 @@ const TableCard = ({
   });
 
   useEffect(() => {
+    let timeout: number | undefined = undefined;
+
     if (animations && animations.length) {
-      const event = animations.at(0)!;
-      const [nowMs, eventMs] = [new Date().getTime(), event.transaction.timestamp.getTime()];
-      setMarketCap(Big(event.state.instantaneousStats.marketCap.toString()));
-      if (isMarketStateModel(event)) {
-        setDailyVolume(Big(event.dailyVolume.toString()));
-      }
+      const event = animations.at(0);
+      if (!event) {
+        setDailyVolume(Big(0));
+        setMarketCap(Big(0));
+      } else {
+        const [nowMs, eventMs] = [new Date().getTime(), event.transaction.timestamp.getTime()];
+        setMarketCap(Big(event.state.instantaneousStats.marketCap.toString()));
+        if (isMarketStateModel(event)) {
+          setDailyVolume(Big(event.dailyVolume.toString()));
+        }
 
-      let timeout: number;
-      // Animate the event immediately if it occurred while the user is actively viewing this page.
-      if (nowMs - eventMs < 200) {
-        startAnimation(event);
-        // Otherwise, allow for some latency when receiving events, but ensure the animation queue is triggered
-        // once controls are set by passing a `setTimeout` with a timeout value of zero.
-        // Without this, the table card is stuck in its "glow" variant until another event for its market occurs.
-      } else if (nowMs - eventMs < 5000) {
-        timeout = window.setTimeout(() => {
+        // Animate the event immediately if it occurred while the user is actively viewing this page.
+        if (nowMs - eventMs < 200) {
           startAnimation(event);
-        }, 0);
+          // Otherwise, allow for some latency when receiving events, but ensure the animation queue is triggered
+          // once controls are set by passing a `setTimeout` with a timeout value of zero.
+          // Without this, the table card is stuck in its "glow" variant until another event for its market occurs.
+        } else if (nowMs - eventMs < 5000) {
+          timeout = window.setTimeout(() => {
+            startAnimation(event);
+          }, 0);
+        }
       }
-
-      return () => window.clearTimeout(timeout);
     }
+
+    return () => window.clearTimeout(timeout);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [animations]);
 
