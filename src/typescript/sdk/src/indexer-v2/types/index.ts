@@ -601,10 +601,7 @@ export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => 
   openPrice: q64ToBigInt(data.open_price_q64),
   closePrice: q64ToBigInt(data.close_price_q64),
   deltaPercentage: Number(
-    (q64ToBig(data.close_price_q64).div(q64ToBig(data.open_price_q64)))
-      .mul(100)
-      .sub(100)
-      .toString()
+    q64ToBig(data.close_price_q64).div(q64ToBig(data.open_price_q64)).mul(100).sub(100).toString()
   ),
 });
 
