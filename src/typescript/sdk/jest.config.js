@@ -12,7 +12,6 @@ module.exports = {
     customExportConditions: ["react-server", "node", "node-addons"],
   },
   coveragePathIgnorePatterns: [
-    "src/cli/local-node.ts",
     "src/helpers/misc.ts",
     "src/helpers/aptos-client.ts",
     "src/utils/env.ts",
@@ -27,7 +26,6 @@ module.exports = {
       statements: 55,
     },
   },
-  maxWorkers: 4,
   globalSetup: process.env.NO_TEST_SETUP !== "true" ? "./tests/pre-test.ts" : null,
   globalTeardown: process.env.NO_TEST_SETUP !== "true" ? "./tests/post-test.ts" : null,
 };

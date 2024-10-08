@@ -16,10 +16,10 @@ import {
   ensureMarketInStore,
   handleLatestBarForPeriodicStateEvent,
   handleLatestBarForSwapEvent,
+  initialStateStore,
   pushPeriodicStateEvents,
   toMappedMarketEvents,
 } from "./utils";
-import { initialStatePatch } from "./local-storage";
 import { periodEnumToRawDuration } from "@sdk/const";
 import { joinEmojis } from "@sdk/emoji_data";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
@@ -28,7 +28,7 @@ import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
 export const createEventStore = () => {
   return createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
-      ...initialStatePatch(),
+      ...initialStateStore(),
       getMarket: (m) => get().markets.get(joinEmojis(m)),
       getRegisteredMarkets: () => {
         return get().markets;

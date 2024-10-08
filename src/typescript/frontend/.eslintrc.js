@@ -35,7 +35,7 @@ module.exports = {
     },
     ecmaVersion: "latest",
     sourceType: "module",
-    project: ["tsconfig.json"],
+    project: ["tsconfig.json", "tests/tsconfig.json"],
     warnOnUnsupportedTypeScriptVersion: false,
   },
   plugins: ["@typescript-eslint", "import", "prettier"],

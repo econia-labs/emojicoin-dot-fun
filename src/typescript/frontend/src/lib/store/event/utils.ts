@@ -15,6 +15,16 @@ import { q64ToBig } from "@sdk/utils/nominal-price";
 
 type PeriodicState = DatabaseModels["periodic_state_events"];
 
+export const initialStateStore = (): EventState => {
+  return {
+    guids: new Set<string>(),
+    stateFirehose: [],
+    marketRegistrations: [],
+    markets: new Map(),
+    globalStateEvents: [],
+  };
+};
+
 export const createInitialCandlestickData = (): WritableDraft<CandlestickData> => ({
   candlesticks: [] as PeriodicState[],
   callback: undefined,
