@@ -1,7 +1,4 @@
-import { type AnimationControls } from "framer-motion";
-import { type AnyNonGridTableCardVariant } from "./event-variants";
 import {
-  type AnyEventModel,
   type ChatEventModel,
   type LiquidityEventModel,
   type MarketLatestStateEventModel,
