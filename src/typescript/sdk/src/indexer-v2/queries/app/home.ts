@@ -2,7 +2,7 @@ import "server-only";
 
 import { LIMIT, ORDER_BY } from "../../../queries/const";
 import { SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
-import { TableName } from "../../types/json-types";
+import { DatabaseRpc, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { getLatestProcessedEmojicoinVersion, queryHelper } from "../utils";
 import { DatabaseTypeConverter } from "../../types";
@@ -84,3 +84,10 @@ export const fetchNumRegisteredMarkets = async () => {
       .then((r) => r.count ?? 0);
   }
 };
+
+const selectPriceFeed = () => postgrest.rpc(DatabaseRpc.PriceFeed, undefined, { get: true });
+
+export const fetchPriceFeed = queryHelper(
+  selectPriceFeed,
+  DatabaseTypeConverter[DatabaseRpc.PriceFeed]
+);

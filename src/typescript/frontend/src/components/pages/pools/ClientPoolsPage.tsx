@@ -26,14 +26,17 @@ import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/t
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
-export const ClientPoolsPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
+export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: PoolsData[] }> = ({
+  geoblocked,
+  initialData,
+}) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(poolParam ? 0 : undefined);
   const [page, setPage] = useState<number>(1);
-  const [markets, setMarkets] = useState<PoolsData[]>([]);
+  const [markets, setMarkets] = useState<PoolsData[]>(initialData);
   const [allDataIsLoaded, setAllDataIsLoaded] = useState<boolean>(false);
   const [pools, setPools] = useState<"all" | "mypools">("all");
   const [realEmojis, setRealEmojis] = useState(getEmojisInString(poolParam ?? ""));

@@ -1,7 +1,4 @@
-import { type AnimationControls } from "framer-motion";
-import { type AnyNonGridTableCardVariant } from "./event-variants";
 import {
-  type AnyEventModel,
   type ChatEventModel,
   type LiquidityEventModel,
   type MarketLatestStateEventModel,
@@ -90,49 +87,6 @@ export const tableCardVariants = {
 };
 
 export type TableCardVariants = keyof typeof tableCardVariants;
-
-const ONE_SECOND_MS = 1000n;
-const FIVE_SECONDS_MS = 5n * ONE_SECOND_MS;
-
-/**
- * To avoid animations being started when the component is unmounted or the event that triggers
- * the animation was already consumed, we check if the component is mounted and if the event
- * happened less than the animation grace period.
- *
- * This is to avoid the animation being triggered when the sorting filter is changed and the
- * component is unmounted and mounted again.
- */
-export const shouldAnimateGlow = (
-  isMounted: React.MutableRefObject<boolean>,
-  latestEvent?: AnyEventModel
-) => {
-  // Note this is in microseconds.
-  const now = BigInt(Date.now()) * 1000n;
-  const eventTime = latestEvent ? latestEvent.transaction.time : now;
-  return isMounted.current && now - eventTime <= FIVE_SECONDS_MS * 1000n;
-};
-
-export const safeQueueAnimations = async ({
-  controls,
-  variants,
-  isMounted,
-  latestEvent,
-}: {
-  controls: AnimationControls;
-  variants: [AnyNonGridTableCardVariant, AnyNonGridTableCardVariant];
-  isMounted: React.MutableRefObject<boolean>;
-  latestEvent: AnyEventModel;
-}) => {
-  if (shouldAnimateGlow(isMounted, latestEvent)) {
-    await controls.start(variants[0]).then(() => {
-      // Only check if the component is still mounted after the first animation, because we
-      // always want to reset it to the initial state if the first animation is triggered.
-      if (shouldAnimateGlow(isMounted)) {
-        controls.start(variants[1]);
-      }
-    });
-  }
-};
 
 // Set the `symbol` <span> value to `variant` to view these variants in action and how they work.
 export const determineGridAnimationVariant = ({

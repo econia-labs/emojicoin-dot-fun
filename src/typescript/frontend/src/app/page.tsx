@@ -3,7 +3,12 @@ import HomePageComponent from "./home/HomePage";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { headers } from "next/headers";
 import { isUserGeoblocked } from "utils/geolocation";
-import { fetchFeaturedMarket, fetchMarkets, fetchNumRegisteredMarkets } from "@/queries/home";
+import {
+  fetchFeaturedMarket,
+  fetchMarkets,
+  fetchNumRegisteredMarkets,
+  fetchPriceFeed,
+} from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 
 export const revalidate = REVALIDATION_TIME;
@@ -21,6 +26,7 @@ export default async function Home({ searchParams }: HomePageParams) {
     orderBy,
     searchEmojis,
   });
+  const priceFeed = await fetchPriceFeed({});
 
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 
@@ -33,6 +39,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       sortBy={sortBy}
       searchBytes={q}
       geoblocked={geoblocked}
+      priceFeed={priceFeed}
     />
   );
 }
