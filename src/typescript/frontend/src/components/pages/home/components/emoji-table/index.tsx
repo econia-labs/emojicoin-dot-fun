@@ -34,7 +34,8 @@ import { type HomePageProps } from "app/home/HomePage";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 
-export interface EmojiTableProps extends Omit<HomePageProps, "featured" | "children"> {}
+export interface EmojiTableProps
+  extends Omit<HomePageProps, "featured" | "children" | "priceFeed"> {}
 
 const EmojiTable = (props: EmojiTableProps) => {
   const router = useRouter();
