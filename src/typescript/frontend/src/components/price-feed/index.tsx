@@ -1,8 +1,6 @@
-import { fetchPriceFeed } from "@/queries/home";
+import type { DatabaseModels } from "@sdk/indexer-v2/types";
 import { PriceFeedInner } from "./inner";
 
-export const PriceFeed = async () => {
-  const data = await fetchPriceFeed({});
-
+export const PriceFeed = async ({ data }: { data: Array<DatabaseModels["price_feed"]> }) => {
   return <PriceFeedInner data={data} />;
 };

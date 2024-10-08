@@ -35,7 +35,8 @@ import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { type BrokerEvent } from "@/broker/types";
 
-export interface EmojiTableProps extends Omit<HomePageProps, "featured" | "children"> {}
+export interface EmojiTableProps
+  extends Omit<HomePageProps, "featured" | "children" | "priceFeed"> {}
 
 const baseGridSubscriptions: Array<BrokerEvent> = [
   "Chat",

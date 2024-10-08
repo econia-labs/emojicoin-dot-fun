@@ -14,6 +14,7 @@ export interface HomePageProps {
   searchBytes?: string;
   children?: React.ReactNode;
   geoblocked: boolean;
+  priceFeed: Array<DatabaseModels["price_feed"]>;
 }
 
 export default async function HomePageComponent({
@@ -25,12 +26,13 @@ export default async function HomePageComponent({
   searchBytes,
   children,
   geoblocked,
+  priceFeed,
 }: HomePageProps) {
   return (
     <>
       <div className="pt-[93px]">
         <div className="flex-col mb-[31px]">
-          <PriceFeed />
+          {priceFeed.length > 0 ? <PriceFeed data={priceFeed} /> : <TextCarousel />}
           <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
             <MainCard featured={featured} page={page} sortBy={sortBy} />
           </div>

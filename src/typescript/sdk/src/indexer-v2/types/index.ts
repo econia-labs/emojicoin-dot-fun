@@ -31,6 +31,7 @@ import {
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
+import { q64ToBig } from "../../utils/nominal-price";
 
 export type TransactionMetadata = {
   version: bigint;
@@ -322,6 +323,7 @@ export type Market1MPeriodsInLastDayModel = ReturnType<typeof toMarket1MPeriodsI
 export type MarketStateModel = ReturnType<typeof toMarketStateModel>;
 export type ProcessorStatusModel = ReturnType<typeof toProcessorStatus>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
+export type PriceFeedRPCModel = ReturnType<typeof toPriceFeedRPCResponse>;
 
 /**
  * Converts a function that converts a type to another type into a function that converts the type
@@ -595,16 +597,21 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   dailyVolume: BigInt(data.daily_volume),
 });
 
-const unq64 = (n: number) => n / 2 ** 64;
+const q64ToBigInt = (n: string) => BigInt(Big(n).div(Big(2).pow(64)).toFixed(0));
 
 export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => ({
   marketID: data.market_id,
   symbolBytes: data.symbol_bytes,
   symbolEmojis: data.symbol_emojis,
   marketAddress: data.market_address,
-  openPrice: unq64(data.open_price_q64),
-  closePrice: unq64(data.close_price_q64),
-  deltaPercentage: (1 - unq64(data.close_price_q64) / unq64(data.open_price_q64)) * 100,
+  openPrice: q64ToBigInt(data.open_price_q64),
+  closePrice: q64ToBigInt(data.close_price_q64),
+  deltaPercentage: Number(
+    Big(1)
+      .sub(q64ToBig(data.close_price_q64).div(q64ToBig(data.open_price_q64)))
+      .mul(100)
+      .toString()
+  ),
 });
 
 export const DatabaseTypeConverter = {
@@ -638,6 +645,7 @@ export type DatabaseModels = {
   [TableName.MarketState]: MarketStateModel;
   [TableName.ProcessorStatus]: ProcessorStatusModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
+  [DatabaseRpc.PriceFeed]: PriceFeedRPCModel;
 };
 
 export type AnyEventTable =
