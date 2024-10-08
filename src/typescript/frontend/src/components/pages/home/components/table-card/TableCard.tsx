@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { translationFunction } from "context/language-context";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
@@ -24,13 +24,12 @@ import {
   determineGridAnimationVariant,
   type EmojicoinAnimationEvents,
   LAYOUT_DURATION,
-  safeQueueAnimations,
   tableCardVariants,
 } from "./animation-variants/grid-variants";
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
-import useEvent from "@hooks/use-event";
-import "./module.css";
 import { isMarketStateModel } from "@sdk/indexer-v2/types";
+import { useEmojiPicker } from "context/emoji-picker-context";
+import "./module.css";
 
 const TableCard = ({
   index,
@@ -56,6 +55,7 @@ const TableCard = ({
   const animations = useEventStore(
     (s) => s.getMarket(emojis.map((e) => e.emoji))?.stateEvents ?? []
   );
+  const anySearchBytes = useEmojiPicker((s) => s.emojis.length > 0);
 
   // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {
@@ -66,47 +66,40 @@ const TableCard = ({
     };
   }, []);
 
-  const startAnimation = useEvent((latestEvent: EmojicoinAnimationEvents) => {
-    safeQueueAnimations({
-      controls,
-      variants: [toVariant(latestEvent), "initial"],
-      isMounted,
-      latestEvent,
-    });
-  });
+  const runAnimationSequence = useCallback(
+    (event: EmojicoinAnimationEvents) => {
+      const [nowMs, eventMs] = [new Date().getTime(), event.transaction.timestamp.getTime()];
+      // Only animate the event if it occurred within the last 5 seconds.
+      if (nowMs - eventMs < 5000) {
+        const variant = toVariant(event);
+        controls.stop();
+        if (isMounted.current) {
+          controls.start(variant).then(() => {
+            controls.start("initial");
+          });
+        }
+      }
+    },
+    [controls]
+  );
 
   useEffect(() => {
-    let timeout: number | undefined = undefined;
-
     if (animations && animations.length) {
       const event = animations.at(0);
       if (!event) {
         setDailyVolume(Big(0));
         setMarketCap(Big(0));
       } else {
-        const [nowMs, eventMs] = [new Date().getTime(), event.transaction.timestamp.getTime()];
         setMarketCap(Big(event.state.instantaneousStats.marketCap.toString()));
         if (isMarketStateModel(event)) {
           setDailyVolume(Big(event.dailyVolume.toString()));
         }
-
-        // Animate the event immediately if it occurred while the user is actively viewing this page.
-        if (nowMs - eventMs < 200) {
-          startAnimation(event);
-          // Otherwise, allow for some latency when receiving events, but ensure the animation queue is triggered
-          // once controls are set by passing a `setTimeout` with a timeout value of zero.
-          // Without this, the table card is stuck in its "glow" variant until another event for its market occurs.
-        } else if (nowMs - eventMs < 5000) {
-          timeout = window.setTimeout(() => {
-            startAnimation(event);
-          }, 0);
-        }
+        runAnimationSequence(event);
       }
     }
 
-    return () => window.clearTimeout(timeout);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [animations]);
+  }, [animations, runAnimationSequence]);
 
   const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
   const { ref: dailyVolumeRef } = useLabelScrambler(dailyVolume, " APT");
@@ -135,7 +128,8 @@ const TableCard = ({
 
   // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border
   // though, which we handle in the layout animation begin/complete callbacks and in the outermost div's style prop.
-  const borderLeftWidth = useMotionValue(curr.col === 0 ? 1 : 0);
+  // Always show the left border when there's something in the search bar.
+  const borderLeftWidth = useMotionValue(curr.col === 0 ? 1 : anySearchBytes ? 1 : 0);
 
   return (
     <motion.div

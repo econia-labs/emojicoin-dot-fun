@@ -144,7 +144,21 @@ export const EmojiPickerWithInput = ({
     [removeEmojiTextInput, textAreaRef]
   );
 
-  const onKeyUpHandler = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleNativeTextInput = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    if (!target) return;
+    const emojisInString = getEmojisInString(e.currentTarget.value);
+    if (e.key === "Backspace" || e.key === "Delete") {
+      e.preventDefault();
+      removeEmojiTextInput(e.key);
+    } else if (emojisInString.length) {
+      e.preventDefault();
+      e.stopPropagation();
+      setEmojis(emojisInString);
+    }
+  };
+
+  const handleEmojiPickerInput = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
     if (!target) return;
     // I use this so much while developing that I need to account for it.
@@ -154,10 +168,9 @@ export const EmojiPickerWithInput = ({
       e.stopPropagation();
       window.location.reload();
     }
-    if (getEmojisInString(e.currentTarget.value).length) {
+    if (getEmojisInString(e.key).length) {
       e.preventDefault();
       e.stopPropagation();
-      setEmojis(getEmojisInString(e.currentTarget.value));
     } else if (e.key === "Enter") {
       e.preventDefault();
       await handleSubmission(emojis.join(""));
@@ -218,7 +231,17 @@ export const EmojiPickerWithInput = ({
                   onPaste={handlePaste}
                   onCut={handleCut}
                   inputMode={nativePicker ? "text" : "none"}
-                  onKeyUp={onKeyUpHandler}
+                  onKeyUp={nativePicker ? handleNativeTextInput : () => {}}
+                  onKeyDown={
+                    nativePicker
+                      ? (e) => {
+                          if (e.key === "Backspace" || e.key === "Delete") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }
+                        }
+                      : handleEmojiPickerInput
+                  }
                   onFocus={(e) => {
                     // Stop the focus from bubbling up to the `Flex` component above. We only want to focus
                     // this specific text area without triggering a focus on the `Flex` component.
