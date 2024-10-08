@@ -32,7 +32,7 @@ export const Loading = ({
             className={
               centered +
               " text-center" +
-              " mobile-sm:pixel-display-2 sm:pixel-display-2"
+              " mobile-sm:pixel-display-2 sm:pixel-display-2 !text-5xl"
             }
             title={name}
           >
