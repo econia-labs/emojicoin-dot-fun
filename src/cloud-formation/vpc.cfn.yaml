@@ -1,0 +1,44 @@
+---
+Mappings:
+  Constants:
+    Vpc:
+      CidrBlock: '10.0.0.0/16'
+  PrivateSubnets:
+    A:
+      # Private subnet in first availability zone.
+      AvailabilityZone: 0
+      CidrBlock: '10.0.0.0/19'
+    B:
+      # Private subnet in second availability zone.
+      AvailabilityZone: 1
+      CidrBlock: '10.0.32.0/19'
+    C:
+      # Private subnet in third availability zone.
+      AvailabilityZone: 2
+      CidrBlock: '10.0.64.0/19'
+  PublicSubnets:
+    A:
+      # Public subnet in first availability zone.
+      AvailabilityZone: 0
+      CidrBlock: '10.0.128.0/19'
+    B:
+      # Public subnet in second availability zone.
+      AvailabilityZone: 1
+      CidrBlock: '10.0.160.0/19'
+    C:
+      # Public subnet in third availability zone.
+      AvailabilityZone: 2
+      CidrBlock: '10.0.192.0/19'
+Resources:
+  # Virtual private cloud for internal networking.
+  Vpc:
+    Properties:
+      CidrBlock: !FindInMap
+      - 'Constants'
+      - 'Vpc'
+      - 'CidrBlock'
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+    Type: 'AWS::EC2::VPC'
+Transform: 'AWS::LanguageExtensions'
+...
