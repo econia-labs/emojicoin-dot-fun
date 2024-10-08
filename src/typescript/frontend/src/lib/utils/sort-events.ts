@@ -117,8 +117,8 @@ export const memoizedSortedDedupedEvents = <
   if (res.length) {
     res[0] = {
       ...res[0],
-      // Looks weird if we delay the first swap animation as an insertion and it's the only row, so we also check for
-      // the length of the swaps array to be greater than 1.
+      // It looks weird if we delay the first swap animation as an insertion and it's the only row,
+      // so we also check for the length of the swaps array to be greater than 1.
       shouldAnimateAsInsertion: canAnimateAsInsertion && res.length > 1,
     };
   }
