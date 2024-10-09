@@ -1,10 +1,8 @@
-import { cache } from "react";
-
 export const preload = (id: string) => {
   void fetchLocale(`language-dictionary-${id}`);
 };
 
-export const fetchLocale = cache(async (locale: string) => {
+export const fetchLocale = async (locale: string) => {
   try {
     const response = await fetch(`/locales/${locale}.json`);
 
@@ -15,6 +13,6 @@ export const fetchLocale = cache(async (locale: string) => {
 
     return null;
   }
-});
+};
 
 export default fetchLocale;

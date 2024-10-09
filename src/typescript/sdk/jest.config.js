@@ -16,8 +16,9 @@ module.exports = {
     "src/helpers/aptos-client.ts",
     "src/utils/env.ts",
   ],
-  testPathIgnorePatterns: ["dist/*"],
+  testPathIgnorePatterns: [],
   collectCoverage: false,
+  forceExit: true,
   coverageThreshold: {
     global: {
       branches: 50,

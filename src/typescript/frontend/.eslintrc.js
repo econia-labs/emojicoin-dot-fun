@@ -26,6 +26,9 @@ module.exports = {
     "postcss.config.js",
     "tailwind.config.js",
     "example.spec.ts",
+    "jest.config.js",
+    "jest.setup.js",
+    "next.config.mjs",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -35,7 +38,7 @@ module.exports = {
     },
     ecmaVersion: "latest",
     sourceType: "module",
-    project: ["tsconfig.json", "tests/tsconfig.json"],
+    project: ["tsconfig.json", "tests/jest/tsconfig.json", "pre-test.js"],
     warnOnUnsupportedTypeScriptVersion: false,
   },
   plugins: ["@typescript-eslint", "import", "prettier"],

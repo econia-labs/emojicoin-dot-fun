@@ -16,7 +16,6 @@ const styledComponentsConfig = {
 const debugConfigOptions = {
   productionBrowserSourceMaps: true,
   outputFileTracing: true,
-  swcMinify: false,
   cleanDistDir: true,
   experimental: {
     serverMinification: false,
@@ -43,7 +42,13 @@ const nextConfig = {
     styledComponents: DEBUG ? styledComponentsConfig : true,
   },
   ...(DEBUG ? debugConfigOptions : {}),
-  transpilePackages: ["@sdk"],
+  transpilePackages: [
+    "@sdk",
+    "@mizuwallet-sdk/aptos-wallet-adapter",
+    "@mizuwallet-sdk/core",
+    "@mizuwallet-sdk/core/dist",
+    "graphql-request",
+    "@aptos-labs/wallet-adapter-react",
+    "@aptos-labs/wallet-adapter-core",
+  ]
 };
-
-export default withBundleAnalyzer(nextConfig);

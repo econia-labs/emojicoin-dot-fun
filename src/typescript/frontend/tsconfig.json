@@ -70,5 +70,6 @@
     "./src/**/*.tsx",
     ".next/types/**/*.ts",
     "./dist/types/**/*.ts"
-  ]
+  ],
+  "types": ["@testing-library/jest-dom"]
 }
