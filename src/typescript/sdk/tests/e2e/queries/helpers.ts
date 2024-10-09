@@ -9,6 +9,7 @@ import {
   rawPeriodToEnum,
   type Types,
 } from "../../../src";
+import postgres from "postgres";
 
 export const getTrackerFromWriteSet = <T extends Period>(
   res: UserTransactionResponse,
@@ -43,3 +44,7 @@ export const getOneMinutePeriodicStateEvents = (res: UserTransactionResponse) =>
   getEvents(res).periodicStateEvents.filter(
     (e) => rawPeriodToEnum(e.periodicStateMetadata.period) === Period.Period1M
   );
+
+export const getDbConnection = () => {
+  return postgres(process.env.DB_URL!);
+};

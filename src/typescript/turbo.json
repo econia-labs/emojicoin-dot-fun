@@ -18,7 +18,8 @@
     "BROKER_PORT",
     "FETCH_DEBUG",
     "FETCH_DEBUG_VERBOSE",
-    "VERBOSE_TEST_LOGS"
+    "VERBOSE_TEST_LOGS",
+    "DB_URL"
   ],
   "tasks": {
     "build": {
