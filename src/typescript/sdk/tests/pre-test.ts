@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import WebSocket from "ws";
-import { DockerTestHarness } from "./utils/docker/docker-test-harness";
-import { type ContainerName } from "./utils/docker/logs";
+import { DockerTestHarness } from "./../src/utils/test/docker/docker-test-harness";
+import { type ContainerName } from "./../src/utils/test/docker/logs";
 
 export default async function preTest() {
   // @ts-expect-error Using `globalThis` as any for a polyfill for `WebSocket` in node.js.
@@ -19,13 +19,10 @@ export default async function preTest() {
     }
     // @ts-expect-error Using `globalThis` as any.
     globalThis.__DOCKER_LOGS_FILTER__ = noLogs;
-    const testHarness = new DockerTestHarness({ includeFrontend: false });
     // --------------------------------------------------------------------------------------
     //                             Start the docker containers.
     // --------------------------------------------------------------------------------------
-    await testHarness.run();
-    // @ts-expect-error Using `globalThis` as any.
-    globalThis.__TEST_HARNESS__ = testHarness;
+    await DockerTestHarness.run(false);
 
     // The docker container start-up script publishes the package on-chain.
   }

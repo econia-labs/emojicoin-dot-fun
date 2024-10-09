@@ -6,10 +6,10 @@ import {
   type WriteSetChangeWriteResource,
   type WriteSetChangeWriteTableItem,
 } from "@aptos-labs/ts-sdk";
-import { getPublishHelpers } from "../utils";
+import { getPublishHelpers } from "../../src/utils/test";
 import { STRUCT_STRINGS, SYMBOL_DATA, normalizeHex } from "../../src";
 import EmojiJSONData from "../../src/emoji_data/symbol-emojis.json";
-import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
+import { getPublishTransactionFromIndexer } from "../../src/utils/test/get-publish-txn-from-indexer";
 
 jest.setTimeout(10000);
 

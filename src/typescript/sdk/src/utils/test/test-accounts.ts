@@ -1,5 +1,5 @@
 import { Account, type Ed25519Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
-import testAccountData from "../../../../docker/deployer/json/test-accounts.json";
+import testAccountData from "../../../../../docker/deployer/json/test-accounts.json";
 
 export type FundedAddress = keyof typeof testAccountData;
 type D = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
