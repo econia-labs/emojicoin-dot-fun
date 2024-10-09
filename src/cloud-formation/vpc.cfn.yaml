@@ -16,19 +16,19 @@ Mappings:
 #      # Private subnet in third availability zone.
 #      AvailabilityZone: 2
 #      CidrBlock: '10.0.64.0/19'
-#  PublicSubnets:
-#    A:
-#      # Public subnet in first availability zone.
-#      AvailabilityZone: 0
-#      CidrBlock: '10.0.128.0/19'
-#    B:
-#      # Public subnet in second availability zone.
-#      AvailabilityZone: 1
-#      CidrBlock: '10.0.160.0/19'
-#    C:
-#      # Public subnet in third availability zone.
-#      AvailabilityZone: 2
-#      CidrBlock: '10.0.192.0/19'
+  PublicSubnets:
+    A:
+      # Public subnet in first availability zone.
+      AvailabilityZone: 0
+      CidrBlock: '10.0.128.0/19'
+    B:
+      # Public subnet in second availability zone.
+      AvailabilityZone: 1
+      CidrBlock: '10.0.160.0/19'
+    C:
+      # Public subnet in third availability zone.
+      AvailabilityZone: 2
+      CidrBlock: '10.0.192.0/19'
 Outputs:
   VpcId:
     Export:
@@ -129,28 +129,28 @@ Resources:
   #        SubnetId: !Ref
   #          Fn::Sub: 'PublicSubnet${Identifier}'
   #      Type: 'AWS::EC2::SubnetRouteTableAssociation'
-  #  # A public subnet for each availability zone.
-  #  Fn::ForEach::PublicSubnet:
-  #  - 'Identifier'
-  #  - - 'A'
-  #    - 'B'
-  #    - 'C'
-  #  - PublicSubnet${Identifier}:
-  #      Properties:
-  #        AvailabilityZone: !Select
-  #        - !FindInMap
-  #          - 'PublicSubnets'
-  #          - Ref: 'Identifier'
-  #          - 'AvailabilityZone'
-  #        - Fn::GetAZs: !Ref 'AWS::Region'
-  #        CidrBlock: !FindInMap
-  #        - 'PublicSubnets'
-  #        - Ref: 'Identifier'
-  #        - 'CidrBlock'
-  #        MapPublicIpOnLaunch: true
-  #        VpcId: !Ref 'Vpc'
-  #      Type: 'AWS::EC2::Subnet'
-  #  # Internet gateway for the virtual private cloud.
+  # A public subnet for each availability zone.
+  Fn::ForEach::PublicSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PublicSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PublicSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PublicSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: true
+        VpcId: !Ref 'Vpc'
+      Type: 'AWS::EC2::Subnet'
+  # Internet gateway for the virtual private cloud.
   #  InternetGateway:
   #    Type: 'AWS::EC2::InternetGateway'
   #  # Attachment of internet gateway to the virtual private cloud.
