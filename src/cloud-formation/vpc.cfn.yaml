@@ -3,19 +3,19 @@ Mappings:
   Constants:
     Vpc:
       CidrBlock: '10.0.0.0/16'
-#  PrivateSubnets:
-#    A:
-#      # Private subnet in first availability zone.
-#      AvailabilityZone: 0
-#      CidrBlock: '10.0.0.0/19'
-#    B:
-#      # Private subnet in second availability zone.
-#      AvailabilityZone: 1
-#      CidrBlock: '10.0.32.0/19'
-#    C:
-#      # Private subnet in third availability zone.
-#      AvailabilityZone: 2
-#      CidrBlock: '10.0.64.0/19'
+  PrivateSubnets:
+    A:
+      # Private subnet in first availability zone.
+      AvailabilityZone: 0
+      CidrBlock: '10.0.0.0/19'
+    B:
+      # Private subnet in second availability zone.
+      AvailabilityZone: 1
+      CidrBlock: '10.0.32.0/19'
+    C:
+      # Private subnet in third availability zone.
+      AvailabilityZone: 2
+      CidrBlock: '10.0.64.0/19'
   PublicSubnets:
     A:
       # Public subnet in first availability zone.
@@ -96,28 +96,28 @@ Resources:
   #        RouteTableId: !Ref
   #          Fn::Sub: 'PrivateRouteTable${Identifier}'
   #      Type: 'AWS::EC2::Route'
-  #  # A private subnet for each availability zone.
-  #  Fn::ForEach::PrivateSubnet:
-  #  - 'Identifier'
-  #  - - 'A'
-  #    - 'B'
-  #    - 'C'
-  #  - PrivateSubnet${Identifier}:
-  #      Properties:
-  #        AvailabilityZone: !Select
-  #        - !FindInMap
-  #          - 'PrivateSubnets'
-  #          - Ref: 'Identifier'
-  #          - 'AvailabilityZone'
-  #        - Fn::GetAZs: !Ref 'AWS::Region'
-  #        CidrBlock: !FindInMap
-  #        - 'PrivateSubnets'
-  #        - Ref: 'Identifier'
-  #        - 'CidrBlock'
-  #        MapPublicIpOnLaunch: false
-  #        VpcId: !Ref 'Vpc'
-  #      Type: 'AWS::EC2::Subnet'
-  #  # Association for public route table with each public subnet.
+  # A private subnet for each availability zone.
+  Fn::ForEach::PrivateSubnet:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateSubnet${Identifier}:
+      Properties:
+        AvailabilityZone: !Select
+        - !FindInMap
+          - 'PrivateSubnets'
+          - Ref: 'Identifier'
+          - 'AvailabilityZone'
+        - Fn::GetAZs: !Ref 'AWS::Region'
+        CidrBlock: !FindInMap
+        - 'PrivateSubnets'
+        - Ref: 'Identifier'
+        - 'CidrBlock'
+        MapPublicIpOnLaunch: false
+        VpcId: !Ref 'Vpc'
+      Type: 'AWS::EC2::Subnet'
+  # Association for public route table with each public subnet.
   #  Fn::ForEach::PublicRouteTableAssociation:
   #  - 'Identifier'
   #  - - 'A'
