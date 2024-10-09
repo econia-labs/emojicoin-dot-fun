@@ -96,7 +96,7 @@
     "e2e:frontend": "playwright test --project=firefox",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
-    "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
+    "lint": "eslint --max-warnings=0 -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",
     "playwright:install": "playwright install --with-deps",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
