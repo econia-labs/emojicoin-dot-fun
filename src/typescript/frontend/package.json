@@ -96,7 +96,7 @@
     "e2e-webkit": "playwright test --project=webkit",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
-    "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
+    "lint": "eslint --max-warnings=0 -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",
     "playwright-preps": "./submodule.sh && pnpm i && pnpm exec playwright install",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
