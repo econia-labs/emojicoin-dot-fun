@@ -36,19 +36,20 @@ Outputs:
     Value: !Ref 'Vpc'
 Resources:
   # Network address translation gateway for each public subnet.
-  # Fn::ForEach::NatGateway:
-  # - 'Identifier'
-  # - - 'A'
-  #   - 'B'
-  #   - 'C'
-  # - NatGateway${Identifier}:
-  #     Properties:
-  #       AllocationId: !GetAtt
-  #       - !Sub 'NatGatewayEip${Identifier}'
-  #       - 'AllocationId'
-  #       SubnetId: !Ref
-  #         Fn::Sub: 'PublicSubnet${Identifier}'
-  #     Type: 'AWS::EC2::NatGateway'
+  Fn::ForEach::NatGateway:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - NatGateway${Identifier}:
+      DependsOn: 'InternetGatewayAttachment'
+      Properties:
+        AllocationId: !GetAtt
+        - !Sub 'NatGatewayEip${Identifier}'
+        - 'AllocationId'
+        SubnetId: !Ref
+          Fn::Sub: 'PublicSubnet${Identifier}'
+      Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for each network address translation gateway.
   Fn::ForEach::NatGatewayEip:
   - 'Identifier'
