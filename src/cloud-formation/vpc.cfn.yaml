@@ -60,17 +60,17 @@ Resources:
       Properties:
         Domain: 'vpc'
       Type: 'AWS::EC2::EIP'
-  #  # Route table for each private subnet.
-  #  Fn::ForEach::PrivateRouteTable:
-  #  - 'Identifier'
-  #  - - 'A'
-  #    - 'B'
-  #    - 'C'
-  #  - PrivateRouteTable${Identifier}:
-  #      Properties:
-  #        VpcId: !Ref 'Vpc'
-  #      Type: 'AWS::EC2::RouteTable'
-  #  # Association for each private route table within each private subnet.
+  # Route table for each private subnet.
+  Fn::ForEach::PrivateRouteTable:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateRouteTable${Identifier}:
+      Properties:
+        VpcId: !Ref 'Vpc'
+      Type: 'AWS::EC2::RouteTable'
+  # Association for each private route table within each private subnet.
   #  Fn::ForEach::PrivateRouteTableAssociation:
   #  - 'Identifier'
   #  - - 'A'
@@ -161,10 +161,10 @@ Resources:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::VPCGatewayAttachment'
   # Route table for public subnets in the virtual private cloud.
-  #  PublicRouteTable:
-  #    Properties:
-  #      VpcId: !Ref 'Vpc'
-  #    Type: 'AWS::EC2::RouteTable'
+  PublicRouteTable:
+    Properties:
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::RouteTable'
   #  # Route from public subnets through the internet gateway.
   #  PublicRouteToInternet:
   #    Properties:
