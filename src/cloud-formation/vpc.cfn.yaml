@@ -165,13 +165,17 @@ Resources:
     Properties:
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::RouteTable'
-  #  # Route from public subnets through the internet gateway.
-  #  PublicRouteToInternet:
-  #    Properties:
-  #      DestinationCidrBlock: '0.0.0.0/0'
-  #      GatewayId: !Ref 'InternetGateway'
-  #      RouteTableId: !Ref 'PublicRouteTable'
-  #    Type: 'AWS::EC2::Route'
+  # Route from public subnets through the internet gateway.
+  PublicRouteToInternet:
+    DependsOn:
+    - 'PublicRouteTableAssociationA'
+    - 'PublicRouteTableAssociationB'
+    - 'PublicRouteTableAssociationC'
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+      RouteTableId: !Ref 'PublicRouteTable'
+    Type: 'AWS::EC2::Route'
   # Virtual private cloud for internal networking.
   Vpc:
     Properties:
