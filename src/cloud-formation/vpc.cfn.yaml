@@ -83,20 +83,24 @@ Resources:
         SubnetId: !Ref
           Fn::Sub: 'PrivateSubnet${Identifier}'
       Type: 'AWS::EC2::SubnetRouteTableAssociation'
-  #  # Route through network address translation gateway for each private subnet.
-  #  Fn::ForEach::PrivateRouteThroughNatGateway:
-  #  - 'Identifier'
-  #  - - 'A'
-  #    - 'B'
-  #    - 'C'
-  #  - PrivateRouteThroughNatGateway${Identifier}:
-  #      Properties:
-  #        DestinationCidrBlock: '0.0.0.0/0'
-  #        NatGatewayId: !Ref
-  #          Fn::Sub: 'NatGateway${Identifier}'
-  #        RouteTableId: !Ref
-  #          Fn::Sub: 'PrivateRouteTable${Identifier}'
-  #      Type: 'AWS::EC2::Route'
+  # Route through network address translation gateway for each private subnet.
+  Fn::ForEach::PrivateRouteThroughNatGateway:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - PrivateRouteThroughNatGateway${Identifier}:
+      DependsOn:
+      - 'PrivateRouteTableAssociationA'
+      - 'PrivateRouteTableAssociationB'
+      - 'PrivateRouteTableAssociationC'
+      Properties:
+        DestinationCidrBlock: '0.0.0.0/0'
+        NatGatewayId: !Ref
+          Fn::Sub: 'NatGateway${Identifier}'
+        RouteTableId: !Ref
+          Fn::Sub: 'PrivateRouteTable${Identifier}'
+      Type: 'AWS::EC2::Route'
   # A private subnet for each availability zone.
   Fn::ForEach::PrivateSubnet:
   - 'Identifier'
