@@ -36,19 +36,19 @@ Outputs:
     Value: !Ref 'Vpc'
 Resources:
   # Network address translation gateway for each public subnet.
-  Fn::ForEach::NatGateway:
-  - 'Identifier'
-  - - 'A'
-    - 'B'
-    - 'C'
-  - NatGateway${Identifier}:
-      Properties:
-        AllocationId: !GetAtt
-        - !Sub 'NatGatewayEip${Identifier}'
-        - 'AllocationId'
-        SubnetId: !Ref
-          Fn::Sub: 'PublicSubnet${Identifier}'
-      Type: 'AWS::EC2::NatGateway'
+  # Fn::ForEach::NatGateway:
+  # - 'Identifier'
+  # - - 'A'
+  #   - 'B'
+  #   - 'C'
+  # - NatGateway${Identifier}:
+  #     Properties:
+  #       AllocationId: !GetAtt
+  #       - !Sub 'NatGatewayEip${Identifier}'
+  #       - 'AllocationId'
+  #       SubnetId: !Ref
+  #         Fn::Sub: 'PublicSubnet${Identifier}'
+  #     Type: 'AWS::EC2::NatGateway'
   # Elastic IP address for each network address translation gateway.
   Fn::ForEach::NatGatewayEip:
   - 'Identifier'
@@ -151,15 +151,15 @@ Resources:
         VpcId: !Ref 'Vpc'
       Type: 'AWS::EC2::Subnet'
   # Internet gateway for the virtual private cloud.
-  #  InternetGateway:
-  #    Type: 'AWS::EC2::InternetGateway'
-  #  # Attachment of internet gateway to the virtual private cloud.
-  #  InternetGatewayAttachment:
-  #    Properties:
-  #      InternetGatewayId: !Ref 'InternetGateway'
-  #      VpcId: !Ref 'Vpc'
-  #    Type: 'AWS::EC2::VPCGatewayAttachment'
-  #  # Route table for public subnets in the virtual private cloud.
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+  # Attachment of internet gateway to the virtual private cloud.
+  InternetGatewayAttachment:
+    Properties:
+      InternetGatewayId: !Ref 'InternetGateway'
+      VpcId: !Ref 'Vpc'
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+  # Route table for public subnets in the virtual private cloud.
   #  PublicRouteTable:
   #    Properties:
   #      VpcId: !Ref 'Vpc'
