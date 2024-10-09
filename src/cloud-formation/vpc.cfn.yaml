@@ -49,16 +49,16 @@ Resources:
   #        SubnetId: !Ref
   #          Fn::Sub: 'PublicSubnet${Identifier}'
   #      Type: 'AWS::EC2::NatGateway'
-  #  # Elastic IP address for each network address translation gateway.
-  #  Fn::ForEach::NatGatewayEip:
-  #  - 'Identifier'
-  #  - - 'A'
-  #    - 'B'
-  #    - 'C'
-  #  - NatGatewayEip${Identifier}:
-  #      Properties:
-  #        Domain: 'vpc'
-  #      Type: 'AWS::EC2::EIP'
+  # Elastic IP address for each network address translation gateway.
+  Fn::ForEach::NatGatewayEip:
+  - 'Identifier'
+  - - 'A'
+    - 'B'
+    - 'C'
+  - NatGatewayEip${Identifier}:
+      Properties:
+        Domain: 'vpc'
+      Type: 'AWS::EC2::EIP'
   #  # Route table for each private subnet.
   #  Fn::ForEach::PrivateRouteTable:
   #  - 'Identifier'
