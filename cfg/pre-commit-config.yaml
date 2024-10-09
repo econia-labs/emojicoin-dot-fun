@@ -109,6 +109,16 @@ repos:
     name: 'mypy'
     types:
     - 'python'
+  -
+    entry: |
+      pnpm run lint
+    files: 'src/typescript'
+    id: 'pnpm'
+    language: 'node'
+    name: 'lint typescript'
+    pass_filenames: false
+    types:
+    - 'directory'
   repo: 'local'
 -
   hooks:
