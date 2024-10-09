@@ -1,7 +1,7 @@
 import { AccountAddress, Network, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { getModuleExists, publishPackage } from "../utils/publish";
+import { getModuleExists, publishPackage } from "../../src/utils/test/publish";
 import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS, ONE_APT } from "../../src";
-import { getPublishHelpers } from "../utils";
+import { getPublishHelpers } from "../../src/utils/test";
 
 jest.setTimeout(60000);
 jest.retryTimes(3);

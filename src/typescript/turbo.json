@@ -42,7 +42,7 @@
     "dev": {
       "cache": false
     },
-    "e2e:testnet": {
+    "e2e": {
       "outputs": []
     },
     "format": {
@@ -55,6 +55,9 @@
       "outputs": []
     },
     "lint:fix": {
+      "outputs": []
+    },
+    "playwright-preps": {
       "outputs": []
     },
     "start": {

@@ -2,10 +2,10 @@ import { Ed25519Account } from "@aptos-labs/ts-sdk";
 import { ONE_APT } from "../../src/const";
 import { getRegistryAddress, toChatEvent } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getPublishHelpers } from "../utils";
+import { getPublishHelpers } from "../../src/utils/test";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
 import { STRUCT_STRINGS } from "../../src/utils/type-tags";
-import { getFundedAccount } from "../utils/test-accounts";
+import { getFundedAccount } from "../../src/utils/test/test-accounts";
 
 jest.setTimeout(20000);
 

@@ -2,8 +2,8 @@ import { getRegistryResourceFromWriteSet, toRegistryView } from "../../../src";
 import { type EmojiName } from "../../../src/emoji_data/types";
 import { RegistryView } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../src/utils/aptos-client";
-import TestHelpers from "../../utils/helpers";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import TestHelpers from "../../../src/utils/test/helpers";
+import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
 
 jest.setTimeout(20000);
 

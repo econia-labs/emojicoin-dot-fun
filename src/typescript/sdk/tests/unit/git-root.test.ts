@@ -1,5 +1,5 @@
 import path from "path";
-import { getGitRoot } from "../utils/helpers";
+import { getGitRoot } from "../../src/utils/test/helpers";
 
 describe("ensures find git root works as expected", () => {
   it("should find the correct git root", () => {

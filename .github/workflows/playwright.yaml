@@ -1,9 +1,12 @@
 ---
+env:
+  GITHUB_ACCESS_TOKEN: '${{ secrets.TRADING_VIEW_REPO_ACCESS_TOKEN }}'
+  TRADING_VIEW_REPO_OWNER: '${{ secrets.TRADING_VIEW_REPO_OWNER }}'
 jobs:
   test:
     defaults:
       run:
-        working-directory: 'src/typescript/frontend'
+        working-directory: 'src/typescript'
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
@@ -12,15 +15,14 @@ jobs:
         node-version: 'lts/*'
     - name: 'Install dependencies'
       run: 'npm install -g pnpm && pnpm install'
-    - env:
-        GITHUB_ACCESS_TOKEN: '${{ secrets.TRADING_VIEW_REPO_ACCESS_TOKEN }}'
-        TRADING_VIEW_REPO_OWNER: '${{ secrets.TRADING_VIEW_REPO_OWNER }}'
-      name: 'Prepare CI env'
+    - name: 'Prepare CI env'
       run: 'pnpm run playwright-preps'
+    - name: 'Run pnpm i'
+      run: 'pnpm i'
     - name: 'Install Playwright Browsers'
       run: 'pnpm exec playwright install --with-deps'
     - name: 'Copy env file'
-      run: 'cp ../env.ci .env'
+      run: 'cp ci.env .env'
     - name: 'Run Playwright tests'
       run: 'pnpm exec playwright test'
     - if: 'always()'

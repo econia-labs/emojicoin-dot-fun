@@ -9,11 +9,11 @@ import {
   SYMBOL_DATA,
   UnitOfTime,
 } from "../../../../src";
-import TestHelpers from "../../../utils/helpers";
-import { getFundedAccounts } from "../../../utils/test-accounts";
+import TestHelpers from "../../../../src/utils/test/helpers";
+import { getFundedAccounts } from "../../../../src/utils/test/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { Swap } from "../../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getAptosClient } from "../../../utils";
+import { getAptosClient } from "../../../../src/utils/test";
 import { fetchMarkets } from "../../../../src/indexer-v2/queries/app/home";
 import { SortMarketsBy } from "../../../../src/indexer-v2/types/common";
 import {
