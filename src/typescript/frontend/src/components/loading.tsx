@@ -16,7 +16,7 @@ export const Loading = ({
     const interval = setInterval(() => {
       emojiCycle.unshift(emojiCycle.pop()!);
       setEmoji(emojiCycle[0]);
-    }, 3000);
+    }, 600);
 
     return () => clearInterval(interval);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -31,7 +31,7 @@ export const Loading = ({
           <div
             className={
               centered +
-              " text-center" +
+              " text-center mt-[.3rem]" +
               " mobile-sm:pixel-display-2 sm:pixel-display-2 !text-5xl"
             }
             title={name}
