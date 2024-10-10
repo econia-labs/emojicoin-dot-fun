@@ -30,9 +30,9 @@ export const SYMBOL_DATA = {
   byHex: (v: HexInput) => hexMap.get(normalizeHex(v)),
   byEmojiStrict: (v: SymbolEmoji) => emojiMap.get(v)!,
   byEmoji: (v: string) => emojiMap.get(v),
-  hasName: (v: string) => nameMap.has(v),
-  hasHex: (v: HexInput) => hexMap.has(normalizeHex(v)),
-  hasEmoji: (v: string) => emojiMap.has(v),
+  hasName: (v: string): v is SymbolEmoji => nameMap.has(v),
+  hasHex: (v: HexInput): v is SymbolEmoji => hexMap.has(normalizeHex(v)),
+  hasEmoji: (v: string): v is SymbolEmoji => emojiMap.has(v),
 };
 
 export const getRandomEmoji = (): SymbolEmojiData => {

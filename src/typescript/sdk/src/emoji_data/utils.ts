@@ -2,7 +2,7 @@ import { type HexInput } from "@aptos-labs/ts-sdk";
 import emojiRegex from "emoji-regex";
 import { normalizeHex } from "../utils/hex";
 import { getRandomEmoji, SYMBOL_DATA } from "./symbol-data";
-import { type SymbolEmojiData, type EmojiName, type SymbolData } from "./types";
+import { type SymbolEmojiData, type EmojiName, type SymbolData, MarketSymbolEmojis } from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
 export const getEmojisInString = (symbols: string): Array<string> => {
@@ -10,6 +10,9 @@ export const getEmojisInString = (symbols: string): Array<string> => {
   const matches = symbols.matchAll(regex);
   return Array.from(matches).map((match) => match[0]) as Array<string>;
 };
+
+export const getSymbolEmojisInString = (symbols: string): MarketSymbolEmojis =>
+  getEmojisInString(symbols).filter(SYMBOL_DATA.hasEmoji);
 
 /**
  *
