@@ -20,3 +20,6 @@ export const parseJSON = <T>(json: string): T =>
     }
     return value as T;
   });
+
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+export type QueryType<T extends (...args: any) => any> = Awaited<ReturnType<T>>;

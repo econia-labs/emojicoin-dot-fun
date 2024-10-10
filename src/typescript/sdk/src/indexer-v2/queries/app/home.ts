@@ -62,8 +62,8 @@ export const fetchNumRegisteredMarkets = async () => {
   try {
     latestVersion = await getLatestProcessedEmojicoinVersion();
   } catch (e) {
-    console.error("Couldn't get the latest processed version.");
-    return 0;
+    console.error("Couldn't get the latest processed version.", e);
+    throw e;
   }
   try {
     const numRegisteredMarkets = await RegistryView.view({

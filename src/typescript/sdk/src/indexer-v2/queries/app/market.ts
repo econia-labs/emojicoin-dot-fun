@@ -62,7 +62,7 @@ const selectMarketState = ({ searchEmojis }: { searchEmojis: MarketSymbolEmojis 
     .select("*")
     .eq("symbol_emojis", toQueryArray(searchEmojis))
     .limit(1)
-    .single();
+    .maybeSingle();
 
 export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);
