@@ -10,7 +10,6 @@ import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
-  console.log({MAINTENANCE_MODE, pathname, env: process.env.MAINTENANCE_MODE});
   if (MAINTENANCE_MODE && pathname !== "/maintenance") {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }

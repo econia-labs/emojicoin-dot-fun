@@ -2,13 +2,13 @@ import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage"
 import EmojiNotFoundPage from "./not-found";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
-import { MarketSymbolEmojis, SYMBOL_DATA } from "@sdk/emoji_data";
+import { type MarketSymbolEmojis, SYMBOL_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
-import { QueryType } from "utils";
+import type { QueryType } from "utils";
 import { ROUTES } from "router/routes";
 import { redirect } from "next/navigation";
 
@@ -55,7 +55,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   try {
     state = await fetchMarketState({ searchEmojis: emojis });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     redirect(ROUTES.maintenance);
   }
 
@@ -74,7 +74,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
       swaps = await fetchSwapEvents({ marketID });
       marketView = await fetchContractMarketView(marketAddress.toString());
     } catch (e) {
-      console.log(e);
+      console.error(e);
       redirect(ROUTES.maintenance);
     }
 

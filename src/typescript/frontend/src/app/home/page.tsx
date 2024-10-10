@@ -13,7 +13,7 @@ import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { ROUTES } from "router/routes";
 import { redirect } from "next/navigation";
-import { QueryType } from "utils";
+import type { QueryType } from "utils";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -41,7 +41,7 @@ export default async function Home({ searchParams }: HomePageParams) {
     });
     priceFeed = await fetchPriceFeed({});
   } catch (e) {
-    console.error(e)
+    console.error(e);
     redirect(ROUTES.maintenance);
   }
 
