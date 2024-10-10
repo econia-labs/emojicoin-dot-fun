@@ -16,7 +16,7 @@ export const Loading = ({
     const interval = setInterval(() => {
       emojiCycle.unshift(emojiCycle.pop()!);
       setEmoji(emojiCycle[0]);
-    }, 600);
+    }, 3000);
 
     return () => clearInterval(interval);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
