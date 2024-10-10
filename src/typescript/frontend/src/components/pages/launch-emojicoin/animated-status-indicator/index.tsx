@@ -1,102 +1,136 @@
-import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
-import React, { useCallback, useMemo } from "react";
-import { useEffect } from "react";
+import { getRandomEmoji } from "@sdk/emoji_data";
+import {
+  // type AnimationSequence,
+  // stagger,
+  // useAnimate,
+  // type SequenceOptions,
+  motion,
+} from "framer-motion";
+import React, { useMemo } from "react";
+// import { useEffect } from "react";
 
-export type StaggerSpeed = 1 | 2 | 3 | 4 | 5;
+//const useStaggerAnimation = () => {
+//  const [scope, animate] = useAnimate();
+//
+//  const delay = stagger(0.05, { from: "first" });
+//  const marginBottom = [0, 10, -3, 0];
+//
+//  const generateSequence: (i: number) => AnimationSequence = (i: number) => [
+//    [`.item-${i}`, { marginBottom, opacity: i == 0 ? 1 : 0 }, { delay }],
+//    [`.item-${i}`, { marginBottom, opacity: i == 1 ? 1 : 0 }, { delay }],
+//    [`.item-${i}`, { marginBottom, opacity: i == 2 ? 1 : 0 }, { delay }],
+//  ];
+//
+//  const sequence0 = generateSequence(0);
+//  const sequence1 = generateSequence(1);
+//  const sequence2 = generateSequence(2);
+//
+//  const options: SequenceOptions = {
+//    repeat: Infinity,
+//    repeatType: "loop",
+//  };
+//
+//  useEffect(() => {
+//    animate(sequence0, options);
+//    animate(sequence1, options);
+//    animate(sequence2, options);
+//    /* eslint-disable-next-line */
+//  }, []);
+//
+//  return scope;
+//};
 
-/**
- * @param speed The speed of the animation. Higher is faster. 1 is the default.
- * @param delay The delay before the animation starts. 0 is the default.
- * @returns The scope ref to pass to the animated component's shared parent.
- */
-const useStaggerAnimation = ({
-  speed = 1,
-  delay = 0,
-}: {
-  speed?: StaggerSpeed;
-  delay?: number;
-}) => {
-  const [scope, animate] = useAnimate();
+//export const AnimatedStatusIndicator = ({
+//  numHearts = 14,
+//}: {
+//  numHearts?: number;
+//}) => {
+//  const scope = useStaggerAnimation();
+//  const emptyArray = useMemo(() => Array.from({ length: numHearts }), [numHearts]);
+//
+//  const getHearts = useCallback(
+//    (emoji: string, index: number) =>
+//      emptyArray.map((_, i) => (
+//        <span
+//          key={`heart-${i}-${index}`}
+//          className={`m-auto item-${index}`}
+//          style={{
+//          }}
+//        >
+//          {emoji}
+//        </span>
+//      )),
+//    [emptyArray]
+//  );
+//
+//  const hearts = ["🩷", "💚", "💙"];
+//
+//  return (
+//    <div className="pixel-heading-4 relative select-none" ref={scope}>
+//      {hearts.map((heart, i) => (
+//        <div key={`heart-row-${i}`} className="absolute translate-y-[-50%] translate-x-[-50%] flex flex-row z-[-1] h-[2rem]">
+//          {getHearts(heart, i)}
+//        </div>
+//      ))}
+//    </div>
+//  );
+//};
+//
+//export default React.memo(AnimatedStatusIndicator);
 
-  const boundedSpeed = Math.min(5 as StaggerSpeed, Math.max(1 as StaggerSpeed, speed));
-  const sequence: AnimationSequence = [
-    [
-      ".item-1",
-      { opacity: [0, 1], scale: [1, 1.05] },
-      { delay: stagger(0.06 - 0.01 * boundedSpeed, { from: "first" }) },
-    ],
-    [
-      ".item-1",
-      { opacity: [1, 0], scale: [1.05, 1] },
-      { delay: stagger(0.06 - 0.01 * boundedSpeed, { from: "first" }), at: "-0.25" },
-    ],
-  ];
-
-  useEffect(() => {
-    animate(sequence, {
-      delay,
-      repeat: Infinity,
-      repeatType: "loop",
-    });
-
-    animate(
-      ".item-1",
-      {
-        filter: ["hue-rotate(0deg)", "hue-rotate(360deg)"],
-      },
-      { delay: stagger(0.03, { from: "last", startDelay: 0.5 }), duration: 4, repeat: Infinity }
-    );
-    /* eslint-disable-next-line */
-  }, []);
-
-  return scope;
-};
-
-export const AnimatedStatusIndicator = ({
-  numSquares = 14,
-  delay,
-  speed,
-}: {
-  numSquares?: number;
-  delay?: number;
-  speed?: StaggerSpeed;
-}) => {
-  const scope = useStaggerAnimation({ speed, delay });
-  const emptyArray = useMemo(() => Array.from({ length: numSquares }), [numSquares]);
-
-  const getSquares = useCallback(
-    (color: boolean) =>
-      emptyArray.map((_, i) => (
-        <span
-          key={color ? `color-${i}` : `gray-${i}`}
-          className={`m-auto${color ? " item-1" : ""}`}
-          style={
-            color
-              ? {
-                  boxShadow: "0 0 15px 4px #00FF0055",
-                }
-              : {
-                  opacity: 0.2,
-                }
-          }
-        >
-          {color ? "🟩" : "⬜"}
-        </span>
-      )),
-    [emptyArray]
+export const AnimatedStatusIndicator = ({ numHearts = 14, className }: { numHearts?: number, className?: string }) => {
+  const emojis = useMemo(() => Array.from({ length: numHearts }), [numHearts]).map(() =>
+    getRandomEmoji()
   );
+  const degrees = 360 / numHearts;
 
   return (
-    <div className="flex flex-row relative h-fit w-fit pixel-heading-4 " ref={scope}>
-      <div className="flex flex-col gap-1">
-        <div className="relative flex flex-row select-none">
-          {getSquares(true)}
-          <div className="absolute top-[50%] translate-y-[-50%] left-0 gap-0 flex flex-row z-[-1]">
-            {getSquares(false)}
+    <motion.div
+      className={className ?? "" + " pixel-heading-4 relative select-none mt-[100px]"}
+      initial={{
+        transform: "rotate(0deg)",
+      }}
+      transition={{
+        repeat: Infinity,
+        ease: null,
+        duration: 2.5,
+      }}
+    >
+      {emojis.map((emoji, i) => (
+        <div key={`heart-row-${i}`} className="relative">
+          <div
+            className="z-[-1] absolute top-0 left-0 w-[20px] h-[150px]"
+            style={{
+              transform: `translateX(-50%) translateY(-50%) rotate(${degrees * i}deg)`,
+            }}
+          >
+            {emoji.emoji}
+          </div>
+          <div
+            className="z-[1] absolute top-0 left-0 w-[30px] h-[160px]"
+            style={{
+              transform: `translateX(-50%) translateY(-50%) rotate(${degrees * i}deg)`,
+            }}
+          >
+            <motion.div
+              className="w-[30px] h-[30px] bg-black"
+              initial={{
+                opacity: 1,
+              }}
+              animate={{
+                opacity: [null, 0, 1],
+              }}
+              transition={{
+                delay: (1 / numHearts) * i,
+                duration: 1,
+                ease: "circIn",
+                repeat: Infinity,
+              }}
+            ></motion.div>
           </div>
         </div>
-      </div>
-    </div>
+      ))}
+    </motion.div>
   );
 };
 

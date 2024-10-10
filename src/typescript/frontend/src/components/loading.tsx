@@ -1,17 +1,13 @@
 import React, { useEffect } from "react";
-import AnimatedStatusIndicator, {
-  type StaggerSpeed,
-} from "./pages/launch-emojicoin/animated-status-indicator";
+import AnimatedStatusIndicator from "./pages/launch-emojicoin/animated-status-indicator";
 import { getRandomEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
 
 export const Loading = ({
   emojis,
   numSquares,
-  animationSpeed,
 }: {
   emojis?: SymbolEmojiData[];
   numSquares?: number;
-  animationSpeed?: StaggerSpeed;
 }) => {
   const emojiCycle = emojis ?? Array.from({ length: 20 }, getRandomEmoji);
   const [{ name, emoji }, setEmoji] = React.useState(emojiCycle[0]);
@@ -26,20 +22,23 @@ export const Loading = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
+  const centered = "absolute left-0 right-0 ms-auto me-auto w-fit";
+
   return (
     <>
       <div className="flex relative w-full h-full m-auto">
         <div className="flex flex-col m-auto gap-10 max-w-[420px] justify-center items-center align-middle">
           <div
             className={
-              "flex flex-col h-full justify-center items-center align-middle text-center" +
-              " mobile-sm:pixel-display-2 sm:pixel-display-2"
+              centered +
+              " text-center mt-[.3rem]" +
+              " mobile-sm:pixel-display-2 sm:pixel-display-2 !text-5xl"
             }
             title={name}
           >
             {emoji}
           </div>
-          <AnimatedStatusIndicator speed={animationSpeed} numSquares={numSquares} />
+          <AnimatedStatusIndicator className={centered} numHearts={numSquares} />
         </div>
       </div>
     </>
