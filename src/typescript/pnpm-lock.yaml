@@ -96,6 +96,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
       emoji-mart:
         specifier: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz
         version: https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz
