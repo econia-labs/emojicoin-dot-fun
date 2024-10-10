@@ -1,7 +1,7 @@
 import "server-only";
 import { APTOS_NETWORK, IS_ALLOWLIST_ENABLED } from "./env";
 import { Network } from "@aptos-labs/ts-sdk";
-import { EMOJICOIN_INDEXER_URL } from "@sdk/server-env";
+import { EMOJICOIN_INDEXER_URL } from "@sdk/server/env";
 
 if (typeof process.env.REVALIDATION_TIME === "undefined") {
   if (process.env.NODE) throw new Error("Environment variable REVALIDATION_TIME is undefined.");
