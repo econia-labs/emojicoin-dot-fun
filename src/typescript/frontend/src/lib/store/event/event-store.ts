@@ -19,7 +19,7 @@ import {
   pushPeriodicStateEvents,
   toMappedMarketEvents,
 } from "./utils";
-import { addToLocalStorage, initialStateFromLocalStorage } from "./local-storage";
+import { initialStatePatch } from "./local-storage";
 import { periodEnumToRawDuration } from "@sdk/const";
 import { joinEmojis } from "@sdk/emoji_data";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
@@ -28,7 +28,7 @@ import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
 export const createEventStore = () => {
   return createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
-      ...initialStateFromLocalStorage(),
+      ...initialStatePatch(),
       getMarket: (m) => get().markets.get(joinEmojis(m)),
       getRegisteredMarkets: () => {
         return get().markets;
@@ -51,7 +51,6 @@ export const createEventStore = () => {
             marketEvents.forEach((event) => market.stateEvents.push(event));
           });
         });
-        filtered.forEach(addToLocalStorage);
       },
       loadEventsFromServer: (eventsIn: Array<AnyEventModel>) => {
         const guids = get().guids;
@@ -77,7 +76,6 @@ export const createEventStore = () => {
             pushPeriodicStateEvents(market, extractFilter(marketEvents, isPeriodicStateEventModel));
             DEBUG_ASSERT(() => marketEvents.length === 0);
           });
-          events.forEach(addToLocalStorage);
         });
       },
       pushEventFromClient: (event: AnyEventModel) => {
@@ -108,7 +106,6 @@ export const createEventStore = () => {
             }
           }
         });
-        addToLocalStorage(event);
       },
       setLatestBars: ({ marketMetadata, latestBars }: SetLatestBarsArgs) => {
         set((state) => {

@@ -33,16 +33,9 @@ import { ROUTES } from "router/routes";
 import { type HomePageProps } from "app/home/HomePage";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import { type BrokerEvent } from "@/broker/types";
 
-export interface EmojiTableProps extends Omit<HomePageProps, "featured" | "children"> {}
-
-const baseGridSubscriptions: Array<BrokerEvent> = [
-  "Chat",
-  "Liquidity",
-  "MarketRegistration",
-  "Swap",
-];
+export interface EmojiTableProps
+  extends Omit<HomePageProps, "featured" | "children" | "priceFeed"> {}
 
 const EmojiTable = (props: EmojiTableProps) => {
   const router = useRouter();
@@ -111,9 +104,7 @@ const EmojiTable = (props: EmojiTableProps) => {
   const rowLength = useGridRowLength();
 
   useReliableSubscribe({
-    eventTypes: shouldAnimateGrid
-      ? ["MarketLatestState", ...baseGridSubscriptions]
-      : baseGridSubscriptions,
+    eventTypes: ["MarketLatestState"],
   });
 
   return (
@@ -164,13 +155,9 @@ const EmojiTable = (props: EmojiTableProps) => {
                 >
                   <StyledGrid>
                     {shouldAnimateGrid ? (
-                      <LiveClientGrid markets={markets} sortBy={sort ?? SortMarketsBy.MarketCap} />
+                      <LiveClientGrid markets={markets} sortBy={sort} />
                     ) : (
-                      <ClientGrid
-                        markets={markets}
-                        page={page}
-                        sortBy={sort ?? SortMarketsBy.MarketCap}
-                      />
+                      <ClientGrid markets={markets} page={page} sortBy={sort} />
                     )}
                   </StyledGrid>
                 </motion.div>

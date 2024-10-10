@@ -36,9 +36,13 @@ const ThWrapper = ({ className, children }: { className: string } & PropsWithChi
 
 const TradeHistory = (props: TradeHistoryProps) => {
   const swaps = useEventStore((s) => s.markets.get(props.data.symbol)?.swapEvents ?? []);
+
   const initialLoad = useRef(true);
   useEffect(() => {
     initialLoad.current = false;
+    return () => {
+      initialLoad.current = true;
+    };
   }, []);
 
   // TODO: Add infinite scroll to this.
