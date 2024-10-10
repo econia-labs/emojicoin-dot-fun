@@ -3,12 +3,17 @@ import {
   COOKIE_FOR_HASHED_ADDRESS,
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
+import { MAINTENANCE_MODE } from "lib/server-env";
 import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
 import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
+  console.log({MAINTENANCE_MODE, pathname, env: process.env.MAINTENANCE_MODE});
+  if (MAINTENANCE_MODE && pathname !== "/maintenance") {
+    return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
+  }
   if (
     pathname === "/social-preview.png" ||
     pathname === "/webclip.png" ||

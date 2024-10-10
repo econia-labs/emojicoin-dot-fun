@@ -20,3 +20,5 @@ export const parseJSON = <T>(json: string): T =>
     }
     return value as T;
   });
+
+export type QueryType<T extends (...args: any) => any> = Awaited<ReturnType<T>>;

@@ -48,3 +48,5 @@ if (APTOS_NETWORK === Network.LOCAL && !EMOJICOIN_INDEXER_URL.includes("localhos
     `APTOS_NETWORK is ${APTOS_NETWORK} but the indexer processor url is set to ${EMOJICOIN_INDEXER_URL}`
   );
 }
+
+export const MAINTENANCE_MODE: boolean = process.env.MAINTENANCE_MODE === "true";

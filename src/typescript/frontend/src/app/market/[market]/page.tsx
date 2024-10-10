@@ -2,12 +2,15 @@ import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage"
 import EmojiNotFoundPage from "./not-found";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { MarketSymbolEmojis, SYMBOL_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
+import { QueryType } from "utils";
+import { ROUTES } from "router/routes";
+import { redirect } from "next/navigation";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -34,23 +37,47 @@ interface EmojicoinPageProps {
 const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const { market: marketSlug } = params.params;
   const names = pathToEmojiNames(marketSlug);
-  const emojis = names.map((n) => {
-    const res = SYMBOL_DATA.byName(n)?.emoji;
-    if (!res) {
-      throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
-    }
-    return res;
-  });
-  const state = await fetchMarketState({ searchEmojis: emojis });
+  let emojis: MarketSymbolEmojis;
+  try {
+    emojis = names.map((n) => {
+      const res = SYMBOL_DATA.byName(n)?.emoji;
+      if (!res) {
+        throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+      }
+      return res;
+    });
+  } catch (_) {
+    return <EmojiNotFoundPage />;
+  }
+
+  let state: QueryType<typeof fetchMarketState>;
+
+  try {
+    state = await fetchMarketState({ searchEmojis: emojis });
+  } catch (e) {
+    console.log(e);
+    redirect(ROUTES.maintenance);
+  }
 
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 
   if (state) {
     const { marketID } = state.market;
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
-    const chats = await fetchChatEvents({ marketID });
-    const swaps = await fetchSwapEvents({ marketID });
-    const marketView = await fetchContractMarketView(marketAddress.toString());
+
+    let chats: QueryType<typeof fetchChatEvents>;
+    let swaps: QueryType<typeof fetchSwapEvents>;
+    let marketView: QueryType<typeof fetchContractMarketView>;
+
+    try {
+      chats = await fetchChatEvents({ marketID });
+      swaps = await fetchSwapEvents({ marketID });
+      marketView = await fetchContractMarketView(marketAddress.toString());
+    } catch (e) {
+      console.log(e);
+      redirect(ROUTES.maintenance);
+    }
+
     return (
       <ClientEmojicoinPage
         data={{
