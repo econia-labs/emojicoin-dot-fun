@@ -31,16 +31,24 @@ For a concise list of such parameters, see a [stack deployment file] at
 
 The indexer uses
 [NAT gateways to provide internet access for private instances], with
-[a NAT gateway in each availability zone (per AWS best practices)] to ensure
+[a NAT gateway in each Availability Zone][az-specific nat gateways] to ensure
 high resilience. To avoid [VPC quota] exhaustion for multiple indexer
 deployments, networking resources associated with the indexer are thus
 abstracted into a [VPC]-specific stack at `vpc.cfn.yaml`, whose resources can be
 re-used across multiple indexer deployments via [cross-stack references].
 
 The VPC stack contains a [private and public subnet] for each
-[availability zone], with each public subnet connecting to a common
-[custom route table] containing a [public internet route]. Each private subnet
-has its own custom route table with a [NAT gateway route].
+[Availability Zone] (AZ), with each public subnet sharing a common
+[public internet route] inside a [custom route table]. Per
+[AZ-specific NAT gateway best practices][az-specific nat gateways], each private
+subnet has its own custom route table with a [NAT gateway route]. No additional
+routing is required to enable communication across subnets, because as per the
+[AWS routes docs]:
+
+> Every route table contains a local route for communication within the VPC.
+> This route is added by default to all route tables. If your VPC has more than
+> one IPv4 CIDR block, your route tables contain a local route for each IPv4
+> CIDR block.
 
 ## Setup
 
@@ -431,7 +439,6 @@ instance is live and at idle.
 This design ensures that at least one server container is always live for both
 REST and WebSocket endpoints.
 
-[a nat gateway in each availability zone (per aws best practices)]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
@@ -443,6 +450,8 @@ REST and WebSocket endpoints.
 [auto-selection of aurora az]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-availabilityzone
 [availability zone]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-availability-zones
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
+[aws routes docs]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html#route-table-routes
+[az-specific nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
 [container autoscaling]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
