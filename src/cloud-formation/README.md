@@ -37,6 +37,11 @@ deployments, networking resources associated with the indexer are thus
 abstracted into a [VPC]-specific stack at `vpc.cfn.yaml`, whose resources can be
 re-used across multiple indexer deployments via [cross-stack references].
 
+The VPC stack contains a [private and public subnet] for each
+[availability zone], with each public subnet connecting to a common
+[custom route table] containing a [public internet route]. Each private subnet
+has its own custom route table with a [NAT gateway route].
+
 ## Setup
 
 1. [Make Route 53 the DNS service for a domain you own], which will
@@ -436,6 +441,7 @@ REST and WebSocket endpoints.
 [aurora clusters]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html
 [aurora postgresql]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraPostgreSQL.html
 [auto-selection of aurora az]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-availabilityzone
+[availability zone]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-availability-zones
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
@@ -443,6 +449,7 @@ REST and WebSocket endpoints.
 [container logging permissions]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html#ec2-considerations
 [create the stack with gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-walkthrough.html
 [cross-stack references]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/walkthrough-crossstackref.html
+[custom route table]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html#custom-route-tables
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [ecr pull through cache permissions]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-iam.html
@@ -462,10 +469,13 @@ REST and WebSocket endpoints.
 [make route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
 [managed rules]: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
 [multi-az aurora serverless v2 cluster]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html#aurora-serverless.ha
+[nat gateway route]: https://docs.aws.amazon.com/vpc/latest/userguide/route-table-options.html#route-tables-nat
 [nat gateways to provide internet access for private instances]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [parameter naming constraints]: https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-su-create.html
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
+[private and public subnet]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html#subnet-types
+[public internet route]: https://docs.aws.amazon.com/vpc/latest/userguide/route-table-options.html#route-tables-internet-gateway
 [resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 [role passing]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_passrole.html
 [rule actions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-ruleaction.html
