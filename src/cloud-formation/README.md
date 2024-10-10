@@ -50,6 +50,11 @@ routing is required to enable communication across subnets, because as per the
 > one IPv4 CIDR block, your route tables contain a local route for each IPv4
 > CIDR block.
 
+The VPC uses an [AWS-recommended VPC CIDR block] of `10.0.0.0/16` corresponding
+to 65,536 IP addresses, with each non-overlapping [subnet CIDR block] using a
+`/19` netmask for up to 8,192 IP addresses per subnet (excluding the
+[5 default reserved addresses per subnet]).
+
 ## Setup
 
 1. [Make Route 53 the DNS service for a domain you own], which will
@@ -439,6 +444,7 @@ instance is live and at idle.
 This design ensures that at least one server container is always live for both
 REST and WebSocket endpoints.
 
+[5 default reserved addresses per subnet]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-sizing.html
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
@@ -451,6 +457,7 @@ REST and WebSocket endpoints.
 [availability zone]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-availability-zones
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [aws routes docs]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html#route-table-routes
+[aws-recommended vpc cidr block]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html
 [az-specific nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
@@ -494,6 +501,7 @@ REST and WebSocket endpoints.
 [stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html#git-sync-concepts-terms-depoyment-file
 [step scale cloudwatch alarm]: https://docs.aws.amazon.com/autoscaling/application/userguide/step-scaling-policy-overview.html#step-scaling-how-it-works
 [step scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-step-scaling-policies.html
+[subnet cidr block]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-sizing.html
 [systems manager parameters]: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
 [target tracking]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
