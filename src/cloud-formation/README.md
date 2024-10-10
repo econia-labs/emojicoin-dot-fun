@@ -34,8 +34,9 @@ The indexer uses
 [a NAT gateway in each Availability Zone][az-specific nat gateways] to ensure
 high resilience. To avoid [VPC quota] exhaustion for multiple indexer
 deployments, networking resources associated with the indexer are thus
-abstracted into a [VPC]-specific stack at `vpc.cfn.yaml`, whose resources can be
-re-used across multiple indexer deployments via [cross-stack references].
+abstracted into a [VPC]-specific [stack template][template file] at
+`vpc.cfn.yaml`, whose resources can be re-used across multiple indexer
+deployments via [cross-stack references].
 
 The VPC stack contains a [private and public subnet] for each
 [Availability Zone] (AZ), with each public subnet sharing a common
