@@ -9,7 +9,6 @@ module.exports = {
   extends: [
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "prettier",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -19,9 +18,8 @@ module.exports = {
     sourceType: "module",
     warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "unused-imports", "import", "prettier"],
+  plugins: ["@typescript-eslint", "unused-imports", "import"],
   rules: {
-    "prettier/prettier": ["error"],
     "@typescript-eslint/no-explicit-any": "warn",
     "no-console": [
       "warn",
