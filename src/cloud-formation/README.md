@@ -27,6 +27,16 @@ be used to [conditionally][conditions] provision and de-provision [resources].
 For a concise list of such parameters, see a [stack deployment file] at
 `deploy-*.yaml`. See the template [rules] section for associated dependencies.
 
+## VPC stack
+
+The indexer uses
+[NAT gateways to provide internet access for private instances], with
+[a NAT gateway in each availability zone (per AWS best practices)] to ensure
+high resilience. To avoid [VPC quota] exhaustion for multiple indexer
+deployments, networking resources associated with the indexer are thus
+abstracted into a [VPC]-specific stack at `vpc.cfn.yaml`, whose resources can be
+re-used across multiple indexer deployments via [cross-stack references].
+
 ## Setup
 
 1. [Make Route 53 the DNS service for a domain you own], which will
@@ -378,10 +388,6 @@ The indexer database uses [Aurora PostgreSQL] on a
 [high availability][high availability for aurora] with
 [fault tolerant replica promotion] and [autoscaling][aurora autoscaling].
 
-### NAT gateway redundancy
-
-The indexer uses [a NAT gateway in each availability zone] for high resilience.
-
 ### Permissions
 
 The `ContainerRole` [ECS task execution IAM role] provides
@@ -420,7 +426,7 @@ instance is live and at idle.
 This design ensures that at least one server container is always live for both
 REST and WebSocket endpoints.
 
-[a nat gateway in each availability zone]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
+[a nat gateway in each availability zone (per aws best practices)]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
@@ -436,6 +442,7 @@ REST and WebSocket endpoints.
 [container autoscaling]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [container logging permissions]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html#ec2-considerations
 [create the stack with gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-walkthrough.html
+[cross-stack references]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/walkthrough-crossstackref.html
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [ecr pull through cache permissions]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-iam.html
@@ -455,6 +462,7 @@ REST and WebSocket endpoints.
 [make route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
 [managed rules]: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
 [multi-az aurora serverless v2 cluster]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html#aurora-serverless.ha
+[nat gateways to provide internet access for private instances]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [parameter naming constraints]: https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-su-create.html
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
@@ -474,6 +482,8 @@ REST and WebSocket endpoints.
 [the upstream repository credentials docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-secret.html
 [transaction stream service endpoint]: https://aptos.dev/en/build/indexer/txn-stream
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
+[vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
+[vpc quota]: https://docs.aws.amazon.com/vpc/latest/userguide/amazon-vpc-limits.html
 [web acl traffic overview dashboards]: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-dashboards.html
 [web application firewall]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
 [`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
