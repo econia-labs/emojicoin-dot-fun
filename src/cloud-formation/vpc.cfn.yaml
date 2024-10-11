@@ -30,6 +30,34 @@ Mappings:
       AvailabilityZone: 2
       CidrBlock: '10.0.192.0/19'
 Outputs:
+  InternetGatewayId:
+    Export:
+      Name: !Sub '${AWS::StackName}-InternetGatewayId'
+    Value: !Ref 'InternetGateway'
+  PrivateSubnetIdA:
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnetIdA'
+    Value: !Ref 'PrivateSubnetA'
+  PrivateSubnetIdB:
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnetIdB'
+    Value: !Ref 'PrivateSubnetB'
+  PrivateSubnetIdC:
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnetIdC'
+    Value: !Ref 'PrivateSubnetC'
+  PublicSubnetIdA:
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnetIdA'
+    Value: !Ref 'PublicSubnetA'
+  PublicSubnetIdB:
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnetIdB'
+    Value: !Ref 'PublicSubnetB'
+  PublicSubnetIdC:
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnetIdC'
+    Value: !Ref 'PublicSubnetC'
   VpcId:
     Export:
       Name: !Sub '${AWS::StackName}-VpcId'
