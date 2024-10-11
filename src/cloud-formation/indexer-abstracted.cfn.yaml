@@ -317,8 +317,7 @@ Resources:
         IpProtocol: 'tcp'
         ToPort: 443
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Minimal VM for monitoring internal processes.
   BastionHost:
@@ -348,8 +347,7 @@ Resources:
           - !Ref 'ProcessorWsClientSecurityGroup'
           - !Ref 'AWS::NoValue'
         SubnetId:
-          Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdA'
+          Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
       UserData:
         # Install PostgreSQL client & websocat, set connection strings.
         Fn::Base64: !Sub
@@ -460,8 +458,7 @@ Resources:
       SecurityGroupIds:
       - !Ref 'BastionHostConnectionEndpointSecurityGroup'
       SubnetId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-PrivateSubnetIdA'
+        Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
     Type: 'AWS::EC2::InstanceConnectEndpoint'
   # Security group for bastion host connection endpoint.
   BastionHostConnectionEndpointSecurityGroup:
@@ -472,8 +469,7 @@ Resources:
       - DestinationSecurityGroupId: !Ref 'BastionHostSecurityGroup'
         IpProtocol: -1
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Security group for the bastion host.
   BastionHostSecurityGroup:
@@ -481,8 +477,7 @@ Resources:
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the bastion host security group, separated to eliminate
   # circular dependencies with the security group for the connection endpoint.
@@ -525,8 +520,7 @@ Resources:
       TargetType: 'ip'
       UnhealthyThresholdCount: 2
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Security group for the broker's WebSocket server.
   BrokerPublisherSecurityGroup:
@@ -534,8 +528,7 @@ Resources:
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the broker's WebSocket server security group.
   BrokerPublisherSecurityGroupIngress:
@@ -701,8 +694,7 @@ Resources:
       - DestinationSecurityGroupId: !Ref 'BrokerPublisherSecurityGroup'
         IpProtocol: -1
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Cluster for running ECS containers.
   ContainerCluster:
@@ -827,8 +819,7 @@ Resources:
       - CidrIp: '0.0.0.0/0'
         IpProtocol: -1
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Database cluster.
   DbCluster:
@@ -887,8 +878,7 @@ Resources:
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the database's security group, separated to eliminate
   # circular dependencies with security group for users of the database.
@@ -918,8 +908,7 @@ Resources:
       - DestinationSecurityGroupId: !Ref 'DbSecurityGroup'
         IpProtocol: -1
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Autoscaling policy for scaling in broker and PostgREST.
   Fn::ForEach::AutoScalingPolicyScaleIn:
@@ -1081,8 +1070,7 @@ Resources:
       - DestinationSecurityGroupId: !Ref 'NlbSecurityGroup'
         IpProtocol: -1
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Security group for the network load balancer.
   NlbSecurityGroup:
@@ -1090,8 +1078,7 @@ Resources:
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Network load balancer security group ingress policy for PostgREST traffic
   # over VPC link.
@@ -1127,8 +1114,7 @@ Resources:
       - DestinationSecurityGroupId: !Ref 'PostgrestServerSecurityGroup'
         IpProtocol: -1
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Listener for network load balancer traffic to PostgREST.
   PostgrestNlbListener:
@@ -1172,8 +1158,7 @@ Resources:
       TargetType: 'ip'
       UnhealthyThresholdCount: 2
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   # Service for running PostgREST.
   PostgrestRunner:
@@ -1229,8 +1214,7 @@ Resources:
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the PostgREST server security group.
   PostgrestServerSecurityGroupIngress:
@@ -1357,8 +1341,7 @@ Resources:
       Description: !Ref 'AWS::StackName'
       Name: !Ref 'AWS::StackName'
       Vpc:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
   ProcessorPublisherSecurityGroup:
@@ -1366,8 +1349,7 @@ Resources:
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # Ingress policy for the processor's WebSocket server security group.
   ProcessorPublisherSecurityGroupIngress:
@@ -1542,8 +1524,7 @@ Resources:
       - DestinationSecurityGroupId: !Ref 'ProcessorPublisherSecurityGroup'
         IpProtocol: -1
       VpcId:
-        Fn::ImportValue:
-          'Fn::Sub': '${VpcStackName}-VpcId'
+        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
   # REST API endpoint.
   RestApi:
