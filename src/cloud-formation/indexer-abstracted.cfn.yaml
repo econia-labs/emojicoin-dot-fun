@@ -178,11 +178,6 @@ Parameters:
     - 'false'
     - 'true'
     Type: 'String'
-  DeployRouteTables:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
   DeployStack:
     AllowedValues:
     - 'false'
@@ -1900,13 +1895,9 @@ Rules:
   DeployContainers:
     Assertions:
     - Assert: !Or
-      - !And
-        - !Equals
-          - !Ref 'DeployDb'
-          - 'true'
-        - !Equals
-          - !Ref 'DeployRouteTables'
-          - 'true'
+      - !Equals
+        - !Ref 'DeployDb'
+        - 'true'
       - !Equals
         - !Ref 'DeployContainers'
         - 'false'
@@ -1980,15 +1971,6 @@ Rules:
         - 'true'
       - !Equals
         - !Ref 'DeployRestApiDnsRecord'
-        - 'false'
-  DeployRouteTables:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'DeployVpc'
-        - 'true'
-      - !Equals
-        - !Ref 'DeployRouteTables'
         - 'false'
   DeployVpc:
     Assertions:
