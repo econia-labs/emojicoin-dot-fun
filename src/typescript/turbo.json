@@ -18,7 +18,9 @@
     "BROKER_PORT",
     "FETCH_DEBUG",
     "FETCH_DEBUG_VERBOSE",
-    "VERBOSE_TEST_LOGS"
+    "VERBOSE_TEST_LOGS",
+    "TRADING_VIEW_REPO_OWNER",
+    "GITHUB_ACCESS_TOKEN"
   ],
   "tasks": {
     "build": {
@@ -42,7 +44,10 @@
     "dev": {
       "cache": false
     },
-    "e2e": {
+    "e2e:frontend": {
+      "outputs": []
+    },
+    "e2e:sdk": {
       "outputs": []
     },
     "format": {
@@ -57,13 +62,16 @@
     "lint:fix": {
       "outputs": []
     },
-    "playwright-preps": {
+    "playwright:install": {
       "outputs": []
     },
     "start": {
       "dependsOn": [
         "build"
       ],
+      "outputs": []
+    },
+    "submodule": {
       "outputs": []
     },
     "test": {

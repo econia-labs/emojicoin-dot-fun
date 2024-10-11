@@ -97,7 +97,7 @@ export const spawnWrapper = (
   command: string,
   args: string[],
   quiet: boolean = false,
-  filterLogsFrom: ContainerName[] = [],
+  filterLogsFrom: ContainerName[] = []
 ): ChildProcessWithoutNullStreams => {
   const childProcess = spawn(command, args);
   if (!quiet) {

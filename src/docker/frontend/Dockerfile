@@ -8,7 +8,7 @@ RUN ["mv", "/root/.local/share/pnpm/pnpm", "/usr/local/bin"]
 
 COPY . /
 
-WORKDIR /src/typescript/frontend
+WORKDIR /src/typescript
 
 ARG HASH_SEED \
     NEXT_PUBLIC_APTOS_NETWORK \
@@ -33,4 +33,4 @@ ENV HASH_SEED=$HASH_SEED \
 
 RUN ["bash", "-c", "pnpm install && pnpm run build"]
 
-CMD ["pnpm", "run", "start", "-H", "0.0.0.0"]
+CMD ["bash", "-c", "pnpm run start -- -H 0.0.0.0"]

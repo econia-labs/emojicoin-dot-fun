@@ -7,7 +7,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import path from "path";
 import findGitRoot from "find-git-root";
-import { getAptosClient } from "../../utils/aptos-client";
+import { getAptosClient } from "../aptos-client";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../markets/utils";
 import { EmojicoinDotFun, getEvents } from "../../emojicoin_dot_fun";
 import {

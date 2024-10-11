@@ -7,6 +7,15 @@ import { APTOS_NETWORK } from "lib/env";
 export const getAptosConfig = (): AptosConfig => {
   // Check if it's a valid network.
   const networkString = APTOS_NETWORK;
+  console.log({ networkString });
+  if ((networkString as string) === "docker") {
+    return new AptosConfig({
+      network: NetworkToNetworkName["custom"],
+      fullnode: NetworkToNodeAPI["local"].replace("127.0.0.1", "host.docker.internal"),
+      indexer: NetworkToIndexerAPI["local"].replace("127.0.0.1", "host.docker.internal"),
+      faucet: NetworkToFaucetAPI["local"].replace("127.0.0.1", "host.docker.internal"),
+    });
+  }
   const network = NetworkToNetworkName[networkString ?? APTOS_NETWORK];
   const fullnode = NetworkToNodeAPI[network];
   const indexer = NetworkToIndexerAPI[network];
@@ -20,5 +29,6 @@ export const getAptosConfig = (): AptosConfig => {
 // Get an Aptos client based off of the network environment variables.
 export const getAptos = (): Aptos => {
   const cfg = getAptosConfig();
+  console.log({ cfg });
   return new Aptos(cfg);
 };

@@ -56,7 +56,7 @@
     "build:debug": "BUILD_DEBUG=true pnpm run build",
     "check": "dotenv -e ../.env.example -e ../.env.local -e ../../docker/example.local.env -e ../../docker/.env -- tsc --noEmit",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "e2e": "pnpm load-test-env -v NO_TEST_SETUP=true -- pnpm jest tests/e2e/queries/testnet --conditions=react-server",
+    "e2e:sdk": "pnpm load-test-env -v NO_TEST_SETUP=true -- pnpm jest tests/e2e/queries/testnet --conditions=react-server",
     "format": "pnpm _format --write",
     "format:check": "pnpm _format --check",
     "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' -c .eslintrc.js",

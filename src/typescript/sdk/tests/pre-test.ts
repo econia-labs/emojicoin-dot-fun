@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import WebSocket from "ws";
-import { DockerTestHarness } from "./../src/utils/test/docker/docker-test-harness";
-import { type ContainerName } from "./../src/utils/test/docker/logs";
+import { DockerTestHarness } from "../src/utils/test/docker/docker-test-harness";
+import { type ContainerName } from "../src/utils/test/docker/logs";
 
 export default async function preTest() {
   // @ts-expect-error Using `globalThis` as any for a polyfill for `WebSocket` in node.js.

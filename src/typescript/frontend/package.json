@@ -91,7 +91,7 @@
     "build:debug": "BUILD_DEBUG=true next build --no-lint --no-mangling --debug",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbo --port 3001",
-    "e2e": "playwright test",
+    "e2e:frontend": "playwright test --project=firefox",
     "e2e-chromium": "playwright test --project=chromium",
     "e2e-firefox": "playwright test --project=firefox",
     "e2e-webkit": "playwright test --project=webkit",
@@ -99,11 +99,12 @@
     "format:check": "pnpm _format --check",
     "lint": "eslint -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",
-    "playwright-preps": "./submodule.sh && pnpm i && pnpm exec playwright install",
+    "playwright:install": "playwright install --with-deps",
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
     "start": "next start --port 3001",
+    "submodule": "./submodule.sh",
     "vercel-install": "./submodule.sh && pnpm i"
   },
   "version": "0.0.1-alpha"

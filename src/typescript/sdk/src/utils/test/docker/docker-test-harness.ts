@@ -2,7 +2,7 @@
 // cspell:word localnet
 
 import path from "path";
-import { waitFor } from "../../../utils";
+import { waitFor } from "../..";
 import { getGitRoot } from "../helpers";
 import { type ContainerName } from "./logs";
 import {
@@ -12,7 +12,7 @@ import {
   execPromise,
   spawnWrapper,
 } from "./utils";
-import { EMOJICOIN_INDEXER_URL } from "../../../server-env";
+import { EMOJICOIN_INDEXER_URL } from "../../../server/env";
 import { TableName } from "../../../indexer-v2/types/json-types";
 import { readFileSync, writeFileSync } from "node:fs";
 import { kill } from "node:process";
@@ -57,7 +57,7 @@ const isDataNotCorrupted = (state?: ContainerState): boolean | undefined => {
   return true;
 };
 
-const MAX_WAIT_TIME_SECONDS = 120;
+const MAX_WAIT_TIME_SECONDS = 240;
 
 export class DockerTestHarness {
   constructor() {}
@@ -74,7 +74,7 @@ export class DockerTestHarness {
    */
   static async stop() {
     await execPromise(`docker compose -f ${LOCAL_COMPOSE_PATH} stop`);
-    const process = Number(readFileSync("/tmp/emojicoin-e2e", {encoding: 'utf-8'}));
+    const process = Number(readFileSync("/tmp/emojicoin-e2e", { encoding: "utf-8" }));
     if (process) {
       kill(process);
     }
