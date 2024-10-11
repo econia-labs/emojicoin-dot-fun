@@ -246,12 +246,9 @@ Resources:
         - !Ref 'BrokerWsClientSecurityGroup'
         - !Ref 'AWS::NoValue'
       Subnets:
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PublicSubnetIdA'
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PublicSubnetIdB'
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PublicSubnetIdC'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PublicSubnetIdA'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PublicSubnetIdB'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PublicSubnetIdC'
       Type: 'application'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
   # DNS certificate for the broker's application load balancer.
@@ -585,12 +582,9 @@ Resources:
           - !Ref 'ContainerSecurityGroup'
           - !Ref 'ProcessorWsClientSecurityGroup'
           Subnets:
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdA'
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdB'
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdC'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdB'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'BrokerServiceDiscovery.Arn'
       TaskDefinition: !Ref 'BrokerTask'
@@ -911,12 +905,9 @@ Resources:
     Properties:
       DBSubnetGroupDescription: !Ref 'AWS::StackName'
       SubnetIds:
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PrivateSubnetIdA'
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PrivateSubnetIdB'
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PrivateSubnetIdC'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdB'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdC'
     Type: 'AWS::RDS::DBSubnetGroup'
   # Security group for users of the database.
   DbUserSecurityGroup:
@@ -1076,12 +1067,9 @@ Resources:
         - !Ref 'PostgrestClientSecurityGroup'
         - !Ref 'AWS::NoValue'
       Subnets:
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PrivateSubnetIdA'
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PrivateSubnetIdB'
-      - Fn::ImportValue:
-        'Fn::Sub': '${VpcStackName}-PrivateSubnetIdC'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdB'
+      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdC'
       Type: 'network'
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
   # Security group for direct clients of the network load balancer.
@@ -1228,12 +1216,9 @@ Resources:
           - !Ref 'PostgrestServerSecurityGroup'
           - !Ref 'ContainerSecurityGroup'
           Subnets:
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdA'
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdB'
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdC'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdB'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'PostgrestServiceDiscovery.Arn'
       TaskDefinition: !Ref 'PostgrestTask'
@@ -1417,12 +1402,9 @@ Resources:
           - !Ref 'DbUserSecurityGroup'
           - !Ref 'ProcessorPublisherSecurityGroup'
           Subnets:
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdA'
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdB'
-          - Fn::ImportValue:
-            'Fn::Sub': '${VpcStackName}-PrivateSubnetIdC'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdB'
+          - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdC'
       ServiceRegistries:
       - RegistryArn: !GetAtt 'ProcessorServiceDiscovery.Arn'
       TaskDefinition: !Ref 'ProcessorTask'
