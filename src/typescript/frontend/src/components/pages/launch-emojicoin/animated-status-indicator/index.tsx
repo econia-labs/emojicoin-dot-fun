@@ -78,7 +78,13 @@ import React, { useMemo } from "react";
 //
 //export default React.memo(AnimatedStatusIndicator);
 
-export const AnimatedStatusIndicator = ({ numHearts = 14, className }: { numHearts?: number, className?: string }) => {
+export const AnimatedStatusIndicator = ({
+  numHearts = 14,
+  className,
+}: {
+  numHearts?: number;
+  className?: string;
+}) => {
   const emojis = useMemo(() => Array.from({ length: numHearts }), [numHearts]).map(() =>
     getRandomEmoji()
   );
