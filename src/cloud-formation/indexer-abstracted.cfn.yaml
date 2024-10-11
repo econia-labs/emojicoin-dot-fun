@@ -44,9 +44,6 @@ Conditions:
   DeployRestApiDnsRecord: !Equals
   - !Ref 'DeployRestApiDnsRecord'
   - 'true'
-  DeployVpc: !Equals
-  - !Ref 'DeployVpc'
-  - 'true'
   DeployWaf: !Equals
   - !Ref 'DeployWaf'
   - 'true'
@@ -179,11 +176,6 @@ Parameters:
     - 'true'
     Type: 'String'
   DeployStack:
-    AllowedValues:
-    - 'false'
-    - 'true'
-    Type: 'String'
-  DeployVpc:
     AllowedValues:
     - 'false'
     - 'true'
@@ -1331,7 +1323,7 @@ Resources:
     Type: 'AWS::ECS::TaskDefinition'
   # Private DNS namespace for internal service discovery.
   PrivateServiceDiscoveryNamespace:
-    Condition: 'DeployVpc'
+    Condition: 'DeployContainers'
     Properties:
       Description: !Ref 'AWS::StackName'
       Name: !Ref 'AWS::StackName'
@@ -1340,7 +1332,7 @@ Resources:
     Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
   ProcessorPublisherSecurityGroup:
-    Condition: 'DeployVpc'
+    Condition: 'DeployProcessor'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
       VpcId:
@@ -1852,15 +1844,6 @@ Resources:
       WebACLArn: !GetAtt 'Waf.Arn'
     Type: 'AWS::WAFv2::WebACLAssociation'
 Rules:
-  DeployAlb:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'DeployVpc'
-        - 'true'
-      - !Equals
-        - !Ref 'DeployAlb'
-        - 'false'
   DeployAlbDnsRecord:
     Assertions:
     - Assert: !Or
@@ -1900,24 +1883,6 @@ Rules:
         - 'true'
       - !Equals
         - !Ref 'DeployContainers'
-        - 'false'
-  DeployDb:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'DeployVpc'
-        - 'true'
-      - !Equals
-        - !Ref 'DeployDb'
-        - 'false'
-  DeployNlb:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'DeployVpc'
-        - 'true'
-      - !Equals
-        - !Ref 'DeployNlb'
         - 'false'
   DeployNlbVpcLink:
     Assertions:
@@ -1971,15 +1936,6 @@ Rules:
         - 'true'
       - !Equals
         - !Ref 'DeployRestApiDnsRecord'
-        - 'false'
-  DeployVpc:
-    Assertions:
-    - Assert: !Or
-      - !Equals
-        - !Ref 'DeployStack'
-        - 'true'
-      - !Equals
-        - !Ref 'DeployVpc'
         - 'false'
   DeployWaf:
     Assertions:
