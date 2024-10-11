@@ -23,5 +23,5 @@ parameters:
   ProcessorImageVersion: '0.8.1'
   VpcStackName: 'emoji-vpc'
 tags: null
-template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
+template-file-path: 'src/cloud-formation/indexer-abstracted.cfn.yaml'
 ...
