@@ -7,7 +7,7 @@ module.exports = {
   workerThreads: true,
   testEnvironment: "node",
   testEnvironmentOptions: {
-    customExportConditions: ["node", "node-addons"],
+    customExportConditions: ["react-server", "node", "node-addons"],
   },
   coveragePathIgnorePatterns: [],
   testPathIgnorePatterns: ["dist/*"],
