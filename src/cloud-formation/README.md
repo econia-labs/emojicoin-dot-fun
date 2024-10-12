@@ -8,8 +8,8 @@ cspell:word pullthroughcache
 # Indexer on CloudFormation
 
 The indexer can be automatically deployed on [AWS CloudFormation] with [GitSync]
-using the [template file] at `indexer.cfn.yaml` and a development-specific
-[stack deployment file] at `deploy-*.yaml`. Once a [stack] is configured
+using the [template file] at `indexer.cfn.yaml` and an environment-specific
+[stack deployment file] at `deploy-indexer-*.yaml`. Once a [stack] is configured
 accordingly, `git` updates will result in automatic updates.
 
 The indexer provides a public REST endpoint and a public WebSocket endpoint
@@ -25,14 +25,19 @@ under a root domain you provide, for an environment name of your choosing:
 `indexer.cfn.yaml` contains assorted [parameters] of the form `Deploy*` that can
 be used to [conditionally][conditions] provision and de-provision [resources].
 For a concise list of such parameters, see a [stack deployment file] at
-`deploy-*.yaml`. See the template [rules] section for associated dependencies.
+`deploy-indexer-*.yaml`. See the template [rules] section for associated
+dependencies.
+
+Note that the `Environment` parameter should be unique across stacks, as it is
+used for endpoint subdomain assignment.
 
 ## VPC stack abstraction
 
 The indexer depends on an abstracted [VPC stack](#vpc-stack) with common
 resources that can be shared across indexer deployments. Once you've deployed
-a single VPC stack based on the [template file] at `vpc.cfn.yaml`, you can
-re-use it across indexer deployments.
+a single VPC stack based on the [template file] at `vpc.cfn.yaml` and
+the [stack deployment file] at `deploy-vpc.yaml`, you can re-use it across
+indexer deployments.
 
 ## Setup
 
@@ -197,10 +202,12 @@ re-use it across indexer deployments.
    </details>
    <!-- markdownlint-enable MD033 -->
 
-1. Create a [stack deployment file] (see `deploy-*.yml`) with appropriate
-   [template parameters](#template-parameters) for the indexer and for the VPC
-   stack (if you've already deployed a VPC stack you'll just need to create a
-   stack deployment file for the indexer).
+1. If you haven't already deployed a VPC stack, create a [stack deployment file]
+   based on `deploy-vpc.yml`.
+
+1. Create a [stack deployment file] (see `deploy-indexer-*.yml`) with
+   appropriate [template parameters](#template-parameters) for the indexer (in
+   particular the `Environment` parameter should be unique across stacks).
 
 1. If you haven't already deployed a VPC stack, [create the stack with GitSync],
    then monitor [GitSync events][gitsync event] in the
