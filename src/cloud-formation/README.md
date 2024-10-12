@@ -207,7 +207,8 @@ indexer deployments.
 
 1. Create a [stack deployment file] (see `deploy-indexer-*.yml`) with
    appropriate [template parameters](#template-parameters) for the indexer (in
-   particular the `Environment` parameter should be unique across stacks).
+   particular the `Environment` parameter should be
+   [unique across stacks](#template-parameters)).
 
 1. If you haven't already deployed a VPC stack, [create the stack with GitSync],
    then monitor [GitSync events][gitsync event] in the
