@@ -30,6 +30,10 @@ Mappings:
       AvailabilityZone: 2
       CidrBlock: '10.0.192.0/19'
 Outputs:
+  DbSubnetGroupName:
+    Export:
+      Name: !Sub '${AWS::StackName}-DbSubnetGroupName'
+    Value: !Ref 'DbSubnetGroup'
   InstanceConnectEndpointSecurityGroupId:
     Export:
       Name: !Sub '${AWS::StackName}-InstanceConnectEndpointSecurityGroupId'
@@ -67,6 +71,15 @@ Outputs:
       Name: !Sub '${AWS::StackName}-VpcId'
     Value: !Ref 'Vpc'
 Resources:
+  # Database subnet group.
+  DbSubnetGroup:
+    Properties:
+      DBSubnetGroupDescription: !Ref 'AWS::StackName'
+      SubnetIds:
+      - !Ref 'PrivateSubnetA'
+      - !Ref 'PrivateSubnetB'
+      - !Ref 'PrivateSubnetC'
+    Type: 'AWS::RDS::DBSubnetGroup'
   # Network address translation gateway for each public subnet.
   Fn::ForEach::NatGateway:
   - 'Identifier'
