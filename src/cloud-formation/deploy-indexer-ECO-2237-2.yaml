@@ -10,7 +10,7 @@ parameters:
   DeployNlb: 'false'
   DeployNlbVpcLink: 'false'
   DeployPostgrest: 'false'
-  DeployProcessor: 'false'
+  DeployProcessor: 'true'
   DeployRestApi: 'false'
   DeployRestApiDnsRecord: 'false'
   DeployStack: 'true'
