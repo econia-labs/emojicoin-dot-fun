@@ -38,6 +38,10 @@ abstracted into a [VPC]-specific [stack template][template file] at
 `vpc.cfn.yaml`, whose resources can be re-used across multiple indexer
 deployments via [cross-stack references].
 
+Similarly, the VPC stack contains a single [EC2 Instance Connect Endpoint] that
+can be used to [connect to a bastion host] for an indexer deployment inside the
+VPC. This approach avoids [EC2 Instance Connect Endpoint quota] exhaustion.
+
 The VPC stack contains a [private and public subnet] for each
 [Availability Zone] (AZ), with each public subnet sharing a common
 [public internet route] inside a [custom route table]. Per
@@ -308,12 +312,12 @@ deployment environment:
 
 ### Bastion host connections
 
-Before you try connecting to the bastion host, verify that the
-`DeployBastionHost` [condition][conditions] evaluates to `true`. Note too that
-if you have been provisioning and de-provisioning other resources, you might
-want to de-provision then provision the bastion host before running the below
-commands, in order to refresh the bastion host [user data] that stores the URLs
-of other resources in the stack.
+Before you try connecting to the [bastion host][connect to a bastion host],
+verify that the `DeployBastionHost` [condition][conditions] evaluates to `true`.
+Note too that if you have been provisioning and de-provisioning other resources,
+you might want to de-provision then provision the bastion host before running
+the below commands, in order to refresh the bastion host [user data] that stores
+the URLs of other resources in the stack.
 
 1. Install the [EC2 Instance Connect CLI]:
 
@@ -462,6 +466,7 @@ REST and WebSocket endpoints.
 [az-specific nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+[connect to a bastion host]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/access-a-bastion-host-by-using-session-manager-and-amazon-ec2-instance-connect.html
 [container autoscaling]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [container logging permissions]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html#ec2-considerations
 [create the stack with gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-walkthrough.html
@@ -469,6 +474,7 @@ REST and WebSocket endpoints.
 [custom route table]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html#custom-route-tables
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
+[ec2 instance connect endpoint quota]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/eice-quotas.html
 [ecr pull through cache permissions]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-iam.html
 [ecr pull through cache rule creation docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-rule.html
 [ecs task execution iam role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html
