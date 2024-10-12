@@ -204,14 +204,15 @@ re-use it across indexer deployments.
 
 1. If you haven't already deployed a VPC stack, [create the stack with GitSync],
    then monitor [GitSync events][gitsync event] in the
-   [GitSync status dashboard]. After it has deployed, repeat for the indexer.
+   [GitSync status dashboard] or with [`rain`]. After it has deployed, repeat
+   for the indexer.
 
 ## Querying endpoints
 
 ### Public endpoints
 
-Once you have [deployed a stack](#setup), query the public endpoint for your
-deployment environment:
+Once you have [deployed an indexer stack](#setup), query the public endpoint for
+your deployment environment:
 
 1. Set your stack name:
 
@@ -539,3 +540,4 @@ REST and WebSocket endpoints.
 [web acl traffic overview dashboards]: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-dashboards.html
 [web application firewall]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
 [`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
+[`rain`]: https://github.com/aws-cloudformation/rain
