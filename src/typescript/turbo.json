@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "envMode": "loose",
+  "globalDependencies": ["**/*.env.*", "**/*.env", "**/tsconfig.json", "**/package.json"],
   "globalEnv": [],
   "tasks": {
     "build": {
@@ -22,7 +23,8 @@
       "outputs": []
     },
     "dev": {
-      "cache": false
+      "cache": false,
+      "persistent": true
     },
     "e2e:testnet": {
       "outputs": []
@@ -40,6 +42,7 @@
       "outputs": []
     },
     "start": {
+      "persistent": true,
       "dependsOn": [
         "build"
       ],
