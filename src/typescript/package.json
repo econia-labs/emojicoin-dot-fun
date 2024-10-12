@@ -41,8 +41,8 @@
     "test": "pnpm run load-env:test -- turbo run test --force",
     "test:debug": "pnpm run load-env:test-debug -- turbo run test --force",
     "test:frontend": "pnpm run load-env:test -- turbo run test --filter @econia-labs/emojicoin-frontend --log-prefix none",
-    "test:parallel": "pnpm run load-env:test -- turbo run test:parallet --force --log-prefix none",
-    "test:sequential": "pnpm run load-env:test -- turbo run test:sequentiat --force --log-prefix none",
+    "test:parallel": "pnpm run load-env:test -- turbo run test:parallel --force --log-prefix none",
+    "test:sequential": "pnpm run load-env:test -- turbo run test:sequential --force --log-prefix none",
     "test:verbose": "pnpm run load-env:test-verbose -- turbo run test --force",
     "unit-test": "pnpm run load-env:unit-test -- turbo run unit-test --force --log-prefix none --log-order grouped",
     "up": "docker compose -f ../docker/compose.local.yaml up -d"
