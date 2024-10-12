@@ -18,7 +18,7 @@ parameters:
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'main-slim'
+  Environment: 'main'
   Network: 'testnet'
   ProcessorImageVersion: '0.8.1'
   VpcStackName: 'emoji-vpc'
