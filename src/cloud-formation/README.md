@@ -214,6 +214,11 @@ indexer deployments.
    [GitSync status dashboard] or with [`rain`]. After it has deployed, repeat
    for the indexer.
 
+   > Use concise stack names like `emoji-vpc` and `emoji-production` since
+   > excessively long names may result in resource creation failure due to
+   > character count limits, for example the
+   > [load balancer target group name 32 character limit].
+
 ## Querying endpoints
 
 ### Public endpoints
@@ -514,6 +519,7 @@ REST and WebSocket endpoints.
 [iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
 [inline policy]: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#inline-policies
 [least-privilege permissions]: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege
+[load balancer target group name 32 character limit]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-target-group.html#:~:text=For%20Target%20group%20name%2C%20type,the%20default%20values%20as%20needed.
 [make route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
 [managed rules]: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
 [multi-az aurora serverless v2 cluster]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html#aurora-serverless.ha
