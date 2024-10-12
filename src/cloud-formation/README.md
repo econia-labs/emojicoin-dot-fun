@@ -42,6 +42,12 @@ Similarly, the VPC stack contains a single [EC2 Instance Connect Endpoint] that
 can be used to [connect to a bastion host] for an indexer deployment inside the
 VPC. This approach avoids [EC2 Instance Connect Endpoint quota] exhaustion.
 
+Though not strictly necessary to prevent quota exhaustion, the following
+common network resources are additionally abstracted:
+
+1. A [DB subnet group].
+1. A [Private DNS namespace].
+
 The VPC stack contains a [private and public subnet] for each
 [Availability Zone] (AZ), with each public subnet sharing a common
 [public internet route] inside a [custom route table]. Per
@@ -472,6 +478,7 @@ REST and WebSocket endpoints.
 [create the stack with gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-walkthrough.html
 [cross-stack references]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/walkthrough-crossstackref.html
 [custom route table]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html#custom-route-tables
+[db subnet group]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html#USER_VPC.Subnets
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
 [ec2 instance connect endpoint quota]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/eice-quotas.html
@@ -498,6 +505,7 @@ REST and WebSocket endpoints.
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
 [private and public subnet]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html#subnet-types
+[private dns namespace]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicediscovery-privatednsnamespace.html
 [public internet route]: https://docs.aws.amazon.com/vpc/latest/userguide/route-table-options.html#route-tables-internet-gateway
 [resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 [role passing]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_passrole.html
