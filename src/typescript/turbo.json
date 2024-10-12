@@ -1,7 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "envMode": "loose",
-  "globalDependencies": ["**/*.env.*", "**/*.env", "**/tsconfig.json", "**/package.json"],
+  "globalDependencies": [
+    "**/*.env.*",
+    "**/*.env",
+    "**/tsconfig.json",
+    "**/package.json"
+  ],
   "globalEnv": [],
   "tasks": {
     "build": {
@@ -42,11 +47,11 @@
       "outputs": []
     },
     "start": {
-      "persistent": true,
       "dependsOn": [
         "build"
       ],
-      "outputs": []
+      "outputs": [],
+      "persistent": true
     },
     "test": {
       "outputs": []
