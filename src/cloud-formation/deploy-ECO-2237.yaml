@@ -13,9 +13,7 @@ parameters:
   DeployProcessor: 'true'
   DeployRestApi: 'true'
   DeployRestApiDnsRecord: 'true'
-  DeployRouteTables: 'true'
   DeployStack: 'true'
-  DeployVpc: 'true'
   DeployWaf: 'false'
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
@@ -23,6 +21,7 @@ parameters:
   Environment: 'ECO-2237'
   Network: 'testnet'
   ProcessorImageVersion: '0.8.1'
+  VpcStackName: 'emoji-vpc'
 tags: null
-template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
+template-file-path: 'src/cloud-formation/indexer-abstracted.cfn.yaml'
 ...
