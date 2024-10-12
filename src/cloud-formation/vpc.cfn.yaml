@@ -42,6 +42,10 @@ Outputs:
     Export:
       Name: !Sub '${AWS::StackName}-InternetGatewayId'
     Value: !Ref 'InternetGateway'
+  PrivateDnsNamespaceId:
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateDnsNamespaceId'
+    Value: !Ref 'PrivateDnsNamespace'
   PrivateSubnetIdA:
     Export:
       Name: !Sub '${AWS::StackName}-PrivateSubnetIdA'
@@ -223,6 +227,12 @@ Resources:
       InternetGatewayId: !Ref 'InternetGateway'
       VpcId: !Ref 'Vpc'
     Type: 'AWS::EC2::VPCGatewayAttachment'
+  # Private DNS namespace for internal service discovery.
+  PrivateDnsNamespace:
+    Properties:
+      Name: !Ref 'AWS::StackName'
+      Vpc: !Ref 'Vpc'
+    Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Route table for public subnets in the virtual private cloud.
   PublicRouteTable:
     Properties:
