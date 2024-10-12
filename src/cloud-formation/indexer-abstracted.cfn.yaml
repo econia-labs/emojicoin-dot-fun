@@ -555,7 +555,8 @@ Resources:
       HealthCheckCustomConfig:
         FailureThreshold: 1
       Name: !Sub '${AWS::StackName}-broker'
-      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+      NamespaceId:
+        Fn::ImportValue: !Sub '${VpcStackName}-PrivateDnsNamespaceId'
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for the broker.
   BrokerTask:
@@ -791,7 +792,8 @@ Resources:
           ignore_checks:
           - 'W2501'
     Properties:
-      DBSubnetGroupName: !Ref 'DbSubnetGroup'
+      DBSubnetGroupName:
+        Fn::ImportValue: !Sub '${VpcStackName}-DbSubnetGroupName'
       DatabaseName: !FindInMap
       - 'Constants'
       - 'DatabaseConfig'
@@ -850,16 +852,6 @@ Resources:
       IpProtocol: -1
       SourceSecurityGroupId: !Ref 'DbUserSecurityGroup'
     Type: 'AWS::EC2::SecurityGroupIngress'
-  # Database subnet group.
-  DbSubnetGroup:
-    Condition: 'DeployDb'
-    Properties:
-      DBSubnetGroupDescription: !Ref 'AWS::StackName'
-      SubnetIds:
-      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
-      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdB'
-      - Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdC'
-    Type: 'AWS::RDS::DBSubnetGroup'
   # Security group for users of the database.
   DbUserSecurityGroup:
     Condition: 'DeployDb'
@@ -1197,7 +1189,8 @@ Resources:
       HealthCheckCustomConfig:
         FailureThreshold: 1
       Name: !Sub '${AWS::StackName}-postgrest'
-      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+      NamespaceId:
+        Fn::ImportValue: !Sub '${VpcStackName}-PrivateDnsNamespaceId'
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for PostgREST.
   PostgrestTask:
@@ -1295,15 +1288,6 @@ Resources:
       RequiresCompatibilities:
       - 'FARGATE'
     Type: 'AWS::ECS::TaskDefinition'
-  # Private DNS namespace for internal service discovery.
-  PrivateServiceDiscoveryNamespace:
-    Condition: 'DeployContainers'
-    Properties:
-      Description: !Ref 'AWS::StackName'
-      Name: !Ref 'AWS::StackName'
-      Vpc:
-        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
-    Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
   # Security group for the processor's WebSocket server.
   ProcessorPublisherSecurityGroup:
     Condition: 'DeployProcessor'
@@ -1364,7 +1348,8 @@ Resources:
       HealthCheckCustomConfig:
         FailureThreshold: 1
       Name: !Sub '${AWS::StackName}-processor'
-      NamespaceId: !Ref 'PrivateServiceDiscoveryNamespace'
+      NamespaceId:
+        Fn::ImportValue: !Sub '${VpcStackName}-PrivateDnsNamespaceId'
     Type: 'AWS::ServiceDiscovery::Service'
   # Task definition for processor.
   ProcessorTask:
