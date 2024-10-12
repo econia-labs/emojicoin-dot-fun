@@ -437,45 +437,19 @@ Resources:
           - 'Websocat'
           - 'Version'
     Type: 'AWS::EC2::Instance'
-  # Connection endpoint allowing access to the bastion host.
-  BastionHostConnectionEndpoint:
-    Condition: 'DeployBastionHost'
-    Properties:
-      PreserveClientIp: true
-      SecurityGroupIds:
-      - !Ref 'BastionHostConnectionEndpointSecurityGroup'
-      SubnetId:
-        Fn::ImportValue: !Sub '${VpcStackName}-PrivateSubnetIdA'
-    Type: 'AWS::EC2::InstanceConnectEndpoint'
-  # Security group for bastion host connection endpoint.
-  BastionHostConnectionEndpointSecurityGroup:
-    Condition: 'DeployBastionHost'
-    Properties:
-      GroupDescription: !Ref 'AWS::StackName'
-      SecurityGroupEgress:
-      - DestinationSecurityGroupId: !Ref 'BastionHostSecurityGroup'
-        IpProtocol: -1
-      VpcId:
-        Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
-    Type: 'AWS::EC2::SecurityGroup'
   # Security group for the bastion host.
   BastionHostSecurityGroup:
     Condition: 'DeployBastionHost'
     Properties:
       GroupDescription: !Ref 'AWS::StackName'
+      SecurityGroupIngress:
+      - IpProtocol: -1
+        SourceSecurityGroupId:
+          Fn::ImportValue: !Sub
+            '${VpcStackName}-InstanceConnectEndpointSecurityGroupId'
       VpcId:
         Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::EC2::SecurityGroup'
-  # Ingress policy for the bastion host security group, separated to eliminate
-  # circular dependencies with the security group for the connection endpoint.
-  BastionHostSecurityGroupIngress:
-    Condition: 'DeployBastionHost'
-    Properties:
-      GroupId: !Ref 'BastionHostSecurityGroup'
-      IpProtocol: -1
-      SourceSecurityGroupId:
-        !Ref 'BastionHostConnectionEndpointSecurityGroup'
-    Type: 'AWS::EC2::SecurityGroupIngress'
   # Target group for application load balancer traffic to the broker.
   BrokerAlbTargetGroup:
     Condition: 'DeployAlb'
