@@ -1,4 +1,6 @@
-import "server-only";
+if (process.env.NODE_ENV !== "test") {
+  require("server-only");
+}
 
 if (typeof process.env.EMOJICOIN_INDEXER_URL === "undefined") {
   throw new Error("The indexer processor url must be defined.");
