@@ -1,26 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "EMOJICOIN_INDEXER_URL",
-    "EMOJICOIN_INDEXER_API_KEY",
-    "REVALIDATION_TIME",
-    "ALLOWLISTER3K_URL",
-    "NEXT_PUBLIC_IS_ALLOWLIST_ENABLED",
-    "NO_TEST_SETUP",
-    "GALXE_CAMPAIGN_ID",
-    "NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT",
-    "HASH_SEED",
-    "NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS",
-    "NEXT_PUBLIC_INTEGRATOR_ADDRESS",
-    "NEXT_PUBLIC_MODULE_ADDRESS",
-    "NEXT_PUBLIC_REWARDS_MODULE_ADDRESS",
-    "NEXT_PUBLIC_APTOS_NETWORK",
-    "NEXT_PUBLIC_BROKER_URL",
-    "BROKER_PORT",
-    "FETCH_DEBUG",
-    "FETCH_DEBUG_VERBOSE",
-    "VERBOSE_TEST_LOGS"
-  ],
+  "envMode": "loose",
+  "globalEnv": [],
   "tasks": {
     "build": {
       "dependsOn": [
