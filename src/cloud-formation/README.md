@@ -27,44 +27,12 @@ be used to [conditionally][conditions] provision and de-provision [resources].
 For a concise list of such parameters, see a [stack deployment file] at
 `deploy-*.yaml`. See the template [rules] section for associated dependencies.
 
-## VPC stack
+## VPC stack abstraction
 
-The indexer uses
-[NAT gateways to provide internet access for private instances], with
-[a NAT gateway in each Availability Zone][az-specific nat gateways] to ensure
-high resilience. To avoid [VPC quota] exhaustion for multiple indexer
-deployments, networking resources associated with the indexer are thus
-abstracted into a [VPC]-specific [stack template][template file] at
-`vpc.cfn.yaml`, whose resources can be re-used across multiple indexer
-deployments via [cross-stack references].
-
-Similarly, the VPC stack contains a single [EC2 Instance Connect Endpoint] that
-can be used to [connect to a bastion host] for an indexer deployment inside the
-VPC. This approach avoids [EC2 Instance Connect Endpoint quota] exhaustion.
-
-Though not strictly necessary to prevent quota exhaustion, the following
-common network resources are additionally abstracted:
-
-1. A [DB subnet group].
-1. A [Private DNS namespace].
-
-The VPC stack contains a [private and public subnet] for each
-[Availability Zone] (AZ), with each public subnet sharing a common
-[public internet route] inside a [custom route table]. Per
-[AZ-specific NAT gateway best practices][az-specific nat gateways], each private
-subnet has its own custom route table with a [NAT gateway route]. No additional
-routing is required to enable communication across subnets, because as per the
-[AWS routes docs]:
-
-> Every route table contains a local route for communication within the VPC.
-> This route is added by default to all route tables. If your VPC has more than
-> one IPv4 CIDR block, your route tables contain a local route for each IPv4
-> CIDR block.
-
-The VPC uses an [AWS-recommended VPC CIDR block] of `10.0.0.0/16` corresponding
-to 65,536 IP addresses, with each non-overlapping [subnet CIDR block] using a
-`/19` netmask for up to 8,192 IP addresses per subnet (excluding the
-[5 default reserved addresses per subnet]).
+The indexer depends on an abstracted [VPC stack](#vpc-stack) with common
+resources that can be shared across indexer deployments. Once you've deployed
+a single VPC stack based on the [template file] at `vpc.cfn.yaml`, you can
+re-use it across indexer deployments.
 
 ## Setup
 
@@ -230,10 +198,13 @@ to 65,536 IP addresses, with each non-overlapping [subnet CIDR block] using a
    <!-- markdownlint-enable MD033 -->
 
 1. Create a [stack deployment file] (see `deploy-*.yml`) with appropriate
-   [template parameters](#template-parameters).
+   [template parameters](#template-parameters) for the indexer and for the VPC
+   stack (if you've already deployed a VPC stack you'll just need to create a
+   stack deployment file for the indexer).
 
-1. [Create the stack with GitSync], then monitor [GitSync events][gitsync event]
-   in the [GitSync status dashboard].
+1. If you haven't already deployed a VPC stack, [create the stack with GitSync],
+   then monitor [GitSync events][gitsync event] in the
+   [GitSync status dashboard]. After it has deployed, repeat for the indexer.
 
 ## Querying endpoints
 
@@ -405,6 +376,45 @@ the URLs of other resources in the stack.
    ```
 
 ## Design notes
+
+### VPC stack
+
+The indexer uses
+[NAT gateways to provide internet access for private instances], with
+[a NAT gateway in each Availability Zone][az-specific nat gateways] to ensure
+high resilience. To avoid [VPC quota] exhaustion for multiple indexer
+deployments, networking resources associated with the indexer are thus
+abstracted into a [VPC]-specific [stack template][template file] at
+`vpc.cfn.yaml`, whose resources can be re-used across multiple indexer
+deployments via [cross-stack references].
+
+Similarly, the VPC stack contains a single [EC2 Instance Connect Endpoint] that
+can be used to [connect to a bastion host] for an indexer deployment inside the
+VPC. This approach avoids [EC2 Instance Connect Endpoint quota] exhaustion.
+
+Though not strictly necessary to prevent quota exhaustion, the following
+common network resources are additionally abstracted:
+
+1. A [DB subnet group].
+1. A [Private DNS namespace].
+
+The VPC stack contains a [private and public subnet] for each
+[Availability Zone] (AZ), with each public subnet sharing a common
+[public internet route] inside a [custom route table]. Per
+[AZ-specific NAT gateway best practices][az-specific nat gateways], each private
+subnet has its own custom route table with a [NAT gateway route]. No additional
+routing is required to enable communication across subnets, because as per the
+[AWS routes docs]:
+
+> Every route table contains a local route for communication within the VPC.
+> This route is added by default to all route tables. If your VPC has more than
+> one IPv4 CIDR block, your route tables contain a local route for each IPv4
+> CIDR block.
+
+The VPC uses an [AWS-recommended VPC CIDR block] of `10.0.0.0/16` corresponding
+to 65,536 IP addresses, with each non-overlapping [subnet CIDR block] using a
+`/19` netmask for up to 8,192 IP addresses per subnet (excluding the
+[5 default reserved addresses per subnet]).
 
 ### Database
 
