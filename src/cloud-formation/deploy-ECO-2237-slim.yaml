@@ -18,7 +18,7 @@ parameters:
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'ECO-2237-lite'
+  Environment: 'ECO-2237-slim'
   Network: 'testnet'
   ProcessorImageVersion: '0.8.1'
   VpcStackName: 'emoji-vpc'
