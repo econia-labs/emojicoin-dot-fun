@@ -13,7 +13,7 @@ import {
   execPromise,
   spawnWrapper,
 } from "./utils";
-import { EMOJICOIN_INDEXER_URL } from "../../../src/server-env";
+import { EMOJICOIN_INDEXER_URL } from "../../../src/server/env";
 import { TableName } from "../../../src/indexer-v2/types/json-types";
 
 const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
