@@ -594,9 +594,9 @@ Resources:
               - 'Constants'
               - 'Networking'
               - 'BrokerPort'
-          Interval: 5
-          Retries: 3
-          StartPeriod: 5
+          Interval: 120
+          Retries: 1
+          StartPeriod: 10
           Timeout: 5
         Image: !Join
         - ''
@@ -1397,9 +1397,9 @@ Resources:
               - 'Constants'
               - 'Networking'
               - 'ProcessorWebsocketPort'
-          Interval: 5
-          Retries: 3
-          StartPeriod: 5
+          Interval: 60
+          Retries: 2
+          StartPeriod: 60
           Timeout: 5
         Image: !Join
         - ''
