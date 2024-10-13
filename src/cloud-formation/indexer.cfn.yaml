@@ -462,8 +462,8 @@ Resources:
       - 'Networking'
       - 'BrokerPort'
       HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 3
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
       Name: !Sub '${AWS::StackName}-broker'
       Port: !FindInMap
       - 'Constants'
@@ -479,7 +479,7 @@ Resources:
       - Key: 'stickiness.type'
         Value: 'lb_cookie'
       TargetType: 'ip'
-      UnhealthyThresholdCount: 3
+      UnhealthyThresholdCount: 2
       VpcId:
         Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
@@ -1093,8 +1093,8 @@ Resources:
       - 'Networking'
       - 'PostgrestHealthCheckPort'
       HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 3
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
       Name: !Sub '${AWS::StackName}-postgrest'
       Port: !FindInMap
       - 'Constants'
@@ -1107,7 +1107,7 @@ Resources:
       - Key: 'stickiness.enabled'
         Value: 'false'
       TargetType: 'ip'
-      UnhealthyThresholdCount: 3
+      UnhealthyThresholdCount: 2
       VpcId:
         Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
