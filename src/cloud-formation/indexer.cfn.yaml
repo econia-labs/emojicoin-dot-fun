@@ -359,7 +359,8 @@ Resources:
             - - 'export BROKER_WS_URL="ws://'
               - !GetAtt 'BrokerServiceDiscovery.Name'
               - '.'
-              - !Ref 'AWS::StackName'
+              # The private DNS namespace comes from the VPC stack.
+              - !Ref 'VpcStackName'
               - ':'
               - !FindInMap
                 - 'Constants'
@@ -401,7 +402,8 @@ Resources:
             - - 'export POSTGREST_URL="http://'
               - !GetAtt 'PostgrestServiceDiscovery.Name'
               - '.'
-              - !Ref 'AWS::StackName'
+              # The private DNS namespace comes from the VPC stack.
+              - !Ref 'VpcStackName'
               - ':'
               - !FindInMap
                 - 'Constants'
@@ -416,7 +418,8 @@ Resources:
             - - 'export PROCESSOR_WS_URL="ws://'
               - !GetAtt 'ProcessorServiceDiscovery.Name'
               - '.'
-              - !Ref 'AWS::StackName'
+              # The private DNS namespace comes from the VPC stack.
+              - !Ref 'VpcStackName'
               - ':'
               - !FindInMap
                 - 'Constants'
@@ -569,7 +572,8 @@ Resources:
           - - 'ws://'
             - !GetAtt 'ProcessorServiceDiscovery.Name'
             - '.'
-            - !Ref 'AWS::StackName'
+            # The private DNS namespace comes from the VPC stack.
+            - !Ref 'VpcStackName'
             - ':'
             - !FindInMap
               - 'Constants'
