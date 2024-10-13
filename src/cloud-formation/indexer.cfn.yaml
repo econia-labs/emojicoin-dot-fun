@@ -462,8 +462,8 @@ Resources:
       - 'Networking'
       - 'BrokerPort'
       HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 2
-      HealthyThresholdCount: 2
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
       Name: !Sub '${AWS::StackName}-broker'
       Port: !FindInMap
       - 'Constants'
@@ -479,7 +479,7 @@ Resources:
       - Key: 'stickiness.type'
         Value: 'lb_cookie'
       TargetType: 'ip'
-      UnhealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
       VpcId:
         Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
@@ -552,8 +552,6 @@ Resources:
         - TTL: 10
           Type: 'A'
         RoutingPolicy: 'MULTIVALUE'
-      HealthCheckCustomConfig:
-        FailureThreshold: 1
       Name: !Sub '${AWS::StackName}-broker'
       NamespaceId:
         Fn::ImportValue: !Sub '${VpcStackName}-PrivateDnsNamespaceId'
@@ -597,9 +595,9 @@ Resources:
               - 'Networking'
               - 'BrokerPort'
           Interval: 5
-          Retries: 1
-          StartPeriod: 0
-          Timeout: 2
+          Retries: 3
+          StartPeriod: 5
+          Timeout: 5
         Image: !Join
         - ''
         - - !Ref 'AWS::AccountId'
@@ -1095,8 +1093,8 @@ Resources:
       - 'Networking'
       - 'PostgrestHealthCheckPort'
       HealthCheckProtocol: 'HTTP'
-      HealthCheckTimeoutSeconds: 2
-      HealthyThresholdCount: 2
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
       Name: !Sub '${AWS::StackName}-postgrest'
       Port: !FindInMap
       - 'Constants'
@@ -1109,7 +1107,7 @@ Resources:
       - Key: 'stickiness.enabled'
         Value: 'false'
       TargetType: 'ip'
-      UnhealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
       VpcId:
         Fn::ImportValue: !Sub '${VpcStackName}-VpcId'
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
@@ -1186,8 +1184,6 @@ Resources:
         - TTL: 10
           Type: 'A'
         RoutingPolicy: 'MULTIVALUE'
-      HealthCheckCustomConfig:
-        FailureThreshold: 1
       Name: !Sub '${AWS::StackName}-postgrest'
       NamespaceId:
         Fn::ImportValue: !Sub '${VpcStackName}-PrivateDnsNamespaceId'
@@ -1345,8 +1341,6 @@ Resources:
         - TTL: 10
           Type: 'A'
         RoutingPolicy: 'MULTIVALUE'
-      HealthCheckCustomConfig:
-        FailureThreshold: 1
       Name: !Sub '${AWS::StackName}-processor'
       NamespaceId:
         Fn::ImportValue: !Sub '${VpcStackName}-PrivateDnsNamespaceId'
@@ -1404,9 +1398,9 @@ Resources:
               - 'Networking'
               - 'ProcessorWebsocketPort'
           Interval: 5
-          Retries: 1
-          StartPeriod: 0
-          Timeout: 2
+          Retries: 3
+          StartPeriod: 5
+          Timeout: 5
         Image: !Join
         - ''
         - - !Ref 'AWS::AccountId'
