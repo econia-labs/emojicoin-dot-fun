@@ -7,7 +7,7 @@ export default async function preTest() {
   // @ts-expect-error Using `globalThis` as any for a polyfill for `WebSocket` in node.js.
   globalThis.WebSocket = WebSocket;
 
-  const startDockerServices = process.env.APTOS_NETWORK === "local";
+  const startDockerServices = process.env.NEXT_PUBLIC_APTOS_NETWORK === "local";
   const setupTest = !process.env.NO_TEST_SETUP;
   if (setupTest && startDockerServices) {
     // Print an empty line to separate `Determining test suites to run...` from the logs.
