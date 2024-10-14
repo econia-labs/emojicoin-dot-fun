@@ -16,6 +16,10 @@ export const getEmojisInString = (symbols: string): Array<string> => {
   return Array.from(matches).map((match) => match[0]) as Array<string>;
 };
 
+export const getSymbolEmojisInString = (symbols: string): SymbolEmoji[] => {
+  return getEmojisInString(symbols).filter(SYMBOL_EMOJI_DATA.hasEmoji);
+};
+
 /**
  *
  * A function that returns an emoji's data from any input that could represent a single

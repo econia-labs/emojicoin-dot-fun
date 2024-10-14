@@ -29,7 +29,7 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { getAptosConfig } from "lib/utils/aptos-client";
-import { getEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
+import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
 import { type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
 import { Aptos } from "@aptos-labs/ts-sdk";
@@ -270,7 +270,7 @@ export const Chart = async (props: ChartContainerProps) => {
           throw new Error(`No ticker for symbol: ${symbolInfo}`);
         }
         const period = ResolutionStringToPeriod[resolution.toString()];
-        const marketEmojis = getEmojisInString(symbolInfo.ticker);
+        const marketEmojis = getSymbolEmojisInString(symbolInfo.ticker);
         subscribeToPeriod({
           marketEmojis,
           period,
@@ -282,7 +282,7 @@ export const Chart = async (props: ChartContainerProps) => {
         // For example: `🚀_#_5` for the `🚀` market for a resolution of period `5`.
         const [symbol, resolution] = subscriberUID.split("_#_");
         const period = ResolutionStringToPeriod[resolution];
-        const marketEmojis = getEmojisInString(symbol);
+        const marketEmojis = getSymbolEmojisInString(symbol);
         unsubscribeFromPeriod({
           marketEmojis,
           period,
