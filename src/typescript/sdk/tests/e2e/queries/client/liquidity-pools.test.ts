@@ -41,7 +41,7 @@ describe("queries for liquidity pools with the emojicoin client", () => {
     const registrant = registrants[0];
     const [swapper, provider] = [registrant, registrant];
 
-    const symbols: MarketSymbolEmojis[] = [["🏄"], ["🏄"], ["🏄🏼"], ["🏄🏽"], ["🏄🏾"], ["🏄🏿"]];
+    const symbols: MarketSymbolEmojis[] = [["🏄"], ["🏄🏻"], ["🏄🏼"], ["🏄🏽"], ["🏄🏾"], ["🏄🏿"]];
 
     const toSequenceNumberAndMaxGas = (n: number) => ({
       options: {
