@@ -13,7 +13,7 @@ describe("queries a market by market state with the emojicoin client", () => {
   const emojicoin = new EmojicoinClient();
 
   it("fetches the market state for a market based on an emoji symbols array", async () => {
-    const emojis: MarketSymbolEmojis = ["🧐", "🧐", "#️⃣"];
+    const emojis: MarketSymbolEmojis = ["🧐", "#️⃣"];
     const res = await emojicoin
       .register(registrant, emojis, { integrator: INTEGRATOR_ADDRESS })
       .then(({ response }) => waitForEmojicoinIndexer(response.version))
