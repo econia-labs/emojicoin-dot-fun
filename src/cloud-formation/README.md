@@ -410,7 +410,7 @@ Though not strictly necessary to prevent quota exhaustion, the following
 common network resources are additionally abstracted:
 
 1. A [DB subnet group].
-1. A [Private DNS namespace].
+1. A [private DNS namespace].
 
 The VPC stack contains a [private and public subnet] for each
 [Availability Zone] (AZ), with each public subnet sharing a common
