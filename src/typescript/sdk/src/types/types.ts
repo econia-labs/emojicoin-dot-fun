@@ -16,7 +16,7 @@ import {
   isJSONSwapEvent,
 } from "./json-types";
 import { type STRUCT_STRINGS } from "../utils";
-import { Flatten } from ".";
+import { type Flatten } from ".";
 
 export type AnyNumberString = number | string | bigint;
 const strToBigInt = (data: string): bigint => BigInt(data);
@@ -219,108 +219,122 @@ export type Types = {
     time: bigint;
   };
 
-  SwapEvent: Flatten<WithMarketID &
-    WithVersionAndGUID & {
-      marketID: bigint;
-      time: bigint;
-      marketNonce: bigint;
-      swapper: AccountAddressString;
-      inputAmount: bigint;
-      isSell: boolean;
-      integrator: AccountAddressString;
-      integratorFeeRateBPs: number;
-      netProceeds: bigint;
-      baseVolume: bigint;
-      quoteVolume: bigint;
-      avgExecutionPriceQ64: bigint;
-      integratorFee: bigint;
-      poolFee: bigint;
-      startsInBondingCurve: boolean;
-      resultsInStateTransition: boolean;
-      balanceAsFractionOfCirculatingSupplyBeforeQ64: bigint;
-      balanceAsFractionOfCirculatingSupplyAfterQ64: bigint;
-    }>;
+  SwapEvent: Flatten<
+    WithMarketID &
+      WithVersionAndGUID & {
+        marketID: bigint;
+        time: bigint;
+        marketNonce: bigint;
+        swapper: AccountAddressString;
+        inputAmount: bigint;
+        isSell: boolean;
+        integrator: AccountAddressString;
+        integratorFeeRateBPs: number;
+        netProceeds: bigint;
+        baseVolume: bigint;
+        quoteVolume: bigint;
+        avgExecutionPriceQ64: bigint;
+        integratorFee: bigint;
+        poolFee: bigint;
+        startsInBondingCurve: boolean;
+        resultsInStateTransition: boolean;
+        balanceAsFractionOfCirculatingSupplyBeforeQ64: bigint;
+        balanceAsFractionOfCirculatingSupplyAfterQ64: bigint;
+      }
+  >;
 
-  ChatEvent: Flatten<WithMarketID &
+  ChatEvent: Flatten<
+    WithMarketID &
+      WithVersionAndGUID & {
+        marketMetadata: Types["MarketMetadata"];
+        emitTime: bigint;
+        emitMarketNonce: bigint;
+        user: AccountAddressString;
+        message: string;
+        userEmojicoinBalance: bigint;
+        circulatingSupply: bigint;
+        balanceAsFractionOfCirculatingSupplyQ64: bigint;
+      }
+  >;
+
+  MarketRegistrationEvent: Flatten<
+    WithMarketID &
+      WithVersionAndGUID & {
+        marketMetadata: Types["MarketMetadata"];
+        time: bigint;
+        registrant: AccountAddressString;
+        integrator: AccountAddressString;
+        integratorFee: bigint;
+      }
+  >;
+
+  PeriodicStateEvent: Flatten<
+    WithMarketID &
+      WithVersionAndGUID & {
+        marketMetadata: Types["MarketMetadata"];
+        periodicStateMetadata: Types["PeriodicStateMetadata"];
+        openPriceQ64: bigint;
+        highPriceQ64: bigint;
+        lowPriceQ64: bigint;
+        closePriceQ64: bigint;
+        volumeBase: bigint;
+        volumeQuote: bigint;
+        integratorFees: bigint;
+        poolFeesBase: bigint;
+        poolFeesQuote: bigint;
+        numSwaps: bigint;
+        numChatMessages: bigint;
+        startsInBondingCurve: boolean;
+        endsInBondingCurve: boolean;
+        tvlPerLPCoinGrowthQ64: bigint;
+      }
+  >;
+
+  StateEvent: Flatten<
+    WithMarketID &
+      WithVersionAndGUID & {
+        marketMetadata: Types["MarketMetadata"];
+        stateMetadata: Types["StateMetadata"];
+        clammVirtualReserves: Types["Reserves"];
+        cpammRealReserves: Types["Reserves"];
+        lpCoinSupply: bigint;
+        cumulativeStats: Types["CumulativeStats"];
+        instantaneousStats: Types["InstantaneousStats"];
+        lastSwap: Types["LastSwap"];
+      }
+  >;
+
+  GlobalStateEvent: Flatten<
     WithVersionAndGUID & {
-      marketMetadata: Types["MarketMetadata"];
       emitTime: bigint;
-      emitMarketNonce: bigint;
-      user: AccountAddressString;
-      message: string;
-      userEmojicoinBalance: bigint;
-      circulatingSupply: bigint;
-      balanceAsFractionOfCirculatingSupplyQ64: bigint;
-    }>;
+      registryNonce: bigint;
+      trigger: Trigger;
+      cumulativeQuoteVolume: bigint;
+      totalQuoteLocked: bigint;
+      totalValueLocked: bigint;
+      marketCap: bigint;
+      fullyDilutedValue: bigint;
+      cumulativeIntegratorFees: bigint;
+      cumulativeSwaps: bigint;
+      cumulativeChatMessages: bigint;
+    }
+  >;
 
-  MarketRegistrationEvent: Flatten<WithMarketID &
-    WithVersionAndGUID & {
-      marketMetadata: Types["MarketMetadata"];
-      time: bigint;
-      registrant: AccountAddressString;
-      integrator: AccountAddressString;
-      integratorFee: bigint;
-    }>;
-
-  PeriodicStateEvent: Flatten<WithMarketID &
-    WithVersionAndGUID & {
-      marketMetadata: Types["MarketMetadata"];
-      periodicStateMetadata: Types["PeriodicStateMetadata"];
-      openPriceQ64: bigint;
-      highPriceQ64: bigint;
-      lowPriceQ64: bigint;
-      closePriceQ64: bigint;
-      volumeBase: bigint;
-      volumeQuote: bigint;
-      integratorFees: bigint;
-      poolFeesBase: bigint;
-      poolFeesQuote: bigint;
-      numSwaps: bigint;
-      numChatMessages: bigint;
-      startsInBondingCurve: boolean;
-      endsInBondingCurve: boolean;
-      tvlPerLPCoinGrowthQ64: bigint;
-    }>;
-
-  StateEvent: Flatten<WithMarketID &
-    WithVersionAndGUID & {
-      marketMetadata: Types["MarketMetadata"];
-      stateMetadata: Types["StateMetadata"];
-      clammVirtualReserves: Types["Reserves"];
-      cpammRealReserves: Types["Reserves"];
-      lpCoinSupply: bigint;
-      cumulativeStats: Types["CumulativeStats"];
-      instantaneousStats: Types["InstantaneousStats"];
-      lastSwap: Types["LastSwap"];
-    }>;
-
-  GlobalStateEvent: Flatten<WithVersionAndGUID & {
-    emitTime: bigint;
-    registryNonce: bigint;
-    trigger: Trigger;
-    cumulativeQuoteVolume: bigint;
-    totalQuoteLocked: bigint;
-    totalValueLocked: bigint;
-    marketCap: bigint;
-    fullyDilutedValue: bigint;
-    cumulativeIntegratorFees: bigint;
-    cumulativeSwaps: bigint;
-    cumulativeChatMessages: bigint;
-  }>;
-
-  LiquidityEvent: Flatten<WithMarketID &
-    WithVersionAndGUID & {
-      marketID: bigint;
-      time: bigint;
-      marketNonce: bigint;
-      provider: AccountAddressString;
-      baseAmount: bigint;
-      quoteAmount: bigint;
-      lpCoinAmount: bigint;
-      liquidityProvided: boolean;
-      baseDonationClaimAmount: bigint;
-      quoteDonationClaimAmount: bigint;
-    }>;
+  LiquidityEvent: Flatten<
+    WithMarketID &
+      WithVersionAndGUID & {
+        marketID: bigint;
+        time: bigint;
+        marketNonce: bigint;
+        provider: AccountAddressString;
+        baseAmount: bigint;
+        quoteAmount: bigint;
+        lpCoinAmount: bigint;
+        liquidityProvided: boolean;
+        baseDonationClaimAmount: bigint;
+        quoteDonationClaimAmount: bigint;
+      }
+  >;
 
   // Query return type for `market_data` view.
   MarketDataView: {

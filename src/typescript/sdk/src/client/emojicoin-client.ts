@@ -1,16 +1,13 @@
 import {
-  Account,
-  InputGenerateTransactionOptions,
-  WaitForTransactionOptions,
-  UserTransactionResponse,
-  AccountAddressInput,
-  Aptos,
-  HexInput,
-  AccountAddress,
-  TypeTag,
-  Uint64,
+  type Account,
+  type UserTransactionResponse,
+  type AccountAddressInput,
+  type Aptos,
+  type AccountAddress,
+  type TypeTag,
+  type Uint64,
 } from "@aptos-labs/ts-sdk";
-import { MarketSymbolEmojis, SymbolEmoji } from "../emoji_data/types";
+import { type MarketSymbolEmojis, type SymbolEmoji } from "../emoji_data/types";
 import { getEvents } from "../emojicoin_dot_fun";
 import {
   Chat,
@@ -20,64 +17,53 @@ import {
   Swap,
   SwapWithRewards,
 } from "../emojicoin_dot_fun/emojicoin-dot-fun";
-import { Events } from "../emojicoin_dot_fun/events";
+import { type Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
-import { EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
+import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
 import { getAptosClient } from "../utils/aptos-client";
 import { getEmojisInString } from "../emoji_data";
-import { Types } from "../types";
+import customExpect from "./expect";
+import type EmojicoinClientTypes from "./types";
 
-type Options = {
-  feePayer?: Account;
-  options?: InputGenerateTransactionOptions;
-  waitForTransactionOptions?: WaitForTransactionOptions;
-};
+const { expect, Expect } = customExpect;
+type Options = EmojicoinClientTypes["Options"];
+type AnyEmoji = EmojicoinClientTypes["AnyEmoji"];
+type ExtraSwapArgs = EmojicoinClientTypes["ExtraSwapArgs"];
 
-type TransactionResult = {
-  response: UserTransactionResponse;
-  events: Events;
-  models: EventsModels;
-};
-
-type AnyEmoji = string;
-
-type ExtraSwapArgs = {
-  isSell: boolean;
-  inputAmount: Uint64;
-  minOutputAmount: Uint64;
-  integrator: AccountAddressInput;
-  integratorFeeRateBPs: number;
-};
-
-const expect = <T>(v: T | undefined, message?: string): T => {
-  if (typeof v === "undefined") {
-    throw new Error(message ?? "Expected to receive a non-undefined value.");
-  }
-  return v;
-};
-
-const expectErrorMessage = (type: "event" | "model", eventType: string) =>
-  `Expected to receive ${type === "event" ? "an event" : "a model"} of type ${eventType}`;
-
-const Expect = {
-  Register: {
-    Event: expectErrorMessage("event", "MarketRegistrationEvent"),
-    Model: expectErrorMessage("model", "MarketRegistrationEvent"),
-  },
-  Liquidity: {
-    Event: expectErrorMessage("event", "LiquidityEvent"),
-    Model: expectErrorMessage("model", "LiquidityEvent"),
-  },
-  Swap: {
-    Event: expectErrorMessage("event", "SwapEvent"),
-    Model: expectErrorMessage("model", "SwapEvent"),
-  },
-  Chat: {
-    Event: expectErrorMessage("event", "ChatEvent"),
-    Model: expectErrorMessage("model", "ChatEvent"),
-  },
-};
-
+/**
+ * A helper class intended to streamline the process of submitting transactions and using utility
+ * functions for emojis and market symbols.
+ *
+ * The class is created with an optional `Aptos` client, defaulting to creating an `Aptos` client
+ * from the current network in the environment variables.
+ *
+ * Each transaction submission automatically parses the event data and sorts it into corresponding
+ * events and models, offering an easy way to extract the most relevant event data- i.e., the
+ * RegisterMarket event for `register`ing a market, or the `Swap` event for `swap`ping.
+ *
+ * The `swap` function is separated into `buy` and `sell` to reduce the amount of input arguments.
+ *
+ * The `provide_liquidity` and `remove_liquidity` functions in the contract are both under
+ * `liquidity` as `provide` and `remove`, respectively.
+ *
+ * The `utils` functions provides several commonly used utility functions.
+ *
+ * @example
+ * ```typescript
+ * const emojis: MarketSymbolEmojis = ["🌊"];
+ * const emojicoin = new EmojicoinClient();
+ * const account = Account.generate();
+ * const integrator = account.accountAddress;
+ * await emojicoin.register(account, emojis, { integrator });
+ * const buyArgs = {
+ *  inputAmount: 100n,
+ *  minOutputAmount: 1n,
+ *  integrator,
+ *  integratorFeeRateBPs: 0,
+ * };
+ * await emojicoin.buy(account, emojis, buyArgs);
+ * ```
+ */
 export class EmojicoinClient {
   public aptos: Aptos;
 
@@ -90,7 +76,7 @@ export class EmojicoinClient {
     emojisToHexStrings: this.emojisToHexStrings.bind(this),
     emojisToHexSymbol: this.emojisToHexSymbol.bind(this),
     getEmojicoinInfo: this.getEmojicoinInfo.bind(this),
-    getEmojicoinData: this.getEmojicoinData.bind(this),
+    getTransactionEventData: this.getTransactionEventData.bind(this),
   };
 
   public rewards = {
@@ -117,7 +103,7 @@ export class EmojicoinClient {
       integrator: args.integrator,
       ...options,
     });
-    const res = this.getEmojicoinData(response);
+    const res = this.getTransactionEventData(response);
     return {
       ...res,
       registration: {
@@ -148,7 +134,7 @@ export class EmojicoinClient {
       ...options,
       ...this.getEmojicoinInfo(emojis),
     });
-    const res = this.getEmojicoinData(response);
+    const res = this.getTransactionEventData(response);
     return {
       ...res,
       chat: {
@@ -199,7 +185,7 @@ export class EmojicoinClient {
       ...options,
       ...this.getEmojicoinInfo(emojis),
     });
-    const res = this.getEmojicoinData(response);
+    const res = this.getTransactionEventData(response);
     return {
       ...res,
       swap: {
@@ -246,7 +232,7 @@ export class EmojicoinClient {
       ...options,
       ...this.getEmojicoinInfo(emojis),
     });
-    const res = this.getEmojicoinData(response);
+    const res = this.getTransactionEventData(response);
     return {
       ...res,
       swap: {
@@ -272,7 +258,7 @@ export class EmojicoinClient {
       ...options,
       ...this.getEmojicoinInfo(emojis),
     });
-    const res = this.getEmojicoinData(response);
+    const res = this.getTransactionEventData(response);
     return {
       ...res,
       liquidity: {
@@ -298,7 +284,7 @@ export class EmojicoinClient {
       ...options,
       ...this.getEmojicoinInfo(emojis),
     });
-    const res = this.getEmojicoinData(response);
+    const res = this.getTransactionEventData(response);
     return {
       ...res,
       liquidity: {
@@ -308,11 +294,11 @@ export class EmojicoinClient {
     };
   }
 
-  private emojisToHexStrings(emojis: SymbolEmoji[]): HexInput[] {
+  private emojisToHexStrings(emojis: SymbolEmoji[]) {
     return emojis.map((emoji) => new TextEncoder().encode(emoji));
   }
 
-  private emojisToHexSymbol(emojis: SymbolEmoji[]): HexInput {
+  private emojisToHexSymbol(emojis: SymbolEmoji[]) {
     const res = emojis.flatMap((emoji) => Array.from(new TextEncoder().encode(emoji)));
     return new Uint8Array(res);
   }
@@ -330,7 +316,11 @@ export class EmojicoinClient {
     };
   }
 
-  private getEmojicoinData(response: UserTransactionResponse): TransactionResult {
+  private getTransactionEventData(response: UserTransactionResponse): {
+    response: UserTransactionResponse;
+    events: Events;
+    models: EventsModels;
+  } {
     const events = getEvents(response);
     const models = getEventsAsProcessorModelsFromResponse(response, events);
     return {
