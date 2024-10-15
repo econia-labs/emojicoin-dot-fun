@@ -8,8 +8,8 @@ cspell:word pullthroughcache
 # Indexer on CloudFormation
 
 The indexer can be automatically deployed on [AWS CloudFormation] with [GitSync]
-using the [template file] at `indexer.cfn.yaml` and a development-specific
-[stack deployment file] at `deploy-*.yaml`. Once a [stack] is configured
+using the [template file] at `indexer.cfn.yaml` and an environment-specific
+[stack deployment file] at `deploy-indexer-*.yaml`. Once a [stack] is configured
 accordingly, `git` updates will result in automatic updates.
 
 The indexer provides a public REST endpoint and a public WebSocket endpoint
@@ -25,7 +25,19 @@ under a root domain you provide, for an environment name of your choosing:
 `indexer.cfn.yaml` contains assorted [parameters] of the form `Deploy*` that can
 be used to [conditionally][conditions] provision and de-provision [resources].
 For a concise list of such parameters, see a [stack deployment file] at
-`deploy-*.yaml`. See the template [rules] section for associated dependencies.
+`deploy-indexer-*.yaml`. See the template [rules] section for associated
+dependencies.
+
+Note that the `Environment` parameter should be unique across stacks, as it is
+used for endpoint subdomain assignment.
+
+## VPC stack abstraction
+
+The indexer depends on an abstracted [VPC stack](#vpc-stack) with common
+resources that can be shared across indexer deployments. Once you've deployed
+a single VPC stack based on the [template file] at `vpc.cfn.yaml` and
+the [stack deployment file] at `deploy-vpc.yaml`, you can re-use it across
+indexer deployments.
 
 ## Setup
 
@@ -190,18 +202,30 @@ For a concise list of such parameters, see a [stack deployment file] at
    </details>
    <!-- markdownlint-enable MD033 -->
 
-1. Create a [stack deployment file] (see `deploy-*.yml`) with appropriate
-   [template parameters](#template-parameters).
+1. If you haven't already deployed a VPC stack, create a [stack deployment file]
+   based on `deploy-vpc.yml`.
 
-1. [Create the stack with GitSync], then monitor [GitSync events][gitsync event]
-   in the [GitSync status dashboard].
+1. Create a [stack deployment file] (see `deploy-indexer-*.yml`) with
+   appropriate [template parameters](#template-parameters) for the indexer (in
+   particular the `Environment` parameter should be
+   [unique across stacks](#template-parameters)).
+
+1. If you haven't already deployed a VPC stack, [create the stack with GitSync],
+   then monitor [GitSync events][gitsync event] in the
+   [GitSync status dashboard] or with [`rain`]. After it has deployed, repeat
+   for the indexer.
+
+   > Use concise stack names like `emoji-vpc` and `emoji-production` since
+   > excessively long names may result in resource creation failure due to
+   > character count limits, for example the
+   > [load balancer target group name 32 character limit].
 
 ## Querying endpoints
 
 ### Public endpoints
 
-Once you have [deployed a stack](#setup), query the public endpoint for your
-deployment environment:
+Once you have [deployed an indexer stack](#setup), query the public endpoint for
+your deployment environment:
 
 1. Set your stack name:
 
@@ -279,12 +303,12 @@ deployment environment:
 
 ### Bastion host connections
 
-Before you try connecting to the bastion host, verify that the
-`DeployBastionHost` [condition][conditions] evaluates to `true`. Note too that
-if you have been provisioning and de-provisioning other resources, you might
-want to de-provision then provision the bastion host before running the below
-commands, in order to refresh the bastion host [user data] that stores the URLs
-of other resources in the stack.
+Before you try connecting to the [bastion host][connect to a bastion host],
+verify that the `DeployBastionHost` [condition][conditions] evaluates to `true`.
+Note too that if you have been provisioning and de-provisioning other resources,
+you might want to de-provision then provision the bastion host before running
+the below commands, in order to refresh the bastion host [user data] that stores
+the URLs of other resources in the stack.
 
 1. Install the [EC2 Instance Connect CLI]:
 
@@ -367,6 +391,45 @@ of other resources in the stack.
 
 ## Design notes
 
+### VPC stack
+
+The indexer uses
+[NAT gateways to provide internet access for private instances], with
+[a NAT gateway in each Availability Zone][az-specific nat gateways] to ensure
+high resilience. To avoid [VPC quota] exhaustion for multiple indexer
+deployments, networking resources associated with the indexer are thus
+abstracted into a [VPC]-specific [stack template][template file] at
+`vpc.cfn.yaml`, whose resources can be re-used across multiple indexer
+deployments via [cross-stack references].
+
+Similarly, the VPC stack contains a single [EC2 Instance Connect Endpoint] that
+can be used to [connect to a bastion host] for an indexer deployment inside the
+VPC. This approach avoids [EC2 Instance Connect Endpoint quota] exhaustion.
+
+Though not strictly necessary to prevent quota exhaustion, the following
+common network resources are additionally abstracted:
+
+1. A [DB subnet group].
+1. A [private DNS namespace].
+
+The VPC stack contains a [private and public subnet] for each
+[Availability Zone] (AZ), with each public subnet sharing a common
+[public internet route] inside a [custom route table]. Per
+[AZ-specific NAT gateway best practices][az-specific nat gateways], each private
+subnet has its own custom route table with a [NAT gateway route]. No additional
+routing is required to enable communication across subnets, because as per the
+[AWS routes docs]:
+
+> Every route table contains a local route for communication within the VPC.
+> This route is added by default to all route tables. If your VPC has more than
+> one IPv4 CIDR block, your route tables contain a local route for each IPv4
+> CIDR block.
+
+The VPC uses an [AWS-recommended VPC CIDR block] of `10.0.0.0/16` corresponding
+to 65,536 IP addresses, with each non-overlapping [subnet CIDR block] using a
+`/19` netmask for up to 8,192 IP addresses per subnet (excluding the
+[5 default reserved addresses per subnet]).
+
 ### Database
 
 The indexer database uses [Aurora PostgreSQL] on a
@@ -377,10 +440,6 @@ The indexer database uses [Aurora PostgreSQL] on a
 [Availability Zones][aurora availability zones] to ensure
 [high availability][high availability for aurora] with
 [fault tolerant replica promotion] and [autoscaling][aurora autoscaling].
-
-### NAT gateway redundancy
-
-The indexer uses [a NAT gateway in each availability zone] for high resilience.
 
 ### Permissions
 
@@ -420,7 +479,7 @@ instance is live and at idle.
 This design ensures that at least one server container is always live for both
 REST and WebSocket endpoints.
 
-[a nat gateway in each availability zone]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
+[5 default reserved addresses per subnet]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-sizing.html
 [amazonec2containerserviceautoscalerole]: https://docs.aws.amazon.com/autoscaling/application/userguide/security-iam-awsmanpol.html#ecs-policy
 [application autoscaling iam access]: https://docs.aws.amazon.com/autoscaling/application/userguide/security_iam_service-with-iam.html
 [aptos labs grpc endpoint]: https://aptos.dev/en/build/indexer/txn-stream/aptos-hosted-txn-stream#endpoints
@@ -430,14 +489,23 @@ REST and WebSocket endpoints.
 [aurora clusters]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html
 [aurora postgresql]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraPostgreSQL.html
 [auto-selection of aurora az]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-availabilityzone
+[availability zone]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-availability-zones
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
+[aws routes docs]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html#route-table-routes
+[aws-recommended vpc cidr block]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html
+[az-specific nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
 [cloudformation service role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html
 [conditions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html
+[connect to a bastion host]: https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/access-a-bastion-host-by-using-session-manager-and-amazon-ec2-instance-connect.html
 [container autoscaling]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
 [container logging permissions]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html#ec2-considerations
 [create the stack with gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-walkthrough.html
+[cross-stack references]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/walkthrough-crossstackref.html
+[custom route table]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html#custom-route-tables
+[db subnet group]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html#USER_VPC.Subnets
 [ec2 instance connect cli]: https://github.com/aws/aws-ec2-instance-connect-cli
 [ec2 instance connect endpoint]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-using-eice.html
+[ec2 instance connect endpoint quota]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/eice-quotas.html
 [ecr pull through cache permissions]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-iam.html
 [ecr pull through cache rule creation docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-rule.html
 [ecs task execution iam role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html
@@ -452,12 +520,18 @@ REST and WebSocket endpoints.
 [iam roles]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
 [inline policy]: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#inline-policies
 [least-privilege permissions]: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege
+[load balancer target group name 32 character limit]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-target-group.html#:~:text=For%20Target%20group%20name%2C%20type,the%20default%20values%20as%20needed.
 [make route 53 the dns service for a domain you own]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
 [managed rules]: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
 [multi-az aurora serverless v2 cluster]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html#aurora-serverless.ha
+[nat gateway route]: https://docs.aws.amazon.com/vpc/latest/userguide/route-table-options.html#route-tables-nat
+[nat gateways to provide internet access for private instances]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [parameter naming constraints]: https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-su-create.html
 [parameters]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
 [poweruseraccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/PowerUserAccess.html
+[private and public subnet]: https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html#subnet-types
+[private dns namespace]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicediscovery-privatednsnamespace.html
+[public internet route]: https://docs.aws.amazon.com/vpc/latest/userguide/route-table-options.html#route-tables-internet-gateway
 [resources]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 [role passing]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_passrole.html
 [rule actions]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-ruleaction.html
@@ -467,6 +541,7 @@ REST and WebSocket endpoints.
 [stack deployment file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-concepts-terms.html#git-sync-concepts-terms-depoyment-file
 [step scale cloudwatch alarm]: https://docs.aws.amazon.com/autoscaling/application/userguide/step-scaling-policy-overview.html#step-scaling-how-it-works
 [step scaling]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-step-scaling-policies.html
+[subnet cidr block]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-sizing.html
 [systems manager parameters]: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
 [target tracking]: https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-target-tracking.html
 [template file]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html
@@ -474,6 +549,9 @@ REST and WebSocket endpoints.
 [the upstream repository credentials docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-secret.html
 [transaction stream service endpoint]: https://aptos.dev/en/build/indexer/txn-stream
 [user data]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
+[vpc]: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
+[vpc quota]: https://docs.aws.amazon.com/vpc/latest/userguide/amazon-vpc-limits.html
 [web acl traffic overview dashboards]: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-dashboards.html
 [web application firewall]: https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
 [`ecr::getauthorizationtoken`]: https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_GetAuthorizationToken.html
+[`rain`]: https://github.com/aws-cloudformation/rain
