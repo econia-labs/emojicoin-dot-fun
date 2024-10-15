@@ -138,8 +138,7 @@ module rewards::emojicoin_dot_fun_rewards {
             // `probability_per_octa_q64` is less than 1 in nominal probability, hence less than
             // `MAX_U64` when represented as a Q64-style `u128`. Since `integrator_fee_in_octas` is
             // also significantly less than `MAX_U64`, the product is less than `MAX_U128`.
-            let reward_threshold_q64 =
-                (probability_per_octa_q64) * (integrator_fee_in_octas as u128);
+            let reward_threshold_q64 = probability_per_octa_q64 * (integrator_fee_in_octas as u128);
 
             // Check if user is eligible for reward at current tier by checking if tier still has
             // rewards remaining, then compare random number to probability threshold. Since the
