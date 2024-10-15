@@ -135,12 +135,11 @@ module rewards::emojicoin_dot_fun_rewards {
             // Get reward probability threshold for current tier based on integrator fees paid.
             let probability_per_octa_q64 =
                 tier_ref.reward_probability_per_octa_of_swap_fees_paid_q64;
-            let reward_threshold_q64 = ( // Q64 multiplication requires shifting at the end.
-                (
-                    ((probability_per_octa_q64 as u256) * (integrator_fee_in_octas as u256))
-                        >> SHIFT_Q64
-                ) as u128
-            );
+            // `probability_per_octa_q64` is less than 1 in nominal probability, hence less than
+            // `MAX_U64` when represented as a Q64-style `u128`. Since `integrator_fee_in_octas` is
+            // also significantly less than `MAX_U64`, the product is less than `MAX_U128`.
+            let reward_threshold_q64 =
+                (probability_per_octa_q64) * (integrator_fee_in_octas as u128);
 
             // Check if user is eligible for reward at current tier by checking if tier still has
             // rewards remaining, then compare random number to probability threshold. Since the
@@ -248,6 +247,10 @@ module rewards::emojicoin_dot_fun_rewards {
                 apt_amount_per_reward: *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i),
                 n_rewards_disbursed: 0,
                 n_rewards_remaining: 0,
+                // Once `octas_nominal_fees` have been paid, `NOMINAL_N_REWARDS_PER_TIER[i]` rewards
+                // will have been disbursed, so the probability of winning a reward for an octa of
+                // fees paid is the ratio of the number of rewards in this tier to the total number
+                // of nominal fees paid after all rewards for this tier have been disbursed.
                 reward_probability_per_octa_of_swap_fees_paid_q64:
                     (
                         ((*vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i) as u128) << SHIFT_Q64) /
