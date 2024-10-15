@@ -49,3 +49,4 @@ ipinfo
 localstorage
 vpnapi
 ctrls
+dockerenv
