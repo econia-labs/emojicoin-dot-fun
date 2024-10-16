@@ -7,7 +7,7 @@ import {
   type TypeTag,
   type Uint64,
 } from "@aptos-labs/ts-sdk";
-import { ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
+import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
 import { getEvents } from "../emojicoin_dot_fun";
 import {
   Chat,
@@ -21,14 +21,13 @@ import { type Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
 import { getAptosClient } from "../utils/aptos-client";
-import { getEmojisInString, toChatMessageEntryFunctionArgs } from "../emoji_data";
+import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
 import type EmojicoinClientTypes from "./types";
 import { INTEGRATOR_ADDRESS } from "../const";
 
 const { expect, Expect } = customExpect;
 type Options = EmojicoinClientTypes["Options"];
-type AnyEmoji = EmojicoinClientTypes["AnyEmoji"];
 type ExtraSwapArgs = EmojicoinClientTypes["ExtraSwapArgs"];
 
 /**

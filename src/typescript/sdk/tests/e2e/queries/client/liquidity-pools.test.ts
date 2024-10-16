@@ -1,12 +1,7 @@
 /* eslint-disable no-await-in-loop */
 
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import {
-  maxBigInt,
-  ONE_APT,
-  toSequenceNumberOptions,
-  type SymbolEmoji,
-} from "../../../../src";
+import { maxBigInt, ONE_APT, toSequenceNumberOptions, type SymbolEmoji } from "../../../../src";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
 import { getFundedAccounts } from "../../../../src/utils/test/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
@@ -68,14 +63,16 @@ describe("queries for liquidity pools with the emojicoin client", () => {
     const swapper = registrant;
     const emojis: SymbolEmoji[] = ["🌊", "💦"];
     await emojicoin.register(registrant, emojis);
-    const res = await emojicoin.buy(swapper, emojis, EXACT_TRANSITION_INPUT_AMOUNT).then(({ response }) =>
-      waitForEmojicoinIndexer(response.version).then(() =>
-        fetchMarkets({
-          inBondingCurve: false,
-          pageSize: LIMIT,
-        })
-      )
-    );
+    const res = await emojicoin
+      .buy(swapper, emojis, EXACT_TRANSITION_INPUT_AMOUNT)
+      .then(({ response }) =>
+        waitForEmojicoinIndexer(response.version).then(() =>
+          fetchMarkets({
+            inBondingCurve: false,
+            pageSize: LIMIT,
+          })
+        )
+      );
     // If the result is not less than `LIMIT`, this test needs to be updated to paginate results.
     expect(res.length).toBeLessThan(LIMIT);
 

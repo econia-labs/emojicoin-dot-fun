@@ -12,8 +12,6 @@ type Options = {
   waitForTransactionOptions?: WaitForTransactionOptions;
 };
 
-type AnyEmoji = string;
-
 type ExtraSwapArgs = {
   isSell: boolean;
   inputAmount: Uint64;
@@ -24,7 +22,6 @@ type ExtraSwapArgs = {
 
 type EmojicoinClientTypes = {
   Options: Options;
-  AnyEmoji: AnyEmoji;
   ExtraSwapArgs: ExtraSwapArgs;
 };
 
