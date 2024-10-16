@@ -1,9 +1,9 @@
 import {
+  AccountAddress,
   type Account,
   type UserTransactionResponse,
   type AccountAddressInput,
   type Aptos,
-  type AccountAddress,
   type TypeTag,
   type Uint64,
 } from "@aptos-labs/ts-sdk";
@@ -24,6 +24,7 @@ import { getAptosClient } from "../utils/aptos-client";
 import { getEmojisInString } from "../emoji_data";
 import customExpect from "./expect";
 import type EmojicoinClientTypes from "./types";
+import { INTEGRATOR_ADDRESS } from "../const";
 
 const { expect, Expect } = customExpect;
 type Options = EmojicoinClientTypes["Options"];
@@ -84,23 +85,39 @@ export class EmojicoinClient {
     sell: this.sellWithRewards.bind(this),
   };
 
-  constructor(args?: { aptos?: Aptos }) {
-    this.aptos = args?.aptos ?? getAptosClient().aptos;
+  public integrator: AccountAddress;
+
+  public integratorFeeRateBPs: number;
+
+  public minOutputAmount: bigint;
+
+  constructor({
+    aptos = getAptosClient().aptos,
+    integrator = INTEGRATOR_ADDRESS,
+    integratorFeeRateBPs = 0,
+    minOutputAmount = 1n,
+  }: {
+    aptos?: Aptos;
+    integrator?: AccountAddressInput;
+    integratorFeeRateBPs?: number;
+    minOutputAmount?: bigint;
+  }) {
+    this.aptos = aptos;
+    this.integrator = AccountAddress.from(integrator);
+    this.integratorFeeRateBPs = integratorFeeRateBPs;
+    this.minOutputAmount = minOutputAmount;
   }
 
   async register(
     registrant: Account,
     emojis: MarketSymbolEmojis,
-    args: {
-      integrator: AccountAddressInput;
-    },
     options?: Options
   ) {
     const response = await RegisterMarket.submit({
       aptosConfig: this.aptos.config,
       registrant,
       emojis: this.emojisToHexStrings(emojis),
-      integrator: args.integrator,
+      integrator: this.integrator,
       ...options,
     });
     const res = this.getTransactionEventData(response);
