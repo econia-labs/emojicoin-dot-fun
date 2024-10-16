@@ -7,7 +7,7 @@ import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { type ChatEmojiData, type EmojiName } from "@sdk/emoji_data";
+import { type ChatEmojiData, type SymbolEmojiName } from "@sdk/emoji_data";
 import { normalizeHex } from "@sdk/utils";
 import { ECONIA_BLUE } from "theme/colors";
 import RoundButton from "@icons/Minimize";
@@ -63,7 +63,7 @@ export default function EmojiPicker(
           const bytes = new TextEncoder().encode(emoji);
           const hex = normalizeHex(bytes);
           chatEmojiData.set(emoji, {
-            name: name as EmojiName,
+            name: name as SymbolEmojiName,
             emoji,
             hex,
             bytes,

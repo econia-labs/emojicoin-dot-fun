@@ -21,7 +21,6 @@ import {
 } from "./utils";
 import { initialStatePatch } from "./local-storage";
 import { periodEnumToRawDuration } from "@sdk/const";
-import { joinEmojis } from "@sdk/emoji_data";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
 
@@ -29,14 +28,14 @@ export const createEventStore = () => {
   return createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
       ...initialStatePatch(),
-      getMarket: (m) => get().markets.get(joinEmojis(m)),
+      getMarket: (emojis) => get().markets.get(emojis.join("")),
       getRegisteredMarkets: () => {
         return get().markets;
       },
       loadMarketStateFromServer: (states) => {
         const filtered = states.filter((e) => {
           const marketEmojis = e.market.symbolEmojis;
-          const symbol = joinEmojis(marketEmojis);
+          const symbol = marketEmojis.join("");
           const market = get().markets.get(symbol);
           // Filter by daily volume being undefined *or* the guid not already existing in `guids`.
           return !market || typeof market.dailyVolume === "undefined" || !get().guids.has(symbol);
@@ -119,7 +118,7 @@ export const createEventStore = () => {
         });
       },
       subscribeToPeriod: ({ marketEmojis, period, cb }) => {
-        const symbol = joinEmojis(marketEmojis);
+        const symbol = marketEmojis.join("");
         if (!get().markets.has(symbol)) return;
         set((state) => {
           const market = state.markets.get(symbol)!;
@@ -127,7 +126,7 @@ export const createEventStore = () => {
         });
       },
       unsubscribeFromPeriod: ({ marketEmojis, period }) => {
-        const symbol = joinEmojis(marketEmojis);
+        const symbol = marketEmojis.join("");
         if (!get().markets.has(symbol)) return;
         set((state) => {
           const market = state.markets.get(symbol)!;

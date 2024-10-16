@@ -22,12 +22,7 @@ import {
   type ProcessedFields,
   DatabaseRpc,
 } from "./json-types";
-import {
-  type MarketEmojiData,
-  type MarketSymbolEmojis,
-  type SymbolEmoji,
-  toMarketEmojiData,
-} from "../../emoji_data";
+import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
@@ -388,9 +383,7 @@ const EVENT_NAMES = {
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
 
-const formatEmojis = <
-  T extends { symbol_emojis: MarketSymbolEmojis } | { symbolEmojis: MarketSymbolEmojis },
->(
+const formatEmojis = <T extends { symbol_emojis: SymbolEmoji[] } | { symbolEmojis: SymbolEmoji[] }>(
   data: T
 ) => {
   if ("symbol_emojis" in data) {

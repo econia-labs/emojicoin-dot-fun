@@ -11,13 +11,13 @@ import { getAptosClient } from "../aptos-client";
 import { getEmojicoinMarketAddressAndTypeTags } from "../../markets/utils";
 import { EmojicoinDotFun, getEvents } from "../../emojicoin_dot_fun";
 import {
-  type EmojiName,
   generateRandomSymbol,
   type JsonTypes,
   type MarketEmojiData,
   ONE_APT,
-  SYMBOL_DATA,
+  SYMBOL_EMOJI_DATA,
   type SymbolEmoji,
+  type SymbolEmojiName,
   toMarketEmojiData,
   type Types,
 } from "../..";
@@ -87,12 +87,12 @@ type RegisterMarketHelper = Types["EmojicoinInfo"] &
     events: Events;
   };
 
-const bytesFromNameOrEmoji = (nameOrEmoji: EmojiName | SymbolEmoji) => {
-  if (SYMBOL_DATA.hasName(nameOrEmoji)) {
-    return Array.from(SYMBOL_DATA.byName(nameOrEmoji)!.bytes);
+const bytesFromNameOrEmoji = (nameOrEmoji: SymbolEmojiName | SymbolEmoji) => {
+  if (SYMBOL_EMOJI_DATA.hasName(nameOrEmoji)) {
+    return Array.from(SYMBOL_EMOJI_DATA.byName(nameOrEmoji)!.bytes);
   }
-  if (SYMBOL_DATA.hasEmoji(nameOrEmoji)) {
-    return Array.from(SYMBOL_DATA.byEmoji(nameOrEmoji)!.bytes);
+  if (SYMBOL_EMOJI_DATA.hasEmoji(nameOrEmoji)) {
+    return Array.from(SYMBOL_EMOJI_DATA.byEmoji(nameOrEmoji)!.bytes);
   }
   throw new Error(`Invalid name or emoji passed: ${nameOrEmoji}`);
 };
@@ -107,7 +107,7 @@ async function registerMarketFromEmojis(args: {
 
 async function registerMarketFromNames(args: {
   registrant: Account;
-  emojiNames: Array<EmojiName>;
+  emojiNames: Array<SymbolEmojiName>;
   integrator?: Account;
 }) {
   return registerMarketFromEmojisOrNames({ ...args, inputs: args.emojiNames });
@@ -115,7 +115,7 @@ async function registerMarketFromNames(args: {
 
 async function registerMarketFromEmojisOrNames(args: {
   registrant: Account;
-  inputs: Array<EmojiName>;
+  inputs: Array<SymbolEmoji | SymbolEmojiName>;
   integrator?: Account;
 }): Promise<RegisterMarketHelper & { registerResponse: UserTransactionResponse }> {
   const { aptos } = getPublishHelpers();

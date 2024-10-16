@@ -1,5 +1,5 @@
 import { type Period } from "@sdk/const";
-import { type MarketSymbolEmojis } from "@sdk/emoji_data";
+import { type SymbolEmoji } from "@sdk/emoji_data";
 import {
   type MarketMetadataModel,
   type AnyEventModel,
@@ -53,7 +53,7 @@ export type EventState = {
 };
 
 export type PeriodSubscription = {
-  marketEmojis: MarketSymbolEmojis;
+  marketEmojis: SymbolEmoji[];
   period: Period;
   cb: SubscribeBarsCallback;
 };
@@ -64,7 +64,7 @@ export type SetLatestBarsArgs = {
 };
 
 export type EventActions = {
-  getMarket: (m: MarketSymbolEmojis) => undefined | Readonly<MarketEventStore>;
+  getMarket: (m: SymbolEmoji[]) => undefined | Readonly<MarketEventStore>;
   getRegisteredMarkets: () => Readonly<EventState["markets"]>;
   loadMarketStateFromServer: (states: Array<DatabaseModels["market_state"]>) => void;
   loadEventsFromServer: (events: Array<AnyEventModel>) => void;

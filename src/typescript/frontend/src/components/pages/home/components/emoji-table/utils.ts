@@ -3,7 +3,7 @@ import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type EmojiPickerStore } from "@/store/emoji-picker-store";
 import { type HomePageProps } from "app/home/HomePage";
 import { type EventStore } from "@/store/event/types";
-import { joinEmojis, type SymbolEmoji } from "@sdk/emoji_data";
+import { type SymbolEmoji } from "@sdk/emoji_data";
 
 export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   time: number;
@@ -43,8 +43,8 @@ export const stateEventsToProps = (
   // order data visually.
   return firehose.map((e) => {
     const marketID = Number(e.market.marketID);
-    const { emojis, symbolEmojis: marketEmojis } = e.market;
-    const symbol = joinEmojis(marketEmojis);
+    const { emojis } = e.market;
+    const symbol = e.market.symbolData.symbol;
     const marketCap = e.state.instantaneousStats.marketCap;
     const volume24H = getMarket(e.market.symbolEmojis)?.dailyVolume;
     return {

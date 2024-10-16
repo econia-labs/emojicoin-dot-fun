@@ -1,11 +1,12 @@
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
-import { LIMIT, ORDER_BY } from "../../../queries";
+import { LIMIT, ORDER_BY, type OrderBy } from "../../../queries";
 import { type AnyNumberString } from "../../../types";
 import {
   toChatEventModel,
   toLiquidityEventModel,
   toMarket1MPeriodsInLastDay,
   toMarketLatestStateEventModel,
+  toMarketRegistrationEventModel,
   toSwapEventModel,
 } from "../../types";
 import { type MarketStateQueryArgs } from "../../types/common";
@@ -72,6 +73,17 @@ const selectChatsByUser = ({
     .eq("user", toAccountAddressString(user))
     .range((page - 1) * pageSize, page * pageSize - 1);
 
+const selectMarketRegistrationEvents = ({
+  page = 1,
+  pageSize = LIMIT,
+  orderBy = ORDER_BY.DESC,
+}: { orderBy?: OrderBy } & MarketStateQueryArgs) =>
+  postgrest
+    .from(TableName.MarketRegistrationEvents)
+    .select("*")
+    .order("transaction_version", orderBy)
+    .range((page - 1) * pageSize, page * pageSize - 1);
+
 export const fetchLiquidityEvents = queryHelper(selectLiquidityEvents, toLiquidityEventModel);
 export const fetchDailyVolumeForMarket = queryHelper(selectMarketDailyVolume, (r) => ({
   dailyVolume: BigInt(r.daily_volume),
@@ -88,3 +100,7 @@ export const fetchLatestStateEventForMarket = queryHelper(
 );
 export const fetchSwapEventsBySwapper = queryHelper(selectSwapsBySwapper, toSwapEventModel);
 export const fetchChatEventsByUser = queryHelper(selectChatsByUser, toChatEventModel);
+export const fetchMarketRegistrationEvents = queryHelper(
+  selectMarketRegistrationEvents,
+  toMarketRegistrationEventModel
+);

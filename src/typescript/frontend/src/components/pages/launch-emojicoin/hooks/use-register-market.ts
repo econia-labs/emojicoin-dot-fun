@@ -13,7 +13,7 @@ import {
   MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST,
 } from "@sdk/const";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
@@ -39,7 +39,7 @@ export const useRegisterMarket = () => {
 
   const { data: numMarkets } = useNumMarkets();
 
-  const emojiBytes = emojis.map((e) => SYMBOL_DATA.byEmoji(e)!.bytes);
+  const emojiBytes = emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.bytes);
 
   const { data: gasResult } = useQuery({
     queryKey: ["register-market-cost", numMarkets, account?.address, emojiBytes],
@@ -62,7 +62,7 @@ export const useRegisterMarket = () => {
           aptosConfig: aptos.config,
           registrant: account.address,
           registrantPubKey: publicKey,
-          emojis: numMarkets === 0 ? [SYMBOL_DATA.byName("Virgo")!.bytes] : emojiBytes,
+          emojis: numMarkets === 0 ? [SYMBOL_EMOJI_DATA.byName("Virgo")!.bytes] : emojiBytes,
         });
         return r;
       } catch (e) {

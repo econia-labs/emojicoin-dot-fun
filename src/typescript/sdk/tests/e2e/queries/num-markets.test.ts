@@ -1,5 +1,5 @@
 import { getRegistryResourceFromWriteSet, toRegistryView } from "../../../src";
-import { type EmojiName } from "../../../src/emoji_data/types";
+import { type SymbolEmojiName } from "../../../src/emoji_data/types";
 import { RegistryView } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../src/utils/aptos-client";
 import TestHelpers from "../../../src/utils/test/helpers";
@@ -13,7 +13,7 @@ describe("fetches the number of registered markets based on the latest processed
 
   let versionsAndNumMarkets: { version: bigint; numMarkets: bigint }[];
 
-  const marketEmojiNames: EmojiName[][] = [
+  const marketEmojiNames: SymbolEmojiName[][] = [
     ["supervillain"],
     ["supervillain: dark skin tone"],
     ["supervillain: light skin tone"],

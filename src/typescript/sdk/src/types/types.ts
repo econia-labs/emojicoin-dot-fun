@@ -148,7 +148,7 @@ export type Types = {
   };
 
   Registry: {
-    coinSymbolEmojis: AccountAddressString;
+    coinSymbolEmojis: Types["TableHandle"];
     extendRef: Types["ExtendRef"];
     globalStats: {
       cumulativeQuoteVolume: bigint;
@@ -508,7 +508,7 @@ export const toSmartTable = (data: JsonTypes["SmartTable"]): Types["SmartTable"]
 });
 
 export const toRegistryResource = (data: JsonTypes["Registry"]): Types["Registry"] => ({
-  coinSymbolEmojis: standardizeAddress(data.coin_symbol_emojis.handle),
+  coinSymbolEmojis: { handle: standardizeAddress(data.coin_symbol_emojis.handle) },
   extendRef: toExtendRef(data.extend_ref),
   globalStats: {
     cumulativeQuoteVolume: fromAggregatorSnapshot(
@@ -533,7 +533,7 @@ export const toRegistryResource = (data: JsonTypes["Registry"]): Types["Registry
   marketsByMarketID: toSmartTable(data.markets_by_market_id),
   registryAddress: standardizeAddress(data.registry_address),
   sequenceInfo: toParallelizableSequenceInfo(data.sequence_info),
-  supplementalChatEmojis: data.supplemental_chat_emojis,
+  supplementalChatEmojis: { handle: standardizeAddress(data.supplemental_chat_emojis.handle) },
 });
 
 export const toPeriodicStateMetadata = (

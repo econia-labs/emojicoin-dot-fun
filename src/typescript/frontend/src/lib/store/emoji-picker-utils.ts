@@ -1,5 +1,5 @@
 import { type EmojiPickerStore } from "./emoji-picker-store";
-import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data/symbol-data";
 import { getEmojisInString } from "@sdk/emoji_data";
 
 export const calculateEmojiIndices = (emojis: string[]) => {
@@ -37,7 +37,9 @@ export const insertEmojiTextInputHelper = (
   if (!target) return;
   const parsedEmojis = Array.isArray(textToInsert) ? textToInsert : getEmojisInString(textToInsert);
   const filteredEmojis =
-    mode === "chat" ? parsedEmojis : parsedEmojis.filter((emoji) => SYMBOL_DATA.byEmoji(emoji));
+    mode === "chat"
+      ? parsedEmojis
+      : parsedEmojis.filter((emoji) => SYMBOL_EMOJI_DATA.byEmoji(emoji));
   if (filteredEmojis.length === 0) return;
 
   const { start, end } = calculateIndicesFromSelection(

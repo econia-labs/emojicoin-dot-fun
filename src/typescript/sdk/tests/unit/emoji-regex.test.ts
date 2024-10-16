@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { SYMBOL_DATA, type SymbolEmoji } from "../../src";
+import { SYMBOL_EMOJI_DATA, type SymbolEmoji } from "../../src";
 import {
   encodeEmojis,
   getEmojisInString,
@@ -69,7 +69,7 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
     const symbols = new Set(Object.keys(SymbolEmojiData));
     const names = new Set(Object.values(SymbolEmojiData));
     const emojis = new Array<SymbolEmoji>("🎅", "🎅🏽", "🎅🏼", "🎅🏿", "🌎", "🇧🇷", "⭐").map((v) =>
-      SYMBOL_DATA.byEmojiStrict(v)
+      SYMBOL_EMOJI_DATA.byEmojiStrict(v)
     );
     emojis.forEach((emoji) => {
       expect(emoji).toBeDefined();
@@ -98,13 +98,13 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
 
   it("encodes emojis", () => {
     const symbolsForward = [
-      SYMBOL_DATA.byStrictName("ATM sign"),
-      SYMBOL_DATA.byStrictName("Aquarius"),
-      SYMBOL_DATA.byStrictName("yin yang"),
-      SYMBOL_DATA.byStrictName("Cancer"),
-      SYMBOL_DATA.byStrictName("world map"),
-      SYMBOL_DATA.byStrictName("yellow heart"),
-      SYMBOL_DATA.byStrictName("black cat"),
+      SYMBOL_EMOJI_DATA.byStrictName("ATM sign"),
+      SYMBOL_EMOJI_DATA.byStrictName("Aquarius"),
+      SYMBOL_EMOJI_DATA.byStrictName("yin yang"),
+      SYMBOL_EMOJI_DATA.byStrictName("Cancer"),
+      SYMBOL_EMOJI_DATA.byStrictName("world map"),
+      SYMBOL_EMOJI_DATA.byStrictName("yellow heart"),
+      SYMBOL_EMOJI_DATA.byStrictName("black cat"),
     ];
     const symbolsReverse = symbolsForward.toReversed();
 

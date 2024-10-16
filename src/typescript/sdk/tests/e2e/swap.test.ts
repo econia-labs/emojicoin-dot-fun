@@ -5,7 +5,7 @@ import {
   type UserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 import { ONE_APT } from "../../src/const";
-import { SYMBOL_DATA } from "../../src";
+import { SYMBOL_EMOJI_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
 import { getPublishHelpers } from "../../src/utils/test";
 import {
@@ -27,7 +27,7 @@ describe("tests the swap functionality", () => {
   const randomIntegrator = getFundedAccount("001");
   const registrant = getFundedAccount("002");
   const nonRegistrantUser = getFundedAccount("003");
-  const emoji = SYMBOL_DATA.byStrictName("pile of poo");
+  const emoji = SYMBOL_EMOJI_DATA.byStrictName("pile of poo");
   const {
     marketAddress: pooMarketAddress,
     emojicoin: pooEmojicoin,
@@ -153,7 +153,7 @@ describe("tests the swap functionality", () => {
   });
 
   it("successfully ends the grace period by having the registrant buy", async () => {
-    const newEmoji = SYMBOL_DATA.byStrictName("anger symbol");
+    const newEmoji = SYMBOL_EMOJI_DATA.byStrictName("anger symbol");
     const newMarketRegisterResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
       registrant,
@@ -228,7 +228,7 @@ describe("tests the swap functionality", () => {
   });
 
   it("fails to swap buy before the market registrant has ended the grace period", async () => {
-    const newEmoji = SYMBOL_DATA.byStrictName("yo-yo");
+    const newEmoji = SYMBOL_EMOJI_DATA.byStrictName("yo-yo");
     const newMarketRegisterResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
       registrant,
@@ -258,7 +258,7 @@ describe("tests the swap functionality", () => {
   });
 
   it("sees the grace period hasn't ended", async () => {
-    const newEmoji = SYMBOL_DATA.byStrictName("yawning face");
+    const newEmoji = SYMBOL_EMOJI_DATA.byStrictName("yawning face");
     const newMarketRegisterResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
       registrant,
