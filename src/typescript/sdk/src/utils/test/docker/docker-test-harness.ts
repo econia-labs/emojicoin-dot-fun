@@ -75,7 +75,7 @@ export class DockerTestHarness {
    */
   static async stop() {
     await execPromise(`docker compose -f ${LOCAL_COMPOSE_PATH} stop`);
-    const process = Number(readFileSync("/tmp/emojicoin-e2e", { encoding: "utf-8" }));
+    const process = Number(readFileSync(TMP_PID_FILE_PATH, { encoding: "utf-8" }));
     if (process) {
       kill(process);
     }
