@@ -1,5 +1,5 @@
 import emojiRegex from "emoji-regex";
-import { CHAT_EMOJI_DATA } from "./emoji-data";
+import { CHAT_EMOJI_DATA, isSymbolEmoji, isValidChatMessageEmoji, SYMBOL_EMOJI_DATA } from "./emoji-data";
 
 export const toChatMessageEntryFunctionArgs = (message: string) => {
   const emojiArr = message.match(emojiRegex()) ?? [];
@@ -8,13 +8,17 @@ export const toChatMessageEntryFunctionArgs = (message: string) => {
   const sequence: number[] = [];
 
   for (const emoji of emojiArr) {
-    if (!CHAT_EMOJI_DATA.hasEmoji(emoji)) {
+    if (!isValidChatMessageEmoji(emoji)) {
       console.warn(`Emoji ${emoji} not found in mapping. Ignoring it.`);
       continue;
     }
     if (indices[emoji] === undefined) {
       indices[emoji] = bytesArray.length;
-      bytesArray.push(CHAT_EMOJI_DATA.byEmojiStrict(emoji).bytes);
+      if (isSymbolEmoji(emoji)) {
+        bytesArray.push(SYMBOL_EMOJI_DATA.byEmojiStrict(emoji).bytes);
+      } else {
+        bytesArray.push(CHAT_EMOJI_DATA.byEmojiStrict(emoji).bytes);
+      }
     }
     sequence.push(indices[emoji]);
   }

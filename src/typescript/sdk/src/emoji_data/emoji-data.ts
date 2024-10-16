@@ -64,3 +64,11 @@ export const getRandomChatEmoji = (): ChatEmojiData => {
   const randomIndex = Math.floor(allChatEmojis.length * Math.random());
   return allChatEmojis[randomIndex];
 };
+
+export const isSymbolEmoji = (v: string): v is SymbolEmoji => SYMBOL_EMOJI_DATA.hasEmoji(v);
+/**
+ * Note that this function checks if the emoji is valid as an input for a chat message, not if it's
+ * specifically a chat/supplemental emoji.
+ */
+export const isValidChatMessageEmoji = (v: string): v is SymbolEmoji | ChatEmoji =>
+  isSymbolEmoji(v) || CHAT_EMOJI_DATA.hasEmoji(v);
