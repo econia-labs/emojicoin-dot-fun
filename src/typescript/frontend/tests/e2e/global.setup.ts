@@ -3,7 +3,7 @@ import { DockerTestHarness } from "../../../sdk/src/utils/test/docker/docker-tes
 
 setup("setup the Docker containers", async ({}) => {
   // Ten minute timeout.
-  setup.setTimeout(600_000);
+  setup.setTimeout(12000);
   const startDockerServices = process.env.APTOS_NETWORK === "local";
   if (startDockerServices) {
     await DockerTestHarness.run(true);
