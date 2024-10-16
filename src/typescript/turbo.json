@@ -10,9 +10,6 @@
   "globalEnv": [],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
       "outputs": [
         "dist/**",
         ".next/**"
@@ -32,6 +29,7 @@
       "persistent": true
     },
     "e2e:frontend": {
+      "cache": false,
       "outputs": []
     },
     "format": {
@@ -60,15 +58,19 @@
       "outputs": []
     },
     "test": {
+      "cache": false,
       "outputs": []
     },
     "test:parallel": {
+      "cache": false,
       "outputs": []
     },
     "test:sequential": {
+      "cache": false,
       "outputs": []
     },
     "unit-test": {
+      "cache": false,
       "outputs": []
     }
   }
