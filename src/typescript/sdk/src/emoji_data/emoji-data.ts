@@ -67,8 +67,13 @@ export const getRandomChatEmoji = (): ChatEmojiData => {
 
 export const isSymbolEmoji = (v: string): v is SymbolEmoji => SYMBOL_EMOJI_DATA.hasEmoji(v);
 /**
+ * Note that this function only checks if the emoji is a supplemental chat emoji, not if it's a
+ * valid input emoji for a chat message in the `emojicoin_dot_fun.move` `chat` entry function.
+ */
+export const isChatEmoji = (v: string): v is ChatEmoji => CHAT_EMOJI_DATA.hasEmoji(v);
+/**
  * Note that this function checks if the emoji is valid as an input for a chat message, not if it's
  * specifically a chat/supplemental emoji.
  */
 export const isValidChatMessageEmoji = (v: string): v is SymbolEmoji | ChatEmoji =>
-  isSymbolEmoji(v) || CHAT_EMOJI_DATA.hasEmoji(v);
+  isSymbolEmoji(v) || isChatEmoji(v);
