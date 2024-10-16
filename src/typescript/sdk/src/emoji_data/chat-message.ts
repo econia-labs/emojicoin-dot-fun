@@ -1,5 +1,10 @@
 import emojiRegex from "emoji-regex";
-import { CHAT_EMOJI_DATA, isSymbolEmoji, isValidChatMessageEmoji, SYMBOL_EMOJI_DATA } from "./emoji-data";
+import {
+  CHAT_EMOJI_DATA,
+  isSymbolEmoji,
+  isValidChatMessageEmoji,
+  SYMBOL_EMOJI_DATA,
+} from "./emoji-data";
 
 export const toChatMessageEntryFunctionArgs = (message: string) => {
   const emojiArr = message.match(emojiRegex()) ?? [];
@@ -22,5 +27,8 @@ export const toChatMessageEntryFunctionArgs = (message: string) => {
     }
     sequence.push(indices[emoji]);
   }
-  return { emojiBytes: bytesArray, emojiIndicesSequence: sequence };
+  return {
+    emojiBytes: bytesArray,
+    emojiIndicesSequence: sequence,
+  };
 };

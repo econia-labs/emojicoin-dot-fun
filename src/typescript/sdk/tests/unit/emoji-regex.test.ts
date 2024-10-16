@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { CHAT_EMOJI_DATA, ChatEmoji, SYMBOL_EMOJI_DATA, type SymbolEmoji } from "../../src";
+import { CHAT_EMOJI_DATA, type ChatEmoji, SYMBOL_EMOJI_DATA, type SymbolEmoji } from "../../src";
 import {
   encodeEmojis,
   getEmojisInString,
