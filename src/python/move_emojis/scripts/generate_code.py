@@ -121,7 +121,7 @@ def as_emojis_array(symbol_emojis: dict[str, EmojiData]) -> list[str]:
     return list(data.keys())
 
 
-def ensure_write_to_file(data: str | dict[str, Any] | list[str] | set[str], fp: str):
+def ensure_write_to_file(data: str | dict[str, Any] | list[str], fp: str):
     fp_obj = pathlib.Path(fp)
     pathlib.Path(fp_obj.parent).mkdir(exist_ok=True)
 
