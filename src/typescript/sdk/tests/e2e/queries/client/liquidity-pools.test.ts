@@ -2,14 +2,13 @@
 
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
-  INTEGRATOR_ADDRESS,
   maxBigInt,
   ONE_APT,
   toSequenceNumberOptions,
-  type MarketSymbolEmojis,
+  type SymbolEmoji,
 } from "../../../../src";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../utils/helpers";
-import { getFundedAccounts } from "../../../utils/test-accounts";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
+import { getFundedAccounts } from "../../../../src/utils/test/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { fetchMarkets, fetchUserLiquidityPools } from "../../../../src/indexer-v2/queries";
 import { LIMIT } from "../../../../src/queries";
@@ -21,27 +20,11 @@ describe("queries for liquidity pools with the emojicoin client", () => {
   const registrants = getFundedAccounts("046", "047");
   const emojicoin = new EmojicoinClient();
 
-  const REGISTRATION_ARGS = {
-    integrator: INTEGRATOR_ADDRESS,
-  };
-
-  const SWAP_ARGS = {
-    inputAmount: EXACT_TRANSITION_INPUT_AMOUNT,
-    minOutputAmount: 1n,
-    integrator: INTEGRATOR_ADDRESS,
-    integratorFeeRateBPs: 0,
-  };
-
-  const LIQUIDITY_ARGS = {
-    quoteAmount: 1000n,
-    minLpCoinsOut: 1n,
-  };
-
   it("queries a user's liquidity pools with the rpc function call", async () => {
     const registrant = registrants[0];
     const [swapper, provider] = [registrant, registrant];
 
-    const symbols: MarketSymbolEmojis[] = [["🏄"], ["🏄🏻"], ["🏄🏼"], ["🏄🏽"], ["🏄🏾"], ["🏄🏿"]];
+    const symbols: SymbolEmoji[][] = [["🏄"], ["🏄🏻"], ["🏄🏼"], ["🏄🏽"], ["🏄🏾"], ["🏄🏿"]];
 
     const toSequenceNumberAndMaxGas = (n: number) => ({
       options: {
@@ -54,13 +37,13 @@ describe("queries for liquidity pools with the emojicoin client", () => {
     const responses: UserTransactionResponse[] = await Promise.all(
       symbols.map((symbol, i) =>
         emojicoin
-          .register(registrant, symbol, REGISTRATION_ARGS, toSequenceNumberAndMaxGas(i * 3))
+          .register(registrant, symbol, toSequenceNumberAndMaxGas(i * 3))
           .then(() =>
             emojicoin
-              .buy(swapper, symbol, SWAP_ARGS)
+              .buy(swapper, symbol, EXACT_TRANSITION_INPUT_AMOUNT)
               .then(() =>
                 emojicoin.liquidity
-                  .provide(provider, symbol, LIQUIDITY_ARGS)
+                  .provide(provider, symbol, 1000n)
                   .then(({ response }) => response)
               )
           )
@@ -83,9 +66,9 @@ describe("queries for liquidity pools with the emojicoin client", () => {
   it("queries all existing liquidity pools", async () => {
     const registrant = registrants[1];
     const swapper = registrant;
-    const emojis: MarketSymbolEmojis = ["🌊", "💦"];
-    await emojicoin.register(registrant, emojis, REGISTRATION_ARGS);
-    const res = await emojicoin.buy(swapper, emojis, SWAP_ARGS).then(({ response }) =>
+    const emojis: SymbolEmoji[] = ["🌊", "💦"];
+    await emojicoin.register(registrant, emojis);
+    const res = await emojicoin.buy(swapper, emojis, EXACT_TRANSITION_INPUT_AMOUNT).then(({ response }) =>
       waitForEmojicoinIndexer(response.version).then(() =>
         fetchMarkets({
           inBondingCurve: false,

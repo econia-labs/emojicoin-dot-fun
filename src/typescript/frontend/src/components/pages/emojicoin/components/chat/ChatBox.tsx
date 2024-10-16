@@ -48,7 +48,7 @@ const ChatBox = (props: ChatProps) => {
         user: account.address,
         marketAddress,
         emojiBytes,
-        emojiIndicesSequence: new Uint8Array(emojiIndicesSequence),
+        emojiIndicesSequence,
         typeTags: [emojicoin, emojicoinLP],
       });
     const res = await submit(builderLambda);

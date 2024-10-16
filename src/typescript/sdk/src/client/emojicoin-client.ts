@@ -7,7 +7,7 @@ import {
   type TypeTag,
   type Uint64,
 } from "@aptos-labs/ts-sdk";
-import { type MarketSymbolEmojis, type SymbolEmoji } from "../emoji_data/types";
+import { ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
 import { getEvents } from "../emojicoin_dot_fun";
 import {
   Chat,
@@ -21,7 +21,7 @@ import { type Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
 import { getAptosClient } from "../utils/aptos-client";
-import { getEmojisInString } from "../emoji_data";
+import { getEmojisInString, toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
 import type EmojicoinClientTypes from "./types";
 import { INTEGRATOR_ADDRESS } from "../const";
@@ -91,32 +91,29 @@ export class EmojicoinClient {
 
   public minOutputAmount: bigint;
 
-  constructor({
-    aptos = getAptosClient().aptos,
-    integrator = INTEGRATOR_ADDRESS,
-    integratorFeeRateBPs = 0,
-    minOutputAmount = 1n,
-  }: {
+  constructor(args?: {
     aptos?: Aptos;
     integrator?: AccountAddressInput;
     integratorFeeRateBPs?: number;
     minOutputAmount?: bigint;
   }) {
+    const {
+      aptos = getAptosClient().aptos,
+      integrator = INTEGRATOR_ADDRESS,
+      integratorFeeRateBPs = 0,
+      minOutputAmount = 1n,
+    } = args ?? {};
     this.aptos = aptos;
     this.integrator = AccountAddress.from(integrator);
     this.integratorFeeRateBPs = integratorFeeRateBPs;
     this.minOutputAmount = minOutputAmount;
   }
 
-  async register(
-    registrant: Account,
-    emojis: MarketSymbolEmojis,
-    options?: Options
-  ) {
+  async register(registrant: Account, symbolEmojis: SymbolEmoji[], options?: Options) {
     const response = await RegisterMarket.submit({
       aptosConfig: this.aptos.config,
       registrant,
-      emojis: this.emojisToHexStrings(emojis),
+      emojis: this.emojisToHexStrings(symbolEmojis),
       integrator: this.integrator,
       ...options,
     });
@@ -132,16 +129,14 @@ export class EmojicoinClient {
 
   async chat(
     user: Account,
-    emojis: SymbolEmoji[],
-    args: {
-      chatEmojis: AnyEmoji[];
-      emojiIndicesSequence: number[];
-    },
+    symbolEmojis: SymbolEmoji[],
+    message: string | (SymbolEmoji | ChatEmoji)[],
     options?: Options
   ) {
-    const chatEmojis = getEmojisInString(args.chatEmojis.join("")) as SymbolEmoji[];
-    const emojiBytes = this.emojisToHexStrings(chatEmojis);
-    const emojiIndicesSequence = new Uint8Array(args.emojiIndicesSequence);
+    const { emojiBytes, emojiIndicesSequence } =
+      typeof message === "string"
+        ? toChatMessageEntryFunctionArgs(message)
+        : toChatMessageEntryFunctionArgs(message.join(""));
 
     const response = await Chat.submit({
       aptosConfig: this.aptos.config,
@@ -149,7 +144,7 @@ export class EmojicoinClient {
       emojiBytes,
       emojiIndicesSequence,
       ...options,
-      ...this.getEmojicoinInfo(emojis),
+      ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
     return {
@@ -161,37 +156,44 @@ export class EmojicoinClient {
     };
   }
 
-  async buy(
-    swapper: Account,
-    emojis: SymbolEmoji[],
-    args: {
-      inputAmount: Uint64;
-      minOutputAmount: Uint64;
-      integrator: AccountAddressInput;
-      integratorFeeRateBPs: number;
-    },
-    options?: Options
-  ) {
-    return await this.swap(swapper, emojis, { ...args, isSell: false }, options);
+  async buy(swapper: Account, symbolEmojis: SymbolEmoji[], inputAmount: Uint64, options?: Options) {
+    return await this.swap(
+      swapper,
+      symbolEmojis,
+      {
+        inputAmount,
+        integrator: this.integrator,
+        integratorFeeRateBPs: this.integratorFeeRateBPs,
+        minOutputAmount: this.minOutputAmount,
+        isSell: false,
+      },
+      options
+    );
   }
 
   async sell(
     swapper: Account,
-    emojis: SymbolEmoji[],
-    args: {
-      inputAmount: Uint64;
-      minOutputAmount: Uint64;
-      integrator: AccountAddressInput;
-      integratorFeeRateBPs: number;
-    },
+    symbolEmojis: SymbolEmoji[],
+    inputAmount: Uint64,
     options?: Options
   ) {
-    return await this.swap(swapper, emojis, { ...args, isSell: true }, options);
+    return await this.swap(
+      swapper,
+      symbolEmojis,
+      {
+        inputAmount,
+        integrator: this.integrator,
+        integratorFeeRateBPs: this.integratorFeeRateBPs,
+        minOutputAmount: this.minOutputAmount,
+        isSell: true,
+      },
+      options
+    );
   }
 
   private async swap(
     swapper: Account,
-    emojis: SymbolEmoji[],
+    symbolEmojis: SymbolEmoji[],
     args: ExtraSwapArgs,
     options?: Options
   ) {
@@ -200,7 +202,7 @@ export class EmojicoinClient {
       swapper,
       ...args,
       ...options,
-      ...this.getEmojicoinInfo(emojis),
+      ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
     return {
@@ -214,31 +216,35 @@ export class EmojicoinClient {
 
   private async buyWithRewards(
     swapper: Account,
-    emojis: SymbolEmoji[],
-    args: {
-      inputAmount: Uint64;
-      minOutputAmount: Uint64;
-    },
+    symbolEmojis: SymbolEmoji[],
+    inputAmount: Uint64,
     options?: Options
   ) {
-    return await this.swapWithRewards(swapper, emojis, { ...args, isSell: false }, options);
+    return await this.swapWithRewards(
+      swapper,
+      symbolEmojis,
+      { inputAmount, minOutputAmount: this.minOutputAmount, isSell: false },
+      options
+    );
   }
 
   private async sellWithRewards(
     swapper: Account,
-    emojis: SymbolEmoji[],
-    args: {
-      inputAmount: Uint64;
-      minOutputAmount: Uint64;
-    },
+    symbolEmojis: SymbolEmoji[],
+    inputAmount: Uint64,
     options?: Options
   ) {
-    return await this.swapWithRewards(swapper, emojis, { ...args, isSell: true }, options);
+    return await this.swapWithRewards(
+      swapper,
+      symbolEmojis,
+      { inputAmount, minOutputAmount: this.minOutputAmount, isSell: true },
+      options
+    );
   }
 
   private async swapWithRewards(
     swapper: Account,
-    emojis: SymbolEmoji[],
+    symbolEmojis: SymbolEmoji[],
     args: Omit<ExtraSwapArgs, "integrator" | "integratorFeeRateBPs">,
     options?: Options
   ) {
@@ -247,7 +253,7 @@ export class EmojicoinClient {
       swapper,
       ...args,
       ...options,
-      ...this.getEmojicoinInfo(emojis),
+      ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
     return {
@@ -261,19 +267,17 @@ export class EmojicoinClient {
 
   private async provideLiquidity(
     provider: Account,
-    emojis: SymbolEmoji[],
-    args: {
-      quoteAmount: Uint64;
-      minLpCoinsOut: Uint64;
-    },
+    symbolEmojis: SymbolEmoji[],
+    quoteAmount: Uint64,
     options?: Options
   ) {
     const response = await ProvideLiquidity.submit({
       aptosConfig: this.aptos.config,
       provider,
-      ...args,
+      quoteAmount,
+      minLpCoinsOut: this.minOutputAmount,
       ...options,
-      ...this.getEmojicoinInfo(emojis),
+      ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
     return {
@@ -287,19 +291,17 @@ export class EmojicoinClient {
 
   private async removeLiquidity(
     provider: Account,
-    emojis: SymbolEmoji[],
-    args: {
-      lpCoinAmount: Uint64;
-      minQuoteOut: Uint64;
-    },
+    symbolEmojis: SymbolEmoji[],
+    lpCoinAmount: Uint64,
     options?: Options
   ) {
     const response = await RemoveLiquidity.submit({
       aptosConfig: this.aptos.config,
       provider,
-      ...args,
+      lpCoinAmount,
+      minQuoteOut: this.minOutputAmount,
       ...options,
-      ...this.getEmojicoinInfo(emojis),
+      ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
     return {
@@ -311,21 +313,21 @@ export class EmojicoinClient {
     };
   }
 
-  private emojisToHexStrings(emojis: SymbolEmoji[]) {
-    return emojis.map((emoji) => new TextEncoder().encode(emoji));
+  private emojisToHexStrings(symbolEmojis: SymbolEmoji[]) {
+    return symbolEmojis.map((emoji) => new TextEncoder().encode(emoji));
   }
 
-  private emojisToHexSymbol(emojis: SymbolEmoji[]) {
-    const res = emojis.flatMap((emoji) => Array.from(new TextEncoder().encode(emoji)));
+  private emojisToHexSymbol(symbolEmojis: SymbolEmoji[]) {
+    const res = symbolEmojis.flatMap((emoji) => Array.from(new TextEncoder().encode(emoji)));
     return new Uint8Array(res);
   }
 
-  private getEmojicoinInfo(emojis: SymbolEmoji[]): {
+  private getEmojicoinInfo(symbolEmojis: SymbolEmoji[]): {
     marketAddress: AccountAddress;
     typeTags: [TypeTag, TypeTag];
   } {
     const { marketAddress, emojicoin, emojicoinLP } = getEmojicoinMarketAddressAndTypeTags({
-      symbolBytes: this.emojisToHexSymbol(emojis),
+      symbolBytes: this.emojisToHexSymbol(symbolEmojis),
     });
     return {
       marketAddress,

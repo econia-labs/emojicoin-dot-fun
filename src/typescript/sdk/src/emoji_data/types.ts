@@ -6,6 +6,7 @@ import { type symbolBytesToEmojis } from "./utils";
 // Note the name data JSON files are not duplicated data, they are purely for type resolution.
 import type SymbolNamesJSON from "./symbol-names.json";
 import type ChatNamesJSON from "./chat-names.json";
+import { Flatten } from "../types";
 
 export type AllSymbolEmojiData = typeof AllSymbolEmojiJSON;
 export type SymbolEmoji = keyof AllSymbolEmojiData;

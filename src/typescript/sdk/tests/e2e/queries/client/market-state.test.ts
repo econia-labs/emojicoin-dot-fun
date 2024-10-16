@@ -1,5 +1,5 @@
-import { INTEGRATOR_ADDRESS, type MarketSymbolEmojis } from "../../../../src";
-import { getFundedAccount } from "../../../utils/test-accounts";
+import { type SymbolEmoji } from "../../../../src";
+import { getFundedAccount } from "../../../../src/utils/test/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { fetchMarketState } from "../../../../src/indexer-v2/queries";
 import { type MarketStateModel } from "../../../../src/indexer-v2/types";
@@ -13,25 +13,23 @@ describe("queries a market by market state with the emojicoin client", () => {
   const emojicoin = new EmojicoinClient();
 
   it("fetches the market state for a market based on an emoji symbols array", async () => {
-    const emojis: MarketSymbolEmojis = ["♻️", "🤕"];
+    const emojis: SymbolEmoji[] = ["♻️", "🤕"];
     const res = await emojicoin
-      .register(registrant, emojis, { integrator: INTEGRATOR_ADDRESS })
+      .register(registrant, emojis)
       .then(({ response }) => waitForEmojicoinIndexer(response.version))
       .then(() => fetchMarketState({ searchEmojis: emojis }));
     expect(res).not.toBeNull();
     expect(res).toBeDefined();
     expect(res!.dailyVolume).toEqual(0n);
 
-    const results = await emojicoin.rewards
-      .buy(registrant, emojis, { inputAmount: 1234n, minOutputAmount: 1n })
-      .then((res) =>
-        waitForEmojicoinIndexer(res.response.version).then(() =>
-          fetchMarketState({ searchEmojis: emojis }).then((stateFromIndexerProcessor) => ({
-            stateFromMiniProcessor: res.models.marketLatestStateEvents.at(0),
-            stateFromIndexerProcessor,
-          }))
-        )
-      );
+    const results = await emojicoin.rewards.buy(registrant, emojis, 1234n).then((res) =>
+      waitForEmojicoinIndexer(res.response.version).then(() =>
+        fetchMarketState({ searchEmojis: emojis }).then((stateFromIndexerProcessor) => ({
+          stateFromMiniProcessor: res.models.marketLatestStateEvents.at(0),
+          stateFromIndexerProcessor,
+        }))
+      )
+    );
 
     const { stateFromMiniProcessor, stateFromIndexerProcessor } = results;
     expect(stateFromMiniProcessor).not.toBeNull();
