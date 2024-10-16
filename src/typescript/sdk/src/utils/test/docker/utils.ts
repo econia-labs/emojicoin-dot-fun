@@ -51,8 +51,8 @@ type ExecCallback = (
 ) => void;
 
 const logger: ExecCallback = (error, stdout, stderr) => {
-  printLogs(stdout);
-  printLogs(stderr);
+  printLogs(stdout, []);
+  printLogs(stderr, []);
   if (error) {
     console.error(error);
   }
@@ -96,15 +96,16 @@ export async function getContainerState(name: ContainerName): Promise<ContainerS
 export const spawnWrapper = (
   command: string,
   args: string[],
-  quiet: boolean = false
+  quiet: boolean = false,
+  filterLogsFrom: ContainerName[] = []
 ): ChildProcessWithoutNullStreams => {
   const childProcess = spawn(command, args);
   if (!quiet) {
     childProcess.stdout.on("data", (data) => {
-      printLogs(data.toString().trim());
+      printLogs(data.toString().trim(), filterLogsFrom);
     });
     childProcess.stderr.on("data", (data) => {
-      printLogs(data.toString().trim());
+      printLogs(data.toString().trim(), filterLogsFrom);
     });
     childProcess.on("error", (error) => {
       console.error(error);

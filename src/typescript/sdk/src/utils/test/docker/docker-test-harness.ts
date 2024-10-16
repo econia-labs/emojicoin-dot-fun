@@ -1,9 +1,10 @@
 // eslint-disable no-await-in-loop
 // cspell:word localnet
 
-import { type ChildProcessWithoutNullStreams } from "child_process";
-import path from "path";
-import { waitFor } from "../../../src/utils";
+import path from "node:path";
+import os from "node:os";
+import { kill } from "node:process";
+import { waitFor } from "../..";
 import { getGitRoot } from "../helpers";
 import { type ContainerName } from "./logs";
 import {
@@ -13,10 +14,12 @@ import {
   execPromise,
   spawnWrapper,
 } from "./utils";
-import { EMOJICOIN_INDEXER_URL } from "../../../src/server/env";
-import { TableName } from "../../../src/indexer-v2/types/json-types";
+import { EMOJICOIN_INDEXER_URL } from "../../../server/env";
+import { TableName } from "../../../indexer-v2/types/json-types";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
+const LOCAL_ENV_PATH = path.join(getGitRoot(), "src/docker", "example.local.env");
 const PRUNE_SCRIPT = path.join(getGitRoot(), "src/docker/utils", "prune.sh");
 
 const PING_STATE_INTERVAL = 200;
@@ -55,16 +58,11 @@ const isDataNotCorrupted = (state?: ContainerState): boolean | undefined => {
   return true;
 };
 
-const MAX_WAIT_TIME_SECONDS = 120;
+const MAX_WAIT_TIME_SECONDS = 240;
+const TMP_PID_FILE_PATH = path.join(os.tmpdir(), "emojicoin-e2e-process-id");
 
 export class DockerTestHarness {
-  public includeFrontend: boolean;
-
-  public processes: ChildProcessWithoutNullStreams[] = [];
-
-  constructor({ includeFrontend }: { includeFrontend: boolean }) {
-    this.includeFrontend = includeFrontend;
-  }
+  constructor() {}
 
   /**
    * Removes all related processes.
@@ -76,23 +74,21 @@ export class DockerTestHarness {
   /**
    * Stops the Docker containers.
    */
-  async stop() {
+  static async stop() {
     await execPromise(`docker compose -f ${LOCAL_COMPOSE_PATH} stop`);
-    while (this.processes.length) {
-      const process = this.processes.pop();
-      if (process) {
-        process.kill();
-      }
+    const process = Number(readFileSync(TMP_PID_FILE_PATH, { encoding: "utf-8" }));
+    if (process) {
+      kill(process);
     }
   }
 
   /**
    * Calls the Docker helper script to start the containers.
    */
-  async run() {
-    await this.start();
+  static async run(frontend: boolean, filterLogsFrom: ContainerName[] = []) {
+    await DockerTestHarness.start(frontend, filterLogsFrom);
     const promises = [
-      this.waitForPrimaryService(),
+      DockerTestHarness.waitForPrimaryService(frontend),
       DockerTestHarness.waitForDeployer(),
       DockerTestHarness.waitForMigrationsToComplete(),
     ];
@@ -102,7 +98,7 @@ export class DockerTestHarness {
   /**
    * Starts a completely new Docker environment for the test harness.
    */
-  async start() {
+  static async start(frontend: boolean, filterLogsFrom: ContainerName[]) {
     // Ensure that we have a fresh Docker environment before starting the test harness.
     await DockerTestHarness.remove();
 
@@ -111,12 +107,14 @@ export class DockerTestHarness {
       "compose",
       "-f",
       LOCAL_COMPOSE_PATH,
+      "--env-file",
+      LOCAL_ENV_PATH,
+      ...(frontend ? ["--profile", "frontend"] : []),
       "up",
-      this.includeFrontend ? "--profile frontend" : "",
     ].filter((arg) => arg !== "");
 
-    const child = spawnWrapper(command, args);
-    this.processes.push(child);
+    const process = spawnWrapper(command, args, false, filterLogsFrom);
+    writeFileSync(TMP_PID_FILE_PATH, process.pid?.toString() ?? "");
   }
 
   /**
@@ -124,10 +122,10 @@ export class DockerTestHarness {
    *
    * @returns Promise<boolean>
    */
-  async waitForPrimaryService(): Promise<boolean> {
+  static async waitForPrimaryService(frontend: boolean): Promise<boolean> {
     // The broker will be the last container up, unless we're running the frontend.
     // In that case, the frontend will be last.
-    const container: ContainerName = this.includeFrontend ? "frontend" : "broker";
+    const container: ContainerName = frontend ? "frontend" : "broker";
     const ready = await waitFor({
       condition: async () => await isPrimaryContainerReady(container),
       interval: PING_STATE_INTERVAL,

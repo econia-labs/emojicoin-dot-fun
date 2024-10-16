@@ -59,9 +59,7 @@ containerNames.forEach((containerName, index) => {
   coloredNames.set(containerName, colorText(r, g, b)(containerName));
 });
 
-const shouldPrint = (containerName: ContainerName) => {
-  // @ts-expect-error Using `globalThis` as any.
-  const filterLogsFrom = globalThis.__DOCKER_LOGS_FILTER__ as Array<ContainerName>;
+const shouldPrint = (containerName: ContainerName, filterLogsFrom: ContainerName[]) => {
   return !filterLogsFrom.includes(containerName);
 };
 
@@ -90,13 +88,13 @@ const colorContainerName = (originalText: string) => {
   return originalText.replace(logPrefix, newLogPrefix);
 };
 
-const printLogs = (log: string | Buffer) => {
+const printLogs = (log: string | Buffer, filterLogsFrom: ContainerName[]) => {
   if (typeof log === "undefined" || log === null) {
     return;
   }
   const { containerName } = matchContainerLogs(log);
   // Filter out logs from containers that we shouldn't print.
-  if (containerName && !shouldPrint(containerName)) {
+  if (containerName && !shouldPrint(containerName, filterLogsFrom)) {
     return;
   }
   let res = log.toString();

@@ -8,7 +8,7 @@ import {
   symbolToEmojis,
 } from "../../src/emoji_data/utils";
 import SymbolEmojiData from "../../src/emoji_data/symbol-emojis.json";
-import { getGitRoot } from "../utils";
+import { getGitRoot } from "../../src/utils/test";
 
 describe("tests emojis against the emoji regex to ensure they're properly validated", () => {
   it("tests a few single emojis", () => {

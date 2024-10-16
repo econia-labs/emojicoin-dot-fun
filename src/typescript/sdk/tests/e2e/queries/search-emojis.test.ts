@@ -1,6 +1,6 @@
 import { type EmojiName, namesToEmojis } from "../../../src";
-import TestHelpers from "../../utils/helpers";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import TestHelpers from "../../../src/utils/test/helpers";
+import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
 import { fetchMarkets } from "../../../src/indexer-v2/queries/app/home";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 

@@ -23,6 +23,12 @@ export async function GET(request: Request) {
   // The liquidity `provider`, aka the account to search for in the user liquidity pools.
   const provider = searchParams.get("account");
 
-  const data = await getPoolData(page, sortBy, orderBy, searchEmojis, provider ?? undefined);
-  return new Response(stringifyJSON(data));
+  let res: Awaited<ReturnType<typeof getPoolData>> = [];
+
+  try {
+    res = await getPoolData(page, sortBy, orderBy, searchEmojis, provider ?? undefined);
+  } catch (e) {
+    console.error(e);
+  }
+  return new Response(stringifyJSON(res));
 }
