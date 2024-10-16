@@ -1,4 +1,4 @@
-import { type ChatEmojiData, type SymbolEmojiData } from "@sdk/emoji_data";
+import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { createStore } from "zustand";
 import { insertEmojiTextInputHelper, removeEmojiTextInputHelper } from "./emoji-picker-utils";
 
@@ -8,7 +8,6 @@ export type EmojiPickerState = {
   nativePicker: boolean;
   pickerRef: HTMLDivElement | null;
   textAreaRef: HTMLTextAreaElement | null;
-  chatEmojiData: Map<string, ChatEmojiData>;
   onClickOutside: (e: MouseEvent) => void;
   pickerInvisible: boolean;
   isLoadingRegisteredMarket: boolean;
@@ -32,7 +31,6 @@ export type EmojiPickerActions = {
   setTextAreaRef: (value: HTMLTextAreaElement | null) => void;
   setMode: (mode: "chat" | "register" | "search") => void;
   setOnClickOutside: (value: (e: MouseEvent) => void) => void;
-  setChatEmojiData: (value: Map<string, ChatEmojiData>) => void;
   setPickerInvisible: (value: boolean) => void;
   setRegisteredEmojis: (emojis: SymbolEmojiData[]) => void;
   setIsLoadingRegisteredMarket: (value: boolean) => void;
@@ -50,7 +48,6 @@ const defaultValues: EmojiPickerState = {
   emojis: [],
   pickerRef: null,
   textAreaRef: null,
-  chatEmojiData: new Map<string, SymbolEmojiData>(),
   registeredSymbolData: [],
   isLoadingRegisteredMarket: false,
   onClickOutside: (_e) => {},
@@ -163,7 +160,6 @@ export const createEmojiPickerStore = (initial?: Partial<EmojiPickerState>) =>
       }
       return set({ textAreaRef });
     },
-    setChatEmojiData: (value: Map<string, ChatEmojiData>) => set({ chatEmojiData: value }),
   }));
 
 export default createEmojiPickerStore;

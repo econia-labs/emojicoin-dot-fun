@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { SYMBOL_DATA, type SymbolEmoji } from "../../src";
+import { CHAT_EMOJI_DATA, type ChatEmoji, SYMBOL_EMOJI_DATA, type SymbolEmoji } from "../../src";
 import {
   encodeEmojis,
   getEmojisInString,
@@ -9,6 +9,7 @@ import {
 } from "../../src/emoji_data/utils";
 import SymbolEmojiData from "../../src/emoji_data/symbol-emojis.json";
 import { getGitRoot } from "../../src/utils/test";
+import { toChatMessageEntryFunctionArgs } from "../../src/emoji_data/chat-message";
 
 describe("tests emojis against the emoji regex to ensure they're properly validated", () => {
   it("tests a few single emojis", () => {
@@ -69,7 +70,7 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
     const symbols = new Set(Object.keys(SymbolEmojiData));
     const names = new Set(Object.values(SymbolEmojiData));
     const emojis = new Array<SymbolEmoji>("🎅", "🎅🏽", "🎅🏼", "🎅🏿", "🌎", "🇧🇷", "⭐").map((v) =>
-      SYMBOL_DATA.byEmojiStrict(v)
+      SYMBOL_EMOJI_DATA.byEmojiStrict(v)
     );
     emojis.forEach((emoji) => {
       expect(emoji).toBeDefined();
@@ -98,13 +99,13 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
 
   it("encodes emojis", () => {
     const symbolsForward = [
-      SYMBOL_DATA.byStrictName("ATM sign"),
-      SYMBOL_DATA.byStrictName("Aquarius"),
-      SYMBOL_DATA.byStrictName("yin yang"),
-      SYMBOL_DATA.byStrictName("Cancer"),
-      SYMBOL_DATA.byStrictName("world map"),
-      SYMBOL_DATA.byStrictName("yellow heart"),
-      SYMBOL_DATA.byStrictName("black cat"),
+      SYMBOL_EMOJI_DATA.byStrictName("ATM sign"),
+      SYMBOL_EMOJI_DATA.byStrictName("Aquarius"),
+      SYMBOL_EMOJI_DATA.byStrictName("yin yang"),
+      SYMBOL_EMOJI_DATA.byStrictName("Cancer"),
+      SYMBOL_EMOJI_DATA.byStrictName("world map"),
+      SYMBOL_EMOJI_DATA.byStrictName("yellow heart"),
+      SYMBOL_EMOJI_DATA.byStrictName("black cat"),
     ];
     const symbolsReverse = symbolsForward.toReversed();
 
@@ -143,5 +144,28 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
       }
     })();
     expect(JSON.stringify(tsJSON) === JSON.stringify(rustJSON));
+  });
+
+  it("constructs the chat message entry function args with the helper function correctly", () => {
+    // Symbol emojis.
+    const a: SymbolEmoji[] = ["⛄", "🎽", "🏃🏻"];
+    // Chat emojis.
+    const b: ChatEmoji[] = ["👩🏻‍🦼‍➡️", "👩🏾‍🎤", "🏊‍♀️", "🚴‍♂️"];
+    // symbols 012, chats 0123.
+    const indices = [a[0], a[1], a[2], b[0], b[1], b[2], b[3]];
+    // symbols 012, chats 0123, chats 3210, symbols 210.
+    const fullIndices = [...indices, ...indices.toReversed()];
+    const message = fullIndices.join("");
+    const args = toChatMessageEntryFunctionArgs(message);
+    expect(args.emojiBytes).toEqual([
+      SYMBOL_EMOJI_DATA.byEmojiStrict(a[0]).bytes,
+      SYMBOL_EMOJI_DATA.byEmojiStrict(a[1]).bytes,
+      SYMBOL_EMOJI_DATA.byEmojiStrict(a[2]).bytes,
+      CHAT_EMOJI_DATA.byEmojiStrict(b[0]).bytes,
+      CHAT_EMOJI_DATA.byEmojiStrict(b[1]).bytes,
+      CHAT_EMOJI_DATA.byEmojiStrict(b[2]).bytes,
+      CHAT_EMOJI_DATA.byEmojiStrict(b[3]).bytes,
+    ]);
+    expect(args.emojiIndicesSequence).toEqual([0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 2, 1, 0]);
   });
 });

@@ -1,8 +1,13 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
 import emojiRegex from "emoji-regex";
 import { normalizeHex } from "../utils/hex";
-import { getRandomEmoji, SYMBOL_DATA } from "./symbol-data";
-import { type SymbolEmojiData, type EmojiName, type SymbolData, type SymbolEmoji } from "./types";
+import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA } from "./emoji-data";
+import {
+  type SymbolEmojiData,
+  type SymbolEmojiName,
+  type SymbolData,
+  type SymbolEmoji,
+} from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
 export const getEmojisInString = (symbols: string): Array<SymbolEmoji> => {
@@ -16,30 +21,30 @@ export const getEmojisInString = (symbols: string): Array<SymbolEmoji> => {
  * A function that returns an emoji's data from any input that could represent a single
  * emoji, be its hex string, name, emoji character, or Uint8Array bytes.
  *
- * If you know the input type, consider using the more specific map {@link SYMBOL_DATA}.
+ * If you know the input type, consider using the more specific map {@link SYMBOL_EMOJI_DATA}.
  *
  * @param input any input that could represent an emoji
  * @returns SymbolEmoji if the input is a valid emoji, otherwise undefined.
  *
  */
-export const getEmojiData = (input: HexInput | EmojiName): SymbolEmojiData | undefined => {
+export const getEmojiData = (input: HexInput | SymbolEmojiName): SymbolEmojiData | undefined => {
   if (typeof input === "string") {
-    if (SYMBOL_DATA.hasEmoji(input)) {
-      return SYMBOL_DATA.byEmoji(input);
+    if (SYMBOL_EMOJI_DATA.hasEmoji(input)) {
+      return SYMBOL_EMOJI_DATA.byEmoji(input);
     }
-    if (SYMBOL_DATA.hasName(input)) {
-      return SYMBOL_DATA.byName(input);
+    if (SYMBOL_EMOJI_DATA.hasName(input)) {
+      return SYMBOL_EMOJI_DATA.byName(input);
     }
     if (input.startsWith("0x")) {
-      return SYMBOL_DATA.byHex(input as `0x${string}`);
+      return SYMBOL_EMOJI_DATA.byHex(input as `0x${string}`);
     }
-    if (SYMBOL_DATA.hasHex(normalizeHex(input))) {
-      return SYMBOL_DATA.byHex(`0x${input}`);
+    if (SYMBOL_EMOJI_DATA.hasHex(normalizeHex(input))) {
+      return SYMBOL_EMOJI_DATA.byHex(`0x${input}`);
     }
     return undefined;
   }
   const hex = normalizeHex(input);
-  return SYMBOL_DATA.byHex(hex);
+  return SYMBOL_EMOJI_DATA.byHex(hex);
 };
 
 /**
@@ -52,7 +57,7 @@ export const getEmojiData = (input: HexInput | EmojiName): SymbolEmojiData | und
  * isValidEmoji('🟥'); // true
  * ```
  */
-export const isValidEmoji = (emoji: string): boolean => SYMBOL_DATA.hasEmoji(emoji);
+export const isValidEmoji = (emoji: string): boolean => SYMBOL_EMOJI_DATA.hasEmoji(emoji);
 
 /**
  * This parses an input string to see if it's a valid symbol.
@@ -156,7 +161,7 @@ export const joinEmojiNames = (emojis: Array<SymbolEmojiData>, delimiter: string
  */
 export const isValidEmojiHex = (input: HexInput) => {
   try {
-    SYMBOL_DATA.hasHex(normalizeHex(input));
+    SYMBOL_EMOJI_DATA.hasHex(normalizeHex(input));
     return true;
   } catch (e) {
     return false;
@@ -215,7 +220,7 @@ export const generateRandomSymbol = () => {
   // Try 1000 times to add another emoji to the symbol.
   // Thus, it is guaranteed to return at least one emoji, but there may be multiple in the symbol.
   while (i < 1000) {
-    const randomEmoji = getRandomEmoji();
+    const randomEmoji = getRandomSymbolEmoji();
     if (sumBytes([...emojis.map((e) => e.bytes), randomEmoji.bytes]) < MAX_SYMBOL_LENGTH) {
       emojis.push(randomEmoji);
     }
@@ -226,5 +231,5 @@ export const generateRandomSymbol = () => {
   return toMarketEmojiData(symbolBytes);
 };
 
-export const namesToEmojis = (...names: EmojiName[]) =>
-  names.map((name) => SYMBOL_DATA.byStrictName(name).emoji);
+export const namesToEmojis = (...names: SymbolEmojiName[]) =>
+  names.map((name) => SYMBOL_EMOJI_DATA.byStrictName(name).emoji);

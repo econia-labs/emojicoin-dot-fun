@@ -7,8 +7,6 @@ import { type ChatProps } from "../../types";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import emojiRegex from "emoji-regex";
-import { type ChatEmojiData } from "@sdk/emoji_data";
 import { useEventStore, useNameStore } from "context/event-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
@@ -17,30 +15,9 @@ import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
 import { MAX_NUM_CHAT_EMOJIS } from "@sdk/const";
 import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { motion } from "framer-motion";
+import { toChatMessageEntryFunctionArgs } from "@sdk/emoji_data/chat-message";
 
 const HARD_LIMIT = 500;
-
-const convertChatMessageToEmojiAndIndices = (
-  message: string,
-  mapping: Map<string, ChatEmojiData>
-) => {
-  const emojiArr = message.match(emojiRegex()) ?? [];
-  const indices: Record<string, number> = {};
-  const bytesArray: Uint8Array[] = [];
-  const sequence: number[] = [];
-
-  for (const emoji of emojiArr) {
-    if (!mapping.has(emoji)) {
-      throw new Error(`Emoji ${emoji} not found in mapping.`);
-    }
-    if (indices[emoji] === undefined) {
-      indices[emoji] = bytesArray.length;
-      bytesArray.push(mapping.get(emoji)!.bytes);
-    }
-    sequence.push(indices[emoji]);
-  }
-  return { emojiBytes: bytesArray, emojiIndicesSequence: sequence };
-};
 
 const ChatBox = (props: ChatProps) => {
   const { aptos, account, submit } = useAptos();
@@ -48,7 +25,6 @@ const ChatBox = (props: ChatProps) => {
   const setMode = useEmojiPicker((state) => state.setMode);
   const emojis = useEmojiPicker((state) => state.emojis);
   const chats = useEventStore((s) => s.getMarket(props.data.symbolEmojis)?.chatEvents ?? []);
-  const chatEmojiData = useEmojiPicker((state) => state.chatEmojiData);
   const setPickerInvisible = useEmojiPicker((state) => state.setPickerInvisible);
 
   useEffect(() => {
@@ -65,10 +41,7 @@ const ChatBox = (props: ChatProps) => {
     const emojiText = emojis.join("");
     const { marketAddress } = props.data.marketView.metadata;
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-    const { emojiBytes, emojiIndicesSequence } = convertChatMessageToEmojiAndIndices(
-      emojiText,
-      chatEmojiData
-    );
+    const { emojiBytes, emojiIndicesSequence } = toChatMessageEntryFunctionArgs(emojiText);
     const builderLambda = () =>
       Chat.builder({
         aptosConfig: aptos.config,

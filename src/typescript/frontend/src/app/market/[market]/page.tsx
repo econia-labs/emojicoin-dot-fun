@@ -2,7 +2,7 @@ import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage"
 import EmojiNotFoundPage from "./not-found";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
@@ -35,7 +35,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   const { market: marketSlug } = params.params;
   const names = pathToEmojiNames(marketSlug);
   const emojis = names.map((n) => {
-    const res = SYMBOL_DATA.byName(n)?.emoji;
+    const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
     if (!res) {
       throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
     }

@@ -1,12 +1,12 @@
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import {
   compareBigInt,
-  type EmojiName,
   getEmojicoinMarketAddressAndTypeTags,
   getEvents,
   ONE_APT,
   sleep,
-  SYMBOL_DATA,
+  SYMBOL_EMOJI_DATA,
+  type SymbolEmojiName,
   UnitOfTime,
 } from "../../../../src";
 import TestHelpers from "../../../../src/utils/test/helpers";
@@ -35,7 +35,7 @@ describe("sorting queries for the sort filters on the home page", () => {
   // In order for these tests to work, *NONE* of the following emojis can be used in any other tests
   // as part of a market symbol, because then the query for searching by emoji will return multiple
   // results that were not intended.
-  const marketEmojiNames: EmojiName[][] = [
+  const marketEmojiNames: SymbolEmojiName[][] = [
     ["vampire"],
     ["vampire", "drop of blood"],
     ["vampire", "sweat droplets"],
@@ -45,7 +45,7 @@ describe("sorting queries for the sort filters on the home page", () => {
     ["vampire: medium-dark skin tone"],
     ["vampire: medium-light skin tone"],
   ];
-  const baseVampireEmoji = SYMBOL_DATA.byStrictName("vampire").emoji;
+  const baseVampireEmoji = SYMBOL_EMOJI_DATA.byStrictName("vampire").emoji;
 
   beforeAll(async () => {
     const registerAndSwap = new Array<

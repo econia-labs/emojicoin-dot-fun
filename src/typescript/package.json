@@ -24,7 +24,7 @@
     "dev:debug": "pnpm dotenv -v FETCH_DEBUG=true -- pnpm run dev",
     "dev:debug-verbose": "pnpm dotenv -v FETCH_DEBUG_VERBOSE=true -- pnpm run dev",
     "down": "pnpm run prune",
-    "e2e:frontend": "pnpm run load-env:e2e-frontend -- turbo run e2e:frontend",
+    "e2e:frontend": "pnpm run load-env:e2e-frontend -- turbo run e2e:frontend --filter @econia-labs/emojicoin-frontend --log-prefix none",
     "format": "turbo run format -- --write",
     "format:check": "turbo run format -- --check",
     "full-clean": "pnpm run clean && rm -rf node_modules && rm -rf sdk/node_modules && rm -rf frontend/node_modules",

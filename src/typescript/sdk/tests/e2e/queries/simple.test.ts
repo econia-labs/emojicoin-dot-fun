@@ -1,4 +1,4 @@
-import { type EmojiName, getEvents, ONE_APT } from "../../../src";
+import { type SymbolEmojiName, getEvents, ONE_APT } from "../../../src";
 import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../src/utils/test/helpers";
 import { Chat, ProvideLiquidity, Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import {
@@ -19,7 +19,7 @@ jest.setTimeout(20000);
 describe("queries swap_events and returns accurate swap row data", () => {
   const { aptos } = getAptosClient();
   const [registrant, user, swapper, provider] = getFundedAccounts("007", "008", "009", "010");
-  const marketEmojiNames: EmojiName[][] = [
+  const marketEmojiNames: SymbolEmojiName[][] = [
     ["scroll"],
     ["selfie"],
     ['Japanese "discount" button'],

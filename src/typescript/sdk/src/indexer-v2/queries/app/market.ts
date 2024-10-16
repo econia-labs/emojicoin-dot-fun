@@ -12,7 +12,7 @@ import {
   toSwapEventModel,
 } from "../../types";
 import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
-import { type MarketSymbolEmojis } from "../../../emoji_data";
+import { type SymbolEmoji } from "../../../emoji_data/types";
 
 const selectSwapsByMarketID = ({
   marketID,
@@ -56,7 +56,7 @@ const selectPeriodicEventsSince = ({
     .order("start_time", ORDER_BY.ASC)
     .range(offset, offset + limit - 1);
 
-const selectMarketState = ({ searchEmojis }: { searchEmojis: MarketSymbolEmojis }) =>
+const selectMarketState = ({ searchEmojis }: { searchEmojis: SymbolEmoji[] }) =>
   postgrest
     .from(TableName.MarketState)
     .select("*")
