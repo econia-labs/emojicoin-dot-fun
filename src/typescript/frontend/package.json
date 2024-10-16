@@ -34,7 +34,6 @@
     "@types/semver": "^7.5.8",
     "big.js": "^6.2.2",
     "clsx": "^2.1.1",
-    "dotenv": "^16.4.5",
     "emoji-mart": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart/emoji-mart-v5.6.0.tgz",
     "emoji-regex": "^10.4.0",
     "framer-motion": "^11.11.4",
