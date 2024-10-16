@@ -2,6 +2,7 @@
 // cspell:word localnet
 
 import path from "path";
+import os from "os";
 import { waitFor } from "../..";
 import { getGitRoot } from "../helpers";
 import { type ContainerName } from "./logs";
@@ -16,6 +17,7 @@ import { EMOJICOIN_INDEXER_URL } from "../../../server/env";
 import { TableName } from "../../../indexer-v2/types/json-types";
 import { readFileSync, writeFileSync } from "node:fs";
 import { kill } from "node:process";
+import { tmpdir } from "os";
 
 const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
 const LOCAL_ENV_PATH = path.join(getGitRoot(), "src/docker", "example.local.env");
@@ -58,7 +60,7 @@ const isDataNotCorrupted = (state?: ContainerState): boolean | undefined => {
 };
 
 const MAX_WAIT_TIME_SECONDS = 240;
-const TMP_PID_FILE_PATH = path.join("tmp", "emojicoin-e2e-process-id");
+const TMP_PID_FILE_PATH = path.join(os.tmpdir(), 'emojicoin-e2e-process-id');
 
 export class DockerTestHarness {
   constructor() {}
