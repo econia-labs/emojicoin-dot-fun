@@ -1,4 +1,4 @@
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data/symbol-data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data/emoji-data";
 import { languageList } from "configs";
 import { ROUTES } from "router/routes";
 

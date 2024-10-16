@@ -24,9 +24,9 @@ const createMaps = <T extends SymbolEmojiData | ChatEmojiData>(entries: Array<T>
     byHex: (v: HexInput) => hexMap.get(normalizeHex(v)),
     byEmojiStrict: (v: T["emoji"]) => emojiMap.get(v)!,
     byEmoji: (v: string) => emojiMap.get(v),
-    hasName: (v: string) => nameMap.has(v),
+    hasName: (v: string): v is T["name"] => nameMap.has(v),
     hasHex: (v: HexInput) => hexMap.has(normalizeHex(v)),
-    hasEmoji: (v: string) => emojiMap.has(v),
+    hasEmoji: (v: string): v is T["emoji"] => emojiMap.has(v),
   };
 };
 
