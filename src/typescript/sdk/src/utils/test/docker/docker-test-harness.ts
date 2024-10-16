@@ -113,7 +113,7 @@ export class DockerTestHarness {
     ].filter((arg) => arg !== "");
 
     const process = spawnWrapper(command, args, false, filterLogsFrom);
-    writeFileSync("/tmp/emojicoin-e2e", process.pid?.toString() ?? "");
+    writeFileSync(TMP_PID_FILE_PATH, process.pid?.toString() ?? "");
   }
 
   /**
