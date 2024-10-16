@@ -39,7 +39,7 @@ jobs:
         path: 'playwright-report/'
         retention-days: 30
     timeout-minutes: 60
-name: 'Run Playwright E2E tests'
+name: 'Run the Playwright E2E tests'
 "on":
   pull_request:
     branches:
