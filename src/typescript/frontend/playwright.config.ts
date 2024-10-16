@@ -36,9 +36,9 @@ export default defineConfig({
     launchOptions: {
       env: {
         ...process.env,
-        NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --conditions=react-server`
-      }
-    }
+        NODE_OPTIONS: `${process.env.NODE_OPTIONS || ""} --conditions=react-server`,
+      },
+    },
   },
 
   /* Configure projects for major browsers */
@@ -70,5 +70,4 @@ export default defineConfig({
       dependencies: ["setup"],
     },
   ],
-
 });
