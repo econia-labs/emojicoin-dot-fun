@@ -1,15 +1,4 @@
-function isPlaywrightTest() {
-  return (
-    process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined ||
-    process.env.TEST_WORKER_INDEX !== undefined
-  );
-}
-
-function isTest() {
-  return process.env.NODE_ENV === "test" || isPlaywrightTest();
-}
-
-if (!isTest()) {
+if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
