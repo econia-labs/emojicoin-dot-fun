@@ -6,6 +6,8 @@ import {
   type Aptos,
   type TypeTag,
   type Uint64,
+  InputGenerateTransactionOptions,
+  WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
 import { getEvents } from "../emojicoin_dot_fun";
@@ -23,12 +25,15 @@ import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mi
 import { getAptosClient } from "../utils/aptos-client";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
-import type EmojicoinClientTypes from "./types";
 import { INTEGRATOR_ADDRESS } from "../const";
 
 const { expect, Expect } = customExpect;
-type Options = EmojicoinClientTypes["Options"];
-type ExtraSwapArgs = EmojicoinClientTypes["ExtraSwapArgs"];
+
+type Options = {
+  feePayer?: Account;
+  options?: InputGenerateTransactionOptions;
+  waitForTransactionOptions?: WaitForTransactionOptions;
+};
 
 /**
  * A helper class intended to streamline the process of submitting transactions and using utility
@@ -193,7 +198,13 @@ export class EmojicoinClient {
   private async swap(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
-    args: ExtraSwapArgs,
+    args: {
+      isSell: boolean;
+      inputAmount: Uint64;
+      minOutputAmount: Uint64;
+      integrator: AccountAddressInput;
+      integratorFeeRateBPs: number;
+    },
     options?: Options
   ) {
     const response = await Swap.submit({
@@ -244,7 +255,11 @@ export class EmojicoinClient {
   private async swapWithRewards(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
-    args: Omit<ExtraSwapArgs, "integrator" | "integratorFeeRateBPs">,
+    args: {
+      isSell: boolean;
+      inputAmount: Uint64;
+      minOutputAmount: Uint64;
+    },
     options?: Options
   ) {
     const response = await SwapWithRewards.submit({
