@@ -83,10 +83,4 @@ export default defineConfig({
     // },
   ],
 
-  //webServer: {
-  //  command: "pnpm run build && pnpm run start",
-  //  url: "http://127.0.0.1:3001/",
-  //  reuseExistingServer: false,
-  //  timeout: 120 * 1000,
-  //},
 });
