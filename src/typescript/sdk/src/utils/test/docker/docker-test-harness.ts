@@ -58,6 +58,7 @@ const isDataNotCorrupted = (state?: ContainerState): boolean | undefined => {
 };
 
 const MAX_WAIT_TIME_SECONDS = 240;
+const TMP_PID_FILE_PATH = path.join("tmp", "emojicoin-e2e-process-id");
 
 export class DockerTestHarness {
   constructor() {}
