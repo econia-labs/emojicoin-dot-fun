@@ -21,7 +21,6 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
 import { getAptosNetwork } from "../../../../src/utils/aptos-client";
-import { getCoinBalanceFromChanges } from "../../../../src/utils/parse-changes-for-balances";
 
 jest.setTimeout(15000);
 
