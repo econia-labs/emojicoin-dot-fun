@@ -5,7 +5,6 @@ import {
   type AccountAddressInput,
   type Aptos,
   type TypeTag,
-  type Uint64,
   type InputGenerateTransactionOptions,
   type WaitForTransactionOptions,
 } from "@aptos-labs/ts-sdk";
