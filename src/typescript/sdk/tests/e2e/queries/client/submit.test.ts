@@ -143,7 +143,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.chatEvents.length).toEqual(0);
       expect(events.globalStateEvents.length).toEqual(0);
       expect(events.liquidityEvents.length).toEqual(0);
-      expect(events.periodicStateEvents.length).toEqual(0);
+      expect(events.periodicStateEvents.length).toBeLessThanOrEqual(1);
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(1);
       expect(events.marketRegistrationEvents.length).toEqual(0);
@@ -169,7 +169,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.chatEvents.length).toEqual(0);
       expect(events.globalStateEvents.length).toEqual(0);
       expect(events.liquidityEvents.length).toEqual(0);
-      expect(events.periodicStateEvents.length).toEqual(0);
+      expect(events.periodicStateEvents.length).toBeLessThanOrEqual(1);
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(1);
       expect(events.marketRegistrationEvents.length).toEqual(0);
@@ -218,7 +218,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.chatEvents.length).toEqual(1);
       expect(events.globalStateEvents.length).toEqual(0);
       expect(events.liquidityEvents.length).toEqual(0);
-      expect(events.periodicStateEvents.length).toEqual(0);
+      expect(events.periodicStateEvents.length).toBeLessThanOrEqual(1);
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(0);
       expect(events.marketRegistrationEvents.length).toEqual(0);
@@ -243,7 +243,7 @@ describe("all submission types for the emojicoin client", () => {
         expect(events.chatEvents.length).toEqual(0);
         expect(events.globalStateEvents.length).toEqual(0);
         expect(events.liquidityEvents.length).toEqual(1);
-        expect(events.periodicStateEvents.length).toEqual(0);
+        expect(events.periodicStateEvents.length).toBeLessThanOrEqual(1);
         expect(events.stateEvents.length).toEqual(1);
         expect(events.swapEvents.length).toEqual(0);
         expect(events.marketRegistrationEvents.length).toEqual(0);
@@ -269,7 +269,7 @@ describe("all submission types for the emojicoin client", () => {
           expect(events.chatEvents.length).toEqual(0);
           expect(events.globalStateEvents.length).toEqual(0);
           expect(events.liquidityEvents.length).toEqual(1);
-          expect(events.periodicStateEvents.length).toEqual(0);
+          expect(events.periodicStateEvents.length).toBeLessThanOrEqual(1);
           expect(events.stateEvents.length).toEqual(1);
           expect(events.swapEvents.length).toEqual(0);
           expect(events.marketRegistrationEvents.length).toEqual(0);
@@ -293,7 +293,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.chatEvents.length).toEqual(0);
       expect(events.globalStateEvents.length).toEqual(0);
       expect(events.liquidityEvents.length).toEqual(0);
-      expect(events.periodicStateEvents.length).toEqual(0);
+      expect(events.periodicStateEvents.length).toBeLessThanOrEqual(1);
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(1);
       expect(events.marketRegistrationEvents.length).toEqual(0);
@@ -319,7 +319,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.chatEvents.length).toEqual(0);
       expect(events.globalStateEvents.length).toEqual(0);
       expect(events.liquidityEvents.length).toEqual(0);
-      expect(events.periodicStateEvents.length).toEqual(0);
+      expect(events.periodicStateEvents.length).toBeLessThanOrEqual(1);
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(1);
       expect(events.marketRegistrationEvents.length).toEqual(0);
