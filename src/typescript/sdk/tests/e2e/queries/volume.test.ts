@@ -94,7 +94,7 @@ describe("queries swap_events and returns accurate swap row data", () => {
     if (firstEvents.periodicStateEvents.length > 1) {
       console.warn(
         "This test is inherently flaky and started at an inopportune time with regards to the " +
-        "PERIOD_1M boundary. It will now fail- please re-run the tests."
+          "PERIOD_1M boundary. It will now fail- please re-run the tests."
       );
     }
     expect(firstEvents.periodicStateEvents.length).toEqual(0);
