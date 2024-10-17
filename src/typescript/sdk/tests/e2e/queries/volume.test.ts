@@ -24,7 +24,7 @@ import {
   getOneMinutePeriodicStateEvents,
   getPeriodExpiryDate,
   getTrackerFromWriteSet,
-} from "./helpers";
+} from "../helpers";
 import {
   fetchDailyVolumeForMarket,
   fetchMarket1MPeriodsInLastDay,
@@ -88,7 +88,15 @@ describe("queries swap_events and returns accurate swap row data", () => {
     const firstEvents = getEvents(first);
     const { marketID } = firstEvents.swapEvents[0];
 
-    // There should be no periodic state events emitted for the first swap.
+    // There should be no periodic state events emitted for the first swap, but right now this test
+    // must be flaky due to the way that period boundaries are calculated (explained above), so
+    // console.warn if we encounter a periodic state event and then fail + retry.
+    if (firstEvents.periodicStateEvents.length > 1) {
+      console.warn(
+        "This test is inherently flaky and started at an inopportune time with regards to the " +
+          "PERIOD_1M boundary. It will now fail- please re-run the tests."
+      );
+    }
     expect(firstEvents.periodicStateEvents.length).toEqual(0);
 
     const firstTracker = getTrackerFromWriteSet(first, marketAddress, Period.Period1M)!;

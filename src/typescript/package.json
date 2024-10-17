@@ -19,6 +19,7 @@
   "scripts": {
     "build": "pnpm i && pnpm load-env -- turbo run build",
     "build:debug": "pnpm i && pnpm load-env -- turbo run build:debug",
+    "check": "turbo run check",
     "clean": "turbo run clean --no-cache --force && rm -rf .turbo && rm -rf sdk/.turbo && rm -rf frontend/.turbo && rm -rf frontend/.next",
     "dev": "pnpm load-env -- turbo run dev --force --parallel --continue",
     "dev:debug": "pnpm dotenv -v FETCH_DEBUG=true -- pnpm run dev",

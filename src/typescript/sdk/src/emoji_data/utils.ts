@@ -10,10 +10,14 @@ import {
 } from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
-export const getEmojisInString = (symbols: string): Array<SymbolEmoji> => {
+export const getEmojisInString = (symbols: string): Array<string> => {
   const regex = emojiRegex();
   const matches = symbols.matchAll(regex);
-  return Array.from(matches).map((match) => match[0]) as Array<SymbolEmoji>;
+  return Array.from(matches).map((match) => match[0]) as Array<string>;
+};
+
+export const getSymbolEmojisInString = (symbols: string): SymbolEmoji[] => {
+  return getEmojisInString(symbols).filter(SYMBOL_EMOJI_DATA.hasEmoji);
 };
 
 /**

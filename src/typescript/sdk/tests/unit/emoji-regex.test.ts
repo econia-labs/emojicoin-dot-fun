@@ -166,6 +166,8 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
       CHAT_EMOJI_DATA.byEmojiStrict(b[2]).bytes,
       CHAT_EMOJI_DATA.byEmojiStrict(b[3]).bytes,
     ]);
-    expect(args.emojiIndicesSequence).toEqual([0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 2, 1, 0]);
+    expect(Array.from(args.emojiIndicesSequence)).toEqual([
+      0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 2, 1, 0,
+    ]);
   });
 });

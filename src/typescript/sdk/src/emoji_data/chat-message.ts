@@ -29,6 +29,6 @@ export const toChatMessageEntryFunctionArgs = (message: string) => {
   }
   return {
     emojiBytes: bytesArray,
-    emojiIndicesSequence: sequence,
+    emojiIndicesSequence: new Uint8Array(sequence),
   };
 };
