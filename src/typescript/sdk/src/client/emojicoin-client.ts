@@ -88,11 +88,11 @@ export class EmojicoinClient {
     sell: this.sellWithRewards.bind(this),
   };
 
-  public integrator: AccountAddress;
+  private integrator: AccountAddress;
 
-  public integratorFeeRateBPs: number;
+  private integratorFeeRateBPs: number;
 
-  public minOutputAmount: bigint;
+  private minOutputAmount: bigint;
 
   constructor(args?: {
     aptos?: Aptos;

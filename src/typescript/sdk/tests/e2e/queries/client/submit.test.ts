@@ -1,6 +1,7 @@
 import {
   getEmojicoinMarketAddressAndTypeTags,
   INTEGRATOR_ADDRESS,
+  INTEGRATOR_FEE_RATE_BPS,
   MODULE_ADDRESS,
   ONE_APT,
   REWARDS_MODULE_ADDRESS,
@@ -11,16 +12,20 @@ import {
 } from "../../../../src";
 import { getFundedAccount } from "../../../../src/utils/test/test-accounts";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
-import { Aptos, AptosConfig, type EntryFunctionPayloadResponse, Network } from "@aptos-labs/ts-sdk";
+import {
+  Aptos,
+  AptosConfig,
+  Ed25519Account,
+  type EntryFunctionPayloadResponse,
+  Network,
+} from "@aptos-labs/ts-sdk";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
 import { getAptosNetwork } from "../../../../src/utils/aptos-client";
+import { getCoinBalanceFromChanges } from "../../../../src/utils/parse-changes-for-balances";
 
 jest.setTimeout(15000);
 
 describe("all submission types for the emojicoin client", () => {
-  // Use a custom integrator here so that it's possible to differentiate between the integrator
-  // in regular `swap` buys vs `rewards` contract swap buys (and thus ensure it's set correctly).
-  const integrator = getFundedAccount("048").accountAddress;
   const emojicoin = new EmojicoinClient();
   const senders = [
     getFundedAccount("048"),
@@ -31,6 +36,8 @@ describe("all submission types for the emojicoin client", () => {
     getFundedAccount("053"),
     getFundedAccount("054"),
     getFundedAccount("055"),
+    getFundedAccount("056"),
+    getFundedAccount("057"),
   ];
   const symbols: Array<SymbolEmoji[]> = [
     ["✨", "🌑"],
@@ -41,6 +48,8 @@ describe("all submission types for the emojicoin client", () => {
     ["✨", "🌖"],
     ["✨", "🌗"],
     ["✨", "🌘"],
+    ["✨", "🌚"],
+    ["✨", "🌙"],
   ];
   const senderAndSymbols = zip(senders, symbols);
 
@@ -142,8 +151,8 @@ describe("all submission types for the emojicoin client", () => {
       expect(swap.event.inputAmount).toEqual(inputAmount);
       expect(swap.event.isSell).toEqual(false);
       expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
-      expect(swap.event.integrator).toEqual(integrator.toString());
-      expect(swap.event.integrator).not.toEqual(INTEGRATOR_ADDRESS.toString());
+      expect(swap.event.integrator).toEqual(INTEGRATOR_ADDRESS.toString());
+      expect(swap.event.integratorFeeRateBPs).toEqual(0);
       expect(swap.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
       expect(swap.model.market.trigger).toEqual(Trigger.SwapBuy);
     });
@@ -168,12 +177,35 @@ describe("all submission types for the emojicoin client", () => {
       expect(swap.event.inputAmount).toEqual(inputAmount);
       expect(swap.event.isSell).toEqual(true);
       expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
-      expect(swap.event.integrator).toEqual(integrator.toString());
-      expect(swap.event.integrator).not.toEqual(INTEGRATOR_ADDRESS.toString());
+      expect(swap.event.integrator).toEqual(INTEGRATOR_ADDRESS.toString());
+      expect(swap.event.integratorFeeRateBPs).toEqual(0);
       expect(swap.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
       expect(swap.model.market.trigger).toEqual(Trigger.SwapSell);
     });
   });
+
+  it("uses custom defaults", async () => {
+    const config = new AptosConfig({ network: Network.MAINNET });
+    const emojicoin2 = new EmojicoinClient({
+      aptos: new Aptos(config),
+      integrator: "0x0",
+      integratorFeeRateBPs: 123,
+      minOutputAmount: 1337n,
+    });
+    // @ts-expect-error Checking private fields of the EmojicoinClient class instance.
+    const { aptos, integrator, integratorFeeRateBPs, minOutputAmount } = emojicoin2;
+    expect(aptos.config.network).toEqual(Network.MAINNET);
+    expect(integrator.toString()).toEqual("0x0");
+    expect(integratorFeeRateBPs).toEqual(123);
+    expect(minOutputAmount).toEqual(1337n);
+    // @ts-expect-error Checking private fields of the test default EmojicoinClient class instance.
+    const { integrator: a, integratorFeeRateBPs: b, minOutputAmount: c } = emojicoin;
+    expect(emojicoin.aptos.config.network).not.toEqual(Network.MAINNET);
+    expect(a.toString()).not.toEqual("0x0");
+    expect(b).not.toEqual(123);
+    expect(c).not.toEqual(1337n);
+  });
+
   it("sends a chat message", async () => {
     const [sender, emojis] = senderAndSymbols[3];
     const [a, b] = emojis;
@@ -270,7 +302,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(swap.event.isSell).toEqual(false);
       expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
       expect(swap.event.integrator).toEqual(INTEGRATOR_ADDRESS.toString());
-      expect(swap.event.integrator).not.toEqual(integrator.toString());
+      expect(swap.event.integratorFeeRateBPs).toEqual(INTEGRATOR_FEE_RATE_BPS);
       expect(swap.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
       expect(swap.model.market.trigger).toEqual(Trigger.SwapBuy);
     });
@@ -296,9 +328,58 @@ describe("all submission types for the emojicoin client", () => {
       expect(swap.event.isSell).toEqual(true);
       expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
       expect(swap.event.integrator).toEqual(INTEGRATOR_ADDRESS.toString());
-      expect(swap.event.integrator).not.toEqual(integrator.toString());
+      expect(swap.event.integratorFeeRateBPs).toEqual(INTEGRATOR_FEE_RATE_BPS);
       expect(swap.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
       expect(swap.model.market.trigger).toEqual(Trigger.SwapSell);
     });
+  });
+
+  it("buys with a custom integrator and fee rate", async () => {
+    const inputAmount = 10_000_000n;
+    const [sender, emojis] = senderAndSymbols[8];
+    const randomIntegrator = Ed25519Account.generate();
+    const customIntegrator = randomIntegrator.accountAddress;
+    const customFeeRateBPs = 100;
+    const clientWithCustomDefaults = new EmojicoinClient({
+      integrator: customIntegrator,
+      integratorFeeRateBPs: customFeeRateBPs,
+    });
+
+    await clientWithCustomDefaults.register(sender, emojis);
+    await clientWithCustomDefaults
+      .buy(sender, emojis, inputAmount)
+      .then(({ response, events, swap }) => {
+        const { success } = response;
+        expect(success).toBe(true);
+        expect(events.swapEvents.length).toEqual(1);
+        expect(swap.event.inputAmount).toEqual(inputAmount);
+        expect(swap.event.integrator).toEqual(customIntegrator.toString());
+        expect(swap.event.integratorFeeRateBPs).toEqual(customFeeRateBPs);
+      });
+  });
+
+  it("sells with a custom integrator and fee rate", async () => {
+    const inputAmount = 10_000_000n;
+    const [sender, emojis] = senderAndSymbols[9];
+    const randomIntegrator = Ed25519Account.generate();
+    const customIntegrator = randomIntegrator.accountAddress;
+    const customFeeRateBPs = 100;
+    const clientWithCustomDefaults = new EmojicoinClient({
+      integrator: customIntegrator,
+      integratorFeeRateBPs: customFeeRateBPs,
+    });
+
+    await clientWithCustomDefaults.register(sender, emojis);
+    await clientWithCustomDefaults.buy(sender, emojis, inputAmount);
+    await clientWithCustomDefaults
+      .sell(sender, emojis, inputAmount)
+      .then(({ response, events, swap }) => {
+        const { success } = response;
+        expect(success).toBe(true);
+        expect(events.swapEvents.length).toEqual(1);
+        expect(swap.event.inputAmount).toEqual(inputAmount);
+        expect(swap.event.integrator).toEqual(customIntegrator.toString());
+        expect(swap.event.integratorFeeRateBPs).toEqual(customFeeRateBPs);
+      });
   });
 });

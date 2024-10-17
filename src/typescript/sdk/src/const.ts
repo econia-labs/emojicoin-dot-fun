@@ -7,12 +7,14 @@ export const VERCEL = process.env.VERCEL === "1";
 if (
   !process.env.NEXT_PUBLIC_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS ||
-  !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS
+  !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS ||
+  !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
 ) {
   const missing = [
     ["NEXT_PUBLIC_MODULE_ADDRESS", process.env.NEXT_PUBLIC_MODULE_ADDRESS],
     ["NEXT_PUBLIC_REWARDS_MODULE_ADDRESS", process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
+    ["NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS", process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS],
   ].filter(([_, value]) => !value);
   missing.forEach(([key, _]) => {
     console.error(`Missing environment variables ${key}`);
@@ -29,6 +31,7 @@ export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
 export const INTEGRATOR_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS))();
+export const INTEGRATOR_FEE_RATE_BPS = Number(process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS);
 export const ONE_APT = 1 * 10 ** 8;
 export const ONE_APT_BIGINT = BigInt(ONE_APT);
 export const APTOS_COIN_TYPE_TAG = parseTypeTag(APTOS_COIN);
