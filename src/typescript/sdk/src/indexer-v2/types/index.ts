@@ -22,7 +22,12 @@ import {
   type ProcessedFields,
   DatabaseRpc,
 } from "./json-types";
-import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
+import {
+  type MarketEmojiData,
+  symbolBytesToEmojis,
+  type SymbolEmoji,
+  toMarketEmojiData,
+} from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
@@ -598,6 +603,9 @@ export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => 
   ),
 });
 
+export const toRandomNamesRPCResponse = (data: DatabaseJsonType["random_names"]) =>
+  symbolBytesToEmojis("0" + data.emojis.substring(1));
+
 export const DatabaseTypeConverter = {
   [TableName.GlobalStateEvents]: toGlobalStateEventModel,
   [TableName.PeriodicStateEvents]: toPeriodicStateEventModel,
@@ -613,6 +621,7 @@ export const DatabaseTypeConverter = {
   [TableName.ProcessorStatus]: toProcessorStatus,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
   [DatabaseRpc.PriceFeed]: toPriceFeedRPCResponse,
+  [DatabaseRpc.RandomNames]: toRandomNamesRPCResponse,
 };
 
 export type DatabaseModels = {

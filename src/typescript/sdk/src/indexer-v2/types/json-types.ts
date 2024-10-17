@@ -287,6 +287,7 @@ export enum TableName {
 export enum DatabaseRpc {
   UserPools = "user_pools",
   PriceFeed = "price_feed",
+  RandomNames = "random_names",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -364,6 +365,7 @@ export type DatabaseJsonType = {
       close_price_q64: Uint64String;
     }
   >;
+  [DatabaseRpc.RandomNames]: { emojis: string };
 };
 
 type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
@@ -378,6 +380,7 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.Market1MPeriodsInLastDay] &
   DatabaseJsonType[TableName.MarketState] &
   DatabaseJsonType[TableName.ProcessorStatus] &
-  DatabaseJsonType[DatabaseRpc.UserPools];
+  DatabaseJsonType[DatabaseRpc.UserPools] &
+  DatabaseJsonType[DatabaseRpc.RandomNames];
 
 export type AnyColumnName = keyof Columns;

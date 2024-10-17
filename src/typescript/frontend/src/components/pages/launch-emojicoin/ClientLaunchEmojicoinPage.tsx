@@ -19,6 +19,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import MemoizedLaunchAnimation from "./memoized-launch";
+import { EmojiRain } from "./EmojiRain";
 
 const LOADING_TIME = 2000;
 type Stage = "initial" | "loading" | "coding";
@@ -32,7 +33,10 @@ const lastMarketRegistration = (
   return undefined;
 };
 
-const ClientLaunchEmojicoinPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
+const ClientLaunchEmojicoinPage: React.FC<{
+  geoblocked: boolean;
+  randomNames: ReturnType<typeof symbolBytesToEmojis>[];
+}> = ({ geoblocked, randomNames }) => {
   const searchParams = useSearchParams();
   const emojiParams = searchParams.get("emojis");
   const setEmojis = useEmojiPicker((state) => state.setEmojis);
@@ -137,7 +141,11 @@ const ClientLaunchEmojicoinPage: React.FC<{ geoblocked: boolean }> = ({ geoblock
   }, [status]);
 
   return (
-    <div className="flex flex-col grow pt-[85px]">
+    <div className="flex flex-col grow pt-[85px] relative overflow-hidden">
+      <EmojiRain
+        randomNames={randomNames}
+        onClick={(name) => setEmojis(name.emojis.map((e) => e.emoji))}
+      />
       <TextCarousel />
 
       <div className="flex justify-center items-center h-full px-6">
@@ -145,6 +153,12 @@ const ClientLaunchEmojicoinPage: React.FC<{ geoblocked: boolean }> = ({ geoblock
           <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} geoblocked={geoblocked} />
         </div>
       </div>
+      <div
+        className="absolute bottom-0 w-[100%] h-[1%] bg-black z-20"
+        style={{
+          boxShadow: "0px 0px 8px 8px black",
+        }}
+      ></div>
     </div>
   );
 };
