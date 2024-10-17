@@ -23,7 +23,7 @@ const LOCAL_ENV_PATH = path.join(getGitRoot(), "src/docker", "example.local.env"
 const PRUNE_SCRIPT = path.join(getGitRoot(), "src/docker/utils", "prune.sh");
 
 const PING_STATE_INTERVAL = 200;
-const MAX_WAIT_TIME_SECONDS = 300;
+const MAX_WAIT_TIME_SECONDS = 600;
 const TMP_PID_FILE_PATH = path.join(os.tmpdir(), "emojicoin-e2e-process-id");
 
 async function isPrimaryContainerReady(name: ContainerName): Promise<boolean> {
