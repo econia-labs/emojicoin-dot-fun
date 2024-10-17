@@ -98,8 +98,8 @@ export class EmojicoinClient {
   constructor(args?: {
     aptos?: Aptos;
     integrator?: AccountAddressInput;
-    integratorFeeRateBPs?: number;
-    minOutputAmount?: bigint;
+    integratorFeeRateBPs?: bigint | number;
+    minOutputAmount?: bigint | number;
   }) {
     const {
       aptos = getAptosClient().aptos,
@@ -109,8 +109,8 @@ export class EmojicoinClient {
     } = args ?? {};
     this.aptos = aptos;
     this.integrator = AccountAddress.from(integrator);
-    this.integratorFeeRateBPs = integratorFeeRateBPs;
-    this.minOutputAmount = minOutputAmount;
+    this.integratorFeeRateBPs = Number(integratorFeeRateBPs);
+    this.minOutputAmount = BigInt(minOutputAmount);
   }
 
   async register(registrant: Account, symbolEmojis: SymbolEmoji[], options?: Options) {
@@ -160,7 +160,12 @@ export class EmojicoinClient {
     };
   }
 
-  async buy(swapper: Account, symbolEmojis: SymbolEmoji[], inputAmount: Uint64, options?: Options) {
+  async buy(
+    swapper: Account,
+    symbolEmojis: SymbolEmoji[],
+    inputAmount: bigint | number,
+    options?: Options
+  ) {
     return await this.swap(
       swapper,
       symbolEmojis,
@@ -178,7 +183,7 @@ export class EmojicoinClient {
   async sell(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
-    inputAmount: Uint64,
+    inputAmount: bigint | number,
     options?: Options
   ) {
     return await this.swap(
@@ -200,8 +205,8 @@ export class EmojicoinClient {
     symbolEmojis: SymbolEmoji[],
     args: {
       isSell: boolean;
-      inputAmount: Uint64;
-      minOutputAmount: Uint64;
+      inputAmount: bigint | number;
+      minOutputAmount: bigint | number;
       integrator: AccountAddressInput;
       integratorFeeRateBPs: number;
     },
@@ -227,7 +232,7 @@ export class EmojicoinClient {
   private async buyWithRewards(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
-    inputAmount: Uint64,
+    inputAmount: bigint | number,
     options?: Options
   ) {
     return await this.swapWithRewards(
@@ -241,7 +246,7 @@ export class EmojicoinClient {
   private async sellWithRewards(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
-    inputAmount: Uint64,
+    inputAmount: bigint | number,
     options?: Options
   ) {
     return await this.swapWithRewards(
@@ -257,8 +262,8 @@ export class EmojicoinClient {
     symbolEmojis: SymbolEmoji[],
     args: {
       isSell: boolean;
-      inputAmount: Uint64;
-      minOutputAmount: Uint64;
+      inputAmount: bigint | number;
+      minOutputAmount: bigint | number;
     },
     options?: Options
   ) {
@@ -282,7 +287,7 @@ export class EmojicoinClient {
   private async provideLiquidity(
     provider: Account,
     symbolEmojis: SymbolEmoji[],
-    quoteAmount: Uint64,
+    quoteAmount: bigint | number,
     options?: Options
   ) {
     const response = await ProvideLiquidity.submit({
@@ -306,7 +311,7 @@ export class EmojicoinClient {
   private async removeLiquidity(
     provider: Account,
     symbolEmojis: SymbolEmoji[],
-    lpCoinAmount: Uint64,
+    lpCoinAmount: bigint | number,
     options?: Options
   ) {
     const response = await RemoveLiquidity.submit({
