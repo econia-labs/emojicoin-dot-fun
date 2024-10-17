@@ -7,12 +7,13 @@ import {
   REWARDS_MODULE_NAME,
   Trigger,
   zip,
-  type MarketSymbolEmojis,
+  type SymbolEmoji,
 } from "../../../../src";
-import { getFundedAccount } from "../../../utils/test-accounts";
+import { getFundedAccount } from "../../../../src/utils/test/test-accounts";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
-import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosNetwork } from "../../../utils";
 import { Aptos, AptosConfig, type EntryFunctionPayloadResponse, Network } from "@aptos-labs/ts-sdk";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
+import { getAptosNetwork } from "../../../../src/utils/aptos-client";
 
 jest.setTimeout(15000);
 
@@ -31,7 +32,7 @@ describe("all submission types for the emojicoin client", () => {
     getFundedAccount("054"),
     getFundedAccount("055"),
   ];
-  const symbols: MarketSymbolEmojis[] = [
+  const symbols: Array<SymbolEmoji[]> = [
     ["✨", "🌑"],
     ["✨", "🌒"],
     ["✨", "🌓"],
@@ -42,18 +43,6 @@ describe("all submission types for the emojicoin client", () => {
     ["✨", "🌘"],
   ];
   const senderAndSymbols = zip(senders, symbols);
-
-  const swapArgs = {
-    inputAmount: 7654321n,
-    minOutputAmount: 1n,
-    integrator,
-    integratorFeeRateBPs: 0,
-  };
-
-  const buyEntireBondingCurveArgs = {
-    ...swapArgs,
-    inputAmount: EXACT_TRANSITION_INPUT_AMOUNT,
-  };
 
   const functionNames = {
     registerMarket: `${MODULE_ADDRESS}::emojicoin_dot_fun::register_market`,
@@ -113,7 +102,7 @@ describe("all submission types for the emojicoin client", () => {
   it("registers a market", async () => {
     const [sender, emojis] = senderAndSymbols[0];
     await emojicoin
-      .register(sender, emojis, { integrator }, gasOptions)
+      .register(sender, emojis, gasOptions)
       .then(({ response, events, registration }) => {
         const { success } = response;
         const payload = response.payload as EntryFunctionPayloadResponse;
@@ -136,8 +125,9 @@ describe("all submission types for the emojicoin client", () => {
   });
   it("swap buys", async () => {
     const [sender, emojis] = senderAndSymbols[1];
-    await emojicoin.register(sender, emojis, { integrator }, gasOptions);
-    await emojicoin.buy(sender, emojis, swapArgs).then(({ response, events, swap }) => {
+    await emojicoin.register(sender, emojis, gasOptions);
+    const inputAmount = 7654321n;
+    await emojicoin.buy(sender, emojis, inputAmount).then(({ response, events, swap }) => {
       const { success } = response;
       const payload = response.payload as EntryFunctionPayloadResponse;
       expect(success).toBe(true);
@@ -149,7 +139,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(1);
       expect(events.marketRegistrationEvents.length).toEqual(0);
-      expect(swap.event.inputAmount).toEqual(swapArgs.inputAmount);
+      expect(swap.event.inputAmount).toEqual(inputAmount);
       expect(swap.event.isSell).toEqual(false);
       expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
       expect(swap.event.integrator).toEqual(integrator.toString());
@@ -160,9 +150,10 @@ describe("all submission types for the emojicoin client", () => {
   });
   it("swap sells", async () => {
     const [sender, emojis] = senderAndSymbols[2];
-    await emojicoin.register(sender, emojis, { integrator }, gasOptions);
-    await emojicoin.buy(sender, emojis, swapArgs);
-    await emojicoin.sell(sender, emojis, swapArgs).then(({ response, events, swap }) => {
+    const inputAmount = 7654321n;
+    await emojicoin.register(sender, emojis, gasOptions);
+    await emojicoin.buy(sender, emojis, inputAmount);
+    await emojicoin.sell(sender, emojis, inputAmount).then(({ response, events, swap }) => {
       const { success } = response;
       const payload = response.payload as EntryFunctionPayloadResponse;
       expect(success).toBe(true);
@@ -174,7 +165,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(1);
       expect(events.marketRegistrationEvents.length).toEqual(0);
-      expect(swap.event.inputAmount).toEqual(swapArgs.inputAmount);
+      expect(swap.event.inputAmount).toEqual(inputAmount);
       expect(swap.event.isSell).toEqual(true);
       expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
       expect(swap.event.integrator).toEqual(integrator.toString());
@@ -185,41 +176,34 @@ describe("all submission types for the emojicoin client", () => {
   });
   it("sends a chat message", async () => {
     const [sender, emojis] = senderAndSymbols[3];
-    const emojiIndicesSequence = [0, 1, 1, 0];
-    await emojicoin.register(sender, emojis, { integrator }, gasOptions);
-    await emojicoin
-      .chat(sender, emojis, {
-        chatEmojis: emojis,
-        emojiIndicesSequence,
-      })
-      .then(({ response, events, chat }) => {
-        const { success } = response;
-        const payload = response.payload as EntryFunctionPayloadResponse;
-        expect(success).toBe(true);
-        expect(payload.function).toEqual(functionNames.chat);
-        expect(events.chatEvents.length).toEqual(1);
-        expect(events.globalStateEvents.length).toEqual(0);
-        expect(events.liquidityEvents.length).toEqual(0);
-        expect(events.periodicStateEvents.length).toEqual(0);
-        expect(events.stateEvents.length).toEqual(1);
-        expect(events.swapEvents.length).toEqual(0);
-        expect(events.marketRegistrationEvents.length).toEqual(0);
-        const expectedMessage = emojiIndicesSequence.map((v) => emojis[v]).join("");
-        expect(chat.event.message).toEqual(expectedMessage);
-        expect(chat.event.user).toEqual(sender.accountAddress.toString());
-        expect(chat.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
-        expect(chat.model.market.trigger).toEqual(Trigger.Chat);
-      });
+    const [a, b] = emojis;
+    const expectedMessage = [a, b, b, a].join("");
+    await emojicoin.register(sender, emojis, gasOptions);
+    await emojicoin.chat(sender, emojis, [a, b, b, a]).then(({ response, events, chat }) => {
+      const { success } = response;
+      const payload = response.payload as EntryFunctionPayloadResponse;
+      expect(success).toBe(true);
+      expect(payload.function).toEqual(functionNames.chat);
+      expect(events.chatEvents.length).toEqual(1);
+      expect(events.globalStateEvents.length).toEqual(0);
+      expect(events.liquidityEvents.length).toEqual(0);
+      expect(events.periodicStateEvents.length).toEqual(0);
+      expect(events.stateEvents.length).toEqual(1);
+      expect(events.swapEvents.length).toEqual(0);
+      expect(events.marketRegistrationEvents.length).toEqual(0);
+      expect(chat.event.message).toEqual(expectedMessage);
+      expect(chat.event.user).toEqual(sender.accountAddress.toString());
+      expect(chat.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
+      expect(chat.model.market.trigger).toEqual(Trigger.Chat);
+    });
   });
   it("provides liquidity", async () => {
     const [sender, emojis] = senderAndSymbols[4];
-    await emojicoin.register(sender, emojis, { integrator }, gasOptions);
-    await emojicoin.buy(sender, emojis, buyEntireBondingCurveArgs);
+    const inputAmount = 12386n;
+    await emojicoin.register(sender, emojis, gasOptions);
+    await emojicoin.buy(sender, emojis, EXACT_TRANSITION_INPUT_AMOUNT);
     await emojicoin.liquidity
-      .provide(sender, emojis, {
-        quoteAmount: 12386n,
-        minLpCoinsOut: 1n,
-      })
+      .provide(sender, emojis, inputAmount)
       .then(({ response, events, liquidity }) => {
         const { success } = response;
         const payload = response.payload as EntryFunctionPayloadResponse;
@@ -232,7 +216,7 @@ describe("all submission types for the emojicoin client", () => {
         expect(events.stateEvents.length).toEqual(1);
         expect(events.swapEvents.length).toEqual(0);
         expect(events.marketRegistrationEvents.length).toEqual(0);
-        expect(liquidity.event.quoteAmount).toEqual(12386n);
+        expect(liquidity.event.quoteAmount).toEqual(inputAmount);
         expect(liquidity.event.provider).toEqual(sender.accountAddress.toString());
         expect(liquidity.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
         expect(liquidity.model.market.trigger).toEqual(Trigger.ProvideLiquidity);
@@ -240,48 +224,37 @@ describe("all submission types for the emojicoin client", () => {
   });
   it("removes liquidity", async () => {
     const [sender, emojis] = senderAndSymbols[5];
-    await emojicoin.register(sender, emojis, { integrator }, gasOptions);
-    await emojicoin.buy(sender, emojis, buyEntireBondingCurveArgs);
-    await emojicoin.liquidity
-      .provide(sender, emojis, {
-        quoteAmount: 59182n,
-        minLpCoinsOut: 1n,
-      })
-      .then(({ liquidity }) => {
-        const lpCoinAmount = liquidity.event.lpCoinAmount;
-        emojicoin.liquidity
-          .remove(sender, emojis, {
-            lpCoinAmount,
-            minQuoteOut: 1n,
-          })
-          .then(({ response, events, liquidity }) => {
-            const { success } = response;
-            const payload = response.payload as EntryFunctionPayloadResponse;
-            expect(success).toBe(true);
-            expect(payload.function).toEqual(functionNames.removeLiquidity);
-            expect(events.chatEvents.length).toEqual(0);
-            expect(events.globalStateEvents.length).toEqual(0);
-            expect(events.liquidityEvents.length).toEqual(1);
-            expect(events.periodicStateEvents.length).toEqual(0);
-            expect(events.stateEvents.length).toEqual(1);
-            expect(events.swapEvents.length).toEqual(0);
-            expect(events.marketRegistrationEvents.length).toEqual(0);
-            expect(liquidity.event.provider).toEqual(sender.accountAddress.toString());
-            expect(liquidity.event.lpCoinAmount).toEqual(lpCoinAmount);
-            expect(liquidity.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
-            expect(liquidity.model.market.trigger).toEqual(Trigger.RemoveLiquidity);
-          });
-      });
+    await emojicoin.register(sender, emojis, gasOptions);
+    await emojicoin.buy(sender, emojis, EXACT_TRANSITION_INPUT_AMOUNT);
+    await emojicoin.liquidity.provide(sender, emojis, 59182n).then(({ liquidity }) => {
+      const lpCoinAmount = liquidity.event.lpCoinAmount;
+      emojicoin.liquidity
+        .remove(sender, emojis, lpCoinAmount)
+        .then(({ response, events, liquidity }) => {
+          const { success } = response;
+          const payload = response.payload as EntryFunctionPayloadResponse;
+          expect(success).toBe(true);
+          expect(payload.function).toEqual(functionNames.removeLiquidity);
+          expect(events.chatEvents.length).toEqual(0);
+          expect(events.globalStateEvents.length).toEqual(0);
+          expect(events.liquidityEvents.length).toEqual(1);
+          expect(events.periodicStateEvents.length).toEqual(0);
+          expect(events.stateEvents.length).toEqual(1);
+          expect(events.swapEvents.length).toEqual(0);
+          expect(events.marketRegistrationEvents.length).toEqual(0);
+          expect(liquidity.event.provider).toEqual(sender.accountAddress.toString());
+          expect(liquidity.event.lpCoinAmount).toEqual(lpCoinAmount);
+          expect(liquidity.model.market.emojis.map(({ emoji }) => emoji)).toEqual(emojis);
+          expect(liquidity.model.market.trigger).toEqual(Trigger.RemoveLiquidity);
+        });
+    });
   });
 
   it("swap buys with the rewards contract", async () => {
     const [sender, emojis] = senderAndSymbols[6];
-    const args = {
-      inputAmount: 1234567n,
-      minOutputAmount: 1n,
-    };
-    await emojicoin.register(sender, emojis, { integrator }, gasOptions);
-    await emojicoin.rewards.buy(sender, emojis, args).then(({ response, events, swap }) => {
+    const inputAmount = 1234567n;
+    await emojicoin.register(sender, emojis, gasOptions);
+    await emojicoin.rewards.buy(sender, emojis, inputAmount).then(({ response, events, swap }) => {
       const { success } = response;
       const payload = response.payload as EntryFunctionPayloadResponse;
       expect(success).toBe(true);
@@ -293,7 +266,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(1);
       expect(events.marketRegistrationEvents.length).toEqual(0);
-      expect(swap.event.inputAmount).toEqual(args.inputAmount);
+      expect(swap.event.inputAmount).toEqual(inputAmount);
       expect(swap.event.isSell).toEqual(false);
       expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
       expect(swap.event.integrator).toEqual(INTEGRATOR_ADDRESS.toString());
@@ -304,13 +277,10 @@ describe("all submission types for the emojicoin client", () => {
   });
   it("swap sells with the rewards contract", async () => {
     const [sender, emojis] = senderAndSymbols[7];
-    const args = {
-      inputAmount: 1234567n,
-      minOutputAmount: 1n,
-    };
-    await emojicoin.register(sender, emojis, { integrator }, gasOptions);
-    await emojicoin.rewards.buy(sender, emojis, args);
-    await emojicoin.rewards.sell(sender, emojis, args).then(({ response, events, swap }) => {
+    const inputAmount = 1234567n;
+    await emojicoin.register(sender, emojis, gasOptions);
+    await emojicoin.rewards.buy(sender, emojis, inputAmount);
+    await emojicoin.rewards.sell(sender, emojis, inputAmount).then(({ response, events, swap }) => {
       const { success } = response;
       const payload = response.payload as EntryFunctionPayloadResponse;
       expect(success).toBe(true);
@@ -322,7 +292,7 @@ describe("all submission types for the emojicoin client", () => {
       expect(events.stateEvents.length).toEqual(1);
       expect(events.swapEvents.length).toEqual(1);
       expect(events.marketRegistrationEvents.length).toEqual(0);
-      expect(swap.event.inputAmount).toEqual(args.inputAmount);
+      expect(swap.event.inputAmount).toEqual(inputAmount);
       expect(swap.event.isSell).toEqual(true);
       expect(swap.event.swapper).toEqual(sender.accountAddress.toString());
       expect(swap.event.integrator).toEqual(INTEGRATOR_ADDRESS.toString());
