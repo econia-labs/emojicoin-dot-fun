@@ -5,8 +5,7 @@ import { stringifyJSON } from "utils";
 import { REVALIDATION_TIME } from "lib/server-env";
 import { getPoolData } from "./getPoolDataQuery";
 
-export const revalidate = REVALIDATION_TIME;
-export const dynamic = "force-dynamic";
+export const revalidate = 1;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
