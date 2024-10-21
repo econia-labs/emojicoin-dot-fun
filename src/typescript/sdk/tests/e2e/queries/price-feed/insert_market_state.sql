@@ -9,7 +9,7 @@ insert into market_latest_state_event values (
     777701,                             -- Market ID
     '\\xDEADBEEF'::bytea,               -- ##
     '{""}',                             -- ##
-    now() - interval '1 day 1 hour',    -- ##
+    now(),                              -- Bump time
     2,                                  -- ##
     'swap_buy',                         -- ##
     '0xaaa101',                         -- ##
@@ -40,5 +40,5 @@ insert into market_latest_state_event values (
 
     0,                                  -- ##
     false,                              -- ##
-    500000000000000                     -- ##
+    500000000000000                     -- Volume in 1m state tracker
 )
