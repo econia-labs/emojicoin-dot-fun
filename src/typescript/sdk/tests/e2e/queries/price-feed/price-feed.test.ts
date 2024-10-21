@@ -9,13 +9,13 @@ describe("queries price_feed and returns accurate price feed data", () => {
     const db = getDbConnection();
 
     // Insert a swap 25 hours ago at price 500
-    await db.file('./insert_past_day_swap.sql');
+    await db.file("./insert_past_day_swap.sql");
 
     // Insert a fresh swap at price 750
-    await db.file('./insert_current_day_swap.sql');
+    await db.file("./insert_current_day_swap.sql");
 
     // Update market_latest_state_event accordingly
-    await db.file('./insert_market_state.sql');
+    await db.file("./insert_market_state.sql");
 
     const priceFeed = await fetchPriceFeed({});
     expect(priceFeed[0].marketID).toEqual(777701);
