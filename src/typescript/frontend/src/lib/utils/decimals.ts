@@ -24,7 +24,7 @@ const toActualCoinDecimals = ({ num }: { num: AnyNumberString }): bigint => {
   if (typeof num === "string" && isNaN(parseFloat(num))) {
     return 0n;
   }
-  let res = Big(num.toString()).mul(Big(10 ** DECIMALS));
+  const res = Big(num.toString()).mul(Big(10 ** DECIMALS));
   return BigInt(res.toString());
 };
 
