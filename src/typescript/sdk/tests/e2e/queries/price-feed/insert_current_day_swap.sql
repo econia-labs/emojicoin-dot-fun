@@ -3,7 +3,7 @@ insert into swap_events values (
     2,                                  -- ##
     '1',                                -- ##
     '1',                                -- ##
-    now() - interval '1 day 1 hour',    -- Transaction timestamp
+    now(),                              -- Transaction timestamp
     now(),                              -- ##
 
     -- Market and state metadata.
