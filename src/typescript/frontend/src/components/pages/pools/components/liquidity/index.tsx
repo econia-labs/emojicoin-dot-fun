@@ -192,7 +192,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           onChange={(e) => {
             let value = e.target.value;
             value = value.replace(/^0*0\./, "0.");
-            let decimals = value.replace(/^.*\.(.*)/, "$1");
+            const decimals = value.replace(/^.*\.(.*)/, "$1");
             if (decimals.length > 8) {
               e.stopPropagation();
               return;
@@ -276,7 +276,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           onChange={(e) => {
             let value = e.target.value;
             value = value.replace(/^0*0\./, "0.");
-            let decimals = value.replace(/^.*\.(.*)/, "$1");
+            const decimals = value.replace(/^.*\.(.*)/, "$1");
             if (decimals.length > 8) {
               e.stopPropagation();
               return;
