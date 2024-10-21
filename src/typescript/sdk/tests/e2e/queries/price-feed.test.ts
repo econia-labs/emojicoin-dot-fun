@@ -1,4 +1,4 @@
-import { getDbConnection } from "./helpers";
+import { getDbConnection } from "../helpers";
 import { fetchPriceFeed } from "../../../src/indexer-v2/queries";
 
 // We need a long timeout because the test must wait for the 1-minute period to expire.
