@@ -1,6 +1,6 @@
 "use client";
 import LoadingComponent from "components/loading";
 
-export default async function Home() {
+export default function Home() {
   return <LoadingComponent />;
 }
