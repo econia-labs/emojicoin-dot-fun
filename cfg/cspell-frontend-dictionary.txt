@@ -50,5 +50,3 @@ localstorage
 vpnapi
 ctrls
 dockerenv
-ADBEEF
-bytea
