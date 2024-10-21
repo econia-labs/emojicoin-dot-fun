@@ -22,7 +22,7 @@ describe("queries price_feed and returns accurate price feed data", () => {
 
     const priceFeed = await fetchPriceFeed({});
     expect(priceFeed[0].marketID).toEqual(777701);
-    expect(priceFeed[0].openPrice).toEqual(500);
-    expect(priceFeed[0].closePrice).toEqual(750);
+    expect(priceFeed[0].openPrice).toEqual(500n);
+    expect(priceFeed[0].closePrice).toEqual(750n);
   });
 });
