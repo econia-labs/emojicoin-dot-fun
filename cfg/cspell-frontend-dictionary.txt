@@ -50,3 +50,4 @@ localstorage
 vpnapi
 ctrls
 dockerenv
+testid

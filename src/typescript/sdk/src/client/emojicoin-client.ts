@@ -24,7 +24,7 @@ import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mi
 import { getAptosClient } from "../utils/aptos-client";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
-import { INTEGRATOR_ADDRESS } from "../const";
+import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
 
 const { expect, Expect } = customExpect;
 
@@ -118,6 +118,7 @@ export class EmojicoinClient {
       registrant,
       emojis: this.emojisToHexStrings(symbolEmojis),
       integrator: this.integrator,
+      options: DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
       ...options,
     });
     const res = this.getTransactionEventData(response);
