@@ -73,8 +73,10 @@ export class DockerTestHarness {
   /**
    * Stops the Docker containers.
    */
-  static async stop() {
-    await execPromise(`docker compose -f ${LOCAL_COMPOSE_PATH} stop`);
+  static async stop(frontend: boolean) {
+    await execPromise(
+      `docker compose -f ${LOCAL_COMPOSE_PATH} ${frontend ? "--profile frontend" : ""} stop`
+    );
     const process = Number(readFileSync(TMP_PID_FILE_PATH, { encoding: "utf-8" }));
     if (process) {
       kill(process);
