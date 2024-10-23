@@ -5,7 +5,9 @@ import { SYMBOL_EMOJI_DATA } from "../../../sdk/src";
 
 test("check search results", async ({ page }) => {
   const user = getFundedAccount("666");
-  const symbols = [SYMBOL_EMOJI_DATA.byName("cat")!.emoji, SYMBOL_EMOJI_DATA.byName("cat")!.emoji];
+  const cat = SYMBOL_EMOJI_DATA.byName("cat")!.emoji;
+  const symbols = [cat,cat];
+
   const client = new EmojicoinClient();
   await client.register(user, symbols).then((res) => res.handle);
 
@@ -13,7 +15,19 @@ test("check search results", async ({ page }) => {
 
   const search = page.getByTestId("emoji-input");
   expect(search).toBeVisible();
-  await search.fill(symbols.join(""));
+  await search.click();
+
+  const picker = page.getByTestId("picker");
+  expect(picker).toBeVisible();
+
+  const emojiSearch = page.getByPlaceholder("Search");
+  expect(emojiSearch).toBeVisible();
+  await emojiSearch.fill("cat");
+
+  const emojiSearchCatButton = picker.getByLabel(cat).first();
+  expect(emojiSearchCatButton).toBeVisible();
+  await emojiSearchCatButton.click();
+  await emojiSearchCatButton.click();
 
   const marketCard = page.getByText("cat,cat", { exact: true });
   expect(marketCard).toBeVisible();
