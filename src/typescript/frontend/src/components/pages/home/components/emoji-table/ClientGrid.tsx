@@ -53,6 +53,7 @@ export const ClientGrid = ({
             prevIndex={i}
             runInitialAnimation={true}
             sortBy={sortBy}
+            data-testid="market-grid-item"
           />
         );
       })}
