@@ -8,6 +8,7 @@ import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
+import { type Metadata } from "next";
 
 export const revalidate = REVALIDATION_TIME;
 export const dynamic = "force-dynamic";
@@ -24,6 +25,34 @@ type StaticParams = {
 interface EmojicoinPageProps {
   params: StaticParams;
   searchParams: {};
+}
+
+export async function generateMetadata({ params }: EmojicoinPageProps): Promise<Metadata> {
+  const { market: marketSlug } = params;
+  const names = pathToEmojiNames(marketSlug);
+  const emojis = names.map((n) => {
+    const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
+    if (!res) {
+      throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+    }
+    return res;
+  });
+
+  const title = `${emojis.join("")}`;
+  const description = `Trade ${emojis.join("")} on emojicoin.fun !`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+    },
+    twitter: {
+      title,
+      description,
+    },
+  };
 }
 
 /**
