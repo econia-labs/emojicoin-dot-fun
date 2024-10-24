@@ -96,7 +96,7 @@ const MainCard = (props: MainCardProps) => {
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <div className="pixel-heading-1 text-dark-gray pixel-heading-text">00</div>
+          <div className="pixel-heading-1 text-medium-gray pixel-heading-text">00</div>
           <div
             className="display-font-text ellipses font-forma-bold"
             title={(featured ? featured.market.symbolData.name : "BLACK HEART").toUpperCase()}
@@ -107,7 +107,7 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <div className="font-forma text-dark-gray market-data-text uppercase">
+                <div className="font-forma text-medium-gray market-data-text uppercase">
                   {t("Mkt. Cap:")}
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
@@ -124,8 +124,8 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <div className="text-dark-gray uppercase">
-                  <div className="font-forma text-dark-gray market-data-text uppercase">
+                <div className="uppercase">
+                  <div className="font-forma text-medium-gray market-data-text uppercase">
                     {t("24 hour vol:")}
                   </div>
                 </div>
@@ -143,7 +143,7 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <div className="font-forma text-dark-gray market-data-text uppercase">
+                <div className="font-forma text-medium-gray market-data-text uppercase">
                   {t("All-time vol:")}
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
