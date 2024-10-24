@@ -8,8 +8,8 @@ export const GeoblockedBanner: React.FC = () => (
     <Carousel>
       <div className="flex items-center justify-center min-w-[fit-content] gap-[16px]">
         <Text
-          className="h-[2.4rem] whitespace-nowrap uppercase"
-          lineHeight="2.4rem"
+          className="h-[2.6rem] whitespace-nowrap uppercase"
+          lineHeight="2.6rem"
           textScale="display6"
           color="black"
           textAlign="center"
