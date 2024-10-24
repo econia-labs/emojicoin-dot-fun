@@ -1,8 +1,8 @@
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { type Metadata } from "next";
+import { emoji } from "utils";
 
 export const DEFAULT_TITLE = "emojicoin.fun";
-export const DEFAULT_DESCRIPTION = `Give your wallet the personality it deserves ${SYMBOL_EMOJI_DATA.byName("zany face")}${SYMBOL_EMOJI_DATA.byName("sparkles")}`;
+export const DEFAULT_DESCRIPTION = `Give your wallet the personality it deserves ${emoji("zany face")}${emoji("sparkles")}`;
 export const OG_IMAGES = "/social-preview.png";
 export const OG_TYPE = "website";
 export const TWITTER_CARD = "summary";
