@@ -250,6 +250,7 @@ export const EmojiPickerWithInput = ({
                   onClick={() => {
                     setPickerInvisible(false);
                   }}
+                  data-testid="emoji-input"
                 />
                 {mode === "search" && close}
                 {mode === "chat" ? (

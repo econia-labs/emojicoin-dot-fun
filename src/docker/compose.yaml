@@ -100,13 +100,13 @@ services:
       dockerfile: 'src/docker/frontend/Dockerfile'
       args:
         HASH_SEED: '${HASH_SEED}'
-        EMOJICOIN_INDEXER_URL: 'http://localhost:3000'
+        EMOJICOIN_INDEXER_URL: 'http://host.docker.internal:3000'
         NEXT_PUBLIC_APTOS_NETWORK: '${APTOS_NETWORK}'
         NEXT_PUBLIC_INTEGRATOR_ADDRESS: '${EMOJICOIN_INTEGRATOR_ADDRESS}'
         NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: '${FEE_RATE_BPS}'
         NEXT_PUBLIC_IS_ALLOWLIST_ENABLED: 'false'
         NEXT_PUBLIC_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
-        NEXT_PUBLIC_BROKER_URL: 'ws://localhost:${BROKER_PORT}'
+        NEXT_PUBLIC_BROKER_URL: 'ws://host.docker.internal:${BROKER_PORT}'
         NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: >-
           ${EMOJICOIN_REWARDS_MODULE_ADDRESS}
         REVALIDATION_TIME: '${REVALIDATION_TIME}'
@@ -116,18 +116,18 @@ services:
     - 'frontend'
     environment:
       HASH_SEED: '${HASH_SEED}'
-      EMOJICOIN_INDEXER_URL: 'http://localhost:3000'
+      EMOJICOIN_INDEXER_URL: 'http://host.docker.internal:3000'
       NEXT_PUBLIC_APTOS_NETWORK: '${APTOS_NETWORK}'
       NEXT_PUBLIC_INTEGRATOR_ADDRESS: '${EMOJICOIN_INTEGRATOR_ADDRESS}'
       NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS: '${FEE_RATE_BPS}'
       NEXT_PUBLIC_IS_ALLOWLIST_ENABLED: 'false'
       NEXT_PUBLIC_MODULE_ADDRESS: '${EMOJICOIN_MODULE_ADDRESS}'
-      NEXT_PUBLIC_BROKER_URL: 'ws://localhost:${BROKER_PORT}'
+      NEXT_PUBLIC_BROKER_URL: 'ws://host.docker.internal:${BROKER_PORT}'
       NEXT_PUBLIC_REWARDS_MODULE_ADDRESS: '${EMOJICOIN_REWARDS_MODULE_ADDRESS}'
       REVALIDATION_TIME: '${REVALIDATION_TIME}'
     healthcheck:
       test: 'curl -f http://localhost:3001/ || exit 1'
-      interval: '2m'
+      interval: '30s'
       timeout: '1s'
       retries: '1'
       start_period: '20s'
