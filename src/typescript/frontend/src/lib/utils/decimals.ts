@@ -20,26 +20,12 @@ export const toCoinDecimalString = (num: AnyNumberString, displayDecimals?: numb
  * @example
  * 1 APT => 100000000
  */
-const toActualCoinDecimals = ({
-  num,
-  round,
-  decimals,
-}: {
-  num: AnyNumberString;
-  round?: number;
-  decimals?: number;
-}): string => {
+const toActualCoinDecimals = ({ num }: { num: AnyNumberString }): bigint => {
   if (typeof num === "string" && isNaN(parseFloat(num))) {
-    return "0";
+    return 0n;
   }
-  let res = Big(num.toString()).mul(Big(10 ** DECIMALS));
-  if (typeof round !== "undefined") {
-    res = res.round(round);
-  }
-  if (typeof decimals !== "undefined") {
-    return res.toFixed(decimals).toString();
-  }
-  return res.toString();
+  const res = Big(num.toString()).mul(Big(10 ** DECIMALS));
+  return BigInt(res.toString());
 };
 
 /**
@@ -68,7 +54,10 @@ const toDisplayCoinDecimals = ({
     res = res.round(round);
   }
   if (typeof decimals !== "undefined") {
-    return res.toFixed(decimals).toString();
+    if (res < Big(1)) {
+      return res.toPrecision(decimals).replace(/\.?0+$/, "");
+    }
+    return res.toFixed(decimals).replace(/\.?0+$/, "");
   }
   return res.toString();
 };
