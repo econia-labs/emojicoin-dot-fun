@@ -1,6 +1,6 @@
 ---
 jobs:
-  frontend-tests:
+  playwright-tests:
     defaults:
       run:
         working-directory: 'src/typescript'
