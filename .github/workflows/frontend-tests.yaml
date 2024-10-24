@@ -1,6 +1,6 @@
 ---
 jobs:
-  test:
+  frontend-tests:
     defaults:
       run:
         working-directory: 'src/typescript'
@@ -39,7 +39,7 @@ jobs:
         path: 'playwright-report/'
         retention-days: 30
     timeout-minutes: 60
-name: 'Run the Playwright E2E tests'
+name: 'Run the frontend tests'
 "on":
   pull_request:
     branches:
