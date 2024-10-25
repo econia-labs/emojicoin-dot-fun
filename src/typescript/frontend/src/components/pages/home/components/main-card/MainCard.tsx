@@ -13,7 +13,7 @@ import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { type HomePageProps } from "app/home/HomePage";
 import "./module.css";
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 
 export interface MainCardProps {
   featured?: HomePageProps["featured"];
@@ -101,7 +101,7 @@ const MainCard = (props: MainCardProps) => {
             <span className="pixel-heading-1 text-medium-gray pixel-heading-text">HOT</span>
             <span>&nbsp;</span>
             <span className="pixel-heading-2 pixel-heading-text mt-[.2rem]">
-              {SYMBOL_DATA.byName("fire")?.emoji}
+              {SYMBOL_EMOJI_DATA.byName("fire")?.emoji}
             </span>
           </div>
           <div
