@@ -73,7 +73,7 @@ export class DockerTestHarness {
   /**
    * Stops the Docker containers.
    */
-  static async stop(frontend: boolean) {
+  static async stop({ frontend }: { frontend: boolean }) {
     await execPromise(
       `docker compose -f ${LOCAL_COMPOSE_PATH} ${frontend ? "--profile frontend" : ""} stop`
     );
@@ -86,8 +86,14 @@ export class DockerTestHarness {
   /**
    * Calls the Docker helper script to start the containers.
    */
-  static async run(frontend: boolean, filterLogsFrom: ContainerName[] = []) {
-    await DockerTestHarness.start(frontend, filterLogsFrom);
+  static async run({
+    frontend,
+    filterLogsFrom = [],
+  }: {
+    frontend: boolean;
+    filterLogsFrom?: ContainerName[];
+  }) {
+    await DockerTestHarness.start({ frontend, filterLogsFrom });
     const promises = [
       DockerTestHarness.waitForPrimaryService(frontend),
       DockerTestHarness.waitForDeployer(),
@@ -99,7 +105,13 @@ export class DockerTestHarness {
   /**
    * Starts a completely new Docker environment for the test harness.
    */
-  static async start(frontend: boolean, filterLogsFrom: ContainerName[]) {
+  static async start({
+    frontend,
+    filterLogsFrom,
+  }: {
+    frontend: boolean;
+    filterLogsFrom: ContainerName[];
+  }) {
     // Ensure that we have a fresh Docker environment before starting the test harness.
     await DockerTestHarness.remove();
 

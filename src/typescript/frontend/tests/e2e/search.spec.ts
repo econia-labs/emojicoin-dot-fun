@@ -6,9 +6,7 @@ import { SYMBOL_EMOJI_DATA } from "../../../sdk/src";
 test("check search results", async ({ page }) => {
   const user = getFundedAccount("666");
   const symbols = [SYMBOL_EMOJI_DATA.byName("cat")!.emoji, SYMBOL_EMOJI_DATA.byName("cat")!.emoji];
-
   const client = new EmojicoinClient();
-
   await client.register(user, symbols);
 
   await page.goto("/home");
