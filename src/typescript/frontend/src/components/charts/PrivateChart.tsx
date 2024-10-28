@@ -30,17 +30,17 @@ import { useEventStore } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { getAptosConfig } from "lib/utils/aptos-client";
 import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
-import { type MarketMetadataModel } from "@sdk/indexer-v2/types";
+import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
 import { Aptos } from "@aptos-labs/ts-sdk";
-import { periodEnumToRawDuration, Trigger } from "@sdk/const";
-import { fetchAllCandlesticksInTimeRange } from "@/queries/candlesticks";
+import { PeriodDuration, periodEnumToRawDuration, Trigger } from "@sdk/const";
 import {
   type LatestBar,
   marketToLatestBars,
   periodicStateTrackerToLatestBar,
   toBar,
 } from "@/store/event/candlestick-bars";
+import { parseJSON } from "utils";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -145,119 +145,117 @@ export const Chart = async (props: ChartContainerProps) => {
 
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
-      getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
+      getBars: async (
+        _symbolInfo,
+        resolution,
+        periodParams,
+        onHistoryCallback,
+        _onErrorCallback
+      ) => {
         const { from, to } = periodParams;
-        try {
-          const period = ResolutionStringToPeriod[resolution.toString()];
-          const periodDuration = periodEnumToRawDuration(period);
-          const start = new Date(from * 1000);
-          const end = new Date(to * 1000);
-          // TODO: Consider that if our data is internally consistent and we run into performance/scalability issues
-          // with this implementation below (fetching without regard for anything in state), we can store the values in
-          // state and coalesce that with the data we fetch from the server.
-          const data = await fetchAllCandlesticksInTimeRange({
-            marketID: props.marketID,
-            start,
-            end,
-            period,
+        const period = ResolutionStringToPeriod[resolution.toString()];
+        const periodDuration = periodEnumToRawDuration(period);
+        const periodDurationSeconds = (periodDuration / PeriodDuration.PERIOD_1M) * 60;
+        const end = new Date(to * 1000);
+        // The start timestamp is rounded so that all the people who load the webpage at a similar time get served
+        // the same cached response.
+        const start = from - (from % periodDurationSeconds);
+        const data: PeriodicStateEventModel[] = await fetch(
+          `/candlesticks?marketID=${props.marketID}&start=${start}&period=${period}&limit=500`
+        )
+          .then((res) => res.text())
+          .then((res) => parseJSON(res));
+
+        const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
+
+        // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
+        // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
+        let latestBar: LatestBar | undefined;
+        if (isFetchForMostRecentBars) {
+          // Fetch the current candlestick data from the Aptos fullnode. This fetch call should *never* be cached.
+          // Also, we specifically call this client-side because the server will get rate-limited if we call the
+          // fullnode from the server for each client.
+          const marketResource = await getMarketResource({
+            aptos: new Aptos(getAptosConfig()),
+            marketAddress: props.marketAddress,
           });
 
-          const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
+          // Convert the market view data to `latestBar[]` and set the latest bars in our EventStore to those values.
+          const latestBars = marketToLatestBars(marketResource);
+          const marketEmojiData = toMarketEmojiData(marketResource.metadata.emojiBytes);
+          const marketMetadata: MarketMetadataModel = {
+            marketID: marketResource.metadata.marketID,
+            time: 0n,
+            marketNonce: marketResource.sequenceInfo.nonce,
+            trigger: Trigger.PackagePublication, // Make up some bunk trigger, since it should be clear it's made up.
+            symbolEmojis: marketEmojiData.emojis.map((e) => e.emoji),
+            marketAddress: marketResource.metadata.marketAddress,
+            ...marketEmojiData,
+          };
+          setLatestBars({ marketMetadata, latestBars });
 
-          // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
-          // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
-          let latestBar: LatestBar | undefined;
+          // Get the period-specific state tracker for the current resolution/period type and set the latest bar on
+          // the chart- *not* just in state- to the latest bar from that tracker.
+          const tracker = marketResource.periodicStateTrackers.find(
+            // These are most likely indexed in order, but in case they aren't, we use `find` here.
+            (p) => Number(p.period) === periodDuration
+          );
+          if (!tracker) {
+            throw new Error("This should never happen.");
+          }
+          const nonce = marketResource.sequenceInfo.nonce;
+          latestBar = periodicStateTrackerToLatestBar(tracker, nonce);
+        }
+        // Filter the data so that all resulting bars are within the specified time range.
+        // Also, update the `open` price to the previous bar's `close` price if it exists.
+        // NOTE: Since `getBars` is called multiple times, this will result in several
+        // bars having incorrect `open` values. This isn't a big deal but may result in
+        // some visual inconsistencies in the chart.
+        const bars: Bar[] = data.reduce((acc: Bar[], event) => {
+          const bar = toBar(event);
+          if (bar.time >= from * 1000 && bar.time <= to * 1000) {
+            if (acc.at(-1)) {
+              bar.open = acc.at(-1)!.close;
+            }
+            acc.push(bar);
+          }
+          return acc;
+        }, []);
+
+        // Push the latest bar to the bars array if it exists and update its `open` value to be the previous bar's
+        // `close` if it's not the first/only bar.
+        if (latestBar) {
+          if (bars.at(-1)) {
+            latestBar.open = bars.at(-1)!.close;
+          }
+          bars.push(latestBar);
+        }
+
+        if (bars.length === 0) {
           if (isFetchForMostRecentBars) {
-            // Fetch the current candlestick data from the Aptos fullnode. This fetch call should *never* be cached.
-            // Also, we specifically call this client-side because the server will get rate-limited if we call the
-            // fullnode from the server for each client.
-            const marketResource = await getMarketResource({
-              aptos: new Aptos(getAptosConfig()),
-              marketAddress: props.marketAddress,
+            // If this is the most recent bar fetch and there is literally zero trading activity thus far,
+            // we should create a single empty bar to get rid of the `No chart data` ghost error from showing.
+            const time = BigInt(new Date().getTime()) * 1000n;
+            const timeAsPeriod = getPeriodStartTimeFromTime(time, periodDuration) / 1000n;
+            bars.push({
+              time: Number(timeAsPeriod.toString()),
+              open: 0,
+              high: 0,
+              low: 0,
+              close: 0,
+              volume: 0,
             });
-
-            // Convert the market view data to `latestBar[]` and set the latest bars in our EventStore to those values.
-            const latestBars = marketToLatestBars(marketResource);
-            const marketEmojiData = toMarketEmojiData(marketResource.metadata.emojiBytes);
-            const marketMetadata: MarketMetadataModel = {
-              marketID: marketResource.metadata.marketID,
-              time: 0n,
-              marketNonce: marketResource.sequenceInfo.nonce,
-              trigger: Trigger.PackagePublication, // Make up some bunk trigger, since it should be clear it's made up.
-              symbolEmojis: marketEmojiData.emojis.map((e) => e.emoji),
-              marketAddress: marketResource.metadata.marketAddress,
-              ...marketEmojiData,
-            };
-            setLatestBars({ marketMetadata, latestBars });
-
-            // Get the period-specific state tracker for the current resolution/period type and set the latest bar on
-            // the chart- *not* just in state- to the latest bar from that tracker.
-            const tracker = marketResource.periodicStateTrackers.find(
-              // These are most likely indexed in order, but in case they aren't, we use `find` here.
-              (p) => Number(p.period) === periodDuration
-            );
-            if (!tracker) {
-              throw new Error("This should never happen.");
-            }
-            const nonce = marketResource.sequenceInfo.nonce;
-            latestBar = periodicStateTrackerToLatestBar(tracker, nonce);
-          }
-          // Filter the data so that all resulting bars are within the specified time range.
-          // Also, update the `open` price to the previous bar's `close` price if it exists.
-          // NOTE: Since `getBars` is called multiple times, this will result in several
-          // bars having incorrect `open` values. This isn't a big deal but may result in
-          // some visual inconsistencies in the chart.
-          const bars: Bar[] = data.reduce((acc: Bar[], event) => {
-            const bar = toBar(event);
-            if (bar.time >= from * 1000 && bar.time <= to * 1000) {
-              if (acc.at(-1)) {
-                bar.open = acc.at(-1)!.close;
-              }
-              acc.push(bar);
-            }
-            return acc;
-          }, []);
-
-          // Push the latest bar to the bars array if it exists and update its `open` value to be the previous bar's
-          // `close` if it's not the first/only bar.
-          if (latestBar) {
-            if (bars.at(-1)) {
-              latestBar.open = bars.at(-1)!.close;
-            }
-            bars.push(latestBar);
-          }
-
-          if (bars.length === 0) {
-            if (isFetchForMostRecentBars) {
-              // If this is the most recent bar fetch and there is literally zero trading activity thus far,
-              // we should create a single empty bar to get rid of the `No chart data` ghost error from showing.
-              const time = BigInt(new Date().getTime()) * 1000n;
-              const timeAsPeriod = getPeriodStartTimeFromTime(time, periodDuration) / 1000n;
-              bars.push({
-                time: Number(timeAsPeriod),
-                open: 0,
-                high: 0,
-                low: 0,
-                close: 0,
-                volume: 0,
-              });
-            } else {
-              onHistoryCallback([], {
-                noData: true,
-              });
-              return;
-            }
-          }
-
-          onHistoryCallback(bars, {
-            noData: bars.length === 0,
-          });
-        } catch (e) {
-          if (e instanceof Error) {
-            console.warn("[getBars]: Get error", e);
-            onErrorCallback(e.message);
+          } else {
+            onHistoryCallback([], {
+              noData: true,
+            });
+            return;
           }
         }
+
+        onHistoryCallback(bars, {
+          noData: bars.length === 0,
+        });
       },
       subscribeBars: async (
         symbolInfo,

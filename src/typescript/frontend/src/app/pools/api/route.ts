@@ -2,10 +2,10 @@ import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { getValidSortByForPoolsPage } from "@sdk/indexer-v2/queries/query-params";
 import { handleEmptySearchBytes, safeParsePageWithDefault } from "lib/routes/home-page-params";
 import { stringifyJSON } from "utils";
-import { REVALIDATION_TIME } from "lib/server-env";
 import { getPoolData } from "./getPoolDataQuery";
 
 export const revalidate = 1;
+export const fetchCache = "default-cache";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

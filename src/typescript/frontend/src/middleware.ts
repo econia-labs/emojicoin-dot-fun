@@ -21,6 +21,10 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (!IS_ALLOWLIST_ENABLED) {
+    return NextResponse.next();
+  }
+
   const possibleMarketPath = normalizePossibleMarketPath(pathname, request.url);
   if (possibleMarketPath) {
     return NextResponse.redirect(possibleMarketPath);
