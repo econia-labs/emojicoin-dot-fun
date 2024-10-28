@@ -75,7 +75,7 @@ export class DockerTestHarness {
    */
   static async stop({ frontend }: { frontend: boolean }) {
     await execPromise(
-      `docker compose -f ${LOCAL_COMPOSE_PATH} ${frontend ? "--profile frontend" : ""} stop`
+      `docker compose -f ${LOCAL_COMPOSE_PATH} ${frontend ? "--profile frontend" : ""} --env-file ${LOCAL_ENV_PATH} stop`
     );
     const process = Number(readFileSync(TMP_PID_FILE_PATH, { encoding: "utf-8" }));
     if (process) {
