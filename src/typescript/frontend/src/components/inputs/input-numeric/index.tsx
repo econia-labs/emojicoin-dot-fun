@@ -1,5 +1,6 @@
 import Big from "big.js";
 import React, { useEffect, useState } from "react";
+import { isNumberInContstruction, numberOfDecimals, sanitizeNumber } from "@sdk/utils";
 
 const intToStr = (value: bigint, decimals?: number) =>
   (Number(value) / 10 ** (decimals ?? 0)).toString();
@@ -39,13 +40,13 @@ export const InputNumeric = ({
   }, [value, decimals]);
 
   const onChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, ".").replace(/^0+/, "0");
+    const value = sanitizeNumber(e.target.value);
 
-    if (!/^[0-9.]*$/.test(value)) {
+    if (!isNumberInContstruction(value)) {
       return;
     }
 
-    const decimalsInValue = /\./.test(value) ? value.split(".")[1].length : 0;
+    const decimalsInValue = numberOfDecimals(value);
     if (typeof decimals === "number" && decimalsInValue > decimals) {
       return;
     }
