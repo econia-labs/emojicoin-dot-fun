@@ -13,25 +13,33 @@ test("check search results", async ({ page }) => {
 
   await page.goto("/home");
 
+  // Click the search field.
   const search = page.getByTestId("emoji-input");
   expect(search).toBeVisible();
   await search.click();
 
+  // Expect the emoji picker to be visible.
   const picker = page.getByTestId("picker");
   expect(picker).toBeVisible();
 
+  // Search for "cat" in the emoji picker search field.
   const emojiSearch = page.getByPlaceholder("Search");
   expect(emojiSearch).toBeVisible();
   await emojiSearch.fill("cat");
 
+  // Expect the "cat" emoji to be visible in the search results.
   const emojiSearchCatButton = picker.getByLabel(cat).first();
   expect(emojiSearchCatButton).toBeVisible();
+
+  // Search for the cat,cat market.
   await emojiSearchCatButton.click();
   await emojiSearchCatButton.click();
 
+  // Click on the cat,cat market.
   const marketCard = page.getByText("cat,cat", { exact: true });
   expect(marketCard).toBeVisible();
   await marketCard.click();
 
+  // Expect to be redirected to the cat,cat market.
   await expect(page).toHaveURL(/.*cat;cat/);
 });
