@@ -65,7 +65,9 @@ test("check sorting order", async ({ page }) => {
 
   // Expect the markets to be in order of daily volume.
   marketGridItems = page.getByTestId("market-grid-item");
-  expect(marketGridItems).toHaveText(markets.map(e => new RegExp(e.join(""))));
+  const symbols = markets.map(e => e.join(""));
+  const patterns = symbols.map(e => new RegExp(e));
+  expect(marketGridItems).toHaveText(patterns);
 
   // Sort by bump order.
   await filters.click();
@@ -73,5 +75,5 @@ test("check sorting order", async ({ page }) => {
 
   // Expect the markets to be in bump order.
   marketGridItems = page.getByTestId("market-grid-item");
-  expect(marketGridItems).toHaveText(markets.map(e => new RegExp(e.join(""))).reverse());
+  expect(marketGridItems).toHaveText(patterns.reverse());
 });
