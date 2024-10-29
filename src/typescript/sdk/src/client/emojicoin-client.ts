@@ -37,18 +37,26 @@ type Options = {
   waitForTransactionOptions?: WaitForTransactionOptions;
 };
 
-const waitForEventProcessed = async (marketID: bigint, marketNonce: bigint, tableName: TableName) => {
+const waitForEventProcessed = async (
+  marketID: bigint,
+  marketNonce: bigint,
+  tableName: TableName
+) => {
   return waitFor({
     condition: async () => {
-      const data = await postgrest.from(tableName).select("*").eq("market_id", marketID).eq("market_nonce", marketNonce);
+      const data = await postgrest
+        .from(tableName)
+        .select("*")
+        .eq("market_id", marketID)
+        .eq("market_nonce", marketNonce);
       return data.error === null && data.data?.length === 1;
     },
     interval: 500,
     maxWaitTime: 30000,
     throwError: true,
     errorMessage: "Event did not register on time.",
-  })
-}
+  });
+};
 
 /**
  * A helper class intended to streamline the process of submitting transactions and using utility
@@ -323,7 +331,7 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
-    const { marketNonce, marketID } = res.events.swapEvents[0];
+    const { marketNonce, marketID } = res.events.liquidityEvents[0];
     return {
       ...res,
       liquidity: {
@@ -349,7 +357,7 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
-    const { marketNonce, marketID } = res.events.swapEvents[0];
+    const { marketNonce, marketID } = res.events.liquidityEvents[0];
     return {
       ...res,
       liquidity: {
