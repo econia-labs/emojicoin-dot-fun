@@ -25,6 +25,9 @@ import { getAptosClient } from "../utils/aptos-client";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
+import { waitFor } from "../utils";
+import { postgrest } from "../indexer-v2/queries";
+import { TableName } from "../indexer-v2/types/json-types";
 
 const { expect, Expect } = customExpect;
 
@@ -33,6 +36,19 @@ type Options = {
   options?: InputGenerateTransactionOptions;
   waitForTransactionOptions?: WaitForTransactionOptions;
 };
+
+const waitForEventProcessed = async (marketID: bigint, marketNonce: bigint, tableName: TableName) => {
+  return waitFor({
+    condition: async () => {
+      const data = await postgrest.from(tableName).select("*").eq("market_id", marketID).eq("market_nonce", marketNonce);
+      return data.error === null && data.data?.length === 1;
+    },
+    interval: 500,
+    maxWaitTime: 30000,
+    throwError: true,
+    errorMessage: "Event did not register on time.",
+  })
+}
 
 /**
  * A helper class intended to streamline the process of submitting transactions and using utility
@@ -122,12 +138,14 @@ export class EmojicoinClient {
       ...options,
     });
     const res = this.getTransactionEventData(response);
+    const marketID = res.events.marketRegistrationEvents[0].marketID;
     return {
       ...res,
       registration: {
         event: expect(res.events.marketRegistrationEvents.at(0), Expect.Register.Event),
         model: expect(res.models.marketRegistrationEvents.at(0), Expect.Register.Model),
       },
+      handle: waitForEventProcessed(marketID, 1n, TableName.MarketRegistrationEvents),
     };
   }
 
@@ -151,12 +169,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { emitMarketNonce, marketID } = res.events.chatEvents[0];
     return {
       ...res,
       chat: {
         event: expect(res.events.chatEvents.at(0), Expect.Chat.Event),
         model: expect(res.models.chatEvents.at(0), Expect.Chat.Model),
       },
+      handle: waitForEventProcessed(marketID, emitMarketNonce, TableName.ChatEvents),
     };
   }
 
@@ -220,12 +240,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { marketNonce, marketID } = res.events.swapEvents[0];
     return {
       ...res,
       swap: {
         event: expect(res.events.swapEvents.at(0), Expect.Swap.Event),
         model: expect(res.models.swapEvents.at(0), Expect.Swap.Model),
       },
+      handle: waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents),
     };
   }
 
@@ -275,12 +297,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { marketNonce, marketID } = res.events.swapEvents[0];
     return {
       ...res,
       swap: {
         event: expect(res.events.swapEvents.at(0), Expect.Swap.Event),
         model: expect(res.models.swapEvents.at(0), Expect.Swap.Model),
       },
+      handle: waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents),
     };
   }
 
@@ -299,12 +323,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { marketNonce, marketID } = res.events.swapEvents[0];
     return {
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0), Expect.Liquidity.Event),
         model: expect(res.models.liquidityEvents.at(0), Expect.Liquidity.Model),
       },
+      handle: waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents),
     };
   }
 
@@ -323,12 +349,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { marketNonce, marketID } = res.events.swapEvents[0];
     return {
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0), Expect.Liquidity.Event),
         model: expect(res.models.liquidityEvents.at(0), Expect.Liquidity.Model),
       },
+      handle: waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents),
     };
   }
 
