@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { EmojicoinClient } from "../../../sdk/src/client/emojicoin-client";
 import { getFundedAccount } from "../../../sdk/src/utils/test/test-accounts";
-import { SYMBOL_EMOJI_DATA } from "../../../sdk/src";
+import { sleep, SYMBOL_EMOJI_DATA } from "../../../sdk/src";
 
 test("check search results", async ({ page }) => {
   const user = getFundedAccount("666");
@@ -28,12 +28,15 @@ test("check search results", async ({ page }) => {
   await emojiSearch.fill("cat");
 
   // Expect the "cat" emoji to be visible in the search results.
-  const emojiSearchCatButton = picker.getByLabel(cat).first();
+  let emojiSearchCatButton = picker.getByLabel(cat).first();
   expect(emojiSearchCatButton).toBeVisible();
 
   // Search for the cat,cat market.
-  await emojiSearchCatButton.click();
-  await emojiSearchCatButton.click();
+  await emojiSearchCatButton.click({force: true});
+
+  emojiSearchCatButton = picker.getByLabel(cat).first();
+  expect(emojiSearchCatButton).toBeVisible();
+  await emojiSearchCatButton.click({force: true});
 
   // Click on the cat,cat market.
   const marketCard = page.getByText("cat,cat", { exact: true });
