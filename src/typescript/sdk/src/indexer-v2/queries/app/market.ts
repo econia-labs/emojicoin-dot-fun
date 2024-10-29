@@ -1,4 +1,6 @@
-import "server-only";
+if (process.env.NODE_ENV !== "test") {
+  require("server-only");
+}
 
 import { LIMIT, ORDER_BY } from "../../../queries";
 import { type AnyNumberString } from "../../../types";

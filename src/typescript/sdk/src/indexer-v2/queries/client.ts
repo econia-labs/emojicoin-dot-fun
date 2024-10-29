@@ -1,4 +1,6 @@
-import "server-only";
+if (process.env.NODE_ENV !== "test") {
+  require("server-only");
+}
 
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { parseJSONWithBigInts, stringifyJSONWithBigInts } from "../json-bigint";

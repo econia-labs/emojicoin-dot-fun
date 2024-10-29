@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import "server-only";
+if (process.env.NODE_ENV !== "test") {
+  require("server-only");
+}
 
 import {
   type PostgrestSingleResponse,

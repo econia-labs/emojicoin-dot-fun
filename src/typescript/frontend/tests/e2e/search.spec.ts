@@ -7,7 +7,7 @@ test("check search results", async ({ page }) => {
   const user = getFundedAccount("666");
   const symbols = [SYMBOL_EMOJI_DATA.byName("cat")!.emoji, SYMBOL_EMOJI_DATA.byName("cat")!.emoji];
   const client = new EmojicoinClient();
-  await client.register(user, symbols);
+  await client.register(user, symbols).then(res => res.handle);
 
   await page.goto("/home");
 
