@@ -2,16 +2,15 @@
 //
 // In the case of 0.[0-9]+, the leading zero will not be removed.
 export const trimLeadingZeros = (input: string) => {
-   // Replace all leading zeros with one zero
-  input = input
-    .replace(/^0+/, "0"); // The regex matches all leading 0s.
+  // Replace all leading zeros with one zero
+  input = input.replace(/^0+/, "0"); // The regex matches all leading 0s.
 
   if (input.startsWith("0") && !input.startsWith("0.") && input.length > 1) {
     input = input.slice(1);
   }
 
   return input;
-}
+};
 
 // Remove all leading zeros and transform "," in ".".
 //
@@ -22,7 +21,7 @@ export const sanitizeNumber = (input: string) => {
     return `0${input}`;
   }
   return input;
-}
+};
 
 // Return true if input is a number in construction.
 //
@@ -56,4 +55,5 @@ export const isNumberInContstruction = (input: string) => /^[0-9]*(\.([0-9]*)?)?
 // return 0.
 //
 // The regex tests if there is a dot in the string.
-export const numberOfDecimals = (input: string) => /\./.test(input) ? input.split(".")[1].length : 0;
+export const numberOfDecimals = (input: string) =>
+  /\./.test(input) ? input.split(".")[1].length : 0;
