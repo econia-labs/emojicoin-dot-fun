@@ -9,6 +9,7 @@ import {
   fetchPriceFeed,
 } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
+import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 
 export const revalidate = 1;
 export const fetchCache = "default-cache";
@@ -24,6 +25,7 @@ export default async function Home({ searchParams }: HomePageParams) {
     sortBy,
     orderBy,
     searchEmojis,
+    pageSize: MARKETS_PER_PAGE,
   });
   const priceFeed = await fetchPriceFeed({});
 
