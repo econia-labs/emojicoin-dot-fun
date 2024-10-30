@@ -1,4 +1,4 @@
-import { SimulateSwap } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { SimulateSwap, Swap } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import {
   type AnyNumber,
@@ -12,22 +12,58 @@ import { withResponseError } from "./client";
 import Big from "big.js";
 import { useMemo } from "react";
 import { toCoinTypes } from "@sdk/markets/utils";
+import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { tryEd25519PublicKey } from "components/pages/launch-emojicoin/hooks/use-register-market";
+import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "@sdk/const";
 
 export const simulateSwap = async (args: {
   aptos: Aptos;
+  account: AccountInfo | null;
   swapper: AccountAddressString;
   marketAddress: AccountAddressString;
   inputAmount: AnyNumber;
   isSell: boolean;
+  minOutputAmount: AnyNumber;
   typeTags: [TypeTagInput, TypeTagInput];
 }) => {
-  return withResponseError(
+  if (args.account) {
+    const publicKey = tryEd25519PublicKey(args.account);
+    if (publicKey) {
+      const res = await Swap.simulate({
+        aptosConfig: args.aptos.config,
+        swapper: args.swapper,
+        swapperPubKey: publicKey,
+        marketAddress: args.marketAddress,
+        inputAmount: args.inputAmount,
+        isSell: args.isSell,
+        integrator: INTEGRATOR_ADDRESS,
+        integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
+        minOutputAmount: args.minOutputAmount,
+        typeTags: args.typeTags,
+      });
+      const swapName = `${MODULE_ADDRESS}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Swap`;
+      const swapEvent = res.events.find((e) => e.type === swapName)!;
+      return {
+        base_volume: swapEvent.data.base_volume,
+        quote_volume: swapEvent.data.quote_volume,
+        gas_used: res.gas_used,
+        gas_unit_price: res.gas_unit_price,
+      };
+    }
+  }
+  const res = await withResponseError(
     SimulateSwap.view({
       ...args,
       integrator: INTEGRATOR_ADDRESS,
       integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS,
     })
   );
+  return {
+    base_volume: res.base_volume,
+    quote_volume: res.quote_volume,
+    gas_used: null,
+    gas_unit_price: null,
+  };
 };
 
 /**
@@ -40,20 +76,24 @@ export const useSimulateSwap = (args: {
   inputAmount: bigint | number | string;
   isSell: boolean;
   numSwaps: number;
+  minOutputAmount: bigint | number | string;
 }) => {
   const { marketAddress, isSell, numSwaps } = args;
   const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
   const { aptos, account } = useAptos();
   const typeTags = [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
-  const { inputAmount, invalid, swapper } = useMemo(() => {
+  const { inputAmount, invalid, swapper, minOutputAmount } = useMemo(() => {
     const bigInput = Big(args.inputAmount.toString());
     const inputAmount = BigInt(bigInput.toString());
+    const bigMinOutput = Big(args.minOutputAmount.toString());
+    const minOutputAmount = BigInt(bigMinOutput.toString());
     return {
       invalid: inputAmount === 0n,
       inputAmount,
+      minOutputAmount,
       swapper: account?.address ? (account.address as `0x${string}`) : undefined,
     };
-  }, [args.inputAmount, account?.address]);
+  }, [args.inputAmount, account?.address, args.minOutputAmount]);
 
   const { data } = useQuery({
     queryKey: [
@@ -66,20 +106,35 @@ export const useSimulateSwap = (args: {
       emojicoin.toString(),
       emojicoinLP.toString(),
       swapper ?? "",
+      minOutputAmount.toString(),
     ],
     queryFn: () =>
       invalid || typeof swapper === "undefined"
         ? {
             quote_volume: "0",
             base_volume: "0",
+            gas_used: "0",
+            gas_unit_price: "0",
           }
-        : simulateSwap({ aptos, ...args, swapper, inputAmount, typeTags }),
+        : simulateSwap({
+            aptos,
+            account,
+            ...args,
+            swapper,
+            inputAmount,
+            minOutputAmount,
+            typeTags,
+          }),
     staleTime: Infinity,
   });
 
   return typeof data === "undefined"
     ? data
-    : isSell
-      ? BigInt(data.quote_volume)
-      : BigInt(data.base_volume);
+    : {
+        gasCost:
+          typeof data.gas_used === "string" && typeof data.gas_unit_price === "string"
+            ? BigInt(data.gas_used) * BigInt(data.gas_unit_price)
+            : null,
+        swapResult: isSell ? BigInt(data.quote_volume) : BigInt(data.base_volume),
+      };
 };
