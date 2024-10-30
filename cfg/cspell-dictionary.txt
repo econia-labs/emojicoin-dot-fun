@@ -1,4 +1,3 @@
-ADBEEF
 aland
 allowlister
 aptn
@@ -12,7 +11,6 @@ bouvet
 buildtime
 buildx
 burkina
-bytea
 caicos
 clamm
 clipperton
