@@ -137,7 +137,7 @@ if [ -n "$reset_localnet" ]; then
 	# Bind-mounting the parent of `.aptos` gives the container the right to
 	# delete it.
 	docker run --rm -v "$docker_dir/localnet:/pwd" busybox rm -rf /pwd/.aptos
-	docker compose -f compose.local.yaml down --volumes
+	docker compose -f compose.local.yaml --profile frontend down --volumes
 else
-	docker compose -f compose.local.yaml down
+	docker compose -f compose.local.yaml --profile frontend down
 fi

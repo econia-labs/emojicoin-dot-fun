@@ -25,7 +25,7 @@ module.exports = {
     "playwright.config.ts",
     "postcss.config.js",
     "tailwind.config.js",
-    "example.spec.ts",
+    "tests/**",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {

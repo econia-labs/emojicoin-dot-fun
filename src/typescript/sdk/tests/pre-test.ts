@@ -23,7 +23,7 @@ export default async function preTest() {
     //                             Start the docker containers.
     // --------------------------------------------------------------------------------------
     // Start the Docker test harness without the frontend container.
-    await DockerTestHarness.run(false);
+    await DockerTestHarness.run({ frontend: false });
 
     // The docker container start-up script publishes the package on-chain.
   }

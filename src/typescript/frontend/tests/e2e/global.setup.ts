@@ -6,6 +6,6 @@ setup("setup the Docker containers", async ({}) => {
   setup.setTimeout(600_000);
   const startDockerServices = process.env.APTOS_NETWORK === "local";
   if (startDockerServices) {
-    await DockerTestHarness.run(true);
+    await DockerTestHarness.run({ frontend: true });
   }
 });
