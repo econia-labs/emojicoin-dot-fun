@@ -2,9 +2,6 @@ import { getDbConnection } from "../../helpers";
 import { fetchPriceFeed } from "../../../../src/indexer-v2/queries";
 import path from "path";
 
-// We need a long timeout because the test must wait for the 1-minute period to expire.
-jest.setTimeout(750000);
-
 const pathRoot = path.join(__dirname, "./");
 
 describe("queries price_feed and returns accurate price feed data", () => {
