@@ -45,9 +45,9 @@ export const sanitizeNumber = (input: string) => {
 // It cannot be:
 // - 0.0.1
 //
-// Regex explenation:
+// Regex explanation:
 // n digits, then maybe (a dot, then maybe (m digits))
-export const isNumberInContstruction = (input: string) => /^[0-9]*(\.([0-9]*)?)?$/.test(input);
+export const isNumberInConstruction = (input: string) => /^[0-9]*(\.([0-9]*)?)?$/.test(input);
 
 // Return the number of decimals that input has.
 //

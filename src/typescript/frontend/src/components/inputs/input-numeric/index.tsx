@@ -1,6 +1,6 @@
 import Big from "big.js";
 import React, { useEffect, useState } from "react";
-import { isNumberInContstruction, numberOfDecimals, sanitizeNumber } from "@sdk/utils";
+import { isNumberInConstruction, numberOfDecimals, sanitizeNumber } from "@sdk/utils";
 
 const intToStr = (value: bigint, decimals?: number) =>
   (Number(value) / 10 ** (decimals ?? 0)).toString();
@@ -42,7 +42,7 @@ export const InputNumeric = ({
   const onChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = sanitizeNumber(e.target.value);
 
-    if (!isNumberInContstruction(value)) {
+    if (!isNumberInConstruction(value)) {
       return;
     }
 

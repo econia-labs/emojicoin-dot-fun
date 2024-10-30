@@ -40,7 +40,7 @@ describe("validation utility functions", () => {
     });
   });
 
-  it("should accurately test if number is in contruction", () => {
+  it("should accurately test if number is in construction", () => {
     const givenAndExpected: [string, boolean][] = [
       [".0", true],
       [".1", true],
@@ -58,7 +58,7 @@ describe("validation utility functions", () => {
     ];
 
     givenAndExpected.forEach(([given, expected]) => {
-      expect(validation.isNumberInContstruction(given)).toEqual(expected);
+      expect(validation.isNumberInConstruction(given)).toEqual(expected);
     });
   });
 
