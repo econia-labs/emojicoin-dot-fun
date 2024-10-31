@@ -5,7 +5,7 @@ import ButtonWithConnectWalletFallback from "components/header/wallet-button/Con
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { standardizeAddress } from "@sdk/utils";
+import { standardizeAddress, truncateAddress } from "@sdk/utils";
 import { getVerificationStatus } from "./get-verification-status";
 
 export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
@@ -55,7 +55,8 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
               </motion.div>
             )}
             <ButtonWithConnectWalletFallback geoblocked={false} arrow={false}>
-              <div className="flex flex-col uppercase mt-[8ch] gap-1">
+              <div className="flex flex-col uppercase mt-[16ch] gap-1">
+                <div>Wallet address: {account && truncateAddress(account.address)}</div>
                 <div>Galxe: {galxe ? "✅" : "❌"}</div>
                 <div>Custom allowlist: {customAllowlisted ? "✅" : "❌"}</div>
                 <div>Not geoblocked: {geoblocked ? "✅" : "❌"}</div>
