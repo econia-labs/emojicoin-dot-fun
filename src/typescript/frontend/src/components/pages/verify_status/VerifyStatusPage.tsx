@@ -69,7 +69,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
                 </div>
                 <div>Galxe: {checkmarkOrX(galxe)}</div>
                 <div>Custom allowlist: {checkmarkOrX(customAllowlisted)}</div>
-                <div>Not geoblocked: {checkmarkOrX(geoblocked)}</div>
+                <div>Passes geoblocking: {checkmarkOrX(geoblocked)}</div>
                 <a
                   className="underline text-ec-blue"
                   href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
