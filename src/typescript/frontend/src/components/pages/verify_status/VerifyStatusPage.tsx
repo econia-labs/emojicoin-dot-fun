@@ -56,8 +56,13 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
               </motion.div>
             )}
             <ButtonWithConnectWalletFallback geoblocked={false} arrow={false}>
-              <div className="flex flex-col uppercase mt-[16ch] gap-1">
-                <div>Wallet address: {account && truncateAddress(account.address)}</div>
+              <div className="flex flex-col uppercase mt-[20ch] gap-1">
+                <div>
+                  Wallet address:{" "}
+                  <span className="text-warning">
+                    {account && <span>`0x${truncateAddress(account.address).substring(2)}`</span>}
+                  </span>
+                </div>
                 <div>Galxe: {galxe ? "✅" : "❌"}</div>
                 <div>Custom allowlist: {customAllowlisted ? "✅" : "❌"}</div>
                 <div>Not geoblocked: {geoblocked ? "✅" : "❌"}</div>
