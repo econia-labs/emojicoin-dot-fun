@@ -9,6 +9,10 @@ import { standardizeAddress, truncateAddress } from "@sdk/utils";
 import { getVerificationStatus } from "./get-verification-status";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 
+const checkmarkOrX = (bool: boolean) => {
+  return <span className="text-lg">{bool ? "✅" : "❌"} </span>;
+};
+
 export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
@@ -63,9 +67,9 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
                     {account && <span>`0x${truncateAddress(account.address).substring(2)}`</span>}
                   </span>
                 </div>
-                <div>Galxe: {galxe ? "✅" : "❌"}</div>
-                <div>Custom allowlist: {customAllowlisted ? "✅" : "❌"}</div>
-                <div>Not geoblocked: {geoblocked ? "✅" : "❌"}</div>
+                <div>Galxe: {checkmarkOrX(galxe)}</div>
+                <div>Custom allowlist: {checkmarkOrX(customAllowlisted)}</div>
+                <div>Not geoblocked: {checkmarkOrX(geoblocked)}</div>
                 <a
                   className="underline text-ec-blue"
                   href="NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT"
