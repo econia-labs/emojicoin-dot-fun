@@ -64,7 +64,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
                 <div>
                   Wallet address:{" "}
                   <span className="text-warning">
-                    {account && <span>`0x${truncateAddress(account.address).substring(2)}`</span>}
+                    {account && <span>{`0x${truncateAddress(account.address).substring(2)}`}</span>}
                   </span>
                 </div>
                 <div>Galxe: {checkmarkOrX(galxe)}</div>
@@ -72,7 +72,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
                 <div>Not geoblocked: {checkmarkOrX(geoblocked)}</div>
                 <a
                   className="underline text-ec-blue"
-                  href="NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT"
+                  href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
                   {...EXTERNAL_LINK_PROPS}
                 >
                   Galxe Campaign
