@@ -5,8 +5,8 @@ import ButtonWithConnectWalletFallback from "components/header/wallet-button/Con
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { isInGalxeCampaign, isOnCustomAllowlist } from "lib/utils/allowlist";
 import { standardizeAddress } from "@sdk/utils";
+import { getVerificationStatus } from "./get-verification-status";
 
 export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const { account } = useAptos();
@@ -20,8 +20,10 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
       setCustomAllowlisted(false);
     } else {
       const address = standardizeAddress(account.address);
-      isInGalxeCampaign(address).then((r) => setGalxe(r));
-      isOnCustomAllowlist(address).then((r) => setCustomAllowlisted(r));
+      getVerificationStatus(address).then(({ galxe, customAllowlisted }) => {
+        setGalxe(galxe);
+        setCustomAllowlisted(customAllowlisted);
+      });
     }
   }, [account, connected]);
 
