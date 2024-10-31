@@ -30,9 +30,11 @@ describe("queries price_feed and returns accurate price feed data", () => {
     expect(priceFeed[0].marketID).toEqual(777701);
     expect(priceFeed[0].openPrice).toEqual(500n);
     expect(priceFeed[0].closePrice).toEqual(750n);
+    expect(priceFeed[0].deltaPercentage).toEqual(50);
 
     expect(priceFeed[1].marketID).toEqual(777702);
     expect(priceFeed[1].openPrice).toEqual(1000n);
     expect(priceFeed[1].closePrice).toEqual(250n);
+    expect(priceFeed[1].deltaPercentage).toEqual(-75);
   });
 });
