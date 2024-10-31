@@ -5,7 +5,6 @@ import {
   type PropsWithChildren,
   useEffect,
   useState,
-  useCallback,
   useMemo,
   type MouseEventHandler,
 } from "react";
@@ -26,6 +25,7 @@ import { toCoinTypes } from "@sdk/markets/utils";
 import { Flex, FlexGap } from "@containers";
 import Popup from "components/popup";
 import { Text } from "components/text";
+import { InputNumeric } from "components/inputs";
 
 const SmallButton = ({
   emoji,
@@ -79,8 +79,7 @@ const inputAndOutputStyles = `
   border-transparent !p-0 text-white
 `;
 
-const APT_DISPLAY_DECIMALS = 4;
-const EMOJICOIN_DISPLAY_DECIMALS = 1;
+const OUTPUT_DISPLAY_DECIMALS = 4;
 const SWAP_GAS_COST = 52500n;
 
 export default function SwapComponent({
@@ -103,7 +102,7 @@ export default function SwapComponent({
   const [inputAmount, setInputAmount] = useState(
     toActualCoinDecimals({ num: presetInputAmountIsValid ? presetInputAmount! : "1" })
   );
-  const [outputAmount, setOutputAmount] = useState("0");
+  const [outputAmount, setOutputAmount] = useState(0n);
   const [previous, setPrevious] = useState(inputAmount);
   const [isLoading, setIsLoading] = useState(false);
   const [isSell, setIsSell] = useState(!(searchParams.get("sell") === null));
@@ -125,15 +124,18 @@ export default function SwapComponent({
 
   const swapResult = useSimulateSwap({
     marketAddress,
-    inputAmount: inputAmount === "" ? "0" : inputAmount,
+    inputAmount: inputAmount.toString(),
     isSell,
     numSwaps,
   });
 
+  const outputAmountString = toDisplayCoinDecimals({
+    num: isLoading ? previous : outputAmount,
+    decimals: OUTPUT_DISPLAY_DECIMALS,
+  });
+
   const { ref, replay } = useScramble({
-    text: Number(isLoading ? previous : outputAmount).toFixed(
-      isSell ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS
-    ),
+    text: new Intl.NumberFormat().format(Number(outputAmountString)),
     overdrive: false,
     overflow: true,
     speed: isLoading ? 0.4 : 1000,
@@ -151,52 +153,19 @@ export default function SwapComponent({
       setIsLoading(true);
       return;
     }
-    const swapResultDisplay = toDisplayNumber(swapResult, isSell ? "apt" : "emoji");
-    setPrevious(swapResultDisplay);
-    setOutputAmount(swapResultDisplay);
+    setPrevious(swapResult);
+    setOutputAmount(swapResult);
     setIsLoading(false);
     replay();
   }, [swapResult, replay, isSell]);
-
-  const toDisplayNumber = (value: bigint | number | string, type: "apt" | "emoji" = "apt") => {
-    const badString = typeof value === "string" && (value === "" || isNaN(parseInt(value)));
-    if (!value || badString) {
-      return "0";
-    }
-    // We use the APT display decimal amount here to avoid early truncation.
-    return toDisplayCoinDecimals({
-      num: value,
-      decimals: type === "apt" ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS,
-    }).toString();
-  };
-
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value === "") {
-      setInputAmount("");
-    }
-    if (isNaN(parseFloat(e.target.value))) {
-      e.stopPropagation();
-      return;
-    }
-    setInputAmount(toActualCoinDecimals({ num: e.target.value }));
-  };
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter" && submit) {
-        submit();
-      }
-    },
-    [submit]
-  );
 
   const sufficientBalance = useMemo(() => {
     if (!account || (isSell && !emojicoinBalance) || (!isSell && !aptBalance)) return false;
     if (account) {
       if (isSell) {
-        return emojicoinBalance >= BigInt(inputAmount);
+        return emojicoinBalance >= inputAmount;
       }
-      return aptBalance >= BigInt(inputAmount);
+      return aptBalance >= inputAmount;
     }
   }, [account, aptBalance, emojicoinBalance, isSell, inputAmount]);
 
@@ -205,7 +174,7 @@ export default function SwapComponent({
     const coinBalance = isSell ? emojicoinBalance : aptBalance;
     const balance = toDisplayCoinDecimals({
       num: coinBalance,
-      decimals: !isSell ? APT_DISPLAY_DECIMALS : EMOJICOIN_DISPLAY_DECIMALS,
+      decimals: 4,
     });
     return (
       <AnimatePresence>
@@ -235,12 +204,16 @@ export default function SwapComponent({
                 <SmallButton
                   emoji="🤢"
                   description="Sell 50%"
-                  onClick={() => setInputAmount(String(emojicoinBalance / 2n))}
+                  onClick={() => {
+                    setInputAmount(emojicoinBalance / 2n);
+                  }}
                 />
                 <SmallButton
                   emoji="🤮"
                   description="Sell 100%"
-                  onClick={() => setInputAmount(String(emojicoinBalance))}
+                  onClick={() => {
+                    setInputAmount(emojicoinBalance);
+                  }}
                 />
               </>
             ) : (
@@ -248,17 +221,23 @@ export default function SwapComponent({
                 <SmallButton
                   emoji="🌒"
                   description="Buy 25%"
-                  onClick={() => setInputAmount(String(availableAptBalance / 4n))}
+                  onClick={() => {
+                    setInputAmount(availableAptBalance / 4n);
+                  }}
                 />
                 <SmallButton
                   emoji="🌓"
                   description="Buy 50%"
-                  onClick={() => setInputAmount(String(availableAptBalance / 2n))}
+                  onClick={() => {
+                    setInputAmount(availableAptBalance / 2n);
+                  }}
                 />
                 <SmallButton
                   emoji="🌕"
                   description="Buy 100%"
-                  onClick={() => setInputAmount(String(availableAptBalance))}
+                  onClick={() => {
+                    setInputAmount(availableAptBalance);
+                  }}
                 />
               </>
             )}
@@ -272,25 +251,23 @@ export default function SwapComponent({
                 {isSell ? t("You sell") : t("You pay")}
                 {balanceLabel}
               </div>
-              <input
+              <InputNumeric
                 className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-                value={
-                  inputAmount === ""
-                    ? ""
-                    : Number(toDisplayNumber(inputAmount, isSell ? "emoji" : "apt"))
-                }
-                step={0.01}
-                onChange={handleInput}
-                onKeyDown={handleKeyDown}
-                type="number"
-              ></input>
+                value={inputAmount}
+                onUserInput={(v) => setInputAmount(v)}
+                onSubmit={() => (submit ? submit() : {})}
+                decimals={8}
+              />
             </Column>
             {isSell ? <EmojiInputLabel emoji={emojicoin} /> : <AptosInputLabel />}
           </InnerWrapper>
 
           <FlipInputsArrow
             onClick={() => {
-              setInputAmount(toActualCoinDecimals({ num: outputAmount }));
+              setInputAmount(outputAmount);
+              // This is done as to not display an old value if the swap simulation fails.
+              setOutputAmount(0n);
+              setPrevious(0n);
               setIsSell((v) => !v);
             }}
           />
