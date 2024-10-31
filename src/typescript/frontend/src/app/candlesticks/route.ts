@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(limitStr);
   const marketID = parseInt(marketIDStr);
 
-  const data = getCachedCandlesticks({ marketID, start, period, limit });
+  const data = await getCachedCandlesticks({ marketID, start, period, limit });
 
   return new Response(stringifyJSON(data));
 }
