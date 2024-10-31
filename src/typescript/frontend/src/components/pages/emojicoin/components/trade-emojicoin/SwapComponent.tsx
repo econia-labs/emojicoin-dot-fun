@@ -139,7 +139,6 @@ export default function SwapComponent({
     inputAmount: inputAmount.toString(),
     isSell,
     numSwaps,
-    minOutputAmount,
   });
 
   const outputAmountString = toDisplayCoinDecimals({
@@ -329,14 +328,12 @@ export default function SwapComponent({
             {emoji("gear")}
           </div>
           {tooltip}
-          {gasCost && (
-            <div className="text-dark-gray">
-              <span className="text-xl leading-[0]">
-                {toDisplayCoinDecimals({ num: gasCost.toString(), decimals: 4 })}
-              </span>{" "}
-              {emoji("fuel pump")}
-            </div>
-          )}
+          <div className="text-dark-gray">
+            <span className="text-xl leading-[0]">
+              {gasCost === null ? "~" : ""}{toDisplayCoinDecimals({ num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(), decimals: 4 })}
+            </span>{" "}
+            {emoji("fuel pump")}
+          </div>
         </div>
 
         <Row className="justify-center mt-[14px]">

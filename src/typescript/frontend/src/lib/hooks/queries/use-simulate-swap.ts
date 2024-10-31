@@ -76,7 +76,6 @@ export const useSimulateSwap = (args: {
   inputAmount: bigint | number | string;
   isSell: boolean;
   numSwaps: number;
-  minOutputAmount: bigint | number | string;
 }) => {
   const { marketAddress, isSell, numSwaps } = args;
   const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
@@ -85,15 +84,13 @@ export const useSimulateSwap = (args: {
   const { inputAmount, invalid, swapper, minOutputAmount } = useMemo(() => {
     const bigInput = Big(args.inputAmount.toString());
     const inputAmount = BigInt(bigInput.toString());
-    const bigMinOutput = Big(args.minOutputAmount.toString());
-    const minOutputAmount = BigInt(bigMinOutput.toString());
     return {
       invalid: inputAmount === 0n,
       inputAmount,
-      minOutputAmount,
+      minOutputAmount: 1n,
       swapper: account?.address ? (account.address as `0x${string}`) : undefined,
     };
-  }, [args.inputAmount, account?.address, args.minOutputAmount]);
+  }, [args.inputAmount, account?.address]);
 
   const { data } = useQuery({
     queryKey: [
@@ -113,8 +110,8 @@ export const useSimulateSwap = (args: {
         ? {
             quote_volume: "0",
             base_volume: "0",
-            gas_used: "0",
-            gas_unit_price: "0",
+            gas_used: null,
+            gas_unit_price: null,
           }
         : simulateSwap({
             aptos,
