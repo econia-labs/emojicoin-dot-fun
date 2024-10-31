@@ -1,44 +1,72 @@
-import React from "react";
-import { Input } from "components/inputs/input";
-import { type InputProps } from "components/inputs/input/types";
+import Big from "big.js";
+import React, { useEffect, useState } from "react";
+import { isNumberInConstruction, countDigitsAfterDecimal, sanitizeNumber } from "@sdk/utils";
 
-const NUMBERS = new Set("0123456789");
+const intToStr = (value: bigint, decimals?: number) =>
+  (Number(value) / 10 ** (decimals ?? 0)).toString();
 
-export const InputNumeric = <E extends React.ElementType = "input">({
+const strToInt = (value: string, decimals?: number) => {
+  if (isNaN(parseFloat(value))) {
+    return 0n;
+  }
+  const res = Big(value.toString()).mul(Big(10 ** (decimals ?? 0)));
+  if (res < Big(1)) {
+    return 0n;
+  }
+  return BigInt(res.toString());
+};
+
+export const InputNumeric = ({
   onUserInput,
+  decimals,
+  value,
+  onSubmit,
   ...props
-}: InputProps<E> & { onUserInput: (value: string) => void }): JSX.Element => {
-  const [input, setInput] = React.useState("");
+}: {
+  className?: string;
+  onUserInput?: (value: bigint) => void;
+  onSubmit?: (value: bigint) => void;
+  decimals?: number;
+  disabled?: boolean;
+  value: bigint;
+}) => {
+  const [input, setInput] = useState(intToStr(value, decimals));
 
-  const onChangeText = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.replace(/,/g, ".").replace(/^0+/, "0");
+  useEffect(() => {
+    if (strToInt(input, decimals) != value) {
+      setInput(intToStr(value, decimals));
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [value, decimals]);
 
-    let hasDecimal = false;
-    let s = "";
-    for (const char of value) {
-      if (char === ".") {
-        if (!hasDecimal) {
-          s += char;
-        } else {
-          hasDecimal = true;
-        }
-      } else if (NUMBERS.has(char)) {
-        s += char;
-      }
+  const onChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = sanitizeNumber(e.target.value);
+
+    if (!isNumberInConstruction(value)) {
+      return;
     }
 
-    if (s === "" || !isNaN(Number(s))) {
-      setInput(s);
-      onUserInput(s);
+    const decimalsInValue = countDigitsAfterDecimal(value);
+    if (typeof decimals === "number" && decimalsInValue > decimals) {
+      return;
+    }
+
+    setInput(value);
+    if (onUserInput) {
+      onUserInput(strToInt(value, decimals));
     }
   };
 
   return (
-    <Input
-      inputMode="decimal"
-      pattern="^\d*\.?\d*$"
-      onChange={(event) => onChangeText(event)}
+    <input
+      type="text"
+      onChange={(e) => onChangeText(e)}
       value={input}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && onSubmit) {
+          onSubmit(strToInt(input, decimals));
+        }
+      }}
       {...props}
     />
   );
