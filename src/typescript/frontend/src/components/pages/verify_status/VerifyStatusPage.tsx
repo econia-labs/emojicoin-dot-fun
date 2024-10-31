@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { standardizeAddress, truncateAddress } from "@sdk/utils";
 import { getVerificationStatus } from "./get-verification-status";
+import { EXTERNAL_LINK_PROPS } from "components/link";
 
 export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const { account } = useAptos();
@@ -60,6 +61,13 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
                 <div>Galxe: {galxe ? "✅" : "❌"}</div>
                 <div>Custom allowlist: {customAllowlisted ? "✅" : "❌"}</div>
                 <div>Not geoblocked: {geoblocked ? "✅" : "❌"}</div>
+                <a
+                  className="underline text-ec-blue"
+                  href="NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT"
+                  {...EXTERNAL_LINK_PROPS}
+                >
+                  Galxe Campaign
+                </a>
               </div>
             </ButtonWithConnectWalletFallback>
           </div>
