@@ -15,7 +15,8 @@ export default async function middleware(request: NextRequest) {
     pathname === "/webclip.png" ||
     pathname === "/icon.png" ||
     pathname === "/test" ||
-    pathname === "/geolocation"
+    pathname === "/geolocation" ||
+    pathname === "/verify_status"
   ) {
     return NextResponse.next();
   }
