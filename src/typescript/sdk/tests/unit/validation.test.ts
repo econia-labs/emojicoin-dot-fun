@@ -78,7 +78,7 @@ describe("validation utility functions", () => {
     ];
 
     givenAndExpected.forEach(([given, expected]) => {
-      expect(validation.numberOfDecimals(given)).toEqual(expected);
+      expect(validation.countDigitsAfterDecimal(given)).toEqual(expected);
     });
   });
 });
