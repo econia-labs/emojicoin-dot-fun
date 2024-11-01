@@ -330,7 +330,11 @@ export default function SwapComponent({
           {tooltip}
           <div className="text-dark-gray">
             <span className="text-xl leading-[0]">
-              {gasCost === null ? "~" : ""}{toDisplayCoinDecimals({ num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(), decimals: 4 })}
+              {gasCost === null ? "~" : ""}
+              {toDisplayCoinDecimals({
+                num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
+                decimals: 4,
+              })}
             </span>{" "}
             {emoji("fuel pump")}
           </div>
