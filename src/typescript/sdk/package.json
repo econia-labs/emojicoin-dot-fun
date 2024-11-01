@@ -66,10 +66,11 @@
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
-    "test": "pnpm run test:parallel && pnpm run test:sequential",
+    "test": "pnpm run test:parallel && pnpm run test:sequential && pnpm run test:unit",
+    "test:e2e": "pnpm run test:parallel && pnpm run test:sequential",
     "test:parallel": "pnpm jest --testPathIgnorePatterns=tests/e2e/broker",
     "test:sequential": "pnpm jest --runInBand tests/e2e/broker",
-    "unit-test": "pnpm jest tests/unit"
+    "test:unit": "pnpm jest tests/unit"
   },
   "typings": "dist/src/index.d.ts",
   "version": "0.0.1"
