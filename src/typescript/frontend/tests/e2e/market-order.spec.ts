@@ -4,20 +4,19 @@ import { getFundedAccount } from "../../../sdk/src/utils/test/test-accounts";
 import { ONE_APT_BIGINT, sleep, SYMBOL_EMOJI_DATA } from "../../../sdk/src";
 
 test("check sorting order", async ({ page }) => {
-  test.slow();
   const user = getFundedAccount("777");
   const rat = SYMBOL_EMOJI_DATA.byName("rat")!.emoji;
   const emojis = ["cat", "dog", "eagle", "sauropod"];
-  const markets = emojis.map(e => [rat, SYMBOL_EMOJI_DATA.byName(e)!.emoji])
+  const markets = emojis.map((e) => [rat, SYMBOL_EMOJI_DATA.byName(e)!.emoji]);
 
   const client = new EmojicoinClient();
 
   // Register markets.
   // They all start with rat to simplify the search.
   for (let i = 0; i < markets.length; i++) {
-    await client.register(user, markets[i]).then(res => res.handle);
-    const amount = 1n * ONE_APT_BIGINT / 100n * BigInt(10 ** (markets.length - i));
-    await client.buy(user, markets[i], amount).then(res => res.handle);
+    await client.register(user, markets[i]).then((res) => res.handle);
+    const amount = ((1n * ONE_APT_BIGINT) / 100n) * BigInt(10 ** (markets.length - i));
+    await client.buy(user, markets[i], amount).then((res) => res.handle);
   }
 
   await page.goto("/home");
@@ -52,15 +51,14 @@ test("check sorting order", async ({ page }) => {
   await filters.click();
 
   // Expect the sort by daily volume button to be visible.
-  const dailyVolume = page.locator('#emoji-grid-header').getByText('24h Volume');
+  const dailyVolume = page.locator("#emoji-grid-header").getByText("24h Volume");
   expect(dailyVolume).toBeVisible();
 
   // Sort by daily volume.
   await dailyVolume.click();
-  sleep(10000);
 
-  const names = emojis.map(e => `rat,${e}`);
-  const patterns = names.map(e => new RegExp(e));
+  const names = emojis.map((e) => `rat,${e}`);
+  const patterns = names.map((e) => new RegExp(e));
 
   // Expect the markets to be in order of daily volume.
   marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/, { exact: true });
@@ -70,13 +68,11 @@ test("check sorting order", async ({ page }) => {
   await filters.click();
 
   // Expect the sort by bump order button to be visible.
-  const bumpOrder = page.locator('#emoji-grid-header').getByText('Bump Order');
+  const bumpOrder = page.locator("#emoji-grid-header").getByText("Bump Order");
   expect(bumpOrder).toBeVisible();
 
   // Sort by bump order.
   await bumpOrder.click();
-
-  await sleep(10000);
 
   await page.screenshot();
 

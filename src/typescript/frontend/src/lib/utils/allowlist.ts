@@ -10,24 +10,19 @@ export const GALXE_URL = "https://graphigo.prd.galaxy.eco/query";
 // If IS_ALLOWLIST_ENABLED is not truthy, the function returns true.
 //
 // The address can be provided either as "0xabc" or directly "abc".
-export async function isAllowListed(address: string): Promise<boolean> {
+export async function isAllowListed(addressIn: string): Promise<boolean> {
   if (!IS_ALLOWLIST_ENABLED) {
     return true;
   }
 
-  if (!address.startsWith("0x")) {
-    address = `0x${address}`;
-  }
+  const address = addressIn.startsWith("0x")
+    ? (addressIn as `0x${string}`)
+    : (`0x${addressIn}` as const);
 
-  if (ALLOWLISTER3K_URL !== undefined) {
-    const condition = await fetch(`${ALLOWLISTER3K_URL}/${address}`)
-      .then((r) => r.text())
-      .then((data) => data === "true");
-    if (condition) {
-      return true;
-    }
-  }
+  return isInGalxeCampaign(address) || isOnCustomAllowlist(address);
+}
 
+export const isInGalxeCampaign = async (address: `0x${string}`): Promise<boolean> => {
   if (GALXE_CAMPAIGN_ID !== undefined) {
     const condition = await fetch(GALXE_URL, {
       method: "POST",
@@ -57,4 +52,17 @@ export async function isAllowListed(address: string): Promise<boolean> {
   }
 
   return false;
-}
+};
+
+export const isOnCustomAllowlist = async (address: `0x${string}`): Promise<boolean> => {
+  if (ALLOWLISTER3K_URL !== undefined) {
+    const condition = await fetch(`${ALLOWLISTER3K_URL}/${address}`)
+      .then((r) => r.text())
+      .then((data) => data === "true");
+    if (condition) {
+      return true;
+    }
+  }
+
+  return false;
+};

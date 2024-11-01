@@ -4,7 +4,7 @@ import React, { type PropsWithChildren, useEffect, useMemo, useState } from "rea
 import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
 import { Flex, Column, FlexGap } from "@containers";
-import { Text, Button } from "components";
+import { Text, Button, InputNumeric } from "components";
 import { StyledAddLiquidityWrapper } from "./styled";
 import { ProvideLiquidity, RemoveLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -41,15 +41,6 @@ const fmtCoin = (n: AnyNumberString | undefined) => {
   return new Intl.NumberFormat().format(Number(toCoinDecimalString(n, 8)));
 };
 
-const unfmtCoin = (n: AnyNumberString) => {
-  return BigInt(
-    toActualCoinDecimals({
-      num: typeof n === "bigint" ? n : Number(n),
-      decimals: 0,
-    })
-  );
-};
-
 const InnerWrapper = ({
   children,
   id,
@@ -82,18 +73,27 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
   const { theme } = useThemeContext();
 
   const searchParams = useSearchParams();
+
   const presetInputAmount =
     searchParams.get("add") !== null ? searchParams.get("add") : searchParams.get("remove");
   const presetInputAmountIsValid =
     presetInputAmount !== null &&
     presetInputAmount !== "" &&
     !Number.isNaN(Number(presetInputAmount));
-  const [liquidity, setLiquidity] = useState<number | "">(
-    searchParams.get("add") !== null && presetInputAmountIsValid ? Number(presetInputAmount) : ""
+
+  const [liquidity, setLiquidity] = useState<bigint>(
+    toActualCoinDecimals({
+      num: searchParams.get("add") !== null && presetInputAmountIsValid ? presetInputAmount! : "1",
+    })
   );
-  const [lp, setLP] = useState<number | "">(
-    searchParams.get("remove") !== null && presetInputAmountIsValid ? Number(presetInputAmount) : ""
+
+  const [lp, setLP] = useState<bigint>(
+    toActualCoinDecimals({
+      num:
+        searchParams.get("remove") !== null && presetInputAmountIsValid ? presetInputAmount! : "1",
+    })
   );
+
   const [direction, setDirection] = useState<"add" | "remove">(
     searchParams.get("remove") !== null ? "remove" : "add"
   );
@@ -113,21 +113,19 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
 
   const provideLiquidityResult = useSimulateProvideLiquidity({
     marketAddress: market?.market.marketAddress,
-    quoteAmount: unfmtCoin(liquidity ?? 0),
+    quoteAmount: liquidity ?? 0,
   });
 
   const { emojicoin } = market ? toCoinTypes(market?.market.marketAddress) : { emojicoin: "" };
 
   const removeLiquidityResult = useSimulateRemoveLiquidity({
     marketAddress: market?.market.marketAddress,
-    lpCoinAmount: unfmtCoin(lp ?? 0),
+    lpCoinAmount: lp ?? 0,
     typeTags: [emojicoin ?? ""],
   });
 
   const enoughApt =
-    direction === "add"
-      ? aptBalance !== undefined && aptBalance >= unfmtCoin(liquidity ?? 0)
-      : true;
+    direction === "add" ? aptBalance !== undefined && aptBalance >= (liquidity ?? 0) : true;
   const enoughEmoji =
     direction === "add"
       ? emojicoinBalance !== undefined &&
@@ -135,7 +133,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
       : true;
   const enoughEmojiLP =
     direction === "remove"
-      ? emojicoinLPBalance !== undefined && emojicoinLPBalance >= unfmtCoin(lp ?? 0)
+      ? emojicoinLPBalance !== undefined && emojicoinLPBalance >= (lp ?? 0)
       : true;
 
   useEffect(() => {
@@ -157,7 +155,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
 
   const isActionPossible =
     market !== undefined &&
-    (direction === "add" ? liquidity !== "" : lp !== "") &&
+    (direction === "add" ? liquidity !== 0n : lp !== 0n) &&
     enoughApt &&
     enoughEmoji &&
     enoughEmojiLP;
@@ -175,22 +173,20 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           <span className={enoughApt ? "text-green" : "text-error"}>{fmtCoin(aptBalance)}</span>
           {")"}
         </div>
-        <input
-          className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-          onChange={(e) => setLiquidity(e.target.value === "" ? "" : Number(e.target.value))}
-          style={{
-            color: direction === "remove" ? theme.colors.lightGray + "99" : "white",
-          }}
-          min={0}
-          step={0.01}
-          type={direction === "add" ? "number" : "text"}
-          disabled={direction === "remove"}
-          value={
-            direction === "add"
-              ? liquidity
-              : (fmtCoin(removeLiquidityResult?.quote_amount) ?? "...")
-          }
-        ></input>
+        {direction === "add" ? (
+          <InputNumeric
+            className={inputAndOutputStyles + " bg-transparent leading-[32px] text-white"}
+            onUserInput={(e) => setLiquidity(e)}
+            value={liquidity}
+            decimals={8}
+          />
+        ) : (
+          <input
+            className={inputAndOutputStyles + " bg-transparent leading-[32px] text-medium-gray"}
+            disabled={true}
+            value={fmtCoin(removeLiquidityResult?.quote_amount) ?? "..."}
+          />
+        )}
       </Column>
       <AptosInputLabel />
     </InnerWrapper>
@@ -217,7 +213,6 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
               ? (fmtCoin(provideLiquidityResult?.base_amount) ?? "...")
               : (fmtCoin(removeLiquidityResult?.base_amount) ?? "...")
           }
-          type="text"
           disabled
         ></input>
       </Column>
@@ -236,18 +231,20 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           </span>
           {")"}
         </div>
-        <input
-          className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-          style={{
-            color: direction === "add" ? theme.colors.lightGray + "99" : "white",
-          }}
-          value={
-            direction === "add" ? (fmtCoin(provideLiquidityResult?.lp_coin_amount) ?? "...") : lp
-          }
-          type={direction === "add" ? "text" : "number"}
-          onChange={(e) => setLP(e.target.value === "" ? "" : Number(e.target.value))}
-          disabled={direction === "add"}
-        ></input>
+        {direction === "add" ? (
+          <input
+            className={inputAndOutputStyles + " bg-transparent leading-[32px] text-medium-gray"}
+            value={fmtCoin(provideLiquidityResult?.lp_coin_amount) ?? "..."}
+            disabled={true}
+          />
+        ) : (
+          <InputNumeric
+            className={inputAndOutputStyles + " bg-transparent leading-[32px] text-white"}
+            onUserInput={(e) => setLP(e)}
+            value={lp}
+            decimals={8}
+          />
+        )}
       </Column>
       <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol} LP` : "- LP"} />
     </InnerWrapper>
@@ -318,7 +315,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                       aptosConfig: aptos.config,
                       provider: account.address,
                       marketAddress: market!.market.marketAddress,
-                      quoteAmount: unfmtCoin(liquidity ?? 0),
+                      quoteAmount: liquidity ?? 0,
                       typeTags: [emojicoin, emojicoinLP],
                       minLpCoinsOut: 1n,
                     });
@@ -328,7 +325,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
                       aptosConfig: aptos.config,
                       provider: account.address,
                       marketAddress: market!.market.marketAddress,
-                      lpCoinAmount: unfmtCoin(lp),
+                      lpCoinAmount: lp,
                       typeTags: [emojicoin, emojicoinLP],
                       minQuoteOut: 1n,
                     });
