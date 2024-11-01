@@ -20,7 +20,7 @@ parameters:
   EnableWafRulesWebSocket: 'false'
   Environment: 'production'
   Network: 'testnet'
-  ProcessorImageVersion: '0.8.1'
+  ProcessorImageVersion: '0.9.1'
   VpcStackName: 'emoji-production'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
