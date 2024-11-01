@@ -26,12 +26,8 @@ jobs:
       run: 'pnpm i'
     - name: 'Install Playwright Browsers'
       run: 'pnpm run playwright:install'
-    - name: 'Copy env file'
-      run: 'cp ci.env .env'
-    - name: 'Copy docker env file'
-      run: 'cp ../docker/example.local.env ../docker/.env'
     - name: 'Run Playwright tests'
-      run: 'pnpm run e2e:frontend'
+      run: 'pnpm run test:frontend'
     - if: 'always()'
       uses: 'actions/upload-artifact@v4'
       with:

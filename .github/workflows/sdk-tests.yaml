@@ -19,7 +19,21 @@ jobs:
       uses: 'aptos-labs/aptos-core/.github/actions/get-latest-cli@8792eefecd537c33fb879984635a0762838e2329'
       with:
         destination_directory: '/usr/local/bin'
-    - uses: './.github/actions/ts-run-tests'
+    - uses: 'actions/setup-node@v4'
+      with:
+        node-version-file: '${{ env.TS_DIR }}/.node-version'
+        registry-url: 'https://registry.npmjs.org'
+    - uses: 'pnpm/action-setup@v4'
+      with:
+        package_json_file: '${{ env.TS_DIR }}/package.json'
+    - name: 'Run pnpm i'
+      run: 'pnpm i'
+    - name: 'Run Playwright tests'
+      run: 'pnpm run test:sdk'
+    - if: 'failure()'
+      name: 'Print local testnet logs on failure'
+      run: 'cat ${{ runner.temp }}/local-testnet-logs.txt'
+      shell: 'bash'
 name: 'Run the SDK tests'
 'on':
   pull_request: null
