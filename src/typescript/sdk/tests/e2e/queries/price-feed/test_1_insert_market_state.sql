@@ -40,5 +40,5 @@ insert into market_latest_state_event values (
 
     0,                                  -- ##
     false,                              -- ##
-    500000000000000                     -- Volume in 1m state tracker
+    92233720368547758080000000000000    -- Volume in 1m state tracker
 )

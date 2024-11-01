@@ -32,7 +32,7 @@ insert into market_latest_state_event values (
     0,                                  -- ##
     0,                                  -- ##
     false,                              -- ##
-    4611686018427387904000,            -- Last swap average execution price
+    4611686018427387904000,             -- Last swap average execution price
     0,                                  -- ##
     0,                                  -- ##
     0,                                  -- ##
@@ -40,5 +40,5 @@ insert into market_latest_state_event values (
 
     0,                                  -- ##
     false,                              -- ##
-    400000000000000                     -- Volume in 1m state tracker
+    73786976294838206464000000000000    -- Volume in 1m state tracker
 )
