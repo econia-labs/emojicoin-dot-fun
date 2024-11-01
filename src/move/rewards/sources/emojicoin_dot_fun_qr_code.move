@@ -1,5 +1,5 @@
 // cspell:word funder
-module rewards::emojicoin_dot_fun_access_code {
+module rewards::emojicoin_dot_fun_qr_code {
 
     use aptos_framework::account::{Self, SignerCapability};
     use aptos_framework::aptos_account;
