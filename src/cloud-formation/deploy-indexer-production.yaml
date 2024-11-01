@@ -21,7 +21,7 @@ parameters:
   Environment: 'production'
   Network: 'testnet'
   ProcessorImageVersion: '0.9.1'
-  VpcStackName: 'emoji-production'
+  VpcStackName: 'emoji-vpc'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
 ...
