@@ -32,7 +32,8 @@ module rewards::emojicoin_dot_fun_access_code {
 
     struct Vault has key {
         signer_capability: SignerCapability,
-        /// Map from SHA3-256 hash of access code to address of claimant, `NIL` if unclaimed.
+        /// Map from public key of an Aptos Connect escrow account the to address of claimant,
+        /// `NIL` if unclaimed.
         manifest: SmartTable<vector<u8>, address>,
         /// Addresses of signers who can mutate the manifest.
         admins: vector<address>
@@ -109,7 +110,7 @@ module rewards::emojicoin_dot_fun_access_code {
 
     public entry fun redeem<Emojicoin, EmojicoinLP>(
         claimant: &signer,
-        access_code: vector<u8>,
+        claimant_address_bytes_signed_by_aptos_connect_escrow_account_private_key: vector<u8>,
         market_address: address,
         min_output_amount: u64
     ) acquires Vault {
