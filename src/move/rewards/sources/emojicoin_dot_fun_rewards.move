@@ -44,41 +44,27 @@ module rewards::emojicoin_dot_fun_rewards {
     const E_APT_REWARD_AMOUNTS_DECREASING: u64 = 4;
 
     /// Expected number of rewards disbursed per tier per `APT_NOMINAL_VOLUME`.
-    const NOMINAL_N_REWARDS_PER_TIER: vector<u64> = vector[
-        1_500,
-        500,
-        200,
-        50,
-        5,
-        1,
-    ];
+    const NOMINAL_N_REWARDS_PER_TIER: vector<u64> = vector[1_500, 500, 200, 50, 5, 1];
 
     /// Reward value in APT per reward per tier.
-    const APT_REWARD_AMOUNTS_PER_TIER: vector<u64> = vector[
-        1,
-        2,
-        5,
-        10,
-        100,
-        500,
-    ];
+    const APT_REWARD_AMOUNTS_PER_TIER: vector<u64> = vector[1, 2, 5, 10, 100, 500];
 
     struct RewardTier has drop, store {
         apt_amount_per_reward: u64,
         n_rewards_disbursed: u64,
         n_rewards_remaining: u64,
-        reward_probability_per_octa_of_swap_fees_paid_q64: u128,
+        reward_probability_per_octa_of_swap_fees_paid_q64: u128
     }
 
     struct Vault has key {
         signer_capability: SignerCapability,
-        reward_tiers: vector<RewardTier>,
+        reward_tiers: vector<RewardTier>
     }
 
     #[event]
     struct EmojicoinDotFunRewards has copy, drop, store {
         swap: Swap,
-        octas_reward_amount: u64,
+        octas_reward_amount: u64
     }
 
     #[randomness]
@@ -87,22 +73,22 @@ module rewards::emojicoin_dot_fun_rewards {
         market_address: address,
         input_amount: u64,
         is_sell: bool,
-        min_output_amount: u64,
+        min_output_amount: u64
     ) acquires Vault {
 
         // Simulate swap to get integrator fee, then execute swap.
         let swapper_address = signer::address_of(swapper);
-        let swap = emojicoin_dot_fun::simulate_swap<Emojicoin, EmojicoinLP>(
-            swapper_address,
-            market_address,
-            input_amount,
-            is_sell,
-            @integrator,
-            INTEGRATOR_FEE_RATE_BPS,
-        );
-        let (
-             _, _, _, _, _, _, _, _, _, _, _, _, integrator_fee_in_octas, _, _, _, _, _,
-        ) = emojicoin_dot_fun::unpack_swap(swap);
+        let swap =
+            emojicoin_dot_fun::simulate_swap<Emojicoin, EmojicoinLP>(
+                swapper_address,
+                market_address,
+                input_amount,
+                is_sell,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS
+            );
+        let (_, _, _, _, _, _, _, _, _, _, _, _, integrator_fee_in_octas, _, _, _, _, _) =
+            emojicoin_dot_fun::unpack_swap(swap);
         emojicoin_dot_fun::swap<Emojicoin, EmojicoinLP>(
             swapper,
             market_address,
@@ -110,7 +96,7 @@ module rewards::emojicoin_dot_fun_rewards {
             is_sell,
             @integrator,
             INTEGRATOR_FEE_RATE_BPS,
-            min_output_amount,
+            min_output_amount
         );
 
         // Get vault balance, returning early if empty.
@@ -138,7 +124,8 @@ module rewards::emojicoin_dot_fun_rewards {
             // `probability_per_octa_q64` is less than 1 in nominal probability, hence less than
             // `MAX_U64` when represented as a Q64-style `u128`. Since `integrator_fee_in_octas` is
             // also significantly less than `MAX_U64`, the product is less than `MAX_U128`.
-            let reward_threshold_q64 = probability_per_octa_q64 * (integrator_fee_in_octas as u128);
+            let reward_threshold_q64 =
+                probability_per_octa_q64 * (integrator_fee_in_octas as u128);
 
             // Check if user is eligible for reward at current tier by checking if tier still has
             // rewards remaining, then compare random number to probability threshold. Since the
@@ -154,37 +141,46 @@ module rewards::emojicoin_dot_fun_rewards {
         // disbursement effectively requires an additional GOTO statement (`BrFalse`) in bytecode
         // for the false branch.
         if (!option::is_none(&highest_winning_tier_index)) {
-            let highest_winning_tier_index = option::destroy_some(highest_winning_tier_index);
-            let tier_ref_mut = vector::borrow_mut(tiers_ref_mut, highest_winning_tier_index);
+            let highest_winning_tier_index =
+                option::destroy_some(highest_winning_tier_index);
+            let tier_ref_mut = vector::borrow_mut(
+                tiers_ref_mut, highest_winning_tier_index
+            );
             tier_ref_mut.n_rewards_remaining = tier_ref_mut.n_rewards_remaining - 1;
             tier_ref_mut.n_rewards_disbursed = tier_ref_mut.n_rewards_disbursed + 1;
-            let octas_reward_amount = tier_ref_mut.apt_amount_per_reward * OCTAS_PER_APT;
-            let vault_signer = account::create_signer_with_capability(vault_signer_cap_ref);
-            event::emit(EmojicoinDotFunRewards{ swap, octas_reward_amount });
+            let octas_reward_amount = tier_ref_mut.apt_amount_per_reward
+                * OCTAS_PER_APT;
+            let vault_signer =
+                account::create_signer_with_capability(vault_signer_cap_ref);
+            event::emit(EmojicoinDotFunRewards { swap, octas_reward_amount });
             aptos_account::transfer(&vault_signer, swapper_address, octas_reward_amount);
         }
     }
 
     /// To fund 10 rewards in the first tier and 5 rewards in the second tier, pass
     /// `n_rewards_to_fund_per_tier` as `vector[10, 5, ...]`.
-    public entry fun fund_tiers(funder: &signer, n_rewards_to_fund_per_tier: vector<u64>)
-        acquires Vault
-    {
+    public entry fun fund_tiers(
+        funder: &signer, n_rewards_to_fund_per_tier: vector<u64>
+    ) acquires Vault {
         // Check tiers.
         let vault_ref_mut = borrow_global_mut<Vault>(@rewards);
         let n_tiers = vector::length(&NOMINAL_N_REWARDS_PER_TIER);
         let tiers_ref_mut = &mut vault_ref_mut.reward_tiers;
-        assert!(vector::length(&n_rewards_to_fund_per_tier) == n_tiers, E_N_TIERS_MISMATCH);
+        assert!(
+            vector::length(&n_rewards_to_fund_per_tier) == n_tiers, E_N_TIERS_MISMATCH
+        );
 
         // Calculate total amount to fund, updating remaining rewards for each tier.
         let octas_to_fund = 0;
-        for (i in 0..n_tiers)  {
+        for (i in 0..n_tiers) {
             let tier_ref_mut = vector::borrow_mut(tiers_ref_mut, i);
-            let n_rewards_to_fund_this_tier = *vector::borrow(&n_rewards_to_fund_per_tier, i);
-            octas_to_fund = octas_to_fund +
-                n_rewards_to_fund_this_tier * tier_ref_mut.apt_amount_per_reward * OCTAS_PER_APT;
-            tier_ref_mut.n_rewards_remaining =
-                tier_ref_mut.n_rewards_remaining + n_rewards_to_fund_this_tier;
+            let n_rewards_to_fund_this_tier =
+                *vector::borrow(&n_rewards_to_fund_per_tier, i);
+            octas_to_fund = octas_to_fund
+                + n_rewards_to_fund_this_tier * tier_ref_mut.apt_amount_per_reward
+                    * OCTAS_PER_APT;
+            tier_ref_mut.n_rewards_remaining = tier_ref_mut.n_rewards_remaining
+                + n_rewards_to_fund_this_tier;
         };
 
         // Transfer rewards to vault.
@@ -194,35 +190,43 @@ module rewards::emojicoin_dot_fun_rewards {
     }
 
     fun init_module(rewards: &signer) {
-        let (vault_signer, signer_capability) = account::create_resource_account(rewards, VAULT);
-        move_to(rewards, Vault {
-            signer_capability,
-            reward_tiers: reward_tiers(),
-        });
+        let (vault_signer, signer_capability) =
+            account::create_resource_account(rewards, VAULT);
+        move_to(
+            rewards,
+            Vault { signer_capability, reward_tiers: reward_tiers() }
+        );
         coin::register<AptosCoin>(&vault_signer);
     }
 
     fun reward_tiers(): vector<RewardTier> {
         // Check tier count.
         let n_tiers = vector::length(&NOMINAL_N_REWARDS_PER_TIER);
-        assert!(vector::length(&APT_REWARD_AMOUNTS_PER_TIER) == n_tiers, E_N_TIERS_MISMATCH);
+        assert!(
+            vector::length(&APT_REWARD_AMOUNTS_PER_TIER) == n_tiers, E_N_TIERS_MISMATCH
+        );
 
         // Check number of rewards, and reward amount in APT: total, and for each tier.
         let n_rewards_total = 0;
         let apt_total_reward_amount = 0;
         let n_rewards_per_tier_last = *vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, 0);
-        let apt_reward_amount_last_tier = *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, 0);
-        for (i in 0..n_tiers)  {
+        let apt_reward_amount_last_tier = *vector::borrow(
+            &APT_REWARD_AMOUNTS_PER_TIER, 0
+        );
+        for (i in 0..n_tiers) {
             let n_rewards_this_tier = *vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i);
-            assert!(n_rewards_this_tier <= n_rewards_per_tier_last, E_N_REWARDS_INCREASING);
+            assert!(
+                n_rewards_this_tier <= n_rewards_per_tier_last, E_N_REWARDS_INCREASING
+            );
             n_rewards_total = n_rewards_total + n_rewards_this_tier;
-            let apt_reward_amount_this_tier = *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i);
+            let apt_reward_amount_this_tier =
+                *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i);
             assert!(
                 apt_reward_amount_this_tier >= apt_reward_amount_last_tier,
                 E_APT_REWARD_AMOUNTS_DECREASING
             );
-            apt_total_reward_amount = apt_total_reward_amount +
-                apt_reward_amount_this_tier * n_rewards_this_tier;
+            apt_total_reward_amount = apt_total_reward_amount
+                + apt_reward_amount_this_tier * n_rewards_this_tier;
             n_rewards_per_tier_last = n_rewards_this_tier;
             apt_reward_amount_last_tier = apt_reward_amount_this_tier;
         };
@@ -230,35 +234,42 @@ module rewards::emojicoin_dot_fun_rewards {
 
         // Check expected value of rewards against nominal fees paid.
         let octas_nominal_volume = APT_NOMINAL_VOLUME * OCTAS_PER_APT;
-        let octas_nominal_fees = (
+        let octas_nominal_fees =
             (
-                (octas_nominal_volume as u128) * (INTEGRATOR_FEE_RATE_BPS as u128) /
-                (BASIS_POINTS_PER_UNIT as u128)
-            ) as u64
-        );
+                ((octas_nominal_volume as u128) * (INTEGRATOR_FEE_RATE_BPS as u128)
+                    / (BASIS_POINTS_PER_UNIT as u128)) as u64
+            );
         let octas_total_reward_amount = apt_total_reward_amount * OCTAS_PER_APT;
         assert!(octas_total_reward_amount <= octas_nominal_fees, E_EXPECTED_VALUE);
 
         // Construct tiers.
         let reward_tiers = vector[];
         for (i in 0..n_tiers) {
-            vector::push_back(&mut reward_tiers, RewardTier {
-                apt_amount_per_reward: *vector::borrow(&APT_REWARD_AMOUNTS_PER_TIER, i),
-                n_rewards_disbursed: 0,
-                n_rewards_remaining: 0,
-                // Once `octas_nominal_fees` have been paid, `NOMINAL_N_REWARDS_PER_TIER[i]` rewards
-                // will have been disbursed, so the probability of winning a reward for an octa of
-                // fees paid is the ratio of the number of rewards in this tier to the total number
-                // of nominal fees paid after all rewards for this tier have been disbursed.
-                reward_probability_per_octa_of_swap_fees_paid_q64:
-                    (
-                        ((*vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i) as u128) << SHIFT_Q64) /
-                        (octas_nominal_fees as u128)
+            vector::push_back(
+                &mut reward_tiers,
+                RewardTier {
+                    apt_amount_per_reward: *vector::borrow(
+                        &APT_REWARD_AMOUNTS_PER_TIER, i
+                    ),
+                    n_rewards_disbursed: 0,
+                    n_rewards_remaining: 0,
+                    // Once `octas_nominal_fees` have been paid, `NOMINAL_N_REWARDS_PER_TIER[i]`
+                    // rewards will have been disbursed, so the probability of winning a reward for
+                    // an octa of fees paid is the ratio of the number of rewards in this tier to
+                    // the total number of nominal fees paid after all rewards for this tier have
+                    // been disbursed.
+                    reward_probability_per_octa_of_swap_fees_paid_q64: (
+                        ((*vector::borrow(&NOMINAL_N_REWARDS_PER_TIER, i) as u128)
+                            << SHIFT_Q64) / (octas_nominal_fees as u128)
                     )
-            });
+                }
+            );
         };
         reward_tiers
     }
 
-    #[test] fun test_reward_tiers() { reward_tiers(); }
+    #[test]
+    fun test_reward_tiers() {
+        reward_tiers();
+    }
 }
