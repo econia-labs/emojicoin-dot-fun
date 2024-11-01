@@ -10,7 +10,7 @@ module rewards::emojicoin_dot_fun_qr_code {
     use aptos_std::simple_map::SimpleMap;
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
-    use std::option::Option;
+    use std::option::{Self, Option};
     use std::signer;
     use std::hash;
 
@@ -29,6 +29,8 @@ module rewards::emojicoin_dot_fun_qr_code {
     const E_QR_CODE_ALREADY_REDEEMED: u64 = 3;
     /// Vault has insufficient funds.
     const E_VAULT_INSUFFICIENT_FUNDS: u64 = 4;
+    /// Public key does not pass Ed25519 validation.
+    const E_INVALID_PUBLIC_KEY: u64 = 5;
 
     struct Vault has key {
         signer_capability: SignerCapability,
@@ -39,7 +41,7 @@ module rewards::emojicoin_dot_fun_qr_code {
     }
 
     #[event]
-    struct EmojicoinDotFunAccessCodeRedemption has copy, drop, store {
+    struct EmojicoinDotFunQRcodeRedemption has copy, drop, store {
         claimant: address,
         octas_claim_amount: u64,
         swap: Swap
@@ -86,15 +88,19 @@ module rewards::emojicoin_dot_fun_qr_code {
             )
         }
 
-        public entry fun add_access_code_hashes(
-            admin: &signer, access_code_hashes: vector<vector<u8>>
-        ) acquires Vault {
-            let manifest_ref_mut = &mut borrow_vault_mut_checked(admin).manifest;
-            access_code_hashes.for_each(|access_code_hash| {
-                manifest_ref_mut.add(access_code_hash, NIL);
-            });
-        }
     */
+
+    public entry fun add_public_keys(
+        admin: &signer, public_keys: vector<vector<u8>>
+    ) acquires Vault {
+        let manifest_ref_mut = &mut borrow_vault_mut_checked(admin).manifest;
+        public_keys.for_each(|public_key_bytes| {
+            let validated_public_key_option =
+                ed25519::new_validated_public_key_from_bytes(public_key_bytes);
+            assert!(option::is_some(&validated_public_key_option), E_INVALID_PUBLIC_KEY);
+            manifest_ref_mut.add(option::destroy_some(validated_public_key_option), NIL);
+        });
+    }
 
     public entry fun add_admin(admin: &signer, new_admin: address) acquires Vault {
         let admins_ref_mut = &mut borrow_vault_mut_checked(admin).admins;
@@ -192,24 +198,19 @@ module rewards::emojicoin_dot_fun_qr_code {
         admins_ref_mut.remove(admin_to_remove_index);
     }
 
-    /*
-
-
-        fun init_module(rewards: &signer) {
-            let (vault_signer, signer_capability) =
-                account::create_resource_account(rewards, VAULT);
-            move_to(
-                rewards,
-                Vault {
-                    signer_capability,
-                    manifest: smart_table::new(),
-                    admins: vector[signer::address_of(rewards)]
-                }
-            );
-            coin::register<AptosCoin>(&vault_signer);
-        }
-
-    */
+    fun init_module(rewards: &signer) {
+        let (vault_signer, signer_capability) =
+            account::create_resource_account(rewards, VAULT);
+        move_to(
+            rewards,
+            Vault {
+                signer_capability,
+                manifest: smart_table::new(),
+                admins: vector[signer::address_of(rewards)]
+            }
+        );
+        coin::register<AptosCoin>(&vault_signer);
+    }
 
     inline fun borrow_vault_mut_checked(admin: &signer): &mut Vault {
         let vault_ref_mut = &mut Vault[@rewards];
