@@ -1,3 +1,4 @@
+// cspell:word funder
 module rewards::emojicoin_dot_fun_access_code {
 
     use aptos_framework::account::{Self, SignerCapability};
@@ -31,7 +32,7 @@ module rewards::emojicoin_dot_fun_access_code {
 
     struct Vault has key {
         signer_capability: SignerCapability,
-        /// Map from SHA3-256 hash of access code to address of claimaint, `NIL` if unclaimed.
+        /// Map from SHA3-256 hash of access code to address of claimant, `NIL` if unclaimed.
         manifest: SmartTable<vector<u8>, address>,
         /// Addresses of signers who can mutate the manifest.
         admins: vector<address>
@@ -132,7 +133,7 @@ module rewards::emojicoin_dot_fun_access_code {
             E_VAULT_INSUFFICIENT_FUNDS
         );
 
-        // Update manifest, transfer APT to claimaint.
+        // Update manifest, transfer APT to claimant.
         let claimant_address = signer::address_of(claimant);
         *manifest_ref_mut.borrow_mut(access_code_hash) = claimant_address;
         let vault_signer = account::create_signer_with_capability(vault_signer_cap_ref);
