@@ -4,9 +4,6 @@ import { headers } from "next/headers";
 import { type Metadata } from "next";
 import { emoji } from "utils";
 
-export const revalidate = 1;
-export const fetchCache = "default-cache";
-
 export const metadata: Metadata = {
   title: "launch",
   description: `Launch your own emojicoins using emojicoin.fun ${emoji("party popper")}`,

@@ -7,9 +7,6 @@ import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { type Metadata } from "next";
 import { emoji } from "utils";
 
-export const revalidate = 1;
-export const fetchCache = "default-cache";
-
 export const metadata: Metadata = {
   title: "pools",
   description: `Provide ${emoji("water wave")}liquidity${emoji("water wave")} and earn APR using your emojis !`,

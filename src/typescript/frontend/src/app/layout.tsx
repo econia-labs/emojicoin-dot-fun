@@ -14,6 +14,8 @@ import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
 import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 
+export const revalidate = 10;
+
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
   themeColor: "#000000",
