@@ -25,15 +25,12 @@ To avoid having to define environment variables in multiple places, we've
 intentionally omitted environment variables from the `frontend` directory to
 enforce that the project be built and run in a certain order.
 
-## Copy the `example.env` file to an `.env` or `.env.local` file
+## Copy the `example.env` file to a `.env` file
 
 Most commands load `.env.local` first then `.env`, so copy the environment
 example file to your own file.
 
 ```shell
-# With the highest precedence.
-cp example.env .env.local
-# or just `.env.`, which will be superseded by `.env.local` in loading order
 cp example.env .env
 ```
 
