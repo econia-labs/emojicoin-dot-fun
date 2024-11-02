@@ -587,7 +587,7 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
 const q64ToBigInt = (n: string) => BigInt(Big(n).div(Big(2).pow(64)).toFixed(0));
 
 export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => ({
-  marketID: data.market_id,
+  marketID: BigInt(data.market_id),
   symbolBytes: data.symbol_bytes,
   symbolEmojis: data.symbol_emojis,
   marketAddress: data.market_address,
