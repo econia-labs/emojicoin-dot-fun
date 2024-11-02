@@ -295,7 +295,8 @@ module rewards::emojicoin_dot_fun_claim_link {
         emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
             @rewards, DEFAULT_CLAIM_AMOUNT
         );
-        fund_vault(&rewards_signer, 1);
+        let n_redemptions = 1;
+        fund_vault(&rewards_signer, n_redemptions);
 
         // Get expected proceeds from swap.
         let swap_event =
