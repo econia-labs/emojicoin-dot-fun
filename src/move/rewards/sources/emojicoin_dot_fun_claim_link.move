@@ -264,16 +264,72 @@ module rewards::emojicoin_dot_fun_claim_link {
     }
 
     #[test_only]
-    use black_heart_market::coin_factory::{
-        Emojicoin as BlackHeartEmojicoin,
-        EmojicoinLP as BlackHeartEmojicoinLP
+    use aptos_framework::account::{create_signer_for_test as get_signer};
+    #[test_only]
+    use black_cat_market::coin_factory::{
+        Emojicoin as BlackCatEmojicoin,
+        EmojicoinLP as BlackCatEmojicoinLP
     };
 
+    #[test_only]
+    const CLAIMANT: address = @0x1111;
+
     #[test]
-    fun test_core_flow() {
+    fun test_general_flow() acquires Vault {
         // Initialize black cat market, have it undergo state transition.
         emojicoin_dot_fun::tests::init_package_then_exact_transition();
 
         // Get claim link private, public keys.
+        let (claim_link_private_key, claim_link_validated_public_key) =
+            ed25519::generate_keys();
+        let claim_link_validated_public_key_bytes =
+            ed25519::validated_public_key_to_bytes(&claim_link_validated_public_key);
+
+        // Initialize module, manifest, vault.
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        add_public_keys(
+            &rewards_signer,
+            vector[claim_link_validated_public_key_bytes]
+        );
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, DEFAULT_CLAIM_AMOUNT
+        );
+        fund_vault(&rewards_signer, 1);
+
+        // Get expected proceeds from swap.
+        let swap_event =
+            emojicoin_dot_fun::simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+                CLAIMANT,
+                @black_cat_market,
+                DEFAULT_CLAIM_AMOUNT,
+                false,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS
+            );
+        let (_, _, _, _, _, _, _, _, net_proceeds, _, _, _, _, _, _, _, _, _) =
+            emojicoin_dot_fun::unpack_swap(swap_event);
+        assert!(net_proceeds > 0);
+
+        // Redeem a claim link.
+        redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(CLAIMANT),
+            ed25519::signature_to_bytes(
+                &ed25519::sign_arbitrary_bytes(
+                    &claim_link_private_key, bcs::to_bytes(&CLAIMANT)
+                )
+            ),
+            claim_link_validated_public_key_bytes,
+            @black_cat_market,
+            1
+        );
+
+        // Verify claimaint's emojicoin balance.
+        assert!(coin::balance<BlackCatEmojicoin>(CLAIMANT) == net_proceeds);
+
+        // Check vault balance, manifest.
+        assert!(vault_balance() == 0);
+        assert!(public_key_claimant(claim_link_validated_public_key_bytes) == CLAIMANT);
+
     }
 }
