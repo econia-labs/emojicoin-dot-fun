@@ -97,7 +97,7 @@
     "format:check": "pnpm _format --check",
     "lint": "eslint --max-warnings=0 -c .eslintrc.js --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "pnpm run lint --fix",
-    "playwright:install": "playwright install --with-deps",
+    "playwright:install": "playwright install",
     "start": "next start --port 3001",
     "submodule": "./submodule.sh",
     "test": "pnpm run test:e2e",
