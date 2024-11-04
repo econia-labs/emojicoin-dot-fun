@@ -3,7 +3,7 @@ import { EmojicoinClient } from "../../../sdk/src/client/emojicoin-client";
 import { getFundedAccount } from "../../../sdk/src/utils/test/test-accounts";
 import { ONE_APT_BIGINT, sleep, SYMBOL_EMOJI_DATA } from "../../../sdk/src";
 
-test.skip("check sorting order", async ({ page }) => {
+test("check sorting order", async ({ page }) => {
   const user = getFundedAccount("777");
   const rat = SYMBOL_EMOJI_DATA.byName("rat")!.emoji;
   const emojis = ["cat", "dog", "eagle", "sauropod"];
@@ -73,12 +73,15 @@ test.skip("check sorting order", async ({ page }) => {
   await bumpOrder.waitFor({ state: "visible", timeout: 5000 });
   expect(bumpOrder).toBeVisible();
 
+  await page.screenshot({ path: "screenshots/test-failure.png" });
+
   // Sort by bump order.
   await bumpOrder.click();
 
   // Expect the markets to be in bump order.
   marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/);
   await marketGridItems.first().waitFor({ state: "visible", timeout: 5000 });
+  await page.screenshot({ path: "screenshots/test-failure-2.png" });
   expect(marketGridItems.first()).toBeVisible();
   expect(marketGridItems).toHaveText(patterns.reverse());
 });
