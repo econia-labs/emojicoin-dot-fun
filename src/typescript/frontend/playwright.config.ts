@@ -28,6 +28,7 @@ export default defineConfig({
         ...process.env,
         NODE_OPTIONS: `${process.env.NODE_OPTIONS || ""} --conditions=react-server`,
       },
+      slowMo: 0, // Change this to 1000-3000 to slow the test down and see what's going on.
     },
   },
 
@@ -47,7 +48,6 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup"],
     },
-
     {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },

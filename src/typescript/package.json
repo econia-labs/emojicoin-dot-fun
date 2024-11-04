@@ -27,7 +27,7 @@
     "dev:debug-verbose": "FETCH_DEBUG_VERBOSE=true pnpm load-env -- pnpm run dev",
     "docker:prune": "../docker/utils/prune.sh --reset-localnet --yes",
     "docker:restart": "pnpm run docker:prune && pnpm run docker:up",
-    "docker:up": "docker compose -f ../docker/compose.local.yaml --env-file ../docker/compose.local.yaml up -d",
+    "docker:up": "docker compose -f ../docker/compose.local.yaml --env-file ../docker/example.local.env up -d",
     "format": "turbo run format -- --write",
     "format:check": "turbo run format -- --check",
     "lint": "turbo run lint",
