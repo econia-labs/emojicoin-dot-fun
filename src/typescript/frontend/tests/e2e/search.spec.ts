@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { EmojicoinClient } from "../../../sdk/src/client/emojicoin-client";
 import { getFundedAccount } from "../../../sdk/src/utils/test/test-accounts";
-import { sleep, SYMBOL_EMOJI_DATA } from "../../../sdk/src";
+import { SYMBOL_EMOJI_DATA } from "../../../sdk/src";
 
 test("check search results", async ({ page }) => {
   const user = getFundedAccount("666");
@@ -28,15 +28,12 @@ test("check search results", async ({ page }) => {
   await emojiSearch.fill("cat");
 
   // Expect the "cat" emoji to be visible in the search results.
-  let emojiSearchCatButton = picker.getByLabel(cat).first();
+  // Note: we must use `getByRole` with 'button' because this element is in the picker shadow DOM.
+  let emojiSearchCatButton = picker.getByRole('button', { name: cat, exact: true });
   expect(emojiSearchCatButton).toBeVisible();
 
-  // Search for the cat,cat market.
-  await emojiSearchCatButton.click({ force: true });
-
-  emojiSearchCatButton = picker.getByLabel(cat).first();
-  expect(emojiSearchCatButton).toBeVisible();
-  await emojiSearchCatButton.click({ force: true });
+  // Search for the cat,cat market by clicking twice.
+  await emojiSearchCatButton.click({ force: true, clickCount: 2 });
 
   // Click on the cat,cat market.
   const marketCard = page.getByText("cat,cat", { exact: true });

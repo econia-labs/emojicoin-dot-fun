@@ -52,6 +52,7 @@ test("check sorting order", async ({ page }) => {
 
   // Expect the sort by daily volume button to be visible.
   const dailyVolume = page.locator("#emoji-grid-header").getByText("24h Volume");
+  await dailyVolume.waitFor({ state: "visible", timeout: 5000 });
   expect(dailyVolume).toBeVisible();
 
   // Sort by daily volume.
@@ -69,16 +70,13 @@ test("check sorting order", async ({ page }) => {
 
   // Expect the sort by bump order button to be visible.
   const bumpOrder = page.locator("#emoji-grid-header").getByText("Bump Order");
+  await bumpOrder.waitFor({ state: "visible", timeout: 5000 });
   expect(bumpOrder).toBeVisible();
 
   // Sort by bump order.
   await bumpOrder.click();
 
-  await page.screenshot();
-
   // Expect the markets to be in bump order.
   marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/, { exact: true });
   expect(marketGridItems).toHaveText(patterns.reverse());
-
-  await page.screenshot();
 });
