@@ -75,7 +75,7 @@ test("check sorting order", async ({ page }) => {
 
   // Sort by bump order.
   await bumpOrder.click();
-  await sleep(1000);
+  await sleep(5000);
 
   // Expect the markets to be in bump order.
   marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/i, { exact: true });
