@@ -78,8 +78,7 @@ test("check sorting order", async ({ page }) => {
 
   // Expect the markets to be in bump order.
   marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/, { exact: true });
-  await marketGridItems.waitFor({ state: "visible" });
-  const texts = await marketGridItems.allTextContents();
-  console.log("Found texts:", texts);
+  await marketGridItems.waitFor({ state: "visible", timeout: 5000 });
+  expect(marketGridItems).toBeVisible();
   expect(marketGridItems).toHaveText(patterns.reverse());
 });
