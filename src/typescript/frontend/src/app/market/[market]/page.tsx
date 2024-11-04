@@ -9,6 +9,8 @@ import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/ma
 import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
 import { type Metadata } from "next";
 
+export const revalidate = 2;
+
 /**
  * Our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
  * That is, if you paste the emoji 💅🏾 into the URL, it becomes %F0%9F%92%85%F0%9F%8F%BE.

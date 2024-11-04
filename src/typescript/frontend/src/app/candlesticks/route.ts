@@ -34,10 +34,10 @@ const getCandlesticks = async (params: QueryParams) => {
     }
   }
 
-  return aggregate;
+  return stringifyJSON(aggregate);
 };
 
-const getCachedCandlesticks = unstable_cache(getCandlesticks, ["candlesticks"], { revalidate: 1 });
+const getCachedCandlesticks = unstable_cache(getCandlesticks, ["candlesticks"], { revalidate: 10 });
 
 /* eslint-disable-next-line import/no-unused-modules */
 export async function GET(request: NextRequest) {
@@ -76,5 +76,5 @@ export async function GET(request: NextRequest) {
 
   const data = await getCachedCandlesticks({ marketID, start, period, limit });
 
-  return new Response(stringifyJSON(data));
+  return new Response(data);
 }
