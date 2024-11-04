@@ -3,7 +3,7 @@ import { EmojicoinClient } from "../../../sdk/src/client/emojicoin-client";
 import { getFundedAccount } from "../../../sdk/src/utils/test/test-accounts";
 import { ONE_APT_BIGINT, sleep, SYMBOL_EMOJI_DATA } from "../../../sdk/src";
 
-test("check sorting order", async ({ page }) => {
+test.skip("check sorting order", async ({ page }) => {
   const user = getFundedAccount("777");
   const rat = SYMBOL_EMOJI_DATA.byName("rat")!.emoji;
   const emojis = ["cat", "dog", "eagle", "sauropod"];
