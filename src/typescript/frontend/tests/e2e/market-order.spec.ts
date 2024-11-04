@@ -75,9 +75,9 @@ test("check sorting order", async ({ page }) => {
 
   // Sort by bump order.
   await bumpOrder.click();
+  await sleep(2000);
 
   // Expect the markets to be in bump order.
   marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/, { exact: true });
-  await sleep(2000);
   expect(marketGridItems).toHaveText(patterns.reverse());
 });
