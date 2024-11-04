@@ -20,9 +20,15 @@ jobs:
       name: 'Clone submodule'
       run: 'pnpm run submodule'
     - name: 'Install Playwright Browsers'
-      run: 'pnpm run playwright:install'
+      run: 'pnpm run playwright:install --with-deps firefox'
     - name: 'Run Playwright tests'
       run: 'pnpm run test:frontend'
+    - if: 'failure()'
+      name: 'Upload screenshots as artifacts'
+      uses: 'actions/upload-artifact@v3'
+      with:
+        name: 'playwright-screenshots'
+        path: 'screenshots/'
     timeout-minutes: 15
 name: 'Run the frontend tests'
 "on":
