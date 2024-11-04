@@ -29,7 +29,7 @@ test("check search results", async ({ page }) => {
 
   // Expect the "cat" emoji to be visible in the search results.
   // Note: we must use `getByRole` with 'button' because this element is in the picker shadow DOM.
-  let emojiSearchCatButton = picker.getByRole('button', { name: cat, exact: true });
+  let emojiSearchCatButton = picker.getByRole("button", { name: cat, exact: true });
   expect(emojiSearchCatButton).toBeVisible();
 
   // Search for the cat,cat market by clicking twice.
