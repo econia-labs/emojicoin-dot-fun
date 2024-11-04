@@ -1,9 +1,6 @@
 ---
 jobs:
   playwright-tests:
-    container:
-      image: 'mcr.microsoft.com/playwright:v1.48.1-jammy'
-      options: '--user 1001'
     defaults:
       run:
         working-directory: 'src/typescript'
