@@ -62,7 +62,7 @@ test("check sorting order", async ({ page }) => {
   const patterns = names.map((e) => new RegExp(e));
 
   // Expect the markets to be in order of daily volume.
-  marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/, { exact: true });
+  marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/);
   expect(marketGridItems).toHaveText(patterns);
 
   // Click the sorting button.
@@ -77,8 +77,8 @@ test("check sorting order", async ({ page }) => {
   await bumpOrder.click();
 
   // Expect the markets to be in bump order.
-  marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/, { exact: true });
-  await marketGridItems.waitFor({ state: "visible", timeout: 5000 });
-  expect(marketGridItems).toBeVisible();
+  marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/);
+  await marketGridItems.first().waitFor({ state: "visible", timeout: 5000 });
+  expect(marketGridItems.first()).toBeVisible();
   expect(marketGridItems).toHaveText(patterns.reverse());
 });
