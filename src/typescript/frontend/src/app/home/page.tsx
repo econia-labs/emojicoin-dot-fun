@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import {
   fetchFeaturedMarket,
   fetchMarkets,
+  fetchMarketsWithCount,
   fetchNumRegisteredMarkets,
   fetchPriceFeed,
 } from "@/queries/home";
@@ -19,15 +20,32 @@ export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
-  const numRegisteredMarkets = await fetchNumRegisteredMarkets();
   const featured = await fetchFeaturedMarket();
-  const markets = await fetchMarkets({
-    page,
-    sortBy,
-    orderBy,
-    searchEmojis,
-    pageSize: MARKETS_PER_PAGE,
-  });
+  let numMarkets: number;
+  let markets: Awaited<ReturnType<typeof fetchMarketsWithCount>>['rows'];
+
+  if (searchEmojis?.length) {
+    const res = await fetchMarketsWithCount({
+      page,
+      sortBy,
+      orderBy,
+      searchEmojis,
+      pageSize: MARKETS_PER_PAGE,
+      count: true,
+    });
+    numMarkets = res.count!;
+    markets = res.rows;
+  } else {
+    numMarkets = await fetchNumRegisteredMarkets();
+    markets = await fetchMarkets({
+      page,
+      sortBy,
+      orderBy,
+      searchEmojis,
+      pageSize: MARKETS_PER_PAGE,
+    });
+  }
+
   const priceFeed = await fetchPriceFeed({});
 
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
@@ -35,7 +53,7 @@ export default async function Home({ searchParams }: HomePageParams) {
     <HomePageComponent
       featured={featured}
       markets={markets}
-      numRegisteredMarkets={numRegisteredMarkets}
+      numMarkets={numMarkets}
       page={page}
       sortBy={sortBy}
       searchBytes={q}

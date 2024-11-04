@@ -42,7 +42,7 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const { markets, page, sort, pages, searchBytes } = useMemo(() => {
     const { markets, page, sortBy: sort } = props;
-    const numMarkets = Math.max(props.numRegisteredMarkets, 1);
+    const numMarkets = Math.max(props.numMarkets, 1);
     const pages = Math.ceil(numMarkets / MARKETS_PER_PAGE);
     const searchBytes = props.searchBytes ?? "";
     return { markets, page, sort, pages, searchBytes };

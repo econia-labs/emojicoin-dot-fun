@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: HomePageParams) {
     <HomePageComponent
       featured={featured}
       markets={markets}
-      numRegisteredMarkets={numRegisteredMarkets}
+      numMarkets={numRegisteredMarkets}
       page={page}
       sortBy={sortBy}
       searchBytes={q}

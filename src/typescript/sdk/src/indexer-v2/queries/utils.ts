@@ -156,6 +156,50 @@ export function queryHelperSingle<
 }
 
 /**
+ *
+ * @param queryFn Takes in a query function that's used to be called after waiting for the indexer
+ * to reach a certain version. Then it extracts the row data and returns it.
+ * @param convert A function that converts the raw row data into the desired output, usually
+ * by converting it into a camelCased representation of the database row.
+ * @returns A curried function that applies the logic to the new query function.
+ */
+export function queryHelperWithCount<
+  Row extends Record<string, unknown>,
+  Result extends Row[],
+  RelationName,
+  Relationships extends TableName,
+  QueryArgs extends Record<string, any> | undefined,
+  OutputType,
+>(
+  queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
+  convert: (rows: Row) => OutputType
+): (args: WithConfig<QueryArgs>) => Promise<{ rows: OutputType[], count: number | null }> {
+  const query = async (args: WithConfig<QueryArgs>) => {
+    const { minimumVersion, ...queryArgs } = args;
+    const innerQuery = queryFn(queryArgs as QueryArgs);
+
+    if (minimumVersion) {
+      await waitForEmojicoinIndexer(minimumVersion);
+    }
+
+    try {
+      const res = await innerQuery;
+      const rows = extractRows<Row>(res);
+      if (res.error) {
+        console.error("[Failed row conversion]:\n");
+        throw new Error(JSON.stringify(res));
+      }
+      return { rows: rows.map(convert), count: res.count };
+    } catch (e) {
+      console.error(e);
+      return { rows: [], count: null };
+    }
+  };
+
+  return query;
+}
+
+/**
  * Strip leading zeroes from an address.
  *
  * @param address either the account object, an account address, or a string.
