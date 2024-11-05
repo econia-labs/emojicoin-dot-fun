@@ -215,7 +215,7 @@ const TableCard = ({
               <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
             </Flex>
 
-            <Text textScale="pixelHeading1" textAlign="center" mb="22px">
+            <Text textScale="pixelHeading1" textAlign="center" mb="22px" className="text-nowrap">
               <span>{symbol}</span>
             </Text>
             <Text

@@ -26,7 +26,6 @@ export const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
   textScale,
 }))`
   color: ${({ theme, color }) => (color ? theme.colors[color] : theme.colors.white)};
-  font-family: ${({ theme }) => theme.fonts.forma};
   text-transform: ${({ textTransform }) => textTransform};
 
   ${({ textScale }) => textScale && textStyles(textScale as keyof typeof scales)}
@@ -39,15 +38,6 @@ export const Text = styled.p.attrs<TextProps>(({ textScale = "display6" }) => ({
   ${layout}
   ${opacity}
   ${flexbox}
-
-  ${({ className }) =>
-    className &&
-    css`
-      &.${className} {
-        font-family: inherit;
-        font-size: inherit;
-      }
-    `}
 `;
 
 export default Text;

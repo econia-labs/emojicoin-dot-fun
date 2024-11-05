@@ -29,14 +29,17 @@ export const textStyles = (k: keyof typeof scales) => {
     [scales.display4]: `
       font-size: 28px;
       line-height: 48px;
+      font-family: var(--font-forma);
     `,
     [scales.display5]: `
       font-size: 20px;
       line-height: 48px;
+      font-family: var(--font-forma);
     `,
     [scales.display6]: `
       font-size: 15px;
       line-height: 20px;
+      font-family: var(--font-forma);
     `,
     [scales.pixelHeading1]: `
       font-size: 64px;
@@ -71,14 +74,17 @@ export const textStyles = (k: keyof typeof scales) => {
     [scales.bodyLarge]: `
       font-size: 16px;
       line-height: 18px;
+      font-family: var(--font-forma);
     `,
     [scales.bodySmall]: `
       font-size: 12px;
       line-height: 18px;
+      font-family: var(--font-forma);
     `,
     [scales.bodyXSmall]: `
       font-size: 10px;
       line-height: 18px;
+      font-family: var(--font-forma);
     `,
   };
 
