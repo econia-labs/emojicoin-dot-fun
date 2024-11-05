@@ -69,7 +69,6 @@
     "./src/**/*.ts",
     "./src/**/*.tsx",
     ".next/types/**/*.ts",
-    "./dist/types/**/*.ts",
-    "playwright.config.ts"
+    "./dist/types/**/*.ts"
   ]
 }

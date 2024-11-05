@@ -78,7 +78,7 @@ test("check sorting order", async ({ page }) => {
   await bumpOrder.waitFor({ state: "visible", timeout: 5000 });
   expect(bumpOrder).toBeVisible();
 
-  await page.screenshot({ path: "screenshots/test-failure.png" });
+  await page.screenshot({ path: "screenshots/market-order-1.png" });
 
   // Sort by bump order.
   await bumpOrder.click();
@@ -86,7 +86,7 @@ test("check sorting order", async ({ page }) => {
   // Expect the markets to be in bump order.
   marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/);
   await marketGridItems.first().waitFor({ state: "visible", timeout: 5000 });
-  await page.screenshot({ path: "screenshots/test-failure-2.png" });
+  await page.screenshot({ path: "screenshots/market-order-2.png" });
   expect(marketGridItems.first()).toBeVisible();
   expect(marketGridItems).toHaveText(patterns.reverse());
 });
