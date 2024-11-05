@@ -20,6 +20,19 @@ export const StyledContentColumn = styled(Flex)`
 
   border-left: 1px solid ${({ theme }) => theme.colors.darkGray};
   border-right: 1px solid ${({ theme }) => theme.colors.darkGray};
+  position: relative;
+
+  &:after,
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 200vw;
+    background-color: ${({ theme }) => theme.colors.darkGray};
+    height: 1px;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
 `;
 
 export const StyledContentHeader = styled.div`

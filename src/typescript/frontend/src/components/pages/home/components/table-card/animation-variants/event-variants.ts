@@ -1,4 +1,3 @@
-import { type AnyNumberString } from "@sdk-types";
 import { Trigger } from "@sdk/const";
 import {
   type ChatEventModel,
@@ -12,8 +11,6 @@ import {
   type MarketRegistrationEventModel,
   type SwapEventModel,
 } from "@sdk/indexer-v2/types";
-import type Big from "big.js";
-import { toCoinDecimalString } from "lib/utils/decimals";
 import { ECONIA_BLUE, GREEN, PINK, WHITE } from "theme/colors";
 import { useScramble } from "use-scramble";
 
@@ -133,7 +130,7 @@ export const scrambleConfig = {
   playOnMount: false,
 };
 
-export const useLabelScrambler = (value: AnyNumberString | Big, suffix: string = "") => {
+export const useLabelScrambler = (value: string, suffix: string = "") => {
   // Ignore all characters in the suffix, as long as they are not numbers.
   const ignore = ["."];
   const numberSet = new Set("0123456789");
@@ -145,7 +142,7 @@ export const useLabelScrambler = (value: AnyNumberString | Big, suffix: string =
   }
 
   const scrambler = useScramble({
-    text: toCoinDecimalString(value.toString(), 2) + suffix,
+    text: value,
     ...scrambleConfig,
     ignore,
   });

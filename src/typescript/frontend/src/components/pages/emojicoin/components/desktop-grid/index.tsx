@@ -1,13 +1,8 @@
 import React, { Suspense } from "react";
 
-import { Text } from "components";
-
-import { translationFunction } from "context/language-context";
-
 import {
   StyledContentWrapper,
   StyledContentColumn,
-  StyledContentHeader,
   StyledBlockWrapper,
   StyledContentInner,
   StyledBlock,
@@ -16,22 +11,16 @@ import {
 import ChatBox from "../chat/ChatBox";
 import TradeHistory from "../trade-history";
 import { type GridProps } from "../../types";
-import { LiquidityButton } from "../trade-emojicoin/LiquidityButton";
 import ChartContainer from "components/charts/ChartContainer";
 import SwapComponent from "../trade-emojicoin/SwapComponent";
 import Loading from "components/loading";
 
 const DesktopGrid = (props: GridProps) => {
-  const { t } = translationFunction();
-
   return (
     <StyledContentWrapper>
       <StyledContentInner>
         <StyledContentColumn>
-          <StyledBlock
-            width="57%"
-            className="bg-black z-10 border-t border-solid border-t-dark-gray"
-          >
+          <StyledBlock width="57%" className="bg-black z-10">
             <StyledBlockWrapper>
               <Suspense fallback={<Loading numEmojis={20} />}>
                 <ChartContainer
@@ -44,8 +33,6 @@ const DesktopGrid = (props: GridProps) => {
             </StyledBlockWrapper>
           </StyledBlock>
           <StyledBlock width="43%">
-            <LiquidityButton geoblocked={props.geoblocked} data={props.data} />
-
             <StyledBlockWrapper>
               <SwapComponent
                 emojicoin={props.data.symbolData.symbol}
@@ -60,24 +47,12 @@ const DesktopGrid = (props: GridProps) => {
 
         <StyledContentColumn>
           <StyledBlock width="57%">
-            <StyledContentHeader>
-              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
-                {t("Trade History")}
-              </Text>
-            </StyledContentHeader>
-
             <StyledBlockWrapper>
               <TradeHistory data={props.data} />
             </StyledBlockWrapper>
           </StyledBlock>
 
           <StyledBlock width="43%">
-            <StyledContentHeader>
-              <Text textScale="pixelHeading3" color="lightGray" textTransform="uppercase">
-                {t("Chat")}
-              </Text>
-            </StyledContentHeader>
-
             <StyledBlockWrapper>
               <ChatBox geoblocked={props.geoblocked} data={props.data} />
             </StyledBlockWrapper>

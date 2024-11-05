@@ -103,8 +103,14 @@ const TableCard = ({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [animations, runAnimationSequence]);
 
-  const { ref: marketCapRef } = useLabelScrambler(marketCap, " APT");
-  const { ref: dailyVolumeRef } = useLabelScrambler(dailyVolume, " APT");
+  const { ref: marketCapRef } = useLabelScrambler(
+    toCoinDecimalString(marketCap.toString(), 2),
+    " APT"
+  );
+  const { ref: dailyVolumeRef } = useLabelScrambler(
+    toCoinDecimalString(dailyVolume.toString(), 2),
+    " APT"
+  );
 
   const { curr, prev, variant, displayIndex, layoutDelay } = useMemo(() => {
     const { curr, prev } = calculateGridData({
