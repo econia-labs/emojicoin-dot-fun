@@ -12,7 +12,7 @@ import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
 import { toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
-import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 const selectMarketStates = ({
   page = 1,
@@ -22,12 +22,13 @@ const selectMarketStates = ({
   sortBy = SortMarketsBy.MarketCap,
   inBondingCurve,
   count,
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 }: MarketStateQueryArgs): PostgrestFilterBuilder<any, any, any[], TableName, unknown> => {
-  let query: any = postgrest
-      .from(TableName.MarketState);
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  let query: any = postgrest.from(TableName.MarketState);
 
   if (count === true) {
-    query = query.select("*", { count: 'exact' });
+    query = query.select("*", { count: "exact" });
   } else {
     query = query.select("*");
   }

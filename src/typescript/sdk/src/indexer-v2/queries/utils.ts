@@ -173,7 +173,7 @@ export function queryHelperWithCount<
 >(
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
   convert: (rows: Row) => OutputType
-): (args: WithConfig<QueryArgs>) => Promise<{ rows: OutputType[], count: number | null }> {
+): (args: WithConfig<QueryArgs>) => Promise<{ rows: OutputType[]; count: number | null }> {
   const query = async (args: WithConfig<QueryArgs>) => {
     const { minimumVersion, ...queryArgs } = args;
     const innerQuery = queryFn(queryArgs as QueryArgs);

@@ -22,7 +22,7 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   const featured = await fetchFeaturedMarket();
   let numMarkets: number;
-  let markets: Awaited<ReturnType<typeof fetchMarketsWithCount>>['rows'];
+  let markets: Awaited<ReturnType<typeof fetchMarketsWithCount>>["rows"];
 
   if (searchEmojis?.length) {
     const res = await fetchMarketsWithCount({
