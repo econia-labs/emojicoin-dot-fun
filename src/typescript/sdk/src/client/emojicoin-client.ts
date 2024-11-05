@@ -7,9 +7,10 @@ import {
   type TypeTag,
   type InputGenerateTransactionOptions,
   type WaitForTransactionOptions,
+  LedgerVersionArg,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
-import { getEvents } from "../emojicoin_dot_fun";
+import { EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
 import {
   Chat,
   ProvideLiquidity,
@@ -28,6 +29,7 @@ import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../cons
 import { waitFor } from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
+import { AnyNumberString } from "../types";
 
 const { expect, Expect } = customExpect;
 
@@ -100,16 +102,30 @@ export class EmojicoinClient {
     remove: this.removeLiquidity.bind(this),
   };
 
-  public utils = {
+  public utils: {
+    emojisToHexStrings: typeof EmojicoinClient.prototype.emojisToHexStrings;
+    emojisToHexSymbol: typeof EmojicoinClient.prototype.emojisToHexSymbol;
+    getEmojicoinInfo: typeof EmojicoinClient.prototype.getEmojicoinInfo;
+    getTransactionEventData: typeof EmojicoinClient.prototype.getTransactionEventData;
+  } = {
     emojisToHexStrings: this.emojisToHexStrings.bind(this),
     emojisToHexSymbol: this.emojisToHexSymbol.bind(this),
     getEmojicoinInfo: this.getEmojicoinInfo.bind(this),
     getTransactionEventData: this.getTransactionEventData.bind(this),
   };
 
-  public rewards = {
+  public rewards: {
+    buy: typeof EmojicoinClient.prototype.buyWithRewards;
+    sell: typeof EmojicoinClient.prototype.sellWithRewards;
+  } = {
     buy: this.buyWithRewards.bind(this),
     sell: this.sellWithRewards.bind(this),
+  };
+
+  public view: {
+    marketExists: typeof EmojicoinClient.prototype.isMarketRegisteredView;
+  } = {
+    marketExists: this.isMarketRegisteredView.bind(this),
   };
 
   private integrator: AccountAddress;
@@ -226,6 +242,19 @@ export class EmojicoinClient {
       },
       options
     );
+  }
+
+  private async isMarketRegisteredView(
+    symbolEmojis: SymbolEmoji[],
+    ledgerVersion?: AnyNumberString
+  ) {
+    const { marketAddress } = this.getEmojicoinInfo(symbolEmojis);
+    const res = await EmojicoinDotFun.MarketMetadataByMarketAddress.view({
+      aptos: this.aptos,
+      marketAddress,
+      ...(ledgerVersion ? { options: { ledgerVersion: BigInt(ledgerVersion) } } : {}),
+    });
+    return typeof res.vec.pop() !== "undefined";
   }
 
   private async swap(

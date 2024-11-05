@@ -9,7 +9,11 @@ test("check search results", async ({ page }) => {
   const symbols = [cat, cat];
 
   const client = new EmojicoinClient();
-  await client.register(user, symbols).then((res) => res.handle);
+  // Register the market if it doesn't exist- it should only exist if the test is retried.
+  const exists = await client.view.marketExists(symbols);
+  if (!exists) {
+    await client.register(user, symbols);
+  }
 
   await page.goto("/home");
 

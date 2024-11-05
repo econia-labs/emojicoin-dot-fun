@@ -10,13 +10,18 @@ test("check sorting order", async ({ page }) => {
   const markets = emojis.map((e) => [rat, SYMBOL_EMOJI_DATA.byName(e)!.emoji]);
 
   const client = new EmojicoinClient();
+  client.view;
 
   // Register markets.
   // They all start with rat to simplify the search.
+  // Only register if it doesn't exist- this will occur on retries of the test.
   for (let i = 0; i < markets.length; i++) {
-    await client.register(user, markets[i]).then((res) => res.handle);
+    const exists = await client.view.marketExists(markets[i]);
+    if (!exists) {
+      await client.register(user, markets[i]);
+    }
     const amount = ((1n * ONE_APT_BIGINT) / 100n) * BigInt(10 ** (markets.length - i));
-    await client.buy(user, markets[i], amount).then((res) => res.handle);
+    await client.buy(user, markets[i], amount);
   }
 
   await page.goto("/home");
