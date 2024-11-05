@@ -28,7 +28,6 @@ import {
 } from "./animation-variants/grid-variants";
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import { isMarketStateModel } from "@sdk/indexer-v2/types";
-import { useEmojiPicker } from "context/emoji-picker-context";
 import "./module.css";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 
@@ -59,7 +58,6 @@ const TableCard = ({
   const animations = useEventStore(
     (s) => s.getMarket(emojis.map((e) => e.emoji))?.stateEvents ?? []
   );
-  const anySearchBytes = useEmojiPicker((s) => s.emojis.length > 0);
 
   // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {
@@ -133,7 +131,13 @@ const TableCard = ({
   // By default set this to 0, unless it's currently the left-most border. Sometimes we need to show a temporary border
   // though, which we handle in the layout animation begin/complete callbacks and in the outermost div's style prop.
   // Always show the left border when there's something in the search bar.
-  const borderLeftWidth = useMotionValue(curr.col === 0 ? 1 : anySearchBytes ? 1 : 0);
+  const borderLeftWidth = useMotionValue(curr.col === 0 ? 1 : 0);
+
+  useEffect(() => {
+    if (curr.col === 0) {
+      borderLeftWidth.set(1);
+    }
+  }, [curr]);
 
   return (
     <motion.div
