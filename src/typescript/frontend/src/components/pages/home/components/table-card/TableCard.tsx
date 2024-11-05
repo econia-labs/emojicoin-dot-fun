@@ -137,6 +137,7 @@ const TableCard = ({
     if (curr.col === 0) {
       borderLeftWidth.set(1);
     }
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [curr]);
 
   return (
