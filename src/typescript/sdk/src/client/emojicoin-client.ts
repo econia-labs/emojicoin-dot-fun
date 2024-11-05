@@ -28,7 +28,7 @@ import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../cons
 import { waitFor } from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
-import { AnyNumberString } from "../types";
+import { type AnyNumberString } from "../types";
 
 const { expect, Expect } = customExpect;
 
