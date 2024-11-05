@@ -67,7 +67,7 @@ const configurationData: DatafeedConfiguration = {
  * @param props
  * @returns
  */
-export const Chart = async (props: ChartContainerProps) => {
+export const Chart = (props: ChartContainerProps) => {
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
