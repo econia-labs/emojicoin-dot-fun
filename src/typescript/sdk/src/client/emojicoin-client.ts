@@ -7,7 +7,6 @@ import {
   type TypeTag,
   type InputGenerateTransactionOptions,
   type WaitForTransactionOptions,
-  LedgerVersionArg,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
 import { EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
