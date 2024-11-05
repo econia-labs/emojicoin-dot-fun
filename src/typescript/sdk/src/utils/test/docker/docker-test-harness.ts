@@ -17,6 +17,7 @@ import {
 import { EMOJICOIN_INDEXER_URL } from "../../../server/env";
 import { TableName } from "../../../indexer-v2/types/json-types";
 import { readFileSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 
 const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
 const LOCAL_ENV_PATH = path.join(getGitRoot(), "src/docker", "example.local.env");
@@ -116,6 +117,15 @@ export class DockerTestHarness {
     await DockerTestHarness.remove();
 
     const command = "docker";
+
+    // Always build the frontend container if we're using it.
+    if (frontend) {
+      execSync(
+        `docker compose -f ${LOCAL_COMPOSE_PATH} --env-file ${LOCAL_ENV_PATH} build frontend`,
+        { stdio: "inherit" }
+      );
+    }
+
     const args = [
       "compose",
       "-f",
