@@ -113,6 +113,16 @@ export const createEventStore = () => {
           const market = state.markets.get(symbol)!;
           latestBars.forEach((bar) => {
             const period = bar.period;
+            // A bar's open should never be zero, so use the previous bar if it exists and isn't 0,
+            // otherwise, use the existing current bar's close.
+            if (bar.open === 0) {
+              const prevLatestBarClose = market[period].latestBar?.close;
+              if (prevLatestBarClose) {
+                bar.open = prevLatestBarClose;
+              } else {
+                bar.open = bar.close;
+              }
+            }
             market[period].latestBar = bar;
           });
         });

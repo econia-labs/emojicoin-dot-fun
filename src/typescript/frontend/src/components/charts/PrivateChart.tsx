@@ -20,7 +20,7 @@ import {
   type Timezone,
   widget,
 } from "@static/charting_library";
-import { getClientTimezone } from "lib/chart-utils";
+import { getClientTimezone, hasTradingActivity } from "lib/chart-utils";
 import { type ChartContainerProps } from "./types";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
@@ -67,7 +67,7 @@ const configurationData: DatafeedConfiguration = {
  * @param props
  * @returns
  */
-export const Chart = async (props: ChartContainerProps) => {
+export const Chart = (props: ChartContainerProps) => {
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -179,12 +179,13 @@ export const Chart = async (props: ChartContainerProps) => {
             // Convert the market view data to `latestBar[]` and set the latest bars in our EventStore to those values.
             const latestBars = marketToLatestBars(marketResource);
             const marketEmojiData = toMarketEmojiData(marketResource.metadata.emojiBytes);
+            const symbolEmojis = marketEmojiData.emojis.map((e) => e.emoji);
             const marketMetadata: MarketMetadataModel = {
               marketID: marketResource.metadata.marketID,
               time: 0n,
               marketNonce: marketResource.sequenceInfo.nonce,
               trigger: Trigger.PackagePublication, // Make up some bunk trigger, since it should be clear it's made up.
-              symbolEmojis: marketEmojiData.emojis.map((e) => e.emoji),
+              symbolEmojis,
               marketAddress: marketResource.metadata.marketAddress,
               ...marketEmojiData,
             };
@@ -209,9 +210,11 @@ export const Chart = async (props: ChartContainerProps) => {
           // some visual inconsistencies in the chart.
           const bars: Bar[] = data.reduce((acc: Bar[], event) => {
             const bar = toBar(event);
-            if (bar.time >= from * 1000 && bar.time <= to * 1000) {
-              if (acc.at(-1)) {
-                bar.open = acc.at(-1)!.close;
+            const inTimeRange = bar.time >= from * 1000 && bar.time <= to * 1000;
+            if (inTimeRange && hasTradingActivity(bar)) {
+              const prev = acc.at(-1);
+              if (prev) {
+                bar.open = prev.close;
               }
               acc.push(bar);
             }
@@ -220,9 +223,23 @@ export const Chart = async (props: ChartContainerProps) => {
 
           // Push the latest bar to the bars array if it exists and update its `open` value to be the previous bar's
           // `close` if it's not the first/only bar.
+          // This logic mirrors what we use in `createBarFrom[Swap|PeriodicState]` but we need it here because we
+          // update the latest bar based on the market view every time we fetch with `getBars`, not just when a new
+          // event comes in.
           if (latestBar) {
-            if (bars.at(-1)) {
-              latestBar.open = bars.at(-1)!.close;
+            const secondLatestBar = bars.at(-1);
+            if (secondLatestBar) {
+              // If the latest bar has no trading activity, set all of its fields to the previous bar's close.
+              if (!hasTradingActivity(latestBar)) {
+                latestBar.high = secondLatestBar.close;
+                latestBar.low = secondLatestBar.close;
+                latestBar.close = secondLatestBar.close;
+              }
+              if (secondLatestBar.close !== 0) {
+                latestBar.open = secondLatestBar.close;
+              } else {
+                latestBar.open = latestBar.close;
+              }
             }
             bars.push(latestBar);
           }

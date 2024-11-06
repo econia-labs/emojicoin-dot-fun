@@ -19,7 +19,11 @@ export async function isAllowListed(addressIn: string): Promise<boolean> {
     ? (addressIn as `0x${string}`)
     : (`0x${addressIn}` as const);
 
-  return isInGalxeCampaign(address) || isOnCustomAllowlist(address);
+  const [inCampaign, onAllowlist] = await Promise.all([
+    isInGalxeCampaign(address),
+    isOnCustomAllowlist(address),
+  ]);
+  return inCampaign || onAllowlist;
 }
 
 export const isInGalxeCampaign = async (address: `0x${string}`): Promise<boolean> => {
