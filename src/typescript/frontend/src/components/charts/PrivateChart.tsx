@@ -1,7 +1,7 @@
 // cspell:word intraday
 // cspell:word minmov
 // cspell:word pricescale
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   EXCHANGE_NAME,
@@ -348,11 +348,19 @@ export const Chart = (props: ChartContainerProps) => {
     };
   }, [datafeed, symbol]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowErrorMessage(true);
+    }, 3500);
+  });
+
   return (
     <div className="relative w-full">
       <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-sm font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
         <div>
-          {"The device you're using isn't supported. 😔 Please try viewing on another device."}
+          { showErrorMessage ? "The browser you're using isn't supported. 😔 Please try viewing in another browser." : "Loading..."}
         </div>
       </div>
       <div ref={ref} className="relative h-full w-full"></div>
