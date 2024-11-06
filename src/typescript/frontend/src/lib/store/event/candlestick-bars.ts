@@ -75,9 +75,8 @@ export const createBarFromSwap = (
   const periodStartTime = getPeriodStartTimeFromTime(market.time, period);
   return {
     time: Number(periodStartTime / 1000n),
-    // Only use previousClose if it's a truthy value. Without this contingency, any time a new bar
-    // is created and the previous bar has no activity, the new bar will be a huge green candlestick
-    // starting with an open price of `0`.
+    // Only use previousClose if it's a truthy value, otherwise, new bars that follow bars with no
+    // trading activity will appear as a huge green candlestick because their open price is `0`.
     open: previousClose ? previousClose : price,
     high: price,
     low: price,
@@ -97,9 +96,8 @@ export const createBarFromPeriodicState = (
   const price = q64ToBig(periodicState.closePriceQ64).toNumber();
   return {
     time: periodEnumToRawDuration(period) / 1000,
-    // Only use previousClose if it's a truthy value. Without this contingency, any time a new bar
-    // is created and the previous bar has no activity, the new bar will be a huge green candlestick
-    // starting with an open price of `0`.
+    // Only use previousClose if it's a truthy value, otherwise, new bars that follow bars with no
+    // trading activity will appear as a huge green candlestick because their open price is `0`.
     open: previousClose ? previousClose : price,
     high: price,
     low: price,
