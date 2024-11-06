@@ -45,7 +45,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
     <div
       className="flex justify-center mt-[10px]"
       style={{
-        border: `1px solid ${theme.colors.darkGray}`,
+        borderTop: `1px solid ${theme.colors.darkGray}`,
       }}
     >
       <div
