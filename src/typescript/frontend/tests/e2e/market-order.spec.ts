@@ -10,13 +10,18 @@ test("check sorting order", async ({ page }) => {
   const markets = emojis.map((e) => [rat, SYMBOL_EMOJI_DATA.byName(e)!.emoji]);
 
   const client = new EmojicoinClient();
+  client.view;
 
   // Register markets.
   // They all start with rat to simplify the search.
+  // Only register if it doesn't exist- this will occur on retries of the test.
   for (let i = 0; i < markets.length; i++) {
-    await client.register(user, markets[i]).then((res) => res.handle);
+    const exists = await client.view.marketExists(markets[i]);
+    if (!exists) {
+      await client.register(user, markets[i]);
+    }
     const amount = ((1n * ONE_APT_BIGINT) / 100n) * BigInt(10 ** (markets.length - i));
-    await client.buy(user, markets[i], amount).then((res) => res.handle);
+    await client.buy(user, markets[i], amount);
   }
 
   await page.goto("/home");
@@ -52,6 +57,7 @@ test("check sorting order", async ({ page }) => {
 
   // Expect the sort by daily volume button to be visible.
   const dailyVolume = page.locator("#emoji-grid-header").getByText("24h Volume");
+  await dailyVolume.waitFor({ state: "visible", timeout: 5000 });
   expect(dailyVolume).toBeVisible();
 
   // Sort by daily volume.
@@ -61,7 +67,7 @@ test("check sorting order", async ({ page }) => {
   const patterns = names.map((e) => new RegExp(e));
 
   // Expect the markets to be in order of daily volume.
-  marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/, { exact: true });
+  marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/);
   expect(marketGridItems).toHaveText(patterns);
 
   // Click the sorting button.
@@ -69,16 +75,18 @@ test("check sorting order", async ({ page }) => {
 
   // Expect the sort by bump order button to be visible.
   const bumpOrder = page.locator("#emoji-grid-header").getByText("Bump Order");
+  await bumpOrder.waitFor({ state: "visible", timeout: 5000 });
   expect(bumpOrder).toBeVisible();
+
+  await page.screenshot({ path: "screenshots/market-order-1.png" });
 
   // Sort by bump order.
   await bumpOrder.click();
 
-  await page.screenshot();
-
   // Expect the markets to be in bump order.
-  marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/, { exact: true });
+  marketGridItems = page.locator("#emoji-grid a").getByTitle(/RAT,/);
+  await marketGridItems.first().waitFor({ state: "visible", timeout: 5000 });
+  await page.screenshot({ path: "screenshots/market-order-2.png" });
+  expect(marketGridItems.first()).toBeVisible();
   expect(marketGridItems).toHaveText(patterns.reverse());
-
-  await page.screenshot();
 });
