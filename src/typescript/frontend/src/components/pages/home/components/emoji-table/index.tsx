@@ -23,7 +23,7 @@ import { encodeEmojis } from "@sdk/emoji_data";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { LiveClientGrid } from "./AnimatedClientGrid";
 import useEvent from "@hooks/use-event";
-import { constructURLForHomePage, isHomePageURLDifferent } from "lib/queries/sorting/query-params";
+import { constructURLForHomePage } from "lib/queries/sorting/query-params";
 import { AnimatePresence, motion } from "framer-motion";
 import { EMOJI_GRID_ITEM_WIDTH } from "../const";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
@@ -66,18 +66,13 @@ const EmojiTable = (props: EmojiTableProps) => {
   }, [searchBytes]);
 
   const pushURL = useEvent((args?: { page?: number; sort?: SortMarketsBy; emojis?: string[] }) => {
-    const curr = new URLSearchParams(location.search);
     const newURL = constructURLForHomePage({
       page: args?.page ?? page,
       sort: args?.sort ?? sort,
       searchBytes: encodeEmojis(args?.emojis ?? emojis),
     });
 
-    // Always push the new URL to the history, but only refresh if the URL has actually changed in a meaningful way.
     router.push(newURL.toString(), { scroll: false });
-    if (isHomePageURLDifferent(curr, newURL.searchParams)) {
-      router.refresh();
-    }
   });
 
   const handlePageChange = (page: number) => {
