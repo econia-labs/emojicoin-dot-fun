@@ -10,10 +10,6 @@ import { fontFamily } from "tailwindcss/defaultTheme";
 
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
-  safelist: [
-    // Force tailwind to include `pixel-heading-1`, `pixel-heading-1b` in the build output.
-    /^pixel-heading-\d\w?$/
-  ],
   theme: {
     extend: {
       typography: {},
