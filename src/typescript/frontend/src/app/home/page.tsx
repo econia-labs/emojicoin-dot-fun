@@ -1,6 +1,5 @@
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 import HomePageComponent from "./HomePage";
-import { REVALIDATION_TIME } from "lib/server-env";
 import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 import {
@@ -12,8 +11,7 @@ import {
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 
-export const revalidate = REVALIDATION_TIME;
-export const dynamic = "force-dynamic";
+export const revalidate = 2;
 
 export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
@@ -30,6 +28,7 @@ export default async function Home({ searchParams }: HomePageParams) {
   });
   const priceFeed = await fetchPriceFeed({});
 
+  // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
   return (
     <HomePageComponent
