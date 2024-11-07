@@ -132,6 +132,11 @@ module.exports = {
           fontSize: "64px",
           lineHeight: "48px",
         },
+        ".pixel-heading-1b": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "52px",
+          lineHeight: "48px",
+        },
         ".pixel-heading-2": {
           fontFamily: "var(--font-pixelar)",
           fontSize: "40px",

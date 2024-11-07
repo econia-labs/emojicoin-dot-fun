@@ -215,9 +215,11 @@ const TableCard = ({
               <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
             </Flex>
 
-            <Text textScale="pixelHeading1" textAlign="center" mb="22px" className="text-nowrap">
+            <div
+              className={`pixel-heading-${emojis.length <= 2 ? "1" : "1b"} text-center mb-[22px] text-nowrap`}
+            >
               <span>{symbol}</span>
-            </Text>
+            </div>
             <Text
               textScale="display4"
               textTransform="uppercase"
