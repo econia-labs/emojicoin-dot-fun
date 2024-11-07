@@ -360,7 +360,9 @@ export const Chart = (props: ChartContainerProps) => {
     <div className="relative w-full">
       <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-sm font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
         <div>
-          { showErrorMessage ? "The browser you're using isn't supported. 😔 Please try viewing in another browser." : "Loading..."}
+          {showErrorMessage
+            ? "The browser you're using isn't supported. 😔 Please try viewing in another browser."
+            : "Loading..."}
         </div>
       </div>
       <div ref={ref} className="relative h-full w-full"></div>
