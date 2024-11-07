@@ -70,7 +70,6 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   });
   const state = await fetchMarketState({ searchEmojis: emojis });
 
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 
   if (state) {
     const { marketID } = state.market;
@@ -78,6 +77,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const chats = await fetchChatEvents({ marketID });
     const swaps = await fetchSwapEvents({ marketID });
     const marketView = await fetchContractMarketView(marketAddress.toString());
+    const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
     return (
       <ClientEmojicoinPage
         data={{

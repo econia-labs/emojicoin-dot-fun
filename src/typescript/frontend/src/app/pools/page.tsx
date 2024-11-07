@@ -15,7 +15,6 @@ export const metadata: Metadata = {
 };
 
 export default async function PoolsPage({ searchParams }: { searchParams: { pool: string } }) {
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
   const initialData: PoolsData[] = parseJSON(
     await getPoolData(
       1,
@@ -26,5 +25,6 @@ export default async function PoolsPage({ searchParams }: { searchParams: { pool
         : undefined
     )
   );
+  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
   return <ClientPoolsPage geoblocked={geoblocked} initialData={initialData} />;
 }
