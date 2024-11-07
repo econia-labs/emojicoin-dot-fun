@@ -12,26 +12,23 @@ export async function getPoolData(
   searchEmojis?: string[],
   provider?: string
 ) {
-  let ret: any;
-  if (provider) {
-    ret = fetchUserLiquidityPools({
-      page,
-      orderBy: toOrderBy(orderBy),
-      sortBy,
-      provider,
-      searchEmojis,
-      pageSize: MARKETS_PER_PAGE,
-    });
-  } else {
-    ret = fetchMarkets({
-      page,
-      inBondingCurve: false,
-      orderBy: toOrderBy(orderBy),
-      sortBy,
-      searchEmojis,
-      pageSize: MARKETS_PER_PAGE,
-    });
-  }
+  const res = provider
+    ? fetchUserLiquidityPools({
+        page,
+        orderBy: toOrderBy(orderBy),
+        sortBy,
+        provider,
+        searchEmojis,
+        pageSize: MARKETS_PER_PAGE,
+      })
+    : fetchMarkets({
+        page,
+        inBondingCurve: false,
+        orderBy: toOrderBy(orderBy),
+        sortBy,
+        searchEmojis,
+        pageSize: MARKETS_PER_PAGE,
+      });
 
-  return stringifyJSON(await ret);
+  return stringifyJSON(await res);
 }

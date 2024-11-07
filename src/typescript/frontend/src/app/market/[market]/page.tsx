@@ -70,7 +70,6 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   });
   const state = await fetchMarketState({ searchEmojis: emojis });
 
-
   if (state) {
     const { marketID } = state.market;
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
