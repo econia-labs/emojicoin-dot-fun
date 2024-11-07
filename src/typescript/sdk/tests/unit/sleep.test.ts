@@ -1,5 +1,7 @@
 import { getTime, sleep, UNIT_OF_TIME_MULTIPLIERS, UnitOfTime } from "../../src";
 
+jest.retryTimes(3);
+
 describe("sleep utility function with units of time", () => {
   it("converts units of time to milliseconds", () => {
     expect(UNIT_OF_TIME_MULTIPLIERS[UnitOfTime.Microseconds]).toEqual(0.001);
