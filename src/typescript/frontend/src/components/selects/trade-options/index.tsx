@@ -49,7 +49,7 @@ export const TradeOptions: React.FC<TradeOptionsProps> = ({ onClose, onMaxSlippa
           <div className="med-pixel-text flex flex-row justify-between gap-[32px]">
             <div className="mt-[3px] med-pixel-text flex flex-row justify-between gap-[16px]">
               <span
-                className={`${maxSlippageMode === "auto" ? "text-black" : "text-dark-gray"} font-pixelar text-2xl cursor-pointer`}
+                className={`${maxSlippageMode === "auto" ? "opacity-100" : "opacity-30"} text-black font-pixelar text-2xl cursor-pointer`}
                 onClick={() => {
                   setMaxSlippageMode("auto");
                   SlippageSettings.setMaxSlippageMode("auto");
@@ -60,7 +60,7 @@ export const TradeOptions: React.FC<TradeOptionsProps> = ({ onClose, onMaxSlippa
                 AUTO
               </span>
               <span
-                className={`${maxSlippageMode === "custom" ? "text-black" : "text-dark-gray"} font-pixelar text-2xl cursor-pointer`}
+                className={`${maxSlippageMode === "custom" ? "opacity-30" : "opacity-100"} text-black font-pixelar text-2xl cursor-pointer`}
                 onClick={() => {
                   setMaxSlippageMode("custom");
                   SlippageSettings.setMaxSlippageMode("custom");
@@ -71,7 +71,7 @@ export const TradeOptions: React.FC<TradeOptionsProps> = ({ onClose, onMaxSlippa
               </span>
             </div>
             <div
-              className={`${maxSlippageMode === "custom" ? "text-black border-black" : "text-dark-gray border-dark-gray"} flex flex-row border-[1px] p-[.2rem] rounded border-solid`}
+              className={`${maxSlippageMode === "custom" ? "opacity-100" : "opacity-30"} text-black border-black flex flex-row border-[1px] p-[.2rem] rounded border-solid`}
             >
               <InputNumeric
                 disabled={maxSlippageMode === "auto"}
