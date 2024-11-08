@@ -46,7 +46,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
                 AUTO
               </span>
               <span
-                className={`${maxSlippageMode === "custom" ? "opacity-30" : "opacity-100"} text-black font-pixelar text-2xl cursor-pointer`}
+                className={`${maxSlippageMode === "custom" ? "opacity-100" : "opacity-30"} text-black font-pixelar text-2xl cursor-pointer`}
                 onClick={() => {
                   setMaxSlippageMode("custom");
                   SlippageSettings.setMaxSlippageMode("custom");
