@@ -50,8 +50,10 @@ export async function logFetch<T extends object, R>(
       ? (fn as AsyncFunctionWithParams<T, R>)(params)
       : (fn as AsyncFunctionNoParams<R>)());
     const end = performance.now();
+    const elapsed = end - start;
+    const isSlow = elapsed >= 300;
     /* eslint-disable-next-line no-console */
-    console.log(`✓ ${callSignature} took ${(end - start).toFixed(2)}ms`);
+    console.log(`${isSlow ? "⚠️" : "✅"} ${callSignature} took ${elapsed.toFixed(2)}ms`);
     return result;
   } catch (error) {
     const end = performance.now();
