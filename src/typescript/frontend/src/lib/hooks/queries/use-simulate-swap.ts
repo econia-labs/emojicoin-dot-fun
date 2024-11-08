@@ -14,7 +14,7 @@ import { useMemo } from "react";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { tryEd25519PublicKey } from "components/pages/launch-emojicoin/hooks/use-register-market";
-import { EMOJICOIN_DOT_FUN_MODULE_NAME, MODULE_ADDRESS } from "@sdk/const";
+import { STRUCT_STRINGS } from "@sdk/utils";
 
 export const simulateSwap = async (args: {
   aptos: Aptos;
@@ -41,8 +41,7 @@ export const simulateSwap = async (args: {
         minOutputAmount: args.minOutputAmount,
         typeTags: args.typeTags,
       });
-      const swapName = `${MODULE_ADDRESS}::${EMOJICOIN_DOT_FUN_MODULE_NAME}::Swap`;
-      const swapEvent = res.events.find((e) => e.type === swapName)!;
+      const swapEvent = res.events.find((e) => e.type === STRUCT_STRINGS.SwapEvent)!;
       return {
         base_volume: swapEvent.data.base_volume,
         quote_volume: swapEvent.data.quote_volume,
