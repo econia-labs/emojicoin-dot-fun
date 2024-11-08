@@ -33,7 +33,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
       <StyledDropdownMenuItem disabled={false}>
         <DropdownMenuInner>
           <div className="med-pixel-text flex flex-row justify-between gap-[32px]">
-            <div className="mt-[3px] med-pixel-text flex flex-row justify-between gap-[16px]">
+            <div className="med-pixel-text flex flex-row justify-between m-auto gap-[16px]">
               <span
                 className={`${maxSlippageMode === "auto" ? "opacity-100" : "opacity-30"} text-black font-pixelar text-2xl cursor-pointer`}
                 onClick={() => {
