@@ -61,7 +61,7 @@ jobs:
         path: './src/python/hooks/.venv'
     - uses: 'pre-commit/action@v3.0.0'
       with:
-        extra_args: '--all-files --config cfg/pre-commit-config.yaml --verbose'
+        extra_args: '--all-files --config cfg/pre-commit-config.yaml'
 name: 'pre-commit'
 'on':
   pull_request: null
