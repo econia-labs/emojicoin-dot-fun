@@ -25,12 +25,15 @@ export default async function PoolsPage({ searchParams }: { searchParams: { pool
       : undefined,
   };
   const poolData = await logFetch(
+    "getPoolData",
     async () => getPoolData(args.page, args.sortBy, args.orderBy, args.searchEmojis),
     args
   );
   const initialData: PoolsData[] = parseJSON(poolData);
 
   // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
-  const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
+  const geoblocked = await logFetch("isUserGeoblocked", isUserGeoblocked, {
+    ip: headers().get("x-real-ip"),
+  });
   return <ClientPoolsPage geoblocked={geoblocked} initialData={initialData} />;
 }

@@ -74,12 +74,16 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   if (state) {
     const { marketID } = state.market;
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
-    const chats = await logFetch(fetchChatEvents, { marketID });
-    const swaps = await logFetch(fetchSwapEvents, { marketID });
-    const marketView = await logFetch(fetchContractMarketView, { marketAddress });
+    const chats = await logFetch("fetchChatEvents", fetchChatEvents, { marketID });
+    const swaps = await logFetch("fetchSwapEvents", fetchSwapEvents, { marketID });
+    const marketView = await logFetch("fetchContractMarketView", fetchContractMarketView, {
+      marketAddress,
+    });
 
     // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
-    const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
+    const geoblocked = await logFetch("isUserGeoblocked", isUserGeoblocked, {
+      ip: headers().get("x-real-ip"),
+    });
     return (
       <ClientEmojicoinPage
         data={{

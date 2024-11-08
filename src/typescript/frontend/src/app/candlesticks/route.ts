@@ -75,7 +75,12 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(limitStr);
   const marketID = parseInt(marketIDStr);
 
-  const data = await logFetch(getCachedCandlesticks, { marketID, start, period, limit });
+  const data = await logFetch("getCachedCandlesticks", getCachedCandlesticks, {
+    marketID,
+    start,
+    period,
+    limit,
+  });
 
   return new Response(data);
 }

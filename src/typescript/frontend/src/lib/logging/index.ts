@@ -8,11 +8,12 @@ type AsyncFunctionNoParams<R> = () => Promise<R>;
 /**
  * Overload for functions that take no parameters
  */
-export function logFetch<R>(fn: AsyncFunctionNoParams<R>): Promise<R>;
+export function logFetch<R>(name: string, fn: AsyncFunctionNoParams<R>): Promise<R>;
 /**
  * Overload for functions that take an object parameter
  */
 export function logFetch<T extends object, R>(
+  name: string,
   fn: AsyncFunctionWithParams<T, R>,
   params: T
 ): Promise<R>;
@@ -20,10 +21,10 @@ export function logFetch<T extends object, R>(
  * Implementation handling both cases
  */
 export async function logFetch<T extends object, R>(
+  fnName: string,
   fn: AsyncFunctionNoParams<R> | AsyncFunctionWithParams<T, R>,
   params?: T
 ): Promise<R> {
-  const fnName = fn.name || "anonymous";
   const start = performance.now();
 
   // Handle param logging for functions with parameters

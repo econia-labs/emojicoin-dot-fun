@@ -11,6 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default async function LaunchEmojicoinPage() {
-  const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
+  const geoblocked = await logFetch("isUserGeoblocked", isUserGeoblocked, {
+    ip: headers().get("x-real-ip"),
+  });
   return <ClientLaunchEmojicoinPage geoblocked={geoblocked} />;
 }

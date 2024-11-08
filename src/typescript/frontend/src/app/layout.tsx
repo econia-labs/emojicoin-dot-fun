@@ -24,7 +24,9 @@ const fonts = [pixelar, formaDJRMicro, formaDJRDisplayMedium, formaDJRDisplayReg
 const fontsClassName = fonts.map((font) => font.variable).join(" ");
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
+  const geoblocked = await logFetch("isUserGeoblocked", isUserGeoblocked, {
+    ip: headers().get("x-real-ip"),
+  });
   return (
     <html>
       <body className={fontsClassName}>

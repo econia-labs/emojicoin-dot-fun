@@ -6,7 +6,9 @@ import { isUserGeoblocked } from "utils/geolocation";
 export const dynamic = "force-dynamic";
 
 const Verify = async () => {
-  const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
+  const geoblocked = await logFetch("isUserGeoblocked", isUserGeoblocked, {
+    ip: headers().get("x-real-ip"),
+  });
   return <VerifyStatusPage geoblocked={geoblocked} />;
 };
 
