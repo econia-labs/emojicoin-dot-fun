@@ -12,7 +12,7 @@ import { DEFAULT_MAX_SLIPPAGE } from "const";
 
 import * as SlippageSettings from "../../../utils/slippage";
 
-export const TradeOptions: React.FC<TradeOptionsProps> = ({ onClose, onMaxSlippageUpdate }) => {
+export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
   const [maxSlippage, setMaxSlippage] = useState<bigint>(DEFAULT_MAX_SLIPPAGE);
   const [maxSlippageMode, setMaxSlippageMode] = useState<SlippageSettings.MaxSlippageMode>("auto");
   useEffect(() => {

@@ -211,9 +211,8 @@ export default function SwapComponent({
 
   const { theme } = useThemeContext();
 
-  const { targetRef, tooltip, setVisible } = useTooltip(
+  const { targetRef, tooltip } = useTooltip(
     <TradeOptions
-      onClose={() => setVisible(false)}
       onMaxSlippageUpdate={() => setMaxSlippage(getMaxSlippageSettings().maxSlippage)}
     />,
     {

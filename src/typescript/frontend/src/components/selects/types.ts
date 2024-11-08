@@ -39,7 +39,6 @@ export type SelectProps = {
 };
 
 export interface TradeOptionsProps extends BoxProps {
-  onClose: () => void;
   onMaxSlippageUpdate?: () => void;
 }
 
