@@ -5,7 +5,6 @@ import { DropdownMenuWrapper } from "../dropdown-menu/styled";
 import { type TradeOptionsProps } from "../types";
 import {
   DropdownMenuInner,
-  StyledDropdownMenuClose,
   StyledDropdownMenuItem,
 } from "../dropdown-menu//components/dropdown-menu-item/styled";
 import { InputNumeric } from "components/inputs";
@@ -23,19 +22,6 @@ export const TradeOptions: React.FC<TradeOptionsProps> = ({ onClose, onMaxSlippa
   }, []);
   return (
     <DropdownMenuWrapper>
-      <StyledDropdownMenuClose
-        key="close"
-        disabled={false}
-        onClick={onClose}
-        className="cursor-pointer"
-      >
-        <DropdownMenuInner
-          className="flex"
-          style={{ justifyContent: "end", margin: "0", padding: "0" }}
-        >
-          <div className="med-pixel-text lowercase">x</div>
-        </DropdownMenuInner>
-      </StyledDropdownMenuClose>
       <StyledDropdownMenuItem disabled={false}>
         <DropdownMenuInner>
           <div className="med-pixel-text flex flex-row justify-between gap-[16px] w-[100%]">
