@@ -35,7 +35,10 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
           <div className="med-pixel-text flex flex-row justify-between gap-[32px]">
             <div className="med-pixel-text flex flex-row justify-between m-auto gap-[16px]">
               <span
-                className={`${maxSlippageMode === "auto" ? "opacity-100" : "opacity-30"} text-black font-pixelar text-2xl cursor-pointer`}
+                className={
+                  `${maxSlippageMode === "auto" ? "opacity-100" : "opacity-30"} ` +
+                  "text-black font-pixelar text-2xl cursor-pointer"
+                }
                 onClick={() => {
                   setMaxSlippageMode("auto");
                   SlippageSettings.setMaxSlippageMode("auto");
@@ -46,7 +49,10 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
                 AUTO
               </span>
               <span
-                className={`${maxSlippageMode === "custom" ? "opacity-100" : "opacity-30"} text-black font-pixelar text-2xl cursor-pointer`}
+                className={
+                  `${maxSlippageMode === "custom" ? "opacity-100" : "opacity-30"} ` +
+                  "text-black font-pixelar text-2xl cursor-pointer"
+                }
                 onClick={() => {
                   setMaxSlippageMode("custom");
                   SlippageSettings.setMaxSlippageMode("custom");
@@ -57,7 +63,10 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
               </span>
             </div>
             <div
-              className={`${maxSlippageMode === "custom" ? "opacity-100" : "opacity-30"} text-black border-black flex flex-row border-[1px] p-[.2rem] rounded border-solid`}
+              className={
+                `${maxSlippageMode === "custom" ? "opacity-100" : "opacity-30"} ` +
+                "text-black border-black flex flex-row border-[1px] p-[.2rem] rounded border-solid"
+              }
             >
               <InputNumeric
                 disabled={maxSlippageMode === "auto"}
