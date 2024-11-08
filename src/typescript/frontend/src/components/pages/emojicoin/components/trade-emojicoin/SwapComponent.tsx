@@ -334,7 +334,8 @@ export default function SwapComponent({
               {toDisplayCoinDecimals({
                 num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
                 decimals: 4,
-              })} APT
+              })}{" "}
+              APT
             </span>{" "}
             {emoji("fuel pump")}
           </div>
