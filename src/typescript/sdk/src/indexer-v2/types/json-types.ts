@@ -10,7 +10,7 @@ import type {
 } from "../../emojicoin_dot_fun/types";
 import { type Flatten } from "../../types";
 
-type PeriodTypeFromDatabase =
+export type PeriodTypeFromDatabase =
   | "period_1m"
   | "period_5m"
   | "period_15m"

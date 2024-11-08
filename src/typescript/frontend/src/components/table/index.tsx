@@ -60,6 +60,7 @@ export const Th = styled.td<TdProps>`
   z-index: 1;
   text-transform: uppercase;
   border-bottom: 1px solid ${({ theme }) => theme.colors.darkGray};
+  align-content: center;
 
   &:nth-child(1) {
     ${ThInner} {

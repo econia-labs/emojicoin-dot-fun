@@ -113,20 +113,28 @@ module.exports = {
           lineHeight: "65px",
         },
         ".display-4": {
+          fontFamily: "var(--font-forma)",
           fontSize: "28px",
           lineHeight: "48px",
         },
         ".display-5": {
+          fontFamily: "var(--font-forma)",
           fontSize: "20px",
           lineHeight: "48px",
         },
         ".display-6": {
+          fontFamily: "var(--font-forma)",
           fontSize: "15px",
           lineHeight: "20px",
         },
         ".pixel-heading-1": {
           fontFamily: "var(--font-pixelar)",
           fontSize: "64px",
+          lineHeight: "48px",
+        },
+        ".pixel-heading-1b": {
+          fontFamily: "var(--font-pixelar)",
+          fontSize: "52px",
           lineHeight: "48px",
         },
         ".pixel-heading-2": {
@@ -160,14 +168,17 @@ module.exports = {
           lineHeight: "18px",
         },
         ".body-lg": {
+          fontFamily: "var(--font-forma)",
           fontSize: "16px",
           lineHeight: "18px",
         },
         ".body-sm": {
+          fontFamily: "var(--font-forma)",
           fontSize: "12px",
           lineHeight: "18px",
         },
         ".body-xs": {
+          fontFamily: "var(--font-forma)",
           fontSize: "10px",
           lineHeight: "18px",
         },
