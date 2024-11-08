@@ -17,17 +17,12 @@ import { filterBigEmojis } from "components/pages/emoji-picker/EmojiPicker";
 import { Emoji } from "utils/emoji";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
-export const MemoizedLaunchAnimation = ({
-  loading,
-  geoblocked,
-}: {
-  loading: boolean;
-  geoblocked: boolean;
-}) => {
-  // Maybe it's this...? Maybe we need to memoize this value.
+export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
+  const geoblocked = useIsUserGeoblocked();
   const { t } = translationFunction();
   const emojis = useEmojiPicker((state) => state.emojis);
   const setIsLoadingRegisteredMarket = useEmojiPicker(
