@@ -70,7 +70,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
                 decimals={2}
                 className="w-[4rem] bg-transparent text-right outline-none"
               />
-              <span className="mt-[3px] block">%</span>
+              <span className="ml-[1px] mt-[2px] mr-[2px] block">%</span>
             </div>
           </div>
         </DropdownMenuInner>
