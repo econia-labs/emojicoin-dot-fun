@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
 import { type Metadata } from "next";
+import { logFetch } from "lib/logging";
 
 export const revalidate = 2;
 
@@ -73,12 +74,12 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
   if (state) {
     const { marketID } = state.market;
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
-    const chats = await fetchChatEvents({ marketID });
-    const swaps = await fetchSwapEvents({ marketID });
-    const marketView = await fetchContractMarketView(marketAddress.toString());
+    const chats = await logFetch(fetchChatEvents, { marketID });
+    const swaps = await logFetch(fetchSwapEvents, { marketID });
+    const marketView = await logFetch(fetchContractMarketView, { marketAddress });
 
     // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
-    const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
+    const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
     return (
       <ClientEmojicoinPage
         data={{

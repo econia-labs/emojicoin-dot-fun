@@ -3,6 +3,7 @@ import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
 import { type Metadata } from "next";
 import { emoji } from "utils";
+import { logFetch } from "lib/logging";
 
 export const metadata: Metadata = {
   title: "launch",
@@ -10,6 +11,6 @@ export const metadata: Metadata = {
 };
 
 export default async function LaunchEmojicoinPage() {
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
+  const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
   return <ClientLaunchEmojicoinPage geoblocked={geoblocked} />;
 }

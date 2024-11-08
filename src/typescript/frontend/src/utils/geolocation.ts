@@ -19,7 +19,7 @@ const isDisallowedLocation = (location: Location) => {
   return false;
 };
 
-export const isUserGeoblocked = async (ip: string | undefined | null) => {
+export const isUserGeoblocked = async ({ ip }: { ip: string | undefined | null }) => {
   if (!GEOBLOCKING_ENABLED) return false;
   if (ip === "undefined" || typeof ip === "undefined" || ip === "null" || ip === null) {
     return true;

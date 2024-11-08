@@ -2,6 +2,7 @@ import { fetchPeriodicEventsSince } from "@/queries/market";
 import { type Period, toPeriod } from "@sdk/index";
 import { type PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 import { type PeriodTypeFromDatabase } from "@sdk/indexer-v2/types/json-types";
+import { logFetch } from "lib/logging";
 import { parseInt } from "lodash";
 import { unstable_cache } from "next/cache";
 import { type NextRequest } from "next/server";
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(limitStr);
   const marketID = parseInt(marketIDStr);
 
-  const data = await getCachedCandlesticks({ marketID, start, period, limit });
+  const data = await logFetch(getCachedCandlesticks, { marketID, start, period, limit });
 
   return new Response(data);
 }

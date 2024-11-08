@@ -13,6 +13,7 @@ import "../app/global.css";
 import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
 import { isUserGeoblocked } from "utils/geolocation";
 import { headers } from "next/headers";
+import { logFetch } from "lib/logging";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -23,7 +24,7 @@ const fonts = [pixelar, formaDJRMicro, formaDJRDisplayMedium, formaDJRDisplayReg
 const fontsClassName = fonts.map((font) => font.variable).join(" ");
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
+  const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
   return (
     <html>
       <body className={fontsClassName}>

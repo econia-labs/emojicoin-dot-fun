@@ -10,6 +10,7 @@ import {
 } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { logFetch } from "lib/logging";
 
 export const revalidate = 2;
 
@@ -17,19 +18,19 @@ export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
-  const numRegisteredMarkets = await fetchNumRegisteredMarkets();
-  const featured = await fetchFeaturedMarket();
-  const markets = await fetchMarkets({
+  const numRegisteredMarkets = await logFetch(fetchNumRegisteredMarkets);
+  const featured = await logFetch(fetchFeaturedMarket);
+  const markets = await logFetch(fetchMarkets, {
     page,
     sortBy,
     orderBy,
     searchEmojis,
     pageSize: MARKETS_PER_PAGE,
   });
-  const priceFeed = await fetchPriceFeed({});
+  const priceFeed = await logFetch(fetchPriceFeed, {});
 
   // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
+  const geoblocked = await logFetch(isUserGeoblocked, { ip: headers().get("x-real-ip") });
   return (
     <HomePageComponent
       featured={featured}
