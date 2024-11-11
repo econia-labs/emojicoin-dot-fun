@@ -224,7 +224,12 @@ export default function SwapComponent({
 
   return (
     <Column className="relative w-full max-w-[414px] justify-center">
-      <Flex flexDirection="row" justifyContent="space-between" alignItems="center" className="mb-[.4em]">
+      <Flex
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        className="mb-[.4em]"
+      >
         <div>
           <div className="cursor-pointer" ref={targetRef}>
             {emoji("gear")}
@@ -323,8 +328,7 @@ export default function SwapComponent({
         </InnerWrapper>
       </SimulateInputsWrapper>
       <div className="flex flex-row justify-between py-[10px]">
-        <div>
-        </div>
+        <div></div>
         <div className="text-dark-gray">
           <span className="text-xl leading-[0]">
             {gasCost === null ? "~" : ""}
