@@ -33,6 +33,8 @@ import { ROUTES } from "router/routes";
 import { type HomePageProps } from "app/home/HomePage";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { useMatchBreakpoints } from "@hooks/index";
+import { useWindowSize } from "react-use";
 
 export interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed"> {}
@@ -98,6 +100,8 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const rowLength = useGridRowLength();
 
+  const { width } = useWindowSize();
+
   useReliableSubscribe({
     eventTypes: ["MarketLatestState"],
   });
@@ -120,6 +124,7 @@ const EmojiTable = (props: EmojiTableProps) => {
             <SearchWrapper>
               <SearchBar geoblocked={props.geoblocked} />
             </SearchWrapper>
+            {width >= 1375 ? <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} /> : <></>}
             <FilterOptionsWrapper>
               <FilterOptions filter={sort ?? SortMarketsBy.MarketCap} onChange={handleSortChange} />
             </FilterOptionsWrapper>
@@ -157,7 +162,7 @@ const EmojiTable = (props: EmojiTableProps) => {
                   </StyledGrid>
                 </motion.div>
               </AnimatePresence>
-              <ButtonsBlock value={page} onChange={handlePageChange} numPages={pages} />
+              <ButtonsBlock className="mt-[30px]" value={page} onChange={handlePageChange} numPages={pages} />
             </>
           ) : (
             <div className="py-10">
