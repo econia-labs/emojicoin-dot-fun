@@ -218,13 +218,19 @@ export default function SwapComponent({
       placement: "bottom",
       customStyles: getTooltipStyles(theme),
       trigger: "click",
+      tooltipOffset: [100, 10],
     }
   );
 
   return (
     <Column className="relative w-full max-w-[414px] justify-center">
-      <Flex flexDirection="row" justifyContent="space-between" className="mb-[.4em]">
-        <div></div>
+      <Flex flexDirection="row" justifyContent="space-between" alignItems="center" className="mb-[.4em]">
+        <div>
+          <div className="cursor-pointer" ref={targetRef}>
+            {emoji("gear")}
+          </div>
+          {tooltip}
+        </div>
         <FlexGap flexDirection="row" gap="5px">
           {isSell ? (
             <>
@@ -317,10 +323,8 @@ export default function SwapComponent({
         </InnerWrapper>
       </SimulateInputsWrapper>
       <div className="flex flex-row justify-between py-[10px]">
-        <div className="cursor-pointer" ref={targetRef}>
-          {emoji("gear")}
+        <div>
         </div>
-        {tooltip}
         <div className="text-dark-gray">
           <span className="text-xl leading-[0]">
             {gasCost === null ? "~" : ""}
