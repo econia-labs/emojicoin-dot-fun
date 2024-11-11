@@ -316,23 +316,23 @@ export default function SwapComponent({
           {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
         </InnerWrapper>
       </SimulateInputsWrapper>
-        <div className="flex flex-row justify-between py-[10px]">
-          <div className="cursor-pointer" ref={targetRef}>
-            {emoji("gear")}
-          </div>
-          {tooltip}
-          <div className="text-dark-gray">
-            <span className="text-xl leading-[0]">
-              {gasCost === null ? "~" : ""}
-              {toDisplayCoinDecimals({
-                num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
-                decimals: 4,
-              })}{" "}
-              APT
-            </span>{" "}
-            {emoji("fuel pump")}
-          </div>
+      <div className="flex flex-row justify-between py-[10px]">
+        <div className="cursor-pointer" ref={targetRef}>
+          {emoji("gear")}
         </div>
+        {tooltip}
+        <div className="text-dark-gray">
+          <span className="text-xl leading-[0]">
+            {gasCost === null ? "~" : ""}
+            {toDisplayCoinDecimals({
+              num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
+              decimals: 4,
+            })}{" "}
+            APT
+          </span>{" "}
+          {emoji("fuel pump")}
+        </div>
+      </div>
 
       <Row className="justify-center mt-[14px]">
         <SwapButton
