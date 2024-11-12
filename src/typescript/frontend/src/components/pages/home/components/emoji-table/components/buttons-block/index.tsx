@@ -11,7 +11,7 @@ export type ButtonsBlockProps = {
   value: number;
   numPages: number;
   onChange: (page: number) => void;
-  className?: string,
+  className?: string;
 };
 
 const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
