@@ -51,7 +51,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
           {"{"}
         </Text>
 
-        <Arrow className="med-pixel-search" rotate="180deg" />
+        <Arrow className="med-pixel-search-arrows" rotate="180deg" />
 
         <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}
@@ -97,7 +97,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
           {"{"}
         </Text>
 
-        <Arrow className="med-pixel-search" />
+        <Arrow className="med-pixel-search-arrows" />
 
         <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}

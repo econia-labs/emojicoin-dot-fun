@@ -58,23 +58,27 @@
 }
 
 .med-pixel-search {
+  width: 18px;
+}
+
+.med-pixel-search-arrows {
   width: 11px;
 }
 
 @media screen and (min-width: 768px) {
-  .med-pixel-search {
+  .med-pixel-search-arrows {
     width: 12px;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .med-pixel-search {
+  .med-pixel-search-arrows {
     width: 14px;
   }
 }
 
 @media screen and (min-width: 1440px) {
-  .med-pixel-search {
+  .med-pixel-search-arrows {
     width: 18px;
   }
 }
