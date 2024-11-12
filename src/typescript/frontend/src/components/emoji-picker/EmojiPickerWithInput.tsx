@@ -223,7 +223,7 @@ export const EmojiPickerWithInput = ({
               <div
                 className={
                   "flex flex-row absolute items-center justify-between h-full w-full " +
-                  "border-0 border-t-[1px] border-solid border-dark-gray relative " +
+                  "border-0 border-t-[1px] border-solid border-dark-gray " +
                   inputClassName
                 }
               >
