@@ -20,11 +20,10 @@ export const ClientGrid = ({
   sortBy: MarketDataSortByHomePage;
 }) => {
   const rowLength = useGridRowLength();
-  const searchEmojis = useEmojiPicker((s) => s.emojis);
 
   const ordered = useMemo(() => {
-    return marketDataToProps(markets, searchEmojis);
-  }, [markets, searchEmojis]);
+    return marketDataToProps(markets);
+  }, [markets]);
 
   const initialRender = useRef(true);
 
@@ -41,7 +40,7 @@ export const ClientGrid = ({
       {ordered.map((v, i) => {
         return (
           <TableCard
-            key={`live-${v.marketID}-${v.searchEmojisKey}`}
+            key={`live-${v.marketID}`}
             index={i}
             pageOffset={(page - 1) * MARKETS_PER_PAGE}
             marketID={v.marketID}

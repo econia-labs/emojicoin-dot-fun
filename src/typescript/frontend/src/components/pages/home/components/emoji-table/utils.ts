@@ -7,7 +7,6 @@ import { type SymbolEmoji } from "@sdk/emoji_data";
 
 export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   time: number;
-  searchEmojisKey: string;
 };
 export type PropsWithTimeAndIndex = TableCardProps & {
   time: number;
@@ -21,7 +20,6 @@ const toSearchEmojisKey = (searchEmojis: string[]) => `{${searchEmojis.join("")}
 
 export const marketDataToProps = (
   markets: HomePageProps["markets"],
-  searchEmojis: string[]
 ): PropsWithTime[] =>
   markets.map((m) => ({
     time: Number(m.market.time),
@@ -30,7 +28,6 @@ export const marketDataToProps = (
     emojis: m.market.emojis,
     staticMarketCap: m.state.instantaneousStats.marketCap.toString(),
     staticVolume24H: m.dailyVolume.toString(),
-    searchEmojisKey: toSearchEmojisKey(searchEmojis),
   }));
 
 export const stateEventsToProps = (
