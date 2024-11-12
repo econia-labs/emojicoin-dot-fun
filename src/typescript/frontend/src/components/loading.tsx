@@ -1,4 +1,5 @@
 "use client";
+// cspell:word unpathify
 
 import React, { useEffect, useMemo } from "react";
 import AnimatedStatusIndicator from "./pages/launch-emojicoin/animated-emoji-circle";
