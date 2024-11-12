@@ -7,7 +7,7 @@ import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA, type SymbolEmojiData } from "@
 import { Emoji } from "utils/emoji";
 import { usePathname } from "next/navigation";
 import { EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE } from "utils/pathname-helpers";
-import { EmojiMartData } from "./pages/emoji-picker/types";
+import { type EmojiMartData } from "./pages/emoji-picker/types";
 import { init } from "emoji-mart";
 
 const unpathify = (pathEmojiName: string) =>
