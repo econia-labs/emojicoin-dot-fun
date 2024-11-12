@@ -56,6 +56,7 @@
     "_format": "prettier 'src/**/*.ts' 'tests/**/*.ts' '.eslintrc.js'",
     "build": "tsc",
     "build:debug": "BUILD_DEBUG=true pnpm run build",
+    "build:no-checks": "tsc --skipLibCheck",
     "check": "tsc -p tests/tsconfig.json --noEmit",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "e2e:testnet": "pnpm load-test-env -v NO_TEST_SETUP=true -- pnpm jest tests/e2e/queries/testnet",

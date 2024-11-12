@@ -90,6 +90,7 @@
   "scripts": {
     "_format": "prettier './**/*.{js,jsx,ts,tsx,css,md}' --config ./.prettierrc.js",
     "build": "next build",
+    "build:no-checks": "IGNORE_BUILD_ERRORS=true next build --no-lint",
     "build:debug": "BUILD_DEBUG=true next build --no-lint --no-mangling --debug",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbo --port 3001",

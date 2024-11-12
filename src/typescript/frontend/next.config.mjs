@@ -38,6 +38,7 @@ const nextConfig = {
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
+    ignoreBuildErrors: process.env.IGNORE_BUILD_ERRORS === "true",
   },
   compiler: {
     styledComponents: DEBUG ? styledComponentsConfig : true,

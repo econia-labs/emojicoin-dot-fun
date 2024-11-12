@@ -16,10 +16,16 @@
       ]
     },
     "build:debug": {
-      "dependsOn": [
-        "build"
-      ],
-      "outputs": []
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
+    },
+    "build:no-checks": {
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
     },
     "check": {
       "outputs": []
