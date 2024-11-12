@@ -41,6 +41,7 @@ import {
   toBar,
 } from "@/store/event/candlestick-bars";
 import { parseJSON } from "utils";
+import { EMOJI_FONT_FAMILY } from "components/emoji-picker/EmojiPickerWithInput";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
