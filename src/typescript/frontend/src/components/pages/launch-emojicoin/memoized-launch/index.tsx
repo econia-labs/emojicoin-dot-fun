@@ -152,7 +152,9 @@ export const MemoizedLaunchAnimation = ({
                   <span>{t("Your balance")}</span>
                   <div className={"flex flex-row absolute mt-[2px]"}>
                     <span className="opacity-0 select-none">{t("Your balance")}</span>
-                    <Emoji className="ml-[3px] text-[12px]">{sufficientBalance ? emoji("check mark button") : emoji("cross mark")}</Emoji>
+                    <Emoji className="ml-[3px] text-[12px]">
+                      {sufficientBalance ? emoji("check mark button") : emoji("cross mark")}
+                    </Emoji>
                   </div>
                 </div>
                 <div>

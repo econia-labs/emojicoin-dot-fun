@@ -13,7 +13,9 @@ export const ConnectToWebSockets = () => {
       {process.env.NODE_ENV === "development" && (
         <div className="relative w-full h-full">
           <div className="absolute top-4 right-4 z-[100] flex flex-col">
-            <Emoji className="m-auto">{connected ? emoji("green circle") : emoji("black circle")}</Emoji>
+            <Emoji className="m-auto">
+              {connected ? emoji("green circle") : emoji("black circle")}
+            </Emoji>
             <motion.div
               className="m-auto text-white font-pixelar uppercase text-2xl"
               key={received}
