@@ -15,4 +15,4 @@ rewards = "0xddd"
 authors = ["Econia Labs (developers@econialabs.com)"]
 name = "EmojicoinDotFunRewards"
 upgrade_policy = "compatible"
-version = "1.0.0"
+version = "1.0.1"

@@ -1,8 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-import { type DockerTestHarness } from "./utils/docker/docker-test-harness";
+import { DockerTestHarness } from "../src/utils/test/docker/docker-test-harness";
 
 export default async function postTest() {
-  // @ts-expect-error Using `globalThis` as any.
-  const testHarness: DockerTestHarness | undefined = globalThis.__TEST_HARNESS__;
-  if (testHarness) await testHarness.stop();
+  await DockerTestHarness.stop({ frontend: false });
 }

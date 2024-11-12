@@ -250,6 +250,7 @@ export const EmojiPickerWithInput = ({
                   onClick={() => {
                     setPickerInvisible(false);
                   }}
+                  data-testid="emoji-input"
                 />
                 {mode === "search" && close}
                 {mode === "chat" ? (
@@ -315,6 +316,7 @@ export const EmojiPickerWithInput = ({
           >
             <EmojiPicker
               id="picker"
+              data-testid="picker"
               className={mode}
               drag={(e) => ctrls.start(e, { snapToCursor: false })}
               filterEmojis={filterEmojis}

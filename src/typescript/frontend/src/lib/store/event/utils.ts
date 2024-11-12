@@ -75,7 +75,7 @@ export const handleLatestBarForSwapEvent = (
       throw new Error("This should never occur. It is a type guard/hint.");
     } else if (event.market.marketNonce >= data.latestBar.marketNonce) {
       const price = q64ToBig(event.swap.avgExecutionPriceQ64).toNumber();
-      data.latestBar.time = Number(getPeriodStartTimeFromTime(event.market.time, period));
+      data.latestBar.time = Number(getPeriodStartTimeFromTime(event.market.time, period) / 1000n);
       data.latestBar.close = price;
       data.latestBar.high = Math.max(data.latestBar.high, price);
       data.latestBar.low = Math.min(data.latestBar.low, price);

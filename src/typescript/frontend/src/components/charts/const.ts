@@ -47,6 +47,7 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
   theme: "Dark" as ThemeName,
   locale: "en" as LanguageCode,
   custom_css_url: "/styles/tradingview.css",
+  enabled_features: ["iframe_loading_compatibility_mode"],
   disabled_features: [
     "use_localstorage_for_settings" as ChartingLibraryFeatureset,
     "left_toolbar" as ChartingLibraryFeatureset,

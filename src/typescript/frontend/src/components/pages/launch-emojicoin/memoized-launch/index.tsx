@@ -1,4 +1,4 @@
-import { SYMBOL_DATA } from "@sdk/emoji_data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { MarketValidityIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { AnimatePresence, motion } from "framer-motion";
@@ -103,7 +103,7 @@ export const MemoizedLaunchAnimation = ({
           <div className="flex">
             <div className={labelClassName}>{t("Emojicoin Name:")}</div>
             <div className="body-sm md:body-lg uppercase ellipses text-white font-forma ml-[0.5ch]">
-              {emojis.map((e) => SYMBOL_DATA.byEmoji(e)?.name).join(", ")}
+              {emojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)?.name).join(", ")}
             </div>
           </div>
 

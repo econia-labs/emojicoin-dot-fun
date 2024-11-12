@@ -7,16 +7,9 @@ module.exports = {
   workerThreads: true,
   testEnvironment: "node",
   testEnvironmentOptions: {
-    // If we don't add this, all the jest tests that run/import server-only code will fail to
-    // import it and thus fail.
     customExportConditions: ["react-server", "node", "node-addons"],
   },
-  coveragePathIgnorePatterns: [
-    "src/cli/local-node.ts",
-    "src/helpers/misc.ts",
-    "src/helpers/aptos-client.ts",
-    "src/utils/env.ts",
-  ],
+  coveragePathIgnorePatterns: [],
   testPathIgnorePatterns: ["dist/*"],
   collectCoverage: false,
   coverageThreshold: {

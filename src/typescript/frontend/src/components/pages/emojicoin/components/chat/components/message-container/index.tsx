@@ -53,7 +53,12 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
       <StyledMessageContainer layout fromAnotherUser={fromAnotherUser}>
         <StyledMessageWrapper layout fromAnotherUser={fromAnotherUser}>
           <StyledMessageInner>
-            <span className="pt-[1ch] p-[0.25ch] text-xl tracking-widest">{message.text}</span>
+            <span
+              className="pt-[1ch] p-[0.25ch] text-xl tracking-widest"
+              style={{ wordBreak: "break-word" }}
+            >
+              {message.text}
+            </span>
             <Arrow />
           </StyledMessageInner>
 

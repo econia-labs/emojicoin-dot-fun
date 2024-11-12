@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useEffect } from "react";
 import AnimatedStatusIndicator from "./pages/launch-emojicoin/animated-status-indicator";
-import { getRandomEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
+import { getRandomSymbolEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
 
 export const Loading = ({
   emojis,
@@ -9,7 +11,7 @@ export const Loading = ({
   emojis?: SymbolEmojiData[];
   numSquares?: number;
 }) => {
-  const emojiCycle = emojis ?? Array.from({ length: 20 }, getRandomEmoji);
+  const emojiCycle = emojis ?? Array.from({ length: 20 }, getRandomSymbolEmoji);
   const [{ name, emoji }, setEmoji] = React.useState(emojiCycle[0]);
 
   useEffect(() => {

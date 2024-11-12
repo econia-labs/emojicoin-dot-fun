@@ -1,7 +1,7 @@
 import { sleep } from "../../../../src";
 import { getLatestProcessedEmojicoinVersion, postgrest } from "../../../../src/indexer-v2/queries";
 import { TableName } from "../../../../src/indexer-v2/types/json-types";
-import { EMOJICOIN_INDEXER_URL } from "../../../../src/server-env";
+import { EMOJICOIN_INDEXER_URL } from "../../../../src/server/env";
 
 const API_KEY = process.env.EMOJICOIN_INDEXER_API_KEY!;
 

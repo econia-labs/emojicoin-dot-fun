@@ -23,6 +23,7 @@ export const scales = {
   display5: "display5",
   display6: "display6",
   pixelHeading1: "pixelHeading1",
+  pixelHeading1b: "pixelHeading1b",
   pixelHeading2: "pixelHeading2",
   pixelHeading3: "pixelHeading3",
   pixelHeading4: "pixelHeading4",
