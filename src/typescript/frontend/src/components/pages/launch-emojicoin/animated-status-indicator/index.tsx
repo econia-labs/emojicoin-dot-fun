@@ -1,4 +1,4 @@
-import { getRandomEmoji } from "@sdk/emoji_data";
+import { getRandomSymbolEmoji } from "@sdk/emoji_data";
 import {
   // type AnimationSequence,
   // stagger,
@@ -86,7 +86,7 @@ export const AnimatedStatusIndicator = ({
   className?: string;
 }) => {
   const emojis = useMemo(() => Array.from({ length: numHearts }), [numHearts]).map(() =>
-    getRandomEmoji()
+    getRandomSymbolEmoji()
   );
   const degrees = 360 / numHearts;
 
