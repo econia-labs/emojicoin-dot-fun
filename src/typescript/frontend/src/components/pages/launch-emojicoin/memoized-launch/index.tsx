@@ -15,6 +15,7 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import { MARKET_REGISTRATION_DEPOSIT, ONE_APT_BIGINT } from "@sdk/const";
 import Info from "components/info";
 import { filterBigEmojis } from "components/pages/emoji-picker/EmojiPicker";
+import { Emoji } from "utils/emoji";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -109,14 +110,14 @@ export const MemoizedLaunchAnimation = ({
 
           <div className="flex">
             <div className={labelClassName}>{t("Emojicoin Symbol:")}</div>
-            <div
+            <Emoji
               className={
                 "body-sm md:body-lg uppercase whitespace-normal text-ellipsis text-white font-forma " +
                 "ml-[0.5ch] leading-6 "
               }
             >
               {emojis.join(", ")}
-            </div>
+            </Emoji>
           </div>
           <div className="flex flex-col justify-center m-auto pt-2 pixel-heading-4 uppercase">
             <div className="flex flex-col text-dark-gray">

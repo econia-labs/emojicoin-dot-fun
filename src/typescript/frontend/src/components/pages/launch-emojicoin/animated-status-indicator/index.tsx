@@ -1,6 +1,8 @@
 import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
 import React, { useCallback, useMemo } from "react";
 import { useEffect } from "react";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
 export type StaggerSpeed = 1 | 2 | 3 | 4 | 5;
 
@@ -80,7 +82,7 @@ export const AnimatedStatusIndicator = ({
                 }
           }
         >
-          {color ? "🟩" : "⬜"}
+          {color ? emoji("green square") : emoji("green square")}
         </span>
       )),
     [emptyArray]

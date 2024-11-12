@@ -3,6 +3,7 @@
 import type { fetchPriceFeed } from "@/queries/home";
 import Link from "next/link";
 import Carousel from "components/carousel";
+import { Emoji } from "utils/emoji";
 
 const Item = ({ emoji, change }: { emoji: string; change: number }) => {
   return (
@@ -11,7 +12,7 @@ const Item = ({ emoji, change }: { emoji: string; change: number }) => {
       className={`font-pixelar whitespace-nowrap border-[1px] border-solid ${change >= 0 ? "border-green" : "border-pink"} rounded-full px-3 py-[2px] select-none mr-[22px]`}
       draggable={false}
     >
-      <span className="text-xl mr-[9px]">{emoji}:</span>
+      <Emoji className="text-xl mr-[9px]">{emoji}</Emoji>
       <span className={`text-2xl ${change >= 0 ? "text-green" : "text-pink"}`}>
         {change >= 0 ? "+" : "-"} {Math.abs(change).toFixed(2)}%
       </span>

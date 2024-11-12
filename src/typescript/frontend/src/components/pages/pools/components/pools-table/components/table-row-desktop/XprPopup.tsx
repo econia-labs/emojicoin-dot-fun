@@ -1,5 +1,7 @@
 import { type ReactNode } from "react";
 import { Big } from "big.js";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;
@@ -13,7 +15,7 @@ export const getXPR = (x: number, tvlPerLpCoinGrowth: Big) =>
 
 export const formatXPR = (time: number, bigDailyTvl: Big) => {
   if (bigDailyTvl.eq(Big(0))) {
-    return `⏳`;
+    return <Emoji>{emoji("hourglass not done")}</Emoji>;
   }
   const xprIn = getXPR(time, bigDailyTvl);
   const xpr = xprIn.toFixed(4);

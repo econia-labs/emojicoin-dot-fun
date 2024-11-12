@@ -10,6 +10,8 @@ import { formatDisplayName } from "@sdk/utils";
 import Text from "components/text";
 import Popup from "components/popup";
 import { motion } from "framer-motion";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
 type TableRowTextItemProps = {
   className: string;
@@ -75,16 +77,16 @@ const TableRow = ({
         <Popup
           content={
             <Text textScale="pixelHeading4" lineHeight="20px" color="black">
-              {item.rankIcon === "🐡"
+              {item.rankIcon === emoji("blowfish")
                 ? "n00b"
-                : item.rankIcon === "🐳"
+                : item.rankIcon === emoji("whale")
                   ? "365 UR SO JULIA"
                   : "SKILL ISSUE"}
             </Text>
           }
         >
           <div className="flex h-full relative">
-            <span className="text-light-gray m-auto">{item.rankIcon}</span>
+            <Emoji className="text-light-gray m-auto">{item.rankIcon}</Emoji>
           </div>
         </Popup>
       </td>

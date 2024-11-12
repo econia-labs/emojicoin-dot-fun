@@ -1,4 +1,4 @@
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+import { ChatEmojiData, SYMBOL_EMOJI_DATA, SymbolEmojiData } from "@sdk/emoji_data";
 
 export { checkIsEllipsis } from "./check-is-ellipsis";
 export { getFileNameFromSrc } from "./get-file-name-from-src";
@@ -23,4 +23,4 @@ export const parseJSON = <T>(json: string): T =>
     return value as T;
   });
 
-export const emoji = (name: string): string => SYMBOL_EMOJI_DATA.byName(name)!.emoji;
+export const emoji = (name: Parameters<typeof SYMBOL_EMOJI_DATA.byStrictName>[0]): string => SYMBOL_EMOJI_DATA.byStrictName(name)!.emoji;

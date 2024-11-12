@@ -5,6 +5,7 @@ import AnimatedStatusIndicator, {
   type StaggerSpeed,
 } from "./pages/launch-emojicoin/animated-status-indicator";
 import { getRandomSymbolEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
+import { Emoji } from "utils/emoji";
 
 export const Loading = ({
   emojis,
@@ -32,7 +33,7 @@ export const Loading = ({
     <>
       <div className="flex relative w-full h-full m-auto">
         <div className="flex flex-col m-auto gap-10 max-w-[420px] justify-center items-center align-middle">
-          <div
+          <Emoji
             className={
               "flex flex-col h-full justify-center items-center align-middle text-center" +
               " mobile-sm:pixel-display-2 sm:pixel-display-2"
@@ -40,7 +41,7 @@ export const Loading = ({
             title={name}
           >
             {emoji}
-          </div>
+          </Emoji>
           <AnimatedStatusIndicator speed={animationSpeed} numSquares={numSquares} />
         </div>
       </div>

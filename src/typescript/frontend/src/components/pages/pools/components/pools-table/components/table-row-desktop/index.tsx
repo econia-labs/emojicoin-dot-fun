@@ -7,6 +7,7 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import Popup from "components/popup";
 import { Big } from "big.js";
 import { formatXPR, XprPopup } from "./XprPopup";
+import { Emoji } from "utils/emoji";
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
   const { isMobile } = useMatchBreakpoints();
@@ -23,7 +24,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             ellipsis
             title={item.market.symbolData.symbol.toUpperCase()}
           >
-            {item.market.symbolData.symbol}
+            <Emoji>{item.market.emojis}</Emoji>
           </Text>
         </Flex>
       </Td>
