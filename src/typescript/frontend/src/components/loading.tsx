@@ -7,9 +7,18 @@ import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA, type SymbolEmojiData } from "@
 import { Emoji } from "utils/emoji";
 import { usePathname } from "next/navigation";
 import { EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE } from "utils/pathname-helpers";
+import { EmojiMartData } from "./pages/emoji-picker/types";
+import { init } from "emoji-mart";
 
 const unpathify = (pathEmojiName: string) =>
   SYMBOL_EMOJI_DATA.byName(pathEmojiName.replaceAll(EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE));
+
+const data = fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then(
+  (res) =>
+    res.json().then((data) => {
+      return data as EmojiMartData;
+    })
+);
 
 export const Loading = ({
   emojis,
@@ -18,6 +27,13 @@ export const Loading = ({
   emojis?: SymbolEmojiData[];
   numEmojis?: number;
 }) => {
+  useEffect(() => {
+    data.then((d) => {
+      init({ set: "native", data: d });
+    });
+
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
   const pathname = usePathname();
   // Use the emojis in the path if we're on the `market` page.
   const emojisInPath = pathname
