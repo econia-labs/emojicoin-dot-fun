@@ -2,7 +2,12 @@
 
 import React, { useEffect, useMemo } from "react";
 import AnimatedStatusIndicator from "./pages/launch-emojicoin/animated-emoji-circle";
-import { getRandomSymbolEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
+import { getRandomSymbolEmoji, SYMBOL_EMOJI_DATA, type SymbolEmojiData } from "@sdk/emoji_data";
+import { usePathname } from "next/navigation";
+import { EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE } from "utils/pathname-helpers";
+
+const unpathify = (pathEmojiName: string) =>
+  SYMBOL_EMOJI_DATA.byName(pathEmojiName.replaceAll(EMOJI_PATH_INTRA_SEGMENT_DELIMITER, ONE_SPACE));
 
 export const Loading = ({
   emojis,
@@ -11,12 +16,23 @@ export const Loading = ({
   emojis?: SymbolEmojiData[];
   numEmojis?: number;
 }) => {
-  // console.log(emojis);
-  const emojiCycle =
-    typeof emojis === "undefined" || emojis.length === 0
-      ? Array.from({ length: 20 }, getRandomSymbolEmoji)
-      : emojis;
-  console.log("emoji cycle:", emojiCycle);
+  const pathname = usePathname();
+  // Use the emojis in the path if we're on the `market` page.
+  const emojisInPath = pathname
+    .split("/market/")
+    .at(1)
+    ?.split(";")
+    .map(unpathify)
+    .filter((e) => typeof e !== "undefined");
+
+  const emojiCycle = useMemo(() => {
+    if (emojisInPath?.length || emojis?.length) {
+      // Note the `emojis!` below is because TypeScript can't infer that it's defined, but it definitely is.
+      return emojisInPath?.length ? emojisInPath : emojis!;
+    }
+    return Array.from({ length: 20 }, getRandomSymbolEmoji);
+  }, [emojisInPath, emojis]);
+
   const [emojiName, setEmojiName] = React.useState(emojiCycle[0].name);
   const [emoji, setEmoji] = React.useState(emojiCycle[0].emoji);
 
@@ -25,7 +41,7 @@ export const Loading = ({
       emojiCycle.unshift(emojiCycle.pop()!);
       setEmoji(emojiCycle[0].emoji);
       setEmojiName(emojiCycle[0].name);
-    }, 3000);
+    }, 420.69);
 
     return () => clearInterval(interval);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
