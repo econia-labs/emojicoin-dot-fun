@@ -16,6 +16,7 @@ import Info from "components/info";
 import { filterBigEmojis } from "components/pages/emoji-picker/EmojiPicker";
 import { Emoji } from "utils/emoji";
 import { useScramble } from "use-scramble";
+import { emoji } from "utils";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -151,7 +152,7 @@ export const MemoizedLaunchAnimation = ({
                   <span>{t("Your balance")}</span>
                   <div className={"flex flex-row absolute mt-[2px]"}>
                     <span className="opacity-0 select-none">{t("Your balance")}</span>
-                    <div className="ml-[3px] text-[12px]">{sufficientBalance ? "✅" : "❌"}</div>
+                    <Emoji className="ml-[3px] text-[12px]">{sufficientBalance ? emoji("check mark button") : emoji("cross mark")}</Emoji>
                   </div>
                 </div>
                 <div>

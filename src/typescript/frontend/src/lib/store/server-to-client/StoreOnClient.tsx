@@ -8,6 +8,7 @@ import { useEventStore } from "context/event-store-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { emoji } from "utils";
 
 export const StoreOnClient = () => {
   const { account, connect, connected, wallet } = useWallet();
@@ -81,7 +82,7 @@ export const StoreOnClient = () => {
             }
           }}
         >
-          {"Fund me 💰"}
+          {"Fund me"} {emoji("money bag")}
         </button>
       </div>
     </>
