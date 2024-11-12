@@ -225,7 +225,9 @@ const TableCard = ({
               <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
             </Flex>
 
-            <Emoji className={`${getFontSize(emojis)} text-center mb-[22px] text-nowrap`}>{emojis}</Emoji>
+            <Emoji className={`${getFontSize(emojis)} text-center mb-[22px] text-nowrap`}>
+              {emojis}
+            </Emoji>
             <Text
               textScale="display4"
               textTransform="uppercase"

@@ -56,9 +56,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             {emojisToName(data.emojis)}
           </div>
 
-          <Emoji className="text-[24px] md:display-2 my-auto text-white">
-            {data.emojis}
-          </Emoji>
+          <Emoji className="text-[24px] md:display-2 my-auto text-white">{data.emojis}</Emoji>
         </div>
 
         <div className={statsWrapper}>

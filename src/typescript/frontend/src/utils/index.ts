@@ -23,4 +23,5 @@ export const parseJSON = <T>(json: string): T =>
     return value as T;
   });
 
-export const emoji = (name: Parameters<typeof SYMBOL_EMOJI_DATA.byStrictName>[0]): string => SYMBOL_EMOJI_DATA.byStrictName(name)!.emoji;
+export const emoji = (name: Parameters<typeof SYMBOL_EMOJI_DATA.byStrictName>[0]): string =>
+  SYMBOL_EMOJI_DATA.byStrictName(name)!.emoji;

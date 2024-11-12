@@ -84,7 +84,9 @@ const MainCard = (props: MainCardProps) => {
             ref={globeImage}
             placeholder="empty"
           />
-          <Emoji className={`styled-emoji ${featured?.market.emojis.length === 1 ? "styled-single-emoji" : "styled-double-emoji"}`}>
+          <Emoji
+            className={`styled-emoji ${featured?.market.emojis.length === 1 ? "styled-single-emoji" : "styled-double-emoji"}`}
+          >
             {featured?.market.emojis ?? emoji("black heart")}
           </Emoji>
         </Link>
@@ -94,9 +96,7 @@ const MainCard = (props: MainCardProps) => {
             <span className="text-medium-gray pixel-heading-text">HOT</span>
             <span>&nbsp;</span>
             <div>
-            <Emoji className="pixel-heading-emoji">
-              {emoji("fire")}
-            </Emoji>
+              <Emoji className="pixel-heading-emoji">{emoji("fire")}</Emoji>
             </div>
           </div>
           <div

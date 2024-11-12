@@ -17,7 +17,11 @@ import "./triangle.css";
 import { createPortal } from "react-dom";
 import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { Emoji } from "utils/emoji";
+
+const EMOJI_FONT_FAMILY =
+  '"EmojiMart", "Segoe UI Emoji", "Segoe UI Symbol", ' +
+  '"Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", ' +
+  '"Android Emoji"';
 
 const ChatInputBox = ({
   children,
@@ -252,7 +256,7 @@ export const EmojiPickerWithInput = ({
                     setPickerInvisible(false);
                   }}
                   data-testid="emoji-input"
-                  style={{fontFamily:'"EmojiMart", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji"'}}
+                  style={{ fontFamily: EMOJI_FONT_FAMILY }}
                 />
                 {mode === "search" && close}
                 {mode === "chat" ? (
