@@ -85,7 +85,7 @@ const EmojiTable = (props: EmojiTableProps) => {
   };
 
   useEffect(() => {
-    pushURL();
+    pushURL({ page: 0 });
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [emojis]);
 
