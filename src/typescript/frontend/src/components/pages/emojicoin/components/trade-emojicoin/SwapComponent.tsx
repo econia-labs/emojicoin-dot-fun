@@ -32,7 +32,7 @@ import { useThemeContext } from "context";
 import { TradeOptions } from "components/selects/trade-options";
 import { getMaxSlippageSettings } from "utils/slippage";
 import { Emoji } from "utils/emoji";
-import { SYMBOL_EMOJI_DATA } from "@sdk/index";
+import { type SYMBOL_EMOJI_DATA } from "@sdk/index";
 
 const SmallEmojiButton = ({
   emoji: emojiName,

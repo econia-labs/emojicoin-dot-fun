@@ -12,7 +12,9 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
 const checkmarkOrX = (bool: boolean) => {
-  return <Emoji className="text-lg">{bool ? emoji("check mark button") : emoji("cross mark")}</Emoji>;
+  return (
+    <Emoji className="text-lg">{bool ? emoji("check mark button") : emoji("cross mark")}</Emoji>
+  );
 };
 
 export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {

@@ -1,4 +1,4 @@
-import { ChatEmojiData, SYMBOL_EMOJI_DATA, SymbolEmojiData } from "@sdk/emoji_data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 
 export { checkIsEllipsis } from "./check-is-ellipsis";
 export { getFileNameFromSrc } from "./get-file-name-from-src";

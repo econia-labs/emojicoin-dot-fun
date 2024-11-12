@@ -38,7 +38,6 @@ const getFontSize = (emojis: SymbolEmojiData[]) =>
 const TableCard = ({
   index,
   marketID,
-  symbol,
   emojis,
   staticMarketCap,
   staticVolume24H,
