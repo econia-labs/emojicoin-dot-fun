@@ -177,7 +177,7 @@ export default function EmojiPicker(
     }
   }, []);
 
-  const { drag, ...propsRest } = props;
+  const { drag, filterEmojis, ...propsRest } = props;
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -200,7 +200,7 @@ export default function EmojiPicker(
             theme="dark"
             perLine={8}
             exceptEmojis={[]}
-            filterEmojis={props.filterEmojis}
+            filterEmojis={filterEmojis}
             onEmojiSelect={(v: EmojiSelectorData) => {
               const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
               insertEmojiTextInput([newEmoji]);

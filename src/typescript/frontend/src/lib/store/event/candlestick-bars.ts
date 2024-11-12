@@ -59,7 +59,7 @@ export const toBar = (event: PeriodicStateEventModel): Bar => ({
   high: q64ToBig(event.periodicState.highPriceQ64).toNumber(),
   low: q64ToBig(event.periodicState.lowPriceQ64).toNumber(),
   close: q64ToBig(event.periodicState.closePriceQ64).toNumber(),
-  volume: Number(event.periodicState.volumeQuote),
+  volume: Number(event.periodicState.volumeBase),
 });
 
 export const toBars = (events: PeriodicStateEventModel | PeriodicStateEventModel[]) =>
@@ -75,7 +75,9 @@ export const createBarFromSwap = (
   const periodStartTime = getPeriodStartTimeFromTime(market.time, period);
   return {
     time: Number(periodStartTime / 1000n),
-    open: previousClose ?? price,
+    // Only use previousClose if it's a truthy value, otherwise, new bars that follow bars with no
+    // trading activity will appear as a huge green candlestick because their open price is `0`.
+    open: previousClose ? previousClose : price,
     high: price,
     low: price,
     close: price,
@@ -94,7 +96,9 @@ export const createBarFromPeriodicState = (
   const price = q64ToBig(periodicState.closePriceQ64).toNumber();
   return {
     time: periodEnumToRawDuration(period) / 1000,
-    open: previousClose ?? price,
+    // Only use previousClose if it's a truthy value, otherwise, new bars that follow bars with no
+    // trading activity will appear as a huge green candlestick because their open price is `0`.
+    open: previousClose ? previousClose : price,
     high: price,
     low: price,
     close: price,

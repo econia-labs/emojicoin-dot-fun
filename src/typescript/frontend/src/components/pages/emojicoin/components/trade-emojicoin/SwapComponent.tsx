@@ -16,7 +16,7 @@ import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals"
 import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
 import { useEventStore } from "context/event-store-context";
-import { useMatchBreakpoints } from "@hooks/index";
+import { useMatchBreakpoints, useTooltip } from "@hooks/index";
 import { useSearchParams } from "next/navigation";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -26,6 +26,11 @@ import { Flex, FlexGap } from "@containers";
 import Popup from "components/popup";
 import { Text } from "components/text";
 import { InputNumeric } from "components/inputs";
+import { emoji } from "utils";
+import { getTooltipStyles } from "components/selects/theme";
+import { useThemeContext } from "context";
+import { TradeOptions } from "components/selects/trade-options";
+import { getMaxSlippageSettings } from "utils/slippage";
 
 const SmallButton = ({
   emoji,
@@ -113,6 +118,13 @@ export default function SwapComponent({
     [aptBalance]
   );
 
+  const [maxSlippage, setMaxSlippage] = useState(getMaxSlippageSettings().maxSlippage);
+
+  const minOutputAmount =
+    outputAmount - (outputAmount * maxSlippage) / 10000n > 0n
+      ? outputAmount - (outputAmount * maxSlippage) / 10000n
+      : 1n;
+
   const numSwaps = useEventStore(
     (s) => s.getMarket(marketEmojis)?.swapEvents.length ?? initNumSwaps
   );
@@ -122,7 +134,7 @@ export default function SwapComponent({
     setEmojicoinType(emojicoinType);
   }, [marketAddress, setEmojicoinType]);
 
-  const swapResult = useSimulateSwap({
+  const swapData = useSimulateSwap({
     marketAddress,
     inputAmount: inputAmount.toString(),
     isSell,
@@ -133,6 +145,14 @@ export default function SwapComponent({
     num: isLoading ? previous : outputAmount,
     decimals: OUTPUT_DISPLAY_DECIMALS,
   });
+
+  let swapResult: bigint = 0n;
+  let gasCost: bigint | null = null;
+
+  if (swapData) {
+    swapResult = swapData.swapResult;
+    gasCost = swapData.gasCost;
+  }
 
   const { ref, replay } = useScramble({
     text: new Intl.NumberFormat().format(Number(outputAmountString)),
@@ -188,6 +208,19 @@ export default function SwapComponent({
       </AnimatePresence>
     );
   }, [t, account, isSell, aptBalance, emojicoinBalance, sufficientBalance]);
+
+  const { theme } = useThemeContext();
+
+  const { targetRef, tooltip } = useTooltip(
+    <TradeOptions
+      onMaxSlippageUpdate={() => setMaxSlippage(getMaxSlippageSettings().maxSlippage)}
+    />,
+    {
+      placement: "bottom",
+      customStyles: getTooltipStyles(theme),
+      trigger: "click",
+    }
+  );
 
   return (
     <>
@@ -289,6 +322,23 @@ export default function SwapComponent({
             {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
           </InnerWrapper>
         </SimulateInputsWrapper>
+        <div className="flex flex-row justify-between py-[10px]">
+          <div className="cursor-pointer" ref={targetRef}>
+            {emoji("gear")}
+          </div>
+          {tooltip}
+          <div className="text-dark-gray">
+            <span className="text-xl leading-[0]">
+              {gasCost === null ? "~" : ""}
+              {toDisplayCoinDecimals({
+                num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
+                decimals: 4,
+              })}{" "}
+              APT
+            </span>{" "}
+            {emoji("fuel pump")}
+          </div>
+        </div>
 
         <Row className="justify-center mt-[14px]">
           <SwapButton
@@ -301,6 +351,7 @@ export default function SwapComponent({
             disabled={!sufficientBalance && !isLoading && !!account}
             geoblocked={geoblocked}
             symbol={emojicoin}
+            minOutputAmount={minOutputAmount}
           />
         </Row>
       </Column>

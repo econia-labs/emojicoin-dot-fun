@@ -11,17 +11,19 @@ export type ButtonsBlockProps = {
   value: number;
   numPages: number;
   onChange: (page: number) => void;
+  className?: string;
 };
 
 const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
   value,
   numPages,
   onChange,
+  className,
 }: ButtonsBlockProps) => {
   const { isMobile } = useMatchBreakpoints();
   const gap = isMobile ? "12px" : "17px";
   return (
-    <FlexGap gap={gap} justifyContent="center" marginTop="30px">
+    <FlexGap className={className} gap={gap} justifyContent="center">
       {/* First */}
       <StyledBtn onClick={() => onChange(1)}>
         <Text className="med-pixel-text" fontSize="48px" color="darkGray">
@@ -49,7 +51,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
           {"{"}
         </Text>
 
-        <Arrow className="med-pixel-search" rotate="180deg" />
+        <Arrow className="med-pixel-search-arrows" rotate="180deg" />
 
         <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}
@@ -95,7 +97,7 @@ const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
           {"{"}
         </Text>
 
-        <Arrow className="med-pixel-search" />
+        <Arrow className="med-pixel-search-arrows" />
 
         <Text className="med-pixel-text" fontSize="48px" color="darkGray">
           {"}"}
