@@ -1,6 +1,20 @@
 import { getEmojisInString, type SymbolEmojiData } from "@sdk/index";
 import { type DetailedHTMLProps, type HTMLAttributes } from "react";
 
+import * as React from "react";
+declare global {
+  /* eslint-disable-next-line @typescript-eslint/no-namespace */
+  namespace JSX {
+    interface IntrinsicElements {
+      "em-emoji": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        size?: string;
+        native?: string;
+        key?: string;
+      };
+    }
+  }
+}
+
 export const Emoji = ({
   children,
   ...props
@@ -12,7 +26,7 @@ export const Emoji = ({
     const emojis = getEmojisInString(children);
     data = emojis.map((e) => <em-emoji key={e} size="1em" native={e}></em-emoji>);
   } else {
-    data = children.map((e) => <em-emoji key={e} size="1em" native={e.emoji}></em-emoji>);
+    data = children.map((e) => <em-emoji key={e.emoji} size="1em" native={e.emoji}></em-emoji>);
   }
   return <span {...props}>{data}</span>;
 };
