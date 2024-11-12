@@ -1,23 +1,30 @@
 "use client";
 
-import React, { useEffect } from "react";
-import AnimatedStatusIndicator from "./pages/launch-emojicoin/animated-status-indicator";
+import React, { useEffect, useMemo } from "react";
+import AnimatedStatusIndicator from "./pages/launch-emojicoin/animated-emoji-circle";
 import { getRandomSymbolEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
 
 export const Loading = ({
   emojis,
-  numSquares,
+  numEmojis,
 }: {
   emojis?: SymbolEmojiData[];
-  numSquares?: number;
+  numEmojis?: number;
 }) => {
-  const emojiCycle = emojis ?? Array.from({ length: 20 }, getRandomSymbolEmoji);
-  const [{ name, emoji }, setEmoji] = React.useState(emojiCycle[0]);
+  // console.log(emojis);
+  const emojiCycle =
+    typeof emojis === "undefined" || emojis.length === 0
+      ? Array.from({ length: 20 }, getRandomSymbolEmoji)
+      : emojis;
+  console.log("emoji cycle:", emojiCycle);
+  const [emojiName, setEmojiName] = React.useState(emojiCycle[0].name);
+  const [emoji, setEmoji] = React.useState(emojiCycle[0].emoji);
 
   useEffect(() => {
     const interval = setInterval(() => {
       emojiCycle.unshift(emojiCycle.pop()!);
-      setEmoji(emojiCycle[0]);
+      setEmoji(emojiCycle[0].emoji);
+      setEmojiName(emojiCycle[0].name);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -36,11 +43,11 @@ export const Loading = ({
               " text-center mt-[.3rem]" +
               " mobile-sm:pixel-display-2 sm:pixel-display-2 !text-5xl"
             }
-            title={name}
+            title={emojiName}
           >
             {emoji}
           </div>
-          <AnimatedStatusIndicator className={centered} numHearts={numSquares} />
+          <AnimatedStatusIndicator className={centered} numEmojis={numEmojis} />
         </div>
       </div>
     </>

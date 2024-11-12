@@ -1,9 +1,8 @@
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+import { SYMBOL_EMOJI_DATA, symbolToEmojis } from "@sdk/emoji_data";
 import { MarketValidityIndicator } from "components/emoji-picker/ColoredBytesIndicator";
 import EmojiPickerWithInput from "components/emoji-picker/EmojiPickerWithInput";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useMemo } from "react";
-import AnimatedStatusIndicator from "../animated-status-indicator";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { translationFunction } from "context/language-context";
 import { useRegisterMarket } from "../hooks/use-register-market";
@@ -15,6 +14,9 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import { MARKET_REGISTRATION_DEPOSIT, ONE_APT_BIGINT } from "@sdk/const";
 import Info from "components/info";
 import { filterBigEmojis } from "components/pages/emoji-picker/EmojiPicker";
+import Loading from "components/loading";
+import AnimatedStatusIndicator from "../animated-emoji-circle";
+import { useScramble } from "use-scramble";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
@@ -67,6 +69,15 @@ export const MemoizedLaunchAnimation = ({
       await registerMarket();
     }
   };
+
+  const { ref } = useScramble({
+    text: "Building your emojicoin...",
+    overdrive: false,
+    overflow: true,
+    playOnMount: true,
+    scramble: 10,
+    tick: 9,
+  });
 
   return (
     <AnimatePresence initial={false} mode="wait">
@@ -198,10 +209,9 @@ export const MemoizedLaunchAnimation = ({
           animate={{ opacity: 1 }}
           className="absolute flex flex-col justify-center items-center w-full h-full gap-6"
         >
-          <span className="pixel-heading-3 text-ec-blue uppercase">Building your emojicoin...</span>
-          <div className="relative">
-            <AnimatedStatusIndicator />
-          </div>
+          <span ref={ref} className="pixel-heading-3 text-ec-blue uppercase">
+            Building your emojicoin...
+          </span>
         </motion.div>
       )}
     </AnimatePresence>

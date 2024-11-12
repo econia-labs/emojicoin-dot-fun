@@ -41,12 +41,12 @@ import React, { useMemo } from "react";
 //};
 
 //export const AnimatedStatusIndicator = ({
-//  numHearts = 14,
+//  numEmojis = 14,
 //}: {
-//  numHearts?: number;
+//  numEmojis?: number;
 //}) => {
 //  const scope = useStaggerAnimation();
-//  const emptyArray = useMemo(() => Array.from({ length: numHearts }), [numHearts]);
+//  const emptyArray = useMemo(() => Array.from({ length: numEmojis }), [numEmojis]);
 //
 //  const getHearts = useCallback(
 //    (emoji: string, index: number) =>
@@ -79,16 +79,16 @@ import React, { useMemo } from "react";
 //export default React.memo(AnimatedStatusIndicator);
 
 export const AnimatedStatusIndicator = ({
-  numHearts = 14,
+  numEmojis = 14,
   className,
 }: {
-  numHearts?: number;
+  numEmojis?: number;
   className?: string;
 }) => {
-  const emojis = useMemo(() => Array.from({ length: numHearts }), [numHearts]).map(() =>
+  const emojis = useMemo(() => Array.from({ length: numEmojis }), [numEmojis]).map(() =>
     getRandomSymbolEmoji()
   );
-  const degrees = 360 / numHearts;
+  const degrees = 360 / numEmojis;
 
   return (
     <motion.div
@@ -103,7 +103,7 @@ export const AnimatedStatusIndicator = ({
       }}
     >
       {emojis.map((emoji, i) => (
-        <div key={`heart-row-${i}`} className="relative">
+        <div key={`emoji-row-${i}`} className="relative">
           <div
             className="z-[-1] absolute top-0 left-0 w-[20px] h-[150px]"
             style={{
@@ -127,7 +127,7 @@ export const AnimatedStatusIndicator = ({
                 opacity: [null, 0, 1],
               }}
               transition={{
-                delay: (1 / numHearts) * i,
+                delay: (1 / numEmojis) * i,
                 duration: 1,
                 ease: "circIn",
                 repeat: Infinity,

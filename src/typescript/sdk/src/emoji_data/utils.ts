@@ -103,6 +103,8 @@ export const isValidMarketSymbol = (symbol: string): boolean => {
  */
 export const symbolToEmojis = (symbolInput: string | string[]) => {
   const symbol = Array.isArray(symbolInput) ? symbolInput.join("") : symbolInput;
+  console.log("symbol:", symbol);
+  console.log("emojis in string:", getEmojisInString(symbol));
   const emojis = getEmojisInString(symbol)
     .map((emoji) => getEmojiData(emoji))
     .filter((data) => data !== undefined);
