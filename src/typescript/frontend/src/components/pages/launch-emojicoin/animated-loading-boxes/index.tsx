@@ -53,7 +53,7 @@ const useStaggerAnimation = ({
   return scope;
 };
 
-export const AnimatedStatusIndicator = ({
+export const AnimatedLoadingBoxes = ({
   numSquares = 14,
   delay,
   speed,
@@ -101,4 +101,4 @@ export const AnimatedStatusIndicator = ({
   );
 };
 
-export default React.memo(AnimatedStatusIndicator);
+export default React.memo(AnimatedLoadingBoxes);

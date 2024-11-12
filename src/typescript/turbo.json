@@ -71,6 +71,10 @@
     "test:sequential": {
       "cache": false,
       "outputs": []
+    },
+    "test:unit": {
+      "cache": false,
+      "outputs": []
     }
   }
 }
