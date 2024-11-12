@@ -336,7 +336,7 @@ export class EmojicoinClient {
     const { marketNonce, marketID } = res.events.swapEvents[0];
     return {
       ...res,
-      sell: {
+      swap: {
         event: expect(res.events.swapEvents.at(0), Expect.Swap.Event),
         model: expect(res.models.swapEvents.at(0), Expect.Swap.Model),
       },
