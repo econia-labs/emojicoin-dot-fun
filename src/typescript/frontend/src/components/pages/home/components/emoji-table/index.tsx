@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo } from "react";
 
-import { ButtonsBlock } from "./components";
+import { ButtonsBlock } from "./components/buttons-block";
 import {
   InnerGridContainer,
   SearchWrapper,
