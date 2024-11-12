@@ -23,7 +23,7 @@ import {
 import { Arrows } from "components/svg";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { useSearchParams } from "next/navigation";
-import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-status-indicator";
+import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-emoji-circle";
 import { TypeTag } from "@aptos-labs/ts-sdk";
 import Info from "components/info";
 import { type AnyNumberString } from "@sdk/types/types";
@@ -98,7 +98,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
     searchParams.get("remove") !== null ? "remove" : "add"
   );
 
-  const loadingComponent = useMemo(() => <AnimatedStatusIndicator numSquares={4} />, []);
+  const loadingComponent = useMemo(() => <AnimatedStatusIndicator numEmojis={4} />, []);
 
   const {
     aptos,
