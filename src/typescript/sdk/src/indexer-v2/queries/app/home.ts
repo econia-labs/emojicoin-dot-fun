@@ -6,12 +6,13 @@ import { LIMIT, ORDER_BY } from "../../../queries/const";
 import { SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
 import { DatabaseRpc, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
-import { getLatestProcessedEmojicoinVersion, queryHelper } from "../utils";
+import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
 import { DatabaseTypeConverter } from "../../types";
 import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
 import { toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
+import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 const selectMarketStates = ({
   page = 1,
@@ -20,10 +21,19 @@ const selectMarketStates = ({
   searchEmojis,
   sortBy = SortMarketsBy.MarketCap,
   inBondingCurve,
-}: MarketStateQueryArgs) => {
-  let query = postgrest
-    .from(TableName.MarketState)
-    .select("*")
+  count,
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+}: MarketStateQueryArgs): PostgrestFilterBuilder<any, any, any[], TableName, unknown> => {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  let query: any = postgrest.from(TableName.MarketState);
+
+  if (count === true) {
+    query = query.select("*", { count: "exact" });
+  } else {
+    query = query.select("*");
+  }
+
+  query = query
     .order(sortByWithFallback(sortBy), orderBy)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
@@ -39,6 +49,11 @@ const selectMarketStates = ({
 };
 
 export const fetchMarkets = queryHelper(
+  selectMarketStates,
+  DatabaseTypeConverter[TableName.MarketState]
+);
+
+export const fetchMarketsWithCount = queryHelperWithCount(
   selectMarketStates,
   DatabaseTypeConverter[TableName.MarketState]
 );

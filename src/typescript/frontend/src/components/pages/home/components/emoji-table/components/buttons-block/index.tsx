@@ -14,7 +14,7 @@ export type ButtonsBlockProps = {
   className?: string;
 };
 
-const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
+export const ButtonsBlock: React.FC<ButtonsBlockProps> = ({
   value,
   numPages,
   onChange,

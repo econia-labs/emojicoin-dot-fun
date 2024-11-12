@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo } from "react";
 
-import { ButtonsBlock } from "./components";
+import { ButtonsBlock } from "./components/buttons-block";
 import {
   InnerGridContainer,
   SearchWrapper,
@@ -42,7 +42,7 @@ const EmojiTable = (props: EmojiTableProps) => {
 
   const { markets, page, sort, pages, searchBytes } = useMemo(() => {
     const { markets, page, sortBy: sort } = props;
-    const numMarkets = Math.max(props.numRegisteredMarkets, 1);
+    const numMarkets = Math.max(props.numMarkets, 1);
     const pages = Math.ceil(numMarkets / MARKETS_PER_PAGE);
     const searchBytes = props.searchBytes ?? "";
     return { markets, page, sort, pages, searchBytes };
@@ -85,7 +85,7 @@ const EmojiTable = (props: EmojiTableProps) => {
   };
 
   useEffect(() => {
-    pushURL();
+    pushURL({ page: 0 });
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [emojis]);
 
