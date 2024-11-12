@@ -171,7 +171,6 @@ describe("all submission types for the emojicoin client", () => {
       emojicoin.sell(sender, emojis, inputAmount).then(({ response, events, swap: sell }) => {
         const { success } = response;
         const payload = response.payload as EntryFunctionPayloadResponse;
-        const endMicroseconds = events.swapEvents[0].time;
         expect(success).toBe(true);
         expect(payload.function).toEqual(functionNames.swap);
         expect(events.chatEvents.length).toEqual(0);
