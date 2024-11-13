@@ -15,7 +15,7 @@ export const getXPR = (x: number, tvlPerLpCoinGrowth: Big) =>
 
 export const formatXPR = (time: number, bigDailyTvl: Big) => {
   if (bigDailyTvl.eq(Big(0))) {
-    return <Emoji>{emoji("hourglass not done")}</Emoji>;
+    return <Emoji emojis={emoji("hourglass not done")} />;
   }
   const xprIn = getXPR(time, bigDailyTvl);
   const xpr = xprIn.toFixed(4);

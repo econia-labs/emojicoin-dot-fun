@@ -10,7 +10,7 @@ export const EmojiNotFound = () => {
   return (
     <Flex flexDirection="column" alignItems="center" justifyContent="center" height="100%">
       <Text textScale="display2" color={"warning"} textAlign="center" paddingY={100}>
-        {t("Emoji not found.")} <Emoji>{emoji("flushed face")}</Emoji>
+        {t("Emoji not found.")} <Emoji emojis={emoji("flushed face")} />
       </Text>
     </Flex>
   );

@@ -55,7 +55,7 @@ const SmallEmojiButton = ({
         className="px-[.7rem] py-[.2rem] border-[1px] border-solid rounded-full border-dark-gray h-[1.5rem] cursor-pointer hover:bg-neutral-800"
         onClick={onClick}
       >
-        <Emoji className="mt-[.11rem]">{emoji(emojiName)}</Emoji>
+        <Emoji className="mt-[.11rem]" emojis={emoji(emojiName)} />
       </div>
     </Popup>
   );
@@ -325,9 +325,7 @@ export default function SwapComponent({
           </InnerWrapper>
         </SimulateInputsWrapper>
         <div className="flex flex-row justify-between py-[10px]">
-          <Emoji className="cursor-pointer" ref={targetRef}>
-            {emoji("gear")}
-          </Emoji>
+          <Emoji className="cursor-pointer" ref={targetRef} emojis={emoji("gear")} />
           {tooltip}
           <div className="text-dark-gray">
             <span className="text-xl leading-[0]">
@@ -338,7 +336,7 @@ export default function SwapComponent({
               })}{" "}
               APT
             </span>{" "}
-            <Emoji>{emoji("fuel pump")}</Emoji>
+            <Emoji emojis={emoji("fuel pump")} />
           </div>
         </div>
 

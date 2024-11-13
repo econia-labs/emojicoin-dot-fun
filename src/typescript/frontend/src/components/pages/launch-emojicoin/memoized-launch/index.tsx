@@ -125,9 +125,8 @@ export const MemoizedLaunchAnimation = ({
                 "body-sm md:body-lg uppercase whitespace-normal text-ellipsis text-white font-forma " +
                 "ml-[0.5ch] leading-6 "
               }
-            >
-              {emojis.join(", ")}
-            </Emoji>
+              emojis={emojis.join("")}
+            />
           </div>
           <div className="flex flex-col justify-center m-auto pt-2 pixel-heading-4 uppercase">
             <div className="flex flex-col text-dark-gray">
@@ -152,9 +151,10 @@ export const MemoizedLaunchAnimation = ({
                   <span>{t("Your balance")}</span>
                   <div className={"flex flex-row absolute mt-[2px]"}>
                     <span className="opacity-0 select-none">{t("Your balance")}</span>
-                    <Emoji className="ml-[3px] text-[12px]">
-                      {sufficientBalance ? emoji("check mark button") : emoji("cross mark")}
-                    </Emoji>
+                    <Emoji
+                      className="ml-[3px] text-[12px]"
+                      emojis={sufficientBalance ? emoji("check mark button") : emoji("cross mark")}
+                    />
                   </div>
                 </div>
                 <div>

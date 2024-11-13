@@ -375,7 +375,7 @@ export const Chart = (props: ChartContainerProps) => {
             <>
               <div>
                 <span>{"The browser you're using isn't supported. "}</span>
-                <Emoji>{emoji("pensive face")}</Emoji>
+                <Emoji emojis={emoji("pensive face")} />
               </div>
               <div>
                 <span>{" Please try viewing in another browser."}</span>

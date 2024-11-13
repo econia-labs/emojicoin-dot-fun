@@ -34,9 +34,8 @@ export const AnimatedStatusIndicator = ({
             style={{
               transform: `translateX(-50%) translateY(-50%) rotate(${degrees * i}deg)`,
             }}
-          >
-            {emoji.emoji}
-          </Emoji>
+            emojis={emoji.emoji}
+          />
           <div
             className="z-[1] absolute top-0 left-0 w-[30px] h-[160px]"
             style={{

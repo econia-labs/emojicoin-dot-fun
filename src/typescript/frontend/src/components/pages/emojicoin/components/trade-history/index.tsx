@@ -88,7 +88,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
             <span className="flex my-auto">APT</span>
           </ThWrapper>
           <ThWrapper className="flex w-[22%] md:w-[18%]">
-            <Emoji className="flex my-auto">{props.data.symbol}</Emoji>
+            <Emoji className="flex my-auto" emojis={props.data.symbol} />
           </ThWrapper>
           <ThWrapper className="hidden md:flex md:w-[24%]">
             <span className="flex my-auto">Time</span>

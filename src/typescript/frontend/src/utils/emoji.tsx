@@ -1,4 +1,4 @@
-import { getEmojisInString, type SymbolEmojiData } from "@sdk/index";
+import { type AnyEmojiData, getEmojisInString } from "@sdk/index";
 import { type DetailedHTMLProps, type HTMLAttributes } from "react";
 
 import * as React from "react";
@@ -16,17 +16,21 @@ declare global {
 }
 
 export const Emoji = ({
-  children,
+  emojis,
   ...props
 }: Omit<DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, "children"> & {
-  children: SymbolEmojiData[] | string;
+  emojis: AnyEmojiData[] | string;
 }) => {
   let data: React.ReactNode[] = [];
-  if (typeof children === "string") {
-    const emojis = getEmojisInString(children);
-    data = emojis.map((e) => <em-emoji key={e} size="1em" native={e}></em-emoji>);
+  if (typeof emojis === "string") {
+    const emojisInString = getEmojisInString(emojis);
+    data = emojisInString.map((e, i) => (
+      <em-emoji key={`${emojisInString[i]}-${i}`} size="1em" native={e}></em-emoji>
+    ));
   } else {
-    data = children.map((e) => <em-emoji key={e.emoji} size="1em" native={e.emoji}></em-emoji>);
+    data = emojis.map((e, i) => (
+      <em-emoji key={`${emojis[i].emoji}-${i}`} size="1em" native={e.emoji}></em-emoji>
+    ));
   }
   return <span {...props}>{data}</span>;
 };

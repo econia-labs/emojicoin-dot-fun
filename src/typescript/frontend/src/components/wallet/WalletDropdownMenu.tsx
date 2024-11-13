@@ -68,17 +68,19 @@ const WalletDropdownMenu = () => {
         <DropdownTrigger asChild className="focus:outline-none">
           <button className="" onMouseOver={() => handleReplay(enabled, replay)}>
             <div className="flex flex-row text-ec-blue text-2xl">
-              <Emoji className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">
-                {emoji("high voltage")}
-              </Emoji>
+              <Emoji
+                className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage"
+                emojis={emoji("high voltage")}
+              />
               <p
                 className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
                 style={{ width, maxWidth: width }}
                 ref={ref}
               />
-              <Emoji className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">
-                {emoji("high voltage")}
-              </Emoji>
+              <Emoji
+                className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage"
+                emojis={emoji("high voltage")}
+              />
             </div>
           </button>
         </DropdownTrigger>

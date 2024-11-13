@@ -119,12 +119,14 @@ export const WalletItem: React.FC<{
       <div className={ArrowDivClassName}>
         {wallet.name === current?.name ? (
           <>
-            <Emoji className="absolute bottom-[-2px] right-[5px] mr-[1ch] inline-flex group-hover:hidden animate-flicker drop-shadow-text">
-              {emoji("high voltage")}
-            </Emoji>
-            <Emoji className="absolute bottom-[-2px] right-[6px] mr-[1ch] hidden group-hover:inline-flex scale-[0.75]">
-              {emoji("cross mark")}
-            </Emoji>
+            <Emoji
+              className="absolute bottom-[-2px] right-[5px] mr-[1ch] inline-flex group-hover:hidden animate-flicker drop-shadow-text"
+              emojis={emoji("high voltage")}
+            />
+            <Emoji
+              className="absolute bottom-[-2px] right-[6px] mr-[1ch] hidden group-hover:inline-flex scale-[0.75]"
+              emojis={emoji("cross mark")}
+            />
           </>
         ) : (
           <Arrow width={16} height={19} className="fill-black mr-[1ch]" />

@@ -86,7 +86,7 @@ const TableRow = ({
           }
         >
           <div className="flex h-full relative">
-            <Emoji className="text-light-gray m-auto">{item.rankIcon}</Emoji>
+            <Emoji className="text-light-gray m-auto" emojis={item.rankIcon} />
           </div>
         </Popup>
       </td>

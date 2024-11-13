@@ -15,6 +15,7 @@ export type AllChatEmojiData = typeof AllChatEmojiJSON;
 export type ChatEmoji = keyof AllChatEmojiData;
 export type ChatEmojiName = keyof typeof ChatNamesJSON;
 
+export type AnyEmoji = SymbolEmoji | ChatEmoji;
 export type AnyEmojiName = SymbolEmojiName | ChatEmojiName;
 
 /**
@@ -41,6 +42,8 @@ export type ChatEmojiData = {
   bytes: Uint8Array;
   emoji: ChatEmoji;
 };
+
+export type AnyEmojiData = SymbolEmojiData | ChatEmojiData;
 
 /**
  * The final concatenated symbol data for a market symbol. This will consist of data for one or

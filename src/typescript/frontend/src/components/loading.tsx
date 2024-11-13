@@ -81,9 +81,8 @@ export const Loading = ({
               " mobile-sm:pixel-display-2 sm:pixel-display-2 !text-5xl"
             }
             title={emojiName}
-          >
-            {emoji}
-          </Emoji>
+            emojis={emoji}
+          />
           <AnimatedStatusIndicator className={centered} numEmojis={numEmojis} />
         </div>
       </div>

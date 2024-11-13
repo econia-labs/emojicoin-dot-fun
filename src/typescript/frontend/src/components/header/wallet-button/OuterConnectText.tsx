@@ -18,9 +18,10 @@ export const OuterConnectText = ({
     }
     return (
       <div className={side === "left" ? "pr-2.5" : "pl-2.5"}>
-        <Emoji className="text-base flex mt-2.5 animate-flicker drop-shadow-voltage">
-          {emoji("high voltage")}
-        </Emoji>
+        <Emoji
+          className="text-base flex mt-2.5 animate-flicker drop-shadow-voltage"
+          emojis={emoji("high voltage")}
+        />
       </div>
     );
   } else {

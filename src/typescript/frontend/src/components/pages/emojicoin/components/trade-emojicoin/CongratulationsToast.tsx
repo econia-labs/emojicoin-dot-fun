@@ -17,7 +17,7 @@ export const CongratulationsToast = ({
   const amountString = toDisplayCoinDecimals({ num: amount, decimals: 2 });
   return (
     <div className="flex flex-col text-center">
-      <Emoji className="text-7xl p-[20px]">{emoji("party popper")}</Emoji>
+      <Emoji className="text-7xl p-[20px]" emojis={emoji("party popper")} />
       <div className="flex flex-col text-center">
         <span className="font-pixelar text-5xl uppercase">Congratulations!</span>
         <span className="font-forma text-2xl uppercase text-ec-blue">

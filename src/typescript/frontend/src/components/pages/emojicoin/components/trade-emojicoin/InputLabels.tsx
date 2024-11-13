@@ -8,7 +8,8 @@ export const AptosInputLabel = () => (
 );
 
 export const EmojiInputLabel = ({ emoji }: { emoji: string }) => (
-  <Emoji className="pixel-heading-3 text-light-gray text-[24px] md:text-[30px] cursor-default">
-    {emoji}
-  </Emoji>
+  <Emoji
+    className="pixel-heading-3 text-light-gray text-[24px] md:text-[30px] cursor-default"
+    emojis={emoji}
+  />
 );

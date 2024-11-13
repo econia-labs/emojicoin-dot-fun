@@ -24,7 +24,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             ellipsis
             title={item.market.symbolData.symbol.toUpperCase()}
           >
-            <Emoji>{item.market.emojis}</Emoji>
+            <Emoji emojis={item.market.emojis} />
           </Text>
         </Flex>
       </Td>
