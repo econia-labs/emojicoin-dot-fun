@@ -88,7 +88,6 @@ export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
           <div className="flex relative mb-1">
             <div className="flex flex-col grow relative w-full">
               <EmojiPickerWithInput
-                geoblocked={geoblocked}
                 handleClick={handleClick}
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}

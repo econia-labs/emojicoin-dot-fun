@@ -63,7 +63,7 @@ export const ClientVerifyPage = () => {
                 <span>Disconnect Wallet</span>
               </motion.div>
             )}
-            <ButtonWithConnectWalletFallback geoblocked={false} arrow={false}>
+            <ButtonWithConnectWalletFallback forceAllowConnect={true} arrow={false}>
               <div className="flex flex-col uppercase mt-[20ch] gap-1">
                 <div>
                   Wallet address:{" "}
