@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { isUserGeoblockedServerAction } from "utils/server/geoblocked";
+import { isUserGeoblocked } from "utils/geolocation";
 
 const useIsUserGeoblocked = () => {
   const { data } = useQuery({
     queryKey: ["geoblocked"],
-    queryFn: () => isUserGeoblockedServerAction(),
+    queryFn: () => isUserGeoblocked(),
     staleTime: Infinity,
   });
 
