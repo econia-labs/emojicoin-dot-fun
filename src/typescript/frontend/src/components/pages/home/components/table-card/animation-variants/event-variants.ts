@@ -127,7 +127,7 @@ export const scrambleConfig = {
   overdrive: false,
   overflow: true,
   speed: 0.6,
-  playOnMount: false,
+  playOnMount: true,
 };
 
 export const useLabelScrambler = (value: string, suffix: string = "") => {

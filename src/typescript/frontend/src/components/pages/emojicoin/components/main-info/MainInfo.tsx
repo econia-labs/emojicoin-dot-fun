@@ -9,6 +9,7 @@ import { useLabelScrambler } from "components/pages/home/components/table-card/a
 import { isMarketStateModel } from "@sdk/indexer-v2/types";
 import BondingProgress from "./BondingProgress";
 import { useThemeContext } from "context";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -41,6 +42,8 @@ const MainInfo = ({ data }: MainInfoProps) => {
   const { ref: dailyVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
   const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
+  const { isMobile } = useMatchBreakpoints();
+
   return (
     <div
       className="flex justify-center mt-[10px]"
@@ -49,7 +52,13 @@ const MainInfo = ({ data }: MainInfoProps) => {
       }}
     >
       <div
-        style={{
+        style={isMobile ? {
+          display: "flex",
+          gap: "1em",
+          flexDirection: "column",
+          width: "100%",
+          padding: "40px",
+        } : {
           display: "grid",
           gridTemplateColumns: "57fr 43fr",
           width: "100%",
@@ -59,7 +68,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
       >
         <div className="text-[100px] text-center my-auto text-white">{data.symbolData.symbol}</div>
 
-        <div className="flex flex-col mt-[-8px] ml-[4em] w-fit gap-[2px]">
+        <div className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}>
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
