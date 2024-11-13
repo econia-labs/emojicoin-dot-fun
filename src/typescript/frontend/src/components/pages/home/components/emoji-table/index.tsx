@@ -179,7 +179,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <div className="py-10">
                 <Link href={`${ROUTES.launch}?emojis=${emojis.join("")}`}>
                   <Text textScale="pixelHeading3" color="econiaBlue" className="uppercase">
-                    Click here to launch {<Emoji>{emojis.join("")}</Emoji>} !
+                    Click here to launch {<Emoji emojis={emojis.join("")} />}
                   </Text>
                 </Link>
               </div>
