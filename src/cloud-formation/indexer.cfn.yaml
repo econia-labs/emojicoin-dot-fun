@@ -210,12 +210,12 @@ Parameters:
   PostgrestImageVersion:
     Default: 'v12.2.3'
     Type: 'String'
-  PostgrestMaxRows:
-    Default: 500
-    Type: 'Number'
   PostgrestLogLevel:
     Default: 'info'
     Type: 'String'
+  PostgrestMaxRows:
+    Default: 500
+    Type: 'Number'
   PostgrestPlanEnabled:
     Default: 'true'
     Type: 'String'
