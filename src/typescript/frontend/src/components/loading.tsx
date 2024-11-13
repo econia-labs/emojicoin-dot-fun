@@ -27,6 +27,9 @@ export const Loading = ({
   emojis?: SymbolEmojiData[];
   numEmojis?: number;
 }) => {
+  // Fetch/load the emoji picker data here to ensure that the picker has emoji data to use.
+  // Since the library only initializes when the picker component is rendered, the library won't have
+  // data on pages that don't use the picker component unless we explicitly call `init(...)` here.
   useEffect(() => {
     data.then((d) => {
       init({ set: "native", data: d });
