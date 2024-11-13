@@ -33,6 +33,7 @@ import { ROUTES } from "router/routes";
 import { type HomePageProps } from "app/home/HomePage";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { Emoji } from "utils/emoji";
 
 export interface EmojiTableProps
   extends Omit<HomePageProps, "featured" | "children" | "priceFeed"> {}
@@ -178,7 +179,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               <div className="py-10">
                 <Link href={`${ROUTES.launch}?emojis=${emojis.join("")}`}>
                   <Text textScale="pixelHeading3" color="econiaBlue" className="uppercase">
-                    Click here to launch {emojis.join("")} !
+                    Click here to launch {<Emoji emojis={emojis.join("")} />}
                   </Text>
                 </Link>
               </div>

@@ -30,6 +30,7 @@ import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import { isMarketStateModel } from "@sdk/indexer-v2/types";
 import "./module.css";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
+import { Emoji } from "utils/emoji";
 
 const getFontSize = (emojis: SymbolEmojiData[]) =>
   emojis.length <= 2 ? ("pixel-heading-1" as const) : ("pixel-heading-1b" as const);
@@ -37,7 +38,6 @@ const getFontSize = (emojis: SymbolEmojiData[]) =>
 const TableCard = ({
   index,
   marketID,
-  symbol,
   emojis,
   staticMarketCap,
   staticVolume24H,
@@ -230,9 +230,10 @@ const TableCard = ({
               <Arrow className="w-[21px] !fill-current text-dark-gray group-hover:text-ec-blue transition-all" />
             </Flex>
 
-            <div className={`${getFontSize(emojis)} text-center mb-[22px] text-nowrap`}>
-              <span>{symbol}</span>
-            </div>
+            <Emoji
+              className={`${getFontSize(emojis)} text-center mb-[22px] text-nowrap`}
+              emojis={emojis}
+            />
             <Text
               textScale="display4"
               textTransform="uppercase"

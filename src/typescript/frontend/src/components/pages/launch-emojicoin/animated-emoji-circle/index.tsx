@@ -1,6 +1,7 @@
 import { getRandomSymbolEmoji } from "@sdk/emoji_data";
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
+import { Emoji } from "utils/emoji";
 
 export const AnimatedStatusIndicator = ({
   numEmojis = 14,
@@ -28,14 +29,13 @@ export const AnimatedStatusIndicator = ({
     >
       {emojis.map((emoji, i) => (
         <div key={`emoji-row-${i}`} className="relative">
-          <div
+          <Emoji
             className="z-[-1] absolute top-0 left-0 w-[20px] h-[150px]"
             style={{
               transform: `translateX(-50%) translateY(-50%) rotate(${degrees * i}deg)`,
             }}
-          >
-            {emoji.emoji}
-          </div>
+            emojis={emoji.emoji}
+          />
           <div
             className="z-[1] absolute top-0 left-0 w-[30px] h-[160px]"
             style={{

@@ -10,6 +10,7 @@ import { isMarketStateModel } from "@sdk/indexer-v2/types";
 import BondingProgress from "./BondingProgress";
 import { useThemeContext } from "context";
 import { useMatchBreakpoints } from "@hooks/index";
+import { Emoji } from "utils/emoji";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -70,7 +71,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
               }
         }
       >
-        <div className="text-[100px] text-center my-auto text-white">{data.symbolData.symbol}</div>
+        <Emoji className="text-[24px] text-center md:display-2 my-auto text-white" emojis={data.emojis} />
 
         <div
           className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}
