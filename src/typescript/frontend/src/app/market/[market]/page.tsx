@@ -68,17 +68,22 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     }
     return res;
   });
+
   const state = await fetchMarketState({ searchEmojis: emojis });
 
   if (state) {
     const { marketID } = state.market;
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
-    const chats = await fetchChatEvents({ marketID });
-    const swaps = await fetchSwapEvents({ marketID });
-    const marketView = await fetchContractMarketView(marketAddress.toString());
+
+    const [chats, swaps, marketView] = await Promise.all([
+      await fetchChatEvents({ marketID }),
+      await fetchSwapEvents({ marketID }),
+      await fetchContractMarketView(marketAddress.toString()),
+    ]);
 
     // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
     const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
+
     return (
       <ClientEmojicoinPage
         data={{

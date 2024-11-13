@@ -90,16 +90,22 @@ export async function GET(request: NextRequest) {
 
   const processorTimestamp = new Date(await getCachedLatestProcessedEmojicoinTimestamp());
 
+  const promises: Promise<string>[] = [];
+
   for (let i = 0; i < amount; i++) {
     const localIndex = index + i;
     const endDate = indexToEndDate(localIndex, period);
     if (endDate < processorTimestamp) {
-      const res = await getHistoricCachedCandlesticks({ marketID, index: localIndex, period });
-      data = jsonStrAppend(data, res);
+      promises.push(getHistoricCachedCandlesticks({ marketID, index: localIndex, period }));
     } else {
-      const res = await getNormalCachedCandlesticks({ marketID, index: localIndex, period });
-      data = jsonStrAppend(data, res);
+      promises.push(getNormalCachedCandlesticks({ marketID, index: localIndex, period }));
     }
+  }
+
+  const parcels = await Promise.all(promises);
+
+  for (const parcel of parcels) {
+    data = jsonStrAppend(data, parcel);
   }
 
   return new Response(data);

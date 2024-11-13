@@ -18,12 +18,15 @@ export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
-  const featured = await fetchFeaturedMarket();
-  let numMarkets: number;
-  let markets: Awaited<ReturnType<typeof fetchMarketsWithCount>>["rows"];
+  const featuredPromise = fetchFeaturedMarket();
+  const priceFeedPromise = fetchPriceFeed({});
+
+  let marketsPromise: ReturnType<typeof fetchMarkets>;
+
+  let numMarketsPromise: Promise<number>;
 
   if (searchEmojis?.length) {
-    const res = await fetchMarketsWithCount({
+    const promise = fetchMarketsWithCount({
       page,
       sortBy,
       orderBy,
@@ -31,20 +34,25 @@ export default async function Home({ searchParams }: HomePageParams) {
       pageSize: MARKETS_PER_PAGE,
       count: true,
     });
-    numMarkets = res.count!;
-    markets = res.rows;
+    marketsPromise = promise.then((r) => r.rows);
+    numMarketsPromise = promise.then((r) => r.count!);
   } else {
-    numMarkets = await fetchNumRegisteredMarkets();
-    markets = await fetchMarkets({
+    marketsPromise = fetchMarkets({
       page,
       sortBy,
       orderBy,
       searchEmojis,
       pageSize: MARKETS_PER_PAGE,
     });
+    numMarketsPromise = fetchNumRegisteredMarkets();
   }
 
-  const priceFeed = await fetchPriceFeed({});
+  const [featured, priceFeed, markets, numMarkets] = await Promise.all([
+    featuredPromise,
+    priceFeedPromise,
+    marketsPromise,
+    numMarketsPromise,
+  ]);
 
   // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
   const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
