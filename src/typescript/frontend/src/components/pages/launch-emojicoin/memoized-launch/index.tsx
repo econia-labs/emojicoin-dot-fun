@@ -17,7 +17,6 @@ import { filterBigEmojis } from "components/pages/emoji-picker/EmojiPicker";
 import { Emoji } from "utils/emoji";
 import { useScramble } from "use-scramble";
 import { emoji } from "utils";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
