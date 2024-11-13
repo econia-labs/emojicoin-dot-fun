@@ -27,7 +27,7 @@ export const LaunchButtonOrGoToMarketLink = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
+      <ButtonWithConnectWalletFallback>
         {registered ? (
           <Link
             className="font-pixelar text-lg uppercase text-ec-blue"
