@@ -351,9 +351,10 @@ export const Chart = (props: ChartContainerProps) => {
   const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setShowErrorMessage(true);
     }, 3500);
+    return () => clearTimeout(timeout);
   });
 
   return (
