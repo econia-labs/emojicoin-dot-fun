@@ -1,13 +1,7 @@
 "use client";
 
 import { AptosInputLabel, EmojiInputLabel } from "./InputLabels";
-import {
-  type PropsWithChildren,
-  useEffect,
-  useState,
-  useMemo,
-  type MouseEventHandler,
-} from "react";
+import { type PropsWithChildren, useEffect, useState, useMemo } from "react";
 import FlipInputsArrow from "./FlipInputsArrow";
 import { Column, Row } from "components/layout/components/FlexContainers";
 import { SwapButton } from "./SwapButton";
@@ -23,8 +17,6 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { Flex, FlexGap } from "@containers";
-import Popup from "components/popup";
-import { Text } from "components/text";
 import { InputNumeric } from "components/inputs";
 import { emoji } from "utils";
 import { getTooltipStyles } from "components/selects/theme";
@@ -32,34 +24,7 @@ import { useThemeContext } from "context";
 import { TradeOptions } from "components/selects/trade-options";
 import { getMaxSlippageSettings } from "utils/slippage";
 import { Emoji } from "utils/emoji";
-import { type AnyEmojiName } from "@sdk/emoji_data/types";
-
-const SmallEmojiButton = ({
-  emoji: emojiName,
-  description,
-  onClick,
-}: {
-  emoji: AnyEmojiName;
-  description: string;
-  onClick?: MouseEventHandler<HTMLDivElement>;
-}) => {
-  return (
-    <Popup
-      content={
-        <Text textScale="pixelHeading4" textTransform="uppercase" color="black">
-          {description}
-        </Text>
-      }
-    >
-      <div
-        className="px-[.7rem] py-[.2rem] border-[1px] border-solid rounded-full border-dark-gray h-[1.5rem] cursor-pointer hover:bg-neutral-800"
-        onClick={onClick}
-      >
-        <Emoji className="mt-[.11rem]" emojis={emoji(emojiName)} />
-      </div>
-    </Popup>
-  );
-};
+import { EmojiPill } from "components/EmojiPill";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -236,14 +201,14 @@ export default function SwapComponent({
           <FlexGap flexDirection="row" gap="5px">
             {isSell ? (
               <>
-                <SmallEmojiButton
+                <EmojiPill
                   emoji="nauseated face"
                   description="Sell 50%"
                   onClick={() => {
                     setInputAmount(emojicoinBalance / 2n);
                   }}
                 />
-                <SmallEmojiButton
+                <EmojiPill
                   emoji="face vomiting"
                   description="Sell 100%"
                   onClick={() => {
@@ -253,21 +218,21 @@ export default function SwapComponent({
               </>
             ) : (
               <>
-                <SmallEmojiButton
+                <EmojiPill
                   emoji={"waxing crescent moon"}
                   description="Buy 25%"
                   onClick={() => {
                     setInputAmount(availableAptBalance / 4n);
                   }}
                 />
-                <SmallEmojiButton
+                <EmojiPill
                   emoji={"first quarter moon"}
                   description="Buy 50%"
                   onClick={() => {
                     setInputAmount(availableAptBalance / 2n);
                   }}
                 />
-                <SmallEmojiButton
+                <EmojiPill
                   emoji={"full moon"}
                   description="Buy 100%"
                   onClick={() => {
