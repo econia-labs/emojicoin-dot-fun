@@ -7,18 +7,16 @@ import { authenticate } from "components/pages/verify/verify";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
-import { isUserGeoblocked } from "utils/geolocation";
 
 export const dynamic = "force-dynamic";
 
 const Verify = async () => {
   const hashed = cookies().get(COOKIE_FOR_HASHED_ADDRESS)?.value;
   const address = cookies().get(COOKIE_FOR_ACCOUNT_ADDRESS)?.value;
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
 
   let authenticated = false;
   if (!hashed || !address) {
-    return <VerifyPage geoblocked={geoblocked} />;
+    return <VerifyPage />;
   } else {
     authenticated = await authenticate({
       address,
@@ -30,7 +28,7 @@ const Verify = async () => {
     }
   }
 
-  return <VerifyPage geoblocked={geoblocked} />;
+  return <VerifyPage />;
 };
 
 export default Verify;

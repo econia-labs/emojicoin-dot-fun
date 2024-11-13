@@ -10,16 +10,18 @@ import { getVerificationStatus } from "./get-verification-status";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 const checkmarkOrX = (bool: boolean) => (
   <Emoji className="text-lg" emojis={bool ? emoji("check mark button") : emoji("cross mark")} />
 );
 
-export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
+export const ClientVerifyPage = () => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [galxe, setGalxe] = useState(false);
   const [customAllowlisted, setCustomAllowlisted] = useState(false);
+  const geoblocked = useIsUserGeoblocked();
 
   useEffect(() => {
     if (!account || !connected) {

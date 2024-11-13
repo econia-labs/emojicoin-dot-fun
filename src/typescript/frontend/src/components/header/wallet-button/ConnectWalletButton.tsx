@@ -10,11 +10,11 @@ import Arrow from "@icons/Arrow";
 import { useNameStore } from "context/event-store-context";
 import Popup from "components/popup";
 import Text from "components/text";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
   onClick?: () => void;
-  geoblocked: boolean;
   arrow?: boolean;
 }
 
@@ -25,12 +25,12 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   children,
   className,
   onClick,
-  geoblocked,
   arrow = true,
 }) => {
   const { connected, account } = useWallet();
   const { openWalletModal } = useWalletModal();
   const { t } = translationFunction();
+  const geoblocked = useIsUserGeoblocked();
 
   const [enabled, setEnabled] = useState(false);
 

@@ -21,13 +21,12 @@ import { useSearchParams } from "next/navigation";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
 import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
-export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: PoolsData[] }> = ({
-  geoblocked,
-  initialData,
-}) => {
+export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
+  const geoblocked = useIsUserGeoblocked();
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
@@ -91,7 +90,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
             alignItems="center"
             gap="13px"
           >
-            {!isMobile ? <SearchBar geoblocked={geoblocked} /> : null}
+            {!isMobile ? <SearchBar /> : null}
 
             <TableHeaderSwitcher
               title1="Pools"
@@ -110,7 +109,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
       {isMobile ? (
         <StyledSubHeader>
           <StyledHeaderInner>
-            <SearchBar geoblocked={geoblocked} />
+            <SearchBar />
           </StyledHeaderInner>
         </StyledSubHeader>
       ) : null}

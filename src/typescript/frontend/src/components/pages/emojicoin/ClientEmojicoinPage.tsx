@@ -38,9 +38,9 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
       <TextCarousel />
       <MainInfo data={props.data} />
       {isTablet || isMobile ? (
-        <MobileGrid geoblocked={props.geoblocked} data={props.data} />
+        <MobileGrid data={props.data} />
       ) : (
-        <DesktopGrid geoblocked={props.geoblocked} data={props.data} />
+        <DesktopGrid data={props.data} />
       )}
     </Box>
   );

@@ -13,10 +13,10 @@ import { MarketValidityIndicator } from "./ColoredBytesIndicator";
 import { variants } from "./animation-variants";
 import { checkTargetAndStopDefaultPropagation } from "./utils";
 import { getEmojisInString } from "@sdk/emoji_data";
-import "./triangle.css";
 import { createPortal } from "react-dom";
 import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import "./triangle.css";
 
 const EMOJI_FONT_FAMILY =
   '"EmojiMart", "Segoe UI Emoji", "Segoe UI Symbol", ' +
@@ -25,15 +25,13 @@ const EMOJI_FONT_FAMILY =
 
 const ChatInputBox = ({
   children,
-  geoblocked,
 }: {
   children: React.ReactNode;
-  geoblocked: boolean;
 }) => {
   const { connected } = useWallet();
   return (
     <>
-      <ButtonWithConnectWalletFallback geoblocked={geoblocked} className="mt-[6px]">
+      <ButtonWithConnectWalletFallback className="mt-[6px]">
         {children}
       </ButtonWithConnectWalletFallback>
       {!connected && (
@@ -50,14 +48,12 @@ const ChatInputBox = ({
 const ConditionalWrapper = ({
   children,
   mode,
-  geoblocked,
 }: {
   children: React.ReactNode;
   mode: "chat" | "register" | "search";
-  geoblocked: boolean;
 }) => {
   return mode === "chat" ? (
-    <ChatInputBox geoblocked={geoblocked}>{children}</ChatInputBox>
+    <ChatInputBox>{children}</ChatInputBox>
   ) : (
     <>{children}</>
   );
@@ -68,14 +64,12 @@ export const EmojiPickerWithInput = ({
   pickerButtonClassName,
   inputGroupProps,
   inputClassName = "",
-  geoblocked,
   filterEmojis,
 }: {
   handleClick: (message: string) => Promise<void>;
   pickerButtonClassName?: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
-  geoblocked: boolean;
   filterEmojis?: (e: EmojiMartData["emojis"][string]) => boolean;
 }) => {
   const inputRef = useRef<HTMLDivElement | null>(null);
@@ -216,7 +210,7 @@ export const EmojiPickerWithInput = ({
       className="justify-center"
       ref={inputRef}
     >
-      <ConditionalWrapper geoblocked={geoblocked} mode={mode}>
+      <ConditionalWrapper mode={mode}>
         <InputGroup isShowError={false} {...inputGroupProps}>
           <div className="flex-row relative items-center justify-center">
             <div className="relative h-[45px]">

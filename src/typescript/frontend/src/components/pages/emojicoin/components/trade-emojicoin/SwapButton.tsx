@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -26,7 +27,6 @@ export const SwapButton = ({
   marketAddress,
   setSubmit,
   disabled,
-  geoblocked,
   symbol,
   minOutputAmount,
 }: {
@@ -35,7 +35,6 @@ export const SwapButton = ({
   marketAddress: AccountAddressString;
   setSubmit: Dispatch<SetStateAction<(() => Promise<void>) | null>>;
   disabled?: boolean;
-  geoblocked: boolean;
   symbol: string;
   minOutputAmount: bigint | number | string;
 }) => {
@@ -100,7 +99,7 @@ export const SwapButton = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
+      <ButtonWithConnectWalletFallback>
         {canTrade ? (
           <>
             <Button disabled={disabled} onClick={handleClick} scale="lg">

@@ -46,8 +46,6 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   const priceFeed = await fetchPriceFeed({});
 
-  // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
   return (
     <HomePageComponent
       featured={featured}
@@ -56,7 +54,6 @@ export default async function Home({ searchParams }: HomePageParams) {
       page={page}
       sortBy={sortBy}
       searchBytes={q}
-      geoblocked={geoblocked}
       priceFeed={priceFeed}
     />
   );
