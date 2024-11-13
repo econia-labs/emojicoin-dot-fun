@@ -44,9 +44,6 @@ const BondingProgress = ({ data }: MainInfoProps) => {
           <div className="text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]" ref={bondingCurveRef}>
             {bondingProgress.toFixed(2)}%
           </div>
-          <div className="text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]" ref={bondingCurveRef}>
-            {bondingProgress.toFixed(2)}%
-          </div>
         </div>
       </div>
       {bondingProgress >= 100 ? (
