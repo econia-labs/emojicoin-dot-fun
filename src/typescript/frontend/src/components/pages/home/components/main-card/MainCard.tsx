@@ -91,7 +91,7 @@ const MainCard = (props: MainCardProps) => {
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <div className="flex flex-row content-center">
+          <div className="flex flex-row items-center">
             <span className="text-medium-gray pixel-heading-text">HOT</span>
             <span>&nbsp;</span>
             <div>
