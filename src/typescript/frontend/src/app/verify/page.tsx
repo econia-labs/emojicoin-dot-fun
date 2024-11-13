@@ -4,7 +4,7 @@ import {
   COOKIE_FOR_HASHED_ADDRESS,
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROUTES } from "router/routes";
 

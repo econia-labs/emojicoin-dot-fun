@@ -31,7 +31,6 @@ import { type PoolsData } from "../../ClientPoolsPage";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
-  geoblocked: boolean;
 };
 
 const fmtCoin = (n: AnyNumberString | undefined) => {
@@ -68,7 +67,7 @@ const inputAndOutputStyles = `
   border-transparent !p-0 text-white
 `;
 
-const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
+const Liquidity = ({ market }: LiquidityProps) => {
   const { t } = translationFunction();
   const { theme } = useThemeContext();
 

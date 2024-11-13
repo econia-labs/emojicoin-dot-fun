@@ -23,11 +23,7 @@ const EMOJI_FONT_FAMILY =
   '"Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", ' +
   '"Android Emoji"';
 
-const ChatInputBox = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+const ChatInputBox = ({ children }: { children: React.ReactNode }) => {
   const { connected } = useWallet();
   return (
     <>
@@ -52,11 +48,7 @@ const ConditionalWrapper = ({
   children: React.ReactNode;
   mode: "chat" | "register" | "search";
 }) => {
-  return mode === "chat" ? (
-    <ChatInputBox>{children}</ChatInputBox>
-  ) : (
-    <>{children}</>
-  );
+  return mode === "chat" ? <ChatInputBox>{children}</ChatInputBox> : <>{children}</>;
 };
 
 export const EmojiPickerWithInput = ({

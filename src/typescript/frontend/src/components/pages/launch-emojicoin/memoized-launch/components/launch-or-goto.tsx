@@ -10,12 +10,10 @@ export const LaunchButtonOrGoToMarketLink = ({
   onWalletButtonClick,
   registered,
   invalid,
-  geoblocked,
 }: {
   onWalletButtonClick: () => void;
   registered?: boolean;
   invalid: boolean;
-  geoblocked: boolean;
 }) => {
   const emojis = useEmojiPicker((state) => state.emojis);
   const { t } = translationFunction();

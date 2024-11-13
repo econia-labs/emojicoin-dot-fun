@@ -1,7 +1,5 @@
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 import HomePageComponent from "./HomePage";
-import { isUserGeoblocked } from "utils/geolocation";
-import { headers } from "next/headers";
 import {
   fetchFeaturedMarket,
   fetchMarkets,

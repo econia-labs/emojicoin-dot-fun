@@ -21,12 +21,10 @@ import { useSearchParams } from "next/navigation";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
 import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
-import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
 export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
-  const geoblocked = useIsUserGeoblocked();
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
@@ -141,10 +139,7 @@ export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) =
         </StyledInner>
 
         <StyledInner flexGrow={1} width={{ _: "100%", laptopL: "43%" }}>
-          <Liquidity
-            geoblocked={geoblocked}
-            market={selectedIndex !== undefined ? markets[selectedIndex] : undefined}
-          />
+          <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
         </StyledInner>
       </StyledWrapper>
     </StyledPoolsPage>

@@ -34,11 +34,11 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   const { t } = translationFunction();
   const _geoblocked = useIsUserGeoblocked();
   const geoblocked = useMemo(() => {
-  // For letting the user connect on the `/verify_status` page when `forceAllowConnect` is `true`,
-  // by only returning `geoblocked = true` if we're not force allow connecting and they're
-  // geoblocked.
+    // For letting the user connect on the `/verify_status` page when `forceAllowConnect` is `true`,
+    // by only returning `geoblocked = true` if we're not force allow connecting and they're
+    // geoblocked.
     return !forceAllowConnect && _geoblocked;
-  }, [_geoblocked]);
+  }, [forceAllowConnect, _geoblocked]);
 
   const [enabled, setEnabled] = useState(false);
 
