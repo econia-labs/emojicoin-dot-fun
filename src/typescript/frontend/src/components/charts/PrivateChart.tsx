@@ -33,7 +33,7 @@ import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk
 import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
 import { Aptos } from "@aptos-labs/ts-sdk";
-import { PeriodDuration, periodEnumToRawDuration, Trigger } from "@sdk/const";
+import { periodEnumToRawDuration, Trigger } from "@sdk/const";
 import {
   type LatestBar,
   marketToLatestBars,
@@ -42,6 +42,7 @@ import {
 } from "@/store/event/candlestick-bars";
 import { emoji, parseJSON } from "utils";
 import { Emoji } from "utils/emoji";
+import { toIndexAndAmount } from "app/candlesticks/utils";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -157,22 +158,21 @@ export const Chart = (props: ChartContainerProps) => {
         try {
           const period = ResolutionStringToPeriod[resolution.toString()];
           const periodDuration = periodEnumToRawDuration(period);
-          const periodDurationSeconds = (periodDuration / PeriodDuration.PERIOD_1M) * 60;
-          const end = new Date(to * 1000);
+          const { index, amount } = toIndexAndAmount(from, to, period);
           // The start timestamp is rounded so that all the people who load the webpage at a similar time get served
           // the same cached response.
-          const start = from - (from % periodDurationSeconds);
           const params = new URLSearchParams({
             marketID: props.marketID,
-            start: start.toString(),
             period: period.toString(),
-            limit: "500",
+            index: index.toString(),
+            amount: amount.toString(),
           });
           const data: PeriodicStateEventModel[] = await fetch(`/candlesticks?${params.toString()}`)
             .then((res) => res.text())
             .then((res) => parseJSON(res));
 
-          const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
+          const endDate = new Date(to * 1000);
+          const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
 
           // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
           // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
