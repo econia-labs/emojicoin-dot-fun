@@ -4,6 +4,7 @@ import MainCard from "components/pages/home/components/main-card/MainCard";
 import { PriceFeed } from "components/price-feed";
 import TextCarousel from "components/text-carousel/TextCarousel";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
+import './module.css';
 
 export interface HomePageProps {
   featured?: DatabaseModels["market_state"];
@@ -28,7 +29,7 @@ export default async function HomePageComponent({
 }: HomePageProps) {
   return (
     <>
-      <div className="pt-[93px]">
+      <div className="home-page-container">
         <div className="flex-col mb-[31px]">
           {priceFeed.length > 0 ? <PriceFeed data={priceFeed} /> : <TextCarousel />}
           <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
