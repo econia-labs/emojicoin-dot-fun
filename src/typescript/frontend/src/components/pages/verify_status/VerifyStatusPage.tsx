@@ -12,8 +12,11 @@ import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
-const checkmarkOrX = (bool: boolean) => (
-  <Emoji className="text-lg" emojis={bool ? emoji("check mark button") : emoji("cross mark")} />
+const checkmarkOrX = (checkmark: boolean) => (
+  <Emoji
+    className="text-lg"
+    emojis={checkmark ? emoji("check mark button") : emoji("cross mark")}
+  />
 );
 
 export const ClientVerifyPage = () => {
@@ -73,7 +76,7 @@ export const ClientVerifyPage = () => {
                 </div>
                 <div>Galxe: {checkmarkOrX(galxe)}</div>
                 <div>Custom allowlist: {checkmarkOrX(customAllowlisted)}</div>
-                <div>Passes geoblocking: {checkmarkOrX(geoblocked)}</div>
+                <div>Passes geoblocking: {checkmarkOrX(!geoblocked)}</div>
                 <a
                   className="underline text-ec-blue"
                   href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
