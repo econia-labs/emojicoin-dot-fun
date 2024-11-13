@@ -30,17 +30,17 @@ import { useEventStore } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { getAptosConfig } from "lib/utils/aptos-client";
 import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
-import { type MarketMetadataModel } from "@sdk/indexer-v2/types";
+import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
 import { Aptos } from "@aptos-labs/ts-sdk";
-import { periodEnumToRawDuration, Trigger } from "@sdk/const";
-import { fetchAllCandlesticksInTimeRange } from "@/queries/candlesticks";
+import { PeriodDuration, periodEnumToRawDuration, Trigger } from "@sdk/const";
 import {
   type LatestBar,
   marketToLatestBars,
   periodicStateTrackerToLatestBar,
   toBar,
 } from "@/store/event/candlestick-bars";
+import { parseJSON } from "utils";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -145,22 +145,31 @@ export const Chart = (props: ChartContainerProps) => {
 
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
-      getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
+      getBars: async (
+        _symbolInfo,
+        resolution,
+        periodParams,
+        onHistoryCallback,
+        onErrorCallback
+      ) => {
         const { from, to } = periodParams;
         try {
           const period = ResolutionStringToPeriod[resolution.toString()];
           const periodDuration = periodEnumToRawDuration(period);
-          const start = new Date(from * 1000);
+          const periodDurationSeconds = (periodDuration / PeriodDuration.PERIOD_1M) * 60;
           const end = new Date(to * 1000);
-          // TODO: Consider that if our data is internally consistent and we run into performance/scalability issues
-          // with this implementation below (fetching without regard for anything in state), we can store the values in
-          // state and coalesce that with the data we fetch from the server.
-          const data = await fetchAllCandlesticksInTimeRange({
+          // The start timestamp is rounded so that all the people who load the webpage at a similar time get served
+          // the same cached response.
+          const start = from - (from % periodDurationSeconds);
+          const params = new URLSearchParams({
             marketID: props.marketID,
-            start,
-            end,
-            period,
+            start: start.toString(),
+            period: period.toString(),
+            limit: "500",
           });
+          const data: PeriodicStateEventModel[] = await fetch(`/candlesticks?${params.toString()}`)
+            .then((res) => res.text())
+            .then((res) => parseJSON(res));
 
           const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
 
@@ -251,7 +260,7 @@ export const Chart = (props: ChartContainerProps) => {
               const time = BigInt(new Date().getTime()) * 1000n;
               const timeAsPeriod = getPeriodStartTimeFromTime(time, periodDuration) / 1000n;
               bars.push({
-                time: Number(timeAsPeriod),
+                time: Number(timeAsPeriod.toString()),
                 open: 0,
                 high: 0,
                 low: 0,

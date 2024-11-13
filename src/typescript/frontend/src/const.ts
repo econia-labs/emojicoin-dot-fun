@@ -6,3 +6,4 @@ export const DEFAULT_TOAST_CONFIG = {
 
 export const LOCALSTORAGE_EXPIRY_TIME_MS = 60 * 1000;
 export const REVALIDATE_TEST = 2;
+export const DEFAULT_MAX_SLIPPAGE = 500n;

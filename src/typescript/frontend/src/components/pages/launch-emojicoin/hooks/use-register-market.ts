@@ -18,7 +18,7 @@ import { useNumMarkets } from "lib/hooks/queries/use-num-markets";
 import { useQuery } from "@tanstack/react-query";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 
-const tryEd25519PublicKey = (account: AccountInfo) => {
+export const tryEd25519PublicKey = (account: AccountInfo) => {
   try {
     return new Ed25519PublicKey(
       typeof account.publicKey === "string" ? account.publicKey : account.publicKey[0]

@@ -70,7 +70,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
           </Info>
         )}
         <Text
-          textScale={{ _: "bodySmall", tablet: "bodyLarge" }}
+          textScale="bodyLarge"
           textTransform="uppercase"
           color="econiaBlue"
           $fontWeight="regular"

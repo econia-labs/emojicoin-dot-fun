@@ -33,7 +33,7 @@ const DesktopGrid = (props: GridProps) => {
             className="bg-black z-10 border-t border-solid border-t-dark-gray"
           >
             <StyledBlockWrapper>
-              <Suspense fallback={<Loading numSquares={20} />}>
+              <Suspense fallback={<Loading numEmojis={20} />}>
                 <ChartContainer
                   symbol={props.data.symbolData.symbol}
                   emojis={props.data.emojis}
