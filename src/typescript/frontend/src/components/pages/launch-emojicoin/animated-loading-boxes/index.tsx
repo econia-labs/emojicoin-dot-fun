@@ -81,7 +81,7 @@ export const AnimatedLoadingBoxes = ({
                 }
           }
         >
-          {color ? emoji("green square") : emoji("green square")}
+          {color ? emoji("green square") : emoji("white large square")}
         </span>
       )),
     [emptyArray]
