@@ -61,7 +61,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
         <div className="flex flex-col mt-[-8px] ml-[4em] w-fit gap-[2px]">
           <div className="flex justify-between">
-            <div className={statsTextClasses + " text-light-gray"}>{t("Mkt. Cap:")}</div>
+            <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
                 <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
