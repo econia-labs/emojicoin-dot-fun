@@ -210,9 +210,21 @@ Parameters:
   PostgrestImageVersion:
     Default: 'v12.2.3'
     Type: 'String'
+  PostgrestLogLevel:
+    Default: 'info'
+    Type: 'String'
   PostgrestMaxRows:
     Default: 500
     Type: 'Number'
+  PostgrestPlanEnabled:
+    Default: 'true'
+    Type: 'String'
+  PostgrestServerTimingEnabled:
+    Default: 'true'
+    Type: 'String'
+  PostgrestServerTraceHeader:
+    Default: 'X-Request-Id'
+    Type: 'String'
   ProcessorImageVersion:
     Type: 'String'
   VpcStackName:
@@ -1233,6 +1245,14 @@ Resources:
           Value: 'web_anon'
         - Name: 'PGRST_DB_MAX_ROWS'
           Value: !Ref 'PostgrestMaxRows'
+        - Name: 'PGRST_LOG_LEVEL'
+          Value: !Ref 'PostgrestLogLevel'
+        - Name: 'PGRST_DB_PLAN_ENABLED'
+          Value: !Ref 'PostgrestPlanEnabled'
+        - Name: 'PGRST_SERVER_TIMING_ENABLED'
+          Value: !Ref 'PostgrestServerTimingEnabled'
+        - Name: 'PGRST_SERVER_TRACE_HEADER'
+          Value: !Ref 'PostgrestServerTraceHeader'
         Image: !Join
         - ''
         - - !Ref 'AWS::AccountId'
