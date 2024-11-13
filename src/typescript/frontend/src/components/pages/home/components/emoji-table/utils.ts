@@ -18,9 +18,7 @@ export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
 
 const toSearchEmojisKey = (searchEmojis: string[]) => `{${searchEmojis.join("")}}`;
 
-export const marketDataToProps = (
-  markets: HomePageProps["markets"],
-): PropsWithTime[] =>
+export const marketDataToProps = (markets: HomePageProps["markets"]): PropsWithTime[] =>
   markets.map((m) => ({
     time: Number(m.market.time),
     symbol: m.market.symbolData.symbol,
