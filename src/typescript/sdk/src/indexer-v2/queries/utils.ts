@@ -59,6 +59,23 @@ export const getLatestProcessedEmojicoinVersion = async () =>
       }
       return BigInt(rowWithVersion.last_success_version);
     });
+export const getLatestProcessedEmojicoinTimestamp = async () =>
+  postgrest
+    .from(TableName.ProcessorStatus)
+    .select("last_transaction_timestamp")
+    .limit(1)
+    .single()
+    .then((r) => {
+      const rowWithVersion = extractRow(r);
+      if (!rowWithVersion) {
+        console.error(r);
+        throw new Error("No processor status row found.");
+      }
+      if (!("last_transaction_timestamp" in rowWithVersion)) {
+        console.warn("Couldn't find `last_success_version` in the response data.", r);
+      }
+      return new Date(rowWithVersion.last_transaction_timestamp);
+    });
 /**
  * Wait for the processed version of a table or view to be at least the given version.
  */
