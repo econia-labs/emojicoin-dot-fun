@@ -36,12 +36,15 @@ const BondingProgress = ({ data }: MainInfoProps) => {
 
   return (
     <div className="flex flex-col w-fit">
-      <div className="flex gap-[8px] mb-[.2em]">
+      <div className="flex justify-between gap-[8px] mb-[.2em]">
         <div className={statsTextClasses + " text-light-gray font-pixelar text-[32px]"}>
           {t("Bonding progress:")}
         </div>
         <div className={statsTextClasses + " text-white"}>
-          <div className="text-ec-blue font-pixelar text-[32px]" ref={bondingCurveRef}>
+          <div className="text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]" ref={bondingCurveRef}>
+            {bondingProgress.toFixed(2)}%
+          </div>
+          <div className="text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]" ref={bondingCurveRef}>
             {bondingProgress.toFixed(2)}%
           </div>
         </div>
