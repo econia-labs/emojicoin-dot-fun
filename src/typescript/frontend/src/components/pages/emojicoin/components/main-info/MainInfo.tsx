@@ -71,7 +71,10 @@ const MainInfo = ({ data }: MainInfoProps) => {
               }
         }
       >
-        <Emoji className="text-[24px] text-center md:display-2 my-auto text-white" emojis={data.emojis} />
+        <Emoji
+          className="text-[24px] text-center md:display-2 my-auto text-white"
+          emojis={data.emojis}
+        />
 
         <div
           className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}

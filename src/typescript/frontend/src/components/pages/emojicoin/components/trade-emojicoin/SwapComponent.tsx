@@ -232,114 +232,114 @@ export default function SwapComponent({
         alignItems="center"
         className="mb-[.4em]"
       >
-          <div ref={targetRef}>
-            <Emoji className="cursor-pointer" emojis={emoji("gear")} />
-          </div>
-          {tooltip}
-          <FlexGap flexDirection="row" gap="5px">
-            {isSell ? (
-              <>
-                <SmallEmojiButton
-                  emoji="nauseated face"
-                  description="Sell 50%"
-                  onClick={() => {
-                    setInputAmount(emojicoinBalance / 2n);
-                  }}
-                />
-                <SmallEmojiButton
-                  emoji="face vomiting"
-                  description="Sell 100%"
-                  onClick={() => {
-                    setInputAmount(emojicoinBalance);
-                  }}
-                />
-              </>
-            ) : (
-              <>
-                <SmallEmojiButton
-                  emoji={"waxing crescent moon"}
-                  description="Buy 25%"
-                  onClick={() => {
-                    setInputAmount(availableAptBalance / 4n);
-                  }}
-                />
-                <SmallEmojiButton
-                  emoji={"first quarter moon"}
-                  description="Buy 50%"
-                  onClick={() => {
-                    setInputAmount(availableAptBalance / 2n);
-                  }}
-                />
-                <SmallEmojiButton
-                  emoji={"full moon"}
-                  description="Buy 100%"
-                  onClick={() => {
-                    setInputAmount(availableAptBalance);
-                  }}
-                />
-              </>
-            )}
-          </FlexGap>
-        </Flex>
-
-        <SimulateInputsWrapper>
-          <InnerWrapper>
-            <Column>
-              <div className={grayLabel}>
-                {isSell ? t("You sell") : t("You pay")}
-                {balanceLabel}
-              </div>
-              <InputNumeric
-                className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-                value={inputAmount}
-                onUserInput={(v) => setInputAmount(v)}
-                onSubmit={() => (submit ? submit() : {})}
-                decimals={8}
+        <div ref={targetRef}>
+          <Emoji className="cursor-pointer" emojis={emoji("gear")} />
+        </div>
+        {tooltip}
+        <FlexGap flexDirection="row" gap="5px">
+          {isSell ? (
+            <>
+              <SmallEmojiButton
+                emoji="nauseated face"
+                description="Sell 50%"
+                onClick={() => {
+                  setInputAmount(emojicoinBalance / 2n);
+                }}
               />
-            </Column>
-            {isSell ? <EmojiInputLabel emoji={emojicoin} /> : <AptosInputLabel />}
-          </InnerWrapper>
+              <SmallEmojiButton
+                emoji="face vomiting"
+                description="Sell 100%"
+                onClick={() => {
+                  setInputAmount(emojicoinBalance);
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <SmallEmojiButton
+                emoji={"waxing crescent moon"}
+                description="Buy 25%"
+                onClick={() => {
+                  setInputAmount(availableAptBalance / 4n);
+                }}
+              />
+              <SmallEmojiButton
+                emoji={"first quarter moon"}
+                description="Buy 50%"
+                onClick={() => {
+                  setInputAmount(availableAptBalance / 2n);
+                }}
+              />
+              <SmallEmojiButton
+                emoji={"full moon"}
+                description="Buy 100%"
+                onClick={() => {
+                  setInputAmount(availableAptBalance);
+                }}
+              />
+            </>
+          )}
+        </FlexGap>
+      </Flex>
 
-          <FlipInputsArrow
-            onClick={() => {
-              setInputAmount(outputAmount);
-              // This is done as to not display an old value if the swap simulation fails.
-              setOutputAmount(0n);
-              setPrevious(0n);
-              setIsSell((v) => !v);
-            }}
-          />
+      <SimulateInputsWrapper>
+        <InnerWrapper>
+          <Column>
+            <div className={grayLabel}>
+              {isSell ? t("You sell") : t("You pay")}
+              {balanceLabel}
+            </div>
+            <InputNumeric
+              className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
+              value={inputAmount}
+              onUserInput={(v) => setInputAmount(v)}
+              onSubmit={() => (submit ? submit() : {})}
+              decimals={8}
+            />
+          </Column>
+          {isSell ? <EmojiInputLabel emoji={emojicoin} /> : <AptosInputLabel />}
+        </InnerWrapper>
 
-          <InnerWrapper>
-            <Column>
-              <div className={grayLabel}>{t("You receive")}</div>
-              <div className="h-[22px] w-full">
-                <div
-                  onClick={() => setIsSell((v) => !v)}
-                  className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
-                  style={{ opacity: isLoading ? 0.6 : 1 }}
-                >
-                  {/* Scrambled swap result output below. */}
-                  <div ref={ref}></div>
-                </div>
+        <FlipInputsArrow
+          onClick={() => {
+            setInputAmount(outputAmount);
+            // This is done as to not display an old value if the swap simulation fails.
+            setOutputAmount(0n);
+            setPrevious(0n);
+            setIsSell((v) => !v);
+          }}
+        />
+
+        <InnerWrapper>
+          <Column>
+            <div className={grayLabel}>{t("You receive")}</div>
+            <div className="h-[22px] w-full">
+              <div
+                onClick={() => setIsSell((v) => !v)}
+                className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
+                style={{ opacity: isLoading ? 0.6 : 1 }}
+              >
+                {/* Scrambled swap result output below. */}
+                <div ref={ref}></div>
               </div>
-            </Column>
-            {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
-          </InnerWrapper>
-        </SimulateInputsWrapper>
-        <div className="flex flex-row justify-between py-[10px]">
+            </div>
+          </Column>
+          {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
+        </InnerWrapper>
+      </SimulateInputsWrapper>
+      <div className="flex flex-row justify-between py-[10px]">
         <div></div>
-          <div className="text-dark-gray">
-            <span className="text-xl leading-[0]">
-              {gasCost === null ? "~" : ""}
-              {toDisplayCoinDecimals({
-                num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
-                decimals: 4,
-              })}{" "}
-              APT
-            </span>{" "}
-            <Emoji emojis={emoji("fuel pump")} />
-          </div>
+        <div className="text-dark-gray">
+          <span className="text-xl leading-[0]">
+            {gasCost === null ? "~" : ""}
+            {toDisplayCoinDecimals({
+              num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
+              decimals: 4,
+            })}{" "}
+            APT
+          </span>{" "}
+          <Emoji emojis={emoji("fuel pump")} />
+        </div>
       </div>
 
       <Row className="justify-center mt-[14px]">
