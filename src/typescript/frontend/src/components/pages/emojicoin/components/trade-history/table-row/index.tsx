@@ -79,7 +79,7 @@ const TableRow = ({
             <Text textScale="pixelHeading4" lineHeight="20px" color="black">
               {item.rankIcon === emoji("blowfish")
                 ? "n00b"
-                : item.rankIcon === emoji("whale")
+                : item.rankIcon === emoji("spouting whale")
                   ? "365 UR SO JULIA"
                   : "SKILL ISSUE"}
             </Text>
