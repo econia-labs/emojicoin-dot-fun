@@ -3,6 +3,8 @@ import { type AnyNumberString } from "@sdk/types/types";
 import { ExplorerLink } from "components/link/component";
 import { APTOS_NETWORK } from "lib/env";
 import { toDisplayCoinDecimals } from "lib/utils/decimals";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
 export const CongratulationsToast = ({
   transactionHash,
@@ -15,7 +17,7 @@ export const CongratulationsToast = ({
   const amountString = toDisplayCoinDecimals({ num: amount, decimals: 2 });
   return (
     <div className="flex flex-col text-center">
-      <span className="text-7xl p-[20px]">🎉</span>
+      <Emoji className="text-7xl p-[20px]" emojis={emoji("party popper")} />
       <div className="flex flex-col text-center">
         <span className="font-pixelar text-5xl uppercase">Congratulations!</span>
         <span className="font-forma text-2xl uppercase text-ec-blue">

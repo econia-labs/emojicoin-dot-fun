@@ -40,7 +40,8 @@ import {
   periodicStateTrackerToLatestBar,
   toBar,
 } from "@/store/event/candlestick-bars";
-import { parseJSON } from "utils";
+import { emoji, parseJSON } from "utils";
+import { Emoji } from "utils/emoji";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -368,11 +369,21 @@ export const Chart = (props: ChartContainerProps) => {
 
   return (
     <div className="relative w-full">
-      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-sm font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
+      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-xl font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
         <div>
-          {showErrorMessage
-            ? "The browser you're using isn't supported. 😔 Please try viewing in another browser."
-            : "Loading..."}
+          {showErrorMessage ? (
+            <>
+              <div>
+                <span>{"The browser you're using isn't supported. "}</span>
+                <Emoji emojis={emoji("pensive face")} />
+              </div>
+              <div>
+                <span>{" Please try viewing in another browser."}</span>
+              </div>
+            </>
+          ) : (
+            "Loading..."
+          )}
         </div>
       </div>
       <div ref={ref} className="relative h-full w-full"></div>
