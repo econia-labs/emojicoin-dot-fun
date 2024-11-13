@@ -50,7 +50,7 @@ export const isInBondingCurve = (
  * @returns the percentage of the bonding curve progress
  */
 export const getBondingCurveProgress = (clammVirtualReservesQuote: number | bigint) => {
-  if (clammVirtualReservesQuote === 0 || clammVirtualReservesQuote === 0n) return 100;
+  if (BigInt(clammVirtualReservesQuote) === 0n) return 100;
   return Big(clammVirtualReservesQuote.toString())
     .sub(QUOTE_VIRTUAL_FLOOR.toString())
     .div(QUOTE_REAL_CEILING.toString())
