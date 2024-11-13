@@ -15,6 +15,8 @@ export type AllChatEmojiData = typeof AllChatEmojiJSON;
 export type ChatEmoji = keyof AllChatEmojiData;
 export type ChatEmojiName = keyof typeof ChatNamesJSON;
 
+export type AnyEmojiName = SymbolEmojiName | ChatEmojiName;
+
 /**
  * A single symbol emoji's data.
  */

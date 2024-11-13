@@ -32,14 +32,14 @@ import { useThemeContext } from "context";
 import { TradeOptions } from "components/selects/trade-options";
 import { getMaxSlippageSettings } from "utils/slippage";
 import { Emoji } from "utils/emoji";
-import { type SYMBOL_EMOJI_DATA } from "@sdk/index";
+import { type AnyEmojiName } from "@sdk/emoji_data/types";
 
 const SmallEmojiButton = ({
   emoji: emojiName,
   description,
   onClick,
 }: {
-  emoji: Parameters<typeof SYMBOL_EMOJI_DATA.byStrictName>[0];
+  emoji: AnyEmojiName;
   description: string;
   onClick?: MouseEventHandler<HTMLDivElement>;
 }) => {
