@@ -41,7 +41,10 @@ const BondingProgress = ({ data }: MainInfoProps) => {
           {t("Bonding progress:")}
         </div>
         <div className={statsTextClasses + " text-white"}>
-          <div className="text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]" ref={bondingCurveRef}>
+          <div
+            className="text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]"
+            ref={bondingCurveRef}
+          >
             {bondingProgress.toFixed(2)}%
           </div>
         </div>

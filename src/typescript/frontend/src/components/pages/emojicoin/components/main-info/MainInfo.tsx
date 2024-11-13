@@ -52,23 +52,29 @@ const MainInfo = ({ data }: MainInfoProps) => {
       }}
     >
       <div
-        style={isMobile ? {
-          display: "flex",
-          gap: "1em",
-          flexDirection: "column",
-          width: "100%",
-          padding: "40px",
-        } : {
-          display: "grid",
-          gridTemplateColumns: "57fr 43fr",
-          width: "100%",
-          maxWidth: "1362px",
-          padding: "40px",
-        }}
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                gap: "1em",
+                flexDirection: "column",
+                width: "100%",
+                padding: "40px",
+              }
+            : {
+                display: "grid",
+                gridTemplateColumns: "57fr 43fr",
+                width: "100%",
+                maxWidth: "1362px",
+                padding: "40px",
+              }
+        }
       >
         <div className="text-[100px] text-center my-auto text-white">{data.symbolData.symbol}</div>
 
-        <div className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}>
+        <div
+          className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}
+        >
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
