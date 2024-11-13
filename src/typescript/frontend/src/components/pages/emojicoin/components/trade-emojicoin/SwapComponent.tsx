@@ -325,7 +325,9 @@ export default function SwapComponent({
           </InnerWrapper>
         </SimulateInputsWrapper>
         <div className="flex flex-row justify-between py-[10px]">
-          <Emoji className="cursor-pointer" ref={targetRef} emojis={emoji("gear")} />
+          <div ref={targetRef}>
+            <Emoji className="cursor-pointer" emojis={emoji("gear")} />
+          </div>
           {tooltip}
           <div className="text-dark-gray">
             <span className="text-xl leading-[0]">
