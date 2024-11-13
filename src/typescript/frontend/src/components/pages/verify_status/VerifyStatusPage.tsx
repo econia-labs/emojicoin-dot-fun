@@ -8,10 +8,12 @@ import { motion } from "framer-motion";
 import { standardizeAddress, truncateAddress } from "@sdk/utils";
 import { getVerificationStatus } from "./get-verification-status";
 import { EXTERNAL_LINK_PROPS } from "components/link";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
-const checkmarkOrX = (bool: boolean) => {
-  return <span className="text-lg">{bool ? "✅" : "❌"} </span>;
-};
+const checkmarkOrX = (bool: boolean) => (
+  <Emoji className="text-lg" emojis={bool ? emoji("check mark button") : emoji("cross mark")} />
+);
 
 export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
   const { account } = useAptos();

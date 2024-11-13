@@ -18,6 +18,11 @@ import { createPortal } from "react-dom";
 import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
+const EMOJI_FONT_FAMILY =
+  '"EmojiMart", "Segoe UI Emoji", "Segoe UI Symbol", ' +
+  '"Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", ' +
+  '"Android Emoji"';
+
 const ChatInputBox = ({
   children,
   geoblocked,
@@ -251,6 +256,7 @@ export const EmojiPickerWithInput = ({
                     setPickerInvisible(false);
                   }}
                   data-testid="emoji-input"
+                  style={{ fontFamily: EMOJI_FONT_FAMILY }}
                 />
                 {mode === "search" && close}
                 {mode === "chat" ? (

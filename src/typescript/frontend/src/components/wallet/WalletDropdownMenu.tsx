@@ -18,6 +18,8 @@ import { EXTERNAL_LINK_PROPS } from "components/link";
 import { WalletDropdownItem } from "./WalletDropdownItem";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useNameStore } from "context/event-store-context";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
 const WIDTH = "24ch";
 
@@ -66,13 +68,19 @@ const WalletDropdownMenu = () => {
         <DropdownTrigger asChild className="focus:outline-none">
           <button className="" onMouseOver={() => handleReplay(enabled, replay)}>
             <div className="flex flex-row text-ec-blue text-2xl">
-              <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
+              <Emoji
+                className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage"
+                emojis={emoji("high voltage")}
+              />
               <p
                 className="whitespace-nowrap text-overflow-ellipsis overflow-hidden"
                 style={{ width, maxWidth: width }}
                 ref={ref}
               />
-              <p className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage">{"⚡"}</p>
+              <Emoji
+                className="text-base flex mt-1.5 animate-flicker drop-shadow-voltage"
+                emojis={emoji("high voltage")}
+              />
             </div>
           </button>
         </DropdownTrigger>

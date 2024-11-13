@@ -31,13 +31,15 @@ import { getTooltipStyles } from "components/selects/theme";
 import { useThemeContext } from "context";
 import { TradeOptions } from "components/selects/trade-options";
 import { getMaxSlippageSettings } from "utils/slippage";
+import { Emoji } from "utils/emoji";
+import { type AnyEmojiName } from "@sdk/emoji_data/types";
 
-const SmallButton = ({
-  emoji,
+const SmallEmojiButton = ({
+  emoji: emojiName,
   description,
   onClick,
 }: {
-  emoji: string;
+  emoji: AnyEmojiName;
   description: string;
   onClick?: MouseEventHandler<HTMLDivElement>;
 }) => {
@@ -53,7 +55,7 @@ const SmallButton = ({
         className="px-[.7rem] py-[.2rem] border-[1px] border-solid rounded-full border-dark-gray h-[1.5rem] cursor-pointer hover:bg-neutral-800"
         onClick={onClick}
       >
-        <div className="mt-[.11rem]">{emoji}</div>
+        <Emoji className="mt-[.11rem]" emojis={emoji(emojiName)} />
       </div>
     </Popup>
   );
@@ -234,15 +236,15 @@ export default function SwapComponent({
           <FlexGap flexDirection="row" gap="5px">
             {isSell ? (
               <>
-                <SmallButton
-                  emoji="🤢"
+                <SmallEmojiButton
+                  emoji="nauseated face"
                   description="Sell 50%"
                   onClick={() => {
                     setInputAmount(emojicoinBalance / 2n);
                   }}
                 />
-                <SmallButton
-                  emoji="🤮"
+                <SmallEmojiButton
+                  emoji="face vomiting"
                   description="Sell 100%"
                   onClick={() => {
                     setInputAmount(emojicoinBalance);
@@ -251,22 +253,22 @@ export default function SwapComponent({
               </>
             ) : (
               <>
-                <SmallButton
-                  emoji="🌒"
+                <SmallEmojiButton
+                  emoji={"waxing crescent moon"}
                   description="Buy 25%"
                   onClick={() => {
                     setInputAmount(availableAptBalance / 4n);
                   }}
                 />
-                <SmallButton
-                  emoji="🌓"
+                <SmallEmojiButton
+                  emoji={"first quarter moon"}
                   description="Buy 50%"
                   onClick={() => {
                     setInputAmount(availableAptBalance / 2n);
                   }}
                 />
-                <SmallButton
-                  emoji="🌕"
+                <SmallEmojiButton
+                  emoji={"full moon"}
                   description="Buy 100%"
                   onClick={() => {
                     setInputAmount(availableAptBalance);
@@ -323,8 +325,8 @@ export default function SwapComponent({
           </InnerWrapper>
         </SimulateInputsWrapper>
         <div className="flex flex-row justify-between py-[10px]">
-          <div className="cursor-pointer" ref={targetRef}>
-            {emoji("gear")}
+          <div ref={targetRef}>
+            <Emoji className="cursor-pointer" emojis={emoji("gear")} />
           </div>
           {tooltip}
           <div className="text-dark-gray">
@@ -336,7 +338,7 @@ export default function SwapComponent({
               })}{" "}
               APT
             </span>{" "}
-            {emoji("fuel pump")}
+            <Emoji emojis={emoji("fuel pump")} />
           </div>
         </div>
 

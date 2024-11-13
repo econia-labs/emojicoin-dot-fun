@@ -7,13 +7,14 @@ import {
   type SymbolEmojiName,
   type SymbolData,
   type SymbolEmoji,
+  type AnyEmoji,
 } from "./types";
 import { MAX_SYMBOL_LENGTH } from "../const";
 
-export const getEmojisInString = (symbols: string): Array<string> => {
+export const getEmojisInString = (symbols: string): Array<AnyEmoji> => {
   const regex = emojiRegex();
   const matches = symbols.matchAll(regex);
-  return Array.from(matches).map((match) => match[0]) as Array<string>;
+  return Array.from(matches).map((match) => match[0]) as Array<AnyEmoji>;
 };
 
 export const getSymbolEmojisInString = (symbols: string): SymbolEmoji[] => {
