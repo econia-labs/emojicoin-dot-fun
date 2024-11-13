@@ -98,7 +98,7 @@ export const constructOrdered = ({
   // We don't need to filter the fetched data because it's already filtered and sorted by the
   // server. We only need to filter event store state events.
   const searchEmojis = getSearchEmojis() as Array<SymbolEmoji>;
-  const initial = marketDataToProps(markets, searchEmojis);
+  const initial = marketDataToProps(markets);
 
   // If we're sorting by bump order, deduplicate and sort the events by bump order.
   const bumps = stateEventsToProps(stateFirehose, getMarket, searchEmojis);
