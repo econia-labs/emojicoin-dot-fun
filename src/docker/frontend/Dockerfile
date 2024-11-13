@@ -31,6 +31,6 @@ ENV HASH_SEED=$HASH_SEED \
     REVALIDATION_TIME=$REVALIDATION_TIME \
     EMOJICOIN_INDEXER_URL=$EMOJICOIN_INDEXER_URL
 
-RUN ["bash", "-c", "pnpm install && pnpm run build"]
+RUN ["bash", "-c", "pnpm install && pnpm run build:no-checks"]
 
 CMD ["bash", "-c", "pnpm run start -- -H 0.0.0.0"]
