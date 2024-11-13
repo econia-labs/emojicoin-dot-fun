@@ -4,7 +4,9 @@ import { isUserGeoblocked } from "utils/geolocation";
 
 const SEVEN_DAYS_MS = 7 * MS_IN_ONE_DAY;
 
-const useIsUserGeoblocked = () => {
+const useIsUserGeoblocked = (args?: { explicitlyGeoblocked: boolean }) => {
+  // In some cases we may want to know if the query's return value is explicitly true.
+  const { explicitlyGeoblocked = false } = args ?? {};
   const { data } = useQuery({
     queryKey: ["geoblocked"],
     queryFn: () => isUserGeoblocked(),
@@ -12,8 +14,10 @@ const useIsUserGeoblocked = () => {
     placeholderData: (prev) => prev,
   });
 
-  // Assume the user is geoblocked if the response hasn't completed yet.
-  return data ?? true;
+  // If we want to know if they're explicitly geoblocked, return true only if `data === true`.
+  // Otherwise, return true if they're explicitly geoblocked or if the query hasn't returned yet;
+  // i.e., the data is undefined.
+  return explicitlyGeoblocked ? data === true : (data ?? true);
 };
 
 export default useIsUserGeoblocked;
