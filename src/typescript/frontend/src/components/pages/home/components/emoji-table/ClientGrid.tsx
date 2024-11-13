@@ -6,9 +6,8 @@ import { marketDataToProps } from "./utils";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { useEffect, useMemo, useRef } from "react";
-import "./module.css";
-import { useEmojiPicker } from "context/emoji-picker-context";
 import { type HomePageProps } from "app/home/HomePage";
+import "./module.css";
 
 export const ClientGrid = ({
   markets,
