@@ -839,7 +839,9 @@ Resources:
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
+      EnablePerformanceInsights: true
       Engine: 'aurora-postgresql'
+      PerformanceInsightsRetentionPeriod: 31
     Type: 'AWS::RDS::DBInstance'
   # Replica (reader) database instance.
   DbInstanceReplica:
@@ -847,7 +849,9 @@ Resources:
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
+      EnablePerformanceInsights: true
       Engine: 'aurora-postgresql'
+      PerformanceInsightsRetentionPeriod: 31
     Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
