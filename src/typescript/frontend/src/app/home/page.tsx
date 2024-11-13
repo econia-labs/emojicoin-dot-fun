@@ -11,6 +11,8 @@ import {
 } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
+import { ORDER_BY } from "@sdk/queries";
+import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 
 export const revalidate = 2;
 
@@ -18,7 +20,6 @@ export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
-  const featuredPromise = fetchFeaturedMarket();
   const priceFeedPromise = fetchPriceFeed({});
 
   let marketsPromise: ReturnType<typeof fetchMarkets>;
@@ -45,6 +46,15 @@ export default async function Home({ searchParams }: HomePageParams) {
       pageSize: MARKETS_PER_PAGE,
     });
     numMarketsPromise = fetchNumRegisteredMarkets();
+  }
+
+
+  let featuredPromise: ReturnType<typeof fetchFeaturedMarket>;
+
+  if(sortBy === SortMarketsBy.DailyVolume && orderBy === ORDER_BY.DESC) {
+    featuredPromise = marketsPromise.then(r => r[0]);
+  } else {
+    featuredPromise = fetchFeaturedMarket();
   }
 
   const [featured, priceFeed, markets, numMarkets] = await Promise.all([
