@@ -32,9 +32,20 @@ const getCandlesticks = async (params: GetCandlesticksParams) => {
   return stringifyJSON(data);
 };
 
+/**
+ * Fetch all of the parcels of candlesticks that have completely ended.
+ * The only difference between this and {@link getNormalCachedCandlesticks} is the cache tag and
+ * thus how long the data is cached for.
+ */
 const getHistoricCachedCandlesticks = unstable_cache(getCandlesticks, ["candlesticks-historic"], {
   revalidate: HISTORICAL_CACHE_DURATION,
 });
+
+/**
+ * Fetch all candlestick parcels that haven't completed yet.
+ * The only difference between this and {@link getHistoricCachedCandlesticks} is the cache tag and
+ * thus how long the data is cached for.
+ */
 const getNormalCachedCandlesticks = unstable_cache(getCandlesticks, ["candlesticks"], {
   revalidate: NORMAL_CACHE_DURATION,
 });
