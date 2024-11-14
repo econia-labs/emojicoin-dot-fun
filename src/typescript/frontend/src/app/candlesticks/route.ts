@@ -1,12 +1,13 @@
-import { type Period, toPeriod } from "@sdk/index";
-import { type PeriodTypeFromDatabase } from "@sdk/indexer-v2/types/json-types";
+import { toPeriod } from "@sdk/index";
 import { parseInt } from "lodash";
 import { type NextRequest } from "next/server";
 import {
+  type CandlesticksSearchParams,
   type GetCandlesticksParams,
   HISTORICAL_CACHE_DURATION,
-  indexToEndDate,
-  indexToStartDate,
+  indexToParcelEndDate,
+  indexToParcelStartDate,
+  isValidCandlesticksSearchParams,
   jsonStrAppend,
   NORMAL_CACHE_DURATION,
   PARCEL_SIZE,
@@ -19,7 +20,7 @@ import { fetchPeriodicEventsSince } from "@/queries/market";
 const getCandlesticks = async (params: GetCandlesticksParams) => {
   const { marketID, index, period } = params;
 
-  const start = indexToStartDate(index, period);
+  const start = indexToParcelStartDate(index, period);
 
   const data = await fetchPeriodicEventsSince({
     marketID,
@@ -59,47 +60,39 @@ const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
 /* eslint-disable-next-line import/no-unused-modules */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const marketIDStr = searchParams.get("marketID");
-  const indexStr = searchParams.get("index");
-  const periodStr = searchParams.get("period");
-  const amountStr = searchParams.get("amount");
+  const params: CandlesticksSearchParams = {
+    marketID: searchParams.get("marketID"),
+    index: searchParams.get("index"),
+    period: searchParams.get("period"),
+    amount: searchParams.get("amount"),
+  };
 
-  if (!marketIDStr || isNaN(parseInt(marketIDStr))) {
-    return new Response("Invalid market ID.", { status: 400 });
+  if (!isValidCandlesticksSearchParams(params)) {
+    return new Response("Invalid candlestick search params.", { status: 400 });
   }
 
-  if (!indexStr || isNaN(parseInt(indexStr))) {
-    return new Response("Invalid index.", { status: 400 });
-  }
+  const marketID = parseInt(params.marketID);
+  const index = parseInt(params.index);
+  const period = toPeriod(params.period);
+  const numParcels = parseInt(params.amount);
 
-  if (!amountStr || isNaN(parseInt(amountStr))) {
-    return new Response("Invalid amount.", { status: 400 });
-  }
-
-  let period: Period;
-  try {
-    period = toPeriod(periodStr as PeriodTypeFromDatabase);
-  } catch {
-    return new Response("Invalid period.", { status: 400 });
-  }
-
-  const index = parseInt(indexStr);
-  const marketID = parseInt(marketIDStr);
-  const amount = parseInt(amountStr);
-
-  const lastStartDate = indexToStartDate(index + amount - 1, period);
-
-  if (lastStartDate > new Date()) {
-    return new Response("Last start date cannot be later than the current time.", { status: 400 });
+  // Ensure that the last start date as calculated per the search params is valid.
+  // This is specifically the last parcel's start date- aka the last parcel's first candlestick's
+  // start time.
+  const lastParcelStartDate = indexToParcelStartDate(index + numParcels - 1, period);
+  if (lastParcelStartDate > new Date()) {
+    return new Response("The last parcel's start date cannot be later than the current time.", {
+      status: 400,
+    });
   }
 
   let data: string = "[]";
 
   const processorTimestamp = new Date(await getCachedLatestProcessedEmojicoinTimestamp());
 
-  for (let i = 0; i < amount; i++) {
+  for (let i = 0; i < numParcels; i++) {
     const localIndex = index + i;
-    const endDate = indexToEndDate(localIndex, period);
+    const endDate = indexToParcelEndDate(localIndex, period);
     if (endDate < processorTimestamp) {
       const res = await getHistoricCachedCandlesticks({ marketID, index: localIndex, period });
       data = jsonStrAppend(data, res);

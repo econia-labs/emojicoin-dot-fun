@@ -1,4 +1,4 @@
-import { type Period, PeriodDuration, periodEnumToRawDuration } from "@sdk/index";
+import { isPeriod, type Period, PeriodDuration, periodEnumToRawDuration } from "@sdk/index";
 
 /**
  * Parcel size is the amount of candlestick periods that will be in a single parcel.
@@ -12,9 +12,9 @@ import { type Period, PeriodDuration, periodEnumToRawDuration } from "@sdk/index
  */
 export const PARCEL_SIZE = 500;
 
-export const indexToStartDate = (index: number, period: Period): Date =>
+export const indexToParcelStartDate = (index: number, period: Period): Date =>
   new Date((index * periodEnumToRawDuration(period)) / 1000);
-export const indexToEndDate = (index: number, period: Period): Date =>
+export const indexToParcelEndDate = (index: number, period: Period): Date =>
   new Date(((index + 1) * periodEnumToRawDuration(period)) / 1000);
 
 export const getPeriodDurationSeconds = (period: Period) =>
@@ -44,6 +44,46 @@ export type GetCandlesticksParams = {
   marketID: number;
   index: number;
   period: Period;
+};
+
+/**
+ * The search params used in the `GET` request at `candlesticks/api`.
+ *
+ * @property {string} marketID      - The market ID.
+ * @property {string} index         - The pagination index.
+ * @property {string} period        - The {@link Period}.
+ * @property {string} amount        - The number of parcels to fetch.
+ */
+export type CandlesticksSearchParams = {
+  marketID: string | null;
+  index: string | null;
+  period: string | null;
+  amount: string | null;
+};
+
+/**
+ * Validated {@link CandlesticksSearchParams}.
+ */
+export type ValidCandlesticksSearchParams = {
+  marketID: string;
+  index: string;
+  period: Period;
+  amount: string;
+};
+
+const isNumber = (s: string) => !isNaN(parseInt(s));
+
+export const isValidCandlesticksSearchParams = (
+  params: CandlesticksSearchParams
+): params is ValidCandlesticksSearchParams => {
+  const { marketID, index, period, amount } = params;
+  // prettier-ignore
+  return (
+    marketID !== null && isNumber(marketID) &&
+    index !== null && isNumber(index) &&
+    amount !== null && isNumber(amount) &&
+    period !== null && isPeriod(period)
+  );
 };
 
 export const HISTORICAL_CACHE_DURATION = 60 * 60 * 24 * 365; // 1 year.
