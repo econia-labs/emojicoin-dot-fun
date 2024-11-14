@@ -1,6 +1,6 @@
-import { type EmojiName, namesToEmojis } from "../../../src";
-import TestHelpers from "../../utils/helpers";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import { type SymbolEmojiName, namesToEmojis } from "../../../src";
+import TestHelpers from "../../../src/utils/test/helpers";
+import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
 import { fetchMarkets } from "../../../src/indexer-v2/queries/app/home";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 
@@ -14,7 +14,7 @@ describe("queries markets by the various emojis in their symbols", () => {
   // In order for these tests to work, *ANY* of the following emojis must *NOT* be used in any other
   // tests as part of a market symbol, because then the query for searching by emoji will return
   // multiple results that were not intended.
-  const marketEmojiNames: EmojiName[][] = [
+  const marketEmojiNames: SymbolEmojiName[][] = [
     ["fuel pump"],
     ["fuel pump", "raised fist"],
     ["fuel pump", "raised fist", "sun behind cloud"],

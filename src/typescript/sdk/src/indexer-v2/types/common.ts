@@ -19,6 +19,7 @@ export type MarketStateQueryArgs = {
   orderBy?: OrderBy;
   searchEmojis?: string[];
   inBondingCurve?: boolean;
+  count?: boolean;
 };
 
 export type PeriodicStateEventQueryArgs = {

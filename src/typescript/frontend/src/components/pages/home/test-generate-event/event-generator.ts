@@ -11,7 +11,7 @@ import {
   type AnyEmojicoinEvent,
 } from "@sdk-types";
 import { triggerEnumToRawTrigger, Trigger } from "@sdk/const";
-import { getRandomEmoji, type EmojicoinSymbol, generateRandomSymbol } from "@sdk/emoji_data";
+import { getRandomSymbolEmoji, type EmojicoinSymbol, generateRandomSymbol } from "@sdk/emoji_data";
 import { getEmojicoinData } from "@sdk/markets/utils";
 import type JsonTypes from "@sdk/types/json-types";
 import { STRUCT_STRINGS } from "@sdk/utils";
@@ -350,7 +350,7 @@ const generateChatJSON = ({
       market_id: marketID.toString(),
     },
     message: Array.from({ length: Math.random() * 10 })
-      .map(() => getRandomEmoji().emoji)
+      .map(() => getRandomSymbolEmoji().emoji)
       .join(""),
     user: AccountAddress.from(user).toString(),
     user_emojicoin_balance: "0",

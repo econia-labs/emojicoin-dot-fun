@@ -42,5 +42,5 @@ export const toHomePageParamsWithDefault = (searchParams: HomePageSearchParams |
 // Converts a bare `0x` and a `null` input to undefined. If it's already undefined, it remains so.
 // Otherwise, return the value.
 export const handleEmptySearchBytes = (searchBytes?: string | null) => {
-  return searchBytes === "0x" ? undefined : searchBytes ?? undefined;
+  return searchBytes === "0x" ? undefined : (searchBytes ?? undefined);
 };

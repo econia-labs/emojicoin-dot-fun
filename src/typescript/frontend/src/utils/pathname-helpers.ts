@@ -1,4 +1,4 @@
-import { SYMBOL_DATA } from "@sdk/emoji_data/symbol-data";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data/emoji-data";
 import { languageList } from "configs";
 import { ROUTES } from "router/routes";
 
@@ -48,7 +48,7 @@ export const ONE_SPACE = " ";
 
 export const emojisToPath = (emojis: string[]) => {
   const names = emojis
-    .map((x) => SYMBOL_DATA.byEmoji(x)?.name)
+    .map((x) => SYMBOL_EMOJI_DATA.byEmoji(x)?.name)
     .filter((x) => typeof x !== "undefined") as string[];
   return emojiNamesToPath(names);
 };

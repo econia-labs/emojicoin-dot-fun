@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import "server-only";
+if (process.env.NODE_ENV !== "test") {
+  require("server-only");
+}
 
 import {
   type PostgrestSingleResponse,
@@ -88,12 +90,9 @@ export const waitForEmojicoinIndexer = async (
   });
 
 /**
+ * Return the curried version of queryHelperWithCount that extracts just the rows.
  *
- * @param queryFn Takes in a query function that's used to be called after waiting for the indexer
- * to reach a certain version. Then it extracts the row data and returns it.
- * @param convert A function that converts the raw row data into the desired output, usually
- * by converting it into a camelCased representation of the database row.
- * @returns A curried function that applies the logic to the new query function.
+ * @see queryHelperWithCount
  */
 export function queryHelper<
   Row extends Record<string, unknown>,
@@ -106,29 +105,8 @@ export function queryHelper<
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
   convert: (rows: Row) => OutputType
 ): (args: WithConfig<QueryArgs>) => Promise<OutputType[]> {
-  const query = async (args: WithConfig<QueryArgs>) => {
-    const { minimumVersion, ...queryArgs } = args;
-    const innerQuery = queryFn(queryArgs as QueryArgs);
-
-    if (minimumVersion) {
-      await waitForEmojicoinIndexer(minimumVersion);
-    }
-
-    try {
-      const res = await innerQuery;
-      const rows = extractRows<Row>(res);
-      if (res.error) {
-        console.error("[Failed row conversion]:\n");
-        throw new Error(JSON.stringify(res));
-      }
-      return rows.map(convert);
-    } catch (e) {
-      console.error(e);
-      return [];
-    }
-  };
-
-  return query;
+  // Return the curried version of queryHelperWithCount that extracts just the rows.
+  return async (args) => (await queryHelperWithCount(queryFn, convert)(args)).rows;
 }
 
 export function queryHelperSingle<
@@ -148,6 +126,50 @@ export function queryHelperSingle<
     const res = await innerQuery;
     const row = extractRow<Row>(res);
     return row ? convert(row) : null;
+  };
+
+  return query;
+}
+
+/**
+ *
+ * @param queryFn Takes in a query function that's used to be called after waiting for the indexer
+ * to reach a certain version. Then it extracts the row data and returns it.
+ * @param convert A function that converts the raw row data into the desired output, usually
+ * by converting it into a camelCased representation of the database row.
+ * @returns A curried function that applies the logic to the new query function.
+ */
+export function queryHelperWithCount<
+  Row extends Record<string, unknown>,
+  Result extends Row[],
+  RelationName,
+  Relationships extends TableName,
+  QueryArgs extends Record<string, any> | undefined,
+  OutputType,
+>(
+  queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
+  convert: (rows: Row) => OutputType
+): (args: WithConfig<QueryArgs>) => Promise<{ rows: OutputType[]; count: number | null }> {
+  const query = async (args: WithConfig<QueryArgs>) => {
+    const { minimumVersion, ...queryArgs } = args;
+    const innerQuery = queryFn(queryArgs as QueryArgs);
+
+    if (minimumVersion) {
+      await waitForEmojicoinIndexer(minimumVersion);
+    }
+
+    try {
+      const res = await innerQuery;
+      const rows = extractRows<Row>(res);
+      if (res.error) {
+        console.error("[Failed row conversion]:\n");
+        throw new Error(JSON.stringify(res));
+      }
+      return { rows: rows.map(convert), count: res.count };
+    } catch (e) {
+      console.error(e);
+      return { rows: [], count: null };
+    }
   };
 
   return query;

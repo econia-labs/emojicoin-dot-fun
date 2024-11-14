@@ -3,11 +3,10 @@ import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { type EmojiPickerStore } from "@/store/emoji-picker-store";
 import { type HomePageProps } from "app/home/HomePage";
 import { type EventStore } from "@/store/event/types";
-import { joinEmojis, type SymbolEmoji } from "@sdk/emoji_data";
+import { type SymbolEmoji } from "@sdk/emoji_data";
 
 export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   time: number;
-  searchEmojisKey: string;
 };
 export type PropsWithTimeAndIndex = TableCardProps & {
   time: number;
@@ -19,10 +18,7 @@ export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
 
 const toSearchEmojisKey = (searchEmojis: string[]) => `{${searchEmojis.join("")}}`;
 
-export const marketDataToProps = (
-  markets: HomePageProps["markets"],
-  searchEmojis: string[]
-): PropsWithTime[] =>
+export const marketDataToProps = (markets: HomePageProps["markets"]): PropsWithTime[] =>
   markets.map((m) => ({
     time: Number(m.market.time),
     symbol: m.market.symbolData.symbol,
@@ -30,7 +26,6 @@ export const marketDataToProps = (
     emojis: m.market.emojis,
     staticMarketCap: m.state.instantaneousStats.marketCap.toString(),
     staticVolume24H: m.dailyVolume.toString(),
-    searchEmojisKey: toSearchEmojisKey(searchEmojis),
   }));
 
 export const stateEventsToProps = (
@@ -43,8 +38,8 @@ export const stateEventsToProps = (
   // order data visually.
   return firehose.map((e) => {
     const marketID = Number(e.market.marketID);
-    const { emojis, symbolEmojis: marketEmojis } = e.market;
-    const symbol = joinEmojis(marketEmojis);
+    const { emojis } = e.market;
+    const symbol = e.market.symbolData.symbol;
     const marketCap = e.state.instantaneousStats.marketCap;
     const volume24H = getMarket(e.market.symbolEmojis)?.dailyVolume;
     return {
@@ -103,7 +98,7 @@ export const constructOrdered = ({
   // We don't need to filter the fetched data because it's already filtered and sorted by the
   // server. We only need to filter event store state events.
   const searchEmojis = getSearchEmojis() as Array<SymbolEmoji>;
-  const initial = marketDataToProps(markets, searchEmojis);
+  const initial = marketDataToProps(markets);
 
   // If we're sorting by bump order, deduplicate and sort the events by bump order.
   const bumps = stateEventsToProps(stateFirehose, getMarket, searchEmojis);

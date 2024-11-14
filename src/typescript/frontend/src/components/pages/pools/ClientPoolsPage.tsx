@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import { useMatchBreakpoints } from "hooks";
-
 import { FlexGap } from "@containers";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
 import {
@@ -20,7 +18,7 @@ import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useSearchParams } from "next/navigation";
-import { encodeEmojis, getEmojisInString, type MarketSymbolEmojis } from "@sdk/emoji_data";
+import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
 import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
 
@@ -52,7 +50,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
   const { account } = useAptos();
 
   useEffect(() => {
-    setRealEmojis(emojis as MarketSymbolEmojis);
+    setRealEmojis(emojis as SymbolEmoji[]);
   }, [emojis]);
 
   useEffect(() => {

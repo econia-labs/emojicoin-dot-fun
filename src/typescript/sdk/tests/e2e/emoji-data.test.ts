@@ -1,58 +1,54 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // cspell:word writeset
+import { AccountAddress, type WriteSetChangeWriteTableItem } from "@aptos-labs/ts-sdk";
+import { getPublishHelpers } from "../../src/utils/test/helpers";
 import {
-  AccountAddress,
-  type UserTransactionResponse,
-  type WriteSetChangeWriteResource,
-  type WriteSetChangeWriteTableItem,
-} from "@aptos-labs/ts-sdk";
-import { getPublishHelpers } from "../utils";
-import { STRUCT_STRINGS, SYMBOL_DATA, normalizeHex } from "../../src";
-import EmojiJSONData from "../../src/emoji_data/symbol-emojis.json";
-import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
+  CHAT_EMOJI_DATA,
+  SYMBOL_EMOJI_DATA,
+  allChatEmojis,
+  allSymbolEmojis,
+  getRegistryResourceFromWriteSet,
+  isEntryFunctionUserTransactionResponse,
+  isWriteSetChangeWriteTableItem,
+  normalizeHex,
+} from "../../src";
+import SymbolEmojiJson from "../../src/emoji_data/symbol-emojis.json";
+import ChatEmojiJson from "../../src/emoji_data/chat-emojis.json";
+import { getPublishTransactionFromIndexer } from "../../src/utils/test/get-publish-txn-from-indexer";
+import { getFundedAccount } from "../../src/utils/test/test-accounts";
+import TestHelpers from "../../src/utils/test/helpers";
+import { waitForEmojicoinIndexer } from "../../src/indexer-v2/queries";
+import { fetchMarketRegistrationEvents } from "./queries";
+import { ORDER_BY } from "../../src/queries";
 
 jest.setTimeout(10000);
 
 describe("verification of typescript emoji JSON data", () => {
   const { aptos } = getPublishHelpers();
 
-  it("checks the on-chain changes in the publish txn to verify the JSON data", async () => {
-    const { transaction_hash: transactionHash } = await getPublishTransactionFromIndexer();
-    const res = (await aptos.waitForTransaction({ transactionHash })) as UserTransactionResponse;
-    const { changes } = res;
+  let symbolEmojisTableHandle: AccountAddress;
+  let chatEmojisTableHandle: AccountAddress;
+  let tableItemWrites: WriteSetChangeWriteTableItem[];
 
-    // Find the table handle in the `Registry` write resource change.
-    const registryWrite = changes.find((change) => {
-      const changeType = change.type;
-      if (changeType !== "write_resource") {
-        return false;
-      }
-      const resourceType = (change as WriteSetChangeWriteResource).data.type;
-      if (resourceType !== STRUCT_STRINGS.Registry) {
-        return false;
-      }
-      const changeData = (change as WriteSetChangeWriteResource).data.data as any;
-      return changeData.coin_symbol_emojis?.handle?.startsWith("0x");
-    });
+  beforeAll(async () => {
+    const transactionHash = (await getPublishTransactionFromIndexer()).transaction_hash;
+    const res = await aptos.waitForTransaction({ transactionHash });
+    if (!isEntryFunctionUserTransactionResponse(res)) {
+      throw new Error("This should always be true.");
+    }
+    const registryResource = getRegistryResourceFromWriteSet(res)!;
+    expect(registryResource).toBeDefined();
 
-    expect(registryWrite).toBeDefined();
-    // Get the table handle in the writeset.
-    const writeset = registryWrite as WriteSetChangeWriteResource;
-    const data = writeset.data.data as any;
-    // Believe it or not, the REST API strips leading zeroes from a table handle when it's in the
-    // `handle` field, but not when i's in the `key` field of a table item. 💀
-    // So we need to normalize it.
-    const tableHandle = AccountAddress.from(data.coin_symbol_emojis.handle);
+    symbolEmojisTableHandle = AccountAddress.from(registryResource.coinSymbolEmojis.handle);
+    chatEmojisTableHandle = AccountAddress.from(registryResource.supplementalChatEmojis.handle);
+    tableItemWrites = res.changes.filter(isWriteSetChangeWriteTableItem);
+  });
 
-    // Then filter all writeset changes for emojis being added to the coin_symbol_emojis table.
-    const emojisInChangeSet = changes.filter((change) => {
-      const changeType = change.type;
-      if (changeType !== "write_table_item") {
-        return false;
-      }
-      const ch = change as WriteSetChangeWriteTableItem;
+  it("verifies symbol emoji JSON data with on-chain changes in the publish txn", async () => {
+    // Filter all writeset changes for emojis being added to the coin_symbol_emojis table.
+    const symbolEmojisInWriteSets = tableItemWrites.filter((ch) => {
       return (
-        AccountAddress.from(ch.handle).equals(tableHandle) &&
+        AccountAddress.from(ch.handle).equals(symbolEmojisTableHandle) &&
         ch.data?.key_type === "vector<u8>" &&
         ch.data?.value === 0 &&
         ch.data?.value_type === "u8"
@@ -60,13 +56,13 @@ describe("verification of typescript emoji JSON data", () => {
     });
 
     // From the Move changesets.
-    const numEmojisAdded = emojisInChangeSet.length;
+    const numEmojisAdded = symbolEmojisInWriteSets.length;
     // From our TS JSON file.
-    const jsonEntries = Object.entries(EmojiJSONData);
+    const jsonEntries = Object.entries(SymbolEmojiJson);
     const encoder = new TextEncoder();
     const emojisInJSON = jsonEntries.map(([symbol, _name]) => normalizeHex(encoder.encode(symbol)));
 
-    const moveTableChangeKeys = emojisInChangeSet.map((ch) => (ch as any).data.key);
+    const moveTableChangeKeys = symbolEmojisInWriteSets.map((ch) => (ch as any).data.key);
     const moveEmojiHexStringsAsSet = new Set(moveTableChangeKeys);
 
     // From our TS JSON file.
@@ -78,15 +74,90 @@ describe("verification of typescript emoji JSON data", () => {
     expect(moveEmojiHexStringsAsSet.size).toStrictEqual(jsonEntries.length);
     expect(moveEmojiHexStringsAsSet.size).toStrictEqual(emojisInJSONAsSet.size);
     expect(moveEmojiHexStringsAsSet.size).toStrictEqual(emojisInJSON.length);
+    expect(moveEmojiHexStringsAsSet.size).toStrictEqual(allSymbolEmojis.length);
 
     for (const emojiHex of moveEmojiHexStringsAsSet) {
       expect(emojisInJSONAsSet.has(emojiHex)).toBe(true);
-      expect(SYMBOL_DATA.hasHex(emojiHex)).toBe(true);
-      expect(SYMBOL_DATA.byHex(emojiHex)).toBeDefined();
-      expect(SYMBOL_DATA.byEmoji(SYMBOL_DATA.byHex(emojiHex)!.emoji)).toBeDefined();
-      expect(SYMBOL_DATA.byName(SYMBOL_DATA.byHex(emojiHex)!.name)).toBeDefined();
+      expect(SYMBOL_EMOJI_DATA.hasHex(emojiHex)).toBe(true);
+      expect(SYMBOL_EMOJI_DATA.byHex(emojiHex)).toBeDefined();
+      expect(SYMBOL_EMOJI_DATA.byEmoji(SYMBOL_EMOJI_DATA.byHex(emojiHex)!.emoji)).toBeDefined();
+      expect(SYMBOL_EMOJI_DATA.byName(SYMBOL_EMOJI_DATA.byHex(emojiHex)!.name)).toBeDefined();
       // Finally, test equality.
-      expect(SYMBOL_DATA.byHex(emojiHex)!.hex).toBe(emojiHex);
+      expect(SYMBOL_EMOJI_DATA.byHex(emojiHex)!.hex).toBe(emojiHex);
+    }
+
+    // To be extra paranoid.
+    const [moveValues, jsonValues] = [
+      Array.from(moveEmojiHexStringsAsSet),
+      Array.from(emojisInJSONAsSet),
+    ];
+    moveValues.sort();
+    jsonValues.sort();
+    expect(moveValues).toStrictEqual(jsonValues);
+  });
+
+  it("verifies chat emoji JSON data with on-chain changes in the first registration", async () => {
+    // Since the table items aren't added until the first market is registered, we must get the
+    // writeset changes for the first registered market, not the publish package transaction.
+    // We must also register a market to ensure that there is at least one registered market.
+    const { registerResponse } = await TestHelpers.registerMarketFromEmojis({
+      registrant: getFundedAccount("999"),
+      emojis: ["🚽", "🚽"],
+    });
+    await waitForEmojicoinIndexer(registerResponse.version);
+
+    const firstRegisterTxn = await fetchMarketRegistrationEvents({
+      orderBy: ORDER_BY.ASC,
+      minimumVersion: registerResponse.version,
+    }).then((res) =>
+      aptos.getTransactionByVersion({ ledgerVersion: res[0].transaction.version }).then((res) => {
+        if (!isEntryFunctionUserTransactionResponse(res)) {
+          throw new Error("This should always be true.");
+        }
+        return res;
+      })
+    );
+    const chatTableItemWrites = firstRegisterTxn.changes.filter(isWriteSetChangeWriteTableItem);
+
+    // Filter all writeset changes for emojis being added to the coin_symbol_emojis table.
+    const chatEmojisInWriteSet = chatTableItemWrites.filter((ch) => {
+      return (
+        AccountAddress.from(ch.handle).equals(chatEmojisTableHandle) &&
+        ch.data?.key_type === "vector<u8>" &&
+        ch.data?.value === 0 &&
+        ch.data?.value_type === "u8"
+      );
+    });
+
+    // From the Move changesets.
+    const numEmojisAdded = chatEmojisInWriteSet.length;
+    // From our TS JSON file.
+    const jsonEntries = Object.entries(ChatEmojiJson);
+    const encoder = new TextEncoder();
+    const emojisInJSON = jsonEntries.map(([symbol, _name]) => normalizeHex(encoder.encode(symbol)));
+
+    const moveTableChangeKeys = chatEmojisInWriteSet.map((ch) => (ch as any).data.key);
+    const moveEmojiHexStringsAsSet = new Set(moveTableChangeKeys);
+
+    // From our TS JSON file.
+    const emojisInJSONAsSet = new Set(emojisInJSON);
+
+    // Check the set length is equal to the original array lengths and the json set length.
+    expect(moveEmojiHexStringsAsSet.size).toStrictEqual(numEmojisAdded);
+    expect(moveEmojiHexStringsAsSet.size).toStrictEqual(moveTableChangeKeys.length);
+    expect(moveEmojiHexStringsAsSet.size).toStrictEqual(jsonEntries.length);
+    expect(moveEmojiHexStringsAsSet.size).toStrictEqual(emojisInJSONAsSet.size);
+    expect(moveEmojiHexStringsAsSet.size).toStrictEqual(emojisInJSON.length);
+    expect(moveEmojiHexStringsAsSet.size).toStrictEqual(allChatEmojis.length);
+
+    for (const emojiHex of moveEmojiHexStringsAsSet) {
+      expect(emojisInJSONAsSet.has(emojiHex)).toBe(true);
+      expect(CHAT_EMOJI_DATA.hasHex(emojiHex)).toBe(true);
+      expect(CHAT_EMOJI_DATA.byHex(emojiHex)).toBeDefined();
+      expect(CHAT_EMOJI_DATA.byEmoji(CHAT_EMOJI_DATA.byHex(emojiHex)!.emoji)).toBeDefined();
+      expect(CHAT_EMOJI_DATA.byName(CHAT_EMOJI_DATA.byHex(emojiHex)!.name)).toBeDefined();
+      // Finally, test equality.
+      expect(CHAT_EMOJI_DATA.byHex(emojiHex)!.hex).toBe(emojiHex);
     }
 
     // To be extra paranoid.

@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { type SwapEventModel } from "@sdk/indexer-v2/types";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import "./trade-history.css";
+import { Emoji } from "utils/emoji";
 
 const HARD_LIMIT = 500;
 
@@ -87,7 +88,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
             <span className="flex my-auto">APT</span>
           </ThWrapper>
           <ThWrapper className="flex w-[22%] md:w-[18%]">
-            <span className="flex my-auto">{props.data.symbol}</span>
+            <Emoji className="flex my-auto" emojis={props.data.symbol} />
           </ThWrapper>
           <ThWrapper className="hidden md:flex md:w-[24%]">
             <span className="flex my-auto">Time</span>

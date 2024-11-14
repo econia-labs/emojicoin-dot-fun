@@ -8,6 +8,7 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore } from "context/event-store-context";
 import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 import { isMarketStateModel } from "@sdk/indexer-v2/types";
+import { Emoji } from "utils/emoji";
 
 const innerWrapper = `flex flex-col md:flex-row justify-around w-full max-w-[1362px] px-[30px] lg:px-[44px] py-[17px]
 md:py-[37px] xl:py-[68px]`;
@@ -55,9 +56,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             {emojisToName(data.emojis)}
           </div>
 
-          <div className="text-[24px] md:display-2 my-auto text-white">
-            {data.symbolData.symbol}
-          </div>
+          <Emoji className="text-[24px] md:display-2 my-auto text-white" emojis={data.emojis} />
         </div>
 
         <div className={statsWrapper}>

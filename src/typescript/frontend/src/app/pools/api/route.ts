@@ -1,12 +1,10 @@
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { getValidSortByForPoolsPage } from "@sdk/indexer-v2/queries/query-params";
 import { handleEmptySearchBytes, safeParsePageWithDefault } from "lib/routes/home-page-params";
-import { stringifyJSON } from "utils";
-import { REVALIDATION_TIME } from "lib/server-env";
 import { getPoolData } from "./getPoolDataQuery";
+import { unstable_cache } from "next/cache";
 
-export const revalidate = REVALIDATION_TIME;
-export const dynamic = "force-dynamic";
+const getCachedPoolData = unstable_cache(getPoolData, ["pool-data"], { revalidate: 5 });
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -23,6 +21,12 @@ export async function GET(request: Request) {
   // The liquidity `provider`, aka the account to search for in the user liquidity pools.
   const provider = searchParams.get("account");
 
-  const data = await getPoolData(page, sortBy, orderBy, searchEmojis, provider ?? undefined);
-  return new Response(stringifyJSON(data));
+  let res: Awaited<ReturnType<typeof getPoolData>> = "[]";
+
+  try {
+    res = await getCachedPoolData(page, sortBy, orderBy, searchEmojis, provider ?? undefined);
+  } catch (e) {
+    console.error(e);
+  }
+  return new Response(res);
 }

@@ -8,7 +8,7 @@ import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 export interface HomePageProps {
   featured?: DatabaseModels["market_state"];
   markets: Array<DatabaseModels["market_state"]>;
-  numRegisteredMarkets: number;
+  numMarkets: number;
   page: number;
   sortBy: MarketDataSortByHomePage;
   searchBytes?: string;
@@ -20,7 +20,7 @@ export interface HomePageProps {
 export default async function HomePageComponent({
   featured,
   markets,
-  numRegisteredMarkets,
+  numMarkets,
   page,
   sortBy,
   searchBytes,
@@ -42,7 +42,7 @@ export default async function HomePageComponent({
 
         <EmojiTable
           markets={markets}
-          numRegisteredMarkets={numRegisteredMarkets}
+          numMarkets={numMarkets}
           page={page}
           sortBy={sortBy}
           searchBytes={searchBytes}

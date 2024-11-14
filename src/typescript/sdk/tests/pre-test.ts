@@ -1,13 +1,13 @@
 /* eslint-disable no-underscore-dangle */
 import WebSocket from "ws";
-import { DockerTestHarness } from "./utils/docker/docker-test-harness";
-import { type ContainerName } from "./utils/docker/logs";
+import { DockerTestHarness } from "../src/utils/test/docker/docker-test-harness";
+import { type ContainerName } from "../src/utils/test/docker/logs";
 
 export default async function preTest() {
   // @ts-expect-error Using `globalThis` as any for a polyfill for `WebSocket` in node.js.
   globalThis.WebSocket = WebSocket;
 
-  const startDockerServices = process.env.APTOS_NETWORK === "local";
+  const startDockerServices = process.env.NEXT_PUBLIC_APTOS_NETWORK === "local";
   const setupTest = !process.env.NO_TEST_SETUP;
   if (setupTest && startDockerServices) {
     // Print an empty line to separate `Determining test suites to run...` from the logs.
@@ -19,13 +19,11 @@ export default async function preTest() {
     }
     // @ts-expect-error Using `globalThis` as any.
     globalThis.__DOCKER_LOGS_FILTER__ = noLogs;
-    const testHarness = new DockerTestHarness({ includeFrontend: false });
     // --------------------------------------------------------------------------------------
     //                             Start the docker containers.
     // --------------------------------------------------------------------------------------
-    await testHarness.run();
-    // @ts-expect-error Using `globalThis` as any.
-    globalThis.__TEST_HARNESS__ = testHarness;
+    // Start the Docker test harness without the frontend container.
+    await DockerTestHarness.run({ frontend: false });
 
     // The docker container start-up script publishes the package on-chain.
   }

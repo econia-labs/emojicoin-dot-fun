@@ -1,6 +1,6 @@
 import { Hex, type HexInput } from "@aptos-labs/ts-sdk";
 import * as EmojicoinDotFun from "../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getPublishHelpers } from "../utils";
+import { getPublishHelpers } from "../../src/utils/test";
 
 jest.setTimeout(15000);
 

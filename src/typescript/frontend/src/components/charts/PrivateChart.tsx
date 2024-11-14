@@ -1,7 +1,7 @@
 // cspell:word intraday
 // cspell:word minmov
 // cspell:word pricescale
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   EXCHANGE_NAME,
@@ -20,7 +20,7 @@ import {
   type Timezone,
   widget,
 } from "@static/charting_library";
-import { getClientTimezone } from "lib/chart-utils";
+import { getClientTimezone, hasTradingActivity } from "lib/chart-utils";
 import { type ChartContainerProps } from "./types";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "router/routes";
@@ -29,18 +29,19 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { getAptosConfig } from "lib/utils/aptos-client";
-import { getEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
-import { type MarketMetadataModel } from "@sdk/indexer-v2/types";
+import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
+import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
 import { Aptos } from "@aptos-labs/ts-sdk";
-import { periodEnumToRawDuration, Trigger } from "@sdk/const";
-import { fetchAllCandlesticksInTimeRange } from "@/queries/candlesticks";
+import { PeriodDuration, periodEnumToRawDuration, Trigger } from "@sdk/const";
 import {
   type LatestBar,
   marketToLatestBars,
   periodicStateTrackerToLatestBar,
   toBar,
 } from "@/store/event/candlestick-bars";
+import { emoji, parseJSON } from "utils";
+import { Emoji } from "utils/emoji";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -67,7 +68,7 @@ const configurationData: DatafeedConfiguration = {
  * @param props
  * @returns
  */
-export const Chart = async (props: ChartContainerProps) => {
+export const Chart = (props: ChartContainerProps) => {
   const tvWidget = useRef<IChartingLibraryWidget>();
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -145,22 +146,31 @@ export const Chart = async (props: ChartContainerProps) => {
 
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
-      getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
+      getBars: async (
+        _symbolInfo,
+        resolution,
+        periodParams,
+        onHistoryCallback,
+        onErrorCallback
+      ) => {
         const { from, to } = periodParams;
         try {
           const period = ResolutionStringToPeriod[resolution.toString()];
           const periodDuration = periodEnumToRawDuration(period);
-          const start = new Date(from * 1000);
+          const periodDurationSeconds = (periodDuration / PeriodDuration.PERIOD_1M) * 60;
           const end = new Date(to * 1000);
-          // TODO: Consider that if our data is internally consistent and we run into performance/scalability issues
-          // with this implementation below (fetching without regard for anything in state), we can store the values in
-          // state and coalesce that with the data we fetch from the server.
-          const data = await fetchAllCandlesticksInTimeRange({
+          // The start timestamp is rounded so that all the people who load the webpage at a similar time get served
+          // the same cached response.
+          const start = from - (from % periodDurationSeconds);
+          const params = new URLSearchParams({
             marketID: props.marketID,
-            start,
-            end,
-            period,
+            start: start.toString(),
+            period: period.toString(),
+            limit: "500",
           });
+          const data: PeriodicStateEventModel[] = await fetch(`/candlesticks?${params.toString()}`)
+            .then((res) => res.text())
+            .then((res) => parseJSON(res));
 
           const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
 
@@ -179,12 +189,13 @@ export const Chart = async (props: ChartContainerProps) => {
             // Convert the market view data to `latestBar[]` and set the latest bars in our EventStore to those values.
             const latestBars = marketToLatestBars(marketResource);
             const marketEmojiData = toMarketEmojiData(marketResource.metadata.emojiBytes);
+            const symbolEmojis = marketEmojiData.emojis.map((e) => e.emoji);
             const marketMetadata: MarketMetadataModel = {
               marketID: marketResource.metadata.marketID,
               time: 0n,
               marketNonce: marketResource.sequenceInfo.nonce,
               trigger: Trigger.PackagePublication, // Make up some bunk trigger, since it should be clear it's made up.
-              symbolEmojis: marketEmojiData.emojis.map((e) => e.emoji),
+              symbolEmojis,
               marketAddress: marketResource.metadata.marketAddress,
               ...marketEmojiData,
             };
@@ -209,9 +220,11 @@ export const Chart = async (props: ChartContainerProps) => {
           // some visual inconsistencies in the chart.
           const bars: Bar[] = data.reduce((acc: Bar[], event) => {
             const bar = toBar(event);
-            if (bar.time >= from * 1000 && bar.time <= to * 1000) {
-              if (acc.at(-1)) {
-                bar.open = acc.at(-1)!.close;
+            const inTimeRange = bar.time >= from * 1000 && bar.time <= to * 1000;
+            if (inTimeRange && hasTradingActivity(bar)) {
+              const prev = acc.at(-1);
+              if (prev) {
+                bar.open = prev.close;
               }
               acc.push(bar);
             }
@@ -220,9 +233,23 @@ export const Chart = async (props: ChartContainerProps) => {
 
           // Push the latest bar to the bars array if it exists and update its `open` value to be the previous bar's
           // `close` if it's not the first/only bar.
+          // This logic mirrors what we use in `createBarFrom[Swap|PeriodicState]` but we need it here because we
+          // update the latest bar based on the market view every time we fetch with `getBars`, not just when a new
+          // event comes in.
           if (latestBar) {
-            if (bars.at(-1)) {
-              latestBar.open = bars.at(-1)!.close;
+            const secondLatestBar = bars.at(-1);
+            if (secondLatestBar) {
+              // If the latest bar has no trading activity, set all of its fields to the previous bar's close.
+              if (!hasTradingActivity(latestBar)) {
+                latestBar.high = secondLatestBar.close;
+                latestBar.low = secondLatestBar.close;
+                latestBar.close = secondLatestBar.close;
+              }
+              if (secondLatestBar.close !== 0) {
+                latestBar.open = secondLatestBar.close;
+              } else {
+                latestBar.open = latestBar.close;
+              }
             }
             bars.push(latestBar);
           }
@@ -234,7 +261,7 @@ export const Chart = async (props: ChartContainerProps) => {
               const time = BigInt(new Date().getTime()) * 1000n;
               const timeAsPeriod = getPeriodStartTimeFromTime(time, periodDuration) / 1000n;
               bars.push({
-                time: Number(timeAsPeriod),
+                time: Number(timeAsPeriod.toString()),
                 open: 0,
                 high: 0,
                 low: 0,
@@ -270,7 +297,7 @@ export const Chart = async (props: ChartContainerProps) => {
           throw new Error(`No ticker for symbol: ${symbolInfo}`);
         }
         const period = ResolutionStringToPeriod[resolution.toString()];
-        const marketEmojis = getEmojisInString(symbolInfo.ticker);
+        const marketEmojis = getSymbolEmojisInString(symbolInfo.ticker);
         subscribeToPeriod({
           marketEmojis,
           period,
@@ -282,7 +309,7 @@ export const Chart = async (props: ChartContainerProps) => {
         // For example: `🚀_#_5` for the `🚀` market for a resolution of period `5`.
         const [symbol, resolution] = subscriberUID.split("_#_");
         const period = ResolutionStringToPeriod[resolution];
-        const marketEmojis = getEmojisInString(symbol);
+        const marketEmojis = getSymbolEmojisInString(symbol);
         unsubscribeFromPeriod({
           marketEmojis,
           period,
@@ -331,11 +358,32 @@ export const Chart = async (props: ChartContainerProps) => {
     };
   }, [datafeed, symbol]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowErrorMessage(true);
+    }, 3500);
+    return () => clearTimeout(timeout);
+  });
+
   return (
     <div className="relative w-full">
-      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-sm font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
+      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-xl font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
         <div>
-          {"The device you're using isn't supported. 😔 Please try viewing on another device."}
+          {showErrorMessage ? (
+            <>
+              <div>
+                <span>{"The browser you're using isn't supported. "}</span>
+                <Emoji emojis={emoji("pensive face")} />
+              </div>
+              <div>
+                <span>{" Please try viewing in another browser."}</span>
+              </div>
+            </>
+          ) : (
+            "Loading..."
+          )}
         </div>
       </div>
       <div ref={ref} className="relative h-full w-full"></div>
