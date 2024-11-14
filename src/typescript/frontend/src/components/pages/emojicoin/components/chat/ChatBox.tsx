@@ -111,7 +111,6 @@ const ChatBox = (props: ChatProps) => {
         >
           {sortedChatsWithNames.map((chat, index) => {
             const message = {
-              // TODO: Resolve address to Aptos name, store in state.
               sender: chat.user,
               text: chat.message,
               senderRank: getRankFromEvent(chat).rankIcon,
@@ -129,7 +128,7 @@ const ChatBox = (props: ChatProps) => {
         </motion.div>
       </Flex>
 
-      <EmojiPickerWithInput geoblocked={props.geoblocked} handleClick={sendChatMessage} />
+      <EmojiPickerWithInput handleClick={sendChatMessage} />
     </Column>
   );
 };

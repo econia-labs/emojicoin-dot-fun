@@ -84,12 +84,11 @@ const MobileGrid = (props: GridProps) => {
         ) : tab === 2 ? (
           <>
             <div style={{ width: "100%" }}>
-              <LiquidityButton geoblocked={props.geoblocked} data={props.data} />
+              <LiquidityButton data={props.data} />
             </div>
             <StyledMobileContentInner>
               <Flex width="100%" justifyContent="center" px="17px">
                 <SwapComponent
-                  geoblocked={props.geoblocked}
                   emojicoin={props.data.symbol}
                   marketAddress={props.data.marketAddress}
                   marketEmojis={props.data.symbolEmojis}
@@ -100,7 +99,7 @@ const MobileGrid = (props: GridProps) => {
           </>
         ) : (
           <StyledMobileContentInner>
-            <ChatBox geoblocked={props.geoblocked} data={props.data} />
+            <ChatBox data={props.data} />
           </StyledMobileContentInner>
         )}
       </StyledMobileContentBlock>
