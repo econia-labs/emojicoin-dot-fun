@@ -239,7 +239,12 @@ export const EmojiPickerWithInput = ({
                     e.stopPropagation();
                   }}
                   onClick={() => {
+                    const shadowRoot = document.querySelector("em-emoji-picker")?.shadowRoot!;
+                    const pickerInputElement = shadowRoot.querySelector("div.search input") as HTMLInputElement;
                     setPickerInvisible(false);
+                    if (pickerInvisible) {
+                      pickerInputElement.focus();
+                    }
                   }}
                   data-testid="emoji-input"
                   style={{ fontFamily: EMOJI_FONT_FAMILY }}
