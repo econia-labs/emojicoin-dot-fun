@@ -368,8 +368,8 @@ export const Chart = (props: ChartContainerProps) => {
   });
 
   return (
-    <div className="relative w-full">
-      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-xl font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
+    <div className="relative w-full h-[420px]">
+      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-lg font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
         <div>
           {showErrorMessage ? (
             <>
