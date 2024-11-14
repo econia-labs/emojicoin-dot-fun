@@ -33,7 +33,7 @@ export const LiquidityButton = (props: GridProps) => {
         </StyledContentHeader>
       ) : canTrade ? (
         <StyledContentHeader className="!p-0">
-          <AnimatedProgressBar geoblocked={props.geoblocked} data={props.data} />
+          <AnimatedProgressBar data={props.data} />
         </StyledContentHeader>
       ) : (
         <StyledContentHeader>
