@@ -53,27 +53,23 @@ export async function GET(request: NextRequest) {
   const periodStr = searchParams.get("period");
   const amountStr = searchParams.get("amount");
 
-  if (!marketIDStr || !indexStr || !periodStr || !amountStr) {
-    return new Response("", { status: 400 });
+  if (!marketIDStr || isNaN(parseInt(marketIDStr))) {
+    return new Response("Invalid market ID.", { status: 400 });
   }
 
-  if (isNaN(parseInt(marketIDStr))) {
-    return new Response("", { status: 400 });
+  if (!indexStr || isNaN(parseInt(indexStr))) {
+    return new Response("Invalid index.", { status: 400 });
   }
 
-  if (isNaN(parseInt(indexStr))) {
-    return new Response("", { status: 400 });
-  }
-
-  if (isNaN(parseInt(amountStr))) {
-    return new Response("", { status: 400 });
+  if (!amountStr || isNaN(parseInt(amountStr))) {
+    return new Response("Invalid amount.", { status: 400 });
   }
 
   let period: Period;
   try {
     period = toPeriod(periodStr as PeriodTypeFromDatabase);
   } catch {
-    return new Response("", { status: 400 });
+    return new Response("Invalid period.", { status: 400 });
   }
 
   const index = parseInt(indexStr);
@@ -83,7 +79,7 @@ export async function GET(request: NextRequest) {
   const lastStartDate = indexToStartDate(index + amount - 1, period);
 
   if (lastStartDate > new Date()) {
-    return new Response("", { status: 400 });
+    return new Response("Last start date cannot be later than the current time.", { status: 400 });
   }
 
   let data: string = "[]";
