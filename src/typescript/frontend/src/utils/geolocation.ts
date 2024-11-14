@@ -1,4 +1,7 @@
+"use server";
+
 import { GEOBLOCKED, GEOBLOCKING_ENABLED, VPNAPI_IO_API_KEY } from "lib/server-env";
+import { headers } from "next/headers";
 
 export type Location = {
   country: string;
@@ -19,7 +22,8 @@ const isDisallowedLocation = (location: Location) => {
   return false;
 };
 
-export const isUserGeoblocked = async (ip: string | undefined | null) => {
+export const isUserGeoblocked = async () => {
+  const ip = headers().get("x-real-ip");
   if (!GEOBLOCKING_ENABLED) return false;
   if (ip === "undefined" || typeof ip === "undefined" || ip === "null" || ip === null) {
     return true;

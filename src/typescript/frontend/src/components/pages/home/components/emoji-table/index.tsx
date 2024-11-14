@@ -126,7 +126,7 @@ const EmojiTable = (props: EmojiTableProps) => {
               }}
             >
               <SearchWrapper>
-                <SearchBar geoblocked={props.geoblocked} />
+                <SearchBar />
               </SearchWrapper>
               <FilterOptionsWrapper>
                 <FilterOptions

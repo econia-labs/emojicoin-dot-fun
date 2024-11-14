@@ -13,7 +13,6 @@ export interface HomePageProps {
   sortBy: MarketDataSortByHomePage;
   searchBytes?: string;
   children?: React.ReactNode;
-  geoblocked: boolean;
   priceFeed: Array<DatabaseModels["price_feed"]>;
 }
 
@@ -25,7 +24,6 @@ export default async function HomePageComponent({
   sortBy,
   searchBytes,
   children,
-  geoblocked,
   priceFeed,
 }: HomePageProps) {
   return (
@@ -46,7 +44,6 @@ export default async function HomePageComponent({
           page={page}
           sortBy={sortBy}
           searchBytes={searchBytes}
-          geoblocked={geoblocked}
         />
       </div>
     </>

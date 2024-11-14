@@ -10,12 +10,13 @@ import Arrow from "@icons/Arrow";
 import { useNameStore } from "context/event-store-context";
 import Popup from "components/popup";
 import Text from "components/text";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
   onClick?: () => void;
-  geoblocked: boolean;
   arrow?: boolean;
+  forceAllowConnect?: boolean;
 }
 
 const CONNECT_WALLET = "Connect Wallet";
@@ -25,12 +26,19 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   children,
   className,
   onClick,
-  geoblocked,
   arrow = true,
+  forceAllowConnect,
 }) => {
   const { connected, account } = useWallet();
   const { openWalletModal } = useWalletModal();
   const { t } = translationFunction();
+  const shouldBeGeoblocked = useIsUserGeoblocked();
+  const geoblocked = useMemo(() => {
+    // For letting the user connect on the `/verify_status` page when `forceAllowConnect` is `true`,
+    // by only returning `geoblocked = true` if we're not force allow connecting and they're
+    // geoblocked.
+    return !forceAllowConnect && shouldBeGeoblocked;
+  }, [forceAllowConnect, shouldBeGeoblocked]);
 
   const [enabled, setEnabled] = useState(false);
 
