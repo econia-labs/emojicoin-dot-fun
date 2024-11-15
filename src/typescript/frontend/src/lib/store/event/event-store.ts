@@ -83,7 +83,7 @@ export const createEventStore = () => {
           });
         });
       },
-      pushEventFromClient: (event: AnyEventModel, localize = false) => {
+      pushEventFromClient: (event: AnyEventModel, pushToLocalStorage = false) => {
         if (get().guids.has(event.guid)) return;
         set((state) => {
           state.guids.add(event.guid);
@@ -97,30 +97,30 @@ export const createEventStore = () => {
             if (isSwapEventModel(event)) {
               market.swapEvents.unshift(event);
               handleLatestBarForSwapEvent(market, event);
-              if (localize) {
+              if (pushToLocalStorage) {
                 updateLocalStorage("swap", event);
               }
             } else if (isChatEventModel(event)) {
               market.chatEvents.unshift(event);
-              if (localize) {
+              if (pushToLocalStorage) {
                 updateLocalStorage("chat", event);
               }
             } else if (isLiquidityEventModel(event)) {
               market.liquidityEvents.unshift(event);
-              if (localize) {
+              if (pushToLocalStorage) {
                 updateLocalStorage("liquidity", event);
               }
             } else if (isMarketLatestStateEventModel(event)) {
               market.stateEvents.unshift(event);
               state.stateFirehose.unshift(event);
-              if (localize) {
+              if (pushToLocalStorage) {
                 updateLocalStorage("market", event);
               }
             } else if (isPeriodicStateEventModel(event)) {
               const period = periodEnumToRawDuration(event.periodicMetadata.period);
               market[period].candlesticks.unshift(event);
               handleLatestBarForPeriodicStateEvent(market, event);
-              if (localize) {
+              if (pushToLocalStorage) {
                 updateLocalStorage("periodic", event);
               }
             }
