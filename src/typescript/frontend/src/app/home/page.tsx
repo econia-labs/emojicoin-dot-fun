@@ -46,11 +46,10 @@ export default async function Home({ searchParams }: HomePageParams) {
     numMarketsPromise = fetchNumRegisteredMarkets();
   }
 
-
   let featuredPromise: ReturnType<typeof fetchFeaturedMarket>;
 
-  if(sortBy === SortMarketsBy.DailyVolume && orderBy === ORDER_BY.DESC) {
-    featuredPromise = marketsPromise.then(r => r[0]);
+  if (sortBy === SortMarketsBy.DailyVolume && orderBy === ORDER_BY.DESC) {
+    featuredPromise = marketsPromise.then((r) => r[0]);
   } else {
     featuredPromise = fetchFeaturedMarket();
   }
