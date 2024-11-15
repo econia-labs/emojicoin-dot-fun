@@ -17,7 +17,6 @@ type DataProps = MarketMetadataModel & {
 
 export interface EmojicoinProps {
   data: DataProps;
-  geoblocked: boolean;
 }
 
 export interface MainInfoProps {
@@ -26,19 +25,16 @@ export interface MainInfoProps {
 
 export interface GridProps {
   data: DataProps;
-  geoblocked: boolean;
 }
 
 export interface ChatProps {
   data: Omit<DataProps, "swaps">;
-  geoblocked: boolean;
 }
 export interface SwapComponentProps {
   emojicoin: string;
   marketAddress: AccountAddressString;
   marketEmojis: SymbolEmoji[];
   initNumSwaps: number;
-  geoblocked: boolean;
 }
 export interface TradeHistoryProps {
   data: Omit<DataProps, "chats">;

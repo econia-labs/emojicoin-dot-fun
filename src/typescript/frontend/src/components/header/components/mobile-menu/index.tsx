@@ -1,12 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-
 import { MobileMenuInner, MobileMenuWrapper, StyledMotion } from "./styled";
 import { EXTERNAL_LINK_PROPS, Link } from "components/link";
 import { MobileSocialLinks } from "./components/mobile-social-links";
 import { MobileMenuItem } from "../index";
-
 import { type MobileMenuProps } from "./types";
-
 import { slideVariants } from "./animations";
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -26,7 +23,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
   setIsOpen,
   linksForCurrentPage,
-  geoblocked,
 }) => {
   const { wallet, account, disconnect } = useWallet();
   const { copyAddress } = useAptos();
@@ -96,7 +92,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       <MobileMenuWrapper>
         <MobileMenuInner>
           <ButtonWithConnectWalletFallback
-            geoblocked={geoblocked}
             className="w-full"
             mobile={true}
             onClick={subMenuOnClick}

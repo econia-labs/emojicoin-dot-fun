@@ -7,7 +7,6 @@ import DesktopGrid from "./components/desktop-grid";
 import MobileGrid from "./components/mobile-grid";
 import { type EmojicoinProps } from "./types";
 import { useEventStore } from "context/event-store-context";
-import TextCarousel from "components/text-carousel/TextCarousel";
 import MainInfo from "./components/main-info/MainInfo";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { type BrokerEvent } from "@/broker/types";
@@ -35,13 +34,8 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
 
   return (
     <Box pt="85px">
-      <TextCarousel />
       <MainInfo data={props.data} />
-      {isTablet || isMobile ? (
-        <MobileGrid geoblocked={props.geoblocked} data={props.data} />
-      ) : (
-        <DesktopGrid geoblocked={props.geoblocked} data={props.data} />
-      )}
+      {isTablet || isMobile ? <MobileGrid data={props.data} /> : <DesktopGrid data={props.data} />}
     </Box>
   );
 };

@@ -1,7 +1,5 @@
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 import HomePageComponent from "./HomePage";
-import { isUserGeoblocked } from "utils/geolocation";
-import { headers } from "next/headers";
 import {
   fetchFeaturedMarket,
   fetchMarkets,
@@ -64,8 +62,6 @@ export default async function Home({ searchParams }: HomePageParams) {
     numMarketsPromise,
   ]);
 
-  // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
   return (
     <HomePageComponent
       featured={featured}
@@ -74,7 +70,6 @@ export default async function Home({ searchParams }: HomePageParams) {
       page={page}
       sortBy={sortBy}
       searchBytes={q}
-      geoblocked={geoblocked}
       priceFeed={priceFeed}
     />
   );

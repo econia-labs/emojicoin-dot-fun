@@ -24,10 +24,7 @@ import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/t
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
-export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: PoolsData[] }> = ({
-  geoblocked,
-  initialData,
-}) => {
+export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
@@ -91,7 +88,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
             alignItems="center"
             gap="13px"
           >
-            {!isMobile ? <SearchBar geoblocked={geoblocked} /> : null}
+            {!isMobile ? <SearchBar /> : null}
 
             <TableHeaderSwitcher
               title1="Pools"
@@ -110,7 +107,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
       {isMobile ? (
         <StyledSubHeader>
           <StyledHeaderInner>
-            <SearchBar geoblocked={geoblocked} />
+            <SearchBar />
           </StyledHeaderInner>
         </StyledSubHeader>
       ) : null}
@@ -142,10 +139,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
         </StyledInner>
 
         <StyledInner flexGrow={1} width={{ _: "100%", laptopL: "43%" }}>
-          <Liquidity
-            geoblocked={geoblocked}
-            market={selectedIndex !== undefined ? markets[selectedIndex] : undefined}
-          />
+          <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
         </StyledInner>
       </StyledWrapper>
     </StyledPoolsPage>

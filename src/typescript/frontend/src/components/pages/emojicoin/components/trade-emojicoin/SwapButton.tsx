@@ -26,7 +26,6 @@ export const SwapButton = ({
   marketAddress,
   setSubmit,
   disabled,
-  geoblocked,
   symbol,
   minOutputAmount,
 }: {
@@ -35,7 +34,6 @@ export const SwapButton = ({
   marketAddress: AccountAddressString;
   setSubmit: Dispatch<SetStateAction<(() => Promise<void>) | null>>;
   disabled?: boolean;
-  geoblocked: boolean;
   symbol: string;
   minOutputAmount: bigint | number | string;
 }) => {
@@ -100,7 +98,7 @@ export const SwapButton = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
+      <ButtonWithConnectWalletFallback>
         {canTrade ? (
           <>
             <Button disabled={disabled} onClick={handleClick} scale="lg">

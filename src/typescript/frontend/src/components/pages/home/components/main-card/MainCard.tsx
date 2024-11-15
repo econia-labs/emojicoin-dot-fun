@@ -51,9 +51,9 @@ const MainCard = (props: MainCardProps) => {
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  const { ref: marketCapRef } = useLabelScrambler(marketCap);
-  const { ref: dailyVolumeRef } = useLabelScrambler(dailyVolume);
-  const { ref: allTimeVolumeRef } = useLabelScrambler(allTimeVolume);
+  const { ref: marketCapRef } = useLabelScrambler(toCoinDecimalString(marketCap, 2));
+  const { ref: dailyVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
+  const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
   return (
     <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1872px">
@@ -91,7 +91,7 @@ const MainCard = (props: MainCardProps) => {
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <div className="flex flex-row content-center">
+          <div className="flex flex-row items-center">
             <span className="text-medium-gray pixel-heading-text">HOT</span>
             <span>&nbsp;</span>
             <div>
