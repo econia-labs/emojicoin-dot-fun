@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Maintenance from "./maintenance/component";
 
-export default function Error({
+export default function GlobalError({
   error,
 }: {
   error: Error & { digest?: string }
@@ -14,6 +14,10 @@ export default function Error({
   }, [error]);
 
   return (
-    <Maintenance />
+    <html>
+      <body>
+        <Maintenance />
+      </body>
+    </html>
   );
 }

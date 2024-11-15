@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import useNodeDimensions from "@hooks/use-node-dimensions";
-import { getRandomEmoji, type SymbolEmoji } from "@sdk/emoji_data";
+import { type SymbolEmoji, getRandomSymbolEmoji } from "@sdk/emoji_data";
 import React, { useEffect, useRef, useState } from "react";
 import { useInterval } from "react-use";
 
@@ -18,7 +18,7 @@ const MAX_DELAY_BETWEEN_STREAMS = 8000;
 
 const getRandInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min;
 
-const getRandChar = () => getRandomEmoji().emoji;
+const getRandChar = () => getRandomSymbolEmoji().emoji;
 
 const getRandStream = () =>
   Array.from({ length: getRandInRange(MIN_STREAM_SIZE, MAX_STREAM_SIZE) }).map((_) =>
@@ -40,7 +40,7 @@ const getMutatedStream = (stream: SymbolEmoji[]) => {
 
 const RainStream = (props: { height: number }) => {
   const [stream, setStream] = useState(getRandStream());
-  const [topPadding, setTopPadding] = useState(stream.length * -70);
+  const [topPadding, setTopPadding] = useState(stream.length * -70 - 140);
   const [intervalDelay, setIntervalDelay] = useState<number | null>(null);
 
   // Initialize intervalDelay
@@ -60,10 +60,9 @@ const RainStream = (props: { height: number }) => {
 
     // If stream is off the screen, reset it after timeout
     if (topPadding > props.height) {
-      setStream([]);
       const newStream = getRandStream();
       setStream(newStream);
-      setTopPadding(newStream.length * -70);
+      setTopPadding(newStream.length * -70 - 140);
       setIntervalDelay(null);
       setTimeout(
         () => setIntervalDelay(getRandInRange(MIN_INTERVAL_DELAY, MAX_INTERVAL_DELAY)),
