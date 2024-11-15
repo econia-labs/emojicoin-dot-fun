@@ -10,11 +10,7 @@
     "incremental": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
@@ -22,33 +18,15 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "paths": {
-      "@/broker/*": [
-        "../../sdk/src/broker-v2/*"
-      ],
-      "@/queries/*": [
-        "../../sdk/src/indexer-v2/queries/app/*"
-      ],
-      "@/store/*": [
-        "lib/store/*"
-      ],
-      "@containers": [
-        "components/layout/components/index.ts"
-      ],
-      "@hooks/*": [
-        "hooks/*"
-      ],
-      "@icons/*": [
-        "components/svg/icons/*"
-      ],
-      "@sdk-types": [
-        "../../sdk/src/types/index.ts"
-      ],
-      "@sdk/*": [
-        "../../sdk/src/*"
-      ],
-      "@static/*": [
-        "../public/static/*"
-      ]
+      "@/broker/*": ["../../sdk/src/broker-v2/*"],
+      "@/queries/*": ["../../sdk/src/indexer-v2/queries/app/*"],
+      "@/store/*": ["lib/store/*"],
+      "@containers": ["components/layout/components/index.ts"],
+      "@hooks/*": ["hooks/*"],
+      "@icons/*": ["components/svg/icons/*"],
+      "@sdk-types": ["../../sdk/src/types/index.ts"],
+      "@sdk/*": ["../../sdk/src/*"],
+      "@static/*": ["../public/static/*"]
     },
     "plugins": [
       {
@@ -61,14 +39,13 @@
     "strictNullChecks": true,
     "target": "esnext"
   },
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "include": [
     "next-env.d.ts",
     "./src/**/*.ts",
     "./src/**/*.tsx",
     ".next/types/**/*.ts",
-    "./dist/types/**/*.ts"
-, "../types.ts"  ]
+    "./dist/types/**/*.ts",
+    "../types.ts"
+  ]
 }
