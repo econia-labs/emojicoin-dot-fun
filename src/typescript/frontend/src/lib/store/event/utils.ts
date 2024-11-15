@@ -1,7 +1,7 @@
 import { Period, PERIODS, periodEnumToRawDuration } from "@sdk/const";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type WritableDraft } from "immer";
-import { type EventState, type CandlestickData, type MarketEventStore } from "./types";
+import { type EventState, type CandlestickData, type MarketEventStore } from "../../../../../types";
 import {
   type MarketMetadataModel,
   type PeriodicStateEventModel,
@@ -161,4 +161,14 @@ export const toMappedMarketEvents = <T extends EventModelWithMarket>(events: Arr
   const map = new Map(Array.from(uniques).map((symbol) => [symbol, [] as Array<T>]));
   events.forEach((event) => map.get(event.market.symbolData.symbol)!.push(event));
   return map;
+};
+
+export const initialState = (): EventState => {
+  return {
+    guids: new Set<string>(),
+    stateFirehose: [],
+    marketRegistrations: [],
+    markets: new Map(),
+    globalStateEvents: [],
+  };
 };

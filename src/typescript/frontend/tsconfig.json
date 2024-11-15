@@ -70,5 +70,5 @@
     "./src/**/*.tsx",
     ".next/types/**/*.ts",
     "./dist/types/**/*.ts"
-  ]
+, "../types.ts"  ]
 }
