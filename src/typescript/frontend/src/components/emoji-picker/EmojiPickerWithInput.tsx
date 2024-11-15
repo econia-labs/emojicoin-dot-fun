@@ -239,8 +239,11 @@ export const EmojiPickerWithInput = ({
                     e.stopPropagation();
                   }}
                   onClick={() => {
-                    const shadowRoot = document.querySelector("em-emoji-picker")?.shadowRoot!;
-                    const pickerInputElement = shadowRoot.querySelector("div.search input") as HTMLInputElement;
+                    const shadowRoot = document.querySelector("em-emoji-picker")
+                      ?.shadowRoot as ShadowRoot;
+                    const pickerInputElement = shadowRoot.querySelector(
+                      "div.search input"
+                    ) as HTMLInputElement;
                     setPickerInvisible(false);
                     if (pickerInvisible) {
                       pickerInputElement.focus();
