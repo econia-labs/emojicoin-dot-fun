@@ -14,7 +14,7 @@
   animation: image-pulse 4s infinite ease-in-out;
 }
 
-div.styled-emoji {
+.styled-emoji {
   position: absolute;
   color: white;
   left: 61%;
@@ -22,7 +22,7 @@ div.styled-emoji {
   padding-top: 8px;
 }
 
-div.styled-single-emoji {
+.styled-single-emoji {
   font-size: 51px;
 
   @media screen and (min-width: 578px) {
@@ -49,7 +49,7 @@ div.styled-single-emoji {
   }
 }
 
-div.styled-double-emoji {
+.styled-double-emoji {
   font-size: 40px;
 
   @media screen and (min-width: 578px) {
@@ -75,7 +75,7 @@ div.styled-double-emoji {
   }
 }
 
-div.pixel-heading-text {
+.pixel-heading-text {
   font-size: 26px;
 
   @media screen and (min-width: 578px) {
@@ -99,7 +99,31 @@ div.pixel-heading-text {
   }
 }
 
-div.market-data-text {
+.pixel-heading-emoji {
+  font-size: 15px;
+
+  @media screen and (min-width: 578px) {
+    font-size: 20px;
+  }
+
+  @media screen and (min-width: 1096px) {
+    font-size: 30px;
+  }
+
+  @media screen and (min-width: 1355px) {
+    font-size: 35px;
+  }
+
+  @media screen and (min-width: 1614px) {
+    font-size: 40px;
+  }
+
+  @media screen and (min-width: 1873px) {
+    font-size: 45px;
+  }
+}
+
+.market-data-text {
   font-size: 11px;
   line-height: unset;
   margin-bottom: 7px;
@@ -130,10 +154,9 @@ div.market-data-text {
   }
 }
 
-div.display-font-text {
+.display-font-text {
   font-size: 38px;
   line-height: unset;
-  margin-top: -12px;
   margin-bottom: 7px;
   color: white;
   max-width: 50vw;

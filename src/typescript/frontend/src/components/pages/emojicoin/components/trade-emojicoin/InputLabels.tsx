@@ -1,4 +1,5 @@
 import AptosIconBlack from "@icons/AptosBlack";
+import { Emoji } from "utils/emoji";
 
 export const AptosInputLabel = () => (
   <div className="pixel-heading-4 md:pixel-heading-3 text-light-gray">
@@ -6,8 +7,9 @@ export const AptosInputLabel = () => (
   </div>
 );
 
+export const EmojiInputLabelStyles =
+  "pixel-heading-3 text-light-gray text-[24px] md:text-[30px] cursor-default";
+
 export const EmojiInputLabel = ({ emoji }: { emoji: string }) => (
-  <div className="pixel-heading-3 text-light-gray text-[24px] md:text-[30px] !leading-[34px] pt-[6px] cursor-default">
-    {emoji}
-  </div>
+  <Emoji className={EmojiInputLabelStyles} emojis={emoji} />
 );

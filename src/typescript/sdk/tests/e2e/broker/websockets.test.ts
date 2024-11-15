@@ -5,11 +5,11 @@ import {
   getEmojicoinMarketAddressAndTypeTags,
   getEvents,
   type MarketEmojiData,
-  type MarketSymbolEmojis,
   maxBigInt,
   ONE_APT,
   sleep,
-  SYMBOL_DATA,
+  SYMBOL_EMOJI_DATA,
+  type SymbolEmoji,
   toMarketEmojiData,
   type Types,
   waitFor,
@@ -22,8 +22,8 @@ import {
   Swap,
   SwapWithRewards,
 } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../utils";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../../src/utils/test";
+import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
 import { type BrokerEvent } from "../../../src/broker-v2/types";
 import {
   isChatEventModel,
@@ -67,12 +67,12 @@ describe("tests to ensure that websocket event subscriptions work as expected", 
   };
 
   const sharedChatArgs = {
-    emojiBytes: [SYMBOL_DATA.byEmojiStrict("⚔️").bytes],
+    emojiBytes: [SYMBOL_EMOJI_DATA.byEmojiStrict("⚔️").bytes],
     emojiIndicesSequence: new Uint8Array([0]),
   };
 
   const marketData: MarketEmojiData[] = (
-    [["🍌"], ["🍟"], ["🍺"], ["🍦"], ["🍌", "🍟"], ["🍉", "🍉"]] as MarketSymbolEmojis[]
+    [["🍌"], ["🍟"], ["🍺"], ["🍦"], ["🍌", "🍟"], ["🍉", "🍉"]] as Array<SymbolEmoji[]>
   )
     .map(encodeEmojis)
     .map(toMarketEmojiData);

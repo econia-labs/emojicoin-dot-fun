@@ -26,16 +26,16 @@ export const SwapButton = ({
   marketAddress,
   setSubmit,
   disabled,
-  geoblocked,
   symbol,
+  minOutputAmount,
 }: {
   inputAmount: bigint | number | string;
   isSell: boolean;
   marketAddress: AccountAddressString;
   setSubmit: Dispatch<SetStateAction<(() => Promise<void>) | null>>;
   disabled?: boolean;
-  geoblocked: boolean;
   symbol: string;
+  minOutputAmount: bigint | number | string;
 }) => {
   const { t } = translationFunction();
   const { aptos, account, submit } = useAptos();
@@ -55,7 +55,7 @@ export const SwapButton = ({
         inputAmount: BigInt(inputAmount),
         isSell,
         typeTags: [emojicoin, emojicoinLP],
-        minOutputAmount: 1n,
+        minOutputAmount: BigInt(minOutputAmount),
       });
     const res = await submit(builderLambda);
     if (res && res.response && isUserTransactionResponse(res.response)) {
@@ -81,7 +81,16 @@ export const SwapButton = ({
         );
       }
     }
-  }, [account, aptos.config, inputAmount, isSell, marketAddress, submit, controls]);
+  }, [
+    account,
+    aptos.config,
+    inputAmount,
+    isSell,
+    marketAddress,
+    submit,
+    controls,
+    minOutputAmount,
+  ]);
 
   useEffect(() => {
     setSubmit(() => handleClick);
@@ -89,7 +98,7 @@ export const SwapButton = ({
 
   return (
     <>
-      <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
+      <ButtonWithConnectWalletFallback>
         {canTrade ? (
           <>
             <Button disabled={disabled} onClick={handleClick} scale="lg">

@@ -1,8 +1,6 @@
 import React from "react";
-
 import { DropdownMenuWrapper } from "./styled";
 import { DropdownMenuItem } from "./components";
-
 import { type DropdownMenuProps } from "../types";
 import { DropdownMenuInner, StyledDropdownMenuClose } from "./components/dropdown-menu-item/styled";
 

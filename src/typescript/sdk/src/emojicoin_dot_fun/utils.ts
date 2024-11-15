@@ -19,7 +19,7 @@ import {
 import { typeTagInputToStructName } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
 import type JsonTypes from "../types/json-types";
-import { encodeEmojis, SYMBOL_DATA, type SymbolEmoji } from "../emoji_data";
+import { encodeEmojis, SYMBOL_EMOJI_DATA, type SymbolEmoji } from "../emoji_data";
 
 // Note that the conversion to string bytes below doesn't work if the length of the string is > 255.
 const registryNameBytes = new MoveString("Registry").bcsToBytes().slice(1);
@@ -39,7 +39,7 @@ export function deriveEmojicoinPublisherAddress(args: {
 }): AccountAddress {
   const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
   const { emojis } = args;
-  if (emojis.every(SYMBOL_DATA.hasEmoji)) {
+  if (emojis.every(SYMBOL_EMOJI_DATA.hasEmoji)) {
     return createNamedObjectAddress({
       creator: registryAddress,
       seed: encodeEmojis(emojis),

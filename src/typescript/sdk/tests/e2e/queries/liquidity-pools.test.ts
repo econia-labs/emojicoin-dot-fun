@@ -1,13 +1,13 @@
 /* eslint-disable no-await-in-loop */
 
 import { type TypeTag, type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { maxBigInt, type MarketSymbolEmojis } from "../../../src";
-import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import { maxBigInt, type SymbolEmoji } from "../../../src";
+import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../src/utils/test/helpers";
+import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
 
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 import { ProvideLiquidity, Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getAptosClient } from "../../utils";
+import { getAptosClient } from "../../../src/utils/test";
 import { fetchMarkets, fetchUserLiquidityPools } from "../../../src/indexer-v2/queries";
 import { LIMIT } from "../../../src/queries";
 
@@ -23,7 +23,7 @@ describe("queries for liquidity pools", () => {
     const registrant = registrants[0];
     const [swapper, provider] = [registrant, registrant];
 
-    const symbols = (["🏊", "🏊🏻", "🏊🏼", "🏊🏽", "🏊🏾", "🏊🏿"] as MarketSymbolEmojis).map((e) =>
+    const symbols = (["🏊", "🏊🏻", "🏊🏼", "🏊🏽", "🏊🏾", "🏊🏿"] as SymbolEmoji[]).map((e) =>
       Array.from([e])
     );
 
@@ -78,7 +78,7 @@ describe("queries for liquidity pools", () => {
   it("queries all existing liquidity pools", async () => {
     const registrant = registrants[1];
     const swapper = registrant;
-    const emojis: MarketSymbolEmojis = ["🌊"];
+    const emojis: SymbolEmoji[] = ["🌊"];
     const { marketAddress, emojicoin, emojicoinLP } = await TestHelpers.registerMarketFromEmojis({
       registrant,
       emojis,

@@ -1,5 +1,15 @@
-import { type EventGuid } from "@aptos-labs/ts-sdk";
+import {
+  type WriteSetChange,
+  type WriteSetChangeWriteResource,
+  type WriteSetChangeWriteTableItem,
+  type EventGuid,
+  type TransactionResponse,
+  type UserTransactionResponse,
+  type EntryFunctionPayloadResponse,
+  isUserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import { type AccountAddressString } from "../emojicoin_dot_fun/types";
+import { type Flatten } from ".";
 
 // JSON representation of the Event data from a UserTransactionResponse.
 // We allow `guid` and `sequence_number` to be optional because we don't
@@ -69,3 +79,23 @@ export const toFeeStatement = (json: JSONFeeStatement): FeeStatement => ({
   storageFeeOctas: BigInt(json.storage_fee_octas),
   storageFeeRefundOctas: BigInt(json.storage_fee_refund_octas),
 });
+
+export const isWriteSetChangeWriteResource = (
+  writeSet: WriteSetChange
+): writeSet is WriteSetChangeWriteResource => writeSet.type === "write_resource";
+
+export const isWriteSetChangeWriteTableItem = (
+  writeSet: WriteSetChange
+): writeSet is WriteSetChangeWriteTableItem => writeSet.type === "write_table_item";
+
+type UserTransactionResponseWithEntryFunctionPayload = Flatten<
+  UserTransactionResponse & {
+    payload: EntryFunctionPayloadResponse;
+  }
+>;
+
+export const isEntryFunctionUserTransactionResponse = (
+  response: TransactionResponse
+): response is UserTransactionResponseWithEntryFunctionPayload => {
+  return isUserTransactionResponse(response) && response.payload.type === "entry_function_payload";
+};

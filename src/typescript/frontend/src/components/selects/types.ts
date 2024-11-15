@@ -38,6 +38,10 @@ export type SelectProps = {
   tooltip: JSX.Element;
 };
 
+export interface TradeOptionsProps extends BoxProps {
+  onMaxSlippageUpdate?: () => void;
+}
+
 export interface DropdownMenuProps extends Omit<BoxProps, "onClick"> {
   value?: Option | null;
   options: Option[];

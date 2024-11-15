@@ -7,8 +7,6 @@ import { default as Picker } from "@emoji-mart/react";
 import { init, SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { type ChatEmojiData, type EmojiName } from "@sdk/emoji_data";
-import { normalizeHex } from "@sdk/utils";
 import { ECONIA_BLUE } from "theme/colors";
 import RoundButton from "@icons/Minimize";
 
@@ -38,7 +36,6 @@ export default function EmojiPicker(
   }
 ) {
   const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
-  const setChatEmojiData = useEmojiPicker((s) => s.setChatEmojiData);
   const mode = useEmojiPicker((s) => s.mode);
   const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
   const host = document.querySelector("em-emoji-picker");
@@ -49,29 +46,6 @@ export default function EmojiPicker(
   // NOTE: We don't verify that the length of this set is equal to the number of valid chat emojis in the Move contract.
   useEffect(() => {
     data.then((d) => {
-      const chatEmojiData = new Map<string, ChatEmojiData>();
-
-      Object.keys(d.emojis).forEach((key) => {
-        const skinVariants = d.emojis[key].skins.map((skin) => skin.unified);
-        const name = d.emojis[key].name;
-        // To be safe, we parse and store this data ourselves, instead of relaying on the library
-        // for the native emoji value.
-        const asEmojis = skinVariants.map((skin) =>
-          unifiedCodepointsToEmoji(skin as `${string}-${string}`)
-        );
-        asEmojis.forEach((emoji) => {
-          const bytes = new TextEncoder().encode(emoji);
-          const hex = normalizeHex(bytes);
-          chatEmojiData.set(emoji, {
-            name: name as EmojiName,
-            emoji,
-            hex,
-            bytes,
-          });
-        });
-      });
-
-      setChatEmojiData(chatEmojiData);
       init({ set: "native", data: d });
     });
 
@@ -203,7 +177,7 @@ export default function EmojiPicker(
     }
   }, []);
 
-  const { drag, ...propsRest } = props;
+  const { drag, filterEmojis, ...propsRest } = props;
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -226,7 +200,7 @@ export default function EmojiPicker(
             theme="dark"
             perLine={8}
             exceptEmojis={[]}
-            filterEmojis={props.filterEmojis}
+            filterEmojis={filterEmojis}
             onEmojiSelect={(v: EmojiSelectorData) => {
               const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
               insertEmojiTextInput([newEmoji]);

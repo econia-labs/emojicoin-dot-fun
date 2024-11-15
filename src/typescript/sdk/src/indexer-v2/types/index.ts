@@ -22,12 +22,7 @@ import {
   type ProcessedFields,
   DatabaseRpc,
 } from "./json-types";
-import {
-  type MarketEmojiData,
-  type MarketSymbolEmojis,
-  type SymbolEmoji,
-  toMarketEmojiData,
-} from "../../emoji_data";
+import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
 import { toAccountAddressString } from "../../utils";
 import Big from "big.js";
@@ -388,9 +383,7 @@ const EVENT_NAMES = {
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
 
-const formatEmojis = <
-  T extends { symbol_emojis: MarketSymbolEmojis } | { symbolEmojis: MarketSymbolEmojis },
->(
+const formatEmojis = <T extends { symbol_emojis: SymbolEmoji[] } | { symbolEmojis: SymbolEmoji[] }>(
   data: T
 ) => {
   if ("symbol_emojis" in data) {
@@ -594,7 +587,7 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
 const q64ToBigInt = (n: string) => BigInt(Big(n).div(Big(2).pow(64)).toFixed(0));
 
 export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => ({
-  marketID: data.market_id,
+  marketID: BigInt(data.market_id),
   symbolBytes: data.symbol_bytes,
   symbolEmojis: data.symbol_emojis,
   marketAddress: data.market_address,

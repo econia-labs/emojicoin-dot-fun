@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import { useMatchBreakpoints } from "hooks";
-
 import { FlexGap } from "@containers";
 import { Liquidity, PoolsTable, TableHeaderSwitcher } from "components/pages/pools/components";
 import {
@@ -20,16 +18,13 @@ import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { useSearchParams } from "next/navigation";
-import { encodeEmojis, getEmojisInString, type MarketSymbolEmojis } from "@sdk/emoji_data";
+import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
 import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
-export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: PoolsData[] }> = ({
-  geoblocked,
-  initialData,
-}) => {
+export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
   const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
@@ -52,7 +47,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
   const { account } = useAptos();
 
   useEffect(() => {
-    setRealEmojis(emojis as MarketSymbolEmojis);
+    setRealEmojis(emojis as SymbolEmoji[]);
   }, [emojis]);
 
   useEffect(() => {
@@ -93,7 +88,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
             alignItems="center"
             gap="13px"
           >
-            {!isMobile ? <SearchBar geoblocked={geoblocked} /> : null}
+            {!isMobile ? <SearchBar /> : null}
 
             <TableHeaderSwitcher
               title1="Pools"
@@ -112,7 +107,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
       {isMobile ? (
         <StyledSubHeader>
           <StyledHeaderInner>
-            <SearchBar geoblocked={geoblocked} />
+            <SearchBar />
           </StyledHeaderInner>
         </StyledSubHeader>
       ) : null}
@@ -144,10 +139,7 @@ export const ClientPoolsPage: React.FC<{ geoblocked: boolean; initialData: Pools
         </StyledInner>
 
         <StyledInner flexGrow={1} width={{ _: "100%", laptopL: "43%" }}>
-          <Liquidity
-            geoblocked={geoblocked}
-            market={selectedIndex !== undefined ? markets[selectedIndex] : undefined}
-          />
+          <Liquidity market={selectedIndex !== undefined ? markets[selectedIndex] : undefined} />
         </StyledInner>
       </StyledWrapper>
     </StyledPoolsPage>

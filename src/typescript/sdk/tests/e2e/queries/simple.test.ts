@@ -1,16 +1,16 @@
-import { type EmojiName, getEvents, ONE_APT } from "../../../src";
-import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
+import { type SymbolEmojiName, getEvents, ONE_APT } from "../../../src";
+import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../src/utils/test/helpers";
 import { Chat, ProvideLiquidity, Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import {
   fetchChatEvents,
   fetchSwapEvents,
   fetchUserLiquidityPools,
 } from "../../../src/indexer-v2/queries";
-import { getAptosClient } from "../../utils";
+import { getAptosClient } from "../../../src/utils/test";
 import RowEqualityChecks from "./equality-checks";
 import { queryHelper } from "../../../src/indexer-v2/queries/utils";
 import { TableName } from "../../../src/indexer-v2/types/json-types";
-import { getFundedAccounts } from "../../utils/test-accounts";
+import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
 import { postgrest } from "../../../src/indexer-v2/queries/client";
 import { fetchLatestStateEventForMarket, fetchLiquidityEvents } from ".";
 
@@ -19,7 +19,7 @@ jest.setTimeout(20000);
 describe("queries swap_events and returns accurate swap row data", () => {
   const { aptos } = getAptosClient();
   const [registrant, user, swapper, provider] = getFundedAccounts("007", "008", "009", "010");
-  const marketEmojiNames: EmojiName[][] = [
+  const marketEmojiNames: SymbolEmojiName[][] = [
     ["scroll"],
     ["selfie"],
     ['Japanese "discount" button'],

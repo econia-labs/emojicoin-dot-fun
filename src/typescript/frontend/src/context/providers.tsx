@@ -33,10 +33,7 @@ enableMapSet();
 
 const queryClient = new QueryClient();
 
-const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
-  children,
-  geoblocked,
-}) => {
+const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
@@ -56,7 +53,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
               dappConfig={{ network: APTOS_NETWORK }}
             >
               <WalletModalContextProvider>
-                <AptosContextProvider geoblocked={geoblocked}>
+                <AptosContextProvider>
                   <EmojiPickerProvider
                     initialState={{
                       nativePicker: isMobile || isTablet,
@@ -67,11 +64,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
                     <Suspense fallback={<Loader />}>
                       <StyledToaster />
                       <ContentWrapper>
-                        <Header
-                          isOpen={isMobileMenuOpen}
-                          setIsOpen={setIsOpen}
-                          geoblocked={geoblocked}
-                        />
+                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
                         {children}
                         <Footer />
                       </ContentWrapper>
@@ -87,10 +80,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
   );
 };
 
-const Providers: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
-  children,
-  geoblocked,
-}) => {
+const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [p, setP] = useState(false);
 
   // Hack for now because I'm unsure how to get rid of the warning.
@@ -102,7 +92,7 @@ const Providers: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
   return (
     p && (
       <ThemeContextProvider>
-        <ThemedApp geoblocked={geoblocked}>{children}</ThemedApp>
+        <ThemedApp>{children}</ThemedApp>
       </ThemeContextProvider>
     )
   );

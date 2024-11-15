@@ -25,7 +25,7 @@ const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_ALLOWLIST_ENABL
 
 if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
-  if (["mainnet", "testnet", "devnet", "local", "custom"].includes(network)) {
+  if (["mainnet", "testnet", "devnet", "local", "custom", "docker"].includes(network)) {
     APTOS_NETWORK = network as Network;
   } else {
     throw new Error(`Invalid network: ${network}`);

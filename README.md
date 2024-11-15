@@ -108,7 +108,6 @@ If you don't have access to TradingView's `charting_library` repository, please
 run the command below to clone the appropriate submodules:
 
 ```shell
-git submodule update --init --recursive src/inbox
 git submodule update --init --recursive src/rust/processor
 ```
 

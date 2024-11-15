@@ -7,6 +7,7 @@
 env:
   POETRY_VERSION: '1.8.2'
   PYTHON_VERSION: '3.10'
+  TS_DIR: 'src/typescript'
 jobs:
   pre-commit:
     runs-on: 'ubuntu-latest'
@@ -20,6 +21,14 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libdw-dev
+    - uses: 'actions/setup-node@v4'
+      with:
+        node-version-file: '${{ env.TS_DIR }}/.node-version'
+        registry-url: 'https://registry.npmjs.org'
+    - uses: 'pnpm/action-setup@v4'
+      with:
+        package_json_file: '${{ env.TS_DIR }}/package.json'
+    - run: 'cd ${{ env.TS_DIR }} && pnpm i'
     - name: 'Cache Poetry Install'
       uses: 'actions/cache@v3'
       with:
@@ -52,7 +61,7 @@ jobs:
         path: './src/python/hooks/.venv'
     - uses: 'pre-commit/action@v3.0.0'
       with:
-        extra_args: '--all-files --config cfg/pre-commit-config.yaml --verbose'
+        extra_args: '--all-files --config cfg/pre-commit-config.yaml'
 name: 'pre-commit'
 'on':
   pull_request: null

@@ -19,12 +19,12 @@ export type MarketStateQueryArgs = {
   orderBy?: OrderBy;
   searchEmojis?: string[];
   inBondingCurve?: boolean;
+  count?: boolean;
 };
 
 export type PeriodicStateEventQueryArgs = {
   marketID: AnyNumberString;
   start: Date;
-  offset: number;
+  end: Date;
   period: Period;
-  limit?: number;
 } & Omit<MarketStateQueryArgs, "page" | "pageSize" | "searchEmojis" | "sortBy" | "orderBy">;

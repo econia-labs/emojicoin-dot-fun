@@ -39,6 +39,8 @@ import {
   getCoinBalanceFromChanges,
 } from "@sdk/utils/parse-changes-for-balances";
 import { getEventsAsProcessorModelsFromResponse } from "@sdk/mini-processor";
+import { emoji } from "utils";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -77,10 +79,7 @@ export type AptosContextState = {
 
 export const AptosContext = createContext<AptosContextState | undefined>(undefined);
 
-export function AptosContextProvider({
-  children,
-  geoblocked,
-}: PropsWithChildren<{ geoblocked: boolean }>) {
+export function AptosContextProvider({ children }: PropsWithChildren) {
   const {
     signAndSubmitTransaction: adapterSignAndSubmitTxn,
     account,
@@ -93,6 +92,7 @@ export function AptosContextProvider({
   const [lastResponse, setLastResponse] = useState<ResponseType>(null);
   const [lastResponseStoredAt, setLastResponseStoredAt] = useState(-1);
   const [emojicoinType, setEmojicoinType] = useState<string | undefined>();
+  const geoblocked = useIsUserGeoblocked();
 
   const { emojicoin, emojicoinLP } = useMemo(() => {
     if (!emojicoinType) return { emojicoin: undefined, emojicoinLP: undefined };
@@ -149,12 +149,12 @@ export function AptosContextProvider({
     if (!account?.address) return;
     try {
       await navigator.clipboard.writeText(account.address);
-      toast.success("Copied address to clipboard! 📋", {
+      toast.success(`Copied address to clipboard! ${emoji("clipboard")}`, {
         pauseOnFocusLoss: false,
         autoClose: 2000,
       });
     } catch {
-      toast.error("Failed to copy address to clipboard. 😓", {
+      toast.error(`Failed to copy address to clipboard. ${emoji("downcast face with sweat")}`, {
         pauseOnFocusLoss: false,
         autoClose: 2000,
       });

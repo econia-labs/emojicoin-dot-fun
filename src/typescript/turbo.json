@@ -1,50 +1,41 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "EMOJICOIN_INDEXER_URL",
-    "EMOJICOIN_INDEXER_API_KEY",
-    "REVALIDATION_TIME",
-    "ALLOWLISTER3K_URL",
-    "MAINTENANCE_MODE",
-    "NEXT_PUBLIC_IS_ALLOWLIST_ENABLED",
-    "GALXE_CAMPAIGN_ID",
-    "NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT",
-    "HASH_SEED",
-    "NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS",
-    "NEXT_PUBLIC_INTEGRATOR_ADDRESS",
-    "NEXT_PUBLIC_MODULE_ADDRESS",
-    "NEXT_PUBLIC_REWARDS_MODULE_ADDRESS",
-    "NEXT_PUBLIC_APTOS_NETWORK",
-    "NEXT_PUBLIC_BROKER_URL",
-    "BROKER_PORT",
-    "FETCH_DEBUG",
-    "FETCH_DEBUG_VERBOSE",
-    "VERBOSE_TEST_LOGS"
+  "envMode": "loose",
+  "globalDependencies": [
+    "**/*.env.*",
+    "**/*.env",
+    "**/tsconfig.json",
+    "**/package.json"
   ],
+  "globalEnv": [],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
       "outputs": [
         "dist/**",
         ".next/**"
       ]
     },
     "build:debug": {
-      "dependsOn": [
-        "build"
-      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
+    },
+    "build:no-checks": {
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
+    },
+    "check": {
       "outputs": []
     },
     "clean": {
       "outputs": []
     },
     "dev": {
-      "cache": false
-    },
-    "e2e:testnet": {
-      "outputs": []
+      "cache": false,
+      "persistent": true
     },
     "format": {
       "outputs": []
@@ -58,22 +49,34 @@
     "lint:fix": {
       "outputs": []
     },
+    "playwright:install": {
+      "outputs": []
+    },
     "start": {
-      "dependsOn": [
-        "build"
-      ],
+      "outputs": [],
+      "persistent": true
+    },
+    "submodule": {
       "outputs": []
     },
     "test": {
+      "cache": false,
+      "outputs": []
+    },
+    "test:e2e": {
+      "cache": false,
       "outputs": []
     },
     "test:parallel": {
+      "cache": false,
       "outputs": []
     },
     "test:sequential": {
+      "cache": false,
       "outputs": []
     },
-    "unit-test": {
+    "test:unit": {
+      "cache": false,
       "outputs": []
     }
   }

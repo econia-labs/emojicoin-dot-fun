@@ -15,6 +15,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { formatDisplayName } from "@sdk/utils";
 import { useNameStore } from "context/event-store-context";
 import { motion } from "framer-motion";
+import { Emoji } from "utils/emoji";
 
 const MessageContainer: React.FC<MessageContainerProps> = ({
   index,
@@ -53,7 +54,11 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
       <StyledMessageContainer layout fromAnotherUser={fromAnotherUser}>
         <StyledMessageWrapper layout fromAnotherUser={fromAnotherUser}>
           <StyledMessageInner>
-            <span className="pt-[1ch] p-[0.25ch] text-xl tracking-widest">{message.text}</span>
+            <Emoji
+              className="pt-[1ch] p-[0.25ch] text-xl tracking-widest"
+              style={{ wordBreak: "break-word" }}
+              emojis={message.text}
+            />
             <Arrow />
           </StyledMessageInner>
 
@@ -67,9 +72,10 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
                   {formatDisplayName(message.sender)}
                 </span>
               </a>
-              <span className="pixel-heading-4 text-light-gray uppercase">
-                {message.senderRank}
-              </span>
+              <Emoji
+                className="pixel-heading-4 text-light-gray uppercase"
+                emojis={message.senderRank}
+              />
             </FlexGap>
           </StyledUserNameWrapper>
         </StyledMessageWrapper>

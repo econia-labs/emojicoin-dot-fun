@@ -11,28 +11,6 @@ export type HomePageSearchParams = {
   q: string | undefined;
 };
 
-export const DefaultHomePageSearchParams: HomePageSearchParams = {
-  page: "1",
-  sort: "market_cap",
-  order: "desc",
-  bonding: undefined,
-  q: undefined,
-};
-
-export const AllHomePageSearchParams = Object.keys(DefaultHomePageSearchParams) as Array<
-  keyof HomePageSearchParams
->;
-
-export const constructHomePageSearchParams = (searchParams: URLSearchParams) => {
-  const res = {} as HomePageSearchParams;
-  AllHomePageSearchParams.forEach((key) => {
-    const value = searchParams.get(key);
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    res[key] = value ?? (DefaultHomePageSearchParams[key] as any);
-  });
-  return res;
-};
-
 export const constructURLForHomePage = ({
   page,
   sort,
@@ -60,23 +38,4 @@ export const constructURLForHomePage = ({
   }
 
   return newURL;
-};
-
-/**
- * Check all the current and next url parameters using their default fallback values to see if the URL has
- * actually changed.
- */
-export const isHomePageURLDifferent = (curr: URLSearchParams, next: URLSearchParams) => {
-  if ((curr.get("page") ?? "1") !== (next.get("page") ?? "1")) {
-    return true;
-  }
-  if (
-    (curr.get("sort") ?? SortMarketsBy.MarketCap) !== (next.get("sort") ?? SortMarketsBy.MarketCap)
-  ) {
-    return true;
-  }
-  if ((curr.get("q") ?? "0x") !== (next.get("q") ?? "0x")) {
-    return true;
-  }
-  return false;
 };

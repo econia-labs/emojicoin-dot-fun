@@ -1,3 +1,5 @@
+import { type AnyEmojiName, CHAT_EMOJI_DATA, SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+
 export { checkIsEllipsis } from "./check-is-ellipsis";
 export { getFileNameFromSrc } from "./get-file-name-from-src";
 export {
@@ -21,5 +23,7 @@ export const parseJSON = <T>(json: string): T =>
     return value as T;
   });
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export type QueryType<T extends (...args: any) => any> = Awaited<ReturnType<T>>;
+export const emoji = (name: AnyEmojiName) =>
+  SYMBOL_EMOJI_DATA.hasName(name)
+    ? SYMBOL_EMOJI_DATA.byStrictName(name).emoji
+    : CHAT_EMOJI_DATA.byStrictName(name).emoji;

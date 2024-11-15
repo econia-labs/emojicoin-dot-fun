@@ -6,9 +6,8 @@ import { marketDataToProps } from "./utils";
 import { useGridRowLength } from "./hooks/use-grid-items-per-line";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 import { useEffect, useMemo, useRef } from "react";
-import "./module.css";
-import { useEmojiPicker } from "context/emoji-picker-context";
 import { type HomePageProps } from "app/home/HomePage";
+import "./module.css";
 
 export const ClientGrid = ({
   markets,
@@ -20,11 +19,10 @@ export const ClientGrid = ({
   sortBy: MarketDataSortByHomePage;
 }) => {
   const rowLength = useGridRowLength();
-  const searchEmojis = useEmojiPicker((s) => s.emojis);
 
   const ordered = useMemo(() => {
-    return marketDataToProps(markets, searchEmojis);
-  }, [markets, searchEmojis]);
+    return marketDataToProps(markets);
+  }, [markets]);
 
   const initialRender = useRef(true);
 
@@ -41,7 +39,7 @@ export const ClientGrid = ({
       {ordered.map((v, i) => {
         return (
           <TableCard
-            key={`live-${v.marketID}-${v.searchEmojisKey}`}
+            key={`live-${v.marketID}`}
             index={i}
             pageOffset={(page - 1) * MARKETS_PER_PAGE}
             marketID={v.marketID}
@@ -53,6 +51,7 @@ export const ClientGrid = ({
             prevIndex={i}
             runInitialAnimation={true}
             sortBy={sortBy}
+            data-testid="market-grid-item"
           />
         );
       })}

@@ -1,5 +1,8 @@
 // cspell:word Kolkata
 // cspell:word Fakaofo
+
+import { type Bar } from "@static/charting_library/datafeed-api";
+
 /**
  * Retrieves the client's timezone based on the current system time offset.
  *
@@ -70,3 +73,6 @@ export function getClientTimezone() {
   }
   return "Etc/UTC";
 }
+
+export const hasTradingActivity = (bar: Bar) =>
+  [bar.open, bar.high, bar.low, bar.close].some((price) => price !== 0);

@@ -1,5 +1,7 @@
 import { useEventStore } from "./event-store-context/hooks";
 import { motion } from "framer-motion";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 import { hexToRgba } from "utils/hex-to-rgba";
 
 export const ConnectToWebSockets = () => {
@@ -11,7 +13,10 @@ export const ConnectToWebSockets = () => {
       {process.env.NODE_ENV === "development" && (
         <div className="relative w-full h-full">
           <div className="absolute top-4 right-4 z-[100] flex flex-col">
-            <div className="m-auto">{connected ? "🟢" : "⚫"}</div>
+            <Emoji
+              className="m-auto"
+              emojis={connected ? emoji("green circle") : emoji("black circle")}
+            />
             <motion.div
               className="m-auto text-white font-pixelar uppercase text-2xl"
               key={received}
