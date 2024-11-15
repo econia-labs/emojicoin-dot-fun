@@ -32,7 +32,7 @@ const BondingProgress = ({ data }: MainInfoProps) => {
     }
   }, [stateEvents]);
 
-  const { ref: bondingCurveRef } = useLabelScrambler(`${bondingProgress.toFixed(2)}%`, "%");
+  const { ref: bondingCurveRef } = useLabelScrambler(`${bondingProgress.toFixed(2)}`, "%");
 
   return (
     <div className="flex flex-col w-fit">

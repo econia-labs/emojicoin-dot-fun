@@ -66,14 +66,18 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     }
     return res;
   });
+
   const state = await fetchMarketState({ searchEmojis: emojis });
 
   if (state) {
     const { marketID } = state.market;
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
-    const chats = await fetchChatEvents({ marketID });
-    const swaps = await fetchSwapEvents({ marketID });
-    const marketView = await fetchContractMarketView(marketAddress.toString());
+
+    const [chats, swaps, marketView] = await Promise.all([
+      fetchChatEvents({ marketID }),
+      fetchSwapEvents({ marketID }),
+      fetchContractMarketView(marketAddress.toString()),
+    ]);
 
     return (
       <ClientEmojicoinPage
