@@ -19,6 +19,7 @@
   "scripts": {
     "build": "pnpm i && pnpm load-env:test -- turbo run build",
     "build:debug": "pnpm i && pnpm load-env:test -- turbo run build:debug",
+    "build:no-checks": "pnpm i && pnpm load-env:test -- turbo run build:no-checks",
     "check": "turbo run check",
     "clean": "turbo run clean --no-cache --force && rm -rf .turbo",
     "clean:full": "pnpm run clean && rm -rf node_modules && rm -rf sdk/node_modules && rm -rf frontend/node_modules",
@@ -28,8 +29,8 @@
     "docker:prune": "../docker/utils/prune.sh --reset-localnet --yes",
     "docker:restart": "pnpm run docker:prune && pnpm run docker:up",
     "docker:up": "docker compose -f ../docker/compose.local.yaml --env-file ../docker/example.local.env up -d",
-    "format": "turbo run format -- --write",
-    "format:check": "turbo run format -- --check",
+    "format": "turbo run format",
+    "format:check": "turbo run format:check",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
     "load-env": "dotenv -e .env",

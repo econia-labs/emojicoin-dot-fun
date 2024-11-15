@@ -1,6 +1,7 @@
 import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
 import React, { useCallback, useMemo } from "react";
 import { useEffect } from "react";
+import { emoji } from "utils";
 
 export type StaggerSpeed = 1 | 2 | 3 | 4 | 5;
 
@@ -52,7 +53,7 @@ const useStaggerAnimation = ({
   return scope;
 };
 
-export const AnimatedStatusIndicator = ({
+export const AnimatedLoadingBoxes = ({
   numSquares = 14,
   delay,
   speed,
@@ -80,7 +81,7 @@ export const AnimatedStatusIndicator = ({
                 }
           }
         >
-          {color ? "🟩" : "⬜"}
+          {color ? emoji("green square") : emoji("white large square")}
         </span>
       )),
     [emptyArray]
@@ -100,4 +101,4 @@ export const AnimatedStatusIndicator = ({
   );
 };
 
-export default React.memo(AnimatedStatusIndicator);
+export default React.memo(AnimatedLoadingBoxes);

@@ -8,16 +8,23 @@ import { motion } from "framer-motion";
 import { standardizeAddress, truncateAddress } from "@sdk/utils";
 import { getVerificationStatus } from "./get-verification-status";
 import { EXTERNAL_LINK_PROPS } from "components/link";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
-const checkmarkOrX = (bool: boolean) => {
-  return <span className="text-lg">{bool ? "✅" : "❌"} </span>;
-};
+const checkmarkOrX = (checkmark: boolean) => (
+  <Emoji
+    className="text-lg"
+    emojis={checkmark ? emoji("check mark button") : emoji("cross mark")}
+  />
+);
 
-export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
+export const ClientVerifyPage = () => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [galxe, setGalxe] = useState(false);
   const [customAllowlisted, setCustomAllowlisted] = useState(false);
+  const geoblocked = useIsUserGeoblocked();
 
   useEffect(() => {
     if (!account || !connected) {
@@ -59,7 +66,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
                 <span>Disconnect Wallet</span>
               </motion.div>
             )}
-            <ButtonWithConnectWalletFallback geoblocked={false} arrow={false}>
+            <ButtonWithConnectWalletFallback forceAllowConnect={true} arrow={false}>
               <div className="flex flex-col uppercase mt-[20ch] gap-1">
                 <div>
                   Wallet address:{" "}
@@ -69,7 +76,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
                 </div>
                 <div>Galxe: {checkmarkOrX(galxe)}</div>
                 <div>Custom allowlist: {checkmarkOrX(customAllowlisted)}</div>
-                <div>Passes geoblocking: {checkmarkOrX(geoblocked)}</div>
+                <div>Passes geoblocking: {checkmarkOrX(!geoblocked)}</div>
                 <a
                   className="underline text-ec-blue"
                   href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}

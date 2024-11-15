@@ -23,15 +23,15 @@ import {
 import { Arrows } from "components/svg";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { useSearchParams } from "next/navigation";
-import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-status-indicator";
+import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-emoji-circle";
 import { TypeTag } from "@aptos-labs/ts-sdk";
 import Info from "components/info";
 import { type AnyNumberString } from "@sdk/types/types";
 import { type PoolsData } from "../../ClientPoolsPage";
+import { EmojiPill } from "components/EmojiPill";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
-  geoblocked: boolean;
 };
 
 const fmtCoin = (n: AnyNumberString | undefined) => {
@@ -68,7 +68,7 @@ const inputAndOutputStyles = `
   border-transparent !p-0 text-white
 `;
 
-const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
+const Liquidity = ({ market }: LiquidityProps) => {
   const { t } = translationFunction();
   const { theme } = useThemeContext();
 
@@ -98,7 +98,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
     searchParams.get("remove") !== null ? "remove" : "add"
   );
 
-  const loadingComponent = useMemo(() => <AnimatedStatusIndicator numSquares={4} />, []);
+  const loadingComponent = useMemo(() => <AnimatedStatusIndicator numEmojis={4} />, []);
 
   const {
     aptos,
@@ -253,29 +253,78 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
   return (
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
       <Column width="100%" maxWidth="414px" justifyContent="center">
-        <Flex width="100%" justifyContent="space-between" alignItems="baseline">
-          <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="baseline">
-            <Text textScale="heading1" textTransform="uppercase" mb="16px">
-              {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
-            </Text>
-
-            <Info>
-              <Text
-                textScale="pixelHeading4"
-                lineHeight="20px"
-                color="black"
-                textTransform="uppercase"
+        <Flex width="100%" justifyContent="space-between" alignItems="baseline" mb="10px">
+          <Flex flexDirection="row">
+            <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="baseline">
+              <button
+                onClick={() => setDirection(direction === "add" ? "remove" : "add")}
+                className="absolute left-[-30px] top-[-2px]"
               >
-                Liquidity providers receive a 0.25% fee from all trades, proportional to their pool
-                share. Fees are continuously reinvested in the pool and can be claimed by
-                withdrawing liquidity.
-              </Text>
-            </Info>
-          </FlexGap>
+                <Arrows color="econiaBlue" />
+              </button>
 
-          <button onClick={() => setDirection(direction === "add" ? "remove" : "add")}>
-            <Arrows color="econiaBlue" />
-          </button>
+              <Text textScale="heading1" textTransform="uppercase">
+                {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
+              </Text>
+
+              <Info>
+                <Text
+                  textScale="pixelHeading4"
+                  lineHeight="20px"
+                  color="black"
+                  textTransform="uppercase"
+                >
+                  Liquidity providers receive a 0.25% fee from all trades, proportional to their
+                  pool share. Fees are continuously reinvested in the pool and can be claimed by
+                  withdrawing liquidity.
+                </Text>
+              </Info>
+            </FlexGap>
+          </Flex>
+          <FlexGap flexDirection="row" gap="5px">
+            {direction === "add" ? (
+              <>
+                <EmojiPill
+                  emoji={"waxing crescent moon"}
+                  description="Deposit 25%"
+                  onClick={() => {
+                    setLiquidity(aptBalance / 4n);
+                  }}
+                />
+                <EmojiPill
+                  emoji={"first quarter moon"}
+                  description="Deposit 50%"
+                  onClick={() => {
+                    setLiquidity(aptBalance / 2n);
+                  }}
+                />
+                <EmojiPill
+                  emoji={"full moon"}
+                  description="Deposit 100%"
+                  onClick={() => {
+                    setLiquidity(aptBalance);
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <EmojiPill
+                  emoji="nauseated face"
+                  description="Withdraw 50%"
+                  onClick={() => {
+                    setLP(emojicoinLPBalance / 2n);
+                  }}
+                />
+                <EmojiPill
+                  emoji="face vomiting"
+                  description="Withdraw 100%"
+                  onClick={() => {
+                    setLP(emojicoinLPBalance);
+                  }}
+                />
+              </>
+            )}
+          </FlexGap>
         </Flex>
 
         {direction === "add" ? (
@@ -298,7 +347,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           mb={{ _: "17px", tablet: "37px" }}
           position="relative"
         >
-          <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
+          <ButtonWithConnectWalletFallback>
             <Button
               scale="lg"
               disabled={!isActionPossible}

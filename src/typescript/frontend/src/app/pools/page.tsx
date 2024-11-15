@@ -1,15 +1,11 @@
-import ClientPoolsPage from "components/pages/pools/ClientPoolsPage";
-import { REVALIDATION_TIME } from "lib/server-env";
-import { headers } from "next/headers";
-import { isUserGeoblocked } from "utils/geolocation";
+import ClientPoolsPage, { type PoolsData } from "components/pages/pools/ClientPoolsPage";
 import { getPoolData } from "./api/getPoolDataQuery";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
 import { type Metadata } from "next";
-import { emoji } from "utils";
+import { emoji, parseJSON } from "utils";
 
-export const revalidate = REVALIDATION_TIME;
-export const dynamic = "force-dynamic";
+export const revalidate = 2;
 
 export const metadata: Metadata = {
   title: "pools",
@@ -17,14 +13,16 @@ export const metadata: Metadata = {
 };
 
 export default async function PoolsPage({ searchParams }: { searchParams: { pool: string } }) {
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
-  const initialData = await getPoolData(
-    1,
-    SortMarketsBy.AllTimeVolume,
-    "desc",
-    searchParams.pool
-      ? symbolBytesToEmojis(searchParams.pool).emojis.map((e) => e.emoji)
-      : undefined
+  const initialData: PoolsData[] = parseJSON(
+    await getPoolData(
+      1,
+      SortMarketsBy.AllTimeVolume,
+      "desc",
+      searchParams.pool
+        ? symbolBytesToEmojis(searchParams.pool).emojis.map((e) => e.emoji)
+        : undefined
+    )
   );
-  return <ClientPoolsPage geoblocked={geoblocked} initialData={initialData} />;
+
+  return <ClientPoolsPage initialData={initialData} />;
 }

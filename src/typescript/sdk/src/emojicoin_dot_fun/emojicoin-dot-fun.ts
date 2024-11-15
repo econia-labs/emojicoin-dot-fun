@@ -18,7 +18,7 @@ import {
   type UserTransactionResponse,
   type LedgerVersionArg,
   SimpleTransaction,
-  type Ed25519PublicKey,
+  type PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -302,7 +302,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   static async getGasCost(args: {
     aptosConfig: AptosConfig;
     registrant: AccountAddressInput; // &signer
-    registrantPubKey: Ed25519PublicKey;
+    registrantPubKey: PublicKey;
     emojis: Array<HexInput>; // vector<vector<u8>>
   }): Promise<{ data: { amount: number; unitPrice: number }; error: boolean }> {
     const { aptosConfig } = args;
@@ -615,6 +615,39 @@ export class Swap extends EntryFunctionPayloadBuilder {
       options: waitForTransactionOptions,
     });
     return response;
+  }
+
+  static async simulate(args: {
+    aptosConfig: AptosConfig;
+    swapper: AccountAddressInput; // &signer
+    swapperPubKey: PublicKey; // &signer
+    marketAddress: AccountAddressInput; // address
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
+    integrator: AccountAddressInput; // address
+    integratorFeeRateBPs: Uint8; // u8
+    minOutputAmount: Uint64; // u64
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
+    feePayer?: AccountAddressInput;
+    options?: InputGenerateTransactionOptions;
+  }): Promise<UserTransactionResponse> {
+    const { aptosConfig } = args;
+
+    const aptos = new Aptos(aptosConfig);
+    const rawTransaction = await this.builder({
+      ...args,
+      integrator: AccountAddress.ONE,
+    }).then((res) => res.rawTransactionInput.rawTransaction);
+    const transaction = new SimpleTransaction(rawTransaction);
+    const [userTransactionResponse] = await aptos.transaction.simulate.simple({
+      signerPublicKey: args.swapperPubKey,
+      transaction,
+      options: {
+        estimateGasUnitPrice: true,
+        estimateMaxGasAmount: true,
+      },
+    });
+    return userTransactionResponse;
   }
 }
 

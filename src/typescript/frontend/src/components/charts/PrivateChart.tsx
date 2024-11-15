@@ -1,7 +1,7 @@
 // cspell:word intraday
 // cspell:word minmov
 // cspell:word pricescale
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   EXCHANGE_NAME,
@@ -30,17 +30,18 @@ import { useEventStore } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { getAptosConfig } from "lib/utils/aptos-client";
 import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
-import { type MarketMetadataModel } from "@sdk/indexer-v2/types";
+import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
 import { Aptos } from "@aptos-labs/ts-sdk";
-import { periodEnumToRawDuration, Trigger } from "@sdk/const";
-import { fetchAllCandlesticksInTimeRange } from "@/queries/candlesticks";
+import { PeriodDuration, periodEnumToRawDuration, Trigger } from "@sdk/const";
 import {
   type LatestBar,
   marketToLatestBars,
   periodicStateTrackerToLatestBar,
   toBar,
 } from "@/store/event/candlestick-bars";
+import { emoji, parseJSON } from "utils";
+import { Emoji } from "utils/emoji";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -145,22 +146,31 @@ export const Chart = (props: ChartContainerProps) => {
 
         setTimeout(() => onSymbolResolvedCallback(symbolInfo), 0);
       },
-      getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
+      getBars: async (
+        _symbolInfo,
+        resolution,
+        periodParams,
+        onHistoryCallback,
+        onErrorCallback
+      ) => {
         const { from, to } = periodParams;
         try {
           const period = ResolutionStringToPeriod[resolution.toString()];
           const periodDuration = periodEnumToRawDuration(period);
-          const start = new Date(from * 1000);
+          const periodDurationSeconds = (periodDuration / PeriodDuration.PERIOD_1M) * 60;
           const end = new Date(to * 1000);
-          // TODO: Consider that if our data is internally consistent and we run into performance/scalability issues
-          // with this implementation below (fetching without regard for anything in state), we can store the values in
-          // state and coalesce that with the data we fetch from the server.
-          const data = await fetchAllCandlesticksInTimeRange({
+          // The start timestamp is rounded so that all the people who load the webpage at a similar time get served
+          // the same cached response.
+          const start = from - (from % periodDurationSeconds);
+          const params = new URLSearchParams({
             marketID: props.marketID,
-            start,
-            end,
-            period,
+            start: start.toString(),
+            period: period.toString(),
+            limit: "500",
           });
+          const data: PeriodicStateEventModel[] = await fetch(`/candlesticks?${params.toString()}`)
+            .then((res) => res.text())
+            .then((res) => parseJSON(res));
 
           const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
 
@@ -251,7 +261,7 @@ export const Chart = (props: ChartContainerProps) => {
               const time = BigInt(new Date().getTime()) * 1000n;
               const timeAsPeriod = getPeriodStartTimeFromTime(time, periodDuration) / 1000n;
               bars.push({
-                time: Number(timeAsPeriod),
+                time: Number(timeAsPeriod.toString()),
                 open: 0,
                 high: 0,
                 low: 0,
@@ -348,11 +358,32 @@ export const Chart = (props: ChartContainerProps) => {
     };
   }, [datafeed, symbol]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowErrorMessage(true);
+    }, 3500);
+    return () => clearTimeout(timeout);
+  });
+
   return (
-    <div className="relative w-full">
-      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-sm font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
+    <div className="relative w-full h-[420px]">
+      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-lg font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
         <div>
-          {"The device you're using isn't supported. 😔 Please try viewing on another device."}
+          {showErrorMessage ? (
+            <>
+              <div>
+                <span>{"The browser you're using isn't supported. "}</span>
+                <Emoji emojis={emoji("pensive face")} />
+              </div>
+              <div>
+                <span>{" Please try viewing in another browser."}</span>
+              </div>
+            </>
+          ) : (
+            "Loading..."
+          )}
         </div>
       </div>
       <div ref={ref} className="relative h-full w-full"></div>

@@ -13,7 +13,8 @@ import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { type HomePageProps } from "app/home/HomePage";
 import "./module.css";
-import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
 export interface MainCardProps {
   featured?: HomePageProps["featured"];
@@ -50,9 +51,9 @@ const MainCard = (props: MainCardProps) => {
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  const { ref: marketCapRef } = useLabelScrambler(marketCap);
-  const { ref: dailyVolumeRef } = useLabelScrambler(dailyVolume);
-  const { ref: allTimeVolumeRef } = useLabelScrambler(allTimeVolume);
+  const { ref: marketCapRef } = useLabelScrambler(toCoinDecimalString(marketCap, 2));
+  const { ref: dailyVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
+  const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
   return (
     <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1872px">
@@ -83,26 +84,19 @@ const MainCard = (props: MainCardProps) => {
             ref={globeImage}
             placeholder="empty"
           />
-
-          {[...new Intl.Segmenter().segment(featured?.market.symbolData.symbol ?? "🖤")].length ==
-          1 ? (
-            <div className="styled-emoji styled-single-emoji">
-              {featured?.market.symbolData.symbol ?? "🖤"}
-            </div>
-          ) : (
-            <div className="styled-emoji styled-double-emoji">
-              {featured?.market.symbolData.symbol}
-            </div>
-          )}
+          <Emoji
+            className={`styled-emoji ${featured?.market.emojis.length === 1 ? "styled-single-emoji" : "styled-double-emoji"}`}
+            emojis={featured?.market.emojis ?? emoji("black heart")}
+          />
         </Link>
 
         <Column maxWidth="100%" ellipsis>
-          <div className="flex flex-row">
-            <span className="pixel-heading-1 text-medium-gray pixel-heading-text">HOT</span>
+          <div className="flex flex-row items-center">
+            <span className="text-medium-gray pixel-heading-text">HOT</span>
             <span>&nbsp;</span>
-            <span className="pixel-heading-2 pixel-heading-text mt-[.2rem]">
-              {SYMBOL_EMOJI_DATA.byName("fire")?.emoji}
-            </span>
+            <div>
+              <Emoji className="pixel-heading-emoji" emojis={emoji("fire")} />
+            </div>
           </div>
           <div
             className="display-font-text ellipses font-forma-bold"

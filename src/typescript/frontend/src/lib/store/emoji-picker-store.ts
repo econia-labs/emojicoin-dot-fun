@@ -1,10 +1,10 @@
-import { type SymbolEmojiData } from "@sdk/emoji_data";
+import { type AnyEmoji, type SymbolEmojiData } from "@sdk/emoji_data";
 import { createStore } from "zustand";
 import { insertEmojiTextInputHelper, removeEmojiTextInputHelper } from "./emoji-picker-utils";
 
 export type EmojiPickerState = {
   mode: "chat" | "register" | "search";
-  emojis: string[];
+  emojis: AnyEmoji[];
   nativePicker: boolean;
   pickerRef: HTMLDivElement | null;
   textAreaRef: HTMLTextAreaElement | null;
@@ -25,7 +25,7 @@ export type EmojiPickerState = {
 
 export type EmojiPickerActions = {
   clear: () => void;
-  setEmojis: (emojis: string[]) => void;
+  setEmojis: (emojis: AnyEmoji[]) => void;
   setNativePicker: (value: boolean) => void;
   setPickerRef: (value: HTMLDivElement | null) => void;
   setTextAreaRef: (value: HTMLTextAreaElement | null) => void;
@@ -36,7 +36,7 @@ export type EmojiPickerActions = {
   setIsLoadingRegisteredMarket: (value: boolean) => void;
   insertEmojiTextInput: (textToInsert: string | string[]) => void;
   removeEmojiTextInput: (key?: string) => void;
-  getEmojis: () => string[];
+  getEmojis: () => AnyEmoji[];
 };
 
 export type EmojiPickerStore = EmojiPickerState & EmojiPickerActions;
@@ -61,7 +61,7 @@ export const setInputHelper = ({
   shouldFocus,
 }: {
   textAreaRef: HTMLTextAreaElement | null;
-  emojis: string[];
+  emojis: AnyEmoji[];
   selectionStart?: number;
   selectionEnd?: number;
   shouldFocus?: boolean;

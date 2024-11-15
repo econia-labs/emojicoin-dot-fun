@@ -56,6 +56,10 @@ services:
       PGRST_DB_URI: 'postgres://emojicoin:emojicoin@postgres:5432/emojicoin'
       PGRST_DB_ANON_ROLE: 'web_anon'
       PGRST_DB_MAX_ROWS: '${POSTGREST_MAX_ROWS}'
+      PGRST_LOG_LEVEL: 'info'
+      PGRST_SERVER_TIMING_ENABLED: 'true'
+      PGRST_DB_PLAN_ENABLED: 'true'
+      PGRST_SERVER_TRACE_HEADER: 'X-Request-Id'
     image: 'postgrest/postgrest'
     container_name: 'postgrest'
     ports:

@@ -38,12 +38,18 @@ const nextConfig = {
   crossOrigin: "use-credentials",
   typescript: {
     tsconfigPath: "tsconfig.json",
+    ignoreBuildErrors: process.env.IGNORE_BUILD_ERRORS === "true",
   },
   compiler: {
     styledComponents: DEBUG ? styledComponentsConfig : true,
   },
   ...(DEBUG ? debugConfigOptions : {}),
   transpilePackages: ["@sdk"],
+  redirects: async () => ([{
+    source: '/',
+    destination: '/home',
+    permanent: true,
+  }]),
 };
 
 export default withBundleAnalyzer(nextConfig);
