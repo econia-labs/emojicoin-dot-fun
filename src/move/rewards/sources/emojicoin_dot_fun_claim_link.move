@@ -510,7 +510,8 @@ module rewards::emojicoin_dot_fun_claim_link {
 
     #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_CLAIMED)]
     fun test_redeem_claim_link_already_claimed() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
         redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(CLAIMANT),
             signature_bytes,
@@ -529,7 +530,8 @@ module rewards::emojicoin_dot_fun_claim_link {
 
     #[test, expected_failure(abort_code = E_INVALID_CLAIM_LINK)]
     fun test_redeem_invalid_claim_link() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
         remove_public_keys(
             &get_signer(@rewards),
             vector[claim_link_validated_public_key_bytes]
@@ -545,7 +547,8 @@ module rewards::emojicoin_dot_fun_claim_link {
 
     #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
     fun test_redeem_invalid_public_key() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
         claim_link_validated_public_key_bytes.push_back(0);
         redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(CLAIMANT),
@@ -558,7 +561,8 @@ module rewards::emojicoin_dot_fun_claim_link {
 
     #[test, expected_failure(abort_code = E_INVALID_SIGNATURE)]
     fun test_redeem_invalid_signature() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
         signature_bytes[0] = signature_bytes[0] ^ 0xff;
         redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(CLAIMANT),
@@ -571,7 +575,8 @@ module rewards::emojicoin_dot_fun_claim_link {
 
     #[test, expected_failure(abort_code = E_VAULT_INSUFFICIENT_FUNDS)]
     fun test_redeem_vault_insufficient_funds() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
         withdraw_from_vault(&get_signer(@rewards), DEFAULT_CLAIM_AMOUNT);
         redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(CLAIMANT),
