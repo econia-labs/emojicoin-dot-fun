@@ -142,7 +142,7 @@ export const useLabelScrambler = (value: string, suffix: string = "") => {
   }
 
   const scrambler = useScramble({
-    text: value,
+    text: value + suffix,
     ...scrambleConfig,
     ignore,
   });
