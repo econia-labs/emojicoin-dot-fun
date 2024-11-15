@@ -39,11 +39,12 @@ aptos move publish \
     --profile $PROFILE
 ```
 
-## Fund the vault
+## Fund the vaults
 
 ```sh
 REWARDS=0xaaa...
 PROFILE=my-profile
+N_CLAIM_LINK_REDEMPTIONS_TO_FUND=10
 N_REWARDS_TO_FUND_PER_TIER="u64:[1500,500,200,50,5,1]"
 ```
 
@@ -51,5 +52,12 @@ N_REWARDS_TO_FUND_PER_TIER="u64:[1500,500,200,50,5,1]"
 aptos move run \
     --args $N_REWARDS_TO_FUND_PER_TIER \
     --function-id $REWARDS::emojicoin_dot_fun_rewards::fund_tiers \
+    --profile $PROFILE
+```
+
+```sh
+aptos move run \
+    --args $N_CLAIM_LINK_REDEMPTIONS_TO_FUND \
+    --function-id $REWARDS::emojicoin_dot_fun_claim_link::fund_vault \
     --profile $PROFILE
 ```
