@@ -242,7 +242,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           ...models.liquidityEvents,
           ...models.marketLatestStateEvents,
         ];
-        flattenedEvents.forEach(pushEventFromClient);
+        flattenedEvents.forEach((e) => pushEventFromClient(e, true));
         parseChangesAndSetBalances(response);
       }
 

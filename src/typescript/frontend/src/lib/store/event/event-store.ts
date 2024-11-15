@@ -23,9 +23,35 @@ import { initialStatePatch } from "./local-storage";
 import { periodEnumToRawDuration } from "@sdk/const";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
+import { parseJSON, stringifyJSON } from "utils";
+
+export const TIMEOUT = 1000 * 60;
+
+type EventLocalStorageKey = "swap" | "chat" | "periodic" | "market" | "liquidity";
+
+const updateLocalStorage = (key: EventLocalStorageKey, event: AnyEventModel) => {
+  const str = localStorage.getItem(key) ?? "[]";
+  const data: AnyEventModel[] = parseJSON(str);
+  data.unshift(event);
+  localStorage.setItem(key, stringifyJSON(data));
+};
+
+const cleanReadLocalStorage = (key: EventLocalStorageKey) => {
+  const str = localStorage.getItem(key) ?? "[]";
+  const data: AnyEventModel[] = parseJSON(str);
+  const relevants = data.filter(
+    (e) => e.transaction.timestamp > new Date(new Date().getTime() - TIMEOUT)
+  );
+  localStorage.setItem(key, stringifyJSON(relevants));
+  return relevants;
+};
+
+const clearLocalStorage = (key: EventLocalStorageKey) => {
+  localStorage.setItem(key, "[]");
+};
 
 export const createEventStore = () => {
-  return createStore<EventStore & WebSocketClientStore>()(
+  const store = createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
       ...initialStatePatch(),
       getMarket: (emojis) => get().markets.get(emojis.join("")),
@@ -77,7 +103,7 @@ export const createEventStore = () => {
           });
         });
       },
-      pushEventFromClient: (event: AnyEventModel) => {
+      pushEventFromClient: (event: AnyEventModel, localize = false) => {
         if (get().guids.has(event.guid)) return;
         set((state) => {
           state.guids.add(event.guid);
@@ -91,17 +117,32 @@ export const createEventStore = () => {
             if (isSwapEventModel(event)) {
               market.swapEvents.unshift(event);
               handleLatestBarForSwapEvent(market, event);
+              if (localize) {
+                updateLocalStorage("swap", event);
+              }
             } else if (isChatEventModel(event)) {
               market.chatEvents.unshift(event);
+              if (localize) {
+                updateLocalStorage("chat", event);
+              }
             } else if (isLiquidityEventModel(event)) {
               market.liquidityEvents.unshift(event);
+              if (localize) {
+                updateLocalStorage("liquidity", event);
+              }
             } else if (isMarketLatestStateEventModel(event)) {
               market.stateEvents.unshift(event);
               state.stateFirehose.unshift(event);
+              if (localize) {
+                updateLocalStorage("market", event);
+              }
             } else if (isPeriodicStateEventModel(event)) {
               const period = periodEnumToRawDuration(event.periodicMetadata.period);
               market[period].candlesticks.unshift(event);
               handleLatestBarForPeriodicStateEvent(market, event);
+              if (localize) {
+                updateLocalStorage("periodic", event);
+              }
             }
           }
         });
@@ -146,4 +187,19 @@ export const createEventStore = () => {
       ...createWebSocketClientStore(set, get),
     }))
   );
+
+  const eventTypes: EventLocalStorageKey[] = ["swap", "chat", "liquidity", "market", "periodic"];
+  const state = store.getState();
+  for (const eventType of eventTypes) {
+    try {
+      const events = cleanReadLocalStorage(eventType);
+      for (const event of events) {
+        state.pushEventFromClient(event);
+      }
+    } catch (e) {
+      console.error(e);
+      clearLocalStorage(eventType);
+    }
+  }
+  return store;
 };
