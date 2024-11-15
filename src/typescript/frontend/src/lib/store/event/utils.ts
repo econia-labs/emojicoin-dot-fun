@@ -1,7 +1,7 @@
 import { Period, PERIODS, periodEnumToRawDuration } from "@sdk/const";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type WritableDraft } from "immer";
-import { type EventState, type CandlestickData, type MarketEventStore } from "../../../../../types";
+import { type EventState, type CandlestickData, type MarketEventStore } from "./types";
 import {
   type MarketMetadataModel,
   type PeriodicStateEventModel,

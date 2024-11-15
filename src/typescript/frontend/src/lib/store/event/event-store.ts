@@ -11,7 +11,7 @@ import {
 } from "@sdk/indexer-v2/types";
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
-import { type SetLatestBarsArgs, type EventStore } from "../../../../../types";
+import { type SetLatestBarsArgs, type EventStore } from "./types";
 import {
   ensureMarketInStore,
   handleLatestBarForPeriodicStateEvent,
