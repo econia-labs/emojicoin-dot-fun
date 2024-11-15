@@ -311,6 +311,43 @@ module rewards::emojicoin_dot_fun_claim_link {
         (signature_bytes, claim_link_validated_public_key_bytes)
     }
 
+    #[test, expected_failure(abort_code = E_ALREADY_ADMIN)]
+    fun test_add_admin_already_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        add_admin(&rewards_signer, @rewards);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_add_admin_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin = @0x2222;
+        let not_admin_signer = get_signer(not_admin);
+        assert!(&rewards_signer != &not_admin_signer);
+        add_admin(&not_admin_signer, not_admin);
+    }
+
+    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
+    fun test_add_public_keys_invalid_public_key() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        add_public_keys(&rewards_signer, vector[vector[0x0]]);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_add_public_keys_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin_signer = get_signer(@0x2222);
+        assert!(&rewards_signer != &not_admin_signer);
+        add_public_keys(&not_admin_signer, vector[]);
+    }
+
     #[test]
     fun test_general_flow() acquires Vault {
         // Initialize black cat market, have it undergo state transition.
@@ -449,49 +486,31 @@ module rewards::emojicoin_dot_fun_claim_link {
         );
         assert!(public_key_is_in_manifest(claim_link_validated_public_key_bytes));
 
-    }
-
-    #[test, expected_failure(abort_code = E_ALREADY_ADMIN)]
-    fun test_add_admin_already_admin() acquires Vault {
-        emojicoin_dot_fun::tests::init_package();
-        let rewards_signer = get_signer(@rewards);
-        init_module(&rewards_signer);
-        add_admin(&rewards_signer, @rewards);
-    }
-
-    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
-    fun test_add_admin_not_admin() acquires Vault {
-        emojicoin_dot_fun::tests::init_package();
-        let rewards_signer = get_signer(@rewards);
-        init_module(&rewards_signer);
-        let not_admin = @0x2222;
-        let not_admin_signer = get_signer(not_admin);
-        assert!(&rewards_signer != &not_admin_signer);
-        add_admin(&not_admin_signer, not_admin);
+        // Verify silent return for trying to remove public key not in manifest.
+        let (_, new_public_key) = ed25519::generate_keys();
+        remove_public_keys(
+            &rewards_signer,
+            vector[ed25519::validated_public_key_to_bytes(&new_public_key)]
+        );
     }
 
     #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
-    fun test_add_public_keys_invalid_public_key() acquires Vault {
-        emojicoin_dot_fun::tests::init_package();
-        let rewards_signer = get_signer(@rewards);
-        init_module(&rewards_signer);
-        add_public_keys(&rewards_signer, vector[vector[0x0]]);
+    fun test_public_key_claimaint_invalid_public_key() acquires Vault {
+        let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        claim_link_validated_public_key_bytes.push_back(0);
+        public_key_claimant(claim_link_validated_public_key_bytes);
     }
 
-    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
-    fun test_add_public_keys_not_admin() acquires Vault {
-        emojicoin_dot_fun::tests::init_package();
-        let rewards_signer = get_signer(@rewards);
-        init_module(&rewards_signer);
-        let not_admin_signer = get_signer(@0x2222);
-        assert!(&rewards_signer != &not_admin_signer);
-        add_public_keys(&not_admin_signer, vector[]);
+    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
+    fun test_public_key_is_in_manifest_invalid_public_key() acquires Vault {
+        let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        claim_link_validated_public_key_bytes.push_back(0);
+        public_key_is_in_manifest(claim_link_validated_public_key_bytes);
     }
 
     #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_CLAIMED)]
     fun test_redeem_claim_link_already_claimed() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) =
-            prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
         redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(CLAIMANT),
             signature_bytes,
@@ -510,8 +529,7 @@ module rewards::emojicoin_dot_fun_claim_link {
 
     #[test, expected_failure(abort_code = E_INVALID_CLAIM_LINK)]
     fun test_redeem_invalid_claim_link() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) =
-            prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
         remove_public_keys(
             &get_signer(@rewards),
             vector[claim_link_validated_public_key_bytes]
@@ -525,10 +543,22 @@ module rewards::emojicoin_dot_fun_claim_link {
         );
     }
 
+    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
+    fun test_redeem_invalid_public_key() acquires Vault {
+        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        claim_link_validated_public_key_bytes.push_back(0);
+        redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(CLAIMANT),
+            signature_bytes,
+            claim_link_validated_public_key_bytes,
+            @black_cat_market,
+            1
+        );
+    }
+
     #[test, expected_failure(abort_code = E_INVALID_SIGNATURE)]
     fun test_redeem_invalid_signature() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) =
-            prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
         signature_bytes[0] = signature_bytes[0] ^ 0xff;
         redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(CLAIMANT),
@@ -541,8 +571,7 @@ module rewards::emojicoin_dot_fun_claim_link {
 
     #[test, expected_failure(abort_code = E_VAULT_INSUFFICIENT_FUNDS)]
     fun test_redeem_vault_insufficient_funds() acquires Vault {
-        let (signature_bytes, claim_link_validated_public_key_bytes) =
-            prepare_for_redemption();
+        let (signature_bytes, claim_link_validated_public_key_bytes) = prepare_for_redemption();
         withdraw_from_vault(&get_signer(@rewards), DEFAULT_CLAIM_AMOUNT);
         redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
             &get_signer(CLAIMANT),
