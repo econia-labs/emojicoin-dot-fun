@@ -9,6 +9,7 @@ import { postgrest, toQueryArray } from "../client";
 import { queryHelper, queryHelperSingle } from "../utils";
 import {
   toChatEventModel,
+  toMarketRegistrationEventModel,
   toMarketStateModel,
   toPeriodicStateEventModel,
   toSwapEventModel,
@@ -46,23 +47,34 @@ const selectPeriodicEventsSince = ({
   marketID,
   period,
   start,
-  offset,
-  limit = LIMIT,
-}: PeriodicStateEventQueryArgs) =>
-  postgrest
+  end,
+}: PeriodicStateEventQueryArgs) => {
+  const query = postgrest
     .from(TableName.PeriodicStateEvents)
     .select("*")
     .eq("market_id", marketID)
     .eq("period", period)
     .gte("start_time", start.toISOString())
-    .order("start_time", ORDER_BY.ASC)
-    .range(offset, offset + limit - 1);
+    .lte("start_time", end.toISOString())
+    .order("start_time", ORDER_BY.ASC);
+
+  console.log(query);
+  return query;
+};
 
 const selectMarketState = ({ searchEmojis }: { searchEmojis: SymbolEmoji[] }) =>
   postgrest
     .from(TableName.MarketState)
     .select("*")
     .eq("symbol_emojis", toQueryArray(searchEmojis))
+    .limit(1)
+    .single();
+
+const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =>
+  postgrest
+    .from(TableName.MarketRegistrationEvents)
+    .select("*")
+    .eq("market_id", marketID)
     .limit(1)
     .single();
 
@@ -73,3 +85,7 @@ export const fetchPeriodicEventsSince = queryHelper(
   toPeriodicStateEventModel
 );
 export const fetchMarketState = queryHelperSingle(selectMarketState, toMarketStateModel);
+export const fetchMarketRegistration = queryHelperSingle(
+  selectMarketRegistration,
+  toMarketRegistrationEventModel
+);

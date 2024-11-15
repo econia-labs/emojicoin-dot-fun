@@ -13,25 +13,20 @@ import { isPeriod, type Period, PeriodDuration, periodEnumToRawDuration } from "
 export const PARCEL_SIZE = 500;
 
 export const indexToParcelStartDate = (index: number, period: Period): Date =>
-  new Date((index * periodEnumToRawDuration(period)) / 1000);
+  new Date((PARCEL_SIZE * (index * periodEnumToRawDuration(period))) / 1000);
 export const indexToParcelEndDate = (index: number, period: Period): Date =>
-  new Date(((index + 1) * periodEnumToRawDuration(period)) / 1000);
+  new Date((PARCEL_SIZE * ((index + 1) * periodEnumToRawDuration(period))) / 1000);
 
 export const getPeriodDurationSeconds = (period: Period) =>
   (periodEnumToRawDuration(period) / PeriodDuration.PERIOD_1M) * 60;
 
-export const toIndexAndAmount = (
-  start: number,
-  end: number,
-  period: Period
-): { amount: number; index: number } => {
+export const toIndex = (end: number, period: Period): number => {
   const periodDuration = getPeriodDurationSeconds(period);
   const parcelDuration = periodDuration * PARCEL_SIZE;
 
-  const index = Math.floor(start / parcelDuration);
-  const amount = Math.ceil((end - start) / parcelDuration);
+  const index = Math.floor(end / parcelDuration);
 
-  return { index, amount };
+  return index;
 };
 
 export const jsonStrAppend = (a: string, b: string): string => {
@@ -50,15 +45,15 @@ export type GetCandlesticksParams = {
  * The search params used in the `GET` request at `candlesticks/api`.
  *
  * @property {string} marketID      - The market ID.
- * @property {string} index         - The pagination index.
+ * @property {string} to            - The end time boundary.
  * @property {string} period        - The {@link Period}.
- * @property {string} amount        - The number of parcels to fetch.
+ * @property {string} countBack     - The `countBack` value requested by the datafeed API.
  */
 export type CandlesticksSearchParams = {
   marketID: string | null;
-  index: string | null;
+  to: string | null;
   period: string | null;
-  amount: string | null;
+  countBack: string | null;
 };
 
 /**
@@ -66,9 +61,10 @@ export type CandlesticksSearchParams = {
  */
 export type ValidCandlesticksSearchParams = {
   marketID: string;
-  index: string;
+  to: string;
   period: Period;
   amount: string;
+  countBack: string;
 };
 
 const isNumber = (s: string) => !isNaN(parseInt(s));
@@ -76,12 +72,12 @@ const isNumber = (s: string) => !isNaN(parseInt(s));
 export const isValidCandlesticksSearchParams = (
   params: CandlesticksSearchParams
 ): params is ValidCandlesticksSearchParams => {
-  const { marketID, index, period, amount } = params;
+  const { marketID, to, period, countBack } = params;
   // prettier-ignore
   return (
     marketID !== null && isNumber(marketID) &&
-    index !== null && isNumber(index) &&
-    amount !== null && isNumber(amount) &&
+    to !== null && isNumber(to) &&
+    countBack !== null && isNumber(countBack) &&
     period !== null && isPeriod(period)
   );
 };

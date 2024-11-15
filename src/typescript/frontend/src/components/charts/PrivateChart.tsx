@@ -42,7 +42,6 @@ import {
 } from "@/store/event/candlestick-bars";
 import { emoji, parseJSON } from "utils";
 import { Emoji } from "utils/emoji";
-import { toIndexAndAmount } from "app/candlesticks/utils";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -154,22 +153,47 @@ export const Chart = (props: ChartContainerProps) => {
         onHistoryCallback,
         onErrorCallback
       ) => {
-        const { from, to } = periodParams;
+        const { from, to, countBack } = periodParams;
         try {
           const period = ResolutionStringToPeriod[resolution.toString()];
           const periodDuration = periodEnumToRawDuration(period);
-          const { index, amount } = toIndexAndAmount(from, to, period);
+
           // The start timestamp is rounded so that all the people who load the webpage at a similar time get served
           // the same cached response.
           const params = new URLSearchParams({
             marketID: props.marketID,
             period: period.toString(),
-            index: index.toString(),
-            amount: amount.toString(),
+            countBack: countBack.toString(),
+            to: to.toString(),
           });
           const data: PeriodicStateEventModel[] = await fetch(`/candlesticks?${params.toString()}`)
             .then((res) => res.text())
             .then((res) => parseJSON(res));
+
+          console.log("-".repeat(80));
+          console.log({
+            from: new Date(from * 1000).toUTCString(),
+            to: new Date(to * 1000).toUTCString(),
+            data: "BELOW!",
+            dataLastStartTime: new Date(
+              Number(
+                data
+                  .map((d) => d.periodicMetadata.startTime)
+                  .toSorted()
+                  .pop() ?? 0n
+              ) / 1000
+            ).toUTCString(),
+            dataFirstStartTime: new Date(
+              Number(
+                data
+                  .map((d) => d.periodicMetadata.startTime)
+                  .toSorted()
+                  .reverse()
+                  .pop() ?? 0n
+              ) / 1000
+            ).toUTCString(),
+          });
+          console.log(data);
 
           const endDate = new Date(to * 1000);
           const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
@@ -213,6 +237,7 @@ export const Chart = (props: ChartContainerProps) => {
             const nonce = marketResource.sequenceInfo.nonce;
             latestBar = periodicStateTrackerToLatestBar(tracker, nonce);
           }
+
           // Filter the data so that all resulting bars are within the specified time range.
           // Also, update the `open` price to the previous bar's `close` price if it exists.
           // NOTE: Since `getBars` is called multiple times, this will result in several
@@ -220,7 +245,16 @@ export const Chart = (props: ChartContainerProps) => {
           // some visual inconsistencies in the chart.
           const bars: Bar[] = data.reduce((acc: Bar[], event) => {
             const bar = toBar(event);
-            const inTimeRange = bar.time >= from * 1000 && bar.time <= to * 1000;
+            // Only exclude bars that are after `to`.
+            // see: https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods#getbars
+            const inTimeRange = bar.time <= to * 1000;
+            // console.log({
+            //   hasTradingActivity: hasTradingActivity(bar),
+            //   time: bar.time,
+            //   from: from * 1000,
+            //   to: to * 1000,
+            //   inTimeRange,
+            // });
             if (inTimeRange && hasTradingActivity(bar)) {
               const prev = acc.at(-1);
               if (prev) {
@@ -254,6 +288,11 @@ export const Chart = (props: ChartContainerProps) => {
             bars.push(latestBar);
           }
 
+          console.log({
+            bars_length: bars.length,
+            data_length: data.length,
+          });
+
           if (bars.length === 0) {
             if (isFetchForMostRecentBars) {
               // If this is the most recent bar fetch and there is literally zero trading activity thus far,
@@ -269,15 +308,29 @@ export const Chart = (props: ChartContainerProps) => {
                 volume: 0,
               });
             } else {
+              console.log(
+                "Done fetching with" +
+                  " from: " +
+                  new Date(from * 1000) +
+                  " to: " +
+                  new Date(to * 1000)
+              );
               onHistoryCallback([], {
                 noData: true,
               });
               return;
             }
           }
-
+          console.log(
+            "bars length: " +
+              bars.length +
+              " from: " +
+              new Date(from * 1000) +
+              " to: " +
+              new Date(to * 1000)
+          );
           onHistoryCallback(bars, {
-            noData: bars.length === 0,
+            noData: bars.length === 0, // && notAllEmptyBars,
           });
         } catch (e) {
           if (e instanceof Error) {
