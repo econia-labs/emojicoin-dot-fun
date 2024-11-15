@@ -1,11 +1,6 @@
 // cspell:word timespan
 
-import {
-  type AnyNumberString,
-  compareBigInt,
-  getPeriodStartTimeFromTime,
-  toPeriod,
-} from "@sdk/index";
+import { type AnyNumberString, getPeriodStartTimeFromTime, toPeriod } from "@sdk/index";
 import { parseInt } from "lodash";
 import { type NextRequest } from "next/server";
 import {
