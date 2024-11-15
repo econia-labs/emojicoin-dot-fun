@@ -280,6 +280,37 @@ module rewards::emojicoin_dot_fun_claim_link {
     #[test_only]
     const CLAIMANT: address = @0x1111;
 
+    #[test_only]
+    fun prepare_for_redemption(): (vector<u8>, vector<u8>) acquires Vault {
+        // Init package, execute exact transition swap, fund vault.
+        emojicoin_dot_fun::tests::init_package_then_exact_transition();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, DEFAULT_CLAIM_AMOUNT
+        );
+        fund_vault(&rewards_signer, 1);
+
+        // Generate private, public keys.
+        let (claim_link_private_key, claim_link_validated_public_key) =
+            ed25519::generate_keys();
+        let claim_link_validated_public_key_bytes =
+            ed25519::validated_public_key_to_bytes(&claim_link_validated_public_key);
+        let signature_bytes =
+            ed25519::signature_to_bytes(
+                &ed25519::sign_arbitrary_bytes(
+                    &claim_link_private_key, bcs::to_bytes(&CLAIMANT)
+                )
+            );
+        add_public_keys(
+            &rewards_signer,
+            vector[claim_link_validated_public_key_bytes]
+        );
+
+        // Return valid signature against claimaint's address, claim link public key bytes.
+        (signature_bytes, claim_link_validated_public_key_bytes)
+    }
+
     #[test]
     fun test_general_flow() acquires Vault {
         // Initialize black cat market, have it undergo state transition.
@@ -455,6 +486,20 @@ module rewards::emojicoin_dot_fun_claim_link {
         let not_admin_signer = get_signer(@0x2222);
         assert!(&rewards_signer != &not_admin_signer);
         add_public_keys(&not_admin_signer, vector[]);
+    }
+
+    #[test, expected_failure(abort_code = E_INVALID_SIGNATURE)]
+    fun test_redeem_invalid_signature() acquires Vault {
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
+        signature_bytes[0] = signature_bytes[0] ^ 0xff;
+        redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(CLAIMANT),
+            signature_bytes,
+            claim_link_validated_public_key_bytes,
+            @black_cat_market,
+            1
+        );
     }
 
     #[test, expected_failure(abort_code = E_NOT_ADMIN)]
