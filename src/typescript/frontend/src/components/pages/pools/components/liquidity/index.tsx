@@ -11,6 +11,7 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import {
   AptosInputLabel,
   EmojiInputLabel,
+  EmojiInputLabelStyles,
 } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toActualCoinDecimals } from "lib/utils/decimals";
@@ -216,7 +217,10 @@ const Liquidity = ({ market }: LiquidityProps) => {
           disabled
         ></input>
       </Column>
-      <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
+      <div>
+        <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
+        <span className={EmojiInputLabelStyles}>{market ? "" : "-"}</span>
+      </div>
     </InnerWrapper>
   );
 
@@ -246,7 +250,10 @@ const Liquidity = ({ market }: LiquidityProps) => {
           />
         )}
       </Column>
-      <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol} LP` : "- LP"} />
+      <div>
+        <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol}` : ""} />
+        <span className={EmojiInputLabelStyles}>{market ? " LP" : "-"}</span>
+      </div>
     </InnerWrapper>
   );
 
