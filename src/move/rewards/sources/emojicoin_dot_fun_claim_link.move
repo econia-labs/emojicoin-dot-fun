@@ -1,4 +1,5 @@
 // cspell:word funder
+// cspell:word unvalidated
 module rewards::emojicoin_dot_fun_claim_link {
 
     use aptos_framework::account::{Self, SignerCapability};
@@ -307,7 +308,7 @@ module rewards::emojicoin_dot_fun_claim_link {
             vector[claim_link_validated_public_key_bytes]
         );
 
-        // Return valid signature against claimaint's address, claim link public key bytes.
+        // Return valid signature against claimant's address, claim link public key bytes.
         (signature_bytes, claim_link_validated_public_key_bytes)
     }
 
@@ -472,7 +473,7 @@ module rewards::emojicoin_dot_fun_claim_link {
             1
         );
 
-        // Verify claimaint's emojicoin balance.
+        // Verify claimant's emojicoin balance.
         assert!(coin::balance<BlackCatEmojicoin>(CLAIMANT) == net_proceeds);
 
         // Check vault balance, manifest.
@@ -495,7 +496,7 @@ module rewards::emojicoin_dot_fun_claim_link {
     }
 
     #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
-    fun test_public_key_claimaint_invalid_public_key() acquires Vault {
+    fun test_public_key_claimant_invalid_public_key() acquires Vault {
         let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
         claim_link_validated_public_key_bytes.push_back(0);
         public_key_claimant(claim_link_validated_public_key_bytes);
