@@ -153,7 +153,8 @@ export const Chart = (props: ChartContainerProps) => {
         onHistoryCallback,
         onErrorCallback
       ) => {
-        const { from, to, countBack } = periodParams;
+        const { to, countBack } = periodParams;
+
         try {
           const period = ResolutionStringToPeriod[resolution.toString()];
           const periodDuration = periodEnumToRawDuration(period);
@@ -170,30 +171,7 @@ export const Chart = (props: ChartContainerProps) => {
             .then((res) => res.text())
             .then((res) => parseJSON(res));
 
-          console.log("-".repeat(80));
-          console.log({
-            from: new Date(from * 1000).toUTCString(),
-            to: new Date(to * 1000).toUTCString(),
-            data: "BELOW!",
-            dataLastStartTime: new Date(
-              Number(
-                data
-                  .map((d) => d.periodicMetadata.startTime)
-                  .toSorted()
-                  .pop() ?? 0n
-              ) / 1000
-            ).toUTCString(),
-            dataFirstStartTime: new Date(
-              Number(
-                data
-                  .map((d) => d.periodicMetadata.startTime)
-                  .toSorted()
-                  .reverse()
-                  .pop() ?? 0n
-              ) / 1000
-            ).toUTCString(),
-          });
-          console.log(data);
+          data.sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime));
 
           const endDate = new Date(to * 1000);
           const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
@@ -248,13 +226,6 @@ export const Chart = (props: ChartContainerProps) => {
             // Only exclude bars that are after `to`.
             // see: https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods#getbars
             const inTimeRange = bar.time <= to * 1000;
-            // console.log({
-            //   hasTradingActivity: hasTradingActivity(bar),
-            //   time: bar.time,
-            //   from: from * 1000,
-            //   to: to * 1000,
-            //   inTimeRange,
-            // });
             if (inTimeRange && hasTradingActivity(bar)) {
               const prev = acc.at(-1);
               if (prev) {
@@ -288,11 +259,6 @@ export const Chart = (props: ChartContainerProps) => {
             bars.push(latestBar);
           }
 
-          console.log({
-            bars_length: bars.length,
-            data_length: data.length,
-          });
-
           if (bars.length === 0) {
             if (isFetchForMostRecentBars) {
               // If this is the most recent bar fetch and there is literally zero trading activity thus far,
@@ -308,27 +274,12 @@ export const Chart = (props: ChartContainerProps) => {
                 volume: 0,
               });
             } else {
-              console.log(
-                "Done fetching with" +
-                  " from: " +
-                  new Date(from * 1000) +
-                  " to: " +
-                  new Date(to * 1000)
-              );
               onHistoryCallback([], {
                 noData: true,
               });
               return;
             }
           }
-          console.log(
-            "bars length: " +
-              bars.length +
-              " from: " +
-              new Date(from * 1000) +
-              " to: " +
-              new Date(to * 1000)
-          );
           onHistoryCallback(bars, {
             noData: bars.length === 0, // && notAllEmptyBars,
           });

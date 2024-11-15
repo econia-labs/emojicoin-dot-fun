@@ -157,10 +157,7 @@ export async function GET(request: NextRequest) {
     return new Response("Market has not been registered yet.", { status: 400 });
   }
 
-  console.log("registration boundary start:", registrationPeriodBoundaryStart);
-
   while (totalCount <= countBack) {
-    // for (let i = 0; i < numParcels; i++) {
     const localIndex = index - i;
     const endDate = indexToParcelEndDate(localIndex, period);
     let res: GetCandlesticksResponse;
@@ -179,29 +176,17 @@ export async function GET(request: NextRequest) {
     }
 
     if (i == 0) {
-      // parse JSON data, count how many candlesticks are before the `to` date, and append those.
       const parsed = parseJSON<CandlesticksDataType>(res.data);
       const filtered = parsed.filter(
         (val) => val.periodicMetadata.startTime < BigInt(to) * 1_000_000n
       );
-      filtered.sort((a, b) =>
-        compareBigInt(a.periodicMetadata.startTime, b.periodicMetadata.startTime)
-      );
       totalCount += filtered.length;
       data = jsonStrAppend(data, stringifyJSON(filtered));
     } else {
-      // don't parse, just append
       totalCount += res.count;
       data = jsonStrAppend(data, res.data);
     }
-    if (i > 100) {
-      console.log({
-        to,
-        endDate,
-        registrationPeriodBoundaryStart,
-      });
-    }
-    if (endDate < registrationPeriodBoundaryStart || i > 200) {
+    if (endDate < registrationPeriodBoundaryStart) {
       break;
     }
     i++;

@@ -55,10 +55,8 @@ const selectPeriodicEventsSince = ({
     .eq("market_id", marketID)
     .eq("period", period)
     .gte("start_time", start.toISOString())
-    .lte("start_time", end.toISOString())
+    .lt("start_time", end.toISOString())
     .order("start_time", ORDER_BY.ASC);
-
-  console.log(query);
   return query;
 };
 
