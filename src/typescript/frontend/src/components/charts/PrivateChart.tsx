@@ -42,7 +42,6 @@ import {
 } from "@/store/event/candlestick-bars";
 import { emoji, parseJSON } from "utils";
 import { Emoji } from "utils/emoji";
-import { toIndexAndAmount } from "app/candlesticks/utils";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -154,22 +153,25 @@ export const Chart = (props: ChartContainerProps) => {
         onHistoryCallback,
         onErrorCallback
       ) => {
-        const { from, to } = periodParams;
+        const { to, countBack } = periodParams;
+
         try {
           const period = ResolutionStringToPeriod[resolution.toString()];
           const periodDuration = periodEnumToRawDuration(period);
-          const { index, amount } = toIndexAndAmount(from, to, period);
+
           // The start timestamp is rounded so that all the people who load the webpage at a similar time get served
           // the same cached response.
           const params = new URLSearchParams({
             marketID: props.marketID,
             period: period.toString(),
-            index: index.toString(),
-            amount: amount.toString(),
+            countBack: countBack.toString(),
+            to: to.toString(),
           });
           const data: PeriodicStateEventModel[] = await fetch(`/candlesticks?${params.toString()}`)
             .then((res) => res.text())
             .then((res) => parseJSON(res));
+
+          data.sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime));
 
           const endDate = new Date(to * 1000);
           const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
@@ -213,6 +215,7 @@ export const Chart = (props: ChartContainerProps) => {
             const nonce = marketResource.sequenceInfo.nonce;
             latestBar = periodicStateTrackerToLatestBar(tracker, nonce);
           }
+
           // Filter the data so that all resulting bars are within the specified time range.
           // Also, update the `open` price to the previous bar's `close` price if it exists.
           // NOTE: Since `getBars` is called multiple times, this will result in several
@@ -220,7 +223,9 @@ export const Chart = (props: ChartContainerProps) => {
           // some visual inconsistencies in the chart.
           const bars: Bar[] = data.reduce((acc: Bar[], event) => {
             const bar = toBar(event);
-            const inTimeRange = bar.time >= from * 1000 && bar.time <= to * 1000;
+            // Only exclude bars that are after `to`.
+            // see: https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods#getbars
+            const inTimeRange = bar.time <= to * 1000;
             if (inTimeRange && hasTradingActivity(bar)) {
               const prev = acc.at(-1);
               if (prev) {
@@ -275,9 +280,8 @@ export const Chart = (props: ChartContainerProps) => {
               return;
             }
           }
-
           onHistoryCallback(bars, {
-            noData: bars.length === 0,
+            noData: bars.length === 0, // && notAllEmptyBars,
           });
         } catch (e) {
           if (e instanceof Error) {

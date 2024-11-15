@@ -11,7 +11,7 @@ import {
 } from "@supabase/postgrest-js";
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
-import { type DatabaseJsonType, TableName } from "../types/json-types";
+import { type DatabaseJsonType, postgresTimestampToDate, TableName } from "../types/json-types";
 import { toAccountAddress } from "../../utils";
 import { postgrest } from "./client";
 import { type DatabaseModels } from "../types";
@@ -42,40 +42,44 @@ const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? (
 // NOTE: If we ever add another processor type to the indexer processor stack, this will need to be
 // updated, because it is assumed here that there is a single row returned. Multiple processors
 // would mean there would be multiple rows.
+export const getProcessorStatus = async () =>
+  postgrest
+    .from(TableName.ProcessorStatus)
+    .select("processor, last_success_version, last_updated, last_transaction_timestamp")
+    .limit(1)
+    .single()
+    .then((r) => {
+      const row = extractRow(r);
+      if (!row) {
+        console.error(r);
+        throw new Error("No processor status row found.");
+      }
+      if (
+        !(
+          "processor" in row &&
+          "last_success_version" in row &&
+          "last_updated" in row &&
+          "last_transaction_timestamp" in row
+        )
+      ) {
+        console.warn("Couldn't find all fields in the row response data.", r);
+      }
+      return {
+        processor: row.processor,
+        lastSuccessVersion: BigInt(row.last_success_version),
+        lastUpdated: postgresTimestampToDate(row.last_updated),
+        lastTransactionTimestamp: row.last_transaction_timestamp
+          ? postgresTimestampToDate(row.last_transaction_timestamp)
+          : new Date(0), // Provide a default, because this field is nullable.
+      };
+    });
+
 export const getLatestProcessedEmojicoinVersion = async () =>
-  postgrest
-    .from(TableName.ProcessorStatus)
-    .select("last_success_version")
-    .limit(1)
-    .single()
-    .then((r) => {
-      const rowWithVersion = extractRow(r);
-      if (!rowWithVersion) {
-        console.error(r);
-        throw new Error("No processor status row found.");
-      }
-      if (!("last_success_version" in rowWithVersion)) {
-        console.warn("Couldn't find `last_success_version` in the response data.", r);
-      }
-      return BigInt(rowWithVersion.last_success_version);
-    });
+  getProcessorStatus().then((r) => r.lastSuccessVersion);
+
 export const getLatestProcessedEmojicoinTimestamp = async () =>
-  postgrest
-    .from(TableName.ProcessorStatus)
-    .select("last_transaction_timestamp")
-    .limit(1)
-    .single()
-    .then((r) => {
-      const rowWithVersion = extractRow(r);
-      if (!rowWithVersion) {
-        console.error(r);
-        throw new Error("No processor status row found.");
-      }
-      if (!("last_transaction_timestamp" in rowWithVersion)) {
-        console.warn("Couldn't find `last_success_version` in the response data.", r);
-      }
-      return new Date(rowWithVersion.last_transaction_timestamp);
-    });
+  getProcessorStatus().then((r) => r.lastTransactionTimestamp);
+
 /**
  * Wait for the processed version of a table or view to be at least the given version.
  */

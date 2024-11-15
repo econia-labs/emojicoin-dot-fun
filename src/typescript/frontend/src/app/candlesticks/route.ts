@@ -1,40 +1,99 @@
-import { type Period, toPeriod } from "@sdk/index";
-import { type PeriodTypeFromDatabase } from "@sdk/indexer-v2/types/json-types";
+// cspell:word timespan
+
+import { type AnyNumberString, getPeriodStartTimeFromTime, toPeriod } from "@sdk/index";
 import { parseInt } from "lodash";
 import { type NextRequest } from "next/server";
 import {
+  type CandlesticksSearchParams,
   type GetCandlesticksParams,
+  getPeriodDurationSeconds,
   HISTORICAL_CACHE_DURATION,
-  indexToEndDate,
-  indexToStartDate,
+  indexToParcelEndDate,
+  indexToParcelStartDate,
+  isValidCandlesticksSearchParams,
   jsonStrAppend,
   NORMAL_CACHE_DURATION,
   PARCEL_SIZE,
+  toIndex,
 } from "./utils";
 import { unstable_cache } from "next/cache";
 import { getLatestProcessedEmojicoinTimestamp } from "@sdk/indexer-v2/queries/utils";
-import { stringifyJSON } from "utils";
-import { fetchPeriodicEventsSince } from "@/queries/market";
+import { parseJSON, stringifyJSON } from "utils";
+import { fetchMarketRegistration, fetchPeriodicEventsSince } from "@/queries/market";
+
+/**
+ * @property `data` the stringified version of {@link CandlesticksDataType}.
+ * @property `count` the number of rows returned.
+ */
+type GetCandlesticksResponse = {
+  data: string;
+  count: number;
+};
+
+type CandlesticksDataType = Awaited<ReturnType<typeof fetchPeriodicEventsSince>>;
 
 const getCandlesticks = async (params: GetCandlesticksParams) => {
   const { marketID, index, period } = params;
 
-  const start = indexToStartDate(index, period);
+  const start = indexToParcelStartDate(index, period);
 
+  const periodDurationMilliseconds = getPeriodDurationSeconds(period) * 1000;
+  const timespan = periodDurationMilliseconds * PARCEL_SIZE;
+  const end = new Date(start.getTime() + timespan);
+
+  // PARCEL_SIZE determines the max number of rows, so we don't need to pass a `LIMIT` value.
+  // `start` and `end` determine the level of pagination, so no need to specify `offset` either.
   const data = await fetchPeriodicEventsSince({
     marketID,
     period,
     start,
-    offset: 0,
-    limit: PARCEL_SIZE,
+    end,
   });
 
-  return stringifyJSON(data);
+  return {
+    data: stringifyJSON(data),
+    count: data.length,
+  };
 };
 
+/**
+ * Returns the market registration event for a market if it exists.
+ *
+ * If it doesn't exist, it throws an error so that the value isn't cached in the
+ * `unstable_cache` call.
+ *
+ * @see {@link getCachedMarketRegistrationMs}
+ */
+const getMarketRegistrationMs = async (marketID: AnyNumberString) =>
+  fetchMarketRegistration({ marketID }).then((res) => {
+    if (res) {
+      return Number(res.market.time / 1000n);
+    }
+    throw new Error("Market is not yet registered.");
+  });
+
+const getCachedMarketRegistrationMs = unstable_cache(
+  getMarketRegistrationMs,
+  ["market-registrations"],
+  {
+    revalidate: HISTORICAL_CACHE_DURATION,
+  }
+);
+
+/**
+ * Fetch all of the parcels of candlesticks that have completely ended.
+ * The only difference between this and {@link getNormalCachedCandlesticks} is the cache tag and
+ * thus how long the data is cached for.
+ */
 const getHistoricCachedCandlesticks = unstable_cache(getCandlesticks, ["candlesticks-historic"], {
   revalidate: HISTORICAL_CACHE_DURATION,
 });
+
+/**
+ * Fetch all candlestick parcels that haven't completed yet.
+ * The only difference between this and {@link getHistoricCachedCandlesticks} is the cache tag and
+ * thus how long the data is cached for.
+ */
 const getNormalCachedCandlesticks = unstable_cache(getCandlesticks, ["candlesticks"], {
   revalidate: NORMAL_CACHE_DURATION,
 });
@@ -48,64 +107,84 @@ const getCachedLatestProcessedEmojicoinTimestamp = unstable_cache(
 /* eslint-disable-next-line import/no-unused-modules */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const marketIDStr = searchParams.get("marketID");
-  const indexStr = searchParams.get("index");
-  const periodStr = searchParams.get("period");
-  const amountStr = searchParams.get("amount");
+  const params: CandlesticksSearchParams = {
+    marketID: searchParams.get("marketID"),
+    to: searchParams.get("to"),
+    period: searchParams.get("period"),
+    countBack: searchParams.get("countBack"),
+  };
 
-  if (!marketIDStr || !indexStr || !periodStr || !amountStr) {
-    return new Response("", { status: 400 });
+  if (!isValidCandlesticksSearchParams(params)) {
+    return new Response("Invalid candlestick search params.", { status: 400 });
   }
 
-  if (isNaN(parseInt(marketIDStr))) {
-    return new Response("", { status: 400 });
-  }
+  const marketID = parseInt(params.marketID);
+  const to = parseInt(params.to);
+  const period = toPeriod(params.period);
+  const countBack = parseInt(params.countBack);
+  const numParcels = parseInt(params.amount);
 
-  if (isNaN(parseInt(indexStr))) {
-    return new Response("", { status: 400 });
-  }
+  const index = toIndex(to, period);
 
-  if (isNaN(parseInt(amountStr))) {
-    return new Response("", { status: 400 });
-  }
-
-  let period: Period;
-  try {
-    period = toPeriod(periodStr as PeriodTypeFromDatabase);
-  } catch {
-    return new Response("", { status: 400 });
-  }
-
-  const index = parseInt(indexStr);
-  const marketID = parseInt(marketIDStr);
-  const amount = parseInt(amountStr);
-
-  const lastStartDate = indexToStartDate(index + amount - 1, period);
-
-  if (lastStartDate > new Date()) {
-    return new Response("", { status: 400 });
+  // Ensure that the last start date as calculated per the search params is valid.
+  // This is specifically the last parcel's start date- aka the last parcel's first candlestick's
+  // start time.
+  const lastParcelStartDate = indexToParcelStartDate(index + numParcels - 1, period);
+  if (lastParcelStartDate > new Date()) {
+    return new Response("The last parcel's start date cannot be later than the current time.", {
+      status: 400,
+    });
   }
 
   let data: string = "[]";
 
   const processorTimestamp = new Date(await getCachedLatestProcessedEmojicoinTimestamp());
 
-  const promises: Promise<string>[] = [];
+  let totalCount = 0;
+  let i = 0;
 
-  for (let i = 0; i < amount; i++) {
-    const localIndex = index + i;
-    const endDate = indexToEndDate(localIndex, period);
-    if (endDate < processorTimestamp) {
-      promises.push(getHistoricCachedCandlesticks({ marketID, index: localIndex, period }));
-    } else {
-      promises.push(getNormalCachedCandlesticks({ marketID, index: localIndex, period }));
-    }
+  let registrationPeriodBoundaryStart: Date;
+  try {
+    registrationPeriodBoundaryStart = await getCachedMarketRegistrationMs(marketID).then(
+      (time) => new Date(Number(getPeriodStartTimeFromTime(time, period)))
+    );
+  } catch {
+    return new Response("Market has not been registered yet.", { status: 400 });
   }
 
-  const parcels = await Promise.all(promises);
+  while (totalCount <= countBack) {
+    const localIndex = index - i;
+    const endDate = indexToParcelEndDate(localIndex, period);
+    let res: GetCandlesticksResponse;
+    if (endDate < processorTimestamp) {
+      res = await getHistoricCachedCandlesticks({
+        marketID,
+        index: localIndex,
+        period,
+      });
+    } else {
+      res = await getNormalCachedCandlesticks({
+        marketID,
+        index: localIndex,
+        period,
+      });
+    }
 
-  for (const parcel of parcels) {
-    data = jsonStrAppend(data, parcel);
+    if (i == 0) {
+      const parsed = parseJSON<CandlesticksDataType>(res.data);
+      const filtered = parsed.filter(
+        (val) => val.periodicMetadata.startTime < BigInt(to) * 1_000_000n
+      );
+      totalCount += filtered.length;
+      data = jsonStrAppend(data, stringifyJSON(filtered));
+    } else {
+      totalCount += res.count;
+      data = jsonStrAppend(data, res.data);
+    }
+    if (endDate < registrationPeriodBoundaryStart) {
+      break;
+    }
+    i++;
   }
 
   return new Response(data);
