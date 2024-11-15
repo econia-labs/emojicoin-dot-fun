@@ -11,6 +11,7 @@ import { toCoinDecimalString } from "lib/utils/decimals";
 import {
   AptosInputLabel,
   EmojiInputLabel,
+  EmojiInputLabelStyles,
 } from "components/pages/emojicoin/components/trade-emojicoin/InputLabels";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toActualCoinDecimals } from "lib/utils/decimals";
@@ -32,7 +33,6 @@ import { EmojiPill } from "components/EmojiPill";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
-  geoblocked: boolean;
 };
 
 const fmtCoin = (n: AnyNumberString | undefined) => {
@@ -69,7 +69,7 @@ const inputAndOutputStyles = `
   border-transparent !p-0 text-white
 `;
 
-const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
+const Liquidity = ({ market }: LiquidityProps) => {
   const { t } = translationFunction();
   const { theme } = useThemeContext();
 
@@ -217,7 +217,10 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           disabled
         ></input>
       </Column>
-      <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
+      <div>
+        <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
+        <span className={EmojiInputLabelStyles}>{market ? "" : "-"}</span>
+      </div>
     </InnerWrapper>
   );
 
@@ -247,7 +250,10 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           />
         )}
       </Column>
-      <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol} LP` : "- LP"} />
+      <div>
+        <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol}` : ""} />
+        <span className={EmojiInputLabelStyles}>{market ? " LP" : "-"}</span>
+      </div>
     </InnerWrapper>
   );
 
@@ -348,7 +354,7 @@ const Liquidity: React.FC<LiquidityProps> = ({ market, geoblocked }) => {
           mb={{ _: "17px", tablet: "37px" }}
           position="relative"
         >
-          <ButtonWithConnectWalletFallback geoblocked={geoblocked}>
+          <ButtonWithConnectWalletFallback>
             <Button
               scale="lg"
               disabled={!isActionPossible}

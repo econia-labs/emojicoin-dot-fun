@@ -3,8 +3,6 @@ import EmojiNotFoundPage from "./not-found";
 import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
-import { isUserGeoblocked } from "utils/geolocation";
-import { headers } from "next/headers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
 import { type Metadata } from "next";
@@ -68,17 +66,19 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     }
     return res;
   });
+
   const state = await fetchMarketState({ searchEmojis: emojis });
 
   if (state) {
     const { marketID } = state.market;
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
-    const chats = await fetchChatEvents({ marketID });
-    const swaps = await fetchSwapEvents({ marketID });
-    const marketView = await fetchContractMarketView(marketAddress.toString());
 
-    // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
-    const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
+    const [chats, swaps, marketView] = await Promise.all([
+      fetchChatEvents({ marketID }),
+      fetchSwapEvents({ marketID }),
+      fetchContractMarketView(marketAddress.toString()),
+    ]);
+
     return (
       <ClientEmojicoinPage
         data={{
@@ -89,7 +89,6 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
           marketView,
           ...state.market,
         }}
-        geoblocked={geoblocked}
       />
     );
   }

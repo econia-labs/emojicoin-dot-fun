@@ -33,7 +33,7 @@ import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk
 import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
 import { Aptos } from "@aptos-labs/ts-sdk";
-import { PeriodDuration, periodEnumToRawDuration, Trigger } from "@sdk/const";
+import { periodEnumToRawDuration, Trigger } from "@sdk/const";
 import {
   type LatestBar,
   marketToLatestBars,
@@ -153,26 +153,28 @@ export const Chart = (props: ChartContainerProps) => {
         onHistoryCallback,
         onErrorCallback
       ) => {
-        const { from, to } = periodParams;
+        const { to, countBack } = periodParams;
+
         try {
           const period = ResolutionStringToPeriod[resolution.toString()];
           const periodDuration = periodEnumToRawDuration(period);
-          const periodDurationSeconds = (periodDuration / PeriodDuration.PERIOD_1M) * 60;
-          const end = new Date(to * 1000);
+
           // The start timestamp is rounded so that all the people who load the webpage at a similar time get served
           // the same cached response.
-          const start = from - (from % periodDurationSeconds);
           const params = new URLSearchParams({
             marketID: props.marketID,
-            start: start.toString(),
             period: period.toString(),
-            limit: "500",
+            countBack: countBack.toString(),
+            to: to.toString(),
           });
           const data: PeriodicStateEventModel[] = await fetch(`/candlesticks?${params.toString()}`)
             .then((res) => res.text())
             .then((res) => parseJSON(res));
 
-          const isFetchForMostRecentBars = end.getTime() - new Date().getTime() > 1000;
+          data.sort((a, b) => Number(a.periodicMetadata.startTime - b.periodicMetadata.startTime));
+
+          const endDate = new Date(to * 1000);
+          const isFetchForMostRecentBars = endDate.getTime() - new Date().getTime() > 1000;
 
           // If the end time is in the future, it means that `getBars` is being called for the most recent candlesticks,
           // and thus we should append the latest candlestick to this dataset to ensure the chart is up to date.
@@ -213,6 +215,7 @@ export const Chart = (props: ChartContainerProps) => {
             const nonce = marketResource.sequenceInfo.nonce;
             latestBar = periodicStateTrackerToLatestBar(tracker, nonce);
           }
+
           // Filter the data so that all resulting bars are within the specified time range.
           // Also, update the `open` price to the previous bar's `close` price if it exists.
           // NOTE: Since `getBars` is called multiple times, this will result in several
@@ -220,7 +223,9 @@ export const Chart = (props: ChartContainerProps) => {
           // some visual inconsistencies in the chart.
           const bars: Bar[] = data.reduce((acc: Bar[], event) => {
             const bar = toBar(event);
-            const inTimeRange = bar.time >= from * 1000 && bar.time <= to * 1000;
+            // Only exclude bars that are after `to`.
+            // see: https://www.tradingview.com/charting-library-docs/latest/connecting_data/datafeed-api/required-methods#getbars
+            const inTimeRange = bar.time <= to * 1000;
             if (inTimeRange && hasTradingActivity(bar)) {
               const prev = acc.at(-1);
               if (prev) {
@@ -275,9 +280,8 @@ export const Chart = (props: ChartContainerProps) => {
               return;
             }
           }
-
           onHistoryCallback(bars, {
-            noData: bars.length === 0,
+            noData: bars.length === 0, // && notAllEmptyBars,
           });
         } catch (e) {
           if (e instanceof Error) {
@@ -368,8 +372,8 @@ export const Chart = (props: ChartContainerProps) => {
   });
 
   return (
-    <div className="relative w-full">
-      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-xl font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
+    <div className="relative w-full h-[420px]">
+      <div className="absolute left-0 top-0 flex h-full w-full animate-fadeIn items-center justify-center text-center font-roboto-mono text-lg font-light leading-6 text-neutral-500 opacity-0 delay-[2000]">
         <div>
           {showErrorMessage ? (
             <>

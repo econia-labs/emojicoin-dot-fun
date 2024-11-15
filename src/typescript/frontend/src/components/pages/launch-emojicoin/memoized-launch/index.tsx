@@ -20,14 +20,7 @@ import { emoji } from "utils";
 
 const labelClassName = "whitespace-nowrap body-sm md:body-lg text-light-gray uppercase font-forma";
 
-export const MemoizedLaunchAnimation = ({
-  loading,
-  geoblocked,
-}: {
-  loading: boolean;
-  geoblocked: boolean;
-}) => {
-  // Maybe it's this...? Maybe we need to memoize this value.
+export const MemoizedLaunchAnimation = ({ loading }: { loading: boolean }) => {
   const { t } = translationFunction();
   const emojis = useEmojiPicker((state) => state.emojis);
   const setIsLoadingRegisteredMarket = useEmojiPicker(
@@ -93,7 +86,6 @@ export const MemoizedLaunchAnimation = ({
           <div className="flex relative mb-1">
             <div className="flex flex-col grow relative w-full">
               <EmojiPickerWithInput
-                geoblocked={geoblocked}
                 handleClick={handleClick}
                 inputClassName="!border !border-solid !border-light-gray rounded-md !flex-row-reverse pl-3 pr-1.5"
                 inputGroupProps={{ label: "Select Emojis", scale: "xm" }}
@@ -193,7 +185,6 @@ export const MemoizedLaunchAnimation = ({
             }}
           >
             <LaunchButtonOrGoToMarketLink
-              geoblocked={geoblocked}
               invalid={invalid}
               registered={registered}
               onWalletButtonClick={() => {

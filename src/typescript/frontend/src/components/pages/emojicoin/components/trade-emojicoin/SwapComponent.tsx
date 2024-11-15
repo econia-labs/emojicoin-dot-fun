@@ -10,7 +10,7 @@ import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals"
 import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
 import { useEventStore } from "context/event-store-context";
-import { useMatchBreakpoints, useTooltip } from "@hooks/index";
+import { useTooltip } from "@hooks/index";
 import { useSearchParams } from "next/navigation";
 import { translationFunction } from "context/language-context";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
@@ -59,7 +59,6 @@ export default function SwapComponent({
   marketAddress,
   marketEmojis,
   initNumSwaps,
-  geoblocked,
 }: SwapComponentProps) {
   const { t } = translationFunction();
   const searchParams = useSearchParams();
@@ -70,7 +69,6 @@ export default function SwapComponent({
     presetInputAmount !== null &&
     presetInputAmount !== "" &&
     !Number.isNaN(Number(presetInputAmount));
-  const { isDesktop } = useMatchBreakpoints();
   const [inputAmount, setInputAmount] = useState(
     toActualCoinDecimals({ num: presetInputAmountIsValid ? presetInputAmount! : "1" })
   );
@@ -178,7 +176,7 @@ export default function SwapComponent({
 
   const { theme } = useThemeContext();
 
-  const { targetRef, tooltip } = useTooltip(
+  const { targetRef, tooltip: gearTooltip } = useTooltip(
     <TradeOptions
       onMaxSlippageUpdate={() => setMaxSlippage(getMaxSlippageSettings().maxSlippage)}
     />,
@@ -186,142 +184,141 @@ export default function SwapComponent({
       placement: "bottom",
       customStyles: getTooltipStyles(theme),
       trigger: "click",
+      tooltipOffset: [100, 10],
     }
   );
 
   return (
-    <>
-      <Column className="relative w-full max-w-[414px] h-full justify-center">
-        <Flex flexDirection="row" justifyContent="space-between">
-          <div
-            className={`${isDesktop ? "heading-1" : "heading-2"} md:heading-1 text-white uppercase pb-[17px]`}
-          >
-            {t("Trade Emojicoin")}
-          </div>
-          <FlexGap flexDirection="row" gap="5px">
-            {isSell ? (
-              <>
-                <EmojiPill
-                  emoji="nauseated face"
-                  description="Sell 50%"
-                  onClick={() => {
-                    setInputAmount(emojicoinBalance / 2n);
-                  }}
-                />
-                <EmojiPill
-                  emoji="face vomiting"
-                  description="Sell 100%"
-                  onClick={() => {
-                    setInputAmount(emojicoinBalance);
-                  }}
-                />
-              </>
-            ) : (
-              <>
-                <EmojiPill
-                  emoji={"waxing crescent moon"}
-                  description="Buy 25%"
-                  onClick={() => {
-                    setInputAmount(availableAptBalance / 4n);
-                  }}
-                />
-                <EmojiPill
-                  emoji={"first quarter moon"}
-                  description="Buy 50%"
-                  onClick={() => {
-                    setInputAmount(availableAptBalance / 2n);
-                  }}
-                />
-                <EmojiPill
-                  emoji={"full moon"}
-                  description="Buy 100%"
-                  onClick={() => {
-                    setInputAmount(availableAptBalance);
-                  }}
-                />
-              </>
-            )}
-          </FlexGap>
-        </Flex>
-
-        <SimulateInputsWrapper>
-          <InnerWrapper>
-            <Column>
-              <div className={grayLabel}>
-                {isSell ? t("You sell") : t("You pay")}
-                {balanceLabel}
-              </div>
-              <InputNumeric
-                className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-                value={inputAmount}
-                onUserInput={(v) => setInputAmount(v)}
-                onSubmit={() => (submit ? submit() : {})}
-                decimals={8}
-              />
-            </Column>
-            {isSell ? <EmojiInputLabel emoji={emojicoin} /> : <AptosInputLabel />}
-          </InnerWrapper>
-
-          <FlipInputsArrow
-            onClick={() => {
-              setInputAmount(outputAmount);
-              // This is done as to not display an old value if the swap simulation fails.
-              setOutputAmount(0n);
-              setPrevious(0n);
-              setIsSell((v) => !v);
-            }}
-          />
-
-          <InnerWrapper>
-            <Column>
-              <div className={grayLabel}>{t("You receive")}</div>
-              <div className="h-[22px] w-full">
-                <div
-                  onClick={() => setIsSell((v) => !v)}
-                  className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
-                  style={{ opacity: isLoading ? 0.6 : 1 }}
-                >
-                  {/* Scrambled swap result output below. */}
-                  <div ref={ref}></div>
-                </div>
-              </div>
-            </Column>
-            {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
-          </InnerWrapper>
-        </SimulateInputsWrapper>
-        <div className="flex flex-row justify-between py-[10px]">
-          <div ref={targetRef}>
-            <Emoji className="cursor-pointer" emojis={emoji("gear")} />
-          </div>
-          {tooltip}
-          <div className="text-dark-gray">
-            <span className="text-xl leading-[0]">
-              {gasCost === null ? "~" : ""}
-              {toDisplayCoinDecimals({
-                num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
-                decimals: 4,
-              })}{" "}
-              APT
-            </span>{" "}
-            <Emoji emojis={emoji("fuel pump")} />
-          </div>
+    <Column className="relative w-full max-w-[414px] justify-center">
+      <Flex
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        className="mb-[.4em]"
+      >
+        <div ref={targetRef}>
+          <Emoji className="cursor-pointer" emojis={emoji("gear")} />
         </div>
+        {gearTooltip}
+        <FlexGap flexDirection="row" gap="5px">
+          {isSell ? (
+            <>
+              <EmojiPill
+                emoji="nauseated face"
+                description="Sell 50%"
+                onClick={() => {
+                  setInputAmount(emojicoinBalance / 2n);
+                }}
+              />
+              <EmojiPill
+                emoji="face vomiting"
+                description="Sell 100%"
+                onClick={() => {
+                  setInputAmount(emojicoinBalance);
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <EmojiPill
+                emoji={"waxing crescent moon"}
+                description="Buy 25%"
+                onClick={() => {
+                  setInputAmount(availableAptBalance / 4n);
+                }}
+              />
+              <EmojiPill
+                emoji={"first quarter moon"}
+                description="Buy 50%"
+                onClick={() => {
+                  setInputAmount(availableAptBalance / 2n);
+                }}
+              />
+              <EmojiPill
+                emoji={"full moon"}
+                description="Buy 100%"
+                onClick={() => {
+                  setInputAmount(availableAptBalance);
+                }}
+              />
+            </>
+          )}
+        </FlexGap>
+      </Flex>
 
-        <Row className="justify-center mt-[14px]">
-          <SwapButton
-            inputAmount={inputAmount}
-            marketAddress={marketAddress}
-            isSell={isSell}
-            setSubmit={setSubmit}
-            // Disable the button if and only if the balance has been fetched and isn't sufficient *and*
-            // the user is connected.
-            disabled={!sufficientBalance && !isLoading && !!account}
-            geoblocked={geoblocked}
-            symbol={emojicoin}
-            minOutputAmount={minOutputAmount}
-          />
-        </Row>
-      </Column>
-    </>
+      <SimulateInputsWrapper>
+        <InnerWrapper>
+          <Column>
+            <div className={grayLabel}>
+              {isSell ? t("You sell") : t("You pay")}
+              {balanceLabel}
+            </div>
+            <InputNumeric
+              className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
+              value={inputAmount}
+              onUserInput={(v) => setInputAmount(v)}
+              onSubmit={() => (submit ? submit() : {})}
+              decimals={8}
+            />
+          </Column>
+          {isSell ? <EmojiInputLabel emoji={emojicoin} /> : <AptosInputLabel />}
+        </InnerWrapper>
+
+        <FlipInputsArrow
+          onClick={() => {
+            setInputAmount(outputAmount);
+            // This is done as to not display an old value if the swap simulation fails.
+            setOutputAmount(0n);
+            setPrevious(0n);
+            setIsSell((v) => !v);
+          }}
+        />
+
+        <InnerWrapper>
+          <Column>
+            <div className={grayLabel}>{t("You receive")}</div>
+            <div className="h-[22px] w-full">
+              <div
+                onClick={() => setIsSell((v) => !v)}
+                className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
+                style={{ opacity: isLoading ? 0.6 : 1 }}
+              >
+                {/* Scrambled swap result output below. */}
+                <div ref={ref}></div>
+              </div>
+            </div>
+          </Column>
+          {isSell ? <AptosInputLabel /> : <EmojiInputLabel emoji={emojicoin} />}
+        </InnerWrapper>
+      </SimulateInputsWrapper>
+      <div className="flex flex-row justify-between py-[10px]">
+        <div></div>
+        <div className="text-dark-gray">
+          <span className="text-xl leading-[0]">
+            {gasCost === null ? "~" : ""}
+            {toDisplayCoinDecimals({
+              num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
+              decimals: 4,
+            })}{" "}
+            APT
+          </span>{" "}
+          <Emoji emojis={emoji("fuel pump")} />
+        </div>
+      </div>
+
+      <Row className="justify-center mt-[14px]">
+        <SwapButton
+          inputAmount={inputAmount}
+          marketAddress={marketAddress}
+          isSell={isSell}
+          setSubmit={setSubmit}
+          // Disable the button if and only if the balance has been fetched and isn't sufficient *and*
+          // the user is connected.
+          disabled={!sufficientBalance && !isLoading && !!account}
+          symbol={emojicoin}
+          minOutputAmount={minOutputAmount}
+        />
+      </Row>
+    </Column>
   );
 }

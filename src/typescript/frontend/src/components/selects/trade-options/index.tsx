@@ -65,7 +65,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
             <div
               className={
                 `${maxSlippageMode === "custom" ? "opacity-100" : "opacity-30"} ` +
-                "text-black border-black flex flex-row border-[1px] p-[.2rem] rounded border-solid"
+                "text-black border-black flex flex-row items-center border-[1px] rounded border-solid leading-4"
               }
             >
               <InputNumeric
@@ -79,7 +79,7 @@ export const TradeOptions = ({ onMaxSlippageUpdate }: TradeOptionsProps) => {
                 decimals={2}
                 className="w-[4rem] bg-transparent text-right outline-none"
               />
-              <span className="ml-[1px] mt-[2px] mr-[2px] block">%</span>
+              <span className="ml-[1px] mr-[2px] block">%</span>
             </div>
           </div>
         </DropdownMenuInner>

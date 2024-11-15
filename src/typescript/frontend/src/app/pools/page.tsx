@@ -1,6 +1,4 @@
 import ClientPoolsPage, { type PoolsData } from "components/pages/pools/ClientPoolsPage";
-import { headers } from "next/headers";
-import { isUserGeoblocked } from "utils/geolocation";
 import { getPoolData } from "./api/getPoolDataQuery";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { symbolBytesToEmojis } from "@sdk/emoji_data/utils";
@@ -26,7 +24,5 @@ export default async function PoolsPage({ searchParams }: { searchParams: { pool
     )
   );
 
-  // Call this last because `headers()` is a dynamic API and all fetches after this aren't cached.
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
-  return <ClientPoolsPage geoblocked={geoblocked} initialData={initialData} />;
+  return <ClientPoolsPage initialData={initialData} />;
 }
