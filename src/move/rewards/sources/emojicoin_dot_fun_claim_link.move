@@ -33,6 +33,10 @@ module rewards::emojicoin_dot_fun_claim_link {
     const E_INVALID_PUBLIC_KEY: u64 = 5;
     /// Signature does not pass Ed25519 validation.
     const E_INVALID_SIGNATURE: u64 = 6;
+    /// Admin to remove is rewards publisher.
+    const E_ADMIN_TO_REMOVE_IS_REWARDS_PUBLISHER: u64 = 7;
+    /// Admin is already an admin.
+    const E_ALREADY_ADMIN: u64 = 8;
 
     struct Vault has key {
         /// Addresses of signers who can mutate the manifest.
@@ -105,6 +109,7 @@ module rewards::emojicoin_dot_fun_claim_link {
 
     public entry fun add_admin(admin: &signer, new_admin: address) acquires Vault {
         let admins_ref_mut = &mut borrow_vault_mut_checked(admin).admins;
+        assert!(!admins_ref_mut.contains(&new_admin), E_ALREADY_ADMIN);
         admins_ref_mut.push_back(new_admin);
     }
 
@@ -204,6 +209,7 @@ module rewards::emojicoin_dot_fun_claim_link {
         let admins_ref_mut = &mut borrow_vault_mut_checked(admin).admins;
         let (admin_to_remove_is_admin, admin_to_remove_index) =
             admins_ref_mut.index_of(&admin_to_remove);
+        assert!(admin_to_remove != @rewards, E_ADMIN_TO_REMOVE_IS_REWARDS_PUBLISHER);
         assert!(admin_to_remove_is_admin, E_ADMIN_TO_REMOVE_IS_NOT_ADMIN);
         admins_ref_mut.remove(admin_to_remove_index);
     }
@@ -285,9 +291,30 @@ module rewards::emojicoin_dot_fun_claim_link {
         let claim_link_validated_public_key_bytes =
             ed25519::validated_public_key_to_bytes(&claim_link_validated_public_key);
 
-        // Initialize module, manifest, vault.
+        // Initialize module.
         let rewards_signer = get_signer(@rewards);
         init_module(&rewards_signer);
+
+        // Check initial state.
+        assert!(admins() == vector[@rewards]);
+        assert!(claim_amount() == DEFAULT_CLAIM_AMOUNT);
+        assert!(!public_key_is_in_manifest(claim_link_validated_public_key_bytes));
+        assert!(public_keys().is_empty());
+        let (keys, starting_bucket_index, starting_vector_index) =
+            public_keys_paginated(0, 0, 1);
+        assert!(keys == vector[]);
+        assert!(starting_bucket_index == option::none());
+        assert!(starting_vector_index == option::none());
+        assert!(manifest_to_simple_map().length() == 0);
+        assert!(vault_balance() == 0);
+        assert!(
+            vault_signer_address()
+                == account::get_signer_capability_address(
+                    &Vault[@rewards].signer_capability
+                )
+        );
+
+        // Add an admin, public key, mint APT, fund vault.
         add_public_keys(
             &rewards_signer,
             vector[claim_link_validated_public_key_bytes]
@@ -297,13 +324,65 @@ module rewards::emojicoin_dot_fun_claim_link {
         );
         let n_redemptions = 1;
         fund_vault(&rewards_signer, n_redemptions);
+        let new_admin = @0x2222;
+        add_admin(&rewards_signer, new_admin);
+
+        // Check new state.
+        assert!(admins() == vector[@rewards, new_admin]);
+        assert!(claim_amount() == DEFAULT_CLAIM_AMOUNT);
+        assert!(public_key_is_in_manifest(claim_link_validated_public_key_bytes));
+        assert!(
+            manifest_to_simple_map().keys() == vector[claim_link_validated_public_key]
+        );
+        assert!(public_key_claimant(claim_link_validated_public_key_bytes) == NIL);
+        (keys, starting_bucket_index, starting_vector_index) = public_keys_paginated(
+            0, 0, 1
+        );
+        assert!(keys == vector[claim_link_validated_public_key]);
+        assert!(starting_bucket_index == option::none());
+        assert!(starting_vector_index == option::none());
+        assert!(
+            manifest_to_simple_map().keys() == vector[claim_link_validated_public_key]
+        );
+        assert!(vault_balance() == DEFAULT_CLAIM_AMOUNT);
+
+        // Fund another reward, double claim amount, fund another reward, remove admin, withdraw.
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, 3 * DEFAULT_CLAIM_AMOUNT
+        );
+        fund_vault(&rewards_signer, 1);
+        set_claim_amount(&rewards_signer, 2 * DEFAULT_CLAIM_AMOUNT);
+        fund_vault(&rewards_signer, 1);
+        remove_admin(&rewards_signer, new_admin);
+        withdraw_from_vault(&rewards_signer, 2 * DEFAULT_CLAIM_AMOUNT);
+
+        // Verify new state.
+        assert!(admins() == vector[@rewards]);
+        assert!(claim_amount() == 2 * DEFAULT_CLAIM_AMOUNT);
+        assert!(vault_balance() == 2 * DEFAULT_CLAIM_AMOUNT);
+        assert!(
+            coin::balance<AptosCoin>(@rewards) == 2 * DEFAULT_CLAIM_AMOUNT
+        );
+
+        // Verify that public key can be removed and re-added.
+        remove_public_keys(
+            &rewards_signer,
+            vector[claim_link_validated_public_key_bytes]
+        );
+        assert!(!public_key_is_in_manifest(claim_link_validated_public_key_bytes));
+        add_public_keys(
+            &rewards_signer,
+            vector[claim_link_validated_public_key_bytes]
+        );
+        assert!(public_key_is_in_manifest(claim_link_validated_public_key_bytes));
+        assert!(public_key_claimant(claim_link_validated_public_key_bytes) == NIL);
 
         // Get expected proceeds from swap.
         let swap_event =
             emojicoin_dot_fun::simulate_swap<BlackCatEmojicoin, BlackCatEmojicoinLP>(
                 CLAIMANT,
                 @black_cat_market,
-                DEFAULT_CLAIM_AMOUNT,
+                2 * DEFAULT_CLAIM_AMOUNT,
                 false,
                 @integrator,
                 INTEGRATOR_FEE_RATE_BPS
@@ -332,5 +411,115 @@ module rewards::emojicoin_dot_fun_claim_link {
         assert!(vault_balance() == 0);
         assert!(public_key_claimant(claim_link_validated_public_key_bytes) == CLAIMANT);
 
+        // Verify that public key entry can no longer be removed.
+        remove_public_keys(
+            &rewards_signer,
+            vector[claim_link_validated_public_key_bytes]
+        );
+        assert!(public_key_is_in_manifest(claim_link_validated_public_key_bytes));
+
+    }
+
+    #[test, expected_failure(abort_code = E_ALREADY_ADMIN)]
+    fun test_add_admin_already_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        add_admin(&rewards_signer, @rewards);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_add_admin_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin = @0x2222;
+        let not_admin_signer = get_signer(not_admin);
+        assert!(&rewards_signer != &not_admin_signer);
+        add_admin(&not_admin_signer, not_admin);
+    }
+
+    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
+    fun test_add_public_keys_invalid_public_key() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        add_public_keys(&rewards_signer, vector[vector[0x0]]);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_add_public_keys_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin_signer = get_signer(@0x2222);
+        assert!(&rewards_signer != &not_admin_signer);
+        add_public_keys(&not_admin_signer, vector[]);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_remove_admin_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin = @0x2222;
+        assert!(not_admin != @rewards);
+        remove_admin(&get_signer(not_admin), @rewards);
+    }
+
+    #[test, expected_failure(abort_code = E_ADMIN_TO_REMOVE_IS_NOT_ADMIN)]
+    fun test_remove_admin_admin_to_remove_is_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin = @0x2222;
+        assert!(not_admin != @rewards);
+        remove_admin(&rewards_signer, not_admin);
+    }
+
+    #[test, expected_failure(abort_code = E_ADMIN_TO_REMOVE_IS_REWARDS_PUBLISHER)]
+    fun test_remove_admin_admin_to_remove_is_rewards_publisher() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        remove_admin(&rewards_signer, @rewards);
+    }
+
+    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
+    fun test_remove_public_keys_invalid_public_key() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        remove_public_keys(&rewards_signer, vector[vector[0x0]]);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_remove_public_keys_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin_signer = get_signer(@0x2222);
+        assert!(&rewards_signer != &not_admin_signer);
+        remove_public_keys(&not_admin_signer, vector[]);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_set_claim_amount_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin_signer = get_signer(@0x2222);
+        assert!(&not_admin_signer != &rewards_signer);
+        set_claim_amount(&not_admin_signer, 1);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun withdraw_from_vault_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin_signer = get_signer(@0x2222);
+        assert!(&not_admin_signer != &rewards_signer);
+        withdraw_from_vault(&not_admin_signer, 1);
     }
 }
