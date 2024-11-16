@@ -25,9 +25,14 @@ jobs:
         context: 'src/rust'
         file: 'src/rust/broker/Dockerfile'
         labels: '${{ steps.metadata.outputs.labels }}'
-        platforms: '${{ vars.DOCKER_IMAGE_PLATFORMS }}'
+        platforms: '${{ matrix.platform }}'
         push: 'true'
         tags: '${{ steps.metadata.outputs.tags }}'
+    strategy:
+      matrix:
+        platform:
+        - 'linux/amd64'
+        - 'linux/arm64'
     timeout-minutes: 360
 name: 'Build broker Docker image and push to Docker Hub'
 'on':
