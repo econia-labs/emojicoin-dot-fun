@@ -11,7 +11,6 @@ module.exports = {
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
-    "prettier",
   ],
   globals: {
     JSX: true,
@@ -39,9 +38,8 @@ module.exports = {
     project: ["tsconfig.json", "tests/tsconfig.json"],
     warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "import", "prettier"],
+  plugins: ["@typescript-eslint", "import"],
   rules: {
-    "prettier/prettier": ["error"],
     "import/no-cycle": [
       "error",
       {
