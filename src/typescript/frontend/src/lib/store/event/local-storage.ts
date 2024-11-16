@@ -29,9 +29,9 @@ export const updateLocalStorage = (key: EventLocalStorageKey, event: AnyEventMod
 export const cleanReadLocalStorage = (key: EventLocalStorageKey) => {
   const str = localStorage.getItem(key) ?? "[]";
   const data: AnyEventModel[] = parseJSON(str);
-  const relevants = data.filter(shouldKeep);
-  localStorage.setItem(key, stringifyJSON(relevants));
-  return relevants;
+  const relevantItems = data.filter(shouldKeep);
+  localStorage.setItem(key, stringifyJSON(relevantItems));
+  return relevantItems;
 };
 
 export const clearLocalStorage = (key: EventLocalStorageKey) => {
