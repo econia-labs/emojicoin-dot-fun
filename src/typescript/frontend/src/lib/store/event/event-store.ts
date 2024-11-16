@@ -18,16 +18,22 @@ import {
   handleLatestBarForSwapEvent,
   pushPeriodicStateEvents,
   toMappedMarketEvents,
+  initialState,
 } from "./utils";
-import { initialStatePatch } from "./local-storage";
 import { periodEnumToRawDuration } from "@sdk/const";
 import { createWebSocketClientStore, type WebSocketClientStore } from "../websocket/store";
 import { DEBUG_ASSERT, extractFilter } from "@sdk/utils";
+import {
+  updateLocalStorage,
+  cleanReadLocalStorage,
+  clearLocalStorage,
+  LOCAL_STORAGE_EVENT_TYPES,
+} from "./local-storage";
 
 export const createEventStore = () => {
-  return createStore<EventStore & WebSocketClientStore>()(
+  const store = createStore<EventStore & WebSocketClientStore>()(
     immer((set, get) => ({
-      ...initialStatePatch(),
+      ...initialState(),
       getMarket: (emojis) => get().markets.get(emojis.join("")),
       getRegisteredMarkets: () => {
         return get().markets;
@@ -77,7 +83,7 @@ export const createEventStore = () => {
           });
         });
       },
-      pushEventFromClient: (event: AnyEventModel) => {
+      pushEventFromClient: (event: AnyEventModel, pushToLocalStorage = false) => {
         if (get().guids.has(event.guid)) return;
         set((state) => {
           state.guids.add(event.guid);
@@ -91,17 +97,32 @@ export const createEventStore = () => {
             if (isSwapEventModel(event)) {
               market.swapEvents.unshift(event);
               handleLatestBarForSwapEvent(market, event);
+              if (pushToLocalStorage) {
+                updateLocalStorage("swap", event);
+              }
             } else if (isChatEventModel(event)) {
               market.chatEvents.unshift(event);
+              if (pushToLocalStorage) {
+                updateLocalStorage("chat", event);
+              }
             } else if (isLiquidityEventModel(event)) {
               market.liquidityEvents.unshift(event);
+              if (pushToLocalStorage) {
+                updateLocalStorage("liquidity", event);
+              }
             } else if (isMarketLatestStateEventModel(event)) {
               market.stateEvents.unshift(event);
               state.stateFirehose.unshift(event);
+              if (pushToLocalStorage) {
+                updateLocalStorage("market", event);
+              }
             } else if (isPeriodicStateEventModel(event)) {
               const period = periodEnumToRawDuration(event.periodicMetadata.period);
               market[period].candlesticks.unshift(event);
               handleLatestBarForPeriodicStateEvent(market, event);
+              if (pushToLocalStorage) {
+                updateLocalStorage("periodic", event);
+              }
             }
           }
         });
@@ -146,4 +167,18 @@ export const createEventStore = () => {
       ...createWebSocketClientStore(set, get),
     }))
   );
+
+  const state = store.getState();
+  for (const eventType of LOCAL_STORAGE_EVENT_TYPES) {
+    try {
+      const events = cleanReadLocalStorage(eventType);
+      for (const event of events) {
+        state.pushEventFromClient(event);
+      }
+    } catch (e) {
+      console.error(e);
+      clearLocalStorage(eventType);
+    }
+  }
+  return store;
 };
