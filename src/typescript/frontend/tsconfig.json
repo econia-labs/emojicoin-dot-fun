@@ -69,6 +69,6 @@
     "./src/**/*.ts",
     "./src/**/*.tsx",
     ".next/types/**/*.ts",
-    "./dist/types/**/*.ts",
+    "./dist/types/**/*.ts"
   ]
 }
