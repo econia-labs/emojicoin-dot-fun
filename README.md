@@ -27,6 +27,69 @@ The process is as simple as merging feature branches to `main` first to trigger
 CI/CD checks, and then once it's merged into `main`, merging or [cherry-picking]
 a subset of the new features into the `production` branch.
 
+If you don't have a production branch yet, simply run the following:
+
+1. `git checkout main && git pull origin main`
+1. `git checkout -b production`
+1. `git push origin production`
+
+Now a production branch exists.
+
+To merge new changes from `main` after `production` already exists, you can
+create a PR that merges all new changes in `main` into `production`.
+
+### Cherry-picking strategy
+
+It's possible to preserve the linear history of `main` when merging into
+`production` while still squashing the commits. This process looks like the
+following:
+
+```shell
+# Make sure `main` is up to date in your local environment.
+git checkout main && git pull origin main
+
+# Do the same for `production`.
+git checkout production && git pull origin production
+
+# Create a branch to make a PR to cherry-pick new changes from main into
+# production with.
+git checkout -b merge-main-to-prod
+```
+
+Now find the last commit that `main` and `production` share. If the commit
+history looks like this:
+
+```yaml
+- main:
+  - 06eadf3
+  - 05eacbd
+  - 04de8fb # Squashed into the last commit `ff382ba` in `production`.
+  - 03aebcd # Squashed into the last commit `ff382ba` in `production`.
+  - 02abde4 # Common ancestor.
+  - 01ebadc
+- production:
+  - ff382ba # Commit that previously squashed `03..` + `04..` into `production`.
+  - 02abde4 # Common ancestor.
+  - 01ebadc
+```
+
+Then the last commit they share (the common ancestor) is `02abde4`.
+
+Thus you should run:
+
+```shell
+# Cherry-pick all commits from `02abde4..06eadf3` into `production`.
+git cherry-pick 02abde4..06eadf3
+
+# Push to the new branch.
+git push origin merge-main-to-prod
+```
+
+Now you can make a PR to merge main to production with the `merge-main-to-prod`
+branch!
+
+### Environment variables
+
 You can set in Vercel project settings the production branch. By default, this
 is `main`, however you can use the `production` branch to separate staging
 environments from the release (aka production) environment.
