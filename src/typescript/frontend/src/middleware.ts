@@ -21,10 +21,9 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!IS_ALLOWLIST_ENABLED) {
-    return NextResponse.next();
-  }
-
+  // This will replace emojis in the path name with their actual text names. Since this occurs
+  // before the allowlist check, it will redirect the user to the pure text version of their path
+  // but then still require them to verify after.
   const possibleMarketPath = normalizePossibleMarketPath(pathname, request.url);
   if (possibleMarketPath) {
     return NextResponse.redirect(possibleMarketPath);
