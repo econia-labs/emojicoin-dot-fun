@@ -749,12 +749,12 @@ module rewards::emojicoin_dot_fun_claim_link {
             vector[claim_link_validated_public_key_bytes]
         );
         assert!(public_key_claimant(claim_link_validated_public_key_bytes) == option::some(CLAIMANT));
-        /*
 
         // Verify silent return for trying to remove public key that is not eligible.
         let (_, new_public_key) = ed25519::generate_keys();
         let new_public_key_bytes = ed25519::validated_public_key_to_bytes(&new_public_key);
         remove_public_keys(&rewards_signer, vector[new_public_key_bytes]);
+        /*
         assert!(public_key_claimant(new_public_key_bytes) == option::none());
         assert!(!public_key_is_eligible(new_public_key_bytes));
         */
