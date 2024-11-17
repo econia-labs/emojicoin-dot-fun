@@ -584,8 +584,6 @@ module rewards::emojicoin_dot_fun_claim_link {
         let (claim_link_private_key, claim_link_validated_public_key) = ed25519::generate_keys();
         let claim_link_validated_public_key_bytes =
             ed25519::validated_public_key_to_bytes(&claim_link_validated_public_key);
-        let invalid_public_key_bytes = claim_link_validated_public_key_bytes;
-        invalid_public_key_bytes[0] = invalid_public_key_bytes[0] ^ 0xff;
 
         // Initialize module.
         let rewards_signer = get_signer(@rewards);
@@ -595,9 +593,9 @@ module rewards::emojicoin_dot_fun_claim_link {
         assert!(admins() == vector[@rewards]);
         assert!(claim_amount() == DEFAULT_CLAIM_AMOUNT);
         assert!(!public_key_is_eligible(claim_link_validated_public_key_bytes));
-        assert!(!public_key_is_eligible(invalid_public_key_bytes));
+        assert!(!public_key_is_eligible(vector[0]));
         assert!(public_key_claimant(claim_link_validated_public_key_bytes) == option::none());
-        assert!(public_key_claimant(invalid_public_key_bytes) == option::none());
+        assert!(public_key_claimant(vector[0]) == option::none());
         assert!(public_keys_that_are_claimed().is_empty());
         assert!(public_keys_that_are_eligible().is_empty());
         let (keys, starting_bucket_index, starting_vector_index) =
@@ -644,7 +642,7 @@ module rewards::emojicoin_dot_fun_claim_link {
                 == option::none()
         );
         assert!(public_key_claimant(claim_link_validated_public_key_bytes) == option::none());
-        assert!(public_key_claimant(invalid_public_key_bytes) == option::none());
+        assert!(public_key_claimant(vector[0]) == option::none());
         assert!(
             public_keys_that_are_eligible() == vector[claim_link_validated_public_key]
         );
