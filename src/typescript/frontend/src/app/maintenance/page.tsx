@@ -4,5 +4,5 @@ import React from "react";
 import Maintenance from "./component";
 
 export default function MaintenancePage() {
-  return <Maintenance />
+  return <Maintenance />;
 }
