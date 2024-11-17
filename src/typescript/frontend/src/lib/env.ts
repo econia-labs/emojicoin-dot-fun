@@ -1,4 +1,4 @@
-import { type Network } from "@aptos-labs/wallet-adapter-react";
+import { Network } from "@aptos-labs/ts-sdk";
 import packageInfo from "../../package.json";
 import { parse } from "semver";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
@@ -15,6 +15,12 @@ let APTOS_NETWORK: Network;
 let INTEGRATOR_ADDRESS: AccountAddressString;
 let INTEGRATOR_FEE_RATE_BPS: number;
 let BROKER_URL: string;
+
+/**
+ * Per the API gateway docs, it's actually okay to provide this API key client-side.
+ * @see {@link https://developers.aptoslabs.com/docs/api-access#application-types}
+ */
+let APTOS_API_KEY: string | undefined;
 
 export const LINKS: Links | undefined =
   typeof process.env.NEXT_PUBLIC_LINKS === "string" && process.env.NEXT_PUBLIC_LINKS !== ""
@@ -52,6 +58,18 @@ if (process.env.NEXT_PUBLIC_BROKER_URL) {
   throw new Error("Environment variable NEXT_PUBLIC_BROKER_URL is undefined.");
 }
 
+/**
+ * @see APTOS_API_KEY
+ */
+if (process.env.NEXT_PUBLIC_APTOS_API_KEY) {
+  APTOS_API_KEY = process.env.NEXT_PUBLIC_APTOS_API_KEY;
+} else {
+  if (APTOS_NETWORK === Network.MAINNET) {
+    throw new Error("You must provide an API key for the mainnet version of this deployment.");
+  }
+  console.warn("Environment variable APTOS_API_KEY is undefined.");
+}
+
 const VERSION = parse(packageInfo.version);
 
 export {
@@ -61,4 +79,5 @@ export {
   IS_ALLOWLIST_ENABLED,
   BROKER_URL,
   VERSION,
+  APTOS_API_KEY,
 };
