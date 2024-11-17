@@ -424,6 +424,30 @@ module rewards::emojicoin_dot_fun_claim_link {
         add_admin(&not_admin_signer, not_admin);
     }
 
+    #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_CLAIMED)]
+    fun test_add_public_keys_claim_link_already_claimed() acquires Vault {
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
+        redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(CLAIMANT),
+            signature_bytes,
+            claim_link_validated_public_key_bytes,
+            @black_cat_market,
+            1
+        );
+        add_public_keys(
+            &get_signer(@rewards), vector[claim_link_validated_public_key_bytes]
+        );
+    }
+
+    #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_ELIGIBLE)]
+    fun test_add_public_keys_claim_link_already_eligible() acquires Vault {
+        let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        add_public_keys(
+            &get_signer(@rewards), vector[claim_link_validated_public_key_bytes]
+        );
+    }
+
     #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
     fun test_add_public_keys_invalid_public_key() acquires Vault {
         emojicoin_dot_fun::tests::init_package();
@@ -494,6 +518,42 @@ module rewards::emojicoin_dot_fun_claim_link {
         );
         assert!(coin::balance<AptosCoin>(@rewards) == 0);
 
+    }
+
+    #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_CLAIMED)]
+    fun test_add_public_keys_and_fund_gas_escrows_claim_link_already_claimed() acquires Vault {
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
+        redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(CLAIMANT),
+            signature_bytes,
+            claim_link_validated_public_key_bytes,
+            @black_cat_market,
+            1
+        );
+        let amount_per_escrow = 1;
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, amount_per_escrow
+        );
+        add_public_keys_and_fund_gas_escrows(
+            &get_signer(@rewards),
+            vector[claim_link_validated_public_key_bytes],
+            amount_per_escrow
+        );
+    }
+
+    #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_ELIGIBLE)]
+    fun test_add_public_keys_and_fund_gas_escrows_claim_link_already_eligible() acquires Vault {
+        let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        let amount_per_escrow = 1;
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, amount_per_escrow
+        );
+        add_public_keys_and_fund_gas_escrows(
+            &get_signer(@rewards),
+            vector[claim_link_validated_public_key_bytes],
+            amount_per_escrow
+        );
     }
 
     #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
