@@ -34,6 +34,7 @@ export default function GenerateQRCode(props: PageProps) {
   return (
     <div className="h-[100%] w-[100%] grid items-center">
       <div className="m-auto">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img alt="QR Code" className="m-auto w-[90vw] max-w-[40vh]" src={qrCode} />
       </div>
     </div>
