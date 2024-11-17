@@ -17,7 +17,7 @@
     "keyv": "npm:@keyvhq/core@2.1.1"
   },
   "scripts": {
-    "build": "pnpm i && pnpm load-env:test -- turbo run build",
+    "build": "pnpm i && pnpm load-env -- turbo run build",
     "build:debug": "pnpm i && pnpm load-env:test -- turbo run build:debug",
     "build:no-checks": "pnpm i && pnpm load-env:test -- turbo run build:no-checks",
     "check": "turbo run check",

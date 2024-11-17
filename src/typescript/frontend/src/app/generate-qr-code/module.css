@@ -1,0 +1,4 @@
+textarea::placeholder {
+  color: var(--ec-blue);
+  opacity: 0.5; /* Firefox */
+}

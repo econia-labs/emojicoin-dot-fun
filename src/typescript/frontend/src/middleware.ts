@@ -21,6 +21,14 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (/^\/generate-qr-code.*$/.test(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (/^\/redeem.*$/.test(pathname)) {
+    return NextResponse.next();
+  }
+
   if (!IS_ALLOWLIST_ENABLED) {
     return NextResponse.next();
   }
