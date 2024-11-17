@@ -743,13 +743,13 @@ module rewards::emojicoin_dot_fun_claim_link {
             public_keys_that_are_claimed_to_simple_map().values() == vector[CLAIMANT]
         );
 
-        /*
         // Verify that public key entry can no longer be removed.
         remove_public_keys(
             &rewards_signer,
             vector[claim_link_validated_public_key_bytes]
         );
         assert!(public_key_claimant(claim_link_validated_public_key_bytes) == option::some(CLAIMANT));
+        /*
 
         // Verify silent return for trying to remove public key that is not eligible.
         let (_, new_public_key) = ed25519::generate_keys();
