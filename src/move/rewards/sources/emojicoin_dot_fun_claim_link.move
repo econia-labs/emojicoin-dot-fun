@@ -723,7 +723,6 @@ module rewards::emojicoin_dot_fun_claim_link {
         // Verify claimant's emojicoin balance.
         assert!(coin::balance<BlackCatEmojicoin>(CLAIMANT) == net_proceeds);
 
-        /*
         // Check vault balance, state.
         assert!(vault_balance() == 0);
         assert!(
@@ -736,6 +735,7 @@ module rewards::emojicoin_dot_fun_claim_link {
         assert!(keys == vector[claim_link_validated_public_key]);
         assert!(starting_bucket_index == option::none());
         assert!(starting_vector_index == option::none());
+        /*
         assert!(
             public_keys_that_are_claimed_to_simple_map().keys()
                 == vector[claim_link_validated_public_key]
