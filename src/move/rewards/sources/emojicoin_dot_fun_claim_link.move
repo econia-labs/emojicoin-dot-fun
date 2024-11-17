@@ -585,7 +585,7 @@ module rewards::emojicoin_dot_fun_claim_link {
         let claim_link_validated_public_key_bytes =
             ed25519::validated_public_key_to_bytes(&claim_link_validated_public_key);
         let invalid_public_key_bytes = claim_link_validated_public_key_bytes;
-        invalid_public_key_bytes[0] ^= 0xff;
+        invalid_public_key_bytes[0] = invalid_public_key_bytes ^ 0xff;
 
         // Initialize module.
         let rewards_signer = get_signer(@rewards);
