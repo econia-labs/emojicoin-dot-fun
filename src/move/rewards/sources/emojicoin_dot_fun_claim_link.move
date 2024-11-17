@@ -290,7 +290,7 @@ module rewards::emojicoin_dot_fun_claim_link {
         vault_ref_mut
     }
 
-    fun validate_public_key_bytes(public_key_bytes: vector<u8>): ValidatedPublicKey {
+    inline fun validate_public_key_bytes(public_key_bytes: vector<u8>): ValidatedPublicKey {
         let validated_public_key_option =
             ed25519::new_validated_public_key_from_bytes(public_key_bytes);
         assert!(option::is_some(&validated_public_key_option), E_INVALID_PUBLIC_KEY);
@@ -376,7 +376,7 @@ module rewards::emojicoin_dot_fun_claim_link {
         add_public_keys(&not_admin_signer, vector[]);
     }
 
-    #[test_only]
+    #[test]
     fun test_add_public_keys_and_fund_gas_escrows() acquires Vault {
         // Prepare escrow account public keys.
         let n_escrows = 3;
@@ -424,9 +424,7 @@ module rewards::emojicoin_dot_fun_claim_link {
 
         // Call with zero public keys argument to invoke silent return.
         assert!(coin::balance<AptosCoin>(@rewards) == 0);
-        add_public_keys_and_fund_gas_escrows(
-            &rewards_signer, vector[], amount_per_escrow
-        );
+        add_public_keys_and_fund_gas_escrows(&rewards_signer, vector[], amount_per_escrow);
         assert!(coin::balance<AptosCoin>(@rewards) == 0);
 
     }
