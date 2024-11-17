@@ -8,6 +8,7 @@ module rewards::emojicoin_dot_fun_claim_link {
     use aptos_framework::coin;
     use aptos_framework::event;
     use aptos_std::ed25519::{Self, ValidatedPublicKey};
+    use aptos_std::from_bcs;
     use aptos_std::simple_map::SimpleMap;
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
@@ -118,9 +119,35 @@ module rewards::emojicoin_dot_fun_claim_link {
         admin: &signer, public_keys_as_bytes: vector<vector<u8>>
     ) acquires Vault {
         let manifest_ref_mut = &mut borrow_vault_mut_checked(admin).manifest;
-        public_keys_as_bytes.for_each(|public_key_bytes| {
-            manifest_ref_mut.add(validate_public_key_bytes(public_key_bytes), NIL);
+        public_keys_as_bytes.for_each_ref(|public_key_bytes_ref| {
+            manifest_ref_mut.add(validate_public_key_bytes(*public_key_bytes_ref), NIL);
         });
+    }
+
+    public entry fun add_public_keys_and_fund_gas_escrows(
+        admin: &signer, public_keys_as_bytes: vector<vector<u8>>, amount_per_escrow: u64
+    ) acquires Vault {
+        let manifest_ref_mut = &mut borrow_vault_mut_checked(admin).manifest;
+        let coins =
+            coin::withdraw<AptosCoin>(
+                admin, public_keys_as_bytes.length() * amount_per_escrow
+            );
+        let validated_public_key;
+        public_keys_as_bytes.for_each_ref(
+            |public_key_bytes_ref| {
+                validated_public_key = validate_public_key_bytes(*public_key_bytes_ref);
+                manifest_ref_mut.add(validated_public_key, NIL);
+                aptos_account::deposit_coins(
+                    from_bcs::to_address(
+                        ed25519::validated_public_key_to_authentication_key(
+                            &validated_public_key
+                        )
+                    ),
+                    coin::extract(&mut coins, amount_per_escrow)
+                )
+            }
+        );
+        coin::destroy_zero(coins);
     }
 
     public entry fun fund_vault(funder: &signer, n_claims: u64) acquires Vault {
@@ -219,8 +246,8 @@ module rewards::emojicoin_dot_fun_claim_link {
         admin: &signer, public_keys_as_bytes: vector<vector<u8>>
     ) acquires Vault {
         let manifest_ref_mut = &mut borrow_vault_mut_checked(admin).manifest;
-        public_keys_as_bytes.for_each(|public_key_bytes| {
-            let validated_public_key = validate_public_key_bytes(public_key_bytes);
+        public_keys_as_bytes.for_each_ref(|public_key_bytes_ref| {
+            let validated_public_key = validate_public_key_bytes(*public_key_bytes_ref);
             if (manifest_ref_mut.contains(validated_public_key)
                 && *manifest_ref_mut.borrow(validated_public_key) == NIL) {
                 manifest_ref_mut.remove(validated_public_key);
@@ -263,7 +290,7 @@ module rewards::emojicoin_dot_fun_claim_link {
         vault_ref_mut
     }
 
-    inline fun validate_public_key_bytes(public_key_bytes: vector<u8>): ValidatedPublicKey {
+    fun validate_public_key_bytes(public_key_bytes: vector<u8>): ValidatedPublicKey {
         let validated_public_key_option =
             ed25519::new_validated_public_key_from_bytes(public_key_bytes);
         assert!(option::is_some(&validated_public_key_option), E_INVALID_PUBLIC_KEY);
@@ -347,6 +374,80 @@ module rewards::emojicoin_dot_fun_claim_link {
         let not_admin_signer = get_signer(@0x2222);
         assert!(&rewards_signer != &not_admin_signer);
         add_public_keys(&not_admin_signer, vector[]);
+    }
+
+    #[test_only]
+    fun test_add_public_keys_and_fund_gas_escrows() acquires Vault {
+        // Prepare escrow account public keys.
+        let n_escrows = 3;
+        let amount_per_escrow = 2;
+        let escrow_account_public_keys = vector[];
+        let escrow_account_public_key_bytes = vector[];
+        let validated_public_key;
+        for (i in 0..n_escrows) {
+            (_, validated_public_key) = ed25519::generate_keys();
+            escrow_account_public_key_bytes.push_back(
+                ed25519::validated_public_key_to_bytes(&validated_public_key)
+            );
+            escrow_account_public_keys.push_back(validated_public_key);
+        };
+
+        // Init packages.
+        emojicoin_dot_fun::tests::init_package_then_exact_transition();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+
+        // Fund escrows.
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, n_escrows * amount_per_escrow
+        );
+        add_public_keys_and_fund_gas_escrows(
+            &rewards_signer, escrow_account_public_key_bytes, amount_per_escrow
+        );
+
+        // Verify state.
+        let public_key_bytes;
+        escrow_account_public_key_bytes.for_each_ref(|public_key_bytes_ref| {
+            public_key_bytes = *public_key_bytes_ref;
+            assert!(public_key_is_in_manifest(public_key_bytes));
+            assert!(public_key_claimant(public_key_bytes) == NIL);
+        });
+        escrow_account_public_keys.for_each_ref(|public_key_ref| {
+            assert!(
+                coin::balance<AptosCoin>(
+                    from_bcs::to_address(
+                        ed25519::validated_public_key_to_authentication_key(public_key_ref)
+                    )
+                ) == amount_per_escrow
+            );
+        });
+
+        // Call with zero public keys argument to invoke silent return.
+        assert!(coin::balance<AptosCoin>(@rewards) == 0);
+        add_public_keys_and_fund_gas_escrows(
+            &rewards_signer, vector[], amount_per_escrow
+        );
+        assert!(coin::balance<AptosCoin>(@rewards) == 0);
+
+    }
+
+    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
+    fun test_add_public_keys_and_fund_gas_escrows_invalid_public_key() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(@rewards, 1);
+        init_module(&rewards_signer);
+        add_public_keys_and_fund_gas_escrows(&rewards_signer, vector[vector[0x0]], 1);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_add_public_keys_and_fund_gas_escrows_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin_signer = get_signer(@0x2222);
+        assert!(&rewards_signer != &not_admin_signer);
+        add_public_keys_and_fund_gas_escrows(&not_admin_signer, vector[], 1);
     }
 
     #[test]
