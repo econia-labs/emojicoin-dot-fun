@@ -4,6 +4,7 @@ import type { fetchPriceFeed } from "@/queries/home";
 import Link from "next/link";
 import Carousel from "components/carousel";
 import { Emoji } from "utils/emoji";
+import { useUserSettings } from "context/event-store-context";
 
 const Item = ({ emoji, change }: { emoji: string; change: number }) => {
   return (
@@ -21,7 +22,8 @@ const Item = ({ emoji, change }: { emoji: string; change: number }) => {
 };
 
 export const PriceFeedInner = ({ data }: { data: Awaited<ReturnType<typeof fetchPriceFeed>> }) => {
-  return (
+  const code = useUserSettings((s) => s.code);
+  return code === undefined ? (
     <div className="w-full z-[10] relative">
       <Carousel>
         {data!.map((itemData, i) => (
@@ -33,5 +35,7 @@ export const PriceFeedInner = ({ data }: { data: Awaited<ReturnType<typeof fetch
         ))}
       </Carousel>
     </div>
+  ) : (
+    <></>
   );
 };

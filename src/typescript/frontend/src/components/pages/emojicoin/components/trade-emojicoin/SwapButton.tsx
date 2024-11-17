@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
+import { useUserSettings } from "context/event-store-context";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -41,6 +42,8 @@ export const SwapButton = ({
   const { aptos, account, submit } = useAptos();
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
+
+  const _code = useUserSettings((s) => s.code);
 
   const handleClick = useCallback(async () => {
     if (!account) {

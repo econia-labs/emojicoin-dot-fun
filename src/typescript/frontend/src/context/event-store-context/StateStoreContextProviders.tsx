@@ -52,13 +52,12 @@ export const UserSettingsContext = createContext<StoreApi<UserSettingsStore> | n
 
 export interface UserSettingsProviderProps {
   children: ReactNode;
-  initialState?: UserSettingsStore;
 }
 
-export const UserSettingsProvider = ({ children, initialState }: UserSettingsProviderProps) => {
+export const UserSettingsProvider = ({ children }: UserSettingsProviderProps) => {
   const store = useRef<StoreApi<UserSettingsStore>>();
   if (!store.current) {
-    store.current = createUserSettingsStore(initialState);
+    store.current = createUserSettingsStore();
   }
   return (
     <UserSettingsContext.Provider value={store.current}>{children}</UserSettingsContext.Provider>

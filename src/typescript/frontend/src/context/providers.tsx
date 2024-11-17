@@ -28,6 +28,9 @@ import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
 import { isMobile, isTablet } from "react-device-detect";
+import { RewardsBanner } from "components/rewards-banner";
+import { GeoblockedBanner } from "components/geoblocking";
+import { HeaderSpacer } from "components/header-spacer";
 
 enableMapSet();
 
@@ -65,6 +68,9 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       <StyledToaster />
                       <ContentWrapper>
                         <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                        <HeaderSpacer />
+                        <GeoblockedBanner />
+                        <RewardsBanner />
                         {children}
                         <Footer />
                       </ContentWrapper>
