@@ -1,6 +1,6 @@
 ---
 parameters:
-  BrokerImageVersion: '0.9.1'
+  BrokerImageVersion: '1.0.0'
   DeployAlb: 'true'
   DeployAlbDnsRecord: 'true'
   DeployBastionHost: 'true'
@@ -20,7 +20,7 @@ parameters:
   EnableWafRulesWebSocket: 'false'
   Environment: 'production'
   Network: 'testnet'
-  ProcessorImageVersion: '0.9.1'
+  ProcessorImageVersion: '1.0.0'
   VpcStackName: 'emoji-vpc'
 tags: null
 template-file-path: 'src/cloud-formation/indexer.cfn.yaml'

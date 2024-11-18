@@ -66,7 +66,7 @@ const selectMarketState = ({ searchEmojis }: { searchEmojis: SymbolEmoji[] }) =>
     .select("*")
     .eq("symbol_emojis", toQueryArray(searchEmojis))
     .limit(1)
-    .single();
+    .maybeSingle();
 
 const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =>
   postgrest

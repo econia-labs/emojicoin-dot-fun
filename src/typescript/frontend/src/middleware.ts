@@ -3,6 +3,7 @@ import {
   COOKIE_FOR_HASHED_ADDRESS,
 } from "components/pages/verify/session-info";
 import { authenticate } from "components/pages/verify/verify";
+import { MAINTENANCE_MODE, PRE_LAUNCH_TEASER } from "lib/server-env";
 import { IS_ALLOWLIST_ENABLED } from "lib/env";
 import { NextResponse, type NextRequest } from "next/server";
 import { ROUTES } from "router/routes";
@@ -10,6 +11,15 @@ import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
+  if (pathname === "/launching") {
+    return NextResponse.next();
+  }
+  if (PRE_LAUNCH_TEASER && pathname !== "/launching") {
+    return NextResponse.redirect(new URL(ROUTES.launching, request.url));
+  }
+  if (MAINTENANCE_MODE && pathname !== "/maintenance") {
+    return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
+  }
   if (
     pathname === "/social-preview.png" ||
     pathname === "/webclip.png" ||
@@ -21,10 +31,9 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!IS_ALLOWLIST_ENABLED) {
-    return NextResponse.next();
-  }
-
+  // This will replace emojis in the path name with their actual text names. Since this occurs
+  // before the allowlist check, it will redirect the user to the pure text version of their path
+  // but then still require them to verify after.
   const possibleMarketPath = normalizePossibleMarketPath(pathname, request.url);
   if (possibleMarketPath) {
     return NextResponse.redirect(possibleMarketPath);

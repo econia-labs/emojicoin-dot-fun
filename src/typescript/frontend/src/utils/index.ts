@@ -13,12 +13,20 @@ export { isDisallowedEventKey } from "./check-is-disallowed-event-key";
 export { getEmptyListTr } from "./get-empty-list-tr";
 
 export const stringifyJSON = (data: object) =>
-  JSON.stringify(data, (_, value) => (typeof value === "bigint" ? value.toString() + "n" : value));
+  JSON.stringify(data, (_, value) => {
+    if (typeof value === "bigint") return value.toString() + "n";
+    return value;
+  });
 
 export const parseJSON = <T>(json: string): T =>
   JSON.parse(json, (_, value) => {
     if (typeof value === "string" && /^\d+n$/.test(value)) {
       return BigInt(value.substring(0, value.length - 1));
+    }
+    // This matches the below pattern: 1234-12-31T23:59:59.666Z
+    const dateRegex = /^\d{4}-\d{2}-\d2T\d{2}:\d{2}:\d{2}.\d*Z$/;
+    if (typeof value === "string" && dateRegex.test(value)) {
+      return new Date(value);
     }
     return value as T;
   });

@@ -162,3 +162,13 @@ export const toMappedMarketEvents = <T extends EventModelWithMarket>(events: Arr
   events.forEach((event) => map.get(event.market.symbolData.symbol)!.push(event));
   return map;
 };
+
+export const initialState = (): EventState => {
+  return {
+    guids: new Set<string>(),
+    stateFirehose: [],
+    marketRegistrations: [],
+    markets: new Map(),
+    globalStateEvents: [],
+  };
+};

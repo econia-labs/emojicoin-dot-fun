@@ -8,6 +8,7 @@ module rewards::emojicoin_dot_fun_claim_link {
     use aptos_framework::coin;
     use aptos_framework::event;
     use aptos_std::ed25519::{Self, ValidatedPublicKey};
+    use aptos_std::from_bcs;
     use aptos_std::simple_map::SimpleMap;
     use aptos_std::smart_table::{Self, SmartTable};
     use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
@@ -16,7 +17,6 @@ module rewards::emojicoin_dot_fun_claim_link {
     use std::signer;
 
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
-    const NIL: address = @0x0;
     const DEFAULT_CLAIM_AMOUNT: u64 = 100_000_000;
     const VAULT: vector<u8> = b"Claim link vault";
 
@@ -24,7 +24,7 @@ module rewards::emojicoin_dot_fun_claim_link {
     const E_NOT_ADMIN: u64 = 0;
     /// Admin to remove address does not correspond to admin.
     const E_ADMIN_TO_REMOVE_IS_NOT_ADMIN: u64 = 1;
-    /// Public key of claim link private key is not in manifest.
+    /// Public key of claim link private key is not eligible.
     const E_INVALID_CLAIM_LINK: u64 = 2;
     /// Claim link has already been claimed.
     const E_CLAIM_LINK_ALREADY_CLAIMED: u64 = 3;
@@ -38,14 +38,21 @@ module rewards::emojicoin_dot_fun_claim_link {
     const E_ADMIN_TO_REMOVE_IS_REWARDS_PUBLISHER: u64 = 7;
     /// Admin is already an admin.
     const E_ALREADY_ADMIN: u64 = 8;
+    /// Claim link is already eligible.
+    const E_CLAIM_LINK_ALREADY_ELIGIBLE: u64 = 9;
+
+    struct Nil {}
+    has copy, drop, store;
 
     struct Vault has key {
-        /// Addresses of signers who can mutate the manifest.
+        /// Addresses of signers who can mutate the vault.
         admins: vector<address>,
         /// In octas.
         claim_amount: u64,
-        /// Map from claim link public key to address of claimant, `NIL` if unclaimed.
-        manifest: SmartTable<ValidatedPublicKey, address>,
+        /// Eligible claim link public keys.
+        eligible: SmartTable<ValidatedPublicKey, Nil>,
+        /// Map from claim link public key to address of claimant.
+        claimed: SmartTable<ValidatedPublicKey, address>,
         /// Approves transfers from the vault.
         signer_capability: SignerCapability
     }
@@ -68,32 +75,65 @@ module rewards::emojicoin_dot_fun_claim_link {
     }
 
     #[view]
-    public fun public_key_is_in_manifest(public_key_bytes: vector<u8>): bool acquires Vault {
-        Vault[@rewards].manifest.contains(validate_public_key_bytes(public_key_bytes))
+    public fun public_key_claimant(public_key_bytes: vector<u8>): Option<address> acquires Vault {
+        let validated_public_key_option =
+            ed25519::new_validated_public_key_from_bytes(public_key_bytes);
+        if (option::is_some(&validated_public_key_option)) {
+            let validated_public_key = option::destroy_some(validated_public_key_option);
+            let claimed_ref = &Vault[@rewards].claimed;
+            if (claimed_ref.contains(validated_public_key)) {
+                option::some(*claimed_ref.borrow(validated_public_key))
+            } else {
+                option::none()
+            }
+        } else {
+            option::none()
+        }
     }
 
     #[view]
-    public fun public_key_claimant(public_key_bytes: vector<u8>): address acquires Vault {
-        *Vault[@rewards].manifest.borrow(validate_public_key_bytes(public_key_bytes))
+    public fun public_key_is_eligible(public_key_bytes: vector<u8>): bool acquires Vault {
+        let validated_public_key_option =
+            ed25519::new_validated_public_key_from_bytes(public_key_bytes);
+        if (option::is_some(&validated_public_key_option)) {
+            Vault[@rewards].eligible.contains(
+                option::destroy_some(validated_public_key_option)
+            )
+        } else { false }
     }
 
     #[view]
-    public fun public_keys(): vector<ValidatedPublicKey> acquires Vault {
-        Vault[@rewards].manifest.keys()
+    public fun public_keys_that_are_claimed(): vector<ValidatedPublicKey> acquires Vault {
+        Vault[@rewards].claimed.keys()
     }
 
     #[view]
-    public fun public_keys_paginated(
+    public fun public_keys_that_are_claimed_paginated(
         starting_bucket_index: u64, starting_vector_index: u64, num_public_keys_to_get: u64
     ): (vector<ValidatedPublicKey>, Option<u64>, Option<u64>) acquires Vault {
-        Vault[@rewards].manifest.keys_paginated(
+        Vault[@rewards].claimed.keys_paginated(
             starting_bucket_index, starting_vector_index, num_public_keys_to_get
         )
     }
 
     #[view]
-    public fun manifest_to_simple_map(): SimpleMap<ValidatedPublicKey, address> acquires Vault {
-        Vault[@rewards].manifest.to_simple_map()
+    public fun public_keys_that_are_claimed_to_simple_map():
+        SimpleMap<ValidatedPublicKey, address> acquires Vault {
+        Vault[@rewards].claimed.to_simple_map()
+    }
+
+    #[view]
+    public fun public_keys_that_are_eligible(): vector<ValidatedPublicKey> acquires Vault {
+        Vault[@rewards].eligible.keys()
+    }
+
+    #[view]
+    public fun public_keys_that_are_eligible_paginated(
+        starting_bucket_index: u64, starting_vector_index: u64, num_public_keys_to_get: u64
+    ): (vector<ValidatedPublicKey>, Option<u64>, Option<u64>) acquires Vault {
+        Vault[@rewards].eligible.keys_paginated(
+            starting_bucket_index, starting_vector_index, num_public_keys_to_get
+        )
     }
 
     #[view]
@@ -117,10 +157,60 @@ module rewards::emojicoin_dot_fun_claim_link {
     public entry fun add_public_keys(
         admin: &signer, public_keys_as_bytes: vector<vector<u8>>
     ) acquires Vault {
-        let manifest_ref_mut = &mut borrow_vault_mut_checked(admin).manifest;
-        public_keys_as_bytes.for_each(|public_key_bytes| {
-            manifest_ref_mut.add(validate_public_key_bytes(public_key_bytes), NIL);
-        });
+        let vault_ref_mut = borrow_vault_mut_checked(admin);
+        let claimed_ref = &vault_ref_mut.claimed;
+        let eligible_ref_mut = &mut vault_ref_mut.eligible;
+        let validated_public_key;
+        public_keys_as_bytes.for_each_ref(
+            |public_key_bytes_ref| {
+                validated_public_key = validate_public_key_bytes(*public_key_bytes_ref);
+                assert!(
+                    !claimed_ref.contains(validated_public_key),
+                    E_CLAIM_LINK_ALREADY_CLAIMED
+                );
+                assert!(
+                    !eligible_ref_mut.contains(validated_public_key),
+                    E_CLAIM_LINK_ALREADY_ELIGIBLE
+                );
+                eligible_ref_mut.add(validated_public_key, Nil {});
+            }
+        );
+    }
+
+    public entry fun add_public_keys_and_fund_gas_escrows(
+        admin: &signer, public_keys_as_bytes: vector<vector<u8>>, amount_per_escrow: u64
+    ) acquires Vault {
+        let vault_ref_mut = borrow_vault_mut_checked(admin);
+        let claimed_ref = &vault_ref_mut.claimed;
+        let eligible_ref_mut = &mut vault_ref_mut.eligible;
+        let coins =
+            coin::withdraw<AptosCoin>(
+                admin, public_keys_as_bytes.length() * amount_per_escrow
+            );
+        let validated_public_key;
+        public_keys_as_bytes.for_each_ref(
+            |public_key_bytes_ref| {
+                validated_public_key = validate_public_key_bytes(*public_key_bytes_ref);
+                assert!(
+                    !claimed_ref.contains(validated_public_key),
+                    E_CLAIM_LINK_ALREADY_CLAIMED
+                );
+                assert!(
+                    !eligible_ref_mut.contains(validated_public_key),
+                    E_CLAIM_LINK_ALREADY_ELIGIBLE
+                );
+                eligible_ref_mut.add(validated_public_key, Nil {});
+                aptos_account::deposit_coins(
+                    from_bcs::to_address(
+                        ed25519::validated_public_key_to_authentication_key(
+                            &validated_public_key
+                        )
+                    ),
+                    coin::extract(&mut coins, amount_per_escrow)
+                )
+            }
+        );
+        coin::destroy_zero(coins);
     }
 
     public entry fun fund_vault(funder: &signer, n_claims: u64) acquires Vault {
@@ -156,12 +246,13 @@ module rewards::emojicoin_dot_fun_claim_link {
 
         // Verify public key is eligible for claim.
         let vault_ref_mut = &mut Vault[@rewards];
-        let manifest_ref_mut = &mut vault_ref_mut.manifest;
-        assert!(manifest_ref_mut.contains(validated_public_key), E_INVALID_CLAIM_LINK);
+        let claimed_ref_mut = &mut vault_ref_mut.claimed;
+        let eligible_ref_mut = &mut vault_ref_mut.eligible;
         assert!(
-            *manifest_ref_mut.borrow(validated_public_key) == NIL,
+            !claimed_ref_mut.contains(validated_public_key),
             E_CLAIM_LINK_ALREADY_CLAIMED
         );
+        assert!(eligible_ref_mut.contains(validated_public_key), E_INVALID_CLAIM_LINK);
 
         // Check vault balance.
         let vault_signer_cap_ref = &vault_ref_mut.signer_capability;
@@ -172,8 +263,9 @@ module rewards::emojicoin_dot_fun_claim_link {
             E_VAULT_INSUFFICIENT_FUNDS
         );
 
-        // Update manifest, transfer APT to claimant.
-        *manifest_ref_mut.borrow_mut(validated_public_key) = claimant_address;
+        // Update tables, transfer APT to claimant.
+        eligible_ref_mut.remove(validated_public_key);
+        claimed_ref_mut.add(validated_public_key, claimant_address);
         let vault_signer = account::create_signer_with_capability(vault_signer_cap_ref);
         aptos_account::transfer(&vault_signer, claimant_address, claim_amount);
 
@@ -218,12 +310,12 @@ module rewards::emojicoin_dot_fun_claim_link {
     public entry fun remove_public_keys(
         admin: &signer, public_keys_as_bytes: vector<vector<u8>>
     ) acquires Vault {
-        let manifest_ref_mut = &mut borrow_vault_mut_checked(admin).manifest;
-        public_keys_as_bytes.for_each(|public_key_bytes| {
-            let validated_public_key = validate_public_key_bytes(public_key_bytes);
-            if (manifest_ref_mut.contains(validated_public_key)
-                && *manifest_ref_mut.borrow(validated_public_key) == NIL) {
-                manifest_ref_mut.remove(validated_public_key);
+        let eligible_ref_mut = &mut borrow_vault_mut_checked(admin).eligible;
+        let validated_public_key;
+        public_keys_as_bytes.for_each_ref(|public_key_bytes_ref| {
+            validated_public_key = validate_public_key_bytes(*public_key_bytes_ref);
+            if (eligible_ref_mut.contains(validated_public_key)) {
+                eligible_ref_mut.remove(validated_public_key);
             }
         });
     }
@@ -250,7 +342,8 @@ module rewards::emojicoin_dot_fun_claim_link {
             Vault {
                 admins: vector[signer::address_of(rewards)],
                 claim_amount: DEFAULT_CLAIM_AMOUNT,
-                manifest: smart_table::new(),
+                claimed: smart_table::new(),
+                eligible: smart_table::new(),
                 signer_capability
             }
         );
@@ -331,6 +424,30 @@ module rewards::emojicoin_dot_fun_claim_link {
         add_admin(&not_admin_signer, not_admin);
     }
 
+    #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_CLAIMED)]
+    fun test_add_public_keys_claim_link_already_claimed() acquires Vault {
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
+        redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(CLAIMANT),
+            signature_bytes,
+            claim_link_validated_public_key_bytes,
+            @black_cat_market,
+            1
+        );
+        add_public_keys(
+            &get_signer(@rewards), vector[claim_link_validated_public_key_bytes]
+        );
+    }
+
+    #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_ELIGIBLE)]
+    fun test_add_public_keys_claim_link_already_eligible() acquires Vault {
+        let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        add_public_keys(
+            &get_signer(@rewards), vector[claim_link_validated_public_key_bytes]
+        );
+    }
+
     #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
     fun test_add_public_keys_invalid_public_key() acquires Vault {
         emojicoin_dot_fun::tests::init_package();
@@ -350,11 +467,120 @@ module rewards::emojicoin_dot_fun_claim_link {
     }
 
     #[test]
+    fun test_add_public_keys_and_fund_gas_escrows() acquires Vault {
+        // Prepare escrow account public keys.
+        let n_escrows = 3;
+        let amount_per_escrow = 2;
+        let escrow_account_public_keys = vector[];
+        let escrow_account_public_key_bytes = vector[];
+        let validated_public_key;
+        for (i in 0..n_escrows) {
+            (_, validated_public_key) = ed25519::generate_keys();
+            escrow_account_public_key_bytes.push_back(
+                ed25519::validated_public_key_to_bytes(&validated_public_key)
+            );
+            escrow_account_public_keys.push_back(validated_public_key);
+        };
+
+        // Init packages.
+        emojicoin_dot_fun::tests::init_package_then_exact_transition();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+
+        // Fund escrows.
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, n_escrows * amount_per_escrow
+        );
+        add_public_keys_and_fund_gas_escrows(
+            &rewards_signer, escrow_account_public_key_bytes, amount_per_escrow
+        );
+
+        // Verify state.
+        let public_key_bytes;
+        escrow_account_public_key_bytes.for_each_ref(|public_key_bytes_ref| {
+            public_key_bytes = *public_key_bytes_ref;
+            assert!(public_key_is_eligible(public_key_bytes));
+        });
+        escrow_account_public_keys.for_each_ref(|public_key_ref| {
+            assert!(
+                coin::balance<AptosCoin>(
+                    from_bcs::to_address(
+                        ed25519::validated_public_key_to_authentication_key(public_key_ref)
+                    )
+                ) == amount_per_escrow
+            );
+        });
+
+        // Call with zero public keys argument to invoke silent return.
+        assert!(coin::balance<AptosCoin>(@rewards) == 0);
+        add_public_keys_and_fund_gas_escrows(
+            &rewards_signer, vector[], amount_per_escrow
+        );
+        assert!(coin::balance<AptosCoin>(@rewards) == 0);
+
+    }
+
+    #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_CLAIMED)]
+    fun test_add_public_keys_and_fund_gas_escrows_claim_link_already_claimed() acquires Vault {
+        let (signature_bytes, claim_link_validated_public_key_bytes) =
+            prepare_for_redemption();
+        redeem<BlackCatEmojicoin, BlackCatEmojicoinLP>(
+            &get_signer(CLAIMANT),
+            signature_bytes,
+            claim_link_validated_public_key_bytes,
+            @black_cat_market,
+            1
+        );
+        let amount_per_escrow = 1;
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, amount_per_escrow
+        );
+        add_public_keys_and_fund_gas_escrows(
+            &get_signer(@rewards),
+            vector[claim_link_validated_public_key_bytes],
+            amount_per_escrow
+        );
+    }
+
+    #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_ELIGIBLE)]
+    fun test_add_public_keys_and_fund_gas_escrows_claim_link_already_eligible() acquires Vault {
+        let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
+        let amount_per_escrow = 1;
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(
+            @rewards, amount_per_escrow
+        );
+        add_public_keys_and_fund_gas_escrows(
+            &get_signer(@rewards),
+            vector[claim_link_validated_public_key_bytes],
+            amount_per_escrow
+        );
+    }
+
+    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
+    fun test_add_public_keys_and_fund_gas_escrows_invalid_public_key() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to(@rewards, 1);
+        init_module(&rewards_signer);
+        add_public_keys_and_fund_gas_escrows(&rewards_signer, vector[vector[0x0]], 1);
+    }
+
+    #[test, expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_add_public_keys_and_fund_gas_escrows_not_admin() acquires Vault {
+        emojicoin_dot_fun::tests::init_package();
+        let rewards_signer = get_signer(@rewards);
+        init_module(&rewards_signer);
+        let not_admin_signer = get_signer(@0x2222);
+        assert!(&rewards_signer != &not_admin_signer);
+        add_public_keys_and_fund_gas_escrows(&not_admin_signer, vector[], 1);
+    }
+
+    #[test]
     fun test_general_flow() acquires Vault {
         // Initialize black cat market, have it undergo state transition.
         emojicoin_dot_fun::tests::init_package_then_exact_transition();
 
-        // Get claim link private, public keys.
+        // Get claim link private, public keys, bogus public key.
         let (claim_link_private_key, claim_link_validated_public_key) =
             ed25519::generate_keys();
         let claim_link_validated_public_key_bytes =
@@ -367,14 +593,29 @@ module rewards::emojicoin_dot_fun_claim_link {
         // Check initial state.
         assert!(admins() == vector[@rewards]);
         assert!(claim_amount() == DEFAULT_CLAIM_AMOUNT);
-        assert!(!public_key_is_in_manifest(claim_link_validated_public_key_bytes));
-        assert!(public_keys().is_empty());
+        assert!(!public_key_is_eligible(claim_link_validated_public_key_bytes));
+        assert!(!public_key_is_eligible(vector[0]));
+        assert!(
+            public_key_claimant(claim_link_validated_public_key_bytes)
+                == option::none()
+        );
+        assert!(
+            public_key_claimant(vector[0]) == option::none()
+        );
+        assert!(public_keys_that_are_claimed().is_empty());
+        assert!(public_keys_that_are_eligible().is_empty());
         let (keys, starting_bucket_index, starting_vector_index) =
-            public_keys_paginated(0, 0, 1);
+            public_keys_that_are_claimed_paginated(0, 0, 1);
         assert!(keys == vector[]);
         assert!(starting_bucket_index == option::none());
         assert!(starting_vector_index == option::none());
-        assert!(manifest_to_simple_map().length() == 0);
+        (keys, starting_bucket_index, starting_vector_index) = public_keys_that_are_eligible_paginated(
+            0, 0, 1
+        );
+        assert!(keys == vector[]);
+        assert!(starting_bucket_index == option::none());
+        assert!(starting_vector_index == option::none());
+        assert!(public_keys_that_are_claimed_to_simple_map().length() == 0);
         assert!(vault_balance() == 0);
         assert!(
             vault_signer_address()
@@ -399,20 +640,32 @@ module rewards::emojicoin_dot_fun_claim_link {
         // Check new state.
         assert!(admins() == vector[@rewards, new_admin]);
         assert!(claim_amount() == DEFAULT_CLAIM_AMOUNT);
-        assert!(public_key_is_in_manifest(claim_link_validated_public_key_bytes));
+        assert!(public_key_is_eligible(claim_link_validated_public_key_bytes));
         assert!(
-            manifest_to_simple_map().keys() == vector[claim_link_validated_public_key]
+            public_key_claimant(claim_link_validated_public_key_bytes)
+                == option::none()
         );
-        assert!(public_key_claimant(claim_link_validated_public_key_bytes) == NIL);
-        (keys, starting_bucket_index, starting_vector_index) = public_keys_paginated(
+        assert!(
+            public_key_claimant(claim_link_validated_public_key_bytes)
+                == option::none()
+        );
+        assert!(
+            public_key_claimant(vector[0]) == option::none()
+        );
+        assert!(
+            public_keys_that_are_eligible() == vector[claim_link_validated_public_key]
+        );
+        assert!(
+            public_key_claimant(claim_link_validated_public_key_bytes)
+                == option::none()
+        );
+        (keys, starting_bucket_index, starting_vector_index) = public_keys_that_are_eligible_paginated(
             0, 0, 1
         );
         assert!(keys == vector[claim_link_validated_public_key]);
         assert!(starting_bucket_index == option::none());
         assert!(starting_vector_index == option::none());
-        assert!(
-            manifest_to_simple_map().keys() == vector[claim_link_validated_public_key]
-        );
+        assert!(public_keys_that_are_claimed_to_simple_map().length() == 0);
         assert!(vault_balance() == DEFAULT_CLAIM_AMOUNT);
 
         // Fund another reward, double claim amount, fund another reward, remove admin, withdraw.
@@ -438,13 +691,12 @@ module rewards::emojicoin_dot_fun_claim_link {
             &rewards_signer,
             vector[claim_link_validated_public_key_bytes]
         );
-        assert!(!public_key_is_in_manifest(claim_link_validated_public_key_bytes));
+        assert!(!public_key_is_eligible(claim_link_validated_public_key_bytes));
         add_public_keys(
             &rewards_signer,
             vector[claim_link_validated_public_key_bytes]
         );
-        assert!(public_key_is_in_manifest(claim_link_validated_public_key_bytes));
-        assert!(public_key_claimant(claim_link_validated_public_key_bytes) == NIL);
+        assert!(public_key_is_eligible(claim_link_validated_public_key_bytes));
 
         // Get expected proceeds from swap.
         let swap_event =
@@ -476,37 +728,43 @@ module rewards::emojicoin_dot_fun_claim_link {
         // Verify claimant's emojicoin balance.
         assert!(coin::balance<BlackCatEmojicoin>(CLAIMANT) == net_proceeds);
 
-        // Check vault balance, manifest.
+        // Check vault balance, state.
         assert!(vault_balance() == 0);
-        assert!(public_key_claimant(claim_link_validated_public_key_bytes) == CLAIMANT);
+        assert!(
+            public_key_claimant(claim_link_validated_public_key_bytes)
+                == option::some(CLAIMANT)
+        );
+        (keys, starting_bucket_index, starting_vector_index) = public_keys_that_are_claimed_paginated(
+            0, 0, 1
+        );
+        assert!(keys == vector[claim_link_validated_public_key]);
+        assert!(starting_bucket_index == option::none());
+        assert!(starting_vector_index == option::none());
+        assert!(
+            public_keys_that_are_claimed_to_simple_map().keys()
+                == vector[claim_link_validated_public_key]
+        );
+        assert!(
+            public_keys_that_are_claimed_to_simple_map().values() == vector[CLAIMANT]
+        );
 
         // Verify that public key entry can no longer be removed.
         remove_public_keys(
             &rewards_signer,
             vector[claim_link_validated_public_key_bytes]
         );
-        assert!(public_key_is_in_manifest(claim_link_validated_public_key_bytes));
-
-        // Verify silent return for trying to remove public key not in manifest.
-        let (_, new_public_key) = ed25519::generate_keys();
-        remove_public_keys(
-            &rewards_signer,
-            vector[ed25519::validated_public_key_to_bytes(&new_public_key)]
+        assert!(
+            public_key_claimant(claim_link_validated_public_key_bytes)
+                == option::some(CLAIMANT)
         );
-    }
 
-    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
-    fun test_public_key_claimant_invalid_public_key() acquires Vault {
-        let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
-        claim_link_validated_public_key_bytes.push_back(0);
-        public_key_claimant(claim_link_validated_public_key_bytes);
-    }
-
-    #[test, expected_failure(abort_code = E_INVALID_PUBLIC_KEY)]
-    fun test_public_key_is_in_manifest_invalid_public_key() acquires Vault {
-        let (_, claim_link_validated_public_key_bytes) = prepare_for_redemption();
-        claim_link_validated_public_key_bytes.push_back(0);
-        public_key_is_in_manifest(claim_link_validated_public_key_bytes);
+        // Verify silent return for trying to remove public key that is not eligible.
+        let (_, new_public_key) = ed25519::generate_keys();
+        let new_public_key_bytes =
+            ed25519::validated_public_key_to_bytes(&new_public_key);
+        remove_public_keys(&rewards_signer, vector[new_public_key_bytes]);
+        assert!(public_key_claimant(new_public_key_bytes) == option::none());
+        assert!(!public_key_is_eligible(new_public_key_bytes));
     }
 
     #[test, expected_failure(abort_code = E_CLAIM_LINK_ALREADY_CLAIMED)]
@@ -645,7 +903,7 @@ module rewards::emojicoin_dot_fun_claim_link {
     }
 
     #[test, expected_failure(abort_code = E_NOT_ADMIN)]
-    fun withdraw_from_vault_not_admin() acquires Vault {
+    fun test_withdraw_from_vault_not_admin() acquires Vault {
         emojicoin_dot_fun::tests::init_package();
         let rewards_signer = get_signer(@rewards);
         init_module(&rewards_signer);
