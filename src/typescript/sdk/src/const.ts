@@ -15,7 +15,6 @@ if (
   !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS ||
-  !process.env.NEXT_PUBLIC_APTOS_API_KEY ||
   !process.env.NEXT_PUBLIC_APTOS_NETWORK
 ) {
   const missing = [
@@ -23,7 +22,6 @@ if (
     ["NEXT_PUBLIC_REWARDS_MODULE_ADDRESS", process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS", process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS],
-    ["NEXT_PUBLIC_APTOS_API_KEY", process.env.NEXT_PUBLIC_APTOS_API_KEY],
     ["NEXT_PUBLIC_APTOS_NETWORK", process.env.NEXT_PUBLIC_APTOS_NETWORK],
   ].filter(([_, value]) => !value);
   missing.forEach(([key, _]) => {
