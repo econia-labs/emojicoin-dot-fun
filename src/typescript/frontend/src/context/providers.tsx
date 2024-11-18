@@ -31,8 +31,6 @@ import { isMobile, isTablet } from "react-device-detect";
 import { RewardsBanner } from "components/rewards-banner";
 import { GeoblockedBanner } from "components/geoblocking";
 import { HeaderSpacer } from "components/header-spacer";
-import { useSearchParams } from "next/navigation";
-import { Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
 
 enableMapSet();
 
@@ -47,27 +45,6 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const wallets = useMemo(() => [new PontemWallet(), new RiseWallet(), new MartianWallet()], []);
 
-  // Eventually, this needs to check local storage as well. For now, just check the search params.
-  const searchParams = useSearchParams();
-  const { aptosConnect } = useMemo(() => {
-    const privateKeyString = searchParams.get("claim_key");
-    let privateKey: Ed25519PrivateKey | undefined;
-    try {
-      privateKey = new Ed25519PrivateKey(privateKeyString ?? "");
-    } catch {
-      null;
-    }
-    return {
-      aptosConnect: {
-        claimSecretKey: privateKey?.toUint8Array(),
-      },
-    };
-  }, [searchParams]);
-
-  useEffect(() => {
-    console.log(aptosConnect);
-  }, [aptosConnect]);
-
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
@@ -79,7 +56,6 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               dappConfig={{
                 aptosApiKey: APTOS_API_KEY,
                 network: APTOS_NETWORK,
-                aptosConnect,
               }}
             >
               <WalletModalContextProvider>
