@@ -31,15 +31,37 @@ import { isMobile, isTablet } from "react-device-detect";
 import { RewardsBanner } from "components/rewards-banner";
 import { GeoblockedBanner } from "components/geoblocking";
 import { HeaderSpacer } from "components/header-spacer";
+import { init } from "emoji-mart";
+import type { EmojiMartData } from "components/pages/emoji-picker/types";
 
 enableMapSet();
 
 const queryClient = new QueryClient();
 
+// This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
+// TBH, we should probably just fork the library.
+const data = fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then(
+  (res) =>
+    res.json().then((data) => {
+      return data as EmojiMartData;
+    })
+);
+
 const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
+
+  // Load the data from the emoji picker library and then extract the valid chat emojis from it.
+  // This is why it's not necessary to build/import a `chat-emojis.json` set, even though there is `symbol-emojis.json`.
+  // NOTE: We don't verify that the length of this set is equal to the number of valid chat emojis in the Move contract.
+  useEffect(() => {
+    data.then((d) => {
+      init({ set: "native", data: d });
+    });
+
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   const isMobileMenuOpen = isOpen && !isDesktop;
 
