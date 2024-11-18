@@ -19,7 +19,7 @@ fi
 # This script initializes a profile on the `testnet` network and then updates
 # the profile to use the `custom` network with the correct rest and faucet URLs.
 # This is a workaround to avoid having to run a local testnet during the image
-# build process.
+# build process. If the testnet query fails, it tries to use mainnet.
 # This facilitates checking the derived address against the expected address at
 # build time and initializing the profile and subsequent `aptos` config.yaml
 # file without having to run a local testnet.
@@ -29,12 +29,13 @@ fi
 profile="publisher"
 
 # See the note above for why we use `testnet` below.
-result_json=$(aptos init \
-	--assume-yes \
-	--profile $profile \
-	--private-key $PUBLISHER_PRIVATE_KEY \
-	--encoding hex \
-	--network testnet 2>/dev/null)
+# Use `mainnet` if `testnet` fails.
+base_cmd="aptos init --assume-yes --encoding hex"
+cmd="$base_cmd --profile $profile --private-key $PUBLISHER_PRIVATE_KEY"
+result_json=$(
+	$cmd --network testnet 2>/dev/null ||
+		$cmd --network mainnet 2>/dev/null
+)
 
 result=$(echo $result_json | jq -r '.Error')
 
