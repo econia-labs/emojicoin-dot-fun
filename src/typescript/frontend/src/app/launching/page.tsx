@@ -13,7 +13,7 @@ export default function LaunchingPage() {
     const emoji = getRandomChatEmoji().emoji;
     return `${emoji} ${phrases[index]} ${emoji}`;
   }, []);
-  const { ref } = useScramble({ text: `{ ${catchPhrase} }` });
+  const { ref } = useScramble({ text: catchPhrase });
   return (
     <div className="relative">
       <MatrixRain />
