@@ -1,8 +1,10 @@
 "use client";
 
+import { type FreeSwapData } from "@/store/user-settings-store";
 import { useUserSettings } from "context/event-store-context";
 import { redirect } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { parseJSON } from "utils";
 
 interface PageProps {
   params: {
@@ -12,19 +14,22 @@ interface PageProps {
 }
 
 export default function GenerateQRCode(props: PageProps) {
-  const data = props.params.data;
-  const setCode = useUserSettings((s) => s.setCode);
+  const data = decodeURIComponent(props.params.data);
+  const setFreeSwap = useUserSettings((s) => s.setFreeSwapData);
+  const freeSwapData: FreeSwapData = useMemo(() => {
+    return parseJSON(atob(data));
+  }, [data]);
 
   useEffect(() => {
-    if (setCode) {
-      setCode(data);
+    if (setFreeSwap) {
+      setFreeSwap(freeSwapData);
       redirect("/home");
     }
-  }, [data, setCode]);
+  }, [freeSwapData, setFreeSwap]);
 
   return (
-    <div className="h-[100%] w-[100%] grid items-center">
-      <div className="text-center pixel-heading-2 text-white">Redeeming...</div>
+    <div className="h-[100%] w-[100%] block content-center">
+      <div className="text-center pixel-heading-2 text-ec-blue">Redeeming...</div>
     </div>
   );
 }

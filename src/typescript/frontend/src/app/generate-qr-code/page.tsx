@@ -1,11 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "./module.css";
+import { stringifyJSON } from "utils";
+import { type FreeSwapData } from "@/store/user-settings-store";
 
 export default function GenerateQRCode() {
-  const [data, setData] = useState<string>();
+  const [feePayerKey, setFeePayerKey] = useState<string>("");
+  const [claimCode, setClaimCode] = useState<string>("");
+
+  const data = useMemo(() => {
+    const pathData: FreeSwapData = { claimCode, feePayerKey };
+    return btoa(stringifyJSON(pathData));
+  }, [feePayerKey, claimCode]);
 
   return (
     <div className="h-[100%] w-[100%] grid items-center">
@@ -13,15 +21,26 @@ export default function GenerateQRCode() {
         <textarea
           autoFocus={true}
           rows={4}
-          placeholder={"0x..."}
-          value={data}
-          onChange={(v) => setData(v.currentTarget.value.replace(/\n/g, ""))}
+          placeholder={"Fee payer key..."}
+          value={feePayerKey}
+          onChange={(v) => setFeePayerKey(v.currentTarget.value.replace(/\n/g, ""))}
           className="bg-black text-3xl outline-none text-ec-blue p-[10px]"
           style={{
             border: "3px dashed var(--ec-blue)",
           }}
         />
-        <Link href={`/generate-qr-code/${data}`}>
+        <textarea
+          autoFocus={true}
+          rows={4}
+          placeholder={"Claim code..."}
+          value={claimCode}
+          onChange={(v) => setClaimCode(v.currentTarget.value.replace(/\n/g, ""))}
+          className="bg-black text-3xl outline-none text-ec-blue p-[10px]"
+          style={{
+            border: "3px dashed var(--ec-blue)",
+          }}
+        />
+        <Link href={`/generate-qr-code/${encodeURIComponent(data)}`}>
           <button
             type="submit"
             className="text-ec-blue text-3xl uppercase w-[100%] p-[4px]"

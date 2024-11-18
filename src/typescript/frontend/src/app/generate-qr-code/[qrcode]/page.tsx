@@ -19,10 +19,11 @@ const QRCODE_OPTIONS: QRCode.QRCodeToDataURLOptions = {
   },
 };
 
-const getUrl = (code: string) => `${location.protocol}//${location.host}/redeem/${code}`;
+const getUrl = (data: string) =>
+  `${location.protocol}//${location.host}/redeem/${encodeURIComponent(data)}`;
 
 export default function GenerateQRCode(props: PageProps) {
-  const data = props.params.qrcode;
+  const data = decodeURIComponent(props.params.qrcode);
 
   const [qrCode, setQrCode] = useState<string>();
 

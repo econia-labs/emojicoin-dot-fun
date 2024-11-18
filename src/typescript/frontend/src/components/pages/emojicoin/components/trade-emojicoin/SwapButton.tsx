@@ -43,13 +43,14 @@ export const SwapButton = ({
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
-  const _code = useUserSettings((s) => s.code);
+  const _freeSwapData = useUserSettings((s) => s.freeSwapData);
 
   const handleClick = useCallback(async () => {
     if (!account) {
       return;
     }
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+    // TODO: If freeSwapData !== undefined, use alternative swap wrapper.
     const builderLambda = () =>
       SwapWithRewards.builder({
         aptosConfig: aptos.config,

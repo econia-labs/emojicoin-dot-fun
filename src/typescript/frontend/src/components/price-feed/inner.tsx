@@ -22,8 +22,8 @@ const Item = ({ emoji, change }: { emoji: string; change: number }) => {
 };
 
 export const PriceFeedInner = ({ data }: { data: Awaited<ReturnType<typeof fetchPriceFeed>> }) => {
-  const code = useUserSettings((s) => s.code);
-  return code === undefined ? (
+  const hasFreeSwap = useUserSettings((s) => s.freeSwapData !== undefined);
+  return !hasFreeSwap ? (
     <div className="w-full z-[10] relative">
       <Carousel>
         {data!.map((itemData, i) => (

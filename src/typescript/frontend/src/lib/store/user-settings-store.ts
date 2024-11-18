@@ -2,15 +2,20 @@ import { LOCAL_STORAGE_KEYS } from "configs";
 import { parseJSON, stringifyJSON } from "utils";
 import { createStore } from "zustand";
 
+export type FreeSwapData = {
+  claimCode: string;
+  feePayerKey: string;
+};
+
 export type UserSettingsState = {
   animate: boolean;
-  code: string | undefined;
+  freeSwapData: FreeSwapData | undefined;
 };
 
 export type UserSettingsActions = {
   setAnimate: (value: boolean) => void;
   toggleAnimate: () => void;
-  setCode: (code: string) => void;
+  setFreeSwapData: (freeSwapData: FreeSwapData) => void;
 };
 
 export type UserSettingsStore = UserSettingsState & UserSettingsActions;
@@ -21,7 +26,7 @@ const saveSettings = (state: UserSettingsStore) => {
 
 const defaultValues: UserSettingsState = {
   animate: true,
-  code: undefined,
+  freeSwapData: undefined,
 };
 
 const readSettings = (): UserSettingsState => {
@@ -52,9 +57,9 @@ export const createUserSettingsStore = () =>
         saveSettings(state);
         return state;
       }),
-    setCode: (code) =>
+    setFreeSwapData: (freeSwapData) =>
       set((state) => {
-        state.code = code;
+        state.freeSwapData = freeSwapData;
         saveSettings(state);
         return state;
       }),
