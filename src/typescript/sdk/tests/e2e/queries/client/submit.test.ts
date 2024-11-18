@@ -1,5 +1,6 @@
 import {
   APTOS_API_KEY,
+  APTOS_NETWORK,
   getEmojicoinMarketAddressAndTypeTags,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
@@ -21,7 +22,7 @@ import {
   Network,
 } from "@aptos-labs/ts-sdk";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
-import { getAptosClient, getAptosNetwork } from "../../../../src/utils/aptos-client";
+import { getAptosClient } from "../../../../src/utils/aptos-client";
 import { calculatePeriodBoundariesCrossed } from "../../../../src/utils/test";
 
 jest.setTimeout(15000);
@@ -126,7 +127,7 @@ describe("all submission types for the emojicoin client", () => {
 
   it("creates the aptos client with the correct default configuration settings", () => {
     expect(emojicoin.aptos.config.network).toEqual(process.env.NEXT_PUBLIC_APTOS_NETWORK);
-    expect(emojicoin.aptos.config.network).toEqual(getAptosNetwork());
+    expect(emojicoin.aptos.config.network).toEqual(APTOS_NETWORK);
   });
 
   it("registers a market", async () => {
