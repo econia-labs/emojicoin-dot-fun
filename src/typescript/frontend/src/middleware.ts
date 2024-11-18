@@ -11,6 +11,9 @@ import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
+  if (pathname === "/launching") {
+    return NextResponse.next();
+  }
   if (PRE_LAUNCH_TEASER && pathname !== "/launching") {
     return NextResponse.redirect(new URL(ROUTES.launching, request.url));
   }
