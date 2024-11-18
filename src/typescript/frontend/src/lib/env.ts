@@ -7,7 +7,6 @@ export type Links = {
   x: string;
   github: string;
   discord: string;
-  telegram: string;
   tos: string;
 };
 
