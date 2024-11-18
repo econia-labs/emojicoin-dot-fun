@@ -9,4 +9,5 @@ export const ROUTES = {
   docs: "https://docs.emojicoin.fun/category/--start-here",
   notFound: "/not-found",
   maintenance: "/maintenance",
+  launching: "/launching",
 } as const;
