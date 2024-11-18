@@ -1,12 +1,12 @@
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import Button from "components/button";
 import { translationFunction } from "context/language-context";
-import { SwapWithRewards } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { Redeem, SwapWithRewards } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
-import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { Ed25519PrivateKey, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { STRUCT_STRINGS } from "@sdk/utils";
 import { useAnimationControls } from "framer-motion";
 import { RewardsAnimation } from "./RewardsAnimation";
@@ -15,6 +15,7 @@ import { CongratulationsToast } from "./CongratulationsToast";
 import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
 import { useUserSettings } from "context/event-store-context";
+import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -43,47 +44,70 @@ export const SwapButton = ({
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
-  const _freeSwapData = useUserSettings((s) => s.freeSwapData);
+  const freeSwapData = useUserSettings((s) => s.freeSwapData);
+  const setFreeSwapData = useUserSettings((s) => s.setFreeSwapData);
 
   const handleClick = useCallback(async () => {
     if (!account) {
       return;
     }
+    let builderLambda: () => Promise<EntryFunctionTransactionBuilder>;
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
-    // TODO: If freeSwapData !== undefined, use alternative swap wrapper.
-    const builderLambda = () =>
-      SwapWithRewards.builder({
-        aptosConfig: aptos.config,
-        swapper: account.address,
-        marketAddress,
-        inputAmount: BigInt(inputAmount),
-        isSell,
-        typeTags: [emojicoin, emojicoinLP],
-        minOutputAmount: BigInt(minOutputAmount),
-      });
-    const res = await submit(builderLambda);
-    if (res && res.response && isUserTransactionResponse(res.response)) {
-      const rewardsEvent = res.response.events.find(
-        (e) => e.type === STRUCT_STRINGS.EmojicoinDotFunRewards
-      );
-      if (rewardsEvent) {
-        controls.start("celebration");
-        toast.dark(
-          <>
-            <RewardsAnimation controls={controls} />
-            <CongratulationsToast
-              transactionHash={res.response.hash}
-              amount={rewardsEvent.data.octas_reward_amount}
-            />
-          </>,
-          {
-            pauseOnFocusLoss: false,
-            autoClose: 15000,
-            position: "top-center",
-            closeOnClick: false,
-          }
-        );
+    try {
+      if (freeSwapData !== undefined) {
+        const privateKey = new Ed25519PrivateKey(freeSwapData.feePayerKey);
+        const publicKey = privateKey.publicKey();
+        builderLambda = () =>
+          Redeem.builder({
+            aptosConfig: aptos.config,
+            swapper: account.address,
+            signatureBytes: privateKey.sign(account.address).toString(),
+            publicKeyBytes: publicKey.toString(),
+            marketAddress,
+            typeTags: [emojicoin, emojicoinLP],
+            minOutputAmount: BigInt(minOutputAmount),
+            feePayer: freeSwapData.feePayerKey,
+          });
+      } else {
+        builderLambda = () =>
+          SwapWithRewards.builder({
+            aptosConfig: aptos.config,
+            swapper: account.address,
+            marketAddress,
+            inputAmount: BigInt(inputAmount),
+            isSell,
+            typeTags: [emojicoin, emojicoinLP],
+            minOutputAmount: BigInt(minOutputAmount),
+          });
       }
+      const res = await submit(builderLambda);
+      if (res && res.response && isUserTransactionResponse(res.response)) {
+        const rewardsEvent = res.response.events.find(
+          (e) => e.type === STRUCT_STRINGS.EmojicoinDotFunRewards
+        );
+        if (rewardsEvent) {
+          controls.start("celebration");
+          toast.dark(
+            <>
+              <RewardsAnimation controls={controls} />
+              <CongratulationsToast
+                transactionHash={res.response.hash}
+                amount={rewardsEvent.data.octas_reward_amount}
+              />
+            </>,
+            {
+              pauseOnFocusLoss: false,
+              autoClose: 15000,
+              position: "top-center",
+              closeOnClick: false,
+            }
+          );
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setFreeSwapData(undefined);
     }
   }, [
     account,
@@ -94,6 +118,8 @@ export const SwapButton = ({
     submit,
     controls,
     minOutputAmount,
+    freeSwapData,
+    setFreeSwapData,
   ]);
 
   useEffect(() => {

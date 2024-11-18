@@ -9,7 +9,7 @@ import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
 import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
-import { useEventStore, useUserSettings } from "context/event-store-context";
+import { useEventStore } from "context/event-store-context";
 import { useTooltip } from "@hooks/index";
 import { useSearchParams } from "next/navigation";
 import { translationFunction } from "context/language-context";
@@ -25,10 +25,6 @@ import { TradeOptions } from "components/selects/trade-options";
 import { getMaxSlippageSettings } from "utils/slippage";
 import { Emoji } from "utils/emoji";
 import { EmojiPill } from "components/EmojiPill";
-import useClaimAmount from "@hooks/use-claim-amount";
-import { ONE_APT } from "@sdk/const";
-import Info from "components/info";
-import { Text } from "components";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -58,7 +54,7 @@ const inputAndOutputStyles = `
 const OUTPUT_DISPLAY_DECIMALS = 4;
 const SWAP_GAS_COST = 52500n;
 
-export default function SwapComponent({
+export default function FreeSwap({
   emojicoin,
   marketAddress,
   marketEmojis,
@@ -67,10 +63,6 @@ export default function SwapComponent({
   const { t } = translationFunction();
   const searchParams = useSearchParams();
 
-  const hasFreeSwap = useUserSettings((s) => s.freeSwapData !== undefined);
-
-  const claimAmount = useClaimAmount() / ONE_APT;
-
   const presetInputAmount =
     searchParams.get("buy") !== null ? searchParams.get("buy") : searchParams.get("sell");
   const presetInputAmountIsValid =
@@ -78,9 +70,7 @@ export default function SwapComponent({
     presetInputAmount !== "" &&
     !Number.isNaN(Number(presetInputAmount));
   const [inputAmount, setInputAmount] = useState(
-    toActualCoinDecimals({
-      num: hasFreeSwap ? claimAmount : presetInputAmountIsValid ? presetInputAmount! : "1",
-    })
+    toActualCoinDecimals({ num: presetInputAmountIsValid ? presetInputAmount! : "1" })
   );
   const [outputAmount, setOutputAmount] = useState(0n);
   const [previous, setPrevious] = useState(inputAmount);
@@ -206,25 +196,10 @@ export default function SwapComponent({
         alignItems="center"
         className="mb-[.4em]"
       >
-        <div className="flex flex-row gap-[10px]">
-          <div ref={targetRef}>
-            <Emoji className="cursor-pointer" emojis={emoji("gear")} />
-          </div>
-          {gearTooltip}
-          {hasFreeSwap && (
-            <Info popupClassName="pixel-heading-4">
-              <Text
-                textScale="pixelHeading4"
-                lineHeight="20px"
-                color="black"
-                textTransform="uppercase"
-              >
-                You are eligible for a free trade of {claimAmount} APT. To claim this gift, click
-                the swap button. You cannot trade normally until the gift is claimed.
-              </Text>
-            </Info>
-          )}
+        <div ref={targetRef}>
+          <Emoji className="cursor-pointer" emojis={emoji("gear")} />
         </div>
+        {gearTooltip}
         <FlexGap flexDirection="row" gap="5px">
           {isSell ? (
             <>
@@ -232,18 +207,14 @@ export default function SwapComponent({
                 emoji="nauseated face"
                 description="Sell 50%"
                 onClick={() => {
-                  if (!hasFreeSwap) {
-                    setInputAmount(emojicoinBalance / 2n);
-                  }
+                  setInputAmount(emojicoinBalance / 2n);
                 }}
               />
               <EmojiPill
                 emoji="face vomiting"
                 description="Sell 100%"
                 onClick={() => {
-                  if (!hasFreeSwap) {
-                    setInputAmount(emojicoinBalance);
-                  }
+                  setInputAmount(emojicoinBalance);
                 }}
               />
             </>
@@ -253,27 +224,21 @@ export default function SwapComponent({
                 emoji={"waxing crescent moon"}
                 description="Buy 25%"
                 onClick={() => {
-                  if (!hasFreeSwap) {
-                    setInputAmount(availableAptBalance / 4n);
-                  }
+                  setInputAmount(availableAptBalance / 4n);
                 }}
               />
               <EmojiPill
                 emoji={"first quarter moon"}
                 description="Buy 50%"
                 onClick={() => {
-                  if (!hasFreeSwap) {
-                    setInputAmount(availableAptBalance / 2n);
-                  }
+                  setInputAmount(availableAptBalance / 2n);
                 }}
               />
               <EmojiPill
                 emoji={"full moon"}
                 description="Buy 100%"
                 onClick={() => {
-                  if (!hasFreeSwap) {
-                    setInputAmount(availableAptBalance);
-                  }
+                  setInputAmount(availableAptBalance);
                 }}
               />
             </>
@@ -291,7 +256,6 @@ export default function SwapComponent({
             <InputNumeric
               className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
               value={inputAmount}
-              disabled={hasFreeSwap}
               onUserInput={(v) => setInputAmount(v)}
               onSubmit={() => (submit ? submit() : {})}
               decimals={8}
@@ -302,13 +266,11 @@ export default function SwapComponent({
 
         <FlipInputsArrow
           onClick={() => {
-            if (!hasFreeSwap) {
-              setInputAmount(outputAmount);
-              // This is done as to not display an old value if the swap simulation fails.
-              setOutputAmount(0n);
-              setPrevious(0n);
-              setIsSell((v) => !v);
-            }
+            setInputAmount(outputAmount);
+            // This is done as to not display an old value if the swap simulation fails.
+            setOutputAmount(0n);
+            setPrevious(0n);
+            setIsSell((v) => !v);
           }}
         />
 
@@ -317,15 +279,7 @@ export default function SwapComponent({
             <div className={grayLabel}>{t("You receive")}</div>
             <div className="h-[22px] w-full">
               <div
-                onClick={() => {
-                  if (!hasFreeSwap) {
-                    setInputAmount(outputAmount);
-                    // This is done as to not display an old value if the swap simulation fails.
-                    setOutputAmount(0n);
-                    setPrevious(0n);
-                    setIsSell((v) => !v);
-                  }
-                }}
+                onClick={() => setIsSell((v) => !v)}
                 className={inputAndOutputStyles + " mt-[8px] ml-[1px] cursor-pointer"}
                 style={{ opacity: isLoading ? 0.6 : 1 }}
               >

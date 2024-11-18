@@ -15,7 +15,7 @@ export type UserSettingsState = {
 export type UserSettingsActions = {
   setAnimate: (value: boolean) => void;
   toggleAnimate: () => void;
-  setFreeSwapData: (freeSwapData: FreeSwapData) => void;
+  setFreeSwapData: (freeSwapData: FreeSwapData | undefined) => void;
 };
 
 export type UserSettingsStore = UserSettingsState & UserSettingsActions;

@@ -20,13 +20,14 @@ import {
   SimpleTransaction,
   type PublicKey,
 } from "@aptos-labs/ts-sdk";
-import {
-  type Option,
-  type TypeTagInput,
-  type Uint8,
-  type Uint64,
-  type AccountAddressString,
-  type HexString,
+import type {
+  Option,
+  TypeTagInput,
+  Uint8,
+  Uint64,
+  AccountAddressString,
+  HexString,
+  Uint64String,
 } from "./types";
 import {
   ViewFunctionPayloadBuilder,
@@ -768,6 +769,157 @@ export class SwapWithRewards extends EntryFunctionPayloadBuilder {
 export type IsASupplementalChatEmojiPayloadMoveArguments = {
   hexBytes: MoveVector<U8>;
 };
+
+export type RedeemPayloadMoveArguments = {
+  signatureBytes: MoveVector<U8>;
+  publicKeyBytes: MoveVector<U8>;
+  marketAddress: AccountAddress;
+  minOutputAmount: U64;
+};
+
+/**
+ *```
+ *  public entry fun swap_with_rewards<Emojicoin, EmojicoinLP>(
+ *     swapper: &signer,
+ *     market_address: address,
+ *     input_amount: u64,
+ *     is_sell: bool,
+ *     min_output_amount: u64,
+ *  )
+ *```
+ * */
+
+export class Redeem extends EntryFunctionPayloadBuilder {
+  public readonly moduleAddress = REWARDS_MODULE_ADDRESS;
+
+  public readonly moduleName = "emojicoin_dot_fun_claim_link";
+
+  public readonly functionName = "redeem";
+
+  public readonly args: RedeemPayloadMoveArguments;
+
+  public readonly typeTags: [TypeTag, TypeTag]; // [Emojicoin, EmojicoinLP]
+
+  public readonly primarySender: AccountAddress;
+
+  public readonly secondarySenders: [] = [];
+
+  public readonly feePayer?: AccountAddress;
+
+  private constructor(args: {
+    swapper: AccountAddressInput; // &signer
+    signatureBytes: HexInput; // vector<u8>
+    publicKeyBytes: HexInput; // vector<u8>
+    marketAddress: AccountAddressInput; // address
+    minOutputAmount: Uint64; // u64
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
+    feePayer?: AccountAddressInput; // Optional fee payer account to pay gas fees.
+  }) {
+    super();
+    const {
+      swapper,
+      signatureBytes,
+      publicKeyBytes,
+      marketAddress,
+      minOutputAmount,
+      typeTags,
+      feePayer,
+    } = args;
+    this.primarySender = AccountAddress.from(swapper);
+
+    this.args = {
+      signatureBytes: MoveVector.U8(signatureBytes),
+      publicKeyBytes: MoveVector.U8(publicKeyBytes),
+      marketAddress: AccountAddress.from(marketAddress),
+      minOutputAmount: new U64(minOutputAmount),
+    };
+    this.typeTags = typeTags.map((typeTag) =>
+      typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
+    ) as [TypeTag, TypeTag];
+    this.feePayer = feePayer !== undefined ? AccountAddress.from(feePayer) : undefined;
+  }
+
+  static async builder(args: {
+    aptosConfig: AptosConfig;
+    swapper: AccountAddressInput; // &signer
+    signatureBytes: HexInput; // vector<u8>
+    publicKeyBytes: HexInput; // vector<u8>
+    marketAddress: AccountAddressInput; // address
+    minOutputAmount: Uint64; // u64
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
+    feePayer?: AccountAddressInput;
+    options?: InputGenerateTransactionOptions;
+  }): Promise<EntryFunctionTransactionBuilder> {
+    const { aptosConfig, options, feePayer } = args;
+    const payloadBuilder = new this(args);
+    const rawTransactionInput = await buildTransaction({
+      aptosConfig,
+      sender: payloadBuilder.primarySender,
+      payload: payloadBuilder.createPayload(),
+      options,
+      feePayerAddress: feePayer,
+    });
+    const aptos = new Aptos(aptosConfig);
+    return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
+  }
+
+  static async submit(args: {
+    aptosConfig: AptosConfig;
+    swapper: Account; // &signer
+    signatureBytes: HexInput; // vector<u8>
+    publicKeyBytes: HexInput; // vector<u8>
+    marketAddress: AccountAddressInput; // address
+    minOutputAmount: Uint64; // u64
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP]
+    feePayer?: Account;
+    options?: InputGenerateTransactionOptions;
+    waitForTransactionOptions?: WaitForTransactionOptions;
+  }): Promise<UserTransactionResponse> {
+    const { swapper: primarySigner, waitForTransactionOptions, feePayer } = args;
+
+    const transactionBuilder = await Redeem.builder({
+      ...args,
+      feePayer: feePayer ? feePayer.accountAddress : undefined,
+      swapper: primarySigner.accountAddress,
+    });
+    const response = await transactionBuilder.submit({
+      primarySigner,
+      feePayer,
+      options: waitForTransactionOptions,
+    });
+    return response;
+  }
+}
+/**
+ *```
+ *  #[view]
+ *  public fun claim_amount(): u64
+ *```
+ * */
+
+export class ClaimAmount extends ViewFunctionPayloadBuilder<[Uint64String]> {
+  public readonly moduleAddress = MODULE_ADDRESS;
+
+  public readonly moduleName = "emojicoin_dot_fun_claim_link";
+
+  public readonly functionName = "claim_amount";
+
+  public readonly args: Record<string, never> = {};
+
+  public readonly typeTags: [] = [];
+
+  constructor() {
+    super();
+  }
+
+  static async view(args: {
+    aptos: Aptos | AptosConfig;
+    options?: LedgerVersionArg;
+  }): Promise<number> {
+    const [res] = await new ClaimAmount().view(args);
+    return Number(res);
+  }
+}
 
 /**
  *```
