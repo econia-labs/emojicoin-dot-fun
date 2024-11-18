@@ -35,6 +35,7 @@ NAMED_ADDRESSES=$(
 )
 aptos move publish \
     --assume-yes \
+    --move-2 \
     --named-addresses $NAMED_ADDRESSES \
     --profile $PROFILE
 ```
