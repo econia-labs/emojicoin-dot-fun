@@ -42,6 +42,7 @@ export const ALLOWLISTER3K_URL: string | undefined = process.env.ALLOWLISTER3K_U
 export const GALXE_CAMPAIGN_ID: string | undefined = process.env.GALXE_CAMPAIGN_ID;
 export const REVALIDATION_TIME: number = Number(process.env.REVALIDATION_TIME);
 export const VPNAPI_IO_API_KEY: string = process.env.VPNAPI_IO_API_KEY!;
+export const PRE_LAUNCH_TEASER: boolean = process.env.PRE_LAUNCH_TEASER === "true";
 
 if (
   APTOS_NETWORK === Network.LOCAL &&
