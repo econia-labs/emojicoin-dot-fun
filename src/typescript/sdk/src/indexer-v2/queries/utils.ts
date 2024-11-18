@@ -145,6 +145,12 @@ export function queryHelperSingle<
     }
 
     const res = await innerQuery;
+
+    if (res.error) {
+      console.error(res.error);
+      throw new Error(JSON.stringify(res.error));
+    }
+
     const row = extractRow<Row>(res);
     return row ? convert(row) : null;
   };
@@ -181,11 +187,11 @@ export function queryHelperWithCount<
 
     try {
       const res = await innerQuery;
-      const rows = extractRows<Row>(res);
       if (res.error) {
         console.error("[Failed row conversion]:\n");
         throw new Error(JSON.stringify(res));
       }
+      const rows = extractRows<Row>(res);
       return { rows: rows.map(convert), count: res.count };
     } catch (e) {
       console.error(e);
