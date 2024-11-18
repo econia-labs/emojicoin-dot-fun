@@ -43,6 +43,7 @@ jobs:
     - name: 'Push ARM image to Docker Hub'
       uses: 'docker/build-push-action@v6'
       with:
+        build-args: 'FEATURES=ws'
         cache-from: 'type=gha'
         cache-to: 'type=gha,mode=max'
         context: 'src/rust'
