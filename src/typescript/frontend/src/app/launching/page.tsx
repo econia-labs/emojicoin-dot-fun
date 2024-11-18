@@ -19,7 +19,7 @@ export default function LaunchingPage() {
       <MatrixRain />
       <Text
         ref={ref}
-        textScale="pixelHeading1"
+        textScale="pixelHeading2"
         color="econiaBlue"
         textTransform="uppercase"
         className="fixed left-0 right-0 top-0 bottom-0 bg-black"
