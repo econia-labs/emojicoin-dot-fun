@@ -11,8 +11,15 @@ import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { ORDER_BY } from "@sdk/queries";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { unstable_cache } from "next/cache";
 
 export const revalidate = 2;
+
+const getCachedNumMarketsFromAptosNode = unstable_cache(
+  fetchNumRegisteredMarkets,
+  ["num-registered-markets"],
+  { revalidate: 10 }
+);
 
 export default async function Home({ searchParams }: HomePageParams) {
   const { page, sortBy, orderBy, q } = toHomePageParamsWithDefault(searchParams);
@@ -43,7 +50,7 @@ export default async function Home({ searchParams }: HomePageParams) {
       searchEmojis,
       pageSize: MARKETS_PER_PAGE,
     });
-    numMarketsPromise = fetchNumRegisteredMarkets();
+    numMarketsPromise = getCachedNumMarketsFromAptosNode();
   }
 
   let featuredPromise: ReturnType<typeof fetchFeaturedMarket>;
