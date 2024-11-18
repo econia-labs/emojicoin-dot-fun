@@ -206,6 +206,7 @@ Parameters:
     AllowedValues:
     - 'mainnet'
     - 'testnet'
+    - 'devnet'
     Type: 'String'
   PostgrestImageVersion:
     Default: 'v12.2.3'
