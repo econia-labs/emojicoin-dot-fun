@@ -1,7 +1,7 @@
-import { type Network } from "@aptos-labs/wallet-adapter-react";
 import packageInfo from "../../package.json";
 import { parse } from "semver";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import { APTOS_NETWORK as SDK_APTOS_NETWORK } from "@sdk/const";
 
 export type Links = {
   x: string;
@@ -10,7 +10,7 @@ export type Links = {
   tos: string;
 };
 
-let APTOS_NETWORK: Network;
+const APTOS_NETWORK = SDK_APTOS_NETWORK;
 let INTEGRATOR_ADDRESS: AccountAddressString;
 let INTEGRATOR_FEE_RATE_BPS: number;
 let BROKER_URL: string;
@@ -21,17 +21,6 @@ export const LINKS: Links | undefined =
     : undefined;
 
 const IS_ALLOWLIST_ENABLED: boolean = process.env.NEXT_PUBLIC_IS_ALLOWLIST_ENABLED === "true";
-
-if (process.env.NEXT_PUBLIC_APTOS_NETWORK) {
-  const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
-  if (["mainnet", "testnet", "devnet", "local", "custom", "docker"].includes(network)) {
-    APTOS_NETWORK = network as Network;
-  } else {
-    throw new Error(`Invalid network: ${network}`);
-  }
-} else {
-  throw new Error("Environment variable NEXT_PUBLIC_APTOS_NETWORK is undefined.");
-}
 
 if (process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS) {
   INTEGRATOR_ADDRESS = process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS as AccountAddressString;

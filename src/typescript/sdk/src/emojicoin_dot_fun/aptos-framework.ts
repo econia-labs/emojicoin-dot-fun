@@ -8,7 +8,7 @@ import {
   type AptosConfig,
   type InputGenerateTransactionOptions,
   buildTransaction,
-  Aptos,
+  type Aptos,
   type Account,
   type WaitForTransactionOptions,
   type UserTransactionResponse,
@@ -22,6 +22,7 @@ import {
   ViewFunctionPayloadBuilder,
 } from "./payload-builders";
 import { type TypeTagInput } from ".";
+import { getAptosClient } from "../utils/aptos-client";
 
 export type MintPayloadMoveArguments = {
   dstAddr: AccountAddress;
@@ -89,7 +90,7 @@ export class Mint extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const { aptos } = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -189,7 +190,7 @@ export class BatchTransferCoins extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const { aptos } = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -290,7 +291,7 @@ export class TransferCoins extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const { aptos } = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 

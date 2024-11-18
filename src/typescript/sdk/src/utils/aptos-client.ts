@@ -1,22 +1,20 @@
-import { Aptos, AptosConfig, Network, NetworkToNetworkName } from "@aptos-labs/ts-sdk";
+import { Aptos, AptosConfig, type ClientConfig } from "@aptos-labs/ts-sdk";
+import { APTOS_API_KEY, APTOS_NETWORK } from "../const";
+
+export const APTOS_CONFIG: Partial<ClientConfig> = {
+  API_KEY: APTOS_API_KEY,
+};
 
 export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
   aptos: Aptos;
   config: AptosConfig;
 } {
-  const network = getAptosNetwork();
+  const network = APTOS_NETWORK;
   const config = new AptosConfig({
     network,
     ...additionalConfig,
+    ...APTOS_CONFIG,
   });
   const aptos = new Aptos(config);
   return { aptos, config };
-}
-
-export function getAptosNetwork(): Network {
-  const networkRaw = process.env.NEXT_PUBLIC_APTOS_NETWORK;
-  if (!networkRaw) {
-    throw new Error("NEXT_PUBLIC_APTOS_NETWORK environment variable is not set.");
-  }
-  return networkRaw ? NetworkToNetworkName[networkRaw] : Network.LOCAL;
 }

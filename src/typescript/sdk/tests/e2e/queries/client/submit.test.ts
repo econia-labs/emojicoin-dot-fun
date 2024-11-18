@@ -1,4 +1,5 @@
 import {
+  APTOS_API_KEY,
   getEmojicoinMarketAddressAndTypeTags,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
@@ -20,7 +21,7 @@ import {
   Network,
 } from "@aptos-labs/ts-sdk";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
-import { getAptosNetwork } from "../../../../src/utils/aptos-client";
+import { getAptosClient, getAptosNetwork } from "../../../../src/utils/aptos-client";
 import { calculatePeriodBoundariesCrossed } from "../../../../src/utils/test";
 
 jest.setTimeout(15000);
@@ -101,6 +102,26 @@ describe("all submission types for the emojicoin client", () => {
     const aptos = new Aptos(config);
     const emojicoinClient = new EmojicoinClient({ aptos });
     expect(emojicoinClient.aptos.config.network).toEqual(Network.TESTNET);
+  });
+
+  it("sets the API key in the aptos client configuration", () => {
+    const config = new AptosConfig({
+      network: Network.TESTNET,
+    });
+    const aptos = new Aptos(config);
+    const emojicoinClient = new EmojicoinClient({ aptos });
+    expect(aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
+    expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
+  });
+
+  it("sets the API key in the client returned by getAptos()", () => {
+    const config = new AptosConfig({
+      network: Network.TESTNET,
+    });
+    const { aptos } = getAptosClient(config);
+    const emojicoinClient = new EmojicoinClient({ aptos });
+    expect(aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
+    expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
   });
 
   it("creates the aptos client with the correct default configuration settings", () => {
