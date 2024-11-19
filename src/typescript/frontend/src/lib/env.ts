@@ -1,7 +1,7 @@
 import packageInfo from "../../package.json";
 import { parse } from "semver";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import { APTOS_NETWORK as SDK_APTOS_NETWORK } from "@sdk/const";
+import { type Network } from "@aptos-labs/ts-sdk";
 
 export type Links = {
   x: string;
@@ -10,7 +10,15 @@ export type Links = {
   tos: string;
 };
 
-const APTOS_NETWORK = SDK_APTOS_NETWORK;
+const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
+const APTOS_NETWORK = network as Network;
+// NOTE: We must check it this way instead of with `NetworkToNetworkName[APTOS_NETWORK]` because
+// otherwise the @aptos-labs/ts-sdk package is included in the middleware.ts function and the edge
+// runtime won't build properly.
+if (!["local", "devnet", "testnet", "mainnet", "custom"].includes(APTOS_NETWORK)) {
+  throw new Error(`Invalid network: ${network}`);
+}
+
 let INTEGRATOR_ADDRESS: AccountAddressString;
 let INTEGRATOR_FEE_RATE_BPS: number;
 let BROKER_URL: string;
