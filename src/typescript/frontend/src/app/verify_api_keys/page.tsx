@@ -4,7 +4,7 @@ import { getAptosClient } from "@sdk/utils/aptos-client";
 
 export const dynamic = "force-static";
 export const revalidate = 600;
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 const VerifyApiKeys = async () => {
   const { aptos } = getAptosClient();

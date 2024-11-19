@@ -50,12 +50,13 @@ const allAPIKeys: Record<Network, string | undefined> = {
 
 const apiKey = allAPIKeys[APTOS_NETWORK];
 if (typeof apiKey === "undefined") {
-  // Do nothing if we're on a local network, because we don't need an API key for it. For custom,
-  // warn the developer.
-  if (APTOS_NETWORK === "custom") {
-    console.warn(`No API key set. Ignoring because we're on the \`${APTOS_NETWORK}\` network.`);
-  } else {
-    throw new Error(`Invalid API key set for the network: ${APTOS_NETWORK}: ${apiKey}`);
+  // Do nothing if we're on a local network, because we don't need an API key for it.
+  if (APTOS_NETWORK !== "local") {
+    if (APTOS_NETWORK === "custom") {
+      console.warn(`No API key set. Ignoring because we're on the \`${APTOS_NETWORK}\` network.`);
+    } else {
+      throw new Error(`Invalid API key set for the network: ${APTOS_NETWORK}: ${apiKey}`);
+    }
   }
 }
 // Select the API key from the list of env API keys. This means we don't have to change the env
