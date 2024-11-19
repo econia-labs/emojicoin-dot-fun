@@ -41,7 +41,7 @@ export const SwapButton = ({
   minOutputAmount: bigint | number | string;
 }) => {
   const { t } = translationFunction();
-  const { aptos, account, submit } = useAptos();
+  const { aptos, account, submit, signThenSubmit } = useAptos();
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
@@ -55,6 +55,7 @@ export const SwapButton = ({
     let builderLambda: () => Promise<EntryFunctionTransactionBuilder>;
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
     try {
+      const isClaimFlow = !!claimAccount;
       if (claimAccount) {
         const signatureBytes = claimAccount.privateKey.sign(account.address).toString();
         const publicKeyBytes = claimAccount.publicKey.toUint8Array();
@@ -81,7 +82,7 @@ export const SwapButton = ({
             minOutputAmount: BigInt(minOutputAmount),
           });
       }
-      const res = await submit(builderLambda);
+      const res = await (isClaimFlow ? signThenSubmit(builderLambda) : submit(builderLambda));
       if (res && res.response && isUserTransactionResponse(res.response)) {
         const rewardsEvent = res.response.events.find(
           (e) => e.type === STRUCT_STRINGS.EmojicoinDotFunRewards

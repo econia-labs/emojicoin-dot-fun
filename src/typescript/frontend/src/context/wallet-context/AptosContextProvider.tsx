@@ -262,17 +262,11 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           const builder = await builderFn();
           setStatus("prompt");
           const input = builder.payloadBuilder.toInputPayload();
-          // If the input fee payer is defined, it means this is the claim/redeem function and we
-          // need to use the claim account information in the hook to sign the transaction.
-          // if (input.feePayer) {
-
-          // }
-          const asdf = adapterSignAndSubmitTxn(input).then((res) => ({
+          return adapterSignAndSubmitTxn(input).then((res) => ({
             aptos: builder.aptos,
             functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
             res,
           }));
-          return asdf;
         };
 
         return await handleTransactionSubmission(network, trySubmit);
@@ -284,7 +278,8 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
 
   // To manually enforce explicit gas options, we can use this transaction submission flow.
   // Note that you need to pass the options to the builder, not here. It's possible to do it here, but it's
-  // unnecessary to support that and I'm not gonna write the code for it.
+  // unnecessarily complex.
+  // Also, use this function to call functions that use a client-side fee payer (the redeem/claimKey flow).
   const signThenSubmit = useCallback(
     async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
       if (geoblocked) return null;
