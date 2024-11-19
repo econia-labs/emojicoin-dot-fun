@@ -1,4 +1,10 @@
-import { AccountAddress, APTOS_COIN, parseTypeTag } from "@aptos-labs/ts-sdk";
+import {
+  AccountAddress,
+  APTOS_COIN,
+  Network,
+  NetworkToNetworkName,
+  parseTypeTag,
+} from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import { type ValueOf } from "./utils/utility-types";
 import { type DatabaseStructType } from "./indexer-v2/types/json-types";
@@ -8,13 +14,15 @@ if (
   !process.env.NEXT_PUBLIC_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS ||
-  !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
+  !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS ||
+  !process.env.NEXT_PUBLIC_APTOS_NETWORK
 ) {
   const missing = [
     ["NEXT_PUBLIC_MODULE_ADDRESS", process.env.NEXT_PUBLIC_MODULE_ADDRESS],
     ["NEXT_PUBLIC_REWARDS_MODULE_ADDRESS", process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS", process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS],
+    ["NEXT_PUBLIC_APTOS_NETWORK", process.env.NEXT_PUBLIC_APTOS_NETWORK],
   ].filter(([_, value]) => !value);
   missing.forEach(([key, _]) => {
     console.error(`Missing environment variables ${key}`);
@@ -26,6 +34,35 @@ if (
   );
 }
 
+const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
+export const APTOS_NETWORK = NetworkToNetworkName[network];
+if (!APTOS_NETWORK) {
+  throw new Error(`Invalid network: ${network}`);
+}
+
+const allAPIKeys: Record<Network, string | undefined> = {
+  [Network.LOCAL]: process.env.NEXT_PUBLIC_LOCAL_APTOS_API_KEY,
+  [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY,
+  [Network.DEVNET]: process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,
+  [Network.TESTNET]: process.env.NEXT_PUBLIC_TESTNET_APTOS_API_KEY,
+  [Network.MAINNET]: process.env.NEXT_PUBLIC_MAINNET_APTOS_API_KEY,
+};
+
+const apiKey = allAPIKeys[APTOS_NETWORK];
+if (typeof apiKey === "undefined") {
+  // Do nothing if we're on a local network, because we don't need an API key for it.
+  if (APTOS_NETWORK !== "local") {
+    if (APTOS_NETWORK === "custom") {
+      console.warn(`No API key set. Ignoring because we're on the \`${APTOS_NETWORK}\` network.`);
+    } else {
+      throw new Error(`Invalid API key set for the network: ${APTOS_NETWORK}: ${apiKey}`);
+    }
+  }
+}
+// Select the API key from the list of env API keys. This means we don't have to change the env
+// var for API keys when changing environments- we just need to provide them all every time, which
+// is much simpler.
+export const APTOS_API_KEY = apiKey;
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();

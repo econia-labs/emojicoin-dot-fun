@@ -17,7 +17,7 @@ module rewards::emojicoin_dot_fun_claim_link {
     use std::signer;
 
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
-    const DEFAULT_CLAIM_AMOUNT: u64 = 100_000_000;
+    const DEFAULT_CLAIM_AMOUNT: u64 = 500_000_000;
     const VAULT: vector<u8> = b"Claim link vault";
 
     /// Signer does not correspond to admin.

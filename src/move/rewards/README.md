@@ -35,6 +35,7 @@ NAMED_ADDRESSES=$(
 )
 aptos move publish \
     --assume-yes \
+    --move-2 \
     --named-addresses $NAMED_ADDRESSES \
     --profile $PROFILE
 ```
@@ -44,7 +45,7 @@ aptos move publish \
 ```sh
 REWARDS=0xaaa...
 PROFILE=my-profile
-N_CLAIM_LINK_REDEMPTIONS_TO_FUND=10
+N_CLAIM_LINK_REDEMPTIONS_TO_FUND="u64:10"
 N_REWARDS_TO_FUND_PER_TIER="u64:[1500,500,200,50,5,1]"
 ```
 
