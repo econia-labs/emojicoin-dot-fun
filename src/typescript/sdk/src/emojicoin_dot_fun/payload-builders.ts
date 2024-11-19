@@ -143,6 +143,10 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
 
   public abstract readonly feePayer?: AccountAddress;
 
+  fullyQualifiedFunctionName(): `0x${string}::${string}::${string}` {
+    return `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`;
+  }
+
   createPayload(
     multisigAddress?: AccountAddress
   ): TransactionPayloadEntryFunction | TransactionPayloadMultiSig {

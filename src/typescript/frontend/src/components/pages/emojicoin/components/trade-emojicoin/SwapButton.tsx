@@ -6,11 +6,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
-import {
-  Account,
-  Ed25519PrivateKey,
-  isUserTransactionResponse,
-} from "@aptos-labs/ts-sdk";
+import { isUserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { STRUCT_STRINGS } from "@sdk/utils";
 import { useAnimationControls } from "framer-motion";
 import { RewardsAnimation } from "./RewardsAnimation";
@@ -20,6 +16,7 @@ import { useCanTradeMarket } from "lib/hooks/queries/use-grace-period";
 import Popup from "components/popup";
 import { useUserSettings } from "context/event-store-context";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
+import { useClaimAccount } from "lib/hooks/queries/use-claim-account";
 
 const GRACE_PERIOD_MESSAGE =
   "This market is in its grace period. During the grace period of a market, only the market " +
@@ -48,8 +45,8 @@ export const SwapButton = ({
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
-  const claimKey = useUserSettings((s) => s.claimKey);
-  const setFreeSwapData = useUserSettings((s) => s.setClaimKey);
+  const setClaimKey = useUserSettings((s) => s.setClaimKey);
+  const claimAccount = useClaimAccount();
 
   const handleClick = useCallback(async () => {
     if (!account) {
@@ -58,20 +55,19 @@ export const SwapButton = ({
     let builderLambda: () => Promise<EntryFunctionTransactionBuilder>;
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
     try {
-      if (claimKey !== undefined) {
-        const privateKey = new Ed25519PrivateKey(Buffer.from(claimKey, "base64").subarray(16));
-        const publicKey = privateKey.publicKey();
-        const feePayerAccount = Account.fromPrivateKey({ privateKey });
+      if (claimAccount) {
+        const signatureBytes = claimAccount.privateKey.sign(account.address).toString();
+        const publicKeyBytes = claimAccount.publicKey.toUint8Array();
         builderLambda = () =>
           Redeem.builder({
             aptosConfig: aptos.config,
             swapper: account.address,
-            signatureBytes: privateKey.sign(account.address).toString(),
-            publicKeyBytes: publicKey.toString(),
+            signatureBytes,
+            publicKeyBytes,
             marketAddress,
             typeTags: [emojicoin, emojicoinLP],
             minOutputAmount: BigInt(minOutputAmount),
-            feePayer: feePayerAccount.accountAddress,
+            feePayer: claimAccount.accountAddress,
           });
       } else {
         builderLambda = () =>
@@ -112,7 +108,7 @@ export const SwapButton = ({
     } catch (e) {
       console.error(e);
     } finally {
-      setFreeSwapData(undefined);
+      setClaimKey(undefined);
     }
   }, [
     account,
@@ -123,8 +119,8 @@ export const SwapButton = ({
     submit,
     controls,
     minOutputAmount,
-    claimKey,
-    setFreeSwapData,
+    claimAccount,
+    setClaimKey,
   ]);
 
   useEffect(() => {

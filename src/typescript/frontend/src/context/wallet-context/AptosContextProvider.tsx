@@ -41,6 +41,8 @@ import {
 import { getEventsAsProcessorModelsFromResponse } from "@sdk/mini-processor";
 import { emoji } from "utils";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import { useClaimAccount } from "lib/hooks/queries/use-claim-account";
+import { REWARDS_MODULE_ADDRESS } from "@sdk/const";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -93,6 +95,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const [lastResponseStoredAt, setLastResponseStoredAt] = useState(-1);
   const [emojicoinType, setEmojicoinType] = useState<string | undefined>();
   const geoblocked = useIsUserGeoblocked();
+  const claimAccount = useClaimAccount();
 
   const { emojicoin, emojicoinLP } = useMemo(() => {
     if (!emojicoinType) return { emojicoin: undefined, emojicoinLP: undefined };
@@ -259,11 +262,17 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
           const builder = await builderFn();
           setStatus("prompt");
           const input = builder.payloadBuilder.toInputPayload();
-          return adapterSignAndSubmitTxn(input).then((res) => ({
+          // If the input fee payer is defined, it means this is the claim/redeem function and we
+          // need to use the claim account information in the hook to sign the transaction.
+          // if (input.feePayer) {
+
+          // }
+          const asdf = adapterSignAndSubmitTxn(input).then((res) => ({
             aptos: builder.aptos,
             functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
             res,
           }));
+          return asdf;
         };
 
         return await handleTransactionSubmission(network, trySubmit);
@@ -283,10 +292,20 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
         const trySubmit = async () => {
           const builder = await builderFn();
           setStatus("prompt");
+          // Check if it's the redeem function and that the claim account exists- if so, sign it with the claim account
+          // as the fee payer and send the fee payer authenticator to the submitTransaction function.
+          const isRedeemFunction =
+            builder.payloadBuilder.fullyQualifiedFunctionName() ===
+            `${REWARDS_MODULE_ADDRESS}::emojicoin_dot_fun_claim_link::redeem`;
+          const feePayerAuthenticator =
+            isRedeemFunction && claimAccount
+              ? claimAccount.signTransactionWithAuthenticator(builder.rawTransactionInput)
+              : undefined;
           const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
           return submitTransaction({
             transaction: builder.rawTransactionInput,
             senderAuthenticator,
+            feePayerAuthenticator,
           }).then((res) => ({
             aptos: builder.aptos,
             functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
@@ -297,7 +316,14 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
       }
       return null;
     },
-    [network, handleTransactionSubmission, signTransaction, submitTransaction, geoblocked]
+    [
+      network,
+      handleTransactionSubmission,
+      signTransaction,
+      submitTransaction,
+      geoblocked,
+      claimAccount,
+    ]
   );
 
   const setCoinTypeHelper = (

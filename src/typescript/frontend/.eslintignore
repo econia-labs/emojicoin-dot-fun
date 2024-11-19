@@ -3,3 +3,4 @@ dist/
 .next/
 public/static/
 tests/e2e/global.*.ts
+playwright-report/
