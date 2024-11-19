@@ -41,11 +41,11 @@ if (!APTOS_NETWORK) {
 }
 
 const allAPIKeys: Record<Network, string | undefined> = {
-  [Network.LOCAL]: process.env.NEXT_PUBLIC_LOCAL_APTOS_API_KEY,
+  [Network.LOCAL]: process.env.NEXT_PUBLIC_LOCAL_APTOS_API_KEY ?? "",
+  [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY ?? "",
   [Network.DEVNET]: process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,
   [Network.TESTNET]: process.env.NEXT_PUBLIC_TESTNET_APTOS_API_KEY,
   [Network.MAINNET]: process.env.NEXT_PUBLIC_MAINNET_APTOS_API_KEY,
-  [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY,
 };
 export const apiKey = allAPIKeys[APTOS_NETWORK];
 if (typeof apiKey === "undefined") {

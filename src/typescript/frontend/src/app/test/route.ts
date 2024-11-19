@@ -5,6 +5,9 @@ export const revalidate = 2;
 export const fetchCache = "default-cache";
 
 export async function GET() {
+  if (process.env.NODE_ENV !== "test") {
+    return new NextResponse("-1");
+  }
   const aptos = getAptos();
   try {
     const version = await aptos.getLedgerInfo().then((res) => res.ledger_version);
