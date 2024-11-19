@@ -13,7 +13,10 @@ export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
   const config = new AptosConfig({
     network,
     ...additionalConfig,
-    ...APTOS_CONFIG,
+    clientConfig: {
+      ...additionalConfig?.clientConfig,
+      ...APTOS_CONFIG,
+    },
   });
   const aptos = new Aptos(config);
   return { aptos, config };

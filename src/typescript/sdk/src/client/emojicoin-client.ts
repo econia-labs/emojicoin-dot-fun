@@ -147,7 +147,10 @@ export class EmojicoinClient {
       minOutputAmount = 1n,
     } = args ?? {};
     // Create a client that always uses the static API_KEY config options.
-    const hardCodedConfig = new AptosConfig({ ...aptos.config, clientConfig: APTOS_CONFIG });
+    const hardCodedConfig = new AptosConfig({
+      ...aptos.config,
+      clientConfig: { ...aptos.config.clientConfig, ...APTOS_CONFIG },
+    });
     this.aptos = new Aptos(hardCodedConfig);
     this.integrator = AccountAddress.from(integrator);
     this.integratorFeeRateBPs = Number(integratorFeeRateBPs);
