@@ -13,7 +13,8 @@ const VerifyApiKeys = async () => {
   try {
     balance = await aptos.account.getAccountAPTAmount({ accountAddress });
   } catch (e) {
-    throw new Error(`Couldn't fetch ${accountAddress}'s balance. APTOS_API_KEY: ${APTOS_API_KEY}`);
+    const msg = `\n\tLikely an invalid API key. APTOS_API_KEY: ${APTOS_API_KEY}`;
+    throw new Error(`Couldn't fetch ${accountAddress}'s balance. ${msg}`);
   }
 
   return (
