@@ -73,7 +73,9 @@ indexer deployments.
 
    A plaintext API key for the [transaction stream service endpoint] you are
    connecting to, for example an
-   [Aptos Labs transaction stream service API key].
+   [Aptos Labs transaction stream service API key]. Note that you'll need to
+   prepend `https://` as applicable if it is a public endpoint, for example
+   `https://grpc.devnet.aptoslabs.com:443`
 
    </td></tr></table>
 
