@@ -28,6 +28,7 @@ import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
 import { isMobile, isTablet } from "react-device-detect";
+import { APTOS_API_KEY } from "@sdk/const";
 
 enableMapSet();
 
@@ -50,7 +51,10 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <AptosWalletAdapterProvider
               plugins={wallets}
               autoConnect={false}
-              dappConfig={{ network: APTOS_NETWORK }}
+              dappConfig={{
+                aptosApiKey: APTOS_API_KEY,
+                network: APTOS_NETWORK,
+              }}
             >
               <WalletModalContextProvider>
                 <AptosContextProvider>
