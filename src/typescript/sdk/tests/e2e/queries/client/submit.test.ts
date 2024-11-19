@@ -111,7 +111,7 @@ describe("all submission types for the emojicoin client", () => {
     });
     const aptos = new Aptos(config);
     const emojicoinClient = new EmojicoinClient({ aptos });
-    expect(aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
+    expect(aptos.config.clientConfig?.API_KEY ?? "").toEqual(APTOS_API_KEY);
     expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
   });
 
@@ -121,7 +121,7 @@ describe("all submission types for the emojicoin client", () => {
     });
     const { aptos } = getAptosClient(config);
     const emojicoinClient = new EmojicoinClient({ aptos });
-    expect(aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
+    expect(aptos.config.clientConfig?.API_KEY ?? "").toEqual(APTOS_API_KEY);
     expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
   });
 

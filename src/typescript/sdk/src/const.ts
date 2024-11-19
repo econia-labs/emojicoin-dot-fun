@@ -47,7 +47,7 @@ const allAPIKeys: Record<Network, string | undefined> = {
   [Network.TESTNET]: process.env.NEXT_PUBLIC_TESTNET_APTOS_API_KEY,
   [Network.MAINNET]: process.env.NEXT_PUBLIC_MAINNET_APTOS_API_KEY,
 };
-export const apiKey = allAPIKeys[APTOS_NETWORK];
+const apiKey = allAPIKeys[APTOS_NETWORK];
 if (typeof apiKey === "undefined") {
   throw new Error(`Invalid API key set for the network: ${APTOS_NETWORK}: ${apiKey}`);
 }
