@@ -10,7 +10,7 @@ const useClaimAmount = () => {
     queryKey: ["claim-amount"],
     queryFn: () => ClaimAmount.view({ aptos }),
     staleTime: MS_IN_ONE_DAY,
-    initialData: ONE_APT,
+    initialData: ONE_APT * 5,
   });
 
   return data;
