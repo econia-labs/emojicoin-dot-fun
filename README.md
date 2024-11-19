@@ -75,7 +75,7 @@ history looks like this:
 
 Then the last commit they share (the common ancestor) is `02abde4`.
 
-Thus you should run:
+Thus you should run this:
 
 ```shell
 # Cherry-pick all commits from `02abde4..06eadf3` into `production`.
