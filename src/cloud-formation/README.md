@@ -73,7 +73,9 @@ indexer deployments.
 
    A plaintext API key for the [transaction stream service endpoint] you are
    connecting to, for example an
-   [Aptos Labs transaction stream service API key].
+   [Aptos Labs transaction stream service API key]. Note that you'll need to
+   prepend `https://` as applicable if it is a public endpoint, for example
+   `https://grpc.devnet.aptoslabs.com:443`
 
    </td></tr></table>
 
@@ -96,7 +98,7 @@ indexer deployments.
     Description
     </th></tr><tr><td>
 
-   `/emojicoin/grpc-data-service-url/<mainnet|testnet>`
+   `/emojicoin/grpc-data-service-url/<mainnet|testnet|devnet>`
 
    </td><td>
 
@@ -120,14 +122,14 @@ indexer deployments.
 
    </td></tr><tr><td>
 
-   `/emojicoin/minimum-starting-version/<mainnet|testnet>`
+   `/emojicoin/minimum-starting-version/<mainnet|testnet|devnet>`
 
    </td><td>
     A transaction version number prior to the version in which the target Move
     package was published.
     </td></tr><tr><td>
 
-   `/emojicoin/package-address/<mainnet|testnet>`
+   `/emojicoin/package-address/<mainnet|testnet|devnet>`
 
    </td><td>
     The address of the Move package you want to index.
@@ -135,9 +137,10 @@ indexer deployments.
 
    <!-- markdownlint-enable MD033 -->
 
-   > Substitute either `mainnet` or `testnet` for `<mainnet|testnet>` depending
-   > on the network you want to index (create a parameter for each network if
-   > you want to run deployments for both).
+   > Substitute either `mainnet`, `testnet`, or `devnet` for
+   > `<mainnet|testnet|devnet>` depending on the network you want to index
+   > (create a parameter for each network if you want to run deployments for
+   > all).
 
 1. Create the following [IAM roles]:
 
