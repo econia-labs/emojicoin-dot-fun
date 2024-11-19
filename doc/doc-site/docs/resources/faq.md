@@ -15,7 +15,7 @@ caught the emojicoin bug.*
 
 **Q: What is the cost to launch an Emojicoin?**
 
-A: 1 APT, plus a 4 APT deposit that is automatically refunded after the market
+A: 1 APT, plus a 1 APT deposit that is automatically refunded after the market
 exits the bonding curve
 
 <!-- markdownlint-disable MD013 -->
