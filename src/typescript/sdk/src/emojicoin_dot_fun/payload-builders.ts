@@ -120,6 +120,7 @@ export class EntryFunctionTransactionBuilder {
 /* eslint-disable-next-line import/no-unused-modules */
 export type WalletInputTransactionData = {
   sender?: AccountAddressInput;
+  feePayer?: AccountAddressInput;
   // For now we only use entry functions. Eventually we could support script functions, too.
   data: InputEntryFunctionData;
   options?: InputGenerateTransactionOptions;
@@ -173,6 +174,7 @@ export abstract class EntryFunctionPayloadBuilder extends Serializable {
 
     return {
       sender: this.primarySender,
+      feePayer: this.feePayer,
       data: {
         ...multiSigData,
         function: `${this.moduleAddress.toString()}::${this.moduleName}::${this.functionName}`,

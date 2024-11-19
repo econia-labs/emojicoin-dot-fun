@@ -1,10 +1,8 @@
 "use client";
 
-import { type FreeSwapData } from "@/store/user-settings-store";
 import { useUserSettings } from "context/event-store-context";
 import { redirect } from "next/navigation";
-import { useEffect, useMemo } from "react";
-import { parseJSON } from "utils";
+import { useEffect } from "react";
 
 interface PageProps {
   params: {
@@ -14,18 +12,15 @@ interface PageProps {
 }
 
 export default function GenerateQRCode(props: PageProps) {
-  const data = decodeURIComponent(props.params.data);
-  const setFreeSwap = useUserSettings((s) => s.setFreeSwapData);
-  const freeSwapData: FreeSwapData = useMemo(() => {
-    return parseJSON(atob(data));
-  }, [data]);
+  const claimKey = decodeURIComponent(props.params.data);
+  const setClaimKey = useUserSettings((s) => s.setClaimKey);
 
   useEffect(() => {
-    if (setFreeSwap) {
-      setFreeSwap(freeSwapData);
+    if (setClaimKey) {
+      setClaimKey(claimKey);
       redirect("/home");
     }
-  }, [freeSwapData, setFreeSwap]);
+  }, [claimKey, setClaimKey]);
 
   return (
     <div className="h-[100%] w-[100%] block content-center">

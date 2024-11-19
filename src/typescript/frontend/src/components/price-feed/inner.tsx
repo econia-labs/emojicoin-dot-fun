@@ -22,7 +22,7 @@ const Item = ({ emoji, change }: { emoji: string; change: number }) => {
 };
 
 export const PriceFeedInner = ({ data }: { data: Awaited<ReturnType<typeof fetchPriceFeed>> }) => {
-  const hasFreeSwap = useUserSettings((s) => s.freeSwapData !== undefined);
+  const hasFreeSwap = useUserSettings((s) => s.claimKey !== undefined);
   return !hasFreeSwap ? (
     <div className="w-full z-[10] relative">
       <Carousel>

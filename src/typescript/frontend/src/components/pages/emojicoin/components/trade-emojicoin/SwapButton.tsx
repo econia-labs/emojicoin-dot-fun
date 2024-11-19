@@ -6,7 +6,11 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 import { type Dispatch, type SetStateAction, useEffect, useCallback } from "react";
-import { Ed25519PrivateKey, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  Ed25519PrivateKey,
+  isUserTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import { STRUCT_STRINGS } from "@sdk/utils";
 import { useAnimationControls } from "framer-motion";
 import { RewardsAnimation } from "./RewardsAnimation";
@@ -44,8 +48,8 @@ export const SwapButton = ({
   const controls = useAnimationControls();
   const { canTrade } = useCanTradeMarket(symbol);
 
-  const freeSwapData = useUserSettings((s) => s.freeSwapData);
-  const setFreeSwapData = useUserSettings((s) => s.setFreeSwapData);
+  const claimKey = useUserSettings((s) => s.claimKey);
+  const setFreeSwapData = useUserSettings((s) => s.setClaimKey);
 
   const handleClick = useCallback(async () => {
     if (!account) {
@@ -54,9 +58,10 @@ export const SwapButton = ({
     let builderLambda: () => Promise<EntryFunctionTransactionBuilder>;
     const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
     try {
-      if (freeSwapData !== undefined) {
-        const privateKey = new Ed25519PrivateKey(freeSwapData.feePayerKey);
+      if (claimKey !== undefined) {
+        const privateKey = new Ed25519PrivateKey(Buffer.from(claimKey, "base64").subarray(16));
         const publicKey = privateKey.publicKey();
+        const feePayerAccount = Account.fromPrivateKey({ privateKey });
         builderLambda = () =>
           Redeem.builder({
             aptosConfig: aptos.config,
@@ -66,7 +71,7 @@ export const SwapButton = ({
             marketAddress,
             typeTags: [emojicoin, emojicoinLP],
             minOutputAmount: BigInt(minOutputAmount),
-            feePayer: freeSwapData.feePayerKey,
+            feePayer: feePayerAccount.accountAddress,
           });
       } else {
         builderLambda = () =>
@@ -118,7 +123,7 @@ export const SwapButton = ({
     submit,
     controls,
     minOutputAmount,
-    freeSwapData,
+    claimKey,
     setFreeSwapData,
   ]);
 

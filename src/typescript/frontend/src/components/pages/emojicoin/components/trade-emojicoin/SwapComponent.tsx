@@ -67,7 +67,7 @@ export default function SwapComponent({
   const { t } = translationFunction();
   const searchParams = useSearchParams();
 
-  const hasFreeSwap = useUserSettings((s) => s.freeSwapData !== undefined);
+  const hasFreeSwap = useUserSettings((s) => s.claimKey !== undefined);
 
   const claimAmount = useClaimAmount() / ONE_APT;
 

@@ -4,7 +4,7 @@ import { useUserSettings } from "context/event-store-context";
 import Carousel from "components/carousel";
 
 export const RewardsBanner = () => {
-  const hasFreeSwap = useUserSettings((s) => s.freeSwapData !== undefined);
+  const hasFreeSwap = useUserSettings((s) => s.claimKey !== undefined);
   return hasFreeSwap ? (
     <div className="w-full z-[10] relative">
       <Carousel>
