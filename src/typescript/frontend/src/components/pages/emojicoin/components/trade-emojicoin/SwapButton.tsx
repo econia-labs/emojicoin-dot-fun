@@ -118,6 +118,7 @@ export const SwapButton = ({
     isSell,
     marketAddress,
     submit,
+    signThenSubmit,
     controls,
     minOutputAmount,
     claimAccount,

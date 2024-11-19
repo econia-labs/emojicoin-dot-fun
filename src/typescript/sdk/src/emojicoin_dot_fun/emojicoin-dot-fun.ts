@@ -779,12 +779,12 @@ export type RedeemPayloadMoveArguments = {
 
 /**
  *```
- *  public entry fun swap_with_rewards<Emojicoin, EmojicoinLP>(
- *     swapper: &signer,
+ *  public entry fun redeem<Emojicoin, EmojicoinLP>(
+ *     claimant: &signer,
+ *     signature_bytes: vector<u8>,
+ *     public_key_bytes: vector<u8>,
  *     market_address: address,
- *     input_amount: u64,
- *     is_sell: bool,
- *     min_output_amount: u64,
+ *     min_output_amount: u64
  *  )
  *```
  * */
