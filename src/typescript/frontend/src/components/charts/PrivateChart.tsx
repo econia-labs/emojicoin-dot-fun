@@ -28,11 +28,10 @@ import path from "path";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
-import { getAptosConfig } from "lib/utils/aptos-client";
+import { getAptos } from "lib/utils/aptos-client";
 import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
 import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
-import { Aptos } from "@aptos-labs/ts-sdk";
 import { periodEnumToRawDuration, Trigger } from "@sdk/const";
 import {
   type LatestBar,
@@ -184,7 +183,7 @@ export const Chart = (props: ChartContainerProps) => {
             // Also, we specifically call this client-side because the server will get rate-limited if we call the
             // fullnode from the server for each client.
             const marketResource = await getMarketResource({
-              aptos: new Aptos(getAptosConfig()),
+              aptos: getAptos(),
               marketAddress: props.marketAddress,
             });
 

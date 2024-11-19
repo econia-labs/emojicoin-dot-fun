@@ -27,6 +27,12 @@
         ".next/**"
       ]
     },
+    "build:test": {
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
+    },
     "check": {
       "outputs": []
     },

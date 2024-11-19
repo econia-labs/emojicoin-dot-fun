@@ -1,12 +1,13 @@
 import {
   AccountAddress,
+  Aptos,
   type Account,
   type UserTransactionResponse,
   type AccountAddressInput,
-  type Aptos,
   type TypeTag,
   type InputGenerateTransactionOptions,
   type WaitForTransactionOptions,
+  AptosConfig,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
 import { EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
@@ -21,7 +22,7 @@ import {
 import { type Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
-import { getAptosClient } from "../utils/aptos-client";
+import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
 import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
@@ -145,7 +146,12 @@ export class EmojicoinClient {
       integratorFeeRateBPs = 0,
       minOutputAmount = 1n,
     } = args ?? {};
-    this.aptos = aptos;
+    // Create a client that always uses the static API_KEY config options.
+    const hardCodedConfig = new AptosConfig({
+      ...aptos.config,
+      clientConfig: { ...aptos.config.clientConfig, ...APTOS_CONFIG },
+    });
+    this.aptos = new Aptos(hardCodedConfig);
     this.integrator = AccountAddress.from(integrator);
     this.integratorFeeRateBPs = Number(integratorFeeRateBPs);
     this.minOutputAmount = BigInt(minOutputAmount);
