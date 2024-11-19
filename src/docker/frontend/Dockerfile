@@ -41,6 +41,6 @@ ENV HASH_SEED=$HASH_SEED \
     NEXT_PUBLIC_TESTNET_APTOS_API_KEY=$FRONTEND_TESTNET_APTOS_API_KEY \
     NEXT_PUBLIC_MAINNET_APTOS_API_KEY=$FRONTEND_MAINNET_APTOS_API_KEY
 
-RUN ["bash", "-c", "pnpm install && pnpm run build:no-checks"]
+RUN ["bash", "-c", "pnpm install && pnpm run build:test"]
 
 CMD ["bash", "-c", "pnpm run start -- -H 0.0.0.0"]
