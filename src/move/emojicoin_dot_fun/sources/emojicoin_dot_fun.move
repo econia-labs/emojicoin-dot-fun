@@ -35,7 +35,7 @@ module emojicoin_dot_fun::emojicoin_dot_fun {
     const POOL_FEE_RATE_BPS: u8 = 25;
 
     /// Denominated in `AptosCoin` subunits.
-    const MARKET_REGISTRATION_DEPOSIT: u64 = 400_000_000;
+    const MARKET_REGISTRATION_DEPOSIT: u64 = 100_000_000;
     const MARKET_REGISTRATION_FEE: u64 = 100_000_000;
 
     /// Named object seed for the registry.
