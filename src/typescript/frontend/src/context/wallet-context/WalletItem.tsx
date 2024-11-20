@@ -11,6 +11,7 @@ import PetraIcon from "@icons/PetraIcon";
 import PontemIcon from "@icons/PontemIcon";
 import RiseIcon from "@icons/RiseIcon";
 import NightlyIcon from "@icons/NightlyIcon";
+import OKXIcon from "@icons/OKXIcon";
 import { Arrow } from "components/svg";
 import { useScramble } from "use-scramble";
 import { Emoji } from "utils/emoji";
@@ -23,6 +24,7 @@ const IconProps = {
 };
 
 export const WALLET_ICON: { [key: string]: ReactElement } = {
+  "okx wallet": <OKXIcon {...IconProps} />,
   petra: <PetraIcon {...IconProps} />,
   pontem: <PontemIcon {...IconProps} />,
   martian: <MartianIcon {...IconProps} />,
@@ -40,7 +42,9 @@ export const walletSort = (
 };
 
 export const isSupportedWallet = (s: string) => {
-  return Object.keys(WALLET_ICON).includes(s.toLowerCase());
+  return Object.keys(WALLET_ICON)
+    .map((w) => w.toLowerCase())
+    .includes(s.toLowerCase());
 };
 
 const WalletNameClassName = "ml-4 font-pixelar text-[20px] text-black uppercase flex";
