@@ -19,7 +19,7 @@ parameters:
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
   Environment: 'production'
-  Network: 'devnet'
+  Network: 'mainnet'
   ProcessorImageVersion: '1.0.1'
   VpcStackName: 'emoji-vpc'
 tags: null
