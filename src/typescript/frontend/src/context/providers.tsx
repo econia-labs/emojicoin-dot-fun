@@ -2,6 +2,7 @@
 
 // cspell:word martianwallet
 // cspell:word pontem
+// cspell:word okwallet
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "styles";
