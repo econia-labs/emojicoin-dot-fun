@@ -55,7 +55,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <UserSettingsProvider>
             <AptosWalletAdapterProvider
               plugins={wallets}
-              autoConnect={false}
+              autoConnect={true}
               dappConfig={{
                 aptosApiKey: APTOS_API_KEY,
                 network: APTOS_NETWORK,
