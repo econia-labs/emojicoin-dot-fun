@@ -6,7 +6,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { standardizeAddress, truncateAddress } from "@sdk/utils";
-import { getVerificationStatus } from "./get-verification-status";
+import { getIsOnCustomAllowlist } from "./get-verification-status";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
@@ -32,10 +32,7 @@ export const ClientVerifyPage = () => {
       setCustomAllowlisted(false);
     } else {
       const address = standardizeAddress(account.address);
-      getVerificationStatus(address).then(({ galxe, customAllowlisted }) => {
-        setGalxe(galxe);
-        setCustomAllowlisted(customAllowlisted);
-      });
+      getIsOnCustomAllowlist(address).then((res) => setCustomAllowlisted(res));
     }
   }, [account, connected]);
 
