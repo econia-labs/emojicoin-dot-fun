@@ -1,6 +1,6 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import EmojiNotFoundPage from "./not-found";
-import { cachedContractMarketView } from "lib/queries/aptos-client/market-view";
+import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
@@ -76,7 +76,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const [chats, swaps, marketView] = await Promise.all([
       fetchChatEvents({ marketID }),
       fetchSwapEvents({ marketID }),
-      cachedContractMarketView(marketAddress.toString()),
+      wrappedCachedContractMarketView(marketAddress.toString()),
     ]);
 
     return (
