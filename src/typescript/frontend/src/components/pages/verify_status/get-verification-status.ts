@@ -1,14 +1,6 @@
 "use server";
+import { isOnCustomAllowlist } from "lib/utils/allowlist";
 
-import { isInGalxeCampaign, isOnCustomAllowlist } from "lib/utils/allowlist";
-
-export async function getVerificationStatus(address: `0x${string}`) {
-  const [galxe, customAllowlisted] = await Promise.all([
-    isInGalxeCampaign(address),
-    isOnCustomAllowlist(address),
-  ]);
-  return {
-    galxe,
-    customAllowlisted,
-  };
+export async function getIsOnCustomAllowlist(address: `0x${string}`) {
+  return await isOnCustomAllowlist(address);
 }

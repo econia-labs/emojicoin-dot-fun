@@ -12,11 +12,7 @@ if (!process.env.HASH_SEED || process.env.HASH_SEED.length < 8) {
   throw new Error("Environment variable HASH_SEED must be set and at least 8 characters.");
 }
 
-if (
-  IS_ALLOWLIST_ENABLED &&
-  typeof process.env.ALLOWLISTER3K_URL === "undefined" &&
-  typeof process.env.GALXE_CAMPAIGN_ID === "undefined"
-) {
+if (IS_ALLOWLIST_ENABLED && typeof process.env.ALLOWLISTER3K_URL === "undefined") {
   throw new Error("Allowlist is enabled but no allowlist provider is set.");
 }
 
@@ -38,7 +34,6 @@ if (GEOBLOCKING_ENABLED) {
 }
 
 export const ALLOWLISTER3K_URL: string | undefined = process.env.ALLOWLISTER3K_URL;
-export const GALXE_CAMPAIGN_ID: string | undefined = process.env.GALXE_CAMPAIGN_ID;
 export const REVALIDATION_TIME: number = Number(process.env.REVALIDATION_TIME);
 export const VPNAPI_IO_API_KEY: string = process.env.VPNAPI_IO_API_KEY!;
 export const PRE_LAUNCH_TEASER: boolean = process.env.PRE_LAUNCH_TEASER === "true";
