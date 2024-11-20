@@ -8,7 +8,7 @@ import { SwapButton } from "./SwapButton";
 import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
-import { useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
+import { DEFAULT_SWAP_GAS_COST, useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
 import { useEventStore } from "context/event-store-context";
 import { useTooltip } from "@hooks/index";
 import { useSearchParams } from "next/navigation";
@@ -52,7 +52,6 @@ const inputAndOutputStyles = `
 `;
 
 const OUTPUT_DISPLAY_DECIMALS = 4;
-const SWAP_GAS_COST = 52500n;
 
 export default function SwapComponent({
   emojicoin,
@@ -78,10 +77,6 @@ export default function SwapComponent({
   const [isSell, setIsSell] = useState(!(searchParams.get("sell") === null));
   const [submit, setSubmit] = useState<(() => Promise<void>) | null>(null);
   const { aptBalance, emojicoinBalance, account, setEmojicoinType } = useAptos();
-  const availableAptBalance = useMemo(
-    () => (aptBalance - SWAP_GAS_COST > 0 ? aptBalance - SWAP_GAS_COST : 0n),
-    [aptBalance]
-  );
 
   const [maxSlippage, setMaxSlippage] = useState(getMaxSlippageSettings().maxSlippage);
 
@@ -106,18 +101,27 @@ export default function SwapComponent({
     numSwaps,
   });
 
+  const { swapResult, gasCost, gasCostWasUndefined } = swapData
+    ? {
+        swapResult: swapData.swapResult,
+        gasCost: swapData.gasCost,
+        gasCostWasUndefined: false,
+      }
+    : {
+        swapResult: undefined,
+        gasCost: DEFAULT_SWAP_GAS_COST,
+        gasCostWasUndefined: true,
+      };
+
   const outputAmountString = toDisplayCoinDecimals({
     num: isLoading ? previous : outputAmount,
     decimals: OUTPUT_DISPLAY_DECIMALS,
   });
 
-  let swapResult: bigint = 0n;
-  let gasCost: bigint | null = null;
-
-  if (swapData) {
-    swapResult = swapData.swapResult;
-    gasCost = swapData.gasCost;
-  }
+  const availableAptBalance = useMemo(
+    () => (aptBalance - gasCost > 0 ? aptBalance - gasCost : 0n),
+    [gasCost, aptBalance]
+  );
 
   const { ref, replay } = useScramble({
     text: new Intl.NumberFormat().format(Number(outputAmountString)),
@@ -295,9 +299,9 @@ export default function SwapComponent({
         <div></div>
         <div className="text-dark-gray">
           <span className="text-xl leading-[0]">
-            {gasCost === null ? "~" : ""}
+            {gasCostWasUndefined ? "~" : ""}
             {toDisplayCoinDecimals({
-              num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
+              num: gasCost,
               decimals: 4,
             })}{" "}
             APT

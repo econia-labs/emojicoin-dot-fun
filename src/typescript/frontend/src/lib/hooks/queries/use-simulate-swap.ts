@@ -14,19 +14,22 @@ import { useMemo } from "react";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountInfo } from "@aptos-labs/wallet-adapter-core";
 import { tryEd25519PublicKey } from "components/pages/launch-emojicoin/hooks/use-register-market";
-import { STRUCT_STRINGS } from "@sdk/utils";
 
-export const simulateSwap = async (args: {
+type Args = {
   aptos: Aptos;
   account: AccountInfo | null;
-  swapper: AccountAddressString;
+  swapper: AccountAddressString | undefined;
   marketAddress: AccountAddressString;
   inputAmount: AnyNumber;
   isSell: boolean;
   minOutputAmount: AnyNumber;
   typeTags: [TypeTagInput, TypeTagInput];
-}) => {
-  if (args.account) {
+};
+
+export const DEFAULT_SWAP_GAS_COST = 52500n;
+
+const getGas = async (args: Args) => {
+  if (args.account && typeof args.swapper !== "undefined") {
     const publicKey = tryEd25519PublicKey(args.account);
     if (publicKey) {
       const res = await Swap.simulate({
@@ -41,15 +44,37 @@ export const simulateSwap = async (args: {
         minOutputAmount: args.minOutputAmount,
         typeTags: args.typeTags,
       });
-      const swapEvent = res.events.find((e) => e.type === STRUCT_STRINGS.SwapEvent)!;
       return {
-        base_volume: swapEvent.data.base_volume,
-        quote_volume: swapEvent.data.quote_volume,
         gas_used: res.gas_used,
         gas_unit_price: res.gas_unit_price,
       };
     }
   }
+  return {
+    gas_used: null,
+    gas_unit_price: null,
+  };
+};
+
+const useGetGas = (args: Args) => {
+  const { data } = useQuery({
+    queryKey: ["get-gas-price", args.aptos.config.network, args.swapper ?? ""],
+    queryFn: () => getGas(args),
+    staleTime: 20 * 1000,
+  });
+  return data;
+};
+
+export const simulateSwap = async (args: {
+  aptos: Aptos;
+  account: AccountInfo | null;
+  swapper: AccountAddressString;
+  marketAddress: AccountAddressString;
+  inputAmount: AnyNumber;
+  isSell: boolean;
+  minOutputAmount: AnyNumber;
+  typeTags: [TypeTagInput, TypeTagInput];
+}) => {
   const res = await withResponseError(
     SimulateSwap.view({
       ...args,
@@ -60,8 +85,6 @@ export const simulateSwap = async (args: {
   return {
     base_volume: res.base_volume,
     quote_volume: res.quote_volume,
-    gas_used: null,
-    gas_unit_price: null,
   };
 };
 
@@ -98,7 +121,7 @@ export const useSimulateSwap = (args: {
       marketAddress,
       inputAmount.toString(),
       isSell,
-      numSwaps,
+      Math.round(numSwaps / 10) * 10,
       emojicoin.toString(),
       emojicoinLP.toString(),
       swapper ?? "",
@@ -109,8 +132,6 @@ export const useSimulateSwap = (args: {
         ? {
             quote_volume: "0",
             base_volume: "0",
-            gas_used: null,
-            gas_unit_price: null,
           }
         : simulateSwap({
             aptos,
@@ -121,16 +142,26 @@ export const useSimulateSwap = (args: {
             minOutputAmount,
             typeTags,
           }),
-    staleTime: Infinity,
+    staleTime: 10 * 1000,
+  });
+
+  const gas = useGetGas({
+    aptos,
+    account,
+    ...args,
+    swapper,
+    inputAmount,
+    minOutputAmount,
+    typeTags,
   });
 
   return typeof data === "undefined"
     ? data
     : {
         gasCost:
-          typeof data.gas_used === "string" && typeof data.gas_unit_price === "string"
-            ? BigInt(data.gas_used) * BigInt(data.gas_unit_price)
-            : null,
+          gas && typeof gas.gas_used === "string" && typeof gas.gas_unit_price === "string"
+            ? BigInt(gas.gas_used) * BigInt(gas.gas_unit_price)
+            : DEFAULT_SWAP_GAS_COST,
         swapResult: isSell ? BigInt(data.quote_volume) : BigInt(data.base_volume),
       };
 };
