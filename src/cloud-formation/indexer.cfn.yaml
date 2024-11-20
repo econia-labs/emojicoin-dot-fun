@@ -110,7 +110,7 @@ Parameters:
   BrokerImageVersion:
     Type: 'String'
   DbMaxCapacity:
-    Default: 4
+    Default: 16
     Type: 'Number'
   DbMinCapacity:
     Default: 0.5
@@ -654,10 +654,10 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
-      Cpu: '256'
+      Cpu: '1024'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
-      Memory: '512'
+      Memory: '2048'
       NetworkMode: 'awsvpc'
       RequiresCompatibilities:
       - 'FARGATE'
@@ -1305,10 +1305,10 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'PostgrestHealthCheckPort'
-      Cpu: '256'
+      Cpu: '1024'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
-      Memory: '512'
+      Memory: '2048'
       NetworkMode: 'awsvpc'
       RequiresCompatibilities:
       - 'FARGATE'
