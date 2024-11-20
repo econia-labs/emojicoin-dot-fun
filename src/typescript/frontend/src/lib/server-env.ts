@@ -12,10 +12,7 @@ if (!process.env.HASH_SEED || process.env.HASH_SEED.length < 8) {
   throw new Error("Environment variable HASH_SEED must be set and at least 8 characters.");
 }
 
-if (
-  IS_ALLOWLIST_ENABLED &&
-  typeof process.env.ALLOWLISTER3K_URL === "undefined"
-) {
+if (IS_ALLOWLIST_ENABLED && typeof process.env.ALLOWLISTER3K_URL === "undefined") {
   throw new Error("Allowlist is enabled but no allowlist provider is set.");
 }
 
