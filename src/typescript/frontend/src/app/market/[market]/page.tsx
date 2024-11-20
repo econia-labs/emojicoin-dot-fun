@@ -1,8 +1,6 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import EmojiNotFoundPage from "./not-found";
-import {
-  cachedContractMarketView,
-} from "lib/queries/aptos-client/market-view";
+import { cachedContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
