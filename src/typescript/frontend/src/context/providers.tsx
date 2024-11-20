@@ -26,6 +26,7 @@ import { WalletModalContextProvider } from "./wallet-context/WalletModalContext"
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
+import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
 import { isMobile, isTablet } from "react-device-detect";
 import { APTOS_API_KEY } from "@sdk/const";
@@ -41,7 +42,10 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const isMobileMenuOpen = isOpen && !isDesktop;
 
-  const wallets = useMemo(() => [new PontemWallet(), new RiseWallet(), new MartianWallet()], []);
+  const wallets = useMemo(
+    () => [new PontemWallet(), new RiseWallet(), new MartianWallet(), new OKXWallet()],
+    []
+  );
 
   return (
     <ThemeProvider theme={theme}>
