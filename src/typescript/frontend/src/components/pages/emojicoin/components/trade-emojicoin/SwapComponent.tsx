@@ -78,10 +78,6 @@ export default function SwapComponent({
   const [isSell, setIsSell] = useState(!(searchParams.get("sell") === null));
   const [submit, setSubmit] = useState<(() => Promise<void>) | null>(null);
   const { aptBalance, emojicoinBalance, account, setEmojicoinType } = useAptos();
-  const availableAptBalance = useMemo(
-    () => (aptBalance - SWAP_GAS_COST > 0 ? aptBalance - SWAP_GAS_COST : 0n),
-    [aptBalance]
-  );
 
   const [maxSlippage, setMaxSlippage] = useState(getMaxSlippageSettings().maxSlippage);
 
@@ -118,6 +114,15 @@ export default function SwapComponent({
     swapResult = swapData.swapResult;
     gasCost = swapData.gasCost;
   }
+
+  if(gasCost === null) {
+    gasCost = SWAP_GAS_COST;
+  }
+
+  const availableAptBalance = useMemo(
+    () => (aptBalance - gasCost > 0 ? aptBalance - gasCost : 0n),
+    [aptBalance]
+  );
 
   const { ref, replay } = useScramble({
     text: new Intl.NumberFormat().format(Number(outputAmountString)),
@@ -297,7 +302,7 @@ export default function SwapComponent({
           <span className="text-xl leading-[0]">
             {gasCost === null ? "~" : ""}
             {toDisplayCoinDecimals({
-              num: gasCost !== null ? gasCost.toString() : SWAP_GAS_COST.toString(),
+              num: gasCost,
               decimals: 4,
             })}{" "}
             APT
