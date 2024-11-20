@@ -26,6 +26,8 @@ type Args = {
   typeTags: [TypeTagInput, TypeTagInput];
 };
 
+export const DEFAULT_SWAP_GAS_COST = 52500n;
+
 const getGas = async (args: Args) => {
   if (args.account && typeof args.swapper !== "undefined") {
     const publicKey = tryEd25519PublicKey(args.account);
@@ -159,7 +161,7 @@ export const useSimulateSwap = (args: {
         gasCost:
           gas && typeof gas.gas_used === "string" && typeof gas.gas_unit_price === "string"
             ? BigInt(gas.gas_used) * BigInt(gas.gas_unit_price)
-            : null,
+            : DEFAULT_SWAP_GAS_COST,
         swapResult: isSell ? BigInt(data.quote_volume) : BigInt(data.base_volume),
       };
 };
