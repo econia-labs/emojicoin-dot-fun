@@ -1,8 +1,8 @@
 import { Aptos, AptosConfig, type ClientConfig } from "@aptos-labs/ts-sdk";
-import { APTOS_API_KEY, APTOS_NETWORK } from "../const";
+import { APTOS_API_KEY, APTOS_NETWORK, APTOS_SERVER_API_KEY } from "../const";
 
 export const APTOS_CONFIG: Partial<ClientConfig> = {
-  API_KEY: APTOS_API_KEY,
+  API_KEY: typeof window === 'undefined' ? APTOS_SERVER_API_KEY : APTOS_API_KEY,
 };
 
 export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
