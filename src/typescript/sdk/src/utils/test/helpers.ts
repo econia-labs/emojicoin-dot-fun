@@ -53,7 +53,7 @@ export function getPublishHelpers() {
     );
   }
 
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
 
   const privateKeyString = process.env.PUBLISHER_PRIVATE_KEY;
   if (!privateKeyString) {

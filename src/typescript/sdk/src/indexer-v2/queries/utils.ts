@@ -185,18 +185,15 @@ export function queryHelperWithCount<
       await waitForEmojicoinIndexer(minimumVersion);
     }
 
-    try {
-      const res = await innerQuery;
-      if (res.error) {
-        console.error("[Failed row conversion]:\n");
-        throw new Error(JSON.stringify(res));
-      }
-      const rows = extractRows<Row>(res);
-      return { rows: rows.map(convert), count: res.count };
-    } catch (e) {
-      console.error(e);
-      return { rows: [], count: null };
+    const res = await innerQuery;
+
+    if (res.error) {
+      console.error("[Failed row conversion]:\n");
+      throw new Error(JSON.stringify(res));
     }
+
+    const rows = extractRows<Row>(res);
+    return { rows: rows.map(convert), count: res.count };
   };
 
   return query;

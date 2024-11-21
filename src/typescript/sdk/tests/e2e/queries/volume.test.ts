@@ -38,7 +38,7 @@ const TWENTY_FIVE_SECONDS = 20 * 1000;
 const TWO_SECONDS = 2000;
 
 describe("queries swap_events and returns accurate swap row data", () => {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const fundedAccounts = getFundedAccounts("011", "012", "013", "014", "015", "016");
 
   it("sums a market's daily volume over multiple 1-minute periods with 3 swaps", async () => {

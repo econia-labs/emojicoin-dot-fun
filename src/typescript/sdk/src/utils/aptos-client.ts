@@ -1,23 +1,45 @@
-import { Aptos, AptosConfig, type ClientConfig } from "@aptos-labs/ts-sdk";
-import { APTOS_API_KEY, APTOS_NETWORK, APTOS_SERVER_API_KEY } from "../const";
+import {
+  Aptos,
+  AptosConfig,
+  NetworkToFaucetAPI,
+  NetworkToIndexerAPI,
+  NetworkToNetworkName,
+  NetworkToNodeAPI,
+  type ClientConfig,
+} from "@aptos-labs/ts-sdk";
+import { APTOS_NETWORK, getAptosApiKey } from "../const";
 
 export const APTOS_CONFIG: Partial<ClientConfig> = {
-  API_KEY: typeof window === 'undefined' ? APTOS_SERVER_API_KEY : APTOS_API_KEY,
+  API_KEY: getAptosApiKey(),
 };
 
-export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
-  aptos: Aptos;
-  config: AptosConfig;
-} {
+const toDockerUrl = (url: string) => url.replace("127.0.0.1", "host.docker.internal");
+
+export function getAptosClient(additionalConfig?: Partial<AptosConfig>): Aptos {
   const network = APTOS_NETWORK;
-  const config = new AptosConfig({
+  let config = new AptosConfig({
     network,
     ...additionalConfig,
     clientConfig: {
-      ...additionalConfig?.clientConfig,
       ...APTOS_CONFIG,
+      ...additionalConfig?.clientConfig,
     },
   });
-  const aptos = new Aptos(config);
-  return { aptos, config };
+  if (network === "local" && typeof window === "undefined") {
+    /* eslint-disable-next-line @typescript-eslint/no-var-requires */
+    const fs = require("node:fs");
+    if (fs.existsSync("/.dockerenv")) {
+      config = new AptosConfig({
+        network: NetworkToNetworkName["local"],
+        fullnode: toDockerUrl(NetworkToNodeAPI["local"]),
+        indexer: toDockerUrl(NetworkToIndexerAPI["local"]),
+        faucet: toDockerUrl(NetworkToFaucetAPI["local"]),
+        clientConfig: {
+          ...APTOS_CONFIG,
+          ...additionalConfig?.clientConfig,
+        },
+      });
+    }
+  }
+  return new Aptos(config);
 }

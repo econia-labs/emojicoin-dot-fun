@@ -17,7 +17,7 @@ import { fetchLatestStateEventForMarket, fetchLiquidityEvents } from ".";
 jest.setTimeout(20000);
 
 describe("queries swap_events and returns accurate swap row data", () => {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const [registrant, user, swapper, provider] = getFundedAccounts("007", "008", "009", "010");
   const marketEmojiNames: SymbolEmojiName[][] = [
     ["scroll"],

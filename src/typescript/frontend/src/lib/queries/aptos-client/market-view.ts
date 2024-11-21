@@ -2,12 +2,12 @@
 
 import { toMarketView } from "@sdk-types";
 import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getAptos } from "lib/utils/aptos-client";
+import { getAptosClient } from "@sdk/utils/aptos-client";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
 export const fetchContractMarketView = async (marketAddress: `0x${string}`) => {
-  const aptos = getAptos();
+  const aptos = getAptosClient();
   const res = await MarketView.view({
     aptos,
     marketAddress,

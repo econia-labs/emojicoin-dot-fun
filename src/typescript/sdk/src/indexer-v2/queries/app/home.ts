@@ -74,7 +74,7 @@ export const fetchFeaturedMarket = async () =>
  * @returns The number of registered markets at the latest processed transaction version
  */
 export const fetchNumRegisteredMarkets = async () => {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   let latestVersion: bigint;
   try {
     latestVersion = await getLatestProcessedEmojicoinVersion();

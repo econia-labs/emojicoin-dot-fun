@@ -90,7 +90,7 @@ export class Mint extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -190,7 +190,7 @@ export class BatchTransferCoins extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -291,7 +291,7 @@ export class TransferCoins extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
