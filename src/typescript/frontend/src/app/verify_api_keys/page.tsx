@@ -1,4 +1,4 @@
-import { fetchMarketsWithCount, fetchPriceFeed } from "@/queries/home";
+import { fetchMarketsWithCount } from "@/queries/home";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { VERCEL } from "@sdk/const";
 import { getAptosClient } from "@sdk/utils/aptos-client";
