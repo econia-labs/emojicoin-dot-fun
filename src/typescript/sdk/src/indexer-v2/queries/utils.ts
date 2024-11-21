@@ -8,7 +8,6 @@ import {
   type PostgrestFilterBuilder,
   type PostgrestBuilder,
   type PostgrestTransformBuilder,
-  PostgrestError,
 } from "@supabase/postgrest-js";
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
