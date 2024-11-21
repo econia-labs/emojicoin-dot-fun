@@ -8,7 +8,6 @@ import {
 import Big from "big.js";
 import { type ValueOf } from "./utils/utility-types";
 import { type DatabaseStructType } from "./indexer-v2/types/json-types";
-import { serverLog } from "./server-log";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (
@@ -60,17 +59,7 @@ const serverKeys: Record<Network, string | undefined> = {
 const clientApiKey = clientKeys[APTOS_NETWORK];
 const serverApiKey = serverKeys[APTOS_NETWORK];
 
-export const getAptosApiKey = () => {
-  const whichApiKey = serverApiKey ? "server" : "client";
-  const msg = `API key being used: ${whichApiKey}`;
-  if (typeof window === "undefined") {
-    /* eslint-disable-next-line no-console */
-    console.log(msg);
-  } else {
-    serverLog(msg);
-  }
-  return serverApiKey ?? clientApiKey;
-};
+export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
 
 // Select the API key from the list of env API keys. This means we don't have to change the env
 // var for API keys when changing environments- we just need to provide them all every time, which
