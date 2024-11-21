@@ -27,10 +27,11 @@ import {
   tableCardVariants,
 } from "./animation-variants/grid-variants";
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
-import { isMarketStateModel } from "@sdk/indexer-v2/types";
-import "./module.css";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { Emoji } from "utils/emoji";
+import { Trigger } from "@sdk/const";
+import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import "./module.css";
 
 const getFontSize = (emojis: SymbolEmojiData[]) =>
   emojis.length <= 2 ? ("pixel-heading-1" as const) : ("pixel-heading-1b" as const);
@@ -88,13 +89,10 @@ const TableCard = ({
   useEffect(() => {
     if (animations && animations.length) {
       const event = animations.at(0);
-      if (!event) {
-        setDailyVolume(Big(0));
-        setMarketCap(Big(0));
-      } else {
+      if (event) {
         setMarketCap(Big(event.state.instantaneousStats.marketCap.toString()));
-        if (isMarketStateModel(event)) {
-          setDailyVolume(Big(event.dailyVolume.toString()));
+        if (event.market.trigger === Trigger.SwapBuy || event.market.trigger === Trigger.SwapSell) {
+          setDailyVolume((v) => v.plus(event.lastSwap.quoteVolume.toString()));
         }
         runAnimationSequence(event);
       }
@@ -274,7 +272,7 @@ const TableCard = ({
                     "group-hover:text-ec-blue uppercase p-[1px] transition-all"
                   }
                 >
-                  {t("24h Volume")}
+                  {sortBy === SortMarketsBy.BumpOrder ? t("Recent Volume") : t("24h Volume")}
                 </div>
                 <motion.div
                   animate={controls}
