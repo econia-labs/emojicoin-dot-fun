@@ -1,6 +1,6 @@
 import {
-  APTOS_API_KEY,
   APTOS_NETWORK,
+  getAptosApiKey,
   getEmojicoinMarketAddressAndTypeTags,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
@@ -109,10 +109,11 @@ describe("all submission types for the emojicoin client", () => {
     const config = new AptosConfig({
       network: Network.TESTNET,
     });
-    const aptos = new Aptos(config);
+    const aptos = getAptosClient();
     const emojicoinClient = new EmojicoinClient({ aptos });
-    expect(aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
-    expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
+    const API_KEY = getAptosApiKey();
+    expect(aptos.config.clientConfig?.API_KEY).toEqual(API_KEY);
+    expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(API_KEY);
   });
 
   it("sets the API key in the client returned by getAptosClient()", () => {
@@ -121,8 +122,9 @@ describe("all submission types for the emojicoin client", () => {
     });
     const aptos = getAptosClient(config);
     const emojicoinClient = new EmojicoinClient({ aptos });
-    expect(aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
-    expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
+    const API_KEY = getAptosApiKey();
+    expect(aptos.config.clientConfig?.API_KEY).toEqual(API_KEY);
+    expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(API_KEY);
   });
 
   it("creates the aptos client with the correct default configuration settings", () => {
