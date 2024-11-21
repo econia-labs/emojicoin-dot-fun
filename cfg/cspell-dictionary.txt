@@ -27,6 +27,7 @@ dasharray
 defi
 devnet
 diya
+dockerenv
 dockerhub
 econia
 econialabs

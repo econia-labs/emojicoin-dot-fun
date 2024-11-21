@@ -113,7 +113,7 @@ export class Chat extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -220,7 +220,7 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -308,7 +308,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   }): Promise<{ data: { amount: number; unitPrice: number }; error: boolean }> {
     const { aptosConfig } = args;
 
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     const rawTransaction = await this.builder({
       ...args,
       integrator: AccountAddress.ONE,
@@ -348,7 +348,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -453,7 +453,7 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -585,7 +585,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -634,7 +634,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
   }): Promise<UserTransactionResponse> {
     const { aptosConfig } = args;
 
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     const rawTransaction = await this.builder({
       ...args,
       integrator: AccountAddress.ONE,
@@ -734,7 +734,7 @@ export class SwapWithRewards extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const { aptos } = getAptosClient(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 

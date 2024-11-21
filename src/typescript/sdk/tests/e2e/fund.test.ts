@@ -5,7 +5,7 @@ import { getAptosClient } from "../../src/utils/test";
 jest.setTimeout(10000);
 
 describe("tests a simple faucet fund account request", () => {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const account = Ed25519Account.generate();
 
   beforeAll(async () => {

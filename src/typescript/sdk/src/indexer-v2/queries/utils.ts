@@ -176,7 +176,9 @@ export function queryHelperWithCount<
 >(
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
   convert: (rows: Row) => OutputType
-): (args: WithConfig<QueryArgs>) => Promise<{ rows: OutputType[]; count: number | null }> {
+): (
+  args: WithConfig<QueryArgs>
+) => Promise<{ rows: OutputType[]; count: number | null; error: unknown }> {
   const query = async (args: WithConfig<QueryArgs>) => {
     const { minimumVersion, ...queryArgs } = args;
     const innerQuery = queryFn(queryArgs as QueryArgs);
@@ -192,10 +194,10 @@ export function queryHelperWithCount<
         throw new Error(JSON.stringify(res));
       }
       const rows = extractRows<Row>(res);
-      return { rows: rows.map(convert), count: res.count };
+      return { rows: rows.map(convert), count: res.count, error: res.error };
     } catch (e) {
       console.error(e);
-      return { rows: [], count: null };
+      return { rows: [], count: null, error: e };
     }
   };
 

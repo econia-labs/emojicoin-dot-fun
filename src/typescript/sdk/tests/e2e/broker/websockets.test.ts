@@ -49,7 +49,7 @@ const customWaitFor = async (condition: () => boolean) =>
 
 describe("tests to ensure that websocket event subscriptions work as expected", () => {
   const registrants = getFundedAccounts("040", "041", "042", "043", "044", "045");
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const senderArgs = Array.from(registrants).map((acc) => ({
     registrant: acc,
     provider: acc,

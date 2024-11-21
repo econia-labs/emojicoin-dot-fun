@@ -30,7 +30,7 @@ import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
 import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
 import { isMobile, isTablet } from "react-device-detect";
-import { APTOS_API_KEY } from "@sdk/const";
+import { getAptosApiKey } from "@sdk/const";
 
 enableMapSet();
 
@@ -57,7 +57,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               plugins={wallets}
               autoConnect={true}
               dappConfig={{
-                aptosApiKey: APTOS_API_KEY,
+                aptosApiKey: getAptosApiKey(),
                 network: APTOS_NETWORK,
               }}
             >

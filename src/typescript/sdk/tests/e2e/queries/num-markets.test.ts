@@ -8,7 +8,7 @@ import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
 jest.setTimeout(20000);
 
 describe("fetches the number of registered markets based on the latest processed version", () => {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const registrants = getFundedAccounts("031", "032", "033", "034", "035", "036");
 
   let versionsAndNumMarkets: { version: bigint; numMarkets: bigint }[];
