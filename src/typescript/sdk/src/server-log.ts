@@ -5,5 +5,8 @@
 const inProduction = process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
 
 export const serverLog = async (s: string) => {
-  console.log(s);
+  if (!inProduction) {
+    /* eslint-disable-next-line no-console */
+    console.log(s);
+  }
 };

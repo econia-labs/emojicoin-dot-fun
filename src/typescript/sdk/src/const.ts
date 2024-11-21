@@ -64,6 +64,7 @@ export const getAptosApiKey = () => {
   const whichApiKey = serverApiKey ? "server" : "client";
   const msg = `API key being used: ${whichApiKey}`;
   if (typeof window === "undefined") {
+    /* eslint-disable-next-line no-console */
     console.log(msg);
   } else {
     serverLog(msg);
