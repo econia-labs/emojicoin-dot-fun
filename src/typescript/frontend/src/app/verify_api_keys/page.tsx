@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 const VerifyApiKeys = async () => {
   if (VERCEL === false) return <></>;
   /* eslint-disable-next-line no-console */
-  console.info("The API keys are being verified.");
+  console.warn("The API keys are being verified.");
 
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK?.toUpperCase();
   const serverKey = process.env[`SERVER_${network}_APTOS_API_KEY`];
