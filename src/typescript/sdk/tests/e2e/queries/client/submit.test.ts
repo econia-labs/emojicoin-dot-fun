@@ -1,6 +1,5 @@
 import {
   APTOS_NETWORK,
-  getAptosApiKey,
   getEmojicoinMarketAddressAndTypeTags,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
@@ -22,7 +21,6 @@ import {
   Network,
 } from "@aptos-labs/ts-sdk";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
-import { getAptosClient } from "../../../../src/utils/aptos-client";
 import { calculatePeriodBoundariesCrossed } from "../../../../src/utils/test";
 
 jest.setTimeout(15000);
