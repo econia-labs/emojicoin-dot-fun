@@ -2,7 +2,7 @@
 import {
   MoveVector,
   AccountAddress,
-  Aptos,
+  type Aptos,
   U64,
   type AccountAddressInput,
   type Uint64,
@@ -21,7 +21,7 @@ import {
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "./payload-builders";
-import { Uint64String, type TypeTagInput } from ".";
+import { type Uint64String, type TypeTagInput } from ".";
 import { getAptosClient } from "../utils/aptos-client";
 
 export type MintPayloadMoveArguments = {
