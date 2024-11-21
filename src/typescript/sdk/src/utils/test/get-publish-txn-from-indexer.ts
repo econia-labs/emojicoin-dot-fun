@@ -9,7 +9,7 @@ import { getAptosClient } from "../aptos-client";
 import { getPublisherPrivateKey } from "./helpers";
 
 export const getPublishTransactionFromIndexer = async () => {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const publisher = Account.fromPrivateKey({
     privateKey: getPublisherPrivateKey(),
   });

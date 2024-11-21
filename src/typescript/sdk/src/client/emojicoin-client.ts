@@ -141,7 +141,7 @@ export class EmojicoinClient {
     minOutputAmount?: bigint | number;
   }) {
     const {
-      aptos = getAptosClient().aptos,
+      aptos = getAptosClient(),
       integrator = INTEGRATOR_ADDRESS,
       integratorFeeRateBPs = 0,
       minOutputAmount = 1n,

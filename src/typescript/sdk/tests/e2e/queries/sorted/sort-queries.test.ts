@@ -27,7 +27,7 @@ import {
 jest.setTimeout(20000);
 
 describe("sorting queries for the sort filters on the home page", () => {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const registrants = getFundedAccounts("023", "024", "025", "026", "027", "028", "029", "030");
 
   let latestTransactionVersion: number;

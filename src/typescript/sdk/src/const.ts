@@ -40,7 +40,7 @@ if (!APTOS_NETWORK) {
   throw new Error(`Invalid network: ${network}`);
 }
 
-const allAPIKeys: Record<Network, string | undefined> = {
+const clientKeys: Record<Network, string | undefined> = {
   [Network.LOCAL]: process.env.NEXT_PUBLIC_LOCAL_APTOS_API_KEY,
   [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY,
   [Network.DEVNET]: process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,
@@ -48,21 +48,22 @@ const allAPIKeys: Record<Network, string | undefined> = {
   [Network.MAINNET]: process.env.NEXT_PUBLIC_MAINNET_APTOS_API_KEY,
 };
 
-const apiKey = allAPIKeys[APTOS_NETWORK];
-if (typeof apiKey === "undefined") {
-  // Do nothing if we're on a local network, because we don't need an API key for it.
-  if (APTOS_NETWORK !== "local") {
-    if (APTOS_NETWORK === "custom") {
-      console.warn(`No API key set. Ignoring because we're on the \`${APTOS_NETWORK}\` network.`);
-    } else {
-      throw new Error(`Invalid API key set for the network: ${APTOS_NETWORK}: ${apiKey}`);
-    }
-  }
-}
+const serverKeys: Record<Network, string | undefined> = {
+  [Network.LOCAL]: process.env.SERVER_LOCAL_APTOS_API_KEY,
+  [Network.CUSTOM]: process.env.SERVER_CUSTOM_APTOS_API_KEY,
+  [Network.DEVNET]: process.env.SERVER_DEVNET_APTOS_API_KEY,
+  [Network.TESTNET]: process.env.SERVER_TESTNET_APTOS_API_KEY,
+  [Network.MAINNET]: process.env.SERVER_MAINNET_APTOS_API_KEY,
+};
+
+const clientApiKey = clientKeys[APTOS_NETWORK];
+const serverApiKey = serverKeys[APTOS_NETWORK];
+
+export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
+
 // Select the API key from the list of env API keys. This means we don't have to change the env
 // var for API keys when changing environments- we just need to provide them all every time, which
 // is much simpler.
-export const APTOS_API_KEY = apiKey;
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
