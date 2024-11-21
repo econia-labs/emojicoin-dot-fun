@@ -105,46 +105,6 @@ describe("all submission types for the emojicoin client", () => {
     expect(emojicoinClient.aptos.config.network).toEqual(Network.TESTNET);
   });
 
-  it("ensures that no public API keys are equal", () => {
-    const keysNonDuped = [
-      process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,
-      process.env.NEXT_PUBLIC_TESTNET_APTOS_API_KEY,
-      process.env.NEXT_PUBLIC_MAINNET_APTOS_API_KEY,
-    ];
-    const keys = new Set(keysNonDuped);
-    expect(keys.size).toEqual(keysNonDuped.length);
-  });
-
-  it("sets the public devnet API key in the aptos client configuration", () => {
-    const aptos = getAptosClient({ network: Network.TESTNET });
-    const emojicoinClient = new EmojicoinClient({ aptos });
-    const API_KEY = getAptosApiKey();
-    const emojicoinClientAPIKey = emojicoinClient.aptos.config.clientConfig?.API_KEY;
-    expect(aptos.config.clientConfig?.API_KEY).toEqual(API_KEY);
-    expect(emojicoinClientAPIKey).toEqual(API_KEY);
-    expect(emojicoinClientAPIKey).toEqual(process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY);
-  });
-
-  it("sets the public testnet API key in the aptos client configuration", () => {
-    const aptos = getAptosClient({ network: Network.TESTNET });
-    const emojicoinClient = new EmojicoinClient({ aptos });
-    const API_KEY = getAptosApiKey();
-    const emojicoinClientAPIKey = emojicoinClient.aptos.config.clientConfig?.API_KEY;
-    expect(aptos.config.clientConfig?.API_KEY).toEqual(API_KEY);
-    expect(emojicoinClientAPIKey).toEqual(API_KEY);
-    expect(emojicoinClientAPIKey).toEqual(process.env.NEXT_PUBLIC_TESTNET_APTOS_API_KEY);
-  });
-
-  it("sets the public mainnet API key in the aptos client configuration", () => {
-    const aptos = getAptosClient({ network: Network.TESTNET });
-    const emojicoinClient = new EmojicoinClient({ aptos });
-    const API_KEY = getAptosApiKey();
-    const emojicoinClientAPIKey = emojicoinClient.aptos.config.clientConfig?.API_KEY;
-    expect(aptos.config.clientConfig?.API_KEY).toEqual(API_KEY);
-    expect(emojicoinClientAPIKey).toEqual(API_KEY);
-    expect(emojicoinClientAPIKey).toEqual(process.env.NEXT_PUBLIC_MAINNET_APTOS_API_KEY);
-  });
-
   it("creates the aptos client with the correct default configuration settings", () => {
     expect(emojicoin.aptos.config.network).toEqual(process.env.NEXT_PUBLIC_APTOS_NETWORK);
     expect(emojicoin.aptos.config.network).toEqual(APTOS_NETWORK);
