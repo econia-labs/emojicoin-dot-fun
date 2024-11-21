@@ -56,20 +56,8 @@ export default async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-const negativeLookaheads = [
-  "verify",
-  "api",
-  "_next/static",
-  "_next/image",
-  "favicon.ico",
-  "logo192.png",
-  "icon.png",
-  "webclip.png",
-  "social-preview.png",
-  "okx-logo.png",
-  "manifest.json",
-].join("|");
-
+// Note this must be a static string- we can't dynamically construct it.
 export const config = {
-  matcher: `/((?!${negativeLookaheads}).*)`,
+  /* eslint-disable-next-line */
+  matcher: `/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|icon.png|webclip.png|social-preview.png|okx-logo.png|manifest.json).*)`,
 };
