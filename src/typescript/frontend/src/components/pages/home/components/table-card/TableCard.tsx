@@ -272,7 +272,7 @@ const TableCard = ({
                     "group-hover:text-ec-blue uppercase p-[1px] transition-all"
                   }
                 >
-                  {sortBy === SortMarketsBy.BumpOrder ? t("Recent Volume") : t("24h Volume")}
+                  {sortBy === SortMarketsBy.BumpOrder ? t("Live Volume") : t("24h Volume")}
                 </div>
                 <motion.div
                   animate={controls}
