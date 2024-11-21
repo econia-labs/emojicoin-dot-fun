@@ -26,11 +26,6 @@ const debugConfigOptions = {
       static: 30, // Default is normally 180s.
     },
   },
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
 };
 
 /** @type {import('next').NextConfig} */
@@ -44,12 +39,26 @@ const nextConfig = {
     styledComponents: DEBUG ? styledComponentsConfig : true,
   },
   ...(DEBUG ? debugConfigOptions : {}),
+  // Log full fetch URLs if we're in a specific environment.
+  logging:
+    process.env.NODE_ENV === "development" ||
+    process.env.NODE_ENV === "test" ||
+    process.env.VERCEL_ENV === "preview" ||
+    process.env.VERCEL_ENV === "development"
+      ? {
+          fetches: {
+            fullUrl: true,
+          },
+        }
+      : undefined,
   transpilePackages: ["@sdk"],
-  redirects: async () => ([{
-    source: '/',
-    destination: '/home',
-    permanent: true,
-  }]),
+  redirects: async () => [
+    {
+      source: "/",
+      destination: "/home",
+      permanent: true,
+    },
+  ],
 };
 
 export default withBundleAnalyzer(nextConfig);

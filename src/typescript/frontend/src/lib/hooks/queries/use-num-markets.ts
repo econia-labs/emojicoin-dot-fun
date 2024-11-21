@@ -1,10 +1,10 @@
 import { RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
 import { useQuery } from "@tanstack/react-query";
-import { getAptos } from "lib/utils/aptos-client";
 import { useEventStore } from "context/event-store-context";
+import { getAptosClient } from "@sdk/utils/aptos-client";
 
 async function getNumMarkets(): Promise<number> {
-  const aptos = getAptos();
+  const aptos = getAptosClient();
   return RegistryView.view({ aptos }).then((res) => Number(res.n_markets));
 }
 

@@ -20,14 +20,7 @@ export default async function middleware(request: NextRequest) {
   if (MAINTENANCE_MODE && pathname !== "/maintenance") {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
-  if (
-    pathname === "/social-preview.png" ||
-    pathname === "/webclip.png" ||
-    pathname === "/icon.png" ||
-    pathname === "/test" ||
-    pathname === "/geolocation" ||
-    pathname === "/verify_status"
-  ) {
+  if (pathname === "/test" || pathname === "/verify_status") {
     return NextResponse.next();
   }
 
@@ -63,6 +56,8 @@ export default async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Note this must be a static string- we can't dynamically construct it.
 export const config = {
-  matcher: "/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|manifest.json).*)",
+  /* eslint-disable-next-line */
+  matcher: `/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|icon.png|webclip.png|social-preview.png|okx-logo.png|manifest.json).*)`,
 };

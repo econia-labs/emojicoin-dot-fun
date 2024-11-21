@@ -120,7 +120,7 @@ function extractJsonFromText(originalCommand: string, text: string): ResultJSON 
 }
 
 export async function publishForTest(privateKeyString: string) {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const publisher = Account.fromPrivateKey({
     privateKey: new Ed25519PrivateKey(Hex.fromHexString(privateKeyString).toUint8Array()),
   });
@@ -157,7 +157,7 @@ export async function getModuleExists(
   publisherAddress: AccountAddressInput,
   moduleName: string
 ): Promise<boolean> {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const abiExists =
     typeof (
       await aptos.account.getAccountModule({

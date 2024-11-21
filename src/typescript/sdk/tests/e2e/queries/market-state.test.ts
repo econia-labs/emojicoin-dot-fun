@@ -11,7 +11,7 @@ import { type JsonValue } from "../../../src/types/json-types";
 jest.setTimeout(20000);
 
 describe("queries a market by market state", () => {
-  const { aptos } = getAptosClient();
+  const aptos = getAptosClient();
   const registrant = getFundedAccount("037");
 
   it("fetches the market state for a market based on an emoji symbols array", async () => {

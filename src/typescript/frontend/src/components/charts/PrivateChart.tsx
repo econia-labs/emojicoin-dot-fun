@@ -28,7 +28,6 @@ import path from "path";
 import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore } from "context/event-store-context";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
-import { getAptos } from "lib/utils/aptos-client";
 import { getSymbolEmojisInString, symbolToEmojis, toMarketEmojiData } from "@sdk/emoji_data";
 import { type PeriodicStateEventModel, type MarketMetadataModel } from "@sdk/indexer-v2/types";
 import { getMarketResource } from "@sdk/markets";
@@ -41,6 +40,7 @@ import {
 } from "@/store/event/candlestick-bars";
 import { emoji, parseJSON } from "utils";
 import { Emoji } from "utils/emoji";
+import { getAptosClient } from "@sdk/utils/aptos-client";
 
 const configurationData: DatafeedConfiguration = {
   supported_resolutions: TV_CHARTING_LIBRARY_RESOLUTIONS,
@@ -183,7 +183,7 @@ export const Chart = (props: ChartContainerProps) => {
             // Also, we specifically call this client-side because the server will get rate-limited if we call the
             // fullnode from the server for each client.
             const marketResource = await getMarketResource({
-              aptos: getAptos(),
+              aptos: getAptosClient(),
               marketAddress: props.marketAddress,
             });
 

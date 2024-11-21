@@ -11,7 +11,7 @@ jest.setTimeout(20000);
 describe("address standardization tests", () => {
   it("standardizes a user's address", async () => {
     const user = getFundedAccount("005");
-    const { aptos } = getAptosClient();
+    const aptos = getAptosClient();
 
     const { marketAddress, emojicoin, emojicoinLP, emojis } =
       await TestHelpers.registerRandomMarket({ registrant: user });

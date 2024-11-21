@@ -23,7 +23,6 @@ import {
 import { toast } from "react-toastify";
 
 import { type EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
-import { getAptos } from "lib/utils/aptos-client";
 import {
   checkNetworkAndToast,
   parseAPIErrorAndToast,
@@ -41,6 +40,7 @@ import {
 import { getEventsAsProcessorModelsFromResponse } from "@sdk/mini-processor";
 import { emoji } from "utils";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import { getAptosClient } from "@sdk/utils/aptos-client";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -103,10 +103,8 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   }, [emojicoinType]);
 
   const aptos = useMemo(() => {
-    if (checkNetworkAndToast(network)) {
-      return getAptos();
-    }
-    return getAptos();
+    checkNetworkAndToast(network);
+    return getAptosClient();
   }, [network]);
 
   const {
