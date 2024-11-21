@@ -115,7 +115,7 @@ describe("all submission types for the emojicoin client", () => {
     expect(emojicoinClient.aptos.config.clientConfig?.API_KEY).toEqual(APTOS_API_KEY);
   });
 
-  it("sets the API key in the client returned by getAptos()", () => {
+  it("sets the API key in the client returned by getAptosClient()", () => {
     const config = new AptosConfig({
       network: Network.TESTNET,
     });
