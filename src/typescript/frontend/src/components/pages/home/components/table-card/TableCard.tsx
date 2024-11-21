@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { translationFunction } from "context/language-context";
 import { Column, Flex } from "@containers";
 import { Text } from "components/text";
@@ -9,7 +9,6 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
-import Big from "big.js";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import {
   borderVariants,
@@ -29,8 +28,8 @@ import {
 import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { Emoji } from "utils/emoji";
-import { Trigger } from "@sdk/const";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import Big from "big.js";
 import "./module.css";
 
 const getFontSize = (emojis: SymbolEmojiData[]) =>
@@ -54,11 +53,28 @@ const TableCard = ({
   const controls = useAnimationControls();
   const animationsOn = useUserSettings((s) => s.animate);
 
-  const [marketCap, setMarketCap] = useState(Big(staticMarketCap));
-  const [dailyVolume, setDailyVolume] = useState(Big(staticVolume24H));
-  const animations = useEventStore(
+  const stateEvents = useEventStore(
     (s) => s.getMarket(emojis.map((e) => e.emoji))?.stateEvents ?? []
   );
+  const animationEvent = stateEvents.at(0);
+
+  const { isBumpOrder, secondaryMetric, marketCap } = useMemo(() => {
+    const isBumpOrder = sortBy === SortMarketsBy.BumpOrder;
+    const { lastSwapVolume, marketCap } = animationEvent
+      ? {
+          lastSwapVolume: Big(animationEvent.lastSwap.quoteVolume.toString()),
+          marketCap: animationEvent.state.instantaneousStats.marketCap,
+        }
+      : {
+          lastSwapVolume: 0,
+          marketCap: staticMarketCap,
+        };
+    return {
+      isBumpOrder,
+      secondaryMetric: isBumpOrder ? lastSwapVolume : Big(staticVolume24H),
+      marketCap,
+    };
+  }, [sortBy, animationEvent, staticVolume24H, staticMarketCap]);
 
   // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {
@@ -78,7 +94,9 @@ const TableCard = ({
         controls.stop();
         if (isMounted.current) {
           controls.start(variant).then(() => {
-            controls.start("initial");
+            if (isMounted.current) {
+              controls.start("initial");
+            }
           });
         }
       }
@@ -87,26 +105,17 @@ const TableCard = ({
   );
 
   useEffect(() => {
-    if (animations && animations.length) {
-      const event = animations.at(0);
-      if (event) {
-        setMarketCap(Big(event.state.instantaneousStats.marketCap.toString()));
-        if (event.market.trigger === Trigger.SwapBuy || event.market.trigger === Trigger.SwapSell) {
-          setDailyVolume((v) => v.plus(event.lastSwap.quoteVolume.toString()));
-        }
-        runAnimationSequence(event);
-      }
+    if (animationEvent) {
+      runAnimationSequence(animationEvent);
     }
-
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [animations, runAnimationSequence]);
+  }, [animationEvent, runAnimationSequence, isBumpOrder]);
 
   const { ref: marketCapRef } = useLabelScrambler(
     toCoinDecimalString(marketCap.toString(), 2),
     " APT"
   );
   const { ref: dailyVolumeRef } = useLabelScrambler(
-    toCoinDecimalString(dailyVolume.toString(), 2),
+    toCoinDecimalString(secondaryMetric.toString(), 2),
     " APT"
   );
 
@@ -272,7 +281,7 @@ const TableCard = ({
                     "group-hover:text-ec-blue uppercase p-[1px] transition-all"
                   }
                 >
-                  {sortBy === SortMarketsBy.BumpOrder ? t("Live Volume") : t("24h Volume")}
+                  {isBumpOrder ? t("Last Swap") : t("24h Volume")}
                 </div>
                 <motion.div
                   animate={controls}
@@ -281,7 +290,7 @@ const TableCard = ({
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                   ref={dailyVolumeRef}
                 >
-                  {toCoinDecimalString(dailyVolume.toString(), 2) + " APT"}
+                  {toCoinDecimalString(secondaryMetric.toString(), 2) + " APT"}
                 </motion.div>
               </Column>
             </Flex>
