@@ -1,9 +1,9 @@
 "use server";
 
-/**
- * Do NOT call this function directly unless you know what you're doing- it's a POST request to
- * the application server just to log to the console.
- */
-export const serverLogAction = async (s: string) => {
+// Don't print server logs if we're on the production build, since each invocation of this
+// function (the server action) is a POST request.
+const inProduction = process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
+
+export const serverLog = async (s: string) => {
   console.log(s);
 };

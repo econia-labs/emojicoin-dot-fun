@@ -62,7 +62,12 @@ const serverApiKey = serverKeys[APTOS_NETWORK];
 
 export const getAptosApiKey = () => {
   const whichApiKey = serverApiKey ? "server" : "client";
-  serverLog(`API key being used: ${whichApiKey}`);
+  const msg = `API key being used: ${whichApiKey}`;
+  if (typeof window === "undefined") {
+    console.log(msg);
+  } else {
+    serverLog(msg);
+  }
   return serverApiKey ?? clientApiKey;
 };
 
