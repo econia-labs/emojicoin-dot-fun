@@ -9,6 +9,8 @@ export const runtime = "nodejs";
 
 const VerifyApiKeys = async () => {
   if (VERCEL === false) return <></>;
+  /* eslint-disable-next-line no-console */
+  console.info("The API keys are being verified.");
 
   const network = process.env.NEXT_PUBLIC_APTOS_NETWORK?.toUpperCase();
   const serverKey = process.env[`SERVER_${network}_APTOS_API_KEY`];
@@ -28,7 +30,7 @@ const VerifyApiKeys = async () => {
 
   const accountAddress = AccountAddress.ONE;
 
-  // Client check
+  // Check that the client-side Aptos API key works.
   try {
     await clientAptos.account.getAccountAPTAmount({ accountAddress });
   } catch (e) {
@@ -36,7 +38,7 @@ const VerifyApiKeys = async () => {
     throw new Error(`Couldn't fetch ${accountAddress}'s balance on the client. ${msg}`);
   }
 
-  // Server check
+  // Check that the server-side Aptos API key works.
   try {
     await serverAptos.account.getAccountAPTAmount({ accountAddress });
   } catch (e) {
