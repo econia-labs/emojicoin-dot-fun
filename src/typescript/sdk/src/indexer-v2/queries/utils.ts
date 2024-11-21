@@ -8,6 +8,7 @@ import {
   type PostgrestFilterBuilder,
   type PostgrestBuilder,
   type PostgrestTransformBuilder,
+  PostgrestError,
 } from "@supabase/postgrest-js";
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
@@ -176,7 +177,9 @@ export function queryHelperWithCount<
 >(
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
   convert: (rows: Row) => OutputType
-): (args: WithConfig<QueryArgs>) => Promise<{ rows: OutputType[]; count: number | null }> {
+): (
+  args: WithConfig<QueryArgs>
+) => Promise<{ rows: OutputType[]; count: number | null; error: unknown }> {
   const query = async (args: WithConfig<QueryArgs>) => {
     const { minimumVersion, ...queryArgs } = args;
     const innerQuery = queryFn(queryArgs as QueryArgs);
@@ -185,15 +188,18 @@ export function queryHelperWithCount<
       await waitForEmojicoinIndexer(minimumVersion);
     }
 
-    const res = await innerQuery;
-
-    if (res.error) {
-      console.error("[Failed row conversion]:\n");
-      throw new Error(JSON.stringify(res));
+    try {
+      const res = await innerQuery;
+      if (res.error) {
+        console.error("[Failed row conversion]:\n");
+        throw new Error(JSON.stringify(res));
+      }
+      const rows = extractRows<Row>(res);
+      return { rows: rows.map(convert), count: res.count, error: res.error };
+    } catch (e) {
+      console.error(e);
+      return { rows: [], count: null, error: e };
     }
-
-    const rows = extractRows<Row>(res);
-    return { rows: rows.map(convert), count: res.count };
   };
 
   return query;

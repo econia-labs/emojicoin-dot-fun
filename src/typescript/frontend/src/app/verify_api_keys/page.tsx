@@ -1,4 +1,4 @@
-import { fetchPriceFeed } from "@/queries/home";
+import { fetchMarketsWithCount, fetchPriceFeed } from "@/queries/home";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { VERCEL } from "@sdk/const";
 import { getAptosClient } from "@sdk/utils/aptos-client";
@@ -44,9 +44,8 @@ const VerifyApiKeys = async () => {
     throw new Error(`Couldn't fetch ${accountAddress}'s balance on the server. ${msg}`);
   }
 
-  try {
-    await fetchPriceFeed({});
-  } catch (e) {
+  const res = await fetchMarketsWithCount({});
+  if (res.error) {
     const msg = "\n\tLikely an invalid indexer API key.";
     throw new Error(`Couldn't fetch the price feed on the server. ${msg}`);
   }
