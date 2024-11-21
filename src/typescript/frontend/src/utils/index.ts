@@ -12,11 +12,12 @@ export { getStylesFromResponsiveValue } from "./styled-components-helpers";
 export { isDisallowedEventKey } from "./check-is-disallowed-event-key";
 export { getEmptyListTr } from "./get-empty-list-tr";
 
-export const stringifyJSON = (data: object) =>
-  JSON.stringify(data, (_, value) => {
+export function stringifyJSON<T>(data: T) {
+  return JSON.stringify(data, (_, value) => {
     if (typeof value === "bigint") return value.toString() + "n";
     return value;
   });
+}
 
 export const parseJSON = <T>(json: string): T =>
   JSON.parse(json, (_, value) => {
