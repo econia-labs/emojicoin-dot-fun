@@ -1,2 +1,4 @@
 **/.env
 **/.turbo
+**/.vercel
+**/.env*.local
