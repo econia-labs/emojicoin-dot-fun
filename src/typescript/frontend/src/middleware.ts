@@ -20,14 +20,7 @@ export default async function middleware(request: NextRequest) {
   if (MAINTENANCE_MODE && pathname !== "/maintenance") {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
-  if (
-    pathname === "/social-preview.png" ||
-    pathname === "/webclip.png" ||
-    pathname === "/icon.png" ||
-    pathname === "/test" ||
-    pathname === "/geolocation" ||
-    pathname === "/verify_status"
-  ) {
+  if (pathname === "/test" || pathname === "/verify_status") {
     return NextResponse.next();
   }
 
@@ -63,6 +56,20 @@ export default async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+const negativeLookaheads = [
+  "verify",
+  "api",
+  "_next/static",
+  "_next/image",
+  "favicon.ico",
+  "logo192.png",
+  "icon.png",
+  "webclip.png",
+  "social-preview.png",
+  "okx-logo.png",
+  "manifest.json",
+].join("|");
+
 export const config = {
-  matcher: "/((?!verify|api|_next/static|_next/image|favicon.ico|logo192.png|okx-logo.png|manifest.json).*)",
+  matcher: `/((?!${negativeLookaheads}).*)`,
 };
