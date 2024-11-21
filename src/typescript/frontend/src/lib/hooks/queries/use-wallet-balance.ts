@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { withResponseError } from "./client";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
+import { Balance } from "@sdk/emojicoin_dot_fun/aptos-framework";
 
 /**
  * __NOTE: If you're using this for a connected user's APT balance, you should use__
@@ -60,12 +61,11 @@ export const useWalletBalance = ({
         return res;
       }
       return withResponseError(
-        aptos
-          .getAccountCoinAmount({
-            accountAddress,
-            coinType: coinType.toString() as `${string}::${string}::${string}`,
-          })
-          .then((r) => BigInt(r))
+        Balance.view({
+          aptos,
+          owner: accountAddress,
+          typeTags: [coinType],
+        }).then((res) => BigInt(res))
       );
     },
     placeholderData: (previousBalance) => previousBalance ?? 0,
