@@ -8,7 +8,7 @@ import {
 import Big from "big.js";
 import { type ValueOf } from "./utils/utility-types";
 import { type DatabaseStructType } from "./indexer-v2/types/json-types";
-import { serverLog } from "./server-log-wrapper";
+import { serverLog } from "./server-log";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (
