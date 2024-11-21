@@ -2,13 +2,13 @@
 import {
   MoveVector,
   AccountAddress,
+  Aptos,
   U64,
   type AccountAddressInput,
   type Uint64,
   type AptosConfig,
   type InputGenerateTransactionOptions,
   buildTransaction,
-  type Aptos,
   type Account,
   type WaitForTransactionOptions,
   type UserTransactionResponse,
@@ -21,7 +21,7 @@ import {
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
 } from "./payload-builders";
-import { type TypeTagInput } from ".";
+import { Uint64String, type TypeTagInput } from ".";
 import { getAptosClient } from "../utils/aptos-client";
 
 export type MintPayloadMoveArguments = {
@@ -362,6 +362,56 @@ export class ExistsAt extends ViewFunctionPayloadBuilder<[boolean]> {
     options?: LedgerVersionArg;
   }): Promise<boolean> {
     const [res] = await new ExistsAt(args).view(args);
+    return res;
+  }
+}
+
+export type BalancePayloadMoveArguments = {
+  owner: AccountAddress;
+};
+
+/**
+ *```
+ *  #[view]
+ *  public fun balance<CoinType>(
+ *     owner: address,
+ *  ): u64
+ *```
+ * */
+
+export class Balance extends ViewFunctionPayloadBuilder<[Uint64String]> {
+  public readonly moduleAddress = AccountAddress.ONE;
+
+  public readonly moduleName = "coin";
+
+  public readonly functionName = "balance";
+
+  public readonly args: BalancePayloadMoveArguments;
+
+  public readonly typeTags: [TypeTag]; // [CoinType]
+
+  constructor(args: {
+    owner: AccountAddressInput; // address
+    typeTags: [TypeTagInput]; // [CoinType]
+  }) {
+    super();
+    const { owner, typeTags } = args;
+
+    this.args = {
+      owner: AccountAddress.from(owner),
+    };
+    this.typeTags = typeTags.map((typeTag) =>
+      typeof typeTag === "string" ? parseTypeTag(typeTag) : typeTag
+    ) as [TypeTag];
+  }
+
+  static async view(args: {
+    aptos: Aptos | AptosConfig;
+    owner: AccountAddressInput; // address
+    typeTags: [TypeTagInput]; // [CoinType]
+    options?: LedgerVersionArg;
+  }): Promise<Uint64String> {
+    const [res] = await new Balance(args).view(args);
     return res;
   }
 }
