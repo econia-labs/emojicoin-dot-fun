@@ -93,14 +93,15 @@ module rewards::emojicoin_dot_fun_rewards {
                 move_from<EmojicoinDotFunRewardsEscrow>(swapper_address);
             let octas_reward_amount = coin::value(&aptos_coin);
             aptos_account::deposit_coins(swapper_address, aptos_coin);
-            let swap = emojicoin_dot_fun::simulate_swap<Emojicoin, EmojicoinLP>(
-                swapper_address,
-                market_address,
-                octas_reward_amount,
-                false,
-                @integrator,
-                INTEGRATOR_FEE_RATE_BPS
-            );
+            let swap =
+                emojicoin_dot_fun::simulate_swap<Emojicoin, EmojicoinLP>(
+                    swapper_address,
+                    market_address,
+                    octas_reward_amount,
+                    false,
+                    @integrator,
+                    INTEGRATOR_FEE_RATE_BPS
+                );
             emojicoin_dot_fun::swap<Emojicoin, EmojicoinLP>(
                 swapper,
                 market_address,
@@ -192,12 +193,15 @@ module rewards::emojicoin_dot_fun_rewards {
             event::emit(EmojicoinDotFunRewards { swap, octas_reward_amount });
 
             // Top off escrow if it exists, otherwise create it.
-            let aptos_coin = if (exists<EmojicoinDotFunRewardsEscrow>(swapper_address)) {
-                let EmojicoinDotFunRewardsEscrow { aptos_coin } =
-                    move_from<EmojicoinDotFunRewardsEscrow>(swapper_address);
-                aptos_coin
-            } else coin::zero();
-            coin::merge(&mut aptos_coin, coin::withdraw(&vault_signer, octas_reward_amount));
+            let aptos_coin =
+                if (exists<EmojicoinDotFunRewardsEscrow>(swapper_address)) {
+                    let EmojicoinDotFunRewardsEscrow { aptos_coin } =
+                        move_from<EmojicoinDotFunRewardsEscrow>(swapper_address);
+                    aptos_coin
+                } else coin::zero();
+            coin::merge(
+                &mut aptos_coin, coin::withdraw(&vault_signer, octas_reward_amount)
+            );
             move_to(swapper, EmojicoinDotFunRewardsEscrow { aptos_coin });
         }
     }
