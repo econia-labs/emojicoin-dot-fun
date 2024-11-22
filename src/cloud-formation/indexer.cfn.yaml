@@ -107,10 +107,16 @@ Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
     Type: 'AWS::EC2::Image::Id'
+  BrokerCpu:
+    Default: 256
+    Type: 'Number'
   BrokerImageVersion:
     Type: 'String'
+  BrokerMemory:
+    Default: 512
+    Type: 'Number'
   DbMaxCapacity:
-    Default: 16
+    Default: 1
     Type: 'Number'
   DbMinCapacity:
     Default: 0.5
@@ -654,10 +660,10 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
-      Cpu: '1024'
+      Cpu: !Ref 'BrokerCpu'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
-      Memory: '2048'
+      Memory: !Ref 'BrokerMemory'
       NetworkMode: 'awsvpc'
       RequiresCompatibilities:
       - 'FARGATE'
@@ -676,6 +682,10 @@ Resources:
   # Cluster for running ECS containers.
   ContainerCluster:
     Condition: 'DeployContainers'
+    Properties:
+      ClusterSettings:
+      - Name: 'containerInsights'
+        Value: 'enabled'
     Type: 'AWS::ECS::Cluster'
   # Log group for ECS task logging.
   ContainerLogGroup:
@@ -1305,10 +1315,10 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'PostgrestHealthCheckPort'
-      Cpu: '1024'
+      Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
-      Memory: '2048'
+      Memory: '512'
       NetworkMode: 'awsvpc'
       RequiresCompatibilities:
       - 'FARGATE'
