@@ -19,7 +19,9 @@ export type LocalStorageCache<T> = {
 };
 
 /**
- * Note that this data is not validated and any change in data type returned from this function should be validated to ensure that persisted cache data between multiple builds can cause errors with unexpected data types.
+ * Note that this data is not validated and any change in data type returned from this function
+ * should be validated to ensure that persisted cache data between multiple builds can cause errors
+ * with unexpected data types.
  */
 export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): T | null {
   const str = localStorage.getItem(key);
