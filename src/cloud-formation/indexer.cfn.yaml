@@ -107,16 +107,16 @@ Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
     Type: 'AWS::EC2::Image::Id'
-  BrokerImageVersion:
-    Type: 'String'
   BrokerCpu:
     Default: 256
     Type: 'Number'
+  BrokerImageVersion:
+    Type: 'String'
   BrokerMemory:
     Default: 512
     Type: 'Number'
   DbMaxCapacity:
-    Default: 16
+    Default: 1
     Type: 'Number'
   DbMinCapacity:
     Default: 0.5
