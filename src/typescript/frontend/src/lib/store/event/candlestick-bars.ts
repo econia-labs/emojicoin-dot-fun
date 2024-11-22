@@ -1,5 +1,5 @@
 import { type Types } from "@sdk-types";
-import { type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
+import { ONE_APT, type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
 import { type SwapEventModel, type PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { q64ToBig } from "@sdk/utils/nominal-price";
@@ -59,7 +59,7 @@ export const toBar = (event: PeriodicStateEventModel): Bar => ({
   high: q64ToBig(event.periodicState.highPriceQ64).toNumber(),
   low: q64ToBig(event.periodicState.lowPriceQ64).toNumber(),
   close: q64ToBig(event.periodicState.closePriceQ64).toNumber(),
-  volume: Number(event.periodicState.volumeBase),
+  volume: Number(event.periodicState.volumeQuote) / ONE_APT,
 });
 
 export const toBars = (events: PeriodicStateEventModel | PeriodicStateEventModel[]) =>

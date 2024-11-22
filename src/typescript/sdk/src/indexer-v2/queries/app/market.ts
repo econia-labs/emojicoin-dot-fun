@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== "test") {
   require("server-only");
 }
 
-import { LIMIT, ORDER_BY } from "../../../queries";
+import { ORDER_BY } from "../../../queries";
 import { type AnyNumberString } from "../../../types";
 import { TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
@@ -14,32 +14,60 @@ import {
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
-import { type PeriodicStateEventQueryArgs, type MarketStateQueryArgs } from "../../types/common";
+import { type PeriodicStateEventQueryArgs } from "../../types/common";
 import { type SymbolEmoji } from "../../../emoji_data/types";
 
 const selectSwapsByMarketID = ({
   marketID,
-  page = 1,
-  pageSize = LIMIT,
-}: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
-  postgrest
+  fromMarketNonce = null,
+  amount = 20,
+}: {
+  marketID: AnyNumberString;
+  fromMarketNonce?: number | null;
+  amount?: number;
+}) => {
+  if (fromMarketNonce !== null) {
+    return postgrest
+      .from(TableName.SwapEvents)
+      .select("*")
+      .eq("market_id", marketID)
+      .lte("market_nonce", fromMarketNonce)
+      .order("market_nonce", ORDER_BY.DESC)
+      .limit(amount);
+  }
+  return postgrest
     .from(TableName.SwapEvents)
     .select("*")
     .eq("market_id", marketID)
     .order("market_nonce", ORDER_BY.DESC)
-    .range((page - 1) * pageSize, page * pageSize - 1);
+    .limit(amount);
+};
 
 const selectChatsByMarketID = ({
   marketID,
-  page = 1,
-  pageSize = LIMIT,
-}: { marketID: AnyNumberString } & MarketStateQueryArgs) =>
-  postgrest
+  fromMarketNonce = null,
+  amount = 20,
+}: {
+  marketID: AnyNumberString;
+  fromMarketNonce?: number | null;
+  amount?: number;
+}) => {
+  if (fromMarketNonce !== null) {
+    return postgrest
+      .from(TableName.ChatEvents)
+      .select("*")
+      .eq("market_id", marketID)
+      .lte("market_nonce", fromMarketNonce)
+      .order("market_nonce", ORDER_BY.DESC)
+      .limit(amount);
+  }
+  return postgrest
     .from(TableName.ChatEvents)
     .select("*")
     .eq("market_id", marketID)
     .order("market_nonce", ORDER_BY.DESC)
-    .range((page - 1) * pageSize, page * pageSize - 1);
+    .limit(amount);
+};
 
 // This query uses `offset` instead of `page` because the periodic state events query requires
 // more granular pagination due to the requirements of the private TradingView charting library.

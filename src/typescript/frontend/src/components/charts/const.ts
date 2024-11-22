@@ -43,8 +43,8 @@ export const MS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 export const EXCHANGE_NAME = "emojicoin.fun";
 
 export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "container"> = {
-  interval: "5" as ResolutionString,
   library_path: `${CDN_URL}/charting_library/`,
+  interval: "1" as ResolutionString,
   theme: "Dark" as ThemeName,
   locale: "en" as LanguageCode,
   custom_css_url: `${CDN_URL}/charting_library_stylesheets/emojicoin-dot-fun.css`,
