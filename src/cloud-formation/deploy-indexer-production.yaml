@@ -1,6 +1,8 @@
 ---
 parameters:
+  BrokerCpu: 1024
   BrokerImageVersion: '1.0.1'
+  BrokerMemory: 2048
   DeployAlb: 'true'
   DeployAlbDnsRecord: 'true'
   DeployBastionHost: 'true'

@@ -109,6 +109,12 @@ Parameters:
     Type: 'AWS::EC2::Image::Id'
   BrokerImageVersion:
     Type: 'String'
+  BrokerCpu:
+    Default: 256
+    Type: 'Number'
+  BrokerMemory:
+    Default: 512
+    Type: 'Number'
   DbMaxCapacity:
     Default: 16
     Type: 'Number'
@@ -654,10 +660,10 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
-      Cpu: '1024'
+      Cpu: !Ref 'BrokerCpu'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
-      Memory: '2048'
+      Memory: !Ref 'BrokerMemory'
       NetworkMode: 'awsvpc'
       RequiresCompatibilities:
       - 'FARGATE'
@@ -1305,10 +1311,10 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'PostgrestHealthCheckPort'
-      Cpu: '1024'
+      Cpu: '256'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
-      Memory: '2048'
+      Memory: '512'
       NetworkMode: 'awsvpc'
       RequiresCompatibilities:
       - 'FARGATE'
