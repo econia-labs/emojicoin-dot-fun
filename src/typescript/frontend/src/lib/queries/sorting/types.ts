@@ -85,6 +85,8 @@ export const toPostgrestQueryParam = (
   return sortByFilters[sortBy]?.forPostgrestQuery ?? sortBy;
 };
 
+export const DEFAULT_SORT_BY = SortMarketsBy.MarketCap;
+
 export const toMarketDataSortBy = (
   sortBy?: SortByPostgrestQueryParams | SortMarketsBy | SortByPageQueryParams
 ): SortMarketsBy => {
@@ -93,7 +95,7 @@ export const toMarketDataSortBy = (
     if (sortBy === sortByFilters[key]?.forPageQueryParams) return key as SortMarketsBy;
     if (sortBy === key) return key as SortMarketsBy;
   }
-  return SortMarketsBy.MarketCap;
+  return DEFAULT_SORT_BY;
 };
 
 export const toMarketDataSortByHomePage = (
@@ -104,5 +106,5 @@ export const toMarketDataSortByHomePage = (
   if (sort === SortMarketsBy.BumpOrder) return sort;
   if (sort === SortMarketsBy.DailyVolume) return sort;
   if (sort === SortMarketsBy.AllTimeVolume) return sort;
-  return SortMarketsBy.MarketCap;
+  return DEFAULT_SORT_BY;
 };

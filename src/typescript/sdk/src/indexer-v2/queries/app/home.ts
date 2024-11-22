@@ -58,12 +58,15 @@ export const fetchMarketsWithCount = queryHelperWithCount(
   DatabaseTypeConverter[TableName.MarketState]
 );
 
-// The featured market is simply the current highest daily volume market.
+export const DEFAULT_FEATURED_BY = SortMarketsBy.BumpOrder;
+export const DEFAULT_ORDERED_BY_FOR_FEATURED_BY = ORDER_BY.DESC;
+
 export const fetchFeaturedMarket = async () =>
   fetchMarkets({
     page: 1,
     pageSize: 1,
-    sortBy: SortMarketsBy.DailyVolume,
+    sortBy: DEFAULT_FEATURED_BY,
+    orderBy: ORDER_BY.DESC,
   }).then((markets) => (markets ?? []).at(0));
 
 /**

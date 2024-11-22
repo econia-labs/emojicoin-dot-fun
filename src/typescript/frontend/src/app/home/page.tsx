@@ -1,6 +1,8 @@
 import { type HomePageParams, toHomePageParamsWithDefault } from "lib/routes/home-page-params";
 import HomePageComponent from "./HomePage";
 import {
+  DEFAULT_FEATURED_BY,
+  DEFAULT_ORDERED_BY_FOR_FEATURED_BY,
   fetchFeaturedMarket,
   fetchMarkets,
   fetchMarketsWithCount,
@@ -9,8 +11,6 @@ import {
 } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
-import { ORDER_BY } from "@sdk/queries";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { unstable_cache } from "next/cache";
 
 export const revalidate = 2;
@@ -55,7 +55,7 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   let featuredPromise: ReturnType<typeof fetchFeaturedMarket>;
 
-  if (sortBy === SortMarketsBy.DailyVolume && orderBy === ORDER_BY.DESC) {
+  if (sortBy === DEFAULT_FEATURED_BY && orderBy === DEFAULT_ORDERED_BY_FOR_FEATURED_BY) {
     featuredPromise = marketsPromise.then((r) => r[0]);
   } else {
     featuredPromise = fetchFeaturedMarket();

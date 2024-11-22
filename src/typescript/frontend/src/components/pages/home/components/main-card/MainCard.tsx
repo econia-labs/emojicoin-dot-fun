@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { translationFunction } from "context/language-context";
 import { Column, Flex, FlexGap } from "@containers";
 import { toCoinDecimalString } from "lib/utils/decimals";
@@ -12,9 +12,10 @@ import { useLabelScrambler } from "../table-card/animation-variants/event-varian
 import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { type HomePageProps } from "app/home/HomePage";
-import "./module.css";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+import { useEventStore } from "context/event-store-context";
+import "./module.css";
 
 export interface MainCardProps {
   featured?: HomePageProps["featured"];
@@ -23,14 +24,26 @@ export interface MainCardProps {
 }
 
 const MainCard = (props: MainCardProps) => {
-  const { featured } = props;
+  const { featured: initialFeatured } = props;
   const { t } = translationFunction();
   const globeImage = useRef<HTMLImageElement>(null);
 
-  const { marketCap, dailyVolume, allTimeVolume } = useMemo(() => {
+  const firehose = useEventStore((s) => s.stateFirehose);
+  const [featured, setFeatured] = useState(initialFeatured);
+
+  // The `featured` market from `props` is the one from the server component. Since the featured market is currently
+  // the latest market in terms of bump order, we need to update it when a new market is bumped.
+  useEffect(() => {
+    const latestBumpedMarket = firehose.at(0);
+    if (latestBumpedMarket) {
+      setFeatured(latestBumpedMarket);
+    }
+  }, [firehose]);
+
+  const { marketCap, lastSwapVolume, allTimeVolume } = useMemo(() => {
     return {
       marketCap: BigInt(featured?.state.instantaneousStats.marketCap ?? 0),
-      dailyVolume: BigInt(featured?.dailyVolume ?? 0),
+      lastSwapVolume: BigInt(featured?.lastSwap.quoteVolume ?? 0),
       allTimeVolume: BigInt(featured?.state.cumulativeStats.quoteVolume ?? 0),
     };
   }, [featured]);
@@ -52,7 +65,7 @@ const MainCard = (props: MainCardProps) => {
   /* eslint-enable react-hooks/exhaustive-deps */
 
   const { ref: marketCapRef } = useLabelScrambler(toCoinDecimalString(marketCap, 2));
-  const { ref: dailyVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
+  const { ref: lastSwapVolumeRef } = useLabelScrambler(toCoinDecimalString(lastSwapVolume, 2));
   const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
   return (
@@ -125,14 +138,12 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <div className="uppercase">
-                  <div className="font-forma text-medium-gray market-data-text uppercase">
-                    {t("24 hour vol:")}
-                  </div>
+                <div className="font-forma text-medium-gray market-data-text uppercase">
+                  {t("All-time vol:")}
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <div ref={dailyVolumeRef}>{toCoinDecimalString(dailyVolume, 2)}</div>
+                    <div ref={allTimeVolumeRef}>{toCoinDecimalString(allTimeVolume, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
@@ -144,12 +155,14 @@ const MainCard = (props: MainCardProps) => {
           <FlexGap gap="8px">
             {typeof featured !== "undefined" && (
               <>
-                <div className="font-forma text-medium-gray market-data-text uppercase">
-                  {t("All-time vol:")}
+                <div className="uppercase">
+                  <div className="font-forma text-medium-gray market-data-text uppercase">
+                    {t("Last swap vol:")}
+                  </div>
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <div ref={allTimeVolumeRef}>{toCoinDecimalString(allTimeVolume, 2)}</div>
+                    <div ref={lastSwapVolumeRef}>{toCoinDecimalString(lastSwapVolume, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
