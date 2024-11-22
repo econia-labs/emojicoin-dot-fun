@@ -5,7 +5,7 @@ module rewards::emojicoin_dot_fun_rewards {
     use aptos_framework::account::{Self, SignerCapability};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
-    use aptos_framework::coin;
+    use aptos_framework::coin::{Self, Coin};
     use aptos_framework::event;
     use aptos_framework::randomness;
     use emojicoin_dot_fun::emojicoin_dot_fun::{Self, Swap};
@@ -49,6 +49,10 @@ module rewards::emojicoin_dot_fun_rewards {
     /// Reward value in APT per reward per tier.
     const APT_REWARD_AMOUNTS_PER_TIER: vector<u64> = vector[1, 2, 5, 10, 100, 500];
 
+    struct EmojicoinDotFunRewardsEscrow has key {
+        aptos_coin: Coin<AptosCoin>
+    }
+
     struct RewardTier has drop, store {
         apt_amount_per_reward: u64,
         n_rewards_disbursed: u64,
@@ -67,6 +71,12 @@ module rewards::emojicoin_dot_fun_rewards {
         octas_reward_amount: u64
     }
 
+    #[event]
+    struct EmojicoinDotFunRewardsRedemption has copy, drop, store {
+        swap: Swap,
+        octas_reward_amount: u64
+    }
+
     #[randomness]
     entry fun swap_with_rewards<Emojicoin, EmojicoinLP>(
         swapper: &signer,
@@ -74,10 +84,37 @@ module rewards::emojicoin_dot_fun_rewards {
         input_amount: u64,
         is_sell: bool,
         min_output_amount: u64
-    ) acquires Vault {
+    ) acquires EmojicoinDotFunRewardsEscrow, Vault {
+
+        // If a swap buy, first exhaust funds from the rewards escrow if it exists.
+        let swapper_address = signer::address_of(swapper);
+        if (!is_sell && exists<EmojicoinDotFunRewardsEscrow>(swapper_address)) {
+            let EmojicoinDotFunRewardsEscrow { aptos_coin } =
+                move_from<EmojicoinDotFunRewardsEscrow>(swapper_address);
+            let octas_reward_amount = coin::value(&aptos_coin);
+            aptos_account::deposit_coins(swapper_address, aptos_coin);
+            let swap = emojicoin_dot_fun::simulate_swap<Emojicoin, EmojicoinLP>(
+                swapper_address,
+                market_address,
+                octas_reward_amount,
+                false,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS
+            );
+            emojicoin_dot_fun::swap<Emojicoin, EmojicoinLP>(
+                swapper,
+                market_address,
+                octas_reward_amount,
+                false,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS,
+                1
+            );
+            event::emit(EmojicoinDotFunRewardsRedemption { swap, octas_reward_amount });
+            if (input_amount == 0) return; // Then return if user only wanted to redeem escrow.
+        };
 
         // Simulate swap to get integrator fee, then execute swap.
-        let swapper_address = signer::address_of(swapper);
         let swap =
             emojicoin_dot_fun::simulate_swap<Emojicoin, EmojicoinLP>(
                 swapper_address,
@@ -153,7 +190,15 @@ module rewards::emojicoin_dot_fun_rewards {
             let vault_signer =
                 account::create_signer_with_capability(vault_signer_cap_ref);
             event::emit(EmojicoinDotFunRewards { swap, octas_reward_amount });
-            aptos_account::transfer(&vault_signer, swapper_address, octas_reward_amount);
+
+            // Top off escrow if it exists, otherwise create it.
+            let aptos_coin = if (exists<EmojicoinDotFunRewardsEscrow>(swapper_address)) {
+                let EmojicoinDotFunRewardsEscrow { aptos_coin } =
+                    move_from<EmojicoinDotFunRewardsEscrow>(swapper_address);
+                aptos_coin
+            } else coin::zero();
+            coin::merge(&mut aptos_coin, coin::withdraw(&vault_signer, octas_reward_amount));
+            move_to(swapper, EmojicoinDotFunRewardsEscrow { aptos_coin });
         }
     }
 
