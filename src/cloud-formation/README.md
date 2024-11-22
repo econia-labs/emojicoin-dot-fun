@@ -41,6 +41,10 @@ indexer deployments.
 
 ## Setup
 
+1. Choose an [AWS region][aws regions] like `us-east-2` (Ohio) if you are going
+   to get indexer data from the [Aptos Labs gRPC endpoint], which is located in
+   [GCP region][gcp regions] `us-central1` (Iowa).
+
 1. [Make Route 53 the DNS service for a domain you own], which will
    automatically be configured with a subdomain for each deployment environment.
 
@@ -494,6 +498,7 @@ REST and WebSocket endpoints.
 [auto-selection of aurora az]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-availabilityzone
 [availability zone]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-availability-zones
 [aws cloudformation]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
+[aws regions]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions
 [aws routes docs]: https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html#route-table-routes
 [aws-recommended vpc cidr block]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html
 [az-specific nat gateways]: https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html
@@ -513,6 +518,7 @@ REST and WebSocket endpoints.
 [ecr pull through cache rule creation docs]: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-rule.html
 [ecs task execution iam role]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html
 [fault tolerant replica promotion]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.AuroraHighAvailability.html#Aurora.Managing.FaultTolerance
+[gcp regions]: https://cloud.google.com/compute/docs/regions-zones#available
 [gitsync]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
 [gitsync event]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-status.html#git-sync-status-sync-events
 [gitsync iam role]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync-prereq.html#git-sync-prereq-iam
