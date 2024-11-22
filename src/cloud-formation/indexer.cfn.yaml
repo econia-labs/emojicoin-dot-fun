@@ -682,6 +682,10 @@ Resources:
   # Cluster for running ECS containers.
   ContainerCluster:
     Condition: 'DeployContainers'
+    Properties:
+      ClusterSettings:
+      - Name: 'containerInsights'
+        Value: 'enabled'
     Type: 'AWS::ECS::Cluster'
   # Log group for ECS task logging.
   ContainerLogGroup:
