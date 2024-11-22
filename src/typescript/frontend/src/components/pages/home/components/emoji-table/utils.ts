@@ -47,7 +47,7 @@ export const stateEventsToProps = (
       symbol,
       emojis,
       marketID: Number(marketID),
-      staticMarketCap: (marketCap ?? 0).toString(),
+      staticMarketCap: marketCap.toString(),
       staticVolume24H: (volume24H ?? 0).toString(),
       trigger: e.market.trigger,
       searchEmojisKey: toSearchEmojisKey(searchEmojis),
