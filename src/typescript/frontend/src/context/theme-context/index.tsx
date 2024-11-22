@@ -6,7 +6,7 @@ import { type DefaultTheme } from "styled-components";
 import dark from "theme/dark";
 import light from "theme/light";
 
-import { LOCAL_STORAGE_KEYS } from "configs";
+import { readLocalStorageCache, writeLocalStorageCache } from "configs/local-storage-keys";
 
 type ContextType = {
   theme: DefaultTheme;
@@ -28,7 +28,7 @@ const ThemeContextProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => 
   const [theme, setTheme] = useState(() => {
     const themeFromStorage = getThemeValueFromLS();
 
-    localStorage.setItem(LOCAL_STORAGE_KEYS.theme, themeFromStorage);
+    writeLocalStorageCache("theme", themeFromStorage);
     return { theme: themeValues[themeFromStorage], key: themeFromStorage };
   });
 
@@ -42,12 +42,12 @@ const ThemeContextProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => 
     const themeFromStorage = getThemeValueFromLS();
     const newValue = themeFromStorage === LIGHT ? DARK : LIGHT;
 
-    localStorage.setItem(LOCAL_STORAGE_KEYS.theme, newValue);
+    writeLocalStorageCache("theme", newValue);
     setTheme({ theme: themeValues[newValue], key: newValue });
   }
 
   function getThemeValueFromLS() {
-    let themeFromStorage = localStorage.getItem(LOCAL_STORAGE_KEYS.theme) ?? LIGHT;
+    let themeFromStorage = readLocalStorageCache<string>("theme") ?? LIGHT;
 
     if (!(themeFromStorage in themeValues)) {
       themeFromStorage = LIGHT;
