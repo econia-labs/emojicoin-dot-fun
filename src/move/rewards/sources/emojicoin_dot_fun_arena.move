@@ -18,6 +18,9 @@ module rewards::emojicoin_dot_fun_arena {
     use std::option::Self;
     use std::signer;
 
+    /// Signer does not correspond to rewards account.
+    const E_NOT_REWARDS: u64 = 0;
+
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
 
@@ -68,6 +71,22 @@ module rewards::emojicoin_dot_fun_arena {
     struct UserMelees has key {
         /// Set of serial IDs of all melees the user has entered.
         melee_ids: SmartTable<u64, Nil>
+    }
+
+    public entry fun fund_vault(rewards: &signer, amount: u64) acquires Registry {
+        assert!(signer::address_of(rewards) == @rewards, E_NOT_REWARDS);
+        let vault_address =
+            account::get_signer_capability_address(&Registry[@rewards].signer_capability);
+        aptos_account::transfer(rewards, vault_address, amount);
+    }
+
+    public entry fun withdraw_from_vault(rewards: &signer, amount: u64) acquires Registry {
+        assert!(signer::address_of(rewards) == @rewards, E_NOT_REWARDS);
+        let vault_signer =
+            account::create_signer_with_capability(
+                &Registry[@rewards].signer_capability
+            );
+        aptos_account::transfer(&vault_signer, @rewards, amount);
     }
 
     #[randomness]
@@ -126,6 +145,17 @@ module rewards::emojicoin_dot_fun_arena {
                         eligible_match_amount
                     } else {
                         current_melee_ref.available_rewards
+                    };
+                    let vault_balance =
+                        coin::balance<AptosCoin>(
+                            account::get_signer_capability_address(
+                                &Registry[@rewards].signer_capability
+                            )
+                        );
+                    eligible_match_amount = if (eligible_match_amount < vault_balance) {
+                        eligible_match_amount
+                    } else {
+                        vault_balance
                     };
                     let requested_match_amount =
                         (
@@ -473,7 +503,36 @@ module rewards::emojicoin_dot_fun_arena {
             let escrow_ref_mut =
                 &mut MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>[participant_address];
             // Only allow exit if melee ID matches.
-            if (escrow_ref_mut.melee_id == melee_id) {}
+            if (escrow_ref_mut.melee_id == melee_id) {
+                // Update available rewards and transfer tap out fee to vault if applicable.
+                if (may_have_to_pay_tap_out_fee) {
+                    let registry_ref_mut = &mut Registry[@rewards];
+                    let exited_melee_ref_mut =
+                        registry_ref_mut.melees_by_id.borrow_mut(melee_id);
+                    let tap_out_fee_ref_mut = &mut escrow_ref_mut.tap_out_fee;
+                    let available_rewards_ref_mut =
+                        &mut exited_melee_ref_mut.available_rewards;
+                    *available_rewards_ref_mut = *available_rewards_ref_mut
+                        + *tap_out_fee_ref_mut;
+                    let vault_address =
+                        account::get_signer_capability_address(
+                            &registry_ref_mut.signer_capability
+                        );
+                    aptos_account::transfer(
+                        participant, vault_address, *tap_out_fee_ref_mut
+                    );
+                    *tap_out_fee_ref_mut = 0;
+                };
+                // Move emojicoin balances out of escrow.
+                aptos_account::deposit_coins(
+                    participant_address,
+                    coin::extract_all(&mut escrow_ref_mut.emojicoin_0)
+                );
+                aptos_account::deposit_coins(
+                    participant_address,
+                    coin::extract_all(&mut escrow_ref_mut.emojicoin_1)
+                );
+            };
         }
     }
 
