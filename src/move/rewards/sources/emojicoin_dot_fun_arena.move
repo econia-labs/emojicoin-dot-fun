@@ -15,7 +15,7 @@ module rewards::emojicoin_dot_fun_arena {
         unpack_market_metadata,
         unpack_registry_view
     };
-    use std::option::{Self, Option};
+    use std::option::Self;
     use std::signer;
 
     /// Resource account address seed for the registry.
@@ -29,6 +29,7 @@ module rewards::emojicoin_dot_fun_arena {
 
     /// Flat integrator fee.
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
+    const INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE: u8 = 50;
     const REWARDS_PER_MELEE: u64 = 1500 * 100_000_000;
     const MATCH_PERCENTAGE: u64 = 20;
     const MAX_PERCENTAGE: u64 = 100;
@@ -50,8 +51,6 @@ module rewards::emojicoin_dot_fun_arena {
 
     struct MeleeEscrow<phantom Emojicoin0, phantom EmojicoinLP0, phantom Emojicoin1, phantom EmojicoinLP1> has key {
         melee_id: u64,
-        /// Indentical to `Melee.market_metadatas`.
-        market_metadatas: vector<MarketMetadata>,
         emojicoin_0: Coin<Emojicoin0>,
         emojicoin_1: Coin<Emojicoin1>,
         tap_out_fee: u64
@@ -98,7 +97,6 @@ module rewards::emojicoin_dot_fun_arena {
                 entrant,
                 MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1> {
                     melee_id,
-                    market_metadatas,
                     emojicoin_0: coin::zero(),
                     emojicoin_1: coin::zero(),
                     tap_out_fee: 0
@@ -145,8 +143,8 @@ module rewards::emojicoin_dot_fun_arena {
                             + actual_match_amount;
                         let registry_ref_mut = &mut Registry[@rewards];
                         let available_rewards_ref_mut =
-                            registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
-                        available_rewards_ref_mut = available_rewards_ref_mut
+                            &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
+                        *available_rewards_ref_mut = *available_rewards_ref_mut
                             - actual_match_amount;
                         let vault_signer =
                             account::create_signer_with_capability(
@@ -218,9 +216,10 @@ module rewards::emojicoin_dot_fun_arena {
     #[randomness]
     entry fun exit<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
         participant: &signer, melee_id: u64
-    ) acquires Registry {
-        let may_have_to_pay_tap_out_fee = !crank_schedule();
-        // Ensure registry available rewards incremented correctly.
+    ) acquires MeleeEscrow, Registry {
+        exit_inner<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
+            participant, melee_id, !crank_schedule()
+        );
     }
 
     #[randomness]
@@ -229,9 +228,180 @@ module rewards::emojicoin_dot_fun_arena {
         melee_id: u64,
         market_addresses: vector<address>,
         buy_emojicoin_0: bool
-    ) acquires Registry {
-        if (crank_schedule()) {}
-        else {}
+    ) acquires MeleeEscrow, Registry {
+        let exit_once_done = crank_schedule();
+
+        // Return early if type arguments or melee ID is passed incorrectly, but only after cranking
+        // schedule.
+        let swapper_address = signer::address_of(swapper);
+        if (!exists<MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>>(
+            swapper_address
+        )) {
+            return;
+        };
+        let escrow_ref_mut =
+            &mut MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>[swapper_address];
+        if (escrow_ref_mut.melee_id != melee_id)
+            return;
+        let (market_address_0, market_address_1) =
+            (market_addresses[0], market_addresses[1]);
+
+        if (buy_emojicoin_0) {
+            // Move emojicoin 1 balance out of escrow.
+            let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
+            let input_amount = coin::value(emojicoin_1_ref_mut);
+            aptos_account::deposit_coins(
+                swapper_address, coin::extract_all(emojicoin_1_ref_mut)
+            );
+
+            // Get amount of APT recieved by selling emojicoin 1, then execute swap.
+            let swap_to_apt =
+                emojicoin_dot_fun::simulate_swap<Emojicoin1, EmojicoinLP1>(
+                    swapper_address,
+                    market_address_1,
+                    input_amount,
+                    true,
+                    @integrator,
+                    INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+                );
+            let (_, _, _, _, _, _, _, _, net_proceeds_in_apt, _, _, _, _, _, _, _, _, _) =
+                emojicoin_dot_fun::unpack_swap(swap_to_apt);
+            emojicoin_dot_fun::swap<Emojicoin1, EmojicoinLP1>(
+                swapper,
+                market_address_1,
+                input_amount,
+                true,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
+                1
+            );
+
+            // Get amount of emojicoin 0 recieved by buying it with APT proceeds.
+            let swap_to_emojicoin_0 =
+                emojicoin_dot_fun::simulate_swap<Emojicoin0, EmojicoinLP0>(
+                    swapper_address,
+                    market_address_0,
+                    net_proceeds_in_apt,
+                    false,
+                    @integrator,
+                    INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+                );
+            let (
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                net_proceeds_in_emojicoin_0,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _
+            ) = emojicoin_dot_fun::unpack_swap(swap_to_emojicoin_0);
+            emojicoin_dot_fun::swap<Emojicoin0, EmojicoinLP0>(
+                swapper,
+                market_address_0,
+                net_proceeds_in_apt,
+                false,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
+                1
+            );
+
+            // Move emojicoin 0 balance to escrow.
+            coin::merge(
+                &mut escrow_ref_mut.emojicoin_0,
+                coin::withdraw(swapper, net_proceeds_in_emojicoin_0)
+            );
+        } else {
+            // Move emojicoin 0 balance out of escrow.
+            let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
+            let input_amount = coin::value(emojicoin_0_ref_mut);
+            aptos_account::deposit_coins(
+                swapper_address, coin::extract_all(emojicoin_0_ref_mut)
+            );
+
+            // Get amount of APT recieved by selling emojicoin 0, then execute swap.
+            let swap_to_apt =
+                emojicoin_dot_fun::simulate_swap<Emojicoin0, EmojicoinLP0>(
+                    swapper_address,
+                    market_address_0,
+                    input_amount,
+                    true,
+                    @integrator,
+                    INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+                );
+            let (_, _, _, _, _, _, _, _, net_proceeds_in_apt, _, _, _, _, _, _, _, _, _) =
+                emojicoin_dot_fun::unpack_swap(swap_to_apt);
+            emojicoin_dot_fun::swap<Emojicoin0, EmojicoinLP0>(
+                swapper,
+                market_address_1,
+                input_amount,
+                true,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
+                1
+            );
+
+            // Get amount of emojicoin 1 recieved by buying it with APT proceeds.
+            let swap_to_emojicoin_1 =
+                emojicoin_dot_fun::simulate_swap<Emojicoin1, EmojicoinLP1>(
+                    swapper_address,
+                    market_address_1,
+                    net_proceeds_in_apt,
+                    false,
+                    @integrator,
+                    INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+                );
+            let (
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                net_proceeds_in_emojicoin_1,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _
+            ) = emojicoin_dot_fun::unpack_swap(swap_to_emojicoin_1);
+            emojicoin_dot_fun::swap<Emojicoin1, EmojicoinLP1>(
+                swapper,
+                market_address_1,
+                net_proceeds_in_apt,
+                false,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
+                1
+            );
+
+            // Move emojicoin 1 balance to escrow.
+            coin::merge(
+                &mut escrow_ref_mut.emojicoin_1,
+                coin::withdraw(swapper, net_proceeds_in_emojicoin_1)
+            );
+        };
+
+        if (exit_once_done)
+            exit_inner<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
+                swapper, melee_id, false
+            );
     }
 
     fun init_module(rewards: &signer) {
@@ -284,6 +454,27 @@ module rewards::emojicoin_dot_fun_arena {
             }
         );
         coin::register<AptosCoin>(&vault_signer);
+    }
+
+    inline fun borrow_current_melee_ref(): &Melee {
+        let registry_ref = &Registry[@rewards];
+        let n_melees = registry_ref.melees_by_id.length();
+        registry_ref.melees_by_id.borrow(n_melees)
+    }
+
+    inline fun exit_inner<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
+        participant: &signer, melee_id: u64, may_have_to_pay_tap_out_fee: bool
+    ) acquires Registry {
+        let participant_address = signer::address_of(participant);
+        // Only allow exit if user has corresponding melee resourcce and melee ID matches.
+        if (exists<MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>>(
+            participant_address
+        )) {
+            let escrow_ref_mut =
+                &mut MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>[participant_address];
+            // Only allow exit if melee ID matches.
+            if (escrow_ref_mut.melee_id == melee_id) {}
+        }
     }
 
     /// Cranks schedule and returns `true` if a melee has ended as a result.
@@ -341,6 +532,14 @@ module rewards::emojicoin_dot_fun_arena {
 
     }
 
+    /// Psuedo random number generator based on xorshift64 algorithm from Wikipedia.
+    inline fun psuedo_random_u64(seed: u64): u64 {
+        seed = seed ^ (seed << 13);
+        seed = seed ^ (seed >> 7);
+        seed = seed ^ (seed << 17);
+        seed
+    }
+
     /// Market IDs are 1-indexed.
     inline fun random_market_id(n_markets: u64): u64 {
         randomness::u64_range(0, n_markets) + 1
@@ -352,19 +551,5 @@ module rewards::emojicoin_dot_fun_arena {
         } else {
             vector[market_id_1, market_id_0]
         }
-    }
-
-    /// Psuedo random number generator based on xorshift64 algorithm from Wikipedia.
-    inline fun psuedo_random_u64(seed: u64): u64 {
-        seed = seed ^ (seed << 13);
-        seed = seed ^ (seed >> 7);
-        seed = seed ^ (seed << 17);
-        seed
-    }
-
-    inline fun borrow_current_melee_ref(): &Melee {
-        let registry_ref = &Registry[@rewards];
-        let n_melees = registry_ref.melees_by_id.length();
-        registry_ref.melees_by_id.borrow(n_melees)
     }
 }
