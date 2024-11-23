@@ -43,7 +43,7 @@ module rewards::emojicoin_dot_fun_arena {
         melee_id: u64,
         /// Market with lower market ID first.
         market_metadatas: vector<MarketMetadata>,
-        available_rewards: u64,
+        available_rewards_in_octas: u64,
         /// In microseconds.
         start_time: u64,
         lock_in_period: u64,
@@ -542,7 +542,7 @@ module rewards::emojicoin_dot_fun_arena {
         let registry_ref = &Registry[@rewards];
         let n_melees = registry_ref.melees_by_id.length();
         let most_recent_melee_ref = registry_ref.melees_by_id.borrow(n_melees);
-        if (most_recent_melee_ref.start_time + most_recent_melee_ref.duration >= time) {
+        if (time >= most_recent_melee_ref.start_time + most_recent_melee_ref.duration) {
             let market_ids = next_melee_market_ids();
             let melee_id = n_melees + 1;
             let registry_ref_mut = &mut Registry[@rewards];
