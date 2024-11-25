@@ -5,14 +5,14 @@ const LOCAL_STORAGE_KEYS = {
   theme: `${packages.name}_theme`,
   language: `${packages.name}_language`,
   geoblocking: `${packages.name}_geoblocking`,
-  settings: `${packages.name}_geoblocking`,
+  settings: `${packages.name}_settings`,
 };
 
 const LOCAL_STORAGE_CACHE_TIME = {
   theme: Infinity,
   language: Infinity,
   geoblocking: 7 * 24 * 60 * 60 * 1000, // 7 days.
-  settings: Infinity, // 7 days.
+  settings: Infinity,
 };
 
 export type LocalStorageCache<T> = {
