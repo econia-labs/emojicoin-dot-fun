@@ -21,6 +21,7 @@ import {
   TableName,
   type ProcessedFields,
   DatabaseRpc,
+  type BlockAndEventIndexMetadata,
 } from "./json-types";
 import { type MarketEmojiData, type SymbolEmoji, toMarketEmojiData } from "../../emoji_data";
 import { toPeriod, toTrigger, type Period, type Trigger } from "../../const";
@@ -49,6 +50,11 @@ const toTransactionMetadata = (
   // for bookkeeping and debug logs.
   timestamp: postgresTimestampToDate(data.transaction_timestamp),
   insertedAt: data.inserted_at ? postgresTimestampToDate(data.inserted_at) : new Date(0),
+});
+
+const toBlockAndEventIndex = (data: BlockAndEventIndexMetadata) => ({
+  blockNumber: BigInt(data.block_number),
+  eventIndex: BigInt(data.event_index),
 });
 
 /// If received from postgres, symbol bytes come in as a hex string in the format "\\xabcd" where
@@ -351,6 +357,7 @@ export const withMarketAndStateMetadataAndEmitTime = curryToNamedType(
   toMarketMetadataModel,
   "market"
 );
+export const withBlockAndEventIndex = curryToNamedType(toBlockAndEventIndex, "blockAndEvent");
 export const withLastSwap = curryToNamedType(toLastSwapFromDatabase, "lastSwap");
 export const withGlobalStateEventData = curryToNamedType(toGlobalStateEventData, "globalState");
 export const withPeriodicStateMetadata = curryToNamedType(
@@ -476,6 +483,7 @@ export const toSwapEventModel = (data: DatabaseJsonType["swap_events"]) => ({
   ...withMarketAndStateMetadataAndBumpTime(data),
   ...withSwapEventData(data),
   ...withStateEventData(data),
+  ...withBlockAndEventIndex(data),
   ...GuidGetters.swapEvent(data),
 });
 
@@ -494,6 +502,7 @@ export const toLiquidityEventModel = (data: DatabaseJsonType["liquidity_events"]
   ...withLiquidityEventData(data),
   ...withStateEventData(data),
   ...withLastSwapData(data),
+  ...withBlockAndEventIndex(data),
   ...GuidGetters.liquidityEvent(data),
 });
 

@@ -98,6 +98,7 @@ export function getEventsAsProcessorModels(
     marketLatestStateEvents: Array<DatabaseModels["market_latest_state_event"]>(),
   };
 
+  let eventIndex = 0n;
   for (const builder of builders.values()) {
     const { marketID, marketNonce, bumpEvent, stateEvent, periodicStateEvents } = builder.build();
 
@@ -137,7 +138,9 @@ export function getEventsAsProcessorModels(
       lastSwap,
       event: bumpEvent,
       response,
+      eventIndex,
     });
+    eventIndex += 1n;
 
     // Create fake data if we're generating an event- otherwise, use the transaction response
     // passed in.

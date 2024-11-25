@@ -10,4 +10,5 @@ export const ROUTES = {
   notFound: "/not-found",
   maintenance: "/maintenance",
   launching: "/launching",
+  dexscreener: "/dexscreener",
 } as const;
