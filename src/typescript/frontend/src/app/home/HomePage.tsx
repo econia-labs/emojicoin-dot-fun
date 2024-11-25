@@ -33,7 +33,7 @@ export default async function HomePageComponent({
           ) : (
             <TextCarousel />
           )}
-          <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
+          <div className="flex justify-center items-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
             <MainCard featuredMarkets={priceFeed} page={page} sortBy={sortBy} />
           </div>
         {children}
