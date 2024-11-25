@@ -2,6 +2,7 @@ import {
   type Account,
   AccountAddress,
   type AccountAddressInput,
+  AnyNumber,
   type Aptos,
   type AptosConfig,
   Hex,
@@ -235,12 +236,16 @@ export const registerMarketAndGetEmojicoinInfo = async (args: {
 export async function getMarketResource(args: {
   aptos: Aptos;
   marketAddress: AccountAddressInput;
+  ledgerVersion?: AnyNumber;
 }): Promise<Types["Market"]> {
-  const { aptos } = args;
+  const { aptos, ledgerVersion } = args;
   const marketAddress = AccountAddress.from(args.marketAddress);
   const marketResource = await aptos.getAccountResource<JsonTypes["Market"]>({
     accountAddress: marketAddress,
     resourceType: STRUCT_STRINGS.Market,
+    options: {
+      ledgerVersion,
+    },
   });
 
   return toMarketResource(marketResource);

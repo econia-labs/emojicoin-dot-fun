@@ -1,14 +1,13 @@
 import {
-  // BASE_VIRTUAL_CEILING,
   BASE_VIRTUAL_FLOOR,
   BASIS_POINTS_PER_UNIT,
   EMOJICOIN_REMAINDER,
-  // EMOJICOIN_SUPPLY,
+  INTEGRATOR_FEE_RATE_BPS,
   POOL_FEE_RATE_BPS,
   QUOTE_REAL_CEILING,
   QUOTE_VIRTUAL_CEILING,
-} from "@sdk/const";
-import { type AnyNumberString, type Types } from "@sdk/types/types";
+} from "../const";
+import { type AnyNumberString, type Types } from "../types";
 import Big from "big.js";
 
 export class CustomCalculatedSwapError extends Error {
@@ -31,29 +30,29 @@ export class DivideByZeroError extends CustomCalculatedSwapError {
   }
 }
 
-/**
- * NOTE: This function throws an error just like the move code.
- * Use a try/catch around it to catch invalid inputs/invalid on-chain state.
- *
- */
-export const calculatedSwap = ({
-  marketData,
-  inputAmountMaybeString,
-  userEmojicoinBalance,
-}: {
-  marketData: {
-    clammVirtualReserves: Types["Reserves"];
-    cpammRealReserves: Types["Reserves"];
-    // inBondingCurve: boolean;
-    isSell: boolean;
-    startsInBondingCurve: boolean;
-  };
-  inputAmountMaybeString: AnyNumberString;
+export type SwapNetProceedsArgs = {
+  clammVirtualReserves: Types["Reserves"];
+  cpammRealReserves: Types["Reserves"];
+  startsInBondingCurve: boolean;
+  isSell: boolean;
+  inputAmount: AnyNumberString;
   userEmojicoinBalance: AnyNumberString;
-}) => {
-  const inputAmount = Big(BigInt(inputAmountMaybeString).toString());
+}
+
+/**
+ * @throws {@link SwapNotEnoughBaseError} if the user does not have enough base
+ * @throws {@link DivideByZeroError} if the cpamm output calculation results in a divide by zero
+ */
+const calculateExactSwapNetProceeds = (args: SwapNetProceedsArgs) => {
+  const {
+    clammVirtualReserves,
+    cpammRealReserves,
+    startsInBondingCurve,
+    userEmojicoinBalance,
+    isSell,
+  } = args;
+  const inputAmount = Big(BigInt(args.inputAmount).toString());
   const balanceBefore = Big(BigInt(userEmojicoinBalance).toString());
-  const { clammVirtualReserves, cpammRealReserves, isSell, startsInBondingCurve } = marketData;
 
   let poolFee: Big = Big(0);
   let baseVolume: Big;
@@ -61,34 +60,36 @@ export const calculatedSwap = ({
   let integratorFee: Big;
   let resultsInStateTransition = false;
 
-  // SELLING.
+  // -------------------------- Selling --------------------------
   if (isSell) {
-    const ammQuoteOutput = startsInBondingCurve
-      ? cpammSimpleSwapOutputAmount({
-          inputAmount,
-          isSell,
-          reserves: clammVirtualReserves,
-        })
-      : cpammSimpleSwapOutputAmount({
-          inputAmount,
-          isSell,
-          reserves: cpammRealReserves,
-        });
+    let ammQuoteOutput: Big;
     if (startsInBondingCurve) {
-      poolFee = getBPsFee(ammQuoteOutput);
+      ammQuoteOutput = cpammSimpleSwapOutputAmount({
+        inputAmount,
+        isSell,
+        reserves: clammVirtualReserves,
+      });
+    } else {
+      ammQuoteOutput = cpammSimpleSwapOutputAmount({
+        inputAmount,
+        isSell,
+        reserves: cpammRealReserves,
+      });
+      poolFee = getBPsFee(ammQuoteOutput, POOL_FEE_RATE_BPS);
     }
-    integratorFee = getBPsFee(ammQuoteOutput);
+    integratorFee = getBPsFee(ammQuoteOutput, INTEGRATOR_FEE_RATE_BPS);
     baseVolume = inputAmount; /* eslint-disable-line */
     quoteVolume = ammQuoteOutput.minus(poolFee).minus(integratorFee);
     const netProceeds = quoteVolume;
     if (!inputAmount.lte(balanceBefore)) {
       throw new SwapNotEnoughBaseError();
     }
-    // const balanceAfter = balanceBefore.minus(inputAmount);
+    // Unused, but kept here to preserve the Move code flow.
+    const _balanceAfter = balanceBefore.minus(inputAmount);
     return netProceeds;
   } else {
-    // BUYING.
-    integratorFee = getBPsFee(inputAmount);
+    // -------------------------- Buying --------------------------
+    integratorFee = getBPsFee(inputAmount, INTEGRATOR_FEE_RATE_BPS);
     quoteVolume = inputAmount.minus(integratorFee);
     if (startsInBondingCurve) {
       const maxQuoteVolumeInClamm = Big(
@@ -118,9 +119,8 @@ export const calculatedSwap = ({
               quote: QUOTE_REAL_CEILING,
             },
           });
-          poolFee = getBPsFee(cpammBaseOutput);
+          poolFee = getBPsFee(cpammBaseOutput, POOL_FEE_RATE_BPS);
           baseVolume = baseVolume.plus(cpammBaseOutput).minus(poolFee);
-          //   baseVolume = cpammBaseOutput.minus(poolFee);
         }
       }
     } else {
@@ -130,17 +130,65 @@ export const calculatedSwap = ({
         isSell,
         reserves: cpammRealReserves,
       });
-      const poolFee = getBPsFee(cpammBaseOutput);
+      const poolFee = getBPsFee(cpammBaseOutput, POOL_FEE_RATE_BPS);
       baseVolume = cpammBaseOutput.minus(poolFee);
     }
     const netProceeds = baseVolume;
+    // Unused, but kept here to preserve the Move code flow.
     const _balanceAfter = balanceBefore.plus(netProceeds);
     return netProceeds;
   }
 };
 
-const getBPsFee = (principal: Big) =>
-  principal.mul(POOL_FEE_RATE_BPS).div(BASIS_POINTS_PER_UNIT.toString());
+type NetProceedsReturnTypes = {
+  netProceeds: bigint;
+  error: null;
+} | {
+  netProceeds: 0n;
+  error: CustomCalculatedSwapError;
+}
+
+/**
+ * The wrapper function for calculating the swap proceeds. This function rounds
+ * the returned value down like the Move contract does, since technically
+ * this code is more precise than the Move code with truncated uint values.
+ *
+ * @returns the total net proceeds- denominated in quote or volume based on `isSell`.
+ * @returns 0 if the calculation results in an error.
+ */
+export const calculateSwapNetProceeds = (args: {
+  clammVirtualReserves: Types["Reserves"];
+  cpammRealReserves: Types["Reserves"];
+  startsInBondingCurve: boolean;
+  isSell: boolean;
+  inputAmount: AnyNumberString;
+  userEmojicoinBalance: AnyNumberString;
+}): NetProceedsReturnTypes => {
+  try {
+    const res = calculateExactSwapNetProceeds(args);
+    // Round down to zero decimal places like an unsigned integer will in Move.
+    const netProceeds = BigInt(res.round(0, Big.roundDown).toString());
+    return {
+      netProceeds,
+      error: null,
+    };
+  } catch (e) {
+    if (e instanceof CustomCalculatedSwapError) {
+      return {
+        netProceeds: 0n,
+        error: e,
+      };
+    }
+    console.warn(`Unexpected error when calculating swap ${e}`);
+    return {
+      netProceeds: 0n,
+      error: null,
+    };
+  }
+};
+
+const getBPsFee = (principal: Big, feeRateBPs: AnyNumberString) =>
+  principal.mul(feeRateBPs.toString()).div(BASIS_POINTS_PER_UNIT.toString());
 
 const cpammSimpleSwapOutputAmount = ({
   inputAmount,
@@ -161,26 +209,3 @@ const cpammSimpleSwapOutputAmount = ({
   }
   return numerator.div(denominator);
 };
-
-// const assignSupplyMinuendAndReserves = ({
-//   clammVirtualReserves,
-//   cpammRealReserves,
-//   inBondingCurve,
-// }: {
-//   clammVirtualReserves: Types["Reserves"];
-//   cpammRealReserves: Types["Reserves"];
-//   inBondingCurve: boolean;
-// }): {
-//   supplyMinuend: bigint;
-//   reserves: Types["Reserves"];
-// } => {
-//   return inBondingCurve
-//     ? {
-//         supplyMinuend: BASE_VIRTUAL_CEILING,
-//         reserves: clammVirtualReserves,
-//       }
-//     : {
-//         supplyMinuend: EMOJICOIN_SUPPLY,
-//         reserves: cpammRealReserves,
-//       };
-// };

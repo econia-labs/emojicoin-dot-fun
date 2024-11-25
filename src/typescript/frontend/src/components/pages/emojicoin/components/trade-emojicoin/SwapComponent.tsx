@@ -25,6 +25,8 @@ import { TradeOptions } from "components/selects/trade-options";
 import { getMaxSlippageSettings } from "utils/slippage";
 import { Emoji } from "utils/emoji";
 import { EmojiPill } from "components/EmojiPill";
+import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
+import { INITIAL_REAL_RESERVES, INITIAL_VIRTUAL_RESERVES } from "@sdk/const";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -89,10 +91,14 @@ export default function SwapComponent({
     (s) => s.getMarket(marketEmojis)?.swapEvents.length ?? initNumSwaps
   );
 
-  useEffect(() => {
-    const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();
-    setEmojicoinType(emojicoinType);
-  }, [marketAddress, setEmojicoinType]);
+  const lastSwapEvent = useEventStore((s) => s.getMarket(marketEmojis)?.swapEvents?.at(0));
+
+  const netProceeds = useCalculateSwapPrice({
+    lastSwapEvent,
+    isSell,
+    inputAmount,
+    userEmojicoinBalance: emojicoinBalance,
+  });
 
   const swapData = useSimulateSwap({
     marketAddress,
@@ -100,6 +106,31 @@ export default function SwapComponent({
     isSell,
     numSwaps,
   });
+
+  useEffect(() => {
+    console.dir(
+      {
+        msg: "num swaps for simulated vs client-side",
+        simulated: {
+          numSwaps,
+        },
+        calculated: {
+          numSwaps: lastSwapEvent?.state.cumulativeStats.numSwaps,
+          clamm: lastSwapEvent?.state.clammVirtualReserves ?? INITIAL_VIRTUAL_RESERVES,
+          cpamm: lastSwapEvent?.state.cpammRealReserves ?? INITIAL_REAL_RESERVES,
+          bondingCurve: lastSwapEvent?.swap.startsInBondingCurve,
+        },
+      },
+      { depth: null }
+    );
+    console.log("swap result from simulated swap data:", swapData?.swapResult);
+    console.log("net proceeds from client-side calculation", netProceeds);
+  }, [swapData, netProceeds]);
+
+  useEffect(() => {
+    const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();
+    setEmojicoinType(emojicoinType);
+  }, [marketAddress, setEmojicoinType]);
 
   const { swapResult, gasCost, gasCostWasUndefined } = swapData
     ? {
