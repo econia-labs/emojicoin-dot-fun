@@ -6,6 +6,7 @@ import {
   INITIAL_VIRTUAL_RESERVES,
 } from "../../src/const";
 import {
+  type AnyNumberString,
   getMarketResource,
   maxBigInt,
   SYMBOL_EMOJI_DATA,
@@ -39,7 +40,8 @@ describe("tests the swap functionality", () => {
   // transaction version into this function so that all Market resources can be found on-chain at
   // the time of the query.
   let getMarketResourceHelper: (
-    marketAddress: AccountAddressInput
+    marketAddress: AccountAddressInput,
+    version: AnyNumberString
   ) => ReturnType<typeof getMarketResource>;
   const getMarketAddress = (emojis: SymbolEmoji[]) => deriveEmojicoinPublisherAddress({ emojis });
 
@@ -58,8 +60,8 @@ describe("tests the swap functionality", () => {
       )
     );
     maxRegisterTxnVersion = maxBigInt(...versions);
-    getMarketResourceHelper = (marketAddress) =>
-      getMarketResource({ aptos, marketAddress, ledgerVersion: maxRegisterTxnVersion });
+    getMarketResourceHelper = (marketAddress, version) =>
+      getMarketResource({ aptos, marketAddress, ledgerVersion: BigInt(version) });
     return true;
   });
 
@@ -69,7 +71,7 @@ describe("tests the swap functionality", () => {
     const isSell = false;
     const inputAmount = ONE_APT * 500;
     const marketAddress = getMarketAddress(marketSymbols[idx]);
-    const market = await getMarketResourceHelper(marketAddress);
+    const market = await getMarketResourceHelper(marketAddress, maxRegisterTxnVersion);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
     const viewSimulationOutput = await emojicoin.view.simulateBuy({
@@ -102,7 +104,7 @@ describe("tests the swap functionality", () => {
 
     const { model } = res.swap;
     const marketAddress = getMarketAddress(symbolEmojis);
-    const market = await getMarketResourceHelper(marketAddress);
+    const market = await getMarketResourceHelper(marketAddress, res.response.version);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
     // Ensure the market HAS NOT progressed past the bonding curve by checking the resource fields.
@@ -143,7 +145,7 @@ describe("tests the swap functionality", () => {
 
     const { model } = res.swap;
     const marketAddress = getMarketAddress(symbolEmojis);
-    const market = await getMarketResourceHelper(marketAddress);
+    const market = await getMarketResourceHelper(marketAddress, res.response.version);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
     // Ensure the market HAS NOT progressed past the bonding curve by checking the resource fields.
@@ -183,7 +185,7 @@ describe("tests the swap functionality", () => {
 
     const { model } = res.swap;
     const marketAddress = getMarketAddress(symbolEmojis);
-    const market = await getMarketResourceHelper(marketAddress);
+    const market = await getMarketResourceHelper(marketAddress, res.response.version);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
     // Ensure the market HAS NOT progressed past the bonding curve.
@@ -234,7 +236,7 @@ describe("tests the swap functionality", () => {
 
     const { model } = res.swap;
     const marketAddress = getMarketAddress(symbolEmojis);
-    const market = await getMarketResourceHelper(marketAddress);
+    const market = await getMarketResourceHelper(marketAddress, res.response.version);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
     // Ensure the market HAS progressed past the bonding curve.
@@ -275,7 +277,7 @@ describe("tests the swap functionality", () => {
   it("verifies that a market's initial virtual and real reserves are expected", async () => {
     const idx = 5;
     const marketAddress = getMarketAddress(marketSymbols[idx]);
-    const market = await getMarketResourceHelper(marketAddress);
+    const market = await getMarketResourceHelper(marketAddress, maxRegisterTxnVersion);
     expect(market.clammVirtualReserves).toEqual(INITIAL_VIRTUAL_RESERVES);
     expect(market.cpammRealReserves).toEqual(INITIAL_REAL_RESERVES);
   });
