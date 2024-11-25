@@ -93,7 +93,7 @@ const MainCard = (props: MainCardProps) => {
   const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
   return (
-    <div className="flex flex-col w-full my-[70px] md:my-[20px] max-w-full">
+    <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
       <div className="flex flex-col md:flex-row w-full max-w-full items-center justify-center">
         <Link
           className="flex relative items-center ml-[-8%]"
@@ -148,7 +148,7 @@ const MainCard = (props: MainCardProps) => {
             )}
           </div>
           <div
-            className="display-font-text ellipses font-forma-bold"
+            className="display-font-text ellipses font-forma-bold uppercase"
             title={featured?.market.symbolData.name ?? "BLACK HEART"}
           >
             {featured?.market.symbolData.name ?? "BLACK HEART"}
