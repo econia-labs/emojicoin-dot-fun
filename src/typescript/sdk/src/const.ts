@@ -8,7 +8,7 @@ import {
 import Big from "big.js";
 import { type ValueOf } from "./utils/utility-types";
 import { type DatabaseStructType } from "./indexer-v2/types/json-types";
-import { Types } from "./types";
+import { type Types } from "./types";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (
@@ -103,23 +103,23 @@ export const BASIS_POINTS_PER_UNIT = 10_000n;
 /**
  * A market's virtual reserves upon creation. Used to calculate the swap price
  * of a market when no swaps exist yet.
- * 
+ *
  * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/295cf611950f66651452baa3e6ad6d6aef583f9b/src/move/emojicoin_dot_fun/sources/emojicoin_dot_fun.move#L2030}
  */
 export const INITIAL_VIRTUAL_RESERVES: Types["Reserves"] = {
   base: BASE_VIRTUAL_CEILING,
   quote: QUOTE_VIRTUAL_FLOOR,
-}
+};
 
 /**
  * A market's real reserves upon creation.
- * 
+ *
  * @see {@link INITIAL_VIRTUAL_RESERVES}
  */
 export const INITIAL_REAL_RESERVES: Types["Reserves"] = {
   base: 0n,
   quote: 0n,
-}
+};
 
 /// As defined in the database, aka the enum string.
 export enum Period {

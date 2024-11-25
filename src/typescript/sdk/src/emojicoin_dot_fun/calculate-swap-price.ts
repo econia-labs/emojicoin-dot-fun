@@ -37,7 +37,30 @@ export type SwapNetProceedsArgs = {
   isSell: boolean;
   inputAmount: AnyNumberString;
   userEmojicoinBalance: AnyNumberString;
-}
+};
+
+const getBPsFee = (principal: Big, feeRateBPs: AnyNumberString) =>
+  principal.mul(feeRateBPs.toString()).div(BASIS_POINTS_PER_UNIT.toString());
+
+const cpammSimpleSwapOutputAmount = ({
+  inputAmount,
+  isSell,
+  reserves,
+}: {
+  inputAmount: Big;
+  isSell: boolean;
+  reserves: Types["Reserves"];
+}) => {
+  const [numeratorCoefficient, denominatorAddend] = isSell
+    ? [reserves.quote, reserves.base]
+    : [reserves.base, reserves.quote];
+  const numerator = inputAmount.mul(numeratorCoefficient.toString());
+  const denominator = inputAmount.plus(denominatorAddend.toString());
+  if (!denominator.gt(0)) {
+    throw new DivideByZeroError();
+  }
+  return numerator.div(denominator);
+};
 
 /**
  * @throws {@link SwapNotEnoughBaseError} if the user does not have enough base
@@ -140,13 +163,15 @@ const calculateExactSwapNetProceeds = (args: SwapNetProceedsArgs) => {
   }
 };
 
-type NetProceedsReturnTypes = {
-  netProceeds: bigint;
-  error: null;
-} | {
-  netProceeds: 0n;
-  error: CustomCalculatedSwapError;
-}
+type NetProceedsReturnTypes =
+  | {
+      netProceeds: bigint;
+      error: null;
+    }
+  | {
+      netProceeds: 0n;
+      error: CustomCalculatedSwapError;
+    };
 
 /**
  * The wrapper function for calculating the swap proceeds. This function rounds
@@ -185,27 +210,4 @@ export const calculateSwapNetProceeds = (args: {
       error: null,
     };
   }
-};
-
-const getBPsFee = (principal: Big, feeRateBPs: AnyNumberString) =>
-  principal.mul(feeRateBPs.toString()).div(BASIS_POINTS_PER_UNIT.toString());
-
-const cpammSimpleSwapOutputAmount = ({
-  inputAmount,
-  isSell,
-  reserves,
-}: {
-  inputAmount: Big;
-  isSell: boolean;
-  reserves: Types["Reserves"];
-}) => {
-  const [numeratorCoefficient, denominatorAddend] = isSell
-    ? [reserves.quote, reserves.base]
-    : [reserves.base, reserves.quote];
-  const numerator = inputAmount.mul(numeratorCoefficient.toString());
-  const denominator = inputAmount.plus(denominatorAddend.toString());
-  if (!denominator.gt(0)) {
-    throw new DivideByZeroError();
-  }
-  return numerator.div(denominator);
 };

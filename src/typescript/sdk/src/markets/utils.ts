@@ -2,7 +2,7 @@ import {
   type Account,
   AccountAddress,
   type AccountAddressInput,
-  AnyNumber,
+  type AnyNumber,
   type Aptos,
   type AptosConfig,
   Hex,
