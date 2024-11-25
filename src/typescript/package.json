@@ -44,9 +44,10 @@
     "test:frontend": "    pnpm run load-env:test -- turbo run test --filter @econia-labs/emojicoin-frontend --log-prefix none",
     "test:frontend:e2e": "pnpm run load-env:test -- turbo run test:e2e --filter @econia-labs/emojicoin-frontend --log-prefix none",
     "test:sdk": "pnpm run load-env:test -- turbo run test --filter @econia-labs/emojicoin-sdk --log-prefix none",
-    "test:sdk:e2e": "pnpm run load-env:unit-test -- turbo run test:e2e --filter @econia-labs/emojicoin-sdk --force --log-prefix none --log-order grouped",
-    "test:sdk:unit": "NO_TEST_SETUP=true pnpm run load-env:test -- turbo run test:unit --force --log-prefix none --log-order grouped",
-    "test:verbose": "FETCH_DEBUG=true VERBOSE_TEST_LOGS=true pnpm run load-env:test -- turbo run test --force"
+    "test:sdk:e2e": "pnpm run load-env:test -- turbo run test:e2e --filter @econia-labs/emojicoin-sdk --force --log-prefix none",
+    "test:sdk:sequential": "pnpm run load-env:test -- turbo run test:sdk:sequential --filter @econia-labs/emojicoin-sdk --force --log-prefix none",
+    "test:sdk:parallel": "pnpm run load-env:test -- turbo run test:sdk:parallel --filter @econia-labs/emojicoin-sdk --force --log-prefix none",
+    "test:sdk:unit": "NO_TEST_SETUP=true pnpm run load-env:test -- turbo run test:unit --filter @econia-labs/emojicoin-sdk --force --log-prefix none"
   },
   "version": "0.0.0",
   "workspaces": [
