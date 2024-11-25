@@ -130,19 +130,19 @@ export const scrambleConfig = {
   playOnMount: true,
 };
 
-export const useLabelScrambler = (value: string, suffix: string = "") => {
-  // Ignore all characters in the suffix, as long as they are not numbers.
+export const useLabelScrambler = (value: string, suffix: string = "", prefix: string = "") => {
+  // Ignore all characters in the prefix and the suffix, as long as they are not numbers.
   const ignore = ["."];
   const numberSet = new Set("0123456789");
-  const suffixSet = new Set(suffix);
-  for (const char of suffixSet) {
+  const suffixesAndPrefixes = new Set(prefix + suffix);
+  for (const char of suffixesAndPrefixes) {
     if (!numberSet.has(char)) {
       ignore.push(char);
     }
   }
 
   const scrambler = useScramble({
-    text: value + suffix,
+    text: prefix + value + suffix,
     ...scrambleConfig,
     ignore,
   });

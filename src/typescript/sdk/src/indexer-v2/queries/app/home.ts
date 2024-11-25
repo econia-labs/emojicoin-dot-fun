@@ -3,23 +3,30 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 import { LIMIT, ORDER_BY } from "../../../queries/const";
-import { SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
+import { DEFAULT_SORT_BY, SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
 import { DatabaseRpc, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
 import { DatabaseTypeConverter } from "../../types";
 import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
-import { toRegistryView } from "../../../types";
+import { AnyNumberString, toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
 import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
+
+// prettier-ignore
+const selectSpecificMarkets = ({ marketIDs }: { marketIDs: AnyNumberString[] }) =>
+  postgrest
+    .from(TableName.MarketState)
+    .select("*")
+    .in("market_id", marketIDs.map(String));
 
 const selectMarketStates = ({
   page = 1,
   pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
   searchEmojis,
-  sortBy = SortMarketsBy.MarketCap,
+  sortBy = DEFAULT_SORT_BY,
   inBondingCurve,
   count,
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -58,15 +65,15 @@ export const fetchMarketsWithCount = queryHelperWithCount(
   DatabaseTypeConverter[TableName.MarketState]
 );
 
-export const DEFAULT_FEATURED_BY = SortMarketsBy.BumpOrder;
-export const DEFAULT_ORDERED_BY_FOR_FEATURED_BY = ORDER_BY.DESC;
+export const DEFAULT_TOP_MARKET_SORT = SortMarketsBy.BumpOrder;
+export const DEFAULT_TOP_MARKET_ORDER = ORDER_BY.DESC;
 
-export const fetchFeaturedMarket = async () =>
+export const fetchTopMarketForSortBy = async (sortBy: SortMarketsBy = DEFAULT_TOP_MARKET_SORT) =>
   fetchMarkets({
     page: 1,
     pageSize: 1,
-    sortBy: DEFAULT_FEATURED_BY,
-    orderBy: ORDER_BY.DESC,
+    sortBy,
+    orderBy: DEFAULT_TOP_MARKET_ORDER,
   }).then((markets) => (markets ?? []).at(0));
 
 /**
@@ -111,3 +118,39 @@ export const fetchPriceFeed = queryHelper(
   selectPriceFeed,
   DatabaseTypeConverter[DatabaseRpc.PriceFeed]
 );
+
+export const fetchSpecificMarkets = queryHelper(
+  selectSpecificMarkets,
+  DatabaseTypeConverter[TableName.MarketState]
+);
+
+// Fetch the top N markets from the price feed, then fetch their corresponding market data.
+export const fetchPriceFeedAndMarketData = async () =>
+  fetchPriceFeed({}).then((priceFeed) =>
+    fetchSpecificMarkets({ marketIDs: priceFeed.map(({ marketID }) => marketID) }).then(
+      (allMarketData) =>
+        priceFeed
+          .map((marketPriceFeed) => {
+            // Find the price feed marketID's matching market data entry.
+            const marketData = allMarketData.find(
+              (mkt) => mkt.market.marketID === marketPriceFeed.marketID
+            );
+            if (!marketData) {
+              console.error(
+                `Found market ID ${marketPriceFeed}, ${marketPriceFeed.symbolEmojis} in price feed ` +
+                  `but not when querying its market state.`
+              );
+              return undefined;
+            }
+            return {
+              marketPriceFeed,
+              marketData,
+            };
+          })
+          .filter((v) => typeof v !== "undefined")
+    )
+  );
+
+export type PriceFeedAndMarketData = Awaited<
+  ReturnType<typeof fetchPriceFeedAndMarketData>
+>[number];

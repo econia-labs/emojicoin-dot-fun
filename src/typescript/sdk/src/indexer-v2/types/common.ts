@@ -12,6 +12,8 @@ export enum SortMarketsBy {
   Tvl = "tvl",
 }
 
+export const DEFAULT_SORT_BY = SortMarketsBy.BumpOrder;
+
 export type MarketStateQueryArgs = {
   sortBy?: SortMarketsBy;
   page?: number;

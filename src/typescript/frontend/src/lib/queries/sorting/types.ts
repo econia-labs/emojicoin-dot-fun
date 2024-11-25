@@ -1,4 +1,4 @@
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { DEFAULT_SORT_BY, SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { type ORDER_BY } from "@sdk/queries/const";
 import { type ValueOf } from "@sdk/utils/utility-types";
 
@@ -84,8 +84,6 @@ export const toPostgrestQueryParam = (
 ): SortByPostgrestQueryParams => {
   return sortByFilters[sortBy]?.forPostgrestQuery ?? sortBy;
 };
-
-export const DEFAULT_SORT_BY = SortMarketsBy.MarketCap;
 
 export const toMarketDataSortBy = (
   sortBy?: SortByPostgrestQueryParams | SortMarketsBy | SortByPageQueryParams
