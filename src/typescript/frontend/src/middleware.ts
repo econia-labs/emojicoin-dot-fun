@@ -20,7 +20,7 @@ export default async function middleware(request: NextRequest) {
   if (MAINTENANCE_MODE && pathname !== "/maintenance") {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
-  if (pathname === "/test" || pathname === "/verify_status") {
+  if (pathname === "/test" || pathname === "/verify_status" || pathname === "/dexscreener") {
     return NextResponse.next();
   }
 
