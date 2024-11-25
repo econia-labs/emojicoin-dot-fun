@@ -107,6 +107,7 @@ export default function SwapComponent({
     numSwaps,
   });
 
+  /* eslint-disable */
   useEffect(() => {
     console.dir(
       {
@@ -126,6 +127,7 @@ export default function SwapComponent({
     console.log("swap result from simulated swap data:", swapData?.swapResult);
     console.log("net proceeds from client-side calculation", netProceeds);
   }, [swapData, netProceeds]);
+  /* eslint-enable */
 
   useEffect(() => {
     const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();
