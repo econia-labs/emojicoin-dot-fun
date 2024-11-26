@@ -29,7 +29,7 @@ import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../cons
 import { waitFor } from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
-import { type AnyNumberString } from "../types";
+import { toSwapEvent, type AnyNumberString } from "../types";
 
 const { expect, Expect } = customExpect;
 
@@ -124,8 +124,12 @@ export class EmojicoinClient {
 
   public view: {
     marketExists: typeof EmojicoinClient.prototype.isMarketRegisteredView;
+    simulateBuy: typeof EmojicoinClient.prototype.simulateBuy;
+    simulateSell: typeof EmojicoinClient.prototype.simulateSell;
   } = {
     marketExists: this.isMarketRegisteredView.bind(this),
+    simulateBuy: this.simulateBuy.bind(this),
+    simulateSell: this.simulateSell.bind(this),
   };
 
   private integrator: AccountAddress;
@@ -247,6 +251,49 @@ export class EmojicoinClient {
       },
       options
     );
+  }
+
+  private async simulateBuy(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    ledgerVersion?: number | bigint;
+  }) {
+    return await this.simulateSwap({ ...args, isSell: false });
+  }
+
+  private async simulateSell(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    ledgerVersion?: number | bigint;
+  }) {
+    return await this.simulateSwap({ ...args, isSell: true });
+  }
+
+  private async simulateSwap(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    isSell: boolean;
+    ledgerVersion?: number | bigint;
+  }) {
+    const { symbolEmojis, swapper, inputAmount, isSell, ledgerVersion } = args;
+    const { marketAddress, typeTags } = this.getEmojicoinInfo(symbolEmojis);
+    const res = await EmojicoinDotFun.SimulateSwap.view({
+      aptos: this.aptos,
+      swapper,
+      marketAddress,
+      inputAmount: BigInt(inputAmount),
+      isSell,
+      integrator: this.integrator,
+      integratorFeeRateBPs: this.integratorFeeRateBPs,
+      typeTags,
+      options: {
+        ledgerVersion,
+      },
+    });
+    return toSwapEvent(res, -1);
   }
 
   private async isMarketRegisteredView(
