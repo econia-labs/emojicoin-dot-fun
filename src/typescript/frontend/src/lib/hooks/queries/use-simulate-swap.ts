@@ -200,7 +200,8 @@ export const useGetGasWithDefault = (args: {
     typeTags,
   });
 
-  // Neither of these values will ever be zero, so we can just check if it's truthy.
+  // Neither of these values will ever be zero if a meaningful value is returned,
+  // so we can just check if it's truthy.
   return gas && gas.gas_used && gas.gas_unit_price
     ? BigInt(gas.gas_used) * BigInt(gas.gas_unit_price)
     : DEFAULT_SWAP_GAS_COST;
