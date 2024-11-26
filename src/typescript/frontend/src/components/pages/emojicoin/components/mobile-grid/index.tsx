@@ -22,7 +22,7 @@ const DISPLAY_HEADER_ABOVE_CHART = false;
 const HEIGHT = DISPLAY_HEADER_ABOVE_CHART ? "min-h-[320px]" : "min-h-[365px]";
 
 const MobileGrid = (props: GridProps) => {
-  const [tab, setTab] = useState(1);
+  const [tab, setTab] = useState(2);
   const { t } = translationFunction();
 
   return (
