@@ -1,33 +1,34 @@
-import { fetchChatEvents } from "@/queries/market";
+import { fetchChatEvents, tryFetchFirstChatEvent } from "@/queries/market";
+import { Parcel } from "lib/parcel";
 import type { NextRequest } from "next/server";
-import { stringifyJSON } from "utils";
+import { isNumber } from "utils";
 
 type ChatSearchParams = {
   marketID: string | null;
-  fromMarketNonce: string | null;
+  toMarketNonce: string | null;
 };
 
 export type ValidChatSearchParams = {
   marketID: string;
-  fromMarketNonce: string;
+  toMarketNonce: string;
 };
 
-const isNumber = (s: string) => !isNaN(parseInt(s));
-
 const isValidChatSearchParams = (params: ChatSearchParams): params is ValidChatSearchParams => {
-  const { marketID, fromMarketNonce } = params;
+  const { marketID, toMarketNonce } = params;
   // prettier-ignore
   return (
     marketID !== null && isNumber(marketID) &&
-    fromMarketNonce !== null && isNumber(fromMarketNonce)
+    toMarketNonce !== null && isNumber(toMarketNonce)
   );
 };
+
+type Chat = Awaited<ReturnType<typeof fetchChatEvents>>[number];
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const params: ChatSearchParams = {
     marketID: searchParams.get("marketID"),
-    fromMarketNonce: searchParams.get("fromMarketNonce"),
+    toMarketNonce: searchParams.get("toMarketNonce"),
   };
 
   if (!isValidChatSearchParams(params)) {
@@ -35,9 +36,24 @@ export async function GET(request: NextRequest) {
   }
 
   const marketID = Number(params.marketID);
-  const fromMarketNonce = Number(params.fromMarketNonce);
+  const toMarketNonce = Number(params.toMarketNonce);
 
-  const res = await fetchChatEvents({ marketID, fromMarketNonce });
+  const queryHelper = new Parcel<Chat, { marketID: number }>({
+    parcelSize: 20,
+    normalRevalidate: 5,
+    historicRevalidate: 365 * 24 * 60 * 60,
+    fetchHistoricThreshold: (query) =>
+      fetchChatEvents({ marketID: query.marketID, amount: 1 }).then((r) =>
+        Number(r[0].market.marketNonce)
+      ),
+    fetchFirst: (query) => tryFetchFirstChatEvent(query.marketID),
+    cacheKey: "chats",
+    getKey: (s) => Number(s.market.marketNonce),
+    fetchFn: ({ to, count }, { marketID }) =>
+      fetchChatEvents({ marketID, toMarketNonce: to, amount: count }),
+  });
 
-  return new Response(stringifyJSON(res));
+  const res = await queryHelper.getUnparsedData(toMarketNonce, 50, { marketID });
+
+  return new Response(res);
 }
