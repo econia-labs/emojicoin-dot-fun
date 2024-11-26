@@ -92,6 +92,9 @@ export const simulateSwap = async (args: {
  * Simulate a swap with the view function.
  * The only three params that the user can change are the marketAddress, inputAmount, and isSell.
  * `numSwaps` is for invalidating the cache and refetching the query when the # of swaps changes.
+ *
+ * @deprecated in favor of calculating the swap price client-side instead of from the fullnode.
+ * @see {@link useCalculateSwapPrice}
  */
 export const useSimulateSwap = (args: {
   marketAddress: AccountAddressString;
@@ -164,4 +167,41 @@ export const useSimulateSwap = (args: {
             : DEFAULT_SWAP_GAS_COST,
         swapResult: isSell ? BigInt(data.quote_volume) : BigInt(data.base_volume),
       };
+};
+
+export const useGetGasWithDefault = (args: {
+  marketAddress: AccountAddressString;
+  inputAmount: bigint | number | string;
+  isSell: boolean;
+  numSwaps: number;
+}) => {
+  const { marketAddress } = args;
+  const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
+  const { aptos, account } = useAptos();
+  const typeTags = [emojicoin, emojicoinLP] as [TypeTag, TypeTag];
+  const { inputAmount, swapper, minOutputAmount } = useMemo(() => {
+    const bigInput = Big(args.inputAmount.toString());
+    const inputAmount = BigInt(bigInput.toString());
+    return {
+      invalid: inputAmount === 0n,
+      inputAmount,
+      minOutputAmount: 1n,
+      swapper: account?.address ? (account.address as `0x${string}`) : undefined,
+    };
+  }, [args.inputAmount, account?.address]);
+
+  const gas = useGetGas({
+    aptos,
+    account,
+    ...args,
+    swapper,
+    inputAmount,
+    minOutputAmount,
+    typeTags,
+  });
+
+  // Neither of these values will ever be zero, so we can just check if it's truthy.
+  return gas && gas.gas_used && gas.gas_unit_price
+    ? BigInt(gas.gas_used) * BigInt(gas.gas_unit_price)
+    : DEFAULT_SWAP_GAS_COST;
 };
