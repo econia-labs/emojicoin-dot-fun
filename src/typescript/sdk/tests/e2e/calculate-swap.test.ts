@@ -18,12 +18,16 @@ import {
   calculateSwapNetProceeds,
   deriveEmojicoinPublisherAddress,
 } from "../../src/emojicoin_dot_fun";
-import { EXACT_TRANSITION_INPUT_AMOUNT, getPublishHelpers } from "../../src/utils/test";
+import { getPublishHelpers } from "../../src/utils/test";
 import { getFundedAccounts } from "../../src/utils/test/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { TransferCoins } from "../../src/emojicoin_dot_fun/aptos-framework";
+import { getExactTransitionInputAmount } from "./helpers/misc";
+import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
 
 jest.setTimeout(30000);
+
+const exactTransitionInputAmount = getExactTransitionInputAmount();
 
 describe("tests the swap functionality", () => {
   const { aptos } = getPublishHelpers();
@@ -92,14 +96,14 @@ describe("tests the swap functionality", () => {
 
   it("the second buyer on a market buys past the bonding curve", async () => {
     const idx = 1;
-    const [firstSwapper, _secondSwapper, symbolEmojis] = [
+    const [firstSwapper, secondSwapper, symbolEmojis] = [
       registrants[idx],
       secondaryTraders[idx],
       marketSymbols[idx],
     ];
     // Have the registrant buy just barely not enough to move through the bonding curve.
     // That is, one more octa would mean it moves out of bonding curve from the swap buy.
-    const justNotEnough = EXACT_TRANSITION_INPUT_AMOUNT - 1n;
+    const justNotEnough = exactTransitionInputAmount - 1n;
     const res = await emojicoin.buy(firstSwapper, symbolEmojis, justNotEnough);
 
     const { model } = res.swap;
@@ -114,10 +118,10 @@ describe("tests the swap functionality", () => {
     expect(model.swap.resultsInStateTransition).toBe(false);
     expect(model.market.marketNonce).toEqual(market.sequenceInfo.nonce);
 
-    const inputAmount = 1n; // To push it just past the bonding curve.
+    const inputAmount = 123456n;
     const viewSimulationOutput = await emojicoin.view.simulateBuy({
       symbolEmojis: symbolEmojis,
-      swapper: firstSwapper.accountAddress,
+      swapper: secondSwapper.accountAddress,
       inputAmount,
     });
     const { netProceeds } = calculateSwapNetProceeds({
@@ -155,7 +159,7 @@ describe("tests the swap functionality", () => {
     expect(model.swap.resultsInStateTransition).toBe(false);
     expect(model.market.marketNonce).toEqual(market.sequenceInfo.nonce);
 
-    const inputAmount = EXACT_TRANSITION_INPUT_AMOUNT - firstInputAmount;
+    const inputAmount = exactTransitionInputAmount - firstInputAmount;
     const viewSimulationOutput = await emojicoin.view.simulateBuy({
       symbolEmojis: symbolEmojis,
       swapper: secondSwapper.accountAddress,
@@ -232,7 +236,7 @@ describe("tests the swap functionality", () => {
       marketSymbols[idx],
     ];
     // Buy exactly enough to trigger a bonding curve transition.
-    const res = await emojicoin.buy(firstSwapper, symbolEmojis, EXACT_TRANSITION_INPUT_AMOUNT);
+    const res = await emojicoin.buy(firstSwapper, symbolEmojis, exactTransitionInputAmount);
 
     const { model } = res.swap;
     const marketAddress = getMarketAddress(symbolEmojis);
@@ -240,8 +244,8 @@ describe("tests the swap functionality", () => {
     const { clammVirtualReserves, cpammRealReserves } = market;
 
     // Ensure the market HAS progressed past the bonding curve.
-    expect(market.lpCoinSupply).toEqual(0n);
-    expect(model.state.lpCoinSupply).toEqual(0n);
+    expect(market.lpCoinSupply).not.toEqual(0n);
+    expect(model.state.lpCoinSupply).not.toEqual(0n);
     expect(model.swap.startsInBondingCurve).toBe(true);
     expect(model.swap.resultsInStateTransition).toBe(true);
     expect(model.market.marketNonce).toEqual(market.sequenceInfo.nonce);
@@ -252,24 +256,32 @@ describe("tests the swap functionality", () => {
       aptosConfig: aptos.config,
       from: firstSwapper,
       to: secondSwapper.accountAddress,
-      amount: EXACT_TRANSITION_INPUT_AMOUNT,
+      amount: res.swap.model.swap.netProceeds,
       typeTags: [emojicoinType],
     });
     expect(transferRes.success).toBe(true);
+
+    const balance = getCoinBalanceFromChanges({
+      response: transferRes,
+      userAddress: secondSwapper.accountAddress,
+      coinType: emojicoinType,
+    })!;
+    expect(balance).toBeDefined();
+    expect(balance).toEqual(res.swap.model.swap.netProceeds);
 
     // Have the second trader sell the coins into a post-bonding curve market.
     const viewSimulationOutput = await emojicoin.view.simulateSell({
       symbolEmojis: symbolEmojis,
       swapper: secondSwapper.accountAddress,
-      inputAmount: EXACT_TRANSITION_INPUT_AMOUNT,
+      inputAmount: balance,
     });
     const { netProceeds } = calculateSwapNetProceeds({
       clammVirtualReserves,
       cpammRealReserves,
       startsInBondingCurve: false,
       isSell: true,
-      inputAmount: EXACT_TRANSITION_INPUT_AMOUNT,
-      userEmojicoinBalance: EXACT_TRANSITION_INPUT_AMOUNT,
+      inputAmount: balance,
+      userEmojicoinBalance: balance,
     });
     expect(viewSimulationOutput.netProceeds).toEqual(netProceeds);
   });

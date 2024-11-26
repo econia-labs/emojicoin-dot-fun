@@ -39,8 +39,11 @@ export type SwapNetProceedsArgs = {
   userEmojicoinBalance: AnyNumberString;
 };
 
-const getBPsFee = (principal: Big, feeRateBPs: AnyNumberString) =>
-  principal.mul(feeRateBPs.toString()).div(BASIS_POINTS_PER_UNIT.toString());
+export const getBPsFee = (principal: Big, feeRateBPs: AnyNumberString) =>
+  principal
+    .mul(feeRateBPs.toString())
+    .div(BASIS_POINTS_PER_UNIT.toString())
+    .round(0, Big.roundDown);
 
 const cpammSimpleSwapOutputAmount = ({
   inputAmount,
