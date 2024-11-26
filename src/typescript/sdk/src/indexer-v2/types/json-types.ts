@@ -282,6 +282,7 @@ export enum TableName {
   Market1MPeriodsInLastDay = "market_1m_periods_in_last_day",
   MarketState = "market_state",
   ProcessorStatus = "processor_status",
+  PriceFeedWithMarketState = "price_feed_with_market_state",
 }
 
 export enum DatabaseRpc {
@@ -351,6 +352,9 @@ export type DatabaseJsonType = {
     last_updated: PostgresTimestamp;
     last_transaction_timestamp: PostgresTimestamp;
   };
+  [TableName.PriceFeedWithMarketState]: Flatten<
+    DatabaseJsonType["market_state"] & DatabaseJsonType["price_feed"]
+  >;
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
@@ -377,7 +381,9 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.MarketDailyVolume] &
   DatabaseJsonType[TableName.Market1MPeriodsInLastDay] &
   DatabaseJsonType[TableName.MarketState] &
+  DatabaseJsonType[TableName.PriceFeedWithMarketState] &
   DatabaseJsonType[TableName.ProcessorStatus] &
-  DatabaseJsonType[DatabaseRpc.UserPools];
+  DatabaseJsonType[DatabaseRpc.UserPools] &
+  DatabaseJsonType[DatabaseRpc.PriceFeed];
 
 export type AnyColumnName = keyof Columns;

@@ -317,6 +317,7 @@ export type MarketDailyVolumeModel = ReturnType<typeof toMarketDailyVolumeModel>
 export type Market1MPeriodsInLastDayModel = ReturnType<typeof toMarket1MPeriodsInLastDay>;
 export type MarketStateModel = ReturnType<typeof toMarketStateModel>;
 export type ProcessorStatusModel = ReturnType<typeof toProcessorStatus>;
+export type PriceFeedWithMarketStateModel = ReturnType<typeof toPriceFeedWithMarketState>;
 export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
 export type PriceFeedRPCModel = ReturnType<typeof toPriceFeedRPCResponse>;
 
@@ -585,6 +586,8 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
 });
 
 const q64ToBigInt = (n: string) => BigInt(Big(n).div(Big(2).pow(64)).toFixed(0));
+const calculateDeltaPercentage = (open: AnyNumberString, close: AnyNumberString) =>
+  q64ToBig(close).div(q64ToBig(open)).mul(100).sub(100).toNumber();
 
 export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => ({
   marketID: BigInt(data.market_id),
@@ -593,9 +596,16 @@ export const toPriceFeedRPCResponse = (data: DatabaseJsonType["price_feed"]) => 
   marketAddress: data.market_address,
   openPrice: q64ToBigInt(data.open_price_q64),
   closePrice: q64ToBigInt(data.close_price_q64),
-  deltaPercentage: Number(
-    q64ToBig(data.close_price_q64).div(q64ToBig(data.open_price_q64)).mul(100).sub(100).toString()
-  ),
+  deltaPercentage: calculateDeltaPercentage(data.close_price_q64, data.open_price_q64),
+});
+
+export const toPriceFeedWithMarketState = (
+  data: DatabaseJsonType["price_feed_with_market_state"]
+) => ({
+  ...toMarketStateModel(data),
+  openPrice: q64ToBigInt(data.open_price_q64),
+  closePrice: q64ToBigInt(data.close_price_q64),
+  deltaPercentage: calculateDeltaPercentage(data.close_price_q64, data.open_price_q64),
 });
 
 export const DatabaseTypeConverter = {
@@ -611,6 +621,7 @@ export const DatabaseTypeConverter = {
   [TableName.Market1MPeriodsInLastDay]: toMarket1MPeriodsInLastDay,
   [TableName.MarketState]: toMarketStateModel,
   [TableName.ProcessorStatus]: toProcessorStatus,
+  [TableName.PriceFeedWithMarketState]: toPriceFeedWithMarketState,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
   [DatabaseRpc.PriceFeed]: toPriceFeedRPCResponse,
 };
@@ -628,6 +639,7 @@ export type DatabaseModels = {
   [TableName.Market1MPeriodsInLastDay]: Market1MPeriodsInLastDayModel;
   [TableName.MarketState]: MarketStateModel;
   [TableName.ProcessorStatus]: ProcessorStatusModel;
+  [TableName.PriceFeedWithMarketState]: PriceFeedWithMarketStateModel;
   [DatabaseRpc.UserPools]: UserPoolsRPCModel;
   [DatabaseRpc.PriceFeed]: PriceFeedRPCModel;
 };

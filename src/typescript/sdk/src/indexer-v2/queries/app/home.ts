@@ -7,10 +7,10 @@ import { DEFAULT_SORT_BY, SortMarketsBy, type MarketStateQueryArgs } from "../..
 import { DatabaseRpc, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
-import { DatabaseTypeConverter } from "../../types";
+import { DatabaseModels, DatabaseTypeConverter, toPriceFeedWithMarketState } from "../../types";
 import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
-import { AnyNumberString, toRegistryView } from "../../../types";
+import { AnyNumberString, Flatten, toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
 import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
@@ -21,7 +21,9 @@ const selectSpecificMarkets = ({ marketIDs }: { marketIDs: AnyNumberString[] }) 
     .select("*")
     .in("market_id", marketIDs.map(String));
 
-const selectMarketStates = ({
+// A helper function to abstract the logic for fetching rows that contain market state.
+const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeedWithMarketState>({
+  tableName,
   page = 1,
   pageSize = LIMIT,
   orderBy = ORDER_BY.DESC,
@@ -30,9 +32,15 @@ const selectMarketStates = ({
   inBondingCurve,
   count,
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-}: MarketStateQueryArgs): PostgrestFilterBuilder<any, any, any[], TableName, unknown> => {
+}: MarketStateQueryArgs & { tableName: T }): PostgrestFilterBuilder<
+  any,
+  any,
+  any[],
+  TableName,
+  T
+> => {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  let query: any = postgrest.from(TableName.MarketState);
+  let query: any = postgrest.from(tableName);
 
   if (count === true) {
     query = query.select("*", { count: "exact" });
@@ -54,6 +62,25 @@ const selectMarketStates = ({
 
   return query;
 };
+
+selectMarketHelper({
+  tableName: TableName.PriceFeedWithMarketState,
+});
+
+const selectMarketStates = (args: MarketStateQueryArgs) =>
+  selectMarketHelper({ ...args, tableName: TableName.MarketState });
+
+const NUM_MARKETS_ON_PRICE_FEED = 25;
+
+const selectMarketsFromPriceFeed = ({
+  pageSize = NUM_MARKETS_ON_PRICE_FEED,
+  ...args
+}: MarketStateQueryArgs) =>
+  selectMarketHelper({
+    ...args,
+    tableName: TableName.PriceFeedWithMarketState,
+    pageSize: NUM_MARKETS_ON_PRICE_FEED,
+  });
 
 export const fetchMarkets = queryHelper(
   selectMarketStates,
@@ -150,6 +177,11 @@ export const fetchPriceFeedAndMarketData = async () =>
           .filter((v) => typeof v !== "undefined")
     )
   );
+
+export const fetchPriceFeedWithMarketState = queryHelper(
+  selectMarketsFromPriceFeed,
+  toPriceFeedWithMarketState
+);
 
 export type PriceFeedAndMarketData = Awaited<
   ReturnType<typeof fetchPriceFeedAndMarketData>
