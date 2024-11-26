@@ -5,12 +5,14 @@ const LOCAL_STORAGE_KEYS = {
   theme: `${packages.name}_theme`,
   language: `${packages.name}_language`,
   geoblocking: `${packages.name}_geoblocking`,
+  settings: `${packages.name}_settings`,
 };
 
 const LOCAL_STORAGE_CACHE_TIME = {
   theme: Infinity,
   language: Infinity,
   geoblocking: 7 * 24 * 60 * 60 * 1000, // 7 days.
+  settings: Infinity,
 };
 
 export type LocalStorageCache<T> = {
@@ -24,7 +26,7 @@ export type LocalStorageCache<T> = {
  * with unexpected data types.
  */
 export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): T | null {
-  const str = localStorage.getItem(key);
+  const str = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
   if (str === null) {
     return null;
   }
@@ -44,5 +46,5 @@ export function writeLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS, 
     expiry: new Date().getTime() + LOCAL_STORAGE_CACHE_TIME[key],
     data,
   };
-  localStorage.setItem(key, stringifyJSON<LocalStorageCache<T>>(cache));
+  localStorage.setItem(LOCAL_STORAGE_KEYS[key], stringifyJSON<LocalStorageCache<T>>(cache));
 }

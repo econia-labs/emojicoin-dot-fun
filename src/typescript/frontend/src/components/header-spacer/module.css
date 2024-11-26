@@ -1,0 +1,9 @@
+.header-spacer {
+  padding-top: 93px;
+}
+
+@media screen and (max-width: 526px) {
+  .header-spacer {
+    padding-top: 110px;
+  }
+}

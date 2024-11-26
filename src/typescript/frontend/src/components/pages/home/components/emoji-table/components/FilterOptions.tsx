@@ -39,10 +39,6 @@ export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsCompon
   const animate = useUserSettings((s) => s.animate);
   const toggleAnimate = useUserSettings((s) => s.toggleAnimate);
 
-  const handler = () => {
-    toggleAnimate();
-  };
-
   return (
     <StyledTHFilters>
       <SingleSelect
@@ -74,7 +70,7 @@ export const FilterOptionsComponent = ({ filter, onChange }: FilterOptionsCompon
           {t("Animate:")}
         </Text>
 
-        <Switcher checked={animate} onChange={handler} scale={isLaptopL ? "md" : "sm"} />
+        <Switcher checked={animate} onChange={toggleAnimate} scale={isLaptopL ? "md" : "sm"} />
       </FlexGap>
     </StyledTHFilters>
   );
