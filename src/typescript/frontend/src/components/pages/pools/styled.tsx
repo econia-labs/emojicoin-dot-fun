@@ -6,7 +6,6 @@ export const StyledPoolsPage = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-top: 93px;
   flex-grow: 1;
   margin-top: 15px;
 

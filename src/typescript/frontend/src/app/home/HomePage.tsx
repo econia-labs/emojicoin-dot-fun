@@ -28,24 +28,22 @@ export default async function HomePageComponent({
 }: HomePageProps) {
   return (
     <>
-      <div className="pt-[93px]">
-        <div className="flex-col mb-[31px]">
-          {priceFeed.length > 0 ? <PriceFeed data={priceFeed} /> : <TextCarousel />}
-          <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
-            <MainCard featured={featured} page={page} sortBy={sortBy} />
-          </div>
-          {children}
-          <TextCarousel />
+      <div className="flex-col mb-[31px]">
+        {priceFeed.length > 0 ? <PriceFeed data={priceFeed} /> : <TextCarousel />}
+        <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
+          <MainCard featured={featured} page={page} sortBy={sortBy} />
         </div>
-
-        <EmojiTable
-          markets={markets}
-          numMarkets={numMarkets}
-          page={page}
-          sortBy={sortBy}
-          searchBytes={searchBytes}
-        />
+        {children}
+        <TextCarousel />
       </div>
+
+      <EmojiTable
+        markets={markets}
+        numMarkets={numMarkets}
+        page={page}
+        sortBy={sortBy}
+        searchBytes={searchBytes}
+      />
     </>
   );
 }

@@ -19,7 +19,6 @@ import ButtonWithConnectWalletFallback from "./wallet-button/ConnectWalletButton
 import { useSearchParams } from "next/navigation";
 import Link, { type LinkProps } from "next/link";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { GeoblockedBanner } from "components/geoblocking";
 
 const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
   const { isDesktop } = useMatchBreakpoints();
@@ -110,7 +109,6 @@ const Header = ({ isOpen, setIsOpen }: HeaderProps) => {
         </Flex>
       </Container>
       <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} linksForCurrentPage={linksForCurrentPage} />
-      <GeoblockedBanner />
     </StyledContainer>
   );
 };
