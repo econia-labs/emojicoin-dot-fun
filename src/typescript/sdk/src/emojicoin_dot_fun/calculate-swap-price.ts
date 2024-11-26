@@ -66,8 +66,8 @@ const cpammSimpleSwapOutputAmount = ({
 };
 
 /**
- * @throws {@link SwapNotEnoughBaseError} if the user does not have enough base
- * @throws {@link DivideByZeroError} if the cpamm output calculation results in a divide by zero
+ * @throws @see {@link SwapNotEnoughBaseError} if the user does not have enough base
+ * @throws @see {@link DivideByZeroError} if the cpamm output calculation results in a divide by zero
  * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/295cf611950f66651452baa3e6ad6d6aef583f9b/src/move/emojicoin_dot_fun/sources/emojicoin_dot_fun.move#L1691}
  */
 const calculateExactSwapNetProceeds = (args: SwapNetProceedsArgs) => {
