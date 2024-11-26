@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MS_IN_ONE_DAY } from "components/charts/const";
+import { readLocalStorageCache, writeLocalStorageCache } from "configs/local-storage-keys";
 import { isUserGeoblocked } from "utils/geolocation";
 
 const SEVEN_DAYS_MS = 7 * MS_IN_ONE_DAY;
@@ -9,7 +10,16 @@ const useIsUserGeoblocked = (args?: { explicitlyGeoblocked: boolean }) => {
   const { explicitlyGeoblocked = false } = args ?? {};
   const { data } = useQuery({
     queryKey: ["geoblocked"],
-    queryFn: () => isUserGeoblocked(),
+    queryFn: async () => {
+      let geoblocked = readLocalStorageCache<boolean>("geoblocking");
+
+      if (geoblocked === null) {
+        geoblocked = await isUserGeoblocked();
+        writeLocalStorageCache("geoblocking", geoblocked);
+      }
+
+      return geoblocked;
+    },
     staleTime: SEVEN_DAYS_MS,
     placeholderData: (prev) => prev,
   });
