@@ -14,59 +14,102 @@ import {
   toPeriodicStateEventModel,
   toSwapEventModel,
 } from "../../types";
-import { type PeriodicStateEventQueryArgs } from "../../types/common";
+import type {
+  PeriodicStateEventToQueryArgs,
+  PeriodicStateEventQueryArgs,
+} from "../../types/common";
 import { type SymbolEmoji } from "../../../emoji_data/types";
 
 const selectSwapsByMarketID = ({
   marketID,
-  fromMarketNonce = null,
+  toMarketNonce = null,
   amount = 20,
+  order = "DESC",
 }: {
   marketID: AnyNumberString;
-  fromMarketNonce?: number | null;
+  toMarketNonce?: number | null;
   amount?: number;
+  order?: keyof typeof ORDER_BY;
 }) => {
-  if (fromMarketNonce !== null) {
+  if (toMarketNonce !== null) {
     return postgrest
       .from(TableName.SwapEvents)
       .select("*")
       .eq("market_id", marketID)
-      .lte("market_nonce", fromMarketNonce)
-      .order("market_nonce", ORDER_BY.DESC)
+      .lte("market_nonce", toMarketNonce)
+      .order("market_nonce", ORDER_BY[order])
       .limit(amount);
   }
   return postgrest
     .from(TableName.SwapEvents)
     .select("*")
     .eq("market_id", marketID)
-    .order("market_nonce", ORDER_BY.DESC)
+    .order("market_nonce", ORDER_BY[order])
     .limit(amount);
+};
+
+const selectSwapsByNonce = ({
+  marketID,
+  fromMarketNonce,
+  toMarketNonce,
+}: {
+  marketID: AnyNumberString;
+  fromMarketNonce: number;
+  toMarketNonce: number;
+}) => {
+  return postgrest
+    .from(TableName.SwapEvents)
+    .select("*")
+    .lt("market_nonce", toMarketNonce)
+    .gte("market_nonce", fromMarketNonce)
+    .eq("market_id", marketID)
+    .order("market_nonce", ORDER_BY.DESC);
 };
 
 const selectChatsByMarketID = ({
   marketID,
-  fromMarketNonce = null,
+  toMarketNonce = null,
   amount = 20,
+  order = "DESC",
 }: {
   marketID: AnyNumberString;
-  fromMarketNonce?: number | null;
+  toMarketNonce?: number | null;
   amount?: number;
+  order?: keyof typeof ORDER_BY;
 }) => {
-  if (fromMarketNonce !== null) {
+  if (toMarketNonce !== null) {
     return postgrest
       .from(TableName.ChatEvents)
       .select("*")
       .eq("market_id", marketID)
-      .lte("market_nonce", fromMarketNonce)
-      .order("market_nonce", ORDER_BY.DESC)
+      .lte("market_nonce", toMarketNonce)
+      .order("market_nonce", ORDER_BY[order])
       .limit(amount);
   }
   return postgrest
     .from(TableName.ChatEvents)
     .select("*")
     .eq("market_id", marketID)
-    .order("market_nonce", ORDER_BY.DESC)
+    .order("market_nonce", ORDER_BY[order])
     .limit(amount);
+};
+
+const selectChatsByNonce = ({
+  marketID,
+  fromMarketNonce,
+  toMarketNonce,
+}: {
+  marketID: AnyNumberString;
+  fromMarketNonce: number;
+  toMarketNonce: number;
+}) => {
+  return postgrest
+    .from(TableName.ChatEvents)
+    .select("*")
+    .lt("market_nonce", toMarketNonce)
+    .gte("market_nonce", fromMarketNonce)
+    .eq("market_id", marketID)
+    .order("market_nonce", ORDER_BY.DESC);
 };
 
 // This query uses `offset` instead of `page` because the periodic state events query requires
@@ -88,6 +131,23 @@ const selectPeriodicEventsSince = ({
   return query;
 };
 
+const selectPeriodicEventsTo = ({
+  marketID,
+  period,
+  end,
+  amount,
+}: PeriodicStateEventToQueryArgs) => {
+  const query = postgrest
+    .from(TableName.PeriodicStateEvents)
+    .select("*")
+    .eq("market_id", marketID)
+    .eq("period", period)
+    .lt("start_time", end.toISOString())
+    .limit(amount)
+    .order("start_time", ORDER_BY.DESC);
+  return query;
+};
+
 const selectMarketState = ({ searchEmojis }: { searchEmojis: SymbolEmoji[] }) =>
   postgrest
     .from(TableName.MarketState)
@@ -105,13 +165,40 @@ const selectMarketRegistration = ({ marketID }: { marketID: AnyNumberString }) =
     .single();
 
 export const fetchSwapEvents = queryHelper(selectSwapsByMarketID, toSwapEventModel);
+export const fetchSwapEventsByNonce = queryHelper(selectSwapsByNonce, toSwapEventModel);
 export const fetchChatEvents = queryHelper(selectChatsByMarketID, toChatEventModel);
+export const fetchChatEventsByNonce = queryHelper(selectChatsByNonce, toChatEventModel);
 export const fetchPeriodicEventsSince = queryHelper(
   selectPeriodicEventsSince,
   toPeriodicStateEventModel
 );
+export const fetchPeriodicEventsTo = queryHelper(selectPeriodicEventsTo, toPeriodicStateEventModel);
 export const fetchMarketState = queryHelperSingle(selectMarketState, toMarketStateModel);
 export const fetchMarketRegistration = queryHelperSingle(
   selectMarketRegistration,
   toMarketRegistrationEventModel
 );
+
+export const tryFetchMarketRegistration = async (marketID: AnyNumberString) =>
+  fetchMarketRegistration({ marketID }).then((res) => {
+    if (res) {
+      return Number(res.market.time / 1000n / 1000n);
+    }
+    throw new Error("Market is not yet registered.");
+  });
+
+export const tryFetchFirstChatEvent = async (marketID: AnyNumberString) =>
+  fetchChatEvents({ marketID, amount: 1, order: "ASC" }).then((res) => {
+    if (res && res[0]) {
+      return Number(res[0].market.marketNonce);
+    }
+    throw new Error("Market is not yet registered.");
+  });
+
+export const tryFetchFirstSwapEvent = async (marketID: AnyNumberString) =>
+  fetchSwapEvents({ marketID, amount: 1, order: "ASC" }).then((res) => {
+    if (res && res[0]) {
+      return Number(res[0].market.marketNonce);
+    }
+    throw new Error("Market is not yet registered.");
+  });
