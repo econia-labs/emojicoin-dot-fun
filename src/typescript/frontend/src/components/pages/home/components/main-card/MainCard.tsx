@@ -18,6 +18,7 @@ import "./module.css";
 import { PriceDelta } from "components/price-feed/inner";
 import { sortByValue } from "lib/utils/sort-events";
 import { AnimatePresence, motion } from "framer-motion";
+import { useInterval } from "react-use";
 
 export interface MainCardProps {
   featuredMarkets: HomePageProps["priceFeed"];
@@ -47,13 +48,9 @@ const MainCard = (props: MainCardProps) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((i) => (i + 1) % Math.min(featuredMarkets.length, MAX_NUM_FEATURED_MARKETS));
-    }, FEATURED_MARKET_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [featuredMarkets.length]);
+  useInterval(() => {
+    setCurrentIndex((i) => (i + 1) % Math.min(featuredMarkets.length, MAX_NUM_FEATURED_MARKETS));
+  }, FEATURED_MARKET_INTERVAL);
 
   const { featured, priceData } = useMemo(
     () => ({
