@@ -97,6 +97,11 @@ const waitForEventProcessed = async (
 export class EmojicoinClient {
   public aptos: Aptos;
 
+  public register = this.registerInternal.bind(this);
+  public chat = this.chatInternal.bind(this);
+  public buy = this.buyInternal.bind(this);
+  public sell = this.sellInternal.bind(this);
+
   public liquidity = {
     provide: this.provideLiquidity.bind(this),
     remove: this.removeLiquidity.bind(this),
@@ -161,14 +166,24 @@ export class EmojicoinClient {
     this.minOutputAmount = BigInt(minOutputAmount);
   }
 
-  async register(registrant: Account, symbolEmojis: SymbolEmoji[], options?: Options) {
+  // Internal so we can bind the public functions.
+  private async registerInternal(
+    registrant: Account,
+    symbolEmojis: SymbolEmoji[],
+    transactionOptions?: Options
+  ) {
+    const { feePayer, waitForTransactionOptions, options } = transactionOptions ?? {};
     const response = await RegisterMarket.submit({
       aptosConfig: this.aptos.config,
       registrant,
       emojis: this.emojisToHexStrings(symbolEmojis),
       integrator: this.integrator,
-      options: DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
-      ...options,
+      options: {
+        ...DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+        ...options,
+      },
+      feePayer,
+      waitForTransactionOptions,
     });
     const res = this.getTransactionEventData(response);
     const marketID = res.events.marketRegistrationEvents[0].marketID;
@@ -182,7 +197,8 @@ export class EmojicoinClient {
     };
   }
 
-  async chat(
+  // Internal so we can bind the public functions.
+  private async chatInternal(
     user: Account,
     symbolEmojis: SymbolEmoji[],
     message: string | (SymbolEmoji | ChatEmoji)[],
@@ -213,7 +229,8 @@ export class EmojicoinClient {
     };
   }
 
-  async buy(
+  // Internal so we can bind the public functions.
+  private async buyInternal(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
     inputAmount: bigint | number,
@@ -233,7 +250,8 @@ export class EmojicoinClient {
     );
   }
 
-  async sell(
+  // Internal so we can bind the public functions.
+  private async sellInternal(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
     inputAmount: bigint | number,

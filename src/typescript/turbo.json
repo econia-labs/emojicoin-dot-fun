@@ -81,7 +81,7 @@
       "cache": false,
       "outputs": []
     },
-    "test:sdk:unit": {
+    "test:unit": {
       "cache": false,
       "outputs": []
     }

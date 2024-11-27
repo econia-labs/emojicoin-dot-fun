@@ -48,6 +48,7 @@
     "test:sdk:parallel": "pnpm run load-env:test -- turbo run test:sdk:parallel --filter @econia-labs/emojicoin-sdk --force --log-prefix none",
     "test:sdk:sequential": "pnpm run load-env:test -- turbo run test:sdk:sequential --filter @econia-labs/emojicoin-sdk --force --log-prefix none",
     "test:sdk:unit": "NO_TEST_SETUP=true pnpm run load-env:test -- turbo run test:unit --filter @econia-labs/emojicoin-sdk --force --log-prefix none",
+    "test:unit": "NO_TEST_SETUP=true pnpm run load-env:test -- turbo run test:unit --force",
     "test:verbose": "FETCH_DEBUG=true VERBOSE_TEST_LOGS=true pnpm run load-env:test -- turbo run test --force"
   },
   "version": "0.0.0",

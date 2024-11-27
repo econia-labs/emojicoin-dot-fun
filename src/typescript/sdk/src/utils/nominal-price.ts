@@ -16,3 +16,5 @@ export const toQuotePrice = (
   avgExecutionPriceQ64: string | number | bigint,
   decimals: number = DECIMALS
 ) => Number(Big(Q64_BASE).div(avgExecutionPriceQ64.toString()).toFixed(decimals));
+
+export const toQ64Big = (input: string | number | bigint) => Big(input.toString()).mul(Q64_BASE);

@@ -584,15 +584,15 @@ export const toUserPoolsRPCResponse = (data: DatabaseJsonType["user_pools"]) => 
   dailyVolume: BigInt(data.daily_volume),
 });
 
-const calculateDeltaPercentage = (open: string, close: string) =>
-  q64ToBig(close).div(q64ToBig(open)).mul(100).sub(100).toNumber();
+export const calculateDeltaPercentageForQ64s = (open: AnyNumberString, close: AnyNumberString) =>
+  q64ToBig(close.toString()).div(q64ToBig(open.toString())).mul(100).sub(100).toNumber();
 
 export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
   return {
     ...toMarketStateModel(data),
     openPrice: q64ToBig(data.open_price_q64).toNumber(),
     closePrice: q64ToBig(data.close_price_q64).toNumber(),
-    deltaPercentage: calculateDeltaPercentage(data.open_price_q64, data.close_price_q64),
+    deltaPercentage: calculateDeltaPercentageForQ64s(data.open_price_q64, data.close_price_q64),
   };
 };
 
