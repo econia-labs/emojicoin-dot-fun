@@ -1,6 +1,6 @@
 ---
 jobs:
-  verify-fallback-deployment-file:
+  verify-fallback-deploy-file:
     runs-on: 'ubuntu-latest'
     env:
       FALLBACK_FILE: 'src/cloud-formation/deploy-indexer-fallback.yaml'
