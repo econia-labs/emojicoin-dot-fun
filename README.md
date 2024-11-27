@@ -88,6 +88,19 @@ git push origin merge-main-to-prod
 Now you can make a PR to merge main to production with the `merge-main-to-prod`
 branch!
 
+### `fallback` branch
+
+The `fallback` branch is intended to follow the `production` branch by a commit
+during indexer stack updates: whenever indexer stack changes merge to
+`production`, frontend deployments can be temporarily pointed at the `fallback`
+stack to prevent any downtime in the case of a `production` stack deployment
+failure or for in-place stack upgrades that result temporary outages.
+
+For the purposes of indexer stack management, `production` only *needs* to be
+merged into `fallback` just before indexer changes land in `production`,
+nevertheless it is best practice to merge from `production` into `fallback` on a
+regular cadence.
+
 ### Environment variables
 
 You can set in Vercel project settings the production branch. By default, this
