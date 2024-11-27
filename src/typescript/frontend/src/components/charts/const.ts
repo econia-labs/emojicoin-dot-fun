@@ -11,6 +11,7 @@ import {
 import { Period } from "@econia-labs/emojicoin-sdk";
 import { GREEN as GREEN_HEX, PINK as PINK_HEX } from "theme/colors";
 import { hexToRgba } from "utils/hex-to-rgba";
+import { CDN_URL } from "lib/env";
 
 export const TV_CHARTING_LIBRARY_RESOLUTIONS = [
   "1",
@@ -43,7 +44,7 @@ export const EXCHANGE_NAME = "emojicoin.fun";
 
 export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "container"> = {
   interval: "5" as ResolutionString,
-  library_path: "/static/charting_library/",
+  library_path: `${CDN_URL}/charting_library/`,
   theme: "Dark" as ThemeName,
   locale: "en" as LanguageCode,
   custom_css_url: "/styles/tradingview.css",

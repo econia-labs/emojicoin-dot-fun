@@ -1,33 +1,30 @@
-import localFont from "next/font/local";
+import { CDN_URL } from "lib/env";
 
-export const pixelar = localFont({
-  src: "../../public/fonts/Pixelar-Regular.woff2",
-  display: "swap",
-  weight: "400",
-  style: "normal",
-  variable: "--font-pixelar",
-});
+export const fontsStyle = `
+  @font-face {
+    font-family: Pixelar;
+    font-style: normal;
+    font-weight: 400;
+    src: url("${CDN_URL}/fonts/Pixelar-Regular.woff2");
+  }
 
-export const formaDJRMicro = localFont({
-  src: "../../public/fonts/FormaDJRMicro-Regular-Testing.woff2",
-  display: "swap",
-  weight: "400",
-  style: "normal",
-  variable: "--font-forma",
-});
+  @font-face {
+    font-family: Forma;
+    font-style: normal;
+    font-weight: 400;
+    src: url("${CDN_URL}/fonts/FormaDJRMicro-Regular-Testing.woff2");
+  }
 
-export const formaDJRDisplayMedium = localFont({
-  src: "../../public/fonts/FormaDJRDisplay-Medium-Testing.woff2",
-  display: "swap",
-  weight: "400",
-  style: "normal",
-  variable: "--font-formaM",
-});
+  @font-face {
+    font-family: FormaM;
+    font-style: nomral;
+    font-weight: 400;
+    src: url("${CDN_URL}/fonts/FormaDJRDisplay-Medium-Testing.woff2");
+  }
 
-export const formaDJRDisplayRegular = localFont({
-  src: "../../public/fonts/FormaDJRDisplay-Regular-Testing.woff2",
-  display: "swap",
-  weight: "400",
-  style: "normal",
-  variable: "--font-formaDR",
-});
+  :root {
+    --font-pixelar: Pixelar;
+    --font-forma: Forma;
+    --font-formaM: FormaM;
+  }
+`

@@ -22,6 +22,7 @@ if (!["local", "devnet", "testnet", "mainnet", "custom"].includes(APTOS_NETWORK)
 let INTEGRATOR_ADDRESS: AccountAddressString;
 let INTEGRATOR_FEE_RATE_BPS: number;
 let BROKER_URL: string;
+let CDN_URL: string;
 
 export const LINKS: Links | undefined =
   typeof process.env.NEXT_PUBLIC_LINKS === "string" && process.env.NEXT_PUBLIC_LINKS !== ""
@@ -48,10 +49,17 @@ if (process.env.NEXT_PUBLIC_BROKER_URL) {
   throw new Error("Environment variable NEXT_PUBLIC_BROKER_URL is undefined.");
 }
 
+if (process.env.NEXT_PUBLIC_CDN_URL) {
+  CDN_URL = process.env.NEXT_PUBLIC_CDN_URL;
+} else {
+  throw new Error("Environment variable NEXT_PUBLIC_CDN_URL is undefined.");
+}
+
 const VERSION = parse(packageInfo.version);
 
 export {
   APTOS_NETWORK,
+  CDN_URL,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
   IS_ALLOWLIST_ENABLED,
