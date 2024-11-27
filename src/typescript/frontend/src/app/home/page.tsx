@@ -12,6 +12,8 @@ import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 import { type DatabaseModels, toPriceFeed } from "@sdk/indexer-v2/types";
 import { type DatabaseJsonType } from "@sdk/indexer-v2/types/json-types";
+import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { ORDER_BY } from "@sdk/queries";
 
 export const revalidate = 2;
 
@@ -21,8 +23,14 @@ const getCachedNumMarketsFromAptosNode = unstable_cache(
   { revalidate: 10 }
 );
 
+const NUM_MARKETS_ON_PRICE_FEED = 25;
+
 const stringifiedFetchPriceFeedData = () =>
-  fetchPriceFeedWithMarketState({}).then((res) => stringifyJSON(res));
+  fetchPriceFeedWithMarketState({
+    sortBy: SortMarketsBy.DailyVolume,
+    orderBy: ORDER_BY.DESC,
+    pageSize: NUM_MARKETS_ON_PRICE_FEED,
+  }).then((res) => stringifyJSON(res));
 
 const getCachedPriceFeedData = unstable_cache(
   stringifiedFetchPriceFeedData,

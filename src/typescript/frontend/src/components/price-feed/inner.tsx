@@ -1,6 +1,5 @@
 "use client";
 
-import type { fetchPriceFeed } from "@/queries/home";
 import Link from "next/link";
 import Carousel from "components/carousel";
 import { Emoji } from "utils/emoji";
@@ -9,6 +8,7 @@ import { useMemo } from "react";
 import { cn } from "lib/utils/class-name";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 import { useEventStore } from "context/event-store-context/hooks";
+import { type DatabaseModels } from "@sdk/indexer-v2/types";
 
 export const PriceDelta = ({ delta, className = "" }: { delta: number; className?: string }) => {
   const { prefix, suffix, text } = useMemo(
@@ -41,7 +41,7 @@ const Item = ({ emoji, delta }: { emoji: string; delta: number }) => {
   );
 };
 
-export const PriceFeedInner = ({ data }: { data: Awaited<ReturnType<typeof fetchPriceFeed>> }) => {
+export const PriceFeedInner = ({ data }: { data: DatabaseModels["price_feed"][] }) => {
   // Load the price feed market data into the event store.
   const loadEventsFromServer = useEventStore((s) => s.loadEventsFromServer);
 

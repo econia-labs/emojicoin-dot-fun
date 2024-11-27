@@ -3,23 +3,16 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 import { LIMIT, ORDER_BY } from "../../../queries/const";
-import { DEFAULT_SORT_BY, SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
-import { type DatabaseJsonType, DatabaseRpc, TableName } from "../../types/json-types";
+import { DEFAULT_SORT_BY, type MarketStateQueryArgs } from "../../types/common";
+import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
 import { DatabaseTypeConverter } from "../../types";
 import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
-import { type AnyNumberString, toRegistryView } from "../../../types";
+import { toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
 import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
-
-// prettier-ignore
-const selectSpecificMarkets = ({ marketIDs }: { marketIDs: AnyNumberString[] }) =>
-  postgrest
-    .from(TableName.MarketState)
-    .select("*")
-    .in("market_id", marketIDs.map(String));
 
 // A helper function to abstract the logic for fetching rows that contain market state.
 const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeed>({
@@ -63,21 +56,11 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   return query;
 };
 
-selectMarketHelper({
-  tableName: TableName.PriceFeed,
-});
-
 const selectMarketStates = (args: MarketStateQueryArgs) =>
   selectMarketHelper({ ...args, tableName: TableName.MarketState });
 
-const NUM_MARKETS_ON_PRICE_FEED = 25;
-
-const selectMarketsFromPriceFeed = ({
-  pageSize = NUM_MARKETS_ON_PRICE_FEED,
-  ...args
-}: MarketStateQueryArgs) =>
+const selectMarketsFromPriceFeed = ({ ...args }: MarketStateQueryArgs) =>
   selectMarketHelper({
-    pageSize,
     ...args,
     tableName: TableName.PriceFeed,
   });
@@ -91,17 +74,6 @@ export const fetchMarketsWithCount = queryHelperWithCount(
   selectMarketStates,
   DatabaseTypeConverter[TableName.MarketState]
 );
-
-export const DEFAULT_TOP_MARKET_SORT = SortMarketsBy.BumpOrder;
-export const DEFAULT_TOP_MARKET_ORDER = ORDER_BY.DESC;
-
-export const fetchTopMarketForSortBy = async (sortBy: SortMarketsBy = DEFAULT_TOP_MARKET_SORT) =>
-  fetchMarkets({
-    page: 1,
-    pageSize: 1,
-    sortBy,
-    orderBy: DEFAULT_TOP_MARKET_ORDER,
-  }).then((markets) => (markets ?? []).at(0));
 
 /**
  * Retrieves the number of markets by querying the view function in the registry contract on-chain.
@@ -138,18 +110,6 @@ export const fetchNumRegisteredMarkets = async () => {
       .then((r) => r.count ?? 0);
   }
 };
-
-const selectPriceFeed = () => postgrest.rpc(DatabaseRpc.PriceFeed, undefined, { get: true });
-
-export const fetchPriceFeed = queryHelper(
-  selectPriceFeed,
-  DatabaseTypeConverter[DatabaseRpc.PriceFeed]
-);
-
-export const fetchSpecificMarkets = queryHelper(
-  selectSpecificMarkets,
-  DatabaseTypeConverter[TableName.MarketState]
-);
 
 // Note the no-op conversion function- this is simply to satisfy the `queryHelper` params and
 // indicate with generics that we don't convert the type here.
