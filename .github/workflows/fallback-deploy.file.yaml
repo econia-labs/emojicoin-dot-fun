@@ -9,14 +9,14 @@ jobs:
     - uses: 'actions/checkout@v4'
     - run: 'sudo apt-get update && sudo apt-get install -y yq'
     - run: |
-      ! diff \
-      <(yq 'del(.parameters.Environment)' "$PRODUCTION_FILE") \
-      <(yq 'del(.parameters.Environment)' "$FALLBACK_FILE")
+        ! diff \
+        <(yq 'del(.parameters.Environment)' "$PRODUCTION_FILE") \
+        <(yq 'del(.parameters.Environment)' "$FALLBACK_FILE")
     - run: |
-      PROD_ENV=$(yq '.parameters.Environment' "$PRODUCTION_FILE")
-      FALLBACK_ENV=$(yq '.parameters.Environment' "$FALLBACK_FILE")
-      [ "$PROD_ENV" = 'production' ] || exit 1
-      [ "$FALLBACK_ENV" = 'fallback' ] || exit 1
+        PROD_ENV=$(yq '.parameters.Environment' "$PRODUCTION_FILE")
+        FALLBACK_ENV=$(yq '.parameters.Environment' "$FALLBACK_FILE")
+        [ "$PROD_ENV" = 'production' ] || exit 1
+        [ "$FALLBACK_ENV" = 'fallback' ] || exit 1
 name: 'Validate fallback stack deployment file'
 'on':
   pull_request: null
