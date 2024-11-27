@@ -1,6 +1,6 @@
 ---
 jobs:
-  validate-deployment-files:
+  verify-fallback-deployment-file:
     runs-on: 'ubuntu-latest'
     env:
       FALLBACK_FILE: 'src/cloud-formation/deploy-indexer-fallback.yaml'
@@ -14,7 +14,7 @@ jobs:
         sudo wget -O /usr/local/bin/yq "$YQ_BINARY"
         sudo chmod +x /usr/local/bin/yq
     - run: |
-        ! diff \
+        diff \
         <(yq 'del(.parameters.Environment)' "$PRODUCTION_FILE") \
         <(yq 'del(.parameters.Environment)' "$FALLBACK_FILE")
     - run: |
@@ -22,7 +22,7 @@ jobs:
         FALLBACK_ENV=$(yq '.parameters.Environment' "$FALLBACK_FILE")
         [ "$PROD_ENV" = 'production' ] || exit 1
         [ "$FALLBACK_ENV" = 'fallback' ] || exit 1
-name: 'Validate fallback stack deployment file'
+name: 'Verify fallback stack deployment file'
 'on':
   pull_request: null
   push:
