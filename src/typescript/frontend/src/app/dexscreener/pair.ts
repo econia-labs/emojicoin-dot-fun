@@ -67,6 +67,25 @@ export interface PairResponse {
   pair: Pair;
 }
 
+/**
+ *
+ * @param pairId is the pair ID. Generally it's `event.market.symbolEmojis.join("") + "-APT"`
+ */
+export function getPair(pairId: string): Promise<Pair> {
+  event.market.symbolEmojis.join("") + "-APT"
+
+  return Promise.resolve({
+    id: pairId,
+    dexKey: "uniswap",
+    asset0Id: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    asset1Id: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    createdAtBlockNumber: 100,
+    createdAtBlockTimestamp: 1698126147,
+    createdAtTxnId: "0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e",
+    feeBps: 100,
+  });
+}
+
 // NextJS JSON response handler
 export async function GET(request: NextRequest): Promise<NextResponse<PairResponse>> {
   const searchParams = request.nextUrl.searchParams;

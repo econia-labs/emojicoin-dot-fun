@@ -191,7 +191,7 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
 
     // TODO: this is just a guess- confirm it
     asset0In: Number(event.swap.inputAmount),
-    asset1Out: Number(event.swap.resultsInStateTransition),
+    asset1Out: Number(event.swap.quoteVolume),
     priceNative: Number(event.swap.avgExecutionPriceQ64),
     reserves: {
       asset0: Number(event.state.clammVirtualReserves),
