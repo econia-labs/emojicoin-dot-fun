@@ -27,4 +27,4 @@ export const fontsStyle = `
     --font-forma: Forma;
     --font-formaM: FormaM;
   }
-`
+`;

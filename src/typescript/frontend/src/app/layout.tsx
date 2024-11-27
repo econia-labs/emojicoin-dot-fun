@@ -16,8 +16,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html>
       <body>
-        { /* This is used to avoid React escaping the quotes in `fontsStyle`. */ }
-        <style dangerouslySetInnerHTML={{__html: fontsStyle}} />
+        {/* This is used to avoid React escaping the quotes in `fontsStyle`. */}
+        <style dangerouslySetInnerHTML={{ __html: fontsStyle }} />
         <StyledComponentsRegistry>
           <Providers>
             <DisplayDebugData />
