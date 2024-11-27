@@ -4,13 +4,13 @@ if (process.env.NODE_ENV !== "test") {
 
 import { LIMIT, ORDER_BY } from "../../../queries/const";
 import { DEFAULT_SORT_BY, SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
-import { DatabaseRpc, TableName } from "../../types/json-types";
+import { DatabaseJsonType, DatabaseRpc, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
-import { DatabaseModels, DatabaseTypeConverter, toPriceFeedWithMarketState } from "../../types";
+import {  DatabaseTypeConverter } from "../../types";
 import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
-import { AnyNumberString, Flatten, toRegistryView } from "../../../types";
+import { AnyNumberString, toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
 import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
@@ -22,7 +22,7 @@ const selectSpecificMarkets = ({ marketIDs }: { marketIDs: AnyNumberString[] }) 
     .in("market_id", marketIDs.map(String));
 
 // A helper function to abstract the logic for fetching rows that contain market state.
-const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeedWithMarketState>({
+const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFeed>({
   tableName,
   page = 1,
   pageSize = LIMIT,
@@ -64,7 +64,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
 };
 
 selectMarketHelper({
-  tableName: TableName.PriceFeedWithMarketState,
+  tableName: TableName.PriceFeed,
 });
 
 const selectMarketStates = (args: MarketStateQueryArgs) =>
@@ -78,8 +78,7 @@ const selectMarketsFromPriceFeed = ({
 }: MarketStateQueryArgs) =>
   selectMarketHelper({
     ...args,
-    tableName: TableName.PriceFeedWithMarketState,
-    pageSize: NUM_MARKETS_ON_PRICE_FEED,
+    tableName: TableName.PriceFeed,
   });
 
 export const fetchMarkets = queryHelper(
@@ -151,38 +150,14 @@ export const fetchSpecificMarkets = queryHelper(
   DatabaseTypeConverter[TableName.MarketState]
 );
 
-// Fetch the top N markets from the price feed, then fetch their corresponding market data.
-export const fetchPriceFeedAndMarketData = async () =>
-  fetchPriceFeed({}).then((priceFeed) =>
-    fetchSpecificMarkets({ marketIDs: priceFeed.map(({ marketID }) => marketID) }).then(
-      (allMarketData) =>
-        priceFeed
-          .map((marketPriceFeed) => {
-            // Find the price feed marketID's matching market data entry.
-            const marketData = allMarketData.find(
-              (mkt) => mkt.market.marketID === marketPriceFeed.marketID
-            );
-            if (!marketData) {
-              console.error(
-                `Found market ID ${marketPriceFeed}, ${marketPriceFeed.symbolEmojis} in price feed ` +
-                  `but not when querying its market state.`
-              );
-              return undefined;
-            }
-            return {
-              marketPriceFeed,
-              marketData,
-            };
-          })
-          .filter((v) => typeof v !== "undefined")
-    )
-  );
-
+// Note the no-op conversion function- this is simply to satisfy the `queryHelper` params and
+// indicate with generics that we don't convert the type here.
+// We don't do it because of the issues with serialization/deserialization in `unstable_cache`.
+// It's easier to use the conversion function later (after the response is returned from
+// `unstable_cache`) rather than deal with the headache of doing it before.
+// Otherwise things like `Date` objects aren't properly created upon retrieval from the
+// `unstable_cache` query.
 export const fetchPriceFeedWithMarketState = queryHelper(
   selectMarketsFromPriceFeed,
-  toPriceFeedWithMarketState
+  (v): DatabaseJsonType["price_feed"] => v,
 );
-
-export type PriceFeedAndMarketData = Awaited<
-  ReturnType<typeof fetchPriceFeedAndMarketData>
->[number];

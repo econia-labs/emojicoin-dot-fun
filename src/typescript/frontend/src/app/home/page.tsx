@@ -4,13 +4,14 @@ import {
   fetchMarkets,
   fetchMarketsWithCount,
   fetchNumRegisteredMarkets,
-  fetchPriceFeedAndMarketData,
-  type PriceFeedAndMarketData,
+  fetchPriceFeedWithMarketState,
 } from "@/queries/home";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import { MARKETS_PER_PAGE } from "lib/queries/sorting/const";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
+import { type DatabaseModels, toPriceFeed } from "@sdk/indexer-v2/types";
+import { type DatabaseJsonType } from "@sdk/indexer-v2/types/json-types";
 
 export const revalidate = 2;
 
@@ -21,7 +22,7 @@ const getCachedNumMarketsFromAptosNode = unstable_cache(
 );
 
 const stringifiedFetchPriceFeedData = () =>
-  fetchPriceFeedAndMarketData().then((res) => stringifyJSON(res));
+  fetchPriceFeedWithMarketState({}).then((res) => stringifyJSON(res));
 
 const getCachedPriceFeedData = unstable_cache(
   stringifiedFetchPriceFeedData,
@@ -34,10 +35,10 @@ export default async function Home({ searchParams }: HomePageParams) {
   const searchEmojis = q ? symbolBytesToEmojis(q).emojis.map((e) => e.emoji) : undefined;
 
   const priceFeedPromise = getCachedPriceFeedData()
-    .then((res) => parseJSON<PriceFeedAndMarketData[]>(res))
+    .then((res) => parseJSON<DatabaseJsonType["price_feed"][]>(res).map((p) => toPriceFeed(p)))
     .catch((err) => {
       console.error(err);
-      return [] as PriceFeedAndMarketData[];
+      return [] as DatabaseModels["price_feed"][];
     });
 
   let marketsPromise: ReturnType<typeof fetchMarkets>;

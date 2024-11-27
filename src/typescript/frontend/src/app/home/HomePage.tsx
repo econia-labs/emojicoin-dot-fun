@@ -1,4 +1,3 @@
-import { type PriceFeedAndMarketData } from "@/queries/home";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import EmojiTable from "components/pages/home/components/emoji-table";
 import MainCard from "components/pages/home/components/main-card/MainCard";
@@ -13,7 +12,7 @@ export interface HomePageProps {
   sortBy: MarketDataSortByHomePage;
   searchBytes?: string;
   children?: React.ReactNode;
-  priceFeed: PriceFeedAndMarketData[];
+  priceFeed: DatabaseModels["price_feed"][];
 }
 
 export default async function HomePageComponent({
@@ -29,7 +28,7 @@ export default async function HomePageComponent({
     <>
         <div className="flex-col mb-[31px]">
           {priceFeed.length > 0 ? (
-            <PriceFeed data={priceFeed.map(({ marketPriceFeed }) => marketPriceFeed)} />
+            <PriceFeed data={priceFeed} />
           ) : (
             <TextCarousel />
           )}

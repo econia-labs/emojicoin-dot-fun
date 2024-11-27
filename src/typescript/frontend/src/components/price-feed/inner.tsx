@@ -7,6 +7,8 @@ import { Emoji } from "utils/emoji";
 import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 import { useMemo } from "react";
 import { cn } from "lib/utils/class-name";
+import useEffectOnce from "react-use/lib/useEffectOnce";
+import { useEventStore } from "context/event-store-context/hooks";
 
 export const PriceDelta = ({ delta, className = "" }: { delta: number; className?: string }) => {
   const { prefix, suffix, text } = useMemo(
@@ -40,13 +42,20 @@ const Item = ({ emoji, delta }: { emoji: string; delta: number }) => {
 };
 
 export const PriceFeedInner = ({ data }: { data: Awaited<ReturnType<typeof fetchPriceFeed>> }) => {
+  // Load the price feed market data into the event store.
+  const loadEventsFromServer = useEventStore((s) => s.loadEventsFromServer);
+
+  useEffectOnce(() => {
+    loadEventsFromServer(data);
+  });
+
   return (
     <div className="w-full z-[10] relative">
       <Carousel>
         {data!.map((itemData, i) => (
           <Item
             key={`item::${i}`}
-            emoji={itemData.symbolEmojis.join("")}
+            emoji={itemData.market.symbolEmojis.join("")}
             delta={itemData.deltaPercentage}
           />
         ))}

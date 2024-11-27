@@ -32,12 +32,10 @@ const MAX_NUM_FEATURED_MARKETS = 5;
 const MainCard = (props: MainCardProps) => {
   const featuredMarkets = useMemo(() => {
     const sorted = props.featuredMarkets.toSorted((a, b) =>
-      sortByValue(a.marketPriceFeed.deltaPercentage, b.marketPriceFeed.deltaPercentage, "desc")
+      sortByValue(a.deltaPercentage, b.deltaPercentage, "desc")
     );
-    const positives = sorted.filter(({ marketPriceFeed }) => marketPriceFeed.deltaPercentage > 0);
-    const notPositives = sorted.filter(
-      ({ marketPriceFeed }) => marketPriceFeed.deltaPercentage <= 0
-    );
+    const positives = sorted.filter(({ deltaPercentage }) => deltaPercentage > 0);
+    const notPositives = sorted.filter(({ deltaPercentage }) => deltaPercentage <= 0);
     return positives.length
       ? positives.slice(0, MAX_NUM_FEATURED_MARKETS)
       : notPositives.slice(0, MAX_NUM_FEATURED_MARKETS);
@@ -52,22 +50,16 @@ const MainCard = (props: MainCardProps) => {
     setCurrentIndex((i) => (i + 1) % Math.min(featuredMarkets.length, MAX_NUM_FEATURED_MARKETS));
   }, FEATURED_MARKET_INTERVAL);
 
-  const { featured, priceData } = useMemo(
-    () => ({
-      featured: featuredMarkets.at(currentIndex)?.marketData,
-      priceData: featuredMarkets.at(currentIndex)?.marketPriceFeed,
-    }),
-    [featuredMarkets, currentIndex]
-  );
+  const featured = useMemo(() => featuredMarkets.at(currentIndex), [featuredMarkets, currentIndex]);
 
   const { marketCap, dailyVolume, allTimeVolume, priceDelta } = useMemo(() => {
     return {
       marketCap: BigInt(featured?.state.instantaneousStats.marketCap ?? 0),
       dailyVolume: BigInt(featured?.dailyVolume ?? 0),
       allTimeVolume: BigInt(featured?.state.cumulativeStats.quoteVolume ?? 0),
-      priceDelta: priceData?.deltaPercentage ?? 0,
+      priceDelta: featured?.deltaPercentage ?? 0,
     };
-  }, [featured, priceData]);
+  }, [featured]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {

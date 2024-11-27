@@ -2,7 +2,7 @@
 import { Big } from "big.js";
 
 /* eslint-disable-next-line no-bitwise */
-const Q64_BASE = Big((1n << 64n).toString());
+const Q64_BASE = Big((Big(2).pow(64)).toString());
 const DECIMALS = 16;
 
 export const q64ToBig = (q64: string | number | bigint) => Big(q64.toString()).div(Q64_BASE);
