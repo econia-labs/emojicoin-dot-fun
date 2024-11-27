@@ -13,10 +13,12 @@ jobs:
         YQ_BINARY="${YQ_BASE_URL}/${YQ_VERSION}/yq_linux_amd64"
         sudo wget -O /usr/local/bin/yq "$YQ_BINARY"
         sudo chmod +x /usr/local/bin/yq
-    - run: |
+    - name: 'Verify fallback and production files same except `Environment`'
+      run: |
         diff \
         <(yq 'del(.parameters.Environment)' "$PRODUCTION_FILE") \
         <(yq 'del(.parameters.Environment)' "$FALLBACK_FILE")
+    - name: 'Verify `Environment` in fallback and production files.'
     - run: |
         PROD_ENV=$(yq '.parameters.Environment' "$PRODUCTION_FILE")
         FALLBACK_ENV=$(yq '.parameters.Environment' "$FALLBACK_FILE")
