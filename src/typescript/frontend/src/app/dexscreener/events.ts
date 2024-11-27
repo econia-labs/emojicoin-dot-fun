@@ -74,7 +74,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { type Block } from "./latest-block";
-import { fetchLiquidityEventsByVersion, fetchSwapEventsByVersion } from "@sdk/indexer-v2/queries/test";
+import { fetchLiquidityEventsByVersion, fetchSwapEventsByVersion } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { type toLiquidityEventModel, type toSwapEventModel } from "@sdk/indexer-v2/types";
 
 

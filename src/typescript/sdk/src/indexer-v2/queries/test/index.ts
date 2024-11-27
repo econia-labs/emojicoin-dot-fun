@@ -11,7 +11,7 @@ import {
 } from "../../types";
 import { type MarketStateQueryArgs } from "../../types/common";
 import { TableName } from "../../types/json-types";
-import { postgrest } from "../client";
+import { postgrest, toQueryArray } from "../client";
 import { queryHelper } from "../utils";
 import { toAccountAddressString } from "../../../utils";
 
@@ -84,33 +84,6 @@ const selectMarketRegistrationEvents = ({
     .order("transaction_version", orderBy)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-const selectSwapEventsByVersion = ({
-  fromVersion,
-  toVersion,
-  page = 1,
-  pageSize = LIMIT,
-}: { fromVersion: number, toVersion: number } & MarketStateQueryArgs) =>
-  postgrest
-    .from(TableName.SwapEvents)
-    .select("*")
-    .gte("transaction_version", fromVersion)
-    .lte("transaction_version", toVersion)
-    .range((page - 1) * pageSize, page * pageSize - 1);
-
-const selectLiquidityEventsByVersion = ({
-  fromVersion,
-  toVersion,
-  page = 1,
-  pageSize = LIMIT,
-}: { fromVersion: number, toVersion: number } & MarketStateQueryArgs) =>
-  postgrest
-    .from(TableName.LiquidityEvents)
-    .select("*")
-    .gte("transaction_version", fromVersion)
-    .lte("transaction_version", toVersion)
-    .range((page - 1) * pageSize, page * pageSize - 1);
-
-
 export const fetchLiquidityEvents = queryHelper(selectLiquidityEvents, toLiquidityEventModel);
 export const fetchDailyVolumeForMarket = queryHelper(selectMarketDailyVolume, (r) => ({
   dailyVolume: BigInt(r.daily_volume),
@@ -131,6 +104,3 @@ export const fetchMarketRegistrationEvents = queryHelper(
   selectMarketRegistrationEvents,
   toMarketRegistrationEventModel
 );
-
-export const fetchSwapEventsByVersion = queryHelper(selectSwapEventsByVersion, toSwapEventModel);
-export const fetchLiquidityEventsByVersion = queryHelper(selectLiquidityEventsByVersion, toLiquidityEventModel);

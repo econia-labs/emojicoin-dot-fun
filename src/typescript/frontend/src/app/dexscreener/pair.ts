@@ -22,6 +22,9 @@
  **/
 
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  fetchMarketRegistrationEventBySymbolEmojis
+} from "@sdk/indexer-v2/queries/app/dexscreener";
 
 
 /**
@@ -72,7 +75,10 @@ export interface PairResponse {
  * @param pairId is the pair ID. Generally it's `event.market.symbolEmojis.join("") + "-APT"`
  */
 export function getPair(pairId: string): Promise<Pair> {
-  event.market.symbolEmojis.join("") + "-APT"
+
+  const emojistring = pairId.split("-")[0];
+  const symbolBytes = emojistring.split("").map((c) => c.charCodeAt(0));
+  fetchMarketRegistrationEventBySymbolEmojis({ symbolBytes });
 
   return Promise.resolve({
     id: pairId,

@@ -48,6 +48,10 @@ export interface AssetResponse {
   asset: Asset;
 }
 
+/**
+ * Fetches an asset by a string of the emojis that represent the asset
+ * @param assetId
+ */
 export function getAsset(assetId: string): Promise<Asset> {
   const aptos = getAptosClient();
 }
