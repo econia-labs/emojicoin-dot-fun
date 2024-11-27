@@ -21,6 +21,7 @@
  **/
 
 import { type NextRequest, NextResponse } from "next/server";
+import { getAptosClient } from "@sdk/utils/aptos-client";
 
 /**
  * - In most cases, asset ids will correspond to contract addresses. Ids are case-sensitive.
@@ -48,7 +49,7 @@ export interface AssetResponse {
 }
 
 export function getAsset(assetId: string): Promise<Asset> {
-c
+  const aptos = getAptosClient();
 }
 
 // NextJS JSON response handler

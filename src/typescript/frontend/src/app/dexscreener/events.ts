@@ -74,6 +74,8 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { type Block } from "./latest-block";
+import { fetchLiquidityEventsByVersion, fetchSwapEventsByVersion } from "@sdk/indexer-v2/queries/test";
+import { type toLiquidityEventModel, type toSwapEventModel } from "@sdk/indexer-v2/types";
 
 
 /**
@@ -161,17 +163,114 @@ export interface JoinExitEvent {
   metadata?: Record<string, string>;
 }
 
-export type Event = (SwapEvent | JoinExitEvent) & { block: Block };
+export type BlockInfo = { block: Block };
+export type Event = (SwapEvent | JoinExitEvent) & BlockInfo;
 
 export interface EventsResponse {
   events: Event[];
 }
 
+function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): SwapEvent & BlockInfo {
+
+  return {
+    block: {
+      blockNumber: Number(event.transaction.version),
+      blockTimestamp: event.transaction.timestamp.getTime() / 1000
+    },
+    eventType: "swap",
+    txnId: String(event.transaction.version),
+
+    // Because each transaction version is one "block", we default to "1" for everything.
+    // TODO: IT'S POSSIBLE TO EMIT MULTIPLES OF THESE WITHIN A TRANSACTION FROM A SCRIPT!! Ideally ensure a standard
+    //  sort, and increment these values for each event (across both event types)
+    txnIndex: 1,
+    eventIndex: 1,
+
+    maker: event.swap.swapper,
+    pairId: event.market.symbolEmojis.join("") + "-APT",
+
+    // TODO: this is just a guess- confirm it
+    asset0In: Number(event.swap.inputAmount),
+    asset1Out: Number(event.swap.resultsInStateTransition),
+    priceNative: Number(event.swap.avgExecutionPriceQ64),
+    reserves: {
+      asset0: Number(event.state.clammVirtualReserves),
+      asset1: Number(event.state.cpammRealReserves),
+    },
+  };
+}
+
+function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventModel>): JoinExitEvent & BlockInfo {
+  return {
+    block: {
+      blockNumber: Number(event.transaction.version),
+      blockTimestamp: event.transaction.timestamp.getTime() / 1000
+    },
+    eventType: event.liquidity.liquidityProvided ? "join" : "exit",
+
+    txnId: String(event.transaction.version),
+
+    // Because each transaction version is one "block", we default to "1" for everything.
+    // TODO: IT'S POSSIBLE TO EMIT MULTIPLES OF THESE WITHIN A TRANSACTION FROM A SCRIPT!! Ideally ensure a standard
+    //  sort, and increment these values for each event (across both event types)
+    txnIndex: 1,
+    eventIndex: 1,
+
+    maker: event.liquidity.provider,
+    pairId: event.market.symbolEmojis.join("") + "-APT",
+
+    // TODO: this is just a guess- confirm it
+    amount0: Number(event.liquidity.baseAmount),
+    amount1: Number(event.liquidity.lpCoinAmount),
+    reserves: {
+      asset0: Number(event.state.clammVirtualReserves),
+      asset1: Number(event.state.cpammRealReserves),
+    },
+  };
+}
+
+export async function getEventsByVersion(fromVersion: number, toVersion: number): Promise<Event[]> {
+  const swapEvents = await fetchSwapEventsByVersion({ fromVersion, toVersion });
+  const liquidityEvents = await fetchLiquidityEventsByVersion({ fromVersion, toVersion });
+
+  // Merge these two arrays by their `transaction.version`: do it iteratively across both to avoid M*N complexity
+  const events: Event[] = [];
+  let swapIndex = 0;
+  let liquidityIndex = 0;
+  while (swapIndex < swapEvents.length && liquidityIndex < liquidityEvents.length) {
+    const swapEvent = swapEvents[swapIndex];
+    const liquidityEvent = liquidityEvents[liquidityIndex];
+    if (swapEvent.transaction.version < liquidityEvent.transaction.version) {
+      events.push(toDexscreenerSwapEvent(swapEvent));
+      swapIndex++;
+    } else {
+      events.push(toDexscreenerJoinExitEvent(liquidityEvent));
+      liquidityIndex++;
+    }
+  }
+
+  // Add any remaining events
+  events.push(...swapEvents.slice(swapIndex).map(toDexscreenerSwapEvent));
+  events.push(...liquidityEvents.slice(liquidityIndex).map(toDexscreenerJoinExitEvent));
+
+  return events;
+}
+
 // NextJS JSON response handler
-export async function GET(request: NextRequest): Promise<NextResponse<EventsResponse>> {
+/**
+ * We treat our versions as "blocks", because it's faster to implement given our current architecture
+ * This requires dexscreener to have relatively large `fromBlock - toBlock` ranges to keep up
+ * */
+export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const fromBlock = searchParams.get("fromBlock");
   const toBlock = searchParams.get("toBlock");
-  const events = await getEvents(fromBlock, toBlock);
+  if (fromBlock === null || toBlock === null) {
+    // This should never happen, and is an invalid call
+    return new Response("fromBlock and toBlock are required parameters", { status: 400 });
+  }
+
+  const events = await getEventsByVersion(parseInt(fromBlock, 10), parseInt(toBlock, 10));
+
   return NextResponse.json({ events });
 }

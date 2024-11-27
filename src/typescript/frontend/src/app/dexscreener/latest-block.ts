@@ -16,6 +16,7 @@
  **/
 
 import { type NextRequest, NextResponse } from "next/server";
+import { getProcessorStatus } from "@sdk/indexer-v2/queries";
 
 /**
  * - `blockTimestamp` should be a UNIX timestamp, **not** including milliseconds
@@ -33,6 +34,13 @@ export interface LatestBlockResponse {
 
 // NextJS JSON response handler
 export async function GET(_request: NextRequest): Promise<NextResponse<LatestBlockResponse>> {
-  const latestBlock = await getLatestBlock();
-  return NextResponse.json({ block: latestBlock });
+  const status = await getProcessorStatus();
+  return NextResponse.json({
+    block: {
+      // TODO: do we want to use the block here?
+      blockNumber: Number(status.lastSuccessVersion),
+      // Convert to seconds
+      blockTimestamp: status.lastTransactionTimestamp.getTime() / 1000,
+    }
+  });
 }
