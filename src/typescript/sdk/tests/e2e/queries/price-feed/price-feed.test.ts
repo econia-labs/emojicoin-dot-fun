@@ -8,7 +8,7 @@ import {
 import path from "path";
 import { getFundedAccount } from "../../../../src/utils/test/test-accounts";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
-import { compareBigInt, maxBigInt, SymbolEmoji, toSequenceNumberOptions } from "../../../../src";
+import { maxBigInt, type SymbolEmoji, toSequenceNumberOptions } from "../../../../src";
 
 const pathRoot = path.join(__dirname, "./");
 

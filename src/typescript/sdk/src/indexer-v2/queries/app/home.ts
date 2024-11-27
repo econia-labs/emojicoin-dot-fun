@@ -4,13 +4,13 @@ if (process.env.NODE_ENV !== "test") {
 
 import { LIMIT, ORDER_BY } from "../../../queries/const";
 import { DEFAULT_SORT_BY, SortMarketsBy, type MarketStateQueryArgs } from "../../types/common";
-import { DatabaseJsonType, DatabaseRpc, TableName } from "../../types/json-types";
+import { type DatabaseJsonType, DatabaseRpc, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
-import {  DatabaseTypeConverter } from "../../types";
+import { DatabaseTypeConverter } from "../../types";
 import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
-import { AnyNumberString, toRegistryView } from "../../../types";
+import { type AnyNumberString, toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";
 import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
@@ -31,7 +31,7 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   sortBy = DEFAULT_SORT_BY,
   inBondingCurve,
   count,
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  /* eslint-disable @typescript-eslint/no-explicit-any */
 }: MarketStateQueryArgs & { tableName: T }): PostgrestFilterBuilder<
   any,
   any,
@@ -39,8 +39,8 @@ const selectMarketHelper = <T extends TableName.MarketState | TableName.PriceFee
   TableName,
   T
 > => {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   let query: any = postgrest.from(tableName);
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   if (count === true) {
     query = query.select("*", { count: "exact" });
@@ -159,5 +159,5 @@ export const fetchSpecificMarkets = queryHelper(
 // `unstable_cache` query.
 export const fetchPriceFeedWithMarketState = queryHelper(
   selectMarketsFromPriceFeed,
-  (v): DatabaseJsonType["price_feed"] => v,
+  (v): DatabaseJsonType["price_feed"] => v
 );

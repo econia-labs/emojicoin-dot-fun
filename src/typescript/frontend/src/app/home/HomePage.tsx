@@ -26,18 +26,14 @@ export default async function HomePageComponent({
 }: HomePageProps) {
   return (
     <>
-        <div className="flex-col mb-[31px]">
-          {priceFeed.length > 0 ? (
-            <PriceFeed data={priceFeed} />
-          ) : (
-            <TextCarousel />
-          )}
-          <div className="flex justify-center items-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
-            <MainCard featuredMarkets={priceFeed} page={page} sortBy={sortBy} />
-          </div>
+      <div className="flex-col mb-[31px]">
+        {priceFeed.length > 0 ? <PriceFeed data={priceFeed} /> : <TextCarousel />}
+        <div className="flex justify-center items-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
+          <MainCard featuredMarkets={priceFeed} page={page} sortBy={sortBy} />
+        </div>
         {children}
         <TextCarousel />
-        </div>
+      </div>
 
       <EmojiTable
         markets={markets}
