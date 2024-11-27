@@ -1,12 +1,12 @@
 ---
 jobs:
   verify-fallback-deploy-file:
-    runs-on: 'ubuntu-latest'
     env:
       FALLBACK_FILE: 'src/cloud-formation/deploy-indexer-fallback.yaml'
       PRODUCTION_FILE: 'src/cloud-formation/deploy-indexer-production.yaml'
-      YQ_VERSION: 'v4.44.5'
       YQ_BASE_URL: 'https://github.com/mikefarah/yq/releases/download'
+      YQ_VERSION: 'v4.44.5'
+    runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v4'
     - name: 'Install yaml parsing tool'
