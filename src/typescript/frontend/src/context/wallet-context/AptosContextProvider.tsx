@@ -187,18 +187,20 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   );
 
   const handleTransactionSubmission = useCallback(
-    async (
-      network: NetworkInfo,
-      trySubmit: () => Promise<{
-        aptos: Aptos;
-        functionName: EntryFunctionNames;
-        res: PendingTransactionResponse;
-      }>
-    ) => {
+    async ({
+      network,
+      aptos,
+      functionName,
+      res,
+    }: {
+      network: NetworkInfo;
+      aptos: Aptos;
+      functionName: EntryFunctionNames;
+      res: PendingTransactionResponse;
+    }) => {
       let response: PendingTransactionResponse | UserTransactionResponse | null = null;
       let error: unknown;
       try {
-        const { aptos, res, functionName } = await trySubmit();
         response = res;
         setStatus("pending");
         try {
@@ -256,18 +258,16 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
       if (geoblocked) return null;
       if (checkNetworkAndToast(network, true)) {
-        const trySubmit = async () => {
-          const builder = await builderFn();
-          setStatus("prompt");
-          const input = builder.payloadBuilder.toInputPayload();
-          return adapterSignAndSubmitTxn(input).then((res) => ({
-            aptos: builder.aptos,
-            functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
-            res,
-          }));
-        };
+        const builder = await builderFn();
+        setStatus("prompt");
+        const input = builder.payloadBuilder.toInputPayload();
+        const { aptos, functionName, res } = await adapterSignAndSubmitTxn(input).then((res) => ({
+          aptos: builder.aptos,
+          functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
+          res,
+        }));
 
-        return await handleTransactionSubmission(network, trySubmit);
+        return await handleTransactionSubmission({ network, aptos, functionName, res });
       }
       return null;
     },
@@ -281,20 +281,19 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     async (builderFn: () => Promise<EntryFunctionTransactionBuilder>) => {
       if (geoblocked) return null;
       if (checkNetworkAndToast(network, true)) {
-        const trySubmit = async () => {
-          const builder = await builderFn();
-          setStatus("prompt");
-          const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
-          return submitTransaction({
-            transaction: builder.rawTransactionInput,
-            senderAuthenticator,
-          }).then((res) => ({
-            aptos: builder.aptos,
-            functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
-            res,
-          }));
-        };
-        return await handleTransactionSubmission(network, trySubmit);
+        const builder = await builderFn();
+        setStatus("prompt");
+        const senderAuthenticator = await signTransaction(builder.rawTransactionInput);
+        const { aptos, functionName, res } = await submitTransaction({
+          transaction: builder.rawTransactionInput,
+          senderAuthenticator,
+        }).then((res) => ({
+          aptos: builder.aptos,
+          functionName: builder.payloadBuilder.functionName as EntryFunctionNames,
+          res,
+        }));
+
+        return await handleTransactionSubmission({ network, aptos, functionName, res });
       }
       return null;
     },
