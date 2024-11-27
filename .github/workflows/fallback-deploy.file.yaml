@@ -9,7 +9,8 @@ jobs:
       YQ_BASE_URL: 'https://github.com/mikefarah/yq/releases/download'
     steps:
     - uses: 'actions/checkout@v4'
-    - run: |
+    - name: 'Install yaml parsing tool'
+      run: |
         YQ_BINARY="${YQ_BASE_URL}/${YQ_VERSION}/yq_linux_amd64"
         sudo wget -O /usr/local/bin/yq "$YQ_BINARY"
         sudo chmod +x /usr/local/bin/yq
