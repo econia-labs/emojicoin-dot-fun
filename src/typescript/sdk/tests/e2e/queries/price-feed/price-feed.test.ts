@@ -1,7 +1,6 @@
 import { getDbConnection } from "../../helpers";
 import {
   fetchPriceFeed,
-  fetchPriceFeedAndMarketData,
   fetchPriceFeedWithMarketState,
   waitForEmojicoinIndexer,
 } from "../../../../src/indexer-v2/queries";
@@ -9,11 +8,12 @@ import path from "path";
 import { getFundedAccount } from "../../../../src/utils/test/test-accounts";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
 import { maxBigInt, type SymbolEmoji, toSequenceNumberOptions } from "../../../../src";
+import { toPriceFeed } from "../../../../src/indexer-v2/types";
 
 const pathRoot = path.join(__dirname, "./");
 
 describe("queries price_feed and returns accurate price feed data", () => {
-  it.skip("checks price feed results generated from artificial data", async () => {
+  it("checks price feed results generated from artificial data", async () => {
     const db = getDbConnection();
 
     // Insert a swap 25 hours ago at price 500
@@ -35,16 +35,16 @@ describe("queries price_feed and returns accurate price feed data", () => {
     await db.file(`${pathRoot}test_2_insert_market_state.sql`);
 
     const priceFeed = await fetchPriceFeed({});
-    const market_777701 = priceFeed.find((m) => m.marketID === 777701n);
+    const market_777701 = priceFeed.find((m) => m.market.marketID === 777701n);
     expect(market_777701).toBeDefined();
-    expect(market_777701!.marketID).toEqual(777701n);
+    expect(market_777701!.market.marketID).toEqual(777701n);
     expect(market_777701!.openPrice).toEqual(500n);
     expect(market_777701!.closePrice).toEqual(750n);
     expect(market_777701!.deltaPercentage).toEqual(50);
 
-    const market_777702 = priceFeed.find((m) => m.marketID === 777702n);
+    const market_777702 = priceFeed.find((m) => m.market.marketID === 777702n);
     expect(market_777702).toBeDefined();
-    expect(market_777702!.marketID).toEqual(777702n);
+    expect(market_777702!.market.marketID).toEqual(777702n);
     expect(market_777702!.openPrice).toEqual(1000n);
     expect(market_777702!.closePrice).toEqual(250n);
     expect(market_777702!.deltaPercentage).toEqual(-75);
@@ -80,18 +80,7 @@ describe("queries price_feed and returns accurate price feed data", () => {
     );
     await waitForEmojicoinIndexer(maxTransactionVersion);
 
-    const priceFeedView = await fetchPriceFeedWithMarketState({});
-    const priceFeed = await fetchPriceFeedAndMarketData();
-
-    const marketIDs1 = priceFeedView.map((v) => v.market.marketID);
-    const marketIDs2 = priceFeed.map((v) => v.marketData.market.marketID);
-
-    expect(marketIDs1).toEqual(marketIDs2);
-
-    const deltas1 = priceFeedView.map((v) => v.deltaPercentage);
-    const deltas2 = priceFeed.map((v) => v.marketPriceFeed.deltaPercentage);
-
-    expect(deltas1).toEqual(deltas2);
+    const priceFeedView = await fetchPriceFeedWithMarketState({}).then((v) => v.map(toPriceFeed));
 
     emojisAndInputAmounts.forEach((inputs) => {
       const [symbolEmojis, openPrice, closePrice] = inputs;
