@@ -81,12 +81,16 @@ const MainInfo = ({ data }: MainInfoProps) => {
               }
         }
       >
-        <Link
-          className="text-[24px] text-center md:display-2 my-auto text-white"
-          href={explorerLink}
-        >
-          <Emoji emojis={data.emojis} />
-        </Link>
+        <div className="text-center my-auto">
+          <Link href={explorerLink} target="_blank">
+            <Emoji className="display-2" emojis={data.emojis} />
+          </Link>
+          <Link href={explorerLink} target="_blank">
+            <div className="text-2xl text-ec-blue font-pixelar underline">
+              {data.marketView.metadata.marketAddress.replace(/^0x(....).*(....)$/, "0x$1...$2")}
+            </div>
+          </Link>
+        </div>
 
         <div
           className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}
