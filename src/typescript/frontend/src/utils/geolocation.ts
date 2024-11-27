@@ -1,14 +1,11 @@
 "use server";
 
-import { GEOBLOCKED, GEOBLOCKING_ENABLED, VPNAPI_IO_API_KEY } from "lib/server-env";
+import { GEOBLOCKED, GEOBLOCKING_ENABLED } from "lib/server-env";
 import { headers } from "next/headers";
 
 export type Location = {
-  country: string;
-  region: string;
   countryCode: string;
   regionCode: string;
-  vpn: boolean;
 };
 
 const isDisallowedLocation = (location: Location) => {
@@ -23,40 +20,23 @@ const isDisallowedLocation = (location: Location) => {
 };
 
 export const isUserGeoblocked = async () => {
-  const ip = headers().get("x-real-ip");
   if (!GEOBLOCKING_ENABLED) return false;
-  if (ip === "undefined" || typeof ip === "undefined" || ip === "null" || ip === null) {
+  const country = headers().get('x-vercel-ip-country');
+  const region = headers().get('x-vercel-ip-country-region');
+  if (country === "undefined" || typeof country === "undefined" || country === "null" || country === null) {
+    return true;
+  }
+  if (region === "undefined" || typeof region === "undefined" || region === "null" || region === null) {
     return true;
   }
   let location: Location;
   try {
-    location = await getLocation(ip);
+    location = {
+      countryCode: country,
+      regionCode: region,
+    };
   } catch (_) {
     return true;
   }
-  if (location.vpn) {
-    return true;
-  }
   return isDisallowedLocation(location);
-};
-
-const ONE_DAY = 604800;
-
-const getLocation: (ip: string) => Promise<Location> = async (ip) => {
-  if (ip === "undefined" || typeof ip === "undefined") {
-    throw new Error("IP is undefined");
-  }
-  const queryResult = await fetch(`https://vpnapi.io/api/${ip}?key=${VPNAPI_IO_API_KEY}`, {
-    next: { revalidate: ONE_DAY },
-  }).then((res) => res.json());
-
-  const data = {
-    country: queryResult.location.country,
-    region: queryResult.location.region,
-    countryCode: queryResult.location.country_code,
-    regionCode: queryResult.location.region_code,
-    vpn: queryResult.security.vpn,
-  };
-
-  return data;
 };
