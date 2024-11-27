@@ -19,7 +19,7 @@ jobs:
         <(yq 'del(.parameters.Environment)' "$PRODUCTION_FILE") \
         <(yq 'del(.parameters.Environment)' "$FALLBACK_FILE")
     - name: 'Verify `Environment` in fallback and production files.'
-    - run: |
+      run: |
         PROD_ENV=$(yq '.parameters.Environment' "$PRODUCTION_FILE")
         FALLBACK_ENV=$(yq '.parameters.Environment' "$FALLBACK_FILE")
         [ "$PROD_ENV" = 'production' ] || exit 1
