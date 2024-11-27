@@ -5,9 +5,14 @@ jobs:
     env:
       FALLBACK_FILE: 'src/cloud-formation/deploy-indexer-fallback.yaml'
       PRODUCTION_FILE: 'src/cloud-formation/deploy-indexer-production.yaml'
+      YQ_VERSION: 'v4.44.5'
+      YQ_BASE_URL: 'https://github.com/mikefarah/yq/releases/download'
     steps:
     - uses: 'actions/checkout@v4'
-    - run: 'sudo apt-get update && sudo apt-get install -y yq'
+    - run: |
+        YQ_BINARY="${YQ_BASE_URL}/${YQ_VERSION}/yq_linux_amd64"
+        sudo wget -O /usr/local/bin/yq "$YQ_BINARY"
+        sudo chmod +x /usr/local/bin/yq
     - run: |
         ! diff \
         <(yq 'del(.parameters.Environment)' "$PRODUCTION_FILE") \
