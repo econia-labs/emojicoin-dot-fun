@@ -11,6 +11,11 @@ import BondingProgress from "./BondingProgress";
 import { useThemeContext } from "context";
 import { useMatchBreakpoints } from "@hooks/index";
 import { Emoji } from "utils/emoji";
+import Link from "next/link";
+import { APTOS_COIN } from "@aptos-labs/ts-sdk";
+import { APTOS_NETWORK } from "@sdk/const";
+import { ExplorerLink } from "components/link/component";
+import { toExplorerLink } from "lib/utils/explorer-link";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -45,6 +50,11 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
   const { isMobile } = useMatchBreakpoints();
 
+  const explorerLink = toExplorerLink({
+    linkType: "coin",
+    value: `${data.marketView.metadata.marketAddress}::coin_factory::Emojicoin`,
+  });
+
   return (
     <div
       className="flex justify-center mt-[10px]"
@@ -71,10 +81,12 @@ const MainInfo = ({ data }: MainInfoProps) => {
               }
         }
       >
-        <Emoji
+        <Link
           className="text-[24px] text-center md:display-2 my-auto text-white"
-          emojis={data.emojis}
-        />
+          href={explorerLink}
+        >
+          <Emoji emojis={data.emojis} />
+        </Link>
 
         <div
           className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}
