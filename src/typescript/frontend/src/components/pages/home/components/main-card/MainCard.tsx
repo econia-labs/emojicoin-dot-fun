@@ -78,7 +78,7 @@ const MainCard = (props: MainCardProps) => {
   /* eslint-enable react-hooks/exhaustive-deps */
 
   const { ref: marketCapRef } = useLabelScrambler(toCoinDecimalString(marketCap, 2));
-  const { ref: lastSwapVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
+  const { ref: dailyVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
   const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
   return (
@@ -170,7 +170,7 @@ const MainCard = (props: MainCardProps) => {
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <div ref={lastSwapVolumeRef}>{toCoinDecimalString(dailyVolume, 2)}</div>
+                    <div ref={dailyVolumeRef}>{toCoinDecimalString(dailyVolume, 2)}</div>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
