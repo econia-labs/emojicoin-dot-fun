@@ -77,6 +77,7 @@ const selectMarketsFromPriceFeed = ({
   ...args
 }: MarketStateQueryArgs) =>
   selectMarketHelper({
+    pageSize,
     ...args,
     tableName: TableName.PriceFeed,
   });
