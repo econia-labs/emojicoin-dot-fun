@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "1.27.1",
-    "@aptos-labs/wallet-adapter-core": "^4.17.0",
-    "@aptos-labs/wallet-adapter-react": "3.7.0",
+    "@aptos-labs/wallet-adapter-core": "^4.22.1",
+    "@aptos-labs/wallet-adapter-react": "3.7.7",
     "@econia-labs/emojicoin-sdk": "workspace:*",
     "@emoji-mart/data": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-data/emoji-mart-data-v1.2.1.tgz",
     "@emoji-mart/react": "https://github.com/econia-labs/emoji-mart/raw/emojicoin-dot-fun/packages/emoji-mart-react/emoji-mart-react-v1.1.1.tgz",
