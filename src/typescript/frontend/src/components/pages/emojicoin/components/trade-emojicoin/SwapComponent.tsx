@@ -8,7 +8,7 @@ import { SwapButton } from "./SwapButton";
 import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
 import { useScramble } from "use-scramble";
-import { DEFAULT_SWAP_GAS_COST, useSimulateSwap } from "lib/hooks/queries/use-simulate-swap";
+import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-simulate-swap";
 import { useEventStore } from "context/event-store-context";
 import { useTooltip } from "@hooks/index";
 import { useSearchParams } from "next/navigation";
@@ -25,6 +25,7 @@ import { TradeOptions } from "components/selects/trade-options";
 import { getMaxSlippageSettings } from "utils/slippage";
 import { Emoji } from "utils/emoji";
 import { EmojiPill } from "components/EmojiPill";
+import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -89,29 +90,21 @@ export default function SwapComponent({
     (s) => s.getMarket(marketEmojis)?.swapEvents.length ?? initNumSwaps
   );
 
+  const lastSwapEvent = useEventStore((s) => s.getMarket(marketEmojis)?.swapEvents?.at(0));
+
+  const gasCost = useGetGasWithDefault({ marketAddress, inputAmount, isSell, numSwaps });
+
+  const { netProceeds, error } = useCalculateSwapPrice({
+    lastSwapEvent,
+    isSell,
+    inputAmount,
+    userEmojicoinBalance: emojicoinBalance,
+  });
+
   useEffect(() => {
     const emojicoinType = toCoinTypes(marketAddress).emojicoin.toString();
     setEmojicoinType(emojicoinType);
   }, [marketAddress, setEmojicoinType]);
-
-  const swapData = useSimulateSwap({
-    marketAddress,
-    inputAmount: inputAmount.toString(),
-    isSell,
-    numSwaps,
-  });
-
-  const { swapResult, gasCost, gasCostWasUndefined } = swapData
-    ? {
-        swapResult: swapData.swapResult,
-        gasCost: swapData.gasCost,
-        gasCostWasUndefined: false,
-      }
-    : {
-        swapResult: undefined,
-        gasCost: DEFAULT_SWAP_GAS_COST,
-        gasCostWasUndefined: true,
-      };
 
   const outputAmountString = toDisplayCoinDecimals({
     num: isLoading ? previous : outputAmount,
@@ -138,15 +131,15 @@ export default function SwapComponent({
   }, [isLoading, replay]);
 
   useEffect(() => {
-    if (typeof swapResult === "undefined") {
+    if (netProceeds === 0n || error) {
       setIsLoading(true);
       return;
     }
-    setPrevious(swapResult);
-    setOutputAmount(swapResult);
+    setPrevious(netProceeds);
+    setOutputAmount(netProceeds);
     setIsLoading(false);
     replay();
-  }, [swapResult, replay, isSell]);
+  }, [netProceeds, replay, isSell, error]);
 
   const sufficientBalance = useMemo(() => {
     if (!account || (isSell && !emojicoinBalance) || (!isSell && !aptBalance)) return false;
@@ -299,7 +292,7 @@ export default function SwapComponent({
         <div></div>
         <div className="text-dark-gray">
           <span className="text-xl leading-[0]">
-            {gasCostWasUndefined ? "~" : ""}
+            {gasCost === DEFAULT_SWAP_GAS_COST ? "~" : ""}
             {toDisplayCoinDecimals({
               num: gasCost,
               decimals: 4,

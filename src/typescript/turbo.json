@@ -73,11 +73,11 @@
       "cache": false,
       "outputs": []
     },
-    "test:parallel": {
+    "test:sdk:parallel": {
       "cache": false,
       "outputs": []
     },
-    "test:sequential": {
+    "test:sdk:sequential": {
       "cache": false,
       "outputs": []
     },

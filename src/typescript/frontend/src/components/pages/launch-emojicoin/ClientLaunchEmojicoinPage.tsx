@@ -137,7 +137,7 @@ const ClientLaunchEmojicoinPage = () => {
   }, [status]);
 
   return (
-    <div className="flex flex-col grow pt-[85px]">
+    <div className="flex flex-col grow">
       <TextCarousel />
 
       <div className="flex justify-center items-center h-full px-6">

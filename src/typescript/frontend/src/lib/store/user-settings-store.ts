@@ -1,3 +1,4 @@
+import { readLocalStorageCache, writeLocalStorageCache } from "configs/local-storage-keys";
 import { createStore } from "zustand";
 
 export type UserSettingsState = {
@@ -11,16 +12,31 @@ export type UserSettingsActions = {
 
 export type UserSettingsStore = UserSettingsState & UserSettingsActions;
 
+const saveSettings = (state: UserSettingsState) => {
+  writeLocalStorageCache("settings", state);
+};
+
 const defaultValues: UserSettingsState = {
   animate: true,
 };
 
-export const createUserSettingsStore = (initial?: Partial<UserSettingsState>) =>
+const readSettings = (): UserSettingsState => readLocalStorageCache("settings") ?? defaultValues;
+
+export const createUserSettingsStore = () =>
   createStore<UserSettingsStore>()((set) => ({
-    ...defaultValues,
-    ...initial,
-    setAnimate: (value) => set({ animate: value }),
-    toggleAnimate: () => set((state) => ({ animate: !state.animate })),
+    ...readSettings(),
+    setAnimate: (value) =>
+      set(() => {
+        const state = { animate: value };
+        saveSettings(state);
+        return state;
+      }),
+    toggleAnimate: () =>
+      set((state) => {
+        const newState = { animate: !state.animate };
+        saveSettings(newState);
+        return newState;
+      }),
   }));
 
 export default createUserSettingsStore;

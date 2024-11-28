@@ -33,7 +33,7 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
   useReliableSubscribe({ eventTypes: EVENT_TYPES });
 
   return (
-    <Box pt="85px">
+    <Box>
       <MainInfo data={props.data} />
       {isTablet || isMobile ? <MobileGrid data={props.data} /> : <DesktopGrid data={props.data} />}
     </Box>

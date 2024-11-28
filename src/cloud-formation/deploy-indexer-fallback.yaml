@@ -1,6 +1,9 @@
 ---
 parameters:
+  BrokerCpu: 1024
   BrokerImageVersion: '1.1.0'
+  BrokerMemory: 2048
+  DbMaxCapacity: 8
   DeployAlb: 'true'
   DeployAlbDnsRecord: 'true'
   DeployBastionHost: 'true'
@@ -18,8 +21,8 @@ parameters:
   EnableWafRulesGeneral: 'false'
   EnableWafRulesRestApi: 'false'
   EnableWafRulesWebSocket: 'false'
-  Environment: 'main'
-  Network: 'testnet'
+  Environment: 'fallback'
+  Network: 'mainnet'
   ProcessorImageVersion: '1.1.0'
   VpcStackName: 'emoji-vpc'
 tags: null

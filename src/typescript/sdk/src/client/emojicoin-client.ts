@@ -29,7 +29,7 @@ import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../cons
 import { waitFor } from "../utils";
 import { postgrest } from "../indexer-v2/queries";
 import { TableName } from "../indexer-v2/types/json-types";
-import { type AnyNumberString } from "../types";
+import { toSwapEvent, type AnyNumberString } from "../types";
 
 const { expect, Expect } = customExpect;
 
@@ -97,6 +97,11 @@ const waitForEventProcessed = async (
 export class EmojicoinClient {
   public aptos: Aptos;
 
+  public register = this.registerInternal.bind(this);
+  public chat = this.chatInternal.bind(this);
+  public buy = this.buyInternal.bind(this);
+  public sell = this.sellInternal.bind(this);
+
   public liquidity = {
     provide: this.provideLiquidity.bind(this),
     remove: this.removeLiquidity.bind(this),
@@ -124,8 +129,12 @@ export class EmojicoinClient {
 
   public view: {
     marketExists: typeof EmojicoinClient.prototype.isMarketRegisteredView;
+    simulateBuy: typeof EmojicoinClient.prototype.simulateBuy;
+    simulateSell: typeof EmojicoinClient.prototype.simulateSell;
   } = {
     marketExists: this.isMarketRegisteredView.bind(this),
+    simulateBuy: this.simulateBuy.bind(this),
+    simulateSell: this.simulateSell.bind(this),
   };
 
   private integrator: AccountAddress;
@@ -157,14 +166,24 @@ export class EmojicoinClient {
     this.minOutputAmount = BigInt(minOutputAmount);
   }
 
-  async register(registrant: Account, symbolEmojis: SymbolEmoji[], options?: Options) {
+  // Internal so we can bind the public functions.
+  private async registerInternal(
+    registrant: Account,
+    symbolEmojis: SymbolEmoji[],
+    transactionOptions?: Options
+  ) {
+    const { feePayer, waitForTransactionOptions, options } = transactionOptions ?? {};
     const response = await RegisterMarket.submit({
       aptosConfig: this.aptos.config,
       registrant,
       emojis: this.emojisToHexStrings(symbolEmojis),
       integrator: this.integrator,
-      options: DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
-      ...options,
+      options: {
+        ...DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+        ...options,
+      },
+      feePayer,
+      waitForTransactionOptions,
     });
     const res = this.getTransactionEventData(response);
     const marketID = res.events.marketRegistrationEvents[0].marketID;
@@ -178,7 +197,8 @@ export class EmojicoinClient {
     };
   }
 
-  async chat(
+  // Internal so we can bind the public functions.
+  private async chatInternal(
     user: Account,
     symbolEmojis: SymbolEmoji[],
     message: string | (SymbolEmoji | ChatEmoji)[],
@@ -209,7 +229,8 @@ export class EmojicoinClient {
     };
   }
 
-  async buy(
+  // Internal so we can bind the public functions.
+  private async buyInternal(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
     inputAmount: bigint | number,
@@ -229,7 +250,8 @@ export class EmojicoinClient {
     );
   }
 
-  async sell(
+  // Internal so we can bind the public functions.
+  private async sellInternal(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
     inputAmount: bigint | number,
@@ -247,6 +269,49 @@ export class EmojicoinClient {
       },
       options
     );
+  }
+
+  private async simulateBuy(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    ledgerVersion?: number | bigint;
+  }) {
+    return await this.simulateSwap({ ...args, isSell: false });
+  }
+
+  private async simulateSell(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    ledgerVersion?: number | bigint;
+  }) {
+    return await this.simulateSwap({ ...args, isSell: true });
+  }
+
+  private async simulateSwap(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    isSell: boolean;
+    ledgerVersion?: number | bigint;
+  }) {
+    const { symbolEmojis, swapper, inputAmount, isSell, ledgerVersion } = args;
+    const { marketAddress, typeTags } = this.getEmojicoinInfo(symbolEmojis);
+    const res = await EmojicoinDotFun.SimulateSwap.view({
+      aptos: this.aptos,
+      swapper,
+      marketAddress,
+      inputAmount: BigInt(inputAmount),
+      isSell,
+      integrator: this.integrator,
+      integratorFeeRateBPs: this.integratorFeeRateBPs,
+      typeTags,
+      options: {
+        ledgerVersion,
+      },
+    });
+    return toSwapEvent(res, -1);
   }
 
   private async isMarketRegisteredView(
