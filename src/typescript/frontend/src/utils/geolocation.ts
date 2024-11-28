@@ -8,11 +8,11 @@ export type Location = {
   regionCode: string;
 };
 
-const isDisallowedLocation = (location: Location) => {
-  if (GEOBLOCKED.countries.includes(location.countryCode)) {
+const isDisallowedLocation = ({ countryCode, regionCode }: Location) => {
+  if (GEOBLOCKED.countries.includes(countryCode)) {
     return true;
   }
-  const isoCode = `${location.countryCode}-${location.regionCode}`;
+  const isoCode = `${countryCode}-${regionCode}`;
   if (GEOBLOCKED.regions.includes(isoCode)) {
     return true;
   }
@@ -21,22 +21,13 @@ const isDisallowedLocation = (location: Location) => {
 
 export const isUserGeoblocked = async () => {
   if (!GEOBLOCKING_ENABLED) return false;
-  const country = headers().get('x-vercel-ip-country');
-  const region = headers().get('x-vercel-ip-country-region');
-  if (country === "undefined" || typeof country === "undefined" || country === "null" || country === null) {
+  const country = headers().get("x-vercel-ip-country");
+  const region = headers().get("x-vercel-ip-country-region");
+  if (typeof country !== "string" || typeof region !== "string") {
     return true;
   }
-  if (region === "undefined" || typeof region === "undefined" || region === "null" || region === null) {
-    return true;
-  }
-  let location: Location;
-  try {
-    location = {
-      countryCode: country,
-      regionCode: region,
-    };
-  } catch (_) {
-    return true;
-  }
-  return isDisallowedLocation(location);
+  return isDisallowedLocation({
+    countryCode: country,
+    regionCode: region,
+  });
 };

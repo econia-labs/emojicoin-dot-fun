@@ -19,7 +19,13 @@ const checkmarkOrX = (checkmark: boolean) => (
   />
 );
 
-export const ClientVerifyPage = ({ country, region }: { country: string | null, region: string | null }) => {
+export const ClientVerifyPage = ({
+  country,
+  region,
+}: {
+  country: string | null;
+  region: string | null;
+}) => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [galxe, setGalxe] = useState(false);
