@@ -95,6 +95,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             className="w-full"
             mobile={true}
             onClick={subMenuOnClick}
+            arrow
           />
           <AnimatePresence>
             {subMenuOpen && (

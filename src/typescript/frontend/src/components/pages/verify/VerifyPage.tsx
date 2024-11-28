@@ -87,7 +87,7 @@ export const ClientVerifyPage = () => {
                 <span ref={backRef}>Back</span>
               </motion.div>
             )}
-            <ButtonWithConnectWalletFallback arrow={false}>
+            <ButtonWithConnectWalletFallback>
               <div className="flex flex-row uppercase mt-[8ch]">
                 <span className="px-2.5">{"{"}</span>
                 <span ref={ref} onMouseEnter={replay} />
