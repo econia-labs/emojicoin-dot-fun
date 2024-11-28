@@ -1,13 +1,13 @@
 import { APTOS_NETWORK } from "lib/env";
 
 const linkTypes = {
-  "coin": "coin",
-  "acc": "account",
-  "account": "account",
-  "transaction": "txn",
-  "version": "txn",
-  "txn": "txn",
-}
+  coin: "coin",
+  acc: "account",
+  account: "account",
+  transaction: "txn",
+  version: "txn",
+  txn: "txn",
+};
 
 export const toExplorerLink = ({
   value,
