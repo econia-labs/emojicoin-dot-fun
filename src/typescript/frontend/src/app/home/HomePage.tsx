@@ -6,18 +6,16 @@ import TextCarousel from "components/text-carousel/TextCarousel";
 import { type MarketDataSortByHomePage } from "lib/queries/sorting/types";
 
 export interface HomePageProps {
-  featured?: DatabaseModels["market_state"];
   markets: Array<DatabaseModels["market_state"]>;
   numMarkets: number;
   page: number;
   sortBy: MarketDataSortByHomePage;
   searchBytes?: string;
   children?: React.ReactNode;
-  priceFeed: Array<DatabaseModels["price_feed"]>;
+  priceFeed: DatabaseModels["price_feed"][];
 }
 
 export default async function HomePageComponent({
-  featured,
   markets,
   numMarkets,
   page,
@@ -30,8 +28,8 @@ export default async function HomePageComponent({
     <>
       <div className="flex-col mb-[31px]">
         {priceFeed.length > 0 ? <PriceFeed data={priceFeed} /> : <TextCarousel />}
-        <div className="flex justify-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
-          <MainCard featured={featured} page={page} sortBy={sortBy} />
+        <div className="flex justify-center items-center px-[16px] mobile-lg:px-[24px] mx-auto w-full max-w-full max-h-[60dvh]">
+          <MainCard featuredMarkets={priceFeed} page={page} sortBy={sortBy} />
         </div>
         {children}
         <TextCarousel />
