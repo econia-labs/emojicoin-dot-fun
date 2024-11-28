@@ -1,4 +1,4 @@
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { DEFAULT_SORT_BY, SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { type ORDER_BY } from "@sdk/queries/const";
 import { type ValueOf } from "@sdk/utils/utility-types";
 
@@ -93,7 +93,7 @@ export const toMarketDataSortBy = (
     if (sortBy === sortByFilters[key]?.forPageQueryParams) return key as SortMarketsBy;
     if (sortBy === key) return key as SortMarketsBy;
   }
-  return SortMarketsBy.MarketCap;
+  return DEFAULT_SORT_BY;
 };
 
 export const toMarketDataSortByHomePage = (
@@ -104,5 +104,5 @@ export const toMarketDataSortByHomePage = (
   if (sort === SortMarketsBy.BumpOrder) return sort;
   if (sort === SortMarketsBy.DailyVolume) return sort;
   if (sort === SortMarketsBy.AllTimeVolume) return sort;
-  return SortMarketsBy.MarketCap;
+  return DEFAULT_SORT_BY;
 };

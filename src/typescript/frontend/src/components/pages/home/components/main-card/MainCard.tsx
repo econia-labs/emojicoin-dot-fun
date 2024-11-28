@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { translationFunction } from "context/language-context";
-import { Column, Flex, FlexGap } from "@containers";
+import { FlexGap } from "@containers";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import Image from "next/image";
@@ -12,26 +12,52 @@ import { useLabelScrambler } from "../table-card/animation-variants/event-varian
 import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { type HomePageProps } from "app/home/HomePage";
-import "./module.css";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+import "./module.css";
+import { PriceDelta } from "components/price-feed/inner";
+import { sortByValue } from "lib/utils/sort-events";
+import { AnimatePresence, motion } from "framer-motion";
+import { useInterval } from "react-use";
 
 export interface MainCardProps {
-  featured?: HomePageProps["featured"];
+  featuredMarkets: HomePageProps["priceFeed"];
   page: HomePageProps["page"];
   sortBy: HomePageProps["sortBy"];
 }
 
+const FEATURED_MARKET_INTERVAL = 5 * 1000;
+const MAX_NUM_FEATURED_MARKETS = 5;
+
 const MainCard = (props: MainCardProps) => {
-  const { featured } = props;
+  const featuredMarkets = useMemo(() => {
+    const sorted = props.featuredMarkets.toSorted((a, b) =>
+      sortByValue(a.deltaPercentage, b.deltaPercentage, "desc")
+    );
+    const positives = sorted.filter(({ deltaPercentage }) => deltaPercentage > 0);
+    const notPositives = sorted.filter(({ deltaPercentage }) => deltaPercentage <= 0);
+    return positives.length
+      ? positives.slice(0, MAX_NUM_FEATURED_MARKETS)
+      : notPositives.slice(0, MAX_NUM_FEATURED_MARKETS);
+  }, [props.featuredMarkets]);
+
   const { t } = translationFunction();
   const globeImage = useRef<HTMLImageElement>(null);
 
-  const { marketCap, dailyVolume, allTimeVolume } = useMemo(() => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useInterval(() => {
+    setCurrentIndex((i) => (i + 1) % Math.min(featuredMarkets.length, MAX_NUM_FEATURED_MARKETS));
+  }, FEATURED_MARKET_INTERVAL);
+
+  const featured = useMemo(() => featuredMarkets.at(currentIndex), [featuredMarkets, currentIndex]);
+
+  const { marketCap, dailyVolume, allTimeVolume, priceDelta } = useMemo(() => {
     return {
       marketCap: BigInt(featured?.state.instantaneousStats.marketCap ?? 0),
       dailyVolume: BigInt(featured?.dailyVolume ?? 0),
       allTimeVolume: BigInt(featured?.state.cumulativeStats.quoteVolume ?? 0),
+      priceDelta: featured?.deltaPercentage ?? 0,
     };
   }, [featured]);
 
@@ -56,26 +82,15 @@ const MainCard = (props: MainCardProps) => {
   const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
   return (
-    <Flex justifyContent="center" width="100%" my={{ _: "20px", tablet: "70px" }} maxWidth="1872px">
-      <Flex
-        alignItems="center"
-        justifyContent="center"
-        maxWidth="100%"
-        width="100%"
-        flexDirection={{ _: "column", tablet: "row" }}
-      >
+    <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
+      <div className="flex flex-col md:flex-row w-full max-w-full items-center justify-center">
         <Link
+          className="flex relative items-center ml-[-8%]"
           href={
             featured
               ? `${ROUTES.market}/${emojiNamesToPath(featured.market.emojis.map((x) => x.name))}`
               : ROUTES.home
           }
-          style={{
-            position: "relative",
-            alignItems: "center",
-            marginLeft: "-8%",
-            display: "flex",
-          }}
         >
           <Image
             id="hero-image"
@@ -83,30 +98,53 @@ const MainCard = (props: MainCardProps) => {
             src={planetHome}
             ref={globeImage}
             placeholder="empty"
+            className="z-10"
           />
-          <Emoji
-            className={`styled-emoji ${featured?.market.emojis.length === 1 ? "styled-single-emoji" : "styled-double-emoji"}`}
-            emojis={featured?.market.emojis ?? emoji("black heart")}
-          />
+          <AnimatePresence mode="popLayout">
+            <div
+              key={`${featured?.market.symbolData.symbol}-${currentIndex}`}
+              className={`flex flex-row styled-emoji ${featured?.market.emojis.length === 1 ? "styled-single-emoji" : "styled-double-emoji"} z-[-1]`}
+            >
+              <motion.div
+                className="flex relative"
+                initial={{
+                  right: -300,
+                  opacity: 0,
+                }}
+                animate={{
+                  right: 0,
+                  opacity: 1,
+                }}
+                exit={{
+                  right: 300,
+                  opacity: 0,
+                }}
+              >
+                <Emoji emojis={featured?.market.emojis ?? emoji("black heart")} />
+              </motion.div>
+            </div>
+          </AnimatePresence>
         </Link>
-
-        <Column maxWidth="100%" ellipsis>
+        <div className="flex flex-col max-w-full ellipses">
           <div className="flex flex-row items-center">
-            <span className="text-medium-gray pixel-heading-text">HOT</span>
+            <span className="text-medium-gray pixel-heading-text uppercase">Hot</span>
             <span>&nbsp;</span>
             <div>
               <Emoji className="pixel-heading-emoji" emojis={emoji("fire")} />
             </div>
+            {priceDelta > 0 && (
+              <PriceDelta className="pixel-heading-emoji ml-[0.5ch]" delta={priceDelta} />
+            )}
           </div>
           <div
-            className="display-font-text ellipses font-forma-bold"
-            title={(featured ? featured.market.symbolData.name : "BLACK HEART").toUpperCase()}
+            className="display-font-text ellipses font-forma-bold uppercase"
+            title={featured?.market.symbolData.name ?? "BLACK HEART"}
           >
-            {(featured ? featured.market.symbolData.name : "BLACK HEART").toUpperCase()}
+            {featured?.market.symbolData.name ?? "BLACK HEART"}
           </div>
 
           <FlexGap gap="8px">
-            {typeof featured !== "undefined" && (
+            {featured && (
               <>
                 <div className="font-forma text-medium-gray market-data-text uppercase">
                   {t("Mkt. Cap:")}
@@ -123,7 +161,7 @@ const MainCard = (props: MainCardProps) => {
           </FlexGap>
 
           <FlexGap gap="8px">
-            {typeof featured !== "undefined" && (
+            {featured && (
               <>
                 <div className="uppercase">
                   <div className="font-forma text-medium-gray market-data-text uppercase">
@@ -142,7 +180,7 @@ const MainCard = (props: MainCardProps) => {
           </FlexGap>
 
           <FlexGap gap="8px">
-            {typeof featured !== "undefined" && (
+            {featured && (
               <>
                 <div className="font-forma text-medium-gray market-data-text uppercase">
                   {t("All-time vol:")}
@@ -157,9 +195,9 @@ const MainCard = (props: MainCardProps) => {
               </>
             )}
           </FlexGap>
-        </Column>
-      </Flex>
-    </Flex>
+        </div>
+      </div>
+    </div>
   );
 };
 
