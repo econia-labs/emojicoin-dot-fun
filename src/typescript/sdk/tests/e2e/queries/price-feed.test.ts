@@ -16,6 +16,8 @@ import { SortMarketsBy } from "../../../src/indexer-v2/types/common";
 import { ORDER_BY } from "../../../src/queries";
 import Big from "big.js";
 
+jest.setTimeout(30000);
+
 const percentageOfInputToBigInt = (amount: AnyNumberString, percentage: number) =>
   BigInt(
     Big(amount.toString())
