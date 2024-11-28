@@ -19,7 +19,13 @@ const checkmarkOrX = (checkmark: boolean) => (
   />
 );
 
-export const ClientVerifyPage = () => {
+export const ClientVerifyPage = ({
+  country,
+  region,
+}: {
+  country: string | null;
+  region: string | null;
+}) => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [galxe, setGalxe] = useState(false);
@@ -64,7 +70,7 @@ export const ClientVerifyPage = () => {
               </motion.div>
             )}
             <ButtonWithConnectWalletFallback forceAllowConnect={true} arrow={false}>
-              <div className="flex flex-col uppercase mt-[20ch] gap-1">
+              <div className="flex flex-col uppercase mt-[30ch] gap-1">
                 <div>
                   Wallet address:{" "}
                   <span className="text-warning">
@@ -74,6 +80,8 @@ export const ClientVerifyPage = () => {
                 <div>Galxe: {checkmarkOrX(galxe)}</div>
                 <div>Custom allowlist: {checkmarkOrX(customAllowlisted)}</div>
                 <div>Passes geoblocking: {checkmarkOrX(!geoblocked)}</div>
+                <div>Country: {country ?? "unknown"}</div>
+                <div>Region: {region ?? "unknown"}</div>
                 <a
                   className="underline text-ec-blue"
                   href={process.env.NEXT_PUBLIC_GALXE_CAMPAIGN_REDIRECT}
