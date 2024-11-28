@@ -112,7 +112,7 @@ export const successfulTransactionToast = (
             value={response.hash}
             type="transaction"
           >
-            {truncateAddress(response.hash, 8)}
+            {truncateAddress(response.hash, false)}
           </ExplorerLink>
         </div>
       </div>

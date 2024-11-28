@@ -1,7 +1,7 @@
 import { type OrderByStrings } from "@sdk/queries/const";
 import { toMarketDataSortByHomePage, type SortByPageQueryParams } from "./types";
 import { safeParsePageWithDefault } from "lib/routes/home-page-params";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { DEFAULT_SORT_BY, type SortMarketsBy } from "@sdk/indexer-v2/types/common";
 
 export type HomePageSearchParams = {
   page: string | undefined;
@@ -33,7 +33,7 @@ export const constructURLForHomePage = ({
     newURL.searchParams.set("q", searchBytes);
   }
   const newSort = toMarketDataSortByHomePage(sort);
-  if (newSort !== SortMarketsBy.MarketCap) {
+  if (newSort !== DEFAULT_SORT_BY) {
     newURL.searchParams.set("sort", newSort);
   }
 

@@ -1,5 +1,6 @@
 import { parseJSON, stringifyJSON } from "utils";
 import packages from "../../package.json";
+import { MS_IN_ONE_DAY } from "components/charts/const";
 
 const LOCAL_STORAGE_KEYS = {
   theme: `${packages.name}_theme`,
@@ -8,10 +9,10 @@ const LOCAL_STORAGE_KEYS = {
   settings: `${packages.name}_settings`,
 };
 
-const LOCAL_STORAGE_CACHE_TIME = {
+export const LOCAL_STORAGE_CACHE_TIME = {
   theme: Infinity,
   language: Infinity,
-  geoblocking: 7 * 24 * 60 * 60 * 1000, // 7 days.
+  geoblocking: MS_IN_ONE_DAY,
   settings: Infinity,
 };
 

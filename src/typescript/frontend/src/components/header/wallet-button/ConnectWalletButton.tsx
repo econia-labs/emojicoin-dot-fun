@@ -26,7 +26,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   children,
   className,
   onClick,
-  arrow = true,
+  arrow = false,
   forceAllowConnect,
 }) => {
   const { connected, account } = useWallet();
