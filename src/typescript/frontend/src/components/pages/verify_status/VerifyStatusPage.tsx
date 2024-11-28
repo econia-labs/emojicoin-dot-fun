@@ -74,7 +74,7 @@ export const ClientVerifyPage = ({
                 <div>
                   Wallet address:{" "}
                   <span className="text-warning">
-                    {account && <span>{`0x${truncateAddress(account.address).substring(2)}`}</span>}
+                    {account && <span>{`${truncateAddress(account.address)}`}</span>}
                   </span>
                 </div>
                 <div>Galxe: {checkmarkOrX(galxe)}</div>

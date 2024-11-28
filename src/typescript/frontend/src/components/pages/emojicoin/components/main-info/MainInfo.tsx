@@ -11,6 +11,11 @@ import BondingProgress from "./BondingProgress";
 import { useThemeContext } from "context";
 import { useMatchBreakpoints } from "@hooks/index";
 import { Emoji } from "utils/emoji";
+import Link from "next/link";
+import { toExplorerLink } from "lib/utils/explorer-link";
+import { emoji } from "utils";
+import { motion } from "framer-motion";
+import { truncateAddress } from "@sdk/utils";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -45,6 +50,13 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
   const { isMobile } = useMatchBreakpoints();
 
+  const explorerLink = toExplorerLink({
+    linkType: "coin",
+    value: `${data.marketView.metadata.marketAddress}::coin_factory::Emojicoin`,
+  });
+
+  const [copied, setCopied] = useState(false);
+
   return (
     <div
       className="flex justify-center mt-[10px]"
@@ -57,7 +69,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
           isMobile
             ? {
                 display: "flex",
-                gap: "1em",
+                gap: "2.5em",
                 flexDirection: "column",
                 width: "100%",
                 padding: "40px",
@@ -71,10 +83,33 @@ const MainInfo = ({ data }: MainInfoProps) => {
               }
         }
       >
-        <Emoji
-          className="text-[24px] text-center md:display-2 my-auto text-white"
-          emojis={data.emojis}
-        />
+        <div className="text-center my-auto flex flex-col gap-[16px] items-center">
+          <Link href={explorerLink} target="_blank">
+            <Emoji className="display-2" emojis={data.emojis} />
+          </Link>
+          <div className="text-2xl w-fit bg-[#151515] rounded-xl px-[.5em] flex flex-row gap-[.5em]">
+            <Link
+              className="text-ec-blue font-pixelar underline"
+              href={explorerLink}
+              target="_blank"
+            >
+              {truncateAddress(data.marketView.metadata.marketAddress)}
+            </Link>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              transition={{ ease: "linear", duration: 0.05 }}
+              onClick={() => {
+                navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
+                if (!copied) {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 3000);
+                }
+              }}
+            >
+              <Emoji emojis={emoji(copied ? "check mark button" : "clipboard")} />
+            </motion.button>
+          </div>
+        </div>
 
         <div
           className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}

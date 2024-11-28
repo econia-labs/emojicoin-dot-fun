@@ -1,16 +1,23 @@
 import { APTOS_NETWORK } from "lib/env";
 
+const linkTypes = {
+  coin: "coin",
+  acc: "account",
+  account: "account",
+  transaction: "txn",
+  version: "txn",
+  txn: "txn",
+};
+
 export const toExplorerLink = ({
   value,
-  linkType: type,
+  linkType: t,
   network = APTOS_NETWORK,
 }: {
   value: string | number;
-  linkType: "acc" | "account" | "transaction" | "version" | "txn";
+  linkType: keyof typeof linkTypes;
   network?: string;
 }) => {
-  if (type === "account" || type === "acc") {
-    return `https://explorer.aptoslabs.com/account/${value}?network=${network}`;
-  }
-  return `https://explorer.aptoslabs.com/txn/${value}?network=${network}`;
+  const type = linkTypes[t] ?? "txn";
+  return `https://explorer.aptoslabs.com/${type}/${value}?network=${network}`;
 };
