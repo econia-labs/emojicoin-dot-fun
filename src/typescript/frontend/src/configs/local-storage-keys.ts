@@ -30,8 +30,8 @@ export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): 
   if (str === null) {
     return null;
   }
-  const cache = parseJSON<LocalStorageCache<T>>(str);
   try {
+    const cache = parseJSON<LocalStorageCache<T>>(str);
     if (new Date(cache.expiry) > new Date()) {
       return cache.data;
     }
