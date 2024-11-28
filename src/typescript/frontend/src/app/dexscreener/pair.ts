@@ -76,16 +76,14 @@ export interface PairResponse {
  * @param pairId is the pair ID. Generally it's `event.market.symbolEmojis.join("") + "-APT"`
  */
 export async function getPair(pairId: string): Promise<Pair> {
-
   const emojiString = pairId.split("-")[0];
   const sybolEmojis = emojiString.split("");
-  // TODO: merge these
+
   const symbolBytesArray = sybolEmojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.bytes);
   const symbolBytes = new Uint8Array(symbolBytesArray.flatMap((v) => Array.from(v)));
-  
+
   const marketRegistrations = await fetchMarketRegistrationEventBySymbolBytes({ symbolBytes });
   const marketRegistration = marketRegistrations[0];
-
 
   return Promise.resolve({
     id: pairId,
@@ -95,6 +93,7 @@ export async function getPair(pairId: string): Promise<Pair> {
     createdAtBlockNumber: Number(marketRegistration.transaction.version),
     createdAtBlockTimestamp: marketRegistration.transaction.timestamp.getTime() / 1000,
     createdAtTxnId: String(marketRegistration.transaction.version),
+    // TODO: validate there is no swap fee (is there?)
     feeBps: 0,
   });
 }

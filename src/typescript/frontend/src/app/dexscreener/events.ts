@@ -223,8 +223,8 @@ function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventMod
     amount0: Number(event.liquidity.baseAmount),
     amount1: Number(event.liquidity.lpCoinAmount),
     reserves: {
-      asset0: Number(event.state.clammVirtualReserves),
-      asset1: Number(event.state.cpammRealReserves),
+      asset0: Number(event.state.clammVirtualReserves.quote),
+      asset1: Number(event.state.cpammRealReserves.quote),
     },
   };
 }
