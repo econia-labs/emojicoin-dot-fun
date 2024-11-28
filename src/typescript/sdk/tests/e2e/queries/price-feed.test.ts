@@ -76,13 +76,14 @@ describe("queries price_feed and returns accurate price feed data", () => {
     // If the # of rows returned is >= `limit`, this test may fail, so ensure it fails here.
     expect(priceFeedView.length).toBeLessThan(limit);
 
-    // Ensure it sorts by daily volume.
-    const marketIDsFromView = priceFeedView.map((v) => v.market.marketID);
-    const marketIDsSortedByDailyVolume = priceFeedView
+    // Ensure it sorts by daily volume. Note that we cannot check the market IDs here, because
+    // postgres sort order is non-deterministic when returning rows of equal values.
+    const dailyVolumeFromView = priceFeedView.map((v) => v.dailyVolume);
+    const dailyVolumeSortedManually = priceFeedView
       .toSorted((a, b) => compareBigInt(a.dailyVolume, b.dailyVolume))
       .reverse() // Sort by daily volume *descending*.
-      .map((v) => v.market.marketID);
-    expect(marketIDsFromView).toEqual(marketIDsSortedByDailyVolume);
+      .map((v) => v.dailyVolume);
+    expect(dailyVolumeFromView).toEqual(dailyVolumeSortedManually);
 
     // Ensure the prices returned are expected.
     results.forEach(({ openSwap, closeSwap }) => {
