@@ -70,7 +70,7 @@ export const ClientVerifyPage = ({
               </motion.div>
             )}
             <ButtonWithConnectWalletFallback forceAllowConnect={true} arrow={false}>
-              <div className="flex flex-col uppercase mt-[20ch] gap-1">
+              <div className="flex flex-col uppercase mt-[24ch] gap-1">
                 <div>
                   Wallet address:{" "}
                   <span className="text-warning">
