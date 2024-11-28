@@ -15,6 +15,7 @@ import Link from "next/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { emoji } from "utils";
 import { motion } from "framer-motion";
+import { truncateAddress } from "@sdk/utils";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -92,7 +93,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
               href={explorerLink}
               target="_blank"
             >
-              {data.marketView.metadata.marketAddress.replace(/^0x(....).*(....)$/, "0x$1...$2")}
+              {truncateAddress(data.marketView.metadata.marketAddress)}
             </Link>
             <motion.button
               whileTap={{ scale: 0.95 }}
