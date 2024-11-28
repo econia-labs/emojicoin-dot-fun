@@ -17,8 +17,8 @@ const NightlyIcon = (props: SVGProps<SVGSVGElement>) => {
       <style type="text/css">
         {`
         .st0{clip-path:url(#SVGID_00000071537066756014834180000001545902057288800951_);}
-        .st1{fill:currentColor}
-        .st2{fill:#F7F7F7;}
+        .st1{fill:black}
+        .st2{fill:currentColor}
       `}
       </style>
       <g>

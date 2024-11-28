@@ -26,11 +26,10 @@ const IconProps = {
 export const WALLET_ICON: { [key: string]: ReactElement } = {
   "okx wallet": <OKXIcon {...IconProps} />,
   petra: <PetraIcon {...IconProps} />,
+  nightly: <NightlyIcon {...IconProps} className="text-ec-blue" />,
   pontem: <PontemIcon {...IconProps} />,
   martian: <MartianIcon {...IconProps} />,
   rise: <RiseIcon {...IconProps} />,
-  // Nightly isn't working currently- exclude by making the key different from the wallet name.
-  _nightly: <NightlyIcon {...IconProps} />,
 };
 
 export const walletSort = (
@@ -94,11 +93,15 @@ const ScrambledRow: React.FC<ScrambledProps> = ({ text, active, hover, installed
   return <p ref={ref} />;
 };
 
-export const WalletItem: React.FC<{
+export const WalletItem = ({
+  wallet,
+  className,
+  onClick,
+}: {
   wallet: Wallet | AptosStandardSupportedWallet;
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
-}> = ({ wallet, className, onClick }) => {
+}) => {
   const [hover, setHover] = useState<boolean>(false);
   const { wallet: current } = useWallet();
 
