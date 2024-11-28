@@ -23,8 +23,9 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import {
-  fetchMarketRegistrationEventBySymbolEmojis
+  fetchMarketRegistrationEventBySymbolBytes
 } from "@sdk/indexer-v2/queries/app/dexscreener";
+import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 
 
 /**
@@ -74,21 +75,27 @@ export interface PairResponse {
  *
  * @param pairId is the pair ID. Generally it's `event.market.symbolEmojis.join("") + "-APT"`
  */
-export function getPair(pairId: string): Promise<Pair> {
+export async function getPair(pairId: string): Promise<Pair> {
 
-  const emojistring = pairId.split("-")[0];
-  const symbolBytes = emojistring.split("").map((c) => c.charCodeAt(0));
-  fetchMarketRegistrationEventBySymbolEmojis({ symbolBytes });
+  const emojiString = pairId.split("-")[0];
+  const sybolEmojis = emojiString.split("");
+  // TODO: merge these
+  const symbolBytesArray = sybolEmojis.map((e) => SYMBOL_EMOJI_DATA.byEmoji(e)!.bytes);
+  const symbolBytes = new Uint8Array(symbolBytesArray.flatMap((v) => Array.from(v)));
+  
+  const marketRegistrations = await fetchMarketRegistrationEventBySymbolBytes({ symbolBytes });
+  const marketRegistration = marketRegistrations[0];
+
 
   return Promise.resolve({
     id: pairId,
-    dexKey: "uniswap",
-    asset0Id: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    asset1Id: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    createdAtBlockNumber: 100,
-    createdAtBlockTimestamp: 1698126147,
-    createdAtTxnId: "0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e",
-    feeBps: 100,
+    dexKey: "emojicoin.fun",
+    asset0Id: emojiString,
+    asset1Id: "APT",
+    createdAtBlockNumber: Number(marketRegistration.transaction.version),
+    createdAtBlockTimestamp: marketRegistration.transaction.timestamp.getTime() / 1000,
+    createdAtTxnId: String(marketRegistration.transaction.version),
+    feeBps: 0,
   });
 }
 
@@ -96,6 +103,9 @@ export function getPair(pairId: string): Promise<Pair> {
 export async function GET(request: NextRequest): Promise<NextResponse<PairResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const pairId = searchParams.get("id");
+  if (!pairId) {
+    return new NextResponse("id is a required parameter", { status: 400 });
+  }
   const pair = await getPair(pairId);
   return NextResponse.json({ pair });
 }

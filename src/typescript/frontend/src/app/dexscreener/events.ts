@@ -261,13 +261,13 @@ export async function getEventsByVersion(fromVersion: number, toVersion: number)
  * We treat our versions as "blocks", because it's faster to implement given our current architecture
  * This requires dexscreener to have relatively large `fromBlock - toBlock` ranges to keep up
  * */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse<EventsResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const fromBlock = searchParams.get("fromBlock");
   const toBlock = searchParams.get("toBlock");
   if (fromBlock === null || toBlock === null) {
     // This should never happen, and is an invalid call
-    return new Response("fromBlock and toBlock are required parameters", { status: 400 });
+    return new NextResponse("fromBlock and toBlock are required parameters", { status: 400 });
   }
 
   const events = await getEventsByVersion(parseInt(fromBlock, 10), parseInt(toBlock, 10));

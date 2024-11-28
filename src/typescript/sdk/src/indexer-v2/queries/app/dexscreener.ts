@@ -2,19 +2,19 @@ import { queryHelper } from "../utils";
 import { toLiquidityEventModel, toMarketRegistrationEventModel, toSwapEventModel } from "../../types";
 import { LIMIT } from "../../../queries";
 import type { MarketStateQueryArgs } from "../../types/common";
-import { postgrest, toQueryArray } from "../client";
+import { postgrest } from "../client";
 import { TableName } from "../../types/json-types";
 
 
-const selectMarketRegistrationEventBySymbolEmojis = ({
-  searchEmojis,
+const selectMarketRegistrationEventBySymbolBytes = ({
+  symbolBytes,
   page = 1,
   pageSize = LIMIT,
-}: { searchEmojis: string[] } & MarketStateQueryArgs) =>
+}: { symbolBytes: Uint8Array } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.MarketRegistrationEvents)
     .select("*")
-    .contains("symbol_emojis", toQueryArray(searchEmojis))
+    .eq("symbol_bytes", symbolBytes)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
 const selectSwapEventsByVersion = ({
@@ -43,8 +43,8 @@ const selectLiquidityEventsByVersion = ({
     .lte("transaction_version", toVersion)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-export const fetchMarketRegistrationEventBySymbolEmojis = queryHelper(
-  selectMarketRegistrationEventBySymbolEmojis,
+export const fetchMarketRegistrationEventBySymbolBytes = queryHelper(
+  selectMarketRegistrationEventBySymbolBytes,
   toMarketRegistrationEventModel
 );
 
