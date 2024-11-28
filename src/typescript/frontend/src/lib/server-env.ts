@@ -25,17 +25,8 @@ export const GEOBLOCKED: { countries: string[]; regions: string[] } = JSON.parse
 );
 export const GEOBLOCKING_ENABLED = GEOBLOCKED.countries.length > 0 || GEOBLOCKED.regions.length > 0;
 
-if (GEOBLOCKING_ENABLED) {
-  if (process.env.VPNAPI_IO_API_KEY === "undefined") {
-    throw new Error(
-      "Geoblocking is enabled but environment variable VPNAPI_IO_API_KEY is undefined."
-    );
-  }
-}
-
 export const ALLOWLISTER3K_URL: string | undefined = process.env.ALLOWLISTER3K_URL;
 export const REVALIDATION_TIME: number = Number(process.env.REVALIDATION_TIME);
-export const VPNAPI_IO_API_KEY: string = process.env.VPNAPI_IO_API_KEY!;
 export const PRE_LAUNCH_TEASER: boolean = process.env.PRE_LAUNCH_TEASER === "true";
 
 if (

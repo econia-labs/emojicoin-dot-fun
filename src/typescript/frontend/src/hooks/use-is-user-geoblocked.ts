@@ -1,9 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { MS_IN_ONE_DAY } from "components/charts/const";
-import { readLocalStorageCache, writeLocalStorageCache } from "configs/local-storage-keys";
+import {
+  LOCAL_STORAGE_CACHE_TIME,
+  readLocalStorageCache,
+  writeLocalStorageCache,
+} from "configs/local-storage-keys";
 import { isUserGeoblocked } from "utils/geolocation";
 
-const SEVEN_DAYS_MS = 7 * MS_IN_ONE_DAY;
+const FETCH_IS_GEOBLOCKED_CACHE_TIME = LOCAL_STORAGE_CACHE_TIME["geoblocking"];
 
 const useIsUserGeoblocked = (args?: { explicitlyGeoblocked: boolean }) => {
   // In some cases we may want to know if the query's return value is explicitly true.
@@ -20,7 +23,7 @@ const useIsUserGeoblocked = (args?: { explicitlyGeoblocked: boolean }) => {
 
       return geoblocked;
     },
-    staleTime: SEVEN_DAYS_MS,
+    staleTime: FETCH_IS_GEOBLOCKED_CACHE_TIME,
     placeholderData: (prev) => prev,
   });
 
