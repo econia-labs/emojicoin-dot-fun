@@ -17,7 +17,7 @@ export const fontsStyle = `
 
   @font-face {
     font-family: FormaM;
-    font-style: nomral;
+    font-style: normal;
     font-weight: 400;
     src: url("${CDN_URL}/fonts/FormaDJRDisplay-Medium-Testing.woff2");
   }
