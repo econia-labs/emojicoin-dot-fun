@@ -9,7 +9,6 @@ import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
 import { useNameStore } from "context/event-store-context";
 import Popup from "components/popup";
-import Text from "components/text";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
@@ -124,19 +123,7 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
       children
     );
 
-  return geoblocked ? (
-    <Popup
-      content={
-        <Text textTransform="uppercase" color="black">
-          not available in your jurisdiction
-        </Text>
-      }
-    >
-      {inner}
-    </Popup>
-  ) : (
-    inner
-  );
+  return geoblocked ? <Popup content="not available in your jurisdiction">{inner}</Popup> : inner;
 };
 
 export default ButtonWithConnectWalletFallback;

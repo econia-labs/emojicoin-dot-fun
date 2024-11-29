@@ -1,32 +1,51 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useMatchBreakpoints } from "hooks";
 import { Flex } from "@containers";
 import { Text, Tr, Td } from "components";
 import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
-import Popup from "components/popup";
-import { Big } from "big.js";
-import { formatXPR, XprPopup } from "./XprPopup";
+import { XprPopup } from "./XprPopup";
 import { Emoji } from "utils/emoji";
+import Link from "next/link";
+import Popup from "components/popup";
+import { emojiNamesToPath } from "utils/pathname-helpers";
+
+const DAYS_IN_WEEK = 7;
+const DAYS_IN_YEAR = 365;
+
+// prettier-ignore
+export const getXPR = (x: number, tvlPerLpCoinGrowth: number) =>
+  ((tvlPerLpCoinGrowth ** x) - 1) * 100;
+
+export const formatXPR = (time: number, bigDailyTvl: number) => {
+  const xpr = getXPR(time, bigDailyTvl);
+  const matchTrailingZeros = /(\.0*|(?<=(\..*))0*)$/;
+  const xprStr = xpr.toFixed(4).replace(matchTrailingZeros, "");
+  return `${xprStr}%`;
+};
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
   const { isMobile } = useMatchBreakpoints();
-  const bigDailyTvl = Big(item.dailyTvlPerLPCoinGrowth);
+  const bigDailyTvl = Number(item.dailyTvlPerLPCoinGrowth);
+
+  const dpr = useMemo(() => formatXPR(1, bigDailyTvl), [bigDailyTvl]);
+  const wpr = useMemo(() => formatXPR(DAYS_IN_WEEK, bigDailyTvl), [bigDailyTvl]);
+  const apr = useMemo(() => formatXPR(DAYS_IN_YEAR, bigDailyTvl), [bigDailyTvl]);
 
   return (
     <Tr hover selected={selected} onClick={onClick}>
       <Td p="7px 12px" width={{ _: "25%", tablet: "11.5%" }}>
-        <Flex justifyContent="start">
-          <Text
-            textScale="bodySmall"
-            color="lightGray"
-            textTransform="uppercase"
-            ellipsis
-            title={item.market.symbolData.symbol.toUpperCase()}
-          >
-            <Emoji emojis={item.market.emojis} />
-          </Text>
-        </Flex>
+        <Popup content="go to market">
+          <Link href={`/market/${emojiNamesToPath(item.market.emojis.map((e) => e.name))}`}>
+            <Flex justifyContent="space-between" className="cursor-pointer">
+              <div className="font-pixelar font-sm text-ec-blue">{"{"}</div>
+              <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
+                <Emoji emojis={item.market.emojis} />
+              </Text>
+              <div className="font-pixelar font-sm text-ec-blue">{"}"}</div>
+            </Flex>
+          </Link>
+        </Popup>
       </Td>
 
       <Td p="7px 12px" width={{ _: "30%", tablet: "26.5%" }}>
@@ -75,9 +94,21 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
 
       <Td p="7px 12px" width={{ _: "20%", tablet: "24%" }}>
         <Flex justifyContent="start" className="relative">
-          <Popup content={<XprPopup bigDailyTvl={bigDailyTvl} />}>
+          <Popup
+            content={
+              bigDailyTvl === 0 ? (
+                <div>
+                  <span>{"Please wait until this pool has existed for at"}</span>
+                  <br />
+                  <span>{"least one day to view its percentage returns."}</span>
+                </div>
+              ) : (
+                <XprPopup {...{ dpr, wpr, apr }} />
+              )
+            }
+          >
             <Text textScale="bodySmall" color="lightGray" textTransform="uppercase" ellipsis>
-              {formatXPR(1, bigDailyTvl)}
+              {dpr}
             </Text>
           </Popup>
         </Flex>
