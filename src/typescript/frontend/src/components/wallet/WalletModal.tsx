@@ -36,6 +36,7 @@ export const FirstSlide = ({
   const { aptosConnectWallets } = getAptosConnectWallets(wallets);
   // The wallets we specify as `optIn` in the provider.
   const { defaultWallets, moreWallets } = partitionWallets(wallets);
+  console.log(wallets);
 
   return slide.idx === 0 ? (
     <div className="px-[46px] py-[25.5px]" {...props}>
