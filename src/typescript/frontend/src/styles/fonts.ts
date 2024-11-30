@@ -1,4 +1,6 @@
+// cspell:word noto
 import { CDN_URL } from "lib/env";
+import { Noto_Color_Emoji as NotoColorEmoji } from "next/font/google";
 
 export const fontsStyle = `
   @font-face {
@@ -21,10 +23,11 @@ export const fontsStyle = `
     font-weight: 400;
     src: url("${CDN_URL}/fonts/FormaDJRDisplay-Medium-Testing.woff2");
   }
-
-  :root {
-    --font-pixelar: Pixelar;
-    --font-forma: Forma;
-    --font-formaM: FormaM;
-  }
 `;
+
+export const notoColorEmoji = NotoColorEmoji({
+  weight: "400",
+  subsets: ["emoji"],
+  preload: true,
+  variable: "--font-noto-color-emoji",
+});

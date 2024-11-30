@@ -1,3 +1,4 @@
+// cspell:word noto
 /** @type {import('tailwindcss').Config} */
 import colors from "tailwindcss/colors";
 delete colors.lightBlue;
@@ -18,6 +19,8 @@ module.exports = {
         pixelar: ["var(--font-pixelar)", ...fontFamily.sans],
         forma: ["var(--font-forma)", ...fontFamily.sans],
         "forma-bold": ["var(--font-formaM)", ...fontFamily.sans],
+        "forma-thin": ["var(--font-formaDR)", ...fontFamily.sans],
+        "noto-color-emoji": ["var(--font-noto-color-emoji)"],
       },
       screens: {
         tall: { raw: "(min-height: 960px)" },

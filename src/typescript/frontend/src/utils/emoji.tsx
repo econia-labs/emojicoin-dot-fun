@@ -18,23 +18,31 @@ declare global {
 
 export const Emoji = ({
   emojis,
-  set = undefined,
-  size = "1em",
   ...props
 }: Omit<DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, "children"> & {
   emojis: AnyEmojiData[] | string;
-  set?: string;
-  size?: string;
 }) => {
   let data: React.ReactNode[] = [];
   if (typeof emojis === "string") {
     const emojisInString = getEmojisInString(emojis);
     data = emojisInString.map((e, i) => (
-      <em-emoji key={`${emojisInString[i]}-${i}`} size={size} native={e} set={set}></em-emoji>
+      <span
+        className="text-[1em] font-noto-color-emoji"
+        style={{ fontVariantEmoji: "emoji" }}
+        key={`${emojisInString[i]}-${i}`}
+      >
+        {e}
+      </span>
     ));
   } else {
     data = emojis.map((e, i) => (
-      <em-emoji key={`${emojis[i].emoji}-${i}`} size={size} native={e.emoji}></em-emoji>
+      <span
+        className="text-[1em] font-noto-color-emoji"
+        style={{ fontVariantEmoji: "emoji" }}
+        key={`${emojis[i].emoji}-${i}`}
+      >
+        {e.emoji}
+      </span>
     ));
   }
   return <span {...props}>{data}</span>;

@@ -59,10 +59,8 @@ const BondingProgress = ({ data }: MainInfoProps) => {
       <div className="w-[100%] pl-[3.26%]">
         <div className="grid relative w-[100%]" style={{ gridTemplateColumns: "repeat(7, 1fr)" }}>
           <Emoji
-            size="100%"
-            className="absolute h-[175%] translate-x-[-50%] translate-y-[-18.75%]"
+            className="absolute w-[100%] h-[175%] translate-x-[-50%] translate-y-[-18.75%]"
             emojis={emoji("rocket")}
-            set="apple"
           />
           <BondingCurveArrow
             className="w-[100%] h-[100%]"
