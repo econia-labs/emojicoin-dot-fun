@@ -1,21 +1,6 @@
 import { type AnyEmojiData, getEmojisInString } from "@sdk/index";
 import { cn } from "lib/utils/class-name";
-import { type DetailedHTMLProps, type HTMLAttributes } from "react";
-
-import * as React from "react";
-declare global {
-  /* eslint-disable-next-line @typescript-eslint/no-namespace */
-  namespace JSX {
-    interface IntrinsicElements {
-      "em-emoji": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        size?: string;
-        native?: string;
-        key?: string;
-        set?: string;
-      };
-    }
-  }
-}
+import { useMemo, type DetailedHTMLProps, type HTMLAttributes } from "react";
 
 export const Emoji = ({
   emojis,
@@ -23,7 +8,7 @@ export const Emoji = ({
 }: Omit<DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, "children"> & {
   emojis: AnyEmojiData[] | string;
 }) => {
-  const data = React.useMemo(
+  const data = useMemo(
     () =>
       typeof emojis === "string"
         ? getEmojisInString(emojis).join("")
