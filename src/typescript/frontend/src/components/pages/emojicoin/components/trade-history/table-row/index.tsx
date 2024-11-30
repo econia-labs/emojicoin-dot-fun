@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type PropsWithChildren } from "react";
+import React, { useMemo, type PropsWithChildren } from "react";
 import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { toNominalPrice } from "@sdk/utils/nominal-price";
@@ -11,6 +11,7 @@ import Popup from "components/popup";
 import { motion } from "framer-motion";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
+import { useNameResolver } from "@hooks/use-name-resolver";
 
 type TableRowTextItemProps = {
   className: string;
@@ -43,6 +44,14 @@ const TableRow = ({
   numSwapsDisplayed,
   shouldAnimateAsInsertion,
 }: TableRowDesktopProps) => {
+  const resolvedName = useNameResolver(item.swapper);
+  const { displayName, isANSName } = useMemo(() => {
+    return {
+      displayName: formatDisplayName(resolvedName),
+      isANSName: item.swapper !== resolvedName,
+    };
+  }, [item.swapper, resolvedName]);
+
   return (
     <motion.tr
       className={TableRowStyles}
@@ -117,11 +126,12 @@ const TableRow = ({
         <ExplorerLink className="flex w-full h-full" value={item.version} type="txn">
           <span
             className={
-              "text-light-gray group-hover/explorer:text-blue group-hover/explorer:underline" +
+              `${isANSName ? "brightness-[1.4] contrast-[1.4]" : ""}` +
+              " text-light-gray group-hover/explorer:text-blue group-hover/explorer:underline" +
               " my-auto ml-auto mr-[20px]"
             }
           >
-            {formatDisplayName(item.swapper)}
+            {displayName}
           </span>
         </ExplorerLink>
       </td>

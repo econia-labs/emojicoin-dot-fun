@@ -197,11 +197,19 @@ export const truncateAddress = (
   }
 };
 
+const MAX_NAME_LENGTH = 13;
 export const truncateANSName = (input: string, numChars: number = 4): string => {
-  if (input.length > 11) {
-    const start = input.substring(0, numChars);
-    const end = input.substring(input.length - numChars, input.length);
-    return `${start}...${end}`;
+  // Because periods (`...`) aren't nearly as long as normal characters in a non-monospace font, we
+  // only consider them the length of 2 characters, not 3.
+  const truncatedLength = MAX_NAME_LENGTH - 2;
+  if (input.length > MAX_NAME_LENGTH) {
+    const truncated = input.substring(0, truncatedLength);
+    const res =
+      // Remove trailing periods, since we end with an ellipses.
+      truncated.at(-1) === "."
+        ? truncated.substring(0, truncated.length - 1)
+        : truncated.substring(0, truncated.length);
+    return `${res}...`;
   }
   return input;
 };

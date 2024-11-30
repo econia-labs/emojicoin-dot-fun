@@ -8,5 +8,5 @@ export type MessageType = {
   sender: string;
   text: string;
   senderRank: string;
-  version: number;
+  version: bigint;
 };

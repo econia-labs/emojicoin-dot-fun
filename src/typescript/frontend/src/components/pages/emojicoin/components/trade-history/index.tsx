@@ -2,29 +2,29 @@ import React, { type PropsWithChildren, useEffect, useMemo, useRef } from "react
 
 import { type TradeHistoryProps } from "../../types";
 import { getRankFromEvent } from "lib/utils/get-user-rank";
-import { useEventStore, useNameStore } from "context/event-store-context";
+import { useEventStore } from "context/event-store-context";
 import TableRow from "./table-row";
 import { type TableRowDesktopProps } from "./table-row/types";
 import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
 import { motion } from "framer-motion";
 import { type SwapEventModel } from "@sdk/indexer-v2/types";
-import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
-import "./trade-history.css";
 import { Emoji } from "utils/emoji";
+import "./trade-history.css";
 
 const HARD_LIMIT = 500;
 
 const toTableItem = (
-  swap: SwapEventModel["swap"] & { time: bigint; version: number }
+  swap: SwapEventModel["swap"],
+  transaction: SwapEventModel["transaction"]
 ): TableRowDesktopProps["item"] => ({
   ...getRankFromEvent(swap),
   apt: swap.quoteVolume.toString(),
   emoji: swap.baseVolume.toString(),
-  date: new Date(Number(swap.time / 1000n)),
+  date: new Date(Number(transaction.time / 1000n)),
   type: swap.isSell ? "sell" : "buy",
   priceQ64: swap.avgExecutionPriceQ64.toString(),
   swapper: swap.swapper,
-  version: swap.version,
+  version: transaction.version.toString(),
 });
 
 const TableHeader =
@@ -61,21 +61,6 @@ const TradeHistory = (props: TradeHistoryProps) => {
     [props.data.swaps.length, swaps.length]
   );
 
-  const addresses = sortedSwaps.map(({ swap }) => swap.swapper);
-  const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
-
-  const sortedSwapsWithNames = useMemo(() => {
-    const data = sortedSwaps.map(({ swap, shouldAnimateAsInsertion, transaction }) => ({
-      ...swap,
-      swapper: nameResolver(swap.swapper) as AccountAddressString,
-      shouldAnimateAsInsertion,
-      time: transaction.time,
-      version: Number(transaction.version),
-    }));
-    return data;
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [nameResolver]);
-
   return (
     <table className="relative flex flex-col table-fixed w-full">
       <thead className="relative w-full border-solid border-b-[1px] border-b-dark-gray">
@@ -105,12 +90,12 @@ const TradeHistory = (props: TradeHistoryProps) => {
         layoutScroll
         className="flex flex-col overflow-auto scrollbar-track w-full h-[340px] overflow-x-hidden"
       >
-        {sortedSwapsWithNames.map((item, index) => (
+        {sortedSwaps.map((item, index) => (
           <TableRow
             // Note the key/index must be in reverse for the rows to animate correctly.
             key={sortedSwaps.length - index}
             index={sortedSwaps.length - index}
-            item={toTableItem(item)}
+            item={toTableItem(item.swap, item.transaction)}
             showBorder={index !== sortedSwaps.length - 1 || sortedSwaps.length < 11}
             numSwapsDisplayed={sortedSwaps.length}
             shouldAnimateAsInsertion={item.shouldAnimateAsInsertion}

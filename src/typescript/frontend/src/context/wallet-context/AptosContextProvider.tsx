@@ -41,6 +41,7 @@ import { getEventsAsProcessorModelsFromResponse } from "@sdk/mini-processor";
 import { emoji } from "utils";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 import { getAptosClient } from "@sdk/utils/aptos-client";
+import { useNameResolver } from "@hooks/use-name-resolver";
 
 type WalletContextState = ReturnType<typeof useWallet>;
 export type SubmissionResponse = Promise<{
@@ -67,6 +68,7 @@ export type AptosContextState = {
   status: TransactionStatus;
   lastResponse: ResponseType;
   lastResponseStoredAt: number;
+  addressName: string;
   setEmojicoinType: (type?: TypeTagInput) => void;
   aptBalance: bigint;
   emojicoinBalance: bigint;
@@ -93,6 +95,9 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
   const [lastResponseStoredAt, setLastResponseStoredAt] = useState(-1);
   const [emojicoinType, setEmojicoinType] = useState<string | undefined>();
   const geoblocked = useIsUserGeoblocked();
+  // We could check `account?.ansName` here but it would require conditional hook logic, plus not all wallets provide it
+  // so it's not really worth the extra effort and complexity.
+  const addressName = useNameResolver(account?.address);
 
   const { emojicoin, emojicoinLP } = useMemo(() => {
     if (!emojicoinType) return { emojicoin: undefined, emojicoinLP: undefined };
@@ -324,6 +329,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
     aptBalance,
     emojicoinBalance,
     emojicoinLPBalance,
+    addressName,
     setEmojicoinType: (type?: TypeTagInput) => setCoinTypeHelper(setEmojicoinType, type),
     setBalance: (coinType: TrackedCoinType, n: bigint) => {
       if (coinType === "apt") setAptBalance(n);

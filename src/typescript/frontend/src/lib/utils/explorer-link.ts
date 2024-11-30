@@ -1,3 +1,4 @@
+import { type AnyNumberString } from "@sdk-types";
 import { APTOS_NETWORK } from "lib/env";
 
 const linkTypes = {
@@ -14,7 +15,7 @@ export const toExplorerLink = ({
   linkType: t,
   network = APTOS_NETWORK,
 }: {
-  value: string | number;
+  value: AnyNumberString;
   linkType: keyof typeof linkTypes;
   network?: string;
 }) => {

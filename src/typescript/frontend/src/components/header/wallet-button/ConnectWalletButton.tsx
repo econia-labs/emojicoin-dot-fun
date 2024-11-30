@@ -7,9 +7,9 @@ import { useMemo, useState, type PropsWithChildren } from "react";
 import { useScramble } from "use-scramble";
 import OuterConnectText from "./OuterConnectText";
 import Arrow from "@icons/Arrow";
-import { useNameStore } from "context/event-store-context";
 import Popup from "components/popup";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
 
 export interface ConnectWalletProps extends PropsWithChildren<{ className?: string }> {
   mobile?: boolean;
@@ -20,15 +20,15 @@ export interface ConnectWalletProps extends PropsWithChildren<{ className?: stri
 
 const CONNECT_WALLET = "Connect Wallet";
 
-export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
+export const ButtonWithConnectWalletFallback = ({
   mobile,
   children,
   className,
   onClick,
   arrow = false,
   forceAllowConnect,
-}) => {
-  const { connected, account } = useWallet();
+}: ConnectWalletProps) => {
+  const { connected } = useWallet();
   const { openWalletModal } = useWalletModal();
   const { t } = translationFunction();
   const shouldBeGeoblocked = useIsUserGeoblocked();
@@ -40,21 +40,18 @@ export const ButtonWithConnectWalletFallback: React.FC<ConnectWalletProps> = ({
   }, [forceAllowConnect, shouldBeGeoblocked]);
 
   const [enabled, setEnabled] = useState(false);
-
-  const nameResolver = useNameStore((s) =>
-    s.getResolverWithNames(account?.address ? [account.address] : [])
-  );
+  const { addressName } = useAptos();
 
   const text = useMemo(() => {
     if (!geoblocked && connected) {
-      if (account) {
-        return formatDisplayName(nameResolver(account.address));
+      if (addressName) {
+        return formatDisplayName(addressName);
       } else {
         return t("Connected");
       }
     }
     return t(CONNECT_WALLET);
-  }, [connected, account, t, nameResolver, geoblocked]);
+  }, [connected, addressName, t, geoblocked]);
 
   const width = useMemo(() => {
     return `${text.length + 1}ch`;
