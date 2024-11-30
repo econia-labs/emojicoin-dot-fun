@@ -25,11 +25,23 @@ export const Emoji = ({
   if (typeof emojis === "string") {
     const emojisInString = getEmojisInString(emojis);
     data = emojisInString.map((e, i) => (
-      <em-emoji key={`${emojisInString[i]}-${i}`} size="1em" native={e}></em-emoji>
+      <span
+        className="text-[1em] font-noto-color-emoji"
+        style={{ fontVariantEmoji: "emoji" }}
+        key={`${emojisInString[i]}-${i}`}
+      >
+        {e}
+      </span>
     ));
   } else {
     data = emojis.map((e, i) => (
-      <em-emoji key={`${emojis[i].emoji}-${i}`} size="1em" native={e.emoji}></em-emoji>
+      <span
+        className="text-[1em] font-noto-color-emoji"
+        style={{ fontVariantEmoji: "emoji" }}
+        key={`${emojis[i].emoji}-${i}`}
+      >
+        {e.emoji}
+      </span>
     ));
   }
   return <span {...props}>{data}</span>;
