@@ -47,14 +47,19 @@ type Selectors = { [K in Keys]?: boolean };
 
 const booleanSelectors = new Set(Object.keys(booleanUserAgentSelectors) as Keys[]);
 
-export const getBooleanUserAgentSelectors = (userAgent: string) => {
-  const selectors = getSelectorsByUserAgent(userAgent);
-  const res: Selectors = {};
-  Object.keys(selectors)
-    .map((k) =>
-      selectors[k] === true && booleanSelectors.has(k as Keys) ? (k as Keys) : undefined
-    )
-    .filter((v) => typeof v !== "undefined")
-    .forEach((k) => (res[k] = true));
-  return res;
+export const getBooleanUserAgentSelectors = (userAgent: string): Selectors => {
+  try {
+    const selectors = getSelectorsByUserAgent(userAgent) ?? {};
+    const res: Selectors = {};
+    Object.keys(selectors)
+      .map((k) =>
+        selectors[k] === true && booleanSelectors.has(k as Keys) ? (k as Keys) : undefined
+      )
+      .filter((v) => typeof v !== "undefined")
+      .forEach((k) => (res[k] = true));
+    return res;
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
 };
