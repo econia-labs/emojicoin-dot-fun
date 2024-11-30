@@ -19,7 +19,7 @@ export const Emoji = ({
   return (
     <span
       {...props}
-      className={cn(props.className, "text-[1em] font-noto-color-emoji")}
+      className={cn(props.className, "text-[1em] !font-noto-color-emoji")}
       style={{ fontVariantEmoji: "emoji" }}
     >
       {data}
