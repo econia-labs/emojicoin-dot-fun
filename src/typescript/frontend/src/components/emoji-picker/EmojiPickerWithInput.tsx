@@ -19,8 +19,8 @@ import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import "./triangle.css";
 
 const EMOJI_FONT_FAMILY =
-  '"EmojiMart", "Segoe UI Emoji", "Segoe UI Symbol", ' +
-  '"Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", ' +
+  '"Noto Color Emoji", "Apple Color Emoji", "EmojiMart", "Segoe UI Emoji", ' +
+  '"Segoe UI Symbol", "Segoe UI", "Twemoji Mozilla", ' +
   '"Android Emoji"';
 
 const ChatInputBox = ({ children }: { children: React.ReactNode }) => {
@@ -216,7 +216,7 @@ export const EmojiPickerWithInput = ({
                 {mode !== "search" && close}
                 <Textarea
                   id="emoji-picker-text-area"
-                  className={`relative !pt-[16px] px-[4px] scroll-auto ${mode === "search" ? "home-textarea" : ""}`}
+                  className={`!font-noto-color-emoji relative !pt-[16px] px-[4px] scroll-auto ${mode === "search" ? "home-textarea" : ""}`}
                   ref={onRefChange}
                   autoFocus={false}
                   onPaste={handlePaste}

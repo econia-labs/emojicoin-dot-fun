@@ -7,10 +7,13 @@ import {
   formaDJRDisplayMedium,
   formaDJRDisplayRegular,
   formaDJRMicro,
+  notoColorEmoji,
   pixelar,
 } from "styles/fonts";
 import "../app/global.css";
 import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
+import { headers } from "next/headers";
+import { getBooleanUserAgentSelectors } from "lib/utils/user-agent-selectors";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -18,9 +21,16 @@ export const viewport: Viewport = {
 };
 
 const fonts = [pixelar, formaDJRMicro, formaDJRDisplayMedium, formaDJRDisplayRegular];
-const fontsClassName = fonts.map((font) => font.variable).join(" ");
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const userAgent = headers().get("user-agent") || "";
+  const { isIOS, isMacOs } = getBooleanUserAgentSelectors(userAgent);
+  // Only use the Noto Color Emoji font if the user is not on a recognized iOS or MacOS device.
+  if (!isIOS && !isMacOs) {
+    fonts.push(notoColorEmoji);
+  }
+  const fontsClassName = fonts.map((font) => font.variable).join(" ");
+
   return (
     <html>
       <body className={fontsClassName}>
