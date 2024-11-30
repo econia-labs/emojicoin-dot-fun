@@ -11,7 +11,6 @@ import MainInfo from "./components/main-info/MainInfo";
 import { useReliableSubscribe } from "@hooks/use-reliable-subscribe";
 import { type BrokerEvent } from "@/broker/types";
 import { marketToLatestBars } from "@/store/event/candlestick-bars";
-import { DefaultProfiler } from "on-render";
 
 const EVENT_TYPES: BrokerEvent[] = ["Chat", "PeriodicState", "Swap"];
 
@@ -35,16 +34,8 @@ const ClientEmojicoinPage = (props: EmojicoinProps) => {
 
   return (
     <Box>
-      <DefaultProfiler id="[market]/page.tsx: MainInfo">
-        <MainInfo data={props.data} />
-      </DefaultProfiler>
-      <DefaultProfiler id={`[market]/page.tsx: ${isTablet || isMobile ? "Mobile" : "Desktop"}Grid`}>
-        {isTablet || isMobile ? (
-          <MobileGrid data={props.data} />
-        ) : (
-          <DesktopGrid data={props.data} />
-        )}
-      </DefaultProfiler>
+      <MainInfo data={props.data} />
+      {isTablet || isMobile ? <MobileGrid data={props.data} /> : <DesktopGrid data={props.data} />}
     </Box>
   );
 };
