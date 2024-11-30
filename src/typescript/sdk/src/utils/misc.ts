@@ -197,21 +197,21 @@ export const truncateAddress = (
   }
 };
 
-const MAX_NAME_LENGTH = 13;
-export const truncateANSName = (input: string, numChars: number = 4): string => {
-  // Because periods (`...`) aren't nearly as long as normal characters in a non-monospace font, we
-  // only consider them the length of 2 characters, not 3.
-  const truncatedLength = MAX_NAME_LENGTH - 2;
-  if (input.length > MAX_NAME_LENGTH) {
-    const truncated = input.substring(0, truncatedLength);
-    const res =
-      // Remove trailing periods, since we end with an ellipses.
-      truncated.at(-1) === "."
-        ? truncated.substring(0, truncated.length - 1)
-        : truncated.substring(0, truncated.length);
-    return `${res}...`;
+const MAX_ANS_DISPLAY_NAME_LENGTH = 13;
+
+export const truncateANSName = (input: string): string => {
+  if (input.length <= MAX_ANS_DISPLAY_NAME_LENGTH) {
+    return input;
   }
-  return input;
+  // Periods aren't as long as normal non-monospace characters, so count `...` as 2 characters.
+  const truncatedLength = MAX_ANS_DISPLAY_NAME_LENGTH - 2;
+  const truncated = input.substring(0, truncatedLength);
+  const res =
+    // Remove the trailing period on truncated names; e.g. "my-name.petra." => "my-name.petra"
+    truncated.at(-1) === "."
+      ? truncated.substring(0, truncated.length - 1)
+      : truncated.substring(0, truncated.length);
+  return `${res}...`;
 };
 
 /**
