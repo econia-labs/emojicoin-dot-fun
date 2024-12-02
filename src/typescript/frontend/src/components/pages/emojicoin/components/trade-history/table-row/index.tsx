@@ -7,7 +7,6 @@ import { toNominalPrice } from "@sdk/utils/nominal-price";
 import { ExplorerLink } from "components/link/component";
 import { darkColors } from "theme";
 import { formatDisplayName } from "@sdk/utils";
-import Text from "components/text";
 import Popup from "components/popup";
 import { motion } from "framer-motion";
 import { emoji } from "utils";
@@ -76,14 +75,13 @@ const TableRow = ({
       <td className={`min-w-[60px] xl:min-w-[71px] xl:ml-[0.5ch] xl:mr-[-0.5ch] ${Height}`}>
         <Popup
           content={
-            <Text textScale="pixelHeading4" lineHeight="20px" color="black">
-              {item.rankIcon === emoji("blowfish")
-                ? "n00b"
-                : item.rankIcon === emoji("spouting whale")
-                  ? "365 UR SO JULIA"
-                  : "SKILL ISSUE"}
-            </Text>
+            item.rankIcon === emoji("blowfish")
+              ? "n00b"
+              : item.rankIcon === emoji("spouting whale")
+                ? "365 UR SO JULIA"
+                : "SKILL ISSUE"
           }
+          uppercase={false}
         >
           <div className="flex h-full relative">
             <Emoji className="text-light-gray m-auto" emojis={item.rankIcon} />
