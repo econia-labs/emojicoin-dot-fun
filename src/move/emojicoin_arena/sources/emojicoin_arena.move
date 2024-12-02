@@ -424,8 +424,7 @@ module arena::emojicoin_arena {
     fun init_module(arena: &signer) {
         // Get first melee market addresses, without using randomness APIs.
         let time = timestamp::now_microseconds();
-        let (_, _, _, n_markets, _, _, _, _, _, _, _, _) =
-            unpack_registry_view(registry_view());
+        let n_markets = get_n_registered_markets();
         let pseudo_random_market_id_0 = time % n_markets + 1;
         let pseudo_random_market_id_1;
         loop {
@@ -555,13 +554,18 @@ module arena::emojicoin_arena {
         } else false
     }
 
+    inline fun get_n_registered_markets(): u64 {
+        let (_, _, _, n_markets, _, _, _, _, _, _, _, _) =
+            unpack_registry_view(registry_view());
+        n_markets
+    }
+
     inline fun last_period_boundary(time: u64, period: u64): u64 {
         (time / period) * period
     }
 
     inline fun next_melee_market_ids(): vector<u64> {
-        let (_, _, _, n_markets, _, _, _, _, _, _, _, _) =
-            unpack_registry_view(registry_view());
+        let n_markets = get_n_registered_markets();
         let market_ids;
         loop {
             let random_market_id_0 = random_market_id(n_markets);
