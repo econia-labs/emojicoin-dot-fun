@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 
 import { translationFunction } from "context/language-context";
-import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
-import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 import { isMarketStateModel } from "@sdk/indexer-v2/types";
 import BondingProgress from "./BondingProgress";
 import { useThemeContext } from "context";
@@ -16,6 +14,7 @@ import { toExplorerLink } from "lib/utils/explorer-link";
 import { emoji } from "utils";
 import { motion } from "framer-motion";
 import { truncateAddress } from "@sdk/utils";
+import { FormattedNumber } from "components/FormattedNumber";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -43,10 +42,6 @@ const MainInfo = ({ data }: MainInfoProps) => {
       }
     }
   }, [stateEvents]);
-
-  const { ref: marketCapRef } = useLabelScrambler(toCoinDecimalString(marketCap, 2));
-  const { ref: dailyVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
-  const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
   const { isMobile } = useMatchBreakpoints();
 
@@ -118,7 +113,9 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
+                <FormattedNumber nominalize scramble>
+                  {marketCap}
+                </FormattedNumber>
                 &nbsp;
                 <AptosIconBlack className="icon-inline mb-[0.3ch]" />
               </div>
@@ -129,7 +126,9 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("24 hour vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <div ref={dailyVolumeRef}>{toCoinDecimalString(dailyVolume, 2)}</div>
+                <FormattedNumber nominalize scramble>
+                  {dailyVolume}
+                </FormattedNumber>
                 &nbsp;
                 <AptosIconBlack className="icon-inline mb-[0.3ch]" />
               </div>
@@ -140,7 +139,9 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("All-time vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <div ref={allTimeVolumeRef}>{toCoinDecimalString(allTimeVolume, 2)}</div>
+                <FormattedNumber nominalize scramble>
+                  {allTimeVolume}
+                </FormattedNumber>
                 &nbsp;
                 <AptosIconBlack className="icon-inline mb-[0.3ch]" />
               </div>

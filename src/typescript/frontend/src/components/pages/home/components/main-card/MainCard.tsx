@@ -3,12 +3,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { translationFunction } from "context/language-context";
 import { FlexGap } from "@containers";
-import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
-import { useLabelScrambler } from "../table-card/animation-variants/event-variants";
 import planetHome from "../../../../../../public/images/planet-home.png";
 import { emojiNamesToPath } from "utils/pathname-helpers";
 import { type HomePageProps } from "app/home/HomePage";
@@ -19,6 +17,7 @@ import { PriceDelta } from "components/price-feed/inner";
 import { sortByValue } from "lib/utils/sort-events";
 import { AnimatePresence, motion } from "framer-motion";
 import { useInterval } from "react-use";
+import { FormattedNumber } from "components/FormattedNumber";
 
 export interface MainCardProps {
   featuredMarkets: HomePageProps["priceFeed"];
@@ -76,10 +75,6 @@ const MainCard = (props: MainCardProps) => {
     };
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
-
-  const { ref: marketCapRef } = useLabelScrambler(toCoinDecimalString(marketCap, 2));
-  const { ref: dailyVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
-  const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
 
   return (
     <div className="flex flex-col w-full my-[20px] md:my-[70px] max-w-full">
@@ -151,7 +146,9 @@ const MainCard = (props: MainCardProps) => {
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
+                    <FormattedNumber scramble nominalize>
+                      {marketCap}
+                    </FormattedNumber>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
@@ -170,7 +167,9 @@ const MainCard = (props: MainCardProps) => {
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <div ref={dailyVolumeRef}>{toCoinDecimalString(dailyVolume, 2)}</div>
+                    <FormattedNumber scramble nominalize>
+                      {dailyVolume}
+                    </FormattedNumber>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
@@ -187,7 +186,9 @@ const MainCard = (props: MainCardProps) => {
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <div ref={allTimeVolumeRef}>{toCoinDecimalString(allTimeVolume, 2)}</div>
+                    <FormattedNumber scramble nominalize>
+                      {allTimeVolume}
+                    </FormattedNumber>
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>

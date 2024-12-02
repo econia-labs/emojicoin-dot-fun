@@ -9,12 +9,10 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
-import { toCoinDecimalString } from "lib/utils/decimals";
 import {
   borderVariants,
   onlyHoverVariant,
   textVariants,
-  useLabelScrambler,
   glowVariants,
   eventToVariant as toVariant,
 } from "./animation-variants/event-variants";
@@ -29,8 +27,8 @@ import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { Emoji } from "utils/emoji";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import Big from "big.js";
 import "./module.css";
+import { FormattedNumber } from "components/FormattedNumber";
 
 const getFontSize = (emojis: SymbolEmojiData[]) =>
   emojis.length <= 2 ? ("pixel-heading-1" as const) : ("pixel-heading-1b" as const);
@@ -62,16 +60,16 @@ const TableCard = ({
     const isBumpOrder = sortBy === SortMarketsBy.BumpOrder;
     const { lastSwapVolume, marketCap } = animationEvent
       ? {
-          lastSwapVolume: Big(animationEvent.lastSwap.quoteVolume.toString()),
+          lastSwapVolume: animationEvent.lastSwap.quoteVolume,
           marketCap: animationEvent.state.instantaneousStats.marketCap,
         }
       : {
-          lastSwapVolume: 0,
+          lastSwapVolume: 0n,
           marketCap: staticMarketCap,
         };
     return {
       isBumpOrder,
-      secondaryMetric: isBumpOrder ? lastSwapVolume : Big(staticVolume24H),
+      secondaryMetric: isBumpOrder ? lastSwapVolume : staticVolume24H,
       marketCap,
     };
   }, [sortBy, animationEvent, staticVolume24H, staticMarketCap]);
@@ -109,15 +107,6 @@ const TableCard = ({
       runAnimationSequence(animationEvent);
     }
   }, [animationEvent, runAnimationSequence, isBumpOrder]);
-
-  const { ref: marketCapRef } = useLabelScrambler(
-    toCoinDecimalString(marketCap.toString(), 2),
-    " APT"
-  );
-  const { ref: dailyVolumeRef } = useLabelScrambler(
-    toCoinDecimalString(secondaryMetric.toString(), 2),
-    " APT"
-  );
 
   const { curr, prev, variant, displayIndex, layoutDelay } = useMemo(() => {
     const { curr, prev } = calculateGridData({
@@ -269,9 +258,10 @@ const TableCard = ({
                   variants={animationsOn ? textVariants : {}}
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
-                  ref={marketCapRef}
                 >
-                  {toCoinDecimalString(marketCap.toString(), 2) + " APT"}
+                  <FormattedNumber scramble nominalize suffix=" APT">
+                    {marketCap}
+                  </FormattedNumber>
                 </motion.div>
               </Column>
               <Column width="50%">
@@ -288,9 +278,10 @@ const TableCard = ({
                   variants={animationsOn ? textVariants : {}}
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
-                  ref={dailyVolumeRef}
                 >
-                  {toCoinDecimalString(secondaryMetric.toString(), 2) + " APT"}
+                  <FormattedNumber scramble nominalize suffix=" APT">
+                    {secondaryMetric}
+                  </FormattedNumber>
                 </motion.div>
               </Column>
             </Flex>

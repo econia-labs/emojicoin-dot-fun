@@ -7,7 +7,6 @@ import { Column, Row } from "components/layout/components/FlexContainers";
 import { SwapButton } from "./SwapButton";
 import { type SwapComponentProps } from "components/pages/emojicoin/types";
 import { toActualCoinDecimals, toDisplayCoinDecimals } from "lib/utils/decimals";
-import { useScramble } from "use-scramble";
 import { DEFAULT_SWAP_GAS_COST, useGetGasWithDefault } from "lib/hooks/queries/use-simulate-swap";
 import { useEventStore } from "context/event-store-context";
 import { useTooltip } from "@hooks/index";
@@ -26,6 +25,7 @@ import { getMaxSlippageSettings } from "utils/slippage";
 import { Emoji } from "utils/emoji";
 import { EmojiPill } from "components/EmojiPill";
 import { useCalculateSwapPrice } from "lib/hooks/use-calculate-swap-price";
+import { FormattedNumber } from "components/FormattedNumber";
 
 const SimulateInputsWrapper = ({ children }: PropsWithChildren) => (
   <div className="flex flex-col relative gap-[19px]">{children}</div>
@@ -106,29 +106,10 @@ export default function SwapComponent({
     setEmojicoinType(emojicoinType);
   }, [marketAddress, setEmojicoinType]);
 
-  const outputAmountString = toDisplayCoinDecimals({
-    num: isLoading ? previous : outputAmount,
-    decimals: OUTPUT_DISPLAY_DECIMALS,
-  });
-
   const availableAptBalance = useMemo(
     () => (aptBalance - gasCost > 0 ? aptBalance - gasCost : 0n),
     [gasCost, aptBalance]
   );
-
-  const { ref, replay } = useScramble({
-    text: new Intl.NumberFormat().format(Number(outputAmountString)),
-    overdrive: false,
-    overflow: true,
-    speed: isLoading ? 0.4 : 1000,
-    scramble: isLoading ? 5 : 0,
-    range: [48, 58],
-    playOnMount: false,
-  });
-
-  useEffect(() => {
-    replay();
-  }, [isLoading, replay]);
 
   useEffect(() => {
     if (netProceeds === 0n || error) {
@@ -138,8 +119,7 @@ export default function SwapComponent({
     setPrevious(netProceeds);
     setOutputAmount(netProceeds);
     setIsLoading(false);
-    replay();
-  }, [netProceeds, replay, isSell, error]);
+  }, [netProceeds, isSell, error]);
 
   const sufficientBalance = useMemo(() => {
     if (!account || (isSell && !emojicoinBalance) || (!isSell && !aptBalance)) return false;
@@ -281,7 +261,9 @@ export default function SwapComponent({
                 style={{ opacity: isLoading ? 0.6 : 1 }}
               >
                 {/* Scrambled swap result output below. */}
-                <div ref={ref}></div>
+                <FormattedNumber nominalize scramble decimals={OUTPUT_DISPLAY_DECIMALS}>
+                  {isLoading ? previous : outputAmount}
+                </FormattedNumber>
               </div>
             </div>
           </Column>

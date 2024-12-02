@@ -19,13 +19,13 @@ const toTableItem = ({
 }: SwapEventModel & { shouldAnimateAsInsertion?: boolean }) => ({
   item: {
     ...getRankFromEvent(swap),
-    apt: swap.quoteVolume.toString(),
-    emoji: swap.baseVolume.toString(),
+    apt: swap.quoteVolume,
+    emoji: swap.baseVolume,
     date: new Date(Number(transaction.time / 1000n)),
     type: swap.isSell ? "sell" : "buy",
-    priceQ64: swap.avgExecutionPriceQ64.toString(),
+    priceQ64: swap.avgExecutionPriceQ64,
     swapper: swap.swapper,
-    version: transaction.version.toString(),
+    version: transaction.version,
   },
   shouldAnimateAsInsertion,
 });
