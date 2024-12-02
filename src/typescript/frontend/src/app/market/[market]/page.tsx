@@ -23,6 +23,8 @@ interface EmojicoinPageProps {
   searchParams: {};
 }
 
+const EVENTS_ON_PAGE_LOAD = 25;
+
 export async function generateMetadata({ params }: EmojicoinPageProps): Promise<Metadata> {
   const { market: marketSlug } = params;
   const names = pathToEmojiNames(marketSlug);
@@ -74,8 +76,8 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
 
     const [chats, swaps, marketView] = await Promise.all([
-      fetchChatEvents({ marketID }),
-      fetchSwapEvents({ marketID }),
+      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
+      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       wrappedCachedContractMarketView(marketAddress.toString()),
     ]);
 
