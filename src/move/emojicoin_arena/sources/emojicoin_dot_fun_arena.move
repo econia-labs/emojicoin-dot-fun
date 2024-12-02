@@ -18,8 +18,8 @@ module arena::emojicoin_arena {
     use std::option::Self;
     use std::signer;
 
-    /// Signer does not correspond to rewards account.
-    const E_NOT_REWARDS: u64 = 0;
+    /// Signer does not correspond to arena account.
+    const E_NOT_ARENA: u64 = 0;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -73,20 +73,18 @@ module arena::emojicoin_arena {
         melee_ids: SmartTable<u64, Nil>
     }
 
-    public entry fun fund_vault(rewards: &signer, amount: u64) acquires Registry {
-        assert!(signer::address_of(rewards) == @rewards, E_NOT_REWARDS);
+    public entry fun fund_vault(arena: &signer, amount: u64) acquires Registry {
+        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
         let vault_address =
-            account::get_signer_capability_address(&Registry[@rewards].signer_capability);
-        aptos_account::transfer(rewards, vault_address, amount);
+            account::get_signer_capability_address(&Registry[@arena].signer_capability);
+        aptos_account::transfer(arena, vault_address, amount);
     }
 
-    public entry fun withdraw_from_vault(rewards: &signer, amount: u64) acquires Registry {
-        assert!(signer::address_of(rewards) == @rewards, E_NOT_REWARDS);
+    public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
+        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
         let vault_signer =
-            account::create_signer_with_capability(
-                &Registry[@rewards].signer_capability
-            );
-        aptos_account::transfer(&vault_signer, @rewards, amount);
+            account::create_signer_with_capability(&Registry[@arena].signer_capability);
+        aptos_account::transfer(&vault_signer, @arena, amount);
     }
 
     #[randomness]
@@ -141,15 +139,15 @@ module arena::emojicoin_arena {
                 if (current_tap_out_fee < MAX_MATCH_AMOUNT && lock_ins_still_allowed) {
                     let eligible_match_amount = MAX_MATCH_AMOUNT - current_tap_out_fee;
                     eligible_match_amount = if (eligible_match_amount
-                        < current_melee_ref.available_rewards) {
+                        < current_melee_ref.available_rewards_in_octas) {
                         eligible_match_amount
                     } else {
-                        current_melee_ref.available_rewards
+                        current_melee_ref.available_rewards_in_octas
                     };
                     let vault_balance =
                         coin::balance<AptosCoin>(
                             account::get_signer_capability_address(
-                                &Registry[@rewards].signer_capability
+                                &Registry[@arena].signer_capability
                             )
                         );
                     eligible_match_amount = if (eligible_match_amount < vault_balance) {
@@ -171,9 +169,9 @@ module arena::emojicoin_arena {
                     if (actual_match_amount > 0) {
                         escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee
                             + actual_match_amount;
-                        let registry_ref_mut = &mut Registry[@rewards];
+                        let registry_ref_mut = &mut Registry[@arena];
                         let available_rewards_ref_mut =
-                            &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
+                            &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards_in_octas;
                         *available_rewards_ref_mut = *available_rewards_ref_mut
                             - actual_match_amount;
                         let vault_signer =
@@ -434,7 +432,7 @@ module arena::emojicoin_arena {
             );
     }
 
-    fun init_module(rewards: &signer) {
+    fun init_module(arena: &signer) {
         // Get first melee market addresses, without using randomness APIs.
         let time = timestamp::now_microseconds();
         let (_, _, _, n_markets, _, _, _, _, _, _, _, _) =
@@ -463,7 +461,7 @@ module arena::emojicoin_arena {
                         emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
                     )
                 }),
-                available_rewards: REWARDS_PER_MELEE,
+                available_rewards_in_octas: REWARDS_PER_MELEE,
                 start_time,
                 lock_in_period: LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR,
                 duration: MELEE_DURATION_HOURS * MICROSECONDS_PER_HOUR
@@ -474,9 +472,9 @@ module arena::emojicoin_arena {
 
         // Store registry resource.
         let (vault_signer, signer_capability) =
-            account::create_resource_account(rewards, REGISTRY_SEED);
+            account::create_resource_account(arena, REGISTRY_SEED);
         move_to(
-            rewards,
+            arena,
             Registry {
                 melees_by_id,
                 melees_by_market_combo_sorted_market_ids,
@@ -487,7 +485,7 @@ module arena::emojicoin_arena {
     }
 
     inline fun borrow_current_melee_ref(): &Melee {
-        let registry_ref = &Registry[@rewards];
+        let registry_ref = &Registry[@arena];
         let n_melees = registry_ref.melees_by_id.length();
         registry_ref.melees_by_id.borrow(n_melees)
     }
@@ -506,12 +504,12 @@ module arena::emojicoin_arena {
             if (escrow_ref_mut.melee_id == melee_id) {
                 // Update available rewards and transfer tap out fee to vault if applicable.
                 if (may_have_to_pay_tap_out_fee) {
-                    let registry_ref_mut = &mut Registry[@rewards];
+                    let registry_ref_mut = &mut Registry[@arena];
                     let exited_melee_ref_mut =
                         registry_ref_mut.melees_by_id.borrow_mut(melee_id);
                     let tap_out_fee_ref_mut = &mut escrow_ref_mut.tap_out_fee;
                     let available_rewards_ref_mut =
-                        &mut exited_melee_ref_mut.available_rewards;
+                        &mut exited_melee_ref_mut.available_rewards_in_octas;
                     *available_rewards_ref_mut = *available_rewards_ref_mut
                         + *tap_out_fee_ref_mut;
                     let vault_address =
@@ -539,13 +537,13 @@ module arena::emojicoin_arena {
     /// Cranks schedule and returns `true` if a melee has ended as a result.
     inline fun crank_schedule(): bool {
         let time = timestamp::now_microseconds();
-        let registry_ref = &Registry[@rewards];
+        let registry_ref = &Registry[@arena];
         let n_melees = registry_ref.melees_by_id.length();
         let most_recent_melee_ref = registry_ref.melees_by_id.borrow(n_melees);
         if (time >= most_recent_melee_ref.start_time + most_recent_melee_ref.duration) {
             let market_ids = next_melee_market_ids();
             let melee_id = n_melees + 1;
-            let registry_ref_mut = &mut Registry[@rewards];
+            let registry_ref_mut = &mut Registry[@arena];
             registry_ref_mut.melees_by_id.add(
                 melee_id,
                 Melee {
@@ -555,7 +553,7 @@ module arena::emojicoin_arena {
                             emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
                         )
                     }),
-                    available_rewards: REWARDS_PER_MELEE,
+                    available_rewards_in_octas: REWARDS_PER_MELEE,
                     start_time: last_period_boundary(
                         time, LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR
                     ),
@@ -583,7 +581,7 @@ module arena::emojicoin_arena {
             let random_market_id_1 = random_market_id(n_markets);
             if (random_market_id_0 == random_market_id_1) continue;
             market_ids = sort_unique_market_ids(random_market_id_0, random_market_id_1);
-            if (!Registry[@rewards].melees_by_market_combo_sorted_market_ids.contains(market_ids)) {
+            if (!Registry[@arena].melees_by_market_combo_sorted_market_ids.contains(market_ids)) {
                 break;
             }
         };
