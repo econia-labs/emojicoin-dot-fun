@@ -1677,8 +1677,8 @@ packages:
   '@telegram-apps/bridge@1.2.1':
     resolution: {integrity: sha512-nNri01sAIDqDPPV1dBwB5/U0dWhm5URInY8jcY39BuRqbC4mjwf7xJmRwO67MYxncwSqacBW43ILIrpv8PQyrQ==}
 
-  '@telegram-apps/signals@1.0.1':
-    resolution: {integrity: sha512-+DAltcPtLBeNPjX+BxEh9smh0cbxCXuEcsOEyDCovp6HJHusWFv1tDyJuV0/rXFmcDs+VwU7SjmINdjld2nFHw==}
+  '@telegram-apps/signals@1.1.0':
+    resolution: {integrity: sha512-5qN7cU8t3l7n0cKcnzc/1TYKJTwAggUinfwbLHL1SYmB47pBHjCvfsRiYliFohk6lb635SBmNuVZL6LHFmGZaw==}
 
   '@telegram-apps/toolkit@1.0.0':
     resolution: {integrity: sha512-fSVoveLuMzwRKWeXEufMSXxH+HvjsFKb1DeT3pG5qLpnb2rdtejnNcwAt6WEPtiZ3a4YntYaFuR3KYgVv0ZxeQ==}
@@ -1861,24 +1861,24 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@wallet-standard/app@1.0.1':
-    resolution: {integrity: sha512-LnLYq2Vy2guTZ8GQKKSXQK3+FRGPil75XEdkZqE6fiLixJhZJoJa5hT7lXxwe0ykVTt9LEThdTbOpT7KadS26Q==}
+  '@wallet-standard/app@1.1.0':
+    resolution: {integrity: sha512-3CijvrO9utx598kjr45hTbbeeykQrQfKmSnxeWOgU25TOEpvcipD/bYDQWIqUv1Oc6KK4YStokSMu/FBNecGUQ==}
     engines: {node: '>=16'}
 
-  '@wallet-standard/base@1.0.1':
-    resolution: {integrity: sha512-1To3ekMfzhYxe0Yhkpri+Fedq0SYcfrOfJi3vbLjMwF2qiKPjTGLwZkf2C9ftdQmxES+hmxhBzTwF4KgcOwf8w==}
+  '@wallet-standard/base@1.1.0':
+    resolution: {integrity: sha512-DJDQhjKmSNVLKWItoKThJS+CsJQjR9AOBOirBVT1F9YpRyC9oYHE+ZnSf8y8bxUphtKqdQMPVQ2mHohYdRvDVQ==}
     engines: {node: '>=16'}
 
   '@wallet-standard/core@1.0.3':
     resolution: {integrity: sha512-Jb33IIjC1wM1HoKkYD7xQ6d6PZ8EmMZvyc8R7dFgX66n/xkvksVTW04g9yLvQXrLFbcIjHrCxW6TXMhvpsAAzg==}
     engines: {node: '>=16'}
 
-  '@wallet-standard/features@1.0.3':
-    resolution: {integrity: sha512-m8475I6W5LTatTZuUz5JJNK42wFRgkJTB0I9tkruMwfqBF2UN2eomkYNVf9RbrsROelCRzSFmugqjKZBFaubsA==}
+  '@wallet-standard/features@1.1.0':
+    resolution: {integrity: sha512-hiEivWNztx73s+7iLxsuD1sOJ28xtRix58W7Xnz4XzzA/pF0+aicnWgjOdA10doVDEDZdUuZCIIqG96SFNlDUg==}
     engines: {node: '>=16'}
 
-  '@wallet-standard/wallet@1.0.1':
-    resolution: {integrity: sha512-qkhJeuQU2afQTZ02yMZE5SFc91Fo3hyFjFkpQglHudENNyiSG0oUKcIjky8X32xVSaumgTZSQUAzpXnCTWHzKQ==}
+  '@wallet-standard/wallet@1.1.0':
+    resolution: {integrity: sha512-Gt8TnSlDZpAl+RWOOAB/kuvC7RpcdWAlFbHNoi4gsXsfaWa1QCT6LBcfIYTPdOZC9OVZUDwqGuGAcqZejDmHjg==}
     engines: {node: '>=16'}
 
   '@xobotyi/scrollbar-width@1.9.5':
@@ -4442,8 +4442,8 @@ packages:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
 
-  type-fest@4.26.1:
-    resolution: {integrity: sha512-yOGpmOAL7CkKe/91I5O3gPICmJNLJ1G4zFYVAsRHg7M64biSnPtRj0WNQt++bRkjYOqjWXrhnUw1utzmVErAdg==}
+  type-fest@4.28.1:
+    resolution: {integrity: sha512-LO/+yb3mf46YqfUC7QkkoAlpa7CTYh//V1Xy9+NQ+pKqDqXIq0NTfPfQRwFfCt+if4Qkwb9gzZfsl6E5TkXZGw==}
     engines: {node: '>=16'}
 
   typed-array-buffer@1.0.2:
@@ -5588,7 +5588,7 @@ snapshots:
       string-length: 6.0.0
       strip-ansi: 7.1.0
       ts-toolbelt: 9.6.0
-      type-fest: 4.26.1
+      type-fest: 4.28.1
       zod: 3.23.8
 
   '@molt/types@0.2.0':
@@ -6125,12 +6125,12 @@ snapshots:
 
   '@telegram-apps/bridge@1.2.1':
     dependencies:
-      '@telegram-apps/signals': 1.0.1
+      '@telegram-apps/signals': 1.1.0
       '@telegram-apps/toolkit': 1.0.0
       '@telegram-apps/transformers': 1.0.1
       '@telegram-apps/types': 1.0.1
 
-  '@telegram-apps/signals@1.0.1': {}
+  '@telegram-apps/signals@1.1.0': {}
 
   '@telegram-apps/toolkit@1.0.0': {}
 
@@ -6347,26 +6347,26 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@wallet-standard/app@1.0.1':
+  '@wallet-standard/app@1.1.0':
     dependencies:
-      '@wallet-standard/base': 1.0.1
+      '@wallet-standard/base': 1.1.0
 
-  '@wallet-standard/base@1.0.1': {}
+  '@wallet-standard/base@1.1.0': {}
 
   '@wallet-standard/core@1.0.3':
     dependencies:
-      '@wallet-standard/app': 1.0.1
-      '@wallet-standard/base': 1.0.1
-      '@wallet-standard/features': 1.0.3
-      '@wallet-standard/wallet': 1.0.1
+      '@wallet-standard/app': 1.1.0
+      '@wallet-standard/base': 1.1.0
+      '@wallet-standard/features': 1.1.0
+      '@wallet-standard/wallet': 1.1.0
 
-  '@wallet-standard/features@1.0.3':
+  '@wallet-standard/features@1.1.0':
     dependencies:
-      '@wallet-standard/base': 1.0.1
+      '@wallet-standard/base': 1.1.0
 
-  '@wallet-standard/wallet@1.0.1':
+  '@wallet-standard/wallet@1.1.0':
     dependencies:
-      '@wallet-standard/base': 1.0.1
+      '@wallet-standard/base': 1.1.0
 
   '@xobotyi/scrollbar-width@1.9.5': {}
 
@@ -9339,7 +9339,7 @@ snapshots:
 
   type-fest@0.21.3: {}
 
-  type-fest@4.26.1: {}
+  type-fest@4.28.1: {}
 
   typed-array-buffer@1.0.2:
     dependencies:
