@@ -20,7 +20,12 @@ export enum RankName {
  */
 export const getRankFromEvent = <
   T extends
-    | Pick<SwapEventModel["swap"], "balanceAsFractionOfCirculatingSupplyAfterQ64">
+    | Pick<
+        SwapEventModel["swap"],
+        | "balanceAsFractionOfCirculatingSupplyAfterQ64"
+        | "balanceAsFractionOfCirculatingSupplyBeforeQ64"
+        | "isSell"
+      >
     | Pick<ChatEventModel["chat"], "balanceAsFractionOfCirculatingSupplyQ64">,
 >(
   event: T
@@ -29,8 +34,13 @@ export const getRankFromEvent = <
   rankName: RankName;
 } => {
   const fraction = (() => {
-    if ("balanceAsFractionOfCirculatingSupplyAfterQ64" in event) {
-      const q64 = event.balanceAsFractionOfCirculatingSupplyAfterQ64;
+    if ("isSell" in event) {
+      let q64: bigint;
+      if (event.isSell) {
+        q64 = event.balanceAsFractionOfCirculatingSupplyBeforeQ64;
+      } else {
+        q64 = event.balanceAsFractionOfCirculatingSupplyAfterQ64;
+      }
       return q64ToBig(q64).toNumber();
     } else {
       const q64 = event.balanceAsFractionOfCirculatingSupplyQ64;
