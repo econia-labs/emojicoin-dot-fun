@@ -275,16 +275,9 @@ const Liquidity = ({ market }: LiquidityProps) => {
               </Text>
 
               <Info>
-                <Text
-                  textScale="pixelHeading4"
-                  lineHeight="20px"
-                  color="black"
-                  textTransform="uppercase"
-                >
-                  Liquidity providers receive a 0.25% fee from all trades, proportional to their
-                  pool share. Fees are continuously reinvested in the pool and can be claimed by
-                  withdrawing liquidity.
-                </Text>
+                Liquidity providers receive a 0.25% fee from all trades, proportional to their pool
+                share. Fees are continuously reinvested in the pool and can be claimed by
+                withdrawing liquidity.
               </Info>
             </FlexGap>
           </Flex>
