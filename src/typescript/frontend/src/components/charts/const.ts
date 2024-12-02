@@ -47,7 +47,7 @@ export const WIDGET_OPTIONS: Omit<ChartingLibraryWidgetOptions, "datafeed" | "co
   library_path: `${CDN_URL}/charting_library/`,
   theme: "Dark" as ThemeName,
   locale: "en" as LanguageCode,
-  custom_css_url: "/styles/tradingview.css",
+  custom_css_url: `${CDN_URL}/charting_library_stylesheets/emojicoin-dot-fun.css`,
   enabled_features: ["iframe_loading_compatibility_mode"],
   disabled_features: [
     "use_localstorage_for_settings" as ChartingLibraryFeatureset,
