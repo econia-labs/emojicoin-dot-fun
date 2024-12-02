@@ -15,7 +15,7 @@ const OKXIcon = ({
       width={width + 2}
       height={height + 2}
       alt="okx logo"
-      src="/okx-logo.png"
+      src="/images/wallets/okx-logo.png"
     ></Image>
   );
 };

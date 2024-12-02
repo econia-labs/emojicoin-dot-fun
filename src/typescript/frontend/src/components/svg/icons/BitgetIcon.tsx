@@ -16,7 +16,7 @@ const BitgetIcon = ({
     width={width}
     height={height}
     alt="bitget logo"
-    src="/bitget-logo.png"
+    src="/images/wallets/bitget-logo.png"
   />
 );
 export default BitgetIcon;
