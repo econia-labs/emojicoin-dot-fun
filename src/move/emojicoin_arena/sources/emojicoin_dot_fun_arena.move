@@ -52,10 +52,10 @@ module arena::emojicoin_arena {
 
     struct Nil has store {}
 
-    struct MeleeEscrow<phantom Emojicoin0, phantom EmojicoinLP0, phantom Emojicoin1, phantom EmojicoinLP1> has key {
+    struct MeleeEscrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
         melee_id: u64,
-        emojicoin_0: Coin<Emojicoin0>,
-        emojicoin_1: Coin<Emojicoin1>,
+        emojicoin_0: Coin<Coin0>,
+        emojicoin_1: Coin<Coin1>,
         tap_out_fee: u64
     }
 
@@ -88,7 +88,7 @@ module arena::emojicoin_arena {
     }
 
     #[randomness]
-    entry fun enter<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
+    entry fun enter<Coin0, LP0, Coin1, LP1>(
         entrant: &signer,
         buy_emojicoin_0: bool,
         input_amount: u64,
@@ -100,19 +100,17 @@ module arena::emojicoin_arena {
         let current_melee_ref = borrow_current_melee_ref();
         let market_metadatas = current_melee_ref.market_metadatas;
         let (_, market_address_0, _) = unpack_market_metadata(market_metadatas[0]);
-        market_view<Emojicoin0, EmojicoinLP0>(market_address_0);
+        market_view<Coin0, LP0>(market_address_0);
         let (_, market_address_1, _) = unpack_market_metadata(market_metadatas[1]);
-        market_view<Emojicoin1, EmojicoinLP1>(market_address_1);
+        market_view<Coin1, LP1>(market_address_1);
 
         // Create escrow and user melees resources if they don't exist.
         let melee_id = current_melee_ref.melee_id;
         let entrant_address = signer::address_of(entrant);
-        if (!exists<MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>>(
-            entrant_address
-        )) {
+        if (!exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(entrant_address)) {
             move_to(
                 entrant,
-                MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1> {
+                MeleeEscrow<Coin0, LP0, Coin1, LP1> {
                     melee_id,
                     emojicoin_0: coin::zero(),
                     emojicoin_1: coin::zero(),
@@ -130,7 +128,7 @@ module arena::emojicoin_arena {
         let match_amount =
             if (lock_in) {
                 let escrow_ref_mut =
-                    &mut MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>[entrant_address];
+                    &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
                 let current_tap_out_fee = escrow_ref_mut.tap_out_fee;
                 let lock_in_period_end_time =
                     current_melee_ref.start_time + current_melee_ref.lock_in_period;
@@ -188,11 +186,10 @@ module arena::emojicoin_arena {
 
         // Execute a swap then immediately move funds into escrow.
         let input_amount_after_matching = input_amount + match_amount;
-        let escrow_ref_mut =
-            &mut MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>[entrant_address];
+        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
         if (buy_emojicoin_0) {
             let swap =
-                emojicoin_dot_fun::simulate_swap<Emojicoin0, EmojicoinLP0>(
+                emojicoin_dot_fun::simulate_swap<Coin0, LP0>(
                     entrant_address,
                     market_address_0,
                     input_amount_after_matching,
@@ -202,7 +199,7 @@ module arena::emojicoin_arena {
                 );
             let (_, _, _, _, _, _, _, _, net_proceeds, _, _, _, _, _, _, _, _, _) =
                 emojicoin_dot_fun::unpack_swap(swap);
-            emojicoin_dot_fun::swap<Emojicoin0, EmojicoinLP0>(
+            emojicoin_dot_fun::swap<Coin0, LP0>(
                 entrant,
                 market_address_0,
                 input_amount_after_matching,
@@ -216,7 +213,7 @@ module arena::emojicoin_arena {
             );
         } else {
             let swap =
-                emojicoin_dot_fun::simulate_swap<Emojicoin1, EmojicoinLP1>(
+                emojicoin_dot_fun::simulate_swap<Coin1, LP1>(
                     entrant_address,
                     market_address_1,
                     input_amount_after_matching,
@@ -226,7 +223,7 @@ module arena::emojicoin_arena {
                 );
             let (_, _, _, _, _, _, _, _, net_proceeds, _, _, _, _, _, _, _, _, _) =
                 emojicoin_dot_fun::unpack_swap(swap);
-            emojicoin_dot_fun::swap<Emojicoin1, EmojicoinLP1>(
+            emojicoin_dot_fun::swap<Coin1, LP1>(
                 entrant,
                 market_address_1,
                 input_amount_after_matching,
@@ -242,16 +239,14 @@ module arena::emojicoin_arena {
     }
 
     #[randomness]
-    entry fun exit<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
+    entry fun exit<Coin0, LP0, Coin1, LP1>(
         participant: &signer, melee_id: u64
     ) acquires MeleeEscrow, Registry {
-        exit_inner<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
-            participant, melee_id, !crank_schedule()
-        );
+        exit_inner<Coin0, LP0, Coin1, LP1>(participant, melee_id, !crank_schedule());
     }
 
     #[randomness]
-    entry fun swap<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
+    entry fun swap<Coin0, LP0, Coin1, LP1>(
         swapper: &signer,
         melee_id: u64,
         market_addresses: vector<address>,
@@ -262,13 +257,10 @@ module arena::emojicoin_arena {
         // Return early if type arguments or melee ID is passed incorrectly, but only after cranking
         // schedule.
         let swapper_address = signer::address_of(swapper);
-        if (!exists<MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>>(
-            swapper_address
-        )) {
+        if (!exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(swapper_address)) {
             return;
         };
-        let escrow_ref_mut =
-            &mut MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>[swapper_address];
+        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[swapper_address];
         if (escrow_ref_mut.melee_id != melee_id)
             return;
         let (market_address_0, market_address_1) =
@@ -284,7 +276,7 @@ module arena::emojicoin_arena {
 
             // Get amount of APT recieved by selling emojicoin 1, then execute swap.
             let swap_to_apt =
-                emojicoin_dot_fun::simulate_swap<Emojicoin1, EmojicoinLP1>(
+                emojicoin_dot_fun::simulate_swap<Coin1, LP1>(
                     swapper_address,
                     market_address_1,
                     input_amount,
@@ -294,7 +286,7 @@ module arena::emojicoin_arena {
                 );
             let (_, _, _, _, _, _, _, _, net_proceeds_in_apt, _, _, _, _, _, _, _, _, _) =
                 emojicoin_dot_fun::unpack_swap(swap_to_apt);
-            emojicoin_dot_fun::swap<Emojicoin1, EmojicoinLP1>(
+            emojicoin_dot_fun::swap<Coin1, LP1>(
                 swapper,
                 market_address_1,
                 input_amount,
@@ -306,7 +298,7 @@ module arena::emojicoin_arena {
 
             // Get amount of emojicoin 0 recieved by buying it with APT proceeds.
             let swap_to_emojicoin_0 =
-                emojicoin_dot_fun::simulate_swap<Emojicoin0, EmojicoinLP0>(
+                emojicoin_dot_fun::simulate_swap<Coin0, LP0>(
                     swapper_address,
                     market_address_0,
                     net_proceeds_in_apt,
@@ -334,7 +326,7 @@ module arena::emojicoin_arena {
                 _,
                 _
             ) = emojicoin_dot_fun::unpack_swap(swap_to_emojicoin_0);
-            emojicoin_dot_fun::swap<Emojicoin0, EmojicoinLP0>(
+            emojicoin_dot_fun::swap<Coin0, LP0>(
                 swapper,
                 market_address_0,
                 net_proceeds_in_apt,
@@ -359,7 +351,7 @@ module arena::emojicoin_arena {
 
             // Get amount of APT recieved by selling emojicoin 0, then execute swap.
             let swap_to_apt =
-                emojicoin_dot_fun::simulate_swap<Emojicoin0, EmojicoinLP0>(
+                emojicoin_dot_fun::simulate_swap<Coin0, LP0>(
                     swapper_address,
                     market_address_0,
                     input_amount,
@@ -369,7 +361,7 @@ module arena::emojicoin_arena {
                 );
             let (_, _, _, _, _, _, _, _, net_proceeds_in_apt, _, _, _, _, _, _, _, _, _) =
                 emojicoin_dot_fun::unpack_swap(swap_to_apt);
-            emojicoin_dot_fun::swap<Emojicoin0, EmojicoinLP0>(
+            emojicoin_dot_fun::swap<Coin0, LP0>(
                 swapper,
                 market_address_1,
                 input_amount,
@@ -381,7 +373,7 @@ module arena::emojicoin_arena {
 
             // Get amount of emojicoin 1 recieved by buying it with APT proceeds.
             let swap_to_emojicoin_1 =
-                emojicoin_dot_fun::simulate_swap<Emojicoin1, EmojicoinLP1>(
+                emojicoin_dot_fun::simulate_swap<Coin1, LP1>(
                     swapper_address,
                     market_address_1,
                     net_proceeds_in_apt,
@@ -409,7 +401,7 @@ module arena::emojicoin_arena {
                 _,
                 _
             ) = emojicoin_dot_fun::unpack_swap(swap_to_emojicoin_1);
-            emojicoin_dot_fun::swap<Emojicoin1, EmojicoinLP1>(
+            emojicoin_dot_fun::swap<Coin1, LP1>(
                 swapper,
                 market_address_1,
                 net_proceeds_in_apt,
@@ -426,10 +418,7 @@ module arena::emojicoin_arena {
             );
         };
 
-        if (exit_once_done)
-            exit_inner<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
-                swapper, melee_id, false
-            );
+        if (exit_once_done) exit_inner<Coin0, LP0, Coin1, LP1>(swapper, melee_id, false);
     }
 
     fun init_module(arena: &signer) {
@@ -490,16 +479,14 @@ module arena::emojicoin_arena {
         registry_ref.melees_by_id.borrow(n_melees)
     }
 
-    inline fun exit_inner<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>(
+    inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
         participant: &signer, melee_id: u64, may_have_to_pay_tap_out_fee: bool
     ) acquires Registry {
         let participant_address = signer::address_of(participant);
         // Only allow exit if user has corresponding melee resourcce and melee ID matches.
-        if (exists<MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>>(
-            participant_address
-        )) {
+        if (exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(participant_address)) {
             let escrow_ref_mut =
-                &mut MeleeEscrow<Emojicoin0, EmojicoinLP0, Emojicoin1, EmojicoinLP1>[participant_address];
+                &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[participant_address];
             // Only allow exit if melee ID matches.
             if (escrow_ref_mut.melee_id == melee_id) {
                 // Update available rewards and transfer tap out fee to vault if applicable.
