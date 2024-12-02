@@ -3,6 +3,7 @@ import { StyledLink, RouterLink } from "./styled";
 import { EXTERNAL_LINK_PROPS } from "./const";
 import { type LinkProps } from "./types";
 import { toExplorerLink } from "lib/utils/explorer-link";
+import { type AnyNumberString } from "@sdk-types";
 
 export const ExplorerLink = ({
   value,
@@ -12,7 +13,7 @@ export const ExplorerLink = ({
   style,
   className,
 }: {
-  value: string | number;
+  value: AnyNumberString;
   type: "acc" | "account" | "transaction" | "version" | "txn";
   children: React.ReactNode;
   network?: string;

@@ -1,36 +1,31 @@
 import { createStore } from "zustand/vanilla";
 import { immer } from "zustand/middleware/immer";
 import { APTOS_NETWORK } from "lib/env";
-import type { WritableDraft } from "immer";
+import { MS_IN_ONE_DAY } from "components/charts/const";
 
 export type ANSValue = { name: string | null; expiry: number };
 export type ANSMap = Map<string, ANSValue>;
 export type ANSPromiseMap = Map<string, Promise<void>>;
-
 export type NameState = {
   names: ANSMap;
 };
 export type NameActions = {
   /**
-   * Return a map of addresses to names.
+   * Resolves an ANS name for an address. If it's not in local storage, it will be fetched.
    *
-   * The returned map might not contain the values right away, as it takes time to make network requests.
-   */
-  getMapWithNames: (addresses: string[]) => ANSMap;
-  /**
-   * Return a function that takes an address and returns the text identifying the wallet.
-   *
-   * It will return the address if no name is found.
+   * It will return the input address if no name is found.
    * It will return a name otherwise.
-   *
-   * The returned function might not be able to resolve all names right away, as it takes time to make network requests.
    */
-  getResolverWithNames: (addresses: string[]) => (address: string) => string;
+  resolveAddress: (address: string) => void;
 };
 export type NameStore = NameState & NameActions;
 
 export const LOCALSTORAGE_ANS_KEY = `${APTOS_NETWORK}-ans-names`;
-export const ANS_CACHE_TIME = 60 * 60 * 24 * 7 * 1000; // One week
+// Cache resolved names for one week.
+export const ANS_CACHE_TIME = MS_IN_ONE_DAY * 7;
+// Cache unresolved names for one day. Otherwise people who register new names wouldn't see them
+// get updated for a week.
+export const ANS_NULL_CACHE_TIME = MS_IN_ONE_DAY;
 export const MAX_ITEMS_IN_CACHE = 3000;
 
 /**
@@ -118,54 +113,31 @@ export const initializeEventStore = (): NameState => {
 
 export const defaultState: NameState = initializeEventStore();
 
-type Set = (
-  nextStateOrUpdater: NameStore | Partial<NameStore> | ((state: WritableDraft<NameStore>) => void),
-  shouldReplace?: boolean | undefined
-) => void;
-type Get = () => NameStore;
-
-const getNameMap = (set: Set, get: Get, addresses: string[]): ANSMap => {
-  const map = get().names;
-  const uncachedNames: string[] = [];
-  for (const address of addresses) {
-    if (!map.has(address)) {
-      uncachedNames.push(address);
-    }
-  }
-  if (uncachedNames.length > 0) {
-    for (const address of uncachedNames) {
-      if (!ansPromiseMap.has(address)) {
-        const x = fetchANSName(address)
-          .then((res) => ({
-            name: res,
-            expiry: new Date().getTime() + ANS_CACHE_TIME,
-          }))
-          .then((res) => {
-            set((state) => {
-              state.names.set(address, res);
-              ansPromiseMap.delete(address);
-              if (ansPromiseMap.size === 0) {
-                saveANSMap(state.names);
-              }
-            });
-          });
-        ansPromiseMap.set(address, x);
-      }
-    }
-  }
-  return get().names;
-};
-
 export const createNameStore = (initialState: NameState = defaultState) => {
   return createStore<NameStore>()(
     immer((set, get) => ({
       ...initialState,
-      getMapWithNames: (addresses) => {
-        return getNameMap(set, get, addresses);
-      },
-      getResolverWithNames: (addresses) => {
-        const map = getNameMap(set, get, addresses);
-        return (address) => map.get(address)?.name ?? address;
+      resolveAddress: (address) => {
+        if (get().names.has(address)) {
+          return;
+        }
+        if (!ansPromiseMap.has(address)) {
+          const ansPromise = fetchANSName(address)
+            .then((res) => ({
+              name: res,
+              expiry: new Date().getTime() + (res ? ANS_CACHE_TIME : ANS_NULL_CACHE_TIME),
+            }))
+            .then((ansValue) => {
+              set((state) => {
+                state.names.set(address, ansValue);
+                ansPromiseMap.delete(address);
+                if (ansPromiseMap.size === 0) {
+                  saveANSMap(state.names);
+                }
+              });
+            });
+          ansPromiseMap.set(address, ansPromise);
+        }
       },
     }))
   );
