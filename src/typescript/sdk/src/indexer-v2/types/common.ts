@@ -30,10 +30,3 @@ export type PeriodicStateEventQueryArgs = {
   end: Date;
   period: Period;
 } & Omit<MarketStateQueryArgs, "page" | "pageSize" | "searchEmojis" | "sortBy" | "orderBy">;
-
-export type PeriodicStateEventToQueryArgs = {
-  marketID: AnyNumberString;
-  amount: number;
-  end: Date;
-  period: Period;
-} & Omit<MarketStateQueryArgs, "page" | "pageSize" | "searchEmojis" | "sortBy" | "orderBy">;
