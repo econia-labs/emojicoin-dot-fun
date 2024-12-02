@@ -1,4 +1,4 @@
-module rewards::emojicoin_dot_fun_arena {
+module arena::emojicoin_arena {
 
     use aptos_framework::account::{Self, SignerCapability};
     use aptos_framework::aptos_account;
