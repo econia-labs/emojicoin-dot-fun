@@ -1,5 +1,5 @@
 import { isPeriod, type Period, PeriodDuration, periodEnumToRawDuration } from "@sdk/index";
-import { isNumber } from "lib/utils";
+import { isNumber } from "utils";
 
 /**
  * Parcel size is the amount of candlestick periods that will be in a single parcel.
