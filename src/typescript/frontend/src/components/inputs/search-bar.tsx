@@ -36,7 +36,7 @@ export const Border = styled(Flex)`
   }
 `;
 
-export const SearchBar: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
+export const SearchBar = () => {
   const setMode = useEmojiPicker((state) => state.setMode);
   useEffect(() => {
     setMode("search");
@@ -63,7 +63,6 @@ export const SearchBar: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => 
               <EmojiPickerWithInput
                 handleClick={async () => {}}
                 inputClassName="search-picker border-none"
-                geoblocked={geoblocked}
                 filterEmojis={filterBigEmojis}
               />
             </Flex>

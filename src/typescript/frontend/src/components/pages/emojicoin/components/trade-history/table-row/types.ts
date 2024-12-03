@@ -1,3 +1,5 @@
+import { type AnyNumberString } from "@sdk-types";
+
 export type TableRowDesktopProps = {
   item: {
     rankIcon: string;
@@ -7,7 +9,7 @@ export type TableRowDesktopProps = {
     type: string;
     priceQ64: string;
     date: Date;
-    version: number;
+    version: AnyNumberString;
     swapper: string;
   };
   showBorder: boolean;

@@ -16,10 +16,22 @@
       ]
     },
     "build:debug": {
-      "dependsOn": [
-        "build"
-      ],
-      "outputs": []
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
+    },
+    "build:no-checks": {
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
+    },
+    "build:test": {
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
     },
     "check": {
       "outputs": []
@@ -30,10 +42,6 @@
     "dev": {
       "cache": false,
       "persistent": true
-    },
-    "e2e:frontend": {
-      "cache": false,
-      "outputs": []
     },
     "format": {
       "outputs": []
@@ -51,9 +59,6 @@
       "outputs": []
     },
     "start": {
-      "dependsOn": [
-        "build"
-      ],
       "outputs": [],
       "persistent": true
     },
@@ -64,15 +69,19 @@
       "cache": false,
       "outputs": []
     },
-    "test:parallel": {
+    "test:e2e": {
       "cache": false,
       "outputs": []
     },
-    "test:sequential": {
+    "test:sdk:parallel": {
       "cache": false,
       "outputs": []
     },
-    "unit-test": {
+    "test:sdk:sequential": {
+      "cache": false,
+      "outputs": []
+    },
+    "test:unit": {
       "cache": false,
       "outputs": []
     }

@@ -10,7 +10,7 @@ import type {
 } from "../../emojicoin_dot_fun/types";
 import { type Flatten } from "../../types";
 
-type PeriodTypeFromDatabase =
+export type PeriodTypeFromDatabase =
   | "period_1m"
   | "period_5m"
   | "period_15m"
@@ -282,12 +282,13 @@ export enum TableName {
   Market1MPeriodsInLastDay = "market_1m_periods_in_last_day",
   MarketState = "market_state",
   ProcessorStatus = "processor_status",
+  PriceFeed = "price_feed",
 }
 
 export enum DatabaseRpc {
   UserPools = "user_pools",
   PriceFeed = "price_feed",
-  RandomNames = "random_names",
+  RandomSymbols = "random_symbols",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -352,6 +353,12 @@ export type DatabaseJsonType = {
     last_updated: PostgresTimestamp;
     last_transaction_timestamp: PostgresTimestamp;
   };
+  [TableName.PriceFeed]: Flatten<
+    DatabaseJsonType["market_state"] & {
+      open_price_q64: Uint64String;
+      close_price_q64: Uint64String;
+    }
+  >;
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
@@ -359,13 +366,7 @@ export type DatabaseJsonType = {
       ProcessedFields &
       UserLPCoinBalance & { daily_volume: Uint128String }
   >;
-  [DatabaseRpc.PriceFeed]: Flatten<
-    Omit<MarketAndStateMetadata, "bump_time" | "market_nonce" | "trigger"> & {
-      open_price_q64: Uint64String;
-      close_price_q64: Uint64String;
-    }
-  >;
-  [DatabaseRpc.RandomNames]: { emojis: string };
+  [DatabaseRpc.RandomSymbols]: { emojis: string };
 };
 
 type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
@@ -379,8 +380,9 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.MarketDailyVolume] &
   DatabaseJsonType[TableName.Market1MPeriodsInLastDay] &
   DatabaseJsonType[TableName.MarketState] &
+  DatabaseJsonType[TableName.PriceFeed] &
   DatabaseJsonType[TableName.ProcessorStatus] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
-  DatabaseJsonType[DatabaseRpc.RandomNames];
+  DatabaseJsonType[DatabaseRpc.RandomSymbols];
 
 export type AnyColumnName = keyof Columns;

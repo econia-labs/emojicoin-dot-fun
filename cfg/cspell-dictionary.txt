@@ -1,3 +1,4 @@
+ADBEEF
 aland
 allowlister
 aptn
@@ -11,6 +12,7 @@ bouvet
 buildtime
 buildx
 burkina
+bytea
 caicos
 clamm
 clipperton
@@ -25,6 +27,7 @@ dasharray
 defi
 devnet
 diya
+dockerenv
 dockerhub
 econia
 econialabs

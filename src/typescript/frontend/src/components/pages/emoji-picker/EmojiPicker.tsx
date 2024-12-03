@@ -4,20 +4,11 @@
 import { type HTMLAttributes, Suspense, useEffect, type PointerEventHandler } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
-import { init, SearchIndex } from "emoji-mart";
+import { SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { ECONIA_BLUE } from "theme/colors";
 import RoundButton from "@icons/Minimize";
-
-// This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
-// TBH, we should probably just fork the library.
-const data = fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then(
-  (res) =>
-    res.json().then((data) => {
-      return data as EmojiMartData;
-    })
-);
 
 export type SearchResult = Array<EmojiPickerSearchData>;
 
@@ -40,17 +31,6 @@ export default function EmojiPicker(
   const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
   const host = document.querySelector("em-emoji-picker");
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
-
-  // Load the data from the emoji picker library and then extract the valid chat emojis from it.
-  // This is why it's not necessary to build/import a `chat-emojis.json` set, even though there is `symbol-emojis.json`.
-  // NOTE: We don't verify that the length of this set is equal to the number of valid chat emojis in the Move contract.
-  useEffect(() => {
-    data.then((d) => {
-      init({ set: "native", data: d });
-    });
-
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
 
   useEffect(() => {
     setPickerRef(host as HTMLDivElement);
@@ -177,7 +157,7 @@ export default function EmojiPicker(
     }
   }, []);
 
-  const { drag, ...propsRest } = props;
+  const { drag, filterEmojis, ...propsRest } = props;
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -200,7 +180,7 @@ export default function EmojiPicker(
             theme="dark"
             perLine={8}
             exceptEmojis={[]}
-            filterEmojis={props.filterEmojis}
+            filterEmojis={filterEmojis}
             onEmojiSelect={(v: EmojiSelectorData) => {
               const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
               insertEmojiTextInput([newEmoji]);

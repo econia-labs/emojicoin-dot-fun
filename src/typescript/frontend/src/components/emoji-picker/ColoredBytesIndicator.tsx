@@ -1,7 +1,7 @@
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { MAX_NUM_CHAT_EMOJIS, MAX_SYMBOL_LENGTH } from "components/pages/emoji-picker/const";
-import { AnimatedStatusIndicator } from "components/pages/launch-emojicoin/animated-status-indicator";
+import { AnimatedLoadingBoxes } from "components/pages/launch-emojicoin/animated-loading-boxes";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -52,7 +52,7 @@ export const MarketValidityIndicator = ({
               <div className="text-error">Too many bytes</div>
             ) : null
           ) : typeof registered === "undefined" ? (
-            <AnimatedStatusIndicator numSquares={4} delay={0} />
+            <AnimatedLoadingBoxes numSquares={4} />
           ) : registered ? (
             <div className="text-error">Already Registered</div>
           ) : (

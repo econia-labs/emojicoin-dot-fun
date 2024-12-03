@@ -1,7 +1,9 @@
 "use client";
 
+// cspell:word bitget
 // cspell:word martianwallet
 // cspell:word pontem
+// cspell:word okwallet
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "styles";
@@ -23,27 +25,60 @@ import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
 import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
+import { BitgetWallet } from "@bitget-wallet/aptos-wallet-adapter";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
+import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
 import { isMobile, isTablet } from "react-device-detect";
+import { getAptosApiKey } from "@sdk/const";
+import type { EmojiMartData } from "components/pages/emoji-picker/types";
+import { init } from "emoji-mart";
+import { HeaderSpacer } from "components/header-spacer";
+import { GeoblockedBanner } from "components/geoblocking";
 
 enableMapSet();
 
 const queryClient = new QueryClient();
 
-const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
-  children,
-  geoblocked,
-}) => {
+// This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
+// TBH, we should probably just fork the library.
+const data = fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then(
+  (res) =>
+    res.json().then((data) => {
+      return data as EmojiMartData;
+    })
+);
+
+const ThemedApp = ({ children }) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
 
   const isMobileMenuOpen = isOpen && !isDesktop;
 
-  const wallets = useMemo(() => [new PontemWallet(), new RiseWallet(), new MartianWallet()], []);
+  const wallets = useMemo(
+    () => [
+      new BitgetWallet(),
+      new PontemWallet(),
+      new RiseWallet(),
+      new MartianWallet(),
+      new OKXWallet(),
+    ],
+    []
+  );
+
+  // Load the data from the emoji picker library and then extract the valid chat emojis from it.
+  // This is why it's not necessary to build/import a `chat-emojis.json` set, even though there is `symbol-emojis.json`.
+  // NOTE: We don't verify that the length of this set is equal to the number of valid chat emojis in the Move contract.
+  useEffect(() => {
+    data.then((d) => {
+      init({ set: "native", data: d });
+    });
+
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -52,11 +87,14 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
           <UserSettingsProvider>
             <AptosWalletAdapterProvider
               plugins={wallets}
-              autoConnect={false}
-              dappConfig={{ network: APTOS_NETWORK }}
+              autoConnect={true}
+              dappConfig={{
+                aptosApiKey: getAptosApiKey(),
+                network: APTOS_NETWORK,
+              }}
             >
               <WalletModalContextProvider>
-                <AptosContextProvider geoblocked={geoblocked}>
+                <AptosContextProvider>
                   <EmojiPickerProvider
                     initialState={{
                       nativePicker: isMobile || isTablet,
@@ -67,11 +105,9 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
                     <Suspense fallback={<Loader />}>
                       <StyledToaster />
                       <ContentWrapper>
-                        <Header
-                          isOpen={isMobileMenuOpen}
-                          setIsOpen={setIsOpen}
-                          geoblocked={geoblocked}
-                        />
+                        <Header isOpen={isMobileMenuOpen} setIsOpen={setIsOpen} />
+                        <HeaderSpacer />
+                        <GeoblockedBanner />
                         {children}
                         <Footer />
                       </ContentWrapper>
@@ -87,10 +123,7 @@ const ThemedApp: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
   );
 };
 
-const Providers: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = ({
-  children,
-  geoblocked,
-}) => {
+const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [p, setP] = useState(false);
 
   // Hack for now because I'm unsure how to get rid of the warning.
@@ -102,7 +135,7 @@ const Providers: React.FC<{ children: React.ReactNode; geoblocked: boolean }> = 
   return (
     p && (
       <ThemeContextProvider>
-        <ThemedApp geoblocked={geoblocked}>{children}</ThemedApp>
+        <ThemedApp>{children}</ThemedApp>
       </ThemeContextProvider>
     )
   );

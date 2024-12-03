@@ -22,14 +22,14 @@ export const createSession = async (address: AccountAddressString) => {
 
   cookies().set(COOKIE_FOR_HASHED_ADDRESS, hashed, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" || process.env.VERCEL === "1",
     maxAge: COOKIE_LENGTH,
     path: "/",
   });
 
   cookies().set(COOKIE_FOR_ACCOUNT_ADDRESS, address, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" || process.env.VERCEL === "1",
     maxAge: COOKIE_LENGTH,
     path: "/",
   });

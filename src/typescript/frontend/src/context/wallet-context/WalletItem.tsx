@@ -1,3 +1,4 @@
+// cspell:word bitget
 // cspell:word pontem
 import {
   type Wallet,
@@ -11,8 +12,12 @@ import PetraIcon from "@icons/PetraIcon";
 import PontemIcon from "@icons/PontemIcon";
 import RiseIcon from "@icons/RiseIcon";
 import NightlyIcon from "@icons/NightlyIcon";
+import OKXIcon from "@icons/OKXIcon";
 import { Arrow } from "components/svg";
 import { useScramble } from "use-scramble";
+import { Emoji } from "utils/emoji";
+import { emoji } from "utils";
+import BitgetIcon from "@icons/BitgetIcon";
 
 const IconProps = {
   width: 28,
@@ -21,12 +26,13 @@ const IconProps = {
 };
 
 export const WALLET_ICON: { [key: string]: ReactElement } = {
+  "okx wallet": <OKXIcon {...IconProps} />,
   petra: <PetraIcon {...IconProps} />,
+  "bitget wallet": <BitgetIcon {...IconProps} />,
+  nightly: <NightlyIcon {...IconProps} className="text-ec-blue" />,
   pontem: <PontemIcon {...IconProps} />,
   martian: <MartianIcon {...IconProps} />,
   rise: <RiseIcon {...IconProps} />,
-  // Nightly isn't working currently- exclude by making the key different from the wallet name.
-  _nightly: <NightlyIcon {...IconProps} />,
 };
 
 export const walletSort = (
@@ -38,7 +44,9 @@ export const walletSort = (
 };
 
 export const isSupportedWallet = (s: string) => {
-  return Object.keys(WALLET_ICON).includes(s.toLowerCase());
+  return Object.keys(WALLET_ICON)
+    .map((w) => w.toLowerCase())
+    .includes(s.toLowerCase());
 };
 
 const WalletNameClassName = "ml-4 font-pixelar text-[20px] text-black uppercase flex";
@@ -88,11 +96,15 @@ const ScrambledRow: React.FC<ScrambledProps> = ({ text, active, hover, installed
   return <p ref={ref} />;
 };
 
-export const WalletItem: React.FC<{
+export const WalletItem = ({
+  wallet,
+  className,
+  onClick,
+}: {
   wallet: Wallet | AptosStandardSupportedWallet;
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
-}> = ({ wallet, className, onClick }) => {
+}) => {
   const [hover, setHover] = useState<boolean>(false);
   const { wallet: current } = useWallet();
 
@@ -117,12 +129,14 @@ export const WalletItem: React.FC<{
       <div className={ArrowDivClassName}>
         {wallet.name === current?.name ? (
           <>
-            <p className="absolute bottom-[-2px] right-[5px] mr-[1ch] inline-flex group-hover:hidden animate-flicker drop-shadow-text">
-              {"⚡"}
-            </p>
-            <p className="absolute bottom-[-2px] right-[6px] mr-[1ch] hidden group-hover:inline-flex scale-[0.75]">
-              {"❌"}
-            </p>
+            <Emoji
+              className="absolute bottom-[-2px] right-[5px] mr-[1ch] inline-flex group-hover:hidden animate-flicker drop-shadow-text"
+              emojis={emoji("high voltage")}
+            />
+            <Emoji
+              className="absolute bottom-[-2px] right-[6px] mr-[1ch] hidden group-hover:inline-flex scale-[0.75]"
+              emojis={emoji("cross mark")}
+            />
           </>
         ) : (
           <Arrow width={16} height={19} className="fill-black mr-[1ch]" />

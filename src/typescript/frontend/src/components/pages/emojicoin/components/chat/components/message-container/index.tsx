@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 
 import { FlexGap } from "@containers";
 import {
@@ -13,28 +13,20 @@ import { EXTERNAL_LINK_PROPS } from "components/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { formatDisplayName } from "@sdk/utils";
-import { useNameStore } from "context/event-store-context";
 import { motion } from "framer-motion";
+import { Emoji } from "utils/emoji";
+import { useNameResolver } from "@hooks/use-name-resolver";
 
-const MessageContainer: React.FC<MessageContainerProps> = ({
-  index,
-  message,
-  shouldAnimateAsInsertion,
-}) => {
-  const { account } = useAptos();
-  const [fromAnotherUser, setFromAnotherUser] = useState(true);
-  const nameResolver = useNameStore((s) =>
-    s.getResolverWithNames(account?.address ? [account.address] : [])
+const MessageContainer = ({ index, message, shouldAnimateAsInsertion }: MessageContainerProps) => {
+  const { addressName: connectedWalletName } = useAptos();
+  const senderAddressName = useNameResolver(message.sender);
+  const { fromAnotherUser, displayName } = useMemo(
+    () => ({
+      fromAnotherUser: senderAddressName === connectedWalletName,
+      displayName: formatDisplayName(senderAddressName),
+    }),
+    [connectedWalletName, senderAddressName]
   );
-  useEffect(() => {
-    if (!account) {
-      setFromAnotherUser(true);
-      return;
-    }
-    const selfName = nameResolver(account.address);
-    setFromAnotherUser(selfName !== message.sender);
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [account, message]);
 
   return (
     <motion.div
@@ -53,7 +45,11 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
       <StyledMessageContainer layout fromAnotherUser={fromAnotherUser}>
         <StyledMessageWrapper layout fromAnotherUser={fromAnotherUser}>
           <StyledMessageInner>
-            <span className="pt-[1ch] p-[0.25ch] text-xl tracking-widest">{message.text}</span>
+            <Emoji
+              className="pt-[1ch] p-[0.25ch] text-xl tracking-widest"
+              style={{ wordBreak: "break-word" }}
+              emojis={message.text}
+            />
             <Arrow />
           </StyledMessageInner>
 
@@ -64,12 +60,13 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
                 href={toExplorerLink({ value: message.version, linkType: "version" })}
               >
                 <span className="pixel-heading-4 text-light-gray uppercase hover:underline">
-                  {formatDisplayName(message.sender)}
+                  {displayName}
                 </span>
               </a>
-              <span className="pixel-heading-4 text-light-gray uppercase">
-                {message.senderRank}
-              </span>
+              <Emoji
+                className="pixel-heading-4 text-light-gray uppercase"
+                emojis={message.senderRank}
+              />
             </FlexGap>
           </StyledUserNameWrapper>
         </StyledMessageWrapper>

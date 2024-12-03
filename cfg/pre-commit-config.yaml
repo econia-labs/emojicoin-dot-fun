@@ -111,9 +111,19 @@ repos:
     - 'python'
   -
     entry: |
+      pnpm run format:check
+    files: 'src/typescript'
+    id: 'ts-format'
+    language: 'node'
+    name: 'format typescript'
+    pass_filenames: false
+    types:
+    - 'directory'
+  -
+    entry: |
       pnpm run lint
     files: 'src/typescript'
-    id: 'pnpm'
+    id: 'ts-lint'
     language: 'node'
     name: 'lint typescript'
     pass_filenames: false

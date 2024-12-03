@@ -5,7 +5,7 @@
 # the `yq` releases on apt are outdated and technically deprecated.
 FROM mikefarah/yq:4.44.3 AS yq
 
-FROM econialabs/aptos-cli:4.1.0
+FROM econialabs/aptos-cli:4.4.0
 
 COPY --from=yq /usr/bin/yq /usr/bin/yq
 

@@ -107,10 +107,16 @@ Parameters:
   BastionHostAmiId:
     Default: 'ami-030cb86c12b18e236'
     Type: 'AWS::EC2::Image::Id'
+  BrokerCpu:
+    Default: 256
+    Type: 'Number'
   BrokerImageVersion:
     Type: 'String'
+  BrokerMemory:
+    Default: 512
+    Type: 'Number'
   DbMaxCapacity:
-    Default: 4
+    Default: 1
     Type: 'Number'
   DbMinCapacity:
     Default: 0.5
@@ -206,13 +212,26 @@ Parameters:
     AllowedValues:
     - 'mainnet'
     - 'testnet'
+    - 'devnet'
     Type: 'String'
   PostgrestImageVersion:
     Default: 'v12.2.3'
     Type: 'String'
+  PostgrestLogLevel:
+    Default: 'info'
+    Type: 'String'
   PostgrestMaxRows:
     Default: 500
     Type: 'Number'
+  PostgrestPlanEnabled:
+    Default: 'true'
+    Type: 'String'
+  PostgrestServerTimingEnabled:
+    Default: 'true'
+    Type: 'String'
+  PostgrestServerTraceHeader:
+    Default: 'X-Request-Id'
+    Type: 'String'
   ProcessorImageVersion:
     Type: 'String'
   VpcStackName:
@@ -641,10 +660,10 @@ Resources:
           - 'Constants'
           - 'Networking'
           - 'BrokerPort'
-      Cpu: '256'
+      Cpu: !Ref 'BrokerCpu'
       ExecutionRoleArn: !GetAtt 'ContainerRole.Arn'
       Family: !Ref 'AWS::StackName'
-      Memory: '512'
+      Memory: !Ref 'BrokerMemory'
       NetworkMode: 'awsvpc'
       RequiresCompatibilities:
       - 'FARGATE'
@@ -663,6 +682,10 @@ Resources:
   # Cluster for running ECS containers.
   ContainerCluster:
     Condition: 'DeployContainers'
+    Properties:
+      ClusterSettings:
+      - Name: 'containerInsights'
+        Value: 'enabled'
     Type: 'AWS::ECS::Cluster'
   # Log group for ECS task logging.
   ContainerLogGroup:
@@ -827,7 +850,9 @@ Resources:
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
+      EnablePerformanceInsights: true
       Engine: 'aurora-postgresql'
+      PerformanceInsightsRetentionPeriod: 31
     Type: 'AWS::RDS::DBInstance'
   # Replica (reader) database instance.
   DbInstanceReplica:
@@ -835,7 +860,9 @@ Resources:
     Properties:
       DBClusterIdentifier: !Ref 'DbCluster'
       DBInstanceClass: 'db.serverless'
+      EnablePerformanceInsights: true
       Engine: 'aurora-postgresql'
+      PerformanceInsightsRetentionPeriod: 31
     Type: 'AWS::RDS::DBInstance'
   # Security group for the database itself.
   DbSecurityGroup:
@@ -1233,6 +1260,14 @@ Resources:
           Value: 'web_anon'
         - Name: 'PGRST_DB_MAX_ROWS'
           Value: !Ref 'PostgrestMaxRows'
+        - Name: 'PGRST_LOG_LEVEL'
+          Value: !Ref 'PostgrestLogLevel'
+        - Name: 'PGRST_DB_PLAN_ENABLED'
+          Value: !Ref 'PostgrestPlanEnabled'
+        - Name: 'PGRST_SERVER_TIMING_ENABLED'
+          Value: !Ref 'PostgrestServerTimingEnabled'
+        - Name: 'PGRST_SERVER_TRACE_HEADER'
+          Value: !Ref 'PostgrestServerTraceHeader'
         Image: !Join
         - ''
         - - !Ref 'AWS::AccountId'

@@ -7,7 +7,7 @@ import {
   U8,
   Bool,
   type Account,
-  Aptos,
+  type Aptos,
   type AptosConfig,
   type AccountAddressInput,
   type HexInput,
@@ -18,7 +18,7 @@ import {
   type UserTransactionResponse,
   type LedgerVersionArg,
   SimpleTransaction,
-  type Ed25519PublicKey,
+  type PublicKey,
 } from "@aptos-labs/ts-sdk";
 import {
   type Option,
@@ -35,6 +35,7 @@ import {
 } from "./payload-builders";
 import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../const";
 import type JsonTypes from "../types/json-types";
+import { getAptosClient } from "../utils/aptos-client";
 
 export type ChatPayloadMoveArguments = {
   marketAddress: AccountAddress;
@@ -112,7 +113,7 @@ export class Chat extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -219,7 +220,7 @@ export class ProvideLiquidity extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -302,12 +303,12 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
   static async getGasCost(args: {
     aptosConfig: AptosConfig;
     registrant: AccountAddressInput; // &signer
-    registrantPubKey: Ed25519PublicKey;
+    registrantPubKey: PublicKey;
     emojis: Array<HexInput>; // vector<vector<u8>>
   }): Promise<{ data: { amount: number; unitPrice: number }; error: boolean }> {
     const { aptosConfig } = args;
 
-    const aptos = new Aptos(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     const rawTransaction = await this.builder({
       ...args,
       integrator: AccountAddress.ONE,
@@ -347,7 +348,7 @@ export class RegisterMarket extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -452,7 +453,7 @@ export class RemoveLiquidity extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -584,7 +585,7 @@ export class Swap extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 
@@ -615,6 +616,39 @@ export class Swap extends EntryFunctionPayloadBuilder {
       options: waitForTransactionOptions,
     });
     return response;
+  }
+
+  static async simulate(args: {
+    aptosConfig: AptosConfig;
+    swapper: AccountAddressInput; // &signer
+    swapperPubKey: PublicKey; // &signer
+    marketAddress: AccountAddressInput; // address
+    inputAmount: Uint64; // u64
+    isSell: boolean; // bool
+    integrator: AccountAddressInput; // address
+    integratorFeeRateBPs: Uint8; // u8
+    minOutputAmount: Uint64; // u64
+    typeTags: [TypeTagInput, TypeTagInput]; // [Emojicoin, EmojicoinLP],
+    feePayer?: AccountAddressInput;
+    options?: InputGenerateTransactionOptions;
+  }): Promise<UserTransactionResponse> {
+    const { aptosConfig } = args;
+
+    const aptos = getAptosClient(aptosConfig);
+    const rawTransaction = await this.builder({
+      ...args,
+      integrator: AccountAddress.ONE,
+    }).then((res) => res.rawTransactionInput.rawTransaction);
+    const transaction = new SimpleTransaction(rawTransaction);
+    const [userTransactionResponse] = await aptos.transaction.simulate.simple({
+      signerPublicKey: args.swapperPubKey,
+      transaction,
+      options: {
+        estimateGasUnitPrice: true,
+        estimateMaxGasAmount: true,
+      },
+    });
+    return userTransactionResponse;
   }
 }
 
@@ -700,7 +734,7 @@ export class SwapWithRewards extends EntryFunctionPayloadBuilder {
       options,
       feePayerAddress: feePayer,
     });
-    const aptos = new Aptos(aptosConfig);
+    const aptos = getAptosClient(aptosConfig);
     return new EntryFunctionTransactionBuilder(payloadBuilder, aptos, rawTransactionInput);
   }
 

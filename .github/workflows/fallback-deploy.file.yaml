@@ -1,0 +1,37 @@
+---
+jobs:
+  verify-fallback-deploy-file:
+    env:
+      FALLBACK_FILE: 'src/cloud-formation/deploy-indexer-fallback.yaml'
+      PRODUCTION_FILE: 'src/cloud-formation/deploy-indexer-production.yaml'
+      YQ_BASE_URL: 'https://github.com/mikefarah/yq/releases/download'
+      YQ_VERSION: 'v4.44.5'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v4'
+    - name: 'Install yaml parsing tool'
+      run: |
+        YQ_BINARY="${YQ_BASE_URL}/${YQ_VERSION}/yq_linux_amd64"
+        sudo wget -O /usr/local/bin/yq "$YQ_BINARY"
+        sudo chmod +x /usr/local/bin/yq
+    - name: 'Verify fallback and production files same except `Environment`'
+      run: |
+        diff \
+        <(yq 'del(.parameters.Environment)' "$PRODUCTION_FILE") \
+        <(yq 'del(.parameters.Environment)' "$FALLBACK_FILE")
+    - name: 'Verify `Environment` in fallback and production files.'
+      run: |
+        PROD_ENV=$(yq '.parameters.Environment' "$PRODUCTION_FILE")
+        FALLBACK_ENV=$(yq '.parameters.Environment' "$FALLBACK_FILE")
+        [ "$PROD_ENV" = 'production' ] || exit 1
+        [ "$FALLBACK_ENV" = 'fallback' ] || exit 1
+name: 'Verify fallback stack deployment file'
+'on':
+  pull_request: null
+  push:
+    branches:
+    - 'main'
+    - 'fallback'
+    - 'production'
+  workflow_dispatch: null
+...

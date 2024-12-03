@@ -17,6 +17,7 @@ import {
 import { EMOJICOIN_INDEXER_URL } from "../../../server/env";
 import { TableName } from "../../../indexer-v2/types/json-types";
 import { readFileSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 
 const LOCAL_COMPOSE_PATH = path.join(getGitRoot(), "src/docker", "compose.local.yaml");
 const LOCAL_ENV_PATH = path.join(getGitRoot(), "src/docker", "example.local.env");
@@ -73,8 +74,10 @@ export class DockerTestHarness {
   /**
    * Stops the Docker containers.
    */
-  static async stop() {
-    await execPromise(`docker compose -f ${LOCAL_COMPOSE_PATH} stop`);
+  static async stop({ frontend }: { frontend: boolean }) {
+    await execPromise(
+      `docker compose -f ${LOCAL_COMPOSE_PATH} ${frontend ? "--profile frontend" : ""} --env-file ${LOCAL_ENV_PATH} stop`
+    );
     const process = Number(readFileSync(TMP_PID_FILE_PATH, { encoding: "utf-8" }));
     if (process) {
       kill(process);
@@ -84,8 +87,14 @@ export class DockerTestHarness {
   /**
    * Calls the Docker helper script to start the containers.
    */
-  static async run(frontend: boolean, filterLogsFrom: ContainerName[] = []) {
-    await DockerTestHarness.start(frontend, filterLogsFrom);
+  static async run({
+    frontend,
+    filterLogsFrom = [],
+  }: {
+    frontend: boolean;
+    filterLogsFrom?: ContainerName[];
+  }) {
+    await DockerTestHarness.start({ frontend, filterLogsFrom });
     const promises = [
       DockerTestHarness.waitForPrimaryService(frontend),
       DockerTestHarness.waitForDeployer(),
@@ -97,11 +106,26 @@ export class DockerTestHarness {
   /**
    * Starts a completely new Docker environment for the test harness.
    */
-  static async start(frontend: boolean, filterLogsFrom: ContainerName[]) {
+  static async start({
+    frontend,
+    filterLogsFrom,
+  }: {
+    frontend: boolean;
+    filterLogsFrom: ContainerName[];
+  }) {
     // Ensure that we have a fresh Docker environment before starting the test harness.
     await DockerTestHarness.remove();
 
     const command = "docker";
+
+    // Always build the frontend container if we're using it.
+    if (frontend) {
+      execSync(
+        `docker compose -f ${LOCAL_COMPOSE_PATH} --env-file ${LOCAL_ENV_PATH} build frontend`,
+        { stdio: "inherit" }
+      );
+    }
+
     const args = [
       "compose",
       "-f",

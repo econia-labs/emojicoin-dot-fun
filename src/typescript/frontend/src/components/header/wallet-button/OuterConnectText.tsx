@@ -1,3 +1,6 @@
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
+
 export const OuterConnectText = ({
   side,
   connected,
@@ -15,7 +18,10 @@ export const OuterConnectText = ({
     }
     return (
       <div className={side === "left" ? "pr-2.5" : "pl-2.5"}>
-        <span className="text-base flex mt-2.5 animate-flicker drop-shadow-voltage">{"⚡"}</span>
+        <Emoji
+          className="text-base flex mt-2.5 animate-flicker drop-shadow-voltage"
+          emojis={emoji("high voltage")}
+        />
       </div>
     );
   } else {

@@ -5,9 +5,9 @@ import { postgrest } from "../client";
 import { queryHelper } from "../utils";
 import { DatabaseTypeConverter } from "../../types";
 
-const selectRandomNames = () => postgrest.rpc(DatabaseRpc.RandomNames, undefined, { get: true });
+const selectRandomSymbols = () => postgrest.rpc(DatabaseRpc.RandomSymbols, undefined, { get: true });
 
-export const fetchRandomNames = queryHelper(
-  selectRandomNames,
-  DatabaseTypeConverter[DatabaseRpc.RandomNames]
+export const fetchRandomSymbols = queryHelper(
+  selectRandomSymbols,
+  DatabaseTypeConverter[DatabaseRpc.RandomSymbols]
 );

@@ -1,7 +1,7 @@
 import { type OrderByStrings } from "@sdk/queries/const";
 import { toMarketDataSortByHomePage, type SortByPageQueryParams } from "./types";
 import { safeParsePageWithDefault } from "lib/routes/home-page-params";
-import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
+import { DEFAULT_SORT_BY, type SortMarketsBy } from "@sdk/indexer-v2/types/common";
 
 export type HomePageSearchParams = {
   page: string | undefined;
@@ -9,28 +9,6 @@ export type HomePageSearchParams = {
   order: OrderByStrings | undefined;
   bonding: boolean | undefined;
   q: string | undefined;
-};
-
-export const DefaultHomePageSearchParams: HomePageSearchParams = {
-  page: "1",
-  sort: "market_cap",
-  order: "desc",
-  bonding: undefined,
-  q: undefined,
-};
-
-export const AllHomePageSearchParams = Object.keys(DefaultHomePageSearchParams) as Array<
-  keyof HomePageSearchParams
->;
-
-export const constructHomePageSearchParams = (searchParams: URLSearchParams) => {
-  const res = {} as HomePageSearchParams;
-  AllHomePageSearchParams.forEach((key) => {
-    const value = searchParams.get(key);
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    res[key] = value ?? (DefaultHomePageSearchParams[key] as any);
-  });
-  return res;
 };
 
 export const constructURLForHomePage = ({
@@ -55,28 +33,9 @@ export const constructURLForHomePage = ({
     newURL.searchParams.set("q", searchBytes);
   }
   const newSort = toMarketDataSortByHomePage(sort);
-  if (newSort !== SortMarketsBy.MarketCap) {
+  if (newSort !== DEFAULT_SORT_BY) {
     newURL.searchParams.set("sort", newSort);
   }
 
   return newURL;
-};
-
-/**
- * Check all the current and next url parameters using their default fallback values to see if the URL has
- * actually changed.
- */
-export const isHomePageURLDifferent = (curr: URLSearchParams, next: URLSearchParams) => {
-  if ((curr.get("page") ?? "1") !== (next.get("page") ?? "1")) {
-    return true;
-  }
-  if (
-    (curr.get("sort") ?? SortMarketsBy.MarketCap) !== (next.get("sort") ?? SortMarketsBy.MarketCap)
-  ) {
-    return true;
-  }
-  if ((curr.get("q") ?? "0x") !== (next.get("q") ?? "0x")) {
-    return true;
-  }
-  return false;
 };

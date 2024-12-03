@@ -4,20 +4,24 @@ import { translationFunction } from "context/language-context";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import AptosIconBlack from "components/svg/icons/AptosBlack";
 import { type MainInfoProps } from "../../types";
-import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore } from "context/event-store-context";
 import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 import { isMarketStateModel } from "@sdk/indexer-v2/types";
+import BondingProgress from "./BondingProgress";
+import { useThemeContext } from "context";
+import { useMatchBreakpoints } from "@hooks/index";
+import { Emoji } from "utils/emoji";
+import Link from "next/link";
+import { toExplorerLink } from "lib/utils/explorer-link";
+import { emoji } from "utils";
+import { motion } from "framer-motion";
+import { truncateAddress } from "@sdk/utils";
 
-const innerWrapper = `flex flex-col md:flex-row justify-around w-full max-w-[1362px] px-[30px] lg:px-[44px] py-[17px]
-md:py-[37px] xl:py-[68px]`;
-const headerWrapper =
-  "flex flex-row md:flex-col md:justify-between gap-[12px] md:gap-[4px] w-full md:w-[58%] xl:w-[65%] mb-[8px]";
-const statsWrapper = "flex flex-col w-full md:w-[42%] xl:w-[35%] mt-[-8px]";
-const statsTextClasses = "display-6 md:display-4 uppercase ellipses font-forma";
+const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
 const MainInfo = ({ data }: MainInfoProps) => {
   const { t } = translationFunction();
+  const { theme } = useThemeContext();
 
   const marketEmojis = data.symbolEmojis;
   const stateEvents = useEventStore((s) => s.getMarket(marketEmojis)?.stateEvents ?? []);
@@ -40,29 +44,78 @@ const MainInfo = ({ data }: MainInfoProps) => {
     }
   }, [stateEvents]);
 
-  const { ref: marketCapRef } = useLabelScrambler(marketCap);
-  const { ref: dailyVolumeRef } = useLabelScrambler(dailyVolume);
-  const { ref: allTimeVolumeRef } = useLabelScrambler(allTimeVolume);
+  const { ref: marketCapRef } = useLabelScrambler(toCoinDecimalString(marketCap, 2));
+  const { ref: dailyVolumeRef } = useLabelScrambler(toCoinDecimalString(dailyVolume, 2));
+  const { ref: allTimeVolumeRef } = useLabelScrambler(toCoinDecimalString(allTimeVolume, 2));
+
+  const { isMobile } = useMatchBreakpoints();
+
+  const explorerLink = toExplorerLink({
+    linkType: "coin",
+    value: `${data.marketView.metadata.marketAddress}::coin_factory::Emojicoin`,
+  });
+
+  const [copied, setCopied] = useState(false);
 
   return (
-    <div className="flex justify-center">
-      <div className={innerWrapper}>
-        <div className={headerWrapper}>
-          <div
-            title={emojisToName(data.emojis).toUpperCase()}
-            className=" text-white uppercase ellipses display-4 font-forma-bold md:display-2"
-          >
-            {emojisToName(data.emojis)}
-          </div>
-
-          <div className="text-[24px] md:display-2 my-auto text-white">
-            {data.symbolData.symbol}
+    <div
+      className="flex justify-center mt-[10px]"
+      style={{
+        borderTop: `1px solid ${theme.colors.darkGray}`,
+      }}
+    >
+      <div
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                gap: "2.5em",
+                flexDirection: "column",
+                width: "100%",
+                padding: "40px",
+              }
+            : {
+                display: "grid",
+                gridTemplateColumns: "57fr 43fr",
+                width: "100%",
+                maxWidth: "1362px",
+                padding: "40px",
+              }
+        }
+      >
+        <div className="text-center my-auto flex flex-col gap-[16px] items-center">
+          <Link href={explorerLink} target="_blank">
+            <Emoji className="display-2" emojis={data.emojis} />
+          </Link>
+          <div className="text-2xl w-fit bg-[#151515] rounded-xl px-[.5em] flex flex-row gap-[.5em]">
+            <Link
+              className="text-ec-blue font-pixelar underline"
+              href={explorerLink}
+              target="_blank"
+            >
+              {truncateAddress(data.marketView.metadata.marketAddress)}
+            </Link>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              transition={{ ease: "linear", duration: 0.05 }}
+              onClick={() => {
+                navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
+                if (!copied) {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 3000);
+                }
+              }}
+            >
+              <Emoji emojis={emoji(copied ? "check mark button" : "clipboard")} />
+            </motion.button>
           </div>
         </div>
 
-        <div className={statsWrapper}>
-          <div className="flex gap-[8px]">
-            <div className={statsTextClasses + " text-light-gray"}>{t("Mkt. Cap:")}</div>
+        <div
+          className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}
+        >
+          <div className="flex justify-between">
+            <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
                 <div ref={marketCapRef}>{toCoinDecimalString(marketCap, 2)}</div>
@@ -72,7 +125,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             </div>
           </div>
 
-          <div className="flex gap-[8px]">
+          <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("24 hour vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
@@ -83,7 +136,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             </div>
           </div>
 
-          <div className="flex gap-[8px]">
+          <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("All-time vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
@@ -92,6 +145,10 @@ const MainInfo = ({ data }: MainInfoProps) => {
                 <AptosIconBlack className="icon-inline mb-[0.3ch]" />
               </div>
             </div>
+          </div>
+
+          <div className="mt-[.6em]">
+            <BondingProgress data={data} />
           </div>
         </div>
       </div>

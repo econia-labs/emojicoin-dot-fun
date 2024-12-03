@@ -1,7 +1,8 @@
 import { type Metadata } from "next";
+import { emoji } from "utils";
 
 export const DEFAULT_TITLE = "emojicoin.fun";
-export const DEFAULT_DESCRIPTION = "Emojicoin joy starts here";
+export const DEFAULT_DESCRIPTION = `Give your wallet the personality it deserves ${emoji("zany face")}${emoji("sparkles")}`;
 export const OG_IMAGES = "/social-preview.png";
 export const OG_TYPE = "website";
 export const TWITTER_CARD = "summary";
@@ -27,7 +28,10 @@ export const getDefaultMetadata = (): Metadata => {
     alternates: {
       canonical: "/",
     },
-    title: DEFAULT_TITLE,
+    title: {
+      default: DEFAULT_TITLE,
+      template: `%s | ${DEFAULT_TITLE}`,
+    },
     description: DEFAULT_DESCRIPTION,
     keywords: "aptos, tokens, emoji, emojicoins",
     openGraph: {

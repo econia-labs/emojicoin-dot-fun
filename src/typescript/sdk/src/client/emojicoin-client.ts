@@ -1,15 +1,16 @@
 import {
   AccountAddress,
+  Aptos,
   type Account,
   type UserTransactionResponse,
   type AccountAddressInput,
-  type Aptos,
   type TypeTag,
   type InputGenerateTransactionOptions,
   type WaitForTransactionOptions,
+  AptosConfig,
 } from "@aptos-labs/ts-sdk";
 import { type ChatEmoji, type SymbolEmoji } from "../emoji_data/types";
-import { getEvents } from "../emojicoin_dot_fun";
+import { EmojicoinDotFun, getEvents } from "../emojicoin_dot_fun";
 import {
   Chat,
   ProvideLiquidity,
@@ -21,10 +22,14 @@ import {
 import { type Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
-import { getAptosClient } from "../utils/aptos-client";
+import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
-import { INTEGRATOR_ADDRESS } from "../const";
+import { DEFAULT_REGISTER_MARKET_GAS_OPTIONS, INTEGRATOR_ADDRESS } from "../const";
+import { waitFor } from "../utils";
+import { postgrest } from "../indexer-v2/queries";
+import { TableName } from "../indexer-v2/types/json-types";
+import { toSwapEvent, type AnyNumberString } from "../types";
 
 const { expect, Expect } = customExpect;
 
@@ -32,6 +37,27 @@ type Options = {
   feePayer?: Account;
   options?: InputGenerateTransactionOptions;
   waitForTransactionOptions?: WaitForTransactionOptions;
+};
+
+const waitForEventProcessed = async (
+  marketID: bigint,
+  marketNonce: bigint,
+  tableName: TableName
+) => {
+  return waitFor({
+    condition: async () => {
+      const data = await postgrest
+        .from(tableName)
+        .select("*")
+        .eq("market_id", marketID)
+        .eq("market_nonce", marketNonce);
+      return data.error === null && data.data?.length === 1;
+    },
+    interval: 500,
+    maxWaitTime: 30000,
+    throwError: true,
+    errorMessage: "Event did not register on time.",
+  });
 };
 
 /**
@@ -71,21 +97,44 @@ type Options = {
 export class EmojicoinClient {
   public aptos: Aptos;
 
+  public register = this.registerInternal.bind(this);
+  public chat = this.chatInternal.bind(this);
+  public buy = this.buyInternal.bind(this);
+  public sell = this.sellInternal.bind(this);
+
   public liquidity = {
     provide: this.provideLiquidity.bind(this),
     remove: this.removeLiquidity.bind(this),
   };
 
-  public utils = {
+  public utils: {
+    emojisToHexStrings: typeof EmojicoinClient.prototype.emojisToHexStrings;
+    emojisToHexSymbol: typeof EmojicoinClient.prototype.emojisToHexSymbol;
+    getEmojicoinInfo: typeof EmojicoinClient.prototype.getEmojicoinInfo;
+    getTransactionEventData: typeof EmojicoinClient.prototype.getTransactionEventData;
+  } = {
     emojisToHexStrings: this.emojisToHexStrings.bind(this),
     emojisToHexSymbol: this.emojisToHexSymbol.bind(this),
     getEmojicoinInfo: this.getEmojicoinInfo.bind(this),
     getTransactionEventData: this.getTransactionEventData.bind(this),
   };
 
-  public rewards = {
+  public rewards: {
+    buy: typeof EmojicoinClient.prototype.buyWithRewards;
+    sell: typeof EmojicoinClient.prototype.sellWithRewards;
+  } = {
     buy: this.buyWithRewards.bind(this),
     sell: this.sellWithRewards.bind(this),
+  };
+
+  public view: {
+    marketExists: typeof EmojicoinClient.prototype.isMarketRegisteredView;
+    simulateBuy: typeof EmojicoinClient.prototype.simulateBuy;
+    simulateSell: typeof EmojicoinClient.prototype.simulateSell;
+  } = {
+    marketExists: this.isMarketRegisteredView.bind(this),
+    simulateBuy: this.simulateBuy.bind(this),
+    simulateSell: this.simulateSell.bind(this),
   };
 
   private integrator: AccountAddress;
@@ -101,36 +150,55 @@ export class EmojicoinClient {
     minOutputAmount?: bigint | number;
   }) {
     const {
-      aptos = getAptosClient().aptos,
+      aptos = getAptosClient(),
       integrator = INTEGRATOR_ADDRESS,
       integratorFeeRateBPs = 0,
       minOutputAmount = 1n,
     } = args ?? {};
-    this.aptos = aptos;
+    // Create a client that always uses the static API_KEY config options.
+    const hardCodedConfig = new AptosConfig({
+      ...aptos.config,
+      clientConfig: { ...aptos.config.clientConfig, ...APTOS_CONFIG },
+    });
+    this.aptos = new Aptos(hardCodedConfig);
     this.integrator = AccountAddress.from(integrator);
     this.integratorFeeRateBPs = Number(integratorFeeRateBPs);
     this.minOutputAmount = BigInt(minOutputAmount);
   }
 
-  async register(registrant: Account, symbolEmojis: SymbolEmoji[], options?: Options) {
+  // Internal so we can bind the public functions.
+  private async registerInternal(
+    registrant: Account,
+    symbolEmojis: SymbolEmoji[],
+    transactionOptions?: Options
+  ) {
+    const { feePayer, waitForTransactionOptions, options } = transactionOptions ?? {};
     const response = await RegisterMarket.submit({
       aptosConfig: this.aptos.config,
       registrant,
       emojis: this.emojisToHexStrings(symbolEmojis),
       integrator: this.integrator,
-      ...options,
+      options: {
+        ...DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+        ...options,
+      },
+      feePayer,
+      waitForTransactionOptions,
     });
     const res = this.getTransactionEventData(response);
+    const marketID = res.events.marketRegistrationEvents[0].marketID;
     return {
       ...res,
       registration: {
         event: expect(res.events.marketRegistrationEvents.at(0), Expect.Register.Event),
         model: expect(res.models.marketRegistrationEvents.at(0), Expect.Register.Model),
       },
+      handle: waitForEventProcessed(marketID, 1n, TableName.MarketRegistrationEvents),
     };
   }
 
-  async chat(
+  // Internal so we can bind the public functions.
+  private async chatInternal(
     user: Account,
     symbolEmojis: SymbolEmoji[],
     message: string | (SymbolEmoji | ChatEmoji)[],
@@ -150,16 +218,19 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { emitMarketNonce, marketID } = res.events.chatEvents[0];
     return {
       ...res,
       chat: {
         event: expect(res.events.chatEvents.at(0), Expect.Chat.Event),
         model: expect(res.models.chatEvents.at(0), Expect.Chat.Model),
       },
+      handle: waitForEventProcessed(marketID, emitMarketNonce, TableName.ChatEvents),
     };
   }
 
-  async buy(
+  // Internal so we can bind the public functions.
+  private async buyInternal(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
     inputAmount: bigint | number,
@@ -179,7 +250,8 @@ export class EmojicoinClient {
     );
   }
 
-  async sell(
+  // Internal so we can bind the public functions.
+  private async sellInternal(
     swapper: Account,
     symbolEmojis: SymbolEmoji[],
     inputAmount: bigint | number,
@@ -197,6 +269,62 @@ export class EmojicoinClient {
       },
       options
     );
+  }
+
+  private async simulateBuy(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    ledgerVersion?: number | bigint;
+  }) {
+    return await this.simulateSwap({ ...args, isSell: false });
+  }
+
+  private async simulateSell(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    ledgerVersion?: number | bigint;
+  }) {
+    return await this.simulateSwap({ ...args, isSell: true });
+  }
+
+  private async simulateSwap(args: {
+    symbolEmojis: SymbolEmoji[];
+    swapper: AccountAddressInput;
+    inputAmount: AnyNumberString;
+    isSell: boolean;
+    ledgerVersion?: number | bigint;
+  }) {
+    const { symbolEmojis, swapper, inputAmount, isSell, ledgerVersion } = args;
+    const { marketAddress, typeTags } = this.getEmojicoinInfo(symbolEmojis);
+    const res = await EmojicoinDotFun.SimulateSwap.view({
+      aptos: this.aptos,
+      swapper,
+      marketAddress,
+      inputAmount: BigInt(inputAmount),
+      isSell,
+      integrator: this.integrator,
+      integratorFeeRateBPs: this.integratorFeeRateBPs,
+      typeTags,
+      options: {
+        ledgerVersion,
+      },
+    });
+    return toSwapEvent(res, -1);
+  }
+
+  private async isMarketRegisteredView(
+    symbolEmojis: SymbolEmoji[],
+    ledgerVersion?: AnyNumberString
+  ) {
+    const { marketAddress } = this.getEmojicoinInfo(symbolEmojis);
+    const res = await EmojicoinDotFun.MarketMetadataByMarketAddress.view({
+      aptos: this.aptos,
+      marketAddress,
+      ...(ledgerVersion ? { options: { ledgerVersion: BigInt(ledgerVersion) } } : {}),
+    });
+    return typeof res.vec.pop() !== "undefined";
   }
 
   private async swap(
@@ -219,12 +347,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { marketNonce, marketID } = res.events.swapEvents[0];
     return {
       ...res,
       swap: {
         event: expect(res.events.swapEvents.at(0), Expect.Swap.Event),
         model: expect(res.models.swapEvents.at(0), Expect.Swap.Model),
       },
+      handle: waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents),
     };
   }
 
@@ -274,12 +404,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { marketNonce, marketID } = res.events.swapEvents[0];
     return {
       ...res,
       swap: {
         event: expect(res.events.swapEvents.at(0), Expect.Swap.Event),
         model: expect(res.models.swapEvents.at(0), Expect.Swap.Model),
       },
+      handle: waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents),
     };
   }
 
@@ -298,12 +430,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { marketNonce, marketID } = res.events.liquidityEvents[0];
     return {
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0), Expect.Liquidity.Event),
         model: expect(res.models.liquidityEvents.at(0), Expect.Liquidity.Model),
       },
+      handle: waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents),
     };
   }
 
@@ -322,12 +456,14 @@ export class EmojicoinClient {
       ...this.getEmojicoinInfo(symbolEmojis),
     });
     const res = this.getTransactionEventData(response);
+    const { marketNonce, marketID } = res.events.liquidityEvents[0];
     return {
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0), Expect.Liquidity.Event),
         model: expect(res.models.liquidityEvents.at(0), Expect.Liquidity.Model),
       },
+      handle: waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents),
     };
   }
 

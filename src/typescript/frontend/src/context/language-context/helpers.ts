@@ -1,10 +1,11 @@
-import { EN, LOCAL_STORAGE_KEYS, REGEX } from "configs";
+import { EN, REGEX } from "configs";
+import { readLocalStorageCache } from "configs/local-storage-keys";
 
 export const getLanguageCodeFromLocalStorage = () => {
   if (typeof window === "undefined") {
     return EN.locale;
   }
-  return localStorage.getItem(LOCAL_STORAGE_KEYS.language) ?? EN.locale;
+  return readLocalStorageCache<string>("language") ?? EN.locale;
 };
 
 export const translatedTextIncludesVariable = (translatedText: string) => {

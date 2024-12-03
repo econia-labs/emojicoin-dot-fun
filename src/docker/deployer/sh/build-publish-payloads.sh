@@ -28,4 +28,5 @@ aptos move build-publish-payload \
 	--included-artifacts none \
 	--package-dir $move_dir/rewards/ \
 	--json-output-file $json_dir/rewards.json \
-	--skip-fetch-latest-git-deps
+	--skip-fetch-latest-git-deps \
+	--move-2

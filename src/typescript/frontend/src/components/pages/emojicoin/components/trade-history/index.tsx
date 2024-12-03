@@ -2,28 +2,32 @@ import React, { type PropsWithChildren, useEffect, useMemo, useRef } from "react
 
 import { type TradeHistoryProps } from "../../types";
 import { getRankFromEvent } from "lib/utils/get-user-rank";
-import { useEventStore, useNameStore } from "context/event-store-context";
+import { useEventStore } from "context/event-store-context";
 import TableRow from "./table-row";
-import { type TableRowDesktopProps } from "./table-row/types";
 import { memoizedSortedDedupedEvents } from "lib/utils/sort-events";
 import { motion } from "framer-motion";
 import { type SwapEventModel } from "@sdk/indexer-v2/types";
-import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
+import { Emoji } from "utils/emoji";
 import "./trade-history.css";
 
 const HARD_LIMIT = 500;
 
-const toTableItem = (
-  swap: SwapEventModel["swap"] & { time: bigint; version: number }
-): TableRowDesktopProps["item"] => ({
-  ...getRankFromEvent(swap),
-  apt: swap.quoteVolume.toString(),
-  emoji: swap.baseVolume.toString(),
-  date: new Date(Number(swap.time / 1000n)),
-  type: swap.isSell ? "sell" : "buy",
-  priceQ64: swap.avgExecutionPriceQ64.toString(),
-  swapper: swap.swapper,
-  version: swap.version,
+const toTableItem = ({
+  swap,
+  transaction,
+  shouldAnimateAsInsertion,
+}: SwapEventModel & { shouldAnimateAsInsertion?: boolean }) => ({
+  item: {
+    ...getRankFromEvent(swap),
+    apt: swap.quoteVolume.toString(),
+    emoji: swap.baseVolume.toString(),
+    date: new Date(Number(transaction.time / 1000n)),
+    type: swap.isSell ? "sell" : "buy",
+    priceQ64: swap.avgExecutionPriceQ64.toString(),
+    swapper: swap.swapper,
+    version: transaction.version.toString(),
+  },
+  shouldAnimateAsInsertion,
 });
 
 const TableHeader =
@@ -55,25 +59,10 @@ const TradeHistory = (props: TradeHistoryProps) => {
         order: "desc",
         limit: HARD_LIMIT,
         canAnimateAsInsertion: !initialLoad.current,
-      }),
+      }).map(toTableItem),
     /* eslint-disable react-hooks/exhaustive-deps */
     [props.data.swaps.length, swaps.length]
   );
-
-  const addresses = sortedSwaps.map(({ swap }) => swap.swapper);
-  const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
-
-  const sortedSwapsWithNames = useMemo(() => {
-    const data = sortedSwaps.map(({ swap, shouldAnimateAsInsertion, transaction }) => ({
-      ...swap,
-      swapper: nameResolver(swap.swapper) as AccountAddressString,
-      shouldAnimateAsInsertion,
-      time: transaction.time,
-      version: Number(transaction.version),
-    }));
-    return data;
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [nameResolver]);
 
   return (
     <table className="relative flex flex-col table-fixed w-full">
@@ -87,7 +76,7 @@ const TradeHistory = (props: TradeHistoryProps) => {
             <span className="flex my-auto">APT</span>
           </ThWrapper>
           <ThWrapper className="flex w-[22%] md:w-[18%]">
-            <span className="flex my-auto">{props.data.symbol}</span>
+            <Emoji className="flex my-auto" emojis={props.data.symbol} />
           </ThWrapper>
           <ThWrapper className="hidden md:flex md:w-[24%]">
             <span className="flex my-auto">Time</span>
@@ -104,15 +93,15 @@ const TradeHistory = (props: TradeHistoryProps) => {
         layoutScroll
         className="flex flex-col overflow-auto scrollbar-track w-full h-[340px] overflow-x-hidden"
       >
-        {sortedSwapsWithNames.map((item, index) => (
+        {sortedSwaps.map(({ item, shouldAnimateAsInsertion }, index) => (
           <TableRow
             // Note the key/index must be in reverse for the rows to animate correctly.
             key={sortedSwaps.length - index}
             index={sortedSwaps.length - index}
-            item={toTableItem(item)}
+            item={item}
             showBorder={index !== sortedSwaps.length - 1 || sortedSwaps.length < 11}
             numSwapsDisplayed={sortedSwaps.length}
-            shouldAnimateAsInsertion={item.shouldAnimateAsInsertion}
+            shouldAnimateAsInsertion={shouldAnimateAsInsertion}
           ></TableRow>
         ))}
         <tr className="absolute top-0 right-0 w-full z-[-1]">

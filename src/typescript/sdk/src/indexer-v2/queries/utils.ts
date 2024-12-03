@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import "server-only";
+if (process.env.NODE_ENV !== "test") {
+  require("server-only");
+}
 
 import {
   type PostgrestSingleResponse,
@@ -9,7 +11,7 @@ import {
 } from "@supabase/postgrest-js";
 import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
-import { type DatabaseJsonType, TableName } from "../types/json-types";
+import { type DatabaseJsonType, postgresTimestampToDate, TableName } from "../types/json-types";
 import { toAccountAddress } from "../../utils";
 import { postgrest } from "./client";
 import { type DatabaseModels } from "../types";
@@ -40,23 +42,44 @@ const extractRows = <T>(res: PostgrestSingleResponse<Array<T>>) => res.data ?? (
 // NOTE: If we ever add another processor type to the indexer processor stack, this will need to be
 // updated, because it is assumed here that there is a single row returned. Multiple processors
 // would mean there would be multiple rows.
-export const getLatestProcessedEmojicoinVersion = async () =>
+export const getProcessorStatus = async () =>
   postgrest
     .from(TableName.ProcessorStatus)
-    .select("last_success_version")
+    .select("processor, last_success_version, last_updated, last_transaction_timestamp")
     .limit(1)
     .single()
     .then((r) => {
-      const rowWithVersion = extractRow(r);
-      if (!rowWithVersion) {
+      const row = extractRow(r);
+      if (!row) {
         console.error(r);
         throw new Error("No processor status row found.");
       }
-      if (!("last_success_version" in rowWithVersion)) {
-        console.warn("Couldn't find `last_success_version` in the response data.", r);
+      if (
+        !(
+          "processor" in row &&
+          "last_success_version" in row &&
+          "last_updated" in row &&
+          "last_transaction_timestamp" in row
+        )
+      ) {
+        console.warn("Couldn't find all fields in the row response data.", r);
       }
-      return BigInt(rowWithVersion.last_success_version);
+      return {
+        processor: row.processor,
+        lastSuccessVersion: BigInt(row.last_success_version),
+        lastUpdated: postgresTimestampToDate(row.last_updated),
+        lastTransactionTimestamp: row.last_transaction_timestamp
+          ? postgresTimestampToDate(row.last_transaction_timestamp)
+          : new Date(0), // Provide a default, because this field is nullable.
+      };
     });
+
+export const getLatestProcessedEmojicoinVersion = async () =>
+  getProcessorStatus().then((r) => r.lastSuccessVersion);
+
+export const getLatestProcessedEmojicoinTimestamp = async () =>
+  getProcessorStatus().then((r) => r.lastTransactionTimestamp);
+
 /**
  * Wait for the processed version of a table or view to be at least the given version.
  */
@@ -88,12 +111,9 @@ export const waitForEmojicoinIndexer = async (
   });
 
 /**
+ * Return the curried version of queryHelperWithCount that extracts just the rows.
  *
- * @param queryFn Takes in a query function that's used to be called after waiting for the indexer
- * to reach a certain version. Then it extracts the row data and returns it.
- * @param convert A function that converts the raw row data into the desired output, usually
- * by converting it into a camelCased representation of the database row.
- * @returns A curried function that applies the logic to the new query function.
+ * @see queryHelperWithCount
  */
 export function queryHelper<
   Row extends Record<string, unknown>,
@@ -106,29 +126,8 @@ export function queryHelper<
   queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
   convert: (rows: Row) => OutputType
 ): (args: WithConfig<QueryArgs>) => Promise<OutputType[]> {
-  const query = async (args: WithConfig<QueryArgs>) => {
-    const { minimumVersion, ...queryArgs } = args;
-    const innerQuery = queryFn(queryArgs as QueryArgs);
-
-    if (minimumVersion) {
-      await waitForEmojicoinIndexer(minimumVersion);
-    }
-
-    try {
-      const res = await innerQuery;
-      const rows = extractRows<Row>(res);
-      if (res.error) {
-        console.error("[Failed row conversion]:\n");
-        throw new Error(JSON.stringify(res));
-      }
-      return rows.map(convert);
-    } catch (e) {
-      console.error(e);
-      return [];
-    }
-  };
-
-  return query;
+  // Return the curried version of queryHelperWithCount that extracts just the rows.
+  return async (args) => (await queryHelperWithCount(queryFn, convert)(args)).rows;
 }
 
 export function queryHelperSingle<
@@ -146,8 +145,60 @@ export function queryHelperSingle<
     }
 
     const res = await innerQuery;
+
+    if (res.error) {
+      console.error(res.error);
+      throw new Error(JSON.stringify(res.error));
+    }
+
     const row = extractRow<Row>(res);
     return row ? convert(row) : null;
+  };
+
+  return query;
+}
+
+/**
+ *
+ * @param queryFn Takes in a query function that's used to be called after waiting for the indexer
+ * to reach a certain version. Then it extracts the row data and returns it.
+ * @param convert A function that converts the raw row data into the desired output, usually
+ * by converting it into a camelCased representation of the database row.
+ * @returns A curried function that applies the logic to the new query function.
+ */
+export function queryHelperWithCount<
+  Row extends Record<string, unknown>,
+  Result extends Row[],
+  RelationName,
+  Relationships extends TableName,
+  QueryArgs extends Record<string, any> | undefined,
+  OutputType,
+>(
+  queryFn: QueryFunction<Row, Result, RelationName, EnumLiteralType<Relationships>, QueryArgs>,
+  convert: (rows: Row) => OutputType
+): (
+  args: WithConfig<QueryArgs>
+) => Promise<{ rows: OutputType[]; count: number | null; error: unknown }> {
+  const query = async (args: WithConfig<QueryArgs>) => {
+    const { minimumVersion, ...queryArgs } = args;
+    const innerQuery = queryFn(queryArgs as QueryArgs);
+
+    if (minimumVersion) {
+      await waitForEmojicoinIndexer(minimumVersion);
+    }
+
+    try {
+      const res = await innerQuery;
+      if (res.error) {
+        console.error("[Failed row conversion]:\n");
+        throw new Error(JSON.stringify(res));
+      }
+      const rows = extractRows<Row>(res);
+      return { rows: rows.map(convert), count: res.count, error: res.error };
+    } catch (e) {
+      console.error(e);
+      return { rows: [], count: null, error: e };
+    }
   };
 
   return query;

@@ -1,0 +1,30 @@
+---
+parameters:
+  BrokerCpu: 1024
+  BrokerImageVersion: '1.1.0'
+  BrokerMemory: 2048
+  DbMaxCapacity: 8
+  DeployAlb: 'true'
+  DeployAlbDnsRecord: 'true'
+  DeployBastionHost: 'true'
+  DeployBroker: 'true'
+  DeployContainers: 'true'
+  DeployDb: 'true'
+  DeployNlb: 'true'
+  DeployNlbVpcLink: 'true'
+  DeployPostgrest: 'true'
+  DeployProcessor: 'true'
+  DeployRestApi: 'true'
+  DeployRestApiDnsRecord: 'true'
+  DeployStack: 'true'
+  DeployWaf: 'false'
+  EnableWafRulesGeneral: 'false'
+  EnableWafRulesRestApi: 'false'
+  EnableWafRulesWebSocket: 'false'
+  Environment: 'fallback'
+  Network: 'mainnet'
+  ProcessorImageVersion: '1.1.0'
+  VpcStackName: 'emoji-vpc'
+tags: null
+template-file-path: 'src/cloud-formation/indexer.cfn.yaml'
+...

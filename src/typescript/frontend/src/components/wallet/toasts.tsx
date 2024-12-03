@@ -1,5 +1,6 @@
 import {
   AptosApiError,
+  NetworkToChainId,
   NetworkToNetworkName,
   NetworkToNodeAPI,
   type UserTransactionResponse,
@@ -46,7 +47,12 @@ export const checkNetworkAndToast = (
     .replaceAll("/v1", "")
     .replaceAll("v1", "");
   const isUsingLocalhost = normalizedLocalWalletNetwork === normalizedLocalApplicationNetwork;
-  if (!isUsingLocalhost && network.name !== APTOS_NETWORK && typeof network.name !== "undefined") {
+  if (
+    !isUsingLocalhost &&
+    network.name !== APTOS_NETWORK &&
+    typeof network.name !== "undefined" &&
+    Number(network.chainId ?? -1) !== NetworkToChainId[APTOS_NETWORK]
+  ) {
     const message = (
       <div className="flex flex-col">
         <div>
@@ -112,7 +118,7 @@ export const successfulTransactionToast = (
             value={response.hash}
             type="transaction"
           >
-            {truncateAddress(response.hash, 8)}
+            {truncateAddress(response.hash, false)}
           </ExplorerLink>
         </div>
       </div>

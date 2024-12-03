@@ -14,7 +14,7 @@ import { LINKS } from "lib/env";
 import { ROUTES } from "router/routes";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";
 
-export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked }) => {
+export const ClientVerifyPage = () => {
   const { account } = useAptos();
   const { connected, disconnect } = useWallet();
   const [verified, setVerified] = useState<boolean | null>(null);
@@ -87,7 +87,7 @@ export const ClientVerifyPage: React.FC<{ geoblocked: boolean }> = ({ geoblocked
                 <span ref={backRef}>Back</span>
               </motion.div>
             )}
-            <ButtonWithConnectWalletFallback geoblocked={geoblocked} arrow={false}>
+            <ButtonWithConnectWalletFallback>
               <div className="flex flex-row uppercase mt-[8ch]">
                 <span className="px-2.5">{"{"}</span>
                 <span ref={ref} onMouseEnter={replay} />

@@ -7,7 +7,6 @@ import { type SymbolEmoji } from "@sdk/emoji_data";
 
 export type PropsWithTime = Omit<TableCardProps, "index" | "rowLength"> & {
   time: number;
-  searchEmojisKey: string;
 };
 export type PropsWithTimeAndIndex = TableCardProps & {
   time: number;
@@ -19,10 +18,7 @@ export type WithTimeIndexAndPrev = PropsWithTimeAndIndex & {
 
 const toSearchEmojisKey = (searchEmojis: string[]) => `{${searchEmojis.join("")}}`;
 
-export const marketDataToProps = (
-  markets: HomePageProps["markets"],
-  searchEmojis: string[]
-): PropsWithTime[] =>
+export const marketDataToProps = (markets: HomePageProps["markets"]): PropsWithTime[] =>
   markets.map((m) => ({
     time: Number(m.market.time),
     symbol: m.market.symbolData.symbol,
@@ -30,7 +26,6 @@ export const marketDataToProps = (
     emojis: m.market.emojis,
     staticMarketCap: m.state.instantaneousStats.marketCap.toString(),
     staticVolume24H: m.dailyVolume.toString(),
-    searchEmojisKey: toSearchEmojisKey(searchEmojis),
   }));
 
 export const stateEventsToProps = (
@@ -52,7 +47,7 @@ export const stateEventsToProps = (
       symbol,
       emojis,
       marketID: Number(marketID),
-      staticMarketCap: (marketCap ?? 0).toString(),
+      staticMarketCap: marketCap.toString(),
       staticVolume24H: (volume24H ?? 0).toString(),
       trigger: e.market.trigger,
       searchEmojisKey: toSearchEmojisKey(searchEmojis),
@@ -103,7 +98,7 @@ export const constructOrdered = ({
   // We don't need to filter the fetched data because it's already filtered and sorted by the
   // server. We only need to filter event store state events.
   const searchEmojis = getSearchEmojis() as Array<SymbolEmoji>;
-  const initial = marketDataToProps(markets, searchEmojis);
+  const initial = marketDataToProps(markets);
 
   // If we're sorting by bump order, deduplicate and sort the events by bump order.
   const bumps = stateEventsToProps(stateFirehose, getMarket, searchEmojis);

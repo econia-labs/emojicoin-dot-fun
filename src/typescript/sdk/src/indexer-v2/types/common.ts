@@ -12,6 +12,8 @@ export enum SortMarketsBy {
   Tvl = "tvl",
 }
 
+export const DEFAULT_SORT_BY = SortMarketsBy.BumpOrder;
+
 export type MarketStateQueryArgs = {
   sortBy?: SortMarketsBy;
   page?: number;
@@ -19,12 +21,12 @@ export type MarketStateQueryArgs = {
   orderBy?: OrderBy;
   searchEmojis?: string[];
   inBondingCurve?: boolean;
+  count?: boolean;
 };
 
 export type PeriodicStateEventQueryArgs = {
   marketID: AnyNumberString;
   start: Date;
-  offset: number;
+  end: Date;
   period: Period;
-  limit?: number;
 } & Omit<MarketStateQueryArgs, "page" | "pageSize" | "searchEmojis" | "sortBy" | "orderBy">;

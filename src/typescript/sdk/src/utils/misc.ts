@@ -1,8 +1,4 @@
-import {
-  AccountAddress,
-  type InputGenerateTransactionOptions,
-  type HexInput,
-} from "@aptos-labs/ts-sdk";
+import { AccountAddress, type InputGenerateTransactionOptions } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import {
   type PeriodDuration,
@@ -10,7 +6,6 @@ import {
   periodEnumToRawDuration,
   toPeriodDuration,
 } from "../const";
-import { normalizeHex } from "./hex";
 import {
   type AnyNumberString,
   type Types,
@@ -176,36 +171,47 @@ export function getPeriodBoundaryAsDate(microseconds: AnyNumberString, period: P
   return dateFromMicroseconds(getPeriodBoundary(microseconds, period));
 }
 
-export const ADDRESS_FULL_CHAR_LENGTH = 64;
-
-export const truncateAddress = (input: HexInput, numChars: number = 4): string => {
-  let s;
-  if (typeof input === "string") {
-    if (input.startsWith("0x")) {
-      s = input.slice(2);
-    } else {
-      s = input;
-    }
-    if (s.length < ADDRESS_FULL_CHAR_LENGTH) {
-      s = "0".repeat(ADDRESS_FULL_CHAR_LENGTH - s.length) + s;
-    }
-    s = `0x${s}`;
-  } else {
-    s = input;
+/**
+ * Truncates a hex string address to a max of 8 hex characters plus 3 periods as the ellipsis.
+ * Defaults to uppercase hex characters.
+ *
+ * @param input the hex string to truncate
+ * @param upper use lowercase hex characters, aka 0xabcd
+ * @returns the truncated hex string. if < 8 characters, doesn't add spacer periods. Ensures
+ * the string is returned as `0x{string}`.
+ */
+export const truncateAddress = (
+  input: string,
+  upper: boolean = true
+): `0x${string}...${string}` | `0x${string}` => {
+  // Catch errors due to incorrect input types- e.g., an AccountAddress instead of a string.
+  try {
+    const res =
+      input.length < 8
+        ? `${input.replace(/^0x/, "")}`
+        : `${input.replace(/^(0x)?(....).*(....)$/, "$2...$3")}`;
+    return `0x${upper ? res.toUpperCase() : res.toLowerCase()}`;
+  } catch (e) {
+    console.error(e);
+    return "0x";
   }
-  const res = normalizeHex(s);
-  const start = res.substring(0, numChars + 2);
-  const end = res.substring(res.length - numChars, res.length);
-  return `${start}...${end}`;
 };
 
-export const truncateANSName = (input: string, numChars: number = 4): string => {
-  if (input.length > 11) {
-    const start = input.substring(0, numChars);
-    const end = input.substring(input.length - numChars, input.length);
-    return `${start}...${end}`;
+const MAX_ANS_DISPLAY_NAME_LENGTH = 13;
+
+export const truncateANSName = (input: string): string => {
+  if (input.length <= MAX_ANS_DISPLAY_NAME_LENGTH) {
+    return input;
   }
-  return input;
+  // Periods aren't as long as normal non-monospace characters, so count `...` as 2 characters.
+  const truncatedLength = MAX_ANS_DISPLAY_NAME_LENGTH - 2;
+  const truncated = input.substring(0, truncatedLength);
+  const res =
+    // Remove the trailing period on truncated names; e.g. "my-name.petra." => "my-name.petra"
+    truncated.at(-1) === "."
+      ? truncated.substring(0, truncated.length - 1)
+      : truncated.substring(0, truncated.length);
+  return `${res}...`;
 };
 
 /**
@@ -213,7 +219,7 @@ export const truncateANSName = (input: string, numChars: number = 4): string => 
  */
 export const formatDisplayName = (input: string) => {
   if (AccountAddress.isValid({ input, strict: false }).valid) {
-    return `0x${truncateAddress(input).substring(2).toUpperCase()}`;
+    return truncateAddress(input);
   }
   return truncateANSName(input);
 };

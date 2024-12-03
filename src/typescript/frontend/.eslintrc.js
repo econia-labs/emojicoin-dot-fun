@@ -11,7 +11,6 @@ module.exports = {
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
-    "prettier",
   ],
   globals: {
     JSX: true,
@@ -22,10 +21,11 @@ module.exports = {
     "node_modules/**",
     ".eslintrc.js",
     "config-overrides.js",
-    "playwright.config.ts",
+    "next.config.mjs",
+    "playwright.config.js",
     "postcss.config.js",
     "tailwind.config.js",
-    "example.spec.ts",
+    "tests/**",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -35,12 +35,11 @@ module.exports = {
     },
     ecmaVersion: "latest",
     sourceType: "module",
-    project: ["tsconfig.json"],
+    project: ["tsconfig.json", "tests/tsconfig.json"],
     warnOnUnsupportedTypeScriptVersion: false,
   },
-  plugins: ["@typescript-eslint", "import", "prettier"],
+  plugins: ["@typescript-eslint", "import"],
   rules: {
-    "prettier/prettier": ["error"],
     "import/no-cycle": [
       "error",
       {

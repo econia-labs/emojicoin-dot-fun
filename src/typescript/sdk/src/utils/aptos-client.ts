@@ -1,22 +1,48 @@
-import { Aptos, AptosConfig, Network, NetworkToNetworkName } from "@aptos-labs/ts-sdk";
+import {
+  Aptos,
+  AptosConfig,
+  NetworkToFaucetAPI,
+  NetworkToIndexerAPI,
+  NetworkToNetworkName,
+  NetworkToNodeAPI,
+  type ClientConfig,
+} from "@aptos-labs/ts-sdk";
+import { APTOS_NETWORK, getAptosApiKey } from "../const";
 
-export function getAptosClient(additionalConfig?: Partial<AptosConfig>): {
-  aptos: Aptos;
-  config: AptosConfig;
-} {
-  const network = getAptosNetwork();
+export const APTOS_CONFIG: Partial<ClientConfig> = {
+  API_KEY: getAptosApiKey(),
+};
+
+const toDockerUrl = (url: string) => url.replace("127.0.0.1", "host.docker.internal");
+
+export function getAptosClient(additionalConfig?: Partial<AptosConfig>): Aptos {
+  const network = APTOS_NETWORK;
+
+  if (network === "local" && typeof window === "undefined") {
+    /* eslint-disable-next-line @typescript-eslint/no-var-requires */
+    const fs = require("node:fs");
+    if (fs.existsSync("/.dockerenv")) {
+      const config = new AptosConfig({
+        network: NetworkToNetworkName["local"],
+        fullnode: toDockerUrl(NetworkToNodeAPI["local"]),
+        indexer: toDockerUrl(NetworkToIndexerAPI["local"]),
+        faucet: toDockerUrl(NetworkToFaucetAPI["local"]),
+        clientConfig: {
+          ...APTOS_CONFIG,
+          ...additionalConfig?.clientConfig,
+        },
+      });
+      return new Aptos(config);
+    }
+  }
+
   const config = new AptosConfig({
     network,
     ...additionalConfig,
+    clientConfig: {
+      ...APTOS_CONFIG,
+      ...additionalConfig?.clientConfig,
+    },
   });
-  const aptos = new Aptos(config);
-  return { aptos, config };
-}
-
-export function getAptosNetwork(): Network {
-  const networkRaw = process.env.NEXT_PUBLIC_APTOS_NETWORK;
-  if (!networkRaw) {
-    throw new Error("NEXT_PUBLIC_APTOS_NETWORK environment variable is not set.");
-  }
-  return networkRaw ? NetworkToNetworkName[networkRaw] : Network.LOCAL;
+  return new Aptos(config);
 }

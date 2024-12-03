@@ -1,15 +1,17 @@
 "use client";
 
-import React, { type PropsWithChildren } from "react";
+import React, { useMemo, type PropsWithChildren } from "react";
 import { type TableRowDesktopProps } from "./types";
 import { toCoinDecimalString } from "lib/utils/decimals";
 import { toNominalPrice } from "@sdk/utils/nominal-price";
 import { ExplorerLink } from "components/link/component";
 import { darkColors } from "theme";
 import { formatDisplayName } from "@sdk/utils";
-import Text from "components/text";
 import Popup from "components/popup";
 import { motion } from "framer-motion";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
+import { useNameResolver } from "@hooks/use-name-resolver";
 
 type TableRowTextItemProps = {
   className: string;
@@ -42,6 +44,14 @@ const TableRow = ({
   numSwapsDisplayed,
   shouldAnimateAsInsertion,
 }: TableRowDesktopProps) => {
+  const resolvedName = useNameResolver(item.swapper);
+  const { displayName, isANSName } = useMemo(() => {
+    return {
+      displayName: formatDisplayName(resolvedName),
+      isANSName: item.swapper !== resolvedName,
+    };
+  }, [item.swapper, resolvedName]);
+
   return (
     <motion.tr
       className={TableRowStyles}
@@ -74,17 +84,16 @@ const TableRow = ({
       <td className={`min-w-[60px] xl:min-w-[71px] xl:ml-[0.5ch] xl:mr-[-0.5ch] ${Height}`}>
         <Popup
           content={
-            <Text textScale="pixelHeading4" lineHeight="20px" color="black">
-              {item.rankIcon === "🐡"
-                ? "n00b"
-                : item.rankIcon === "🐳"
-                  ? "365 UR SO JULIA"
-                  : "SKILL ISSUE"}
-            </Text>
+            item.rankIcon === emoji("blowfish")
+              ? "n00b"
+              : item.rankIcon === emoji("spouting whale")
+                ? "365 UR SO JULIA"
+                : "SKILL ISSUE"
           }
+          uppercase={false}
         >
           <div className="flex h-full relative">
-            <span className="text-light-gray m-auto">{item.rankIcon}</span>
+            <Emoji className="text-light-gray m-auto" emojis={item.rankIcon} />
           </div>
         </Popup>
       </td>
@@ -117,11 +126,12 @@ const TableRow = ({
         <ExplorerLink className="flex w-full h-full" value={item.version} type="txn">
           <span
             className={
-              "text-light-gray group-hover/explorer:text-blue group-hover/explorer:underline" +
+              `${isANSName ? "brightness-[1.4] contrast-[1.4]" : ""}` +
+              " text-light-gray group-hover/explorer:text-blue group-hover/explorer:underline" +
               " my-auto ml-auto mr-[20px]"
             }
           >
-            {formatDisplayName(item.swapper)}
+            {displayName}
           </span>
         </ExplorerLink>
       </td>

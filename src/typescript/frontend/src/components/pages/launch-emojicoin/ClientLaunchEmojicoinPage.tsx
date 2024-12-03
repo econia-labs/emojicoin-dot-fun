@@ -34,9 +34,8 @@ const lastMarketRegistration = (
 };
 
 const ClientLaunchEmojicoinPage: React.FC<{
-  geoblocked: boolean;
-  randomNames: ReturnType<typeof symbolBytesToEmojis>[];
-}> = ({ geoblocked, randomNames }) => {
+  randomSymbols: ReturnType<typeof symbolBytesToEmojis>[];
+}> = ({ randomSymbols }) => {
   const searchParams = useSearchParams();
   const emojiParams = searchParams.get("emojis");
   const setEmojis = useEmojiPicker((state) => state.setEmojis);
@@ -141,16 +140,18 @@ const ClientLaunchEmojicoinPage: React.FC<{
   }, [status]);
 
   return (
-    <div className="flex flex-col grow pt-[85px] relative overflow-hidden">
-      <EmojiRain
-        randomNames={randomNames}
-        onClick={(name) => setEmojis(name.emojis.map((e) => e.emoji))}
-      />
+    <div className="flex flex-col grow relative overflow-hidden">
+      {randomSymbols.length > 0 &&
+        <EmojiRain
+          randomSymbols={randomSymbols}
+          onClick={(name) => setEmojis(name.emojis.map((e) => e.emoji))}
+        />
+      }
       <TextCarousel />
 
       <div className="flex justify-center items-center h-full px-6">
         <div className="relative flex flex-col w-full max-w-[414px]">
-          <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} geoblocked={geoblocked} />
+          <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} />
         </div>
       </div>
       <div

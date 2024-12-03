@@ -1,20 +1,29 @@
-import { AccountAddress, APTOS_COIN, parseTypeTag } from "@aptos-labs/ts-sdk";
+import {
+  AccountAddress,
+  APTOS_COIN,
+  Network,
+  NetworkToNetworkName,
+  parseTypeTag,
+} from "@aptos-labs/ts-sdk";
 import Big from "big.js";
 import { type ValueOf } from "./utils/utility-types";
 import { type DatabaseStructType } from "./indexer-v2/types/json-types";
+import { type Types } from "./types";
 
 export const VERCEL = process.env.VERCEL === "1";
 if (
   !process.env.NEXT_PUBLIC_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS ||
   !process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS ||
-  !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS
+  !process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS ||
+  !process.env.NEXT_PUBLIC_APTOS_NETWORK
 ) {
   const missing = [
     ["NEXT_PUBLIC_MODULE_ADDRESS", process.env.NEXT_PUBLIC_MODULE_ADDRESS],
     ["NEXT_PUBLIC_REWARDS_MODULE_ADDRESS", process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_ADDRESS", process.env.NEXT_PUBLIC_INTEGRATOR_ADDRESS],
     ["NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS", process.env.NEXT_PUBLIC_INTEGRATOR_FEE_RATE_BPS],
+    ["NEXT_PUBLIC_APTOS_NETWORK", process.env.NEXT_PUBLIC_APTOS_NETWORK],
   ].filter(([_, value]) => !value);
   missing.forEach(([key, _]) => {
     console.error(`Missing environment variables ${key}`);
@@ -26,6 +35,36 @@ if (
   );
 }
 
+const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
+export const APTOS_NETWORK = NetworkToNetworkName[network];
+if (!APTOS_NETWORK) {
+  throw new Error(`Invalid network: ${network}`);
+}
+
+const clientKeys: Record<Network, string | undefined> = {
+  [Network.LOCAL]: process.env.NEXT_PUBLIC_LOCAL_APTOS_API_KEY,
+  [Network.CUSTOM]: process.env.NEXT_PUBLIC_CUSTOM_APTOS_API_KEY,
+  [Network.DEVNET]: process.env.NEXT_PUBLIC_DEVNET_APTOS_API_KEY,
+  [Network.TESTNET]: process.env.NEXT_PUBLIC_TESTNET_APTOS_API_KEY,
+  [Network.MAINNET]: process.env.NEXT_PUBLIC_MAINNET_APTOS_API_KEY,
+};
+
+const serverKeys: Record<Network, string | undefined> = {
+  [Network.LOCAL]: process.env.SERVER_LOCAL_APTOS_API_KEY,
+  [Network.CUSTOM]: process.env.SERVER_CUSTOM_APTOS_API_KEY,
+  [Network.DEVNET]: process.env.SERVER_DEVNET_APTOS_API_KEY,
+  [Network.TESTNET]: process.env.SERVER_TESTNET_APTOS_API_KEY,
+  [Network.MAINNET]: process.env.SERVER_MAINNET_APTOS_API_KEY,
+};
+
+const clientApiKey = clientKeys[APTOS_NETWORK];
+const serverApiKey = serverKeys[APTOS_NETWORK];
+
+export const getAptosApiKey = () => serverApiKey ?? clientApiKey;
+
+// Select the API key from the list of env API keys. This means we don't have to change the env
+// var for API keys when changing environments- we just need to provide them all every time, which
+// is much simpler.
 export const MODULE_ADDRESS = (() => AccountAddress.from(process.env.NEXT_PUBLIC_MODULE_ADDRESS))();
 export const REWARDS_MODULE_ADDRESS = (() =>
   AccountAddress.from(process.env.NEXT_PUBLIC_REWARDS_MODULE_ADDRESS))();
@@ -57,9 +96,30 @@ export const BASE_VIRTUAL_CEILING = 4_900_000_000_000_000n;
 export const QUOTE_VIRTUAL_CEILING = 140_000_000_000n;
 export const POOL_FEE_RATE_BPS = 25;
 export const MARKET_REGISTRATION_FEE = ONE_APT_BIGINT;
-export const MARKET_REGISTRATION_DEPOSIT = 4n * ONE_APT_BIGINT;
+export const MARKET_REGISTRATION_DEPOSIT = 1n * ONE_APT_BIGINT;
 export const MARKET_REGISTRATION_GAS_ESTIMATION_NOT_FIRST = ONE_APT * 0.005;
 export const MARKET_REGISTRATION_GAS_ESTIMATION_FIRST = ONE_APT * 0.6;
+export const BASIS_POINTS_PER_UNIT = 10_000n;
+/**
+ * A market's virtual reserves upon creation. Used to calculate the swap price
+ * of a market when no swaps exist yet.
+ *
+ * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/295cf611950f66651452baa3e6ad6d6aef583f9b/src/move/emojicoin_dot_fun/sources/emojicoin_dot_fun.move#L2030}
+ */
+export const INITIAL_VIRTUAL_RESERVES: Types["Reserves"] = {
+  base: BASE_VIRTUAL_CEILING,
+  quote: QUOTE_VIRTUAL_FLOOR,
+};
+
+/**
+ * A market's real reserves upon creation.
+ *
+ * @see {@link INITIAL_VIRTUAL_RESERVES}
+ */
+export const INITIAL_REAL_RESERVES: Types["Reserves"] = {
+  base: 0n,
+  quote: 0n,
+};
 
 /// As defined in the database, aka the enum string.
 export enum Period {
@@ -238,3 +298,7 @@ export const PERIODS = [
   Period.Period4H,
   Period.Period1D,
 ];
+
+const PERIODS_STRINGS_SET = new Set(PERIODS.map(String));
+
+export const isPeriod = (period: string): period is Period => PERIODS_STRINGS_SET.has(period);

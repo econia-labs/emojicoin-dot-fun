@@ -1,16 +1,13 @@
 import ClientEmojicoinPage from "components/pages/emojicoin/ClientEmojicoinPage";
 import EmojiNotFoundPage from "./not-found";
-import { REVALIDATION_TIME } from "lib/server-env";
-import { fetchContractMarketView } from "lib/queries/aptos-client/market-view";
+import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market-view";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
-import { isUserGeoblocked } from "utils/geolocation";
-import { headers } from "next/headers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
+import { type Metadata } from "next";
 
-export const revalidate = REVALIDATION_TIME;
-export const dynamic = "force-dynamic";
+export const revalidate = 2;
 
 /**
  * Our queries work with the marketID, but the URL uses the emoji bytes with a URL encoding.
@@ -24,6 +21,36 @@ type StaticParams = {
 interface EmojicoinPageProps {
   params: StaticParams;
   searchParams: {};
+}
+
+const EVENTS_ON_PAGE_LOAD = 25;
+
+export async function generateMetadata({ params }: EmojicoinPageProps): Promise<Metadata> {
+  const { market: marketSlug } = params;
+  const names = pathToEmojiNames(marketSlug);
+  const emojis = names.map((n) => {
+    const res = SYMBOL_EMOJI_DATA.byName(n)?.emoji;
+    if (!res) {
+      throw new Error(`Cannot parse invalid emoji input: ${marketSlug}, names: ${names}`);
+    }
+    return res;
+  });
+
+  const title = `${emojis.join("")}`;
+  const description = `Trade ${emojis.join("")} on emojicoin.fun !`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+    },
+    twitter: {
+      title,
+      description,
+    },
+  };
 }
 
 /**
@@ -41,16 +68,19 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     }
     return res;
   });
-  const state = await fetchMarketState({ searchEmojis: emojis });
 
-  const geoblocked = await isUserGeoblocked(headers().get("x-real-ip"));
+  const state = await fetchMarketState({ searchEmojis: emojis });
 
   if (state) {
     const { marketID } = state.market;
     const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
-    const chats = await fetchChatEvents({ marketID });
-    const swaps = await fetchSwapEvents({ marketID });
-    const marketView = await fetchContractMarketView(marketAddress.toString());
+
+    const [chats, swaps, marketView] = await Promise.all([
+      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
+      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
+      wrappedCachedContractMarketView(marketAddress.toString()),
+    ]);
+
     return (
       <ClientEmojicoinPage
         data={{
@@ -61,7 +91,6 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
           marketView,
           ...state.market,
         }}
-        geoblocked={geoblocked}
       />
     );
   }
