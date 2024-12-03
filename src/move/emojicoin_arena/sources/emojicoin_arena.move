@@ -27,18 +27,18 @@ module arena::emojicoin_arena {
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
 
     const U64_MAX: u64 = 0xffffffffffffffff;
-
-    const LOCK_IN_PERIOD_HOURS: u64 = 12;
-    const MELEE_DURATION_HOURS: u64 = 36;
-    const MICROSECONDS_PER_HOUR: u64 = 3_600_000_000;
+    const MAX_PERCENTAGE: u64 = 100;
 
     /// Flat integrator fee.
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
     const INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE: u8 = 50;
-    const REWARDS_PER_MELEE: u64 = 1500 * 100_000_000;
-    const MATCH_PERCENTAGE: u64 = 20;
-    const MAX_PERCENTAGE: u64 = 100;
-    const MAX_MATCH_AMOUNT: u64 = 100_000_000;
+
+    // Default parameters for new melees.
+    const DEFAULT_DURATION: u64 = 36 * 3_600_000_000;
+    const DEFAULT_LOCK_IN_PERIOD: u64 = 12 * 3_600_000_000;
+    const DEFAULT_AVAILABLE_REWADS: u64 = 1500 * 100_000_000;
+    const DEFAULT_MATCH_PERCENTAGE: u64 = 50;
+    const DEFAULT_MAX_MATCH_AMOUNT: u64 = 10 * 100_000_000;
 
     struct Melee has store {
         /// 1-indexed for conformity with emojicoin market ID indexing.
@@ -47,12 +47,16 @@ module arena::emojicoin_arena {
         market_metadatas: vector<MarketMetadata>,
         /// In microseconds.
         start_time: u64,
-        /// How long after start time users can lock in.
-        lock_in_period: u64,
         /// How long melee lasts after start time.
         duration: u64,
-        /// Amount of rewards available for distribution in octas.
+        /// How long after start time users can lock in.
+        lock_in_period: u64,
+        /// Amount of rewards available for distribution in octas, conditional on vault balance.
         available_rewards: u64,
+        /// Percentage of user's input amount to match in octas, when locking in.
+        match_percentage: u64,
+        /// Maximum amount of APT to match in octas, when locking in.
+        max_match_amount: u64,
         /// Active entrants.
         entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
@@ -68,13 +72,16 @@ module arena::emojicoin_arena {
     struct MeleeEscrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
         /// `Melee.market_id`.
         melee_id: u64,
+        /// Emojicoin 0 holdings.
         emojicoin_0: Coin<Coin0>,
+        /// Emojicoin 1 holdings.
         emojicoin_1: Coin<Coin1>,
         /// Volume of user's melee-specific swaps in octas.
         melee_swaps_volume: u128,
         /// Number of swaps user has executed during the melee.
         n_melee_swaps: u64,
-        /// APT entered into the melee. Normalized to equivalent amount when topping off.
+        /// APT entered into the melee, used as a benchmark for PnL calculations. Normalized when
+        /// topping off, reset to zero when exiting.
         octas_entered: u64,
         /// Octas user must pay to exit the melee, if they have locked in.
         tap_out_fee: u64
@@ -88,7 +95,17 @@ module arena::emojicoin_arena {
         /// Map from a sorted combination of market IDs (lower ID first) to the melee serial ID.
         melee_ids_by_market_ids: SmartTable<vector<u64>, u64>,
         /// Approves transfers from the vault.
-        signer_capability: SignerCapability
+        signer_capability: SignerCapability,
+        /// `Melee.duration` for new melees.
+        new_melee_duration: u64,
+        /// `Melee.lock_in_period` for new melees.
+        new_melee_lock_in_period: u64,
+        /// `Melee.available_rewards` for new melees.
+        new_melee_available_rewards: u64,
+        /// `Melee.match_percentage` for new melees.
+        new_melee_match_percentage: u64,
+        /// `Melee.max_match_amount` for new melees.
+        new_melee_max_match_amount: u64
     }
 
     struct UserMelees has key {
@@ -160,8 +177,10 @@ module arena::emojicoin_arena {
                     current_melee_ref.start_time + current_melee_ref.lock_in_period;
                 let lock_ins_still_allowed =
                     timestamp::now_microseconds() < lock_in_period_end_time;
-                if (current_tap_out_fee < MAX_MATCH_AMOUNT && lock_ins_still_allowed) {
-                    let eligible_match_amount = MAX_MATCH_AMOUNT - current_tap_out_fee;
+                if (current_tap_out_fee < current_melee_ref.max_match_amount
+                    && lock_ins_still_allowed) {
+                    let eligible_match_amount =
+                        current_melee_ref.max_match_amount - current_tap_out_fee;
                     eligible_match_amount = if (eligible_match_amount
                         < current_melee_ref.available_rewards) {
                         eligible_match_amount
@@ -181,7 +200,8 @@ module arena::emojicoin_arena {
                     };
                     let requested_match_amount =
                         (
-                            ((input_amount as u128) * (MATCH_PERCENTAGE as u128)
+                            ((input_amount as u128)
+                                * (current_melee_ref.match_percentage as u128)
                                 / (MAX_PERCENTAGE as u128)) as u64
                         );
                     let actual_match_amount =
@@ -447,10 +467,27 @@ module arena::emojicoin_arena {
         if (exit_once_done) exit_inner<Coin0, LP0, Coin1, LP1>(swapper, melee_id, false);
     }
 
-    fun init_module(arena: &signer) {
+    fun init_module(arena: &signer) acquires Registry {
+        // Store registry resource.
+        let (vault_signer, signer_capability) =
+            account::create_resource_account(arena, REGISTRY_SEED);
+        move_to(
+            arena,
+            Registry {
+                melees_by_id: smart_table::new(),
+                melee_ids_by_market_ids: smart_table::new(),
+                signer_capability,
+                new_melee_duration: DEFAULT_DURATION,
+                new_melee_lock_in_period: DEFAULT_LOCK_IN_PERIOD,
+                new_melee_available_rewards: DEFAULT_AVAILABLE_REWADS,
+                new_melee_match_percentage: DEFAULT_MATCH_PERCENTAGE,
+                new_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT
+            }
+        );
+        coin::register<AptosCoin>(&vault_signer);
+
         // Use pseudo-randomness to get market IDs for the first melee, since randomness is not
         // supported during `init_module`.
-        let time = timestamp::now_microseconds();
         let n_markets = get_n_registered_markets();
         let market_id_0 = pseudo_random_market_id(n_markets);
         let market_id_1;
@@ -458,43 +495,13 @@ module arena::emojicoin_arena {
             market_id_1 = pseudo_random_market_id(n_markets);
             if (market_id_1 != market_id_0) break;
         };
-        let market_ids = sort_unique_market_ids(market_id_0, market_id_1);
 
-        // Initialize first melee.
-        let start_time =
-            last_period_boundary(time, LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR);
-        let melees_by_id = smart_table::new();
-        melees_by_id.add(
-            1,
-            Melee {
-                melee_id: 1,
-                market_metadatas: market_ids.map_ref(|market_id_ref| {
-                    option::destroy_some(
-                        emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
-                    )
-                }),
-                start_time,
-                lock_in_period: LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR,
-                duration: MELEE_DURATION_HOURS * MICROSECONDS_PER_HOUR,
-                available_rewards: REWARDS_PER_MELEE,
-                entrants: smart_table::new(),
-                n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
-                melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
-                emojicoin_0_locked: aggregator_v2::create_unbounded_aggregator(),
-                emojicoin_1_locked: aggregator_v2::create_unbounded_aggregator()
-            }
+        // Register the first melee.
+        register_melee(
+            &mut Registry[@arena],
+            0,
+            sort_unique_market_ids(market_id_0, market_id_1)
         );
-        let melee_ids_by_market_ids = smart_table::new();
-        melee_ids_by_market_ids.add(market_ids, 1);
-
-        // Store registry resource.
-        let (vault_signer, signer_capability) =
-            account::create_resource_account(arena, REGISTRY_SEED);
-        move_to(
-            arena,
-            Registry { melees_by_id, melee_ids_by_market_ids, signer_capability }
-        );
-        coin::register<AptosCoin>(&vault_signer);
     }
 
     inline fun borrow_current_melee_ref(): &Melee {
@@ -552,32 +559,8 @@ module arena::emojicoin_arena {
         let n_melees = registry_ref.melees_by_id.length();
         let most_recent_melee_ref = registry_ref.melees_by_id.borrow(n_melees);
         if (time >= most_recent_melee_ref.start_time + most_recent_melee_ref.duration) {
-            let market_ids = next_melee_market_ids();
-            let melee_id = n_melees + 1;
-            let registry_ref_mut = &mut Registry[@arena];
-            registry_ref_mut.melees_by_id.add(
-                melee_id,
-                Melee {
-                    melee_id,
-                    market_metadatas: market_ids.map_ref(|market_id_ref| {
-                        option::destroy_some(
-                            emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
-                        )
-                    }),
-                    start_time: last_period_boundary(
-                        time, LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR
-                    ),
-                    lock_in_period: LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR,
-                    duration: MELEE_DURATION_HOURS * MICROSECONDS_PER_HOUR,
-                    available_rewards: REWARDS_PER_MELEE,
-                    entrants: smart_table::new(),
-                    n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
-                    melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
-                    emojicoin_0_locked: aggregator_v2::create_unbounded_aggregator(),
-                    emojicoin_1_locked: aggregator_v2::create_unbounded_aggregator()
-                }
-            );
-            registry_ref_mut.melee_ids_by_market_ids.add(market_ids, melee_id);
+            let next_melee_market_ids = next_melee_market_ids(registry_ref);
+            register_melee(&mut Registry[@arena], n_melees, next_melee_market_ids);
             true
         } else false
     }
@@ -592,7 +575,7 @@ module arena::emojicoin_arena {
         (time / period) * period
     }
 
-    inline fun next_melee_market_ids(): vector<u64> {
+    inline fun next_melee_market_ids(registry_ref: &Registry): vector<u64> {
         let n_markets = get_n_registered_markets();
         let market_ids;
         loop {
@@ -600,7 +583,7 @@ module arena::emojicoin_arena {
             let market_id_1 = random_market_id(n_markets);
             if (market_id_0 == market_id_1) continue;
             market_ids = sort_unique_market_ids(market_id_0, market_id_1);
-            if (!Registry[@arena].melee_ids_by_market_ids.contains(market_ids))
+            if (!registry_ref.melee_ids_by_market_ids.contains(market_ids))
                 break;
         };
         market_ids
@@ -615,6 +598,40 @@ module arena::emojicoin_arena {
     /// Market IDs are 1-indexed.
     inline fun random_market_id(n_markets: u64): u64 {
         randomness::u64_range(0, n_markets) + 1
+    }
+
+    inline fun register_melee(
+        registry_ref_mut: &mut Registry,
+        n_melees: u64,
+        sorted_unique_market_ids: vector<u64>
+    ) {
+        let melee_id = n_melees + 1;
+        registry_ref_mut.melees_by_id.add(
+            melee_id,
+            Melee {
+                melee_id,
+                market_metadatas: sorted_unique_market_ids.map_ref(|market_id_ref| {
+                    option::destroy_some(
+                        emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
+                    )
+                }),
+                start_time: last_period_boundary(
+                    timestamp::now_microseconds(),
+                    registry_ref_mut.new_melee_lock_in_period
+                ),
+                lock_in_period: registry_ref_mut.new_melee_lock_in_period,
+                duration: registry_ref_mut.new_melee_duration,
+                available_rewards: registry_ref_mut.new_melee_available_rewards,
+                match_percentage: registry_ref_mut.new_melee_match_percentage,
+                max_match_amount: registry_ref_mut.new_melee_max_match_amount,
+                entrants: smart_table::new(),
+                n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
+                melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
+                emojicoin_0_locked: aggregator_v2::create_unbounded_aggregator(),
+                emojicoin_1_locked: aggregator_v2::create_unbounded_aggregator()
+            }
+        );
+        registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
     }
 
     inline fun sort_unique_market_ids(market_id_0: u64, market_id_1: u64): vector<u64> {
