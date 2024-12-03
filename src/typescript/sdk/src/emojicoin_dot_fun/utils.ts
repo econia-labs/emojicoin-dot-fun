@@ -39,9 +39,10 @@ export function deriveMarketAddress(
   registryAddress?: AccountAddressInput
 ): AccountAddress {
   const creator = AccountAddress.from(registryAddress ?? REGISTRY_ADDRESS);
+  const seed = encodeEmojis(emojis);
   return createNamedObjectAddress({
     creator,
-    seed: encodeEmojis(emojis),
+    seed,
   });
 }
 
