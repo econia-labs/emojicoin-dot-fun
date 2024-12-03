@@ -480,7 +480,6 @@ export const toLastSwap = (data: JsonTypes["LastSwap"]): Types["LastSwap"] => ({
 export const toMarketView = (data: JsonTypes["MarketView"]): Types["MarketView"] => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
-
   clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves.base),
   clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves.quote),
   cpammRealReservesBase: BigInt(data.cpamm_real_reserves.base),
