@@ -93,7 +93,8 @@ module arena::emojicoin_arena {
         /// APT entered into the melee, used as a benchmark for PnL calculations. Normalized when
         /// topping off, reset to zero when exiting.
         octas_entered: u64,
-        /// Octas user must pay to exit the melee, if they have locked in.
+        /// Octas user must pay to exit the melee, if they have locked in. Equivalent to the amount
+        /// of APT they have been matched by locking in.
         tap_out_fee: u64
     }
 
@@ -189,11 +190,11 @@ module arena::emojicoin_arena {
         input_amount: u64,
         lock_in: bool
     ) acquires MeleeEscrow, Registry, UserMelees {
-        let (melee_just_ended, registry_ref_mut, _time, n_melees_before_cranking) =
+        let (melee_just_ended, registry_ref_mut, time, n_melees_before_cranking) =
             crank_schedule();
         if (melee_just_ended) return; // Can not enter melee if cranking ends it.
 
-        // Verify coin types for the current melee by calling the market view function.
+        // Verify that coin types are for the current melee by calling the market view function.
         let current_melee_ref_mut =
             registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
         let market_metadatas = current_melee_ref_mut.market_metadatas;
@@ -225,72 +226,39 @@ module arena::emojicoin_arena {
             user_melee_ids_ref_mut.add(melee_id, Nil {});
         };
 
-        // Verify user's melee escrow has no coins in it.
+        // Verify that user does not split balance between the two emojicoins.
         let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
-        assert!(coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0);
-        assert!(coin::value(&escrow_ref_mut.emojicoin_1) == 0, E_ENTER_COIN_BALANCE_1);
+        if (buy_emojicoin_0)
+            assert!(
+                coin::value(&escrow_ref_mut.emojicoin_1) == 0, E_ENTER_COIN_BALANCE_1
+            )
+        else
+            assert!(
+                coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0
+            );
 
-        // Try locking in if user selects the option.
+        // Try matching user's contribution if they elect to lock in.
         let match_amount =
             if (lock_in) {
-                let current_tap_out_fee = escrow_ref_mut.tap_out_fee;
-                let lock_in_period_end_time =
-                    current_melee_ref_mut.start_time
-                        + current_melee_ref_mut.lock_in_period;
-                let lock_ins_still_allowed =
-                    timestamp::now_microseconds() < lock_in_period_end_time;
-                if (current_tap_out_fee < current_melee_ref_mut.max_match_amount
-                    && lock_ins_still_allowed) {
-                    let eligible_match_amount =
-                        current_melee_ref_mut.max_match_amount - current_tap_out_fee;
-                    eligible_match_amount = if (eligible_match_amount
-                        < current_melee_ref_mut.available_rewards) {
-                        eligible_match_amount
-                    } else {
-                        current_melee_ref_mut.available_rewards
-                    };
-                    let vault_balance =
-                        coin::balance<AptosCoin>(
-                            account::get_signer_capability_address(
-                                &registry_ref_mut.signer_capability
-                            )
-                        );
-                    eligible_match_amount = if (eligible_match_amount < vault_balance) {
-                        eligible_match_amount
-                    } else {
-                        vault_balance
-                    };
-                    let requested_match_amount =
-                        (
-                            ((input_amount as u128)
-                                * (current_melee_ref_mut.match_percentage as u128)
-                                / (MAX_PERCENTAGE as u128)) as u64
-                        );
-                    let actual_match_amount =
-                        if (eligible_match_amount < requested_match_amount) {
-                            eligible_match_amount
-                        } else {
-                            requested_match_amount
-                        };
-                    if (actual_match_amount > 0) {
-                        escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee
-                            + actual_match_amount;
-                        let registry_ref_mut = &mut Registry[@arena];
-                        let available_rewards_ref_mut =
-                            &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
-                        *available_rewards_ref_mut = *available_rewards_ref_mut
-                            - actual_match_amount;
-                        let vault_signer =
-                            account::create_signer_with_capability(
-                                &registry_ref_mut.signer_capability
-                            );
-                        aptos_account::transfer(
-                            &vault_signer, entrant_address, actual_match_amount
-                        );
-                    };
-                    actual_match_amount
-                } else { 0 }
+                match_amount(
+                    input_amount,
+                    escrow_ref_mut,
+                    current_melee_ref_mut,
+                    registry_ref_mut,
+                    time
+                )
             } else { 0 };
+        if (match_amount > 0) {
+            escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee + match_amount;
+            let available_rewards_ref_mut =
+                &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
+            *available_rewards_ref_mut = *available_rewards_ref_mut - match_amount;
+            let vault_signer =
+                account::create_signer_with_capability(
+                    &registry_ref_mut.signer_capability
+                );
+            aptos_account::transfer(&vault_signer, entrant_address, match_amount);
+        };
 
         // Execute a swap then immediately move funds into escrow.
         let input_amount_after_matching = input_amount + match_amount;
@@ -646,6 +614,59 @@ module arena::emojicoin_arena {
 
     inline fun last_period_boundary(time: u64, period: u64): u64 {
         (time / period) * period
+    }
+
+    /// Uses mutable references to avoid freezing references up the stack.
+    inline fun match_amount<Coin0, LP0, Coin1, LP1>(
+        input_amount: u64,
+        escrow_ref_mut: &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>,
+        current_melee_ref_mut: &mut Melee,
+        registry_ref_mut: &mut Registry,
+        time: u64
+    ): u64 {
+        // Can only get matched if lock-in period is still active and matching not maxed out yet.
+        let lock_ins_still_allowed =
+            time
+                < current_melee_ref_mut.start_time
+                    + current_melee_ref_mut.lock_in_period;
+        let tap_out_fee = escrow_ref_mut.tap_out_fee;
+        let can_match_more = tap_out_fee < current_melee_ref_mut.max_match_amount;
+        if (lock_ins_still_allowed && can_match_more) {
+            // Eligible match amount is the maximum match amount minus the tap out fee.
+            let eligible_match_amount =
+                current_melee_ref_mut.max_match_amount - tap_out_fee;
+            // Correct eligible match amount for available melee rewards and vault balance.
+            eligible_match_amount = if (eligible_match_amount
+                < current_melee_ref_mut.available_rewards) {
+                eligible_match_amount
+            } else {
+                current_melee_ref_mut.available_rewards
+            };
+            let vault_balance =
+                coin::balance<AptosCoin>(
+                    account::get_signer_capability_address(
+                        &registry_ref_mut.signer_capability
+                    )
+                );
+            eligible_match_amount = if (eligible_match_amount < vault_balance) {
+                eligible_match_amount
+            } else {
+                vault_balance
+            };
+            // Requested match amount is the input amount times the match percentage.
+            let requested_match_amount =
+                (
+                    ((input_amount as u128)
+                        * (current_melee_ref_mut.match_percentage as u128)
+                        / (MAX_PERCENTAGE as u128)) as u64
+                );
+            // Correct actual match amount for the minimum of eligible and requested match amounts.
+            if (eligible_match_amount < requested_match_amount) {
+                eligible_match_amount
+            } else {
+                requested_match_amount
+            }
+        } else { 0 }
     }
 
     /// Accepts a mutable reference to avoid freezing references up the stack.
