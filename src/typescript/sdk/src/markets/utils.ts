@@ -332,11 +332,13 @@ export const calculateCirculatingSupply = (args: {
     : EMOJICOIN_SUPPLY - args.cpammRealReservesBase;
 
 /**
+ * *NOTE*: This fetches market data with an Aptos fullnode query; be mindful of rate-limiting.
+ * 
  * Fetches the circulating supply of a market.
  *
  * Calls the on-chain `market_view` view function and calculates the circulating supply from the
  * returned market state.
- *
+ * 
  * @param emojis the input {@link SymbolEmoji}s that form the market symbol
  * @returns the circulating supply of the market if the market exists, `null` otherwise
  */
