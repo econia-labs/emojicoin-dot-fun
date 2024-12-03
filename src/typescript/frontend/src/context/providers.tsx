@@ -1,5 +1,6 @@
 "use client";
 
+// cspell:word bitget
 // cspell:word martianwallet
 // cspell:word pontem
 // cspell:word okwallet
@@ -24,6 +25,7 @@ import { enableMapSet } from "immer";
 import { ConnectToWebSockets } from "./ConnectToWebSockets";
 import { APTOS_NETWORK } from "lib/env";
 import { WalletModalContextProvider } from "./wallet-context/WalletModalContext";
+import { BitgetWallet } from "@bitget-wallet/aptos-wallet-adapter";
 import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
@@ -49,7 +51,7 @@ const data = fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15
     })
 );
 
-const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ThemedApp = ({ children }) => {
   const { theme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { isDesktop } = useMatchBreakpoints();
@@ -57,7 +59,13 @@ const ThemedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isMobileMenuOpen = isOpen && !isDesktop;
 
   const wallets = useMemo(
-    () => [new PontemWallet(), new RiseWallet(), new MartianWallet(), new OKXWallet()],
+    () => [
+      new BitgetWallet(),
+      new PontemWallet(),
+      new RiseWallet(),
+      new MartianWallet(),
+      new OKXWallet(),
+    ],
     []
   );
 
