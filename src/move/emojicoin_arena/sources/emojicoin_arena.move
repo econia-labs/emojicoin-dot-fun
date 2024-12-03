@@ -28,6 +28,10 @@ module arena::emojicoin_arena {
     const E_NEW_LOCK_IN_PERIOD_TOO_LONG: u64 = 2;
     /// New melee match percentage is too high.
     const E_NEW_MATCH_PERCENTAGE_TOO_HIGH: u64 = 3;
+    /// User's melee escrow has nonzero emojicoin 0 balance.
+    const E_ENTER_COIN_BALANCE_0: u64 = 4;
+    /// User's melee escrow has nonzero emojicoin 1 balance.
+    const E_ENTER_COIN_BALANCE_1: u64 = 5;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -185,18 +189,21 @@ module arena::emojicoin_arena {
         input_amount: u64,
         lock_in: bool
     ) acquires MeleeEscrow, Registry, UserMelees {
-        if (crank_schedule()) return; // Can not enter melee if cranking ends it.
+        let (melee_just_ended, registry_ref_mut, _time, n_melees_before_cranking) =
+            crank_schedule();
+        if (melee_just_ended) return; // Can not enter melee if cranking ends it.
 
         // Verify coin types for the current melee by calling the market view function.
-        let current_melee_ref = borrow_current_melee_ref();
-        let market_metadatas = current_melee_ref.market_metadatas;
+        let current_melee_ref_mut =
+            registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
+        let market_metadatas = current_melee_ref_mut.market_metadatas;
         let (_, market_address_0, _) = unpack_market_metadata(market_metadatas[0]);
         market_view<Coin0, LP0>(market_address_0);
         let (_, market_address_1, _) = unpack_market_metadata(market_metadatas[1]);
         market_view<Coin1, LP1>(market_address_1);
 
         // Create escrow and user melees resources if they don't exist.
-        let melee_id = current_melee_ref.melee_id;
+        let melee_id = current_melee_ref_mut.melee_id;
         let entrant_address = signer::address_of(entrant);
         if (!exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(entrant_address)) {
             move_to(
@@ -218,30 +225,34 @@ module arena::emojicoin_arena {
             user_melee_ids_ref_mut.add(melee_id, Nil {});
         };
 
+        // Verify user's melee escrow has no coins in it.
+        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
+        assert!(coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0);
+        assert!(coin::value(&escrow_ref_mut.emojicoin_1) == 0, E_ENTER_COIN_BALANCE_1);
+
         // Try locking in if user selects the option.
         let match_amount =
             if (lock_in) {
-                let escrow_ref_mut =
-                    &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
                 let current_tap_out_fee = escrow_ref_mut.tap_out_fee;
                 let lock_in_period_end_time =
-                    current_melee_ref.start_time + current_melee_ref.lock_in_period;
+                    current_melee_ref_mut.start_time
+                        + current_melee_ref_mut.lock_in_period;
                 let lock_ins_still_allowed =
                     timestamp::now_microseconds() < lock_in_period_end_time;
-                if (current_tap_out_fee < current_melee_ref.max_match_amount
+                if (current_tap_out_fee < current_melee_ref_mut.max_match_amount
                     && lock_ins_still_allowed) {
                     let eligible_match_amount =
-                        current_melee_ref.max_match_amount - current_tap_out_fee;
+                        current_melee_ref_mut.max_match_amount - current_tap_out_fee;
                     eligible_match_amount = if (eligible_match_amount
-                        < current_melee_ref.available_rewards) {
+                        < current_melee_ref_mut.available_rewards) {
                         eligible_match_amount
                     } else {
-                        current_melee_ref.available_rewards
+                        current_melee_ref_mut.available_rewards
                     };
                     let vault_balance =
                         coin::balance<AptosCoin>(
                             account::get_signer_capability_address(
-                                &Registry[@arena].signer_capability
+                                &registry_ref_mut.signer_capability
                             )
                         );
                     eligible_match_amount = if (eligible_match_amount < vault_balance) {
@@ -252,7 +263,7 @@ module arena::emojicoin_arena {
                     let requested_match_amount =
                         (
                             ((input_amount as u128)
-                                * (current_melee_ref.match_percentage as u128)
+                                * (current_melee_ref_mut.match_percentage as u128)
                                 / (MAX_PERCENTAGE as u128)) as u64
                         );
                     let actual_match_amount =
@@ -339,7 +350,9 @@ module arena::emojicoin_arena {
     entry fun exit<Coin0, LP0, Coin1, LP1>(
         participant: &signer, melee_id: u64
     ) acquires MeleeEscrow, Registry {
-        exit_inner<Coin0, LP0, Coin1, LP1>(participant, melee_id, !crank_schedule());
+        let (melee_just_ended, _registry_ref_mut, _time, _n_melees_before_cranking) =
+            crank_schedule();
+        exit_inner<Coin0, LP0, Coin1, LP1>(participant, melee_id, !melee_just_ended);
     }
 
     #[randomness]
@@ -349,7 +362,8 @@ module arena::emojicoin_arena {
         market_addresses: vector<address>,
         buy_emojicoin_0: bool
     ) acquires MeleeEscrow, Registry {
-        let exit_once_done = crank_schedule();
+        let (exit_once_done, _registry_ref_mut, _time, _n_melees_before_cranking) =
+            crank_schedule();
 
         // Return early if type arguments or melee ID are passed incorrectly, but only after
         // cranking schedule.
@@ -555,12 +569,6 @@ module arena::emojicoin_arena {
         );
     }
 
-    inline fun borrow_current_melee_ref(): &Melee {
-        let registry_ref = &Registry[@arena];
-        let n_melees = registry_ref.melees_by_id.length();
-        registry_ref.melees_by_id.borrow(n_melees)
-    }
-
     inline fun borrow_registry_ref_checked(arena: &signer): &Registry {
         assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
         &Registry[@arena]
@@ -572,7 +580,7 @@ module arena::emojicoin_arena {
     }
 
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
-        participant: &signer, melee_id: u64, may_have_to_pay_tap_out_fee: bool
+        participant: &signer, melee_id: u64, melee_is_current: bool
     ) acquires Registry {
         let participant_address = signer::address_of(participant);
         // Only allow exit if user has corresponding melee resource and melee ID matches.
@@ -582,7 +590,7 @@ module arena::emojicoin_arena {
             // Only allow exit if melee ID matches.
             if (escrow_ref_mut.melee_id == melee_id) {
                 // Update available rewards and transfer tap out fee to vault if applicable.
-                if (may_have_to_pay_tap_out_fee) {
+                if (melee_is_current) {
                     let registry_ref_mut = &mut Registry[@arena];
                     let exited_melee_ref_mut =
                         registry_ref_mut.melees_by_id.borrow_mut(melee_id);
@@ -613,17 +621,21 @@ module arena::emojicoin_arena {
         }
     }
 
-    /// Cranks schedule and returns `true` if a melee has ended as a result.
-    inline fun crank_schedule(): bool {
+    /// Cranks schedule and returns `true` if a melee has ended as a result, along with assorted
+    /// variables, to reduce borrows and lookups in the caller.
+    inline fun crank_schedule(): (bool, &mut Registry, u64, u64) {
         let time = timestamp::now_microseconds();
-        let registry_ref = &Registry[@arena];
-        let n_melees = registry_ref.melees_by_id.length();
-        let most_recent_melee_ref = registry_ref.melees_by_id.borrow(n_melees);
-        if (time >= most_recent_melee_ref.start_time + most_recent_melee_ref.duration) {
-            let next_melee_market_ids = next_melee_market_ids(registry_ref);
-            register_melee(&mut Registry[@arena], n_melees, next_melee_market_ids);
-            true
-        } else false
+        let registry_ref_mut = &mut Registry[@arena];
+        let n_melees_before_cranking = registry_ref_mut.melees_by_id.length();
+        let current_melee_ref =
+            registry_ref_mut.melees_by_id.borrow(n_melees_before_cranking);
+        let cranked =
+            if (time >= current_melee_ref.start_time + current_melee_ref.duration) {
+                let market_ids = next_melee_market_ids(registry_ref_mut);
+                register_melee(registry_ref_mut, n_melees_before_cranking, market_ids);
+                true
+            } else false;
+        (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
     inline fun get_n_registered_markets(): u64 {
@@ -636,7 +648,8 @@ module arena::emojicoin_arena {
         (time / period) * period
     }
 
-    inline fun next_melee_market_ids(registry_ref: &Registry): vector<u64> {
+    /// Accepts a mutable reference to avoid freezing references up the stack.
+    inline fun next_melee_market_ids(registry_ref_mut: &mut Registry): vector<u64> {
         let n_markets = get_n_registered_markets();
         let market_ids;
         loop {
@@ -644,7 +657,7 @@ module arena::emojicoin_arena {
             let market_id_1 = random_market_id(n_markets);
             if (market_id_0 == market_id_1) continue;
             market_ids = sort_unique_market_ids(market_id_0, market_id_1);
-            if (!registry_ref.melee_ids_by_market_ids.contains(market_ids))
+            if (!registry_ref_mut.melee_ids_by_market_ids.contains(market_ids))
                 break;
         };
         market_ids
@@ -663,10 +676,10 @@ module arena::emojicoin_arena {
 
     inline fun register_melee(
         registry_ref_mut: &mut Registry,
-        n_melees: u64,
+        n_melees_before_registration: u64,
         sorted_unique_market_ids: vector<u64>
     ) {
-        let melee_id = n_melees + 1;
+        let melee_id = n_melees_before_registration + 1;
         registry_ref_mut.melees_by_id.add(
             melee_id,
             Melee {
