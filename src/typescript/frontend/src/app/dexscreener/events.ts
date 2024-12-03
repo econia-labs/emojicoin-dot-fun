@@ -76,6 +76,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { type Block } from "./latest-block";
 import { fetchLiquidityEventsByVersion, fetchSwapEventsByVersion } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { type toLiquidityEventModel, type toSwapEventModel } from "@sdk/indexer-v2/types";
+import Big from "big.js";
 
 
 /**
@@ -172,6 +173,28 @@ export interface EventsResponse {
 
 function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): SwapEvent & BlockInfo {
 
+  let assetInOut;
+
+  if (event.swap.isSell) {
+    // We are selling to APT
+    assetInOut = {
+      asset0In: event.swap.inputAmount.toString(),
+      asset0Out: 0,
+      asset1In: 0,
+      asset1Out: event.swap.quoteVolume.toString(),
+    };
+  } else {
+    // We are buying with APT
+    assetInOut = {
+      asset0In: 0,
+      asset0Out: event.swap.baseVolume.toString(),
+      asset1In: event.swap.inputAmount.toString(),
+      asset1Out: 0,
+    };
+  }
+
+  const priceNative = (new Big(event.swap.avgExecutionPriceQ64.toString())).div(2 ** 64).toFixed(64);
+
   return {
     block: {
       blockNumber: Number(event.transaction.version),
@@ -189,10 +212,11 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
     maker: event.swap.swapper,
     pairId: event.market.symbolEmojis.join("") + "-APT",
 
+    ...assetInOut,
     // TODO: this is just a guess- confirm it
-    asset0In: Number(event.swap.inputAmount),
-    asset1Out: Number(event.swap.quoteVolume),
-    priceNative: Number(event.swap.avgExecutionPriceQ64),
+    asset0In: event.swap.inputAmount.toString(),
+    asset1Out: event.swap.quoteVolume.toString(),
+    priceNative,
     reserves: {
       asset0: Number(event.state.clammVirtualReserves),
       asset1: Number(event.state.cpammRealReserves),
@@ -211,8 +235,8 @@ function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventMod
     txnId: String(event.transaction.version),
 
     // Because each transaction version is one "block", we default to "1" for everything.
-    // TODO: IT'S POSSIBLE TO EMIT MULTIPLES OF THESE WITHIN A TRANSACTION FROM A SCRIPT!! Ideally ensure a standard
-    //  sort, and increment these values for each event (across both event types)
+    // TODO: IT'S POSSIBLE TO EMIT MULTIPLES OF THESE WITHIN A TRANSACTION FROM A SCRIPT!!
+    //  MUST ensure a stable sort, and increment these values for each event (across both event types)
     txnIndex: 1,
     eventIndex: 1,
 
@@ -220,11 +244,11 @@ function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventMod
     pairId: event.market.symbolEmojis.join("") + "-APT",
 
     // TODO: this is just a guess- confirm it
-    amount0: Number(event.liquidity.baseAmount),
-    amount1: Number(event.liquidity.lpCoinAmount),
+    amount0: event.liquidity.baseAmount.toString(),
+    amount1: event.liquidity.quoteAmount.toString(),
     reserves: {
-      asset0: Number(event.state.clammVirtualReserves.quote),
-      asset1: Number(event.state.cpammRealReserves.quote),
+      asset0: event.state.clammVirtualReserves.quote.toString(),
+      asset1: event.state.cpammRealReserves.quote.toString(),
     },
   };
 }
