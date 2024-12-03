@@ -58,10 +58,15 @@ module arena::emojicoin_arena {
         /// Number of melee-specific swaps.
         n_melee_swaps: Aggregator<u64>,
         /// Volume of melee-specific swaps in octas.
-        melee_swaps_volume: Aggregator<u128>
+        melee_swaps_volume: Aggregator<u128>,
+        /// Amount of emojicoin 0 locked in all melee escrows for the melee.
+        emojicoin_0_locked: Aggregator<u64>,
+        /// Amount of emojicoin 1 locked in all melee escrows for the melee.
+        emojicoin_1_locked: Aggregator<u64>
     }
 
     struct MeleeEscrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
+        /// `Melee.market_id`.
         melee_id: u64,
         emojicoin_0: Coin<Coin0>,
         emojicoin_1: Coin<Coin1>,
@@ -474,7 +479,9 @@ module arena::emojicoin_arena {
                 available_rewards: REWARDS_PER_MELEE,
                 entrants: smart_table::new(),
                 n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
-                melee_swaps_volume: aggregator_v2::create_unbounded_aggregator()
+                melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
+                emojicoin_0_locked: aggregator_v2::create_unbounded_aggregator(),
+                emojicoin_1_locked: aggregator_v2::create_unbounded_aggregator()
             }
         );
         let melee_ids_by_market_ids = smart_table::new();
@@ -500,7 +507,7 @@ module arena::emojicoin_arena {
         participant: &signer, melee_id: u64, may_have_to_pay_tap_out_fee: bool
     ) acquires Registry {
         let participant_address = signer::address_of(participant);
-        // Only allow exit if user has corresponding melee resourcce and melee ID matches.
+        // Only allow exit if user has corresponding melee resource and melee ID matches.
         if (exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(participant_address)) {
             let escrow_ref_mut =
                 &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[participant_address];
@@ -565,7 +572,9 @@ module arena::emojicoin_arena {
                     available_rewards: REWARDS_PER_MELEE,
                     entrants: smart_table::new(),
                     n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
-                    melee_swaps_volume: aggregator_v2::create_unbounded_aggregator()
+                    melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
+                    emojicoin_0_locked: aggregator_v2::create_unbounded_aggregator(),
+                    emojicoin_1_locked: aggregator_v2::create_unbounded_aggregator()
                 }
             );
             registry_ref_mut.melee_ids_by_market_ids.add(market_ids, melee_id);
