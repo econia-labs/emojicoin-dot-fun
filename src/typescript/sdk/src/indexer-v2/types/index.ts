@@ -601,7 +601,7 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
   };
 };
 
-export const toRandomNamesRPCResponse = (data: DatabaseJsonType["random_names"]) =>
+export const toRandomSymbolsRPCResponse = (data: DatabaseJsonType["random_symbols"]) =>
   symbolBytesToEmojis("0" + data.emojis.substring(1));
 
 export const DatabaseTypeConverter = {
@@ -619,7 +619,7 @@ export const DatabaseTypeConverter = {
   [TableName.ProcessorStatus]: toProcessorStatus,
   [TableName.PriceFeed]: toPriceFeed,
   [DatabaseRpc.UserPools]: toUserPoolsRPCResponse,
-  [DatabaseRpc.RandomSymbols]: toRandomNamesRPCResponse,
+  [DatabaseRpc.RandomSymbols]: toRandomSymbolsRPCResponse,
 };
 
 export type DatabaseModels = {
