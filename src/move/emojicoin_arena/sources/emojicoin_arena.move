@@ -1,6 +1,7 @@
 module arena::emojicoin_arena {
 
     use aptos_framework::account::{Self, SignerCapability};
+    use aptos_framework::aggregator_v2::{Self, Aggregator};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin::{Self, Coin};
@@ -39,26 +40,42 @@ module arena::emojicoin_arena {
     const MAX_PERCENTAGE: u64 = 100;
     const MAX_MATCH_AMOUNT: u64 = 100_000_000;
 
-    struct Melee has copy, drop, store {
+    struct Melee has store {
         /// 1-indexed for conformity with emojicoin market ID indexing.
         melee_id: u64,
         /// Metadata for market with lower market ID comes first.
         market_metadatas: vector<MarketMetadata>,
-        available_rewards_in_octas: u64,
         /// In microseconds.
         start_time: u64,
+        /// How long after start time users can lock in.
         lock_in_period: u64,
-        duration: u64
+        /// How long melee lasts after start time.
+        duration: u64,
+        /// Amount of rewards available for distribution in octas.
+        available_rewards: u64,
+        /// Active entrants.
+        entrants: SmartTable<address, Nil>,
+        /// Number of melee-specific swaps.
+        n_melee_swaps: Aggregator<u64>,
+        /// Volume of melee-specific swaps in octas.
+        melee_swaps_volume: Aggregator<u128>
     }
-
-    struct Nil has store {}
 
     struct MeleeEscrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
         melee_id: u64,
         emojicoin_0: Coin<Coin0>,
         emojicoin_1: Coin<Coin1>,
+        /// Volume of user's melee-specific swaps in octas.
+        melee_swaps_volume: u128,
+        /// Number of swaps user has executed during the melee.
+        n_melee_swaps: u64,
+        /// APT entered into the melee. Normalized to equivalent amount when topping off.
+        octas_entered: u64,
+        /// Octas user must pay to exit the melee, if they have locked in.
         tap_out_fee: u64
     }
+
+    struct Nil has store {}
 
     struct Registry has key {
         /// Map from melee serial ID to the melee.
@@ -115,7 +132,10 @@ module arena::emojicoin_arena {
                     melee_id,
                     emojicoin_0: coin::zero(),
                     emojicoin_1: coin::zero(),
-                    tap_out_fee: 0
+                    octas_entered: 0,
+                    tap_out_fee: 0,
+                    melee_swaps_volume: 0,
+                    n_melee_swaps: 0
                 }
             );
             if (!exists<UserMelees>(entrant_address)) {
@@ -138,10 +158,10 @@ module arena::emojicoin_arena {
                 if (current_tap_out_fee < MAX_MATCH_AMOUNT && lock_ins_still_allowed) {
                     let eligible_match_amount = MAX_MATCH_AMOUNT - current_tap_out_fee;
                     eligible_match_amount = if (eligible_match_amount
-                        < current_melee_ref.available_rewards_in_octas) {
+                        < current_melee_ref.available_rewards) {
                         eligible_match_amount
                     } else {
-                        current_melee_ref.available_rewards_in_octas
+                        current_melee_ref.available_rewards
                     };
                     let vault_balance =
                         coin::balance<AptosCoin>(
@@ -170,7 +190,7 @@ module arena::emojicoin_arena {
                             + actual_match_amount;
                         let registry_ref_mut = &mut Registry[@arena];
                         let available_rewards_ref_mut =
-                            &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards_in_octas;
+                            &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
                         *available_rewards_ref_mut = *available_rewards_ref_mut
                             - actual_match_amount;
                         let vault_signer =
@@ -448,10 +468,13 @@ module arena::emojicoin_arena {
                         emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
                     )
                 }),
-                available_rewards_in_octas: REWARDS_PER_MELEE,
                 start_time,
                 lock_in_period: LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR,
-                duration: MELEE_DURATION_HOURS * MICROSECONDS_PER_HOUR
+                duration: MELEE_DURATION_HOURS * MICROSECONDS_PER_HOUR,
+                available_rewards: REWARDS_PER_MELEE,
+                entrants: smart_table::new(),
+                n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
+                melee_swaps_volume: aggregator_v2::create_unbounded_aggregator()
             }
         );
         let melee_ids_by_market_ids = smart_table::new();
@@ -490,7 +513,7 @@ module arena::emojicoin_arena {
                         registry_ref_mut.melees_by_id.borrow_mut(melee_id);
                     let tap_out_fee_ref_mut = &mut escrow_ref_mut.tap_out_fee;
                     let available_rewards_ref_mut =
-                        &mut exited_melee_ref_mut.available_rewards_in_octas;
+                        &mut exited_melee_ref_mut.available_rewards;
                     *available_rewards_ref_mut = *available_rewards_ref_mut
                         + *tap_out_fee_ref_mut;
                     let vault_address =
@@ -534,12 +557,15 @@ module arena::emojicoin_arena {
                             emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
                         )
                     }),
-                    available_rewards_in_octas: REWARDS_PER_MELEE,
                     start_time: last_period_boundary(
                         time, LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR
                     ),
                     lock_in_period: LOCK_IN_PERIOD_HOURS * MICROSECONDS_PER_HOUR,
-                    duration: MELEE_DURATION_HOURS * MICROSECONDS_PER_HOUR
+                    duration: MELEE_DURATION_HOURS * MICROSECONDS_PER_HOUR,
+                    available_rewards: REWARDS_PER_MELEE,
+                    entrants: smart_table::new(),
+                    n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
+                    melee_swaps_volume: aggregator_v2::create_unbounded_aggregator()
                 }
             );
             registry_ref_mut.melee_ids_by_market_ids.add(market_ids, melee_id);
