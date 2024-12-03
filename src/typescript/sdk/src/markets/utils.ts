@@ -14,15 +14,13 @@ import {
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import {
-  EmojicoinDotFun,
-  REGISTRY_ADDRESS,
-  deriveEmojicoinPublisherAddress,
-} from "../emojicoin_dot_fun";
+import { EmojicoinDotFun, REGISTRY_ADDRESS, deriveMarketAddress } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
+  BASE_VIRTUAL_CEILING,
   COIN_FACTORY_MODULE_NAME,
   DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+  EMOJICOIN_SUPPLY,
   GRACE_PERIOD_TIME,
   Period,
   rawPeriodToEnum,
@@ -30,6 +28,7 @@ import {
 import {
   type Types,
   toMarketResource,
+  toMarketView,
   toRegistrantGracePeriodFlag,
   toRegistryResource,
 } from "../types/types";
@@ -39,9 +38,12 @@ import {
   type EmojicoinSymbol,
   encodeEmojis,
   symbolBytesToEmojis,
+  type SymbolEmoji,
   type SymbolEmojiData,
 } from "../emoji_data";
 import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
+import { getAptosClient } from "../utils/aptos-client";
+import { MarketView } from "../emojicoin_dot_fun/emojicoin-dot-fun";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
@@ -70,11 +72,8 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
 }): Types["EmojicoinInfo"] {
   const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
   const symbolBytes = Hex.fromHexInput(args.symbolBytes);
-  const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array());
-  const marketAddress = deriveEmojicoinPublisherAddress({
-    registryAddress,
-    emojis: emojis.emojis.map((e) => e.hex),
-  });
+  const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array()).emojis.map((e) => e.emoji);
+  const marketAddress = deriveMarketAddress(emojis, registryAddress);
 
   const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
 
@@ -322,3 +321,30 @@ export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateT
   // (b * c) / (a * d)
   return b.mul(c).div(a.mul(d)).toString();
 }
+
+export const calculateCirculatingSupply = (args: {
+  inBondingCurve: boolean;
+  clammVirtualReservesBase: Types["Reserves"]["base"];
+  cpammRealReservesBase: Types["Reserves"]["base"];
+}) =>
+  args.inBondingCurve
+    ? BASE_VIRTUAL_CEILING - args.clammVirtualReservesBase
+    : EMOJICOIN_SUPPLY - args.cpammRealReservesBase;
+
+/**
+ * Fetches the circulating supply of a market.
+ *
+ * Calls the on-chain `market_view` view function and calculates the circulating supply from the
+ * returned market state.
+ *
+ * @param emojis the input {@link SymbolEmoji}s that form the market symbol
+ * @returns the circulating supply of the market if the market exists, `null` otherwise
+ */
+export const fetchCirculatingSupply = async (emojis: SymbolEmoji[]) =>
+  MarketView.view({
+    aptos: getAptosClient(),
+    marketAddress: deriveMarketAddress(emojis),
+  })
+    .then(toMarketView)
+    .then(calculateCirculatingSupply)
+    .catch(() => null);
