@@ -22,6 +22,12 @@ module arena::emojicoin_arena {
 
     /// Signer does not correspond to arena account.
     const E_NOT_ARENA: u64 = 0;
+    /// New melee duration is too short.
+    const E_NEW_DURATION_TOO_SHORT: u64 = 1;
+    /// New melee lock-in period is too long.
+    const E_NEW_LOCK_IN_PERIOD_TOO_LONG: u64 = 2;
+    /// New melee match percentage is too high.
+    const E_NEW_MATCH_PERCENTAGE_TOO_HIGH: u64 = 3;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -114,17 +120,62 @@ module arena::emojicoin_arena {
     }
 
     public entry fun fund_vault(arena: &signer, amount: u64) acquires Registry {
-        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
-        let vault_address =
-            account::get_signer_capability_address(&Registry[@arena].signer_capability);
-        aptos_account::transfer(arena, vault_address, amount);
+        aptos_account::transfer(
+            arena,
+            account::get_signer_capability_address(
+                &borrow_registry_ref_checked(arena).signer_capability
+            ),
+            amount
+        );
+    }
+
+    public entry fun set_new_melee_available_rewards(
+        arena: &signer, amount: u64
+    ) acquires Registry {
+        borrow_registry_ref_mut_checked(arena).new_melee_available_rewards = amount;
+    }
+
+    public entry fun set_new_melee_duration(arena: &signer, duration: u64) acquires Registry {
+        let registry_ref_mut = borrow_registry_ref_mut_checked(arena);
+        assert!(
+            duration > registry_ref_mut.new_melee_lock_in_period,
+            E_NEW_DURATION_TOO_SHORT
+        );
+        registry_ref_mut.new_melee_duration = duration;
+    }
+
+    public entry fun set_new_melee_lock_in_period(
+        arena: &signer, lock_in_period: u64
+    ) acquires Registry {
+        let registry_ref_mut = borrow_registry_ref_mut_checked(arena);
+        assert!(
+            lock_in_period < registry_ref_mut.new_melee_duration,
+            E_NEW_LOCK_IN_PERIOD_TOO_LONG
+        );
+        registry_ref_mut.new_melee_lock_in_period = lock_in_period;
+    }
+
+    public entry fun set_new_melee_match_percentage(
+        arena: &signer, match_percentage: u64
+    ) acquires Registry {
+        assert!(match_percentage <= MAX_PERCENTAGE, E_NEW_MATCH_PERCENTAGE_TOO_HIGH);
+        borrow_registry_ref_mut_checked(arena).new_melee_match_percentage = match_percentage;
+    }
+
+    public entry fun set_new_melee_max_match_amount(
+        arena: &signer, max_match_amount: u64
+    ) acquires Registry {
+        borrow_registry_ref_mut_checked(arena).new_melee_max_match_amount = max_match_amount;
     }
 
     public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
-        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
-        let vault_signer =
-            account::create_signer_with_capability(&Registry[@arena].signer_capability);
-        aptos_account::transfer(&vault_signer, @arena, amount);
+        aptos_account::transfer(
+            &account::create_signer_with_capability(
+                &borrow_registry_ref_checked(arena).signer_capability
+            ),
+            @arena,
+            amount
+        );
     }
 
     #[randomness]
@@ -508,6 +559,16 @@ module arena::emojicoin_arena {
         let registry_ref = &Registry[@arena];
         let n_melees = registry_ref.melees_by_id.length();
         registry_ref.melees_by_id.borrow(n_melees)
+    }
+
+    inline fun borrow_registry_ref_checked(arena: &signer): &Registry {
+        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
+        &Registry[@arena]
+    }
+
+    inline fun borrow_registry_ref_mut_checked(arena: &signer): &mut Registry {
+        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
+        &mut Registry[@arena]
     }
 
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
