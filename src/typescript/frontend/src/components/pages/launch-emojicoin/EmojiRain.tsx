@@ -1,5 +1,5 @@
 import { type symbolBytesToEmojis } from "@sdk/emoji_data";
-import { AnimationPlaybackControls, useAnimate } from "framer-motion";
+import { type AnimationPlaybackControls, useAnimate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { useWindowSize } from "react-use";
 
@@ -10,7 +10,7 @@ export function EmojiRainDrop({
   name,
   onClick,
   index,
-  emojis
+  emojis,
 }: {
   name: ReturnType<typeof symbolBytesToEmojis>;
   onClick?: (data: ReturnType<typeof symbolBytesToEmojis>) => void;
@@ -31,7 +31,6 @@ export function EmojiRainDrop({
   const [scope, animate] = useAnimate();
   const [controls, setControls] = useState<AnimationPlaybackControls>();
 
-
   useEffect(() => {
     const controls = animate(
       scope.current,
@@ -48,12 +47,17 @@ export function EmojiRainDrop({
     setControls(controls);
 
     return () => controls.complete();
-  }, []);
+  }, [scope, animate, delay, height, emojis]);
 
   return (
     <div
       onClick={() => onClick && onClick(name)}
-      onMouseOver={() => { if (controls){controls.time += delay; controls.pause()} }}
+      onMouseOver={() => {
+        if (controls) {
+          controls.time += delay;
+          controls.pause();
+        }
+      }}
       onMouseOut={() => controls?.play()}
       className="absolute emoji-rain-drop z-10 flex flex-col select-none cursor-pointer"
       style={{
@@ -64,8 +68,7 @@ export function EmojiRainDrop({
       ref={scope}
     >
       {name.emojis.map((e) => (
-        <span
-          key={`rain-drop-emoji-${e.hex}`}>{e.emoji}</span>
+        <span key={`rain-drop-emoji-${e.hex}`}>{e.emoji}</span>
       ))}
     </div>
   );
@@ -81,15 +84,16 @@ export function EmojiRain({
   return (
     <>
       {randomSymbols.map((name, i) => {
-        const emojiRainDrop =
+        const emojiRainDrop = (
           <EmojiRainDrop
             key={`rain-drop-${name.emojis.map((e) => e.hex).reduce((a, b) => `${a}-${b}`, "")}`}
             name={name}
             onClick={onClick}
             index={i}
             emojis={randomSymbols.length}
-          />;
-          return emojiRainDrop;
+          />
+        );
+        return emojiRainDrop;
       })}
     </>
   );

@@ -141,12 +141,12 @@ const ClientLaunchEmojicoinPage: React.FC<{
 
   return (
     <div className="flex flex-col grow relative overflow-hidden">
-      {randomSymbols.length > 0 &&
+      {randomSymbols.length > 0 && (
         <EmojiRain
           randomSymbols={randomSymbols}
           onClick={(name) => setEmojis(name.emojis.map((e) => e.emoji))}
         />
-      }
+      )}
       <TextCarousel />
 
       <div className="flex justify-center items-center h-full px-6">
