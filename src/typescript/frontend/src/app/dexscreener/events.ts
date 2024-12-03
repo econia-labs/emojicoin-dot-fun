@@ -193,6 +193,21 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
     };
   }
 
+
+  let reserves;
+  // Bonding is complete
+  if (event.state.lpCoinSupply > 0) {
+    reserves = {
+      reserves: {
+        asset0: event.swap.baseVolume.toString(),
+        asset1: event.swap.quoteVolume.toString(),
+      }
+    };
+  } else {
+    // Still in bonding
+    reserves = {};
+  }
+
   const priceNative = (new Big(event.swap.avgExecutionPriceQ64.toString())).div(2 ** 64).toFixed(64);
 
   return {
@@ -213,14 +228,11 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
     pairId: event.market.symbolEmojis.join("") + "-APT",
 
     ...assetInOut,
-    // TODO: this is just a guess- confirm it
+
     asset0In: event.swap.inputAmount.toString(),
     asset1Out: event.swap.quoteVolume.toString(),
     priceNative,
-    reserves: {
-      asset0: Number(event.state.clammVirtualReserves),
-      asset1: Number(event.state.cpammRealReserves),
-    },
+    ...reserves,
   };
 }
 
@@ -243,11 +255,10 @@ function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventMod
     maker: event.liquidity.provider,
     pairId: event.market.symbolEmojis.join("") + "-APT",
 
-    // TODO: this is just a guess- confirm it
     amount0: event.liquidity.baseAmount.toString(),
     amount1: event.liquidity.quoteAmount.toString(),
     reserves: {
-      asset0: event.state.clammVirtualReserves.quote.toString(),
+      asset0: event.state.cpammRealReserves.base.toString(),
       asset1: event.state.cpammRealReserves.quote.toString(),
     },
   };
