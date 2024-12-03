@@ -18,11 +18,14 @@ import { EmojicoinDotFun, REGISTRY_ADDRESS, deriveMarketAddress } from "../emoji
 import { toConfig } from "../utils/aptos-utils";
 import {
   BASE_VIRTUAL_CEILING,
+  BASE_VIRTUAL_FLOOR,
   COIN_FACTORY_MODULE_NAME,
   DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+  EMOJICOIN_REMAINDER,
   EMOJICOIN_SUPPLY,
   GRACE_PERIOD_TIME,
   Period,
+  QUOTE_VIRTUAL_FLOOR,
   rawPeriodToEnum,
 } from "../const";
 import {
@@ -31,6 +34,7 @@ import {
   toMarketView,
   toRegistrantGracePeriodFlag,
   toRegistryResource,
+  toReserves,
 } from "../types/types";
 import type JsonTypes from "../types/json-types";
 import {
@@ -322,6 +326,12 @@ export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateT
   return b.mul(c).div(a.mul(d)).toString();
 }
 
+/**
+ * Calculates the circulating supply based on the current market state.
+ *
+ * The logic for calculation is taken directly from the Move smart contract.
+ * @see assign_supply_minuend_reserves_ref_mut in `emojicoin_dot_fun.move`
+ */
 export const calculateCirculatingSupply = (args: {
   inBondingCurve: boolean;
   clammVirtualReservesBase: Types["Reserves"]["base"];
@@ -332,21 +342,66 @@ export const calculateCirculatingSupply = (args: {
     : EMOJICOIN_SUPPLY - args.cpammRealReservesBase;
 
 /**
- * *NOTE*: This fetches market data with an Aptos fullnode query; be mindful of rate-limiting.
- * 
- * Fetches the circulating supply of a market.
+ * *NOTE*: If you already have a market's state, call {@link calculateCirculatingSupply} directly.
  *
- * Calls the on-chain `market_view` view function and calculates the circulating supply from the
- * returned market state.
- * 
- * @param emojis the input {@link SymbolEmoji}s that form the market symbol
- * @returns the circulating supply of the market if the market exists, `null` otherwise
+ * Fetches the circulating supply of a market by looking at its on-chain state.
+ *
+ * Uses the Aptos fullnode; be mindful of rate-limiting.
+ *
+ * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
+ * @returns the circulating supply a market if it exists, `null` otherwise.
  */
-export const fetchCirculatingSupply = async (emojis: SymbolEmoji[]) =>
+export const fetchCirculatingSupply = async (emojis: SymbolEmoji[]): Promise<bigint | null> =>
   MarketView.view({
     aptos: getAptosClient(),
     marketAddress: deriveMarketAddress(emojis),
   })
     .then(toMarketView)
     .then(calculateCirculatingSupply)
+    .catch(() => null);
+
+/**
+ * Calculates the real reserves of a market given on information from the partial state of the
+ * market passed in.
+ *
+ * The logic for calculating the real reserves of a market in the bonding curve is taken directly
+ * from the Move smart contract.
+ */
+export const calculateRealReserves = (args: {
+  inBondingCurve: boolean;
+  clammVirtualReserves: Types["Reserves"];
+  cpammRealReserves: Types["Reserves"];
+}): Types["Reserves"] => {
+  const { inBondingCurve, clammVirtualReserves, cpammRealReserves } = args;
+  if (inBondingCurve) {
+    return {
+      base: clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
+      quote: clammVirtualReserves.base - BASE_VIRTUAL_FLOOR + EMOJICOIN_REMAINDER,
+    };
+  }
+  return cpammRealReserves;
+};
+
+/**
+ * *NOTE*: If you already have a market's state, call {@link calculateRealReserves} directly.
+ *
+ * Fetches the circulating supply of a market by looking at its on-chain state.
+ *
+ * Uses the Aptos fullnode; be mindful of rate-limiting.
+ *
+ * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
+ * @returns the real reserves for a market if it exists, `null` otherwise.
+ */
+export const fetchRealReserves = async (emojis: SymbolEmoji[]): Promise<Types["Reserves"] | null> =>
+  MarketView.view({
+    aptos: getAptosClient(),
+    marketAddress: deriveMarketAddress(emojis),
+  })
+    .then((market) =>
+      calculateRealReserves({
+        inBondingCurve: market.in_bonding_curve,
+        cpammRealReserves: toReserves(market.cpamm_real_reserves),
+        clammVirtualReserves: toReserves(market.clamm_virtual_reserves),
+      })
+    )
     .catch(() => null);
