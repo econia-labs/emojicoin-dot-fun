@@ -29,6 +29,16 @@ const ScrambledNumberLabel = ({
   return <span className={className} ref={ref}>{`${prefix}${value}${suffix}`}</span>;
 };
 
+type NominalizedBigIntOrAnyNumberString =
+  | {
+      value: bigint;
+      nominalize: true;
+    }
+  | {
+      value: AnyNumberString;
+      nominalize?: undefined | false;
+    };
+
 /**
  * Formats a number, string or bigint and scrambles it if desired.
  *
@@ -51,11 +61,9 @@ export const FormattedNumber = ({
   prefix = "",
   className,
   style = "sliding-precision",
-}: {
-  value: AnyNumberString;
+}: NominalizedBigIntOrAnyNumberString & {
   decimals?: number;
   scramble?: boolean;
-  nominalize?: boolean;
   suffix?: string;
   prefix?: string;
   className?: string;
