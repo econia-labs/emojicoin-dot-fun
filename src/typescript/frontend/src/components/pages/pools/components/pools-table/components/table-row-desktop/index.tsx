@@ -9,6 +9,8 @@ import { Emoji } from "utils/emoji";
 import Link from "next/link";
 import Popup from "components/popup";
 import { emojiNamesToPath } from "utils/pathname-helpers";
+import { FormattedNumber } from "components/FormattedNumber";
+import { emoji } from "utils";
 
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_YEAR = 365;
@@ -18,10 +20,12 @@ export const getXPR = (x: number, tvlPerLpCoinGrowth: number) =>
   ((tvlPerLpCoinGrowth ** x) - 1) * 100;
 
 export const formatXPR = (time: number, bigDailyTvl: number) => {
-  const xpr = getXPR(time, bigDailyTvl);
-  const matchTrailingZeros = /(\.0*|(?<=(\..*))0*)$/;
-  const xprStr = xpr.toFixed(4).replace(matchTrailingZeros, "");
-  return `${xprStr}%`;
+  if (bigDailyTvl === 0) {
+    return <Emoji emojis={emoji("hourglass not done")} />;
+  }
+  const xprIn = getXPR(time, bigDailyTvl);
+
+  return <FormattedNumber value={xprIn} style="fixed" suffix="%" decimals={4} />;
 };
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
@@ -57,7 +61,11 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             ellipsis
             title={`${toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT`}
           >
-            {toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT
+            <FormattedNumber
+              value={item.state.cumulativeStats.quoteVolume}
+              suffix=" APT"
+              nominalize
+            />
           </Text>
         </Flex>
       </Td>
@@ -72,7 +80,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               ellipsis
               title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
             >
-              {toCoinDecimalString(item.dailyVolume, 2)} APT
+              <FormattedNumber value={item.dailyVolume} suffix=" APT" nominalize />
             </Text>
           </Flex>
         </Td>
@@ -87,7 +95,11 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             ellipsis
             title={`${toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT`}
           >
-            {toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT
+            <FormattedNumber
+              value={item.state.cpammRealReserves.quote * 2n}
+              suffix=" APT"
+              nominalize
+            />
           </Text>
         </Flex>
       </Td>
@@ -103,7 +115,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
                   <span>{"least one day to view its percentage returns."}</span>
                 </div>
               ) : (
-                <XprPopup {...{ dpr, wpr, apr }} />
+                <XprPopup dpr={dpr} wpr={wpr} apr={apr} />
               )
             }
           >
