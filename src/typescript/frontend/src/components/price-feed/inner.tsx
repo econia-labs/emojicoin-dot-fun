@@ -3,27 +3,25 @@
 import Link from "next/link";
 import Carousel from "components/carousel";
 import { Emoji } from "utils/emoji";
-import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 import { useMemo } from "react";
 import { cn } from "lib/utils/class-name";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 import { useEventStore } from "context/event-store-context/hooks";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
+import { FormattedNumber } from "components/FormattedNumber";
 
 export const PriceDelta = ({ delta, className = "" }: { delta: number; className?: string }) => {
-  const { prefix, suffix, text } = useMemo(
+  const { prefix, suffix } = useMemo(
     () => ({
       prefix: delta >= 0 ? "+" : "-",
       suffix: "%",
-      text: Math.abs(delta).toFixed(2),
     }),
     [delta]
   );
-  const { ref } = useLabelScrambler(text, suffix, prefix);
 
   return (
-    <span ref={ref} className={cn(`${delta >= 0 ? "text-green" : "text-pink"}`, className)}>
-      {`${prefix} ${text}${suffix}`}
+    <span className={cn(`${delta >= 0 ? "text-green" : "text-pink"}`, className)}>
+      <FormattedNumber value={Math.abs(delta)} suffix={suffix} prefix={prefix} scramble />
     </span>
   );
 };

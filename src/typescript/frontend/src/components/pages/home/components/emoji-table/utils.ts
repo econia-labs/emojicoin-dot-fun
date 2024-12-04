@@ -24,8 +24,8 @@ export const marketDataToProps = (markets: HomePageProps["markets"]): PropsWithT
     symbol: m.market.symbolData.symbol,
     marketID: Number(m.market.marketID),
     emojis: m.market.emojis,
-    staticMarketCap: m.state.instantaneousStats.marketCap.toString(),
-    staticVolume24H: m.dailyVolume.toString(),
+    staticMarketCap: m.state.instantaneousStats.marketCap,
+    staticVolume24H: m.dailyVolume,
   }));
 
 export const stateEventsToProps = (
@@ -47,8 +47,8 @@ export const stateEventsToProps = (
       symbol,
       emojis,
       marketID: Number(marketID),
-      staticMarketCap: marketCap.toString(),
-      staticVolume24H: (volume24H ?? 0).toString(),
+      staticMarketCap: marketCap,
+      staticVolume24H: volume24H ?? 0n,
       trigger: e.market.trigger,
       searchEmojisKey: toSearchEmojisKey(searchEmojis),
     };
