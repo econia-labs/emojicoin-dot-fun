@@ -46,7 +46,7 @@ describe("tests the calculation functions for circulating supply and real reserv
           response.version
         );
         const circulatingSupplyFromTxnResponse = calculateCirculatingSupply(swap.model.state);
-        expect(circulatingSupplyFromFetch).not.toBeNull();
+        expect(circulatingSupplyFromFetch).toBeDefined();
         expect(circulatingSupplyFromFetch).toEqual(circulatingSupplyFromTxnResponse);
         const balance = getCoinBalanceFromChanges({
           response,
@@ -66,7 +66,7 @@ describe("tests the calculation functions for circulating supply and real reserv
     emojicoin.sell(swapper, symbolEmojis, sellAmount).then(async ({ response, swap }) => {
       const circulatingSupplyFromFetch = await fetchCirculatingSupply(symbolEmojis);
       const circulatingSupplyFromTxnResponse = calculateCirculatingSupply(swap.model.state);
-      expect(circulatingSupplyFromFetch).not.toBeNull();
+      expect(circulatingSupplyFromFetch).toBeDefined();
       expect(circulatingSupplyFromFetch).toEqual(circulatingSupplyFromTxnResponse);
       const newBalance = getCoinBalanceFromChanges({
         response,
@@ -114,7 +114,7 @@ describe("tests the calculation functions for circulating supply and real reserv
         const realReservesFromFetch = await fetchRealReserves(symbolEmojis, response.version);
         const realReservesFromTxnResponse = calculateRealReserves(swap.model.state);
         expect(isInBondingCurve(swap.model.state)).toBe(true);
-        expect(realReservesFromFetch).not.toBeNull();
+        expect(realReservesFromFetch).toBeDefined();
         expect(realReservesFromFetch).toEqual(realReservesFromTxnResponse);
         const { base, quote } = realReservesFromFetch!;
         const balance = getCoinBalanceFromChanges({
@@ -141,8 +141,8 @@ describe("tests the calculation functions for circulating supply and real reserv
         fetchRealReserves(symbolEmojis).then((res) => res!),
       ]);
       expect(isInBondingCurve(swap.model.state)).toBe(true);
-      expect(circulatingSupplyFromFetch).not.toBeNull();
-      expect(realReservesFromFetch).not.toBeNull();
+      expect(circulatingSupplyFromFetch).toBeDefined();
+      expect(realReservesFromFetch).toBeDefined();
       const realReservesFromTxnResponse = calculateRealReserves(swap.model.state);
       expect(realReservesFromFetch).toEqual(realReservesFromTxnResponse);
       const { base, quote } = realReservesFromFetch;
