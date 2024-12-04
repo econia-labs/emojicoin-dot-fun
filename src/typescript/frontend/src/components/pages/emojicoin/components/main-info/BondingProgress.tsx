@@ -39,14 +39,13 @@ const BondingProgress = ({ data }: MainInfoProps) => {
           {t("Bonding progress:")}
         </div>
         <FormattedNumber
+          value={bondingProgress}
           className={
             statsTextClasses + " text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]"
           }
           suffix="%"
           scramble
-        >
-          {bondingProgress}
-        </FormattedNumber>
+        />
       </div>
       {bondingProgress >= 100 ? (
         <Link
