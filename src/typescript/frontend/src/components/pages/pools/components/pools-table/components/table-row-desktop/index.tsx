@@ -25,11 +25,7 @@ export const formatXPR = (time: number, bigDailyTvl: number) => {
   }
   const xprIn = getXPR(time, bigDailyTvl);
 
-  return (
-    <FormattedNumber style="fixed" suffix="%" decimals={4}>
-      {xprIn}
-    </FormattedNumber>
-  );
+  return <FormattedNumber value={xprIn} style="fixed" suffix="%" decimals={4} />;
 };
 
 const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onClick }) => {
@@ -65,9 +61,11 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             ellipsis
             title={`${toCoinDecimalString(item.state.cumulativeStats.quoteVolume, 2)} APT`}
           >
-            <FormattedNumber suffix=" APT" nominalize>
-              {item.state.cumulativeStats.quoteVolume}
-            </FormattedNumber>
+            <FormattedNumber
+              value={item.state.cumulativeStats.quoteVolume}
+              suffix=" APT"
+              nominalize
+            />
           </Text>
         </Flex>
       </Td>
@@ -82,9 +80,7 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
               ellipsis
               title={`${toCoinDecimalString(item.dailyVolume, 2)} APT`}
             >
-              <FormattedNumber suffix=" APT" nominalize>
-                {item.dailyVolume}
-              </FormattedNumber>
+              <FormattedNumber value={item.dailyVolume} suffix=" APT" nominalize />
             </Text>
           </Flex>
         </Td>
@@ -99,9 +95,11 @@ const TableRowDesktop: React.FC<TableRowDesktopProps> = ({ item, selected, onCli
             ellipsis
             title={`${toCoinDecimalString(item.state.cpammRealReserves.quote * 2n, 2)} APT`}
           >
-            <FormattedNumber suffix=" APT" nominalize>
-              {item.state.cpammRealReserves.quote * 2n}
-            </FormattedNumber>
+            <FormattedNumber
+              value={item.state.cpammRealReserves.quote * 2n}
+              suffix=" APT"
+              nominalize
+            />
           </Text>
         </Flex>
       </Td>

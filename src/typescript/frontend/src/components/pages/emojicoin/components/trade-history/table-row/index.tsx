@@ -99,14 +99,10 @@ const TableRow = ({
       </td>
       <td className={`w-[5%] md:w-[4.7%] ${Height}`}></td>
       <TableRowTextItem className={`w-[22%] md:w-[18%] ${Height}`}>
-        <FormattedNumber className="ellipses" decimals={3} nominalize>
-          {item.apt}
-        </FormattedNumber>
+        <FormattedNumber value={item.apt} className="ellipses" decimals={3} nominalize />
       </TableRowTextItem>
       <TableRowTextItem className={`w-[22%] md:w-[18%] ${Height}`}>
-        <FormattedNumber className="ellipses" decimals={3} nominalize>
-          {item.emoji}
-        </FormattedNumber>
+        <FormattedNumber value={item.emoji} className="ellipses" decimals={3} nominalize />
       </TableRowTextItem>
       <td className={`w-[0%] md:w-[0.3%] ${Height}`}></td>
       <TableRowTextItem
@@ -124,9 +120,12 @@ const TableRow = ({
         className={`w-[22%] md:w-[18%] ${Height} md:ml-[3ch] xl:ml-[0.5ch] xl:mr-[-0.5ch]`}
         color={item.type === "sell" ? darkColors.pink : darkColors.green}
       >
-        <FormattedNumber className="ellipses" decimals={9} style="fixed">
-          {toNominalPrice(item.priceQ64)}
-        </FormattedNumber>
+        <FormattedNumber
+          value={toNominalPrice(item.priceQ64)}
+          className="ellipses"
+          decimals={9}
+          style="fixed"
+        />
       </TableRowTextItem>
       <td className={`group/explorer w-[22%] md:w-[18%] border-r-[1px] z-[2] ${Height}`}>
         <ExplorerLink className="flex w-full h-full" value={item.version} type="txn">
