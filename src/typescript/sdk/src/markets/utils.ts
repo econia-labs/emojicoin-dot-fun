@@ -340,7 +340,7 @@ type ReservesAndBondingCurveState = Flatten<
 >;
 
 /**
- * Calculates the circulating supply based on the current market state.
+ * Calculates the circulating supply based on the given market state.
  *
  * The logic for calculation is taken directly from the Move smart contract.
  * @see assign_supply_minuend_reserves_ref_mut in `emojicoin_dot_fun.move`
@@ -383,11 +383,19 @@ export const fetchCirculatingSupply = async (
     .catch(() => undefined);
 
 /**
- * Calculates the real reserves of a market given on information from the partial state of the
- * market passed in.
+ * Calculates the real reserves of a market based on the given market state.
  *
  * The logic for calculating the real reserves of a market in the bonding curve is taken directly
  * from the Move smart contract.
+ *
+ * Note that while the market is in the bonding curve, the current market price (the current
+ * position on the bonding curve) is represented by the clamm's virtual reserves, *not* the clamm's
+ * real reserves calculated here.
+ *
+ * Post bonding curve, the price is directly equal to the cpamm's real reserves.
+ *
+ * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf} 
+ * for an in depth explanation of the math and behavior behind the bonding curve.
  */
 export const calculateRealReserves = ({
   clammVirtualReserves,
