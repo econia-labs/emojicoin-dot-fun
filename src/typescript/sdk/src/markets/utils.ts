@@ -363,12 +363,12 @@ export const calculateCirculatingSupply = ({
  *
  * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
  * @param ledgerVersion an optional ledger version number to specify the view function should use.
- * @returns the circulating supply a market if it exists, `null` otherwise.
+ * @returns the circulating supply a market if it exists, `undefined` otherwise.
  */
 export const fetchCirculatingSupply = async (
   emojis: SymbolEmoji[],
   ledgerVersion?: AnyNumberString
-): Promise<bigint | null> =>
+): Promise<bigint | undefined> =>
   MarketView.view({
     aptos: getAptosClient(),
     marketAddress: deriveMarketAddress(emojis),
@@ -380,7 +380,7 @@ export const fetchCirculatingSupply = async (
   })
     .then(toMarketView)
     .then(calculateCirculatingSupply)
-    .catch(() => null);
+    .catch(() => undefined);
 
 /**
  * Calculates the real reserves of a market given on information from the partial state of the
@@ -410,12 +410,12 @@ export const calculateRealReserves = ({
  *
  * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
  * @param ledgerVersion an optional ledger version number to specify the view function should use.
- * @returns the real reserves for a market if it exists, `null` otherwise.
+ * @returns the real reserves for a market if it exists, `undefined` otherwise.
  */
 export const fetchRealReserves = async (
   emojis: SymbolEmoji[],
   ledgerVersion?: AnyNumberString
-): Promise<Types["Reserves"] | null> =>
+): Promise<Types["Reserves"] | undefined> =>
   MarketView.view({
     aptos: getAptosClient(),
     marketAddress: deriveMarketAddress(emojis),
@@ -427,4 +427,4 @@ export const fetchRealReserves = async (
   })
     .then(toMarketView)
     .then(calculateRealReserves)
-    .catch(() => null);
+    .catch(() => undefined);
