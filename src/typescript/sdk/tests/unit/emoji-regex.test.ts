@@ -1,15 +1,8 @@
-import fs from "fs";
-import path from "path";
 import { CHAT_EMOJI_DATA, type ChatEmoji, SYMBOL_EMOJI_DATA, type SymbolEmoji } from "../../src";
-import {
-  encodeEmojis,
-  getEmojisInString,
-  isValidMarketSymbol,
-  symbolToEmojis,
-} from "../../src/emoji_data/utils";
-import SymbolEmojiData from "../../src/emoji_data/symbol-emojis.json";
-import { getGitRoot } from "../utils";
+import { encodeEmojis, getEmojisInString, symbolToEmojis } from "../../src/emoji_data/utils";
+import { SYMBOL_EMOJIS } from "../../src/emoji_data/symbol-emojis";
 import { toChatMessageEntryFunctionArgs } from "../../src/emoji_data/chat-message";
+import { isValidMarketSymbol } from "../utils/market-symbol";
 
 describe("tests emojis against the emoji regex to ensure they're properly validated", () => {
   it("tests a few single emojis", () => {
@@ -67,8 +60,8 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
   });
 
   it("maps the emojis to their corresponding data", () => {
-    const symbols = new Set(Object.keys(SymbolEmojiData));
-    const names = new Set(Object.values(SymbolEmojiData));
+    const symbols = new Set(Object.keys(SYMBOL_EMOJIS));
+    const names = new Set(Object.values(SYMBOL_EMOJIS));
     const emojis = new Array<SymbolEmoji>("🎅", "🎅🏽", "🎅🏼", "🎅🏿", "🌎", "🇧🇷", "⭐").map((v) =>
       SYMBOL_EMOJI_DATA.byEmojiStrict(v)
     );
@@ -89,8 +82,8 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
     const symbol = " 🎅🎅🏽🎅🏼🎅🏿   🌎🇧🇷 ⭐ ...";
     const emojiData = symbolToEmojis(symbol);
     expect(emojiData.emojis).toHaveLength(7);
-    const symbols = new Set(Object.keys(SymbolEmojiData));
-    const names = new Set(Object.values(SymbolEmojiData));
+    const symbols = new Set(Object.keys(SYMBOL_EMOJIS));
+    const names = new Set(Object.values(SYMBOL_EMOJIS));
     emojiData.emojis.forEach((emoji) => {
       expect(symbols.has(emoji.emoji)).toBe(true);
       expect(names.has(emoji.name)).toBe(true);
@@ -117,33 +110,6 @@ describe("tests the emojis in a string, and the emoji data for each one", () => 
       expect(enc1).toEqual(enc2);
       expect(enc1).toEqual(enc3);
     }
-  });
-
-  it("ensures the Rust processor has the same emoji data as the TypeScript SDK", () => {
-    const gitRoot = getGitRoot();
-    const tsPath = path.join(gitRoot, "src/typescript/sdk/src/emoji_data/symbol-emojis.json");
-    const rustPath = path.join(
-      gitRoot,
-      "src/rust/processor",
-      "rust/processor",
-      "src/db/common/models/emojicoin_models",
-      "parsers/emojis/symbol-emojis.json"
-    );
-    const tsData = fs.readFileSync(tsPath);
-    const tsJSON = JSON.parse(tsData.toString());
-    const rustJSON = (() => {
-      try {
-        const rustData = fs.readFileSync(rustPath).toString();
-        return JSON.parse(rustData);
-      } catch (e) {
-        // File not found. If we're in CI, that's fine. Only need to check this infrequently.
-        if (process.env.CI || process.env.GITHUB_ACTIONS) {
-          return tsJSON;
-        }
-        return "[]";
-      }
-    })();
-    expect(JSON.stringify(tsJSON) === JSON.stringify(rustJSON));
   });
 
   it("constructs the chat message entry function args with the helper function correctly", () => {

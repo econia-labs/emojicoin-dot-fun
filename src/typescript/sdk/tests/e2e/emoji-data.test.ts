@@ -12,8 +12,8 @@ import {
   isWriteSetChangeWriteTableItem,
   normalizeHex,
 } from "../../src";
-import SymbolEmojiJson from "../../src/emoji_data/symbol-emojis.json";
-import ChatEmojiJson from "../../src/emoji_data/chat-emojis.json";
+import { SYMBOL_EMOJIS } from "../../src/emoji_data/symbol-emojis";
+import { CHAT_EMOJIS } from "../../src/emoji_data/chat-emojis";
 import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
 import { getFundedAccount } from "../utils/test-accounts";
 import TestHelpers from "../utils/helpers";
@@ -58,7 +58,7 @@ describe("verification of typescript emoji JSON data", () => {
     // From the Move changesets.
     const numEmojisAdded = symbolEmojisInWriteSets.length;
     // From our TS JSON file.
-    const jsonEntries = Object.entries(SymbolEmojiJson);
+    const jsonEntries = Object.entries(SYMBOL_EMOJIS);
     const encoder = new TextEncoder();
     const emojisInJSON = jsonEntries.map(([symbol, _name]) => normalizeHex(encoder.encode(symbol)));
 
@@ -132,7 +132,7 @@ describe("verification of typescript emoji JSON data", () => {
     // From the Move changesets.
     const numEmojisAdded = chatEmojisInWriteSet.length;
     // From our TS JSON file.
-    const jsonEntries = Object.entries(ChatEmojiJson);
+    const jsonEntries = Object.entries(CHAT_EMOJIS);
     const encoder = new TextEncoder();
     const emojisInJSON = jsonEntries.map(([symbol, _name]) => normalizeHex(encoder.encode(symbol)));
 

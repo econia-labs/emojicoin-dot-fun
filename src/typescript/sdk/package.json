@@ -44,7 +44,6 @@
   },
   "exports": {
     ".": {
-      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -55,7 +54,7 @@
   "homepage": "https://github.com/econia-labs/emojicoin-dot-fun#readme",
   "license": "Apache-2.0",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "module": "dist/esm/index.mjs",
   "name": "@econia-labs/emojicoin-sdk",
   "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a",
   "repository": "github:econia-labs/emojicoin-dot-fun",
@@ -64,6 +63,7 @@
     "build": "tsc",
     "build:debug": "BUILD_DEBUG=true pnpm run build",
     "build:no-checks": "tsc --skipLibCheck",
+    "build:publish": "tsc -p tsconfig.prod.json",
     "check": "tsc -p tests/tsconfig.json --noEmit",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "e2e:testnet": "pnpm load-test-env -v NO_TEST_SETUP=true -- pnpm jest tests/e2e/queries/testnet",
@@ -74,7 +74,7 @@
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
-    "prepublishOnly": "pnpm clean && pnpm i && pnpm build",
+    "prepublishOnly": "pnpm clean && pnpm i && pnpm check && pnpm build:publish",
     "test": "pnpm run test:sdk:parallel && pnpm run test:sdk:sequential && pnpm run test:unit",
     "test:e2e": "pnpm run test:sdk:parallel && pnpm run test:sdk:sequential",
     "test:sdk:parallel": "pnpm jest --testPathIgnorePatterns=tests/e2e/broker",
