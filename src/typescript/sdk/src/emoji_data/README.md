@@ -1,6 +1,6 @@
-# Reproducing the TypeScript `symbol-emojis.json` data
+# Reproducing the TypeScript `*-emojis.ts` data
 
-To reproduce the data in the TypeScript JSON data file `symbol-emojis.json`
+To reproduce the data in the TypeScript data files `*-emojis.ts`
 `cd` to the root of the repo then run the following commands.
 
 ```shell
@@ -9,7 +9,25 @@ poetry install
 poetry run python -m scripts.generate_code
 ```
 
-Note that the `symbol-names.json` and `chat-names.json` are not duplicated data;
-they're merely used for type resolution in TypeScript, since TypeScript can't
-resolve to actual values when resolving to the value field in an imported JSON
-`[key]: value` type.
+Then alter the file such that it's prepended with a `const` declaration:
+
+```json
+{
+  "🥇": "1st place medal",
+  "🥈": "2nd place medal",
+  ...
+}
+```
+
+Becomes:
+
+```typescript
+const SYMBOL_EMOJIS = {
+  "🥇": "1st place medal",
+  "🥈": "2nd place medal",
+  ...
+} as const;
+```
+
+Note the ` as const;` at the end of the object. It _must_ be there for the types
+to be resolved correctly.

@@ -4,7 +4,7 @@
 import path from "node:path";
 import os from "node:os";
 import { kill } from "node:process";
-import { waitFor } from "../..";
+import { waitFor } from "../../../src/utils";
 import { getGitRoot } from "../helpers";
 import { type ContainerName } from "./logs";
 import {
@@ -14,8 +14,8 @@ import {
   execPromise,
   spawnWrapper,
 } from "./utils";
-import { EMOJICOIN_INDEXER_URL } from "../../../server/env";
-import { TableName } from "../../../indexer-v2/types/json-types";
+import { EMOJICOIN_INDEXER_URL } from "../../../src/server/env";
+import { TableName } from "../../../src/indexer-v2/types/json-types";
 import { readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 

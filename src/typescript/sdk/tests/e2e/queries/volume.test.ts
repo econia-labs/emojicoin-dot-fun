@@ -15,11 +15,11 @@ import {
   sumByKey,
 } from "../../../src";
 import { Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getAptosClient } from "../../../src/utils/test";
-import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
+import { getAptosClient } from "../../utils";
+import { getFundedAccounts } from "../../utils/test-accounts";
 import { type Events } from "../../../src/emojicoin_dot_fun/events";
-import { getTxnBatchHighestVersion } from "../../../src/utils/test/get-txn-batch-highest-version";
-import TestHelpers from "../../../src/utils/test/helpers";
+import { getTxnBatchHighestVersion } from "../../utils/get-txn-batch-highest-version";
+import TestHelpers from "../../utils/helpers";
 import {
   getOneMinutePeriodicStateEvents,
   getPeriodExpiryDate,

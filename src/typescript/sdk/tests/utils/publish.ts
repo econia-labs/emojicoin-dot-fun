@@ -9,8 +9,8 @@ import {
   Ed25519PrivateKey,
 } from "@aptos-labs/ts-sdk";
 import path from "path";
-import { getAptosClient } from "../aptos-client";
-import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../..";
+import { getAptosClient } from "../../src/utils/aptos-client";
+import { MAX_GAS_FOR_PUBLISH, ONE_APT, EMOJICOIN_DOT_FUN_MODULE_NAME } from "../../src";
 import { getGitRoot } from "./helpers";
 
 type ResultJSON = {

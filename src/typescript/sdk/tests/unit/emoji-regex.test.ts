@@ -8,7 +8,7 @@ import {
   symbolToEmojis,
 } from "../../src/emoji_data/utils";
 import SymbolEmojiData from "../../src/emoji_data/symbol-emojis.json";
-import { getGitRoot } from "../../src/utils/test";
+import { getGitRoot } from "../utils";
 import { toChatMessageEntryFunctionArgs } from "../../src/emoji_data/chat-message";
 
 describe("tests emojis against the emoji regex to ensure they're properly validated", () => {

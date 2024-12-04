@@ -50,8 +50,7 @@
     }
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "homepage": "https://github.com/econia-labs/emojicoin-dot-fun#readme",
   "license": "Apache-2.0",
@@ -75,6 +74,7 @@
     "pre-commit": "pnpm run pre-commit:install && pnpm run pre-commit:run",
     "pre-commit:install": "pre-commit install -c ../../../cfg/pre-commit-config.yaml",
     "pre-commit:run": "pre-commit run --all-files -c ../../../cfg/pre-commit-config.yaml",
+    "prepublishOnly": "pnpm clean && pnpm i && pnpm build",
     "test": "pnpm run test:sdk:parallel && pnpm run test:sdk:sequential && pnpm run test:unit",
     "test:e2e": "pnpm run test:sdk:parallel && pnpm run test:sdk:sequential",
     "test:sdk:parallel": "pnpm jest --testPathIgnorePatterns=tests/e2e/broker",

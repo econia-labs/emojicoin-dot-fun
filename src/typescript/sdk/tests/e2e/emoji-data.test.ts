@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // cspell:word writeset
 import { AccountAddress, type WriteSetChangeWriteTableItem } from "@aptos-labs/ts-sdk";
-import { getPublishHelpers } from "../../src/utils/test/helpers";
+import { getPublishHelpers } from "../utils/helpers";
 import {
   CHAT_EMOJI_DATA,
   SYMBOL_EMOJI_DATA,
@@ -14,9 +14,9 @@ import {
 } from "../../src";
 import SymbolEmojiJson from "../../src/emoji_data/symbol-emojis.json";
 import ChatEmojiJson from "../../src/emoji_data/chat-emojis.json";
-import { getPublishTransactionFromIndexer } from "../../src/utils/test/get-publish-txn-from-indexer";
-import { getFundedAccount } from "../../src/utils/test/test-accounts";
-import TestHelpers from "../../src/utils/test/helpers";
+import { getPublishTransactionFromIndexer } from "../utils/get-publish-txn-from-indexer";
+import { getFundedAccount } from "../utils/test-accounts";
+import TestHelpers from "../utils/helpers";
 import { waitForEmojicoinIndexer } from "../../src/indexer-v2/queries";
 import { fetchMarketRegistrationEvents } from "./queries";
 import { ORDER_BY } from "../../src/queries";

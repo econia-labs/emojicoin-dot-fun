@@ -2,7 +2,7 @@ import {
   fetchPriceFeedWithMarketState,
   waitForEmojicoinIndexer,
 } from "../../../src/indexer-v2/queries";
-import { getFundedAccount } from "../../../src/utils/test/test-accounts";
+import { getFundedAccount } from "../../utils/test-accounts";
 import { EmojicoinClient } from "../../../src/client/emojicoin-client";
 import {
   type AnyNumberString,

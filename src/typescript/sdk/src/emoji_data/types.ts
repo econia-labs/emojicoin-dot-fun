@@ -1,19 +1,14 @@
 import { type MarketMetadataModel } from "../indexer-v2/types";
 import { type getEmojicoinMarketAddressAndTypeTags } from "../markets";
-import type AllSymbolEmojiJSON from "./symbol-emojis.json";
-import type AllChatEmojiJSON from "./chat-emojis.json";
+import { CHAT_EMOJIS } from "./chat-emojis";
+import { SYMBOL_EMOJIS } from "./symbol-emojis";
 import { type symbolBytesToEmojis } from "./utils";
 // Note the name data JSON files are not duplicated data, they are purely for type resolution.
-import type SymbolNamesJSON from "./symbol-names.json";
-import type ChatNamesJSON from "./chat-names.json";
 
-export type AllSymbolEmojiData = typeof AllSymbolEmojiJSON;
-export type SymbolEmoji = keyof AllSymbolEmojiData;
-export type SymbolEmojiName = keyof typeof SymbolNamesJSON;
-
-export type AllChatEmojiData = typeof AllChatEmojiJSON;
-export type ChatEmoji = keyof AllChatEmojiData;
-export type ChatEmojiName = keyof typeof ChatNamesJSON;
+export type SymbolEmoji = keyof typeof SYMBOL_EMOJIS;
+export type SymbolEmojiName = (typeof SYMBOL_EMOJIS)[keyof typeof SYMBOL_EMOJIS];
+export type ChatEmoji = keyof typeof CHAT_EMOJIS;
+export type ChatEmojiName = (typeof CHAT_EMOJIS)[keyof typeof CHAT_EMOJIS];
 
 export type AnyEmoji = SymbolEmoji | ChatEmoji;
 export type AnyEmojiName = SymbolEmojiName | ChatEmojiName;

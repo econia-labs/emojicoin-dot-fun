@@ -11,7 +11,7 @@ import {
 } from "../../../src";
 import postgres from "postgres";
 import Big from "big.js";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../src/utils/test";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils";
 
 export const getTrackerFromWriteSet = <T extends Period>(
   res: UserTransactionResponse,

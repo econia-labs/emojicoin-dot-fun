@@ -1,6 +1,6 @@
-import { type Period, periodEnumToRawDuration, PERIODS } from "../../const";
-import { type AnyNumberString } from "../../types";
-import { getPeriodBoundary } from "../misc";
+import { type Period, periodEnumToRawDuration, PERIODS } from "../../src/const";
+import { type AnyNumberString } from "../../src/types";
+import { getPeriodBoundary } from "../../src/utils/misc";
 
 /**
  * Calculates the number of period boundaries crossed between two times. Since this will always

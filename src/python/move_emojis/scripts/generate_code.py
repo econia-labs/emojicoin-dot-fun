@@ -29,11 +29,11 @@ TYPESCRIPT_PATH_DIR = os.path.join(
 )
 TYPESCRIPT_SYMBOL_EMOJIS_PATH = os.path.join(
     TYPESCRIPT_PATH_DIR,
-    "symbol-emojis.json",
+    "symbol-emojis.ts",
 )
 TYPESCRIPT_CHAT_EMOJIS_PATH = os.path.join(
     TYPESCRIPT_PATH_DIR,
-    "chat-emojis.json",
+    "chat-emojis.ts",
 )
 TYPESCRIPT_SYMBOL_NAMES_PATH = os.path.join(
     TYPESCRIPT_PATH_DIR,
@@ -106,7 +106,6 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
         ]
     )
 
-
 # Sort by emoji name first, then flip the key to be the encoded UTF-8 emoji and set the
 # value as its name.
 def as_emoji_to_name_dict(symbol_emojis: dict[str, EmojiData]) -> dict[str, str]:
@@ -125,11 +124,11 @@ def ensure_write_to_file(data: str | dict[str, Any] | list[str], fp: str):
     fp_obj = pathlib.Path(fp)
     pathlib.Path(fp_obj.parent).mkdir(exist_ok=True)
 
-    with open(fp, "w") as outfile:
+    with open(fp, "w", encoding='utf-8') as outfile:
         if isinstance(data, str):
             _ = outfile.write(data)
         else:
-            json.dump(data, outfile, indent=2)
+            json.dump(data, outfile, indent=2, ensure_ascii=False)
 
 
 if __name__ == "__main__":
@@ -159,12 +158,8 @@ if __name__ == "__main__":
     ensure_write_to_file(symbol_emojis, SYMBOL_EMOJIS_ALL_DATA_PATH)
     typescript_symbol_emojis = as_emoji_to_name_dict(symbol_emojis)
     typescript_chat_emojis = as_emoji_to_name_dict(extended_emojis)
-    typescript_symbol_names = {k: None for k in typescript_symbol_emojis.values()}
-    typescript_chat_names = {k: None for k in typescript_chat_emojis.values()}
     ensure_write_to_file(typescript_symbol_emojis, TYPESCRIPT_SYMBOL_EMOJIS_PATH)
-    ensure_write_to_file(typescript_symbol_names, TYPESCRIPT_SYMBOL_NAMES_PATH)
     ensure_write_to_file(typescript_chat_emojis, TYPESCRIPT_CHAT_EMOJIS_PATH)
-    ensure_write_to_file(typescript_chat_names, TYPESCRIPT_CHAT_NAMES_PATH)
     # The rust processor uses the `symbol-emojis.json` data at build time, so if the
     # path for the directory exists, output the data there as well.
     if pathlib.Path(RUST_JSON_PATH).parent.exists():
