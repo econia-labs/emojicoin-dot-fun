@@ -14,7 +14,7 @@ import {
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import { EmojicoinDotFun, REGISTRY_ADDRESS, deriveMarketAddress } from "../emojicoin_dot_fun";
+import { EmojicoinDotFun, REGISTRY_ADDRESS, getMarketAddress } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
   BASE_VIRTUAL_CEILING,
@@ -80,7 +80,7 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
   const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
   const symbolBytes = Hex.fromHexInput(args.symbolBytes);
   const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array()).emojis.map((e) => e.emoji);
-  const marketAddress = deriveMarketAddress(emojis, registryAddress);
+  const marketAddress = getMarketAddress(emojis, registryAddress);
 
   const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
 
@@ -371,7 +371,7 @@ export const fetchCirculatingSupply = async (
 ): Promise<bigint | undefined> =>
   MarketView.view({
     aptos: getAptosClient(),
-    marketAddress: deriveMarketAddress(emojis),
+    marketAddress: getMarketAddress(emojis),
     options: ledgerVersion
       ? {
           ledgerVersion: BigInt(ledgerVersion),
@@ -418,7 +418,7 @@ export const fetchRealReserves = async (
 ): Promise<Types["Reserves"] | undefined> =>
   MarketView.view({
     aptos: getAptosClient(),
-    marketAddress: deriveMarketAddress(emojis),
+    marketAddress: getMarketAddress(emojis),
     options: ledgerVersion
       ? {
           ledgerVersion: BigInt(ledgerVersion),

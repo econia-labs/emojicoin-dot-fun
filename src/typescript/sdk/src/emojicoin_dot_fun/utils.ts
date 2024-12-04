@@ -34,7 +34,7 @@ export const REGISTRY_ADDRESS = createNamedObjectAddress({
  *
  * This is the address of the Object<Market> that publishes the coin type.
  */
-export function deriveMarketAddress(
+export function getMarketAddress(
   emojis: SymbolEmoji[],
   registryAddress?: AccountAddressInput
 ): AccountAddress {

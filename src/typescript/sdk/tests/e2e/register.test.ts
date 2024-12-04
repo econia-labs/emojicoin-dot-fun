@@ -4,7 +4,7 @@ import {
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   ONE_APT,
   SYMBOL_EMOJI_DATA,
-  deriveMarketAddress,
+  getMarketAddress,
   getMarketResource,
   getRegistryAddress,
 } from "../../src";
@@ -55,7 +55,7 @@ describe("registers a market successfully", () => {
       .filter((emoji) => typeof emoji !== "undefined")
       .map(({ emoji }) => emoji);
     expect(emojis.length).toEqual(symbolBytes.length);
-    const derivedNamedObjectAddress = deriveMarketAddress(emojis, registryAddress);
+    const derivedNamedObjectAddress = getMarketAddress(emojis, registryAddress);
 
     const publisherObjectResources = await aptos.getAccountResources({
       accountAddress: derivedNamedObjectAddress,

@@ -8,7 +8,7 @@ import {
   toCoinTypes,
   zip,
 } from "../../src";
-import { deriveMarketAddress } from "../../src/emojicoin_dot_fun";
+import { getMarketAddress } from "../../src/emojicoin_dot_fun";
 import { getFundedAccounts } from "../../src/utils/test/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
@@ -35,7 +35,7 @@ describe("tests the calculation functions for circulating supply and real reserv
   it("checks the circulating supply after a buy and a sell", async () => {
     const idx = 0;
     const [swapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
-    const coinAddress = deriveMarketAddress(symbolEmojis);
+    const coinAddress = getMarketAddress(symbolEmojis);
     const coinType = toCoinTypes(coinAddress).emojicoin;
 
     const { supplyAfterBuy, userBalance } = await emojicoin
@@ -104,7 +104,7 @@ describe("tests the calculation functions for circulating supply and real reserv
   it("checks the real reserves after a buy and a sell", async () => {
     const idx = 2;
     const [swapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
-    const coinAddress = deriveMarketAddress(symbolEmojis);
+    const coinAddress = getMarketAddress(symbolEmojis);
     const coinType = toCoinTypes(coinAddress).emojicoin;
 
     const buyAmount = ONE_APT_BIGINT;
