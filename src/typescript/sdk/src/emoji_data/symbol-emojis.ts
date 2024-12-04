@@ -1,3 +1,5 @@
+// cspell:disable
+
 export const SYMBOL_EMOJIS = {
   "🥇": "1st place medal",
   "🥈": "2nd place medal",

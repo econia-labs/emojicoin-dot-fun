@@ -29,5 +29,5 @@ const SYMBOL_EMOJIS = {
 } as const;
 ```
 
-Note the ` as const;` at the end of the object. It _must_ be there for the types
+Note the `as const;` at the end of the object. It _must_ be there for the types
 to be resolved correctly.

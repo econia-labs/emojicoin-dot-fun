@@ -1,3 +1,5 @@
+// cspell:disable
+
 export const CHAT_EMOJIS = {
   "🧑‍🎨": "artist",
   "🧑🏿‍🎨": "artist: dark skin tone",
