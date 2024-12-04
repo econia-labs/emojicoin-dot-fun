@@ -113,9 +113,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <FormattedNumber nominalize scramble>
-                  {marketCap}
-                </FormattedNumber>
+                <FormattedNumber value={marketCap} nominalize scramble />
                 &nbsp;
                 <AptosIconBlack className="icon-inline mb-[0.3ch]" />
               </div>
@@ -126,9 +124,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("24 hour vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <FormattedNumber nominalize scramble>
-                  {dailyVolume}
-                </FormattedNumber>
+                <FormattedNumber value={dailyVolume} nominalize scramble />
                 &nbsp;
                 <AptosIconBlack className="icon-inline mb-[0.3ch]" />
               </div>
@@ -139,9 +135,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("All-time vol:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <FormattedNumber nominalize scramble>
-                  {allTimeVolume}
-                </FormattedNumber>
+                <FormattedNumber value={allTimeVolume} nominalize scramble />
                 &nbsp;
                 <AptosIconBlack className="icon-inline mb-[0.3ch]" />
               </div>

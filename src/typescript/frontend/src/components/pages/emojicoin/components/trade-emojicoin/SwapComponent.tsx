@@ -261,9 +261,12 @@ export default function SwapComponent({
                 style={{ opacity: isLoading ? 0.6 : 1 }}
               >
                 {/* Scrambled swap result output below. */}
-                <FormattedNumber nominalize scramble decimals={OUTPUT_DISPLAY_DECIMALS}>
-                  {isLoading ? previous : outputAmount}
-                </FormattedNumber>
+                <FormattedNumber
+                  value={isLoading ? previous : outputAmount}
+                  nominalize
+                  scramble
+                  decimals={OUTPUT_DISPLAY_DECIMALS}
+                />
               </div>
             </div>
           </Column>

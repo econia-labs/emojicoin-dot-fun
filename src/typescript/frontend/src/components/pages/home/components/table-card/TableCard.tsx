@@ -259,9 +259,7 @@ const TableCard = ({
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                 >
-                  <FormattedNumber scramble nominalize suffix=" APT">
-                    {marketCap}
-                  </FormattedNumber>
+                  <FormattedNumber value={marketCap} scramble nominalize suffix=" APT" />
                 </motion.div>
               </Column>
               <Column width="50%">
@@ -279,9 +277,7 @@ const TableCard = ({
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
                 >
-                  <FormattedNumber scramble nominalize suffix=" APT">
-                    {secondaryMetric}
-                  </FormattedNumber>
+                  <FormattedNumber value={secondaryMetric} scramble nominalize suffix=" APT" />
                 </motion.div>
               </Column>
             </Flex>

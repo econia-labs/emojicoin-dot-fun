@@ -146,9 +146,7 @@ const MainCard = (props: MainCardProps) => {
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <FormattedNumber scramble nominalize>
-                      {marketCap}
-                    </FormattedNumber>
+                    <FormattedNumber value={marketCap} scramble nominalize />
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
@@ -167,9 +165,7 @@ const MainCard = (props: MainCardProps) => {
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <FormattedNumber scramble nominalize>
-                      {dailyVolume}
-                    </FormattedNumber>
+                    <FormattedNumber value={dailyVolume} scramble nominalize />
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>
@@ -186,9 +182,7 @@ const MainCard = (props: MainCardProps) => {
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <FormattedNumber scramble nominalize>
-                      {allTimeVolume}
-                    </FormattedNumber>
+                    <FormattedNumber value={allTimeVolume} scramble nominalize />
                     &nbsp;
                     <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
                   </div>

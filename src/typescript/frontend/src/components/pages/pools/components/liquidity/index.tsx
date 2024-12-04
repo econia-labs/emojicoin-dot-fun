@@ -159,12 +159,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
           {direction === "add" ? t("You deposit") : t("You get")}
           {balanceLabel}
           <FormattedNumber
+            value={aptBalance}
             className={enoughApt ? "text-green" : "text-error"}
             nominalize
             decimals={3}
-          >
-            {aptBalance}
-          </FormattedNumber>
+          />
           {")"}
         </div>
         {direction === "add" ? (
@@ -176,12 +175,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
           />
         ) : (
           <FormattedNumber
+            value={BigInt(removeLiquidityResult?.quote_amount ?? 0)}
             decimals={3}
             className={inputAndOutputStyles + " bg-transparent leading-[32px] text-medium-gray"}
             nominalize
-          >
-            {BigInt(removeLiquidityResult?.quote_amount ?? 0)}
-          </FormattedNumber>
+          />
         )}
       </Column>
       <AptosInputLabel />
@@ -195,25 +193,23 @@ const Liquidity = ({ market }: LiquidityProps) => {
           {direction === "add" ? "You deposit" : "You get"}
           {balanceLabel}
           <FormattedNumber
+            value={emojicoinBalance}
             className={enoughEmoji ? "text-green" : "text-error"}
             nominalize
             decimals={3}
-          >
-            {emojicoinBalance}
-          </FormattedNumber>
+          />
           {")"}
         </div>
         <FormattedNumber
-          decimals={3}
-          className={inputAndOutputStyles + ` bg-transparent leading-[32px] !text-light-gray/[.6]`}
-          nominalize
-        >
-          {BigInt(
+          value={BigInt(
             (direction === "add"
               ? provideLiquidityResult?.base_amount
               : removeLiquidityResult?.base_amount) ?? 0
           )}
-        </FormattedNumber>
+          decimals={3}
+          className={inputAndOutputStyles + ` bg-transparent leading-[32px] !text-light-gray/[.6]`}
+          nominalize
+        />
       </Column>
       <div>
         <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
@@ -229,22 +225,20 @@ const Liquidity = ({ market }: LiquidityProps) => {
           {direction === "remove" ? "You deposit" : "You get"}
           {balanceLabel}
           <FormattedNumber
+            value={emojicoinLPBalance}
             className={enoughEmojiLP ? "text-green" : "text-error"}
             nominalize
             decimals={3}
-          >
-            {emojicoinLPBalance}
-          </FormattedNumber>
+          />
           {")"}
         </div>
         {direction === "add" ? (
           <FormattedNumber
+            value={BigInt(provideLiquidityResult?.lp_coin_amount ?? 0)}
             decimals={3}
             className={inputAndOutputStyles + " bg-transparent leading-[32px] text-medium-gray"}
             nominalize
-          >
-            {BigInt(provideLiquidityResult?.lp_coin_amount ?? 0)}
-          </FormattedNumber>
+          />
         ) : (
           <InputNumeric
             className={inputAndOutputStyles + " bg-transparent leading-[32px] text-white"}
@@ -405,9 +399,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
               {market ? (
-                <FormattedNumber nominalize decimals={3}>
-                  {market.state.cpammRealReserves.quote}
-                </FormattedNumber>
+                <FormattedNumber
+                  value={market.state.cpammRealReserves.quote}
+                  nominalize
+                  decimals={3}
+                />
               ) : (
                 "-"
               )}
@@ -423,9 +419,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
               {market ? (
-                <FormattedNumber nominalize decimals={3}>
-                  {market.state.cpammRealReserves.base}
-                </FormattedNumber>
+                <FormattedNumber
+                  value={market.state.cpammRealReserves.base}
+                  nominalize
+                  decimals={3}
+                />
               ) : (
                 "-"
               )}

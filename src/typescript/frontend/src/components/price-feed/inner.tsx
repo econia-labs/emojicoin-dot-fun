@@ -21,9 +21,7 @@ export const PriceDelta = ({ delta, className = "" }: { delta: number; className
 
   return (
     <span className={cn(`${delta >= 0 ? "text-green" : "text-pink"}`, className)}>
-      <FormattedNumber suffix={suffix} prefix={prefix} scramble>
-        {Math.abs(delta)}
-      </FormattedNumber>
+      <FormattedNumber value={Math.abs(delta)} suffix={suffix} prefix={prefix} scramble />
     </span>
   );
 };
