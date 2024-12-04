@@ -36,7 +36,7 @@ const ScrambledNumberLabel = ({
  * @param decimals the number of decimals to show
  * @param scramble whether or not to scramble the text upon change
  * @param suffix the suffix that shouldn't be scrambled, if the value is scrambled
- * @param prefix the prefix that shuldn't be scrambled, if the value is scrambled
+ * @param prefix the prefix that shouldn't be scrambled, if the value is scrambled
  * @param className the class name for the span wrapping the value
  * @param style the formatter style
  * @see {@link FormattedNumberStyle}
