@@ -121,10 +121,8 @@ export type Types = {
   MarketView: {
     metadata: Types["MarketMetadata"];
     sequenceInfo: Types["SequenceInfo"];
-    clammVirtualReservesBase: bigint;
-    clammVirtualReservesQuote: bigint;
-    cpammRealReservesBase: bigint;
-    cpammRealReservesQuote: bigint;
+    clammVirtualReserves: Types["Reserves"];
+    cpammRealReserves: Types["Reserves"];
     lpCoinSupply: bigint;
     inBondingCurve: boolean;
     cumulativeStats: Types["CumulativeStats"];
@@ -480,11 +478,8 @@ export const toLastSwap = (data: JsonTypes["LastSwap"]): Types["LastSwap"] => ({
 export const toMarketView = (data: JsonTypes["MarketView"]): Types["MarketView"] => ({
   metadata: toMarketMetadata(data.metadata),
   sequenceInfo: toSequenceInfo(data.sequence_info),
-
-  clammVirtualReservesBase: BigInt(data.clamm_virtual_reserves.base),
-  clammVirtualReservesQuote: BigInt(data.clamm_virtual_reserves.quote),
-  cpammRealReservesBase: BigInt(data.cpamm_real_reserves.base),
-  cpammRealReservesQuote: BigInt(data.cpamm_real_reserves.quote),
+  clammVirtualReserves: toReserves(data.clamm_virtual_reserves),
+  cpammRealReserves: toReserves(data.cpamm_real_reserves),
   lpCoinSupply: BigInt(data.lp_coin_supply),
   inBondingCurve: data.in_bonding_curve,
   cumulativeStats: toCumulativeStats(data.cumulative_stats),

@@ -14,22 +14,25 @@ import {
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import {
-  EmojicoinDotFun,
-  REGISTRY_ADDRESS,
-  deriveEmojicoinPublisherAddress,
-} from "../emojicoin_dot_fun";
+import { EmojicoinDotFun, REGISTRY_ADDRESS, getMarketAddress } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
+  BASE_VIRTUAL_CEILING,
+  BASE_VIRTUAL_FLOOR,
   COIN_FACTORY_MODULE_NAME,
   DEFAULT_REGISTER_MARKET_GAS_OPTIONS,
+  EMOJICOIN_REMAINDER,
+  EMOJICOIN_SUPPLY,
   GRACE_PERIOD_TIME,
   Period,
+  QUOTE_VIRTUAL_FLOOR,
   rawPeriodToEnum,
 } from "../const";
 import {
+  type AnyNumberString,
   type Types,
   toMarketResource,
+  toMarketView,
   toRegistrantGracePeriodFlag,
   toRegistryResource,
 } from "../types/types";
@@ -39,9 +42,15 @@ import {
   type EmojicoinSymbol,
   encodeEmojis,
   symbolBytesToEmojis,
+  type SymbolEmoji,
   type SymbolEmojiData,
 } from "../emoji_data";
 import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
+import { getAptosClient } from "../utils/aptos-client";
+import { MarketView } from "../emojicoin_dot_fun/emojicoin-dot-fun";
+import { type Flatten } from "../types";
+import { isInBondingCurve } from "../utils/bonding-curve";
+import { type AtLeastOne } from "../utils/utility-types";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
@@ -70,11 +79,8 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
 }): Types["EmojicoinInfo"] {
   const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
   const symbolBytes = Hex.fromHexInput(args.symbolBytes);
-  const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array());
-  const marketAddress = deriveEmojicoinPublisherAddress({
-    registryAddress,
-    emojis: emojis.emojis.map((e) => e.hex),
-  });
+  const emojis = symbolBytesToEmojis(symbolBytes.toUint8Array()).emojis.map((e) => e.emoji);
+  const marketAddress = getMarketAddress(emojis, registryAddress);
 
   const { emojicoin, emojicoinLP } = toCoinTypes(marketAddress);
 
@@ -322,3 +328,111 @@ export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateT
   // (b * c) / (a * d)
   return b.mul(c).div(a.mul(d)).toString();
 }
+
+type ReservesAndBondingCurveState = Flatten<
+  AtLeastOne<{
+    inBondingCurve: boolean;
+    lpCoinSupply: bigint;
+  }> & {
+    clammVirtualReserves: Types["Reserves"];
+    cpammRealReserves: Types["Reserves"];
+  }
+>;
+
+/**
+ * Calculates the circulating supply based on the given market state.
+ *
+ * The logic for calculation is taken directly from the Move smart contract.
+ * @see assign_supply_minuend_reserves_ref_mut in `emojicoin_dot_fun.move`
+ */
+export const calculateCirculatingSupply = ({
+  clammVirtualReserves,
+  cpammRealReserves,
+  ...args
+}: ReservesAndBondingCurveState) =>
+  isInBondingCurve(args)
+    ? BASE_VIRTUAL_CEILING - clammVirtualReserves.base
+    : EMOJICOIN_SUPPLY - cpammRealReserves.base;
+
+/**
+ * *NOTE*: If you already have a market's state, call {@link calculateCirculatingSupply} directly.
+ *
+ * Fetches the circulating supply of a market by looking at its on-chain state.
+ *
+ * Uses the Aptos fullnode; be mindful of rate-limiting.
+ *
+ * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
+ * @param ledgerVersion an optional ledger version number to specify the view function should use.
+ * @returns the market's circulating supply if the market exists, `undefined` otherwise.
+ */
+export const fetchCirculatingSupply = async (
+  emojis: SymbolEmoji[],
+  ledgerVersion?: AnyNumberString
+): Promise<bigint | undefined> =>
+  MarketView.view({
+    aptos: getAptosClient(),
+    marketAddress: getMarketAddress(emojis),
+    options: ledgerVersion
+      ? {
+          ledgerVersion: BigInt(ledgerVersion),
+        }
+      : {},
+  })
+    .then(toMarketView)
+    .then(calculateCirculatingSupply)
+    .catch(() => undefined);
+
+/**
+ * Calculates the real reserves of a market based on the given market state.
+ *
+ * The logic for calculating the real reserves of a market in the bonding curve is taken directly
+ * from the Move smart contract.
+ *
+ * Note that while the market is in the bonding curve, the current market price (the current
+ * position on the bonding curve) is represented by the clamm's virtual reserves, *not* the clamm's
+ * real reserves calculated here.
+ *
+ * Post bonding curve, the price is directly equal to the cpamm's real reserves.
+ *
+ * For an in depth explanation of the math and behavior behind the bonding curve:
+ * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf}
+ */
+export const calculateRealReserves = ({
+  clammVirtualReserves,
+  cpammRealReserves,
+  ...args
+}: ReservesAndBondingCurveState): Types["Reserves"] =>
+  isInBondingCurve(args)
+    ? {
+        base: clammVirtualReserves.base - BASE_VIRTUAL_FLOOR + EMOJICOIN_REMAINDER,
+        quote: clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
+      }
+    : cpammRealReserves;
+
+/**
+ * *NOTE*: If you already have a market's state, call {@link calculateRealReserves} directly.
+ *
+ * Fetches the real reserves of a market by looking at its on-chain state.
+ *
+ * Uses the Aptos fullnode; be mindful of rate-limiting.
+ *
+ * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
+ * @param ledgerVersion an optional ledger version number to specify the view function should use.
+ * @returns the market's real reserves if the market exists, `undefined` otherwise.
+ */
+export const fetchRealReserves = async (
+  emojis: SymbolEmoji[],
+  ledgerVersion?: AnyNumberString
+): Promise<Types["Reserves"] | undefined> =>
+  MarketView.view({
+    aptos: getAptosClient(),
+    marketAddress: getMarketAddress(emojis),
+    options: ledgerVersion
+      ? {
+          ledgerVersion: BigInt(ledgerVersion),
+        }
+      : {},
+  })
+    .then(toMarketView)
+    .then(calculateRealReserves)
+    .catch(() => undefined);
