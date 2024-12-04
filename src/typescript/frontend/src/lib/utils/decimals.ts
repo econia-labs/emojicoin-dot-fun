@@ -62,4 +62,6 @@ const toDisplayCoinDecimals = ({
   return res.toString();
 };
 
-export { toDisplayCoinDecimals, toActualCoinDecimals };
+const toNominal = (num: bigint) => new Big(num.toString()).div(10 ** DECIMALS).toNumber();
+
+export { toDisplayCoinDecimals, toActualCoinDecimals, toNominal };

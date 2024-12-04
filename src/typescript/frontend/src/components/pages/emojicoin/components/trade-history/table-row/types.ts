@@ -4,10 +4,10 @@ export type TableRowDesktopProps = {
   item: {
     rankIcon: string;
     rankName: string;
-    apt: string;
-    emoji: string;
+    apt: bigint;
+    emoji: bigint;
     type: string;
-    priceQ64: string;
+    priceQ64: bigint;
     date: Date;
     version: AnyNumberString;
     swapper: string;

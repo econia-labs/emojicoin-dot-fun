@@ -3,13 +3,13 @@ import React, { useEffect, useState } from "react";
 import { translationFunction } from "context/language-context";
 import { type MainInfoProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
-import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 import { motion } from "framer-motion";
 import { getBondingCurveProgress } from "utils/bonding-curve";
 import Button from "components/button";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
 import { useThemeContext } from "context";
+import { FormattedNumber } from "components/FormattedNumber";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -32,22 +32,20 @@ const BondingProgress = ({ data }: MainInfoProps) => {
     }
   }, [stateEvents]);
 
-  const { ref: bondingCurveRef } = useLabelScrambler(`${bondingProgress.toFixed(2)}`, "%");
-
   return (
     <div className="flex flex-col w-fit">
       <div className="flex justify-between gap-[8px] mb-[.2em]">
         <div className={statsTextClasses + " text-light-gray font-pixelar text-[32px]"}>
           {t("Bonding progress:")}
         </div>
-        <div className={statsTextClasses + " text-white"}>
-          <div
-            className="text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]"
-            ref={bondingCurveRef}
-          >
-            {bondingProgress.toFixed(2)}%
-          </div>
-        </div>
+        <FormattedNumber
+          value={bondingProgress}
+          className={
+            statsTextClasses + " text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]"
+          }
+          suffix="%"
+          scramble
+        />
       </div>
       {bondingProgress >= 100 ? (
         <Link

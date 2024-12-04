@@ -5,27 +5,27 @@ export const XprPopup = ({
   wpr,
   apr,
 }: {
-  dpr: string;
-  wpr: string;
-  apr: string;
+  dpr: JSX.Element;
+  wpr: JSX.Element;
+  apr: JSX.Element;
 }): ReactNode => (
   <>
     <div>
       <div className="flex gap-[0.2rem] justify-between">
         <span>DPR:</span>
-        <span>{dpr}</span>
+        {dpr}
       </div>
     </div>
     <div>
       <div className="flex gap-[0.2rem] justify-between">
         <span>WPR:</span>
-        <span>{wpr}</span>
+        {wpr}
       </div>
     </div>
     <div>
       <div className="flex gap-[0.2rem] justify-between">
         <span>APR:</span>
-        <span>{apr}</span>
+        {apr}
       </div>
     </div>
   </>
