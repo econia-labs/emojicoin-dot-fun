@@ -14,9 +14,8 @@ import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
 import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../src/utils/test";
 import { isInBondingCurve } from "../../src/utils/bonding-curve";
-import { UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { SwapEventModel } from "../../src/indexer-v2/types";
-import { number } from "@noble/hashes/_assert";
+import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
+import { type SwapEventModel } from "../../src/indexer-v2/types";
 
 jest.setTimeout(30000);
 
