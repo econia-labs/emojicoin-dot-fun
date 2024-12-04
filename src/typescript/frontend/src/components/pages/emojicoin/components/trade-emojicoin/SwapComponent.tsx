@@ -244,9 +244,8 @@ export default function SwapComponent({
         <FlipInputsArrow
           onClick={() => {
             setInputAmount(outputAmount);
-            // This is done as to not display an old value if the swap simulation fails.
-            setOutputAmount(0n);
-            setPrevious(0n);
+            setOutputAmount(inputAmount);
+            setPrevious(inputAmount);
             setIsSell((v) => !v);
           }}
         />
