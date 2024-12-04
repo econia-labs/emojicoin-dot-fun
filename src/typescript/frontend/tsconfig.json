@@ -34,6 +34,9 @@
       "@containers": [
         "components/layout/components/index.ts"
       ],
+      "@econia-labs/emojicoin-sdk": [
+        "../../sdk/src/index.ts"
+      ],
       "@hooks/*": [
         "hooks/*"
       ],
@@ -48,8 +51,7 @@
       ],
       "@static/*": [
         "../public/static/*"
-      ],
-      "@econia-labs/emojicoin-sdk": ["../../sdk/src/index.ts"]
+      ]
     },
     "plugins": [
       {
