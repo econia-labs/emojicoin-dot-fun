@@ -5,7 +5,7 @@ import { type MainInfoProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
 import { useLabelScrambler } from "components/pages/home/components/table-card/animation-variants/event-variants";
 import { motion } from "framer-motion";
-import { getBondingCurveProgress } from "utils/bonding-curve";
+import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
 import Button from "components/button";
 import Link from "next/link";
 import { ROUTES } from "router/routes";

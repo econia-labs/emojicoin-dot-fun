@@ -29,12 +29,12 @@ import {
   rawPeriodToEnum,
 } from "../const";
 import {
+  type AnyNumberString,
   type Types,
   toMarketResource,
   toMarketView,
   toRegistrantGracePeriodFlag,
   toRegistryResource,
-  toReserves,
 } from "../types/types";
 import type JsonTypes from "../types/json-types";
 import {
@@ -48,6 +48,9 @@ import {
 import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
 import { MarketView } from "../emojicoin_dot_fun/emojicoin-dot-fun";
+import { type Flatten } from "../types";
+import { isInBondingCurve } from "../utils/bonding-curve";
+import { type AtLeastOne } from "../utils/utility-types";
 
 export function toCoinTypes(inputAddress: AccountAddressInput): {
   emojicoin: TypeTag;
@@ -326,20 +329,30 @@ export function calculateTvlGrowth(periodicStateTracker1D: Types["PeriodicStateT
   return b.mul(c).div(a.mul(d)).toString();
 }
 
+type ReservesAndBondingCurveState = Flatten<
+  AtLeastOne<{
+    inBondingCurve: boolean;
+    lpCoinSupply: bigint;
+  }> & {
+    clammVirtualReserves: Types["Reserves"];
+    cpammRealReserves: Types["Reserves"];
+  }
+>;
+
 /**
  * Calculates the circulating supply based on the current market state.
  *
  * The logic for calculation is taken directly from the Move smart contract.
  * @see assign_supply_minuend_reserves_ref_mut in `emojicoin_dot_fun.move`
  */
-export const calculateCirculatingSupply = (args: {
-  inBondingCurve: boolean;
-  clammVirtualReservesBase: Types["Reserves"]["base"];
-  cpammRealReservesBase: Types["Reserves"]["base"];
-}) =>
-  args.inBondingCurve
-    ? BASE_VIRTUAL_CEILING - args.clammVirtualReservesBase
-    : EMOJICOIN_SUPPLY - args.cpammRealReservesBase;
+export const calculateCirculatingSupply = ({
+  clammVirtualReserves,
+  cpammRealReserves,
+  ...args
+}: ReservesAndBondingCurveState) =>
+  isInBondingCurve(args)
+    ? BASE_VIRTUAL_CEILING - clammVirtualReserves.base
+    : EMOJICOIN_SUPPLY - cpammRealReserves.base;
 
 /**
  * *NOTE*: If you already have a market's state, call {@link calculateCirculatingSupply} directly.
@@ -349,12 +362,21 @@ export const calculateCirculatingSupply = (args: {
  * Uses the Aptos fullnode; be mindful of rate-limiting.
  *
  * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
+ * @param ledgerVersion an optional ledger version number to specify the view function should use.
  * @returns the circulating supply a market if it exists, `null` otherwise.
  */
-export const fetchCirculatingSupply = async (emojis: SymbolEmoji[]): Promise<bigint | null> =>
+export const fetchCirculatingSupply = async (
+  emojis: SymbolEmoji[],
+  ledgerVersion?: AnyNumberString
+): Promise<bigint | null> =>
   MarketView.view({
     aptos: getAptosClient(),
     marketAddress: deriveMarketAddress(emojis),
+    options: ledgerVersion
+      ? {
+          ledgerVersion: BigInt(ledgerVersion),
+        }
+      : {},
   })
     .then(toMarketView)
     .then(calculateCirculatingSupply)
@@ -367,20 +389,17 @@ export const fetchCirculatingSupply = async (emojis: SymbolEmoji[]): Promise<big
  * The logic for calculating the real reserves of a market in the bonding curve is taken directly
  * from the Move smart contract.
  */
-export const calculateRealReserves = (args: {
-  inBondingCurve: boolean;
-  clammVirtualReserves: Types["Reserves"];
-  cpammRealReserves: Types["Reserves"];
-}): Types["Reserves"] => {
-  const { inBondingCurve, clammVirtualReserves, cpammRealReserves } = args;
-  if (inBondingCurve) {
-    return {
-      base: clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
-      quote: clammVirtualReserves.base - BASE_VIRTUAL_FLOOR + EMOJICOIN_REMAINDER,
-    };
-  }
-  return cpammRealReserves;
-};
+export const calculateRealReserves = ({
+  clammVirtualReserves,
+  cpammRealReserves,
+  ...args
+}: ReservesAndBondingCurveState): Types["Reserves"] =>
+  isInBondingCurve(args)
+    ? {
+        base: clammVirtualReserves.base - BASE_VIRTUAL_FLOOR + EMOJICOIN_REMAINDER,
+        quote: clammVirtualReserves.quote - QUOTE_VIRTUAL_FLOOR,
+      }
+    : cpammRealReserves;
 
 /**
  * *NOTE*: If you already have a market's state, call {@link calculateRealReserves} directly.
@@ -390,18 +409,22 @@ export const calculateRealReserves = (args: {
  * Uses the Aptos fullnode; be mindful of rate-limiting.
  *
  * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
+ * @param ledgerVersion an optional ledger version number to specify the view function should use.
  * @returns the real reserves for a market if it exists, `null` otherwise.
  */
-export const fetchRealReserves = async (emojis: SymbolEmoji[]): Promise<Types["Reserves"] | null> =>
+export const fetchRealReserves = async (
+  emojis: SymbolEmoji[],
+  ledgerVersion?: AnyNumberString
+): Promise<Types["Reserves"] | null> =>
   MarketView.view({
     aptos: getAptosClient(),
     marketAddress: deriveMarketAddress(emojis),
+    options: ledgerVersion
+      ? {
+          ledgerVersion: BigInt(ledgerVersion),
+        }
+      : {},
   })
-    .then((market) =>
-      calculateRealReserves({
-        inBondingCurve: market.in_bonding_curve,
-        cpammRealReserves: toReserves(market.cpamm_real_reserves),
-        clammVirtualReserves: toReserves(market.clamm_virtual_reserves),
-      })
-    )
+    .then(toMarketView)
+    .then(calculateRealReserves)
     .catch(() => null);
