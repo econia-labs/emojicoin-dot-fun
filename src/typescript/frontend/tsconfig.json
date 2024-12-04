@@ -18,7 +18,6 @@
     "module": "esnext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
-    "customConditions": ["source"],
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
@@ -49,7 +48,9 @@
       ],
       "@static/*": [
         "../public/static/*"
-      ]
+      ],
+      "@econia-labs/emojicoin-sdk": ["../../sdk/src/index.ts"],
+      "@econia-labs/emojicoin-sdk/*": ["../../sdk/src/*"]
     },
     "plugins": [
       {
