@@ -363,7 +363,7 @@ export const calculateCirculatingSupply = ({
  *
  * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
  * @param ledgerVersion an optional ledger version number to specify the view function should use.
- * @returns the circulating supply a market if it exists, `undefined` otherwise.
+ * @returns the market's circulating supply if the market exists, `undefined` otherwise.
  */
 export const fetchCirculatingSupply = async (
   emojis: SymbolEmoji[],
@@ -410,7 +410,7 @@ export const calculateRealReserves = ({
  *
  * @param emojis the input {@link SymbolEmoji}s that form the market symbol.
  * @param ledgerVersion an optional ledger version number to specify the view function should use.
- * @returns the real reserves for a market if it exists, `undefined` otherwise.
+ * @returns the market's real reserves if the market exists, `undefined` otherwise.
  */
 export const fetchRealReserves = async (
   emojis: SymbolEmoji[],
