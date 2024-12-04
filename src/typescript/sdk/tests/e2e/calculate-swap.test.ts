@@ -13,7 +13,7 @@ import {
   toCoinTypes,
   zip,
 } from "../../src";
-import { calculateSwapNetProceeds, deriveMarketAddress } from "../../src/emojicoin_dot_fun";
+import { calculateSwapNetProceeds, getMarketAddress } from "../../src/emojicoin_dot_fun";
 import { getPublishHelpers } from "../../src/utils/test";
 import { getFundedAccounts } from "../../src/utils/test/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
@@ -57,7 +57,7 @@ describe("tests the swap functionality", () => {
     const [firstSwapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
     const isSell = false;
     const inputAmount = ONE_APT * 500;
-    const marketAddress = deriveMarketAddress(marketSymbols[idx]);
+    const marketAddress = getMarketAddress(marketSymbols[idx]);
     const market = await getMarketResourceHelper(marketAddress, maxRegisterTxnVersion);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
@@ -90,7 +90,7 @@ describe("tests the swap functionality", () => {
     const res = await emojicoin.buy(firstSwapper, symbolEmojis, justNotEnough);
 
     const { model } = res.swap;
-    const marketAddress = deriveMarketAddress(symbolEmojis);
+    const marketAddress = getMarketAddress(symbolEmojis);
     const market = await getMarketResourceHelper(marketAddress, res.response.version);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
@@ -131,7 +131,7 @@ describe("tests the swap functionality", () => {
     const res = await emojicoin.buy(firstSwapper, symbolEmojis, firstInputAmount);
 
     const { model } = res.swap;
-    const marketAddress = deriveMarketAddress(symbolEmojis);
+    const marketAddress = getMarketAddress(symbolEmojis);
     const market = await getMarketResourceHelper(marketAddress, res.response.version);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
@@ -171,7 +171,7 @@ describe("tests the swap functionality", () => {
     const res = await emojicoin.buy(firstSwapper, symbolEmojis, inputAmount);
 
     const { model } = res.swap;
-    const marketAddress = deriveMarketAddress(symbolEmojis);
+    const marketAddress = getMarketAddress(symbolEmojis);
     const market = await getMarketResourceHelper(marketAddress, res.response.version);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
@@ -222,7 +222,7 @@ describe("tests the swap functionality", () => {
     const res = await emojicoin.buy(firstSwapper, symbolEmojis, exactTransitionInputAmount);
 
     const { model } = res.swap;
-    const marketAddress = deriveMarketAddress(symbolEmojis);
+    const marketAddress = getMarketAddress(symbolEmojis);
     const market = await getMarketResourceHelper(marketAddress, res.response.version);
     const { clammVirtualReserves, cpammRealReserves } = market;
 
@@ -271,7 +271,7 @@ describe("tests the swap functionality", () => {
 
   it("verifies that a market's initial virtual and real reserves are expected", async () => {
     const idx = 5;
-    const marketAddress = deriveMarketAddress(marketSymbols[idx]);
+    const marketAddress = getMarketAddress(marketSymbols[idx]);
     const market = await getMarketResourceHelper(marketAddress, maxRegisterTxnVersion);
     expect(market.clammVirtualReserves).toEqual(INITIAL_VIRTUAL_RESERVES);
     expect(market.cpammRealReserves).toEqual(INITIAL_REAL_RESERVES);

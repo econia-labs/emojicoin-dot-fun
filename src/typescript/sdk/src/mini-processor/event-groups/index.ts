@@ -1,6 +1,6 @@
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { toMarketEmojiData } from "../../emoji_data";
-import { type AccountAddressString, deriveMarketAddress, getEvents } from "../../emojicoin_dot_fun";
+import { type AccountAddressString, getMarketAddress, getEvents } from "../../emojicoin_dot_fun";
 import {
   GuidGetters,
   type MarketMetadataModel,
@@ -109,7 +109,7 @@ export function getEventsAsProcessorModels(
     };
     const { emojiBytes } = stateEvent.marketMetadata;
     const marketEmojiData = toMarketEmojiData(emojiBytes);
-    const marketAddress = deriveMarketAddress(
+    const marketAddress = getMarketAddress(
       marketEmojiData.emojis.map((e) => e.emoji)
     ).toString();
     const market: MarketMetadataModel = {
