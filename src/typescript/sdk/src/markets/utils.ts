@@ -394,8 +394,8 @@ export const fetchCirculatingSupply = async (
  *
  * Post bonding curve, the price is directly equal to the cpamm's real reserves.
  *
- * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf} 
- * for an in depth explanation of the math and behavior behind the bonding curve.
+ * For an in depth explanation of the math and behavior behind the bonding curve:
+ * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf}
  */
 export const calculateRealReserves = ({
   clammVirtualReserves,

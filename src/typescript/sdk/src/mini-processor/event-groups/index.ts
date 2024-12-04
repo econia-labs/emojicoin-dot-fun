@@ -109,9 +109,7 @@ export function getEventsAsProcessorModels(
     };
     const { emojiBytes } = stateEvent.marketMetadata;
     const marketEmojiData = toMarketEmojiData(emojiBytes);
-    const marketAddress = getMarketAddress(
-      marketEmojiData.emojis.map((e) => e.emoji)
-    ).toString();
+    const marketAddress = getMarketAddress(marketEmojiData.emojis.map((e) => e.emoji)).toString();
     const market: MarketMetadataModel = {
       marketID,
       time: txnInfo.time,
