@@ -1,7 +1,7 @@
 import type { AnyNumberString } from "@sdk-types";
 import { useLabelScrambler } from "./pages/home/components/table-card/animation-variants/event-variants";
 import { toNominal } from "lib/utils/decimals";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 /**
  * Sliding precision will show `decimals` decimals when Math.abs(number) is
@@ -11,17 +11,50 @@ import { useEffect } from "react";
  */
 export type FormattedNumberStyle = "sliding-precision" | "fixed";
 
+const ScrambledNumberLabel = ({
+  value,
+  suffix = "",
+  prefix = "",
+  className = "",
+}: {
+  value: string;
+  suffix?: string;
+  prefix?: string;
+  className?: string;
+}) => {
+  const { ref, replay } = useLabelScrambler(value, suffix, prefix);
+  useEffect(() => {
+    replay();
+  }, [value, replay]);
+  return <span className={className} ref={ref}>{`${prefix}${value}${suffix}`}</span>;
+};
+
+/**
+ * Formats a number, string or bigint and scrambles it if desired.
+ *
+ * @param value the number to format and display
+ * @param decimals the number of decimals to show
+ * @param scramble whether or not to scramble the text upon change
+ * @param suffix the suffix that shouldn't be scrambled, if the value is scrambled
+ * @param prefix the prefix that shuldn't be scrambled, if the value is scrambled
+ * @param className the class name for the span wrapping the value
+ * @param style the formatter style
+ * @see {@link FormattedNumberStyle}
+ *
+ * @param param0
+ * @returns
+ */
 export const FormattedNumber = ({
-  children,
+  value,
   decimals = 2,
   scramble = false,
   nominalize = false,
-  suffix,
-  prefix,
+  suffix = "",
+  prefix = "",
   className,
   style = "sliding-precision",
 }: {
-  children: AnyNumberString;
+  value: AnyNumberString;
   decimals?: number;
   scramble?: boolean;
   nominalize?: boolean;
@@ -30,42 +63,31 @@ export const FormattedNumber = ({
   className?: string;
   style?: FormattedNumberStyle;
 }) => {
-  let num: number;
-  if (nominalize) {
-    if (typeof children === "bigint") {
-      num = toNominal(children);
-    } else {
-      throw new Error("Wrong number type");
+  const displayValue = useMemo(() => {
+    if (nominalize && typeof value !== "bigint") {
+      throw new Error("Input value needs to be a bigint.");
     }
-  } else {
-    num = Number(children);
-  }
-  let formatter: Intl.NumberFormat;
-  if (style === "fixed" || Math.abs(num) >= 1) {
-    formatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: decimals });
-  } else {
-    formatter = new Intl.NumberFormat("en-US", { maximumSignificantDigits: decimals });
-  }
-  const str = formatter.format(num);
-  const { ref, replay } = useLabelScrambler(str, suffix, prefix);
+    const num = nominalize ? toNominal(value as bigint) : Number(value);
+    const format =
+      style === "fixed" || Math.abs(num) >= 1
+        ? { maximumFractionDigits: decimals }
+        : { maximumSignificantDigits: decimals };
+    const formatter = new Intl.NumberFormat("en-US", format);
+    return formatter.format(num);
+  }, [value, decimals, nominalize, style]);
 
-  useEffect(() => {
-    replay();
-  }, [children, replay]);
-
-  if (scramble) {
-    return (
-      <span className={className} ref={ref}>
-        {str}
-      </span>
-    );
-  } else {
-    return (
-      <span className={className}>
-        {prefix}
-        {str}
-        {suffix}
-      </span>
-    );
-  }
+  return scramble ? (
+    <ScrambledNumberLabel
+      value={displayValue}
+      prefix={prefix}
+      suffix={suffix}
+      className={className}
+    />
+  ) : (
+    <span className={className}>
+      {prefix}
+      {displayValue}
+      {suffix}
+    </span>
+  );
 };
