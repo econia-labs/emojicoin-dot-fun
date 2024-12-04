@@ -64,7 +64,7 @@ describe("tests the calculation functions for circulating supply and real reserv
 
     // Sell 3/4 of the circulating supply (back into the reserves).
     const sellAmount = (userBalance * 3n) / 4n;
-    emojicoin.sell(swapper, symbolEmojis, sellAmount).then(async ({ response, swap }) => {
+    await emojicoin.sell(swapper, symbolEmojis, sellAmount).then(async ({ response, swap }) => {
       const circulatingSupplyFromFetch = await fetchCirculatingSupply(symbolEmojis);
       const circulatingSupplyFromTxnResponse = calculateCirculatingSupply(swap.model.state);
       expect(circulatingSupplyFromFetch).toBeDefined();
@@ -114,7 +114,7 @@ describe("tests the calculation functions for circulating supply and real reserv
 
     await emojicoin
       .buy(swapper, symbolEmojis, buyAmountQuote)
-      .then(({ swap }) => {
+      .then(({ response, swap }) =>
         fetchRealReserves(symbolEmojis)
           .then((res) => res!)
           .then(({ base, quote }) => {
@@ -123,28 +123,33 @@ describe("tests the calculation functions for circulating supply and real reserv
             // The quote reserves are equal to the amount of APT the user just exchanged for base.
             expect(quote).toEqual(EXACT_TRANSITION_INPUT_AMOUNT + ONE_APT_BIGINT);
             expect(isInBondingCurve(swap.model.state)).toBe(false);
-          });
-      })
-      .then(() => emojicoin.sell(swapper, symbolEmojis, sellAmountEmojicoin))
-      .then(({ response, swap }) => {
+            const userBalance = getCoinBalanceFromChanges({ response, userAddress, coinType })!;
+            expect(userBalance).toBeDefined();
+            expect(userBalance).toEqual(swap.model.swap.netProceeds);
+            expect(EMOJICOIN_SUPPLY).toEqual(base + userBalance);
+            return base;
+          })
+      )
+      .then((base) =>
+        emojicoin.sell(swapper, symbolEmojis, sellAmountEmojicoin).then((res) => ({ ...res, base }))
+      )
+      .then(({ base: previousBaseReserves, swap }) =>
         fetchRealReserves(symbolEmojis)
           .then((res) => res!)
           .then(({ base, quote }) => {
-            const userBalance = getCoinBalanceFromChanges({ response, userAddress, coinType })!;
-            expect(userBalance).toBeDefined();
-            const previousBaseReserves = EMOJICOIN_SUPPLY - userBalance;
-            expect(sellAmountEmojicoin).toEqual(swap.model.swap.baseVolume);
-            // The base reserves now are the previous reserves plus the amount of base sold.
-            expect(base).toEqual(previousBaseReserves + sellAmountEmojicoin);
+            // The base volume equals the sell amount- no pool fee incurred for base on a sell.
+            expect(swap.model.swap.baseVolume).toEqual(sellAmountEmojicoin);
+            // The previous reserves should be the current base minus the amount that was just sold.
+            expect(previousBaseReserves).toEqual(base - sellAmountEmojicoin);
             const { netProceeds } = swap.model.swap;
             // The quote reserves now are the previous reserves minus the quote volume/net proceeds.
             expect(netProceeds).toEqual(swap.model.swap.quoteVolume);
             expect(quote).toEqual(EXACT_TRANSITION_INPUT_AMOUNT + ONE_APT_BIGINT - netProceeds);
-          });
-      });
+          })
+      );
   });
 
-  it("checks the real reserves after a buy and a sell", async () => {
+  it("checks the real reserves after a user buys & sells in the bonding curve", async () => {
     const idx = 3;
     const [swapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
     const buyAmount = ONE_APT_BIGINT;
@@ -212,7 +217,7 @@ describe("tests the calculation functions for circulating supply and real reserv
     const verifyCSAndReserves = (response: UserTransactionResponse, swap: SwapEventModel) => {
       const realReserves = calculateRealReserves(swap.state);
       const circulatingSupply = calculateCirculatingSupply(swap.state);
-      expect(realReserves).toEqual(EMOJICOIN_SUPPLY - circulatingSupply);
+      expect(realReserves.base).toEqual(EMOJICOIN_SUPPLY - circulatingSupply);
       const userBalance = getCoinBalanceFromChanges({ response, userAddress, coinType });
       expect(userBalance).toEqual(circulatingSupply);
     };
@@ -237,7 +242,7 @@ describe("tests the calculation functions for circulating supply and real reserv
   };
 
   it("verifies the real reserves are total supply - circulating supply", async () => {
-    verifyReservesWithBuyBuyBuySell({
+    await verifyReservesWithBuyBuyBuySell({
       idx: 4,
       amounts: [
         EXACT_TRANSITION_INPUT_AMOUNT / 2n, // Buy in the bonding curve only.
@@ -249,7 +254,7 @@ describe("tests the calculation functions for circulating supply and real reserv
   });
 
   it("verifies the real reserves are total supply - circulating supply, huge amounts", async () => {
-    verifyReservesWithBuyBuyBuySell({
+    await verifyReservesWithBuyBuyBuySell({
       idx: 5,
       amounts: [
         (EXACT_TRANSITION_INPUT_AMOUNT * 3n) / 4n, // Buy in the bonding curve only.
