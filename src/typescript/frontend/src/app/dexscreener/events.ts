@@ -77,6 +77,7 @@ import { type Block } from "./latest-block";
 import { fetchLiquidityEventsByBlock, fetchSwapEventsByBlock } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { type toLiquidityEventModel, type toSwapEventModel } from "@sdk/indexer-v2/types";
 import Big from "big.js";
+import { calculateRealReserves } from "@sdk/markets";
 
 
 /**
@@ -194,19 +195,11 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
   }
 
 
-  let reserves;
-  // Bonding is complete
-  if (event.state.lpCoinSupply > 0) {
-    reserves = {
-      reserves: {
-        asset0: event.swap.baseVolume.toString(),
-        asset1: event.swap.quoteVolume.toString(),
-      }
-    };
-  } else {
-    // Still in bonding
-    reserves = {};
-  }
+  const { base, quote } = calculateRealReserves(event.state);
+  const reserves = {
+    asset0: base.toString(),
+    asset1: quote.toString(),
+  };
 
   const priceNative = (new Big(event.swap.avgExecutionPriceQ64.toString())).div(2 ** 64).toFixed(64);
 
@@ -234,6 +227,12 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
 }
 
 function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventModel>): JoinExitEvent & BlockInfo {
+  const { base, quote } = calculateRealReserves(event.state);
+  const reserves = {
+    asset0: base.toString(),
+    asset1: quote.toString(),
+  };
+  
   return {
     block: {
       blockNumber: Number(event.blockAndEvent.blockNumber),
@@ -251,10 +250,7 @@ function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventMod
 
     amount0: event.liquidity.baseAmount.toString(),
     amount1: event.liquidity.quoteAmount.toString(),
-    reserves: {
-      asset0: event.state.cpammRealReserves.base.toString(),
-      asset1: event.state.cpammRealReserves.quote.toString(),
-    },
+    reserves,
   };
 }
 
