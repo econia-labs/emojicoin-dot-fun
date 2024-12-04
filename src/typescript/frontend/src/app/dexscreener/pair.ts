@@ -27,6 +27,7 @@ import {
 } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { getAptosClient } from "@sdk/utils/aptos-client";
+import { INTEGRATOR_FEE_RATE_BPS } from "@sdk/const";
 
 
 /**
@@ -98,8 +99,7 @@ export async function getPair(pairId: string): Promise<Pair> {
     createdAtBlockNumber: parseInt(block.block_height),
     createdAtBlockTimestamp: marketRegistration.transaction.timestamp.getTime() / 1000,
     createdAtTxnId: String(marketRegistration.transaction.version),
-    // TODO: validate there is no swap fee (is there?)
-    feeBps: 0,
+    feeBps: INTEGRATOR_FEE_RATE_BPS,
   };
 }
 
