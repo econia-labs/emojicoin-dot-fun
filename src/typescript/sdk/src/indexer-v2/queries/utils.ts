@@ -9,10 +9,8 @@ import {
   type PostgrestBuilder,
   type PostgrestTransformBuilder,
 } from "@supabase/postgrest-js";
-import { type Account, type AccountAddressInput } from "@aptos-labs/ts-sdk";
 import { type AnyNumberString } from "../../types/types";
 import { type DatabaseJsonType, postgresTimestampToDate, TableName } from "../types/json-types";
-import { toAccountAddress } from "../../utils";
 import { postgrest } from "./client";
 import { type DatabaseModels } from "../types";
 
@@ -203,17 +201,3 @@ export function queryHelperWithCount<
 
   return query;
 }
-
-/**
- * Strip leading zeroes from an address.
- *
- * @param address either the account object, an account address, or a string.
- * @returns the address without any leading zeroes, still prefixed with "0x".
- *
- */
-/* eslint-disable-next-line import/no-unused-modules */
-export const stripLeadingZeroes = <T extends Account>(address: T | AccountAddressInput) =>
-  // prettier-ignore
-  toAccountAddress(address)
-    .toString()
-    .replace(/^0x0+/, "0x");

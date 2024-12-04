@@ -7,7 +7,6 @@ import {
   sleep,
   SYMBOL_EMOJI_DATA,
   type SymbolEmojiName,
-  UnitOfTime,
 } from "../../../../src";
 import TestHelpers from "../../../utils/helpers";
 import { getFundedAccounts } from "../../../utils/test-accounts";
@@ -66,7 +65,7 @@ describe("sorting queries for the sort filters on the home page", () => {
           });
           // Sleep in reverse order to mix up the bump order of the markets so it doesn't match
           // the volume queries, since the inputAmounts are in order according to the index `i`.
-          await sleep(marketEmojiNames.length - i, UnitOfTime.Seconds);
+          await sleep((marketEmojiNames.length - i) * 1000);
           const swap = Swap.submit({
             aptosConfig: aptos.config,
             swapper: registrants[i],

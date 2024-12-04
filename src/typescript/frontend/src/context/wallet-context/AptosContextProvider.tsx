@@ -31,7 +31,7 @@ import {
 import { useEventStore } from "context/event-store-context";
 import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
-import { sleep, UnitOfTime } from "@sdk/utils";
+import { sleep } from "@sdk/utils";
 import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
 import {
   getAptBalanceFromChanges,
@@ -222,9 +222,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
             error: null,
           });
           setLastResponseStoredAt(Date.now());
-          sleep(DEFAULT_TOAST_CONFIG.autoClose, UnitOfTime.Milliseconds).then(() => {
-            setStatus("idle");
-          });
+          sleep(DEFAULT_TOAST_CONFIG.autoClose).then(() => setStatus("idle"));
         }
       } catch (e: unknown) {
         if (e instanceof AptosApiError) {

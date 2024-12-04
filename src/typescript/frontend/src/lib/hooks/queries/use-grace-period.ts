@@ -6,9 +6,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { useEffect, useMemo, useState } from "react";
 
 // -------------------------------------------------------------------------------------------------
-//
 //                        Utilities for calculating the number of seconds left.
-//
 // -------------------------------------------------------------------------------------------------
 const nowSeconds = () => Math.floor(new Date().getTime() / 1000);
 
@@ -26,9 +24,7 @@ const formattedTimeLeft = (secondsRemaining: number) => {
 };
 
 // -------------------------------------------------------------------------------------------------
-//
 //                  Hook to force the component to re-render on an interval basis.
-//
 // -------------------------------------------------------------------------------------------------
 const useDisplayTimeLeft = (marketRegistrationTime?: bigint) => {
   const [timeLeft, setTimeLeft] = useState<ReturnType<typeof formattedTimeLeft>>();
@@ -51,9 +47,7 @@ const useDisplayTimeLeft = (marketRegistrationTime?: bigint) => {
 };
 
 // -------------------------------------------------------------------------------------------------
-//
 //            `useQuery` hook that fetches the grace period status on an interval basis.
-//
 // -------------------------------------------------------------------------------------------------
 const useGracePeriod = (symbol: string, hasSwaps: boolean) => {
   const { aptos } = useAptos();
@@ -80,9 +74,7 @@ const useGracePeriod = (symbol: string, hasSwaps: boolean) => {
 };
 
 // -------------------------------------------------------------------------------------------------
-//
 //          The actual hook to be used in a component to display the amount of seconds left.
-//
 // -------------------------------------------------------------------------------------------------
 export const useCanTradeMarket = (symbol: string) => {
   const { account } = useAptos();
