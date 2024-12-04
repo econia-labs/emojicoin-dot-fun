@@ -22,7 +22,7 @@ export const isInBondingCurve = ({
     throw new Error("At least one argument should be defined.");
   }
 
-  return typeof lpCoinSupply === "undefined" ? !!inBondingCurve : BigInt(lpCoinSupply) === 0n;
+  return inBondingCurve || BigInt(lpCoinSupply ?? 1n) === 0n;
 };
 
 /**
