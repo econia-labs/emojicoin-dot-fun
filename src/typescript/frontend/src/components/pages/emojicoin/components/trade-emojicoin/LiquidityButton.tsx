@@ -3,7 +3,7 @@ import { type GridProps } from "components/pages/emojicoin/types";
 import { StyledContentHeader } from "../desktop-grid/styled";
 import Button from "components/button";
 import { translationFunction } from "context/language-context";
-import { isInBondingCurve } from "utils/bonding-curve";
+import { isInBondingCurve } from "@sdk/utils/bonding-curve";
 import { AnimatedProgressBar } from "./AnimatedProgressBar";
 import Link from "next/link";
 import { ROUTES } from "router/routes";
