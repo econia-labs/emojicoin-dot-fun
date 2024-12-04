@@ -23,6 +23,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { SYMBOL_EMOJI_DATA, toMarketEmojiData } from "@sdk/emoji_data";
 import { fetchMarketRegistrationEventBySymbolBytes } from "@/queries/dexscreener";
+import { EMOJICOIN_SUPPLY } from "@sdk/const";
 
 /**
  * - In most cases, asset ids will correspond to contract addresses. Ids are case-sensitive.
@@ -60,7 +61,7 @@ export function getAsset(assetId: string): Asset {
     id: assetId,
     name: marketEmojiData.symbolData.name,
     symbol: marketEmojiData.symbolData.symbol,
-    totalSupply: 4_500_000_000_000_000,
+    totalSupply: Number(EMOJICOIN_SUPPLY),
     circulatingSupply: 0, // TODO: how do I calculate this?
     // coinGeckoId: assetId,
     // coinMarketCapId: assetId,

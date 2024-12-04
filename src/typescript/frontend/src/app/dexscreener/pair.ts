@@ -87,7 +87,6 @@ export async function getPair(pairId: string): Promise<Pair> {
   const marketRegistrations = await fetchMarketRegistrationEventBySymbolBytes({ symbolBytes });
   const marketRegistration = marketRegistrations[0];
 
-
   const aptos = getAptosClient();
   const block = await aptos.getBlockByVersion({ ledgerVersion: marketRegistration.transaction.version });
 

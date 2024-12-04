@@ -78,6 +78,8 @@ import { fetchLiquidityEventsByBlock, fetchSwapEventsByBlock } from "@sdk/indexe
 import { type toLiquidityEventModel, type toSwapEventModel } from "@sdk/indexer-v2/types";
 import Big from "big.js";
 import { calculateRealReserves } from "@sdk/markets";
+import { toCoinDecimalString } from "../../lib/utils/decimals";
+import { DECIMALS } from "@sdk/const";
 
 
 /**
@@ -172,6 +174,7 @@ export interface EventsResponse {
   events: Event[];
 }
 
+
 function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): SwapEvent & BlockInfo {
 
   let assetInOut;
@@ -179,26 +182,25 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
   if (event.swap.isSell) {
     // We are selling to APT
     assetInOut = {
-      asset0In: event.swap.inputAmount.toString(),
+      asset0In: toCoinDecimalString(event.swap.inputAmount, DECIMALS),
       asset0Out: 0,
       asset1In: 0,
-      asset1Out: event.swap.quoteVolume.toString(),
+      asset1Out: toCoinDecimalString(event.swap.quoteVolume, DECIMALS),
     };
   } else {
     // We are buying with APT
     assetInOut = {
       asset0In: 0,
-      asset0Out: event.swap.baseVolume.toString(),
-      asset1In: event.swap.inputAmount.toString(),
+      asset0Out: toCoinDecimalString(event.swap.baseVolume, DECIMALS),
+      asset1In: toCoinDecimalString(event.swap.inputAmount, DECIMALS),
       asset1Out: 0,
     };
   }
 
-
   const { base, quote } = calculateRealReserves(event.state);
   const reserves = {
-    asset0: base.toString(),
-    asset1: quote.toString(),
+    asset0: toCoinDecimalString(base, DECIMALS),
+    asset1: toCoinDecimalString(quote, DECIMALS),
   };
 
   const priceNative = (new Big(event.swap.avgExecutionPriceQ64.toString())).div(2 ** 64).toFixed(64);
@@ -229,10 +231,10 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
 function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventModel>): JoinExitEvent & BlockInfo {
   const { base, quote } = calculateRealReserves(event.state);
   const reserves = {
-    asset0: base.toString(),
-    asset1: quote.toString(),
+    asset0: toCoinDecimalString(base, DECIMALS),
+    asset1: toCoinDecimalString(quote, DECIMALS),
   };
-  
+
   return {
     block: {
       blockNumber: Number(event.blockAndEvent.blockNumber),
@@ -248,8 +250,8 @@ function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventMod
     maker: event.liquidity.provider,
     pairId: event.market.symbolEmojis.join("") + "-APT",
 
-    amount0: event.liquidity.baseAmount.toString(),
-    amount1: event.liquidity.quoteAmount.toString(),
+    amount0: toCoinDecimalString(event.liquidity.baseAmount, DECIMALS),
+    amount1: toCoinDecimalString(event.liquidity.quoteAmount, DECIMALS),
     reserves,
   };
 }
