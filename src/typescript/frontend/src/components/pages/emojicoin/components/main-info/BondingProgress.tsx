@@ -4,7 +4,7 @@ import { translationFunction } from "context/language-context";
 import { type MainInfoProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
 import { motion } from "framer-motion";
-import { getBondingCurveProgress } from "utils/bonding-curve";
+import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
 import Button from "components/button";
 import Link from "next/link";
 import { ROUTES } from "router/routes";

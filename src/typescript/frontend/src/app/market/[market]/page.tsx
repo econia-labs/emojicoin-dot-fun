@@ -4,7 +4,7 @@ import { wrappedCachedContractMarketView } from "lib/queries/aptos-client/market
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
 import { pathToEmojiNames } from "utils/pathname-helpers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
-import { deriveEmojicoinPublisherAddress } from "@sdk/emojicoin_dot_fun";
+import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { type Metadata } from "next";
 
 export const revalidate = 2;
@@ -73,7 +73,7 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
 
   if (state) {
     const { marketID } = state.market;
-    const marketAddress = deriveEmojicoinPublisherAddress({ emojis });
+    const marketAddress = getMarketAddress(emojis);
 
     const [chats, swaps, marketView] = await Promise.all([
       fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
