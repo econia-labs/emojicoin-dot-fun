@@ -1,4 +1,6 @@
-import "server-only";
+if (process.env.NODE_ENV !== "test") {
+  require("server-only");
+}
 
 import { DatabaseRpc } from "../../types/json-types";
 import { postgrest } from "../client";

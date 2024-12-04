@@ -601,6 +601,7 @@ export const toPriceFeed = (data: DatabaseJsonType["price_feed"]) => {
   };
 };
 
+/// Replace `\x` with `0x` then convert to market symbol data.
 export const toRandomSymbolsRPCResponse = (data: DatabaseJsonType["random_symbols"]) =>
   symbolBytesToEmojis("0" + data.emojis.substring(1));
 

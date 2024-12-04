@@ -287,7 +287,6 @@ export enum TableName {
 
 export enum DatabaseRpc {
   UserPools = "user_pools",
-  PriceFeed = "price_feed",
   RandomSymbols = "random_symbols",
 }
 
@@ -366,7 +365,7 @@ export type DatabaseJsonType = {
       ProcessedFields &
       UserLPCoinBalance & { daily_volume: Uint128String }
   >;
-  [DatabaseRpc.RandomSymbols]: { emojis: string };
+  [DatabaseRpc.RandomSymbols]: { emojis: `\\x${string}` };
 };
 
 type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &

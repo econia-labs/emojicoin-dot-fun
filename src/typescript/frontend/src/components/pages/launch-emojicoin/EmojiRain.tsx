@@ -1,7 +1,6 @@
 import { type symbolBytesToEmojis } from "@sdk/emoji_data";
 import { type AnimationPlaybackControls, useAnimate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { useWindowSize } from "react-use";
 
 const DROP_FALL_TIME = 7.5;
 const DROP_INTERVAL = 1;
@@ -17,13 +16,11 @@ export function EmojiRainDrop({
   index: number;
   emojis: number;
 }) {
-  const { height, width } = useWindowSize();
-
   // Position all emojis above the visible space.
-  const initialX = -200;
+  const initialY = -200;
 
-  // Calculate a random position on the Y axis.
-  const y = useMemo(() => Math.random() * (width - 20) + 10, [width]);
+  // Calculate a random position on the X axis.
+  const x = useMemo(() => Math.random() * 90 + 5, []);
 
   // Calculate a random delay for the emojis to be staggered.
   const delay = useMemo(() => (Math.random() + index) * DROP_INTERVAL, [index]);
@@ -34,7 +31,7 @@ export function EmojiRainDrop({
   useEffect(() => {
     const controls = animate(
       scope.current,
-      { top: height + 100 },
+      { top: "110vh" },
       {
         duration: DROP_FALL_TIME,
         delay,
@@ -47,7 +44,7 @@ export function EmojiRainDrop({
     setControls(controls);
 
     return () => controls.complete();
-  }, [scope, animate, delay, height, emojis]);
+  }, [scope, animate, delay, emojis]);
 
   return (
     <div
@@ -61,9 +58,9 @@ export function EmojiRainDrop({
       onMouseOut={() => controls?.play()}
       className="absolute emoji-rain-drop z-10 flex flex-col select-none cursor-pointer"
       style={{
-        left: y,
+        left: `${x}vw`,
         fontSize: "2em",
-        top: initialX,
+        top: initialY,
       }}
       ref={scope}
     >
