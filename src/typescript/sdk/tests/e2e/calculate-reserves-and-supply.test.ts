@@ -79,7 +79,7 @@ describe("tests the calculation functions for circulating supply and real reserv
     });
   });
 
-  it("checks the real reserves before a swap and after an exact transition", async () => {
+  it("checks the real reserves upon creation and after exiting the bonding curve", async () => {
     const idx = 1;
     const [swapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
 
@@ -146,11 +146,11 @@ describe("tests the calculation functions for circulating supply and real reserv
       const realReservesFromTxnResponse = calculateRealReserves(swap.model.state);
       expect(realReservesFromFetch).toEqual(realReservesFromTxnResponse);
       const { base, quote } = realReservesFromFetch;
-      // The base emojicoin in the reserves is exactly the amount that was just sold.
+      // The base reserves increase by how much was just sold.
       expect(base).toEqual(baseAfterBuy + sellAmount);
+      expect(swap.event.netProceeds).toEqual(swap.event.quoteVolume);
       // The new quote reserves are equal to the original buy amount minus the net proceeds returned
       // from the swap event.
-      expect(swap.event.netProceeds).toEqual(swap.event.quoteVolume);
       expect(quote).toEqual(buyAmount - swap.event.netProceeds);
     });
   });
