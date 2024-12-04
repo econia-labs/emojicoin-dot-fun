@@ -17,7 +17,7 @@
     "module": "esnext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
-    "noEmit": true,
+    "noEmit": false,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "outDir": "./dist",
