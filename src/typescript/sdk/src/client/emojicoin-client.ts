@@ -78,6 +78,9 @@ const waitForEventProcessed = async (
  *
  * The `utils` functions provides several commonly used utility functions.
  *
+ * @param alwaysWaitForIndexer whether or not each transaction should wait for the indexer to
+ * process the event before returning.
+ *
  * @example
  * ```typescript
  * const emojis: MarketSymbolEmojis = ["🌊"];
