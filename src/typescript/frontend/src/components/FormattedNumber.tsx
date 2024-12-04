@@ -40,9 +40,7 @@ const ScrambledNumberLabel = ({
  * @param className the class name for the span wrapping the value
  * @param style the formatter style
  * @see {@link FormattedNumberStyle}
- *
- * @param param0
- * @returns
+ * @returns a component for the formatted number
  */
 export const FormattedNumber = ({
   value,
