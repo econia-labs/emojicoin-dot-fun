@@ -1,0 +1,16 @@
+[addresses]
+market_metadata = "_"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dev-addresses]
+market_metadata = "0xddd"
+
+[package]
+authors = ["Econia Labs (developers@econialabs.com)"]
+name = "EmojicoinDotFunMetadata"
+upgrade_policy = "compatible"
+version = "1.1.0"
