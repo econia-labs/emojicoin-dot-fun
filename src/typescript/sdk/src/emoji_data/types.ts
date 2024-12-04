@@ -1,9 +1,6 @@
 import { type MarketMetadataModel } from "../indexer-v2/types";
-import { type getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { CHAT_EMOJIS } from "./chat-emojis";
 import { SYMBOL_EMOJIS } from "./symbol-emojis";
-import { type symbolBytesToEmojis } from "./utils";
-// Note the name data JSON files are not duplicated data, they are purely for type resolution.
 
 export type SymbolEmoji = keyof typeof SYMBOL_EMOJIS;
 export type SymbolEmojiName = (typeof SYMBOL_EMOJIS)[keyof typeof SYMBOL_EMOJIS];
@@ -55,12 +52,3 @@ export type RegisteredMarketInfo = Pick<
   MarketMetadataModel,
   "marketID" | "emojis" | "symbolEmojis" | "symbolData"
 >;
-
-/**
- * Represents either the raw emoji symbol or symbol array or the emoji data.
- * This should *NOT* represent emojis as hex strings/bytes.
- */
-export type EmojicoinSymbol = string | string[] | SymbolEmojiData | SymbolEmojiData[];
-
-export type DerivedEmojicoinData = ReturnType<typeof getEmojicoinMarketAddressAndTypeTags> &
-  ReturnType<typeof symbolBytesToEmojis> & { symbolBytes: `0x${string}` };

@@ -38,12 +38,10 @@ import {
 } from "../types/types";
 import type JsonTypes from "../types/json-types";
 import {
-  type DerivedEmojicoinData,
-  type EmojicoinSymbol,
   encodeEmojis,
   symbolBytesToEmojis,
-  type SymbolEmoji,
   type SymbolEmojiData,
+  type SymbolEmoji,
 } from "../emoji_data";
 import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
@@ -94,9 +92,14 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
 /**
  * Helper function to get all emoji data based from a symbol.
  *
+ * Do *not* pass emojis as hex strings to this function, they should be actual emojis if they're
+ * passed as strings.
+ *
  * Note that the market metadata is implicitly derived from the hardcoded module address constant.
  */
-export const getEmojicoinData = (symbol: EmojicoinSymbol): DerivedEmojicoinData => {
+export const getEmojicoinData = (
+  symbol: string | string[] | SymbolEmojiData | SymbolEmojiData[]
+) => {
   const symbolArray = Array.isArray(symbol)
     ? symbol
     : ([symbol] as Array<string> | Array<SymbolEmojiData>);
