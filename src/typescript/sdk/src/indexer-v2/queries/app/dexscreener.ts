@@ -17,30 +17,30 @@ const selectMarketRegistrationEventBySymbolBytes = ({
     .eq("symbol_bytes", symbolBytes)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-const selectSwapEventsByVersion = ({
-  fromVersion,
-  toVersion,
+const selectSwapEventsByBlock = ({
+  fromBlock,
+  toBlock,
   page = 1,
   pageSize = LIMIT,
-}: { fromVersion: number, toVersion: number } & MarketStateQueryArgs) =>
+}: { fromBlock: number, toBlock: number } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.SwapEvents)
     .select("*")
-    .gte("transaction_version", fromVersion)
-    .lte("transaction_version", toVersion)
+    .gte("block_number", fromBlock)
+    .lte("block_number", toBlock)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-const selectLiquidityEventsByVersion = ({
-  fromVersion,
-  toVersion,
+const selectLiquidityEventsByBlock = ({
+  fromBlock,
+  toBlock,
   page = 1,
   pageSize = LIMIT,
-}: { fromVersion: number, toVersion: number } & MarketStateQueryArgs) =>
+}: { fromBlock: number, toBlock: number } & MarketStateQueryArgs) =>
   postgrest
     .from(TableName.LiquidityEvents)
     .select("*")
-    .gte("transaction_version", fromVersion)
-    .lte("transaction_version", toVersion)
+    .gte("block_number", fromBlock)
+    .lte("block_number", toBlock)
     .range((page - 1) * pageSize, page * pageSize - 1);
 
 export const fetchMarketRegistrationEventBySymbolBytes = queryHelper(
@@ -48,5 +48,5 @@ export const fetchMarketRegistrationEventBySymbolBytes = queryHelper(
   toMarketRegistrationEventModel
 );
 
-export const fetchSwapEventsByVersion = queryHelper(selectSwapEventsByVersion, toSwapEventModel);
-export const fetchLiquidityEventsByVersion = queryHelper(selectLiquidityEventsByVersion, toLiquidityEventModel);
+export const fetchSwapEventsByBlock = queryHelper(selectSwapEventsByBlock, toSwapEventModel);
+export const fetchLiquidityEventsByBlock = queryHelper(selectLiquidityEventsByBlock, toLiquidityEventModel);

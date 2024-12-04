@@ -26,6 +26,7 @@ import {
   fetchMarketRegistrationEventBySymbolBytes
 } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { SYMBOL_EMOJI_DATA } from "@sdk/emoji_data";
+import { getAptosClient } from "@sdk/utils/aptos-client";
 
 
 /**
@@ -85,17 +86,21 @@ export async function getPair(pairId: string): Promise<Pair> {
   const marketRegistrations = await fetchMarketRegistrationEventBySymbolBytes({ symbolBytes });
   const marketRegistration = marketRegistrations[0];
 
-  return Promise.resolve({
+
+  const aptos = getAptosClient();
+  const block = await aptos.getBlockByVersion({ ledgerVersion: marketRegistration.transaction.version });
+
+  return {
     id: pairId,
     dexKey: "emojicoin.fun",
     asset0Id: emojiString,
     asset1Id: "APT",
-    createdAtBlockNumber: Number(marketRegistration.transaction.version),
+    createdAtBlockNumber: parseInt(block.block_height),
     createdAtBlockTimestamp: marketRegistration.transaction.timestamp.getTime() / 1000,
     createdAtTxnId: String(marketRegistration.transaction.version),
     // TODO: validate there is no swap fee (is there?)
     feeBps: 0,
-  });
+  };
 }
 
 // NextJS JSON response handler

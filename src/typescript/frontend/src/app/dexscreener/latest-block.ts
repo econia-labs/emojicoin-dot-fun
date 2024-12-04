@@ -17,6 +17,8 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { getProcessorStatus } from "@sdk/indexer-v2/queries";
+import { getAptosClient } from "@sdk/utils/aptos-client";
+import { parse } from "semver";
 
 /**
  * - `blockTimestamp` should be a UNIX timestamp, **not** including milliseconds
@@ -35,10 +37,16 @@ export interface LatestBlockResponse {
 // NextJS JSON response handler
 export async function GET(_request: NextRequest): Promise<NextResponse<LatestBlockResponse>> {
   const status = await getProcessorStatus();
+  const aptos = getAptosClient();
+  const latestBlock = await aptos.getBlockByVersion({ ledgerVersion: status.lastSuccessVersion });
+  // Because we may not have finished processing the entire block yet, we return block number - 1 here. This adds
+  // ~1s (blocktime) of latency, but ensures completeness. We set it to 0 if below.
+  const blockHeight = parseInt(latestBlock.block_height, 10);
+  const blockNumber = blockHeight > 0 ? blockHeight - 1 : 0;
+
   return NextResponse.json({
     block: {
-      // TODO: do we want to use the block here?
-      blockNumber: Number(status.lastSuccessVersion),
+      blockNumber,
       // Convert to seconds
       blockTimestamp: status.lastTransactionTimestamp.getTime() / 1000,
     }

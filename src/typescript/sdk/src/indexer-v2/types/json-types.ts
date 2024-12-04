@@ -125,6 +125,11 @@ type TransactionMetadata = {
   inserted_at?: PostgresTimestamp;
 };
 
+export type BlockAndEventIndexMetadata = {
+  block_number: Uint64String,
+  event_index: number,
+}
+
 type MarketAndStateMetadata = {
   market_id: Uint64String;
   symbol_bytes: HexString;
@@ -314,10 +319,10 @@ export type DatabaseJsonType = {
     TransactionMetadata & MarketAndStateMetadata & MarketRegistrationEventData
   >;
   [TableName.SwapEvents]: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & SwapEventData & StateEventData
+    TransactionMetadata & MarketAndStateMetadata & SwapEventData & StateEventData & BlockAndEventIndexMetadata
   >;
   [TableName.LiquidityEvents]: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & LiquidityEventData & StateEventData
+    TransactionMetadata & MarketAndStateMetadata & LiquidityEventData & StateEventData & BlockAndEventIndexMetadata
   >;
   [TableName.ChatEvents]: Flatten<
     TransactionMetadata & MarketAndStateMetadata & ChatEventData & StateEventData

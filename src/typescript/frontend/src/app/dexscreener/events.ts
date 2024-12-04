@@ -74,7 +74,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { type Block } from "./latest-block";
-import { fetchLiquidityEventsByVersion, fetchSwapEventsByVersion } from "@sdk/indexer-v2/queries/app/dexscreener";
+import { fetchLiquidityEventsByBlock, fetchSwapEventsByBlock } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { type toLiquidityEventModel, type toSwapEventModel } from "@sdk/indexer-v2/types";
 import Big from "big.js";
 
@@ -212,17 +212,14 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
 
   return {
     block: {
-      blockNumber: Number(event.transaction.version),
+      blockNumber: Number(event.blockAndEvent.blockNumber),
       blockTimestamp: event.transaction.timestamp.getTime() / 1000
     },
     eventType: "swap",
-    txnId: String(event.transaction.version),
+    txnId: event.transaction.version.toString(),
 
-    // Because each transaction version is one "block", we default to "1" for everything.
-    // TODO: IT'S POSSIBLE TO EMIT MULTIPLES OF THESE WITHIN A TRANSACTION FROM A SCRIPT!! Ideally ensure a standard
-    //  sort, and increment these values for each event (across both event types)
-    txnIndex: 1,
-    eventIndex: 1,
+    txnIndex: Number(event.transaction.version),
+    eventIndex: Number(event.blockAndEvent.eventIndex),
 
     maker: event.swap.swapper,
     pairId: event.market.symbolEmojis.join("") + "-APT",
@@ -239,18 +236,15 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
 function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventModel>): JoinExitEvent & BlockInfo {
   return {
     block: {
-      blockNumber: Number(event.transaction.version),
+      blockNumber: Number(event.blockAndEvent.blockNumber),
       blockTimestamp: event.transaction.timestamp.getTime() / 1000
     },
     eventType: event.liquidity.liquidityProvided ? "join" : "exit",
 
-    txnId: String(event.transaction.version),
+    txnId: event.transaction.version.toString(),
 
-    // Because each transaction version is one "block", we default to "1" for everything.
-    // TODO: IT'S POSSIBLE TO EMIT MULTIPLES OF THESE WITHIN A TRANSACTION FROM A SCRIPT!!
-    //  MUST ensure a stable sort, and increment these values for each event (across both event types)
-    txnIndex: 1,
-    eventIndex: 1,
+    txnIndex: Number(event.transaction.version),
+    eventIndex: Number(event.blockAndEvent.eventIndex),
 
     maker: event.liquidity.provider,
     pairId: event.market.symbolEmojis.join("") + "-APT",
@@ -264,9 +258,9 @@ function toDexscreenerJoinExitEvent(event: ReturnType<typeof toLiquidityEventMod
   };
 }
 
-export async function getEventsByVersion(fromVersion: number, toVersion: number): Promise<Event[]> {
-  const swapEvents = await fetchSwapEventsByVersion({ fromVersion, toVersion });
-  const liquidityEvents = await fetchLiquidityEventsByVersion({ fromVersion, toVersion });
+export async function getEventsByVersion(fromBlock: number, toBlock: number): Promise<Event[]> {
+  const swapEvents = await fetchSwapEventsByBlock({ fromBlock, toBlock });
+  const liquidityEvents = await fetchLiquidityEventsByBlock({ fromBlock, toBlock });
 
   // Merge these two arrays by their `transaction.version`: do it iteratively across both to avoid M*N complexity
   const events: Event[] = [];
