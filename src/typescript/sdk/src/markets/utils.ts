@@ -404,7 +404,7 @@ export const calculateRealReserves = ({
 /**
  * *NOTE*: If you already have a market's state, call {@link calculateRealReserves} directly.
  *
- * Fetches the circulating supply of a market by looking at its on-chain state.
+ * Fetches the real reserves of a market by looking at its on-chain state.
  *
  * Uses the Aptos fullnode; be mindful of rate-limiting.
  *
