@@ -49,8 +49,7 @@
       "@static/*": [
         "../public/static/*"
       ],
-      "@econia-labs/emojicoin-sdk": ["../../sdk/src/index.ts"],
-      "@econia-labs/emojicoin-sdk/*": ["../../sdk/src/*"]
+      "@econia-labs/emojicoin-sdk": ["../../sdk/src/index.ts"]
     },
     "plugins": [
       {
