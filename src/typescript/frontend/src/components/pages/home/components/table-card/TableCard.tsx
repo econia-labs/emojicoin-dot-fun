@@ -56,20 +56,27 @@ const TableCard = ({
   );
   const animationEvent = stateEvents.at(0);
 
-  const { isBumpOrder, secondaryMetric, marketCap } = useMemo(() => {
-    const isBumpOrder = sortBy === SortMarketsBy.BumpOrder;
-    const { lastSwapVolume, marketCap } = animationEvent
+  const { secondaryLabel, secondaryMetric, marketCap } = useMemo(() => {
+    const { allTimeVolume, lastSwapVolume, marketCap } = animationEvent
       ? {
+          allTimeVolume: animationEvent.state.cumulativeStats.quoteVolume,
           lastSwapVolume: animationEvent.lastSwap.quoteVolume,
           marketCap: animationEvent.state.instantaneousStats.marketCap,
         }
       : {
+          allTimeVolume: 0n,
           lastSwapVolume: 0n,
           marketCap: staticMarketCap,
         };
+    const [secondaryLabel, secondaryMetric] =
+      sortBy === SortMarketsBy.BumpOrder
+        ? ["Last Swap", lastSwapVolume]
+        : sortBy === SortMarketsBy.AllTimeVolume
+          ? ["All Time Vol", allTimeVolume]
+          : ["24h Volume", staticVolume24H];
     return {
-      isBumpOrder,
-      secondaryMetric: isBumpOrder ? lastSwapVolume : staticVolume24H,
+      secondaryLabel,
+      secondaryMetric,
       marketCap,
     };
   }, [sortBy, animationEvent, staticVolume24H, staticMarketCap]);
@@ -106,7 +113,7 @@ const TableCard = ({
     if (animationEvent) {
       runAnimationSequence(animationEvent);
     }
-  }, [animationEvent, runAnimationSequence, isBumpOrder]);
+  }, [animationEvent, runAnimationSequence, sortBy]);
 
   const { curr, prev, variant, displayIndex, layoutDelay } = useMemo(() => {
     const { curr, prev } = calculateGridData({
@@ -269,7 +276,7 @@ const TableCard = ({
                     "group-hover:text-ec-blue uppercase p-[1px] transition-all"
                   }
                 >
-                  {isBumpOrder ? t("Last Swap") : t("24h Volume")}
+                  {t(secondaryLabel)}
                 </div>
                 <motion.div
                   animate={controls}
