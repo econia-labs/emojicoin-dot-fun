@@ -19,7 +19,7 @@ export type PeriodTypeFromDatabase =
   | "period_4h"
   | "period_1d";
 
-type PeriodTypeFromBroker =
+export type PeriodTypeFromBroker =
   | "OneMinute"
   | "FiveMinutes"
   | "FifteenMinutes"
@@ -28,7 +28,7 @@ type PeriodTypeFromBroker =
   | "FourHours"
   | "OneDay";
 
-type TriggerTypeFromDatabase =
+export type TriggerTypeFromDatabase =
   | "package_publication"
   | "market_registration"
   | "swap_buy"
@@ -37,7 +37,7 @@ type TriggerTypeFromDatabase =
   | "remove_liquidity"
   | "chat";
 
-type TriggerTypeFromBroker =
+export type TriggerTypeFromBroker =
   | "PackagePublication"
   | "MarketRegistration"
   | "SwapBuy"

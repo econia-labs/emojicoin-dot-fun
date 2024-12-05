@@ -31,13 +31,13 @@ import {
 import { useEventStore } from "context/event-store-context";
 import { type TypeTagInput } from "@sdk/emojicoin_dot_fun";
 import { DEFAULT_TOAST_CONFIG } from "const";
-import { sleep, UnitOfTime } from "@sdk/utils";
+import { sleep } from "@sdk/utils";
 import { useWalletBalance } from "lib/hooks/queries/use-wallet-balance";
 import {
   getAptBalanceFromChanges,
   getCoinBalanceFromChanges,
 } from "@sdk/utils/parse-changes-for-balances";
-import { getEventsAsProcessorModelsFromResponse } from "@sdk/mini-processor";
+import { getEventsAsProcessorModelsFromResponse } from "@sdk/indexer-v2/mini-processor";
 import { emoji } from "utils";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 import { getAptosClient } from "@sdk/utils/aptos-client";
@@ -222,9 +222,7 @@ export function AptosContextProvider({ children }: PropsWithChildren) {
             error: null,
           });
           setLastResponseStoredAt(Date.now());
-          sleep(DEFAULT_TOAST_CONFIG.autoClose, UnitOfTime.Milliseconds).then(() => {
-            setStatus("idle");
-          });
+          sleep(DEFAULT_TOAST_CONFIG.autoClose).then(() => setStatus("idle"));
         }
       } catch (e: unknown) {
         if (e instanceof AptosApiError) {

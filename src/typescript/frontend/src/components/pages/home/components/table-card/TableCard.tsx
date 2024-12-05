@@ -23,7 +23,7 @@ import {
   LAYOUT_DURATION,
   tableCardVariants,
 } from "./animation-variants/grid-variants";
-import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
+import EmojiMarketPageLink from "./LinkOrAnimationTrigger";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { Emoji } from "utils/emoji";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
@@ -205,7 +205,7 @@ const TableCard = ({
       }}
       {...props}
     >
-      <LinkOrAnimationTrigger emojis={emojis} marketID={marketID}>
+      <EmojiMarketPageLink emojis={emojis}>
         <motion.div
           animate={controls}
           variants={animationsOn ? glowVariants : {}}
@@ -290,7 +290,7 @@ const TableCard = ({
             </Flex>
           </motion.div>
         </motion.div>
-      </LinkOrAnimationTrigger>
+      </EmojiMarketPageLink>
     </motion.div>
   );
 };

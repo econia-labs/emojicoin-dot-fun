@@ -10,10 +10,6 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { sha3_256 } from "@noble/hashes/sha3";
 
-export function toAptos(aptos: Aptos | AptosConfig): Aptos {
-  return aptos instanceof Aptos ? aptos : new Aptos(aptos);
-}
-
 export function toConfig(aptos: Aptos | AptosConfig): AptosConfig {
   return aptos instanceof Aptos ? aptos.config : aptos;
 }

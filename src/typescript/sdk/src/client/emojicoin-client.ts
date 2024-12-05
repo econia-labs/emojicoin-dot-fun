@@ -21,7 +21,7 @@ import {
 } from "../emojicoin_dot_fun/emojicoin-dot-fun";
 import { type Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
-import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
+import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
 import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
@@ -77,6 +77,9 @@ const waitForEventProcessed = async (
  * `liquidity` as `provide` and `remove`, respectively.
  *
  * The `utils` functions provides several commonly used utility functions.
+ *
+ * @param alwaysWaitForIndexer whether or not each transaction should wait for the indexer to
+ * process the event before returning.
  *
  * @example
  * ```typescript

@@ -7,9 +7,9 @@ import {
 } from "@aptos-labs/ts-sdk";
 import path from "path";
 import findGitRoot from "find-git-root";
-import { getAptosClient } from "../aptos-client";
-import { getEmojicoinMarketAddressAndTypeTags } from "../../markets/utils";
-import { EmojicoinDotFun, getEvents } from "../../emojicoin_dot_fun";
+import { getAptosClient } from "../../src/utils/aptos-client";
+import { getEmojicoinMarketAddressAndTypeTags } from "../../src/markets/utils";
+import { EmojicoinDotFun, getEvents } from "../../src/emojicoin_dot_fun";
 import {
   generateRandomSymbol,
   type JsonTypes,
@@ -20,8 +20,8 @@ import {
   type SymbolEmojiName,
   toMarketEmojiData,
   type Types,
-} from "../..";
-import { type Events } from "../../emojicoin_dot_fun/events";
+} from "../../src";
+import { type Events } from "../../src/emojicoin_dot_fun/events";
 
 // The exact amount of APT to trigger a transition out of the bonding curve. Note that the
 // fee integrator rate BPs must be set to 0 for this to work.

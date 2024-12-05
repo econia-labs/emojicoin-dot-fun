@@ -1,10 +1,10 @@
 import { getEvents } from "../../../src";
 import { Chat } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { fetchChatEvents } from "../../../src/indexer-v2/queries";
-import { getAptosClient } from "../../../src/utils/test";
+import { getAptosClient } from "../../utils";
 import RowEqualityChecks from "./equality-checks";
-import { getFundedAccount } from "../../../src/utils/test/test-accounts";
-import TestHelpers from "../../../src/utils/test/helpers";
+import { getFundedAccount } from "../../utils/test-accounts";
+import TestHelpers from "../../utils/helpers";
 
 jest.setTimeout(20000);
 

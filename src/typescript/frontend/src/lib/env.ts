@@ -12,9 +12,8 @@ export type Links = {
 
 const network = process.env.NEXT_PUBLIC_APTOS_NETWORK;
 const APTOS_NETWORK = network as Network;
-// NOTE: We must check it this way instead of with `NetworkToNetworkName[APTOS_NETWORK]` because
-// otherwise the @aptos-labs/ts-sdk package is included in the middleware.ts function and the edge
-// runtime won't build properly.
+// NOTE: Don't use `NetworkToNetworkName[APTOS_NETWORK]` here or the @aptos-labs/ts-sdk package is
+// included in the middleware.ts function in the frontend and the edge runtime won't build properly.
 if (!["local", "devnet", "testnet", "mainnet", "custom"].includes(APTOS_NETWORK)) {
   throw new Error(`Invalid network: ${network}`);
 }
