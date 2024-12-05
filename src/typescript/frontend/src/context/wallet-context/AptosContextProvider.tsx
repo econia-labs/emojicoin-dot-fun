@@ -37,7 +37,7 @@ import {
   getAptBalanceFromChanges,
   getCoinBalanceFromChanges,
 } from "@sdk/utils/parse-changes-for-balances";
-import { getEventsAsProcessorModelsFromResponse } from "@sdk/mini-processor";
+import { getEventsAsProcessorModelsFromResponse } from "@sdk/indexer-v2";
 import { emoji } from "utils";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 import { getAptosClient } from "@sdk/utils/aptos-client";
