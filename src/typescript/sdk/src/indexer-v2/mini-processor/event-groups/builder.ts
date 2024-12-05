@@ -1,15 +1,15 @@
 import { AccountAddress, type TransactionPayloadResponse } from "@aptos-labs/ts-sdk";
+import { AccountAddressString } from "../../../emojicoin_dot_fun";
 import {
-  type AnyNumberString,
+  Types,
   isChatEvent,
-  isLiquidityEvent,
   isMarketRegistrationEvent,
-  isPeriodicStateEvent,
-  isStateEvent,
   isSwapEvent,
-  type Types,
-} from "../../types";
-import { type AccountAddressString } from "../../emojicoin_dot_fun/types";
+  isLiquidityEvent,
+  isStateEvent,
+  isPeriodicStateEvent,
+  AnyNumberString,
+} from "../../../types";
 
 export type TxnInfo = {
   version: bigint;
