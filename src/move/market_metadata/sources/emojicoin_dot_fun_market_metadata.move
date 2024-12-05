@@ -17,6 +17,8 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     const E_ADMIN_TO_REMOVE_IS_MARKET_METADATA_PUBLISHER: u64 = 3;
     /// Market not found.
     const E_MARKET_NOT_FOUND: u64 = 4;
+    /// Provided inproper keys and values.
+    const E_KEYS_AND_VALUES_NOT_EQUAL_LENGTH: u64 = 5;
 
     struct Nil {}
     has copy, drop, store;
@@ -79,27 +81,30 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         admins_ref_mut.remove(admin_to_remove_index);
     }
 
-    public entry fun add_market_property(
+    public entry fun add_market_properties(
         admin: &signer,
         market: address,
-        key: String,
-        value: String
+        keys: vector<String>,
+        values: vector<String>
     ) acquires MetadataStore {
         assert!(
             option::is_some(&emojicoin_dot_fun::market_metadata_by_market_address(market)),
             E_MARKET_NOT_FOUND
         );
+        assert!(keys.length() == values.length(), E_KEYS_AND_VALUES_NOT_EQUAL_LENGTH);
         let vault_ref_mut = borrow_vault_mut_checked(admin);
         let market_properties_table = &mut vault_ref_mut.market_properties_table;
         if (market_properties_table.contains(market) == false) {
             market_properties_table.add(market, simple_map::create());
         };
         let market_properties = market_properties_table.borrow_mut(market);
-        market_properties.upsert(key, value);
+        while (keys.length() > 0) {
+            market_properties.upsert(keys.pop_back(), values.pop_back());
+        }
     }
 
-    public entry fun remove_market_property(
-        admin: &signer, market: address, key: String
+    public entry fun remove_market_properties(
+        admin: &signer, market: address, keys: vector<String>
     ) acquires MetadataStore {
         let vault_ref_mut = borrow_vault_mut_checked(admin);
         let market_properties_table = &mut vault_ref_mut.market_properties_table;
@@ -107,13 +112,15 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
             return;
         };
         let market_properties = market_properties_table.borrow_mut(market);
-        if (market_properties.contains_key(&key) == false) {
-            return;
+        while (keys.length() > 0) {
+            let key = keys.pop_back();
+            if (market_properties.contains_key(&key)) {
+                market_properties.remove(&key);
+            };
         };
-        market_properties.remove(&key);
         if (market_properties.length() == 0) {
             market_properties_table.remove(market);
-        }
+        };
     }
 
     fun init_module(market_metadata: &signer) {
@@ -179,17 +186,17 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         init_module(&market_metadata_signer);
         let market_1_value = utf8(b"bar");
         let market_2_value = utf8(b"baz");
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY(),
-            market_1_value
+            vector[get_PROPERTY()],
+            vector[market_1_value]
         );
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_2),
-            get_PROPERTY(),
-            market_2_value
+            vector[get_PROPERTY()],
+            vector[market_2_value]
         );
         assert!(
             market_property(get_market_address(MARKET_1), get_PROPERTY())
@@ -200,22 +207,22 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
                 == option::some(market_2_value)
         );
         let market_1_value_override = utf8(b"barbaz");
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY(),
-            market_1_value_override
+            vector[get_PROPERTY()],
+            vector[market_1_value_override]
         );
         assert!(
             market_property(get_market_address(MARKET_1), get_PROPERTY())
                 == option::some(market_1_value_override)
         );
         let market_1_property_other_value = utf8(b"big bar");
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY_OTHER(),
-            market_1_property_other_value
+            vector[get_PROPERTY_OTHER()],
+            vector[market_1_property_other_value]
         );
         let map = option::destroy_some(market_properties(get_market_address(MARKET_1)));
         assert!(map.contains_key(&get_PROPERTY()));
@@ -233,6 +240,43 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     }
 
     #[test]
+    fun test_add_multiple_properties() acquires MetadataStore {
+        init_emojicoin();
+        let market_metadata_signer = get_signer(@market_metadata);
+        init_module(&market_metadata_signer);
+        add_market_properties(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            vector[get_PROPERTY(), get_PROPERTY_OTHER()],
+            vector[utf8(b"bar"), utf8(b"baz")]
+        );
+        assert!(
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
+                == option::some(utf8(b"bar"))
+        );
+        assert!(
+            market_property(get_market_address(MARKET_1), get_PROPERTY_OTHER())
+                == option::some(utf8(b"baz"))
+        );
+        remove_market_properties(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            vector[get_PROPERTY(), get_PROPERTY_OTHER()]
+        );
+        assert!(
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
+                == option::none()
+        );
+        assert!(
+            market_property(get_market_address(MARKET_1), get_PROPERTY_OTHER())
+                == option::none()
+        );
+        assert!(
+            market_properties(get_market_address(MARKET_1)) == option::none()
+        );
+    }
+
+    #[test]
     fun test_unset_property() acquires MetadataStore {
         init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
@@ -241,11 +285,11 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
             market_property(get_market_address(MARKET_1), get_PROPERTY())
                 == option::none()
         );
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY(),
-            utf8(b"bar")
+            vector[get_PROPERTY()],
+            vector[utf8(b"bar")]
         );
         assert!(
             market_property(get_market_address(MARKET_1), get_PROPERTY_OTHER())
@@ -268,29 +312,31 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY(),
-            utf8(b"bar")
+            vector[get_PROPERTY()],
+            vector[utf8(b"bar")]
         );
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY_OTHER(),
-            utf8(b"bar")
+            vector[get_PROPERTY_OTHER()],
+            vector[utf8(b"bar")]
         );
-        remove_market_property(
+        remove_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY_OTHER()
+            vector[get_PROPERTY_OTHER()]
         );
         assert!(
             market_property(get_market_address(MARKET_1), get_PROPERTY())
                 == option::some(utf8(b"bar"))
         );
-        remove_market_property(
-            &market_metadata_signer, get_market_address(MARKET_1), get_PROPERTY()
+        remove_market_properties(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            vector[get_PROPERTY()]
         );
         assert!(
             market_properties(get_market_address(MARKET_1)) == option::none()
@@ -302,21 +348,21 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
-        remove_market_property(
+        remove_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY_OTHER()
+            vector[get_PROPERTY_OTHER()]
         );
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY(),
-            utf8(b"bar")
+            vector[get_PROPERTY()],
+            vector[utf8(b"bar")]
         );
-        remove_market_property(
+        remove_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY_OTHER()
+            vector[get_PROPERTY_OTHER()]
         );
         assert!(
             market_property(get_market_address(MARKET_1), get_PROPERTY())
@@ -350,11 +396,11 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             @0x6666,
-            get_PROPERTY(),
-            utf8(b"bar")
+            vector[get_PROPERTY()],
+            vector[utf8(b"bar")]
         );
     }
 
@@ -401,33 +447,48 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     }
 
     #[test, expected_failure(abort_code = E_NOT_ADMIN)]
-    fun test_add_market_property_not_admin() acquires MetadataStore {
+    fun test_add_market_properties_not_admin() acquires MetadataStore {
         init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         let not_admin_signer = get_signer(NON_ADMIN);
-        add_market_property(
+        add_market_properties(
             &not_admin_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY(),
-            utf8(b"bar")
+            vector[get_PROPERTY()],
+            vector[utf8(b"bar")]
         );
     }
 
     #[test, expected_failure(abort_code = E_NOT_ADMIN)]
-    fun test_remove_market_property_not_admin() acquires MetadataStore {
+    fun test_remove_market_properties_not_admin() acquires MetadataStore {
         init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         let not_admin_signer = get_signer(NON_ADMIN);
-        add_market_property(
+        add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
-            get_PROPERTY(),
-            utf8(b"bar")
+            vector[get_PROPERTY()],
+            vector[utf8(b"bar")]
         );
-        remove_market_property(
-            &not_admin_signer, get_market_address(MARKET_1), get_PROPERTY()
+        remove_market_properties(
+            &not_admin_signer,
+            get_market_address(MARKET_1),
+            vector[get_PROPERTY()]
+        );
+    }
+
+    #[test, expected_failure(abort_code = E_KEYS_AND_VALUES_NOT_EQUAL_LENGTH)]
+    fun test_add_market_properties_inequal_length() acquires MetadataStore {
+        init_emojicoin();
+        let market_metadata_signer = get_signer(@market_metadata);
+        init_module(&market_metadata_signer);
+        add_market_properties(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            vector[get_PROPERTY()],
+            vector[utf8(b"bar"), utf8(b"baz")]
         );
     }
 }
