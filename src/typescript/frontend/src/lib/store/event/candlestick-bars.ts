@@ -30,7 +30,7 @@ export const periodicStateTrackerToLatestBar = (
     high: q64ToBig(tracker.highPriceQ64).toNumber(),
     low: q64ToBig(tracker.lowPriceQ64).toNumber(),
     close: q64ToBig(tracker.closePriceQ64).toNumber(),
-    volume: Number(tracker.volumeBase),
+    volume: Number(tracker.volumeQuote),
     period: rawPeriodToEnum(tracker.period),
     marketNonce,
   };
@@ -81,7 +81,7 @@ export const createBarFromSwap = (
     high: price,
     low: price,
     close: price,
-    volume: Number(swap.baseVolume),
+    volume: Number(swap.quoteVolume),
     period,
     marketNonce: market.marketNonce,
   };

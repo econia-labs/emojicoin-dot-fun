@@ -80,7 +80,7 @@ export const handleLatestBarForSwapEvent = (
       data.latestBar.high = Math.max(data.latestBar.high, price);
       data.latestBar.low = Math.min(data.latestBar.low, price);
       data.latestBar.marketNonce = event.market.marketNonce;
-      data.latestBar.volume += Number(event.swap.baseVolume);
+      data.latestBar.volume += Number(event.swap.quoteVolume);
       // Note this results in `time order violation` errors if we set `has_empty_bars`
       // to `true` in the `LibrarySymbolInfo` configuration.
       callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar);
@@ -122,7 +122,7 @@ export const handleLatestBarForPeriodicStateEvent = (
         data.latestBar.high = Math.max(data.latestBar.high, price);
         data.latestBar.low = Math.min(data.latestBar.low, price);
         data.latestBar.marketNonce = innerMarket.marketNonce;
-        data.latestBar.volume += Number(innerSwap.baseVolume);
+        data.latestBar.volume += Number(innerSwap.quoteVolume);
       }
     }
     // Call the callback with the new latest bar.
