@@ -1,4 +1,4 @@
-import { Period, PERIODS, periodEnumToRawDuration } from "@sdk/const";
+import { Period, PERIODS, periodEnumToRawDuration, ONE_APT_BIGINT } from "@sdk/const";
 import { type SubscribeBarsCallback } from "@static/charting_library/datafeed-api";
 import { type WritableDraft } from "immer";
 import { type EventState, type CandlestickData, type MarketEventStore } from "./types";
@@ -80,7 +80,7 @@ export const handleLatestBarForSwapEvent = (
       data.latestBar.high = Math.max(data.latestBar.high, price);
       data.latestBar.low = Math.min(data.latestBar.low, price);
       data.latestBar.marketNonce = event.market.marketNonce;
-      data.latestBar.volume += Number(event.swap.quoteVolume);
+      data.latestBar.volume += Number(event.swap.quoteVolume / ONE_APT_BIGINT);
       // Note this results in `time order violation` errors if we set `has_empty_bars`
       // to `true` in the `LibrarySymbolInfo` configuration.
       callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar);
@@ -122,7 +122,7 @@ export const handleLatestBarForPeriodicStateEvent = (
         data.latestBar.high = Math.max(data.latestBar.high, price);
         data.latestBar.low = Math.min(data.latestBar.low, price);
         data.latestBar.marketNonce = innerMarket.marketNonce;
-        data.latestBar.volume += Number(innerSwap.quoteVolume);
+        data.latestBar.volume += Number(innerSwap.quoteVolume / ONE_APT_BIGINT);
       }
     }
     // Call the callback with the new latest bar.
@@ -146,6 +146,8 @@ export const callbackClonedLatestBarIfSubscribed = (
 ) => {
   if (cb) {
     cb({
+      // NOTE: Do _not_ alter or normalize any data here- this is solely to clone the bar data.
+      // The data should already be in its end format by the time it gets to this function.
       time: latestBar.time,
       open: latestBar.open,
       high: latestBar.high,
