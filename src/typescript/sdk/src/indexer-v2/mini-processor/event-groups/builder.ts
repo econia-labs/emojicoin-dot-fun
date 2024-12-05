@@ -1,14 +1,14 @@
 import { AccountAddress, type TransactionPayloadResponse } from "@aptos-labs/ts-sdk";
-import { AccountAddressString } from "../../../emojicoin_dot_fun";
+import { type AccountAddressString } from "../../../emojicoin_dot_fun";
 import {
-  Types,
+  type Types,
   isChatEvent,
   isMarketRegistrationEvent,
   isSwapEvent,
   isLiquidityEvent,
   isStateEvent,
   isPeriodicStateEvent,
-  AnyNumberString,
+  type AnyNumberString,
 } from "../../../types";
 
 export type TxnInfo = {

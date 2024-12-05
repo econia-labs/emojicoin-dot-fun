@@ -7,7 +7,7 @@ import {
   type DatabaseModels,
   toTransactionMetadataForUserLiquidityPools,
   type TransactionMetadata,
-} from "../../../indexer-v2/types";
+} from "../../types";
 import { type BumpEvent } from "./builder";
 import {
   isChatEvent,

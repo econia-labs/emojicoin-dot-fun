@@ -1,6 +1,6 @@
 import { type MarketMetadataModel } from "../indexer-v2/types";
-import { CHAT_EMOJIS } from "./chat-emojis";
-import { SYMBOL_EMOJIS } from "./symbol-emojis";
+import { type CHAT_EMOJIS } from "./chat-emojis";
+import { type SYMBOL_EMOJIS } from "./symbol-emojis";
 
 export type SymbolEmoji = keyof typeof SYMBOL_EMOJIS;
 export type SymbolEmojiName = (typeof SYMBOL_EMOJIS)[keyof typeof SYMBOL_EMOJIS];

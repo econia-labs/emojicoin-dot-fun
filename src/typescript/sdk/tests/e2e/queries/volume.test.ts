@@ -6,11 +6,6 @@ import {
 import {
   maxBigInt,
   getEvents,
-  getPeriodBoundary,
-  getPeriodBoundaryAsDate,
-  ONE_APT,
-  Period,
-  sleep,
   sum,
   sumByKey,
 } from "../../../src";

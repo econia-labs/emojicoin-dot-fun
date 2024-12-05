@@ -7,7 +7,7 @@ import {
   type StateEventData,
   type DatabaseModels,
   type TransactionMetadata,
-} from "../../../indexer-v2/types";
+} from "../../types";
 import {
   EventGroupBuilder,
   type EventWithMarket,
