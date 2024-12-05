@@ -3,12 +3,7 @@ import {
   type UserTransactionResponse,
   type Account,
 } from "@aptos-labs/ts-sdk";
-import {
-  maxBigInt,
-  getEvents,
-  sum,
-  sumByKey,
-} from "../../../src";
+import { maxBigInt, getEvents, sum, sumByKey } from "../../../src";
 import { Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
 import { getAptosClient } from "../../utils";
 import { getFundedAccounts } from "../../utils/test-accounts";
