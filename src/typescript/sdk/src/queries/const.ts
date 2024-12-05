@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "test") {
+  require("server-only");
+}
+
 export const LIMIT = 100;
 export const ORDER_BY = {
   DESC: {
