@@ -5,6 +5,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     use std::option::{Self, Option};
     use std::signer;
     use std::string::{String};
+    use emojicoin_dot_fun::emojicoin_dot_fun;
 
     /// Signer does not correspond to admin.
     const E_NOT_ADMIN: u64 = 0;
@@ -14,6 +15,8 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     const E_ALREADY_ADMIN: u64 = 2;
     /// Admin to remove is market_metadata publisher.
     const E_ADMIN_TO_REMOVE_IS_MARKET_METADATA_PUBLISHER: u64 = 3;
+    /// Market not found.
+    const E_MARKET_NOT_FOUND: u64 = 4;
 
     struct Nil {}
     has copy, drop, store;
@@ -82,6 +85,10 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         key: String,
         value: String
     ) acquires MetadataStore {
+        assert!(
+            option::is_some(&emojicoin_dot_fun::market_metadata_by_market_address(market)),
+            E_MARKET_NOT_FOUND
+        );
         let vault_ref_mut = borrow_vault_mut_checked(admin);
         let market_properties_table = &mut vault_ref_mut.market_properties_table;
         if (market_properties_table.contains(market) == false) {
@@ -135,9 +142,9 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     #[test_only]
     const NON_ADMIN: address = @0x2222;
     #[test_only]
-    const MARKET_1: address = @0x3333;
+    const MARKET_1: vector<vector<u8>> = vector[x"f09f9088e2808de2ac9b"];
     #[test_only]
-    const MARKET_2: address = @0x4444;
+    const MARKET_2: vector<vector<u8>> = vector[x"f09f96a4"];
     #[test_only]
     const PROPERTY: vector<u8> = b"foo";
     #[test_only]
@@ -153,131 +160,173 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         utf8(PROPERTY_OTHER)
     }
 
+    #[test_only]
+    fun init_emojicoin() {
+        emojicoin_dot_fun::tests::init_package();
+        emojicoin_dot_fun::tests::init_market(MARKET_1);
+        emojicoin_dot_fun::tests::init_market(MARKET_2);
+    }
+
+    #[test_only]
+    fun get_market_address(emoji_bytes: vector<vector<u8>>): address {
+        emojicoin_dot_fun::tests::address_for_registered_market_by_emoji_bytes(emoji_bytes)
+    }
+
     #[test]
     fun test_normal_flow() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         let market_1_value = utf8(b"bar");
         let market_2_value = utf8(b"baz");
         add_market_property(
             &market_metadata_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY(),
             market_1_value
         );
         add_market_property(
             &market_metadata_signer,
-            MARKET_2,
+            get_market_address(MARKET_2),
             get_PROPERTY(),
             market_2_value
         );
         assert!(
-            market_property(MARKET_1, get_PROPERTY()) == option::some(market_1_value)
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
+                == option::some(market_1_value)
         );
         assert!(
-            market_property(MARKET_2, get_PROPERTY()) == option::some(market_2_value)
+            market_property(get_market_address(MARKET_2), get_PROPERTY())
+                == option::some(market_2_value)
         );
         let market_1_value_override = utf8(b"barbaz");
         add_market_property(
             &market_metadata_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY(),
             market_1_value_override
         );
         assert!(
-            market_property(MARKET_1, get_PROPERTY())
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
                 == option::some(market_1_value_override)
         );
         let market_1_property_other_value = utf8(b"big bar");
         add_market_property(
             &market_metadata_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY_OTHER(),
             market_1_property_other_value
         );
-        let map = option::destroy_some(market_properties(MARKET_1));
+        let map = option::destroy_some(market_properties(get_market_address(MARKET_1)));
         assert!(map.contains_key(&get_PROPERTY()));
         assert!(map.contains_key(&get_PROPERTY_OTHER()));
         assert!(*map.borrow(&get_PROPERTY()) == market_1_value_override);
         assert!(*map.borrow(&get_PROPERTY_OTHER()) == market_1_property_other_value);
         assert!(
-            market_property(MARKET_1, get_PROPERTY())
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
                 == option::some(market_1_value_override)
         );
         assert!(
-            market_property(MARKET_1, get_PROPERTY_OTHER())
+            market_property(get_market_address(MARKET_1), get_PROPERTY_OTHER())
                 == option::some(market_1_property_other_value)
         );
     }
 
     #[test]
     fun test_unset_property() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         assert!(
-            market_property(MARKET_1, get_PROPERTY()) == option::none()
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
+                == option::none()
         );
         add_market_property(
             &market_metadata_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY(),
             utf8(b"bar")
         );
         assert!(
-            market_property(MARKET_1, get_PROPERTY_OTHER()) == option::none()
+            market_property(get_market_address(MARKET_1), get_PROPERTY_OTHER())
+                == option::none()
         );
     }
 
     #[test]
     fun test_unset_properties() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
-        assert!(market_properties(MARKET_1) == option::none());
+        assert!(
+            market_properties(get_market_address(MARKET_1)) == option::none()
+        );
     }
 
     #[test]
     fun test_remove_property() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         add_market_property(
             &market_metadata_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY(),
             utf8(b"bar")
         );
         add_market_property(
             &market_metadata_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY_OTHER(),
             utf8(b"bar")
         );
-        remove_market_property(&market_metadata_signer, MARKET_1, get_PROPERTY_OTHER());
-        assert!(
-            market_property(MARKET_1, get_PROPERTY()) == option::some(utf8(b"bar"))
+        remove_market_property(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            get_PROPERTY_OTHER()
         );
-        remove_market_property(&market_metadata_signer, MARKET_1, get_PROPERTY());
-        assert!(market_properties(MARKET_1) == option::none());
+        assert!(
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
+                == option::some(utf8(b"bar"))
+        );
+        remove_market_property(
+            &market_metadata_signer, get_market_address(MARKET_1), get_PROPERTY()
+        );
+        assert!(
+            market_properties(get_market_address(MARKET_1)) == option::none()
+        );
     }
 
     #[test]
     fun test_remove_unset_property() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
-        remove_market_property(&market_metadata_signer, MARKET_1, get_PROPERTY_OTHER());
+        remove_market_property(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            get_PROPERTY_OTHER()
+        );
         add_market_property(
             &market_metadata_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY(),
             utf8(b"bar")
         );
-        remove_market_property(&market_metadata_signer, MARKET_1, get_PROPERTY_OTHER());
+        remove_market_property(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            get_PROPERTY_OTHER()
+        );
         assert!(
-            market_property(MARKET_1, get_PROPERTY()) == option::some(utf8(b"bar"))
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
+                == option::some(utf8(b"bar"))
         );
     }
 
     #[test]
     fun test_add_admin() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         add_admin(&market_metadata_signer, NON_ADMIN);
@@ -287,6 +336,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
 
     #[test]
     fun test_remove_admin() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         add_admin(&market_metadata_signer, NON_ADMIN);
@@ -295,8 +345,22 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         assert!(admins() == expected_admins);
     }
 
+    #[test, expected_failure(abort_code = E_MARKET_NOT_FOUND)]
+    fun test_market_not_found() acquires MetadataStore {
+        init_emojicoin();
+        let market_metadata_signer = get_signer(@market_metadata);
+        init_module(&market_metadata_signer);
+        add_market_property(
+            &market_metadata_signer,
+            @0x6666,
+            get_PROPERTY(),
+            utf8(b"bar")
+        );
+    }
+
     #[test, expected_failure(abort_code = E_ALREADY_ADMIN)]
     fun test_add_admin_already_admin() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         add_admin(&market_metadata_signer, @market_metadata);
@@ -304,6 +368,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
 
     #[test, expected_failure(abort_code = E_NOT_ADMIN)]
     fun test_add_admin_not_admin() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         let not_admin_signer = get_signer(NON_ADMIN);
@@ -312,6 +377,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
 
     #[test, expected_failure(abort_code = E_NOT_ADMIN)]
     fun test_remove_admin_not_admin() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         remove_admin(&get_signer(NON_ADMIN), @market_metadata);
@@ -319,6 +385,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
 
     #[test, expected_failure(abort_code = E_ADMIN_TO_REMOVE_IS_NOT_ADMIN)]
     fun test_remove_admin_admin_to_remove_is_not_admin() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         remove_admin(&market_metadata_signer, NON_ADMIN);
@@ -326,6 +393,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
 
     #[test, expected_failure(abort_code = E_ADMIN_TO_REMOVE_IS_MARKET_METADATA_PUBLISHER)]
     fun test_remove_admin_admin_to_remove_is_market_metadata_publisher() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         let market_metadata_signer = get_signer(@market_metadata);
@@ -334,12 +402,13 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
 
     #[test, expected_failure(abort_code = E_NOT_ADMIN)]
     fun test_add_market_property_not_admin() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         let not_admin_signer = get_signer(NON_ADMIN);
         add_market_property(
             &not_admin_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY(),
             utf8(b"bar")
         );
@@ -347,15 +416,18 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
 
     #[test, expected_failure(abort_code = E_NOT_ADMIN)]
     fun test_remove_market_property_not_admin() acquires MetadataStore {
+        init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
         let not_admin_signer = get_signer(NON_ADMIN);
         add_market_property(
             &market_metadata_signer,
-            MARKET_1,
+            get_market_address(MARKET_1),
             get_PROPERTY(),
             utf8(b"bar")
         );
-        remove_market_property(&not_admin_signer, MARKET_1, get_PROPERTY());
+        remove_market_property(
+            &not_admin_signer, get_market_address(MARKET_1), get_PROPERTY()
+        );
     }
 }
