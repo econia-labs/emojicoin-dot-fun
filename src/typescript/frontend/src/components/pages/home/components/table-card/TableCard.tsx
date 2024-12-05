@@ -9,12 +9,10 @@ import { emojisToName } from "lib/utils/emojis-to-name-or-symbol";
 import { useEventStore, useUserSettings } from "context/event-store-context";
 import { motion, type MotionProps, useAnimationControls, useMotionValue } from "framer-motion";
 import { Arrow } from "components/svg";
-import { toCoinDecimalString } from "lib/utils/decimals";
 import {
   borderVariants,
   onlyHoverVariant,
   textVariants,
-  useLabelScrambler,
   glowVariants,
   eventToVariant as toVariant,
 } from "./animation-variants/event-variants";
@@ -29,8 +27,8 @@ import LinkOrAnimationTrigger from "./LinkOrAnimationTrigger";
 import { type SymbolEmojiData } from "@sdk/emoji_data";
 import { Emoji } from "utils/emoji";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import Big from "big.js";
 import "./module.css";
+import { FormattedNumber } from "components/FormattedNumber";
 
 const getFontSize = (emojis: SymbolEmojiData[]) =>
   emojis.length <= 2 ? ("pixel-heading-1" as const) : ("pixel-heading-1b" as const);
@@ -58,20 +56,27 @@ const TableCard = ({
   );
   const animationEvent = stateEvents.at(0);
 
-  const { isBumpOrder, secondaryMetric, marketCap } = useMemo(() => {
-    const isBumpOrder = sortBy === SortMarketsBy.BumpOrder;
-    const { lastSwapVolume, marketCap } = animationEvent
+  const { secondaryLabel, secondaryMetric, marketCap } = useMemo(() => {
+    const { allTimeVolume, lastSwapVolume, marketCap } = animationEvent
       ? {
-          lastSwapVolume: Big(animationEvent.lastSwap.quoteVolume.toString()),
+          allTimeVolume: animationEvent.state.cumulativeStats.quoteVolume,
+          lastSwapVolume: animationEvent.lastSwap.quoteVolume,
           marketCap: animationEvent.state.instantaneousStats.marketCap,
         }
       : {
-          lastSwapVolume: 0,
+          allTimeVolume: 0n,
+          lastSwapVolume: 0n,
           marketCap: staticMarketCap,
         };
+    const [secondaryLabel, secondaryMetric] =
+      sortBy === SortMarketsBy.BumpOrder
+        ? ["Last Swap", lastSwapVolume]
+        : sortBy === SortMarketsBy.AllTimeVolume
+          ? ["All Time Vol", allTimeVolume]
+          : ["24h Volume", staticVolume24H];
     return {
-      isBumpOrder,
-      secondaryMetric: isBumpOrder ? lastSwapVolume : Big(staticVolume24H),
+      secondaryLabel,
+      secondaryMetric,
       marketCap,
     };
   }, [sortBy, animationEvent, staticVolume24H, staticMarketCap]);
@@ -108,16 +113,7 @@ const TableCard = ({
     if (animationEvent) {
       runAnimationSequence(animationEvent);
     }
-  }, [animationEvent, runAnimationSequence, isBumpOrder]);
-
-  const { ref: marketCapRef } = useLabelScrambler(
-    toCoinDecimalString(marketCap.toString(), 2),
-    " APT"
-  );
-  const { ref: dailyVolumeRef } = useLabelScrambler(
-    toCoinDecimalString(secondaryMetric.toString(), 2),
-    " APT"
-  );
+  }, [animationEvent, runAnimationSequence, sortBy]);
 
   const { curr, prev, variant, displayIndex, layoutDelay } = useMemo(() => {
     const { curr, prev } = calculateGridData({
@@ -269,9 +265,8 @@ const TableCard = ({
                   variants={animationsOn ? textVariants : {}}
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
-                  ref={marketCapRef}
                 >
-                  {toCoinDecimalString(marketCap.toString(), 2) + " APT"}
+                  <FormattedNumber value={marketCap} scramble nominalize suffix=" APT" />
                 </motion.div>
               </Column>
               <Column width="50%">
@@ -281,16 +276,15 @@ const TableCard = ({
                     "group-hover:text-ec-blue uppercase p-[1px] transition-all"
                   }
                 >
-                  {isBumpOrder ? t("Last Swap") : t("24h Volume")}
+                  {t(secondaryLabel)}
                 </div>
                 <motion.div
                   animate={controls}
                   variants={animationsOn ? textVariants : {}}
                   className="body-sm uppercase font-forma"
                   style={{ color: "#FFFFFFFF", filter: "brightness(1) contrast(1)" }}
-                  ref={dailyVolumeRef}
                 >
-                  {toCoinDecimalString(secondaryMetric.toString(), 2) + " APT"}
+                  <FormattedNumber value={secondaryMetric} scramble nominalize suffix=" APT" />
                 </motion.div>
               </Column>
             </Flex>

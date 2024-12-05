@@ -7,7 +7,7 @@ import { type ChatProps } from "../../types";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import { useEventStore, useNameStore } from "context/event-store-context";
+import { useEventStore } from "context/event-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
 import { getRankFromEvent } from "lib/utils/get-user-rank";
@@ -76,25 +76,18 @@ const ChatBox = (props: ChatProps) => {
         order: "desc",
         limit: HARD_LIMIT,
         canAnimateAsInsertion: !initialLoad.current,
-      }),
-
+      }).map(({ chat, transaction, shouldAnimateAsInsertion }) => ({
+        message: {
+          sender: chat.user,
+          text: chat.message,
+          senderRank: getRankFromEvent(chat).rankIcon,
+          version: transaction.version,
+        },
+        shouldAnimateAsInsertion,
+      })),
     /* eslint-disable react-hooks/exhaustive-deps */
     [props.data.chats.length, chats.length]
   );
-
-  const addresses = sortedChats.map(({ chat }) => chat.user);
-  const nameResolver = useNameStore((s) => s.getResolverWithNames(addresses));
-
-  const sortedChatsWithNames = useMemo(() => {
-    const data = sortedChats.map(({ transaction, chat, shouldAnimateAsInsertion }) => ({
-      ...chat,
-      user: nameResolver(chat.user),
-      version: Number(transaction.version),
-      shouldAnimateAsInsertion,
-    }));
-    return data;
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [nameResolver]);
 
   return (
     <Column className="relative" width="100%" flexGrow={1}>
@@ -109,22 +102,14 @@ const ChatBox = (props: ChatProps) => {
           layoutScroll
           className="flex flex-col-reverse w-full justify-center px-[21px] py-0 border-r border-solid border-r-dark-gray"
         >
-          {sortedChatsWithNames.map((chat, index) => {
-            const message = {
-              sender: chat.user,
-              text: chat.message,
-              senderRank: getRankFromEvent(chat).rankIcon,
-              version: chat.version,
-            };
-            return (
-              <MessageContainer
-                message={message}
-                key={sortedChats.length - index}
-                index={sortedChats.length - index}
-                shouldAnimateAsInsertion={chat.shouldAnimateAsInsertion}
-              />
-            );
-          })}
+          {sortedChats.map(({ message, shouldAnimateAsInsertion }, index) => (
+            <MessageContainer
+              message={message}
+              key={sortedChats.length - index}
+              index={sortedChats.length - index}
+              shouldAnimateAsInsertion={shouldAnimateAsInsertion}
+            />
+          ))}
         </motion.div>
       </Flex>
 

@@ -2,7 +2,6 @@ import {
   AccountAddress,
   type AccountAddressInput,
   type Aptos,
-  Hex,
   type UserTransactionResponse,
   MoveString,
   isUserTransactionResponse,
@@ -19,7 +18,7 @@ import {
 import { typeTagInputToStructName } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
 import type JsonTypes from "../types/json-types";
-import { encodeEmojis, SYMBOL_EMOJI_DATA, type SymbolEmoji } from "../emoji_data";
+import { encodeEmojis, type SymbolEmoji } from "../emoji_data";
 
 // Note that the conversion to string bytes below doesn't work if the length of the string is > 255.
 const registryNameBytes = new MoveString("Registry").bcsToBytes().slice(1);
@@ -32,25 +31,17 @@ export const REGISTRY_ADDRESS = createNamedObjectAddress({
 /**
  * Derives the object address from the given emoji hex codes vector<u8> seed and
  * the given object creator.
+ *
+ * This is the address of the Object<Market> that publishes the coin type.
  */
-export function deriveEmojicoinPublisherAddress(args: {
-  registryAddress?: AccountAddress;
-  emojis: Array<SymbolEmoji | `0x${string}`>;
-}): AccountAddress {
-  const registryAddress = AccountAddress.from(args.registryAddress ?? REGISTRY_ADDRESS);
-  const { emojis } = args;
-  if (emojis.every(SYMBOL_EMOJI_DATA.hasEmoji)) {
-    return createNamedObjectAddress({
-      creator: registryAddress,
-      seed: encodeEmojis(emojis),
-    });
-  }
-  const hexStringBytes = emojis
-    .map((emoji) => Hex.fromHexString(emoji.replace(/^0x/, "")).toStringWithoutPrefix())
-    .join("");
-  const seed = Hex.fromHexString(hexStringBytes).toUint8Array();
+export function getMarketAddress(
+  emojis: SymbolEmoji[],
+  registryAddress?: AccountAddressInput
+): AccountAddress {
+  const creator = AccountAddress.from(registryAddress ?? REGISTRY_ADDRESS);
+  const seed = encodeEmojis(emojis);
   return createNamedObjectAddress({
-    creator: registryAddress,
+    creator,
     seed,
   });
 }

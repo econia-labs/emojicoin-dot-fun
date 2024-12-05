@@ -5,7 +5,6 @@ import "./styles.css";
 
 import { type ErrorBoundaryFallbackProps } from "./types";
 import styled from "styled-components";
-import { pixelar } from "styles/fonts";
 
 export const ErrorContainerButton = styled.button`
   font-family: var(--font-pixelar) !important;
@@ -49,7 +48,7 @@ const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({ error, re
 
       <h2 className="error-container__sub-title">Please, go to home page</h2>
 
-      <ErrorContainerButton className={pixelar.variable} onClick={onPressHandler}>
+      <ErrorContainerButton className={"font-pixelar"} onClick={onPressHandler}>
         Go to home page
       </ErrorContainerButton>
     </div>

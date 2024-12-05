@@ -34,39 +34,24 @@ const TableHeader: React.FC<TableHeaderProps> = ({ item, isLast, onClick }) => {
       >
         {isLast && (
           <Info>
-            <Text
-              textScale="pixelHeading4"
-              lineHeight="20px"
-              color="black"
-              textTransform="uppercase"
-            >
+            <div>
               <FlexGap gap=".2rem" justifyContent="space-between">
                 <span>DPR:</span>
                 <span>Daily Percentage Return</span>
               </FlexGap>
-            </Text>
-            <Text
-              textScale="pixelHeading4"
-              lineHeight="20px"
-              color="black"
-              textTransform="uppercase"
-            >
+            </div>
+            <div>
               <FlexGap gap=".2rem" justifyContent="space-between">
                 <span>WPR:</span>
                 <span>Weekly Percentage Return</span>
               </FlexGap>
-            </Text>
-            <Text
-              textScale="pixelHeading4"
-              lineHeight="20px"
-              color="black"
-              textTransform="uppercase"
-            >
+            </div>
+            <div>
               <FlexGap gap=".2rem" justifyContent="space-between">
                 <span>APR:</span>
                 <span>Annual Percentage Return</span>
               </FlexGap>
-            </Text>
+            </div>
           </Info>
         )}
         <Text

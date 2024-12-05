@@ -6,8 +6,8 @@ export type TableCardProps = {
   symbol: string;
   marketID: number;
   emojis: Array<SymbolEmojiData>;
-  staticMarketCap: string;
-  staticVolume24H: string;
+  staticMarketCap: bigint;
+  staticVolume24H: bigint;
   prevIndex?: number;
 };
 

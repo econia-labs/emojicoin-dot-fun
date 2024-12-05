@@ -43,15 +43,23 @@
     "node": ">=v20.12.2"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
+  "homepage": "https://github.com/econia-labs/emojicoin-dot-fun#readme",
   "license": "Apache-2.0",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "name": "@econia-labs/emojicoin-sdk",
   "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a",
+  "repository": "github:econia-labs/emojicoin-dot-fun",
   "scripts": {
     "_format": "prettier 'src/**/*.ts' 'tests/**/*.ts' '.eslintrc.js'",
     "build": "tsc",
@@ -73,6 +81,6 @@
     "test:sdk:sequential": "pnpm jest --runInBand tests/e2e/broker",
     "test:unit": "pnpm jest tests/unit"
   },
-  "typings": "dist/src/index.d.ts",
-  "version": "0.0.1"
+  "typings": "dist/index.d.ts",
+  "version": "0.1.0"
 }

@@ -10,6 +10,9 @@
   "globalEnv": [],
   "tasks": {
     "build": {
+      "dependsOn": [
+        "^build"
+      ],
       "outputs": [
         "dist/**",
         ".next/**"

@@ -1,4 +1,5 @@
 import { isPeriod, type Period, PeriodDuration, periodEnumToRawDuration } from "@sdk/index";
+import { isNumber } from "utils";
 
 /**
  * Parcel size is the amount of candlestick periods that will be in a single parcel.
@@ -66,8 +67,6 @@ export type ValidCandlesticksSearchParams = {
   amount: string;
   countBack: string;
 };
-
-const isNumber = (s: string) => !isNaN(parseInt(s));
 
 export const isValidCandlesticksSearchParams = (
   params: CandlesticksSearchParams

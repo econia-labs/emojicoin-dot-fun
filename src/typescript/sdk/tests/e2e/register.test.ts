@@ -3,7 +3,8 @@ import {
   COIN_FACTORY_MODULE_NAME,
   EMOJICOIN_DOT_FUN_MODULE_NAME,
   ONE_APT,
-  deriveEmojicoinPublisherAddress,
+  SYMBOL_EMOJI_DATA,
+  getMarketAddress,
   getMarketResource,
   getRegistryAddress,
 } from "../../src";
@@ -29,12 +30,12 @@ describe("registers a market successfully", () => {
     const randomIntegrator = Ed25519Account.generate();
 
     // As actual emojis: ["🦓", "🧟"];
-    const emojis = ["0xf09fa693" as const, "0xf09fa79f" as const];
+    const symbolBytes = ["0xf09fa693" as const, "0xf09fa79f" as const];
 
     const txResponse = await EmojicoinDotFun.RegisterMarket.submit({
       aptosConfig: aptos.config,
       registrant: user,
-      emojis,
+      emojis: symbolBytes,
       integrator: randomIntegrator.accountAddress,
       options: {
         maxGasAmount: ONE_APT / 100,
@@ -49,10 +50,12 @@ describe("registers a market successfully", () => {
       moduleAddress: publisher.accountAddress,
     });
 
-    const derivedNamedObjectAddress = deriveEmojicoinPublisherAddress({
-      registryAddress,
-      emojis,
-    });
+    const emojis = symbolBytes
+      .map(SYMBOL_EMOJI_DATA.byHex)
+      .filter((emoji) => typeof emoji !== "undefined")
+      .map(({ emoji }) => emoji);
+    expect(emojis.length).toEqual(symbolBytes.length);
+    const derivedNamedObjectAddress = getMarketAddress(emojis, registryAddress);
 
     const publisherObjectResources = await aptos.getAccountResources({
       accountAddress: derivedNamedObjectAddress,
@@ -70,7 +73,7 @@ describe("registers a market successfully", () => {
     const { lpCoinSupply, extendRef } = marketObjectMarketResource;
 
     expect(marketID).toBeGreaterThanOrEqual(1n);
-    const fullHex = `0x${emojis.map((e) => e.replace(/^0x/, "")).join("")}` as const;
+    const fullHex = `0x${symbolBytes.map((e) => e.replace(/^0x/, "")).join("")}` as const;
     expect(Hex.fromHexInput(emojiBytes).toString()).toEqual(fullHex);
     expect(emojiBytes).toEqual(Hex.fromHexString(fullHex).toUint8Array());
     expect(extendRef.self).toEqual(standardizeAddress(derivedNamedObjectAddress));

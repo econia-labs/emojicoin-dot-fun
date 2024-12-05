@@ -17,7 +17,6 @@ import { useScramble } from "use-scramble";
 import { EXTERNAL_LINK_PROPS } from "components/link";
 import { WalletDropdownItem } from "./WalletDropdownItem";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { useNameStore } from "context/event-store-context";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 
@@ -25,21 +24,17 @@ const WIDTH = "24ch";
 
 const WalletDropdownMenu = () => {
   const { t } = translationFunction();
-  const { account, disconnect, wallet } = useWallet();
-  const { copyAddress } = useAptos();
+  const { disconnect, wallet } = useWallet();
+  const { addressName, copyAddress } = useAptos();
   const [enabled, setEnabled] = useState(true);
 
-  const nameResolver = useNameStore((s) =>
-    s.getResolverWithNames(account?.address ? [account.address] : [])
-  );
-
   const text = useMemo(() => {
-    if (account) {
-      return formatDisplayName(nameResolver(account.address));
+    if (addressName) {
+      return formatDisplayName(addressName);
     } else {
       return t("Connected");
     }
-  }, [account, t, nameResolver]);
+  }, [addressName, t]);
 
   const { ref, replay } = useScramble({
     text: text.startsWith("0x") ? `0x${text.slice(2).toUpperCase()}` : text.toUpperCase(),
