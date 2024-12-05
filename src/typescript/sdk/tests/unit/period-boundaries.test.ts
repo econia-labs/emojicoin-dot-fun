@@ -1,6 +1,6 @@
 import { PERIODS, PeriodDuration, getPeriodStartTime } from "../../src";
-import { calculatePeriodBoundariesCrossed } from "../../src/utils/test";
-import { SAMPLE_STATE_EVENT, SAMPLE_SWAP_EVENT } from "../../src/utils/test/sample-data";
+import { calculatePeriodBoundariesCrossed } from "../utils";
+import { SAMPLE_STATE_EVENT, SAMPLE_SWAP_EVENT } from "../utils/sample-data";
 
 const swap = SAMPLE_SWAP_EVENT;
 const state = SAMPLE_STATE_EVENT;

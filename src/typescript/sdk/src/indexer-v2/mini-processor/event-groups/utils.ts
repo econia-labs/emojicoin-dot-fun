@@ -1,5 +1,5 @@
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { rawPeriodToEnum } from "../../const";
+import { rawPeriodToEnum } from "../../../const";
 import {
   GuidGetters,
   type MarketMetadataModel,
@@ -7,7 +7,7 @@ import {
   type DatabaseModels,
   toTransactionMetadataForUserLiquidityPools,
   type TransactionMetadata,
-} from "../../indexer-v2/types";
+} from "../../types";
 import { type BumpEvent } from "./builder";
 import {
   isChatEvent,
@@ -15,9 +15,9 @@ import {
   isMarketRegistrationEvent,
   isSwapEvent,
   type Types,
-} from "../../types";
+} from "../../../types";
 import { type EventsModels, type UserLiquidityPoolsMap } from ".";
-import { type AccountAddressString } from "../../emojicoin_dot_fun";
+import { type AccountAddressString } from "../../../emojicoin_dot_fun";
 import { getLPCoinBalanceFromWriteSet } from "../parse-write-set";
 
 const toChatEventData = (event: Types["ChatEvent"]): DatabaseModels["chat_events"]["chat"] => ({

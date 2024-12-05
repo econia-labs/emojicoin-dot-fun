@@ -1,5 +1,5 @@
-import { Trigger } from "../..";
-import { type Types } from "../../types/types";
+import { Trigger } from "../../src";
+import { type Types } from "../../src/types/types";
 
 export const SAMPLE_SWAP_EVENT: Types["SwapEvent"] = {
   marketID: 1n,

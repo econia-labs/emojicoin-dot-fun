@@ -1,9 +1,9 @@
 import { INTEGRATOR_FEE_RATE_BPS } from "../../src/const";
 import { SYMBOL_EMOJI_DATA, type SymbolEmoji, zip } from "../../src";
-import { getFundedAccounts } from "../../src/utils/test/test-accounts";
+import { getFundedAccounts } from "../utils/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { getExactTransitionInputAmount } from "./helpers/misc";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../src/utils/test";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../utils";
 import { isInBondingCurve } from "../../src/utils/bonding-curve";
 
 jest.setTimeout(30000);

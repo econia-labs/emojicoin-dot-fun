@@ -1,7 +1,7 @@
 import { type HexInput } from "@aptos-labs/ts-sdk";
 import { normalizeHex } from "../utils/hex";
-import AllSymbolEmojiJSON from "./symbol-emojis.json";
-import AllChatEmojiJSON from "./chat-emojis.json";
+import { SYMBOL_EMOJIS } from "./symbol-emojis";
+import { CHAT_EMOJIS } from "./chat-emojis";
 import {
   type SymbolEmojiName,
   type SymbolEmoji,
@@ -30,7 +30,7 @@ const createMaps = <T extends SymbolEmojiData | ChatEmojiData>(entries: Array<T>
   };
 };
 
-export const allSymbolEmojis = Object.entries(AllSymbolEmojiJSON).map(([emoji, name]) => {
+export const allSymbolEmojis = Object.entries(SYMBOL_EMOJIS).map(([emoji, name]) => {
   const bytes = encoder.encode(emoji);
   const hex = normalizeHex(bytes);
   return {
@@ -41,7 +41,7 @@ export const allSymbolEmojis = Object.entries(AllSymbolEmojiJSON).map(([emoji, n
   };
 });
 
-export const allChatEmojis = Object.entries(AllChatEmojiJSON).map(([emoji, name]) => {
+export const allChatEmojis = Object.entries(CHAT_EMOJIS).map(([emoji, name]) => {
   const bytes = encoder.encode(emoji);
   const hex = normalizeHex(bytes);
   return {

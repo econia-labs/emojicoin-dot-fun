@@ -9,10 +9,10 @@ import {
   zip,
 } from "../../src";
 import { getMarketAddress } from "../../src/emojicoin_dot_fun";
-import { getFundedAccounts } from "../../src/utils/test/test-accounts";
+import { getFundedAccounts } from "../utils/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { getCoinBalanceFromChanges } from "../../src/utils/parse-changes-for-balances";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../src/utils/test";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../utils/helpers";
 import { isInBondingCurve } from "../../src/utils/bonding-curve";
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { type SwapEventModel } from "../../src/indexer-v2/types";

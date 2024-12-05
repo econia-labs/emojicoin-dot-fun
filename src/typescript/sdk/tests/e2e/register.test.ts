@@ -9,9 +9,9 @@ import {
   getRegistryAddress,
 } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getPublishHelpers } from "../../src/utils/test";
+import { getPublishHelpers } from "../utils";
 import { standardizeAddress } from "../../src/utils/account-address";
-import { getFundedAccount } from "../../src/utils/test/test-accounts";
+import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(20000);
 

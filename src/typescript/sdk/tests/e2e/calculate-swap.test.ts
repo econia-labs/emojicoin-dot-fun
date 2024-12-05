@@ -14,8 +14,8 @@ import {
   zip,
 } from "../../src";
 import { calculateSwapNetProceeds, getMarketAddress } from "../../src/emojicoin_dot_fun";
-import { getPublishHelpers } from "../../src/utils/test";
-import { getFundedAccounts } from "../../src/utils/test/test-accounts";
+import { getPublishHelpers } from "../utils/helpers";
+import { getFundedAccounts } from "../utils/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { TransferCoins } from "../../src/emojicoin_dot_fun/aptos-framework";
 import { getExactTransitionInputAmount } from "./helpers/misc";

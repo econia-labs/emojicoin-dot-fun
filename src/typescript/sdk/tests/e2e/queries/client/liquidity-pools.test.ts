@@ -2,8 +2,8 @@
 
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
 import { maxBigInt, ONE_APT, toSequenceNumberOptions, type SymbolEmoji } from "../../../../src";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
-import { getFundedAccounts } from "../../../../src/utils/test/test-accounts";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../utils/helpers";
+import { getFundedAccounts } from "../../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { fetchMarkets, fetchUserLiquidityPools } from "../../../../src/indexer-v2/queries";
 import { LIMIT } from "../../../../src/queries";
