@@ -106,6 +106,7 @@ def generate_move_code(viable_emojis: dict[str, EmojiData]) -> str:
         ]
     )
 
+
 # Sort by emoji name first, then flip the key to be the encoded UTF-8 emoji and set the
 # value as its name.
 def as_emoji_to_name_dict(symbol_emojis: dict[str, EmojiData]) -> dict[str, str]:
@@ -124,7 +125,7 @@ def ensure_write_to_file(data: str | dict[str, Any] | list[str], fp: str):
     fp_obj = pathlib.Path(fp)
     pathlib.Path(fp_obj.parent).mkdir(exist_ok=True)
 
-    with open(fp, "w", encoding='utf-8') as outfile:
+    with open(fp, "w", encoding="utf-8") as outfile:
         if isinstance(data, str):
             _ = outfile.write(data)
         else:
