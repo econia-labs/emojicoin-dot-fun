@@ -12,6 +12,7 @@ import {
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { createBarFromPeriodicState, createBarFromSwap, type LatestBar } from "./candlestick-bars";
 import { q64ToBig } from "@sdk/utils/nominal-price";
+import { toNominal } from "lib/utils/decimals";
 
 type PeriodicState = DatabaseModels["periodic_state_events"];
 
@@ -80,7 +81,7 @@ export const handleLatestBarForSwapEvent = (
       data.latestBar.high = Math.max(data.latestBar.high, price);
       data.latestBar.low = Math.min(data.latestBar.low, price);
       data.latestBar.marketNonce = event.market.marketNonce;
-      data.latestBar.volume += Number(event.swap.baseVolume);
+      data.latestBar.volume += toNominal(event.swap.quoteVolume);
       // Note this results in `time order violation` errors if we set `has_empty_bars`
       // to `true` in the `LibrarySymbolInfo` configuration.
       callbackClonedLatestBarIfSubscribed(data.callback, data.latestBar);
@@ -122,7 +123,7 @@ export const handleLatestBarForPeriodicStateEvent = (
         data.latestBar.high = Math.max(data.latestBar.high, price);
         data.latestBar.low = Math.min(data.latestBar.low, price);
         data.latestBar.marketNonce = innerMarket.marketNonce;
-        data.latestBar.volume += Number(innerSwap.baseVolume);
+        data.latestBar.volume += toNominal(innerSwap.quoteVolume);
       }
     }
     // Call the callback with the new latest bar.
@@ -146,6 +147,8 @@ export const callbackClonedLatestBarIfSubscribed = (
 ) => {
   if (cb) {
     cb({
+      // NOTE: Do _not_ alter or normalize any data here- this is solely to clone the bar data.
+      // The data should already be in its end format by the time it gets to this function.
       time: latestBar.time,
       open: latestBar.open,
       high: latestBar.high,
