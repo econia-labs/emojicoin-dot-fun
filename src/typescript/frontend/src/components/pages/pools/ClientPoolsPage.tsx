@@ -27,7 +27,7 @@ export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
-  const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
+  const [sortBy, setSortBy] = useState<SortByPageQueryParams>("apr");
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(poolParam ? 0 : undefined);
   const [page, setPage] = useState<number>(1);
