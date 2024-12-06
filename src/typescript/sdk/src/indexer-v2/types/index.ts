@@ -52,10 +52,13 @@ const toTransactionMetadata = (
   insertedAt: data.inserted_at ? postgresTimestampToDate(data.inserted_at) : new Date(0),
 });
 
-const toBlockAndEventIndex = (data: BlockAndEventIndexMetadata) =>({
-  blockNumber: BigInt(data.block_number),
-  eventIndex: BigInt(data.event_index),
-});
+const toBlockAndEventIndex = (data: BlockAndEventIndexMetadata) =>
+  data && data.block_number
+    ? {
+        blockNumber: BigInt(data.block_number),
+        eventIndex: BigInt(data.event_index),
+      }
+    : undefined;
 
 /// If received from postgres, symbol bytes come in as a hex string in the format "\\xabcd" where
 /// "abcd" is the hex string.
@@ -357,6 +360,7 @@ export const withMarketAndStateMetadataAndEmitTime = curryToNamedType(
   toMarketMetadataModel,
   "market"
 );
+/// The `blockAndEvent` field is only set when fetched from the DB- otherwise it's `undefined`.
 export const withBlockAndEventIndex = curryToNamedType(toBlockAndEventIndex, "blockAndEvent");
 export const withLastSwap = curryToNamedType(toLastSwapFromDatabase, "lastSwap");
 export const withGlobalStateEventData = curryToNamedType(toGlobalStateEventData, "globalState");
