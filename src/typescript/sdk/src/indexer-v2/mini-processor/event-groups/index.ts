@@ -29,12 +29,12 @@ export type BumpEventModel =
 export type EventsModels = {
   transaction: TxnInfo;
   chatEvents: Array<DatabaseModels["chat_events"]>;
-  liquidityEvents: Array<Omit<DatabaseModels["liquidity_events"], "blockAndEvent">>;
+  liquidityEvents: Array<DatabaseModels["liquidity_events"]>;
   marketRegistrationEvents: Array<DatabaseModels["market_registration_events"]>;
   periodicStateEvents: Array<DatabaseModels["periodic_state_events"]>;
-  swapEvents: Array<Omit<DatabaseModels["swap_events"], "blockAndEvent">>;
+  swapEvents: Array<DatabaseModels["swap_events"]>;
   userPools: Array<DatabaseModels["user_liquidity_pools"]>;
-  marketLatestStateEvents: Array<DatabaseModels["market_latest_state_event"]>
+  marketLatestStateEvents: Array<DatabaseModels["market_latest_state_event"]>;
 };
 
 export type UserLiquidityPoolsMap = Map<
@@ -98,7 +98,6 @@ export function getEventsAsProcessorModels(
     marketLatestStateEvents: Array<DatabaseModels["market_latest_state_event"]>(),
   };
 
-  let eventIndex = 0n;
   for (const builder of builders.values()) {
     const { marketID, marketNonce, bumpEvent, stateEvent, periodicStateEvents } = builder.build();
 
@@ -138,9 +137,7 @@ export function getEventsAsProcessorModels(
       lastSwap,
       event: bumpEvent,
       response,
-      eventIndex,
     });
-    eventIndex += 1n;
 
     // Create fake data if we're generating an event- otherwise, use the transaction response
     // passed in.

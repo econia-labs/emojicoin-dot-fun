@@ -25,7 +25,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { fetchMarketRegistrationEventBySymbolEmojis } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { getAptosClient } from "@sdk/utils/aptos-client";
 import { INTEGRATOR_FEE_RATE_BPS } from "@sdk/const";
-import { pairIdToSymbolEmojis } from "./util";
+import { pairIdToSymbolEmojis, symbolEmojisToString } from "./util";
 
 /**
  * - All `Pair` props are immutable - Indexer will not query a given pair more than once
@@ -74,11 +74,22 @@ export interface PairResponse {
  *
  * @param pairId is the pair ID. Generally it's `event.market.symbolEmojis.join("") + "-APT"`
  */
-export async function getPair(pairId: string): Promise<Pair> {
-  const sybolEmojis = pairIdToSymbolEmojis(pairId);
+export async function getPair(
+  pairId: string
+): Promise<{ pair: Pair; error?: never } | { pair?: never; error: NextResponse }> {
+  const symbolEmojis = pairIdToSymbolEmojis(pairId);
 
-  const marketRegistrations = await fetchMarketRegistrationEventBySymbolEmojis({ sybolEmojis });
-  const marketRegistration = marketRegistrations[0];
+  const marketRegistrations = await fetchMarketRegistrationEventBySymbolEmojis({
+    searchEmojis: symbolEmojis,
+  });
+  const marketRegistration = marketRegistrations.pop();
+  if (!marketRegistration) {
+    return {
+      error: new NextResponse(`Market registration not found for pairId: ${pairId}`, {
+        status: 404,
+      }),
+    };
+  }
 
   const aptos = getAptosClient();
   const block = await aptos.getBlockByVersion({
@@ -86,24 +97,28 @@ export async function getPair(pairId: string): Promise<Pair> {
   });
 
   return {
-    id: pairId,
-    dexKey: "emojicoin.fun",
-    asset0Id: emojiString,
-    asset1Id: "APT",
-    createdAtBlockNumber: parseInt(block.block_height),
-    createdAtBlockTimestamp: marketRegistration.transaction.timestamp.getTime() / 1000,
-    createdAtTxnId: String(marketRegistration.transaction.version),
-    feeBps: INTEGRATOR_FEE_RATE_BPS,
+    pair: {
+      id: pairId,
+      dexKey: "emojicoin.fun",
+      asset0Id: symbolEmojisToString(symbolEmojis),
+      asset1Id: "APT",
+      createdAtBlockNumber: parseInt(block.block_height),
+      createdAtBlockTimestamp: marketRegistration.transaction.timestamp.getTime() / 1000,
+      createdAtTxnId: String(marketRegistration.transaction.version),
+      feeBps: INTEGRATOR_FEE_RATE_BPS,
+    },
   };
 }
 
 // NextJS JSON response handler
-export async function GET(request: NextRequest): Promise<NextResponse<PairResponse>> {
+export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const pairId = searchParams.get("id");
   if (!pairId) {
     return new NextResponse("id is a required parameter", { status: 400 });
   }
-  const pair = await getPair(pairId);
+  const { pair, error } = await getPair(pairId);
+  if (error) return error;
+
   return NextResponse.json({ pair });
 }

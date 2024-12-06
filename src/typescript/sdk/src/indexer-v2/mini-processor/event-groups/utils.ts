@@ -75,9 +75,8 @@ export const addModelsForBumpEvent = (args: {
   lastSwap: Types["LastSwap"];
   event: BumpEvent;
   response?: UserTransactionResponse; // If we're parsing the WriteSet.
-  eventIndex?: bigint; // For liquidity and swap events.
 }) => {
-  const { rows, transaction, market, state, lastSwap, event, response, eventIndex } = args;
+  const { rows, transaction, market, state, lastSwap, event, response } = args;
   if (isChatEvent(event)) {
     rows.chatEvents.push({
       transaction,
@@ -97,6 +96,7 @@ export const addModelsForBumpEvent = (args: {
   } else if (isLiquidityEvent(event)) {
     const liquidity = toLiquidityEventData(event);
     const liquidityEventModel = {
+      blockAndEvent: undefined,
       transaction,
       market,
       state,
@@ -127,6 +127,7 @@ export const addModelsForBumpEvent = (args: {
     }
   } else if (isSwapEvent(event)) {
     rows.swapEvents.push({
+      blockAndEvent: undefined,
       transaction,
       market,
       state,
