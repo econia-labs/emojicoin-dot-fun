@@ -52,10 +52,10 @@ const toTransactionMetadata = (
   insertedAt: data.inserted_at ? postgresTimestampToDate(data.inserted_at) : new Date(0),
 });
 
-const toBlockAndEventIndex = (data: BlockAndEventIndexMetadata) => ({
+const toBlockAndEventIndex = (data: BlockAndEventIndexMetadata) => (data && data.block_number) ? ({
   blockNumber: BigInt(data.block_number),
   eventIndex: BigInt(data.event_index),
-});
+}) : undefined;
 
 /// If received from postgres, symbol bytes come in as a hex string in the format "\\xabcd" where
 /// "abcd" is the hex string.
@@ -345,8 +345,8 @@ export type UserPoolsRPCModel = ReturnType<typeof toUserPoolsRPCResponse>;
  */
 const curryToNamedType =
   <T, U, K extends string>(to: (data: T) => U, name: K) =>
-  (data: T): { [P in K]: U } =>
-    ({ [name]: to(data) }) as { [P in K]: U };
+    (data: T): { [P in K]: U } =>
+      ({ [name]: to(data) }) as { [P in K]: U };
 
 export const withTransactionMetadata = curryToNamedType(toTransactionMetadata, "transaction");
 export const withMarketAndStateMetadataAndBumpTime = curryToNamedType(
