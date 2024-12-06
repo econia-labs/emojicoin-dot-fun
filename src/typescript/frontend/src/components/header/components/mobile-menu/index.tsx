@@ -16,6 +16,7 @@ import { Copy, LogOut, User } from "lucide-react";
 import { useWalletModal } from "context/wallet-context/WalletModalContext";
 import { AnimatePresence, useAnimationControls } from "framer-motion";
 import AnimatedDropdownItem from "./components/animated-dropdown-item";
+import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
 
 const IconClass = "w-[22px] h-[22px] m-auto ml-[3ch] mr-[1.5ch]";
 
@@ -86,17 +87,20 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       }
     }
   };
+  const geoblocked = useIsUserGeoblocked();
 
   return (
     <StyledMotion initial="hidden" animate={isOpen ? "visible" : "hidden"} variants={slideVariants}>
       <MobileMenuWrapper>
         <MobileMenuInner>
-          <ButtonWithConnectWalletFallback
-            className="w-full"
-            mobile={true}
-            onClick={subMenuOnClick}
-            arrow
-          />
+          {!geoblocked && (
+            <ButtonWithConnectWalletFallback
+              className={"w-full"}
+              mobile={true}
+              onClick={subMenuOnClick}
+              arrow
+            />
+          )}
           <AnimatePresence>
             {subMenuOpen && (
               <>
