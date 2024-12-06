@@ -78,12 +78,17 @@ import {
   fetchLiquidityEventsByBlock,
   fetchSwapEventsByBlock,
 } from "@sdk/indexer-v2/queries/app/dexscreener";
-import { type toLiquidityEventModel, type toSwapEventModel } from "@sdk/indexer-v2/types";
+import {
+  isLiquidityEventModel,
+  type toLiquidityEventModel,
+  type toSwapEventModel,
+} from "@sdk/indexer-v2/types";
 import Big from "big.js";
 import { calculateRealReserves } from "@sdk/markets";
 import { toCoinDecimalString } from "../../lib/utils/decimals";
 import { DECIMALS } from "@sdk/const";
 import { symbolEmojisToPairId } from "./util";
+import { compareBigInt } from "@econia-labs/emojicoin-sdk";
 
 /**
  * - `txnId` is a transaction identifier such as a transaction hash
@@ -177,6 +182,8 @@ export interface EventsResponse {
   events: Event[];
 }
 
+const TWO_TO_64 = new Big(2).pow(64);
+
 export function toDexscreenerSwapEvent(
   event: ReturnType<typeof toSwapEventModel>
 ): SwapEvent & BlockInfo {
@@ -206,7 +213,11 @@ export function toDexscreenerSwapEvent(
     asset1: toCoinDecimalString(quote, DECIMALS),
   };
 
-  const priceNative = new Big(event.swap.avgExecutionPriceQ64.toString()).div(2 ** 64).toFixed(64);
+  const priceNative = new Big(event.swap.avgExecutionPriceQ64.toString())
+    .div(TWO_TO_64)
+    .toFixed(64);
+
+  if (!event.blockAndEvent) throw new Error("blockAndEvent is undefined");
 
   return {
     block: {
@@ -240,6 +251,8 @@ export function toDexscreenerJoinExitEvent(
     asset1: toCoinDecimalString(quote, DECIMALS),
   };
 
+  if (!event.blockAndEvent) throw new Error("blockAndEvent is undefined");
+
   return {
     block: {
       blockNumber: Number(event.blockAndEvent.blockNumber),
@@ -265,27 +278,14 @@ export async function getEventsByVersion(fromBlock: number, toBlock: number): Pr
   const swapEvents = await fetchSwapEventsByBlock({ fromBlock, toBlock });
   const liquidityEvents = await fetchLiquidityEventsByBlock({ fromBlock, toBlock });
 
-  // Merge these two arrays by their `transaction.version`: do it iteratively across both to avoid M*N complexity
-  const events: Event[] = [];
-  let swapIndex = 0;
-  let liquidityIndex = 0;
-  while (swapIndex < swapEvents.length && liquidityIndex < liquidityEvents.length) {
-    const swapEvent = swapEvents[swapIndex];
-    const liquidityEvent = liquidityEvents[liquidityIndex];
-    if (swapEvent.transaction.version < liquidityEvent.transaction.version) {
-      events.push(toDexscreenerSwapEvent(swapEvent));
-      swapIndex++;
-    } else {
-      events.push(toDexscreenerJoinExitEvent(liquidityEvent));
-      liquidityIndex++;
-    }
-  }
-
-  // Add any remaining events
-  events.push(...swapEvents.slice(swapIndex).map(toDexscreenerSwapEvent));
-  events.push(...liquidityEvents.slice(liquidityIndex).map(toDexscreenerJoinExitEvent));
-
-  return events;
+  // Merge these two arrays by their `transaction.version`
+  return [...swapEvents, ...liquidityEvents]
+    .sort((a, b) => compareBigInt(a.transaction.version, b.transaction.version))
+    .map((event) =>
+      isLiquidityEventModel(event)
+        ? toDexscreenerJoinExitEvent(event)
+        : toDexscreenerSwapEvent(event)
+    );
 }
 
 // NextJS JSON response handler
