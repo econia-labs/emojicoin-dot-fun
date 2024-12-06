@@ -277,7 +277,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
                 <Arrows color="econiaBlue" />
               </button>
 
-              <Text textScale={isMobile ? "heading2" : "heading1"} textTransform="uppercase" className={isMobile ? "w-min" : ""}>
+              <Text
+                textScale={isMobile ? "heading2" : "heading1"}
+                textTransform="uppercase"
+                className={isMobile ? "w-min" : ""}
+              >
                 {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
               </Text>
 
