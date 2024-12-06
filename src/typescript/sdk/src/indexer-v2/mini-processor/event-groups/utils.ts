@@ -96,9 +96,8 @@ export const addModelsForBumpEvent = (args: {
     });
   } else if (isLiquidityEvent(event)) {
     const liquidity = toLiquidityEventData(event);
-    const liquidityEventModel: DatabaseModels["liquidity_events"] = {
+    const liquidityEventModel = {
       transaction,
-      blockAndEvent: { blockNumber: transaction.version, eventIndex: eventIndex! },
       market,
       state,
       lastSwap,
@@ -129,7 +128,6 @@ export const addModelsForBumpEvent = (args: {
   } else if (isSwapEvent(event)) {
     rows.swapEvents.push({
       transaction,
-      blockAndEvent: { blockNumber: transaction.version, eventIndex: eventIndex! },
       market,
       state,
       swap: toSwapEventData(event),
