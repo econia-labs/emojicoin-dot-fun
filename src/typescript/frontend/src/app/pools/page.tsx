@@ -22,6 +22,10 @@ type PoolsSearchParams = {
   account: string | null;
 };
 
+/**
+ * Uses the same exact parsing logic as the /pools/api route.
+ * @see {@link src/pools/api/route.ts}
+ */
 export default async function PoolsPage({ searchParams }: { searchParams: PoolsSearchParams }) {
   const page = safeParsePageWithDefault(searchParams.page);
   const sortBy = getValidSortByForPoolsPage(searchParams.sortby);
