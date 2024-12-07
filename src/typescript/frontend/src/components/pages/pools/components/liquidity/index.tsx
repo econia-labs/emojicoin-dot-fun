@@ -27,6 +27,7 @@ import Info from "components/info";
 import { type PoolsData } from "../../ClientPoolsPage";
 import { EmojiPill } from "components/EmojiPill";
 import { FormattedNumber } from "components/FormattedNumber";
+import { useMatchBreakpoints } from "@hooks/index";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
@@ -50,7 +51,7 @@ const InnerWrapper = ({
 );
 
 const grayLabel = `
-  pixel-heading-4 mb-[-6px] text-light-gray !leading-5 uppercase
+  md:pixel-heading-4 mb-[-6px] text-light-gray !leading-5 uppercase
 `;
 
 const inputAndOutputStyles = `
@@ -61,6 +62,8 @@ const inputAndOutputStyles = `
 
 const Liquidity = ({ market }: LiquidityProps) => {
   const { t } = translationFunction();
+
+  const { isMobile } = useMatchBreakpoints();
 
   const searchParams = useSearchParams();
 
@@ -156,8 +159,10 @@ const Liquidity = ({ market }: LiquidityProps) => {
     <InnerWrapper id="apt" className="liquidity-input">
       <Column>
         <div className={grayLabel}>
-          {direction === "add" ? t("You deposit") : t("You get")}
-          {balanceLabel}
+          <span className="text-nowrap">
+            {direction === "add" ? t("You deposit") : t("You get")}
+            {balanceLabel}
+          </span>
           <FormattedNumber
             value={aptBalance}
             className={enoughApt ? "text-green" : "text-error"}
@@ -190,8 +195,10 @@ const Liquidity = ({ market }: LiquidityProps) => {
     <InnerWrapper id="emoji" className="liquidity-input">
       <Column>
         <div className={grayLabel}>
-          {direction === "add" ? "You deposit" : "You get"}
-          {balanceLabel}
+          <span className="text-nowrap">
+            {direction === "add" ? "You deposit" : "You get"}
+            {balanceLabel}
+          </span>
           <FormattedNumber
             value={emojicoinBalance}
             className={enoughEmoji ? "text-green" : "text-error"}
@@ -222,8 +229,10 @@ const Liquidity = ({ market }: LiquidityProps) => {
     <InnerWrapper id="lp" className="liquidity-input">
       <Column>
         <div className={grayLabel}>
-          {direction === "remove" ? "You deposit" : "You get"}
-          {balanceLabel}
+          <span className="text-nowrap">
+            {direction === "remove" ? "You deposit" : "You get"}
+            {balanceLabel}
+          </span>
           <FormattedNumber
             value={emojicoinLPBalance}
             className={enoughEmojiLP ? "text-green" : "text-error"}
@@ -248,7 +257,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           />
         )}
       </Column>
-      <div>
+      <div className="text-nowrap">
         <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol}` : ""} />
         <span className={EmojiInputLabelStyles}>{market ? " LP" : "-"}</span>
       </div>
@@ -258,17 +267,21 @@ const Liquidity = ({ market }: LiquidityProps) => {
   return (
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
       <Column width="100%" maxWidth="414px" justifyContent="center">
-        <Flex width="100%" justifyContent="space-between" alignItems="baseline" mb="10px">
+        <Flex width="100%" justifyContent="space-between" alignItems="center" mb="10px">
           <Flex flexDirection="row">
-            <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="baseline">
+            <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="center">
               <button
                 onClick={() => setDirection(direction === "add" ? "remove" : "add")}
-                className="absolute left-[-30px] top-[-2px]"
+                className="absolute left-[-30px]"
               >
                 <Arrows color="econiaBlue" />
               </button>
 
-              <Text textScale="heading1" textTransform="uppercase">
+              <Text
+                textScale={isMobile ? "heading2" : "heading1"}
+                textTransform="uppercase"
+                className={isMobile ? "w-min" : ""}
+              >
                 {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
               </Text>
 
@@ -385,7 +398,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           </ButtonWithConnectWalletFallback>
         </Flex>
 
-        <Text textScale="heading1" textTransform="uppercase" mb="16px">
+        <Text textScale={isMobile ? "heading2" : "heading1"} textTransform="uppercase" mb="16px">
           {t("Reserves")}
         </Text>
 
