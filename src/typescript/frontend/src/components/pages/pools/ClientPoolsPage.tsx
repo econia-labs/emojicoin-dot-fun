@@ -21,13 +21,14 @@ import { useSearchParams } from "next/navigation";
 import { encodeEmojis, getEmojisInString, type SymbolEmoji } from "@sdk/emoji_data";
 import SearchBar from "components/inputs/search-bar";
 import { type MarketStateModel, type UserPoolsRPCModel } from "@sdk/indexer-v2/types";
+import { DEFAULT_POOLS_SORT_BY } from "@sdk/indexer-v2/queries/query-params";
 
 export type PoolsData = MarketStateModel | UserPoolsRPCModel;
 
 export const ClientPoolsPage = ({ initialData }: { initialData: PoolsData[] }) => {
   const searchParams = useSearchParams();
   const poolParam = searchParams.get("pool");
-  const [sortBy, setSortBy] = useState<SortByPageQueryParams>("all_time_vol");
+  const [sortBy, setSortBy] = useState<SortByPageQueryParams>(DEFAULT_POOLS_SORT_BY);
   const [orderBy, setOrderBy] = useState<"desc" | "asc">("desc");
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(poolParam ? 0 : undefined);
   const [page, setPage] = useState<number>(1);
