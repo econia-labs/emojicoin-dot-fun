@@ -48,6 +48,12 @@
       ],
       "@static/*": [
         "../public/static/*"
+      ],
+      "@/contract-apis": [
+        "../../sdk/src/emojicoin_dot_fun/contract-apis"
+      ],
+      "@/contract-apis/*": [
+        "../../sdk/src/emojicoin_dot_fun/contract-apis/*"
       ]
     },
     "plugins": [

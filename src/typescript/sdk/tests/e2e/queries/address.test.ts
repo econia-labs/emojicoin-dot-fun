@@ -1,5 +1,5 @@
 import { getEvents } from "../../../src";
-import { Chat } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { Chat } from "@/contract-apis/emojicoin-dot-fun";
 import { fetchChatEvents } from "../../../src/indexer-v2/queries";
 import { getAptosClient } from "../../../src/utils/test";
 import RowEqualityChecks from "./equality-checks";
