@@ -1,6 +1,6 @@
 // cspell:word noto
 import { CDN_URL } from "lib/env";
-import { Noto_Color_Emoji as NotoColorEmoji } from "next/font/google";
+import { Noto_Color_Emoji } from "next/font/google";
 
 export const fontsStyle = `
   @font-face {
@@ -25,7 +25,7 @@ export const fontsStyle = `
   }
 `;
 
-export const notoColorEmoji = NotoColorEmoji({
+export const notoColorEmoji = Noto_Color_Emoji({
   weight: "400",
   subsets: ["emoji"],
   preload: true,
