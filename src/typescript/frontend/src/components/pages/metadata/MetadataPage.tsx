@@ -7,7 +7,8 @@ type MetadataField = { name: string; placeholder: string };
 
 const DEFAULT_FIELDS: [MetadataField, string][] = [
   [{ name: "CTO link", placeholder: "https://..." }, ""],
-  [{ name: "Moto", placeholder: "The best shoe market ever !" }, ""],
+  // cspell:word moto
+  [{ name: "Moto", placeholder: "The best shoe market ever!" }, ""],
 ];
 
 const BUTTON_CLASSNAME = "text-white px-4 border-ec-blue border-solid border-[3px] rounded-xl";
