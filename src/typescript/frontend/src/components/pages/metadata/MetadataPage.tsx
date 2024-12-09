@@ -1,7 +1,19 @@
 "use client";
 
+import {
+  MarketMetadataByMarketAddress,
+  MarketProperties,
+  SetMarketProperties,
+} from "@/contract-apis";
+import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { type ChangeEventHandler, type MouseEventHandler, useState } from "react";
+import {
+  type ChangeEventHandler,
+  type MouseEventHandler,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 type MetadataField = { name: string; placeholder: string };
 
@@ -21,6 +33,7 @@ const FormEntry = ({
   name,
   onClick,
   buttonText,
+  className,
 }: {
   value: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
@@ -28,12 +41,13 @@ const FormEntry = ({
   placeholder: string;
   name: string;
   buttonText?: string;
+  className?: string;
 }) => (
   <div className={`mx-auto relative`}>
     <div className="max-w-[300px] text-white">{name}</div>
     <input
       tabIndex={1}
-      className={`${INPUT_CLASSNAME} w-[300px]`}
+      className={`${INPUT_CLASSNAME} w-[300px] ${className}`}
       value={value}
       placeholder={placeholder}
       onChange={onChange}
@@ -54,7 +68,55 @@ const MetadataPage = () => {
   const [fields, setFields] = useState<Map<MetadataField, string>>(new Map(DEFAULT_FIELDS));
   const [marketAddress, setMarketAddress] = useState<string>("");
   const [addFieldName, setAddFieldName] = useState<string>("");
-  const { account } = useAptos();
+  const { account, aptos, submit } = useAptos();
+
+  const { data: marketExists } = useQuery({
+    queryKey: ["metadata-market-exists", marketAddress],
+    queryFn: async () => {
+      if (marketAddress === "") {
+        return undefined;
+      }
+      try {
+        const market = await MarketMetadataByMarketAddress.view({
+          aptos,
+          marketAddress,
+        });
+        return market.vec.length !== 0;
+      } catch (e) {
+        console.error("Could not get if market exists", e);
+        return false;
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (marketAddress === "") {
+      return;
+    }
+    MarketProperties.submit({
+      aptos,
+      market: marketAddress,
+    })
+      .then((r) => (r.vec.length === 0 ? null : (r.vec[0] ?? null)))
+      .then((r) => {
+        if (r) {
+          // TODO: complete with the data.
+          // console.log(r);
+        }
+      })
+      .catch((e) => console.error("Could not get existing market metadata.", e));
+  }, [marketAddress, aptos]);
+
+  const borderColor = useMemo(() => {
+    switch (marketExists) {
+      case true:
+        return "border-green";
+      case false:
+        return "border-pink";
+      case undefined:
+        return "border-ec-blue";
+    }
+  }, [marketExists]);
 
   return (
     <div className="w-[100%] h-[100%] flex flex-col gap-[10px] text-xl place-content-center">
@@ -63,6 +125,7 @@ const MetadataPage = () => {
         value={marketAddress}
         placeholder="0xabc..."
         onChange={(e) => setMarketAddress(e.target.value)}
+        className={borderColor}
       ></FormEntry>
       {Array.from(fields.entries()).map(([key, value]) => (
         <FormEntry
@@ -125,13 +188,24 @@ const MetadataPage = () => {
         <button
           tabIndex={3}
           className={`${BUTTON_CLASSNAME} ${account === null ? "!border-dark-gray" : ""} col-span-full`}
-          onClick={() => {
-            navigator.clipboard
-              .readText()
-              .then((r) => setFields(new Map(JSON.parse(r))))
-              .catch(console.warn);
+          onClick={async () => {
+            if (!account) {
+              return;
+            }
+            const builderLambda = () =>
+              SetMarketProperties.builder({
+                aptosConfig: aptos.config,
+                admin: account.address,
+                market: marketAddress,
+                keys: Array.from(fields.keys().map((key) => key.name)),
+                values: Array.from(fields.values()),
+              });
+            const res = await submit(builderLambda);
+            if (!res || res.error) {
+              console.error(res);
+            }
           }}
-          disabled={account === null}
+          disabled={account === null && marketExists}
         >
           Submit
         </button>
