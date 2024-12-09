@@ -39,4 +39,4 @@ export const GREEN = "#2FA90F";
 export const PINK = "#CD2F8D";
 export const ECONIA_BLUE = "#086CD9";
 export const WARNING = "#FFB119";
-export const ERROR = "#F3263E";
+export const ERROR_RED = "#F3263E";
