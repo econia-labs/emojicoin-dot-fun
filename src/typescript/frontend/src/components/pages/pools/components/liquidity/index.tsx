@@ -5,7 +5,7 @@ import { translationFunction } from "context/language-context";
 import { Flex, Column, FlexGap } from "@containers";
 import { Text, Button, InputNumeric } from "components";
 import { StyledAddLiquidityWrapper } from "./styled";
-import { ProvideLiquidity, RemoveLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { ProvideLiquidity, RemoveLiquidity } from "@/contract-apis/emojicoin-dot-fun";
 import {
   AptosInputLabel,
   EmojiInputLabel,

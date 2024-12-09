@@ -17,7 +17,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     const E_ADMIN_TO_REMOVE_IS_MARKET_METADATA_PUBLISHER: u64 = 3;
     /// Market not found.
     const E_MARKET_NOT_FOUND: u64 = 4;
-    /// Provided inproper keys and values.
+    /// The number of provided keys and values do not match.
     const E_KEYS_AND_VALUES_NOT_EQUAL_LENGTH: u64 = 5;
 
     struct Nil {}
@@ -230,7 +230,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
             market_property(get_market_address(MARKET_2), get_PROPERTY())
                 == option::some(market_2_value)
         );
-        let market_1_value_override = utf8(b"barbaz");
+        let market_1_value_override = utf8(b"bar baz");
         add_market_properties(
             &market_metadata_signer,
             get_market_address(MARKET_1),
@@ -597,7 +597,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     }
 
     #[test, expected_failure(abort_code = E_KEYS_AND_VALUES_NOT_EQUAL_LENGTH)]
-    fun test_add_market_properties_inequal_length() acquires MetadataStore {
+    fun test_add_market_properties_unequal_length() acquires MetadataStore {
         init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);
@@ -610,7 +610,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     }
 
     #[test, expected_failure(abort_code = E_KEYS_AND_VALUES_NOT_EQUAL_LENGTH)]
-    fun test_set_market_properties_inequal_length() acquires MetadataStore {
+    fun test_set_market_properties_unequal_length() acquires MetadataStore {
         init_emojicoin();
         let market_metadata_signer = get_signer(@market_metadata);
         init_module(&market_metadata_signer);

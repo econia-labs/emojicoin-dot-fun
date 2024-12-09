@@ -6,7 +6,7 @@ import { MessageContainer } from "./components";
 import { type ChatProps } from "../../types";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
-import { Chat } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { Chat } from "@/contract-apis/emojicoin-dot-fun";
 import { useEventStore } from "context/event-store-context";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import EmojiPickerWithInput from "../../../../emoji-picker/EmojiPickerWithInput";
