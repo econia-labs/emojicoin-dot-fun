@@ -1,7 +1,13 @@
 "use client";
 // cspell:word couldn
 
-import { type HTMLAttributes, Suspense, useEffect, type PointerEventHandler } from "react";
+import {
+  type HTMLAttributes,
+  Suspense,
+  useEffect,
+  type PointerEventHandler,
+  useCallback,
+} from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
 import { SearchIndex } from "emoji-mart";
@@ -9,6 +15,7 @@ import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData 
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
 import { ECONIA_BLUE } from "theme/colors";
 import RoundButton from "@icons/Minimize";
+import { isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
 
 export type SearchResult = Array<EmojiPickerSearchData>;
 
@@ -18,13 +25,20 @@ export const search = async (value: string): Promise<SearchResult> => {
 
 const nBytes = (e: string) => new TextEncoder().encode(e).length;
 
-export const filterBigEmojis = (e: EmojiMartData["emojis"][string]) =>
-  nBytes(e.skins[0].native) <= 10;
+/**
+ * Checks if an emoji-mart input is a valid symbol emoji.
+ */
+export const isEmojiMartSymbolEmoji = (e?: EmojiMartData["emojis"][string]) =>
+  isSymbolEmoji(e?.skins[0].native ?? "");
+
+/**
+ * * Checks if an emoji-mart input is a valid chat emoji.
+ */
+export const isEmojiMartChatEmoji = (e?: EmojiMartData["emojis"][string]) =>
+  isValidChatMessageEmoji(e?.skins[0].native ?? "");
 
 export default function EmojiPicker(
-  props: HTMLAttributes<HTMLDivElement> & { drag: PointerEventHandler<HTMLDivElement> } & {
-    filterEmojis?: (e: EmojiMartData["emojis"][string]) => boolean;
-  }
+  props: HTMLAttributes<HTMLDivElement> & { drag: PointerEventHandler<HTMLDivElement> }
 ) {
   const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
   const mode = useEmojiPicker((s) => s.mode);
@@ -38,6 +52,12 @@ export default function EmojiPicker(
 
   const previewSelector = host?.shadowRoot?.querySelector("div.margin-l");
   const search = host?.shadowRoot?.querySelector("div.search input");
+
+  const filterEmojis = useCallback(
+    (e?: EmojiMartData["emojis"][string]) =>
+      mode === "chat" ? isEmojiMartChatEmoji(e) : isEmojiMartSymbolEmoji(e),
+    [mode]
+  );
 
   useEffect(() => {
     if (!search || !host) return;
@@ -157,7 +177,7 @@ export default function EmojiPicker(
     }
   }, []);
 
-  const { drag, filterEmojis, ...propsRest } = props;
+  const { drag, ...propsRest } = props;
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

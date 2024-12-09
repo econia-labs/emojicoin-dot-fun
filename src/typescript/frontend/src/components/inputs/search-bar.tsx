@@ -9,7 +9,6 @@ import { EMOJI_GRID_ITEM_WIDTH } from "components/pages/home/components/const";
 import { breakpointsArray } from "theme/base";
 import { DARK_GRAY } from "theme/colors";
 import { useEmojiPicker } from "context/emoji-picker-context";
-import { filterBigEmojis } from "components/pages/emoji-picker/EmojiPicker";
 
 const searchIcon = <Image className="med-pixel-search" alt="search" src={icon} />;
 
@@ -63,7 +62,6 @@ export const SearchBar = () => {
               <EmojiPickerWithInput
                 handleClick={async () => {}}
                 inputClassName="search-picker border-none"
-                filterEmojis={filterBigEmojis}
               />
             </Flex>
           </InputGroup>
