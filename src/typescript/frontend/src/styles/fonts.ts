@@ -1,6 +1,6 @@
 // cspell:word noto
 import localFont from "next/font/local";
-import { Noto_Color_Emoji as NotoColorEmoji } from "next/font/google";
+import { Noto_Color_Emoji } from "next/font/google";
 
 export const pixelar = localFont({
   src: "../../public/fonts/Pixelar-Regular.woff2",
@@ -34,7 +34,7 @@ export const formaDJRDisplayRegular = localFont({
   variable: "--font-formaDR",
 });
 
-export const notoColorEmoji = NotoColorEmoji({
+export const notoColorEmoji = Noto_Color_Emoji({
   weight: "400",
   subsets: ["emoji"],
   preload: true,
