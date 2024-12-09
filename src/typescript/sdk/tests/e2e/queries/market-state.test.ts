@@ -2,7 +2,7 @@ import { getEventsAsProcessorModelsFromResponse, type SymbolEmoji } from "../../
 import TestHelpers from "../../../src/utils/test/helpers";
 import { getFundedAccount } from "../../../src/utils/test/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
-import { SwapWithRewards } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "../../../src/utils/test";
 import { fetchMarketState } from "../../../src/indexer-v2/queries";
 import { type MarketStateModel } from "../../../src/indexer-v2/types";

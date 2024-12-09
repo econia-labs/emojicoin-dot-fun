@@ -1,7 +1,7 @@
 import ButtonWithConnectWalletFallback from "components/header/wallet-button/ConnectWalletButton";
 import Button from "components/button";
 import { translationFunction } from "context/language-context";
-import { SwapWithRewards } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { SwapWithRewards } from "@/contract-apis/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import { toCoinTypes } from "@sdk/markets/utils";
 import { type AccountAddressString } from "@sdk/emojicoin_dot_fun";

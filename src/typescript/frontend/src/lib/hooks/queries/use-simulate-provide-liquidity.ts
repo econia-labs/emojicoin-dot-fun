@@ -6,7 +6,7 @@ import { withResponseError } from "lib/hooks/queries/client";
 import {
   SimulateProvideLiquidity,
   SimulateRemoveLiquidity,
-} from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+} from "@/contract-apis/emojicoin-dot-fun";
 
 export const simulateProvideLiquidity = async (args: {
   aptos: Aptos;

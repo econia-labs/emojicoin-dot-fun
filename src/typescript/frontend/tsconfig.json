@@ -25,6 +25,12 @@
       "@/broker/*": [
         "../../sdk/src/broker-v2/*"
       ],
+      "@/contract-apis": [
+        "../../sdk/src/emojicoin_dot_fun/contract-apis"
+      ],
+      "@/contract-apis/*": [
+        "../../sdk/src/emojicoin_dot_fun/contract-apis/*"
+      ],
       "@/queries/*": [
         "../../sdk/src/indexer-v2/queries/app/*"
       ],

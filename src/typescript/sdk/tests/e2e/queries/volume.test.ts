@@ -14,7 +14,7 @@ import {
   sum,
   sumByKey,
 } from "../../../src";
-import { Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { Swap } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "../../../src/utils/test";
 import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
 import { type Events } from "../../../src/emojicoin_dot_fun/events";

@@ -20,9 +20,9 @@ import {
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
   ViewFunctionPayloadBuilder,
-} from "./payload-builders";
-import { type Uint64String, type TypeTagInput } from ".";
-import { getAptosClient } from "../utils/aptos-client";
+} from "../payload-builders";
+import { type Uint64String, type TypeTagInput } from "..";
+import { getAptosClient } from "../../utils/aptos-client";
 
 export type MintPayloadMoveArguments = {
   dstAddr: AccountAddress;

@@ -18,7 +18,7 @@ import {
   RegisterMarket,
   Swap,
   SwapWithRewards,
-} from "../emojicoin_dot_fun/emojicoin-dot-fun";
+} from "@/contract-apis/emojicoin-dot-fun";
 import { type Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
 import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";

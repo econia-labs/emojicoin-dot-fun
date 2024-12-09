@@ -27,15 +27,15 @@ import {
   type Uint64,
   type AccountAddressString,
   type HexString,
-} from "./types";
+} from "../types";
 import {
   ViewFunctionPayloadBuilder,
   EntryFunctionPayloadBuilder,
   EntryFunctionTransactionBuilder,
-} from "./payload-builders";
-import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../const";
-import type JsonTypes from "../types/json-types";
-import { getAptosClient } from "../utils/aptos-client";
+} from "../payload-builders";
+import { MODULE_ADDRESS, REWARDS_MODULE_ADDRESS } from "../../const";
+import type JsonTypes from "../../types/json-types";
+import { getAptosClient } from "../../utils/aptos-client";
 
 export type ChatPayloadMoveArguments = {
   marketAddress: AccountAddress;

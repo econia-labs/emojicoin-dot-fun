@@ -1,7 +1,7 @@
 "use server";
 
 import { toMarketView } from "@sdk-types";
-import { MarketView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { MarketView } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "@sdk/utils/aptos-client";
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";

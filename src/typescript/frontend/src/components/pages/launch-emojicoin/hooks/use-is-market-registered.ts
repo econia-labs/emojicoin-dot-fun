@@ -1,4 +1,4 @@
-import { MarketMetadataByEmojiBytes } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { MarketMetadataByEmojiBytes } from "@/contract-apis/emojicoin-dot-fun";
 import { normalizeHex } from "@sdk/utils";
 import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
 import { useEmojiPicker } from "context/emoji-picker-context";
