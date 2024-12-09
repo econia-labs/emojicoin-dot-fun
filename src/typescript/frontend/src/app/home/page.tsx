@@ -79,7 +79,14 @@ export default async function Home({ searchParams }: HomePageParams) {
     priceFeedPromise,
     marketsPromise,
     numMarketsPromise,
-  ]);
+  ]).catch((e) => {
+    console.error(e);
+    return [
+      [] as DatabaseModels["price_feed"][],
+      [] as DatabaseModels["market_state"][],
+      0,
+    ] as const;
+  });
 
   return (
     <HomePageComponent
