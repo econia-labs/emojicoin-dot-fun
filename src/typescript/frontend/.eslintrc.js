@@ -77,7 +77,7 @@ module.exports = {
     "no-console": [
       "warn",
       {
-        allow: ["warn", "error", "debug", "clear", "trace"],
+        allow: ["warn", "error", "debug", "clear", "trace", "info"],
       },
     ],
     "no-unreachable": "error",
