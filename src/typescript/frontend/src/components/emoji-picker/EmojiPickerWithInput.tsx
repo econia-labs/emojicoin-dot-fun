@@ -14,7 +14,6 @@ import { variants } from "./animation-variants";
 import { checkTargetAndStopDefaultPropagation } from "./utils";
 import { getEmojisInString } from "@sdk/emoji_data";
 import { createPortal } from "react-dom";
-import { type EmojiMartData } from "components/pages/emoji-picker/types";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import "./triangle.css";
 
@@ -56,13 +55,11 @@ export const EmojiPickerWithInput = ({
   pickerButtonClassName,
   inputGroupProps,
   inputClassName = "",
-  filterEmojis,
 }: {
   handleClick: (message: string) => Promise<void>;
   pickerButtonClassName?: string;
   inputGroupProps?: Partial<React.ComponentProps<typeof InputGroup>>;
   inputClassName?: string;
-  filterEmojis?: (e: EmojiMartData["emojis"][string]) => boolean;
 }) => {
   const inputRef = useRef<HTMLDivElement | null>(null);
   const sendButtonRef = useRef<HTMLDivElement | null>(null);
@@ -319,7 +316,6 @@ export const EmojiPickerWithInput = ({
               data-testid="picker"
               className={mode}
               drag={(e) => ctrls.start(e, { snapToCursor: false })}
-              filterEmojis={filterEmojis}
             />
           </motion.button>
         </div>,
