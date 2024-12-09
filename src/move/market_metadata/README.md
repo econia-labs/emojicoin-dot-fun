@@ -1,6 +1,8 @@
+<!-- cspell:word permissioned -->
 # `emojicoin-dot-fun` market metadata
 
-This package contains functions to set and get metadata about markets in an permissioned way.
+This package contains functions to set and get metadata about markets in a
+permissioned way.
 
 ## Publish commands
 
@@ -35,6 +37,7 @@ VALUE=string:bar
 MARKET_ID=u64:1
 ```
 
+<!-- markdownlint-disable MD013 -->
 ```sh
 aptos move run \
     --args $MARKET_ID $PROPERTY $VALUE \
@@ -50,3 +53,4 @@ aptos move run \
     --function-id $MARKET_METADATA::emojicoin_dot_fun_market_metadata::remove_market_property \
     --profile $PROFILE
 ```
+<!-- markdownlint-enable MD013 -->

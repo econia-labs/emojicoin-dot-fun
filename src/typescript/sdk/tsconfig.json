@@ -21,7 +21,6 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "outDir": "./dist",
-    "preserveWatchOutput": true,
     "paths": {
       "@/contract-apis": [
         "./src/emojicoin_dot_fun/contract-apis"
@@ -30,6 +29,7 @@
         "./src/emojicoin_dot_fun/contract-apis/*"
       ]
     },
+    "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
