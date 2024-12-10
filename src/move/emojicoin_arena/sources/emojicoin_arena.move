@@ -98,7 +98,7 @@ module arena::emojicoin_arena {
         tap_out_fee: u64
     }
 
-    struct Nil has store {}
+    struct Nil has drop, store {}
 
     struct Registry has key {
         /// Map from melee serial ID to the melee.
@@ -121,7 +121,11 @@ module arena::emojicoin_arena {
 
     struct UserMelees has key {
         /// Set of serial IDs of all melees the user has entered.
-        melee_ids: SmartTable<u64, Nil>
+        entered_melee_ids: SmartTable<u64, Nil>,
+        /// Set of serial IDs of all melees the user has exited.
+        exited_melee_ids: SmartTable<u64, Nil>,
+        /// Set of serial IDs of all melees the user has entered but not exited.
+        unexited_melee_ids: SmartTable<u64, Nil>
     }
 
     public entry fun fund_vault(arena: &signer, amount: u64) acquires Registry {
@@ -220,11 +224,22 @@ module arena::emojicoin_arena {
                 }
             );
             if (!exists<UserMelees>(entrant_address)) {
-                move_to(entrant, UserMelees { melee_ids: smart_table::new() });
+                move_to(
+                    entrant,
+                    UserMelees {
+                        entered_melee_ids: smart_table::new(),
+                        exited_melee_ids: smart_table::new(),
+                        unexited_melee_ids: smart_table::new()
+                    }
+                );
             };
-            let user_melee_ids_ref_mut = &mut UserMelees[entrant_address].melee_ids;
-            user_melee_ids_ref_mut.add(melee_id, Nil {});
         };
+
+        // Update user melees resource.
+        let user_melees_ref_mut = &mut UserMelees[entrant_address];
+        ensure_contains(&mut user_melees_ref_mut.entered_melee_ids, melee_id);
+        ensure_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
+        ensure_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
 
         // Verify that user does not split balance between the two emojicoins.
         let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
@@ -317,7 +332,7 @@ module arena::emojicoin_arena {
     #[randomness]
     entry fun exit<Coin0, LP0, Coin1, LP1>(
         participant: &signer, melee_id: u64
-    ) acquires MeleeEscrow, Registry {
+    ) acquires MeleeEscrow, Registry, UserMelees {
         let (melee_just_ended, _registry_ref_mut, _time, _n_melees_before_cranking) =
             crank_schedule();
         exit_inner<Coin0, LP0, Coin1, LP1>(participant, melee_id, !melee_just_ended);
@@ -329,7 +344,7 @@ module arena::emojicoin_arena {
         melee_id: u64,
         market_addresses: vector<address>,
         buy_emojicoin_0: bool
-    ) acquires MeleeEscrow, Registry {
+    ) acquires MeleeEscrow, Registry, UserMelees {
         let (exit_once_done, _registry_ref_mut, _time, _n_melees_before_cranking) =
             crank_schedule();
 
@@ -547,6 +562,22 @@ module arena::emojicoin_arena {
         &mut Registry[@arena]
     }
 
+    inline fun ensure_contains(
+        map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
+    ) {
+        if (!map_ref_mut.contains(key)) {
+            map_ref_mut.add(key, Nil {});
+        }
+    }
+
+    inline fun ensure_not_contains(
+        map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
+    ) {
+        if (map_ref_mut.contains(key)) {
+            map_ref_mut.remove(key);
+        }
+    }
+
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
         participant: &signer, melee_id: u64, melee_is_current: bool
     ) acquires Registry {
@@ -576,6 +607,7 @@ module arena::emojicoin_arena {
                     );
                     *tap_out_fee_ref_mut = 0;
                 };
+
                 // Move emojicoin balances out of escrow.
                 aptos_account::deposit_coins(
                     participant_address,
@@ -584,6 +616,13 @@ module arena::emojicoin_arena {
                 aptos_account::deposit_coins(
                     participant_address,
                     coin::extract_all(&mut escrow_ref_mut.emojicoin_1)
+                );
+
+                // Update user melees resource.
+                let user_melees_ref_mut = &mut UserMelees[participant_address];
+                ensure_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
+                ensure_not_contains(
+                    &mut user_melees_ref_mut.unexited_melee_ids, melee_id
                 );
             };
         }
