@@ -1,6 +1,7 @@
 import { type symbolBytesToEmojis } from "@sdk/emoji_data";
 import { type AnimationPlaybackControls, useAnimate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
+import { Emoji } from "utils/emoji";
 
 const DROP_FALL_TIME = 7.5;
 const DROP_INTERVAL = 1;
@@ -65,7 +66,9 @@ export function EmojiRainDrop({
       ref={scope}
     >
       {name.emojis.map((e) => (
-        <span key={`rain-drop-emoji-${e.hex}`}>{e.emoji}</span>
+        <span key={`rain-drop-emoji-${e.hex}`}>
+          <Emoji emojis={e.emoji} />
+        </span>
       ))}
     </div>
   );
