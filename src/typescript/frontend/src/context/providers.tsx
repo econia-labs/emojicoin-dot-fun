@@ -33,23 +33,26 @@ import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { EmojiPickerProvider } from "./emoji-picker-context/EmojiPickerContextProvider";
 import { isMobile, isTablet } from "react-device-detect";
 import { getAptosApiKey } from "@sdk/const";
-import type { EmojiMartData } from "components/pages/emoji-picker/types";
-import { init } from "emoji-mart";
 import { HeaderSpacer } from "components/header-spacer";
 import { GeoblockedBanner } from "components/geoblocking";
+import { completePickerData } from "utils/picker-data/complete-picker-data";
+import { type EmojiMartData } from "components/pages/emoji-picker/types";
+import { init } from "emoji-mart";
+
+/**
+ * Initialize the picker data from the CDN- then augment it with the missing emoji data with @see completePickerData.
+ */
+fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then((res) =>
+  res
+    .json()
+    .then((data) => data as EmojiMartData)
+    .then(completePickerData)
+    .then((data) => init({ set: "native", data }))
+);
 
 enableMapSet();
 
 const queryClient = new QueryClient();
-
-// This is 400KB of lots of repeated data, we can use a smaller version of this if necessary later.
-// TBH, we should probably just fork the library.
-const data = fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data@latest/sets/15/native.json").then(
-  (res) =>
-    res.json().then((data) => {
-      return data as EmojiMartData;
-    })
-);
 
 const ThemedApp = ({ children }) => {
   const { theme } = useThemeContext();
@@ -68,14 +71,6 @@ const ThemedApp = ({ children }) => {
     ],
     []
   );
-
-  useEffect(() => {
-    data.then((d) => {
-      init({ set: "native", data: d });
-    });
-
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
 
   return (
     <ThemeProvider theme={theme}>
