@@ -195,13 +195,13 @@ export function toDexscreenerSwapEvent(
       asset0In: toCoinDecimalString(event.swap.inputAmount, DECIMALS),
       asset0Out: 0,
       asset1In: 0,
-      asset1Out: toCoinDecimalString(event.swap.quoteVolume, DECIMALS),
+      asset1Out: toCoinDecimalString(event.swap.baseVolume, DECIMALS),
     };
   } else {
     // We are buying with APT
     assetInOut = {
       asset0In: 0,
-      asset0Out: toCoinDecimalString(event.swap.baseVolume, DECIMALS),
+      asset0Out: toCoinDecimalString(event.swap.quoteVolume, DECIMALS),
       asset1In: toCoinDecimalString(event.swap.inputAmount, DECIMALS),
       asset1Out: 0,
     };
