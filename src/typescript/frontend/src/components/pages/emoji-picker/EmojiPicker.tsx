@@ -7,23 +7,25 @@ import {
   useEffect,
   type PointerEventHandler,
   useCallback,
+  useMemo,
 } from "react";
 import { useEmojiPicker } from "context/emoji-picker-context";
 import { default as Picker } from "@emoji-mart/react";
 import { SearchIndex } from "emoji-mart";
 import { type EmojiMartData, type EmojiPickerSearchData, type EmojiSelectorData } from "./types";
 import { unifiedCodepointsToEmoji } from "utils/unified-codepoint-to-emoji";
-import { ECONIA_BLUE } from "theme/colors";
+import { ECONIA_BLUE, ERROR_RED } from "theme/colors";
 import RoundButton from "@icons/Minimize";
-import { isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
+import { isIOS, isMacOs } from "react-device-detect";
+import { getEmojiData, isSymbolEmoji, isValidChatMessageEmoji } from "@sdk/emoji_data";
+import { sumBytes } from "@sdk/utils/sum-emoji-bytes";
+import { MAX_SYMBOL_LENGTH } from "@sdk/const";
 
 export type SearchResult = Array<EmojiPickerSearchData>;
 
 export const search = async (value: string): Promise<SearchResult> => {
   return await SearchIndex.search(value);
 };
-
-const nBytes = (e: string) => new TextEncoder().encode(e).length;
 
 /**
  * Checks if an emoji-mart input is a valid symbol emoji.
@@ -42,16 +44,11 @@ export default function EmojiPicker(
 ) {
   const setPickerRef = useEmojiPicker((s) => s.setPickerRef);
   const mode = useEmojiPicker((s) => s.mode);
+  const emojis = useEmojiPicker((s) => s.emojis);
   const setPickerInvisible = useEmojiPicker((s) => s.setPickerInvisible);
   const host = document.querySelector("em-emoji-picker");
   const insertEmojiTextInput = useEmojiPicker((s) => s.insertEmojiTextInput);
-
-  useEffect(() => {
-    setPickerRef(host as HTMLDivElement);
-  }, [host, setPickerRef]);
-
-  const previewSelector = host?.shadowRoot?.querySelector("div.margin-l");
-  const search = host?.shadowRoot?.querySelector("div.search input");
+  const currentBytes = useMemo(() => sumBytes(emojis), [emojis]);
 
   const filterEmojis = useCallback(
     (e?: EmojiMartData["emojis"][string]) =>
@@ -59,79 +56,26 @@ export default function EmojiPicker(
     [mode]
   );
 
-  useEffect(() => {
-    if (!search || !host) return;
-    const inputHandler = (_e: Event) => {
-      const previewSubtitle = host.shadowRoot?.querySelector("div.preview-subtitle");
-      if (!previewSubtitle) return;
-      const text = previewSubtitle.textContent;
-      // There's a weird apostrophe character in the text, so just check startsWith and endsWith here.
-      const failedSearch =
-        text && text.startsWith("That emoji couldn") && text.endsWith("t be found");
-      if (failedSearch) {
-        previewSubtitle.textContent = "That emoji couldn't be found";
+  // This may become non-performant due to the interaction with the picker. It determines whether the picker grid emojis
+  // should show as disabled or not. It runs in any mode, but short-circuits in "chat" or "search" mode.
+  // Note this is a check on the currently highlighted emoji AND each emoji in the picker! The difference in how they
+  // behave is determined by the CSS selectors with the `emojicoin-invalid-symbol` class. That is, if this function
+  // returns true, both the highlighted (preview) emoji and the emojis in the picker will possess the class, but the
+  // css that applies to them is determined in the `CSSStyleSheet` below.
+  const shouldDisableInput = useCallback(
+    (emoji?: string) => {
+      if (!emoji || typeof emoji !== "string" || mode === "chat" || mode === "search") {
+        return false;
       }
-    };
-    search?.addEventListener("input", inputHandler);
-
-    return () => {
-      search?.removeEventListener("input", inputHandler);
-    };
-  }, [search, host]);
+      const pickerInputBytes = getEmojiData(emoji)?.bytes.length ?? 0;
+      return !isSymbolEmoji(emoji) || currentBytes + pickerInputBytes > MAX_SYMBOL_LENGTH;
+    },
+    [mode, currentBytes]
+  );
 
   useEffect(() => {
-    // We use query selector here because we're working with a shadow root in the DOM,
-    // and there's no other way to get a reference to it in React.
-    // We use a MutationObserver to watch for changes in the preview element,
-    // and then we update the text content of the preview element to show the
-    // byte size of the emoji.
-    // We can make more changes here as necessary.
-    if (previewSelector) {
-      const setupObserver = () => {
-        const observer = new MutationObserver((mutations) => {
-          mutations.forEach((mutation, _i) => {
-            mutation.addedNodes.forEach((node) => {
-              const text = node.textContent;
-
-              // The `text` here is the short code the library uses, aka `:smile:` or `:rolling_on_the_floor_laughing:`
-              if (text?.at(0) === ":" && text?.at(-1) === ":") {
-                // No matter what we need to replace the text, so let's just reset it if we can even find it.
-                // The main reason we do this is because if we don't, the bytes text content sometimes shows up appended
-                // to the end of the emoji.
-                node.textContent = "";
-
-                // Traverse the tree up and then down to the emoji element. This is a bit hacky,
-                // but I think it's faster than using a querySelector, and we know the structure
-                // of the DOM here won't change.
-                const parent = node.parentElement?.parentElement?.parentElement;
-                const emojiNode = parent
-                  ?.querySelector("span.emoji-mart-emoji")
-                  ?.querySelector("span");
-
-                const emoji = emojiNode?.textContent;
-                if (emoji) {
-                  const bytes = nBytes(emoji).toString();
-                  const formattedBytes = `${" ".repeat(2 - bytes.length)}${bytes}`;
-                  node.textContent = `${formattedBytes} bytes`;
-                }
-              }
-            });
-          });
-        });
-
-        const config = {
-          childList: true,
-          subtree: true,
-        };
-
-        observer.observe(previewSelector, config);
-
-        return () => observer.disconnect();
-      };
-
-      setupObserver();
-    }
-  }, [previewSelector, mode]);
+    setPickerRef(host as HTMLDivElement);
+  }, [host, setPickerRef]);
 
   useEffect(() => {
     const root = document.querySelector("em-emoji-picker")?.shadowRoot;
@@ -145,6 +89,33 @@ export default function EmojiPicker(
           font-weight: 500 !important;
           background: var(--black) !important;
           color: ${ECONIA_BLUE} !important;
+        }
+
+        ${/* The emoji name label when selected */ ""}
+        .preview-title.emojicoin-invalid-symbol {}
+
+        ${/* The bytes label when selected */ ""}
+        .preview-subtitle.emojicoin-invalid-symbol {
+          color: ${ERROR_RED} !important;
+          filter: brightness(1.25);
+        }
+
+        ${/* The big emoji preview when hovered. Also is the ☝️ when nothing is hovered. */ ""}
+        #emoji-preview-wrapper.emojicoin-invalid-symbol {}
+
+        ${/* Each emoji in the picker grid. */ ""}
+        #emoji-picker-grid-item.emojicoin-invalid-symbol {
+          opacity: 0.1;
+          cursor: not-allowed;
+        }
+
+        ${
+          isMacOs || isIOS
+            ? ""
+            : `.individual-emoji {
+          font-family: var(--font-noto-color-emoji) !important;
+          font-size: 0.9em;
+        }`
         }
 
         div.flex div.search input {
@@ -197,10 +168,29 @@ export default function EmojiPicker(
           style={{ marginTop: "-10px" }}
         >
           <Picker
+            categories={[
+              "new",
+              "activity",
+              "flags",
+              "foods",
+              "frequent",
+              "nature",
+              "objects",
+              "people",
+              "places",
+              "symbols",
+            ]}
+            categoryIcons={{
+              // Emojis from the more recent Unicode versions, set in the json passed to the emoji-mart `init` function.
+              new: {
+                svg: "<span>🆕</span>",
+              },
+            }}
+            noCountryFlags={false}
             theme="dark"
             perLine={8}
-            exceptEmojis={[]}
             filterEmojis={filterEmojis}
+            shouldDisableInput={shouldDisableInput}
             onEmojiSelect={(v: EmojiSelectorData) => {
               const newEmoji = unifiedCodepointsToEmoji(v.unified as `${string}-${string}`);
               insertEmojiTextInput([newEmoji]);
