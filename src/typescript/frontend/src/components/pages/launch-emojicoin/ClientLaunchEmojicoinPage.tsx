@@ -139,6 +139,11 @@ const ClientLaunchEmojicoinPage: React.FC<{
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [status]);
 
+  const backgroundDivClasses =
+    "absolute w-[200vw] h-[130%] top-[-15%] " +
+    "left-[-100vw] backdrop-blur-lg border-y-[1px] border-dark-gray " +
+    "border-solid sm:border-x-[1px] sm:!w-[130%] sm:left-[-15%]";
+
   return (
     <div className="flex flex-col grow relative overflow-hidden">
       {randomSymbols.length > 0 && (
@@ -150,8 +155,11 @@ const ClientLaunchEmojicoinPage: React.FC<{
       <TextCarousel />
 
       <div className="flex justify-center items-center h-full px-6">
-        <div className="relative flex flex-col w-full max-w-[414px]">
-          <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} />
+        <div className="relative flex flex-col w-full max-w-[414px] z-50">
+          <div className={backgroundDivClasses}></div>
+          <div className="z-50">
+            <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} />
+          </div>
         </div>
       </div>
       <div
