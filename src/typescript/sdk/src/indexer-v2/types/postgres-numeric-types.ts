@@ -101,6 +101,8 @@ export const bigintColumns: Set<AnyColumnName> = new Set([
   "lp_coin_balance",
   "nonce",
   "last_success_version",
+  "block_number",
+  "event_index",
 ]);
 
 /**
