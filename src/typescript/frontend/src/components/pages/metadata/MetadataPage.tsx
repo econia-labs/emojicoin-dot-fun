@@ -16,15 +16,19 @@ import {
   useState,
 } from "react";
 
-const DEFAULT_FIELDS = new Map([
-  ["CTO link", ""],
-  ["Motto", ""],
+const PLACEHOLDERS = new Map([
+  ["Discord", "https://discord.gg/..."],
+  ["Motto", "The best shoe market ever!"],
+  ["Telegram", "https://t.me/..."],
+  ["Website", "https://..."],
+  ["X profile", "https://x.com/..."],
 ]);
 
-const PLACEHOLDERS = new Map([
-  ["CTO link", "https://..."],
-  ["Motto", "The best shoe market ever!"],
-]);
+const DEFAULT_FIELDS = new Map(Array.from(
+  PLACEHOLDERS
+    .entries()
+    .map(([key, _]) => [key, ""])
+));
 
 const BUTTON_CLASSNAME = "text-white px-4 border-ec-blue border-solid border-[3px] rounded-xl";
 const INPUT_CLASSNAME =
