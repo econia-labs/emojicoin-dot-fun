@@ -5,6 +5,7 @@ import {
   MarketProperties,
   SetMarketProperties,
 } from "@/contract-apis";
+import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
@@ -15,12 +16,15 @@ import {
   useState,
 } from "react";
 
-type MetadataField = { name: string; placeholder: string };
+const DEFAULT_FIELDS = new Map([
+  ["CTO link", ""],
+  ["Motto", ""],
+]);
 
-const DEFAULT_FIELDS: [MetadataField, string][] = [
-  [{ name: "CTO link", placeholder: "https://..." }, ""],
-  [{ name: "Motto", placeholder: "The best shoe market ever!" }, ""],
-];
+const PLACEHOLDERS = new Map([
+  ["CTO link", "https://..."],
+  ["Motto", "The best shoe market ever!"],
+]);
 
 const BUTTON_CLASSNAME = "text-white px-4 border-ec-blue border-solid border-[3px] rounded-xl";
 const INPUT_CLASSNAME =
@@ -34,6 +38,7 @@ const FormEntry = ({
   onClick,
   buttonText,
   className,
+  disabled = false,
 }: {
   value: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
@@ -42,6 +47,7 @@ const FormEntry = ({
   name: string;
   buttonText?: string;
   className?: string;
+  disabled?: boolean;
 }) => (
   <div className={`mx-auto relative`}>
     <div className="max-w-[300px] text-white">{name}</div>
@@ -54,9 +60,10 @@ const FormEntry = ({
     ></input>
     {buttonText && (
       <button
-        className={`${BUTTON_CLASSNAME} absolute right-[-60px]`}
+        className={`${BUTTON_CLASSNAME} absolute right-[-60px] ${disabled ? "!border-dark-gray" : ""}`}
         onClick={onClick}
         tabIndex={2}
+        disabled={disabled}
       >
         {buttonText}
       </button>
@@ -65,16 +72,23 @@ const FormEntry = ({
 );
 
 const MetadataPage = () => {
-  const [fields, setFields] = useState<Map<MetadataField, string>>(new Map(DEFAULT_FIELDS));
+  const [fields, setFields] = useState<Map<string, string>>(DEFAULT_FIELDS);
   const [marketAddress, setMarketAddress] = useState<string>("");
   const [addFieldName, setAddFieldName] = useState<string>("");
+  const [pasted, setPasted] = useState(false);
+
   const { account, aptos, submit } = useAptos();
+
+  const isMarketAddressValid = useMemo(
+    () => AccountAddress.isValid({ input: marketAddress }).valid,
+    [marketAddress]
+  );
 
   const { data: marketExists } = useQuery({
     queryKey: ["metadata-market-exists", marketAddress],
     queryFn: async () => {
-      if (marketAddress === "") {
-        return undefined;
+      if (!isMarketAddressValid) {
+        return null;
       }
       try {
         const market = await MarketMetadataByMarketAddress.view({
@@ -89,8 +103,31 @@ const MetadataPage = () => {
     },
   });
 
+  const marketAddressBorderColor = useMemo(() => {
+    switch (marketExists) {
+      case true:
+        return "border-green";
+      case false:
+        return "border-pink";
+      case null:
+      case undefined:
+        return "border-ec-blue";
+    }
+  }, [marketExists]);
+
+  const isSubmitEnabled = useMemo(
+    () => account !== null && marketExists === true,
+    [account, marketExists]
+  );
+
+  // Update fields on market address change
   useEffect(() => {
-    if (marketAddress === "") {
+    // Don't fetch market properties if market address is not valid.
+    if (!isMarketAddressValid) {
+      return;
+    }
+    // Don't fetch market properties if user has pasted.
+    if (pasted) {
       return;
     }
     MarketProperties.submit({
@@ -100,23 +137,19 @@ const MetadataPage = () => {
       .then((r) => (r.vec.length === 0 ? null : (r.vec[0] ?? null)))
       .then((r) => {
         if (r) {
-          // TODO: complete with the data.
-          // console.log(r);
+          const newFields = new Map();
+          PLACEHOLDERS.entries().forEach(([fieldName, _]) => {
+            newFields.set(fieldName, "");
+          });
+          (r as { data: { key: string; value: string }[] }).data.forEach(({ key, value }) => {
+            newFields.set(key, value);
+          });
+          setFields(newFields);
         }
       })
       .catch((e) => console.error("Could not get existing market metadata.", e));
-  }, [marketAddress, aptos]);
-
-  const borderColor = useMemo(() => {
-    switch (marketExists) {
-      case true:
-        return "border-green";
-      case false:
-        return "border-pink";
-      case undefined:
-        return "border-ec-blue";
-    }
-  }, [marketExists]);
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [marketAddress]);
 
   return (
     <div className="w-[100%] h-[100%] flex flex-col gap-[10px] text-xl place-content-center">
@@ -125,22 +158,33 @@ const MetadataPage = () => {
         value={marketAddress}
         placeholder="0xabc..."
         onChange={(e) => setMarketAddress(e.target.value)}
-        className={borderColor}
+        className={marketAddressBorderColor}
       ></FormEntry>
-      {Array.from(fields.entries()).map(([key, value]) => (
-        <FormEntry
-          key={key.name}
-          name={key.name}
-          value={value}
-          placeholder={key.placeholder}
-          onChange={(e) => setFields(new Map(fields.set(key, e.target.value)))}
-          onClick={() => {
-            fields.delete(key);
-            setFields(new Map(fields));
-          }}
-          buttonText="-"
-        ></FormEntry>
-      ))}
+      {Array.from(fields.entries())
+        // We sort special (those which have a placeholder) fields first, then alphabetically.
+        .toSorted((a, b) => {
+          if (PLACEHOLDERS.has(a[0]) && !PLACEHOLDERS.has(b[0])) {
+            return -1;
+          }
+          if (PLACEHOLDERS.has(b[0]) && !PLACEHOLDERS.has(a[0])) {
+            return 1;
+          }
+          return a[0].localeCompare(b[0]);
+        })
+        .map(([key, value]) => (
+          <FormEntry
+            key={key}
+            name={key}
+            value={value}
+            placeholder={PLACEHOLDERS.get(key) ?? key}
+            onChange={(e) => setFields(new Map(fields.set(key, e.target.value)))}
+            onClick={() => {
+              fields.delete(key);
+              setFields(new Map(fields));
+            }}
+            buttonText="-"
+          ></FormEntry>
+        ))}
       <FormEntry
         name="Add new field"
         value={addFieldName}
@@ -149,9 +193,13 @@ const MetadataPage = () => {
           setAddFieldName(e.target.value);
         }}
         onClick={() => {
-          setFields(new Map(fields.set({ name: addFieldName, placeholder: addFieldName }, "")));
+          if (addFieldName === "") {
+            return;
+          }
+          setFields(new Map(fields.set(addFieldName, "")));
           setAddFieldName("");
         }}
+        disabled={addFieldName === ""}
         buttonText="+"
       ></FormEntry>
       <div>{/* For spacing. */}</div>
@@ -162,7 +210,7 @@ const MetadataPage = () => {
           onClick={() => {
             const data = {
               marketAddress,
-              fields: Array.from(fields.entries()),
+              fields: Array.from(fields.entries().filter(([_, value]) => value !== "")),
             };
             navigator.clipboard.writeText(JSON.stringify(data));
           }}
@@ -179,6 +227,7 @@ const MetadataPage = () => {
                 const data = JSON.parse(r);
                 setFields(new Map(data.fields));
                 setMarketAddress(data.marketAddress);
+                setPasted(true);
               })
               .catch(console.warn);
           }}
@@ -187,25 +236,35 @@ const MetadataPage = () => {
         </button>
         <button
           tabIndex={3}
-          className={`${BUTTON_CLASSNAME} ${account === null ? "!border-dark-gray" : ""} col-span-full`}
+          className={`${BUTTON_CLASSNAME} ${!isSubmitEnabled ? "!border-dark-gray" : ""} col-span-full`}
           onClick={async () => {
-            if (!account) {
+            if (!isSubmitEnabled) {
               return;
             }
             const builderLambda = () =>
               SetMarketProperties.builder({
                 aptosConfig: aptos.config,
-                admin: account.address,
+                admin: account!.address,
                 market: marketAddress,
-                keys: Array.from(fields.keys().map((key) => key.name)),
-                values: Array.from(fields.values()),
+                keys: Array.from(
+                  fields
+                    .entries()
+                    .filter(([_, value]) => value !== "")
+                    .map(([key, _]) => key)
+                ),
+                values: Array.from(
+                  fields
+                    .entries()
+                    .filter(([_, value]) => value !== "")
+                    .map(([_, value]) => value)
+                ),
               });
             const res = await submit(builderLambda);
             if (!res || res.error) {
               console.error(res);
             }
           }}
-          disabled={account === null && marketExists}
+          disabled={!isSubmitEnabled}
         >
           Submit
         </button>
