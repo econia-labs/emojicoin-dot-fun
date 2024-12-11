@@ -11,6 +11,7 @@ Set variables:
 
 ```sh
 MARKET_METADATA=0xaaa...
+EMOJICOIN_DOT_FUN=0xbbb...
 PROFILE=my-profile
 ```
 
@@ -18,8 +19,9 @@ Publish:
 
 ```sh
 NAMED_ADDRESSES=$(
-    printf "%s,%s,%s" \
-        "market_metadata=$MARKET_METADATA"
+    printf "%s,%s" \
+        "market_metadata=$MARKET_METADATA" \
+        "emojicoin_dot_fun=$EMOJICOIN_DOT_FUN"
 )
 aptos move publish \
     --assume-yes \
