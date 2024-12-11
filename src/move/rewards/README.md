@@ -1,8 +1,9 @@
 # `emojicoin-dot-fun` rewards
 
 This package contains an overloaded version of the `swap` function for
-`emojicoin-dot-fun`, `swap_with_rewards`, which gives users an opportunity for a
-reward based on the amount of integrator fees they pay for their swap.
+`emojicoin-dot-fun`, `emojioin_dot_fun_rewards::swap_with_rewards`, which gives
+users an opportunity for a reward based on the amount of integrator fees they
+pay for their swap.
 
 The rewards vault can be loaded up via the `fund_tiers` function.
 
@@ -12,6 +13,10 @@ nominal volume amount. See `reward_tiers` for more.
 
 For ease of parameter modeling, named constants use values in `APT`, which are
 converted to octas internally.
+
+The `emojicoin_dot_fun_claim_link` module contains a system for administering
+pre-paid swaps using private keys encoded in "claim links", akin to magic links
+for website login.
 
 ## Publish commands
 
