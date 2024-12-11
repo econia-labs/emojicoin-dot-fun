@@ -1,29 +1,10 @@
 import { DEFAULT_SORT_BY, SortMarketsBy } from "@sdk/indexer-v2/types/common";
-import { type ORDER_BY } from "@sdk/queries/const";
-import { type ValueOf } from "@sdk/utils/utility-types";
 
 export type MarketDataSortByHomePage =
   | SortMarketsBy.MarketCap
   | SortMarketsBy.BumpOrder
   | SortMarketsBy.DailyVolume
   | SortMarketsBy.AllTimeVolume;
-
-export type GetSortedMarketDataQueryArgs = {
-  limit?: number;
-  page: number;
-  orderBy: ValueOf<typeof ORDER_BY>;
-  sortBy: SortMarketsBy | SortByPostgrestQueryParams;
-  inBondingCurve?: boolean;
-  exactCount?: boolean;
-  searchBytes?: string;
-};
-
-export type GetMySortedMarketDataQueryArgs = Omit<
-  GetSortedMarketDataQueryArgs,
-  "exactCount" | "inBondingCurve"
-> & {
-  account?: string;
-};
 
 export const sortByFilters = {
   [SortMarketsBy.MarketCap]: {
@@ -72,18 +53,6 @@ export type SortByPostgrestQueryParams =
   | "last_swap_avg_execution_price_q64"
   | "one_day_tvl_per_lp_coin_growth_q64"
   | "cpamm_real_reserves_quote";
-
-export const toPageQueryParam = (
-  sortBy: SortByPostgrestQueryParams | SortMarketsBy | SortByPageQueryParams
-): SortByPageQueryParams => {
-  return sortByFilters[sortBy].forPageQueryParams ?? sortBy;
-};
-
-export const toPostgrestQueryParam = (
-  sortBy: SortByPageQueryParams | SortMarketsBy | SortByPostgrestQueryParams
-): SortByPostgrestQueryParams => {
-  return sortByFilters[sortBy]?.forPostgrestQuery ?? sortBy;
-};
 
 export const toMarketDataSortBy = (
   sortBy?: SortByPostgrestQueryParams | SortMarketsBy | SortByPageQueryParams

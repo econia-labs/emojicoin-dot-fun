@@ -5,7 +5,7 @@ module.exports = {
     jest: true,
     node: true,
   },
-  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js"],
+  ignorePatterns: ["dist/**", "node_modules/**", ".eslintrc.js", "jest.config.js"],
   extends: [
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
@@ -74,9 +74,15 @@ module.exports = {
     ],
   },
   settings: {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"],
+    },
     "import/resolver": {
+      typescript: {
+        project: ["tsconfig.json", "tests/tsconfig.json"],
+      },
       node: {
-        extensions: [".js", ".jsx", ".ts", ".tsx"],
+        project: ["tsconfig.json", "tests/tsconfig.json"],
       },
     },
   },

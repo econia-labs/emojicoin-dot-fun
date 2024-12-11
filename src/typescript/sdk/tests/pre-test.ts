@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import WebSocket from "ws";
-import { DockerTestHarness } from "../src/utils/test/docker/docker-test-harness";
+import { DockerTestHarness } from "./utils/docker/docker-test-harness";
 
 // process.env.NO_TEST_SETUP => to skip the docker container test setup, like for unit tests.
 // process.env.FILTER_TEST_LOGS => quiet mode, don't output logs that print to the console a lot.

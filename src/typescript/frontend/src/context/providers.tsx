@@ -69,9 +69,6 @@ const ThemedApp = ({ children }) => {
     []
   );
 
-  // Load the data from the emoji picker library and then extract the valid chat emojis from it.
-  // This is why it's not necessary to build/import a `chat-emojis.json` set, even though there is `symbol-emojis.json`.
-  // NOTE: We don't verify that the length of this set is equal to the number of valid chat emojis in the Move contract.
   useEffect(() => {
     data.then((d) => {
       init({ set: "native", data: d });

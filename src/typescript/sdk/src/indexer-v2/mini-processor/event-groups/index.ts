@@ -1,13 +1,13 @@
 import { type UserTransactionResponse } from "@aptos-labs/ts-sdk";
-import { toMarketEmojiData } from "../../emoji_data";
-import { type AccountAddressString, getMarketAddress, getEvents } from "../../emojicoin_dot_fun";
+import { toMarketEmojiData } from "../../../emoji_data";
+import { type AccountAddressString, getMarketAddress, getEvents } from "../../../emojicoin_dot_fun";
 import {
   GuidGetters,
   type MarketMetadataModel,
   type StateEventData,
   type DatabaseModels,
   type TransactionMetadata,
-} from "../../indexer-v2/types";
+} from "../../types";
 import {
   EventGroupBuilder,
   type EventWithMarket,
@@ -18,7 +18,7 @@ import {
 import { getMiscLatestStateEventFieldsFromWriteSet } from "../parse-write-set";
 
 import { addModelsForBumpEvent, toPeriodicStateEventData } from "./utils";
-import { type Events } from "../../emojicoin_dot_fun/events";
+import { type Events } from "../../../emojicoin_dot_fun/events";
 
 export type BumpEventModel =
   | DatabaseModels["chat_events"]

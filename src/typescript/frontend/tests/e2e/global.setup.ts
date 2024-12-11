@@ -1,5 +1,5 @@
 import { test as setup } from "@playwright/test";
-import { DockerTestHarness } from "../../../sdk/src/utils/test/docker/docker-test-harness";
+import { DockerTestHarness } from "../../../sdk/tests/utils/docker/docker-test-harness";
 
 setup("setup the Docker containers", async ({}) => {
   // Five minute timeout.

@@ -40,9 +40,12 @@ const isValidSortBy = (input?: string | null): input is SortMarketsBy =>
   validSortBy.has((input ?? "") as unknown as SortMarketsBy);
 
 /* eslint-disable-next-line import/no-unused-modules */
+export const DEFAULT_POOLS_SORT_BY = SortMarketsBy.Apr;
+
+/* eslint-disable-next-line import/no-unused-modules */
 export const getValidSortByForPoolsPage = (input?: string | null): SortMarketsBy => {
   if (isValidSortBy(input)) {
     return input;
   }
-  return SortMarketsBy.MarketCap;
+  return DEFAULT_POOLS_SORT_BY;
 };

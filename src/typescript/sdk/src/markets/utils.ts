@@ -38,12 +38,10 @@ import {
 } from "../types/types";
 import type JsonTypes from "../types/json-types";
 import {
-  type DerivedEmojicoinData,
-  type EmojicoinSymbol,
   encodeEmojis,
   symbolBytesToEmojis,
-  type SymbolEmoji,
   type SymbolEmojiData,
+  type SymbolEmoji,
 } from "../emoji_data";
 import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
@@ -94,9 +92,14 @@ export function getEmojicoinMarketAddressAndTypeTags(args: {
 /**
  * Helper function to get all emoji data based from a symbol.
  *
+ * Do *not* pass emojis as hex strings to this function, they should be actual emojis if they're
+ * passed as strings.
+ *
  * Note that the market metadata is implicitly derived from the hardcoded module address constant.
  */
-export const getEmojicoinData = (symbol: EmojicoinSymbol): DerivedEmojicoinData => {
+export const getEmojicoinData = (
+  symbol: string | string[] | SymbolEmojiData | SymbolEmojiData[]
+) => {
   const symbolArray = Array.isArray(symbol)
     ? symbol
     : ([symbol] as Array<string> | Array<SymbolEmojiData>);
@@ -436,3 +439,27 @@ export const fetchRealReserves = async (
     .then(toMarketView)
     .then(calculateRealReserves)
     .catch(() => undefined);
+
+/**
+ * @see {@link https://mikemcl.github.io/big.js/#faq}
+ */
+export const PreciseBig = Big();
+PreciseBig.DP = 100;
+
+/**
+ * Calculate the price at an exact point in time based on the reserves of a market.
+ *
+ * This is equivalent to calculating the slope of the tangent line created from the exact point on
+ * the curve, where the curve is the function the AMM uses to calculate the price for the market.
+ *
+ * The price is denominated in `quote / base`, where `base` is the emojicoin and `quote` is APT.
+ *
+ *  * For an in depth explanation of the math and behavior behind the AMMs:
+ * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf}
+ */
+export const calculateCurvePrice = (args: ReservesAndBondingCurveState) => {
+  const { base, quote } = isInBondingCurve(args)
+    ? args.clammVirtualReserves
+    : args.cpammRealReserves;
+  return PreciseBig(quote.toString()).div(base.toString());
+};

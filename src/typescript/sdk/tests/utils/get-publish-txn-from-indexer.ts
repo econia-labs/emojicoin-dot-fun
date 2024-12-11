@@ -4,8 +4,8 @@ import {
   isUserTransactionResponse,
   type TransactionResponse,
 } from "@aptos-labs/ts-sdk";
-import { getEvents, Trigger } from "../..";
-import { getAptosClient } from "../aptos-client";
+import { getEvents, Trigger } from "../../src";
+import { getAptosClient } from "../../src/utils/aptos-client";
 import { getPublisherPrivateKey } from "./helpers";
 
 export const getPublishTransactionFromIndexer = async () => {
