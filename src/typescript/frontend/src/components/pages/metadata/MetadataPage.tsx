@@ -24,11 +24,7 @@ const PLACEHOLDERS = new Map([
   ["X profile", "https://x.com/..."],
 ]);
 
-const DEFAULT_FIELDS = new Map(Array.from(
-  PLACEHOLDERS
-    .entries()
-    .map(([key, _]) => [key, ""])
-));
+const DEFAULT_FIELDS = new Map(Array.from(PLACEHOLDERS.entries().map(([key, _]) => [key, ""])));
 
 const BUTTON_CLASSNAME = "text-white px-4 border-ec-blue border-solid border-[3px] rounded-xl";
 const INPUT_CLASSNAME =
