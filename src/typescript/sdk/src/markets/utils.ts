@@ -439,3 +439,27 @@ export const fetchRealReserves = async (
     .then(toMarketView)
     .then(calculateRealReserves)
     .catch(() => undefined);
+
+/**
+ * @see {@link https://mikemcl.github.io/big.js/#faq}
+ */
+export const PreciseBig = Big();
+PreciseBig.DP = 100;
+
+/**
+ * Calculate the price at an exact point in time based on the reserves of a market.
+ *
+ * This is equivalent to calculating the slope of the tangent line created from the exact point on
+ * the curve, where the curve is the function the AMM uses to calculate the price for the market.
+ *
+ * The price is denominated in `quote / base`, where `base` is the emojicoin and `quote` is APT.
+ *
+ *  * For an in depth explanation of the math and behavior behind the AMMs:
+ * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf}
+ */
+export const calculateCurvePrice = (args: ReservesAndBondingCurveState) => {
+  const { base, quote } = isInBondingCurve(args)
+    ? args.clammVirtualReserves
+    : args.cpammRealReserves;
+  return PreciseBig(quote.toString()).div(base.toString());
+};
