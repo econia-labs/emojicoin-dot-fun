@@ -27,12 +27,12 @@ const accuracy = 0.995;
 
 /**
  * NOTE:
- *   These tests merely serve to illustrate an example for how price travels across each curve.
- *   The accuracy of the `calculateCurvePrice` function is always 100% accurate, since it's an
- *   instantaneous evaluation of a curve's price based on its reserves.
+ *  These tests merely serve to illustrate an example for how price travels across each curve.
+ *  The accuracy of the `calculateCurvePrice` function is always 100% accurate, since it's an
+ *  instantaneous evaluation of a curve's price based on its reserves.
  *
- *   However, in order to calculate the price between two swaps, we must use the geometric mean,
- *   which is why the resulting expected value is very slightly inaccurate.
+ *  However, in order to calculate the price between two swaps, we must use the geometric mean,
+ *  which is why the resulting expected value is very slightly inaccurate.
  */
 describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}% accurate`, () => {
   const registrants = getFundedAccounts("080", "081", "082", "083");
@@ -124,9 +124,7 @@ describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}
         const receivedAverage = before.mul(after).sqrt();
         const variance = expectedAverage.div(receivedAverage);
         const normalizedVariance = PreciseBig(1).minus(variance).abs();
-        // Expect it to be 99.5% accurate. It is impossible to get it perfect, since the Move
-        // contract rounds the intermediate representation at various points.
-        // Note that larger trades will result in a larger variance.
+        // NOTE: larger trades will result in a larger variance and may fail.
         expect(normalizedVariance.lte(1 - accuracy)).toBe(true);
         const apt = getCoinBalanceFromChanges({
           response,
@@ -155,27 +153,34 @@ describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}
   it("calculates the price in the bonding curve for both a buy & a sell)", async () => {
     const idx = 0;
     const [swapper, symbol] = [registrants[idx], marketSymbols[idx]];
-    const balances = await checkBuy(swapper, ONE_APT_BIGINT, symbol);
-    await checkSell(swapper, balances.emoji, symbol);
+    await checkBuy(swapper, ONE_APT_BIGINT, symbol).then((balances) =>
+      checkSell(swapper, balances.emoji, symbol)
+    );
   });
+
   it("calculates the price at an exact state transition for a buy & then a sell", async () => {
     const idx = 1;
     const [swapper, symbol] = [registrants[idx], marketSymbols[idx]];
-    const balances = await checkBuy(swapper, EXACT_TRANSITION_INPUT_AMOUNT, symbol);
-    await checkSell(swapper, balances.emoji / 10n, symbol);
+    await checkBuy(swapper, EXACT_TRANSITION_INPUT_AMOUNT, symbol).then((balances) =>
+      checkSell(swapper, balances.emoji / 10n, symbol)
+    );
   });
+
   it("calculates the price post bonding curve for both a buy & a sell", async () => {
     const idx = 2;
     const [swapper, symbol] = [registrants[idx], marketSymbols[idx]];
     const inputAmount = EXACT_TRANSITION_INPUT_AMOUNT + ONE_APT_BIGINT;
-    const balances = await checkBuy(swapper, inputAmount, symbol);
-    await checkSell(swapper, balances.emoji / 2n, symbol);
+    await checkBuy(swapper, inputAmount, symbol).then((balances) =>
+      checkSell(swapper, balances.emoji / 2n, symbol)
+    );
   });
+
   it("calculates the price post bonding curve for both a buy & a small sell", async () => {
     const idx = 3;
     const [swapper, symbol] = [registrants[idx], marketSymbols[idx]];
     const inputAmount = EXACT_TRANSITION_INPUT_AMOUNT + ONE_APT_BIGINT;
-    const balances = await checkBuy(swapper, inputAmount, symbol);
-    await checkSell(swapper, balances.emoji / 100n, symbol);
+    await checkBuy(swapper, inputAmount, symbol).then((balances) =>
+      checkSell(swapper, balances.emoji / 100n, symbol)
+    );
   });
 });
