@@ -1,3 +1,5 @@
+"use client";
+
 import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
 import React, { useCallback, useMemo } from "react";
 import { useEffect } from "react";
@@ -64,29 +66,29 @@ export const AnimatedLoadingBoxes = ({
 }) => {
   const scope = useStaggerAnimation({ speed, delay });
   const emptyArray = useMemo(() => Array.from({ length: numSquares }), [numSquares]);
-
+  
   const getSquares = useCallback(
     (color: boolean) =>
       emptyArray.map((_, i) => (
         <span
-          key={color ? `color-${i}` : `gray-${i}`}
-          className={`m-auto${color ? " item-1" : ""}`}
-          style={
-            color
-              ? {
-                  boxShadow: "0 0 15px 4px #00FF0055",
-                }
-              : {
-                  opacity: 0.2,
-                }
+        key={color ? `color-${i}` : `gray-${i}`}
+        className={`m-auto${color ? " item-1" : ""}`}
+        style={
+          color
+          ? {
+            boxShadow: "0 0 15px 4px #00FF0055",
           }
-        >
+          : {
+            opacity: 0.2,
+          }
+          }
+          >
           {color ? emoji("green square") : emoji("white large square")}
         </span>
       )),
-    [emptyArray]
-  );
-
+      [emptyArray]
+    );
+    
   return (
     <div className="flex flex-row relative h-fit w-fit pixel-heading-4 " ref={scope}>
       <div className="flex flex-col gap-1">
