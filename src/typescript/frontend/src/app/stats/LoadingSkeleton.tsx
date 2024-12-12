@@ -1,12 +1,16 @@
 "use client";
 
 import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
-import { Suspense, use } from "react";
+import { Suspense, use, useEffect } from "react";
 
 // NOTE: The Suspense boundary won't work unless a separate client component awaits the promise. The `Suspense` wrapper
 //   can't be used in the same component that settles the promise with `use(...)`
 const Container = ({ promised }: { promised: Promise<JSX.Element> }) => {
   const awaited = use(promised);
+  useEffect(() => {
+    console.log("Awaited is ready!");
+    console.log(awaited);
+  }, [awaited])
   return <div>{awaited}</div>;
 };
 
