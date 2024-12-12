@@ -115,6 +115,10 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         assert!(keys.length() == values.length(), E_KEYS_AND_VALUES_NOT_EQUAL_LENGTH);
         let vault_ref_mut = borrow_registry_mut_checked(admin);
         let map = &mut vault_ref_mut.map;
+        if (keys.length() == 0) {
+            map.remove(market);
+            return;
+        };
         map.upsert(market, simple_map::create());
         let market_properties = map.borrow_mut(market);
         while (keys.length() > 0) {
@@ -352,6 +356,37 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         assert!(
             market_property(get_market_address(MARKET_1), get_PROPERTY_OTHER())
                 == option::some(utf8(b"bar"))
+        );
+    }
+
+    #[test]
+    fun test_set_market_properties_empty() acquires Registry {
+        init_emojicoin();
+        let market_metadata_signer = get_signer(@market_metadata);
+        init_module(&market_metadata_signer);
+        add_market_properties(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            vector[get_PROPERTY(), get_PROPERTY_OTHER()],
+            vector[utf8(b"bar"), utf8(b"baz")]
+        );
+        set_market_properties(
+            &market_metadata_signer,
+            get_market_address(MARKET_1),
+            vector[],
+            vector[]
+        );
+        assert!(
+            market_property(get_market_address(MARKET_1), get_PROPERTY())
+                == option::none()
+        );
+        assert!(
+            market_property(get_market_address(MARKET_1), get_PROPERTY_OTHER())
+                == option::none()
+        );
+        assert!(
+            market_properties(get_market_address(MARKET_1))
+                == option::none()
         );
     }
 
