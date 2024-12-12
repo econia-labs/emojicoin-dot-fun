@@ -20,6 +20,7 @@ import {
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import MemoizedLaunchAnimation from "./memoized-launch";
 import { EmojiRain } from "./EmojiRain";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const LOADING_TIME = 2000;
 type Stage = "initial" | "loading" | "coding";
@@ -50,6 +51,8 @@ const ClientLaunchEmojicoinPage: React.FC<{
   const lastResponseStoredAt = useRef(lastResponseStoredAtFromContext);
   const isLoadingRegisteredMarket = useEmojiPicker((state) => state.isLoadingRegisteredMarket);
   const [stage, setStage] = useState<Stage>(isLoadingRegisteredMarket ? "loading" : "initial");
+
+  const { isMobile } = useMatchBreakpoints();
 
   useEffect(() => {
     if (emojiParams !== null) {
@@ -140,18 +143,20 @@ const ClientLaunchEmojicoinPage: React.FC<{
   }, [status]);
 
   const backgroundDivClasses =
-    "absolute w-[200vw] h-[130%] top-[-15%] " +
+    "absolute w-[200vw] h-[123%] top-[-15%] " +
     "left-[-100vw] backdrop-blur-lg border-y-[1px] border-dark-gray " +
-    "border-solid sm:border-x-[1px] sm:!w-[130%] sm:left-[-15%]";
+    "border-solid sm:border-x-[1px] sm:!w-[130%] sm:left-[-15%] rounded-[3px]";
 
   return (
-    <div className="flex flex-col grow relative overflow-hidden">
-      {randomSymbols.length > 0 && (
-        <EmojiRain
-          randomSymbols={randomSymbols}
-          onClick={(name) => setEmojis(name.emojis.map((e) => e.emoji))}
-        />
-      )}
+    <div className="flex flex-col grow relative h-[100%]">
+      <div className="absolute w-[100%] overflow-hidden" style={{height: isMobile ? "calc(100% + 12px)" : "calc(100% + 36px)"}}>
+        {randomSymbols.length > 0 && (
+          <EmojiRain
+            randomSymbols={randomSymbols}
+            onClick={(name) => setEmojis(name.emojis.map((e) => e.emoji))}
+          />
+        )}
+      </div>
       <TextCarousel />
 
       <div className="flex justify-center items-center h-full px-6">
@@ -162,12 +167,6 @@ const ClientLaunchEmojicoinPage: React.FC<{
           </div>
         </div>
       </div>
-      <div
-        className="absolute bottom-0 w-[100%] h-[1%] bg-black z-20"
-        style={{
-          boxShadow: "0px 0px 8px 8px black",
-        }}
-      ></div>
     </div>
   );
 };

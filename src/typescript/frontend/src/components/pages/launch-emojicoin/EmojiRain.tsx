@@ -38,7 +38,7 @@ export function EmojiRainDrop({
         delay,
         ease: [],
         repeat: Infinity,
-        repeatDelay: emojis * DROP_INTERVAL * DROP_FALL_TIME, // Repeat after all the other emojis have fallen.
+        repeatDelay: emojis * DROP_INTERVAL - DROP_FALL_TIME, // Repeat after all the other emojis have fallen.
       }
     );
 
@@ -60,7 +60,7 @@ export function EmojiRainDrop({
       className="absolute emoji-rain-drop z-10 flex flex-col select-none cursor-pointer"
       style={{
         left: `${x}vw`,
-        fontSize: "2em",
+        fontSize: "1em",
         top: initialY,
       }}
       ref={scope}
@@ -83,6 +83,12 @@ export function EmojiRain({
 }) {
   return (
     <>
+      <div
+        className="absolute top-[-1.1%] w-[100%] h-[1%] bg-black z-20"
+        style={{
+          boxShadow: "0px 0px 8px 8px black",
+        }}
+      ></div>
       {randomSymbols.map((name, i) => {
         const emojiRainDrop = (
           <EmojiRainDrop
@@ -95,6 +101,12 @@ export function EmojiRain({
         );
         return emojiRainDrop;
       })}
+      <div
+        className="absolute bottom-0 w-[100%] h-[1%] bg-black z-20"
+        style={{
+          boxShadow: "0px 0px 8px 8px black",
+        }}
+      ></div>
     </>
   );
 }
