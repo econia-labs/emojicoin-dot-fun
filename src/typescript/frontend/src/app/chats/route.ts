@@ -1,7 +1,7 @@
 import { fetchChatEvents, tryFetchFirstChatEvent } from "@/queries/market";
 import { Parcel } from "lib/parcel";
 import type { NextRequest } from "next/server";
-import { isNumber } from "utils";
+import { isNumber, stringifyJSON } from "utils";
 
 type ChatSearchParams = {
   marketID: string | null;
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       fetchChatEvents({ marketID, toMarketNonce: to, amount: count }),
   });
 
-  const res = await queryHelper.getUnparsedData(toMarketNonce, 50);
+  const res = await queryHelper.getData(toMarketNonce, 50);
 
-  return new Response(res);
+  return new Response(stringifyJSON(res));
 }

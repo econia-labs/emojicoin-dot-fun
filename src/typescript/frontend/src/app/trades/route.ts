@@ -1,7 +1,7 @@
 import { fetchSwapEvents, tryFetchFirstSwapEvent } from "@/queries/market";
 import { Parcel } from "lib/parcel";
 import type { NextRequest } from "next/server";
-import { isNumber } from "utils";
+import { isNumber, stringifyJSON } from "utils";
 
 type SwapSearchParams = {
   marketID: string | null;
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       fetchSwapEvents({ marketID, toMarketNonce: to, amount: count }),
   });
 
-  const res = await queryHelper.getUnparsedData(toMarketNonce, 20);
+  const res = await queryHelper.getData(toMarketNonce, 20);
 
-  return new Response(res);
+  return new Response(stringifyJSON(res));
 }

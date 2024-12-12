@@ -11,6 +11,7 @@ import {
 import { getLatestProcessedEmojicoinTimestamp } from "@sdk/indexer-v2/queries/utils";
 import { fetchPeriodicEventsTo, tryFetchMarketRegistration } from "@/queries/market";
 import { Parcel } from "lib/parcel";
+import { stringifyJSON } from "utils";
 
 type CandlesticksDataType = Awaited<ReturnType<typeof fetchPeriodicEventsTo>>;
 
@@ -60,8 +61,8 @@ export async function GET(request: NextRequest) {
   });
 
   try {
-    const data = await queryHelper.getUnparsedData(to, countBack, );
-    return new Response(data);
+    const data = await queryHelper.getData(to, countBack, );
+    return new Response(stringifyJSON(data));
   } catch (e) {
     return new Response(e as string, { status: 400 });
   }

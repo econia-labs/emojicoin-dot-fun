@@ -1,14 +1,9 @@
 import { unstable_cache } from "next/cache";
 import { parseJSON, stringifyJSON } from "utils";
 
-const jsonStrAppend = (a: string, b: string): string => {
-  if (a === "[]") return b;
-  if (b === "[]") return a;
-  return `${a.substring(0, a.length - 1)},${b.substring(1)}`;
-};
-
 export type ParcelQueryParameters = {
   count: number;
+  /** Inclusive. */
   to: number;
 };
 
@@ -144,7 +139,7 @@ export class Parcel<S> {
     parcelSize: number;
     /** Unique cache key to store the cached events. */
     cacheKey: string;
-    /** A function to fetch events. */
+    /** A function to fetch events. Events must be returned sorted by key in descending order. */
     fetchFn: (params: ParcelQueryParameters) => Promise<S[]>;
     /** How much time current parcels are cached. */
     currentRevalidate: number;
@@ -184,19 +179,28 @@ export class Parcel<S> {
     this._step = step;
   }
 
-  private parcelize(to: number): number {
+  /** Get the parcel number from a key. */
+  private toParcelNumber(to: number): number {
     return Math.floor(to / this._step / this._parcelSize);
   }
 
-  private unparcelize(parcel: number): number {
+  /** Get the start key of a parcel from a parcel number. */
+  private toKey(parcel: number): number {
     return parcel * this._step * this._parcelSize;
   }
 
-  async getData(to: number, count: number): Promise<S[]> {
-    return parseJSON<S[]>(await this.getUnparsedData(to, count));
+  /** Get the parcel start key from a key in that parcel. */
+  private parcelStartKey(key: number): number {
+    return this.toKey(this.toParcelNumber(key));
   }
 
-  async getUnparsedData(to: number, count: number): Promise<string> {
+  /** Get the parcel start key from a key in that parcel. */
+  private parcelEndKey(key: number): number {
+    return this.parcelStartKey(key) + this._parcelSize * this._step;
+  }
+
+  /** Get `count` events starting from `to` (inclusive) backwards. */
+  async getData(to: number, count: number): Promise<S[]> {
     let first: number;
     try {
       first = await this._fetchFirst();
@@ -205,38 +209,38 @@ export class Parcel<S> {
         "Could not get first event. This either means that no events have yet been emmited for this data type, or that the fetch first event function is wrong.",
         e
       );
-      return "[]";
+      return [];
     }
     if (to < first) {
-      return "[]";
+      return [];
     }
-    const lastParcel = this.parcelize(to);
-    let dataCount = 0;
+
+    let parcel: CachedWrapperReturn;
     const historicThreshold = await this._fetchHistoricThreshold();
-    let lastParcelData: CachedWrapperReturn;
-    const end = this.unparcelize(lastParcel + 1);
-    if (this.unparcelize(lastParcel + 1) > historicThreshold) {
-      lastParcelData = await this._currentFetch({ to: end, count: this._parcelSize });
+
+    const rightmostParcelNumber = this.toParcelNumber(to);
+    const rightmostParcelEndKey = this.parcelEndKey(rightmostParcelNumber);
+
+    if (rightmostParcelEndKey > historicThreshold) {
+      parcel = await this._currentFetch({ to: rightmostParcelEndKey, count: this._parcelSize });
     } else {
-      lastParcelData = await this._historicFetch({ to: end, count: this._parcelSize });
+      parcel = await this._historicFetch({ to: rightmostParcelEndKey, count: this._parcelSize });
     }
-    const parsedLastParcel = parseJSON<S[]>(lastParcelData.stringifiedData);
-    const relevantData = parsedLastParcel.filter((s) => this._getKey(s) < to);
-    dataCount += relevantData.length;
-    let dataString = lastParcelData.stringifiedData;
-    let parcel = this.parcelize(lastParcelData.first) - 1;
-    for (; dataCount < count && this.unparcelize(parcel) > first; ) {
-      const start = this.unparcelize(parcel);
-      const params = {
-        to: start + this._parcelSize,
+
+    let events = parseJSON<S[]>(parcel.stringifiedData).filter((s) => this._getKey(s) <= to);
+
+    while (events.length < count && parcel.first > first) {
+      const endKey = this.parcelEndKey(parcel.first - 1);
+      parcel = await this._historicFetch({
+        to: endKey,
         count: this._parcelSize,
-      };
-      const parcelData = await this._historicFetch(params);
-      dataCount += parcelData.length;
-      dataString = jsonStrAppend(dataString, parcelData.stringifiedData);
-      parcel = this.parcelize(parcelData.first) - 1;
+      });
+      const newEvents: S[] = (parseJSON(parcel.stringifiedData) as S[])
+        .filter(e => this._getKey(e) < this._getKey(events[events.length - 1]));
+      events = [...events, ...newEvents];
     }
-    return dataString;
+
+    return events;
   }
 }
 
