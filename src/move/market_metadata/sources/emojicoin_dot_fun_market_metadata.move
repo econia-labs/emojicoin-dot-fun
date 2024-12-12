@@ -101,7 +101,8 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         }
     }
 
-    /// Clear all properties for the given market if it has any, then set the supplied values.
+    /// Clear all properties for the given market if it has any, then set the supplied values. If
+    /// there are no supplied key-value pairs, remove the market's entry from the metadata registry.
     public entry fun set_market_properties(
         admin: &signer,
         market: address,
