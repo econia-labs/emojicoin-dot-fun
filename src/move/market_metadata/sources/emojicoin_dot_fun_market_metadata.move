@@ -385,8 +385,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
                 == option::none()
         );
         assert!(
-            market_properties(get_market_address(MARKET_1))
-                == option::none()
+            market_properties(get_market_address(MARKET_1)) == option::none()
         );
     }
 
