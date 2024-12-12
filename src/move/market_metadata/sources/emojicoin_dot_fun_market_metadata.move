@@ -39,8 +39,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     public fun market_properties(
         market: address
     ): Option<SimpleMap<String, String>> acquires Registry {
-        let map =
-            &Registry[@market_metadata].map;
+        let map = &Registry[@market_metadata].map;
         if (!map.contains(market)) {
             return option::none();
         };
@@ -48,11 +47,8 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
     }
 
     #[view]
-    public fun market_property(
-        market: address, property: String
-    ): Option<String> acquires Registry {
-        let map =
-            &Registry[@market_metadata].map;
+    public fun market_property(market: address, property: String): Option<String> acquires Registry {
+        let map = &Registry[@market_metadata].map;
         if (!map.contains(market)) {
             return option::none();
         };
@@ -81,6 +77,8 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         admins_ref_mut.remove(admin_to_remove_index);
     }
 
+    /// If market metadata entry does not exist, create an empty entry. Then, add market properties,
+    /// overwriting existing properties if they already exist.
     public entry fun add_market_properties(
         admin: &signer,
         market: address,
@@ -103,6 +101,7 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         }
     }
 
+    /// Clear all properties for the given market if it has any, then set the supplied values.
     public entry fun set_market_properties(
         admin: &signer,
         market: address,
@@ -123,6 +122,8 @@ module market_metadata::emojicoin_dot_fun_market_metadata {
         }
     }
 
+    /// If the market has an entry, remove all specified keys. If the market has no entries after
+    /// removing the keys, remove the market from the metadata registry.
     public entry fun remove_market_properties(
         admin: &signer, market: address, keys: vector<String>
     ) acquires Registry {
