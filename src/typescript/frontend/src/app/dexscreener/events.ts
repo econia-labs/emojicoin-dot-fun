@@ -83,8 +83,7 @@ import {
   type toLiquidityEventModel,
   type toSwapEventModel,
 } from "@sdk/indexer-v2/types";
-import Big from "big.js";
-import { calculateRealReserves } from "@sdk/markets";
+import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
 import { toCoinDecimalString } from "../../lib/utils/decimals";
 import { DECIMALS } from "@sdk/const";
 import { symbolEmojisToPairId } from "./util";
@@ -182,8 +181,6 @@ export interface EventsResponse {
   events: Event[];
 }
 
-const TWO_TO_64 = new Big(2).pow(64);
-
 export function toDexscreenerSwapEvent(
   event: ReturnType<typeof toSwapEventModel>
 ): SwapEvent & BlockInfo {
@@ -213,9 +210,7 @@ export function toDexscreenerSwapEvent(
     asset1: toCoinDecimalString(quote, DECIMALS),
   };
 
-  const priceNative = new Big(event.swap.avgExecutionPriceQ64.toString())
-    .div(TWO_TO_64)
-    .toFixed(64);
+  const priceNative = calculateCurvePrice(event.state).toFixed(50).toString();
 
   if (!event.blockAndEvent) throw new Error("blockAndEvent is undefined");
 
