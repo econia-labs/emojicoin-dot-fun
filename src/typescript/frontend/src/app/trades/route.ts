@@ -38,22 +38,22 @@ export async function GET(request: NextRequest) {
   const marketID = Number(params.marketID);
   const toMarketNonce = Number(params.toMarketNonce);
 
-  const queryHelper = new Parcel<Swap, { marketID: number }>({
+  const queryHelper = new Parcel<Swap>({
     parcelSize: 20,
-    normalRevalidate: 5,
+    currentRevalidate: 5,
     historicRevalidate: 365 * 24 * 60 * 60,
-    fetchHistoricThreshold: (query) =>
-      fetchSwapEvents({ marketID: query.marketID, amount: 1 }).then((r) =>
+    fetchHistoricThreshold: () =>
+      fetchSwapEvents({ marketID, amount: 1 }).then((r) =>
         Number(r[0].market.marketNonce)
       ),
-    fetchFirst: (query) => tryFetchFirstSwapEvent(query.marketID),
+    fetchFirst: () => tryFetchFirstSwapEvent(marketID),
     cacheKey: "swaps",
     getKey: (s) => Number(s.market.marketNonce),
-    fetchFn: ({ to, count }, { marketID }) =>
+    fetchFn: ({ to, count }) =>
       fetchSwapEvents({ marketID, toMarketNonce: to, amount: count }),
   });
 
-  const res = await queryHelper.getUnparsedData(toMarketNonce, 20, { marketID });
+  const res = await queryHelper.getUnparsedData(toMarketNonce, 20);
 
   return new Response(res);
 }

@@ -38,22 +38,22 @@ export async function GET(request: NextRequest) {
   const marketID = Number(params.marketID);
   const toMarketNonce = Number(params.toMarketNonce);
 
-  const queryHelper = new Parcel<Chat, { marketID: number }>({
+  const queryHelper = new Parcel<Chat>({
     parcelSize: 20,
-    normalRevalidate: 5,
+    currentRevalidate: 5,
     historicRevalidate: 365 * 24 * 60 * 60,
-    fetchHistoricThreshold: (query) =>
-      fetchChatEvents({ marketID: query.marketID, amount: 1 }).then((r) =>
+    fetchHistoricThreshold: () =>
+      fetchChatEvents({ marketID, amount: 1 }).then((r) =>
         Number(r[0].market.marketNonce)
       ),
-    fetchFirst: (query) => tryFetchFirstChatEvent(query.marketID),
+    fetchFirst: () => tryFetchFirstChatEvent(marketID),
     cacheKey: "chats",
     getKey: (s) => Number(s.market.marketNonce),
-    fetchFn: ({ to, count }, { marketID }) =>
+    fetchFn: ({ to, count }) =>
       fetchChatEvents({ marketID, toMarketNonce: to, amount: count }),
   });
 
-  const res = await queryHelper.getUnparsedData(toMarketNonce, 50, { marketID });
+  const res = await queryHelper.getUnparsedData(toMarketNonce, 50);
 
   return new Response(res);
 }

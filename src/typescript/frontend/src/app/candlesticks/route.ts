@@ -47,23 +47,20 @@ export async function GET(request: NextRequest) {
   const period = toPeriod(params.period);
   const countBack = parseInt(params.countBack);
 
-  const queryHelper = new Parcel<
-    CandlesticksDataType[number],
-    { marketID: number; period: Period }
-  >({
+  const queryHelper = new Parcel<CandlesticksDataType[number]>({
     parcelSize: 500,
-    normalRevalidate: NORMAL_CACHE_DURATION,
+    currentRevalidate: NORMAL_CACHE_DURATION,
     historicRevalidate: HISTORICAL_CACHE_DURATION,
     fetchHistoricThreshold: () => getLatestProcessedEmojicoinTimestamp().then((r) => r.getTime()),
-    fetchFirst: (query) => tryFetchMarketRegistration(query.marketID),
+    fetchFirst: () => tryFetchMarketRegistration(marketID),
     cacheKey: "candlesticks",
     getKey: (s) => Number(s.periodicMetadata.startTime / 1000n / 1000n),
-    fetchFn: getCandlesticksParcel,
+    fetchFn: (params) => getCandlesticksParcel(params, { marketID, period }),
     step: getPeriodDurationSeconds(period),
   });
 
   try {
-    const data = await queryHelper.getUnparsedData(to, countBack, { marketID, period });
+    const data = await queryHelper.getUnparsedData(to, countBack, );
     return new Response(data);
   } catch (e) {
     return new Response(e as string, { status: 400 });
