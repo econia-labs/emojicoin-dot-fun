@@ -75,7 +75,7 @@ export const FormattedNumber = ({
     const num = nominalize ? toNominal(value as bigint) : Number(value);
     const format =
       style === "fixed" || Math.abs(num) >= 1
-        ? { maximumFractionDigits: decimals }
+        ? { maximumFractionDigits: decimals, minimumFractionDigits: style === "fixed" ? decimals : undefined }
         : { maximumSignificantDigits: decimals };
     const formatter = new Intl.NumberFormat("en-US", format);
     return formatter.format(num);

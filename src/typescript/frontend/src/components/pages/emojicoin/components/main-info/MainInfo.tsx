@@ -15,6 +15,7 @@ import { emoji } from "utils";
 import { motion } from "framer-motion";
 import { truncateAddress } from "@sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
+import Button from "components/button";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -52,6 +53,8 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
   const [copied, setCopied] = useState(false);
 
+  const borderStyle = "border-solid border-[1px] border-dark-gray rounded-[3px] p-[1em]";
+
   return (
     <div
       className="flex justify-center mt-[10px]"
@@ -60,29 +63,31 @@ const MainInfo = ({ data }: MainInfoProps) => {
       }}
     >
       <div
+        className="mx-[2vw]"
         style={
           isMobile
             ? {
                 display: "flex",
-                gap: "2.5em",
+                gap: "1em",
                 flexDirection: "column",
                 width: "100%",
                 padding: "40px",
               }
             : {
                 display: "grid",
-                gridTemplateColumns: "57fr 43fr",
+                gridTemplateColumns: "25fr 35fr 40fr",
+                gap: "32px",
                 width: "100%",
                 maxWidth: "1362px",
-                padding: "40px",
+                padding: "20px 0",
               }
         }
       >
-        <div className="text-center my-auto flex flex-col gap-[16px] items-center">
+        <div className={`grid place-items-center text-center ${borderStyle}`}>
           <Link href={explorerLink} target="_blank">
             <Emoji className="display-2" emojis={data.emojis} />
           </Link>
-          <div className="text-2xl w-fit bg-[#151515] rounded-xl px-[.5em] flex flex-row gap-[.5em]">
+          {/*<div className="text-2xl w-fit bg-[#151515] rounded-xl px-[.5em] flex flex-row gap-[.5em]">
             <Link
               className="text-ec-blue font-pixelar underline"
               href={explorerLink}
@@ -103,11 +108,11 @@ const MainInfo = ({ data }: MainInfoProps) => {
             >
               <Emoji emojis={emoji(copied ? "check mark button" : "clipboard")} />
             </motion.button>
-          </div>
+          </div>*/}
         </div>
 
         <div
-          className={`flex flex-col mt-[-8px] ${isMobile ? "m-auto" : "ml-[4em]"} w-fit gap-[2px]`}
+          className={`flex flex-col justify-between ${borderStyle}`}
         >
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
@@ -142,9 +147,24 @@ const MainInfo = ({ data }: MainInfoProps) => {
             </div>
           </div>
 
-          <div className="mt-[.6em]">
-            <BondingProgress data={data} />
+        </div>
+        <div className={`flex flex-col gap-[1em] ${borderStyle}`}>
+          <div className={`flex flex-row flex-wrap justify-between`}>
+            <Link href=""><Button scale="lg"
+                onClick={() => {
+                  navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
+                  if (!copied) {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 3000);
+                  }
+                }}
+            >copy contract address</Button></Link>
+            <Link href=""><Button scale="lg">dexscreener</Button></Link>
+            <Link href=""><Button scale="lg">twitter</Button></Link>
+            <Link href=""><Button scale="lg">telegram</Button></Link>
+            <Link href=""><Button scale="lg">website</Button></Link>
           </div>
+          <BondingProgress data={data} />
         </div>
       </div>
     </div>

@@ -3,19 +3,16 @@ import React, { useEffect, useState } from "react";
 import { translationFunction } from "context/language-context";
 import { type MainInfoProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
-import { motion } from "framer-motion";
 import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
-import Button from "components/button";
-import Link from "next/link";
-import { ROUTES } from "router/routes";
-import { useThemeContext } from "context";
 import { FormattedNumber } from "components/FormattedNumber";
+import BondingCurveArrow from "@icons/BondingCurveArrow";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
-const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
+const statsTextClasses = "uppercase ellipses font-forma";
 
 const BondingProgress = ({ data }: MainInfoProps) => {
   const { t } = translationFunction();
-  const { theme } = useThemeContext();
 
   const marketEmojis = data.symbolEmojis;
   const stateEvents = useEventStore((s) => s.getMarket(marketEmojis)?.stateEvents ?? []);
@@ -32,52 +29,39 @@ const BondingProgress = ({ data }: MainInfoProps) => {
     }
   }, [stateEvents]);
 
+  console.log(bondingProgress)
+
   return (
-    <div className="flex flex-col w-fit">
-      <div className="flex justify-between gap-[8px] mb-[.2em]">
-        <div className={statsTextClasses + " text-light-gray font-pixelar text-[32px]"}>
+    <div className="relative mb-[.7em]">
+      <div className="w-[100%] pl-[.8em] pr-[1em]">
+        <div className="grid relative w-[100%]" style={{gridTemplateColumns: "repeat(7, 1fr)"}}>
+        <div className="absolute left-[-.5em] top-[-.125em] text-[1.6em]">
+          <Emoji emojis={emoji("rocket")} />
+        </div>
+        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 15 ? "econiaBlue" : "darkGray"}/>
+        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 30 ? "econiaBlue" : "darkGray"}/>
+        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 45 ? "econiaBlue" : "darkGray"}/>
+        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 60 ? "econiaBlue" : "darkGray"}/>
+        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 75 ? "econiaBlue" : "darkGray"}/>
+        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 90 ? "econiaBlue" : "darkGray"}/>
+        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress >= 100 ? "econiaBlue" : "darkGray"}/>
+        </div>
+      </div>
+      <div className="absolute bottom-[-1em] my-[-.2em] right-0 flex justify-end mr-[1em]">
+        <div className={statsTextClasses + " text-dark-gray font-pixelar text-[1em]"}>
           {t("Bonding progress:")}
         </div>
         <FormattedNumber
           value={bondingProgress}
           className={
-            statsTextClasses + " text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]"
+            statsTextClasses + " text-dark-gray font-pixelar text-[1em] text-end min-w-[3.3em]"
           }
           suffix="%"
           scramble
+          style="fixed"
+          decimals={2}
         />
       </div>
-      {bondingProgress >= 100 ? (
-        <Link
-          href={{
-            pathname: ROUTES.pools,
-            query: { pool: data.emojis.map((e) => e.emoji).join("") },
-          }}
-        >
-          <Button scale="lg">{t("Provide liquidity")}</Button>
-        </Link>
-      ) : (
-        <div
-          style={{
-            width: "100%",
-            border: `1px solid ${theme.colors.darkGray}`,
-            padding: "0.15em",
-            borderRadius: "5px",
-          }}
-        >
-          <motion.div
-            initial={{ width: "0%" }}
-            animate={{ width: `${Math.max(bondingProgress, 1).toFixed(2)}%` }}
-            // Allow the page to load first so that users can actually see the animation.
-            transition={{ delay: 0.3 }}
-            style={{
-              height: "0.8em",
-              background: theme.colors.econiaBlue,
-              borderRadius: "3px",
-            }}
-          ></motion.div>
-        </div>
-      )}
     </div>
   );
 };
