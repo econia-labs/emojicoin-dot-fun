@@ -3,7 +3,7 @@ import { parseJSON, stringifyJSON } from "utils";
 
 export type ParcelQueryParameters = {
   count: number;
-  /** Inclusive. */
+  /** Exclusive. */
   to: number;
 };
 
@@ -86,7 +86,7 @@ const cachedWrapper = async <S>(
  * | ------------------------------- |                         |
  * | EV    EV EV    |          EV    | EV       EV EV | EV    EV
  * | t0 t1 t2 t3 t4 | t5 t6 t7 t8 t9 | tA tB tC tD tt | tF tG tH
- * | ------------------------------- |                 
+ * | ------------------------------- |
  *
  * Parcel 3:
  *                                                            now
@@ -134,6 +134,7 @@ export class Parcel<S> {
     fetchFirst,
     getKey,
     step = 1,
+    cacheFn = unstable_cache,
   }: {
     /** How many events are stored in one parcel. */
     parcelSize: number;
@@ -153,28 +154,32 @@ export class Parcel<S> {
     getKey: (s: S) => number;
     /** The spacing between keys. 1 by default. */
     step?: number;
+    /** The caching method. Override for testing. */
+    cacheFn?: <T, P>(
+      fn: (args: P) => Promise<T>,
+      keys: string[],
+      options: { revalidate: number }
+    ) => (args: P) => Promise<T>;
   }) {
     this._parcelSize = parcelSize;
-    this._currentFetch = unstable_cache(
+    this._currentFetch = cacheFn(
       (params: ParcelQueryParameters) => cachedWrapper(params, fetchFn, getKey),
       ["parcel", cacheKey, "current", parcelSize.toString()],
       { revalidate: currentRevalidate }
     );
-    this._historicFetch = unstable_cache(
+    this._historicFetch = cacheFn(
       (params: ParcelQueryParameters) => cachedWrapper(params, fetchFn, getKey),
       ["parcel", cacheKey, "historic", parcelSize.toString()],
       { revalidate: historicRevalidate }
     );
-    this._fetchHistoricThreshold = unstable_cache(
+    this._fetchHistoricThreshold = cacheFn<number, void>(
       fetchHistoricThreshold,
       ["parcel", cacheKey, "threshold"],
       { revalidate: 2 }
     );
-    this._fetchFirst = unstable_cache(
-      fetchFirst,
-      ["parcel", cacheKey, "first"],
-      { revalidate: 365 * 24 * 60 * 60 }
-    );
+    this._fetchFirst = cacheFn<number, void>(fetchFirst, ["parcel", cacheKey, "first"], {
+      revalidate: 365 * 24 * 60 * 60,
+    });
     this._getKey = getKey;
     this._step = step;
   }
@@ -194,14 +199,15 @@ export class Parcel<S> {
     return this.toKey(this.toParcelNumber(key));
   }
 
-  /** Get the parcel start key from a key in that parcel. */
+  /** Get the parcel end key from a key in that parcel. */
   private parcelEndKey(key: number): number {
     return this.parcelStartKey(key) + this._parcelSize * this._step;
   }
 
-  /** Get `count` events starting from `to` (inclusive) backwards. */
+  /** Get `count` events starting from `to` (exclusive) backwards. */
   async getData(to: number, count: number): Promise<S[]> {
     let first: number;
+
     try {
       first = await this._fetchFirst();
     } catch (e) {
@@ -211,36 +217,40 @@ export class Parcel<S> {
       );
       return [];
     }
-    if (to < first) {
+
+    // Because there are no events before the first event.
+    // `<=` is used here as `to` is exclusive.
+    if (to <= first) {
       return [];
     }
 
-    let parcel: CachedWrapperReturn;
     const historicThreshold = await this._fetchHistoricThreshold();
 
-    const rightmostParcelNumber = this.toParcelNumber(to);
-    const rightmostParcelEndKey = this.parcelEndKey(rightmostParcelNumber);
+    let events: S[] = [];
 
-    if (rightmostParcelEndKey > historicThreshold) {
-      parcel = await this._currentFetch({ to: rightmostParcelEndKey, count: this._parcelSize });
-    } else {
-      parcel = await this._historicFetch({ to: rightmostParcelEndKey, count: this._parcelSize });
-    }
+    // While we haven't gotten `count` events AND there are still events.
+    while (events.length < count && to > first) {
+      // End key of parcel we're trying to query.
+      const endKey = this.parcelEndKey(to - 1);
+      const params = { to: endKey, count: this._parcelSize };
 
-    let events = parseJSON<S[]>(parcel.stringifiedData).filter((s) => this._getKey(s) <= to);
+      const parcel = await (endKey > historicThreshold
+        ? this._currentFetch(params)
+        : this._historicFetch(params));
 
-    while (events.length < count && parcel.first > first) {
-      const endKey = this.parcelEndKey(parcel.first - 1);
-      parcel = await this._historicFetch({
-        to: endKey,
-        count: this._parcelSize,
-      });
-      const newEvents: S[] = (parseJSON(parcel.stringifiedData) as S[])
-        .filter(e => this._getKey(e) < this._getKey(events[events.length - 1]));
+      const parsedData = parseJSON<S[]>(parcel.stringifiedData);
+
+      // If `events` is empty, we want all events before `to`, else we want all events before the earliest event from `events`.
+      const newEvents: S[] = parsedData.filter(
+        (e) =>
+          this._getKey(e) < (events.length === 0 ? to : this._getKey(events[events.length - 1]))
+      );
+
       events = [...events, ...newEvents];
+
+      to = parcel.first;
     }
 
-    return events;
+    return events.slice(0, count);
   }
 }
-

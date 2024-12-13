@@ -36,7 +36,7 @@ const selectSwapsByMarketID = ({
       .from(TableName.SwapEvents)
       .select("*")
       .eq("market_id", marketID)
-      .lte("market_nonce", toMarketNonce)
+      .lt("market_nonce", toMarketNonce)
       .order("market_nonce", ORDER_BY[order])
       .limit(amount);
   }
@@ -82,7 +82,7 @@ const selectChatsByMarketID = ({
       .from(TableName.ChatEvents)
       .select("*")
       .eq("market_id", marketID)
-      .lte("market_nonce", toMarketNonce)
+      .lt("market_nonce", toMarketNonce)
       .order("market_nonce", ORDER_BY[order])
       .limit(amount);
   }

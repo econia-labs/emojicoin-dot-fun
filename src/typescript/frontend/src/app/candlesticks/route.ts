@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
   });
 
   try {
-    const data = await queryHelper.getData(to, countBack, );
+    const data = await queryHelper.getData(to, countBack);
     return new Response(stringifyJSON(data));
   } catch (e) {
     return new Response(e as string, { status: 400 });

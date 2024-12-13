@@ -43,14 +43,11 @@ export async function GET(request: NextRequest) {
     currentRevalidate: 5,
     historicRevalidate: 365 * 24 * 60 * 60,
     fetchHistoricThreshold: () =>
-      fetchSwapEvents({ marketID, amount: 1 }).then((r) =>
-        Number(r[0].market.marketNonce)
-      ),
+      fetchSwapEvents({ marketID, amount: 1 }).then((r) => Number(r[0].market.marketNonce)),
     fetchFirst: () => tryFetchFirstSwapEvent(marketID),
     cacheKey: "swaps",
     getKey: (s) => Number(s.market.marketNonce),
-    fetchFn: ({ to, count }) =>
-      fetchSwapEvents({ marketID, toMarketNonce: to, amount: count }),
+    fetchFn: ({ to, count }) => fetchSwapEvents({ marketID, toMarketNonce: to, amount: count }),
   });
 
   const res = await queryHelper.getData(toMarketNonce, 20);
