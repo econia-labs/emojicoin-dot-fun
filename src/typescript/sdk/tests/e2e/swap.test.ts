@@ -7,7 +7,7 @@ import {
 import { ONE_APT } from "../../src/const";
 import { SYMBOL_EMOJI_DATA } from "../../src";
 import { EmojicoinDotFun } from "../../src/emojicoin_dot_fun";
-import { getPublishHelpers } from "../../src/utils/test";
+import { getPublishHelpers } from "../utils";
 import {
   getEmojicoinMarketAddressAndTypeTags,
   getRegistrationGracePeriodFlag,
@@ -18,7 +18,7 @@ import {
   getCoinBalanceFromChanges,
   getFeeStatement,
 } from "../../src/utils/parse-changes-for-balances";
-import { getFundedAccount } from "../../src/utils/test/test-accounts";
+import { getFundedAccount } from "../utils/test-accounts";
 
 jest.setTimeout(90000);
 

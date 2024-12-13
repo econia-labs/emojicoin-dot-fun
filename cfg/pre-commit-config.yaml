@@ -148,7 +148,8 @@ repos:
     exclude: |
       (?x)^(
       src/typescript/frontend/public/locales/.*\.json|
-      src/typescript/sdk/tests/unit/event-parser/json/.*\.json
+      src/typescript/sdk/tests/unit/event-parser/json/.*\.json|
+      src/typescript/([^/]*/)?package.json
       )$
     id: 'pretty-format-json'
   - id: 'trailing-whitespace'

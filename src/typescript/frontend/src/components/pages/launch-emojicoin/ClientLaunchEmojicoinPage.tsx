@@ -6,8 +6,6 @@ import { startTransition, useCallback, useEffect, useRef, useState } from "react
 import { useSearchParams } from "next/navigation";
 import { getEmojisInString } from "@sdk/emoji_data";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { revalidateTagAction } from "lib/queries/cache-utils/revalidate";
-import { TAGS } from "lib/queries/cache-utils/tags";
 import { ROUTES } from "router/routes";
 import { useRouter } from "next/navigation";
 import path from "path";
@@ -69,14 +67,6 @@ const ClientLaunchEmojicoinPage = () => {
   const handleLoading = useCallback(async () => {
     const marketRegistrationEvent = lastResponse.current;
     if (marketRegistrationEvent) {
-      // NOTE: revalidateTagAction may cause a flicker in the loading animation because the server
-      // rerenders and sends the RSC components again. To avoid this we'll probably need to finish the animation
-      // orchestration with a different animation or cover it up somehow, otherwise I'm not sure how to fix it in a
-      // clean way.
-
-      // Revalidate the registered markets tag.
-      revalidateTagAction(TAGS.RegisteredMarkets);
-
       startTransition(() => {
         // Parse the emojis from the market registration event.
         // We do this in case the emojis are somehow cleared before the response is received. This ensures that

@@ -1,9 +1,10 @@
 import { INTEGRATOR_FEE_RATE_BPS } from "../../src/const";
 import { SYMBOL_EMOJI_DATA, type SymbolEmoji, zip } from "../../src";
-import { getFundedAccounts } from "../../src/utils/test/test-accounts";
+import { getFundedAccounts } from "../utils/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { getExactTransitionInputAmount } from "./helpers/misc";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../src/utils/test";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../utils";
+import { isInBondingCurve } from "../../src/utils/bonding-curve";
 
 jest.setTimeout(30000);
 
@@ -42,6 +43,7 @@ describe("tests the exact transition input amount with integrator fees calculati
     expect(model.swap.integratorFeeRateBPs).toEqual(INTEGRATOR_FEE_RATE_BPS);
     expect(model.swap.startsInBondingCurve).toEqual(true);
     expect(model.swap.resultsInStateTransition).toEqual(true);
+    expect(isInBondingCurve(model.state)).toBe(false);
   });
 
   it("just barely doesn't exit the bonding curve with the default env integrator fee", async () => {
@@ -56,6 +58,7 @@ describe("tests the exact transition input amount with integrator fees calculati
     expect(model.swap.integratorFeeRateBPs).toEqual(INTEGRATOR_FEE_RATE_BPS);
     expect(model.swap.startsInBondingCurve).toEqual(true);
     expect(model.swap.resultsInStateTransition).toEqual(false);
+    expect(isInBondingCurve(model.state)).toBe(true);
 
     // Push it over the bonding curve with the smallest amount possible.
     const res2 = await emojicoin.buy(buyer, symbol, 1n);
@@ -64,6 +67,7 @@ describe("tests the exact transition input amount with integrator fees calculati
     expect(model2.swap.integratorFeeRateBPs).toEqual(INTEGRATOR_FEE_RATE_BPS);
     expect(model2.swap.startsInBondingCurve).toEqual(true);
     expect(model2.swap.resultsInStateTransition).toEqual(true);
+    expect(isInBondingCurve(model2.state)).toBe(false);
   });
 
   it("exits the bonding curve with a custom integrator fee", async () => {
@@ -80,6 +84,7 @@ describe("tests the exact transition input amount with integrator fees calculati
     expect(model.swap.integratorFeeRateBPs).toEqual(customFee);
     expect(model.swap.startsInBondingCurve).toEqual(true);
     expect(model.swap.resultsInStateTransition).toEqual(true);
+    expect(isInBondingCurve(model.state)).toBe(false);
   });
 
   it("just barely doesn't exit the bonding curve with a custom integrator fee", async () => {
@@ -96,6 +101,7 @@ describe("tests the exact transition input amount with integrator fees calculati
     expect(model.swap.integratorFeeRateBPs).toEqual(customFee);
     expect(model.swap.startsInBondingCurve).toEqual(true);
     expect(model.swap.resultsInStateTransition).toEqual(false);
+    expect(isInBondingCurve(model.state)).toBe(true);
 
     // Push it over the bonding curve with the smallest amount possible.
     const res2 = await customIntegratorFeeClient.buy(buyer, symbol, 1n);
@@ -104,6 +110,7 @@ describe("tests the exact transition input amount with integrator fees calculati
     expect(model2.swap.integratorFeeRateBPs).toEqual(customFee);
     expect(model2.swap.startsInBondingCurve).toEqual(true);
     expect(model2.swap.resultsInStateTransition).toEqual(true);
+    expect(isInBondingCurve(model2.state)).toBe(false);
   });
 
   it("calculates the correct no fee transition amount", () => {

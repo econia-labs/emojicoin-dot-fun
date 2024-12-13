@@ -1,13 +1,11 @@
 "use client";
 
 import React, { type PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { useThemeContext } from "context";
 import { translationFunction } from "context/language-context";
 import { Flex, Column, FlexGap } from "@containers";
 import { Text, Button, InputNumeric } from "components";
 import { StyledAddLiquidityWrapper } from "./styled";
 import { ProvideLiquidity, RemoveLiquidity } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
-import { toCoinDecimalString } from "lib/utils/decimals";
 import {
   AptosInputLabel,
   EmojiInputLabel,
@@ -24,22 +22,15 @@ import {
 import { Arrows } from "components/svg";
 import type { EntryFunctionTransactionBuilder } from "@sdk/emojicoin_dot_fun/payload-builders";
 import { useSearchParams } from "next/navigation";
-import AnimatedStatusIndicator from "components/pages/launch-emojicoin/animated-emoji-circle";
 import { TypeTag } from "@aptos-labs/ts-sdk";
 import Info from "components/info";
-import { type AnyNumberString } from "@sdk/types/types";
 import { type PoolsData } from "../../ClientPoolsPage";
 import { EmojiPill } from "components/EmojiPill";
+import { FormattedNumber } from "components/FormattedNumber";
+import { useMatchBreakpoints } from "@hooks/index";
 
 type LiquidityProps = {
   market: PoolsData | undefined;
-};
-
-const fmtCoin = (n: AnyNumberString | undefined) => {
-  if (n === undefined) {
-    return n;
-  }
-  return new Intl.NumberFormat().format(Number(toCoinDecimalString(n, 8)));
 };
 
 const InnerWrapper = ({
@@ -60,7 +51,7 @@ const InnerWrapper = ({
 );
 
 const grayLabel = `
-  pixel-heading-4 mb-[-6px] text-light-gray !leading-5 uppercase
+  md:pixel-heading-4 mb-[-6px] text-light-gray !leading-5 uppercase
 `;
 
 const inputAndOutputStyles = `
@@ -71,7 +62,8 @@ const inputAndOutputStyles = `
 
 const Liquidity = ({ market }: LiquidityProps) => {
   const { t } = translationFunction();
-  const { theme } = useThemeContext();
+
+  const { isMobile } = useMatchBreakpoints();
 
   const searchParams = useSearchParams();
 
@@ -98,8 +90,6 @@ const Liquidity = ({ market }: LiquidityProps) => {
   const [direction, setDirection] = useState<"add" | "remove">(
     searchParams.get("remove") !== null ? "remove" : "add"
   );
-
-  const loadingComponent = useMemo(() => <AnimatedStatusIndicator numEmojis={4} />, []);
 
   const {
     aptos,
@@ -169,9 +159,16 @@ const Liquidity = ({ market }: LiquidityProps) => {
     <InnerWrapper id="apt" className="liquidity-input">
       <Column>
         <div className={grayLabel}>
-          {direction === "add" ? t("You deposit") : t("You get")}
-          {balanceLabel}
-          <span className={enoughApt ? "text-green" : "text-error"}>{fmtCoin(aptBalance)}</span>
+          <span className="text-nowrap">
+            {direction === "add" ? t("You deposit") : t("You get")}
+            {balanceLabel}
+          </span>
+          <FormattedNumber
+            value={aptBalance}
+            className={enoughApt ? "text-green" : "text-error"}
+            nominalize
+            decimals={3}
+          />
           {")"}
         </div>
         {direction === "add" ? (
@@ -182,10 +179,11 @@ const Liquidity = ({ market }: LiquidityProps) => {
             decimals={8}
           />
         ) : (
-          <input
+          <FormattedNumber
+            value={BigInt(removeLiquidityResult?.quote_amount ?? 0)}
+            decimals={3}
             className={inputAndOutputStyles + " bg-transparent leading-[32px] text-medium-gray"}
-            disabled={true}
-            value={fmtCoin(removeLiquidityResult?.quote_amount) ?? "..."}
+            nominalize
           />
         )}
       </Column>
@@ -197,25 +195,28 @@ const Liquidity = ({ market }: LiquidityProps) => {
     <InnerWrapper id="emoji" className="liquidity-input">
       <Column>
         <div className={grayLabel}>
-          {direction === "add" ? "You deposit" : "You get"}
-          {balanceLabel}
-          <span className={enoughEmoji ? "text-green" : "text-error"}>
-            {fmtCoin(emojicoinBalance)}
+          <span className="text-nowrap">
+            {direction === "add" ? "You deposit" : "You get"}
+            {balanceLabel}
           </span>
+          <FormattedNumber
+            value={emojicoinBalance}
+            className={enoughEmoji ? "text-green" : "text-error"}
+            nominalize
+            decimals={3}
+          />
           {")"}
         </div>
-        <input
-          className={inputAndOutputStyles + " bg-transparent leading-[32px]"}
-          style={{
-            color: theme.colors.lightGray + "99",
-          }}
-          value={
-            direction === "add"
-              ? (fmtCoin(provideLiquidityResult?.base_amount) ?? "...")
-              : (fmtCoin(removeLiquidityResult?.base_amount) ?? "...")
-          }
-          disabled
-        ></input>
+        <FormattedNumber
+          value={BigInt(
+            (direction === "add"
+              ? provideLiquidityResult?.base_amount
+              : removeLiquidityResult?.base_amount) ?? 0
+          )}
+          decimals={3}
+          className={inputAndOutputStyles + ` bg-transparent leading-[32px] !text-light-gray/[.6]`}
+          nominalize
+        />
       </Column>
       <div>
         <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
@@ -228,18 +229,24 @@ const Liquidity = ({ market }: LiquidityProps) => {
     <InnerWrapper id="lp" className="liquidity-input">
       <Column>
         <div className={grayLabel}>
-          {direction === "remove" ? "You deposit" : "You get"}
-          {balanceLabel}
-          <span className={enoughEmojiLP ? "text-green" : "text-error"}>
-            {fmtCoin(emojicoinLPBalance)}
+          <span className="text-nowrap">
+            {direction === "remove" ? "You deposit" : "You get"}
+            {balanceLabel}
           </span>
+          <FormattedNumber
+            value={emojicoinLPBalance}
+            className={enoughEmojiLP ? "text-green" : "text-error"}
+            nominalize
+            decimals={3}
+          />
           {")"}
         </div>
         {direction === "add" ? (
-          <input
+          <FormattedNumber
+            value={BigInt(provideLiquidityResult?.lp_coin_amount ?? 0)}
+            decimals={3}
             className={inputAndOutputStyles + " bg-transparent leading-[32px] text-medium-gray"}
-            value={fmtCoin(provideLiquidityResult?.lp_coin_amount) ?? "..."}
-            disabled={true}
+            nominalize
           />
         ) : (
           <InputNumeric
@@ -250,7 +257,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           />
         )}
       </Column>
-      <div>
+      <div className="text-nowrap">
         <EmojiInputLabel emoji={market ? `${market.market.symbolData.symbol}` : ""} />
         <span className={EmojiInputLabelStyles}>{market ? " LP" : "-"}</span>
       </div>
@@ -260,31 +267,28 @@ const Liquidity = ({ market }: LiquidityProps) => {
   return (
     <Flex width="100%" justifyContent="center" p={{ _: "64px 17px", mobileM: "64px 33px" }}>
       <Column width="100%" maxWidth="414px" justifyContent="center">
-        <Flex width="100%" justifyContent="space-between" alignItems="baseline" mb="10px">
+        <Flex width="100%" justifyContent="space-between" alignItems="center" mb="10px">
           <Flex flexDirection="row">
-            <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="baseline">
+            <FlexGap gap="10px" position="relative" justifyContent="left" alignItems="center">
               <button
                 onClick={() => setDirection(direction === "add" ? "remove" : "add")}
-                className="absolute left-[-30px] top-[-2px]"
+                className="absolute left-[-30px]"
               >
                 <Arrows color="econiaBlue" />
               </button>
 
-              <Text textScale="heading1" textTransform="uppercase">
+              <Text
+                textScale={isMobile ? "heading2" : "heading1"}
+                textTransform="uppercase"
+                className={isMobile ? "w-min" : ""}
+              >
                 {t(direction === "add" ? "Add liquidity" : "Remove liquidity")}
               </Text>
 
               <Info>
-                <Text
-                  textScale="pixelHeading4"
-                  lineHeight="20px"
-                  color="black"
-                  textTransform="uppercase"
-                >
-                  Liquidity providers receive a 0.25% fee from all trades, proportional to their
-                  pool share. Fees are continuously reinvested in the pool and can be claimed by
-                  withdrawing liquidity.
-                </Text>
+                Liquidity providers receive a 0.25% fee from all trades, proportional to their pool
+                share. Fees are continuously reinvested in the pool and can be claimed by
+                withdrawing liquidity.
               </Info>
             </FlexGap>
           </Flex>
@@ -394,7 +398,7 @@ const Liquidity = ({ market }: LiquidityProps) => {
           </ButtonWithConnectWalletFallback>
         </Flex>
 
-        <Text textScale="heading1" textTransform="uppercase" mb="16px">
+        <Text textScale={isMobile ? "heading2" : "heading1"} textTransform="uppercase" mb="16px">
           {t("Reserves")}
         </Text>
 
@@ -407,7 +411,15 @@ const Liquidity = ({ market }: LiquidityProps) => {
             <AptosInputLabel />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              {market ? (fmtCoin(market.state.cpammRealReserves.quote) ?? loadingComponent) : "-"}
+              {market ? (
+                <FormattedNumber
+                  value={market.state.cpammRealReserves.quote}
+                  nominalize
+                  decimals={3}
+                />
+              ) : (
+                "-"
+              )}
             </Text>
           </Flex>
 
@@ -419,7 +431,15 @@ const Liquidity = ({ market }: LiquidityProps) => {
             <EmojiInputLabel emoji={market ? market.market.symbolData.symbol : "-"} />
 
             <Text textScale={{ _: "bodySmall", tablet: "bodyLarge" }} textTransform="uppercase">
-              {market ? (fmtCoin(market.state.cpammRealReserves.base) ?? loadingComponent) : "-"}
+              {market ? (
+                <FormattedNumber
+                  value={market.state.cpammRealReserves.base}
+                  nominalize
+                  decimals={3}
+                />
+              ) : (
+                "-"
+              )}
             </Text>
           </Flex>
         </StyledAddLiquidityWrapper>

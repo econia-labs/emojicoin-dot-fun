@@ -1,5 +1,4 @@
 import { type MouseEventHandler } from "react";
-import { Text } from "components/text";
 import { Emoji } from "utils/emoji";
 import Popup from "./popup";
 import { emoji } from "utils";
@@ -15,13 +14,7 @@ export const EmojiPill = ({
   onClick?: MouseEventHandler<HTMLDivElement>;
 }) => {
   return (
-    <Popup
-      content={
-        <Text textScale="pixelHeading4" textTransform="uppercase" color="black">
-          {description}
-        </Text>
-      }
-    >
+    <Popup content={description}>
       <div
         className={
           "px-[.7rem] py-[.2rem] border-[1px] border-solid rounded-full " +

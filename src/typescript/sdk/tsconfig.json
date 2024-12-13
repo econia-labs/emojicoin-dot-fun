@@ -20,7 +20,6 @@
     "noEmit": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "outDir": "./dist",
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,

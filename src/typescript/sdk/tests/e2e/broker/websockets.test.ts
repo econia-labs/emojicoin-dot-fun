@@ -22,8 +22,8 @@ import {
   Swap,
   SwapWithRewards,
 } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../../src/utils/test";
-import { getFundedAccounts } from "../../../src/utils/test/test-accounts";
+import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../utils";
+import { getFundedAccounts } from "../../utils/test-accounts";
 import { type BrokerEvent } from "../../../src/broker-v2/types";
 import {
   isChatEventModel,
