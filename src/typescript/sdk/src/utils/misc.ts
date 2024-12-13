@@ -14,67 +14,16 @@ import {
   isSwapEvent,
 } from "../types";
 
-// No nanoseconds because dealing with overflow is a pain (aka using a bigint) and we don't need it.
-export enum UnitOfTime {
-  Microseconds,
-  Milliseconds,
-  Seconds,
-  Minutes,
-  Hours,
-  Days,
-  Weeks,
-}
-
-// No nanoseconds because dealing with overflow is a pain (aka using a bigint) and we don't need it.
-// NOTE: This specifically for converting from a UnitOfTime to milliseconds.
-export const UNIT_OF_TIME_MULTIPLIERS: Record<UnitOfTime, number> = {
-  [UnitOfTime.Microseconds]: 1 / 1000,
-  [UnitOfTime.Milliseconds]: 1,
-  [UnitOfTime.Seconds]: 1000,
-  [UnitOfTime.Minutes]: 1000 * 60,
-  [UnitOfTime.Hours]: 1000 * 60 * 60,
-  [UnitOfTime.Days]: 1000 * 60 * 60 * 24,
-  [UnitOfTime.Weeks]: 1000 * 60 * 60 * 24 * 7,
-};
-
 /**
- * Sleep the current thread for the given amount of time, with an optional specifier
- * for the unit of time.
+ * Sleep for a given amount of time.
  *
- *
- * @param amount the numeric amount of time to sleep
- * @param unitOfTime the unit of time to sleep for
- * @default unitOfTime milliseconds.
+ * @param amount the numeric amount of time to sleep in milliseconds.
  *
  */
-export async function sleep(
-  amount: number,
-  unitOfTime: UnitOfTime = UnitOfTime.Milliseconds
-): Promise<null> {
+export async function sleep(amount: number): Promise<null> {
   return new Promise((resolve) => {
-    setTimeout(resolve, amount * UNIT_OF_TIME_MULTIPLIERS[unitOfTime]);
+    setTimeout(resolve, amount);
   });
-}
-
-/**
- *
- * This is a helper function to specify the unit of time for `Date.now()`.
- *
- * Note that this function returns a fractional, floating point value.
- *
- * @param unitOfTime {@link UnitOfTime}
- * @returns the elapsed {@link UnitOfTime} since the Unix epoch, as a floating point number.
- *
- * @example
- * ```
- * const time = getTime(UnitOfTime.Seconds);
- * // `time` is the number of seconds since the Unix epoch.
- * const time = getTime(UnitOfTime.Days);
- * // `time` is the number of days since the Unix epoch.
- * ```
- */
-export function getTime(unitOfTime: UnitOfTime) {
-  return Date.now() / UNIT_OF_TIME_MULTIPLIERS[unitOfTime];
 }
 
 /**
@@ -197,13 +146,21 @@ export const truncateAddress = (
   }
 };
 
-export const truncateANSName = (input: string, numChars: number = 4): string => {
-  if (input.length > 11) {
-    const start = input.substring(0, numChars);
-    const end = input.substring(input.length - numChars, input.length);
-    return `${start}...${end}`;
+const MAX_ANS_DISPLAY_NAME_LENGTH = 13;
+
+export const truncateANSName = (input: string): string => {
+  if (input.length <= MAX_ANS_DISPLAY_NAME_LENGTH) {
+    return input;
   }
-  return input;
+  // Periods aren't as long as normal non-monospace characters, so count `...` as 2 characters.
+  const truncatedLength = MAX_ANS_DISPLAY_NAME_LENGTH - 2;
+  const truncated = input.substring(0, truncatedLength);
+  const res =
+    // Remove the trailing period on truncated names; e.g. "my-name.petra." => "my-name.petra"
+    truncated.at(-1) === "."
+      ? truncated.substring(0, truncated.length - 1)
+      : truncated.substring(0, truncated.length);
+  return `${res}...`;
 };
 
 /**

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { EmojicoinClient } from "../../../sdk/src/client/emojicoin-client";
-import { getFundedAccount } from "../../../sdk/src/utils/test/test-accounts";
+import { getFundedAccount } from "../../../sdk/tests/utils/test-accounts";
 import { ONE_APT_BIGINT, sleep, SYMBOL_EMOJI_DATA } from "../../../sdk/src";
 
 test("check sorting order", async ({ page }) => {

@@ -10,7 +10,7 @@ module.exports = {
     customExportConditions: ["react-server", "node", "node-addons"],
   },
   coveragePathIgnorePatterns: [],
-  testPathIgnorePatterns: ["dist/*"],
+  testPathIgnorePatterns: ["dist/*", "tests/utils/*"],
   collectCoverage: false,
   coverageThreshold: {
     global: {

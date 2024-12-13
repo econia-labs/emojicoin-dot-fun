@@ -1,12 +1,13 @@
-import { getEventsAsProcessorModelsFromResponse, type SymbolEmoji } from "../../../src";
-import TestHelpers from "../../../src/utils/test/helpers";
-import { getFundedAccount } from "../../../src/utils/test/test-accounts";
+import { type SymbolEmoji } from "../../../src";
+import TestHelpers from "../../utils/helpers";
+import { getFundedAccount } from "../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../src/indexer-v2/queries/utils";
 import { SwapWithRewards } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getAptosClient } from "../../../src/utils/test";
+import { getAptosClient } from "../../utils";
 import { fetchMarketState } from "../../../src/indexer-v2/queries";
 import { type MarketStateModel } from "../../../src/indexer-v2/types";
 import { type JsonValue } from "../../../src/types/json-types";
+import { getEventsAsProcessorModelsFromResponse } from "../../../src/indexer-v2/mini-processor";
 
 jest.setTimeout(20000);
 

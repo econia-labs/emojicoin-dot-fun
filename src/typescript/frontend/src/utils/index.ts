@@ -36,3 +36,5 @@ export const emoji = (name: AnyEmojiName) =>
   SYMBOL_EMOJI_DATA.hasName(name)
     ? SYMBOL_EMOJI_DATA.byStrictName(name).emoji
     : CHAT_EMOJI_DATA.byStrictName(name).emoji;
+
+export const isNumber = (s: string) => !isNaN(parseInt(s));

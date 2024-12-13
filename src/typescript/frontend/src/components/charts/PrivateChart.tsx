@@ -335,16 +335,13 @@ export const Chart = (props: ChartContainerProps) => {
       tvWidget.current.onChartReady(() => {
         const chart = tvWidget.current!.activeChart();
         const now = new Date();
-        const startDaysAgo = 1;
         const endDaysAgo = 0;
-        const startMilliseconds = now.getTime() - startDaysAgo * MS_IN_ONE_DAY;
         const endMilliseconds = now.getTime() - endDaysAgo * MS_IN_ONE_DAY;
-        const startTimestamp = Math.floor(new Date(startMilliseconds).getTime()) / 1000;
         const endTimestamp = Math.floor(new Date(endMilliseconds).getTime()) / 1000;
 
         chart
           .setVisibleRange({
-            from: startTimestamp,
+            from: endTimestamp - (24 * 60 * 60) / 6,
             to: endTimestamp,
           })
           .catch((error) => {

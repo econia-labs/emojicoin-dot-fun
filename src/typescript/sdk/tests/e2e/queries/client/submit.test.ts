@@ -11,7 +11,7 @@ import {
   zip,
   type SymbolEmoji,
 } from "../../../../src";
-import { getFundedAccount } from "../../../../src/utils/test/test-accounts";
+import { getFundedAccount } from "../../../utils/test-accounts";
 import { EmojicoinClient } from "../../../../src/client/emojicoin-client";
 import {
   Aptos,
@@ -20,8 +20,8 @@ import {
   type EntryFunctionPayloadResponse,
   Network,
 } from "@aptos-labs/ts-sdk";
-import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../../src/utils/test/helpers";
-import { calculatePeriodBoundariesCrossed } from "../../../../src/utils/test";
+import { EXACT_TRANSITION_INPUT_AMOUNT } from "../../../utils/helpers";
+import { calculatePeriodBoundariesCrossed } from "../../../utils";
 
 jest.setTimeout(15000);
 

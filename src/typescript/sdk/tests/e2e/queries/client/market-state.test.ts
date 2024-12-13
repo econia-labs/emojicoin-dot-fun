@@ -1,5 +1,5 @@
 import { type SymbolEmoji } from "../../../../src";
-import { getFundedAccount } from "../../../../src/utils/test/test-accounts";
+import { getFundedAccount } from "../../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { fetchMarketState } from "../../../../src/indexer-v2/queries";
 import { type MarketStateModel } from "../../../../src/indexer-v2/types";

@@ -4,6 +4,7 @@ import { type SwapEventModel, type PeriodicStateEventModel } from "@sdk/indexer-
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { q64ToBig } from "@sdk/utils/nominal-price";
 import Big from "big.js";
+import { toNominal } from "lib/utils/decimals";
 
 export type Bar = {
   time: number;
@@ -30,7 +31,7 @@ export const periodicStateTrackerToLatestBar = (
     high: q64ToBig(tracker.highPriceQ64).toNumber(),
     low: q64ToBig(tracker.lowPriceQ64).toNumber(),
     close: q64ToBig(tracker.closePriceQ64).toNumber(),
-    volume: Number(tracker.volumeBase),
+    volume: toNominal(tracker.volumeQuote),
     period: rawPeriodToEnum(tracker.period),
     marketNonce,
   };
@@ -59,7 +60,7 @@ export const toBar = (event: PeriodicStateEventModel): Bar => ({
   high: q64ToBig(event.periodicState.highPriceQ64).toNumber(),
   low: q64ToBig(event.periodicState.lowPriceQ64).toNumber(),
   close: q64ToBig(event.periodicState.closePriceQ64).toNumber(),
-  volume: Number(event.periodicState.volumeBase),
+  volume: toNominal(event.periodicState.volumeQuote),
 });
 
 export const toBars = (events: PeriodicStateEventModel | PeriodicStateEventModel[]) =>
@@ -81,7 +82,7 @@ export const createBarFromSwap = (
     high: price,
     low: price,
     close: price,
-    volume: Number(swap.baseVolume),
+    volume: toNominal(swap.quoteVolume),
     period,
     marketNonce: market.marketNonce,
   };

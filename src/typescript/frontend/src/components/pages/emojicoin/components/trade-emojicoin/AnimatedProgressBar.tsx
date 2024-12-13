@@ -3,7 +3,7 @@ import { type GridProps } from "components/pages/emojicoin/types";
 import { useEventStore } from "context/event-store-context";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
-import { getBondingCurveProgress } from "utils/bonding-curve";
+import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
 import { darkColors } from "theme/colors";
 import { useMatchBreakpoints } from "@hooks/index";
 

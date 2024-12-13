@@ -1,3 +1,4 @@
+// cspell:word bitget
 // cspell:word pontem
 import {
   type Wallet,
@@ -16,6 +17,7 @@ import { Arrow } from "components/svg";
 import { useScramble } from "use-scramble";
 import { Emoji } from "utils/emoji";
 import { emoji } from "utils";
+import BitgetIcon from "@icons/BitgetIcon";
 
 const IconProps = {
   width: 28,
@@ -26,6 +28,7 @@ const IconProps = {
 export const WALLET_ICON: { [key: string]: ReactElement } = {
   "okx wallet": <OKXIcon {...IconProps} />,
   petra: <PetraIcon {...IconProps} />,
+  "bitget wallet": <BitgetIcon {...IconProps} />,
   nightly: <NightlyIcon {...IconProps} className="text-ec-blue" />,
   pontem: <PontemIcon {...IconProps} />,
   martian: <MartianIcon {...IconProps} />,

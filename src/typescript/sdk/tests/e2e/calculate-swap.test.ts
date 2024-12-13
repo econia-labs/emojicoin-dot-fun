@@ -9,17 +9,13 @@ import {
   type AnyNumberString,
   getMarketResource,
   maxBigInt,
-  SYMBOL_EMOJI_DATA,
   type SymbolEmoji,
   toCoinTypes,
   zip,
 } from "../../src";
-import {
-  calculateSwapNetProceeds,
-  deriveEmojicoinPublisherAddress,
-} from "../../src/emojicoin_dot_fun";
-import { getPublishHelpers } from "../../src/utils/test";
-import { getFundedAccounts } from "../../src/utils/test/test-accounts";
+import { calculateSwapNetProceeds, getMarketAddress } from "../../src/emojicoin_dot_fun";
+import { getPublishHelpers } from "../utils/helpers";
+import { getFundedAccounts } from "../utils/test-accounts";
 import { EmojicoinClient } from "../../src/client/emojicoin-client";
 import { TransferCoins } from "../../src/emojicoin_dot_fun/aptos-framework";
 import { getExactTransitionInputAmount } from "./helpers/misc";
@@ -33,34 +29,21 @@ describe("tests the swap functionality", () => {
   const { aptos } = getPublishHelpers();
   const registrants = getFundedAccounts("058", "059", "060", "061", "062", "063");
   const secondaryTraders = getFundedAccounts("064", "065", "066", "067", "068");
-  const marketEmojis = ([["👱"], ["👱🏻"], ["👱🏼"], ["👱🏽"], ["👱🏾"], ["👱🏿"]] as SymbolEmoji[][]).map(
-    (symbol) => symbol.map((e) => SYMBOL_EMOJI_DATA.byEmojiStrict(e))
-  );
-  const marketSymbols = marketEmojis.map((emojis) => emojis.map((e) => e.emoji));
+  const marketSymbols: SymbolEmoji[][] = [["👱"], ["👱🏻"], ["👱🏼"], ["👱🏽"], ["👱🏾"], ["👱🏿"]];
   const emojicoin = new EmojicoinClient({ integratorFeeRateBPs: INTEGRATOR_FEE_RATE_BPS });
   let maxRegisterTxnVersion: bigint;
 
-  // A helper function to get a market resource. We embed the latest market registration
-  // transaction version into this function so that all Market resources can be found on-chain at
-  // the time of the query.
   let getMarketResourceHelper: (
     marketAddress: AccountAddressInput,
     version: AnyNumberString
   ) => ReturnType<typeof getMarketResource>;
-  const getMarketAddress = (emojis: SymbolEmoji[]) => deriveEmojicoinPublisherAddress({ emojis });
-
   beforeAll(async () => {
     const versions = await Promise.all(
-      zip(registrants, marketEmojis).map(([registrant, marketEmojis]) =>
-        emojicoin
-          .register(
-            registrant,
-            marketEmojis.map((emojiData) => emojiData.emoji)
-          )
-          .then((res) => {
-            expect(res.response.success).toBe(true);
-            return BigInt(res.response.version);
-          })
+      zip(registrants, marketSymbols).map(([registrant, emojis]) =>
+        emojicoin.register(registrant, emojis).then((res) => {
+          expect(res.response.success).toBe(true);
+          return BigInt(res.response.version);
+        })
       )
     );
     maxRegisterTxnVersion = maxBigInt(...versions);
@@ -69,7 +52,7 @@ describe("tests the swap functionality", () => {
     return true;
   });
 
-  it("first buyer on a market buys halfway through bonding curve", async () => {
+  it("first buyer on a market buys halfway through the bonding curve", async () => {
     const idx = 0;
     const [firstSwapper, symbolEmojis] = [registrants[idx], marketSymbols[idx]];
     const isSell = false;

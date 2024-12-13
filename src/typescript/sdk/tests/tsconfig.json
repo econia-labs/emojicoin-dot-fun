@@ -1,7 +1,9 @@
 {
+  "compilerOptions": {
+    "noEmit": true
+  },
   "extends": "../tsconfig.json",
   "include": [
-    "**/*.ts",
-    "../src/utils/aptos-client.ts"
+    "./**/*"
   ]
 }

@@ -19,7 +19,7 @@ export type PeriodTypeFromDatabase =
   | "period_4h"
   | "period_1d";
 
-type PeriodTypeFromBroker =
+export type PeriodTypeFromBroker =
   | "OneMinute"
   | "FiveMinutes"
   | "FifteenMinutes"
@@ -28,7 +28,7 @@ type PeriodTypeFromBroker =
   | "FourHours"
   | "OneDay";
 
-type TriggerTypeFromDatabase =
+export type TriggerTypeFromDatabase =
   | "package_publication"
   | "market_registration"
   | "swap_buy"
@@ -37,7 +37,7 @@ type TriggerTypeFromDatabase =
   | "remove_liquidity"
   | "chat";
 
-type TriggerTypeFromBroker =
+export type TriggerTypeFromBroker =
   | "PackagePublication"
   | "MarketRegistration"
   | "SwapBuy"
@@ -123,6 +123,11 @@ type TransactionMetadata = {
   entry_function?: string | null;
   transaction_timestamp: PostgresTimestamp;
   inserted_at?: PostgresTimestamp;
+};
+
+export type BlockAndEventIndexMetadata = {
+  block_number: Uint64String;
+  event_index: number;
 };
 
 type MarketAndStateMetadata = {
@@ -314,10 +319,18 @@ export type DatabaseJsonType = {
     TransactionMetadata & MarketAndStateMetadata & MarketRegistrationEventData
   >;
   [TableName.SwapEvents]: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & SwapEventData & StateEventData
+    TransactionMetadata &
+      MarketAndStateMetadata &
+      SwapEventData &
+      StateEventData &
+      BlockAndEventIndexMetadata
   >;
   [TableName.LiquidityEvents]: Flatten<
-    TransactionMetadata & MarketAndStateMetadata & LiquidityEventData & StateEventData
+    TransactionMetadata &
+      MarketAndStateMetadata &
+      LiquidityEventData &
+      StateEventData &
+      BlockAndEventIndexMetadata
   >;
   [TableName.ChatEvents]: Flatten<
     TransactionMetadata & MarketAndStateMetadata & ChatEventData & StateEventData

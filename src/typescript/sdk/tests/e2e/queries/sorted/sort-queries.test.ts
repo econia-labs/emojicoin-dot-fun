@@ -7,13 +7,12 @@ import {
   sleep,
   SYMBOL_EMOJI_DATA,
   type SymbolEmojiName,
-  UnitOfTime,
 } from "../../../../src";
-import TestHelpers from "../../../../src/utils/test/helpers";
-import { getFundedAccounts } from "../../../../src/utils/test/test-accounts";
+import TestHelpers from "../../../utils/helpers";
+import { getFundedAccounts } from "../../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
 import { Swap } from "../../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
-import { getAptosClient } from "../../../../src/utils/test";
+import { getAptosClient } from "../../../utils";
 import { fetchMarkets } from "../../../../src/indexer-v2/queries/app/home";
 import { SortMarketsBy } from "../../../../src/indexer-v2/types/common";
 import {
@@ -66,7 +65,7 @@ describe("sorting queries for the sort filters on the home page", () => {
           });
           // Sleep in reverse order to mix up the bump order of the markets so it doesn't match
           // the volume queries, since the inputAmounts are in order according to the index `i`.
-          await sleep(marketEmojiNames.length - i, UnitOfTime.Seconds);
+          await sleep((marketEmojiNames.length - i) * 1000);
           const swap = Swap.submit({
             aptosConfig: aptos.config,
             swapper: registrants[i],

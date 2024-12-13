@@ -1,13 +1,15 @@
+import { type AnyNumberString } from "@sdk-types";
+
 export type TableRowDesktopProps = {
   item: {
     rankIcon: string;
     rankName: string;
-    apt: string;
-    emoji: string;
+    apt: bigint;
+    emoji: bigint;
     type: string;
-    priceQ64: string;
+    priceQ64: bigint;
     date: Date;
-    version: number;
+    version: AnyNumberString;
     swapper: string;
   };
   showBorder: boolean;

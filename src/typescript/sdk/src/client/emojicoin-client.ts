@@ -21,7 +21,7 @@ import {
 } from "../emojicoin_dot_fun/emojicoin-dot-fun";
 import { type Events } from "../emojicoin_dot_fun/events";
 import { getEmojicoinMarketAddressAndTypeTags } from "../markets";
-import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../mini-processor";
+import { type EventsModels, getEventsAsProcessorModelsFromResponse } from "../indexer-v2";
 import { APTOS_CONFIG, getAptosClient } from "../utils/aptos-client";
 import { toChatMessageEntryFunctionArgs } from "../emoji_data";
 import customExpect from "./expect";
@@ -78,6 +78,9 @@ const waitForEventProcessed = async (
  *
  * The `utils` functions provides several commonly used utility functions.
  *
+ * @param alwaysWaitForIndexer whether or not each transaction should wait for the indexer to
+ * process the event before returning.
+ *
  * @example
  * ```typescript
  * const emojis: MarketSymbolEmojis = ["🌊"];
@@ -96,6 +99,7 @@ const waitForEventProcessed = async (
  */
 export class EmojicoinClient {
   public aptos: Aptos;
+  public alwaysWaitForIndexer: boolean;
 
   public register = this.registerInternal.bind(this);
   public chat = this.chatInternal.bind(this);
@@ -148,12 +152,14 @@ export class EmojicoinClient {
     integrator?: AccountAddressInput;
     integratorFeeRateBPs?: bigint | number;
     minOutputAmount?: bigint | number;
+    alwaysWaitForIndexer?: boolean;
   }) {
     const {
       aptos = getAptosClient(),
       integrator = INTEGRATOR_ADDRESS,
       integratorFeeRateBPs = 0,
       minOutputAmount = 1n,
+      alwaysWaitForIndexer = false,
     } = args ?? {};
     // Create a client that always uses the static API_KEY config options.
     const hardCodedConfig = new AptosConfig({
@@ -164,6 +170,7 @@ export class EmojicoinClient {
     this.integrator = AccountAddress.from(integrator);
     this.integratorFeeRateBPs = Number(integratorFeeRateBPs);
     this.minOutputAmount = BigInt(minOutputAmount);
+    this.alwaysWaitForIndexer = alwaysWaitForIndexer;
   }
 
   // Internal so we can bind the public functions.
@@ -187,13 +194,15 @@ export class EmojicoinClient {
     });
     const res = this.getTransactionEventData(response);
     const marketID = res.events.marketRegistrationEvents[0].marketID;
+    if (this.alwaysWaitForIndexer) {
+      await waitForEventProcessed(marketID, 1n, TableName.MarketRegistrationEvents);
+    }
     return {
       ...res,
       registration: {
         event: expect(res.events.marketRegistrationEvents.at(0), Expect.Register.Event),
         model: expect(res.models.marketRegistrationEvents.at(0), Expect.Register.Model),
       },
-      handle: waitForEventProcessed(marketID, 1n, TableName.MarketRegistrationEvents),
     };
   }
 
@@ -219,13 +228,15 @@ export class EmojicoinClient {
     });
     const res = this.getTransactionEventData(response);
     const { emitMarketNonce, marketID } = res.events.chatEvents[0];
+    if (this.alwaysWaitForIndexer) {
+      await waitForEventProcessed(marketID, emitMarketNonce, TableName.ChatEvents);
+    }
     return {
       ...res,
       chat: {
         event: expect(res.events.chatEvents.at(0), Expect.Chat.Event),
         model: expect(res.models.chatEvents.at(0), Expect.Chat.Model),
       },
-      handle: waitForEventProcessed(marketID, emitMarketNonce, TableName.ChatEvents),
     };
   }
 
@@ -348,13 +359,15 @@ export class EmojicoinClient {
     });
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.swapEvents[0];
+    if (this.alwaysWaitForIndexer) {
+      await waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents);
+    }
     return {
       ...res,
       swap: {
         event: expect(res.events.swapEvents.at(0), Expect.Swap.Event),
         model: expect(res.models.swapEvents.at(0), Expect.Swap.Model),
       },
-      handle: waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents),
     };
   }
 
@@ -405,13 +418,15 @@ export class EmojicoinClient {
     });
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.swapEvents[0];
+    if (this.alwaysWaitForIndexer) {
+      await waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents);
+    }
     return {
       ...res,
       swap: {
         event: expect(res.events.swapEvents.at(0), Expect.Swap.Event),
         model: expect(res.models.swapEvents.at(0), Expect.Swap.Model),
       },
-      handle: waitForEventProcessed(marketID, marketNonce, TableName.SwapEvents),
     };
   }
 
@@ -431,13 +446,15 @@ export class EmojicoinClient {
     });
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.liquidityEvents[0];
+    if (this.alwaysWaitForIndexer) {
+      await waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents);
+    }
     return {
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0), Expect.Liquidity.Event),
         model: expect(res.models.liquidityEvents.at(0), Expect.Liquidity.Model),
       },
-      handle: waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents),
     };
   }
 
@@ -457,13 +474,15 @@ export class EmojicoinClient {
     });
     const res = this.getTransactionEventData(response);
     const { marketNonce, marketID } = res.events.liquidityEvents[0];
+    if (this.alwaysWaitForIndexer) {
+      await waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents);
+    }
     return {
       ...res,
       liquidity: {
         event: expect(res.events.liquidityEvents.at(0), Expect.Liquidity.Event),
         model: expect(res.models.liquidityEvents.at(0), Expect.Liquidity.Model),
       },
-      handle: waitForEventProcessed(marketID, marketNonce, TableName.LiquidityEvents),
     };
   }
 
