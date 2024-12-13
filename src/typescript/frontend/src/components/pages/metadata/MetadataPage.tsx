@@ -97,7 +97,10 @@ const MetadataPage = () => {
         });
         return market.vec.length !== 0;
       } catch (e) {
-        console.error("Could not get if market exists", e);
+        console.error(
+          "Failed to call the emojicoin_dot_fun::MarketMetadataByMarketAddress view function.",
+          e
+        );
         return false;
       }
     },
@@ -134,7 +137,7 @@ const MetadataPage = () => {
       aptos,
       market: marketAddress,
     })
-      .then((r) => (r.vec.length === 0 ? null : (r.vec[0] ?? null)))
+      .then((r) => r.vec.at(0) ?? null)
       .then((r) => {
         if (r) {
           const newFields = new Map();
@@ -241,23 +244,14 @@ const MetadataPage = () => {
             if (!isSubmitEnabled) {
               return;
             }
+            const filledFields = fields.entries().filter(([_, value]) => value !== "");
             const builderLambda = () =>
               SetMarketProperties.builder({
                 aptosConfig: aptos.config,
                 admin: account!.address,
                 market: marketAddress,
-                keys: Array.from(
-                  fields
-                    .entries()
-                    .filter(([_, value]) => value !== "")
-                    .map(([key, _]) => key)
-                ),
-                values: Array.from(
-                  fields
-                    .entries()
-                    .filter(([_, value]) => value !== "")
-                    .map(([_, value]) => value)
-                ),
+                keys: Array.from(filledFields.map(([key, _]) => key)),
+                values: Array.from(filledFields.map(([_, value]) => value)),
               });
             const res = await submit(builderLambda);
             if (!res || res.error) {
