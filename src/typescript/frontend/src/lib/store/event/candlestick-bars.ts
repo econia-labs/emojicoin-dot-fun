@@ -1,5 +1,5 @@
 import { type Types } from "@sdk-types";
-import { ONE_APT, type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
+import { type Period, periodEnumToRawDuration, rawPeriodToEnum } from "@sdk/const";
 import { type SwapEventModel, type PeriodicStateEventModel } from "@sdk/indexer-v2/types";
 import { getPeriodStartTimeFromTime } from "@sdk/utils";
 import { q64ToBig } from "@sdk/utils/nominal-price";
