@@ -149,7 +149,10 @@ const ClientLaunchEmojicoinPage: React.FC<{
 
   return (
     <div className="flex flex-col grow relative h-[100%]">
-      <div className="absolute w-[100%] overflow-hidden" style={{height: isMobile ? "calc(100% + 12px)" : "calc(100% + 36px)"}}>
+      <div
+        className="absolute w-[100%] overflow-hidden"
+        style={{ height: isMobile ? "calc(100% + 12px)" : "calc(100% + 36px)" }}
+      >
         {randomSymbols.length > 0 && (
           <EmojiRain
             randomSymbols={randomSymbols}
