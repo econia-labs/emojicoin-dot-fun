@@ -1,0 +1,22 @@
+[addresses]
+emojicoin_dot_fun = "_"
+market_metadata = "_"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dependencies.EmojicoinDotFun]
+local = "../emojicoin_dot_fun"
+
+[dev-addresses]
+coin_factory = "0xaaaa"
+emojicoin_dot_fun = "0xc0de"
+market_metadata = "0xddd"
+
+[package]
+authors = ["Econia Labs (developers@econialabs.com)"]
+name = "EmojicoinDotFunMetadata"
+upgrade_policy = "compatible"
+version = "1.0.0"

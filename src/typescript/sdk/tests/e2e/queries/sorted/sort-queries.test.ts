@@ -11,7 +11,7 @@ import {
 import TestHelpers from "../../../utils/helpers";
 import { getFundedAccounts } from "../../../utils/test-accounts";
 import { waitForEmojicoinIndexer } from "../../../../src/indexer-v2/queries/utils";
-import { Swap } from "../../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { Swap } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils";
 import { fetchMarkets } from "../../../../src/indexer-v2/queries/app/home";
 import { SortMarketsBy } from "../../../../src/indexer-v2/types/common";

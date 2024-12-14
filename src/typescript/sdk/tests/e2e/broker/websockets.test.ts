@@ -15,13 +15,7 @@ import {
   waitFor,
   zip,
 } from "../../../src";
-import {
-  Chat,
-  ProvideLiquidity,
-  RegisterMarket,
-  Swap,
-  SwapWithRewards,
-} from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { Chat, ProvideLiquidity, RegisterMarket, Swap, SwapWithRewards } from "@/contract-apis";
 import { EXACT_TRANSITION_INPUT_AMOUNT, getAptosClient } from "../../utils";
 import { getFundedAccounts } from "../../utils/test-accounts";
 import { type BrokerEvent } from "../../../src/broker-v2/types";
