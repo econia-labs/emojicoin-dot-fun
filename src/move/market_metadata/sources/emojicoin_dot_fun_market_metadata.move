@@ -1,3 +1,4 @@
+// cspell:word upsert
 module market_metadata::emojicoin_dot_fun_market_metadata {
 
     use aptos_std::simple_map::{Self, SimpleMap};

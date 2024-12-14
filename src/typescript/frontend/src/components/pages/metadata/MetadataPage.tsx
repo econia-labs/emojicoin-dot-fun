@@ -26,8 +26,8 @@ const PLACEHOLDERS = new Map([
 
 const DEFAULT_FIELDS = new Map(Array.from(PLACEHOLDERS.entries().map(([key, _]) => [key, ""])));
 
-const BUTTON_CLASSNAME = "text-white px-4 border-ec-blue border-solid border-[3px] rounded-xl";
-const INPUT_CLASSNAME =
+const BUTTON_CLASS_NAME = "text-white px-4 border-ec-blue border-solid border-[3px] rounded-xl";
+const INPUT_CLASS_NAME =
   "text-white px-4 border-ec-blue border-solid border-[3px] rounded-xl bg-black outline-none";
 
 const FormEntry = ({
@@ -53,14 +53,14 @@ const FormEntry = ({
     <div className="max-w-[300px] text-white">{name}</div>
     <input
       tabIndex={1}
-      className={`${INPUT_CLASSNAME} w-[300px] ${className}`}
+      className={`${INPUT_CLASS_NAME} w-[300px] ${className}`}
       value={value}
       placeholder={placeholder}
       onChange={onChange}
     ></input>
     {buttonText && (
       <button
-        className={`${BUTTON_CLASSNAME} absolute right-[-60px] ${disabled ? "!border-dark-gray" : ""}`}
+        className={`${BUTTON_CLASS_NAME} absolute right-[-60px] ${disabled ? "!border-dark-gray" : ""}`}
         onClick={onClick}
         tabIndex={2}
         disabled={disabled}
@@ -209,7 +209,7 @@ const MetadataPage = () => {
       <div className="mx-auto w-[300px] grid grid-cols-2 grid-rows-2 gap-[10px]">
         <button
           tabIndex={3}
-          className={`${BUTTON_CLASSNAME}`}
+          className={`${BUTTON_CLASS_NAME}`}
           onClick={() => {
             const data = {
               marketAddress,
@@ -222,7 +222,7 @@ const MetadataPage = () => {
         </button>
         <button
           tabIndex={3}
-          className={`${BUTTON_CLASSNAME}`}
+          className={`${BUTTON_CLASS_NAME}`}
           onClick={() => {
             navigator.clipboard
               .readText()
@@ -239,7 +239,7 @@ const MetadataPage = () => {
         </button>
         <button
           tabIndex={3}
-          className={`${BUTTON_CLASSNAME} ${!isSubmitEnabled ? "!border-dark-gray" : ""} col-span-full`}
+          className={`${BUTTON_CLASS_NAME} ${!isSubmitEnabled ? "!border-dark-gray" : ""} col-span-full`}
           onClick={async () => {
             if (!isSubmitEnabled) {
               return;
