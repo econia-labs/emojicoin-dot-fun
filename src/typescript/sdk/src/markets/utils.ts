@@ -14,7 +14,12 @@ import {
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import { EmojicoinDotFun, MarketView, REGISTRY_ADDRESS, getMarketAddress } from "../emojicoin_dot_fun";
+import {
+  EmojicoinDotFun,
+  MarketView,
+  REGISTRY_ADDRESS,
+  getMarketAddress,
+} from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
   BASE_VIRTUAL_CEILING,
