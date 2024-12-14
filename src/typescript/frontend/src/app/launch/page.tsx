@@ -1,8 +1,7 @@
 import ClientLaunchEmojicoinPage from "../../components/pages/launch-emojicoin/ClientLaunchEmojicoinPage";
+import { fetchRandomSymbols } from "@/queries/launch";
 import { type Metadata } from "next";
 import { emoji } from "utils";
-
-export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "launch",
@@ -10,5 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default async function LaunchEmojicoinPage() {
-  return <ClientLaunchEmojicoinPage />;
+  const randomSymbols = await fetchRandomSymbols({});
+  return <ClientLaunchEmojicoinPage randomSymbols={randomSymbols} />;
 }

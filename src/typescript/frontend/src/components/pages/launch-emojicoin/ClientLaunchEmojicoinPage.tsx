@@ -17,6 +17,8 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { symbolBytesToEmojis } from "@sdk/emoji_data";
 import MemoizedLaunchAnimation from "./memoized-launch";
+import { EmojiRain } from "./EmojiRain";
+import { useMatchBreakpoints } from "@hooks/index";
 
 const LOADING_TIME = 2000;
 type Stage = "initial" | "loading" | "coding";
@@ -30,7 +32,9 @@ const lastMarketRegistration = (
   return undefined;
 };
 
-const ClientLaunchEmojicoinPage = () => {
+const ClientLaunchEmojicoinPage: React.FC<{
+  randomSymbols: ReturnType<typeof symbolBytesToEmojis>[];
+}> = ({ randomSymbols }) => {
   const searchParams = useSearchParams();
   const emojiParams = searchParams.get("emojis");
   const setEmojis = useEmojiPicker((state) => state.setEmojis);
@@ -45,6 +49,8 @@ const ClientLaunchEmojicoinPage = () => {
   const lastResponseStoredAt = useRef(lastResponseStoredAtFromContext);
   const isLoadingRegisteredMarket = useEmojiPicker((state) => state.isLoadingRegisteredMarket);
   const [stage, setStage] = useState<Stage>(isLoadingRegisteredMarket ? "loading" : "initial");
+
+  const { isMobile } = useMatchBreakpoints();
 
   useEffect(() => {
     if (emojiParams !== null) {
@@ -126,13 +132,32 @@ const ClientLaunchEmojicoinPage = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [status]);
 
+  const backgroundDivClasses =
+    "absolute w-[200vw] h-[123%] top-[-15%] " +
+    "left-[-100vw] backdrop-blur-lg border-y-[1px] border-dark-gray " +
+    "border-solid sm:border-x-[1px] sm:!w-[130%] sm:left-[-15%] rounded-[3px]";
+
   return (
-    <div className="flex flex-col grow">
+    <div className="flex flex-col grow relative h-[100%]">
+      <div
+        className="absolute w-[100%] overflow-hidden"
+        style={{ height: isMobile ? "calc(100% + 12px)" : "calc(100% + 36px)" }}
+      >
+        {randomSymbols.length > 0 && (
+          <EmojiRain
+            randomSymbols={randomSymbols}
+            onClick={(name) => setEmojis(name.emojis.map((e) => e.emoji))}
+          />
+        )}
+      </div>
       <TextCarousel />
 
       <div className="flex justify-center items-center h-full px-6">
-        <div className="relative flex flex-col w-full max-w-[414px]">
-          <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} />
+        <div className="relative flex flex-col w-full max-w-[414px] z-50">
+          <div className={backgroundDivClasses}></div>
+          <div className="z-50">
+            <MemoizedLaunchAnimation loading={isLoadingRegisteredMarket} />
+          </div>
         </div>
       </div>
     </div>
