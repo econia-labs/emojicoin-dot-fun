@@ -8,6 +8,7 @@ module arena::emojicoin_arena {
     use aptos_framework::randomness::Self;
     use aptos_framework::timestamp;
     use aptos_std::smart_table::{Self, SmartTable};
+    use aptos_std::math64::min;
     use arena::pseudo_randomness;
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         Self,
@@ -38,6 +39,7 @@ module arena::emojicoin_arena {
 
     const U64_MAX: u64 = 0xffffffffffffffff;
     const MAX_PERCENTAGE: u64 = 100;
+    const MIN_MELEE_DURATION: u64 = 1 * 3_600_000_000;
 
     /// Flat integrator fee.
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
@@ -45,10 +47,9 @@ module arena::emojicoin_arena {
 
     // Default parameters for new melees.
     const DEFAULT_DURATION: u64 = 36 * 3_600_000_000;
-    const DEFAULT_LOCK_IN_PERIOD: u64 = 12 * 3_600_000_000;
-    const DEFAULT_AVAILABLE_REWADS: u64 = 1500 * 100_000_000;
-    const DEFAULT_MATCH_PERCENTAGE: u64 = 50;
-    const DEFAULT_MAX_MATCH_AMOUNT: u64 = 10 * 100_000_000;
+    const DEFAULT_AVAILABLE_REWADS: u64 = 1000 * 100_000_000;
+    const DEFAULT_MAX_MATCH_PERCENTAGE: u64 = 50;
+    const DEFAULT_MAX_MATCH_AMOUNT: u64 = 5 * 100_000_000;
 
     struct Melee has store {
         /// 1-indexed for conformity with emojicoin market ID indexing.
@@ -59,12 +60,10 @@ module arena::emojicoin_arena {
         start_time: u64,
         /// How long melee lasts after start time.
         duration: u64,
-        /// How long after start time users can lock in.
-        lock_in_period: u64,
         /// Amount of rewards available for distribution in octas, conditional on vault balance.
         available_rewards: u64,
-        /// Percentage of user's input amount to match in octas, when locking in.
-        match_percentage: u64,
+        /// Max percentage of user's input amount to match in octas, when locking in.
+        max_match_percentage: u64,
         /// Maximum amount of APT to match in octas, when locking in.
         max_match_amount: u64,
         /// Active entrants.
@@ -93,8 +92,8 @@ module arena::emojicoin_arena {
         /// APT entered into the melee, used as a benchmark for PnL calculations. Normalized when
         /// topping off, reset to zero when exiting.
         octas_entered: u64,
-        /// Octas user must pay to exit the melee, if they have locked in. Equivalent to the amount
-        /// of APT they have been matched by locking in.
+        /// Octas user must pay to exit the melee before it ends, if they have locked in. Equivalent
+        /// to the amount of APT they have been matched by locking in.
         tap_out_fee: u64
     }
 
@@ -109,12 +108,10 @@ module arena::emojicoin_arena {
         signer_capability: SignerCapability,
         /// `Melee.duration` for new melees.
         new_melee_duration: u64,
-        /// `Melee.lock_in_period` for new melees.
-        new_melee_lock_in_period: u64,
         /// `Melee.available_rewards` for new melees.
         new_melee_available_rewards: u64,
-        /// `Melee.match_percentage` for new melees.
-        new_melee_match_percentage: u64,
+        /// `Melee.max_match_percentage` for new melees.
+        new_melee_max_match_percentage: u64,
         /// `Melee.max_match_amount` for new melees.
         new_melee_max_match_amount: u64
     }
@@ -146,29 +143,15 @@ module arena::emojicoin_arena {
 
     public entry fun set_new_melee_duration(arena: &signer, duration: u64) acquires Registry {
         let registry_ref_mut = borrow_registry_ref_mut_checked(arena);
-        assert!(
-            duration > registry_ref_mut.new_melee_lock_in_period,
-            E_NEW_DURATION_TOO_SHORT
-        );
+        assert!(duration >= MIN_MELEE_DURATION, E_NEW_DURATION_TOO_SHORT);
         registry_ref_mut.new_melee_duration = duration;
     }
 
-    public entry fun set_new_melee_lock_in_period(
-        arena: &signer, lock_in_period: u64
+    public entry fun set_new_melee_max_match_percentage(
+        arena: &signer, max_match_percentage: u64
     ) acquires Registry {
-        let registry_ref_mut = borrow_registry_ref_mut_checked(arena);
-        assert!(
-            lock_in_period < registry_ref_mut.new_melee_duration,
-            E_NEW_LOCK_IN_PERIOD_TOO_LONG
-        );
-        registry_ref_mut.new_melee_lock_in_period = lock_in_period;
-    }
-
-    public entry fun set_new_melee_match_percentage(
-        arena: &signer, match_percentage: u64
-    ) acquires Registry {
-        assert!(match_percentage <= MAX_PERCENTAGE, E_NEW_MATCH_PERCENTAGE_TOO_HIGH);
-        borrow_registry_ref_mut_checked(arena).new_melee_match_percentage = match_percentage;
+        assert!(max_match_percentage <= MAX_PERCENTAGE, E_NEW_MATCH_PERCENTAGE_TOO_HIGH);
+        borrow_registry_ref_mut_checked(arena).new_melee_max_match_percentage = max_match_percentage;
     }
 
     public entry fun set_new_melee_max_match_amount(
@@ -526,9 +509,8 @@ module arena::emojicoin_arena {
                 melee_ids_by_market_ids: smart_table::new(),
                 signer_capability,
                 new_melee_duration: DEFAULT_DURATION,
-                new_melee_lock_in_period: DEFAULT_LOCK_IN_PERIOD,
                 new_melee_available_rewards: DEFAULT_AVAILABLE_REWADS,
-                new_melee_match_percentage: DEFAULT_MATCH_PERCENTAGE,
+                new_melee_max_match_percentage: DEFAULT_MAX_MATCH_PERCENTAGE,
                 new_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT
             }
         );
@@ -663,49 +645,28 @@ module arena::emojicoin_arena {
         registry_ref_mut: &mut Registry,
         time: u64
     ): u64 {
-        // Can only get matched if lock-in period is still active and matching not maxed out yet.
-        let lock_ins_still_allowed =
-            time
-                < current_melee_ref_mut.start_time
-                    + current_melee_ref_mut.lock_in_period;
-        let tap_out_fee = escrow_ref_mut.tap_out_fee;
-        let can_match_more = tap_out_fee < current_melee_ref_mut.max_match_amount;
-        if (lock_ins_still_allowed && can_match_more) {
-            // Eligible match amount is the maximum match amount minus the tap out fee.
-            let eligible_match_amount =
-                current_melee_ref_mut.max_match_amount - tap_out_fee;
-            // Correct eligible match amount for available melee rewards and vault balance.
-            eligible_match_amount = if (eligible_match_amount
-                < current_melee_ref_mut.available_rewards) {
-                eligible_match_amount
-            } else {
-                current_melee_ref_mut.available_rewards
-            };
-            let vault_balance =
+        min(
+            // Scale down input amount for matching percentage and time elapsed in one compound
+            // operation, to reduce truncation errors.
+            ((input_amount as u256)
+                * (current_melee_ref_mut.max_match_percentage as u256)
+                * ((time as u256) - (current_melee_ref_mut.start_time as u256))
+                / ((MAX_PERCENTAGE as u256) * (current_melee_ref_mut.duration as u256)) as u64),
+            min(
+                // Correct for vault balance.
                 coin::balance<AptosCoin>(
                     account::get_signer_capability_address(
                         &registry_ref_mut.signer_capability
                     )
-                );
-            eligible_match_amount = if (eligible_match_amount < vault_balance) {
-                eligible_match_amount
-            } else {
-                vault_balance
-            };
-            // Requested match amount is the input amount times the match percentage.
-            let requested_match_amount =
-                (
-                    ((input_amount as u128)
-                        * (current_melee_ref_mut.match_percentage as u128)
-                        / (MAX_PERCENTAGE as u128)) as u64
-                );
-            // Correct actual match amount for the minimum of eligible and requested match amounts.
-            if (eligible_match_amount < requested_match_amount) {
-                eligible_match_amount
-            } else {
-                requested_match_amount
-            }
-        } else { 0 }
+                ),
+                min(
+                    // Correct for available rewards in current melee.
+                    current_melee_ref_mut.available_rewards,
+                    // Correct for max match amount user is eligible for.
+                    current_melee_ref_mut.max_match_amount - escrow_ref_mut.tap_out_fee
+                )
+            )
+        )
     }
 
     /// Accepts a mutable reference to avoid freezing references up the stack.
@@ -750,13 +711,11 @@ module arena::emojicoin_arena {
                     )
                 }),
                 start_time: last_period_boundary(
-                    timestamp::now_microseconds(),
-                    registry_ref_mut.new_melee_lock_in_period
+                    timestamp::now_microseconds(), registry_ref_mut.new_melee_duration
                 ),
-                lock_in_period: registry_ref_mut.new_melee_lock_in_period,
                 duration: registry_ref_mut.new_melee_duration,
                 available_rewards: registry_ref_mut.new_melee_available_rewards,
-                match_percentage: registry_ref_mut.new_melee_match_percentage,
+                max_match_percentage: registry_ref_mut.new_melee_max_match_percentage,
                 max_match_amount: registry_ref_mut.new_melee_max_match_amount,
                 entrants: smart_table::new(),
                 n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
