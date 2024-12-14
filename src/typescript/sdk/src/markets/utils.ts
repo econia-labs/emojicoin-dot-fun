@@ -45,7 +45,7 @@ import {
 } from "../emoji_data";
 import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
-import { MarketView } from "../emojicoin_dot_fun/emojicoin-dot-fun";
+import { MarketView } from "@/contract-apis";
 import { type Flatten } from "../types";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import { type AtLeastOne } from "../utils/utility-types";
