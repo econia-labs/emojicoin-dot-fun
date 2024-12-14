@@ -41,8 +41,8 @@ export interface Asset {
   id: string;
   name: string;
   symbol: string;
-  totalSupply: number;
-  circulatingSupply: number;
+  totalSupply: number | string;
+  circulatingSupply?: number | string;
   coinGeckoId?: string;
   coinMarketCapId?: string;
   metadata?: Record<string, string>;
@@ -56,14 +56,14 @@ export interface AssetResponse {
  * Fetches an asset by a string of the emojis that represent the asset
  * @param assetId
  */
-export async function getAsset(assetId: string): Asset {
+export async function getAsset(assetId: string): Promise<Asset> {
   const marketEmojiData = toMarketEmojiData(assetId);
   const symbolEmojis = symbolEmojiStringToArray(assetId);
   const marketState = await fetchMarketState({ searchEmojis: symbolEmojis });
 
-  const circulatingSupply: { circulatingSupply?: number } = {};
+  const circulatingSupply: { circulatingSupply?: number | string } = {};
   if (marketState && marketState.state) {
-    circulatingSupply.circulatingSupply = calculateCirculatingSupply(marketState.state);
+    circulatingSupply.circulatingSupply = calculateCirculatingSupply(marketState.state).toString();
   }
 
   return {
