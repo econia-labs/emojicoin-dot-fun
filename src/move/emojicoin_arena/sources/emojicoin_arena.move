@@ -426,6 +426,23 @@ module arena::emojicoin_arena {
         &mut Registry[@arena]
     }
 
+    /// Cranks schedule and returns `true` if a melee has ended as a result, along with assorted
+    /// variables, to reduce borrows and lookups in the caller.
+    inline fun crank_schedule(): (bool, &mut Registry, u64, u64) {
+        let time = timestamp::now_microseconds();
+        let registry_ref_mut = &mut Registry[@arena];
+        let n_melees_before_cranking = registry_ref_mut.melees_by_id.length();
+        let current_melee_ref =
+            registry_ref_mut.melees_by_id.borrow(n_melees_before_cranking);
+        let cranked =
+            if (time >= current_melee_ref.start_time + current_melee_ref.duration) {
+                let market_ids = next_melee_market_ids(registry_ref_mut);
+                register_melee(registry_ref_mut, n_melees_before_cranking, market_ids);
+                true
+            } else false;
+        (cranked, registry_ref_mut, time, n_melees_before_cranking)
+    }
+
     inline fun ensure_contains(
         map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
     ) {
@@ -490,23 +507,6 @@ module arena::emojicoin_arena {
                 );
             };
         }
-    }
-
-    /// Cranks schedule and returns `true` if a melee has ended as a result, along with assorted
-    /// variables, to reduce borrows and lookups in the caller.
-    inline fun crank_schedule(): (bool, &mut Registry, u64, u64) {
-        let time = timestamp::now_microseconds();
-        let registry_ref_mut = &mut Registry[@arena];
-        let n_melees_before_cranking = registry_ref_mut.melees_by_id.length();
-        let current_melee_ref =
-            registry_ref_mut.melees_by_id.borrow(n_melees_before_cranking);
-        let cranked =
-            if (time >= current_melee_ref.start_time + current_melee_ref.duration) {
-                let market_ids = next_melee_market_ids(registry_ref_mut);
-                register_melee(registry_ref_mut, n_melees_before_cranking, market_ids);
-                true
-            } else false;
-        (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
     inline fun get_n_registered_markets(): u64 {
