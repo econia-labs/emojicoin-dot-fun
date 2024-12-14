@@ -7,8 +7,9 @@ module arena::emojicoin_arena {
     use aptos_framework::coin::{Self, Coin};
     use aptos_framework::randomness::Self;
     use aptos_framework::timestamp;
-    use aptos_std::smart_table::{Self, SmartTable};
     use aptos_std::math64::min;
+    use aptos_std::smart_table::{Self, SmartTable};
+    use aptos_std::type_info;
     use arena::pseudo_randomness;
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         Self,
@@ -35,6 +36,8 @@ module arena::emojicoin_arena {
     const E_ENTER_COIN_BALANCE_1: u64 = 5;
     /// Elected to lock in but unable to match.
     const E_UNABLE_TO_LOCK_IN: u64 = 6;
+    /// Provided escrow coin type is invalid.
+    const E_INVALID_ESCROW_COIN_TYPE: u64 = 7;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -173,11 +176,8 @@ module arena::emojicoin_arena {
     }
 
     #[randomness]
-    entry fun enter<Coin0, LP0, Coin1, LP1>(
-        entrant: &signer,
-        buy_emojicoin_0: bool,
-        input_amount: u64,
-        lock_in: bool
+    entry fun enter<Coin0, LP0, Coin1, LP1, EscrowCoin>(
+        entrant: &signer, input_amount: u64, lock_in: bool
     ) acquires MeleeEscrow, Registry, UserMelees {
         let (melee_just_ended, registry_ref_mut, time, n_melees_before_cranking) =
             crank_schedule();
@@ -226,9 +226,23 @@ module arena::emojicoin_arena {
         ensure_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
         ensure_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
 
+        // Verify user is selecting one of the two emojicoin types.
+        let coin_0_type_info = type_info::type_of<Coin0>();
+        let coin_1_type_info = type_info::type_of<Coin1>();
+        let escrow_coin_type_info = type_info::type_of<EscrowCoin>();
+        let buy_coin_0 =
+            if (coin_0_type_info == escrow_coin_type_info) true
+            else {
+                assert!(
+                    escrow_coin_type_info == coin_1_type_info,
+                    E_INVALID_ESCROW_COIN_TYPE
+                );
+                false
+            };
+
         // Verify that user does not split balance between the two emojicoins.
         let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
-        if (buy_emojicoin_0)
+        if (buy_coin_0)
             assert!(
                 coin::value(&escrow_ref_mut.emojicoin_1) == 0, E_ENTER_COIN_BALANCE_1
             )
@@ -269,7 +283,7 @@ module arena::emojicoin_arena {
         // Execute a swap then immediately move funds into escrow.
         let input_amount_after_matching = input_amount + match_amount;
         let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
-        if (buy_emojicoin_0) {
+        if (buy_coin_0) {
             let (net_proceeds, _) =
                 swap_with_stats<Coin0, LP0>(
                     entrant,
@@ -309,10 +323,7 @@ module arena::emojicoin_arena {
 
     #[randomness]
     entry fun swap<Coin0, LP0, Coin1, LP1>(
-        swapper: &signer,
-        melee_id: u64,
-        market_addresses: vector<address>,
-        buy_emojicoin_0: bool
+        swapper: &signer, melee_id: u64, market_addresses: vector<address>
     ) acquires MeleeEscrow, Registry, UserMelees {
         let (exit_once_done, _registry_ref_mut, _time, _n_melees_before_cranking) =
             crank_schedule();
@@ -326,26 +337,24 @@ module arena::emojicoin_arena {
         let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[swapper_address];
         if (escrow_ref_mut.melee_id != melee_id)
             return;
-        let (market_address_0, market_address_1) =
-            (market_addresses[0], market_addresses[1]);
 
-        if (buy_emojicoin_0) {
-            swap_within_escrow<Coin1, LP1, Coin0, LP0>(
-                swapper,
-                swapper_address,
-                market_address_1,
-                market_address_0,
-                &mut escrow_ref_mut.emojicoin_1,
-                &mut escrow_ref_mut.emojicoin_0
-            );
-        } else {
+        if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
             swap_within_escrow<Coin0, LP0, Coin1, LP1>(
                 swapper,
                 swapper_address,
-                market_address_0,
-                market_address_1,
+                market_addresses[0],
+                market_addresses[1],
                 &mut escrow_ref_mut.emojicoin_0,
                 &mut escrow_ref_mut.emojicoin_1
+            );
+        } else {
+            swap_within_escrow<Coin1, LP1, Coin0, LP0>(
+                swapper,
+                swapper_address,
+                market_addresses[1],
+                market_addresses[0],
+                &mut escrow_ref_mut.emojicoin_1,
+                &mut escrow_ref_mut.emojicoin_0
             );
         };
 
