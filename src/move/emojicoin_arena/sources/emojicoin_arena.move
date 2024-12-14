@@ -527,28 +527,36 @@ module arena::emojicoin_arena {
         registry_ref_mut: &mut Registry,
         time: u64
     ): u64 {
-        min(
-            // Scale down input amount for matching percentage and time elapsed in one compound
-            // operation, to reduce truncation errors.
-            ((input_amount as u256)
-                * (current_melee_ref_mut.max_match_percentage as u256)
-                * ((time as u256) - (current_melee_ref_mut.start_time as u256))
-                / ((MAX_PERCENTAGE as u256) * (current_melee_ref_mut.duration as u256)) as u64),
+        let elapsed_time = ((time - current_melee_ref_mut.start_time) as u256);
+        let duration = (current_melee_ref_mut.duration as u256);
+        if (elapsed_time >= duration) { 0 }
+        else {
             min(
-                // Correct for vault balance.
-                coin::balance<AptosCoin>(
-                    account::get_signer_capability_address(
-                        &registry_ref_mut.signer_capability
-                    )
+                // Scale down input amount for matching percentage and time elapsed in one compound
+                // operation, to reduce truncation errors.
+                (
+                    ((input_amount as u256)
+                        * (current_melee_ref_mut.max_match_percentage as u256)
+                        * (duration - elapsed_time)) / ((MAX_PERCENTAGE as u256)
+                        * duration) as u64
                 ),
                 min(
-                    // Correct for available rewards in current melee.
-                    current_melee_ref_mut.available_rewards,
-                    // Correct for max match amount user is eligible for.
-                    current_melee_ref_mut.max_match_amount - escrow_ref_mut.tap_out_fee
+                    // Correct for vault balance.
+                    coin::balance<AptosCoin>(
+                        account::get_signer_capability_address(
+                            &registry_ref_mut.signer_capability
+                        )
+                    ),
+                    min(
+                        // Correct for available rewards in current melee.
+                        current_melee_ref_mut.available_rewards,
+                        // Correct for max match amount user is eligible for.
+                        current_melee_ref_mut.max_match_amount
+                            - escrow_ref_mut.tap_out_fee
+                    )
                 )
             )
-        )
+        }
     }
 
     /// Accepts a mutable reference to avoid freezing references up the stack.
