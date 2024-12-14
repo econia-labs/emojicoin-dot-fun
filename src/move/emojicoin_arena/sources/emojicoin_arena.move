@@ -1,3 +1,4 @@
+// cspell:word unexited
 module arena::emojicoin_arena {
 
     use aptos_framework::account::{Self, SignerCapability};
@@ -52,7 +53,7 @@ module arena::emojicoin_arena {
 
     // Default parameters for new melees.
     const DEFAULT_DURATION: u64 = 36 * 3_600_000_000;
-    const DEFAULT_AVAILABLE_REWADS: u64 = 1000 * 100_000_000;
+    const DEFAULT_AVAILABLE_REWARDS: u64 = 1000 * 100_000_000;
     const DEFAULT_MAX_MATCH_PERCENTAGE: u64 = 50;
     const DEFAULT_MAX_MATCH_AMOUNT: u64 = 5 * 100_000_000;
 
@@ -71,8 +72,14 @@ module arena::emojicoin_arena {
         max_match_percentage: u64,
         /// Maximum amount of APT to match in octas, when locking in.
         max_match_amount: u64,
-        /// Active entrants.
-        entrants: SmartTable<address, Nil>,
+        /// All entrants who have entered the melee.
+        all_entrants: SmartTable<address, Nil>,
+        /// Active entrants in the melee.
+        active_entrants: SmartTable<address, Nil>,
+        /// Entrants who have exited the melee.
+        exited_entrants: SmartTable<address, Nil>,
+        /// Entrants who have locked in.
+        locked_in_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
         n_melee_swaps: Aggregator<u64>,
         /// Volume of melee-specific swaps in octas.
@@ -118,7 +125,15 @@ module arena::emojicoin_arena {
         /// `Melee.max_match_percentage` for new melees.
         new_melee_max_match_percentage: u64,
         /// `Melee.max_match_amount` for new melees.
-        new_melee_max_match_amount: u64
+        new_melee_max_match_amount: u64,
+        /// All entrants who have entered a melee.
+        all_entrants: SmartTable<address, Nil>,
+        /// Number of melee-specific swaps.
+        n_melee_swaps: Aggregator<u64>,
+        /// Volume of melee-specific swaps in octas.
+        melee_swaps_volume: Aggregator<u128>,
+        /// Amount of octas disbursed as rewards. Decremented when a user taps out.
+        rewards_disbursed: u64
     }
 
     struct UserMelees has key {
@@ -372,9 +387,13 @@ module arena::emojicoin_arena {
                 melee_ids_by_market_ids: smart_table::new(),
                 signer_capability,
                 new_melee_duration: DEFAULT_DURATION,
-                new_melee_available_rewards: DEFAULT_AVAILABLE_REWADS,
+                new_melee_available_rewards: DEFAULT_AVAILABLE_REWARDS,
                 new_melee_max_match_percentage: DEFAULT_MAX_MATCH_PERCENTAGE,
-                new_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT
+                new_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT,
+                all_entrants: smart_table::new(),
+                n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
+                melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
+                rewards_disbursed: 0
             }
         );
         coin::register<AptosCoin>(&vault_signer);
@@ -580,7 +599,10 @@ module arena::emojicoin_arena {
                 available_rewards: registry_ref_mut.new_melee_available_rewards,
                 max_match_percentage: registry_ref_mut.new_melee_max_match_percentage,
                 max_match_amount: registry_ref_mut.new_melee_max_match_amount,
-                entrants: smart_table::new(),
+                all_entrants: smart_table::new(),
+                active_entrants: smart_table::new(),
+                exited_entrants: smart_table::new(),
+                locked_in_entrants: smart_table::new(),
                 n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
                 melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
                 emojicoin_0_locked: aggregator_v2::create_unbounded_aggregator(),
