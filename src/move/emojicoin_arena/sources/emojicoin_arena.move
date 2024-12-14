@@ -320,154 +320,22 @@ module arena::emojicoin_arena {
             (market_addresses[0], market_addresses[1]);
 
         if (buy_emojicoin_0) {
-            // Move emojicoin 1 balance out of escrow.
-            let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
-            let input_amount = coin::value(emojicoin_1_ref_mut);
-            aptos_account::deposit_coins(
-                swapper_address, coin::extract_all(emojicoin_1_ref_mut)
-            );
-
-            // Get amount of APT recieved by selling emojicoin 1, then execute swap.
-            let swap_to_apt =
-                emojicoin_dot_fun::simulate_swap<Coin1, LP1>(
-                    swapper_address,
-                    market_address_1,
-                    input_amount,
-                    true,
-                    @integrator,
-                    INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
-                );
-            let (_, _, _, _, _, _, _, _, net_proceeds_in_apt, _, _, _, _, _, _, _, _, _) =
-                emojicoin_dot_fun::unpack_swap(swap_to_apt);
-            emojicoin_dot_fun::swap<Coin1, LP1>(
+            swap_within_escrow<Coin1, LP1, Coin0, LP0>(
                 swapper,
+                swapper_address,
                 market_address_1,
-                input_amount,
-                true,
-                @integrator,
-                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
-                1
-            );
-
-            // Get amount of emojicoin 0 recieved by buying it with APT proceeds.
-            let swap_to_emojicoin_0 =
-                emojicoin_dot_fun::simulate_swap<Coin0, LP0>(
-                    swapper_address,
-                    market_address_0,
-                    net_proceeds_in_apt,
-                    false,
-                    @integrator,
-                    INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
-                );
-            let (
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                net_proceeds_in_emojicoin_0,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _
-            ) = emojicoin_dot_fun::unpack_swap(swap_to_emojicoin_0);
-            emojicoin_dot_fun::swap<Coin0, LP0>(
-                swapper,
                 market_address_0,
-                net_proceeds_in_apt,
-                false,
-                @integrator,
-                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
-                1
-            );
-
-            // Move emojicoin 0 balance to escrow.
-            coin::merge(
-                &mut escrow_ref_mut.emojicoin_0,
-                coin::withdraw(swapper, net_proceeds_in_emojicoin_0)
+                &mut escrow_ref_mut.emojicoin_1,
+                &mut escrow_ref_mut.emojicoin_0
             );
         } else {
-            // Move emojicoin 0 balance out of escrow.
-            let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
-            let input_amount = coin::value(emojicoin_0_ref_mut);
-            aptos_account::deposit_coins(
-                swapper_address, coin::extract_all(emojicoin_0_ref_mut)
-            );
-
-            // Get amount of APT recieved by selling emojicoin 0, then execute swap.
-            let swap_to_apt =
-                emojicoin_dot_fun::simulate_swap<Coin0, LP0>(
-                    swapper_address,
-                    market_address_0,
-                    input_amount,
-                    true,
-                    @integrator,
-                    INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
-                );
-            let (_, _, _, _, _, _, _, _, net_proceeds_in_apt, _, _, _, _, _, _, _, _, _) =
-                emojicoin_dot_fun::unpack_swap(swap_to_apt);
-            emojicoin_dot_fun::swap<Coin0, LP0>(
+            swap_within_escrow<Coin0, LP0, Coin1, LP1>(
                 swapper,
+                swapper_address,
+                market_address_0,
                 market_address_1,
-                input_amount,
-                true,
-                @integrator,
-                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
-                1
-            );
-
-            // Get amount of emojicoin 1 recieved by buying it with APT proceeds.
-            let swap_to_emojicoin_1 =
-                emojicoin_dot_fun::simulate_swap<Coin1, LP1>(
-                    swapper_address,
-                    market_address_1,
-                    net_proceeds_in_apt,
-                    false,
-                    @integrator,
-                    INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
-                );
-            let (
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                net_proceeds_in_emojicoin_1,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _
-            ) = emojicoin_dot_fun::unpack_swap(swap_to_emojicoin_1);
-            emojicoin_dot_fun::swap<Coin1, LP1>(
-                swapper,
-                market_address_1,
-                net_proceeds_in_apt,
-                false,
-                @integrator,
-                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
-                1
-            );
-
-            // Move emojicoin 1 balance to escrow.
-            coin::merge(
-                &mut escrow_ref_mut.emojicoin_1,
-                coin::withdraw(swapper, net_proceeds_in_emojicoin_1)
+                &mut escrow_ref_mut.emojicoin_0,
+                &mut escrow_ref_mut.emojicoin_1
             );
         };
 
@@ -739,5 +607,69 @@ module arena::emojicoin_arena {
             1
         );
         coin::merge(escrow_coin_ref_mut, coin::withdraw(swapper, net_proceeds));
+    }
+
+    inline fun swap_within_escrow<FromCoin, FromLP, ToCoin, ToLP>(
+        swapper: &signer,
+        swapper_address: address,
+        market_address_from: address,
+        market_address_to: address,
+        escrow_from_coin_ref_mut: &mut Coin<FromCoin>,
+        escrow_to_coin_ref_mut: &mut Coin<ToCoin>
+    ) {
+        // Move all from coins out of escrow.
+        let input_amount = coin::value(escrow_from_coin_ref_mut);
+        aptos_account::deposit_coins(
+            swapper_address, coin::extract_all(escrow_from_coin_ref_mut)
+        );
+
+        // Get amount of APT recieved by selling from coin, then execute swap.
+        let simulated_swap_to_apt =
+            emojicoin_dot_fun::simulate_swap<FromCoin, FromLP>(
+                swapper_address,
+                market_address_from,
+                input_amount,
+                true,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+            );
+        let (_, _, _, _, _, _, _, _, net_proceeds_in_apt, _, _, _, _, _, _, _, _, _) =
+            emojicoin_dot_fun::unpack_swap(simulated_swap_to_apt);
+        emojicoin_dot_fun::swap<FromCoin, FromLP>(
+            swapper,
+            market_address_from,
+            input_amount,
+            true,
+            @integrator,
+            INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
+            1
+        );
+
+        // Get amount of to coin recieved by buying it with APT proceeds.
+        let simulated_swap_to_to_coin =
+            emojicoin_dot_fun::simulate_swap<ToCoin, ToLP>(
+                swapper_address,
+                market_address_to,
+                net_proceeds_in_apt,
+                false,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+            );
+        let (_, _, _, _, _, _, _, _, net_proceeds_in_to_coin, _, _, _, _, _, _, _, _, _) =
+            emojicoin_dot_fun::unpack_swap(simulated_swap_to_to_coin);
+        emojicoin_dot_fun::swap<ToCoin, ToLP>(
+            swapper,
+            market_address_to,
+            net_proceeds_in_apt,
+            false,
+            @integrator,
+            INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE,
+            1
+        );
+
+        // Move to coin to escrow.
+        coin::merge(
+            escrow_to_coin_ref_mut, coin::withdraw(swapper, net_proceeds_in_to_coin)
+        );
     }
 }
