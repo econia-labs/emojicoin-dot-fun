@@ -33,6 +33,8 @@ module arena::emojicoin_arena {
     const E_ENTER_COIN_BALANCE_0: u64 = 4;
     /// User's melee escrow has nonzero emojicoin 1 balance.
     const E_ENTER_COIN_BALANCE_1: u64 = 5;
+    /// Elected to lock in but unable to match.
+    const E_UNABLE_TO_LOCK_IN: u64 = 6;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -238,25 +240,31 @@ module arena::emojicoin_arena {
         // Try matching user's contribution if they elect to lock in.
         let match_amount =
             if (lock_in) {
-                match_amount(
-                    input_amount,
-                    escrow_ref_mut,
-                    current_melee_ref_mut,
-                    registry_ref_mut,
-                    time
-                )
-            } else { 0 };
-        if (match_amount > 0) {
-            escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee + match_amount;
-            let available_rewards_ref_mut =
-                &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
-            *available_rewards_ref_mut = *available_rewards_ref_mut - match_amount;
-            let vault_signer =
-                account::create_signer_with_capability(
-                    &registry_ref_mut.signer_capability
+                // Verify that user can even lock in.
+                let match_amount =
+                    match_amount(
+                        input_amount,
+                        escrow_ref_mut,
+                        current_melee_ref_mut,
+                        registry_ref_mut,
+                        time
+                    );
+                assert!(match_amount > 0, E_UNABLE_TO_LOCK_IN);
+
+                // Update counters, transfer APT to entrant.
+                escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee + match_amount;
+                let available_rewards_ref_mut =
+                    &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
+                *available_rewards_ref_mut = *available_rewards_ref_mut - match_amount;
+                aptos_account::transfer(
+                    &account::create_signer_with_capability(
+                        &registry_ref_mut.signer_capability
+                    ),
+                    entrant_address,
+                    match_amount
                 );
-            aptos_account::transfer(&vault_signer, entrant_address, match_amount);
-        };
+                match_amount
+            } else 0;
 
         // Execute a swap then immediately move funds into escrow.
         let input_amount_after_matching = input_amount + match_amount;
