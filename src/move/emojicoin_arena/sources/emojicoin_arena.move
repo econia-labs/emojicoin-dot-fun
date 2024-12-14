@@ -270,52 +270,20 @@ module arena::emojicoin_arena {
         let input_amount_after_matching = input_amount + match_amount;
         let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
         if (buy_emojicoin_0) {
-            let swap =
-                emojicoin_dot_fun::simulate_swap<Coin0, LP0>(
-                    entrant_address,
-                    market_address_0,
-                    input_amount_after_matching,
-                    false,
-                    @integrator,
-                    INTEGRATOR_FEE_RATE_BPS
-                );
-            let (_, _, _, _, _, _, _, _, net_proceeds, _, _, _, _, _, _, _, _, _) =
-                emojicoin_dot_fun::unpack_swap(swap);
-            emojicoin_dot_fun::swap<Coin0, LP0>(
+            swap_buy_into_escrow<Coin0, LP0>(
                 entrant,
+                entrant_address,
                 market_address_0,
                 input_amount_after_matching,
-                false,
-                @integrator,
-                INTEGRATOR_FEE_RATE_BPS,
-                1
-            );
-            coin::merge(
-                &mut escrow_ref_mut.emojicoin_0, coin::withdraw(entrant, net_proceeds)
+                &mut escrow_ref_mut.emojicoin_0
             );
         } else {
-            let swap =
-                emojicoin_dot_fun::simulate_swap<Coin1, LP1>(
-                    entrant_address,
-                    market_address_1,
-                    input_amount_after_matching,
-                    false,
-                    @integrator,
-                    INTEGRATOR_FEE_RATE_BPS
-                );
-            let (_, _, _, _, _, _, _, _, net_proceeds, _, _, _, _, _, _, _, _, _) =
-                emojicoin_dot_fun::unpack_swap(swap);
-            emojicoin_dot_fun::swap<Coin1, LP1>(
+            swap_buy_into_escrow<Coin1, LP1>(
                 entrant,
-                market_address_1,
+                entrant_address,
+                market_address_0,
                 input_amount_after_matching,
-                false,
-                @integrator,
-                INTEGRATOR_FEE_RATE_BPS,
-                1
-            );
-            coin::merge(
-                &mut escrow_ref_mut.emojicoin_1, coin::withdraw(entrant, net_proceeds)
+                &mut escrow_ref_mut.emojicoin_1
             );
         }
     }
@@ -741,5 +709,35 @@ module arena::emojicoin_arena {
         } else {
             vector[market_id_1, market_id_0]
         }
+    }
+
+    inline fun swap_buy_into_escrow<Emojicoin, LP>(
+        swapper: &signer,
+        swapper_address: address,
+        market_address: address,
+        input_amount: u64,
+        escrow_coin_ref_mut: &mut Coin<Emojicoin>
+    ) {
+        let simulated_swap =
+            emojicoin_dot_fun::simulate_swap<Emojicoin, LP>(
+                swapper_address,
+                market_address,
+                input_amount,
+                false,
+                @integrator,
+                INTEGRATOR_FEE_RATE_BPS
+            );
+        let (_, _, _, _, _, _, _, _, net_proceeds, _, _, _, _, _, _, _, _, _) =
+            emojicoin_dot_fun::unpack_swap(simulated_swap);
+        emojicoin_dot_fun::swap<Emojicoin, LP>(
+            swapper,
+            market_address,
+            input_amount,
+            false,
+            @integrator,
+            INTEGRATOR_FEE_RATE_BPS,
+            1
+        );
+        coin::merge(escrow_coin_ref_mut, coin::withdraw(swapper, net_proceeds));
     }
 }
