@@ -14,7 +14,7 @@ import {
   type WriteSetChangeWriteResource,
 } from "@aptos-labs/ts-sdk";
 import Big from "big.js";
-import { EmojicoinDotFun, REGISTRY_ADDRESS, getMarketAddress } from "../emojicoin_dot_fun";
+import { EmojicoinDotFun, MarketView, REGISTRY_ADDRESS, getMarketAddress } from "../emojicoin_dot_fun";
 import { toConfig } from "../utils/aptos-utils";
 import {
   BASE_VIRTUAL_CEILING,
@@ -45,7 +45,6 @@ import {
 } from "../emoji_data";
 import { STRUCT_STRINGS, TYPE_TAGS } from "../utils";
 import { getAptosClient } from "../utils/aptos-client";
-import { MarketView } from "@/contract-apis";
 import { type Flatten } from "../types";
 import { isInBondingCurve } from "../utils/bonding-curve";
 import { type AtLeastOne } from "../utils/utility-types";
