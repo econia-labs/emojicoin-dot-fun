@@ -121,16 +121,12 @@ export const MarketPreviewCarousel = ({ markets }: { markets: DatabaseModels["pr
   </Carousel>
 );
 
-export const StatsCarousel = ({ elements }: { elements: Promise<React.JSX.Element>[] }) => {
-  elements.map((p) => p.then((res) => console.log(res)));
-
+export const StatsCarousel = ({ elements }: { elements: React.JSX.Element[] }) => {
   return (
     <Carousel>
       <CarouselContent>
         {elements.map((element, i) => (
-          <CarouselItem key={`carousel-${i}`}>
-            <LoadingSkeleton promised={element} />
-          </CarouselItem>
+          <CarouselItem key={`carousel-${i}`}>{element}</CarouselItem>
         ))}
       </CarouselContent>
     </Carousel>
