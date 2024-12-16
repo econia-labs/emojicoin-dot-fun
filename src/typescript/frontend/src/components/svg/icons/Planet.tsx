@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SvgProps } from "../types";
+import type { SvgProps } from "../types";
 import Svg from "../Svg";
 import { useThemeContext } from "context";
 

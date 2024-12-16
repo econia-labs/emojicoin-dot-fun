@@ -29,8 +29,6 @@ const BondingProgress = ({ data }: MainInfoProps) => {
     }
   }, [stateEvents]);
 
-  console.log(bondingProgress);
-
   return (
     <div className="relative mb-[.7em]">
       <div className="w-[100%] pl-[.8em] pr-[1em]">

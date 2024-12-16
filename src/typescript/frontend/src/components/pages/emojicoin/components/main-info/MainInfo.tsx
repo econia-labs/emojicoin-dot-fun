@@ -18,7 +18,7 @@ import TelegramOutlineIcon from "@icons/TelegramOutlineIcon";
 import { motion } from "framer-motion";
 import { MarketProperties } from "@/contract-apis";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
-import { Colors } from "theme/types";
+import type { Colors } from "theme/types";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -34,7 +34,7 @@ const LinkButton = ({
   const button = (
     <Button isScramble={false} scale="lg" disabled={!link}>
       <div className="flex flex-row items-baseline h-[1em]">
-        {icon && icon(!!link ? "econiaBlue" : "darkGray")}
+        {icon && icon(link ? "econiaBlue" : "darkGray")}
         <span>{name}</span>
       </div>
     </Button>
