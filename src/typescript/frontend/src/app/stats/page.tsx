@@ -13,7 +13,7 @@ export const dynamic = "force-static";
 
 // Nothing here is cached because we only revalidate this static page once every `revalidate` seconds.
 export default async function Stats() {
-  const numMarkets = fetchNumRegisteredMarkets();
+  const numMarketsPromise = fetchNumRegisteredMarkets();
 
   const commonArgs = {
     page: 1,
@@ -22,7 +22,7 @@ export default async function Stats() {
   };
 
   // This is essentially a daily volume fetch but with price feed data.
-  const priceFeedData = fetchPriceFeedWithMarketState({
+  const priceFeedDataPromise = fetchPriceFeedWithMarketState({
     ...commonArgs,
     sortBy: SortMarketsBy.DailyVolume,
   }).then((res) => res.map(toPriceFeed));
@@ -32,10 +32,20 @@ export default async function Stats() {
 
   const fetchMarketsBy = (sortBy: SortMarketsBy) => fetchMarkets({ ...commonArgs, sortBy });
 
-  const marketCapData = fetchMarketsBy(SortMarketsBy.MarketCap);
-  const allTimeVolumeData = fetchMarketsBy(SortMarketsBy.AllTimeVolume);
-  const latestPricesData = fetchMarketsBy(SortMarketsBy.Price);
-  const tvlData = fetchMarketsBy(SortMarketsBy.Tvl);
+  const marketCapDataPromise = fetchMarketsBy(SortMarketsBy.MarketCap);
+  const allTimeVolumeDataPromise = fetchMarketsBy(SortMarketsBy.AllTimeVolume);
+  const latestPricesDataPromise = fetchMarketsBy(SortMarketsBy.Price);
+  const tvlDataPromise = fetchMarketsBy(SortMarketsBy.Tvl);
+
+  const [numMarkets, priceFeedData, marketCapData, allTimeVolumeData, latestPricesData, tvlData] =
+    await Promise.all([
+      numMarketsPromise,
+      priceFeedDataPromise,
+      marketCapDataPromise,
+      allTimeVolumeDataPromise,
+      latestPricesDataPromise,
+      tvlDataPromise,
+    ]);
 
   const props = {
     numMarkets,
