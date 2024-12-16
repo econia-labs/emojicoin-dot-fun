@@ -71,7 +71,9 @@ const Button = <E extends React.ElementType = "button">({
                 textTransform="uppercase"
                 fontSize={scale === "sm" ? "20px" : "24px"}
                 className="flex flex-row"
-              >{children}</Text>
+              >
+                {children}
+              </Text>
               <Text
                 textScale="pixelHeading4"
                 color={isDisabled ? "darkGray" : "econiaBlue"}

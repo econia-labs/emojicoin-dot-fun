@@ -29,22 +29,43 @@ const BondingProgress = ({ data }: MainInfoProps) => {
     }
   }, [stateEvents]);
 
-  console.log(bondingProgress)
+  console.log(bondingProgress);
 
   return (
     <div className="relative mb-[.7em]">
       <div className="w-[100%] pl-[.8em] pr-[1em]">
-        <div className="grid relative w-[100%]" style={{gridTemplateColumns: "repeat(7, 1fr)"}}>
-        <div className="absolute left-[-.5em] top-[-.125em] text-[1.6em]">
-          <Emoji emojis={emoji("rocket")} />
-        </div>
-        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 15 ? "econiaBlue" : "darkGray"}/>
-        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 30 ? "econiaBlue" : "darkGray"}/>
-        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 45 ? "econiaBlue" : "darkGray"}/>
-        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 60 ? "econiaBlue" : "darkGray"}/>
-        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 75 ? "econiaBlue" : "darkGray"}/>
-        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress > 90 ? "econiaBlue" : "darkGray"}/>
-        <BondingCurveArrow className="w-[100%] h-[100%]" color={bondingProgress >= 100 ? "econiaBlue" : "darkGray"}/>
+        <div className="grid relative w-[100%]" style={{ gridTemplateColumns: "repeat(7, 1fr)" }}>
+          <div className="absolute left-[-.5em] top-[-.125em] text-[1.6em]">
+            <Emoji emojis={emoji("rocket")} />
+          </div>
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 15 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 30 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 45 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 60 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 75 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 90 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress >= 100 ? "econiaBlue" : "darkGray"}
+          />
         </div>
       </div>
       <div className="absolute bottom-[-1em] my-[-.2em] right-0 flex justify-end mr-[1em]">

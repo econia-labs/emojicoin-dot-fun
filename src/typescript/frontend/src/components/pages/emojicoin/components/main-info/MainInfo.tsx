@@ -22,14 +22,23 @@ import { Colors } from "theme/types";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
-const LinkButton = ({name, link, icon}: {name: string, link: string | undefined, icon?: (color: keyof Colors) => React.ReactNode}) => {
-  const button =
+const LinkButton = ({
+  name,
+  link,
+  icon,
+}: {
+  name: string;
+  link: string | undefined;
+  icon?: (color: keyof Colors) => React.ReactNode;
+}) => {
+  const button = (
     <Button isScramble={false} scale="lg" disabled={!link}>
       <div className="flex flex-row items-baseline h-[1em]">
         {icon && icon(!!link ? "econiaBlue" : "darkGray")}
         <span>{name}</span>
       </div>
-    </Button>;
+    </Button>
+  );
   return link ? <Link href={link}>{button}</Link> : button;
 };
 
@@ -69,7 +78,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
   const borderStyle = "border-solid border-[1px] border-dark-gray rounded-[3px] p-[1em]";
 
-  const [marketProperties, setMarketProperties] = useState<Map<string,string>>();
+  const [marketProperties, setMarketProperties] = useState<Map<string, string>>();
 
   const { aptos } = useAptos();
 
@@ -92,32 +101,35 @@ const MainInfo = ({ data }: MainInfoProps) => {
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [data.marketAddress]);
 
-  const dexscreenerButton =
-    <LinkButton
-      name={"dexscreener"}
-      link={undefined}
-    />;
+  const dexscreenerButton = <LinkButton name={"dexscreener"} link={undefined} />;
 
-  const telegramButton =
+  const telegramButton = (
     <LinkButton
       name={"telegram"}
       link={marketProperties?.get("Telegram")}
-      icon={(color) => <TelegramOutlineIcon className="h-[1.5em] w-[1.5em] ml-[-8px]" color={color} />}
-    />;
+      icon={(color) => (
+        <TelegramOutlineIcon className="h-[1.5em] w-[1.5em] ml-[-8px]" color={color} />
+      )}
+    />
+  );
 
-  const twitterButton =
+  const twitterButton = (
     <LinkButton
       name={"twitter"}
       link={marketProperties?.get("X profile")}
-      icon={(color) => <TwitterOutlineIcon className="h-[1.2em] w-[1.2em] ml-[-8px]" color={color} />}
-    />;
+      icon={(color) => (
+        <TwitterOutlineIcon className="h-[1.2em] w-[1.2em] ml-[-8px]" color={color} />
+      )}
+    />
+  );
 
-  const websiteButton =
+  const websiteButton = (
     <LinkButton
       name={"website"}
       link={marketProperties?.get("Website")}
       icon={(color) => <Planet className="h-[.7em] w-[.7em] self-center mr-[8px]" color={color} />}
-    />;
+    />
+  );
 
   return (
     <div
@@ -153,9 +165,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
           </Link>
         </div>
 
-        <div
-          className={`flex flex-col justify-between ${borderStyle}`}
-        >
+        <div className={`flex flex-col justify-between ${borderStyle}`}>
           <div className="flex justify-between">
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
@@ -188,23 +198,24 @@ const MainInfo = ({ data }: MainInfoProps) => {
               </div>
             </div>
           </div>
-
         </div>
         <div className={`flex flex-col gap-[1em] ${borderStyle}`}>
-          <div className={`flex flex-row flex-wrap justify-between`} style={{gap: "8px 0"}}>
+          <div className={`flex flex-row flex-wrap justify-between`} style={{ gap: "8px 0" }}>
             <motion.div
-                onClick={() => {
-                  navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
-                  if (!copied) {
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 3000);
-                  }
-                }}
-              whileTap={{scaleX: 0.96, scaleY: 0.98}}
+              onClick={() => {
+                navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
+                if (!copied) {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 3000);
+                }
+              }}
+              whileTap={{ scaleX: 0.96, scaleY: 0.98 }}
               transition={{ ease: "linear", duration: 0.05 }}
             >
-            <Button scale="lg" isScramble={false}
-            >copy contract address</Button></motion.div>
+              <Button scale="lg" isScramble={false}>
+                copy contract address
+              </Button>
+            </motion.div>
             {dexscreenerButton}
             {twitterButton}
             {telegramButton}
