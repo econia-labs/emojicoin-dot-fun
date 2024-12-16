@@ -56,7 +56,31 @@ const Button = <E extends React.ElementType = "button">({
             })}
 
           {!isScramble ? (
-            `{ ${children} }`
+            <FlexGap gap="8px" onMouseOver={replay}>
+              <Text
+                textScale="pixelHeading4"
+                color={isDisabled ? "darkGray" : "econiaBlue"}
+                textTransform="uppercase"
+                fontSize={scale === "sm" ? "20px" : "24px"}
+              >
+                {"{ "}
+              </Text>
+              <Text
+                textScale="pixelHeading4"
+                color={isDisabled ? "darkGray" : "econiaBlue"}
+                textTransform="uppercase"
+                fontSize={scale === "sm" ? "20px" : "24px"}
+                className="flex flex-row"
+              >{children}</Text>
+              <Text
+                textScale="pixelHeading4"
+                color={isDisabled ? "darkGray" : "econiaBlue"}
+                textTransform="uppercase"
+                fontSize={scale === "sm" ? "20px" : "24px"}
+              >
+                {" }"}
+              </Text>
+            </FlexGap>
           ) : (
             <FlexGap gap="8px" onMouseOver={replay}>
               <Text

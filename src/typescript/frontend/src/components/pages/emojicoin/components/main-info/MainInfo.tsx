@@ -11,13 +11,27 @@ import { useMatchBreakpoints } from "@hooks/index";
 import { Emoji } from "utils/emoji";
 import Link from "next/link";
 import { toExplorerLink } from "lib/utils/explorer-link";
-import { emoji } from "utils";
-import { motion } from "framer-motion";
-import { truncateAddress } from "@sdk/utils";
 import { FormattedNumber } from "components/FormattedNumber";
 import Button from "components/button";
+import { Planet, TwitterOutlineIcon } from "components/svg";
+import TelegramOutlineIcon from "@icons/TelegramOutlineIcon";
+import { motion } from "framer-motion";
+import { MarketProperties } from "@/contract-apis";
+import { useAptos } from "context/wallet-context/AptosContextProvider";
+import { Colors } from "theme/types";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
+
+const LinkButton = ({name, link, icon}: {name: string, link: string | undefined, icon?: (color: keyof Colors) => React.ReactNode}) => {
+  const button =
+    <Button isScramble={false} scale="lg" disabled={!link}>
+      <div className="flex flex-row items-baseline h-[1em]">
+        {icon && icon(!!link ? "econiaBlue" : "darkGray")}
+        <span>{name}</span>
+      </div>
+    </Button>;
+  return link ? <Link href={link}>{button}</Link> : button;
+};
 
 const MainInfo = ({ data }: MainInfoProps) => {
   const { t } = translationFunction();
@@ -44,7 +58,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
     }
   }, [stateEvents]);
 
-  const { isMobile } = useMatchBreakpoints();
+  const { isMobile, isTablet } = useMatchBreakpoints();
 
   const explorerLink = toExplorerLink({
     linkType: "coin",
@@ -54,6 +68,56 @@ const MainInfo = ({ data }: MainInfoProps) => {
   const [copied, setCopied] = useState(false);
 
   const borderStyle = "border-solid border-[1px] border-dark-gray rounded-[3px] p-[1em]";
+
+  const [marketProperties, setMarketProperties] = useState<Map<string,string>>();
+
+  const { aptos } = useAptos();
+
+  useEffect(() => {
+    MarketProperties.submit({
+      aptos,
+      market: data.marketAddress,
+    })
+      .then((r) => r.vec.at(0) ?? null)
+      .then((r) => {
+        if (r) {
+          const newFields = new Map();
+          (r as { data: { key: string; value: string }[] }).data.forEach(({ key, value }) => {
+            newFields.set(key, value);
+          });
+          setMarketProperties(newFields);
+        }
+      })
+      .catch((e) => console.error("Could not get market metadata.", e));
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [data.marketAddress]);
+
+  const dexscreenerButton =
+    <LinkButton
+      name={"dexscreener"}
+      link={undefined}
+    />;
+
+  const telegramButton =
+    <LinkButton
+      name={"telegram"}
+      link={marketProperties?.get("Telegram")}
+      icon={(color) => <TelegramOutlineIcon className="h-[1.5em] w-[1.5em] ml-[-8px]" color={color} />}
+    />;
+
+  const twitterButton =
+    <LinkButton
+      name={"twitter"}
+      link={marketProperties?.get("X profile")}
+      icon={(color) => <TwitterOutlineIcon className="h-[1.2em] w-[1.2em] ml-[-8px]" color={color} />}
+    />;
+
+  const websiteButton =
+    <LinkButton
+      name={"website"}
+      link={marketProperties?.get("Website")}
+      icon={(color) => <Planet className="h-[.7em] w-[.7em] self-center mr-[8px]" color={color} />}
+    />;
 
   return (
     <div
@@ -65,7 +129,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
       <div
         className="mx-[2vw]"
         style={
-          isMobile
+          isMobile || isTablet
             ? {
                 display: "flex",
                 gap: "1em",
@@ -87,28 +151,6 @@ const MainInfo = ({ data }: MainInfoProps) => {
           <Link href={explorerLink} target="_blank">
             <Emoji className="display-2" emojis={data.emojis} />
           </Link>
-          {/*<div className="text-2xl w-fit bg-[#151515] rounded-xl px-[.5em] flex flex-row gap-[.5em]">
-            <Link
-              className="text-ec-blue font-pixelar underline"
-              href={explorerLink}
-              target="_blank"
-            >
-              {truncateAddress(data.marketView.metadata.marketAddress)}
-            </Link>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              transition={{ ease: "linear", duration: 0.05 }}
-              onClick={() => {
-                navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
-                if (!copied) {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 3000);
-                }
-              }}
-            >
-              <Emoji emojis={emoji(copied ? "check mark button" : "clipboard")} />
-            </motion.button>
-          </div>*/}
         </div>
 
         <div
@@ -149,8 +191,8 @@ const MainInfo = ({ data }: MainInfoProps) => {
 
         </div>
         <div className={`flex flex-col gap-[1em] ${borderStyle}`}>
-          <div className={`flex flex-row flex-wrap justify-between`}>
-            <Link href=""><Button scale="lg"
+          <div className={`flex flex-row flex-wrap justify-between`} style={{gap: "8px 0"}}>
+            <motion.div
                 onClick={() => {
                   navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
                   if (!copied) {
@@ -158,11 +200,15 @@ const MainInfo = ({ data }: MainInfoProps) => {
                     setTimeout(() => setCopied(false), 3000);
                   }
                 }}
-            >copy contract address</Button></Link>
-            <Link href=""><Button scale="lg">dexscreener</Button></Link>
-            <Link href=""><Button scale="lg">twitter</Button></Link>
-            <Link href=""><Button scale="lg">telegram</Button></Link>
-            <Link href=""><Button scale="lg">website</Button></Link>
+              whileTap={{scaleX: 0.96, scaleY: 0.98}}
+              transition={{ ease: "linear", duration: 0.05 }}
+            >
+            <Button scale="lg" isScramble={false}
+            >copy contract address</Button></motion.div>
+            {dexscreenerButton}
+            {twitterButton}
+            {telegramButton}
+            {websiteButton}
           </div>
           <BondingProgress data={data} />
         </div>
