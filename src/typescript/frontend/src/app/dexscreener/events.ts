@@ -1,8 +1,9 @@
+// cspell:word dexscreener
 /***
  Request: GET /events?fromBlock=:number&toBlock=:number
 
- - fromBlock and toBlock are both inclusive: a request to /events?fromBlock=10&toBlock=15 should include all
- available events from block 10, 11, 12, 13, 14 and 15
+ - fromBlock and toBlock are both inclusive: a request to /events?fromBlock=10&toBlock=15 should
+ include all available events from block 10, 11, 12, 13, 14 and 15.
 
  Response Schema:
  // interface EventsResponse {
@@ -91,36 +92,41 @@ import { compareBigInt } from "@econia-labs/emojicoin-sdk";
 
 /**
  * - `txnId` is a transaction identifier such as a transaction hash
- * - `txnIndex` refers to the order of a transaction within a block, the higher the index the later in the block the
- * transaction was processed
- * - `eventIndex` refer to the order of the event within a transaction, the higher the index the later in the
- * transaction the event was processed
- * - The combination of `txnIndex` + `eventIndex` must be unique to any given event within a block, including for
- * different event types
- * - `maker` is an identifier for the account responsible for submitting the transaction. In most cases the transaction
- * is submitted by the same account that sent/received tokens, but in cases where this doesn't apply (i.e.: transaction
- * submitted by an aggregator) an effort should be made to identify the underlying account
- * - All amounts (`assetIn`/`assetOut`/`reserve`) should be decimalized (`amount / (10 ** assetDecimals)`)
- * - Reserves refer to the pooled amount of each asset *after* a swap event has occured. If there are multiple swap
- * events on the same block and reserves cannot be determined after each individual event then it's acceptable for only
- * the last event to contain the `reserves` prop
- *     - While `reserves` are technically optional, the Indexer relies on it for accurately calculating derived USD
- * pricing (i.e.: USD price for `FOO/BAR` derived from `BAR/USDC`) from the most suitable reference pair. Pairs with no
- * known reserves, from both `SwapEvent` or `JoinExitEvent`, will **not** be used for derived pricing and this may
- * result in pairs with no known USD prices
- *     - `reserves` are also required to calculate total liquidity for each pair: if that's not available then DEX
- * Screener will show liquidity as `N/A` and a warning for “Unknown liquidity”
- * - A combination of either `asset0In + asset1Out` or `asset1In + asset0Out` is expected. If there are multiple assets
- * in or multiple assets out then the swap event is considered invalid and indexing will halt
+ * - `txnIndex` refers to the order of a transaction within a block, the higher the index the later
+ * in the block the transaction was processed
+ * - `eventIndex` refer to the order of the event within a transaction, the higher the index the
+ * later in the transaction the event was processed
+ * - The combination of `txnIndex` + `eventIndex` must be unique to any given event within a block,
+ * including for different event types
+ * - `maker` is an identifier for the account responsible for submitting the transaction. In most
+ * cases the transaction is submitted by the same account that sent/received tokens, but in cases
+ * where this doesn't apply (i.e.: transaction submitted by an aggregator) an effort should be made
+ * to identify the underlying account
+ * - All amounts (`assetIn`/`assetOut`/`reserve`) should be decimalized
+ * (`amount / (10 ** assetDecimals)`)
+ * - Reserves refer to the pooled amount of each asset *after* a swap event has occurred. If there
+ * are multiple swap events on the same block and reserves cannot be determined after each
+ * individual event then it's acceptable for only the last event to contain the `reserves` prop
+ * - While `reserves` are technically optional, the Indexer relies on it for accurately calculating
+ * derived USD pricing (i.e. USD price for `FOO/BAR` derived from `BAR/USDC`) from the most suitable
+ * reference pair. Pairs with no known reserves, from both `SwapEvent` or `JoinExitEvent`, will
+ * **not** be used for derived pricing and this may result in pairs with no known USD prices
+ * - `reserves` are also required to calculate total liquidity for each pair: if that's not
+ * available then DEX Screener will show liquidity as `N/A` and a warning for “Unknown liquidity”
+ * - A combination of either `asset0In + asset1Out` or `asset1In + asset0Out` is expected. If there
+ * are multiple assets in or multiple assets out then the swap event is considered invalid and
+ * indexing will halt
  * - `priceNative` refers to the price of `asset0` quoted in `asset1` in that event
- *     - For example, in a theoretical `BTC/USD` pair, `priceNative` would be `30000` (1 BTC = 30000 USD)
- *
- *     - Similarly, in a theoretical `USD/BTC` pair, `priceNative` would be `0.00003333333333` (1 USD =
- * 0.00003333333333 USD)
- * - `metadata` includes any optional auxiliary info not covered in the default schema and not required in most cases
- * - The Indexer will use up to 50 decimal places for amounts/prices/reserves and all subsequent decimal places will be
- * ignored. Using all 50 decimal places is highly encouraged to ensure accurate prices
- * - The Indexer automatically handles calculations for USD pricing (`priceUsd` as opposed to `priceNative`)
+ *    - For example, in a theoretical `BTC/USD` pair, if 1 BTC = 30000 USD `priceNative` == `30000`
+ *    - Similarly, in a theoretical `USD/BTC` pair, `priceNative` would be `0.00003333333333`
+ *      (1 BTC = 0.00003333333333 USD)
+ * - `metadata` includes any optional auxiliary info not covered in the default schema and not
+ * required in most cases
+ * - The Indexer will use up to 50 decimal places for amounts/prices/reserves and all subsequent
+ * decimal places will be ignored. Using all 50 decimal places is highly encouraged to ensure
+ * accurate prices
+ * - The Indexer automatically handles calculations for USD pricing (`priceUsd` as opposed to
+ * `priceNative`)
  */
 export interface SwapEvent {
   eventType: "swap";
@@ -143,20 +149,23 @@ export interface SwapEvent {
 
 /**
  * - `txnId` is a transaction identifier such as a transaction hash
- * - `txnIndex` refers to the order of a transaction within a block, the higher the index the later in the block the
- * transaction was processed
- * - `eventIndex` refer to the order of the event within a transaction, the higher the index the later in the
- * transaction the event was processed
- * - The combination of `txnIndex` + `eventIndex` must be unique to any given event within a block, including for
- * different event types
- * - `maker` is an identifier for the account responsible for submitting the transaction. In most cases the transaction
- * is submitted by the same account that sent/received tokens, but in cases where this doesn't apply (i.e.: transaction
- * submitted by an aggregator) an effort should be made to identify the underlying account.
- * - All amounts (`assetIn`/`assetOut`/`reserve`) should be decimalized (`amount / (10 ** assetDecimals)`)
- * - Reserves refer to the pooled amount of each asset *after* a join/exit event has occured. If there are multiple
- * join/exit events on the same block and reserves cannot be determined after each individual event then it's
- * acceptable for only the last event to contain the `reserves` prop.
- * - `metadata` includes any optional auxiliary info not covered in the default schema and not required in most cases
+ * - `txnIndex` refers to the order of a transaction within a block, the higher the index the later
+ * in the block the transaction was processed
+ * - `eventIndex` refer to the order of the event within a transaction, the higher the index the
+ * later in the transaction the event was processed
+ * - The combination of `txnIndex` + `eventIndex` must be unique to any given event within a block,
+ * including for different event types
+ * - `maker` is an identifier for the account responsible for submitting the transaction. In most
+ * cases the transaction is submitted by the same account that sent/received tokens, but in cases
+ * where this doesn't apply (i.e.: transaction submitted by an aggregator) an effort should be made
+ * to identify the underlying account.
+ * - All amounts (`assetIn`/`assetOut`/`reserve`) should be decimalized:
+ *   (`amount / (10 ** assetDecimals)`)
+ * - Reserves refer to the pooled amount of each asset *after* a join/exit event has occurred.
+ * If there are multiple join/exit events on the same block and reserves cannot be determined after
+ * each individual event then it's acceptable for only the last event to contain the `reserves` prop
+ * - `metadata` includes any optional auxiliary info not covered in the default schema and not
+ * required in most cases
  */
 export interface JoinExitEvent {
   eventType: "join" | "exit";
@@ -285,7 +294,7 @@ export async function getEventsByVersion(fromBlock: number, toBlock: number): Pr
 
 // NextJS JSON response handler
 /**
- * We treat our versions as "blocks", because it's faster to implement given our current architecture
+ * We treat our versions as "blocks" because it's faster to implement given our current architecture
  * This requires dexscreener to have relatively large `fromBlock - toBlock` ranges to keep up
  * */
 export async function GET(request: NextRequest): Promise<NextResponse<EventsResponse>> {

@@ -1,3 +1,4 @@
+// cspell:word dexscreener
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,
   COOKIE_FOR_HASHED_ADDRESS,

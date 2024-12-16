@@ -1,3 +1,4 @@
+// cspell:word dexscreener
 /***
  Request: GET /pair?id=:string
 

@@ -1,3 +1,4 @@
+// cspell:word dexscreener
 export const ROUTES = {
   root: "/",
   api: "/api",

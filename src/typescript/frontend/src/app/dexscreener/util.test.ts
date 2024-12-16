@@ -1,3 +1,4 @@
+// cspell:word dexscreener
 import type { SymbolEmoji } from "@sdk/emoji_data";
 import { describe, it } from "node:test";
 import { pairIdToSymbolEmojis, symbolEmojisToPairId, symbolEmojisToString } from "./util";
