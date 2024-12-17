@@ -10,6 +10,7 @@ declare global {
         size?: string;
         native?: string;
         key?: string;
+        set?: string;
       };
     }
   }
@@ -17,19 +18,28 @@ declare global {
 
 export const Emoji = ({
   emojis,
+  set = undefined,
+  size = undefined,
   ...props
 }: Omit<DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, "children"> & {
   emojis: AnyEmojiData[] | string;
+  set?: string;
+  size?: string;
 }) => {
   let data: React.ReactNode[] = [];
   if (typeof emojis === "string") {
     const emojisInString = getEmojisInString(emojis);
     data = emojisInString.map((e, i) => (
-      <em-emoji key={`${emojisInString[i]}-${i}`} size="1em" native={e}></em-emoji>
+      <em-emoji
+        key={`${emojisInString[i]}-${i}`}
+        size={size ?? "1em"}
+        native={e}
+        set={set}
+      ></em-emoji>
     ));
   } else {
     data = emojis.map((e, i) => (
-      <em-emoji key={`${emojis[i].emoji}-${i}`} size="1em" native={e.emoji}></em-emoji>
+      <em-emoji key={`${emojis[i].emoji}-${i}`} size={size ?? "1em"} native={e.emoji}></em-emoji>
     ));
   }
   return <span {...props}>{data}</span>;
