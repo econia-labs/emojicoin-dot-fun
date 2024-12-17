@@ -69,12 +69,12 @@ module arena::emojicoin_arena {
         start_time: u64,
         /// How long melee lasts after start time.
         duration: u64,
-        /// Amount of rewards available for distribution in octas, conditional on vault balance.
-        available_rewards: u64,
         /// Max percentage of user's input amount to match in octas, when locking in.
         max_match_percentage: u64,
         /// Maximum amount of APT to match in octas, when locking in.
         max_match_amount: u64,
+        /// Amount of rewards available for distribution in octas, conditional on vault balance.
+        available_rewards: u64,
         /// All entrants who have entered the melee.
         all_entrants: SmartTable<address, Nil>,
         /// Active entrants in the melee.
@@ -283,9 +283,7 @@ module arena::emojicoin_arena {
 
                 // Update counters, transfer APT to entrant.
                 escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee + match_amount;
-                let available_rewards_ref_mut =
-                    &mut registry_ref_mut.melees_by_id.borrow_mut(melee_id).available_rewards;
-                *available_rewards_ref_mut = *available_rewards_ref_mut - match_amount;
+                current_melee_ref_mut.available_rewards_decrement(match_amount);
                 aptos_account::transfer(
                     &account::create_signer_with_capability(
                         &registry_ref_mut.signer_capability
@@ -468,6 +466,14 @@ module arena::emojicoin_arena {
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
+    inline fun available_rewards_decrement(self: &mut Melee, amount: u64) {
+        self.available_rewards = self.available_rewards - amount;
+    }
+
+    inline fun available_rewards_increment(self: &mut Melee, amount: u64) {
+        self.available_rewards = self.available_rewards + amount;
+    }
+
     /// Assumes user has an escrow resource.
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
         participant: &signer,
@@ -482,9 +488,7 @@ module arena::emojicoin_arena {
         if (melee_is_current) {
             let exited_melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
             let tap_out_fee_ref_mut = &mut escrow_ref_mut.tap_out_fee;
-            let available_rewards_ref_mut = &mut exited_melee_ref_mut.available_rewards;
-            *available_rewards_ref_mut = *available_rewards_ref_mut
-                + *tap_out_fee_ref_mut;
+            exited_melee_ref_mut.available_rewards_increment(*tap_out_fee_ref_mut);
             let vault_address =
                 account::get_signer_capability_address(&registry_ref_mut.signer_capability);
             aptos_account::transfer(participant, vault_address, *tap_out_fee_ref_mut);
@@ -602,9 +606,9 @@ module arena::emojicoin_arena {
                     timestamp::now_microseconds(), registry_ref_mut.new_melee_duration
                 ),
                 duration: registry_ref_mut.new_melee_duration,
-                available_rewards: registry_ref_mut.new_melee_available_rewards,
                 max_match_percentage: registry_ref_mut.new_melee_max_match_percentage,
                 max_match_amount: registry_ref_mut.new_melee_max_match_amount,
+                available_rewards: registry_ref_mut.new_melee_available_rewards,
                 all_entrants: smart_table::new(),
                 active_entrants: smart_table::new(),
                 exited_entrants: smart_table::new(),
