@@ -30,3 +30,11 @@ aptos move build-publish-payload \
 	--json-output-file $json_dir/rewards.json \
 	--skip-fetch-latest-git-deps \
 	--move-2
+
+aptos move build-publish-payload \
+	--assume-yes \
+	--named-addresses market_metadata=$profile,emojicoin_dot_fun=$profile \
+	--package-dir $move_dir/market_metadata/ \
+	--json-output-file $json_dir/market_metadata.json \
+	--skip-fetch-latest-git-deps \
+	--move-2

@@ -8,7 +8,7 @@ import { type DatabaseJsonType, TableName } from "../../types/json-types";
 import { postgrest, toQueryArray } from "../client";
 import { getLatestProcessedEmojicoinVersion, queryHelper, queryHelperWithCount } from "../utils";
 import { DatabaseTypeConverter } from "../../types";
-import { RegistryView } from "../../../emojicoin_dot_fun/emojicoin-dot-fun";
+import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "../../../utils/aptos-client";
 import { toRegistryView } from "../../../types";
 import { sortByWithFallback } from "../query-params";

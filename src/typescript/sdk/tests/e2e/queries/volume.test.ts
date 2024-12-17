@@ -4,7 +4,7 @@ import {
   type Account,
 } from "@aptos-labs/ts-sdk";
 import { maxBigInt, getEvents, sum, sumByKey } from "../../../src";
-import { Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { Swap } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "../../utils";
 import { getFundedAccounts } from "../../utils/test-accounts";
 import { type Events } from "../../../src/emojicoin_dot_fun/events";
