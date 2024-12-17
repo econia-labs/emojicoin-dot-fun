@@ -26,7 +26,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { fetchMarketRegistrationEventBySymbolEmojis } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { getAptosClient } from "@sdk/utils/aptos-client";
 import { INTEGRATOR_FEE_RATE_BPS } from "@sdk/const";
-import { pairIdToSymbolEmojis, symbolEmojisToString } from "./util";
+import { pairIdToSymbolEmojis, symbolEmojisToString } from "../util";
 
 /**
  * - All `Pair` props are immutable - Indexer will not query a given pair more than once

@@ -24,7 +24,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { toMarketEmojiData } from "@sdk/emoji_data";
 import { EMOJICOIN_SUPPLY } from "@sdk/const";
 import { calculateCirculatingSupply } from "@sdk/markets";
-import { symbolEmojiStringToArray } from "./util";
+import { symbolEmojiStringToArray } from "../util";
 import { fetchMarketState } from "@/queries/market";
 
 /**
