@@ -39,7 +39,13 @@ const LinkButton = ({
       </div>
     </Button>
   );
-  return link ? <Link href={link}>{button}</Link> : button;
+  return link ? (
+    <Link href={link} target="_blank">
+      {button}
+    </Link>
+  ) : (
+    button
+  );
 };
 
 const MainInfo = ({ data }: MainInfoProps) => {

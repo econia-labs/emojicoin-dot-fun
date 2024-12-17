@@ -244,15 +244,16 @@ const MetadataPage = () => {
             if (!isSubmitEnabled) {
               return;
             }
-            const filledFields = fields.entries().filter(([_, value]) => value !== "");
-            const builderLambda = () =>
-              SetMarketProperties.builder({
+            const filledFields = Array.from(fields.entries().filter(([_, value]) => value !== ""));
+            const builderLambda = () => {
+              return SetMarketProperties.builder({
                 aptosConfig: aptos.config,
                 admin: account!.address,
                 market: marketAddress,
-                keys: Array.from(filledFields.map(([key, _]) => key)),
-                values: Array.from(filledFields.map(([_, value]) => value)),
+                keys: filledFields.map(([key, _]) => key),
+                values: filledFields.map(([_, value]) => value),
               });
+            };
             const res = await submit(builderLambda);
             if (!res || res.error) {
               console.error(res);
