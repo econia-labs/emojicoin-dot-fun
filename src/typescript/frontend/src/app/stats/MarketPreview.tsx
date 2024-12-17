@@ -122,6 +122,7 @@ export const MarketPreviewCarousel = ({ markets }: { markets: DatabaseModels["pr
 );
 
 export const StatsCarousel = ({ elements }: { elements: React.JSX.Element[] }) => {
+  console.log(elements);
   return (
     <Carousel>
       <CarouselContent>
