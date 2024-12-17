@@ -45,7 +45,6 @@ module arena::emojicoin_arena {
 
     const U64_MAX: u64 = 0xffffffffffffffff;
     const MAX_PERCENTAGE: u64 = 100;
-    const MIN_MELEE_DURATION: u64 = 1 * 3_600_000_000;
 
     /// Flat integrator fee.
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
@@ -163,14 +162,12 @@ module arena::emojicoin_arena {
 
     public entry fun set_new_melee_duration(arena: &signer, duration: u64) acquires Registry {
         let registry_ref_mut = borrow_registry_ref_mut_checked(arena);
-        assert!(duration >= MIN_MELEE_DURATION, E_NEW_DURATION_TOO_SHORT);
         registry_ref_mut.new_melee_duration = duration;
     }
 
     public entry fun set_new_melee_max_match_percentage(
         arena: &signer, max_match_percentage: u64
     ) acquires Registry {
-        assert!(max_match_percentage <= MAX_PERCENTAGE, E_NEW_MATCH_PERCENTAGE_TOO_HIGH);
         borrow_registry_ref_mut_checked(arena).new_melee_max_match_percentage = max_match_percentage;
     }
 
