@@ -24,7 +24,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { toMarketEmojiData } from "@sdk/emoji_data";
 import { EMOJICOIN_SUPPLY } from "@sdk/const";
 import { calculateCirculatingSupply } from "@sdk/markets";
-import { symbolEmojiStringToArray } from "./util";
+import { symbolEmojiStringToArray } from "../util";
 import { fetchMarketState } from "@/queries/market";
 
 /**
@@ -37,7 +37,7 @@ import { fetchMarketState } from "@/queries/market";
  * as image, description and self-reported/off-chain circulating supply
  * - `metadata` includes any optional auxiliary info not covered in the default schema and not required in most cases
  */
-export interface Asset {
+interface Asset {
   id: string;
   name: string;
   symbol: string;
@@ -48,7 +48,7 @@ export interface Asset {
   metadata?: Record<string, string>;
 }
 
-export interface AssetResponse {
+interface AssetResponse {
   asset: Asset;
 }
 
@@ -56,7 +56,7 @@ export interface AssetResponse {
  * Fetches an asset by a string of the emojis that represent the asset
  * @param assetId
  */
-export async function getAsset(assetId: string): Promise<Asset> {
+async function getAsset(assetId: string): Promise<Asset> {
   const marketEmojiData = toMarketEmojiData(assetId);
   const symbolEmojis = symbolEmojiStringToArray(assetId);
   const marketState = await fetchMarketState({ searchEmojis: symbolEmojis });
