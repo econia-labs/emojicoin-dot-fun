@@ -39,6 +39,10 @@ module arena::emojicoin_arena {
     const E_UNABLE_TO_LOCK_IN: u64 = 6;
     /// Provided escrow coin type is invalid.
     const E_INVALID_ESCROW_COIN_TYPE: u64 = 7;
+    /// User has no escrow resource.
+    const E_SWAP_NO_ESCROW: u64 = 8;
+    /// Swapper has no funds in escrow to swap.
+    const E_SWAP_NO_FUNDS: u64 = 9;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -326,29 +330,30 @@ module arena::emojicoin_arena {
 
     #[randomness]
     entry fun exit<Coin0, LP0, Coin1, LP1>(
-        participant: &signer, melee_id: u64
+        participant: &signer
     ) acquires MeleeEscrow, Registry, UserMelees {
         let (melee_just_ended, _registry_ref_mut, _time, _n_melees_before_cranking) =
             crank_schedule();
-        exit_inner<Coin0, LP0, Coin1, LP1>(participant, melee_id, !melee_just_ended);
+        exit_inner<Coin0, LP0, Coin1, LP1>(participant, !melee_just_ended);
     }
 
     #[randomness]
     entry fun swap<Coin0, LP0, Coin1, LP1>(
-        swapper: &signer, melee_id: u64, market_addresses: vector<address>
+        swapper: &signer, market_addresses: vector<address>
     ) acquires MeleeEscrow, Registry, UserMelees {
+
+        // Verify that swapper has an escrow resource.
+        let swapper_address = signer::address_of(swapper);
+        assert!(
+            exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(swapper_address),
+            E_SWAP_NO_ESCROW
+        );
+        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[swapper_address];
+
+        // Try cranking the schedule, and if a new melee starts, flag that user's escrow should be
+        // emptied immediately after the swap.
         let (exit_once_done, _registry_ref_mut, _time, _n_melees_before_cranking) =
             crank_schedule();
-
-        // Return early if type arguments or melee ID are passed incorrectly, but only after
-        // cranking schedule.
-        let swapper_address = signer::address_of(swapper);
-        if (!exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(swapper_address)) {
-            return;
-        };
-        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[swapper_address];
-        if (escrow_ref_mut.melee_id != melee_id)
-            return;
 
         if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
             swap_within_escrow<Coin0, LP0, Coin1, LP1>(
@@ -360,6 +365,7 @@ module arena::emojicoin_arena {
                 &mut escrow_ref_mut.emojicoin_1
             );
         } else {
+            assert!(coin::value(&escrow_ref_mut.emojicoin_1) > 0, E_SWAP_NO_FUNDS);
             swap_within_escrow<Coin1, LP1, Coin0, LP0>(
                 swapper,
                 swapper_address,
@@ -370,7 +376,7 @@ module arena::emojicoin_arena {
             );
         };
 
-        if (exit_once_done) exit_inner<Coin0, LP0, Coin1, LP1>(swapper, melee_id, false);
+        if (exit_once_done) exit_inner<Coin0, LP0, Coin1, LP1>(swapper, false);
     }
 
     fun init_module(arena: &signer) acquires Registry {
@@ -449,52 +455,48 @@ module arena::emojicoin_arena {
     }
 
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
-        participant: &signer, melee_id: u64, melee_is_current: bool
+        participant: &signer, melee_is_current: bool
     ) acquires Registry {
         let participant_address = signer::address_of(participant);
-        // Only allow exit if user has corresponding melee resource and melee ID matches.
+        // Only allow exit if user has corresponding melee resource.
         if (exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(participant_address)) {
             let escrow_ref_mut =
                 &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[participant_address];
-            // Only allow exit if melee ID matches.
-            if (escrow_ref_mut.melee_id == melee_id) {
-                // Update available rewards and transfer tap out fee to vault if applicable.
-                if (melee_is_current) {
-                    let registry_ref_mut = &mut Registry[@arena];
-                    let exited_melee_ref_mut =
-                        registry_ref_mut.melees_by_id.borrow_mut(melee_id);
-                    let tap_out_fee_ref_mut = &mut escrow_ref_mut.tap_out_fee;
-                    let available_rewards_ref_mut =
-                        &mut exited_melee_ref_mut.available_rewards;
-                    *available_rewards_ref_mut = *available_rewards_ref_mut
-                        + *tap_out_fee_ref_mut;
-                    let vault_address =
-                        account::get_signer_capability_address(
-                            &registry_ref_mut.signer_capability
-                        );
-                    aptos_account::transfer(
-                        participant, vault_address, *tap_out_fee_ref_mut
+            let melee_id = escrow_ref_mut.melee_id;
+            // Update available rewards and transfer tap out fee to vault if applicable.
+            if (melee_is_current) {
+                let registry_ref_mut = &mut Registry[@arena];
+                let exited_melee_ref_mut =
+                    registry_ref_mut.melees_by_id.borrow_mut(melee_id);
+                let tap_out_fee_ref_mut = &mut escrow_ref_mut.tap_out_fee;
+                let available_rewards_ref_mut =
+                    &mut exited_melee_ref_mut.available_rewards;
+                *available_rewards_ref_mut = *available_rewards_ref_mut
+                    + *tap_out_fee_ref_mut;
+                let vault_address =
+                    account::get_signer_capability_address(
+                        &registry_ref_mut.signer_capability
                     );
-                    *tap_out_fee_ref_mut = 0;
-                };
-
-                // Move emojicoin balances out of escrow.
-                aptos_account::deposit_coins(
-                    participant_address,
-                    coin::extract_all(&mut escrow_ref_mut.emojicoin_0)
+                aptos_account::transfer(
+                    participant, vault_address, *tap_out_fee_ref_mut
                 );
-                aptos_account::deposit_coins(
-                    participant_address,
-                    coin::extract_all(&mut escrow_ref_mut.emojicoin_1)
-                );
-
-                // Update user melees resource.
-                let user_melees_ref_mut = &mut UserMelees[participant_address];
-                add_if_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
-                remove_if_contains(
-                    &mut user_melees_ref_mut.unexited_melee_ids, melee_id
-                );
+                *tap_out_fee_ref_mut = 0;
             };
+
+            // Move emojicoin balances out of escrow.
+            aptos_account::deposit_coins(
+                participant_address,
+                coin::extract_all(&mut escrow_ref_mut.emojicoin_0)
+            );
+            aptos_account::deposit_coins(
+                participant_address,
+                coin::extract_all(&mut escrow_ref_mut.emojicoin_1)
+            );
+
+            // Update user melees resource.
+            let user_melees_ref_mut = &mut UserMelees[participant_address];
+            add_if_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
+            remove_if_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
         }
     }
 
