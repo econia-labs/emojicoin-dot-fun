@@ -234,9 +234,9 @@ module arena::emojicoin_arena {
 
         // Update user melees resource.
         let user_melees_ref_mut = &mut UserMelees[entrant_address];
-        ensure_contains(&mut user_melees_ref_mut.entered_melee_ids, melee_id);
-        ensure_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
-        ensure_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
+        add_if_not_contains(&mut user_melees_ref_mut.entered_melee_ids, melee_id);
+        add_if_not_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
+        remove_if_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
 
         // Verify user is selecting one of the two emojicoin types.
         let coin_0_type_info = type_info::type_of<Coin0>();
@@ -413,6 +413,14 @@ module arena::emojicoin_arena {
         );
     }
 
+    inline fun add_if_not_contains(
+        map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
+    ) {
+        if (!map_ref_mut.contains(key)) {
+            map_ref_mut.add(key, Nil {});
+        }
+    }
+
     inline fun borrow_registry_ref_checked(arena: &signer): &Registry {
         assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
         &Registry[@arena]
@@ -438,22 +446,6 @@ module arena::emojicoin_arena {
                 true
             } else false;
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
-    }
-
-    inline fun ensure_contains(
-        map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
-    ) {
-        if (!map_ref_mut.contains(key)) {
-            map_ref_mut.add(key, Nil {});
-        }
-    }
-
-    inline fun ensure_not_contains(
-        map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
-    ) {
-        if (map_ref_mut.contains(key)) {
-            map_ref_mut.remove(key);
-        }
     }
 
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
@@ -498,8 +490,8 @@ module arena::emojicoin_arena {
 
                 // Update user melees resource.
                 let user_melees_ref_mut = &mut UserMelees[participant_address];
-                ensure_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
-                ensure_not_contains(
+                add_if_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
+                remove_if_contains(
                     &mut user_melees_ref_mut.unexited_melee_ids, melee_id
                 );
             };
@@ -615,6 +607,14 @@ module arena::emojicoin_arena {
             }
         );
         registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
+    }
+
+    inline fun remove_if_contains(
+        map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
+    ) {
+        if (map_ref_mut.contains(key)) {
+            map_ref_mut.remove(key);
+        }
     }
 
     inline fun sort_unique_market_ids(market_id_0: u64, market_id_1: u64): vector<u64> {
