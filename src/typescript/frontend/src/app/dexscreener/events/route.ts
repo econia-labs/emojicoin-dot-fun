@@ -74,7 +74,7 @@
  **/
 
 import { type NextRequest, NextResponse } from "next/server";
-import { type Block } from "./latest-block";
+import { type Block } from "../latest-block/route";
 import {
   fetchLiquidityEventsByBlock,
   fetchSwapEventsByBlock,
@@ -85,9 +85,9 @@ import {
   type toSwapEventModel,
 } from "@sdk/indexer-v2/types";
 import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
-import { toCoinDecimalString } from "../../lib/utils/decimals";
+import { toCoinDecimalString } from "../../../lib/utils/decimals";
 import { DECIMALS } from "@sdk/const";
-import { symbolEmojisToPairId } from "./util";
+import { symbolEmojisToPairId } from "../util";
 import { compareBigInt } from "@econia-labs/emojicoin-sdk";
 
 /**
@@ -167,7 +167,7 @@ export interface SwapEvent {
  * - `metadata` includes any optional auxiliary info not covered in the default schema and not
  * required in most cases
  */
-export interface JoinExitEvent {
+interface JoinExitEvent {
   eventType: "join" | "exit";
   txnId: string;
   txnIndex: number;
@@ -183,16 +183,14 @@ export interface JoinExitEvent {
   metadata?: Record<string, string>;
 }
 
-export type BlockInfo = { block: Block };
-export type Event = (SwapEvent | JoinExitEvent) & BlockInfo;
+type BlockInfo = { block: Block };
+type Event = (SwapEvent | JoinExitEvent) & BlockInfo;
 
-export interface EventsResponse {
+interface EventsResponse {
   events: Event[];
 }
 
-export function toDexscreenerSwapEvent(
-  event: ReturnType<typeof toSwapEventModel>
-): SwapEvent & BlockInfo {
+function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): SwapEvent & BlockInfo {
   let assetInOut;
 
   if (event.swap.isSell) {
@@ -246,7 +244,7 @@ export function toDexscreenerSwapEvent(
   };
 }
 
-export function toDexscreenerJoinExitEvent(
+function toDexscreenerJoinExitEvent(
   event: ReturnType<typeof toLiquidityEventModel>
 ): JoinExitEvent & BlockInfo {
   const { base, quote } = calculateRealReserves(event.state);
@@ -278,7 +276,7 @@ export function toDexscreenerJoinExitEvent(
   };
 }
 
-export async function getEventsByVersion(fromBlock: number, toBlock: number): Promise<Event[]> {
+async function getEventsByVersion(fromBlock: number, toBlock: number): Promise<Event[]> {
   const swapEvents = await fetchSwapEventsByBlock({ fromBlock, toBlock });
   const liquidityEvents = await fetchLiquidityEventsByBlock({ fromBlock, toBlock });
 

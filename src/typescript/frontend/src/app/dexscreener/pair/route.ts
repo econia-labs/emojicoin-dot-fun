@@ -26,7 +26,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { fetchMarketRegistrationEventBySymbolEmojis } from "@sdk/indexer-v2/queries/app/dexscreener";
 import { getAptosClient } from "@sdk/utils/aptos-client";
 import { INTEGRATOR_FEE_RATE_BPS } from "@sdk/const";
-import { pairIdToSymbolEmojis, symbolEmojisToString } from "./util";
+import { pairIdToSymbolEmojis, symbolEmojisToString } from "../util";
 
 /**
  * - All `Pair` props are immutable - Indexer will not query a given pair more than once
@@ -47,7 +47,7 @@ import { pairIdToSymbolEmojis, symbolEmojisToString } from "./util";
  * multiple pairs in the same multi-asset pool
  * - `metadata` includes any optional auxiliary info not covered in the default schema and not required in most cases
  */
-export interface Pair {
+interface Pair {
   id: string;
   dexKey: string;
   asset0Id: string;
@@ -67,7 +67,7 @@ export interface Pair {
   metadata?: Record<string, string>;
 }
 
-export interface PairResponse {
+interface PairResponse {
   pair: Pair;
 }
 
@@ -75,9 +75,9 @@ export interface PairResponse {
  *
  * @param pairId is the pair ID. Generally it's `event.market.symbolEmojis.join("") + "-APT"`
  */
-export async function getPair(
+async function getPair(
   pairId: string
-): Promise<{ pair: Pair; error?: never } | { pair?: never; error: NextResponse }> {
+): Promise<{ pair: Pair; error?: never } | { pair?: never; error: NextResponse<PairResponse> }> {
   const symbolEmojis = pairIdToSymbolEmojis(pairId);
 
   const marketRegistrations = await fetchMarketRegistrationEventBySymbolEmojis({
@@ -112,7 +112,7 @@ export async function getPair(
 }
 
 // NextJS JSON response handler
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse<PairResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const pairId = searchParams.get("id");
   if (!pairId) {

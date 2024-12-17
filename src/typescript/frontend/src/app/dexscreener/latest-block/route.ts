@@ -30,7 +30,7 @@ export interface Block {
   metadata?: Record<string, string>;
 }
 
-export interface LatestBlockResponse {
+interface LatestBlockResponse {
   block: Block;
 }
 
