@@ -1,6 +1,6 @@
 import { getRegistryResourceFromWriteSet, toRegistryView } from "../../../src";
 import { type SymbolEmojiName } from "../../../src/emoji_data/types";
-import { RegistryView } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
 import { getAptosClient } from "../../../src/utils/aptos-client";
 import TestHelpers from "../../utils/helpers";
 import { getFundedAccounts } from "../../utils/test-accounts";

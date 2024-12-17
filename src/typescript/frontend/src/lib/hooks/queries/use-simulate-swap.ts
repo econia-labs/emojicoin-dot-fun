@@ -1,4 +1,4 @@
-import { SimulateSwap, Swap } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { SimulateSwap, Swap } from "@/contract-apis/emojicoin-dot-fun";
 import { INTEGRATOR_ADDRESS, INTEGRATOR_FEE_RATE_BPS } from "lib/env";
 import {
   type AnyNumber,

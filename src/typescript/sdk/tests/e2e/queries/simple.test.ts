@@ -1,6 +1,6 @@
 import { type SymbolEmojiName, getEvents, ONE_APT } from "../../../src";
 import TestHelpers, { EXACT_TRANSITION_INPUT_AMOUNT } from "../../utils/helpers";
-import { Chat, ProvideLiquidity, Swap } from "../../../src/emojicoin_dot_fun/emojicoin-dot-fun";
+import { Chat, ProvideLiquidity, Swap } from "@/contract-apis/emojicoin-dot-fun";
 import {
   fetchChatEvents,
   fetchSwapEvents,

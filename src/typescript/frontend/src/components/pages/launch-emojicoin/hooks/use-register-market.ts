@@ -1,4 +1,4 @@
-import { RegisterMarket } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { RegisterMarket } from "@/contract-apis/emojicoin-dot-fun";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import {
   Ed25519PublicKey,

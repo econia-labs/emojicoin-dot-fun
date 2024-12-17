@@ -23,10 +23,13 @@ COPY src/move/emojicoin_dot_fun/Move.toml move/emojicoin_dot_fun/Move.toml
 COPY src/move/rewards/sources/* move/rewards/sources/
 COPY src/move/rewards/Move.toml move/rewards/Move.toml
 
+COPY src/move/market_metadata/sources/* move/market_metadata/sources/
+COPY src/move/market_metadata/Move.toml move/market_metadata/Move.toml
+
 RUN mkdir json
 
 COPY src/docker/deployer/sh/* sh/
-COPY src/typescript/sdk/src/utils/test/test-accounts.json json/test-accounts.json
+COPY src/typescript/sdk/tests/utils/test-accounts.json json/test-accounts.json
 COPY src/sh/utils/colors.sh sh/colors.sh
 
 RUN chmod +x sh/*.sh                    \

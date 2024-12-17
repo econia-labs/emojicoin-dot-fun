@@ -1,8 +1,12 @@
+const { pathsToModuleNameMapper } = require("ts-jest");
+const { compilerOptions } = require("./tsconfig");
+
 /** @type {import("jest").Config} */
 module.exports = {
   preset: "ts-jest",
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    ...pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: "<rootDir>/" }),
   },
   workerThreads: true,
   testEnvironment: "node",
