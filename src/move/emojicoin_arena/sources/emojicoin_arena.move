@@ -535,30 +535,39 @@ module arena::emojicoin_arena {
         let duration = (current_melee_ref_mut.duration as u256);
         if (elapsed_time >= duration) { 0 }
         else {
-            min(
-                // Scale down input amount for matching percentage and time elapsed in one compound
-                // operation, to reduce truncation errors.
+            // Scale down input amount for matching percentage and remaining time in one compound
+            // operation, to reduce truncation errors. Equivalent to:
+            //
+            //                max match percentage   remaining time
+            // input_amount * -------------------- * --------------
+            //                100                    duration
+            let raw_match_amount =
                 (
                     ((input_amount as u256)
                         * (current_melee_ref_mut.max_match_percentage as u256)
                         * (duration - elapsed_time)) / ((MAX_PERCENTAGE as u256)
                         * duration) as u64
-                ),
+                );
+            // Correct for the amount that is available in the vault.
+            let corrected_for_vault_balance =
                 min(
-                    // Correct for vault balance.
+                    raw_match_amount,
                     coin::balance<AptosCoin>(
                         account::get_signer_capability_address(
                             &registry_ref_mut.signer_capability
                         )
-                    ),
-                    min(
-                        // Correct for available rewards in current melee.
-                        current_melee_ref_mut.available_rewards,
-                        // Correct for max match amount user is eligible for.
-                        current_melee_ref_mut.max_match_amount
-                            - escrow_ref_mut.tap_out_fee
                     )
-                )
+                );
+            // Correct for available rewards in melee.
+            let corrected_for_melee_available_rewards =
+                min(
+                    corrected_for_vault_balance,
+                    current_melee_ref_mut.available_rewards
+                );
+            // Correct for the max match amount that the user is eligible for.
+            min(
+                corrected_for_melee_available_rewards,
+                current_melee_ref_mut.max_match_amount - escrow_ref_mut.tap_out_fee
             )
         }
     }
