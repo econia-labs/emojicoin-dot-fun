@@ -287,9 +287,7 @@ module arena::emojicoin_arena {
                     );
                 assert!(match_amount > 0, E_UNABLE_TO_LOCK_IN);
 
-                // Update counters, transfer APT to entrant.
-                escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee + match_amount;
-                current_melee_ref_mut.available_rewards_decrement(match_amount);
+                // Transfer APT to entrant.
                 aptos_account::transfer(
                     &account::create_signer_with_capability(
                         &registry_ref_mut.signer_capability
@@ -297,7 +295,17 @@ module arena::emojicoin_arena {
                     entrant_address,
                     match_amount
                 );
+
+                // Update melee state.
+                current_melee_ref_mut.available_rewards_decrement(match_amount);
+                current_melee_ref_mut.locked_in_entrants_add_if_not_contains(
+                    entrant_address
+                );
+
+                // Update escrow state.
+                escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee + match_amount;
                 match_amount
+
             } else 0;
 
         // Execute a swap then immediately move funds into escrow.
@@ -332,6 +340,7 @@ module arena::emojicoin_arena {
         // Update melee state.
         current_melee_ref_mut.all_entrants_add_if_not_contains(entrant_address);
         current_melee_ref_mut.active_entrants_add_if_not_contains(entrant_address);
+        current_melee_ref_mut.exited_entrants_remove_if_contains(entrant_address);
     }
 
     #[randomness]
@@ -369,26 +378,33 @@ module arena::emojicoin_arena {
         // emptied immediately after the swap.
         let (exit_once_done, registry_ref_mut, _, _) = crank_schedule();
 
-        if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
-            swap_within_escrow<Coin0, LP0, Coin1, LP1>(
-                swapper,
-                swapper_address,
-                market_addresses[0],
-                market_addresses[1],
-                &mut escrow_ref_mut.emojicoin_0,
-                &mut escrow_ref_mut.emojicoin_1
-            );
-        } else {
-            assert!(coin::value(&escrow_ref_mut.emojicoin_1) > 0, E_SWAP_NO_FUNDS);
-            swap_within_escrow<Coin1, LP1, Coin0, LP0>(
-                swapper,
-                swapper_address,
-                market_addresses[1],
-                market_addresses[0],
-                &mut escrow_ref_mut.emojicoin_1,
-                &mut escrow_ref_mut.emojicoin_0
-            );
-        };
+        let quote_volume =
+            if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
+                swap_within_escrow<Coin0, LP0, Coin1, LP1>(
+                    swapper,
+                    swapper_address,
+                    market_addresses[0],
+                    market_addresses[1],
+                    &mut escrow_ref_mut.emojicoin_0,
+                    &mut escrow_ref_mut.emojicoin_1
+                )
+            } else {
+                assert!(coin::value(&escrow_ref_mut.emojicoin_1) > 0, E_SWAP_NO_FUNDS);
+                swap_within_escrow<Coin1, LP1, Coin0, LP0>(
+                    swapper,
+                    swapper_address,
+                    market_addresses[1],
+                    market_addresses[0],
+                    &mut escrow_ref_mut.emojicoin_1,
+                    &mut escrow_ref_mut.emojicoin_0
+                )
+            };
+
+        // Update melee state.
+        let swap_melee_ref_mut =
+            registry_ref_mut.melees_by_id.borrow_mut(escrow_ref_mut.melee_id);
+        swap_melee_ref_mut.n_melee_swaps_increment();
+        swap_melee_ref_mut.melee_swaps_volume_increment((quote_volume as u128));
 
         if (exit_once_done)
             exit_inner<Coin0, LP0, Coin1, LP1>(
@@ -542,6 +558,20 @@ module arena::emojicoin_arena {
 
         // Update melee state.
         exited_melee_ref_mut.active_entrants_remove_if_contains(participant_address);
+        exited_melee_ref_mut.exited_entrants_add_if_not_contains(participant_address);
+        exited_melee_ref_mut.locked_in_entrants_remove_if_contains(participant_address);
+    }
+
+    inline fun exited_entrants_add_if_not_contains(
+        self: &mut Melee, address: address
+    ) {
+        add_if_not_contains(&mut self.exited_entrants, address);
+    }
+
+    inline fun exited_entrants_remove_if_contains(
+        self: &mut Melee, address: address
+    ) {
+        remove_if_contains(&mut self.exited_entrants, address);
     }
 
     inline fun get_n_registered_markets(): u64 {
@@ -552,6 +582,18 @@ module arena::emojicoin_arena {
 
     inline fun last_period_boundary(time: u64, period: u64): u64 {
         (time / period) * period
+    }
+
+    inline fun locked_in_entrants_add_if_not_contains(
+        self: &mut Melee, address: address
+    ) {
+        add_if_not_contains(&mut self.locked_in_entrants, address);
+    }
+
+    inline fun locked_in_entrants_remove_if_contains(
+        self: &mut Melee, address: address
+    ) {
+        remove_if_contains(&mut self.locked_in_entrants, address);
     }
 
     /// Uses mutable references to avoid freezing references up the stack.
@@ -601,6 +643,16 @@ module arena::emojicoin_arena {
                 current_melee_ref_mut.max_match_amount - escrow_ref_mut.tap_out_fee
             )
         }
+    }
+
+    inline fun melee_swaps_volume_increment(
+        self: &mut Melee, amount: u128
+    ) {
+        aggregator_v2::add(&mut self.melee_swaps_volume, amount);
+    }
+
+    inline fun n_melee_swaps_increment(self: &mut Melee) {
+        aggregator_v2::add(&mut self.n_melee_swaps, 1);
     }
 
     /// Accepts a mutable reference to avoid freezing references up the stack.
@@ -752,7 +804,7 @@ module arena::emojicoin_arena {
         market_address_to: address,
         escrow_from_coin_ref_mut: &mut Coin<FromCoin>,
         escrow_to_coin_ref_mut: &mut Coin<ToCoin>
-    ) {
+    ): u64 {
         // Move all from coins out of escrow.
         let input_amount = coin::value(escrow_from_coin_ref_mut);
         withdraw_from_escrow(swapper_address, escrow_from_coin_ref_mut);
@@ -768,7 +820,7 @@ module arena::emojicoin_arena {
             );
 
         // Swap into to emojicoin.
-        let (net_proceeds_in_to_coin, _) =
+        let (net_proceeds_in_to_coin, quote_volume) =
             swap_with_stats_buy_emojicoin<ToCoin, ToLP>(
                 swapper,
                 swapper_address,
@@ -781,6 +833,9 @@ module arena::emojicoin_arena {
         coin::merge(
             escrow_to_coin_ref_mut, coin::withdraw(swapper, net_proceeds_in_to_coin)
         );
+
+        // Return quote volume on second swap only, to avoid double-counting.
+        quote_volume
     }
 
     inline fun withdraw_from_escrow<Emojicoin>(
