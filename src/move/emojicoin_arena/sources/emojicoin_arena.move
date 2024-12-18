@@ -117,7 +117,7 @@ module arena::emojicoin_arena {
     struct Nil has drop, store {}
 
     struct Registry has key {
-        /// Map from melee serial ID to the melee.
+        /// A map of each melee's `melee_id` to the melee.
         melees_by_id: SmartTable<u64, Melee>,
         /// Map from a sorted combination of market IDs (lower ID first) to the melee serial ID.
         melee_ids_by_market_ids: SmartTable<vector<u64>, u64>,
