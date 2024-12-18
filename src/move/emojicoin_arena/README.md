@@ -3,8 +3,8 @@
 ## A note on pseudo-randomness
 
 Since randomness is not supported in `init_module` per [`aptos-core` #15436],
-pseudo-random substitute implementations are used for the first crank. For a detailed rationale
-that explains how this is effectively random in practice, see
+pseudo-random substitute implementations are used for the first crank. For a
+detailed rationale that explains how this is effectively random in practice, see
 [this `emojicoin-dot-fun` pull request comment].
 
 [this `emojicoin-dot-fun` pull request comment]: https://github.com/econia-labs/emojicoin-dot-fun/pull/408#discussion_r1887856202
