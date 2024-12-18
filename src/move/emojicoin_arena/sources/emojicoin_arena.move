@@ -123,14 +123,14 @@ module arena::emojicoin_arena {
         melee_ids_by_market_ids: SmartTable<vector<u64>, u64>,
         /// Approves transfers from the vault.
         signer_capability: SignerCapability,
-        /// `Melee.duration` for new melees.
-        new_melee_duration: u64,
-        /// `Melee.available_rewards` for new melees.
-        new_melee_available_rewards: u64,
-        /// `Melee.max_match_percentage` for new melees.
-        new_melee_max_match_percentage: u64,
-        /// `Melee.max_match_amount` for new melees.
-        new_melee_max_match_amount: u64,
+        /// `Melee.duration` for next melee.
+        next_melee_duration: u64,
+        /// `Melee.available_rewards` for next melee.
+        next_melee_available_rewards: u64,
+        /// `Melee.max_match_percentage` for next melee.
+        next_melee_max_match_percentage: u64,
+        /// `Melee.max_match_amount` for next melee.
+        next_melee_max_match_amount: u64,
         /// All entrants who have entered a melee.
         all_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
@@ -160,27 +160,27 @@ module arena::emojicoin_arena {
         );
     }
 
-    public entry fun set_new_melee_available_rewards(
+    public entry fun set_next_melee_available_rewards(
         arena: &signer, amount: u64
     ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).new_melee_available_rewards = amount;
+        borrow_registry_ref_mut_checked(arena).next_melee_available_rewards = amount;
     }
 
-    public entry fun set_new_melee_duration(arena: &signer, duration: u64) acquires Registry {
+    public entry fun set_next_melee_duration(arena: &signer, duration: u64) acquires Registry {
         let registry_ref_mut = borrow_registry_ref_mut_checked(arena);
-        registry_ref_mut.new_melee_duration = duration;
+        registry_ref_mut.next_melee_duration = duration;
     }
 
-    public entry fun set_new_melee_max_match_percentage(
+    public entry fun set_next_melee_max_match_percentage(
         arena: &signer, max_match_percentage: u64
     ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).new_melee_max_match_percentage = max_match_percentage;
+        borrow_registry_ref_mut_checked(arena).next_melee_max_match_percentage = max_match_percentage;
     }
 
-    public entry fun set_new_melee_max_match_amount(
+    public entry fun set_next_melee_max_match_amount(
         arena: &signer, max_match_amount: u64
     ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).new_melee_max_match_amount = max_match_amount;
+        borrow_registry_ref_mut_checked(arena).next_melee_max_match_amount = max_match_amount;
     }
 
     public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
@@ -401,10 +401,10 @@ module arena::emojicoin_arena {
                 melees_by_id: smart_table::new(),
                 melee_ids_by_market_ids: smart_table::new(),
                 signer_capability,
-                new_melee_duration: DEFAULT_DURATION,
-                new_melee_available_rewards: DEFAULT_AVAILABLE_REWARDS,
-                new_melee_max_match_percentage: DEFAULT_MAX_MATCH_PERCENTAGE,
-                new_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT,
+                next_melee_duration: DEFAULT_DURATION,
+                next_melee_available_rewards: DEFAULT_AVAILABLE_REWARDS,
+                next_melee_max_match_percentage: DEFAULT_MAX_MATCH_PERCENTAGE,
+                next_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT,
                 all_entrants: smart_table::new(),
                 n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
                 melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
@@ -603,12 +603,12 @@ module arena::emojicoin_arena {
                     )
                 }),
                 start_time: last_period_boundary(
-                    timestamp::now_microseconds(), registry_ref_mut.new_melee_duration
+                    timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
                 ),
-                duration: registry_ref_mut.new_melee_duration,
-                max_match_percentage: registry_ref_mut.new_melee_max_match_percentage,
-                max_match_amount: registry_ref_mut.new_melee_max_match_amount,
-                available_rewards: registry_ref_mut.new_melee_available_rewards,
+                duration: registry_ref_mut.next_melee_duration,
+                max_match_percentage: registry_ref_mut.next_melee_max_match_percentage,
+                max_match_amount: registry_ref_mut.next_melee_max_match_amount,
+                available_rewards: registry_ref_mut.next_melee_available_rewards,
                 all_entrants: smart_table::new(),
                 active_entrants: smart_table::new(),
                 exited_entrants: smart_table::new(),
