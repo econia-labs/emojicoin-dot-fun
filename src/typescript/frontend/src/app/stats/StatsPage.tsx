@@ -1,12 +1,13 @@
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
-import { StatsCarousel } from "./MarketPreview";
 import { useMemo } from "react";
-import { toCoinDecimalString, toNominal } from "lib/utils/decimals";
-import { calculateCurvePrice, calculateCirculatingSupply, toCoinTypes } from "@sdk/markets";
+import { toNominal } from "lib/utils/decimals";
+import { calculateCurvePrice, calculateCirculatingSupply } from "@sdk/markets";
 import { MiniBondingCurveProgress } from "./MiniBondingCurveProgress";
 import { toNominalPrice } from "@sdk/utils";
 import AptosIconBlack from "@icons/AptosBlack";
 import { ExplorerLink } from "components/explorer-link/ExplorerLink";
+import { ROUTES } from "router/routes";
+import { EXTERNAL_LINK_PROPS } from "components/link/const";
 
 export interface HomePageProps {
   numMarkets: number;
@@ -27,6 +28,13 @@ enum Column {
   MarketCap,
 }
 
+const TextWithAptosLabel = ({ text }: { text: string }) => (
+  <div className="flex flex-row gap-1 w-fit m-auto">
+    <span>{text}</span>
+    <AptosIconBlack className="m-auto" height={13} width={13} />
+  </div>
+);
+
 const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["market_state"]>({
   data = [] as T[],
   k,
@@ -35,7 +43,9 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
   k: Column;
 }) => {
   const cells = useMemo(() => {
-    const getCN = (col: Column) => (col === k ? "text-ec-blue bg-opacity-[0.04] bg-ec-blue" : "");
+    const bigNumberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+    const fmt = (n: number) => bigNumberFormatter.format(n);
+    const getCN = (col: Column) => (col === k ? "bg-opacity-[0.04] bg-ec-blue" : "");
     return {
       delta: {
         cn: getCN(Column.PriceDelta),
@@ -47,11 +57,11 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
       },
       allTimeVolume: {
         cn: getCN(Column.AllTimeVolume),
-        getValue: (v: T) => toNominal(v.state.cumulativeStats.quoteVolume).toFixed(2),
+        getValue: (v: T) => fmt(toNominal(v.state.cumulativeStats.quoteVolume)),
       },
       dailyVolume: {
         cn: getCN(Column.DailyVolume),
-        getValue: (v: T) => toNominal(v.dailyVolume).toFixed(2),
+        getValue: (v: T) => fmt(toNominal(v.dailyVolume)),
       },
       lastAvgPrice: {
         cn: getCN(Column.LastAvgExecutionPrice),
@@ -59,12 +69,13 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
       },
       tvl: {
         cn: getCN(Column.Tvl),
-        getValue: (v: T) => v.state.instantaneousStats.totalValueLocked.toString(),
+        getValue: (v: T) => fmt(toNominal(v.state.instantaneousStats.totalValueLocked)),
       },
       marketCap: {
         cn: getCN(Column.MarketCap),
-        getValue: (v: T) => v.state.instantaneousStats.marketCap.toString(),
+        getValue: (v: T) => fmt(toNominal(v.state.instantaneousStats.marketCap)),
       },
+      getCirculatingSupply: (v: T) => fmt(toNominal(calculateCirculatingSupply(v.state))),
     };
   }, [k]);
 
@@ -79,36 +90,23 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
         <thead className="text-white opacity-[.95] font-forma tracking-wide text-md">
           <tr>
             <th>{"symbol"}</th>
-            {"deltaPercentage" in (data.at(0) ?? []) && <th>{"delta"}</th>}
+            {"deltaPercentage" in (data.at(0) ?? []) && (
+              <th className={cells.delta.cn ? "text-ec-blue" : ""}>{"delta"}</th>
+            )}
             <th>{"mkt id"}</th>
-            <th>{"price"}</th>
-            <th>
-              <div className="flex flex-row gap-1 w-fit m-auto">
-                <span>{"all time vol"}</span>
-                <AptosIconBlack className="m-auto" height={13} width={13} />
-              </div>
+            <th className={cells.price.cn ? "text-ec-blue" : ""}>{"price"}</th>
+            <th className={cells.allTimeVolume.cn ? "text-ec-blue" : ""}>
+              <TextWithAptosLabel text={"all time vol"} />
             </th>
-            <th>
-              <div className="flex flex-row gap-1 w-fit m-auto">
-                <span>{"daily vol"}</span>
-                <AptosIconBlack className="m-auto" height={13} width={13} />
-              </div>
+            <th className={cells.dailyVolume.cn ? "text-ec-blue" : ""}>
+              <TextWithAptosLabel text={"daily vol"} />
             </th>
-
-            <th>
-              <div className="flex flex-row gap-1 w-fit m-auto">
-                <span>{"tvl"}</span>
-                <AptosIconBlack className="m-auto" height={13} width={13} />
-              </div>
+            <th className={cells.tvl.cn ? "text-ec-blue" : ""}>
+              <TextWithAptosLabel text={"tvl"} />
             </th>
-
-            <th>{"last avg price"}</th>
-
-            <th>
-              <div className="flex flex-row gap-1 w-fit m-auto">
-                <span>{"market cap"}</span>
-                <AptosIconBlack className="m-auto" height={13} width={13} />
-              </div>
+            <th className={cells.lastAvgPrice.cn ? "text-ec-blue" : ""}>{"last avg price"}</th>
+            <th className={cells.marketCap.cn ? "text-ec-blue" : ""}>
+              <TextWithAptosLabel text={"market cap"} />
             </th>
             <th>{"circulating supply"}</th>
             <th>{"bonding curve"}</th>
@@ -116,16 +114,18 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
         </thead>
         <tbody>
           {data.map((row, i) => (
-            <tr key={`${k}-${i}`} className="text-lighter-gray text-sm font-forma p-3">
+            <tr
+              key={`${k}-${i}`}
+              className="text-lighter-gray text-sm font-forma p-3 hover:bg-ec-blue hover:bg-opacity-5"
+            >
               <td>
-                {
-                  <ExplorerLink
-                    value={toCoinTypes(row.market.marketAddress).emojicoin.toString()}
-                    type="coin"
-                  >
-                    {row.market.symbolData.symbol}
-                  </ExplorerLink>
-                }
+                <a
+                  className="hover:underline"
+                  href={`${ROUTES.market}/${row.market.symbolData.symbol}`}
+                  {...EXTERNAL_LINK_PROPS}
+                >
+                  {row.market.symbolData.symbol}
+                </a>
               </td>
               {"deltaPercentage" in row && (
                 <td className={cells.delta.cn}>{cells.delta.getValue(row)}</td>
@@ -134,12 +134,20 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
               <td className={cells.price.cn}>{cells.price.getValue(row)}</td>
               <td className={cells.allTimeVolume.cn}>{cells.allTimeVolume.getValue(row)}</td>
               <td className={cells.dailyVolume.cn}>{cells.dailyVolume.getValue(row)}</td>
-              <td className={cells.tvl.cn}>{toCoinDecimalString(cells.tvl.getValue(row), 2)}</td>
-              <td className={cells.lastAvgPrice.cn}>{cells.lastAvgPrice.getValue(row)}</td>
-              <td className={cells.marketCap.cn}>
-                {toCoinDecimalString(cells.marketCap.getValue(row).toString(), 2)}
+              <td className={cells.tvl.cn}>{cells.tvl.getValue(row)}</td>
+              <td className={cells.lastAvgPrice.cn}>
+                {
+                  <ExplorerLink
+                    className="hover:underline"
+                    value={row.transaction.version}
+                    type="txn"
+                  >
+                    {cells.lastAvgPrice.getValue(row)}
+                  </ExplorerLink>
+                }
               </td>
-              <td>{toCoinDecimalString(calculateCirculatingSupply(row.state).toString(), 2)}</td>
+              <td className={cells.marketCap.cn}>{cells.marketCap.getValue(row)}</td>
+              <td>{cells.getCirculatingSupply(row)}</td>
               <td>
                 <MiniBondingCurveProgress state={row.state} />
               </td>
@@ -167,16 +175,16 @@ export default function StatsPageComponent(props: HomePageProps) {
         <div className="flex flex-row m-auto">
           <span>{"num markets:"}</span>
           <div>{props.numMarkets}</div>
+          <span>{"global stats"}</span>
+          <div>{"global stats go here or something"}</div>
         </div>
-        <StatsCarousel
-          elements={Object.keys(columnToElement).map((k) => (
-            <TableData
-              key={`${props[k]}-${k}`}
-              data={props[columnToElement[Number(k)]]}
-              k={Number(k)}
-            />
-          ))}
-        />
+        {Object.keys(columnToElement).map((k) => (
+          <TableData
+            key={`${props[k]}-${k}`}
+            data={props[columnToElement[Number(k)]]}
+            k={Number(k)}
+          />
+        ))}
       </div>
     </>
   );
