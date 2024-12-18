@@ -84,7 +84,8 @@ module arena::emojicoin_arena {
         active_entrants: SmartTable<address, Nil>,
         /// Entrants who have exited the melee, used as a set.
         exited_entrants: SmartTable<address, Nil>,
-        /// Entrants who have locked in, used as a set.
+        /// Entrants who have locked in, used as a set. If user exits before melee ends they are
+        /// removed from this set. If they exit after the melee ends, they are not removed.
         locked_in_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
         n_melee_swaps: Aggregator<u64>,
@@ -539,7 +540,12 @@ module arena::emojicoin_arena {
                     participant, vault_address, *tap_out_fee_ref_mut
                 );
                 *tap_out_fee_ref_mut = 0;
+
+                // Update melee state.
                 exited_melee_ref_mut.available_rewards_increment(*tap_out_fee_ref_mut);
+                exited_melee_ref_mut.locked_in_entrants_remove_if_contains(
+                    participant_address
+                );
             }
         };
 
@@ -559,7 +565,6 @@ module arena::emojicoin_arena {
         // Update melee state.
         exited_melee_ref_mut.active_entrants_remove_if_contains(participant_address);
         exited_melee_ref_mut.exited_entrants_add_if_not_contains(participant_address);
-        exited_melee_ref_mut.locked_in_entrants_remove_if_contains(participant_address);
     }
 
     inline fun exited_entrants_add_if_not_contains(
