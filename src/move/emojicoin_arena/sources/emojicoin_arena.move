@@ -43,6 +43,8 @@ module arena::emojicoin_arena {
     const E_NO_ESCROW: u64 = 8;
     /// Swapper has no funds in escrow to swap.
     const E_SWAP_NO_FUNDS: u64 = 9;
+    /// User has no funds in escrow to withdraw.
+    const E_EXIT_NO_FUNDS: u64 = 10;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -325,7 +327,11 @@ module arena::emojicoin_arena {
             coin::merge(
                 &mut escrow_ref_mut.emojicoin_1, coin::withdraw(entrant, net_proceeds)
             );
-        }
+        };
+
+        // Update melee state.
+        current_melee_ref_mut.all_entrants_add_if_not_contains(entrant_address);
+        current_melee_ref_mut.active_entrants_add_if_not_contains(entrant_address);
     }
 
     #[randomness]
@@ -433,8 +439,8 @@ module arena::emojicoin_arena {
         );
     }
 
-    inline fun add_if_not_contains(
-        map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
+    inline fun add_if_not_contains<T: drop>(
+        map_ref_mut: &mut SmartTable<T, Nil>, key: T
     ) {
         if (!map_ref_mut.contains(key)) {
             map_ref_mut.add(key, Nil {});
@@ -468,6 +474,24 @@ module arena::emojicoin_arena {
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
+    inline fun all_entrants_add_if_not_contains(
+        self: &mut Melee, address: address
+    ) {
+        add_if_not_contains(&mut self.all_entrants, address);
+    }
+
+    inline fun active_entrants_add_if_not_contains(
+        self: &mut Melee, address: address
+    ) {
+        add_if_not_contains(&mut self.active_entrants, address);
+    }
+
+    inline fun active_entrants_remove_if_contains(
+        self: &mut Melee, address: address
+    ) {
+        remove_if_contains(&mut self.active_entrants, address);
+    }
+
     inline fun available_rewards_decrement(self: &mut Melee, amount: u64) {
         self.available_rewards = self.available_rewards - amount;
     }
@@ -485,32 +509,39 @@ module arena::emojicoin_arena {
     ) acquires Registry {
         let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[participant_address];
         let melee_id = escrow_ref_mut.melee_id;
+        let exited_melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
 
-        // Update available rewards and transfer tap out fee back to vault if applicable.
+        // Charge tap out fee if applicable.
         if (melee_is_current) {
-            let exited_melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
             let tap_out_fee_ref_mut = &mut escrow_ref_mut.tap_out_fee;
-            exited_melee_ref_mut.available_rewards_increment(*tap_out_fee_ref_mut);
-            let vault_address =
-                account::get_signer_capability_address(&registry_ref_mut.signer_capability);
-            aptos_account::transfer(participant, vault_address, *tap_out_fee_ref_mut);
-            *tap_out_fee_ref_mut = 0;
+            if (*tap_out_fee_ref_mut > 0) {
+                let vault_address =
+                    account::get_signer_capability_address(
+                        &registry_ref_mut.signer_capability
+                    );
+                aptos_account::transfer(
+                    participant, vault_address, *tap_out_fee_ref_mut
+                );
+                *tap_out_fee_ref_mut = 0;
+                exited_melee_ref_mut.available_rewards_increment(*tap_out_fee_ref_mut);
+            }
         };
 
-        // Move emojicoin balances out of escrow.
-        aptos_account::deposit_coins(
-            participant_address,
-            coin::extract_all(&mut escrow_ref_mut.emojicoin_0)
-        );
-        aptos_account::deposit_coins(
-            participant_address,
-            coin::extract_all(&mut escrow_ref_mut.emojicoin_1)
-        );
+        // Withdraw emojicoin balances from escrow.
+        if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
+            withdraw_from_escrow(participant_address, &mut escrow_ref_mut.emojicoin_0);
+        } else {
+            assert!(coin::value(&escrow_ref_mut.emojicoin_1) > 0, E_EXIT_NO_FUNDS);
+            withdraw_from_escrow(participant_address, &mut escrow_ref_mut.emojicoin_1);
+        };
 
-        // Update user melees resource.
+        // Update user state.
         let user_melees_ref_mut = &mut UserMelees[participant_address];
         add_if_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
         remove_if_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
+
+        // Update melee state.
+        exited_melee_ref_mut.active_entrants_remove_if_contains(participant_address);
     }
 
     inline fun get_n_registered_markets(): u64 {
@@ -633,8 +664,8 @@ module arena::emojicoin_arena {
         registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
     }
 
-    inline fun remove_if_contains(
-        map_ref_mut: &mut SmartTable<u64, Nil>, key: u64
+    inline fun remove_if_contains<T: copy + drop>(
+        map_ref_mut: &mut SmartTable<T, Nil>, key: T
     ) {
         if (map_ref_mut.contains(key)) {
             map_ref_mut.remove(key);
@@ -724,9 +755,7 @@ module arena::emojicoin_arena {
     ) {
         // Move all from coins out of escrow.
         let input_amount = coin::value(escrow_from_coin_ref_mut);
-        aptos_account::deposit_coins(
-            swapper_address, coin::extract_all(escrow_from_coin_ref_mut)
-        );
+        withdraw_from_escrow(swapper_address, escrow_from_coin_ref_mut);
 
         // Swap into APT.
         let (net_proceeds_in_apt, _) =
@@ -752,5 +781,11 @@ module arena::emojicoin_arena {
         coin::merge(
             escrow_to_coin_ref_mut, coin::withdraw(swapper, net_proceeds_in_to_coin)
         );
+    }
+
+    inline fun withdraw_from_escrow<Emojicoin>(
+        recipient: address, escrow_coin_ref_mut: &mut Coin<Emojicoin>
+    ) {
+        aptos_account::deposit_coins(recipient, coin::extract_all(escrow_coin_ref_mut));
     }
 }
