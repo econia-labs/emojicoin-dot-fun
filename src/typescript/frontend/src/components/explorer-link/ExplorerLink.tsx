@@ -19,14 +19,7 @@ export const ExplorerLink = ({
 }) => {
   const href = toExplorerLink({ value, linkType: type, network });
   return (
-    <a
-      style={style}
-      className={className + " explorer-link"}
-      href={href}
-      {...EXTERNAL_LINK_PROPS}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
+    <a style={style} className={className + " explorer-link"} href={href} {...EXTERNAL_LINK_PROPS}>
       {children}
     </a>
   );
