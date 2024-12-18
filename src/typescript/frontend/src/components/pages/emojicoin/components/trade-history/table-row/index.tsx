@@ -3,7 +3,7 @@
 import React, { useMemo, type PropsWithChildren } from "react";
 import { type TableRowDesktopProps } from "./types";
 import { toNominalPrice } from "@sdk/utils/nominal-price";
-import { ExplorerLink } from "components/link/component";
+import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { darkColors } from "theme";
 import { formatDisplayName } from "@sdk/utils";
 import Popup from "components/popup";

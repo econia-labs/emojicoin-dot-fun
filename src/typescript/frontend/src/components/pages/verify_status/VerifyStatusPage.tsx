@@ -11,10 +11,11 @@ import { EXTERNAL_LINK_PROPS } from "components/link";
 import { emoji } from "utils";
 import { Emoji } from "utils/emoji";
 import useIsUserGeoblocked from "@hooks/use-is-user-geoblocked";
+import { cn } from "lib/utils/class-name";
 
-const checkmarkOrX = (checkmark: boolean) => (
+export const checkmarkOrX = (checkmark: boolean, className?: string) => (
   <Emoji
-    className="text-lg"
+    className={cn("text-lg", className)}
     emojis={checkmark ? emoji("check mark button") : emoji("cross mark")}
   />
 );
