@@ -95,7 +95,7 @@ module arena::emojicoin_arena {
     }
 
     struct MeleeEscrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
-        /// `Melee.market_id`.
+        /// Corresponding `Melee.melee_id`.
         melee_id: u64,
         /// Emojicoin 0 holdings.
         emojicoin_0: Coin<Coin0>,
