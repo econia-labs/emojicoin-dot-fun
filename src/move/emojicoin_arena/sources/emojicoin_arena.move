@@ -109,7 +109,8 @@ module arena::emojicoin_arena {
         /// topping off, reset to zero when exiting.
         octas_entered: u64,
         /// Octas user must pay to exit the melee before it ends, if they have locked in. Equivalent
-        /// to the amount of APT they have been matched by locking in.
+        /// to the current total amount of APT rewards they have been matched across all
+        /// transactions since they began depositing funds into an empty escrow.
         tap_out_fee: u64
     }
 
