@@ -1,8 +1,12 @@
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import { StatsCarousel } from "./MarketPreview";
 import { useMemo } from "react";
-import { toNominal } from "lib/utils/decimals";
-import { calculateCurvePrice, calculateCirculatingSupply } from "@sdk/markets";
+import { toCoinDecimalString, toNominal } from "lib/utils/decimals";
+import { calculateCurvePrice, calculateCirculatingSupply, toCoinTypes } from "@sdk/markets";
+import { MiniBondingCurveProgress } from "./MiniBondingCurveProgress";
+import { toNominalPrice } from "@sdk/utils";
+import AptosIconBlack from "@icons/AptosBlack";
+import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 
 export interface HomePageProps {
   numMarkets: number;
@@ -31,7 +35,7 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
   k: Column;
 }) => {
   const cells = useMemo(() => {
-    const getCN = (col: Column) => (col === k ? "text-ec-blue bg-opacity-[0.02] bg-ec-blue" : "");
+    const getCN = (col: Column) => (col === k ? "text-ec-blue bg-opacity-[0.04] bg-ec-blue" : "");
     return {
       delta: {
         cn: getCN(Column.PriceDelta),
@@ -49,9 +53,9 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
         cn: getCN(Column.DailyVolume),
         getValue: (v: T) => toNominal(v.dailyVolume).toFixed(2),
       },
-      lastAvgExecutionPrice: {
+      lastAvgPrice: {
         cn: getCN(Column.LastAvgExecutionPrice),
-        getValue: (v: T) => v.lastSwap.avgExecutionPriceQ64.toString(),
+        getValue: (v: T) => toNominalPrice(v.lastSwap.avgExecutionPriceQ64).toFixed(8),
       },
       tvl: {
         cn: getCN(Column.Tvl),
@@ -72,25 +76,57 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
           "[&_th]:border-[1px] [&_td]:border-[1px] [&_td]:border-dark-gray [&_th]:border-dark-gray"
         }
       >
-        <thead>
+        <thead className="text-white opacity-[.95] font-forma tracking-wide text-md">
           <tr>
             <th>{"symbol"}</th>
             {"deltaPercentage" in (data.at(0) ?? []) && <th>{"delta"}</th>}
-            <th>{"market ID"}</th>
+            <th>{"mkt id"}</th>
             <th>{"price"}</th>
-            <th>{"allTimeVolume"}</th>
-            <th>{"dailyVolume"}</th>
-            <th>{"tvl"}</th>
-            <th>{"lastAvgExecutionPrice"}</th>
-            <th>{"market cap"}</th>
+            <th>
+              <div className="flex flex-row gap-1 w-fit m-auto">
+                <span>{"all time vol"}</span>
+                <AptosIconBlack className="m-auto" height={13} width={13} />
+              </div>
+            </th>
+            <th>
+              <div className="flex flex-row gap-1 w-fit m-auto">
+                <span>{"daily vol"}</span>
+                <AptosIconBlack className="m-auto" height={13} width={13} />
+              </div>
+            </th>
+
+            <th>
+              <div className="flex flex-row gap-1 w-fit m-auto">
+                <span>{"tvl"}</span>
+                <AptosIconBlack className="m-auto" height={13} width={13} />
+              </div>
+            </th>
+
+            <th>{"last avg price"}</th>
+
+            <th>
+              <div className="flex flex-row gap-1 w-fit m-auto">
+                <span>{"market cap"}</span>
+                <AptosIconBlack className="m-auto" height={13} width={13} />
+              </div>
+            </th>
             <th>{"circulating supply"}</th>
-            <th>{"in bonding curve"}</th>
+            <th>{"bonding curve"}</th>
           </tr>
         </thead>
         <tbody>
           {data.map((row, i) => (
             <tr key={`${k}-${i}`} className="text-lighter-gray text-sm font-forma p-3">
-              <td>{row.market.symbolData.symbol}</td>
+              <td>
+                {
+                  <ExplorerLink
+                    value={toCoinTypes(row.market.marketAddress).emojicoin.toString()}
+                    type="coin"
+                  >
+                    {row.market.symbolData.symbol}
+                  </ExplorerLink>
+                }
+              </td>
               {"deltaPercentage" in row && (
                 <td className={cells.delta.cn}>{cells.delta.getValue(row)}</td>
               )}
@@ -98,13 +134,15 @@ const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["mark
               <td className={cells.price.cn}>{cells.price.getValue(row)}</td>
               <td className={cells.allTimeVolume.cn}>{cells.allTimeVolume.getValue(row)}</td>
               <td className={cells.dailyVolume.cn}>{cells.dailyVolume.getValue(row)}</td>
-              <td className={cells.tvl.cn}>{cells.tvl.getValue(row)}</td>
-              <td className={cells.lastAvgExecutionPrice.cn}>
-                {cells.lastAvgExecutionPrice.getValue(row)}
+              <td className={cells.tvl.cn}>{toCoinDecimalString(cells.tvl.getValue(row), 2)}</td>
+              <td className={cells.lastAvgPrice.cn}>{cells.lastAvgPrice.getValue(row)}</td>
+              <td className={cells.marketCap.cn}>
+                {toCoinDecimalString(cells.marketCap.getValue(row).toString(), 2)}
               </td>
-              <td className={cells.marketCap.cn}>{cells.marketCap.getValue(row).toString()}</td>
-              <td>{calculateCirculatingSupply(row.state).toString()}</td>
-              <td>{row.inBondingCurve.toString()}</td>
+              <td>{toCoinDecimalString(calculateCirculatingSupply(row.state).toString(), 2)}</td>
+              <td>
+                <MiniBondingCurveProgress state={row.state} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -125,7 +163,7 @@ export default function StatsPageComponent(props: HomePageProps) {
   };
   return (
     <>
-      <div className="flex flex-col mb-[31px] text-white w-full">
+      <div className="flex flex-col mb-[31px] opacity-[.95] w-full">
         <div className="flex flex-row m-auto">
           <span>{"num markets:"}</span>
           <div>{props.numMarkets}</div>

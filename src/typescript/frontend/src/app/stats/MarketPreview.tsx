@@ -1,6 +1,6 @@
 "use client";
 
-import { parseTypeTag, TypeTagStruct } from "@aptos-labs/ts-sdk";
+import { parseTypeTag } from "@aptos-labs/ts-sdk";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
 import {
   calculateCirculatingSupply,
@@ -8,8 +8,7 @@ import {
   calculateRealReserves,
   toCoinTypes,
 } from "@sdk/markets";
-import { toNominalPrice, truncateAddress } from "@sdk/utils";
-import AnimatedLoadingBoxes from "components/pages/launch-emojicoin/animated-loading-boxes";
+import { toNominalPrice } from "@sdk/utils";
 import {
   Carousel,
   CarouselContent,
@@ -17,11 +16,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "components/ui/carousel";
-import { toDisplayCoinDecimals, toNominal } from "lib/utils/decimals";
-import { version } from "os";
-import { Suspense, useMemo } from "react";
+import { toNominal } from "lib/utils/decimals";
+import { useMemo } from "react";
 import JsonView from "react-json-view";
-import { LoadingSkeleton } from "./LoadingSkeleton";
 
 const useRelevantData = (data: DatabaseModels["price_feed"]) => {
   const { market, state, transaction, inBondingCurve, deltaPercentage, dailyVolume, lastSwap } =
@@ -122,7 +119,6 @@ export const MarketPreviewCarousel = ({ markets }: { markets: DatabaseModels["pr
 );
 
 export const StatsCarousel = ({ elements }: { elements: React.JSX.Element[] }) => {
-  console.log(elements);
   return (
     <Carousel>
       <CarouselContent>

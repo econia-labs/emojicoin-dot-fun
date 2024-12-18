@@ -10,7 +10,7 @@ import { PeriodDuration } from "@sdk/const";
 import { getPeriodStartTimeFromTime, truncateAddress } from "@sdk/utils/misc";
 import { APTOS_NETWORK } from "lib/env";
 import { toast } from "react-toastify";
-import { ExplorerLink } from "components/link/component";
+import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { DEFAULT_TOAST_CONFIG } from "const";
 
 const debouncedToastKey = (s: string, debouncePeriod: PeriodDuration) => {
