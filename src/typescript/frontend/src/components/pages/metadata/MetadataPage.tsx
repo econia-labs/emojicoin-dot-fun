@@ -133,7 +133,7 @@ const MetadataPage = () => {
     if (pasted) {
       return;
     }
-    MarketProperties.submit({
+    MarketProperties.view({
       aptos,
       market: marketAddress,
     })

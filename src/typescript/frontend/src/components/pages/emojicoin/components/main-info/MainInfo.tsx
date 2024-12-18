@@ -80,8 +80,6 @@ const MainInfo = ({ data }: MainInfoProps) => {
     value: `${data.marketView.metadata.marketAddress}::coin_factory::Emojicoin`,
   });
 
-  const [copied, setCopied] = useState(false);
-
   const borderStyle = "border-solid border-[1px] border-dark-gray rounded-[3px] p-[1em]";
 
   const [marketProperties, setMarketProperties] = useState<Map<string, string>>();
@@ -89,7 +87,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
   const { aptos } = useAptos();
 
   useEffect(() => {
-    MarketProperties.submit({
+    MarketProperties.view({
       aptos,
       market: data.marketAddress,
     })
@@ -210,16 +208,12 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <motion.div
               onClick={() => {
                 navigator.clipboard.writeText(data.marketView.metadata.marketAddress);
-                if (!copied) {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 3000);
-                }
               }}
               whileTap={{ scaleX: 0.96, scaleY: 0.98 }}
               transition={{ ease: "linear", duration: 0.05 }}
             >
               <Button scale="lg" isScramble={false}>
-                copy contract address
+                copy coin address
               </Button>
             </motion.div>
             {dexscreenerButton}
