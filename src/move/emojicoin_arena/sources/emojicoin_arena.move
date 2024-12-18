@@ -73,7 +73,8 @@ module arena::emojicoin_arena {
         max_match_percentage: u64,
         /// Maximum amount of APT to match in octas, when locking in.
         max_match_amount: u64,
-        /// Amount of rewards available for distribution in octas, conditional on vault balance.
+        /// Amount of rewards that are available to claim for this melee while it is still active.
+        /// Measured in octas, conditional on vault balance.
         available_rewards: u64,
         /// All entrants who have entered the melee.
         all_entrants: SmartTable<address, Nil>,
