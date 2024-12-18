@@ -206,8 +206,10 @@ module arena::emojicoin_arena {
             registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
         let market_metadatas = current_melee_ref_mut.market_metadatas;
         let (_, market_address_0, _) = unpack_market_metadata(market_metadatas[0]);
+        // Ensures the function aborts if Coin0 doesn't match LP0.
         market_view<Coin0, LP0>(market_address_0);
         let (_, market_address_1, _) = unpack_market_metadata(market_metadatas[1]);
+        // Ensures the function aborts if Coin1 doesn't match LP1.
         market_view<Coin1, LP1>(market_address_1);
 
         // Create escrow and user melees resources if they don't exist.
