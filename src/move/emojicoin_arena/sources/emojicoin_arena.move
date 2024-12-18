@@ -76,13 +76,13 @@ module arena::emojicoin_arena {
         /// Amount of rewards that are available to claim for this melee while it is still active.
         /// Measured in octas, conditional on vault balance.
         available_rewards: u64,
-        /// All entrants who have entered the melee.
+        /// All entrants who have entered the melee, used as a set.
         all_entrants: SmartTable<address, Nil>,
-        /// Active entrants in the melee.
+        /// Active entrants in the melee, used as a set.
         active_entrants: SmartTable<address, Nil>,
-        /// Entrants who have exited the melee.
+        /// Entrants who have exited the melee, used as a set.
         exited_entrants: SmartTable<address, Nil>,
-        /// Entrants who have locked in.
+        /// Entrants who have locked in, used as a set.
         locked_in_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
         n_melee_swaps: Aggregator<u64>,
