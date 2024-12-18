@@ -52,7 +52,8 @@ PROFILE_NAME=my-profile
 
 aptos move run \
   --args address:$ADMIN_TO_REMOVE \
-  --function-id $MARKET_METADATA::emojicoin_dot_fun_market_metadata::remove_admin \
+  --function-id \
+    $MARKET_METADATA::emojicoin_dot_fun_market_metadata::remove_admin \
   --profile $PROFILE_NAME
 ```
 
