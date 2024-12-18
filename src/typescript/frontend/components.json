@@ -1,21 +1,21 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
+  "aliases": {
+    "components": "@/broker/components",
+    "hooks": "@/broker/hooks",
+    "lib": "@/broker/lib",
+    "ui": "@/broker/components/ui",
+    "utils": "@/broker/lib/utils"
+  },
+  "iconLibrary": "lucide",
   "rsc": true,
-  "tsx": true,
+  "style": "new-york",
   "tailwind": {
+    "baseColor": "stone",
     "config": "tailwind.config.js",
     "css": "src/app/global.css",
-    "baseColor": "stone",
     "cssVariables": true,
     "prefix": ""
   },
-  "aliases": {
-    "components": "@/broker/components",
-    "utils": "@/broker/lib/utils",
-    "ui": "@/broker/components/ui",
-    "lib": "@/broker/lib",
-    "hooks": "@/broker/hooks"
-  },
-  "iconLibrary": "lucide"
+  "tsx": true
 }
