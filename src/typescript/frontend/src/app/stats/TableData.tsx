@@ -38,7 +38,6 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
   priceDeltas,
 }: {
   data?: T[];
-  u;
   k: Column;
   reversed: boolean;
   priceDeltas: DatabaseModels["price_feed"][];
