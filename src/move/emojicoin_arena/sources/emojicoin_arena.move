@@ -307,51 +307,65 @@ module arena::emojicoin_arena {
 
             } else 0;
 
-        // Execute a swap then immediately move funds into escrow.
+        // Execute a swap then immediately move funds into escrow, updating total emojicoin locked
+        // values based on side.
         let input_amount_after_matching = input_amount + match_amount;
-        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[entrant_address];
-        if (buy_coin_0) {
-            let (net_proceeds, _) =
-                swap_with_stats_buy_emojicoin<Coin0, LP0>(
-                    entrant,
-                    entrant_address,
-                    market_address_0,
-                    input_amount_after_matching,
-                    INTEGRATOR_FEE_RATE_BPS
+        let quote_volume =
+            if (buy_coin_0) {
+                let (net_proceeds, quote_volume) =
+                    swap_with_stats_buy_emojicoin<Coin0, LP0>(
+                        entrant,
+                        entrant_address,
+                        market_address_0,
+                        input_amount_after_matching,
+                        INTEGRATOR_FEE_RATE_BPS
+                    );
+                let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
+                coin::merge(emojicoin_0_ref_mut, coin::withdraw(entrant, net_proceeds));
+                current_melee_ref_mut.melee_emojicoin_0_locked_increment(
+                    coin::value(emojicoin_0_ref_mut)
                 );
-            coin::merge(
-                &mut escrow_ref_mut.emojicoin_0, coin::withdraw(entrant, net_proceeds)
-            );
-        } else {
-            let (net_proceeds, _) =
-                swap_with_stats_buy_emojicoin<Coin1, LP1>(
-                    entrant,
-                    entrant_address,
-                    market_address_1,
-                    input_amount_after_matching,
-                    INTEGRATOR_FEE_RATE_BPS
+                quote_volume
+            } else {
+                let (net_proceeds, quote_volume) =
+                    swap_with_stats_buy_emojicoin<Coin1, LP1>(
+                        entrant,
+                        entrant_address,
+                        market_address_1,
+                        input_amount_after_matching,
+                        INTEGRATOR_FEE_RATE_BPS
+                    );
+                let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
+                coin::merge(emojicoin_1_ref_mut, coin::withdraw(entrant, net_proceeds));
+                current_melee_ref_mut.melee_emojicoin_0_locked_increment(
+                    coin::value(emojicoin_1_ref_mut)
                 );
-            coin::merge(
-                &mut escrow_ref_mut.emojicoin_1, coin::withdraw(entrant, net_proceeds)
-            );
-        };
+                quote_volume
+            };
 
         // Update melee state.
+        let quote_volume_u128 = (quote_volume as u128);
+        current_melee_ref_mut.melee_n_swaps_increment();
+        current_melee_ref_mut.melee_swaps_volume_increment(quote_volume_u128);
         current_melee_ref_mut.melee_all_entrants_add_if_not_contains(entrant_address);
         current_melee_ref_mut.melee_active_entrants_add_if_not_contains(entrant_address);
         current_melee_ref_mut.melee_exited_entrants_remove_if_contains(entrant_address);
 
         // Update registry state.
+        registry_ref_mut.registry_n_swaps_increment();
+        registry_ref_mut.registry_swaps_volume_increment(quote_volume_u128);
         registry_ref_mut.registry_all_entrants_add_if_not_contains(entrant_address);
 
         // Update escrow state.
+        escrow_ref_mut.escrow_n_swaps_increment();
+        escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
         escrow_ref_mut.escrow_octas_entered_increment(input_amount_after_matching);
 
         // Update user melees state.
         let user_melees_ref_mut = &mut UserMelees[entrant_address];
-        add_if_not_contains(&mut user_melees_ref_mut.entered_melee_ids, melee_id);
-        add_if_not_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
-        remove_if_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
+        user_melees_ref_mut.user_melees_entered_melee_ids_add_if_not_contains(melee_id);
+        user_melees_ref_mut.user_melees_unexited_melee_ids_add_if_not_contains(melee_id);
+        user_melees_ref_mut.user_melees_exited_melee_ids_remove_if_contains(melee_id);
 
     }
 
@@ -602,9 +616,6 @@ module arena::emojicoin_arena {
 
                 // Update registry state.
                 registry_ref_mut.registry_octas_matched_decrement(octas_matched);
-
-                // Update escrow state.
-                escrow_ref_mut.escrow_octas_matched_reset();
             }
         };
 
@@ -622,12 +633,12 @@ module arena::emojicoin_arena {
 
         // Update escrow state.
         escrow_ref_mut.escrow_octas_entered_reset();
+        escrow_ref_mut.escrow_octas_matched_reset();
 
         // Update user melees state.
         let user_melees_ref_mut = &mut UserMelees[participant_address];
-        add_if_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
-        remove_if_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
-
+        user_melees_ref_mut.user_melees_exited_melee_ids_add_if_not_contains(melee_id);
+        user_melees_ref_mut.user_melees_unexited_melee_ids_remove_if_contains(melee_id);
     }
 
     inline fun get_n_registered_markets(): u64 {
@@ -986,6 +997,36 @@ module arena::emojicoin_arena {
 
         // Return quote volume on second swap only, to avoid double-counting.
         quote_volume
+    }
+
+    inline fun user_melees_entered_melee_ids_add_if_not_contains(
+        self: &mut UserMelees, melee_id: u64
+    ) {
+        add_if_not_contains(&mut self.entered_melee_ids, melee_id);
+    }
+
+    inline fun user_melees_exited_melee_ids_add_if_not_contains(
+        self: &mut UserMelees, melee_id: u64
+    ) {
+        add_if_not_contains(&mut self.exited_melee_ids, melee_id);
+    }
+
+    inline fun user_melees_exited_melee_ids_remove_if_contains(
+        self: &mut UserMelees, melee_id: u64
+    ) {
+        remove_if_contains(&mut self.exited_melee_ids, melee_id);
+    }
+
+    inline fun user_melees_unexited_melee_ids_add_if_not_contains(
+        self: &mut UserMelees, melee_id: u64
+    ) {
+        add_if_not_contains(&mut self.unexited_melee_ids, melee_id);
+    }
+
+    inline fun user_melees_unexited_melee_ids_remove_if_contains(
+        self: &mut UserMelees, melee_id: u64
+    ) {
+        remove_if_contains(&mut self.unexited_melee_ids, melee_id);
     }
 
     inline fun withdraw_from_escrow<Emojicoin>(
