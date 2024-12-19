@@ -34,11 +34,14 @@ const LinkButton = ({
   icon?: (color: keyof Colors) => React.ReactNode;
 }) => {
   const button = (
-    <Button isScramble={false} scale="lg" disabled={!link}>
-      <div className="flex flex-row items-baseline h-[1em]">
-        {icon && icon(link ? "econiaBlue" : "darkGray")}
-        <span>{name}</span>
-      </div>
+    <Button
+      isScramble={false}
+      scale="lg"
+      fakeDisabled={!link && !!LINKS?.discord && !!DISCORD_METADATA_REQUEST_CHANNEL}
+      disabled={!link && !LINKS?.discord && !DISCORD_METADATA_REQUEST_CHANNEL}
+      icon={icon && icon(link ? "econiaBlue" : "darkGray")}
+    >
+      {name}
     </Button>
   );
   if (link) {
@@ -54,7 +57,7 @@ const LinkButton = ({
         className="w-[300px]"
         content={
           "If you're the owner of this project and want to link your socials " +
-          "profile here, please use our dedicated Discord channel: " +
+          "profile here, please use our dedicated Discord channel: #" +
           DISCORD_METADATA_REQUEST_CHANNEL +
           " ! (click the button to go to our discord)"
         }
