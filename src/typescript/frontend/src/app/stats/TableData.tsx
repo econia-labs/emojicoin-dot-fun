@@ -54,7 +54,7 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
     const fmt = (n: number) => bigNumberFormatter.format(n);
     return {
       cells: {
-        delta: (v: T) => deltaByMarket.get(v.market.symbolData.symbol) ?? -1,
+        delta: (v: T) => deltaByMarket.get(v.market.symbolData.symbol),
         price: (v: T) => calculateCurvePrice(v.state).toNumber(),
         allTimeVolume: (v: T) => fmt(toNominal(v.state.cumulativeStats.quoteVolume)),
         dailyVolume: (v: T) => fmt(toNominal(v.dailyVolume)),
@@ -82,7 +82,7 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
         </a>
       </td>
       <td className={getCN(Column.PriceDelta)}>
-        <PriceDelta delta={Number(cells.delta(row))} />
+        {cells.delta(row) ? <PriceDelta delta={Number(cells.delta(row))} /> : "-"}
       </td>
       <td>{row.market.marketID.toString()}</td>
       <td className={getCN(Column.Price)}>
