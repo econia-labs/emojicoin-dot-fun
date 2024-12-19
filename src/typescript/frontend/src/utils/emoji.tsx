@@ -30,12 +30,7 @@ export const Emoji = ({
   if (typeof emojis === "string") {
     const emojisInString = getEmojisInString(emojis);
     data = emojisInString.map((e, i) => (
-      <em-emoji
-        key={`${emojisInString[i]}-${i}`}
-        size={size}
-        native={e}
-        set={set}
-      ></em-emoji>
+      <em-emoji key={`${emojisInString[i]}-${i}`} size={size} native={e} set={set}></em-emoji>
     ));
   } else {
     data = emojis.map((e, i) => (
