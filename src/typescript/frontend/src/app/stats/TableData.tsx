@@ -7,6 +7,7 @@ import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { ROUTES } from "router/routes";
 import { EXTERNAL_LINK_PROPS } from "components/link/const";
 import { type DatabaseModels } from "@sdk/indexer-v2/types";
+import { PriceDelta } from "components/price-feed/inner";
 
 export enum Column {
   Price,
@@ -18,6 +19,18 @@ export enum Column {
   MarketCap,
 }
 
+const NominalPriceDisplay = ({ price }: { price: number }) => {
+  const fixed = price.toFixed(8);
+  const firstSigFigOnwards = fixed.match(/[1-9].*/)?.at(0) ?? "";
+  const beforeSigFig = fixed.slice(0, fixed.length - firstSigFigOnwards.length);
+  return (
+    <>
+      <span className="text-dark-gray">{beforeSigFig}</span>
+      <span className="text-lighter-gray">{firstSigFigOnwards}</span>
+    </>
+  );
+};
+
 export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModels["market_state"]>({
   data = [] as T[],
   k,
@@ -25,6 +38,7 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
   priceDeltas,
 }: {
   data?: T[];
+  u;
   k: Column;
   reversed: boolean;
   priceDeltas: DatabaseModels["price_feed"][];
@@ -41,12 +55,12 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
     const fmt = (n: number) => bigNumberFormatter.format(n);
     return {
       cells: {
-        delta: (v: T) => deltaByMarket.get(v.market.symbolData.symbol)?.toFixed(4) ?? "-",
-        price: (v: T) => calculateCurvePrice(v.state).toFixed(8),
+        delta: (v: T) => deltaByMarket.get(v.market.symbolData.symbol) ?? -1,
+        price: (v: T) => calculateCurvePrice(v.state).toNumber(),
         allTimeVolume: (v: T) => fmt(toNominal(v.state.cumulativeStats.quoteVolume)),
         dailyVolume: (v: T) => fmt(toNominal(v.dailyVolume)),
         tvl: (v: T) => fmt(toNominal(v.state.instantaneousStats.totalValueLocked)),
-        lastAvgPrice: (v: T) => toNominalPrice(v.lastSwap.avgExecutionPriceQ64).toFixed(8),
+        lastAvgPrice: (v: T) => toNominalPrice(v.lastSwap.avgExecutionPriceQ64),
         marketCap: (v: T) => fmt(toNominal(v.state.instantaneousStats.marketCap)),
         getCirculatingSupply: (v: T) => fmt(toNominal(calculateCirculatingSupply(v.state))),
       },
@@ -68,15 +82,19 @@ export const TableData = <T extends DatabaseModels["price_feed"] | DatabaseModel
           {row.market.symbolData.symbol}
         </a>
       </td>
-      <td className={getCN(Column.PriceDelta)}>{cells.delta(row)}</td>
+      <td className={getCN(Column.PriceDelta)}>
+        <PriceDelta delta={Number(cells.delta(row))} />
+      </td>
       <td>{row.market.marketID.toString()}</td>
-      <td className={getCN(Column.Price)}>{cells.price(row)}</td>
+      <td className={getCN(Column.Price)}>
+        <NominalPriceDisplay price={cells.price(row)} />
+      </td>
       <td className={getCN(Column.AllTimeVolume)}>{cells.allTimeVolume(row)}</td>
       <td className={getCN(Column.DailyVolume)}>{cells.dailyVolume(row)}</td>
       <td className={getCN(Column.Tvl)}>{cells.tvl(row)}</td>
       <td className={getCN(Column.LastAvgExecutionPrice)}>
         <ExplorerLink className="hover:underline" value={row.transaction.version} type="txn">
-          {cells.lastAvgPrice(row)}
+          <NominalPriceDisplay price={cells.lastAvgPrice(row)} />
         </ExplorerLink>
       </td>
       <td className={getCN(Column.MarketCap)}>{cells.marketCap(row)}</td>
