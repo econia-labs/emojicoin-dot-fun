@@ -62,6 +62,8 @@ module arena::emojicoin_arena {
     const DEFAULT_MAX_MATCH_PERCENTAGE: u64 = 50;
     const DEFAULT_MAX_MATCH_AMOUNT: u64 = 5 * 100_000_000;
 
+    struct Nil has drop, store {}
+
     struct Melee has store {
         /// 1-indexed for conformity with emojicoin market ID indexing.
         melee_id: u64,
@@ -97,28 +99,6 @@ module arena::emojicoin_arena {
         emojicoin_1_locked: Aggregator<u64>
     }
 
-    struct MeleeEscrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
-        /// Corresponding `Melee.melee_id`.
-        melee_id: u64,
-        /// Emojicoin 0 holdings.
-        emojicoin_0: Coin<Coin0>,
-        /// Emojicoin 1 holdings.
-        emojicoin_1: Coin<Coin1>,
-        /// Number of swaps user has executed during the melee.
-        n_swaps: u64,
-        /// Volume of user's melee-specific swaps in octas.
-        swaps_volume: u128,
-        /// Cumulative amount of APT entered into the melee since the most recent deposit into an
-        /// empty escrow. Inclusive of total amount matched from locking in since most recent
-        /// deposit into an empty escrow. Reset to 0 upon exit.
-        octas_entered: u64,
-        /// Cumulative amount of APT matched since most recent deposit into an empty escrow, reset
-        /// to 0 upon exit. Must be paid back in full when tapping out.
-        octas_matched: u64
-    }
-
-    struct Nil has drop, store {}
-
     struct Registry has key {
         /// A map of each melee's `melee_id` to the melee.
         melees_by_id: SmartTable<u64, Melee>,
@@ -141,6 +121,26 @@ module arena::emojicoin_arena {
         /// Volume of melee-specific swaps in octas.
         swaps_volume: Aggregator<u128>,
         /// Amount of octas matched. Decremented when a user taps out.
+        octas_matched: u64
+    }
+
+    struct Escrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
+        /// Corresponding `Melee.melee_id`.
+        melee_id: u64,
+        /// Emojicoin 0 holdings.
+        emojicoin_0: Coin<Coin0>,
+        /// Emojicoin 1 holdings.
+        emojicoin_1: Coin<Coin1>,
+        /// Number of swaps user has executed during the melee.
+        n_swaps: u64,
+        /// Volume of user's melee-specific swaps in octas.
+        swaps_volume: u128,
+        /// Cumulative amount of APT entered into the melee since the most recent deposit into an
+        /// empty escrow. Inclusive of total amount matched from locking in since most recent
+        /// deposit into an empty escrow. Reset to 0 upon exit.
+        octas_entered: u64,
+        /// Cumulative amount of APT matched since most recent deposit into an empty escrow, reset
+        /// to 0 upon exit. Must be paid back in full when tapping out.
         octas_matched: u64
     }
 
@@ -199,7 +199,7 @@ module arena::emojicoin_arena {
     #[randomness]
     entry fun enter<Coin0, LP0, Coin1, LP1, EscrowCoin>(
         entrant: &signer, input_amount: u64, lock_in: bool
-    ) acquires MeleeEscrow, Registry, UserMelees {
+    ) acquires Escrow, Registry, UserMelees {
         let (melee_just_ended, registry_ref_mut, time, n_melees_before_cranking) =
             crank_schedule();
         if (melee_just_ended) return; // Can not enter melee if cranking ends it.
@@ -218,10 +218,10 @@ module arena::emojicoin_arena {
         // Create escrow and user melees resources if they don't exist.
         let melee_id = current_melee_ref_mut.melee_id;
         let entrant_address = signer::address_of(entrant);
-        if (!exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(entrant_address)) {
+        if (!exists<Escrow<Coin0, LP0, Coin1, LP1>>(entrant_address)) {
             move_to(
                 entrant,
-                MeleeEscrow<Coin0, LP0, Coin1, LP1> {
+                Escrow<Coin0, LP0, Coin1, LP1> {
                     melee_id,
                     emojicoin_0: coin::zero(),
                     emojicoin_1: coin::zero(),
@@ -264,7 +264,7 @@ module arena::emojicoin_arena {
             };
 
         // Verify that user does not split balance between the two emojicoins.
-        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
+        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[entrant_address];
         if (buy_coin_0)
             assert!(
                 coin::value(&escrow_ref_mut.emojicoin_1) == 0, E_ENTER_COIN_BALANCE_1
@@ -312,7 +312,7 @@ module arena::emojicoin_arena {
 
         // Execute a swap then immediately move funds into escrow.
         let input_amount_after_matching = input_amount + match_amount;
-        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[entrant_address];
+        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[entrant_address];
         if (buy_coin_0) {
             let (net_proceeds, _) =
                 swap_with_stats_buy_emojicoin<Coin0, LP0>(
@@ -346,12 +346,10 @@ module arena::emojicoin_arena {
     }
 
     #[randomness]
-    entry fun exit<Coin0, LP0, Coin1, LP1>(
-        participant: &signer
-    ) acquires MeleeEscrow, Registry, UserMelees {
+    entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry, UserMelees {
         let participant_address = signer::address_of(participant);
         assert!(
-            exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(participant_address),
+            exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant_address),
             E_NO_ESCROW
         );
         let (melee_just_ended, registry_ref_mut, _, _) = crank_schedule();
@@ -366,15 +364,15 @@ module arena::emojicoin_arena {
     #[randomness]
     entry fun swap<Coin0, LP0, Coin1, LP1>(
         swapper: &signer, market_addresses: vector<address>
-    ) acquires MeleeEscrow, Registry, UserMelees {
+    ) acquires Escrow, Registry, UserMelees {
 
         // Verify that swapper has an escrow resource.
         let swapper_address = signer::address_of(swapper);
         assert!(
-            exists<MeleeEscrow<Coin0, LP0, Coin1, LP1>>(swapper_address),
+            exists<Escrow<Coin0, LP0, Coin1, LP1>>(swapper_address),
             E_NO_ESCROW
         );
-        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[swapper_address];
+        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[swapper_address];
 
         // Try cranking the schedule, and if a new melee starts, flag that user's escrow should be
         // emptied immediately after the swap.
@@ -523,7 +521,7 @@ module arena::emojicoin_arena {
         registry_ref_mut: &mut Registry,
         melee_is_current: bool
     ) acquires Registry {
-        let escrow_ref_mut = &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>[participant_address];
+        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[participant_address];
         let melee_id = escrow_ref_mut.melee_id;
         let exited_melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
 
@@ -581,7 +579,7 @@ module arena::emojicoin_arena {
     /// Uses mutable references to avoid freezing references up the stack.
     inline fun match_amount<Coin0, LP0, Coin1, LP1>(
         input_amount: u64,
-        escrow_ref_mut: &mut MeleeEscrow<Coin0, LP0, Coin1, LP1>,
+        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         current_melee_ref_mut: &mut Melee,
         registry_ref_mut: &mut Registry,
         time: u64
