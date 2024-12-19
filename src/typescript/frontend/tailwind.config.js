@@ -42,6 +42,11 @@ module.exports = {
         white: "0 0 2px #FFFFFF",
         gray: "0 0 2px #717386",
       },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
     },
     colors: {
       ...colors,
@@ -221,5 +226,6 @@ module.exports = {
       };
       addUtilities(newUtilities, ["responsive"]);
     },
+    require("tailwindcss-animate"),
   ],
 };
