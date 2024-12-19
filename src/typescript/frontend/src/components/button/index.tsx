@@ -17,13 +17,18 @@ const Button = <E extends React.ElementType = "button">({
   children,
   isLoading = false,
   disabled = false,
+  fakeDisabled = false,
   external,
   isScramble = true,
   scale = "sm",
   variant = "outline",
   scrambleProps = {},
+  icon,
   ...rest
-}: ButtonProps<E> & { scrambleProps?: UseScrambleProps }): JSX.Element => {
+}: ButtonProps<E> & { scrambleProps?: UseScrambleProps } & {
+  icon?: React.ReactNode;
+  fakeDisabled?: boolean;
+}): JSX.Element => {
   const isDisabled = isLoading || disabled;
   const internalProps = external ? EXTERNAL_LINK_PROPS : {};
 
@@ -33,6 +38,14 @@ const Button = <E extends React.ElementType = "button">({
     speed: 0.5,
     ...scrambleProps,
   });
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const textProps: any = {
+    textScale: "pixelHeading4",
+    color: isDisabled || fakeDisabled ? "darkGray" : "econiaBlue",
+    textTransform: "uppercase",
+    fontSize: scale === "sm" ? "20px" : "24px",
+  };
 
   return (
     <StyledButton
@@ -56,58 +69,28 @@ const Button = <E extends React.ElementType = "button">({
             })}
 
           {!isScramble ? (
-            <FlexGap gap="8px" onMouseOver={replay}>
-              <Text
-                textScale="pixelHeading4"
-                color={isDisabled ? "darkGray" : "econiaBlue"}
-                textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
-              >
-                {"{ "}
-              </Text>
-              <Text
-                textScale="pixelHeading4"
-                color={isDisabled ? "darkGray" : "econiaBlue"}
-                textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
-                className="flex flex-row"
-              >
+            <FlexGap gap="8px" onMouseOver={replay} className="h-[1em]">
+              <Text {...textProps}>{"{ "}</Text>
+              {icon && (
+                <Text {...textProps} className="flex flex-row">
+                  {icon}
+                </Text>
+              )}
+              <Text {...textProps} className="flex flex-row">
                 {children}
               </Text>
-              <Text
-                textScale="pixelHeading4"
-                color={isDisabled ? "darkGray" : "econiaBlue"}
-                textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
-              >
-                {" }"}
-              </Text>
+              <Text {...textProps}>{" }"}</Text>
             </FlexGap>
           ) : (
-            <FlexGap gap="8px" onMouseOver={replay}>
-              <Text
-                textScale="pixelHeading4"
-                color={isDisabled ? "darkGray" : "econiaBlue"}
-                textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
-              >
-                {"{ "}
-              </Text>
-              <Text
-                textScale="pixelHeading4"
-                color={isDisabled ? "darkGray" : "econiaBlue"}
-                textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
-                ref={isScramble ? ref : undefined}
-              />
-              <Text
-                textScale="pixelHeading4"
-                color={isDisabled ? "darkGray" : "econiaBlue"}
-                textTransform="uppercase"
-                fontSize={scale === "sm" ? "20px" : "24px"}
-              >
-                {" }"}
-              </Text>
+            <FlexGap gap="8px" onMouseOver={replay} className="h-[1em]">
+              <Text {...textProps}>{"{ "}</Text>
+              {icon && (
+                <Text {...textProps} className="flex flex-row">
+                  {icon}
+                </Text>
+              )}
+              <Text {...textProps} ref={isScramble ? ref : undefined} />
+              <Text {...textProps}>{" }"}</Text>
             </FlexGap>
           )}
 
