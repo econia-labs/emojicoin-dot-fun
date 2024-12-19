@@ -1,7 +1,7 @@
 import { parseJSON, stringifyJSON } from "utils";
 import packages from "../../package.json";
 import { MS_IN_ONE_DAY } from "components/charts/const";
-import { satisfies, SemVer, parse } from "semver";
+import { satisfies, type SemVer, parse } from "semver";
 
 const LOCAL_STORAGE_KEYS = {
   theme: `${packages.name}_theme`,
@@ -11,16 +11,16 @@ const LOCAL_STORAGE_KEYS = {
 };
 
 const LOCAL_STORAGE_VERSIONS: {
-  [Property in keyof typeof LOCAL_STORAGE_KEYS]: SemVer
+  [Property in keyof typeof LOCAL_STORAGE_KEYS]: SemVer;
 } = {
-  theme: parse('1.0.0')!,
-  language: parse('1.0.0')!,
-  geoblocking: parse('2.0.0')!,
-  settings: parse('1.0.0')!,
+  theme: parse("1.0.0")!,
+  language: parse("1.0.0")!,
+  geoblocking: parse("2.0.0")!,
+  settings: parse("1.0.0")!,
 };
 
 export const LOCAL_STORAGE_CACHE_TIME: {
-  [Property in keyof typeof LOCAL_STORAGE_KEYS]: number
+  [Property in keyof typeof LOCAL_STORAGE_KEYS]: number;
 } = {
   theme: Infinity,
   language: Infinity,
@@ -45,7 +45,7 @@ export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): 
       return cache.data;
     }
     // Check for no breaking changes
-    if (satisfies(cache.version ?? '1.0.0', `~${LOCAL_STORAGE_VERSIONS[key].major}`)) {
+    if (satisfies(cache.version ?? "1.0.0", `~${LOCAL_STORAGE_VERSIONS[key].major}`)) {
       return null;
     }
   } catch (e) {
