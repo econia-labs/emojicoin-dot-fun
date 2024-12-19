@@ -243,12 +243,6 @@ module arena::emojicoin_arena {
             };
         };
 
-        // Update user melees resource.
-        let user_melees_ref_mut = &mut UserMelees[entrant_address];
-        add_if_not_contains(&mut user_melees_ref_mut.entered_melee_ids, melee_id);
-        add_if_not_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
-        remove_if_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
-
         // Verify user is selecting one of the two emojicoin types.
         let coin_0_type_info = type_info::type_of<Coin0>();
         let coin_1_type_info = type_info::type_of<Coin1>();
@@ -274,7 +268,7 @@ module arena::emojicoin_arena {
                 coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0
             );
 
-        // Try matching user's contribution if they elect to lock in.
+        // Match a portion of user's contribution if they elect to lock in.
         let match_amount =
             if (lock_in) {
                 // Verify that user can even lock in.
@@ -303,9 +297,12 @@ module arena::emojicoin_arena {
                     entrant_address
                 );
 
+                // Update registry state.
+                registry_ref_mut.registry_octas_matched_increment(match_amount);
+
                 // Update escrow state.
-                escrow_ref_mut.octas_matched = escrow_ref_mut.octas_matched
-                    + match_amount;
+                escrow_ref_mut.escrow_octas_matched_increment(match_amount);
+
                 match_amount
 
             } else 0;
@@ -343,6 +340,19 @@ module arena::emojicoin_arena {
         current_melee_ref_mut.melee_all_entrants_add_if_not_contains(entrant_address);
         current_melee_ref_mut.melee_active_entrants_add_if_not_contains(entrant_address);
         current_melee_ref_mut.melee_exited_entrants_remove_if_contains(entrant_address);
+
+        // Update registry state.
+        registry_ref_mut.registry_all_entrants_add_if_not_contains(entrant_address);
+
+        // Update escrow state.
+        escrow_ref_mut.escrow_octas_entered_increment(input_amount_after_matching);
+
+        // Update user melees state.
+        let user_melees_ref_mut = &mut UserMelees[entrant_address];
+        add_if_not_contains(&mut user_melees_ref_mut.entered_melee_ids, melee_id);
+        add_if_not_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
+        remove_if_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
+
     }
 
     #[randomness]
@@ -399,13 +409,13 @@ module arena::emojicoin_arena {
                 swap_melee_ref_mut.melee_emojicoin_0_locked_decrement(
                     emojicoin_0_locked_before_swap
                 );
-                swap_melee_ref_mut.emojicoin_1_locked_increment(
+                swap_melee_ref_mut.melee_emojicoin_1_locked_increment(
                     coin::value(emojicoin_1_ref_mut)
                 );
                 quote_volume
             } else {
                 assert!(emojicoin_1_locked_before_swap > 0, E_SWAP_NO_FUNDS);
-                swap_melee_ref_mut.emojicoin_1_locked_decrement(
+                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(
                     emojicoin_1_locked_before_swap
                 );
                 let quote_volume =
@@ -417,18 +427,27 @@ module arena::emojicoin_arena {
                         emojicoin_1_ref_mut,
                         emojicoin_0_ref_mut
                     );
-                swap_melee_ref_mut.emojicoin_1_locked_decrement(
+                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(
                     emojicoin_1_locked_before_swap
                 );
-                swap_melee_ref_mut.emojicoin_0_locked_increment(
+                swap_melee_ref_mut.melee_emojicoin_0_locked_increment(
                     coin::value(emojicoin_0_ref_mut)
                 );
                 quote_volume
             };
 
         // Update melee state.
+        let quote_volume_u128 = (quote_volume as u128);
         swap_melee_ref_mut.melee_n_swaps_increment();
-        swap_melee_ref_mut.melee_swaps_volume_increment((quote_volume as u128));
+        swap_melee_ref_mut.melee_swaps_volume_increment(quote_volume_u128);
+
+        // Update registry state.
+        registry_ref_mut.registry_n_swaps_increment();
+        registry_ref_mut.registry_swaps_volume_increment(quote_volume_u128);
+
+        // Update escrow state.
+        escrow_ref_mut.escrow_n_swaps_increment();
+        escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
 
         if (exit_once_done)
             exit_inner<Coin0, LP0, Coin1, LP1>(
@@ -437,6 +456,7 @@ module arena::emojicoin_arena {
                 registry_ref_mut,
                 false
             );
+
     }
 
     fun init_module(arena: &signer) acquires Registry {
@@ -514,6 +534,45 @@ module arena::emojicoin_arena {
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
+    inline fun escrow_n_swaps_increment<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
+    ) {
+        self.n_swaps = self.n_swaps + 1;
+    }
+
+    inline fun escrow_octas_entered_increment<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        amount: u64
+    ) {
+        self.octas_entered = self.octas_entered + amount;
+    }
+
+    inline fun escrow_octas_entered_reset<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
+    ) {
+        self.octas_entered = 0;
+    }
+
+    inline fun escrow_octas_matched_increment<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        amount: u64
+    ) {
+        self.octas_matched = self.octas_matched + amount;
+    }
+
+    inline fun escrow_octas_matched_reset<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
+    ) {
+        self.octas_matched = 0;
+    }
+
+    inline fun escrow_swaps_volume_increment<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        amount: u128
+    ) {
+        self.swaps_volume = self.swaps_volume + amount;
+    }
+
     /// Assumes user has an escrow resource.
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
         participant: &signer,
@@ -527,24 +586,25 @@ module arena::emojicoin_arena {
 
         // Charge tap out fee if applicable.
         if (melee_is_current) {
-            let tap_out_fee_ref_mut = &mut escrow_ref_mut.octas_matched;
-            if (*tap_out_fee_ref_mut > 0) {
+            let octas_matched = escrow_ref_mut.octas_matched;
+            if (octas_matched > 0) {
                 let vault_address =
                     account::get_signer_capability_address(
                         &registry_ref_mut.signer_capability
                     );
-                aptos_account::transfer(
-                    participant, vault_address, *tap_out_fee_ref_mut
-                );
-                *tap_out_fee_ref_mut = 0;
+                aptos_account::transfer(participant, vault_address, octas_matched);
 
                 // Update melee state.
-                exited_melee_ref_mut.melee_available_rewards_increment(
-                    *tap_out_fee_ref_mut
-                );
+                exited_melee_ref_mut.melee_available_rewards_increment(octas_matched);
                 exited_melee_ref_mut.melee_locked_in_entrants_remove_if_contains(
                     participant_address
                 );
+
+                // Update registry state.
+                registry_ref_mut.registry_octas_matched_decrement(octas_matched);
+
+                // Update escrow state.
+                escrow_ref_mut.escrow_octas_matched_reset();
             }
         };
 
@@ -556,14 +616,18 @@ module arena::emojicoin_arena {
             withdraw_from_escrow(participant_address, &mut escrow_ref_mut.emojicoin_1);
         };
 
-        // Update user state.
+        // Update melee state.
+        exited_melee_ref_mut.melee_active_entrants_remove_if_contains(participant_address);
+        exited_melee_ref_mut.melee_exited_entrants_add_if_not_contains(participant_address);
+
+        // Update escrow state.
+        escrow_ref_mut.escrow_octas_entered_reset();
+
+        // Update user melees state.
         let user_melees_ref_mut = &mut UserMelees[participant_address];
         add_if_not_contains(&mut user_melees_ref_mut.exited_melee_ids, melee_id);
         remove_if_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
 
-        // Update melee state.
-        exited_melee_ref_mut.melee_active_entrants_remove_if_contains(participant_address);
-        exited_melee_ref_mut.melee_exited_entrants_add_if_not_contains(participant_address);
     }
 
     inline fun get_n_registered_markets(): u64 {
@@ -661,15 +725,21 @@ module arena::emojicoin_arena {
         aggregator_v2::sub(&mut self.emojicoin_0_locked, amount);
     }
 
-    inline fun emojicoin_0_locked_increment(self: &mut Melee, amount: u64) {
+    inline fun melee_emojicoin_0_locked_increment(
+        self: &mut Melee, amount: u64
+    ) {
         aggregator_v2::add(&mut self.emojicoin_0_locked, amount);
     }
 
-    inline fun emojicoin_1_locked_decrement(self: &mut Melee, amount: u64) {
+    inline fun melee_emojicoin_1_locked_decrement(
+        self: &mut Melee, amount: u64
+    ) {
         aggregator_v2::sub(&mut self.emojicoin_1_locked, amount);
     }
 
-    inline fun emojicoin_1_locked_increment(self: &mut Melee, amount: u64) {
+    inline fun melee_emojicoin_1_locked_increment(
+        self: &mut Melee, amount: u64
+    ) {
         aggregator_v2::add(&mut self.emojicoin_1_locked, amount);
     }
 
@@ -766,6 +836,34 @@ module arena::emojicoin_arena {
             }
         );
         registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
+    }
+
+    inline fun registry_all_entrants_add_if_not_contains(
+        self: &mut Registry, address: address
+    ) {
+        add_if_not_contains(&mut self.all_entrants, address);
+    }
+
+    inline fun registry_n_swaps_increment(self: &mut Registry) {
+        aggregator_v2::add(&mut self.n_swaps, 1);
+    }
+
+    inline fun registry_octas_matched_decrement(
+        self: &mut Registry, amount: u64
+    ) {
+        self.octas_matched = self.octas_matched - amount;
+    }
+
+    inline fun registry_octas_matched_increment(
+        self: &mut Registry, amount: u64
+    ) {
+        self.octas_matched = self.octas_matched + amount;
+    }
+
+    inline fun registry_swaps_volume_increment(
+        self: &mut Registry, amount: u128
+    ) {
+        aggregator_v2::add(&mut self.swaps_volume, amount);
     }
 
     inline fun remove_if_contains<T: copy + drop>(
