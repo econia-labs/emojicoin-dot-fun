@@ -88,9 +88,9 @@ module arena::emojicoin_arena {
         /// removed from this set. If they exit after the melee ends, they are not removed.
         locked_in_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
-        n_melee_swaps: Aggregator<u64>,
+        n_swaps: Aggregator<u64>,
         /// Volume of melee-specific swaps in octas.
-        melee_swaps_volume: Aggregator<u128>,
+        swaps_volume: Aggregator<u128>,
         /// Amount of emojicoin 0 locked in all melee escrows for the melee.
         emojicoin_0_locked: Aggregator<u64>,
         /// Amount of emojicoin 1 locked in all melee escrows for the melee.
@@ -104,10 +104,10 @@ module arena::emojicoin_arena {
         emojicoin_0: Coin<Coin0>,
         /// Emojicoin 1 holdings.
         emojicoin_1: Coin<Coin1>,
-        /// Volume of user's melee-specific swaps in octas.
-        melee_swaps_volume: u128,
         /// Number of swaps user has executed during the melee.
-        n_melee_swaps: u64,
+        n_swaps: u64,
+        /// Volume of user's melee-specific swaps in octas.
+        swaps_volume: u128,
         /// Cumulative amount of APT entered into the melee since the most recent deposit into an
         /// empty escrow. Inclusive of total amount matched from locking in since most recent
         /// deposit into an empty escrow. Reset to 0 upon exit.
@@ -137,11 +137,11 @@ module arena::emojicoin_arena {
         /// All entrants who have entered a melee.
         all_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
-        n_melee_swaps: Aggregator<u64>,
+        n_swaps: Aggregator<u64>,
         /// Volume of melee-specific swaps in octas.
-        melee_swaps_volume: Aggregator<u128>,
-        /// Amount of octas disbursed as rewards. Decremented when a user taps out.
-        rewards_disbursed: u64
+        swaps_volume: Aggregator<u128>,
+        /// Amount of octas matched. Decremented when a user taps out.
+        octas_matched: u64
     }
 
     struct UserMelees has key {
@@ -227,8 +227,8 @@ module arena::emojicoin_arena {
                     emojicoin_1: coin::zero(),
                     octas_entered: 0,
                     octas_matched: 0,
-                    melee_swaps_volume: 0,
-                    n_melee_swaps: 0
+                    swaps_volume: 0,
+                    n_swaps: 0
                 }
             );
             if (!exists<UserMelees>(entrant_address)) {
@@ -429,7 +429,7 @@ module arena::emojicoin_arena {
             };
 
         // Update melee state.
-        swap_melee_ref_mut.melee_n_melee_swaps_increment();
+        swap_melee_ref_mut.melee_n_swaps_increment();
         swap_melee_ref_mut.melee_swaps_volume_increment((quote_volume as u128));
 
         if (exit_once_done)
@@ -456,9 +456,9 @@ module arena::emojicoin_arena {
                 next_melee_max_match_percentage: DEFAULT_MAX_MATCH_PERCENTAGE,
                 next_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT,
                 all_entrants: smart_table::new(),
-                n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
-                melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
-                rewards_disbursed: 0
+                n_swaps: aggregator_v2::create_unbounded_aggregator(),
+                swaps_volume: aggregator_v2::create_unbounded_aggregator(),
+                octas_matched: 0
             }
         );
         coin::register<AptosCoin>(&vault_signer);
@@ -699,14 +699,14 @@ module arena::emojicoin_arena {
         remove_if_contains(&mut self.locked_in_entrants, address);
     }
 
+    inline fun melee_n_swaps_increment(self: &mut Melee) {
+        aggregator_v2::add(&mut self.n_swaps, 1);
+    }
+
     inline fun melee_swaps_volume_increment(
         self: &mut Melee, amount: u128
     ) {
-        aggregator_v2::add(&mut self.melee_swaps_volume, amount);
-    }
-
-    inline fun melee_n_melee_swaps_increment(self: &mut Melee) {
-        aggregator_v2::add(&mut self.n_melee_swaps, 1);
+        aggregator_v2::add(&mut self.swaps_volume, amount);
     }
 
     /// Accepts a mutable reference to avoid freezing references up the stack.
@@ -761,8 +761,8 @@ module arena::emojicoin_arena {
                 active_entrants: smart_table::new(),
                 exited_entrants: smart_table::new(),
                 locked_in_entrants: smart_table::new(),
-                n_melee_swaps: aggregator_v2::create_unbounded_aggregator(),
-                melee_swaps_volume: aggregator_v2::create_unbounded_aggregator(),
+                n_swaps: aggregator_v2::create_unbounded_aggregator(),
+                swaps_volume: aggregator_v2::create_unbounded_aggregator(),
                 emojicoin_0_locked: aggregator_v2::create_unbounded_aggregator(),
                 emojicoin_1_locked: aggregator_v2::create_unbounded_aggregator()
             }
