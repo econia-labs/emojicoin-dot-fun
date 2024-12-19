@@ -41,12 +41,16 @@ export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): 
   }
   try {
     const cache = parseJSON<LocalStorageCache<T>>(str);
+    const range =  `~${LOCAL_STORAGE_VERSIONS[key].major}`;
+    // Check for no breaking changes.
+    if (!satisfies(cache.version ?? "1.0.0", range)) {
+      console.warn(`${key} cache version not satisfied (needs to satisfy ${range}, but ${cache.version} is present). Purging...`);
+      localStorage.delete(LOCAL_STORAGE_KEYS[key]);
+      return null;
+    }
+    // Check for staleness.
     if (new Date(cache.expiry) > new Date()) {
       return cache.data;
-    }
-    // Check for no breaking changes
-    if (satisfies(cache.version ?? "1.0.0", `~${LOCAL_STORAGE_VERSIONS[key].major}`)) {
-      return null;
     }
   } catch (e) {
     return null;
