@@ -298,8 +298,8 @@ module arena::emojicoin_arena {
                 );
 
                 // Update melee state.
-                current_melee_ref_mut.available_rewards_decrement(match_amount);
-                current_melee_ref_mut.locked_in_entrants_add_if_not_contains(
+                current_melee_ref_mut.melee_available_rewards_decrement(match_amount);
+                current_melee_ref_mut.melee_locked_in_entrants_add_if_not_contains(
                     entrant_address
                 );
 
@@ -340,9 +340,9 @@ module arena::emojicoin_arena {
         };
 
         // Update melee state.
-        current_melee_ref_mut.all_entrants_add_if_not_contains(entrant_address);
-        current_melee_ref_mut.active_entrants_add_if_not_contains(entrant_address);
-        current_melee_ref_mut.exited_entrants_remove_if_contains(entrant_address);
+        current_melee_ref_mut.melee_all_entrants_add_if_not_contains(entrant_address);
+        current_melee_ref_mut.melee_active_entrants_add_if_not_contains(entrant_address);
+        current_melee_ref_mut.melee_exited_entrants_remove_if_contains(entrant_address);
     }
 
     #[randomness]
@@ -398,7 +398,7 @@ module arena::emojicoin_arena {
                         emojicoin_0_ref_mut,
                         emojicoin_1_ref_mut
                     );
-                swap_melee_ref_mut.emojicoin_0_locked_decrement(
+                swap_melee_ref_mut.melee_emojicoin_0_locked_decrement(
                     emojicoin_0_locked_before_swap
                 );
                 swap_melee_ref_mut.emojicoin_1_locked_increment(
@@ -429,7 +429,7 @@ module arena::emojicoin_arena {
             };
 
         // Update melee state.
-        swap_melee_ref_mut.n_melee_swaps_increment();
+        swap_melee_ref_mut.melee_n_melee_swaps_increment();
         swap_melee_ref_mut.melee_swaps_volume_increment((quote_volume as u128));
 
         if (exit_once_done)
@@ -516,48 +516,6 @@ module arena::emojicoin_arena {
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
-    inline fun all_entrants_add_if_not_contains(
-        self: &mut Melee, address: address
-    ) {
-        add_if_not_contains(&mut self.all_entrants, address);
-    }
-
-    inline fun active_entrants_add_if_not_contains(
-        self: &mut Melee, address: address
-    ) {
-        add_if_not_contains(&mut self.active_entrants, address);
-    }
-
-    inline fun active_entrants_remove_if_contains(
-        self: &mut Melee, address: address
-    ) {
-        remove_if_contains(&mut self.active_entrants, address);
-    }
-
-    inline fun available_rewards_decrement(self: &mut Melee, amount: u64) {
-        self.available_rewards = self.available_rewards - amount;
-    }
-
-    inline fun available_rewards_increment(self: &mut Melee, amount: u64) {
-        self.available_rewards = self.available_rewards + amount;
-    }
-
-    inline fun emojicoin_0_locked_decrement(self: &mut Melee, amount: u64) {
-        aggregator_v2::sub(&mut self.emojicoin_0_locked, amount);
-    }
-
-    inline fun emojicoin_0_locked_increment(self: &mut Melee, amount: u64) {
-        aggregator_v2::add(&mut self.emojicoin_0_locked, amount);
-    }
-
-    inline fun emojicoin_1_locked_decrement(self: &mut Melee, amount: u64) {
-        aggregator_v2::sub(&mut self.emojicoin_1_locked, amount);
-    }
-
-    inline fun emojicoin_1_locked_increment(self: &mut Melee, amount: u64) {
-        aggregator_v2::add(&mut self.emojicoin_1_locked, amount);
-    }
-
     /// Assumes user has an escrow resource.
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
         participant: &signer,
@@ -583,8 +541,10 @@ module arena::emojicoin_arena {
                 *tap_out_fee_ref_mut = 0;
 
                 // Update melee state.
-                exited_melee_ref_mut.available_rewards_increment(*tap_out_fee_ref_mut);
-                exited_melee_ref_mut.locked_in_entrants_remove_if_contains(
+                exited_melee_ref_mut.melee_available_rewards_increment(
+                    *tap_out_fee_ref_mut
+                );
+                exited_melee_ref_mut.melee_locked_in_entrants_remove_if_contains(
                     participant_address
                 );
             }
@@ -604,20 +564,8 @@ module arena::emojicoin_arena {
         remove_if_contains(&mut user_melees_ref_mut.unexited_melee_ids, melee_id);
 
         // Update melee state.
-        exited_melee_ref_mut.active_entrants_remove_if_contains(participant_address);
-        exited_melee_ref_mut.exited_entrants_add_if_not_contains(participant_address);
-    }
-
-    inline fun exited_entrants_add_if_not_contains(
-        self: &mut Melee, address: address
-    ) {
-        add_if_not_contains(&mut self.exited_entrants, address);
-    }
-
-    inline fun exited_entrants_remove_if_contains(
-        self: &mut Melee, address: address
-    ) {
-        remove_if_contains(&mut self.exited_entrants, address);
+        exited_melee_ref_mut.melee_active_entrants_remove_if_contains(participant_address);
+        exited_melee_ref_mut.melee_exited_entrants_add_if_not_contains(participant_address);
     }
 
     inline fun get_n_registered_markets(): u64 {
@@ -628,18 +576,6 @@ module arena::emojicoin_arena {
 
     inline fun last_period_boundary(time: u64, period: u64): u64 {
         (time / period) * period
-    }
-
-    inline fun locked_in_entrants_add_if_not_contains(
-        self: &mut Melee, address: address
-    ) {
-        add_if_not_contains(&mut self.locked_in_entrants, address);
-    }
-
-    inline fun locked_in_entrants_remove_if_contains(
-        self: &mut Melee, address: address
-    ) {
-        remove_if_contains(&mut self.locked_in_entrants, address);
     }
 
     /// Uses mutable references to avoid freezing references up the stack.
@@ -691,13 +627,85 @@ module arena::emojicoin_arena {
         }
     }
 
+    inline fun melee_active_entrants_add_if_not_contains(
+        self: &mut Melee, address: address
+    ) {
+        add_if_not_contains(&mut self.active_entrants, address);
+    }
+
+    inline fun melee_active_entrants_remove_if_contains(
+        self: &mut Melee, address: address
+    ) {
+        remove_if_contains(&mut self.active_entrants, address);
+    }
+
+    inline fun melee_all_entrants_add_if_not_contains(
+        self: &mut Melee, address: address
+    ) {
+        add_if_not_contains(&mut self.all_entrants, address);
+    }
+
+    inline fun melee_available_rewards_decrement(
+        self: &mut Melee, amount: u64
+    ) {
+        self.available_rewards = self.available_rewards - amount;
+    }
+
+    inline fun melee_available_rewards_increment(
+        self: &mut Melee, amount: u64
+    ) {
+        self.available_rewards = self.available_rewards + amount;
+    }
+
+    inline fun melee_emojicoin_0_locked_decrement(
+        self: &mut Melee, amount: u64
+    ) {
+        aggregator_v2::sub(&mut self.emojicoin_0_locked, amount);
+    }
+
+    inline fun emojicoin_0_locked_increment(self: &mut Melee, amount: u64) {
+        aggregator_v2::add(&mut self.emojicoin_0_locked, amount);
+    }
+
+    inline fun emojicoin_1_locked_decrement(self: &mut Melee, amount: u64) {
+        aggregator_v2::sub(&mut self.emojicoin_1_locked, amount);
+    }
+
+    inline fun emojicoin_1_locked_increment(self: &mut Melee, amount: u64) {
+        aggregator_v2::add(&mut self.emojicoin_1_locked, amount);
+    }
+
+    inline fun melee_exited_entrants_add_if_not_contains(
+        self: &mut Melee, address: address
+    ) {
+        add_if_not_contains(&mut self.exited_entrants, address);
+    }
+
+    inline fun melee_exited_entrants_remove_if_contains(
+        self: &mut Melee, address: address
+    ) {
+        remove_if_contains(&mut self.exited_entrants, address);
+    }
+
+    inline fun melee_locked_in_entrants_add_if_not_contains(
+        self: &mut Melee, address: address
+    ) {
+        add_if_not_contains(&mut self.locked_in_entrants, address);
+    }
+
+    inline fun melee_locked_in_entrants_remove_if_contains(
+        self: &mut Melee, address: address
+    ) {
+        remove_if_contains(&mut self.locked_in_entrants, address);
+    }
+
     inline fun melee_swaps_volume_increment(
         self: &mut Melee, amount: u128
     ) {
         aggregator_v2::add(&mut self.melee_swaps_volume, amount);
     }
 
-    inline fun n_melee_swaps_increment(self: &mut Melee) {
+    inline fun melee_n_melee_swaps_increment(self: &mut Melee) {
         aggregator_v2::add(&mut self.n_melee_swaps, 1);
     }
 
