@@ -45,7 +45,7 @@ export function readLocalStorageCache<T>(key: keyof typeof LOCAL_STORAGE_KEYS): 
       return cache.data;
     }
     // Check for no breaking changes
-    if (satisfies(cache.version ?? "1.0.0", `~${LOCAL_STORAGE_VERSIONS[key].major}`)) {
+    if (!satisfies(cache.version ?? "1.0.0", `~${LOCAL_STORAGE_VERSIONS[key].major}`)) {
       return null;
     }
   } catch (e) {
