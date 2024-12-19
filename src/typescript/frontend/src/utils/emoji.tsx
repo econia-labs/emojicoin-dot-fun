@@ -19,7 +19,7 @@ declare global {
 export const Emoji = ({
   emojis,
   set = undefined,
-  size = undefined,
+  size = "1em",
   ...props
 }: Omit<DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, "children"> & {
   emojis: AnyEmojiData[] | string;
@@ -32,14 +32,14 @@ export const Emoji = ({
     data = emojisInString.map((e, i) => (
       <em-emoji
         key={`${emojisInString[i]}-${i}`}
-        size={size ?? "1em"}
+        size={size}
         native={e}
         set={set}
       ></em-emoji>
     ));
   } else {
     data = emojis.map((e, i) => (
-      <em-emoji key={`${emojis[i].emoji}-${i}`} size={size ?? "1em"} native={e.emoji}></em-emoji>
+      <em-emoji key={`${emojis[i].emoji}-${i}`} size={size} native={e.emoji}></em-emoji>
     ));
   }
   return <span {...props}>{data}</span>;
