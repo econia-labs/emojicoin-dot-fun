@@ -108,13 +108,13 @@ module arena::emojicoin_arena {
         melee_swaps_volume: u128,
         /// Number of swaps user has executed during the melee.
         n_melee_swaps: u64,
-        /// APT entered into the melee, used as a benchmark for PnL calculations. Normalized when
-        /// topping off, reset to zero when exiting.
+        /// Cumulative amount of APT entered into the melee since the most recent deposit into an
+        /// empty escrow. Inclusive of total amount matched from locking in since most recent
+        /// deposit into an empty escrow. Reset to 0 upon exit.
         octas_entered: u64,
-        /// Octas user must pay to exit the melee before it ends, if they have locked in. Equivalent
-        /// to the current total amount of APT rewards they have been matched across all
-        /// transactions since they began depositing funds into an empty escrow.
-        tap_out_fee: u64
+        /// Cumulative amount of APT matched since most recent deposit into an empty escrow, reset
+        /// to 0 upon exit. Must be paid back in full when tapping out.
+        octas_matched: u64
     }
 
     struct Nil has drop, store {}
@@ -226,7 +226,7 @@ module arena::emojicoin_arena {
                     emojicoin_0: coin::zero(),
                     emojicoin_1: coin::zero(),
                     octas_entered: 0,
-                    tap_out_fee: 0,
+                    octas_matched: 0,
                     melee_swaps_volume: 0,
                     n_melee_swaps: 0
                 }
@@ -304,7 +304,8 @@ module arena::emojicoin_arena {
                 );
 
                 // Update escrow state.
-                escrow_ref_mut.tap_out_fee = escrow_ref_mut.tap_out_fee + match_amount;
+                escrow_ref_mut.octas_matched = escrow_ref_mut.octas_matched
+                    + match_amount;
                 match_amount
 
             } else 0;
@@ -530,7 +531,7 @@ module arena::emojicoin_arena {
 
         // Charge tap out fee if applicable.
         if (melee_is_current) {
-            let tap_out_fee_ref_mut = &mut escrow_ref_mut.tap_out_fee;
+            let tap_out_fee_ref_mut = &mut escrow_ref_mut.octas_matched;
             if (*tap_out_fee_ref_mut > 0) {
                 let vault_address =
                     account::get_signer_capability_address(
@@ -645,7 +646,7 @@ module arena::emojicoin_arena {
             // Correct for the max match amount that the user is eligible for.
             min(
                 corrected_for_melee_available_rewards,
-                current_melee_ref_mut.max_match_amount - escrow_ref_mut.tap_out_fee
+                current_melee_ref_mut.max_match_amount - escrow_ref_mut.octas_matched
             )
         }
     }
