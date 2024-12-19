@@ -1,9 +1,10 @@
-ADBEEF
+adbeef
 aland
 allowlister
 aptn
 aptos
 aptoslabs
+auid
 autoscale
 barthelemy
 bento
@@ -66,6 +67,7 @@ marino
 mayen
 melilla
 merperson
+metadatas
 moai
 mosquitto
 mqtt
