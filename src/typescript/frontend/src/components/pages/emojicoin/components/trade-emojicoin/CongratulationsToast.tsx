@@ -1,6 +1,6 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { type AnyNumberString } from "@sdk/types/types";
-import { ExplorerLink } from "components/link/component";
+import { ExplorerLink } from "components/explorer-link/ExplorerLink";
 import { APTOS_NETWORK } from "lib/env";
 import { toDisplayCoinDecimals } from "lib/utils/decimals";
 import { emoji } from "utils";

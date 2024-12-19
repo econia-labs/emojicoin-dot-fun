@@ -1,3 +1,5 @@
+"use client";
+
 import { type AnimationSequence, stagger, useAnimate } from "framer-motion";
 import React, { useCallback, useMemo } from "react";
 import { useEffect } from "react";

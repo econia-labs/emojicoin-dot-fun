@@ -1,6 +1,17 @@
 import { type AnyNumberString } from "../types";
 import { zip } from "./misc";
 
+export const compareNumber = (a: number | string, b: number | string): 0 | -1 | 1 => {
+  const [aa, bb] = [Number(a), Number(b)];
+  if (aa > bb) {
+    return 1;
+  }
+  if (aa < bb) {
+    return -1;
+  }
+  return 0;
+};
+
 // By default, sorts by descending, aka [1n, 0n] becomes [0n, 1n] with this comparator function.
 export const compareBigInt = (a: AnyNumberString, b: AnyNumberString): 0 | -1 | 1 => {
   const [aa, bb] = [BigInt(a), BigInt(b)];
