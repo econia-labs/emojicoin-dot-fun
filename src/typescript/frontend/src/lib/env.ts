@@ -22,6 +22,8 @@ let INTEGRATOR_ADDRESS: AccountAddressString;
 let INTEGRATOR_FEE_RATE_BPS: number;
 let BROKER_URL: string;
 let CDN_URL: string;
+const DISCORD_METADATA_REQUEST_CHANNEL: string | undefined =
+  process.env.NEXT_PUBLIC_DISCORD_METADATA_REQUEST_CHANNEL;
 
 export const LINKS: Links | undefined =
   typeof process.env.NEXT_PUBLIC_LINKS === "string" && process.env.NEXT_PUBLIC_LINKS !== ""
@@ -59,6 +61,7 @@ const VERSION = parse(packageInfo.version);
 export {
   APTOS_NETWORK,
   CDN_URL,
+  DISCORD_METADATA_REQUEST_CHANNEL,
   INTEGRATOR_ADDRESS,
   INTEGRATOR_FEE_RATE_BPS,
   IS_ALLOWLIST_ENABLED,
