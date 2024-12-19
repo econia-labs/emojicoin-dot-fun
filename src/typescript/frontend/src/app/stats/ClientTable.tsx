@@ -43,9 +43,9 @@ export const ClientTable = (props: ClientTableProps) => {
     col === sortBy ? (
       <div key={`${col}-sort`} className="hover:cursor-pointer w-fit">
         {reversed ? (
-          <ChevronUp className="ml-2 h-4 w-4" />
+          <ChevronUp className="gap-1 h-4 w-4" />
         ) : (
-          <ChevronDown className="ml-2 h-4 w-4" />
+          <ChevronDown className="gap-1 h-4 w-4" />
         )}
       </div>
     ) : (
