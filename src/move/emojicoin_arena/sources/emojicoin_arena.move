@@ -380,31 +380,55 @@ module arena::emojicoin_arena {
         // emptied immediately after the swap.
         let (exit_once_done, registry_ref_mut, _, _) = crank_schedule();
 
+        // Swap, updating total emojicoin locked values based on side.
+        let swap_melee_ref_mut =
+            registry_ref_mut.melees_by_id.borrow_mut(escrow_ref_mut.melee_id);
+        let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
+        let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
+        let emojicoin_0_locked_before_swap = coin::value(emojicoin_0_ref_mut);
+        let emojicoin_1_locked_before_swap = coin::value(emojicoin_1_ref_mut);
         let quote_volume =
-            if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
-                swap_within_escrow<Coin0, LP0, Coin1, LP1>(
-                    swapper,
-                    swapper_address,
-                    market_addresses[0],
-                    market_addresses[1],
-                    &mut escrow_ref_mut.emojicoin_0,
-                    &mut escrow_ref_mut.emojicoin_1
-                )
+            if (emojicoin_0_locked_before_swap > 0) {
+                let quote_volume =
+                    swap_within_escrow<Coin0, LP0, Coin1, LP1>(
+                        swapper,
+                        swapper_address,
+                        market_addresses[0],
+                        market_addresses[1],
+                        emojicoin_0_ref_mut,
+                        emojicoin_1_ref_mut
+                    );
+                swap_melee_ref_mut.emojicoin_0_locked_decrement(
+                    emojicoin_0_locked_before_swap
+                );
+                swap_melee_ref_mut.emojicoin_1_locked_increment(
+                    coin::value(emojicoin_1_ref_mut)
+                );
+                quote_volume
             } else {
-                assert!(coin::value(&escrow_ref_mut.emojicoin_1) > 0, E_SWAP_NO_FUNDS);
-                swap_within_escrow<Coin1, LP1, Coin0, LP0>(
-                    swapper,
-                    swapper_address,
-                    market_addresses[1],
-                    market_addresses[0],
-                    &mut escrow_ref_mut.emojicoin_1,
-                    &mut escrow_ref_mut.emojicoin_0
-                )
+                assert!(emojicoin_1_locked_before_swap > 0, E_SWAP_NO_FUNDS);
+                swap_melee_ref_mut.emojicoin_1_locked_decrement(
+                    emojicoin_1_locked_before_swap
+                );
+                let quote_volume =
+                    swap_within_escrow<Coin1, LP1, Coin0, LP0>(
+                        swapper,
+                        swapper_address,
+                        market_addresses[1],
+                        market_addresses[0],
+                        emojicoin_1_ref_mut,
+                        emojicoin_0_ref_mut
+                    );
+                swap_melee_ref_mut.emojicoin_1_locked_decrement(
+                    emojicoin_1_locked_before_swap
+                );
+                swap_melee_ref_mut.emojicoin_0_locked_increment(
+                    coin::value(emojicoin_0_ref_mut)
+                );
+                quote_volume
             };
 
         // Update melee state.
-        let swap_melee_ref_mut =
-            registry_ref_mut.melees_by_id.borrow_mut(escrow_ref_mut.melee_id);
         swap_melee_ref_mut.n_melee_swaps_increment();
         swap_melee_ref_mut.melee_swaps_volume_increment((quote_volume as u128));
 
@@ -516,6 +540,22 @@ module arena::emojicoin_arena {
 
     inline fun available_rewards_increment(self: &mut Melee, amount: u64) {
         self.available_rewards = self.available_rewards + amount;
+    }
+
+    inline fun emojicoin_0_locked_decrement(self: &mut Melee, amount: u64) {
+        aggregator_v2::sub(&mut self.emojicoin_0_locked, amount);
+    }
+
+    inline fun emojicoin_0_locked_increment(self: &mut Melee, amount: u64) {
+        aggregator_v2::add(&mut self.emojicoin_0_locked, amount);
+    }
+
+    inline fun emojicoin_1_locked_decrement(self: &mut Melee, amount: u64) {
+        aggregator_v2::sub(&mut self.emojicoin_1_locked, amount);
+    }
+
+    inline fun emojicoin_1_locked_increment(self: &mut Melee, amount: u64) {
+        aggregator_v2::add(&mut self.emojicoin_1_locked, amount);
     }
 
     /// Assumes user has an escrow resource.
