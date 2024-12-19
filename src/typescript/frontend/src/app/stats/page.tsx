@@ -7,6 +7,7 @@ import { toPriceFeed } from "@sdk/indexer-v2/types";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { ORDER_BY } from "@sdk/queries";
 import StatsPageComponent from "./StatsPage";
+import { compareNumber } from "@sdk/utils";
 
 export const revalidate = 60;
 export const dynamic = "force-static";
@@ -21,34 +22,42 @@ export default async function Stats() {
     pageSize: 500,
   };
 
-  // This is essentially a daily volume fetch but with price feed data.
   const priceFeedDataPromise = fetchPriceFeedWithMarketState({
     ...commonArgs,
     sortBy: SortMarketsBy.DailyVolume,
-  }).then((res) => res.map(toPriceFeed));
-  // keep calling until it's done
-
-  // then sum the volume for cumulative daily volume
+  })
+    .then((res) => res.map(toPriceFeed))
+    .then((res) => res.toSorted((a, b) => compareNumber(a.deltaPercentage, b.deltaPercentage)));
 
   const fetchMarketsBy = (sortBy: SortMarketsBy) => fetchMarkets({ ...commonArgs, sortBy });
 
+  const dailyVolumeDataPromise = fetchMarketsBy(SortMarketsBy.DailyVolume);
   const marketCapDataPromise = fetchMarketsBy(SortMarketsBy.MarketCap);
   const allTimeVolumeDataPromise = fetchMarketsBy(SortMarketsBy.AllTimeVolume);
   const latestPricesDataPromise = fetchMarketsBy(SortMarketsBy.Price);
   const tvlDataPromise = fetchMarketsBy(SortMarketsBy.Tvl);
 
-  const [numMarkets, priceFeedData, marketCapData, allTimeVolumeData, latestPricesData, tvlData] =
-    await Promise.all([
-      numMarketsPromise,
-      priceFeedDataPromise,
-      marketCapDataPromise,
-      allTimeVolumeDataPromise,
-      latestPricesDataPromise,
-      tvlDataPromise,
-    ]);
+  const [
+    numMarkets,
+    dailyVolumeData,
+    priceFeedData,
+    marketCapData,
+    allTimeVolumeData,
+    latestPricesData,
+    tvlData,
+  ] = await Promise.all([
+    numMarketsPromise,
+    dailyVolumeDataPromise,
+    priceFeedDataPromise,
+    marketCapDataPromise,
+    allTimeVolumeDataPromise,
+    latestPricesDataPromise,
+    tvlDataPromise,
+  ]);
 
   const props = {
     numMarkets,
+    dailyVolumeData,
     priceFeedData,
     marketCapData,
     allTimeVolumeData,
