@@ -19,7 +19,12 @@ const isDisallowedLocation = ({ countryCode, regionCode }: Location) => {
     }
   }
   if (countryCode && !regionCode) {
-    if (GEOBLOCKED.regions.map(r => r.substring(0, 2)).includes(countryCode)) {
+    if (GEOBLOCKED.regions.map(r => r.split('-')[0]).includes(countryCode)) {
+      return true;
+    }
+  }
+  if (!countryCode && regionCode) {
+    if (GEOBLOCKED.countries.includes(regionCode.split('-')[0])) {
       return true;
     }
   }
