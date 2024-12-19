@@ -1,17 +1,28 @@
 # `emojicoin-dot-fun` rewards
 
-This package contains an overloaded version of the `swap` function for
-`emojicoin-dot-fun`, `swap_with_rewards`, which gives users an opportunity for a
-reward based on the amount of integrator fees they pay for their swap.
+## `emojicoin_dot_fun_rewards`
 
-The rewards vault can be loaded up via the `fund_tiers` function.
+This module contains an overloaded version of the `swap` function for
+`emojicoin-dot-fun`, `emojicoin_dot_fun_rewards::swap_with_rewards`, which gives
+users an opportunity for a reward based on the amount of integrator fees they
+pay for their swap.
 
 Rewards distributions are random, and based on a probabilistic threshold
 determined by the number of nominal rewards distributions expected for a given
-nominal volume amount. See `reward_tiers` for more.
+nominal volume amount. See `emojicoin_dot_fun_rewards::reward_tiers` for more.
 
 For ease of parameter modeling, named constants use values in `APT`, which are
 converted to octas internally.
+
+The rewards vault can be loaded up via the
+`emojicoin_dot_fun_rewards::fund_tiers` function.
+
+## `emojicoin_dot_fun_claim_link`
+
+This module was designed to enable claim links, like for "magic link" sign on,
+which would rely on private keys in QR codes or similar in order to claim
+emojicoins. It was never used beyond the initial Move implementation, but is
+kept here for reference.
 
 ## Publish commands
 
