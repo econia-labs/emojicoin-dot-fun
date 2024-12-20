@@ -19,6 +19,8 @@ import { motion } from "framer-motion";
 import { MarketProperties } from "@/contract-apis";
 import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { Colors } from "theme/types";
+import Popup from "components/popup";
+import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -32,20 +34,41 @@ const LinkButton = ({
   icon?: (color: keyof Colors) => React.ReactNode;
 }) => {
   const button = (
-    <Button isScramble={false} scale="lg" disabled={!link}>
-      <div className="flex flex-row items-baseline h-[1em]">
-        {icon && icon(link ? "econiaBlue" : "darkGray")}
-        <span>{name}</span>
-      </div>
+    <Button
+      isScramble={false}
+      scale="lg"
+      fakeDisabled={!link && !!LINKS?.discord && !!DISCORD_METADATA_REQUEST_CHANNEL}
+      disabled={!link && !LINKS?.discord && !DISCORD_METADATA_REQUEST_CHANNEL}
+      icon={icon && icon(link ? "econiaBlue" : "darkGray")}
+    >
+      {name}
     </Button>
   );
-  return link ? (
-    <Link href={link} target="_blank">
-      {button}
-    </Link>
-  ) : (
-    button
-  );
+  if (link) {
+    return (
+      <Link href={link} target="_blank">
+        {button}
+      </Link>
+    );
+  }
+  if (LINKS?.discord && DISCORD_METADATA_REQUEST_CHANNEL) {
+    return (
+      <Popup
+        className="w-[300px]"
+        content={
+          "If you're the owner of this project and want to link your socials " +
+          "profile here, please use our dedicated Discord channel: #" +
+          DISCORD_METADATA_REQUEST_CHANNEL +
+          " ! (click the button to go to our discord)"
+        }
+      >
+        <Link href={LINKS?.discord} target="_blank">
+          <div>{button}</div>
+        </Link>
+      </Popup>
+    );
+  }
+  return button;
 };
 
 const MainInfo = ({ data }: MainInfoProps) => {
