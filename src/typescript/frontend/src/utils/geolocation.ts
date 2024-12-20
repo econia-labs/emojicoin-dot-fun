@@ -24,6 +24,8 @@ const isDisallowedLocation = ({ countryCode, regionCode }: Location) => {
     }
   }
   if (!countryCode && regionCode) {
+    // Note that even if the `regionCode` is `XX`, and `XX` is a banned country, this will return
+    // `true` and thus block the user, because "XX".split("-")[0] is just "XX".
     if (GEOBLOCKED.countries.includes(regionCode.split("-")[0])) {
       return true;
     }
