@@ -416,6 +416,16 @@ export const calculateRealReserves = ({
       }
     : cpammRealReserves;
 
+// Returns the reserves of a market that are used to calculate the price of the asset along its
+// AMM curve. For `inBondingCurve` markets, this is the virtual reserves, for post-bonding curve
+// markets, this is the market's real reserves.
+export const getReserves = ({
+  clammVirtualReserves,
+  cpammRealReserves,
+  ...args
+}: ReservesAndBondingCurveState): Types["Reserves"] =>
+  isInBondingCurve(args) ? clammVirtualReserves : cpammRealReserves;
+
 /**
  * *NOTE*: If you already have a market's state, call {@link calculateRealReserves} directly.
  *
@@ -456,7 +466,34 @@ PreciseBig.DP = 100;
  * This is equivalent to calculating the slope of the tangent line created from the exact point on
  * the curve, where the curve is the function the AMM uses to calculate the price for the market.
  *
- * The price is denominated in `quote / base`, where `base` is the emojicoin and `quote` is APT.
+ * The price is denominated in `base / quote`, but this is *NOT* a mathematical representation.
+ * Since the `base` is simply `1`, in a `base / quote` representation, the order of base and quote
+ * don't actually mean anything other than which one is being expressed as the whole number `1`.
+ *
+ * That is, `base / quote` does not imply that you divide `base` by `quote` to get the price, it
+ * just indicates how the price is going to be expressed semantically. What it really means is
+ * that you are describing the price in terms of `1 base` per `P quote`.
+ *
+ * To calculate this with the reserves, we need to find `P` below:
+ *
+ * 1 emojicoin / P APT
+ *
+ * We already know the reserves, now just structure them as the same fraction:
+ *
+ * emojicoin_reserves / APT_reserves
+ *
+ * Thus:
+ *
+ * 1 / P = emojicoin_reserves / APT_reserves
+ * =>
+ * 1 = (emojicoin_reserves / APT_reserves) * P
+ * =>
+ * 1 / (emojicoin_reserves / APT_reserves) = P
+ * =>
+ * APT_reserves / emojicoin_reserves = P
+ * =>
+ * Thus, when APT = quote and emojicoin = base,
+ * the price P = (quote.reserves / base.reserves)
  *
  *  * For an in depth explanation of the math and behavior behind the AMMs:
  * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf}

@@ -26,6 +26,7 @@ import { EMOJICOIN_SUPPLY } from "@sdk/const";
 import { calculateCirculatingSupply } from "@sdk/markets";
 import { symbolEmojiStringToArray } from "../util";
 import { fetchMarketState } from "@/queries/market";
+import { toNominal } from "lib/utils/decimals";
 
 /**
  * - In most cases, asset ids will correspond to contract addresses. Ids are case-sensitive.
@@ -63,26 +64,35 @@ async function getAsset(assetId: string): Promise<Asset> {
 
   const circulatingSupply: { circulatingSupply?: number | string } = {};
   if (marketState && marketState.state) {
-    circulatingSupply.circulatingSupply = calculateCirculatingSupply(marketState.state).toString();
+    circulatingSupply.circulatingSupply = toNominal(calculateCirculatingSupply(marketState.state));
   }
 
   return {
     id: assetId,
     name: marketEmojiData.symbolData.name,
     symbol: marketEmojiData.symbolData.symbol,
-    totalSupply: Number(EMOJICOIN_SUPPLY),
+    totalSupply: toNominal(EMOJICOIN_SUPPLY),
     ...circulatingSupply,
     // coinGeckoId: assetId,
     // coinMarketCapId: assetId,
   };
 }
 
-// NextJS JSON response handler
+// Although this route would be ideal for caching, nextjs doesn't offer the ability to control
+// caches for failed responses. In other words, if someone queries an asset that doesn't exist
+// yet at this endpoint, it would permanently cache that asset as not existing and thus return
+// the failed query JSON response. This is obviously problematic for not yet existing markets,
+// so unless we have some way to not cache failed queries/empty responses, we can't cache this
+// endpoint at all.
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export async function GET(request: NextRequest): Promise<NextResponse<AssetResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const assetId = searchParams.get("id");
   if (!assetId) {
-    // This is a required field, and is an error otherwise
+    // This is a required field, and is an error otherwise.
     return new NextResponse("id is a parameter", { status: 400 });
   }
   const asset = await getAsset(assetId);

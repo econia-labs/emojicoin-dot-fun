@@ -565,7 +565,7 @@ export class MarketProperties extends ViewFunctionPayloadBuilder<[Option<MoveVal
     };
   }
 
-  static async submit(args: {
+  static async view(args: {
     aptos: Aptos | AptosConfig;
     market: AccountAddressInput; // address
     options?: LedgerVersionArg;
