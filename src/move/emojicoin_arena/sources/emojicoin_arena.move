@@ -180,6 +180,18 @@ module arena::emojicoin_arena {
     }
 
     #[event]
+    /// Emmitted whenever a user swaps within their escrow.
+    struct Swap has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        quote_volume: u64,
+        emojicoin_0_in: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_in: u64,
+        emojicoin_1_proceeds: u64
+    }
+
+    #[event]
     /// Emitted after a user enters, swaps, or exits, representing the updated escrow state.
     struct EscrowState has copy, drop, store {
         user: address,
@@ -523,8 +535,11 @@ module arena::emojicoin_arena {
         let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
         let emojicoin_0_locked_before_swap = coin::value(emojicoin_0_ref_mut);
         let emojicoin_1_locked_before_swap = coin::value(emojicoin_1_ref_mut);
+        let (emojicoin_0_in, emojicoin_0_proceeds, emojicoin_1_in, emojicoin_1_proceeds) =
+            (0, 0, 0, 0);
         let quote_volume =
             if (emojicoin_0_locked_before_swap > 0) {
+                emojicoin_0_in = emojicoin_0_locked_before_swap;
                 let quote_volume =
                     swap_within_escrow<Coin0, LP0, Coin1, LP1>(
                         swapper,
@@ -534,18 +549,13 @@ module arena::emojicoin_arena {
                         emojicoin_0_ref_mut,
                         emojicoin_1_ref_mut
                     );
-                swap_melee_ref_mut.melee_emojicoin_0_locked_decrement(
-                    emojicoin_0_locked_before_swap
-                );
-                swap_melee_ref_mut.melee_emojicoin_1_locked_increment(
-                    coin::value(emojicoin_1_ref_mut)
-                );
+                swap_melee_ref_mut.melee_emojicoin_0_locked_decrement(emojicoin_0_in);
+                emojicoin_1_proceeds = coin::value(emojicoin_1_ref_mut);
+                swap_melee_ref_mut.melee_emojicoin_1_locked_increment(emojicoin_1_proceeds);
                 quote_volume
             } else {
                 assert!(emojicoin_1_locked_before_swap > 0, E_SWAP_NO_FUNDS);
-                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(
-                    emojicoin_1_locked_before_swap
-                );
+                emojicoin_1_in = emojicoin_1_locked_before_swap;
                 let quote_volume =
                     swap_within_escrow<Coin1, LP1, Coin0, LP0>(
                         swapper,
@@ -555,12 +565,9 @@ module arena::emojicoin_arena {
                         emojicoin_1_ref_mut,
                         emojicoin_0_ref_mut
                     );
-                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(
-                    emojicoin_1_locked_before_swap
-                );
-                swap_melee_ref_mut.melee_emojicoin_0_locked_increment(
-                    coin::value(emojicoin_0_ref_mut)
-                );
+                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(emojicoin_1_in);
+                emojicoin_0_proceeds = coin::value(emojicoin_0_ref_mut);
+                swap_melee_ref_mut.melee_emojicoin_0_locked_increment(emojicoin_0_proceeds);
                 quote_volume
             };
 
@@ -576,6 +583,19 @@ module arena::emojicoin_arena {
         // Update escrow state.
         escrow_ref_mut.escrow_n_swaps_increment();
         escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
+
+        // Emit swap event.
+        event::emit(
+            Swap {
+                user: swapper_address,
+                melee_id: escrow_ref_mut.melee_id,
+                quote_volume,
+                emojicoin_0_in,
+                emojicoin_0_proceeds,
+                emojicoin_1_in,
+                emojicoin_1_proceeds
+            }
+        );
 
         // Exit as needed, emitting state if not exiting, since exit inner function emits state.
         if (exit_once_done)
