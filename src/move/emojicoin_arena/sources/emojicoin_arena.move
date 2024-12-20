@@ -269,8 +269,8 @@ module arena::emojicoin_arena {
                 coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0
             );
 
-        // Verify that if user has been matched since their most recent deposit into an empty esrow,
-        // they lock in again.
+        // Verify that if user has been matched since their most recent deposit into an empty
+        // escrow, they lock in again.
         if (escrow_ref_mut.octas_matched > 0) {
             assert!(lock_in, E_TOP_OFF_MUST_LOCK_IN);
         };
