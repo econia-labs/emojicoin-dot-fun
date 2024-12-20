@@ -6,6 +6,7 @@ module arena::emojicoin_arena {
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin::{Self, Coin};
+    use aptos_framework::event;
     use aptos_framework::randomness::Self;
     use aptos_framework::timestamp;
     use aptos_std::math64::min;
@@ -152,6 +153,18 @@ module arena::emojicoin_arena {
         exited_melee_ids: SmartTable<u64, Nil>,
         /// Set of serial IDs of all melees the user has entered but not exited.
         unexited_melee_ids: SmartTable<u64, Nil>
+    }
+
+    #[event]
+    /// Emitted whenever a new melee starts.
+    struct NewMelee has copy, drop, store {
+        melee_id: u64,
+        market_metadatas: vector<MarketMetadata>,
+        start_time: u64,
+        duration: u64,
+        max_match_percentage: u64,
+        max_match_amount: u64,
+        available_rewards: u64
     }
 
     public entry fun fund_vault(arena: &signer, amount: u64) acquires Registry {
@@ -830,22 +843,30 @@ module arena::emojicoin_arena {
         sorted_unique_market_ids: vector<u64>
     ) {
         let melee_id = n_melees_before_registration + 1;
+        let market_metadatas =
+            sorted_unique_market_ids.map_ref(|market_id_ref| {
+                option::destroy_some(
+                    emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
+                )
+            });
+        let start_time =
+            last_period_boundary(
+                timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
+            );
+        let duration = registry_ref_mut.next_melee_duration;
+        let max_match_percentage = registry_ref_mut.next_melee_max_match_percentage;
+        let max_match_amount = registry_ref_mut.next_melee_max_match_amount;
+        let available_rewards = registry_ref_mut.next_melee_available_rewards;
         registry_ref_mut.melees_by_id.add(
             melee_id,
             Melee {
                 melee_id,
-                market_metadatas: sorted_unique_market_ids.map_ref(|market_id_ref| {
-                    option::destroy_some(
-                        emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
-                    )
-                }),
-                start_time: last_period_boundary(
-                    timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
-                ),
-                duration: registry_ref_mut.next_melee_duration,
-                max_match_percentage: registry_ref_mut.next_melee_max_match_percentage,
-                max_match_amount: registry_ref_mut.next_melee_max_match_amount,
-                available_rewards: registry_ref_mut.next_melee_available_rewards,
+                market_metadatas,
+                start_time,
+                duration,
+                max_match_percentage,
+                max_match_amount,
+                available_rewards,
                 all_entrants: smart_table::new(),
                 active_entrants: smart_table::new(),
                 exited_entrants: smart_table::new(),
@@ -857,6 +878,17 @@ module arena::emojicoin_arena {
             }
         );
         registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
+        event::emit(
+            NewMelee {
+                melee_id,
+                market_metadatas,
+                start_time,
+                duration,
+                max_match_percentage,
+                max_match_amount,
+                available_rewards
+            }
+        )
     }
 
     inline fun registry_all_entrants_add_if_not_contains(
