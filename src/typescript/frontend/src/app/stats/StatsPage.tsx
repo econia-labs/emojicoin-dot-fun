@@ -29,7 +29,7 @@ export interface StatsPageProps {
 const MARKETS_PER_SCROLL = 100;
 
 export default function StatsPageComponent(props: StatsPageProps) {
-  const [tab, setTab] = useState<"global-stats" | "per-market-stats">("global-stats");
+  const [tab, setTab] = useState<"global-stats" | "per-market-stats">("per-market-stats");
   const ref = useRef<HTMLDivElement | null>(null);
   const inView = useInView(ref);
   const rootRef = useRef<HTMLDivElement | null>(null);
