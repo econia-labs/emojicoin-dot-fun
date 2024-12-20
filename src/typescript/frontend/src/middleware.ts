@@ -1,3 +1,4 @@
+// cspell:word dexscreener
 import {
   COOKIE_FOR_ACCOUNT_ADDRESS,
   COOKIE_FOR_HASHED_ADDRESS,
@@ -11,16 +12,16 @@ import { normalizePossibleMarketPath } from "utils/pathname-helpers";
 
 export default async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
-  if (pathname === "/launching") {
+  if (pathname === ROUTES.launching) {
     return NextResponse.next();
   }
-  if (PRE_LAUNCH_TEASER && pathname !== "/launching") {
+  if (PRE_LAUNCH_TEASER && pathname !== ROUTES.launching) {
     return NextResponse.redirect(new URL(ROUTES.launching, request.url));
   }
-  if (MAINTENANCE_MODE && pathname !== "/maintenance") {
+  if (MAINTENANCE_MODE && pathname !== ROUTES.maintenance) {
     return NextResponse.redirect(new URL(ROUTES.maintenance, request.url));
   }
-  if (pathname === "/test" || pathname === "/verify_status") {
+  if (pathname === "/test" || pathname === "/verify_status" || pathname === ROUTES.dexscreener) {
     return NextResponse.next();
   }
 

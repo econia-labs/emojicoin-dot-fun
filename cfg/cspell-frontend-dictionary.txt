@@ -54,3 +54,4 @@ testid
 ADBEEF
 bytea
 nominalize
+dexscreener
