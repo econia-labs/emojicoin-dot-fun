@@ -2,7 +2,7 @@
 module arena::emojicoin_arena {
 
     use aptos_framework::account::{Self, SignerCapability};
-    use aptos_framework::aggregator_v2::{Self, Aggregator};
+    use aptos_framework::aggregator_v2::{Self, Aggregator, AggregatorSnapshot};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin::{Self, Coin};
@@ -166,6 +166,21 @@ module arena::emojicoin_arena {
         swaps_volume: u128,
         octas_entered: u64,
         octas_matched: u64
+    }
+
+    #[event]
+    /// Emitted after a user enters, swaps, or exits, representing the final state of the melee.
+    struct MeleeState has drop, store {
+        melee_id: u64,
+        available_rewards: u64,
+        n_all_entrants: u64,
+        n_active_entrants: u64,
+        n_exited_entrants: u64,
+        n_locked_in_entrants: u64,
+        n_swaps: AggregatorSnapshot<u64>,
+        swaps_volume: AggregatorSnapshot<u128>,
+        emojicoin_0_locked: AggregatorSnapshot<u64>,
+        emojicoin_1_locked: AggregatorSnapshot<u64>
     }
 
     #[event]
@@ -409,8 +424,8 @@ module arena::emojicoin_arena {
         user_melees_ref_mut.user_melees_unexited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_exited_melee_ids_remove_if_contains(melee_id);
 
-        // Emit escrow state event.
-        escrow_ref_mut.emit_escrow_state(entrant_address);
+        // Emit state events.
+        emit_state(escrow_ref_mut, current_melee_ref_mut, entrant_address);
     }
 
     #[randomness]
@@ -507,15 +522,15 @@ module arena::emojicoin_arena {
         escrow_ref_mut.escrow_n_swaps_increment();
         escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
 
-        // Exit as needed, emitting escrow state event if not exiting, since exit inner function
-        // emits the event if exiting.
+        // Exit as needed, emitting state if not exiting, since exit inner function emits state.
         if (exit_once_done)
             exit_inner<Coin0, LP0, Coin1, LP1>(
                 swapper,
                 swapper_address,
                 registry_ref_mut,
                 false
-            ) else escrow_ref_mut.emit_escrow_state(swapper_address);
+            )
+        else emit_state(escrow_ref_mut, swap_melee_ref_mut, swapper_address);
 
     }
 
@@ -610,6 +625,32 @@ module arena::emojicoin_arena {
                 octas_matched: self.octas_matched
             }
         );
+    }
+
+    inline fun emit_melee_state(self: &Melee) {
+        event::emit(
+            MeleeState {
+                melee_id: self.melee_id,
+                available_rewards: self.available_rewards,
+                n_all_entrants: self.all_entrants.length(),
+                n_active_entrants: self.active_entrants.length(),
+                n_exited_entrants: self.exited_entrants.length(),
+                n_locked_in_entrants: self.locked_in_entrants.length(),
+                n_swaps: aggregator_v2::snapshot(&self.n_swaps),
+                swaps_volume: aggregator_v2::snapshot(&self.swaps_volume),
+                emojicoin_0_locked: aggregator_v2::snapshot(&self.emojicoin_0_locked),
+                emojicoin_1_locked: aggregator_v2::snapshot(&self.emojicoin_1_locked)
+            }
+        );
+    }
+
+    inline fun emit_state<Coin0, LP0, Coin1, LP1>(
+        escrow_state_ref: &Escrow<Coin0, LP0, Coin1, LP1>,
+        melee_state_ref: &Melee,
+        participant_address: address
+    ) {
+        escrow_state_ref.emit_escrow_state(participant_address);
+        melee_state_ref.emit_melee_state();
     }
 
     inline fun emit_vault_balance_update_with_singer_capability_ref(
@@ -727,8 +768,8 @@ module arena::emojicoin_arena {
         user_melees_ref_mut.user_melees_exited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_unexited_melee_ids_remove_if_contains(melee_id);
 
-        // Emit escrow state event.
-        escrow_ref_mut.emit_escrow_state(participant_address);
+        // Emit state events.
+        emit_state(escrow_ref_mut, exited_melee_ref_mut, participant_address);
     }
 
     inline fun get_n_registered_markets(): u64 {
