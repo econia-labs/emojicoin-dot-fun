@@ -30,6 +30,7 @@ import {
   Period,
   rawPeriodToEnum,
   standardizeAddress,
+  STRUCT_STRINGS,
   type Types,
 } from "../../../src";
 import { type JsonValue } from "../../../src/types/json-types";
@@ -60,6 +61,26 @@ const checkTuples = (args: [string, JsonValue | undefined, JsonValue | undefined
   );
 
   expect(rows).toEqual(responses);
+};
+
+const checkEventIndex = (
+  row: SwapEventModel | LiquidityEventModel,
+  response: UserTransactionResponse
+) => {
+  const eventsAndIndices = new Map(response.events.map((event, index) => [event.type, index]));
+  // NOTE: This only works because we only submit a single entry function at a time. We expect that
+  // only one type of contract event will exist per transaction. Otherwise, this would fail or
+  // possibly even give false positives/negatives.
+  const fullEventType =
+    row.eventName === "Swap" ? STRUCT_STRINGS.SwapEvent : STRUCT_STRINGS.LiquidityEvent;
+  const eventIndex = eventsAndIndices.get(fullEventType)!;
+  if (!eventIndex) {
+    throw new Error(`${row.eventName}Event not in response version: ${row.transaction.version}`);
+  }
+
+  // We'd check the block number/height here if we could, but it's not returned by the node
+  // and graphql is a pain to work with in jest unit tests.
+  expect(eventIndex.toString()).toEqual(row.blockAndEvent?.eventIndex.toString());
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -425,6 +446,7 @@ const Swap = (row: SwapEventModel, response: UserTransactionResponse) => {
   compareMarketAndStateMetadata(row, stateEvent);
   compareStateEvents(row, stateEvent);
   compareSwapEvents(row, swapEvent);
+  checkEventIndex(row, response);
 };
 
 const Chat = (row: ChatEventModel, response: UserTransactionResponse) => {
@@ -447,6 +469,7 @@ const Liquidity = (row: LiquidityEventModel, response: UserTransactionResponse) 
   compareMarketAndStateMetadata(row, stateEvent);
   compareLastSwap(row, stateEvent);
   compareLiquidityEvents(row, liquidityEvent);
+  checkEventIndex(row, response);
 };
 
 const MarketLatestState = (row: MarketLatestStateEventModel, response: UserTransactionResponse) => {
