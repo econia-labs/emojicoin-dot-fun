@@ -156,7 +156,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted after a user enters, swaps, or exits, representing the final state of their escrow.
+    /// Emitted after a user enters, swaps, or exits, representing the updated escrow state.
     struct EscrowState has copy, drop, store {
         user: address,
         melee_id: u64,
@@ -169,7 +169,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted after a user enters, swaps, or exits, representing the final state of the melee.
+    /// Emitted after a user enters, swaps, or exits, representing the updated melee state.
     struct MeleeState has drop, store {
         melee_id: u64,
         available_rewards: u64,
@@ -181,6 +181,16 @@ module arena::emojicoin_arena {
         swaps_volume: AggregatorSnapshot<u128>,
         emojicoin_0_locked: AggregatorSnapshot<u64>,
         emojicoin_1_locked: AggregatorSnapshot<u64>
+    }
+
+    #[event]
+    /// Emitted after a user enters, swaps, or exits, representing the updated registry state.
+    struct RegistryState has drop, store {
+        n_melees: u64,
+        n_entrants: u64,
+        n_swaps: AggregatorSnapshot<u64>,
+        swaps_volume: AggregatorSnapshot<u128>,
+        octas_matched: u64
     }
 
     #[event]
@@ -425,7 +435,12 @@ module arena::emojicoin_arena {
         user_melees_ref_mut.user_melees_exited_melee_ids_remove_if_contains(melee_id);
 
         // Emit state events.
-        emit_state(escrow_ref_mut, current_melee_ref_mut, entrant_address);
+        emit_state(
+            registry_ref_mut,
+            current_melee_ref_mut,
+            escrow_ref_mut,
+            entrant_address
+        );
     }
 
     #[randomness]
@@ -530,7 +545,13 @@ module arena::emojicoin_arena {
                 registry_ref_mut,
                 false
             )
-        else emit_state(escrow_ref_mut, swap_melee_ref_mut, swapper_address);
+        else
+            emit_state(
+                registry_ref_mut,
+                swap_melee_ref_mut,
+                escrow_ref_mut,
+                swapper_address
+            );
 
     }
 
@@ -610,7 +631,7 @@ module arena::emojicoin_arena {
     }
 
     inline fun emit_escrow_state<Coin0, LP0, Coin1, LP1>(
-        self: &Escrow<Coin0, LP0, Coin1, LP1>,
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         participant_address: address
     ) {
         event::emit(
@@ -627,7 +648,8 @@ module arena::emojicoin_arena {
         );
     }
 
-    inline fun emit_melee_state(self: &Melee) {
+    /// Uses mutable references to avoid borrowing issues.
+    inline fun emit_melee_state(self: &mut Melee) {
         event::emit(
             MeleeState {
                 melee_id: self.melee_id,
@@ -644,13 +666,30 @@ module arena::emojicoin_arena {
         );
     }
 
+    /// Uses mutable references to avoid borrowing issues.
+    inline fun emit_registry_state(self: &mut Registry) {
+        event::emit(
+            RegistryState {
+                n_melees: self.melees_by_id.length(),
+                n_entrants: self.all_entrants.length(),
+                n_swaps: aggregator_v2::snapshot(&self.n_swaps),
+                swaps_volume: aggregator_v2::snapshot(&self.swaps_volume),
+                octas_matched: self.octas_matched
+            }
+        );
+    }
+
+    /// Uses mutable references to avoid borrowing issues. Emitted in ascending hierarchy order,
+    /// since registry state must be emitted after melee state.
     inline fun emit_state<Coin0, LP0, Coin1, LP1>(
-        escrow_state_ref: &Escrow<Coin0, LP0, Coin1, LP1>,
-        melee_state_ref: &Melee,
+        registry_ref_mut: &mut Registry,
+        melee_ref_mut: &mut Melee,
+        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         participant_address: address
     ) {
-        escrow_state_ref.emit_escrow_state(participant_address);
-        melee_state_ref.emit_melee_state();
+        escrow_ref_mut.emit_escrow_state(participant_address);
+        melee_ref_mut.emit_melee_state();
+        registry_ref_mut.emit_registry_state(); // Must emit after melee state for borrow checker.
     }
 
     inline fun emit_vault_balance_update_with_singer_capability_ref(
@@ -769,7 +808,12 @@ module arena::emojicoin_arena {
         user_melees_ref_mut.user_melees_unexited_melee_ids_remove_if_contains(melee_id);
 
         // Emit state events.
-        emit_state(escrow_ref_mut, exited_melee_ref_mut, participant_address);
+        emit_state(
+            registry_ref_mut,
+            exited_melee_ref_mut,
+            escrow_ref_mut,
+            participant_address
+        );
     }
 
     inline fun get_n_registered_markets(): u64 {
