@@ -224,7 +224,7 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
   return {
     block: {
       blockNumber: Number(event.blockAndEvent.blockNumber),
-      blockTimestamp: event.transaction.timestamp.getTime() / 1000,
+      blockTimestamp: Math.floor(event.transaction.timestamp.getTime() / 1000),
     },
     eventType: "swap",
     txnId: event.transaction.version.toString(),
@@ -258,7 +258,7 @@ function toDexscreenerJoinExitEvent(
   return {
     block: {
       blockNumber: Number(event.blockAndEvent.blockNumber),
-      blockTimestamp: event.transaction.timestamp.getTime() / 1000,
+      blockTimestamp: Math.floor(event.transaction.timestamp.getTime() / 1000),
     },
     eventType: event.liquidity.liquidityProvided ? "join" : "exit",
 
@@ -289,6 +289,14 @@ async function getEventsByVersion(fromBlock: number, toBlock: number): Promise<E
         : toDexscreenerSwapEvent(event)
     );
 }
+
+// Don't cache this request, because we could inadvertently cache data that is immediately invalid
+// in the case where the `toBlock` is larger than the present block. Although this shouldn't happen,
+// it's not worth caching these queries anyway, because they should only be called once or twice
+// with the same query parameters.
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 // NextJS JSON response handler
 /**

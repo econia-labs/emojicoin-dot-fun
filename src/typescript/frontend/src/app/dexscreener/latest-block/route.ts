@@ -26,13 +26,15 @@ import { getAptosClient } from "@sdk/utils/aptos-client";
  */
 export interface Block {
   blockNumber: number;
-  blockTimestamp: number;
+  blockTimestamp: number; // Whole number integer representing UNIX timestamp in seconds.
   metadata?: Record<string, string>;
 }
 
 interface LatestBlockResponse {
   block: Block;
 }
+
+export const revalidate = 1;
 
 // NextJS JSON response handler
 export async function GET(_request: NextRequest): Promise<NextResponse<LatestBlockResponse>> {
@@ -48,7 +50,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse<LatestBlo
     block: {
       blockNumber,
       // Convert to seconds
-      blockTimestamp: status.lastTransactionTimestamp.getTime() / 1000,
+      blockTimestamp: Math.floor(status.lastTransactionTimestamp.getTime() / 1000),
     },
   });
 }

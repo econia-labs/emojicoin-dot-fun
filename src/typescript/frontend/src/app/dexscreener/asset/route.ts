@@ -77,6 +77,16 @@ async function getAsset(assetId: string): Promise<Asset> {
   };
 }
 
+// Although this route would be ideal for caching, nextjs doesn't offer the ability to control
+// caches for failed responses. In other words, if someone queries an asset that doesn't exist
+// yet at this endpoint, it would permanently cache that asset as not existing and thus return
+// the failed query JSON response. This is obviously problematic for not yet existing markets,
+// so unless we have some way to not cache failed queries/empty responses, we can't cache this
+// endpoint at all.
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 // NextJS JSON response handler
 export async function GET(request: NextRequest): Promise<NextResponse<AssetResponse>> {
   const searchParams = request.nextUrl.searchParams;
