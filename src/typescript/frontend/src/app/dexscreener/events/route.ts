@@ -84,7 +84,7 @@ import {
   type toLiquidityEventModel,
   type toSwapEventModel,
 } from "@sdk/indexer-v2/types";
-import { calculateCurvePrice, getReserves } from "@sdk/markets";
+import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
 import { toCoinDecimalString } from "../../../lib/utils/decimals";
 import { DECIMALS } from "@sdk/const";
 import { symbolEmojisToPairId } from "../util";
@@ -215,7 +215,7 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
         asset1In: toCoinDecimalString(event.swap.quoteVolume, DECIMALS),
       };
 
-  const { base, quote } = getReserves(event.state);
+  const { base, quote } = calculateRealReserves(event.state);
   const reserves = {
     asset0: toCoinDecimalString(base, DECIMALS),
     asset1: toCoinDecimalString(quote, DECIMALS),
@@ -236,7 +236,7 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
     txnIndex: Number(event.transaction.version),
     eventIndex: Number(event.blockAndEvent.eventIndex),
 
-    maker: event.transaction.sender,
+    maker: event.swap.swapper,
     pairId: symbolEmojisToPairId(event.market.symbolEmojis),
 
     ...assetInOut,
@@ -248,7 +248,7 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
 function toDexscreenerJoinExitEvent(
   event: ReturnType<typeof toLiquidityEventModel>
 ): JoinExitEvent & BlockInfo {
-  const { base, quote } = getReserves(event.state);
+  const { base, quote } = calculateRealReserves(event.state);
   const reserves = {
     asset0: toCoinDecimalString(base, DECIMALS),
     asset1: toCoinDecimalString(quote, DECIMALS),
@@ -268,7 +268,7 @@ function toDexscreenerJoinExitEvent(
     txnIndex: Number(event.transaction.version),
     eventIndex: Number(event.blockAndEvent.eventIndex),
 
-    maker: event.transaction.sender,
+    maker: event.liquidity.provider,
     pairId: symbolEmojisToPairId(event.market.symbolEmojis),
 
     amount0: toCoinDecimalString(event.liquidity.baseAmount, DECIMALS),

@@ -26,6 +26,7 @@ import { EMOJICOIN_SUPPLY } from "@sdk/const";
 import { calculateCirculatingSupply } from "@sdk/markets";
 import { symbolEmojiStringToArray } from "../util";
 import { fetchMarketState } from "@/queries/market";
+import { toNominal } from "lib/utils/decimals";
 
 /**
  * - In most cases, asset ids will correspond to contract addresses. Ids are case-sensitive.
@@ -63,14 +64,14 @@ async function getAsset(assetId: string): Promise<Asset> {
 
   const circulatingSupply: { circulatingSupply?: number | string } = {};
   if (marketState && marketState.state) {
-    circulatingSupply.circulatingSupply = calculateCirculatingSupply(marketState.state).toString();
+    circulatingSupply.circulatingSupply = toNominal(calculateCirculatingSupply(marketState.state));
   }
 
   return {
     id: assetId,
     name: marketEmojiData.symbolData.name,
     symbol: marketEmojiData.symbolData.symbol,
-    totalSupply: EMOJICOIN_SUPPLY.toString(),
+    totalSupply: toNominal(EMOJICOIN_SUPPLY),
     ...circulatingSupply,
     // coinGeckoId: assetId,
     // coinMarketCapId: assetId,
