@@ -804,7 +804,8 @@ module arena::emojicoin_arena {
 
     }
 
-    /// Pseudo-random proxy for `random_market_id` for use during `init_module`.
+    /// Pseudo-random substitute for `random_market_id`, since the Aptos randomness API
+    /// is not available during `init_module`.
     inline fun pseudo_random_market_id(n_markets: u64): u64 {
         pseudo_randomness::u64_range(0, n_markets) + 1
     }
