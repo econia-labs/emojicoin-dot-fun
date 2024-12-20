@@ -172,11 +172,11 @@ module arena::emojicoin_arena {
     struct Exit has copy, drop, store {
         user: address,
         melee_id: u64,
-        emojicoin_0_proceeds: u64,
-        emojicoin_1_proceeds: u64,
         octas_entered: u64,
         octas_matched: u64,
-        tap_out_fee: u64
+        tap_out_fee: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64
     }
 
     #[event]
