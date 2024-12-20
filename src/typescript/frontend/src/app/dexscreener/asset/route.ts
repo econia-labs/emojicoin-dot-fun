@@ -70,7 +70,7 @@ async function getAsset(assetId: string): Promise<Asset> {
     id: assetId,
     name: marketEmojiData.symbolData.name,
     symbol: marketEmojiData.symbolData.symbol,
-    totalSupply: Number(EMOJICOIN_SUPPLY),
+    totalSupply: EMOJICOIN_SUPPLY.toString(),
     ...circulatingSupply,
     // coinGeckoId: assetId,
     // coinMarketCapId: assetId,
