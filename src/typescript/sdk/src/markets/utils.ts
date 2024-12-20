@@ -416,6 +416,16 @@ export const calculateRealReserves = ({
       }
     : cpammRealReserves;
 
+// Returns the reserves of a market that are used to calculate the price of the asset along its
+// AMM curve. For `inBondingCurve` markets, this is the virtual reserves, for post-bonding curve
+// markets, this is the market's real reserves.
+export const getReserves = ({
+  clammVirtualReserves,
+  cpammRealReserves,
+  ...args
+}: ReservesAndBondingCurveState): Types["Reserves"] =>
+  isInBondingCurve(args) ? clammVirtualReserves : cpammRealReserves;
+
 /**
  * *NOTE*: If you already have a market's state, call {@link calculateRealReserves} directly.
  *
