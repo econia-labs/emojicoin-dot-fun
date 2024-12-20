@@ -53,7 +53,7 @@ interface Pair {
   asset0Id: string;
   asset1Id: string;
   createdAtBlockNumber?: number;
-  createdAtBlockTimestamp?: number;
+  createdAtBlockTimestamp?: number; // Whole number representing a UNIX timestamp in seconds.
   createdAtTxnId?: string;
   creator?: string;
   feeBps?: number;
@@ -104,7 +104,9 @@ async function getPair(
       asset0Id: symbolEmojisToString(symbolEmojis),
       asset1Id: "APT",
       createdAtBlockNumber: parseInt(block.block_height),
-      createdAtBlockTimestamp: marketRegistration.transaction.timestamp.getTime() / 1000,
+      createdAtBlockTimestamp: Math.floor(
+        marketRegistration.transaction.timestamp.getTime() / 1000
+      ),
       createdAtTxnId: String(marketRegistration.transaction.version),
       feeBps: INTEGRATOR_FEE_RATE_BPS,
     },
