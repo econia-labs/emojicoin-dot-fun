@@ -53,7 +53,7 @@ interface Pair {
   asset0Id: string;
   asset1Id: string;
   createdAtBlockNumber?: number;
-  createdAtBlockTimestamp?: number;
+  createdAtBlockTimestamp?: number; // Whole number representing a UNIX timestamp in seconds.
   createdAtTxnId?: string;
   creator?: string;
   feeBps?: number;
@@ -104,14 +104,25 @@ async function getPair(
       asset0Id: symbolEmojisToString(symbolEmojis),
       asset1Id: "APT",
       createdAtBlockNumber: parseInt(block.block_height),
-      createdAtBlockTimestamp: marketRegistration.transaction.timestamp.getTime() / 1000,
+      createdAtBlockTimestamp: Math.floor(
+        marketRegistration.transaction.timestamp.getTime() / 1000
+      ),
       createdAtTxnId: String(marketRegistration.transaction.version),
       feeBps: INTEGRATOR_FEE_RATE_BPS,
     },
   };
 }
 
-// NextJS JSON response handler
+// Although this route would be ideal for caching, nextjs doesn't offer the ability to control
+// caches for failed responses. In other words, if someone queries an asset that doesn't exist
+// yet at this endpoint, it would permanently cache that asset as not existing and thus return
+// the failed query JSON response. This is obviously problematic for not yet existing markets,
+// so unless we have some way to not cache failed queries/empty responses, we can't cache this
+// endpoint at all.
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export async function GET(request: NextRequest): Promise<NextResponse<PairResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const pairId = searchParams.get("id");

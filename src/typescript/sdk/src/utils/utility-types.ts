@@ -36,3 +36,8 @@ export type Writable<T> = {
 export type DeepWritable<T> = {
   -readonly [P in keyof T]: DeepWritable<T[P]>;
 };
+
+// prettier-ignore
+export type XOR<T, U> =
+  | (T & { [K in keyof U]?: never })
+  | (U & { [K in keyof T]?: never });
