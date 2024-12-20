@@ -108,5 +108,5 @@
     "test:e2e": "playwright test --project=firefox",
     "vercel-install": "./submodule.sh && pnpm i"
   },
-  "version": "0.0.1-alpha"
+  "version": "1.0.0"
 }
