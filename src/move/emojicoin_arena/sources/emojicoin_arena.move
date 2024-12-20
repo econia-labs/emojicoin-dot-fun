@@ -156,7 +156,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted whenever a user enters.
+    /// Emitted whenever a user enters, thereby executing a single-route swap into escrow.
     struct Enter has copy, drop, store {
         user: address,
         melee_id: u64,
@@ -165,6 +165,18 @@ module arena::emojicoin_arena {
         match_amount: u64,
         emojicoin_0_proceeds: u64,
         emojicoin_1_proceeds: u64
+    }
+
+    #[event]
+    /// Emitted whenever a user exits, thereby withdrawing from escrow.
+    struct Exit has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64,
+        octas_entered: u64,
+        octas_matched: u64,
+        tap_out_fee: u64
     }
 
     #[event]
@@ -793,14 +805,17 @@ module arena::emojicoin_arena {
         let exited_melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
 
         // Charge tap out fee if applicable.
+        let octas_entered = escrow_ref_mut.octas_entered;
+        let tap_out_fee = 0;
+        let octas_matched = escrow_ref_mut.octas_matched;
         if (melee_is_current) {
-            let octas_matched = escrow_ref_mut.octas_matched;
             if (octas_matched > 0) {
                 let vault_address =
                     account::get_signer_capability_address(
                         &registry_ref_mut.signer_capability
                     );
                 aptos_account::transfer(participant, vault_address, octas_matched);
+                tap_out_fee = octas_matched;
                 emit_vault_balance_update_with_vault_address(vault_address);
 
                 // Update melee state.
@@ -815,11 +830,16 @@ module arena::emojicoin_arena {
         };
 
         // Withdraw emojicoin balances from escrow.
+        let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
         if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
-            withdraw_from_escrow(participant_address, &mut escrow_ref_mut.emojicoin_0);
+            let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
+            emojicoin_0_proceeds = coin::value(emojicoin_0_ref_mut);
+            withdraw_from_escrow(participant_address, emojicoin_0_ref_mut);
         } else {
-            assert!(coin::value(&escrow_ref_mut.emojicoin_1) > 0, E_EXIT_NO_FUNDS);
-            withdraw_from_escrow(participant_address, &mut escrow_ref_mut.emojicoin_1);
+            let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
+            emojicoin_1_proceeds = coin::value(emojicoin_1_ref_mut);
+            assert!(emojicoin_1_proceeds > 0, E_EXIT_NO_FUNDS);
+            withdraw_from_escrow(participant_address, emojicoin_1_ref_mut);
         };
 
         // Update melee state.
@@ -834,6 +854,19 @@ module arena::emojicoin_arena {
         let user_melees_ref_mut = &mut UserMelees[participant_address];
         user_melees_ref_mut.user_melees_exited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_unexited_melee_ids_remove_if_contains(melee_id);
+
+        // Emit exit event.
+        event::emit(
+            Exit {
+                user: participant_address,
+                melee_id,
+                emojicoin_0_proceeds,
+                emojicoin_1_proceeds,
+                octas_entered,
+                octas_matched,
+                tap_out_fee
+            }
+        );
 
         // Emit state events.
         emit_state(
