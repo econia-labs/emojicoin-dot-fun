@@ -167,14 +167,18 @@ module arena::emojicoin_arena {
         available_rewards: u64
     }
 
-    public entry fun fund_vault(arena: &signer, amount: u64) acquires Registry {
-        aptos_account::transfer(
-            arena,
-            account::get_signer_capability_address(
-                &borrow_registry_ref_checked(arena).signer_capability
-            ),
-            amount
-        );
+    #[event]
+    /// Emitted whenever the vault balance is updated, except for when the vault is funded by
+    /// sending funds directly to the vault address instead of by using the `fund_vault` function.
+    struct VaultBalanceUpdate has copy, drop, store {
+        new_balance: u64
+    }
+
+    public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
+        let vault_address =
+            account::get_signer_capability_address(&Registry[@arena].signer_capability);
+        aptos_account::transfer(funder, vault_address, amount);
+        emit_vault_balance_update_with_vault_address(vault_address);
     }
 
     public entry fun set_next_melee_available_rewards(
@@ -201,13 +205,14 @@ module arena::emojicoin_arena {
     }
 
     public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
+        let signer_capability_ref =
+            &borrow_registry_ref_mut_checked(arena).signer_capability;
         aptos_account::transfer(
-            &account::create_signer_with_capability(
-                &borrow_registry_ref_checked(arena).signer_capability
-            ),
+            &account::create_signer_with_capability(signer_capability_ref),
             @arena,
             amount
         );
+        emit_vault_balance_update_with_singer_capability_ref(signer_capability_ref);
     }
 
     #[randomness]
@@ -303,12 +308,14 @@ module arena::emojicoin_arena {
                 if (match_amount > 0) {
 
                     // Transfer APT to entrant.
+                    let signer_capability_ref = &registry_ref_mut.signer_capability;
                     aptos_account::transfer(
-                        &account::create_signer_with_capability(
-                            &registry_ref_mut.signer_capability
-                        ),
+                        &account::create_signer_with_capability(signer_capability_ref),
                         entrant_address,
                         match_amount
+                    );
+                    emit_vault_balance_update_with_singer_capability_ref(
+                        signer_capability_ref
                     );
 
                     // Update melee state.
@@ -570,6 +577,28 @@ module arena::emojicoin_arena {
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
+    inline fun emit_vault_balance_update_with_singer_capability_ref(
+        signer_capability_ref: &SignerCapability
+    ) {
+        event::emit(
+            VaultBalanceUpdate {
+                new_balance: coin::balance<AptosCoin>(
+                    account::get_signer_capability_address(signer_capability_ref)
+                )
+            }
+        );
+    }
+
+    inline fun emit_vault_balance_update_with_vault_address(
+        vault_address: address
+    ) {
+        event::emit(
+            VaultBalanceUpdate {
+                new_balance: coin::balance<AptosCoin>(vault_address)
+            }
+        );
+    }
+
     inline fun escrow_n_swaps_increment<Coin0, LP0, Coin1, LP1>(
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>
     ) {
@@ -629,6 +658,7 @@ module arena::emojicoin_arena {
                         &registry_ref_mut.signer_capability
                     );
                 aptos_account::transfer(participant, vault_address, octas_matched);
+                emit_vault_balance_update_with_vault_address(vault_address);
 
                 // Update melee state.
                 exited_melee_ref_mut.melee_available_rewards_increment(octas_matched);
