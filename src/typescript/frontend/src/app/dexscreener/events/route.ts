@@ -202,9 +202,7 @@ type Event = (SwapEvent | JoinExitEvent) & BlockInfo;
 interface EventsResponse {
   events: Event[];
 }
-type Asdf = Flatten<SwapEvent & BlockInfo>;
-
-function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Asdf {
+function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): SwapEvent & BlockInfo {
   // Base / quote is emojicoin / APT.
   // Thus asset0 / asset1 is always base volume / quote volume.
   const assetInOut = event.swap.isSell
@@ -238,7 +236,7 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Asd
     txnIndex: Number(event.transaction.version),
     eventIndex: Number(event.blockAndEvent.eventIndex),
 
-    maker: event.swap.swapper,
+    maker: event.transaction.sender,
     pairId: symbolEmojisToPairId(event.market.symbolEmojis),
 
     ...assetInOut,
@@ -270,7 +268,7 @@ function toDexscreenerJoinExitEvent(
     txnIndex: Number(event.transaction.version),
     eventIndex: Number(event.blockAndEvent.eventIndex),
 
-    maker: event.liquidity.provider,
+    maker: event.transaction.sender,
     pairId: symbolEmojisToPairId(event.market.symbolEmojis),
 
     amount0: toCoinDecimalString(event.liquidity.baseAmount, DECIMALS),
