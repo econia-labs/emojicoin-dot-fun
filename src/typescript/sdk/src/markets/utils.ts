@@ -456,7 +456,7 @@ PreciseBig.DP = 100;
  * This is equivalent to calculating the slope of the tangent line created from the exact point on
  * the curve, where the curve is the function the AMM uses to calculate the price for the market.
  *
- * The price is denominated in `quote / base`, where `base` is the emojicoin and `quote` is APT.
+ * The price is denominated in `base / quote`, where `base` is the emojicoin and `quote` is APT.
  *
  *  * For an in depth explanation of the math and behavior behind the AMMs:
  * @see {@link https://github.com/econia-labs/emojicoin-dot-fun/blob/main/doc/blackpaper/emojicoin-dot-fun-blackpaper.pdf}

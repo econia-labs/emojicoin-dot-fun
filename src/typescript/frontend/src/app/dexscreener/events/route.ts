@@ -88,7 +88,27 @@ import { calculateCurvePrice, calculateRealReserves } from "@sdk/markets";
 import { toCoinDecimalString } from "../../../lib/utils/decimals";
 import { DECIMALS } from "@sdk/const";
 import { symbolEmojisToPairId } from "../util";
-import { compareBigInt } from "@econia-labs/emojicoin-sdk";
+import { compareBigInt, type Flatten } from "@econia-labs/emojicoin-sdk";
+import { type XOR } from "@sdk/utils/utility-types";
+
+export type Asset0In1Out = {
+  asset0In: number | string;
+  asset1Out: number | string;
+};
+
+export type Asset1In0Out = {
+  asset0Out: number | string;
+  asset1In: number | string;
+};
+
+export type AssetInOut = XOR<Asset0In1Out, Asset1In0Out>;
+
+export type DexscreenerReserves = {
+  reserves: {
+    asset0: number | string;
+    asset1: number | string;
+  };
+};
 
 /**
  * - `txnId` is a transaction identifier such as a transaction hash
@@ -128,24 +148,19 @@ import { compareBigInt } from "@econia-labs/emojicoin-sdk";
  * - The Indexer automatically handles calculations for USD pricing (`priceUsd` as opposed to
  * `priceNative`)
  */
-export interface SwapEvent {
-  eventType: "swap";
-  txnId: string;
-  txnIndex: number;
-  eventIndex: number;
-  maker: string;
-  pairId: string;
-  asset0In?: number | string;
-  asset1In?: number | string;
-  asset0Out?: number | string;
-  asset1Out?: number | string;
-  priceNative: number | string;
-  reserves?: {
-    asset0: number | string;
-    asset1: number | string;
-  };
-  metadata?: Record<string, string>;
-}
+export type SwapEvent = Flatten<
+  {
+    eventType: "swap";
+    txnId: string;
+    txnIndex: number;
+    eventIndex: number;
+    maker: string;
+    pairId: string;
+    priceNative: number | string;
+    metadata?: Record<string, string>;
+  } & AssetInOut &
+    DexscreenerReserves
+>;
 
 /**
  * - `txnId` is a transaction identifier such as a transaction hash
@@ -167,21 +182,19 @@ export interface SwapEvent {
  * - `metadata` includes any optional auxiliary info not covered in the default schema and not
  * required in most cases
  */
-interface JoinExitEvent {
-  eventType: "join" | "exit";
-  txnId: string;
-  txnIndex: number;
-  eventIndex: number;
-  maker: string;
-  pairId: string;
-  amount0: number | string;
-  amount1: number | string;
-  reserves?: {
-    asset0: number | string;
-    asset1: number | string;
-  };
-  metadata?: Record<string, string>;
-}
+type JoinExitEvent = Flatten<
+  {
+    eventType: "join" | "exit";
+    txnId: string;
+    txnIndex: number;
+    eventIndex: number;
+    maker: string;
+    pairId: string;
+    amount0: number | string;
+    amount1: number | string;
+    metadata?: Record<string, string>;
+  } & DexscreenerReserves
+>;
 
 type BlockInfo = { block: Block };
 type Event = (SwapEvent | JoinExitEvent) & BlockInfo;
@@ -189,27 +202,20 @@ type Event = (SwapEvent | JoinExitEvent) & BlockInfo;
 interface EventsResponse {
   events: Event[];
 }
+type Asdf = Flatten<SwapEvent & BlockInfo>;
 
-function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): SwapEvent & BlockInfo {
-  let assetInOut;
-
-  if (event.swap.isSell) {
-    // We are selling to APT
-    assetInOut = {
-      asset0In: toCoinDecimalString(event.swap.inputAmount, DECIMALS),
-      asset0Out: 0,
-      asset1In: 0,
-      asset1Out: toCoinDecimalString(event.swap.baseVolume, DECIMALS),
-    };
-  } else {
-    // We are buying with APT
-    assetInOut = {
-      asset0In: 0,
-      asset0Out: toCoinDecimalString(event.swap.quoteVolume, DECIMALS),
-      asset1In: toCoinDecimalString(event.swap.inputAmount, DECIMALS),
-      asset1Out: 0,
-    };
-  }
+function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Asdf {
+  // Base / quote is emojicoin / APT.
+  // Thus asset0 / asset1 is always base volume / quote volume.
+  const assetInOut = event.swap.isSell
+    ? {
+        asset0In: toCoinDecimalString(event.swap.baseVolume, DECIMALS),
+        asset1Out: toCoinDecimalString(event.swap.quoteVolume, DECIMALS),
+      }
+    : {
+        asset0Out: toCoinDecimalString(event.swap.baseVolume, DECIMALS),
+        asset1In: toCoinDecimalString(event.swap.quoteVolume, DECIMALS),
+      };
 
   const { base, quote } = calculateRealReserves(event.state);
   const reserves = {
@@ -236,11 +242,8 @@ function toDexscreenerSwapEvent(event: ReturnType<typeof toSwapEventModel>): Swa
     pairId: symbolEmojisToPairId(event.market.symbolEmojis),
 
     ...assetInOut,
-
-    asset0In: event.swap.inputAmount.toString(),
-    asset1Out: event.swap.quoteVolume.toString(),
     priceNative,
-    ...reserves,
+    reserves,
   };
 }
 

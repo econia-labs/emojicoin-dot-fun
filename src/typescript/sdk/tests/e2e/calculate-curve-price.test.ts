@@ -112,8 +112,8 @@ describe(`curve price calculations w/ geometric mean, at least ${accuracy * 100}
       )
       .then(({ beforePrice, swap, response }) => ({
         before: beforePrice,
-        average: PreciseBig(swap.event.quoteVolume.toString()).div(
-          swap.event.baseVolume.toString()
+        average: PreciseBig(swap.event.baseVolume.toString()).div(
+          swap.event.quoteVolume.toString()
         ),
         after: calculateCurvePrice(swap.model.state),
         response,
