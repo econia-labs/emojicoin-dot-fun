@@ -156,6 +156,18 @@ module arena::emojicoin_arena {
     }
 
     #[event]
+    /// Emitted whenever a user enters.
+    struct Enter has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        input_amount: u64,
+        quote_volume: u64,
+        match_amount: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64
+    }
+
+    #[event]
     /// Emitted after a user enters, swaps, or exits, representing the updated escrow state.
     struct EscrowState has copy, drop, store {
         user: address,
@@ -377,6 +389,7 @@ module arena::emojicoin_arena {
         // Execute a swap then immediately move funds into escrow, updating total emojicoin locked
         // values based on side.
         let input_amount_after_matching = input_amount + match_amount;
+        let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
         let quote_volume =
             if (buy_coin_0) {
                 let (net_proceeds, quote_volume) =
@@ -392,6 +405,7 @@ module arena::emojicoin_arena {
                 current_melee_ref_mut.melee_emojicoin_0_locked_increment(
                     coin::value(emojicoin_0_ref_mut)
                 );
+                emojicoin_0_proceeds = net_proceeds;
                 quote_volume
             } else {
                 let (net_proceeds, quote_volume) =
@@ -407,6 +421,7 @@ module arena::emojicoin_arena {
                 current_melee_ref_mut.melee_emojicoin_0_locked_increment(
                     coin::value(emojicoin_1_ref_mut)
                 );
+                emojicoin_1_proceeds = net_proceeds;
                 quote_volume
             };
 
@@ -433,6 +448,19 @@ module arena::emojicoin_arena {
         user_melees_ref_mut.user_melees_entered_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_unexited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_exited_melee_ids_remove_if_contains(melee_id);
+
+        // Emit enter event.
+        event::emit(
+            Enter {
+                user: entrant_address,
+                melee_id,
+                input_amount,
+                quote_volume,
+                match_amount,
+                emojicoin_0_proceeds,
+                emojicoin_1_proceeds
+            }
+        );
 
         // Emit state events.
         emit_state(
