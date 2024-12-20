@@ -1,3 +1,4 @@
+// cspell:word funder
 // cspell:word unexited
 module arena::emojicoin_arena {
 
@@ -180,7 +181,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emmitted whenever a user swaps within their escrow.
+    /// Emitted whenever a user swaps within their escrow.
     struct Swap has copy, drop, store {
         user: address,
         melee_id: u64,
