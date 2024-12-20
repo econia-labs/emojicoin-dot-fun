@@ -35,8 +35,9 @@ module arena::emojicoin_arena {
     const E_ENTER_COIN_BALANCE_0: u64 = 4;
     /// User's melee escrow has nonzero emojicoin 1 balance.
     const E_ENTER_COIN_BALANCE_1: u64 = 5;
-    /// Elected to lock in but unable to match.
-    const E_UNABLE_TO_LOCK_IN: u64 = 6;
+    /// User did not elect to lock in even though they've been matched since their most recent
+    /// deposit into an empty escrow.
+    const E_TOP_OFF_MUST_LOCK_IN: u64 = 6;
     /// Provided escrow coin type is invalid.
     const E_INVALID_ESCROW_COIN_TYPE: u64 = 7;
     /// User has no escrow resource.
@@ -268,10 +269,16 @@ module arena::emojicoin_arena {
                 coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0
             );
 
-        // Match a portion of user's contribution if they elect to lock in.
+        // Verify that if user has been matched since their most recent deposit into an empty esrow,
+        // they lock in again.
+        if (escrow_ref_mut.octas_matched > 0) {
+            assert!(lock_in, E_TOP_OFF_MUST_LOCK_IN);
+        };
+
+        // Match a portion of user's contribution if they elect to lock in, and if there are any
+        // available rewards to match.
         let match_amount =
             if (lock_in) {
-                // Verify that user can even lock in.
                 let match_amount =
                     match_amount(
                         input_amount,
@@ -280,28 +287,30 @@ module arena::emojicoin_arena {
                         registry_ref_mut,
                         time
                     );
-                assert!(match_amount > 0, E_UNABLE_TO_LOCK_IN);
+                if (match_amount > 0) {
 
-                // Transfer APT to entrant.
-                aptos_account::transfer(
-                    &account::create_signer_with_capability(
-                        &registry_ref_mut.signer_capability
-                    ),
-                    entrant_address,
-                    match_amount
-                );
+                    // Transfer APT to entrant.
+                    aptos_account::transfer(
+                        &account::create_signer_with_capability(
+                            &registry_ref_mut.signer_capability
+                        ),
+                        entrant_address,
+                        match_amount
+                    );
 
-                // Update melee state.
-                current_melee_ref_mut.melee_available_rewards_decrement(match_amount);
-                current_melee_ref_mut.melee_locked_in_entrants_add_if_not_contains(
-                    entrant_address
-                );
+                    // Update melee state.
+                    current_melee_ref_mut.melee_available_rewards_decrement(match_amount);
+                    current_melee_ref_mut.melee_locked_in_entrants_add_if_not_contains(
+                        entrant_address
+                    );
 
-                // Update registry state.
-                registry_ref_mut.registry_octas_matched_increment(match_amount);
+                    // Update registry state.
+                    registry_ref_mut.registry_octas_matched_increment(match_amount);
 
-                // Update escrow state.
-                escrow_ref_mut.escrow_octas_matched_increment(match_amount);
+                    // Update escrow state.
+                    escrow_ref_mut.escrow_octas_matched_increment(match_amount);
+
+                };
 
                 match_amount
 
