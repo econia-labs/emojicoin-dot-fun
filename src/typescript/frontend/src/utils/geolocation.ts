@@ -4,17 +4,31 @@ import { GEOBLOCKED, GEOBLOCKING_ENABLED } from "lib/server-env";
 import { headers } from "next/headers";
 
 export type Location = {
-  countryCode: string;
-  regionCode: string;
+  countryCode: string | null;
+  regionCode: string | null;
 };
 
 const isDisallowedLocation = ({ countryCode, regionCode }: Location) => {
-  if (GEOBLOCKED.countries.includes(countryCode)) {
+  if (countryCode && GEOBLOCKED.countries.includes(countryCode)) {
     return true;
   }
-  const isoCode = `${countryCode}-${regionCode}`;
-  if (GEOBLOCKED.regions.includes(isoCode)) {
-    return true;
+  if (regionCode) {
+    const isoCode = `${countryCode}-${regionCode}`;
+    if (GEOBLOCKED.regions.includes(isoCode)) {
+      return true;
+    }
+  }
+  if (countryCode && !regionCode) {
+    if (GEOBLOCKED.regions.map((r) => r.split("-")[0]).includes(countryCode)) {
+      return true;
+    }
+  }
+  if (!countryCode && regionCode) {
+    // Note that even if the `regionCode` is `XX`, and `XX` is a banned country, this will return
+    // `true` and thus block the user, because "XX".split("-")[0] is just "XX".
+    if (GEOBLOCKED.countries.includes(regionCode.split("-")[0])) {
+      return true;
+    }
   }
   return false;
 };
@@ -23,7 +37,7 @@ export const isUserGeoblocked = async () => {
   if (!GEOBLOCKING_ENABLED) return false;
   const country = headers().get("x-vercel-ip-country");
   const region = headers().get("x-vercel-ip-country-region");
-  if (typeof country !== "string" || typeof region !== "string") {
+  if (typeof country !== "string" && typeof region !== "string") {
     return true;
   }
   return isDisallowedLocation({

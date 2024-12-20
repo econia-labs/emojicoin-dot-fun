@@ -30,6 +30,33 @@ aptos move publish \
     --profile $PROFILE
 ```
 
+## Add admin
+
+```sh
+NEW_ADMIN=0xccc...
+MARKET_METADATA=0xaaa...
+PROFILE_NAME=my-profile
+
+aptos move run \
+  --args address:$NEW_ADMIN \
+  --function-id $MARKET_METADATA::emojicoin_dot_fun_market_metadata::add_admin \
+  --profile $PROFILE_NAME
+```
+
+## Remove admin
+
+```sh
+ADMIN_TO_REMOVE=0xccc...
+MARKET_METADATA=0xaaa...
+PROFILE_NAME=my-profile
+
+aptos move run \
+  --args address:$ADMIN_TO_REMOVE \
+  --function-id \
+    $MARKET_METADATA::emojicoin_dot_fun_market_metadata::remove_admin \
+  --profile $PROFILE_NAME
+```
+
 ## Set property
 
 ```sh
