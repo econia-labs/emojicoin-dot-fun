@@ -39,12 +39,11 @@ const Button = <E extends React.ElementType = "button">({
     ...scrambleProps,
   });
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const textProps: any = {
-    textScale: "pixelHeading4",
-    color: isDisabled || fakeDisabled ? "darkGray" : "econiaBlue",
-    textTransform: "uppercase",
-    fontSize: scale === "sm" ? "20px" : "24px",
+  const textProps = {
+    textScale: "pixelHeading4" as const,
+    color: isDisabled || fakeDisabled ? ("darkGray" as const) : ("econiaBlue" as const),
+    textTransform: "uppercase" as const,
+    fontSize: scale === "sm" ? "20px" : ("24px" as const),
   };
 
   return (
