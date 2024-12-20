@@ -87,12 +87,11 @@ export const revalidate = 0;
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-// NextJS JSON response handler
 export async function GET(request: NextRequest): Promise<NextResponse<AssetResponse>> {
   const searchParams = request.nextUrl.searchParams;
   const assetId = searchParams.get("id");
   if (!assetId) {
-    // This is a required field, and is an error otherwise
+    // This is a required field, and is an error otherwise.
     return new NextResponse("id is a parameter", { status: 400 });
   }
   const asset = await getAsset(assetId);

@@ -36,7 +36,6 @@ interface LatestBlockResponse {
 
 export const revalidate = 1;
 
-// NextJS JSON response handler
 export async function GET(_request: NextRequest): Promise<NextResponse<LatestBlockResponse>> {
   const status = await getProcessorStatus();
   const aptos = getAptosClient();

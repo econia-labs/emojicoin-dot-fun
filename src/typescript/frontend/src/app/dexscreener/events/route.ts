@@ -298,7 +298,6 @@ export const revalidate = 0;
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-// NextJS JSON response handler
 /**
  * We treat our versions as "blocks" because it's faster to implement given our current architecture
  * This requires dexscreener to have relatively large `fromBlock - toBlock` ranges to keep up
