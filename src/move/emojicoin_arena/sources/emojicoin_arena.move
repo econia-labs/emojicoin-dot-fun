@@ -156,6 +156,19 @@ module arena::emojicoin_arena {
     }
 
     #[event]
+    /// Emitted after a user enters, swaps, or exits, representing the final state of their escrow.
+    struct EscrowState has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        emojicoin_0_balance: u64,
+        emojicoin_1_balance: u64,
+        n_swaps: u64,
+        swaps_volume: u128,
+        octas_entered: u64,
+        octas_matched: u64
+    }
+
+    #[event]
     /// Emitted whenever a new melee starts.
     struct NewMelee has copy, drop, store {
         melee_id: u64,
@@ -396,6 +409,8 @@ module arena::emojicoin_arena {
         user_melees_ref_mut.user_melees_unexited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_exited_melee_ids_remove_if_contains(melee_id);
 
+        // Emit escrow state event.
+        escrow_ref_mut.emit_escrow_state(entrant_address);
     }
 
     #[randomness]
@@ -492,13 +507,15 @@ module arena::emojicoin_arena {
         escrow_ref_mut.escrow_n_swaps_increment();
         escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
 
+        // Exit as needed, emitting escrow state event if not exiting, since exit inner function
+        // emits the event if exiting.
         if (exit_once_done)
             exit_inner<Coin0, LP0, Coin1, LP1>(
                 swapper,
                 swapper_address,
                 registry_ref_mut,
                 false
-            );
+            ) else escrow_ref_mut.emit_escrow_state(swapper_address);
 
     }
 
@@ -575,6 +592,24 @@ module arena::emojicoin_arena {
                 true
             } else false;
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
+    }
+
+    inline fun emit_escrow_state<Coin0, LP0, Coin1, LP1>(
+        self: &Escrow<Coin0, LP0, Coin1, LP1>,
+        participant_address: address
+    ) {
+        event::emit(
+            EscrowState {
+                user: participant_address,
+                melee_id: self.melee_id,
+                emojicoin_0_balance: coin::value(&self.emojicoin_0),
+                emojicoin_1_balance: coin::value(&self.emojicoin_1),
+                n_swaps: self.n_swaps,
+                swaps_volume: self.swaps_volume,
+                octas_entered: self.octas_entered,
+                octas_matched: self.octas_matched
+            }
+        );
     }
 
     inline fun emit_vault_balance_update_with_singer_capability_ref(
@@ -691,6 +726,9 @@ module arena::emojicoin_arena {
         let user_melees_ref_mut = &mut UserMelees[participant_address];
         user_melees_ref_mut.user_melees_exited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_unexited_melee_ids_remove_if_contains(melee_id);
+
+        // Emit escrow state event.
+        escrow_ref_mut.emit_escrow_state(participant_address);
     }
 
     inline fun get_n_registered_markets(): u64 {
