@@ -24,8 +24,10 @@ import {
   type MarketLatestStateEventModel,
 } from "../../../src/indexer-v2/types";
 import {
+  type AnyEmojicoinEvent,
   calculateTvlGrowth,
   getEvents,
+  getEventsWithIndices,
   getMarketResourceFromWriteSet,
   Period,
   rawPeriodToEnum,
@@ -60,6 +62,30 @@ const checkTuples = (args: [string, JsonValue | undefined, JsonValue | undefined
   );
 
   expect(rows).toEqual(responses);
+};
+
+const checkEventIndex = (
+  row: SwapEventModel | LiquidityEventModel,
+  // This *has* to be the event GUID from the Event, not the EventModel type,
+  // because the GUIDs are created differently. This is used to map the event
+  // to an event index to easily compare to the emojicoin indexer event index.
+  eventGuid: AnyEmojicoinEvent["guid"],
+  response: UserTransactionResponse
+) => {
+  const events = getEventsWithIndices(response);
+  const flattenedGuidsToEventIndices = Object.values(events).flatMap((v) =>
+    v.map(({ guid, eventIndex }) => [guid, eventIndex] as const)
+  );
+  const eventsAndIndices = new Map(flattenedGuidsToEventIndices);
+  const eventIndex = eventsAndIndices.get(eventGuid)!;
+  if (!eventIndex) {
+    throw new Error(`${row.eventName}Event not in response version: ${row.transaction.version}`);
+  }
+
+  // It would be nice to check the block number/height here if possible, but it's not returned by
+  // the fullnode and graphql is a pain to work with in jest unit tests, and this can just be
+  // verified manually.
+  expect(eventIndex.toString()).toEqual(row.blockAndEvent?.eventIndex.toString());
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -425,6 +451,7 @@ const Swap = (row: SwapEventModel, response: UserTransactionResponse) => {
   compareMarketAndStateMetadata(row, stateEvent);
   compareStateEvents(row, stateEvent);
   compareSwapEvents(row, swapEvent);
+  checkEventIndex(row, swapEvent.guid, response);
 };
 
 const Chat = (row: ChatEventModel, response: UserTransactionResponse) => {
@@ -447,6 +474,7 @@ const Liquidity = (row: LiquidityEventModel, response: UserTransactionResponse) 
   compareMarketAndStateMetadata(row, stateEvent);
   compareLastSwap(row, stateEvent);
   compareLiquidityEvents(row, liquidityEvent);
+  checkEventIndex(row, liquidityEvent.guid, response);
 };
 
 const MarketLatestState = (row: MarketLatestStateEventModel, response: UserTransactionResponse) => {
