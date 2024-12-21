@@ -14,6 +14,7 @@ import {
   createEmptyEvents,
   toCamelCaseEventName,
   isAnEmojicoinStructName,
+  type EventsWithIndices,
 } from "./events";
 import { typeTagInputToStructName } from "../utils/type-tags";
 import { createNamedObjectAddress } from "../utils/aptos-utils";
@@ -66,25 +67,42 @@ export async function getRegistryAddress(args: {
   return AccountAddress.from(registryAddressResource.registry_address);
 }
 
-export function getEvents(
+export const getEvents = (response?: UserTransactionResponse | PendingTransactionResponse | null) =>
+  getEventsMaybeWithIndices(response, false);
+
+export const getEventsWithIndices = (
   response?: UserTransactionResponse | PendingTransactionResponse | null
-): Events {
-  const events = createEmptyEvents();
+) => getEventsMaybeWithIndices(response, true);
+
+function getEventsMaybeWithIndices(
+  response: UserTransactionResponse | PendingTransactionResponse | null | undefined,
+  withIndices?: false | undefined
+): Events;
+function getEventsMaybeWithIndices(
+  response: UserTransactionResponse | PendingTransactionResponse | null | undefined,
+  withIndices: true
+): EventsWithIndices;
+function getEventsMaybeWithIndices(
+  response: UserTransactionResponse | PendingTransactionResponse | null | undefined,
+  withIndices: boolean = false
+): Events | EventsWithIndices {
+  const events = createEmptyEvents() as EventsWithIndices;
   if (!response || !isUserTransactionResponse(response)) {
     return events;
   }
 
-  response.events.forEach((event): void => {
+  response.events.forEach((event, eventIndex): void => {
     const structName = typeTagInputToStructName(event.type);
     if (!structName || !isAnEmojicoinStructName(structName)) {
       return;
     }
     const data = converter[structName](event.data, response.version);
     const camelCasedAndPlural = `${toCamelCaseEventName(structName)}s` as const;
+    const eventData = withIndices ? { ...data, eventIndex } : data;
     // TypeScript can't infer or narrow the type. It's too difficult to figure out how to get it to
     // do it properly so we must use `as any` here, although we know for sure its type is correct.
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    events[camelCasedAndPlural].push(data as any);
+    events[camelCasedAndPlural].push(eventData as any);
   });
   return events;
 }
