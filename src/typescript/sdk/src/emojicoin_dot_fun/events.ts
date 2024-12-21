@@ -44,6 +44,9 @@ export const toCamelCaseEventName = <T extends FullEventName>(s: T): PascalToCam
 };
 
 export type Events = { [K in CamelCaseEventNames]: Types[Capitalize<RemovePlurality<K>>][] };
+export type EventsWithIndices = {
+  [K in keyof Events]: (Events[K][number] & { eventIndex: number })[];
+};
 
 export const createEmptyEvents = (): Events => ({
   swapEvents: [],
