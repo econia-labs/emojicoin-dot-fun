@@ -68,7 +68,7 @@ export async function getRegistryAddress(args: {
 }
 
 export const getEvents = (response?: UserTransactionResponse | PendingTransactionResponse | null) =>
-  getEventsMaybeWithIndices(response);
+  getEventsMaybeWithIndices(response, false);
 
 export const getEventsWithIndices = (
   response?: UserTransactionResponse | PendingTransactionResponse | null

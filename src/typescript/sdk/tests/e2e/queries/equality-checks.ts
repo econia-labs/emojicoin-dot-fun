@@ -83,7 +83,8 @@ const checkEventIndex = (
   }
 
   // It would be nice to check the block number/height here if possible, but it's not returned by
-  // the fullnode and graphql is a pain to work with in jest unit tests.
+  // the fullnode and graphql is a pain to work with in jest unit tests, and this can just be
+  // verified manually.
   expect(eventIndex.toString()).toEqual(row.blockAndEvent?.eventIndex.toString());
 };
 
