@@ -212,7 +212,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted after a user enters or exits, representing ther final `UserMelees` state.
+    /// Emitted after a user enters or exits, representing their final `UserMelees` state.
     struct UserMeleesState has copy, drop, store {
         n_entered_melees: u64,
         n_exited_melees: u64,
