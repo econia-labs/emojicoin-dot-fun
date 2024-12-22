@@ -1,56 +1,45 @@
+// cspell:word funder
 // cspell:word unexited
 module arena::emojicoin_arena {
 
     use aptos_framework::account::{Self, SignerCapability};
-    use aptos_framework::aggregator_v2::{Self, Aggregator};
     use aptos_framework::aptos_account;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin::{Self, Coin};
+    use aptos_framework::event;
     use aptos_framework::randomness::Self;
     use aptos_framework::timestamp;
     use aptos_std::math64::min;
     use aptos_std::smart_table::{Self, SmartTable};
     use aptos_std::type_info;
     use arena::pseudo_randomness;
-    use emojicoin_dot_fun::emojicoin_dot_fun::{
-        Self,
-        MarketMetadata,
-        market_view,
-        registry_view,
-        unpack_market_metadata,
-        unpack_registry_view
-    };
+    use emojicoin_dot_fun::emojicoin_dot_fun::{Self, MarketMetadata};
     use std::option::Self;
     use std::signer;
 
     /// Signer does not correspond to arena account.
     const E_NOT_ARENA: u64 = 0;
-    /// New melee duration is too short.
-    const E_NEW_DURATION_TOO_SHORT: u64 = 1;
-    /// New melee lock-in period is too long.
-    const E_NEW_LOCK_IN_PERIOD_TOO_LONG: u64 = 2;
-    /// New melee match percentage is too high.
-    const E_NEW_MATCH_PERCENTAGE_TOO_HIGH: u64 = 3;
     /// User's melee escrow has nonzero emojicoin 0 balance.
-    const E_ENTER_COIN_BALANCE_0: u64 = 4;
+    const E_ENTER_COIN_BALANCE_0: u64 = 1;
     /// User's melee escrow has nonzero emojicoin 1 balance.
-    const E_ENTER_COIN_BALANCE_1: u64 = 5;
-    /// Elected to lock in but unable to match.
-    const E_UNABLE_TO_LOCK_IN: u64 = 6;
+    const E_ENTER_COIN_BALANCE_1: u64 = 2;
+    /// User did not elect to lock in even though they've been matched since their most recent
+    /// deposit into an empty escrow.
+    const E_TOP_OFF_MUST_LOCK_IN: u64 = 3;
     /// Provided escrow coin type is invalid.
-    const E_INVALID_ESCROW_COIN_TYPE: u64 = 7;
+    const E_INVALID_ESCROW_COIN_TYPE: u64 = 4;
     /// User has no escrow resource.
-    const E_NO_ESCROW: u64 = 8;
+    const E_NO_ESCROW: u64 = 5;
     /// Swapper has no funds in escrow to swap.
-    const E_SWAP_NO_FUNDS: u64 = 9;
+    const E_SWAP_NO_FUNDS: u64 = 6;
     /// User has no funds in escrow to withdraw.
-    const E_EXIT_NO_FUNDS: u64 = 10;
+    const E_EXIT_NO_FUNDS: u64 = 7;
+
+    const MAX_PERCENTAGE: u64 = 100;
+    const SHIFT_Q64: u8 = 64;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
-
-    const U64_MAX: u64 = 0xffffffffffffffff;
-    const MAX_PERCENTAGE: u64 = 100;
 
     /// Flat integrator fee.
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
@@ -77,8 +66,8 @@ module arena::emojicoin_arena {
         max_match_percentage: u64,
         /// Maximum amount of APT to match in octas, when locking in.
         max_match_amount: u64,
-        /// Amount of rewards that are available to claim for this melee while it is still active.
-        /// Measured in octas, conditional on vault balance.
+        /// Amount of rewards that are available to claim for this melee, measured in octas, and
+        /// conditional on vault balance. Reset to 0 when cranking the schedule.
         available_rewards: u64,
         /// All entrants who have entered the melee, used as a set.
         all_entrants: SmartTable<address, Nil>,
@@ -86,23 +75,23 @@ module arena::emojicoin_arena {
         active_entrants: SmartTable<address, Nil>,
         /// Entrants who have exited the melee, used as a set.
         exited_entrants: SmartTable<address, Nil>,
-        /// Entrants who have locked in, used as a set. If user exits before melee ends they are
+        /// Entrants who have locked in, used as a set. If user exits before the melee ends they are
         /// removed from this set. If they exit after the melee ends, they are not removed.
         locked_in_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
-        n_swaps: Aggregator<u64>,
+        n_swaps: u64,
         /// Volume of melee-specific swaps in octas.
-        swaps_volume: Aggregator<u128>,
+        swaps_volume: u128,
         /// Amount of emojicoin 0 locked in all melee escrows for the melee.
-        emojicoin_0_locked: Aggregator<u64>,
+        emojicoin_0_locked: u64,
         /// Amount of emojicoin 1 locked in all melee escrows for the melee.
-        emojicoin_1_locked: Aggregator<u64>
+        emojicoin_1_locked: u64
     }
 
     struct Registry has key {
-        /// A map of each melee's `melee_id` to the melee.
+        /// A map of each `Melee`'s `melee_id` to the `Melee` itself.
         melees_by_id: SmartTable<u64, Melee>,
-        /// Map from a sorted combination of market IDs (lower ID first) to the melee serial ID.
+        /// Map from a sorted combination of market IDs (lower ID first) to the `Melee` serial ID.
         melee_ids_by_market_ids: SmartTable<vector<u64>, u64>,
         /// Approves transfers from the vault.
         signer_capability: SignerCapability,
@@ -117,9 +106,9 @@ module arena::emojicoin_arena {
         /// All entrants who have entered a melee.
         all_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
-        n_swaps: Aggregator<u64>,
+        n_swaps: u64,
         /// Volume of melee-specific swaps in octas.
-        swaps_volume: Aggregator<u128>,
+        swaps_volume: u128,
         /// Amount of octas matched. Decremented when a user taps out.
         octas_matched: u64
     }
@@ -131,36 +120,159 @@ module arena::emojicoin_arena {
         emojicoin_0: Coin<Coin0>,
         /// Emojicoin 1 holdings.
         emojicoin_1: Coin<Coin1>,
-        /// Number of swaps user has executed during the melee.
+        /// Number of swaps user has executed during the `Melee`.
         n_swaps: u64,
-        /// Volume of user's melee-specific swaps in octas.
+        /// Volume of user's `Melee`-specific swaps in octas.
         swaps_volume: u128,
-        /// Cumulative amount of APT entered into the melee since the most recent deposit into an
-        /// empty escrow. Inclusive of total amount matched from locking in since most recent
-        /// deposit into an empty escrow. Reset to 0 upon exit.
+        /// Cumulative amount of APT entered into the `Melee` since the most recent deposit into an
+        /// empty `Escrow`. Inclusive of total amount matched from locking in since most recent
+        /// deposit into an empty `Escrow`. Reset to 0 upon exit.
         octas_entered: u64,
-        /// Cumulative amount of APT matched since most recent deposit into an empty escrow, reset
+        /// Cumulative amount of APT matched since most recent deposit into an empty `Escrow`, reset
         /// to 0 upon exit. Must be paid back in full when tapping out.
         octas_matched: u64
     }
 
     struct UserMelees has key {
-        /// Set of serial IDs of all melees the user has entered.
+        /// Set of serial IDs of all `Melee`s the user has entered.
         entered_melee_ids: SmartTable<u64, Nil>,
-        /// Set of serial IDs of all melees the user has exited.
+        /// Set of serial IDs of all `Melee`s the user has exited.
         exited_melee_ids: SmartTable<u64, Nil>,
-        /// Set of serial IDs of all melees the user has entered but not exited.
+        /// Set of serial IDs of all `Melee`s the user has entered but not exited.
         unexited_melee_ids: SmartTable<u64, Nil>
     }
 
-    public entry fun fund_vault(arena: &signer, amount: u64) acquires Registry {
-        aptos_account::transfer(
-            arena,
-            account::get_signer_capability_address(
-                &borrow_registry_ref_checked(arena).signer_capability
-            ),
-            amount
-        );
+    #[event]
+    /// Emitted whenever a user executes a single-route swap into `Escrow`.
+    struct Enter has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        input_amount: u64,
+        quote_volume: u64,
+        match_amount: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64
+    }
+
+    #[event]
+    /// Emitted whenever a user exits from `Escrow`.
+    struct Exit has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        octas_entered: u64,
+        octas_matched: u64,
+        tap_out_fee: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64,
+        profit_and_loss: ProfitAndLoss
+    }
+
+    #[event]
+    /// Emitted whenever a user executes a double-route swap inside `Escrow`.
+    struct Swap has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        quote_volume: u64,
+        emojicoin_0_in: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_in: u64,
+        emojicoin_1_proceeds: u64
+    }
+
+    #[event]
+    /// Emitted after a user enters, swaps, or exits, representing their final `Escrow` state.
+    struct EscrowState has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        emojicoin_0_balance: u64,
+        emojicoin_1_balance: u64,
+        n_swaps: u64,
+        swaps_volume: u128,
+        octas_entered: u64,
+        octas_matched: u64,
+        profit_and_loss: ProfitAndLoss
+    }
+
+    #[event]
+    /// Emitted after a user enters, swaps, or exits, representing the final `Melee` state for the
+    /// corresponding `Melee` (which may be inactive.)
+    struct MeleeState has copy, drop, store {
+        melee_id: u64,
+        available_rewards: u64,
+        n_all_entrants: u64,
+        n_active_entrants: u64,
+        n_exited_entrants: u64,
+        n_locked_in_entrants: u64,
+        n_swaps: u64,
+        swaps_volume: u128,
+        emojicoin_0_locked: u64,
+        emojicoin_1_locked: u64,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    }
+
+    #[event]
+    /// Emitted after a user enters or exits, representing their final `UserMelees` state.
+    struct UserMeleesState has copy, drop, store {
+        n_entered_melees: u64,
+        n_exited_melees: u64,
+        n_unexited_melees: u64
+    }
+
+    #[event]
+    /// Emitted after a user enters, swaps, or exits, representing the final `Registry` state.
+    struct RegistryState has copy, drop, store {
+        n_melees: u64,
+        n_entrants: u64,
+        n_swaps: u64,
+        swaps_volume: u128,
+        octas_matched: u64
+    }
+
+    #[event]
+    /// Emitted whenever a new `Melee` starts.
+    struct NewMelee has copy, drop, store {
+        melee_id: u64,
+        market_metadatas: vector<MarketMetadata>,
+        start_time: u64,
+        duration: u64,
+        max_match_percentage: u64,
+        max_match_amount: u64,
+        available_rewards: u64
+    }
+
+    /// Exchange rate between APT and emojicoins.
+    struct ExchangeRate has copy, drop, store {
+        /// Octas per `quote` emojicoins.
+        base: u64,
+        /// Emojicoins per `base` octas.
+        quote: u64
+    }
+
+    /// Based on proceeds when exiting, otherwise based on holdings in escrow.
+    struct ProfitAndLoss has copy, drop, store {
+        /// Emojicoins effective value, converted to octas at current exchange rate.
+        octas_value: u128,
+        /// Unrealized gain if `octas_value` is greater than `Escrow.octas_entered`.
+        octas_gain: u128,
+        /// Unrealized loss if `octas_value` is less than `Escrow.octas_entered`.
+        octas_loss: u128,
+        /// Ratio of `octas_value` to `Escrow.octas_entered`, as a Q64.
+        octas_growth_q64: u128
+    }
+
+    #[event]
+    /// Emitted whenever the vault balance is updated, except for when the vault is funded by
+    /// sending funds directly to the vault address instead of by using the `fund_vault` function.
+    struct VaultBalanceUpdate has copy, drop, store {
+        new_balance: u64
+    }
+
+    public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
+        let vault_address =
+            account::get_signer_capability_address(&Registry[@arena].signer_capability);
+        aptos_account::transfer(funder, vault_address, amount);
+        emit_vault_balance_update_with_vault_address(vault_address);
     }
 
     public entry fun set_next_melee_available_rewards(
@@ -170,8 +282,7 @@ module arena::emojicoin_arena {
     }
 
     public entry fun set_next_melee_duration(arena: &signer, duration: u64) acquires Registry {
-        let registry_ref_mut = borrow_registry_ref_mut_checked(arena);
-        registry_ref_mut.next_melee_duration = duration;
+        borrow_registry_ref_mut_checked(arena).next_melee_duration = duration;
     }
 
     public entry fun set_next_melee_max_match_percentage(
@@ -187,13 +298,14 @@ module arena::emojicoin_arena {
     }
 
     public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
+        let signer_capability_ref =
+            &borrow_registry_ref_mut_checked(arena).signer_capability;
         aptos_account::transfer(
-            &account::create_signer_with_capability(
-                &borrow_registry_ref_checked(arena).signer_capability
-            ),
+            &account::create_signer_with_capability(signer_capability_ref),
             @arena,
             amount
         );
+        emit_vault_balance_update_with_singer_capability_ref(signer_capability_ref);
     }
 
     #[randomness]
@@ -204,19 +316,13 @@ module arena::emojicoin_arena {
             crank_schedule();
         if (melee_just_ended) return; // Can not enter melee if cranking ends it.
 
-        // Verify that coin types are for the current melee by calling the market view function.
-        let current_melee_ref_mut =
+        // Get market addresses for active melee.
+        let active_melee_ref_mut =
             registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
-        let market_metadatas = current_melee_ref_mut.market_metadatas;
-        let (_, market_address_0, _) = unpack_market_metadata(market_metadatas[0]);
-        // Ensures the function aborts if Coin0 doesn't match LP0.
-        market_view<Coin0, LP0>(market_address_0);
-        let (_, market_address_1, _) = unpack_market_metadata(market_metadatas[1]);
-        // Ensures the function aborts if Coin1 doesn't match LP1.
-        market_view<Coin1, LP1>(market_address_1);
+        let (market_address_0, market_address_1) = market_addresses(active_melee_ref_mut);
 
         // Create escrow and user melees resources if they don't exist.
-        let melee_id = current_melee_ref_mut.melee_id;
+        let melee_id = active_melee_ref_mut.melee_id;
         let entrant_address = signer::address_of(entrant);
         if (!exists<Escrow<Coin0, LP0, Coin1, LP1>>(entrant_address)) {
             move_to(
@@ -243,7 +349,8 @@ module arena::emojicoin_arena {
             };
         };
 
-        // Verify user is selecting one of the two emojicoin types.
+        // Verify user has indicated escrow coin type as one of the two emojicoin types. Note that
+        // coin types are later type checked during exchange rate calculation inner calls.
         let coin_0_type_info = type_info::type_of<Coin0>();
         let coin_1_type_info = type_info::type_of<Coin1>();
         let escrow_coin_type_info = type_info::type_of<EscrowCoin>();
@@ -268,40 +375,48 @@ module arena::emojicoin_arena {
                 coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0
             );
 
-        // Match a portion of user's contribution if they elect to lock in.
+        // Verify that if user has been matched since their most recent deposit into an empty
+        // escrow, they lock in again.
+        if (escrow_ref_mut.octas_matched > 0) assert!(lock_in, E_TOP_OFF_MUST_LOCK_IN);
+
+        // Match a portion of user's contribution if they elect to lock in, and if there are any
+        // available rewards to match.
         let match_amount =
             if (lock_in) {
-                // Verify that user can even lock in.
                 let match_amount =
                     match_amount(
                         input_amount,
                         escrow_ref_mut,
-                        current_melee_ref_mut,
+                        active_melee_ref_mut,
                         registry_ref_mut,
                         time
                     );
-                assert!(match_amount > 0, E_UNABLE_TO_LOCK_IN);
+                if (match_amount > 0) {
 
-                // Transfer APT to entrant.
-                aptos_account::transfer(
-                    &account::create_signer_with_capability(
-                        &registry_ref_mut.signer_capability
-                    ),
-                    entrant_address,
-                    match_amount
-                );
+                    // Transfer APT to entrant.
+                    let signer_capability_ref = &registry_ref_mut.signer_capability;
+                    aptos_account::transfer(
+                        &account::create_signer_with_capability(signer_capability_ref),
+                        entrant_address,
+                        match_amount
+                    );
+                    emit_vault_balance_update_with_singer_capability_ref(
+                        signer_capability_ref
+                    );
 
-                // Update melee state.
-                current_melee_ref_mut.melee_available_rewards_decrement(match_amount);
-                current_melee_ref_mut.melee_locked_in_entrants_add_if_not_contains(
-                    entrant_address
-                );
+                    // Update melee state.
+                    active_melee_ref_mut.melee_available_rewards_decrement(match_amount);
+                    active_melee_ref_mut.melee_locked_in_entrants_add_if_not_contains(
+                        entrant_address
+                    );
 
-                // Update registry state.
-                registry_ref_mut.registry_octas_matched_increment(match_amount);
+                    // Update registry state.
+                    registry_ref_mut.registry_octas_matched_increment(match_amount);
 
-                // Update escrow state.
-                escrow_ref_mut.escrow_octas_matched_increment(match_amount);
+                    // Update escrow state.
+                    escrow_ref_mut.escrow_octas_matched_increment(match_amount);
+
+                };
 
                 match_amount
 
@@ -310,6 +425,7 @@ module arena::emojicoin_arena {
         // Execute a swap then immediately move funds into escrow, updating total emojicoin locked
         // values based on side.
         let input_amount_after_matching = input_amount + match_amount;
+        let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
         let quote_volume =
             if (buy_coin_0) {
                 let (net_proceeds, quote_volume) =
@@ -322,9 +438,10 @@ module arena::emojicoin_arena {
                     );
                 let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
                 coin::merge(emojicoin_0_ref_mut, coin::withdraw(entrant, net_proceeds));
-                current_melee_ref_mut.melee_emojicoin_0_locked_increment(
+                active_melee_ref_mut.melee_emojicoin_0_locked_increment(
                     coin::value(emojicoin_0_ref_mut)
                 );
+                emojicoin_0_proceeds = net_proceeds;
                 quote_volume
             } else {
                 let (net_proceeds, quote_volume) =
@@ -337,19 +454,20 @@ module arena::emojicoin_arena {
                     );
                 let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
                 coin::merge(emojicoin_1_ref_mut, coin::withdraw(entrant, net_proceeds));
-                current_melee_ref_mut.melee_emojicoin_0_locked_increment(
+                active_melee_ref_mut.melee_emojicoin_1_locked_increment(
                     coin::value(emojicoin_1_ref_mut)
                 );
+                emojicoin_1_proceeds = net_proceeds;
                 quote_volume
             };
 
         // Update melee state.
         let quote_volume_u128 = (quote_volume as u128);
-        current_melee_ref_mut.melee_n_swaps_increment();
-        current_melee_ref_mut.melee_swaps_volume_increment(quote_volume_u128);
-        current_melee_ref_mut.melee_all_entrants_add_if_not_contains(entrant_address);
-        current_melee_ref_mut.melee_active_entrants_add_if_not_contains(entrant_address);
-        current_melee_ref_mut.melee_exited_entrants_remove_if_contains(entrant_address);
+        active_melee_ref_mut.melee_n_swaps_increment();
+        active_melee_ref_mut.melee_swaps_volume_increment(quote_volume_u128);
+        active_melee_ref_mut.melee_all_entrants_add_if_not_contains(entrant_address);
+        active_melee_ref_mut.melee_active_entrants_add_if_not_contains(entrant_address);
+        active_melee_ref_mut.melee_exited_entrants_remove_if_contains(entrant_address);
 
         // Update registry state.
         registry_ref_mut.registry_n_swaps_increment();
@@ -367,6 +485,35 @@ module arena::emojicoin_arena {
         user_melees_ref_mut.user_melees_unexited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_exited_melee_ids_remove_if_contains(melee_id);
 
+        // Emit user melees state.
+        user_melees_ref_mut.emit_user_melees_state();
+
+        // Emit enter event.
+        event::emit(
+            Enter {
+                user: entrant_address,
+                melee_id,
+                input_amount,
+                quote_volume,
+                match_amount,
+                emojicoin_0_proceeds,
+                emojicoin_1_proceeds
+            }
+        );
+
+        // Get final exchange rates.
+        let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
+        let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
+
+        // Emit state events.
+        emit_state(
+            registry_ref_mut,
+            active_melee_ref_mut,
+            escrow_ref_mut,
+            entrant_address,
+            exchange_rate_0,
+            exchange_rate_1
+        );
     }
 
     #[randomness]
@@ -386,9 +533,7 @@ module arena::emojicoin_arena {
     }
 
     #[randomness]
-    entry fun swap<Coin0, LP0, Coin1, LP1>(
-        swapper: &signer, market_addresses: vector<address>
-    ) acquires Escrow, Registry, UserMelees {
+    entry fun swap<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry, UserMelees {
 
         // Verify that swapper has an escrow resource.
         let swapper_address = signer::address_of(swapper);
@@ -402,51 +547,49 @@ module arena::emojicoin_arena {
         // emptied immediately after the swap.
         let (exit_once_done, registry_ref_mut, _, _) = crank_schedule();
 
-        // Swap, updating total emojicoin locked values based on side.
+        // Get market addresses.
         let swap_melee_ref_mut =
             registry_ref_mut.melees_by_id.borrow_mut(escrow_ref_mut.melee_id);
+        let (market_address_0, market_address_1) = market_addresses(swap_melee_ref_mut);
+
+        // Swap, updating total emojicoin locked values based on side.
         let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
         let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
         let emojicoin_0_locked_before_swap = coin::value(emojicoin_0_ref_mut);
         let emojicoin_1_locked_before_swap = coin::value(emojicoin_1_ref_mut);
+        let (emojicoin_0_in, emojicoin_0_proceeds, emojicoin_1_in, emojicoin_1_proceeds) =
+            (0, 0, 0, 0);
         let quote_volume =
             if (emojicoin_0_locked_before_swap > 0) {
+                emojicoin_0_in = emojicoin_0_locked_before_swap;
                 let quote_volume =
                     swap_within_escrow<Coin0, LP0, Coin1, LP1>(
                         swapper,
                         swapper_address,
-                        market_addresses[0],
-                        market_addresses[1],
+                        market_address_0,
+                        market_address_1,
                         emojicoin_0_ref_mut,
                         emojicoin_1_ref_mut
                     );
-                swap_melee_ref_mut.melee_emojicoin_0_locked_decrement(
-                    emojicoin_0_locked_before_swap
-                );
-                swap_melee_ref_mut.melee_emojicoin_1_locked_increment(
-                    coin::value(emojicoin_1_ref_mut)
-                );
+                swap_melee_ref_mut.melee_emojicoin_0_locked_decrement(emojicoin_0_in);
+                emojicoin_1_proceeds = coin::value(emojicoin_1_ref_mut);
+                swap_melee_ref_mut.melee_emojicoin_1_locked_increment(emojicoin_1_proceeds);
                 quote_volume
             } else {
                 assert!(emojicoin_1_locked_before_swap > 0, E_SWAP_NO_FUNDS);
-                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(
-                    emojicoin_1_locked_before_swap
-                );
+                emojicoin_1_in = emojicoin_1_locked_before_swap;
                 let quote_volume =
                     swap_within_escrow<Coin1, LP1, Coin0, LP0>(
                         swapper,
                         swapper_address,
-                        market_addresses[1],
-                        market_addresses[0],
+                        market_address_1,
+                        market_address_0,
                         emojicoin_1_ref_mut,
                         emojicoin_0_ref_mut
                     );
-                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(
-                    emojicoin_1_locked_before_swap
-                );
-                swap_melee_ref_mut.melee_emojicoin_0_locked_increment(
-                    coin::value(emojicoin_0_ref_mut)
-                );
+                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(emojicoin_1_in);
+                emojicoin_0_proceeds = coin::value(emojicoin_0_ref_mut);
+                swap_melee_ref_mut.melee_emojicoin_0_locked_increment(emojicoin_0_proceeds);
                 quote_volume
             };
 
@@ -463,14 +606,41 @@ module arena::emojicoin_arena {
         escrow_ref_mut.escrow_n_swaps_increment();
         escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
 
+        // Emit swap event.
+        event::emit(
+            Swap {
+                user: swapper_address,
+                melee_id: escrow_ref_mut.melee_id,
+                quote_volume,
+                emojicoin_0_in,
+                emojicoin_0_proceeds,
+                emojicoin_1_in,
+                emojicoin_1_proceeds
+            }
+        );
+
+        // Exit as needed, emitting state if not exiting, since exit inner function emits state.
         if (exit_once_done)
             exit_inner<Coin0, LP0, Coin1, LP1>(
                 swapper,
                 swapper_address,
                 registry_ref_mut,
                 false
-            );
+            )
+        else {
+            // Get final exchange rates.
+            let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
+            let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
 
+            emit_state(
+                registry_ref_mut,
+                swap_melee_ref_mut,
+                escrow_ref_mut,
+                swapper_address,
+                exchange_rate_0,
+                exchange_rate_1
+            );
+        }
     }
 
     fun init_module(arena: &signer) acquires Registry {
@@ -488,8 +658,8 @@ module arena::emojicoin_arena {
                 next_melee_max_match_percentage: DEFAULT_MAX_MATCH_PERCENTAGE,
                 next_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT,
                 all_entrants: smart_table::new(),
-                n_swaps: aggregator_v2::create_unbounded_aggregator(),
-                swaps_volume: aggregator_v2::create_unbounded_aggregator(),
+                n_swaps: 0,
+                swaps_volume: 0,
                 octas_matched: 0
             }
         );
@@ -531,21 +701,150 @@ module arena::emojicoin_arena {
         &mut Registry[@arena]
     }
 
-    /// Cranks schedule and returns `true` if a melee has ended as a result, along with assorted
-    /// variables, to reduce borrows and lookups in the caller.
+    /// Crank schedule and return `true` if the active melee has ended as a result, along with other
+    /// assorted variables, to reduce borrows and lookups in the caller.
     inline fun crank_schedule(): (bool, &mut Registry, u64, u64) {
         let time = timestamp::now_microseconds();
         let registry_ref_mut = &mut Registry[@arena];
         let n_melees_before_cranking = registry_ref_mut.melees_by_id.length();
-        let current_melee_ref =
-            registry_ref_mut.melees_by_id.borrow(n_melees_before_cranking);
+        let last_active_melee_ref_mut =
+            registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
         let cranked =
-            if (time >= current_melee_ref.start_time + current_melee_ref.duration) {
+            if (time
+                >= last_active_melee_ref_mut.start_time
+                    + last_active_melee_ref_mut.duration) {
+                last_active_melee_ref_mut.available_rewards = 0;
                 let market_ids = next_melee_market_ids(registry_ref_mut);
                 register_melee(registry_ref_mut, n_melees_before_cranking, market_ids);
                 true
             } else false;
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
+    }
+
+    /// Octa-denominated value of emojicoins at given exchange rate.
+    inline fun effective_value(
+        emojicoin_holdings: u64, exchange_rate: ExchangeRate
+    ): u128 {
+        (emojicoin_holdings as u128) * (exchange_rate.quote as u128)
+            / (exchange_rate.base as u128)
+    }
+
+    inline fun emit_escrow_state<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        participant_address: address,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    ) {
+        let emojicoin_0_balance = coin::value(&self.emojicoin_0);
+        let emojicoin_1_balance = coin::value(&self.emojicoin_1);
+        let octas_entered = self.octas_entered;
+        event::emit(
+            EscrowState {
+                user: participant_address,
+                melee_id: self.melee_id,
+                emojicoin_0_balance,
+                emojicoin_1_balance,
+                n_swaps: self.n_swaps,
+                swaps_volume: self.swaps_volume,
+                octas_entered,
+                octas_matched: self.octas_matched,
+                profit_and_loss: profit_and_loss(
+                    octas_entered,
+                    emojicoin_0_balance,
+                    emojicoin_1_balance,
+                    emojicoin_0_exchange_rate,
+                    emojicoin_1_exchange_rate
+                )
+            }
+        );
+    }
+
+    /// Uses mutable references to avoid borrowing issues.
+    inline fun emit_melee_state(
+        self: &mut Melee,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    ) {
+        event::emit(
+            MeleeState {
+                melee_id: self.melee_id,
+                available_rewards: self.available_rewards,
+                n_all_entrants: self.all_entrants.length(),
+                n_active_entrants: self.active_entrants.length(),
+                n_exited_entrants: self.exited_entrants.length(),
+                n_locked_in_entrants: self.locked_in_entrants.length(),
+                n_swaps: self.n_swaps,
+                swaps_volume: self.swaps_volume,
+                emojicoin_0_locked: self.emojicoin_0_locked,
+                emojicoin_1_locked: self.emojicoin_1_locked,
+                emojicoin_0_exchange_rate,
+                emojicoin_1_exchange_rate
+            }
+        );
+    }
+
+    /// Uses mutable references to avoid borrowing issues.
+    inline fun emit_registry_state(self: &mut Registry) {
+        event::emit(
+            RegistryState {
+                n_melees: self.melees_by_id.length(),
+                n_entrants: self.all_entrants.length(),
+                n_swaps: self.n_swaps,
+                swaps_volume: self.swaps_volume,
+                octas_matched: self.octas_matched
+            }
+        );
+    }
+
+    /// Uses mutable references to avoid borrowing issues. Emitted in ascending hierarchy order,
+    /// since registry state must be emitted after melee state.
+    inline fun emit_state<Coin0, LP0, Coin1, LP1>(
+        registry_ref_mut: &mut Registry,
+        melee_ref_mut: &mut Melee,
+        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        participant_address: address,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    ) {
+        escrow_ref_mut.emit_escrow_state(
+            participant_address, emojicoin_0_exchange_rate, emojicoin_1_exchange_rate
+        );
+        melee_ref_mut.emit_melee_state(
+            emojicoin_0_exchange_rate, emojicoin_1_exchange_rate
+        );
+        registry_ref_mut.emit_registry_state(); // Must emit after melee state for borrow checker.
+    }
+
+    inline fun emit_user_melees_state(self: &mut UserMelees) {
+        event::emit(
+            UserMeleesState {
+                n_entered_melees: self.entered_melee_ids.length(),
+                n_exited_melees: self.exited_melee_ids.length(),
+                n_unexited_melees: self.unexited_melee_ids.length()
+            }
+        )
+    }
+
+    inline fun emit_vault_balance_update_with_singer_capability_ref(
+        signer_capability_ref: &SignerCapability
+    ) {
+        event::emit(
+            VaultBalanceUpdate {
+                new_balance: coin::balance<AptosCoin>(
+                    account::get_signer_capability_address(signer_capability_ref)
+                )
+            }
+        );
+    }
+
+    inline fun emit_vault_balance_update_with_vault_address(
+        vault_address: address
+    ) {
+        event::emit(
+            VaultBalanceUpdate {
+                new_balance: coin::balance<AptosCoin>(vault_address)
+            }
+        );
     }
 
     inline fun escrow_n_swaps_increment<Coin0, LP0, Coin1, LP1>(
@@ -587,26 +886,58 @@ module arena::emojicoin_arena {
         self.swaps_volume = self.swaps_volume + amount;
     }
 
+    inline fun exchange_rate<Emojicoin, EmojicoinLP>(
+        market_address: address
+    ): ExchangeRate {
+        let (
+            _,
+            _,
+            clamm_virtual_reserves,
+            cpamm_real_reserves,
+            _,
+            in_bonding_curve,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _
+        ) =
+            emojicoin_dot_fun::unpack_market_view(
+                emojicoin_dot_fun::market_view<Emojicoin, EmojicoinLP>(market_address)
+            );
+        let reserves = if (in_bonding_curve) clamm_virtual_reserves
+        else cpamm_real_reserves;
+        let (base, quote) = emojicoin_dot_fun::unpack_reserves(reserves);
+        ExchangeRate { base, quote }
+    }
+
     /// Assumes user has an escrow resource.
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
         participant: &signer,
         participant_address: address,
         registry_ref_mut: &mut Registry,
-        melee_is_current: bool
+        melee_is_active: bool
     ) acquires Registry {
         let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[participant_address];
         let melee_id = escrow_ref_mut.melee_id;
         let exited_melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
+        let (market_address_0, market_address_1) = market_addresses(exited_melee_ref_mut);
 
         // Charge tap out fee if applicable.
-        if (melee_is_current) {
-            let octas_matched = escrow_ref_mut.octas_matched;
+        let octas_entered = escrow_ref_mut.octas_entered;
+        let tap_out_fee = 0;
+        let octas_matched = escrow_ref_mut.octas_matched;
+        if (melee_is_active) {
             if (octas_matched > 0) {
                 let vault_address =
                     account::get_signer_capability_address(
                         &registry_ref_mut.signer_capability
                     );
                 aptos_account::transfer(participant, vault_address, octas_matched);
+                tap_out_fee = octas_matched;
+                emit_vault_balance_update_with_vault_address(vault_address);
 
                 // Update melee state.
                 exited_melee_ref_mut.melee_available_rewards_increment(octas_matched);
@@ -620,11 +951,16 @@ module arena::emojicoin_arena {
         };
 
         // Withdraw emojicoin balances from escrow.
+        let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
         if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
-            withdraw_from_escrow(participant_address, &mut escrow_ref_mut.emojicoin_0);
+            let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
+            emojicoin_0_proceeds = coin::value(emojicoin_0_ref_mut);
+            withdraw_from_escrow(participant_address, emojicoin_0_ref_mut);
         } else {
-            assert!(coin::value(&escrow_ref_mut.emojicoin_1) > 0, E_EXIT_NO_FUNDS);
-            withdraw_from_escrow(participant_address, &mut escrow_ref_mut.emojicoin_1);
+            let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
+            emojicoin_1_proceeds = coin::value(emojicoin_1_ref_mut);
+            assert!(emojicoin_1_proceeds > 0, E_EXIT_NO_FUNDS);
+            withdraw_from_escrow(participant_address, emojicoin_1_ref_mut);
         };
 
         // Update melee state.
@@ -639,11 +975,48 @@ module arena::emojicoin_arena {
         let user_melees_ref_mut = &mut UserMelees[participant_address];
         user_melees_ref_mut.user_melees_exited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_unexited_melee_ids_remove_if_contains(melee_id);
+
+        // Emit user melees state.
+        user_melees_ref_mut.emit_user_melees_state();
+
+        // Get final exchange rates.
+        let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
+        let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
+
+        // Emit exit event.
+        event::emit(
+            Exit {
+                user: participant_address,
+                melee_id,
+                emojicoin_0_proceeds,
+                emojicoin_1_proceeds,
+                octas_entered,
+                octas_matched,
+                tap_out_fee,
+                profit_and_loss: profit_and_loss(
+                    octas_entered,
+                    emojicoin_0_proceeds,
+                    emojicoin_1_proceeds,
+                    exchange_rate_0,
+                    exchange_rate_1
+                )
+            }
+        );
+
+        // Emit state events.
+        emit_state(
+            registry_ref_mut,
+            exited_melee_ref_mut,
+            escrow_ref_mut,
+            participant_address,
+            exchange_rate_0,
+            exchange_rate_1
+        );
     }
 
     inline fun get_n_registered_markets(): u64 {
         let (_, _, _, n_markets, _, _, _, _, _, _, _, _) =
-            unpack_registry_view(registry_view());
+            emojicoin_dot_fun::unpack_registry_view(emojicoin_dot_fun::registry_view());
         n_markets
     }
 
@@ -651,28 +1024,38 @@ module arena::emojicoin_arena {
         (time / period) * period
     }
 
-    /// Uses mutable references to avoid freezing references up the stack.
+    /// Uses mutable references to avoid borrowing issues.
+    inline fun market_addresses(melee_ref_mut: &mut Melee): (address, address) {
+        let market_metadatas = melee_ref_mut.market_metadatas;
+        let (_, market_address_0, _) =
+            emojicoin_dot_fun::unpack_market_metadata(market_metadatas[0]);
+        let (_, market_address_1, _) =
+            emojicoin_dot_fun::unpack_market_metadata(market_metadatas[1]);
+        (market_address_0, market_address_1)
+    }
+
+    /// Uses mutable references to avoid borrowing issues.
     inline fun match_amount<Coin0, LP0, Coin1, LP1>(
         input_amount: u64,
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
-        current_melee_ref_mut: &mut Melee,
+        active_melee_ref_mut: &mut Melee,
         registry_ref_mut: &mut Registry,
         time: u64
     ): u64 {
-        let elapsed_time = ((time - current_melee_ref_mut.start_time) as u256);
-        let duration = (current_melee_ref_mut.duration as u256);
+        let elapsed_time = ((time - active_melee_ref_mut.start_time) as u256);
+        let duration = (active_melee_ref_mut.duration as u256);
         if (elapsed_time >= duration) { 0 }
         else {
             // Scale down input amount for matching percentage and remaining time in one compound
             // operation, to reduce truncation errors. Equivalent to:
             //
             //                max match percentage   remaining time
-            // input_amount * -------------------- * --------------
+            // input amount * -------------------- * --------------
             //                100                    duration
             let raw_match_amount =
                 (
                     ((input_amount as u256)
-                        * (current_melee_ref_mut.max_match_percentage as u256)
+                        * (active_melee_ref_mut.max_match_percentage as u256)
                         * (duration - elapsed_time)) / ((MAX_PERCENTAGE as u256)
                         * duration) as u64
                 );
@@ -690,12 +1073,12 @@ module arena::emojicoin_arena {
             let corrected_for_melee_available_rewards =
                 min(
                     corrected_for_vault_balance,
-                    current_melee_ref_mut.available_rewards
+                    active_melee_ref_mut.available_rewards
                 );
             // Correct for the max match amount that the user is eligible for.
             min(
                 corrected_for_melee_available_rewards,
-                current_melee_ref_mut.max_match_amount - escrow_ref_mut.octas_matched
+                active_melee_ref_mut.max_match_amount - escrow_ref_mut.octas_matched
             )
         }
     }
@@ -733,25 +1116,25 @@ module arena::emojicoin_arena {
     inline fun melee_emojicoin_0_locked_decrement(
         self: &mut Melee, amount: u64
     ) {
-        aggregator_v2::sub(&mut self.emojicoin_0_locked, amount);
+        self.emojicoin_0_locked = self.emojicoin_0_locked - amount;
     }
 
     inline fun melee_emojicoin_0_locked_increment(
         self: &mut Melee, amount: u64
     ) {
-        aggregator_v2::add(&mut self.emojicoin_0_locked, amount);
+        self.emojicoin_0_locked = self.emojicoin_0_locked + amount;
     }
 
     inline fun melee_emojicoin_1_locked_decrement(
         self: &mut Melee, amount: u64
     ) {
-        aggregator_v2::sub(&mut self.emojicoin_1_locked, amount);
+        self.emojicoin_1_locked = self.emojicoin_1_locked - amount;
     }
 
     inline fun melee_emojicoin_1_locked_increment(
         self: &mut Melee, amount: u64
     ) {
-        aggregator_v2::add(&mut self.emojicoin_1_locked, amount);
+        self.emojicoin_1_locked = self.emojicoin_1_locked + amount;
     }
 
     inline fun melee_exited_entrants_add_if_not_contains(
@@ -779,16 +1162,16 @@ module arena::emojicoin_arena {
     }
 
     inline fun melee_n_swaps_increment(self: &mut Melee) {
-        aggregator_v2::add(&mut self.n_swaps, 1);
+        self.n_swaps = self.n_swaps + 1;
     }
 
     inline fun melee_swaps_volume_increment(
         self: &mut Melee, amount: u128
     ) {
-        aggregator_v2::add(&mut self.swaps_volume, amount);
+        self.swaps_volume = self.swaps_volume + amount;
     }
 
-    /// Accepts a mutable reference to avoid freezing references up the stack.
+    /// Accepts a mutable reference to avoid borrowing issues.
     inline fun next_melee_market_ids(registry_ref_mut: &mut Registry): vector<u64> {
         let n_markets = get_n_registered_markets();
         let market_ids;
@@ -802,6 +1185,32 @@ module arena::emojicoin_arena {
         };
         market_ids
 
+    }
+
+    inline fun profit_and_loss(
+        octas_entered: u64,
+        emojicoin_0_holdings: u64,
+        emojicoin_1_holdings: u64,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    ): ProfitAndLoss {
+        let (octas_value, octas_gain, octas_loss, octas_growth_q64) = (0, 0, 0, 0);
+        let octas_entered = (octas_entered as u128);
+        if (octas_entered > 0) {
+            octas_value = if (emojicoin_0_holdings > 0)
+                effective_value(emojicoin_0_holdings, emojicoin_0_exchange_rate)
+            else if (emojicoin_1_holdings > 0)
+                effective_value(emojicoin_1_holdings, emojicoin_1_exchange_rate)
+            else 0;
+            if (octas_value > 0) {
+                if (octas_value > octas_entered) octas_gain = octas_value
+                    - octas_entered;
+                if (octas_value < octas_entered) octas_loss = octas_entered
+                    - octas_value;
+                octas_growth_q64 = (octas_value << SHIFT_Q64) / (octas_entered);
+            }
+        };
+        ProfitAndLoss { octas_value, octas_gain, octas_loss, octas_growth_q64 }
     }
 
     /// Pseudo-random substitute for `random_market_id`, since the Aptos randomness API is not
@@ -821,33 +1230,52 @@ module arena::emojicoin_arena {
         sorted_unique_market_ids: vector<u64>
     ) {
         let melee_id = n_melees_before_registration + 1;
+        let market_metadatas =
+            sorted_unique_market_ids.map_ref(|market_id_ref| {
+                option::destroy_some(
+                    emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
+                )
+            });
+        let start_time =
+            last_period_boundary(
+                timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
+            );
+        let duration = registry_ref_mut.next_melee_duration;
+        let max_match_percentage = registry_ref_mut.next_melee_max_match_percentage;
+        let max_match_amount = registry_ref_mut.next_melee_max_match_amount;
+        let available_rewards = registry_ref_mut.next_melee_available_rewards;
         registry_ref_mut.melees_by_id.add(
             melee_id,
             Melee {
                 melee_id,
-                market_metadatas: sorted_unique_market_ids.map_ref(|market_id_ref| {
-                    option::destroy_some(
-                        emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
-                    )
-                }),
-                start_time: last_period_boundary(
-                    timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
-                ),
-                duration: registry_ref_mut.next_melee_duration,
-                max_match_percentage: registry_ref_mut.next_melee_max_match_percentage,
-                max_match_amount: registry_ref_mut.next_melee_max_match_amount,
-                available_rewards: registry_ref_mut.next_melee_available_rewards,
+                market_metadatas,
+                start_time,
+                duration,
+                max_match_percentage,
+                max_match_amount,
+                available_rewards,
                 all_entrants: smart_table::new(),
                 active_entrants: smart_table::new(),
                 exited_entrants: smart_table::new(),
                 locked_in_entrants: smart_table::new(),
-                n_swaps: aggregator_v2::create_unbounded_aggregator(),
-                swaps_volume: aggregator_v2::create_unbounded_aggregator(),
-                emojicoin_0_locked: aggregator_v2::create_unbounded_aggregator(),
-                emojicoin_1_locked: aggregator_v2::create_unbounded_aggregator()
+                n_swaps: 0,
+                swaps_volume: 0,
+                emojicoin_0_locked: 0,
+                emojicoin_1_locked: 0
             }
         );
         registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
+        event::emit(
+            NewMelee {
+                melee_id,
+                market_metadatas,
+                start_time,
+                duration,
+                max_match_percentage,
+                max_match_amount,
+                available_rewards
+            }
+        )
     }
 
     inline fun registry_all_entrants_add_if_not_contains(
@@ -857,7 +1285,7 @@ module arena::emojicoin_arena {
     }
 
     inline fun registry_n_swaps_increment(self: &mut Registry) {
-        aggregator_v2::add(&mut self.n_swaps, 1);
+        self.n_swaps = self.n_swaps + 1;
     }
 
     inline fun registry_octas_matched_decrement(
@@ -875,7 +1303,7 @@ module arena::emojicoin_arena {
     inline fun registry_swaps_volume_increment(
         self: &mut Registry, amount: u128
     ) {
-        aggregator_v2::add(&mut self.swaps_volume, amount);
+        self.swaps_volume = self.swaps_volume + amount;
     }
 
     inline fun remove_if_contains<T: copy + drop>(
