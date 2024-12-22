@@ -150,7 +150,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted whenever a user enters, thereby executing a single-route swap into escrow.
+    /// Emitted whenever a user enters, thereby executing a single-route swap into `Escrow`.
     struct Enter has copy, drop, store {
         user: address,
         melee_id: u64,
@@ -162,7 +162,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted whenever a user exits, thereby withdrawing from escrow.
+    /// Emitted whenever a user exits, thereby withdrawing from `Escrow`.
     struct Exit has copy, drop, store {
         user: address,
         melee_id: u64,
@@ -175,7 +175,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted whenever a user swaps within their escrow.
+    /// Emitted whenever a user executes a double-route swap inside `Escrow`.
     struct Swap has copy, drop, store {
         user: address,
         melee_id: u64,
@@ -187,7 +187,7 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted after a user enters, swaps, or exits, representing the updated escrow state.
+    /// Emitted after a user enters, swaps, or exits, representing their final `Escrow` state.
     struct EscrowState has copy, drop, store {
         user: address,
         melee_id: u64,
@@ -201,8 +201,8 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted after a user enters, swaps, or exits, representing the updated melee state.
-    struct MeleeState has drop, store {
+    /// Emitted after a user enters, swaps, or exits, representing the final `Melee` state.
+    struct MeleeState has copy, drop, store {
         melee_id: u64,
         available_rewards: u64,
         n_all_entrants: u64,
@@ -218,8 +218,16 @@ module arena::emojicoin_arena {
     }
 
     #[event]
-    /// Emitted after a user enters, swaps, or exits, representing the updated registry state.
-    struct RegistryState has drop, store {
+    /// Emitted after a user enters or exits, representing the final `UserMelees` state.
+    struct UserMeleesState has copy, drop, store {
+        n_entered_melees: u64,
+        n_exited_melees: u64,
+        n_unexited_melees: u64
+    }
+
+    #[event]
+    /// Emitted after a user enters, swaps, or exits, representing the final `Registry` state.
+    struct RegistryState has copy, drop, store {
         n_melees: u64,
         n_entrants: u64,
         n_swaps: u64,
@@ -240,14 +248,20 @@ module arena::emojicoin_arena {
     }
 
     struct ExchangeRate has copy, drop, store {
+        /// Octas per `quote` emojicoins.
         base: u64,
+        /// Emojicoins per `base` octas.
         quote: u64
     }
 
     struct ProfitAndLoss has copy, drop, store {
+        /// Emojicoins effective value, converted to octas at current exchange rate.
         octas_value: u128,
+        /// Unrealized gain if `octas_value` is greater than `Escrow.octas_entered`.
         octas_gain: u128,
+        /// Unrealized loss if `octas_value` is less than `Escrow.octas_entered`.
         octas_loss: u128,
+        /// Ratio of `octas_value` to `Escrow.octas_entered`, as a Q64.
         octas_growth_q64: u128
     }
 
@@ -477,6 +491,9 @@ module arena::emojicoin_arena {
         user_melees_ref_mut.user_melees_entered_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_unexited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_exited_melee_ids_remove_if_contains(melee_id);
+
+        // Emit user melees state.
+        user_melees_ref_mut.emit_user_melees_state();
 
         // Emit enter event.
         event::emit(
@@ -801,6 +818,16 @@ module arena::emojicoin_arena {
         registry_ref_mut.emit_registry_state(); // Must emit after melee state for borrow checker.
     }
 
+    inline fun emit_user_melees_state(self: &mut UserMelees) {
+        event::emit(
+            UserMeleesState {
+                n_entered_melees: self.entered_melee_ids.length(),
+                n_exited_melees: self.exited_melee_ids.length(),
+                n_unexited_melees: self.unexited_melee_ids.length()
+            }
+        )
+    }
+
     inline fun emit_vault_balance_update_with_singer_capability_ref(
         signer_capability_ref: &SignerCapability
     ) {
@@ -951,6 +978,9 @@ module arena::emojicoin_arena {
         let user_melees_ref_mut = &mut UserMelees[participant_address];
         user_melees_ref_mut.user_melees_exited_melee_ids_add_if_not_contains(melee_id);
         user_melees_ref_mut.user_melees_unexited_melee_ids_remove_if_contains(melee_id);
+
+        // Emit user melees state.
+        user_melees_ref_mut.emit_user_melees_state();
 
         // Get final exchange rates.
         let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
