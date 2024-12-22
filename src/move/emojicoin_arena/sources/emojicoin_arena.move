@@ -1050,7 +1050,7 @@ module arena::emojicoin_arena {
             // operation, to reduce truncation errors. Equivalent to:
             //
             //                max match percentage   remaining time
-            // input_amount * -------------------- * --------------
+            // input amount * -------------------- * --------------
             //                100                    duration
             let raw_match_amount =
                 (
