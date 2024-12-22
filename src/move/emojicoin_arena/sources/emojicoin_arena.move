@@ -1023,7 +1023,7 @@ module arena::emojicoin_arena {
         (time / period) * period
     }
 
-    /// Uses mutable references to avoid freezing references up the stack.
+    /// Uses mutable references to avoid borrowing issues.
     inline fun market_addresses(melee_ref_mut: &mut Melee): (address, address) {
         let market_metadatas = melee_ref_mut.market_metadatas;
         let (_, market_address_0, _) =
@@ -1033,7 +1033,7 @@ module arena::emojicoin_arena {
         (market_address_0, market_address_1)
     }
 
-    /// Uses mutable references to avoid freezing references up the stack.
+    /// Uses mutable references to avoid borrowing issues.
     inline fun match_amount<Coin0, LP0, Coin1, LP1>(
         input_amount: u64,
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
@@ -1170,7 +1170,7 @@ module arena::emojicoin_arena {
         self.swaps_volume = self.swaps_volume + amount;
     }
 
-    /// Accepts a mutable reference to avoid freezing references up the stack.
+    /// Accepts a mutable reference to avoid borrowing issues.
     inline fun next_melee_market_ids(registry_ref_mut: &mut Registry): vector<u64> {
         let n_markets = get_n_registered_markets();
         let market_ids;
