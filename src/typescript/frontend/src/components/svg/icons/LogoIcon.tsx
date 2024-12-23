@@ -24,12 +24,14 @@ const Badge: React.FC<React.PropsWithChildren<{ color: keyof Colors }>> = ({ chi
   );
 };
 
-const VersionBadge: React.FC<{ color: keyof Colors }> = ({ color }) => (
+const VersionBadge: React.FC<{ color: keyof Colors }> = ({ color }) =>
+  // prettier-ignore
   <Badge color={color}>
-    {VERSION?.prerelease[0].toString().toUpperCase()}&nbsp;v{VERSION?.major}.{VERSION?.minor}.
-    {VERSION?.patch}
-  </Badge>
-);
+    {VERSION?.prerelease.at(0)?.toString().toUpperCase()}
+    {VERSION?.prerelease.at(0) && <>&nbsp;</>}
+    v
+    {VERSION?.major}.{VERSION?.minor}.{VERSION?.patch}
+  </Badge>;
 
 const Icon: React.FC<SvgProps & { versionBadge?: boolean }> = ({
   color = "econiaBlue",

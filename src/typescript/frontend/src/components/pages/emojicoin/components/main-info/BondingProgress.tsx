@@ -3,19 +3,16 @@ import React, { useEffect, useState } from "react";
 import { translationFunction } from "context/language-context";
 import { type MainInfoProps } from "../../types";
 import { useEventStore } from "context/event-store-context";
-import { motion } from "framer-motion";
 import { getBondingCurveProgress } from "@sdk/utils/bonding-curve";
-import Button from "components/button";
-import Link from "next/link";
-import { ROUTES } from "router/routes";
-import { useThemeContext } from "context";
 import { FormattedNumber } from "components/FormattedNumber";
+import BondingCurveArrow from "@icons/BondingCurveArrow";
+import { emoji } from "utils";
+import { Emoji } from "utils/emoji";
 
-const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
+const statsTextClasses = "uppercase ellipses font-forma";
 
 const BondingProgress = ({ data }: MainInfoProps) => {
   const { t } = translationFunction();
-  const { theme } = useThemeContext();
 
   const marketEmojis = data.symbolEmojis;
   const stateEvents = useEventStore((s) => s.getMarket(marketEmojis)?.stateEvents ?? []);
@@ -33,51 +30,85 @@ const BondingProgress = ({ data }: MainInfoProps) => {
   }, [stateEvents]);
 
   return (
-    <div className="flex flex-col w-fit">
-      <div className="flex justify-between gap-[8px] mb-[.2em]">
-        <div className={statsTextClasses + " text-light-gray font-pixelar text-[32px]"}>
+    <div className="relative mb-[.7em]">
+      {/*
+        3.26 is calculated like this:
+
+        The aspect ratio of a bonding curve arrow is 115/30 aka 23/6.
+
+        There are 7 of them.
+
+        So the aspect ratio of the container element is 115/30*7 aka 161/6.
+
+        We know that the rocket emoji's width and height is 175% of the container height.
+
+        We want to add padding to the container to include the half part of the rocket emoji that overflows on the left, in order to properly center the container within its container.
+
+        The padding should be 50% of the rocket's width, but we cannot use the rocket width as a unit in CSS.
+
+        But we know that the rocket width is 175% of the container height.
+
+        But we cannot specify the left padding in height percentage, but only in width percentage.
+
+        But we know that the container's width is 161/6 times the container's height.
+
+        So we can do 100 / (161/6) * 1.75 / 2 which gives us ~3.26.
+
+        Who knew CSS could be this hard...
+      */}
+      <div className="w-[100%] pl-[3.26%]">
+        <div className="grid relative w-[100%]" style={{ gridTemplateColumns: "repeat(7, 1fr)" }}>
+          <Emoji
+            size="100%"
+            className="absolute h-[175%] translate-x-[-50%] translate-y-[-18.75%]"
+            emojis={emoji("rocket")}
+            set="apple"
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 15 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 30 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 45 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 60 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 75 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress > 90 ? "econiaBlue" : "darkGray"}
+          />
+          <BondingCurveArrow
+            className="w-[100%] h-[100%]"
+            color={bondingProgress >= 100 ? "econiaBlue" : "darkGray"}
+          />
+        </div>
+      </div>
+      <div className="absolute bottom-[-1em] my-[-.2em] right-0 flex justify-end mr-[1em]">
+        <div className={statsTextClasses + " text-dark-gray font-pixelar text-[1em]"}>
           {t("Bonding progress:")}
         </div>
         <FormattedNumber
           value={bondingProgress}
           className={
-            statsTextClasses + " text-ec-blue font-pixelar text-[32px] text-end min-w-[3.5em]"
+            statsTextClasses + " text-dark-gray font-pixelar text-[1em] text-end min-w-[3.3em]"
           }
           suffix="%"
           scramble
+          style="fixed"
+          decimals={2}
         />
       </div>
-      {bondingProgress >= 100 ? (
-        <Link
-          href={{
-            pathname: ROUTES.pools,
-            query: { pool: data.emojis.map((e) => e.emoji).join("") },
-          }}
-        >
-          <Button scale="lg">{t("Provide liquidity")}</Button>
-        </Link>
-      ) : (
-        <div
-          style={{
-            width: "100%",
-            border: `1px solid ${theme.colors.darkGray}`,
-            padding: "0.15em",
-            borderRadius: "5px",
-          }}
-        >
-          <motion.div
-            initial={{ width: "0%" }}
-            animate={{ width: `${Math.max(bondingProgress, 1).toFixed(2)}%` }}
-            // Allow the page to load first so that users can actually see the animation.
-            transition={{ delay: 0.3 }}
-            style={{
-              height: "0.8em",
-              background: theme.colors.econiaBlue,
-              borderRadius: "3px",
-            }}
-          ></motion.div>
-        </div>
-      )}
     </div>
   );
 };

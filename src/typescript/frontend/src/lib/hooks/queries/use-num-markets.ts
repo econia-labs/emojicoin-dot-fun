@@ -1,4 +1,4 @@
-import { RegistryView } from "@sdk/emojicoin_dot_fun/emojicoin-dot-fun";
+import { RegistryView } from "@/contract-apis/emojicoin-dot-fun";
 import { useQuery } from "@tanstack/react-query";
 import { useEventStore } from "context/event-store-context";
 import { getAptosClient } from "@sdk/utils/aptos-client";
