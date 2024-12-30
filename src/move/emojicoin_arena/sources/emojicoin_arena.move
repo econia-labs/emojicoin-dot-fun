@@ -221,7 +221,8 @@ module arena::emojicoin_arena {
         emojicoin_0_locked: u64,
         emojicoin_1_locked: u64,
         emojicoin_0_exchange_rate: ExchangeRate,
-        emojicoin_1_exchange_rate: ExchangeRate
+        emojicoin_1_exchange_rate: ExchangeRate,
+        top_exits: TopExits
     }
 
     #[event]
@@ -239,7 +240,8 @@ module arena::emojicoin_arena {
         n_entrants: u64,
         n_swaps: u64,
         swaps_volume: u128,
-        octas_matched: u64
+        octas_matched: u64,
+        top_exits: TopExits
     }
 
     #[event]
@@ -792,7 +794,8 @@ module arena::emojicoin_arena {
                 emojicoin_0_locked: self.emojicoin_0_locked,
                 emojicoin_1_locked: self.emojicoin_1_locked,
                 emojicoin_0_exchange_rate,
-                emojicoin_1_exchange_rate
+                emojicoin_1_exchange_rate,
+                top_exits: self.top_exits
             }
         );
     }
@@ -805,7 +808,8 @@ module arena::emojicoin_arena {
                 n_entrants: self.all_entrants.length(),
                 n_swaps: self.n_swaps,
                 swaps_volume: self.swaps_volume,
-                octas_matched: self.octas_matched
+                octas_matched: self.octas_matched,
+                top_exits: self.top_exits
             }
         );
     }
