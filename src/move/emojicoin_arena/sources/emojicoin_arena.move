@@ -303,13 +303,15 @@ module arena::emojicoin_arena {
     public entry fun set_next_melee_max_match_percentage(
         arena: &signer, max_match_percentage: u64
     ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_max_match_percentage = max_match_percentage;
+        borrow_registry_ref_mut_checked(arena).next_melee_max_match_percentage =
+            max_match_percentage;
     }
 
     public entry fun set_next_melee_max_match_amount(
         arena: &signer, max_match_amount: u64
     ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_max_match_amount = max_match_amount;
+        borrow_registry_ref_mut_checked(arena).next_melee_max_match_amount =
+            max_match_amount;
     }
 
     public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
@@ -868,14 +870,14 @@ module arena::emojicoin_arena {
     inline fun escrow_n_swaps_increment<Coin0, LP0, Coin1, LP1>(
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>
     ) {
-        self.n_swaps = self.n_swaps + 1;
+        self.n_swaps += 1;
     }
 
     inline fun escrow_octas_entered_increment<Coin0, LP0, Coin1, LP1>(
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         amount: u64
     ) {
-        self.octas_entered = self.octas_entered + amount;
+        self.octas_entered += amount;
     }
 
     inline fun escrow_octas_entered_reset<Coin0, LP0, Coin1, LP1>(
@@ -888,7 +890,7 @@ module arena::emojicoin_arena {
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         amount: u64
     ) {
-        self.octas_matched = self.octas_matched + amount;
+        self.octas_matched += amount;
     }
 
     inline fun escrow_octas_matched_reset<Coin0, LP0, Coin1, LP1>(
@@ -901,7 +903,7 @@ module arena::emojicoin_arena {
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         amount: u128
     ) {
-        self.swaps_volume = self.swaps_volume + amount;
+        self.swaps_volume += amount;
     }
 
     inline fun exchange_rate<Emojicoin, EmojicoinLP>(
@@ -925,8 +927,9 @@ module arena::emojicoin_arena {
             emojicoin_dot_fun::unpack_market_view(
                 emojicoin_dot_fun::market_view<Emojicoin, EmojicoinLP>(market_address)
             );
-        let reserves = if (in_bonding_curve) clamm_virtual_reserves
-        else cpamm_real_reserves;
+        let reserves =
+            if (in_bonding_curve) clamm_virtual_reserves
+            else cpamm_real_reserves;
         let (base, quote) = emojicoin_dot_fun::unpack_reserves(reserves);
         ExchangeRate { base, quote }
     }
@@ -1127,37 +1130,37 @@ module arena::emojicoin_arena {
     inline fun melee_available_rewards_decrement(
         self: &mut Melee, amount: u64
     ) {
-        self.available_rewards = self.available_rewards - amount;
+        self.available_rewards -= amount;
     }
 
     inline fun melee_available_rewards_increment(
         self: &mut Melee, amount: u64
     ) {
-        self.available_rewards = self.available_rewards + amount;
+        self.available_rewards += amount;
     }
 
     inline fun melee_emojicoin_0_locked_decrement(
         self: &mut Melee, amount: u64
     ) {
-        self.emojicoin_0_locked = self.emojicoin_0_locked - amount;
+        self.emojicoin_0_locked -= amount;
     }
 
     inline fun melee_emojicoin_0_locked_increment(
         self: &mut Melee, amount: u64
     ) {
-        self.emojicoin_0_locked = self.emojicoin_0_locked + amount;
+        self.emojicoin_0_locked += amount;
     }
 
     inline fun melee_emojicoin_1_locked_decrement(
         self: &mut Melee, amount: u64
     ) {
-        self.emojicoin_1_locked = self.emojicoin_1_locked - amount;
+        self.emojicoin_1_locked -= amount;
     }
 
     inline fun melee_emojicoin_1_locked_increment(
         self: &mut Melee, amount: u64
     ) {
-        self.emojicoin_1_locked = self.emojicoin_1_locked + amount;
+        self.emojicoin_1_locked += amount;
     }
 
     inline fun melee_exited_entrants_add_if_not_contains(
@@ -1185,13 +1188,13 @@ module arena::emojicoin_arena {
     }
 
     inline fun melee_n_swaps_increment(self: &mut Melee) {
-        self.n_swaps = self.n_swaps + 1;
+        self.n_swaps += 1;
     }
 
     inline fun melee_swaps_volume_increment(
         self: &mut Melee, amount: u128
     ) {
-        self.swaps_volume = self.swaps_volume + amount;
+        self.swaps_volume += amount;
     }
 
     inline fun melee_top_exits_update(self: &mut Melee, exit: &Exit) {
@@ -1254,11 +1257,12 @@ module arena::emojicoin_arena {
         let (octas_value, octas_gain, octas_loss, octas_growth_q64) = (0, 0, 0, 0);
         let octas_entered = (octas_entered as u128);
         if (octas_entered > 0) {
-            octas_value = if (emojicoin_0_holdings > 0)
-                effective_value(emojicoin_0_holdings, emojicoin_0_exchange_rate)
-            else if (emojicoin_1_holdings > 0)
-                effective_value(emojicoin_1_holdings, emojicoin_1_exchange_rate)
-            else 0;
+            octas_value =
+                if (emojicoin_0_holdings > 0)
+                    effective_value(emojicoin_0_holdings, emojicoin_0_exchange_rate)
+                else if (emojicoin_1_holdings > 0)
+                    effective_value(emojicoin_1_holdings, emojicoin_1_exchange_rate)
+                else 0;
             if (octas_value > 0) {
                 if (octas_value > octas_entered) octas_gain = octas_value
                     - octas_entered;
@@ -1343,25 +1347,25 @@ module arena::emojicoin_arena {
     }
 
     inline fun registry_n_swaps_increment(self: &mut Registry) {
-        self.n_swaps = self.n_swaps + 1;
+        self.n_swaps += 1;
     }
 
     inline fun registry_octas_matched_decrement(
         self: &mut Registry, amount: u64
     ) {
-        self.octas_matched = self.octas_matched - amount;
+        self.octas_matched -= amount;
     }
 
     inline fun registry_octas_matched_increment(
         self: &mut Registry, amount: u64
     ) {
-        self.octas_matched = self.octas_matched + amount;
+        self.octas_matched += amount;
     }
 
     inline fun registry_swaps_volume_increment(
         self: &mut Registry, amount: u128
     ) {
-        self.swaps_volume = self.swaps_volume + amount;
+        self.swaps_volume += amount;
     }
 
     inline fun registry_top_exits_update(self: &mut Registry, exit: &Exit) {
