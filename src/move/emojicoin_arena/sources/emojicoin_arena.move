@@ -927,7 +927,9 @@ module arena::emojicoin_arena {
             emojicoin_dot_fun::unpack_market_view(
                 emojicoin_dot_fun::market_view<Emojicoin, EmojicoinLP>(market_address)
             );
-        let reserves = if (in_bonding_curve) clamm_virtual_reserves else cpamm_real_reserves;
+        let reserves =
+            if (in_bonding_curve) clamm_virtual_reserves
+            else cpamm_real_reserves;
         let (base, quote) = emojicoin_dot_fun::unpack_reserves(reserves);
         ExchangeRate { base, quote }
     }
