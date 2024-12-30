@@ -62,17 +62,17 @@ aptos move run \
 ```sh
 MARKET_METADATA=0xaaa...
 PROFILE=my-profile
-PROPERTY=string:foo
-VALUE=string:bar
-MARKET_ID=u64:1
+PROPERTY=foo
+VALUE=bar
+MARKET_ADDRESS=0xabcd
 ```
 
 <!-- markdownlint-disable MD013 -->
 
 ```sh
 aptos move run \
-    --args $MARKET_ID $PROPERTY $VALUE \
-    --function-id $MARKET_METADATA::emojicoin_dot_fun_market_metadata::add_market_property \
+    --args "address:$MARKET_ADDRESS" "string:[\"$PROPERTY\"]" "string:[\"$VALUE\"]" \
+    --function-id $MARKET_METADATA::emojicoin_dot_fun_market_metadata::add_market_properties \
     --profile $PROFILE
 ```
 
@@ -80,8 +80,37 @@ aptos move run \
 
 ```sh
 aptos move run \
-    --args $MARKET_ID $PROPERTY \
-    --function-id $MARKET_METADATA::emojicoin_dot_fun_market_metadata::remove_market_property \
+    --args "address:$MARKET_ADDRESS" "string:[\"$PROPERTY\"]" \
+    --function-id $MARKET_METADATA::emojicoin_dot_fun_market_metadata::remove_market_properties \
+    --profile $PROFILE
+```
+
+<!-- markdownlint-enable MD013 -->
+
+## Emojicoin special properties
+
+The emojicoin frontend will only consider the following values:
+
+- `Discord`
+- `Telegram`
+- `Website`
+- `X profile`
+
+For example, to set the website to `example.org` and the x profile to `0xabcd`
+for the `0xabcd` market, you can use the following command:
+
+<!-- markdownlint-disable MD013 -->
+
+```sh
+MARKET_METADATA=0xaaa...
+PROFILE=my-profile
+PROPERTY='"Website","X profile"'
+VALUE='"example.org","https://x.com/0xabcd"'
+MARKET_ADDRESS=0xabcd
+
+aptos move run \
+    --args "address:$MARKET_ADDRESS" "string:[$PROPERTY]" "string:[$VALUE]" \
+    --function-id $MARKET_METADATA::emojicoin_dot_fun_market_metadata::add_market_properties \
     --profile $PROFILE
 ```
 
