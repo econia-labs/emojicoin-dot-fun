@@ -37,6 +37,7 @@ module arena::emojicoin_arena {
 
     const MAX_PERCENTAGE: u64 = 100;
     const SHIFT_Q64: u8 = 64;
+    const NULL_ADDRESS: address = @0x0;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -46,7 +47,7 @@ module arena::emojicoin_arena {
     const INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE: u8 = 50;
 
     // Default parameters for new melees.
-    const DEFAULT_DURATION: u64 = 36 * 3_600_000_000;
+    const DEFAULT_DURATION: u64 = 20 * 3_600_000_000;
     const DEFAULT_AVAILABLE_REWARDS: u64 = 1000 * 100_000_000;
     const DEFAULT_MAX_MATCH_PERCENTAGE: u64 = 50;
     const DEFAULT_MAX_MATCH_AMOUNT: u64 = 5 * 100_000_000;
@@ -85,7 +86,9 @@ module arena::emojicoin_arena {
         /// Amount of emojicoin 0 locked in all melee escrows for the melee.
         emojicoin_0_locked: u64,
         /// Amount of emojicoin 1 locked in all melee escrows for the melee.
-        emojicoin_1_locked: u64
+        emojicoin_1_locked: u64,
+        /// Top exits for the melee.
+        top_exits: TopExits
     }
 
     struct Registry has key {
@@ -110,7 +113,9 @@ module arena::emojicoin_arena {
         /// Volume of melee-specific swaps in octas.
         swaps_volume: u128,
         /// Amount of octas matched. Decremented when a user taps out.
-        octas_matched: u64
+        octas_matched: u64,
+        /// Top exits across all `Melee`s.
+        top_exits: TopExits
     }
 
     struct Escrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
@@ -140,6 +145,14 @@ module arena::emojicoin_arena {
         exited_melee_ids: SmartTable<u64, Nil>,
         /// Set of serial IDs of all `Melee`s the user has entered but not exited.
         unexited_melee_ids: SmartTable<u64, Nil>
+    }
+
+    /// The top `Exits` for either a `Melee` or for the entire `Registry`, depending on context:
+    /// `by_octas_gain` means highest `ProfitAndLoss.octas_gain`, and `by_octas_growth_q64` means
+    /// highest `ProfitAndLoss.octas_growth_q64`. Initialized via `null_top_exits`.
+    struct TopExits has copy, drop, store {
+        by_octas_gain: Exit,
+        by_octas_growth_q64: Exit
     }
 
     #[event]
@@ -660,7 +673,8 @@ module arena::emojicoin_arena {
                 all_entrants: smart_table::new(),
                 n_swaps: 0,
                 swaps_volume: 0,
-                octas_matched: 0
+                octas_matched: 0,
+                top_exits: null_top_exits()
             }
         );
         coin::register<AptosCoin>(&vault_signer);
@@ -963,9 +977,35 @@ module arena::emojicoin_arena {
             withdraw_from_escrow(participant_address, emojicoin_1_ref_mut);
         };
 
+        // Get final exchange rates.
+        let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
+        let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
+
+        // Construct exit event.
+        let exit = Exit {
+            user: participant_address,
+            melee_id,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            octas_entered,
+            octas_matched,
+            tap_out_fee,
+            profit_and_loss: profit_and_loss(
+                octas_entered,
+                emojicoin_0_proceeds,
+                emojicoin_1_proceeds,
+                exchange_rate_0,
+                exchange_rate_1
+            )
+        };
+
+        // Update registry state.
+        registry_ref_mut.registry_top_exits_update(&exit);
+
         // Update melee state.
         exited_melee_ref_mut.melee_active_entrants_remove_if_contains(participant_address);
         exited_melee_ref_mut.melee_exited_entrants_add_if_not_contains(participant_address);
+        exited_melee_ref_mut.melee_top_exits_update(&exit);
 
         // Update escrow state.
         escrow_ref_mut.escrow_octas_entered_reset();
@@ -979,29 +1019,8 @@ module arena::emojicoin_arena {
         // Emit user melees state.
         user_melees_ref_mut.emit_user_melees_state();
 
-        // Get final exchange rates.
-        let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
-        let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
-
         // Emit exit event.
-        event::emit(
-            Exit {
-                user: participant_address,
-                melee_id,
-                emojicoin_0_proceeds,
-                emojicoin_1_proceeds,
-                octas_entered,
-                octas_matched,
-                tap_out_fee,
-                profit_and_loss: profit_and_loss(
-                    octas_entered,
-                    emojicoin_0_proceeds,
-                    emojicoin_1_proceeds,
-                    exchange_rate_0,
-                    exchange_rate_1
-                )
-            }
-        );
+        event::emit(exit);
 
         // Emit state events.
         emit_state(
@@ -1171,6 +1190,15 @@ module arena::emojicoin_arena {
         self.swaps_volume = self.swaps_volume + amount;
     }
 
+    inline fun melee_top_exits_update(self: &mut Melee, exit: &Exit) {
+        if (exit.profit_and_loss.octas_gain
+            > self.top_exits.by_octas_gain.profit_and_loss.octas_gain)
+            self.top_exits.by_octas_gain = *exit;
+        if (exit.profit_and_loss.octas_growth_q64
+            > self.top_exits.by_octas_growth_q64.profit_and_loss.octas_growth_q64)
+            self.top_exits.by_octas_growth_q64 = *exit;
+    }
+
     /// Accepts a mutable reference to avoid borrowing issues.
     inline fun next_melee_market_ids(registry_ref_mut: &mut Registry): vector<u64> {
         let n_markets = get_n_registered_markets();
@@ -1185,6 +1213,31 @@ module arena::emojicoin_arena {
         };
         market_ids
 
+    }
+
+    inline fun null_exit(): Exit {
+        Exit {
+            user: NULL_ADDRESS,
+            melee_id: 0,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: 0,
+            octas_entered: 0,
+            octas_matched: 0,
+            tap_out_fee: 0,
+            profit_and_loss: ProfitAndLoss {
+                octas_value: 0,
+                octas_gain: 0,
+                octas_loss: 0,
+                octas_growth_q64: 0
+            }
+        }
+    }
+
+    inline fun null_top_exits(): TopExits {
+        TopExits {
+            by_octas_gain: null_exit(),
+            by_octas_growth_q64: null_exit()
+        }
     }
 
     inline fun profit_and_loss(
@@ -1261,7 +1314,8 @@ module arena::emojicoin_arena {
                 n_swaps: 0,
                 swaps_volume: 0,
                 emojicoin_0_locked: 0,
-                emojicoin_1_locked: 0
+                emojicoin_1_locked: 0,
+                top_exits: null_top_exits()
             }
         );
         registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
@@ -1304,6 +1358,15 @@ module arena::emojicoin_arena {
         self: &mut Registry, amount: u128
     ) {
         self.swaps_volume = self.swaps_volume + amount;
+    }
+
+    inline fun registry_top_exits_update(self: &mut Registry, exit: &Exit) {
+        if (exit.profit_and_loss.octas_gain
+            > self.top_exits.by_octas_gain.profit_and_loss.octas_gain)
+            self.top_exits.by_octas_gain = *exit;
+        if (exit.profit_and_loss.octas_growth_q64
+            > self.top_exits.by_octas_growth_q64.profit_and_loss.octas_growth_q64)
+            self.top_exits.by_octas_growth_q64 = *exit;
     }
 
     inline fun remove_if_contains<T: copy + drop>(
