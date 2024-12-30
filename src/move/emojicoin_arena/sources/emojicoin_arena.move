@@ -87,7 +87,7 @@ module arena::emojicoin_arena {
         emojicoin_0_locked: u64,
         /// Amount of emojicoin 1 locked in all melee escrows for the melee.
         emojicoin_1_locked: u64,
-        /// Top exits for the melee.
+        /// `TopExits` for the `Melee`.
         top_exits: TopExits
     }
 
@@ -114,7 +114,7 @@ module arena::emojicoin_arena {
         swaps_volume: u128,
         /// Amount of octas matched. Decremented when a user taps out.
         octas_matched: u64,
-        /// Top exits across all `Melee`s.
+        /// `TopExits` across all `Melee`s.
         top_exits: TopExits
     }
 
@@ -147,7 +147,7 @@ module arena::emojicoin_arena {
         unexited_melee_ids: SmartTable<u64, Nil>
     }
 
-    /// The top `Exits` for either a `Melee` or for the entire `Registry`, depending on context:
+    /// The top `Exit`s for either a `Melee` or for all `Melee`s, depending on context:
     /// `by_octas_gain` means highest `ProfitAndLoss.octas_gain`, and `by_octas_growth_q64` means
     /// highest `ProfitAndLoss.octas_growth_q64`. Initialized via `null_top_exits`.
     struct TopExits has copy, drop, store {
@@ -927,9 +927,7 @@ module arena::emojicoin_arena {
             emojicoin_dot_fun::unpack_market_view(
                 emojicoin_dot_fun::market_view<Emojicoin, EmojicoinLP>(market_address)
             );
-        let reserves =
-            if (in_bonding_curve) clamm_virtual_reserves
-            else cpamm_real_reserves;
+        let reserves = if (in_bonding_curve) clamm_virtual_reserves else cpamm_real_reserves;
         let (base, quote) = emojicoin_dot_fun::unpack_reserves(reserves);
         ExchangeRate { base, quote }
     }
