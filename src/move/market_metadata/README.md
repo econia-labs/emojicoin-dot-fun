@@ -57,77 +57,91 @@ aptos move run \
   --profile $PROFILE_NAME
 ```
 
-## Set property
+## Add properties
+
+> If market metadata entry does not exist, create an empty entry. Then, add
+> market properties, overwriting existing properties if they already exist.
 
 ```sh
-MARKET_METADATA=0xaaa...
 MODULE=emojicoin_dot_fun_market_metadata
-FUNCTION=add_market_property
-MARKET_ADDRESS=0xabcd
+FUNCTION=add_market_properties
+PACKAGE_ADDRESS=0xabc...
+MARKET_ADDRESS=0xdef...
 PROFILE=my-profile
-PROPERTY=foo
-VALUE=bar
+PROPERTIES='"X profile","Website","Telegram"'
+VALUES='"foo","bar","baz"'
 ```
 
 ```sh
 aptos move run \
     --args \
         "address:$MARKET_ADDRESS" \
-        'string:[$PROPERTY]' \
-        'string:[$VALUE]' \
-    --function-id "$MARKET_METADATA::$MODULE::$FUNCTION" \
+        'string:['$PROPERTIES']' \
+        'string:['$VALUES']' \
+    --function-id "$PACKAGE_ADDRESS::$MODULE::$FUNCTION" \
     --profile $PROFILE
 ```
 
-## Unset property
+## Remove properties
+
+> If the market has an entry, remove all specified keys. If the market has no
+> entries after removing the keys, remove the market from the metadata registry.
 
 ```sh
-MARKET_METADATA=0xaaa...
 MODULE=emojicoin_dot_fun_market_metadata
-FUNCTION=add_market_property
-MARKET_ADDRESS=0xabcd
+FUNCTION=remove_market_properties
+PACKAGE_ADDRESS=0xabc...
+MARKET_ADDRESS=0xdef...
 PROFILE=my-profile
-PROPERTY=foo
+PROPERTIES='"X profile","Website"'
 ```
 
 ```sh
-FUNCTION=remove_market_property
+aptos move run \
+    --args "address:$MARKET_ADDRESS" 'string:['$PROPERTIES']' \
+    --function-id "$PACKAGE_ADDRESS::$MODULE::$FUNCTION" \
+    --profile $PROFILE
+```
+
+## Set properties
+
+> Clear all properties for the given market if it has any, then set the supplied
+> values. If there are no supplied key-value pairs, remove the market's entry
+> from the metadata registry.
+
+```sh
+MODULE=emojicoin_dot_fun_market_metadata
+FUNCTION=set_market_properties
+PACKAGE_ADDRESS=0xabc...
+MARKET_ADDRESS=0xdef...
+PROFILE=my-profile
+PROPERTIES='"X profile","Website","Telegram"'
+VALUES='"foo","bar","baz"'
+```
+
+```sh
 aptos move run \
     --args \
         "address:$MARKET_ADDRESS" \
-        'string:[$PROPERTY]' \
-    --function-id "$MARKET_METADATA::$MODULE::$FUNCTION" \
+        'string:['$PROPERTIES']' \
+        'string:['$VALUES']' \
+    --function-id "$PACKAGE_ADDRESS::$MODULE::$FUNCTION" \
     --profile $PROFILE
 ```
 
 ## Emojicoin special properties
 
-The emojicoin frontend will only consider the following values:
+The `emojicoin dot fun` frontend will only consider the following values:
 
 - `Discord`
 - `Telegram`
 - `Website`
 - `X profile`
 
-For example, to set the website to `example.org` and the x profile to `0xabcd`
-for the `0xabcd` market, you can use the following command:
+For example, to set the website to `https://example.org` and the x profile to
+`0xabcd` for the `0xabcd` market, you can use the following variables:
 
 ```sh
-MARKET_METADATA=0xaaa...
-MODULE=emojicoin_dot_fun_market_metadata
-FUNCTION=add_market_properties
-MARKET_ADDRESS=0xabcd
-PROFILE=my-profile
 PROPERTIES='"Website","X profile"'
-VALUES='"example.org","https://x.com/0xabcd"'
-```
-
-```sh
-aptos move run \
-    --args \
-        "address:$MARKET_ADDRESS" \
-        'string:[$PROPERTIES]' \
-        'string:[$VALUES]' \
-    --function-id "$MARKET_METADATA::$MODULE::$FUNCTION" \
-    --profile $PROFILE
+VALUES='"https://example.org","https://x.com/0xabcd"'
 ```
