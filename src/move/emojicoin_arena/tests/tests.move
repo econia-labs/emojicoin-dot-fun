@@ -1,13 +1,13 @@
 #[test_only]
 // This test module uses the same design schema as the emojicoin dot fun core test module.
-module arena::tests {
+module emojicoin_arena::tests {
     use aptos_framework::account::{
         create_resource_address,
         create_signer_for_test as get_signer
     };
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use emojicoin_dot_fun::emojicoin_dot_fun::{MarketMetadata, unpack_market_metadata};
-    use arena::emojicoin_arena::{
+    use emojicoin_arena::emojicoin_arena::{
         Exit,
         NewMelee,
         ProfitAndLoss,
@@ -242,7 +242,7 @@ module arena::tests {
     }
 
     public fun base_vault_address(): address {
-        create_resource_address(&@arena, get_REGISTRY_SEED())
+        create_resource_address(&@emojicoin_arena, get_REGISTRY_SEED())
     }
 
     /// Initialize emojicoin dot fun with test markets.
@@ -259,7 +259,7 @@ module arena::tests {
     #[test]
     fun init_module_default() {
         init_emojicoin_dot_fun_with_test_markets();
-        init_module_test_only(&get_signer(@arena));
+        init_module_test_only(&get_signer(@emojicoin_arena));
         base_registry_view().assert_registry_view(registry_view());
     }
 }

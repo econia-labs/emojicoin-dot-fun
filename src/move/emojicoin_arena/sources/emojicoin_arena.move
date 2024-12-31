@@ -1,6 +1,6 @@
 // cspell:word funder
 // cspell:word unexited
-module arena::emojicoin_arena {
+module emojicoin_arena::emojicoin_arena {
 
     use aptos_framework::account::{Self, SignerCapability};
     use aptos_framework::aptos_account;
@@ -12,7 +12,7 @@ module arena::emojicoin_arena {
     use aptos_std::math64::min;
     use aptos_std::smart_table::{Self, SmartTable};
     use aptos_std::type_info;
-    use arena::pseudo_randomness;
+    use emojicoin_arena::pseudo_randomness;
     use emojicoin_dot_fun::emojicoin_dot_fun::{Self, MarketMetadata};
     use std::option::Self;
     use std::signer;
@@ -635,7 +635,7 @@ module arena::emojicoin_arena {
 
     #[view]
     public fun registry_view(): RegistryView acquires Registry {
-        let registry_ref = &Registry[@arena];
+        let registry_ref = &Registry[@emojicoin_arena];
         let vault_address =
             account::get_signer_capability_address(&registry_ref.signer_capability);
         RegistryView {
@@ -723,52 +723,59 @@ module arena::emojicoin_arena {
 
     public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
         let vault_address =
-            account::get_signer_capability_address(&Registry[@arena].signer_capability);
+            account::get_signer_capability_address(
+                &Registry[@emojicoin_arena].signer_capability
+            );
         aptos_account::transfer(funder, vault_address, amount);
         emit_vault_balance_update_with_vault_address(vault_address);
     }
 
     public entry fun set_next_melee_available_rewards(
-        arena: &signer, amount: u64
+        emojicoin_arena: &signer, amount: u64
     ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_available_rewards = amount;
+        borrow_registry_ref_mut_checked(emojicoin_arena).next_melee_available_rewards =
+            amount;
     }
 
-    public entry fun set_next_melee_duration(arena: &signer, duration: u64) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_duration = duration;
+    public entry fun set_next_melee_duration(
+        emojicoin_arena: &signer, duration: u64
+    ) acquires Registry {
+        borrow_registry_ref_mut_checked(emojicoin_arena).next_melee_duration = duration;
     }
 
     public entry fun set_next_melee_max_match_percentage(
-        arena: &signer, max_match_percentage: u64
+        emojicoin_arena: &signer, max_match_percentage: u64
     ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_max_match_percentage =
+        borrow_registry_ref_mut_checked(emojicoin_arena).next_melee_max_match_percentage =
             max_match_percentage;
     }
 
     public entry fun set_next_melee_max_match_amount(
-        arena: &signer, max_match_amount: u64
+        emojicoin_arena: &signer, max_match_amount: u64
     ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_max_match_amount =
+        borrow_registry_ref_mut_checked(emojicoin_arena).next_melee_max_match_amount =
             max_match_amount;
     }
 
-    public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
+    public entry fun withdraw_from_vault(
+        emojicoin_arena: &signer, amount: u64
+    ) acquires Registry {
         let signer_capability_ref =
-            &borrow_registry_ref_mut_checked(arena).signer_capability;
+            &borrow_registry_ref_mut_checked(emojicoin_arena).signer_capability;
         aptos_account::transfer(
             &account::create_signer_with_capability(signer_capability_ref),
-            @arena,
+            @emojicoin_arena,
             amount
         );
         emit_vault_balance_update_with_singer_capability_ref(signer_capability_ref);
     }
 
-    fun init_module(arena: &signer) acquires Registry {
+    fun init_module(emojicoin_arena: &signer) acquires Registry {
         // Store registry resource.
         let (vault_signer, signer_capability) =
-            account::create_resource_account(arena, REGISTRY_SEED);
+            account::create_resource_account(emojicoin_arena, REGISTRY_SEED);
         move_to(
-            arena,
+            emojicoin_arena,
             Registry {
                 melees_by_id: smart_table::new(),
                 melee_ids_by_market_ids: smart_table::new(),
@@ -798,7 +805,7 @@ module arena::emojicoin_arena {
 
         // Register the first melee.
         register_melee(
-            &mut Registry[@arena],
+            &mut Registry[@emojicoin_arena],
             0,
             sort_unique_market_ids(market_id_0, market_id_1)
         );
@@ -812,21 +819,21 @@ module arena::emojicoin_arena {
         }
     }
 
-    inline fun borrow_registry_ref_checked(arena: &signer): &Registry {
-        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
-        &Registry[@arena]
+    inline fun borrow_registry_ref_checked(emojicoin_arena: &signer): &Registry {
+        assert!(signer::address_of(emojicoin_arena) == @emojicoin_arena, E_NOT_ARENA);
+        &Registry[@emojicoin_arena]
     }
 
-    inline fun borrow_registry_ref_mut_checked(arena: &signer): &mut Registry {
-        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
-        &mut Registry[@arena]
+    inline fun borrow_registry_ref_mut_checked(emojicoin_arena: &signer): &mut Registry {
+        assert!(signer::address_of(emojicoin_arena) == @emojicoin_arena, E_NOT_ARENA);
+        &mut Registry[@emojicoin_arena]
     }
 
     /// Crank schedule and return `true` if the active melee has ended as a result, along with other
     /// assorted variables, to reduce borrows and lookups in the caller.
     inline fun crank_schedule(): (bool, &mut Registry, u64, u64) {
         let time = timestamp::now_microseconds();
-        let registry_ref_mut = &mut Registry[@arena];
+        let registry_ref_mut = &mut Registry[@emojicoin_arena];
         let n_melees_before_cranking = registry_ref_mut.melees_by_id.length();
         let last_active_melee_ref_mut =
             registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
