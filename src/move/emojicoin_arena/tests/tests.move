@@ -210,10 +210,11 @@ module emojicoin_arena::tests {
     #[test]
     /// Like `init_module_base`, but generates several AUIDs before calling `init_module`,
     /// effectively changing the pseudo-random seed. Since there are so few markets registered at
-    /// the effective publish time, multiple calls may be required to trigger a different result
-    /// from that in `init_module`.
+    /// the simulated publish time, multiple calls may be required to trigger a different initial
+    /// melee than that from `init_module`, while also hitting coverage on the inner function
+    /// `sort_unique_market_ids`.
     public fun init_module_different_seed() {
-        for (i in 0..3) {
+        for (i in 0..4) {
             transaction_context::generate_auid_address();
         };
 
