@@ -1,14 +1,24 @@
 #[test_only]
-// This module uses the same testing schema as the emojicoin dot fun package tests.
+// This test module uses the same design schema as the emojicoin dot fun core test module.
 module arena::tests {
-    use aptos_framework::account::{create_signer_for_test as get_signer};
+    use aptos_framework::account::{
+        create_resource_address,
+        create_signer_for_test as get_signer
+    };
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use arena::emojicoin_arena::{
         Exit,
         ProfitAndLoss,
         RegistryView,
         TopExits,
+        get_DEFAULT_AVAILABLE_REWARDS,
+        get_DEFAULT_DURATION,
+        get_DEFAULT_MAX_MATCH_PERCENTAGE,
+        get_DEFAULT_MAX_MATCH_AMOUNT,
+        get_NULL_ADDRESS,
+        get_REGISTRY_SEED,
         init_module_test_only,
+        registry_view,
         unpack_exit,
         unpack_profit_and_loss,
         unpack_registry_view,
@@ -128,6 +138,56 @@ module arena::tests {
         self.by_octas_growth_q64.assert_exit(by_octas_growth_q64);
     }
 
+    public fun base_exit(): MockExit {
+        MockExit {
+            user: get_NULL_ADDRESS(),
+            melee_id: 0,
+            octas_entered: 0,
+            octas_matched: 0,
+            tap_out_fee: 0,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: 0,
+            profit_and_loss: base_profit_and_loss()
+        }
+    }
+
+    public fun base_profit_and_loss(): MockProfitAndLoss {
+        MockProfitAndLoss {
+            octas_value: 0,
+            octas_gain: 0,
+            octas_loss: 0,
+            octas_growth_q64: 0
+        }
+    }
+
+    public fun base_registry_view(): MockRegistryView {
+        MockRegistryView {
+            n_melees: 1,
+            vault_address: base_vault_address(),
+            vault_balance: 0,
+            next_melee_duration: get_DEFAULT_DURATION(),
+            next_melee_available_rewards: get_DEFAULT_AVAILABLE_REWARDS(),
+            next_melee_max_match_percentage: get_DEFAULT_MAX_MATCH_PERCENTAGE(),
+            next_melee_max_match_amount: get_DEFAULT_MAX_MATCH_AMOUNT(),
+            n_entrants: 0,
+            n_swaps: 0,
+            swaps_volume: 0,
+            octas_matched: 0,
+            top_exits: base_top_exits()
+        }
+    }
+
+    public fun base_top_exits(): MockTopExits {
+        MockTopExits {
+            by_octas_gain: base_exit(),
+            by_octas_growth_q64: base_exit()
+        }
+    }
+
+    public fun base_vault_address(): address {
+        create_resource_address(&@arena, get_REGISTRY_SEED())
+    }
+
     /// Initialize emojicoin dot fun with test markets.
     public fun init_emojicoin_dot_fun_with_test_markets() {
         emojicoin_dot_fun_tests::init_package();
@@ -143,5 +203,6 @@ module arena::tests {
     fun init_module_default() {
         init_emojicoin_dot_fun_with_test_markets();
         init_module_test_only(&get_signer(@arena));
+        base_registry_view().assert_registry_view(registry_view());
     }
 }
