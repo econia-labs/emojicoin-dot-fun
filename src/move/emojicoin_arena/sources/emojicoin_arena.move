@@ -1672,4 +1672,29 @@ module arena::emojicoin_arena {
     public fun init_module_test_only(account: &signer) acquires Registry {
         init_module(account)
     }
+
+    #[test_only]
+    public fun unpack_new_melee(self: NewMelee):
+        (
+        u64, vector<MarketMetadata>, u64, u64, u64, u64, u64
+    ) {
+        let NewMelee {
+            melee_id,
+            market_metadatas,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        } = self;
+        (
+            melee_id,
+            market_metadatas,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        )
+    }
 }

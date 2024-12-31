@@ -6,8 +6,10 @@ module arena::tests {
         create_signer_for_test as get_signer
     };
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
+    use emojicoin_dot_fun::emojicoin_dot_fun::{MarketMetadata, unpack_market_metadata};
     use arena::emojicoin_arena::{
         Exit,
+        NewMelee,
         ProfitAndLoss,
         RegistryView,
         TopExits,
@@ -20,6 +22,7 @@ module arena::tests {
         init_module_test_only,
         registry_view,
         unpack_exit,
+        unpack_new_melee,
         unpack_profit_and_loss,
         unpack_registry_view,
         unpack_top_exits
@@ -35,6 +38,22 @@ module arena::tests {
         emojicoin_0_proceeds: u64,
         emojicoin_1_proceeds: u64,
         profit_and_loss: MockProfitAndLoss
+    }
+
+    struct MockMarketMetadata has copy, drop, store {
+        market_id: u64,
+        market_address: address,
+        emoji_bytes: vector<u8>
+    }
+
+    struct MockNewMelee has copy, drop, store {
+        melee_id: u64,
+        market_metadatas: vector<MockMarketMetadata>,
+        start_time: u64,
+        duration: u64,
+        max_match_percentage: u64,
+        max_match_amount: u64,
+        available_rewards: u64
     }
 
     struct MockProfitAndLoss has copy, drop, store {
@@ -88,6 +107,44 @@ module arena::tests {
         assert!(self.emojicoin_0_proceeds == emojicoin_0_proceeds);
         assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
         self.profit_and_loss.assert_profit_and_loss(profit_and_loss);
+    }
+
+    public fun assert_market_metadata(
+        self: MockMarketMetadata, actual: MarketMetadata
+    ) {
+        let (market_id, market_address, emoji_bytes) = unpack_market_metadata(actual);
+        assert!(self.market_id == market_id);
+        assert!(self.market_address == market_address);
+        assert!(self.emoji_bytes == emoji_bytes);
+    }
+
+    public fun assert_market_metadatas(
+        mock: vector<MockMarketMetadata>, actual: vector<MarketMetadata>
+    ) {
+        let mock_length = mock.length();
+        assert!(mock_length == actual.length());
+        for (metadata_index in 0..mock_length) {
+            (mock[metadata_index].assert_market_metadata(actual[metadata_index]));
+        };
+    }
+
+    public fun assert_new_melee(self: MockNewMelee, actual: NewMelee) {
+        let (
+            melee_id,
+            market_metadatas,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        ) = unpack_new_melee(actual);
+        assert!(self.melee_id == melee_id);
+        assert_market_metadatas(self.market_metadatas, market_metadatas);
+        assert!(self.start_time == start_time);
+        assert!(self.duration == duration);
+        assert!(self.max_match_percentage == max_match_percentage);
+        assert!(self.max_match_amount == max_match_amount);
+        assert!(self.available_rewards == available_rewards);
     }
 
     public fun assert_profit_and_loss(
