@@ -56,10 +56,9 @@ const LinkButton = ({
       <Popup
         className="w-[300px]"
         content={
-          "If you're the owner of this project and want to link your socials " +
-          "profile here, please use our dedicated Discord channel: #" +
+          "Submit a request in the #" +
           DISCORD_METADATA_REQUEST_CHANNEL +
-          " ! (click the button to go to our discord)"
+          " Discord channel to add links. (Click the button to join Discord.)"
         }
       >
         <Link href={LINKS?.discord} target="_blank">
