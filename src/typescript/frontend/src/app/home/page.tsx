@@ -14,6 +14,8 @@ import { type DatabaseModels, toPriceFeed } from "@sdk/indexer-v2/types";
 import { type DatabaseJsonType } from "@sdk/indexer-v2/types/json-types";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { ORDER_BY } from "@sdk/queries";
+import { getAptPrice } from "lib/queries/get-apt-price";
+import { AptPriceContextProvider } from "context/AptPrice";
 
 export const revalidate = 2;
 
@@ -75,20 +77,25 @@ export default async function Home({ searchParams }: HomePageParams) {
     numMarketsPromise = getCachedNumMarketsFromAptosNode();
   }
 
-  const [priceFeedData, markets, numMarkets] = await Promise.all([
+  const aptPricePromise = getAptPrice();
+
+  const [priceFeedData, markets, numMarkets, aptPrice] = await Promise.all([
     priceFeedPromise,
     marketsPromise,
     numMarketsPromise,
+    aptPricePromise,
   ]);
 
   return (
-    <HomePageComponent
-      markets={markets}
-      numMarkets={numMarkets}
-      page={page}
-      sortBy={sortBy}
-      searchBytes={q}
-      priceFeed={priceFeedData}
-    />
+    <AptPriceContextProvider aptPrice={aptPrice}>
+      <HomePageComponent
+        markets={markets}
+        numMarkets={numMarkets}
+        page={page}
+        sortBy={sortBy}
+        searchBytes={q}
+        priceFeed={priceFeedData}
+      />
+    </AptPriceContextProvider>
   );
 }
