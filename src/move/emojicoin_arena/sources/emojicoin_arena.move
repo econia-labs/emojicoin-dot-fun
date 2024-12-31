@@ -256,6 +256,21 @@ module arena::emojicoin_arena {
         available_rewards: u64
     }
 
+    struct RegistryView has copy, drop, store {
+        n_melees: u64,
+        vault_address: address,
+        vault_balance: u64,
+        next_melee_duration: u64,
+        next_melee_available_rewards: u64,
+        next_melee_max_match_percentage: u64,
+        next_melee_max_match_amount: u64,
+        n_entrants: u64,
+        n_swaps: u64,
+        swaps_volume: u128,
+        octas_matched: u64,
+        top_exits: TopExits
+    }
+
     /// Exchange rate between APT and emojicoins.
     struct ExchangeRate has copy, drop, store {
         /// Octas per `quote` emojicoins.
@@ -281,48 +296,6 @@ module arena::emojicoin_arena {
     /// sending funds directly to the vault address instead of by using the `fund_vault` function.
     struct VaultBalanceUpdate has copy, drop, store {
         new_balance: u64
-    }
-
-    public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
-        let vault_address =
-            account::get_signer_capability_address(&Registry[@arena].signer_capability);
-        aptos_account::transfer(funder, vault_address, amount);
-        emit_vault_balance_update_with_vault_address(vault_address);
-    }
-
-    public entry fun set_next_melee_available_rewards(
-        arena: &signer, amount: u64
-    ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_available_rewards = amount;
-    }
-
-    public entry fun set_next_melee_duration(arena: &signer, duration: u64) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_duration = duration;
-    }
-
-    public entry fun set_next_melee_max_match_percentage(
-        arena: &signer, max_match_percentage: u64
-    ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_max_match_percentage =
-            max_match_percentage;
-    }
-
-    public entry fun set_next_melee_max_match_amount(
-        arena: &signer, max_match_amount: u64
-    ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_max_match_amount =
-            max_match_amount;
-    }
-
-    public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
-        let signer_capability_ref =
-            &borrow_registry_ref_mut_checked(arena).signer_capability;
-        aptos_account::transfer(
-            &account::create_signer_with_capability(signer_capability_ref),
-            @arena,
-            amount
-        );
-        emit_vault_balance_update_with_singer_capability_ref(signer_capability_ref);
     }
 
     #[randomness]
@@ -658,6 +631,136 @@ module arena::emojicoin_arena {
                 exchange_rate_1
             );
         }
+    }
+
+    #[view]
+    public fun registry_view(): RegistryView acquires Registry {
+        let registry_ref = &Registry[@arena];
+        let vault_address =
+            account::get_signer_capability_address(&registry_ref.signer_capability);
+        RegistryView {
+            n_melees: registry_ref.melees_by_id.length(),
+            vault_address,
+            vault_balance: coin::balance<AptosCoin>(vault_address),
+            next_melee_duration: registry_ref.next_melee_duration,
+            next_melee_available_rewards: registry_ref.next_melee_available_rewards,
+            next_melee_max_match_percentage: registry_ref.next_melee_max_match_percentage,
+            next_melee_max_match_amount: registry_ref.next_melee_max_match_amount,
+            n_entrants: registry_ref.all_entrants.length(),
+            n_swaps: registry_ref.n_swaps,
+            swaps_volume: registry_ref.swaps_volume,
+            octas_matched: registry_ref.octas_matched,
+            top_exits: registry_ref.top_exits
+        }
+    }
+
+    public fun unpack_registry_view(
+        self: RegistryView
+    ): (u64, address, u64, u64, u64, u64, u64, u64, u64, u128, u64, TopExits) {
+        let RegistryView {
+            n_melees,
+            vault_address,
+            vault_balance,
+            next_melee_duration,
+            next_melee_available_rewards,
+            next_melee_max_match_percentage,
+            next_melee_max_match_amount,
+            n_entrants,
+            n_swaps,
+            swaps_volume,
+            octas_matched,
+            top_exits
+        } = self;
+        (
+            n_melees,
+            vault_address,
+            vault_balance,
+            next_melee_duration,
+            next_melee_available_rewards,
+            next_melee_max_match_percentage,
+            next_melee_max_match_amount,
+            n_entrants,
+            n_swaps,
+            swaps_volume,
+            octas_matched,
+            top_exits
+        )
+    }
+
+    public fun unpack_exit(self: Exit): (address, u64, u64, u64, u64, u64, u64, ProfitAndLoss) {
+        let Exit {
+            user,
+            melee_id,
+            octas_entered,
+            octas_matched,
+            tap_out_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            profit_and_loss
+        } = self;
+        (
+            user,
+            melee_id,
+            octas_entered,
+            octas_matched,
+            tap_out_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            profit_and_loss
+        )
+    }
+
+    public fun unpack_top_exits(self: TopExits): (Exit, Exit) {
+        let TopExits { by_octas_gain, by_octas_growth_q64 } = self;
+        (by_octas_gain, by_octas_growth_q64)
+    }
+
+    public fun unpack_profit_and_loss(self: ProfitAndLoss): (u128, u128, u128, u128) {
+        let ProfitAndLoss { octas_value, octas_gain, octas_loss, octas_growth_q64 } =
+            self;
+        (octas_value, octas_gain, octas_loss, octas_growth_q64)
+    }
+
+    public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
+        let vault_address =
+            account::get_signer_capability_address(&Registry[@arena].signer_capability);
+        aptos_account::transfer(funder, vault_address, amount);
+        emit_vault_balance_update_with_vault_address(vault_address);
+    }
+
+    public entry fun set_next_melee_available_rewards(
+        arena: &signer, amount: u64
+    ) acquires Registry {
+        borrow_registry_ref_mut_checked(arena).next_melee_available_rewards = amount;
+    }
+
+    public entry fun set_next_melee_duration(arena: &signer, duration: u64) acquires Registry {
+        borrow_registry_ref_mut_checked(arena).next_melee_duration = duration;
+    }
+
+    public entry fun set_next_melee_max_match_percentage(
+        arena: &signer, max_match_percentage: u64
+    ) acquires Registry {
+        borrow_registry_ref_mut_checked(arena).next_melee_max_match_percentage =
+            max_match_percentage;
+    }
+
+    public entry fun set_next_melee_max_match_amount(
+        arena: &signer, max_match_amount: u64
+    ) acquires Registry {
+        borrow_registry_ref_mut_checked(arena).next_melee_max_match_amount =
+            max_match_amount;
+    }
+
+    public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
+        let signer_capability_ref =
+            &borrow_registry_ref_mut_checked(arena).signer_capability;
+        aptos_account::transfer(
+            &account::create_signer_with_capability(signer_capability_ref),
+            @arena,
+            amount
+        );
+        emit_vault_balance_update_with_singer_capability_ref(signer_capability_ref);
     }
 
     fun init_module(arena: &signer) acquires Registry {
@@ -1533,5 +1636,10 @@ module arena::emojicoin_arena {
         recipient: address, escrow_coin_ref_mut: &mut Coin<Emojicoin>
     ) {
         aptos_account::deposit_coins(recipient, coin::extract_all(escrow_coin_ref_mut));
+    }
+
+    #[test_only]
+    public fun init_module_test_only(account: &signer) acquires Registry {
+        init_module(account)
     }
 }
