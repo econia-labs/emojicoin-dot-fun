@@ -1164,6 +1164,8 @@ module emojicoin_arena::emojicoin_arena {
         n_markets
     }
 
+    /// Returns the most recent time that is an integer multiple of `duration` after `start_time`,
+    /// assuming `current_time` is at least `duration` after `start_time`.
     inline fun last_period_boundary(
         current_time: u64, start_time: u64, duration: u64
     ): u64 {
