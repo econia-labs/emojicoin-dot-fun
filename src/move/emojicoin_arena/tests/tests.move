@@ -7,6 +7,7 @@ module emojicoin_arena::tests {
     };
     use aptos_framework::event::{emitted_events};
     use aptos_framework::timestamp;
+    use aptos_framework::transaction_context;
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use emojicoin_dot_fun::emojicoin_dot_fun::{MarketMetadata, unpack_market_metadata};
     use emojicoin_arena::emojicoin_arena::{
@@ -308,5 +309,39 @@ module emojicoin_arena::tests {
         let new_melee_events = emitted_events<NewMelee>();
         assert!(new_melee_events.length() == 1);
         base_new_melee().assert_new_melee(new_melee_events[0]);
+    }
+
+    #[test]
+    /// Like `init_module_base`, but generates several AUIDs before calling `init_module`,
+    /// effectively changing the pseudo-random seed. Since there are so few markets registered at
+    /// the effective publish time, multiple calls may be required to trigger a different result
+    /// from that in `init_module`.
+    fun init_module_different_seed() {
+        for (i in 0..3) {
+            transaction_context::generate_auid_address();
+        };
+
+        // Initialize emojicoin dot fun.
+        init_emojicoin_dot_fun_with_test_markets();
+
+        // Set global time to base publish time.
+        timestamp::update_global_time_for_test(base_publish_time());
+
+        // Initialize module.
+        init_module_test_only(&get_signer(@emojicoin_arena));
+
+        // Assert registry view.
+        base_registry_view().assert_registry_view(registry_view());
+
+        // Assert new melee event.
+        let new_melee_events = emitted_events<NewMelee>();
+        assert!(new_melee_events.length() == 1);
+        let mock_new_melee = base_new_melee();
+        mock_new_melee.market_metadatas[1] = MockMarketMetadata {
+            market_id: 3,
+            market_address: @yellow_heart_market,
+            emoji_bytes: YELLOW_HEART
+        };
+        mock_new_melee.assert_new_melee(new_melee_events[0]);
     }
 }
