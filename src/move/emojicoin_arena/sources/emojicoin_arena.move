@@ -807,7 +807,9 @@ module emojicoin_arena::emojicoin_arena {
         register_melee(
             &mut Registry[@emojicoin_arena],
             0,
-            sort_unique_market_ids(market_id_0, market_id_1)
+            sort_unique_market_ids(market_id_0, market_id_1),
+            0,
+            DEFAULT_DURATION
         );
     }
 
@@ -837,13 +839,19 @@ module emojicoin_arena::emojicoin_arena {
         let n_melees_before_cranking = registry_ref_mut.melees_by_id.length();
         let last_active_melee_ref_mut =
             registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
+        let last_active_melee_start_time = last_active_melee_ref_mut.start_time;
+        let last_active_melee_duration = last_active_melee_ref_mut.duration;
         let cranked =
-            if (time
-                >= last_active_melee_ref_mut.start_time
-                    + last_active_melee_ref_mut.duration) {
+            if (time >= last_active_melee_start_time + last_active_melee_duration) {
                 last_active_melee_ref_mut.available_rewards = 0;
                 let market_ids = next_melee_market_ids(registry_ref_mut);
-                register_melee(registry_ref_mut, n_melees_before_cranking, market_ids);
+                register_melee(
+                    registry_ref_mut,
+                    n_melees_before_cranking,
+                    market_ids,
+                    last_active_melee_start_time,
+                    last_active_melee_duration
+                );
                 true
             } else false;
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
@@ -1156,8 +1164,10 @@ module emojicoin_arena::emojicoin_arena {
         n_markets
     }
 
-    inline fun last_period_boundary(time: u64, period: u64): u64 {
-        (time / period) * period
+    inline fun last_period_boundary(
+        current_time: u64, start_time: u64, duration: u64
+    ): u64 {
+        (((current_time - start_time) / duration) * duration) + start_time
     }
 
     /// Uses mutable references to avoid borrowing issues.
@@ -1398,7 +1408,9 @@ module emojicoin_arena::emojicoin_arena {
     inline fun register_melee(
         registry_ref_mut: &mut Registry,
         n_melees_before_registration: u64,
-        sorted_unique_market_ids: vector<u64>
+        sorted_unique_market_ids: vector<u64>,
+        last_melee_start_time: u64,
+        last_melee_duration: u64
     ) {
         let melee_id = n_melees_before_registration + 1;
         let market_metadatas =
@@ -1409,7 +1421,9 @@ module emojicoin_arena::emojicoin_arena {
             });
         let start_time =
             last_period_boundary(
-                timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
+                timestamp::now_microseconds(),
+                last_melee_start_time,
+                last_melee_duration
             );
         let duration = registry_ref_mut.next_melee_duration;
         let max_match_percentage = registry_ref_mut.next_melee_max_match_percentage;
