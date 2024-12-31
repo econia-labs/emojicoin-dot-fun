@@ -208,7 +208,7 @@ module emojicoin_arena::emojicoin_arena {
 
     #[event]
     /// Emitted after a user enters, swaps, or exits, representing the final `Melee` state for the
-    /// corresponding `Melee` (which may be inactive.)
+    /// corresponding `Melee` (which may be inactive).
     struct MeleeState has copy, drop, store {
         melee_id: u64,
         available_rewards: u64,
