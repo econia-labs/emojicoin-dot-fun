@@ -2,6 +2,7 @@ import { fetchMarketsWithCount } from "@/queries/home";
 import { AccountAddress } from "@aptos-labs/ts-sdk";
 import { VERCEL } from "@sdk/const";
 import { getAptosClient } from "@sdk/utils/aptos-client";
+import { getAptPrice } from "lib/queries/get-apt-price";
 
 export const dynamic = "force-static";
 export const revalidate = 600;
@@ -50,6 +51,13 @@ const VerifyApiKeys = async () => {
   if (res.error) {
     const msg = "\n\tLikely an invalid indexer API key.";
     throw new Error(`Couldn't fetch the price feed on the server. ${msg}`);
+  }
+
+  // Check that CoinMarketCap API key works
+  try {
+    await getAptPrice();
+  } catch (e) {
+    throw new Error(`Couldn't fetch APT price.\n\tInvalid CoinMarketCap API key.`);
   }
 
   return <div className="bg-black w-full h-full m-auto pixel-heading-2">LGTM</div>;
