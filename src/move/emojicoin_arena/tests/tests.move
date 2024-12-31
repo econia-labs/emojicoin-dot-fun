@@ -188,7 +188,7 @@ module emojicoin_arena::tests {
     }
 
     #[test]
-    fun init_module_base() {
+    public fun init_module_base() {
         // Initialize emojicoin dot fun.
         init_emojicoin_dot_fun_with_test_markets();
 
@@ -212,7 +212,7 @@ module emojicoin_arena::tests {
     /// effectively changing the pseudo-random seed. Since there are so few markets registered at
     /// the effective publish time, multiple calls may be required to trigger a different result
     /// from that in `init_module`.
-    fun init_module_different_seed() {
+    public fun init_module_different_seed() {
         for (i in 0..3) {
             transaction_context::generate_auid_address();
         };
