@@ -5,6 +5,8 @@ module emojicoin_arena::tests {
         create_resource_address,
         create_signer_for_test as get_signer
     };
+    use aptos_framework::event::{emitted_events};
+    use aptos_framework::timestamp;
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use emojicoin_dot_fun::emojicoin_dot_fun::{MarketMetadata, unpack_market_metadata};
     use emojicoin_arena::emojicoin_arena::{
@@ -208,6 +210,29 @@ module emojicoin_arena::tests {
         }
     }
 
+    public fun base_new_melee(): MockNewMelee {
+        MockNewMelee {
+            melee_id: 1,
+            market_metadatas: vector[
+                MockMarketMetadata {
+                    market_id: 1,
+                    market_address: @black_cat_market,
+                    emoji_bytes: BLACK_CAT
+                },
+                MockMarketMetadata {
+                    market_id: 2,
+                    market_address: @black_heart_market,
+                    emoji_bytes: BLACK_HEART
+                }
+            ],
+            start_time: base_start_time(),
+            duration: get_DEFAULT_DURATION(),
+            max_match_percentage: get_DEFAULT_MAX_MATCH_PERCENTAGE(),
+            max_match_amount: get_DEFAULT_MAX_MATCH_AMOUNT(),
+            available_rewards: get_DEFAULT_AVAILABLE_REWARDS()
+        }
+    }
+
     public fun base_profit_and_loss(): MockProfitAndLoss {
         MockProfitAndLoss {
             octas_value: 0,
@@ -215,6 +240,11 @@ module emojicoin_arena::tests {
             octas_loss: 0,
             octas_growth_q64: 0
         }
+    }
+
+    /// 1.5x the default melee duration.
+    public fun base_publish_time(): u64 {
+        get_DEFAULT_DURATION() + get_DEFAULT_DURATION() / 2
     }
 
     public fun base_registry_view(): MockRegistryView {
@@ -232,6 +262,10 @@ module emojicoin_arena::tests {
             octas_matched: 0,
             top_exits: base_top_exits()
         }
+    }
+
+    public fun base_start_time(): u64 {
+        get_DEFAULT_DURATION()
     }
 
     public fun base_top_exits(): MockTopExits {
@@ -257,9 +291,22 @@ module emojicoin_arena::tests {
     }
 
     #[test]
-    fun init_module_default() {
+    fun init_module_base() {
+        // Initialize emojicoin dot fun.
         init_emojicoin_dot_fun_with_test_markets();
+
+        // Set global time to base publish time.
+        timestamp::update_global_time_for_test(base_publish_time());
+
+        // Initialize module.
         init_module_test_only(&get_signer(@emojicoin_arena));
+
+        // Assert registry view.
         base_registry_view().assert_registry_view(registry_view());
+
+        // Assert new melee event.
+        let new_melee_events = emitted_events<NewMelee>();
+        assert!(new_melee_events.length() == 1);
+        base_new_melee().assert_new_melee(new_melee_events[0]);
     }
 }
