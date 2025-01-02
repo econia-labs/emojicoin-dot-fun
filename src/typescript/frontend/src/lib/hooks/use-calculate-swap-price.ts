@@ -67,6 +67,6 @@ const getReservesAndBondingCurveStateWithDefault = (
   return {
     clammVirtualReserves: INITIAL_VIRTUAL_RESERVES,
     cpammRealReserves: INITIAL_REAL_RESERVES,
-    startsInBondingCurve: false,
+    startsInBondingCurve: true,
   };
 };
