@@ -1,0 +1,12 @@
+[addresses]
+zombie_market = "0xfd15a4d8073c1bf3d63eee43f98786a4a2ec9933df89d3cdbed7b90b5b7156ae"
+
+[dev-dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[package]
+name = "ZombieCoinFactory"
+upgrade_policy = "immutable"
+version = "1.0.0"
