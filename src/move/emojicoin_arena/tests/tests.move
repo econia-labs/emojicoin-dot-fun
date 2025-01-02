@@ -407,7 +407,7 @@ module emojicoin_arena::tests {
     /// melee than that from `init_module`, while also hitting coverage on the inner function
     /// `sort_unique_market_ids`.
     public fun init_module_different_seed() {
-        for (i in 0..3) {
+        for (i in 0..4) {
             transaction_context::generate_auid_address();
         };
 
@@ -427,11 +427,18 @@ module emojicoin_arena::tests {
         let new_melee_events = emitted_events<NewMelee>();
         assert!(new_melee_events.length() == 1);
         let mock_new_melee = base_new_melee();
-        mock_new_melee.market_metadatas[1] = MockMarketMetadata {
-            market_id: 6,
-            market_address: @zombie_market,
-            emoji_bytes: ZOMBIE
-        };
+        mock_new_melee.market_metadatas = vector[
+            MockMarketMetadata {
+                market_id: 4,
+                market_address: @yin_yang_market,
+                emoji_bytes: YIN_YANG
+            },
+            MockMarketMetadata {
+                market_id: 6,
+                market_address: @zombie_market,
+                emoji_bytes: ZOMBIE
+            }
+        ];
         mock_new_melee.assert_new_melee(new_melee_events[0]);
     }
 
