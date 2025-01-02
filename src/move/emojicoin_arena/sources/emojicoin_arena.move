@@ -135,7 +135,10 @@ module emojicoin_arena::emojicoin_arena {
         octas_entered: u64,
         /// Cumulative amount of APT matched since most recent deposit into an empty `Escrow`, reset
         /// to 0 upon exit. Must be paid back in full when tapping out.
-        octas_matched: u64
+        octas_matched: u64,
+        /// The most recent `Exit` for the `Escrow`, since a user can technically exit multiple
+        /// times by re-entering. Initialized via `null_exit`.
+        most_recent_exit: Exit
     }
 
     struct UserMelees has key {
@@ -324,7 +327,8 @@ module emojicoin_arena::emojicoin_arena {
                     octas_entered: 0,
                     octas_matched: 0,
                     swaps_volume: 0,
-                    n_swaps: 0
+                    n_swaps: 0,
+                    most_recent_exit: null_exit()
                 }
             );
             if (!exists<UserMelees>(entrant_address)) {
@@ -743,18 +747,18 @@ module emojicoin_arena::emojicoin_arena {
         borrow_registry_ref_mut_checked(emojicoin_arena).next_melee_duration = duration;
     }
 
-    public entry fun set_next_melee_max_match_percentage(
-        emojicoin_arena: &signer, max_match_percentage: u64
-    ) acquires Registry {
-        borrow_registry_ref_mut_checked(emojicoin_arena).next_melee_max_match_percentage =
-            max_match_percentage;
-    }
-
     public entry fun set_next_melee_max_match_amount(
         emojicoin_arena: &signer, max_match_amount: u64
     ) acquires Registry {
         borrow_registry_ref_mut_checked(emojicoin_arena).next_melee_max_match_amount =
             max_match_amount;
+    }
+
+    public entry fun set_next_melee_max_match_percentage(
+        emojicoin_arena: &signer, max_match_percentage: u64
+    ) acquires Registry {
+        borrow_registry_ref_mut_checked(emojicoin_arena).next_melee_max_match_percentage =
+            max_match_percentage;
     }
 
     public entry fun withdraw_from_vault(
@@ -1024,6 +1028,13 @@ module emojicoin_arena::emojicoin_arena {
         self.swaps_volume += amount;
     }
 
+    inline fun escrow_most_recent_exit_set<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        exit: Exit
+    ) {
+        self.most_recent_exit = exit;
+    }
+
     inline fun exchange_rate<Emojicoin, EmojicoinLP>(
         market_address: address
     ): ExchangeRate {
@@ -1135,6 +1146,7 @@ module emojicoin_arena::emojicoin_arena {
         // Update escrow state.
         escrow_ref_mut.escrow_octas_entered_reset();
         escrow_ref_mut.escrow_octas_matched_reset();
+        escrow_ref_mut.escrow_most_recent_exit_set(exit);
 
         // Update user melees state.
         let user_melees_ref_mut = &mut UserMelees[participant_address];
