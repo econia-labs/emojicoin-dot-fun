@@ -1,0 +1,12 @@
+[addresses]
+yin_yang_market = "0x6d64edcaa823d4b7bf5d98d424cc403870dd7ee4383e54ccca21d486d22a8588"
+
+[dev-dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[package]
+name = "YinYangCoinFactory"
+upgrade_policy = "immutable"
+version = "1.0.0"
