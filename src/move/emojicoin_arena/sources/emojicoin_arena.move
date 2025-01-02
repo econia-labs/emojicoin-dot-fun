@@ -1720,4 +1720,10 @@ module emojicoin_arena::emojicoin_arena {
             available_rewards
         )
     }
+
+    #[test_only]
+    public fun unpack_vault_balance_update(self: VaultBalanceUpdate): u64 {
+        let VaultBalanceUpdate { new_balance } = self;
+        new_balance
+    }
 }
