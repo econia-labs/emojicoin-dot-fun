@@ -53,11 +53,11 @@ const VerifyApiKeys = async () => {
     throw new Error(`Couldn't fetch the price feed on the server. ${msg}`);
   }
 
-  // Check that CoinMarketCap API key works
+  // Check that CoinGecko API key works
   try {
     await getAptPrice();
   } catch (e) {
-    throw new Error(`Couldn't fetch APT price.\n\tInvalid CoinMarketCap API key.`);
+    throw new Error(`Couldn't fetch APT price.\n\tInvalid CoinGecko API key.`);
   }
 
   return <div className="bg-black w-full h-full m-auto pixel-heading-2">LGTM</div>;

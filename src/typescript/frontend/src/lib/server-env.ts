@@ -20,8 +20,8 @@ if (typeof process.env.REVALIDATION_TIME === "undefined") {
   throw new Error("Environment variable REVALIDATION_TIME is undefined.");
 }
 
-if (typeof process.env.COINMARKETCAP_API_KEY === "undefined") {
-  throw new Error("Environment variable COINMARKETCAP_API_KEY is undefined.");
+if (typeof process.env.COINGECKO_API_KEY === "undefined") {
+  throw new Error("Environment variable COINGECKO_API_KEY is undefined.");
 }
 
 export const GEOBLOCKED: { countries: string[]; regions: string[] } = JSON.parse(
@@ -32,7 +32,7 @@ export const GEOBLOCKING_ENABLED = GEOBLOCKED.countries.length > 0 || GEOBLOCKED
 export const ALLOWLISTER3K_URL: string | undefined = process.env.ALLOWLISTER3K_URL;
 export const REVALIDATION_TIME: number = Number(process.env.REVALIDATION_TIME);
 export const PRE_LAUNCH_TEASER: boolean = process.env.PRE_LAUNCH_TEASER === "true";
-export const COINMARKETCAP_API_KEY: string = process.env.COINMARKETCAP_API_KEY;
+export const COINGECKO_API_KEY: string = process.env.COINGECKO_API_KEY;
 
 if (
   APTOS_NETWORK.toString() === "local" &&
