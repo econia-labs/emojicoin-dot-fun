@@ -206,7 +206,8 @@ module emojicoin_arena::emojicoin_arena {
         swaps_volume: u128,
         octas_entered: u64,
         octas_matched: u64,
-        profit_and_loss: ProfitAndLoss
+        profit_and_loss: ProfitAndLoss,
+        most_recent_exit: Exit
     }
 
     #[event]
@@ -259,6 +260,38 @@ module emojicoin_arena::emojicoin_arena {
         available_rewards: u64
     }
 
+    #[event]
+    /// Emitted whenever the vault balance is updated, except for when the vault is funded by
+    /// sending funds directly to the vault address instead of by using the `fund_vault` function.
+    struct VaultBalanceUpdate has copy, drop, store {
+        new_balance: u64
+    }
+
+    /// Return for `melee_view` with more fields than `Melee`, since certain fields do not need to
+    /// be emitted for every event.
+    struct MeleeView has copy, drop, store {
+        melee_id: u64,
+        market_metadatas: vector<MarketMetadata>,
+        start_time: u64,
+        duration: u64,
+        max_match_percentage: u64,
+        max_match_amount: u64,
+        available_rewards: u64,
+        n_all_entrants: u64,
+        n_active_entrants: u64,
+        n_exited_entrants: u64,
+        n_locked_in_entrants: u64,
+        n_swaps: u64,
+        swaps_volume: u128,
+        emojicoin_0_locked: u64,
+        emojicoin_1_locked: u64,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate,
+        top_exits: TopExits
+    }
+
+    /// Return for `registry_view` with more fields than `RegistryState`, since certain fields do
+    /// not need to be emitted for every event.
     struct RegistryView has copy, drop, store {
         n_melees: u64,
         vault_address: address,
@@ -292,13 +325,6 @@ module emojicoin_arena::emojicoin_arena {
         octas_loss: u128,
         /// Ratio of `octas_value` to `Escrow.octas_entered`, as a Q64.
         octas_growth_q64: u128
-    }
-
-    #[event]
-    /// Emitted whenever the vault balance is updated, except for when the vault is funded by
-    /// sending funds directly to the vault address instead of by using the `fund_vault` function.
-    struct VaultBalanceUpdate has copy, drop, store {
-        new_balance: u64
     }
 
     #[randomness]
@@ -638,6 +664,96 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[view]
+    public fun melee_view<Coin0, LP0, Coin1, LP1>(melee_id: u64): MeleeView acquires Registry {
+        let melee_ref = Registry[@emojicoin_arena].melees_by_id.borrow(melee_id);
+        let (market_address_0, market_address_1) = market_addresses(melee_ref);
+        MeleeView {
+            melee_id,
+            market_metadatas: melee_ref.market_metadatas,
+            start_time: melee_ref.start_time,
+            duration: melee_ref.duration,
+            max_match_percentage: melee_ref.max_match_percentage,
+            max_match_amount: melee_ref.max_match_amount,
+            available_rewards: melee_ref.available_rewards,
+            n_all_entrants: melee_ref.all_entrants.length(),
+            n_active_entrants: melee_ref.active_entrants.length(),
+            n_exited_entrants: melee_ref.exited_entrants.length(),
+            n_locked_in_entrants: melee_ref.locked_in_entrants.length(),
+            n_swaps: melee_ref.n_swaps,
+            swaps_volume: melee_ref.swaps_volume,
+            emojicoin_0_locked: melee_ref.emojicoin_0_locked,
+            emojicoin_1_locked: melee_ref.emojicoin_1_locked,
+            emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
+            emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1),
+            top_exits: melee_ref.top_exits
+        }
+    }
+
+    public fun unpack_melee_view(
+        self: MeleeView
+    ): (
+        u64,
+        vector<MarketMetadata>,
+        u64,
+        u64,
+        u64,
+        u64,
+        u64,
+        u64,
+        u64,
+        u64,
+        u64,
+        u64,
+        u128,
+        u64,
+        u64,
+        ExchangeRate,
+        ExchangeRate,
+        TopExits
+    ) {
+        let MeleeView {
+            melee_id,
+            market_metadatas,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards,
+            n_all_entrants,
+            n_active_entrants,
+            n_exited_entrants,
+            n_locked_in_entrants,
+            n_swaps,
+            swaps_volume,
+            emojicoin_0_locked,
+            emojicoin_1_locked,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate,
+            top_exits
+        } = self;
+        (
+            melee_id,
+            market_metadatas,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards,
+            n_all_entrants,
+            n_active_entrants,
+            n_exited_entrants,
+            n_locked_in_entrants,
+            n_swaps,
+            swaps_volume,
+            emojicoin_0_locked,
+            emojicoin_1_locked,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate,
+            top_exits
+        )
+    }
+
+    #[view]
     public fun registry_view(): RegistryView acquires Registry {
         let registry_ref = &Registry[@emojicoin_arena];
         let vault_address =
@@ -691,6 +807,51 @@ module emojicoin_arena::emojicoin_arena {
         )
     }
 
+    /// Returns references to `Registry` `SmartTable`s other than `Registry.melees_by_id` (since
+    /// separate getters can inspect an individual melee), to enable assorted `SmartTable` calls
+    /// without having to create a new function for each.
+    public inline fun registry_smart_table_refs():
+        (
+        &SmartTable<vector<u64>, u64>, &SmartTable<address, Nil>
+    ) {
+        let registry_ref = &Registry[@emojicoin_arena];
+        (&registry_ref.melee_ids_by_market_ids, &registry_ref.all_entrants)
+    }
+
+    #[view]
+    public fun user_melees_view(user: address): UserMeleesState acquires UserMelees {
+        let user_melees_ref = &UserMelees[user];
+        UserMeleesState {
+            n_entered_melees: user_melees_ref.entered_melee_ids.length(),
+            n_exited_melees: user_melees_ref.exited_melee_ids.length(),
+            n_unexited_melees: user_melees_ref.unexited_melee_ids.length()
+        }
+    }
+
+    public fun unpack_user_melee_state(self: UserMeleesState): (u64, u64, u64) {
+        let UserMeleesState { n_entered_melees, n_exited_melees, n_unexited_melees } =
+            self;
+        (n_entered_melees, n_exited_melees, n_unexited_melees)
+    }
+
+    /// Returns references to each of the tables in `UserMelees`, to enable assorted `SmartTable`
+    /// calls without having to create a new function for each.
+    public inline fun user_melees_smart_table_refs(
+        user: address
+    ): (&SmartTable<u64, Nil>, &SmartTable<u64, Nil>, &SmartTable<u64, Nil>) acquires UserMelees {
+        let user_melees_ref = &UserMelees[user];
+        (
+            &user_melees_ref.entered_melee_ids,
+            &user_melees_ref.exited_melee_ids,
+            &user_melees_ref.unexited_melee_ids
+        )
+    }
+
+    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
+        let ExchangeRate { base, quote } = self;
+        (base, quote)
+    }
+
     public fun unpack_exit(self: Exit): (address, u64, u64, u64, u64, u64, u64, ProfitAndLoss) {
         let Exit {
             user,
@@ -714,15 +875,15 @@ module emojicoin_arena::emojicoin_arena {
         )
     }
 
-    public fun unpack_top_exits(self: TopExits): (Exit, Exit) {
-        let TopExits { by_octas_gain, by_octas_growth_q64 } = self;
-        (by_octas_gain, by_octas_growth_q64)
-    }
-
     public fun unpack_profit_and_loss(self: ProfitAndLoss): (u128, u128, u128, u128) {
         let ProfitAndLoss { octas_value, octas_gain, octas_loss, octas_growth_q64 } =
             self;
         (octas_value, octas_gain, octas_loss, octas_growth_q64)
+    }
+
+    public fun unpack_top_exits(self: TopExits): (Exit, Exit) {
+        let TopExits { by_octas_gain, by_octas_growth_q64 } = self;
+        (by_octas_gain, by_octas_growth_q64)
     }
 
     public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
@@ -894,7 +1055,8 @@ module emojicoin_arena::emojicoin_arena {
                     emojicoin_1_balance,
                     emojicoin_0_exchange_rate,
                     emojicoin_1_exchange_rate
-                )
+                ),
+                most_recent_exit: self.most_recent_exit
             }
         );
     }
@@ -1184,9 +1346,8 @@ module emojicoin_arena::emojicoin_arena {
         (((current_time - start_time) / duration) * duration) + start_time
     }
 
-    /// Uses mutable references to avoid borrowing issues.
-    inline fun market_addresses(melee_ref_mut: &mut Melee): (address, address) {
-        let market_metadatas = melee_ref_mut.market_metadatas;
+    inline fun market_addresses(melee_ref: &Melee): (address, address) {
+        let market_metadatas = melee_ref.market_metadatas;
         let (_, market_address_0, _) =
             emojicoin_dot_fun::unpack_market_metadata(market_metadatas[0]);
         let (_, market_address_1, _) =
