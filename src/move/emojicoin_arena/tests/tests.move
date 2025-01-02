@@ -204,7 +204,7 @@ module emojicoin_arena::tests {
         MockRegistryView {
             n_melees: 1,
             vault_address: base_vault_address(),
-            vault_balance: 0,
+            vault_balance: get_DEFAULT_AVAILABLE_REWARDS(),
             next_melee_duration: get_DEFAULT_DURATION(),
             next_melee_available_rewards: get_DEFAULT_AVAILABLE_REWARDS(),
             next_melee_max_match_percentage: get_DEFAULT_MAX_MATCH_PERCENTAGE(),
@@ -229,6 +229,20 @@ module emojicoin_arena::tests {
                 emojicoin_dot_fun_tests::init_market(vector[*bytes_ref]);
             }
         );
+    }
+
+    public fun init_modue_with_funded_vault() {
+        init_emojicoin_dot_fun_with_test_markets();
+
+        // Set global time to base publish time.
+        timestamp::update_global_time_for_test(base_publish_time());
+
+        // Initialize module.
+        init_module_test_only(&get_signer(@emojicoin_arena));
+
+        // Fund admin, then fund vault.
+        mint_aptos_coin_to(@emojicoin_arena, get_DEFAULT_AVAILABLE_REWARDS());
+        fund_vault(&get_signer(@emojicoin_arena), get_DEFAULT_AVAILABLE_REWARDS());
     }
 
     #[test]
@@ -288,7 +302,7 @@ module emojicoin_arena::tests {
         registry_view.next_melee_duration = next_duration;
         registry_view.next_melee_max_match_amount = next_max_match_amount;
         registry_view.next_melee_max_match_percentage = next_max_match_percentage;
-        registry_view.vault_balance = get_DEFAULT_AVAILABLE_REWARDS() - withdrawn_octas;
+        registry_view.vault_balance -= withdrawn_octas;
         registry_view.assert_registry_view(registry_view());
     }
 
@@ -304,7 +318,9 @@ module emojicoin_arena::tests {
         init_module_test_only(&get_signer(@emojicoin_arena));
 
         // Assert registry view.
-        base_registry_view().assert_registry_view(registry_view());
+        let registry_view = base_registry_view();
+        registry_view.vault_balance = 0;
+        registry_view.assert_registry_view(registry_view());
 
         // Assert melee event.
         let melee_events = emitted_events<Melee>();
@@ -333,7 +349,9 @@ module emojicoin_arena::tests {
         init_module_test_only(&get_signer(@emojicoin_arena));
 
         // Assert registry view.
-        base_registry_view().assert_registry_view(registry_view());
+        let registry_view = base_registry_view();
+        registry_view.vault_balance = 0;
+        registry_view.assert_registry_view(registry_view());
 
         // Assert melee event.
         let melee_events = emitted_events<Melee>();
