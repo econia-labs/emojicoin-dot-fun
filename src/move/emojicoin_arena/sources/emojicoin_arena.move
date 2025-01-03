@@ -132,7 +132,7 @@ module arena::emojicoin_arena {
         /// Cumulative amount of APT entered into the `Melee` since the most recent deposit into an
         /// empty `Escrow`. Inclusive of total amount matched from locking in since most recent
         /// deposit into an empty `Escrow`. Reset to 0 upon exit.
-        octas_entered: u64,
+        input_amount: u64,
         /// Cumulative amount of APT matched since most recent deposit into an empty `Escrow`, reset
         /// to 0 upon exit. Must be paid back in full when tapping out.
         match_amount: u64
@@ -172,7 +172,7 @@ module arena::emojicoin_arena {
     struct Exit has copy, drop, store {
         user: address,
         melee_id: u64,
-        octas_entered: u64,
+        input_amount: u64,
         match_amount: u64,
         tap_out_fee: u64,
         emojicoin_0_proceeds: u64,
@@ -201,7 +201,7 @@ module arena::emojicoin_arena {
         emojicoin_1_balance: u64,
         n_swaps: u64,
         swaps_volume: u128,
-        octas_entered: u64,
+        input_amount: u64,
         match_amount: u64,
         profit_and_loss: ProfitAndLoss
     }
@@ -268,11 +268,11 @@ module arena::emojicoin_arena {
     struct ProfitAndLoss has copy, drop, store {
         /// Emojicoins effective value, converted to octas at current exchange rate.
         octas_value: u128,
-        /// Unrealized gain if `octas_value` is greater than `Escrow.octas_entered`.
+        /// Unrealized gain if `octas_value` is greater than `Escrow.input_amount`.
         octas_gain: u128,
-        /// Unrealized loss if `octas_value` is less than `Escrow.octas_entered`.
+        /// Unrealized loss if `octas_value` is less than `Escrow.input_amount`.
         octas_loss: u128,
-        /// Ratio of `octas_value` to `Escrow.octas_entered`, as a Q64.
+        /// Ratio of `octas_value` to `Escrow.input_amount`, as a Q64.
         octas_growth_q64: u128
     }
 
@@ -348,7 +348,7 @@ module arena::emojicoin_arena {
                     melee_id,
                     emojicoin_0: coin::zero(),
                     emojicoin_1: coin::zero(),
-                    octas_entered: 0,
+                    input_amount: 0,
                     match_amount: 0,
                     swaps_volume: 0,
                     n_swaps: 0
@@ -494,7 +494,7 @@ module arena::emojicoin_arena {
         // Update escrow state.
         escrow_ref_mut.escrow_n_swaps_increment();
         escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
-        escrow_ref_mut.escrow_octas_entered_increment(input_amount_after_matching);
+        escrow_ref_mut.escrow_input_amount_increment(input_amount_after_matching);
 
         // Update user melees state.
         let user_melees_ref_mut = &mut UserMelees[entrant_address];
@@ -755,7 +755,7 @@ module arena::emojicoin_arena {
     ) {
         let emojicoin_0_balance = coin::value(&self.emojicoin_0);
         let emojicoin_1_balance = coin::value(&self.emojicoin_1);
-        let octas_entered = self.octas_entered;
+        let input_amount = self.input_amount;
         event::emit(
             EscrowState {
                 user: participant_address,
@@ -764,10 +764,10 @@ module arena::emojicoin_arena {
                 emojicoin_1_balance,
                 n_swaps: self.n_swaps,
                 swaps_volume: self.swaps_volume,
-                octas_entered,
+                input_amount,
                 match_amount: self.match_amount,
                 profit_and_loss: profit_and_loss(
-                    octas_entered,
+                    input_amount,
                     emojicoin_0_balance,
                     emojicoin_1_balance,
                     emojicoin_0_exchange_rate,
@@ -867,6 +867,19 @@ module arena::emojicoin_arena {
         );
     }
 
+    inline fun escrow_input_amount_increment<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        amount: u64
+    ) {
+        self.input_amount += amount;
+    }
+
+    inline fun escrow_input_amount_reset<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
+    ) {
+        self.input_amount = 0;
+    }
+
     inline fun escrow_match_amount_increment<Coin0, LP0, Coin1, LP1>(
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         amount: u64
@@ -884,19 +897,6 @@ module arena::emojicoin_arena {
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>
     ) {
         self.n_swaps += 1;
-    }
-
-    inline fun escrow_octas_entered_increment<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
-        amount: u64
-    ) {
-        self.octas_entered += amount;
-    }
-
-    inline fun escrow_octas_entered_reset<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
-    ) {
-        self.octas_entered = 0;
     }
 
     inline fun escrow_swaps_volume_increment<Coin0, LP0, Coin1, LP1>(
@@ -947,7 +947,7 @@ module arena::emojicoin_arena {
         let (market_address_0, market_address_1) = market_addresses(exited_melee_ref_mut);
 
         // Charge tap out fee if applicable.
-        let octas_entered = escrow_ref_mut.octas_entered;
+        let input_amount = escrow_ref_mut.input_amount;
         let tap_out_fee = 0;
         let match_amount = escrow_ref_mut.match_amount;
         if (melee_is_active) {
@@ -994,11 +994,11 @@ module arena::emojicoin_arena {
             melee_id,
             emojicoin_0_proceeds,
             emojicoin_1_proceeds,
-            octas_entered,
+            input_amount,
             match_amount,
             tap_out_fee,
             profit_and_loss: profit_and_loss(
-                octas_entered,
+                input_amount,
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
                 exchange_rate_0,
@@ -1015,7 +1015,7 @@ module arena::emojicoin_arena {
         exited_melee_ref_mut.melee_top_exits_update(&exit);
 
         // Update escrow state.
-        escrow_ref_mut.escrow_octas_entered_reset();
+        escrow_ref_mut.escrow_input_amount_reset();
         escrow_ref_mut.escrow_match_amount_reset();
 
         // Update user melees state.
@@ -1228,7 +1228,7 @@ module arena::emojicoin_arena {
             melee_id: 0,
             emojicoin_0_proceeds: 0,
             emojicoin_1_proceeds: 0,
-            octas_entered: 0,
+            input_amount: 0,
             match_amount: 0,
             tap_out_fee: 0,
             profit_and_loss: ProfitAndLoss {
@@ -1248,15 +1248,15 @@ module arena::emojicoin_arena {
     }
 
     inline fun profit_and_loss(
-        octas_entered: u64,
+        input_amount: u64,
         emojicoin_0_holdings: u64,
         emojicoin_1_holdings: u64,
         emojicoin_0_exchange_rate: ExchangeRate,
         emojicoin_1_exchange_rate: ExchangeRate
     ): ProfitAndLoss {
         let (octas_value, octas_gain, octas_loss, octas_growth_q64) = (0, 0, 0, 0);
-        let octas_entered = (octas_entered as u128);
-        if (octas_entered > 0) {
+        let input_amount = (input_amount as u128);
+        if (input_amount > 0) {
             octas_value =
                 if (emojicoin_0_holdings > 0)
                     effective_value(emojicoin_0_holdings, emojicoin_0_exchange_rate)
@@ -1264,11 +1264,9 @@ module arena::emojicoin_arena {
                     effective_value(emojicoin_1_holdings, emojicoin_1_exchange_rate)
                 else 0;
             if (octas_value > 0) {
-                if (octas_value > octas_entered) octas_gain = octas_value
-                    - octas_entered;
-                if (octas_value < octas_entered) octas_loss = octas_entered
-                    - octas_value;
-                octas_growth_q64 = (octas_value << SHIFT_Q64) / (octas_entered);
+                if (octas_value > input_amount) octas_gain = octas_value - input_amount;
+                if (octas_value < input_amount) octas_loss = input_amount - octas_value;
+                octas_growth_q64 = (octas_value << SHIFT_Q64) / (input_amount);
             }
         };
         ProfitAndLoss { octas_value, octas_gain, octas_loss, octas_growth_q64 }
