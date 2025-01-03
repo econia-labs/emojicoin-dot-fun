@@ -140,15 +140,6 @@ module arena::emojicoin_arena {
         match_amount: u64
     }
 
-    struct UserMelees has key {
-        /// Set of serial IDs of all `Melee`s the user has entered.
-        entered_melee_ids: SmartTable<u64, Nil>,
-        /// Set of serial IDs of all `Melee`s the user has exited.
-        exited_melee_ids: SmartTable<u64, Nil>,
-        /// Set of serial IDs of all `Melee`s the user has entered but not exited.
-        unexited_melee_ids: SmartTable<u64, Nil>
-    }
-
     /// The top `Exit`s for either a `Melee` or for all `Melee`s, depending on context:
     /// `by_octas_gain` means highest `ProfitAndLoss.octas_gain`, and `by_octas_growth_q64` means
     /// highest `ProfitAndLoss.octas_growth_q64`. Initialized via `null_top_exits`.
@@ -225,14 +216,6 @@ module arena::emojicoin_arena {
         emojicoin_0_exchange_rate: ExchangeRate,
         emojicoin_1_exchange_rate: ExchangeRate,
         top_exits: TopExits
-    }
-
-    #[event]
-    /// Emitted after a user enters or exits, representing their final `UserMelees` state.
-    struct UserMeleesState has copy, drop, store {
-        n_entered_melees: u64,
-        n_exited_melees: u64,
-        n_unexited_melees: u64
     }
 
     #[event]
@@ -331,7 +314,7 @@ module arena::emojicoin_arena {
     #[randomness]
     entry fun enter<Coin0, LP0, Coin1, LP1, EscrowCoin>(
         entrant: &signer, input_amount: u64, lock_in: bool
-    ) acquires Escrow, Registry, UserMelees {
+    ) acquires Escrow, Registry {
         let (melee_just_ended, registry_ref_mut, time, n_melees_before_cranking) =
             crank_schedule();
         if (melee_just_ended) return; // Can not enter melee if cranking ends it.
@@ -342,7 +325,7 @@ module arena::emojicoin_arena {
         let market_address_0 = active_melee_ref_mut.emojicoin_0_market_address;
         let market_address_1 = active_melee_ref_mut.emojicoin_1_market_address;
 
-        // Create escrow and user melees resources if they don't exist.
+        // Create escrow if it doesn't exist.
         let melee_id = active_melee_ref_mut.melee_id;
         let entrant_address = signer::address_of(entrant);
         if (!exists<Escrow<Coin0, LP0, Coin1, LP1>>(entrant_address)) {
@@ -358,16 +341,6 @@ module arena::emojicoin_arena {
                     n_swaps: 0
                 }
             );
-            if (!exists<UserMelees>(entrant_address)) {
-                move_to(
-                    entrant,
-                    UserMelees {
-                        entered_melee_ids: smart_table::new(),
-                        exited_melee_ids: smart_table::new(),
-                        unexited_melee_ids: smart_table::new()
-                    }
-                );
-            };
         };
 
         // Verify user has indicated escrow coin type as one of the two emojicoin types. Note that
@@ -500,15 +473,6 @@ module arena::emojicoin_arena {
         escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
         escrow_ref_mut.escrow_input_amount_increment(input_amount_after_matching);
 
-        // Update user melees state.
-        let user_melees_ref_mut = &mut UserMelees[entrant_address];
-        user_melees_ref_mut.user_melees_entered_melee_ids_add_if_not_contains(melee_id);
-        user_melees_ref_mut.user_melees_unexited_melee_ids_add_if_not_contains(melee_id);
-        user_melees_ref_mut.user_melees_exited_melee_ids_remove_if_contains(melee_id);
-
-        // Emit user melees state.
-        user_melees_ref_mut.emit_user_melees_state();
-
         // Emit enter event.
         event::emit(
             Enter {
@@ -538,7 +502,7 @@ module arena::emojicoin_arena {
     }
 
     #[randomness]
-    entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry, UserMelees {
+    entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
         let participant_address = signer::address_of(participant);
         assert!(
             exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant_address),
@@ -554,7 +518,7 @@ module arena::emojicoin_arena {
     }
 
     #[randomness]
-    entry fun swap<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry, UserMelees {
+    entry fun swap<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry {
 
         // Verify that swapper has an escrow resource.
         let swapper_address = signer::address_of(swapper);
@@ -840,16 +804,6 @@ module arena::emojicoin_arena {
         registry_ref_mut.emit_registry_state(); // Must emit after melee state for borrow checker.
     }
 
-    inline fun emit_user_melees_state(self: &mut UserMelees) {
-        event::emit(
-            UserMeleesState {
-                n_entered_melees: self.entered_melee_ids.length(),
-                n_exited_melees: self.exited_melee_ids.length(),
-                n_unexited_melees: self.unexited_melee_ids.length()
-            }
-        )
-    }
-
     inline fun emit_vault_balance_update_with_singer_capability_ref(
         signer_capability_ref: &SignerCapability
     ) {
@@ -1023,14 +977,6 @@ module arena::emojicoin_arena {
         // Update escrow state.
         escrow_ref_mut.escrow_input_amount_reset();
         escrow_ref_mut.escrow_match_amount_reset();
-
-        // Update user melees state.
-        let user_melees_ref_mut = &mut UserMelees[participant_address];
-        user_melees_ref_mut.user_melees_exited_melee_ids_add_if_not_contains(melee_id);
-        user_melees_ref_mut.user_melees_unexited_melee_ids_remove_if_contains(melee_id);
-
-        // Emit user melees state.
-        user_melees_ref_mut.emit_user_melees_state();
 
         // Emit exit event.
         event::emit(exit);
@@ -1499,36 +1445,6 @@ module arena::emojicoin_arena {
 
         // Return quote volume on second swap only, to avoid double-counting.
         quote_volume
-    }
-
-    inline fun user_melees_entered_melee_ids_add_if_not_contains(
-        self: &mut UserMelees, melee_id: u64
-    ) {
-        add_if_not_contains(&mut self.entered_melee_ids, melee_id);
-    }
-
-    inline fun user_melees_exited_melee_ids_add_if_not_contains(
-        self: &mut UserMelees, melee_id: u64
-    ) {
-        add_if_not_contains(&mut self.exited_melee_ids, melee_id);
-    }
-
-    inline fun user_melees_exited_melee_ids_remove_if_contains(
-        self: &mut UserMelees, melee_id: u64
-    ) {
-        remove_if_contains(&mut self.exited_melee_ids, melee_id);
-    }
-
-    inline fun user_melees_unexited_melee_ids_add_if_not_contains(
-        self: &mut UserMelees, melee_id: u64
-    ) {
-        add_if_not_contains(&mut self.unexited_melee_ids, melee_id);
-    }
-
-    inline fun user_melees_unexited_melee_ids_remove_if_contains(
-        self: &mut UserMelees, melee_id: u64
-    ) {
-        remove_if_contains(&mut self.unexited_melee_ids, melee_id);
     }
 
     inline fun withdraw_from_escrow<Emojicoin>(
