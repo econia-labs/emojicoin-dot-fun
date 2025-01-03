@@ -78,6 +78,8 @@ module arena::emojicoin_arena {
         available_rewards: u64
     }
 
+    /// Tracks all melees, holds a signer capability for the rewards vault, and stores parameters
+    /// for the next melee.
     struct Registry has key {
         /// A map of each `Melee`'s `melee_id` to the `Melee` itself. 1-indexed for conformity with
         /// emojicoin market ID indexing.
@@ -97,6 +99,7 @@ module arena::emojicoin_arena {
         next_melee_max_match_amount: u64
     }
 
+    /// Tracks user's emojicoin holdings and octas matched since the escrow was last empty.
     struct Escrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
         /// Corresponding `Melee.melee_id`.
         melee_id: u64,
@@ -104,8 +107,8 @@ module arena::emojicoin_arena {
         emojicoin_0: Coin<Coin0>,
         /// Emojicoin 1 holdings.
         emojicoin_1: Coin<Coin1>,
-        /// Cumulative amount of APT matched since most recent deposit into an empty `Escrow`, reset
-        /// to 0 upon exit. Must be paid back in full when tapping out.
+        /// Cumulative octas matched since the `Escrow` was last empty, reset to 0 upon exit. Must
+        /// be paid back in full when tapping out.
         match_amount: u64
     }
 
@@ -114,6 +117,7 @@ module arena::emojicoin_arena {
     struct Enter has copy, drop, store {
         user: address,
         melee_id: u64,
+        /// Argument passed to `enter`, independent of potential `match_amount`.
         input_amount: u64,
         quote_volume: u64,
         match_amount: u64,
@@ -130,6 +134,7 @@ module arena::emojicoin_arena {
     struct Exit has copy, drop, store {
         user: address,
         melee_id: u64,
+        /// Octas user had to pay if exiting before the end of the melee, if applicable.
         tap_out_fee: u64,
         emojicoin_0_proceeds: u64,
         emojicoin_1_proceeds: u64,
