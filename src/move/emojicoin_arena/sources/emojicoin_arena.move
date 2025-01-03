@@ -113,7 +113,7 @@ module arena::emojicoin_arena {
         /// Volume of melee-specific swaps in octas.
         swaps_volume: u128,
         /// Amount of octas matched. Decremented when a user taps out.
-        octas_matched: u64,
+        match_amount: u64,
         /// `TopExits` across all `Melee`s.
         top_exits: TopExits
     }
@@ -135,7 +135,7 @@ module arena::emojicoin_arena {
         octas_entered: u64,
         /// Cumulative amount of APT matched since most recent deposit into an empty `Escrow`, reset
         /// to 0 upon exit. Must be paid back in full when tapping out.
-        octas_matched: u64
+        match_amount: u64
     }
 
     struct UserMelees has key {
@@ -173,7 +173,7 @@ module arena::emojicoin_arena {
         user: address,
         melee_id: u64,
         octas_entered: u64,
-        octas_matched: u64,
+        match_amount: u64,
         tap_out_fee: u64,
         emojicoin_0_proceeds: u64,
         emojicoin_1_proceeds: u64,
@@ -202,7 +202,7 @@ module arena::emojicoin_arena {
         n_swaps: u64,
         swaps_volume: u128,
         octas_entered: u64,
-        octas_matched: u64,
+        match_amount: u64,
         profit_and_loss: ProfitAndLoss
     }
 
@@ -240,7 +240,7 @@ module arena::emojicoin_arena {
         n_entrants: u64,
         n_swaps: u64,
         swaps_volume: u128,
-        octas_matched: u64,
+        match_amount: u64,
         top_exits: TopExits
     }
 
@@ -349,7 +349,7 @@ module arena::emojicoin_arena {
                     emojicoin_0: coin::zero(),
                     emojicoin_1: coin::zero(),
                     octas_entered: 0,
-                    octas_matched: 0,
+                    match_amount: 0,
                     swaps_volume: 0,
                     n_swaps: 0
                 }
@@ -394,7 +394,7 @@ module arena::emojicoin_arena {
 
         // Verify that if user has been matched since their most recent deposit into an empty
         // escrow, they lock in again.
-        if (escrow_ref_mut.octas_matched > 0) assert!(lock_in, E_TOP_OFF_MUST_LOCK_IN);
+        if (escrow_ref_mut.match_amount > 0) assert!(lock_in, E_TOP_OFF_MUST_LOCK_IN);
 
         // Match a portion of user's contribution if they elect to lock in, and if there are any
         // available rewards to match.
@@ -428,10 +428,10 @@ module arena::emojicoin_arena {
                     );
 
                     // Update registry state.
-                    registry_ref_mut.registry_octas_matched_increment(match_amount);
+                    registry_ref_mut.registry_match_amount_increment(match_amount);
 
                     // Update escrow state.
-                    escrow_ref_mut.escrow_octas_matched_increment(match_amount);
+                    escrow_ref_mut.escrow_match_amount_increment(match_amount);
 
                 };
 
@@ -677,7 +677,7 @@ module arena::emojicoin_arena {
                 all_entrants: smart_table::new(),
                 n_swaps: 0,
                 swaps_volume: 0,
-                octas_matched: 0,
+                match_amount: 0,
                 top_exits: null_top_exits()
             }
         );
@@ -765,7 +765,7 @@ module arena::emojicoin_arena {
                 n_swaps: self.n_swaps,
                 swaps_volume: self.swaps_volume,
                 octas_entered,
-                octas_matched: self.octas_matched,
+                match_amount: self.match_amount,
                 profit_and_loss: profit_and_loss(
                     octas_entered,
                     emojicoin_0_balance,
@@ -810,7 +810,7 @@ module arena::emojicoin_arena {
                 n_entrants: self.all_entrants.length(),
                 n_swaps: self.n_swaps,
                 swaps_volume: self.swaps_volume,
-                octas_matched: self.octas_matched,
+                match_amount: self.match_amount,
                 top_exits: self.top_exits
             }
         );
@@ -867,6 +867,19 @@ module arena::emojicoin_arena {
         );
     }
 
+    inline fun escrow_match_amount_increment<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        amount: u64
+    ) {
+        self.match_amount += amount;
+    }
+
+    inline fun escrow_match_amount_reset<Coin0, LP0, Coin1, LP1>(
+        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
+    ) {
+        self.match_amount = 0;
+    }
+
     inline fun escrow_n_swaps_increment<Coin0, LP0, Coin1, LP1>(
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>
     ) {
@@ -884,19 +897,6 @@ module arena::emojicoin_arena {
         self: &mut Escrow<Coin0, LP0, Coin1, LP1>
     ) {
         self.octas_entered = 0;
-    }
-
-    inline fun escrow_octas_matched_increment<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
-        amount: u64
-    ) {
-        self.octas_matched += amount;
-    }
-
-    inline fun escrow_octas_matched_reset<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
-    ) {
-        self.octas_matched = 0;
     }
 
     inline fun escrow_swaps_volume_increment<Coin0, LP0, Coin1, LP1>(
@@ -949,25 +949,25 @@ module arena::emojicoin_arena {
         // Charge tap out fee if applicable.
         let octas_entered = escrow_ref_mut.octas_entered;
         let tap_out_fee = 0;
-        let octas_matched = escrow_ref_mut.octas_matched;
+        let match_amount = escrow_ref_mut.match_amount;
         if (melee_is_active) {
-            if (octas_matched > 0) {
+            if (match_amount > 0) {
                 let vault_address =
                     account::get_signer_capability_address(
                         &registry_ref_mut.signer_capability
                     );
-                aptos_account::transfer(participant, vault_address, octas_matched);
-                tap_out_fee = octas_matched;
+                aptos_account::transfer(participant, vault_address, match_amount);
+                tap_out_fee = match_amount;
                 emit_vault_balance_update_with_vault_address(vault_address);
 
                 // Update melee state.
-                exited_melee_ref_mut.melee_available_rewards_increment(octas_matched);
+                exited_melee_ref_mut.melee_available_rewards_increment(match_amount);
                 exited_melee_ref_mut.melee_locked_in_entrants_remove_if_contains(
                     participant_address
                 );
 
                 // Update registry state.
-                registry_ref_mut.registry_octas_matched_decrement(octas_matched);
+                registry_ref_mut.registry_match_amount_decrement(match_amount);
             }
         };
 
@@ -995,7 +995,7 @@ module arena::emojicoin_arena {
             emojicoin_0_proceeds,
             emojicoin_1_proceeds,
             octas_entered,
-            octas_matched,
+            match_amount,
             tap_out_fee,
             profit_and_loss: profit_and_loss(
                 octas_entered,
@@ -1016,7 +1016,7 @@ module arena::emojicoin_arena {
 
         // Update escrow state.
         escrow_ref_mut.escrow_octas_entered_reset();
-        escrow_ref_mut.escrow_octas_matched_reset();
+        escrow_ref_mut.escrow_match_amount_reset();
 
         // Update user melees state.
         let user_melees_ref_mut = &mut UserMelees[participant_address];
@@ -1104,7 +1104,7 @@ module arena::emojicoin_arena {
             // Correct for the max match amount that the user is eligible for.
             min(
                 corrected_for_melee_available_rewards,
-                active_melee_ref_mut.max_match_amount - escrow_ref_mut.octas_matched
+                active_melee_ref_mut.max_match_amount - escrow_ref_mut.match_amount
             )
         }
     }
@@ -1229,7 +1229,7 @@ module arena::emojicoin_arena {
             emojicoin_0_proceeds: 0,
             emojicoin_1_proceeds: 0,
             octas_entered: 0,
-            octas_matched: 0,
+            match_amount: 0,
             tap_out_fee: 0,
             profit_and_loss: ProfitAndLoss {
                 octas_value: 0,
@@ -1350,16 +1350,16 @@ module arena::emojicoin_arena {
         self.n_swaps += 1;
     }
 
-    inline fun registry_octas_matched_decrement(
+    inline fun registry_match_amount_decrement(
         self: &mut Registry, amount: u64
     ) {
-        self.octas_matched -= amount;
+        self.match_amount -= amount;
     }
 
-    inline fun registry_octas_matched_increment(
+    inline fun registry_match_amount_increment(
         self: &mut Registry, amount: u64
     ) {
-        self.octas_matched += amount;
+        self.match_amount += amount;
     }
 
     inline fun registry_swaps_volume_increment(
