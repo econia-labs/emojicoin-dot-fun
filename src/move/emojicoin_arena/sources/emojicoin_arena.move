@@ -53,8 +53,6 @@ module arena::emojicoin_arena {
     const DEFAULT_MAX_MATCH_PERCENTAGE: u64 = 50;
     const DEFAULT_MAX_MATCH_AMOUNT: u64 = 5 * 100_000_000;
 
-    struct Nil has drop, store {}
-
     #[event]
     /// Tracks state for active and historical melees. Also emitted whenever a new melee starts.
     struct Melee has copy, drop, store {
