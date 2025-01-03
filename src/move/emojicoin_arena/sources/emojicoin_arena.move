@@ -97,8 +97,6 @@ module arena::emojicoin_arena {
         next_melee_max_match_percentage: u64,
         /// `Melee.max_match_amount` for next melee.
         next_melee_max_match_amount: u64,
-        /// All entrants who have entered a melee.
-        all_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
         n_swaps: u64,
         /// Volume of melee-specific swaps in octas.
@@ -204,7 +202,6 @@ module arena::emojicoin_arena {
     /// Emitted after a user enters, swaps, or exits, representing the final `Registry` state.
     struct RegistryState has copy, drop, store {
         n_melees: u64,
-        n_entrants: u64,
         n_swaps: u64,
         swaps_volume: u128,
         match_amount: u64
@@ -441,7 +438,6 @@ module arena::emojicoin_arena {
         // Update registry state.
         registry_ref_mut.registry_n_swaps_increment();
         registry_ref_mut.registry_swaps_volume_increment(quote_volume_u128);
-        registry_ref_mut.registry_all_entrants_add_if_not_contains(entrant_address);
 
         // Update escrow state.
         escrow_ref_mut.escrow_n_swaps_increment();
@@ -618,7 +614,6 @@ module arena::emojicoin_arena {
                 next_melee_available_rewards: DEFAULT_AVAILABLE_REWARDS,
                 next_melee_max_match_percentage: DEFAULT_MAX_MATCH_PERCENTAGE,
                 next_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT,
-                all_entrants: smart_table::new(),
                 n_swaps: 0,
                 swaps_volume: 0,
                 match_amount: 0
@@ -642,14 +637,6 @@ module arena::emojicoin_arena {
             0,
             sort_unique_market_ids(market_id_0, market_id_1)
         );
-    }
-
-    inline fun add_if_not_contains<T: drop>(
-        map_ref_mut: &mut SmartTable<T, Nil>, key: T
-    ) {
-        if (!map_ref_mut.contains(key)) {
-            map_ref_mut.add(key, Nil {});
-        }
     }
 
     inline fun borrow_registry_ref_checked(arena: &signer): &Registry {
@@ -745,7 +732,6 @@ module arena::emojicoin_arena {
         event::emit(
             RegistryState {
                 n_melees: self.melees_by_id.length(),
-                n_entrants: self.all_entrants.length(),
                 n_swaps: self.n_swaps,
                 swaps_volume: self.swaps_volume,
                 match_amount: self.match_amount
@@ -1162,12 +1148,6 @@ module arena::emojicoin_arena {
                 available_rewards
             }
         )
-    }
-
-    inline fun registry_all_entrants_add_if_not_contains(
-        self: &mut Registry, address: address
-    ) {
-        add_if_not_contains(&mut self.all_entrants, address);
     }
 
     inline fun registry_n_swaps_increment(self: &mut Registry) {
