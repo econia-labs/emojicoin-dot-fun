@@ -72,15 +72,6 @@ module arena::emojicoin_arena {
         /// Amount of rewards that are available to claim for this melee, measured in octas, and
         /// conditional on vault balance. Reset to 0 when cranking the schedule.
         available_rewards: u64,
-        /// All entrants who have entered the melee, used as a set.
-        all_entrants: SmartTable<address, Nil>,
-        /// Active entrants in the melee, used as a set.
-        active_entrants: SmartTable<address, Nil>,
-        /// Entrants who have exited the melee, used as a set.
-        exited_entrants: SmartTable<address, Nil>,
-        /// Entrants who have locked in, used as a set. If user exits before the melee ends they are
-        /// removed from this set. If they exit after the melee ends, they are not removed.
-        locked_in_entrants: SmartTable<address, Nil>,
         /// Number of melee-specific swaps.
         n_swaps: u64,
         /// Volume of melee-specific swaps in octas.
@@ -205,10 +196,6 @@ module arena::emojicoin_arena {
     struct MeleeState has copy, drop, store {
         melee_id: u64,
         available_rewards: u64,
-        n_all_entrants: u64,
-        n_active_entrants: u64,
-        n_exited_entrants: u64,
-        n_locked_in_entrants: u64,
         n_swaps: u64,
         swaps_volume: u128,
         emojicoin_0_locked: u64,
@@ -400,9 +387,6 @@ module arena::emojicoin_arena {
 
                     // Update melee state.
                     active_melee_ref_mut.melee_available_rewards_decrement(match_amount);
-                    active_melee_ref_mut.melee_locked_in_entrants_add_if_not_contains(
-                        entrant_address
-                    );
 
                     // Update registry state.
                     registry_ref_mut.registry_match_amount_increment(match_amount);
@@ -459,9 +443,6 @@ module arena::emojicoin_arena {
         let quote_volume_u128 = (quote_volume as u128);
         active_melee_ref_mut.melee_n_swaps_increment();
         active_melee_ref_mut.melee_swaps_volume_increment(quote_volume_u128);
-        active_melee_ref_mut.melee_all_entrants_add_if_not_contains(entrant_address);
-        active_melee_ref_mut.melee_active_entrants_add_if_not_contains(entrant_address);
-        active_melee_ref_mut.melee_exited_entrants_remove_if_contains(entrant_address);
 
         // Update registry state.
         registry_ref_mut.registry_n_swaps_increment();
@@ -756,10 +737,6 @@ module arena::emojicoin_arena {
             MeleeState {
                 melee_id: self.melee_id,
                 available_rewards: self.available_rewards,
-                n_all_entrants: self.all_entrants.length(),
-                n_active_entrants: self.active_entrants.length(),
-                n_exited_entrants: self.exited_entrants.length(),
-                n_locked_in_entrants: self.locked_in_entrants.length(),
                 n_swaps: self.n_swaps,
                 swaps_volume: self.swaps_volume,
                 emojicoin_0_locked: self.emojicoin_0_locked,
@@ -922,9 +899,6 @@ module arena::emojicoin_arena {
 
                 // Update melee state.
                 exited_melee_ref_mut.melee_available_rewards_increment(match_amount);
-                exited_melee_ref_mut.melee_locked_in_entrants_remove_if_contains(
-                    participant_address
-                );
 
                 // Update registry state.
                 registry_ref_mut.registry_match_amount_decrement(match_amount);
@@ -970,8 +944,6 @@ module arena::emojicoin_arena {
         registry_ref_mut.registry_top_exits_update(&exit);
 
         // Update melee state.
-        exited_melee_ref_mut.melee_active_entrants_remove_if_contains(participant_address);
-        exited_melee_ref_mut.melee_exited_entrants_add_if_not_contains(participant_address);
         exited_melee_ref_mut.melee_top_exits_update(&exit);
 
         // Update escrow state.
@@ -1051,24 +1023,6 @@ module arena::emojicoin_arena {
         }
     }
 
-    inline fun melee_active_entrants_add_if_not_contains(
-        self: &mut Melee, address: address
-    ) {
-        add_if_not_contains(&mut self.active_entrants, address);
-    }
-
-    inline fun melee_active_entrants_remove_if_contains(
-        self: &mut Melee, address: address
-    ) {
-        remove_if_contains(&mut self.active_entrants, address);
-    }
-
-    inline fun melee_all_entrants_add_if_not_contains(
-        self: &mut Melee, address: address
-    ) {
-        add_if_not_contains(&mut self.all_entrants, address);
-    }
-
     inline fun melee_available_rewards_decrement(
         self: &mut Melee, amount: u64
     ) {
@@ -1103,30 +1057,6 @@ module arena::emojicoin_arena {
         self: &mut Melee, amount: u64
     ) {
         self.emojicoin_1_locked += amount;
-    }
-
-    inline fun melee_exited_entrants_add_if_not_contains(
-        self: &mut Melee, address: address
-    ) {
-        add_if_not_contains(&mut self.exited_entrants, address);
-    }
-
-    inline fun melee_exited_entrants_remove_if_contains(
-        self: &mut Melee, address: address
-    ) {
-        remove_if_contains(&mut self.exited_entrants, address);
-    }
-
-    inline fun melee_locked_in_entrants_add_if_not_contains(
-        self: &mut Melee, address: address
-    ) {
-        add_if_not_contains(&mut self.locked_in_entrants, address);
-    }
-
-    inline fun melee_locked_in_entrants_remove_if_contains(
-        self: &mut Melee, address: address
-    ) {
-        remove_if_contains(&mut self.locked_in_entrants, address);
     }
 
     inline fun melee_n_swaps_increment(self: &mut Melee) {
@@ -1262,10 +1192,6 @@ module arena::emojicoin_arena {
                 max_match_percentage,
                 max_match_amount,
                 available_rewards,
-                all_entrants: smart_table::new(),
-                active_entrants: smart_table::new(),
-                exited_entrants: smart_table::new(),
-                locked_in_entrants: smart_table::new(),
                 n_swaps: 0,
                 swaps_volume: 0,
                 emojicoin_0_locked: 0,
