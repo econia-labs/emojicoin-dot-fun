@@ -13,7 +13,7 @@ module arena::emojicoin_arena {
     use aptos_std::smart_table::{Self, SmartTable};
     use aptos_std::type_info;
     use arena::pseudo_randomness;
-    use emojicoin_dot_fun::emojicoin_dot_fun::{Self, MarketMetadata};
+    use emojicoin_dot_fun::emojicoin_dot_fun;
     use std::option::Self;
     use std::signer;
 
@@ -57,8 +57,10 @@ module arena::emojicoin_arena {
     struct Melee has store {
         /// 1-indexed for conformity with emojicoin market ID indexing.
         melee_id: u64,
-        /// Metadata for market with lower market ID comes first.
-        market_metadatas: vector<MarketMetadata>,
+        /// Address for emojicoin market with lower market ID.
+        emojicoin_0_market_address: address,
+        /// Address for emojicoin market with higher market ID.
+        emojicoin_1_market_address: address,
         /// In microseconds.
         start_time: u64,
         /// How long melee lasts after start time.
@@ -248,7 +250,8 @@ module arena::emojicoin_arena {
     /// Emitted whenever a new `Melee` starts.
     struct NewMelee has copy, drop, store {
         melee_id: u64,
-        market_metadatas: vector<MarketMetadata>,
+        emojicoin_0_market_address: address,
+        emojicoin_1_market_address: address,
         start_time: u64,
         duration: u64,
         max_match_percentage: u64,
@@ -336,7 +339,8 @@ module arena::emojicoin_arena {
         // Get market addresses for active melee.
         let active_melee_ref_mut =
             registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
-        let (market_address_0, market_address_1) = market_addresses(active_melee_ref_mut);
+        let market_address_0 = active_melee_ref_mut.emojicoin_0_market_address;
+        let market_address_1 = active_melee_ref_mut.emojicoin_1_market_address;
 
         // Create escrow and user melees resources if they don't exist.
         let melee_id = active_melee_ref_mut.melee_id;
@@ -567,7 +571,8 @@ module arena::emojicoin_arena {
         // Get market addresses.
         let swap_melee_ref_mut =
             registry_ref_mut.melees_by_id.borrow_mut(escrow_ref_mut.melee_id);
-        let (market_address_0, market_address_1) = market_addresses(swap_melee_ref_mut);
+        let market_address_0 = swap_melee_ref_mut.emojicoin_0_market_address;
+        let market_address_1 = swap_melee_ref_mut.emojicoin_1_market_address;
 
         // Swap, updating total emojicoin locked values based on side.
         let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
@@ -944,7 +949,8 @@ module arena::emojicoin_arena {
         let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[participant_address];
         let melee_id = escrow_ref_mut.melee_id;
         let exited_melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
-        let (market_address_0, market_address_1) = market_addresses(exited_melee_ref_mut);
+        let market_address_0 = exited_melee_ref_mut.emojicoin_0_market_address;
+        let market_address_1 = exited_melee_ref_mut.emojicoin_1_market_address;
 
         // Charge tap out fee if applicable.
         let input_amount = escrow_ref_mut.input_amount;
@@ -1048,16 +1054,6 @@ module arena::emojicoin_arena {
 
     inline fun last_period_boundary(time: u64, period: u64): u64 {
         (time / period) * period
-    }
-
-    /// Uses mutable references to avoid borrowing issues.
-    inline fun market_addresses(melee_ref_mut: &mut Melee): (address, address) {
-        let market_metadatas = melee_ref_mut.market_metadatas;
-        let (_, market_address_0, _) =
-            emojicoin_dot_fun::unpack_market_metadata(market_metadatas[0]);
-        let (_, market_address_1, _) =
-            emojicoin_dot_fun::unpack_market_metadata(market_metadatas[1]);
-        (market_address_0, market_address_1)
     }
 
     /// Uses mutable references to avoid borrowing issues.
@@ -1289,12 +1285,18 @@ module arena::emojicoin_arena {
         sorted_unique_market_ids: vector<u64>
     ) {
         let melee_id = n_melees_before_registration + 1;
-        let market_metadatas =
+        let market_addresses =
             sorted_unique_market_ids.map_ref(|market_id_ref| {
-                option::destroy_some(
-                    emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
-                )
+                let (_, market_address, _) =
+                    emojicoin_dot_fun::unpack_market_metadata(
+                        option::destroy_some(
+                            emojicoin_dot_fun::market_metadata_by_market_id(*market_id_ref)
+                        )
+                    );
+                market_address
             });
+        let emojicoin_0_market_address = market_addresses[0];
+        let emojicoin_1_market_address = market_addresses[1];
         let start_time =
             last_period_boundary(
                 timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
@@ -1307,7 +1309,8 @@ module arena::emojicoin_arena {
             melee_id,
             Melee {
                 melee_id,
-                market_metadatas,
+                emojicoin_0_market_address,
+                emojicoin_1_market_address,
                 start_time,
                 duration,
                 max_match_percentage,
@@ -1328,7 +1331,8 @@ module arena::emojicoin_arena {
         event::emit(
             NewMelee {
                 melee_id,
-                market_metadatas,
+                emojicoin_0_market_address,
+                emojicoin_1_market_address,
                 start_time,
                 duration,
                 max_match_percentage,
