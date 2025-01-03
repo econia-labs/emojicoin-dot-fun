@@ -510,14 +510,6 @@ module arena::emojicoin_arena {
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
-    /// Octa-denominated value of emojicoins at given exchange rate.
-    inline fun effective_value(
-        emojicoin_holdings: u64, exchange_rate: ExchangeRate
-    ): u128 {
-        (emojicoin_holdings as u128) * (exchange_rate.quote as u128)
-            / (exchange_rate.base as u128)
-    }
-
     inline fun emit_vault_balance_update_with_singer_capability_ref(
         signer_capability_ref: &SignerCapability
     ) {
