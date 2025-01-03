@@ -71,15 +71,7 @@ module arena::emojicoin_arena {
         max_match_amount: u64,
         /// Amount of rewards that are available to claim for this melee, measured in octas, and
         /// conditional on vault balance. Reset to 0 when cranking the schedule.
-        available_rewards: u64,
-        /// Number of melee-specific swaps.
-        n_swaps: u64,
-        /// Volume of melee-specific swaps in octas.
-        swaps_volume: u128,
-        /// Amount of emojicoin 0 locked in all melee escrows for the melee.
-        emojicoin_0_locked: u64,
-        /// Amount of emojicoin 1 locked in all melee escrows for the melee.
-        emojicoin_1_locked: u64
+        available_rewards: u64
     }
 
     struct Registry has key {
@@ -190,10 +182,6 @@ module arena::emojicoin_arena {
     struct MeleeState has copy, drop, store {
         melee_id: u64,
         available_rewards: u64,
-        n_swaps: u64,
-        swaps_volume: u128,
-        emojicoin_0_locked: u64,
-        emojicoin_1_locked: u64,
         emojicoin_0_exchange_rate: ExchangeRate,
         emojicoin_1_exchange_rate: ExchangeRate
     }
@@ -407,9 +395,6 @@ module arena::emojicoin_arena {
                     );
                 let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
                 coin::merge(emojicoin_0_ref_mut, coin::withdraw(entrant, net_proceeds));
-                active_melee_ref_mut.melee_emojicoin_0_locked_increment(
-                    coin::value(emojicoin_0_ref_mut)
-                );
                 emojicoin_0_proceeds = net_proceeds;
                 quote_volume
             } else {
@@ -423,19 +408,12 @@ module arena::emojicoin_arena {
                     );
                 let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
                 coin::merge(emojicoin_1_ref_mut, coin::withdraw(entrant, net_proceeds));
-                active_melee_ref_mut.melee_emojicoin_1_locked_increment(
-                    coin::value(emojicoin_1_ref_mut)
-                );
                 emojicoin_1_proceeds = net_proceeds;
                 quote_volume
             };
 
-        // Update melee state.
-        let quote_volume_u128 = (quote_volume as u128);
-        active_melee_ref_mut.melee_n_swaps_increment();
-        active_melee_ref_mut.melee_swaps_volume_increment(quote_volume_u128);
-
         // Update registry state.
+        let quote_volume_u128 = (quote_volume as u128);
         registry_ref_mut.registry_n_swaps_increment();
         registry_ref_mut.registry_swaps_volume_increment(quote_volume_u128);
 
@@ -528,9 +506,7 @@ module arena::emojicoin_arena {
                         emojicoin_0_ref_mut,
                         emojicoin_1_ref_mut
                     );
-                swap_melee_ref_mut.melee_emojicoin_0_locked_decrement(emojicoin_0_in);
                 emojicoin_1_proceeds = coin::value(emojicoin_1_ref_mut);
-                swap_melee_ref_mut.melee_emojicoin_1_locked_increment(emojicoin_1_proceeds);
                 quote_volume
             } else {
                 assert!(emojicoin_1_locked_before_swap > 0, E_SWAP_NO_FUNDS);
@@ -544,18 +520,12 @@ module arena::emojicoin_arena {
                         emojicoin_1_ref_mut,
                         emojicoin_0_ref_mut
                     );
-                swap_melee_ref_mut.melee_emojicoin_1_locked_decrement(emojicoin_1_in);
                 emojicoin_0_proceeds = coin::value(emojicoin_0_ref_mut);
-                swap_melee_ref_mut.melee_emojicoin_0_locked_increment(emojicoin_0_proceeds);
                 quote_volume
             };
 
-        // Update melee state.
-        let quote_volume_u128 = (quote_volume as u128);
-        swap_melee_ref_mut.melee_n_swaps_increment();
-        swap_melee_ref_mut.melee_swaps_volume_increment(quote_volume_u128);
-
         // Update registry state.
+        let quote_volume_u128 = (quote_volume as u128);
         registry_ref_mut.registry_n_swaps_increment();
         registry_ref_mut.registry_swaps_volume_increment(quote_volume_u128);
 
@@ -717,10 +687,6 @@ module arena::emojicoin_arena {
             MeleeState {
                 melee_id: self.melee_id,
                 available_rewards: self.available_rewards,
-                n_swaps: self.n_swaps,
-                swaps_volume: self.swaps_volume,
-                emojicoin_0_locked: self.emojicoin_0_locked,
-                emojicoin_1_locked: self.emojicoin_1_locked,
                 emojicoin_0_exchange_rate,
                 emojicoin_1_exchange_rate
             }
@@ -1006,40 +972,6 @@ module arena::emojicoin_arena {
         self.available_rewards += amount;
     }
 
-    inline fun melee_emojicoin_0_locked_decrement(
-        self: &mut Melee, amount: u64
-    ) {
-        self.emojicoin_0_locked -= amount;
-    }
-
-    inline fun melee_emojicoin_0_locked_increment(
-        self: &mut Melee, amount: u64
-    ) {
-        self.emojicoin_0_locked += amount;
-    }
-
-    inline fun melee_emojicoin_1_locked_decrement(
-        self: &mut Melee, amount: u64
-    ) {
-        self.emojicoin_1_locked -= amount;
-    }
-
-    inline fun melee_emojicoin_1_locked_increment(
-        self: &mut Melee, amount: u64
-    ) {
-        self.emojicoin_1_locked += amount;
-    }
-
-    inline fun melee_n_swaps_increment(self: &mut Melee) {
-        self.n_swaps += 1;
-    }
-
-    inline fun melee_swaps_volume_increment(
-        self: &mut Melee, amount: u128
-    ) {
-        self.swaps_volume += amount;
-    }
-
     /// Accepts a mutable reference to avoid borrowing issues.
     inline fun next_melee_market_ids(registry_ref_mut: &mut Registry): vector<u64> {
         let n_markets = get_n_registered_markets();
@@ -1128,11 +1060,7 @@ module arena::emojicoin_arena {
                 duration,
                 max_match_percentage,
                 max_match_amount,
-                available_rewards,
-                n_swaps: 0,
-                swaps_volume: 0,
-                emojicoin_0_locked: 0,
-                emojicoin_1_locked: 0
+                available_rewards
             }
         );
         registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
