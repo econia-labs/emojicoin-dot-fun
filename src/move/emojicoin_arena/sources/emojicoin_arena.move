@@ -483,11 +483,6 @@ module arena::emojicoin_arena {
         (melee_ref_mut, market_address_0, market_address_1)
     }
 
-    inline fun borrow_registry_ref_checked(arena: &signer): &Registry {
-        assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
-        &Registry[@arena]
-    }
-
     inline fun borrow_registry_ref_mut_checked(arena: &signer): &mut Registry {
         assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
         &mut Registry[@arena]
@@ -562,7 +557,8 @@ module arena::emojicoin_arena {
         ExchangeRate { base, quote }
     }
 
-    /// Crank schedule, set local variables for a participant who has already joined a melee.
+    /// Crank schedule, set local variables for a participant who has already joined a melee. Used
+    /// for `swap` and `exit` functions.
     inline fun existing_participant_prologue<Coin0, LP0, Coin1, LP1>(
         participant: &signer
     ): (&mut Registry, bool, address, &mut Escrow<Coin0, LP0, Coin1, LP1>) {
@@ -734,7 +730,11 @@ module arena::emojicoin_arena {
         n_melees_before_registration: u64,
         sorted_unique_market_ids: vector<u64>
     ) {
+        // Get new melee ID, which is 1-indexed.
         let melee_id = n_melees_before_registration + 1;
+
+        // Get the market addresses for each market ID, and store addresses tuple in the reverse
+        // lookup table.
         let market_addresses =
             sorted_unique_market_ids.map_ref(|market_id_ref| {
                 let (_, market_address, _) =
@@ -747,22 +747,24 @@ module arena::emojicoin_arena {
             });
         let emojicoin_0_market_address = market_addresses[0];
         let emojicoin_1_market_address = market_addresses[1];
-        let start_time =
-            last_period_boundary(
-                timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
-            );
+        registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
+
+        // Pack the melee.
         let melee = Melee {
             melee_id,
             emojicoin_0_market_address,
             emojicoin_1_market_address,
-            start_time,
+            start_time: last_period_boundary(
+                timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
+            ),
             duration: registry_ref_mut.next_melee_duration,
             max_match_percentage: registry_ref_mut.next_melee_max_match_percentage,
             max_match_amount: registry_ref_mut.next_melee_max_match_amount,
             available_rewards: registry_ref_mut.next_melee_available_rewards
         };
+
+        // Store the melee, and emit it as an event.
         registry_ref_mut.melees_by_id.add(melee_id, melee);
-        registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
         event::emit(melee);
     }
 
