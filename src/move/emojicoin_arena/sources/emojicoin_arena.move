@@ -54,7 +54,9 @@ module arena::emojicoin_arena {
 
     struct Nil has drop, store {}
 
-    struct Melee has store {
+    #[event]
+    /// Tracks state for active and historical melees. Also emitted whenever a new melee starts.
+    struct Melee has copy, drop, store {
         /// 1-indexed for conformity with emojicoin market ID indexing.
         melee_id: u64,
         /// Address for emojicoin market with lower market ID.
@@ -69,8 +71,9 @@ module arena::emojicoin_arena {
         max_match_percentage: u64,
         /// Maximum amount of APT to match in octas, when locking in.
         max_match_amount: u64,
-        /// Amount of rewards that are available to claim for this melee, measured in octas, and
-        /// conditional on vault balance. Reset to 0 when cranking the schedule.
+        /// Amount of rewards that are available to claim for an active melee, measured in octas and
+        /// conditional on vault balance. If melee is inactive, represents the amount of rewards
+        /// that were available at the end of the melee.
         available_rewards: u64
     }
 
@@ -133,29 +136,6 @@ module arena::emojicoin_arena {
         quote_volume: u64,
         emojicoin_0_proceeds: u64,
         emojicoin_1_proceeds: u64
-    }
-
-    #[event]
-    /// Emitted after a user enters, swaps, or exits, representing the final `Melee` state for the
-    /// corresponding `Melee` (which may be inactive.)
-    struct MeleeState has copy, drop, store {
-        melee_id: u64,
-        available_rewards: u64,
-        emojicoin_0_exchange_rate: ExchangeRate,
-        emojicoin_1_exchange_rate: ExchangeRate
-    }
-
-    #[event]
-    /// Emitted whenever a new `Melee` starts.
-    struct NewMelee has copy, drop, store {
-        melee_id: u64,
-        emojicoin_0_market_address: address,
-        emojicoin_1_market_address: address,
-        start_time: u64,
-        duration: u64,
-        max_match_percentage: u64,
-        max_match_amount: u64,
-        available_rewards: u64
     }
 
     /// Exchange rate between APT and emojicoins.
@@ -300,7 +280,7 @@ module arena::emojicoin_arena {
                     );
 
                     // Update melee state.
-                    active_melee_ref_mut.melee_available_rewards_decrement(match_amount);
+                    active_melee_ref_mut.available_rewards -= match_amount;
 
                     // Update escrow state.
                     escrow_ref_mut.escrow_match_amount_increment(match_amount);
@@ -518,7 +498,6 @@ module arena::emojicoin_arena {
             if (time
                 >= last_active_melee_ref_mut.start_time
                     + last_active_melee_ref_mut.duration) {
-                last_active_melee_ref_mut.available_rewards = 0;
                 let market_ids = next_melee_market_ids(registry_ref_mut);
                 register_melee(registry_ref_mut, n_melees_before_cranking, market_ids);
                 true
@@ -624,7 +603,7 @@ module arena::emojicoin_arena {
                 emit_vault_balance_update_with_vault_address(vault_address);
 
                 // Update melee state.
-                exited_melee_ref_mut.melee_available_rewards_increment(match_amount);
+                exited_melee_ref_mut.available_rewards += match_amount;
             }
         };
 
@@ -720,18 +699,6 @@ module arena::emojicoin_arena {
         }
     }
 
-    inline fun melee_available_rewards_decrement(
-        self: &mut Melee, amount: u64
-    ) {
-        self.available_rewards -= amount;
-    }
-
-    inline fun melee_available_rewards_increment(
-        self: &mut Melee, amount: u64
-    ) {
-        self.available_rewards += amount;
-    }
-
     /// Accepts a mutable reference to avoid borrowing issues.
     inline fun next_melee_market_ids(registry_ref_mut: &mut Registry): vector<u64> {
         let n_markets = get_n_registered_markets();
@@ -781,44 +748,19 @@ module arena::emojicoin_arena {
             last_period_boundary(
                 timestamp::now_microseconds(), registry_ref_mut.next_melee_duration
             );
-        let duration = registry_ref_mut.next_melee_duration;
-        let max_match_percentage = registry_ref_mut.next_melee_max_match_percentage;
-        let max_match_amount = registry_ref_mut.next_melee_max_match_amount;
-        let available_rewards = registry_ref_mut.next_melee_available_rewards;
-        registry_ref_mut.melees_by_id.add(
+        let melee = Melee {
             melee_id,
-            Melee {
-                melee_id,
-                emojicoin_0_market_address,
-                emojicoin_1_market_address,
-                start_time,
-                duration,
-                max_match_percentage,
-                max_match_amount,
-                available_rewards
-            }
-        );
+            emojicoin_0_market_address,
+            emojicoin_1_market_address,
+            start_time,
+            duration: registry_ref_mut.next_melee_duration,
+            max_match_percentage: registry_ref_mut.next_melee_max_match_percentage,
+            max_match_amount: registry_ref_mut.next_melee_max_match_amount,
+            available_rewards: registry_ref_mut.next_melee_available_rewards
+        };
+        registry_ref_mut.melees_by_id.add(melee_id, melee);
         registry_ref_mut.melee_ids_by_market_ids.add(sorted_unique_market_ids, melee_id);
-        event::emit(
-            NewMelee {
-                melee_id,
-                emojicoin_0_market_address,
-                emojicoin_1_market_address,
-                start_time,
-                duration,
-                max_match_percentage,
-                max_match_amount,
-                available_rewards
-            }
-        )
-    }
-
-    inline fun remove_if_contains<T: copy + drop>(
-        map_ref_mut: &mut SmartTable<T, Nil>, key: T
-    ) {
-        if (map_ref_mut.contains(key)) {
-            map_ref_mut.remove(key);
-        }
+        event::emit(melee);
     }
 
     inline fun sort_unique_market_ids(market_id_0: u64, market_id_1: u64): vector<u64> {
