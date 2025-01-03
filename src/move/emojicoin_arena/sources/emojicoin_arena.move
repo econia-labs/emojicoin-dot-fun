@@ -115,7 +115,11 @@ module arena::emojicoin_arena {
         quote_volume: u64,
         match_amount: u64,
         emojicoin_0_proceeds: u64,
-        emojicoin_1_proceeds: u64
+        emojicoin_1_proceeds: u64,
+        /// After the swap into escrow.
+        emojicoin_0_exchange_rate: ExchangeRate,
+        /// After the swap into escrow.
+        emojicoin_1_exchange_rate: ExchangeRate
     }
 
     #[event]
@@ -125,7 +129,9 @@ module arena::emojicoin_arena {
         melee_id: u64,
         tap_out_fee: u64,
         emojicoin_0_proceeds: u64,
-        emojicoin_1_proceeds: u64
+        emojicoin_1_proceeds: u64,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
     }
 
     #[event]
@@ -135,7 +141,11 @@ module arena::emojicoin_arena {
         melee_id: u64,
         quote_volume: u64,
         emojicoin_0_proceeds: u64,
-        emojicoin_1_proceeds: u64
+        emojicoin_1_proceeds: u64,
+        /// After the swap within escrow.
+        emojicoin_0_exchange_rate: ExchangeRate,
+        /// After the swap within escrow.
+        emojicoin_1_exchange_rate: ExchangeRate
     }
 
     /// Exchange rate between APT and emojicoins.
@@ -283,7 +293,7 @@ module arena::emojicoin_arena {
                     active_melee_ref_mut.available_rewards -= match_amount;
 
                     // Update escrow state.
-                    escrow_ref_mut.escrow_match_amount_increment(match_amount);
+                    escrow_ref_mut.match_amount += match_amount;
 
                 };
 
@@ -333,13 +343,11 @@ module arena::emojicoin_arena {
                 quote_volume,
                 match_amount,
                 emojicoin_0_proceeds,
-                emojicoin_1_proceeds
+                emojicoin_1_proceeds,
+                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
+                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
             }
         );
-
-        // Get final exchange rates.
-        let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
-        let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
 
     }
 
@@ -421,11 +429,13 @@ module arena::emojicoin_arena {
                 melee_id: escrow_ref_mut.melee_id,
                 quote_volume,
                 emojicoin_0_proceeds,
-                emojicoin_1_proceeds
+                emojicoin_1_proceeds,
+                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
+                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
             }
         );
 
-        // Exit as needed, emitting state if not exiting, since exit inner function emits state.
+        // Exit if melee has ended.
         if (exit_once_done)
             exit_inner<Coin0, LP0, Coin1, LP1>(
                 swapper,
@@ -433,11 +443,6 @@ module arena::emojicoin_arena {
                 registry_ref_mut,
                 false
             )
-        else {
-            // Get final exchange rates.
-            let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
-            let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
-        }
     }
 
     fun init_module(arena: &signer) acquires Registry {
@@ -535,19 +540,6 @@ module arena::emojicoin_arena {
         );
     }
 
-    inline fun escrow_match_amount_increment<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
-        amount: u64
-    ) {
-        self.match_amount += amount;
-    }
-
-    inline fun escrow_match_amount_reset<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
-    ) {
-        self.match_amount = 0;
-    }
-
     inline fun exchange_rate<Emojicoin, EmojicoinLP>(
         market_address: address
     ): ExchangeRate {
@@ -620,24 +612,21 @@ module arena::emojicoin_arena {
             withdraw_from_escrow(participant_address, emojicoin_1_ref_mut);
         };
 
-        // Get final exchange rates.
-        let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
-        let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
-
-        // Construct exit event.
-        let exit = Exit {
-            user: participant_address,
-            melee_id,
-            emojicoin_0_proceeds,
-            emojicoin_1_proceeds,
-            tap_out_fee
-        };
-
         // Update escrow state.
-        escrow_ref_mut.escrow_match_amount_reset();
+        escrow_ref_mut.match_amount = 0;
 
         // Emit exit event.
-        event::emit(exit);
+        event::emit(
+            Exit {
+                user: participant_address,
+                melee_id,
+                emojicoin_0_proceeds,
+                emojicoin_1_proceeds,
+                tap_out_fee,
+                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
+                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
+            }
+        );
     }
 
     inline fun get_n_registered_markets(): u64 {
