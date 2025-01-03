@@ -10,7 +10,8 @@ module arena::emojicoin_arena {
     use aptos_framework::randomness::Self;
     use aptos_framework::timestamp;
     use aptos_std::math64::min;
-    use aptos_std::smart_table::{Self, SmartTable};
+    use aptos_std::table::{Self, Table};
+    use aptos_std::table_with_length::{Self, TableWithLength};
     use aptos_std::type_info;
     use arena::pseudo_randomness;
     use emojicoin_dot_fun::emojicoin_dot_fun;
@@ -78,10 +79,12 @@ module arena::emojicoin_arena {
     }
 
     struct Registry has key {
-        /// A map of each `Melee`'s `melee_id` to the `Melee` itself.
-        melees_by_id: SmartTable<u64, Melee>,
-        /// Map from a sorted combination of market IDs (lower ID first) to the `Melee` serial ID.
-        melee_ids_by_market_ids: SmartTable<vector<u64>, u64>,
+        /// A map of each `Melee`'s `melee_id` to the `Melee` itself. 1-indexed for conformity with
+        /// emojicoin market ID indexing.
+        melees_by_id: TableWithLength<u64, Melee>,
+        /// Map from a sorted combination of market IDs (lower ID first) to the `Melee` serial ID,
+        /// used to prevent duplicate melees by reverse lookup during crank time.
+        melee_ids_by_market_ids: Table<vector<u64>, u64>,
         /// Approves transfers from the vault.
         signer_capability: SignerCapability,
         /// `Melee.duration` for next melee.
@@ -452,8 +455,8 @@ module arena::emojicoin_arena {
         move_to(
             arena,
             Registry {
-                melees_by_id: smart_table::new(),
-                melee_ids_by_market_ids: smart_table::new(),
+                melees_by_id: table_with_length::new(),
+                melee_ids_by_market_ids: table::new(),
                 signer_capability,
                 next_melee_duration: DEFAULT_DURATION,
                 next_melee_available_rewards: DEFAULT_AVAILABLE_REWARDS,
