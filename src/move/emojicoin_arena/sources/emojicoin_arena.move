@@ -98,10 +98,6 @@ module arena::emojicoin_arena {
         emojicoin_0: Coin<Coin0>,
         /// Emojicoin 1 holdings.
         emojicoin_1: Coin<Coin1>,
-        /// Cumulative amount of APT entered into the `Melee` since the most recent deposit into an
-        /// empty `Escrow`. Inclusive of total amount matched from locking in since most recent
-        /// deposit into an empty `Escrow`. Reset to 0 upon exit.
-        input_amount: u64,
         /// Cumulative amount of APT matched since most recent deposit into an empty `Escrow`, reset
         /// to 0 upon exit. Must be paid back in full when tapping out.
         match_amount: u64
@@ -124,12 +120,9 @@ module arena::emojicoin_arena {
     struct Exit has copy, drop, store {
         user: address,
         melee_id: u64,
-        input_amount: u64,
-        match_amount: u64,
         tap_out_fee: u64,
         emojicoin_0_proceeds: u64,
-        emojicoin_1_proceeds: u64,
-        profit_and_loss: ProfitAndLoss
+        emojicoin_1_proceeds: u64
     }
 
     #[event]
@@ -138,22 +131,8 @@ module arena::emojicoin_arena {
         user: address,
         melee_id: u64,
         quote_volume: u64,
-        emojicoin_0_in: u64,
         emojicoin_0_proceeds: u64,
-        emojicoin_1_in: u64,
         emojicoin_1_proceeds: u64
-    }
-
-    #[event]
-    /// Emitted after a user enters, swaps, or exits, representing their final `Escrow` state.
-    struct EscrowState has copy, drop, store {
-        user: address,
-        melee_id: u64,
-        emojicoin_0_balance: u64,
-        emojicoin_1_balance: u64,
-        input_amount: u64,
-        match_amount: u64,
-        profit_and_loss: ProfitAndLoss
     }
 
     #[event]
@@ -185,18 +164,6 @@ module arena::emojicoin_arena {
         base: u64,
         /// Emojicoins per `base` octas.
         quote: u64
-    }
-
-    /// Based on proceeds when exiting, otherwise based on holdings in escrow.
-    struct ProfitAndLoss has copy, drop, store {
-        /// Emojicoins effective value, converted to octas at current exchange rate.
-        octas_value: u128,
-        /// Unrealized gain if `octas_value` is greater than `Escrow.input_amount`.
-        octas_gain: u128,
-        /// Unrealized loss if `octas_value` is less than `Escrow.input_amount`.
-        octas_loss: u128,
-        /// Ratio of `octas_value` to `Escrow.input_amount`, as a Q64.
-        octas_growth_q64: u128
     }
 
     #[event]
@@ -272,7 +239,6 @@ module arena::emojicoin_arena {
                     melee_id,
                     emojicoin_0: coin::zero(),
                     emojicoin_1: coin::zero(),
-                    input_amount: 0,
                     match_amount: 0
                 }
             );
@@ -378,9 +344,6 @@ module arena::emojicoin_arena {
                 quote_volume
             };
 
-        // Update escrow state.
-        escrow_ref_mut.escrow_input_amount_increment(input_amount_after_matching);
-
         // Emit enter event.
         event::emit(
             Enter {
@@ -398,14 +361,6 @@ module arena::emojicoin_arena {
         let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
         let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
 
-        // Emit state events.
-        emit_state(
-            active_melee_ref_mut,
-            escrow_ref_mut,
-            entrant_address,
-            exchange_rate_0,
-            exchange_rate_1
-        );
     }
 
     #[randomness]
@@ -450,11 +405,9 @@ module arena::emojicoin_arena {
         let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
         let emojicoin_0_locked_before_swap = coin::value(emojicoin_0_ref_mut);
         let emojicoin_1_locked_before_swap = coin::value(emojicoin_1_ref_mut);
-        let (emojicoin_0_in, emojicoin_0_proceeds, emojicoin_1_in, emojicoin_1_proceeds) =
-            (0, 0, 0, 0);
+        let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
         let quote_volume =
             if (emojicoin_0_locked_before_swap > 0) {
-                emojicoin_0_in = emojicoin_0_locked_before_swap;
                 let quote_volume =
                     swap_within_escrow<Coin0, LP0, Coin1, LP1>(
                         swapper,
@@ -468,7 +421,6 @@ module arena::emojicoin_arena {
                 quote_volume
             } else {
                 assert!(emojicoin_1_locked_before_swap > 0, E_SWAP_NO_FUNDS);
-                emojicoin_1_in = emojicoin_1_locked_before_swap;
                 let quote_volume =
                     swap_within_escrow<Coin1, LP1, Coin0, LP0>(
                         swapper,
@@ -488,9 +440,7 @@ module arena::emojicoin_arena {
                 user: swapper_address,
                 melee_id: escrow_ref_mut.melee_id,
                 quote_volume,
-                emojicoin_0_in,
                 emojicoin_0_proceeds,
-                emojicoin_1_in,
                 emojicoin_1_proceeds
             }
         );
@@ -507,14 +457,6 @@ module arena::emojicoin_arena {
             // Get final exchange rates.
             let exchange_rate_0 = exchange_rate<Coin0, LP0>(market_address_0);
             let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
-
-            emit_state(
-                swap_melee_ref_mut,
-                escrow_ref_mut,
-                swapper_address,
-                exchange_rate_0,
-                exchange_rate_1
-            );
         }
     }
 
@@ -592,66 +534,6 @@ module arena::emojicoin_arena {
             / (exchange_rate.base as u128)
     }
 
-    inline fun emit_escrow_state<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
-        participant_address: address,
-        emojicoin_0_exchange_rate: ExchangeRate,
-        emojicoin_1_exchange_rate: ExchangeRate
-    ) {
-        let emojicoin_0_balance = coin::value(&self.emojicoin_0);
-        let emojicoin_1_balance = coin::value(&self.emojicoin_1);
-        let input_amount = self.input_amount;
-        event::emit(
-            EscrowState {
-                user: participant_address,
-                melee_id: self.melee_id,
-                emojicoin_0_balance,
-                emojicoin_1_balance,
-                input_amount,
-                match_amount: self.match_amount,
-                profit_and_loss: profit_and_loss(
-                    input_amount,
-                    emojicoin_0_balance,
-                    emojicoin_1_balance,
-                    emojicoin_0_exchange_rate,
-                    emojicoin_1_exchange_rate
-                )
-            }
-        );
-    }
-
-    /// Uses mutable references to avoid borrowing issues.
-    inline fun emit_melee_state(
-        self: &mut Melee,
-        emojicoin_0_exchange_rate: ExchangeRate,
-        emojicoin_1_exchange_rate: ExchangeRate
-    ) {
-        event::emit(
-            MeleeState {
-                melee_id: self.melee_id,
-                available_rewards: self.available_rewards,
-                emojicoin_0_exchange_rate,
-                emojicoin_1_exchange_rate
-            }
-        );
-    }
-
-    /// Uses mutable references to avoid borrowing issues.
-    inline fun emit_state<Coin0, LP0, Coin1, LP1>(
-        melee_ref_mut: &mut Melee,
-        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
-        participant_address: address,
-        emojicoin_0_exchange_rate: ExchangeRate,
-        emojicoin_1_exchange_rate: ExchangeRate
-    ) {
-        melee_ref_mut.emit_melee_state(
-            emojicoin_0_exchange_rate, emojicoin_1_exchange_rate
-        );
-        escrow_ref_mut.emit_escrow_state(
-            participant_address, emojicoin_0_exchange_rate, emojicoin_1_exchange_rate
-        );
-    }
-
     inline fun emit_vault_balance_update_with_singer_capability_ref(
         signer_capability_ref: &SignerCapability
     ) {
@@ -672,19 +554,6 @@ module arena::emojicoin_arena {
                 new_balance: coin::balance<AptosCoin>(vault_address)
             }
         );
-    }
-
-    inline fun escrow_input_amount_increment<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>,
-        amount: u64
-    ) {
-        self.input_amount += amount;
-    }
-
-    inline fun escrow_input_amount_reset<Coin0, LP0, Coin1, LP1>(
-        self: &mut Escrow<Coin0, LP0, Coin1, LP1>
-    ) {
-        self.input_amount = 0;
     }
 
     inline fun escrow_match_amount_increment<Coin0, LP0, Coin1, LP1>(
@@ -742,7 +611,6 @@ module arena::emojicoin_arena {
         let market_address_1 = exited_melee_ref_mut.emojicoin_1_market_address;
 
         // Charge tap out fee if applicable.
-        let input_amount = escrow_ref_mut.input_amount;
         let tap_out_fee = 0;
         let match_amount = escrow_ref_mut.match_amount;
         if (melee_is_active) {
@@ -783,33 +651,14 @@ module arena::emojicoin_arena {
             melee_id,
             emojicoin_0_proceeds,
             emojicoin_1_proceeds,
-            input_amount,
-            match_amount,
-            tap_out_fee,
-            profit_and_loss: profit_and_loss(
-                input_amount,
-                emojicoin_0_proceeds,
-                emojicoin_1_proceeds,
-                exchange_rate_0,
-                exchange_rate_1
-            )
+            tap_out_fee
         };
 
         // Update escrow state.
-        escrow_ref_mut.escrow_input_amount_reset();
         escrow_ref_mut.escrow_match_amount_reset();
 
         // Emit exit event.
         event::emit(exit);
-
-        // Emit state events.
-        emit_state(
-            exited_melee_ref_mut,
-            escrow_ref_mut,
-            participant_address,
-            exchange_rate_0,
-            exchange_rate_1
-        );
     }
 
     inline fun get_n_registered_markets(): u64 {
@@ -897,31 +746,6 @@ module arena::emojicoin_arena {
         };
         market_ids
 
-    }
-
-    inline fun profit_and_loss(
-        input_amount: u64,
-        emojicoin_0_holdings: u64,
-        emojicoin_1_holdings: u64,
-        emojicoin_0_exchange_rate: ExchangeRate,
-        emojicoin_1_exchange_rate: ExchangeRate
-    ): ProfitAndLoss {
-        let (octas_value, octas_gain, octas_loss, octas_growth_q64) = (0, 0, 0, 0);
-        let input_amount = (input_amount as u128);
-        if (input_amount > 0) {
-            octas_value =
-                if (emojicoin_0_holdings > 0)
-                    effective_value(emojicoin_0_holdings, emojicoin_0_exchange_rate)
-                else if (emojicoin_1_holdings > 0)
-                    effective_value(emojicoin_1_holdings, emojicoin_1_exchange_rate)
-                else 0;
-            if (octas_value > 0) {
-                if (octas_value > input_amount) octas_gain = octas_value - input_amount;
-                if (octas_value < input_amount) octas_loss = input_amount - octas_value;
-                octas_growth_q64 = (octas_value << SHIFT_Q64) / (input_amount);
-            }
-        };
-        ProfitAndLoss { octas_value, octas_gain, octas_loss, octas_growth_q64 }
     }
 
     /// Pseudo-random substitute for `random_market_id`, since the Aptos randomness API is not
