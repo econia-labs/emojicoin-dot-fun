@@ -21,7 +21,11 @@ export const getAptPrice = unstable_cache(
       }
     )
       .then((r) => r.json())
-      .then((r) => r.aptos.usd as number),
+      .then((r) => r.aptos.usd as number)
+      .catch((e) => {
+        console.error("Could not get APT price from CoinGecko.", e);
+        return undefined;
+      }),
   ["apt-price"],
   { revalidate: 60 * 10 } // Ten minutes
 );
