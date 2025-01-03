@@ -266,8 +266,7 @@ module arena::emojicoin_arena {
                 coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0
             );
 
-        // Verify that if user has been matched since their most recent deposit into an empty
-        // escrow, they lock in again.
+        // Verify that if user has been matched since the escrow was last empty, they lock in again.
         if (escrow_ref_mut.match_amount > 0) assert!(lock_in, E_TOP_OFF_MUST_LOCK_IN);
 
         // Match a portion of user's contribution if they elect to lock in, and if there are any
@@ -295,10 +294,8 @@ module arena::emojicoin_arena {
                         signer_capability_ref
                     );
 
-                    // Update melee state.
+                    // Update rewards state for melee and escrow.
                     active_melee_ref_mut.available_rewards -= match_amount;
-
-                    // Update escrow state.
                     escrow_ref_mut.match_amount += match_amount;
 
                 };
@@ -307,8 +304,7 @@ module arena::emojicoin_arena {
 
             } else 0;
 
-        // Execute a swap then immediately move funds into escrow, updating total emojicoin locked
-        // values based on side.
+        // Execute a swap then immediately move funds into escrow.
         let input_amount_after_matching = input_amount + match_amount;
         let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
         let quote_volume =
@@ -359,40 +355,30 @@ module arena::emojicoin_arena {
 
     #[randomness]
     entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
-        let participant_address = signer::address_of(participant);
-        assert!(
-            exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant_address),
-            E_NO_ESCROW
-        );
-        let (melee_just_ended, registry_ref_mut, _, _) = crank_schedule();
+        // Crank schedule, set local variables.
+        let (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut) =
+            existing_participant_prologue<Coin0, LP0, Coin1, LP1>(participant);
+
         exit_inner<Coin0, LP0, Coin1, LP1>(
+            registry_ref_mut,
+            escrow_ref_mut,
             participant,
             participant_address,
-            registry_ref_mut,
-            !melee_just_ended
+            melee_is_active
         );
     }
 
     #[randomness]
     entry fun swap<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry {
+        // Crank schedule, set local variables.
+        let (registry_ref_mut, melee_is_active, swapper_address, escrow_ref_mut) =
+            existing_participant_prologue<Coin0, LP0, Coin1, LP1>(swapper);
 
-        // Verify that swapper has an escrow resource.
-        let swapper_address = signer::address_of(swapper);
-        assert!(
-            exists<Escrow<Coin0, LP0, Coin1, LP1>>(swapper_address),
-            E_NO_ESCROW
-        );
-        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[swapper_address];
-
-        // Try cranking the schedule, and if a new melee starts, flag that user's escrow should be
-        // emptied immediately after the swap.
-        let (exit_once_done, registry_ref_mut, _, _) = crank_schedule();
-
-        // Get market addresses.
-        let swap_melee_ref_mut =
-            registry_ref_mut.melees_by_id.borrow_mut(escrow_ref_mut.melee_id);
-        let market_address_0 = swap_melee_ref_mut.emojicoin_0_market_address;
-        let market_address_1 = swap_melee_ref_mut.emojicoin_1_market_address;
+        // Get melee market addresses.
+        let (_, market_address_0, market_address_1) =
+            borrow_melee_mut_with_market_addresses(
+                registry_ref_mut, escrow_ref_mut.melee_id
+            );
 
         // Swap, updating total emojicoin locked values based on side.
         let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
@@ -441,12 +427,13 @@ module arena::emojicoin_arena {
             }
         );
 
-        // Exit if melee has ended.
-        if (exit_once_done)
+        // Exit if melee is no longer active.
+        if (!melee_is_active)
             exit_inner<Coin0, LP0, Coin1, LP1>(
+                registry_ref_mut,
+                escrow_ref_mut,
                 swapper,
                 swapper_address,
-                registry_ref_mut,
                 false
             )
     }
@@ -485,6 +472,15 @@ module arena::emojicoin_arena {
             0,
             sort_unique_market_ids(market_id_0, market_id_1)
         );
+    }
+
+    inline fun borrow_melee_mut_with_market_addresses(
+        registry_ref_mut: &mut Registry, melee_id: u64
+    ): (&mut Melee, address, address) {
+        let melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
+        let market_address_0 = melee_ref_mut.emojicoin_0_market_address;
+        let market_address_1 = melee_ref_mut.emojicoin_1_market_address;
+        (melee_ref_mut, market_address_0, market_address_1)
     }
 
     inline fun borrow_registry_ref_checked(arena: &signer): &Registry {
@@ -566,36 +562,56 @@ module arena::emojicoin_arena {
         ExchangeRate { base, quote }
     }
 
+    /// Crank schedule, set local variables for a participant who has already joined a melee.
+    inline fun existing_participant_prologue<Coin0, LP0, Coin1, LP1>(
+        participant: &signer
+    ): (&mut Registry, bool, address, &mut Escrow<Coin0, LP0, Coin1, LP1>) {
+        let participant_address = signer::address_of(participant);
+        assert!(
+            exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant_address),
+            E_NO_ESCROW
+        );
+        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[participant_address];
+        let (cranked, registry_ref_mut, _, n_melees_before_cranking) = crank_schedule();
+        let melee_is_active =
+            if (cranked) { false }
+            else {
+                escrow_ref_mut.melee_id == n_melees_before_cranking
+            };
+        (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut)
+    }
+
     /// Assumes user has an escrow resource.
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
+        registry_ref_mut: &mut Registry,
+        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         participant: &signer,
         participant_address: address,
-        registry_ref_mut: &mut Registry,
         melee_is_active: bool
     ) acquires Registry {
-        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[participant_address];
+        // Get mutable reference to melee and its market addresses.
         let melee_id = escrow_ref_mut.melee_id;
-        let exited_melee_ref_mut = registry_ref_mut.melees_by_id.borrow_mut(melee_id);
-        let market_address_0 = exited_melee_ref_mut.emojicoin_0_market_address;
-        let market_address_1 = exited_melee_ref_mut.emojicoin_1_market_address;
+        let (exited_melee_ref_mut, market_address_0, market_address_1) =
+            borrow_melee_mut_with_market_addresses(
+                registry_ref_mut, escrow_ref_mut.melee_id
+            );
 
         // Charge tap out fee if applicable.
-        let tap_out_fee = 0;
         let match_amount = escrow_ref_mut.match_amount;
-        if (melee_is_active) {
-            if (match_amount > 0) {
+        let tap_out_fee =
+            if (melee_is_active && match_amount > 0) {
                 let vault_address =
                     account::get_signer_capability_address(
                         &registry_ref_mut.signer_capability
                     );
                 aptos_account::transfer(participant, vault_address, match_amount);
-                tap_out_fee = match_amount;
                 emit_vault_balance_update_with_vault_address(vault_address);
 
                 // Update melee state.
                 exited_melee_ref_mut.available_rewards += match_amount;
-            }
-        };
+
+                match_amount
+            } else { 0 };
 
         // Withdraw emojicoin balances from escrow.
         let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
@@ -750,6 +766,7 @@ module arena::emojicoin_arena {
         event::emit(melee);
     }
 
+    /// Assumes `market_id_0` != `market_id_1`.
     inline fun sort_unique_market_ids(market_id_0: u64, market_id_1: u64): vector<u64> {
         if (market_id_0 < market_id_1) {
             vector[market_id_0, market_id_1]
