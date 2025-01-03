@@ -592,10 +592,12 @@ module arena::emojicoin_arena {
                 registry_ref_mut, escrow_ref_mut.melee_id
             );
 
-        // Charge tap out fee if applicable.
+        // Charge tap out fee if applicable, updating escrow match amount since user has exited.
         let match_amount = escrow_ref_mut.match_amount;
         let tap_out_fee =
             if (melee_is_active && match_amount > 0) {
+
+                // Get vault address and transfer match amount back to vault.
                 let vault_address =
                     account::get_signer_capability_address(
                         &registry_ref_mut.signer_capability
@@ -603,27 +605,26 @@ module arena::emojicoin_arena {
                 aptos_account::transfer(participant, vault_address, match_amount);
                 emit_vault_balance_update_with_vault_address(vault_address);
 
-                // Update melee state.
+                // Update available rewards for the melee since match amount has been returned.
                 exited_melee_ref_mut.available_rewards += match_amount;
 
                 match_amount
             } else { 0 };
-
-        // Withdraw emojicoin balances from escrow.
-        let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
-        if (coin::value(&escrow_ref_mut.emojicoin_0) > 0) {
-            let emojicoin_0_ref_mut = &mut escrow_ref_mut.emojicoin_0;
-            emojicoin_0_proceeds = coin::value(emojicoin_0_ref_mut);
-            withdraw_from_escrow(participant_address, emojicoin_0_ref_mut);
-        } else {
-            let emojicoin_1_ref_mut = &mut escrow_ref_mut.emojicoin_1;
-            emojicoin_1_proceeds = coin::value(emojicoin_1_ref_mut);
-            assert!(emojicoin_1_proceeds > 0, E_EXIT_NO_FUNDS);
-            withdraw_from_escrow(participant_address, emojicoin_1_ref_mut);
-        };
-
-        // Update escrow state.
         escrow_ref_mut.match_amount = 0;
+
+        // Withdraw emojicoin balance from escrow.
+        let emojicoin_0_proceeds =
+            try_withdraw_from_escrow(
+                participant_address, &mut escrow_ref_mut.emojicoin_0
+            );
+        let emojicoin_1_proceeds =
+            try_withdraw_from_escrow(
+                participant_address, &mut escrow_ref_mut.emojicoin_1
+            );
+        assert!(
+            emojicoin_0_proceeds > 0 || emojicoin_1_proceeds > 0,
+            E_EXIT_NO_FUNDS
+        );
 
         // Emit exit event.
         event::emit(
@@ -881,6 +882,17 @@ module arena::emojicoin_arena {
 
         // Return quote volume on second swap only, to avoid double-counting.
         quote_volume
+    }
+
+    /// Only invoke withdraw function is balance is nonzero, returning the amount withdrawn.
+    inline fun try_withdraw_from_escrow<Emojicoin>(
+        recipient: address, escrow_coin_ref_mut: &mut Coin<Emojicoin>
+    ): u64 {
+        let proceeds = coin::value(escrow_coin_ref_mut);
+        if (proceeds > 0) {
+            withdraw_from_escrow(recipient, escrow_coin_ref_mut);
+        };
+        proceeds
     }
 
     inline fun withdraw_from_escrow<Emojicoin>(
