@@ -215,56 +215,30 @@ module arena::emojicoin_arena {
     entry fun enter<Coin0, LP0, Coin1, LP1, EscrowCoin>(
         entrant: &signer, input_amount: u64, lock_in: bool
     ) acquires Escrow, Registry {
+
+        // Crank schedule, returning early as applicable and storing active melee ID.
         let (melee_just_ended, registry_ref_mut, time, n_melees_before_cranking) =
             crank_schedule();
         if (melee_just_ended) return; // Can not enter melee if cranking ends it.
+        let melee_id = n_melees_before_cranking;
 
         // Get market addresses for active melee.
-        let active_melee_ref_mut =
-            registry_ref_mut.melees_by_id.borrow_mut(n_melees_before_cranking);
-        let market_address_0 = active_melee_ref_mut.emojicoin_0_market_address;
-        let market_address_1 = active_melee_ref_mut.emojicoin_1_market_address;
+        let (active_melee_ref_mut, market_address_0, market_address_1) =
+            borrow_melee_mut_with_market_addresses(
+                registry_ref_mut, n_melees_before_cranking
+            );
 
         // Create escrow if it doesn't exist.
-        let melee_id = active_melee_ref_mut.melee_id;
-        let entrant_address = signer::address_of(entrant);
-        if (!exists<Escrow<Coin0, LP0, Coin1, LP1>>(entrant_address)) {
-            move_to(
-                entrant,
-                Escrow<Coin0, LP0, Coin1, LP1> {
-                    melee_id,
-                    emojicoin_0: coin::zero(),
-                    emojicoin_1: coin::zero(),
-                    match_amount: 0
-                }
-            );
-        };
+        let entrant_address =
+            ensure_melee_escrow_exists<Coin0, LP0, Coin1, LP1>(entrant, melee_id);
 
         // Verify user has indicated escrow coin type as one of the two emojicoin types. Note that
-        // coin types are later type checked during exchange rate calculation inner calls.
-        let coin_0_type_info = type_info::type_of<Coin0>();
-        let coin_1_type_info = type_info::type_of<Coin1>();
-        let escrow_coin_type_info = type_info::type_of<EscrowCoin>();
-        let buy_coin_0 =
-            if (coin_0_type_info == escrow_coin_type_info) true
-            else {
-                assert!(
-                    escrow_coin_type_info == coin_1_type_info,
-                    E_INVALID_ESCROW_COIN_TYPE
-                );
-                false
-            };
+        // coin types are later type checked against each market during exchange rate calculations.
+        let buy_coin_0 = check_buy_side<Coin0, Coin1, EscrowCoin>();
 
         // Verify that user does not split balance between the two emojicoins.
-        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[entrant_address];
-        if (buy_coin_0)
-            assert!(
-                coin::value(&escrow_ref_mut.emojicoin_1) == 0, E_ENTER_COIN_BALANCE_1
-            )
-        else
-            assert!(
-                coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0
-            );
+        let escrow_ref_mut =
+            check_entry_balances<Coin0, LP0, Coin1, LP1>(entrant_address, buy_coin_0);
 
         // Verify that if user has been matched since the escrow was last empty, they lock in again.
         if (escrow_ref_mut.match_amount > 0) assert!(lock_in, E_TOP_OFF_MUST_LOCK_IN);
@@ -272,37 +246,15 @@ module arena::emojicoin_arena {
         // Match a portion of user's contribution if they elect to lock in, and if there are any
         // available rewards to match.
         let match_amount =
-            if (lock_in) {
-                let match_amount =
-                    match_amount(
-                        input_amount,
-                        escrow_ref_mut,
-                        active_melee_ref_mut,
-                        registry_ref_mut,
-                        time
-                    );
-                if (match_amount > 0) {
-
-                    // Transfer APT to entrant.
-                    let signer_capability_ref = &registry_ref_mut.signer_capability;
-                    aptos_account::transfer(
-                        &account::create_signer_with_capability(signer_capability_ref),
-                        entrant_address,
-                        match_amount
-                    );
-                    emit_vault_balance_update_with_singer_capability_ref(
-                        signer_capability_ref
-                    );
-
-                    // Update rewards state for melee and escrow.
-                    active_melee_ref_mut.available_rewards -= match_amount;
-                    escrow_ref_mut.match_amount += match_amount;
-
-                };
-
-                match_amount
-
-            } else 0;
+            try_match_entry<Coin0, LP0, Coin1, LP1>(
+                lock_in,
+                input_amount,
+                escrow_ref_mut,
+                active_melee_ref_mut,
+                registry_ref_mut,
+                time,
+                entrant_address
+            );
 
         // Execute a swap then immediately move funds into escrow.
         let input_amount_after_matching = input_amount + match_amount;
@@ -488,6 +440,37 @@ module arena::emojicoin_arena {
         &mut Registry[@arena]
     }
 
+    inline fun check_buy_side<Coin0, Coin1, EscrowCoin>(): bool {
+        let coin_0_type_info = type_info::type_of<Coin0>();
+        let coin_1_type_info = type_info::type_of<Coin1>();
+        let escrow_coin_type_info = type_info::type_of<EscrowCoin>();
+        let buy_coin_0 =
+            if (coin_0_type_info == escrow_coin_type_info) true
+            else {
+                assert!(
+                    escrow_coin_type_info == coin_1_type_info,
+                    E_INVALID_ESCROW_COIN_TYPE
+                );
+                false
+            };
+        buy_coin_0
+    }
+
+    inline fun check_entry_balances<Coin0, LP0, Coin1, LP1>(
+        entrant_address: address, buy_coin_0: bool
+    ): &mut Escrow<Coin0, LP0, Coin1, LP1> {
+        let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[entrant_address];
+        if (buy_coin_0)
+            assert!(
+                coin::value(&escrow_ref_mut.emojicoin_1) == 0, E_ENTER_COIN_BALANCE_1
+            )
+        else
+            assert!(
+                coin::value(&escrow_ref_mut.emojicoin_0) == 0, E_ENTER_COIN_BALANCE_0
+            );
+        escrow_ref_mut
+    }
+
     /// Crank schedule and return `true` if the active melee has ended as a result, along with other
     /// assorted variables, to reduce borrows and lookups in the caller.
     inline fun crank_schedule(): (bool, &mut Registry, u64, u64) {
@@ -527,6 +510,24 @@ module arena::emojicoin_arena {
                 new_balance: coin::balance<AptosCoin>(vault_address)
             }
         );
+    }
+
+    inline fun ensure_melee_escrow_exists<Coin0, LP0, Coin1, LP1>(
+        entrant: &signer, melee_id: u64
+    ): address {
+        let entrant_address = signer::address_of(entrant);
+        if (!exists<Escrow<Coin0, LP0, Coin1, LP1>>(entrant_address)) {
+            move_to(
+                entrant,
+                Escrow<Coin0, LP0, Coin1, LP1> {
+                    melee_id,
+                    emojicoin_0: coin::zero(),
+                    emojicoin_1: coin::zero(),
+                    match_amount: 0
+                }
+            );
+        };
+        entrant_address
     }
 
     inline fun exchange_rate<Emojicoin, EmojicoinLP>(
@@ -882,6 +883,50 @@ module arena::emojicoin_arena {
 
         // Return quote volume on second swap only, to avoid double-counting.
         quote_volume
+    }
+
+    /// During entry to a melee, try matching a portion of user's contribution if they elect to lock
+    /// in, returning the matched amount.
+    inline fun try_match_entry<Coin0, LP0, Coin1, LP1>(
+        lock_in: bool,
+        input_amount: u64,
+        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        active_melee_ref_mut: &mut Melee,
+        registry_ref_mut: &mut Registry,
+        time: u64,
+        entrant_address: address
+    ): u64 {
+        if (lock_in) {
+            let match_amount =
+                match_amount(
+                    input_amount,
+                    escrow_ref_mut,
+                    active_melee_ref_mut,
+                    registry_ref_mut,
+                    time
+                );
+            if (match_amount > 0) {
+
+                // Transfer APT to entrant.
+                let signer_capability_ref = &registry_ref_mut.signer_capability;
+                aptos_account::transfer(
+                    &account::create_signer_with_capability(signer_capability_ref),
+                    entrant_address,
+                    match_amount
+                );
+                emit_vault_balance_update_with_singer_capability_ref(
+                    signer_capability_ref
+                );
+
+                // Update rewards state for melee and escrow.
+                active_melee_ref_mut.available_rewards -= match_amount;
+                escrow_ref_mut.match_amount += match_amount;
+
+            };
+
+            match_amount
+
+        } else 0
     }
 
     /// Only invoke withdraw function is balance is nonzero, returning the amount withdrawn.
