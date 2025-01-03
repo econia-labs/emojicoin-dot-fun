@@ -88,13 +88,7 @@ module arena::emojicoin_arena {
         /// `Melee.max_match_percentage` for next melee.
         next_melee_max_match_percentage: u64,
         /// `Melee.max_match_amount` for next melee.
-        next_melee_max_match_amount: u64,
-        /// Number of melee-specific swaps.
-        n_swaps: u64,
-        /// Volume of melee-specific swaps in octas.
-        swaps_volume: u128,
-        /// Amount of octas matched. Decremented when a user taps out.
-        match_amount: u64
+        next_melee_max_match_amount: u64
     }
 
     struct Escrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
@@ -184,15 +178,6 @@ module arena::emojicoin_arena {
         available_rewards: u64,
         emojicoin_0_exchange_rate: ExchangeRate,
         emojicoin_1_exchange_rate: ExchangeRate
-    }
-
-    #[event]
-    /// Emitted after a user enters, swaps, or exits, representing the final `Registry` state.
-    struct RegistryState has copy, drop, store {
-        n_melees: u64,
-        n_swaps: u64,
-        swaps_volume: u128,
-        match_amount: u64
     }
 
     #[event]
@@ -367,9 +352,6 @@ module arena::emojicoin_arena {
                     // Update melee state.
                     active_melee_ref_mut.melee_available_rewards_decrement(match_amount);
 
-                    // Update registry state.
-                    registry_ref_mut.registry_match_amount_increment(match_amount);
-
                     // Update escrow state.
                     escrow_ref_mut.escrow_match_amount_increment(match_amount);
 
@@ -412,12 +394,8 @@ module arena::emojicoin_arena {
                 quote_volume
             };
 
-        // Update registry state.
-        let quote_volume_u128 = (quote_volume as u128);
-        registry_ref_mut.registry_n_swaps_increment();
-        registry_ref_mut.registry_swaps_volume_increment(quote_volume_u128);
-
         // Update escrow state.
+        let quote_volume_u128 = (quote_volume as u128);
         escrow_ref_mut.escrow_n_swaps_increment();
         escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
         escrow_ref_mut.escrow_input_amount_increment(input_amount_after_matching);
@@ -441,7 +419,6 @@ module arena::emojicoin_arena {
 
         // Emit state events.
         emit_state(
-            registry_ref_mut,
             active_melee_ref_mut,
             escrow_ref_mut,
             entrant_address,
@@ -524,12 +501,8 @@ module arena::emojicoin_arena {
                 quote_volume
             };
 
-        // Update registry state.
-        let quote_volume_u128 = (quote_volume as u128);
-        registry_ref_mut.registry_n_swaps_increment();
-        registry_ref_mut.registry_swaps_volume_increment(quote_volume_u128);
-
         // Update escrow state.
+        let quote_volume_u128 = (quote_volume as u128);
         escrow_ref_mut.escrow_n_swaps_increment();
         escrow_ref_mut.escrow_swaps_volume_increment(quote_volume_u128);
 
@@ -560,7 +533,6 @@ module arena::emojicoin_arena {
             let exchange_rate_1 = exchange_rate<Coin1, LP1>(market_address_1);
 
             emit_state(
-                registry_ref_mut,
                 swap_melee_ref_mut,
                 escrow_ref_mut,
                 swapper_address,
@@ -583,10 +555,7 @@ module arena::emojicoin_arena {
                 next_melee_duration: DEFAULT_DURATION,
                 next_melee_available_rewards: DEFAULT_AVAILABLE_REWARDS,
                 next_melee_max_match_percentage: DEFAULT_MAX_MATCH_PERCENTAGE,
-                next_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT,
-                n_swaps: 0,
-                swaps_volume: 0,
-                match_amount: 0
+                next_melee_max_match_amount: DEFAULT_MAX_MATCH_AMOUNT
             }
         );
         coin::register<AptosCoin>(&vault_signer);
@@ -694,34 +663,19 @@ module arena::emojicoin_arena {
     }
 
     /// Uses mutable references to avoid borrowing issues.
-    inline fun emit_registry_state(self: &mut Registry) {
-        event::emit(
-            RegistryState {
-                n_melees: self.melees_by_id.length(),
-                n_swaps: self.n_swaps,
-                swaps_volume: self.swaps_volume,
-                match_amount: self.match_amount
-            }
-        );
-    }
-
-    /// Uses mutable references to avoid borrowing issues. Emitted in ascending hierarchy order,
-    /// since registry state must be emitted after melee state.
     inline fun emit_state<Coin0, LP0, Coin1, LP1>(
-        registry_ref_mut: &mut Registry,
         melee_ref_mut: &mut Melee,
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         participant_address: address,
         emojicoin_0_exchange_rate: ExchangeRate,
         emojicoin_1_exchange_rate: ExchangeRate
     ) {
-        escrow_ref_mut.emit_escrow_state(
-            participant_address, emojicoin_0_exchange_rate, emojicoin_1_exchange_rate
-        );
         melee_ref_mut.emit_melee_state(
             emojicoin_0_exchange_rate, emojicoin_1_exchange_rate
         );
-        registry_ref_mut.emit_registry_state(); // Must emit after melee state for borrow checker.
+        escrow_ref_mut.emit_escrow_state(
+            participant_address, emojicoin_0_exchange_rate, emojicoin_1_exchange_rate
+        );
     }
 
     inline fun emit_vault_balance_update_with_singer_capability_ref(
@@ -842,9 +796,6 @@ module arena::emojicoin_arena {
 
                 // Update melee state.
                 exited_melee_ref_mut.melee_available_rewards_increment(match_amount);
-
-                // Update registry state.
-                registry_ref_mut.registry_match_amount_decrement(match_amount);
             }
         };
 
@@ -892,7 +843,6 @@ module arena::emojicoin_arena {
 
         // Emit state events.
         emit_state(
-            registry_ref_mut,
             exited_melee_ref_mut,
             escrow_ref_mut,
             participant_address,
@@ -1076,28 +1026,6 @@ module arena::emojicoin_arena {
                 available_rewards
             }
         )
-    }
-
-    inline fun registry_n_swaps_increment(self: &mut Registry) {
-        self.n_swaps += 1;
-    }
-
-    inline fun registry_match_amount_decrement(
-        self: &mut Registry, amount: u64
-    ) {
-        self.match_amount -= amount;
-    }
-
-    inline fun registry_match_amount_increment(
-        self: &mut Registry, amount: u64
-    ) {
-        self.match_amount += amount;
-    }
-
-    inline fun registry_swaps_volume_increment(
-        self: &mut Registry, amount: u128
-    ) {
-        self.swaps_volume += amount;
     }
 
     inline fun remove_if_contains<T: copy + drop>(
