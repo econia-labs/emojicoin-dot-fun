@@ -7,7 +7,7 @@ export const AptPriceContext = createContext<number | undefined>(undefined);
 export function AptPriceContextProvider({
   aptPrice,
   children,
-}: PropsWithChildren<{ aptPrice: number }>) {
+}: PropsWithChildren<{ aptPrice: number | undefined }>) {
   return <AptPriceContext.Provider value={aptPrice}>{children}</AptPriceContext.Provider>;
 }
 
