@@ -1,10 +1,10 @@
-module arena::pseudo_randomness {
+module emojicoin_arena::pseudo_randomness {
 
     use aptos_framework::transaction_context;
     use std::bcs;
     use std::vector;
 
-    friend arena::emojicoin_arena;
+    friend emojicoin_arena::emojicoin_arena;
 
     /// Pseudo-random substitute for `aptos_framework::randomness::u64_range`, since
     /// the randomness API is not available during `init_module`.
