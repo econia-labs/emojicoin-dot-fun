@@ -6,8 +6,8 @@ integrator = "_"
 local = "../emojicoin_dot_fun"
 
 [dev-addresses]
-emojicoin_arena = "0xaaa"
 coin_factory = "0xbbb"
+emojicoin_arena = "0xaaa"
 emojicoin_dot_fun = "0xc0de"
 integrator = "0xddd"
 
