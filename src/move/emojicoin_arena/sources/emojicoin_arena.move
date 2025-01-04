@@ -24,8 +24,7 @@ module emojicoin_arena::emojicoin_arena {
     const E_ENTER_COIN_BALANCE_0: u64 = 1;
     /// User's melee escrow has nonzero emojicoin 1 balance.
     const E_ENTER_COIN_BALANCE_1: u64 = 2;
-    /// User did not elect to lock in even though they've been matched since their most recent
-    /// deposit into an empty escrow.
+    /// User did not select lock in even though they've been matched since escrow was last empty.
     const E_TOP_OFF_MUST_LOCK_IN: u64 = 3;
     /// Provided escrow coin type is invalid.
     const E_INVALID_ESCROW_COIN_TYPE: u64 = 4;
