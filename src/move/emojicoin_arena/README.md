@@ -68,10 +68,9 @@ event fields as possible.
 As an example, calculating PnL offchain for a given escrow looks something like:
 
 ```python
-profit =
-    sum_over_all_events_since_escrow_was_last_empty(
-        Enter.input_amount + Enter.match_amount
-    ) / current_value_of_holdings()
+profit = sum_over_all_events_since_escrow_was_last_empty(
+    Enter.input_amount + Enter.match_amount
+) / current_value_of_holdings()
 ```
 
 Where `current_value_of_holdings()` aggregates all `Enter`, `Swap`, and `Exit`
