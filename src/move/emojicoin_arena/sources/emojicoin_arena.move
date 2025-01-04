@@ -171,8 +171,9 @@ module arena::emojicoin_arena {
         new_balance: u64
     }
 
-    /// Swap arguments that do not change based on the side.
-    struct SwapStaticArguments has drop {
+    /// Ephemeral batch of swap arguments for a given emojicoin market, enabling cleaner abstraction
+    /// across coin types.
+    struct SwapArgumentsForEmojicoin has copy, drop {
         swapper_address: address,
         input_amount: u64,
         sell_emojicoin_for_apt: bool,
@@ -248,7 +249,7 @@ module arena::emojicoin_arena {
 
         // Verify that user does not split balance between the two emojicoins.
         let escrow_ref_mut =
-            check_entry_balances<Coin0, LP0, Coin1, LP1>(entrant_address, buy_coin_0);
+            check_enter_balances<Coin0, LP0, Coin1, LP1>(entrant_address, buy_coin_0);
 
         // Verify that if user has been matched since the escrow was last empty, they lock in again.
         if (escrow_ref_mut.match_amount > 0) assert!(lock_in, E_TOP_OFF_MUST_LOCK_IN);
@@ -268,15 +269,14 @@ module arena::emojicoin_arena {
 
         // Execute a swap into the escrow.
         let (quote_volume, integrator_fee, emojicoin_0_proceeds, emojicoin_1_proceeds) =
-            swap_into_escrow_with_side<Coin0, LP0, Coin1, LP1>(
+            swap_into_escrow<Coin0, LP0, Coin1, LP1>(
                 entrant,
                 entrant_address,
                 escrow_ref_mut,
                 market_address_0,
                 market_address_1,
                 input_amount + match_amount,
-                buy_coin_0,
-                INTEGRATOR_FEE_RATE_BPS
+                buy_coin_0
             );
 
         // Emit enter event.
@@ -425,7 +425,7 @@ module arena::emojicoin_arena {
         buy_coin_0
     }
 
-    inline fun check_entry_balances<Coin0, LP0, Coin1, LP1>(
+    inline fun check_enter_balances<Coin0, LP0, Coin1, LP1>(
         entrant_address: address, buy_coin_0: bool
     ): &mut Escrow<Coin0, LP0, Coin1, LP1> {
         let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[entrant_address];
@@ -748,59 +748,68 @@ module arena::emojicoin_arena {
         }
     }
 
-    inline fun swap_into_escrow_with_side<Coin0, LP0, Coin1, LP1>(
+    inline fun swap_into_escrow<Coin0, LP0, Coin1, LP1>(
         swapper: &signer,
         swapper_address: address,
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         market_address_0: address,
         market_address_1: address,
-        input_amount: u64,
-        buy_coin_0: bool,
-        integrator_fee_rate_bps: u8
+        octas_to_spend: u64,
+        buy_coin_0: bool
     ): (u64, u64, u64, u64) {
-        // Pack swap arguments that do not change based on side.
-        let swap_static_arguments = SwapStaticArguments {
+
+        // Pack swap arguments for the emojicoin to buy.
+        let swap_arguments = SwapArgumentsForEmojicoin {
             swapper_address,
-            input_amount,
+            input_amount: octas_to_spend,
             sell_emojicoin_for_apt: false,
-            integrator_fee_rate_bps
+            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS
         };
 
-        // Execute a swap into escrow based on the side.
+        // Initialize return values.
         let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
-        let quote_volume;
-        let integrator_fee;
+        let (quote_volume, integrator_fee);
+
+        // Execute a swap into escrow based on the emojicoin to buy.
         if (buy_coin_0) {
-            (emojicoin_0_proceeds, quote_volume, integrator_fee) = swap_into_escrow_without_side<Coin0, LP0>(
-                swapper,
-                swap_static_arguments,
-                market_address_0,
-                &mut escrow_ref_mut.emojicoin_0
+            (emojicoin_0_proceeds, quote_volume, integrator_fee) = swap_into_escrow_for_emojicoin<Coin0, LP0>(
+                swapper, &swap_arguments, market_address_0, &mut escrow_ref_mut.emojicoin_0
             );
         } else {
-            (emojicoin_1_proceeds, quote_volume, integrator_fee) = swap_into_escrow_without_side<Coin1, LP1>(
-                swapper,
-                swap_static_arguments,
-                market_address_1,
-                &mut escrow_ref_mut.emojicoin_1
+            (emojicoin_1_proceeds, quote_volume, integrator_fee) = swap_into_escrow_for_emojicoin<Coin1, LP1>(
+                swapper, &swap_arguments, market_address_1, &mut escrow_ref_mut.emojicoin_1
             );
         };
 
         (quote_volume, integrator_fee, emojicoin_0_proceeds, emojicoin_1_proceeds)
     }
 
-    inline fun swap_into_escrow_without_side<Emojicoin, EmojicoinLP>(
+    inline fun swap_into_escrow_for_emojicoin<Emojicoin, EmojicoinLP>(
         swapper: &signer,
-        swap_static_arguments: SwapStaticArguments,
+        swap_arguments_ref: &SwapArgumentsForEmojicoin,
         market_address: address,
         target_emojicoin_ref_mut: &mut Coin<Emojicoin>
     ): (u64, u64, u64) {
         let (net_proceeds, quote_volume, integrator_fee) =
-            swap_with_stats<Emojicoin, EmojicoinLP>(
-                swapper, market_address, swap_static_arguments
+            swap_with_stats_for_emojicoin<Emojicoin, EmojicoinLP>(
+                swapper, market_address, swap_arguments_ref
             );
         coin::merge(target_emojicoin_ref_mut, coin::withdraw(swapper, net_proceeds));
         (net_proceeds, quote_volume, integrator_fee)
+    }
+
+    inline fun swap_out_of_escrow_for_emojicoin<Emojicoin, EmojicoinLP>(
+        swapper: &signer,
+        swap_arguments_ref: &SwapArgumentsForEmojicoin,
+        market_address: address,
+        target_emojicoin_ref_mut: &mut Coin<Emojicoin>
+    ): (u64, u64, u64) {
+        withdraw_from_escrow(
+            swap_arguments_ref.swapper_address, target_emojicoin_ref_mut
+        );
+        swap_with_stats_for_emojicoin<Emojicoin, EmojicoinLP>(
+            swapper, market_address, swap_arguments_ref
+        )
     }
 
     inline fun swap_within_escrow<Coin0, LP0, Coin1, LP1>(
@@ -811,98 +820,60 @@ module arena::emojicoin_arena {
         market_address_1: address
     ): (u64, u64, u64, u64) {
 
-        // Verify balances in escrow.
+        // Get balances in escrow.
         let emojicoin_0_balance = coin::value(&escrow_ref_mut.emojicoin_0);
         let emojicoin_1_balance = coin::value(&escrow_ref_mut.emojicoin_1);
-        assert!(
-            emojicoin_0_balance > 0 || emojicoin_1_balance > 0,
-            E_EXIT_NO_FUNDS
-        );
 
-        // Swap out of escrow.
-        let (apt_proceeds, _, integrator_fee_first_swap) =
-            if (emojicoin_0_balance > 0) {
-                swap_out_of_escrow_with_side<Coin0, LP0>(
-                    swapper,
-                    swapper_address,
-                    market_address_0,
-                    emojicoin_0_balance,
-                    &mut escrow_ref_mut.emojicoin_0
-                )
-            } else {
-                swap_out_of_escrow_with_side<Coin1, LP1>(
-                    swapper,
-                    swapper_address,
-                    market_address_1,
-                    emojicoin_1_balance,
-                    &mut escrow_ref_mut.emojicoin_1
-                )
-            };
+        // Initialize return values.
+        let (emojicoin_0_proceeds, emojicoin_1_proceeds) = (0, 0);
+        let (quote_volume, integrator_fee);
 
-        // Only report quote volume for second swap to avoid double counting.
-        let (
-            quote_volume,
-            integrator_fee_second_swap,
-            emojicoin_0_proceeds,
-            emojicoin_1_proceeds
-        ) =
-            swap_into_escrow_with_side<Coin0, LP0, Coin1, LP1>(
+        // Execute a swap within escrow based on the direction.
+        if (emojicoin_0_balance > 0) {
+            (quote_volume, integrator_fee, emojicoin_1_proceeds) = swap_within_escrow_for_direction<Coin0, LP0, Coin1, LP1>(
                 swapper,
                 swapper_address,
-                escrow_ref_mut,
                 market_address_0,
                 market_address_1,
-                apt_proceeds,
-                emojicoin_1_balance > 0,
-                INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+                emojicoin_0_balance,
+                &mut escrow_ref_mut.emojicoin_0,
+                &mut escrow_ref_mut.emojicoin_1
             );
-        let integrator_fee = integrator_fee_first_swap + integrator_fee_second_swap;
+        } else {
+            // Verify that at least one emojicoin balance is nonzero.
+            assert!(emojicoin_1_balance > 0, E_EXIT_NO_FUNDS);
+
+            (quote_volume, integrator_fee, emojicoin_0_proceeds) = swap_within_escrow_for_direction<Coin1, LP1, Coin0, LP0>(
+                swapper,
+                swapper_address,
+                market_address_1,
+                market_address_0,
+                emojicoin_1_balance,
+                &mut escrow_ref_mut.emojicoin_1,
+                &mut escrow_ref_mut.emojicoin_0
+            );
+        };
 
         (quote_volume, integrator_fee, emojicoin_0_proceeds, emojicoin_1_proceeds)
     }
 
-    inline fun swap_out_of_escrow_with_side<Emojicoin, EmojicoinLP>(
-        swapper: &signer,
-        swapper_address: address,
-        market_address: address,
-        input_amount: u64,
-        target_emojicoin_ref_mut: &mut Coin<Emojicoin>
-    ): (u64, u64, u64) {
-        // Withdraw funds from escrow.
-        withdraw_from_escrow(swapper_address, target_emojicoin_ref_mut);
-
-        // Pack swap arguments that do not change based on side.
-        let swap_static_arguments = SwapStaticArguments {
-            swapper_address,
-            input_amount,
-            sell_emojicoin_for_apt: true,
-            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
-        };
-
-        // Execute a swap.
-        swap_with_stats<Emojicoin, EmojicoinLP>(
-            swapper,
-            market_address,
-            swap_static_arguments
-        )
-    }
-
-    inline fun swap_with_stats<Emojicoin, LP>(
+    inline fun swap_with_stats_for_emojicoin<Emojicoin, LP>(
         swapper: &signer,
         market_address: address,
-        swap_static_arguments: SwapStaticArguments
+        swap_arguments_for_emojicoin_ref: &SwapArgumentsForEmojicoin
     ): (u64, u64, u64) {
 
-        // Extract swap static arguments.
-        let swapper_address = swap_static_arguments.swapper_address;
-        let input_amount = swap_static_arguments.input_amount;
-        let sell_emojicoin_for_apt = swap_static_arguments.sell_emojicoin_for_apt;
-        let integrator_fee_rate_bps = swap_static_arguments.integrator_fee_rate_bps;
+        // Extract swap arguments that are used more than once.
+        let input_amount = swap_arguments_for_emojicoin_ref.input_amount;
+        let sell_emojicoin_for_apt =
+            swap_arguments_for_emojicoin_ref.sell_emojicoin_for_apt;
+        let integrator_fee_rate_bps =
+            swap_arguments_for_emojicoin_ref.integrator_fee_rate_bps;
 
         // Simulate swap, get key stats.
         let simulated_swap =
             emojicoin_dot_fun::simulate_swap<Emojicoin, LP>(
-                swapper_address,
+                swap_arguments_for_emojicoin_ref.swapper_address,
                 market_address,
                 input_amount,
                 sell_emojicoin_for_apt,
@@ -940,7 +911,53 @@ module arena::emojicoin_arena {
             integrator_fee_rate_bps,
             1
         );
+
         (net_proceeds, quote_volume, integrator_fee)
+    }
+
+    inline fun swap_within_escrow_for_direction<FromCoin, FromLP, ToCoin, ToLP>(
+        swapper: &signer,
+        swapper_address: address,
+        market_address_from: address,
+        market_address_to: address,
+        from_emojicoin_balance: u64,
+        from_emojicoin_ref_mut: &mut Coin<FromCoin>,
+        to_emojicoin_ref_mut: &mut Coin<ToCoin>
+    ): (u64, u64, u64) {
+
+        // Pack swap arguments for the first emojicoin swap out of escrow.
+        let swap_arguments = SwapArgumentsForEmojicoin {
+            swapper_address,
+            input_amount: from_emojicoin_balance,
+            sell_emojicoin_for_apt: true,
+            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+        };
+
+        // Swap out of escrow.
+        let (apt_proceeds, _, integrator_fee_first_swap) =
+            swap_out_of_escrow_for_emojicoin<FromCoin, FromLP>(
+                swapper,
+                &swap_arguments,
+                market_address_from,
+                from_emojicoin_ref_mut
+            );
+
+        // Mutate swap arguments for the second swap into escrow.
+        swap_arguments.input_amount = apt_proceeds;
+        swap_arguments.sell_emojicoin_for_apt = false;
+
+        // Swap into escrow.
+        let (to_emojicoin_proceeds, quote_volume, integrator_fee_second_swap) =
+            swap_into_escrow_for_emojicoin<ToCoin, ToLP>(
+                swapper,
+                &swap_arguments,
+                market_address_to,
+                to_emojicoin_ref_mut
+            );
+
+        // Sum fees across swaps, but only use volume from second swap to avoid double counting.
+        let integrator_fee = integrator_fee_first_swap + integrator_fee_second_swap;
+        (quote_volume, integrator_fee, to_emojicoin_proceeds)
     }
 
     /// During entry to a melee, try matching a portion of user's contribution if they elect to lock
