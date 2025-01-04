@@ -55,6 +55,7 @@ keycap
 khanda
 kitts
 leaderboard
+leaderboards
 leste
 libclang
 libdw
@@ -78,6 +79,7 @@ nohup
 octa
 octas
 oden
+offchain
 parallelizable
 permissionless
 pgrst
@@ -110,5 +112,7 @@ viewports
 vpnapi
 websocat
 websockets
+writeset
+writesets
 xbtmatt
 zustand

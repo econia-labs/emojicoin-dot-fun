@@ -1,3 +1,5 @@
+<!-- cspell:word gamified -->
+
 # Emojicoin arena
 
 ## Overview
@@ -19,8 +21,7 @@ A user can still hold any combination of the two emojicoins for a melee outside
 of escrow in their Aptos wallet, via emojicoin dot fun core functionality.
 However in this case they will miss out on:
 
-1. Profit and loss (PnL) indexing and leaderboards that are enabled by escrow
-   sandboxing.
+1. Profit and loss (PnL) indexing and leaderboards that are enabled by escrow.
 1. Ease of participation in the melee via the emojicoin arena feature page.
 1. Rewards.
 
@@ -43,7 +44,7 @@ each melee are configurable.
 
 ## Terminology
 
-1. **Melee**: A trading free-for-all between two randomly-selected emojicions.
+1. **Melee**: A trading free-for-all between two randomly-selected emojicoins.
    New melees start periodically.
 1. **Arena**: The venue inside of which melees take place.
 1. **Escrow**: A sandbox of two emojicoins for a given melee.
@@ -57,7 +58,7 @@ each melee are configurable.
 
 ## Indexing
 
-Structs and events are deisgined according to the principle of minimized onchain
+Structs and events are designed according to the principle of minimized onchain
 indexing. That is, runtime state and event fields are designed to provide the
 minimum amount of information required to enable comprehensive indexing via
 writeset-aware offchain processing. In order words, the data model is designed
@@ -66,7 +67,7 @@ event fields as possible.
 
 As an example, calculating PnL offchain for a given escrow looks something like:
 
-```
+```python
 profit =
     sum_over_all_events_since_escrow_was_last_empty(
         Enter.input_amount + Enter.match_amount
