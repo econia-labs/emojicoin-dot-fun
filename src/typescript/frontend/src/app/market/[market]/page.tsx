@@ -76,8 +76,8 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const marketAddress = getMarketAddress(emojis);
 
     const [chats, swaps, marketView] = await Promise.all([
-      fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
-      fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
+      fetchChatEvents({ marketID, amount: EVENTS_ON_PAGE_LOAD }),
+      fetchSwapEvents({ marketID, amount: EVENTS_ON_PAGE_LOAD }),
       wrappedCachedContractMarketView(marketAddress.toString()),
     ]);
 

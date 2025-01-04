@@ -56,11 +56,14 @@ export default defineConfig({
       use: { ...devices["Desktop Firefox"] },
       dependencies: ["setup"],
     },
-
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
       dependencies: ["setup"],
+    },
+    {
+      name: "unit",
+      testMatch: /.*\.unit\.ts/,
     },
   ],
 });

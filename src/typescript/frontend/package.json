@@ -110,6 +110,7 @@
     "submodule": "./submodule.sh",
     "test": "pnpm run test:e2e",
     "test:e2e": "playwright test --project=firefox",
+    "test:unit": "playwright test --project=unit",
     "vercel-install": "./submodule.sh && pnpm i"
   },
   "version": "1.0.0"
