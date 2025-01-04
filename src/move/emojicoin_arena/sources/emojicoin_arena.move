@@ -31,14 +31,10 @@ module arena::emojicoin_arena {
     const E_INVALID_ESCROW_COIN_TYPE: u64 = 4;
     /// User has no escrow resource.
     const E_NO_ESCROW: u64 = 5;
-    /// Swapper has no funds in escrow to swap.
-    const E_SWAP_NO_FUNDS: u64 = 6;
     /// User has no funds in escrow to withdraw.
-    const E_EXIT_NO_FUNDS: u64 = 7;
+    const E_EXIT_NO_FUNDS: u64 = 6;
 
     const MAX_PERCENTAGE: u64 = 100;
-    const SHIFT_Q64: u8 = 64;
-    const NULL_ADDRESS: address = @0x0;
 
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
@@ -180,48 +176,6 @@ module arena::emojicoin_arena {
         integrator_fee_rate_bps: u8
     }
 
-    public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
-        let vault_address =
-            account::get_signer_capability_address(&Registry[@arena].signer_capability);
-        aptos_account::transfer(funder, vault_address, amount);
-        emit_vault_balance_update_with_vault_address(vault_address);
-    }
-
-    public entry fun set_next_melee_available_rewards(
-        arena: &signer, amount: u64
-    ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_available_rewards = amount;
-    }
-
-    public entry fun set_next_melee_duration(arena: &signer, duration: u64) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_duration = duration;
-    }
-
-    public entry fun set_next_melee_max_match_percentage(
-        arena: &signer, max_match_percentage: u64
-    ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_max_match_percentage =
-            max_match_percentage;
-    }
-
-    public entry fun set_next_melee_max_match_amount(
-        arena: &signer, max_match_amount: u64
-    ) acquires Registry {
-        borrow_registry_ref_mut_checked(arena).next_melee_max_match_amount =
-            max_match_amount;
-    }
-
-    public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
-        let signer_capability_ref =
-            &borrow_registry_ref_mut_checked(arena).signer_capability;
-        aptos_account::transfer(
-            &account::create_signer_with_capability(signer_capability_ref),
-            @arena,
-            amount
-        );
-        emit_vault_balance_update_with_singer_capability_ref(signer_capability_ref);
-    }
-
     #[randomness]
     entry fun enter<Coin0, LP0, Coin1, LP1, EscrowCoin>(
         entrant: &signer, input_amount: u64, lock_in: bool
@@ -298,21 +252,6 @@ module arena::emojicoin_arena {
     }
 
     #[randomness]
-    entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
-        // Crank schedule, set local variables.
-        let (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut) =
-            existing_participant_prologue<Coin0, LP0, Coin1, LP1>(participant);
-
-        exit_inner<Coin0, LP0, Coin1, LP1>(
-            registry_ref_mut,
-            escrow_ref_mut,
-            participant,
-            participant_address,
-            melee_is_active
-        );
-    }
-
-    #[randomness]
     entry fun swap<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry {
         // Crank schedule, set local variables.
         let (registry_ref_mut, melee_is_active, swapper_address, escrow_ref_mut) =
@@ -357,6 +296,61 @@ module arena::emojicoin_arena {
                 swapper_address,
                 false
             )
+    }
+
+    #[randomness]
+    entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
+        // Crank schedule, set local variables.
+        let (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut) =
+            existing_participant_prologue<Coin0, LP0, Coin1, LP1>(participant);
+
+        exit_inner<Coin0, LP0, Coin1, LP1>(
+            registry_ref_mut,
+            escrow_ref_mut,
+            participant,
+            participant_address,
+            melee_is_active
+        );
+    }
+
+    public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
+        let vault_address =
+            account::get_signer_capability_address(&Registry[@arena].signer_capability);
+        aptos_account::transfer(funder, vault_address, amount);
+        emit_vault_balance_update_with_vault_address(vault_address);
+    }
+
+    public entry fun set_next_melee_available_rewards(
+        arena: &signer, amount: u64
+    ) acquires Registry {
+        borrow_registry_mut_checked(arena).next_melee_available_rewards = amount;
+    }
+
+    public entry fun set_next_melee_duration(arena: &signer, duration: u64) acquires Registry {
+        borrow_registry_mut_checked(arena).next_melee_duration = duration;
+    }
+
+    public entry fun set_next_melee_max_match_percentage(
+        arena: &signer, max_match_percentage: u64
+    ) acquires Registry {
+        borrow_registry_mut_checked(arena).next_melee_max_match_percentage =
+            max_match_percentage;
+    }
+
+    public entry fun set_next_melee_max_match_amount(
+        arena: &signer, max_match_amount: u64
+    ) acquires Registry {
+        borrow_registry_mut_checked(arena).next_melee_max_match_amount = max_match_amount;
+    }
+
+    public entry fun withdraw_from_vault(arena: &signer, amount: u64) acquires Registry {
+        let signer_capability_ref = &borrow_registry_mut_checked(arena).signer_capability;
+        aptos_account::transfer(
+            &account::create_signer_with_capability(signer_capability_ref),
+            @arena,
+            amount
+        );
+        emit_vault_balance_update_with_signer_capability_ref(signer_capability_ref);
     }
 
     fun init_module(arena: &signer) acquires Registry {
@@ -406,7 +400,7 @@ module arena::emojicoin_arena {
         (melee_ref_mut, market_address_0, market_address_1)
     }
 
-    inline fun borrow_registry_ref_mut_checked(arena: &signer): &mut Registry {
+    inline fun borrow_registry_mut_checked(arena: &signer): &mut Registry {
         assert!(signer::address_of(arena) == @arena, E_NOT_ARENA);
         &mut Registry[@arena]
     }
@@ -472,7 +466,7 @@ module arena::emojicoin_arena {
         (cranked, registry_ref_mut, time, n_melees_before_cranking)
     }
 
-    inline fun emit_vault_balance_update_with_singer_capability_ref(
+    inline fun emit_vault_balance_update_with_signer_capability_ref(
         signer_capability_ref: &SignerCapability
     ) {
         event::emit(
@@ -515,6 +509,8 @@ module arena::emojicoin_arena {
     inline fun exchange_rate<Emojicoin, EmojicoinLP>(
         market_address: address
     ): ExchangeRate {
+
+        // Get reserves from the market view.
         let (
             _,
             _,
@@ -533,10 +529,13 @@ module arena::emojicoin_arena {
             emojicoin_dot_fun::unpack_market_view(
                 emojicoin_dot_fun::market_view<Emojicoin, EmojicoinLP>(market_address)
             );
+
+        // Select reserves based on whether the market is in the bonding curve.
         let reserves =
             if (in_bonding_curve) clamm_virtual_reserves
             else cpamm_real_reserves;
         let (base, quote) = emojicoin_dot_fun::unpack_reserves(reserves);
+
         ExchangeRate { base, quote }
     }
 
@@ -545,12 +544,16 @@ module arena::emojicoin_arena {
     inline fun existing_participant_prologue<Coin0, LP0, Coin1, LP1>(
         participant: &signer
     ): (&mut Registry, bool, address, &mut Escrow<Coin0, LP0, Coin1, LP1>) {
+
+        // Ensure user has escrow.
         let participant_address = signer::address_of(participant);
         assert!(
             exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant_address),
             E_NO_ESCROW
         );
         let escrow_ref_mut = &mut Escrow<Coin0, LP0, Coin1, LP1>[participant_address];
+
+        // Crank schedule, determine if melee from escrow is active or not.
         let (cranked, registry_ref_mut, _, n_melees_before_cranking) = crank_schedule();
         let melee_is_active =
             if (cranked) { false }
@@ -560,7 +563,6 @@ module arena::emojicoin_arena {
         (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut)
     }
 
-    /// Assumes user has an escrow resource.
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
         registry_ref_mut: &mut Registry,
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
@@ -1010,7 +1012,7 @@ module arena::emojicoin_arena {
                     entrant_address,
                     match_amount
                 );
-                emit_vault_balance_update_with_singer_capability_ref(
+                emit_vault_balance_update_with_signer_capability_ref(
                     signer_capability_ref
                 );
 
