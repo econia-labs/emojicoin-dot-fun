@@ -302,7 +302,11 @@ module emojicoin_arena::emojicoin_arena {
     entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
         // Crank schedule, set local variables.
         let (
-            registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id
+            registry_ref_mut,
+            melee_is_active,
+            participant_address,
+            escrow_ref_mut,
+            melee_id
         ) = existing_participant_prologue<Coin0, LP0, Coin1, LP1>(participant);
 
         exit_inner<Coin0, LP0, Coin1, LP1>(
