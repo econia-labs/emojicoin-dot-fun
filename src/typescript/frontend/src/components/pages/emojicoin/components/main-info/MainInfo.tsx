@@ -21,6 +21,8 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { Colors } from "theme/types";
 import Popup from "components/popup";
 import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
+import { useAptPrice } from "context/AptPrice";
+import { toNominal } from "lib/utils/decimals";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -94,6 +96,10 @@ const MainInfo = ({ data }: MainInfoProps) => {
       }
     }
   }, [stateEvents]);
+
+  const aptPrice = useAptPrice();
+
+  const usdMarketCap = aptPrice ? toNominal(marketCap) * aptPrice : undefined;
 
   const { isMobile, isTablet } = useMatchBreakpoints();
 
@@ -196,9 +202,17 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <FormattedNumber value={marketCap} nominalize scramble />
+                {usdMarketCap === undefined ? (
+                  <FormattedNumber value={marketCap} nominalize scramble />
+                ) : (
+                  <FormattedNumber value={usdMarketCap} scramble />
+                )}
                 &nbsp;
-                <AptosIconBlack className="icon-inline mb-[0.3ch]" />
+                {usdMarketCap === undefined ? (
+                  <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                ) : (
+                  "$"
+                )}
               </div>
             </div>
           </div>

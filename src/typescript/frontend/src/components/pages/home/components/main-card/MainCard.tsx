@@ -18,6 +18,8 @@ import { sortByValue } from "lib/utils/sort-events";
 import { AnimatePresence, motion } from "framer-motion";
 import { useInterval } from "react-use";
 import { FormattedNumber } from "components/FormattedNumber";
+import { useAptPrice } from "context/AptPrice";
+import { toNominal } from "lib/utils/decimals";
 
 export interface MainCardProps {
   featuredMarkets: HomePageProps["priceFeed"];
@@ -59,6 +61,10 @@ const MainCard = (props: MainCardProps) => {
       priceDelta: featured?.deltaPercentage ?? 0,
     };
   }, [featured]);
+
+  const aptPrice = useAptPrice();
+
+  const usdMarketCap = aptPrice ? toNominal(marketCap) * aptPrice : undefined;
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
@@ -146,9 +152,17 @@ const MainCard = (props: MainCardProps) => {
                 </div>
                 <div className="font-forma text-white market-data-text uppercase">
                   <div className="flex flex-row items-center justify-center">
-                    <FormattedNumber value={marketCap} scramble nominalize />
+                    {usdMarketCap === undefined ? (
+                      <FormattedNumber value={marketCap} nominalize scramble />
+                    ) : (
+                      <FormattedNumber value={usdMarketCap} scramble />
+                    )}
                     &nbsp;
-                    <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                    {usdMarketCap === undefined ? (
+                      <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                    ) : (
+                      "$"
+                    )}
                   </div>
                 </div>
               </>

@@ -6,6 +6,8 @@ import { pathToEmojiNames } from "utils/pathname-helpers";
 import { fetchChatEvents, fetchMarketState, fetchSwapEvents } from "@/queries/market";
 import { getMarketAddress } from "@sdk/emojicoin_dot_fun";
 import { type Metadata } from "next";
+import { getAptPrice } from "lib/queries/get-apt-price";
+import { AptPriceContextProvider } from "context/AptPrice";
 
 export const revalidate = 2;
 
@@ -75,23 +77,26 @@ const EmojicoinPage = async (params: EmojicoinPageProps) => {
     const { marketID } = state.market;
     const marketAddress = getMarketAddress(emojis);
 
-    const [chats, swaps, marketView] = await Promise.all([
+    const [chats, swaps, marketView, aptPrice] = await Promise.all([
       fetchChatEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       fetchSwapEvents({ marketID, pageSize: EVENTS_ON_PAGE_LOAD }),
       wrappedCachedContractMarketView(marketAddress.toString()),
+      getAptPrice(),
     ]);
 
     return (
-      <ClientEmojicoinPage
-        data={{
-          symbol: state.market.symbolData.symbol,
-          swaps,
-          chats,
-          state,
-          marketView,
-          ...state.market,
-        }}
-      />
+      <AptPriceContextProvider aptPrice={aptPrice}>
+        <ClientEmojicoinPage
+          data={{
+            symbol: state.market.symbolData.symbol,
+            swaps,
+            chats,
+            state,
+            marketView,
+            ...state.market,
+          }}
+        />
+      </AptPriceContextProvider>
     );
   }
 
