@@ -255,6 +255,7 @@ module arena::emojicoin_arena {
     entry fun swap<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry {
         // Crank schedule, set local variables.
         let (registry_ref_mut, melee_is_active, swapper_address, escrow_ref_mut, melee_id) =
+
             existing_participant_prologue<Coin0, LP0, Coin1, LP1>(swapper);
 
         // Get melee market addresses.
@@ -300,8 +301,9 @@ module arena::emojicoin_arena {
     #[randomness]
     entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
         // Crank schedule, set local variables.
-        let (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id) =
-            existing_participant_prologue<Coin0, LP0, Coin1, LP1>(participant);
+        let (
+            registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id
+        ) = existing_participant_prologue<Coin0, LP0, Coin1, LP1>(participant);
 
         exit_inner<Coin0, LP0, Coin1, LP1>(
             registry_ref_mut,
