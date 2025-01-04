@@ -254,14 +254,12 @@ module arena::emojicoin_arena {
     #[randomness]
     entry fun swap<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry {
         // Crank schedule, set local variables.
-        let (registry_ref_mut, melee_is_active, swapper_address, escrow_ref_mut) =
+        let (registry_ref_mut, melee_is_active, swapper_address, escrow_ref_mut, melee_id) =
             existing_participant_prologue<Coin0, LP0, Coin1, LP1>(swapper);
 
         // Get melee market addresses.
         let (_, market_address_0, market_address_1) =
-            borrow_melee_mut_with_market_addresses(
-                registry_ref_mut, escrow_ref_mut.melee_id
-            );
+            borrow_melee_mut_with_market_addresses(registry_ref_mut, melee_id);
 
         // Swap coins within escrow.
         let (quote_volume, integrator_fee, emojicoin_0_proceeds, emojicoin_1_proceeds) =
@@ -277,7 +275,7 @@ module arena::emojicoin_arena {
         event::emit(
             Swap {
                 user: swapper_address,
-                melee_id: escrow_ref_mut.melee_id,
+                melee_id,
                 quote_volume,
                 integrator_fee,
                 emojicoin_0_proceeds,
@@ -294,14 +292,15 @@ module arena::emojicoin_arena {
                 escrow_ref_mut,
                 swapper,
                 swapper_address,
-                false
+                false,
+                melee_id
             )
     }
 
     #[randomness]
     entry fun exit<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
         // Crank schedule, set local variables.
-        let (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut) =
+        let (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id) =
             existing_participant_prologue<Coin0, LP0, Coin1, LP1>(participant);
 
         exit_inner<Coin0, LP0, Coin1, LP1>(
@@ -309,7 +308,8 @@ module arena::emojicoin_arena {
             escrow_ref_mut,
             participant,
             participant_address,
-            melee_is_active
+            melee_is_active,
+            melee_id
         );
     }
 
@@ -543,7 +543,7 @@ module arena::emojicoin_arena {
     /// for `swap` and `exit` functions.
     inline fun existing_participant_prologue<Coin0, LP0, Coin1, LP1>(
         participant: &signer
-    ): (&mut Registry, bool, address, &mut Escrow<Coin0, LP0, Coin1, LP1>) {
+    ): (&mut Registry, bool, address, &mut Escrow<Coin0, LP0, Coin1, LP1>, u64) {
 
         // Ensure user has escrow.
         let participant_address = signer::address_of(participant);
@@ -555,12 +555,13 @@ module arena::emojicoin_arena {
 
         // Crank schedule, determine if melee from escrow is active or not.
         let (cranked, registry_ref_mut, _, n_melees_before_cranking) = crank_schedule();
+        let melee_id = escrow_ref_mut.melee_id;
         let melee_is_active =
             if (cranked) { false }
             else {
-                escrow_ref_mut.melee_id == n_melees_before_cranking
+                melee_id == n_melees_before_cranking
             };
-        (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut)
+        (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id)
     }
 
     inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
@@ -568,14 +569,12 @@ module arena::emojicoin_arena {
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         participant: &signer,
         participant_address: address,
-        melee_is_active: bool
+        melee_is_active: bool,
+        melee_id: u64
     ) acquires Registry {
         // Get mutable reference to melee and its market addresses.
-        let melee_id = escrow_ref_mut.melee_id;
         let (exited_melee_ref_mut, market_address_0, market_address_1) =
-            borrow_melee_mut_with_market_addresses(
-                registry_ref_mut, escrow_ref_mut.melee_id
-            );
+            borrow_melee_mut_with_market_addresses(registry_ref_mut, melee_id);
 
         // Charge tap out fee if applicable, updating escrow match amount since user has exited.
         let match_amount = escrow_ref_mut.match_amount;
