@@ -151,6 +151,16 @@ module emojicoin_arena::emojicoin_arena {
         emojicoin_1_exchange_rate: ExchangeRate
     }
 
+    struct RegistryView has copy, drop, store {
+        n_melees: u64,
+        vault_address: address,
+        vault_balance: u64,
+        next_melee_duration: u64,
+        next_melee_available_rewards: u64,
+        next_melee_max_match_percentage: u64,
+        next_melee_max_match_amount: u64
+    }
+
     /// Exchange rate between APT and emojicoins.
     struct ExchangeRate has copy, drop, store {
         /// Octas per `quote` emojicoins.
@@ -316,6 +326,44 @@ module emojicoin_arena::emojicoin_arena {
             melee_is_active,
             melee_id
         );
+    }
+
+    #[view]
+    public fun registry_view(): RegistryView acquires Registry {
+        let registry_ref = &Registry[@emojicoin_arena];
+        let vault_address =
+            account::get_signer_capability_address(&registry_ref.signer_capability);
+        RegistryView {
+            n_melees: registry_ref.melees_by_id.length(),
+            vault_address,
+            vault_balance: coin::balance<AptosCoin>(vault_address),
+            next_melee_duration: registry_ref.next_melee_duration,
+            next_melee_available_rewards: registry_ref.next_melee_available_rewards,
+            next_melee_max_match_percentage: registry_ref.next_melee_max_match_percentage,
+            next_melee_max_match_amount: registry_ref.next_melee_max_match_amount
+        }
+    }
+
+    public fun unpack_registry_view(self: RegistryView):
+        (u64, address, u64, u64, u64, u64, u64) {
+        let RegistryView {
+            n_melees,
+            vault_address,
+            vault_balance,
+            next_melee_duration,
+            next_melee_available_rewards,
+            next_melee_max_match_percentage,
+            next_melee_max_match_amount
+        } = self;
+        (
+            n_melees,
+            vault_address,
+            vault_balance,
+            next_melee_duration,
+            next_melee_available_rewards,
+            next_melee_max_match_percentage,
+            next_melee_max_match_amount
+        )
     }
 
     public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
@@ -1058,5 +1106,39 @@ module emojicoin_arena::emojicoin_arena {
         recipient: address, escrow_coin_ref_mut: &mut Coin<Emojicoin>
     ) {
         aptos_account::deposit_coins(recipient, coin::extract_all(escrow_coin_ref_mut));
+    }
+
+    #[test_only]
+    public fun init_module_test_only(account: &signer) acquires Registry {
+        init_module(account)
+    }
+
+    #[test_only]
+    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
+        let ExchangeRate { base, quote } = self;
+        (base, quote)
+    }
+
+    #[test_only]
+    public fun unpack_exit(self: Exit):
+        (address, u64, u64, u64, u64, ExchangeRate, ExchangeRate) {
+        let Exit {
+            user,
+            melee_id,
+            tap_out_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        } = self;
+        (
+            user,
+            melee_id,
+            tap_out_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        )
     }
 }
