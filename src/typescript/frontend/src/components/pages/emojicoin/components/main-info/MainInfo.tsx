@@ -36,7 +36,6 @@ const LinkButton = ({
 }) => {
   const button = (
     <Button
-      isScramble={false}
       scale="lg"
       fakeDisabled={!link && !!LINKS?.discord && !!DISCORD_METADATA_REQUEST_CHANNEL}
       disabled={!link && !LINKS?.discord && !DISCORD_METADATA_REQUEST_CHANNEL}
@@ -245,9 +244,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
               whileTap={{ scaleX: 0.96, scaleY: 0.98 }}
               transition={{ ease: "linear", duration: 0.05 }}
             >
-              <Button scale="lg" isScramble={false}>
-                copy coin address
-              </Button>
+              <Button scale="lg">copy coin address</Button>
             </motion.div>
             {dexscreenerButton}
             {twitterButton}
