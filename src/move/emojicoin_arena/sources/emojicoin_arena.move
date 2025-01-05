@@ -1166,4 +1166,28 @@ module emojicoin_arena::emojicoin_arena {
             emojicoin_1_exchange_rate
         )
     }
+
+    #[test_only]
+    public fun unpack_melee(self: Melee): (u64, address, address, u64, u64, u64, u64, u64) {
+        let Melee {
+            melee_id,
+            emojicoin_0_market_address,
+            emojicoin_1_market_address,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        } = self;
+        (
+            melee_id,
+            emojicoin_0_market_address,
+            emojicoin_1_market_address,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        )
+    }
 }

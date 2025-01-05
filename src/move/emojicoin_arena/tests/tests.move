@@ -8,6 +8,7 @@ module emojicoin_arena::tests {
     use emojicoin_arena::emojicoin_arena::{
         ExchangeRate,
         Exit,
+        Melee,
         RegistryView,
         get_DEFAULT_AVAILABLE_REWARDS,
         get_DEFAULT_DURATION,
@@ -18,6 +19,7 @@ module emojicoin_arena::tests {
         registry_view,
         unpack_exchange_rate,
         unpack_exit,
+        unpack_melee,
         unpack_registry_view
     };
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
@@ -36,6 +38,17 @@ module emojicoin_arena::tests {
         emojicoin_1_proceeds: u64,
         emojicoin_0_exchange_rate: MockExchangeRate,
         emojicoin_1_exchange_rate: MockExchangeRate
+    }
+
+    struct MockMelee has copy, drop, store {
+        melee_id: u64,
+        emojicoin_0_market_address: address,
+        emojicoin_1_market_address: address,
+        start_time: u64,
+        duration: u64,
+        max_match_percentage: u64,
+        max_match_amount: u64,
+        available_rewards: u64
     }
 
     struct MockRegistryView has copy, drop, store {
@@ -78,6 +91,27 @@ module emojicoin_arena::tests {
         assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
         self.emojicoin_0_exchange_rate.assert_exchange_rate(emojicoin_0_exchange_rate);
         self.emojicoin_1_exchange_rate.assert_exchange_rate(emojicoin_1_exchange_rate);
+    }
+
+    public fun assert_melee(self: MockMelee, actual: Melee) {
+        let (
+            melee_id,
+            emojicoin_0_market_address,
+            emojicoin_1_market_address,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        ) = unpack_melee(actual);
+        assert!(self.melee_id == melee_id);
+        assert!(self.emojicoin_0_market_address == emojicoin_0_market_address);
+        assert!(self.emojicoin_1_market_address == emojicoin_1_market_address);
+        assert!(self.start_time == start_time);
+        assert!(self.duration == duration);
+        assert!(self.max_match_percentage == max_match_percentage);
+        assert!(self.max_match_amount == max_match_amount);
+        assert!(self.available_rewards == available_rewards);
     }
 
     public fun assert_registry_view(
