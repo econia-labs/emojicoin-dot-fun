@@ -1109,6 +1109,31 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[test_only]
+    public fun get_DEFAULT_AVAILABLE_REWARDS(): u64 {
+        DEFAULT_AVAILABLE_REWARDS
+    }
+
+    #[test_only]
+    public fun get_DEFAULT_DURATION(): u64 {
+        DEFAULT_DURATION
+    }
+
+    #[test_only]
+    public fun get_DEFAULT_MAX_MATCH_PERCENTAGE(): u64 {
+        DEFAULT_MAX_MATCH_PERCENTAGE
+    }
+
+    #[test_only]
+    public fun get_DEFAULT_MAX_MATCH_AMOUNT(): u64 {
+        DEFAULT_MAX_MATCH_AMOUNT
+    }
+
+    #[test_only]
+    public fun get_REGISTRY_SEED(): vector<u8> {
+        REGISTRY_SEED
+    }
+
+    #[test_only]
     public fun init_module_test_only(account: &signer) acquires Registry {
         init_module(account)
     }

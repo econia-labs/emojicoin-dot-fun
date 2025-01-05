@@ -1,12 +1,21 @@
 #[test_only]
-// This module uses the same testing schema as the emojicoin dot fun package tests.
+// This test module uses the same design schema as the emojicoin dot fun core test module.
 module emojicoin_arena::tests {
-    use aptos_framework::account::{create_signer_for_test as get_signer};
+    use aptos_framework::account::{
+        create_resource_address,
+        create_signer_for_test as get_signer
+    };
     use emojicoin_arena::emojicoin_arena::{
         ExchangeRate,
         Exit,
         RegistryView,
+        get_DEFAULT_AVAILABLE_REWARDS,
+        get_DEFAULT_DURATION,
+        get_DEFAULT_MAX_MATCH_PERCENTAGE,
+        get_DEFAULT_MAX_MATCH_AMOUNT,
+        get_REGISTRY_SEED,
         init_module_test_only,
+        registry_view,
         unpack_exchange_rate,
         unpack_exit,
         unpack_registry_view
@@ -92,6 +101,22 @@ module emojicoin_arena::tests {
         assert!(self.next_melee_max_match_amount == next_melee_max_match_amount);
     }
 
+    public fun base_registry_view(): MockRegistryView {
+        MockRegistryView {
+            n_melees: 1,
+            vault_address: base_vault_address(),
+            vault_balance: 0,
+            next_melee_duration: get_DEFAULT_DURATION(),
+            next_melee_available_rewards: get_DEFAULT_AVAILABLE_REWARDS(),
+            next_melee_max_match_percentage: get_DEFAULT_MAX_MATCH_PERCENTAGE(),
+            next_melee_max_match_amount: get_DEFAULT_MAX_MATCH_AMOUNT()
+        }
+    }
+
+    public fun base_vault_address(): address {
+        create_resource_address(&@emojicoin_arena, get_REGISTRY_SEED())
+    }
+
     /// Initialize emojicoin dot fun with test markets.
     public fun init_emojicoin_dot_fun_with_test_markets() {
         emojicoin_dot_fun_tests::init_package();
@@ -107,5 +132,6 @@ module emojicoin_arena::tests {
     fun init_module_default() {
         init_emojicoin_dot_fun_with_test_markets();
         init_module_test_only(&get_signer(@emojicoin_arena));
+        base_registry_view().assert_registry_view(registry_view());
     }
 }
