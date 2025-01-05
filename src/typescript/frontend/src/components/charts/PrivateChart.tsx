@@ -132,7 +132,7 @@ export const Chart = (props: ChartContainerProps) => {
           listed_exchange: "",
           session: "24x7",
           // Note that `has_empty_bars` causes invalid `time order violation` errors if it's set to `true`.
-          // has_empty_bars: true,
+          has_empty_bars: true,
           has_seconds: false,
           has_intraday: true,
           has_daily: true,
