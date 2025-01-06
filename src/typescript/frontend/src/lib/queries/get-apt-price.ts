@@ -27,5 +27,5 @@ export const getAptPrice = unstable_cache(
         return undefined;
       }),
   ["apt-price"],
-  { revalidate: 60 * 10 } // Ten minutes
+  { revalidate: 10 } // Ten seconds.
 );
