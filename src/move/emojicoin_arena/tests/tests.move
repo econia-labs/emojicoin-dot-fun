@@ -8,6 +8,11 @@ module emojicoin_arena::tests {
     use aptos_framework::event::{emitted_events};
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
+    use emojicoin_dot_fun::emojicoin_dot_fun::{
+        MarketMetadata,
+        market_metadata_by_market_id,
+        unpack_market_metadata
+    };
     use emojicoin_arena::emojicoin_arena::{
         ExchangeRate,
         Exit,
@@ -26,6 +31,7 @@ module emojicoin_arena::tests {
         unpack_registry_view
     };
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
+    use std::option;
     use std::vector;
 
     struct MockExchangeRate has copy, drop, store {
@@ -41,6 +47,12 @@ module emojicoin_arena::tests {
         emojicoin_1_proceeds: u64,
         emojicoin_0_exchange_rate: MockExchangeRate,
         emojicoin_1_exchange_rate: MockExchangeRate
+    }
+
+    struct MockMarketMetadata has copy, drop, store {
+        market_id: u64,
+        market_address: address,
+        emoji_bytes: vector<u8>
     }
 
     struct MockMelee has copy, drop, store {
@@ -64,10 +76,13 @@ module emojicoin_arena::tests {
         next_melee_max_match_amount: u64
     }
 
-    // Test market emoji bytes.
+    // Test market emoji bytes, in order of market ID.
     const BLACK_CAT: vector<u8> = x"f09f9088e2808de2ac9b";
     const BLACK_HEART: vector<u8> = x"f09f96a4";
     const YELLOW_HEART: vector<u8> = x"f09f929b";
+    const YIN_YANG: vector<u8> = x"e298afefb88f";
+    const ZEBRA: vector<u8> = x"f09fa693";
+    const ZOMBIE: vector<u8> = x"f09fa79f";
 
     public fun assert_exchange_rate(
         self: MockExchangeRate, actual: ExchangeRate
@@ -94,6 +109,15 @@ module emojicoin_arena::tests {
         assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
         self.emojicoin_0_exchange_rate.assert_exchange_rate(emojicoin_0_exchange_rate);
         self.emojicoin_1_exchange_rate.assert_exchange_rate(emojicoin_1_exchange_rate);
+    }
+
+    public fun assert_market_metadata(
+        self: MockMarketMetadata, actual: MarketMetadata
+    ) {
+        let (market_id, market_address, emoji_bytes) = unpack_market_metadata(actual);
+        assert!(self.market_id == market_id);
+        assert!(self.market_address == market_address);
+        assert!(self.emoji_bytes == emoji_bytes);
     }
 
     public fun assert_melee(self: MockMelee, actual: Melee) {
@@ -142,7 +166,7 @@ module emojicoin_arena::tests {
         MockMelee {
             melee_id: 1,
             emojicoin_0_market_address: @black_cat_market,
-            emojicoin_1_market_address: @black_heart_market,
+            emojicoin_1_market_address: @zebra_market,
             start_time: base_start_time(),
             duration: get_DEFAULT_DURATION(),
             max_match_percentage: get_DEFAULT_MAX_MATCH_PERCENTAGE(),
@@ -180,7 +204,7 @@ module emojicoin_arena::tests {
     public fun init_emojicoin_dot_fun_with_test_markets() {
         emojicoin_dot_fun_tests::init_package();
         vector::for_each_ref(
-            &vector[BLACK_CAT, BLACK_HEART, YELLOW_HEART],
+            &vector[BLACK_CAT, BLACK_HEART, YELLOW_HEART, YIN_YANG, ZEBRA, ZOMBIE],
             |bytes_ref| {
                 emojicoin_dot_fun_tests::init_market(vector[*bytes_ref]);
             }
@@ -214,7 +238,7 @@ module emojicoin_arena::tests {
     /// melee than that from `init_module`, while also hitting coverage on the inner function
     /// `sort_unique_market_ids`.
     public fun init_module_different_seed() {
-        for (i in 0..4) {
+        for (i in 0..3) {
             transaction_context::generate_auid_address();
         };
 
@@ -234,7 +258,31 @@ module emojicoin_arena::tests {
         let melee_events = emitted_events<Melee>();
         assert!(melee_events.length() == 1);
         let mock_melee = base_melee();
-        mock_melee.emojicoin_1_market_address = @yellow_heart_market;
+        mock_melee.emojicoin_1_market_address = @zombie_market;
         mock_melee.assert_melee(melee_events[0]);
+    }
+
+    #[test]
+    public fun test_market_addresses() {
+        init_emojicoin_dot_fun_with_test_markets();
+        let market_addresses = vector[
+            @black_cat_market,
+            @black_heart_market,
+            @yellow_heart_market,
+            @yin_yang_market,
+            @zebra_market,
+            @zombie_market
+        ];
+        let market_emoji_bytes = vector[BLACK_CAT, BLACK_HEART, YELLOW_HEART, YIN_YANG, ZEBRA, ZOMBIE];
+        for (i in 0..market_addresses.length()) {
+            MockMarketMetadata {
+                market_id: i + 1,
+                market_address: market_addresses[i],
+                emoji_bytes: market_emoji_bytes[i]
+            }.assert_market_metadata(
+                option::destroy_some(market_metadata_by_market_id(i + 1))
+            );
+        };
+
     }
 }
