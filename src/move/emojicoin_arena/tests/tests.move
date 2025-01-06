@@ -5,6 +5,8 @@ module emojicoin_arena::tests {
         create_resource_address,
         create_signer_for_test as get_signer
     };
+    use aptos_framework::event::{emitted_events};
+    use aptos_framework::timestamp;
     use emojicoin_arena::emojicoin_arena::{
         ExchangeRate,
         Exit,
@@ -135,6 +137,24 @@ module emojicoin_arena::tests {
         assert!(self.next_melee_max_match_amount == next_melee_max_match_amount);
     }
 
+    public fun base_melee(): MockMelee {
+        MockMelee {
+            melee_id: 1,
+            emojicoin_0_market_address: @black_cat_market,
+            emojicoin_1_market_address: @black_heart_market,
+            start_time: base_start_time(),
+            duration: get_DEFAULT_DURATION(),
+            max_match_percentage: get_DEFAULT_MAX_MATCH_PERCENTAGE(),
+            max_match_amount: get_DEFAULT_MAX_MATCH_AMOUNT(),
+            available_rewards: get_DEFAULT_AVAILABLE_REWARDS()
+        }
+    }
+
+    /// 1.5x the default melee duration.
+    public fun base_publish_time(): u64 {
+        get_DEFAULT_DURATION() + get_DEFAULT_DURATION() / 2
+    }
+
     public fun base_registry_view(): MockRegistryView {
         MockRegistryView {
             n_melees: 1,
@@ -145,6 +165,10 @@ module emojicoin_arena::tests {
             next_melee_max_match_percentage: get_DEFAULT_MAX_MATCH_PERCENTAGE(),
             next_melee_max_match_amount: get_DEFAULT_MAX_MATCH_AMOUNT()
         }
+    }
+
+    public fun base_start_time(): u64 {
+        get_DEFAULT_DURATION()
     }
 
     public fun base_vault_address(): address {
@@ -163,9 +187,22 @@ module emojicoin_arena::tests {
     }
 
     #[test]
-    fun init_module_default() {
+    fun init_module_base() {
+        // Initialize emojicoin dot fun.
         init_emojicoin_dot_fun_with_test_markets();
+
+        // Set global time to base publish time.
+        timestamp::update_global_time_for_test(base_publish_time());
+
+        // Initialize module.
         init_module_test_only(&get_signer(@emojicoin_arena));
+
+        // Assert registry view.
         base_registry_view().assert_registry_view(registry_view());
+
+        // Assert melee event.
+        let melee_events = emitted_events<Melee>();
+        assert!(melee_events.length() == 1);
+        base_melee().assert_melee(melee_events[0]);
     }
 }
