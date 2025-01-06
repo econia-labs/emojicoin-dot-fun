@@ -231,7 +231,7 @@ module emojicoin_arena::tests {
         );
     }
 
-    public fun init_modue_with_funded_vault() {
+    public fun init_module_with_funded_vault() {
         init_emojicoin_dot_fun_with_test_markets();
 
         // Set global time to base publish time.
