@@ -18,6 +18,8 @@ module emojicoin_arena::tests {
         Exit,
         Melee,
         RegistryView,
+        VaultBalanceUpdate,
+        fund_vault,
         get_DEFAULT_AVAILABLE_REWARDS,
         get_DEFAULT_DURATION,
         get_DEFAULT_MAX_MATCH_PERCENTAGE,
@@ -25,11 +27,18 @@ module emojicoin_arena::tests {
         get_REGISTRY_SEED,
         init_module_test_only,
         registry_view,
+        set_next_melee_available_rewards,
+        set_next_melee_duration,
+        set_next_melee_max_match_amount,
+        set_next_melee_max_match_percentage,
         unpack_exchange_rate,
         unpack_exit,
         unpack_melee,
-        unpack_registry_view
+        unpack_registry_view,
+        unpack_vault_balance_update,
+        withdraw_from_vault
     };
+    use emojicoin_dot_fun::test_acquisitions::mint_aptos_coin_to;
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use std::option;
     use std::vector;
@@ -74,6 +83,10 @@ module emojicoin_arena::tests {
         next_melee_available_rewards: u64,
         next_melee_max_match_percentage: u64,
         next_melee_max_match_amount: u64
+    }
+
+    struct MockVaultBalanceUpdate has copy, drop, store {
+        new_balance: u64
     }
 
     // Test market emoji bytes, in order of market ID.
@@ -162,6 +175,13 @@ module emojicoin_arena::tests {
         assert!(self.next_melee_max_match_amount == next_melee_max_match_amount);
     }
 
+    public fun assert_vault_balance_update(
+        self: MockVaultBalanceUpdate, actual: VaultBalanceUpdate
+    ) {
+        let new_balance = unpack_vault_balance_update(actual);
+        assert!(self.new_balance == new_balance);
+    }
+
     public fun base_melee(): MockMelee {
         MockMelee {
             melee_id: 1,
@@ -209,6 +229,67 @@ module emojicoin_arena::tests {
                 emojicoin_dot_fun_tests::init_market(vector[*bytes_ref]);
             }
         );
+    }
+
+    #[test]
+    public fun admin_functions() {
+        // Initialize emojicoin dot fun.
+        init_emojicoin_dot_fun_with_test_markets();
+
+        // Set global time to base publish time.
+        timestamp::update_global_time_for_test(base_publish_time());
+
+        // Initialize module.
+        init_module_test_only(&get_signer(@emojicoin_arena));
+
+        // Fund admin, then fund vault.
+        mint_aptos_coin_to(@emojicoin_arena, get_DEFAULT_AVAILABLE_REWARDS());
+        fund_vault(&get_signer(@emojicoin_arena), get_DEFAULT_AVAILABLE_REWARDS());
+
+        // Assert vault balance update event.
+        let vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 1);
+        MockVaultBalanceUpdate { new_balance: get_DEFAULT_AVAILABLE_REWARDS() }.assert_vault_balance_update(
+            vault_balance_update_events[0]
+        );
+
+        // Withdraw from vault.
+        let withdrawn_octas = 1;
+        withdraw_from_vault(&get_signer(@emojicoin_arena), withdrawn_octas);
+
+        // Assert vault balance update event.
+        let vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 2);
+        MockVaultBalanceUpdate {
+            new_balance: get_DEFAULT_AVAILABLE_REWARDS() - withdrawn_octas
+        }.assert_vault_balance_update(vault_balance_update_events[1]);
+
+        // Set next melee parameters.
+        let (
+            next_available_rewards,
+            next_duration,
+            next_max_match_amount,
+            next_max_match_percentage
+        ) = (2, 3, 4, 5);
+        set_next_melee_available_rewards(
+            &get_signer(@emojicoin_arena), next_available_rewards
+        );
+        set_next_melee_duration(&get_signer(@emojicoin_arena), next_duration);
+        set_next_melee_max_match_amount(
+            &get_signer(@emojicoin_arena), next_max_match_amount
+        );
+        set_next_melee_max_match_percentage(
+            &get_signer(@emojicoin_arena), next_max_match_percentage
+        );
+
+        // Verify registry view.
+        let registry_view = base_registry_view();
+        registry_view.next_melee_available_rewards = next_available_rewards;
+        registry_view.next_melee_duration = next_duration;
+        registry_view.next_melee_max_match_amount = next_max_match_amount;
+        registry_view.next_melee_max_match_percentage = next_max_match_percentage;
+        registry_view.vault_balance = get_DEFAULT_AVAILABLE_REWARDS() - withdrawn_octas;
+        registry_view.assert_registry_view(registry_view());
     }
 
     #[test]
@@ -263,6 +344,50 @@ module emojicoin_arena::tests {
     }
 
     #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NOT_EMOJICOIN_ARENA,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun set_next_melee_available_rewards_not_arena() {
+        set_next_melee_available_rewards(&get_signer(@aptos_framework), 0);
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NOT_EMOJICOIN_ARENA,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun set_next_melee_duration_not_arena() {
+        set_next_melee_duration(&get_signer(@aptos_framework), 0);
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NOT_EMOJICOIN_ARENA,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun set_next_melee_max_match_amount_not_arena() {
+        set_next_melee_max_match_amount(&get_signer(@aptos_framework), 0);
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NOT_EMOJICOIN_ARENA,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun set_next_melee_max_match_percentage_not_arena() {
+        set_next_melee_max_match_percentage(&get_signer(@aptos_framework), 0);
+    }
+
+    #[test]
     public fun test_market_addresses() {
         init_emojicoin_dot_fun_with_test_markets();
         let market_addresses = vector[
@@ -283,6 +408,16 @@ module emojicoin_arena::tests {
                 option::destroy_some(market_metadata_by_market_id(i + 1))
             );
         };
+    }
 
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NOT_EMOJICOIN_ARENA,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun withdraw_from_vault_not_arena() {
+        withdraw_from_vault(&get_signer(@aptos_framework), 0);
     }
 }
