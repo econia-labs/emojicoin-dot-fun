@@ -38,8 +38,9 @@ module emojicoin_arena::emojicoin_arena {
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
 
-    /// Flat integrator fee.
+    /// Flat integrator fee for a single-route swap into escrow.
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
+    /// Flat integrator fee for a double-route swap within escrow.
     const INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE: u8 = 50;
 
     // Default parameters for new melees.
@@ -92,6 +93,16 @@ module emojicoin_arena::emojicoin_arena {
         next_melee_max_match_amount: u64
     }
 
+    struct RegistryView has copy, drop, store {
+        n_melees: u64,
+        vault_address: address,
+        vault_balance: u64,
+        next_melee_duration: u64,
+        next_melee_available_rewards: u64,
+        next_melee_max_match_percentage: u64,
+        next_melee_max_match_amount: u64
+    }
+
     /// Tracks user's emojicoin holdings and octas matched since the escrow was last empty.
     struct Escrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
         /// Corresponding `Melee.melee_id`.
@@ -102,6 +113,13 @@ module emojicoin_arena::emojicoin_arena {
         emojicoin_1: Coin<Coin1>,
         /// Cumulative octas matched since the `Escrow` was last empty, reset to 0 upon exit. Must
         /// be paid back in full when tapping out.
+        match_amount: u64
+    }
+
+    struct EscrowView has copy, drop, store {
+        melee_id: u64,
+        emojicoin_0_balance: u64,
+        emojicoin_1_balance: u64,
         match_amount: u64
     }
 
@@ -151,19 +169,19 @@ module emojicoin_arena::emojicoin_arena {
         emojicoin_1_exchange_rate: ExchangeRate
     }
 
+    #[event]
+    /// Emitted whenever the vault balance is updated, except for when the vault is funded by
+    /// sending funds directly to the vault address instead of by using the `fund_vault` function.
+    struct VaultBalanceUpdate has copy, drop, store {
+        new_balance: u64
+    }
+
     /// Exchange rate between APT and emojicoins.
     struct ExchangeRate has copy, drop, store {
         /// Octas per `quote` emojicoins.
         base: u64,
         /// Emojicoins per `base` octas.
         quote: u64
-    }
-
-    #[event]
-    /// Emitted whenever the vault balance is updated, except for when the vault is funded by
-    /// sending funds directly to the vault address instead of by using the `fund_vault` function.
-    struct VaultBalanceUpdate has copy, drop, store {
-        new_balance: u64
     }
 
     /// Ephemeral batch of swap arguments for a given emojicoin market, enabling cleaner abstraction
@@ -318,6 +336,89 @@ module emojicoin_arena::emojicoin_arena {
         );
     }
 
+    #[view]
+    public fun escrow<Coin0, LP0, Coin1, LP1>(participant: address): EscrowView acquires Escrow {
+        let escrow_ref = &Escrow<Coin0, LP0, Coin1, LP1>[participant];
+        EscrowView {
+            melee_id: escrow_ref.melee_id,
+            emojicoin_0_balance: coin::value(&escrow_ref.emojicoin_0),
+            emojicoin_1_balance: coin::value(&escrow_ref.emojicoin_1),
+            match_amount: escrow_ref.match_amount
+        }
+    }
+
+    public fun unpack_escrow_view(self: EscrowView): (u64, u64, u64, u64) {
+        let EscrowView { melee_id, emojicoin_0_balance, emojicoin_1_balance, match_amount } =
+            self;
+        (melee_id, emojicoin_0_balance, emojicoin_1_balance, match_amount)
+    }
+
+    #[view]
+    public fun melee<Coin0, LP0, Coin1, LP1>(melee_id: u64): Melee acquires Registry {
+        *Registry[@emojicoin_arena].melees_by_id.borrow(melee_id)
+    }
+
+    public fun unpack_melee(self: Melee): (u64, address, address, u64, u64, u64, u64, u64) {
+        let Melee {
+            melee_id,
+            emojicoin_0_market_address,
+            emojicoin_1_market_address,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        } = self;
+        (
+            melee_id,
+            emojicoin_0_market_address,
+            emojicoin_1_market_address,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        )
+    }
+
+    #[view]
+    public fun registry(): RegistryView acquires Registry {
+        let registry_ref = &Registry[@emojicoin_arena];
+        let vault_address =
+            account::get_signer_capability_address(&registry_ref.signer_capability);
+        RegistryView {
+            n_melees: registry_ref.melees_by_id.length(),
+            vault_address,
+            vault_balance: coin::balance<AptosCoin>(vault_address),
+            next_melee_duration: registry_ref.next_melee_duration,
+            next_melee_available_rewards: registry_ref.next_melee_available_rewards,
+            next_melee_max_match_percentage: registry_ref.next_melee_max_match_percentage,
+            next_melee_max_match_amount: registry_ref.next_melee_max_match_amount
+        }
+    }
+
+    public fun unpack_registry_view(self: RegistryView):
+        (u64, address, u64, u64, u64, u64, u64) {
+        let RegistryView {
+            n_melees,
+            vault_address,
+            vault_balance,
+            next_melee_duration,
+            next_melee_available_rewards,
+            next_melee_max_match_percentage,
+            next_melee_max_match_amount
+        } = self;
+        (
+            n_melees,
+            vault_address,
+            vault_balance,
+            next_melee_duration,
+            next_melee_available_rewards,
+            next_melee_max_match_percentage,
+            next_melee_max_match_amount
+        )
+    }
+
     public entry fun fund_vault(funder: &signer, amount: u64) acquires Registry {
         let vault_address =
             account::get_signer_capability_address(
@@ -340,18 +441,18 @@ module emojicoin_arena::emojicoin_arena {
         borrow_registry_mut_checked(emojicoin_arena).next_melee_duration = duration;
     }
 
-    public entry fun set_next_melee_max_match_percentage(
-        emojicoin_arena: &signer, max_match_percentage: u64
-    ) acquires Registry {
-        borrow_registry_mut_checked(emojicoin_arena).next_melee_max_match_percentage =
-            max_match_percentage;
-    }
-
     public entry fun set_next_melee_max_match_amount(
         emojicoin_arena: &signer, max_match_amount: u64
     ) acquires Registry {
         borrow_registry_mut_checked(emojicoin_arena).next_melee_max_match_amount =
             max_match_amount;
+    }
+
+    public entry fun set_next_melee_max_match_percentage(
+        emojicoin_arena: &signer, max_match_percentage: u64
+    ) acquires Registry {
+        borrow_registry_mut_checked(emojicoin_arena).next_melee_max_match_percentage =
+            max_match_percentage;
     }
 
     public entry fun withdraw_from_vault(
@@ -1058,5 +1159,127 @@ module emojicoin_arena::emojicoin_arena {
         recipient: address, escrow_coin_ref_mut: &mut Coin<Emojicoin>
     ) {
         aptos_account::deposit_coins(recipient, coin::extract_all(escrow_coin_ref_mut));
+    }
+
+    #[test_only]
+    public fun get_DEFAULT_AVAILABLE_REWARDS(): u64 {
+        DEFAULT_AVAILABLE_REWARDS
+    }
+
+    #[test_only]
+    public fun get_DEFAULT_DURATION(): u64 {
+        DEFAULT_DURATION
+    }
+
+    #[test_only]
+    public fun get_DEFAULT_MAX_MATCH_PERCENTAGE(): u64 {
+        DEFAULT_MAX_MATCH_PERCENTAGE
+    }
+
+    #[test_only]
+    public fun get_DEFAULT_MAX_MATCH_AMOUNT(): u64 {
+        DEFAULT_MAX_MATCH_AMOUNT
+    }
+
+    #[test_only]
+    public fun get_REGISTRY_SEED(): vector<u8> {
+        REGISTRY_SEED
+    }
+
+    #[test_only]
+    public fun init_module_test_only(account: &signer) acquires Registry {
+        init_module(account)
+    }
+
+    #[test_only]
+    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
+        let ExchangeRate { base, quote } = self;
+        (base, quote)
+    }
+
+    #[test_only]
+    public fun unpack_enter(
+        self: Enter
+    ): (address, u64, u64, u64, u64, u64, u64, u64, ExchangeRate, ExchangeRate) {
+        let Enter {
+            user,
+            melee_id,
+            input_amount,
+            quote_volume,
+            integrator_fee,
+            match_amount,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        } = self;
+        (
+            user,
+            melee_id,
+            input_amount,
+            quote_volume,
+            integrator_fee,
+            match_amount,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        )
+    }
+
+    #[test_only]
+    public fun unpack_exit(self: Exit):
+        (address, u64, u64, u64, u64, ExchangeRate, ExchangeRate) {
+        let Exit {
+            user,
+            melee_id,
+            tap_out_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        } = self;
+        (
+            user,
+            melee_id,
+            tap_out_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        )
+    }
+
+    #[test_only]
+    public fun unpack_swap(self: Swap):
+        (
+        address, u64, u64, u64, u64, u64, ExchangeRate, ExchangeRate
+    ) {
+        let Swap {
+            user,
+            melee_id,
+            quote_volume,
+            integrator_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        } = self;
+        (
+            user,
+            melee_id,
+            quote_volume,
+            integrator_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        )
+    }
+
+    #[test_only]
+    public fun unpack_vault_balance_update(self: VaultBalanceUpdate): u64 {
+        let VaultBalanceUpdate { new_balance } = self;
+        new_balance
     }
 }
