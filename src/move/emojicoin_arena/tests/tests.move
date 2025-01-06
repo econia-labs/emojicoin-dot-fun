@@ -319,7 +319,7 @@ module emojicoin_arena::tests {
     /// melee than that from `init_module`, while also hitting coverage on the inner function
     /// `sort_unique_market_ids`.
     public fun init_module_different_seed() {
-        for (i in 0..3) {
+        for (i in 0..4) {
             transaction_context::generate_auid_address();
         };
 
@@ -339,6 +339,7 @@ module emojicoin_arena::tests {
         let melee_events = emitted_events<Melee>();
         assert!(melee_events.length() == 1);
         let mock_melee = base_melee();
+        mock_melee.emojicoin_0_market_address = @yin_yang_market;
         mock_melee.emojicoin_1_market_address = @zombie_market;
         mock_melee.assert_melee(melee_events[0]);
     }
