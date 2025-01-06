@@ -92,6 +92,16 @@ module emojicoin_arena::emojicoin_arena {
         next_melee_max_match_amount: u64
     }
 
+    struct RegistryView has copy, drop, store {
+        n_melees: u64,
+        vault_address: address,
+        vault_balance: u64,
+        next_melee_duration: u64,
+        next_melee_available_rewards: u64,
+        next_melee_max_match_percentage: u64,
+        next_melee_max_match_amount: u64
+    }
+
     /// Tracks user's emojicoin holdings and octas matched since the escrow was last empty.
     struct Escrow<phantom Coin0, phantom LP0, phantom Coin1, phantom LP1> has key {
         /// Corresponding `Melee.melee_id`.
@@ -102,6 +112,13 @@ module emojicoin_arena::emojicoin_arena {
         emojicoin_1: Coin<Coin1>,
         /// Cumulative octas matched since the `Escrow` was last empty, reset to 0 upon exit. Must
         /// be paid back in full when tapping out.
+        match_amount: u64
+    }
+
+    struct EscrowView has copy, drop, store {
+        melee_id: u64,
+        emojicoin_0_balance: u64,
+        emojicoin_1_balance: u64,
         match_amount: u64
     }
 
@@ -151,14 +168,11 @@ module emojicoin_arena::emojicoin_arena {
         emojicoin_1_exchange_rate: ExchangeRate
     }
 
-    struct RegistryView has copy, drop, store {
-        n_melees: u64,
-        vault_address: address,
-        vault_balance: u64,
-        next_melee_duration: u64,
-        next_melee_available_rewards: u64,
-        next_melee_max_match_percentage: u64,
-        next_melee_max_match_amount: u64
+    #[event]
+    /// Emitted whenever the vault balance is updated, except for when the vault is funded by
+    /// sending funds directly to the vault address instead of by using the `fund_vault` function.
+    struct VaultBalanceUpdate has copy, drop, store {
+        new_balance: u64
     }
 
     /// Exchange rate between APT and emojicoins.
@@ -167,13 +181,6 @@ module emojicoin_arena::emojicoin_arena {
         base: u64,
         /// Emojicoins per `base` octas.
         quote: u64
-    }
-
-    #[event]
-    /// Emitted whenever the vault balance is updated, except for when the vault is funded by
-    /// sending funds directly to the vault address instead of by using the `fund_vault` function.
-    struct VaultBalanceUpdate has copy, drop, store {
-        new_balance: u64
     }
 
     /// Ephemeral batch of swap arguments for a given emojicoin market, enabling cleaner abstraction
@@ -329,7 +336,35 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[view]
-    public fun registry_view(): RegistryView acquires Registry {
+    public fun melee<Coin0, LP0, Coin1, LP1>(melee_id: u64): Melee acquires Registry {
+        *Registry[@emojicoin_arena].melees_by_id.borrow(melee_id)
+    }
+
+    public fun unpack_melee(self: Melee): (u64, address, address, u64, u64, u64, u64, u64) {
+        let Melee {
+            melee_id,
+            emojicoin_0_market_address,
+            emojicoin_1_market_address,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        } = self;
+        (
+            melee_id,
+            emojicoin_0_market_address,
+            emojicoin_1_market_address,
+            start_time,
+            duration,
+            max_match_percentage,
+            max_match_amount,
+            available_rewards
+        )
+    }
+
+    #[view]
+    public fun registry(): RegistryView acquires Registry {
         let registry_ref = &Registry[@emojicoin_arena];
         let vault_address =
             account::get_signer_capability_address(&registry_ref.signer_capability);
@@ -1164,30 +1199,6 @@ module emojicoin_arena::emojicoin_arena {
             emojicoin_1_proceeds,
             emojicoin_0_exchange_rate,
             emojicoin_1_exchange_rate
-        )
-    }
-
-    #[test_only]
-    public fun unpack_melee(self: Melee): (u64, address, address, u64, u64, u64, u64, u64) {
-        let Melee {
-            melee_id,
-            emojicoin_0_market_address,
-            emojicoin_1_market_address,
-            start_time,
-            duration,
-            max_match_percentage,
-            max_match_amount,
-            available_rewards
-        } = self;
-        (
-            melee_id,
-            emojicoin_0_market_address,
-            emojicoin_1_market_address,
-            start_time,
-            duration,
-            max_match_percentage,
-            max_match_amount,
-            available_rewards
         )
     }
 

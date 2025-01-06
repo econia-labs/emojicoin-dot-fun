@@ -26,7 +26,7 @@ module emojicoin_arena::tests {
         get_DEFAULT_MAX_MATCH_AMOUNT,
         get_REGISTRY_SEED,
         init_module_test_only,
-        registry_view,
+        registry,
         set_next_melee_available_rewards,
         set_next_melee_duration,
         set_next_melee_max_match_amount,
@@ -303,7 +303,7 @@ module emojicoin_arena::tests {
         registry_view.next_melee_max_match_amount = next_max_match_amount;
         registry_view.next_melee_max_match_percentage = next_max_match_percentage;
         registry_view.vault_balance -= withdrawn_octas;
-        registry_view.assert_registry_view(registry_view());
+        registry_view.assert_registry_view(registry());
     }
 
     #[test]
@@ -320,7 +320,7 @@ module emojicoin_arena::tests {
         // Assert registry view.
         let registry_view = base_registry_view();
         registry_view.vault_balance = 0;
-        registry_view.assert_registry_view(registry_view());
+        registry_view.assert_registry_view(registry());
 
         // Assert melee event.
         let melee_events = emitted_events<Melee>();
@@ -351,7 +351,7 @@ module emojicoin_arena::tests {
         // Assert registry view.
         let registry_view = base_registry_view();
         registry_view.vault_balance = 0;
-        registry_view.assert_registry_view(registry_view());
+        registry_view.assert_registry_view(registry());
 
         // Assert melee event.
         let melee_events = emitted_events<Melee>();
