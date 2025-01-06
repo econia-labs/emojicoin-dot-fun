@@ -1192,12 +1192,6 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[test_only]
-    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
-        let ExchangeRate { base, quote } = self;
-        (base, quote)
-    }
-
-    #[test_only]
     public fun unpack_enter(
         self: Enter
     ): (address, u64, u64, u64, u64, u64, u64, u64, ExchangeRate, ExchangeRate) {
@@ -1225,6 +1219,12 @@ module emojicoin_arena::emojicoin_arena {
             emojicoin_0_exchange_rate,
             emojicoin_1_exchange_rate
         )
+    }
+
+    #[test_only]
+    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
+        let ExchangeRate { base, quote } = self;
+        (base, quote)
     }
 
     #[test_only]
