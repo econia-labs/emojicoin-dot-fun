@@ -38,8 +38,9 @@ module emojicoin_arena::emojicoin_arena {
     /// Resource account address seed for the registry.
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
 
-    /// Flat integrator fee.
+    /// Flat integrator fee for a single-route swap into escrow.
     const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
+    /// Flat integrator fee for a double-route swap within escrow.
     const INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE: u8 = 50;
 
     // Default parameters for new melees.
@@ -333,6 +334,23 @@ module emojicoin_arena::emojicoin_arena {
             melee_is_active,
             melee_id
         );
+    }
+
+    #[view]
+    public fun escrow<Coin0, LP0, Coin1, LP1>(participant: address): EscrowView acquires Escrow {
+        let escrow_ref = &Escrow<Coin0, LP0, Coin1, LP1>[participant];
+        EscrowView {
+            melee_id: escrow_ref.melee_id,
+            emojicoin_0_balance: coin::value(&escrow_ref.emojicoin_0),
+            emojicoin_1_balance: coin::value(&escrow_ref.emojicoin_1),
+            match_amount: escrow_ref.match_amount
+        }
+    }
+
+    public fun unpack_escrow_view(self: EscrowView): (u64, u64, u64, u64) {
+        let EscrowView { melee_id, emojicoin_0_balance, emojicoin_1_balance, match_amount } =
+            self;
+        (melee_id, emojicoin_0_balance, emojicoin_1_balance, match_amount)
     }
 
     #[view]
@@ -1180,6 +1198,36 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[test_only]
+    public fun unpack_enter(
+        self: Enter
+    ): (address, u64, u64, u64, u64, u64, u64, u64, ExchangeRate, ExchangeRate) {
+        let Enter {
+            user,
+            melee_id,
+            input_amount,
+            quote_volume,
+            integrator_fee,
+            match_amount,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        } = self;
+        (
+            user,
+            melee_id,
+            input_amount,
+            quote_volume,
+            integrator_fee,
+            match_amount,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        )
+    }
+
+    #[test_only]
     public fun unpack_exit(self: Exit):
         (address, u64, u64, u64, u64, ExchangeRate, ExchangeRate) {
         let Exit {
@@ -1195,6 +1243,33 @@ module emojicoin_arena::emojicoin_arena {
             user,
             melee_id,
             tap_out_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        )
+    }
+
+    #[test_only]
+    public fun unpack_swap(self: Swap):
+        (
+        address, u64, u64, u64, u64, u64, ExchangeRate, ExchangeRate
+    ) {
+        let Swap {
+            user,
+            melee_id,
+            quote_volume,
+            integrator_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        } = self;
+        (
+            user,
+            melee_id,
+            quote_volume,
+            integrator_fee,
             emojicoin_0_proceeds,
             emojicoin_1_proceeds,
             emojicoin_0_exchange_rate,
