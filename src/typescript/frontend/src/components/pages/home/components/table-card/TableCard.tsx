@@ -29,8 +29,7 @@ import { Emoji } from "utils/emoji";
 import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import "./module.css";
 import { FormattedNumber } from "components/FormattedNumber";
-import { useAptPrice } from "context/AptPrice";
-import { toNominal } from "lib/utils/decimals";
+import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
 
 const getFontSize = (emojis: SymbolEmojiData[]) =>
   emojis.length <= 2 ? ("pixel-heading-1" as const) : ("pixel-heading-1b" as const);
@@ -83,9 +82,7 @@ const TableCard = ({
     };
   }, [sortBy, animationEvent, staticVolume24H, staticMarketCap]);
 
-  const aptPrice = useAptPrice();
-
-  const usdMarketCap = aptPrice ? toNominal(marketCap) * aptPrice : undefined;
+  const usdMarketCap = useUsdMarketCap(marketCap);
 
   // Keep track of whether or not the component is mounted to avoid animating an unmounted component.
   useLayoutEffect(() => {

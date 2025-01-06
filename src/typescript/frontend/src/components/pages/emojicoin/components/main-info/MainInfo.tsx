@@ -21,8 +21,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { Colors } from "theme/types";
 import Popup from "components/popup";
 import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
-import { useAptPrice } from "context/AptPrice";
-import { toNominal } from "lib/utils/decimals";
+import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -97,9 +96,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
     }
   }, [stateEvents]);
 
-  const aptPrice = useAptPrice();
-
-  const usdMarketCap = aptPrice ? toNominal(marketCap) * aptPrice : undefined;
+  const usdMarketCap = useUsdMarketCap(marketCap);
 
   const { isMobile, isTablet } = useMatchBreakpoints();
 

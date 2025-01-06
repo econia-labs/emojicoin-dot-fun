@@ -18,8 +18,7 @@ import { sortByValue } from "lib/utils/sort-events";
 import { AnimatePresence, motion } from "framer-motion";
 import { useInterval } from "react-use";
 import { FormattedNumber } from "components/FormattedNumber";
-import { useAptPrice } from "context/AptPrice";
-import { toNominal } from "lib/utils/decimals";
+import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
 
 export interface MainCardProps {
   featuredMarkets: HomePageProps["priceFeed"];
@@ -62,9 +61,7 @@ const MainCard = (props: MainCardProps) => {
     };
   }, [featured]);
 
-  const aptPrice = useAptPrice();
-
-  const usdMarketCap = aptPrice ? toNominal(marketCap) * aptPrice : undefined;
+  const usdMarketCap = useUsdMarketCap(marketCap);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
