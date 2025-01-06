@@ -388,18 +388,18 @@ module emojicoin_arena::emojicoin_arena {
         borrow_registry_mut_checked(emojicoin_arena).next_melee_duration = duration;
     }
 
-    public entry fun set_next_melee_max_match_percentage(
-        emojicoin_arena: &signer, max_match_percentage: u64
-    ) acquires Registry {
-        borrow_registry_mut_checked(emojicoin_arena).next_melee_max_match_percentage =
-            max_match_percentage;
-    }
-
     public entry fun set_next_melee_max_match_amount(
         emojicoin_arena: &signer, max_match_amount: u64
     ) acquires Registry {
         borrow_registry_mut_checked(emojicoin_arena).next_melee_max_match_amount =
             max_match_amount;
+    }
+
+    public entry fun set_next_melee_max_match_percentage(
+        emojicoin_arena: &signer, max_match_percentage: u64
+    ) acquires Registry {
+        borrow_registry_mut_checked(emojicoin_arena).next_melee_max_match_percentage =
+            max_match_percentage;
     }
 
     public entry fun withdraw_from_vault(
