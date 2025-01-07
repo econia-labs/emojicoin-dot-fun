@@ -21,6 +21,7 @@ import { useAptos } from "context/wallet-context/AptosContextProvider";
 import type { Colors } from "theme/types";
 import Popup from "components/popup";
 import { DISCORD_METADATA_REQUEST_CHANNEL, LINKS } from "lib/env";
+import { useUsdMarketCap } from "@hooks/use-usd-market-cap";
 
 const statsTextClasses = "uppercase ellipses font-forma text-[24px]";
 
@@ -35,7 +36,6 @@ const LinkButton = ({
 }) => {
   const button = (
     <Button
-      isScramble={false}
       scale="lg"
       fakeDisabled={!link && !!LINKS?.discord && !!DISCORD_METADATA_REQUEST_CHANNEL}
       disabled={!link && !LINKS?.discord && !DISCORD_METADATA_REQUEST_CHANNEL}
@@ -94,6 +94,8 @@ const MainInfo = ({ data }: MainInfoProps) => {
       }
     }
   }, [stateEvents]);
+
+  const usdMarketCap = useUsdMarketCap(marketCap);
 
   const { isMobile, isTablet } = useMatchBreakpoints();
 
@@ -196,9 +198,17 @@ const MainInfo = ({ data }: MainInfoProps) => {
             <div className={statsTextClasses + " text-light-gray"}>{t("Market Cap:")}</div>
             <div className={statsTextClasses + " text-white"}>
               <div className="flex flex-row justify-center items-center">
-                <FormattedNumber value={marketCap} nominalize scramble />
+                {usdMarketCap === undefined ? (
+                  <FormattedNumber value={marketCap} nominalize scramble />
+                ) : (
+                  <FormattedNumber value={usdMarketCap} scramble />
+                )}
                 &nbsp;
-                <AptosIconBlack className="icon-inline mb-[0.3ch]" />
+                {usdMarketCap === undefined ? (
+                  <AptosIconBlack className={"icon-inline mb-[0.3ch]"} />
+                ) : (
+                  "$"
+                )}
               </div>
             </div>
           </div>
@@ -234,9 +244,7 @@ const MainInfo = ({ data }: MainInfoProps) => {
               whileTap={{ scaleX: 0.96, scaleY: 0.98 }}
               transition={{ ease: "linear", duration: 0.05 }}
             >
-              <Button scale="lg" isScramble={false}>
-                copy coin address
-              </Button>
+              <Button scale="lg">copy coin address</Button>
             </motion.div>
             {dexscreenerButton}
             {twitterButton}
