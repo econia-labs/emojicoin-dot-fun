@@ -261,8 +261,12 @@ module emojicoin_arena::emojicoin_arena {
                 match_amount,
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
-                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
-                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
+                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
+                    market_address_0
+                ),
+                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
+                    market_address_1
+                )
             }
         );
 
@@ -298,8 +302,12 @@ module emojicoin_arena::emojicoin_arena {
                 integrator_fee,
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
-                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
-                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
+                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
+                    market_address_0
+                ),
+                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
+                    market_address_1
+                )
             }
         );
 
@@ -354,7 +362,19 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[view]
-    public fun melee<Coin0, LP0, Coin1, LP1>(melee_id: u64): Melee acquires Registry {
+    public fun exchange_rate<Emojicoin, EmojicoinLP>(
+        market_address: address
+    ): ExchangeRate {
+        exchange_rate_inner<Emojicoin, EmojicoinLP>(market_address)
+    }
+
+    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
+        let ExchangeRate { base, quote } = self;
+        (base, quote)
+    }
+
+    #[view]
+    public fun melee(melee_id: u64): Melee acquires Registry {
         *Registry[@emojicoin_arena].melees_by_id.borrow(melee_id)
     }
 
@@ -624,7 +644,7 @@ module emojicoin_arena::emojicoin_arena {
         entrant_address
     }
 
-    inline fun exchange_rate<Emojicoin, EmojicoinLP>(
+    inline fun exchange_rate_inner<Emojicoin, EmojicoinLP>(
         market_address: address
     ): ExchangeRate {
 
@@ -736,8 +756,12 @@ module emojicoin_arena::emojicoin_arena {
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
                 tap_out_fee,
-                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
-                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
+                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
+                    market_address_0
+                ),
+                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
+                    market_address_1
+                )
             }
         );
     }
@@ -1219,12 +1243,6 @@ module emojicoin_arena::emojicoin_arena {
             emojicoin_0_exchange_rate,
             emojicoin_1_exchange_rate
         )
-    }
-
-    #[test_only]
-    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
-        let ExchangeRate { base, quote } = self;
-        (base, quote)
     }
 
     #[test_only]
