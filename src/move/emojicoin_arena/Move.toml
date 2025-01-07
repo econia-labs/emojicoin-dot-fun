@@ -1,15 +1,24 @@
 [addresses]
-arena = "_"
+emojicoin_arena = "_"
 integrator = "_"
 
 [dependencies.EmojicoinDotFun]
 local = "../emojicoin_dot_fun"
 
 [dev-addresses]
-arena = "0xaaa"
 coin_factory = "0xbbb"
+emojicoin_arena = "0xaaa"
 emojicoin_dot_fun = "0xc0de"
 integrator = "0xddd"
+
+[dev-dependencies.YinYangCoinFactory]
+local = "../test_coin_factories/yin_yang"
+
+[dev-dependencies.ZebraCoinFactory]
+local = "../test_coin_factories/zebra"
+
+[dev-dependencies.ZombieCoinFactory]
+local = "../test_coin_factories/zombie"
 
 [package]
 authors = ["Econia Labs (developers@econialabs.com)"]
