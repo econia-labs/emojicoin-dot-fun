@@ -91,3 +91,9 @@
   position: relative !important;
   width: 100% !important;
 }
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}
