@@ -10,27 +10,35 @@ module emojicoin_arena::tests {
     use aptos_framework::transaction_context;
     use black_cat_market::coin_factory::{Emojicoin as BlackCat, EmojicoinLP as BlackCatLP};
     use emojicoin_dot_fun::emojicoin_dot_fun::{
+        Self,
         MarketMetadata,
         get_BASE_VIRTUAL_CEILING,
         get_EMOJICOIN_REMAINDER,
         get_QUOTE_REAL_CEILING,
         get_QUOTE_VIRTUAL_FLOOR,
         market_metadata_by_market_id,
+        simulate_swap,
         unpack_market_metadata
     };
     use emojicoin_arena::emojicoin_arena::{
+        Enter,
         ExchangeRate,
         Exit,
         Melee,
         RegistryView,
+        Swap,
         VaultBalanceUpdate,
+        enter_for_test as enter,
         escrow,
         exchange_rate,
+        exit_for_test as exit,
         fund_vault,
         get_DEFAULT_AVAILABLE_REWARDS,
         get_DEFAULT_DURATION,
         get_DEFAULT_MAX_MATCH_PERCENTAGE,
         get_DEFAULT_MAX_MATCH_AMOUNT,
+        get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE,
+        get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE,
         get_REGISTRY_SEED,
         init_module_test_only,
         registry,
@@ -38,10 +46,13 @@ module emojicoin_arena::tests {
         set_next_melee_duration,
         set_next_melee_max_match_amount,
         set_next_melee_max_match_percentage,
+        swap_for_test as swap,
+        unpack_enter,
         unpack_exchange_rate,
         unpack_exit,
         unpack_melee,
         unpack_registry_view,
+        unpack_swap,
         unpack_vault_balance_update,
         withdraw_from_vault
     };
@@ -50,6 +61,19 @@ module emojicoin_arena::tests {
     use std::option;
     use std::vector;
     use zebra_market::coin_factory::{Emojicoin as Zebra, EmojicoinLP as ZebraLP};
+
+    struct MockEnter has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        input_amount: u64,
+        quote_volume: u64,
+        integrator_fee: u64,
+        match_amount: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    }
 
     struct MockExchangeRate has copy, drop, store {
         base: u64,
@@ -62,8 +86,8 @@ module emojicoin_arena::tests {
         tap_out_fee: u64,
         emojicoin_0_proceeds: u64,
         emojicoin_1_proceeds: u64,
-        emojicoin_0_exchange_rate: MockExchangeRate,
-        emojicoin_1_exchange_rate: MockExchangeRate
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
     }
 
     struct MockMarketMetadata has copy, drop, store {
@@ -93,8 +117,32 @@ module emojicoin_arena::tests {
         next_melee_max_match_amount: u64
     }
 
+    struct MockSwap has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        quote_volume: u64,
+        integrator_fee: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    }
+
     struct MockVaultBalanceUpdate has copy, drop, store {
         new_balance: u64
+    }
+
+    struct SimulatedSwapInputs has copy, drop, store {
+        market_address: address,
+        input_amount: u64,
+        selling_emojicoins: bool,
+        integrator_fee_rate: u8
+    }
+
+    struct SimulatedSwapStats has copy, drop, store {
+        quote_volume: u64,
+        integrator_fee: u64,
+        net_proceeds: u64
     }
 
     // Test market emoji bytes, in order of market ID.
@@ -105,12 +153,39 @@ module emojicoin_arena::tests {
     const ZEBRA: vector<u8> = x"f09fa693";
     const ZOMBIE: vector<u8> = x"f09fa79f";
 
+    const PARTICIPANT: address = @0x1234567890abcdef;
+
     public fun assert_exchange_rate(
         self: MockExchangeRate, actual: ExchangeRate
     ) {
         let (base, quote) = unpack_exchange_rate(actual);
         assert!(self.base == base);
         assert!(self.quote == quote);
+    }
+
+    public fun assert_enter(self: MockEnter, actual: Enter) {
+        let (
+            user,
+            melee_id,
+            input_amount,
+            quote_volume,
+            integrator_fee,
+            match_amount,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        ) = unpack_enter(actual);
+        assert!(self.user == user);
+        assert!(self.melee_id == melee_id);
+        assert!(self.input_amount == input_amount);
+        assert!(self.quote_volume == quote_volume);
+        assert!(self.integrator_fee == integrator_fee);
+        assert!(self.match_amount == match_amount);
+        assert!(self.emojicoin_0_proceeds == emojicoin_0_proceeds);
+        assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
+        assert!(self.emojicoin_0_exchange_rate == emojicoin_0_exchange_rate);
+        assert!(self.emojicoin_1_exchange_rate == emojicoin_1_exchange_rate);
     }
 
     public fun assert_exit(self: MockExit, actual: Exit) {
@@ -128,8 +203,8 @@ module emojicoin_arena::tests {
         assert!(self.tap_out_fee == tap_out_fee);
         assert!(self.emojicoin_0_proceeds == emojicoin_0_proceeds);
         assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
-        self.emojicoin_0_exchange_rate.assert_exchange_rate(emojicoin_0_exchange_rate);
-        self.emojicoin_1_exchange_rate.assert_exchange_rate(emojicoin_1_exchange_rate);
+        assert!(self.emojicoin_0_exchange_rate == emojicoin_0_exchange_rate);
+        assert!(self.emojicoin_1_exchange_rate == emojicoin_1_exchange_rate);
     }
 
     public fun assert_market_metadata(
@@ -181,6 +256,27 @@ module emojicoin_arena::tests {
         assert!(self.next_melee_available_rewards == next_melee_available_rewards);
         assert!(self.next_melee_max_match_percentage == next_melee_max_match_percentage);
         assert!(self.next_melee_max_match_amount == next_melee_max_match_amount);
+    }
+
+    public fun assert_swap(self: MockSwap, actual: Swap) {
+        let (
+            user,
+            melee_id,
+            quote_volume,
+            integrator_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        ) = unpack_swap(actual);
+        assert!(self.user == user);
+        assert!(self.melee_id == melee_id);
+        assert!(self.quote_volume == quote_volume);
+        assert!(self.integrator_fee == integrator_fee);
+        assert!(self.emojicoin_0_proceeds == emojicoin_0_proceeds);
+        assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
+        assert!(self.emojicoin_0_exchange_rate == emojicoin_0_exchange_rate);
+        assert!(self.emojicoin_1_exchange_rate == emojicoin_1_exchange_rate);
     }
 
     public fun assert_vault_balance_update(
@@ -253,6 +349,42 @@ module emojicoin_arena::tests {
         fund_vault(&get_signer(@emojicoin_arena), get_DEFAULT_AVAILABLE_REWARDS());
     }
 
+    public fun simulated_swap_stats<Emojicoin, EmojicoinLP>(
+        simulated_swap_inputs: SimulatedSwapInputs
+    ): SimulatedSwapStats {
+        let (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            net_proceeds,
+            _,
+            quote_volume,
+            _,
+            integrator_fee,
+            _,
+            _,
+            _,
+            _,
+            _
+        ) =
+            emojicoin_dot_fun::unpack_swap(
+                simulate_swap<Emojicoin, EmojicoinLP>(
+                    PARTICIPANT,
+                    simulated_swap_inputs.market_address,
+                    simulated_swap_inputs.input_amount,
+                    simulated_swap_inputs.selling_emojicoins,
+                    @integrator,
+                    simulated_swap_inputs.integrator_fee_rate
+                )
+            );
+        SimulatedSwapStats { quote_volume, integrator_fee, net_proceeds }
+    }
+
     #[test]
     public fun admin_functions() {
         // Initialize emojicoin dot fun.
@@ -312,6 +444,126 @@ module emojicoin_arena::tests {
         registry_view.next_melee_max_match_percentage = next_max_match_percentage;
         registry_view.vault_balance -= withdrawn_octas;
         registry_view.assert_registry_view(registry());
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun enter_swap_exit() {
+        // Initialize markets, fund user with APT and initial emojicoin supply so balance checks
+        // do not abort during swap simulation.
+        init_module_with_funded_vault();
+        let arena_octas_enter_amount = get_QUOTE_REAL_CEILING() / 2;
+        mint_aptos_coin_to(PARTICIPANT, arena_octas_enter_amount * 3);
+        emojicoin_dot_fun::swap<BlackCat, BlackCatLP>(
+            &get_signer(PARTICIPANT),
+            @black_cat_market,
+            arena_octas_enter_amount,
+            false,
+            @integrator,
+            0,
+            1
+        );
+        emojicoin_dot_fun::swap<Zebra, ZebraLP>(
+            &get_signer(PARTICIPANT),
+            @zebra_market,
+            arena_octas_enter_amount,
+            false,
+            @integrator,
+            0,
+            1
+        );
+
+        // Simulate swap into escrow.
+        let swap_inputs_enter = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: arena_octas_enter_amount,
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE()
+        };
+        let swap_stats_enter =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Enter melee without locking in.
+        let lock_in = false;
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            arena_octas_enter_amount,
+            lock_in
+        );
+
+        // Assert emitted enter event.
+        let enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 1);
+        MockEnter {
+            user: PARTICIPANT,
+            melee_id: 1,
+            input_amount: arena_octas_enter_amount,
+            quote_volume: swap_stats_enter.quote_volume,
+            integrator_fee: swap_stats_enter.integrator_fee,
+            match_amount: 0,
+            emojicoin_0_proceeds: swap_stats_enter.net_proceeds,
+            emojicoin_1_proceeds: 0,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        }.assert_enter(enter_events[0]);
+
+        // Simulate swap within escrow.
+        let swap_inputs_swap_route_0 = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: swap_stats_enter.net_proceeds,
+            selling_emojicoins: true,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE()
+        };
+        let swap_stats_swap_route_0 =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_swap_route_0);
+        let swap_inputs_swap_route_1 = SimulatedSwapInputs {
+            market_address: @zebra_market,
+            input_amount: swap_stats_swap_route_0.net_proceeds,
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE()
+        };
+        let swap_stats_swap_route_1 =
+            simulated_swap_stats<Zebra, ZebraLP>(swap_inputs_swap_route_1);
+
+        // Swap within escrow.
+        swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert emitted swap event.
+        let swap_events = emitted_events<Swap>();
+        assert!(swap_events.length() == 1);
+        MockSwap {
+            user: PARTICIPANT,
+            melee_id: 1,
+            quote_volume: swap_stats_swap_route_1.quote_volume,
+            integrator_fee: swap_stats_swap_route_0.integrator_fee
+                + swap_stats_swap_route_1.integrator_fee,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: swap_stats_swap_route_1.net_proceeds,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        }.assert_swap(swap_events[0]);
+
+        // Exit.
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert emitted exit event.
+        let exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 1);
+        MockExit {
+            user: PARTICIPANT,
+            melee_id: 1,
+            tap_out_fee: 0,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: swap_stats_swap_route_1.net_proceeds,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        }.assert_exit(exit_events[0]);
     }
 
     #[test]

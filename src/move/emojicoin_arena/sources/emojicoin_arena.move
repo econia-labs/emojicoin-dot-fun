@@ -43,9 +43,9 @@ module emojicoin_arena::emojicoin_arena {
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
 
     /// Flat integrator fee for a single-route swap into escrow.
-    const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
+    const INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE: u8 = 100;
     /// Flat integrator fee for a double-route swap within escrow.
-    const INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE: u8 = 50;
+    const INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE: u8 = 50;
 
     // Default parameters for new melees.
     const DEFAULT_DURATION: u64 = 20 * 3_600_000_000;
@@ -767,14 +767,14 @@ module emojicoin_arena::emojicoin_arena {
         (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id)
     }
 
-    inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
+    fun exit_inner<Coin0, LP0, Coin1, LP1>(
         registry_ref_mut: &mut Registry,
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         participant: &signer,
         participant_address: address,
         melee_is_active: bool,
         melee_id: u64
-    ) acquires Registry {
+    ) {
         // Get mutable reference to melee and its market addresses.
         let (exited_melee_ref_mut, market_address_0, market_address_1) =
             borrow_melee_mut_with_market_addresses(registry_ref_mut, melee_id);
@@ -992,7 +992,7 @@ module emojicoin_arena::emojicoin_arena {
             swapper_address,
             input_amount: octas_to_spend,
             sell_emojicoin_for_apt: false,
-            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS
+            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE
         };
 
         // Initialize return values.
@@ -1159,7 +1159,7 @@ module emojicoin_arena::emojicoin_arena {
             swapper_address,
             input_amount: from_emojicoin_balance,
             sell_emojicoin_for_apt: true,
-            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE
         };
 
         // Swap out of escrow.
@@ -1252,6 +1252,20 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[test_only]
+    #[lint::allow_unsafe_randomness]
+    public fun enter_for_test<Coin0, LP0, Coin1, LP1, EscrowCoin>(
+        entrant: &signer, input_amount: u64, lock_in: bool
+    ) acquires Escrow, Registry {
+        enter<Coin0, LP0, Coin1, LP1, EscrowCoin>(entrant, input_amount, lock_in)
+    }
+
+    #[test_only]
+    #[lint::allow_unsafe_randomness]
+    public fun exit_for_test<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
+        exit<Coin0, LP0, Coin1, LP1>(participant)
+    }
+
+    #[test_only]
     public fun get_DEFAULT_AVAILABLE_REWARDS(): u64 {
         DEFAULT_AVAILABLE_REWARDS
     }
@@ -1272,6 +1286,16 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[test_only]
+    public fun get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE(): u8 {
+        INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE
+    }
+
+    #[test_only]
+    public fun get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE(): u8 {
+        INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE
+    }
+
+    #[test_only]
     public fun get_REGISTRY_SEED(): vector<u8> {
         REGISTRY_SEED
     }
@@ -1279,6 +1303,12 @@ module emojicoin_arena::emojicoin_arena {
     #[test_only]
     public fun init_module_test_only(account: &signer) acquires Registry {
         init_module(account)
+    }
+
+    #[test_only]
+    #[lint::allow_unsafe_randomness]
+    public fun swap_for_test<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry {
+        swap<Coin0, LP0, Coin1, LP1>(swapper);
     }
 
     #[test_only]
