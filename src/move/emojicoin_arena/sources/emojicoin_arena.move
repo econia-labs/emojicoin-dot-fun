@@ -32,6 +32,10 @@ module emojicoin_arena::emojicoin_arena {
     const E_NO_ESCROW: u64 = 5;
     /// User has no funds in escrow to withdraw.
     const E_EXIT_NO_FUNDS: u64 = 6;
+    /// Provided melee ID does not match existing resource.
+    const E_MELEE_ID_MISMATCH: u64 = 7;
+    /// Melee ID does not correspond to a melee that has been registered.
+    const E_INVALID_MELEE_ID: u64 = 8;
 
     const MAX_PERCENTAGE: u64 = 100;
 
@@ -374,6 +378,58 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[view]
+    /// Uses mutable references since inner call requires them to prevent issues in core APIs,
+    /// even though no data gets mutated.
+    public fun match_amount<Coin0, LP0, Coin1, LP1>(
+        participant: address, input_amount: u64, melee_id: u64
+    ): u64 acquires Escrow, Registry {
+
+        // Get global resources and associated information.
+        let registry_ref_mut = &mut Registry[@emojicoin_arena];
+        let melees_by_id_ref_mut = &mut registry_ref_mut.melees_by_id;
+        let n_registered_melees = melees_by_id_ref_mut.length();
+
+        // If user has an escrow, check melee ID and get the amount they've matched for the melee.
+        let escrow_match_amount =
+            if (exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant)) {
+                let escrow_ref = &Escrow<Coin0, LP0, Coin1, LP1>[participant];
+                assert!(escrow_ref.melee_id == melee_id, E_MELEE_ID_MISMATCH);
+                escrow_ref.match_amount
+            } else { // Otherwise, check melee ID and type arguments, returning no match amount.
+                assert!(melee_id <= n_registered_melees, E_INVALID_MELEE_ID);
+                let indicated_melee_ref_mut = melees_by_id_ref_mut.borrow_mut(melee_id);
+                emojicoin_dot_fun::market_view<Coin0, LP0>(
+                    indicated_melee_ref_mut.emojicoin_0_market_address
+                );
+                emojicoin_dot_fun::market_view<Coin1, LP1>(
+                    indicated_melee_ref_mut.emojicoin_1_market_address
+                );
+                0
+            };
+
+        // Borrow the most recent melee, returning early if it does not match indicated melee ID.
+        if (melee_id != n_registered_melees) return 0;
+        let most_recent_melee_ref_mut =
+            melees_by_id_ref_mut.borrow_mut(n_registered_melees);
+
+        // Return early if most recent melee has ended.
+        let time = timestamp::now_microseconds();
+        if (time
+            >= most_recent_melee_ref_mut.start_time
+                + most_recent_melee_ref_mut.duration)
+            return 0;
+
+        // Cross-reference resources and time to get match amount.
+        match_amount_inner(
+            input_amount,
+            escrow_match_amount,
+            most_recent_melee_ref_mut,
+            registry_ref_mut,
+            time
+        )
+    }
+
+    #[view]
     public fun melee(melee_id: u64): Melee acquires Registry {
         *Registry[@emojicoin_arena].melees_by_id.borrow(melee_id)
     }
@@ -694,11 +750,7 @@ module emojicoin_arena::emojicoin_arena {
         // Crank schedule, determine if melee from escrow is active or not.
         let (cranked, registry_ref_mut, _, n_melees_before_cranking) = crank_schedule();
         let melee_id = escrow_ref_mut.melee_id;
-        let melee_is_active =
-            if (cranked) { false }
-            else {
-                melee_id == n_melees_before_cranking
-            };
+        let melee_is_active = !cranked && melee_id == n_melees_before_cranking;
         (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id)
     }
 
@@ -781,9 +833,9 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     /// Uses mutable references to avoid borrowing issues.
-    inline fun match_amount<Coin0, LP0, Coin1, LP1>(
+    inline fun match_amount_inner(
         input_amount: u64,
-        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        escrow_match_amount: u64,
         active_melee_ref_mut: &mut Melee,
         registry_ref_mut: &mut Registry,
         time: u64
@@ -824,7 +876,7 @@ module emojicoin_arena::emojicoin_arena {
             // Correct for the max match amount that the user is eligible for.
             min(
                 corrected_for_melee_available_rewards,
-                active_melee_ref_mut.max_match_amount - escrow_ref_mut.match_amount
+                active_melee_ref_mut.max_match_amount - escrow_match_amount
             )
         }
     }
@@ -1136,10 +1188,11 @@ module emojicoin_arena::emojicoin_arena {
         entrant_address: address
     ): u64 {
         if (lock_in) {
+            let escrow_match_amount_ref_mut = &mut escrow_ref_mut.match_amount;
             let match_amount =
-                match_amount(
+                match_amount_inner(
                     input_amount,
-                    escrow_ref_mut,
+                    *escrow_match_amount_ref_mut,
                     active_melee_ref_mut,
                     registry_ref_mut,
                     time
@@ -1159,7 +1212,7 @@ module emojicoin_arena::emojicoin_arena {
 
                 // Update rewards state for melee and escrow.
                 active_melee_ref_mut.available_rewards -= match_amount;
-                escrow_ref_mut.match_amount += match_amount;
+                *escrow_match_amount_ref_mut += match_amount;
 
             };
 
