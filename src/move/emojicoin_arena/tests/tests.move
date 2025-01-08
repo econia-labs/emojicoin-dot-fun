@@ -9,8 +9,8 @@ module emojicoin_arena::tests {
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
     use black_cat_market::coin_factory::{
-        Emojicoin as BlackCatEmojicoin,
-        EmojicoinLP as BlackCatEmojicoinLP
+        Emojicoin as BlackCat,
+        EmojicoinLP as BlackCatLP
     };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         MarketMetadata,
@@ -27,6 +27,7 @@ module emojicoin_arena::tests {
         Melee,
         RegistryView,
         VaultBalanceUpdate,
+        escrow,
         exchange_rate,
         fund_vault,
         get_DEFAULT_AVAILABLE_REWARDS,
@@ -51,6 +52,10 @@ module emojicoin_arena::tests {
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use std::option;
     use std::vector;
+    use zebra_market::coin_factory::{
+        Emojicoin as Zebra,
+        EmojicoinLP as ZebraLP
+    };
 
     struct MockExchangeRate has copy, drop, store {
         base: u64,
@@ -316,12 +321,23 @@ module emojicoin_arena::tests {
     }
 
     #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NO_ESCROW,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun escrow_no_escrow() {
+        escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(@0x0);
+    }
+
+    #[test]
     public fun exchange_rate_exact_transition() {
         emojicoin_dot_fun_tests::init_package_then_exact_transition();
 
         let (base, quote) =
             unpack_exchange_rate(
-                exchange_rate<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+                exchange_rate<BlackCat, BlackCatLP>(@black_cat_market)
             );
         assert!(base == get_EMOJICOIN_REMAINDER());
         assert!(quote == get_QUOTE_REAL_CEILING());
@@ -333,7 +349,7 @@ module emojicoin_arena::tests {
 
         let (base, quote) =
             unpack_exchange_rate(
-                exchange_rate<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+                exchange_rate<BlackCat, BlackCatLP>(@black_cat_market)
             );
         assert!(base == get_BASE_VIRTUAL_CEILING());
         assert!(quote == get_QUOTE_VIRTUAL_FLOOR());
