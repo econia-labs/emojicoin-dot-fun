@@ -767,14 +767,14 @@ module emojicoin_arena::emojicoin_arena {
         (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id)
     }
 
-    fun exit_inner<Coin0, LP0, Coin1, LP1>(
+    inline fun exit_inner<Coin0, LP0, Coin1, LP1>(
         registry_ref_mut: &mut Registry,
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         participant: &signer,
         participant_address: address,
         melee_is_active: bool,
         melee_id: u64
-    ) {
+    ) acquires Registry {
         // Get mutable reference to melee and its market addresses.
         let (exited_melee_ref_mut, market_address_0, market_address_1) =
             borrow_melee_mut_with_market_addresses(registry_ref_mut, melee_id);
