@@ -350,6 +350,10 @@ module emojicoin_arena::emojicoin_arena {
 
     #[view]
     public fun escrow<Coin0, LP0, Coin1, LP1>(participant: address): EscrowView acquires Escrow {
+        assert!(
+            exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant),
+            E_NO_ESCROW
+        );
         let escrow_ref = &Escrow<Coin0, LP0, Coin1, LP1>[participant];
         EscrowView {
             melee_id: escrow_ref.melee_id,
@@ -396,7 +400,10 @@ module emojicoin_arena::emojicoin_arena {
                 assert!(escrow_ref.melee_id == melee_id, E_MELEE_ID_MISMATCH);
                 escrow_ref.match_amount
             } else { // Otherwise, check melee ID and type arguments, returning no match amount.
-                assert!(melee_id <= n_registered_melees, E_INVALID_MELEE_ID);
+                assert!(
+                    melee_id <= n_registered_melees && melee_id > 0,
+                    E_INVALID_MELEE_ID
+                );
                 let indicated_melee_ref_mut = melees_by_id_ref_mut.borrow_mut(melee_id);
                 emojicoin_dot_fun::market_view<Coin0, LP0>(
                     indicated_melee_ref_mut.emojicoin_0_market_address
@@ -431,7 +438,13 @@ module emojicoin_arena::emojicoin_arena {
 
     #[view]
     public fun melee(melee_id: u64): Melee acquires Registry {
-        *Registry[@emojicoin_arena].melees_by_id.borrow(melee_id)
+        let registry_ref = &Registry[@emojicoin_arena];
+        let melees_by_id_ref = &registry_ref.melees_by_id;
+        assert!(
+            melee_id <= melees_by_id_ref.length() && melee_id > 0,
+            E_INVALID_MELEE_ID
+        );
+        *melees_by_id_ref.borrow(melee_id)
     }
 
     public fun unpack_melee(self: Melee): (u64, address, address, u64, u64, u64, u64, u64) {
