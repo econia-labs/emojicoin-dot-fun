@@ -8,10 +8,7 @@ module emojicoin_arena::tests {
     use aptos_framework::event::{emitted_events};
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
-    use black_cat_market::coin_factory::{
-        Emojicoin as BlackCat,
-        EmojicoinLP as BlackCatLP
-    };
+    use black_cat_market::coin_factory::{Emojicoin as BlackCat, EmojicoinLP as BlackCatLP};
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         MarketMetadata,
         get_BASE_VIRTUAL_CEILING,
@@ -52,10 +49,7 @@ module emojicoin_arena::tests {
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use std::option;
     use std::vector;
-    use zebra_market::coin_factory::{
-        Emojicoin as Zebra,
-        EmojicoinLP as ZebraLP
-    };
+    use zebra_market::coin_factory::{Emojicoin as Zebra, EmojicoinLP as ZebraLP};
 
     struct MockExchangeRate has copy, drop, store {
         base: u64,
