@@ -8,8 +8,16 @@ module emojicoin_arena::tests {
     use aptos_framework::event::{emitted_events};
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
+    use black_cat_market::coin_factory::{
+        Emojicoin as BlackCatEmojicoin,
+        EmojicoinLP as BlackCatEmojicoinLP
+    };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         MarketMetadata,
+        get_BASE_VIRTUAL_CEILING,
+        get_EMOJICOIN_REMAINDER,
+        get_QUOTE_REAL_CEILING,
+        get_QUOTE_VIRTUAL_FLOOR,
         market_metadata_by_market_id,
         unpack_market_metadata
     };
@@ -19,6 +27,7 @@ module emojicoin_arena::tests {
         Melee,
         RegistryView,
         VaultBalanceUpdate,
+        exchange_rate,
         fund_vault,
         get_DEFAULT_AVAILABLE_REWARDS,
         get_DEFAULT_DURATION,
@@ -304,6 +313,30 @@ module emojicoin_arena::tests {
         registry_view.next_melee_max_match_percentage = next_max_match_percentage;
         registry_view.vault_balance -= withdrawn_octas;
         registry_view.assert_registry_view(registry());
+    }
+
+    #[test]
+    public fun exchange_rate_exact_transition() {
+        emojicoin_dot_fun_tests::init_package_then_exact_transition();
+
+        let (base, quote) =
+            unpack_exchange_rate(
+                exchange_rate<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+            );
+        assert!(base == get_EMOJICOIN_REMAINDER());
+        assert!(quote == get_QUOTE_REAL_CEILING());
+    }
+
+    #[test]
+    public fun exchange_rate_fresh_market() {
+        init_emojicoin_dot_fun_with_test_markets();
+
+        let (base, quote) =
+            unpack_exchange_rate(
+                exchange_rate<BlackCatEmojicoin, BlackCatEmojicoinLP>(@black_cat_market)
+            );
+        assert!(base == get_BASE_VIRTUAL_CEILING());
+        assert!(quote == get_QUOTE_VIRTUAL_FLOOR());
     }
 
     #[test]
