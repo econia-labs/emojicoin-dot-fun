@@ -382,8 +382,9 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[view]
-    /// Uses mutable references since inner call requires them to prevent issues in core APIs,
-    /// even though no data gets mutated.
+    /// Uses mutable references since inner match amount call requires them to prevent issues in
+    /// core APIs, even though no data gets mutated. Does not crank schedule since this requires
+    /// randomness, which is not safely supported in public functions.
     public fun match_amount<Coin0, LP0, Coin1, LP1>(
         participant: address, input_amount: u64, melee_id: u64
     ): u64 acquires Escrow, Registry {
