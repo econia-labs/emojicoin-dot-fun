@@ -5,6 +5,7 @@ module emojicoin_arena::tests {
         create_resource_address,
         create_signer_for_test as get_signer
     };
+    use aptos_framework::coin;
     use aptos_framework::event::{emitted_events};
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
@@ -22,6 +23,7 @@ module emojicoin_arena::tests {
     };
     use emojicoin_arena::emojicoin_arena::{
         Enter,
+        EscrowView,
         ExchangeRate,
         Exit,
         Melee,
@@ -30,6 +32,7 @@ module emojicoin_arena::tests {
         VaultBalanceUpdate,
         enter_for_test as enter,
         escrow,
+        escrow_exists,
         exchange_rate,
         exit_for_test as exit,
         fund_vault,
@@ -41,6 +44,7 @@ module emojicoin_arena::tests {
         get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE,
         get_REGISTRY_SEED,
         init_module_test_only,
+        melee,
         registry,
         set_next_melee_available_rewards,
         set_next_melee_duration,
@@ -48,6 +52,7 @@ module emojicoin_arena::tests {
         set_next_melee_max_match_percentage,
         swap_for_test as swap,
         unpack_enter,
+        unpack_escrow_view,
         unpack_exchange_rate,
         unpack_exit,
         unpack_melee,
@@ -73,6 +78,13 @@ module emojicoin_arena::tests {
         emojicoin_1_proceeds: u64,
         emojicoin_0_exchange_rate: ExchangeRate,
         emojicoin_1_exchange_rate: ExchangeRate
+    }
+
+    struct MockEscrowView has copy, drop, store {
+        melee_id: u64,
+        emojicoin_0_balance: u64,
+        emojicoin_1_balance: u64,
+        match_amount: u64
     }
 
     struct MockExchangeRate has copy, drop, store {
@@ -154,6 +166,17 @@ module emojicoin_arena::tests {
     const ZOMBIE: vector<u8> = x"f09fa79f";
 
     const PARTICIPANT: address = @0x1234567890abcdef;
+
+    public fun assert_escrow_view(
+        self: MockEscrowView, actual: EscrowView
+    ) {
+        let (melee_id, emojicoin_0_balance, emojicoin_1_balance, match_amount) =
+            unpack_escrow_view(actual);
+        assert!(self.melee_id == melee_id);
+        assert!(self.emojicoin_0_balance == emojicoin_0_balance);
+        assert!(self.emojicoin_1_balance == emojicoin_1_balance);
+        assert!(self.match_amount == match_amount);
+    }
 
     public fun assert_exchange_rate(
         self: MockExchangeRate, actual: ExchangeRate
@@ -286,6 +309,15 @@ module emojicoin_arena::tests {
         assert!(self.new_balance == new_balance);
     }
 
+    public fun base_escrow_view(): MockEscrowView {
+        MockEscrowView {
+            melee_id: 1,
+            emojicoin_0_balance: 0,
+            emojicoin_1_balance: 0,
+            match_amount: 0
+        }
+    }
+
     public fun base_melee(): MockMelee {
         MockMelee {
             melee_id: 1,
@@ -322,6 +354,35 @@ module emojicoin_arena::tests {
 
     public fun base_vault_address(): address {
         create_resource_address(&@emojicoin_arena, get_REGISTRY_SEED())
+    }
+
+    /// Fund `PARTICIPANT` with initial APT and emojicoin supply so balance checks do not abort
+    /// during swap simulation, based on `arena_octas_enter_amount` to be initially entered: by
+    /// buying `arena_octas_enter_amount` worth of initial supply for each emojicoin, the user's
+    /// balance will always suffice for the swap simulation.
+    public fun fund_participant<Coin0, LP0, Coin1, LP1>(
+        arena_octas_enter_amount: u64, market_address_0: address, market_address_1: address
+    ): (u64, u64) {
+        mint_aptos_coin_to(PARTICIPANT, arena_octas_enter_amount * 3);
+        emojicoin_dot_fun::swap<Coin0, LP0>(
+            &get_signer(PARTICIPANT),
+            market_address_0,
+            arena_octas_enter_amount,
+            false,
+            @integrator,
+            0,
+            1
+        );
+        emojicoin_dot_fun::swap<Coin1, LP1>(
+            &get_signer(PARTICIPANT),
+            market_address_1,
+            arena_octas_enter_amount,
+            false,
+            @integrator,
+            0,
+            1
+        );
+        (coin::balance<Coin0>(PARTICIPANT), coin::balance<Coin1>(PARTICIPANT))
     }
 
     /// Initialize emojicoin dot fun with test markets.
@@ -449,28 +510,23 @@ module emojicoin_arena::tests {
     #[test]
     #[lint::allow_unsafe_randomness]
     public fun enter_swap_exit() {
-        // Initialize markets, fund user with APT and initial emojicoin supply so balance checks
-        // do not abort during swap simulation.
+        // Initialize markets, fund participant.
         init_module_with_funded_vault();
         let arena_octas_enter_amount = get_QUOTE_REAL_CEILING() / 2;
-        mint_aptos_coin_to(PARTICIPANT, arena_octas_enter_amount * 3);
-        emojicoin_dot_fun::swap<BlackCat, BlackCatLP>(
-            &get_signer(PARTICIPANT),
-            @black_cat_market,
-            arena_octas_enter_amount,
-            false,
-            @integrator,
-            0,
-            1
-        );
-        emojicoin_dot_fun::swap<Zebra, ZebraLP>(
-            &get_signer(PARTICIPANT),
-            @zebra_market,
-            arena_octas_enter_amount,
-            false,
-            @integrator,
-            0,
-            1
+        let (emojicoin_0_balance, emojicoin_1_balance) =
+            fund_participant<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                arena_octas_enter_amount,
+                @black_cat_market,
+                @zebra_market
+            );
+
+        // Assert state.
+        let registry_view = base_registry_view();
+        let melee_view = base_melee();
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        assert!(
+            !escrow_exists<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
         );
 
         // Simulate swap into escrow.
@@ -490,6 +546,17 @@ module emojicoin_arena::tests {
             arena_octas_enter_amount,
             lock_in
         );
+
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        let escrow_view = base_escrow_view();
+        escrow_view.emojicoin_0_balance = swap_stats_enter.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
 
         // Assert emitted enter event.
         let enter_events = emitted_events<Enter>();
@@ -530,6 +597,17 @@ module emojicoin_arena::tests {
         // Swap within escrow.
         swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
 
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.emojicoin_1_balance = swap_stats_swap_route_1.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
         // Assert emitted swap event.
         let swap_events = emitted_events<Swap>();
         assert!(swap_events.length() == 1);
@@ -550,6 +628,19 @@ module emojicoin_arena::tests {
         // Exit.
         exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
 
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.emojicoin_1_balance = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(
+            coin::balance<Zebra>(PARTICIPANT)
+                == emojicoin_1_balance + swap_stats_swap_route_1.net_proceeds
+        );
+
         // Assert emitted exit event.
         let exit_events = emitted_events<Exit>();
         assert!(exit_events.length() == 1);
@@ -564,6 +655,7 @@ module emojicoin_arena::tests {
             ),
             emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
         }.assert_exit(exit_events[0]);
+
     }
 
     #[test]

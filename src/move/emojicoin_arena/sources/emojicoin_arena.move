@@ -370,6 +370,11 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[view]
+    public fun escrow_exists<Coin0, LP0, Coin1, LP1>(participant: address): bool {
+        exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant)
+    }
+
+    #[view]
     public fun exchange_rate<Emojicoin, EmojicoinLP>(
         market_address: address
     ): ExchangeRate {
