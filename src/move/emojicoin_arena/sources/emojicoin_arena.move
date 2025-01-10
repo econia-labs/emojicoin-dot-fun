@@ -861,43 +861,42 @@ module emojicoin_arena::emojicoin_arena {
     ): u64 {
         let elapsed_time = ((time - active_melee_ref_mut.start_time) as u256);
         let duration = (active_melee_ref_mut.duration as u256);
-        if (elapsed_time >= duration) { 0 }
-        else {
-            // Scale down input amount for matching percentage and remaining time in one compound
-            // operation, to reduce truncation errors. Equivalent to:
-            //
-            //                max match percentage   remaining time
-            // input amount * -------------------- * --------------
-            //                100                    duration
-            let raw_match_amount =
-                (
-                    ((input_amount as u256)
-                        * (active_melee_ref_mut.max_match_percentage as u256)
-                        * (duration - elapsed_time)) / ((MAX_PERCENTAGE as u256)
-                        * duration) as u64
-                );
-            // Correct for the amount that is available in the vault.
-            let corrected_for_vault_balance =
-                min(
-                    raw_match_amount,
-                    coin::balance<AptosCoin>(
-                        account::get_signer_capability_address(
-                            &registry_ref_mut.signer_capability
-                        )
-                    )
-                );
-            // Correct for available rewards in melee.
-            let corrected_for_melee_available_rewards =
-                min(
-                    corrected_for_vault_balance,
-                    active_melee_ref_mut.available_rewards
-                );
-            // Correct for the max match amount that the user is eligible for.
+        // Scale down input amount for matching percentage and remaining time in one compound
+        // operation, to reduce truncation errors. Equivalent to:
+        //
+        //                max match percentage   remaining time
+        // input amount * -------------------- * --------------
+        //                100                    duration
+        //
+        // Note that the calculation for remaining time (duration - elapsed_time) should never
+        // underflow since callers only invoke this function for an active melee.
+        let raw_match_amount =
+            (
+                ((input_amount as u256)
+                    * (active_melee_ref_mut.max_match_percentage as u256)
+                    * (duration - elapsed_time)) / ((MAX_PERCENTAGE as u256) * duration) as u64
+            );
+        // Correct for the amount that is available in the vault.
+        let corrected_for_vault_balance =
             min(
-                corrected_for_melee_available_rewards,
-                active_melee_ref_mut.max_match_amount - escrow_match_amount
-            )
-        }
+                raw_match_amount,
+                coin::balance<AptosCoin>(
+                    account::get_signer_capability_address(
+                        &registry_ref_mut.signer_capability
+                    )
+                )
+            );
+        // Correct for available rewards in melee.
+        let corrected_for_melee_available_rewards =
+            min(
+                corrected_for_vault_balance,
+                active_melee_ref_mut.available_rewards
+            );
+        // Correct for the max match amount that the user is eligible for.
+        min(
+            corrected_for_melee_available_rewards,
+            active_melee_ref_mut.max_match_amount - escrow_match_amount
+        )
     }
 
     /// Accepts a mutable reference to avoid borrowing issues.
@@ -1304,6 +1303,18 @@ module emojicoin_arena::emojicoin_arena {
     #[test_only]
     public fun get_REGISTRY_SEED(): vector<u8> {
         REGISTRY_SEED
+    }
+
+    #[test_only]
+    public fun set_melee_available_rewards(melee_id: u64, amount: u64) acquires Registry {
+        Registry[@emojicoin_arena].melees_by_id.borrow_mut(melee_id).available_rewards =
+            amount;
+    }
+
+    #[test_only]
+    public fun set_melee_max_match_amount(melee_id: u64, amount: u64) acquires Registry {
+        Registry[@emojicoin_arena].melees_by_id.borrow_mut(melee_id).max_match_amount =
+            amount;
     }
 
     #[test_only]
