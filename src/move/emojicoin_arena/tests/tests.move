@@ -341,6 +341,10 @@ module emojicoin_arena::tests {
         get_QUOTE_REAL_CEILING() / 2
     }
 
+    public fun base_enter_amount_post_bonding_curve(): u64 {
+        get_QUOTE_REAL_CEILING() * 2
+    }
+
     public fun base_escrow_view(): MockEscrowView {
         MockEscrowView {
             melee_id: 1,
@@ -446,6 +450,15 @@ module emojicoin_arena::tests {
         init_module_with_funded_vault();
         fund_participant<BlackCat, BlackCatLP, Zebra, ZebraLP>(
             base_enter_amount(),
+            @black_cat_market,
+            @zebra_market
+        )
+    }
+
+    public fun init_module_with_funded_vault_and_participant_post_bonding_curve(): (u64, u64) {
+        init_module_with_funded_vault();
+        fund_participant<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            base_enter_amount_post_bonding_curve(),
             @black_cat_market,
             @zebra_market
         )
@@ -562,7 +575,7 @@ module emojicoin_arena::tests {
     #[test]
     #[lint::allow_unsafe_randomness]
     public fun crank_by_enter() {
-        init_module_with_funded_vault_and_participant();
+        init_module_with_funded_vault_and_participant_post_bonding_curve();
         set_randomness_seed_for_crank_coverage();
 
         // Set time to middle of a new melee.
@@ -573,8 +586,8 @@ module emojicoin_arena::tests {
         // Crank via enter API.
         enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
             &get_signer(PARTICIPANT),
-            base_enter_amount(),
-            true
+            base_enter_amount_post_bonding_curve(),
+            false
         );
 
         assert_crank_global_state_and_events();
@@ -583,13 +596,13 @@ module emojicoin_arena::tests {
     #[test]
     #[lint::allow_unsafe_randomness]
     public fun crank_by_exit() {
-        init_module_with_funded_vault_and_participant();
+        init_module_with_funded_vault_and_participant_post_bonding_curve();
         set_randomness_seed_for_crank_coverage();
 
         // Enter.
         enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
             &get_signer(PARTICIPANT),
-            base_enter_amount(),
+            base_enter_amount_post_bonding_curve(),
             false
         );
 
@@ -607,13 +620,13 @@ module emojicoin_arena::tests {
     #[test]
     #[lint::allow_unsafe_randomness]
     public fun crank_by_swap() {
-        init_module_with_funded_vault_and_participant();
+        init_module_with_funded_vault_and_participant_post_bonding_curve();
         set_randomness_seed_for_crank_coverage();
 
         // Enter.
         enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
             &get_signer(PARTICIPANT),
-            base_enter_amount(),
+            base_enter_amount_post_bonding_curve(),
             false
         );
 
@@ -691,7 +704,7 @@ module emojicoin_arena::tests {
 
     #[test]
     #[lint::allow_unsafe_randomness]
-    public fun enter_lock_in_top_off() {
+    public fun enter_lock_in_top_off_tap_out() {
         init_module_with_funded_vault_and_participant();
 
         // Assert emitted vault balance event.
@@ -1020,6 +1033,49 @@ module emojicoin_arena::tests {
         // Assert no new vault balance event emitted.
         vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
         assert!(vault_balance_update_events.length() == 7);
+
+        // Tap out.
+        mint_aptos_coin_to(PARTICIPANT, escrow_view.match_amount);
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert state.
+        registry_view.vault_balance += escrow_view.match_amount;
+        registry_view.assert_registry_view(registry());
+        melee_view.available_rewards += escrow_view.match_amount;
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        let emojicoin_0_proceeds = escrow_view.emojicoin_0_balance;
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.emojicoin_1_balance = 0;
+        match_amount = escrow_view.match_amount;
+        escrow_view.match_amount = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+
+        // Assert emitted exit event.
+        let exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 1);
+        let exit_event = MockExit {
+            user: PARTICIPANT,
+            melee_id: 1,
+            tap_out_fee: match_amount,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds: 0,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        exit_event.assert_exit(exit_events[0]);
+
+        // Assert emitted vault balance event.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 8);
+        vault_balance_update_event.new_balance += match_amount;
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[7]
+        );
+
     }
 
     #[test]
