@@ -12,7 +12,7 @@
     "postgres": "^3.4.4",
     "server-only": "^0.0.1"
   },
-  "description": "TypeScript SDK for Econia's Emojicoin Dot Fun",
+  "description": "TypeScript SDK for Econia Labs' Emojicoin Dot Fun",
   "devDependencies": {
     "@types/big.js": "^6.2.2",
     "@types/jest": "^29.5.13",
