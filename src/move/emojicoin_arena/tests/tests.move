@@ -185,6 +185,27 @@ module emojicoin_arena::tests {
         assert!(self.match_amount == match_amount);
     }
 
+    public fun assert_crank_global_state_and_events() {
+        // Assert state.
+        let registry_view = base_registry_view();
+        registry_view.n_melees = 2;
+        registry_view.assert_registry_view(registry());
+        let melee_view_1 = base_melee();
+        melee_view_1.assert_melee(melee(melee_view_1.melee_id));
+        let melee_view_2 = melee_view_1;
+        melee_view_2.melee_id = 2;
+        melee_view_2.emojicoin_0_market_address = @black_heart_market;
+        melee_view_2.emojicoin_1_market_address = @yellow_heart_market;
+        melee_view_2.start_time = base_start_time() + get_DEFAULT_DURATION();
+        melee_view_2.assert_melee(melee(melee_view_2.melee_id));
+
+        // Assert emitted melee events.
+        let melee_events = emitted_events<Melee>();
+        assert!(melee_events.length() == 2);
+        melee_view_1.assert_melee(melee_events[0]);
+        melee_view_2.assert_melee(melee_events[1]);
+    }
+
     public fun assert_exchange_rate(
         self: MockExchangeRate, actual: ExchangeRate
     ) {
@@ -540,7 +561,7 @@ module emojicoin_arena::tests {
 
     #[test]
     #[lint::allow_unsafe_randomness]
-    public fun enter_crank() {
+    public fun crank_by_enter() {
         init_module_with_funded_vault_and_participant();
         set_randomness_seed_for_crank_coverage();
 
@@ -556,24 +577,55 @@ module emojicoin_arena::tests {
             true
         );
 
-        // Assert state.
-        let registry_view = base_registry_view();
-        registry_view.n_melees = 2;
-        registry_view.assert_registry_view(registry());
-        let melee_view_1 = base_melee();
-        melee_view_1.assert_melee(melee(melee_view_1.melee_id));
-        let melee_view_2 = melee_view_1;
-        melee_view_2.melee_id = 2;
-        melee_view_2.emojicoin_0_market_address = @black_heart_market;
-        melee_view_2.emojicoin_1_market_address = @yellow_heart_market;
-        melee_view_2.start_time = base_start_time() + get_DEFAULT_DURATION();
-        melee_view_2.assert_melee(melee(melee_view_2.melee_id));
+        assert_crank_global_state_and_events();
+    }
 
-        // Assert emitted melee events.
-        let melee_events = emitted_events<Melee>();
-        assert!(melee_events.length() == 2);
-        melee_view_1.assert_melee(melee_events[0]);
-        melee_view_2.assert_melee(melee_events[1]);
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun crank_by_exit() {
+        init_module_with_funded_vault_and_participant();
+        set_randomness_seed_for_crank_coverage();
+
+        // Enter.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            false
+        );
+
+        // Set time to middle of a new melee.
+        let time = base_publish_time();
+        time += get_DEFAULT_DURATION();
+        timestamp::update_global_time_for_test(time + 1);
+
+        // Crank via exit API.
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        assert_crank_global_state_and_events();
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun crank_by_swap() {
+        init_module_with_funded_vault_and_participant();
+        set_randomness_seed_for_crank_coverage();
+
+        // Enter.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            false
+        );
+
+        // Set time to middle of a new melee.
+        let time = base_publish_time();
+        time += get_DEFAULT_DURATION();
+        timestamp::update_global_time_for_test(time + 1);
+
+        // Crank via swap API.
+        swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        assert_crank_global_state_and_events();
     }
 
     #[test]
@@ -1222,7 +1274,6 @@ module emojicoin_arena::tests {
             @zebra_market
         );
         exit_event.assert_exit(exit_events[1]);
-
     }
 
     #[test]
