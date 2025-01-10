@@ -526,6 +526,67 @@ module emojicoin_arena::tests {
 
     #[test]
     #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_ENTER_COIN_BALANCE_0,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun enter_invalid_escrow_coin_balance_0() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, Zebra>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_ENTER_COIN_BALANCE_1,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun enter_invalid_escrow_coin_balance_1() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, Zebra>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_ESCROW_COIN_TYPE,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun enter_invalid_escrow_coin_type() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCatLP>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
     public fun enter_lock_in_top_off() {
         init_module_with_funded_vault_and_participant();
 
@@ -1113,6 +1174,28 @@ module emojicoin_arena::tests {
     }
 
     #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_TOP_OFF_MUST_LOCK_IN,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun enter_top_off_must_lock_in() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            false
+        );
+    }
+
+    #[test]
     #[
         expected_failure(
             abort_code = emojicoin_arena::emojicoin_arena::E_NO_ESCROW,
@@ -1201,6 +1284,54 @@ module emojicoin_arena::tests {
         mock_melee.emojicoin_0_market_address = @yin_yang_market;
         mock_melee.emojicoin_1_market_address = @zombie_market;
         mock_melee.assert_melee(melee_events[0]);
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_MELEE_ID,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun match_amount_invalid_melee_id_hi() {
+        init_module_with_funded_vault_and_participant();
+        match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            PARTICIPANT, base_enter_amount(), 2
+        );
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_MELEE_ID,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun match_amount_invalid_melee_id_lo() {
+        init_module_with_funded_vault_and_participant();
+        match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            PARTICIPANT, base_enter_amount(), 0
+        );
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_MELEE_ID_MISMATCH,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun match_amount_melee_id_mismatch() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            PARTICIPANT, base_enter_amount(), 0
+        );
     }
 
     #[test]
