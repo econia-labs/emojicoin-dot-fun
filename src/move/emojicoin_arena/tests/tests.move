@@ -11,10 +11,6 @@ module emojicoin_arena::tests {
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
     use black_cat_market::coin_factory::{Emojicoin as BlackCat, EmojicoinLP as BlackCatLP};
-    use black_heart_market::coin_factory::{
-        Emojicoin as BlackHeart,
-        EmojicoinLP as BlackHeartLP
-    };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         Self,
         MarketMetadata,
@@ -76,7 +72,6 @@ module emojicoin_arena::tests {
     use std::option;
     use std::vector;
     use zebra_market::coin_factory::{Emojicoin as Zebra, EmojicoinLP as ZebraLP};
-    use zombie_market::coin_factory::{Emojicoin as Zombie, EmojicoinLP as ZombieLP};
 
     struct MockEnter has copy, drop, store {
         user: address,
@@ -436,11 +431,14 @@ module emojicoin_arena::tests {
     }
 
     #[lint::allow_unsafe_randomness]
+    /// Set the randomness seed such that a single crank will hit all coverage branches in
+    /// underlying crank logic. This seed was derived using a scripted brute force approach to
+    /// increment the value, then re-run tests until `randomness_seed_for_crank_coverage` passed.
     public fun set_randomness_seed_for_crank_coverage() {
         randomness::initialize_for_testing(&get_signer(@aptos_framework));
-        let seed = x"0000000000000000000000000000000000000000000000000000000000000025";
-        std::debug::print(&seed);
-        randomness::set_seed(seed);
+        randomness::set_seed(
+            x"0000000000000000000000000000000000000000000000000000000000000060"
+        );
     }
 
     public fun simulated_swap_stats<Emojicoin, EmojicoinLP>(
@@ -542,14 +540,14 @@ module emojicoin_arena::tests {
 
     #[test]
     #[lint::allow_unsafe_randomness]
-    public fun enter_crank_twice() {
+    public fun enter_crank() {
         init_module_with_funded_vault_and_participant();
-        randomness::initialize_for_testing(&get_signer(@aptos_framework));
+        set_randomness_seed_for_crank_coverage();
 
         // Set time to middle of a new melee.
         let time = base_publish_time();
         time += get_DEFAULT_DURATION();
-        timestamp::update_global_time_for_test(time);
+        timestamp::update_global_time_for_test(time + 1);
 
         // Crank via enter API.
         enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
@@ -567,22 +565,15 @@ module emojicoin_arena::tests {
         let melee_view_2 = melee_view_1;
         melee_view_2.melee_id = 2;
         melee_view_2.emojicoin_0_market_address = @black_heart_market;
-        melee_view_2.emojicoin_1_market_address = @zombie_market;
+        melee_view_2.emojicoin_1_market_address = @yellow_heart_market;
         melee_view_2.start_time = base_start_time() + get_DEFAULT_DURATION();
         melee_view_2.assert_melee(melee(melee_view_2.melee_id));
 
-        // Set time to middle of another melee.
-        time += get_DEFAULT_DURATION();
-        timestamp::update_global_time_for_test(time);
-
-        // Crank via enter API.
-        enter<BlackHeart, BlackHeartLP, Zombie, ZombieLP, BlackHeart>(
-            &get_signer(PARTICIPANT),
-            base_enter_amount(),
-            true
-        );
-
         // Assert emitted melee events.
+        let melee_events = emitted_events<Melee>();
+        assert!(melee_events.length() == 2);
+        melee_view_1.assert_melee(melee_events[0]);
+        melee_view_2.assert_melee(melee_events[1]);
     }
 
     #[test]
@@ -1433,40 +1424,46 @@ module emojicoin_arena::tests {
         let covered_sort_order_market_id_0_lo = false;
         let covered_melee_ids_by_market_ids_contains = false;
 
+        // Call all coverage conditions to silence erroneously compiler warnings about unused
+        // assignments.
+        covered_equal_market_ids;
+        covered_unequal_market_ids;
+        covered_sort_order_market_id_0_hi;
+        covered_sort_order_market_id_0_lo;
+        covered_melee_ids_by_market_ids_contains;
+
+        // Declare market IDs.
+        let sorted_unique_market_ids;
+
         loop {
             // Get two random market IDs.
             let market_id_0 = random_market_id();
             let market_id_1 = random_market_id();
 
-            // Check if they are equal, restarting loop as needed, and set coverage condition.
+            // Check if they are equal, restarting loop as needed, setting coverage condition.
             if (market_id_0 == market_id_1) {
-                std::debug::print(&1);
                 covered_equal_market_ids = true;
                 continue;
             } else {
-                std::debug::print(&2);
                 covered_unequal_market_ids = true;
             };
 
             // Sort market IDs, setting coverage conditions.
-            let sorted_unique_market_ids = if (market_id_0 < market_id_1) {
-                std::debug::print(&3);
-                covered_sort_order_market_id_0_lo = true;
-                vector[market_id_0, market_id_1]
-            } else {
-                std::debug::print(&4);
-                covered_sort_order_market_id_0_hi = true;
-                vector[market_id_1, market_id_0]
-            };
+            sorted_unique_market_ids =
+                if (market_id_0 < market_id_1) {
+                    covered_sort_order_market_id_0_lo = true;
+                    vector[market_id_0, market_id_1]
+                } else {
+                    covered_sort_order_market_id_0_hi = true;
+                    vector[market_id_1, market_id_0]
+                };
 
-            // Check if melee IDs by market IDs contains sorted unique market IDs, setting coverage
-            // condition.
+            // Check if melee IDs by market IDs contains sorted unique market IDs, restarting loop
+            // as needed, setting coverage condition.
             if (melee_ids_by_market_ids_contains(sorted_unique_market_ids)) {
-                std::debug::print(&5);
                 covered_melee_ids_by_market_ids_contains = true;
                 continue;
             } else {
-                std::debug::print(&6);
                 break;
             };
         };

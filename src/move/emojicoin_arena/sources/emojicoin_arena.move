@@ -1323,6 +1323,21 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[test_only]
+    public fun melee_ids_by_market_ids_contains_for_test(
+        sorted_unique_market_ids: vector<u64>
+    ): bool acquires Registry {
+        Registry[@emojicoin_arena].melee_ids_by_market_ids.contains(
+            sorted_unique_market_ids
+        )
+    }
+
+    #[test_only]
+    #[lint::allow_unsafe_randomness]
+    public fun random_market_id_for_test(): u64 {
+        random_market_id(get_n_registered_markets())
+    }
+
+    #[test_only]
     #[lint::allow_unsafe_randomness]
     public fun swap_for_test<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry {
         swap<Coin0, LP0, Coin1, LP1>(swapper);
