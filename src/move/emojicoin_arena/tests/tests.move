@@ -1337,6 +1337,30 @@ module emojicoin_arena::tests {
     #[test]
     #[
         expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_MELEE_ID,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun melee_invalid_melee_id_hi() {
+        init_module_with_funded_vault_and_participant();
+        melee(2);
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_MELEE_ID,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun melee_invalid_melee_id_lo() {
+        init_module_with_funded_vault_and_participant();
+        melee(0);
+    }
+
+    #[test]
+    #[
+        expected_failure(
             abort_code = emojicoin_arena::emojicoin_arena::E_NOT_EMOJICOIN_ARENA,
             location = emojicoin_arena::emojicoin_arena
         )
