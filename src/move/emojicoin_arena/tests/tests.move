@@ -7,9 +7,14 @@ module emojicoin_arena::tests {
     };
     use aptos_framework::coin;
     use aptos_framework::event::{emitted_events};
+    use aptos_framework::randomness;
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
     use black_cat_market::coin_factory::{Emojicoin as BlackCat, EmojicoinLP as BlackCatLP};
+    use black_heart_market::coin_factory::{
+        Emojicoin as BlackHeart,
+        EmojicoinLP as BlackHeartLP
+    };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         Self,
         MarketMetadata,
@@ -46,6 +51,8 @@ module emojicoin_arena::tests {
         init_module_test_only,
         match_amount,
         melee,
+        melee_ids_by_market_ids_contains_for_test as melee_ids_by_market_ids_contains,
+        random_market_id_for_test as random_market_id,
         registry,
         set_melee_available_rewards,
         set_melee_max_match_amount,
@@ -69,6 +76,7 @@ module emojicoin_arena::tests {
     use std::option;
     use std::vector;
     use zebra_market::coin_factory::{Emojicoin as Zebra, EmojicoinLP as ZebraLP};
+    use zombie_market::coin_factory::{Emojicoin as Zombie, EmojicoinLP as ZombieLP};
 
     struct MockEnter has copy, drop, store {
         user: address,
@@ -427,6 +435,14 @@ module emojicoin_arena::tests {
         )
     }
 
+    #[lint::allow_unsafe_randomness]
+    public fun set_randomness_seed_for_crank_coverage() {
+        randomness::initialize_for_testing(&get_signer(@aptos_framework));
+        let seed = x"0000000000000000000000000000000000000000000000000000000000000025";
+        std::debug::print(&seed);
+        randomness::set_seed(seed);
+    }
+
     public fun simulated_swap_stats<Emojicoin, EmojicoinLP>(
         simulated_swap_inputs: SimulatedSwapInputs
     ): SimulatedSwapStats {
@@ -522,6 +538,51 @@ module emojicoin_arena::tests {
         registry_view.next_melee_max_match_percentage = next_max_match_percentage;
         registry_view.vault_balance -= withdrawn_octas;
         registry_view.assert_registry_view(registry());
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun enter_crank_twice() {
+        init_module_with_funded_vault_and_participant();
+        randomness::initialize_for_testing(&get_signer(@aptos_framework));
+
+        // Set time to middle of a new melee.
+        let time = base_publish_time();
+        time += get_DEFAULT_DURATION();
+        timestamp::update_global_time_for_test(time);
+
+        // Crank via enter API.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+
+        // Assert state.
+        let registry_view = base_registry_view();
+        registry_view.n_melees = 2;
+        registry_view.assert_registry_view(registry());
+        let melee_view_1 = base_melee();
+        melee_view_1.assert_melee(melee(melee_view_1.melee_id));
+        let melee_view_2 = melee_view_1;
+        melee_view_2.melee_id = 2;
+        melee_view_2.emojicoin_0_market_address = @black_heart_market;
+        melee_view_2.emojicoin_1_market_address = @zombie_market;
+        melee_view_2.start_time = base_start_time() + get_DEFAULT_DURATION();
+        melee_view_2.assert_melee(melee(melee_view_2.melee_id));
+
+        // Set time to middle of another melee.
+        time += get_DEFAULT_DURATION();
+        timestamp::update_global_time_for_test(time);
+
+        // Crank via enter API.
+        enter<BlackHeart, BlackHeartLP, Zombie, ZombieLP, BlackHeart>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+
+        // Assert emitted melee events.
     }
 
     #[test]
@@ -1356,6 +1417,66 @@ module emojicoin_arena::tests {
     public fun melee_invalid_melee_id_lo() {
         init_module_with_funded_vault_and_participant();
         melee(0);
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun randomness_seed_for_crank_coverage() {
+        // Initialize module, randomness.
+        init_module_with_funded_vault_and_participant();
+        set_randomness_seed_for_crank_coverage();
+
+        // Initialize all coverage conditions to false.
+        let covered_equal_market_ids = false;
+        let covered_unequal_market_ids = false;
+        let covered_sort_order_market_id_0_hi = false;
+        let covered_sort_order_market_id_0_lo = false;
+        let covered_melee_ids_by_market_ids_contains = false;
+
+        loop {
+            // Get two random market IDs.
+            let market_id_0 = random_market_id();
+            let market_id_1 = random_market_id();
+
+            // Check if they are equal, restarting loop as needed, and set coverage condition.
+            if (market_id_0 == market_id_1) {
+                std::debug::print(&1);
+                covered_equal_market_ids = true;
+                continue;
+            } else {
+                std::debug::print(&2);
+                covered_unequal_market_ids = true;
+            };
+
+            // Sort market IDs, setting coverage conditions.
+            let sorted_unique_market_ids = if (market_id_0 < market_id_1) {
+                std::debug::print(&3);
+                covered_sort_order_market_id_0_lo = true;
+                vector[market_id_0, market_id_1]
+            } else {
+                std::debug::print(&4);
+                covered_sort_order_market_id_0_hi = true;
+                vector[market_id_1, market_id_0]
+            };
+
+            // Check if melee IDs by market IDs contains sorted unique market IDs, setting coverage
+            // condition.
+            if (melee_ids_by_market_ids_contains(sorted_unique_market_ids)) {
+                std::debug::print(&5);
+                covered_melee_ids_by_market_ids_contains = true;
+                continue;
+            } else {
+                std::debug::print(&6);
+                break;
+            };
+        };
+
+        // Assert all coverage conditions met.
+        assert!(covered_equal_market_ids);
+        assert!(covered_unequal_market_ids);
+        assert!(covered_sort_order_market_id_0_hi);
+        assert!(covered_sort_order_market_id_0_lo);
+        assert!(covered_melee_ids_by_market_ids_contains);
     }
 
     #[test]
