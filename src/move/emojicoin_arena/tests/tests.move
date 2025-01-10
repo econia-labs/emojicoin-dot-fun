@@ -583,11 +583,25 @@ module emojicoin_arena::tests {
         time += get_DEFAULT_DURATION();
         timestamp::update_global_time_for_test(time + 1);
 
+        // Verify that nothing can be matched since melee duration has elapsed.
+        assert!(
+            match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                PARTICIPANT, base_enter_amount_post_bonding_curve(), 1
+            ) == 0
+        );
+
         // Crank via enter API.
         enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
             &get_signer(PARTICIPANT),
             base_enter_amount_post_bonding_curve(),
             false
+        );
+
+        // Verify that nothing can be matched since melee is inactive.
+        assert!(
+            match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                PARTICIPANT, base_enter_amount_post_bonding_curve(), 1
+            ) == 0
         );
 
         assert_crank_global_state_and_events();
