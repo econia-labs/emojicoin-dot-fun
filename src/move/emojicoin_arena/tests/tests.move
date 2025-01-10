@@ -5,36 +5,62 @@ module emojicoin_arena::tests {
         create_resource_address,
         create_signer_for_test as get_signer
     };
+    use aptos_framework::coin;
     use aptos_framework::event::{emitted_events};
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
+    use black_cat_market::coin_factory::{Emojicoin as BlackCat, EmojicoinLP as BlackCatLP};
     use emojicoin_dot_fun::emojicoin_dot_fun::{
+        Self,
         MarketMetadata,
+        get_BASE_VIRTUAL_CEILING,
+        get_EMOJICOIN_REMAINDER,
+        get_QUOTE_REAL_CEILING,
+        get_QUOTE_VIRTUAL_FLOOR,
         market_metadata_by_market_id,
+        simulate_swap,
         unpack_market_metadata
     };
     use emojicoin_arena::emojicoin_arena::{
+        Enter,
+        EscrowView,
         ExchangeRate,
         Exit,
         Melee,
         RegistryView,
+        Swap,
         VaultBalanceUpdate,
+        enter_for_test as enter,
+        escrow,
+        escrow_exists,
+        exchange_rate,
+        exit_for_test as exit,
         fund_vault,
         get_DEFAULT_AVAILABLE_REWARDS,
         get_DEFAULT_DURATION,
         get_DEFAULT_MAX_MATCH_PERCENTAGE,
         get_DEFAULT_MAX_MATCH_AMOUNT,
+        get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE,
+        get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE,
         get_REGISTRY_SEED,
         init_module_test_only,
+        match_amount,
+        melee,
         registry,
+        set_melee_available_rewards,
+        set_melee_max_match_amount,
         set_next_melee_available_rewards,
         set_next_melee_duration,
         set_next_melee_max_match_amount,
         set_next_melee_max_match_percentage,
+        swap_for_test as swap,
+        unpack_enter,
+        unpack_escrow_view,
         unpack_exchange_rate,
         unpack_exit,
         unpack_melee,
         unpack_registry_view,
+        unpack_swap,
         unpack_vault_balance_update,
         withdraw_from_vault
     };
@@ -42,6 +68,27 @@ module emojicoin_arena::tests {
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use std::option;
     use std::vector;
+    use zebra_market::coin_factory::{Emojicoin as Zebra, EmojicoinLP as ZebraLP};
+
+    struct MockEnter has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        input_amount: u64,
+        quote_volume: u64,
+        integrator_fee: u64,
+        match_amount: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    }
+
+    struct MockEscrowView has copy, drop, store {
+        melee_id: u64,
+        emojicoin_0_balance: u64,
+        emojicoin_1_balance: u64,
+        match_amount: u64
+    }
 
     struct MockExchangeRate has copy, drop, store {
         base: u64,
@@ -54,8 +101,8 @@ module emojicoin_arena::tests {
         tap_out_fee: u64,
         emojicoin_0_proceeds: u64,
         emojicoin_1_proceeds: u64,
-        emojicoin_0_exchange_rate: MockExchangeRate,
-        emojicoin_1_exchange_rate: MockExchangeRate
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
     }
 
     struct MockMarketMetadata has copy, drop, store {
@@ -85,8 +132,32 @@ module emojicoin_arena::tests {
         next_melee_max_match_amount: u64
     }
 
+    struct MockSwap has copy, drop, store {
+        user: address,
+        melee_id: u64,
+        quote_volume: u64,
+        integrator_fee: u64,
+        emojicoin_0_proceeds: u64,
+        emojicoin_1_proceeds: u64,
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
+    }
+
     struct MockVaultBalanceUpdate has copy, drop, store {
         new_balance: u64
+    }
+
+    struct SimulatedSwapInputs has copy, drop, store {
+        market_address: address,
+        input_amount: u64,
+        selling_emojicoins: bool,
+        integrator_fee_rate: u8
+    }
+
+    struct SimulatedSwapStats has copy, drop, store {
+        quote_volume: u64,
+        integrator_fee: u64,
+        net_proceeds: u64
     }
 
     // Test market emoji bytes, in order of market ID.
@@ -97,12 +168,51 @@ module emojicoin_arena::tests {
     const ZEBRA: vector<u8> = x"f09fa693";
     const ZOMBIE: vector<u8> = x"f09fa79f";
 
+    const PARTICIPANT: address = @0x1234567890abcdef;
+    const MAX_PERCENTAGE: u64 = 100;
+
+    public fun assert_escrow_view(
+        self: MockEscrowView, actual: EscrowView
+    ) {
+        let (melee_id, emojicoin_0_balance, emojicoin_1_balance, match_amount) =
+            unpack_escrow_view(actual);
+        assert!(self.melee_id == melee_id);
+        assert!(self.emojicoin_0_balance == emojicoin_0_balance);
+        assert!(self.emojicoin_1_balance == emojicoin_1_balance);
+        assert!(self.match_amount == match_amount);
+    }
+
     public fun assert_exchange_rate(
         self: MockExchangeRate, actual: ExchangeRate
     ) {
         let (base, quote) = unpack_exchange_rate(actual);
         assert!(self.base == base);
         assert!(self.quote == quote);
+    }
+
+    public fun assert_enter(self: MockEnter, actual: Enter) {
+        let (
+            user,
+            melee_id,
+            input_amount,
+            quote_volume,
+            integrator_fee,
+            match_amount,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        ) = unpack_enter(actual);
+        assert!(self.user == user);
+        assert!(self.melee_id == melee_id);
+        assert!(self.input_amount == input_amount);
+        assert!(self.quote_volume == quote_volume);
+        assert!(self.integrator_fee == integrator_fee);
+        assert!(self.match_amount == match_amount);
+        assert!(self.emojicoin_0_proceeds == emojicoin_0_proceeds);
+        assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
+        assert!(self.emojicoin_0_exchange_rate == emojicoin_0_exchange_rate);
+        assert!(self.emojicoin_1_exchange_rate == emojicoin_1_exchange_rate);
     }
 
     public fun assert_exit(self: MockExit, actual: Exit) {
@@ -120,8 +230,8 @@ module emojicoin_arena::tests {
         assert!(self.tap_out_fee == tap_out_fee);
         assert!(self.emojicoin_0_proceeds == emojicoin_0_proceeds);
         assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
-        self.emojicoin_0_exchange_rate.assert_exchange_rate(emojicoin_0_exchange_rate);
-        self.emojicoin_1_exchange_rate.assert_exchange_rate(emojicoin_1_exchange_rate);
+        assert!(self.emojicoin_0_exchange_rate == emojicoin_0_exchange_rate);
+        assert!(self.emojicoin_1_exchange_rate == emojicoin_1_exchange_rate);
     }
 
     public fun assert_market_metadata(
@@ -175,11 +285,45 @@ module emojicoin_arena::tests {
         assert!(self.next_melee_max_match_amount == next_melee_max_match_amount);
     }
 
+    public fun assert_swap(self: MockSwap, actual: Swap) {
+        let (
+            user,
+            melee_id,
+            quote_volume,
+            integrator_fee,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds,
+            emojicoin_0_exchange_rate,
+            emojicoin_1_exchange_rate
+        ) = unpack_swap(actual);
+        assert!(self.user == user);
+        assert!(self.melee_id == melee_id);
+        assert!(self.quote_volume == quote_volume);
+        assert!(self.integrator_fee == integrator_fee);
+        assert!(self.emojicoin_0_proceeds == emojicoin_0_proceeds);
+        assert!(self.emojicoin_1_proceeds == emojicoin_1_proceeds);
+        assert!(self.emojicoin_0_exchange_rate == emojicoin_0_exchange_rate);
+        assert!(self.emojicoin_1_exchange_rate == emojicoin_1_exchange_rate);
+    }
+
     public fun assert_vault_balance_update(
         self: MockVaultBalanceUpdate, actual: VaultBalanceUpdate
     ) {
         let new_balance = unpack_vault_balance_update(actual);
         assert!(self.new_balance == new_balance);
+    }
+
+    public fun base_enter_amount(): u64 {
+        get_QUOTE_REAL_CEILING() / 2
+    }
+
+    public fun base_escrow_view(): MockEscrowView {
+        MockEscrowView {
+            melee_id: 1,
+            emojicoin_0_balance: 0,
+            emojicoin_1_balance: 0,
+            match_amount: 0
+        }
     }
 
     public fun base_melee(): MockMelee {
@@ -220,6 +364,35 @@ module emojicoin_arena::tests {
         create_resource_address(&@emojicoin_arena, get_REGISTRY_SEED())
     }
 
+    /// Fund `PARTICIPANT` with initial APT and emojicoin supply so balance checks do not abort
+    /// during swap simulation, based on `arena_octas_enter_amount` to be initially entered: by
+    /// buying `arena_octas_enter_amount` worth of initial supply for each emojicoin, the user's
+    /// balance will always suffice for the swap simulation.
+    public fun fund_participant<Coin0, LP0, Coin1, LP1>(
+        arena_octas_enter_amount: u64, market_address_0: address, market_address_1: address
+    ): (u64, u64) {
+        mint_aptos_coin_to(PARTICIPANT, arena_octas_enter_amount * 3);
+        emojicoin_dot_fun::swap<Coin0, LP0>(
+            &get_signer(PARTICIPANT),
+            market_address_0,
+            arena_octas_enter_amount,
+            false,
+            @integrator,
+            0,
+            1
+        );
+        emojicoin_dot_fun::swap<Coin1, LP1>(
+            &get_signer(PARTICIPANT),
+            market_address_1,
+            arena_octas_enter_amount,
+            false,
+            @integrator,
+            0,
+            1
+        );
+        (coin::balance<Coin0>(PARTICIPANT), coin::balance<Coin1>(PARTICIPANT))
+    }
+
     /// Initialize emojicoin dot fun with test markets.
     public fun init_emojicoin_dot_fun_with_test_markets() {
         emojicoin_dot_fun_tests::init_package();
@@ -243,6 +416,51 @@ module emojicoin_arena::tests {
         // Fund admin, then fund vault.
         mint_aptos_coin_to(@emojicoin_arena, get_DEFAULT_AVAILABLE_REWARDS());
         fund_vault(&get_signer(@emojicoin_arena), get_DEFAULT_AVAILABLE_REWARDS());
+    }
+
+    public fun init_module_with_funded_vault_and_participant(): (u64, u64) {
+        init_module_with_funded_vault();
+        fund_participant<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            base_enter_amount(),
+            @black_cat_market,
+            @zebra_market
+        )
+    }
+
+    public fun simulated_swap_stats<Emojicoin, EmojicoinLP>(
+        simulated_swap_inputs: SimulatedSwapInputs
+    ): SimulatedSwapStats {
+        let (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            net_proceeds,
+            _,
+            quote_volume,
+            _,
+            integrator_fee,
+            _,
+            _,
+            _,
+            _,
+            _
+        ) =
+            emojicoin_dot_fun::unpack_swap(
+                simulate_swap<Emojicoin, EmojicoinLP>(
+                    PARTICIPANT,
+                    simulated_swap_inputs.market_address,
+                    simulated_swap_inputs.input_amount,
+                    simulated_swap_inputs.selling_emojicoins,
+                    @integrator,
+                    simulated_swap_inputs.integrator_fee_rate
+                )
+            );
+        SimulatedSwapStats { quote_volume, integrator_fee, net_proceeds }
     }
 
     #[test]
@@ -307,6 +525,712 @@ module emojicoin_arena::tests {
     }
 
     #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_ENTER_COIN_BALANCE_0,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun enter_invalid_escrow_coin_balance_0() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, Zebra>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_ENTER_COIN_BALANCE_1,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun enter_invalid_escrow_coin_balance_1() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, Zebra>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_ESCROW_COIN_TYPE,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun enter_invalid_escrow_coin_type() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCatLP>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun enter_lock_in_top_off() {
+        init_module_with_funded_vault_and_participant();
+
+        // Assert emitted vault balance event.
+        let vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 1);
+        let vault_balance_update_event = MockVaultBalanceUpdate {
+            new_balance: get_DEFAULT_AVAILABLE_REWARDS()
+        };
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[0]
+        );
+
+        // Assign input amount for first entry to first melee, determine user remaining octas.
+        let melee_id = 1;
+        let input_amount = 10000;
+
+        // Determine raw match amount without any other corrections.
+        let max_match_percentage = get_DEFAULT_MAX_MATCH_PERCENTAGE();
+        // Correct for max match percentage.
+        let raw_match_amount = input_amount * max_match_percentage / 100;
+        // Correct for time elapsed since start of melee.
+        raw_match_amount =
+            raw_match_amount * (base_publish_time() - get_DEFAULT_DURATION())
+                / get_DEFAULT_DURATION();
+
+        // Assert raw match amount.
+        assert!(
+            raw_match_amount
+                == match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                    PARTICIPANT, input_amount, melee_id
+                )
+        );
+
+        // Simulate swap into escrow.
+        let swap_inputs_enter = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: input_amount + raw_match_amount,
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE()
+        };
+        let swap_stats_enter =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Enter melee with locking in.
+        let lock_in = true;
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            input_amount,
+            lock_in
+        );
+
+        // Assert state.
+        let registry_view = base_registry_view();
+        registry_view.vault_balance -= raw_match_amount;
+        registry_view.assert_registry_view(registry());
+        let melee_view = base_melee();
+        melee_view.available_rewards -= raw_match_amount;
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        let escrow_view = base_escrow_view();
+        escrow_view.match_amount += raw_match_amount;
+        escrow_view.emojicoin_0_balance = swap_stats_enter.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+
+        // Assert emitted enter event.
+        let enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 1);
+        let enter_event = MockEnter {
+            user: PARTICIPANT,
+            melee_id: 1,
+            input_amount,
+            quote_volume: swap_stats_enter.quote_volume,
+            integrator_fee: swap_stats_enter.integrator_fee,
+            match_amount: raw_match_amount,
+            emojicoin_0_proceeds: swap_stats_enter.net_proceeds,
+            emojicoin_1_proceeds: 0,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        enter_event.assert_enter(enter_events[0]);
+
+        // Assert emitted vault balance event.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 2);
+        vault_balance_update_event.new_balance -= raw_match_amount;
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[1]
+        );
+
+        // Withdraw from vault so that it must be corrected for.
+        let match_amount = raw_match_amount - 1;
+        let amount_to_withdraw = registry_view.vault_balance - match_amount;
+        withdraw_from_vault(&get_signer(@emojicoin_arena), amount_to_withdraw);
+        registry_view.vault_balance -= amount_to_withdraw;
+
+        // Assert emitted vault balance event.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 3);
+        vault_balance_update_event.new_balance -= amount_to_withdraw;
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[2]
+        );
+
+        // Assert match amount.
+        assert!(
+            match_amount
+                == match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                    PARTICIPANT, input_amount, melee_id
+                )
+        );
+
+        // Simulate swap into escrow.
+        swap_inputs_enter.input_amount = input_amount + match_amount;
+        swap_stats_enter = simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Top off.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            input_amount,
+            lock_in
+        );
+
+        // Assert state.
+        registry_view.vault_balance -= match_amount;
+        registry_view.assert_registry_view(registry());
+        melee_view.available_rewards -= match_amount;
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.match_amount += match_amount;
+        escrow_view.emojicoin_0_balance += swap_stats_enter.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+
+        // Assert emitted enter event.
+        enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 2);
+        enter_event.quote_volume = swap_stats_enter.quote_volume;
+        enter_event.integrator_fee = swap_stats_enter.integrator_fee;
+        enter_event.match_amount = match_amount;
+        enter_event.emojicoin_0_proceeds = swap_stats_enter.net_proceeds;
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+        enter_event.assert_enter(enter_events[1]);
+
+        // Assert emitted vault balance event.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 4);
+        vault_balance_update_event.new_balance -= match_amount;
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[3]
+        );
+
+        // Deposit back into vault so that it is not limiting factor for corrections.
+        fund_vault(&get_signer(@emojicoin_arena), amount_to_withdraw);
+        registry_view.vault_balance += amount_to_withdraw;
+
+        // Assert emitted vault balance event.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 5);
+        vault_balance_update_event.new_balance += amount_to_withdraw;
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[4]
+        );
+
+        // Set available rewards in melee to become limiting factor.
+        match_amount -= 1;
+        set_melee_available_rewards(melee_view.melee_id, match_amount);
+        melee_view.available_rewards = match_amount;
+
+        // Assert match amount.
+        assert!(
+            match_amount
+                == match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                    PARTICIPANT, input_amount, melee_id
+                )
+        );
+
+        // Simulate swap into escrow.
+        swap_inputs_enter.input_amount = input_amount + match_amount;
+        swap_stats_enter = simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Top off.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            input_amount,
+            lock_in
+        );
+
+        // Assert state.
+        registry_view.vault_balance -= match_amount;
+        registry_view.assert_registry_view(registry());
+        melee_view.available_rewards -= match_amount;
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.match_amount += match_amount;
+        escrow_view.emojicoin_0_balance += swap_stats_enter.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+
+        // Assert emitted enter event.
+        enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 3);
+        enter_event.quote_volume = swap_stats_enter.quote_volume;
+        enter_event.integrator_fee = swap_stats_enter.integrator_fee;
+        enter_event.match_amount = match_amount;
+        enter_event.emojicoin_0_proceeds = swap_stats_enter.net_proceeds;
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+        enter_event.assert_enter(enter_events[2]);
+
+        // Assert emitted vault balance event.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 6);
+        vault_balance_update_event.new_balance -= match_amount;
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[5]
+        );
+
+        // Set max match amount to become limiting factor.
+        match_amount -= 1;
+        set_melee_available_rewards(
+            melee_view.melee_id, get_DEFAULT_MAX_MATCH_AMOUNT()
+        );
+        melee_view.available_rewards = get_DEFAULT_MAX_MATCH_AMOUNT();
+        melee_view.max_match_amount = escrow_view.match_amount + match_amount;
+        set_melee_max_match_amount(melee_view.melee_id, melee_view.max_match_amount);
+
+        // Assert match amount.
+        assert!(
+            match_amount
+                == match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                    PARTICIPANT, input_amount, melee_id
+                )
+        );
+
+        // Simulate swap into escrow.
+        swap_inputs_enter.input_amount = input_amount + match_amount;
+        swap_stats_enter = simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Top off.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            input_amount,
+            lock_in
+        );
+
+        // Assert state.
+        registry_view.vault_balance -= match_amount;
+        registry_view.assert_registry_view(registry());
+        melee_view.available_rewards -= match_amount;
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.match_amount += match_amount;
+        escrow_view.emojicoin_0_balance += swap_stats_enter.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+
+        // Assert emitted enter event.
+        enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 4);
+        enter_event.quote_volume = swap_stats_enter.quote_volume;
+        enter_event.integrator_fee = swap_stats_enter.integrator_fee;
+        enter_event.match_amount = match_amount;
+        enter_event.emojicoin_0_proceeds = swap_stats_enter.net_proceeds;
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+        enter_event.assert_enter(enter_events[3]);
+
+        // Assert emitted vault balance event.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 7);
+        vault_balance_update_event.new_balance -= match_amount;
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[6]
+        );
+
+        // Simulate swap into escrow for no match amount, since max match is now met.
+        swap_inputs_enter.input_amount = input_amount;
+        swap_stats_enter = simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Top off.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            input_amount,
+            lock_in
+        );
+
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.emojicoin_0_balance += swap_stats_enter.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+
+        // Assert emitted enter event.
+        enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 5);
+        enter_event.quote_volume = swap_stats_enter.quote_volume;
+        enter_event.integrator_fee = swap_stats_enter.integrator_fee;
+        enter_event.match_amount = 0;
+        enter_event.emojicoin_0_proceeds = swap_stats_enter.net_proceeds;
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+        enter_event.assert_enter(enter_events[4]);
+
+        // Assert no new vault balance event emitted.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 7);
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun enter_swap_exit_repeat_other_side() {
+        let (emojicoin_0_balance, emojicoin_1_balance) =
+            init_module_with_funded_vault_and_participant();
+
+        // Assert state.
+        let registry_view = base_registry_view();
+        let melee_view = base_melee();
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        assert!(
+            !escrow_exists<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+
+        // Simulate swap into escrow.
+        let swap_inputs_enter = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: base_enter_amount(),
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE()
+        };
+        let swap_stats_enter =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Enter melee without locking in.
+        let lock_in = false;
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            lock_in
+        );
+
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        assert!(
+            escrow_exists<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        let escrow_view = base_escrow_view();
+        escrow_view.emojicoin_0_balance = swap_stats_enter.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert emitted enter event.
+        let enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 1);
+        let enter_event = MockEnter {
+            user: PARTICIPANT,
+            melee_id: 1,
+            input_amount: base_enter_amount(),
+            quote_volume: swap_stats_enter.quote_volume,
+            integrator_fee: swap_stats_enter.integrator_fee,
+            match_amount: 0,
+            emojicoin_0_proceeds: swap_stats_enter.net_proceeds,
+            emojicoin_1_proceeds: 0,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        enter_event.assert_enter(enter_events[0]);
+
+        // Simulate swap within escrow.
+        let swap_inputs_swap_route_0 = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: swap_stats_enter.net_proceeds,
+            selling_emojicoins: true,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE()
+        };
+        let swap_stats_swap_route_0 =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_swap_route_0);
+        let swap_inputs_swap_route_1 = SimulatedSwapInputs {
+            market_address: @zebra_market,
+            input_amount: swap_stats_swap_route_0.net_proceeds,
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE()
+        };
+        let swap_stats_swap_route_1 =
+            simulated_swap_stats<Zebra, ZebraLP>(swap_inputs_swap_route_1);
+
+        // Swap within escrow.
+        swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.emojicoin_1_balance = swap_stats_swap_route_1.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert emitted swap event.
+        let swap_events = emitted_events<Swap>();
+        assert!(swap_events.length() == 1);
+        let swap_event = MockSwap {
+            user: PARTICIPANT,
+            melee_id: 1,
+            quote_volume: swap_stats_swap_route_1.quote_volume,
+            integrator_fee: swap_stats_swap_route_0.integrator_fee
+                + swap_stats_swap_route_1.integrator_fee,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: swap_stats_swap_route_1.net_proceeds,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        swap_event.assert_swap(swap_events[0]);
+
+        // Exit.
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.emojicoin_1_balance = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        emojicoin_1_balance += swap_stats_swap_route_1.net_proceeds;
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert emitted exit event.
+        let exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 1);
+        let exit_event = MockExit {
+            user: PARTICIPANT,
+            melee_id: 1,
+            tap_out_fee: 0,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: swap_stats_swap_route_1.net_proceeds,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        exit_event.assert_exit(exit_events[0]);
+
+        // Fund with more APT.
+        mint_aptos_coin_to(PARTICIPANT, base_enter_amount());
+
+        // Simulate swap into escrow.
+        swap_inputs_enter.market_address = @zebra_market;
+        swap_stats_enter = simulated_swap_stats<Zebra, ZebraLP>(swap_inputs_enter);
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, Zebra>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            lock_in
+        );
+
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.emojicoin_1_balance = swap_stats_enter.net_proceeds;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert emitted enter event.
+        enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 2);
+        enter_event.quote_volume = swap_stats_enter.quote_volume;
+        enter_event.integrator_fee = swap_stats_enter.integrator_fee;
+        enter_event.emojicoin_0_proceeds = 0;
+        enter_event.emojicoin_1_proceeds = swap_stats_enter.net_proceeds;
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+        enter_event.assert_enter(enter_events[1]);
+
+        // Simulate swap within escrow.
+        swap_inputs_swap_route_0.market_address = @zebra_market;
+        swap_inputs_swap_route_0.input_amount = swap_stats_enter.net_proceeds;
+        swap_stats_swap_route_0 = simulated_swap_stats<Zebra, ZebraLP>(
+            swap_inputs_swap_route_0
+        );
+        swap_inputs_swap_route_1.market_address = @black_cat_market;
+        swap_inputs_swap_route_1.input_amount = swap_stats_swap_route_0.net_proceeds;
+        swap_stats_swap_route_1 = simulated_swap_stats<BlackCat, BlackCatLP>(
+            swap_inputs_swap_route_1
+        );
+
+        // Swap within escrow.
+        swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.emojicoin_0_balance = swap_stats_swap_route_1.net_proceeds;
+        escrow_view.emojicoin_1_balance = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert emitted swap event.
+        swap_events = emitted_events<Swap>();
+        assert!(swap_events.length() == 2);
+        swap_event.quote_volume = swap_stats_swap_route_1.quote_volume;
+        swap_event.integrator_fee =
+            swap_stats_swap_route_0.integrator_fee
+                + swap_stats_swap_route_1.integrator_fee;
+        swap_event.emojicoin_0_proceeds = swap_stats_swap_route_1.net_proceeds;
+        swap_event.emojicoin_1_proceeds = 0;
+        swap_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        swap_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+        swap_event.assert_swap(swap_events[1]);
+
+        // Exit.
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert state.
+        registry_view.assert_registry_view(registry());
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        emojicoin_0_balance += swap_stats_swap_route_1.net_proceeds;
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert emitted exit event.
+        exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 2);
+        exit_event.emojicoin_0_proceeds = swap_stats_swap_route_1.net_proceeds;
+        exit_event.emojicoin_1_proceeds = 0;
+        exit_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        exit_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+        exit_event.assert_exit(exit_events[1]);
+
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_TOP_OFF_MUST_LOCK_IN,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun enter_top_off_must_lock_in() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            false
+        );
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NO_ESCROW,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun escrow_no_escrow() {
+        escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(@0x0);
+    }
+
+    #[test]
+    public fun exchange_rate_exact_transition() {
+        emojicoin_dot_fun_tests::init_package_then_exact_transition();
+
+        let (base, quote) =
+            unpack_exchange_rate(
+                exchange_rate<BlackCat, BlackCatLP>(@black_cat_market)
+            );
+        assert!(base == get_EMOJICOIN_REMAINDER());
+        assert!(quote == get_QUOTE_REAL_CEILING());
+    }
+
+    #[test]
+    public fun exchange_rate_fresh_market() {
+        init_emojicoin_dot_fun_with_test_markets();
+
+        let (base, quote) =
+            unpack_exchange_rate(
+                exchange_rate<BlackCat, BlackCatLP>(@black_cat_market)
+            );
+        assert!(base == get_BASE_VIRTUAL_CEILING());
+        assert!(quote == get_QUOTE_VIRTUAL_FLOOR());
+    }
+
+    #[test]
     public fun init_module_base() {
         // Initialize emojicoin dot fun.
         init_emojicoin_dot_fun_with_test_markets();
@@ -360,6 +1284,78 @@ module emojicoin_arena::tests {
         mock_melee.emojicoin_0_market_address = @yin_yang_market;
         mock_melee.emojicoin_1_market_address = @zombie_market;
         mock_melee.assert_melee(melee_events[0]);
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_MELEE_ID,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun match_amount_invalid_melee_id_hi() {
+        init_module_with_funded_vault_and_participant();
+        match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            PARTICIPANT, base_enter_amount(), 2
+        );
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_MELEE_ID,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun match_amount_invalid_melee_id_lo() {
+        init_module_with_funded_vault_and_participant();
+        match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            PARTICIPANT, base_enter_amount(), 0
+        );
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_MELEE_ID_MISMATCH,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun match_amount_melee_id_mismatch() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            PARTICIPANT, base_enter_amount(), 0
+        );
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_MELEE_ID,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun melee_invalid_melee_id_hi() {
+        init_module_with_funded_vault_and_participant();
+        melee(2);
+    }
+
+    #[test]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_INVALID_MELEE_ID,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun melee_invalid_melee_id_lo() {
+        init_module_with_funded_vault_and_participant();
+        melee(0);
     }
 
     #[test]

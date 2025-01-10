@@ -32,6 +32,10 @@ module emojicoin_arena::emojicoin_arena {
     const E_NO_ESCROW: u64 = 5;
     /// User has no funds in escrow to withdraw.
     const E_EXIT_NO_FUNDS: u64 = 6;
+    /// Provided melee ID does not match existing resource.
+    const E_MELEE_ID_MISMATCH: u64 = 7;
+    /// Melee ID does not correspond to a melee that has been registered.
+    const E_INVALID_MELEE_ID: u64 = 8;
 
     const MAX_PERCENTAGE: u64 = 100;
 
@@ -39,9 +43,9 @@ module emojicoin_arena::emojicoin_arena {
     const REGISTRY_SEED: vector<u8> = b"Arena registry";
 
     /// Flat integrator fee for a single-route swap into escrow.
-    const INTEGRATOR_FEE_RATE_BPS: u8 = 100;
+    const INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE: u8 = 100;
     /// Flat integrator fee for a double-route swap within escrow.
-    const INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE: u8 = 50;
+    const INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE: u8 = 50;
 
     // Default parameters for new melees.
     const DEFAULT_DURATION: u64 = 20 * 3_600_000_000;
@@ -261,8 +265,12 @@ module emojicoin_arena::emojicoin_arena {
                 match_amount,
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
-                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
-                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
+                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
+                    market_address_0
+                ),
+                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
+                    market_address_1
+                )
             }
         );
 
@@ -298,8 +306,12 @@ module emojicoin_arena::emojicoin_arena {
                 integrator_fee,
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
-                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
-                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
+                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
+                    market_address_0
+                ),
+                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
+                    market_address_1
+                )
             }
         );
 
@@ -338,6 +350,10 @@ module emojicoin_arena::emojicoin_arena {
 
     #[view]
     public fun escrow<Coin0, LP0, Coin1, LP1>(participant: address): EscrowView acquires Escrow {
+        assert!(
+            exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant),
+            E_NO_ESCROW
+        );
         let escrow_ref = &Escrow<Coin0, LP0, Coin1, LP1>[participant];
         EscrowView {
             melee_id: escrow_ref.melee_id,
@@ -354,8 +370,87 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[view]
-    public fun melee<Coin0, LP0, Coin1, LP1>(melee_id: u64): Melee acquires Registry {
-        *Registry[@emojicoin_arena].melees_by_id.borrow(melee_id)
+    public fun escrow_exists<Coin0, LP0, Coin1, LP1>(participant: address): bool {
+        exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant)
+    }
+
+    #[view]
+    public fun exchange_rate<Emojicoin, EmojicoinLP>(
+        market_address: address
+    ): ExchangeRate {
+        exchange_rate_inner<Emojicoin, EmojicoinLP>(market_address)
+    }
+
+    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
+        let ExchangeRate { base, quote } = self;
+        (base, quote)
+    }
+
+    #[view]
+    /// Uses mutable references since inner match amount call requires them to prevent issues in
+    /// core APIs, even though no data gets mutated. Does not crank schedule since this requires
+    /// randomness, which is not safely supported in public functions.
+    public fun match_amount<Coin0, LP0, Coin1, LP1>(
+        participant: address, input_amount: u64, melee_id: u64
+    ): u64 acquires Escrow, Registry {
+
+        // Get global resources and associated information.
+        let registry_ref_mut = &mut Registry[@emojicoin_arena];
+        let melees_by_id_ref_mut = &mut registry_ref_mut.melees_by_id;
+        let n_registered_melees = melees_by_id_ref_mut.length();
+
+        // If user has an escrow, check melee ID and get the amount they've matched for the melee.
+        let escrow_match_amount =
+            if (exists<Escrow<Coin0, LP0, Coin1, LP1>>(participant)) {
+                let escrow_ref = &Escrow<Coin0, LP0, Coin1, LP1>[participant];
+                assert!(escrow_ref.melee_id == melee_id, E_MELEE_ID_MISMATCH);
+                escrow_ref.match_amount
+            } else { // Otherwise, check melee ID and type arguments, returning no match amount.
+                assert!(
+                    melee_id <= n_registered_melees && melee_id > 0,
+                    E_INVALID_MELEE_ID
+                );
+                let indicated_melee_ref_mut = melees_by_id_ref_mut.borrow_mut(melee_id);
+                emojicoin_dot_fun::market_view<Coin0, LP0>(
+                    indicated_melee_ref_mut.emojicoin_0_market_address
+                );
+                emojicoin_dot_fun::market_view<Coin1, LP1>(
+                    indicated_melee_ref_mut.emojicoin_1_market_address
+                );
+                0
+            };
+
+        // Borrow the most recent melee, returning early if it does not match indicated melee ID.
+        if (melee_id != n_registered_melees) return 0;
+        let most_recent_melee_ref_mut =
+            melees_by_id_ref_mut.borrow_mut(n_registered_melees);
+
+        // Return early if most recent melee has ended.
+        let time = timestamp::now_microseconds();
+        if (time
+            >= most_recent_melee_ref_mut.start_time
+                + most_recent_melee_ref_mut.duration)
+            return 0;
+
+        // Cross-reference resources and time to get match amount.
+        match_amount_inner(
+            input_amount,
+            escrow_match_amount,
+            most_recent_melee_ref_mut,
+            registry_ref_mut,
+            time
+        )
+    }
+
+    #[view]
+    public fun melee(melee_id: u64): Melee acquires Registry {
+        let registry_ref = &Registry[@emojicoin_arena];
+        let melees_by_id_ref = &registry_ref.melees_by_id;
+        assert!(
+            melee_id <= melees_by_id_ref.length() && melee_id > 0,
+            E_INVALID_MELEE_ID
+        );
+        *melees_by_id_ref.borrow(melee_id)
     }
 
     public fun unpack_melee(self: Melee): (u64, address, address, u64, u64, u64, u64, u64) {
@@ -624,7 +719,7 @@ module emojicoin_arena::emojicoin_arena {
         entrant_address
     }
 
-    inline fun exchange_rate<Emojicoin, EmojicoinLP>(
+    inline fun exchange_rate_inner<Emojicoin, EmojicoinLP>(
         market_address: address
     ): ExchangeRate {
 
@@ -674,11 +769,7 @@ module emojicoin_arena::emojicoin_arena {
         // Crank schedule, determine if melee from escrow is active or not.
         let (cranked, registry_ref_mut, _, n_melees_before_cranking) = crank_schedule();
         let melee_id = escrow_ref_mut.melee_id;
-        let melee_is_active =
-            if (cranked) { false }
-            else {
-                melee_id == n_melees_before_cranking
-            };
+        let melee_is_active = !cranked && melee_id == n_melees_before_cranking;
         (registry_ref_mut, melee_is_active, participant_address, escrow_ref_mut, melee_id)
     }
 
@@ -736,8 +827,12 @@ module emojicoin_arena::emojicoin_arena {
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
                 tap_out_fee,
-                emojicoin_0_exchange_rate: exchange_rate<Coin0, LP0>(market_address_0),
-                emojicoin_1_exchange_rate: exchange_rate<Coin1, LP1>(market_address_1)
+                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
+                    market_address_0
+                ),
+                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
+                    market_address_1
+                )
             }
         );
     }
@@ -757,52 +852,51 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     /// Uses mutable references to avoid borrowing issues.
-    inline fun match_amount<Coin0, LP0, Coin1, LP1>(
+    inline fun match_amount_inner(
         input_amount: u64,
-        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        escrow_match_amount: u64,
         active_melee_ref_mut: &mut Melee,
         registry_ref_mut: &mut Registry,
         time: u64
     ): u64 {
         let elapsed_time = ((time - active_melee_ref_mut.start_time) as u256);
         let duration = (active_melee_ref_mut.duration as u256);
-        if (elapsed_time >= duration) { 0 }
-        else {
-            // Scale down input amount for matching percentage and remaining time in one compound
-            // operation, to reduce truncation errors. Equivalent to:
-            //
-            //                max match percentage   remaining time
-            // input amount * -------------------- * --------------
-            //                100                    duration
-            let raw_match_amount =
-                (
-                    ((input_amount as u256)
-                        * (active_melee_ref_mut.max_match_percentage as u256)
-                        * (duration - elapsed_time)) / ((MAX_PERCENTAGE as u256)
-                        * duration) as u64
-                );
-            // Correct for the amount that is available in the vault.
-            let corrected_for_vault_balance =
-                min(
-                    raw_match_amount,
-                    coin::balance<AptosCoin>(
-                        account::get_signer_capability_address(
-                            &registry_ref_mut.signer_capability
-                        )
-                    )
-                );
-            // Correct for available rewards in melee.
-            let corrected_for_melee_available_rewards =
-                min(
-                    corrected_for_vault_balance,
-                    active_melee_ref_mut.available_rewards
-                );
-            // Correct for the max match amount that the user is eligible for.
+        // Scale down input amount for matching percentage and remaining time in one compound
+        // operation, to reduce truncation errors. Equivalent to:
+        //
+        //                max match percentage   remaining time
+        // input amount * -------------------- * --------------
+        //                100                    duration
+        //
+        // Note that the calculation for remaining time (duration - elapsed_time) should never
+        // underflow since callers only invoke this function for an active melee.
+        let raw_match_amount =
+            (
+                ((input_amount as u256)
+                    * (active_melee_ref_mut.max_match_percentage as u256)
+                    * (duration - elapsed_time)) / ((MAX_PERCENTAGE as u256) * duration) as u64
+            );
+        // Correct for the amount that is available in the vault.
+        let corrected_for_vault_balance =
             min(
-                corrected_for_melee_available_rewards,
-                active_melee_ref_mut.max_match_amount - escrow_ref_mut.match_amount
-            )
-        }
+                raw_match_amount,
+                coin::balance<AptosCoin>(
+                    account::get_signer_capability_address(
+                        &registry_ref_mut.signer_capability
+                    )
+                )
+            );
+        // Correct for available rewards in melee.
+        let corrected_for_melee_available_rewards =
+            min(
+                corrected_for_vault_balance,
+                active_melee_ref_mut.available_rewards
+            );
+        // Correct for the max match amount that the user is eligible for.
+        min(
+            corrected_for_melee_available_rewards,
+            active_melee_ref_mut.max_match_amount - escrow_match_amount
+        )
     }
 
     /// Accepts a mutable reference to avoid borrowing issues.
@@ -903,7 +997,7 @@ module emojicoin_arena::emojicoin_arena {
             swapper_address,
             input_amount: octas_to_spend,
             sell_emojicoin_for_apt: false,
-            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS
+            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE
         };
 
         // Initialize return values.
@@ -1070,7 +1164,7 @@ module emojicoin_arena::emojicoin_arena {
             swapper_address,
             input_amount: from_emojicoin_balance,
             sell_emojicoin_for_apt: true,
-            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS_DUAL_ROUTE
+            integrator_fee_rate_bps: INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE
         };
 
         // Swap out of escrow.
@@ -1112,10 +1206,11 @@ module emojicoin_arena::emojicoin_arena {
         entrant_address: address
     ): u64 {
         if (lock_in) {
+            let escrow_match_amount_ref_mut = &mut escrow_ref_mut.match_amount;
             let match_amount =
-                match_amount(
+                match_amount_inner(
                     input_amount,
-                    escrow_ref_mut,
+                    *escrow_match_amount_ref_mut,
                     active_melee_ref_mut,
                     registry_ref_mut,
                     time
@@ -1135,7 +1230,7 @@ module emojicoin_arena::emojicoin_arena {
 
                 // Update rewards state for melee and escrow.
                 active_melee_ref_mut.available_rewards -= match_amount;
-                escrow_ref_mut.match_amount += match_amount;
+                *escrow_match_amount_ref_mut += match_amount;
 
             };
 
@@ -1162,6 +1257,20 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[test_only]
+    #[lint::allow_unsafe_randomness]
+    public fun enter_for_test<Coin0, LP0, Coin1, LP1, EscrowCoin>(
+        entrant: &signer, input_amount: u64, lock_in: bool
+    ) acquires Escrow, Registry {
+        enter<Coin0, LP0, Coin1, LP1, EscrowCoin>(entrant, input_amount, lock_in)
+    }
+
+    #[test_only]
+    #[lint::allow_unsafe_randomness]
+    public fun exit_for_test<Coin0, LP0, Coin1, LP1>(participant: &signer) acquires Escrow, Registry {
+        exit<Coin0, LP0, Coin1, LP1>(participant)
+    }
+
+    #[test_only]
     public fun get_DEFAULT_AVAILABLE_REWARDS(): u64 {
         DEFAULT_AVAILABLE_REWARDS
     }
@@ -1182,13 +1291,41 @@ module emojicoin_arena::emojicoin_arena {
     }
 
     #[test_only]
+    public fun get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE(): u8 {
+        INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE
+    }
+
+    #[test_only]
+    public fun get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE(): u8 {
+        INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE
+    }
+
+    #[test_only]
     public fun get_REGISTRY_SEED(): vector<u8> {
         REGISTRY_SEED
     }
 
     #[test_only]
+    public fun set_melee_available_rewards(melee_id: u64, amount: u64) acquires Registry {
+        Registry[@emojicoin_arena].melees_by_id.borrow_mut(melee_id).available_rewards =
+            amount;
+    }
+
+    #[test_only]
+    public fun set_melee_max_match_amount(melee_id: u64, amount: u64) acquires Registry {
+        Registry[@emojicoin_arena].melees_by_id.borrow_mut(melee_id).max_match_amount =
+            amount;
+    }
+
+    #[test_only]
     public fun init_module_test_only(account: &signer) acquires Registry {
         init_module(account)
+    }
+
+    #[test_only]
+    #[lint::allow_unsafe_randomness]
+    public fun swap_for_test<Coin0, LP0, Coin1, LP1>(swapper: &signer) acquires Escrow, Registry {
+        swap<Coin0, LP0, Coin1, LP1>(swapper);
     }
 
     #[test_only]
@@ -1219,12 +1356,6 @@ module emojicoin_arena::emojicoin_arena {
             emojicoin_0_exchange_rate,
             emojicoin_1_exchange_rate
         )
-    }
-
-    #[test_only]
-    public fun unpack_exchange_rate(self: ExchangeRate): (u64, u64) {
-        let ExchangeRate { base, quote } = self;
-        (base, quote)
     }
 
     #[test_only]
