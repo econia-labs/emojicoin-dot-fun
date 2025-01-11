@@ -1744,7 +1744,7 @@ module emojicoin_arena::tests {
         let covered_melee_ids_by_market_ids_contains = false;
 
         // Call all coverage conditions to silence erroneously compiler warnings about unused
-        // assignments.
+        // assignments per https://github.com/aptos-labs/aptos-core/issues/15713.
         covered_equal_market_ids;
         covered_unequal_market_ids;
         covered_sort_order_market_id_0_hi;
