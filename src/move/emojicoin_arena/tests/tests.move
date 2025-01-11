@@ -5,6 +5,7 @@ module emojicoin_arena::tests {
         create_resource_address,
         create_signer_for_test as get_signer
     };
+    use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
     use aptos_framework::event::{emitted_events};
     use aptos_framework::randomness;
@@ -511,6 +512,46 @@ module emojicoin_arena::tests {
         SimulatedSwapStats { quote_volume, integrator_fee, net_proceeds }
     }
 
+    public fun simulate_enter_post_bonding_curve():
+        (
+        MockEscrowView, MockEnter, SimulatedSwapStats
+    ) {
+
+        // Simulate swap into escrow.
+        let swap_inputs_enter = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: base_enter_amount_post_bonding_curve(),
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE()
+        };
+        let swap_stats_enter =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Get escrow view.
+        let escrow_view = base_escrow_view();
+        escrow_view.emojicoin_0_balance = swap_stats_enter.net_proceeds;
+
+        // Construct enter event.
+        let enter_event = MockEnter {
+            user: PARTICIPANT,
+            melee_id: 1,
+            input_amount: base_enter_amount_post_bonding_curve(),
+            quote_volume: swap_stats_enter.quote_volume,
+            integrator_fee: swap_stats_enter.integrator_fee,
+            match_amount: 0,
+            emojicoin_0_proceeds: swap_stats_enter.net_proceeds,
+            emojicoin_1_proceeds: 0,
+            // Must be updated after actual enter.
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            // Must be updated after actual enter.
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+
+        (escrow_view, enter_event, swap_stats_enter)
+    }
+
     #[test]
     public fun admin_functions() {
         // Initialize emojicoin dot fun.
@@ -575,7 +616,8 @@ module emojicoin_arena::tests {
     #[test]
     #[lint::allow_unsafe_randomness]
     public fun crank_by_enter() {
-        init_module_with_funded_vault_and_participant_post_bonding_curve();
+        let (emojicoin_0_balance, emojicoin_1_balance) =
+            init_module_with_funded_vault_and_participant_post_bonding_curve();
         set_randomness_seed_for_crank_coverage();
 
         // Set time to middle of a new melee.
@@ -604,14 +646,31 @@ module emojicoin_arena::tests {
             ) == 0
         );
 
+        // Assert user state.
+        assert!(
+            !escrow_exists<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+        assert!(
+            coin::balance<AptosCoin>(PARTICIPANT)
+                == base_enter_amount_post_bonding_curve()
+        );
+
+        // Assert global state and crank events.
         assert_crank_global_state_and_events();
     }
 
     #[test]
     #[lint::allow_unsafe_randomness]
     public fun crank_by_exit() {
-        init_module_with_funded_vault_and_participant_post_bonding_curve();
+        let (emojicoin_0_balance, emojicoin_1_balance) =
+            init_module_with_funded_vault_and_participant_post_bonding_curve();
         set_randomness_seed_for_crank_coverage();
+
+        // Get escrow view and enter event post-enter.
+        let (escrow_view, enter_event, swap_stats_enter) =
+            simulate_enter_post_bonding_curve();
 
         // Enter.
         enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
@@ -619,6 +678,27 @@ module emojicoin_arena::tests {
             base_enter_amount_post_bonding_curve(),
             false
         );
+
+        // Update exchange rates in enter event to be real-time.
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+
+        // Assert user state.
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert enter event.
+        let enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 1);
+        enter_event.assert_enter(enter_events[0]);
 
         // Set time to middle of a new melee.
         let time = base_publish_time();
@@ -628,14 +708,47 @@ module emojicoin_arena::tests {
         // Crank via exit API.
         exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
 
+        // Assert user state.
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        assert!(
+            coin::balance<BlackCat>(PARTICIPANT)
+                == emojicoin_0_balance + swap_stats_enter.net_proceeds
+        );
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert emitted exit event.
+        let exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 1);
+        let exit_event = MockExit {
+            user: PARTICIPANT,
+            melee_id: 1,
+            tap_out_fee: 0,
+            emojicoin_0_proceeds: swap_stats_enter.net_proceeds,
+            emojicoin_1_proceeds: 0,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        exit_event.assert_exit(exit_events[0]);
+
         assert_crank_global_state_and_events();
     }
 
     #[test]
     #[lint::allow_unsafe_randomness]
     public fun crank_by_swap() {
-        init_module_with_funded_vault_and_participant_post_bonding_curve();
+        let (emojicoin_0_balance, emojicoin_1_balance) =
+            init_module_with_funded_vault_and_participant_post_bonding_curve();
         set_randomness_seed_for_crank_coverage();
+
+        // Get escrow view and enter event post-enter.
+        let (escrow_view, enter_event, swap_stats_enter) =
+            simulate_enter_post_bonding_curve();
 
         // Enter.
         enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
@@ -644,13 +757,98 @@ module emojicoin_arena::tests {
             false
         );
 
+        // Update exchange rates in enter event to be real-time.
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+
+        // Assert user state.
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert enter event.
+        let enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 1);
+        enter_event.assert_enter(enter_events[0]);
+
         // Set time to middle of a new melee.
         let time = base_publish_time();
         time += get_DEFAULT_DURATION();
         timestamp::update_global_time_for_test(time + 1);
 
+        // Simulate swap within escrow.
+        let swap_inputs_swap_route_0 = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: swap_stats_enter.net_proceeds,
+            selling_emojicoins: true,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE()
+        };
+        let swap_stats_swap_route_0 =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_swap_route_0);
+        let swap_inputs_swap_route_1 = SimulatedSwapInputs {
+            market_address: @zebra_market,
+            input_amount: swap_stats_swap_route_0.net_proceeds,
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE()
+        };
+        let swap_stats_swap_route_1 =
+            simulated_swap_stats<Zebra, ZebraLP>(swap_inputs_swap_route_1);
+
         // Crank via swap API.
         swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert user state.
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(
+            coin::balance<Zebra>(PARTICIPANT)
+                == emojicoin_1_balance + swap_stats_swap_route_1.net_proceeds
+        );
+
+        // Assert emitted swap event.
+        let swap_events = emitted_events<Swap>();
+        assert!(swap_events.length() == 1);
+        let swap_event = MockSwap {
+            user: PARTICIPANT,
+            melee_id: 1,
+            quote_volume: swap_stats_swap_route_1.quote_volume,
+            integrator_fee: swap_stats_swap_route_0.integrator_fee
+                + swap_stats_swap_route_1.integrator_fee,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: swap_stats_swap_route_1.net_proceeds,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        swap_event.assert_swap(swap_events[0]);
+
+        // Assert emitted exit event.
+        let exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 1);
+        let exit_event = MockExit {
+            user: PARTICIPANT,
+            melee_id: 1,
+            tap_out_fee: 0,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: swap_stats_swap_route_1.net_proceeds,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        exit_event.assert_exit(exit_events[0]);
 
         assert_crank_global_state_and_events();
     }
