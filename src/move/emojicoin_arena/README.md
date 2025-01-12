@@ -25,7 +25,7 @@ However in this case they will miss out on:
 1. Ease of participation in the melee via the emojicoin arena feature page.
 1. Rewards.
 
-Rewards are provided by the Aptos Foundation and are loaded into a vault that
+Rewards are loaded into and disbursed from a vault that anyone can fund and
 anyone can claim from: when a user enters a melee, they can elect to lock in
 their contributions, and if they do so, rewards from the vault will be combined
 with their APT contribution to buy even more emojicoins. However, once a user
