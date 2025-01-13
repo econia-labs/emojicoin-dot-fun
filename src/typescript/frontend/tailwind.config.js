@@ -9,6 +9,7 @@ delete colors.blueGray;
 import { fontFamily } from "tailwindcss/defaultTheme";
 
 module.exports = {
+  darkMode: ["class"],
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
@@ -40,6 +41,11 @@ module.exports = {
         red: "0 0 2px #F3263E",
         white: "0 0 2px #FFFFFF",
         gray: "0 0 2px #717386",
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
     },
     colors: {
@@ -220,5 +226,6 @@ module.exports = {
       };
       addUtilities(newUtilities, ["responsive"]);
     },
+    require("tailwindcss-animate"),
   ],
 };

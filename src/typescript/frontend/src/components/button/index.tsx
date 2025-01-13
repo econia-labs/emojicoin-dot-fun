@@ -68,27 +68,53 @@ const Button = <E extends React.ElementType = "button">({
             })}
 
           {!isScramble ? (
-            <FlexGap gap="8px" onMouseOver={replay} className="h-[1em]">
+            <FlexGap
+              gap="8px"
+              onMouseOver={replay}
+              justifyContent="space-between"
+              className="h-[1em]"
+            >
               <Text {...textProps}>{"{ "}</Text>
               {icon && (
                 <Text {...textProps} className="flex flex-row">
                   {icon}
                 </Text>
               )}
-              <Text {...textProps} className="flex flex-row">
+              <Text
+                {...textProps}
+                className="flex flex-row"
+                style={
+                  typeof children === "string"
+                    ? { minWidth: `${children.length + 1}ch`, textAlign: "center" }
+                    : {}
+                }
+              >
                 {children}
               </Text>
               <Text {...textProps}>{" }"}</Text>
             </FlexGap>
           ) : (
-            <FlexGap gap="8px" onMouseOver={replay} className="h-[1em]">
+            <FlexGap
+              gap="8px"
+              onMouseOver={replay}
+              className="h-[1em]"
+              justifyContent="space-between"
+            >
               <Text {...textProps}>{"{ "}</Text>
               {icon && (
                 <Text {...textProps} className="flex flex-row">
                   {icon}
                 </Text>
               )}
-              <Text {...textProps} ref={isScramble ? ref : undefined} />
+              <Text
+                {...textProps}
+                ref={isScramble ? ref : undefined}
+                style={
+                  typeof children === "string"
+                    ? { minWidth: `${children.length + 1}ch`, textAlign: "center" }
+                    : {}
+                }
+              />
               <Text {...textProps}>{" }"}</Text>
             </FlexGap>
           )}
