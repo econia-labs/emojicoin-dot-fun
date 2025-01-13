@@ -250,6 +250,86 @@ type GlobalStateEventData = {
   cumulative_chat_messages: Uint64String;
 };
 
+type ArenaMeleeEventData = {
+  event_index: Uint64String;
+  melee_id: Uint64String;
+  emojicoin_0_market_address: string;
+  emojicoin_1_market_address: string;
+  start_time: Uint64String;
+  duration: Uint64String;
+  max_match_percentage: Uint64String;
+  max_match_amount: Uint64String;
+  available_rewards: Uint64String;
+};
+
+type ArenaEnterEventData = {
+  event_index: Uint64String;
+  user: string;
+  melee_id: Uint64String;
+  input_amount: Uint64String;
+  quote_volume: Uint64String;
+  integrator_fee: Uint64String;
+  match_amount: Uint64String;
+  emojicoin_0_proceeds: Uint64String;
+  emojicoin_1_proceeds: Uint64String;
+  emojicoin_0_exchange_rate_base: Uint64String;
+  emojicoin_0_exchange_rate_quote: Uint64String;
+  emojicoin_1_exchange_rate_base: Uint64String;
+  emojicoin_1_exchange_rate_quote: Uint64String;
+};
+
+type ArenaExitEventData = {
+  event_index: Uint64String;
+  user: string;
+  melee_id: Uint64String;
+  tap_out_fee: Uint64String;
+  emojicoin_0_proceeds: Uint64String;
+  emojicoin_1_proceeds: Uint64String;
+  emojicoin_0_exchange_rate_base: Uint64String;
+  emojicoin_0_exchange_rate_quote: Uint64String;
+  emojicoin_1_exchange_rate_base: Uint64String;
+  emojicoin_1_exchange_rate_quote: Uint64String;
+};
+
+type ArenaSwapEventData = {
+  event_index: Uint64String;
+  user: string;
+  melee_id: Uint64String;
+  quote_volume: Uint64String;
+  integrator_fee: Uint64String;
+  emojicoin_0_proceeds: Uint64String;
+  emojicoin_1_proceeds: Uint64String;
+  emojicoin_0_exchange_rate_base: Uint64String;
+  emojicoin_0_exchange_rate_quote: Uint64String;
+  emojicoin_1_exchange_rate_base: Uint64String;
+  emojicoin_1_exchange_rate_quote: Uint64String;
+};
+
+type ArenaVaultBalanceUpdateEventData = {
+  event_index: Uint64String;
+  new_balance: Uint64String;
+};
+
+type ArenaPositionsData = {
+  user: string;
+  melee_id: Uint64String;
+  open: boolean;
+  emojicoin_0_balance: Uint64String;
+  emojicoin_1_balance: Uint64String;
+  profits: Uint64String;
+  losses: Uint64String;
+};
+
+type ArenaLeaderboardData = {
+  user: string;
+  open: boolean;
+  emojicoin_0_balance: Uint64String;
+  emojicoin_1_balance: Uint64String;
+  profits: Uint64String;
+  losses: Uint64String;
+  pnl: number;
+};
+
 export type DatabaseStructType = {
   TransactionMetadata: TransactionMetadata;
   MarketAndStateMetadata: MarketAndStateMetadata;
@@ -262,6 +342,13 @@ export type DatabaseStructType = {
   ChatEventData: ChatEventData;
   StateEventData: StateEventData;
   GlobalStateEventData: GlobalStateEventData;
+  ArenaMelee: ArenaMeleeEventData;
+  ArenaEnter: ArenaEnterEventData;
+  ArenaExit: ArenaExitEventData;
+  ArenaSwap: ArenaSwapEventData;
+  ArenaVaultBalanceUpdate: ArenaVaultBalanceUpdateEventData;
+  ArenaPositions: ArenaPositionsData;
+  ArenaLeaderboard: ArenaLeaderboardData;
 };
 
 export type AnyEventDatabaseRow =
@@ -288,11 +375,18 @@ export enum TableName {
   MarketState = "market_state",
   ProcessorStatus = "processor_status",
   PriceFeed = "price_feed",
+  ArenaMeleeEvents = "arena_melee_events",
+  ArenaEnterEvents = "arena_enter_events",
+  ArenaExitEvents = "arena_exit_events",
+  ArenaSwapEvents = "arena_swap_events",
+  ArenaVaultBalanceUpdateEvents = "arena_vault_balance_updates_events",
+  ArenaPositions = "arena_positions",
 }
 
 export enum DatabaseRpc {
   UserPools = "user_pools",
   PriceFeed = "price_feed",
+  ArenaLeaderboard = "arena_leaderboard",
 }
 
 // Fields that only exist after being processed by a processor.
@@ -374,6 +468,14 @@ export type DatabaseJsonType = {
       close_price_q64: Uint64String;
     }
   >;
+  [TableName.ArenaMeleeEvents]: Flatten<TransactionMetadata & ArenaMeleeEventData>;
+  [TableName.ArenaEnterEvents]: Flatten<TransactionMetadata & ArenaEnterEventData>;
+  [TableName.ArenaExitEvents]: Flatten<TransactionMetadata & ArenaExitEventData>;
+  [TableName.ArenaSwapEvents]: Flatten<TransactionMetadata & ArenaSwapEventData>;
+  [TableName.ArenaVaultBalanceUpdateEvents]: Flatten<
+    TransactionMetadata & ArenaVaultBalanceUpdateEventData
+  >;
+  [TableName.ArenaPositions]: ArenaPositionsData;
   [DatabaseRpc.UserPools]: Flatten<
     TransactionMetadata &
       MarketAndStateMetadata &
@@ -381,6 +483,7 @@ export type DatabaseJsonType = {
       ProcessedFields &
       UserLPCoinBalance & { daily_volume: Uint128String }
   >;
+  [DatabaseRpc.ArenaLeaderboard]: ArenaLeaderboardData;
 };
 
 type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
@@ -396,7 +499,14 @@ type Columns = DatabaseJsonType[TableName.GlobalStateEvents] &
   DatabaseJsonType[TableName.MarketState] &
   DatabaseJsonType[TableName.PriceFeed] &
   DatabaseJsonType[TableName.ProcessorStatus] &
+  DatabaseJsonType[TableName.ArenaMeleeEvents] &
+  DatabaseJsonType[TableName.ArenaEnterEvents] &
+  DatabaseJsonType[TableName.ArenaExitEvents] &
+  DatabaseJsonType[TableName.ArenaSwapEvents] &
+  DatabaseJsonType[TableName.ArenaVaultBalanceUpdateEvents] &
+  DatabaseJsonType[TableName.ArenaPositions] &
   DatabaseJsonType[DatabaseRpc.UserPools] &
-  DatabaseJsonType[DatabaseRpc.PriceFeed];
+  DatabaseJsonType[DatabaseRpc.PriceFeed] &
+  DatabaseJsonType[DatabaseRpc.ArenaLeaderboard];
 
 export type AnyColumnName = keyof Columns;
