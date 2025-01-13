@@ -839,10 +839,6 @@ module emojicoin_arena::emojicoin_arena {
         // Withdraw emojicoin balance from escrow.
         let (emojicoin_0_proceeds, emojicoin_1_proceeds) =
             try_withdraw_from_escrow_both_coins(participant_address, escrow_ref_mut);
-        assert!(
-            emojicoin_0_proceeds > 0 || emojicoin_1_proceeds > 0,
-            E_EXIT_NO_FUNDS
-        );
 
         // Emit exit event.
         event::emit(
