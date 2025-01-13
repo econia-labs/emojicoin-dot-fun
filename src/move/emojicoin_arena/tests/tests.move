@@ -1605,6 +1605,25 @@ module emojicoin_arena::tests {
     #[lint::allow_unsafe_randomness]
     #[
         expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_EXIT_NO_FUNDS,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun exit_exit_no_funds() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            false
+        );
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
             abort_code = emojicoin_arena::emojicoin_arena::E_EXIT_TAP_OUT_FEE,
             location = emojicoin_arena::emojicoin_arena
         )
