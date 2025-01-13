@@ -5,8 +5,10 @@ module emojicoin_arena::tests {
         create_resource_address,
         create_signer_for_test as get_signer
     };
+    use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
     use aptos_framework::event::{emitted_events};
+    use aptos_framework::randomness;
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
     use black_cat_market::coin_factory::{Emojicoin as BlackCat, EmojicoinLP as BlackCatLP};
@@ -46,6 +48,8 @@ module emojicoin_arena::tests {
         init_module_test_only,
         match_amount,
         melee,
+        melee_ids_by_market_ids_contains_for_test as melee_ids_by_market_ids_contains,
+        random_market_id_for_test as random_market_id,
         registry,
         set_melee_available_rewards,
         set_melee_max_match_amount,
@@ -180,6 +184,27 @@ module emojicoin_arena::tests {
         assert!(self.emojicoin_0_balance == emojicoin_0_balance);
         assert!(self.emojicoin_1_balance == emojicoin_1_balance);
         assert!(self.match_amount == match_amount);
+    }
+
+    public fun assert_crank_global_state_and_events() {
+        // Assert state.
+        let registry_view = base_registry_view();
+        registry_view.n_melees = 2;
+        registry_view.assert_registry_view(registry());
+        let melee_view_1 = base_melee();
+        melee_view_1.assert_melee(melee(melee_view_1.melee_id));
+        let melee_view_2 = melee_view_1;
+        melee_view_2.melee_id = 2;
+        melee_view_2.emojicoin_0_market_address = @black_heart_market;
+        melee_view_2.emojicoin_1_market_address = @yellow_heart_market;
+        melee_view_2.start_time = base_start_time() + get_DEFAULT_DURATION();
+        melee_view_2.assert_melee(melee(melee_view_2.melee_id));
+
+        // Assert emitted melee events.
+        let melee_events = emitted_events<Melee>();
+        assert!(melee_events.length() == 2);
+        melee_view_1.assert_melee(melee_events[0]);
+        melee_view_2.assert_melee(melee_events[1]);
     }
 
     public fun assert_exchange_rate(
@@ -317,6 +342,10 @@ module emojicoin_arena::tests {
         get_QUOTE_REAL_CEILING() / 2
     }
 
+    public fun base_enter_amount_post_bonding_curve(): u64 {
+        get_QUOTE_REAL_CEILING() * 2
+    }
+
     public fun base_escrow_view(): MockEscrowView {
         MockEscrowView {
             melee_id: 1,
@@ -427,6 +456,26 @@ module emojicoin_arena::tests {
         )
     }
 
+    public fun init_module_with_funded_vault_and_participant_post_bonding_curve(): (u64, u64) {
+        init_module_with_funded_vault();
+        fund_participant<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+            base_enter_amount_post_bonding_curve(),
+            @black_cat_market,
+            @zebra_market
+        )
+    }
+
+    #[lint::allow_unsafe_randomness]
+    /// Set the randomness seed such that a single crank will hit all coverage branches in
+    /// underlying crank logic. This seed was derived using a scripted brute force approach to
+    /// increment the value, then re-run tests until `randomness_seed_for_crank_coverage` passed.
+    public fun set_randomness_seed_for_crank_coverage() {
+        randomness::initialize_for_testing(&get_signer(@aptos_framework));
+        randomness::set_seed(
+            x"0000000000000000000000000000000000000000000000000000000000000060"
+        );
+    }
+
     public fun simulated_swap_stats<Emojicoin, EmojicoinLP>(
         simulated_swap_inputs: SimulatedSwapInputs
     ): SimulatedSwapStats {
@@ -461,6 +510,46 @@ module emojicoin_arena::tests {
                 )
             );
         SimulatedSwapStats { quote_volume, integrator_fee, net_proceeds }
+    }
+
+    public fun simulate_enter_post_bonding_curve():
+        (
+        MockEscrowView, MockEnter, SimulatedSwapStats
+    ) {
+
+        // Simulate swap into escrow.
+        let swap_inputs_enter = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: base_enter_amount_post_bonding_curve(),
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_SINGLE_ROUTE()
+        };
+        let swap_stats_enter =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_enter);
+
+        // Get escrow view.
+        let escrow_view = base_escrow_view();
+        escrow_view.emojicoin_0_balance = swap_stats_enter.net_proceeds;
+
+        // Construct enter event.
+        let enter_event = MockEnter {
+            user: PARTICIPANT,
+            melee_id: 1,
+            input_amount: base_enter_amount_post_bonding_curve(),
+            quote_volume: swap_stats_enter.quote_volume,
+            integrator_fee: swap_stats_enter.integrator_fee,
+            match_amount: 0,
+            emojicoin_0_proceeds: swap_stats_enter.net_proceeds,
+            emojicoin_1_proceeds: 0,
+            // Must be updated after actual enter.
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            // Must be updated after actual enter.
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+
+        (escrow_view, enter_event, swap_stats_enter)
     }
 
     #[test]
@@ -526,6 +615,246 @@ module emojicoin_arena::tests {
 
     #[test]
     #[lint::allow_unsafe_randomness]
+    public fun crank_by_enter() {
+        let (emojicoin_0_balance, emojicoin_1_balance) =
+            init_module_with_funded_vault_and_participant_post_bonding_curve();
+        set_randomness_seed_for_crank_coverage();
+
+        // Set time to middle of a new melee.
+        let time = base_publish_time();
+        time += get_DEFAULT_DURATION();
+        timestamp::update_global_time_for_test(time + 1);
+
+        // Verify that nothing can be matched since melee duration has elapsed.
+        assert!(
+            match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                PARTICIPANT, base_enter_amount_post_bonding_curve(), 1
+            ) == 0
+        );
+
+        // Crank via enter API.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount_post_bonding_curve(),
+            false
+        );
+
+        // Verify that nothing can be matched since melee is inactive.
+        assert!(
+            match_amount<BlackCat, BlackCatLP, Zebra, ZebraLP>(
+                PARTICIPANT, base_enter_amount_post_bonding_curve(), 1
+            ) == 0
+        );
+
+        // Assert user state.
+        assert!(
+            !escrow_exists<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+        assert!(
+            coin::balance<AptosCoin>(PARTICIPANT)
+                == base_enter_amount_post_bonding_curve()
+        );
+
+        // Assert global state and crank events.
+        assert_crank_global_state_and_events();
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun crank_by_exit() {
+        let (emojicoin_0_balance, emojicoin_1_balance) =
+            init_module_with_funded_vault_and_participant_post_bonding_curve();
+        set_randomness_seed_for_crank_coverage();
+
+        // Get escrow view and enter event post-enter.
+        let (escrow_view, enter_event, swap_stats_enter) =
+            simulate_enter_post_bonding_curve();
+
+        // Enter.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount_post_bonding_curve(),
+            false
+        );
+
+        // Update exchange rates in enter event to be real-time.
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+
+        // Assert user state.
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert enter event.
+        let enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 1);
+        enter_event.assert_enter(enter_events[0]);
+
+        // Set time to middle of a new melee.
+        let time = base_publish_time();
+        time += get_DEFAULT_DURATION();
+        timestamp::update_global_time_for_test(time + 1);
+
+        // Crank via exit API.
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert user state.
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        assert!(
+            coin::balance<BlackCat>(PARTICIPANT)
+                == emojicoin_0_balance + swap_stats_enter.net_proceeds
+        );
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert emitted exit event.
+        let exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 1);
+        let exit_event = MockExit {
+            user: PARTICIPANT,
+            melee_id: 1,
+            tap_out_fee: 0,
+            emojicoin_0_proceeds: swap_stats_enter.net_proceeds,
+            emojicoin_1_proceeds: 0,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        exit_event.assert_exit(exit_events[0]);
+
+        assert_crank_global_state_and_events();
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun crank_by_swap() {
+        let (emojicoin_0_balance, emojicoin_1_balance) =
+            init_module_with_funded_vault_and_participant_post_bonding_curve();
+        set_randomness_seed_for_crank_coverage();
+
+        // Get escrow view and enter event post-enter.
+        let (escrow_view, enter_event, swap_stats_enter) =
+            simulate_enter_post_bonding_curve();
+
+        // Enter.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount_post_bonding_curve(),
+            false
+        );
+
+        // Update exchange rates in enter event to be real-time.
+        enter_event.emojicoin_0_exchange_rate = exchange_rate<BlackCat, BlackCatLP>(
+            @black_cat_market
+        );
+        enter_event.emojicoin_1_exchange_rate = exchange_rate<Zebra, ZebraLP>(
+            @zebra_market
+        );
+
+        // Assert user state.
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(coin::balance<Zebra>(PARTICIPANT) == emojicoin_1_balance);
+
+        // Assert enter event.
+        let enter_events = emitted_events<Enter>();
+        assert!(enter_events.length() == 1);
+        enter_event.assert_enter(enter_events[0]);
+
+        // Set time to middle of a new melee.
+        let time = base_publish_time();
+        time += get_DEFAULT_DURATION();
+        timestamp::update_global_time_for_test(time + 1);
+
+        // Simulate swap within escrow.
+        let swap_inputs_swap_route_0 = SimulatedSwapInputs {
+            market_address: @black_cat_market,
+            input_amount: swap_stats_enter.net_proceeds,
+            selling_emojicoins: true,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE()
+        };
+        let swap_stats_swap_route_0 =
+            simulated_swap_stats<BlackCat, BlackCatLP>(swap_inputs_swap_route_0);
+        let swap_inputs_swap_route_1 = SimulatedSwapInputs {
+            market_address: @zebra_market,
+            input_amount: swap_stats_swap_route_0.net_proceeds,
+            selling_emojicoins: false,
+            integrator_fee_rate: get_INTEGRATOR_FEE_RATE_BPS_DOUBLE_ROUTE()
+        };
+        let swap_stats_swap_route_1 =
+            simulated_swap_stats<Zebra, ZebraLP>(swap_inputs_swap_route_1);
+
+        // Crank via swap API.
+        swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert user state.
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        assert!(coin::balance<BlackCat>(PARTICIPANT) == emojicoin_0_balance);
+        assert!(
+            coin::balance<Zebra>(PARTICIPANT)
+                == emojicoin_1_balance + swap_stats_swap_route_1.net_proceeds
+        );
+
+        // Assert emitted swap event.
+        let swap_events = emitted_events<Swap>();
+        assert!(swap_events.length() == 1);
+        let swap_event = MockSwap {
+            user: PARTICIPANT,
+            melee_id: 1,
+            quote_volume: swap_stats_swap_route_1.quote_volume,
+            integrator_fee: swap_stats_swap_route_0.integrator_fee
+                + swap_stats_swap_route_1.integrator_fee,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: swap_stats_swap_route_1.net_proceeds,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        swap_event.assert_swap(swap_events[0]);
+
+        // Assert emitted exit event.
+        let exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 1);
+        let exit_event = MockExit {
+            user: PARTICIPANT,
+            melee_id: 1,
+            tap_out_fee: 0,
+            emojicoin_0_proceeds: 0,
+            emojicoin_1_proceeds: swap_stats_swap_route_1.net_proceeds,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        exit_event.assert_exit(exit_events[0]);
+
+        assert_crank_global_state_and_events();
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
     #[
         expected_failure(
             abort_code = emojicoin_arena::emojicoin_arena::E_ENTER_COIN_BALANCE_0,
@@ -587,7 +916,7 @@ module emojicoin_arena::tests {
 
     #[test]
     #[lint::allow_unsafe_randomness]
-    public fun enter_lock_in_top_off() {
+    public fun enter_lock_in_top_off_tap_out() {
         init_module_with_funded_vault_and_participant();
 
         // Assert emitted vault balance event.
@@ -916,6 +1245,49 @@ module emojicoin_arena::tests {
         // Assert no new vault balance event emitted.
         vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
         assert!(vault_balance_update_events.length() == 7);
+
+        // Tap out.
+        mint_aptos_coin_to(PARTICIPANT, escrow_view.match_amount);
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+
+        // Assert state.
+        registry_view.vault_balance += escrow_view.match_amount;
+        registry_view.assert_registry_view(registry());
+        melee_view.available_rewards += escrow_view.match_amount;
+        melee_view.assert_melee(melee(melee_view.melee_id));
+        let emojicoin_0_proceeds = escrow_view.emojicoin_0_balance;
+        escrow_view.emojicoin_0_balance = 0;
+        escrow_view.emojicoin_1_balance = 0;
+        match_amount = escrow_view.match_amount;
+        escrow_view.match_amount = 0;
+        escrow_view.assert_escrow_view(
+            escrow<BlackCat, BlackCatLP, Zebra, ZebraLP>(PARTICIPANT)
+        );
+
+        // Assert emitted exit event.
+        let exit_events = emitted_events<Exit>();
+        assert!(exit_events.length() == 1);
+        let exit_event = MockExit {
+            user: PARTICIPANT,
+            melee_id: 1,
+            tap_out_fee: match_amount,
+            emojicoin_0_proceeds,
+            emojicoin_1_proceeds: 0,
+            emojicoin_0_exchange_rate: exchange_rate<BlackCat, BlackCatLP>(
+                @black_cat_market
+            ),
+            emojicoin_1_exchange_rate: exchange_rate<Zebra, ZebraLP>(@zebra_market)
+        };
+        exit_event.assert_exit(exit_events[0]);
+
+        // Assert emitted vault balance event.
+        vault_balance_update_events = emitted_events<VaultBalanceUpdate>();
+        assert!(vault_balance_update_events.length() == 8);
+        vault_balance_update_event.new_balance += match_amount;
+        vault_balance_update_event.assert_vault_balance_update(
+            vault_balance_update_events[7]
+        );
+
     }
 
     #[test]
@@ -1170,7 +1542,6 @@ module emojicoin_arena::tests {
             @zebra_market
         );
         exit_event.assert_exit(exit_events[1]);
-
     }
 
     #[test]
@@ -1356,6 +1727,72 @@ module emojicoin_arena::tests {
     public fun melee_invalid_melee_id_lo() {
         init_module_with_funded_vault_and_participant();
         melee(0);
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun randomness_seed_for_crank_coverage() {
+        // Initialize module, randomness.
+        init_module_with_funded_vault_and_participant();
+        set_randomness_seed_for_crank_coverage();
+
+        // Initialize all coverage conditions to false.
+        let covered_equal_market_ids = false;
+        let covered_unequal_market_ids = false;
+        let covered_sort_order_market_id_0_hi = false;
+        let covered_sort_order_market_id_0_lo = false;
+        let covered_melee_ids_by_market_ids_contains = false;
+
+        // Call all coverage conditions to silence erroneously compiler warnings about unused
+        // assignments per https://github.com/aptos-labs/aptos-core/issues/15713.
+        covered_equal_market_ids;
+        covered_unequal_market_ids;
+        covered_sort_order_market_id_0_hi;
+        covered_sort_order_market_id_0_lo;
+        covered_melee_ids_by_market_ids_contains;
+
+        // Declare market IDs.
+        let sorted_unique_market_ids;
+
+        loop {
+            // Get two random market IDs.
+            let market_id_0 = random_market_id();
+            let market_id_1 = random_market_id();
+
+            // Check if they are equal, restarting loop as needed, setting coverage condition.
+            if (market_id_0 == market_id_1) {
+                covered_equal_market_ids = true;
+                continue;
+            } else {
+                covered_unequal_market_ids = true;
+            };
+
+            // Sort market IDs, setting coverage conditions.
+            sorted_unique_market_ids =
+                if (market_id_0 < market_id_1) {
+                    covered_sort_order_market_id_0_lo = true;
+                    vector[market_id_0, market_id_1]
+                } else {
+                    covered_sort_order_market_id_0_hi = true;
+                    vector[market_id_1, market_id_0]
+                };
+
+            // Check if melee IDs by market IDs contains sorted unique market IDs, restarting loop
+            // as needed, setting coverage condition.
+            if (melee_ids_by_market_ids_contains(sorted_unique_market_ids)) {
+                covered_melee_ids_by_market_ids_contains = true;
+                continue;
+            } else {
+                break;
+            };
+        };
+
+        // Assert all coverage conditions met.
+        assert!(covered_equal_market_ids);
+        assert!(covered_unequal_market_ids);
+        assert!(covered_sort_order_market_id_0_hi);
+        assert!(covered_sort_order_market_id_0_lo);
+        assert!(covered_melee_ids_by_market_ids_contains);
     }
 
     #[test]
