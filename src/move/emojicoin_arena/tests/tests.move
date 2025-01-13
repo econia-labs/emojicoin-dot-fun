@@ -1621,6 +1621,18 @@ module emojicoin_arena::tests {
     }
 
     #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NO_ESCROW,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun exit_no_escrow() {
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+    }
+
+    #[test]
     public fun init_module_base() {
         // Initialize emojicoin dot fun.
         init_emojicoin_dot_fun_with_test_markets();
@@ -1856,6 +1868,18 @@ module emojicoin_arena::tests {
     ]
     public fun set_next_melee_max_match_percentage_not_arena() {
         set_next_melee_max_match_percentage(&get_signer(@aptos_framework), 0);
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_NO_ESCROW,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun swap_no_escrow() {
+        swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
     }
 
     #[test]
