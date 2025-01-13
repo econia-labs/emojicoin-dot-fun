@@ -1840,6 +1840,25 @@ module emojicoin_arena::tests {
     }
 
     #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_SWAP_NO_FUNDS,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun swap_swap_no_funds() {
+        init_module_with_funded_vault_and_participant();
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            false
+        );
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+        swap<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+    }
+
+    #[test]
     public fun test_market_addresses() {
         init_emojicoin_dot_fun_with_test_markets();
         let market_addresses = vector[

@@ -36,6 +36,8 @@ module emojicoin_arena::emojicoin_arena {
     const E_MELEE_ID_MISMATCH: u64 = 7;
     /// Melee ID does not correspond to a melee that has been registered.
     const E_INVALID_MELEE_ID: u64 = 8;
+    /// User has no funds in escrow to swap.
+    const E_SWAP_NO_FUNDS: u64 = 9;
 
     const MAX_PERCENTAGE: u64 = 100;
 
@@ -1075,7 +1077,7 @@ module emojicoin_arena::emojicoin_arena {
             );
         } else {
             // Verify that at least one emojicoin balance is nonzero.
-            assert!(emojicoin_1_balance > 0, E_EXIT_NO_FUNDS);
+            assert!(emojicoin_1_balance > 0, E_SWAP_NO_FUNDS);
 
             (quote_volume, integrator_fee, emojicoin_0_proceeds) = swap_within_escrow_for_direction<Coin1, LP1, Coin0, LP0>(
                 swapper,
