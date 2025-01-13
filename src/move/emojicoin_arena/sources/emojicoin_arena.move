@@ -304,6 +304,10 @@ module emojicoin_arena::emojicoin_arena {
                 market_address_1
             );
 
+        // Get exchange rates.
+        let emojicoin_0_exchange_rate = exchange_rate_inner<Coin0, LP0>(market_address_0);
+        let emojicoin_1_exchange_rate = exchange_rate_inner<Coin1, LP1>(market_address_1);
+
         // Emit swap event.
         event::emit(
             Swap {
@@ -313,12 +317,8 @@ module emojicoin_arena::emojicoin_arena {
                 integrator_fee,
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
-                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
-                    market_address_0
-                ),
-                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
-                    market_address_1
-                )
+                emojicoin_0_exchange_rate,
+                emojicoin_1_exchange_rate
             }
         );
 
@@ -329,8 +329,8 @@ module emojicoin_arena::emojicoin_arena {
                 escrow_ref_mut,
                 melee_id,
                 0,
-                market_address_0,
-                market_address_1
+                emojicoin_0_exchange_rate,
+                emojicoin_1_exchange_rate
             );
         }
     }
@@ -349,28 +349,16 @@ module emojicoin_arena::emojicoin_arena {
             melee_id
         ) = existing_participant_prologue<Coin0, LP0, Coin1, LP1>(participant);
 
-        // Charge tap out fee if applicable, updating escrow match amount since user has exited.
-        let match_amount = escrow_ref_mut.match_amount;
+        // Try to charge tap out fee.
         let tap_out_fee =
-            if (melee_is_active && match_amount > 0) {
-
-                // Get vault address and transfer match amount back to vault.
-                let vault_address =
-                    account::get_signer_capability_address(
-                        &registry_ref_mut.signer_capability
-                    );
-                let user_balance = coin::balance<AptosCoin>(participant_address);
-                assert!(user_balance >= match_amount, E_EXIT_TAP_OUT_FEE);
-                aptos_account::transfer(participant, vault_address, match_amount);
-                emit_vault_balance_update_with_vault_address(vault_address);
-
-                // Update available rewards for the melee since match amount has been returned.
-                exited_melee_ref_mut.available_rewards += match_amount;
-
-                match_amount
-            } else { 0 };
-
-        escrow_ref_mut.match_amount = 0;
+            try_charge_tap_out_fee(
+                participant,
+                participant_address,
+                registry_ref_mut,
+                exited_melee_ref_mut,
+                escrow_ref_mut,
+                melee_is_active
+            );
 
         // Withdraw emojicoin balance from escrow, verifying there are funds to withdraw.
         let (emojicoin_0_proceeds, emojicoin_1_proceeds) =
@@ -379,8 +367,8 @@ module emojicoin_arena::emojicoin_arena {
                 escrow_ref_mut,
                 melee_id,
                 tap_out_fee,
-                market_address_0,
-                market_address_1
+                exchange_rate_inner<Coin0, LP0>(market_address_0),
+                exchange_rate_inner<Coin1, LP1>(market_address_1)
             );
         assert!(
             emojicoin_0_proceeds > 0 || emojicoin_1_proceeds > 0,
@@ -841,8 +829,8 @@ module emojicoin_arena::emojicoin_arena {
         escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
         melee_id: u64,
         tap_out_fee: u64,
-        market_address_0: address,
-        market_address_1: address
+        emojicoin_0_exchange_rate: ExchangeRate,
+        emojicoin_1_exchange_rate: ExchangeRate
     ): (u64, u64) {
 
         // Reset escrow match amount.
@@ -864,12 +852,8 @@ module emojicoin_arena::emojicoin_arena {
                 emojicoin_0_proceeds,
                 emojicoin_1_proceeds,
                 tap_out_fee,
-                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
-                    market_address_0
-                ),
-                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
-                    market_address_1
-                )
+                emojicoin_0_exchange_rate,
+                emojicoin_1_exchange_rate
             }
         );
 
@@ -1231,6 +1215,39 @@ module emojicoin_arena::emojicoin_arena {
         // Sum fees across swaps, but only use volume from second swap to avoid double counting.
         let integrator_fee = integrator_fee_first_swap + integrator_fee_second_swap;
         (quote_volume, integrator_fee, to_emojicoin_proceeds)
+    }
+
+    inline fun try_charge_tap_out_fee<Coin0, LP0, Coin1, LP1>(
+        participant: &signer,
+        participant_address: address,
+        registry_ref_mut: &mut Registry,
+        exited_melee_ref_mut: &mut Melee,
+        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        melee_is_active: bool
+    ): u64 {
+        // Only try charging tap out fee if the melee is active and the user has a match amount.
+        let match_amount = escrow_ref_mut.match_amount;
+        if (melee_is_active && match_amount > 0) {
+
+            // Assert user has enough balance to pay tap out fee.
+            assert!(
+                coin::balance<AptosCoin>(participant_address) >= match_amount,
+                E_EXIT_TAP_OUT_FEE
+            );
+
+            // Get vault address and transfer match amount back to vault.
+            let vault_address =
+                account::get_signer_capability_address(
+                    &registry_ref_mut.signer_capability
+                );
+            aptos_account::transfer(participant, vault_address, match_amount);
+            emit_vault_balance_update_with_vault_address(vault_address);
+
+            // Update available rewards for the melee since match amount has been returned.
+            exited_melee_ref_mut.available_rewards += match_amount;
+
+            match_amount
+        } else { 0 }
     }
 
     /// During entry to a melee, try matching a portion of user's contribution if they elect to lock
