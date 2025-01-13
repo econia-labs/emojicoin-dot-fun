@@ -324,29 +324,13 @@ module emojicoin_arena::emojicoin_arena {
 
         // Exit automatically if melee is no longer active.
         if (!melee_is_active) {
-
-            // Withdraw emojicoin balance from escrow.
-            let (emojicoin_0_proceeds, emojicoin_1_proceeds) =
-                try_withdraw_from_escrow_both_coins(swapper_address, escrow_ref_mut);
-
-            // Update match amount.
-            escrow_ref_mut.match_amount = 0;
-
-            // Emit exit event.
-            event::emit(
-                Exit {
-                    user: swapper_address,
-                    melee_id,
-                    emojicoin_0_proceeds,
-                    emojicoin_1_proceeds,
-                    tap_out_fee: 0,
-                    emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
-                        market_address_0
-                    ),
-                    emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
-                        market_address_1
-                    )
-                }
+            exit_epilogue<Coin0, LP0, Coin1, LP1>(
+                swapper_address,
+                escrow_ref_mut,
+                melee_id,
+                0,
+                market_address_0,
+                market_address_1
             );
         }
     }
@@ -385,31 +369,22 @@ module emojicoin_arena::emojicoin_arena {
 
                 match_amount
             } else { 0 };
+
         escrow_ref_mut.match_amount = 0;
 
         // Withdraw emojicoin balance from escrow, verifying there are funds to withdraw.
         let (emojicoin_0_proceeds, emojicoin_1_proceeds) =
-            try_withdraw_from_escrow_both_coins(participant_address, escrow_ref_mut);
+            exit_epilogue<Coin0, LP0, Coin1, LP1>(
+                participant_address,
+                escrow_ref_mut,
+                melee_id,
+                tap_out_fee,
+                market_address_0,
+                market_address_1
+            );
         assert!(
             emojicoin_0_proceeds > 0 || emojicoin_1_proceeds > 0,
             E_EXIT_NO_FUNDS
-        );
-
-        // Emit exit event.
-        event::emit(
-            Exit {
-                user: participant_address,
-                melee_id,
-                emojicoin_0_proceeds,
-                emojicoin_1_proceeds,
-                tap_out_fee,
-                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
-                    market_address_0
-                ),
-                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
-                    market_address_1
-                )
-            }
         );
     }
 
@@ -859,6 +834,46 @@ module emojicoin_arena::emojicoin_arena {
             escrow_ref_mut,
             melee_id
         )
+    }
+
+    inline fun exit_epilogue<Coin0, LP0, Coin1, LP1>(
+        participant_address: address,
+        escrow_ref_mut: &mut Escrow<Coin0, LP0, Coin1, LP1>,
+        melee_id: u64,
+        tap_out_fee: u64,
+        market_address_0: address,
+        market_address_1: address
+    ): (u64, u64) {
+
+        // Reset escrow match amount.
+        escrow_ref_mut.match_amount = 0;
+
+        // Withdraw emojicoin balance from escrow.
+        let (emojicoin_0_proceeds, emojicoin_1_proceeds) =
+            try_withdraw_from_escrow_both_coins(participant_address, escrow_ref_mut);
+        assert!(
+            emojicoin_0_proceeds > 0 || emojicoin_1_proceeds > 0,
+            E_EXIT_NO_FUNDS
+        );
+
+        // Emit exit event.
+        event::emit(
+            Exit {
+                user: participant_address,
+                melee_id,
+                emojicoin_0_proceeds,
+                emojicoin_1_proceeds,
+                tap_out_fee,
+                emojicoin_0_exchange_rate: exchange_rate_inner<Coin0, LP0>(
+                    market_address_0
+                ),
+                emojicoin_1_exchange_rate: exchange_rate_inner<Coin1, LP1>(
+                    market_address_1
+                )
+            }
+        );
+
+        (emojicoin_0_proceeds, emojicoin_1_proceeds)
     }
 
     inline fun get_n_registered_markets(): u64 {
