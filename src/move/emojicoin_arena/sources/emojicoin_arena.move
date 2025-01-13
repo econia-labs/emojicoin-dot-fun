@@ -38,6 +38,8 @@ module emojicoin_arena::emojicoin_arena {
     const E_INVALID_MELEE_ID: u64 = 8;
     /// User has no funds in escrow to swap.
     const E_SWAP_NO_FUNDS: u64 = 9;
+    /// User can not afford tap out fee.
+    const E_EXIT_TAP_OUT_FEE: u64 = 10;
 
     const MAX_PERCENTAGE: u64 = 100;
 
@@ -797,6 +799,8 @@ module emojicoin_arena::emojicoin_arena {
                     account::get_signer_capability_address(
                         &registry_ref_mut.signer_capability
                     );
+                let user_balance = coin::balance<AptosCoin>(participant_address);
+                assert!(user_balance >= match_amount, E_EXIT_TAP_OUT_FEE);
                 aptos_account::transfer(participant, vault_address, match_amount);
                 emit_vault_balance_update_with_vault_address(vault_address);
 

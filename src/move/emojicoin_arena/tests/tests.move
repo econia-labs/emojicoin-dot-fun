@@ -1602,6 +1602,25 @@ module emojicoin_arena::tests {
     }
 
     #[test]
+    #[lint::allow_unsafe_randomness]
+    #[
+        expected_failure(
+            abort_code = emojicoin_arena::emojicoin_arena::E_EXIT_TAP_OUT_FEE,
+            location = emojicoin_arena::emojicoin_arena
+        )
+    ]
+    public fun exit_exit_tap_out_fee() {
+        init_module_with_funded_vault_and_participant(); // Fund just enough to enter.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            true
+        );
+        assert!(coin::balance<AptosCoin>(PARTICIPANT) == 0);
+        exit<BlackCat, BlackCatLP, Zebra, ZebraLP>(&get_signer(PARTICIPANT));
+    }
+
+    #[test]
     public fun init_module_base() {
         // Initialize emojicoin dot fun.
         init_emojicoin_dot_fun_with_test_markets();
