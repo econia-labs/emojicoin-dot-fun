@@ -12,6 +12,10 @@ module emojicoin_arena::tests {
     use aptos_framework::timestamp;
     use aptos_framework::transaction_context;
     use black_cat_market::coin_factory::{Emojicoin as BlackCat, EmojicoinLP as BlackCatLP};
+    use black_heart_market::coin_factory::{
+        Emojicoin as BlackHeart,
+        EmojicoinLP as BlackHeartLP
+    };
     use emojicoin_dot_fun::emojicoin_dot_fun::{
         Self,
         MarketMetadata,
@@ -72,6 +76,10 @@ module emojicoin_arena::tests {
     use emojicoin_dot_fun::tests as emojicoin_dot_fun_tests;
     use std::option;
     use std::vector;
+    use yellow_heart_market::coin_factory::{
+        Emojicoin as YellowHeart,
+        EmojicoinLP as YellowHeartLP
+    };
     use zebra_market::coin_factory::{Emojicoin as Zebra, EmojicoinLP as ZebraLP};
 
     struct MockEnter has copy, drop, store {
@@ -1002,6 +1010,81 @@ module emojicoin_arena::tests {
         exit_event.assert_exit(exit_events[0]);
 
         assert_crank_global_state_and_events(enter_event.match_amount);
+    }
+
+    #[test]
+    #[lint::allow_unsafe_randomness]
+    public fun crank_different_periods() {
+        init_module_with_funded_vault_and_participant();
+        set_randomness_seed_for_crank_coverage();
+
+        // Set duration series for expanding, then contracting duration at crank time.
+        let duration_2 = 2 * get_DEFAULT_DURATION();
+        let duration_3 = get_DEFAULT_DURATION() / 2;
+
+        // Verify testing time.
+        let time = base_publish_time();
+        assert!(timestamp::now_microseconds() == time);
+
+        // Set next duration time.
+        set_next_melee_duration(&get_signer(@emojicoin_arena), duration_2);
+
+        // Set time to just inside a new melee.
+        time += duration_3 + 1;
+        assert!(time == 2 * get_DEFAULT_DURATION() + 1);
+        timestamp::update_global_time_for_test(time);
+
+        // Crank via enter API.
+        enter<BlackCat, BlackCatLP, Zebra, ZebraLP, BlackCat>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            false
+        );
+
+        // Set next duration time.
+        set_next_melee_duration(&get_signer(@emojicoin_arena), duration_3);
+
+        // Set time to just inside a new melee.
+        time += duration_2;
+        assert!(time == 4 * get_DEFAULT_DURATION() + 1);
+        timestamp::update_global_time_for_test(time);
+
+        // Crank via enter API.
+        enter<BlackHeart, BlackHeartLP, YellowHeart, YellowHeartLP, BlackHeart>(
+            &get_signer(PARTICIPANT),
+            base_enter_amount(),
+            false
+        );
+
+        // Construct melee views.
+        let melee_view_1 = base_melee();
+        let melee_view_2 = melee_view_1;
+        let melee_view_3 = melee_view_1;
+
+        melee_view_2.melee_id = 2;
+        melee_view_2.emojicoin_0_market_address = @black_heart_market;
+        melee_view_2.emojicoin_1_market_address = @yellow_heart_market;
+        melee_view_2.start_time = 2 * get_DEFAULT_DURATION();
+        melee_view_2.duration = duration_2;
+
+        melee_view_3.melee_id = 3;
+        melee_view_3.emojicoin_0_market_address = @yellow_heart_market;
+        melee_view_3.emojicoin_1_market_address = @zombie_market;
+        melee_view_3.start_time = 4 * get_DEFAULT_DURATION();
+        melee_view_3.duration = duration_3;
+
+        // Assert melee views.
+        melee_view_1.assert_melee(melee(melee_view_1.melee_id));
+        melee_view_2.assert_melee(melee(melee_view_2.melee_id));
+        melee_view_3.assert_melee(melee(melee_view_3.melee_id));
+
+        // Assert emitted melee events.
+        let melee_events = emitted_events<Melee>();
+        assert!(melee_events.length() == 3);
+        melee_view_1.assert_melee(melee_events[0]);
+        melee_view_2.assert_melee(melee_events[1]);
+        melee_view_3.assert_melee(melee_events[2]);
+
     }
 
     #[test]
