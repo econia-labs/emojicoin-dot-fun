@@ -65,18 +65,6 @@ writeset-aware offchain processing. In order words, the data model is designed
 to enable full indexing using only writesets and events, with as few struct and
 event fields as possible.
 
-As an example, calculating PnL offchain for a given escrow looks something like:
-
-```python
-profit = sum_over_all_events_since_escrow_was_last_empty(
-    Enter.input_amount + Enter.match_amount
-) / current_value_of_holdings()
-```
-
-Where `current_value_of_holdings()` aggregates all `Enter`, `Swap`, and `Exit`
-events for a given `{user, melee_id}` to determine current holdings and then
-converts them to octas using the most recent `ExchangeRate`.
-
 ## Pseudo-randomness
 
 Since randomness is not supported in `init_module` per [`aptos-core` #15436],
