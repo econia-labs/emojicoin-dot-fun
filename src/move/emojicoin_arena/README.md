@@ -90,8 +90,7 @@ NAMED_ADDRESSES=$(
     printf "%s,%s,%s" \
         "emojicoin_arena=$EMOJICOIN_ARENA" \
         "emojicoin_dot_fun=$EMOJICOIN_DOT_FUN" \
-        "integrator=$INTEGRATOR" \
-
+        "integrator=$INTEGRATOR"
 )
 aptos move publish \
     --assume-yes \
