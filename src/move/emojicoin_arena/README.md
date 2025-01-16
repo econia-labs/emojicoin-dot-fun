@@ -84,5 +84,33 @@ pseudo-random substitute implementations are used for the first crank. For a
 detailed rationale that explains how this implementation is effectively random
 in practice, see [this `emojicoin-dot-fun` pull request comment].
 
+## Publish commands
+
+Set variables:
+
+```sh
+EMOJICOIN_ARENA=0xaaa...
+EMOJICOIN_DOT_FUN=0xbbb...
+INTEGRATOR=0xccc...
+PROFILE=my-profile
+```
+
+Publish:
+
+```sh
+NAMED_ADDRESSES=$(
+    printf "%s,%s" \
+        "emojicoin_arena=$EMOJICOIN_ARENA" \
+        "emojicoin_dot_fun=$EMOJICOIN_DOT_FUN" \
+        "integrator=$INTEGRATOR" \
+
+)
+aptos move publish \
+    --assume-yes \
+    --move-2 \
+    --named-addresses $NAMED_ADDRESSES \
+    --profile $PROFILE
+```
+
 [this `emojicoin-dot-fun` pull request comment]: https://github.com/econia-labs/emojicoin-dot-fun/pull/408#discussion_r1887856202
 [`aptos-core` #15436]: https://github.com/aptos-labs/aptos-core/issues/15436
