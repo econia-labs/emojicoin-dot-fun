@@ -16,6 +16,8 @@ import { SortMarketsBy } from "@sdk/indexer-v2/types/common";
 import { ORDER_BY } from "@sdk/queries";
 import { getAptPrice } from "lib/queries/get-apt-price";
 import { AptPriceContextProvider } from "context/AptPrice";
+import { ARENA_MODULE_ADDRESS } from "@sdk/const";
+import { fetchArenaInfo, fetchMarketStateByAddress } from "@/queries/arena";
 
 export const revalidate = 2;
 
@@ -79,11 +81,24 @@ export default async function Home({ searchParams }: HomePageParams) {
 
   const aptPricePromise = getAptPrice();
 
-  const [priceFeedData, markets, numMarkets, aptPrice] = await Promise.all([
+  const meleeDataPromise = (async () => {
+    if (ARENA_MODULE_ADDRESS) {
+      const melee = await fetchArenaInfo({});
+      const [market0, market1] = await Promise.all([
+        fetchMarketStateByAddress({ address: melee!.arenaInfo.emojicoin0MarketAddress }),
+        fetchMarketStateByAddress({ address: melee!.arenaInfo.emojicoin1MarketAddress }),
+      ]);
+      return { melee: melee!, market0: market0!, market1: market1! };
+    }
+    return null;
+  })();
+
+  const [priceFeedData, markets, numMarkets, aptPrice, meleeData] = await Promise.all([
     priceFeedPromise,
     marketsPromise,
     numMarketsPromise,
     aptPricePromise,
+    meleeDataPromise,
   ]);
 
   return (
@@ -95,6 +110,7 @@ export default async function Home({ searchParams }: HomePageParams) {
         sortBy={sortBy}
         searchBytes={q}
         priceFeed={priceFeedData}
+        meleeData={meleeData}
       />
     </AptPriceContextProvider>
   );
