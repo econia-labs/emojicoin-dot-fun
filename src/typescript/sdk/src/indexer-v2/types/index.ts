@@ -161,7 +161,7 @@ const toArenaSwapFromDatabase = (data: DatabaseStructType["ArenaSwap"]): Types["
 const toArenaVaultBalanceUpdateFromDatabase = (
   data: DatabaseStructType["ArenaVaultBalanceUpdate"]
 ): Types["ArenaVaultBalanceUpdate"] => ({
-  new_balance: BigInt(data.new_balance),
+  newBalance: BigInt(data.new_balance),
 });
 
 const toArenaPositionsFromDatabase = (
