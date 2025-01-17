@@ -3,7 +3,9 @@ import { TableName } from "@sdk/indexer-v2/types";
 import Big from "big.js";
 import type { NextRequest } from "next/server";
 import { stringifyJSON } from "utils";
-
+/**
+ * @see {@link https://docs.google.com/document/d/1v27QFoQq1SKT3Priq3aqPgB70Xd_PnDzbOCiuoCyixw/edit?tab=t.0}
+ */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
 
