@@ -8,6 +8,7 @@ import DisplayDebugData from "@/store/server-to-client/FetchFromServer";
 import { fontsStyle, notoColorEmoji } from "styles/fonts";
 import { headers } from "next/headers";
 import "@react95/core/themes/win95.css";
+import { RandomEmojiBg } from "components/RandomEmojiBg";
 
 export const metadata: Metadata = getDefaultMetadata();
 export const viewport: Viewport = {
@@ -19,6 +20,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html>
       <body>
+        <RandomEmojiBg />
         {/* This is used to avoid React escaping the quotes in `fontsStyle`. */}
         <style dangerouslySetInnerHTML={{ __html: fontsStyle }} />
         <StyledComponentsRegistry>
